@@ -29,8 +29,8 @@ namespace bitpit{
 /*!
  *  Returns number of vertices for a given element type.
  *  Codification of element type according to http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
- *  @param[in]  t           element type
- *  @return     number of vertices of element type
+ *  @param[in] t element type
+ *  @return number of vertices of element type
  */
 uint8_t vtk::getNNodeInElement( const VTKElementType & t){
     int myType = static_cast<std::underlying_type<VTKElementType>::type>(t);
@@ -62,14 +62,14 @@ uint8_t vtk::getNNodeInElement( const VTKElementType & t){
 
 /*!
  * Converts a string into a Field information.
- * @param[in]   line_       string to be converted
- * @param[out]  data_       Field information
- * \return      true if successful
+ * @param[in] line string to be converted
+ * @param[out] data Field information
+ * \return true if successful
  */
-bool vtk::convertStringToDataArray( const std::string &line_, VTKField &data_  ){
+bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
 
-    std::string type_, name_, code_, comp_, offs_ ;
-    int         components_(1), offset_ ;
+    std::string typ, name, code, com, offs ;
+    int         components(1), offset ;
 
     VTKFormat    codex ;
     VTKDataType  type ;
@@ -78,31 +78,31 @@ bool vtk::convertStringToDataArray( const std::string &line_, VTKField &data_  )
     bool  success(true) ;
 
 
-    if( bitpit::utils::keywordInString( line_, "<DataArray ") ){  
-        success = success && bitpit::utils::getAfterKeyword( line_, "type=", '\"', type_) ;
-        success = success && bitpit::utils::getAfterKeyword( line_, "Name=", '\"', name_) ;
-        success = success && bitpit::utils::getAfterKeyword( line_, "format=", '\"', code_) ;
+    if( bitpit::utils::keywordInString( line, "<DataArray ") ){  
+        success = success && bitpit::utils::getAfterKeyword( line, "type=", '\"', typ) ;
+        success = success && bitpit::utils::getAfterKeyword( line, "Name=", '\"', name) ;
+        success = success && bitpit::utils::getAfterKeyword( line, "format=", '\"', code) ;
 
-        if( bitpit::utils::getAfterKeyword( line_, "NumberOfComponents=", '\"', comp_)  ){
-            bitpit::utils::convertString( comp_, components_ ) ;
+        if( bitpit::utils::getAfterKeyword( line, "NumberOfComponents=", '\"', com)  ){
+            bitpit::utils::convertString( com, components ) ;
         };
 
-        if(components_==3)
+        if(components==3)
             comp=VTKFieldType::VECTOR ;
 
-        vtk::convertStringToEnum( type_, type) ;
-        vtk::convertStringToEnum( code_, codex) ;
+        vtk::convertStringToEnum( typ, type) ;
+        vtk::convertStringToEnum( code, codex) ;
 
-        data_.setDataType(type) ;
-        data_.setName(name_) ;
-        data_.setCodification(codex) ;
-        if(name_ != "connectivity") 
-            data_.setFieldType(comp) ;
+        field.setDataType(type) ;
+        field.setName(name) ;
+        field.setCodification(codex) ;
+        if(name != "connectivity") 
+            field.setFieldType(comp) ;
 
-        if(code_=="appended") {
-            if( bitpit::utils::getAfterKeyword( line_, "offset=", '\"', offs_) ){
-                bitpit::utils::convertString( offs_, offset_ ) ;
-                data_.setOffset(offset_) ;
+        if(code=="appended") {
+            if( bitpit::utils::getAfterKeyword( line, "offset=", '\"', offs) ){
+                bitpit::utils::convertString( offs, offset ) ;
+                field.setOffset(offset) ;
             }
             else{
                 success = false ;
@@ -121,25 +121,25 @@ bool vtk::convertStringToDataArray( const std::string &line_, VTKField &data_  )
 
 /*!
  * Converts a Field information to string as requested by VTK format.
- * @param[in]  field_       Field information
+ * @param[in] field Field information
  * @return string in VTK format
  */
-std::string  vtk::convertDataArrayToString( const VTKField &field_ ){
+std::string  vtk::convertDataArrayToString( const VTKField &field ){
 
     std::stringstream   os("") ;
-    unsigned            comp = static_cast<unsigned>(field_.getFieldType())  ;
+    unsigned            comp = static_cast<unsigned>(field.getFieldType())  ;
 
-    if( field_.getFieldType() != VTKFieldType::SCALAR && field_.getFieldType() != VTKFieldType::VECTOR )
+    if( field.getFieldType() != VTKFieldType::SCALAR && field.getFieldType() != VTKFieldType::VECTOR )
         comp = 1 ;
 
     os << "        <DataArray "
-        << "type=\"" << vtk::convertEnumToString( field_.getDataType() ) << "\" "
-        << "Name=\"" << field_.getName() << "\" "
+        << "type=\"" << vtk::convertEnumToString( field.getDataType() ) << "\" "
+        << "Name=\"" << field.getName() << "\" "
         << "NumberOfComponents=\""<< comp << "\" "
-        << "format=\"" << vtk::convertEnumToString(field_.getCodification()) << "\" ";
+        << "format=\"" << vtk::convertEnumToString(field.getCodification()) << "\" ";
 
-    if( field_.getCodification() == VTKFormat::APPENDED ){
-        os << "offset=\"" << field_.getOffset() << "\" " ;
+    if( field.getCodification() == VTKFormat::APPENDED ){
+        os << "offset=\"" << field.getOffset() << "\" " ;
     };
 
     os << ">" ;
@@ -151,20 +151,20 @@ std::string  vtk::convertDataArrayToString( const VTKField &field_ ){
 
 /*!
  * Converts a parallel field information to string as requested by VTK format.
- * @param[in]  field_       Field information
+ * @param[in] field Field information
  * @return string in VTK format
  */
-std::string  vtk::convertPDataArrayToString( const VTKField &field_ ){
+std::string  vtk::convertPDataArrayToString( const VTKField &field ){
 
     std::stringstream  os("") ;
-    unsigned            comp = static_cast<unsigned>(field_.getFieldType())  ;
+    unsigned            comp = static_cast<unsigned>(field.getFieldType())  ;
 
-    if( field_.getFieldType() != VTKFieldType::SCALAR && field_.getFieldType() != VTKFieldType::VECTOR )
+    if( field.getFieldType() != VTKFieldType::SCALAR && field.getFieldType() != VTKFieldType::VECTOR )
         comp = 1 ;
 
     os << "        <PDataArray "
-        << "type=\"" << vtk::convertEnumToString(field_.getDataType()) << "\" "
-        << "Name=\"" << field_.getName() << "\" "
+        << "type=\"" << vtk::convertEnumToString(field.getDataType()) << "\" "
+        << "Name=\"" << field.getName() << "\" "
         << "NumberOfComponents=\""<< comp << "\" " 
         << ">" ;
 
@@ -174,7 +174,7 @@ std::string  vtk::convertPDataArrayToString( const VTKField &field_ ){
 
 /*!
  * Converts a VTKLocation into string for DataArray format
- * @param[in]  loc VTKLocation to be converted
+ * @param[in] loc VTKLocation to be converted
  * @return string to be used in DataArray
  */
 std::string vtk::convertEnumToString( const VTKLocation &loc ){
@@ -212,7 +212,7 @@ std::string vtk::convertEnumToString( const VTKFormat &cod ){
 
 /*!
  * Converts a VTKDataType into string for DataArray format
- * @param[in]  type VTKDataType to be converted
+ * @param[in] type VTKDataType to be converted
  * @return string to be used in DataArray
  */
 std::string vtk::convertEnumToString( const VTKDataType &type ){
@@ -248,7 +248,7 @@ std::string vtk::convertEnumToString( const VTKDataType &type ){
 /*!
  * Converts a std::string as read in vtk file to VTKLocation
  * @param[in] str string read in DataArray header
- * @param[out]  loc VTKLocation
+ * @param[out] loc VTKLocation
  * @return  if str contained expected value
  */
 bool vtk::convertStringToEnum(  const std::string &str, VTKLocation &loc ){
@@ -272,7 +272,7 @@ bool vtk::convertStringToEnum(  const std::string &str, VTKLocation &loc ){
 /*!
  * Converts a std::string as read in vtk file to VTKFormat  
  * @param[in] str string read in DataArray header
- * @param[out]  cod VTKFormat
+ * @param[out] cod VTKFormat
  * @return  if str contained expected value
  */
 bool vtk::convertStringToEnum( const  std::string &str, VTKFormat &cod ){
@@ -296,7 +296,7 @@ bool vtk::convertStringToEnum( const  std::string &str, VTKFormat &cod ){
 /*!
  * Converts a std::string as read in vtk file to VTKDataType 
  * @param[in] str string read in DataArray header
- * @param[out]  type VTKDataType to be converted
+ * @param[out] type VTKDataType to be converted
  * @return  if str contained expected value
  */
 bool vtk::convertStringToEnum( const std::string &str, VTKDataType &type ){

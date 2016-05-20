@@ -69,6 +69,8 @@ void VTKBaseStreamer::flushData( std::fstream &str, std::string name, VTKFormat 
  * @param[in] str file stream for writing
  * @param[in] name name of field
  * @param[in] format ASCII or BINARY format
+ * @param[in] entries total number of entries to be read
+ * @param[in] components size of grouping (e.g. =3 for vectors)
  */
 void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
 
@@ -138,6 +140,8 @@ void VTKNativeStreamer::flushData( std::fstream &str, std::string name, VTKForma
  * @param[in] str file stream for reading
  * @param[in] name name of field
  * @param[in] format ASCII or BINARY format
+ * @param[in] entries total number of entries to be read
+ * @param[in] components size of groups
  */
 void VTKNativeStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
 

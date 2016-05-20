@@ -42,32 +42,32 @@ namespace bitpit{
  */
 VTK::VTK(){
 
-    nr_procs = 1;
-    my_proc  = 0;
+    m_procs = 1;
+    m_rank  = 0;
 
-    HeaderType = "UInt32" ;
+    m_headerType = "UInt32" ;
     
-    fh.setDirectory( "." ) ;
-    fh.setSeries( false ) ;
-    fh.setParallel( false ) ;
+    m_fh.setDirectory( "." ) ;
+    m_fh.setSeries( false ) ;
+    m_fh.setParallel( false ) ;
 
-    GeomCodex = VTKFormat::APPENDED ;
-    DataCodex = VTKFormat::APPENDED ;
+    m_geomCodex = VTKFormat::APPENDED ;
+    m_dataCodex = VTKFormat::APPENDED ;
 
-    nr_cells = 0;
-    nr_points= 0;
+    m_cells = 0;
+    m_points= 0;
 
 };
 
 /*! 
  * Constructor referes to a serial VTK file with appended binary data.
- * @param[in]  dir_    directory of file with final "/"
- * @param[in]  name_   file name without suffix
+ * @param[in]  dir    directory of file with final "/"
+ * @param[in]  name   file name without suffix
  */
-VTK::VTK( std::string dir_,  std::string name_ ):
+VTK::VTK( std::string dir,  std::string name ):
      VTK(){
 
-    setNames(dir_, name_) ;
+    setNames(dir, name) ;
 
 };
 
@@ -76,23 +76,23 @@ VTK::VTK( std::string dir_,  std::string name_ ):
  */
 VTK::~VTK(){
 
-    data.clear();
-    geometry.clear();
+    m_data.clear();
+    m_geometry.clear();
 
 } ;
 
 /*! 
  * set header type for appended binary output
- * @param[in]  st_    header type ["UInt32"/"UInt64"]
+ * @param[in] st header type ["UInt32"/"UInt64"]
  */
-void  VTK::setHeaderType( std::string st_){ 
+void  VTK::setHeaderType( std::string st){ 
 
-    if( st_ == "UInt32" || st_ == "UInt64"){
-        HeaderType = st_ ;
+    if( st == "UInt32" || st == "UInt64"){
+        m_headerType = st ;
     }
 
     else{
-        log::cout() << "Unsupported HeaderType " << st_ << std::endl ;
+        log::cout() << "Unsupported HeaderType " << st << std::endl ;
     };
 
     return; 
@@ -100,43 +100,43 @@ void  VTK::setHeaderType( std::string st_){
 
 /*! 
  * Get header type for appended binary output
- * @return    header type ["UInt32"/"UInt64"]
+ * @return header type ["UInt32"/"UInt64"]
  */
 std::string  VTK::getHeaderType( ) const{ 
-    return HeaderType ;
+    return m_headerType ;
 };
 
 /*! 
  * set directory and name for VTK file
- * @param[in]  dir_    directory of file with final "/"
- * @param[in]  name_   file name without suffix
+ * @param[in] dir directory of file with final "/"
+ * @param[in] name file name without suffix
  */
-void  VTK::setNames( std::string dir_, std::string name_ ){
+void  VTK::setNames( std::string dir, std::string name ){
 
-  setDirectory(dir_);
-  setName(name_);
+  setDirectory(dir);
+  setName(name);
 
   return ;
 };
 
 /*!
  * set name for VTK file
- * @param[in]  name_   file name without suffix
+ * @param[in] name file name without suffix
  */
-void  VTK::setName( std::string name_ ){
+void  VTK::setName( std::string name ){
 
-  fh.setName(name_);
+  m_fh.setName(name);
 
   return ;
 };
 
 /*!
  * set directory for VTK file
- * @param[in]  dir_    directory of file with final "/"
+ * @param[in] dir directory of file with final "/"
  */
-void  VTK::setDirectory( std::string dir_ ){
+void  VTK::setDirectory( std::string dir ){
 
-  fh.setDirectory(dir_);
+  m_fh.setDirectory(dir);
 
   return ;
 };
@@ -147,7 +147,7 @@ void  VTK::setDirectory( std::string dir_ ){
  */
 std::string  VTK::getName() const {
 
-  return fh.getName();
+  return m_fh.getName();
 };
 
 /*!
@@ -156,17 +156,17 @@ std::string  VTK::getName() const {
  */
 std::string  VTK::getDirectory() const {
 
-  return fh.getDirectory();
+  return m_fh.getDirectory();
 };
 
 /*!
  * Activates output for time series. sets series to true first output index to input
- * @param[in]  c_    first output index
+ * @param[in] counter first output index
  */
-void  VTK::setCounter( int c_){ 
+void  VTK::setCounter( int counter){ 
 
-  fh.setSeries(true) ;
-  fh.setCounter(c_) ;
+  m_fh.setSeries(true) ;
+  m_fh.setCounter(counter) ;
 
   return; 
 } ;
@@ -177,8 +177,8 @@ void  VTK::setCounter( int c_){
  */
 int  VTK::unsetCounter( ){ 
 
-  int counter = fh.getCounter() ;
-  fh.setSeries(false) ;
+  int counter = m_fh.getCounter() ;
+  m_fh.setSeries(false) ;
 
   return counter; 
 } ;
@@ -189,30 +189,30 @@ int  VTK::unsetCounter( ){
  */
 int  VTK::getCounter( ) const{ 
 
-  return fh.getCounter( ) ;
+  return m_fh.getCounter( ) ;
 
 } ;
 
 /*!
  * Activates parallel output
- * @param[in]  nr    number of processes
- * @param[in]  my    my rank
+ * @param[in] procs number of processes
+ * @param[in] rank my rank
  */
-void  VTK::setParallel( uint16_t nr, uint16_t my){ 
+void  VTK::setParallel( uint16_t procs, uint16_t rank){ 
 
-  if( nr <  1 ) log::cout() << " Numer of processes must be greater than 0" << std::endl ;
-  if( my >= nr) log::cout() << " my_process is not in valid range " << std::endl ;
+  if( procs <  1 ) log::cout() << " Numer of processes must be greater than 0" << std::endl ;
+  if( rank  >= procs) log::cout() << " m_rankess is not in valid range " << std::endl ;
 
-  nr_procs = nr; 
-  my_proc  = my; 
+  m_procs = procs; 
+  m_rank  = rank; 
 
-  if(nr_procs == 0) {
-   fh.setParallel(false) ;
+  if(m_procs == 0) {
+   m_fh.setParallel(false) ;
   }
 
   else {
-   fh.setParallel(true) ;
-   fh.setBlock( my ) ;
+   m_fh.setParallel(true) ;
+   m_fh.setBlock( rank ) ;
   };
 
   return; 
@@ -220,37 +220,37 @@ void  VTK::setParallel( uint16_t nr, uint16_t my){
 
 /*!
  * sets codex for geometry and data
- * @param[in]  cod_    codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
+ * @param[in] cod codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void  VTK::setCodex( VTKFormat cod_) {
+void  VTK::setCodex( VTKFormat cod) {
 
-    setGeomCodex( cod_) ;
-    setDataCodex( cod_) ;
+    setGeomCodex( cod) ;
+    setDataCodex( cod) ;
 
     return ;
 };
 
 /*!
  * sets codex for geometry only
- * @param[in]  cod_    codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
+ * @param[in] cod codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void  VTK::setGeomCodex( VTKFormat cod_ ) {
+void  VTK::setGeomCodex( VTKFormat cod ) {
 
-    GeomCodex = cod_ ;
-    for( auto &field : geometry)
-        field.setCodification( cod_ ) ;
+    m_geomCodex = cod ;
+    for( auto &field : m_geometry)
+        field.setCodification( cod ) ;
     return;
 };
 
 /*!
  * sets codex for data only
- * @param[in]  cod_    codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
+ * @param[in] cod codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void  VTK::setDataCodex( VTKFormat cod_ ) {
+void  VTK::setDataCodex( VTKFormat cod ) {
 
-    DataCodex = cod_ ;
-    for( auto &field : data)
-        field.setCodification( cod_ ) ;
+    m_dataCodex = cod ;
+    for( auto &field : m_data)
+        field.setCodification( cod ) ;
 
     return ;
 };
@@ -258,24 +258,25 @@ void  VTK::setDataCodex( VTKFormat cod_ ) {
 /*!
  * Add user data for input or output. 
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
- * @param[in]  name_    name of field
+ * @param[in] name name of field
+ * @param[in] streamer data streamer
  */
-VTKField& VTK::addData( std::string name_, VTKBaseStreamer* streamer ){
+VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
 
-    VTKField    *ptr(NULL), *test(NULL) ;
+    VTKField *ptr(NULL), *test(NULL) ;
 
-    if( ! getGeomByName(name_, test) ){
+    if( ! getGeomByName(name, test) ){
 
-        if(  ! getDataByName( name_, ptr ) ) {
-            data.push_back( VTKField( name_ ) ) ;
-            ptr = &(data.back()) ;
+        if(  ! getDataByName( name, ptr ) ) {
+            m_data.push_back( VTKField( name ) ) ;
+            ptr = &(m_data.back()) ;
         };
 
-        ptr->setCodification(DataCodex) ;
+        ptr->setCodification(m_dataCodex) ;
         ptr->setStreamer(*streamer) ;
 
     } else {
-        log::cout() << "Not admissible to add user data with same name as geometry field " << name_ << std::endl ;
+        log::cout() << "Not admissible to add user data with same name as geometry field " << name << std::endl ;
     }
 
     return *ptr ;
@@ -285,18 +286,19 @@ VTKField& VTK::addData( std::string name_, VTKBaseStreamer* streamer ){
 /*!
  * Add user data for input or output. 
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
- * @param[in]  name_    name of field
- * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
- * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
- * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * @param[in] name name of field
+ * @param[in] comp type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
+ * @param[in] loc location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in] type type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * @param[in] streamer data streamer
  */
-VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_, VTKBaseStreamer *sreamer_ ){
+VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, VTKDataType type, VTKBaseStreamer *streamer ){
 
-    VTKField&   field = addData( name_, sreamer_ ) ;
+    VTKField&   field = addData( name, streamer ) ;
 
-    field.setFieldType(comp_) ;
-    field.setLocation(loc_) ;
-    field.setDataType(type_) ;
+    field.setFieldType(comp) ;
+    field.setLocation(loc) ;
+    field.setDataType(type) ;
 
     return field ;
 
@@ -304,28 +306,28 @@ VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_
 
 /*!
  * Removes user data from input or output 
- * @param[in]  name_    name of field to be removed
+ * @param[in] name name of field to be removed
  */
-void VTK::removeData( std::string name_ ){
+void VTK::removeData( std::string name ){
 
     std::vector<VTKField>::iterator  i_, j_ ;
     bool                             found ;
 
     found     = false ;
 
-    for ( i_ = data.begin(); i_ != data.end(); i_++){
-        if( i_->getName() == name_){
+    for ( i_ = m_data.begin(); i_ != m_data.end(); i_++){
+        if( i_->getName() == name){
             j_ = i_ ;
             found     = true ;
         };
     };
 
     if( found ){
-        data.erase(j_);
+        m_data.erase(j_);
     }
 
     else{
-        log::cout() << "did not find field for removing: " << name_ << std::endl;
+        log::cout() << "did not find field for removing: " << name << std::endl;
     };
 
 
@@ -335,17 +337,17 @@ void VTK::removeData( std::string name_ ){
 
 /*!
  * Enables field for reading and writing
- * @param[in] name_ name of field to be enabled
+ * @param[in] name name of field to be enabled
  */
-void VTK::enableData( std::string name_ ){
+void VTK::enableData( std::string name ){
 
     VTKField* field ;
 
-    if( getDataByName(name_,field) ) {
+    if( getDataByName(name,field) ) {
         field->enable() ;
 
     } else{
-        log::cout() << "did not find field for enabling: " << name_ << std::endl;
+        log::cout() << "did not find field for enabling: " << name << std::endl;
     };
 
 
@@ -355,17 +357,17 @@ void VTK::enableData( std::string name_ ){
 
 /*!
  * Disables field for reading and writing
- * @param[in] name_ name of field to be disabled
+ * @param[in] name name of field to be disabled
  */
-void VTK::disableData( std::string name_ ){
+void VTK::disableData( std::string name ){
 
     VTKField* field ;
 
-    if( getDataByName(name_,field) ) {
+    if( getDataByName(name,field) ) {
         field->disable() ;
 
     } else{
-        log::cout() << "did not find field for disabling: " << name_ << std::endl;
+        log::cout() << "did not find field for disabling: " << name << std::endl;
     };
 
 
@@ -375,16 +377,16 @@ void VTK::disableData( std::string name_ ){
 
 /*!
  * Finds user data field through name. 
- * @param[in] name_ name of field to be found
+ * @param[in] name name of field to be found
  * @param[out] the_field pointer to the filed if found; if not found value is not altered
  * \return true if field has been found, else false
  */
-bool VTK::getDataByName( const std::string &name_, VTKField*& the_field ){
+bool VTK::getDataByName( const std::string &name, VTKField*& the_field ){
 
     the_field = NULL ;
 
-    for( auto &field : data ){
-        if( field.getName() == name_ ){
+    for( auto &field : m_data ){
+        if( field.getName() == name ){
             the_field = &field ;
             return true ;
         };
@@ -395,16 +397,16 @@ bool VTK::getDataByName( const std::string &name_, VTKField*& the_field ){
 
 /*!
  * Finds geometry data field through name. 
- * @param[in] name_ name of field to be found
+ * @param[in] name name of field to be found
  * @param[out] the_field pointer to the filed if found; if not found value is not altered
  * \return true if field has been found, else false
  */
-bool VTK::getGeomByName( const std::string &name_, VTKField*& the_field ){
+bool VTK::getGeomByName( const std::string &name, VTKField*& the_field ){
 
     the_field = NULL ;
 
-    for( auto &field : geometry ){
-        if( field.getName() == name_ ){
+    for( auto &field : m_geometry ){
+        if( field.getName() == name ){
             the_field = &field ;
             return true ;
         };
@@ -430,21 +432,21 @@ void VTK::calcAppendedOffsets(){
         HeaderByte = sizeof(uint64_t) ;
     };
 
-    for( auto & field : data ){
+    for( auto & field : m_data ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
             field.setOffset( offset) ;
             offset += HeaderByte + calcFieldSize(field) ;
         };
     };
 
-    for( auto & field : data ){
+    for( auto & field : m_data ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL) {
             field.setOffset( offset) ;
             offset += HeaderByte + calcFieldSize(field)  ;
         };
     };
 
-    for( auto & field : geometry ){
+    for( auto & field : m_geometry ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED ) {
             field.setOffset( offset) ;
             offset += HeaderByte + calcFieldSize(field)  ;
@@ -461,7 +463,7 @@ void VTK::calcAppendedOffsets(){
  */
 void VTK::checkAllFields(){
 
-    for( auto & field : data ){
+    for( auto & field : m_data ){
         if( field.isEnabled() && field.hasAllMetaData() ) {
             field.enable() ;
         } else {
@@ -469,7 +471,7 @@ void VTK::checkAllFields(){
         }
     };
 
-    for( auto & field : geometry ){
+    for( auto & field : m_geometry ){
         if( field.hasAllMetaData()){
             field.enable() ;
         } else {
@@ -506,10 +508,10 @@ void VTK::write( VTKWriteMode writeMode ){
     writeMetaInformation() ;
     writeData() ;
 
-    if( nr_procs > 1  && my_proc == 0)  writeCollection() ;
+    if( m_procs > 1  && m_rank == 0)  writeCollection() ;
 
     if( writeMode == VTKWriteMode::DEFAULT ){
-        fh.incrementCounter() ;
+        m_fh.incrementCounter() ;
     }
 
     if( writeMode == VTKWriteMode::NO_SERIES ){
@@ -548,7 +550,7 @@ void VTK::writeData( ){
     int                 length;
     char*               buffer ;
 
-    str.open( fh.getPath( ), std::ios::in | std::ios::out ) ;
+    str.open( m_fh.getPath( ), std::ios::in | std::ios::out ) ;
 
     { // Write Ascii
 
@@ -556,7 +558,7 @@ void VTK::writeData( ){
         VTKField    temp ;
 
         //Writing first point data then cell data
-        for( auto &field : data ){
+        for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII && field.getLocation() == VTKLocation::POINT ) {
                 str.seekg( position_insert);
                 readDataArray( str, field ) ;
@@ -575,7 +577,7 @@ void VTK::writeData( ){
             };
         }; 
 
-        for( auto &field : data ){
+        for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII && field.getLocation() == VTKLocation::CELL ) {
                 str.seekg( position_insert);
                 readDataArray( str, field ) ;
@@ -593,7 +595,7 @@ void VTK::writeData( ){
             };
         }; 
 
-        for( auto &field : geometry ){
+        for( auto &field : m_geometry ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII ) {
                 str.seekg( position_insert);
                 readDataArray( str, field ) ;
@@ -636,13 +638,13 @@ void VTK::writeData( ){
 
 
         //Reopening in binary mode
-        str.open( fh.getPath( ), std::ios::out | std::ios::in | std::ios::binary);
+        str.open( m_fh.getPath( ), std::ios::out | std::ios::in | std::ios::binary);
         str.seekg( position_insert) ;
 
         //str.open( "data.dat", std::ios::out | std::ios::binary);
 
         //Writing first point data then cell data
-        for( auto &field : data ){
+        for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = calcFieldSize(field) ;
@@ -657,7 +659,7 @@ void VTK::writeData( ){
             };
         } 
 
-        for( auto &field : data ){
+        for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL ) {
 
                 if( getHeaderType() == "UInt32"){
@@ -675,7 +677,7 @@ void VTK::writeData( ){
         } 
 
         //Writing Geometry Data
-        for( auto &field : geometry ){
+        for( auto &field : m_geometry ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED ) {
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = calcFieldSize(field) ;
@@ -704,8 +706,8 @@ void VTK::writeData( ){
 
 /*!
  * Writes data headers in strean
- * @param[in]   str     output stream
- * @param[in]   parallel     flag for parallel data headers for collection files [true/false]
+ * @param[in] str output stream
+ * @param[in] parallel flag for parallel data headers for collection files [true/false]
  */
 void VTK::writeDataHeader( std::fstream &str, bool parallel ){
 
@@ -725,7 +727,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
         scalars << "\"" ;
         vectors << "\"" ;
 
-        for( auto &field : data ){
+        for( auto &field : m_data ){
             if( field.isEnabled() && field.getLocation() == location){
                 if(      field.getFieldType() == VTKFieldType::SCALAR ) scalars <<  field.getName() << " " ;
                 else if( field.getFieldType() == VTKFieldType::VECTOR ) vectors <<  field.getName() << " " ;
@@ -753,7 +755,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
             << ">" << std::endl;
 
         //Writing DataArray
-        for( auto &field : data ){
+        for( auto &field : m_data ){
             if( field.isEnabled() && field.getLocation() == location && !parallel) writeDataArray( str, field ) ;
             if( field.isEnabled() && field.getLocation() == location &&  parallel) writePDataArray( str, field ); 
         };
@@ -772,12 +774,12 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
 
 /*!
  * Writes data array related to a field in strean
- * @param[in]   str     output stream
- * @param[in]   field_   field to be written
+ * @param[in] str output stream
+ * @param[in] field field to be written
  */
-void VTK::writeDataArray( std::fstream &str, VTKField &field_ ){
+void VTK::writeDataArray( std::fstream &str, VTKField &field ){
 
-    str << vtk::convertDataArrayToString( field_ )  << std::endl ;
+    str << vtk::convertDataArrayToString( field )  << std::endl ;
     str << "        </DataArray>" << std::endl ;
 
     return ;
@@ -786,12 +788,12 @@ void VTK::writeDataArray( std::fstream &str, VTKField &field_ ){
 
 /*!
  * Writes parallel data array related to a field in strean
- * @param[in]   str     output stream
- * @param[in]   field_   field to be written
+ * @param[in] str output stream
+ * @param[in] field field to be written
  */
-void VTK::writePDataArray( std::fstream &str, VTKField &field_ ){
+void VTK::writePDataArray( std::fstream &str, VTKField &field ){
 
-    str << vtk::convertPDataArrayToString( field_ ) << std::endl ;
+    str << vtk::convertPDataArrayToString( field ) << std::endl ;
     str << "        </PDataArray>" << std::endl ;
 
     return ;
@@ -822,7 +824,7 @@ void VTK::readData( ){
     uint32_t                  nbytes32 ;
     uint64_t                  nbytes64 ;
 
-    str.open( fh.getPath( ), std::ios::in ) ;
+    str.open( m_fh.getPath( ), std::ios::in ) ;
 
     //Read appended data
     //Go to the initial position of the appended section
@@ -838,34 +840,34 @@ void VTK::readData( ){
     str.clear();
 
     //Open in binary for read
-    str.open( fh.getPath( ), std::ios::in | std::ios::binary);
+    str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
 
     //Read appended data
-    for( auto & field : data){
+    for( auto & field : m_data){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
             str.seekg( position_appended) ;
             str.seekg( field.getOffset(), std::ios::cur) ;
-            if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
-            if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
+            if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
+            if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
         };
     };
 
-    //Read appended geometry
-    for( auto & field : geometry ){
+    //Read appended m_geometry
+    for( auto & field : m_geometry ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
             str.seekg( position_appended) ;
             str.seekg( field.getOffset(), std::ios::cur) ;
-            if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
-            if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
+            if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
+            if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
         };
     };
 
     //Read ascii data
-    for( auto & field : data ){
+    for( auto & field : m_data ){
         if( field.isEnabled() &&  field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
@@ -873,7 +875,7 @@ void VTK::readData( ){
     };
 
     //Read ascii geometry
-    for( auto & field : geometry ){
+    for( auto & field : m_geometry ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
@@ -888,7 +890,7 @@ void VTK::readData( ){
 /*!
  * Reads data headers from strean.
  * All field information available in file are stored.
- * @param[in]   str     output stream
+ * @param[in] str output stream
  */
 void VTK::readDataHeader( std::fstream &str ){
 
@@ -897,7 +899,7 @@ void VTK::readDataHeader( std::fstream &str ){
 
     VTKLocation             location;
     std::string             locationString ;
-    std::string             line, loc_;
+    std::string             line, loc;
     std::stringstream       ss;
 
     bool                    read ;
@@ -921,11 +923,11 @@ void VTK::readDataHeader( std::fstream &str ){
         temp.setLocation( location ) ;
 
         ss << "</" << locationString << "Data>" ;
-        loc_ = ss.str();
+        loc = ss.str();
 
         read= true ; 
         if( ! getline( str, line) ) read = false ;
-        if( bitpit::utils::keywordInString( line, loc_) ) read=false ;
+        if( bitpit::utils::keywordInString( line, loc) ) read=false ;
 
 
         while( read ){
@@ -942,7 +944,7 @@ void VTK::readDataHeader( std::fstream &str ){
                 temp.setPosition( pos_ ) ;
 
                 if( ! getDataByName( temp.getName(), ptemp )) {
-                    data.push_back( VTKField( temp ) ) ;
+                    m_data.push_back( VTKField( temp ) ) ;
                 }
 
                 else{
@@ -957,7 +959,7 @@ void VTK::readDataHeader( std::fstream &str ){
             };
 
             if( ! getline( str, line) ) read = false ;
-            if( bitpit::utils::keywordInString( line, loc_) ) read=false ;
+            if( bitpit::utils::keywordInString( line, loc) ) read=false ;
         }; 
 
     };
@@ -967,27 +969,25 @@ void VTK::readDataHeader( std::fstream &str ){
 
 /*!
  * Reads data array from stream and stores in field information
- * @param[in]   str     output stream
- * @param[out]   field_   field information
+ * @param[in]  str output stream
+ * @param[out] field field information
  */
-bool  VTK::readDataArray( std::fstream &str, VTKField &field_  ){
+bool VTK::readDataArray( std::fstream &str, VTKField &field  ){
 
-    std::string              line_ ;
+    std::string line ;
 
-    while( getline(str, line_)  ){
+    while( getline(str, line)  ){
 
-        if( bitpit::utils::keywordInString( line_, field_.getName() ) ){
-            if( vtk::convertStringToDataArray( line_, field_  ) ){
+        if( bitpit::utils::keywordInString( line, field.getName() ) ){
+            if( vtk::convertStringToDataArray( line, field  ) ){
 
-                if( field_.getCodification() == VTKFormat::ASCII) {
-                    field_.setPosition( str.tellg() ) ;
+                if( field.getCodification() == VTKFormat::ASCII) {
+                    field.setPosition( str.tellg() ) ;
                 };
 
                 return true ;
             };
-
         };
-
     };
 
     return false ; 

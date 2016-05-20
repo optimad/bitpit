@@ -28,8 +28,8 @@ namespace bitpit{
 /*!
  * @ingroup VisualizationToolKit
  * @{
- * @class        VTKField
- * @brief        VTKField handles geometry and data field information for the VTK format
+ * @class VTKField
+ * @brief VTKField handles geometry and data field information for the VTK format
  *
  */
 
@@ -45,33 +45,31 @@ VTKField::~VTKField(){
  */
 VTKField::VTKField(){
 
-    name            = "undefined" ;  
-    dataType        = VTKDataType::UNDEFINED ;
-    location        = VTKLocation::UNDEFINED ;
-    codification    = VTKFormat::UNDEFINED ;
-    fieldType       = VTKFieldType::UNDEFINED ;
-    position        = 0 ;
-    streamer        = NULL ;
-    enabled         = true ;
+    m_name            = "undefined" ;  
+    m_dataType        = VTKDataType::UNDEFINED ;
+    m_location        = VTKLocation::UNDEFINED ;
+    m_codification    = VTKFormat::UNDEFINED ;
+    m_fieldType       = VTKFieldType::UNDEFINED ;
+    m_position        = 0 ;
+    m_streamer        = NULL ;
+    m_enabled         = true ;
 
 };
 
 /*!
  * Copy constructor
- * @param[in]   other   object to be copied
+ * @param[in] other object to be copied
  */
 VTKField::VTKField( const VTKField &other){
-
     *this = other ;
 };
 
 /*!
  * Constructor
- * @param[in]   name_   name of data field
+ * @param[in] name name of data field
  */
-VTKField::VTKField( std::string name_ ): VTKField() {
-
-    name = name_ ;
+VTKField::VTKField( std::string name ): VTKField() {
+    setName(name) ;
 };
 
 /*!
@@ -79,88 +77,88 @@ VTKField::VTKField( std::string name_ ): VTKField() {
  */
 VTKField& VTKField::operator=( const VTKField & other){
 
-    name  = other.name;
-    fieldType = other.fieldType ;
-    dataType = other.dataType ;
-    codification = other.codification;
-    location = other.location ;
-    offset = other.offset ;
-    position = other.position ;
-    streamer = other.streamer ;
-    enabled = other.enabled ;
+    m_name  = other.m_name;
+    m_fieldType = other.m_fieldType ;
+    m_dataType = other.m_dataType ;
+    m_codification = other.m_codification;
+    m_location = other.m_location ;
+    m_offset = other.m_offset ;
+    m_position = other.m_position ;
+    m_streamer = other.m_streamer ;
+    m_enabled = other.m_enabled ;
 
     return *this;
 };
 
 /*!
  * set name of data field
- * @param[in]   name_   name of data field
+ * @param[in] name name of data field
  */
-void      VTKField::setName( std::string  name_){ 
-    name= name_; 
+void VTKField::setName( std::string  name){ 
+    m_name= name; 
     return; 
 };
 
 /*!
  * set type of data field
- * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * @param[in] type type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-void      VTKField::setDataType( VTKDataType  type_){
-    dataType= type_; 
+void VTKField::setDataType( VTKDataType type){
+    m_dataType= type; 
     return; 
 };
 
 /*!
  * set location of data field
- * @param[in]   loc_   location of data field [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in] loc location of data field [VTKLocation::CELL/VTKLocation::POINT]
  */
-void      VTKField::setLocation( VTKLocation  loc_ ){ 
-    location= loc_; 
+void VTKField::setLocation( VTKLocation loc ){ 
+    m_location= loc; 
     return; 
 };
 
 /*!
  * set codification of data field
- * @param[in]   code_  codification [VTKFormat::APPENDED/VTKFormat::ASCII]
+ * @param[in] cod codification [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void      VTKField::setCodification( VTKFormat  code_ ){ 
-    codification= code_; 
+void VTKField::setCodification( VTKFormat cod ){ 
+    m_codification= cod; 
     return; 
 };
 
 /*!
  * set type of data field
- * @param[in]   type_   type of data field [VTKFieldType::SCALAR/VECTOR/KNOWN_BY_CLASS]
+ * @param[in] type type of data field [VTKFieldType::SCALAR/VECTOR/KNOWN_BY_CLASS]
  */
-void      VTKField::setFieldType( VTKFieldType type_){ 
-    fieldType= type_; 
+void VTKField::setFieldType( VTKFieldType type ){ 
+    m_fieldType= type; 
     return; 
 };
 
 /*!
  * set position of data field
- * @param[in]   pos_    position of data field [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in] pos position of data field [VTKLocation::CELL/VTKLocation::POINT]
  */
-void      VTKField::setPosition( std::fstream::pos_type pos_ ){ 
-    position =pos_ ; 
-    return; 
-} ;
-
-/*!
- * set offset of data field for appended output
- * @param[in]   offs_   offset from "_" character of appended section
- */
-void      VTKField::setOffset( uint64_t offs_){ 
-    offset= offs_; 
+void VTKField::setPosition( std::fstream::pos_type pos ){ 
+    m_position =pos ; 
     return; 
 };
 
 /*!
  * set offset of data field for appended output
- * @param[in]   offs_   offset from "_" character of appended section
+ * @param[in] off offset from "_" character of appended section
  */
-void VTKField::setStreamer(VTKBaseStreamer& streamer_ ){ 
-    streamer= &streamer_; 
+void VTKField::setOffset( uint64_t off){ 
+    m_offset= off; 
+    return; 
+};
+
+/*!
+ * set streamer for reading and writing 
+ * @param[in] streamer streamer 
+ */
+void VTKField::setStreamer(VTKBaseStreamer& streamer ){ 
+    m_streamer= &streamer; 
     return; 
 };
 
@@ -168,71 +166,71 @@ void VTKField::setStreamer(VTKBaseStreamer& streamer_ ){
  * Enables the field for writing/reading
  */
 void VTKField::enable(){
-    enabled=true;
+    m_enabled=true;
 }
 
 /*!
  * Disables the field for writing/reading
  */
 void VTKField::disable(){
-    enabled=false;
+    m_enabled=false;
 }
 
 /*!
  * get name of data field
  * @return  name of data field
  */
-std::string    VTKField::getName() const{ 
-    return name; 
+std::string VTKField::getName() const{ 
+    return m_name; 
 };
 
 /*!
  * get type of field
- * @return   type of data field [ VTKFieldType ]
+ * @return type of data field [ VTKFieldType ]
  */
-VTKFieldType    VTKField::getFieldType() const{ 
-    return fieldType; 
+VTKFieldType VTKField::getFieldType() const{ 
+    return m_fieldType; 
 };
 
 /*!
  * get type of data field
- * @return   type of data field [ VTKDataType ]
+ * @return type of data field [ VTKDataType ]
  */
-VTKDataType    VTKField::getDataType() const{ 
-    return dataType; 
+VTKDataType VTKField::getDataType() const{ 
+    return m_dataType; 
 };
 
 /*!
  * get location of data field
- * @return  location [VTKLocation::CELL/VTKLocation::POINT]
+ * @return location [VTKLocation::CELL/VTKLocation::POINT]
  */
-VTKLocation    VTKField::getLocation() const{ 
-    return location; 
+VTKLocation VTKField::getLocation() const{ 
+    return m_location; 
 };
 
 /*!
  * get codification of data field
- * @return  codification [VTKFormat::APPENDED/VTKFormat::ASCII]
+ * @return codification [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-VTKFormat    VTKField::getCodification() const{ 
-    return codification; 
+VTKFormat VTKField::getCodification() const{ 
+    return m_codification; 
 };
 
 /*!
  * get offset in appended section
- * @return  offset from "_" character in appended section
+ * @return offset from "_" character in appended section
  */
-uint64_t  VTKField::getOffset() const{ 
-    return offset; 
+uint64_t VTKField::getOffset() const{ 
+    return m_offset; 
 };
 
 /*!
  * get position of data field in VTK file. 
  * This information is available after VTK::ReadMetaData() has been called.
- * @return      position in VTK file.
+ * @return position in VTK file.
  */
 std::fstream::pos_type   VTKField::getPosition() const{ 
-    return position; 
+    return m_position; 
 };
 
 /*!
@@ -240,23 +238,23 @@ std::fstream::pos_type   VTKField::getPosition() const{
  * @return true if enabled
  */
 bool VTKField::isEnabled() const{ 
-    return enabled; 
+    return m_enabled; 
 };
 
 /*!
  * Check if all information of field has been set
  * @return true if all information regarding field is available
  */
-bool   VTKField::hasAllMetaData() const{ 
+bool VTKField::hasAllMetaData() const{ 
 
-    bool    allData(true);
+    bool allData(true);
 
-    allData = allData && name != "undefined" ;  
-    allData = allData && dataType != VTKDataType::UNDEFINED ;
-    allData = allData && location != VTKLocation::UNDEFINED ;
-    allData = allData && codification != VTKFormat::UNDEFINED ;
-    allData = allData && fieldType != VTKFieldType::UNDEFINED ; 
-    allData = allData && streamer != NULL   ;
+    allData = allData && m_name != "undefined" ;  
+    allData = allData && m_dataType != VTKDataType::UNDEFINED ;
+    allData = allData && m_location != VTKLocation::UNDEFINED ;
+    allData = allData && m_codification != VTKFormat::UNDEFINED ;
+    allData = allData && m_fieldType != VTKFieldType::UNDEFINED ; 
+    allData = allData && m_streamer != NULL   ;
 
     return allData;
 
@@ -267,20 +265,18 @@ bool   VTKField::hasAllMetaData() const{
  * @param[in] str file stream
  */
 void  VTKField::write( std::fstream &str) const{ 
-
-    streamer->flushData( str, name, codification) ;
-
+    m_streamer->flushData( str, m_name, m_codification) ;
     return ;
 }
 
 /*!
  * Reads the field through its streamer from file
  * @param[in] str file stream
+ * @param[in] entries total number of entries to be read
+ * @param[in] components size of subgroup
  */
-void  VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
-
-    streamer->absorbData( str, name, codification, entries, components) ;
-
+void VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
+    m_streamer->absorbData( str, m_name, m_codification, entries, components) ;
     return ;
 };
 /*!

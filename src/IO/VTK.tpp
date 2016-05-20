@@ -33,10 +33,10 @@ namespace bitpit{
 template<class T>
 VTKField& VTK::addData( std::string name, std::vector<T> &data ){
 
-    VTKField& field= addData( name, &nativeStreamer) ;
+    VTKField& field= addData( name, &m_nativeStreamer) ;
     field.setDataType( VTKTypes::whichType(data)) ;
 
-    nativeStreamer.addData(name,data) ;
+    m_nativeStreamer.addData(name,data) ;
 
     return field;
 
@@ -46,17 +46,18 @@ VTKField& VTK::addData( std::string name, std::vector<T> &data ){
  * Add user data for input or output. 
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @tparam T type of std::vector<>
- * @param[in]  name_    name of field
- * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
- * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in] name name of field
+ * @param[in] comp type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
+ * @param[in] loc location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in] data data
  */
 template<class T>
-VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, std::vector<T> &data ){
+VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, std::vector<T> &data ){
 
-    VTKField&   field = addData( name_, data ) ;
+    VTKField&   field = addData( name, data ) ;
 
-    field.setFieldType(comp_) ;
-    field.setLocation(loc_) ;
+    field.setFieldType(comp) ;
+    field.setLocation(loc) ;
 
     return field ;
 
@@ -72,12 +73,12 @@ template<class T>
 void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, std::vector<T> &data ){
 
     int      index = static_cast<int>(fieldEnum) ;
-    VTKField& field = geometry[index] ;
+    VTKField& field = m_geometry[index] ;
     std::string   name = field.getName() ;
 
-    nativeStreamer.addData(name,data) ;
+    m_nativeStreamer.addData(name,data) ;
 
-    field.setStreamer( nativeStreamer) ;
+    field.setStreamer( m_nativeStreamer) ;
     field.setDataType( VTKTypes::whichType(data)) ;
 
     return ;
@@ -93,12 +94,12 @@ template<class T>
 void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, std::vector<T> &data ){
 
     int      index = static_cast<int>(fieldEnum) ;
-    VTKField& field = geometry[index] ;
+    VTKField& field = m_geometry[index] ;
     std::string   name = field.getName() ;
 
-    nativeStreamer.addData(name,data) ;
+    m_nativeStreamer.addData(name,data) ;
 
-    field.setStreamer( nativeStreamer) ;
+    field.setStreamer( m_nativeStreamer) ;
     field.setDataType( VTKTypes::whichType(data)) ;
 
     return ;
