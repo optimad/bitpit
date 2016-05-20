@@ -231,6 +231,7 @@ class VTKField{
         uint64_t                 offset;                    /**< offset in the appended section */
         std::fstream::pos_type   position;                  /**< position in file */
         VTKBaseStreamer*         streamer;                  /**< pointer to streamer */
+        bool                     enabled;                   /**< if field is enabled for read/write */
 
         //methods
     public:
@@ -249,6 +250,7 @@ class VTKField{
         VTKFormat                getCodification() const;
         uint64_t                 getOffset() const;
         std::fstream::pos_type   getPosition() const; 
+        bool                     isEnabled() const ;
         bool                     hasAllMetaData() const ;
 
         void                     setName( std::string ) ;
@@ -258,8 +260,10 @@ class VTKField{
         void                     setCodification( VTKFormat ) ;
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
-
         void                     setStreamer( VTKBaseStreamer& ) ;
+        void                     enable() ;
+        void                     disable() ;
+
         void                     read( std::fstream&, uint64_t, uint8_t ) const ;
         void                     write( std::fstream& ) const ;
 
@@ -318,6 +322,9 @@ class VTK{
         VTKField&                       addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
 
         void                            removeData( std::string ) ;
+        void                            enableData( std::string ) ;
+        void                            disableData( std::string ) ;
+
 
         void                            read() ;
         virtual void                    readMetaInformation() = 0 ; 
@@ -344,6 +351,7 @@ class VTK{
         virtual uint64_t                calcFieldSize( const VTKField &) =0;
         virtual uint64_t                calcFieldEntries( const VTKField &) =0;
         virtual uint8_t                 calcFieldComponents( const VTKField &) =0;
+        void                            checkAllFields() ;
 
 };
 

@@ -51,7 +51,8 @@ VTKField::VTKField(){
     codification    = VTKFormat::UNDEFINED ;
     fieldType       = VTKFieldType::UNDEFINED ;
     position        = 0 ;
-    streamer          = NULL ;
+    streamer        = NULL ;
+    enabled         = true ;
 
 };
 
@@ -86,6 +87,7 @@ VTKField& VTKField::operator=( const VTKField & other){
     offset = other.offset ;
     position = other.position ;
     streamer = other.streamer ;
+    enabled = other.enabled ;
 
     return *this;
 };
@@ -163,6 +165,20 @@ void VTKField::setStreamer(VTKBaseStreamer& streamer_ ){
 };
 
 /*!
+ * Enables the field for writing/reading
+ */
+void VTKField::enable(){
+    enabled=true;
+}
+
+/*!
+ * Disables the field for writing/reading
+ */
+void VTKField::disable(){
+    enabled=false;
+}
+
+/*!
  * get name of data field
  * @return  name of data field
  */
@@ -220,19 +236,12 @@ std::fstream::pos_type   VTKField::getPosition() const{
 };
 
 /*!
- * Writes the field through its streamer to file
- * @param[in] str file stream
+ * Returns if field is enabled for readind/writing
+ * @return true if enabled
  */
-void  VTKField::write( std::fstream &str) const{ 
-
-    assert( streamer != NULL ) ;
-    assert( name != "undefined") ;
-    assert( codification != VTKFormat::UNDEFINED ) ;
-
-    streamer->flushData( str, name, codification) ;
-
-    return ;
-}
+bool VTKField::isEnabled() const{ 
+    return enabled; 
+};
 
 /*!
  * Check if all information of field has been set
@@ -254,17 +263,23 @@ bool   VTKField::hasAllMetaData() const{
 };
 
 /*!
+ * Writes the field through its streamer to file
+ * @param[in] str file stream
+ */
+void  VTKField::write( std::fstream &str) const{ 
+
+    streamer->flushData( str, name, codification) ;
+
+    return ;
+}
+
+/*!
  * Reads the field through its streamer from file
  * @param[in] str file stream
  */
 void  VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
 
-    assert( name != "undefined ") ;
-    assert( codification != VTKFormat::UNDEFINED ) ;
-
-    if( streamer != NULL){
-        streamer->absorbData( str, name, codification, entries, components) ;
-    };
+    streamer->absorbData( str, name, codification, entries, components) ;
 
     return ;
 };

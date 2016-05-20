@@ -162,7 +162,9 @@ int main()
         vtk.setNames("./", "mySelection") ;
         vtk.setCounter( 0 ) ;
         vtk.write() ;
+        vtk.disableData( "STLSolidLabeling" ) ;
         vtk.write() ;
+        vtk.enableData( "STLSolidLabeling" ) ;
         vtk.setName( "otherSelection") ;
         vtk.write(bitpit::VTKWriteMode::NO_SERIES) ;
         vtk.write(bitpit::VTKWriteMode::NO_INCREMENT) ;

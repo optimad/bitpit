@@ -98,7 +98,6 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
     return;
 };
 
-
 /*!
  * @class       VTKUnstructuredGrid
  * @brief       VTK input output for Unstructured Meshes
