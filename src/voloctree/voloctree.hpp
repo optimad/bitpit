@@ -99,6 +99,9 @@ protected:
 	void _setTol(double tolerance);
 	void _resetTol();
 
+	std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+
 #if BITPIT_ENABLE_MPI==1
 	const std::vector<adaption::Info> _balancePartition(bool trackChanges);
 #endif
@@ -139,6 +142,10 @@ private:
 
 	typedef std::unordered_set<FaceInfo, FaceInfoHasher> FaceInfoSet;
 
+	std::vector<std::vector<int>> m_octantLocalFacesOnVertex;
+	std::vector<std::vector<int>> m_octantLocalFacesOnEdge;
+	std::vector<std::vector<int>> m_octantLocalEdgesOnVertex;
+
 	const ElementInfo *m_cellTypeInfo;
 	const ElementInfo *m_interfaceTypeInfo;
 
@@ -174,6 +181,9 @@ private:
 	void deleteCell(long id);
 
 	const std::vector<adaption::Info> sync(bool trackChanges);
+
+	std::vector<long> findCellCodimensionNeighs(const long &id, const int &index,
+		const int &codimension, const std::vector<long> &blackList) const;
 };
 
 }

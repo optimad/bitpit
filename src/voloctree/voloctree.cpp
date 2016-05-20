@@ -71,6 +71,49 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 {
 	log::cout() << ">> Initializing Octree mesh\n";
 
+	// Initialize local edges/vertex/faces association
+	if (getDimension() == 3) {
+		m_octantLocalFacesOnVertex.reserve(8);
+		m_octantLocalFacesOnVertex.push_back({{0, 2, 4}});
+		m_octantLocalFacesOnVertex.push_back({{1, 2, 4}});
+		m_octantLocalFacesOnVertex.push_back({{0, 3, 4}});
+		m_octantLocalFacesOnVertex.push_back({{1, 3, 4}});
+		m_octantLocalFacesOnVertex.push_back({{0, 2, 5}});
+		m_octantLocalFacesOnVertex.push_back({{1, 2, 5}});
+		m_octantLocalFacesOnVertex.push_back({{0, 3, 5}});
+		m_octantLocalFacesOnVertex.push_back({{1, 3, 5}});
+
+		m_octantLocalEdgesOnVertex.reserve(8);
+		m_octantLocalEdgesOnVertex.push_back({{0, 2,  4}});
+		m_octantLocalEdgesOnVertex.push_back({{1, 2,  5}});
+		m_octantLocalEdgesOnVertex.push_back({{0, 3,  6}});
+		m_octantLocalEdgesOnVertex.push_back({{1, 3,  7}});
+		m_octantLocalEdgesOnVertex.push_back({{4, 8, 10}});
+		m_octantLocalEdgesOnVertex.push_back({{5, 9, 10}});
+		m_octantLocalEdgesOnVertex.push_back({{6, 8, 11}});
+		m_octantLocalEdgesOnVertex.push_back({{7, 9, 11}});
+
+		m_octantLocalFacesOnEdge.reserve(12);
+		m_octantLocalFacesOnEdge.push_back({{0, 4}});
+		m_octantLocalFacesOnEdge.push_back({{1, 4}});
+		m_octantLocalFacesOnEdge.push_back({{2, 4}});
+		m_octantLocalFacesOnEdge.push_back({{3, 4}});
+		m_octantLocalFacesOnEdge.push_back({{0, 2}});
+		m_octantLocalFacesOnEdge.push_back({{1, 2}});
+		m_octantLocalFacesOnEdge.push_back({{0, 3}});
+		m_octantLocalFacesOnEdge.push_back({{1, 3}});
+		m_octantLocalFacesOnEdge.push_back({{0, 5}});
+		m_octantLocalFacesOnEdge.push_back({{1, 5}});
+		m_octantLocalFacesOnEdge.push_back({{2, 5}});
+		m_octantLocalFacesOnEdge.push_back({{3, 5}});
+	} else {
+		m_octantLocalFacesOnVertex.reserve(4);
+		m_octantLocalFacesOnVertex.push_back({{0, 2}});
+		m_octantLocalFacesOnVertex.push_back({{1, 2}});
+		m_octantLocalFacesOnVertex.push_back({{0, 3}});
+		m_octantLocalFacesOnVertex.push_back({{1, 3}});
+	}
+
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
@@ -1258,8 +1301,7 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 				if (octantInfo.internal) {
 					m_tree.findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
 				} else {
-					m_tree.findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds);
-					neighGhostFlags.resize(neighTreeIds.size(), false);
+					m_tree.findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
 				}
 
 				// Set the adjacencies
@@ -1462,6 +1504,117 @@ void VolOctree::scale(std::array<double, 3> scaling)
 	initializeTreeGeometry();
 
 	VolumeKernel::scale(scaling);
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given edge.
+
+	This function can be only used with three-dimensional cells.
+
+	\param id is the id of the cell
+	\param edge is an edge of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given edge.
+*/
+std::vector<long> VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+{
+	std::vector<long> neighs;
+	assert(isThreeDimensional());
+	if (!isThreeDimensional()) {
+		return neighs;
+	}
+
+	// Get edge neighbours
+	int codimension = getDimension() - 1;
+	neighs = findCellCodimensionNeighs(id, edge, codimension, blackList);
+
+	// Add face neighbours
+	for (int face : m_octantLocalFacesOnEdge[edge]) {
+		for (auto &neigh : _findCellFaceNeighs(id, face, blackList)) {
+			utils::addToOrderedVector<long>(neigh, neighs);
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given local vertex.
+
+	\param id is the id of the cell
+	\param vertex is a local vertex of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given vertex.
+*/
+std::vector<long> VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+{
+	std::vector<long> neighs;
+
+	// Get vertex neighbours
+	int codimension = getDimension();
+	neighs = findCellCodimensionNeighs(id, vertex, codimension, blackList);
+
+	// Add edge neighbours or face neighbours
+	if (isThreeDimensional()) {
+		for (int edge : m_octantLocalEdgesOnVertex[vertex]) {
+			for (auto &neigh : _findCellEdgeNeighs(id, edge, blackList)) {
+				utils::addToOrderedVector<long>(neigh, neighs);
+			}
+		}
+	} else {
+		for (int face : m_octantLocalFacesOnVertex[vertex]) {
+			for (auto &neigh : _findCellFaceNeighs(id, face, blackList)) {
+				utils::addToOrderedVector<long>(neigh, neighs);
+			}
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Finds the neighbours for the given co-dimension of the specified cell.
+
+	Only the neighbours for the specified co-dimension are found, neighbours
+	of higher co-dimensions are not inserted in the returned list.
+
+	\param id is the id of the cell
+	\param codimension is the co-dimension
+	\param index is the local index of the entity (vertex, edge or face)
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours for the given codimension of the specified cell.
+*/
+std::vector<long> VolOctree::findCellCodimensionNeighs(const long &id, const int &index,
+											           const int &codimension, const std::vector<long> &blackList) const
+{
+	std::vector<long> neighs;
+	int dimension = getDimension();
+	if (codimension > dimension || codimension <= 0) {
+		return neighs;
+	}
+
+	OctantInfo octantInfo = getCellOctant(id);
+
+	std::vector<uint32_t> neighTreeIds;
+	std::vector<bool> neighGhostFlags;
+	if (octantInfo.internal) {
+		m_tree.findNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
+	} else {
+		m_tree.findGhostNeighbours(octantInfo.id, index, codimension, neighTreeIds);
+		neighGhostFlags.resize(neighTreeIds.size(), false);
+	}
+
+	int nNeighs = neighTreeIds.size();
+	for (int i = 0; i < nNeighs; ++i) {
+		OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
+		long neighId = getOctantId(neighOctantInfo);
+
+		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+			utils::addToOrderedVector<long>(neighId, neighs);
+		}
+	}
+
+	return neighs;
 }
 
 /*!
