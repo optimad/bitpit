@@ -697,7 +697,7 @@ bool LevelSetKernel::assureMPI( ){
  * @param[in/out] sizeBuffer buffer for first communication used to communicate the size of data buffer
  * @param[in/out] dataBuffer buffer for second communication containing data
  */
-void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous, OBinaryStream &sizeBuffer, OBinaryStream &dataBuffer ){
+void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
     long nItems = previous.size() ;
     int dataSize = 4*sizeof(double) +sizeof(int) +sizeof(long) ;
@@ -730,7 +730,7 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous
  * @param[in] nItems number of items within the buffer
  * @param[in/out] dataBuffer buffer containing the data
  */
-void LevelSetKernel::readCommunicationBuffer( const long &nItems, IBinaryStream &dataBuffer ){
+void LevelSetKernel::readCommunicationBuffer( const long &nItems, RecvBuffer &dataBuffer ){
 
     long    index;
     PiercedVector<LSInfo>::iterator infoItr ;

@@ -31,7 +31,9 @@
 # include <unordered_set>
 # include <unordered_map>
 
-
+# if BITPIT_ENABLE_MPI
+# include "bitpit_communications.hpp"
+# endif
 # include "bitpit_patchkernel.hpp"
 # include "bitpit_surfunstructured.hpp"
 # include "bitpit_volcartesian.hpp"
@@ -163,8 +165,8 @@ class LevelSetKernel{
     void                                        freeCommunicator();
     bool                                        isCommunicatorSet() const;
     bool                                        assureMPI() ;
-    void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & );
-    void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
+    void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & );
+    void                                        readCommunicationBuffer( const long &, RecvBuffer & ) ;
 # endif
 
     protected:
@@ -238,8 +240,8 @@ class LevelSetObject{
     void                                        restore( std::fstream &) ;
 
 # if BITPIT_ENABLE_MPI
-    virtual void                                writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) =0 ;
-    virtual void                                readCommunicationBuffer( const long &, IBinaryStream & ) =0 ;
+    virtual void                                writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & ) =0 ;
+    virtual void                                readCommunicationBuffer( const long &, RecvBuffer & ) =0 ;
 # endif 
 
 };
@@ -288,8 +290,8 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
 
 # if BITPIT_ENABLE_MPI
-    void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) ;
-    void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
+    void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & ) ;
+    void                                        readCommunicationBuffer( const long &, RecvBuffer & ) ;
 # endif
 
     protected:

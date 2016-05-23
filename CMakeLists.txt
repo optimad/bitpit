@@ -341,7 +341,7 @@ set(VOLCARTESIAN_DEPS "common;patchkernel")
 set(VOLOCTREE_DEPS "common;PABLO;patchkernel")
 set(VOLUNSTRUCTURED_DEPS "common;patchkernel")
 set(RBF_DEPS "operators;SA")
-set(LEVELSET_DEPS "common;SA;surfunstructured;voloctree;volcartesian")
+set(LEVELSET_DEPS "common;communications;SA;surfunstructured;voloctree;volcartesian")
 
 #------------------------------------------------------------------------------------#
 # MPI-only modules

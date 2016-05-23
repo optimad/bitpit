@@ -790,8 +790,7 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
  * @param[in/out] sizeBuffer buffer for first communication used to communicate the size of data buffer
  * @param[in/out] dataBuffer buffer for second communication containing data
  */
-void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &previous, OBinaryStream &sizeBuffer, OBinaryStream &dataBuffer ){
-
+void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &previous, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
     long nItems = previous.size() ;
     int dataSize = 10*sizeof(long)  +sizeof(long) +sizeof(bool) +sizeof(long) +sizeof(int) ;
@@ -826,7 +825,7 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &pr
  * @param[in] nItems number of items within the buffer
  * @param[in/out] dataBuffer buffer containing the data
  */
-void LevelSetSegmentation::readCommunicationBuffer( const long &nItems, IBinaryStream &dataBuffer ){
+void LevelSetSegmentation::readCommunicationBuffer( const long &nItems, RecvBuffer &dataBuffer ){
 
     int     s, nSegs ;
     long    index, segment ;

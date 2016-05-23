@@ -24,7 +24,6 @@
 
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
-# include "communications.hpp"
 # endif
 
 # include <unordered_set>
@@ -495,8 +494,8 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
                         dataCommunicator.setSend(rank, 0 ) ;
 
                         //store data in buffer
-                        OBinaryStream &sizeBuffer = sizeCommunicator.getSendBuffer(rank);
-                        OBinaryStream &dataBuffer = dataCommunicator.getSendBuffer(rank);
+                        SendBuffer &sizeBuffer = sizeCommunicator.getSendBuffer(rank);
+                        SendBuffer &dataBuffer = dataCommunicator.getSendBuffer(rank);
 
                         m_kernel->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
                         for( const auto &visitor : m_object){
@@ -523,7 +522,7 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
             nCompletedRecvs = 0;
             while (nCompletedRecvs < sizeCommunicator.getRecvCount()) {
                 rank = sizeCommunicator.waitAnyRecv();
-                IBinaryStream &sizeBuffer = sizeCommunicator.getRecvBuffer(rank);
+                RecvBuffer &sizeBuffer = sizeCommunicator.getRecvBuffer(rank);
 
                 sizeBuffer >> *(itemItr) ;
                 sizeBuffer >> dataSize ;
@@ -547,7 +546,7 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
             while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
                 rank = dataCommunicator.waitAnyRecv();
 
-                IBinaryStream &dataBuffer = dataCommunicator.getRecvBuffer(rank);
+                RecvBuffer &dataBuffer = dataCommunicator.getRecvBuffer(rank);
                 itemItr = items.begin();
 
                 m_kernel->readCommunicationBuffer( *itemItr, dataBuffer ) ;
