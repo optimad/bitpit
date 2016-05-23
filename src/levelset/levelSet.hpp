@@ -160,7 +160,7 @@ class LevelSetKernel{
     void                                        restore( std::fstream &);
 
 # if BITPIT_ENABLE_MPI
-    MPI_Comm                                    getCommunicator() ;
+    MPI_Comm                                    getCommunicator() const ;
     void                                        finalizeMPI() ;
     void                                        freeCommunicator();
     bool                                        isCommunicatorSet() const;

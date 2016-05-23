@@ -630,7 +630,7 @@ void LevelSetKernel::restore( std::fstream &stream ){
 
 # if BITPIT_ENABLE_MPI
 
-MPI_Comm LevelSetKernel::getCommunicator(){
+MPI_Comm LevelSetKernel::getCommunicator() const {
     return m_commMPI;
 }
 
