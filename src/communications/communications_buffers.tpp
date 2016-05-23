@@ -133,6 +133,24 @@ void CommunicationBuffer<RawBufferType>::swap()
     std::swap(m_front, m_back);
 }
 
+/*!
+    Get a reference to the raw buffers
+ */
+template<typename RawBufferType>
+std::vector<RawBufferType> & CommunicationBuffer<RawBufferType>::getBuffers()
+{
+    return m_buffers;
+}
+
+/*!
+    Get a constant reference to the raw buffers
+ */
+template<typename RawBufferType>
+const std::vector<RawBufferType> & CommunicationBuffer<RawBufferType>::getBuffers() const
+{
+    return m_buffers;
+}
+
 }
 
 /*!

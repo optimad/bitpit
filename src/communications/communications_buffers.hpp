@@ -77,6 +77,9 @@ protected:
 
     void swap();
 
+    std::vector<RawBufferType> & getBuffers();
+    const std::vector<RawBufferType> & getBuffers() const;
+
 private:
     std::vector<RawBufferType> m_buffers;
     RawBufferType *m_front;
