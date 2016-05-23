@@ -137,7 +137,7 @@ class IBinaryStream {
         std::streamoff               offset,                              // (input) offset with respect to the specified direction
         std::ios_base::seekdir       way                                  // (input) offset direction
     );
-    const std::vector<char>& getInternalVec(                                 // Returns reference to buffer
+    const std::vector<char>& data(                                 // Returns reference to buffer
         void                                                              // (input) none
     ) { return(buffer); }
     char* get_buffer(                                                     // Returns pointer to buffer
@@ -213,7 +213,7 @@ class OBinaryStream {
     void squeeze(                                                         // Squeeze the stream to fit the data
         void                                                              // (input) none
     );
-    const std::vector<char>& getInternalVec(                                 // Returns reference to buffer
+    const std::vector<char>& data(                                        // Returns reference to buffer
         void                                                              // (input) none
     ) { return(buffer); }
     char* get_buffer(                                                     // Returns pointer to buffer
