@@ -119,7 +119,7 @@ class IBinaryStream {
     );
     size_t capacity(                                                  // Capacity of the stream
         void
-    );
+    ) const;
     void open(                                                            // Open input stream from memory location
         const char                  *mem,                                 // (input) pointer to memory location
         size_t                       capacity                             // (input) capacity (in bytes) of memory chunk
@@ -196,7 +196,7 @@ class OBinaryStream {
     );
     size_t capacity(                                                      // Capacity of the stream
         void
-    );
+    ) const;
 	void open(                                                            // Open output stream
         size_t                       capacity                             // (input) stream capacity
     );

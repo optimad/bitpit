@@ -143,7 +143,7 @@ void IBinaryStream::setCapacity(
 */
 size_t IBinaryStream::capacity(
     void
-) {
+) const {
     return buffer.size();
 }
 
@@ -366,7 +366,7 @@ void OBinaryStream::setCapacity(
 */
 size_t OBinaryStream::capacity(
     void
-) {
+) const {
     return buffer.size();
 }
 
