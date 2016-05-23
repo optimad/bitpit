@@ -162,6 +162,7 @@ class LevelSetKernel{
 # if BITPIT_ENABLE_MPI
     MPI_Comm                                    getCommunicator() ;
     void                                        finalizeMPI() ;
+    bool                                        isCommunicatorSet() const;
     bool                                        assureMPI() ;
     void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & );
     void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;

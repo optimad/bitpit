@@ -635,6 +635,17 @@ MPI_Comm LevelSetKernel::getCommunicator(){
 }
 
 /*!
+    Checks if the communicator to be used for parallel communications has
+    already been set.
+
+    \result Returns true if the communicator has been set, false otherwise.
+*/
+bool LevelSetKernel::isCommunicatorSet() const {
+
+    return (getCommunicator() != MPI_COMM_NULL);
+}
+
+/*!
  * Checks if MPI communicator is available in underlying mesh.
  * If available MPI communicator is retreived from mesh and duplicated if necessary and parallel processing can be done.
  * If not serial processing is necessary
