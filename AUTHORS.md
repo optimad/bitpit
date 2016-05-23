@@ -19,6 +19,10 @@ Here is a list of the main authors of each bitpit module:
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
   * [Andrea Iob](mailto:andrea_iob@hotmail.com)
 
+* communications
+
+  * [Andrea Iob](mailto:andrea_iob@hotmail.com)
+
 * LA
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)

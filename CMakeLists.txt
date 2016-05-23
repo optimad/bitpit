@@ -310,6 +310,7 @@ set(BITPIT_MODULE_LIST "")
 list(APPEND BITPIT_MODULE_LIST "common")
 list(APPEND BITPIT_MODULE_LIST "operators")
 list(APPEND BITPIT_MODULE_LIST "containers")
+list(APPEND BITPIT_MODULE_LIST "communications")
 list(APPEND BITPIT_MODULE_LIST "IO")
 list(APPEND BITPIT_MODULE_LIST "LA")
 list(APPEND BITPIT_MODULE_LIST "SA")
@@ -329,6 +330,7 @@ list(APPEND BITPIT_MODULE_LIST "levelset")
 set(OPERATORS_DEPS "common")
 set(CONTAINERS_DEPS "common;operators")
 set(IO_DEPS "common;operators")
+set(COMMUNICATIONS_DEPS "common;containers;IO")
 set(LA_DEPS "common;operators")
 set(SA_DEPS "common;operators")
 set(CG_DEPS "common;operators")
@@ -342,10 +344,20 @@ set(RBF_DEPS "operators;SA")
 set(LEVELSET_DEPS "common;SA;surfunstructured;voloctree;volcartesian")
 
 #------------------------------------------------------------------------------------#
+# MPI-only modules
+#------------------------------------------------------------------------------------#
+set(MPI_ONLY_MODULE_LIST "")
+list(APPEND MPI_ONLY_MODULE_LIST "communications")
+
+#------------------------------------------------------------------------------------#
 # Check of the dependencies
 #------------------------------------------------------------------------------------#
 foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-	enableModule(${MODULE_NAME} TRUE FALSE)
+	if ((NOT ENABLE_MPI) AND (";${MPI_ONLY_MODULE_LIST};" MATCHES ";${MODULE_NAME};"))
+		hideModule(${MODULE_NAME})
+	else ()
+		enableModule(${MODULE_NAME} TRUE FALSE)
+	endif()
 endforeach ()
 
 set(CHECK_DEPS 1)

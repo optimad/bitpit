@@ -20,6 +20,9 @@ The <B>bitpit::utils</B> namespace provides miscellaneous functions for the bitp
 - <B>bitpit::CollapsedArray2D & bitpit::CollapsedVector2D</B> are 2D linearized vectors which avoid the overhead of the vector infrastructures.
 - <B>bitpit::IBinaryStream & bitpit::OBinaryStream</B> allow to copy chunks of memory
 
+## communications
+The <B>communications</B> module provides methods for parallel communications.
+
 ## Input Output (IO)
 - <B>bitpit::genericIO</B> is a namespace which contains basic routines to read/write in ASCII or BINARY
 - <B>bitpit::DGFObj</B> class and <B>bitpit::dgf</B> namespace for reading and writing Dune Grid Format files

@@ -26,7 +26,12 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Examples can be compiled only if all modules are enabled
-areModulesEnabled("${BITPIT_MODULE_LIST}" ALL_MODULES_ENABLED)
+set(MODULE_LIST "${BITPIT_MODULE_LIST}")
+if (NOT ENABLE_MPI)
+    list(REMOVE_ITEM MODULE_LIST "${MPI_ONLY_MODULE_LIST}")
+endif ()
+
+areModulesEnabled("${MODULE_LIST}" ALL_MODULES_ENABLED)
 if (ALL_MODULES_ENABLED)
 	option(BUILD_EXAMPLES "Create and install the examples" OFF)
 else ()
