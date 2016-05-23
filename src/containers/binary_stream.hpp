@@ -124,9 +124,6 @@ class IBinaryStream {
         const char                  *mem,                                 // (input) pointer to memory location
         size_t                       capacity                             // (input) capacity (in bytes) of memory chunk
     );
-    void close(                                                           // Close input stream from memory
-        void                                                              // (input) none
-    );
     bool eof(                                                             // Flag for eof
         void                                                              // (input) none
     ) const;
@@ -199,9 +196,6 @@ class OBinaryStream {
     ) const;
 	void open(                                                            // Open output stream
         size_t                       capacity                             // (input) stream capacity
-    );
-    void close(                                                           // Close output stream
-        void                                                              // (input) none
     );
     bool eof(                                                             // Flag for eof
         void                                                              // (input) none

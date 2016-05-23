@@ -168,18 +168,6 @@ void IBinaryStream::open(
 
 // -------------------------------------------------------------------------- //
 /*!
-        Close stream from memory
-
-*/
-void IBinaryStream::close(
-    void
-)
-{
-    buffer.clear();
-}
-
-// -------------------------------------------------------------------------- //
-/*!
         Returns true if end of file condition is met.
 
         \result boolean flag (true) if end of file is reached, (false) otherwise
@@ -382,17 +370,6 @@ void OBinaryStream::open(
 ) {
     buffer.reserve(capacity);
     buffer.resize(capacity);
-}
-
-// -------------------------------------------------------------------------- //
-/*!
-        Close output stream
-
-*/
-void OBinaryStream::close(
-    void
-) {
-    buffer.clear();
 }
 
 // -------------------------------------------------------------------------- //
