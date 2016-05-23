@@ -902,7 +902,7 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 
     // Communication
     MPI_Send(&vertexBufferCapacity, 1, MPI_LONG, recvRank, 10, m_communicator);
-    MPI_Send(vertexBuffer.get_buffer(), vertexBuffer.capacity(), MPI_CHAR, recvRank, 11, m_communicator);
+    MPI_Send(vertexBuffer.rawData(), vertexBuffer.capacity(), MPI_CHAR, recvRank, 11, m_communicator);
 
     //
     // Send cell data
@@ -950,7 +950,7 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 
     // Communication
     MPI_Send(&cellBufferCapacity, 1, MPI_LONG, recvRank, 20, m_communicator);
-    MPI_Send(cellBuffer.get_buffer(), cellBuffer.capacity(), MPI_CHAR, recvRank, 21, m_communicator);
+    MPI_Send(cellBuffer.rawData(), cellBuffer.capacity(), MPI_CHAR, recvRank, 21, m_communicator);
 
     //
     // Send ownership notifications
@@ -975,7 +975,7 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
                 notificationBuffer << index;
             }
 
-            MPI_Send(notificationBuffer.get_buffer(), notificationBuffer.capacity(), MPI_CHAR, neighRank, 31, m_communicator);
+            MPI_Send(notificationBuffer.rawData(), notificationBuffer.capacity(), MPI_CHAR, neighRank, 31, m_communicator);
         }
     }
 
@@ -1102,7 +1102,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     MPI_Recv(&vertexBufferCapacity, 1, MPI_LONG, sendRank, 10, m_communicator, MPI_STATUS_IGNORE);
 
     IBinaryStream vertexBuffer(vertexBufferCapacity);
-    MPI_Recv(vertexBuffer.get_buffer(), vertexBuffer.capacity(), MPI_CHAR, sendRank, 11, m_communicator, MPI_STATUS_IGNORE);
+    MPI_Recv(vertexBuffer.rawData(), vertexBuffer.capacity(), MPI_CHAR, sendRank, 11, m_communicator, MPI_STATUS_IGNORE);
 
     // Build a kd-tree with the vertices on the ghosts cells
     //
@@ -1169,7 +1169,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     MPI_Recv(&cellBufferCapacity, 1, MPI_LONG, sendRank, 20, m_communicator, MPI_STATUS_IGNORE);
 
     IBinaryStream cellBuffer(cellBufferCapacity);
-    MPI_Recv(cellBuffer.get_buffer(), cellBuffer.capacity(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
+    MPI_Recv(cellBuffer.rawData(), cellBuffer.capacity(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
 
     // Ghost owned by the receiver that will be promoted as internal cell
     //
@@ -1420,7 +1420,7 @@ adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &r
     }
 
     IBinaryStream buffer(bufferCapacity);
-    MPI_Recv(buffer.get_buffer(), buffer.capacity(), MPI_CHAR, sendRank, 31, m_communicator, MPI_STATUS_IGNORE);
+    MPI_Recv(buffer.rawData(), buffer.capacity(), MPI_CHAR, sendRank, 31, m_communicator, MPI_STATUS_IGNORE);
 
     // Initialize adaption info
     adaptionInfo.entity = adaption::ENTITY_CELL;

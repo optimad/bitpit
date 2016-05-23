@@ -140,7 +140,7 @@ class IBinaryStream {
     const std::vector<char>& data(                                 // Returns reference to buffer
         void                                                              // (input) none
     ) { return(buffer); }
-    char* get_buffer(                                                     // Returns pointer to buffer
+    char* rawData(                                                     // Returns pointer to buffer
         void                                                              // (input) none
     ) { return( buffer.data() ); }
 
@@ -216,7 +216,7 @@ class OBinaryStream {
     const std::vector<char>& data(                                        // Returns reference to buffer
         void                                                              // (input) none
     ) { return(buffer); }
-    char* get_buffer(                                                     // Returns pointer to buffer
+    char* rawData(                                                     // Returns pointer to buffer
         void                                                              // (input) none
     ) { return( buffer.data() ); }
 
