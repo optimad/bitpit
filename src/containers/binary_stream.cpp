@@ -201,7 +201,7 @@ bool IBinaryStream::eof(
 */
 ifstream::pos_type IBinaryStream::tellg(
     void
-) {
+) const {
     return current_pos;
 }
 
@@ -418,7 +418,7 @@ bool OBinaryStream::eof(
 */
 ifstream::pos_type OBinaryStream::tellg(
     void
-) {
+) const {
     return current_pos;
 }
 

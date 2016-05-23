@@ -132,7 +132,7 @@ class IBinaryStream {
     ) const;
     std::ifstream::pos_type tellg(                                             // Returns current position of cursor in the buffer
         void                                                              // (input) none
-    );
+    ) const;
     bool seekg (                                                          // Set cursor position in the current buffer
         size_t                       pos                                  // (input) position
     );
@@ -208,7 +208,7 @@ class OBinaryStream {
     ) const;
     std::ifstream::pos_type tellg(                                             // Returns current position of cursor in the buffer
         void                                                              // (input) none
-    );
+    ) const;
     bool seekg (                                                          // Set cursor position in the current buffer
         size_t                       pos                                  // (input) position
     );
