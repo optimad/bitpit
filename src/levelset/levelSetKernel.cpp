@@ -646,6 +646,24 @@ bool LevelSetKernel::isCommunicatorSet() const {
 }
 
 /*!
+    Frees the MPI communicator associated to the patch
+*/
+void LevelSetKernel::freeCommunicator() {
+
+    if (!isCommunicatorSet()) {
+        return;
+    }
+
+    int finalizedCalled;
+    MPI_Finalized(&finalizedCalled);
+    if (finalizedCalled) {
+        return;
+    }
+
+    MPI_Comm_free(&m_commMPI);
+}
+
+/*!
  * Checks if MPI communicator is available in underlying mesh.
  * If available MPI communicator is retreived from mesh and duplicated if necessary and parallel processing can be done.
  * If not serial processing is necessary
@@ -673,9 +691,7 @@ bool LevelSetKernel::assureMPI( ){
  * Frees the MPI communcator
  */
 void LevelSetKernel::finalizeMPI(){
-    if( m_commMPI != MPI_COMM_NULL){
-        MPI_Comm_free( &m_commMPI) ;
-    }
+    freeCommunicator();
 }
 
 /*!
