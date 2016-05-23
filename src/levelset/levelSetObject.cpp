@@ -80,9 +80,4 @@ void LevelSetObject::restore( std::fstream &stream ){
     return;
 };
 
-# if BITPIT_ENABLE_MPI
-void LevelSetObject::finalizeMPI(){
-}
-# endif
-
 }

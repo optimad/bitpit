@@ -455,20 +455,6 @@ bool LevelSet::assureMPI( ){
 }
 
 /*!
- * Frees the MPI communicator.
- */
-void LevelSet::finalizeMPI( ){
-
-    m_kernel->finalizeMPI() ;
-
-    for( auto visitor:m_object){
-        visitor.second->finalizeMPI() ;
-    }
-
-}
-
-
-/*!
  * Distribution of levelset over available processes after partitioning of mesh
  * @param[in] mapper mapper describing partitioning
  */

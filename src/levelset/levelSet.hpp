@@ -101,7 +101,6 @@ class LevelSet{
     void                                        update( const std::vector<adaption::Info> & ) ;
 # if BITPIT_ENABLE_MPI
     void                                        loadBalance( const std::vector<adaption::Info> & ) ;
-    void                                        finalizeMPI() ;
 # endif
 
     private:
@@ -161,7 +160,6 @@ class LevelSetKernel{
 
 # if BITPIT_ENABLE_MPI
     MPI_Comm                                    getCommunicator() const ;
-    void                                        finalizeMPI() ;
     void                                        freeCommunicator();
     bool                                        isCommunicatorSet() const;
     bool                                        assureMPI() ;
@@ -240,7 +238,6 @@ class LevelSetObject{
     void                                        restore( std::fstream &) ;
 
 # if BITPIT_ENABLE_MPI
-    virtual void                                finalizeMPI() ;
     virtual void                                writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) =0 ;
     virtual void                                readCommunicationBuffer( const long &, IBinaryStream & ) =0 ;
 # endif 

@@ -72,6 +72,10 @@ LevelSetKernel::LevelSetKernel( VolumeKernel *patch): LevelSetKernel() {
 LevelSetKernel::~LevelSetKernel(){
     m_mesh = NULL ;
 
+# if BITPIT_ENABLE_MPI
+    freeCommunicator();
+# endif
+
 };
 
 /*!
@@ -685,13 +689,6 @@ bool LevelSetKernel::assureMPI( ){
         return true ;
     };
 
-}
-
-/*!
- * Frees the MPI communcator
- */
-void LevelSetKernel::finalizeMPI(){
-    freeCommunicator();
 }
 
 /*!

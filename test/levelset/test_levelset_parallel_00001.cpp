@@ -203,6 +203,5 @@ int main( int argc, char *argv[]){
     cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
     cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;
 
-    levelset.finalizeMPI() ;
     MPI_Finalize();
 }
