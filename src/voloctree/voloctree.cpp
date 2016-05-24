@@ -1648,8 +1648,7 @@ std::vector<long> VolOctree::findCellCodimensionNeighs(const long &id, const int
 	if (octantInfo.internal) {
 		m_tree.findNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
 	} else {
-		m_tree.findGhostNeighbours(octantInfo.id, index, codimension, neighTreeIds);
-		neighGhostFlags.resize(neighTreeIds.size(), false);
+		m_tree.findGhostNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
 	}
 
 	int nNeighs = neighTreeIds.size();
