@@ -1152,6 +1152,8 @@ void LoggerManager::_create(const std::string &name, Logger &master)
     Logger &logger = *(m_loggers.at(name));
     logger.setConsoleVerbosity(master.getConsoleVerbosity());
     logger.setFileVerbosity(master.getFileVerbosity());
+    logger.setVisibility(master.getVisibility());
+    logger.setPriority(master.getPriority());
 }
 
 /*!
