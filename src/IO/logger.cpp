@@ -399,7 +399,7 @@ Logger::Logger(std::ostream *consoleStream, std::ofstream *fileStream,
                const int &nProcessors, const int &rank)
 	: m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
 	  m_priority(log::NORMAL), m_visibility(log::MASTER),
-	  m_consoleVerbosity(log::QUIET), m_fileVerbosity(log::QUIET)
+	  m_consoleVerbosity(log::NORMAL), m_fileVerbosity(log::NORMAL)
 {
 	// Assigne the buffer to the stream
 	rdbuf(&m_buffer);
@@ -427,8 +427,6 @@ Logger::Logger(std::ostream *consoleStream, std::ofstream *fileStream,
 	setFileVerbosity(m_fileVerbosity);
 
 	// Set logger data
-	setConsoleVerbosity(log::NORMAL);
-	setFileVerbosity(log::NORMAL);
 	setPriority(log::NORMAL);
 	setVisibility(log::MASTER);
 }
