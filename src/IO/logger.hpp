@@ -48,18 +48,18 @@ namespace log {
         SEPARATE
     };
 
-	enum Verbosity {
-	    QUIET = 0,
-	    NORMAL,
-	    DEBUG
-	};
+    enum Verbosity {
+        QUIET = 0,
+        NORMAL,
+        DEBUG
+    };
 
-	enum Visibility {
-	    MASTER = 0,
-	    GLOBAL
-	};
+    enum Visibility {
+        MASTER = 0,
+        GLOBAL
+    };
 
-	typedef Verbosity Priority;
+    typedef Verbosity Priority;
 }
 
 // Logger buffer
@@ -67,41 +67,41 @@ class LoggerBuffer : public std::streambuf
 {
 
 public:
-	LoggerBuffer(std::size_t bufferSize = 256);
-	~LoggerBuffer();
+    LoggerBuffer(std::size_t bufferSize = 256);
+    ~LoggerBuffer();
 
-	void setConsoleEnabled(bool enabled);
-	void setConsoleStream(std::ostream *console);
-	std::ostream & getConsoleStream();
-	void setConsolePrefix(const std::string &prefix);
-	std::string getConsolePrefix()	const;
+    void setConsoleEnabled(bool enabled);
+    void setConsoleStream(std::ostream *console);
+    std::ostream & getConsoleStream();
+    void setConsolePrefix(const std::string &prefix);
+    std::string getConsolePrefix()	const;
 
-	void setFileEnabled(bool enabled);
-	void setFileStream(std::ofstream *file);
-	std::ofstream & getFileStream();
-	void setFilePrefix(const std::string &prefix);
-	std::string getFilePrefix() const;
+    void setFileEnabled(bool enabled);
+    void setFileStream(std::ofstream *file);
+    std::ofstream & getFileStream();
+    void setFilePrefix(const std::string &prefix);
+    std::string getFilePrefix() const;
 
-	void setContext(const std::string &context);
-	void setPadding(const std::string &padding);
+    void setContext(const std::string &context);
+    void setPadding(const std::string &padding);
 
     int flush(bool terminate);
 
 private:
-	std::vector<char> m_buffer;
+    std::vector<char> m_buffer;
 
-	std::string m_context;
-	std::string m_padding;
+    std::string m_context;
+    std::string m_padding;
 
-	bool m_consoleEnabled;
-	std::ostream *m_console;
-	std::string m_consolePrefix;
+    bool m_consoleEnabled;
+    std::ostream *m_console;
+    std::string m_consolePrefix;
 
-	bool m_fileEnabled;
-	std::ofstream *m_file;
-	std::string m_filePrefix;
+    bool m_fileEnabled;
+    std::ofstream *m_file;
+    std::string m_filePrefix;
 
-	const std::string getTimestamp() const;
+    const std::string getTimestamp() const;
 
     int_type overflow(int_type ch);
     int sync();
@@ -113,63 +113,63 @@ class Logger : public std::ostream
 {
 
 public:
-	Logger(std::ostream *consoleStream, std::ofstream *fileStream,
-           const int &nProcessors = 1, const int &rank = 0);
+    Logger(std::ostream *consoleStream, std::ofstream *fileStream,
+        const int &nProcessors = 1, const int &rank = 0);
 
     int getProcessorCount();
-	int getRank();
+    int getRank();
 
-	void setContext(const std::string &context);
-	std::string getContext();
+    void setContext(const std::string &context);
+    std::string getContext();
 
-	void setIndentation(const int &delta);
-	int getIndentation();
+    void setIndentation(const int &delta);
+    int getIndentation();
 
-	void setPriority(log::Priority priority);
-	log::Priority getPriority();
+    void setPriority(log::Priority priority);
+    log::Priority getPriority();
 
-	void setVisibility(log::Visibility visibility);
-	log::Visibility getVisibility();
+    void setVisibility(log::Visibility visibility);
+    log::Visibility getVisibility();
 
-	void setConsoleStream(std::ostream *console);
-	std::ostream & getConsoleStream();
-	std::string getConsolePrefix();
-	void setConsoleVerbosity(log::Verbosity verbosity);
-	log::Verbosity getConsoleVerbosity();
+    void setConsoleStream(std::ostream *console);
+    std::ostream & getConsoleStream();
+    std::string getConsolePrefix();
+    void setConsoleVerbosity(log::Verbosity verbosity);
+    log::Verbosity getConsoleVerbosity();
 
-	void setFileStream(std::ofstream *file);
-	std::ofstream & getFileStream();
-	std::string getFilePrefix();
-	void setFileVerbosity(log::Verbosity verbosity);
-	log::Verbosity getFileVerbosity();
+    void setFileStream(std::ofstream *file);
+    std::ofstream & getFileStream();
+    std::string getFilePrefix();
+    void setFileVerbosity(log::Verbosity verbosity);
+    log::Verbosity getFileVerbosity();
 
-	std::string getName();
+    std::string getName();
 
-	void println(const std::string &line);
-	void println(const std::string &line, log::Priority priority);
-	void println(const std::string &line, log::Visibility visibility);
-	void println(const std::string &line, const log::Priority priority, log::Visibility visibility);
+    void println(const std::string &line);
+    void println(const std::string &line, log::Priority priority);
+    void println(const std::string &line, log::Visibility visibility);
+    void println(const std::string &line, const log::Priority priority, log::Visibility visibility);
 
-	void print(const std::string &line);
-	void print(const std::string &line, log::Priority priority);
-	void print(const std::string &line, log::Visibility visibility);
-	void print(const std::string &line, log::Priority priority, log::Visibility visibility);
+    void print(const std::string &line);
+    void print(const std::string &line, log::Priority priority);
+    void print(const std::string &line, log::Visibility visibility);
+    void print(const std::string &line, log::Priority priority, log::Visibility visibility);
 
 private:
-	int m_nProcessors;
-	int m_rank;
-	LoggerBuffer m_buffer;
+    int m_nProcessors;
+    int m_rank;
+    LoggerBuffer m_buffer;
 
-	int m_indentation;
-	std::string m_context;
-	log::Priority m_priority;
-	log::Visibility m_visibility;
+    int m_indentation;
+    std::string m_context;
+    log::Priority m_priority;
+    log::Visibility m_visibility;
 
-	log::Verbosity m_consoleVerbosity;
-	log::Verbosity m_fileVerbosity;
+    log::Verbosity m_consoleVerbosity;
+    log::Verbosity m_fileVerbosity;
 
-	Logger(Logger const&) = delete;
-	Logger& operator=(Logger const&) = delete;
+    Logger(Logger const&) = delete;
+    Logger& operator=(Logger const&) = delete;
 
 };
 
@@ -179,126 +179,126 @@ class LoggerManager
 
 public:
     static std::string BITPIT_LOG_NAME;
-	static std::string BITPIT_LOG_DIRECTORY;
+    static std::string BITPIT_LOG_DIRECTORY;
 
     static LoggerManager & manager();
 
-	~LoggerManager();
+    ~LoggerManager();
 
     Logger & cout();
     Logger & cout(const std::string &name);
 
-	void initialize(log::Mode mode, bool reset,
-					const int &nProcessors, const int &rank);
+    void initialize(log::Mode mode, bool reset,
+                    const int &nProcessors, const int &rank);
 
-	void initialize(log::Mode mode, bool reset = false,
-					const std::string &directory = BITPIT_LOG_DIRECTORY,
-					const int &nProcessors = 1, const int &rank = 0);
+    void initialize(log::Mode mode, bool reset = false,
+                    const std::string &directory = BITPIT_LOG_DIRECTORY,
+                    const int &nProcessors = 1, const int &rank = 0);
 
-	void initialize(log::Mode mode, const std::string &name,
-					bool reset = false, const std::string &directory = BITPIT_LOG_DIRECTORY,
-					const int &nProcessors = 1, const int &rank = 0);
+    void initialize(log::Mode mode, const std::string &name,
+                    bool reset = false, const std::string &directory = BITPIT_LOG_DIRECTORY,
+                    const int &nProcessors = 1, const int &rank = 0);
 
-	void create(const std::string &name, bool reset = false,
-				const int &nProcessors = 1, const int &rank = 0);
+    void create(const std::string &name, bool reset = false,
+                const int &nProcessors = 1, const int &rank = 0);
 
-	void create(const std::string &name, bool reset, const std::string &directory,
-				const int &nProcessors = 1, const int &rank = 0);
+    void create(const std::string &name, bool reset, const std::string &directory,
+                const int &nProcessors = 1, const int &rank = 0);
 
-	bool destroy(const std::string &name, bool force = false);
+    bool destroy(const std::string &name, bool force = false);
 
-	bool exists(const std::string &name) const;
+    bool exists(const std::string &name) const;
 
-	bool isInitialized() const;
+    bool isInitialized() const;
 
-	bool setMode(log::Mode mode);
-	log::Mode getMode() const;
+    bool setMode(log::Mode mode);
+    log::Mode getMode() const;
 
-	void setConsoleVerbosity(log::Verbosity verbosity);
-	void setFileVerbosity(log::Verbosity verbosity);
+    void setConsoleVerbosity(log::Verbosity verbosity);
+    void setFileVerbosity(log::Verbosity verbosity);
 
-	std::string getDefaultName() const;
-	std::string getDefaultDirectory() const;
+    std::string getDefaultName() const;
+    std::string getDefaultDirectory() const;
 
 private:
-	static std::unique_ptr<LoggerManager> m_manager;
+    static std::unique_ptr<LoggerManager> m_manager;
 
-	std::string m_defaultName;
-	std::string m_defaultDirectory;
-	log::Mode m_mode;
+    std::string m_defaultName;
+    std::string m_defaultDirectory;
+    log::Mode m_mode;
 
     std::unordered_map<std::string, std::unique_ptr<Logger>> m_loggers;
     std::unordered_map<std::string, int> m_loggerUsers;
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>> m_fileStreams;
 
-	LoggerManager();
+    LoggerManager();
 
     LoggerManager(LoggerManager const&) = delete;
     LoggerManager& operator=(LoggerManager const&) = delete;
 
-	void _create(const std::string &name, bool reset, const std::string &directory,
-	             const int &nProcessors, const int &rank);
-	void _create(const std::string &name, Logger &master);
+    void _create(const std::string &name, bool reset, const std::string &directory,
+                const int &nProcessors, const int &rank);
+    void _create(const std::string &name, Logger &master);
 
 };
 
 
 /*!
-	\brief The namespace 'log' contains routines for interacting with the
-	message logger.
- */
+    \brief The namespace 'log' contains routines for interacting with the
+    message logger.
+*/
 namespace log {
 
-	// Generic global functions
-	LoggerManager & manager();
-	Logger & cout();
-	Logger & cout(std::string name);
+    // Generic global functions
+    LoggerManager & manager();
+    Logger & cout();
+    Logger & cout(std::string name);
 
-	// Manipulators global functions
+    // Manipulators global functions
 
-	/*!
-		Struct that allows to manipulate a logger.
-	*/
-	template<typename T>
-	struct LoggerManipulator {
-		Logger& (*f) (Logger&, const T &);
-		T value;
+    /*!
+        Struct that allows to manipulate a logger.
+    */
+    template<typename T>
+    struct LoggerManipulator {
+        Logger& (*f) (Logger&, const T &);
+        T value;
 
-		/*!
-			Creates a new logger manipulator
-		*/
-		LoggerManipulator(Logger& (*ff)(Logger&, const T &), const T & ss)
-			: f(ff), value(ss) {
+        /*!
+            Creates a new logger manipulator
+        */
+        LoggerManipulator(Logger& (*ff)(Logger&, const T &), const T & ss)
+            : f(ff), value(ss) {
 
-		}
-	};
+        }
+    };
 
-	/*!
-		Applies a manipulator to a logger.
-	*/
-	template<typename T>
-	Logger& operator<<(Logger& logger, LoggerManipulator<T>&& m)
-	{
-		return m.f(logger, m.value);
-	}
+    /*!
+        Applies a manipulator to a logger.
+    */
+    template<typename T>
+    Logger& operator<<(Logger& logger, LoggerManipulator<T>&& m)
+    {
+        return m.f(logger, m.value);
+    }
 
-	Logger& setContext(Logger& logger, const std::string &context);
-	LoggerManipulator<std::string> context(const std::string &context);
+    Logger& setContext(Logger& logger, const std::string &context);
+    LoggerManipulator<std::string> context(const std::string &context);
 
-	Logger& setPriority(Logger& logger, const log::Priority &priority);
-	LoggerManipulator<log::Priority> priority(const log::Priority &priority);
+    Logger& setPriority(Logger& logger, const log::Priority &priority);
+    LoggerManipulator<log::Priority> priority(const log::Priority &priority);
 
-	Logger& setVisibility(Logger& logger, const log::Visibility &visibility);
-	LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility);
+    Logger& setVisibility(Logger& logger, const log::Visibility &visibility);
+    LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility);
 
-	Logger& setConsoleVerbosity(Logger& logger, const log::Verbosity &verbosity);
-	LoggerManipulator<log::Priority> consoleVerbosity(const log::Verbosity &verbosity);
+    Logger& setConsoleVerbosity(Logger& logger, const log::Verbosity &verbosity);
+    LoggerManipulator<log::Priority> consoleVerbosity(const log::Verbosity &verbosity);
 
-	Logger& setFileVerbosity(Logger& logger, const log::Verbosity &verbosity);
-	LoggerManipulator<log::Priority> fileVerbosity(const log::Verbosity &verbosity);
+    Logger& setFileVerbosity(Logger& logger, const log::Verbosity &verbosity);
+    LoggerManipulator<log::Priority> fileVerbosity(const log::Verbosity &verbosity);
 
-	Logger& setIndentation(Logger& logger, const int &delta);
-	LoggerManipulator<int> indent(const int &delta);
+    Logger& setIndentation(Logger& logger, const int &delta);
+    LoggerManipulator<int> indent(const int &delta);
 
 }
 
