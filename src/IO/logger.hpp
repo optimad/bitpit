@@ -131,6 +131,8 @@ public:
     void setVisibility(log::Visibility visibility);
     log::Visibility getVisibility();
 
+    void setVerbosities(log::Verbosity verbosity);
+
     void setConsoleStream(std::ostream *console);
     std::ostream & getConsoleStream();
     std::string getConsolePrefix();
@@ -214,6 +216,7 @@ public:
     bool setMode(log::Mode mode);
     log::Mode getMode() const;
 
+    void setVerbosities(log::Verbosity verbosity);
     void setConsoleVerbosity(log::Verbosity verbosity);
     void setFileVerbosity(log::Verbosity verbosity);
 
@@ -290,6 +293,9 @@ namespace log {
 
     Logger& setVisibility(Logger& logger, const log::Visibility &visibility);
     LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility);
+
+    Logger& setVerbosities(Logger& logger, const log::Verbosity &verbosity);
+    LoggerManipulator<log::Priority> verbosities(const log::Verbosity &verbosity);
 
     Logger& setConsoleVerbosity(Logger& logger, const log::Verbosity &verbosity);
     LoggerManipulator<log::Priority> consoleVerbosity(const log::Verbosity &verbosity);

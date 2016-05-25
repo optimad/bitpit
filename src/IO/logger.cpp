@@ -519,6 +519,18 @@ log::Visibility Logger::getVisibility()
 }
 
 /*!
+    Set the verbosity for the messages printed both on the console and on the
+    log file.
+
+    \param verbosity is the verbosity for the messages
+*/
+void Logger::setVerbosities(log::Verbosity verbosity)
+{
+    setConsoleVerbosity(verbosity);
+    setFileVerbosity(verbosity);
+}
+
+/*!
     Sets the verbosity for the messages printed on the console.
 
     \param verbosity is the verbosity for the messages printed on the console
@@ -1157,6 +1169,19 @@ void LoggerManager::_create(const std::string &name, Logger &master)
 }
 
 /*!
+    Sets the verbosity for the messages printed both on the console and on the
+    log file.
+
+    \param verbosity is the verbosity for the messages
+*/
+void LoggerManager::setVerbosities(log::Verbosity verbosity)
+{
+    for (auto &entry : m_loggers) {
+        entry.second->setVerbosities(verbosity);
+    }
+}
+
+/*!
     Sets the verbosity for the messages printed on the console.
 
     \param verbosity is the verbosity for the messages printed on the console
@@ -1349,6 +1374,34 @@ namespace log {
     LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility)
     {
         return LoggerManipulator<log::Visibility>(setVisibility, visibility);
+    }
+
+    /*!
+        Sets the verbosity for the messages printed both on the console and on
+        the log file.
+
+        \param logger is a reference pointing to the logger
+        \param verbosity is the verbosity for the messages
+        \result A reference pointing to the logger received in input.
+    */
+    Logger& setVerbosities(Logger& logger, const log::Verbosity &verbosity)
+    {
+        logger.setVerbosities(verbosity);
+
+        return logger;
+    }
+
+    /*!
+        Returns a logger manipulator that allows to change the verbosity for
+        the messages printed both on the console and on the log file.
+
+        \param verbosity is the verbosity for the messages
+        \result A logger manipulator that allows to change the verbosity for
+        the messages printed on the console.
+    */
+    LoggerManipulator<log::Verbosity> verbosities(const log::Verbosity &verbosity)
+    {
+        return LoggerManipulator<log::Verbosity>(setVerbosities, verbosity);
     }
 
     /*!
