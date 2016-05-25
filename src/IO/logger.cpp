@@ -50,7 +50,7 @@ namespace bitpit{
 */
 
 /*!
-	Builds a new buffer.
+	Creates a new buffer.
 */
 LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
 	: m_buffer(bufferSize + 1), m_context(""), m_padding(""),
@@ -108,7 +108,7 @@ LoggerBuffer::int_type LoggerBuffer::overflow(int_type character)
 }
 
 /*!
-	Synchronize stream buffer
+	Synchronize stream buffer.
 
 	\return Returns 0 to indicates success, -1 to indicate failure.
 */
@@ -118,7 +118,7 @@ int LoggerBuffer::sync()
 }
 
 /*!
-	Flushes stream buffer
+	Flushes stream buffer.
 
 	\param terminate if true ensures that a new line is added as last
 	character
@@ -243,7 +243,7 @@ std::ostream & LoggerBuffer::getConsoleStream()
 }
 
 /*!
-	Sets the prefix for console output
+	Sets the prefix for console output.
 
 	\param prefix is the prefix that will be prepended to every line of the
 	console output
@@ -256,9 +256,9 @@ void LoggerBuffer::setConsolePrefix(const std::string &prefix)
 }
 
 /*!
-	Gets the prefix for console output
+	Gets the prefix for console output.
 
-	\result The prefix for console output
+	\result The prefix for console output.
 */
 std::string LoggerBuffer::getConsolePrefix() const
 {
@@ -272,7 +272,7 @@ std::string LoggerBuffer::getConsolePrefix() const
 	been set. If there is no log file path specified, the output on the
 	file will not be enabled.
 
-	\param enabled if set to true enables the output on the log file.
+	\param enabled if set to true enables the output on the log file
 */
 void LoggerBuffer::setFileEnabled(bool enabled)
 {
@@ -304,7 +304,7 @@ std::ofstream & LoggerBuffer::getFileStream()
 }
 
 /*!
-	Sets the prefix for file output
+	Sets the prefix for file output.
 
 	\param prefix is the prefix that will be prepended to every line of the
 	file output
@@ -317,9 +317,9 @@ void LoggerBuffer::setFilePrefix(const std::string &prefix)
 }
 
 /*!
-	Gets the prefix for file output
+	Gets the prefix for file output.
 
-	\result The prefix for file output
+	\result The prefix for file output.
 */
 std::string LoggerBuffer::getFilePrefix() const
 {
@@ -327,7 +327,7 @@ std::string LoggerBuffer::getFilePrefix() const
 }
 
 /*!
-	Sets the context of the output
+	Sets the context of the output.
 
 	\param context is the context of the output
 */
@@ -339,7 +339,7 @@ void LoggerBuffer::setContext(const std::string &context)
 }
 
 /*!
-	Sets the padding to be prepended befor every message
+	Sets the padding to be prepended befor every message.
 
 	\param padding is the padding to be prepended befor every message
 */
@@ -351,7 +351,7 @@ void LoggerBuffer::setPadding(const std::string &padding)
 }
 
 /*!
-	Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+	Get current date/time, format is "YYYY-MM-DD.HH:mm:ss".
 */
 const std::string LoggerBuffer::getTimestamp() const
 {
@@ -785,17 +785,17 @@ void Logger::print(const std::string &message, log::Priority priority, log::Visi
 std::unique_ptr<LoggerManager> LoggerManager::m_manager = nullptr;
 
 /*
-	Default name for the logger
+	Default name for the logger.
 */
 std::string LoggerManager::BITPIT_LOG_NAME = "bitpit";
 
 /*
-	Default directory for the logger
+	Default directory for the logger.
 */
 std::string LoggerManager::BITPIT_LOG_DIRECTORY = ".";
 
 /*!
-	Default constructor
+	Default constructor.
 */
 LoggerManager::LoggerManager()
 	: m_defaultName(BITPIT_LOG_NAME), m_defaultDirectory(BITPIT_LOG_DIRECTORY),
@@ -805,7 +805,7 @@ LoggerManager::LoggerManager()
 }
 
 /*!
-	Destructor
+	Destructor.
 */
 LoggerManager::~LoggerManager()
 {
@@ -1085,7 +1085,7 @@ log::Mode LoggerManager::getMode() const
 }
 
 /*!
-    Internal function to configure a logger
+    Internal function to create a logger.
 
     \param name is the name for the logger
     \param reset if true the log files will be reset
@@ -1131,10 +1131,11 @@ void LoggerManager::_create(const std::string &name, bool reset,
 }
 
 /*!
-    Internal function to configure a logger
+    Internal function to create a logger.
 
     \param name is the name for the logger
-    \param master is a pointet to the logger tha
+    \param master is a reference to the logger from which the settings will
+    be copied from
 */
 void LoggerManager::_create(const std::string &name, Logger &master)
 {
