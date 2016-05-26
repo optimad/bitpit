@@ -84,34 +84,28 @@ private:
 
 };
 
-/*!
-    \ingroup communications
-
-    @brief Buffer to be used for send communications.
-*/
 class SendBuffer : public CommunicationBuffer<RawSendBuffer>
 {
-    using CommunicationBuffer::CommunicationBuffer;
-
     friend DataCommunicator;
 
     template<typename T>
     friend SendBuffer & (::operator<<) (SendBuffer &buffer, const T &value);
+
+public:
+    SendBuffer(size_t capacity = 0, bool doubleBuffer = false);
+
 };
 
-/*!
-    \ingroup communications
-
-    @brief Buffer to be used for receive communications.
-*/
 class RecvBuffer : public CommunicationBuffer<RawRecvBuffer>
 {
-    using CommunicationBuffer::CommunicationBuffer;
-
     friend DataCommunicator;
 
     template<typename T>
     friend RecvBuffer & (::operator>>) (RecvBuffer &buffer, T &value);
+
+public:
+    RecvBuffer(size_t capacity = 0, bool doubleBuffer = false);
+
 };
 
 }
