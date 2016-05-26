@@ -25,6 +25,8 @@
 #include <cassert>
 #include <limits>
 
+#include "bitpit_common.hpp"
+
 #include "element.hpp"
 
 /*!
@@ -248,7 +250,7 @@ const ElementInfo & ElementInfo::getElementInfo(ElementInfo::Type type)
 		return wedgeInfo;
 
 	default:
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return undefinedInfo;
 
 	}
@@ -1098,7 +1100,7 @@ int Element::getFaceCount() const
 	case (ElementInfo::POLYGON):
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
 
 	default:
@@ -1119,7 +1121,7 @@ ElementInfo::Type Element::getFaceType(const int &face) const
 	case (ElementInfo::POLYGON):
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return ElementInfo::UNDEFINED;
 
 	default:
@@ -1141,7 +1143,7 @@ std::vector<int> Element::getFaceLocalConnect(const int &face) const
 	case (ElementInfo::POLYGON):
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return std::vector<int>();
 
 	default:
@@ -1162,7 +1164,7 @@ int Element::getEdgeCount() const
 	case (ElementInfo::POLYGON):
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
 
 	default:
@@ -1184,7 +1186,7 @@ std::vector<int> Element::getEdgeLocalConnect(const int &edge) const
 	case (ElementInfo::POLYGON):
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return std::vector<int>();
 
 	default:
@@ -1209,7 +1211,7 @@ int Element::getDimension() const
 		return 3;
 
 	case (ElementInfo::UNDEFINED):
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
 
 	default:
@@ -1241,7 +1243,7 @@ int Element::getVertexCount() const
 	case (ElementInfo::POLYGON):
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
-		assert(false);
+		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
 
 	default:

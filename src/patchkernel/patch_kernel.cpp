@@ -3630,7 +3630,7 @@ const VTKFieldMetaData PatchKernel::getMetaData(std::string name)
 	}
 
 	// This code should never be reached
-	assert(false);
+	BITPIT_UNREACHABLE("Unknown field");
 }
 
 /*!
