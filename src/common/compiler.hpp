@@ -49,4 +49,12 @@ do {                         \
 #define BITPIT_UNREACHABLE(str)
 #endif
 
+/*!
+ * Unused macro.
+ */
+#define BITPIT_UNUSED(variable)     \
+do {                  \
+    (void)(variable); \
+} while (0)
+
 #endif
