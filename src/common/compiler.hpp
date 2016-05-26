@@ -22,26 +22,31 @@
  *
  \*---------------------------------------------------------------------------*/
 
+#ifndef __BITPIT_COMPILER_HPP__
+#define __BITPIT_COMPILER_HPP__
 
-
-/*!
- * @defgroup common Common
- * @{
- * @defgroup commonUtils Utils
- * @}
- *
+/**
+ * Unreachable macro. Useful for suppressing "control reaches end of non-void
+ * function" warnings.
  */
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#define BITPIT_UNREACHABLE(str)    \
+do {                         \
+    assert(!str);            \
+    __builtin_unreachable(); \
+} while (0)
+#elif (defined(__clang__) && defined(__has_builtin))
+# if __has_builtin(__builtin_unreachable)
+#  define BITPIT_UNREACHABLE(str)  \
+do {                         \
+    assert(!str);            \
+    __builtin_unreachable(); \
+} while (0)
+# endif
+#endif
 
-
-#ifndef __BITPIT_MODULE_COMMON_HPP__
-#define __BITPIT_MODULE_COMMON_HPP__
-
-#include "bitpit_version.hpp"
-
-#include "compiler.hpp"
-#include "utils.hpp"
-#include "utils.tpp"
-
-#define BITPIT_UNUSED(expr) do { (void)(expr); } while (0)
+#ifndef BITPIT_UNREACHABLE
+#define BITPIT_UNREACHABLE(str)
+#endif
 
 #endif
