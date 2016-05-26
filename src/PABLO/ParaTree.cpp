@@ -3135,6 +3135,54 @@ namespace bitpit {
         }///end ghosts search
     };
 
+    /** Get the octant owner rank of an input point.
+     * \param[in] point Coordinates of target point.
+     * \return Owner rank of target point (negative if out of global domain).
+     */
+    int
+    ParaTree::getPointOwnerRank(darray3 point){
+
+        uint32_t x,y,z;
+        uint64_t morton;
+
+        if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
+            || point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
+            return -1;
+        }
+        point[0] = min(max(point[0],0.0),1.0);
+        point[1] = min(max(point[1],0.0),1.0);
+        point[2] = min(max(point[2],0.0),1.0);
+
+        x = m_trans.mapX(point[0]);
+        y = m_trans.mapY(point[1]);
+        z = m_trans.mapZ(point[2]);
+
+        if ((x > TreeConstants::MAX_LENGTH) || (y > TreeConstants::MAX_LENGTH) || (z > TreeConstants::MAX_LENGTH)
+            || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
+            return -1;
+        }
+
+        if (m_serial)
+            return m_rank;
+
+        if (x == TreeConstants::MAX_LENGTH)
+            x = x - 1;
+
+        if (y == TreeConstants::MAX_LENGTH)
+            y = y - 1;
+
+        if (z == TreeConstants::MAX_LENGTH)
+            z = z - 1;
+
+        morton = PABLO::computeMorton(x, y, z);
+
+        for (int p = 0; p < m_nproc; ++p){
+            if (morton <= m_partitionLastDesc[p] && morton >= m_partitionFirstDesc[p])
+                return p;
+        }
+
+        return -1;
+    };
 
     /** Get mapping info of an octant after an adapting with tracking changes.
      * \param[in] idx Index of new octant.

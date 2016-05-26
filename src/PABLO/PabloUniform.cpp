@@ -835,6 +835,16 @@ namespace bitpit {
         return ParaTree::getPointOwnerIdx(point,isghost);
     };
     
+    /** Get the octant owner rank of an input point.
+     * \param[in] point Coordinates of target point.
+     * \return Owner rank of target point (negative if out of global domain).
+     */
+    int PabloUniform::getPointOwnerRank(darray3 point){
+        for (int i=0; i<3; i++){
+            point[i] = (point[i] - m_origin[i])/m_L;
+        }
+        return ParaTree::getPointOwnerRank(point);
+    };
     
     // =================================================================================== //
     // OTHER PARATREE BASED METHODS												    	   //

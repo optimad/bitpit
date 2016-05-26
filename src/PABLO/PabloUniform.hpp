@@ -174,6 +174,7 @@ namespace bitpit {
         uint32_t getPointOwnerIdx(darray3 point) const;
         Octant* getPointOwner(darray3 point, bool & isghost);
         uint32_t getPointOwnerIdx(darray3 point, bool & isghost) const;
+        int getPointOwnerRank(darray3 point);
 
         // =================================================================================== //
         // OTHER PARATREE BASED METHODS												    	   //
