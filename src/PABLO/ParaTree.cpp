@@ -2310,9 +2310,9 @@ namespace bitpit {
         }
         else if (m_lastOp == "loadbalance" || m_lastOp == "firstloadbalance"){
             uint64_t gidx = getGlobalIdx(idx);
+            mapper[0] = gidx;
             for (int iproc=0; iproc<m_nproc; ++iproc){
                 if (m_partitionRangeGlobalIdx0[iproc]>=gidx){
-                    mapper[0] = gidx;
                     if (iproc > 0)
                         mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] + 1;
                     rank[0] = (m_lastOp == "firstloadbalance" ? m_rank : iproc);
