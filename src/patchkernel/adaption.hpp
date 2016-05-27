@@ -67,8 +67,8 @@ namespace adaption
 		Type type;
 		Entity entity;
 		int rank;
-		std::vector<unsigned long> previous;
-		std::vector<unsigned long> current;
+		std::vector<long> previous;
+		std::vector<long> current;
 	};
 
 	class InfoCollection

@@ -585,12 +585,12 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			// make the translation later.
 			//
 			// WARNING: tree id are uint32_t wherase adaptionInfo stores
-			//          id as unsigned long.
+			//          id as long.
 			adaptionInfo.current.reserve(nCurrentTreeIds);
 			auto addedOctantsIter = addedOctants.cend() - nCurrentTreeIds;
 			while (addedOctantsIter != addedOctants.cend()) {
 				adaptionInfo.current.emplace_back();
-				unsigned long &adaptionId = adaptionInfo.current.back();
+				long &adaptionId = adaptionInfo.current.back();
 				adaptionId = (*addedOctantsIter).id;
 
 				addedOctantsIter++;
@@ -617,7 +617,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				}
 
 				adaptionInfo.previous.emplace_back();
-				unsigned long &adaptionId = adaptionInfo.previous.back();
+				long &adaptionId = adaptionInfo.previous.back();
 				adaptionId = previousCellId;
 			}
 		}
@@ -714,7 +714,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 					std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, rank);
 					adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 					adaptionInfo.previous.emplace_back();
-					unsigned long &deletedId = adaptionInfo.previous.back();
+					long &deletedId = adaptionInfo.previous.back();
 					deletedId = cellId;
 				}
 
@@ -735,7 +735,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			for (const long &interfaceId : removedInterfaces) {
 				adaptionInfo.previous.emplace_back();
-				unsigned long &deletedInterfaceId = adaptionInfo.previous.back();
+				long &deletedInterfaceId = adaptionInfo.previous.back();
 				deletedInterfaceId = interfaceId;
 			}
 		}
@@ -818,7 +818,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			auto cellIterator = m_cellToGhost.cbegin();
 			while (cellIterator != m_cellToGhost.cend()) {
 				adaptionInfo.current.emplace_back();
-				unsigned long &adaptionId = adaptionInfo.current.back();
+				long &adaptionId = adaptionInfo.current.back();
 				adaptionId = cellIterator->first;
 
 				cellIterator++;
@@ -847,7 +847,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			adaption::Info &adaptionInfo = adaptionData[infoId];
 			for (const long &interfaceId : createdInterfaces) {
 				adaptionInfo.current.emplace_back();
-				unsigned long &createdInterfaceId = adaptionInfo.current.back();
+				long &createdInterfaceId = adaptionInfo.current.back();
 				createdInterfaceId = interfaceId;
 			}
 		}

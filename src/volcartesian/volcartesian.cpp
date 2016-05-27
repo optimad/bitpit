@@ -498,7 +498,7 @@ const std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdapti
 		adaptionCellInfo.current.reserve(m_cells.size());
 		for (auto &cell : m_cells) {
 			adaptionCellInfo.current.emplace_back();
-			unsigned long &cellId = adaptionCellInfo.current.back();
+			long &cellId = adaptionCellInfo.current.back();
 			cellId = cell.getId();
 		}
 
@@ -509,7 +509,7 @@ const std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdapti
 		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
 		for (auto &interface : m_interfaces) {
 			adaptionInterfaceInfo.current.emplace_back();
-			unsigned long &interfaceId = adaptionInterfaceInfo.current.back();
+			long &interfaceId = adaptionInterfaceInfo.current.back();
 			interfaceId = interface.getId();
 		}
 	} else {
