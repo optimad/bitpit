@@ -633,12 +633,20 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree.getSentIdx();
 	for (const auto &rankEntry : sendOctants) {
 		int rank = rankEntry.first;
+
+		adaption::Type deletionType;
+		if (rank == currentRank) {
+			deletionType = adaption::TYPE_DELETION;
+		} else {
+			deletionType = adaption::TYPE_PARTITION_SEND;
+		}
+
 		for (int k = 0; k < 2; ++k) {
 			uint32_t beginTreeId = rankEntry.second[2 * k];
 			uint32_t endTreeId   = rankEntry.second[2 * k + 1];
 			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
 				OctantInfo octantInfo(treeId, true);
-				deletedOctants.emplace_back(octantInfo, adaption::TYPE_PARTITION_SEND, rank);
+				deletedOctants.emplace_back(octantInfo, deletionType, rank);
 				unmappedOctants[treeId] = false;
 			}
 		}
