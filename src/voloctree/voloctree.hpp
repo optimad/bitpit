@@ -145,17 +145,17 @@ private:
 
 	struct DeleteInfo {
 		DeleteInfo()
-			: octantInfo(), source(adaption::TYPE_UNKNOWN), rank(-1)
+			: octantInfo(), trigger(adaption::TYPE_UNKNOWN), rank(-1)
 		{
 		};
 
-		DeleteInfo(OctantInfo _octantInfo, adaption::Type _source, int _rank = -1)
-			: octantInfo(_octantInfo), source(_source), rank(_rank)
+		DeleteInfo(OctantInfo _octantInfo, adaption::Type _trigger, int _rank = -1)
+			: octantInfo(_octantInfo), trigger(_trigger), rank(_rank)
 		{
 		};
 
 		OctantInfo octantInfo;
-		adaption::Type source;
+		adaption::Type trigger;
 		int rank;
 	};
 

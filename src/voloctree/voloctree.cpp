@@ -712,7 +712,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				// Only cells deleted from a real deletion or a partition send
 				// needs to be tracked here, the other cells will be tracked
 				// where the adaption that deleted the cell is tracked.
-				adaption::Type adaptionType = deleteInfo.source;
+				adaption::Type adaptionType = deleteInfo.trigger;
 
 				bool trackCellDeletion = (adaptionType == adaption::TYPE_DELETION) ||
 					(adaptionType == adaption::TYPE_PARTITION_SEND);
