@@ -46,6 +46,7 @@ public:
     void finalize();
 
     void setTag(int tag);
+    int getTag() const;
 
     void clearAllSends();
     void clearAllRecvs();

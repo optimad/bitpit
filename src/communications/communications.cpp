@@ -78,6 +78,16 @@ void DataCommunicator::setTag(int tag)
 }
 
 /*!
+    Gets the tag to be used for the communications
+
+    \result The tag to be used for the communications.
+*/
+int DataCommunicator::getTag() const
+{
+    return m_tag;
+}
+
+/*!
     Set the recevies in "continuous" mode.
 
     When the recives are in "continuous" mode they will be restarted as soon
