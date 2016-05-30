@@ -89,6 +89,8 @@ public:
     void cancelAllRecvs();
 
 private:
+    static int DEFAULT_TAG;
+
     MPI_Comm m_communicator;
     int m_rank;
     int m_tag;

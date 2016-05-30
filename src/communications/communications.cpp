@@ -42,12 +42,14 @@ namespace bitpit {
     exchange data among processors.
 */
 
+int DataCommunicator::DEFAULT_TAG = 0;
+
 /*!
     Creates a new communicator for data exchange.
 */
 DataCommunicator::DataCommunicator(MPI_Comm communicator)
     : m_communicator(communicator), m_rank(-1),
-    m_tag(MPI_ANY_TAG), m_recvsContinuous(false)
+    m_tag(DEFAULT_TAG), m_recvsContinuous(false)
 {
     // Get MPI information
     MPI_Comm_rank(m_communicator, &m_rank);
