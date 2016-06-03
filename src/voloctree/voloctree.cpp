@@ -701,6 +701,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// data is needed and the order in which these data will be sent).
 		if (trackChanges) {
 			// Track deleted cells
+			std::unordered_set<long> sendAdaptionInfo;
 			std::unordered_set<long> removedInterfaces;
 			for (const DeleteInfo &deleteInfo : deletedOctants) {
 				// Cell info
@@ -713,17 +714,21 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				// needs to be tracked here, the other cells will be tracked
 				// where the adaption that deleted the cell is tracked.
 				adaption::Type adaptionType = deleteInfo.trigger;
+				bool adaptionIsDeletion = (adaptionType == adaption::TYPE_DELETION);
+				bool adaptionIsSend = (adaptionType == adaption::TYPE_PARTITION_SEND);
 
-				bool trackCellDeletion = (adaptionType == adaption::TYPE_DELETION) ||
-					(adaptionType == adaption::TYPE_PARTITION_SEND);
-
-				if (trackCellDeletion) {
+				if (adaptionIsDeletion || adaptionIsSend) {
 					int rank = deleteInfo.rank;
 					std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, rank);
 					adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 					adaptionInfo.previous.emplace_back();
 					long &deletedId = adaptionInfo.previous.back();
 					deletedId = cellId;
+
+					// Keep track of adaption info for the send cells
+					if (adaptionIsSend) {
+						sendAdaptionInfo.insert(adaptionInfoId);
+					}
 				}
 
 				// List of deleted interfaces
@@ -737,6 +742,19 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 					}
 				}
 			}
+
+#if BITPIT_ENABLE_MPI==1
+			// Sort sent cells
+			//
+			// We cannot use native functions to evaluate the position of the
+			// cells because the octants associated to the cells no longer
+			// exist on the octree. The cells are still there, therefore we
+			// can evaluate the cell positions using generic patch functions.
+			for (int adaptionInfoId : sendAdaptionInfo) {
+				adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+				std::sort(adaptionInfo.previous.begin(), adaptionInfo.previous.end(), CellPositionLess(*this, false));
+			}
+#endif
 
 			// Adaption info for the deleted interfaces
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, currentRank);
@@ -803,17 +821,30 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	// Track mesh adaption
 	if (trackChanges) {
-		// Map ids of the added cells
+		// Complete mesh adaption info for the cells
 		for (auto &adaptionInfo : adaptionData.data()) {
 			if (adaptionInfo.entity != adaption::ENTITY_CELL) {
 				continue;
 			}
 
+			// Map ids of the added cells
 			int nCurrentIds = adaptionInfo.current.size();
 			for (int k = 0; k < nCurrentIds; ++k) {
 				long cellId = m_octantToCell.at(adaptionInfo.current[k]);
 				adaptionInfo.current[k] = cellId;
 			}
+
+#if BITPIT_ENABLE_MPI==1
+			// Sort received cells
+			//
+			// To match the sorting done on the procesor that sent the cells,
+			// we don't use the native functions to evaluate the position of
+			// the cells.
+			adaption::Type adaptionType = adaptionInfo.type;
+			if (adaptionType == adaption::TYPE_PARTITION_RECV) {
+				std::sort(adaptionInfo.current.begin(), adaptionInfo.current.end(), CellPositionLess(*this, false));
+			}
+#endif
 		}
 
 		// Track created ghosts cells
