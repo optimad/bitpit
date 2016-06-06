@@ -129,6 +129,82 @@ bool DataCommunicator::areRecvsContinuous()
 }
 
 /*!
+    Discover the receives inspecting the sends that the user has already set.
+
+    For the communications needed to discover the receives it will be used
+    se same tag set in the communicator.
+*/
+void DataCommunicator::discoverRecvs()
+{
+	discoverRecvs(m_tag);
+}
+
+/*!
+    Discover the receives inspecting the sends that the user has already set.
+
+    \param discoverTag is the tag to be used for the communications needed
+    to discover the receives
+*/
+void DataCommunicator::discoverRecvs(int discoverTag)
+{
+	// Cancel current receives
+	clearAllRecvs();
+
+	// Send the size of the messages that will be send
+	for (auto &entry : m_sendIds) {
+		int rank = entry.first;
+		SendBuffer &buffer = getSendBuffer(rank);
+		long dataSize = buffer.capacity();
+
+		MPI_Request dataSizeRequest;
+		MPI_Isend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
+
+		// MPI_Isend initiates an asynchronous (background) data transfer.
+		// The actual data transfer might not happen unless one of the
+		// MPI_Wait* or MPI_Test* calls has been made on the request.
+		int completeFlag;
+		MPI_Test(&dataSizeRequest, &completeFlag, MPI_STATUS_IGNORE);
+	}
+
+	// Raise a barrier to make sure that all the sends starts
+	MPI_Barrier(m_communicator);
+
+	// Receive the data size of the sends
+	std::unordered_map<int, long> dataSizes;
+	while (true) {
+		// Probe for messages
+		int messageAvailable;
+		MPI_Status status;
+
+		MPI_Iprobe(MPI_ANY_SOURCE, discoverTag, m_communicator, &messageAvailable, &status);
+		if (!messageAvailable) {
+			break;
+		}
+
+		// Receive the data size that will be received from the source
+		long dataSize;
+		MPI_Recv(&dataSize, 1, MPI_LONG, status.MPI_SOURCE, discoverTag, m_communicator, MPI_STATUS_IGNORE);
+		dataSizes[status.MPI_SOURCE] = dataSize;
+	}
+
+	// Wait that all processors correctly receive the data to communicate.
+	//
+	// Without the barrier some processors may start the receives while other
+	// are still waiting to receive the data sizes. Since the probe for the
+	// data size will accept message for all sources, if a processor start
+	// receiveing data it will intefere with the other processors still
+	// receiving the data sizes.
+	if (discoverTag == m_tag) {
+		MPI_Barrier(m_communicator);
+	}
+
+	// Set the receives
+	for (auto &entry : dataSizes) {
+		setRecv(entry.first, entry.second);
+	}
+}
+
+/*!
     Clear the send associated to the specified processor.
 
     \param rank is the ranks associated to the send that will be cleared

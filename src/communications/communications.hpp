@@ -63,6 +63,9 @@ public:
     void setRecvsContinuous(bool enabled);
     bool areRecvsContinuous();
 
+    void discoverRecvs();
+    void discoverRecvs(int discoverTag);
+
     int getSendCount();
     int getRecvCount();
 
