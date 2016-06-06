@@ -593,28 +593,38 @@ void LevelSetKernel::clear( ){
 /*! 
  * Deletes non-existing items and items outside the narrow band after grid adaption.
  * @param[in] mapper mapping info
- * @param[in] newRSearch new size of narrow band
  */
-void LevelSetKernel::clearAfterAdaption( const std::vector<adaption::Info> &mapper, double &newRSearch ){
+void LevelSetKernel::clearAfterMeshMovement( const std::vector<adaption::Info> &mapper ){
 
-    long id ;
     for ( auto & map : mapper ){
         if( map.entity == adaption::Entity::ENTITY_CELL ){
+            if( map.type == adaption::Type::TYPE_DELETION || 
+                map.type == adaption::Type::TYPE_PARTITION_SEND  ||
+                map.type == adaption::Type::TYPE_REFINEMENT  ||
+                map.type == adaption::Type::TYPE_COARSENING  ){
 
-            for ( auto & parent : map.previous){
-                id = (long) parent ;
-                if( m_ls.exists(id) ) 
-                    m_ls.erase(id,true) ;
+                for ( auto & parent : map.previous){
+                    if( m_ls.exists(parent) ) 
+                        m_ls.erase(parent,true) ;
+                }
             }
         }
     }
 
     m_ls.flush() ;
 
+    return ;
+};
+
+/*! 
+ * Deletes items outside the narrow band after grid adaption.
+ * @param[in] newRSearch new size of narrow band
+ */
+void LevelSetKernel::filterOutsideNarrowBand( double newRSearch ){
+
     PiercedIterator<LSInfo> lsItr = m_ls.begin() ;
     while( lsItr != m_ls.end() ){
 
-        id = lsItr.getId() ;
 
         if( std::abs(lsItr->value) > newRSearch ){
             lsItr = m_ls.erase( lsItr.getId(), true );
@@ -736,33 +746,35 @@ bool LevelSetKernel::assureMPI( ){
 
 /*!
  * Flushing of data to communication buffers for partitioning
- * @param[in] previous list of cells to be sent
+ * @param[in] sendList list of cells to be sent
  * @param[in/out] sizeBuffer buffer for first communication used to communicate the size of data buffer
  * @param[in/out] dataBuffer buffer for second communication containing data
  */
-void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
+void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
-    long nItems = previous.size() ;
+    long nItems = sendList.size() ;
     int dataSize = 4*sizeof(double) +sizeof(int) +sizeof(long) ;
 
     dataBuffer.setCapacity(nItems*dataSize) ;
 
     //determine elements to send
+    long counter(0) ;
     nItems = 0 ;
-    for( const auto &index : previous){
+    for( const auto &index : sendList){
         if( m_ls.exists(index)){
             const auto &lsinfo = m_ls[index] ;
-            dataBuffer << index ;
+            dataBuffer << counter ;
             dataBuffer << lsinfo.value ;
             dataBuffer << lsinfo.gradient ;
             dataBuffer << lsinfo.object ;
             ++nItems ;
         }
+        ++counter ;
     }
+
 
     dataBuffer.squeeze( ) ;
     sizeBuffer << nItems ;
-    sizeBuffer << dataBuffer.capacity() ;
 
     return;
 };
@@ -770,21 +782,33 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous
 
 /*!
  * Processing of communication buffer into data structure
+ * @param[in] recvList list of cells to be received
  * @param[in] nItems number of items within the buffer
  * @param[in/out] dataBuffer buffer containing the data
  */
-void LevelSetKernel::readCommunicationBuffer( const long &nItems, RecvBuffer &dataBuffer ){
+void LevelSetKernel::readCommunicationBuffer( const std::vector<long> &recvList, const long &nItems, RecvBuffer &dataBuffer ){
 
-    long    index;
+    long    index, id;
     PiercedVector<LSInfo>::iterator infoItr ;
 
     for( int i=0; i<nItems; ++i){
         dataBuffer >> index ;
-        infoItr = m_ls.reclaim(index) ;
+        id = recvList[index] ;
 
-        dataBuffer >> infoItr->value ;
-        dataBuffer >> infoItr->gradient ;
-        dataBuffer >> infoItr->object ;
+        if( !m_ls.exists(id)){
+            infoItr = m_ls.reclaim(id) ;
+
+            dataBuffer >> infoItr->value ;
+            dataBuffer >> infoItr->gradient ;
+            dataBuffer >> infoItr->object ;
+
+        } else{
+            auto &ls = m_ls[id] ;
+            dataBuffer >> ls.value ;
+            dataBuffer >> ls.gradient ;
+            dataBuffer >> ls.object ;
+        }
+
     }
 
     return;

@@ -639,40 +639,38 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
 
     if( newSize-oldSize <= 1.e-8 ) { //size of narrow band decreased or remained the same -> mapping
 
-        { // map segments
-            std::unordered_map<long,std::unordered_set<long>> oldSegs ;
-            std::unordered_map<long,std::unordered_set<long>>::iterator oldSegsIt ;
+        std::unordered_map<long,std::unordered_set<long>> oldSegs ;
+        std::unordered_map<long,std::unordered_set<long>>::iterator oldSegsIt ;
 
-            for ( auto & info : mapper ){
-                if( info.entity == adaption::Entity::ENTITY_CELL ){
+        for ( auto & info : mapper ){
+            if( info.entity == adaption::Entity::ENTITY_CELL ){
 
-                    for ( auto & parent : info.previous){ //save old data and delete element
-                        if( m_seg.exists(parent) ){
-                            SegInfo *seg =  &m_seg[parent] ;
+                for ( auto & parent : info.previous){ //save old data and delete element
+                    if( m_seg.exists(parent) ){
+                        SegInfo *seg =  &m_seg[parent] ;
 
-                            oldSegs.insert({{ parent, seg->m_segments }}) ;
-                            m_seg.erase(parent,true) ;
+                        oldSegs.insert({{ parent, seg->m_segments }}) ;
+                        m_seg.erase(parent,true) ;
 
-                        }
                     }
                 }
             }
+        }
 
-            m_seg.flush() ;
+        m_seg.flush() ;
 
-            for ( auto & info : mapper ){ //forall mesh modifications
-                if( info.entity == adaption::Entity::ENTITY_CELL){ //check if changes on cells
-                    for ( auto & child : info.current){ // forall new elements
+        for ( auto & info : mapper ){ //forall mesh modifications
+            if( info.entity == adaption::Entity::ENTITY_CELL){ //check if changes on cells
+                for ( auto & child : info.current){ // forall new elements
 
-                        PiercedVector<SegInfo>::iterator seg =  m_seg.reclaim(child) ;
-                        seg->m_checked = false ;
-                        seg->m_segments.clear() ;
+                    PiercedVector<SegInfo>::iterator seg =  m_seg.reclaim(child) ;
+                    seg->m_checked = false ;
+                    seg->m_segments.clear() ;
 
-                        for ( auto & parent : info.previous){ //take their parents
-                            oldSegsIt = oldSegs.find(parent);
-                            if( oldSegsIt != oldSegs.end() ) //add their information if any
-                                seg->m_segments.insert( oldSegsIt->second.begin(), oldSegsIt->second.end() ) ;
-                        }
+                    for ( auto & parent : info.previous){ //take their parents
+                        oldSegsIt = oldSegs.find(parent);
+                        if( oldSegsIt != oldSegs.end() ) //add their information if any
+                            seg->m_segments.insert( oldSegsIt->second.begin(), oldSegsIt->second.end() ) ;
                     }
                 }
             }
@@ -689,6 +687,32 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
 
     return ;
 
+};
+
+/*! 
+ * Deletes non-existing items 
+ * @param[in] mapper mapping info
+ */
+void LevelSetSegmentation::clearAfterMeshMovement( const std::vector<adaption::Info> &mapper ){
+
+    for ( auto & map : mapper ){
+        if( map.entity == adaption::Entity::ENTITY_CELL ){
+            if( map.type == adaption::Type::TYPE_DELETION || 
+                map.type == adaption::Type::TYPE_PARTITION_SEND  ||
+                map.type == adaption::Type::TYPE_REFINEMENT  ||
+                map.type == adaption::Type::TYPE_COARSENING  ){
+
+                for ( auto & parent : map.previous){
+                    if( m_seg.exists(parent) ) 
+                        m_seg.erase(parent,true) ;
+                }
+            }
+        }
+    }
+
+    m_seg.flush() ;
+
+    return ;
 };
 
 /*!
@@ -757,23 +781,23 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 
 /*!
  * Flushing of data to communication buffers for partitioning
- * @param[in] previous list of cells to be sent
+ * @param[in] sendList list of cells to be sent
  * @param[in/out] sizeBuffer buffer for first communication used to communicate the size of data buffer
  * @param[in/out] dataBuffer buffer for second communication containing data
  */
-void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &previous, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
+void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
-    long nItems = previous.size() ;
+    long nItems = sendList.size(), counter(0) ;
     int dataSize = 10*sizeof(long)  +sizeof(long) +sizeof(bool) +sizeof(long) +sizeof(int) ;
 
     dataBuffer.setCapacity(nItems*dataSize) ;
 
     //determine elements to send
     nItems = 0 ;
-    for( const auto &index : previous){
+    for( const auto &index : sendList){
         if( m_seg.exists(index)){
             const auto &seginfo = m_seg[index] ;
-            dataBuffer << index ;
+            dataBuffer << counter ;
             dataBuffer << (int) seginfo.m_segments.size() ;
             for( const auto & seg : seginfo.m_segments ){
                 dataBuffer << seg ;
@@ -782,39 +806,57 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &pr
             dataBuffer << seginfo.m_checked ;
             ++nItems ;
         }
+
+        ++counter ;
     }
+
 
     dataBuffer.squeeze() ;
     sizeBuffer << nItems ;
-    sizeBuffer << dataBuffer.capacity() ;
 
     return;
 };
 
 /*!
  * Processing of communication buffer into data structure
+ * @param[in] recvList list of cells to be received
  * @param[in] nItems number of items within the buffer
  * @param[in/out] dataBuffer buffer containing the data
  */
-void LevelSetSegmentation::readCommunicationBuffer( const long &nItems, RecvBuffer &dataBuffer ){
+void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &recvList, const long &nItems, RecvBuffer &dataBuffer ){
 
     int     s, nSegs ;
-    long    index, segment ;
+    long    index, id, segment ;
     PiercedVector<SegInfo>::iterator segItr ;
 
     for( int i=0; i<nItems; ++i){
         dataBuffer >> index ;
         dataBuffer >> nSegs ;
+        
+        id = recvList[index] ;
 
-        segItr = m_seg.reclaim(index) ;
+        if( !m_seg.exists(id)){
+            segItr = m_seg.reclaim(id) ;
 
-        for( s=0; s<nSegs; ++s){
-            dataBuffer >> segment ;
-            segItr->m_segments.insert(segment) ;
+            for( s=0; s<nSegs; ++s){
+                dataBuffer >> segment ;
+                segItr->m_segments.insert(segment) ;
+            }
+
+            dataBuffer >> segItr->m_support ;
+            dataBuffer >> segItr->m_checked ;
+
+        } else {
+            auto &seg = m_seg[id] ;
+
+            for( s=0; s<nSegs; ++s){
+                dataBuffer >> segment ;
+                seg.m_segments.insert(segment) ;
+            }
+
+            dataBuffer >> seg.m_support ;
+            dataBuffer >> seg.m_checked ;
         }
-
-        dataBuffer >> segItr->m_support ;
-        dataBuffer >> segItr->m_checked ;
     }
 
     return;

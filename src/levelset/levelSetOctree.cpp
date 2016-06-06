@@ -189,11 +189,10 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
         if( info.entity == adaption::Entity::ENTITY_CELL){
 
             for ( auto & parent : info.previous){
-                id = (long) parent;
 
-                if( isInNarrowBand(id) ){
+                if( isInNarrowBand(parent) ){
                     *mapIt = true;
-                    nb.erase(id) ;
+                    nb.erase(parent) ;
                 };
             };
 
@@ -206,8 +205,7 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
         if( info.entity == adaption::Entity::ENTITY_CELL){
             if(*mapIt){ //parent was in narrow band
                 for( auto &child : info.current){
-                    id = (long) child;
-                    nb.insert(id) ;
+                    nb.insert(child) ;
                 };
             }; //endif parent in narrow band
 

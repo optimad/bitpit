@@ -102,7 +102,9 @@ class LevelSet{
     void                                        compute( ) ;
     void                                        update( const std::vector<adaption::Info> & ) ;
 # if BITPIT_ENABLE_MPI
+    void                                        exchangeGhosts( ) ;
     void                                        loadBalance( const std::vector<adaption::Info> & ) ;
+    void                                        communicate( std::unordered_map<int,std::vector<long>> &, std::unordered_map<int,std::vector<long>> &, std::vector<adaption::Info> const *mapper=NULL ) ;
 # endif
 
     private:
@@ -152,7 +154,8 @@ class LevelSetKernel{
     virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> & )=0;
 
     void                                        clear() ;
-    void                                        clearAfterAdaption( const std::vector<adaption::Info> &, double & ) ;
+    void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
+    void                                        filterOutsideNarrowBand( double ) ;
 
     void                                        propagateSign( std::unordered_map<int,LevelSetObject*> ) ;
     void                                        propagateValue( LevelSetObject *) ;
@@ -166,7 +169,7 @@ class LevelSetKernel{
     bool                                        isCommunicatorSet() const;
     bool                                        assureMPI() ;
     void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & );
-    void                                        readCommunicationBuffer( const long &, RecvBuffer & ) ;
+    void                                        readCommunicationBuffer(  const std::vector<long> &, const long &, RecvBuffer & ) ;
 # endif
 
     protected:
@@ -230,6 +233,7 @@ class LevelSetObject{
 
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
+    virtual void                                clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
 
     virtual void                                dumpDerived( std::fstream &) =0 ;
     virtual void                                restoreDerived( std::fstream &) =0 ;
@@ -241,7 +245,7 @@ class LevelSetObject{
 
 # if BITPIT_ENABLE_MPI
     virtual void                                writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & ) =0 ;
-    virtual void                                readCommunicationBuffer( const long &, RecvBuffer & ) =0 ;
+    virtual void                                readCommunicationBuffer(  const std::vector<long> &, const long &, RecvBuffer & ) =0 ;
 # endif 
 
 };
@@ -288,10 +292,11 @@ class LevelSetSegmentation : public LevelSetObject {
 
     void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
+    void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
 
 # if BITPIT_ENABLE_MPI
     void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & ) ;
-    void                                        readCommunicationBuffer( const long &, RecvBuffer & ) ;
+    void                                        readCommunicationBuffer(  const std::vector<long> &, const long &, RecvBuffer & ) ;
 # endif
 
     protected:

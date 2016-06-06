@@ -66,7 +66,8 @@ int main( int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    // Logger info
+    // Initialize logger
+    bitpit::log::manager().initialize(bitpit::log::SEPARATE, false, nProcessors, rank) ;
     bitpit::log::cout().setVisibility( bitpit::log::GLOBAL ) ;
 
     // Input geometry
@@ -123,8 +124,7 @@ int main( int argc, char *argv[]){
     levelset.addObject(&STL) ;
 
     mesh.addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
-    mesh.setName("levelset_004") ;
-    mesh.setCounter() ;
+    mesh.setName("levelset_parallel_001_initial") ;
 
     levelset.setPropagateSign(true);
 
@@ -134,8 +134,26 @@ int main( int argc, char *argv[]){
 
     elapsed_init = chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
-    mapper = mesh.partition(MPI_COMM_WORLD,true) ;
-    levelset.update(mapper) ;
+    if (rank == 0) {
+        cout << " - Exporting data" << endl;
+
+        LS.resize(mesh.getCellCount() ) ;
+        itLS = LS.begin() ;
+        for( auto & cell : mesh.getCells() ){
+            const long &id = cell.getId() ;
+            *itLS = levelset.getLS(id) ;
+            ++itLS ;
+        };
+
+        mesh.write() ;
+    }
+
+    // Partition the mesh
+    mesh.setCounter() ;
+    mesh.setName("levelset_parallel_001") ;
+
+    mapper = mesh.partition(MPI_COMM_WORLD, true) ;
+    levelset.loadBalance(mapper) ;
 
     // Write mesh
     if (rank == 0) {

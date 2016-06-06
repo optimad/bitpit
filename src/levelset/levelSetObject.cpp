@@ -61,6 +61,15 @@ int LevelSetObject::getId( ) const {
 };
 
 /*!
+ * Clears data structure after mesh modification
+ * @param[in] mapper mapper describing mesh modifications
+ */
+void LevelSetObject::clearAfterMeshMovement( const std::vector<adaption::Info> &mapper ){
+    BITPIT_UNUSED(mapper) ;
+    return;
+}
+
+/*!
  * Writes LevelSetObject to stream in binary format
  * @param[in] stream output stream
  */

@@ -170,8 +170,6 @@ void LevelSet::clear(){
         delete m_kernel ;
     }
 
-    std::cout << "cazz" << std::endl ;
-
     m_object.clear() ;
     return ;
 };
@@ -383,12 +381,16 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         newRSearch = m_kernel->updateSizeNarrowBand( mapper )  ;
     };
 
-    m_kernel->clearAfterAdaption(mapper,newRSearch) ;
+    m_kernel->clearAfterMeshMovement(mapper) ;
+    m_kernel->filterOutsideNarrowBand(newRSearch) ;
 
     for( const auto &visitor : m_object ){
         visitor.second->updateLSInNarrowBand( m_kernel, mapper, newRSearch, m_signedDF ) ;
     }
 
+#if BITPIT_ENABLE_MPI
+    exchangeGhosts() ;
+#endif
 
     if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
 //TODO    if( propagateV ) updatePropagatedValue() ;
@@ -454,10 +456,54 @@ bool LevelSet::assureMPI( ){
 }
 
 /*!
+ * Update of ghost cell;
+ */
+void LevelSet::exchangeGhosts(  ){
+
+    std::unordered_map<int,std::vector<long>> &sendList =  m_kernel->getMesh()->getGhostExchangeSources() ;
+    std::unordered_map<int,std::vector<long>> &recvList =  m_kernel->getMesh()->getGhostExchangeTargets() ;
+
+    communicate(sendList,recvList);
+
+    return ;
+}
+/*!
  * Distribution of levelset over available processes after partitioning of mesh
  * @param[in] mapper mapper describing partitioning
  */
 void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
+
+    std::unordered_map<int,std::vector<long>> sendList, recvList ;
+
+    for( const auto &event : mapper){
+        if( event.entity == adaption::Entity::ENTITY_CELL){
+            if( event.type == adaption::Type::TYPE_PARTITION_SEND){
+                sendList.insert({{event.rank,event.previous}}) ;
+            }
+
+            if( event.type == adaption::Type::TYPE_PARTITION_RECV){
+                recvList.insert({{event.rank,event.current}}) ;
+            }
+        }
+    }
+    
+    m_kernel->clearAfterMeshMovement(mapper) ;    
+
+    communicate(sendList, recvList, &mapper ) ;
+    exchangeGhosts() ;
+
+    return ;
+}
+
+
+/*!
+ * communicates data structures of kernel and objects.
+ * If mapper!=NULL, clearAfterMeshMovement of kernel and objects will be called between send and receive.
+ * @param[in] sendList list of elements to be send
+ * @param[in] recvList list of elements to be received
+ * @param[in] mapper mapper containing mesh modifications
+ */
+void LevelSet::communicate( std::unordered_map<int,std::vector<long>> &sendList, std::unordered_map<int,std::vector<long>> &recvList, std::vector<adaption::Info> const *mapper){
 
     if( assureMPI() ){
 
@@ -467,73 +513,75 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
         DataCommunicator    sizeCommunicator(meshComm) ; 
         DataCommunicator    dataCommunicator(meshComm) ; 
 
+        sizeCommunicator.setTag(0) ;
+        dataCommunicator.setTag(1) ;
 
         // start receive of sizes
-        for( const auto &event : mapper){
-            if( event.entity == adaption::Entity::ENTITY_CELL){
-                if( event.type == adaption::Type::TYPE_PARTITION_RECV){
-                    short rank = event.rank;
+	    for (const auto entry : sendList) {
+            int rank = entry.first;
 
-                    sizeCommunicator.setRecv( rank, 2*sizeof(long)*nClasses ) ;
-                    sizeCommunicator.startRecv(rank);
+            sizeCommunicator.setRecv( rank, (1 + nClasses) * sizeof(long) ) ;
+            sizeCommunicator.startRecv(rank);
 
-                }
-            }
         }
 
         { // send first number of items and then data itself
 
-            for( const auto &event : mapper){
-                if( event.entity == adaption::Entity::ENTITY_CELL){
+	        // Fill the buffer with the given field and start sending the data
+	        for (const auto entry : sendList) {
 
-                    if( event.type == adaption::Type::TYPE_PARTITION_SEND){
-                        short rank = event.rank;
+	        	// Get the send buffer
+	        	int rank = entry.first;
 
-                        //determine elements to send
-                        sizeCommunicator.setSend(rank, 2*sizeof(long) *nClasses ) ;
-                        dataCommunicator.setSend(rank, 0 ) ;
+                sizeCommunicator.setSend(rank, (1 + nClasses) * sizeof(long) ) ;
+                dataCommunicator.setSend(rank, 0 ) ;
 
-                        //store data in buffer
-                        SendBuffer &sizeBuffer = sizeCommunicator.getSendBuffer(rank);
-                        SendBuffer &dataBuffer = dataCommunicator.getSendBuffer(rank);
+                SendBuffer &sizeBuffer = sizeCommunicator.getSendBuffer(rank);
+                SendBuffer &dataBuffer = dataCommunicator.getSendBuffer(rank);
 
-                        m_kernel->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
-                        for( const auto &visitor : m_object){
-                            visitor.second->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
-                        }
-
-                        // Start the send
-                        sizeCommunicator.startSend(rank);
-                        dataCommunicator.startSend(rank);
-                    }
+                m_kernel->writeCommunicationBuffer( entry.second, sizeBuffer, dataBuffer ) ;
+                for( const auto &visitor : m_object){
+                    visitor.second->writeCommunicationBuffer( entry.second, sizeBuffer, dataBuffer ) ;
                 }
-            }
+
+                sizeBuffer << dataBuffer.capacity() ;
+
+                // Start the send
+                sizeCommunicator.startSend(rank);
+                dataCommunicator.startSend(rank);
+
+	        }
+
         }
 
 
         { 
             // as soon as sizes are received start receiving data.
-            int rank, nCompletedRecvs;
-            long data, dataSize ;
-            std::vector<long> items(nClasses) ;
-            std::vector<long>::iterator  itemItr = items.begin() ;
+            int nCompletedRecvs(0);
+
+            std::vector<long>   dummy(nClasses) ;
+            std::unordered_map<int,std::vector<long> > items ;
+
+            std::vector<long>::iterator itemItr ;
 
             // receive sizes
-            nCompletedRecvs = 0;
             while (nCompletedRecvs < sizeCommunicator.getRecvCount()) {
-                rank = sizeCommunicator.waitAnyRecv();
+                int rank = sizeCommunicator.waitAnyRecv();
                 RecvBuffer &sizeBuffer = sizeCommunicator.getRecvBuffer(rank);
 
+                items.insert({{rank, dummy}}) ;
+                itemItr = items[rank].begin() ;
+
                 sizeBuffer >> *(itemItr) ;
-                sizeBuffer >> dataSize ;
 
                 ++itemItr; 
                 for( const auto & visitor : m_object){
                     sizeBuffer >> *(itemItr) ;
-                    sizeBuffer >> data ;
-                    dataSize += data ;
                     ++itemItr ;
                 };
+
+                long dataSize ;
+                sizeBuffer >> dataSize ;
 
                 dataCommunicator.setRecv(rank,dataSize) ;
                 dataCommunicator.startRecv(rank) ;
@@ -541,19 +589,26 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
                 ++nCompletedRecvs;
             }
 
+            if( mapper!=NULL){
+                m_kernel->clearAfterMeshMovement(*mapper);
+                for( const auto & visitor : m_object){
+                    visitor.second->clearAfterMeshMovement(*mapper);
+                }
+            }
+
             //  post-process data from buffer to data within classes
             nCompletedRecvs = 0;
             while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
-                rank = dataCommunicator.waitAnyRecv();
+                int rank = dataCommunicator.waitAnyRecv();
 
                 RecvBuffer &dataBuffer = dataCommunicator.getRecvBuffer(rank);
-                itemItr = items.begin();
+                itemItr = items[rank].begin();
 
-                m_kernel->readCommunicationBuffer( *itemItr, dataBuffer ) ;
+                m_kernel->readCommunicationBuffer( recvList[rank], *itemItr, dataBuffer ) ;
                 ++itemItr ;
 
                 for( const auto &visitor : m_object){
-                    visitor.second->readCommunicationBuffer( *itemItr, dataBuffer ) ;
+                    visitor.second->readCommunicationBuffer( recvList[rank], *itemItr, dataBuffer ) ;
                     ++itemItr ;
                 }
 
@@ -561,13 +616,18 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
             }
         }
 
+        sizeCommunicator.waitAllSends();
         sizeCommunicator.finalize() ;
+
+        dataCommunicator.waitAllSends();
         dataCommunicator.finalize() ;
 
     }
 
+
     return ;
 }
+
 
 #endif 
 
