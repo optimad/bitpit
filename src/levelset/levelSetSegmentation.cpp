@@ -799,7 +799,7 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
             const auto &seginfo = m_seg[index] ;
             dataBuffer << counter ;
             dataBuffer << (int) seginfo.m_segments.size() ;
-            for( const auto & seg : seginfo.m_segments ){
+            for( const long & seg : seginfo.m_segments ){
                 dataBuffer << seg ;
             };
             dataBuffer << seginfo.m_support ;
