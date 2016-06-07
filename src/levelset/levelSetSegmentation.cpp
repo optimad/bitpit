@@ -827,36 +827,28 @@ void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &rec
 
     int     s, nSegs ;
     long    index, id, segment ;
-    PiercedVector<SegInfo>::iterator segItr ;
 
     for( int i=0; i<nItems; ++i){
+        // Get the id of the element
         dataBuffer >> index ;
-        dataBuffer >> nSegs ;
-        
         id = recvList[index] ;
 
+        // Assign the data of the element
+        PiercedVector<SegInfo>::iterator segItr ;
         if( !m_seg.exists(id)){
             segItr = m_seg.reclaim(id) ;
-
-            for( s=0; s<nSegs; ++s){
-                dataBuffer >> segment ;
-                segItr->m_segments.insert(segment) ;
-            }
-
-            dataBuffer >> segItr->m_support ;
-            dataBuffer >> segItr->m_checked ;
-
         } else {
-            auto &seg = m_seg[id] ;
-
-            for( s=0; s<nSegs; ++s){
-                dataBuffer >> segment ;
-                seg.m_segments.insert(segment) ;
-            }
-
-            dataBuffer >> seg.m_support ;
-            dataBuffer >> seg.m_checked ;
+            segItr = m_seg.getIterator(id) ;
         }
+
+        dataBuffer >> nSegs ;
+        for( s=0; s<nSegs; ++s){
+            dataBuffer >> segment ;
+            segItr->m_segments.insert(segment) ;
+        }
+
+        dataBuffer >> segItr->m_support ;
+        dataBuffer >> segItr->m_checked ;
     }
 
     return;

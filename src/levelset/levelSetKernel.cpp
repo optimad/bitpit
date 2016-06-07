@@ -789,25 +789,23 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &sendList
 void LevelSetKernel::readCommunicationBuffer( const std::vector<long> &recvList, const long &nItems, RecvBuffer &dataBuffer ){
 
     long    index, id;
-    PiercedVector<LSInfo>::iterator infoItr ;
 
     for( int i=0; i<nItems; ++i){
+        // Get the id of the element
         dataBuffer >> index ;
         id = recvList[index] ;
 
+        // Assign the data of the element
+        PiercedVector<LSInfo>::iterator infoItr ;
         if( !m_ls.exists(id)){
             infoItr = m_ls.reclaim(id) ;
-
-            dataBuffer >> infoItr->value ;
-            dataBuffer >> infoItr->gradient ;
-            dataBuffer >> infoItr->object ;
-
-        } else{
-            auto &ls = m_ls[id] ;
-            dataBuffer >> ls.value ;
-            dataBuffer >> ls.gradient ;
-            dataBuffer >> ls.object ;
+        } else {
+            infoItr = m_ls.getIterator(id) ;
         }
+
+        dataBuffer >> infoItr->value ;
+        dataBuffer >> infoItr->gradient ;
+        dataBuffer >> infoItr->object ;
 
     }
 
