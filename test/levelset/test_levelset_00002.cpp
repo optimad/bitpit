@@ -42,6 +42,10 @@
 # include <ctime>
 # include <chrono>
 
+#if BITPIT_ENABLE_MPI==1
+# include <mpi.h>
+#endif
+
 // bitpit
 # include "bitpit_levelset.hpp"
 
@@ -52,6 +56,9 @@ using namespace bitpit;
 
 int main( int argc, char *argv[]){
 
+#if BITPIT_ENABLE_MPI==1
+    MPI_Init(&argc, &argv);
+#endif
     int                    dimensions(3) ;
 
     // Input geometry
@@ -133,6 +140,10 @@ int main( int argc, char *argv[]){
     mesh.write() ;
 
     std::cout << " - Exported data" << std::endl;
+
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
 
     return 0;
 

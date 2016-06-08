@@ -39,13 +39,13 @@
 // INCLUDES                                                                   //
 // ========================================================================== //
 
-#if BITPIT_ENABLE_MPI==1
-# include <mpi.h>
-#endif
-
 //Standard Template Library
 # include <ctime>
 # include <chrono>
+
+#if BITPIT_ENABLE_MPI==1
+# include <mpi.h>
+#endif
 
 // bitpit
 # include "bitpit_levelset.hpp"
@@ -59,6 +59,9 @@ using namespace std;
 */
 int main( int argc, char *argv[]){
 
+#if BITPIT_ENABLE_MPI==1
+    MPI_Init(&argc, &argv);
+#endif
     // ========================================================================== //
     // VARIABLES DECLARATION                                                      //
     // ========================================================================== //
@@ -148,11 +151,7 @@ int main( int argc, char *argv[]){
     mesh.write() ;
 
     //Refinement
-    for( int i=0; i<3; ++i){
-
-        std::cout << "refinement loop " << i << std::endl ;
-        std::cout << "refinement loop " << i << std::endl ;
-        std::cout << "refinement loop " << i << std::endl ;
+    for( int i=0; i<10; ++i){
 
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
@@ -180,6 +179,10 @@ int main( int argc, char *argv[]){
 
     cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
     cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;
+
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
 
     return 0;
 
