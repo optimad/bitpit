@@ -76,6 +76,10 @@ LevelSetKernel::LevelSetKernel() {
 
     m_mesh = NULL ;
 
+#if BITPIT_ENABLE_MPI
+    m_commMPI = MPI_COMM_NULL;
+# endif
+
 };
 
 /*!
@@ -660,7 +664,7 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous
     long nItems = previous.size() ;
     int dataSize = 4*sizeof(double) +sizeof(short) +sizeof(int) +sizeof(long) ;
 
-    //TODO new bitpit dataBuffer.setCapacity(nItems*dataSize) ;
+    dataBuffer.setCapacity(nItems*dataSize) ;
 
     //determine elements to send
     nItems = 0 ;
@@ -676,9 +680,9 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous
         }
     }
 
-    //TODO new bitpit dataBuffer.squeeze( ) ;
+    dataBuffer.squeeze( ) ;
     sizeBuffer << nItems ;
-    //TODO new bitpit sizeBuffer << dataBuffer.capacity() ;
+    sizeBuffer << dataBuffer.capacity() ;
 
     return;
 };

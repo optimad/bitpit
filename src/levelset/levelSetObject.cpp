@@ -826,7 +826,7 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &pr
     long nItems = previous.size() ;
     int dataSize = 10*sizeof(long)  +sizeof(long) +sizeof(bool) +sizeof(long) +sizeof(int) ;
 
-    //TODO new BITPIT dataBuffer.setCapacity(nItems*dataSize) ;
+    dataBuffer.setCapacity(nItems*dataSize) ;
 
     //determine elements to send
     nItems = 0 ;
@@ -844,9 +844,9 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &pr
         }
     }
 
-    //TODO new BITPIT dataBuffer.squeeze() ;
+    dataBuffer.squeeze() ;
     sizeBuffer << nItems ;
-    //TODO new BITPIT sizeBuffer << dataBuffer.capacity() ;
+    sizeBuffer << dataBuffer.capacity() ;
 
     return;
 };
