@@ -76,7 +76,7 @@ namespace bitpit {
         m_rank = 0;
         m_nproc = 1;
         m_serial = true;
-        createPartitionInfo(false);
+        createPartitionInfo();
 #if BITPIT_ENABLE_MPI==1
         if (comm != MPI_COMM_NULL) {
             setComm(comm);
@@ -166,7 +166,7 @@ namespace bitpit {
 
         m_rank = 0;
         m_nproc = 1;
-        createPartitionInfo(false);
+        createPartitionInfo();
 #if BITPIT_ENABLE_MPI==1
         setComm(comm);
         m_serial = (m_nproc == 1);
@@ -207,8 +207,6 @@ namespace bitpit {
     /*! Default Destructor of ParaTree.
      */
     ParaTree::~ParaTree(){
-        deletePartitionInfo();
-
 #if BITPIT_ENABLE_MPI==1
         freeComm();
 #endif
@@ -313,7 +311,7 @@ namespace bitpit {
         MPI_Comm_rank(m_comm, &m_rank);
 
         // Initialize partition data
-        createPartitionInfo(true);
+        createPartitionInfo();
     }
 
     /*!
@@ -358,7 +356,7 @@ namespace bitpit {
      * \return Pointer to m_partitionRangeGlobalIdx (global array containing global
      * index of the last existing octant in each processor).
      */
-    uint64_t*
+    std::vector<uint64_t> &
     ParaTree::getPartitionRangeGlobalIdx(){
         return m_partitionRangeGlobalIdx;
     };
@@ -3513,9 +3511,9 @@ namespace bitpit {
                 }
                 //update partition_range_position
                 uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
-                m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc,1,MPI_UINT64_T,m_comm);
+                m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
                 uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
-                m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc,1,MPI_UINT64_T,m_comm);
+                m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
                 delete [] rbuff; rbuff = NULL;
             }
 #endif
@@ -3923,9 +3921,9 @@ namespace bitpit {
         m_octree.setLastDesc();
         //update partition_range_position
         uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
-        m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc,1,MPI_UINT64_T,m_comm);
+        m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
         uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
-        m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc,1,MPI_UINT64_T,m_comm);
+        m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
         m_serial = false;
         delete [] rbuff; rbuff = NULL;
     }
@@ -4460,37 +4458,21 @@ namespace bitpit {
     /*! Create the data structures for storing partion information
      */
     void
-    ParaTree::createPartitionInfo(bool deletePrevious)
+    ParaTree::createPartitionInfo()
     {
-        // Delete previous parittion info
-        if (deletePrevious) {
-            deletePartitionInfo();
-        }
-
         // Create new partition info
-        m_partitionFirstDesc = new uint64_t[m_nproc];
-        m_partitionLastDesc = new uint64_t[m_nproc];
-        m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
-        m_partitionRangeGlobalIdx0 = new uint64_t[m_nproc];
+        m_partitionFirstDesc.resize(m_nproc);
+        m_partitionLastDesc.resize(m_nproc);
+        m_partitionRangeGlobalIdx.resize(m_nproc);
+        m_partitionRangeGlobalIdx0.resize(m_nproc);
         uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
         uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
         for(int p = 0; p < m_nproc; ++p){
             m_partitionRangeGlobalIdx0[p] = 0;
             m_partitionRangeGlobalIdx[p]  = m_globalNumOctants - 1;
-            m_partitionLastDesc[p] = lastDescMorton;
-            m_partitionLastDesc[p] = firstDescMorton;
+            m_partitionLastDesc[p]  = lastDescMorton;
+            m_partitionFirstDesc[p] = firstDescMorton;
         }
-    }
-
-    /*! Delete the data structures for storing partion information
-     */
-    void
-    ParaTree::deletePartitionInfo()
-    {
-        delete[] m_partitionFirstDesc;
-        delete[] m_partitionLastDesc;
-        delete[] m_partitionRangeGlobalIdx;
-        delete[] m_partitionRangeGlobalIdx0;
     }
 
     // =================================================================================== //

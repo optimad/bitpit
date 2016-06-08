@@ -92,10 +92,10 @@ namespace bitpit {
 
     private:
         //undistributed members
-        uint64_t* 				m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each processor*/
-        uint64_t*				m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each processor*/
-        uint64_t* 				m_partitionRangeGlobalIdx;	 	/**<Global array containing global index of the last existing octant in each processor*/
-        uint64_t* 				m_partitionRangeGlobalIdx0;	 	/**<Global array containing global index of the last existing octant in each processor before the last loadBalance (after an adapt is set equal to the actual.)*/
+        std::vector<uint64_t>	m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each processor*/
+        std::vector<uint64_t>	m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each processor*/
+        std::vector<uint64_t>	m_partitionRangeGlobalIdx;	 	/**<Global array containing global index of the last existing octant in each processor*/
+        std::vector<uint64_t>	m_partitionRangeGlobalIdx0;	 	/**<Global array containing global index of the last existing octant in each processor before the last loadBalance (after an adapt is set equal to the actual.)*/
         uint64_t 				m_globalNumOctants;   			/**<Global number of octants in the parallel octree*/
         int 					m_nproc;						/**<Number of processes of the job*/
         uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
@@ -176,7 +176,7 @@ namespace bitpit {
         MPI_Comm	getComm() const;
         bool		isCommSet() const;
 #endif
-        uint64_t*	getPartitionRangeGlobalIdx();
+        std::vector<uint64_t> &getPartitionRangeGlobalIdx();
         darray3		getOrigin();
         double		getX0();
         double		getY0();
@@ -417,8 +417,7 @@ namespace bitpit {
         void 		updateAfterCoarse();
         void 		updateAfterCoarse(u32vector & mapidx);
         void 		balance21(bool const first);
-        void		createPartitionInfo(bool deletePrevious);
-        void		deletePartitionInfo();
+        void		createPartitionInfo();
 
         // =================================================================================== //
         // TESTING OUTPUT METHODS												    			   //
