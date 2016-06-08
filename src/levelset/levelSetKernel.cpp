@@ -728,20 +728,17 @@ void LevelSetKernel::freeCommunicator() {
  */
 bool LevelSetKernel::assureMPI( ){
 
-    if( m_commMPI == MPI_COMM_NULL){
-
-        MPI_Comm meshComm = m_mesh->getCommunicator() ;
-
-        if( meshComm == MPI_COMM_NULL){
-            return false;
-        } else {
-            MPI_Comm_dup(m_mesh->getCommunicator(), &m_commMPI);
-            return true; 
-        }
-    } else {
+    if (isCommunicatorSet()) {
         return true ;
-    };
+    }
 
+    MPI_Comm meshComm = m_mesh->getCommunicator() ;
+    if( meshComm == MPI_COMM_NULL){
+        return false;
+    } else {
+        MPI_Comm_dup(m_mesh->getCommunicator(), &m_commMPI);
+        return true;
+    }
 }
 
 /*!
