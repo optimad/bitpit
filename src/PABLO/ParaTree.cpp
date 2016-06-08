@@ -2592,43 +2592,18 @@ namespace bitpit {
      */
     int
     ParaTree::getOwnerRank(const uint64_t & globalIndex) {
-        int ownerRank = -1;
-        int nofsteps = m_nproc / 2;
-        if(globalIndex <= m_partitionRangeGlobalIdx[m_nproc / 2]){
-            //find backward
-            for(int j = nofsteps; j >= 0; --j){
-                if(j==0){
-                    ownerRank = j;
-                    break;
-                }
-                else{
-                    if(globalIndex > m_partitionRangeGlobalIdx[j-1] && globalIndex <= m_partitionRangeGlobalIdx[j]){
-                        ownerRank = j;
-                        break;
-                    }
+        // Get the iterator point to the onwer rank
+        std::vector<uint64_t>::iterator rankItr = std::lower_bound (m_partitionRangeGlobalIdx.begin(), m_partitionRangeGlobalIdx.end(), globalIndex);
 
-                }
-            }
+        // Get the onwer rank
+        int ownerRank;
+        if (rankItr == m_partitionRangeGlobalIdx.end()) {
+            ownerRank = -1;
+        } else {
+            ownerRank = std::distance(m_partitionRangeGlobalIdx.begin(), rankItr);
         }
-        else{
-            //find forward
-            if(m_nproc % 2)
-                nofsteps -= 1;
-            for(int j = nofsteps; j < m_nproc; ++j){
-                if(j == m_nproc - 1){
-                    ownerRank = j;
-                    break;
-                }
-                else{
-                    if(globalIndex > m_partitionRangeGlobalIdx[j-1] && globalIndex <= m_partitionRangeGlobalIdx[j]){
-                        ownerRank = j;
-                        break;
-                    }
-                }
-            }
-        }
+
         return ownerRank;
-
     }
 
     /** Compute the connectivity of octants and store the coordinates of nodes.
