@@ -23,25 +23,30 @@
 \*---------------------------------------------------------------------------*/
 
 /*!
- *	\date			10/jul/2014
- *	\authors		Alessandro Alaia
- *	\authors		Haysam Telib
- *	\authors		Edoardo Lombardi
- *	\version		0.1
- *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *	This version of Class_LevelSet_Stl is released under the LGPL License.
+ *    \date            10/jul/2014
+ *    \authors        Alessandro Alaia
+ *    \authors        Haysam Telib
+ *    \authors        Edoardo Lombardi
+ *    \version        0.1
+ *    \copyright        Copyright 2015 Optimad engineering srl. All rights reserved.
+ *    \par            License:\n
+ *    This version of Class_LevelSet_Stl is released under the LGPL License.
  *
- *	\brief Level Set Manager Class - 3D PABLO Octree specialization
+ *    \brief Level Set Manager Class - 3D PABLO Octree specialization
  *
- *	Level Set Stl is a user interface class. One user should (read can...) work only
- *	with this Class and its methods to maintain a signed distance function (Sdf)
- *	computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
- *	space. Sdf is computed in a narrow band of at least 2 mesh cell centers
- *	around the geometry.
- *	Parallel implementation developed by using the features of PABLO library.
+ *    Level Set Stl is a user interface class. One user should (read can...) work only
+ *    with this Class and its methods to maintain a signed distance function (Sdf)
+ *    computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
+ *    space. Sdf is computed in a narrow band of at least 2 mesh cell centers
+ *    around the geometry.
+ *    Parallel implementation developed by using the features of PABLO library.
  *
  */
+
+# if BITPIT_ENABLE_MPI
+# include <mpi.h>
+# include "communications.hpp"
+# endif
 
 # include <unordered_set>
 
@@ -53,15 +58,15 @@
 namespace bitpit {
 
 /*!
-	@ingroup levelset
-	@class  LevelSet
-	@brief  Level Set on Stl Manager Class
+    @ingroup levelset
+    @class  LevelSetKernel
+    @brief  Level Set on Stl Manager Class
 
-	LevelSet is a user interface class. One user should (read can...) work only
-	with this class and its methods to maintain a signed distance function (Sdf)
-	computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
-	space. Sdf is computed in a narrow band of at least 2 mesh cell centers
-	around the geometry.
+    LevelSetKernel is a user interface class. One user should (read can...) work only
+    with this class and its methods to maintain a signed distance function (Sdf)
+    computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
+    space. Sdf is computed in a narrow band of at least 2 mesh cell centers
+    around the geometry.
 */
 
 /*!
@@ -69,29 +74,76 @@ namespace bitpit {
  */
 LevelSet::LevelSet() {
 
-    m_mesh = NULL ;
+    m_kernel = NULL ;
+    m_object.clear() ;
 
-    RSearch     = 0;
     m_userRSearch = false ;
 
-    signedDF    = true ;
-    propagateS  = false;
-    propagateV  = false;
+    m_signedDF    = true ;
+    m_propagateS  = false;
+    m_propagateV  = false;
+
+#if BITPIT_ENABLE_MPI
+    m_commMPI = MPI_COMM_NULL;
+# endif
 };
 
 /*!
- * Constructor
- * @param[in] patch underlying mesh
- */
-LevelSet::LevelSet( VolumeKernel *patch): LevelSet() {
-    m_mesh = patch ;
-};
-
-/*!
- * Destructor of LevelSet_Stl.
+ * Destructor of LevelSet
 */
 LevelSet::~LevelSet(){
-    m_mesh = NULL ;
+    delete m_kernel ;
+
+    for( auto &object : m_object){
+        delete object  ;
+    }
+
+};
+
+/*!
+ */
+void LevelSet::setMesh( VolumeKernel* mesh ) {
+
+    if( VolCartesian* cartesian = dynamic_cast<VolCartesian*> (mesh) ){
+        m_kernel = new LevelSetCartesian( *cartesian) ;
+
+    } else if( VolOctree* octree = dynamic_cast<VolOctree*> (mesh) ){
+        m_kernel = new LevelSetOctree(*octree) ;
+    }; 
+
+    return;
+};
+
+void LevelSet::setMesh( VolCartesian* cartesian ) {
+
+    m_kernel = new LevelSetCartesian( *cartesian) ;
+
+    return;
+};
+
+void LevelSet::setMesh( VolOctree* octree ) {
+
+    m_kernel = new LevelSetOctree( *octree) ;
+
+    return;
+};
+
+void LevelSet::addObject( SurfUnstructured* segmentation ) {
+
+    int id = m_object.size() ;
+    m_object.push_back( new LevelSetSegmentation(id,segmentation) ) ;
+
+    return;
+};
+
+void LevelSet::addObject( LevelSetObject* object ) {
+
+
+    if( LevelSetSegmentation* segmentation = dynamic_cast<LevelSetSegmentation*>(object) ){
+        m_object.push_back( new LevelSetSegmentation(*segmentation) ) ;
+    }
+
+    return;
 };
 
 /*!
@@ -100,13 +152,7 @@ LevelSet::~LevelSet(){
  * @return Value of the i-th local element of the octree mesh.
  */
 double LevelSet::getLS( const long &i)const {
-
-    if( !info.exists(i) ){
-        return levelSetDefaults::VALUE;
-    } else {
-        return ( info[i].value );
-    };
-
+    return( m_kernel->getLS(i) ) ;
 };
 
 /*!
@@ -115,13 +161,7 @@ double LevelSet::getLS( const long &i)const {
  * @return Array with components of the Sdf gradient of the i-th local element of the octree mesh.
  */
 std::array<double,3> LevelSet::getGradient(const long &i) const {
-
-    if( !info.exists(i) ){
-        return levelSetDefaults::GRADIENT;
-    } else {
-        return ( info[i].gradient );
-    };
-
+    return( m_kernel->getGradient(i) ) ;
 };
 
 /*!
@@ -130,13 +170,7 @@ std::array<double,3> LevelSet::getGradient(const long &i) const {
  * @return sign
  */
 short LevelSet::getSign(const long &i)const{
-
-    if( !info.exists(i) ){
-        return levelSetDefaults::SIGN;
-    } else {
-        return ( static_cast<short>(sign(info[i].value)) );
-    };
-
+    return( m_kernel->getSign(i) ) ;
 };
 
 /*!
@@ -145,13 +179,7 @@ short LevelSet::getSign(const long &i)const{
  * @return True/false if the Sdf value is exactly computed (true) or not (false).
  */
 bool LevelSet::isInNarrowBand(const long &i)const{
-
-    if( !info.exists(i) ){
-        return false;
-    } else {
-        return ( std::abs(info[i].value) <= RSearch );
-    };
-
+    return( m_kernel->isInNarrowBand(i) ) ;
 };
 
 /*!
@@ -159,7 +187,7 @@ bool LevelSet::isInNarrowBand(const long &i)const{
  * @return Physical size of the current narrow band to guarantee at least one element inside it.
  */
 double LevelSet::getSizeNarrowBand()const{
-    return RSearch;
+    return( m_kernel->getSizeNarrowBand() ) ;
 };
 
 /*!
@@ -167,7 +195,7 @@ double LevelSet::getSizeNarrowBand()const{
  * @param[in] flag true/false for signed /unsigned Level-Set function .
  */
 void LevelSet::setSign(bool flag){
-    signedDF = flag;
+    m_signedDF = flag;
 
 };
 
@@ -176,7 +204,7 @@ void LevelSet::setSign(bool flag){
  * @param[in] flag True/false to active/disable the propagation .
  */
 void LevelSet::setPropagateSign(bool flag){
-    propagateS = flag;
+    m_propagateS = flag;
 };
 
 /*!
@@ -184,7 +212,7 @@ void LevelSet::setPropagateSign(bool flag){
  * @param[in] flag True/false to active/disable the propagation.
  */
 void LevelSet::setPropagateValue(bool flag){
-    propagateV = flag;
+    m_propagateV = flag;
 };
 
 /*!
@@ -192,465 +220,259 @@ void LevelSet::setPropagateValue(bool flag){
  * @param[in] r Size of the narrow band.
  */
 void LevelSet::setSizeNarrowBand(double r){
-    RSearch = r;
     m_userRSearch = true ;
+    m_kernel->setSizeNarrowBand(r) ;
 };
 
-/*!
- * Computes the Level Set Gradient on on cell by first order finite-volume upwind stencil
- * @param[in] I index of cell 
- * @return gradient
- */
-std::array<double,3> LevelSet::computeGradientUpwind( const long &I ){
+void LevelSet::compute(){
 
-    int                     i, border ;
-    std::array<double,3>    normal, gradient = {{0.,0.,0.}};
-    long                    owner;
+    double RSearch ;
 
-    Cell            &cell = m_mesh->getCell(I) ;
-    int                     nI = cell.getInterfaceCount() ;
-    const long*             interfaces = cell.getInterfaces() ;
-    const long*             neighbours = cell.getAdjacencies() ;
-
-    long                    F, N ;
-    double                  value, area;
-
-
-    for( i=0; i<nI; ++i){
-        F = interfaces[i] ;
-        N = neighbours[i] ;
-
-        Interface       &interface = m_mesh->getInterface(F) ;
-
-        owner  = interface.getOwner() ;
-        border = interface.isBorder() ;
-
-        area   = m_mesh->evalInterfaceArea(F) ;
-        normal = m_mesh->evalInterfaceNormal(F) ;
-
-        if( owner != I)
-            normal = -1. *normal ;
-
-        value = border* info[I].value + (1-border) *std::min( info[I].value , info[N].value ) ;
-
-        gradient += area *value *normal ;
-
-    };
-
-    gradient = gradient /m_mesh->evalCellVolume(I) ;
-
-
-    return gradient;
-
-};
-
-/*!
- * Computes the Level Set Gradient on on cell by second order finite-volume central stencil
- * @param[in] I index of cell 
- * @return gradient
- */
-std::array<double,3> LevelSet::computeGradientCentral( const long &I ){
-
-    int                     i, border ;
-    std::array<double,3>    normal, gradient = {{0.,0.,0.}};
-    long                    owner;
-
-    Cell            &cell = m_mesh->getCell(I) ;
-    int                     nI = cell.getInterfaceCount() ;
-    const long*             interfaces = cell.getInterfaces() ;
-    const long*             neighbours = cell.getAdjacencies() ;
-
-    long                    F, N;
-    double                  value, area;
-
-    for( i=0; i<nI; ++i){
-        F = interfaces[i] ;
-        N = neighbours[i] ;
-
-        Interface       &interface = m_mesh->getInterface(F) ;
-
-        owner  = interface.getOwner() ;
-        border = interface.isBorder() ;
-
-        area   = m_mesh->evalInterfaceArea(F) ;
-        normal = m_mesh->evalInterfaceNormal(F) ;
-
-        if( owner != I)
-            normal = -1. *normal ;
-
-        value = border* info[I].value + (1-border) *(info[I].value +info[N].value)/2.  ;
-
-        gradient += area *value *normal ;
-
-    };
-
-    gradient = gradient /m_mesh->evalCellVolume(I) ;
-
-
-    return gradient;
-
-};
-
-/*!
- * Propagate the sign of the signed distance function from narrow band to entire domain
- */
-void LevelSet::propagateSign( LSObject *visitor ) {
-
-
-    // Local variables
-    long                        seed;
-    double                      s;
-
-    std::unordered_set<long>    alreadyEvaluated;
-    LIFOStack<int>     	        stack(sqrt(m_mesh->getCellCount()));
-
-    std::vector<long>			neighs;
-    std::vector<long>::iterator it, itend ;
-
-    bitpit::PiercedIterator<LSInfo> infoItr ;
-
-    visitor->seedSign( this, seed, s) ;
-
-    stack.push(seed);
-    if( s < 0 ){
-        infoItr = info.find(seed) ;
-
-        if( infoItr == info.end() ){
-            infoItr = info.reclaim(seed);
-
-            (*infoItr).value *= s ;
+    if( !m_userRSearch){
+        RSearch = 0. ;
+        for( const auto &visitor : m_object ){
+            RSearch = std::max( RSearch, m_kernel->computeSizeNarrowBand( visitor ) ) ;
         }
+
+        m_kernel->setSizeNarrowBand(RSearch) ;
+
+    }
+
+    for( const auto &visitor : m_object ){
+        visitor->computeLSInNarrowBand( m_kernel, RSearch, m_signedDF) ; 
+    }
+
+
+    if( m_propagateS ) m_kernel->propagateSign( m_object[0] ) ; //TODO for several objects
+//    if( propagateV ) propagateValue( ) ;
+
+    return ;
+}
+
+/*!
+ * Compute the levelset function 
+ */
+void LevelSet::update( const std::vector<adaption::Info> &mapper ){
+
+    double  newRSearch ;
+
+    if(m_userRSearch){
+        newRSearch = m_kernel->getSizeNarrowBand() ;
+    } else {
+        newRSearch = std::max( newRSearch, m_kernel->updateSizeNarrowBand( mapper ) ) ;
     };
 
+    m_kernel->clearAfterAdaption(mapper,newRSearch) ;
 
-    // PROPAGATE SIGN                                                               
-    while (stack.TOPSTK > 0) {
-
-        // Pop item from stack
-        seed = stack.pop();
-        s    = getSign(seed) ;
-
-        // Retrieve info
-		alreadyEvaluated.insert(seed);
-
-        // Loop over neighbors
-        neighs  =   m_mesh->findCellFaceNeighs( seed ) ;
-
-        itend = neighs.end() ;
-
-        for ( it=neighs.begin(); it!=itend; ++it) {
-
-            if ( alreadyEvaluated.count(*it) == 0 ) {
-
-                if ( getLS(*it) == levelSetDefaults::VALUE && s < 0 ){
-                    infoItr = info.find(*it) ;
-
-                    if( infoItr == info.end() ){
-                        infoItr = info.reclaim(*it);
-                        (*infoItr).value = levelSetDefaults::VALUE ;
-                        (*infoItr).gradient = levelSetDefaults::GRADIENT ;
-                        (*infoItr).object = levelSetDefaults::OBJECT ;
-                    };
-
-                    (*infoItr).value = -levelSetDefaults::VALUE ;
-                };
+    for( const auto &visitor : m_object ){
+        visitor->updateLSInNarrowBand( m_kernel, mapper, newRSearch, m_signedDF ) ;
+    }
 
 
-                stack.push(*it);
+    if( m_propagateS ) m_kernel->propagateSign( m_object[0] ) ; //TODO several objects
+//TODO    if( propagateV ) updatePropagatedValue() ;
 
-            } //endif
-
-
-        } //iterator
-
-    } //stack
+    m_kernel->setSizeNarrowBand(newRSearch) ;
 
     return;
 
 };
 
-/*!
- * Driver routine for propagtaing levelset value by a fast marching method
- */
-void LevelSet::propagateValue( LSObject *visitor ){
-
-    BITPIT_UNUSED(visitor) ;
-
-    // Propagate outwards ------------------------------------------------------- //
-    solveEikonal(1.0, 1.0);
-
-    // Propagate inwards -------------------------------------------------------- //
-    solveEikonal(1.0, -1.0);
-
-
-    return ;
-
-};
-
 /*! 
- * Solve the 3D Eikonal equation |grad(u)| = g, using  a fast marching method
- * (Function in the unknown region must be set to the value 1.0e+18)
- * @param[in] g Propagation speed.
- * @param[in] s Velocity sign (+1 --> propagate outwards, -1 --> propagate inwards).
- */
-void LevelSet::solveEikonal( double g, double s ){
-
-    long                            N( m_mesh->getCellCount()) ;
-    PiercedVector<short>    active ;
-
-    { //FLAG ALIVE, DEAD AND FAR AWAY VERTEXES
-        long    m(0), myId ;
-        bool    check;
-
-        std::vector<long>               neighs ;
-        std::vector<long>::iterator     it, itbeg, itend ;
-
-        active.reserve(N) ;
-        for ( const auto &cell : m_mesh->getCells() ){ 
-            myId           = cell.getId() ;
-            active.reclaim(myId) ;
-        }
-
-        for ( const auto &cell : m_mesh->getCells() ){ 
-
-            myId           = cell.getId() ;
-
-            if ( isInNarrowBand(myId) ) // dead vertex
-                active[myId] = 0;
-
-            else { // alive or far away 
-
-                // Loop over neighbors
-                check   = false;
-                neighs = m_mesh->findCellFaceNeighs(myId) ;
-
-                it    = neighs.begin() ;
-                itend = neighs.end() ;
-
-                while( !check &&  it != itend  ){
-
-                    check = (s*info[*it].value >= 0.0) && (abs(info[*it].value) < levelSetDefaults::VALUE) ;
-                    ++it ;
-
-                };
-
-                active[myId] = 2 - (int) check  ;
-                m += (int) check  ;
-
-            }
-        } //next i
-    }
-
-
-    { // Construct min heap data structure 
-        long                            m(0), I(0), myId, J ;
-        double                          value ;
-
-        std::vector<long>               neighs ;
-        std::vector<long>::iterator     it, itbeg, itend ;
-
-        std::unordered_map<long,long>   contiguos ;
-        std::vector<std::array<int,2>>  map(N), *mapPtr = &map;
-        MinPQueue<double, long> heap(m, true, mapPtr);
-
-        for ( const auto &cell : m_mesh->getCells() ){ 
-
-            myId = cell.getId() ;
-            contiguos.insert( {{myId,I}} ) ;
-
-            if (active[myId] == 1) {
-
-                // Solve the quadratic form
-                value = updateEikonal(s, g, myId);
-
-                // Store value into heap
-                map[m][0] = I;
-                map[I][1] = m; 
-
-
-                heap.keys[m] = value;
-                heap.labels[m] = myId;
-
-                // Update counter
-                m++;
-            }
-
-            ++I;
-
-        } //next i
-
-        // Build min-heap 
-        heap.heap_size = m;
-        heap.buildHeap();
-
-        // FAST MARCHING
-        while (heap.heap_size > 0) {
-
-
-            // Extract root
-            heap.extract(value, myId);
-
-            LSInfo &lsInfo = info[myId] ;
-
-            // Update level set value
-            lsInfo.value = s*updateEikonal(s, g, myId);
-
-            // Update m_activeNode to dead node
-            active[myId] = 0;
-
-            // Upadate far-away neighboors
-            neighs = m_mesh->findCellFaceNeighs(myId) ;
-
-            itbeg = neighs.begin() ;
-            itend = neighs.end() ;
-
-            for( it=itbeg; it != itend; ++it){
-
-                J = *it;
-
-                // Update the local value
-                value = updateEikonal(s, g, J);
-
-                if (active[J] == 1) { // Update value in min-heap
-                    I = contiguos[J] ;
-                    heap.modify( map[I][1], value, J );
-                }
-
-                else if (active[J] == 2) {
-
-                    // Update m_activeNode for neighbor
-                    active[J] = 1;
-
-                    I = contiguos[J] ;
-
-                    // Insert neighbor into the min heap
-                    map[heap.heap_size][0] = I ;
-                    map[I][1] = heap.heap_size;
-
-                    heap.insert(value, J);
-
-                };
-            };
-
-        } //next item
-    }
-
-
-    return; 
-};
-
-/*! 
- * Update scalar field value at mesh vertex on a by locally solving the 3D Eikonal equation.
- * @param[in] s Flag for inwards/outwards propagation (s = -+1).
- * @param[in] g Propagation speed for the 3D Eikonal equation.
- * @param[in] I index of the cartesian cell to be updated.
- * @return Updated value at mesh vertex
- */
-double LevelSet::updateEikonal( double s, double g, const long &I ){
-
-    BITPIT_UNUSED(s) ;
-    BITPIT_UNUSED(g) ;
-    BITPIT_UNUSED(I) ;
-
-    return levelSetDefaults::VALUE;
-};
-
-/*! 
- * Deletes non-existing items and items beyon the narrow band after grid adaption.
- * @param[in] mapper mapping info
- * @param[in] newRSearch new size of narrow band
- */
-void LevelSet::clearAfterAdaption( std::vector<adaption::Info> &mapper, double &newRSearch ){
-
-    long id ;
-    for ( auto & map : mapper ){
-        if( map.entity == adaption::Entity::ENTITY_CELL ){
-
-            for ( auto & parent : map.previous){
-                id = (long) parent ;
-                if( info.exists(id) ) 
-                    info.erase(id,true) ;
-            }
-        }
-    }
-
-    info.flush() ; //TODO chiedere andrea se si puo togliere
-
-    PiercedIterator<LSInfo> lsItr = info.begin() ;
-    while( lsItr != info.end() ){
-
-        id = lsItr.getId() ;
-
-        if( std::abs(lsItr->value) > newRSearch ){
-            lsItr = info.erase( lsItr.getId(), true );
-        } else {
-            ++lsItr ;
-        }
-
-    };
-
-    info.flush() ;
-
-    return ;
-};
-
-/*! 
- * Writes LevelSet to stream in binary format
+ * Writes LevelSetKernel to stream in binary format
  * @param[in] stream output stream
  */
 void LevelSet::dump( std::fstream &stream ){
 
-    bitpit::PiercedVector<LSInfo>::iterator   infoItr, infoEnd = info.end() ;
-
-    bitpit::genericIO::flushBINARY(stream, RSearch);
     bitpit::genericIO::flushBINARY(stream, m_userRSearch);
+    bitpit::genericIO::flushBINARY(stream, m_signedDF);
+    bitpit::genericIO::flushBINARY(stream, m_propagateS);
+    bitpit::genericIO::flushBINARY(stream, m_propagateV);
 
-    bitpit::genericIO::flushBINARY(stream, signedDF);
-    bitpit::genericIO::flushBINARY(stream, propagateS);
-    bitpit::genericIO::flushBINARY(stream, propagateV);
+    m_kernel->dump( stream ) ;
 
-    bitpit::genericIO::flushBINARY(stream, (long) info.size() ) ;
+    for( const auto &visitor : m_object ){
+        visitor->dump( stream ) ;
+    }
 
-    for( infoItr=info.begin(); infoItr!=infoEnd; ++infoItr){
-        bitpit::genericIO::flushBINARY(stream, infoItr.getId()) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->value) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->gradient) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->object) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->active) ;
-    };
 
     return ;
 };
 
 /*! 
- * Reads LevelSet from stream in binary format
+ * Reads LevelSetKernel from stream in binary format
  * @param[in] stream output stream
  */
 void LevelSet::restore( std::fstream &stream ){
 
-    long i, n, id;
-    LSInfo cellInfo;
-
-    bitpit::genericIO::absorbBINARY(stream, RSearch);
     bitpit::genericIO::absorbBINARY(stream, m_userRSearch);
+    bitpit::genericIO::absorbBINARY(stream, m_signedDF);
+    bitpit::genericIO::absorbBINARY(stream, m_propagateS);
+    bitpit::genericIO::absorbBINARY(stream, m_propagateV);
 
-    bitpit::genericIO::absorbBINARY(stream, signedDF);
-    bitpit::genericIO::absorbBINARY(stream, propagateS);
-    bitpit::genericIO::absorbBINARY(stream, propagateV);
-    bitpit::genericIO::absorbBINARY(stream, n ) ;
-    info.reserve(n);
+    m_kernel->restore( stream ) ;
 
-    for( i=0; i<n; ++i){
-        bitpit::genericIO::absorbBINARY(stream, id) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.value) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.gradient) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.object) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.active) ;
-        info.insert(id, cellInfo) ;
-    };
+    for( const auto &visitor : m_object ){
+        visitor->restore( stream ) ;
+    }
+
 
     return ;
-};
+}
 
+#if BITPIT_ENABLE_MPI
+/*!
+ * Checks if MPI communicator is available in underlying mesh.
+ * If available MPI communicator is retreived from mesh and duplicated if necessary and parallel processing can be done.
+ * If not serial processing is necessary
+ * @return true if parallel
+ */
+bool LevelSet::assureMPI( ){
+
+    if( m_commMPI == MPI_COMM_NULL){
+
+        MPI_Comm meshComm = m_kernel->getMesh()->getCommunicator() ;
+
+        if( meshComm == MPI_COMM_NULL){
+            return false;
+        } else {
+            MPI_Comm_dup(m_kernel->getMesh()->getCommunicator(), &m_commMPI);
+            return true; 
+        }
+    } else {
+        return true ;
+    };
 
 }
+
+/*!
+ * Frees the MPI communicator.
+ */
+void LevelSet::finalizeMPI( ){
+
+    if( m_commMPI != MPI_COMM_NULL){
+        MPI_Comm_free( &m_commMPI ) ;
+    }
+}
+
+
+/*!
+ * Repartioning of levelset after partitioning of mesh
+ * @param[in] mapper mapper describing partitioning
+ */
+void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
+
+    if( assureMPI() ){
+
+        int                 nClasses = 1 + m_object.size() ;
+        DataCommunicator    sizeCommunicator(m_commMPI) ; 
+        DataCommunicator    dataCommunicator(m_commMPI) ; 
+
+
+        // start receive of sizes
+        for( const auto &event : mapper){
+            if( event.entity == adaption::Entity::ENTITY_CELL){
+                if( event.type == adaption::Type::TYPE_PARTITION_RECV){
+                    short rank = event.rank;
+
+                    sizeCommunicator.setRecv( rank, 2*sizeof(long)*nClasses ) ;
+                    sizeCommunicator.startRecv(rank);
+
+                }
+            }
+        }
+
+        { // send first number of items and then data itself
+
+            for( const auto &event : mapper){
+                if( event.entity == adaption::Entity::ENTITY_CELL){
+
+                    if( event.type == adaption::Type::TYPE_PARTITION_SEND){
+                        short rank = event.rank;
+
+                        //determine elements to send
+                        long nItems = event.previous.size() ;
+
+                        sizeCommunicator.setSend(rank, 2*sizeof(long) *nClasses ) ;
+                        dataCommunicator.setSend(rank, 0 ) ;
+
+                        //store data in buffer
+                        OBinaryStream &sizeBuffer = sizeCommunicator.getSendBuffer(rank);
+                        OBinaryStream &dataBuffer = dataCommunicator.getSendBuffer(rank);
+
+                        m_kernel->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
+                        for( const auto &visitor : m_object){
+                            visitor->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
+                        }
+
+                        // Start the send
+                        sizeCommunicator.startSend(rank);
+                        dataCommunicator.startSend(rank);
+                    }
+                }
+            }
+        }
+
+
+        { 
+            // as soon as sizes are received start receiving data.
+            int rank, nCompletedRecvs;
+            long nItems, data, dataSize ;
+            std::vector<long> items(nClasses) ;
+            std::vector<long>::iterator  itemItr = items.begin() ;
+
+            // receive sizes
+            nCompletedRecvs = 0;
+            while (nCompletedRecvs < sizeCommunicator.getRecvCount()) {
+                rank = sizeCommunicator.waitAnyRecv();
+                IBinaryStream &sizeBuffer = sizeCommunicator.getRecvBuffer(rank);
+
+                sizeBuffer >> *(itemItr) ;
+                sizeBuffer >> dataSize ;
+
+                ++itemItr; 
+                for( const auto & visitor : m_object){
+                    sizeBuffer >> *(itemItr) ;
+                    sizeBuffer >> data ;
+                    dataSize += data ;
+                    ++itemItr ;
+                };
+
+                dataCommunicator.setRecv(rank,dataSize) ;
+                dataCommunicator.startRecv(rank) ;
+
+                ++nCompletedRecvs;
+            }
+
+            //  post-process data from buffer to data within classes
+            nCompletedRecvs = 0;
+            while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
+                rank = dataCommunicator.waitAnyRecv();
+
+                IBinaryStream &dataBuffer = dataCommunicator.getRecvBuffer(rank);
+                itemItr = items.begin();
+
+                m_kernel->readCommunicationBuffer( *itemItr, dataBuffer ) ;
+                ++itemItr ;
+
+                for( const auto &visitor : m_object){
+                    visitor->readCommunicationBuffer( *itemItr, dataBuffer ) ;
+                    ++itemItr ;
+                }
+
+                ++nCompletedRecvs;
+            }
+        }
+
+        sizeCommunicator.finalize() ;
+        dataCommunicator.finalize() ;
+
+    }
+
+    return ;
+}
+
+#endif 
+
+}
+

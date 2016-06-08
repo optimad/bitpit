@@ -39,6 +39,8 @@
 // INCLUDES                                                                   //
 // ========================================================================== //
 
+# include <mpi.h>
+
 //Standard Template Library
 # include <ctime>
 # include <chrono>
@@ -51,20 +53,21 @@
 // ========================================================================== //
 using namespace std;
 
-/*!Demo for 3D level set of complex geometries on a Pablo octree mesh.
+/*!
+    Test for 3D levelset of complex geometries on a Pablo octree mesh.
 */
 int main( int argc, char *argv[]){
 
-#if BITPIT_ENABLE_MPI==1
     MPI_Init(&argc, &argv);
-#endif
 
-    // ========================================================================== //
-    // VARIABLES DECLARATION                                                      //
-    // ========================================================================== //
+    // MPI information
+    int nProcessors, rank ;
 
-    uint8_t                 dimensions(3);
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    // Logger info
+    bitpit::log::cout().setVisibility( bitpit::log::GLOBAL ) ;
 
     // Input geometry
     bitpit::SurfUnstructured    STL(0);
@@ -77,20 +80,18 @@ int main( int argc, char *argv[]){
     STL.buildAdjacencies() ;
 
     STL.setName("geometry_002") ;
-    STL.write() ;
+    if (rank == 0) {
+        STL.write() ;
+    }
 
     std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
     std::cout << "n. simplex: " << STL.getCellCount() << std::endl;
 
-
-
-    // ========================================================================== //
-    // CREATE MESH                                                                //
-    // ========================================================================== //
-    
+    // Create mesh
     std::cout << " - Setting mesh" << std::endl;
     std::array<double,3>    meshMin, meshMax, delta ;
     double                  h(0), dh ;
+    int                     dimensions(3);
 
     STL.getBoundingBox( meshMin, meshMax ) ;
 
@@ -108,116 +109,100 @@ int main( int argc, char *argv[]){
     bitpit::VolOctree    mesh(1, dimensions, meshMin, h, dh );
     mesh.update() ;
 
-
-    // COMPUTE LEVEL SET in NARROW BAND
+    // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock>    start, end;
     int                                         elapsed_init, elapsed_refi(0);
 
-    bitpit::LevelSetOctree          LSP(mesh);
-    bitpit::LevelSetSegmentation    geometry(0,&STL);
+    bitpit::LevelSet                levelset;
+
     std::vector<bitpit::adaption::Info> mapper ;
     std::vector<double>             LS ;
-    std::vector<long>               SG ;
     std::vector<double>::iterator   itLS ;
-    std::vector<long>::iterator     itSG ;
 
+    levelset.setMesh(&mesh) ;
+    levelset.addObject(&STL) ;
 
     mesh.addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
-    mesh.addData("sg", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, SG) ;
     mesh.setName("levelset_004") ;
     mesh.setCounter() ;
 
-    LSP.setPropagateSign(true);
+    levelset.setPropagateSign(true);
 
     start = std::chrono::system_clock::now();
-    LSP.compute( &geometry );
+    levelset.compute( );
     end = std::chrono::system_clock::now();
 
     elapsed_init = chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
+    mapper = mesh.partition(MPI_COMM_WORLD,true) ;
+    levelset.update(mapper) ;
 
-    // Export level set ------------------------------------------------------- //
-    if (mesh.getRank() == 0) cout << " - Exporting data" << endl;
+    // Write mesh
+    if (rank == 0) {
+        cout << " - Exporting data" << endl;
+    }
 
     LS.resize(mesh.getCellCount() ) ;
-    SG.resize(mesh.getCellCount() ) ;
     itLS = LS.begin() ;
-    itSG = SG.begin() ;
     for( auto & cell : mesh.getCells() ){
         const long &id = cell.getId() ;
-        *itLS = LSP.getLS(id) ;
-        *itSG = geometry.getSupportSimplex(id) ;
+        *itLS = levelset.getLS(id) ;
         ++itLS ;
-        ++itSG ;
     };
 
     mesh.write() ;
 
-    std::fstream    file ;
-    file.open("levelset_004.dump", std::ios::out | std::ios::binary );
+//    std::fstream    file ;
+//    file.open("levelset_004.dump", std::ios::out | std::ios::binary );
+//
+//    levelset.dump(file);
+//    geometry.dump(file) ;
+//    file.close();
 
-    LSP.dump(file);
-    geometry.dump(file) ;
-    file.close();
-
-    {// dump levelset to file and restor into new class
-
-        bitpit::LevelSetOctree          LSP2(mesh);
-        bitpit::LevelSetSegmentation    geometry2(0,&STL);
-
-        std::fstream    file ;
-        file.open("levelset_004.dump", std::ios::in | std::ios::binary );
-
-        LSP2.restore(file);
-        geometry2.restore(file);
-
-
+//    {// dump levelset to file and restor into new class
+//
+//        bitpit::LevelSetOctree          levelset2(mesh);
+//        bitpit::LevelSetSegmentation    geometry2(0,&STL);
+//
+//        std::fstream    file ;
+//        file.open("levelset_004.dump", std::ios::in | std::ios::binary );
+//
+//        levelset2.restore(file);
+//        geometry2.restore(file);
+//
+//
         //Refinement
         for( int i=0; i<3; ++i){
 
-            std::cout << "refinement loop " << i << std::endl ;
-            std::cout << "refinement loop " << i << std::endl ;
-            std::cout << "refinement loop " << i << std::endl ;
-
             for( auto & cell : mesh.getCells() ){
                 const long &id = cell.getId() ;
-                if( std::abs(LSP.getLS(id)) < 100. ){
+                if( std::abs(levelset.getLS(id)) < 100. ){
                     mesh.markCellForRefinement(id) ;
                 }
             }
 
             mapper = mesh.update(true) ;
             start = std::chrono::system_clock::now();
-            LSP2.update( &geometry2, mapper) ;
+            levelset.update(mapper) ;
             end = std::chrono::system_clock::now();
 
             elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
             LS.resize(mesh.getCellCount() ) ;
-            SG.resize(mesh.getCellCount() ) ;
             itLS = LS.begin() ;
-            itSG = SG.begin() ;
             for( auto & cell : mesh.getCells() ){
                 const long &id = cell.getId() ;
-                *itLS = LSP2.getLS(id) ;
-                *itSG = geometry2.getSupportSimplex(id) ;
+                *itLS = levelset.getLS(id) ;
                 ++itLS ;
-                ++itSG ;
             };
+
             mesh.write() ;
         }
-    }
-
+//    }
 
     cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
     cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;
 
-#if BITPIT_ENABLE_MPI==1
+    levelset.finalizeMPI() ;
     MPI_Finalize();
-#endif
-
-    return 0;
-
-};
-
-
+}

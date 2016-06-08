@@ -31,46 +31,46 @@ namespace bitpit {
 
 /*!
 	@ingroup    levelset
-	@class      LSObject
+	@class      LevelSetObject
 	@brief      LevelSet object.
 */
 
 /*!
  * Destructor
  */
-LSObject::~LSObject( ){
+LevelSetObject::~LevelSetObject( ){
 };
 
 /*!
  * Constructor
  * @param[in] id Id assigned to object
  */
-LSObject::LSObject( int id) : m_id(id){
+LevelSetObject::LevelSetObject( int id) : m_id(id){
 };
 
 /*!
  * Get the id 
  * @return Id of the object
  */
-int LSObject::getId( ) const {
+int LevelSetObject::getId( ) const {
     return m_id ;
 };
 
 /*!
- * Writes LSObject to stream in binary format
+ * Writes LevelSetObject to stream in binary format
  * @param[in] stream output stream
  */
-void LSObject::dump( std::fstream &stream ){
+void LevelSetObject::dump( std::fstream &stream ){
     bitpit::genericIO::flushBINARY(stream, m_id) ;
     dumpDerived(stream) ;
     return;
 };
 
 /*!
- * Reads LSObject from stream in binary format
+ * Reads LevelSetObject from stream in binary format
  * @param[in] stream output stream
  */
-void LSObject::restore( std::fstream &stream ){
+void LevelSetObject::restore( std::fstream &stream ){
     bitpit::genericIO::absorbBINARY(stream, m_id) ;
     restoreDerived(stream) ;
     return;
@@ -86,7 +86,7 @@ void LSObject::restore( std::fstream &stream ){
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegData::SegData( ) : m_segments(levelSetDefaults::LIST), m_support(levelSetDefaults::ELEMENT), m_checked(false){
+LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST), m_support(levelSetDefaults::ELEMENT), m_checked(false){
 };
 
 /*!
@@ -94,7 +94,7 @@ LevelSetSegmentation::SegData::SegData( ) : m_segments(levelSetDefaults::LIST), 
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegData::SegData( const std::set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT), m_checked(false) {
+LevelSetSegmentation::SegInfo::SegInfo( const std::set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT), m_checked(false) {
 };
 
 /*!
@@ -103,14 +103,14 @@ LevelSetSegmentation::SegData::SegData( const std::set<long> &list) :m_segments(
  * @param[in] list list of simplices
  * @param[in] support index of closest simplex
  */
-LevelSetSegmentation::SegData::SegData( const std::set<long> &list, const long &support) :m_segments(list), m_support(support), m_checked(false){
+LevelSetSegmentation::SegInfo::SegInfo( const std::set<long> &list, const long &support) :m_segments(list), m_support(support), m_checked(false){
 };
 
 /*!
  * Destructor of LevelSet_Stl.
  */
 LevelSetSegmentation::~LevelSetSegmentation() {
-    stl = NULL;
+    m_segmentation = NULL;
 };
 
 /*!
@@ -119,12 +119,10 @@ LevelSetSegmentation::~LevelSetSegmentation() {
  * @param[in] *Pmesh Pointer to 3D pablo octree mesh to be linked to Sdf.
  * @param[in] *STL Pointer to surface Triangulation to be linked to Sdf.
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LSObject(id) {
+LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LevelSetObject(id) {
 
-    stl = STL;
-    abs_tol = 1.0e-12 ;
-
-    m_dimension = stl->getSpaceDimension() ;
+    m_segmentation = STL;
+    m_dimension = m_segmentation->getSpaceDimension() ;
 
 };
 
@@ -133,11 +131,9 @@ LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LSOb
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) :LSObject(other.getId() ) {
+LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) :LevelSetObject(other.getId() ) {
 
-    stl = other.stl; 
-    abs_tol = other.abs_tol ;
-
+    m_segmentation = other.m_segmentation; 
     m_dimension = other.m_dimension ;
 
 };
@@ -157,10 +153,10 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
  */
 const std::set<long> & LevelSetSegmentation::getSimplexList(const long &i){
 
-    if( !m_segInfo.exists(i) ){
+    if( !m_seg.exists(i) ){
         return levelSetDefaults::LIST;
     } else {
-        return ( m_segInfo[i].m_segments );
+        return ( m_seg[i].m_segments );
     };
 
 };
@@ -172,10 +168,10 @@ const std::set<long> & LevelSetSegmentation::getSimplexList(const long &i){
  */
 const long & LevelSetSegmentation::getSupportSimplex(const long &i){
 
-    if( !m_segInfo.exists(i) ){
+    if( !m_seg.exists(i) ){
         return levelSetDefaults::ELEMENT ;
     } else {
-        return ( m_segInfo[i].m_support );
+        return ( m_seg[i].m_support );
     };
 };
 
@@ -186,7 +182,7 @@ const long & LevelSetSegmentation::getSupportSimplex(const long &i){
  * @return if in narow band
  */
 bool LevelSetSegmentation::isInNarrowBand(const long &i){
-    return( m_segInfo.exists(i) ) ; 
+    return( m_seg.exists(i) ) ; 
 };
 
 /*!
@@ -195,14 +191,14 @@ bool LevelSetSegmentation::isInNarrowBand(const long &i){
  */
 std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( const long &i ) const {
 
-    Cell &cell = stl->getCell(i) ;
+    Cell &cell = m_segmentation->getCell(i) ;
 
     int                                     j, n, N (cell.getVertexCount()) ;
     std::vector<std::array<double,3>>       VS(N) ;
 
     for( n=0; n<N; ++n){
         j = cell.getVertex(n) ;
-        VS[n] = stl->getVertexCoords(j);
+        VS[n] = m_segmentation->getVertexCoords(j);
     };
 
     if( N > 3){
@@ -220,21 +216,21 @@ std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( cons
  * @param[in] search size of narrow band
  * @param[in] filter if triangles should be ereased when outside narrow band (default false)
  */
-void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &search, bool filter){
+void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double &search, const bool & signd, bool filter){
 
-    VolumeKernel                &mesh  = *(visitee->m_mesh) ;
-    bool                        &signd = visitee->signedDF ;
+    VolumeKernel                &mesh  = *(visitee->getMesh() ) ;
 
     long                        id ;
     double                      s, d, value;
     std::array<double,3>        n, xP, P;
 
     std::set<long>::iterator    it, itend ;
-    PiercedIterator<SegData>    segIt ;
+    PiercedIterator<SegInfo>    segIt ;
+    PiercedVector<LevelSetKernel::LSInfo>       &lsInfo = visitee->getLSInfo() ;
 
-    for( segIt=m_segInfo.begin(); segIt!=m_segInfo.end(); ++segIt ){
+    for( segIt=m_seg.begin(); segIt!=m_seg.end(); ++segIt ){
 
-        SegData                 &segInfo = *segIt ;
+        SegInfo                 &segInfo = *segIt ;
 
         if( segInfo.m_checked == false){
             segInfo.m_checked = true ;
@@ -249,8 +245,8 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
 
             P = mesh.evalCellCentroid(id) ;
 
-            auto lsInfoItr = visitee->info.find(id) ;
-            if( lsInfoItr != visitee->info.end() ){
+            auto lsInfoItr = lsInfo.find(id) ;
+            if( lsInfoItr != lsInfo.end() ){
                 value = abs( lsInfoItr->value );
             } else {
                 value = 1e18;
@@ -263,8 +259,8 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
                 if ( d <= search ){
 
                     if( d<value ) {
-                        if (lsInfoItr == visitee->info.end()) {
-                            lsInfoItr = visitee->info.reclaim(id) ;
+                        if (lsInfoItr == lsInfo.end()) {
+                            lsInfoItr = lsInfo.reclaim(id) ;
                         }
 
                         value   = d ;
@@ -293,14 +289,14 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
             } //end foreach triangle
 
             if( segs.size() == 0 ){
-                m_segInfo.erase(id,true) ;
+                m_seg.erase(id,true) ;
             };
 
         };
 
     };// foreach cell
 
-    m_segInfo.flush() ;
+    m_seg.flush() ;
 
     return;
 
@@ -321,20 +317,21 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p,const 
 
     std::vector<std::array<double,3>>   VS( getSimplexVertices(i) ) ;
 
+    //TODO save vertex normals
     if( m_dimension == 2){
         std::array<double,2> lambda ;
 
         d= CGElem::distancePointSegment( p, VS[0], VS[1], x, lambda ) ;
-        n  = lambda[0] *stl->evalEdgeNormal(i,0) ;
-        n += lambda[1] *stl->evalEdgeNormal(i,1) ;
+        n  = lambda[0] *m_segmentation->evalVertexNormal(i,0) ;
+        n += lambda[1] *m_segmentation->evalVertexNormal(i,1) ;
 
     } else {
         std::array<double,3> lambda ;
 
         d= CGElem::distancePointTriangle( p, VS[0], VS[1], VS[2], x, lambda ) ;
-        n  = lambda[0] *stl->evalEdgeNormal(i,0) ;
-        n += lambda[1] *stl->evalEdgeNormal(i,1) ;
-        n += lambda[2] *stl->evalEdgeNormal(i,2) ;
+        n  = lambda[0] *m_segmentation->evalVertexNormal(i,0) ;
+        n += lambda[1] *m_segmentation->evalVertexNormal(i,1) ;
+        n += lambda[2] *m_segmentation->evalVertexNormal(i,2) ;
     };
 
     s = sign( dotProduct(n, p - x) );
@@ -351,7 +348,7 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p,const 
  */
 bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vector<std::array<double,3>> &VS, std::vector<int> &I){
 
-    VolumeKernel                 &mesh = *(visitee->m_mesh) ;
+    VolumeKernel                        &mesh = *(visitee->getMesh()) ;
 
     bool                                found(false) ;
     int                                 dim( mesh.getDimension() ) ;
@@ -360,8 +357,8 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 
     mesh.getBoundingBox(B0, B1) ;
 
-    B0 = B0 - visitee->RSearch ;
-    B1 = B1 + visitee->RSearch ;
+    B0 = B0 - visitee->getSizeNarrowBand() ;
+    B1 = B1 + visitee->getSizeNarrowBand() ;
 
     I.clear() ;
 
@@ -387,13 +384,14 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
  * @param[out] seed index of seed cell
  * @param[out] sign sign at seed cell [+1;-1]
  */
-void LevelSetSegmentation::seedSign( LevelSet *visitee, long &seed, double &value) const {
+void LevelSetSegmentation::seedSign( LevelSetKernel *visitee, long &seed, double &value) const {
 
     seed = -1;
 
     {  // FIND SEED ELEMENT In GRID
-        double                      s, lsTmp;
-        PiercedIterator<LevelSet::LSInfo>     lsItr = visitee->info.begin() , lsEnd=visitee->info.end() ;
+        double                      lsTmp;
+        const PiercedVector<LevelSetKernel::LSInfo> & lsInfo = visitee->getLSInfo() ;
+        PiercedVector<LevelSetKernel::LSInfo>::const_iterator lsItr = lsInfo.begin() , lsEnd=lsInfo.end() ;
 
         while( lsItr != lsEnd ) {
             lsTmp = (*lsItr).value ;
@@ -412,15 +410,15 @@ void LevelSetSegmentation::seedSign( LevelSet *visitee, long &seed, double &valu
         double                      d, s, lsTmp;
         std::array<double,3>        P, X, temp;
 
-        PiercedIterator<bitpit::Cell>   cellItr = visitee->m_mesh->getCells().begin() ;
+        PiercedIterator<bitpit::Cell>   cellItr = (visitee->getMesh())->getCells().begin() ;
 
         seed    = (*cellItr).getId() ;
-        P       = visitee->m_mesh->evalCellCentroid(seed) ;
+        P       = (visitee->getMesh())->evalCellCentroid(seed) ;
 
 
         lsTmp  = levelSetDefaults::VALUE;
 
-        for( auto & segment : stl->getCells() ){
+        for( auto & segment : m_segmentation->getCells() ){
 
             infoFromSimplex(P, segment.getId(), d, s, X, temp);
 
@@ -444,7 +442,7 @@ void LevelSetSegmentation::seedSign( LevelSet *visitee, long &seed, double &valu
  * @param[out] maxP maximum point
  */
 void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
-    stl->getBoundingBox(minP,maxP) ;
+    m_segmentation->getBoundingBox(minP,maxP) ;
 };
 
 /*!
@@ -452,10 +450,37 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
  * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
  * of at least 2 mesh cell centers around the geometry. 
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee ){
+void LevelSetSegmentation::computeLSInNarrowBand( LevelSetKernel *visitee, const double &RSearch, const bool &signd ){
 
-    associateSimplexToCell(visitee) ;
-    lsFromSimplex(visitee, visitee->RSearch) ;
+    if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(visitee) ){
+        associateSimplexToCell( lsCartesian, RSearch ) ;
+
+    } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(visitee) ){
+        associateSimplexToCell( lsOctree, RSearch ) ;
+
+    };
+
+    lsFromSimplex(visitee, RSearch, signd) ;
+
+    return;
+};
+
+/*!
+ * Compute the levelset function from a piece-wise linear approximation
+ * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
+ * of at least 2 mesh cell centers around the geometry. 
+ */
+void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
+
+    if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(visitee) ){
+        associateSimplexToCell( lsCartesian, RSearch ) ;
+
+    } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(visitee) ){
+        updateSimplexToCell( lsOctree, mapper, RSearch ) ; 
+
+    };
+
+    lsFromSimplex(visitee, RSearch, signd) ;
 
     return;
 };
@@ -463,9 +488,9 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee ){
 /*!
  * Determines the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle).
  */
-void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee ){
+void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, const double &RSearch ){
 
-    VolumeKernel                     &mesh = *(visitee->m_mesh) ;
+    VolumeKernel                            &mesh = *(visitee->getMesh() ) ;
     std::vector<std::array<double,3>>       VS(3);
 
     std::vector< int >                      stack, temp ;
@@ -478,12 +503,11 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee ){
     std::vector< int >                      where ;
     std::vector<int>                        flag( mesh.getCellCount(), -1);
 
-    int                                     i, N( stl->getCellCount() );
-    double                                  search( visitee->RSearch ) ;
+    int                                     i, N( m_segmentation->getCellCount() );
 
     std::vector<long>                       neighs ;
 
-    PiercedVector<SegData>::iterator data ;
+    PiercedVector<SegInfo>::iterator data ;
 
 
     stack.reserve(128) ;
@@ -500,7 +524,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee ){
 
         // Segments vertex ------------------------------------------------------ //
         VS  = getSimplexVertices( i ) ;
-        seedNarrowBand( visitee, VS, stack ) ;
+        seedNarrowBand( visitee, VS, stack ) ; //TODO check if seed is found correctly if segmentation is outside grid but within narrow band
 
 
         //-----------------------------------------------------------------
@@ -517,12 +541,12 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee ){
             vit = d.begin() ;
 
             for( const auto & I : stack){
-                if ( *vit <= search ) {
+                if ( *vit <= RSearch ) {
 
-                    if( m_segInfo.exists(I) ){
-                        m_segInfo[I].m_segments.insert(i) ;
+                    if( m_seg.exists(I) ){
+                        m_seg[I].m_segments.insert(i) ;
                     } else {
-                        data = m_segInfo.reclaim(I) ;
+                        data = m_seg.reclaim(I) ;
                         data->m_segments.insert(i);
                     };
 
@@ -555,46 +579,31 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee ){
 };
 
 /*!
- * Compute the levelset function from a piece-wise linear approximation
- * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
- * of at least 2 mesh cell centers around the geometry. 
- */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee ){
-
-    associateSimplexToCell(visitee) ;
-    lsFromSimplex(visitee, visitee->RSearch,true) ;
-
-    return;
-};
-
-/*!
  * Compute the signed distance function from a piece-wise linear approximation
  * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
  * of at least 2 mesh cell centers around the geometry. If usersearch = true, RSearch
  * is initialized around the geometry (in order to guarantee at least 2 mesh cell centers
  * around the geometry) and used as imposed size of narrow band.
  */
-void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee){
+void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, const double &RSearch){
 
-    VolumeKernel         &mesh = *visitee->m_mesh ;
+    VolumeKernel                &mesh = *(visitee->getMesh()) ;
     int                         dim(mesh.getDimension()) ;
     long                        id, icart;
     int                         i;
     double                      size ;
 
     std::array<double,3>        C, C0, C1, G0, G1, octrBB0, octrBB1, triBB0, triBB1 ;
-    PiercedVector<SegData>::iterator data;
+    PiercedVector<SegInfo>::iterator data;
 
-    { // mesh size corresponding to RSearch
-        uint8_t    level = visitee->computeLevelFromRSearch( visitee->RSearch ) ;
-        size = (visitee->m_omesh->getTree()).levelToSize(level);
-    }
+    // mesh size corresponding to RSearch
+    size = visitee->computeSizeFromRSearch( RSearch ) ;
 
     mesh.getBoundingBox(octrBB0,octrBB1) ;
     getBoundingBox( triBB0, triBB1 );
 
-    G0 = triBB0 - visitee->RSearch ;
-    G1 = triBB1 + visitee->RSearch ;
+    G0 = triBB0 - RSearch ;
+    G1 = triBB1 + RSearch ;
 
     if( CGElem::intersectBoxBox(octrBB0,octrBB1,G0,G1,C0,C1) ) { //intersect two Bounding Boxes around geometry and local grid
 
@@ -614,8 +623,10 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee){
         LevelSetCartesian       auxLS(cmesh) ;
         LevelSetSegmentation    objLS(*this) ;
 
-        auxLS.computeSizeNarrowBand(this) ;
-        objLS.associateSimplexToCell(&auxLS) ; 
+        double                  localRSearch = auxLS.computeSizeNarrowBand(this) ;
+
+        auxLS.setSizeNarrowBand(localRSearch);
+        objLS.associateSimplexToCell(&auxLS, auxLS.getSizeNarrowBand() ) ; 
 
         for( auto & cell : mesh.getCells() ){
             id = cell.getId() ;
@@ -626,7 +637,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee){
 
                 if( objLS.isInNarrowBand(icart) ){
                     const std::set<long> &list = objLS.getSimplexList(icart) ;
-                    data = m_segInfo.emplace(id, list) ;
+                    data = m_seg.emplace(id, list) ;
                 };
 
             };
@@ -640,31 +651,19 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee){
 };
 
 /*!
- * Compute the levelset function from a piece-wise linear approximation
- * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
- * of at least 2 mesh cell centers around the geometry. 
- */
-void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, std::vector<adaption::Info> &mapper, double &newRSearch ){
-
-    updateSimplexToCell(visitee, mapper, newRSearch ) ; 
-    lsFromSimplex(visitee, newRSearch, true) ;
-
-    //clearAfterAdaption(visitee, newRSearch);
-    return;
-};
-
-/*!
  * Update the Sdf of the triangulation after an octree adaptation.
  * Note: Only a single octree adapt with marker (-1,0,1) is permitted.
  */
-void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::vector<adaption::Info> &mapper, double &newRSearch){
+void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, const double &newRSearch){
 
-    int         oldLevel, newLevel ;
+    double      oldSize, newSize ;
 
-    oldLevel = visitee->computeLevelFromRSearch( visitee->RSearch ) ;
-    newLevel = visitee->computeLevelFromRSearch( newRSearch ) ;
+    oldSize = visitee->computeSizeFromRSearch( visitee->getSizeNarrowBand() ) ;
+    newSize = visitee->computeSizeFromRSearch( newRSearch ) ;
 
-    if( newLevel <= oldLevel ) { //size of narrow band decreased or remained the same -> mapping
+    //TODO does not support coarsening if children were on different processes
+
+    if( newSize-oldSize <= 1.e-8 ) { //size of narrow band decreased or remained the same -> mapping
 
         { // map segments
             std::unordered_map<long,std::set<long>> oldSegs ;
@@ -674,23 +673,23 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::ve
                 if( info.entity == adaption::Entity::ENTITY_CELL ){
 
                     for ( auto & parent : info.previous){ //save old data and delete element
-                        if( m_segInfo.exists(parent) ){
-                            SegData *seg =  &m_segInfo[parent] ;
+                        if( m_seg.exists(parent) ){
+                            SegInfo *seg =  &m_seg[parent] ;
 
                             oldSegs.insert({{ parent, seg->m_segments }}) ;
-                            m_segInfo.erase(parent,true) ;
+                            m_seg.erase(parent,true) ;
                         }
                     }
                 }
             }
 
-            m_segInfo.flush() ;
+            m_seg.flush() ;
 
             for ( auto & info : mapper ){ //forall mesh modifications
                 if( info.entity == adaption::Entity::ENTITY_CELL){ //check if changes on cells
                     for ( auto & child : info.current){ // forall new elements
 
-                        PiercedVector<SegData>::iterator seg =  m_segInfo.reclaim(child) ;
+                        PiercedVector<SegInfo>::iterator seg =  m_seg.reclaim(child) ;
                         seg->m_segments.clear() ;
 
                         for ( auto & parent : info.previous){ //take their parents
@@ -705,8 +704,8 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::ve
 
     } else { //size of narrow band increased -> recalculation
 
-        m_segInfo.clear() ;
-        associateSimplexToCell(visitee) ; 
+        m_seg.clear() ;
+        associateSimplexToCell( visitee, visitee->getSizeNarrowBand() ) ; 
 
     };
 
@@ -724,12 +723,11 @@ void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
     int                 s;
     std::vector<long>   temp;
 
-    bitpit::PiercedVector<SegData>::iterator segItr, segEnd = m_segInfo.end() ;
+    bitpit::PiercedVector<SegInfo>::iterator segItr, segEnd = m_seg.end() ;
 
-    bitpit::genericIO::flushBINARY( stream, (long) m_segInfo.size() ) ;
-    bitpit::genericIO::flushBINARY( stream, abs_tol ) ;
+    bitpit::genericIO::flushBINARY( stream, (long) m_seg.size() ) ;
 
-    for( segItr = m_segInfo.begin(); segItr != segEnd; ++segItr){
+    for( segItr = m_seg.begin(); segItr != segEnd; ++segItr){
         s = segItr->m_segments.size() ;
 
         temp.resize(s);
@@ -753,13 +751,12 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 
     int     s;
     long    i, n, id;
-    SegData cellData ;
+    SegInfo cellData ;
     std::vector<long>   temp;
 
     bitpit::genericIO::absorbBINARY( stream, n ) ;
-    bitpit::genericIO::absorbBINARY( stream, abs_tol ) ;
 
-    m_segInfo.reserve(n);
+    m_seg.reserve(n);
 
     for( i=0; i<n; ++i){
         bitpit::genericIO::absorbBINARY( stream, id );
@@ -772,11 +769,77 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 
         std::copy( temp.begin(), temp.end(), std::inserter( cellData.m_segments, cellData.m_segments.end() ) );
 
-        m_segInfo.insert(id,cellData) ;
+        m_seg.insert(id,cellData) ;
 
     }
 
     return;
 };
+
+# if BITPIT_ENABLE_MPI
+
+/*!
+ * Repartioning of levelset after partitioning of mesh
+ * @param[in] mapper mapper describing partitioning
+ */
+void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &previous, OBinaryStream &sizeBuffer, OBinaryStream &dataBuffer ){
+
+
+    long nItems = previous.size() ;
+    int dataSize = 10*sizeof(long)  +sizeof(long) +sizeof(bool) +sizeof(long) +sizeof(int) ;
+
+    //TODO new BITPIT dataBuffer.setCapacity(nItems*dataSize) ;
+
+    //determine elements to send
+    nItems = 0 ;
+    for( const auto &index : previous){
+        if( m_seg.exists(index)){
+            const auto &seginfo = m_seg[index] ;
+            dataBuffer << index ;
+            dataBuffer << (int) seginfo.m_segments.size() ;
+            for( const auto & seg : seginfo.m_segments ){
+                dataBuffer << seg ;
+            };
+            dataBuffer << seginfo.m_support ;
+            dataBuffer << seginfo.m_checked ;
+            ++nItems ;
+        }
+    }
+
+    //TODO new BITPIT dataBuffer.squeeze() ;
+    sizeBuffer << nItems ;
+    //TODO new BITPIT sizeBuffer << dataBuffer.capacity() ;
+
+    return;
+};
+
+/*!
+ * Repartioning of levelset after partitioning of mesh
+ * @param[in] mapper mapper describing partitioning
+ */
+void LevelSetSegmentation::readCommunicationBuffer( const long &nItems, IBinaryStream &dataBuffer ){
+
+    int     s, nSegs ;
+    long    index, segment ;
+    PiercedVector<SegInfo>::iterator segItr ;
+
+    for( int i=0; i<nItems; ++i){
+        dataBuffer >> index ;
+        dataBuffer >> nSegs ;
+
+        segItr = m_seg.reclaim(index) ;
+
+        for( s=0; s<nSegs; ++s){
+            dataBuffer >> segment ;
+            segItr->m_segments.insert(segment) ;
+        }
+
+        dataBuffer >> segItr->m_support ;
+        dataBuffer >> segItr->m_checked ;
+    }
+
+    return;
+};
+# endif
 
 }

@@ -25,10 +25,6 @@
 # ifndef __BITPIT_LEVELSET_HPP__
 # define __BITPIT_LEVELSET_HPP__
 
-// ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
-
 // Standard Template Library
 # include <cmath>
 # include <array>
@@ -45,7 +41,8 @@
 
 namespace bitpit{
 
-class LSObject ;
+class LevelSetKernel ;
+class LevelSetObject ;
 class LevelSetSegmentation ;
 
 namespace levelSetDefaults{
@@ -59,13 +56,61 @@ namespace levelSetDefaults{
 
 class LevelSet{
 
-    friend  LSObject ;
-    friend  LevelSetSegmentation ;
+    private:
+    LevelSetKernel*                             m_kernel ;              /**< LevelSet computational kernel */
+    std::vector<LevelSetObject*>                m_object ;              /**< Objects defining the boundaries */
 
-//    public:
-//    static double                               NULL_VALUE ;    /**< Default value for levelset function */
-//    static std::array<double,3>                 NULL_GRADIENT ; /**< Default value for levelset gradient */
-//    static int                                  NULL_OBJECT ;   /**< Default value for closest object id */
+    bool                                        m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
+    bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
+    bool                                        m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
+    bool                                        m_propagateV;           /**< Flag for value propagation from narrow band (default = false) */
+
+# if BITPIT_ENABLE_MPI
+    MPI_Comm                                    m_commMPI ;             /**< MPI communicator */
+# endif
+
+    public:
+    ~LevelSet() ;
+    LevelSet() ;
+
+    void                                        setMesh( VolumeKernel* ) ;
+    void                                        setMesh( VolCartesian* ) ;
+    void                                        setMesh( VolOctree* ) ;
+
+    void                                        addObject( SurfaceKernel* ) ;
+    void                                        addObject( SurfUnstructured * ) ;
+    void                                        addObject( LevelSetObject* ) ;
+
+    double                                      getLS(const long &) const;
+    std::array<double,3>                        getGradient(const long &) const ;
+    short                                       getSign(const long &) const;
+    bool                                        isInNarrowBand(const long &) const;
+
+    double                                      getSizeNarrowBand() const;
+
+    void                                        setSizeNarrowBand(double) ;
+    void                                        setSign(bool);
+    void                                        setPropagateSign(bool) ;
+    void                                        setPropagateValue(bool) ;
+
+    void                                        dump( std::fstream &);
+    void                                        restore( std::fstream &);
+
+    void                                        compute( ) ;
+    void                                        update( const std::vector<adaption::Info> & ) ;
+# if BITPIT_ENABLE_MPI
+    void                                        loadBalance( const std::vector<adaption::Info> & ) ;
+    void                                        finalizeMPI() ;
+# endif
+
+    private:
+# if BITPIT_ENABLE_MPI
+    bool                                        assureMPI() ;
+# endif
+
+};
+
+class LevelSetKernel{
 
     protected:
     struct LSInfo{
@@ -75,38 +120,21 @@ class LevelSet{
         short                                   active ;        /**< Flag for nodes for fast marching */
     };
 
-    PiercedVector<LSInfo>                       info ;          /**< Levelset information for each cell */
-
-    double                                      RSearch;        /**< Size of narrow band */
-    bool                                        m_userRSearch;  /**< Flag if user has set size of narrow band (default=false)  */
-
-    bool                                        signedDF;       /**< Flag for sigend/unsigned distance function (default = true) */
-    bool                                        propagateS;     /**< Flag for sign propagation from narrow band (default = false) */
-    bool                                        propagateV;     /**< Flag for value propagation from narrow band (default = false) */
-
+    PiercedVector<LSInfo>                       m_ls ;          /**< Levelset information for each cell */
     VolumeKernel*                               m_mesh ;        /**< Pointer to underlying mesh*/
 
-    protected:
-    LevelSet() ;
-    LevelSet( VolumeKernel *) ;
+    double                                      m_RSearch;      /**< Size of narrow band */
 
-    virtual void                                computeSizeNarrowBand( LSObject * )=0;
-
-    virtual double                              updateSizeNarrowBand( std::vector<adaption::Info> & )=0;
-    void                                        clearAfterAdaption( std::vector<adaption::Info> &, double & ) ;
-
-    void                                        propagateSign( LSObject *) ;
-    void                                        propagateValue( LSObject *) ;
-
-    void                                        solveEikonal( double, double );
-    virtual double                              updateEikonal( double, double, const long & ) ;
-
-    std::array<double,3>                        computeGradientUpwind(const long &) ;
-    std::array<double,3>                        computeGradientCentral(const long &) ;
-
+# if BITPIT_ENABLE_MPI
+    MPI_Comm                                    m_commMPI ;     /**< MPI communicator */
+# endif
 
     public:
-    virtual ~LevelSet() ;
+    LevelSetKernel() ;
+    LevelSetKernel( VolumeKernel *) ;
+
+    PiercedVector<LSInfo>&                      getLSInfo() ;
+    VolumeKernel*                               getMesh() const ;
 
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
@@ -115,66 +143,78 @@ class LevelSet{
     double                                      getSizeNarrowBand() const;
 
     void                                        setSizeNarrowBand(double) ;
-    void                                        setSign(bool);
-    void                                        setPropagateSign(bool) ;
-    void                                        setPropagateValue(bool) ;
-
     bool                                        isInNarrowBand(const long &) const;
 
-    virtual void                                compute( LSObject * )=0 ;
-    virtual void                                update( LSObject *, std::vector<adaption::Info> & )=0 ;
+    virtual double                              computeSizeNarrowBand( LevelSetObject * )=0;
+    virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> & )=0;
+
+    void                                        clearAfterAdaption( const std::vector<adaption::Info> &, double & ) ;
+
+    void                                        propagateSign( LevelSetObject *) ;
+    void                                        propagateValue( LevelSetObject *) ;
+
+    protected:
+    void                                        solveEikonal( double, double );
+    virtual double                              updateEikonal( double, double, const long & ) ;
+
+    std::array<double,3>                        computeGradientUpwind(const long &) ;
+    std::array<double,3>                        computeGradientCentral(const long &) ;
+
+
+    public:
+    virtual ~LevelSetKernel() ;
 
     void                                        dump( std::fstream &);
     void                                        restore( std::fstream &);
 
+# if BITPIT_ENABLE_MPI
+    bool                                        assureMPI() ;
+    void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & );
+    void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
+# endif
+
 };
 
-class LevelSetCartesian : public LevelSet{
-
-    friend  LSObject ;
-    friend  LevelSetSegmentation ;
+class LevelSetCartesian : public LevelSetKernel{
 
     private:
-    VolCartesian*                               m_cmesh ;       /**< Pointer to underlying cartesian mesh*/
+    VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
 
     private:
-    void                                        computeSizeNarrowBand( LSObject * );
-    double                                      updateSizeNarrowBand( std::vector<adaption::Info> & );
+    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> & );
     double                                      updateEikonal( double, double, const long & ) ; 
 
     public:
     virtual ~LevelSetCartesian();
     LevelSetCartesian( VolCartesian & );
 
-    void                                        compute( LSObject * ) ;
-    void                                        update( LSObject *, std::vector<adaption::Info> & ) ;
+    double                                      computeSizeNarrowBand( LevelSetObject * );
+    void                                        update( LevelSetObject *, const std::vector<adaption::Info> & ) ;
 };
 
-class LevelSetOctree : public LevelSet{
+class LevelSetOctree : public LevelSetKernel{
 
-    friend  LSObject ;
+    friend  LevelSetObject ;
     friend  LevelSetSegmentation ;
 
     private:
-    VolOctree*                                  m_omesh ;       /**< Pointer to underlying octree mesh*/
+    VolOctree*                                  m_octree ;       /**< Pointer to underlying octree mesh*/
 
     private:
-    void                                        computeSizeNarrowBand( LSObject * );
-    double                                      updateSizeNarrowBand( std::vector<adaption::Info> & );
-
     double                                      computeRSearchFromLevel( uint8_t ) ;
-    int                                         computeLevelFromRSearch( double ) ;
+    double                                      computeSizeFromRSearch( double ) ;
 
     public:
     virtual ~LevelSetOctree();
     LevelSetOctree( VolOctree & );
 
-    void                                        compute( LSObject * ) ;
-    void                                        update( LSObject *, std::vector<adaption::Info> & ) ;
+    double                                      computeSizeNarrowBand( LevelSetObject * );
+    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> & );
+    void                                        update( LevelSetObject *, const std::vector<adaption::Info> & ) ;
 
 };
 
-class LSObject{
+class LevelSetObject{
 
     friend  LevelSet ;
     friend  LevelSetCartesian;
@@ -184,52 +224,50 @@ class LSObject{
     int                                         m_id;           /**< identifier of object */
 
     protected:
-    virtual ~LSObject();
-    LSObject(int);
-    virtual LSObject*                           clone() const = 0;
+    virtual ~LevelSetObject();
+    LevelSetObject(int);
+
+    virtual LevelSetObject*                     clone() const = 0;
 
     virtual int                                 getId() const ;
 
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
-    virtual void                                seedSign( LevelSet *, long &, double & )const =0;
 
-    virtual void                                computeLSInNarrowBand( LevelSetCartesian *)=0 ;
-    virtual void                                computeLSInNarrowBand( LevelSetOctree *)=0 ;
-
-    virtual void                                updateLSInNarrowBand( LevelSetOctree *, std::vector<adaption::Info> &, double &)=0 ;
+    virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
+    virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
 
     virtual void                                dumpDerived( std::fstream &) =0 ;
     virtual void                                restoreDerived( std::fstream &) =0 ;
 
     public:
+    virtual void                                seedSign( LevelSetKernel *, long &, double & )const =0;
     void                                        dump( std::fstream &) ;
     void                                        restore( std::fstream &) ;
+
+# if BITPIT_ENABLE_MPI
+    virtual void                                writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) =0 ;
+    virtual void                                readCommunicationBuffer( const long &, IBinaryStream & ) =0 ;
+# endif 
 };
 
-class LevelSetSegmentation : public LSObject {
-
-    public:
-//    static std::set<long>                       NULL_LIST ;     /**< Default value for closest segment */
-//    static long                                 NULL_ELEMENT ;  /**< Default value for segmments in narrow band */
+class LevelSetSegmentation : public LevelSetObject {
 
     private:
-    struct SegData{
+    struct SegInfo{
         std::set<long>                          m_segments ;
         long                                    m_support ;
         bool                                    m_checked ;
 
-        SegData( ) ;
-        SegData( const std::set<long> & ) ;
-        SegData( const std::set<long> &, const long & ) ;
+        SegInfo( ) ;
+        SegInfo( const std::set<long> & ) ;
+        SegInfo( const std::set<long> &, const long & ) ;
     };
 
-    int                                         m_dimension ;
+    int                                         m_dimension ;               /**< number of space dimensions */
 
     protected:
-    SurfUnstructured                            *stl;           /**< surface Triangulation */
-    double                                      abs_tol;        /**< tolerance used for calculating normals */
-
-    PiercedVector<SegData>                      m_segInfo ;     /**< cell segment association information */
+    SurfUnstructured                            *m_segmentation;            /**< surface segmentation */
+    PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
 
 
     public:
@@ -246,23 +284,28 @@ class LevelSetSegmentation : public LSObject {
     void                                        dumpDerived( std::fstream &) ;
     void                                        restoreDerived( std::fstream &) ;
 
+# if BITPIT_ENABLE_MPI
+    void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) ;
+    void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
+# endif
+
     protected:
     std::vector<std::array<double,3>>           getSimplexVertices( const long & ) const ;
-    void                                        lsFromSimplex( LevelSet *, const double &, bool filter = false ) ;
+    void                                        lsFromSimplex( LevelSetKernel *, const double &, const bool &, bool filter = false ) ;
     void                                        infoFromSimplex(const std::array<double,3> &, const long &, double &, double &, std::array<double,3> &,std::array<double,3> &) const ;
 
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &) ;
-    void                                        seedSign( LevelSet *, long &, double &) const ;
+    void                                        seedSign( LevelSetKernel *, long &, double &) const ;
 
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const ;
 
-    void                                        computeLSInNarrowBand( LevelSetCartesian *);
-    void                                        associateSimplexToCell( LevelSetCartesian *);
+    void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
+    void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
+    void                                        updateSimplexToCell( LevelSetOctree *, const std::vector<adaption::Info> &, const double & ) ;
 
-    void                                        computeLSInNarrowBand( LevelSetOctree *);
-    void                                        associateSimplexToCell( LevelSetOctree *);
-    void                                        updateLSInNarrowBand( LevelSetOctree *, std::vector<adaption::Info> &, double & ) ;
-    void                                        updateSimplexToCell( LevelSetOctree *, std::vector<adaption::Info> &, double & ) ;
+    void                                        associateSimplexToCell( LevelSetCartesian *, const double &);
+    void                                        associateSimplexToCell( LevelSetOctree *, const double &);
+
 
 };
 

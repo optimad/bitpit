@@ -91,12 +91,14 @@ int main( int argc, char *argv[]){
     std::chrono::time_point<std::chrono::system_clock> start, end;
     int                                      elapsed_seconds;
 
-    LevelSetCartesian       LSP(mesh);
-    LevelSetSegmentation    geometry(0,&STL);
+    LevelSet                levelset ;
 
-    LSP.setPropagateSign(true) ;
+    levelset.setMesh(&mesh) ;
+    levelset.addObject( &STL) ;
+
+    levelset.setPropagateSign(true) ;
     start = std::chrono::system_clock::now();
-    LSP.compute( &geometry ) ;
+    levelset.compute( ) ;
     end = std::chrono::system_clock::now();
 
     elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
@@ -111,7 +113,7 @@ int main( int argc, char *argv[]){
         std::vector<double>::iterator it = LS.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            *it = LSP.getLS(id) ;
+            *it = levelset.getLS(id) ;
             ++it ;
         };
     }
@@ -120,7 +122,7 @@ int main( int argc, char *argv[]){
         std::vector<std::array<double,3>>::iterator it = LG.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            *it = LSP.getGradient(id) ;
+            *it = levelset.getGradient(id) ;
             ++it ;
         };
     }
