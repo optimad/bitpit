@@ -1011,6 +1011,10 @@ bool LoggerManager::destroy(const std::string &name, bool force)
 
 	// If the logger has no users we can delete it
 	if (nUsers == 0 || force) {
+		// Remove the logger from the manager
+		m_loggers.erase(name);
+		m_loggerUsers.erase(name);
+
 		// If the logger has it own file stream, delete it
 		if (m_fileStreams.count(name) > 0) {
 			// Close the stream
@@ -1020,10 +1024,6 @@ bool LoggerManager::destroy(const std::string &name, bool force)
 			// Remove the stream
 			m_fileStreams.erase(name);
 		}
-
-		// Remove the logger from the manager
-		m_loggers.erase(name);
-		m_loggerUsers.erase(name);
 
 		return true;
 	} else {
