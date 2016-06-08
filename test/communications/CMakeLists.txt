@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 2.8)
 # List of tests
 set(TESTS "")
 if (ENABLE_MPI)
-	list(APPEND TESTS "test_parallel_communications_00001")
+	list(APPEND TESTS "test_communications_parallel_00001")
 endif ()
 
 set(COMMUNICATIONS_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the communications module" FORCE)
