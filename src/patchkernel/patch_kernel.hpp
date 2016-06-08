@@ -294,15 +294,22 @@ protected:
 	*/
 	struct CellPositionLess
 	{
-		CellPositionLess(PatchKernel &patch)
-			: m_patch(patch)
+		CellPositionLess(PatchKernel &patch, bool native = true)
+			: m_patch(patch), m_native(native)
 		{
 		}
 
 		bool operator()(const long &id_1, const long &id_2) const
 		{
-			std::array<double, 3> centroid_1 = m_patch.evalCellCentroid(id_1);
-			std::array<double, 3> centroid_2 = m_patch.evalCellCentroid(id_2);
+			std::array<double, 3> centroid_1;
+			std::array<double, 3> centroid_2;
+			if (m_native) {
+				centroid_1 = m_patch.evalCellCentroid(id_1);
+				centroid_2 = m_patch.evalCellCentroid(id_2);
+			} else {
+				centroid_1 = m_patch.PatchKernel::evalCellCentroid(id_1);
+				centroid_2 = m_patch.PatchKernel::evalCellCentroid(id_2);
+			}
 
 			for (int k = 0; k < 3; ++k) {
 				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
@@ -321,6 +328,7 @@ protected:
 		}
 
 		PatchKernel &m_patch;
+		bool m_native;
 	};
 
 	/*!
@@ -328,15 +336,22 @@ protected:
 	*/
 	struct CellPositionGreater
 	{
-		CellPositionGreater(PatchKernel &patch)
-			: m_patch(patch)
+		CellPositionGreater(PatchKernel &patch, bool native = true)
+			: m_patch(patch), m_native(native)
 		{
 		}
 
 		bool operator()(const long &id_1, const long &id_2) const
 		{
-			std::array<double, 3> centroid_1 = m_patch.evalCellCentroid(id_1);
-			std::array<double, 3> centroid_2 = m_patch.evalCellCentroid(id_2);
+			std::array<double, 3> centroid_1;
+			std::array<double, 3> centroid_2;
+			if (m_native) {
+				centroid_1 = m_patch.evalCellCentroid(id_1);
+				centroid_2 = m_patch.evalCellCentroid(id_2);
+			} else {
+				centroid_1 = m_patch.PatchKernel::evalCellCentroid(id_1);
+				centroid_2 = m_patch.PatchKernel::evalCellCentroid(id_2);
+			}
 
 			for (int k = 0; k < 3; ++k) {
 				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
@@ -355,6 +370,7 @@ protected:
 		}
 
 		PatchKernel &m_patch;
+		bool m_native;
 	};
 
 	PiercedVector<Vertex> m_vertices;
