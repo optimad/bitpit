@@ -97,6 +97,8 @@ class SendBuffer : public CommunicationBuffer<RawSendBuffer>
 public:
     SendBuffer(size_t capacity = 0, bool doubleBuffer = false);
 
+    void squeeze();
+
 };
 
 class RecvBuffer : public CommunicationBuffer<RawRecvBuffer>

@@ -42,6 +42,17 @@ SendBuffer::SendBuffer(size_t capacity, bool doubleBuffer)
 }
 
 /*!
+    Requests the buffer to reduce its capacity to fit the data currently
+    contained in the stream.
+*/
+void SendBuffer::squeeze()
+{
+    for (RawSendBuffer & buffer : getBuffers()) {
+        buffer.squeeze();
+    }
+}
+
+/*!
     \ingroup communications
     \class RecvBuffer
 
