@@ -4264,9 +4264,8 @@ namespace bitpit {
         else{
             //Only if parallel
             updateAdapt();
-            uint64_t lastDescMortonPre, firstDescMortonPost;
-            lastDescMortonPre = (m_rank!=0) * m_partitionLastDesc[m_rank-1];
-            firstDescMortonPost = (m_rank<m_nproc-1)*m_partitionFirstDesc[m_rank+1] + (m_rank==m_nproc-1)*m_partitionLastDesc[m_rank];
+            uint64_t lastDescMortonPre   = (m_rank == 0) ? 0 : m_partitionLastDesc[m_rank-1];
+            uint64_t firstDescMortonPost = (m_rank < m_nproc - 1) ? m_partitionFirstDesc[m_rank+1] : m_partitionLastDesc[m_rank];
             m_octree.checkCoarse(lastDescMortonPre, firstDescMortonPost, m_mapIdx);
             updateAdapt();
         }
@@ -4291,9 +4290,9 @@ namespace bitpit {
         else{
             //Only if parallel
             updateAdapt();
-            uint64_t lastDescMortonPre, firstDescMortonPost;
-            lastDescMortonPre = (m_rank!=0) * m_partitionLastDesc[m_rank-1];
-            firstDescMortonPost = (m_rank<m_nproc-1)*m_partitionFirstDesc[m_rank+1] + (m_rank==m_nproc-1)*m_partitionLastDesc[m_rank];
+
+            uint64_t lastDescMortonPre   = (m_rank == 0) ? 0 : m_partitionLastDesc[m_rank-1];
+            uint64_t firstDescMortonPost = (m_rank < m_nproc - 1) ? m_partitionFirstDesc[m_rank+1] : m_partitionLastDesc[m_rank];
             m_octree.checkCoarse(lastDescMortonPre, firstDescMortonPost, mapidx);
             updateAdapt();
         }
