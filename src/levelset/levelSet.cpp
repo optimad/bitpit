@@ -575,7 +575,7 @@ void LevelSet::communicate( std::unordered_map<int,std::vector<long>> &sendList,
                 sizeBuffer >> *(itemItr) ;
 
                 ++itemItr; 
-                for( const auto & visitor : m_object){
+                for(size_t i = 0; i < m_object.size(); ++i){
                     sizeBuffer >> *(itemItr) ;
                     ++itemItr ;
                 };
