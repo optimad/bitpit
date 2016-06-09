@@ -792,22 +792,12 @@ namespace bitpit {
                 else{
                     // Step until the mortontry lower than morton (one idx of distance)
                     {
-                        while(Mortontry < Morton){
+                        while(idxtry < (noctants - 1) && Mortontry < Morton){
                             idxtry++;
-                            if(idxtry > noctants-1){
-                                idxtry = noctants-1;
-                                Mortontry = m_octants[idxtry].computeMorton();
-                                break;
-                            }
                             Mortontry = m_octants[idxtry].computeMorton();
                         }
-                        while(Mortontry > Morton){
+                        while(idxtry > 0 && Mortontry > Morton){
                             idxtry--;
-                            if(idxtry > noctants-1){
-                                idxtry = 0;
-                                Mortontry = m_octants[idxtry].computeMorton();
-                                break;
-                            }
                             Mortontry = m_octants[idxtry].computeMorton();
                         }
                     }
@@ -920,22 +910,12 @@ namespace bitpit {
                     else{
                         // Step until the mortontry lower than morton (one idx of distance)
                         {
-                            while(Mortontry < Morton){
+                            while(idxtry < (m_ghosts.size() - 1) && Mortontry < Morton){
                                 idxtry++;
-                                if(idxtry > m_ghosts.size()-1){
-                                    idxtry = m_ghosts.size()-1;
-                                    Mortontry = m_ghosts[idxtry].computeMorton();
-                                    break;
-                                }
                                 Mortontry = m_ghosts[idxtry].computeMorton();
                             }
-                            while(m_ghosts[idxtry].computeMorton() > Morton){
+                            while(idxtry > 0 && Mortontry > Morton){
                                 idxtry--;
-                                if(idxtry > m_ghosts.size()-1){
-                                    idxtry = 0;
-                                    Mortontry = m_ghosts[idxtry].computeMorton();
-                                    break;
-                                }
                                 Mortontry = m_ghosts[idxtry].computeMorton();
                             }
                         }
@@ -1079,19 +1059,11 @@ namespace bitpit {
                 else{
                     // Step until the mortontry lower than morton (one idx of distance)
                     {
-                        while(m_ghosts[idxtry].computeMorton() < Morton){
+                        while(idxtry < (m_ghosts.size() - 1) && m_ghosts[idxtry].computeMorton() < Morton){
                             idxtry++;
-                            if(idxtry > m_ghosts.size()-1){
-                                idxtry = m_ghosts.size()-1;
-                                break;
-                            }
                         }
-                        while(m_ghosts[idxtry].computeMorton() > Morton){
+                        while(idxtry > 0 && m_ghosts[idxtry].computeMorton() > Morton){
                             idxtry--;
-                            if(idxtry > m_ghosts.size()-1){
-                                idxtry = 0;
-                                break;
-                            }
                         }
                     }
                     if(idxtry < m_sizeGhosts){
@@ -1197,19 +1169,11 @@ namespace bitpit {
             else{
                 // Step until the mortontry lower than morton (one idx of distance)
                 {
-                    while(m_octants[idxtry].computeMorton() < Morton){
+                    while(idxtry < (noctants - 1) && m_octants[idxtry].computeMorton() < Morton){
                         idxtry++;
-                        if(idxtry > noctants-1){
-                            idxtry = noctants-1;
-                            break;
-                        }
                     }
-                    while(m_octants[idxtry].computeMorton() > Morton){
+                    while(idxtry > 0 && m_octants[idxtry].computeMorton() > Morton){
                         idxtry--;
-                        if(idxtry > noctants-1){
-                            idxtry = 0;
-                            break;
-                        }
                     }
                 }
                 if (idxtry < noctants){
@@ -1365,19 +1329,11 @@ namespace bitpit {
                 else{
                     // Step until the mortontry lower than morton (one idx of distance)
                     {
-                        while(m_ghosts[idxtry].computeMorton() < Morton){
+                        while(idxtry < (m_ghosts.size() - 1) && m_ghosts[idxtry].computeMorton() < Morton){
                             idxtry++;
-                            if(idxtry > m_ghosts.size()-1){
-                                idxtry = m_ghosts.size()-1;
-                                break;
-                            }
                         }
-                        while(m_ghosts[idxtry].computeMorton() > Morton){
+                        while(idxtry > 0 && m_ghosts[idxtry].computeMorton() > Morton){
                             idxtry--;
-                            if(idxtry > m_ghosts.size()-1){
-                                idxtry = 0;
-                                break;
-                            }
                         }
                     }
                     if(idxtry < m_sizeGhosts){
@@ -1465,19 +1421,11 @@ namespace bitpit {
             else{
                 // Step until the mortontry lower than morton (one idx of distance)
                 {
-                    while(m_octants[idxtry].computeMorton() < Morton){
+                    while(idxtry < (noctants - 1) && m_octants[idxtry].computeMorton() < Morton){
                         idxtry++;
-                        if(idxtry > noctants-1){
-                            idxtry = noctants-1;
-                            break;
-                        }
                     }
-                    while(m_octants[idxtry].computeMorton() > Morton){
+                    while(idxtry > 0 && m_octants[idxtry].computeMorton() > Morton){
                         idxtry--;
-                        if(idxtry > noctants-1){
-                            idxtry = 0;
-                            break;
-                        }
                     }
                 }
                 if (idxtry < noctants){
@@ -1865,22 +1813,12 @@ namespace bitpit {
             else{
                 // Step until the mortontry lower than morton (one idx of distance)
                 {
-                    while(Mortontry < Morton){
+                    while(idxtry < (noctants - 1) && Mortontry < Morton){
                         idxtry++;
-                        if(idxtry > noctants-1){
-                            idxtry = noctants-1;
-                            Mortontry = m_octants[idxtry].computeMorton();
-                            break;
-                        }
                         Mortontry = m_octants[idxtry].computeMorton();
                     }
-                    while(Mortontry > Morton){
+                    while(idxtry > 0 && Mortontry > Morton){
                         idxtry--;
-                        if(idxtry > noctants-1){
-                            idxtry = 0;
-                            Mortontry = m_octants[idxtry].computeMorton();
-                            break;
-                        }
                         Mortontry = m_octants[idxtry].computeMorton();
                     }
                 }
@@ -1984,22 +1922,12 @@ namespace bitpit {
 				else{
 					// Step until the mortontry lower than morton (one idx of distance)
 					{
-						while(Mortontry < Morton){
+						while(idxtry < (m_ghosts.size() - 1) && Mortontry < Morton){
 							idxtry++;
-							if(idxtry > m_ghosts.size()-1){
-								idxtry = m_ghosts.size()-1;
-								Mortontry = m_ghosts[idxtry].computeMorton();
-								break;
-							}
 							Mortontry = m_ghosts[idxtry].computeMorton();
 						}
-						while(m_ghosts[idxtry].computeMorton() > Morton){
+						while(idxtry > 0 && m_ghosts[idxtry].computeMorton() > Morton){
 							idxtry--;
-							if(idxtry > m_ghosts.size()-1){
-								idxtry = 0;
-								Mortontry = m_ghosts[idxtry].computeMorton();
-								break;
-							}
 							Mortontry = m_ghosts[idxtry].computeMorton();
 						}
 					}
@@ -2097,22 +2025,12 @@ namespace bitpit {
                     else{
                         // Step until the mortontry lower than morton (one idx of distance)
                         {
-                            while(Mortontry < Morton){
+                            while(idxtry < (noctants - 1) && Mortontry < Morton){
                                 idxtry++;
-                                if(idxtry > noctants-1){
-                                    idxtry = noctants-1;
-                                    Mortontry = m_octants[idxtry].computeMorton();
-                                    break;
-                                }
                                 Mortontry = m_octants[idxtry].computeMorton();
                             }
-                            while(Mortontry > Morton){
+                            while(idxtry > 0 && Mortontry > Morton){
                                 idxtry--;
-                                if(idxtry > noctants-1){
-                                    idxtry = 0;
-                                    Mortontry = m_octants[idxtry].computeMorton();
-                                    break;
-                                }
                                 Mortontry = m_octants[idxtry].computeMorton();
                             }
                         }
@@ -2241,22 +2159,12 @@ namespace bitpit {
             else{
                 // Step until the mortontry lower than morton (one idx of distance)
                 {
-                    while(Mortontry < Morton){
+                    while(idxtry < (noctants - 1) && Mortontry < Morton){
                         idxtry++;
-                        if(idxtry > noctants-1){
-                            idxtry = noctants-1;
-                            Mortontry = m_octants[idxtry].computeMorton();
-                            break;
-                        }
                         Mortontry = m_octants[idxtry].computeMorton();
                     }
-                    while(Mortontry > Morton){
+                    while(idxtry > 0 && Mortontry > Morton){
                         idxtry--;
-                        if(idxtry > noctants-1){
-                            idxtry = 0;
-                            Mortontry = m_octants[idxtry].computeMorton();
-                            break;
-                        }
                         Mortontry = m_octants[idxtry].computeMorton();
                     }
                 }
