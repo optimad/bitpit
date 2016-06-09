@@ -756,9 +756,9 @@ namespace bitpit {
                 // Search morton in octants
                 // If a even face morton is lower than morton of oct, if odd higher
                 // ---> can i search only before or after idx in octants
-                Mortontry = oct->computeMorton();
                 int32_t jump;
                 if(haveIidx && !amIghost){
+                    Mortontry = oct->computeMorton();
                     jump = (Mortontry > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
                     idxtry = uint32_t(idx + ((Mortontry < Morton) - (Mortontry > Morton))*jump);
                     if (idxtry > noctants-1) idxtry = noctants-1;
@@ -820,7 +820,6 @@ namespace bitpit {
                     // Compute Last discendent of virtual octant of same size
                     Octant last_desc = samesizeoct.buildLastDesc();
                     uint64_t Mortonlast = last_desc.computeMorton();
-                    Mortontry = m_octants[idxtry].computeMorton();
                     int32_t Dx[3] = {0,0,0};
                     int32_t Dxstar[3] = {0,0,0};
                     u32array3 coord = oct->getCoord();
@@ -950,7 +949,6 @@ namespace bitpit {
                             // Compute Last discendent of virtual octant of same size
                             Octant last_desc = samesizeoct.buildLastDesc();
                             uint64_t Mortonlast = last_desc.computeMorton();
-                            Mortontry = m_ghosts[idxtry].computeMorton();
                             int32_t Dx[3] = {0,0,0};
                             int32_t Dxstar[3] = {0,0,0};
                             u32array3 coord = oct->getCoord();
