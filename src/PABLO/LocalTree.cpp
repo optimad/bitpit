@@ -817,7 +817,6 @@ namespace bitpit {
                     u32array3 coord1 = { {1,1,1} };
                     u32array3 coordtry1 = { {1,1,1} };
                     uint8_t level = oct->m_level;
-                    uint8_t leveltry = m_octants[idxtry].getLevel();
                     while(Mortontry <= Mortonlast && idxtry < noctants){
                         for (int idim=0; idim<m_dim; idim++){
                             Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
@@ -826,7 +825,7 @@ namespace bitpit {
                             coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
                         }
 
-                        leveltry = m_octants[idxtry].getLevel();
+                        uint8_t leveltry = m_octants[idxtry].getLevel();
 
                         if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[m_dim-1] == Dxstar[m_dim-1]){
                             if (leveltry > level){
@@ -936,7 +935,6 @@ namespace bitpit {
                             u32array3 coord1 = { {1,1,1} };
                             u32array3 coordtry1 = { {1,1,1} };
                             uint8_t level = oct->m_level;
-                            uint8_t leveltry = m_octants[idxtry].getLevel();
                             while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
                                 for (int idim=0; idim<m_dim; idim++){
                                     Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
@@ -944,7 +942,8 @@ namespace bitpit {
                                     coord1[idim] 	= coord[idim] + size;
                                     coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getSize();
                                 }
-                                leveltry = m_ghosts[idxtry].getLevel();
+
+                                uint8_t leveltry = m_ghosts[idxtry].getLevel();
 
                                 if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[m_dim-1] == Dxstar[m_dim-1]){
                                     if (leveltry > level){
