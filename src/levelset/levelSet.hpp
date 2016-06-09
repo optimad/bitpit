@@ -50,7 +50,7 @@ namespace levelSetDefaults{
     const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */
     const short                             SIGN = 1;                   /**< Default value for the sign */
     const int                               OBJECT = -1 ;               /**< Default value for closest object id */
-    const std::unordered_set<long>          LIST = { } ;                /**< Default value for closest segment */
+    const std::unordered_set<long>          LIST;                       /**< Default value for closest segment */
     const long                              ELEMENT = -1 ;              /**< Default value for segmments in narrow band */
 };
 
