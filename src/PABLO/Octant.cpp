@@ -925,7 +925,8 @@ vector<uint64_t> Octant::computeVirtualMorton(uint8_t iface, const uint8_t & max
 vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf, uint8_t (&edgeface)[12][2]){
 	uint32_t dh,dh2;
 	uint32_t nneigh;
-	uint32_t i,cx,cy,cz;
+	uint32_t i;
+	int32_t cx,cy,cz;
 	uint8_t iface1, iface2;
 
 	nneigh = (m_level < sm_maxLevel) ? 2 : 1;
@@ -1082,7 +1083,8 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizem, uint8_t (&edgeface)[12][2]){
 	uint32_t dh,dh2;
 	uint32_t nneigh;
-	uint32_t i,cx,cy,cz;
+	uint32_t i;
+	int32_t cx,cy,cz;
 	uint8_t iface1, iface2;
 
 

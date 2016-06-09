@@ -2016,7 +2016,7 @@ namespace bitpit {
 
         if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength)
             || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
-            return -1;
+            return numeric_limits<uint32_t>::max();
         }
 
         if (x == m_global.m_maxLength) x = x - 1;
@@ -2029,7 +2029,7 @@ namespace bitpit {
         if(!m_serial) powner = findOwner(morton);
 
         if ((powner!=m_rank) && (!m_serial))
-            return -1;
+            return numeric_limits<uint32_t>::max();
 
         int32_t jump = idxtry;
         while(abs(jump) > 0){
@@ -2168,7 +2168,7 @@ namespace bitpit {
         //ParaTree works in [0,1] domain
         if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
             || point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
-            return -1;
+            return numeric_limits<uint32_t>::max();
         }
         point[0] = min(max(point[0],0.0),1.0);
         point[1] = min(max(point[1],0.0),1.0);
@@ -2180,7 +2180,7 @@ namespace bitpit {
 
         if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength)
             || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
-            return -1;
+            return numeric_limits<uint32_t>::max();
         }
 
         if (x == m_global.m_maxLength) x = x - 1;
@@ -2193,7 +2193,7 @@ namespace bitpit {
         if(!m_serial) powner = findOwner(morton);
 
         if ((powner!=m_rank) && (!m_serial))
-            return -1;
+            return numeric_limits<uint32_t>::max();
 
         int32_t jump = idxtry;
         while(abs(jump) > 0){
