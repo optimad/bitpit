@@ -28,6 +28,7 @@
 # include "communications.hpp"
 # endif
 
+# include <stack>
 # include <unordered_set>
 
 # include "bitpit_SA.hpp"
@@ -283,79 +284,121 @@ std::array<double,3> LevelSetKernel::computeGradientCentral( const long &I ){
 /*!
  * Propagate the sign of the signed distance function from narrow band to entire domain
  */
-void LevelSetKernel::propagateSign( LevelSetObject *visitor ) {
+void LevelSetKernel::propagateSign( std::unordered_map<int,LevelSetObject*> visitors ) {
 
+    // We don't need to propagate the sign in the narrowband
+    //
+    // An item is in the narrow band if it has a levelset value that differs
+    // from the defualt value.
+    std::unordered_set<long> alreadyEvaluated;
 
-    // Local variables
-    long                        seed;
-    double                      s;
-
-    std::unordered_set<long>    alreadyEvaluated;
-    LIFOStack<int>                 stack(sqrt(m_mesh->getCellCount()));
-
-    std::vector<long>            neighs;
-    std::vector<long>::iterator it, itend ;
-
-    bitpit::PiercedIterator<LSInfo> infoItr ;
-
-    visitor->seedSign( this, seed, s) ;
-
-    stack.push(seed);
-    if( s < 0 ){
-        infoItr = m_ls.find(seed) ;
-
-        if( infoItr == m_ls.end() ){
-            infoItr = m_ls.reclaim(seed);
-
-            (*infoItr).value *= s ;
+    PiercedIterator<LSInfo> infoItr = m_ls.begin() ;
+    while (infoItr != m_ls.end()) {
+        double &value = (*infoItr).value;
+        if(!utils::DoubleFloatingEqual()(std::abs(value), levelSetDefaults::VALUE)) {
+            alreadyEvaluated.insert(infoItr.getId()) ;
         }
-    };
+        ++infoItr;
+    }
 
+    // If the all cells have the correct value we don't need to progagate the
+    // sign
+    if (alreadyEvaluated.size() == (size_t) m_mesh->getCellCount()) {
+        return;
+    }
 
-    // PROPAGATE SIGN                                                               
-    while (stack.TOPSTK > 0) {
+    // Define the seed candidates
+    //
+    // First list cells in the narroband, then all other cells. The cells
+    // outisde the narrowband will be used as seeds only if there are regions
+    // of the mesh disconnected from the narrow band.
+    std::vector<long> seedCandidates;
+    seedCandidates.reserve(m_mesh->getCellCount());
 
-        // Pop item from stack
-        seed = stack.pop();
-        s    = getSign(seed) ;
+    seedCandidates.assign(alreadyEvaluated.begin(), alreadyEvaluated.end());
+    for (const Cell &cell : m_mesh->getCells()) {
+        long cellId = cell.getId();
+        if (alreadyEvaluated.count(cellId) == 0) {
+            seedCandidates.push_back(cellId);
+        }
+    }
 
-        // Retrieve info
-        alreadyEvaluated.insert(seed);
+    // Identify real seeds and propagate the sign
+    for (long seed : seedCandidates) {
+        // Get the neighbours that still need to be processed
+        //
+        // If a cell is surrounded only by items already evaluated,
+        // this cell can not be uses as a seed.
+        std::stack<long> processList;
+        for (long neigh : m_mesh->findCellFaceNeighs( seed )) {
+            if (alreadyEvaluated.count(neigh) == 0) {
+                processList.push(neigh);
+            }
+        }
 
-        // Loop over neighbors
-        neighs  =   m_mesh->findCellFaceNeighs( seed ) ;
+        if (processList.empty()) {
+            continue;
+        }
 
-        itend = neighs.end() ;
+        // Discard seeds with a LS value equal to 0
+        //
+        // If a seed has a value equal to the default value, this means that
+        // the cell is outside the narrow band. To have a meaningful levelset
+        // value we need to evaulate the levelset from scratch.
+        double ls = getLS(seed);
+        if(utils::DoubleFloatingEqual()(std::abs(ls), levelSetDefaults::VALUE)) {
+            ls = levelSetDefaults::VALUE;
+            for (auto entry : visitors) {
+                const LevelSetObject *visitor = entry.second ;
+                ls = std::min( visitor->evaluateLS(this, seed), ls) ;
+            }
+        }
 
-        for ( it=neighs.begin(); it!=itend; ++it) {
+        if( utils::DoubleFloatingEqual()(std::abs(ls), (double) 0.) ) {
+            continue;
+        }
 
-            if ( alreadyEvaluated.count(*it) == 0 ) {
+        // Get the sign of the seed
+        short seedSign = ls > 0 ? 1 : -1;
 
-                if ( getLS(*it) == levelSetDefaults::VALUE && s < 0 ){
-                    infoItr = m_ls.find(*it) ;
+        // Propagate the sign
+        while (!processList.empty()) {
+            long id = processList.top();
+            processList.pop();
 
-                    if( infoItr == m_ls.end() ){
-                        infoItr = m_ls.reclaim(*it);
-                        (*infoItr).value = levelSetDefaults::VALUE ;
-                        (*infoItr).gradient = levelSetDefaults::GRADIENT ;
-                        (*infoItr).object = levelSetDefaults::OBJECT ;
-                    };
+            // Get the value associated to the id
+            //
+            // A new value needs to be created only if the sign to propagate
+            // is different from the default sign.
+            infoItr = m_ls.find(id) ;
+            if( infoItr == m_ls.end() && seedSign != levelSetDefaults::SIGN ){
+                infoItr = m_ls.reclaim(id) ;
+            }
 
-                    (*infoItr).value = -levelSetDefaults::VALUE ;
-                };
+            // Update the value
+            if( infoItr != m_ls.end() ) {
+                (*infoItr).value = seedSign * levelSetDefaults::VALUE;
+            }
 
+            // Add non-evaluated neighs to the process list
+            std::vector<long> neighs = m_mesh->findCellFaceNeighs( id ) ;
+            for (long neigh : neighs) {
+                if (alreadyEvaluated.count(neigh) == 0) {
+                    processList.push(neigh);
+                }
+            }
 
-                stack.push(*it);
+            // The item has been processeed
+            //
+            // If all cells have been evaluated we can stop the propagation
+            alreadyEvaluated.insert(id);
+        }
 
-            } //endif
-
-
-        } //iterator
-
-    } //stack
-
-    return;
-
+        // If all cells have been evaluated we can stop the propagation
+        if (alreadyEvaluated.size() == (size_t) m_mesh->getCellCount()) {
+            break;
+        }
+    }
 };
 
 /*!

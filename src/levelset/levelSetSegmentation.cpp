@@ -24,6 +24,7 @@
 
 # include "levelSet.hpp"
 
+# include "bitpit_common.hpp"
 # include "bitpit_operators.hpp"
 # include "bitpit_CG.hpp"
 
@@ -379,60 +380,30 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 };
 
 /*!
- * Finds a seed point to be used for propgating the levelset sign
- * @param[in] visitee cartesian mesh 
- * @param[out] seed index of seed cell
- * @param[out] value sign at seed cell [+1;-1]
+ * Evaluates the levelset in the specified cell
+ * @param[in] id is the cell index
+ * @result The value of the levelset.
  */
-void LevelSetSegmentation::seedSign( LevelSetKernel *visitee, long &seed, double &value) const {
+double LevelSetSegmentation::evaluateLS( LevelSetKernel *visitee, long id) const {
 
-    seed = -1;
+    double                      d, s, ls;
+    std::array<double,3>        P, X, temp;
 
-    {  // FIND SEED ELEMENT In GRID
-        double                      lsTmp;
-        const PiercedVector<LevelSetKernel::LSInfo> & lsInfo = visitee->getLSInfo() ;
-        PiercedVector<LevelSetKernel::LSInfo>::const_iterator lsItr = lsInfo.begin() , lsEnd=lsInfo.end() ;
+    P  = visitee->getMesh()->evalCellCentroid(id) ;
+    ls = levelSetDefaults::VALUE;
 
-        while( lsItr != lsEnd ) {
-            lsTmp = (*lsItr).value ;
-            if( std::abs(lsTmp) < levelSetDefaults::VALUE ){
-                seed = lsItr.getId();
-                value = sign(lsTmp) ;
-                return ;
-            };
+    for( auto & segment : m_segmentation->getCells() ){
 
-            ++lsItr ;
-        };
+        infoFromSimplex(P, segment.getId(), d, s, X, temp);
+
+        d = abs(d) ;
+        if ( d < ls && !utils::DoubleFloatingEqual()(s, (double) 0.)) {
+            ls = d ;
+        }
+
     }
 
-    { // if no seed element found, check whole triangulation
-
-        double                      d, s, lsTmp;
-        std::array<double,3>        P, X, temp;
-
-        PiercedIterator<bitpit::Cell>   cellItr = (visitee->getMesh())->getCells().begin() ;
-
-        seed    = (*cellItr).getId() ;
-        P       = (visitee->getMesh())->evalCellCentroid(seed) ;
-
-
-        lsTmp  = levelSetDefaults::VALUE;
-
-        for( auto & segment : m_segmentation->getCells() ){
-
-            infoFromSimplex(P, segment.getId(), d, s, X, temp);
-
-            d = abs(d) ;
-            if ( d < lsTmp) {
-                lsTmp = d ;
-                value = s ;
-            };
-
-        };
-    };
-
-    return;
-
+    return ls;
 
 };
 

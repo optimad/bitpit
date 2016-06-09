@@ -363,7 +363,7 @@ void LevelSet::compute(){
     }
 
 
-    if( m_propagateS ) m_kernel->propagateSign( m_object[0] ) ; //TODO for several objects
+    if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
 //    if( propagateV ) propagateValue( ) ;
 
     return ;
@@ -390,7 +390,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     }
 
 
-    if( m_propagateS ) m_kernel->propagateSign( m_object[0] ) ; //TODO several objects
+    if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
 //TODO    if( propagateV ) updatePropagatedValue() ;
 
     m_kernel->setSizeNarrowBand(newRSearch) ;

@@ -154,7 +154,7 @@ class LevelSetKernel{
     void                                        clear() ;
     void                                        clearAfterAdaption( const std::vector<adaption::Info> &, double & ) ;
 
-    void                                        propagateSign( LevelSetObject *) ;
+    void                                        propagateSign( std::unordered_map<int,LevelSetObject*> ) ;
     void                                        propagateValue( LevelSetObject *) ;
 
     void                                        dump( std::fstream &);
@@ -234,7 +234,7 @@ class LevelSetObject{
     virtual void                                dumpDerived( std::fstream &) =0 ;
     virtual void                                restoreDerived( std::fstream &) =0 ;
 
-    virtual void                                seedSign( LevelSetKernel *, long &, double & )const =0;
+    virtual double                              evaluateLS( LevelSetKernel *, long) const =0;
 
     void                                        dump( std::fstream &) ;
     void                                        restore( std::fstream &) ;
@@ -284,7 +284,7 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const ;
 
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &) ;
-    void                                        seedSign( LevelSetKernel *, long &, double &) const ;
+    double                                      evaluateLS( LevelSetKernel *, long) const ;
 
     void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
