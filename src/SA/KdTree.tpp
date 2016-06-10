@@ -714,8 +714,9 @@ return norm2(delta);
 
 // -------------------------------------------------------------------------- //
 /*!
-    Given an input vertex P, returns the index of the first node encountered
-    in the kd-tree which is in the 1-ball centered on P and having a radius of h.
+    Given an input vertex P, returns the labels of all the nodes encountered
+    in the kd-tree which are in the 1-ball centered on P and having a radius
+    of h.
     The 1-ball is defined as:
     B1(x; h) = {y: norm_1(y-x) <= h}
     \param[in] P_ pointer to container storing the coordinates of P
