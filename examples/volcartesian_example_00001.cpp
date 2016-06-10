@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 	double dh = 0.5;
 
 	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
-	patch_2D->setName("cartesian_2D_patch");
+	patch_2D->getVTK().setName("cartesian_2D_patch");
 	patch_2D->update();
 	patch_2D->write();
 
