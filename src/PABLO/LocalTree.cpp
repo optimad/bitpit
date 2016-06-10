@@ -718,6 +718,18 @@ namespace bitpit {
             return;
         }
 
+        // If the face is a boundary it has no neighbours
+        if (oct->m_info[iface]){
+            return;
+        }
+
+        // If the face is a periodic face use the proper function for searching
+        // the neighbours
+        if (m_periodic[iface]){
+            findPeriodicNeighbours(oct, iface, neighbours, isghost);
+            return;
+        }
+
         // Check if the face is a processor boundary
         bool isFacePBound = oct->getPbound(iface);
 
@@ -738,9 +750,6 @@ namespace bitpit {
 
         // Search in the internal octants
         if (internalSearch){
-            // Check if octants face is a boundary
-            if (oct->m_info[iface] == false){
-
                 //Build Morton number of virtual neigh of same size
                 Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
                 Morton = samesizeoct.computeMorton();
@@ -865,24 +874,10 @@ namespace bitpit {
                         return;
                     }
                 }
-            }
-            else if(m_periodic[iface]){
-                // Check if octants face is a periodic boundary
-                findPeriodicNeighbours(oct, iface, neighbours, isghost);
-                return;
-            }
-            else{
-                // Boundary Face
-                return;
-            }
-
         }
 
         // Search in the ghost octants
         if(ghostSearch) {
-            // Check if octants face is a boundary
-            if (oct->m_info[iface] == false){
-
                 if (m_ghosts.size()>0){
 
                     // Search in ghosts
@@ -997,19 +992,7 @@ namespace bitpit {
                             }
                         }
                     }
-
-                    return;
                 }
-            }
-            else if(m_periodic[iface]){
-                // Check if octants face is a periodic boundary
-                findPeriodicNeighbours(oct, iface, neighbours, isghost);
-                return;
-            }
-            else{
-                // Boundary Face
-                return;
-            }
         }
 
     };
