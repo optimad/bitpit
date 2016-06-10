@@ -757,7 +757,6 @@ template< class data_T >
 void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data ){
 
     bool    read(true) ;
-    data_T  value;
     std::string line;
 
     typename bitpit::PiercedVector<data_T>::iterator  dataItr = data.begin(), dataEnd = data.end() ;
