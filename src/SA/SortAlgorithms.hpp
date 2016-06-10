@@ -120,7 +120,7 @@ class KdTree {
     );
 
     template <class T2>
-    void hNeighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
+    void hNeighbors(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
         T           	*,                                                        // (input) pointer to element to be tested
         T2           	,                                                        // (input) radius of ball
         std::vector<T1>	*,                                                        // (output) pointer to container of labels of h-neighbors

@@ -731,7 +731,7 @@ return norm2(delta);
 */
 template<int d, class T, class T1 >
 template< class T2>
-void KdTree<d, T, T1>::hNeighbor(
+void KdTree<d, T, T1>::hNeighbors(
     T               *P_,
     T2               h,
     std::vector<T1> *L_,
@@ -780,12 +780,12 @@ dim = lev % d;
 if (((*(nodes[prev_].object_))[dim] >= (*P_)[dim] - h)
  && (nodes[prev_].lchild_ >= 0)) {
     next_ = nodes[prev_].lchild_;
-    hNeighbor(P_, h, L_, EX_, next_, lev+1);
+    hNeighbors(P_, h, L_, EX_, next_, lev+1);
 }
 if (((*(nodes[prev_].object_))[dim] <= (*P_)[dim] + h)
  && (nodes[prev_].rchild_ >= 0)) {
     next_ = nodes[prev_].rchild_;
-    hNeighbor(P_, h, L_, EX_, next_, lev+1);
+    hNeighbors(P_, h, L_, EX_, next_, lev+1);
 }
 
 return ;
