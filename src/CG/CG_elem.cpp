@@ -283,9 +283,9 @@ double distancePointTriangle(
 /*!
  * Computes distance point to triangle
  * @param[in] P point coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
  * @param[out] xP closest point on triangle
  * @param[out] lambda barycentric coordinates of projection point
  * @return distance
