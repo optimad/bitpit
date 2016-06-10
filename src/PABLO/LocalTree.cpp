@@ -743,7 +743,7 @@ namespace bitpit {
         // If we want also the neighbours that are ghosts, we always need to
         // search in the ghosts, the only exception is for faces of internal
         // octants that are not processor boundaries.
-        bool ghostSearch = !onlyinternal;
+        bool ghostSearch = (m_ghosts.size() > 0) && !onlyinternal;
         if (!amIghost && !isFacePBound) {
             ghostSearch = false;
         }
@@ -866,8 +866,6 @@ namespace bitpit {
 
         // Search in the ghost octants
         if(ghostSearch) {
-                if (m_ghosts.size()>0){
-
                     // Search in ghosts
                     uint32_t idxghost = uint32_t(m_sizeGhosts/2);
                     const Octant* octghost = &m_ghosts[idxghost];
@@ -969,7 +967,6 @@ namespace bitpit {
                             }
                         }
                     }
-                }
         }
 
     };
