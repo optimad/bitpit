@@ -3604,6 +3604,7 @@ VTKUnstructuredGrid & PatchKernel::getVTK()
 void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat format)
 {
 	assert(format == VTKFormat::APPENDED);
+	BITPIT_UNUSED(format);
 
 	static std::unordered_map<long, long> vertexMap;
 
