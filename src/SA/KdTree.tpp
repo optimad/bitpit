@@ -391,7 +391,7 @@ if (n_nodes == 0) { return(-1); };
 
 // Check if root is in the h-neighbor of P_ --------------------------------- //
 //if (debug) { cout << "visiting: " << prev_ << endl; }
-if (norm2((*(nodes[prev_].object_)) - (*P_)) <= h) { return(prev_); }
+if (distance<T2>(*(nodes[prev_].object_), *P_) <= h) { return(prev_); }
 
 // Move on next branch ------------------------------------------------------ //
 dim = lev % d;
@@ -462,7 +462,7 @@ int              index_l = -1, index_r = -1;
 
 // // Find node on leaf -------------------------------------------------------- //
 // while ((next_ >= 0) && (!check)) {
-    // check = (norm2((*P_) - (*(nodes[next_].object_))) <= h);
+    // check = (distance<T2>(*P_, *(nodes[prev_].object_)) <= h);
     // prev_ = next_;
     // dim = lev % d;
     // if ((*P_)[dim] <= (*(nodes[next_].object_))[dim]) {
@@ -684,6 +684,33 @@ nodes.resize(max(MAXSTK, nodes.size() - MAXSTK));
 
 return; };
 
+// -------------------------------------------------------------------------- //
+/*!
+    Given two input vertices, P1 and P2, evaluate the distance between the
+    two vertices.
+    \param[in] P1 is a constant reference to the first vertex
+    \param[in] P1 is a constant reference to the second vertex
+    \result The distance between the two vertices.
+*/
+template<int d, class T, class T1 >
+template< class T2>
+T2 KdTree<d, T, T1>::distance(
+    const T               &P1,
+    const T               &P2
+) const {
+
+// Get the type of the coordinates
+typedef typename std::remove_const<typename std::remove_reference<decltype(std::declval<T>()[0])>::type>::type CoordType;
+
+// Evaluate the ndistance
+std::array<CoordType, d> delta;
+for (int i = 0; i < d; ++i) {
+    delta[i] = P1[i] - P2[i];
+}
+
+return norm2(delta);
+
+};
 
 // -------------------------------------------------------------------------- //
 /*!
@@ -735,7 +762,7 @@ if (n_nodes == 0) { return; };
 // ========================================================================== //
 
 // Check if root is in the h-neighbor of P_ --------------------------------- //
-if (norm2((*(nodes[prev_].object_)) - (*P_)) <= h) {
+if (distance<T2>(*(nodes[prev_].object_), *P_) <= h) {
 
 	if (EX_ != NULL){
 		if (std::find(EX_->begin(), EX_->end(), nodes[prev_].label) == EX_->end() ) {

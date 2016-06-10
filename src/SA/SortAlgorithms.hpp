@@ -153,6 +153,12 @@ class KdTree {
         void                                                                  // )input) none
     );
 
+    template <class T2>
+    T2 distance(                                                              // Evalautes the the distance between two vertices
+        const T               &P1,
+        const T               &P2
+    ) const;
+
 };
 
 // min PQUEUE --------------------------------------------------------------- //
