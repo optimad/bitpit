@@ -54,7 +54,7 @@ uint8_t vtk::getNNodeInElement( const VTKElementType & t){
         case 25: 
             return(20);
         default:
-           return(-1);
+            return(0);
     };
 
 
