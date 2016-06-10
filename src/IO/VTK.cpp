@@ -422,7 +422,7 @@ bool VTK::getGeomByName( const std::string &name, VTKField*& the_field ){
 void VTK::calcAppendedOffsets(){
 
     uint64_t    offset(0) ;
-    uint64_t    HeaderByte ;
+    uint64_t    HeaderByte(0) ;
 
     if( getHeaderType() == "UInt32"){
         HeaderByte = sizeof(uint32_t) ;
