@@ -261,7 +261,7 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKDataTy
  */
 uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
-    uint64_t                 nconn ;
+    uint64_t                 nconn(0) ;
 
     std::fstream             str  ;
     std::fstream::pos_type   position_appended;
