@@ -24,6 +24,7 @@
 
 # include "CG.hpp"
 
+# include "bitpit_common.hpp"
 # include "bitpit_operators.hpp"
 
 # include <assert.h>
@@ -226,6 +227,7 @@ double distancePointTriangle(
 
     int info = LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, 1, A, 3, lambda, 3 ) ;
     assert( info == 0 ) ;
+    BITPIT_UNUSED( info ) ;
 
 
     lambda[2] = 1. -lambda[0] -lambda[1] ;
@@ -319,6 +321,7 @@ double distancePointTriangle(
 
     int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, 1, A, 2, b, 2 ) ;
     assert( info == 0 );
+    BITPIT_UNUSED( info ) ;
 
     lambda[0] = 1. -b[0] -b[1] ;
     lambda[1] = b[0] ;
@@ -430,6 +433,7 @@ std::vector<double> distanceCloudTriangle(
 
     int info = LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, N, A, 3, ptrlambda, 3 ) ;
     assert( info == 0 );
+    BITPIT_UNUSED( info ) ;
 
     j =0 ;
     for( k=0; k<N; ++k) {
