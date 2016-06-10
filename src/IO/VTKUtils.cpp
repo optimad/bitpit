@@ -63,7 +63,7 @@ uint8_t vtk::getNNodeInElement( const VTKElementType & t){
 /*!
  * Converts a string into a Field information.
  * @param[in] line string to be converted
- * @param[out] data Field information
+ * @param[out] field Field information
  * \return true if successful
  */
 bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
