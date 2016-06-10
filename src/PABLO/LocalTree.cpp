@@ -1518,9 +1518,9 @@ namespace bitpit {
      * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
      */
     void
-    LocalTree::findNodeNeighbours(uint32_t idx, bool amIghost,uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    LocalTree::findNodeNeighbours(uint32_t idx, bool amIghost,uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         const Octant* oct = amIghost ? &m_ghosts[idx] : &m_octants[idx];
-        findNodeNeighbours(oct, true, idx ,iface,neighbours, isghost,onlyinternal);
+        findNodeNeighbours(oct, true, idx ,inode,neighbours, isghost,onlyinternal);
     };
 
     /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face.

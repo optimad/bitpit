@@ -121,16 +121,16 @@ double Map::mapSize(uint32_t const & size){
  * \param[in] area Area of octant from logical domain.
  * \return Area of octant in physical domain.
  */
-double Map::mapArea(uint64_t const & Area){
-	return ((1/pow(double(m_maxLength),(m_dim-1)))*double(Area));
+double Map::mapArea(uint64_t const & area){
+	return ((1/pow(double(m_maxLength),(m_dim-1)))*double(area));
 };
 
 /*! Transformation of volume of an octant (logical->physical).
  * \param[in] volume Volume of octant from logical domain.
  * \return Coordinate Volume of octant in physical domain.
  */
-double Map::mapVolume(uint64_t const & Volume){
-	return ((1/pow(double(m_maxLength),m_dim))*double(Volume));
+double Map::mapVolume(uint64_t const & volume){
+	return ((1/pow(double(m_maxLength),m_dim))*double(volume));
 };
 
 /*! Transformation of coordinates of center of an octant (logical->physical).
