@@ -745,7 +745,6 @@ void KdTree<d, T, T1>::hNeighbor(
 // ========================================================================== //
 
 // Local variables
-int              index_l = -1, index_r = -1;
 int              prev_ = next_;
 int              dim;
 
