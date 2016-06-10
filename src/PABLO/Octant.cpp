@@ -235,8 +235,8 @@ int8_t
 Octant::getMarker() const{return m_marker;};
 
 /*! Get the bound flag on an octant face.
- * \param[in] iface local index of the face.
- * \return true if the iface face is a boundary face.
+ * \param[in] face local index of the face.
+ * \return true if the face face is a boundary face.
  */
 bool
 Octant::getBound(uint8_t face) const{

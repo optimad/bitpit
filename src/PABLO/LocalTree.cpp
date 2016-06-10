@@ -200,7 +200,7 @@ namespace bitpit {
     };
 
     /*! Set the codimension for 2:1 balancing
-     * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed.
+     * \param[in] b21codim codimension of the entity through which the 2:1 balance is performed.
      */
     void
     LocalTree::setBalanceCodim(uint8_t b21codim){

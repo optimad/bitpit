@@ -181,7 +181,7 @@ void Map::mapNodes(u32arr3vector nodes, darr3vector & mapnodes){
 
 /*! Transformation of coordinates of a node of an octant (logical->physical).
  * \param[in] node Coordinates of  the node from logical domain.
- * \param[out] mapnodes Coordinates of the node in physical domain.
+ * \param[out] mapnode Coordinates of the node in physical domain.
  */
 void Map::mapNode(u32array3 & node, darray3 & mapnode){
 	for (int j=0; j<3; j++){
@@ -216,8 +216,8 @@ void Map::mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes){
 };
 
 /*! Transformation of components of normal of an intersection (logical->physical).
- * \param[in] nodes Pointer to components of normal from logical domain.
- * \param[out] mapnodes components of normal in physical domain.
+ * \param[in] normal Pointer to components of normal from logical domain.
+ * \param[out] mapnormal components of normal in physical domain.
  */
 void Map::mapNormals(i8array3 normal, darray3 & mapnormal){
 	mapnormal[0] = double(normal[0]);

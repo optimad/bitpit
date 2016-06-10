@@ -2587,7 +2587,7 @@ namespace bitpit {
 
     /** It finds the process owning the element definded by the global index passed as argument
      * The global index can be computed using the methods getGlobalIdx or getGhostGlobalIdx.
-     * \param[in] global index of the element you want find the owner of
+     * \param[in] globalIndex index of the element you want find the owner of
      * \return Rank of the process owning the element
      */
     int
@@ -3755,7 +3755,7 @@ namespace bitpit {
      * of a desired level are retained compact on the same process.
      * \param[out] partition Pointer to partition information array. partition[i] = number of octants
      * to be stored on the i-th process (i-th rank).
-     * \param[in] level Number of level over the max depth reached in the tree at
+     * \param[in] level_ Number of level over the max depth reached in the tree at
      * which families of octants are fixed compact on the same process
      * (level=0 is uniform partition).
      */
