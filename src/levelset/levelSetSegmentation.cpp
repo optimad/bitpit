@@ -381,6 +381,7 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 
 /*!
  * Evaluates the levelset in the specified cell
+ * @param[in] visitee pointer to mesh
  * @param[in] id is the cell index
  * @result The value of the levelset.
  */
@@ -782,8 +783,8 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 /*!
  * Flushing of data to communication buffers for partitioning
  * @param[in] sendList list of cells to be sent
- * @param[in/out] sizeBuffer buffer for first communication used to communicate the size of data buffer
- * @param[in/out] dataBuffer buffer for second communication containing data
+ * @param[in,out] sizeBuffer buffer for first communication used to communicate the size of data buffer
+ * @param[in,out] dataBuffer buffer for second communication containing data
  */
 void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
@@ -821,7 +822,7 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
  * Processing of communication buffer into data structure
  * @param[in] recvList list of cells to be received
  * @param[in] nItems number of items within the buffer
- * @param[in/out] dataBuffer buffer containing the data
+ * @param[in,out] dataBuffer buffer containing the data
  */
 void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &recvList, const long &nItems, RecvBuffer &dataBuffer ){
 
