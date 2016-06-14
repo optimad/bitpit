@@ -682,6 +682,159 @@ namespace bitpit {
         }
     };
 
+    /** Finds neighbours of the specified entity of the given octant. The
+     *  subroutine recevies in input a list of octants (sorted by the Morton
+     *  number) among which the neighbours will be searched.
+     *
+     * \param[in] haystack is the list of octants among which the neighbours
+     * will be searched
+     * \param[in] octant is the octant for which we need to find the neighbours
+     * \param[in] codim is the codimension for which we want to find the
+     * neighbours, if codim is equal to 1 we want the face negighbours, if
+     * codim is equal to the dimension we want the node neighbours, whereas
+     * if codim is equal to the dimension minus 1 (this is possible only
+     * in 3D) we want edge neighbours
+     * \param[in] index is the index of the face/edge/node of the octant for
+     * which we need to find the neighbours
+     * \param[in] start is a starting index to be used for initializeing
+     * the search.
+     * \result The list of neighbours.
+     */
+    void
+    LocalTree::findNeighbours(const Octant &octant, uint8_t codim, uint8_t index, const octvector &haystack, uint32_t start, u32vector &neighbours) const {
+
+        // Initialize an auxiliary vector with xyz coefficients
+        std::array<int8_t, 3> cxyz;
+        if (codim == 1){
+            for (int i = 0; i < m_dim; ++i){
+                cxyz[i] = m_global.m_normals[index][i];
+            }
+        } else if (codim == m_dim){
+            for (int i = 0; i < m_dim; ++i){
+                cxyz[i] = m_global.m_nodeCoeffs[index][i];
+            }
+        } else {
+            for (int i = 0; i < m_dim; ++i){
+                cxyz[i] = m_global.m_edgeCoeffs[index][i];
+            }
+        }
+
+        // Size of the input list
+        size_t haystackSize = haystack.size();
+
+        // Size of the octant
+        uint32_t octantSize = octant.getSize();
+
+        // Compute the morton of the sibling neighbour
+        double sibling_x = int32_t(octant.m_x) + int32_t(cxyz[0] * octantSize);
+        double sibling_y = int32_t(octant.m_y) + int32_t(cxyz[1] * octantSize);
+        double sibling_z = int32_t(octant.m_z) + int32_t(cxyz[2] * octantSize);
+
+        Octant siblingNeighbour(m_dim, octant.m_level, sibling_x, sibling_y, sibling_z, m_global.m_maxLevel);
+        uint64_t siblingMorton = siblingNeighbour.computeMorton();
+
+        // Limits for the binary search
+        uint32_t firstIdx;
+        uint32_t lastIdx;
+
+        uint64_t startMorton = haystack[start].computeMorton();
+        if (startMorton > siblingMorton) {
+            firstIdx = 0;
+            lastIdx  = start;
+        } else {
+            firstIdx = start;
+            lastIdx  = haystackSize - 1;
+        }
+
+        // Check the limits
+        bool binarySearch = true;
+
+        uint32_t candidateIdx    = 0;
+        uint64_t candidateMorton = 0;
+
+        uint64_t firstMorton = haystack[firstIdx].computeMorton();
+        if (firstMorton >= siblingMorton) {
+            candidateIdx    = firstIdx;
+            candidateMorton = firstMorton;
+            binarySearch = false;
+        } else {
+            uint64_t lastMorton = haystack[lastIdx].computeMorton();
+            if (lastMorton <= siblingMorton) {
+                candidateIdx    = lastIdx;
+                candidateMorton = lastMorton;
+                binarySearch    = false;
+            }
+        }
+
+        // Start the binary search.
+        if (binarySearch) {
+            while ((lastIdx - firstIdx) > 1) {
+                candidateIdx = (firstIdx + lastIdx) / 2;
+                candidateMorton = haystack[candidateIdx].computeMorton();
+                if (candidateMorton == siblingMorton) {
+                    break;
+                } else if (candidateMorton > siblingMorton) {
+                    lastIdx = candidateIdx;
+                } else {
+                    firstIdx = candidateIdx;
+                }
+            }
+
+            // If the binary search didn't find a match, set the
+            // index to the lower bound.
+            if (candidateMorton != siblingMorton && candidateIdx != firstIdx) {
+                candidateMorton = haystack[firstIdx].computeMorton();
+                candidateIdx = firstIdx;
+            }
+        }
+
+        // Check if we have found neighbour of same size
+        uint8_t octantLevel = octant.m_level;
+        if(candidateMorton == siblingMorton && haystack[candidateIdx].m_level == octantLevel){
+            neighbours.push_back(candidateIdx);
+            return;
+        }
+
+        // Compute Last discendent of virtual octant of same size
+        Octant lastDesc = siblingNeighbour.buildLastDesc();
+        uint64_t lastDescMorton = lastDesc.computeMorton();
+
+        int32_t Dx[3] = {0,0,0};
+        int32_t Dxstar[3] = {0,0,0};
+        u32array3 octantCoord = octant.getCoord();
+        u32array3 finerCoord = { {1,1,1} };
+        u32array3 coarseCoord = { {1,1,1} };
+        while(candidateMorton <= lastDescMorton && candidateIdx < haystackSize){
+            u32array3 guessCoord = haystack[candidateIdx].getCoord();
+            for (int idim=0; idim<m_dim; idim++){
+                Dx[idim]          = int32_t(int32_t(abs(cxyz[idim]))*(-octantCoord[idim] + guessCoord[idim]));
+                Dxstar[idim]      = int32_t((cxyz[idim]-1)/2)*(haystack[candidateIdx].getSize()) + int32_t((cxyz[idim]+1)/2)*octantSize;
+                finerCoord[idim]  = octantCoord[idim] + octantSize;
+                coarseCoord[idim] = guessCoord[idim] + haystack[candidateIdx].getSize();
+            }
+
+            if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[m_dim-1] == Dxstar[m_dim-1]){
+                uint8_t leveltry = haystack[candidateIdx].getLevel();
+                if (leveltry > octantLevel){
+                    if((abs(cxyz[0])*((guessCoord[1]>=octantCoord[1])*(guessCoord[1]<finerCoord[1]))*((guessCoord[2]>=octantCoord[2])*(guessCoord[2]<finerCoord[2]))) + (abs(cxyz[1])*((guessCoord[0]>=octantCoord[0])*(guessCoord[0]<finerCoord[0]))*((guessCoord[2]>=octantCoord[2])*(guessCoord[2]<finerCoord[2]))) + (abs(cxyz[2])*((guessCoord[0]>=octantCoord[0])*(guessCoord[0]<finerCoord[0]))*((guessCoord[1]>=octantCoord[1])*(guessCoord[1]<finerCoord[1])))){
+                        neighbours.push_back(candidateIdx);
+                    }
+                }
+                else if (leveltry < octantLevel){
+                    if((abs(cxyz[0])*((octantCoord[1]>=guessCoord[1])*(octantCoord[1]<coarseCoord[1]))*((octantCoord[2]>=guessCoord[2])*(octantCoord[2]<coarseCoord[2]))) + (abs(cxyz[1])*((octantCoord[0]>=guessCoord[0])*(octantCoord[0]<coarseCoord[0]))*((octantCoord[2]>=guessCoord[2])*(octantCoord[2]<coarseCoord[2]))) + (abs(cxyz[2])*((octantCoord[0]>=guessCoord[0])*(octantCoord[0]<coarseCoord[0]))*((octantCoord[1]>=guessCoord[1])*(octantCoord[1]<coarseCoord[1])))){
+                        neighbours.push_back(candidateIdx);
+                    }
+                }
+            }
+
+            if(candidateIdx == (haystackSize - 1)){
+                break;
+            }
+
+            candidateIdx++;
+            candidateMorton = haystack[candidateIdx].computeMorton();
+        }
+    }
 
     /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face.
      * Returns a vector (empty if iface is a bound face) with the index of neighbours

@@ -172,6 +172,8 @@ private:
 	void 		updateLocalMaxDepth();
 
     
+    void        findNeighbours(const Octant &octant, uint8_t codim, uint8_t index, const octvector &haystack, uint32_t start, u32vector &neighbours) const;
+
     void        findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
     void        findEdgeNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
     void        findNodeNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
