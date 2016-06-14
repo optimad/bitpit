@@ -88,7 +88,7 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
             uint64_t    offset(0) ;
             for( unsigned int i=0; i<m_cells; ++i){
                 offset += n ;
-                genericIO::flushBINARY(str, offset );
+                genericIO::flushASCII(str, offset );
             }
         
         }
