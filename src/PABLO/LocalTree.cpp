@@ -733,13 +733,6 @@ namespace bitpit {
         // Check if the face is a processor boundary
         bool isFacePBound = oct->getPbound(iface);
 
-        // We always need to search in the internals, the only exception is
-        // for faces of internal octants that are processor boundaries.
-        bool internalSearch = true;
-        if (!amIghost && isFacePBound) {
-            internalSearch = false;
-        }
-
         // If we want also the neighbours that are ghosts, we always need to
         // search in the ghosts, the only exception is for faces of internal
         // octants that are not processor boundaries.
@@ -749,7 +742,9 @@ namespace bitpit {
         }
 
         // Search in the internal octants
-        if (internalSearch){
+        //
+        // We always need to search in the internal octants.
+
             //Build Morton number of virtual neigh of same size
             Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
             Morton = samesizeoct.computeMorton();
@@ -862,7 +857,6 @@ namespace bitpit {
                     return;
                 }
             }
-        }
 
         // Search in the ghost octants
         if(ghostSearch) {
