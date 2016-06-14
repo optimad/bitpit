@@ -25,7 +25,8 @@
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
 
-# Required libraries
+# Name of the current module
+get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
 # Add library to targets
 include_directories("${PROJECT_SOURCE_DIR}/src/common")

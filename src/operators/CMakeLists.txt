@@ -25,6 +25,9 @@
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
 
+# Name of the current module
+get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
+
 # Add library to targets
 file(GLOB SOURCE_FILES "*.cpp")
 set(OPERATORS_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of the operators" FORCE)

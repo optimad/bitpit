@@ -25,6 +25,9 @@
 # Specify the version being used as well as the language
 cmake_minimum_required(VERSION 2.8)
 
+# Name of the current module
+get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
+
 # List of tests
 set(TESTS "")
 list(APPEND TESTS "test_volcartesian_00001")
