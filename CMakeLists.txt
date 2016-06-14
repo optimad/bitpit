@@ -120,6 +120,18 @@ function(getTestNumProcs TEST_ENTRY DEFAULT_N_PROCS N_PROCS)
 	set(${N_PROCS} "${TEST_ENTRY_MATCH}" PARENT_SCOPE)
 endfunction()
 
+function(addModuleIncludeDirectories MODULE_NAME)
+    # Add dependiecies
+    string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+    foreach (DEPENDENCY_NAME IN LISTS ${UPPER_MODULE_NAME}_DEPS)
+        addModuleIncludeDirectories(${DEPENDENCY_NAME})
+    endforeach()
+    unset(UPPER_MODULE_NAME)
+
+    # Add module directory
+    include_directories("${PROJECT_SOURCE_DIR}/src/${MODULE_NAME}")
+endfunction()
+
 #------------------------------------------------------------------------------------#
 # External dependencies
 #------------------------------------------------------------------------------------#
