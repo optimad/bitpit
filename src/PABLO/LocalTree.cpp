@@ -730,20 +730,10 @@ namespace bitpit {
             return;
         }
 
-        // Check if the face is a processor boundary
-        bool isFacePBound = oct->getPbound(iface);
-
-        // If we want also the neighbours that are ghosts, we always need to
-        // search in the ghosts, the only exception is for faces of internal
-        // octants that are not processor boundaries.
-        bool ghostSearch = (m_ghosts.size() > 0) && !onlyinternal;
-        if (!amIghost && !isFacePBound) {
-            ghostSearch = false;
-        }
-
         // Search in the internal octants
         //
         // We always need to search in the internal octants.
+        //
 
             //Build Morton number of virtual neigh of same size
             Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
@@ -858,9 +848,23 @@ namespace bitpit {
                 }
             }
 
+        //
         // Search in the ghost octants
+        //
+
+        // Check if the face is a processor boundary
+        bool isFacePBound = oct->getPbound(iface);
+
+        // If we want also the neighbours that are ghosts, we always need to
+        // search in the ghosts, the only exception is for faces of internal
+        // octants that are not processor boundaries.
+        bool ghostSearch = (m_ghosts.size() > 0) && !onlyinternal;
+        if (!amIghost && !isFacePBound) {
+            ghostSearch = false;
+        }
+
+        // Search in ghosts
         if(ghostSearch) {
-            // Search in ghosts
             uint32_t idxghost = uint32_t(m_sizeGhosts/2);
             const Octant* octghost = &m_ghosts[idxghost];
 
