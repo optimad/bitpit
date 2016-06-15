@@ -49,9 +49,21 @@ namespace levelSetDefaults{
     const double                            VALUE = 1.e18 ;             /**< Default value for levelset function */
     const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */
     const short                             SIGN = 1;                   /**< Default value for the sign */
-    const int                               OBJECT = -1 ;               /**< Default value for closest object id */
-    const std::unordered_set<long>          LIST;                       /**< Default value for closest segment */
-    const long                              ELEMENT = -1 ;              /**< Default value for segmments in narrow band */
+    const int                               OBJECT = -1 ;               /**< Default value for closest object  */
+    const int                               PART  = -1 ;               /**< Default value for closest patch  */
+    const long                              SUPPORT = -1 ;              /**< Default value for closest support element */
+    const std::unordered_set<long>          LIST;                       /**< Default value for list of elements in narrow band */
+};
+
+class LevelSetInfo{
+    public:
+    double                                  value ;                     /**< Levelset value */
+    std::array<double,3>                    gradient ;                  /**< Levelset gradient */
+    int                                     object ;                    /**< Id of closest object */
+    int                                     part  ;                     /**< Id of closest patch */
+    long                                    support ;                   /**< Id of closest support */
+
+    LevelSetInfo() ;
 };
 
 class LevelSet{
@@ -81,11 +93,13 @@ class LevelSet{
     void                                        clearObject();
     void                                        clearObject( int );
 
+    LevelSetInfo                                getLevelSetInfo(const long &) const ;
+
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
     int                                         getObject(const long &) const ;
-    long                                        getSupport(const long &) const ;
-    void                                        getObjectAndSupport(const long &, int &, long &) const;
+    std::pair<int,int>                          getPart(const long &) const ;
+    std::pair<int,long>                         getSupport(const long &) const ;
     short                                       getSign(const long &) const;
     bool                                        isInNarrowBand(const long &) const;
 
@@ -116,14 +130,9 @@ class LevelSet{
 class LevelSetKernel{
 
     public:
-    struct LSInfo{
-        double                                  value ;         /**< Levelset value */
-        std::array<double,3>                    gradient ;      /**< Levelset gradient */
-        int                                     object ;        /**< Id of closest object */
-    };
 
     protected:
-    PiercedVector<LSInfo>                       m_ls ;          /**< Levelset information for each cell */
+    PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
     VolumeKernel*                               m_mesh ;        /**< Pointer to underlying mesh*/
 
     double                                      m_RSearch;      /**< Size of narrow band */
@@ -137,12 +146,16 @@ class LevelSetKernel{
     LevelSetKernel() ;
     LevelSetKernel( VolumeKernel *) ;
 
-    PiercedVector<LSInfo>&                      getLSInfo() ;
     VolumeKernel*                               getMesh() const ;
+
+    PiercedVector<LevelSetInfo>&                getLevelSetInfo() ;
+    LevelSetInfo                                getLevelSetInfo(const long &) const ;
 
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
     int                                         getObject(const long &) const ;
+    std::pair<int,int>                          getPart(const long &) const ;
+    std::pair<int,long>                         getSupport(const long &) const ;
     short                                       getSign(const long &) const;
     double                                      getSizeNarrowBand() const;
     bool                                        isInNarrowBand(const long &) const;
@@ -236,7 +249,6 @@ class LevelSetObject{
     virtual int                                 getId() const ;
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
     virtual LevelSetObject*                     clone() const = 0;
-    virtual long                                getSupport(const long &) const =0 ;
 
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
@@ -263,12 +275,10 @@ class LevelSetSegmentation : public LevelSetObject {
     private:
     struct SegInfo{
         std::unordered_set<long>                m_segments ;                /**< list of segments within narrow band */
-        long                                    m_support ;                 /**< closest segment to cell centroid */
         bool                                    m_checked ;                 /**< true if list of segments has been processed */
 
         SegInfo( ) ;
         SegInfo( const std::unordered_set<long> & ) ;
-        SegInfo( const std::unordered_set<long> &, const long & ) ;
     };
 
     int                                         m_dimension ;               /**< number of space dimensions */
@@ -286,7 +296,6 @@ class LevelSetSegmentation : public LevelSetObject {
     LevelSetSegmentation*                       clone() const ;
 
     const std::unordered_set<long> &            getSimplexList(const long &) const ;
-    long                                        getSupport(const long &) const  ;
     bool                                        isInNarrowBand( const long &) ;
 
     void                                        dumpDerived( std::fstream &) ;

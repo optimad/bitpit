@@ -67,7 +67,6 @@ LevelSetKernel::LevelSetKernel( VolumeKernel *patch): LevelSetKernel() {
     m_mesh = patch ;
 };
 
-
 /*!
  * Destructor of LevelSetKernel
 */
@@ -81,13 +80,6 @@ LevelSetKernel::~LevelSetKernel(){
 };
 
 /*!
- * Returns reference to LSInfo
-*/
-PiercedVector<LevelSetKernel::LSInfo>& LevelSetKernel::getLSInfo(){
-    return m_ls ;
-} 
-
-/*!
  * Returns pointer to underlying mesh.
  * @return pointer to mesh
 */
@@ -95,6 +87,24 @@ VolumeKernel* LevelSetKernel::getMesh() const{
     return m_mesh ;
 } 
 
+/*!
+ * Returns reference to LevelSetInfo
+*/
+PiercedVector<LevelSetInfo>& LevelSetKernel::getLevelSetInfo(){
+    return m_ls ;
+} 
+
+/*!
+ * Returns reference to LevelSetInfo
+*/
+LevelSetInfo LevelSetKernel::getLevelSetInfo( const long &i)const{
+    if( ! m_ls.exists(i) ){
+        return m_ls[i] ;
+    } else {
+        return (  LevelSetInfo() );
+    };
+
+} 
 
 /*!
  * Get the Sdf value of the i-th local element of the octree mesh.
@@ -137,6 +147,38 @@ int LevelSetKernel::getObject(const long &i) const {
         return levelSetDefaults::OBJECT;
     } else {
         return (  m_ls[i].object );
+    };
+
+};
+
+/*!
+ * Get the object and part id of projection point
+ * @param[in] i cell index
+ * @return pair containing object and part id 
+ */
+std::pair<int,int> LevelSetKernel::getPart(const long &i) const {
+
+    if( ! m_ls.exists(i) ){
+        return ( std::make_pair(levelSetDefaults::OBJECT, levelSetDefaults::PART) ) ;
+    } else {
+        LevelSetInfo const &ls = m_ls[i] ;
+        return (  std::make_pair(ls.object, ls.part) );
+    };
+
+};
+
+/*!
+ * Get the object and support id of projection point
+ * @param[in] i cell index
+ * @return pair containing object and support id 
+ */
+std::pair<int,long> LevelSetKernel::getSupport(const long &i) const {
+
+    if( ! m_ls.exists(i) ){
+        return ( std::make_pair(levelSetDefaults::OBJECT, levelSetDefaults::SUPPORT) ) ;
+    } else {
+        LevelSetInfo const &ls = m_ls[i] ;
+        return (  std::make_pair(ls.object, ls.support) );
     };
 
 };
@@ -332,7 +374,7 @@ void LevelSetKernel::propagateSign( std::unordered_map<int,LevelSetObject*> visi
     // from the defualt value.
     std::unordered_set<long> alreadyEvaluated;
 
-    PiercedIterator<LSInfo> infoItr = m_ls.begin() ;
+    PiercedIterator<LevelSetInfo> infoItr = m_ls.begin() ;
     while (infoItr != m_ls.end()) {
         double &value = (*infoItr).value;
         if(!utils::DoubleFloatingEqual()(std::abs(value), levelSetDefaults::VALUE)) {
@@ -556,7 +598,7 @@ void LevelSetKernel::solveEikonal( double g, double s ){
             // Extract root
             heap.extract(value, myId);
 
-            LSInfo &lsInfo = m_ls[myId] ;
+            LevelSetInfo &lsInfo = m_ls[myId] ;
 
             // Update level set value
             lsInfo.value = s*updateEikonal(s, g, myId, active);
@@ -662,7 +704,7 @@ void LevelSetKernel::clearAfterMeshMovement( const std::vector<adaption::Info> &
  */
 void LevelSetKernel::filterOutsideNarrowBand( double newRSearch ){
 
-    PiercedIterator<LSInfo> lsItr = m_ls.begin() ;
+    PiercedIterator<LevelSetInfo> lsItr = m_ls.begin() ;
     while( lsItr != m_ls.end() ){
 
 
@@ -685,7 +727,7 @@ void LevelSetKernel::filterOutsideNarrowBand( double newRSearch ){
  */
 void LevelSetKernel::dump( std::fstream &stream ){
 
-    bitpit::PiercedVector<LSInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
+    bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
 
     bitpit::genericIO::flushBINARY(stream, m_RSearch);
     bitpit::genericIO::flushBINARY(stream, (long) m_ls.size() ) ;
@@ -695,6 +737,8 @@ void LevelSetKernel::dump( std::fstream &stream ){
         bitpit::genericIO::flushBINARY(stream, infoItr->value) ;
         bitpit::genericIO::flushBINARY(stream, infoItr->gradient) ;
         bitpit::genericIO::flushBINARY(stream, infoItr->object) ;
+        bitpit::genericIO::flushBINARY(stream, infoItr->part) ;
+        bitpit::genericIO::flushBINARY(stream, infoItr->support) ;
     };
 
     return ;
@@ -707,7 +751,7 @@ void LevelSetKernel::dump( std::fstream &stream ){
 void LevelSetKernel::restore( std::fstream &stream ){
 
     long i, n, id;
-    LSInfo cellInfo;
+    LevelSetInfo cellInfo;
 
 
     bitpit::genericIO::absorbBINARY(stream, m_RSearch);
@@ -719,6 +763,8 @@ void LevelSetKernel::restore( std::fstream &stream ){
         bitpit::genericIO::absorbBINARY(stream, cellInfo.value) ;
         bitpit::genericIO::absorbBINARY(stream, cellInfo.gradient) ;
         bitpit::genericIO::absorbBINARY(stream, cellInfo.object) ;
+        bitpit::genericIO::absorbBINARY(stream, cellInfo.part) ;
+        bitpit::genericIO::absorbBINARY(stream, cellInfo.support) ;
         m_ls.insert(id, cellInfo) ;
     };
 
@@ -826,7 +872,7 @@ bool LevelSetKernel::assureMPI( ){
 void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
     long nItems = sendList.size() ;
-    int dataSize = 4*sizeof(double) +sizeof(int) +sizeof(long) ;
+    int dataSize = 4*sizeof(double) +2*sizeof(int) +2*sizeof(long) ;
 
     dataBuffer.setCapacity(nItems*dataSize) ;
 
@@ -840,6 +886,8 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &sendList
             dataBuffer << lsinfo.value ;
             dataBuffer << lsinfo.gradient ;
             dataBuffer << lsinfo.object ;
+            dataBuffer << lsinfo.part ;
+            dataBuffer << lsinfo.support ;
             ++nItems ;
         }
         ++counter ;
@@ -869,7 +917,7 @@ void LevelSetKernel::readCommunicationBuffer( const std::vector<long> &recvList,
         id = recvList[index] ;
 
         // Assign the data of the element
-        PiercedVector<LSInfo>::iterator infoItr ;
+        PiercedVector<LevelSetInfo>::iterator infoItr ;
         if( !m_ls.exists(id)){
             infoItr = m_ls.reclaim(id) ;
         } else {
@@ -879,6 +927,8 @@ void LevelSetKernel::readCommunicationBuffer( const std::vector<long> &recvList,
         dataBuffer >> infoItr->value ;
         dataBuffer >> infoItr->gradient ;
         dataBuffer >> infoItr->object ;
+        dataBuffer >> infoItr->part ;
+        dataBuffer >> infoItr->support ;
 
     }
 

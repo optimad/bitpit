@@ -37,6 +37,36 @@ namespace bitpit {
 
 /*!
  * @ingroup levelset
+ * @class  LevelSetInfo
+ *
+ * @brief  A public container which includes all information provided by LevelSet
+ *
+ * LevelSetInfo conatins the following information
+ * - distance to closest object
+ * - gradient of level set function
+ * - the id of the closest object
+ * - the patch of closest object which contains the projection point
+ * - the id of the surface element closest to the projection point 
+ *
+ * If a grid point lies within the narrow band of an object, all of these information are available, provided that the clsest object may provide them.
+ * On the contrary, if the grid point lies were the levelset has been propagated not all of these information may be available; 
+ * in particular the object, patch and segment may be set to the default values.
+ *
+*/
+
+/*!
+ * Default constructor
+ */
+LevelSetInfo::LevelSetInfo() {
+    value = levelSetDefaults::VALUE ;
+    gradient = levelSetDefaults::GRADIENT ;
+    object = levelSetDefaults::OBJECT ;
+    part = levelSetDefaults::PART  ;
+    support = levelSetDefaults::SUPPORT ;
+}
+
+/*!
+ * @ingroup levelset
  * @class  LevelSet
  *
  * @brief  Level Set driver class
@@ -211,6 +241,14 @@ int LevelSet::addObject( LevelSetObject* object ) {
 
 };
 
+/*!
+ * Get all levelset information 
+ * @param[in] i index of cell
+ * @return levelset information
+ */
+LevelSetInfo LevelSet::getLevelSetInfo( const long &i)const {
+    return( m_kernel->getLevelSetInfo(i) ) ;
+};
 
 /*!
  * Get the levelset value of the i-th local cell.
@@ -224,7 +262,7 @@ double LevelSet::getLS( const long &i)const {
 /*!
  * Get the levelset gradient of the i-th local cell.
  * @param[in] i index of cell
- * @return Array with components of the Sdf gradient of the i-th local element of the octree mesh.
+ * @return Array with components of the gradient 
  */
 std::array<double,3> LevelSet::getGradient(const long &i) const {
     return( m_kernel->getGradient(i) ) ;
@@ -240,42 +278,23 @@ int LevelSet::getObject(const long &i) const {
 };
 
 /*!
- * Get the id of closest object
+ * Get the object and part id of the projection point
  * @param[in] i index of cell
- * @return id of closest object
+ * @return pair containing object and part id
  */
-long LevelSet::getSupport(const long &i) const {
+std::pair<int,int> LevelSet::getPart(const long &i) const {
 
-    int object ;
-    long support ;
-
-    getObjectAndSupport( i, object, support) ;
-
-    return support ;
+    return (m_kernel->getPart(i)) ;
 };
 
-
 /*!
- * Get the id of closest object
+ * Get the object and support id of the projection point
  * @param[in] i index of cell
- * @param[out] object id of the closest object
- * @param[out] support id of the support element
+ * @return pair containing object and support id
  */
-void LevelSet::getObjectAndSupport(const long &i, int &object, long &support) const {
+std::pair<int,long> LevelSet::getSupport(const long &i) const {
 
-    object = getObject(i);
-
-    if( object != levelSetDefaults::OBJECT){
-
-        auto objItr = m_object.find(object) ;
-        assert( objItr!=m_object.end() ) ;
-
-        support = objItr->second->getSupport(i);
-
-    } else{
-        support = levelSetDefaults::ELEMENT ;
-    };
-
+    return (m_kernel->getSupport(i)) ;
 };
 
 /*!

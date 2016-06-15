@@ -120,7 +120,7 @@ double LevelSetCartesian::updateEikonal( double s, double g, const long &I, cons
         // Left neighbor
         J   = cell.getAdjacency( 2*d, 0) ;
 
-        LSInfo  &lsInfo = m_ls[J] ;
+        LevelSetInfo  &lsInfo = m_ls[J] ;
 
         if( J >= 0 && active.at(J) == 0){
             value = std::min(s*lsInfo.value, value);

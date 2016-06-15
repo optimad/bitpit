@@ -39,22 +39,14 @@ namespace bitpit {
 /*!
  * Default constructor 
  */
-LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST), m_support(levelSetDefaults::ELEMENT), m_checked(false){
+LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST), m_checked(false){
 };
 
 /*!
  * Constructor
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT), m_checked(false) {
-};
-
-/*!
- * Constructor
- * @param[in] list list of simplices
- * @param[in] support index of closest simplex
- */
-LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list, const long &support) :m_segments(list), m_support(support), m_checked(false){
+LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m_segments(list), m_checked(false) {
 };
 
 /*!
@@ -140,21 +132,6 @@ const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long
 };
 
 /*!
- * Get the index of the closest simplex
- * @param[in] i cell index
- * @return index of closest simplex
- */
-long LevelSetSegmentation::getSupport(const long &i) const{
-
-    if( !m_seg.exists(i) ){
-        return levelSetDefaults::ELEMENT ;
-    } else {
-        return ( m_seg[i].m_support );
-    };
-
-};
-
-/*!
  * Check if cell is in narrowband of any triangle;
  * @param[in] i cell index
  * @return if in narow band
@@ -202,9 +179,9 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
     double                      s, d, value;
     std::array<double,3>        n, xP, P;
 
-    std::unordered_set<long>::iterator    it, itend ;
-    PiercedIterator<SegInfo>    segIt ;
-    PiercedVector<LevelSetKernel::LSInfo>       &lsInfo = visitee->getLSInfo() ;
+    std::unordered_set<long>::iterator  it, itend ;
+    PiercedIterator<SegInfo>            segIt ;
+    PiercedVector<LevelSetInfo>         &lsInfo = visitee->getLevelSetInfo() ;
 
     for( segIt=m_seg.begin(); segIt!=m_seg.end(); ++segIt ){
 
@@ -214,7 +191,6 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
             segInfo.m_checked = true ;
 
             std::unordered_set<long>    &segs = segInfo.m_segments ;
-            long                        &supp = segInfo.m_support ;
 
             id    = segIt.getId() ;
 
@@ -244,9 +220,10 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
                         value   = d ;
 
                         lsInfoItr->object   = getId();
+                        lsInfoItr->part     = m_segmentation->getCell(*it).getPID();
+                        lsInfoItr->support  = *it ;
                         lsInfoItr->value    = ( signd *s  + (!signd) *1.) *d; 
                         lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
-                        supp                = *it ;
                     }
 
                     ++it ;
@@ -795,7 +772,6 @@ void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
         bitpit::genericIO::flushBINARY( stream, segItr.getId() );
         bitpit::genericIO::flushBINARY( stream, s );
         bitpit::genericIO::flushBINARY( stream, temp );
-        bitpit::genericIO::flushBINARY( stream, segItr->m_support );
         bitpit::genericIO::flushBINARY( stream, segItr->m_checked );
     }
 
@@ -823,7 +799,6 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 
         temp.resize(s) ;
         bitpit::genericIO::absorbBINARY( stream, temp );
-        bitpit::genericIO::absorbBINARY( stream, cellData.m_support );
         bitpit::genericIO::absorbBINARY( stream, cellData.m_checked );
 
         std::copy( temp.begin(), temp.end(), std::inserter( cellData.m_segments, cellData.m_segments.end() ) );
@@ -846,7 +821,7 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
     long nItems = sendList.size(), counter(0) ;
-    int dataSize = 10*sizeof(long)  +sizeof(long) +sizeof(bool) +sizeof(long) +sizeof(int) ;
+    int dataSize = 10*sizeof(long)  +sizeof(bool) +sizeof(long) +sizeof(int) ;
 
     dataBuffer.setCapacity(nItems*dataSize) ;
 
@@ -860,7 +835,6 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
             for( const long & seg : seginfo.m_segments ){
                 dataBuffer << seg ;
             };
-            dataBuffer << seginfo.m_support ;
             dataBuffer << seginfo.m_checked ;
             ++nItems ;
         }
@@ -905,7 +879,6 @@ void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &rec
             segItr->m_segments.insert(segment) ;
         }
 
-        dataBuffer >> segItr->m_support ;
         dataBuffer >> segItr->m_checked ;
     }
 
