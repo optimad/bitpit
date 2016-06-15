@@ -350,6 +350,20 @@ list(APPEND MPI_ONLY_MODULE_LIST "communications")
 #------------------------------------------------------------------------------------#
 # Check of the dependencies
 #------------------------------------------------------------------------------------#
+
+# If building without MPI remove dependecies on MPI-only modules
+if (NOT ENABLE_MPI)
+    foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+        string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+        list(LENGTH ${UPPER_MODULE_NAME}_DEPS DEPENDENCY_COUNT)
+        if (${DEPENDENCY_COUNT} GREATER 0)
+            list(REMOVE_ITEM ${UPPER_MODULE_NAME}_DEPS ${MPI_ONLY_MODULE_LIST})
+        endif()
+        unset(UPPER_MODULE_NAME)
+    endforeach()
+endif()
+
+# Initialize module state
 foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
 	if ((NOT ENABLE_MPI) AND (";${MPI_ONLY_MODULE_LIST};" MATCHES ";${MODULE_NAME};"))
 		hideModule(${MODULE_NAME})
