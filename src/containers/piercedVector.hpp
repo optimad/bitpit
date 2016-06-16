@@ -580,7 +580,7 @@ private:
 	std::size_t getPosFromId(id_t id) const;
     void setPosId(const std::size_t &pos, const id_t &id);
 	void setEmptyPosId(const std::size_t &pos, const std::size_t &nextUsedPos);
-	void updateFirstUsedPos(const std::size_t &updated_first_pos);
+	void setFirstUsedPos(const std::size_t &updated_first_pos);
 	void setLastUsedPos(const std::size_t &updated_last_pos);
 
 	std::size_t storageSize() const;

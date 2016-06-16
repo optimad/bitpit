@@ -865,7 +865,7 @@ void PiercedVector<value_t, id_t>::squeeze()
 		holesClear();
 
 		// Reset first and last counters
-		updateFirstUsedPos(0);
+		setFirstUsedPos(0);
 		setLastUsedPos(size() - 1);
 	}
 
@@ -1845,7 +1845,7 @@ std::size_t PiercedVector<value_t, id_t>::fillPosHead(const id_t &id)
 		// and that the hole is before the last element, therefore
 		// only the first position counter may have changed.
 		if (pos < m_first_pos) {
-			updateFirstUsedPos(pos);
+			setFirstUsedPos(pos);
 		}
 
 		// Fill the position
@@ -1900,7 +1900,7 @@ std::size_t PiercedVector<value_t, id_t>::fillPosTail(const id_t &id)
 		// vector. We should olny consider that case where a holes is
 		// below the first element.
 		if (pos < m_first_pos) {
-			updateFirstUsedPos(pos);
+			setFirstUsedPos(pos);
 		}
 
 		// If previos element is a hole, its id and the ids of the
@@ -2044,7 +2044,7 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 	// If removing the first position, update the counter
 	if (pos == m_first_pos) {
 		std::size_t updated_first_pos = findNextUsedPos(m_first_pos);
-		updateFirstUsedPos(updated_first_pos);
+		setFirstUsedPos(updated_first_pos);
 	}
 
 	// If the list of pending holes is full, flush the holes.
@@ -2422,10 +2422,10 @@ void PiercedVector<value_t, id_t>::setEmptyPosId(const std::size_t &pos, const s
 }
 
 /*!
-	Update the first used position.
+	Set the first used position.
 */
 template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::updateFirstUsedPos(const std::size_t &updated_first_pos)
+void PiercedVector<value_t, id_t>::setFirstUsedPos(const std::size_t &updated_first_pos)
 {
 	m_first_pos = updated_first_pos;
 }
