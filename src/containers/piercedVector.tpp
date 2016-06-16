@@ -937,6 +937,23 @@ void PiercedVector<value_t, id_t>::squeeze()
 	}
 
 	// Shrink to fit
+	shrinkToFit();
+}
+
+/*!
+	Requests the container to reduce its capacity to fit its size. This
+	method will NOT compact the elements, leaving the existing holes
+	unaltered.
+
+	The request is non-binding, and the function can leave
+	the vector with a capacity greater than its size.
+
+	This may cause a reallocation, but has no effect on the vector
+	size and cannot alter its elements not the holes.
+*/
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::shrinkToFit()
+{
 	m_ids.shrink_to_fit();
 	m_v.shrink_to_fit();
 }

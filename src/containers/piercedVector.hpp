@@ -341,6 +341,7 @@ public:
 	void resize(std::size_t n);
 	void sort();
 	void squeeze();
+	void shrinkToFit();
 	void swap(PiercedVector& x) noexcept;
 
 	// Methods that extract information on the container
