@@ -718,10 +718,8 @@ void PiercedVector<value_t, id_t>::swap(const id_t &id_first, const id_t &id_sec
 	size_t pos_first  = m_pos.at(id_first);
 	size_t pos_second = m_pos.at(id_second);
 
-	// Swap the elements
-	value_t tmp = std::move(m_v[pos_first]);
-	m_v[pos_first]  = std::move(m_v[pos_second]);
-	m_v[pos_second] = std::move(tmp);
+	// Swap the values
+	std::swap(m_v[pos_first], m_v[pos_second]);
 
 	// Relink the ids
 	setPosId(pos_second, id_first);
