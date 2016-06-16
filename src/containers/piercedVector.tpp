@@ -718,12 +718,11 @@ void PiercedVector<value_t, id_t>::swap(const id_t &id_first, const id_t &id_sec
 	size_t pos_first  = m_pos.at(id_first);
 	size_t pos_second = m_pos.at(id_second);
 
+	// Swap the positions
+	swapPos(pos_first, id_first, pos_second, id_second);
+
 	// Swap the values
 	std::swap(m_v[pos_first], m_v[pos_second]);
-
-	// Relink the ids
-	setPosId(pos_second, id_first);
-	setPosId(pos_first, id_second);
 }
 
 /*!
@@ -2565,6 +2564,21 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::setLastUsedPos(const std::size_t &updated_last_pos)
 {
 	m_last_pos = updated_last_pos;
+}
+
+/*!
+	Swaps two positions.
+
+	\param pos_1 is the first position to swap
+	\param id_1 is the id associated to the first position
+	\param pos_2 is the second position to swap
+	\param id_2 is the id associated to the second position
+*/
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::swapPos(const std::size_t &pos_1, const id_t &id_1, const std::size_t &pos_2, const id_t &id_2)
+{
+	std::swap(m_ids[pos_1], m_ids[pos_2]);
+	std::swap(m_pos[id_1], m_pos[id_2]);
 }
 
 /*!

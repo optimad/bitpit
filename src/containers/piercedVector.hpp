@@ -599,6 +599,7 @@ private:
 	void setEmptyPosId(const std::size_t &pos, const std::size_t &nextUsedPos);
 	void setFirstUsedPos(const std::size_t &updated_first_pos);
 	void setLastUsedPos(const std::size_t &updated_last_pos);
+	void swapPos(const std::size_t &pos_1, const id_t &id_1, const std::size_t &pos_2, const id_t &id_2);
 
 	void storageShrink(size_t n, bool force = false);
 	std::size_t storageSize() const;
