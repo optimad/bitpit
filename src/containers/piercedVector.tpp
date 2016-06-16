@@ -450,12 +450,6 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::re
 	// Replace the element
 	m_v[pos] = std::move(value);
 
-	// Update the map
-	id_t id_prev = m_ids[pos];
-	if (id != id_prev) {
-		setPosId(pos, id);
-	}
-
 	// Return the iterator that points to the element
 	return getIteratorFromPos(pos);
 }
@@ -586,12 +580,6 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 
 	// Replace the element
 	m_v[pos] = value_t(std::forward<Args>(args)...);
-
-	// Update the map
-	id_t id_prev = m_ids[pos];
-	if (id != id_prev) {
-		setPosId(pos, id);
-	}
 
 	// Return the iterator that points to the element
 	return getIteratorFromPos(pos);
