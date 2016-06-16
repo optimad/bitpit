@@ -726,6 +726,7 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::reserve(std::size_t n)
 {
 	m_ids.reserve(n);
+	m_pos.reserve(n);
 	m_v.reserve(n);
 }
 
