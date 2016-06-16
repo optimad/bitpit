@@ -636,7 +636,7 @@ void PiercedVector<value_t, id_t>::popBack()
 		clear();
 	} else {
 		std::size_t updated_last_pos = findPrevUsedPos(m_last_pos);
-		updateLastUsedPos(updated_last_pos);
+		setLastUsedPos(updated_last_pos);
 	}
 }
 
@@ -785,7 +785,7 @@ void PiercedVector<value_t, id_t>::resize(std::size_t n)
 	std::size_t updated_last_pos = getPosFromId(last_id);
 
 	// Update the last position
-	updateLastUsedPos(updated_last_pos);
+	setLastUsedPos(updated_last_pos);
 }
 
 /*!
@@ -866,7 +866,7 @@ void PiercedVector<value_t, id_t>::squeeze()
 
 		// Reset first and last counters
 		updateFirstUsedPos(0);
-		updateLastUsedPos(size() - 1);
+		setLastUsedPos(size() - 1);
 	}
 
 	// Shrink to fit
@@ -1754,7 +1754,7 @@ std::size_t PiercedVector<value_t, id_t>::fillPosInsert(const std::size_t &pos, 
 	}
 
 	// Extend the container
-	updateLastUsedPos(storageSize());
+	setLastUsedPos(storageSize());
 
 	// Make room for the new element
 	if (pos < m_last_pos) {
@@ -2024,7 +2024,7 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 			clear();
 		} else {
 			std::size_t updated_last_pos = findPrevUsedPos(m_last_pos);
-			updateLastUsedPos(updated_last_pos);
+			setLastUsedPos(updated_last_pos);
 		}
 		return;
 	}
@@ -2431,10 +2431,10 @@ void PiercedVector<value_t, id_t>::updateFirstUsedPos(const std::size_t &updated
 }
 
 /*!
-	Update the last used position.
+	Set the last used position.
 */
 template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::updateLastUsedPos(const std::size_t &updated_last_pos)
+void PiercedVector<value_t, id_t>::setLastUsedPos(const std::size_t &updated_last_pos)
 {
 	// Hole needs to be updated only if last position has been decrease
 	bool update_holes = (holesCount() > 0) && (updated_last_pos < m_last_pos);
