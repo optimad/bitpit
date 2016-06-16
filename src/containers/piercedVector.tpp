@@ -456,7 +456,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::re
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::updateId(const id_t &currentId, const id_t &updatedId)
 {
-	setPosId(getPosFromId(currentId), updatedId);
+	fillPos(getPosFromId(currentId), updatedId);
 }
 
 /*!
