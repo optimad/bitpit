@@ -674,14 +674,19 @@ void PiercedVector<value_t, id_t>::swap(const id_t &id_first, const id_t &id_sec
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::clear(bool release)
 {
-	// Clear storage
+	// Clear positions
 	m_ids.clear();
-	m_v.clear();
+	m_pos.clear();
 	if (release) {
 		std::vector<id_t>().swap(m_ids);
+		std::unordered_map<id_t, std::size_t, PiercedHasher>().swap(m_pos);
+	}
+
+	// Clear values
+	m_v.clear();
+	if (release) {
 		std::vector<value_t>().swap(m_v);
 	}
-	storageResize(0);
 
 	// Reset first and last counters
 	m_first_pos = 0;
@@ -689,10 +694,6 @@ void PiercedVector<value_t, id_t>::clear(bool release)
 
 	// Clear holes
 	holesClear(release);
-
-	// Clear position map
-	m_pos.clear();
-	std::unordered_map<id_t, std::size_t, PiercedHasher>().swap(m_pos);
 
 	// There are no dirty positions
 	m_first_dirty_pos = m_last_pos + 1;
