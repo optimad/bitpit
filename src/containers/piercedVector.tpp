@@ -689,8 +689,8 @@ void PiercedVector<value_t, id_t>::clear(bool release)
 	}
 
 	// Reset first and last counters
-	m_first_pos = 0;
-	m_last_pos  = 0;
+	setFirstUsedPos(0);
+	setLastUsedPos(0);
 
 	// Clear holes
 	holesClear(release);
