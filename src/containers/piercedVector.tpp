@@ -1711,15 +1711,8 @@ typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_
 template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::fillPos(const std::size_t &pos, const id_t &id)
 {
-	// Ids needs to be positive
-	if (id < 0) {
-		throw std::out_of_range ("Negative id");
-	}
-
-	// Handle duplicate ids
-	if (exists(id)) {
-		throw std::out_of_range ("Duplicate id");
-	}
+	// Validate the id
+	validateId(id);
 
 	// Associate an id to the position
 	setPosId(pos, id);
@@ -2282,6 +2275,29 @@ void PiercedVector<value_t, id_t>::holesSortRegular()
 
 	std::sort(m_holes_regular_begin, m_holes_regular_end, std::greater<std::size_t>());
 	m_holes_regular_sorted = true;
+}
+
+/*!
+	Validates the specified id.
+
+	\param id is the id to validate
+	\result Return true if the id is valid, otherwise it throws an exception.
+*/
+template<typename value_t, typename id_t>
+bool PiercedVector<value_t, id_t>::validateId(const id_t &id)
+{
+	// Ids needs to be positive
+	if (id < 0) {
+		throw std::out_of_range ("Negative id");
+	}
+
+	// Handle duplicate ids
+	if (exists(id)) {
+		throw std::out_of_range ("Duplicate id");
+	}
+
+	// Id is valid
+	return true;
 }
 
 /*!

@@ -574,6 +574,8 @@ private:
 	void holesSortPending();
 	void holesSortRegular();
 
+	bool validateId(const id_t &id);
+
 	std::size_t findPrevUsedPos(std::size_t pos) const;
 	std::size_t findNextUsedPos(std::size_t pos) const;
 	bool isPosEmpty(std::size_t pos) const;
