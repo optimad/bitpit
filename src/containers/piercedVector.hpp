@@ -436,6 +436,19 @@ private:
 	};
 
 	/*!
+		Storage position
+	*/
+	struct StoragePosition {
+		StoragePosition(size_t _pos, bool _ready)
+			: pos(_pos), ready(_ready)
+		{
+		}
+
+		size_t pos;
+		bool ready;
+	};
+
+	/*!
 		Container used for storing holes
 	*/
 	typedef std::vector<std::size_t> hole_container;
@@ -554,13 +567,13 @@ private:
 	iterator getIteratorFromPos(const std::size_t &pos) noexcept;
 	const_iterator getConstIteratorFromPos(const std::size_t &pos) const noexcept;
 
-	std::size_t fillPos(const std::size_t &pos, const id_t &id);
-	std::size_t fillPosAppend(const id_t &id);
-	std::size_t fillPosInsert(const std::size_t &pos, const id_t &id);
-	std::size_t fillPosHead(const id_t &id);
-	std::size_t fillPosTail(const id_t &id);
-	std::size_t fillPosAfter(const std::size_t &referencePos, const id_t &id);
-	std::size_t fillPosBefore(const std::size_t &referencePos, const id_t &id);
+	StoragePosition fillPos(const std::size_t &pos, const id_t &id);
+	StoragePosition fillPosAppend(const id_t &id);
+	StoragePosition fillPosInsert(const std::size_t &pos, const id_t &id);
+	StoragePosition fillPosHead(const id_t &id);
+	StoragePosition fillPosTail(const id_t &id);
+	StoragePosition fillPosAfter(const std::size_t &referencePos, const id_t &id);
+	StoragePosition fillPosBefore(const std::size_t &referencePos, const id_t &id);
 
 	void piercePos(const std::size_t &pos, bool flush = true);
 
@@ -580,7 +593,9 @@ private:
 	std::size_t findNextUsedPos(std::size_t pos) const;
 	bool isPosEmpty(std::size_t pos) const;
 	std::size_t getPosFromId(id_t id) const;
-    void setPosId(const std::size_t &pos, const id_t &id);
+	void setPosId(const std::size_t &pos, const id_t &id);
+	void appendPosId(const id_t &id);
+	void insertPosId(const std::size_t &pos, const id_t &id);
 	void setEmptyPosId(const std::size_t &pos, const std::size_t &nextUsedPos);
 	void setFirstUsedPos(const std::size_t &updated_first_pos);
 	void setLastUsedPos(const std::size_t &updated_last_pos);
