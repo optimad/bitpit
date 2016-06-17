@@ -163,6 +163,8 @@ class LevelSetKernel{
     void                                        dump( std::fstream &);
     void                                        restore( std::fstream &);
 
+    double                                      isCellInsideBoundingBox( long id, std::array<double, 3> minPoint, std::array<double, 3> maxPoint );
+
 # if BITPIT_ENABLE_MPI
 
     MPI_Comm                                    getCommunicator() const ;

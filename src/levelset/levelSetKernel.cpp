@@ -32,6 +32,7 @@
 # include <unordered_set>
 
 # include "bitpit_SA.hpp"
+# include "bitpit_CG.hpp"
 # include "bitpit_operators.hpp"
 
 # include "levelSet.hpp"
@@ -683,6 +684,38 @@ void LevelSetKernel::restore( std::fstream &stream ){
     };
 
     return ;
+};
+
+/*!
+ * Checks if the specified cell is inside the given bounding box
+ * @param[in] id is the id of the cell
+ * @param[in] minPoint is the lower left point of the boungind box
+ * @param[in] maxPoint is the upper right point of the boungind box
+ * @result True if the specified cell is inside the given bounding box, false
+ * otherwise.
+ */
+double LevelSetKernel::isCellInsideBoundingBox( long id, std::array<double, 3> minPoint, std::array<double, 3> maxPoint ){
+
+    const Cell &cell = m_mesh->getCell(id);
+    double tolerance = m_mesh->getTol();
+
+    std::array<double, 3> cellMinPoint;
+    std::array<double, 3> cellMaxPoint;
+
+    cellMinPoint.fill(   std::numeric_limits<double>::max() ) ;
+    cellMaxPoint.fill( - std::numeric_limits<double>::max() ) ;
+
+    int nVertices = cell.getVertexCount();
+    for (int i = 0; i < nVertices; ++i) {
+        long vertexId = cell.getVertex(i);
+        std::array<double, 3> vertexCoords = m_mesh->getVertexCoords(vertexId);
+        for (int d = 0; d < 3; ++d) {
+            cellMinPoint[d] = std::min( vertexCoords[d] - tolerance, cellMinPoint[d]) ;
+            cellMaxPoint[d] = std::max( vertexCoords[d] + tolerance, cellMaxPoint[d]) ;
+        }
+    }
+
+    return CGElem::intersectBoxBox(minPoint, maxPoint, cellMinPoint, cellMaxPoint);
 };
 
 # if BITPIT_ENABLE_MPI
