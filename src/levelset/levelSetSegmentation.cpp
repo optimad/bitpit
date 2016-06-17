@@ -500,7 +500,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
                     if( m_seg.exists(I) ){
                         m_seg[I].m_segments.insert(i) ;
                     } else {
-                        data = m_seg.reclaim(I) ;
+                        data = m_seg.emplace(I) ;
                         data->m_segments.insert(i);
                     };
 
@@ -868,7 +868,7 @@ void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &rec
         // Assign the data of the element
         PiercedVector<SegInfo>::iterator segItr ;
         if( !m_seg.exists(id)){
-            segItr = m_seg.reclaim(id) ;
+            segItr = m_seg.emplace(id) ;
         } else {
             segItr = m_seg.getIterator(id) ;
         }

@@ -454,7 +454,7 @@ void LevelSetKernel::propagateSign( std::unordered_map<int,LevelSetObject*> visi
             // is different from the default sign.
             infoItr = m_ls.find(id) ;
             if( infoItr == m_ls.end() && seedSign != levelSetDefaults::SIGN ){
-                infoItr = m_ls.reclaim(id) ;
+                infoItr = m_ls.emplace(id) ;
             }
 
             // Update the value
