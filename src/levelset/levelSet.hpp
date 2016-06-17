@@ -151,6 +151,7 @@ class LevelSetKernel{
 
     virtual double                              computeSizeNarrowBand( LevelSetObject * )=0;
     virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> & )=0;
+    virtual double                              computeRSearchFromCell( long id ) = 0;
 
     void                                        clear() ;
     void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
@@ -190,6 +191,7 @@ class LevelSetCartesian : public LevelSetKernel{
 
     private:
     double                                      updateSizeNarrowBand( const std::vector<adaption::Info> & );
+    double                                      computeRSearchFromCell( long id ) ;
     double                                      updateEikonal( double, double, const long &, const std::unordered_map<long,short> & ) ; 
 
     public:
@@ -213,6 +215,7 @@ class LevelSetOctree : public LevelSetKernel{
 
     double                                      computeSizeNarrowBand( LevelSetObject * );
     double                                      updateSizeNarrowBand( const std::vector<adaption::Info> & );
+    double                                      computeRSearchFromCell( long id ) ;
 
 };
 

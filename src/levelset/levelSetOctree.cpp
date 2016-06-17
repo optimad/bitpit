@@ -233,6 +233,19 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
 };
 
 /*!
+ * Compute size of narrow band given a cell.
+ * This function assumes that the octree is balanced 2:1
+ * @param[in] id is the id of the cell
+ */
+double LevelSetOctree::computeRSearchFromCell( long id ){
+
+    int level = m_octree->getCellLevel(id) ;
+
+    return  computeRSearchFromLevel( level ) ;
+
+};
+
+/*!
  * Compute size of narrow band given the coarsest element level which is crossed by geometry.
  * This function assumes that the octree is balanced 2:1
  * @param[in] level the level of the coarsest octree

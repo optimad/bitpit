@@ -74,7 +74,19 @@ double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info
 
     BITPIT_UNUSED(mapper) ;
 
-    double newRSearch = -1. ;
+    return computeRSearchFromCell( 0 ) ;
+
+};
+
+/*!
+ * Compute size of narrow band given a cell.
+ * @param[in] id is the id of the cell
+ */
+double LevelSetCartesian::computeRSearchFromCell( long id ){
+
+    BITPIT_UNUSED(id) ;
+
+    double newRSearch = 0. ;
 
     for( int d=0; d<m_cartesian->getDimension(); ++d){
         newRSearch = std::max( newRSearch, m_cartesian->getSpacing(d) ) ;
