@@ -640,40 +640,79 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
 
     if( newSize-oldSize <= 1.e-8 ) { //size of narrow band decreased or remained the same -> mapping
 
-        std::unordered_map<long,std::unordered_set<long>> oldSegs ;
-        std::unordered_map<long,std::unordered_set<long>>::iterator oldSegsIt ;
+        std::vector<std::vector<long>> previousSegments ;
 
+        long nNewElements = 0;
         for ( auto & info : mapper ){
-            if( info.entity == adaption::Entity::ENTITY_CELL ){
+            // Consider only changes on cells
+            if( info.entity != adaption::Entity::ENTITY_CELL ){
+                continue;
+            }
 
-                for ( auto & parent : info.previous){ //save old data and delete element
-                    if( m_seg.exists(parent) ){
-                        SegInfo *seg =  &m_seg[parent] ;
+            // Count new elements
+            long nCurrentElements = info.current.size() ;
+            nNewElements += nCurrentElements ;
 
-                        oldSegs.insert({{ parent, seg->m_segments }}) ;
-                        m_seg.erase(parent,true) ;
+            // Save previous data and delete previos elements
+            std::vector<long> *parentSegments = nullptr ;
+            if ( nCurrentElements > 0 ) {
+                previousSegments.emplace_back() ;
+                parentSegments = &previousSegments.back() ;
+            }
 
+            for ( auto & parent : info.previous){
+
+                PiercedVector<SegInfo>::const_iterator parentSegInfo = m_seg.find(parent) ;
+                if( parentSegInfo != m_seg.cend() ){
+                    // Add previous segments only if there are current elements
+                    // associated with this change.
+                    if( parentSegments != nullptr ){
+                        auto &segments = parentSegInfo->m_segments ;
+                        parentSegments->insert( parentSegments->end(), segments.begin(), segments.end() ) ;
                     }
+
+                    m_seg.erase(parent,true) ;
                 }
+            }
+
+            // Remove duplicate entries from the list of previous segments
+            if( parentSegments != nullptr ){
+                std::sort( parentSegments->begin(), parentSegments->end() ) ;
+                parentSegments->erase( std::unique(parentSegments->begin(), parentSegments->end()), parentSegments->end() ) ;
             }
         }
 
         m_seg.flush() ;
 
-        for ( auto & info : mapper ){ //forall mesh modifications
-            if( info.entity == adaption::Entity::ENTITY_CELL){ //check if changes on cells
-                for ( auto & child : info.current){ // forall new elements
+        // Update new elements
+        if (nNewElements > 0) {
+            m_seg.reserve(m_seg.size() + nNewElements) ;
 
-                    PiercedVector<SegInfo>::iterator seg =  m_seg.reclaim(child) ;
-                    seg->m_checked = false ;
-                    seg->m_segments.clear() ;
-
-                    for ( auto & parent : info.previous){ //take their parents
-                        oldSegsIt = oldSegs.find(parent);
-                        if( oldSegsIt != oldSegs.end() ) //add their information if any
-                            seg->m_segments.insert( oldSegsIt->second.begin(), oldSegsIt->second.end() ) ;
-                    }
+            size_t adaptionIdx = 0;
+            for ( auto & info : mapper ){
+                // Consider only changes on cells
+                if( info.entity != adaption::Entity::ENTITY_CELL ){
+                    continue;
                 }
+
+                // Skip adaption info with no current elements
+                long nCurrentElements = info.current.size() ;
+                if (nCurrentElements == 0) {
+                    continue;
+                }
+
+                // Get the list of parent segments
+                std::vector<long> &parentSegments = previousSegments[adaptionIdx] ;
+
+                // Assign the segments of the parents to the childs
+                for ( auto & child : info.current){
+                    PiercedVector<SegInfo>::iterator childSegInfo = m_seg.emplace(child) ;
+                    childSegInfo->m_checked = false;
+                    childSegInfo->m_segments.insert( parentSegments.begin(), parentSegments.end() ) ;
+                }
+
+                // Increase adaption info counter
+                adaptionIdx++;
             }
         }
 
@@ -684,9 +723,6 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
         associateSimplexToCell( visitee, visitee->getSizeNarrowBand() ) ; 
 
     };
-
-
-    return ;
 
 };
 
