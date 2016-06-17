@@ -103,7 +103,6 @@ class LevelSet{
     void                                        update( const std::vector<adaption::Info> & ) ;
 # if BITPIT_ENABLE_MPI
     void                                        exchangeGhosts( ) ;
-    void                                        loadBalance( const std::vector<adaption::Info> & ) ;
     void                                        communicate( std::unordered_map<int,std::vector<long>> &, std::unordered_map<int,std::vector<long>> &, std::vector<adaption::Info> const *mapper=NULL ) ;
 # endif
 
