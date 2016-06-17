@@ -60,6 +60,8 @@ class PiercedIterator
 	static_assert(std::is_integral<id_t>::value, "Signed integer required for id.");
 	static_assert(std::numeric_limits<id_t>::is_signed, "Signed integer required for id.");
 
+	 friend class PiercedIterator<value_no_cv_t, id_t>;
+
 private:
 	/*!
 		Container.
