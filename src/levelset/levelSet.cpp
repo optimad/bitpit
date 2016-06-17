@@ -373,29 +373,62 @@ void LevelSet::compute(){
  */
 void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
-    double  newRSearch ;
+    // Check the mapper to detect the operations to perform
+    bool updateNarrowBand = false;
+    std::unordered_map<int,std::vector<long>> sendList, recvList ;
 
-    if(m_userRSearch){
-        newRSearch = m_kernel->getSizeNarrowBand() ;
-    } else {
-        newRSearch = m_kernel->updateSizeNarrowBand( mapper )  ;
-    };
+    for( const auto &event : mapper){
+        if( event.entity != adaption::Entity::ENTITY_CELL){
+            continue;
+        }
 
+        if( event.type == adaption::Type::TYPE_PARTITION_SEND){
+            sendList.insert({{event.rank,event.previous}}) ;
+        } else if( event.type == adaption::Type::TYPE_PARTITION_RECV){
+            recvList.insert({{event.rank,event.current}}) ;
+        } else if( event.type != adaption::Type::TYPE_PARTITION_NOTICE){
+            updateNarrowBand = true ;
+        }
+    }
+
+    // Evaluate new narrow band size
+    double newRSearch ;
+    if (updateNarrowBand) {
+        if(m_userRSearch){
+            newRSearch = m_kernel->getSizeNarrowBand() ;
+        } else {
+            newRSearch = m_kernel->updateSizeNarrowBand( mapper )  ;
+        };
+    }
+
+    // Clear levelset
     m_kernel->clearAfterMeshMovement(mapper) ;
-    m_kernel->filterOutsideNarrowBand(newRSearch) ;
 
-    for( const auto &visitor : m_object ){
-        visitor.second->updateLSInNarrowBand( m_kernel, mapper, newRSearch, m_signedDF ) ;
+    // Update narrow band
+    if (updateNarrowBand) {
+        m_kernel->filterOutsideNarrowBand(newRSearch) ;
+
+        for( const auto &visitor : m_object ){
+            visitor.second->updateLSInNarrowBand( m_kernel, mapper, newRSearch, m_signedDF ) ;
+        }
     }
 
 #if BITPIT_ENABLE_MPI
+    // Parallel communications
+    if (sendList.size() > 0 || recvList.size() > 0) {
+        communicate(sendList, recvList, &mapper ) ;
+    }
+
     exchangeGhosts() ;
 #endif
 
-    if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
-//TODO    if( propagateV ) updatePropagatedValue() ;
+    // Finish narrow band update
+    if (updateNarrowBand) {
+        if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
+//TODO      if( propagateV ) updatePropagatedValue() ;
 
-    m_kernel->setSizeNarrowBand(newRSearch) ;
+        m_kernel->setSizeNarrowBand(newRSearch) ;
+    }
 
     return;
 
@@ -467,34 +500,6 @@ void LevelSet::exchangeGhosts(  ){
 
     return ;
 }
-/*!
- * Distribution of levelset over available processes after partitioning of mesh
- * @param[in] mapper mapper describing partitioning
- */
-void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
-
-    std::unordered_map<int,std::vector<long>> sendList, recvList ;
-
-    for( const auto &event : mapper){
-        if( event.entity == adaption::Entity::ENTITY_CELL){
-            if( event.type == adaption::Type::TYPE_PARTITION_SEND){
-                sendList.insert({{event.rank,event.previous}}) ;
-            }
-
-            if( event.type == adaption::Type::TYPE_PARTITION_RECV){
-                recvList.insert({{event.rank,event.current}}) ;
-            }
-        }
-    }
-    
-    m_kernel->clearAfterMeshMovement(mapper) ;    
-
-    communicate(sendList, recvList, &mapper ) ;
-    exchangeGhosts() ;
-
-    return ;
-}
-
 
 /*!
  * communicates data structures of kernel and objects.

@@ -153,7 +153,7 @@ int main( int argc, char *argv[]){
     mesh.getVTK().setName("levelset_parallel_001") ;
 
     mapper = mesh.partition(MPI_COMM_WORLD, true) ;
-    levelset.loadBalance(mapper) ;
+    levelset.update(mapper) ;
 
     // Write mesh
     if (rank == 0) {
