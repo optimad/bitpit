@@ -397,7 +397,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         if(m_userRSearch){
             newRSearch = m_kernel->getSizeNarrowBand() ;
         } else {
-            newRSearch = m_kernel->updateSizeNarrowBand( mapper )  ;
+            newRSearch = m_kernel->updateSizeNarrowBand( mapper, m_object )  ;
         };
     }
 

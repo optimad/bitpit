@@ -158,67 +158,113 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
  * Update the size of the narrow band after an adaptation of the octree mesh
  * @param[in]  mapper mesh modifications
  */
-double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper ){
-
-    double  newRSearch ;
-    long    id ;
-    int     level(100) ;
-    std::vector<bool>    map(mapper.size()) ;
-    std::vector<bool>::iterator    mapIt=map.begin()  ;
-
-    PiercedIterator<LSInfo> it=m_ls.begin(), itEnd = m_ls.end() ;
-
-    std::unordered_set<long> nb;
+double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, std::unordered_map<int, LevelSetObject *> &objects ){
 
     // assumes that LS information is relevant to OLD!!! grid
     // scrrens old narrow band for coarsest elements
-    
-    nb.reserve( m_ls.size() ) ;
 
-    while( it!=itEnd ){
-        id = it.getId() ;
-        if( isInNarrowBand(id) )
-            nb.insert(id) ;
-        ++it ;
-    };
+    //
+    // Get the bounding box of the objects
+    //
+    int nObjects = objects.size();
 
+    std::vector<std::array<double, 3>> objectsMinPoint(nObjects);
+    std::vector<std::array<double, 3>> objectsMaxPoint(nObjects);
 
-    for ( auto & info : mapper ){
-
-        *mapIt = false ;
-        if( info.entity == adaption::Entity::ENTITY_CELL){
-
-            for ( auto & parent : info.previous){
-
-                if( isInNarrowBand(parent) ){
-                    *mapIt = true;
-                    nb.erase(parent) ;
-                };
-            };
-
-        }
-        ++mapIt ;
+    int i = -1;
+    for ( auto objectEntry : objects ) {
+        ++i;
+        const LevelSetObject *object = objectEntry.second;
+        object->getBoundingBox( objectsMinPoint[i], objectsMaxPoint[i] ) ;
     }
 
-    mapIt= map.begin() ;
+    //
+    // Cells in the narrow band
+    //
+    std::unordered_set<long> narrowBandCells;
+
+    // First insert the new cells added to the narrow band
+    std::unordered_set<long> removedNBCells;
     for ( auto & info : mapper ){
-        if( info.entity == adaption::Entity::ENTITY_CELL){
-            if(*mapIt){ //parent was in narrow band
-                for( auto &child : info.current){
-                    nb.insert(child) ;
-                };
-            }; //endif parent in narrow band
+        if( info.entity != adaption::Entity::ENTITY_CELL){
+            continue;
+        }
 
-        }//if on cell
+        bool parentInNarrowBand = false;
+        for ( auto & parent : info.previous){
+            if( isInNarrowBand(parent) ){
+                parentInNarrowBand = true;
+                break;
+            }
+        }
 
-        ++mapIt ;
-    };//foreach mesh modification
+        if (parentInNarrowBand) {
+            for ( auto & parent : info.previous){
+                removedNBCells.insert(parent);
+            }
 
-    for( auto &id : nb){
-        level = min( level, m_octree->getCellLevel(id) ) ;
-    };
+            for( auto &child : info.current){
+                narrowBandCells.insert(child);
+            }
+        }
+    }
 
-    newRSearch = computeRSearchFromLevel(level) ;
+    // Now add the cells that were inthe narrow band befor and have not been
+    // updated
+    for (auto itr = m_ls.begin(); itr != m_ls.end(); ++itr) {
+        long id = itr.getId() ;
+        if( removedNBCells.count(id) > 0 || !isInNarrowBand(id) ) {
+            continue;
+        }
+
+        narrowBandCells.insert(id);
+    }
+
+    // Evaluate if the cells in the narrow band are inside the bounding box
+    // defined by the objects.
+    std::unordered_map<long, bool> isInsideObjectBox;
+    for ( long cellId : narrowBandCells ){
+        bool isInside = false;
+        for (int i = 0; i < nObjects; ++i) {
+            if( isCellInsideBoundingBox( cellId, objectsMinPoint[i], objectsMaxPoint[i] ) ){
+                isInside = true;
+                break;
+            }
+        }
+
+        isInsideObjectBox.insert( { cellId, isInside } );
+    }
+
+    //
+    // Get the miminum level in the narrow band
+    //
+    // We need to consider only the cells that are inside the bounding box
+    // defined by the objects, or the cells that have at least a neighbout
+    // inside the bounding box defined by the objects.
+    double newRSearch = 0. ;
+    for ( long cellId : narrowBandCells ){
+        // Discard cells that are not in the bounding box
+        bool discardCell = !isInsideObjectBox.at(cellId) ;
+        if ( discardCell ) {
+            for ( long neighId : m_mesh->findCellFaceNeighs(cellId) ) {
+                if ( narrowBandCells.count(neighId) == 0 ) {
+                    continue;
+                }
+
+                if (isInsideObjectBox.at(neighId)) {
+                    discardCell = false ;
+                    break ;
+                }
+            }
+        }
+
+        if (discardCell) {
+            continue;
+        }
+
+        // Update the level
+        newRSearch = std::max( newRSearch, computeRSearchFromCell(cellId) ) ;
+    }
 
 # if BITPIT_ENABLE_MPI
     if( assureMPI() ) {

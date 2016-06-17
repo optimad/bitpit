@@ -70,9 +70,10 @@ double LevelSetCartesian::computeSizeNarrowBand( LevelSetObject *visitor ){
  * Update the size of the narrow band after an adaptation of the cartesian mesh
  * @param[in] mapper mesh modifications
  */
-double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper ){
+double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, std::unordered_map<int, LevelSetObject *> &objects ){
 
     BITPIT_UNUSED(mapper) ;
+    BITPIT_UNUSED(objects) ;
 
     return computeRSearchFromCell( 0 ) ;
 
