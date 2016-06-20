@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 	MPI_Init(&argc,&argv);
 #endif
 
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 20;
 	double dh = 0.5;
 
