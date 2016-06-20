@@ -427,8 +427,11 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         newRSearch = m_kernel->computeSizeNarrowBandFromLS();
 
         m_kernel->filterOutsideNarrowBand(newRSearch) ;
-
         m_kernel->setSizeNarrowBand(newRSearch) ;
+
+        for( const auto &visitor : m_object ){
+            visitor.second->filterOutsideNarrowBand(m_kernel) ;
+        }
 
         if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
 //TODO      if( propagateV ) updatePropagatedValue() ;

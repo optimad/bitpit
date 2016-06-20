@@ -753,6 +753,27 @@ void LevelSetSegmentation::clearAfterMeshMovement( const std::vector<adaption::I
 };
 
 /*!
+ * Clears data structure outside narrow band
+ * @param[in] visitee LevelSetKernel with narrow band information
+ */
+void LevelSetSegmentation::filterOutsideNarrowBand( LevelSetKernel *visitee ){
+
+    long id ;
+
+    bitpit::PiercedVector<SegInfo>::iterator segItr ;
+    for( segItr = m_seg.begin(); segItr != m_seg.end(); ++segItr){
+        id = segItr.getId() ;
+        if( ! visitee->isInNarrowBand(id) ){
+            m_seg.erase(id,true) ;
+        };
+    };
+
+    m_seg.flush() ;
+
+    return ;
+};
+
+/*!
  * Writes LevelSetSegmentation to stream in binary format
  * @param[in] stream output stream
  */

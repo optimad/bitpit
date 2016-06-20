@@ -155,7 +155,7 @@ int main( int argc, char *argv[]){
 
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            if( std::abs(levelset.getLS(id)) < 100. ){
+            if( std::abs(levelset.getLS(id)) < 2.*mesh.evalCellSize(id) ){
                 mesh.markCellForRefinement(id) ;
             }
         }

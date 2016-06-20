@@ -70,6 +70,15 @@ void LevelSetObject::clearAfterMeshMovement( const std::vector<adaption::Info> &
 }
 
 /*!
+ * Clears data structure outside narrow band
+ * @param[in] visitee LevelSetKernel with narrow band information
+ */
+void LevelSetObject::filterOutsideNarrowBand( LevelSetKernel *visitee ){
+    BITPIT_UNUSED(visitee) ;
+    return;
+}
+
+/*!
  * Writes LevelSetObject to stream in binary format
  * @param[in] stream output stream
  */

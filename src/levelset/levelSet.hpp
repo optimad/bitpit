@@ -241,6 +241,7 @@ class LevelSetObject{
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
     virtual void                                clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
+    virtual void                                filterOutsideNarrowBand( LevelSetKernel *) ;
 
     virtual void                                dumpDerived( std::fstream &) =0 ;
     virtual void                                restoreDerived( std::fstream &) =0 ;
@@ -299,6 +300,7 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
     void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
+    void                                        filterOutsideNarrowBand( LevelSetKernel *) ;
 
 # if BITPIT_ENABLE_MPI
     void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & ) ;
