@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	BITPIT_UNUSED(argv);
 #endif
 
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 20;
 	double dh = 1.0;
 

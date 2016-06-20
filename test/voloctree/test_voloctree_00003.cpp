@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 	log::manager().initialize(log::COMBINED);
 	log::cout() << "Testing octree patch" << "\n";
 
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 20;
 	double dh = 0.5;
 
