@@ -62,20 +62,20 @@ int main( int argc, char *argv[]){
     int                    dimensions(3) ;
 
     // Input geometry
-    SurfUnstructured    STL(0);
+    std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(0) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 
-    STL.importSTL("./data/cube1.stl", true);
+    STL->importSTL("./data/cube1.stl", true);
 
-    STL.deleteCoincidentVertices() ;
-    STL.buildAdjacencies() ;
+    STL->deleteCoincidentVertices() ;
+    STL->buildAdjacencies() ;
 
-    STL.getVTK().setName("geometry_002") ;
-    STL.write() ;
+    STL->getVTK().setName("geometry_002") ;
+    STL->write() ;
 
-    std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL.getCellCount() << std::endl;
+    std::cout << "n. vertex: " << STL->getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL->getCellCount() << std::endl;
 
 
 
@@ -84,7 +84,7 @@ int main( int argc, char *argv[]){
     std::array<double,3>     meshMin, meshMax, delta ;
     std::array<int,3>        nc = {{64, 64, 64}} ;
 
-    STL.getBoundingBox( meshMin, meshMax ) ;
+    STL->getBoundingBox( meshMin, meshMax ) ;
 
     delta = meshMax -meshMin ;
     meshMin -=  0.1*delta ;
@@ -101,7 +101,7 @@ int main( int argc, char *argv[]){
     LevelSet                levelset ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject( &STL) ;
+    levelset.addObject( std::move(STL) ) ;
 
     levelset.setPropagateSign(true) ;
     start = std::chrono::system_clock::now();

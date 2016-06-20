@@ -70,20 +70,20 @@ int main( int argc, char *argv[]){
 
 
     // Input geometry
-    bitpit::SurfUnstructured    STL(0,1,dimensions);
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured (0,1,dimensions) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 
-    STL.importDGF("./data/naca0012.dgf");
+    STL->importDGF("./data/naca0012.dgf");
 
-    STL.deleteCoincidentVertices() ;
-    STL.buildAdjacencies() ;
+    STL->deleteCoincidentVertices() ;
+    STL->buildAdjacencies() ;
 
-    STL.getVTK().setName("geometry_003") ;
-    STL.write() ;
+    STL->getVTK().setName("geometry_003") ;
+    STL->write() ;
 
-    std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL.getCellCount() << std::endl;
+    std::cout << "n. vertex: " << STL->getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL->getCellCount() << std::endl;
 
 
 
@@ -94,7 +94,7 @@ int main( int argc, char *argv[]){
     std::array<double,3>    meshMin, meshMax, delta ;
     double                  h(0), dh ;
 
-    STL.getBoundingBox( meshMin, meshMax ) ;
+    STL->getBoundingBox( meshMin, meshMax ) ;
 
     delta = meshMax -meshMin ;
     meshMin -=  0.1*delta ;
@@ -122,8 +122,7 @@ int main( int argc, char *argv[]){
     std::vector<double>::iterator   itLS ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject(&STL) ;
-
+    levelset.addObject(std::move(STL)) ;
 
     mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_003") ;

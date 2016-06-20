@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+# include <cassert>
+
 # include "levelSet.hpp"
 
 # include "bitpit_common.hpp"
@@ -66,13 +68,76 @@ LevelSetSegmentation::~LevelSetSegmentation() {
 /*!
  * Constructor
  * @param[in] id identifier of object
- * @param[in] *STL pointer to surface mesh
+ */
+LevelSetSegmentation::LevelSetSegmentation( int id) :LevelSetObject(id) {
+
+};
+
+/*!
+ * Constructor
+ * @param[in] id identifier of object
+ * @param[in] STL unique pointer to surface mesh
+ */
+LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL) :LevelSetObject(id) {
+
+    setSegmentation( std::move(STL) );
+
+};
+
+/*!
+ * Constructor
+ * @param[in] id identifier of object
+ * @param[in] STL pointer to surface mesh
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LevelSetObject(id) {
 
+    setSegmentation( STL );
+
+};
+
+/*!
+ * Copy constructor.
+ * Assigns same id to new object;
+ * @param[in] other object to be coppied
+ */
+LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) : LevelSetObject(other.getId() ) {
+
+    m_segmentation = other.m_segmentation; 
+    m_dimension = other.m_dimension ;
+    m_vertexNormal = other.m_vertexNormal ;
+    if (m_own != nullptr) {
+        m_own = unique_ptr<SurfUnstructured>(new SurfUnstructured(*(other.m_own)));
+    }
+};
+
+/*!
+ * Clones the object
+ * @return pointer to cloned object
+ */
+LevelSetSegmentation* LevelSetSegmentation::clone() const {
+    return new LevelSetSegmentation( *this ); 
+}
+
+/*!
+ * Set the segmentation
+ * @param[in] segmentation unique pointer to surface mesh
+ */
+void LevelSetSegmentation::setSegmentation( std::unique_ptr<SurfUnstructured> &&segmentation){
+
+    m_own = std::move(segmentation) ;
+
+    setSegmentation( m_own.get() );
+}
+
+/*!
+ * Set the segmentation
+ * @param[in] segmentation pointer to surface mesh
+ */
+void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
+
     std::vector<std::array<double,3>>   vertexNormal ;
 
-    m_segmentation = STL;
+    m_segmentation = segmentation;
     m_dimension = m_segmentation->getSpaceDimension() ;
 
     int  i, nV;
@@ -91,29 +156,6 @@ LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :Leve
         m_vertexNormal.insert({{segId,vertexNormal}}) ;
 
     };
-
-
-};
-
-/*!
- * Copy constructor.
- * Assigns same id to new object;
- * @param[in] other object to be coppied
- */
-LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) :LevelSetObject(other.getId() ) {
-
-    m_segmentation = other.m_segmentation; 
-    m_dimension = other.m_dimension ;
-    m_vertexNormal = other.m_vertexNormal ;
-
-};
-
-/*!
- * Clones the object
- * @return pointer to cloned object
- */
-LevelSetSegmentation* LevelSetSegmentation::clone() const {
-    return new LevelSetSegmentation( *this ); 
 }
 
 /*!

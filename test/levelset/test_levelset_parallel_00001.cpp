@@ -71,22 +71,22 @@ int main( int argc, char *argv[]){
     bitpit::log::cout().setVisibility( bitpit::log::GLOBAL ) ;
 
     // Input geometry
-    bitpit::SurfUnstructured    STL(0);
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(0) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 
-    STL.importSTL("./data/cube1.stl", true);
+    STL->importSTL("./data/cube1.stl", true);
 
-    STL.deleteCoincidentVertices() ;
-    STL.buildAdjacencies() ;
+    STL->deleteCoincidentVertices() ;
+    STL->buildAdjacencies() ;
 
-    STL.getVTK().setName("geometry_002") ;
+    STL->getVTK().setName("geometry_002") ;
     if (rank == 0) {
-        STL.write() ;
+        STL->write() ;
     }
 
-    std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL.getCellCount() << std::endl;
+    std::cout << "n. vertex: " << STL->getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL->getCellCount() << std::endl;
 
     // Create mesh
     std::cout << " - Setting mesh" << std::endl;
@@ -94,7 +94,7 @@ int main( int argc, char *argv[]){
     double                  h(0), dh ;
     int                     dimensions(3);
 
-    STL.getBoundingBox( meshMin, meshMax ) ;
+    STL->getBoundingBox( meshMin, meshMax ) ;
 
     delta = meshMax -meshMin ;
     meshMin -=  0.1*delta ;
@@ -121,7 +121,7 @@ int main( int argc, char *argv[]){
     std::vector<double>::iterator   itLS ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject(&STL) ;
+    levelset.addObject(std::move(STL)) ;
 
     mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_parallel_001_initial") ;

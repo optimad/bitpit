@@ -162,33 +162,81 @@ void LevelSet::setMesh( VolOctree* octree ) {
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
- * @param[in] id identifier of object; in case no id is provided the insertion orer will be used as identifier 
+ * @param[in] id identifier of object; in case no id is provided the insertion
+ * order will be used as identifier
  */
-int LevelSet::addObject( SurfUnstructured* segmentation, int id ) {
+int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, int id ) {
 
-    if( id == levelSetDefaults::OBJECT ){
-        id = m_object.size() ;
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
     }
 
-    m_object.insert( {{id, new LevelSetSegmentation(id,segmentation)}} ) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation)) ;
 
-    return id;
+    return addObject(lsSeg);
 };
 
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
- * @param[in] id identifier of object; in case no id is provided the insertion orer will be used as identifier 
+ * @param[in] id identifier of object; in case no id is provided the insertion
+ * order will be used as identifier
  */
-int LevelSet::addObject( SurfaceKernel* segmentation, int id ) {
+int LevelSet::addObject( SurfUnstructured *segmentation, int id ) {
 
-    if( SurfUnstructured* unstruct = dynamic_cast<SurfUnstructured*>(segmentation) ){
-        return (addObject(unstruct, id) ) ;
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
 
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation) ;
+
+    return addObject(lsSeg);
+};
+
+/*!
+ * Adds a surface segmentation
+ * @param[in] segmentation surface segmentation
+ * @param[in] id identifier of object; in case no id is provided the insertion
+ * order will be used as identifier
+ */
+int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, int id ) {
+
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
+
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
+    if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation.get()) ){
+        segmentation.release();
+        std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
+        lsSeg->setSegmentation( std::move(surfUnstructuredUPtr) );
     } else {
-        return levelSetDefaults::OBJECT;
-    };
+        throw std::runtime_error ("Segmentation type not supported");
+    }
 
+    return addObject(lsSeg);
+};
+
+/*!
+ * Adds a surface segmentation
+ * @param[in] segmentation surface segmentation
+ * @param[in] id identifier of object; in case no id is provided the insertion
+ * order will be used as identifier
+ */
+int LevelSet::addObject( SurfaceKernel *segmentation, int id ) {
+
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
+
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
+    if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation)){
+        lsSeg->setSegmentation( surfUnstructured );
+    } else {
+        throw std::runtime_error ("Segmentation type not supported");
+    }
+
+    return addObject(lsSeg);
 };
 
 /*!

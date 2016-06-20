@@ -85,7 +85,9 @@ class LevelSet{
     void                                        setMesh( VolCartesian* ) ;
     void                                        setMesh( VolOctree* ) ;
 
-    int                                         addObject( SurfaceKernel*, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( std::unique_ptr<SurfaceKernel> &&, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( SurfaceKernel *, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( std::unique_ptr<SurfUnstructured> &&, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( SurfUnstructured *, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( LevelSetObject* ) ;
 
@@ -284,16 +286,23 @@ class LevelSetSegmentation : public LevelSetObject {
     int                                         m_dimension ;               /**< number of space dimensions */
 
     SurfUnstructured*                           m_segmentation;             /**< surface segmentation */
+    std::unique_ptr<SurfUnstructured>           m_own;                      /**< owner of surface segmentation */
+
     std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexNormal;            /**< vertex normals */
     PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
 
 
     public:
     virtual ~LevelSetSegmentation();
-    LevelSetSegmentation(int, SurfUnstructured*);
+    LevelSetSegmentation(int);
+    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> && );
+    LevelSetSegmentation(int, SurfUnstructured* );
     LevelSetSegmentation(const LevelSetSegmentation&);
 
     LevelSetSegmentation*                       clone() const ;
+
+    void                                        setSegmentation( std::unique_ptr<SurfUnstructured> && ) ;
+    void                                        setSegmentation( SurfUnstructured * ) ;
 
     const std::unordered_set<long> &            getSimplexList(const long &) const ;
     bool                                        isInNarrowBand( const long &) ;
@@ -324,7 +333,6 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        associateSimplexToCell( LevelSetOctree *, const double &);
 
     void                                        updateSimplexToCell( LevelSetOctree *, const std::vector<adaption::Info> &, const double & ) ;
-
 };
 
 }

@@ -110,21 +110,17 @@ int main( int argc, char *argv[]){
     int                    dimensions(2) ;
 
     // Input geometry
-    SurfUnstructured STL(0,1,dimensions);
+    std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(0,1,dimensions) );
 
     std::cout << " - Loading dgf geometry" << std::endl;
 
-//    STL.importSTL("./data/naca0012.dgf") 
+    Generate2DSurfMesh( *(STL.get()) ) ;
 
-//    STL.deleteCoincidentVertices() ;
-//    STL.buildAdjacencies() ;
-    Generate2DSurfMesh( STL ) ;
+    STL->getVTK().setName("geometry_001") ;
+    STL->write() ;
 
-    STL.getVTK().setName("geometry_001") ;
-    STL.write() ;
-
-    std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL.getCellCount() << std::endl;
+    std::cout << "n. vertex: " << STL->getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL->getCellCount() << std::endl;
 
 
 
@@ -133,7 +129,7 @@ int main( int argc, char *argv[]){
     std::array<double,3>     meshMin, meshMax, delta ;
     std::array<int,3>        nc = {{64, 64, 0}} ;
 
-    STL.getBoundingBox( meshMin, meshMax ) ;
+    STL->getBoundingBox( meshMin, meshMax ) ;
 
     delta = meshMax -meshMin ;
     meshMin -=  0.1*delta ;
@@ -150,7 +146,8 @@ int main( int argc, char *argv[]){
     LevelSet                levelset ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject(&STL) ;
+
+    levelset.addObject(std::move(STL)) ;
 
     start = std::chrono::system_clock::now();
     levelset.compute( ) ;
