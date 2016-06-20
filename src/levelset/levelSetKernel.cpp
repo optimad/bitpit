@@ -188,6 +188,45 @@ void LevelSetKernel::setSizeNarrowBand(double r){
 };
 
 /*!
+ * Compute the size of the narrow band using the levelset value
+ * @param[in]  mapper mesh modifications
+ */
+double LevelSetKernel::computeSizeNarrowBandFromLS( ){
+
+    // We need to consider only the cells with a levelset value less than
+    // local narrow band (ie. size of the narrowband evalauted using the
+    // cell).
+    double newRSearch = 0.;
+    for (auto itr = m_ls.begin(); itr != m_ls.end(); ++itr) {
+        // Discard cells outside the narrow band
+        long id = itr.getId() ;
+        if( !isInNarrowBand(id) ) {
+            continue;
+        }
+
+         // Discard cells with a levelset greater than the local narrow band
+        double localRSearch = computeRSearchFromCell( id ) ;
+        if ( std::abs( getLS(id) ) > (localRSearch + m_mesh->getTol()) ) {
+            continue;
+        }
+
+        // Update the levelset
+        newRSearch = std::max( localRSearch, newRSearch );
+    }
+
+# if BITPIT_ENABLE_MPI
+    if( assureMPI() ) {
+        double reducedRSearch ;
+        MPI_Allreduce( &newRSearch, &reducedRSearch, 1, MPI_DOUBLE, MPI_MAX, m_commMPI );
+        newRSearch = reducedRSearch ;
+    }
+#endif
+
+    return newRSearch;
+
+};
+
+/*!
  * Computes the Level Set Gradient on on cell by first order finite-volume upwind stencil
  * @param[in] I index of cell 
  * @return gradient

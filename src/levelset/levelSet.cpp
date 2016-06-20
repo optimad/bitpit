@@ -424,10 +424,14 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
     // Finish narrow band update
     if (updateNarrowBand) {
-        if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
-//TODO      if( propagateV ) updatePropagatedValue() ;
+        newRSearch = m_kernel->computeSizeNarrowBandFromLS();
+
+        m_kernel->filterOutsideNarrowBand(newRSearch) ;
 
         m_kernel->setSizeNarrowBand(newRSearch) ;
+
+        if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
+//TODO      if( propagateV ) updatePropagatedValue() ;
     }
 
     return;
