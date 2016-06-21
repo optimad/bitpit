@@ -39,6 +39,8 @@ namespace bitpit {
     using namespace std;
 
 
+    /*! Default constructor. It constructs an empty buffer with MPI_COMM_WORLD as MPI-communicator
+     */
     CommBuffer::CommBuffer(){
 
         m_commBufferSize = 0;
@@ -47,6 +49,9 @@ namespace bitpit {
         m_comm = MPI_COMM_WORLD;
     }
 
+    /*! Constructor. It constructs an empty buffer with comm_ as MPI-communicator
+     * \param[in] comm_ The user MPI-communicator
+     */
     CommBuffer::CommBuffer(MPI_Comm comm_) : m_comm(comm_){
 
         m_commBufferSize = 0;
@@ -54,6 +59,11 @@ namespace bitpit {
         m_pos = 0;
     }
 
+    /*! Constructor. It constructs an value initilized buffer of size size with comm_ as MPI-communicator
+     * \param[in] size The size of the buffer
+     * \param[in] value The initilization value for the buffer
+     * \param[in] comm_ The user MPI-communicator
+     */
     CommBuffer::CommBuffer(uint32_t size, char value, MPI_Comm comm_) : m_comm(comm_){
 
         m_commBufferSize = size;
@@ -63,6 +73,9 @@ namespace bitpit {
         m_pos = 0;
     }
 
+    /*! Copy constructor. It constructs a buffer by copy
+     * \param[in] other The buffer to be copied in
+     */
     CommBuffer::CommBuffer(const CommBuffer& other) {
 
         m_commBufferSize = other.m_commBufferSize;
@@ -77,11 +90,17 @@ namespace bitpit {
         m_comm = other.m_comm;
     }
 
+    /*! Destructor. It dinamically deletes the buffer
+     * \param[in] comm_ The user MPI-communicator
+     */
     CommBuffer::~CommBuffer() {
 		delete [] m_commBuffer;
 		m_commBuffer = NULL;
     }
 
+    /*! Assignement operator. It assigns a buffer all the memebers of another buffer
+     * \param[in] rhs The other buffer whose member have to be copied in
+     */
     CommBuffer& CommBuffer::operator =(const CommBuffer& rhs) {
         if(this != &rhs)
             {
