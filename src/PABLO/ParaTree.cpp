@@ -1926,7 +1926,7 @@ namespace bitpit {
 
     };
 
-    /** Get the octant owner of an input point.
+    /** Get the internal octant owner of an input point.
      * \param[in] point Coordinates of target point.
      * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
      */
@@ -1938,6 +1938,24 @@ namespace bitpit {
         else
             return NULL;
     };
+
+    /** Get the octant owner of an input point.
+     * \param[in] point Coordinates of target point.
+     * \param[out] isghost Boolean flag, true if the octant found is ghost
+     * \return Pointer to octant owner of target point (=NULL if point is outside of the ghosted domain).
+     */
+    Octant*
+    ParaTree::getPointOwner(dvector point, bool & isghost){
+        uint32_t idx = getPointOwnerIdx(point,isghost);
+        if(idx < numeric_limits<uint32_t>::max())
+            if(isghost)
+                return &m_octree.m_ghosts[idx];
+            else
+                return &m_octree.m_octants[idx];
+        else
+            return NULL;
+    };
+
 
     /** Get the octant owner of an input point.
      * \param[in] point Coordinates of target point.
@@ -2016,6 +2034,142 @@ namespace bitpit {
 
     /** Get the octant owner of an input point.
      * \param[in] point Coordinates of target point.
+     * \param[out] isghost Boolean flag, true if the octant found is ghost
+     * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
+     */
+    uint32_t
+    ParaTree::getPointOwnerIdx(dvector point, bool & isghost){
+        uint32_t noctants = m_octree.m_octants.size();
+        uint32_t idxtry = noctants/2;
+        uint32_t x, y, z;
+        uint64_t morton, mortontry;
+        int powner = 0;
+        isghost = false;
+        //ParaTree works in [0,1] domain
+        if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
+            || point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
+            return numeric_limits<uint32_t>::max();
+        }
+        point[0] = min(max(point[0],0.0),1.0);
+        point[1] = min(max(point[1],0.0),1.0);
+        point[2] = min(max(point[2],0.0),1.0);
+
+        x = m_trans.mapX(point[0]);
+        y = m_trans.mapY(point[1]);
+        z = m_trans.mapZ(point[2]);
+
+        if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength)
+            || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
+            return numeric_limits<uint32_t>::max();
+        }
+
+        if (x == m_global.m_maxLength) x = x - 1;
+        if (y == m_global.m_maxLength) y = y - 1;
+        if (z == m_global.m_maxLength) z = z - 1;
+        morton = mortonEncode_magicbits(x,y,z);
+
+
+        powner = 0;
+        if(!m_serial) powner = findOwner(morton);
+
+        if ((powner==m_rank) && (!m_serial)){
+
+            int32_t jump = idxtry;
+            while(abs(jump) > 0){
+                
+                mortontry = m_octree.m_octants[idxtry].computeMorton();
+                jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+                idxtry += jump;
+                if (idxtry > noctants-1){
+                    if (jump > 0){
+                        idxtry = noctants - 1;
+                        jump = 0;
+                    }
+                    else if (jump < 0){
+                        idxtry = 0;
+                        jump = 0;
+                    }
+                }
+            }
+            if(m_octree.m_octants[idxtry].computeMorton() == morton){
+                return idxtry;
+            }
+            else{
+                // Step until the mortontry lower than morton (one idx of distance)
+                {
+                    while(m_octree.m_octants[idxtry].computeMorton() < morton){
+                        idxtry++;
+                        if(idxtry > noctants-1){
+                            idxtry = noctants-1;
+                            break;
+                        }
+                    }
+                    while(m_octree.m_octants[idxtry].computeMorton() > morton){
+                        idxtry--;
+                        if(idxtry > noctants-1){
+                            idxtry = 0;
+                            break;
+                        }
+                    }
+                }
+                return idxtry;
+            }
+        }
+        else if((powner != m_rank) && m_serial){
+            return numeric_limits<uint32_t>::max();
+        }
+        else{
+            //GHOST SEARCH
+            uint32_t nghosts = m_octree.m_ghosts.size();
+            idxtry = nghosts/2;
+            int32_t jump = idxtry;
+            while(abs(jump) > 0){
+                
+                mortontry = m_octree.m_ghosts[idxtry].computeMorton();
+                jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+                idxtry += jump;
+                if (idxtry > nghosts-1){
+                    if (jump > 0){
+                        idxtry = nghosts - 1;
+                        jump = 0;
+                    }
+                    else if (jump < 0){
+                        idxtry = 0;
+                        jump = 0;
+                    }
+                }
+            }
+            if(m_octree.m_ghosts[idxtry].computeMorton() == morton){
+                isghost = true;
+                return idxtry;
+            }
+            else{
+                // Step until the mortontry lower than morton (one idx of distance)
+                {
+                    while(m_octree.m_ghosts[idxtry].computeMorton() < morton){
+                        idxtry++;
+                        if(idxtry > nghosts-1){
+                            idxtry = nghosts-1;
+                            break;
+                        }
+                    }
+                    while(m_octree.m_ghosts[idxtry].computeMorton() > morton){
+                        idxtry--;
+                        if(idxtry > nghosts-1){
+                            idxtry = 0;
+                            break;
+                        }
+                    }
+                }
+                isghost = true;
+                return idxtry;
+            }
+        }///end ghosts search
+    };
+
+
+    /** Get the internal octant owner of an input point.
+     * \param[in] point Coordinates of target point.
      * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
      */
     Octant*
@@ -2023,6 +2177,23 @@ namespace bitpit {
         uint32_t idx = getPointOwnerIdx(point);
         if(idx < numeric_limits<uint32_t>::max())
             return &m_octree.m_octants[idx];
+        else
+            return NULL;
+    };
+
+    /** Get the octant owner of an input point.
+     * \param[in] point Coordinates of target point.
+     * \param[out] isghost Boolean flag, true if the octant found is ghost
+     * \return Pointer to octant owner of target point (=NULL if point is outside of the ghostd domain).
+     */
+    Octant*
+    ParaTree::getPointOwner(darray3 point, bool & isghost){
+        uint32_t idx = getPointOwnerIdx(point,isghost);
+        if(idx < numeric_limits<uint32_t>::max())
+            if(isghost)
+                return &m_octree.m_ghosts[idx];
+            else
+                return &m_octree.m_octants[idx];
         else
             return NULL;
     };
@@ -2109,6 +2280,142 @@ namespace bitpit {
             return idxtry;
         }
     };
+
+    /** Get the octant owner of an input point.
+     * \param[in] point Coordinates of target point.
+     * \param[out] isghost Boolean flag, true if the octant found is ghost
+     * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
+     */
+    uint32_t
+    ParaTree::getPointOwnerIdx(darray3 point, bool & isghost){
+        uint32_t noctants = m_octree.m_octants.size();
+        uint32_t idxtry = noctants/2;
+        uint32_t x, y, z;
+        uint64_t morton, mortontry;
+        int powner = 0;
+        isghost = false;
+        //ParaTree works in [0,1] domain
+        if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
+            || point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
+            return numeric_limits<uint32_t>::max();
+        }
+        point[0] = min(max(point[0],0.0),1.0);
+        point[1] = min(max(point[1],0.0),1.0);
+        point[2] = min(max(point[2],0.0),1.0);
+
+        x = m_trans.mapX(point[0]);
+        y = m_trans.mapY(point[1]);
+        z = m_trans.mapZ(point[2]);
+
+        if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength)
+            || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
+            return numeric_limits<uint32_t>::max();
+        }
+
+        if (x == m_global.m_maxLength) x = x - 1;
+        if (y == m_global.m_maxLength) y = y - 1;
+        if (z == m_global.m_maxLength) z = z - 1;
+        morton = mortonEncode_magicbits(x,y,z);
+
+
+        powner = 0;
+        if(!m_serial) powner = findOwner(morton);
+
+        if ((powner==m_rank) && (!m_serial)){
+
+            int32_t jump = idxtry;
+            while(abs(jump) > 0){
+                
+                mortontry = m_octree.m_octants[idxtry].computeMorton();
+                jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+                idxtry += jump;
+                if (idxtry > noctants-1){
+                    if (jump > 0){
+                        idxtry = noctants - 1;
+                        jump = 0;
+                    }
+                    else if (jump < 0){
+                        idxtry = 0;
+                        jump = 0;
+                    }
+                }
+            }
+            if(m_octree.m_octants[idxtry].computeMorton() == morton){
+                return idxtry;
+            }
+            else{
+                // Step until the mortontry lower than morton (one idx of distance)
+                {
+                    while(m_octree.m_octants[idxtry].computeMorton() < morton){
+                        idxtry++;
+                        if(idxtry > noctants-1){
+                            idxtry = noctants-1;
+                            break;
+                        }
+                    }
+                    while(m_octree.m_octants[idxtry].computeMorton() > morton){
+                        idxtry--;
+                        if(idxtry > noctants-1){
+                            idxtry = 0;
+                            break;
+                        }
+                    }
+                }
+                return idxtry;
+            }
+        }
+        else if((powner != m_rank) && m_serial){
+            return numeric_limits<uint32_t>::max();
+        }
+        else{
+            //GHOST SEARCH
+            uint32_t nghosts = m_octree.m_ghosts.size();
+            idxtry = nghosts/2;
+            int32_t jump = idxtry;
+            while(abs(jump) > 0){
+                
+                mortontry = m_octree.m_ghosts[idxtry].computeMorton();
+                jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+                idxtry += jump;
+                if (idxtry > nghosts-1){
+                    if (jump > 0){
+                        idxtry = nghosts - 1;
+                        jump = 0;
+                    }
+                    else if (jump < 0){
+                        idxtry = 0;
+                        jump = 0;
+                    }
+                }
+            }
+            if(m_octree.m_ghosts[idxtry].computeMorton() == morton){
+                isghost = true;
+                return idxtry;
+            }
+            else{
+                // Step until the mortontry lower than morton (one idx of distance)
+                {
+                    while(m_octree.m_ghosts[idxtry].computeMorton() < morton){
+                        idxtry++;
+                        if(idxtry > nghosts-1){
+                            idxtry = nghosts-1;
+                            break;
+                        }
+                    }
+                    while(m_octree.m_ghosts[idxtry].computeMorton() > morton){
+                        idxtry--;
+                        if(idxtry > nghosts-1){
+                            idxtry = 0;
+                            break;
+                        }
+                    }
+                }
+                isghost = true;
+                return idxtry;
+            }
+        }///end ghosts search
+    };
+
 
     /** Get mapping info of an octant after an adapting with tracking changes.
      * \param[in] idx Index of new octant.

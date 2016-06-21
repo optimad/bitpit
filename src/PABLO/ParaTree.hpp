@@ -357,9 +357,13 @@ namespace bitpit {
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         Octant* 	getPointOwner(dvector point);
+        Octant* 	getPointOwner(dvector point, bool & isghost);
         uint32_t 	getPointOwnerIdx(dvector point);
+        uint32_t 	getPointOwnerIdx(dvector point, bool & isghost);
         Octant* 	getPointOwner(darray3 point);
+        Octant* 	getPointOwner(darray3 point, bool & isghost);
         uint32_t 	getPointOwnerIdx(darray3 point);
+        uint32_t 	getPointOwnerIdx(darray3 point, bool & isghost);
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost);
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank);
 
