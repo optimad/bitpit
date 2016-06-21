@@ -163,6 +163,7 @@ class LevelSetKernel{
     void                                        restore( std::fstream &);
 
 # if BITPIT_ENABLE_MPI
+
     MPI_Comm                                    getCommunicator() const ;
     void                                        freeCommunicator();
     bool                                        isCommunicatorSet() const;
@@ -277,7 +278,6 @@ class LevelSetSegmentation : public LevelSetObject {
     LevelSetSegmentation*                       clone() const ;
 
     const std::unordered_set<long> &            getSimplexList(const long &) const ;
-    long                                        getSupportSimplex(const long &) const;
     long                                        getSupport(const long &) const  ;
     bool                                        isInNarrowBand( const long &) ;
 

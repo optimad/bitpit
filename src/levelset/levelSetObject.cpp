@@ -34,9 +34,9 @@
 namespace bitpit {
 
 /*!
-	@ingroup    levelset
-	@class      LevelSetObject
-	@brief      LevelSet object.
+	@ingroup levelset
+	@interface LevelSetObject
+	@brief Interface class for all objects with respect to whom the levelset function may be computed.
 */
 
 /*!
