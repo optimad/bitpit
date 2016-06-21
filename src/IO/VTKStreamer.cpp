@@ -27,13 +27,10 @@
 namespace bitpit{
 
 
-/*!
- * @ingroup    VisualizationToolKit
- * @{
- */
 
 /*!
- * @class VTKBaseContainer
+ * @ingroup VisualizationToolKit
+ * @interface VTKBaseContainer
  * @brief An interface class to all containers that are batively supported by VTK
  */
 
@@ -45,7 +42,8 @@ VTKBaseContainer::~VTKBaseContainer( ){
 };
 
 /*!
- * @class VTKBaseStreamer
+ * @ingroup VisualizationToolKit
+ * @interface VTKBaseStreamer
  * @brief The base class to be used to derive VTK streamers form
  */
 
@@ -84,8 +82,10 @@ void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat
 };
 
 /*!
+ * @ingroup VisualizationToolKit
  * @class VTKNativeStreamer
- * @brief A VTK streamer which supports natively std::vector
+ * @brief In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored. 
+ * Right now only std::vector is supported.
  */
 
 /*!
@@ -153,8 +153,5 @@ void VTKNativeStreamer::absorbData( std::fstream &str, std::string name, VTKForm
 
     return;
 };
-/*!
- * @}
- */
 
 }

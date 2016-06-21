@@ -26,10 +26,8 @@
 
 namespace bitpit{
 /*!
- * @ingroup    VisualizationToolKit
- * @{
- *
- * @class      VTK
+ * @ingroup VisualizationToolKit
+ * @interface VTK
  * @brief A base class for VTK input output. 
  *
  * VTK provides all basic methods for reading and writing VTK files.
@@ -994,7 +992,4 @@ bool VTK::readDataArray( std::fstream &str, VTKField &field  ){
 
 };
 
-/*! 
- * @} 
- */
 }
