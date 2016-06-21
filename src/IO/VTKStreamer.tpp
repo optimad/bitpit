@@ -25,6 +25,12 @@
 namespace bitpit{
 
 /*!
+ * @ingroup VisualizationToolKit
+ * @class VTKVectorContainer
+ * @brief Implementation of VTKBaseContainer in order to support natively std::vector in VTK
+ */
+
+/*!
  * Destructor
  */
 template<class T>

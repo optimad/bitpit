@@ -26,12 +26,8 @@
 
 namespace bitpit{
 
-/*!        
- * @ingroup VisualizationToolKit
- * @{
- */
-
 /*!
+ * @ingroup VisualizationToolKit
  * @class VTKUnstructuredGridStreamer
  * @brief Streamer for VTKUnstructuredGrid if the grid is made of homogeneous types
  *
@@ -99,6 +95,7 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
 };
 
 /*!
+ * @ingroup VisualizationToolKit
  * @class VTKUnstructuredGrid
  * @brief VTK input output for Unstructured Meshes
  *
@@ -596,9 +593,5 @@ uint64_t VTKUnstructuredGrid::getNConnectivity( ){
 
     return m_connectivity ;
 };
-
-/*!
- *   @}
- */
 
 }
