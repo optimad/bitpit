@@ -29,7 +29,8 @@
  *      Author: Marco Cisternino
  */
 
-
+/* \cond
+ */
 template<class D>
 inline size_t UserDataLB<D>::fixedSize() const {
 	return 0;
@@ -95,3 +96,5 @@ inline UserDataLB<D>::UserDataLB(Data& data_, Data& ghostdata_) : data(data_), g
 
 template<class D>
 inline UserDataLB<D>::~UserDataLB() {}
+/* \endcond
+ */
