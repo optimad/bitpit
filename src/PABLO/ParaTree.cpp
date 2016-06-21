@@ -2710,6 +2710,11 @@ namespace bitpit {
         return m_octree.m_ghostsConnectivity[getIdx(oct)];
     }
 
+
+
+    /** Check if the grid is 2:1 balanced across intersection of balanceCodim codimension
+     * \return true if the grid is 2:1 balanced
+     */
     bool
     ParaTree::check21Balance(){
         
