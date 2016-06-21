@@ -40,7 +40,7 @@ namespace bitpit {
 
 /*!
     @ingroup levelset
-    @class  LevelSetKernel
+    @interface  LevelSetKernel
     @brief  Mesh specific implementation to calculate the levelset function
 
 */
@@ -687,6 +687,10 @@ void LevelSetKernel::restore( std::fstream &stream ){
 
 # if BITPIT_ENABLE_MPI
 
+/*!
+ * Returns the MPI communicator stored within LevelSetKernel
+ * @return MPI communicator
+ */
 MPI_Comm LevelSetKernel::getCommunicator() const {
     return m_commMPI;
 }
