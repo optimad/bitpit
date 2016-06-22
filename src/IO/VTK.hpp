@@ -172,6 +172,7 @@ class VTKBaseContainer{
     private:
 
     public:
+        VTKBaseContainer( ) ;
         virtual ~VTKBaseContainer( ) ;
         virtual void            flushData( std::fstream &, VTKFormat) =0 ;
         virtual void            absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) =0 ;

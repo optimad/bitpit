@@ -35,6 +35,13 @@ namespace bitpit{
  */
 
 /*!
+ * Constructor
+ */
+VTKBaseContainer::VTKBaseContainer( ){
+
+};
+
+/*!
  * Destructor
  */
 VTKBaseContainer::~VTKBaseContainer( ){
