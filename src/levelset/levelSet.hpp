@@ -69,8 +69,8 @@ class LevelSetInfo{
 class LevelSet{
 
     private:
-    LevelSetKernel*                             m_kernel ;              /**< LevelSet computational kernel */
-    std::unordered_map<int,LevelSetObject*>     m_object ;              /**< Objects defining the boundaries */
+    LevelSetKernel*                                             m_kernel ;              /**< LevelSet computational kernel */
+    std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_object ;              /**< Objects defining the boundaries */
 
     bool                                        m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
     bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
@@ -81,6 +81,8 @@ class LevelSet{
     ~LevelSet() ;
     LevelSet() ;
 
+    LevelSet(LevelSet&& other) = default;
+
     void                                        setMesh( VolumeKernel* ) ;
     void                                        setMesh( VolCartesian* ) ;
     void                                        setMesh( VolOctree* ) ;
@@ -89,7 +91,8 @@ class LevelSet{
     int                                         addObject( SurfaceKernel *, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( std::unique_ptr<SurfUnstructured> &&, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( SurfUnstructured *, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( LevelSetObject* ) ;
+    int                                         addObject( std::unique_ptr<LevelSetObject> && ) ;
+    int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
     const LevelSetObject &                      getObject( int ) const ;
     int                                         getObjectCount( ) const ;
 
@@ -168,14 +171,14 @@ class LevelSetKernel{
 
     virtual double                              computeSizeNarrowBand( LevelSetObject * )=0;
     virtual double                              computeSizeNarrowBandFromLS(  );
-    virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, LevelSetObject *> &objects )=0;
+    virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects )=0;
     virtual double                              computeRSearchFromCell( long id ) = 0;
 
     void                                        clear() ;
     void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
     void                                        filterOutsideNarrowBand( double ) ;
 
-    void                                        propagateSign( std::unordered_map<int,LevelSetObject*> ) ;
+    void                                        propagateSign( std::unordered_map<int, std::unique_ptr<LevelSetObject>> & ) ;
     void                                        propagateValue( LevelSetObject *) ;
 
     void                                        dump( std::fstream &);
@@ -210,7 +213,7 @@ class LevelSetCartesian : public LevelSetKernel{
     VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
 
     private:
-    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, LevelSetObject *> &objects );
+    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects );
     double                                      computeRSearchFromCell( long id ) ;
 
     double                                      updateEikonal( double, double, const long &, const std::unordered_map<long,short> & ) ; 
@@ -235,7 +238,7 @@ class LevelSetOctree : public LevelSetKernel{
     LevelSetOctree( VolOctree & );
 
     double                                      computeSizeNarrowBand( LevelSetObject * );
-    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, LevelSetObject *> &objects );
+    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects );
     double                                      computeRSearchFromCell( long id ) ;
 
 };

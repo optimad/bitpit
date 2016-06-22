@@ -90,14 +90,12 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
         // calculate LS on cartesian mesh and calculate RSearch by finding largest cell throughout flagged cartesian cells
         VolCartesian            cmesh( 0, m_octree->getDimension(), C0, C1-C0, nc ) ;
         LevelSet                auxLS ;
-        LevelSetObject*         auxSe = visitor->clone() ;
 
         auxLS.setMesh( &cmesh ) ;
-        auxLS.addObject( auxSe ) ;
+        auxLS.addObject( std::unique_ptr<LevelSetObject>(visitor->clone()) ) ;
 
         auxLS.setSign(false) ;
         auxLS.compute( ) ;
-        delete auxSe ;
 
 
         std::array<int,3>   i0;
@@ -158,7 +156,7 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
  * Update the size of the narrow band after an adaptation of the octree mesh
  * @param[in]  mapper mesh modifications
  */
-double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, std::unordered_map<int, LevelSetObject *> &objects ){
+double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects ){
 
     // assumes that LS information is relevant to OLD!!! grid
     // scrrens old narrow band for coarsest elements
@@ -172,9 +170,9 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
     std::vector<std::array<double, 3>> objectsMaxPoint(nObjects);
 
     int i = -1;
-    for ( auto objectEntry : objects ) {
+    for ( auto &objectEntry : objects ) {
         ++i;
-        const LevelSetObject *object = objectEntry.second;
+        const LevelSetObject *object = objectEntry.second.get();
         object->getBoundingBox( objectsMinPoint[i], objectsMaxPoint[i] ) ;
     }
 

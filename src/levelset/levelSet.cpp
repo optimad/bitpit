@@ -109,10 +109,6 @@ LevelSet::~LevelSet(){
         delete m_kernel ;
     }
 
-    for( auto &object : m_object){
-        delete object.second  ;
-    }
-
     m_object.clear() ;
 
 };
@@ -173,7 +169,9 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, int i
 
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation)) ;
 
-    return addObject(lsSeg);
+    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
+
+    return addObject(std::unique_ptr<LevelSetObject>(object));
 };
 
 /*!
@@ -190,7 +188,9 @@ int LevelSet::addObject( SurfUnstructured *segmentation, int id ) {
 
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation) ;
 
-    return addObject(lsSeg);
+    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
+
+    return addObject(std::unique_ptr<LevelSetObject>(object));
 };
 
 /*!
@@ -214,7 +214,9 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, int id )
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    return addObject(lsSeg);
+    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
+
+    return addObject(std::unique_ptr<LevelSetObject>(object));
 };
 
 /*!
@@ -236,7 +238,35 @@ int LevelSet::addObject( SurfaceKernel *segmentation, int id ) {
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    return addObject(lsSeg);
+    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
+
+    return addObject(std::unique_ptr<LevelSetObject>(object));
+};
+
+/*!
+ * Adds a generic LevelSetObject
+ * @param[in] object generic object
+ * @return the index associated to the object
+ */
+int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
+
+    int objectId = object->getId();
+    m_object[objectId] = std::move(object) ;
+
+    return objectId;
+};
+
+/*!
+ * Adds a generic LevelSetObject
+ * @param[in] object generic object
+ * @return the index associated to the object
+ */
+int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
+
+    int objectId = object->getId();
+    m_object[objectId] = std::unique_ptr<LevelSetObject>(object->clone())  ;
+
+    return objectId;
 };
 
 /*!
@@ -286,24 +316,6 @@ void LevelSet::clearObject(int id){
 
     m_object.erase(id) ;
     return ;
-};
-
-/*!
- * Adds a generic LevelSetObject
- * @param[in] object generic object
- */
-int LevelSet::addObject( LevelSetObject* object ) {
-
-
-    if( LevelSetSegmentation* segmentation = dynamic_cast<LevelSetSegmentation*>(object) ){
-        m_object.insert( {{ object->getId(), new LevelSetSegmentation( *segmentation) }} ) ;
-        return object->getId();
-
-    } else {
-        return levelSetDefaults::OBJECT;
-
-    };
-
 };
 
 /*!
@@ -433,7 +445,7 @@ void LevelSet::compute(){
     if( !m_userRSearch){
         RSearch = 0. ;
         for( const auto &visitor : m_object ){
-            RSearch = std::max( RSearch, m_kernel->computeSizeNarrowBand( visitor.second ) ) ;
+            RSearch = std::max( RSearch, m_kernel->computeSizeNarrowBand( visitor.second.get() ) ) ;
         }
 
         m_kernel->setSizeNarrowBand(RSearch) ;

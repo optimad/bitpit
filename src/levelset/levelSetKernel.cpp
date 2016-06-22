@@ -366,7 +366,7 @@ std::array<double,3> LevelSetKernel::computeGradientCentral( const long &I ){
 /*!
  * Propagate the sign of the signed distance function from narrow band to entire domain
  */
-void LevelSetKernel::propagateSign( std::unordered_map<int,LevelSetObject*> visitors ) {
+void LevelSetKernel::propagateSign( std::unordered_map<int, std::unique_ptr<LevelSetObject>> &visitors ) {
 
     // We don't need to propagate the sign in the narrowband
     //
@@ -430,8 +430,8 @@ void LevelSetKernel::propagateSign( std::unordered_map<int,LevelSetObject*> visi
         double ls = getLS(seed);
         if(utils::DoubleFloatingEqual()(std::abs(ls), levelSetDefaults::VALUE)) {
             ls = levelSetDefaults::VALUE;
-            for (auto entry : visitors) {
-                const LevelSetObject *visitor = entry.second ;
+            for (auto &entry : visitors) {
+                const LevelSetObject *visitor = entry.second.get() ;
                 ls = std::min( visitor->evaluateLS(this, seed), ls) ;
             }
         }
