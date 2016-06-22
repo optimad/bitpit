@@ -59,16 +59,16 @@ enum class RBFMode{
 class RBF{
 
     private:
-    int     m_fields;
-    int     m_nodes ;
-	RBFMode	m_mode;
-    double  m_supportRadius ;
+    int     m_fields;								/**<Number of data fields defined on RBF nodes.*/
+    int     m_nodes ;								/**<Number of RBF nodes.*/
+	RBFMode	m_mode;									/**<Behaviour of RBF class (interpolation or parametrization).*/
+    double  m_supportRadius ;						/**<Support radius of function used as Radiabl Basis Function.*/
 
     double  (*m_fPtr)( const double &);
 
     
-    std::vector<bool>                   m_active ;
-    std::vector<double>                 m_error ;
+    std::vector<bool>                   m_active ;	/**<Vector of active/inactive node (m_active[i] = true/false -> the i-th node is used/not used during RBF evaluation).*/
+    std::vector<double>                 m_error ;	/**<Interpolation error of a field evaluated on each RBF node (auxiliary memeber used in Greedy algorithm).*/
 
 	protected:
     std::vector<std::vector<double>>    m_value ;   /**< displ value to be interpolated on RBF nodes */ 
@@ -132,7 +132,6 @@ class RBF{
 protected:
 	
 	double                  evalError() ;
-	double                  initGreedy( const int &) ;
 	int                     addGreedyPoint() ;
 	int                     solveLSQ() ;	
 	
