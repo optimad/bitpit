@@ -159,6 +159,8 @@ namespace bitpit {
         // =================================================================================== //
         Octant* getPointOwner(darray3 point);
         uint32_t getPointOwnerIdx(darray3 point);
+        Octant* getPointOwner(darray3 point, bool & isghost);
+        uint32_t getPointOwnerIdx(darray3 point, bool & isghost);
 
         // =================================================================================== //
         // OTHER PARATREE BASED METHODS												    	   //

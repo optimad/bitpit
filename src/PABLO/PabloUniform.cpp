@@ -735,6 +735,19 @@ namespace bitpit {
 
     /** Get the octant owner of an input point.
      * \param[in] point Coordinates of target point.
+     * \param[out] isghost Boolean flag, true if the octant found is ghost
+     * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
+     */
+    Octant* PabloUniform::getPointOwner(darray3 point, bool & isghost){
+        for (int i=0; i<3; i++){
+            point[i] = (point[i] - m_origin[i])/m_L;
+        }
+        return ParaTree::getPointOwner(point,isghost);
+    };
+
+
+    /** Get the octant owner of an input point.
+     * \param[in] point Coordinates of target point.
      * \return Index of octant owner of target point
      * (max uint32_t representable if point outside of the domain).
      */
@@ -745,8 +758,21 @@ namespace bitpit {
         }
         return ParaTree::getPointOwnerIdx(point);
     };
-
-
+    
+    /** Get the octant owner of an input point.
+     * \param[in] point Coordinates of target point.
+     * \param[out] isghost Boolean flag, true if the octant found is ghost
+     * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
+     */
+    uint32_t
+    PabloUniform::getPointOwnerIdx(darray3 point, bool & isghost){
+        for (int i=0; i<3; i++){
+            point[i] = (point[i] - m_origin[i])/m_L;
+        }
+        return ParaTree::getPointOwnerIdx(point,isghost);
+    };
+    
+    
     // =================================================================================== //
     // OTHER PARATREE BASED METHODS												    	   //
     // =================================================================================== //
