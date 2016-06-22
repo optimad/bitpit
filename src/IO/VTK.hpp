@@ -175,8 +175,11 @@ class VTKBaseContainer{
         VTKBaseContainer( ) ;
         VTKBaseContainer( const VTKBaseContainer &) = default;
         virtual ~VTKBaseContainer( ) ;
-        virtual void            flushData( std::fstream &, VTKFormat) =0 ;
-        virtual void            absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) =0 ;
+
+        virtual VTKBaseContainer *  clone() const = 0 ;
+
+        virtual void                flushData( std::fstream &, VTKFormat) =0 ;
+        virtual void                absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) =0 ;
 };
 
 template<class T>
@@ -188,6 +191,8 @@ class VTKVectorContainer : public VTKBaseContainer{
         VTKVectorContainer( std::vector<T> &) ;
         VTKVectorContainer( const VTKVectorContainer &);
         ~VTKVectorContainer( ) ;
+
+        VTKVectorContainer*     clone() const ;
 
         void                    flushData( std::fstream &, VTKFormat) ;
         void                    absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) ;

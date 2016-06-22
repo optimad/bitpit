@@ -47,6 +47,15 @@ VTKVectorContainer<T>::VTKVectorContainer( const VTKVectorContainer &other){
 }
 
 /*!
+ * Clones the object
+ * @return pointer to cloned object
+ */
+template<class T>
+VTKVectorContainer<T> * VTKVectorContainer<T>::clone() const {
+    return new VTKVectorContainer<T>( *this );
+}
+
+/*!
  * Constructor assigns container reference to internal pointer
  * @tparam T type of std::vector<>
  * @param[in] data data container
