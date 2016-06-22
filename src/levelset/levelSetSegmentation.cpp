@@ -159,6 +159,14 @@ void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
 }
 
 /*!
+ * Get a constant refernce to the segmentation
+ * @return constant reference to the segmentation
+ */
+const SurfUnstructured & LevelSetSegmentation::getSegmentation() const {
+    return *m_segmentation ;
+};
+
+/*!
  * Get the list of simplices wich contain the cell centroid in their narrow band.
  * @param[in] i cell index
  * @return set with indices of simplices

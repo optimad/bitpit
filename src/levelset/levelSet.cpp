@@ -240,6 +240,24 @@ int LevelSet::addObject( SurfaceKernel *segmentation, int id ) {
 };
 
 /*!
+ * Get a constant reference to the specified object.
+ * If hte specified id does not exist an exception is thrown.
+ * @param id is the object id
+ * @return pointer to levelset object
+ */
+const LevelSetObject & LevelSet::getObject( int id) const{
+    return *(m_object.at(id)) ;
+};
+
+/*!
+ * Get the number of levelset objects
+ * @return number of objects
+ */
+int LevelSet::getObjectCount( ) const{
+    return m_object.size() ;
+};
+
+/*!
  * Clear LevelSet entirely
  */
 void LevelSet::clear(){
@@ -269,7 +287,6 @@ void LevelSet::clearObject(int id){
     m_object.erase(id) ;
     return ;
 };
-
 
 /*!
  * Adds a generic LevelSetObject

@@ -90,6 +90,8 @@ class LevelSet{
     int                                         addObject( std::unique_ptr<SurfUnstructured> &&, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( SurfUnstructured *, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( LevelSetObject* ) ;
+    const LevelSetObject &                      getObject( int ) const ;
+    int                                         getObjectCount( ) const ;
 
     void                                        clear();
     void                                        clearObject();
@@ -303,6 +305,7 @@ class LevelSetSegmentation : public LevelSetObject {
 
     void                                        setSegmentation( std::unique_ptr<SurfUnstructured> && ) ;
     void                                        setSegmentation( SurfUnstructured * ) ;
+    const SurfUnstructured &                    getSegmentation() const ;
 
     const std::unordered_set<long> &            getSimplexList(const long &) const ;
     bool                                        isInNarrowBand( const long &) ;
