@@ -269,8 +269,7 @@ Octant::getPbound(uint8_t face) const{
 };
 
 /*! Get the pbound flag on an octant face.
- * \param[in] iface local index of the face.
- * \return true if the iface face is a process boundary face.
+ * \return true if the octant has at least one face that is a process boundary face.
  */
 bool
 Octant::getPbound() const{
@@ -332,7 +331,8 @@ Octant::setLevel(uint8_t level){
 };
 
 /*! Set the process boundary condition of an octant.
- * \param[in] balance Is the octant a process boundary octant?
+ * \param[in] face Index of the target face to set.
+ * \param[in] flag Condition true/false if the target face is /is not a process boundary face.
  */
 void
 Octant::setPbound(uint8_t face, bool flag){
@@ -501,6 +501,7 @@ u32array3		Octant::getNode(uint8_t inode) const{
 /*! Get the normal of a face of an octant in logical domain.
  * \param[in] iface Index of the face for normal computing.
  * \param[out] normal Array[3] with components (with z=0) of the normal of face.
+ * \param[in] normals Global structure with components of face normals of a reference octant.
  */
 void		Octant::getNormal(uint8_t & iface, i8array3 & normal, int8_t (&normals)[6][3]) const{
 	uint8_t		i;
