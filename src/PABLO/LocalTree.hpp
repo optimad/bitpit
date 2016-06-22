@@ -81,12 +81,33 @@ class LocalTree{
 	// TYPEDEFS
 	// =================================================================================== //
 public:
+
+	/*!Vector of Octants.
+	 */
 	typedef std::vector<Octant>				 	octvector;
+
+	/*!Vector of Intersections.
+	 */
 	typedef std::vector<Intersection>	 		intervector;
+
+	/*!Vector of boolean values.
+	 */
 	typedef std::vector<bool>					bvector;
+
+	/*!Vector of unsigned int (8-bit).
+	 */
 	typedef std::vector<uint8_t>				u8vector;
+
+	/*!Vector of usigned int (32-bit).
+	 */
 	typedef std::vector<uint32_t>				u32vector;
+
+	/*!Vector of unsigned int (64-bit).
+	 */
 	typedef std::vector<uint64_t>				u64vector;
+
+	/*!Vector of three-dimensional arrays of unsigned int (32-bit).
+	 */
 	typedef std::vector<u32array3>				u32arr3vector;
 
 	// =================================================================================== //

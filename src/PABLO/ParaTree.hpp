@@ -87,8 +87,8 @@ namespace bitpit {
         // MEMBERS																			   //
         // =================================================================================== //
     public:
-        static const int			DEFAULT_MAX_LEVELS;
-        static const std::string	DEFAULT_LOG_FILE;
+        static const int			DEFAULT_MAX_LEVELS;			/**<Default value of maximum allowed refinement level for the octree.*/
+        static const std::string	DEFAULT_LOG_FILE;			/**<Default name of logger file.*/
 
     private:
         //undistributed members

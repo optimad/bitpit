@@ -57,7 +57,7 @@ namespace bitpit {
      * \param[in] dim The space dimension of the m_octree. 2D is the default value.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-     * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
     ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
@@ -110,7 +110,7 @@ namespace bitpit {
      * \param[in] dim The space dimension of the m_octree. 2D is the default value.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-     * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
     ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
@@ -3758,6 +3758,7 @@ namespace bitpit {
      * \param[in] level_ Number of level over the max depth reached in the tree at
      * which families of octants are fixed compact on the same process
      * (level=0 is uniform partition).
+     * \param[in] weight Pointer to weight array. weight[i] = weight of i-th local octant.
      */
     void
     ParaTree::computePartition(uint32_t* partition, uint8_t & level_, dvector* weight) {

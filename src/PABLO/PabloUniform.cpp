@@ -47,7 +47,7 @@ using namespace std;
  * \param[in] dim The space dimension of the octree. 2D is the default value.
  * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
- * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+ * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 PabloUniform::PabloUniform(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):ParaTree(dim,maxlevel,logfile,comm){
 	m_origin = { {0,0,0} };
@@ -61,7 +61,7 @@ PabloUniform::PabloUniform(uint8_t dim, int8_t maxlevel, std::string logfile, MP
  * \param[in] dim The space dimension of the octree. 2D is the default value.
  * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
- * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+ * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):ParaTree(dim,maxlevel,logfile,comm){
 	m_origin[0] = X;
