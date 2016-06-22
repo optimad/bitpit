@@ -101,9 +101,9 @@ class LevelSet{
 
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
-    int                                         getObject(const long &) const ;
-    std::pair<int,int>                          getPart(const long &) const ;
-    std::pair<int,long>                         getSupport(const long &) const ;
+    int                                         getClosestObject(const long &) const ;
+    std::pair<int,int>                          getClosestPart(const long &) const ;
+    std::pair<int,long>                         getClosestSupport(const long &) const ;
     short                                       getSign(const long &) const;
     bool                                        isInNarrowBand(const long &) const;
 
@@ -157,9 +157,9 @@ class LevelSetKernel{
 
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
-    int                                         getObject(const long &) const ;
-    std::pair<int,int>                          getPart(const long &) const ;
-    std::pair<int,long>                         getSupport(const long &) const ;
+    int                                         getClosestObject(const long &) const ;
+    std::pair<int,int>                          getClosestPart(const long &) const ;
+    std::pair<int,long>                         getClosestSupport(const long &) const ;
     short                                       getSign(const long &) const;
     double                                      getSizeNarrowBand() const;
     bool                                        isInNarrowBand(const long &) const;

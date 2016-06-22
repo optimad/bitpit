@@ -141,7 +141,7 @@ std::array<double,3> LevelSetKernel::getGradient(const long &i) const {
  * @param[in] i cell index
  * @return id of closest object
  */
-int LevelSetKernel::getObject(const long &i) const {
+int LevelSetKernel::getClosestObject(const long &i) const {
 
     if( ! m_ls.exists(i) ){
         return levelSetDefaults::OBJECT;
@@ -156,7 +156,7 @@ int LevelSetKernel::getObject(const long &i) const {
  * @param[in] i cell index
  * @return pair containing object and part id 
  */
-std::pair<int,int> LevelSetKernel::getPart(const long &i) const {
+std::pair<int,int> LevelSetKernel::getClosestPart(const long &i) const {
 
     if( ! m_ls.exists(i) ){
         return ( std::make_pair(levelSetDefaults::OBJECT, levelSetDefaults::PART) ) ;
@@ -172,7 +172,7 @@ std::pair<int,int> LevelSetKernel::getPart(const long &i) const {
  * @param[in] i cell index
  * @return pair containing object and support id 
  */
-std::pair<int,long> LevelSetKernel::getSupport(const long &i) const {
+std::pair<int,long> LevelSetKernel::getClosestSupport(const long &i) const {
 
     if( ! m_ls.exists(i) ){
         return ( std::make_pair(levelSetDefaults::OBJECT, levelSetDefaults::SUPPORT) ) ;

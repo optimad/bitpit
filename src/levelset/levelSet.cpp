@@ -338,8 +338,8 @@ std::array<double,3> LevelSet::getGradient(const long &i) const {
  * @param[in] i index of cell
  * @return id of closest object
  */
-int LevelSet::getObject(const long &i) const {
-    return( m_kernel->getObject(i) ) ;
+int LevelSet::getClosestObject(const long &i) const {
+    return( m_kernel->getClosestObject(i) ) ;
 };
 
 /*!
@@ -347,9 +347,9 @@ int LevelSet::getObject(const long &i) const {
  * @param[in] i index of cell
  * @return pair containing object and part id
  */
-std::pair<int,int> LevelSet::getPart(const long &i) const {
+std::pair<int,int> LevelSet::getClosestPart(const long &i) const {
 
-    return (m_kernel->getPart(i)) ;
+    return (m_kernel->getClosestPart(i)) ;
 };
 
 /*!
@@ -357,9 +357,9 @@ std::pair<int,int> LevelSet::getPart(const long &i) const {
  * @param[in] i index of cell
  * @return pair containing object and support id
  */
-std::pair<int,long> LevelSet::getSupport(const long &i) const {
+std::pair<int,long> LevelSet::getClosestSupport(const long &i) const {
 
-    return (m_kernel->getSupport(i)) ;
+    return (m_kernel->getClosestSupport(i)) ;
 };
 
 /*!
