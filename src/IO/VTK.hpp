@@ -216,6 +216,7 @@ class VTKNativeStreamer : public VTKBaseStreamer {
 
     public:
         VTKNativeStreamer();
+        VTKNativeStreamer( const VTKNativeStreamer & );
         ~VTKNativeStreamer();
 
         template< class T>

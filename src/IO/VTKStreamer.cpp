@@ -111,6 +111,17 @@ VTKNativeStreamer::VTKNativeStreamer( ) {
 };
 
 /*!
+ * Copy constructor
+ */
+VTKNativeStreamer::VTKNativeStreamer( const VTKNativeStreamer &other ) {
+
+    for (const auto &entry : other.m_field) {
+        m_field[entry.first] = std::unique_ptr<VTKBaseContainer>(entry.second->clone()) ;
+    }
+
+};
+
+/*!
  * Removes a field from streamer
  * @param[in] name name of field
  */
