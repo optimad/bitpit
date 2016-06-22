@@ -2072,7 +2072,7 @@ namespace bitpit {
         powner = 0;
         if(!m_serial) powner = findOwner(morton);
 
-        if ((powner==m_rank) && (!m_serial)){
+        if ((powner==m_rank)){
 
             int32_t jump = idxtry;
             while(abs(jump) > 0){
@@ -2321,7 +2321,7 @@ namespace bitpit {
         powner = 0;
         if(!m_serial) powner = findOwner(morton);
 
-        if ((powner==m_rank) && (!m_serial)){
+        if ((powner==m_rank)){
 
             int32_t jump = idxtry;
             while(abs(jump) > 0){
