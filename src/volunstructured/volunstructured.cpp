@@ -81,7 +81,7 @@ void VolUnstructured::setExpert(bool expert)
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double VolUnstructured::evalCellVolume(const long &id)
+double VolUnstructured::evalCellVolume(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -94,7 +94,7 @@ double VolUnstructured::evalCellVolume(const long &id)
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double VolUnstructured::evalCellSize(const long &id)
+double VolUnstructured::evalCellSize(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -107,7 +107,7 @@ double VolUnstructured::evalCellSize(const long &id)
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double VolUnstructured::evalInterfaceArea(const long &id)
+double VolUnstructured::evalInterfaceArea(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -120,7 +120,7 @@ double VolUnstructured::evalInterfaceArea(const long &id)
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id)
+std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
 {
 	BITPIT_UNUSED(id);
 

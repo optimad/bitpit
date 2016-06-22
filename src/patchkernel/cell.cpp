@@ -654,11 +654,11 @@ int Cell::findAdjacency(const int &face, const int &adjacency)
         \param[in] vertex vertex global ID
         \result local index of the vertex with specified ID within the cell.
 */
-int Cell::findVertex(const long &vertex)
+int Cell::findVertex(const long &vertex) const
 {
     int         loc_id;
     int         n_vert = getVertexCount();
-    long*       c_ = getConnect();
+    const long* c_ = getConnect();
 
     loc_id = std::find(c_, c_ + n_vert, vertex) - c_;
     if (loc_id >= n_vert) return(Vertex::NULL_ID);

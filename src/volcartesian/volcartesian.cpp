@@ -393,7 +393,7 @@ ElementInfo::Type VolCartesian::getInterfaceType() const
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double VolCartesian::evalCellVolume(const long &id)
+double VolCartesian::evalCellVolume(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -406,7 +406,7 @@ double VolCartesian::evalCellVolume(const long &id)
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double VolCartesian::evalCellSize(const long &id)
+double VolCartesian::evalCellSize(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -419,7 +419,7 @@ double VolCartesian::evalCellSize(const long &id)
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double VolCartesian::evalInterfaceArea(const long &id)
+double VolCartesian::evalInterfaceArea(const long &id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -434,7 +434,7 @@ double VolCartesian::evalInterfaceArea(const long &id)
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> VolCartesian::evalInterfaceNormal(const long &id)
+std::array<double, 3> VolCartesian::evalInterfaceNormal(const long &id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -1585,7 +1585,7 @@ int VolCartesian::linearVertexInterpolation(std::array<double,3> &point,
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> VolCartesian::evalCellCentroid(const long &id)
+std::array<double, 3> VolCartesian::evalCellCentroid(const long &id) const
 {
 	std::array<int, 3> ijk = getCellCartesianId(id);
 

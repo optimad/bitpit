@@ -2574,9 +2574,9 @@ bool PatchKernel::squeeze()
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> PatchKernel::evalCellCentroid(const long &id)
+std::array<double, 3> PatchKernel::evalCellCentroid(const long &id) const
 {
-	Cell &cell = getCell(id);
+	const Cell &cell = getCell(id);
 
 	return evalElementCentroid(cell);
 }
@@ -2587,9 +2587,9 @@ std::array<double, 3> PatchKernel::evalCellCentroid(const long &id)
 	\param id is the id of the interface
 	\result The centroid of the specified interface.
 */
-std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id)
+std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id) const
 {
-	Interface &interface = getInterface(id);
+	const Interface &interface = getInterface(id);
 
 	return evalElementCentroid(interface);
 }
@@ -2603,14 +2603,14 @@ std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id)
 	\param element is the element
 	\result The centroid of the specified element.
 */
-std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element)
+std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element) const
 {
 	const long *elementConnect = element.getConnect();
 	int nElementVertices = element.getVertexCount();
 
 	std::array<double, 3> centroid = {{0., 0., 0.}};
 	for (int i = 0; i < nElementVertices; ++i) {
-		Vertex &vertex = getVertex(elementConnect[i]);
+		const Vertex &vertex = getVertex(elementConnect[i]);
 		centroid += vertex.getCoords();
 	}
 	centroid /= (double) nElementVertices;

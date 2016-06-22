@@ -44,11 +44,11 @@ public:
 
 	void setExpert(bool expert);
 
-	double evalCellVolume(const long &id);
-	double evalCellSize(const long &id);
+	double evalCellVolume(const long &id) const;
+	double evalCellSize(const long &id) const;
 
-	double evalInterfaceArea(const long &id);
-	std::array<double, 3> evalInterfaceNormal(const long &id);
+	double evalInterfaceArea(const long &id) const;
+	std::array<double, 3> evalInterfaceNormal(const long &id) const;
 
 	bool isPointInside(const std::array<double, 3> &point);
 	bool isPointInside(const long &id, const std::array<double, 3> &point);

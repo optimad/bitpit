@@ -186,7 +186,7 @@ void VolOctree::initializeTreeGeometry()
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double VolOctree::evalCellVolume(const long &id)
+double VolOctree::evalCellVolume(const long &id) const
 {
 	int level = getCellLevel(id);
 
@@ -199,11 +199,11 @@ double VolOctree::evalCellVolume(const long &id)
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> VolOctree::evalCellCentroid(const long &id)
+std::array<double, 3> VolOctree::evalCellCentroid(const long &id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
-	Octant *octant;
+	const Octant *octant;
 	if (octantInfo.internal) {
 		octant = m_tree.getOctant(octantInfo.id);
 	} else {
@@ -219,7 +219,7 @@ std::array<double, 3> VolOctree::evalCellCentroid(const long &id)
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double VolOctree::evalCellSize(const long &id)
+double VolOctree::evalCellSize(const long &id) const
 {
 	int level = getCellLevel(id);
 
@@ -232,7 +232,7 @@ double VolOctree::evalCellSize(const long &id)
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double VolOctree::evalInterfaceArea(const long &id)
+double VolOctree::evalInterfaceArea(const long &id) const
 {
 	const Interface &interface = getInterface(id);
 	int owner = interface.getOwner();
@@ -247,7 +247,7 @@ double VolOctree::evalInterfaceArea(const long &id)
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> VolOctree::evalInterfaceNormal(const long &id)
+std::array<double, 3> VolOctree::evalInterfaceNormal(const long &id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -351,11 +351,11 @@ VolOctree::OctantHash VolOctree::evaluateOctantHash(const OctantInfo &octantInfo
 	\param id is the id of the cell
 	\result The refinement level of the specified cell.
 */
-int VolOctree::getCellLevel(const long &id)
+int VolOctree::getCellLevel(const long &id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
-	Octant* octant;
+	const Octant* octant;
 	if (octantInfo.internal) {
 		octant = m_tree.getOctant(octantInfo.id);
 	} else {

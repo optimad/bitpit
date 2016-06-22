@@ -75,15 +75,15 @@ public:
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 
-	double evalCellVolume(const long &id);
-	double evalCellSize(const long &id);
-	std::array<double, 3> evalCellCentroid(const long &id);
+	double evalCellVolume(const long &id) const;
+	double evalCellSize(const long &id) const;
+	std::array<double, 3> evalCellCentroid(const long &id) const;
 
-	double evalInterfaceArea(const long &id);
-	std::array<double, 3> evalInterfaceNormal(const long &id);
+	double evalInterfaceArea(const long &id) const;
+	std::array<double, 3> evalInterfaceNormal(const long &id) const;
 
 	OctantInfo getCellOctant(const long &id) const;
-	int getCellLevel(const long &id);
+	int getCellLevel(const long &id) const;
 
 	long getOctantId(const OctantInfo &octantInfo) const;
 	Octant * getOctantPointer(const OctantInfo &octantInfo);

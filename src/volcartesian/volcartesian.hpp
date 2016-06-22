@@ -59,12 +59,12 @@ public:
 	ElementInfo::Type getInterfaceType() const;
 	ElementInfo::Type getInterfaceType(const long &id) const;
 
-	double evalCellVolume(const long &id);
-	double evalCellSize(const long &id);
-	std::array<double, 3> evalCellCentroid(const long &id);
+	double evalCellVolume(const long &id) const;
+	double evalCellSize(const long &id) const;
+	std::array<double, 3> evalCellCentroid(const long &id) const;
 
-	double evalInterfaceArea(const long &id);
-	std::array<double, 3> evalInterfaceNormal(const long &id);
+	double evalInterfaceArea(const long &id) const;
+	std::array<double, 3> evalInterfaceNormal(const long &id) const;
 
 	std::array<double, 3> getSpacing() const;
 	double getSpacing(const int &direction) const;

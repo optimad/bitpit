@@ -144,10 +144,10 @@ public:
 	bool setCellInternal(const long &id, bool isInternal);
 	CellIterator moveGhost2Internal(const long &id);
 	CellIterator moveInternal2Ghost(const long &id);
-	virtual double evalCellSize(const long &id) = 0;
+	virtual double evalCellSize(const long &id) const = 0;
 	long countFreeCells() const;
 	long countOrphanCells() const;
-	virtual std::array<double, 3> evalCellCentroid(const long &id);
+	virtual std::array<double, 3> evalCellCentroid(const long &id) const;
 	std::vector<long> findCellNeighs(const long &id) const;
 	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
 	std::vector<long> findCellFaceNeighs(const long &id) const;
@@ -180,7 +180,7 @@ public:
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	long countFreeInterfaces() const;
 	long countOrphanInterfaces() const;
-	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
+	virtual std::array<double, 3> evalInterfaceCentroid(const long &id) const;
 
 	InterfaceIterator getInterfaceIterator(const long &id);
 	InterfaceIterator interfaceBegin();
@@ -464,7 +464,7 @@ private:
 	void setId(int id);
 	void setDimension(int dimension);
 
-	std::array<double, 3> evalElementCentroid(const Element &element);
+	std::array<double, 3> evalElementCentroid(const Element &element) const;
 };
 
 }

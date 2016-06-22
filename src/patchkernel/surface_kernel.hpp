@@ -39,32 +39,32 @@ public:
         static const std::map<ElementInfo::Type, unsigned short>     m_selectionTypes;
 
         // Types definitions
-        typedef double (SurfaceKernel::*eval_f_)(const long&, int&);
+        typedef double (SurfaceKernel::*eval_f_)(const long&, int&) const;
 
 	SurfaceKernel(const int &id, const int &patch_dim, const int &space_dim, bool expert);
 
         int getSpaceDimension(void) const;
 
 	virtual ~SurfaceKernel();
-        virtual double evalCellArea(const long &);
-        virtual double evalEdgeLength(const long&, const int&);
-        virtual double evalMinEdgeLength(const long &, int &);
-        virtual double evalMaxEdgeLength(const long &, int &);
-        virtual double evalAngleAtVertex(const long&, const int&);
-        virtual double evalMinAngleAtVertex(const long&, int &);
-        virtual double evalMaxAngleAtVertex(const long&, int &);
-        virtual double evalAspectRatio(const long&, int&);
-        virtual std::array<double, 3> evalFacetNormal(const long&);
-        std::array<double, 3> evalEdgeNormal(const long&, const int&);
-        virtual std::array<double, 3> evalVertexNormal(const long&, const int&);
-        double evalCellSize(const long &id);
+        virtual double evalCellArea(const long &) const;
+        virtual double evalEdgeLength(const long&, const int&) const;
+        virtual double evalMinEdgeLength(const long &, int &) const;
+        virtual double evalMaxEdgeLength(const long &, int &) const;
+        virtual double evalAngleAtVertex(const long&, const int&) const;
+        virtual double evalMinAngleAtVertex(const long&, int &) const;
+        virtual double evalMaxAngleAtVertex(const long&, int &) const;
+        virtual double evalAspectRatio(const long&, int&) const;
+        virtual std::array<double, 3> evalFacetNormal(const long&) const;
+        std::array<double, 3> evalEdgeNormal(const long&, const int&) const;
+        virtual std::array<double, 3> evalVertexNormal(const long&, const int&) const;
+        double evalCellSize(const long &id) const;
 
-        void displayQualityStats(ostream&, unsigned int padding = 0);
-        vector<double> computeHistogram(eval_f_, std::vector<double>&, long&, int n_int = 8, unsigned short mask = SELECT_ALL);
+        void displayQualityStats(ostream&, unsigned int padding = 0) const;
+        std::vector<double> computeHistogram(eval_f_, std::vector<double>&, long&, int n_int = 8, unsigned short mask = SELECT_ALL) const;
 
 private:
-        bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &);
-        void displayHistogram(const long&, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0);
+        bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &) const;
+        void displayHistogram(const long&, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0) const;
 
 protected:
         int                     m_spaceDim;
