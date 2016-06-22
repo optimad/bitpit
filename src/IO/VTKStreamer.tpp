@@ -39,6 +39,14 @@ VTKVectorContainer<T>::~VTKVectorContainer( ){
 }
 
 /*!
+ * Copy constructor
+ */
+template<class T>
+VTKVectorContainer<T>::VTKVectorContainer( const VTKVectorContainer &other){
+    m_ptr = other.m_ptr;
+}
+
+/*!
  * Constructor assigns container reference to internal pointer
  * @tparam T type of std::vector<>
  * @param[in] data data container
