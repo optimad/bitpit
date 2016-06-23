@@ -90,7 +90,6 @@ LevelSetInfo::LevelSetInfo() {
  */
 LevelSet::LevelSet() {
 
-    m_kernel = NULL ;
     m_object.clear() ;
 
     m_userRSearch = false ;
@@ -105,9 +104,6 @@ LevelSet::LevelSet() {
  * Destructor of LevelSet
 */
 LevelSet::~LevelSet(){
-    if( m_kernel != NULL){
-        delete m_kernel ;
-    }
 
     m_object.clear() ;
 
@@ -120,15 +116,18 @@ LevelSet::~LevelSet(){
  */
 void LevelSet::setMesh( VolumeKernel* mesh ) {
 
+    LevelSetKernel *kernel = nullptr;
     if( VolCartesian* cartesian = dynamic_cast<VolCartesian*> (mesh) ){
-        m_kernel = new LevelSetCartesian( *cartesian) ;
+        kernel = new LevelSetCartesian( *cartesian) ;
 
     } else if( VolOctree* octree = dynamic_cast<VolOctree*> (mesh) ){
-        m_kernel = new LevelSetOctree(*octree) ;
+        kernel = new LevelSetOctree(*octree) ;
     
     } else{
         log::cout() << "Mesh non supported in LevelSet::setMesh()" << std::endl ;
     }; 
+
+    m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
     return;
 };
@@ -139,7 +138,9 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
  */
 void LevelSet::setMesh( VolCartesian* cartesian ) {
 
-    m_kernel = new LevelSetCartesian( *cartesian) ;
+    LevelSetKernel *kernel = new LevelSetCartesian( *cartesian) ;
+
+    m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
     return;
 };
@@ -150,7 +151,9 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
  */
 void LevelSet::setMesh( VolOctree* octree ) {
 
-    m_kernel = new LevelSetOctree( *octree) ;
+    LevelSetKernel *kernel = new LevelSetOctree( *octree) ;
+
+    m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
     return;
 };
@@ -292,9 +295,7 @@ int LevelSet::getObjectCount( ) const{
  */
 void LevelSet::clear(){
 
-    if( m_kernel != NULL){
-        delete m_kernel ;
-    }
+    m_kernel.reset() ;
 
     m_object.clear() ;
     return ;
@@ -453,7 +454,7 @@ void LevelSet::compute(){
     }
 
     for( const auto &visitor : m_object ){
-        visitor.second->computeLSInNarrowBand( m_kernel, RSearch, m_signedDF) ; 
+        visitor.second->computeLSInNarrowBand( m_kernel.get(), RSearch, m_signedDF) ;
     }
 
 
@@ -505,7 +506,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         m_kernel->filterOutsideNarrowBand(newRSearch) ;
 
         for( const auto &visitor : m_object ){
-            visitor.second->updateLSInNarrowBand( m_kernel, mapper, newRSearch, m_signedDF ) ;
+            visitor.second->updateLSInNarrowBand( m_kernel.get(), mapper, newRSearch, m_signedDF ) ;
         }
     }
 
@@ -526,7 +527,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         m_kernel->setSizeNarrowBand(newRSearch) ;
 
         for( const auto &visitor : m_object ){
-            visitor.second->filterOutsideNarrowBand(m_kernel) ;
+            visitor.second->filterOutsideNarrowBand(m_kernel.get()) ;
         }
 
         if( m_propagateS ) m_kernel->propagateSign( m_object ) ;

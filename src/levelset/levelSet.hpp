@@ -69,7 +69,7 @@ class LevelSetInfo{
 class LevelSet{
 
     private:
-    LevelSetKernel*                                             m_kernel ;              /**< LevelSet computational kernel */
+    std::unique_ptr<LevelSetKernel>                             m_kernel ;              /**< LevelSet computational kernel */
     std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_object ;              /**< Objects defining the boundaries */
 
     bool                                        m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
