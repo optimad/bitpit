@@ -116,18 +116,15 @@ LevelSet::~LevelSet(){
  */
 void LevelSet::setMesh( VolumeKernel* mesh ) {
 
-    LevelSetKernel *kernel = nullptr;
     if( VolCartesian* cartesian = dynamic_cast<VolCartesian*> (mesh) ){
-        kernel = new LevelSetCartesian( *cartesian) ;
+        setMesh(cartesian) ;
 
     } else if( VolOctree* octree = dynamic_cast<VolOctree*> (mesh) ){
-        kernel = new LevelSetOctree(*octree) ;
+        setMesh(octree) ;
     
     } else{
         log::cout() << "Mesh non supported in LevelSet::setMesh()" << std::endl ;
     }; 
-
-    m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
     return;
 };
