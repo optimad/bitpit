@@ -159,7 +159,7 @@ private:
 	uint32_t 		getNumOctants() const;
 	uint8_t 		getLocalMaxDepth() const;
 	int8_t 			getMarker(int32_t idx);
-	uint8_t 		getLevel(int32_t idx);
+	uint8_t 		getLevel(int32_t idx) const;
 	uint64_t 		computeMorton(int32_t idx);
 	uint64_t 		computeNodeMorton(int32_t idx, uint8_t inode);
 	uint8_t 		getGhostLevel(int32_t idx);

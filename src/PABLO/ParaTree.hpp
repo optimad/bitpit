@@ -231,7 +231,7 @@ namespace bitpit {
         void 		getNormal(uint32_t idx, uint8_t & iface, darray3 & normal);
         darray3 	getNormal(uint32_t idx, uint8_t & iface);
         int8_t 		getMarker(uint32_t idx);
-        uint8_t 	getLevel(uint32_t idx);
+        uint8_t 	getLevel(uint32_t idx) const;
         uint64_t 	getMorton(uint32_t idx);
         uint64_t 	getNodeMorton(uint32_t idx, uint8_t inode);
         bool 		getBalance(uint32_t idx);
@@ -271,7 +271,7 @@ namespace bitpit {
         void 		getNormal(Octant* oct, uint8_t & iface, darray3 & normal);
         darray3 	getNormal(Octant* oct, uint8_t & iface);
         int8_t 		getMarker(Octant* oct);
-        uint8_t 	getLevel(Octant* oct);
+        uint8_t 	getLevel(const Octant* oct) const;
         uint64_t 	getMorton(Octant* oct);
         uint64_t 	getNodeMorton(Octant* oct, uint8_t inode);
         bool 		getBalance(Octant* oct);
@@ -312,7 +312,7 @@ namespace bitpit {
         // =================================================================================== //
         uint32_t 	getNumIntersections();
         Intersection* getIntersection(uint32_t idx);
-        uint8_t 	getLevel(Intersection* inter);
+        uint8_t 	getLevel(const Intersection* inter) const;
         bool 		getFiner(Intersection* inter);
         bool 		getBound(Intersection* inter);
         bool 		getIsGhost(Intersection* inter);

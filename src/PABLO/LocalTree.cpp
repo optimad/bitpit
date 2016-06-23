@@ -134,7 +134,7 @@ namespace bitpit {
      * \return Level of the octant.
      */
     uint8_t
-    LocalTree::getLevel(int32_t idx){
+    LocalTree::getLevel(int32_t idx) const {
         return m_octants[idx].getLevel();
     };
 

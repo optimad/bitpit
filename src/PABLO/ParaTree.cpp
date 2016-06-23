@@ -857,7 +857,7 @@ namespace bitpit {
      * \return Level of octant.
      */
     uint8_t
-    ParaTree::getLevel(uint32_t idx){
+    ParaTree::getLevel(uint32_t idx) const {
         return m_octree.getLevel(idx);
     };
 
@@ -1254,7 +1254,7 @@ namespace bitpit {
      * \return Level of octant.
      */
     uint8_t
-    ParaTree::getLevel(Octant* oct){
+    ParaTree::getLevel(const Octant* oct) const {
         return oct->getLevel();
     };
 
@@ -1576,7 +1576,7 @@ namespace bitpit {
      * \return Level of intersection.
      */
     uint8_t
-    ParaTree::getLevel(Intersection* inter) {
+    ParaTree::getLevel(const Intersection* inter) const {
         if(inter->m_finer && inter->m_isghost)
             return m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]).getLevel();
         else
