@@ -137,7 +137,7 @@ double Map::mapVolume(uint64_t const & volume){
  * \param[in] center Pointer to coordinates of center from logical domain.
  * \param[out] mapcenter Coordinates of center in physical domain.
  */
-void Map::mapCenter(double* & center, darray3 & mapcenter){
+void Map::mapCenter(double* & center, darray3 & mapcenter) const {
 	for (int i=0; i<3; i++){
 		mapcenter[i] = m_maxLength_1 * center[i];
 	}
@@ -147,7 +147,7 @@ void Map::mapCenter(double* & center, darray3 & mapcenter){
  * \param[in] center Array of coordinates of center from logical domain.
  * \param[out] mapcenter Coordinates of center in physical domain.
  */
-void Map::mapCenter(darray3 & center, darray3 & mapcenter){
+void Map::mapCenter(darray3 & center, darray3 & mapcenter) const {
 	for (int i=0; i<3; i++){
 		mapcenter[i] = m_maxLength_1 * center[i];
 	}

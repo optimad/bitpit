@@ -109,8 +109,8 @@ private:
 	double mapSize(uint32_t const & size);
 	double mapArea(uint64_t const & area);
 	double mapVolume(uint64_t const & volume);
-	void mapCenter(double* & center, darray3 & mapcenter);
-	void mapCenter(darray3 & center, darray3 & mapcenter);
+	void mapCenter(double* & center, darray3 & mapcenter) const;
+	void mapCenter(darray3 & center, darray3 & mapcenter) const;
 	void mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes);
 	void mapNodes(u32arr3vector nodes, darr3vector & mapnodes);
 	void mapNode(u32array3 & node, darray3 & mapnode);

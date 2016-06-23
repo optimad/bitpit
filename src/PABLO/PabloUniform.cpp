@@ -263,7 +263,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of octant.
      */
     void
-    PabloUniform::getCenter(uint32_t idx, darray3& center){
+    PabloUniform::getCenter(uint32_t idx, darray3& center) const {
         darray3 center_ = ParaTree::getCenter(idx);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -275,7 +275,7 @@ namespace bitpit {
      * \return center Coordinates of the center of octant.
      */
     darray3
-    PabloUniform::getCenter(uint32_t idx){
+    PabloUniform::getCenter(uint32_t idx) const {
         darray3 center, center_ = ParaTree::getCenter(idx);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -289,7 +289,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of the iface-th face of octant.
      */
     void
-    PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center){
+    PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const {
         darray3 center_ = ParaTree::getFaceCenter(idx, iface);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -302,7 +302,7 @@ namespace bitpit {
      * \return center Coordinates of the center of the iface-th face of octant.
      */
     darray3
-    PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface){
+    PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface) const {
         darray3 center, center_ = ParaTree::getFaceCenter(idx, iface);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -481,7 +481,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of octant.
      */
     void
-    PabloUniform::getCenter(Octant* oct, darray3& center){
+    PabloUniform::getCenter(const Octant* oct, darray3& center) const {
         darray3 center_ = ParaTree::getCenter(oct);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -493,7 +493,7 @@ namespace bitpit {
      * \return center Coordinates of the center of octant.
      */
     darray3
-    PabloUniform::getCenter(Octant* oct){
+    PabloUniform::getCenter(const Octant* oct) const {
         darray3 center, center_ = ParaTree::getCenter(oct);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -507,7 +507,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of the iface-th face af octant.
      */
     void
-    PabloUniform::getFaceCenter(Octant* oct, uint8_t iface, darray3& center){
+    PabloUniform::getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const {
         darray3 center_ = ParaTree::getFaceCenter(oct, iface);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -520,7 +520,7 @@ namespace bitpit {
      * \return center Coordinates of the center of the iface-th face af octant.
      */
     darray3
-    PabloUniform::getFaceCenter(Octant* oct, uint8_t iface){
+    PabloUniform::getFaceCenter(const Octant* oct, uint8_t iface) const {
         darray3 center, center_ = ParaTree::getFaceCenter(oct, iface);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
@@ -685,7 +685,7 @@ namespace bitpit {
      * \return Coordinates of the center of intersection.
      */
     darray3
-    PabloUniform::getCenter(Intersection* inter){
+    PabloUniform::getCenter(const Intersection* inter) const {
         darray3 center = ParaTree::getCenter(inter);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center[i];

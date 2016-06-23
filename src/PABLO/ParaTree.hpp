@@ -220,10 +220,10 @@ namespace bitpit {
         double 		getSize(uint32_t idx);
         double 		getArea(uint32_t idx);
         double 		getVolume(uint32_t idx);
-        void 		getCenter(uint32_t idx, darray3& center);
-        darray3 	getCenter(uint32_t idx);
-        darray3 	getFaceCenter(uint32_t idx, uint8_t iface);
-        void 		getFaceCenter(uint32_t idx, uint8_t iface, darray3& center);
+        void 		getCenter(uint32_t idx, darray3& center) const;
+        darray3 	getCenter(uint32_t idx) const;
+        darray3 	getFaceCenter(uint32_t idx, uint8_t iface) const;
+        void 		getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const;
         darray3 	getNode(uint32_t idx, uint8_t inode);
         void 		getNode(uint32_t idx, uint8_t inode, darray3& node);
         void 		getNodes(uint32_t idx, darr3vector & nodes);
@@ -260,10 +260,10 @@ namespace bitpit {
         double 		getSize(Octant* oct);
         double 		getArea(Octant* oct);
         double 		getVolume(Octant* oct);
-        void 		getCenter(Octant* oct, darray3& center);
-        darray3 	getCenter(Octant* oct);
-        darray3 	getFaceCenter(Octant* oct, uint8_t iface);
-        void 		getFaceCenter(Octant* oct, uint8_t iface, darray3& center);
+        void 		getCenter(const Octant* oct, darray3& center) const;
+        darray3 	getCenter(const Octant* oct) const;
+        darray3 	getFaceCenter(const Octant* oct, uint8_t iface) const;
+        void 		getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const;
         darray3 	getNode(Octant* oct, uint8_t inode);
         void 		getNode(Octant* oct, uint8_t inode, darray3& node);
         void 		getNodes(Octant* oct, darr3vector & nodes);
@@ -324,7 +324,7 @@ namespace bitpit {
         bool		getOutIsGhost(Intersection* inter);
         double 		getSize(Intersection* inter);
         double 		getArea(Intersection* inter);
-        darray3 	getCenter(Intersection* inter);
+        darray3 	getCenter(const Intersection* inter) const;
         darr3vector getNodes(Intersection* inter);
         darray3 	getNormal(Intersection* inter);
 

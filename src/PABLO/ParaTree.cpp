@@ -728,7 +728,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of octant.
      */
     void
-    ParaTree::getCenter(uint32_t idx, darray3& center) {
+    ParaTree::getCenter(uint32_t idx, darray3& center) const {
         darray3 center_ = m_octree.m_octants[idx].getCenter();
         m_trans.mapCenter(center_, center);
     }
@@ -738,7 +738,7 @@ namespace bitpit {
      * \return center Coordinates of the center of octant.
      */
     darray3
-    ParaTree::getCenter(uint32_t idx) {
+    ParaTree::getCenter(uint32_t idx) const {
         darray3 center;
         darray3 center_ = m_octree.m_octants[idx].getCenter();
         m_trans.mapCenter(center_, center);
@@ -751,7 +751,7 @@ namespace bitpit {
      * \return center Coordinates of the center of the iface-th face af octant.
      */
     darray3
-    ParaTree::getFaceCenter(uint32_t idx, uint8_t iface) {
+    ParaTree::getFaceCenter(uint32_t idx, uint8_t iface) const {
         darray3 center;
         darray3 center_ = m_octree.m_octants[idx].getFaceCenter(iface);
         m_trans.mapCenter(center_, center);
@@ -764,7 +764,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of the iface-th face af octant.
      */
     void
-    ParaTree::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) {
+    ParaTree::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const {
         darray3 center_ = m_octree.m_octants[idx].getFaceCenter(iface);
         m_trans.mapCenter(center_, center);
     }
@@ -1125,7 +1125,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of octant.
      */
     void
-    ParaTree::getCenter(Octant* oct, darray3& center) {
+    ParaTree::getCenter(const Octant* oct, darray3& center) const {
         darray3 center_ = oct->getCenter();
         m_trans.mapCenter(center_, center);
     }
@@ -1135,7 +1135,7 @@ namespace bitpit {
      * \return center Coordinates of the center of octant.
      */
     darray3
-    ParaTree::getCenter(Octant* oct) {
+    ParaTree::getCenter(const Octant* oct) const {
         darray3 center;
         darray3 center_ = oct->getCenter();
         m_trans.mapCenter(center_, center);
@@ -1148,7 +1148,7 @@ namespace bitpit {
      * \return center Coordinates of the center of the iface-th face af octant.
      */
     darray3
-    ParaTree::getFaceCenter(Octant* oct, uint8_t iface) {
+    ParaTree::getFaceCenter(const Octant* oct, uint8_t iface) const {
         darray3 center;
         darray3 center_ = oct->getFaceCenter(iface);
         m_trans.mapCenter(center_, center);
@@ -1161,7 +1161,7 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of the iface-th face af octant.
      */
     void
-    ParaTree::getFaceCenter(Octant* oct, uint8_t iface, darray3& center) {
+    ParaTree::getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const {
         darray3 center_ = oct->getFaceCenter(iface);
         m_trans.mapCenter(center_, center);
     }
@@ -1700,7 +1700,7 @@ namespace bitpit {
      * \return Coordinates of the center of intersection.
      */
     darray3
-    ParaTree::getCenter(Intersection* inter){
+    ParaTree::getCenter(const Intersection* inter) const {
         darray3 center;
         Octant oct(m_dim, m_global.m_maxLevel);
         if(inter->m_finer && inter->m_isghost)
