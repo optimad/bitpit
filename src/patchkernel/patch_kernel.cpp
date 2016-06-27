@@ -407,20 +407,23 @@ bool PatchKernel::reserveInterfaces(size_t nInterfaces)
 	Writes the patch to filename specified in input.
 
 	\param filename the filename where the patch will be written to
+    \param mode is the VTK file mode that will be used for writing the patch
 */
-void PatchKernel::write(std::string filename)
+void PatchKernel::write(std::string filename, VTKWriteMode mode)
 {
 	std::string oldFilename = m_vtk.getName();
 
 	m_vtk.setName(filename);
-	write();
+	write(mode);
 	m_vtk.setName(oldFilename);
 }
 
 /*!
 	Writes the patch a filename with the same name of the patch
+
+    \param mode is the VTK file mode that will be used for writing the patch
 */
-void PatchKernel::write()
+void PatchKernel::write(VTKWriteMode mode)
 {
 	// Set thedimensinos of the mesh
 	long connectSize = 0;
@@ -430,7 +433,7 @@ void PatchKernel::write()
 	m_vtk.setDimensions(m_cells.size(), m_vertices.size(), connectSize);
 
 	// Write the mesh
-	m_vtk.write();
+	m_vtk.write(mode);
 }
 
 /*!

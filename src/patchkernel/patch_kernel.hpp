@@ -240,8 +240,8 @@ public:
 	void displayInterfaces(std::ostream &out, unsigned int padding = 0) const;
 
 	VTKUnstructuredGrid & getVTK();
-	void write();
-	void write(std::string name);
+	void write(VTKWriteMode mode = VTKWriteMode::DEFAULT);
+	void write(std::string name, VTKWriteMode mode = VTKWriteMode::DEFAULT);
 
 	void flushData(std::fstream &stream, std::string name, VTKFormat format );
 
