@@ -486,10 +486,11 @@ ElementInfo::Type SurfUnstructured::getSTLFacetType(int nFacetVertices)
  * Import surface tasselation from DGF file.
  * 
  * \param[in] dgf_name name of dgf file
+ * \param[in] PIDOffset is the offset for the PID numbering
  * 
  * \result on output returns an error flag for I/O error.
 */
-unsigned short SurfUnstructured::importDGF(const string &dgf_name)
+unsigned short SurfUnstructured::importDGF(const string &dgf_name, int PIDOffset)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -501,6 +502,7 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name)
     long                                                        vcount, idx;
     std::vector<std::array<double, 3>>                          vertex_list;
     std::vector<std::vector<int>>                               simplex_list;
+    std::vector<int>                                            simplex_PID;
     std::vector<long>                                           vertex_map;
     std::vector<long>                                           connect;
 
@@ -515,7 +517,7 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name)
     // ====================================================================== //
 
     // Read vertices and cells from DGF file
-    dgf_in.load(nV, nS, vertex_list, simplex_list);
+    dgf_in.load(nV, nS, vertex_list, simplex_list, simplex_PID);
 
     // Add vertices
     ve_ = vertex_list.cend();
@@ -537,7 +539,9 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name)
     } //next c_
 
     // Add cells
-    for (c_ = simplex_list.begin(); c_ != ce_; ++c_) {
+    int k;
+    for (c_ = simplex_list.begin(), k = 0; c_ != ce_; ++c_, ++k) {
+        // Create cell
         i_ = c_->begin();
         connect.resize(c_->size(), Vertex::NULL_ID);
         je_ = connect.end();
@@ -545,7 +549,10 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name)
             *j_ = *i_;
             ++i_;
         } //next j_
-        addCell(getDGFFacetType(c_->size()), true, connect);
+        CellIterator cellIterator = addCell(getDGFFacetType(c_->size()), true, connect);
+
+        // Set cell PID
+        cellIterator->setPID(PIDOffset + simplex_PID[k]);
     } //next c_
 
     return 0;
