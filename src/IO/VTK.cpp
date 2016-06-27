@@ -508,7 +508,7 @@ void VTK::write( VTKWriteMode writeMode ){
 
     if( m_procs > 1  && m_rank == 0)  writeCollection() ;
 
-    if( writeMode == VTKWriteMode::DEFAULT ){
+    if( writeMode == VTKWriteMode::DEFAULT || writeMode == VTKWriteMode::NO_INCREMENT ){
         m_fh.incrementCounter() ;
     }
 
