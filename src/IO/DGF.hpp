@@ -138,6 +138,14 @@ class DGFObj {
         std::vector<std::array<double,3> >      &,                            // (input/output) vertex coordinate list
         std::vector<std::vector<int> >          &                             // (input/output) simplex-vertex connectivity
     );
+    void load(                                                                // Load mesh data from .dgf file
+        int                                     &,                            // (input/output) number of mesh vertices
+        int                                     &,                            // (input/output) number of mesh facets
+        std::vector<std::array<double,3> >      &,                            // (input/output) vertex coordinate list
+        std::vector<std::vector<int> >          &,                            // (input/output) simplex-vertex connectivity
+        std::vector<int>                        &,                            // (input/output) pid list
+        std::string pidName = "PID"                                           // name of simplexdata to be used as PID
+    );
     void save(                                                                // Save mesh data into a .dgf file
         int                                     &,                            // (input) number of mesh vertices
         int                                     &,                            // (input) number of mesh facets

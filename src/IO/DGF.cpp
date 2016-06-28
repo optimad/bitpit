@@ -604,6 +604,71 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
+    Load mesh data from DGF file. Overloading of member function DGFObj::load()
+    for container vector<array<double,3>>
+
+    \param[in,out] nV on input stores the number of vertices already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh vertices loaded from the dgf file.
+    \param[in,out] nS on input stores the number of cells already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh cells loaded from the dgf file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of
+    the vertices already acquired from the dgf file. New coordinates are appended
+    at the end of V.
+    \param[in,out] S cell->vertex connectivity data. On output stores the connectivity
+    entries for cells acquired from the dgf file. New connectivity entries are
+    appended at the and of S.
+    \param[out] PID part identifier list for each simplex.
+    \param[in] pidName name of the SIMPLEXDATA to  be used as PID.
+*/
+void DGFObj::load(
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::vector<int> >      &S,
+    std::vector<int>                    &PID,
+    std::string                         pidName
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+// none
+
+// ========================================================================== //
+// OPEN INPUT STREAM                                                          //
+// ========================================================================== //
+open("in");
+
+// ========================================================================== //
+// READ MESH DATA FROM DGF FILE                                               //
+// ========================================================================== //
+err = dgf::readMesh(ifile_handle, nV, nS, V, S);
+
+// ========================================================================== //
+// READ PID                                                                   //
+// ========================================================================== //
+int nData = PID.size() ;
+err = dgf::readSimplexData(ifile_handle, nData, PID, pidName ) ;
+if (nData == (int) PID.size()) {
+    PID.resize(nS - nData, 0);
+}
+
+// ========================================================================== //
+// CLOSE INPUT STREAM                                                         //
+// ========================================================================== //
+close("in");
+
+return; };
+
+// -------------------------------------------------------------------------- //
+/*!
     Save mesh data from DGF file.
 
     \param[in] nV number of vertices in the mesh
