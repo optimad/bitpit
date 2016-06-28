@@ -242,10 +242,13 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
  * \param[in] stl_name name of stl file
  * \param[in] isBinary flag for binary (true), of ASCII (false) stl file
  * \param[in] PIDOffset is the offset for the PID numbering
+ * \param[in] PIDSquash controls if the PID of the cells will be read from
+ * the file or if the same PID will be assigned to all cells
  * 
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &isBinary, int PIDOffset)
+unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &isBinary,
+                                           int PIDOffset, bool PIDSquash)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -265,7 +268,11 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
     // ====================================================================== //
     // LOAD ALL SOLID FROM THE STL FILE                                       //
     // ====================================================================== //
-    int pid = PIDOffset - 1;
+    int pid = PIDOffset;
+    if (!PIDSquash) {
+        --pid;
+    }
+
     while (true) {
         // ====================================================================== //
         // LOAD SOLID FROM THE STL FILE                                           //
@@ -284,7 +291,9 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
         // ====================================================================== //
         // PID OF THE SOLID                                                       //
         // ====================================================================== //
-        ++pid;
+        if (!PIDSquash) {
+            ++pid;
+        }
 
         // ====================================================================== //
         // PREPARE MESH FOR DATA IMPORT                                           //
@@ -487,10 +496,12 @@ ElementInfo::Type SurfUnstructured::getSTLFacetType(int nFacetVertices)
  * 
  * \param[in] dgf_name name of dgf file
  * \param[in] PIDOffset is the offset for the PID numbering
+ * \param[in] PIDSquash controls if the PID of the cells will be read from
+ * the file or if the same PID will be assigned to all cells
  * 
  * \result on output returns an error flag for I/O error.
 */
-unsigned short SurfUnstructured::importDGF(const string &dgf_name, int PIDOffset)
+unsigned short SurfUnstructured::importDGF(const string &dgf_name, int PIDOffset, bool PIDSquash)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -552,7 +563,12 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name, int PIDOffset
         CellIterator cellIterator = addCell(getDGFFacetType(c_->size()), true, connect);
 
         // Set cell PID
-        cellIterator->setPID(PIDOffset + simplex_PID[k]);
+        int cellPID = PIDOffset;
+        if (!PIDSquash) {
+            cellPID += simplex_PID[k];
+        }
+
+        cellIterator->setPID(cellPID);
     } //next c_
 
     return 0;

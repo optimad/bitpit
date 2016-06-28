@@ -51,9 +51,9 @@ public:
         void extractEdgeNetwork(SurfUnstructured &);
 
         // I/O routines
-        unsigned short importSTL(const std::string &, const bool &, int PIDOffset = 0);
+        unsigned short importSTL(const std::string &, const bool &, int PIDOffset = 0, bool PIDSquah = false);
         unsigned short exportSTL(const std::string &, const bool &, bool flag = true);
-        unsigned short importDGF(const std::string &, int PIDOffset = 0);
+        unsigned short importDGF(const std::string &, int PIDOffset = 0, bool PIDSquah = false);
         unsigned short exportDGF(const std::string &);
 
 protected:
