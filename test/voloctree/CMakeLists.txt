@@ -52,7 +52,7 @@ foreach(TEST_ENTRY IN LISTS VOLOCTREE_TEST_ENTRIES)
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_DEPENDENCIES})
+	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
 endforeach()
 set(VOLOCTREE_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the voloctree module" FORCE)
 
