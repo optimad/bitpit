@@ -99,9 +99,9 @@ PiercedVector<LevelSetInfo>& LevelSetKernel::getLevelSetInfo(){
 */
 LevelSetInfo LevelSetKernel::getLevelSetInfo( const long &i)const{
     if( ! m_ls.exists(i) ){
-        return m_ls[i] ;
-    } else {
         return (  LevelSetInfo() );
+    } else {
+        return m_ls[i] ;
     };
 
 } 
