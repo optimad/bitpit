@@ -25,6 +25,7 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <limits>
 
 #include "surface_kernel.hpp"
 
@@ -551,80 +552,19 @@ array<double, 3> SurfaceKernel::evalEdgeNormal(const long &id, const int &edge_i
 }
 
 /*!
- * Evaluate the normal unit vector at the vertex with specified local ID belonging to
- * the surface facet with specified global id. Vertex normal are computed as the arithmeic
- * mean of the normals of the edges incident to the vertex. In case adjacencies are
- * not build the vertex normal will be the same as the facet normal.
- * 
- * \param[in] id cell global ID
- * \param[in] vert_id vertex local ID on the specified cell
+ * Evaluate the normal unit vector of the specified local vertex.
+ *
+ * Vertex normal is evaluated as a weighted average of the normals of the
+ * 1 ring of the vertex. The weights used in the average are the normalized
+ * angles of incident facets at vertex.
+ *
+ * \param[in] id is the cell id
+ * \param[in] vertex is the local vertex id
+ * \result The normal unit vector of the specified local vertex.
 */
-array<double, 3> SurfaceKernel::evalVertexNormal(const long &id, const int &vert_id) const
+std::array<double, 3> SurfaceKernel::evalVertexNormal(const long &id, const int &vertex) const
 {
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
-
-    // Local variables
-    const Cell                          *cell_ = &m_cells[id];
-    long                                vert_ID = cell_->getVertex(vert_id);
-    array<double, 3>                    normal;
-    vector<long>                        ring1;
-
-    // Counters
-    vector<long>::const_iterator        i_, e_;
-    
-    // ====================================================================== //
-    // COMPUTE VERTEX NORMAL                                                  //
-    // ====================================================================== //
-
-    // Compute 1-ring of vertex
-    ring1 = findCellVertexOneRing(id, vert_id);
-
-    // Compute angles of incident facet at vertex
-    int i, n_ring1 = ring1.size();
-    double disk_angle = 0.0;
-    vector<double> angles(ring1.size(), 0.);
-    for (i = 0; i < n_ring1; ++i) {
-        cell_ = &m_cells[ring1[i]];
-        angles[i] = evalAngleAtVertex(cell_->getId(), cell_->findVertex(vert_ID));
-    } //next i_
-    sum(angles, disk_angle);
-    angles = angles/disk_angle;
-    e_ = ring1.cend();
-    normal.fill(0.0);
-    i = 0;
-    for (i_ = ring1.cbegin(); i_ != e_; ++i_) {
-        normal += angles[i]*evalFacetNormal(*i_);
-        ++i;
-    } //next i_
-
-    // Average of incident element
-//     e_ = ring1.cend();
-//     normal.fill(0.0);
-//     for (i_ = ring1.cbegin(); i_ != e_; ++i_) {
-//         normal += evalFacetNormal(*i_);
-//     } //next i_
-
-    // Average of edge normal
-//     int                                 loc_id, n_vert;
-//     e_ = ring1.cend();
-//     normal.fill(0.0);
-//     for (i_ = ring1.cbegin(); i_ != e_; ++i_) {
-//         cell_ = &m_cells[*i_];
-//         n_vert = cell_->getVertexCount();
-//         loc_id = cell_->findVertex(vert_ID);
-//         normal += evalEdgeNormal(*i_, loc_id)/double(cell_->getAdjacencyCount(loc_id)
-//                                                   + cell_->getAdjacency(loc_id) != Element::NULL_ID);
-//         loc_id = (n_vert + loc_id - 1) % n_vert;
-//         normal += evalEdgeNormal(*i_, loc_id)/double(cell_->getAdjacencyCount(loc_id)
-//                                                   + cell_->getAdjacency(loc_id) != Element::NULL_ID);
-//     } //next i_
-
-    // Normalization
-    normal = normal/norm2(normal);
-
-    return(normal);
+    return evalLimitedVertexNormal(id, vertex, std::numeric_limits<double>::max());
 }
 
 /*!
