@@ -628,6 +628,80 @@ array<double, 3> SurfaceKernel::evalVertexNormal(const long &id, const int &vert
 }
 
 /*!
+ * Evaluate the limited normal unit vector of the specified local vertex.
+ *
+ * Vertex normal is evaluated as a weighted average of the normals of the
+ * 1 ring of the vertex. Only the normal whose angle with respect to the
+ * considered cell is less that the specified limit are considered. The
+ * weights used in the average are the normalized angles of incident
+ * facets at vertex.
+ *
+ * \param[in] id is the cell id
+ * \param[in] vertex is the local vertex id
+ * \param[in] limit is the maximum allowed misalignment between the normal
+ * of the reference cell and the normal of facets used for evaualting the
+ * vertex normal
+ * \result The normal unit vector of the specified local vertex.
+*/
+std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, const int &vertex, const double &limit) const
+{
+    // Get glocal vertex id
+    const Cell &cell = m_cells[id];
+    long vertexId = cell.getVertex(vertex);
+
+    // Reference normal
+    std::array<double, 3> referenceNormal = evalFacetNormal(id);
+
+    // Compute 1-ring of vertex
+    std::vector<long> ring = findCellVertexOneRing(id, vertex);
+
+    // Build the list of facests that will be use to evaluate the normal
+    std::vector<long> facetIds;
+    std::vector<std::array<double, 3>> facetNormals;
+    for (long ringId : ring) {
+        if (ringId == id) {
+            facetIds.push_back(id);
+            facetNormals.push_back(referenceNormal);
+            continue;
+        }
+
+        std::array<double, 3> facetNormal = evalFacetNormal(ringId);
+        double misalignment = std::acos(dotProduct(facetNormal, referenceNormal);)
+        if (misalignment > std::abs(limit)) {
+            continue;
+        }
+
+        facetIds.push_back(ringId);
+        facetNormals.push_back(std::move(facetNormal));
+    }
+
+    // Compute normalized angles of incident facet at vertex
+    //
+    // These are the weigths used for the averagin.
+    std::vector<double> angles;
+    angles.reserve(facetIds.size());
+    for (long facetId : facetIds) {
+        const Cell &facet = m_cells[facetId];
+        angles.push_back(evalAngleAtVertex(facetId, facet.findVertex(vertexId)));
+    }
+
+    double disk_angle = 0.0;
+    sum(angles, disk_angle);
+    angles = angles / disk_angle;
+
+    // Compute the vertex normal
+    std::array<double, 3> normal = {{0., 0., 0.}};
+    for (size_t i = 0; i < facetIds.size(); ++i) {
+        normal += angles[i] * facetNormals[i];
+    }
+
+    // Normalization
+    normal = normal/norm2(normal);
+
+    return(normal);
+}
+
+/*!
  * Display quality stats for the mesh currently stored.
  * 
  * \param[in,out] out output stream where stats will be printed out

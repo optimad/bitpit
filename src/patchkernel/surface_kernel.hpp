@@ -57,6 +57,7 @@ public:
         virtual std::array<double, 3> evalFacetNormal(const long&) const;
         std::array<double, 3> evalEdgeNormal(const long&, const int&) const;
         virtual std::array<double, 3> evalVertexNormal(const long&, const int&) const;
+        virtual std::array<double, 3> evalLimitedVertexNormal(const long&, const int&, const double&) const;
         double evalCellSize(const long &id) const;
 
         void displayQualityStats(ostream&, unsigned int padding = 0) const;
