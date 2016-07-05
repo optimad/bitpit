@@ -7,21 +7,21 @@
     <meta name="description" content="bitpit is a C++ library for scientific High Performance Computing." />
     <meta name="keywords" content="bitpit, HPC, octree, PABLO, levelset, RBF, mesh, grid" />
 
-    <link rel="shortcut icon" href="/images/bitpit_icon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="shortcut icon" href="/bitpit-private/images/bitpit_icon.ico" type="image/vnd.microsoft.icon" />
 
-    <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" />
-    <link rel="stylesheet" type="text/css" href="/stylesheets/base.css" />
-    <link rel="stylesheet" type="text/css" href="/stylesheets/slideshow.css" />
+    <link rel="stylesheet" type="text/css" href="/bitpit-private/stylesheets/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/bitpit-private/stylesheets/base.css" />
+    <link rel="stylesheet" type="text/css" href="/bitpit-private/stylesheets/slideshow.css" />
 
-    <link rel="stylesheet" type="text/css" href="/stylesheets/modules.css" />
+    <link rel="stylesheet" type="text/css" href="/bitpit-private/stylesheets/modules.css" />
 
-    <link rel="stylesheet" type="text/css" href="/stylesheets/colorbox.css" />
+    <link rel="stylesheet" type="text/css" href="/bitpit-private/stylesheets/colorbox.css" />
 
 
-    <script type="text/javascript" src="/scripts/jquery-1.12.4.min.js"></script>
-    <script type="text/javascript" src="/scripts/jquery.bxslider.min.js"></script>
+    <script type="text/javascript" src="/bitpit-private/scripts/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="/bitpit-private/scripts/jquery.bxslider.min.js"></script>
 
-    <script type="text/javascript" src="/scripts/jquery.colorbox-min.js"></script>
+    <script type="text/javascript" src="/bitpit-private/scripts/jquery.colorbox-min.js"></script>
 
 
 <script>
@@ -37,28 +37,28 @@
 
 <!-- Header-->
 <div id="header">
-    <div class="logo"><a href="">bitpit</a></div>
+    <div class="logo"><a href="/bitpit-private">bitpit</a></div>
 
     <ul class="menu">
 
     
     
-    <li class="current"><a href="/modules/">Modules</a></li>
+    <li class="current"><a href="/bitpit-private/modules/">Modules</a></li>
     
 
     
     
-    <li><a href="/examples/">Examples</a></li>
+    <li><a href="/bitpit-private/examples/">Examples</a></li>
     
 
     
     
-    <li><a href="/documentation/">Documentation</a></li>
+    <li><a href="/bitpit-private/documentation/">Documentation</a></li>
     
 
     
     
-    <li><a href="/downloads/">Downloads</a></li>
+    <li><a href="/bitpit-private/downloads/">Downloads</a></li>
     
 
 </ul>
@@ -71,99 +71,112 @@
 <div id="content">
 
     
-    <div id="banner" class="module PABLO">
-        <img class="background" src="/images/PABLO/background.png" />
-
-        <div class="title">
-            <h1>PABLO</h1>
-
-            <h2>PArallel Balanced Linear Octree</h2>
-
-            <p>PABLO implements a parallel linear quadtree/octree. It allows dynamical adaptive mesh refinement and generationof both graded or non-graded meshes. The Morton's space filling curve, which it is based on, ensures low memory footprint and makes the user able to dinamically load balance the mesh. Intersection between elements can be built and degrees of freedom can be stored on these entities.</p>
-        </div>
+<div id="banner" class="module PABLO">
+    <img class="background" src="/bitpit-private/images/PABLO/background.png" />
+    
+    <div class="title">
+        <h1>PABLO</h1>
+        
+        <h2>PArallel Balanced Linear Octree</h2>
+        
+        <p>PABLO implements a parallel linear quadtree/octree. It allows dynamical adaptive mesh refinement and generationof both graded or non-graded meshes. The Morton's space filling curve, which it is based on, ensures low memory footprint and makes the user able to dinamically load balance the mesh. Intersection between elements can be built and degrees of freedom can be stored on these entities.</p>
     </div>
+</div>
 
-    <div id="main">
-        <h1>Introduction</h1>
-
-        <p>
-        PABLO is one of the modules of the MPI/C++ bitpit library for managing parallel linear octree/quadtree grids.
-        The aim of the project is to provide users with a ready-to-use tool for parallel adaptive grid of quadrilaterals/hexahedra.
-        Message passing paradigm is transparent to the user since MPI calls are embedded in PABLO.
-        </p>
-
-        <h1>Features</h1>
-
-        <h2>Linear octree</h2>
-
-        <p>
-        PABLO stores only the leaves of the quadtree/octree by using Morton's space filling curve for neighbourhood relations among the elements and for linearity of the mesh.
-        </p>
-
-        <div class="figure">
-            <a class="figure_1" href="/images/PABLO/quadtree.png" title="Morton's curve (left) - Leaves on quadtree (right)" >
-                <img src="/images/PABLO/quadtree.png" alt="Morton's curve and leaves on quadtree"/>
-            </a>
-            <p>Morton's curve (left) - Leaves on quadtree (right)</p>
-        </div>
-
-        <p>
-        This approach not only ensures low memory footprint (approx. 30B per element) and contiguous memory storage of the elements, but it also allows dynamical load balance.
-        </p>
-
-        <h2>Dynamical mesh refinement for graded and non-graded grids</h2>
-
-        <p>
-        PABLO allows dynamical adaptive mesh refinement up to 21 levels of resolution and lets the user choose between graded (2:1 balanced) and non-graded grids.
-        </p>
-
-        <div class="figure">
-            <a class="figure_2" href="/images/PABLO/graded.png" title="Difference between graded and non graded" >
-                <img src="/images/PABLO/graded.png" alt="Difference between graded and non graded"/>
-            </a>
-            <p>Graded (yellow) - Non-graded (blue)</p>
-        </div>
-
-        <div class="figure">
-            <a class="figure_3" href="/images/PABLO/loadbalance.png" title="Domain decomposition with load balance disabled (left) and enabled (right)" >
-                <img src="/images/PABLO/loadbalance.png" alt="Different colors for different processes"/>
-            </a>
-            <p>Domain decomposition with load balance disabled (left) and load balance enabled (right). <br/> Different colors represents different processes.</p>
-        </div>
-
-        <h2>Handling of user data</h2>
-
-        <p>
-          User data can easily be associated to the elements of the mesh.
-        </p>
-
-        <div class="figure">
-            <a class="figure_2" href="/images/PABLO/user_data.png" title="Example of user data" >
-                <img src="/images/PABLO/user_data.png" alt="Example of user data"/>
-            </a>
-            <p>Field</p>
-        </div>
-
-        <p>
-          The library provides the user with Curiously Recurrent Template Pattern based interfaces in order to deal with generic type of data during ghost halos updates and load balance.
-          Thanks to parallelism transparency and custom interfaces, the user can easily perform data communications and dynamic load-balance by calling straightforward high level methods.
-        </p>
-
-        <h2>Additional features</h2>
-
-        <p>
-          All the functions and methods in PABLO (but constructor) are independent of the code application spatial dimension, allowing the user to write general codes ready for both 2D and 3D computational spaces.
-          The module has been enriched by introducing intersections between elements structure, in order to give the user a way to store information on this type of codimension-1 geometrical entities.
-          Neighbourhood relations for periodic meshes has been recently introduced
-        </p>
+<div id="main">
+    <h1>Introduction</h1>
+    
+    <p>
+    PABLO is one of the modules of the MPI/C++ bitpit library for managing parallel linear octree/quadtree grids.
+    The aim of the project is to provide users with a ready-to-use tool for parallel adaptive grid of quadrilaterals/hexahedra.
+    Message passing paradigm is transparent to the user since MPI calls are embedded in PABLO.
+    </p>
+    
+    <h1>Features</h1>
+    
+    <h2>Linear octree</h2>
+    
+    <p>
+    PABLO stores only the leaves of the quadtree/octree by using Morton's space filling curve for neighbourhood relations among the elements and for linearity of the mesh.
+    </p>
+    
+    <div class="figure">
+        <a class="figure_1" href="/bitpit-private/images/PABLO/quadtree.png" title="Morton's curve (left) - Leaves on quadtree (right)" >
+            <img src="/bitpit-private/images/PABLO/quadtree.png" alt="Morton's curve and leaves on quadtree"/>
+        </a>
+        <p>Morton's curve (left) - Leaves on quadtree (right)</p>
     </div>
+    
+    <p>
+    This approach not only ensures low memory footprint (approx. 30B per element) and contiguous memory storage of the elements, but it also allows dynamical load balance.
+    </p>
+    
+    <h2>Dynamical mesh refinement for graded and non-graded grids</h2>
+    
+    <p>
+    PABLO allows dynamical adaptive mesh refinement up to 21 levels of resolution and lets the user choose between graded (2:1 balanced) and non-graded grids. <br>
+    The 2:1 balancing condition can be imposed only across entities of codimension 1 (<i>i.e.</i> faces in 3D space) or even across entities of codimension 2 or 3 (3D space).
+    </p>
+    
+    <div class="figure">
+        <a class="figure_2" href="/bitpit-private/images/PABLO/graded.png" title="Difference between graded and non graded" >
+            <img src="/bitpit-private/images/PABLO/graded.png" alt="Difference between graded and non graded"/>
+        </a>
+        <p>Graded (yellow) - Non-graded (blue)</p>
+    </div>
+    
+    <h2>Parallel load balance</h2>
+    
+    <p>
+    In PABLO the partitioning of the grid follows the ordering given by The Morton Index. Basically, the number of elements is equally distributed among the processes. <br>
+    Element computational weights are introduced in order to have computational cost partitions. <br>
+    Moreover, the load balance can be performed by keeping families of a desired level on the same process. Every octant with refinement level higher of the target one (children of the ancestors of the family to be kept undivided on the same process) are maintained in a compact core over the processes. <br>
+    </p>
+    
+    
+    <div class="figure">
+        <a class="figure_3" href="/bitpit-private/images/PABLO/loadbalance.png" title="Domain decomposition with load balance disabled (left) and enabled (right)" >
+            <img src="/bitpit-private/images/PABLO/loadbalance.png" alt="Different colors for different processes"/>
+        </a>
+        <p>Domain decomposition with load balance disabled (left) and load balance enabled (right). <br/> Different colors represents different processes.</p>
+    </div>
+    
+    <h2>Handling of user data</h2>
+    
+    <p>
+    User data can easily be associated to the elements of the mesh.
+    </p>
+    
+    <div class="figure">
+        <a class="figure_2" href="/bitpit-private/images/PABLO/user_data.png" title="Example of user data" >
+            <img src="/bitpit-private/images/PABLO/user_data.png" alt="Example of user data"/>
+        </a>
+        <p>Field</p>
+    </div>
+    
+    <p>
+    The library provides the user with Curiously Recurrent Template Pattern based interfaces in order to deal with generic type of data during ghost halos updates and load balance.
+    Thanks to parallelism transparency and custom interfaces, the user can easily perform data communications and dynamic load-balance by calling straightforward high level methods.
+    </p>
+    
+    <h2>Additional features</h2>
+    
+    <p>
+    All the functions and methods in PABLO (but constructor) are independent of the code application spatial dimension, allowing the user to write general codes ready for both 2D and 3D computational spaces. <br>
+    In the module a simple uniform PABLO interface is implemented in order to map the geometrical quantities between the reference system and the physical one. The user can be implement his own interface by providing the overloading of some essential methods.<br>
+    The module has been enriched by introducing intersections between elements structure, in order to give the user a way to store information on this type of codimension-1 geometrical entities.<br>
+    Neighbourhood relations for periodic meshes has been recently introduced.<br>
+    
+    
+    </p>
+</div>
 
 
 
     <div id="footer" >
         <p><strong>OPTIMAD Engineering Srl</strong> - Via Giacinto Collegno 18 - 10143 Torino</p>
         <p>Capitale Sociale euro 10.000,00 i.v. - Iscr. Reg. Impr. Torino C.F. / P.Iva 09359170017 - R.E.A. TO-1045102</p>
-        <p><a href="/privacy.html">Privacy Policy</a></p>
+        <p><a href="/bitpit-private/privacy.html">Privacy Policy</a></p>
     </div>
 </div>
 
