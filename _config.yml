@@ -1,7 +1,8 @@
 name: bitpit
 markdown: redcarpet
 highlighter: pygments
-baseurl: 
+baseurl: /bitpit-private
+
 
 collections:
   modules:
