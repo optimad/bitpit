@@ -63,14 +63,15 @@ LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m
 LevelSetSegmentation::~LevelSetSegmentation() {
     m_segmentation = NULL;
     m_vertexNormal.clear() ;
+    m_vertexGradient.clear() ;
 };
 
 /*!
  * Constructor
  * @param[in] id identifier of object
  */
-LevelSetSegmentation::LevelSetSegmentation( int id) :LevelSetObject(id) {
-
+LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetObject(id) {
+    setFeatureAngle(angle) ;
 };
 
 /*!
@@ -78,10 +79,8 @@ LevelSetSegmentation::LevelSetSegmentation( int id) :LevelSetObject(id) {
  * @param[in] id identifier of object
  * @param[in] STL unique pointer to surface mesh
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL) :LevelSetObject(id) {
-
+LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL, double angle) :LevelSetSegmentation(id,angle) {
     setSegmentation( std::move(STL) );
-
 };
 
 /*!
@@ -89,10 +88,8 @@ LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstruct
  * @param[in] id identifier of object
  * @param[in] STL pointer to surface mesh
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LevelSetObject(id) {
-
+LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL, double angle) :LevelSetSegmentation(id,angle) {
     setSegmentation( STL );
-
 };
 
 /*!
@@ -100,11 +97,13 @@ LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :Leve
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) : LevelSetObject(other.getId() ) {
+LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) : LevelSetSegmentation(other.getId() ) {
 
     m_segmentation = other.m_segmentation; 
     m_dimension = other.m_dimension ;
+    m_featureAngle = other.m_featureAngle ;
     m_vertexNormal = other.m_vertexNormal ;
+    m_vertexGradient = other.m_vertexGradient ;
     if (m_own != nullptr) {
         m_own = unique_ptr<SurfUnstructured>(new SurfUnstructured(*(other.m_own)));
     }
@@ -135,13 +134,14 @@ void LevelSetSegmentation::setSegmentation( std::unique_ptr<SurfUnstructured> &&
  */
 void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
 
-    std::vector<std::array<double,3>>   vertexNormal ;
+    std::vector<std::array<double,3>>   vertexNormal, vertexGradient ;
 
     m_segmentation = segmentation;
     m_dimension = m_segmentation->getSpaceDimension() ;
 
     int  i, nV;
     long segId ;
+    double norm, tol = m_segmentation->getTol() ;
 
     for( auto & segment : m_segmentation->getCells() ){
 
@@ -149,11 +149,22 @@ void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
         nV = segment.getVertexCount() ;
 
         vertexNormal.resize(nV) ;
+        vertexGradient.resize(nV) ;
         for(i=0; i<nV; ++i){
-            vertexNormal[i] = m_segmentation->evalVertexNormal(segId,i) ;
+            vertexGradient[i] = m_segmentation->evalVertexNormal(segId,i) ;
+            vertexNormal[i] = m_segmentation->evalLimitedVertexNormal(segId,i,m_featureAngle) ;
         }
 
-        m_vertexNormal.insert({{segId,vertexNormal}}) ;
+        m_vertexGradient.insert({{segId,vertexGradient}}) ;
+
+        norm = 0. ;
+        for(i=0; i<nV; ++i){
+            norm += norm2(vertexGradient[i] - vertexNormal[i]) ;
+        }
+
+        if( norm >= tol ){
+            m_vertexNormal.insert({{segId,vertexNormal}}) ;
+        }
 
     };
 }
@@ -164,6 +175,14 @@ void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
  */
 const SurfUnstructured & LevelSetSegmentation::getSegmentation() const {
     return *m_segmentation ;
+};
+
+/*!
+ * Set feature angle
+ * @param[in] angle feature angle to be used when calculating face normals;
+ */
+void LevelSetSegmentation::setFeatureAngle( double angle){
+    m_featureAngle= angle;
 };
 
 /*!
@@ -318,15 +337,19 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
  */
 void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
 
+    std::array<double,3> g ;
+
     Cell &cell = m_segmentation->getCell(i) ;
     int nV = cell.getVertexCount() ;
 
-    auto itr = m_vertexNormal.find(i) ;
-    assert( itr != m_vertexNormal.end() ) ;
+    auto itrNormal = m_vertexNormal.find(i) ;
+    auto itrGradient = m_vertexGradient.find(i) ;
+    assert( itrGradient != m_vertexGradient.end() ) ;
 
     if( nV == 1){
         long id = cell.getVertex(0) ;
         d = norm2( p- m_segmentation->getVertexCoords(id) ) ;
+        g.fill(0.) ;
         n.fill(0.) ;
 
     } else if( nV == 2){
@@ -336,10 +359,18 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
         std::array<double,2> lambda ;
 
         d= CGElem::distancePointSegment( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), x, lambda ) ;
-        n  = lambda[0] *itr->second[0] ;
-        n += lambda[1] *itr->second[1] ;
 
-        n /= norm2(n) ;
+        g  = lambda[0] *itrGradient->second[0] ;
+        g += lambda[1] *itrGradient->second[1] ;
+        g /= norm2(g) ;
+
+        if( itrNormal != m_vertexNormal.end() ){
+            n  = lambda[0] *itrNormal->second[0] ;
+            n += lambda[1] *itrNormal->second[1] ;
+            n /= norm2(n) ;
+        } else {
+            n = g ;
+        }
 
     } else if (nV == 3){
         long id0 = cell.getVertex(0) ;
@@ -349,18 +380,30 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
         std::array<double,3> lambda ;
 
         d= CGElem::distancePointTriangle( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), m_segmentation->getVertexCoords(id2), x, lambda ) ;
-        n  = lambda[0] *itr->second[0] ;
-        n += lambda[1] *itr->second[1] ;
-        n += lambda[2] *itr->second[2] ;
 
-        n /= norm2(n) ;
+        g  = lambda[0] *itrGradient->second[0] ;
+        g += lambda[1] *itrGradient->second[1] ;
+        g += lambda[2] *itrGradient->second[2] ;
+        g /= norm2(g) ;
+
+        if( itrNormal != m_vertexNormal.end() ){
+            n  = lambda[0] *itrNormal->second[0] ;
+            n += lambda[1] *itrNormal->second[1] ;
+            n += lambda[2] *itrNormal->second[2] ;
+            n /= norm2(n) ;
+        } else {
+            n = g ;
+        }
 
     } else{
         log::cout() << " simplex not supported in LevelSetSegmentation::infoFromSimplex " << nV << std::endl ;
         
     };
 
-    s = sign( dotProduct(n, p - x) );
+
+
+
+    s = sign( dotProduct(g, p - x) );
 
 
     return ;

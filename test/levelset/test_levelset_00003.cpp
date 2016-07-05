@@ -122,7 +122,7 @@ int main( int argc, char *argv[]){
     std::vector<double>::iterator   itLS ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject(std::move(STL)) ;
+    levelset.addObject(std::move(STL),M_PI) ;
 
     mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_003") ;

@@ -147,7 +147,7 @@ int main( int argc, char *argv[]){
 
     levelset.setMesh(&mesh) ;
 
-    levelset.addObject(std::move(STL)) ;
+    levelset.addObject(std::move(STL),M_PI) ;
 
     start = std::chrono::system_clock::now();
     levelset.compute( ) ;

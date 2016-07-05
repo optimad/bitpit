@@ -606,7 +606,7 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, con
         }
 
         std::array<double, 3> facetNormal = evalFacetNormal(ringId);
-        double misalignment = std::acos(dotProduct(facetNormal, referenceNormal);)
+        double misalignment = std::acos(dotProduct(facetNormal, referenceNormal)) ;
         if (misalignment > std::abs(limit)) {
             continue;
         }

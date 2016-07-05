@@ -87,10 +87,10 @@ class LevelSet{
     void                                        setMesh( VolCartesian* ) ;
     void                                        setMesh( VolOctree* ) ;
 
-    int                                         addObject( std::unique_ptr<SurfaceKernel> &&, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( SurfaceKernel *, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( std::unique_ptr<SurfUnstructured> &&, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( SurfUnstructured *, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( std::unique_ptr<LevelSetObject> && ) ;
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
     const LevelSetObject &                      getObject( int ) const ;
@@ -293,16 +293,18 @@ class LevelSetSegmentation : public LevelSetObject {
 
     SurfUnstructured*                           m_segmentation;             /**< surface segmentation */
     std::unique_ptr<SurfUnstructured>           m_own;                      /**< owner of surface segmentation */
+    double                                      m_featureAngle;             /**< critical angle between facets */
 
     std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexNormal;            /**< vertex normals */
+    std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexGradient;            /**< vertex gradient */
     PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
 
 
     public:
     virtual ~LevelSetSegmentation();
-    LevelSetSegmentation(int);
-    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> && );
-    LevelSetSegmentation(int, SurfUnstructured* );
+    LevelSetSegmentation(int,double angle=2.*M_PI);
+    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> &&, double angle=2.*M_PI);
+    LevelSetSegmentation(int, SurfUnstructured*, double angle=2.*M_PI);
     LevelSetSegmentation(const LevelSetSegmentation&);
 
     LevelSetSegmentation*                       clone() const ;
@@ -310,6 +312,7 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        setSegmentation( std::unique_ptr<SurfUnstructured> && ) ;
     void                                        setSegmentation( SurfUnstructured * ) ;
     const SurfUnstructured &                    getSegmentation() const ;
+    void                                        setFeatureAngle(double) ;
 
     const std::unordered_set<long> &            getSimplexList(const long &) const ;
     bool                                        isInNarrowBand( const long &) ;

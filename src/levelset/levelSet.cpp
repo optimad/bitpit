@@ -158,16 +158,17 @@ void LevelSet::setMesh( VolOctree* octree ) {
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
+ * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
  * order will be used as identifier
  */
-int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, int id ) {
+int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, double angle, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_object.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation)) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation), angle ) ;
 
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
@@ -177,16 +178,17 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, int i
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
+ * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
  * order will be used as identifier
  */
-int LevelSet::addObject( SurfUnstructured *segmentation, int id ) {
+int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_object.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation, angle) ;
 
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
@@ -196,16 +198,17 @@ int LevelSet::addObject( SurfUnstructured *segmentation, int id ) {
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
+ * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
  * order will be used as identifier
  */
-int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, int id ) {
+int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double angle, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_object.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id,angle) ;
     if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation.get()) ){
         segmentation.release();
         std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
@@ -222,16 +225,17 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, int id )
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
+ * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
  * order will be used as identifier
  */
-int LevelSet::addObject( SurfaceKernel *segmentation, int id ) {
+int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_object.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id,angle) ;
     if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation)){
         lsSeg->setSegmentation( surfUnstructured );
     } else {

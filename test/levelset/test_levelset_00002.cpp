@@ -101,7 +101,7 @@ int main( int argc, char *argv[]){
     LevelSet                levelset ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject( std::move(STL) ) ;
+    levelset.addObject( std::move(STL), M_PI ) ;
 
     levelset.setPropagateSign(true) ;
     start = std::chrono::system_clock::now();
