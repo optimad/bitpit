@@ -1048,6 +1048,16 @@ PiercedVector<Cell> & PatchKernel::getCells()
 }
 
 /*!
+	Gets a constant reference of the cells owned by the patch.
+
+	\return A constant reference of the cells owned by the patch.
+*/
+const PiercedVector<Cell> & PatchKernel::getCells() const
+{
+	return m_cells;
+}
+
+/*!
 	Gets a reference to the cell with the specified id.
 
 	\param id is the id of the requested cell

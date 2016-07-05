@@ -125,6 +125,7 @@ public:
 	long getInternalCount() const;
 	long getGhostCount() const;
 	PiercedVector<Cell> &getCells();
+	const PiercedVector<Cell> &getCells() const;
 	Cell &getCell(const long &id);
 	const Cell &getCell(const long &id) const;
 	virtual ElementInfo::Type getCellType(const long &id) const;
