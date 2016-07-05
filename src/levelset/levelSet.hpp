@@ -95,6 +95,7 @@ class LevelSet{
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
     const LevelSetObject &                      getObject( int ) const ;
     int                                         getObjectCount( ) const ;
+    std::vector<int>                            getObjectIds( ) const ;
 
     void                                        clear();
     void                                        clearObject();

@@ -288,6 +288,20 @@ int LevelSet::getObjectCount( ) const{
 };
 
 /*!
+ * Get the ids of the bodies.
+ * @return a list of the body ids
+*/
+std::vector<int> LevelSet::getObjectIds( ) const{
+    std::vector<int> ids ;
+    ids.reserve(m_object.size()) ;
+    for(const auto &entry : m_object) {
+        ids.push_back(entry.first) ;
+    }
+
+    return ids ;
+};
+
+/*!
  * Clear LevelSet entirely
  */
 void LevelSet::clear(){
