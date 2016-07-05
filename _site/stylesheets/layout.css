@@ -1,0 +1,223 @@
+
+html,
+body {
+	padding: 0;
+	margin: 0;
+
+	height: 100%;
+	width: 100%;
+}
+
+
+#header {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 50px;
+
+  color: #F8F8F8;
+  background-color: #262626;
+
+  z-index: 100;
+}
+
+#header .logo {
+  position: absolute;
+
+  top: 0;
+  left: 50px;
+
+  width: 100px;
+  height: 50px;
+
+  line-height: 50px;
+
+  font-weight: 900;
+  font-size: 24px;
+}
+
+#header .menu {
+  position: absolute;
+
+  padding: 0;
+  margin: 0;
+
+  top: 0;
+  left: 150px;
+  right: 100px;
+
+  height: 50px;
+
+  line-height: 50px;
+  font-size: 16px;
+  list-style: none;
+}
+
+#header .menu li {
+  float: left;
+
+  padding: 0 15px 0 15px;
+
+  height: 100%;
+
+  text-align: center;
+  line-height: 50px;
+
+  cursor: pointer;
+}
+
+#header .menu li:hover {
+  background-color: #165A7C;
+}
+
+#content {
+  position: absolute;
+
+  min-height: 100%;
+  width: 100%;
+
+  padding: 50px 0 0 0;
+  margin: 0;
+}
+
+#title {
+    position: relative;
+
+    background: #1B6E98; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left, #1B6E98, #2391C8); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(right, #1B6E98, #2391C8); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(right, #1B6E98, #2391C8); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to right, #1B6E98, #2391C8); /* Standard syntax */
+
+    border-bottom: 1px solid #242424;
+
+    padding: 20px 500px 20px 300px;
+    box-sizing: border-box;
+
+    text-align: center;
+
+    height: 250px;
+    width: 100%;
+}
+
+#title h1,
+#title h2 {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+
+  margin: 0;
+
+  color: #F8F8F8;
+
+  font-size: 46px;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+#title h2 {
+  font-size: 20px;
+  text-shadow: none;
+
+  margin: 20px 0 30px 0;
+}
+
+#title .download {
+  border-radius: 5px;
+
+  width: 200px;
+  height: 50px;
+  line-height: 50px;
+
+  margin: auto auto;
+
+  font-size: 30px;
+  text-align: center;
+  font-weight: 900;
+
+  color: #F8F8F8;
+  background-color: #4E4E4E;
+}
+
+#title .slideshow {
+  position: absolute;
+
+  top: 25px;
+  right: 150px;
+
+  width: 200px;
+  height: 200px;
+}
+
+#title .slideshow img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+}
+
+#main {
+  padding: 5px 120px 40px 45px;
+
+  min-height: 100%;
+
+  color: #383838;
+}
+
+#main h1 {
+  font-size: 28px;
+
+  color: #1B465B;
+}
+
+#main .module-list {
+  text-align: center;
+}
+
+#main .module-info {
+  display: inline-block;
+  width: 300px;
+  height: 200px;
+
+  margin: 10px;
+
+  overflow: hidden;
+  text-align: justify;
+}
+
+#main .module-info h1 {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+
+  font-size: 20px;
+  color: #1B465B;
+}
+
+#main .module-info p {
+  font-size: 14px;
+  color: #383838;
+}
+
+#footer {
+  position: absolute;
+
+  bottom: 0;
+  width: 100%;
+  height: 25px;
+
+  color: #F8F8F8;
+  background-color: #262626;
+}
+
+#footer p {
+  margin: 0;
+  padding: 0;
+
+  text-align: center;
+
+  line-height: 25px;
+  font-size: 12px;
+}

@@ -1,0 +1,116 @@
+---
+layout: module
+title: PABLO
+name: PABLO
+section: modules
+
+highlights: true
+
+description: "PABLO implements a parallel linear quadtree/octree. It allows
+dynamical adaptive mesh refinement and generationof both graded or non-graded
+meshes. The Morton's space filling curve, which it is based on, ensures low
+memory footprint and makes the user able to dinamically load balance the mesh.
+Intersection between elements can be built and degrees of freedom can be stored
+on these entities."
+
+extra-css:
+    - modules.css
+    - colorbox.css
+
+extra-scripts:
+    - jquery.colorbox-min.js
+
+document-ready-script: "
+    $('.figure_1').colorbox({rel:'figure_1', maxHeight:'85%', maxWidth:'85%'});
+    $('.figure_2').colorbox({rel:'figure_2', maxHeight:'85%', maxWidth:'85%'});
+    $('.figure_3').colorbox({rel:'figure_3', maxHeight:'85%', maxWidth:'85%'});
+    $('.figure_4').colorbox({rel:'figure_4', maxHeight:'85%', maxWidth:'85%'});
+"
+---
+
+    <div id="banner" class="module PABLO">
+        <img class="background" src="{{ site.baseurl }}/images/{{ page.name }}/background.png" />
+
+        <div class="title">
+            <h1>PABLO</h1>
+
+            <h2>PArallel Balanced Linear Octree</h2>
+
+            <p>{{ page.description }}</p>
+        </div>
+    </div>
+
+    <div id="main">
+        <h1>Introduction</h1>
+
+        <p>
+        PABLO is one of the modules of the MPI/C++ bitpit library for managing parallel linear octree/quadtree grids.
+        The aim of the project is to provide users with a ready-to-use tool for parallel adaptive grid of quadrilaterals/hexahedra.
+        Message passing paradigm is transparent to the user since MPI calls are embedded in PABLO.
+        </p>
+
+        <h1>Features</h1>
+
+        <h2>Linear octree</h2>
+
+        <p>
+        PABLO stores only the leaves of the quadtree/octree by using Morton's space filling curve for neighbourhood relations among the elements and for linearity of the mesh.
+        </p>
+
+        <div class="figure">
+            <a class="figure_1" href="{{ site.baseurl }}/images/{{ page.name }}/quadtree.png" title="Morton's curve (left) - Leaves on quadtree (right)" >
+                <img src="{{ site.baseurl }}/images/{{ page.name }}/quadtree.png" alt="Morton's curve and leaves on quadtree"/>
+            </a>
+            <p>Morton's curve (left) - Leaves on quadtree (right)</p>
+        </div>
+
+        <p>
+        This approach not only ensures low memory footprint (approx. 30B per element) and contiguous memory storage of the elements, but it also allows dynamical load balance.
+        </p>
+
+        <h2>Dynamical mesh refinement for graded and non-graded grids</h2>
+
+        <p>
+        PABLO allows dynamical adaptive mesh refinement up to 21 levels of resolution and lets the user choose between graded (2:1 balanced) and non-graded grids.
+        </p>
+
+        <div class="figure">
+            <a class="figure_2" href="{{ site.baseurl }}/images/{{ page.name }}/graded.png" title="Difference between graded and non graded" >
+                <img src="{{ site.baseurl }}/images/{{ page.name }}/graded.png" alt="Difference between graded and non graded"/>
+            </a>
+            <p>Graded (yellow) - Non-graded (blue)</p>
+        </div>
+
+        <div class="figure">
+            <a class="figure_3" href="{{ site.baseurl }}/images/{{ page.name }}/loadbalance.png" title="Domain decomposition with load balance disabled (left) and enabled (right)" >
+                <img src="{{ site.baseurl }}/images/{{ page.name }}/loadbalance.png" alt="Different colors for different processes"/>
+            </a>
+            <p>Domain decomposition with load balance disabled (left) and load balance enabled (right). <br/> Different colors represents different processes.</p>
+        </div>
+
+        <h2>Handling of user data</h2>
+
+        <p>
+          User data can easily be associated to the elements of the mesh.
+        </p>
+
+        <div class="figure">
+            <a class="figure_2" href="{{ site.baseurl }}/images/{{ page.name }}/user_data.png" title="Example of user data" >
+                <img src="{{ site.baseurl }}/images/{{ page.name }}/user_data.png" alt="Example of user data"/>
+            </a>
+            <p>Field</p>
+        </div>
+
+        <p>
+          The library provides the user with Curiously Recurrent Template Pattern based interfaces in order to deal with generic type of data during ghost halos updates and load balance.
+          Thanks to parallelism transparency and custom interfaces, the user can easily perform data communications and dynamic load-balance by calling straightforward high level methods.
+        </p>
+
+        <h2>Additional features</h2>
+
+        <p>
+          All the functions and methods in PABLO (but constructor) are independent of the code application spatial dimension, allowing the user to write general codes ready for both 2D and 3D computational spaces.
+          The module has been enriched by introducing intersections between elements structure, in order to give the user a way to store information on this type of codimension-1 geometrical entities.
+          Neighbourhood relations for periodic meshes has been recently introduced
+        </p>
+    </div>

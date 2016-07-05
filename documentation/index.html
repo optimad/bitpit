@@ -1,0 +1,139 @@
+---
+layout: default
+title: Documentation
+section: documentation
+---
+
+<h1>Installation</h1>
+
+This page describes how to build and install bitpit. It covers both the
+released and the development versions.
+
+bitpit depends on several open source tools and libraries such as cmake,
+libxml2, lapack, etc. These are expected to be present on the machine on
+which bitpit is being built.
+
+<h2>Dependencies</h2>
+
+<p>
+In order to build bitpit you need at least the following software:
+</p>
+<ul>
+<li>
+    a standard compliant C++ compiler, tested are g++ (>= 4.4) and Clang (>= 3.4).
+    Recent versions of ICC (>= 15) should work, older versions (like 14.0.3)
+    are discouraged
+</li>
+<li>
+    CMake (>= 2.8.6, preferably>= 2.8.12)
+</li>
+</ul>
+
+<p>
+Some modules may have additional dependencies, the following software is
+needed only if the modules that depend on it are compiled:
+</p>
+<ul>
+<li>
+    libxml2 (required by the IO module)
+</li>
+<li>
+    lapack and lapacke (required by CG and levelset modules)
+</li>
+</ul>
+
+<p>
+To take advangate of multi-processor systems, bitpit can be compiled, optionally,
+with parallel support. The parallel implementation of bitpit uses the
+Message-Passing Interface (MPI). Any MPI implemetation, either OpenMPI, LAM,
+or MPICH suffice.
+</p>
+
+<h2>Download bipit source code</h2>
+
+If you are trying to build a bitpit release, download it from the
+<a href="{{ site.baseurl }}/downloads/index.html#stable">download page</a>.
+For the development version, please follow the
+<a href="{{ site.baseurl }}/downloads/index.html#development">instructions</a>
+for checking it out from git.
+
+<h2>Configure bitpit with CMake</h2>
+
+<p>Create a build directory where bitpit will be compiled. It is important
+to point out the bitpit needs to be always build in a separate build directory.
+Do not build in the source directory.
+<span class="codebox">
+mkdir $HOME/projects/bitpit-build
+cd $HOME/projects/bitpit-build
+</span>
+</p>
+
+<p>Use ccmake (Curses CMake GUI) from the CMake installed location. CCMake is a
+Curses based GUI for CMake. To run it go to the build directory and specify as
+an argument the source directory (&lt;SOURCE_DIR&gt;):
+<span class="codebox">
+ccmake &lt;SOURCE_DIR&gt;
+</span>
+The ccmake configuration process is an iterative process. First select settings
+values and run the configuration (key c). After the configuration, new settings
+may appear. Select the values for the new settings and run the configration
+again. Repeat until all values are set and the generate option is available
+(g key).
+<p>
+
+<p>
+Some variables (advanced variables) are not visible right away. To see
+advanced varables, toggle to advanced mode (t key).
+</p>
+
+<p>
+To set a variable, move the cursor to the variable and press enter. If it is
+a boolean (ON/OFF) it will flip the value. If it is string or file, it will
+allow editing of the string. For file and directories, the &lt;tab&gt; key can
+be used to complete.
+</p>
+
+<h3>bitpit settings</h3>
+
+<dl>
+    <dt><strong>CMAKE_BUILD_TYPE</strong></dt>
+    <dd>
+    Sets the build type
+    </dd>
+
+    <dt><strong>ENABLE_MPI</strong></dt>
+    <dd>
+    Controls if bitpit will be compiled with parallel support
+    </dd>
+
+   <dt><strong>ENABLE_MPI</strong></dt>
+   <dd>
+   Controls the examples will be build (examples can be build built if all
+   bitpit are compiled)
+   </dd>
+</dl>
+
+<h2>Build bitpit</h2>
+
+<p>
+After the configuration step, bitpit can be build using the command:
+<span class="codebox">
+make
+</span>
+On multi-processor system (let's say two processor), compilation can be
+done in parallel typing:
+<span class="codebox">
+make -j 2
+</span>
+</p>
+
+<h2>Install bitpit</h2>
+
+<p>bitpit can be installed typing:
+<span class="codebox">
+make install
+</span>
+This will install all the relevant files in directories under the
+CMAKE_INSTALL_PREFIX. The executables are installed in ${CMAKE_INSTALL_PREFIX}/bin
+and the libraries are installed in ${CMAKE_INSTALL_PREFIX}/lib/bitpit-${major}.${minor}.
+</p>

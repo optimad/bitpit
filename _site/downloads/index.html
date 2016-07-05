@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="bitpit is a C++ library for scientific High Performance Computing." />
+    <meta name="keywords" content="bitpit, HPC, octree, PABLO, levelset, RBF, mesh, grid" />
+
+    <link rel="shortcut icon" href="/images/bitpit_icon.ico" type="image/vnd.microsoft.icon" />
+
+    <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/base.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/slideshow.css" />
+
+
+    <script type="text/javascript" src="/scripts/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.bxslider.min.js"></script>
+
+
+<script>
+    $(document).ready(function(){
+        
+    });
+</script>
+
+    <title>bitpit - Version 1.2.0</title>
+</head>
+
+<body>
+
+<!-- Header-->
+<div id="header">
+    <div class="logo"><a href="">bitpit</a></div>
+
+    <ul class="menu">
+
+    
+    
+    <li><a href="/modules/">Modules</a></li>
+    
+
+    
+    
+    <li><a href="/examples/">Examples</a></li>
+    
+
+    
+    
+    <li><a href="/documentation/">Documentation</a></li>
+    
+
+    
+    
+    <li class="current"><a href="/downloads/">Downloads</a></li>
+    
+
+</ul>
+
+
+    <div class="line"></div>
+
+</div>
+
+<div id="content">
+
+    
+    <div id="main">
+<span class="anchor" id="stable"></span>
+<h1>Download stable releases</h1>
+
+<h2>Current stable (bitpit 1.2.0) <span class="date">1 Jul 2016</span></h2>
+
+<ul class="downloads">
+    <li>
+    <a href="https://github.com/optimad/bitpit/archive/bitpit-1.2.0.tar.gz" class="big" >bitpit-1.2.0.bz2</a> [9552 kB]<br/>
+    <p>
+    md5: 24b1d7f5a30cc74a709ad4d3d7b11fbc<br/>
+    sha256: 891fc2383074dce29208fae5767f32108d1d8c5175457e202f2664e25c49bd8a
+    <p>
+    </li>
+
+    <li>
+    <a href="https://github.com/optimad/bitpit/archive/bitpit-1.2.0.zip" class="big" >bitpit-1.2.0.zip</a> [9747 kB]<br/>
+    <p>
+    md5: 5970f401649a069e1000324a5e4486b1<br/>
+    sha256: 05e688b65549b48d70c457a31494dba2d10222bbad79e36be8ad8940b0a46a2c<br/>
+    <p>
+    </li>
+</ul>
+
+<span class="anchor" id="development"></span>
+<h1>Download development releases</h1>
+
+<p>
+You can download a development relase of bitpit using Git.
+<a href="https://git-scm.com/">Git</a> is a version control system that is used for
+software development and other version control tasks that allows users to
+download the very latest version of a project, without having to wait for
+someone to get around to packaging it.
+</p>
+
+<h2>Prerequisites</h2>
+
+<p>
+You must have Git installed before you can use it. There are many different
+ways to acquire Git, depending on your operating system. For source and official
+binaries, check out Git official <a href="https://git-scm.com/">website</a>. For alternative
+ways to install Git, use your favorite search engine to find instructions for
+your operating system.
+</p>
+
+<h2>Download</h2>
+
+<p>
+The first step is to clone the bitpit repository. This will take a while.
+</p>
+
+<p>
+In a terminal window, enter the following command:
+<span class="codebox">
+git clone https://github.com/optimad/bitpit.git
+</span>
+This clones the entire bitpit repository into a subdirectory named bitpit. To
+install into a specific directory, add that to the command line (for more info
+refer to these docs). The default "branch" will be master, the cutting-edge,
+developer version of bitpit. Once the repository is cloned, you can easily
+switch to different branches or tags (see below), including those tracking
+stable versions of bitpit.
+</p>
+
+<h3>Download for development</h3>
+
+<p>
+If you have developer access, then instead of cloning anonymously with
+https you should clone with your ssh &lt;USERNAME&gt; so that you can submit
+changes for review:
+<span class="codebox">
+git clone https://&lt;USERNAME&gt;@github.com/optimad/bitpit.git
+</span>
+</p>
+
+<h2>Choosing bitpit version</h2>
+
+<h3>Latest development version</h3>
+
+<p>
+The latest development version of bitpit is tracked in the 'master' branch.
+This is what is locally checked out by default when you first clone the bitpit
+repository. If you have switched to another branch but would like to switch back
+o using bleeding-edge bitpit, do:
+<span class="codebox">
+git checkout master
+</span>
+</p>
+
+<h3>bitpit tags (stable version)</h3>
+
+<p>Specific stable versions of bitpit are tracked using 'tags'. These are analogous
+to the tarball releases. You can see the versions available with:
+<span class="codebox">
+git tag -l | grep bitpit | sort -V
+</span>
+Using non GNU sort command, such as on Mac OS X, you have to rely on the good
+old separators:
+<span class="codebox">
+git tag -l | grep bitpit | sort -n -t. -k1 -k2 -k3
+</span>
+</p>
+
+<p>To use a specific tag:
+<span class="codebox">
+git checkout &lt;tag name&gt;
+</span>
+</p>
+
+<h2>Keeping up to date</h2>
+
+<p>If you're using a particular branch or the development version ("master" branch)
+of bitpit, picking up the latest changes is relatively easy. Change into your bitpit
+clone directory and issue the git pull command:
+<span class="codebox">
+git pull
+</span>
+All of the latest changes for the branch you are using will be applied.
+</p>
+
+    </div>
+
+
+    <div id="footer" >
+        <p><strong>OPTIMAD Engineering Srl</strong> - Via Giacinto Collegno 18 - 10143 Torino</p>
+        <p>Capitale Sociale euro 10.000,00 i.v. - Iscr. Reg. Impr. Torino C.F. / P.Iva 09359170017 - R.E.A. TO-1045102</p>
+        <p><a href="/privacy.html">Privacy Policy</a></p>
+    </div>
+</div>
+
+</body>
+</html>

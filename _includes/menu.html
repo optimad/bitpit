@@ -1,0 +1,10 @@
+<ul class="menu">
+{% for sectionName in site.sectionsNames %}
+    {% assign section = sectionName | downcase %}
+    {% if page.section == section %}
+    <li class="current"><a href="{{ site.baseurl }}/{{section}}/">{{sectionName}}</a></li>
+    {% else %}
+    <li><a href="{{ site.baseurl }}/{{section}}/">{{sectionName}}</a></li>
+    {% endif %}
+{% endfor %}
+</ul>

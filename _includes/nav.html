@@ -1,0 +1,24 @@
+<nav class="nav-primary">
+    <ul>
+    	
+    	<li>
+    		<a href="{{ site.baseurl }}/">
+    	    Home
+    	    </a>
+    	</li>
+        {% for p in site.pages %}
+        	{% if p.home %}
+        	{% else %}
+        <li>
+        	<a {% if p.url == page.url %}class="active"{% endif %} href="{{ site.baseurl }}{{ p.url }}">
+            <div class="img-wrapper">
+        		<img src="{{ p.image }}" />
+        	</div>
+            {{ p.title }}
+            </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    
+</nav>

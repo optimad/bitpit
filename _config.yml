@@ -1,0 +1,21 @@
+name: bitpit
+markdown: redcarpet
+highlighter: pygments
+baseurl: 
+
+collections:
+  modules:
+    output: true
+
+sectionsNames:
+  - Modules
+  - Examples
+  - Documentation
+  - Downloads
+
+gems:
+   - jekyll-mentions
+   - jemoji
+   - jekyll-redirect-from
+   - jekyll-sitemap
+   - jekyll-feed

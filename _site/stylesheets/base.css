@@ -1,0 +1,430 @@
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+
+    height: 100%;
+    width: 100%;
+}
+
+h1 {
+    font-size: 1.75rem;
+    margin: 2.5rem 0 0.75rem 0;
+
+    color: #1B465B;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 0.75em 0;
+
+    color: #1B465B;
+}
+
+h3 {
+    font-size: 1.15rem;
+    margin: 1.25rem 0 0.5rem 0;
+
+    color: #1B465B;
+}
+
+p {
+    font-size: 1rem;
+
+    margin: 0.5rem 0 0.5rem 0;
+}
+
+a {
+    text-decoration: none;
+    outline: none;
+}
+
+#header {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 59px;
+
+    z-index: 100;
+    background-color: #262626;
+}
+
+#header .line {
+    display: block;
+    position: absolute;
+
+    top: 50px;
+    left: 0;
+
+    width: 100%;
+    height: 5px;
+
+    background-color: #237EBA;
+}
+
+#header .line.home {
+    background-color: #185780;
+}
+
+#header .logo {
+    position: absolute;
+
+    top: 0;
+    left: 50px;
+
+    width: 100px;
+    height: 100%;
+
+    line-height: 50px;
+
+    font-weight: 900;
+    font-size: 24px;
+}
+
+#header .menu {
+    position: absolute;
+
+    padding: 0;
+    margin: 0;
+
+    top: 0;
+    left: 150px;
+    right: 100px;
+
+    height: 50px;
+
+    line-height: 50px;
+    font-size: 14px;
+    list-style: none;
+}
+
+#header .menu li {
+    float: left;
+
+    padding: 0 15px 0 15px;
+
+    height: 100%;
+
+    text-align: center;
+    line-height: 50px;
+
+    cursor: pointer;
+}
+
+#header .menu li:hover {
+    background-color: #185780;
+}
+
+#header .menu li.current {
+    background-color: #237EBA;
+}
+
+
+#header .menu li a,
+#header .logo a {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    text-decoration: none;
+    outline: none;
+    color: #F8F8F8;
+}
+
+#header .menu li a:visited,
+#header .menu li a:active,
+#header .logo a:visited,
+#header .logo a:active {
+    color: #F8F8F8;
+}
+
+#content {
+    position: absolute;
+
+    min-height: 100%;
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 59px 0 0 0;
+    margin: 0;
+}
+
+#banner {
+    position: relative;
+
+    background: #1B6E98; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left, #1B6E98, #2391C8); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(right, #1B6E98, #2391C8); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(right, #1B6E98, #2391C8); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to right, #1B6E98, #2391C8); /* Standard syntax */
+
+    border-bottom: 1px solid #242424;
+
+    padding: 0 125px 0 125px;
+    margin: 0;
+    box-sizing: border-box;
+
+    height: 300px;
+    width: 100%;
+}
+
+#banner .title {
+    width: 450px;
+
+    text-align: center;
+
+    position: absolute;
+    top: 50%;
+    left: 200px;
+    transform: translateY(-50%);
+}
+
+#banner .title h1,
+#banner .title h2 {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+
+    margin: 0;
+
+    color: #F8F8F8;
+
+    font-size: 46px;
+    text-shadow: 1px 1px 2px #000000;
+}
+
+#banner .title h2 {
+    font-size: 20px;
+    text-shadow: none;
+
+    margin: 20px 0 30px 0;
+}
+
+#banner .title .download {
+    border-radius: 5px;
+
+    width: 200px;
+    height: 50px;
+    line-height: 50px;
+
+    margin: auto auto;
+
+    font-size: 30px;
+    text-align: center;
+    font-weight: 900;
+
+    color: #F8F8F8;
+    background-color: #262626;
+}
+
+#banner .title .download:hover {
+    background-color: #333333;
+}
+
+#banner .title .download a {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    text-decoration: none;
+    outline: none;
+    color: #F8F8F8;
+}
+
+#banner .title .download a:visited,
+#banner .title .download a:active {
+    color: #F8F8F8;
+}
+
+#banner .bx-wrapper {
+    position: absolute;
+
+    width: 350px;
+
+    top: 50%;
+    right: 125px;
+    transform: translateY(-50%);
+}
+
+#main {
+    position: relative;
+
+    padding: 25px 125px 175px 125px;
+    margin: 0;
+
+    color: #383838;
+}
+
+#main h1 {
+    border-bottom: 1px solid #BEBEBE;
+}
+
+#main h2 {
+    border-bottom: 1px solid #DADADA;
+}
+
+#main h3 {
+    border-bottom: 1px solid #E8E8E8;
+}
+
+#main a {
+    font-weight: 900;
+    color: #2F78B0;
+
+    text-decoration: none;
+    outline: none;
+}
+
+#main a:visited,
+#main a:active {
+    color: #21547C;
+}
+
+#main a.optimad {
+    color: #125175;
+}
+
+#main a.optima:visited,
+#main a.optima:active {
+    color: #0D3A55;
+}
+
+#main > :first-child {
+    margin-top: 0 !important;
+}
+
+#main > :last-child {
+    margin-bottom: 0 !important;
+}
+
+#main .module-list {
+    text-align: center;
+}
+
+#main .module-info {
+    display: inline-block;
+    width: 400px;
+    height: 200px;
+
+    margin: 20px;
+
+    overflow: hidden;
+    text-align: justify;
+}
+
+#main .module-info h1 {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+
+    font-size: 20px;
+    color: #1B465B;
+}
+
+#main .module-info h1 a {
+    color: #1B465B;
+    text-decoration: none;
+    outline: none;
+}
+
+#main .module-info p {
+    font-size: 14px;
+    color: #383838;
+}
+
+#main p .codebox {
+    display: block;
+    background-color: #EAEFF9;
+    border:1px solid #D5D5D7;
+    border-radius: 2px;
+    padding: 10px;
+    margin: 10px 0 10px 0;
+}
+
+#footer {
+    position: absolute;
+
+    bottom: 0;
+    height: 150px;
+
+    box-sizing: border-box;
+    padding: 25px 125px 20px 125px;
+    width: 100%;
+
+    color: #F8F8F8;
+    background-color: #262626;
+
+    overflow: hidden;
+}
+
+#footer p {
+    margin: 0;
+    padding: 0;
+
+    line-height: 25px;
+    font-size: 12px;
+}
+
+#footer a,
+#footer a:visited,
+#footer a:active {
+    color: #F8F8F8;
+}
+
+.big {
+    font-size: 1.25rem;
+}
+
+.downloads li {
+    margin: 1rem 0 1rem 0;
+}
+
+.downloads p {
+    margin: 0 0 1rem 0;
+    font-size: 0.85em;
+}
+
+span.date  {
+    font-size: 1.25rem;
+    display:block;
+    float: right;
+}
+
+.anchor {
+    display: block;
+    position: relative;
+    top: -70px;
+    visibility: hidden;
+}
+
+.anchor + h1 {
+    margin-top: 0 !important;
+}
+
+.figure {
+    text-align: center;
+
+    margin: 20px 0 20px 0;
+}
+
+.figure p {
+    font-size: 0.85rem;
+    font-weight: 900;
+
+    margin: 5px 0 0 0;
+    padding: 0;
+}
+
+.figure img {
+    max-width: 100%;
+
+    width: auto;
+    height: auto;
+}

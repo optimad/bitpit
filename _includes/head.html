@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="bitpit is a C++ library for scientific High Performance Computing." />
+    <meta name="keywords" content="bitpit, HPC, octree, PABLO, levelset, RBF, mesh, grid" />
+
+    <link rel="shortcut icon" href="{{ site.baseurl }}/images/bitpit_icon.ico" type="image/vnd.microsoft.icon" />
+
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/base.css" />
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/slideshow.css" />
+{% for stylesheet in page.extra-css %}
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/{{stylesheet}}" />
+{% endfor %}
+
+    <script type="text/javascript" src="{{ site.baseurl }}/scripts/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="{{ site.baseurl }}/scripts/jquery.bxslider.min.js"></script>
+{% for script in page.extra-scripts %}
+    <script type="text/javascript" src="{{ site.baseurl }}/scripts/{{script}}"></script>
+{% endfor %}
+
+<script>
+    $(document).ready(function(){
+        {{ page.document-ready-script }}
+    });
+</script>
+
+    <title>bitpit - {{ page.title }}</title>
+</head>
+
+<body>
+
+<!-- Header-->
+<div id="header">
+    <div class="logo"><a href="{{ site.baseurl }}">bitpit</a></div>
+
+    {% include menu.html %}
+
+{% if page.layout == 'home' %}
+    <div class="line home"></div>
+{% else %}
+    <div class="line"></div>
+{% endif %}
+</div>
+
+<div id="content">

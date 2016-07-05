@@ -1,0 +1,40 @@
+
+#banner.module {
+    background-image: none;
+    background-color: transparent;
+}
+
+#banner.PABLO {
+    background-color: #73B5DD;
+    border-bottom: 1px solid #A3CEEE;
+}
+
+#banner.module .background {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    width: auto;
+    height: auto;
+    max-height: 300px;
+}
+
+#banner.module .title {
+    left: 125px;
+    text-align: left;
+}
+
+#banner.module .title h1 {
+    color: #262626;
+    text-shadow: none;
+}
+
+#banner.module .title h2 {
+    color: #262626;
+
+    margin-top: 0;
+}
+
+#banner.module .title p {
+    font-size: 14px;
+}
