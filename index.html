@@ -3,15 +3,8 @@ layout: home
 title: Open Source Library For Scientific High Performance Computing
 home: true
 
-document-ready-script: "
-    $('.slideshow').bxSlider({
-                    auto: true,
-                    mode: 'fade',
-                    useCSS: true,
-                    speed: 500,
-                    easing: 'ease-in'
-    });
-"
+extra-scripts:
+    - jquery.cycle2.min.js
 
 ---
 
@@ -27,10 +20,10 @@ document-ready-script: "
             </div>
         </div>
 
-        <ul class="slideshow">
-            <li><img alt="PABLO Example" src="{{ site.baseurl }}/images/header_pablo_1.png" /></li>
-            <li><img alt="PABLO Example" src="{{ site.baseurl }}/images/header_pablo_2.png" /></li>
-        </ul>
+        <div class="cycle-slideshow">
+            <img alt="PABLO Example" src="{{ site.baseurl }}/images/header_pablo_11.png" />
+            <img alt="PABLO Example" src="{{ site.baseurl }}/images/header_pablo_22.png" />
+        </div>
     </div>
 
     <div id="main">
