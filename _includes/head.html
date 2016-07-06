@@ -22,11 +22,11 @@
     <script type="text/javascript" src="{{ site.baseurl }}/scripts/{{script}}"></script>
 {% endfor %}
 
-<script>
-    $(document).ready(function(){
-        {{ page.document-ready-script }}
-    });
-</script>
+    <script>
+        $(document).ready(function(){
+{{ page.document-ready-script }}
+        });
+    </script>
 
     <title>bitpit - {{ page.title }}</title>
 </head>
