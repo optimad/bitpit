@@ -39,10 +39,7 @@ set(IO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests fo the IO module" F
 # External dependencies
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
-include_directories("${PROJECT_SOURCE_DIR}/src/IO")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS IO_TEST_ENTRIES)

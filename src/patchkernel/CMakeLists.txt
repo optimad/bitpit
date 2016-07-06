@@ -29,12 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
 # Add library to targets
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
-include_directories("${PROJECT_SOURCE_DIR}/src/IO")
-include_directories("${PROJECT_SOURCE_DIR}/src/LA")
-include_directories("${PROJECT_SOURCE_DIR}/src/SA")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 file(GLOB SOURCE_FILES "*.cpp")
 set(PATCHKERNEL_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of patch module" FORCE)

@@ -50,6 +50,8 @@ unset(BITPIT_HEADER)
 unset(INCLUDE_LIST)
 
 # Add common files to targets
+addModuleIncludeDirectories(${MODULE_NAME})
+
 file(GLOB SOURCE_FILES "*.cpp")
 set(COMMON_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Common sources" FORCE)
 unset(SOURCE_FILES)

@@ -29,9 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
 # Add library to targets
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/SA")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 file(GLOB SOURCE_FILES "*.cpp")
 set(CG_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of CG module" FORCE)

@@ -35,9 +35,7 @@ list(APPEND TESTS "test_LA_00001")
 set(LA_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the LA module" FORCE)
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
-include_directories("${PROJECT_SOURCE_DIR}/src/LA")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS LA_TEST_ENTRIES)

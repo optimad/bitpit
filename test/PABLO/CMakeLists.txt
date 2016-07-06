@@ -41,11 +41,7 @@ endif()
 set(PABLO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the PABLO module" FORCE)
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
-include_directories("${PROJECT_SOURCE_DIR}/src/IO")
-include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS PABLO_TEST_ENTRIES)

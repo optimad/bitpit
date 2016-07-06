@@ -37,11 +37,8 @@ list(APPEND TESTS "test_RBF_00003")
 set(RBF_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of serial tests fo the RBF module" FORCE)
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
-include_directories("${PROJECT_SOURCE_DIR}/src/IO")
-include_directories("${PROJECT_SOURCE_DIR}/src/RBF")
+addModuleIncludeDirectories(${MODULE_NAME})
+addModuleIncludeDirectories("IO")
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS RBF_TEST_ENTRIES)

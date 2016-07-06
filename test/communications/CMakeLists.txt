@@ -37,11 +37,7 @@ endif ()
 set(COMMUNICATIONS_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the communications module" FORCE)
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/IO")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
-include_directories("${PROJECT_SOURCE_DIR}/src/communications")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS COMMUNICATIONS_TEST_ENTRIES)

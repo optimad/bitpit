@@ -29,6 +29,8 @@ cmake_minimum_required(VERSION 2.8)
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
 # Add library to targets
+addModuleIncludeDirectories(${MODULE_NAME})
+
 file(GLOB SOURCE_FILES "*.cpp")
 set(OPERATORS_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of the operators" FORCE)
 unset(SOURCE_FILES)

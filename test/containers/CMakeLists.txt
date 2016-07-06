@@ -35,8 +35,7 @@ list(APPEND TESTS "test_containers_00001")
 set(CONTAINERS_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the containers module" FORCE)
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS CONTAINERS_TEST_ENTRIES)

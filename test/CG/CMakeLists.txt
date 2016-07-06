@@ -35,10 +35,7 @@ list(APPEND TESTS "test_CG_00001")
 set(CG_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the CG module" FORCE)
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/SA")
-include_directories("${PROJECT_SOURCE_DIR}/src/CG")
+addModuleIncludeDirectories(${MODULE_NAME})
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS CG_TEST_ENTRIES)
