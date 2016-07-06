@@ -456,6 +456,14 @@ if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
 	list (APPEND BITPIT_EXTERNAL_LIBRARIES "${LAPACK_LIBRARIES}")
 endif()
 
+isModuleEnabled("IO" MODULE_IO_ENABLED)
+if (MODULE_IO_ENABLED)
+    find_package(LibXml2 REQUIRED)
+
+    list (APPEND BITPIT_EXTERNAL_LIBRARIES "${LIBXML2_LIBRARIES}")
+    list (APPEND BITPIT_EXTERNAL_INCLUDE_DIRECTORIES "${LIBXML2_INCLUDE_DIR}")
+endif()
+
 #------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#

@@ -33,6 +33,7 @@ set(TESTS "")
 list(APPEND TESTS "test_IO_00001")
 list(APPEND TESTS "test_IO_00002")
 list(APPEND TESTS "test_IO_00003")
+list(APPEND TESTS "test_IO_00004")
 
 set(IO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests fo the IO module" FORCE)
 
@@ -62,4 +63,9 @@ unset(TEST_TARGETS)
 add_custom_command(
     TARGET "test_IO_00001" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/selection.vtu" "${CMAKE_CURRENT_BINARY_DIR}/data/selection.vtu"
-    )
+)
+
+add_custom_command(
+    TARGET "test_IO_00004" PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/configuration.xml" "${CMAKE_CURRENT_BINARY_DIR}/data/configuration.xml"
+)

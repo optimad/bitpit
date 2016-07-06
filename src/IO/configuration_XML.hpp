@@ -20,34 +20,33 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
- \*---------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
+#ifndef __BITPIT_CONFIGURATION_XML_HPP__
+#define __BITPIT_CONFIGURATION_XML_HPP__
 
-/*!
- * @defgroup IO Input/Output (IO)
- * @{
- * @defgroup GenericIO Generic
- * @defgroup DuneGridFormat DuneGridFormat (DGF)
- * @defgroup STereoLithography STereoLithography (STL)
- * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
- * @{
- * @defgroup VTKEnums VTK Enumerations
- * @}
- * @defgroup Logger Logger
- * @}
- *
- */
+#include <libxml/tree.h>
+#include <libxml/xmlwriter.h>
 
-#ifndef __BITPIT_MODULE_IO_HPP__
-#define __BITPIT_MODULE_IO_HPP__
+#include "configuration_config.hpp"
 
-#include "bitpit_version.hpp"
+namespace bitpit {
 
-#include "configuration.hpp"
-#include "logger.hpp"
-#include "FileHandler.hpp"
-#include "VTK.hpp"
-#include "DGF.hpp"
-#include "GenericIO.hpp"
-#include "STL.hpp"
+namespace config {
+
+namespace XML {
+
+extern const std::string DEFAULT_ENCODING;
+
+void readNode(xmlNodePtr root, Config *config);
+void writeNode(xmlTextWriterPtr writer, const Config *config,
+               const std::string &encoding = DEFAULT_ENCODING);
+
+xmlChar * encodeString(const std::string &in, const std::string &encoding);
+
+}
+
+}
+
+}
 
 #endif

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<bitpit version="1">
+    <first>
+        <color>blue</color>
+        <distance>11</distance>
+        <exists>1</exists>
+        <data>
+            <x>11.11</x>
+        </data>
+    </first>
+    <second>
+        <color>red</color>
+        <distance>22</distance>
+        <exists>0</exists>
+        <data>
+            <y>22.22</y>
+        </data>
+    </second>
+</bitpit>
