@@ -121,10 +121,23 @@ function(getTestNumProcs TEST_ENTRY DEFAULT_N_PROCS N_PROCS)
 endfunction()
 
 function(addModuleIncludeDirectories MODULE_NAME)
+    set (EXTRA_ARGUMENTS ${ARGN})
+    list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
+    if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
+        list(GET EXTRA_ARGUMENTS 0 INCLUDE_EXTERNAL)
+    else ()
+        set(INCLUDE_EXTERNAL "TRUE")
+    endif ()
+
+    # External includes
+    if (INCLUDE_EXTERNAL)
+        include_directories("${BITPIT_EXTERNAL_INCLUDE_DIRECTORIES}")
+    endif ()
+
     # Add dependiecies
     string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
     foreach (DEPENDENCY_NAME IN LISTS ${UPPER_MODULE_NAME}_DEPS)
-        addModuleIncludeDirectories(${DEPENDENCY_NAME})
+        addModuleIncludeDirectories(${DEPENDENCY_NAME} "FALSE")
     endforeach()
     unset(UPPER_MODULE_NAME)
 
@@ -421,6 +434,7 @@ set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators mod
 #------------------------------------------------------------------------------------#
 
 set(BITPIT_EXTERNAL_LIBRARIES "")
+set(BITPIT_EXTERNAL_INCLUDE_DIRECTORIES "")
 
 isModuleEnabled("CG" MODULE_CG_ENABLED)
 isModuleEnabled("RBF" MODULE_RBF_ENABLED)
