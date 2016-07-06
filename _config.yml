@@ -1,6 +1,6 @@
 name: bitpit
 markdown: redcarpet
-highlighter: pygments
+highlighter: rouge
 baseurl: /bitpit-private
 
 
