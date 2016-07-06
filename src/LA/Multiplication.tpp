@@ -663,16 +663,11 @@ std::vector< std::vector<T> > matmulDiag(
     const std::vector<std::vector<T> >          &N
 ) {
 
-    int i;
-    int d1, d2;
-
-    d1= M.size();
-    d2= N[0].size() ;
-
+    int d1= M.size();
     std::vector< std::vector<T> > Q( N );
 
-    for( i=0; i<d1; i++){
-        Q[i] = N[i] * M[i] ;
+    for( int i=0; i<d1; i++){
+        Q[i] *= M[i] ;
     };
 
     return (Q);
@@ -693,15 +688,12 @@ std::vector< std::vector<T> > matmulDiag(
     const std::vector<T>                        &N
 ) {
 
-    int i;
-    int d1;
-
     std::vector< std::vector<T> > Q( M );
 
-    d1= M.size() ;
+    int d1= M.size() ;
 
-    for( i=0; i<d1; i++ ){
-        Q[i] = M[i] * N ;
+    for( int i=0; i<d1; i++ ){
+        Q[i] *= N[i] ;
     };
 
     return (Q);
@@ -724,10 +716,10 @@ std::array< std::array<T, d2> , d1> matmulDiag(
 ){
 
     int i;
-    std::array< std::array<T, d2> , d1> Q;
+    std::array< std::array<T, d2> , d1> Q(N);
 
     for( i=0; i<d1; i++){
-        Q[i] = M[i] *N[i] ;
+        Q[i] *= M[i]  ;
     };
 
     return (Q);
@@ -749,10 +741,10 @@ std::array< std::array<T, d2> , d1> matmulDiag(
 ) {
 
     int i;
-    std::array< std::array<T, d2> , d1> Q;
+    std::array< std::array<T, d2> , d1> Q(M);
 
     for( i=0; i<d1; i++){
-        Q[i] = M[i] *N ;
+        Q[i] *= N[i] ;
     };
 
     return (Q);
