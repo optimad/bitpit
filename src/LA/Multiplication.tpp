@@ -603,19 +603,15 @@ std::vector< std::vector<T> > matmul(
     const std::vector<std::vector<T> >          &N
 ) {
 
-    int i, j;
-    int d1, d2;
+    std::vector< std::vector<T> > Tr = transpose(N);
 
-    d1= M.size();
-    d2= N[0].size() ;
+    int d1= M.size();
+    int d2= Tr.size();
 
     std::vector< std::vector<T> > Q(d1, std::vector<T> (d2, T()) );
-    std::vector< std::vector<T> > Tr;
 
-    Tr = transpose( N ) ;
-
-    for( i=0; i<d1; i++){
-        for( j=0; j<d2; j++){
+    for( int i=0; i<d1; i++){
+        for( int j=0; j<d2; j++){
             Q[i][j]= dotProduct( M[i], Tr[j] );
         };
     };
