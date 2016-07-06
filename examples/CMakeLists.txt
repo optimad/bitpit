@@ -73,6 +73,7 @@ if(BUILD_EXAMPLES)
 
 		add_executable(${EXAMPLE_NAME} "${EXAMPLE_SOURCES}")
 		target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})
+		target_link_libraries(${EXAMPLE_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
 		install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}/examples)
 	endforeach()
 
