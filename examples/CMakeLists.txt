@@ -40,13 +40,12 @@ else ()
 endif ()
 
 # Add a target to generate the examples
-include_directories("${PROJECT_SOURCE_DIR}/src/common")
-include_directories("${PROJECT_SOURCE_DIR}/src/operators")
-include_directories("${PROJECT_SOURCE_DIR}/src/containers")
-include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
-include_directories("${PROJECT_SOURCE_DIR}/src/IO")
-include_directories("${PROJECT_SOURCE_DIR}/src/patchkernel")
-include_directories("${PROJECT_SOURCE_DIR}/src/volcartesian")
+foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+	isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
+	if (MODULE_ENABLED)
+		addModuleIncludeDirectories(${MODULE_NAME})
+	endif()
+endforeach ()
 
 if(BUILD_EXAMPLES)
 	# List of examples
