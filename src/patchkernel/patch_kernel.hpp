@@ -254,6 +254,8 @@ public:
 	int getRank() const;
 	int getProcessorCount() const;
 
+	int getCellRank(const long &id) const;
+
 	bool isRankNeighbour(int rank);
 	std::vector<int> getNeighbourRanks();
 	std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets();

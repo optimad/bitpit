@@ -3694,12 +3694,8 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 			genericIO::flushBINARY(stream, globalInfo.getCellGlobalId(cell.getId()));
 		}
 	} else if (name == "rank") {
-		for (Cell &cell : m_cells) {
-			if (cell.isInterior()) {
-				genericIO::flushBINARY(stream, m_rank);
-			} else {
-				genericIO::flushBINARY(stream, m_ghostOwners.at(cell.getId()));
-			}
+		for (auto itr = cellBegin(); itr != cellEnd(); ++itr) {
+			genericIO::flushBINARY(stream, getCellRank(itr.getId()));
 		}
 #endif
 	}

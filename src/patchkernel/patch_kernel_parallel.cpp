@@ -322,6 +322,22 @@ const std::vector<adaption::Info> PatchKernel::_balancePartition(bool trackChang
 }
 
 /*!
+	Gets the rank of the processor that owns the specified cell.
+
+	\param id is the id of the requested cell
+	\result The rank that owns the specified cell.
+*/
+int PatchKernel::getCellRank(const long &id) const
+{
+	const Cell &cell = getCell(id);
+	if (cell.isInterior()) {
+		return m_rank;
+	} else {
+		return m_ghostOwners.at(id);
+	}
+}
+
+/*!
 	Check if the processors associated to the specified rank is a neighbour.
 
 	\param rank is the rank associated to the processor
