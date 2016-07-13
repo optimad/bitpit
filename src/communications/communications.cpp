@@ -735,6 +735,36 @@ void DataCommunicator::waitAllRecvs()
 }
 
 /*!
+    Checkis if the send associated to the sepcified rank is active.
+
+    A send is considered active if the associated request is not set to
+    'MPI_REQUEST_NULL'.
+
+    \param rank is the rank associated to the send
+*/
+bool DataCommunicator::isSendActive(int rank)
+{
+    int id = m_sendIds[rank];
+
+    return (m_sendRequests[id] != MPI_REQUEST_NULL);
+}
+
+/*!
+    Checkis if the receive associated to the sepcified rank is active.
+
+    A receive is considered active if the associated request is not set to
+    'MPI_REQUEST_NULL'.
+
+    \param rank is the rank associated to the receive
+*/
+bool DataCommunicator::isRecvActive(int rank)
+{
+    int id = m_recvIds[rank];
+
+    return (m_recvRequests[id] != MPI_REQUEST_NULL);
+}
+
+/*!
     Cancels the send associated to the specified rank.
 
     \param rank is the rank associated to the send to cancel

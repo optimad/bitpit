@@ -92,6 +92,9 @@ public:
     void waitRecv(int rank);
     void waitAllRecvs();
 
+    bool isSendActive(int rank);
+    bool isRecvActive(int rank);
+
     void cancelSend(int rank);
     void cancelRecv(int rank);
 
