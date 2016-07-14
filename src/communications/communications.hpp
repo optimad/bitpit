@@ -84,11 +84,11 @@ public:
     void startRecv(int srcRank);
     void startAllRecvs();
 
-    int waitAnySend();
+    int waitAnySend(const std::vector<int> &blackList = std::vector<int>());
     void waitSend(int rank);
     void waitAllSends();
 
-    int waitAnyRecv();
+    int waitAnyRecv(const std::vector<int> &blackList = std::vector<int>());
     void waitRecv(int rank);
     void waitAllRecvs();
 

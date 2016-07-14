@@ -594,17 +594,28 @@ void DataCommunicator::startAllRecvs()
 
     If there are no active sends, the call returns MPI_UNDEFINED.
 
+    \param blackList is a list of ranks whose sends don't have to be waited
+    for
     \result The rank of the completed send or MPI_UNDEFINED if there was
     no active sends.
 */
-int DataCommunicator::waitAnySend()
+int DataCommunicator::waitAnySend(const std::vector<int> &blackList)
 {
+    // Exclude blackListed ranks
+    std::vector<MPI_Request> requestList(m_sendRequests);
+    for (const int rank : blackList) {
+        int id = m_sendIds.at(rank);
+        requestList[id] = MPI_REQUEST_NULL;
+    }
+
     // Wait for a send to complete
     int id;
-    MPI_Waitany(m_sendRequests.size(), m_sendRequests.data(), &id, MPI_STATUS_IGNORE);
+    MPI_Waitany(requestList.size(), requestList.data(), &id, MPI_STATUS_IGNORE);
     if (id == MPI_UNDEFINED) {
         return MPI_UNDEFINED;
     }
+
+    m_sendRequests[id] = requestList[id];
 
     // Reset the position of the buffer
     m_sendBuffers[id].seekg(0);
@@ -652,18 +663,28 @@ void DataCommunicator::waitAllSends()
 
     If there are no active recevies, the call returns MPI_UNDEFINED.
 
-    \param if set to true
+    \param blackList is a list of ranks whose recevies don't have to be waited
+    for
     \result The rank of the completed receive or MPI_UNDEFINED if there was
     no active receives.
 */
-int DataCommunicator::waitAnyRecv()
+int DataCommunicator::waitAnyRecv(const std::vector<int> &blackList)
 {
+    // Exclude blackListed ranks
+    std::vector<MPI_Request> requestList(m_recvRequests);
+    for (const int rank : blackList) {
+        int id = m_recvIds.at(rank);
+        requestList[id] = MPI_REQUEST_NULL;
+    }
+
     // Wait for a receive to complete
     int id;
-    MPI_Waitany(m_recvRequests.size(), m_recvRequests.data(), &id, MPI_STATUS_IGNORE);
+    MPI_Waitany(requestList.size(), requestList.data(), &id, MPI_STATUS_IGNORE);
     if (id == MPI_UNDEFINED) {
         return MPI_UNDEFINED;
     }
+
+    m_recvRequests[id] = requestList[id];
 
     // If the buffer is a double buffer, swap it
     RecvBuffer &recvBuffer = m_recvBuffers[id];
