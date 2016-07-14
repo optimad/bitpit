@@ -1168,10 +1168,12 @@ std::vector<id_t> PiercedVector<value_t, id_t>::getIds(bool ordered)
 	size_t pos = m_first_pos;
 
 	ids.push_back(m_ids[pos]);
-	do {
-		pos = findNextUsedPos(pos);
-		ids.push_back(m_ids[pos]);
-	} while (pos != m_last_pos);
+	if (size() > 1) {
+		do {
+			pos = findNextUsedPos(pos);
+			ids.push_back(m_ids[pos]);
+		} while (pos != m_last_pos);
+	}
 
 	// Sort the ids
 	if (ordered) {
