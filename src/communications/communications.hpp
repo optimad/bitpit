@@ -43,6 +43,8 @@ class DataCommunicator
 public:
     DataCommunicator(MPI_Comm communicator);
 
+    const MPI_Comm & getCommunicator() const;
+
     void finalize();
 
     void setTag(int tag);

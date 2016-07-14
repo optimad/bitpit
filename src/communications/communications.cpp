@@ -56,6 +56,16 @@ DataCommunicator::DataCommunicator(MPI_Comm communicator)
 }
 
 /*!
+	Gets the MPI communicator
+
+	\return The MPI communicator.
+*/
+const MPI_Comm & DataCommunicator::getCommunicator() const
+{
+	return m_communicator;
+}
+
+/*!
     Finalizes the communicator
 */
 void DataCommunicator::finalize()
