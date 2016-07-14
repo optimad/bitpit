@@ -364,7 +364,6 @@ void DataCommunicator::clearAllRecvs()
     m_recvIds.clear();
     m_recvRequests.clear();
     m_recvBuffers.clear();
-    m_recvBuffers.clear();
 }
 
 /*!
