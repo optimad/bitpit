@@ -407,7 +407,7 @@ void DataCommunicator::setRecv(int rank, long length)
 
     // If the receives are continous start the receive
     if (areRecvsContinuous()) {
-        startRecv(rank);
+        _startRecv(rank);
     }
 }
 
@@ -720,7 +720,7 @@ int DataCommunicator::waitAnyRecv(const std::vector<int> &blackList)
 
     // Restart the recevie
     if (areRecvsContinuous()) {
-        startRecv(rank);
+        _startRecv(rank);
     }
 
     // Return the rank associated to the completed receive
@@ -752,7 +752,7 @@ void DataCommunicator::waitRecv(int rank)
 
     // Restart the recevie
     if (areRecvsContinuous()) {
-        startRecv(rank);
+        _startRecv(rank);
     }
 }
 
@@ -773,7 +773,9 @@ void DataCommunicator::waitAllRecvs()
 
     // Restart all the receives
     if (areRecvsContinuous()) {
-        startAllRecvs();
+        for (int rank : m_recvRanks) {
+            _startRecv(rank);
+        }
     }
 }
 
