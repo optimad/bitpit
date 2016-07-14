@@ -119,6 +119,9 @@ private:
     std::vector<MPI_Request> m_sendRequests;
     std::vector<SendBuffer> m_sendBuffers;
 
+    void _startSend(int dstRank);
+    void _startRecv(int srcRank);
+
 };
 
 }

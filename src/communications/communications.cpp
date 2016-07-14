@@ -533,20 +533,15 @@ void DataCommunicator::startSend(int dstRank)
     // Wait for the previous send to finish
     waitSend(dstRank);
 
-    // Id of the buffer
-    int id = m_sendIds.at(dstRank);
-
     // If the buffer is a double buffer, swap it
+    int id = m_sendIds.at(dstRank);
     SendBuffer &sendBuffer = m_sendBuffers[id];
     if (sendBuffer.isDouble()) {
         sendBuffer.swap();
     }
 
     // Start the send
-    OBinaryStream &buffer = sendBuffer.getBack();
-
-    MPI_Isend(buffer.rawData(), buffer.capacity(), MPI_CHAR, dstRank, m_tag,
-            m_communicator, &m_sendRequests[id]);
+    _startSend(dstRank);
 }
 
 /*!
@@ -560,6 +555,23 @@ void DataCommunicator::startAllSends()
 }
 
 /*!
+    Internal function that starts sending the data to the specified rank
+
+    \param dstRank is the destination rank
+*/
+void DataCommunicator::_startSend(int dstRank)
+{
+    // Get the buffer
+    int id = m_sendIds.at(dstRank);
+    SendBuffer &sendBuffer = m_sendBuffers[id];
+    OBinaryStream &buffer = sendBuffer.getBack();
+
+    // Start the send
+    MPI_Isend(buffer.rawData(), buffer.capacity(), MPI_CHAR, dstRank, m_tag,
+              m_communicator, &m_sendRequests[id]);
+}
+
+/*!
     Starts receiving the data from the specified rank
 
     \param srcRank is the source rank
@@ -569,14 +581,8 @@ void DataCommunicator::startRecv(int srcRank)
     // Wait for the previous receive to finish
     waitRecv(srcRank);
 
-    // Reset the position of the buffer
-    int id = m_recvIds.at(srcRank);
-    IBinaryStream &buffer = m_recvBuffers[id].getBack();
-    buffer.seekg(0);
-
-    // Start the receive
-    MPI_Irecv(buffer.rawData(), buffer.capacity(), MPI_CHAR, srcRank, m_tag,
-            m_communicator, &m_recvRequests[id]);
+    // Start the recevier
+    _startRecv(srcRank);
 }
 
 /*!
@@ -587,6 +593,23 @@ void DataCommunicator::startAllRecvs()
     for (int rank : m_recvRanks) {
         startRecv(rank);
     }
+}
+
+/*!
+    Internal function taht starts receiving the data from the specified rank
+
+    \param srcRank is the source rank
+*/
+void DataCommunicator::_startRecv(int srcRank)
+{
+    // Reset the position of the buffer
+    int id = m_recvIds.at(srcRank);
+    IBinaryStream &buffer = m_recvBuffers[id].getBack();
+    buffer.seekg(0);
+
+    // Start the receive
+    MPI_Irecv(buffer.rawData(), buffer.capacity(), MPI_CHAR, srcRank, m_tag,
+            m_communicator, &m_recvRequests[id]);
 }
 
 /*!
