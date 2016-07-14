@@ -403,7 +403,7 @@ void DataCommunicator::setRecv(int rank, long length)
 
     m_recvRanks.push_back(rank);
     m_recvRequests.push_back(MPI_REQUEST_NULL);
-    m_recvBuffers.emplace_back(length);
+    m_recvBuffers.emplace_back(length, m_recvsContinuous);
 
     // If the receives are continous start the receive
     if (areRecvsContinuous()) {
