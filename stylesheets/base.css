@@ -83,6 +83,8 @@ a {
 
     font-weight: 900;
     font-size: 24px;
+
+    z-index: 600;
 }
 
 #header .menu {
