@@ -247,6 +247,9 @@ const std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> 
 		}
 	}
 
+	// Patch is now partitioned
+	m_partitioned = true;
+
 	return adaptionData;
 }
 
@@ -301,8 +304,21 @@ const std::vector<adaption::Info> PatchKernel::balancePartition(bool trackChange
 	// Update the bouding box
 	updateBoundingBox();
 
+	// Patch is now partitioned
+	m_partitioned = true;
+
 	// Done
 	return adaptionData;
+}
+
+/*!
+	Checks if the patch has been partitioned.
+
+	\result Returns true if the patch has been partitioned, false otherwise.
+*/
+bool PatchKernel::isPartitioned() const
+{
+	return m_partitioned;
 }
 
 /*!

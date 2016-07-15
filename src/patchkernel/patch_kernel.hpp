@@ -273,6 +273,7 @@ public:
 	const std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackChanges);
 	const std::vector<adaption::Info> partition(bool trackChanges);
 	const std::vector<adaption::Info> balancePartition(bool trackChanges);
+	bool isPartitioned() const;
 
 	adaption::Info sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
 #endif
@@ -446,6 +447,7 @@ private:
 	int m_nProcessors;
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
+	bool m_partitioned;
 
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
