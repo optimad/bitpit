@@ -32,17 +32,18 @@
 
 <body>
 
+{% if page.layout == 'home' %}
+{% assign home_class = 'home' %}
+{% else %}
+{% assign home_class = '' %}
+{% endif %}
+
 <!-- Header-->
-<div id="header">
+<div id="header" class="{{ home_class }}">
     <div class="logo"><a href="{{ site.baseurl }}">bitpit</a></div>
+    <div class="line"></div>
 
     {% include menu.html %}
-
-{% if page.layout == 'home' %}
-    <div class="line home"></div>
-{% else %}
-    <div class="line"></div>
-{% endif %}
 </div>
 
-<div id="content">
+<div id="content" class="{{ home_class }}">

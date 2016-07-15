@@ -8,11 +8,32 @@ collections:
   modules:
     output: true
 
-sectionsNames:
-  - Modules
-  - Examples
-  - Documentation
-  - Downloads
+sections:
+    modules:
+        name: Modules
+
+        subsections:
+            overview:
+                name: Overview
+            PABLO:
+                name: PABLO
+            RBF:
+                name: RBF
+
+    examples:
+        name: Examples
+
+    documentation:
+        name: Documentation
+
+        subsections:
+            installation:
+                name: Installation
+            manual:
+                name: Manual
+
+    downloads:
+        name: Downloads
 
 gems:
    - jekyll-mentions

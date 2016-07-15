@@ -1,10 +1,31 @@
 <ul class="menu">
-{% for sectionName in site.sectionsNames %}
-    {% assign section = sectionName | downcase %}
-    {% if page.section == section %}
-    <li class="current"><a href="{{ site.baseurl }}/{{section}}/">{{sectionName}}</a></li>
+{% for section in site.sections %}
+    {% if page.section == section[0] %}
+    <li class="current">
     {% else %}
-    <li><a href="{{ site.baseurl }}/{{section}}/">{{sectionName}}</a></li>
+    <li>
     {% endif %}
+        {% if section[1].subsections %}
+        <span>{{ section[1].name }}</span>
+        <ul class="sub-menu">
+        {% for subsection in section[1].subsections %}
+            <li><a href="{{ site.baseurl }}/{{ section[0] }}/{{ subsection[0] }}.html">{{ subsection[1].name }}</a></li>
+        {% endfor %}
+        </ul>
+        {% else %}
+        <a href="{{ site.baseurl }}/{{ section[0] }}/">{{ section[1].name }}</a>
+        {% endif %}
+    </li>
 {% endfor %}
 </ul>
+
+<script>
+$('.menu li').hover(
+    function() {
+        $('ul', this).stop().slideDown(200);
+    },
+    function() {
+        $('ul', this).stop().slideUp(200);
+    }
+);
+</script>
