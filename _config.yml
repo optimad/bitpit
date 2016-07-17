@@ -32,10 +32,10 @@ sections:
 
         subsections:
             installation:
-                name: Installation
+                name: Installation guide
                 url: installation.html
             manual:
-                name: Manual
+                name: Programmer's manual
                 url: manual.html
 
     downloads:
