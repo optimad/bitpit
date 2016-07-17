@@ -59,6 +59,12 @@ IF(BUILD_DOCUMENTATION)
   SET(DOXY_OUTPUT_ROOT     ${CMAKE_CURRENT_BINARY_DIR})
   SET(DOXY_PREDEFINED      "BITPIT_ENABLE_MPI=${DOXY_ENABLE_MPI}")
 
+  SET(DOXY_HTML_HEADER           "" CACHE INTERNAL "Header file for Doxygen documentation")
+  SET(DOXY_HTML_FOOTER           "" CACHE INTERNAL "Footer file for Doxygen documentation")
+  SET(DOXY_HTML_EXTRA_STYLESHEET "${CMAKE_SOURCE_DIR}/doc/bitpitStyleSheet.css" CACHE INTERNAL "Stylesheet file for Doxygen documentation")
+  SET(DOXY_DISABLE_INDEX         "YES" CACHE INTERNAL "Controls if the index should be disbaled")
+  SET(DOXY_GENERATE_TREEVIEW     "YES" CACHE INTERNAL "Controls if a tree-like index structure should be generated")
+
   SET(DOXY_INPUT_DIRECTORIES "${CMAKE_SOURCE_DIR}/src/common \\\n      ${CMAKE_SOURCE_DIR}/examples \\\n      ${CMAKE_SOURCE_DIR}/doc/extra")
   SET(DOXY_INPUT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/extra/bitpit.hpp;${CMAKE_CURRENT_SOURCE_DIR}/extra/bitpitStyleGuide.hpp;${COMMON_SOURCES};${COMMON_HEADERS};${EXAMPLES_SOURCES}")
   foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
