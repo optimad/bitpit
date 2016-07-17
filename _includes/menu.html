@@ -5,16 +5,22 @@
     {% else %}
     <li>
     {% endif %}
-        {% if section[1].subsections %}
+    {% if section[1].subsections %}
         <span>{{ section[1].name }}</span>
         <ul class="sub-menu">
         {% for subsection in section[1].subsections %}
-            <li><a href="{{ site.baseurl }}/{{ section[0] }}/{{ subsection[0] }}.html">{{ subsection[1].name }}</a></li>
+            {% capture url %}{{ site.baseurl }}/{{ section[0] }}/{{ subsection[1].url }}{% endcapture %}
+            <li><a href="{{ url }}">{{ subsection[1].name }}</a></li>
         {% endfor %}
         </ul>
+    {% else %}
+        {% if section[1].url %}
+            {% capture url %}{{ site.baseurl }}/{{ section[0] }}/{{ section[1].url }}{% endcapture %}
         {% else %}
-        <a href="{{ site.baseurl }}/{{ section[0] }}/">{{ section[1].name }}</a>
+            {% capture url %}{{ site.baseurl }}/{{ section[0] }}{% endcapture %}
         {% endif %}
+        <a href="{{ url }}">{{ section[1].name }}</a>
+    {% endif %}
     </li>
 {% endfor %}
 </ul>

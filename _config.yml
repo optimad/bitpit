@@ -15,13 +15,17 @@ sections:
         subsections:
             overview:
                 name: Overview
+                url: overview.html
             PABLO:
                 name: PABLO
+                url: PABLO.html
             RBF:
                 name: RBF
+                url: RBF.html
 
     examples:
         name: Examples
+        url:
 
     documentation:
         name: Documentation
@@ -29,11 +33,14 @@ sections:
         subsections:
             installation:
                 name: Installation
+                url: installation.html
             manual:
                 name: Manual
+                url: manual.html
 
     downloads:
         name: Downloads
+        url:
 
 gems:
    - jekyll-mentions
