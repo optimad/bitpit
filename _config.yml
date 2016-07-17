@@ -3,6 +3,7 @@ markdown: redcarpet
 highlighter: rouge
 baseurl: /bitpit-private
 
+exclude: [_manual]
 
 collections:
   modules:
