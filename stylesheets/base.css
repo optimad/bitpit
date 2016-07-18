@@ -81,9 +81,6 @@ a {
 
     line-height: 50px;
 
-    font-weight: 900;
-    font-size: 24px;
-
     z-index: 600;
 }
 
@@ -140,6 +137,11 @@ a {
 #header .logo a:visited,
 #header .logo a:active {
     color: #F8F8F8;
+}
+
+#header .logo a {
+    font-weight: 900;
+    font-size: 24px;
 }
 
 #header .menu li .sub-menu {
