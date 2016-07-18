@@ -1,0 +1,10 @@
+<map id="bitpit::VTKBaseStreamer" name="bitpit::VTKBaseStreamer">
+<area shape="rect" id="node2" href="$classbitpit_1_1PatchKernel.xhtml" title="The PatchKernel class provides an interface for defining patches. " alt="" coords="105,88,236,115"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1VTKNativeStreamer.xhtml" title="In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored. Right now only std::vector is supported. " alt="" coords="261,88,440,115"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1VTKUnstructuredGridStreamer.xhtml" title="Streamer for VTKUnstructuredGrid if the grid is made of homogeneous types. " alt="" coords="465,81,655,122"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1SurfaceKernel.xhtml" title="The SurfaceKernel class provides an interface for defining surface patches. " alt="" coords="13,171,157,197"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1VolumeKernel.xhtml" title="The VolumeKernel class provides an interface for defining volume patches. " alt="" coords="183,171,328,197"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1SurfUnstructured.xhtml" title="The SurfUnstructured class defines an unstructured surface triangulation. " alt="" coords="5,245,163,272"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1VolCartesian.xhtml" title="The VolCartesian defines a Cartesian patch. " alt="" coords="187,245,324,272"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1VolOctree.xhtml" title="The VolOctree defines a Octree patch. " alt="" coords="349,245,467,272"/>
+</map>

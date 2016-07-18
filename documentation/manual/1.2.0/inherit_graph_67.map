@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classbitpit_1_1VTKBaseStreamer.xhtml" title="The base class to be used to derive VTK streamers form. " alt="" coords="5,81,179,108"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1PatchKernel.xhtml" title="The PatchKernel class provides an interface for defining patches. " alt="" coords="255,31,387,57"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1VTKNativeStreamer.xhtml" title="In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored. Right now only std::vector is supported. " alt="" coords="231,81,411,108"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1VTKUnstructuredGridStreamer.xhtml" title="Streamer for VTKUnstructuredGrid if the grid is made of homogeneous types. " alt="" coords="227,133,416,174"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1SurfaceKernel.xhtml" title="The SurfaceKernel class provides an interface for defining surface patches. " alt="" coords="465,5,610,32"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1VolumeKernel.xhtml" title="The VolumeKernel class provides an interface for defining volume patches. " alt="" coords="465,56,610,83"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1SurfUnstructured.xhtml" title="The SurfUnstructured class defines an unstructured surface triangulation. " alt="" coords="659,5,818,32"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1VolCartesian.xhtml" title="The VolCartesian defines a Cartesian patch. " alt="" coords="670,56,807,83"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1VolOctree.xhtml" title="The VolOctree defines a Octree patch. " alt="" coords="679,107,798,133"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="bitpit::PatchKernel" name="bitpit::PatchKernel">
+<area shape="rect" id="node3" href="$classbitpit_1_1SurfaceKernel.xhtml" title="The SurfaceKernel class provides an interface for defining surface patches. " alt="" coords="13,155,157,181"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1VolumeKernel.xhtml" title="The VolumeKernel class provides an interface for defining volume patches. " alt="" coords="183,155,328,181"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1VTKBaseStreamer.xhtml" title="The base class to be used to derive VTK streamers form. " alt="" coords="84,5,257,32"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1SurfUnstructured.xhtml" title="The SurfUnstructured class defines an unstructured surface triangulation. " alt="" coords="5,229,163,256"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1VolCartesian.xhtml" title="The VolCartesian defines a Cartesian patch. " alt="" coords="187,229,324,256"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1VolOctree.xhtml" title="The VolOctree defines a Octree patch. " alt="" coords="349,229,467,256"/>
+</map>
