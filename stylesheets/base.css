@@ -99,9 +99,10 @@ a {
 
 #header .menu li {
     position: relative;
-    display: inline-block;
+    float: left;
 
     height: 100%;
+    width: auto;
 
     text-align: center;
     line-height: 50px;
