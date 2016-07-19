@@ -260,6 +260,8 @@ class LevelSetObject{
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
     virtual LevelSetObject*                     clone() const = 0;
 
+    virtual void                                clear( LevelSetKernel *visitee = nullptr )=0 ;
+
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
     virtual void                                clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
@@ -327,6 +329,8 @@ class LevelSetSegmentation : public LevelSetObject {
 
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &) ;
     double                                      evaluateLS( LevelSetKernel *, long) const ;
+
+    void                                        clear( LevelSetKernel *visitee = nullptr ) ;
 
     void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;

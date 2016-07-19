@@ -488,6 +488,18 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
 };
 
 /*!
+ * Clear the segmentation and the specified kernel.
+ * @param[in] visitee pointer to mesh
+ */
+void LevelSetSegmentation::clear( LevelSetKernel *visitee ){
+
+    m_seg.clear() ;
+    if (visitee) {
+        visitee->clear() ;
+    }
+}
+
+/*!
  * Computes the levelset function within the narrow band
  * @param[in] visitee pointer to mesh
  * @param[in] RSearch size of narrow band
