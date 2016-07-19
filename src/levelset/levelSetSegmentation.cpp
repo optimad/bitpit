@@ -594,9 +594,6 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
 
     std::vector<long>                       neighs ;
 
-    PiercedVector<SegInfo>::iterator data ;
-
-
     stack.reserve(128) ;
     temp.reserve(128) ;
     cloud.reserve(128) ;
@@ -630,12 +627,11 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
             for( const auto & I : stack){
                 if ( *vit <= RSearch ) {
 
-                    if( m_seg.exists(I) ){
-                        m_seg[I].m_segments.insert(i) ;
-                    } else {
+                    PiercedVector<SegInfo>::iterator data = m_seg.find(I) ;
+                    if( data == m_seg.end() ){
                         data = m_seg.emplace(I) ;
-                        data->m_segments.insert(i);
-                    };
+                    }
+                    data->m_segments.insert(i);
 
 
                     neighs  = mesh.findCellFaceNeighs(I) ; 
