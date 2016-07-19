@@ -293,6 +293,24 @@ class LevelSetSegmentation : public LevelSetObject {
         SegInfo( const std::vector<long> & ) ;
     };
 
+    struct DistanceComparator
+    {
+        const vector<double> & m_vector;
+
+        DistanceComparator(const vector<double> & vector)
+            : m_vector(vector)
+        {
+
+        }
+
+        bool operator()(double i1, double i2)
+        {
+            return m_vector[i1] < m_vector[i2];
+        }
+    };
+
+    typedef std::unordered_map<long, std::vector<long>> SegmentToCellMap ;
+
     int                                         m_dimension ;               /**< number of space dimensions */
 
     SurfUnstructured*                           m_segmentation;             /**< surface segmentation */
@@ -344,14 +362,18 @@ class LevelSetSegmentation : public LevelSetObject {
 
     protected:
     std::vector<std::array<double,3>>           getSimplexVertices( const long & ) const ;
-    void                                        lsFromSimplex( LevelSetKernel *, const double &, const bool &, bool filter = false, const std::unordered_set<long> &segInfoList = std::unordered_set<long>()  ) ;
+
+    std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *visitee, const double &search, SegmentToCellMap &segmentToCellMap ) ;
+    void                                        pruneSegmentInfo( const std::vector<adaption::Info> &mapper ) ;
     void                                        updateSegmentList( LevelSetKernel *visitee, const double &search, const std::unordered_set<long> &blacklist = std::unordered_set<long>()  ) ;
 
+    void                                        createLevelsetInfo( LevelSetKernel *visitee, const bool & signd, std::unordered_set<long> &cellList ) ;
     void                                        infoFromSimplex(const std::array<double,3> &, const long &, double &, double &, std::array<double,3> &,std::array<double,3> &) const ;
-    void                                        associateSimplexToCell( LevelSetCartesian *, const double &);
-    void                                        associateSimplexToCell( LevelSetOctree *, const double &);
 
-    std::unordered_set<long>                    updateSimplexToCell( const std::vector<adaption::Info> & ) ;
+    SegmentToCellMap                            extractSegmentToCellMap( LevelSetCartesian *, const double &);
+    SegmentToCellMap                            extractSegmentToCellMap( LevelSetOctree *, const double &);
+    SegmentToCellMap                            extractSegmentToCellMap( const std::vector<adaption::Info> & ) ;
+
     int                                         getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch ) ;
 };
 
