@@ -703,12 +703,8 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, cons
  */
 void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, const double &newRSearch){
 
-    double      oldSize, newSize ;
-
-    oldSize = visitee->computeSizeFromRSearch( visitee->getSizeNarrowBand() ) ;
-    newSize = visitee->computeSizeFromRSearch( newRSearch ) ;
-
-    if( newSize-oldSize <= 1.e-8 ) { //size of narrow band decreased or remained the same -> mapping
+    int resizeDirection = getNarrowBandResizeDirection( visitee, newRSearch ) ;
+    if( resizeDirection <= 0 ) { //size of narrow band decreased or remained the same -> mapping
 
         std::vector<std::vector<long>> previousSegments ;
 
@@ -795,6 +791,22 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
     };
 
 };
+
+/*!
+ * Detects if the requested narrow band size will make the narrow band grow
+ * or shrink.
+ * @param[in] visitee pointer to octree mesh
+ * @param[in] newRSearch new size of narrow band
+ * @return Returns 0 if the outer limit of the narrow band will not change,
+ * +1 is the narrow band will be growth and -1 is the narrow band will shrink.
+ */
+int LevelSetSegmentation::getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch){
+
+    double oldCellSize = visitee->computeSizeFromRSearch( visitee->getSizeNarrowBand() ) ;
+    double newCellSize = visitee->computeSizeFromRSearch( newRSearch ) ;
+
+    return sign( newCellSize - oldCellSize );
+}
 
 /*! 
  * Deletes non-existing items 

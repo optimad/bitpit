@@ -347,6 +347,7 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        associateSimplexToCell( LevelSetOctree *, const double &);
 
     void                                        updateSimplexToCell( LevelSetOctree *, const std::vector<adaption::Info> &, const double & ) ;
+    int                                         getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch ) ;
 };
 
 }
