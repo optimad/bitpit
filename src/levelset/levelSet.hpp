@@ -288,7 +288,6 @@ class LevelSetSegmentation : public LevelSetObject {
     private:
     struct SegInfo{
         std::unordered_set<long>                m_segments ;                /**< list of segments within narrow band */
-        bool                                    m_checked ;                 /**< true if list of segments has been processed */
 
         SegInfo( ) ;
         SegInfo( const std::unordered_set<long> & ) ;

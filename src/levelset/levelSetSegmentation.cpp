@@ -41,14 +41,14 @@ namespace bitpit {
 /*!
  * Default constructor 
  */
-LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST), m_checked(false){
+LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST){
 };
 
 /*!
  * Constructor
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m_segments(list), m_checked(false) {
+LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m_segments(list) {
 };
 
 /*!
@@ -263,8 +263,6 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
         }
 
         SegInfo                 &segInfo = *segIt ;
-
-        segInfo.m_checked = true ;
 
         std::unordered_set<long>    &segs = segInfo.m_segments ;
 
@@ -815,7 +813,6 @@ std::unordered_set<long> LevelSetSegmentation::updateSimplexToCell( const std::v
         std::vector<long> &parentSegments = previousSegments[updateIdx] ;
         for ( auto & child : info.current){
             PiercedVector<SegInfo>::iterator childSegInfo = m_seg.emplace(child) ;
-            childSegInfo->m_checked = false;
             childSegInfo->m_segments.insert( parentSegments.begin(), parentSegments.end() ) ;
 
             newSegInfo.insert(child);
@@ -929,7 +926,6 @@ void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
         bitpit::genericIO::flushBINARY( stream, segItr.getId() );
         bitpit::genericIO::flushBINARY( stream, s );
         bitpit::genericIO::flushBINARY( stream, temp );
-        bitpit::genericIO::flushBINARY( stream, segItr->m_checked );
     }
 
     return;
@@ -956,7 +952,6 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 
         temp.resize(s) ;
         bitpit::genericIO::absorbBINARY( stream, temp );
-        bitpit::genericIO::absorbBINARY( stream, cellData.m_checked );
 
         std::copy( temp.begin(), temp.end(), std::inserter( cellData.m_segments, cellData.m_segments.end() ) );
 
@@ -992,7 +987,6 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
             for( const long & seg : seginfo.m_segments ){
                 dataBuffer << seg ;
             };
-            dataBuffer << seginfo.m_checked ;
             ++nItems ;
         }
 
@@ -1035,8 +1029,6 @@ void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &rec
             dataBuffer >> segment ;
             segItr->m_segments.insert(segment) ;
         }
-
-        dataBuffer >> segItr->m_checked ;
     }
 
     return;
