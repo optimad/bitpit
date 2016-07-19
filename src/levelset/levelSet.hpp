@@ -108,6 +108,7 @@ class LevelSet{
     int                                         getClosestObject(const long &) const ;
     std::pair<int,int>                          getClosestPart(const long &) const ;
     std::pair<int,long>                         getClosestSupport(const long &) const ;
+    int                                         getSupportCount(const long &) const ;
     short                                       getSign(const long &) const;
     bool                                        isInNarrowBand(const long &) const;
 
@@ -164,6 +165,7 @@ class LevelSetKernel{
     int                                         getClosestObject(const long &) const ;
     std::pair<int,int>                          getClosestPart(const long &) const ;
     std::pair<int,long>                         getClosestSupport(const long &) const ;
+    int                                         getSupportCount(const long &) const ;
     short                                       getSign(const long &) const;
     double                                      getSizeNarrowBand() const;
     bool                                        isInNarrowBand(const long &) const;
@@ -262,6 +264,7 @@ class LevelSetObject{
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
     virtual void                                clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
     virtual void                                filterOutsideNarrowBand( LevelSetKernel *) ;
+    virtual int                                 getSupportCount(const long &) const ;
 
     virtual void                                dumpDerived( std::fstream &) =0 ;
     virtual void                                restoreDerived( std::fstream &) =0 ;
@@ -329,6 +332,7 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
     void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
     void                                        filterOutsideNarrowBand( LevelSetKernel *) ;
+    int                                         getSupportCount(const long &) const ;
 
 # if BITPIT_ENABLE_MPI
     void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & ) ;

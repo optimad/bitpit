@@ -391,6 +391,23 @@ std::pair<int,long> LevelSet::getClosestSupport(const long &i) const {
 };
 
 /*!
+ * Get the total number of items which fall in the support radius of the cell
+ * @param[in] i cell index
+ * @return total number of items in narrow band
+ */
+int LevelSet::getSupportCount(const long &i) const {
+
+    int count(0);
+
+    for( auto const &obj : m_object){
+        count += obj.second->getSupportCount(i) ;
+    }
+
+    return count ;
+
+};
+
+/*!
  * Get the sign of the levelset function
  * @param[in] i index of cell
  * @return sign

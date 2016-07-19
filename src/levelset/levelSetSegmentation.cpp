@@ -844,6 +844,21 @@ void LevelSetSegmentation::filterOutsideNarrowBand( LevelSetKernel *visitee ){
 };
 
 /*!
+ * Gets the number of support items within the narrow band of cell
+ * @param[in] id index of cell
+ * @return number of segments in narrow band 
+ */
+int LevelSetSegmentation::getSupportCount( const long &id ) const{
+
+    if( m_seg.exists(id)){
+        return m_seg.at(id).m_segments.size() ;
+    } else {
+        return 0 ;
+    }
+
+};
+
+/*!
  * Writes LevelSetSegmentation to stream in binary format
  * @param[in] stream output stream
  */

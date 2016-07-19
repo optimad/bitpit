@@ -79,6 +79,15 @@ void LevelSetObject::filterOutsideNarrowBand( LevelSetKernel *visitee ){
 }
 
 /*!
+ * Gets the number of support items within the narrow band of cell
+ * @param[in] id index of cell
+ */
+int LevelSetObject::getSupportCount( const long &id )const{
+    BITPIT_UNUSED( id) ;
+    return 0;
+}
+
+/*!
  * Writes LevelSetObject to stream in binary format
  * @param[in] stream output stream
  */
