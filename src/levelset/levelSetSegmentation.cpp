@@ -782,8 +782,10 @@ std::unordered_set<long> LevelSetSegmentation::updateSimplexToCell( const std::v
         }
 
         // Remove duplicate entries from the list of previous segments
-        std::sort( parentSegments.begin(), parentSegments.end() ) ;
-        parentSegments.erase( std::unique(parentSegments.begin(), parentSegments.end()), parentSegments.end() ) ;
+        if (info.previous.size() > 1) {
+            std::sort( parentSegments.begin(), parentSegments.end() ) ;
+            parentSegments.erase( std::unique(parentSegments.begin(), parentSegments.end()), parentSegments.end() ) ;
+        }
 
         // Store the list of segments for the current change
         nNewSegmentInfo += nCurrentElements;
