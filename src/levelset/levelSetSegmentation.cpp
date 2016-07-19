@@ -239,12 +239,14 @@ std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( cons
  * @param[in] search size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  * @param[in] filter if triangles should be ereased when outside narrow band (default false)
+ * @param[in] whiteList is a list of cells that need the update of the levelset,
+ * if the list is empty all elements of the mesh wil be updated
  */
-void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double &search, const bool & signd, bool filter){
+void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double &search, const bool & signd,
+                                          bool filter, const std::unordered_set<long> &whiteList ){
 
     VolumeKernel                &mesh  = *(visitee->getMesh() ) ;
 
-    long                        id ;
     double                      s, d, value;
     std::array<double,3>        n, xP, P;
 
@@ -253,69 +255,70 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
     PiercedVector<LevelSetInfo>         &lsInfo = visitee->getLevelSetInfo() ;
 
     for( segIt=m_seg.begin(); segIt!=m_seg.end(); ++segIt ){
+        long id = segIt.getId() ;
+        if ( !whiteList.empty() ) {
+            if ( whiteList.count(id) == 0 ) {
+                continue;
+            }
+        }
 
         SegInfo                 &segInfo = *segIt ;
 
-        if( segInfo.m_checked == false){
-            segInfo.m_checked = true ;
+        segInfo.m_checked = true ;
 
-            std::unordered_set<long>    &segs = segInfo.m_segments ;
+        std::unordered_set<long>    &segs = segInfo.m_segments ;
 
-            id    = segIt.getId() ;
+        it    = segs.begin();
+        itend = segs.end() ;
 
-            it    = segs.begin();
-            itend = segs.end() ;
+        P = mesh.evalCellCentroid(id) ;
 
-            P = mesh.evalCellCentroid(id) ;
+        auto lsInfoItr = lsInfo.find(id) ;
+        if( lsInfoItr != lsInfo.end() ){
+            value = abs( lsInfoItr->value );
+        } else {
+            value = 1e18;
+        }
 
-            auto lsInfoItr = lsInfo.find(id) ;
-            if( lsInfoItr != lsInfo.end() ){
-                value = abs( lsInfoItr->value );
-            } else {
-                value = 1e18;
-            }
+        while( it != itend ){
 
-            while( it != itend ){
+            infoFromSimplex(P, *it, d, s, xP, n);
 
-                infoFromSimplex(P, *it, d, s, xP, n);
+            if ( d <= search ){
 
-                if ( d <= search ){
-
-                    if( d<value ) {
-                        if (lsInfoItr == lsInfo.end()) {
-                            lsInfoItr = lsInfo.reclaim(id) ;
-                        }
-
-                        value   = d ;
-
-                        lsInfoItr->object   = getId();
-                        lsInfoItr->part     = m_segmentation->getCell(*it).getPID();
-                        lsInfoItr->support  = *it ;
-                        lsInfoItr->value    = ( signd *s  + (!signd) *1.) *d; 
-                        lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
+                if( d<value ) {
+                    if (lsInfoItr == lsInfo.end()) {
+                        lsInfoItr = lsInfo.reclaim(id) ;
                     }
 
+                    value   = d ;
+
+                    lsInfoItr->object   = getId();
+                    lsInfoItr->part     = m_segmentation->getCell(*it).getPID();
+                    lsInfoItr->support  = *it ;
+                    lsInfoItr->value    = ( signd *s  + (!signd) *1.) *d;
+                    lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
+                }
+
+                ++it ;
+
+            } //end if distance
+
+            else {
+                if( filter){
+                    it = segs.erase(it) ;
+                }
+
+                else{
                     ++it ;
-
-                } //end if distance
-
-                else {
-                    if( filter){ 
-                        it = segs.erase(it) ; 
-                    }
-
-                    else{
-                        ++it ;
-                    };
                 };
-
-
-            } //end foreach triangle
-
-            if( segs.size() == 0 ){
-                m_seg.erase(id,true) ;
             };
 
+
+        } //end foreach triangle
+
+        if( segs.size() == 0 ){
+            m_seg.erase(id,true) ;
         };
 
     };// foreach cell
@@ -529,15 +532,42 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetKernel *visitee, const
  */
 void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
 
-    if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(visitee) ){
-        associateSimplexToCell( lsCartesian, RSearch ) ;
+    // Update is not implemented for Cartesian patches
+    if( dynamic_cast<LevelSetCartesian*>(visitee) ){
+        clear( visitee ) ;
+        computeLSInNarrowBand( visitee, RSearch, signd ) ;
+        return;
+    }
 
-    } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(visitee) ){
-        updateSimplexToCell( lsOctree, mapper, RSearch ) ; 
+    // Detect changes in narrow band size
+    int narrowBandResizeDirection = 0;
+    if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(visitee) ){
+        narrowBandResizeDirection = getNarrowBandResizeDirection( lsOctree, RSearch ) ;
+    }
 
-    };
+    // If the narrow band size has been increased we can't just update the
+    // levelset, we need to rebuild it from scratch.
+    if (narrowBandResizeDirection > 0) {
+        clear( visitee ) ;
+        computeLSInNarrowBand( visitee, RSearch, signd ) ;
+        return;
+    }
 
-    lsFromSimplex(visitee, RSearch, signd, true) ;
+    // If the narrow band size has been decreased or is the same as before
+    // it is possible to update the simplex to cell association
+    // update is possible.
+    std::unordered_set<long> newSegInfo = updateSimplexToCell( mapper ) ;
+
+    // If the narrow is the same as before we can update the LS only for the
+    // newly added segment info, otherwise we need to recalculate the LS for
+    // all the cells.
+    if (narrowBandResizeDirection != 0 || newSegInfo.size() != 0 ) {
+        if ( narrowBandResizeDirection != 0 ) {
+            newSegInfo.clear();
+        }
+
+        lsFromSimplex(visitee, RSearch, signd, true, newSegInfo) ;
+    }
 
     return;
 };
@@ -709,99 +739,93 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, cons
 
 /*!
  * Updates the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle) for octree meshes
- * @param[in] visitee pointer to octree mesh
  * @param[in] mapper information concerning mesh adaption 
- * @param[in] newRSearch new size of narrow band
  */
-void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, const double &newRSearch){
+std::unordered_set<long> LevelSetSegmentation::updateSimplexToCell( const std::vector<adaption::Info> &mapper ){
 
-    int resizeDirection = getNarrowBandResizeDirection( visitee, newRSearch ) ;
-    if( resizeDirection <= 0 ) { //size of narrow band decreased or remained the same -> mapping
+    std::unordered_set<long> newSegInfo;
 
-        std::vector<bool> skipAdaption ;
-        skipAdaption.resize(mapper.size(), true);
+    std::vector<bool> skipAdaption ;
+    skipAdaption.resize(mapper.size(), true);
 
-        std::vector<std::vector<long>> previousSegments ;
+    std::vector<std::vector<long>> previousSegments ;
 
-        size_t nNewSegmentInfo = 0;
-        for ( size_t adaptionIdx = 0; adaptionIdx < mapper.size(); ++adaptionIdx ){
-            // Consider only changes on cells
-            const auto &info = mapper[adaptionIdx];
-            if( info.entity != adaption::Entity::ENTITY_CELL ){
-                continue;
-            }
-
-            // Get the number of current elements
-            long nCurrentElements = info.current.size() ;
-
-            // Move the information about the parent segments in a temporary
-            // list
-            std::vector<long> parentSegments;
-            for ( auto & parent : info.previous){
-                PiercedVector<SegInfo>::const_iterator parentSegInfo = m_seg.find(parent) ;
-                if( parentSegInfo == m_seg.cend() ){
-                    continue;
-                }
-
-                // If the adaption has created new elements, add parent
-                // segments to the temporary list
-                if( nCurrentElements > 0 ){
-                    auto &segments = parentSegInfo->m_segments ;
-                    parentSegments.insert( parentSegments.end(), segments.begin(), segments.end() ) ;
-                }
-
-                // Delete parent information
-                m_seg.erase(parent,true) ;
-            }
-
-            // If the list of parents segments is empty we can skip to the next
-            // change
-            if( parentSegments.size() == 0 ){
-                continue;
-            }
-
-            // Remove duplicate entries from the list of previous segments
-            std::sort( parentSegments.begin(), parentSegments.end() ) ;
-            parentSegments.erase( std::unique(parentSegments.begin(), parentSegments.end()), parentSegments.end() ) ;
-
-            // Store the list of segments for the current change
-            nNewSegmentInfo += nCurrentElements;
-
-            skipAdaption[adaptionIdx] = false;
-            previousSegments.push_back(std::move(parentSegments));
+    size_t nNewSegmentInfo = 0;
+    for ( size_t adaptionIdx = 0; adaptionIdx < mapper.size(); ++adaptionIdx ){
+        // Consider only changes on cells
+        const auto &info = mapper[adaptionIdx];
+        if( info.entity != adaption::Entity::ENTITY_CELL ){
+            continue;
         }
 
-        m_seg.flush() ;
+        // Get the number of current elements
+        long nCurrentElements = info.current.size() ;
 
-        // Create the segments info for the new elements
-        m_seg.reserve(m_seg.size() + nNewSegmentInfo) ;
-
-        size_t updateIdx = 0;
-        for ( size_t adaptionIdx = 0; adaptionIdx < mapper.size(); ++adaptionIdx ){
-            if ( skipAdaption[adaptionIdx] ) {
+        // Move the information about the parent segments in a temporary
+        // list
+        std::vector<long> parentSegments;
+        for ( auto & parent : info.previous){
+            PiercedVector<SegInfo>::const_iterator parentSegInfo = m_seg.find(parent) ;
+            if( parentSegInfo == m_seg.cend() ){
                 continue;
             }
 
-            // Copy the list of segments to the childs
-            auto info = mapper[adaptionIdx];
-            std::vector<long> &parentSegments = previousSegments[updateIdx] ;
-            for ( auto & child : info.current){
-                PiercedVector<SegInfo>::iterator childSegInfo = m_seg.emplace(child) ;
-                childSegInfo->m_checked = false;
-                childSegInfo->m_segments.insert( parentSegments.begin(), parentSegments.end() ) ;
+            // If the adaption has created new elements, add parent
+            // segments to the temporary list
+            if( nCurrentElements > 0 ){
+                auto &segments = parentSegInfo->m_segments ;
+                parentSegments.insert( parentSegments.end(), segments.begin(), segments.end() ) ;
             }
 
-            // Increase update info counter
-            updateIdx++;
+            // Delete parent information
+            m_seg.erase(parent,true) ;
         }
 
-    } else { //size of narrow band increased -> recalculation
+        // If the list of parents segments is empty we can skip to the next
+        // change
+        if( parentSegments.size() == 0 ){
+            continue;
+        }
 
-        m_seg.clear() ;
-        visitee->clear() ;
-        associateSimplexToCell( visitee, visitee->getSizeNarrowBand() ) ; 
+        // Remove duplicate entries from the list of previous segments
+        std::sort( parentSegments.begin(), parentSegments.end() ) ;
+        parentSegments.erase( std::unique(parentSegments.begin(), parentSegments.end()), parentSegments.end() ) ;
 
-    };
+        // Store the list of segments for the current change
+        nNewSegmentInfo += nCurrentElements;
+
+        skipAdaption[adaptionIdx] = false;
+        previousSegments.push_back(std::move(parentSegments));
+    }
+
+    m_seg.flush() ;
+
+    // Create the segments info for the new elements
+    newSegInfo.reserve(nNewSegmentInfo);
+    m_seg.reserve(m_seg.size() + nNewSegmentInfo) ;
+
+    size_t updateIdx = 0;
+    for ( size_t adaptionIdx = 0; adaptionIdx < mapper.size(); ++adaptionIdx ){
+        if ( skipAdaption[adaptionIdx] ) {
+            continue;
+        }
+
+        // Copy the list of segments to the childs
+        auto info = mapper[adaptionIdx];
+        std::vector<long> &parentSegments = previousSegments[updateIdx] ;
+        for ( auto & child : info.current){
+            PiercedVector<SegInfo>::iterator childSegInfo = m_seg.emplace(child) ;
+            childSegInfo->m_checked = false;
+            childSegInfo->m_segments.insert( parentSegments.begin(), parentSegments.end() ) ;
+
+            newSegInfo.insert(child);
+        }
+
+        // Increase update info counter
+        updateIdx++;
+    }
+
+    return newSegInfo;
 
 };
 

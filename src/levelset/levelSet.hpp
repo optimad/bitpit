@@ -345,12 +345,12 @@ class LevelSetSegmentation : public LevelSetObject {
 
     protected:
     std::vector<std::array<double,3>>           getSimplexVertices( const long & ) const ;
-    void                                        lsFromSimplex( LevelSetKernel *, const double &, const bool &, bool filter = false ) ;
+    void                                        lsFromSimplex( LevelSetKernel *, const double &, const bool &, bool filter = false, const std::unordered_set<long> &segInfoList = std::unordered_set<long>()  ) ;
     void                                        infoFromSimplex(const std::array<double,3> &, const long &, double &, double &, std::array<double,3> &,std::array<double,3> &) const ;
     void                                        associateSimplexToCell( LevelSetCartesian *, const double &);
     void                                        associateSimplexToCell( LevelSetOctree *, const double &);
 
-    void                                        updateSimplexToCell( LevelSetOctree *, const std::vector<adaption::Info> &, const double & ) ;
+    std::unordered_set<long>                    updateSimplexToCell( const std::vector<adaption::Info> & ) ;
     int                                         getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch ) ;
 };
 
