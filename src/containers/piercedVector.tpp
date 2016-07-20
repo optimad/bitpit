@@ -24,6 +24,8 @@
 
 #include <cmath>
 
+#include <bitpit_common.hpp>
+
 namespace bitpit{
 
 /*!
@@ -813,8 +815,8 @@ void PiercedVector<value_t, id_t>::sort()
 	std::vector<std::size_t> value_permutation(id_permutation);
 
 	// Sort the container
-	reorderVector<id_t>(id_permutation, m_ids, containerSize);
-	reorderVector<value_t>(value_permutation, m_v, containerSize);
+	utils::reorderVector<id_t>(id_permutation, m_ids, containerSize);
+	utils::reorderVector<value_t>(value_permutation, m_v, containerSize);
 }
 
 /*!
