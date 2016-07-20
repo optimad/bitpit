@@ -2471,30 +2471,4 @@ void PiercedVector<value_t, id_t>::storageResize(size_t n)
 	}
 }
 
-/*!
-	Order a vector according to a reordering vector.
-
-	\tparam order_t is the type of data that needs to be rodered
-	\param order is a reference to the reording vector
-	\param v is a reference to the vector that will be reordered
-	\param size is the size of the vector that will be reordered
-*/
-template<typename value_t, typename id_t>
-template<typename order_t>
-void PiercedVector<value_t, id_t>::reorderVector(std::vector<size_t>& order, std::vector<order_t>& v, const size_t &size)
-{
-	for (size_t i = 0; i < size; i++) {
-		size_t j;
-		while (i != (j = order[i])) {
-			size_t k = order[j];
-
-			order_t temp = std::move(v[j]);
-			v[j] = std::move(v[k]);
-			v[k] = std::move(temp);
-
-			std::swap(order[i], order[j]);
-		}
-	}
-}
-
 }

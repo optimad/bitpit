@@ -546,9 +546,6 @@ private:
 	std::size_t storageSize() const;
 	void storageResize(size_t n);
 
-    template<typename order_t>
-    void reorderVector(std::vector<size_t>& order, std::vector<order_t>& v, const size_t &size);
-
 };
 
 }
