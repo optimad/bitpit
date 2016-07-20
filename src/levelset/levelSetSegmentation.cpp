@@ -651,10 +651,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
 
     stack.reserve(128) ;
     temp.reserve(128) ;
-    cloud.reserve(128) ;
 
-    xP.resize(1) ;
-    where.resize(1) ;
 
     // --------------------------------------------------------------------------
     // COMPUTE THE SDF VALUE AT EACH MESH POINT                                   //
@@ -668,12 +665,17 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
 
         //-----------------------------------------------------------------
         //Propagate from seed
-        while (stack.size() > 0) {
+        size_t stackSize = stack.size();
+        while (stackSize > 0) {
 
             // Extract point from lifo
-            cloud.clear() ;
-            for( const auto & I : stack){
-                cloud.push_back( mesh.evalCellCentroid(I) ) ;  
+            cloud.resize(stackSize) ;
+            xP.resize(stackSize) ;
+            where.resize(stackSize) ;
+
+            for( size_t k = 0; k < stackSize; ++k) {
+                long cell = stack[k];
+                cloud[k] = mesh.evalCellCentroid(cell) ;
             };
 
             d = CGElem::distanceCloudSimplex( cloud, VS, xP, where); 
@@ -705,6 +707,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
 
             stack.clear() ;
             stack.swap( temp ) ;
+            stackSize = stack.size() ;
 
 
         } //end while
