@@ -495,7 +495,7 @@ int main(
     }
 
     // ========================================================================== //
-    // Distance Cloud Triangle
+    // Distance Cloud Triangle 1st algorithm
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
@@ -522,7 +522,7 @@ int main(
         d = CGElem::distanceCloudTriangle(P, A, B, C, Q, flag);
 
         // Output message ------------------------------------------------------- //
-        cout << " - INTERSECTION BETWEEN LINE AND TWO TRIANGLES" << endl;
+        cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 1" << endl;
         cout << "  Test 1 " << endl;
         cout << "    segment: " << endl;
         cout << "      P0: " << P[0] << endl;
@@ -537,6 +537,53 @@ int main(
         cout << "    distance to point 1 is: " << d[1] << endl;
         cout << "    projection point 1 is: " << Q[1] << endl;
         cout << "    projecting 1 on : " << flag[1] << endl;
+        cout << endl;
+
+    }
+
+    // ========================================================================== //
+    // Distance Cloud Triangle 2nd algorithm
+    // ========================================================================== //
+    {
+        // Scope variables ------------------------------------------------------ //
+        vector< array<double, 3> >  P(2), Q(2);
+        vector<double>              d(2) ;
+        vector< array<double, 3> >  lambda(2) ;
+
+        array<double, 3>            A, B, C;
+
+        // Compute intersection (Test 1) ---------------------------------------- //
+        A.fill(0.0);
+        B.fill(0.0);
+        B[0] = 1.0;
+        C.fill(0.0);
+        C[1] = 1.0;
+
+        P[0].fill(0.0);
+        P[0][0] = P[0][1] = 1.;
+        P[0][2] = -2.0;
+
+        P[1].fill(-0.5);
+        P[1][2] = 1.0;
+        
+        d = CGElem::distanceCloudTriangle(P, A, B, C, Q, lambda);
+
+        // Output message ------------------------------------------------------- //
+        cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 2" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    segment: " << endl;
+        cout << "      P0: " << P[0] << endl;
+        cout << "      P1: " << P[1] << endl;
+        cout << "    triangle: " << endl;
+        cout << "      A: " << A << endl;
+        cout << "      B: " << B << endl;
+        cout << "      C: " << C << endl;
+        cout << "    distance to point 0 is: " << d[0] << endl;
+        cout << "    projection point 0 is: " << Q[0] << endl;
+        cout << "    barycentric coordinates of projection point: " << lambda[0] << endl;
+        cout << "    distance to point 1 is: " << d[1] << endl;
+        cout << "    projection point 1 is: " << Q[1] << endl;
+        cout << "    barycentric coordinates of projection point: " << lambda[1] << endl;
         cout << endl;
 
     }

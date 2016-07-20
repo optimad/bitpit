@@ -501,6 +501,109 @@ std::vector<double> distanceCloudTriangle(
 };
 
 /*!
+ * Computes distances of point cloud to triangle
+ * @param[in] cloud point cloud coordinates
+ * @param[in] Q1 first triangle vertex
+ * @param[in] Q2 second triangle vertex
+ * @param[in] Q3 third triangle vertex
+ * @param[out] xPs closest points on triangle
+ * @param[out] lambdas barycentric coordinates of projection points
+ * @return distances
+ */
+std::vector<double> distanceCloudTriangle(
+        std::vector<array3D> const &cloud,
+        array3D              const &Q0,
+        array3D              const &Q1,
+        array3D              const &Q2,
+        std::vector<array3D> &xPs,
+        std::vector<array3D> &lambdas
+        ) {
+
+    int                     N( cloud.size() ) ;
+    std::vector<double>     ds(N,0.);
+
+    int                     i, n, vertex0, vertex1;
+
+    int                     count, oneNegative ;
+    std::array<int,2>       twoNegative ;
+    std::array<double,2>    lambdaLocal ;
+
+
+    array3D    s0 = Q1-Q0 ;
+    array3D    s1 = Q2-Q0 ;
+
+    std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}} ;
+
+    double                  A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
+    double                  B[2*N];
+    std::array<double,3>    rP;
+
+    i=0 ;
+    for( auto const &point : cloud){
+        rP = point -Q0 ;
+        B[i]   = dotProduct(s0,rP) ; 
+        B[i+1] = dotProduct(s1,rP) ; 
+        i += 2;
+    }
+
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, N, A, 2, B, N ) ;
+    assert( info == 0 );
+    BITPIT_UNUSED( info ) ;
+
+    xPs.resize(N) ;
+    lambdas.resize(N) ;
+
+    for(n=0; n<N; ++n){
+
+        const array3D &P = cloud[n] ;
+        array3D &lambda = lambdas[n] ;
+        array3D &xP = xPs[n] ;
+        double &d = ds[n] ;
+        double *b = &B[2*n] ;
+
+        lambda[0] = 1. -b[0] -b[1] ;
+        lambda[1] = b[0] ;
+        lambda[2] = b[1] ;
+
+
+        count = 0;
+        twoNegative.fill(0.) ;
+        for( i=0; i<3; ++i){
+            if( lambda[i] < 0){
+                oneNegative = i;
+                twoNegative[count] = i ;
+                ++count ;
+            }
+        };
+
+        if( count == 0){
+            xP = Q0 +b[0]*s0 +b[1]*s1 ;
+            d  = norm2( P - xP)  ;
+
+        } else if( count == 1){
+            vertex0 = (oneNegative +1) %3 ;
+            vertex1 = (vertex0     +1) %3 ;
+            d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal)  ;
+            lambda[oneNegative] = 0. ;
+            lambda[vertex0] = lambdaLocal[0] ;
+            lambda[vertex1] = lambdaLocal[1] ;
+
+        } else {
+            vertex0 = 3 -twoNegative[0] -twoNegative[1] ;
+            lambda.fill(0.);
+            lambda[vertex0] = 1. ;
+            xP      = *r[vertex0] ;
+            d       = norm2( P - xP)  ;
+
+        }
+
+    }
+
+    return ds ;
+
+};
+
+/*!
  * Computes distances of point to generic simplex
  * @param[in] P point coordinates
  * @param[in] V simplex vertices coordinates
