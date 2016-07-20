@@ -52,7 +52,7 @@ namespace levelSetDefaults{
     const int                               OBJECT = -1 ;               /**< Default value for closest object  */
     const int                               PART  = -1 ;               /**< Default value for closest patch  */
     const long                              SUPPORT = -1 ;              /**< Default value for closest support element */
-    const std::unordered_set<long>          LIST;                       /**< Default value for list of elements in narrow band */
+    const std::vector<long>                 LIST;                       /**< Default value for list of elements in narrow band */
 };
 
 class LevelSetInfo{
@@ -287,10 +287,10 @@ class LevelSetSegmentation : public LevelSetObject {
 
     private:
     struct SegInfo{
-        std::unordered_set<long>                m_segments ;                /**< list of segments within narrow band */
+        std::vector<long>                m_segments ;                /**< list of segments within narrow band */
 
         SegInfo( ) ;
-        SegInfo( const std::unordered_set<long> & ) ;
+        SegInfo( const std::vector<long> & ) ;
     };
 
     int                                         m_dimension ;               /**< number of space dimensions */
@@ -318,7 +318,7 @@ class LevelSetSegmentation : public LevelSetObject {
     const SurfUnstructured &                    getSegmentation() const ;
     void                                        setFeatureAngle(double) ;
 
-    const std::unordered_set<long> &            getSimplexList(const long &) const ;
+    const std::vector<long> &                   getSimplexList(const long &) const ;
     bool                                        isInNarrowBand( const long &) ;
 
     void                                        dumpDerived( std::fstream &) ;

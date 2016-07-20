@@ -48,7 +48,7 @@ LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST){
  * Constructor
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m_segments(list) {
+LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &list) :m_segments(list) {
 };
 
 /*!
@@ -190,7 +190,7 @@ void LevelSetSegmentation::setFeatureAngle( double angle){
  * @param[in] i cell index
  * @return set with indices of simplices
  */
-const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long &i) const{
+const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &i) const{
 
     if( !m_seg.exists(i) ){
         return levelSetDefaults::LIST;
@@ -250,10 +250,10 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
     double                      s, d, value;
     std::array<double,3>        n, xP, P;
 
-    std::unordered_set<long>::iterator  it, itend ;
     PiercedIterator<SegInfo>            segIt ;
     PiercedVector<LevelSetInfo>         &lsInfo = visitee->getLevelSetInfo() ;
 
+    std::vector<long> updatedSegments;
     for( segIt=m_seg.begin(); segIt!=m_seg.end(); ++segIt ){
         long id = segIt.getId() ;
         if ( !whiteList.empty() ) {
@@ -264,11 +264,6 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
 
         SegInfo                 &segInfo = *segIt ;
 
-        std::unordered_set<long>    &segs = segInfo.m_segments ;
-
-        it    = segs.begin();
-        itend = segs.end() ;
-
         P = mesh.evalCellCentroid(id) ;
 
         auto lsInfoItr = lsInfo.find(id) ;
@@ -278,11 +273,15 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
             value = 1e18;
         }
 
-        while( it != itend ){
+        updatedSegments.clear();
+        updatedSegments.reserve(segInfo.m_segments.size());
 
-            infoFromSimplex(P, *it, d, s, xP, n);
+        for( long segment : segInfo.m_segments ){
+
+            infoFromSimplex(P, segment, d, s, xP, n);
 
             if ( d <= search ){
+                updatedSegments.push_back(segment);
 
                 if( d<value ) {
                     if (lsInfoItr == lsInfo.end()) {
@@ -292,32 +291,21 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
                     value   = d ;
 
                     lsInfoItr->object   = getId();
-                    lsInfoItr->part     = m_segmentation->getCell(*it).getPID();
-                    lsInfoItr->support  = *it ;
+                    lsInfoItr->part     = m_segmentation->getCell(segment).getPID();
+                    lsInfoItr->support  = segment ;
                     lsInfoItr->value    = ( signd *s  + (!signd) *1.) *d;
                     lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
                 }
 
-                ++it ;
-
             } //end if distance
-
-            else {
-                if( filter){
-                    it = segs.erase(it) ;
-                }
-
-                else{
-                    ++it ;
-                };
-            };
-
 
         } //end foreach triangle
 
-        if( segs.size() == 0 ){
+        if ( updatedSegments.size() > 0 ) {
+            segInfo.m_segments = std::move(updatedSegments);
+        } else if( filter){
             m_seg.erase(id,true) ;
-        };
+        }
 
     };// foreach cell
 
@@ -631,7 +619,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
                     if( data == m_seg.end() ){
                         data = m_seg.emplace(I) ;
                     }
-                    data->m_segments.insert(i);
+                    data->m_segments.push_back(i);
 
 
                     neighs  = mesh.findCellFaceNeighs(I) ; 
@@ -656,6 +644,13 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
 
 
     } //end for i
+
+    // The list of segments has to be unique
+    for ( auto &segInfo : m_seg) {
+        std::vector<long> &segments = segInfo.m_segments;
+        std::sort( segments.begin(), segments.end() ) ;
+        segments.erase( std::unique(segments.begin(), segments.end()), segments.end() ) ;
+    }
 
     return;
 
@@ -717,7 +712,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, cons
                 icart = cmesh.locatePoint(C) ;
 
                 if( objLS.isInNarrowBand(icart) ){
-                    const std::unordered_set<long> &list = objLS.getSimplexList(icart) ;
+                    const std::vector<long> &list = objLS.getSimplexList(icart) ;
                     data = m_seg.emplace(id, list) ;
                 };
 
@@ -768,6 +763,7 @@ std::unordered_set<long> LevelSetSegmentation::updateSimplexToCell( const std::v
             // segments to the temporary list
             if( nCurrentElements > 0 ){
                 auto &segments = parentSegInfo->m_segments ;
+                parentSegments.reserve( parentSegments.size() + segments.size() ) ;
                 parentSegments.insert( parentSegments.end(), segments.begin(), segments.end() ) ;
             }
 
@@ -811,7 +807,10 @@ std::unordered_set<long> LevelSetSegmentation::updateSimplexToCell( const std::v
         std::vector<long> &parentSegments = previousSegments[updateIdx] ;
         for ( auto & child : info.current){
             PiercedVector<SegInfo>::iterator childSegInfo = m_seg.emplace(child) ;
-            childSegInfo->m_segments.insert( parentSegments.begin(), parentSegments.end() ) ;
+
+            std::vector<long> &childSegments = childSegInfo->m_segments;
+            childSegments.reserve( childSegments.size() + parentSegments.size() ) ;
+            childSegments.insert( childSegments.end(), parentSegments.begin(), parentSegments.end() ) ;
 
             newSegInfo.insert(child);
         }
@@ -908,22 +907,14 @@ int LevelSetSegmentation::getSupportCount( const long &id ) const{
  */
 void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
 
-    int                 s;
-    std::vector<long>   temp;
-
     bitpit::PiercedVector<SegInfo>::iterator segItr, segEnd = m_seg.end() ;
 
     bitpit::genericIO::flushBINARY( stream, (long) m_seg.size() ) ;
 
     for( segItr = m_seg.begin(); segItr != segEnd; ++segItr){
-        s = segItr->m_segments.size() ;
-
-        temp.resize(s);
-        std::copy( segItr->m_segments.begin(), segItr->m_segments.end(), temp.begin() );
-
         bitpit::genericIO::flushBINARY( stream, segItr.getId() );
-        bitpit::genericIO::flushBINARY( stream, s );
-        bitpit::genericIO::flushBINARY( stream, temp );
+        bitpit::genericIO::flushBINARY( stream, segItr->m_segments.size() );
+        bitpit::genericIO::flushBINARY( stream, segItr->m_segments );
     }
 
     return;
@@ -938,7 +929,6 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
     int     s;
     long    i, n, id;
     SegInfo cellData ;
-    std::vector<long>   temp;
 
     bitpit::genericIO::absorbBINARY( stream, n ) ;
 
@@ -948,10 +938,8 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
         bitpit::genericIO::absorbBINARY( stream, id );
         bitpit::genericIO::absorbBINARY( stream, s );
 
-        temp.resize(s) ;
-        bitpit::genericIO::absorbBINARY( stream, temp );
-
-        std::copy( temp.begin(), temp.end(), std::inserter( cellData.m_segments, cellData.m_segments.end() ) );
+        cellData.m_segments.resize(s) ;
+        bitpit::genericIO::absorbBINARY( stream, cellData.m_segments );
 
         m_seg.insert(id,cellData) ;
 
@@ -981,7 +969,7 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
         if( m_seg.exists(index)){
             const auto &seginfo = m_seg[index] ;
             dataBuffer << counter ;
-            dataBuffer << (int) seginfo.m_segments.size() ;
+            dataBuffer << seginfo.m_segments.size() ;
             for( const long & seg : seginfo.m_segments ){
                 dataBuffer << seg ;
             };
@@ -1006,8 +994,7 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
  */
 void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &recvList, const long &nItems, RecvBuffer &dataBuffer ){
 
-    int     s, nSegs ;
-    long    index, id, segment ;
+    long    index, id ;
 
     for( int i=0; i<nItems; ++i){
         // Get the id of the element
@@ -1022,10 +1009,11 @@ void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &rec
             segItr = m_seg.getIterator(id) ;
         }
 
+        size_t nSegs ;
         dataBuffer >> nSegs ;
-        for( s=0; s<nSegs; ++s){
-            dataBuffer >> segment ;
-            segItr->m_segments.insert(segment) ;
+        segItr->m_segments.resize(nSegs) ;
+        for( size_t s=0; s<nSegs; ++s){
+            dataBuffer >> segItr->m_segments[s] ;
         }
     }
 
