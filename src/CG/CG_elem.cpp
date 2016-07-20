@@ -506,8 +506,8 @@ std::vector<double> distanceCloudTriangle(
  * @param[in] Q1 first triangle vertex
  * @param[in] Q2 second triangle vertex
  * @param[in] Q3 third triangle vertex
- * @param[out] xPs closest points on triangle
- * @param[out] lambdas barycentric coordinates of projection points
+ * @param[inout] xPExt pointer to std::vector to be filled with the projection point; 
+ * @param[inout] lambdas pointer to sd::vector to be filled with barycentric coordinates of projection points
  * @return distances
  */
 std::vector<double> distanceCloudTriangle(
@@ -515,8 +515,8 @@ std::vector<double> distanceCloudTriangle(
         array3D              const &Q0,
         array3D              const &Q1,
         array3D              const &Q2,
-        std::vector<array3D> &xPs,
-        std::vector<array3D> &lambdas
+        std::vector<array3D>* const xPExt,
+        std::vector<array3D>* const lambdaExt
         ) {
 
     int                     N( cloud.size() ) ;
@@ -528,6 +528,8 @@ std::vector<double> distanceCloudTriangle(
     std::array<int,2>       twoNegative ;
     std::array<double,2>    lambdaLocal ;
 
+    array3D                 xPInt, lambdaInt ;
+    array3D                *xPPtr, *lambdaPtr ;
 
     array3D    s0 = Q1-Q0 ;
     array3D    s1 = Q2-Q0 ;
@@ -550,14 +552,25 @@ std::vector<double> distanceCloudTriangle(
     assert( info == 0 );
     BITPIT_UNUSED( info ) ;
 
-    xPs.resize(N) ;
-    lambdas.resize(N) ;
+    if( xPExt != nullptr) {
+        xPExt->resize(N) ;
+        xPPtr = &(xPExt->at(0) ) ;
+    } else {
+        xPPtr = &xPInt ;
+    }
+
+    if( lambdaExt != nullptr) {
+        lambdaExt->resize(N) ;
+        lambdaPtr = &(lambdaExt->at(0) ) ;
+    } else {
+        lambdaPtr = &lambdaInt ;
+    }
 
     for(n=0; n<N; ++n){
 
         const array3D &P = cloud[n] ;
-        array3D &lambda = lambdas[n] ;
-        array3D &xP = xPs[n] ;
+        array3D &lambda = *lambdaPtr ;
+        array3D &xP = *xPPtr ;
         double &d = ds[n] ;
         double *b = &B[2*n] ;
 
@@ -595,6 +608,14 @@ std::vector<double> distanceCloudTriangle(
             xP      = *r[vertex0] ;
             d       = norm2( P - xP)  ;
 
+        }
+
+        if( xPExt != nullptr){
+            ++xPPtr ;
+        }
+
+        if( lambdaExt != nullptr){
+            ++lambdaPtr ;
         }
 
     }

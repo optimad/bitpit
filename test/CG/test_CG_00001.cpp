@@ -566,7 +566,8 @@ int main(
         P[1].fill(-0.5);
         P[1][2] = 1.0;
         
-        d = CGElem::distanceCloudTriangle(P, A, B, C, Q, lambda);
+        //d = CGElem::distanceCloudTriangle(P, A, B, C, nullptr, nullptr);
+        d = CGElem::distanceCloudTriangle(P, A, B, C, &Q, &lambda);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 2" << endl;
