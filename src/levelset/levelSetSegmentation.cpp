@@ -775,9 +775,9 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, cons
             id = cell.getId() ;
             C  = mesh.evalCellCentroid(id) ;
 
-            if( cmesh.isPointInside(C) ){
-                icart = cmesh.locatePoint(C) ;
 
+            icart = cmesh.locatePoint(C) ;
+            if ( icart != Cell::NULL_ID ) {
                 if( objLS.isInNarrowBand(icart) ){
                     const std::vector<long> &list = objLS.getSimplexList(icart) ;
                     data = m_seg.emplace(id, list) ;
