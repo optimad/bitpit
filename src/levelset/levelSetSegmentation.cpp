@@ -254,6 +254,7 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
     PiercedVector<LevelSetInfo>         &lsInfo = visitee->getLevelSetInfo() ;
 
     std::vector<long> updatedSegments;
+    std::vector<double> updatedDistances;
     for( segIt=m_seg.begin(); segIt!=m_seg.end(); ++segIt ){
         long id = segIt.getId() ;
         if ( !whiteList.empty() ) {
@@ -266,6 +267,11 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
 
         P = mesh.evalCellCentroid(id) ;
 
+        // Evaluate the levelset for the cell
+        //
+        // Also, order the segment's list from the closest to the farthest
+        // from the body, discarding segments with a distance greater than
+        // the narrow band size.
         auto lsInfoItr = lsInfo.find(id) ;
         if( lsInfoItr != lsInfo.end() ){
             value = abs( lsInfoItr->value );
@@ -276,13 +282,26 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
         updatedSegments.clear();
         updatedSegments.reserve(segInfo.m_segments.size());
 
+        updatedDistances.clear();
+        updatedDistances.reserve(segInfo.m_segments.size());
+
         for( long segment : segInfo.m_segments ){
 
             infoFromSimplex(P, segment, d, s, xP, n);
 
             if ( d <= search ){
-                updatedSegments.push_back(segment);
+                // Add dthe segment in the right position
+                size_t pos;
+                for (pos = 0; pos < updatedSegments.size(); ++pos) {
+                    if (d < updatedDistances[pos]) {
+                        break;
+                    }
+                }
 
+                updatedSegments.insert(updatedSegments.begin() + pos, segment);
+                updatedDistances.insert(updatedDistances.begin() + pos, d);
+
+                // Update levelset information
                 if( d<value ) {
                     if (lsInfoItr == lsInfo.end()) {
                         lsInfoItr = lsInfo.reclaim(id) ;
