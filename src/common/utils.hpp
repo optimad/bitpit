@@ -59,6 +59,9 @@ bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator compara
 template <typename T, typename Comparator = std::less<T> >
 typename std::vector<T>::const_iterator findInOrderedVector(const T &value, const std::vector<T> &list, Comparator comparator = Comparator());
 
+template<typename T>
+void reorderVector(std::vector<size_t>& order, std::vector<T>& v, const size_t &size);
+
 template <class T>
 void eraseValue(std::vector<T> &, const T&);
 

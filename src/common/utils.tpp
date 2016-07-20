@@ -101,6 +101,33 @@ typename std::vector<T>::const_iterator findInOrderedVector(const T &value, cons
 };
 
 /*!
+    \ingroup commonUtils
+    *
+    Order a vector according to a reordering vector.
+
+    \tparam order_t is the type of data that needs to be reordered
+    \param order is a reference to the reording vector
+    \param v is a reference to the vector that will be reordered
+    \param size is the size of the vector that will be reordered
+*/
+template<typename T>
+void reorderVector(std::vector<size_t>& order, std::vector<T>& v, const size_t &size)
+{
+    for (size_t i = 0; i < size; i++) {
+        size_t j;
+        while (i != (j = order[i])) {
+            size_t k = order[j];
+
+            T temp = std::move(v[j]);
+            v[j] = std::move(v[k]);
+            v[k] = std::move(temp);
+
+            std::swap(order[i], order[j]);
+        }
+    }
+}
+
+/*!
     Remove a element with specified value from input std::vector.
 
     \param[in,out] vec   inptut vector set. On output stores the input vector
