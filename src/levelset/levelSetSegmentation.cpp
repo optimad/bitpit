@@ -335,6 +335,55 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
 };
 
 /*!
+ * Update the segment list associated to the cells, keeping only the segments
+ * with a distance from the body less than the specified narrow band size.
+ * @param[in] visitee visited mesh
+ * @param[in] search size of narrow band
+ * @param[in] blackList is a list of cells that will not be updated
+ */
+void LevelSetSegmentation::updateSegmentList( LevelSetKernel *visitee, const double &search,
+                                              const std::unordered_set<long> &blacklist ){
+
+    VolumeKernel &mesh  = *(visitee->getMesh() ) ;
+
+    double                 s, d;
+    std::array<double,3>   n, xP;
+    for( PiercedIterator<SegInfo> segInfoItr = m_seg.begin(); segInfoItr != m_seg.end(); ++segInfoItr ){
+        long id = segInfoItr.getId() ;
+        if ( blacklist.count(id) > 0 ) {
+            continue;
+        }
+
+        // Centroid of the cell
+        std::array<double,3> P = mesh.evalCellCentroid(id) ;
+
+        // Starting from the farthest segment (the last in the list) we loop
+        // backwards until we find the first segment with a distance less
+        // that the specified narrow band size.
+        //
+        // We know that the cell is inside the narrow band, because all the
+        // cells outside the narrow band have already been removed. Therefore
+        // we need to perform the check up to the second segment (the first one
+        // is in the narrow band).
+        std::vector<long> &segments = segInfoItr->m_segments;
+
+        size_t nSegmentsToKeep = 1;
+        for( size_t k = segments.size() - 1; k >= 1; --k) {
+            long segment = segments[k];
+
+            infoFromSimplex(P, segment, d, s, xP, n);
+
+            if ( d <= search ){
+                nSegmentsToKeep = k + 1;
+                break;
+            }
+        }
+
+        segments.resize(nSegmentsToKeep);
+    }
+}
+
+/*!
  * Computes levelset relevant information at one point with respect to a simplex
  * @param[in] p coordinates of point
  * @param[in] i index of simplex
@@ -563,15 +612,14 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
     // update is possible.
     std::unordered_set<long> newSegInfo = updateSimplexToCell( mapper ) ;
 
-    // If the narrow is the same as before we can update the LS only for the
-    // newly added segment info, otherwise we need to recalculate the LS for
-    // all the cells.
-    if (narrowBandResizeDirection != 0 || newSegInfo.size() != 0 ) {
-        if ( narrowBandResizeDirection != 0 ) {
-            newSegInfo.clear();
-        }
-
+    // Evaluate the levelset for the newly added elements
+    if (newSegInfo.size() != 0 ) {
         lsFromSimplex(visitee, RSearch, signd, true, newSegInfo) ;
+    }
+
+    // If the narrow band has been shrunk, update the list of segments
+    if (narrowBandResizeDirection < 0) {
+        updateSegmentList(visitee, RSearch, newSegInfo) ;
     }
 
     return;
