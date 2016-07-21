@@ -466,7 +466,6 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
         auto lsInfoItr = lsInfo.reclaim( id ) ;
         lsInfoItr->object   = getId();
         lsInfoItr->part     = m_segmentation->getCell(support).getPID();
-        lsInfoItr->support  = support ;
         lsInfoItr->value    = ( signd *s  + (!signd) *1.   ) *d ;
         lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
     }
@@ -1071,6 +1070,21 @@ int LevelSetSegmentation::getSupportCount( const long &id ) const{
         return m_seg.at(id).m_segments.size() ;
     } else {
         return 0 ;
+    }
+
+};
+
+/*!
+ * Gets the closest support within the narrow band of cell
+ * @param[in] id index of cell
+ * @return closest segment in narrow band
+ */
+long LevelSetSegmentation::getClosestSupport( const long &id ) const{
+
+    if( m_seg.exists(id)){
+        return m_seg.at(id).m_segments.front() ;
+    } else {
+        return levelSetDefaults::SUPPORT ;
     }
 
 };

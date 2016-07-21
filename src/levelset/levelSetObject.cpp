@@ -88,6 +88,16 @@ int LevelSetObject::getSupportCount( const long &id )const{
 }
 
 /*!
+ * Gets the closest support within the narrow band of cell
+ * @param[in] id index of cell
+ * @return closest segment in narrow band
+ */
+long LevelSetObject::getClosestSupport( const long &id )const{
+    BITPIT_UNUSED( id) ;
+    return levelSetDefaults::SUPPORT;
+}
+
+/*!
  * Writes LevelSetObject to stream in binary format
  * @param[in] stream output stream
  */

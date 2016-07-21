@@ -168,22 +168,6 @@ std::pair<int,int> LevelSetKernel::getClosestPart(const long &i) const {
 };
 
 /*!
- * Get the object and support id of projection point
- * @param[in] i cell index
- * @return pair containing object and support id 
- */
-std::pair<int,long> LevelSetKernel::getClosestSupport(const long &i) const {
-
-    if( ! m_ls.exists(i) ){
-        return ( std::make_pair(levelSetDefaults::OBJECT, levelSetDefaults::SUPPORT) ) ;
-    } else {
-        LevelSetInfo const &ls = m_ls[i] ;
-        return (  std::make_pair(ls.object, ls.support) );
-    };
-
-};
-
-/*!
  * Get the sign of the levelset function
  * @param[in] i cell index
  * @return sign of levelset
@@ -738,7 +722,6 @@ void LevelSetKernel::dump( std::fstream &stream ){
         bitpit::genericIO::flushBINARY(stream, infoItr->gradient) ;
         bitpit::genericIO::flushBINARY(stream, infoItr->object) ;
         bitpit::genericIO::flushBINARY(stream, infoItr->part) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->support) ;
     };
 
     return ;
@@ -764,7 +747,6 @@ void LevelSetKernel::restore( std::fstream &stream ){
         bitpit::genericIO::absorbBINARY(stream, cellInfo.gradient) ;
         bitpit::genericIO::absorbBINARY(stream, cellInfo.object) ;
         bitpit::genericIO::absorbBINARY(stream, cellInfo.part) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.support) ;
         m_ls.insert(id, cellInfo) ;
     };
 
@@ -887,7 +869,6 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &sendList
             dataBuffer << lsinfo.gradient ;
             dataBuffer << lsinfo.object ;
             dataBuffer << lsinfo.part ;
-            dataBuffer << lsinfo.support ;
             ++nItems ;
         }
         ++counter ;
@@ -928,7 +909,6 @@ void LevelSetKernel::readCommunicationBuffer( const std::vector<long> &recvList,
         dataBuffer >> infoItr->gradient ;
         dataBuffer >> infoItr->object ;
         dataBuffer >> infoItr->part ;
-        dataBuffer >> infoItr->support ;
 
     }
 

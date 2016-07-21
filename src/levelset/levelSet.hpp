@@ -61,7 +61,6 @@ class LevelSetInfo{
     std::array<double,3>                    gradient ;                  /**< Levelset gradient */
     int                                     object ;                    /**< Id of closest object */
     int                                     part  ;                     /**< Id of closest patch */
-    long                                    support ;                   /**< Id of closest support */
 
     LevelSetInfo() ;
 };
@@ -164,7 +163,6 @@ class LevelSetKernel{
     std::array<double,3>                        getGradient(const long &) const ;
     int                                         getClosestObject(const long &) const ;
     std::pair<int,int>                          getClosestPart(const long &) const ;
-    std::pair<int,long>                         getClosestSupport(const long &) const ;
     int                                         getSupportCount(const long &) const ;
     short                                       getSign(const long &) const;
     double                                      getSizeNarrowBand() const;
@@ -267,6 +265,7 @@ class LevelSetObject{
     virtual void                                clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
     virtual void                                filterOutsideNarrowBand( LevelSetKernel *) ;
     virtual int                                 getSupportCount(const long &) const ;
+    virtual long                                getClosestSupport(const long &i) const;
 
     virtual void                                dumpDerived( std::fstream &) =0 ;
     virtual void                                restoreDerived( std::fstream &) =0 ;
@@ -354,6 +353,7 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
     void                                        filterOutsideNarrowBand( LevelSetKernel *) ;
     int                                         getSupportCount(const long &) const ;
+    long                                        getClosestSupport(const long &i) const;
 
 # if BITPIT_ENABLE_MPI
     void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer &, SendBuffer & ) ;

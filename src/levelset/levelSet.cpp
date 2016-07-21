@@ -62,7 +62,6 @@ LevelSetInfo::LevelSetInfo() {
     gradient = levelSetDefaults::GRADIENT ;
     object = levelSetDefaults::OBJECT ;
     part = levelSetDefaults::PART  ;
-    support = levelSetDefaults::SUPPORT ;
 }
 
 /*!
@@ -387,7 +386,17 @@ std::pair<int,int> LevelSet::getClosestPart(const long &i) const {
  */
 std::pair<int,long> LevelSet::getClosestSupport(const long &i) const {
 
-    return (m_kernel->getClosestSupport(i)) ;
+    int object;
+    long support;
+    if ( isInNarrowBand(i) ) {
+        object  = getClosestObject(i);
+        support = m_object.at(object)->getClosestSupport(i);
+    } else {
+        object  = levelSetDefaults::OBJECT;
+        support = levelSetDefaults::SUPPORT;
+    }
+
+    return ( std::make_pair(object, support) );
 };
 
 /*!
