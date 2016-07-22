@@ -65,6 +65,7 @@ public:
 	void setPID(int pid);
 	int getPID() const;
 	
+	void deleteInterfaces();
 	void resetInterfaces(bool storeInterfaces = true);
 	void setInterfaces(std::vector<std::vector<long>> &interfaces);
 	void setInterface(const int &face, const int &index, const long &interface);

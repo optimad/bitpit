@@ -199,6 +199,15 @@ int Cell::getPID() const
 }
 
 /*!
+	Deletes the interfaces of the cell.
+*/
+void Cell::deleteInterfaces()
+{
+	m_interfaces.clear();
+	m_interfaces.shrink_to_fit();
+}
+
+/*!
 	Resets the interfaces of the cell.
 
 	If the interfaces are stored, there will always be at least one
