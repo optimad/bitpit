@@ -352,7 +352,7 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         // ====================================================================== //
         vector<array<double, 3>>::const_iterator v_, ve_;
 
-        std::unordered_map<long, long> vertexMap;
+        std::vector<long> vertexMap;
         vertexMap.reserve(nVertex);
 
         long v_counter = 0;
