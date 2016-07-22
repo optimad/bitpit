@@ -220,14 +220,28 @@ public:
 	{
 		int nSubArrays = subArraySizes.size();
 
+		// Destroy the container
+		//
+		// Index and the storage data will probabily be stored in memory
+		// regions contigous to each other. To reduce memory fragmentation
+		// it's better to deallocate the container before updating its
+		// data structures.
+		destroy();
+
 		// Initialize the indexes
-		std::vector<size_t>(nSubArrays + 1, 0L).swap(m_index);
+		//
+		// Clear the vector before the resize to reduce memory fragmentation
+		m_index.resize(nSubArrays + 1);
+		m_index.shrink_to_fit();
 		for (int i = 0; i < nSubArrays; ++i) {
 			m_index[i+1] = m_index[i] + subArraySizes[i];
 		}
 
 		// Initialize the storage
-		std::vector<T>(m_index[nSubArrays], value).swap(m_v);
+		//
+		// Clear the vector before the resize to reduce memory fragmentation
+		m_v.assign(m_index[nSubArrays], value);
+		m_v.shrink_to_fit();
 	}
 
 	/*!
@@ -240,14 +254,24 @@ public:
 	*/
 	void initialize(const int &nSubArrays, const int &subArraySize, const T &value = T())
 	{
+		// Destroy the container
+		//
+		// Index and the storage data will probabily be stored in memory
+		// regions contigous to each other. To reduce memory fragmentation
+		// it's better to deallocate the container before updating its
+		// data structures.
+		destroy();
+
 		// Initialize the indexes
-		std::vector<size_t>(nSubArrays + 1, 0L).swap(m_index);
+		m_index.resize(nSubArrays + 1);
+		m_index.shrink_to_fit();
 		for (int i = 0; i < nSubArrays; ++i) {
 			m_index[i+1] = m_index[i] + subArraySize;
 		}
 
 		// Initialize the storage
-		std::vector<T>(m_index[nSubArrays], value).swap(m_v);
+		m_v.assign(m_index[nSubArrays], value);
+		m_v.shrink_to_fit();
 	}
 
 	/*!
@@ -260,14 +284,24 @@ public:
 	{
 		int nSubArrays = vector2D.size();
 
+		// Destroy the container
+		//
+		// Index and the storage data will probabily be stored in memory
+		// regions contigous to each other. To reduce memory fragmentation
+		// it's better to deallocate the container before updating its
+		// data structures.
+		destroy();
+
 		// Initialize the indexes
-		std::vector<size_t>(nSubArrays + 1, 0L).swap(m_index);
+		m_index.resize(nSubArrays + 1);
+		m_index.shrink_to_fit();
 		for (int i = 0; i < nSubArrays; ++i) {
 			m_index[i+1] = m_index[i] + vector2D[i].size();
 		}
 
 		// Initialize the storage
 		m_v.resize(m_index[nSubArrays]);
+		m_v.shrink_to_fit();
 
 		int k = 0;
 		for (int i = 0; i < nSubArrays; ++i) {
