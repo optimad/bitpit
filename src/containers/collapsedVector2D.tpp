@@ -309,6 +309,17 @@ public:
 	}
 
 	/*!
+		Sets the specified value as the value for all the elements in the
+		container.
+
+		\param value is the value to fill the container with
+	*/
+	void fill(T &value)
+	{
+		std::fill(m_v.begin(), m_v.end(), value);
+	}
+
+	/*!
 		Tests whether two collapsed-vectors are equal
 
 		\result true if the collapsed-vectors are equal, false otherwise.
