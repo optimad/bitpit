@@ -1478,6 +1478,7 @@ return(0); }
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
+        err = 2: one facet has more than 3 vertices
 */  
 unsigned int stl::readFacetASCII(
     ifstream                            &file_handle,
@@ -1528,6 +1529,10 @@ while ((!file_handle.eof())
         }
     }
     else if (word.compare("vertex") == 0) {
+        if (nv >= 3) {
+            return(2);
+        }
+
         sline >> V[nV+nv];
         nv++;
     }
@@ -1583,6 +1588,7 @@ return(0); }
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
+        err = 2: one facet has more than 3 vertices
 */  
 unsigned int stl::readFacetASCII(
     ifstream                            &file_handle,
@@ -1633,6 +1639,10 @@ while ((!file_handle.eof())
         }
     }
     else if (word.compare("vertex") == 0) {
+        if (nv >= 3) {
+            return(2);
+        }
+
         sline >> V[nV+nv];
         nv++;
     }
@@ -1692,6 +1702,7 @@ return(0); }
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
+        err = 2: failed to read a facet
 */
 unsigned int stl::readSolidASCII(
     ifstream                            &file_handle,
@@ -1804,7 +1815,10 @@ while ((!file_handle.eof())
     // Look for keyword "facet"
     if ((sline >> word) && (word.compare("facet") == 0)) {
         file_handle.seekg(current_pos);
-        stl::readFacetASCII(file_handle, nV, nT, V, N, T);
+        int readFacetError = stl::readFacetASCII(file_handle, nV, nT, V, N, T);
+        if (readFacetError != 0) {
+            return(2);
+        }
     }
 } //next line
 if (word.compare("endsolid") != 0) {
@@ -1843,6 +1857,7 @@ return(0); }
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
+        err = 2: failed to read a facet
 */
 unsigned int stl::readSolidASCII(
     ifstream                            &file_handle,
@@ -1956,7 +1971,10 @@ while ((!file_handle.eof())
     // Look for keyword "facet"
     if ((sline >> word) && (word.compare("facet") == 0)) {
         file_handle.seekg(current_pos);
-        readFacetASCII(file_handle, nV, nT, V, N, T);
+        int readFacetError = readFacetASCII(file_handle, nV, nT, V, N, T);
+        if (readFacetError != 0) {
+            return(2);
+        }
     }
 } //next line
 if (word.compare("endsolid") != 0) {
