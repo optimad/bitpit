@@ -619,7 +619,7 @@ void STLObj::load(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T
+    vector<array<int, 3> >              &T
 ) {
 
 // ========================================================================== //
@@ -726,7 +726,7 @@ void STLObj::loadSolid(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T
+    vector<array<int,3> >               &T
 ) {
 
 // ========================================================================== //
@@ -1596,7 +1596,7 @@ unsigned int stl::readFacetASCII(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T
+    vector<array<int, 3> >              &T
 ) {
 
 // ========================================================================== //
@@ -1866,7 +1866,7 @@ unsigned int stl::readSolidASCII(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T,
+    vector<array<int,3> >               &T,
     string                               solid_name
 ) {
 
@@ -1946,12 +1946,15 @@ stl::scanSolidASCII(file_handle, nt);
 // ========================================================================== //
 
 // Resize input variables --------------------------------------------------- //
-array<double,3>         temp;
-temp.fill(0.) ;
+array<double,3>         dummyDoubleArray;
+dummyDoubleArray.fill(0.) ;
 
-V.resize(nV+3*nt, temp);
-N.resize(nT+nt, temp);
-T.resize(nT+nt, vector<int>(3, -1));
+array<int,3>            dummyIntArray;
+dummyIntArray.fill(0) ;
+
+V.resize(nV+3*nt, dummyDoubleArray);
+N.resize(nT+nt, dummyDoubleArray);
+T.resize(nT+nt, dummyIntArray);
 
 // Read solid data ---------------------------------------------------------- //
 file_handle.clear();
@@ -2102,7 +2105,7 @@ unsigned int stl::readASCII(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T
+    vector<array<int,3> >               &T
 ) {
 
 // ========================================================================== //
@@ -2319,7 +2322,7 @@ unsigned int stl::readBINARY(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T
+    vector<array<int, 3> >              &T
 ) {
 
 // ========================================================================== //
@@ -2371,17 +2374,20 @@ nV = 3*nT;
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
 
-array<double,3>     temp;
-temp.fill(0.) ;
+array<double,3>     dummyDoubleArray;
+dummyDoubleArray.fill(0.) ;
+
+array<int,3>        dummyIntArray;
+dummyIntArray.fill(0) ;
 
 // Vertex list
-V.resize(nV, temp);
+V.resize(nV, dummyDoubleArray);
 
 // Normals
-N.resize(nT, temp);
+N.resize(nT, dummyDoubleArray);
 
 // Triangle-vector connectivity
-T.resize(nT, vector<int>(3, -1));
+T.resize(nT, dummyIntArray);
 
 // ========================================================================== //
 // READ DATA                                                                  //
@@ -2554,7 +2560,7 @@ unsigned int stl::writeSolidASCII(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T,
+    vector<array<int,3> >               &T,
     string                               solid_name
 ) {
 
@@ -2759,7 +2765,7 @@ unsigned int stl::writeSolidBINARY(
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<vector<int> >                &T,
+    vector<array<int,3> >               &T,
     string                               solid_name
 ) {
 

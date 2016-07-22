@@ -132,7 +132,7 @@ class STLObj {
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input/output) vertex coordinate list
         std::vector<std::array<double,3> >      &,                            // (input/output) unit normal to each triangle
-        std::vector<std::vector<int> >          &                             // (input/output) triangle-vertex connectivity
+        std::vector<std::array<int,3> >         &                             // (input/output) triangle-vertex connectivity
     );
     void loadSolid(                                                            // Load next solid stl triangulation from stl file
         int                                     &,                            // (input/output) number of stl vertices
@@ -146,7 +146,7 @@ class STLObj {
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input/output) vertex coordinate list
         std::vector<std::array<double,3> >      &,                            // (input/output) unit normal to each triangle
-        std::vector<std::vector<int> >          &
+        std::vector<std::array<int,3> >         &
     );
 
     template <typename ... T2>
@@ -166,7 +166,7 @@ class STLObj {
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input/output) vertex coordinate list
         std::vector<std::array<double,3> >      &,                            // (input/output) unit normal to each triangle
-        std::vector<std::vector<int> >          &,                            // (input/output) triangle-vertex connectivity
+        std::vector<std::array<int,3> >         &,                            // (input/output) triangle-vertex connectivity
         T2                                      & ...                         // (input/optional) other stl solids
     );
     template <typename ... T2>
@@ -186,7 +186,7 @@ class STLObj {
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input) vertex coordinate list
         std::vector<std::array<double,3> >      &,                            // (input) unit normal to each triangle
-        std::vector<std::vector<int> >          &,                            // (input) triangle-vertex connectivity
+        std::vector<std::array<int,3> >         &,                            // (input) triangle-vertex connectivity
         T2                                      & ...                         // (input/optional) other stl solids
     );
     template <typename ... T2>
@@ -206,7 +206,7 @@ class STLObj {
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input) vertex coordinate list
         std::vector<std::array<double,3> >      &,                            // (input) unit normal to each triangle
-        std::vector<std::vector<int> >          &,                            // (input) triangle-vertex connectivity
+        std::vector<std::array<int,3> >         &,                            // (input) triangle-vertex connectivity
         T2                                      & ...                         // (input/optional) other stl solids
     );
 
@@ -279,7 +279,7 @@ unsigned int readSolidASCII(                                             // Read
     int                                         &,                            // (input/output) number of triangles
     std::vector<std::array<double,3> >          &,                            // (input/output) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input/output) triangles unit normal
-    std::vector<std::vector<int> >              &,                            // (input/output) triangle-vertex connectivity
+    std::vector<std::array<int, 3> >            &,                            // (input/output) triangle-vertex connectivity
     std::string                                 solid_name = ""               // (input/optional) stl solid name
 );
 unsigned int readFacetASCII(                                             // Read stl facet from ASCII stl file
@@ -296,7 +296,7 @@ unsigned int readFacetASCII(                                             // Read
     int                                         &,                            // (input/output) number of triangles
     std::vector<std::array<double,3> >          &,                            // (input/output) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input/output) triangles unit normal
-    std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
+    std::vector<std::array<int,3> >             &                             // (input/output) triangle-vertex connectivity
 );
 unsigned int readASCII(                                                  // Load stl trianuglation data from ASCII stl file
     std::ifstream                               &,                            // (input) input stream to stl file
@@ -312,7 +312,7 @@ unsigned int readASCII(                                                  // Load
     int                                         &,                            // (input/output) number of stl facets
     std::vector<std::array<double,3> >          &,                            // (input/output) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input/output) triangles unit normals
-    std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
+    std::vector<std::array<int,3> >             &                             // (input/output) triangle-vertex connectivity
 );
 unsigned int readBINARY(                                                    // Read stl triangulation data from binary stl file
     std::ifstream                               &,                            // (input) input stream to stl file
@@ -328,7 +328,7 @@ unsigned int readBINARY(                                                    // R
     int                                         &,                            // (input/output) number of stl facets
     std::vector<std::array<double,3> >          &,                            // (input/output) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input/output) triangles unit normals
-    std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
+    std::vector<std::array<int,3> >             &                             // (input/output) triangle-vertex connectivity
 );
 
 // Output routines ---------------------------------------------------------- //
@@ -347,7 +347,7 @@ unsigned int writeSolidASCII(                                            // Writ
     int                                         &,                            // (input) number of triangles
     std::vector<std::array<double,3> >          &,                            // (input) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input) triangles' unit normals
-    std::vector<std::vector<int> >              &,                            // (input) triangle-vertex connectivity
+    std::vector<std::array<int,3> >             &,                            // (input) triangle-vertex connectivity
     std::string                                  solid_name = ""              // (input/optional) stl solid name
 );
 unsigned int writeSolidBINARY(                                              // Write stl triangulation in a binary stl file
@@ -365,7 +365,7 @@ unsigned int writeSolidBINARY(                                              // W
     int                                         &,                            // (input) number of triangles
     std::vector<std::array<double,3> >          &,                            // (input) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input) triangles' unit normals
-    std::vector<std::vector<int> >              &,                            // (input) triangle-vertex connectivity
+    std::vector<std::array<int,3> >             &,                            // (input) triangle-vertex connectivity
     std::string                                 solid_name = ""               // (input/optional) stl solid name
 );
 

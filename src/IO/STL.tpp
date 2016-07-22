@@ -147,7 +147,7 @@ void STLObj::load(
     int                                         &nT,
     std::vector<std::array<double,3> >          &V,
     std::vector<std::array<double,3> >          &N,
-    std::vector<std::vector<int> >              &T,
+    std::vector<std::array<int,3> >             &T,
     T2                                          & ... others
 ) {
 
@@ -256,7 +256,7 @@ void STLObj::save(
     int                                         &nT,
     std::vector<std::array<double,3> >          &V,
     std::vector<std::array<double,3> >          &N,
-    std::vector<std::vector<int> >              &T,
+    std::vector<std::array<int,3> >             &T,
     T2                                          & ... others
 ) {
 
@@ -362,7 +362,7 @@ void STLObj::append(
     int                                         &nT,
     std::vector<std::array<double,3> >          &V,
     std::vector<std::array<double,3> >          &N,
-    std::vector<std::vector<int> >              &T,
+    std::vector<std::array<int,3> >             &T,
     T2                                          & ... others
 ) {
 

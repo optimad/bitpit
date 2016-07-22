@@ -327,7 +327,7 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         int nSimplex = 0;
         std::vector<std::array<double, 3>> vertexList;
         std::vector<std::array<double, 3>> normalList;
-        std::vector<std::vector<int>> connectivityList;
+        std::vector<std::array<int, 3>> connectivityList;
 
         STL.loadSolid(nVertex, nSimplex, vertexList, normalList, connectivityList);
         if (nVertex == 0) {
@@ -366,8 +366,8 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         // ====================================================================== //
         // ADD CELLS TO MESH                                                      //
         // ====================================================================== //
-        vector<vector<int>>::const_iterator c_, ce_;
-        vector<int>::const_iterator w_, we_;
+        vector<array<int,3>>::const_iterator c_, ce_;
+        array<int,3>::const_iterator w_, we_;
 
         ce_ = connectivityList.cend();
         for (c_ = connectivityList.cbegin(); c_ != ce_; ++c_) {
@@ -428,25 +428,28 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
     int                                         nSimplex;
     vector<array<double, 3>>                    vertexList;
     vector<array<double, 3>>                    normalList;
-    vector<vector<int>>                         connectivityList;
+    vector<array<int,3>>                        connectivityList;
     unordered_map<long, long>                   vertexMap;
+    array<int,3>                                dummyIntArray;
 
     // Counters
     int                                         v_count ,j;
     vector<array<double, 3>>::iterator          i_;
-    vector<vector<int>>::iterator               j_;
-    vector<int>::iterator                       k_, ke_;
+    vector<array<int,3>>::iterator              j_;
+    array<int,3>::iterator                      k_, ke_;
     VertexIterator                              v_, ve_;
     CellIterator                                c_, cb_, ce_;
 
     // ====================================================================== //
     // INITIALIZE DATA STRUCTURE                                              //
     // ====================================================================== //
+    dummyIntArray.fill(0) ;
+
     nSimplex = m_nInternals;
     if (!exportInternalsOnly) nSimplex += m_nGhosts;
     vertexList.resize(getVertexCount());
     normalList.resize(nSimplex);
-    connectivityList.resize(nSimplex, vector<int>(3, 0));
+    connectivityList.resize(nSimplex, dummyIntArray);
 
     // ====================================================================== //
     // CREATE VERTEX LIST                                                     //
