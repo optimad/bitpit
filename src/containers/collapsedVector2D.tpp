@@ -734,7 +734,7 @@ public:
 	*/
 	int capacity() const
 	{
-		return m_index.capacity();
+		return m_index.capacity() - 1;
 	}
 
 	/*!
