@@ -429,6 +429,15 @@ int Cell::findInterface(const int &interface)
 }
 
 /*!
+	Deletes the adjacencies of the cell.
+*/
+void Cell::deleteAdjacencies()
+{
+	m_adjacencies.clear();
+	m_adjacencies.shrink_to_fit();
+}
+
+/*!
 	Resets the adjacencies of the cell.
 
 	If the adjacencies are stored, there will always be at least one
