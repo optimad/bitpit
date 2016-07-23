@@ -1253,6 +1253,28 @@ const std::vector<int> & Element::getFaceLocalConnect(const int &face) const
 }
 
 /*!
+	Gets the connectivity of the specified face of the element.
+
+	\param face is the face for which the connectiviy is reqested
+	\result The connectivity of the specified face of the element.
+*/
+std::vector<long> Element::getFaceConnect(int face) const
+{
+	const std::vector<int> &localFaceConnect = getFaceLocalConnect(face);
+	int nFaceVertices = localFaceConnect.size();
+
+	std::vector<long> faceConnect;
+	faceConnect.resize(nFaceVertices);
+	for (int k = 0; k < nFaceVertices; ++k) {
+		int localVertexId = localFaceConnect[k];
+		long vertexId = getVertex(localVertexId);
+		faceConnect[k] = vertexId;
+	}
+
+	return faceConnect;
+}
+
+/*!
 	Gets the number of edges of the element.
 
 	\result The number of edges of the element
