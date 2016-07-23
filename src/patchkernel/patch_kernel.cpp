@@ -807,10 +807,8 @@ long PatchKernel::countFreeVertices() const
 				continue;
 			}
 
-			std::vector<int> faceLocalConnect = cell.getFaceLocalConnect(i);
-			for (unsigned int j = 0; j < faceLocalConnect.size(); ++j) {
-				freeVertices.insert(cell.getVertex(faceLocalConnect[j]));
-			}
+			std::vector<long> faceConnect = cell.getFaceConnect(i);
+			freeVertices.insert(faceConnect.begin(), faceConnect.end());
 		}
 	}
 
@@ -1996,23 +1994,12 @@ std::vector<long> PatchKernel::_findCellVertexNeighs(const long &id, const int &
 		scanQueue.erase(scanId);
 		alreadyScan.insert(scanId);
 
-		// Info on the cell
-		const ElementInfo &cellTypeInfo = scanCell.getInfo();
-		const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
-		const long *scanCellConnect = scanCell.getConnect();
-
 		// Find the faces that share the vertex
 		std::vector<long> faceList;
 		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
-			// Info on the face
-			ElementInfo::Type faceType = scanCell.getFaceType(i);
-			const ElementInfo &faceTypeInfo = ElementInfo::getElementInfo(faceType);
-			const std::vector<int> &faceLocalConnect = cellLocalFaceConnect[i];
-
-			// Check if the face shares the vertex
-			for (int k = 0; k < faceTypeInfo.nVertices; ++k) {
-				long faceVertexId = scanCellConnect[faceLocalConnect[k]];
-				if (faceVertexId == vertexId) {
+			const std::vector<long> faceConnect = scanCell.getFaceConnect(i);
+			for (size_t k = 0; k < faceConnect.size(); ++k) {
+				if (faceConnect[k] == vertexId) {
 					faceList.push_back(i);
 					break;
 				}
@@ -2757,11 +2744,7 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 			int nFaceVertices = ElementInfo::getElementInfo(faceType).nVertices;
 
 			// Build face connectivity
-			std::vector<long> faceConnect;
-			faceConnect.reserve(nFaceVertices);
-			for (const int localVertexId : cell.getFaceLocalConnect(face)) {
-				faceConnect.push_back(cell.getVertex(localVertexId));
-			}
+			std::vector<long> faceConnect = cell.getFaceConnect(face);
 
 			// Build list of neighbour candidates
 			//
@@ -2945,15 +2928,13 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 				}
 
 				// Set connectivity
-				int nInterfaceVertices = ElementInfo::getElementInfo(interfaceType).nVertices;
-				std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
-				std::vector<int> faceLocalConnect = intrOwner->getFaceLocalConnect(intrOwnerFace);
-				for (int k = 0; k < nInterfaceVertices; ++k) {
-					long localVertexId = faceLocalConnect[k];
-					long vertexId = intrOwner->getVertex(localVertexId);
-					interfaceConnect[k] = vertexId;
-				}
+				std::vector<long> faceConnect = intrOwner->getFaceConnect(intrOwnerFace);
 
+				int nInterfaceVertices = faceConnect.size();
+				std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
+				for (int k = 0; k < nInterfaceVertices; ++k) {
+					interfaceConnect[k] = faceConnect[k];
+				}
 				interface.setConnect(std::move(interfaceConnect));
 
 				// Update owner and neighbour cell data
@@ -3468,12 +3449,12 @@ void PatchKernel::extractEnvelope(PatchKernel &envelope) const
 
 			// Add face vertices to the envelope and get face
 			// connectivity in the envelope
-			std::vector<int> faceLocalConnect = cell.getFaceLocalConnect(i);
-			int nFaceVertices = faceLocalConnect.size();
+			std::vector<long> faceConnect = cell.getFaceConnect(i);
+			int nFaceVertices = faceConnect.size();
 
 			std::unique_ptr<long[]> faceEnvelopeConnect = std::unique_ptr<long[]>(new long[nFaceVertices]);
 			for (int j = 0; j < nFaceVertices; ++j) {
-				long vertexId = cell.getVertex(faceLocalConnect[j]);
+				long vertexId = faceConnect[j];
 
 				// If the vertex is not yet in the envelope
 				// add it.
