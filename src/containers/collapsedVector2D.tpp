@@ -279,6 +279,22 @@ public:
 	}
 
 	/*!
+		Destroy the container
+
+		After calling this function the container will be non-functional
+		until it is re-initialized.
+
+	*/
+	void destroy()
+	{
+		m_index.clear();
+		m_index.shrink_to_fit();
+
+		m_v.clear();
+		m_v.shrink_to_fit();
+	}
+
+	/*!
 		Requests a change in capacity
 
 		Requests that the collpased-vector capacity be at least enough
