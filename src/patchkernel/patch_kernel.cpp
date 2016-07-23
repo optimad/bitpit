@@ -936,7 +936,7 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	}
 
 	// Free memory
-	bin_index.clear();
+	std::unordered_map<long, long>().swap(bin_index);
 
 	// ====================================================================== //
 	// COLLAPSE DOUBLE VERTICES                                               //
