@@ -128,8 +128,8 @@ public:
 	/*!
 		Default constructor
 	*/
-	CollapsedVector2D()
-		: m_index(1, 0L)
+	CollapsedVector2D(bool initialize = true)
+		: m_index(initialize ? 1 : 0, 0L)
 	{
 	}
 
