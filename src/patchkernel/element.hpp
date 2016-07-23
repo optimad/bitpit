@@ -172,10 +172,10 @@ public:
 
 	int getFaceCount() const;
 	ElementInfo::Type getFaceType(const int &face) const;
-	std::vector<int> getFaceLocalConnect(const int &face) const;
+	const std::vector<int> & getFaceLocalConnect(const int &face) const;
 
 	int getEdgeCount() const;
-	std::vector<int> getEdgeLocalConnect(const int &edge) const;
+	const std::vector<int> & getEdgeLocalConnect(const int &edge) const;
 
 	void setVertex(const int &index, const long &vertex);
 	int getVertexCount() const;

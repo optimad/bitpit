@@ -1236,7 +1236,7 @@ ElementInfo::Type Element::getFaceType(const int &face) const
 	\param face is the face for which the connectiviy is reqested
 	\result The local connectivity of the specified face of the element.
 */
-std::vector<int> Element::getFaceLocalConnect(const int &face) const
+const std::vector<int> & Element::getFaceLocalConnect(const int &face) const
 {
 	switch (m_type) {
 
@@ -1244,7 +1244,7 @@ std::vector<int> Element::getFaceLocalConnect(const int &face) const
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
 		BITPIT_UNREACHABLE("Unsupported element");
-		return std::vector<int>();
+		throw std::runtime_error ("Unsupported element");
 
 	default:
 		return getInfo().faceConnect[face];
@@ -1279,7 +1279,7 @@ int Element::getEdgeCount() const
 	\param edge is the edge for which the connectiviy is reqested
 	\result The local connectivity of the specified edge of the element.
 */
-std::vector<int> Element::getEdgeLocalConnect(const int &edge) const
+const std::vector<int> & Element::getEdgeLocalConnect(const int &edge) const
 {
 	switch (m_type) {
 
@@ -1287,7 +1287,7 @@ std::vector<int> Element::getEdgeLocalConnect(const int &edge) const
 	case (ElementInfo::POLYHEDRON):
 	case (ElementInfo::UNDEFINED):
 		BITPIT_UNREACHABLE("Unsupported element");
-		return std::vector<int>();
+		throw std::runtime_error ("Unsupported element");
 
 	default:
 		return getInfo().edgeConnect[edge];
