@@ -1000,10 +1000,12 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 	}
 
 	// Add the cells
-	std::vector<long> createdCells;
-	createdCells.reserve(octantInfoList.size());
+	size_t octantInfoListSize = octantInfoList.size();
 
-	for (OctantInfo &octantInfo : octantInfoList) {
+	std::vector<long> createdCells(octantInfoListSize);
+	for (size_t k = 0; k < octantInfoListSize; ++k) {
+		OctantInfo &octantInfo = octantInfoList[k];
+
 		// Id that will be assigned to the cell
 		long cellId = getOctantId(octantInfo);
 
@@ -1031,7 +1033,7 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 #endif
 
 		// Add the cell to the list of created cells
-		createdCells.push_back(cellId);
+		createdCells[k] = cellId;
 	}
 
 	// Build adjacencies
