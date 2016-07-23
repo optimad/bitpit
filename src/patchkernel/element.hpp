@@ -177,6 +177,7 @@ public:
 
 	int getEdgeCount() const;
 	const std::vector<int> & getEdgeLocalConnect(const int &edge) const;
+	std::vector<long> getEdgeConnect(int edge) const;
 
 	void setVertex(const int &index, const long &vertex);
 	int getVertexCount() const;

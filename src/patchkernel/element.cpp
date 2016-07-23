@@ -1318,6 +1318,28 @@ const std::vector<int> & Element::getEdgeLocalConnect(const int &edge) const
 }
 
 /*!
+	Gets the connectivity of the specified edge of the element.
+
+	\param edge is the edge for which the connectiviy is reqested
+	\result The connectivity of the specified edge of the element.
+*/
+std::vector<long> Element::getEdgeConnect(int edge) const
+{
+	const std::vector<int> &localEdgeConnect = getEdgeLocalConnect(edge);
+	int nEdgeVertices = localEdgeConnect.size();
+
+	std::vector<long> edgeConnect;
+	edgeConnect.resize(nEdgeVertices);
+	for (int k = 0; k < nEdgeVertices; ++k) {
+		int localVertexId = localEdgeConnect[k];
+		long vertexId = getVertex(localVertexId);
+		edgeConnect[k] = vertexId;
+	}
+
+	return edgeConnect;
+}
+
+/*!
 	Gets the dimension of the element.
 
 	\return The dimension of the element
