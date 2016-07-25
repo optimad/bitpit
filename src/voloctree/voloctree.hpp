@@ -86,6 +86,7 @@ public:
 	int getCellLevel(const long &id);
 
 	long getOctantId(const OctantInfo &octantInfo) const;
+	Octant * getOctantPointer(const OctantInfo &octantInfo);
 	const std::vector<uint32_t> & getOctantConnect(const OctantInfo &octantInfo);
 
 	PabloUniform & getTree();

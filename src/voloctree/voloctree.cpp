@@ -309,6 +309,24 @@ long VolOctree::getOctantId(const OctantInfo &octantInfo) const
 }
 
 /*!
+	Gets a pointer to the specified octant.
+
+	\param octantInfo the data of the octant
+	\result The pointer of the specified octant
+*/
+Octant * VolOctree::getOctantPointer(const OctantInfo &octantInfo)
+{
+	Octant *octant;
+	if (octantInfo.internal) {
+		octant = m_tree.getOctant(octantInfo.id);
+	} else {
+		octant = m_tree.getGhostOctant(octantInfo.id);
+	}
+
+	return octant;
+}
+
+/*!
 	Gets the connectivity of the specified octant.
 
 	\param octantInfo the data of the octant
