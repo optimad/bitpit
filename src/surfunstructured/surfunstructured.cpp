@@ -251,15 +251,6 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
     // VARIABLES DECLARATION                                                  //
     // ====================================================================== //
 
-    // Parameters
-    const unordered_map<size_t, ElementInfo::Type> ele_type{
-        {0, ElementInfo::UNDEFINED},
-        {1, ElementInfo::VERTEX},
-        {2, ElementInfo::LINE},
-        {3, ElementInfo::TRIANGLE},
-        {4, ElementInfo::QUAD}
-    };
-
     // STL Object
     STLObj STL(stl_name, isBinary);
 
@@ -336,7 +327,7 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
             } //next w_
 
             // Add cell
-            CellIterator cellIterator = addCell(ele_type.at(n_v), true, connect);
+            CellIterator cellIterator = addCell(getSTLFacetType(n_v), true, connect);
             cellIterator->setPID(pid);
         } //next c_
 
@@ -461,6 +452,36 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
     return 0;
 }
 
+
+/*!
+* Get the element type of a facet with the specified number of vertices.
+*
+* \param[in] nFacetVertices is the number of the vertices of the facet
+*
+* \result The element type of a facet with the specified number of vertices.
+*/
+ElementInfo::Type SurfUnstructured::getSTLFacetType(int nFacetVertices)
+{
+    switch(nFacetVertices) {
+
+    case 1:
+        return ElementInfo::VERTEX;
+
+    case 2:
+        return ElementInfo::LINE;
+
+    case 3:
+        return ElementInfo::TRIANGLE;
+
+    case 4:
+        return ElementInfo::QUAD;
+
+    default:
+        return ElementInfo::UNDEFINED;
+
+    }
+}
+
 /*!
  * Import surface tasselation from DGF file.
  * 
@@ -474,14 +495,6 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name)
     // VARIABLES DECLARATION                                                  //
     // ====================================================================== //
 
-    // Parameters
-    static unordered_map<size_t, ElementInfo::Type>             ele_type{
-                                                                    {0, ElementInfo::UNDEFINED},
-                                                                    {1, ElementInfo::VERTEX},
-                                                                    {2, ElementInfo::LINE},
-                                                                    {3, ElementInfo::TRIANGLE},
-                                                                    {4, ElementInfo::QUAD}
-                                                                };
     // Local variables
     DGFObj                                                      dgf_in(dgf_name);
     int                                                         nV = 0, nS = 0;
@@ -532,7 +545,7 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name)
             *j_ = *i_;
             ++i_;
         } //next j_
-        addCell(ele_type[c_->size()], true, connect);
+        addCell(getDGFFacetType(c_->size()), true, connect);
     } //next c_
 
     return 0;
@@ -594,6 +607,35 @@ unsigned short SurfUnstructured::exportDGF(const string &dgf_name)
     dgf_in.save(nV, nS, vertex_list, simplex_list);
 
     return 0;
+}
+
+/*!
+* Get the element type of a facet with the specified number of vertices.
+*
+* \param[in] nFacetVertices is the number of the vertices of the facet
+*
+* \result The element type of a facet with the specified number of vertices.
+*/
+ElementInfo::Type SurfUnstructured::getDGFFacetType(int nFacetVertices)
+{
+    switch(nFacetVertices) {
+
+    case 1:
+        return ElementInfo::VERTEX;
+
+    case 2:
+        return ElementInfo::LINE;
+
+    case 3:
+        return ElementInfo::TRIANGLE;
+
+    case 4:
+        return ElementInfo::QUAD;
+
+    default:
+        return ElementInfo::UNDEFINED;
+
+    }
 }
 
 

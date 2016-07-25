@@ -62,6 +62,9 @@ protected:
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);
 
+	static ElementInfo::Type getSTLFacetType(int nFacetVertices);
+	static ElementInfo::Type getDGFFacetType(int nFacetVertices);
+
 private:
 
 };
