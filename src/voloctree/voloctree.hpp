@@ -219,7 +219,7 @@ private:
 	void renumberOctants(std::vector<RenumberInfo> &renumberedOctants);
 	FaceInfoSet deleteOctants(std::vector<DeleteInfo> &deletedOctants);
 
-	long addVertex(uint32_t treeId);
+	long addVertex(const OctantInfo &octantInfo, uint8_t node);
 
 	long addCell(OctantInfo octantInfo, std::unique_ptr<long[]> &vertices);
 	void deleteCell(long id);

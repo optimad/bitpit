@@ -440,13 +440,6 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	long nGhostsOctants = m_tree.getNumGhosts();
 	long nPreviousGhosts = m_ghostToCell.size();
 
-	// Evaluate tree conenctivity
-	log::cout() << ">> Evaluating Octree connectivity...";
-
-	m_tree.computeConnectivity();
-
-	log::cout() << " Done" << std::endl;
-
 	// Initialize tracking data
 	adaption::InfoCollection adaptionData;
 
@@ -910,9 +903,6 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		}
 	}
 
-	// Delete tree conenctivity
-	m_tree.clearConnectivity();
-
 	// Done
 	return adaptionData.dump();
 }
@@ -979,7 +969,7 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 	const int &nInterfaceVertices = m_interfaceTypeInfo->nVertices;
 
 	// Add the vertex of the dangling faces to the vertex map
-	std::unordered_map<uint32_t, long> vertexMap;
+	std::unordered_map<uint64_t, long> vertexMap;
 	for (auto &danglingFaceInfo : danglingFaces) {
 		// List of faces with the vertx to be added
 		//
@@ -1016,15 +1006,15 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 
 			// Octant data
 			OctantInfo octantInfo = getCellOctant(vertexSource.id);
-			const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
+			Octant *octant = getOctantPointer(octantInfo);
 
 			// List of vertices
-			const std::vector<int> &localConnect = cellLocalFaceConnect[vertexSource.face];
+			const std::vector<int> &localFaceConnect = cellLocalFaceConnect[vertexSource.face];
 			for (int k = 0; k < nInterfaceVertices; ++k) {
-				uint32_t vertexTreeId = octantTreeConnect[localConnect[k]];
-				if (vertexMap.count(vertexTreeId) == 0) {
-					long vertexId = cellConnect[localConnect[k]];
-					vertexMap.insert({{vertexTreeId, vertexId}});
+				uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, localFaceConnect[k]);
+				if (vertexMap.count(vertexTreeMorton) == 0) {
+					long vertexId = cellConnect[localFaceConnect[k]];
+					vertexMap.insert({vertexTreeMorton, vertexId});
 				}
 			}
 		}
@@ -1032,11 +1022,11 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 
 	// Create the new vertices
 	for (OctantInfo &octantInfo : octantInfoList) {
-		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
+		Octant *octant = getOctantPointer(octantInfo);
 		for (int k = 0; k < nCellVertices; ++k) {
-			uint32_t vertexTreeId = octantTreeConnect[k];
-			if (vertexMap.count(vertexTreeId) == 0) {
-				vertexMap[vertexTreeId] = addVertex(vertexTreeId);
+			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
+			if (vertexMap.count(vertexTreeMorton) == 0) {
+				vertexMap[vertexTreeMorton] = addVertex(octantInfo, k);
 			}
 		}
 	}
@@ -1047,13 +1037,13 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 
 	for (OctantInfo &octantInfo : octantInfoList) {
 		// Octant connectivity
-		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
+		Octant *octant = getOctantPointer(octantInfo);
 
 		// Cell connectivity
 		std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
 		for (int k = 0; k < nCellVertices; ++k) {
-			uint32_t vertexTreeId = octantTreeConnect[k];
-			cellConnect[k] = vertexMap.at(vertexTreeId);
+			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
+			cellConnect[k] = vertexMap.at(vertexTreeMorton);
 		}
 
 		// Add cell
@@ -1250,15 +1240,17 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 }
 
 /*!
-	Creates a new patch vertex from the specified tree vertex.
+	Creates a new patch vertex from the specified octant node.
 
-	\param treeId is the id of the vertex in the tree
+	\param octantInfo is the octant the node belongs to
+	\param node is the octant node
 	\result The id of the newly created vertex.
 */
-long VolOctree::addVertex(uint32_t treeId)
+long VolOctree::addVertex(const OctantInfo &octantInfo, uint8_t node)
 {
-	// Vertex coordinates
-	std::array<double, 3> nodeCoords = m_tree.getNodeCoordinates(treeId);
+	// Node coordinates
+	Octant *octant = getOctantPointer(octantInfo);
+	std::array<double, 3> nodeCoords = m_tree.getNode(octant, node);
 
 	// Create the vertex
 	VertexIterator vertexIterator = VolumeKernel::addVertex(std::move(nodeCoords));
