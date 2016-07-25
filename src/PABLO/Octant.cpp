@@ -520,16 +520,6 @@ uint64_t	Octant::computeMorton() const{
 	return morton;
 };
 
-
-/** Compute the Morton index of the octant (without level).
- * \return Morton index of the octant.
- */
-uint64_t	Octant::computeMorton(){
-	uint64_t morton = 0;
-	morton = mortonEncode_magicbits(this->m_x,this->m_y,this->m_z);
-	return morton;
-};
-
 /** Compute the Morton index of the given node (without level).
  * \return morton Morton index of the node.
  */
