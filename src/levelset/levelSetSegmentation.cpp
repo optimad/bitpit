@@ -268,8 +268,6 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
     // Create the needed dat strucures
     std::unordered_set<long> newSegInfo ;
     std::vector<std::array<double,3>> cloud ;
-    std::vector< std::array<double,3> > cloud_xP ;
-    std::vector<int> cloud_where ;
 
     // Add the segments info
     for ( auto mapItr = segmentToCellMap.begin(); mapItr != segmentToCellMap.end(); ) {
@@ -287,10 +285,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
         }
 
         // Eval distances
-        cloud_xP.resize( cellListCount );
-        cloud_where.resize( cellListCount );
-
-        std::vector<double> distancesFromSegment = CGElem::distanceCloudSimplex( cloud, VS, cloud_xP, cloud_where );
+        std::vector<double> distancesFromSegment = CGElem::distanceCloudSimplex( cloud, VS );
         for ( size_t k = 0; k < cellListCount; ++k ) {
             // Discard segments with a distance greater than the narrow band
             double segmentDistance = distancesFromSegment[k];
@@ -735,8 +730,6 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     std::vector<double>                     d;
     std::vector<double>::iterator           vit;
 
-    std::vector< std::array<double,3> >     xP ;
-    std::vector< int >                      where ;
     std::vector<int>                        flag( mesh.getCellCount(), -1);
 
     int                                     i, N( m_segmentation->getCellCount() );
@@ -770,23 +763,21 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
             // Extract point from lifo
             cloud.resize(stackSize) ;
-            xP.resize(stackSize) ;
-            where.resize(stackSize) ;
 
             for( size_t k = 0; k < stackSize; ++k) {
                 long cell = stack[k];
                 cloud[k] = visitee->computeCellCentroid(cell) ;
             };
 
-            d = CGElem::distanceCloudSimplex( cloud, VS, xP, where); 
+            d = CGElem::distanceCloudSimplex( cloud, VS); 
             vit = d.begin() ;
 
             for( const auto & cell : stack){
                 if ( *vit <= RSearch ) {
 
                     cellList.push_back( cell ) ;
-
                     neighs  = mesh.findCellFaceNeighs(cell) ;
+
                     for( const auto &  neigh : neighs){
                         if( flag[neigh] != i) {
                             temp.push_back( neigh) ;
