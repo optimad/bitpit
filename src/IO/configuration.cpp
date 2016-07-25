@@ -44,12 +44,18 @@ namespace bitpit {
     This class implements a configuration file parser.
 */
 
+/*
+    Undefined versione
+*/
+const int ConfigParser::VERSION_UNDEFINED = -1;
+
+
 /*!
     Construct a new configuration parser.
 */
 ConfigParser::ConfigParser(const std::string &root)
-    : m_root(root), m_checkVersion(false)
 {
+    reset(root);
 }
 
 /*!
@@ -59,8 +65,37 @@ ConfigParser::ConfigParser(const std::string &root)
     \param version is the required version
 */
 ConfigParser::ConfigParser(const std::string &root, const int &version)
-    : m_root(root), m_checkVersion(true), m_version(version)
 {
+    reset(root, version);
+}
+
+/*!
+    Resets the configuration parser
+
+    \param root is the name of the root element
+*/
+void ConfigParser::reset(const std::string &root)
+{
+    m_root         = root;
+    m_checkVersion = false;
+    m_version      = VERSION_UNDEFINED;
+
+    clear();
+}
+
+/*!
+    Resets the configuration parser
+
+    \param root is the name of the root element
+    \param version is the version
+*/
+void ConfigParser::reset(const std::string &root, int version)
+{
+    m_root         = root;
+    m_checkVersion = true;
+    m_version      = version;
+
+    clear();
 }
 
 /*!
@@ -207,44 +242,17 @@ const int GlobalConfigParser::DEFAULT_VERSION = 1;
 /*!
     Default constructor.
 */
+GlobalConfigParser::GlobalConfigParser()
+    : ConfigParser(DEFAULT_ROOT_NAME, DEFAULT_VERSION)
+{
+}
+
+/*!
+    Constructor a new parser.
+*/
 GlobalConfigParser::GlobalConfigParser(const std::string &name, int version)
     : ConfigParser(name, version)
 {
-}
-
-/*!
-    Resets the global configuration parser
-*/
-void GlobalConfigParser::reset()
-{
-    reset(DEFAULT_ROOT_NAME, DEFAULT_VERSION);
-}
-
-
-/*!
-    Resets the global configuration parser
-
-    \param name is the name of the root element
-*/
-void GlobalConfigParser::reset(const std::string &name)
-{
-    reset(name, DEFAULT_VERSION);
-}
-
-
-/*!
-    Resets the global configuration parser
-
-    \param name is the name of the root element
-    \param version is the version
-*/
-void GlobalConfigParser::reset(const std::string &name, int version)
-{
-    if (m_parser) {
-        m_parser.reset();
-    }
-
-    m_parser = std::unique_ptr<GlobalConfigParser>(new GlobalConfigParser(name, version));
 }
 
 /*!
@@ -255,7 +263,7 @@ void GlobalConfigParser::reset(const std::string &name, int version)
 GlobalConfigParser & GlobalConfigParser::parser()
 {
     if (!m_parser) {
-        reset();
+        m_parser = std::unique_ptr<GlobalConfigParser>(new GlobalConfigParser());
     }
 
     return *m_parser;
@@ -279,32 +287,24 @@ namespace config {
     GlobalConfigParser &root = GlobalConfigParser::parser();
 
     /*!
-        Sets the root element name.
-    */
-    void reset()
-    {
-        GlobalConfigParser::reset();
-    }
-
-    /*!
-        Sets the root element name.
+        Resets the root element name.
 
         \param name is the name of the root element
     */
     void reset(const std::string &name)
     {
-        GlobalConfigParser::reset(name);
+        root.reset(name);
     }
 
     /*!
-        Sets the root element name.
+        Resets the root element name and version.
 
         \param name is the name of the root element
         \param version is the version
     */
     void reset(const std::string &name, int version)
     {
-        GlobalConfigParser::reset(name, version);
+        root.reset(name, version);
     }
 
     /*!

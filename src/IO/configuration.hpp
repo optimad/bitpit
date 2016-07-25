@@ -42,10 +42,14 @@ public:
     ConfigParser(const std::string &root);
     ConfigParser(const std::string &root, const int &version);
 
+    void reset(const std::string &root);
+    void reset(const std::string &root, int version);
+
     void read(const std::string &filename, bool append = true);
     void write(const std::string &filename) const;
 
 private:
+    static const int VERSION_UNDEFINED;
 
     std::string m_root;
 
@@ -59,10 +63,6 @@ class GlobalConfigParser : public ConfigParser
 {
 
 public:
-    static void reset();
-    static void reset(const std::string &name);
-    static void reset(const std::string &name, int version);
-
     static GlobalConfigParser & parser();
 
 private:
@@ -71,6 +71,7 @@ private:
 
     static std::unique_ptr<GlobalConfigParser> m_parser;
 
+    GlobalConfigParser();
     GlobalConfigParser(const std::string &name, int version);
 
     GlobalConfigParser(GlobalConfigParser const&) = delete;
