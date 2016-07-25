@@ -149,6 +149,9 @@ class LevelSetKernel{
     MPI_Comm                                    m_commMPI ;     /**< MPI communicator */
 # endif
 
+    private:
+    std::unordered_map<long, std::array<double,3>> m_cellCentroids;
+
     public:
     virtual ~LevelSetKernel() ;
     LevelSetKernel() ;
@@ -185,6 +188,10 @@ class LevelSetKernel{
     void                                        dump( std::fstream &);
     void                                        restore( std::fstream &);
 
+    void                                        clearGeometryCache(  ) ;
+    void                                        updateGeometryCache( const std::vector<adaption::Info> &mapper ) ;
+
+    const std::array<double,3> &                computeCellCentroid( long id ) ;
     double                                      isCellInsideBoundingBox( long id, std::array<double, 3> minPoint, std::array<double, 3> maxPoint );
 
 # if BITPIT_ENABLE_MPI

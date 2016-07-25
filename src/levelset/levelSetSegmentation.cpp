@@ -264,16 +264,12 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
     }
 
     // Create the needed dat strucures
-    VolumeKernel &mesh = *( visitee->getMesh() ) ;
-
     std::unordered_set<long> newSegInfo ;
     std::vector<std::array<double,3>> cloud ;
     std::vector< std::array<double,3> > cloud_xP ;
     std::vector<int> cloud_where ;
-    std::unordered_map<long, std::array<double,3>> cellCentroids;
     std::unordered_map<long, std::vector<double>> cellDistances;
 
-    cellCentroids.reserve( nSegmentsPerCell.size() );
     cellDistances.reserve( nSegmentsPerCell.size() );
 
     // Add the segments info
@@ -288,12 +284,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
 
         cloud.resize( cellListCount ) ;
         for ( size_t k = 0; k < cellListCount; ++k ) {
-            long cell = cellList[k];
-            auto cellCentroid = cellCentroids.find( cell ) ;
-            if ( cellCentroid == cellCentroids.end() ) {
-                cellCentroid = cellCentroids.insert( { cell, mesh.evalCellCentroid( cell ) } ).first ;
-            }
-            cloud[k] = mesh.evalCellCentroid( cell ) ;
+            cloud[k] = visitee->computeCellCentroid( cellList[k] ) ;
         }
 
         // Eval distances
@@ -392,8 +383,6 @@ void LevelSetSegmentation::updateSegmentList( LevelSetKernel *visitee, const dou
 
     log::cout() << "  Updating segment list for cells inside narrow band... " << std::endl;
 
-    VolumeKernel &mesh  = *(visitee->getMesh() ) ;
-
     double                 s, d;
     std::array<double,3>   n, xP;
     for( PiercedIterator<SegInfo> segInfoItr = m_seg.begin(); segInfoItr != m_seg.end(); ++segInfoItr ){
@@ -403,7 +392,7 @@ void LevelSetSegmentation::updateSegmentList( LevelSetKernel *visitee, const dou
         }
 
         // Centroid of the cell
-        std::array<double,3> P = mesh.evalCellCentroid(id) ;
+        const std::array<double,3> &P = visitee->computeCellCentroid(id) ;
 
         // Starting from the farthest segment (the last in the list) we loop
         // backwards until we find the first segment with a distance less
@@ -451,13 +440,12 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
 
     log::cout() << "  Creating levelset info... " << std::endl;
 
-    VolumeKernel &mesh = *( visitee->getMesh() ) ;
     PiercedVector<LevelSetInfo> &lsInfo = visitee->getLevelSetInfo() ;
 
     for ( long id : cellList ) {
         auto segInfoItr = m_seg.find( id ) ;
         long support = segInfoItr->m_segments.front();
-        std::array<double,3> centroid = mesh.evalCellCentroid(id) ;
+        const std::array<double,3> &centroid = visitee->computeCellCentroid(id) ;
 
         double                s, d;
         std::array<double,3>  n, xP;
@@ -603,9 +591,9 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 double LevelSetSegmentation::evaluateLS( LevelSetKernel *visitee, long id) const {
 
     double                      d, s, ls;
-    std::array<double,3>        P, X, temp;
+    std::array<double,3>        X, temp;
+    const std::array<double,3> &P = visitee->computeCellCentroid(id) ;
 
-    P  = visitee->getMesh()->evalCellCentroid(id) ;
     ls = levelSetDefaults::VALUE;
 
     for( auto & segment : m_segmentation->getCells() ){
@@ -781,7 +769,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
             for( size_t k = 0; k < stackSize; ++k) {
                 long cell = stack[k];
-                cloud[k] = mesh.evalCellCentroid(cell) ;
+                cloud[k] = visitee->computeCellCentroid(cell) ;
             };
 
             d = CGElem::distanceCloudSimplex( cloud, VS, xP, where); 
@@ -836,7 +824,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     int                         i;
     double                      size ;
 
-    std::array<double,3>        C, C0, C1, G0, G1, octrBB0, octrBB1, triBB0, triBB1 ;
+    std::array<double,3>        C0, C1, G0, G1, octrBB0, octrBB1, triBB0, triBB1 ;
     PiercedVector<SegInfo>::iterator data;
 
     SegmentToCellMap segmentToCellMap;
@@ -879,8 +867,8 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
         for( auto & cell : mesh.getCells() ){
             id = cell.getId() ;
-            C  = mesh.evalCellCentroid(id) ;
 
+            const std::array<double,3> &C = visitee->computeCellCentroid(id) ;
 
             icart = cmesh.locatePoint(C) ;
             if ( icart != Cell::NULL_ID ) {

@@ -511,6 +511,9 @@ void LevelSet::compute(){
  */
 void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
+    // Udate the cache of the kernel
+    m_kernel->updateGeometryCache( mapper ) ;
+
     // Check the mapper to detect the operations to perform
     bool updateNarrowBand = false;
     std::unordered_map<int,std::vector<long>> sendList, recvList ;

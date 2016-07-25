@@ -253,6 +253,64 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( ){
 };
 
 /*!
+ * Clears the geometry cache.
+ */
+void LevelSetKernel::clearGeometryCache(  ) {
+
+    std::unordered_map<long, std::array<double,3>>().swap( m_cellCentroids ) ;
+
+}
+
+/*!
+ * Updates the geometry cache after an adaption.
+ */
+void LevelSetKernel::updateGeometryCache( const std::vector<adaption::Info> &mapper ) {
+
+    // If there are no cells in the mesh we can just delete all the cache
+    if ( m_mesh->getCellCount() == 0) {
+        clearGeometryCache();
+        return;
+    }
+
+    // Remove the previous cells from the cache
+    for ( auto & map : mapper ){
+        if( map.entity != adaption::Entity::ENTITY_CELL ){
+            continue;
+        }
+
+        for ( auto & previousId : map.previous){
+            auto centroidItr = m_cellCentroids.find( previousId ) ;
+            if ( centroidItr == m_cellCentroids.end() ) {
+                continue ;
+            }
+
+            m_cellCentroids.erase( previousId ) ;
+        }
+    }
+
+}
+
+/*!
+ * Computes the centroid of the specfified cell.
+ *
+ * If the centroid of the cell has been already evaluated, the cached value is
+ * returned. Otherwise the cell centroid is evaluated and stored in the cache.
+ *
+ * @param[in] id is the index of cell
+ * @return The centroid of the cell.
+ */
+const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) {
+
+    auto centroidItr = m_cellCentroids.find( id ) ;
+    if ( centroidItr == m_cellCentroids.end() ) {
+        centroidItr = m_cellCentroids.insert( { id, m_mesh->evalCellCentroid( id ) } ).first ;
+    }
+
+    return centroidItr->second;
+
+}
+
+/*!
  * Computes the Level Set Gradient on on cell by first order finite-volume upwind stencil
  * @param[in] I index of cell 
  * @return gradient
