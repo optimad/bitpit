@@ -47,8 +47,6 @@ public:
 
 private:
 
-    static const std::string DEFAULT_ENCODING;
-
     std::string m_root;
 
     bool m_checkVersion;
