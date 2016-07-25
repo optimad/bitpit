@@ -530,6 +530,16 @@ uint64_t	Octant::computeMorton(){
 	return morton;
 };
 
+/** Compute the Morton index of the given node (without level).
+ * \return morton Morton index of the node.
+ */
+uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
+
+	u32array3 node = getNode(inode);
+
+	return keyXYZ(node[0], node[1], node[2], sm_maxLevel);
+};
+
 // =================================================================================== //
 // OTHER METHODS
 // =================================================================================== //

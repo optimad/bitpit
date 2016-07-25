@@ -146,6 +146,17 @@ namespace bitpit {
         return m_octants[idx].computeMorton();
     };
 
+    /** Compute the Morton index of the specified node of the idx-th octant
+     * (without level).
+     * \param[in] idx Local index of the target octant.
+     * \param[in] inode Index of the target node.
+     * \return Morton index of the octant.
+     */
+    uint64_t
+    LocalTree::computeNodeMorton(int32_t idx, uint8_t inode){
+        return m_octants[idx].computeNodeMorton(inode);
+    };
+
     /** Get refinement/coarsening marker for idx-th ghost octant
      * \param[in] idx Local index of the target ghost octant.
      * \return Level of the ghost octant.
@@ -162,6 +173,17 @@ namespace bitpit {
     uint64_t
     LocalTree::computeGhostMorton(int32_t idx){
         return m_ghosts[idx].computeMorton();
+    };
+
+    /** Compute the Morton index of the specified node of the idx-th ghost
+     * octant (without level).
+     * \param[in] idx Local index of the target octant.
+     * \param[in] inode Index of the target node.
+     * \return Morton index of the octant.
+     */
+    uint64_t
+    LocalTree::computeGhostNodeMorton(int32_t idx, uint8_t inode){
+        return m_ghosts[idx].computeNodeMorton(inode);
     };
 
     /** Get if balancing-blocked idx-th octant

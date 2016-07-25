@@ -233,6 +233,7 @@ namespace bitpit {
         int8_t 		getMarker(uint32_t idx);
         uint8_t 	getLevel(uint32_t idx);
         uint64_t 	getMorton(uint32_t idx);
+        uint64_t 	getNodeMorton(uint32_t idx, uint8_t inode);
         bool 		getBalance(uint32_t idx);
         bool		getBound(uint32_t idx, uint8_t iface);
         bool		getBound(uint32_t idx);
@@ -271,6 +272,7 @@ namespace bitpit {
         int8_t 		getMarker(Octant* oct);
         uint8_t 	getLevel(Octant* oct);
         uint64_t 	getMorton(Octant* oct);
+        uint64_t 	getNodeMorton(Octant* oct, uint8_t inode);
         bool 		getBalance(Octant* oct);
         bool		getBound(Octant* oct, uint8_t iface);
         bool		getBound(Octant* oct);

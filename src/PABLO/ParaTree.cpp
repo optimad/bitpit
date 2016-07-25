@@ -870,6 +870,17 @@ namespace bitpit {
         return m_octree.computeMorton(idx);
     };
 
+    /** Compute the Morton index of the specified node of the idx-th octant
+     * (without level).
+     * \param[in] idx Local index of the target octant.
+     * \param[in] inode Index of the target node.
+     * \return Morton index of the node.
+     */
+    uint64_t
+    ParaTree::getNodeMorton(uint32_t idx, uint8_t inode){
+        return m_octree.computeNodeMorton(idx, inode);
+    };
+
     /*! Get the balancing condition of an octant.
      * \param[in] idx Local index of target octant.
      * \return Has octant to be balanced?
@@ -1239,6 +1250,17 @@ namespace bitpit {
     uint64_t
     ParaTree::getMorton(Octant* oct){
         return oct->computeMorton();
+    };
+
+    /** Compute the Morton index of the specified node of an octant (without
+     * level).
+     * \param[in] oct Pointer to the target octant
+     * \param[in] inode Index of the target node.
+     * \return Morton index of the node.
+     */
+    uint64_t
+    ParaTree::getNodeMorton(Octant* oct, uint8_t inode){
+        return oct->computeNodeMorton(inode);
     };
 
     /*! Get the balancing condition of an octant.
