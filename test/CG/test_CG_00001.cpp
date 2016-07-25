@@ -551,13 +551,20 @@ int main(
         vector< array<double, 3> >  lambda(2) ;
 
         array<double, 3>            A, B, C;
+        std::vector<array<double,3>> VS ;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         A.fill(0.0);
+
         B.fill(0.0);
         B[0] = 1.0;
+
         C.fill(0.0);
         C[1] = 1.0;
+
+        VS.push_back(A) ;
+        VS.push_back(B) ;
+        VS.push_back(C) ;
 
         P[0].fill(0.0);
         P[0][0] = P[0][1] = 1.;
@@ -567,7 +574,8 @@ int main(
         P[1][2] = 1.0;
         
         //d = CGElem::distanceCloudTriangle(P, A, B, C, nullptr, nullptr);
-        d = CGElem::distanceCloudTriangle(P, A, B, C, &Q, &lambda);
+        //d = CGElem::distanceCloudTriangle(P, A, B, C, &Q, &lambda);
+        d = CGElem::distanceCloudSimplex(P,VS);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 2" << endl;

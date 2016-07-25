@@ -537,18 +537,16 @@ std::vector<double> distanceCloudTriangle(
     std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}} ;
 
     double                  A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
-    double                  B[2*N];
+    double                  *B = new double [2*N] ;
     std::array<double,3>    rP;
 
-    i=0 ;
-    for( auto const &point : cloud){
-        rP = point -Q0 ;
-        B[i]   = dotProduct(s0,rP) ; 
-        B[i+1] = dotProduct(s1,rP) ; 
-        i += 2;
+    for( i=0; i<N; ++i){
+        rP = cloud[i] -Q0 ;
+        B[2*i]   = dotProduct(s0,rP) ; 
+        B[2*i+1] = dotProduct(s1,rP) ; 
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, N, A, 2, B, N ) ;
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, N, A, 2, B, 2 ) ;
     assert( info == 0 );
     BITPIT_UNUSED( info ) ;
 
@@ -619,6 +617,8 @@ std::vector<double> distanceCloudTriangle(
         }
 
     }
+
+    delete [] B ;
 
     return ds ;
 
@@ -773,6 +773,67 @@ std::vector<double> distanceCloudSimplex(
     } //end generic polygon
 
     return(d); 
+
+};
+
+/*!
+ * Computes distances of point cloud to generic simplex
+ * @param[in] P point cloud coordinates
+ * @param[in] V simplex vertices coordinates
+ * @param[inout] xPExt pointer to std::vector to be filled with the projection point; 
+ * @return distance
+ */
+std::vector<double> distanceCloudSimplex(
+        std::vector<array3D>  const &P,
+        std::vector<array3D>  const &V
+        ) {
+    int                 N(P.size()), n(V.size());
+
+
+    if (n == 2) { //Segment
+
+        std::vector<double> d(N) ;
+
+        array3D xPInt ;
+        std::array<double,2> lambda ;
+
+        for( int i=0; i<N; ++i ){
+            d[i] = distancePointSegment(P[i], V[0], V[1], xPInt, lambda);
+        }
+
+        return(d) ;
+
+    }
+
+    else if (n == 3) {  // Triangle ------------------------------------------------------------- //
+
+        return( distanceCloudTriangle(P, V[0], V[1], V[2], nullptr, nullptr ) );
+
+    }
+
+    else { // Generic convex polygon ----------------------------------------------- //
+
+        std::vector<double> d(N,1.e18) ;
+        int i, j, p, m;
+
+        p = n - 2;
+        m = 0;
+        j = 1;
+
+        while (m < p) { // foreach triangle
+            i = j;
+            j = i+1;
+            std::vector<double> dT = distanceCloudTriangle(P, V[0], V[i], V[j], nullptr, nullptr);
+
+            d = min(d,dT) ;
+
+            m++;
+
+        } // end triangles
+
+        return(d); 
+    }
+
 
 };
 
