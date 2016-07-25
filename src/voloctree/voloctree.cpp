@@ -327,21 +327,6 @@ Octant * VolOctree::getOctantPointer(const OctantInfo &octantInfo)
 }
 
 /*!
-	Gets the connectivity of the specified octant.
-
-	\param octantInfo the data of the octant
-	\result A reference to the octant's connectivity
-*/
-const std::vector<uint32_t> & VolOctree::getOctantConnect(const OctantInfo &octantInfo)
-{
-	if (octantInfo.internal) {
-		return m_tree.getConnectivity()[octantInfo.id];
-	} else {
-		return m_tree.getGhostConnectivity()[octantInfo.id];
-	}
-}
-
-/*!
 	Evaluates a unique hash for the octant.
 
 	\param octantInfo the data of the octant
