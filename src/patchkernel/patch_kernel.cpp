@@ -1266,6 +1266,9 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 	}
 	iterator->setId(id);
 
+	// Initialize the cell
+	iterator->initialize(type, interior, true);
+
 	return iterator;
 }
 
@@ -1303,8 +1306,6 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool inte
 	}
 
 	CellIterator iterator = createCell(type, interior, id);
-	Cell &cell = (*iterator);
-	cell.initialize(type, interior);
 
 	return iterator;
 }
@@ -2222,6 +2223,9 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
     iterator->setId(id);
 
+	// Initialize the interface
+	iterator->initialize(type);
+
 	return iterator;
 }
 
@@ -2240,8 +2244,6 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementInfo::Type type,
 	}
 
 	InterfaceIterator iterator = createInterface(type, id);
-	Interface &interface = (*iterator);
-	interface.initialize(type);
 
 	return iterator;
 }

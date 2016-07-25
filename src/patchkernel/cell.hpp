@@ -110,7 +110,7 @@ private:
 	bitpit::FlatVector2D<long> m_interfaces;
 	bitpit::FlatVector2D<long> m_adjacencies;
 
-	void _initialize(bool interior, bool storeNeighbourhood);
+	void _initialize(bool interior, bool initializeNeighbourhood, bool storeNeighbourhood);
 
 };
 

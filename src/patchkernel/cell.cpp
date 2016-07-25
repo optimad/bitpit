@@ -94,7 +94,8 @@ namespace bitpit {
 	Default constructor.
 */
 Cell::Cell()
-	: Element(), m_interior(true), m_pid(0)
+	: Element(), m_interior(true), m_pid(0),
+      m_interfaces(false), m_adjacencies(false)
 {
 
 }
@@ -103,9 +104,11 @@ Cell::Cell()
 	Creates a new cell.
 */
 Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeighbourhood)
-	: Element(id, type), m_pid(0)
+	: Element(id, type), m_pid(0),
+      m_interfaces(storeNeighbourhood ? ElementInfo(type).nFaces : 0, 1, NULL_ID),
+      m_adjacencies(storeNeighbourhood ? ElementInfo(type).nFaces : 0, 1, NULL_ID)
 {
-	_initialize(interior, storeNeighbourhood);
+	_initialize(interior, false, false);
 }
 
 /*!
@@ -143,18 +146,26 @@ void Cell::initialize(ElementInfo::Type type, bool interior, bool storeNeighbour
 {
 	Element::initialize(type);
 
-	_initialize(interior, storeNeighbourhood);
+	_initialize(interior, true, storeNeighbourhood);
 }
 
 /*!
 	Internal function to initialize the data structures of the cell.
 */
-void Cell::_initialize(bool interior, bool storeNeighbourhood)
+void Cell::_initialize(bool interior, bool initializeNeighbourhood, bool storeNeighbourhood)
 {
 	setInterior(interior);
 
-	resetInterfaces(storeNeighbourhood);
-	resetAdjacencies(storeNeighbourhood);
+	// Neighbourhood
+	if (initializeNeighbourhood) {
+		// To reduce memory fragmentation, destroy the interfaces/adjacencies
+		// before resetting the adjacencies
+		m_interfaces.destroy();
+		m_adjacencies.destroy();
+
+		resetInterfaces(storeNeighbourhood);
+		resetAdjacencies(storeNeighbourhood);
+	}
 }
 
 /*!
@@ -226,7 +237,7 @@ void Cell::deleteInterfaces()
 void Cell::resetInterfaces(bool storeInterfaces)
 {
 	if (!storeInterfaces || getType() == ElementInfo::UNDEFINED) {
-		m_interfaces.clear();
+		deleteInterfaces();
 	} else {
 		m_interfaces.initialize(getFaceCount(), 1, NULL_ID);
 	}
@@ -456,7 +467,7 @@ void Cell::deleteAdjacencies()
 void Cell::resetAdjacencies(bool storeAdjacencies)
 {
 	if (!storeAdjacencies || getType() == ElementInfo::UNDEFINED) {
-		m_adjacencies.clear();
+		deleteAdjacencies();
 	} else {
 		m_adjacencies.initialize(getFaceCount(), 1, NULL_ID);
 	}
