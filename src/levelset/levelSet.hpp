@@ -373,7 +373,7 @@ class LevelSetSegmentation : public LevelSetObject {
 
     std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *visitee, const double &search, SegmentToCellMap &segmentToCellMap ) ;
     void                                        pruneSegmentInfo( const std::vector<adaption::Info> &mapper ) ;
-    void                                        updateSegmentList( LevelSetKernel *visitee, const double &search, const std::unordered_set<long> &blacklist = std::unordered_set<long>()  ) ;
+    void                                        updateSegmentList( const double &search, const std::unordered_set<long> &blacklist = std::unordered_set<long>()  ) ;
 
     void                                        createLevelsetInfo( LevelSetKernel *visitee, const bool & signd, std::unordered_set<long> &cellList ) ;
     void                                        infoFromSimplex(const std::array<double,3> &, const long &, double &, double &, std::array<double,3> &,std::array<double,3> &) const ;

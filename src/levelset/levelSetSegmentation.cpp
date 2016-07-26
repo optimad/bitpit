@@ -382,11 +382,10 @@ void LevelSetSegmentation::pruneSegmentInfo( const std::vector<adaption::Info> &
 /*!
  * Update the segment list associated to the cells, keeping only the segments
  * with a distance from the body less than the specified narrow band size.
- * @param[in] visitee visited mesh
  * @param[in] search size of narrow band
  * @param[in] blackList is a list of cells that will not be updated
  */
-void LevelSetSegmentation::updateSegmentList( LevelSetKernel *visitee, const double &search,
+void LevelSetSegmentation::updateSegmentList( const double &search,
                                               const std::unordered_set<long> &blacklist ){
 
 
@@ -714,7 +713,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
 
     // If the narrow band has been shrunk, update the list of segments
     if (narrowBandResizeDirection < 0) {
-        updateSegmentList(visitee, RSearch, addedCells) ;
+        updateSegmentList(RSearch, addedCells) ;
     }
 
     return;
