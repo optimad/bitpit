@@ -41,7 +41,7 @@ namespace bitpit {
 /*!
  * Default constructor 
  */
-LevelSetSegmentation::SegInfo::SegInfo( ) : segments(levelSetDefaults::LIST){
+LevelSetSegmentation::SegInfo::SegInfo( ) {
 };
 
 /*!
