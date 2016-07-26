@@ -678,11 +678,6 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
         createLevelsetInfo( visitee, signd, addedCells );
     }
 
-    // If the narrow band has been shrunk, update the list of segments
-    if (narrowBandResizeDirection < 0) {
-        updateSegmentList(RSearch, addedCells) ;
-    }
-
     return;
 };
 
