@@ -1041,6 +1041,10 @@ void LevelSetSegmentation::filterOutsideNarrowBand( LevelSetKernel *visitee ){
 
     m_seg.flush() ;
 
+    std::unordered_set<long> voidSet ;
+    updateSegmentList(visitee->getSizeNarrowBand(), voidSet) ;
+
+
     return ;
 };
 
