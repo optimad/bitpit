@@ -353,6 +353,10 @@ std::array<double,3> LevelSetKernel::computeGradientUpwind( const long &I ){
 
     for( i=0; i<nI; ++i){
         F = interfaces[i] ;
+        if (F < 0) {
+            continue;
+        }
+
         N = neighbours[i] ;
 
         Interface       &interface = m_mesh->getInterface(F) ;
@@ -400,6 +404,10 @@ std::array<double,3> LevelSetKernel::computeGradientCentral( const long &I ){
 
     for( i=0; i<nI; ++i){
         F = interfaces[i] ;
+        if (F < 0) {
+            continue;
+        }
+
         N = neighbours[i] ;
 
         Interface       &interface = m_mesh->getInterface(F) ;
