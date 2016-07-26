@@ -230,8 +230,29 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( ){
             continue;
         }
 
-         // Discard cells with a levelset greater than the local narrow band
-        double localRSearch = computeRSearchFromCell( id ) ;
+        // Evaluate local search radius
+        std::array<double,3> myCenter = computeCellCentroid(id) ;
+
+        Cell cell = m_mesh->getCell(id) ;
+        const long* neighbours = cell.getAdjacencies() ;
+        int N = cell.getAdjacencyCount() ;
+
+        double localRSearch = 0. ;
+        for(int n=0; n<N; ++n){
+            long neighId = neighbours[n] ;
+            if (neighId < 0) {
+                continue;
+            }
+
+            if( isInNarrowBand(neighId)){
+                std::array<double,3> diff = computeCellCentroid(neighId) - myCenter ;
+                if( dotProduct(diff, getGradient(id)) > 0){
+                    localRSearch = std::max( localRSearch, norm2(diff) );
+                }
+            }
+        } 
+
+        // Discard cells with a levelset greater than the local narrow band
         if ( std::abs( getLS(id) ) > (localRSearch + m_mesh->getTol()) ) {
             continue;
         }
