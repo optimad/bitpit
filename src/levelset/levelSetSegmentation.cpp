@@ -35,7 +35,7 @@ namespace bitpit {
 /*!
 	@ingroup    levelset
 	@class      LevelSetSegmentation::SegInfo
-	@brief      Implements visitor pattern fo segmentated geometries
+	@brief      Information about the segments
 */
 
 /*!
