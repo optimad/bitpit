@@ -372,7 +372,6 @@ class LevelSetSegmentation : public LevelSetObject {
     std::vector<std::array<double,3>>           getSimplexVertices( const long & ) const ;
 
     std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *visitee, const double &search, SegmentToCellMap &segmentToCellMap ) ;
-    void                                        pruneSegmentInfo( const std::vector<adaption::Info> &mapper ) ;
     void                                        updateSegmentList( const double &search, const std::unordered_set<long> &blacklist = std::unordered_set<long>()  ) ;
 
     void                                        createLevelsetInfo( LevelSetKernel *visitee, const bool & signd, std::unordered_set<long> &cellList ) ;

@@ -347,34 +347,6 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
 }
 
 /*!
- * Prune the segment's info removing entries associated to cells that are
- * are not in the mesh anymore
- * @param[in] mapper information concerning mesh adaption
- */
-void LevelSetSegmentation::pruneSegmentInfo( const std::vector<adaption::Info> &mapper ){
-
-    log::cout() << "  Pruning segment info... " << std::endl;
-
-    for ( const auto &info : mapper ){
-        // Consider only changes on cells
-        if( info.entity != adaption::Entity::ENTITY_CELL ){
-            continue;
-        }
-
-        // Remove info of previous cells
-        for ( const long & parent : info.previous ) {
-            if ( m_seg.find( parent ) == m_seg.end() ) {
-                continue;
-            }
-
-            m_seg.erase( parent, true ) ;
-        }
-    }
-
-    m_seg.flush();
-}
-
-/*!
  * Update the segment list associated to the cells, keeping only the segments
  * with a distance from the body less than the specified narrow band size.
  * @param[in] search size of narrow band
@@ -696,7 +668,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
     SegmentToCellMap segmentToCellMap = extractSegmentToCellMap( mapper ) ;
 
     // Prune previous segment info
-    pruneSegmentInfo( mapper ) ;
+    clearAfterMeshMovement( mapper ) ;
 
     // Evaluate the levelset for the newly added elements
     std::unordered_set<long> addedCells;
@@ -997,28 +969,37 @@ int LevelSetSegmentation::getNarrowBandResizeDirection( LevelSetOctree *visitee,
     return sign( newCellSize - oldCellSize );
 }
 
-/*! 
- * Deletes non-existing items 
- * @param[in] mapper mapping info
+/*!
+ * Prune the segment's info removing entries associated to cells that are
+ * are not in the mesh anymore
+ * @param[in] mapper information concerning mesh adaption
  */
 void LevelSetSegmentation::clearAfterMeshMovement( const std::vector<adaption::Info> &mapper ){
 
-    for ( auto & map : mapper ){
-        if( map.entity == adaption::Entity::ENTITY_CELL ){
-            if( map.type == adaption::Type::TYPE_DELETION || 
-                map.type == adaption::Type::TYPE_PARTITION_SEND  ||
-                map.type == adaption::Type::TYPE_REFINEMENT  ||
-                map.type == adaption::Type::TYPE_COARSENING  ){
+    log::cout() << "  Clearing segment info... " << std::endl;
 
-                for ( auto & parent : map.previous){
-                    if( m_seg.exists(parent) ) 
-                        m_seg.erase(parent,true) ;
-                }
+    for ( const auto &info : mapper ){
+        // Consider only changes on cells
+        if( info.entity != adaption::Entity::ENTITY_CELL ){
+            continue;
+        }
+
+        // Delete only old data that belongs to the current processor
+        if (info.type == adaption::Type::TYPE_PARTITION_RECV) {
+            continue;
+        }
+
+        // Remove info of previous cells
+        for ( const long & parent : info.previous ) {
+            if ( m_seg.find( parent ) == m_seg.end() ) {
+                continue;
             }
+
+            m_seg.erase( parent, true ) ;
         }
     }
 
-    m_seg.flush() ;
+    m_seg.flush();
 
     return ;
 };
