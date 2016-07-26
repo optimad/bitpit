@@ -293,7 +293,7 @@ class LevelSetSegmentation : public LevelSetObject {
 
     private:
     struct SegInfo{
-        std::vector<long>                m_segments ;                /**< list of segments within narrow band */
+        std::vector<long>                segments ;                /**< list of segments within narrow band */
 
         SegInfo( ) ;
         SegInfo( const std::vector<long> & ) ;

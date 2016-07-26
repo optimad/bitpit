@@ -41,14 +41,14 @@ namespace bitpit {
 /*!
  * Default constructor 
  */
-LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST){
+LevelSetSegmentation::SegInfo::SegInfo( ) : segments(levelSetDefaults::LIST){
 };
 
 /*!
  * Constructor
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &list) :m_segments(list) {
+LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &list) :segments(list) {
 };
 
 /*!
@@ -195,7 +195,7 @@ const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &i) co
     if( !m_seg.exists(i) ){
         return levelSetDefaults::LIST;
     } else {
-        return ( m_seg[i].m_segments );
+        return ( m_seg[i].segments );
     };
 
 };
@@ -304,7 +304,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
             auto segInfoItr = m_seg.find( cell ) ;
             if ( segInfoItr == m_seg.end() ) {
                 segInfoItr = m_seg.emplace( cell );
-                segInfoItr->m_segments.reserve( nSegmentsPerCell.at(cell) );
+                segInfoItr->segments.reserve( nSegmentsPerCell.at(cell) );
 
                 cellDistances[cell].reserve( nSegmentsPerCell.at(cell) ) ;
 
@@ -312,7 +312,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
             }
 
             // Add the segment
-            segInfoItr->m_segments.push_back(segment) ;
+            segInfoItr->segments.push_back(segment) ;
 
             // Add the distance
             cellDistances.at(cell).push_back(segmentDistance) ;
@@ -325,7 +325,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
     std::vector<size_t> rank;
     for ( long id : newSegInfo ) {
         auto segInfoItr = m_seg.find( id ) ;
-        std::vector<long> &segments = segInfoItr->m_segments;
+        std::vector<long> &segments = segInfoItr->segments;
         size_t nSegments = segments.size();
 
         rank.resize(nSegments);
@@ -402,7 +402,7 @@ void LevelSetSegmentation::updateSegmentList( LevelSetKernel *visitee, const dou
         // cells outside the narrow band have already been removed. Therefore
         // we need to perform the check up to the second segment (the first one
         // is in the narrow band).
-        std::vector<long> &segments = segInfoItr->m_segments;
+        std::vector<long> &segments = segInfoItr->segments;
 
         size_t nSegmentsToKeep = 1;
         for( size_t k = segments.size() - 1; k >= 1; --k) {
@@ -444,7 +444,7 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
 
     for ( long id : cellList ) {
         auto segInfoItr = m_seg.find( id ) ;
-        long support = segInfoItr->m_segments.front();
+        long support = segInfoItr->segments.front();
         const std::array<double,3> &centroid = visitee->computeCellCentroid(id) ;
 
         double                s, d;
@@ -920,7 +920,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
                 continue;
             }
 
-            for ( long segment : parentSegInfoItr->m_segments ) {
+            for ( long segment : parentSegInfoItr->segments ) {
                 cellsPerSegment[segment] += nChildElements ;
             }
         }
@@ -959,7 +959,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
                 continue;
             }
 
-            for ( long segment : parentSegInfoItr->m_segments ) {
+            for ( long segment : parentSegInfoItr->segments ) {
                 if ( possibleDuplicates ) {
                     removeDuplicateList.insert( segment ) ;
                 }
@@ -1055,7 +1055,7 @@ void LevelSetSegmentation::filterOutsideNarrowBand( LevelSetKernel *visitee ){
 int LevelSetSegmentation::getSupportCount( const long &id ) const{
 
     if( m_seg.exists(id)){
-        return m_seg.at(id).m_segments.size() ;
+        return m_seg.at(id).segments.size() ;
     } else {
         return 0 ;
     }
@@ -1070,7 +1070,7 @@ int LevelSetSegmentation::getSupportCount( const long &id ) const{
 long LevelSetSegmentation::getClosestSupport( const long &id ) const{
 
     if( m_seg.exists(id)){
-        return m_seg.at(id).m_segments.front() ;
+        return m_seg.at(id).segments.front() ;
     } else {
         return levelSetDefaults::SUPPORT ;
     }
@@ -1089,8 +1089,8 @@ void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
 
     for( segItr = m_seg.begin(); segItr != segEnd; ++segItr){
         bitpit::genericIO::flushBINARY( stream, segItr.getId() );
-        bitpit::genericIO::flushBINARY( stream, segItr->m_segments.size() );
-        bitpit::genericIO::flushBINARY( stream, segItr->m_segments );
+        bitpit::genericIO::flushBINARY( stream, segItr->segments.size() );
+        bitpit::genericIO::flushBINARY( stream, segItr->segments );
     }
 
     return;
@@ -1114,8 +1114,8 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
         bitpit::genericIO::absorbBINARY( stream, id );
         bitpit::genericIO::absorbBINARY( stream, s );
 
-        cellData.m_segments.resize(s) ;
-        bitpit::genericIO::absorbBINARY( stream, cellData.m_segments );
+        cellData.segments.resize(s) ;
+        bitpit::genericIO::absorbBINARY( stream, cellData.segments );
 
         m_seg.insert(id,cellData) ;
 
@@ -1145,8 +1145,8 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
         if( m_seg.exists(index)){
             const auto &seginfo = m_seg[index] ;
             dataBuffer << counter ;
-            dataBuffer << seginfo.m_segments.size() ;
-            for( const long & seg : seginfo.m_segments ){
+            dataBuffer << seginfo.segments.size() ;
+            for( const long & seg : seginfo.segments ){
                 dataBuffer << seg ;
             };
             ++nItems ;
@@ -1187,9 +1187,9 @@ void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &rec
 
         size_t nSegs ;
         dataBuffer >> nSegs ;
-        segItr->m_segments.resize(nSegs) ;
+        segItr->segments.resize(nSegs) ;
         for( size_t s=0; s<nSegs; ++s){
-            dataBuffer >> segItr->m_segments[s] ;
+            dataBuffer >> segItr->segments[s] ;
         }
     }
 
