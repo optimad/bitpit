@@ -416,11 +416,19 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
         std::array<double,3>  n, xP;
         infoFromSimplex(centroid, support, d, s, xP, n);
 
-        auto lsInfoItr = lsInfo.reclaim( id ) ;
-        lsInfoItr->object   = getId();
-        lsInfoItr->part     = m_segmentation->getCell(support).getPID();
-        lsInfoItr->value    = ( signd *s  + (!signd) *1.   ) *d ;
-        lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
+        PiercedVector<LevelSetInfo>::iterator lsInfoItr ;
+        if( !lsInfo.exists(id)){
+            lsInfoItr = lsInfo.reclaim(id) ;
+        } else {
+            lsInfoItr = lsInfo.getIterator(id) ;
+        }
+
+        if( d < std::abs(lsInfoItr->value) ){
+            lsInfoItr->object   = getId();
+            lsInfoItr->part     = m_segmentation->getCell(support).getPID();
+            lsInfoItr->value    = ( signd *s  + (!signd) *1.   ) *d ;
+            lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
+        }
     }
 }
 
