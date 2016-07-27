@@ -24,7 +24,7 @@
 
 #include <stdexcept>
 
-#include "configuration_XML.hpp"
+#include "configuration_config.hpp"
 
 namespace bitpit {
 
