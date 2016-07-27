@@ -25,6 +25,7 @@
 #define __BITPIT_CONFIGURATION_TPP__
 
 #include <sstream>
+#include <stdexcept>
 
 namespace bitpit {
 

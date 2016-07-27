@@ -24,6 +24,7 @@
 
 #include <libxml/encoding.h>
 #include <libxml/parser.h>
+#include <stdexcept>
 #include <string>
 
 #include "configuration_XML.hpp"
