@@ -962,6 +962,21 @@ namespace bitpit {
 
     /*! Get the local index of an octant.
      * \param[in] gidx Global index of target octant.
+     * \param[in] rank Rank of the process owning the octant as a local one. getOwnerRank can be used to get the rank of the process owning the octant locally.
+     * \return Local index of octant.
+     */
+    uint32_t
+    ParaTree::getLocalIdx(uint64_t gidx,int rank){
+        if (rank){
+            return uint32_t(gidx - 1 - m_partitionRangeGlobalIdx[rank-1]);
+        }
+        else{
+            return uint32_t(gidx);
+        };
+    };
+
+    /*! Get the local index of an octant.
+     * \param[in] gidx Global index of target octant.
      * \return Local index of octant.
      */
     uint32_t

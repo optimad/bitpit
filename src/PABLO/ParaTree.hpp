@@ -244,6 +244,7 @@ namespace bitpit {
         uint64_t 	getGlobalIdx(uint32_t idx);
         uint64_t 	getGhostGlobalIdx(uint32_t idx);
         uint32_t    getLocalIdx(uint64_t gidx);
+        uint32_t    getLocalIdx(uint64_t gidx,int rank);
         uint32_t    getGhostLocalIdx(uint64_t gidx);
         octantID	getPersistentIdx(uint32_t idx);
         void 		setMarker(uint32_t idx, int8_t marker);
