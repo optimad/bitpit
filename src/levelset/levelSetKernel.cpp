@@ -514,18 +514,10 @@ void LevelSetKernel::propagateSign( std::unordered_map<int, std::unique_ptr<Leve
 
         // Discard seeds with a LS value equal to 0
         //
-        // If a seed has a value equal to the default value, this means that
-        // the cell is outside the narrow band. To have a meaningful levelset
-        // value we need to evaulate the levelset from scratch.
+        // A cell can have a levelset value equal to zero only if it's inside
+        // the narrow band, therefore the levelset value returned by getLS
+        // is enough to make this check.
         double ls = getLS(seed);
-        if(utils::DoubleFloatingEqual()(std::abs(ls), levelSetDefaults::VALUE)) {
-            ls = levelSetDefaults::VALUE;
-            for (auto &entry : visitors) {
-                const LevelSetObject *visitor = entry.second.get() ;
-                ls = std::min( visitor->evaluateLS(this, seed), ls) ;
-            }
-        }
-
         if( utils::DoubleFloatingEqual()(std::abs(ls), (double) 0.) ) {
             continue;
         }
