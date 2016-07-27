@@ -233,7 +233,7 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( ){
         // Evaluate local search radius
         std::array<double,3> myCenter = computeCellCentroid(id) ;
 
-        Cell cell = m_mesh->getCell(id) ;
+        const Cell &cell = m_mesh->getCell(id) ;
         const long* neighbours = cell.getAdjacencies() ;
         int N = cell.getAdjacencyCount() ;
 
