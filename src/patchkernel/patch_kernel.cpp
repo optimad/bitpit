@@ -760,11 +760,6 @@ bool PatchKernel::deleteVertex(const long &id, bool delayed)
 	m_vertices.erase(id, delayed);
 	m_vertexIdGenerator.trashId(id);
 
-    // If there are no more vertices reset them
-    if (m_vertices.size() == 0) {
-        resetVertices();
-    }
-
 	return true;
 }
 
