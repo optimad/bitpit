@@ -1485,11 +1485,6 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		}
 	}
 
-	// If there are no more cells reset them
-	if (m_cells.size() == 0) {
-        resetCells();
-    }
-
 	return true;
 }
 

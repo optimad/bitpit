@@ -859,7 +859,7 @@ int                             i;
 
     // Remove all ghosts add 2 internal cells
     //bucket: {3,4,2,1,6,9,7,8}
-    //cells:  {0,1}
+    //cells:  {5,1}
     //ghosts: {}
     mesh.deleteCell(4);
     mesh.deleteCell(2);
@@ -877,8 +877,8 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
-    expected.insert(expected.begin(),1);
     expected.insert(expected.begin(),0);
+    expected.insert(expected.begin(),5);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());
