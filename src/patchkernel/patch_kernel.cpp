@@ -2337,11 +2337,6 @@ bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delaye
 	m_interfaces.erase(id, delayed);
 	m_interfaceIdGenerator.trashId(id);
 
-    // If there are no more interfaces reset them
-    if (m_interfaces.size() == 0) {
-        resetInterfaces();
-    }
-
 	return true;
 }
 
