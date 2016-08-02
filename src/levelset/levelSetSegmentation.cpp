@@ -350,21 +350,13 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
  * Update the segment list associated to the cells, keeping only the segments
  * with a distance from the body less than the specified narrow band size.
  * @param[in] search size of narrow band
- * @param[in] blackList is a list of cells that will not be updated
  */
-void LevelSetSegmentation::updateSegmentList( const double &search,
-                                              const std::unordered_set<long> &blacklist ){
+void LevelSetSegmentation::updateSegmentList( const double &search) {
 
 
     log::cout() << "  Updating segment list for cells inside narrow band... " << std::endl;
 
-    PiercedIterator<SegInfo> segInfoItr;
-    for( segInfoItr = m_seg.begin(); segInfoItr != m_seg.end(); ++segInfoItr ){
-        long id = segInfoItr.getId() ;
-        if ( blacklist.count(id) > 0 ) {
-            continue;
-        }
-
+    for ( SegInfo &segInfo : m_seg ) {
         // Starting from the farthest segment (the last in the list) we loop
         // backwards until we find the first segment with a distance less
         // that the specified narrow band size.
@@ -373,7 +365,7 @@ void LevelSetSegmentation::updateSegmentList( const double &search,
         // cells outside the narrow band have already been removed. Therefore
         // we need to perform the check up to the second segment (the first one
         // is in the narrow band).
-        std::vector<double> &distances = segInfoItr->distances;
+        std::vector<double> &distances = segInfo.distances;
         size_t nCurrentSegments = distances.size();
 
         size_t nSegmentsToKeep = 1;
@@ -389,7 +381,7 @@ void LevelSetSegmentation::updateSegmentList( const double &search,
             distances.resize(nSegmentsToKeep);
             distances.shrink_to_fit();
 
-            std::vector<long> &segments = segInfoItr->segments;
+            std::vector<long> &segments = segInfo.segments;
             segments.resize(nSegmentsToKeep);
             segments.shrink_to_fit();
         }
@@ -1017,8 +1009,7 @@ void LevelSetSegmentation::filterOutsideNarrowBand( LevelSetKernel *visitee ){
 
     m_seg.flush() ;
 
-    std::unordered_set<long> voidSet ;
-    updateSegmentList(visitee->getSizeNarrowBand(), voidSet) ;
+    updateSegmentList(visitee->getSizeNarrowBand()) ;
 
 
     return ;
