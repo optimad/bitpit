@@ -130,31 +130,31 @@ private:
 
 	struct RenumberInfo {
 		RenumberInfo()
-			: octantInfo(), newTreeId(0)
+			: cellId(Cell::NULL_ID), newTreeId(0)
 		{
 		};
 
-		RenumberInfo(OctantInfo _octantInfo, uint32_t _newTreeId)
-			: octantInfo(_octantInfo), newTreeId(_newTreeId)
+		RenumberInfo(long _cellId, uint32_t _newTreeId)
+			: cellId(_cellId), newTreeId(_newTreeId)
 		{
 		};
 
-		OctantInfo octantInfo;
+		long cellId;
 		uint32_t newTreeId;
 	};
 
 	struct DeleteInfo {
 		DeleteInfo()
-			: octantInfo(), trigger(adaption::TYPE_UNKNOWN), rank(-1)
+			: cellId(Element::NULL_ID), trigger(adaption::TYPE_UNKNOWN), rank(-1)
 		{
 		};
 
-		DeleteInfo(OctantInfo _octantInfo, adaption::Type _trigger, int _rank = -1)
-			: octantInfo(_octantInfo), trigger(_trigger), rank(_rank)
+		DeleteInfo(long _cellId, adaption::Type _trigger, int _rank = -1)
+			: cellId(_cellId), trigger(_trigger), rank(_rank)
 		{
 		};
 
-		OctantInfo octantInfo;
+		long cellId;
 		adaption::Type trigger;
 		int rank;
 	};
@@ -185,6 +185,8 @@ private:
 
 	typedef std::unordered_set<FaceInfo, FaceInfoHasher> FaceInfoSet;
 
+	typedef std::unordered_map<uint64_t, long> StitchInfo;
+
 	std::vector<std::vector<int>> m_octantLocalFacesOnVertex;
 	std::vector<std::vector<int>> m_octantLocalFacesOnEdge;
 	std::vector<std::vector<int>> m_octantLocalEdgesOnVertex;
@@ -213,15 +215,13 @@ private:
 
 	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
-	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds);
-	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingFaces);
-	void renumberOctants(std::vector<RenumberInfo> &renumberedOctants);
-	FaceInfoSet deleteOctants(std::vector<DeleteInfo> &deletedOctants);
+	void resetCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
+	                         std::vector<RenumberInfo> &renumberedOctants,
+	                         std::vector<OctantInfo> &addOctants);
 
-	long addVertex(const OctantInfo &octantInfo, uint8_t node);
-
-	long addCell(OctantInfo octantInfo, std::unique_ptr<long[]> &vertices);
-	void deleteCell(long id);
+	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds);
+	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo);
+	StitchInfo deleteCells(std::vector<DeleteInfo> &deletedOctants);
 
 	const std::vector<adaption::Info> sync(bool trackChanges);
 

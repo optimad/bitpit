@@ -500,7 +500,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		if (adaptionType == adaption::TYPE_RENUMBERING) {
 			uint32_t previousTreeId = mapper_octantMap.front();
 			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag.front());
-			renumberedOctants.emplace_back(previousOctantInfo, treeId);
+			long cellId = getOctantId(previousOctantInfo);
+			renumberedOctants.emplace_back(cellId, treeId);
 			unmappedOctants[previousTreeId] = false;
 
 			// No more work needed, skip to the next octant
@@ -547,7 +548,9 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			// Mark previous octant for deletion
 			uint32_t previousTreeId = mapper_octantMap[k];
 			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
-			deletedOctants.emplace_back(previousOctantInfo, adaptionType);
+			long cellId = getOctantId(previousOctantInfo);
+			deletedOctants.emplace_back(cellId, adaptionType);
+
 			unmappedOctants[previousTreeId] = false;
 		}
 
@@ -642,7 +645,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			uint32_t endTreeId   = rankEntry.second[2 * k + 1];
 			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
 				OctantInfo octantInfo(treeId, true);
-				deletedOctants.emplace_back(octantInfo, deletionType, rank);
+				long cellId = getOctantId(octantInfo);
+				deletedOctants.emplace_back(cellId, deletionType, rank);
 				unmappedOctants[treeId] = false;
 			}
 		}
@@ -654,7 +658,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 		for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
 			OctantInfo ghostOctantInfo(ghostTreeId, false);
-			deletedOctants.emplace_back(ghostOctantInfo, adaption::TYPE_DELETION);
+			long ghostId = getOctantId(ghostOctantInfo);
+			deletedOctants.emplace_back(ghostId, adaption::TYPE_DELETION);
 		}
 	}
 
@@ -673,15 +678,24 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	for (uint32_t previousTreeId = 0; previousTreeId < nPreviousOctants; ++previousTreeId) {
 		if (unmappedOctants[previousTreeId]) {
 			OctantInfo octantInfo = OctantInfo(previousTreeId, true);
-			deletedOctants.emplace_back(octantInfo, adaption::TYPE_DELETION);
+			long cellId = getOctantId(octantInfo);
+			deletedOctants.emplace_back(cellId, adaption::TYPE_DELETION);
 		}
 	}
 
 	// Enable advanced editing
 	setExpert(true);
 
+	// Reset cell-to-octant and octant-to-cell map
+	log::cout() << ">> Resetting cell-to-octant and octant-to-cell maps...";
+
+	resetCellOctantMaps(deletedOctants, renumberedOctants, addedOctants);
+	std::vector<RenumberInfo>().swap(renumberedOctants);
+
+	log::cout() << " Done" << std::endl;
+
 	// Remove deleted octants
-	FaceInfoSet danglingFaces;
+	StitchInfo stitchInfo;
 	if (deletedOctants.size() > 0) {
 		log::cout() << ">> Removing non-existing cells...";
 
@@ -700,9 +714,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			std::unordered_set<long> sendAdaptionInfo;
 			std::unordered_set<long> removedInterfaces;
 			for (const DeleteInfo &deleteInfo : deletedOctants) {
-				// Cell info
-				const OctantInfo &octantInfo = deleteInfo.octantInfo;
-				long cellId = getOctantId(octantInfo);
+				// Cell id
+				long cellId = deleteInfo.cellId;
 
 				// Adaption tracking
 				//
@@ -763,7 +776,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		}
 
 		// Delete cells
-		danglingFaces = deleteOctants(deletedOctants);
+		stitchInfo = deleteCells(deletedOctants);
 
 		log::cout() << " Done" << std::endl;
 		log::cout() << ">> Cells removed: " <<  deletedOctants.size() << std::endl;
@@ -771,41 +784,18 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	std::vector<DeleteInfo>().swap(deletedOctants);
 
-	// Reserve space in the octant-to-cell maps
-	m_cellToOctant.reserve(nOctants);
-	m_octantToCell.reserve(nOctants);
-
-	// Remap renumbered cells
-	if (renumberedOctants.size() > 0) {
-		log::cout() << ">> Rebuilding octant-to-cell map for renumbered cells...";
-
-		renumberOctants(renumberedOctants);
-
-		log::cout() << " Done" << std::endl;
-		log::cout() << ">> Cells renumbered: " <<  renumberedOctants.size() << std::endl;
-	}
-
-	std::vector<RenumberInfo>().swap(renumberedOctants);
-
-	// Reset ghost maps
-	m_cellToGhost.clear();
-	m_cellToGhost.reserve(nGhostsOctants);
-
-	m_ghostToCell.clear();
-	m_ghostToCell.reserve(nGhostsOctants);
-
 	// Import added octants
 	std::vector<long> createdCells;
 	if (addedOctants.size() > 0) {
 		log::cout() << ">> Importing new octants...";
 
-		createdCells = importOctants(addedOctants, danglingFaces);
+		createdCells = importCells(addedOctants, stitchInfo);
 
 		log::cout() << " Done" << std::endl;
 		log::cout() << ">> Octants imported: " <<  addedOctants.size() << std::endl;
 	}
 
-	FaceInfoSet().swap(danglingFaces);
+	StitchInfo().swap(stitchInfo);
 
 	// Rebuild the ghost information
 #if BITPIT_ENABLE_MPI==1
@@ -897,121 +887,114 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	\param renumberedOctants is the list of octant to renumber
 */
-void VolOctree::renumberOctants(std::vector<RenumberInfo> &renumberedOctants)
+void VolOctree::resetCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
+                                    std::vector<RenumberInfo> &renumberedOctants,
+                                    std::vector<OctantInfo> &addedOctants)
 {
-	// Remove previous cell-to-tree associations
-	std::vector<long> cellIds;
-	cellIds.reserve(renumberedOctants.size());
+	// Reset the ghost maps
+	m_cellToGhost.clear();
+	m_ghostToCell.clear();
+
+	// Reserve space for the maps
+	long nOctants = m_tree.getNumOctants();
+	m_cellToOctant.reserve(nOctants);
+	m_octantToCell.reserve(nOctants);
+
+	long nGhostsOctants = m_tree.getNumGhosts();
+	m_cellToGhost.reserve(nGhostsOctants);
+	m_ghostToCell.reserve(nGhostsOctants);
+
+	// Remove cell-to-tree associations for cells that will be deleted
+	for (const DeleteInfo &deleteInfo : deletedOctants) {
+		long cellId = deleteInfo.cellId;
+		if (!m_cells[cellId].isInterior()) {
+			continue;
+		}
+
+		const OctantInfo &octantInfo = getCellOctant(cellId);
+		uint32_t treeId = octantInfo.id;
+
+		m_cellToOctant.erase(cellId);
+		m_octantToCell.erase(treeId);
+	}
+
+	// Remove old cell-to-tree associations for renumbered cells
 	for (const RenumberInfo &renumberInfo : renumberedOctants) {
-		const OctantInfo &octantInfo = renumberInfo.octantInfo;
+		long cellId = renumberInfo.cellId;
+		if (!m_cells[cellId].isInterior()) {
+			continue;
+		}
 
-		long cellId = getOctantId(octantInfo);
-		cellIds.push_back(cellId);
+		const OctantInfo &previousOctantInfo = getCellOctant(cellId);
+		uint32_t previousTreeId = previousOctantInfo.id;
 
-		uint32_t previousTreeId = octantInfo.id;
 		m_octantToCell.erase(previousTreeId);
 	}
 
-	// Creeate new cell-to-tree associations
-	std::vector<long>::iterator cellIdsItr = cellIds.begin();
+	// Create cell-to-tree associations for renumbered cells
 	for (const RenumberInfo &renumberInfo : renumberedOctants) {
-		uint32_t treeId = renumberInfo.newTreeId;
+		long cellId = renumberInfo.cellId;
+		if (!m_cells[cellId].isInterior()) {
+			continue;
+		}
 
-		long cellId = (*cellIdsItr);
-		cellIdsItr++;
+		uint32_t treeId = renumberInfo.newTreeId;
 
 		m_cellToOctant[cellId] = treeId;
 		m_octantToCell[treeId] = cellId;
 	}
-}
 
-/*!
-	Imports a list of octants into the patch.
+	// Create cell-to-tree associations for cells that wil be added
+	for (OctantInfo &octantInfo : addedOctants) {
+		long cellId = generateCellId();
 
-	\param octantInfoList is the list of octant to import
-*/
-std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList)
-{
-	FaceInfoSet danglingFaces;
-
-	return importOctants(octantInfoList, danglingFaces);
-}
-
-/*!
-	Imports a list of octants into the patch.
-
-	\param octantInfoList is the list of octant to import
-	\param danglingFaces is the list of dangling faces in the current mesh
-*/
-std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList,
-                                           FaceInfoSet &danglingFaces)
-{
-	// Info of the cells
-	const int &nCellVertices = m_cellTypeInfo->nVertices;
-	const std::vector<std::vector<int>> &cellLocalFaceConnect = m_cellTypeInfo->faceConnect;
-
-	// Info on the interfaces
-	const int &nInterfaceVertices = m_interfaceTypeInfo->nVertices;
-
-	// Add the vertex of the dangling faces to the vertex map
-	std::unordered_map<uint64_t, long> vertexMap;
-	for (auto &danglingFaceInfo : danglingFaces) {
-		// List of faces with the vertx to be added
-		//
-		// We need to consider the dangling face itself and all interfaces
-		// on that face.
-		long danglingId = danglingFaceInfo.id;
-		Cell &danglingCell = m_cells[danglingId];
-		int danglingFace = danglingFaceInfo.face;
-
-		int nInterfaces = danglingCell.getInterfaceCount(danglingFace);
-		std::vector<FaceInfo> vertexSourceList;
-		vertexSourceList.reserve(1 + nInterfaces);
-
-		vertexSourceList.emplace_back(danglingFaceInfo.id, danglingFaceInfo.face);
-		for (int k = 0; k < nInterfaces; ++k) {
-			long interfaceId = danglingCell.getInterface(danglingFace, k);
-			if (interfaceId < 0) {
-				continue;
-			}
-
-			Interface &interface = m_interfaces[interfaceId];
-			if (interface.getOwner() != danglingId) {
-				vertexSourceList.emplace_back(interface.getOwner(), interface.getOwnerFace());
-			} else {
-				vertexSourceList.emplace_back(interface.getNeigh(), interface.getNeighFace());
-			}
-		}
-
-		// Add the vertices to the map
-		for (auto & vertexSource : vertexSourceList) {
-			// Cell data
-			Cell &cell = m_cells[vertexSource.id];
-			const long *cellConnect = cell.getConnect();
-
-			// Octant data
-			OctantInfo octantInfo = getCellOctant(vertexSource.id);
-			Octant *octant = getOctantPointer(octantInfo);
-
-			// List of vertices
-			const std::vector<int> &localFaceConnect = cellLocalFaceConnect[vertexSource.face];
-			for (int k = 0; k < nInterfaceVertices; ++k) {
-				uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, localFaceConnect[k]);
-				if (vertexMap.count(vertexTreeMorton) == 0) {
-					long vertexId = cellConnect[localFaceConnect[k]];
-					vertexMap.insert({vertexTreeMorton, vertexId});
-				}
-			}
+		if (octantInfo.internal) {
+			m_cellToOctant.insert({{cellId, octantInfo.id}});
+			m_octantToCell.insert({{octantInfo.id, cellId}});
+		} else {
+			m_cellToGhost.insert({{cellId, octantInfo.id}});
+			m_ghostToCell.insert({{octantInfo.id, cellId}});
 		}
 	}
+}
 
+/*!
+	Imports a list of octants into the patch.
+
+	\param octantInfoList is the list of octant to import
+*/
+std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList)
+{
+	StitchInfo stitchInfo;
+
+	return importCells(octantInfoList, stitchInfo);
+}
+
+/*!
+	Imports a list of octants into the patch.
+
+	\param octantInfoList is the list of octant to import
+	\param stitchInfo is the list of vertices that will be used to stitch the
+	the new octants
+*/
+std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList,
+                                           StitchInfo &stitchInfo)
+{
 	// Create the new vertices
+	int nCellVertices = m_cellTypeInfo->nVertices;
 	for (OctantInfo &octantInfo : octantInfoList) {
 		Octant *octant = getOctantPointer(octantInfo);
 		for (int k = 0; k < nCellVertices; ++k) {
 			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
-			if (vertexMap.count(vertexTreeMorton) == 0) {
-				vertexMap[vertexTreeMorton] = addVertex(octantInfo, k);
+			if (stitchInfo.count(vertexTreeMorton) == 0) {
+				// Vertex coordinates
+				std::array<double, 3> nodeCoords = m_tree.getNode(octant, k);
+
+				// Create the vertex
+				VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
+
+				// Add the vertex to the stitching info
+				stitchInfo[vertexTreeMorton] = vertexIterator->getId();
 			}
 		}
 	}
@@ -1021,6 +1004,9 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 	createdCells.reserve(octantInfoList.size());
 
 	for (OctantInfo &octantInfo : octantInfoList) {
+		// Id that will be assigned to the cell
+		long cellId = getOctantId(octantInfo);
+
 		// Octant connectivity
 		Octant *octant = getOctantPointer(octantInfo);
 
@@ -1028,11 +1014,23 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 		std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
 		for (int k = 0; k < nCellVertices; ++k) {
 			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
-			cellConnect[k] = vertexMap.at(vertexTreeMorton);
+			cellConnect[k] = stitchInfo.at(vertexTreeMorton);
 		}
 
 		// Add cell
-		long cellId = addCell(octantInfo, cellConnect);
+		addCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
+
+		// If the cell is a ghost set its owner
+#if BITPIT_ENABLE_MPI==1
+		if (!octantInfo.internal) {
+			uint64_t globalTreeId = m_tree.getGhostGlobalIdx(octantInfo.id);
+			int rank = m_tree.getOwnerRank(globalTreeId);
+
+			setGhostOwner(cellId, rank, false);
+		}
+#endif
+
+		// Add the cell to the list of created cells
 		createdCells.push_back(cellId);
 	}
 
@@ -1049,45 +1047,28 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 
 	\param deletedOctants contains a list with the information of the deleted
 	octants
-	\result Returns the dangling faces created after deleting the octants.
+	\result Returns the vertices that will be used to stitch  faces created after deleting the octants.
 */
-VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deletedOctants)
+VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOctants)
 {
-	FaceInfoSet danglingFaces;
-
 	// Info of the cells
-	ElementInfo::Type cellType;
-	if (isThreeDimensional()) {
-		cellType = ElementInfo::VOXEL;
-	} else {
-		cellType = ElementInfo::PIXEL;
-	}
-
-	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
-	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
+	int nCellVertices = m_cellTypeInfo->nVertices;
+	const std::vector<std::vector<int>> &cellLocalFaceConnect = m_cellTypeInfo->faceConnect;
 
 	// Info on the faces
-	ElementInfo::Type faceType;
-	if (isThreeDimensional()) {
-		faceType = ElementInfo::PIXEL;
-	} else {
-		faceType = ElementInfo::LINE;
-	}
-
-	const ElementInfo &faceTypeInfo = ElementInfo::getElementInfo(faceType);
-	const int &nFaceVertices = faceTypeInfo.nVertices;
+	const int &nInterfaceVertices = m_interfaceTypeInfo->nVertices;
 
 	// List of cells ot delete
 	std::unordered_set<long> deadCells;
 	deadCells.reserve(deletedOctants.size());
 	for (const DeleteInfo &deleteInfo : deletedOctants) {
-		long cellId = getOctantId(deleteInfo.octantInfo);
-		deadCells.insert(cellId);
+		deadCells.insert(deleteInfo.cellId);
 	}
 
 	// Delete the cells
 	std::unordered_set<long> deadVertices;
 	std::unordered_set<long> deadInterfaces;
+	std::unordered_set<long> danglingCells;
 	for (long cellId : deadCells) {
 		Cell &cell = m_cells[cellId];
 
@@ -1103,14 +1084,10 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 
 		// List of interfaces to delete
 		//
-		// All the interfaces will be deleted, this means that some of the
-		// cells that are not deleted will have a face not donnected to
-		// anything. This faces is called dangling face.
-		//
-		// The vertices of a dangling face has to be kept. Morover information
-		// about adjacencies and interfaces of a dangling cell needs to be
-		// updated (it it not necessary to update those information for the
-		// cells that will be deleted, because they are going to be removed).
+		// All the interfaces of the cell will be deleted, this means that the
+		// neighbours that are not deleted will have a face not connected to
+		// anything. Those faces are called dangling faces and a cell with
+		// dangling faces is called dangling cell.
 		int nCellInterfaces = cell.getInterfaceCount();
 		const long *interfaces = cell.getInterfaces();
 		for (int k = 0; k < nCellInterfaces; ++k) {
@@ -1124,9 +1101,7 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 				continue;
 			}
 
-			// Find if the owner or the neighbour of the interface will be
-			// kept. An interface whose owner or neighbour will not be
-			// deleted is called dangling.
+			// Find if the face associated to the interface will be dangling
 			Interface &interface = m_interfaces[interfaceId];
 
 			int danglingSide = -1;
@@ -1155,6 +1130,7 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 				}
 
 				Cell &danglingCell = m_cells[danglingCellId];
+				danglingCells.insert(danglingCellId);
 
 				// Since the dangling cell will not be deleted, we have to
 				// updated its interface and adjacency data structures.
@@ -1163,9 +1139,6 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 
 				int cellAdjacencyIndex = danglingCell.findAdjacency(danglingCellFace, danglingNeighId);
 				danglingCell.deleteAdjacency(danglingCellFace, cellAdjacencyIndex);
-
-				// Add the face to the dangling face list
-				danglingFaces.insert({{danglingCellId, danglingCellFace}});
 			}
 
 			// Add the interface to the list of interfaces to delete
@@ -1173,32 +1146,48 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 		}
 
 		// Delete cell
-		deleteCell(cellId);
+		deleteCell(cellId, false, true);
 	}
+
+	m_cells.flush();
 
 	// Delete the interfaces
 	for (long interfaceId : deadInterfaces) {
-		VolumeKernel::deleteInterface(interfaceId, false, true);
+		deleteInterface(interfaceId, false, true);
 	}
+
+	m_interfaces.flush();
 
 	// All the vertices belonging to the dangling cells has to be kept
 	//
-	// It's not enough to consider only the vertices on the dangling faces,
-	// we have to consider the vertices of the whole cell. That's because
-	// we may need to keep vertices on the edges of the cell, and those
-	// vertices may not be on interfaces of the dangling face
-	for (const FaceInfo &danglingFaceInfo : danglingFaces) {
-		const Cell &cell = m_cells[danglingFaceInfo.id];
+	// The vertices of the dangling faces need to be kept because there are
+	// still cells using them. However it's not enough to consider only the
+	// vertices on the dangling faces, we have to consider the vertices of
+	// the whole cell. That's because we may need to keep vertices on the
+	// edges of the cell, and those vertices may not be on interfaces of the
+	// dangling faces.
+	//
+	// Morover we need to build a map between the patch numbering and the
+	// octree numbering of the vertices of the dangling cells. This map will
+	// be used when imprting the octants to stitch the imported octants to
+	// the existing cells.
+	StitchInfo stitchVertices;
+	for (const long cellId : danglingCells) {
+		// Vertices of the cell
+		const Cell &cell = m_cells[cellId];
+		const long *cellConnect = cell.getConnect();
 
-		// Vertices of the face
-		const std::vector<int> &localConnect = cellLocalFaceConnect[danglingFaceInfo.face];
-		for (int n = 0; n < nFaceVertices; ++n) {
-			int localVertexId = localConnect[n];
-			long vertexId = cell.getVertex(localVertexId);
+		OctantInfo octantInfo = getCellOctant(cellId);
+		Octant *octant = getOctantPointer(octantInfo);
+
+		for (int k = 0; k < nCellVertices; ++k) {
+			long vertexId = cellConnect[k];
+			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
+			stitchVertices.insert({vertexTreeMorton, vertexId});
 			deadVertices.erase(vertexId);
 		}
 
-		// Vertices of all other interfaces of the cell
+		// Vertices of all other interfaces left of the cell
 		int nCellInterfaces = cell.getInterfaceCount();
 		const long *interfaces = cell.getInterfaces();
 		for (int k = 0; k < nCellInterfaces; ++k) {
@@ -1208,8 +1197,24 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 			}
 
 			const Interface &interface = m_interfaces[interfaceId];
-			for (int n = 0; n < nFaceVertices; ++n) {
-				long vertexId = interface.getVertex(n);
+			if (interface.isBorder()) {
+				continue;
+			}
+
+			long ownerId  = interface.getOwner();
+			int ownerFace = interface.getOwnerFace();
+
+			const Cell &ownerCell = m_cells[ownerId];
+			const long *ownerCellConnect = ownerCell.getConnect();
+
+			OctantInfo ownerOctantInfo = getCellOctant(ownerId);
+			Octant *ownerOctant = getOctantPointer(ownerOctantInfo);
+
+			const std::vector<int> &localFaceConnect = cellLocalFaceConnect[ownerFace];
+			for (int k = 0; k < nInterfaceVertices; ++k) {
+				long vertexId = ownerCellConnect[localFaceConnect[k]];
+				uint64_t vertexTreeMorton = m_tree.getNodeMorton(ownerOctant, localFaceConnect[k]);
+				stitchVertices.insert({vertexTreeMorton, vertexId});
 				deadVertices.erase(vertexId);
 			}
 		}
@@ -1217,121 +1222,14 @@ VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deleted
 
 	// Delete the vertices
 	for (long vertexId : deadVertices) {
-		VolumeKernel::deleteVertex(vertexId, true);
+		deleteVertex(vertexId, true);
 	}
+
+	m_vertices.flush();
 
 	// Done
-	return danglingFaces;
+	return stitchVertices;
 }
-
-/*!
-	Creates a new patch vertex from the specified octant node.
-
-	\param octantInfo is the octant the node belongs to
-	\param node is the octant node
-	\result The id of the newly created vertex.
-*/
-long VolOctree::addVertex(const OctantInfo &octantInfo, uint8_t node)
-{
-	// Node coordinates
-	Octant *octant = getOctantPointer(octantInfo);
-	std::array<double, 3> nodeCoords = m_tree.getNode(octant, node);
-
-	// Create the vertex
-	VertexIterator vertexIterator = VolumeKernel::addVertex(std::move(nodeCoords));
-
-	// Done
-	return vertexIterator->getId();
-}
-
-/*!
-	Creates a new patch cell from the specified tree octant.
-
-	\param octantInfo is the octant associated to the cell
-	\param vertices are the vertices of the cell
-	\param interfaces are the interfaces of the cell
-	\param interfacesOwner is a flag that defines if an interface is owned
-	by the cell
-	\result The id of the newly created cell.
-*/
-long VolOctree::addCell(OctantInfo octantInfo, std::unique_ptr<long[]> &vertices)
-{
-	// Create the cell
-	ElementInfo::Type cellType;
-	if (isThreeDimensional()) {
-		cellType = ElementInfo::VOXEL;
-	} else {
-		cellType = ElementInfo::PIXEL;
-	}
-
-	CellIterator cellIterator = VolumeKernel::addCell(cellType, octantInfo.internal);
-	Cell &cell = *cellIterator;
-	long id = cell.getId();
-
-	// Connectivity
-	cell.setConnect(std::move(vertices));
-
-	// If the cell is a ghost set its owner
-#if BITPIT_ENABLE_MPI==1
-	if (!octantInfo.internal) {
-		uint64_t globalTreeId = m_tree.getGhostGlobalIdx(octantInfo.id);
-		int rank = m_tree.getOwnerRank(globalTreeId);
-
-		setGhostOwner(id, rank, false);
-	}
-#endif
-
-	// Update cell to octant mapping
-	if (octantInfo.internal) {
-		m_cellToOctant.insert({{id, octantInfo.id}});
-		m_octantToCell.insert({{octantInfo.id, id}});
-	} else {
-		m_cellToGhost.insert({{id, octantInfo.id}});
-		m_ghostToCell.insert({{octantInfo.id, id}});
-	}
-
-	// Done
-	return id;
-}
-
-/*!
-	Deletes a cell from the patch.
-
-	\param id is the id of the cell
-*/
-void VolOctree::deleteCell(long id)
-{
-	// Remove the information that link the cell to the octant
-	bool interior = m_cells[id].isInterior();
-
-	std::unordered_map<long, uint32_t, Element::IdHasher> *cellMap;
-	if (interior) {
-		cellMap = &m_cellToOctant;
-	} else {
-		cellMap = &m_cellToGhost;
-	}
-
-	std::unordered_map<long, uint32_t, Element::IdHasher>::const_iterator cellItr = cellMap->find(id);
-	if (cellItr != cellMap->end()) {
-		// Delete octant-to-cell entry
-		std::unordered_map<uint32_t, long> *octantMap;
-		if (interior) {
-			octantMap = &m_octantToCell;
-		} else {
-			octantMap = &m_ghostToCell;
-		}
-
-		uint32_t treeId = cellItr->second;
-		octantMap->erase(treeId);
-
-		// Delete cell-to-octant entry
-		cellMap->erase(cellItr);
-	}
-
-	// Delete the cell
-	VolumeKernel::deleteCell(id, false, true);
-}
-
 
 /*!
 	Build the adjacencies the cells.
