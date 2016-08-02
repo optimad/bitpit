@@ -543,7 +543,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     }
 
     // Clear levelset
-    m_kernel->clearAfterMeshMovement(mapper) ;
+    m_kernel->clearAfterMeshAdaption(mapper) ;
 
     // Update narrow band
     if (updateNarrowBand) {
@@ -651,7 +651,7 @@ void LevelSet::exchangeGhosts(  ){
 
 /*!
  * communicates data structures of kernel and objects.
- * If mapper!=NULL, clearAfterMeshMovement of kernel and objects will be called between send and receive.
+ * If mapper!=NULL, clearAfterMeshAdaption of kernel and objects will be called between send and receive.
  * @param[in] sendList list of elements to be send
  * @param[in] recvList list of elements to be received
  * @param[in] mapper mapper containing mesh modifications
@@ -743,9 +743,9 @@ void LevelSet::communicate( std::unordered_map<int,std::vector<long>> &sendList,
             }
 
             if( mapper!=NULL){
-                m_kernel->clearAfterMeshMovement(*mapper);
+                m_kernel->clearAfterMeshAdaption(*mapper);
                 for( const auto & visitor : m_object){
-                    visitor.second->clearAfterMeshMovement(*mapper);
+                    visitor.second->clearAfterMeshAdaption(*mapper);
                 }
             }
 

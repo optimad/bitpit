@@ -747,7 +747,7 @@ void LevelSetKernel::clear( ){
  * Deletes non-existing items and items outside the narrow band after grid adaption.
  * @param[in] mapper mapping info
  */
-void LevelSetKernel::clearAfterMeshMovement( const std::vector<adaption::Info> &mapper ){
+void LevelSetKernel::clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
 
     for ( auto & map : mapper ){
         if( map.entity == adaption::Entity::ENTITY_CELL ){

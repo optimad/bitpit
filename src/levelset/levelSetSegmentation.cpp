@@ -668,7 +668,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
     SegmentToCellMap segmentToCellMap = extractSegmentToCellMap( mapper ) ;
 
     // Prune previous segment info
-    clearAfterMeshMovement( mapper ) ;
+    clearAfterMeshAdaption( mapper ) ;
 
     // Evaluate the levelset for the newly added elements
     std::unordered_set<long> addedCells;
@@ -974,7 +974,7 @@ int LevelSetSegmentation::getNarrowBandResizeDirection( LevelSetOctree *visitee,
  * are not in the mesh anymore
  * @param[in] mapper information concerning mesh adaption
  */
-void LevelSetSegmentation::clearAfterMeshMovement( const std::vector<adaption::Info> &mapper ){
+void LevelSetSegmentation::clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
 
     log::cout() << "  Clearing segment info... " << std::endl;
 

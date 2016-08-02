@@ -64,7 +64,7 @@ int LevelSetObject::getId( ) const {
  * Clears data structure after mesh modification
  * @param[in] mapper mapper describing mesh modifications
  */
-void LevelSetObject::clearAfterMeshMovement( const std::vector<adaption::Info> &mapper ){
+void LevelSetObject::clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
     BITPIT_UNUSED(mapper) ;
     return;
 }

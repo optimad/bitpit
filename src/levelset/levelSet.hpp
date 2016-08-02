@@ -179,7 +179,7 @@ class LevelSetKernel{
     virtual double                              computeRSearchFromCell( long id ) = 0;
 
     void                                        clear() ;
-    void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
+    void                                        clearAfterMeshAdaption( const std::vector<adaption::Info> & ) ;
     void                                        filterOutsideNarrowBand( double ) ;
 
     void                                        propagateSign( std::unordered_map<int, std::unique_ptr<LevelSetObject>> & ) ;
@@ -269,7 +269,7 @@ class LevelSetObject{
 
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
-    virtual void                                clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
+    virtual void                                clearAfterMeshAdaption( const std::vector<adaption::Info> & ) ;
     virtual void                                filterOutsideNarrowBand( LevelSetKernel *) ;
     virtual int                                 getSupportCount(const long &) const ;
     virtual long                                getClosestSupport(const long &i) const;
@@ -358,7 +358,7 @@ class LevelSetSegmentation : public LevelSetObject {
 
     void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
-    void                                        clearAfterMeshMovement( const std::vector<adaption::Info> & ) ;
+    void                                        clearAfterMeshAdaption( const std::vector<adaption::Info> & ) ;
     void                                        filterOutsideNarrowBand( LevelSetKernel *) ;
     int                                         getSupportCount(const long &) const ;
     long                                        getClosestSupport(const long &i) const;
