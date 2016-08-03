@@ -483,7 +483,26 @@ void LevelSetKernel::propagateSign( std::unordered_map<int, std::unique_ptr<Leve
         // If a cell is surrounded only by items already evaluated,
         // this cell can not be uses as a seed.
         std::stack<long> processList;
-        for (long neigh : m_mesh->findCellFaceNeighs( seed )) {
+
+        int nSeedNeighs;
+        const long* seedNeighs;
+        std::vector<long> seedNeighList;
+        if (m_mesh->getCells().size() == 0) {
+            seedNeighList = m_mesh->findCellFaceNeighs( seed ) ;
+            seedNeighs    = seedNeighList.data() ;
+            nSeedNeighs   = seedNeighList.size() ;
+        } else {
+            Cell& cell  = m_mesh->getCell( seed );
+            seedNeighs  = cell.getAdjacencies() ;
+            nSeedNeighs = cell.getAdjacencyCount() ;
+        }
+
+        for ( int n=0; n<nSeedNeighs; ++n ) {
+            long neigh = seedNeighs[n] ;
+            if(neigh<0){
+                continue ;
+            }
+
             if (alreadyEvaluated.count(neigh) == 0) {
                 processList.push(neigh);
             }
@@ -534,8 +553,25 @@ void LevelSetKernel::propagateSign( std::unordered_map<int, std::unique_ptr<Leve
             }
 
             // Add non-evaluated neighs to the process list
-            std::vector<long> neighs = m_mesh->findCellFaceNeighs( id ) ;
-            for (long neigh : neighs) {
+            int nNeighs;
+            const long* neighs;
+            std::vector<long> neighList;
+            if (m_mesh->getCells().size() == 0) {
+                neighList = m_mesh->findCellFaceNeighs( id ) ;
+                neighs    = neighList.data() ;
+                nNeighs   = neighList.size() ;
+            } else {
+                Cell& cell  = m_mesh->getCell( id );
+                neighs  = cell.getAdjacencies() ;
+                nNeighs = cell.getAdjacencyCount() ;
+            }
+
+            for ( int n=0; n<nNeighs; ++n ) {
+                long neigh = neighs[n];
+                if(neigh<0){
+                    continue;
+                }
+
                 if (alreadyEvaluated.count(neigh) == 0) {
                     processList.push(neigh);
                 }
