@@ -46,9 +46,11 @@ LevelSetSegmentation::SegInfo::SegInfo( ) {
 
 /*!
  * Constructor
- * @param[in] list list of simplices
+ * @param[in] _segments is the list of segment's ids
+ * @param[in] _distances is the list of segment's distances
  */
-LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &list) :segments(list) {
+LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &_segments, const std::vector<double> &_distances )
+    : segments(_segments), distances(_distances) {
 };
 
 /*!
@@ -268,9 +270,6 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
     std::vector<std::array<double,3>> cloud ;
     std::vector< std::array<double,3> > cloud_xP ;
     std::vector<int> cloud_where ;
-    std::unordered_map<long, std::vector<double>> cellDistances;
-
-    cellDistances.reserve( nSegmentsPerCell.size() );
 
     // Add the segments info
     for ( auto mapItr = segmentToCellMap.begin(); mapItr != segmentToCellMap.end(); ) {
@@ -303,39 +302,49 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
             long cell = cellList[k] ;
             auto segInfoItr = m_seg.find( cell ) ;
             if ( segInfoItr == m_seg.end() ) {
+                int segmentCount = nSegmentsPerCell.at(cell);
                 segInfoItr = m_seg.emplace( cell );
-                segInfoItr->segments.reserve( nSegmentsPerCell.at(cell) );
-
-                cellDistances[cell].reserve( nSegmentsPerCell.at(cell) ) ;
+                segInfoItr->segments.reserve( segmentCount );
+                segInfoItr->distances.reserve( segmentCount );
 
                 newSegInfo.insert( cell ) ;
             }
 
-            // Add the segment
+            // Add the segment info
             segInfoItr->segments.push_back(segment) ;
-
-            // Add the distance
-            cellDistances.at(cell).push_back(segmentDistance) ;
+            segInfoItr->distances.push_back(segmentDistance) ;
         }
 
         mapItr = segmentToCellMap.erase( mapItr );
     }
 
     // Order the segments from the closes to the farthest from the body
-    std::vector<size_t> rank;
+    std::vector<size_t> distanceRank;
+    std::vector<size_t> segmentRank;
     for ( long id : newSegInfo ) {
         auto segInfoItr = m_seg.find( id ) ;
         std::vector<long> &segments = segInfoItr->segments;
         size_t nSegments = segments.size();
 
-        rank.resize(nSegments);
+        // Evaluate ranks
+        distanceRank.resize(nSegments);
         for (size_t k = 0; k < nSegments; ++k) {
-            rank[k] = k;
+            distanceRank[k] = k;
         }
 
-        std::vector<double> &distances = cellDistances.at(id);
-        std::sort(rank.begin(), rank.end(), DistanceComparator(distances) ) ;
-        utils::reorderVector(rank, segments, nSegments) ;
+        std::vector<double> &distances = segInfoItr->distances;
+        std::sort(distanceRank.begin(), distanceRank.end(), DistanceComparator(distances) ) ;
+
+        segmentRank.resize(nSegments);
+        for (size_t k = 0; k < nSegments; ++k) {
+            segmentRank[k] = distanceRank[k];
+        }
+
+        // Order vectors
+        utils::reorderVector(distanceRank, distances, nSegments) ;
+        distances.shrink_to_fit();
+
+        utils::reorderVector(segmentRank, segments, nSegments) ;
         segments.shrink_to_fit();
     }
 
@@ -383,16 +392,12 @@ void LevelSetSegmentation::updateSegmentList( LevelSetKernel *visitee, const dou
 
     log::cout() << "  Updating segment list for cells inside narrow band... " << std::endl;
 
-    double                 s, d;
-    std::array<double,3>   n, xP;
-    for( PiercedIterator<SegInfo> segInfoItr = m_seg.begin(); segInfoItr != m_seg.end(); ++segInfoItr ){
+    PiercedIterator<SegInfo> segInfoItr;
+    for( segInfoItr = m_seg.begin(); segInfoItr != m_seg.end(); ++segInfoItr ){
         long id = segInfoItr.getId() ;
         if ( blacklist.count(id) > 0 ) {
             continue;
         }
-
-        // Centroid of the cell
-        const std::array<double,3> &P = visitee->computeCellCentroid(id) ;
 
         // Starting from the farthest segment (the last in the list) we loop
         // backwards until we find the first segment with a distance less
@@ -402,21 +407,23 @@ void LevelSetSegmentation::updateSegmentList( LevelSetKernel *visitee, const dou
         // cells outside the narrow band have already been removed. Therefore
         // we need to perform the check up to the second segment (the first one
         // is in the narrow band).
-        std::vector<long> &segments = segInfoItr->segments;
+        std::vector<double> &distances = segInfoItr->distances;
+        size_t nCurrentSegments = distances.size();
 
         size_t nSegmentsToKeep = 1;
-        for( size_t k = segments.size() - 1; k >= 1; --k) {
-            long segment = segments[k];
-
-            infoFromSimplex(P, segment, d, s, xP, n);
-
-            if ( d <= search ){
+        for( size_t k = nCurrentSegments - 1; k >= 1; --k) {
+            double distance = distances[k];
+            if ( distance <= search ){
                 nSegmentsToKeep = k + 1;
                 break;
             }
         }
 
-        if (nSegmentsToKeep != segments.size()) {
+        if (nSegmentsToKeep != nCurrentSegments) {
+            distances.resize(nSegmentsToKeep);
+            distances.shrink_to_fit();
+
+            std::vector<long> &segments = segInfoItr->segments;
             segments.resize(nSegmentsToKeep);
             segments.shrink_to_fit();
         }
@@ -1091,6 +1098,7 @@ void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
         bitpit::genericIO::flushBINARY( stream, segItr.getId() );
         bitpit::genericIO::flushBINARY( stream, segItr->segments.size() );
         bitpit::genericIO::flushBINARY( stream, segItr->segments );
+        bitpit::genericIO::flushBINARY( stream, segItr->distances );
     }
 
     return;
@@ -1116,6 +1124,9 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 
         cellData.segments.resize(s) ;
         bitpit::genericIO::absorbBINARY( stream, cellData.segments );
+
+        cellData.distances.resize(s) ;
+        bitpit::genericIO::absorbBINARY( stream, cellData.distances );
 
         m_seg.insert(id,cellData) ;
 
@@ -1148,6 +1159,9 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
             dataBuffer << seginfo.segments.size() ;
             for( const long & seg : seginfo.segments ){
                 dataBuffer << seg ;
+            };
+            for( const double & distance : seginfo.distances ){
+                dataBuffer << distance ;
             };
             ++nItems ;
         }
@@ -1190,6 +1204,10 @@ void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &rec
         segItr->segments.resize(nSegs) ;
         for( size_t s=0; s<nSegs; ++s){
             dataBuffer >> segItr->segments[s] ;
+        }
+        segItr->distances.resize(nSegs) ;
+        for( size_t s=0; s<nSegs; ++s){
+            dataBuffer >> segItr->distances[s] ;
         }
     }
 

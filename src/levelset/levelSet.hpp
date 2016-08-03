@@ -294,9 +294,10 @@ class LevelSetSegmentation : public LevelSetObject {
     private:
     struct SegInfo{
         std::vector<long>                segments ;                /**< list of segments within narrow band */
+        std::vector<double>              distances ;               /**< list of segments distances within narrow band */
 
         SegInfo( ) ;
-        SegInfo( const std::vector<long> & ) ;
+        SegInfo( const std::vector<long> &_segments, const std::vector<double> &_distances ) ;
     };
 
     struct DistanceComparator
