@@ -383,7 +383,7 @@ void ElementInfo::initializePixelInfo()
 	ElementInfo vertexInfo(VERTEX);
 	ElementInfo lineInfo(LINE);
 
-	type      = QUAD;
+	type      = PIXEL;
 	dimension = 2;
 
 	// Vertices data
