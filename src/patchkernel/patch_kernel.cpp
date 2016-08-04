@@ -942,8 +942,9 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	// ====================================================================== //
 	// COLLAPSE DOUBLE VERTICES                                               //
 	// ====================================================================== //
-	long collapsedVertexId;
-	std::vector<bool> flag(getVertexCount(), false);
+	std::unordered_set<long> uniqueVertices;
+	uniqueVertices.reserve(getVertexCount());
+
 	for (auto &bin : bins) {
 		int nBinCells = bin.size();
 		if (nBinCells > 0) {
@@ -959,20 +960,35 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 
 				long k         = bin[list[j]][1];
 				long vertexId  = cell.getVertex(k);
+				if (uniqueVertices.count(vertexId) != 0) {
+					continue;
+				}
+
 				Vertex &vertex = m_vertices[vertexId];
 
+				long collapsedVertexId;
 				if (kd.exist(&vertex, collapsedVertexId) >= 0) {
 					cell.setVertex(k, collapsedVertexId);
-					if (!flag[vertexId]) {
-						flag[vertexId] = true;
-						collapsedVertices.push_back(vertexId);
-					}
 				} else {
-					flag[vertexId] = true;
 					kd.insert(&vertex, vertexId);
+					uniqueVertices.insert(vertexId);
 				}
 			}
 		}
+	}
+
+	// Create the list of collapsed vertices
+	size_t nCollapsedVertices = getVertexCount() - uniqueVertices.size();
+	collapsedVertices.resize(nCollapsedVertices);
+
+	size_t k = 0;
+	for (auto vertexItr = m_vertices.begin(); vertexItr != m_vertices.end(); ++vertexItr) {
+		long vertexId = vertexItr.getId();
+		if (uniqueVertices.count(vertexId) != 0) {
+			continue;
+		}
+
+		collapsedVertices[k++] = vertexId;
 	}
 
 	return collapsedVertices;
