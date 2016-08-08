@@ -140,6 +140,76 @@ data.n_solids = -1;
 
 return; };
 
+// -------------------------------------------------------------------------- //
+/*!
+    Constructor #1 for class STLObj.
+    Initialize an interface to stl file with name specified in filename.
+
+    \param[in] filename stl file name
+*/
+STLObj::STLObj(
+    string                              filename
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+// none
+
+// ========================================================================== //
+// SET DEFAULT VALUES                                                         //
+// ========================================================================== //
+
+// General info
+stl_name = utils::trim(filename);
+
+// Error flags
+err = 0;
+
+// stl content
+data.n_solids = -1;
+
+// ========================================================================== //
+// DETECT FILE TYPE (ASCII OR BINARY)                                         //
+// ========================================================================== //
+
+// Open file
+ifile_handle.open(stl_name, ifstream::in);
+
+// Check if the file start with the work "SOLID"
+char keyword[] = "solid";
+int keywordSize = sizeof(keyword) / sizeof(keyword[0]) - 1;
+
+char c;
+int nMatches = 0;
+while (ifile_handle.get(c)) {
+    if (isblank(c)) {
+        continue;
+    }
+
+    c = tolower(c);
+    if (c == keyword[nMatches]) {
+        ++nMatches;
+        if (nMatches == keywordSize) {
+            break;
+        }
+    } else {
+        break;
+    }
+}
+
+stl_type = (nMatches != keywordSize);
+
+// Close file
+ifile_handle.close();
+
+return; };
+
 // Public methods ----------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //

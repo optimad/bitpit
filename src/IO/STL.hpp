@@ -93,6 +93,9 @@ class STLObj {
         std::string                      ,                                    // stl file name
         bool                                                                  // flag for binary/ASCII stl file
     );
+    STLObj(                                                                  // Custom constructor #1
+        std::string                                                           // stl file name
+    );
 
     // Destructors ========================================================== //
     // none
