@@ -240,23 +240,69 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
  * and a different PID will be assigned to the PID of the different solids.
  * 
  * \param[in] stl_name name of stl file
- * \param[in] isBinary flag for binary (true), of ASCII (false) stl file
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file or if the same PID will be assigned to all cells
  * 
  * \result on output returns an error flag for I/O error
 */
+unsigned short SurfUnstructured::importSTL(const string &stl_name,
+                                           int PIDOffset, bool PIDSquash)
+{
+    // Create STL object
+    STLObj STL(stl_name);
+
+    // Import stl object
+    importSTL(STL, PIDOffset, PIDSquash);
+
+    return 0;
+}
+
+/*!
+ * Import surface tasselation from S.T.L. file. STL facet are added at to the
+ * present mesh, i.e. current mesh content is not discarded. Howver no checks
+ * are performed to ensure that no duplicated vertices or cells are created.
+ *
+ * If the input file is a multi-solid ASCII file, all solids will be loaded
+ * and a different PID will be assigned to the PID of the different solids.
+ *
+ * \param[in] stl_name name of stl file
+ * \param[in] isBinary flag for binary (true), of ASCII (false) stl file
+ * \param[in] PIDOffset is the offset for the PID numbering
+ * \param[in] PIDSquash controls if the PID of the cells will be read from
+ * the file or if the same PID will be assigned to all cells
+ *
+ * \result on output returns an error flag for I/O error
+*/
 unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &isBinary,
                                            int PIDOffset, bool PIDSquash)
 {
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
-
-    // STL Object
+    // Create STL object
     STLObj STL(stl_name, isBinary);
 
+    // Import stl object
+    importSTL(STL, PIDOffset, PIDSquash);
+
+    return 0;
+}
+
+/*!
+ * Import surface tasselation from S.T.L. file. STL facet are added at to the
+ * present mesh, i.e. current mesh content is not discarded. Howver no checks
+ * are performed to ensure that no duplicated vertices or cells are created.
+ *
+ * If the input file is a multi-solid ASCII file, all solids will be loaded
+ * and a different PID will be assigned to the PID of the different solids.
+ *
+ * \param[in] STL is the STL object to import
+ * \param[in] PIDOffset is the offset for the PID numbering
+ * \param[in] PIDSquash controls if the PID of the cells will be read from
+ * the file or if the same PID will be assigned to all cells
+ *
+ * \result on output returns an error flag for I/O error
+*/
+unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash)
+{
     // ====================================================================== //
     // OPEN STL FILE                                                          //
     // ====================================================================== //
@@ -343,7 +389,7 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
         // ====================================================================== //
         // Multi-body STL files are supported only in ASCII mode                        //
         // ====================================================================== //
-        if (isBinary) {
+        if (STL.stl_type) {
             break;
         }
     }
