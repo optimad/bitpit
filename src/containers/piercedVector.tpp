@@ -1260,22 +1260,28 @@ std::size_t PiercedVector<value_t, id_t>::getRawIndex(id_t id) const
 template<typename value_t, typename id_t>
 std::vector<id_t> PiercedVector<value_t, id_t>::getIds(bool ordered) const
 {
-	// Initialize the vector wth the ids
+	size_t nIds = size();
+
+	// Initialize the vector
 	std::vector<id_t> ids;
-	if (size() == 0) {
+	if (nIds == 0) {
 		return ids;
 	}
-	ids.reserve(size());
+
+	// Resize the vector
+	ids.resize(nIds);
 
 	// Extract the ids
+	size_t n   = 0;
 	size_t pos = m_first_pos;
+	while (true) {
+		ids[n] = m_ids[pos];
+		if (n == nIds - 1) {
+			break;
+		}
 
-	ids.push_back(m_ids[pos]);
-	if (size() > 1) {
-		do {
-			pos = findNextUsedPos(pos);
-			ids.push_back(m_ids[pos]);
-		} while (pos != m_last_pos);
+		n++;
+		pos = findNextUsedPos(pos);
 	}
 
 	// Sort the ids
