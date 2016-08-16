@@ -693,7 +693,7 @@ std::vector< std::vector<T> > matmulDiag(
     int d1= M.size() ;
 
     for( int i=0; i<d1; i++ ){
-        Q[i] *= N[i] ;
+        Q[i] = M[i] * N ;
     };
 
     return (Q);
@@ -741,10 +741,10 @@ std::array< std::array<T, d2> , d1> matmulDiag(
 ) {
 
     int i;
-    std::array< std::array<T, d2> , d1> Q(M);
+    std::array< std::array<T, d2> , d1> Q;
 
     for( i=0; i<d1; i++){
-        Q[i] *= N[i] ;
+        Q[i] = M[i] *N ;
     };
 
     return (Q);
