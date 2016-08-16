@@ -514,12 +514,12 @@ private:
 	/*!
 		Position of the first element in the internal vector.
 	*/
-	std::size_t m_first_pos;
+	std::size_t m_begin_pos;
 
 	/*!
 		Position of the last element in the internal vector.
 	*/
-	std::size_t m_last_pos;
+	std::size_t m_end_pos;
 
 	/*!
 		Position of the first dirty element.
@@ -528,7 +528,7 @@ private:
 		properly defined, meaning that the iterator can take longer to
 		iterate through the elements.
 	*/
-	std::size_t m_first_dirty_pos;
+	std::size_t m_dirty_begin_pos;
 
 	/*!
 		Compares the id of the elements in the specified position.
@@ -598,8 +598,8 @@ private:
 	void appendPosId(const id_t &id);
 	void insertPosId(const std::size_t &pos, const id_t &id);
 	void setEmptyPosId(const std::size_t &pos, const std::size_t &nextUsedPos);
-	void setFirstUsedPos(const std::size_t &updated_first_pos);
-	void setLastUsedPos(const std::size_t &updated_last_pos);
+	void setBeginPos(const std::size_t &pos);
+	void setEndPos(const std::size_t &pos);
 	void swapPos(const std::size_t &pos_1, const id_t &id_1, const std::size_t &pos_2, const id_t &id_2);
 
 	void storageShrink(size_t n, bool force = false);

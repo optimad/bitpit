@@ -62,7 +62,7 @@ template<typename value_t, typename id_t, typename value_no_cv_t>
 id_t PiercedIterator<value_t, id_t, value_no_cv_t>::getId(const id_t &fallback) const noexcept
 {
 	id_t id;
-	if (m_pos > m_container->m_last_pos) {
+	if (m_pos >= m_container->m_end_pos) {
 		id = fallback;
 		return id;
 	}
@@ -96,8 +96,8 @@ PiercedIterator<value_t, id_t, value_no_cv_t> & PiercedIterator<value_t, id_t, v
 	size_t delta = 1;
 	while (true) {
 		m_pos += delta;
-		if (m_pos > m_container->m_last_pos) {
-			m_pos = m_container->m_last_pos + 1;
+		if (m_pos >= m_container->m_end_pos) {
+			m_pos = m_container->m_end_pos;
 			return *this;
 		}
 
@@ -677,10 +677,10 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::er
 	piercePos(pos, !delayed);
 
 	// Return the iterator to the next element
-	if (empty() || pos >= m_last_pos) {
-		return end();
-	} else {
+	if (pos + 1 < m_end_pos) {
 		return getIteratorFromPos(findNextUsedPos(pos));
+	} else {
+		return end();
 	}
 }
 
@@ -700,8 +700,8 @@ void PiercedVector<value_t, id_t>::popBack()
 	} else if (size() == 1) {
 		clear();
 	} else {
-		std::size_t updated_last_pos = findPrevUsedPos(m_last_pos);
-		storageShrink(updated_last_pos + 1);
+		std::size_t last_used_pos = findPrevUsedPos(m_end_pos - 1);
+		storageShrink(last_used_pos + 1);
 	}
 }
 
@@ -750,15 +750,15 @@ void PiercedVector<value_t, id_t>::clear(bool release)
 		std::vector<value_t>().swap(m_v);
 	}
 
-	// Reset first and last counters
-	setFirstUsedPos(0);
-	setLastUsedPos(0);
+	// Reset begin and end
+	setBeginPos(0);
+	setEndPos(0);
 
 	// Clear holes
 	holesClear(release);
 
 	// There are no dirty positions
-	m_first_dirty_pos = m_last_pos + 1;
+	m_dirty_begin_pos = m_end_pos;
 }
 
 /*!
@@ -843,13 +843,13 @@ void PiercedVector<value_t, id_t>::resize(std::size_t n)
 	holesFlush();
 
 	// Find the id of the last element
-	id_t last_id = getSizeMarker(n - 1);
+	id_t last_stored_id = getSizeMarker(n - 1);
 
-	// Find the updated last position
-	std::size_t updated_last_pos = getPosFromId(last_id);
+	// Find the last position
+	std::size_t last_used_pos = getPosFromId(last_stored_id);
 
-	// Update the last position
-	storageShrink(updated_last_pos + 1);
+	// Shrink the storage
+	storageShrink(last_used_pos + 1);
 }
 
 /*!
@@ -904,14 +904,14 @@ void PiercedVector<value_t, id_t>::squeeze()
 	if (nHoles != 0) {
 		// Move the elements
 		std::size_t firstPosToUpdate;
-		if (m_first_pos == 0) {
+		if (m_begin_pos == 0) {
 			firstPosToUpdate = *(m_holes_regular_end - 1);
 		} else {
 			firstPosToUpdate = 0;
 		}
 
 		std::size_t offset = 0;
-		for (std::size_t pos = firstPosToUpdate; pos <= m_last_pos; pos++) {
+		for (std::size_t pos = firstPosToUpdate; pos < m_end_pos; pos++) {
 			if (offset < nHoles && *(m_holes_regular_end - offset - 1) == pos) {
 				++offset;
 				continue;
@@ -928,9 +928,9 @@ void PiercedVector<value_t, id_t>::squeeze()
 		// Clear the holes
 		holesClear();
 
-		// Reset first and last counters
-		setFirstUsedPos(0);
-		setLastUsedPos(size() - 1);
+		// Reset begin and end
+		setBeginPos(0);
+		setEndPos(size());
 
 		// Shrink the container
 		storageShrink(size(), true);
@@ -976,9 +976,9 @@ void PiercedVector<value_t, id_t>::shrinkToFit()
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::swap(PiercedVector& x) noexcept
 {
-	std::swap(x.m_first_pos, m_first_pos);
-	std::swap(x.m_last_pos, m_last_pos);
-	std::swap(x.m_first_dirty_pos, m_first_dirty_pos);
+	std::swap(x.m_begin_pos, m_begin_pos);
+	std::swap(x.m_end_pos, m_end_pos);
+	std::swap(x.m_dirty_begin_pos, m_dirty_begin_pos);
 	std::swap(x.m_ids, m_ids);
 	std::swap(x.m_v, m_v);
 	std::swap(x.m_holes, m_holes);
@@ -1048,11 +1048,11 @@ void PiercedVector<value_t, id_t>::dump()
 	}
 
 	std::cout << std::endl;
-	std::cout << " m_first_pos: " << m_first_pos << std::endl;
-	std::cout << " m_last_pos: " <<  m_last_pos << std::endl;
+	std::cout << " m_begin_pos: " << m_begin_pos << std::endl;
+	std::cout << " m_end_pos: " <<  m_end_pos << std::endl;
 	std::cout << " Stored ids: " << std::endl;
 	if (m_ids.size() > 0) {
-		for (size_t k = 0; k <= m_last_pos; ++k) {
+		for (size_t k = 0; k < m_end_pos; ++k) {
 			std::cout << m_ids[k] << std::endl;
 		}
 	} else {
@@ -1099,7 +1099,7 @@ bool PiercedVector<value_t, id_t>::empty() const
 template<typename value_t, typename id_t>
 bool PiercedVector<value_t, id_t>::isIteratorSlow()
 {
-	return (m_first_dirty_pos <= m_last_pos);
+	return (m_dirty_begin_pos < m_end_pos);
 }
 
 /*!
@@ -1273,7 +1273,7 @@ std::vector<id_t> PiercedVector<value_t, id_t>::getIds(bool ordered) const
 
 	// Extract the ids
 	size_t n   = 0;
-	size_t pos = m_first_pos;
+	size_t pos = m_begin_pos;
 	while (true) {
 		ids[n] = m_ids[pos];
 		if (n == nIds - 1) {
@@ -1315,9 +1315,9 @@ id_t PiercedVector<value_t, id_t>::getSizeMarker(const size_t &targetSize, const
 	if (targetSize >= size()) {
 		return fallback;
 	} else if (targetSize == 0) {
-		return m_ids[m_first_pos];
+		return m_ids[m_begin_pos];
 	} else if (targetSize == (size() - 1)) {
-		return m_ids[m_last_pos];
+		return m_ids[m_end_pos - 1];
 	}
 
 	// Sort the holes
@@ -1392,7 +1392,7 @@ __PV_REFERENCE__ PiercedVector<value_t, id_t>::back()
 		throw std::out_of_range ("Vector is empty");
 	}
 
-	return m_v[m_last_pos];
+	return m_v[m_end_pos - 1];
 }
 
 /*!
@@ -1408,7 +1408,7 @@ __PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::back() const
 		throw std::out_of_range ("Vector is empty");
 	}
 
-	return m_v[m_last_pos];
+	return m_v[m_end_pos - 1];
 }
 
 /*!
@@ -1424,7 +1424,7 @@ __PV_REFERENCE__ PiercedVector<value_t, id_t>::front()
 		throw std::out_of_range ("Vector is empty");
 	}
 
-	return m_v[m_first_pos];
+	return m_v[m_begin_pos];
 }
 
 /*!
@@ -1440,7 +1440,7 @@ __PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::front() const
 		throw std::out_of_range ("Vector is empty");
 	}
 
-	return m_v[m_first_pos];
+	return m_v[m_begin_pos];
 }
 
 /*!
@@ -1607,7 +1607,7 @@ typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_
 template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::begin() noexcept
 {
-	return getIteratorFromPos(m_first_pos);
+	return getIteratorFromPos(m_begin_pos);
 }
 
 /*!
@@ -1620,7 +1620,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::be
 template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::end() noexcept
 {
-	return getIteratorFromPos(m_last_pos + 1);
+	return getIteratorFromPos(m_end_pos);
 }
 
 /*!
@@ -1659,7 +1659,7 @@ typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_
 template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::cbegin() const noexcept
 {
-	return getConstIteratorFromPos(m_first_pos);
+	return getConstIteratorFromPos(m_begin_pos);
 }
 
 /*!
@@ -1672,7 +1672,7 @@ typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_
 template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::cend() const noexcept
 {
-	return getConstIteratorFromPos(m_last_pos + 1);
+	return getConstIteratorFromPos(m_end_pos);
 }
 
 /*!
@@ -1762,11 +1762,7 @@ typename PiercedVector<value_t, id_t>::raw_const_iterator PiercedVector<value_t,
 template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::getIteratorFromPos(const std::size_t &pos) noexcept
 {
-	if (empty() || pos > m_last_pos) {
-		return iterator(this, m_last_pos + 1);
-	} else {
-		return iterator(this, pos);
-	}
+	return iterator(this, pos);
 }
 
 /*!
@@ -1780,11 +1776,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::ge
 template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::getConstIteratorFromPos(const std::size_t &pos) const noexcept
 {
-	if (empty() || pos > m_last_pos) {
-		return const_iterator(this, m_last_pos + 1);
-	} else {
-		return const_iterator(this, pos);
-	}
+	return const_iterator(this, pos);
 }
 
 /*!
@@ -1824,7 +1816,7 @@ typename PiercedVector<value_t, id_t>::StoragePosition PiercedVector<value_t, id
 	appendPosId(id);
 
 	// Return the filled location
-	return StoragePosition(m_last_pos, false);
+	return StoragePosition(m_end_pos - 1, false);
 }
 
 /*!
@@ -1904,8 +1896,8 @@ typename PiercedVector<value_t, id_t>::StoragePosition PiercedVector<value_t, id
 		// If the vector contains a hole, this means that is not empty
 		// and that the hole is before the last element, therefore
 		// only the first position counter may have changed.
-		if (pos < m_first_pos) {
-			setFirstUsedPos(pos);
+		if (pos < m_begin_pos) {
+			setBeginPos(pos);
 		}
 
 		// Fill the position
@@ -1959,8 +1951,8 @@ typename PiercedVector<value_t, id_t>::StoragePosition PiercedVector<value_t, id
 		// It is not possible that a hole is past the last element of the
 		// vector. We should olny consider that case where a holes is
 		// below the first element.
-		if (pos < m_first_pos) {
-			setFirstUsedPos(pos);
+		if (pos < m_begin_pos) {
+			setBeginPos(pos);
 		}
 
 		// If previos element is a hole, its id and the ids of the
@@ -2079,12 +2071,12 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 	// If removing the last position, there is no need to add the
 	// position to the holes, it's enough to update the last position
 	// counter or clear the container if this was the last hole.
-	if (pos == m_last_pos) {
+	if (pos + 1 == m_end_pos) {
 		if (size() == 1) {
 			clear();
 		} else {
-			std::size_t updated_last_pos = findPrevUsedPos(m_last_pos);
-			storageShrink(updated_last_pos + 1);
+			std::size_t last_used_pos = findPrevUsedPos(m_end_pos - 1);
+			storageShrink(last_used_pos + 1);
 		}
 		return;
 	}
@@ -2099,12 +2091,12 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 	// Reset the position
 	size_t nextUsedPos = findNextUsedPos(pos);
 	setEmptyPosId(pos, nextUsedPos);
-	m_first_dirty_pos = std::min(pos, m_first_dirty_pos);
+	m_dirty_begin_pos = std::min(pos, m_dirty_begin_pos);
 
 	// If removing the first position, update the counter
-	if (pos == m_first_pos) {
-		std::size_t updated_first_pos = findNextUsedPos(m_first_pos);
-		setFirstUsedPos(updated_first_pos);
+	if (pos == m_begin_pos) {
+		std::size_t begin = findNextUsedPos(m_begin_pos);
+		setBeginPos(begin);
 	}
 
 	// If the list of pending holes is full, flush the holes.
@@ -2248,7 +2240,7 @@ void PiercedVector<value_t, id_t>::holesFlush()
 	holesSortPending();
 
 	auto itr = m_holes_pending_begin;
-	size_t pos = m_last_pos + 1;
+	size_t pos = m_end_pos;
 	do {
 		if (*itr >= pos) {
 			itr++;
@@ -2314,7 +2306,7 @@ void PiercedVector<value_t, id_t>::holesFlush()
 	holesClearPending();
 
 	// There are no more dirty positions
-	m_first_dirty_pos = m_last_pos + 1;
+	m_dirty_begin_pos = m_end_pos;
 }
 
 
@@ -2385,7 +2377,7 @@ std::size_t PiercedVector<value_t, id_t>::findPrevUsedPos(std::size_t pos) const
 {
 	std::size_t prev_pos = pos;
 	while (true) {
-		if (prev_pos == m_first_pos) {
+		if (prev_pos == m_begin_pos) {
 			throw std::out_of_range ("Already in the firts position");
 		}
 		prev_pos--;
@@ -2414,7 +2406,7 @@ std::size_t PiercedVector<value_t, id_t>::findNextUsedPos(std::size_t pos) const
 	std::size_t next_pos   = pos;
 	std::size_t next_delta = 1;
 	while (true) {
-		if (next_pos == m_last_pos) {
+		if (next_pos + 1 == m_end_pos) {
 			throw std::out_of_range ("Already in the last position");
 		}
 		next_pos += next_delta;
@@ -2507,10 +2499,10 @@ void PiercedVector<value_t, id_t>::appendPosId(const id_t &id)
 	storedId = id;
 
 	// Update last used position
-	setLastUsedPos(m_ids.size() - 1);
+	setEndPos(m_ids.size());
 
 	// Update the id map
-	m_pos[id] = m_last_pos;
+	m_pos[id] = m_end_pos - 1;
 }
 
 /*!
@@ -2523,7 +2515,7 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::insertPosId(const std::size_t &pos, const id_t &id)
 {
 	// We cannot insert elements past the last position
-	if (pos > m_last_pos) {
+	if (pos >= m_end_pos) {
 		throw std::out_of_range ("Unable to insert elements past the last position");
 	}
 
@@ -2531,10 +2523,10 @@ void PiercedVector<value_t, id_t>::insertPosId(const std::size_t &pos, const id_
 	m_ids.emplace(m_ids.begin() + pos, id);
 
 	// Update last used position
-	setLastUsedPos(m_ids.size() - 1);
+	setEndPos(m_ids.size());
 
 	// Update the id map
-	for (size_t i = pos + 1; i <= m_last_pos; ++i) {
+	for (size_t i = pos + 1; i < m_end_pos; ++i) {
 		id_t id_i = m_ids[i];
 		if (id_i >= 0) {
 			m_pos[id_i] = i;
@@ -2586,18 +2578,18 @@ void PiercedVector<value_t, id_t>::setEmptyPosId(const std::size_t &pos, const s
 	Set the first used position.
 */
 template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::setFirstUsedPos(const std::size_t &updated_first_pos)
+void PiercedVector<value_t, id_t>::setBeginPos(const std::size_t &pos)
 {
-	m_first_pos = updated_first_pos;
+	m_begin_pos = pos;
 }
 
 /*!
 	Set the last used position.
 */
 template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::setLastUsedPos(const std::size_t &updated_last_pos)
+void PiercedVector<value_t, id_t>::setEndPos(const std::size_t &pos)
 {
-	m_last_pos = updated_last_pos;
+	m_end_pos = pos;
 }
 
 /*!
@@ -2638,7 +2630,7 @@ void PiercedVector<value_t, id_t>::storageShrink(std::size_t n, bool force)
 
 	// When the new last position is before the first one this is equivalent
 	// to a clear
-	if (n < (m_first_pos + 1)) {
+	if (n < (m_begin_pos + 1)) {
 		clear();
 		return;
 	}
@@ -2656,7 +2648,7 @@ void PiercedVector<value_t, id_t>::storageShrink(std::size_t n, bool force)
 	m_v.resize(n);
 
 	// Update the last position
-	setLastUsedPos(n - 1);
+	setEndPos(n);
 
 	// If we don't need to update the holes we can exit now
 	if (holesCount() == 0) {
@@ -2665,7 +2657,7 @@ void PiercedVector<value_t, id_t>::storageShrink(std::size_t n, bool force)
 
 	// Remove regular holes beyond the updated last position
 	holesSortRegular();
-	m_holes_regular_begin = std::lower_bound(m_holes_regular_begin, m_holes_regular_end, m_last_pos, std::greater<std::size_t>());
+	m_holes_regular_begin = std::lower_bound(m_holes_regular_begin, m_holes_regular_end, m_end_pos - 1, std::greater<std::size_t>());
 	if (m_holes_regular_begin == m_holes_regular_end) {
 		m_holes_regular_begin = m_holes.begin();
 		m_holes_regular_end   = m_holes_regular_begin;
@@ -2673,7 +2665,7 @@ void PiercedVector<value_t, id_t>::storageShrink(std::size_t n, bool force)
 
 	// Remove pending holes beyond the updated last position
 	holesSortPending();
-	m_holes_pending_begin = std::lower_bound(m_holes_pending_begin, m_holes_pending_end, m_last_pos, std::greater<std::size_t>());
+	m_holes_pending_begin = std::lower_bound(m_holes_pending_begin, m_holes_pending_end, m_end_pos - 1, std::greater<std::size_t>());
 	if (m_holes_pending_begin == m_holes_pending_end) {
 		m_holes_pending_begin = m_holes_regular_end;
 		m_holes_pending_end   = m_holes_pending_begin;
