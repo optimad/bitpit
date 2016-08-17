@@ -138,14 +138,17 @@ int main( int argc, char *argv[]){
     bitpit::LevelSet                levelset;
 
     std::vector<bitpit::adaption::Info> mapper ;
-    std::vector<double>             LS ;
-    std::vector<double>::iterator   itLS ;
+    int                             id0, id1 ;
+    std::vector<double>             LS, LS0, LS1 ;
+    std::vector<double>::iterator   itLS, itLS0, itLS1 ;
 
     levelset.setMesh(&mesh) ;
     id0 = levelset.addObject(std::move(STL0),M_PI) ;
     id1 = levelset.addObject(std::move(STL1),M_PI) ;
 
     mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
+    mesh.getVTK().addData("ls0", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS0) ;
+    mesh.getVTK().addData("ls1", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS1) ;
     mesh.getVTK().setName("levelset_003") ;
     mesh.getVTK().setCounter() ;
 
@@ -162,11 +165,19 @@ int main( int argc, char *argv[]){
     std::cout << " - Exporting data" << endl;
 
     LS.resize(mesh.getCellCount() ) ;
+    LS0.resize(mesh.getCellCount() ) ;
+    LS1.resize(mesh.getCellCount() ) ;
     itLS = LS.begin() ;
+    itLS0 = LS0.begin() ;
+    itLS1 = LS1.begin() ;
     for( auto & cell : mesh.getCells() ){
-        const long &id = cell.getId() ;
-        *itLS = levelset.getLS(id) ;
+        const long &cellId = cell.getId() ;
+        *itLS = levelset.getLS(cellId) ;
+        *itLS0 = levelset.getLS(id0,cellId) ;
+        *itLS1 = levelset.getLS(id1,cellId) ;
         ++itLS ;
+        ++itLS0 ;
+        ++itLS1 ;
     };
 
     mesh.write() ;
@@ -191,11 +202,19 @@ int main( int argc, char *argv[]){
         std::cout << " Narrow Band " << i << " " << levelset.getSizeNarrowBand() << endl;
 
         LS.resize(mesh.getCellCount() ) ;
+        LS0.resize(mesh.getCellCount() ) ;
+        LS1.resize(mesh.getCellCount() ) ;
         itLS = LS.begin() ;
+        itLS0 = LS0.begin() ;
+        itLS1 = LS1.begin() ;
         for( auto & cell : mesh.getCells() ){
-            const long &id = cell.getId() ;
-            *itLS = levelset.getLS(id) ;
+            const long &cellId = cell.getId() ;
+            *itLS = levelset.getLS(cellId) ;
+            *itLS0 = levelset.getLS(id0,cellId) ;
+            *itLS1 = levelset.getLS(id1,cellId) ;
             ++itLS ;
+            ++itLS0 ;
+            ++itLS1 ;
         };
         mesh.write() ;
     }
