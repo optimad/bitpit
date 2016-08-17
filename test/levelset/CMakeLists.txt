@@ -35,6 +35,7 @@ list(APPEND TESTS "test_levelset_00002")
 list(APPEND TESTS "test_levelset_00003")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_levelset_parallel_00001:3")
+	list(APPEND TESTS "test_levelset_parallel_00002:3")
 endif()
 
 set(LEVELSET_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the levelset module" FORCE)
@@ -72,6 +73,11 @@ if (ENABLE_MPI)
 	add_custom_command(
 		TARGET "test_levelset_parallel_00001" PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
+	)
+	add_custom_command(
+		TARGET "test_levelset_parallel_00002" PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/naca0012.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/naca0012.dgf"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/square.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/square.dgf"
 	)
 endif ()
 
