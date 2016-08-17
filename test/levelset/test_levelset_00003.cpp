@@ -48,6 +48,7 @@
 #endif
 
 // bitpit
+# include "bitpit_CG.hpp"
 # include "bitpit_levelset.hpp"
 
 // ========================================================================== //
@@ -69,32 +70,51 @@ int main( int argc, char *argv[]){
     uint8_t                 dimensions(2);
 
 
-    // Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured (0,1,dimensions) );
+    // First Input geometry
+    std::unique_ptr<bitpit::SurfUnstructured> STL0( new bitpit::SurfUnstructured (0,1,dimensions) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 
-    STL->importDGF("./data/naca0012.dgf");
+    STL0->importDGF("./data/naca0012.dgf");
 
-    STL->deleteCoincidentVertices() ;
-    STL->buildAdjacencies() ;
+    STL0->deleteCoincidentVertices() ;
+    STL0->buildAdjacencies() ;
 
-    STL->getVTK().setName("geometry_003") ;
-    STL->write() ;
+    STL0->getVTK().setName("geometry_003_0") ;
+    STL0->write() ;
 
-    std::cout << "n. vertex: " << STL->getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL->getCellCount() << std::endl;
+    std::cout << "n. vertex: " << STL0->getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL0->getCellCount() << std::endl;
 
 
+    // Second Input geometry
+    std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (0,1,dimensions) );
+
+    std::cout << " - Loading stl geometry" << std::endl;
+
+    STL1->importDGF("./data/square.dgf");
+
+    STL1->deleteCoincidentVertices() ;
+    STL1->buildAdjacencies() ;
+
+    STL1->getVTK().setName("geometry_003_1") ;
+    STL1->write() ;
+
+    std::cout << "n. vertex: " << STL1->getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL1->getCellCount() << std::endl;
 
     // ========================================================================== //
     // CREATE MESH                                                                //
     // ========================================================================== //
     std::cout << " - Setting mesh" << std::endl;
+    std::array<double,3>    meshMin0, meshMax0;
+    std::array<double,3>    meshMin1, meshMax1;
     std::array<double,3>    meshMin, meshMax, delta ;
     double                  h(0), dh ;
 
-    STL->getBoundingBox( meshMin, meshMax ) ;
+    STL0->getBoundingBox( meshMin0, meshMax0 ) ;
+    STL1->getBoundingBox( meshMin1, meshMax1 ) ;
+    bitpit::CGElem::unionAABB( meshMin0, meshMax0, meshMin1, meshMax1, meshMin, meshMax ) ;
 
     delta = meshMax -meshMin ;
     meshMin -=  0.1*delta ;
@@ -122,7 +142,8 @@ int main( int argc, char *argv[]){
     std::vector<double>::iterator   itLS ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject(std::move(STL),M_PI) ;
+    id0 = levelset.addObject(std::move(STL0),M_PI) ;
+    id1 = levelset.addObject(std::move(STL1),M_PI) ;
 
     mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_003") ;
@@ -137,6 +158,7 @@ int main( int argc, char *argv[]){
     elapsed_init = chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
     // Export level set ------------------------------------------------------- //
+    std::cout << " Narrow Band " << levelset.getSizeNarrowBand() << endl;
     std::cout << " - Exporting data" << endl;
 
     LS.resize(mesh.getCellCount() ) ;
@@ -154,7 +176,7 @@ int main( int argc, char *argv[]){
 
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            if( std::abs(levelset.getLS(id)) < 2.*mesh.evalCellSize(id) ){
+            if( std::abs(levelset.getLS(id)) < mesh.evalCellSize(id) ){
                 mesh.markCellForRefinement(id) ;
             }
         }
@@ -165,6 +187,8 @@ int main( int argc, char *argv[]){
         end = std::chrono::system_clock::now();
 
         elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
+
+        std::cout << " Narrow Band " << i << " " << levelset.getSizeNarrowBand() << endl;
 
         LS.resize(mesh.getCellCount() ) ;
         itLS = LS.begin() ;
