@@ -158,6 +158,8 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
  */
 double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects ){
 
+    bool coarseningInNarrowBand=false ;
+
     // assumes that LS information is relevant to OLD!!! grid
     // scrrens old narrow band for coarsest elements
 
@@ -192,6 +194,9 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
         for ( auto & parent : info.previous){
             if( isInNarrowBand(parent) ){
                 parentInNarrowBand = true;
+                if( info.type == adaption::Type::TYPE_COARSENING ){
+                    coarseningInNarrowBand=true ;
+                }
                 break;
             }
         }
@@ -262,6 +267,11 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
 
         // Update the level
         newRSearch = std::max( newRSearch, computeRSearchFromCell(cellId) ) ;
+
+    }
+
+    if(coarseningInNarrowBand==false){
+        newRSearch = std::min( newRSearch, getSizeNarrowBand() ) ;
     }
 
 # if BITPIT_ENABLE_MPI
