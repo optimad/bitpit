@@ -1114,13 +1114,24 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
  */
 void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
 
-    long nItems = sendList.size(), counter(0) ;
-    int dataSize = 10*sizeof(long)  +sizeof(bool) +sizeof(long) +sizeof(int) ;
+    long nItems(0), counter(0) ;
 
-    dataBuffer.setCapacity(nItems*dataSize) ;
+
+    //determine number of elements to send
+    for( const auto &index : sendList){
+        if( m_seg.exists(index)){
+            nItems++ ;
+            const auto &seginfo = m_seg[index] ;
+            counter += seginfo.segments.size() ;
+        }
+
+    }
+    sizeBuffer << nItems ;
+
+    dataBuffer.setCapacity(dataBuffer.capacity() +nItems*2*sizeof(long) +counter*(sizeof(long)+sizeof(double))) ;
 
     //determine elements to send
-    nItems = 0 ;
+    counter= 0 ;
     for( const auto &index : sendList){
         if( m_seg.exists(index)){
             const auto &seginfo = m_seg[index] ;
@@ -1132,15 +1143,12 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
             for( const double & distance : seginfo.distances ){
                 dataBuffer << distance ;
             };
-            ++nItems ;
         }
 
         ++counter ;
     }
 
-
     dataBuffer.squeeze() ;
-    sizeBuffer << nItems ;
 
     return;
 };
