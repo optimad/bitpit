@@ -471,7 +471,16 @@ void OBinaryStream::write(
     size_t                       size
 ) {
     if ( buffer.size() - current_pos < size ) {
-        buffer.resize( size + current_pos );
+        // We should take into account the current position in the buffer only
+        // when the buffer is not empty. That's because when the buffer is
+        // empty, the current position is set to 0 but there are not elements
+        // in the buffer.
+        size_t bufferSize = size;
+        if (!buffer.empty()) {
+            bufferSize += (current_pos + 1);
+        }
+
+        buffer.resize(bufferSize);
     }
     for (size_t i = 0;  i < size; ++i) {
         buffer[current_pos] = p[i];
@@ -492,7 +501,16 @@ void OBinaryStream::write(
     const vector<char>          &vec
 ) {
     if ( buffer.size() - current_pos < vec.size() ) {
-        buffer.resize( vec.size() + current_pos );
+        // We should take into account the current position in the buffer only
+        // when the buffer is not empty. That's because when the buffer is
+        // empty, the current position is set to 0 but there are not elements
+        // in the buffer.
+        size_t bufferSize = vec.size();
+        if (!buffer.empty()) {
+            bufferSize += (current_pos + 1);
+        }
+
+        buffer.resize(bufferSize);
     }
     for(size_t i = 0; i < vec.size(); ++i) {
         buffer[current_pos] = vec[i];
