@@ -208,11 +208,6 @@ class LevelSetKernel{
     void                                        solveEikonal( double, double );
     virtual double                              updateEikonal( double, double, const long &, const std::unordered_map<long,short> & ) ; 
 
-    std::array<double,3>                        computeGradientUpwind(const long &) ;
-    std::array<double,3>                        computeGradientCentral(const long &) ;
-
-
-
 };
 
 class LevelSetCartesian : public LevelSetKernel{
