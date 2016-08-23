@@ -563,7 +563,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
     // Finish narrow band update
     if (updateNarrowBand) {
-        newRSearch = m_kernel->computeSizeNarrowBandFromLS();
+        newRSearch = m_kernel->computeSizeNarrowBandFromLS( m_signedDF );
 
         m_kernel->filterOutsideNarrowBand(newRSearch) ;
         m_kernel->setSizeNarrowBand(newRSearch) ;

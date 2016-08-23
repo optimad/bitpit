@@ -215,14 +215,17 @@ void LevelSetKernel::setSizeNarrowBand(double r){
 
 /*!
  * Compute the size of the narrow band using the levelset value
- * @param[in]  mapper mesh modifications
+ * @param[in] signd indicates if signed or unsigned distances are calculated
  */
-double LevelSetKernel::computeSizeNarrowBandFromLS( ){
+double LevelSetKernel::computeSizeNarrowBandFromLS( const bool &signd ){
 
     // We need to consider only the cells with a levelset value less than
     // local narrow band (ie. size of the narrowband evalauted using the
     // cell).
     double newRSearch = 0.;
+
+    int factor  ;
+
     for (auto itr = m_ls.begin(); itr != m_ls.end(); ++itr) {
         // Discard cells outside the narrow band
         long id = itr.getId() ;
@@ -245,8 +248,9 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( ){
             }
 
             if( isInNarrowBand(neighId)){
+                factor = (int) signd * getSign(ob,cellId) + (int) (!signd) ;
                 std::array<double,3> diff = computeCellCentroid(neighId) - myCenter ;
-                if( dotProduct(diff, getGradient(id)) > 0){
+                if( factor *dotProduct(diff, getGradient(id)) > 0){
                     localRSearch = std::max( localRSearch, norm2(diff) );
                 }
             }

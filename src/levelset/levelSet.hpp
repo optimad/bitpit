@@ -174,7 +174,7 @@ class LevelSetKernel{
     void                                        setSizeNarrowBand(double) ;
 
     virtual double                              computeSizeNarrowBand( LevelSetObject * )=0;
-    virtual double                              computeSizeNarrowBandFromLS(  );
+    virtual double                              computeSizeNarrowBandFromLS( const bool & );
     virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects )=0;
     virtual double                              computeRSearchFromCell( long id ) = 0;
 
