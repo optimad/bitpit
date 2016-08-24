@@ -1305,7 +1305,7 @@ void VolCartesian::translate(std::array<double, 3> translation)
  */
 void VolCartesian::scale(std::array<double, 3> scaling)
 {
-	for (int n = 1; n < 3; ++n) {
+	for (int n = 0; n < 3; ++n) {
 		m_maxCoords[n] = m_minCoords[n] + scaling[n] * (m_maxCoords[n] - m_minCoords[n]);
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
 			m_vertexCoords[n][i] = m_minCoords[n] + scaling[n] * (m_vertexCoords[n][i] - m_minCoords[n]);
