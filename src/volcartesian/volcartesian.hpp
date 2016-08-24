@@ -83,6 +83,8 @@ public:
 	std::vector<long> extractVertexSubSet(int const &idxMin, int const &idxMax);
 	std::vector<long> extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax);
 
+	std::array<double, 3> getOrigin() const;
+	void setOrigin(const std::array<double, 3> &origin);
 	void translate(std::array<double, 3> translation);
 	void scale(std::array<double, 3> scaling);
 

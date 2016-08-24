@@ -1276,6 +1276,32 @@ std::vector<long> VolCartesian::extractVertexSubSet(std::array<double, 3> const 
 }
 
 /*!
+	Gets the origin of the patch.
+
+	The origin is the lower-left-back corner of the box that defines the patch
+	domain.
+
+	\return The origin of the patch.
+*/
+std::array<double, 3> VolCartesian::getOrigin() const
+{
+	return m_minCoords;
+}
+
+/*!
+	Sets the origin of the patch.
+
+	The origin is the lower-left-back corner.
+
+	\param origin is the new origin of the patch
+*/
+void VolCartesian::setOrigin(const std::array<double, 3> &origin)
+{
+	std::array<double, 3> translation = origin - getOrigin();
+	translate(translation);
+}
+
+/*!
 	Translates the patch.
 
 	\param[in] translation is the translation vector
