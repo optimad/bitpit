@@ -87,11 +87,11 @@ namespace bitpit {
         // =================================================================================== //
         // BASIC GET/SET METHODS															   //
         // =================================================================================== //
-        darray3		getOrigin();
-        double		getX0();
-        double		getY0();
-        double		getZ0();
-        double		getL();
+        darray3		getOrigin() const;
+        double		getX0() const;
+        double		getY0() const;
+        double		getZ0() const;
+        double		getL() const;
         void		setL(double L);
         void		setOrigin(darray3 origin);
         double		levelToSize( uint8_t& level);

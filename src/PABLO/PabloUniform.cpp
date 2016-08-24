@@ -108,7 +108,7 @@ namespace bitpit {
      * \return Coordinates of the origin.
      */
     darray3
-    PabloUniform::getOrigin(){
+    PabloUniform::getOrigin() const {
         return m_origin;
     };
 
@@ -116,7 +116,7 @@ namespace bitpit {
      * \return Coordinate X of the origin.
      */
     double
-    PabloUniform::getX0(){
+    PabloUniform::getX0() const {
         return m_origin[0];
     };
 
@@ -124,7 +124,7 @@ namespace bitpit {
      * \return Coordinate Y of the origin.
      */
     double
-    PabloUniform::getY0(){
+    PabloUniform::getY0() const {
         return m_origin[1];
     };
 
@@ -132,7 +132,7 @@ namespace bitpit {
      * \return Coordinate Z of the origin.
      */
     double
-    PabloUniform::getZ0(){
+    PabloUniform::getZ0() const {
         return m_origin[2];
     };
 
@@ -140,7 +140,7 @@ namespace bitpit {
      * \return Length of the octree.
      */
     double
-    PabloUniform::getL(){
+    PabloUniform::getL() const {
         return m_L;
     };
 
