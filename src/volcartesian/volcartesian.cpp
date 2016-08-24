@@ -1323,6 +1323,43 @@ void VolCartesian::translate(std::array<double, 3> translation)
 }
 
 /*!
+	Gets the lengths of the sides of the box that defines the patch domain.
+
+	\return The lengths of the sides of the box that defines the patch domain.
+*/
+std::array<double, 3> VolCartesian::getLengths() const
+{
+	return (m_maxCoords - m_minCoords);
+}
+
+/*!
+	Sets the lengths of the sides of the box that defines the patch domain.
+
+	\param lengths is an array with the lengths of the sides of the box that
+	defines the patch domain
+*/
+void VolCartesian::setLengths(const std::array<double, 3> &lengths)
+{
+	// Set the maximum coordinate
+	m_maxCoords = m_minCoords + lengths;
+
+	// Reset the bounding box
+	setBoundingBox(m_minCoords, m_maxCoords);
+
+	// If needed update the discretization
+	if (m_nVertices > 0) {
+		// Rebuild the discretization
+		setDiscretization(m_nCells1D);
+
+		// Rebuild vertex coordinates
+		for (Vertex vertex : m_vertices) {
+			long id = vertex.getId();
+			vertex.setCoords(evalVertexCoords(id));
+		}
+	}
+}
+
+/*!
 	Scales the patch.
 
 	The patch is scaled about the lower-left point of the bounding box.

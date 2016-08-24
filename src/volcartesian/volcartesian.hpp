@@ -86,6 +86,8 @@ public:
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);
 	void translate(std::array<double, 3> translation);
+	std::array<double, 3> getLengths() const;
+	void setLengths(const std::array<double, 3> &lengths);
 	void scale(std::array<double, 3> scaling);
 
 	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
