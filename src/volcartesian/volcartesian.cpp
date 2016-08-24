@@ -59,7 +59,13 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
                                const std::array<int, 3> &nCells)
 	: VolumeKernel(id, dimension, false)
 {
-	initialize(origin, lengths, nCells);
+	initialize();
+	reset();
+
+	setOrigin(origin);
+	setLengths(lengths);
+
+	setDiscretization(nCells);
 }
 
 /*!
@@ -73,31 +79,16 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 */
 VolCartesian::VolCartesian(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
-                               double length, int nCells1D)
+                               double length, int nCells)
 	: VolumeKernel(id, dimension, false)
 {
-	// Number of cells
-	std::array<int, 3> nCells;
-	for (int n = 0; n < dimension; n++) {
-		nCells[n] = nCells1D;
-	}
+	initialize();
+	reset();
 
-	if (!isThreeDimensional()) {
-		nCells[Vertex::COORD_Z] = 0;
-	}
+	setOrigin(origin);
+	setLengths({{length, length, length}});
 
-	// Domain lengths
-	std::array<double, 3> lengths;
-	for (int n = 0; n < dimension; n++) {
-		lengths[n] = length;
-	}
-
-	if (!isThreeDimensional()) {
-		lengths[Vertex::COORD_Z] = 0;
-	}
-
-	// Patch initialization
-	initialize(origin, lengths, nCells);
+	setDiscretization({{nCells, nCells, nCells}});
 }
 
 /*!
@@ -114,28 +105,14 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
                                double length, double dh)
 	: VolumeKernel(id, dimension, false)
 {
-	// Number of cells
-	std::array<int, 3> nCells;
-	for (int n = 0; n < dimension; n++) {
-		nCells[n] = (int) std::ceil(length / dh);
-	}
+	initialize();
+	reset();
 
-	if (!isThreeDimensional()) {
-		nCells[Vertex::COORD_Z] = 0;
-	}
+	setOrigin(origin);
+	setLengths({{length, length, length}});
 
-	// Domain lengths
-	std::array<double, 3> lengths;
-	for (int n = 0; n < dimension; n++) {
-		lengths[n] = length;
-	}
-
-	if (!isThreeDimensional()) {
-		lengths[Vertex::COORD_Z] = 0;
-	}
-
-	// Patch initialization
-	initialize(origin, lengths, nCells);
+	int nCells = (int) std::ceil(length / dh);
+	setDiscretization({{nCells, nCells, nCells}});
 }
 
 /*!
@@ -165,25 +142,103 @@ void VolCartesian::reset()
 }
 
 /*!
-	Initializes the patch
-
-	\param origin is the origin of the domain
-	\param lengths are the lengths of the domain
-	\param nCells are the numbers of cells of the patch
+	Initialize the data structures of the patch.
 */
-void VolCartesian::initialize(const std::array<double, 3> &origin,
-                                const std::array<double, 3> &lengths,
-                                const std::array<int, 3> &nCells)
+void VolCartesian::initialize()
 {
-	log::cout() << ">> Initializing cartesian patch\n";
+	// Normals
+	int i = 0;
+	for (int n = 0; n < 3; n++) {
+		for (int k = -1; k <= 1; k += 2) {
+			std::array<double, 3> normal = {{0.0, 0.0, 0.0}};
+			normal[n] = k;
 
-	// Info sulle celle
+			m_normals[i++] = normal;
+		}
+	}
+
+	// Deltas for the evaluation of the vertex neighbours
+	m_vertexNeighDeltas = std::vector<std::array<int, 3>>(8);
+	m_vertexNeighDeltas[0] = {{ 0,  0, 0}};
+	m_vertexNeighDeltas[1] = {{-1,  0, 0}};
+	m_vertexNeighDeltas[2] = {{ 0, -1, 0}};
+	m_vertexNeighDeltas[3] = {{-1, -1, 0}};
+	m_vertexNeighDeltas[4] = {{ 0,  0, -1}};
+	m_vertexNeighDeltas[5] = {{-1,  0, -1}};
+	m_vertexNeighDeltas[6] = {{ 0, -1, -1}};
+	m_vertexNeighDeltas[7] = {{-1, -1, -1}};
+
+	// Deltas for the evaluation of the edge neighbours
+	m_edgeNeighDeltas = std::vector<std::array<int, 3>>(12);
+	m_edgeNeighDeltas[ 0] = {{-1,  0, -1}};
+	m_edgeNeighDeltas[ 1] = {{ 1,  0, -1}};
+	m_edgeNeighDeltas[ 2] = {{ 0, -1, -1}};
+	m_edgeNeighDeltas[ 3] = {{ 0,  1, -1}};
+	m_edgeNeighDeltas[ 4] = {{-1, -1,  0}};
+	m_edgeNeighDeltas[ 5] = {{ 1, -1,  0}};
+	m_edgeNeighDeltas[ 6] = {{-1,  1,  0}};
+	m_edgeNeighDeltas[ 7] = {{ 1,  1,  0}};
+	m_edgeNeighDeltas[ 8] = {{-1,  0,  1}};
+	m_edgeNeighDeltas[ 9] = {{ 1,  0,  1}};
+	m_edgeNeighDeltas[10] = {{ 0, -1,  1}};
+	m_edgeNeighDeltas[11] = {{ 0,  1,  1}};
+
+	// Faces associated to the edges
+	m_edgeFaces = std::vector<std::array<int, 2>>(12);
+	m_edgeFaces[ 0] = {{ 0, 4}};
+	m_edgeFaces[ 1] = {{ 1, 4}};
+	m_edgeFaces[ 2] = {{ 2, 4}};
+	m_edgeFaces[ 3] = {{ 3, 4}};
+	m_edgeFaces[ 4] = {{ 0, 2}};
+	m_edgeFaces[ 5] = {{ 1, 2}};
+	m_edgeFaces[ 6] = {{ 0, 3}};
+	m_edgeFaces[ 7] = {{ 1, 3}};
+	m_edgeFaces[ 8] = {{ 0, 5}};
+	m_edgeFaces[ 9] = {{ 1, 5}};
+	m_edgeFaces[10] = {{ 2, 5}};
+	m_edgeFaces[11] = {{ 3, 5}};
+
+	// Set the bounding box as frozen
+	setBoundingBoxFrozen(true);
+}
+
+/*!
+	Initializes cell volume
+*/
+void VolCartesian::initializeCellVolume()
+{
+	m_cellVolume = m_cellSpacings[Vertex::COORD_X] * m_cellSpacings[Vertex::COORD_Y];
+	if (isThreeDimensional()) {
+		m_cellVolume *= m_cellSpacings[Vertex::COORD_Z];
+	}
+}
+
+/*!
+	Initializes interface area
+*/
+void VolCartesian::initializeInterfaceArea()
+{
+	for (int n = 0; n < getDimension(); ++n) {
+		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
+	}
+
+	if (!isThreeDimensional()) {
+		m_interfaceArea[Vertex::COORD_Z] = 0.;
+	}
+}
+
+/*!
+	Discretizes the domain.
+
+	\param nCells is the numbers of cells along each direction
+*/
+void VolCartesian::setDiscretization(const std::array<int, 3> &nCells)
+{
+	// Spacing
 	for (int n = 0; n < getDimension(); ++n) {
 		// Initialize cells
 		m_nCells1D[n]     = nCells[n];
-		m_minCoords[n]    = origin[n];
-		m_maxCoords[n]    = origin[n] + lengths[n];
-		m_cellSpacings[n] = lengths[n] / m_nCells1D[n];
+		m_cellSpacings[n] = (m_maxCoords[n] - m_minCoords[n]) / m_nCells1D[n];
 
 		m_cellCenters[n].resize(m_nCells1D[n]);
 		for (int i = 0; i < m_nCells1D[n]; i++) {
@@ -203,8 +258,6 @@ void VolCartesian::initialize(const std::array<double, 3> &origin,
 
 	if (!isThreeDimensional()) {
 		m_nCells1D[Vertex::COORD_Z]     = 0;
-		m_minCoords[Vertex::COORD_Z]    = 0.;
-		m_maxCoords[Vertex::COORD_Z]    = 0.;
 		m_cellSpacings[Vertex::COORD_Z] = 0.;
 
 		m_nVertices1D[Vertex::COORD_Z] = 0;
@@ -244,89 +297,6 @@ void VolCartesian::initialize(const std::array<double, 3> &origin,
 
 	// Cell volume
 	initializeCellVolume();
-
-	// Normals
-	int i = 0;
-	for (int n = 0; n < getDimension(); n++) {
-		for (int k = -1; k <= 1; k += 2) {
-			std::array<double, 3> normal = {{0.0, 0.0, 0.0}};
-			normal[n] = k;
-
-			m_normals[i++] = normal;
-		}
-	}
-
-	// Deltas for the evaluation of the vertex neighbours
-	m_vertexNeighDeltas = std::vector<std::array<int, 3>>(std::pow(2, getDimension()));
-	m_vertexNeighDeltas[0] = {{ 0,  0, 0}};
-	m_vertexNeighDeltas[1] = {{-1,  0, 0}};
-	m_vertexNeighDeltas[2] = {{ 0, -1, 0}};
-	m_vertexNeighDeltas[3] = {{-1, -1, 0}};
-	if (isThreeDimensional()) {
-		m_vertexNeighDeltas[4] = {{ 0,  0, -1}};
-		m_vertexNeighDeltas[5] = {{-1,  0, -1}};
-		m_vertexNeighDeltas[6] = {{ 0, -1, -1}};
-		m_vertexNeighDeltas[7] = {{-1, -1, -1}};
-	}
-
-	// Deltas for the evaluation of the edge neighbours
-	m_edgeNeighDeltas = std::vector<std::array<int, 3>>(12);
-	m_edgeNeighDeltas[ 0] = {{-1,  0, -1}};
-	m_edgeNeighDeltas[ 1] = {{ 1,  0, -1}};
-	m_edgeNeighDeltas[ 2] = {{ 0, -1, -1}};
-	m_edgeNeighDeltas[ 3] = {{ 0,  1, -1}};
-	m_edgeNeighDeltas[ 4] = {{-1, -1,  0}};
-	m_edgeNeighDeltas[ 5] = {{ 1, -1,  0}};
-	m_edgeNeighDeltas[ 6] = {{-1,  1,  0}};
-	m_edgeNeighDeltas[ 7] = {{ 1,  1,  0}};
-	m_edgeNeighDeltas[ 8] = {{-1,  0,  1}};
-	m_edgeNeighDeltas[ 9] = {{ 1,  0,  1}};
-	m_edgeNeighDeltas[10] = {{ 0, -1,  1}};
-	m_edgeNeighDeltas[11] = {{ 0,  1,  1}};
-
-	// Faces associated to the edges
-	m_edgeFaces = std::vector<std::array<int, 2>>(12);
-	m_edgeFaces[ 0] = {{ 0, 4}};
-	m_edgeFaces[ 1] = {{ 1, 4}};
-	m_edgeFaces[ 2] = {{ 2, 4}};
-	m_edgeFaces[ 3] = {{ 3, 4}};
-	m_edgeFaces[ 4] = {{ 0, 2}};
-	m_edgeFaces[ 5] = {{ 1, 2}};
-	m_edgeFaces[ 6] = {{ 0, 3}};
-	m_edgeFaces[ 7] = {{ 1, 3}};
-	m_edgeFaces[ 8] = {{ 0, 5}};
-	m_edgeFaces[ 9] = {{ 1, 5}};
-	m_edgeFaces[10] = {{ 2, 5}};
-	m_edgeFaces[11] = {{ 3, 5}};
-
-	// Set the bounding box
-	setBoundingBox(m_minCoords, m_maxCoords);
-	setBoundingBoxFrozen(true);
-}
-
-/*!
-	Initializes cell volume
-*/
-void VolCartesian::initializeCellVolume()
-{
-	m_cellVolume = m_cellSpacings[Vertex::COORD_X] * m_cellSpacings[Vertex::COORD_Y];
-	if (isThreeDimensional()) {
-		m_cellVolume *= m_cellSpacings[Vertex::COORD_Z];
-	}
-}
-
-/*!
-	Initializes interface area
-*/
-void VolCartesian::initializeInterfaceArea()
-{
-	for (int n = 0; n < getDimension(); ++n) {
-		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
-	}
-
-	if (!isThreeDimensional()) {
-		m_interfaceArea[Vertex::COORD_Z] = 0.;
-	}
 }
 
 /*!

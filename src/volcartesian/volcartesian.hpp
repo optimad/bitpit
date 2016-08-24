@@ -51,6 +51,8 @@ public:
 
 	void reset();
 
+	void setDiscretization(const std::array<int, 3> &nCells);
+
 	long getVertexCount() const;
 
 	long getCellCount() const;
@@ -144,9 +146,7 @@ private:
 	std::vector<std::array<int, 3>> m_edgeNeighDeltas;
 	std::vector<std::array<int, 2>> m_edgeFaces;
 
-	void initialize(const std::array<double, 3> &origin, const std::array<double, 3> &lengths,
-	                const std::array<int, 3> &nCells);
-
+	void initialize();
 	void initializeInterfaceArea();
 	void initializeCellVolume();
 
