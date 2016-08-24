@@ -1282,7 +1282,7 @@ std::vector<long> VolCartesian::extractVertexSubSet(std::array<double, 3> const 
  */
 void VolCartesian::translate(std::array<double, 3> translation)
 {
-	for (int n = 1; n < 3; ++n) {
+	for (int n = 0; n < 3; ++n) {
 		m_minCoords[n] += translation[n];
 		m_maxCoords[n] += translation[n];
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
