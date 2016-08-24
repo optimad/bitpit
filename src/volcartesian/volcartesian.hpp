@@ -151,6 +151,7 @@ private:
 	void initializeCellVolume();
 
 	void addVertices();
+	std::array<double, 3> evalVertexCoords(const long &id);
 
 	void addCells();
 

@@ -532,22 +532,39 @@ void VolCartesian::addVertices()
 	for (int k = 0; (isThreeDimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
+				// Linear index of the vertex
+				long id_vertex = getVertexLinearId(i, j, k);
+
 				// Vertex coordinates
-				std::array<double, 3> coords;
-				coords[Vertex::COORD_X] = m_vertexCoords[Vertex::COORD_X][i];
-				coords[Vertex::COORD_Y] = m_vertexCoords[Vertex::COORD_Y][j];
-				if (isThreeDimensional()) {
-					coords[Vertex::COORD_Z] = m_vertexCoords[Vertex::COORD_Z][k];
-				} else {
-					coords[Vertex::COORD_Z] = 0.0;
-				}
+				std::array<double, 3> coords = evalVertexCoords(id_vertex);
 
 				// Add vertex
-				long id_vertex = getVertexLinearId(i, j, k);
 				VolumeKernel::addVertex(std::move(coords), id_vertex);
 			}
 		}
 	}
+}
+
+/*!
+	Evaluates the coordinate of the specified vertex.
+
+	\param id is the id of the vertex
+	\result The coordinate of the specified vertex.
+*/
+std::array<double, 3> VolCartesian::evalVertexCoords(const long &id)
+{
+	std::array<int, 3> ijk = getVertexCartesianId(id);
+
+	std::array<double, 3> coords;
+	coords[Vertex::COORD_X] = m_vertexCoords[Vertex::COORD_X][ijk[0]];
+	coords[Vertex::COORD_Y] = m_vertexCoords[Vertex::COORD_Y][ijk[1]];
+	if (isThreeDimensional()) {
+		coords[Vertex::COORD_Z] = m_vertexCoords[Vertex::COORD_Z][ijk[2]];
+	} else {
+		coords[Vertex::COORD_Z] = 0.0;
+	}
+
+	return coords;
 }
 
 /*!
