@@ -94,6 +94,8 @@ public:
 	bool isPointInside(const long &id, const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
 
+	std::array<double, 3> getOrigin() const;
+	void setOrigin(const std::array<double, 3> &origin);
 	void translate(std::array<double, 3> translation);
 	void scale(std::array<double, 3> scaling);
 
