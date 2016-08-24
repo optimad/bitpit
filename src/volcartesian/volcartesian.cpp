@@ -139,6 +139,32 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 }
 
 /*!
+	Reset the patch.
+*/
+void VolCartesian::reset()
+{
+	// Reset geometry and discretization
+	m_minCoords = {{0., 0., 0.}};
+	m_maxCoords = {{1., 1., 1.}};
+
+	m_nCells1D     = {{0, 0, 0}};
+	m_nVertices1D  = {{0, 0, 0}};
+	m_cellSpacings = {{0., 0., 0.}};
+
+	for (int n = 0; n < 3; ++n) {
+		std::vector<double>().swap(m_vertexCoords[n]);
+		std::vector<double>().swap(m_cellCenters[n]);
+	}
+
+	m_nVertices   = 0;
+	m_nCells      = 0;
+	m_nInterfaces = 0;
+
+	// Reset patch data structures
+	VolumeKernel::reset();
+}
+
+/*!
 	Initializes the patch
 
 	\param origin is the origin of the domain
@@ -478,7 +504,10 @@ const std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdapti
 	setExpert(true);
 
 	// Reset the mesh
-	reset();
+	//
+	// We need to reset only the generic data of the patch, therefore we call
+	// the 'reset' implementation of the kernel.
+	VolumeKernel::reset();
 
 	// Definition of the mesh
 	addVertices();
