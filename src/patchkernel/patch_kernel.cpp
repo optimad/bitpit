@@ -103,6 +103,33 @@ long IndexGenerator::getHighestId()
 }
 
 /*!
+	Checks if an id is currently assigned.
+
+	\return True if the id has already been assigned, false otherwise.
+*/
+bool IndexGenerator::isIdAssigned(long id)
+{
+	// If the latest id is valid, it is assigned by definition
+	if (m_latest >= 0 && id == m_latest) {
+		return true;
+	}
+
+	// Ids past the highest one are not assigned
+	if (id > m_highest) {
+		return false;
+	}
+
+	// The id is assigned only if is not in the trash
+	for (long trashedId : m_trash) {
+		if (trashedId == id) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/*!
 	Trashes an index.
 
 	A trashed index is an index no more used that can be recycled.
