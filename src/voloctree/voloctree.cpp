@@ -1507,6 +1507,59 @@ void VolOctree::translate(std::array<double, 3> translation)
 }
 
 /*!
+	Gets the reference length of the patch domain.
+
+	\return The the reference length of the patch domain.
+*/
+double VolOctree::getLength() const
+{
+	return m_tree.getL();
+}
+
+/*!
+	Sets the the reference length of the patch domain.
+
+	\param length is the reference length of the patch domain
+*/
+void VolOctree::setLength(double length)
+{
+	// Set the length
+	m_tree.setL(length);
+
+	// Upadate the geometry
+	initializeTreeGeometry();
+
+	// If the bounding box is fronzen it is not updated automatically
+	if (isBoundingBoxFrozen()) {
+		setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
+	}
+
+	// If needed, update the discretization
+	if (m_vertices.size() > 0) {
+		// Create tree connectivity
+		m_tree.computeConnectivity();
+
+		// Update vertex coordinates
+		std::unordered_set<long> alreadyEvaluated;
+		for (Cell &cell : m_cells) {
+			OctantInfo octantInfo = getCellOctant(cell.getId());
+			Octant *octant = getOctantPointer(octantInfo);
+			for (int k = 0; k < m_cellTypeInfo->nVertices; ++k) {
+				long vertexId = cell.getVertex(k);
+				if (alreadyEvaluated.count(vertexId) == 0) {
+					Vertex &vertex = m_vertices.at(vertexId);
+					vertex.setCoords(m_tree.getNode(octant, k));
+					alreadyEvaluated.insert(vertexId);
+				}
+			}
+		}
+
+		// Destroy tree connectivity
+		m_tree.clearConnectivity();
+	}
+}
+
+/*!
 	Scales the patch.
 
 	\param[in] scaling is the scaling factor vector

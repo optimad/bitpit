@@ -97,6 +97,8 @@ public:
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);
 	void translate(std::array<double, 3> translation);
+	double getLength() const;
+	void setLength(double length);
 	void scale(std::array<double, 3> scaling);
 
 	void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
