@@ -53,12 +53,14 @@ public:
 	IndexGenerator();
 
 	long generateId();
-	long getLastId();
+	long getLatestId();
+	long getHighestId();
 	void trashId(const long &id);
 	void reset();
 
 private:
-	long m_id;
+	long m_latest;
+	long m_highest;
 	std::deque<long> m_trash;
 
 };
