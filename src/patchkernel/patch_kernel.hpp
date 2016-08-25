@@ -56,6 +56,7 @@ public:
 	long getLatestId();
 	long getHighestId();
 	bool isIdAssigned(long id);
+	void setAssignedId(long id);
 	void trashId(const long &id);
 	void reset();
 

@@ -130,6 +130,38 @@ bool IndexGenerator::isIdAssigned(long id)
 }
 
 /*!
+	Marks the specified id as currently assigned.
+
+	\param id is the id to be marked as assigned
+*/
+void IndexGenerator::setAssignedId(long id)
+{
+	// If the id is past the highest assigned id we need to trash all the ids
+	// from the highest assigned to this one (the generator only handles
+	// contiguous ids), otherwise look for the id in the trash and, if found,
+	// recycle it (if the id is not in the trash, this means it was already
+	// an assigned id).
+	if (id > m_highest) {
+		for (long wasteId = m_highest + 1; wasteId < id; ++wasteId) {
+			trashId(wasteId);
+		}
+
+		m_highest = id;
+	} else {
+		for (auto trashItr = m_trash.begin(); trashItr != m_trash.end(); ++trashItr) {
+			long trashedId = *trashItr;
+			if (trashedId == id) {
+				m_trash.erase(trashItr);
+				break;
+			}
+		}
+	}
+
+	// This is the latest assigned id
+	m_latest = id;
+}
+
+/*!
 	Trashes an index.
 
 	A trashed index is an index no more used that can be recycled.
