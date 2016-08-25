@@ -60,8 +60,6 @@ namespace bitpit {
 LevelSetInfo::LevelSetInfo() {
     value = levelSetDefaults::VALUE ;
     gradient = levelSetDefaults::GRADIENT ;
-    object = levelSetDefaults::OBJECT ;
-    part = levelSetDefaults::PART  ;
 }
 
 /*!
@@ -95,7 +93,6 @@ LevelSet::LevelSet() {
 
     m_signedDF    = true ;
     m_propagateS  = false;
-    m_propagateV  = false;
 
 };
 
@@ -334,112 +331,180 @@ void LevelSet::clearObject(int id){
 };
 
 /*!
- * Get all levelset information 
- * @param[in] i index of cell
+ * Get levelset information.
+ * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
+ * @param[in] objectId index of object
+ * @param[in] cellId index of cell
  * @return levelset information
  */
-LevelSetInfo LevelSet::getLevelSetInfo( const long &i)const {
-    return( m_kernel->getLevelSetInfo(i) ) ;
+LevelSetInfo LevelSet::getLevelSetInfo( const long &cellId, int objectId)const {
+    if( objectId == levelSetDefaults::OBJECT){
+        objectId = getClosestObject(cellId) ;
+    }
+
+    return( m_object.at(objectId)->getLevelSetInfo(cellId) ) ;
 };
 
 /*!
  * Get the levelset value of the i-th local cell.
- * @param[in] i index of cell
- * @return value of the i-th cell
+ * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
+ * @param[in] cellId index of cell
+ * @param[in] objectId index of object
+ * @return levelset value 
  */
-double LevelSet::getLS( const long &i)const {
-    return( m_kernel->getLS(i) ) ;
+double LevelSet::getLS( const long &cellId, int objectId)const {
+
+    if( objectId == levelSetDefaults::OBJECT){
+        objectId = getClosestObject(cellId) ;
+    }
+
+    if( objectId != levelSetDefaults::OBJECT ) {
+        return m_object.at(objectId)->getLS(cellId) ;
+    } else {
+        return levelSetDefaults::VALUE ;
+    }
 };
 
 /*!
  * Get the levelset gradient of the i-th local cell.
- * @param[in] i index of cell
+ * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
+ * @param[in] cellId index of cell
+ * @param[in] objectId index of object
  * @return Array with components of the gradient 
  */
-std::array<double,3> LevelSet::getGradient(const long &i) const {
-    return( m_kernel->getGradient(i) ) ;
+std::array<double,3> LevelSet::getGradient(const long &cellId, int objectId) const {
+    if( objectId == levelSetDefaults::OBJECT){
+        objectId = getClosestObject(cellId) ;
+    }
+    
+    if( objectId != levelSetDefaults::OBJECT ) {
+        return m_object.at(objectId)->getGradient(cellId) ;
+    } else {
+        return levelSetDefaults::GRADIENT ;
+    }
 };
 
 /*!
  * Get the id of closest object
- * @param[in] i index of cell
+ * @param[in] cellId index of cell
  * @return id of closest object
  */
-int LevelSet::getClosestObject(const long &i) const {
-    return( m_kernel->getClosestObject(i) ) ;
+int LevelSet::getClosestObject(const long &cellId) const {
+    double value(levelSetDefaults::VALUE) ;
+    int objectId(levelSetDefaults::OBJECT) ;
+
+    for( auto &object : m_object){
+        if( object.second->getLS(cellId) < value){
+            value = object.second->getLS(cellId) ;
+            objectId = object.first ;
+        }
+    }
+
+    return objectId ;
 };
 
 /*!
  * Get the object and part id of the projection point
- * @param[in] i index of cell
+ * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
+ * @param[in] cellId index of cell
+ * @param[in] objectId index of object
  * @return pair containing object and part id
  */
-std::pair<int,int> LevelSet::getClosestPart(const long &i) const {
+std::pair<int,int> LevelSet::getClosestPart(const long &cellId, int objectId) const {
 
-    return (m_kernel->getClosestPart(i)) ;
+    if( objectId == levelSetDefaults::OBJECT){
+        objectId = getClosestObject(cellId) ;
+    }
+    long partId = levelSetDefaults::PART ;
+
+    if(objectId!=levelSetDefaults::OBJECT){
+        partId = m_object.at(objectId)->getPart(cellId) ;
+    }
+
+    return ( std::make_pair(objectId, partId) );
+
 };
 
 /*!
  * Get the object and support id of the projection point
- * @param[in] i index of cell
+ * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
+ * @param[in] cellId index of cell
+ * @param[in] objectId index of object
  * @return pair containing object and support id
  */
-std::pair<int,long> LevelSet::getClosestSupport(const long &i) const {
+std::pair<int,long> LevelSet::getClosestSupport(const long &cellId, int objectId) const {
 
-    int object;
-    long support;
-    if ( isInNarrowBand(i) ) {
-        object  = getClosestObject(i);
-        support = m_object.at(object)->getClosestSupport(i);
-    } else {
-        object  = levelSetDefaults::OBJECT;
-        support = levelSetDefaults::SUPPORT;
+    if( objectId == levelSetDefaults::OBJECT){
+        objectId = getClosestObject(cellId) ;
+    }
+    long supportId = levelSetDefaults::SUPPORT ;
+
+    if(objectId!=levelSetDefaults::OBJECT){
+        supportId = m_object.at(objectId)->getSupport(cellId) ;
     }
 
-    return ( std::make_pair(object, support) );
+    return ( std::make_pair(objectId, supportId) );
 };
 
 /*!
- * Get the total number of items which fall in the support radius of the cell
- * @param[in] i cell index
+ * Get the number of items which fall in the support radius of the cell
+ * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
+ * @param[in] cellId index of cell
+ * @param[in] objectId index of object
  * @return total number of items in narrow band
  */
-int LevelSet::getSupportCount(const long &i) const {
+int LevelSet::getSupportCount(const long &cellId, int objectId) const {
 
-    int count(0);
 
-    for( auto const &obj : m_object){
-        count += obj.second->getSupportCount(i) ;
+    if( objectId == levelSetDefaults::OBJECT){
+        objectId = getClosestObject(cellId) ;
     }
 
-    return count ;
+    if( objectId != levelSetDefaults::OBJECT){
+        return m_object.at(objectId)->getSupportCount(cellId) ;
+
+    } else {
+        return 0 ;
+    }
 
 };
 
 /*!
  * Get the sign of the levelset function
- * @param[in] i index of cell
+ * If levelSetDefaults::OBJECT is passed as objectId, the sign of the composed levelset is returned, otherwise those of the indicated object.
+ * @param[in] cellId index of cell
+ * @param[in] objectId index of object
  * @return sign
  */
-short LevelSet::getSign(const long &i)const{
-    return( m_kernel->getSign(i) ) ;
+short LevelSet::getSign(const long &cellId, int objectId)const{
+
+    if( objectId == levelSetDefaults::OBJECT){
+        return( sign( getLS(cellId) ) );
+    } else {
+        return( sign(m_object.at(objectId)->getSign(cellId)) )  ;
+
+    }
+
 };
 
 /*!
- * Returns if the cell centroid lies within the narrow band.
- * @param[in] i index of cell
- * @return true/false if the cell centroid is within the narrow band
+ * Get the sign of the levelset function
+ * @param[in] cellId index of cell
+ * @param[in] objectId index of object
+ * @return sign
  */
-bool LevelSet::isInNarrowBand(const long &i)const{
-    return( m_kernel->isInNarrowBand(i) ) ;
-};
+bool LevelSet::isInNarrowBand(const long &cellId, int objectId)const{
 
+    return( m_object.at(objectId)->isInNarrowBand(cellId) )  ;
+
+};
 /*!
  * Get the current size of the narrow band.
+ * @param[in] objectId index of object
  * @return Physical size of the current narrow band.
  */
-double LevelSet::getSizeNarrowBand()const{
-    return( m_kernel->getSizeNarrowBand() ) ;
+double LevelSet::getSizeNarrowBand( const int &objectId)const{
+    return( m_object.at(objectId)->getSizeNarrowBand() ) ;
 };
 
 /*!
@@ -460,20 +525,14 @@ void LevelSet::setPropagateSign(bool flag){
 };
 
 /*!
- * Set if the levelset value has to be propagated from the narrow band to the whole domain.
- * @param[in] flag True/false to active/disable the propagation.
- */
-void LevelSet::setPropagateValue(bool flag){
-    m_propagateV = flag;
-};
-
-/*!
  * Manually set the physical size of the narrow band.
  * @param[in] r Size of the narrow band.
  */
 void LevelSet::setSizeNarrowBand(double r){
     m_userRSearch = true ;
-    m_kernel->setSizeNarrowBand(r) ;
+    for( auto &object :m_object){
+        object.second->setSizeNarrowBand(r) ;
+    }
 };
 
 /*!
@@ -484,23 +543,16 @@ void LevelSet::compute(){
 
     double RSearch ;
 
-    if( !m_userRSearch){
-        RSearch = 0. ;
-        for( const auto &visitor : m_object ){
-            RSearch = std::max( RSearch, m_kernel->computeSizeNarrowBand( visitor.second.get() ) ) ;
+    for( const auto &visitor : m_object ){
+        if( !m_userRSearch){
+            RSearch = m_kernel->computeSizeNarrowBand( visitor.second.get() )  ;
+            visitor.second->setSizeNarrowBand(RSearch) ;
         }
 
-        m_kernel->setSizeNarrowBand(RSearch) ;
-
-    }
-
-    for( const auto &visitor : m_object ){
         visitor.second->computeLSInNarrowBand( m_kernel.get(), RSearch, m_signedDF) ;
+        if( m_propagateS ) visitor.second->propagateSign( m_kernel.get() ) ;
     }
 
-
-    if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
-//    if( propagateV ) propagateValue( ) ;
 
     return ;
 }
@@ -534,46 +586,40 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
     // Evaluate new narrow band size
     double newRSearch ;
-    if (updateNarrowBand) {
-        if(m_userRSearch){
-            newRSearch = m_kernel->getSizeNarrowBand() ;
-        } else {
-            newRSearch = m_kernel->updateSizeNarrowBand( mapper, m_object )  ;
-        };
-    }
+    for( const auto &visitor : m_object ){
+        if (updateNarrowBand) {
 
-    // Clear levelset
-    m_kernel->clearAfterMeshAdaption(mapper) ;
+            if(m_userRSearch){
+                newRSearch = visitor.second->getSizeNarrowBand() ;
+            } else {
+                newRSearch = m_kernel->updateSizeNarrowBand( mapper, visitor.second.get() )  ;
+            };
 
-    // Update narrow band
-    if (updateNarrowBand) {
-        for( const auto &visitor : m_object ){
             visitor.second->updateLSInNarrowBand( m_kernel.get(), mapper, newRSearch, m_signedDF ) ;
+
+        } else {
+            visitor.second->clearAfterMeshAdaption(mapper) ;
         }
-    }
+
 
 #if BITPIT_ENABLE_MPI
-    // Parallel communications
-    if (sendList.size() > 0 || recvList.size() > 0) {
-        communicate(sendList, recvList, &mapper ) ;
-    }
+        // Parallel communications
+        if (sendList.size() > 0 || recvList.size() > 0) {
+            visitor.second->communicate( m_kernel.get(), sendList, recvList, &mapper ) ;
+        }
 
-    exchangeGhosts() ;
+        visitor.second->exchangeGhosts( m_kernel.get() ) ;
 #endif
 
     // Finish narrow band update
-    if (updateNarrowBand) {
-        newRSearch = m_kernel->computeSizeNarrowBandFromLS( m_signedDF );
+        if (updateNarrowBand) {
+            newRSearch = m_kernel->computeSizeNarrowBandFromLS( visitor.second.get(), m_signedDF );
+            visitor.second->filterOutsideNarrowBand(newRSearch) ;
+            visitor.second->setSizeNarrowBand(newRSearch) ;
 
-        m_kernel->filterOutsideNarrowBand(newRSearch) ;
-        m_kernel->setSizeNarrowBand(newRSearch) ;
-
-        for( const auto &visitor : m_object ){
-            visitor.second->filterOutsideNarrowBand(m_kernel.get()) ;
+            if( m_propagateS ) visitor.second->propagateSign( m_kernel.get() ) ;
         }
 
-        if( m_propagateS ) m_kernel->propagateSign( m_object ) ;
-//TODO      if( propagateV ) updatePropagatedValue() ;
     }
 
     return;
@@ -589,9 +635,6 @@ void LevelSet::dump( std::fstream &stream ){
     bitpit::genericIO::flushBINARY(stream, m_userRSearch);
     bitpit::genericIO::flushBINARY(stream, m_signedDF);
     bitpit::genericIO::flushBINARY(stream, m_propagateS);
-    bitpit::genericIO::flushBINARY(stream, m_propagateV);
-
-    m_kernel->dump( stream ) ;
 
     for( const auto &visitor : m_object ){
         visitor.second->dump( stream ) ;
@@ -610,9 +653,6 @@ void LevelSet::restore( std::fstream &stream ){
     bitpit::genericIO::absorbBINARY(stream, m_userRSearch);
     bitpit::genericIO::absorbBINARY(stream, m_signedDF);
     bitpit::genericIO::absorbBINARY(stream, m_propagateS);
-    bitpit::genericIO::absorbBINARY(stream, m_propagateV);
-
-    m_kernel->restore( stream ) ;
 
     for( const auto &visitor : m_object ){
         visitor.second->restore( stream ) ;
@@ -633,152 +673,6 @@ bool LevelSet::assureMPI( ){
 
     return(m_kernel->assureMPI() ) ;
 }
-
-/*!
- * Update of ghost cell;
- */
-void LevelSet::exchangeGhosts(  ){
-
-    std::unordered_map<int,std::vector<long>> &sendList =  m_kernel->getMesh()->getGhostExchangeSources() ;
-    std::unordered_map<int,std::vector<long>> &recvList =  m_kernel->getMesh()->getGhostExchangeTargets() ;
-
-    communicate(sendList,recvList);
-
-    return ;
-}
-
-/*!
- * communicates data structures of kernel and objects.
- * If mapper!=NULL, clearAfterMeshAdaption of kernel and objects will be called between send and receive.
- * @param[in] sendList list of elements to be send
- * @param[in] recvList list of elements to be received
- * @param[in] mapper mapper containing mesh modifications
- */
-void LevelSet::communicate( std::unordered_map<int,std::vector<long>> &sendList, std::unordered_map<int,std::vector<long>> &recvList, std::vector<adaption::Info> const *mapper){
-
-    if( assureMPI() ){
-
-        MPI_Comm meshComm = m_kernel->getCommunicator() ;
-
-        int                 nClasses = 1 + m_object.size() ;
-        DataCommunicator    sizeCommunicator(meshComm) ; 
-        DataCommunicator    dataCommunicator(meshComm) ; 
-
-        sizeCommunicator.setTag(0) ;
-        dataCommunicator.setTag(1) ;
-
-        // start receive of sizes
-	    for (const auto entry : sendList) {
-            int rank = entry.first;
-
-            sizeCommunicator.setRecv( rank, (1 + nClasses) * sizeof(long) ) ;
-            sizeCommunicator.startRecv(rank);
-
-        }
-
-        { // send first number of items and then data itself
-
-	        // Fill the buffer with the given field and start sending the data
-	        for (const auto entry : sendList) {
-
-	        	// Get the send buffer
-	        	int rank = entry.first;
-
-                sizeCommunicator.setSend(rank, (1 + nClasses) * sizeof(long) ) ;
-                dataCommunicator.setSend(rank, 0 ) ;
-
-                SendBuffer &sizeBuffer = sizeCommunicator.getSendBuffer(rank);
-                SendBuffer &dataBuffer = dataCommunicator.getSendBuffer(rank);
-
-                m_kernel->writeCommunicationBuffer( entry.second, sizeBuffer, dataBuffer ) ;
-                for( const auto &visitor : m_object){
-                    visitor.second->writeCommunicationBuffer( entry.second, sizeBuffer, dataBuffer ) ;
-                }
-
-                sizeBuffer << dataBuffer.capacity() ;
-
-                // Start the send
-                sizeCommunicator.startSend(rank);
-                dataCommunicator.startSend(rank);
-
-	        }
-
-        }
-
-
-        { 
-            // as soon as sizes are received start receiving data.
-            int nCompletedRecvs(0);
-
-            std::vector<long>   dummy(nClasses) ;
-            std::unordered_map<int,std::vector<long> > items ;
-
-            std::vector<long>::iterator itemItr ;
-
-            // receive sizes
-            while (nCompletedRecvs < sizeCommunicator.getRecvCount()) {
-                int rank = sizeCommunicator.waitAnyRecv();
-                RecvBuffer &sizeBuffer = sizeCommunicator.getRecvBuffer(rank);
-
-                items.insert({{rank, dummy}}) ;
-                itemItr = items[rank].begin() ;
-
-                sizeBuffer >> *(itemItr) ;
-
-                ++itemItr; 
-                for(size_t i = 0; i < m_object.size(); ++i){
-                    sizeBuffer >> *(itemItr) ;
-                    ++itemItr ;
-                };
-
-                long dataSize ;
-                sizeBuffer >> dataSize ;
-
-                dataCommunicator.setRecv(rank,dataSize) ;
-                dataCommunicator.startRecv(rank) ;
-
-                ++nCompletedRecvs;
-            }
-
-            if( mapper!=NULL){
-                m_kernel->clearAfterMeshAdaption(*mapper);
-                for( const auto & visitor : m_object){
-                    visitor.second->clearAfterMeshAdaption(*mapper);
-                }
-            }
-
-            //  post-process data from buffer to data within classes
-            nCompletedRecvs = 0;
-            while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
-                int rank = dataCommunicator.waitAnyRecv();
-
-                RecvBuffer &dataBuffer = dataCommunicator.getRecvBuffer(rank);
-                itemItr = items[rank].begin();
-
-                m_kernel->readCommunicationBuffer( recvList[rank], *itemItr, dataBuffer ) ;
-                ++itemItr ;
-
-                for( const auto &visitor : m_object){
-                    visitor.second->readCommunicationBuffer( recvList[rank], *itemItr, dataBuffer ) ;
-                    ++itemItr ;
-                }
-
-                ++nCompletedRecvs;
-            }
-        }
-
-        sizeCommunicator.waitAllSends();
-        sizeCommunicator.finalize() ;
-
-        dataCommunicator.waitAllSends();
-        dataCommunicator.finalize() ;
-
-    }
-
-
-    return ;
-}
-
 
 #endif 
 

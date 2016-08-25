@@ -169,7 +169,8 @@ int main( int argc, char *argv[]){
 
 
     // Export level set ------------------------------------------------------- //
-    std::cout << " Narrow Band " << levelset.getSizeNarrowBand() << endl;
+    std::cout << " Narrow Band id " << id0 << " " << levelset.getSizeNarrowBand(id0) << endl;
+    std::cout << " Narrow Band id " << id1 << " " << levelset.getSizeNarrowBand(id1) << endl;
     std::cout << " - Exporting data" << endl;
 
     LS.resize(mesh.getCellCount() ) ;
@@ -181,8 +182,8 @@ int main( int argc, char *argv[]){
     for( auto & cell : mesh.getCells() ){
         const long &cellId = cell.getId() ;
         *itLS = levelset.getLS(cellId) ;
-        *itLS0 = levelset.getLS(id0,cellId) ;
-        *itLS1 = levelset.getLS(id1,cellId) ;
+        *itLS0 = levelset.getLS(cellId, id0 ) ;
+        *itLS1 = levelset.getLS(cellId, id1 ) ;
         ++itLS ;
         ++itLS0 ;
         ++itLS1 ;
@@ -202,8 +203,15 @@ int main( int argc, char *argv[]){
 
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            if( std::abs(levelset.getLS(id)) < mesh.evalCellSize(id) ){
+            if( std::abs(levelset.getLS(id,id0)) < mesh.evalCellSize(id) ){
                 mesh.markCellForRefinement(id) ;
+            }
+
+            if( i<4){
+            if( std::abs(levelset.getLS(id,id1)) < mesh.evalCellSize(id) ){
+                mesh.markCellForRefinement(id) ;
+            }
+
             }
         }
 
@@ -214,7 +222,8 @@ int main( int argc, char *argv[]){
 
         elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
-        std::cout << " Narrow Band " << i << " " << levelset.getSizeNarrowBand() << endl;
+        std::cout << "Refinement " << i << " Narrow Band id " << id0 << " " << levelset.getSizeNarrowBand(id0) << endl;
+        std::cout << "Refinement " << i << " Narrow Band id " << id1 << " " << levelset.getSizeNarrowBand(id1) << endl;
 
         LS.resize(mesh.getCellCount() ) ;
         LS0.resize(mesh.getCellCount() ) ;
@@ -225,8 +234,8 @@ int main( int argc, char *argv[]){
         for( auto & cell : mesh.getCells() ){
             const long &cellId = cell.getId() ;
             *itLS = levelset.getLS(cellId) ;
-            *itLS0 = levelset.getLS(id0,cellId) ;
-            *itLS1 = levelset.getLS(id1,cellId) ;
+            *itLS0 = levelset.getLS(cellId,id0) ;
+            *itLS1 = levelset.getLS(cellId,id1) ;
             ++itLS ;
             ++itLS0 ;
             ++itLS1 ;

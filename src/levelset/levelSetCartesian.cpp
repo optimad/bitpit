@@ -52,6 +52,7 @@ LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSetKernel( (sta
 /*!
  * Calculate size of narrow band in order to guarantee one element on each side of geometry
  * @param[in] visitor reference object 
+ * @return size of narrow band
  */
 double LevelSetCartesian::computeSizeNarrowBand( LevelSetObject *visitor ){
 
@@ -69,11 +70,13 @@ double LevelSetCartesian::computeSizeNarrowBand( LevelSetObject *visitor ){
 /*!
  * Update the size of the narrow band after an adaptation of the cartesian mesh
  * @param[in] mapper mesh modifications
+ * @param[in] visitor reference object 
+ * @return size of narrow band
  */
-double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects ){
+double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, LevelSetObject *visitor ){
 
     BITPIT_UNUSED(mapper) ;
-    BITPIT_UNUSED(objects) ;
+    BITPIT_UNUSED(visitor) ;
 
     return computeRSearchFromCell( 0 ) ;
 
@@ -82,6 +85,7 @@ double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info
 /*!
  * Compute size of narrow band given a cell.
  * @param[in] id is the id of the cell
+ * @return size of narrow band
  */
 double LevelSetCartesian::computeRSearchFromCell( long id ){
 

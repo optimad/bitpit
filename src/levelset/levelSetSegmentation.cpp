@@ -71,6 +71,7 @@ LevelSetSegmentation::~LevelSetSegmentation() {
 /*!
  * Constructor
  * @param[in] id identifier of object
+ * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
 LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetObject(id) {
     setFeatureAngle(angle) ;
@@ -80,6 +81,7 @@ LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetObject
  * Constructor
  * @param[in] id identifier of object
  * @param[in] STL unique pointer to surface mesh
+ * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL, double angle) :LevelSetSegmentation(id,angle) {
     setSegmentation( std::move(STL) );
@@ -89,6 +91,7 @@ LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstruct
  * Constructor
  * @param[in] id identifier of object
  * @param[in] STL pointer to surface mesh
+ * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL, double angle) :LevelSetSegmentation(id,angle) {
     setSegmentation( STL );
@@ -188,6 +191,52 @@ void LevelSetSegmentation::setFeatureAngle( double angle){
 };
 
 /*!
+ * Gets the closest support within the narrow band of cell
+ * @param[in] id index of cell
+ * @return closest segment in narrow band
+ */
+int LevelSetSegmentation::getPart( const long &id ) const{
+
+    if( m_seg.exists(id)){
+        long support = m_seg.at(id).segments.front() ;
+        return m_segmentation->getCell(support).getPID();
+    } else {
+        return levelSetDefaults::PART ;
+    }
+
+};
+
+/*!
+ * Gets the closest support within the narrow band of cell
+ * @param[in] id index of cell
+ * @return closest segment in narrow band
+ */
+long LevelSetSegmentation::getSupport( const long &id ) const{
+
+    if( m_seg.exists(id)){
+        return m_seg.at(id).segments.front() ;
+    } else {
+        return levelSetDefaults::SUPPORT ;
+    }
+
+};
+
+/*!
+ * Gets the number of support items within the narrow band of cell
+ * @param[in] id index of cell
+ * @return number of segments in narrow band 
+ */
+int LevelSetSegmentation::getSupportCount( const long &id ) const{
+
+    if( m_seg.exists(id)){
+        return m_seg.at(id).segments.size() ;
+    } else {
+        return 0 ;
+    }
+
+};
+
+/*!
  * Get the list of simplices wich contain the cell centroid in their narrow band.
  * @param[in] i cell index
  * @return set with indices of simplices
@@ -200,15 +249,6 @@ const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &i) co
         return ( m_seg[i].segments );
     };
 
-};
-
-/*!
- * Check if cell is in narrowband of any triangle;
- * @param[in] i cell index
- * @return if in narow band
- */
-bool LevelSetSegmentation::isInNarrowBand(const long &i){
-    return( m_seg.exists(i) ) ; 
 };
 
 /*!
@@ -388,7 +428,6 @@ void LevelSetSegmentation::updateSegmentList( const double &search) {
     }
 }
 
-
 /*!
  * Create the levelset info for the specified cell list.
  *
@@ -405,8 +444,6 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
 
     log::cout() << "  Creating levelset info... " << std::endl;
 
-    PiercedVector<LevelSetInfo> &lsInfo = visitee->getLevelSetInfo() ;
-
     for ( long id : cellList ) {
         auto segInfoItr = m_seg.find( id ) ;
         long support = segInfoItr->segments.front();
@@ -417,15 +454,13 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
         infoFromSimplex(centroid, support, d, s, xP, n);
 
         PiercedVector<LevelSetInfo>::iterator lsInfoItr ;
-        if( !lsInfo.exists(id)){
-            lsInfoItr = lsInfo.reclaim(id) ;
+        if( !m_ls.exists(id)){
+            lsInfoItr = m_ls.reclaim(id) ;
         } else {
-            lsInfoItr = lsInfo.getIterator(id) ;
+            lsInfoItr = m_ls.getIterator(id) ;
         }
 
         if( d < std::abs(lsInfoItr->value) ){
-            lsInfoItr->object   = getId();
-            lsInfoItr->part     = m_segmentation->getCell(support).getPID();
             lsInfoItr->value    = ( signd *s  + (!signd) *1.   ) *d ;
             lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
         }
@@ -533,8 +568,8 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 
     mesh.getBoundingBox(B0, B1) ;
 
-    B0 = B0 - visitee->getSizeNarrowBand() ;
-    B1 = B1 + visitee->getSizeNarrowBand() ;
+    B0 = B0 - getSizeNarrowBand() ;
+    B1 = B1 + getSizeNarrowBand() ;
 
     I.clear() ;
 
@@ -556,35 +591,6 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 };
 
 /*!
- * Evaluates the levelset in the specified cell
- * @param[in] visitee pointer to mesh
- * @param[in] id is the cell index
- * @result The value of the levelset.
- */
-double LevelSetSegmentation::evaluateLS( LevelSetKernel *visitee, long id) const {
-
-    double                      d, s, ls;
-    std::array<double,3>        X, temp;
-    const std::array<double,3> &P = visitee->computeCellCentroid(id) ;
-
-    ls = levelSetDefaults::VALUE;
-
-    for( auto & segment : m_segmentation->getCells() ){
-
-        infoFromSimplex(P, segment.getId(), d, s, X, temp);
-
-        d = abs(d) ;
-        if ( d < ls && !utils::DoubleFloatingEqual()(s, (double) 0.)) {
-            ls = d ;
-        }
-
-    }
-
-    return ls;
-
-};
-
-/*!
  * Computes axis aligned bounding box of object
  * @param[out] minP minimum point
  * @param[out] maxP maximum point
@@ -595,14 +601,10 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
 
 /*!
  * Clear the segmentation and the specified kernel.
- * @param[in] visitee pointer to mesh
  */
-void LevelSetSegmentation::clear( LevelSetKernel *visitee ){
+void LevelSetSegmentation::clearDerived( ){
 
     m_seg.clear() ;
-    if (visitee) {
-        visitee->clear() ;
-    }
 }
 
 /*!
@@ -642,7 +644,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
 
     // Update is not implemented for Cartesian patches
     if( dynamic_cast<LevelSetCartesian*>(visitee) ){
-        clear( visitee ) ;
+        clear( ) ;
         computeLSInNarrowBand( visitee, RSearch, signd ) ;
         return;
     }
@@ -658,7 +660,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
     // If the narrow band size has been increased we can't just update the
     // levelset, we need to rebuild it from scratch.
     if (narrowBandResizeDirection > 0) {
-        clear( visitee ) ;
+        clear( ) ;
         computeLSInNarrowBand( visitee, RSearch, signd ) ;
         return;
     }
@@ -668,6 +670,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
     SegmentToCellMap segmentToCellMap = extractSegmentToCellMap( mapper ) ;
 
     // Prune previous segment info
+    //clearAfterMeshAdaptionDerived( mapper ) ;
     clearAfterMeshAdaption( mapper ) ;
 
     // Evaluate the levelset for the newly added elements
@@ -825,9 +828,9 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
         double                  localRSearch = auxLS.computeSizeNarrowBand(this) ;
 
-        auxLS.setSizeNarrowBand(localRSearch);
+        objLS.setSizeNarrowBand(localRSearch);
         SegmentToCellMap auxSegmentToCellMap = extractSegmentToCellMap( &auxLS, localRSearch ) ;
-        objLS.createSegmentInfo( &auxLS, localRSearch, auxSegmentToCellMap ) ;
+        std::unordered_set<long> inNarrowBandCells = objLS.createSegmentInfo( &auxLS, localRSearch, auxSegmentToCellMap ) ;
 
         for( auto & cell : mesh.getCells() ){
             id = cell.getId() ;
@@ -836,7 +839,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
             icart = cmesh.locatePoint(C) ;
             if ( icart != Cell::NULL_ID ) {
-                if( !objLS.isInNarrowBand(icart) ){
+                if( inNarrowBandCells.count(icart)== 0 ){
                     continue;
                 }
 
@@ -958,7 +961,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
  */
 int LevelSetSegmentation::getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch){
 
-    double oldCellSize = visitee->computeSizeFromRSearch( visitee->getSizeNarrowBand() ) ;
+    double oldCellSize = visitee->computeSizeFromRSearch( getSizeNarrowBand() ) ;
     double newCellSize = visitee->computeSizeFromRSearch( newRSearch ) ;
 
     return sign( newCellSize - oldCellSize );
@@ -969,7 +972,7 @@ int LevelSetSegmentation::getNarrowBandResizeDirection( LevelSetOctree *visitee,
  * are not in the mesh anymore
  * @param[in] mapper information concerning mesh adaption
  */
-void LevelSetSegmentation::clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
+void LevelSetSegmentation::clearAfterMeshAdaptionDerived( const std::vector<adaption::Info> &mapper ){
 
     log::cout() << "  Clearing segment info... " << std::endl;
 
@@ -1001,56 +1004,26 @@ void LevelSetSegmentation::clearAfterMeshAdaption( const std::vector<adaption::I
 
 /*!
  * Clears data structure outside narrow band
- * @param[in] visitee LevelSetKernel with narrow band information
+ * @param[in] search size of narrow band
  */
-void LevelSetSegmentation::filterOutsideNarrowBand( LevelSetKernel *visitee ){
+void LevelSetSegmentation::filterOutsideNarrowBandDerived( double search ){
 
     long id ;
 
     bitpit::PiercedVector<SegInfo>::iterator segItr ;
     for( segItr = m_seg.begin(); segItr != m_seg.end(); ++segItr){
         id = segItr.getId() ;
-        if( ! visitee->isInNarrowBand(id) ){
+        if( ! isInNarrowBand(id) ){
             m_seg.erase(id,true) ;
         };
     };
 
     m_seg.flush() ;
 
-    updateSegmentList(visitee->getSizeNarrowBand()) ;
+    updateSegmentList( search) ;
 
 
     return ;
-};
-
-/*!
- * Gets the number of support items within the narrow band of cell
- * @param[in] id index of cell
- * @return number of segments in narrow band 
- */
-int LevelSetSegmentation::getSupportCount( const long &id ) const{
-
-    if( m_seg.exists(id)){
-        return m_seg.at(id).segments.size() ;
-    } else {
-        return 0 ;
-    }
-
-};
-
-/*!
- * Gets the closest support within the narrow band of cell
- * @param[in] id index of cell
- * @return closest segment in narrow band
- */
-long LevelSetSegmentation::getClosestSupport( const long &id ) const{
-
-    if( m_seg.exists(id)){
-        return m_seg.at(id).segments.front() ;
-    } else {
-        return levelSetDefaults::SUPPORT ;
-    }
-
 };
 
 /*!
@@ -1109,13 +1082,11 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 /*!
  * Flushing of data to communication buffers for partitioning
  * @param[in] sendList list of cells to be sent
- * @param[in,out] sizeBuffer buffer for first communication used to communicate the size of data buffer
  * @param[in,out] dataBuffer buffer for second communication containing data
  */
-void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
+void LevelSetSegmentation::writeCommunicationBufferDerived( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
 
     long nItems(0), counter(0) ;
-
 
     //determine number of elements to send
     for( const auto &index : sendList){
@@ -1126,9 +1097,9 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
         }
 
     }
-    sizeBuffer << nItems ;
 
-    dataBuffer.setCapacity(dataBuffer.capacity() +nItems*2*sizeof(long) +counter*(sizeof(long)+sizeof(double))) ;
+    dataBuffer << nItems ;
+    dataBuffer.setCapacity(dataBuffer.capacity() +nItems* (sizeof(long) +sizeof(size_t)) +counter*(sizeof(long)+sizeof(double))) ;
 
     //determine elements to send
     counter= 0 ;
@@ -1136,7 +1107,7 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
         if( m_seg.exists(index)){
             const auto &seginfo = m_seg[index] ;
             dataBuffer << counter ;
-            dataBuffer << seginfo.segments.size() ;
+            dataBuffer << (size_t) seginfo.segments.size() ;
             for( const long & seg : seginfo.segments ){
                 dataBuffer << seg ;
             };
@@ -1148,23 +1119,23 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &se
         ++counter ;
     }
 
-    dataBuffer.squeeze() ;
-
     return;
 };
 
 /*!
  * Processing of communication buffer into data structure
  * @param[in] recvList list of cells to be received
- * @param[in] nItems number of items within the buffer
  * @param[in,out] dataBuffer buffer containing the data
  */
-void LevelSetSegmentation::readCommunicationBuffer( const std::vector<long> &recvList, const long &nItems, RecvBuffer &dataBuffer ){
+void LevelSetSegmentation::readCommunicationBufferDerived( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
 
-    long    index, id ;
+    long    nItems, index, id ;
+
+    dataBuffer >> nItems ;
 
     for( int i=0; i<nItems; ++i){
-        // Get the id of the element
+
+        // Determine the id of the element
         dataBuffer >> index ;
         id = recvList[index] ;
 

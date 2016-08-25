@@ -92,7 +92,7 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
         LevelSet                auxLS ;
 
         auxLS.setMesh( &cmesh ) ;
-        auxLS.addObject( std::unique_ptr<LevelSetObject>(visitor->clone()) ) ;
+        int objectId = auxLS.addObject( std::unique_ptr<LevelSetObject>(visitor->clone()) ) ;
 
         auxLS.setSign(false) ;
         auxLS.compute( ) ;
@@ -123,7 +123,7 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
                     for( _i=i0[0]; _i<i1[0]; ++_i){
 
                         index = cmesh.getCellLinearId( _i, _j, _k) ;
-                        flagged = flagged || auxLS.isInNarrowBand(index) ;
+                        flagged = flagged || auxLS.isInNarrowBand(index,objectId) ;
 
                     };
                 };
@@ -154,9 +154,10 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
 
 /*!
  * Update the size of the narrow band after an adaptation of the octree mesh
- * @param[in]  mapper mesh modifications
+ * @param[in] mapper mesh modifications
+ * @param[in] object the new size of the narrow band will be computed for this object
  */
-double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects ){
+double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper, LevelSetObject *object ){
 
     bool coarseningInNarrowBand=false ;
 
@@ -165,18 +166,10 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
 
     //
     // Get the bounding box of the objects
-    //
-    int nObjects = objects.size();
+    std::array<double, 3> objectsMinPoint;
+    std::array<double, 3> objectsMaxPoint;
 
-    std::vector<std::array<double, 3>> objectsMinPoint(nObjects);
-    std::vector<std::array<double, 3>> objectsMaxPoint(nObjects);
-
-    int i = -1;
-    for ( auto &objectEntry : objects ) {
-        ++i;
-        const LevelSetObject *object = objectEntry.second.get();
-        object->getBoundingBox( objectsMinPoint[i], objectsMaxPoint[i] ) ;
-    }
+    object->getBoundingBox( objectsMinPoint, objectsMaxPoint ) ;
 
     //
     // Cells in the narrow band
@@ -192,7 +185,7 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
 
         bool parentInNarrowBand = false;
         for ( auto & parent : info.previous){
-            if( isInNarrowBand(parent) ){
+            if( object->isInNarrowBand(parent) ){
                 parentInNarrowBand = true;
                 if( info.type == adaption::Type::TYPE_COARSENING ){
                     coarseningInNarrowBand=true ;
@@ -212,11 +205,12 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
         }
     }
 
-    // Now add the cells that were inthe narrow band befor and have not been
+    // Now add the cells that were in the narrow band befor and have not been
     // updated
-    for (auto itr = m_ls.begin(); itr != m_ls.end(); ++itr) {
+    auto const & lsInfo = object->getLevelSetInfo() ;
+    for (auto itr = lsInfo.begin(); itr != lsInfo.end(); ++itr) {
         long id = itr.getId() ;
-        if( removedNBCells.count(id) > 0 || !isInNarrowBand(id) ) {
+        if( removedNBCells.count(id) > 0 || !object->isInNarrowBand(id) ) {
             continue;
         }
 
@@ -227,15 +221,7 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
     // defined by the objects.
     std::unordered_map<long, bool> isInsideObjectBox;
     for ( long cellId : narrowBandCells ){
-        bool isInside = false;
-        for (int i = 0; i < nObjects; ++i) {
-            if( isCellInsideBoundingBox( cellId, objectsMinPoint[i], objectsMaxPoint[i] ) ){
-                isInside = true;
-                break;
-            }
-        }
-
-        isInsideObjectBox.insert( { cellId, isInside } );
+        isInsideObjectBox.insert( { cellId, isCellInsideBoundingBox( cellId, objectsMinPoint, objectsMaxPoint ) } );
     }
 
     //
@@ -247,7 +233,7 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
     double newRSearch = 0. ;
     for ( long cellId : narrowBandCells ){
         // Discard cells that are not in the bounding box
-        bool discardCell = !isInsideObjectBox.at(cellId) ;
+        bool discardCell = ! isInsideObjectBox.at(cellId) ;
         if ( discardCell ) {
             for ( long neighId : m_mesh->findCellFaceNeighs(cellId) ) {
                 if ( narrowBandCells.count(neighId) == 0 ) {
@@ -271,7 +257,7 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
     }
 
     if(coarseningInNarrowBand==false){
-        newRSearch = std::min( newRSearch, getSizeNarrowBand() ) ;
+        newRSearch = std::min( newRSearch, object->getSizeNarrowBand() ) ;
     }
 
 # if BITPIT_ENABLE_MPI

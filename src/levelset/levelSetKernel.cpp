@@ -28,7 +28,6 @@
 # include "communications.hpp"
 # endif
 
-# include <stack>
 # include <unordered_set>
 
 # include "bitpit_SA.hpp"
@@ -88,136 +87,11 @@ VolumeKernel* LevelSetKernel::getMesh() const{
 } 
 
 /*!
- * Returns reference to LevelSetInfo
-*/
-PiercedVector<LevelSetInfo>& LevelSetKernel::getLevelSetInfo(){
-    return m_ls ;
-} 
-
-/*!
- * Returns reference to LevelSetInfo
-*/
-LevelSetInfo LevelSetKernel::getLevelSetInfo( const long &i)const{
-    if( ! m_ls.exists(i) ){
-        return (  LevelSetInfo() );
-    } else {
-        return m_ls[i] ;
-    };
-
-} 
-
-/*!
- * Get the Sdf value of the i-th local element of the octree mesh.
- * @param[in] i cell index
- * @return levelset value in cell
- */
-double LevelSetKernel::getLS( const long &i)const {
-
-    if( ! m_ls.exists(i) ){
-        return levelSetDefaults::VALUE;
-    } else {
-        return (  m_ls[i].value );
-    };
-
-};
-
-/*!
- * Get the Sdf gradient vector of the i-th local element of the octree mesh.
- * @param[in] i cell index
- * @return levelset gradient in cell 
- */
-std::array<double,3> LevelSetKernel::getGradient(const long &i) const {
-
-    if( ! m_ls.exists(i) ){
-        return levelSetDefaults::GRADIENT;
-    } else {
-        return (  m_ls[i].gradient );
-    };
-
-};
-
-/*!
- * Get the id of closest object
- * @param[in] i cell index
- * @return id of closest object
- */
-int LevelSetKernel::getClosestObject(const long &i) const {
-
-    if( ! m_ls.exists(i) ){
-        return levelSetDefaults::OBJECT;
-    } else {
-        return (  m_ls[i].object );
-    };
-
-};
-
-/*!
- * Get the object and part id of projection point
- * @param[in] i cell index
- * @return pair containing object and part id 
- */
-std::pair<int,int> LevelSetKernel::getClosestPart(const long &i) const {
-
-    if( ! m_ls.exists(i) ){
-        return ( std::make_pair(levelSetDefaults::OBJECT, levelSetDefaults::PART) ) ;
-    } else {
-        LevelSetInfo const &ls = m_ls[i] ;
-        return (  std::make_pair(ls.object, ls.part) );
-    };
-
-};
-
-/*!
- * Get the sign of the levelset function
- * @param[in] i cell index
- * @return sign of levelset
- */
-short LevelSetKernel::getSign(const long &i)const{
-
-    if( ! m_ls.exists(i) ){
-        return levelSetDefaults::SIGN;
-    } else {
-        return ( static_cast<short>(sign( m_ls[i].value)) );
-    };
-
-};
-
-/*!
- * If cell centroid lies within the narrow band and hence levelset is computet exactly
- * @param[in] i cell index
- * @return true/false if the centroid is in narrow band
- */
-bool LevelSetKernel::isInNarrowBand(const long &i)const{
-
-    if( ! m_ls.exists(i) ){
-        return false;
-    } else {
-        return ( std::abs( m_ls[i].value) <= m_RSearch );
-    };
-
-};
-
-/*!
- * Get the current size of the narrow band.
- * @return size of the current narrow band
- */
-double LevelSetKernel::getSizeNarrowBand()const{
-    return m_RSearch;
-};
-
-/*!
- * Manually set the size of the narrow band.
- * @param[in] r size of the narrow band.
- */
-void LevelSetKernel::setSizeNarrowBand(double r){
-    m_RSearch = r;
-};
-
-/*!
  * Compute the size of the narrow band using the levelset value
+ * @param[in] visitor reference object
  * @param[in] signd indicates if signed or unsigned distances are calculated
  */
-double LevelSetKernel::computeSizeNarrowBandFromLS( const bool &signd ){
+double LevelSetKernel::computeSizeNarrowBandFromLS( LevelSetObject *visitor, const bool &signd ){
 
     // We need to consider only the cells with a levelset value less than
     // local narrow band (ie. size of the narrowband evalauted using the
@@ -225,11 +99,12 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( const bool &signd ){
     double newRSearch = 0.;
 
     int factor  ;
+    auto &lsInfo= visitor->getLevelSetInfo() ;
 
-    for (auto itr = m_ls.begin(); itr != m_ls.end(); ++itr) {
+    for (auto itr = lsInfo.begin(); itr != lsInfo.end(); ++itr) {
         // Discard cells outside the narrow band
         long id = itr.getId() ;
-        if( !isInNarrowBand(id) ) {
+        if( !visitor->isInNarrowBand(id) ) {
             continue;
         }
 
@@ -247,17 +122,17 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( const bool &signd ){
                 continue;
             }
 
-            if( isInNarrowBand(neighId)){
-                factor = (int) signd * getSign(ob,cellId) + (int) (!signd) ;
+            if( visitor->isInNarrowBand(neighId)){
+                factor = (int) signd * visitor->getSign(id) + (int) (!signd) ;
                 std::array<double,3> diff = computeCellCentroid(neighId) - myCenter ;
-                if( factor *dotProduct(diff, getGradient(id)) > 0){
+                if( factor *dotProduct(diff, visitor->getGradient(id)) < 0){
                     localRSearch = std::max( localRSearch, norm2(diff) );
                 }
             }
         } 
 
         // Discard cells with a levelset greater than the local narrow band
-        if ( std::abs( getLS(id) ) > (localRSearch + m_mesh->getTol()) ) {
+        if ( std::abs( visitor->getLS(id) ) > (localRSearch + m_mesh->getTol()) ) {
             continue;
         }
 
@@ -335,257 +210,6 @@ const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) {
 
 }
 
-/*!
- * Propagate the sign of the signed distance function from narrow band to entire domain
- */
-void LevelSetKernel::propagateSign( std::unordered_map<int, std::unique_ptr<LevelSetObject>> &visitors ) {
-
-    // We don't need to propagate the sign in the narrowband
-    //
-    // An item is in the narrow band if it has a levelset value that differs
-    // from the defualt value.
-    std::unordered_set<long> alreadyEvaluated;
-
-    PiercedIterator<LevelSetInfo> infoItr = m_ls.begin() ;
-    while (infoItr != m_ls.end()) {
-        double &value = (*infoItr).value;
-        if(!utils::DoubleFloatingEqual()(std::abs(value), levelSetDefaults::VALUE)) {
-            alreadyEvaluated.insert(infoItr.getId()) ;
-        }
-        ++infoItr;
-    }
-
-    // If the all cells have the correct value we don't need to progagate the
-    // sign
-    if (alreadyEvaluated.size() == (size_t) m_mesh->getCellCount()) {
-        return;
-    }
-
-    // Define the seed candidates
-    //
-    // First list cells in the narroband, then all other cells. The cells
-    // outisde the narrowband will be used as seeds only if there are regions
-    // of the mesh disconnected from the narrow band.
-    std::vector<long> seedCandidates;
-    seedCandidates.reserve(m_mesh->getCellCount());
-
-    seedCandidates.assign(alreadyEvaluated.begin(), alreadyEvaluated.end());
-    for (const Cell &cell : m_mesh->getCells()) {
-        long cellId = cell.getId();
-        if (alreadyEvaluated.count(cellId) == 0) {
-            seedCandidates.push_back(cellId);
-        }
-    }
-
-    // Identify real seeds and propagate the sign
-    for (long seed : seedCandidates) {
-        // Get the neighbours that still need to be processed
-        //
-        // If a cell is surrounded only by items already evaluated,
-        // this cell can not be uses as a seed.
-        std::stack<long> processList;
-
-        int nSeedNeighs;
-        const long* seedNeighs;
-        std::vector<long> seedNeighList;
-        if (m_mesh->getCells().size() == 0) {
-            seedNeighList = m_mesh->findCellFaceNeighs( seed ) ;
-            seedNeighs    = seedNeighList.data() ;
-            nSeedNeighs   = seedNeighList.size() ;
-        } else {
-            Cell& cell  = m_mesh->getCell( seed );
-            seedNeighs  = cell.getAdjacencies() ;
-            nSeedNeighs = cell.getAdjacencyCount() ;
-        }
-
-        for ( int n=0; n<nSeedNeighs; ++n ) {
-            long neigh = seedNeighs[n] ;
-            if(neigh<0){
-                continue ;
-            }
-
-            if (alreadyEvaluated.count(neigh) == 0) {
-                processList.push(neigh);
-            }
-        }
-
-        if (processList.empty()) {
-            continue;
-        }
-
-        // Discard seeds with a LS value equal to 0
-        //
-        // A cell can have a levelset value equal to zero only if it's inside
-        // the narrow band, therefore the levelset value returned by getLS
-        // is enough to make this check.
-        double ls = getLS(seed);
-        if( utils::DoubleFloatingEqual()(std::abs(ls), (double) 0.) ) {
-            continue;
-        }
-
-        // Get the sign of the seed
-        short seedSign = ls > 0 ? 1 : -1;
-
-        // Propagate the sign
-        while (!processList.empty()) {
-            long id = processList.top();
-            processList.pop();
-
-            // Get the value associated to the id
-            //
-            // A new value needs to be created only if the sign to propagate
-            // is different from the default sign.
-            infoItr = m_ls.find(id) ;
-            if( infoItr == m_ls.end() && seedSign != levelSetDefaults::SIGN ){
-                infoItr = m_ls.emplace(id) ;
-            }
-
-            // Update the value
-            if( infoItr != m_ls.end() ) {
-                (*infoItr).value = seedSign * levelSetDefaults::VALUE;
-            }
-
-            // Add non-evaluated neighs to the process list
-            int nNeighs;
-            const long* neighs;
-            std::vector<long> neighList;
-            if (m_mesh->getCells().size() == 0) {
-                neighList = m_mesh->findCellFaceNeighs( id ) ;
-                neighs    = neighList.data() ;
-                nNeighs   = neighList.size() ;
-            } else {
-                Cell& cell  = m_mesh->getCell( id );
-                neighs  = cell.getAdjacencies() ;
-                nNeighs = cell.getAdjacencyCount() ;
-            }
-
-            for ( int n=0; n<nNeighs; ++n ) {
-                long neigh = neighs[n];
-                if(neigh<0){
-                    continue;
-                }
-
-                if (alreadyEvaluated.count(neigh) == 0) {
-                    processList.push(neigh);
-                }
-            }
-
-            // The item has been processeed
-            //
-            // If all cells have been evaluated we can stop the propagation
-            alreadyEvaluated.insert(id);
-        }
-
-        // If all cells have been evaluated we can stop the propagation
-        if (alreadyEvaluated.size() == (size_t) m_mesh->getCellCount()) {
-            break;
-        }
-    }
-};
-
-/*! 
- * Clears all levelset information
- */
-void LevelSetKernel::clear( ){
-    m_ls.clear() ;
-}
-
-/*! 
- * Deletes non-existing items and items outside the narrow band after grid adaption.
- * @param[in] mapper mapping info
- */
-void LevelSetKernel::clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
-
-    for ( auto & map : mapper ){
-        if( map.entity == adaption::Entity::ENTITY_CELL ){
-            if( map.type == adaption::Type::TYPE_DELETION || 
-                map.type == adaption::Type::TYPE_PARTITION_SEND  ||
-                map.type == adaption::Type::TYPE_REFINEMENT  ||
-                map.type == adaption::Type::TYPE_COARSENING  ){
-
-                for ( auto & parent : map.previous){
-                    if( m_ls.exists(parent) ) 
-                        m_ls.erase(parent,true) ;
-                }
-            }
-        }
-    }
-
-    m_ls.flush() ;
-
-    return ;
-};
-
-/*! 
- * Deletes items outside the narrow band after grid adaption.
- * @param[in] newRSearch new size of narrow band
- */
-void LevelSetKernel::filterOutsideNarrowBand( double newRSearch ){
-
-    PiercedIterator<LevelSetInfo> lsItr = m_ls.begin() ;
-    while( lsItr != m_ls.end() ){
-
-
-        if( std::abs(lsItr->value) > newRSearch ){
-            lsItr = m_ls.erase( lsItr.getId(), true );
-        } else {
-            ++lsItr ;
-        }
-
-    };
-
-    m_ls.flush() ;
-
-    return ;
-};
-
-/*! 
- * Writes LevelSetKernel to stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetKernel::dump( std::fstream &stream ){
-
-    bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
-
-    bitpit::genericIO::flushBINARY(stream, m_RSearch);
-    bitpit::genericIO::flushBINARY(stream, (long) m_ls.size() ) ;
-
-    for( infoItr=m_ls.begin(); infoItr!=infoEnd; ++infoItr){
-        bitpit::genericIO::flushBINARY(stream, infoItr.getId()) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->value) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->gradient) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->object) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->part) ;
-    };
-
-    return ;
-};
-
-/*! 
- * Reads LevelSetKernel from stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetKernel::restore( std::fstream &stream ){
-
-    long i, n, id;
-    LevelSetInfo cellInfo;
-
-
-    bitpit::genericIO::absorbBINARY(stream, m_RSearch);
-    bitpit::genericIO::absorbBINARY(stream, n);
-
-    m_ls.reserve(n);
-    for( i=0; i<n; ++i){
-        bitpit::genericIO::absorbBINARY(stream, id) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.value) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.gradient) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.object) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.part) ;
-        m_ls.insert(id, cellInfo) ;
-    };
-
-    return ;
-};
 
 /*!
  * Checks if the specified cell is inside the given bounding box
@@ -678,76 +302,6 @@ bool LevelSetKernel::assureMPI( ){
         return true;
     }
 }
-
-/*!
- * Flushing of data to communication buffers for partitioning
- * @param[in] sendList list of cells to be sent
- * @param[in,out] sizeBuffer buffer for first communication used to communicate the size of data buffer
- * @param[in,out] dataBuffer buffer for second communication containing data
- */
-void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &sizeBuffer, SendBuffer &dataBuffer ){
-
-    long nItems = sendList.size() ;
-    int dataSize = 4*sizeof(double) +2*sizeof(int) +2*sizeof(long) ;
-
-    dataBuffer.setCapacity(nItems*dataSize) ;
-
-    //determine elements to send
-    long counter(0) ;
-    nItems = 0 ;
-    for( const auto &index : sendList){
-        if( m_ls.exists(index)){
-            const auto &lsinfo = m_ls[index] ;
-            dataBuffer << counter ;
-            dataBuffer << lsinfo.value ;
-            dataBuffer << lsinfo.gradient ;
-            dataBuffer << lsinfo.object ;
-            dataBuffer << lsinfo.part ;
-            ++nItems ;
-        }
-        ++counter ;
-    }
-
-
-    dataBuffer.squeeze( ) ;
-    sizeBuffer << nItems ;
-
-    return;
-};
-
-
-/*!
- * Processing of communication buffer into data structure
- * @param[in] recvList list of cells to be received
- * @param[in] nItems number of items within the buffer
- * @param[in,out] dataBuffer buffer containing the data
- */
-void LevelSetKernel::readCommunicationBuffer( const std::vector<long> &recvList, const long &nItems, RecvBuffer &dataBuffer ){
-
-    long    index, id;
-
-    for( int i=0; i<nItems; ++i){
-        // Get the id of the element
-        dataBuffer >> index ;
-        id = recvList[index] ;
-
-        // Assign the data of the element
-        PiercedVector<LevelSetInfo>::iterator infoItr ;
-        if( !m_ls.exists(id)){
-            infoItr = m_ls.reclaim(id) ;
-        } else {
-            infoItr = m_ls.getIterator(id) ;
-        }
-
-        dataBuffer >> infoItr->value ;
-        dataBuffer >> infoItr->gradient ;
-        dataBuffer >> infoItr->object ;
-        dataBuffer >> infoItr->part ;
-
-    }
-
-    return;
-};
 
 #endif
 
