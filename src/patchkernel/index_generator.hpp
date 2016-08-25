@@ -26,6 +26,7 @@
 #define __BITPIT_INDEX_GENERATOR_HPP__
 
 #include <deque>
+#include <iostream>
 
 namespace bitpit {
 
@@ -44,10 +45,15 @@ public:
 	void trashId(const long &id);
 	void reset();
 
+	void dump(std::ostream &stream);
+	void restore(std::istream &stream);
+
 private:
 	long m_latest;
 	long m_highest;
 	std::deque<long> m_trash;
+
+	int getBinaryArchiveVersion();
 
 };
 

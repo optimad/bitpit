@@ -25,6 +25,8 @@
 #include <cassert>
 #include <limits>
 
+#include "bitpit_IO.hpp"
+
 #include "index_generator.hpp"
 
 namespace bitpit {
@@ -184,6 +186,60 @@ void IndexGenerator::reset()
 	m_latest  = NULL_ID;
 	m_highest = NULL_ID;
 	m_trash.clear();
+}
+
+/*!
+	Gets the version of the binary archive.
+
+	\result The version of the binary archive.
+*/
+int IndexGenerator::getBinaryArchiveVersion()
+{
+	return 1;
+}
+
+/*!
+ *  Write the index generator to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void IndexGenerator::dump(std::ostream &stream)
+{
+	IO::binary::write(stream, getBinaryArchiveVersion());
+	IO::binary::write(stream, m_latest);
+	IO::binary::write(stream, m_highest);
+
+	IO::binary::write(stream, m_trash.size());
+	for (long id : m_trash) {
+		IO::binary::write(stream, id);
+	}
+}
+
+/*!
+ *  Restore the index generator from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void IndexGenerator::restore(std::istream &stream)
+{
+	// Version
+	int version;
+	IO::binary::read(stream, version);
+	if (version != getBinaryArchiveVersion()) {
+		throw std::runtime_error ("The version of the file does not match the required version");
+	}
+
+	// Generator data
+	IO::binary::read(stream, m_latest);
+	IO::binary::read(stream, m_highest);
+
+	size_t nTrashedIds;
+	IO::binary::read(stream, nTrashedIds);
+
+	m_trash.resize(nTrashedIds);
+	for (size_t i = 0; i < nTrashedIds; ++i) {
+		IO::binary::read(stream, m_trash[i]);
+	}
 }
 
 /*!
