@@ -85,6 +85,7 @@ public:
 
 	int getId() const;
 	int getDimension() const;
+	void setDimension(int dimension);
 	bool isThreeDimensional() const;
 
 	virtual long getVertexCount() const;
@@ -455,7 +456,6 @@ private:
 	int findAdjoinNeighFace(const long &cellId, const long &neighId) const;
 
 	void setId(int id);
-	void setDimension(int dimension);
 
 	std::array<double, 3> evalElementCentroid(const Element &element) const;
 };
