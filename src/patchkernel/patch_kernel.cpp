@@ -476,6 +476,16 @@ int PatchKernel::getId() const
 */
 void PatchKernel::setDimension(int dimension)
 {
+	if (dimension == m_dimension) {
+		return;
+	}
+
+	// If the dimension was already assigned, reset the patch
+	if (m_dimension > 0) {
+		reset();
+	}
+
+	// Set the dimension
 	m_dimension = dimension;
 }
 
