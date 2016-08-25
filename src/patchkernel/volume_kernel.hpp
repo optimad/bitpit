@@ -32,6 +32,8 @@ namespace bitpit {
 class VolumeKernel : public PatchKernel {
 
 public:
+	VolumeKernel(bool epxert);
+	VolumeKernel(const int &dimension, bool epxert);
 	VolumeKernel(const int &id, const int &dimension, bool epxert);
 
 	virtual ~VolumeKernel();

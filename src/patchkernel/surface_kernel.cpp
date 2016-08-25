@@ -57,6 +57,29 @@ const unsigned short SurfaceKernel::SELECT_ALL      = 3;
 /*!
 	Creates a new patch.
 
+	\param expert if true, the expert mode will be enabled
+*/
+SurfaceKernel::SurfaceKernel(bool expert)
+	: PatchKernel(expert)
+{
+}
+
+/*!
+	Creates a new patch.
+
+	\param patch_dim is the dimension of the patch
+	\param space_dim is the dimension of the space
+	\param expert if true, the expert mode will be enabled
+*/
+SurfaceKernel::SurfaceKernel(const int &patch_dim, const int& space_dim, bool expert)
+	: PatchKernel(patch_dim, expert)
+{
+    m_spaceDim = space_dim;
+}
+
+/*!
+	Creates a new patch.
+
 	\param id is the id that will be assigned to the patch
 	\param patch_dim is the dimension of the patch
 	\param space_dim is the dimension of the space

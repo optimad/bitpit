@@ -55,6 +55,40 @@ namespace bitpit {
 /*!
 	Creates a new patch.
 
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(bool expert)
+	: m_expert(expert)
+{
+	// Initialize the patch
+	initialize();
+
+	// Register the patch
+	patch::manager().registerPatch(this);
+}
+
+/*!
+	Creates a new patch.
+
+	\param dimension is the dimension of the patch
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(const int &dimension, bool expert)
+	: m_expert(expert)
+{
+	// Initialize the patch
+	initialize();
+
+	// Register the patch
+	patch::manager().registerPatch(this);
+
+	// Set the dimension
+	setDimension(dimension);
+}
+
+/*!
+	Creates a new patch.
+
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
