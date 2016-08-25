@@ -117,6 +117,10 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 		m_octantLocalFacesOnVertex.push_back({{1, 3}});
 	}
 
+	// Set the bounding
+	setBoundingBoxFrozen(true);
+	setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
+
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
@@ -413,6 +417,12 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	TreeOperation lastTreeOperation = m_lastTreeOperation;
 	if (lastTreeOperation == OP_ADAPTION_UNMAPPED && !importAll) {
 		throw std::runtime_error ("Unable to sync the patch after an unmapped adaption");
+	}
+
+	// If the patch is partitioned the bounding box can not be considered
+	// frozen
+	if (lastTreeOperation == OP_LOAD_BALANCE) {
+		setBoundingBoxFrozen(false);
 	}
 
 	// Info on the tree
@@ -1463,6 +1473,11 @@ void VolOctree::translate(std::array<double, 3> translation)
 	m_tree.setOrigin(m_tree.getOrigin() + translation);
 
 	VolumeKernel::translate(translation);
+
+	// If the bounding box is fronzen it is not updated automatically
+	if (isBoundingBoxFrozen()) {
+		setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
+	}
 }
 
 /*!
@@ -1486,6 +1501,11 @@ void VolOctree::scale(std::array<double, 3> scaling)
 	initializeTreeGeometry();
 
 	VolumeKernel::scale(scaling);
+
+	// If the bounding box is fronzen it is not updated automatically
+	if (isBoundingBoxFrozen()) {
+		setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
+	}
 }
 
 /*!
