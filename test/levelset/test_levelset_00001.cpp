@@ -112,20 +112,20 @@ int main( int argc, char *argv[]){
     // Input geometry
     std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(0,1,dimensions) );
 
-    std::cout << " - Loading dgf geometry" << std::endl;
+    log::cout() << " - Loading dgf geometry" << std::endl;
 
     Generate2DSurfMesh( *(STL.get()) ) ;
 
     STL->getVTK().setName("geometry_001") ;
     STL->write() ;
 
-    std::cout << "n. vertex: " << STL->getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL->getCellCount() << std::endl;
+    log::cout() << "n. vertex: " << STL->getVertexCount() << std::endl;
+    log::cout() << "n. simplex: " << STL->getCellCount() << std::endl;
 
 
 
     // create cartesian mesh around geometry 
-    std::cout << " - Setting mesh" << std::endl;
+    log::cout() << " - Setting mesh" << std::endl;
     std::array<double,3>     meshMin, meshMax, delta ;
     std::array<int,3>        nc = {{64, 64, 0}} ;
 
@@ -154,9 +154,9 @@ int main( int argc, char *argv[]){
     end = std::chrono::system_clock::now();
 
     elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    std::cout << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
-    std::cout << " - Exporting data" << std::endl;
+    log::cout() << " - Exporting data" << std::endl;
     mesh.update() ;
     std::vector<double> LS(mesh.getCellCount() ) ;
     std::vector<double>::iterator it = LS.begin() ;
@@ -170,7 +170,7 @@ int main( int argc, char *argv[]){
     mesh.getVTK().setName("levelset_001") ;
     mesh.write() ;
 
-    std::cout << " - Exported data" << std::endl;
+    log::cout() << " - Exported data" << std::endl;
 
 #if BITPIT_ENABLE_MPI==1
     MPI_Finalize();
