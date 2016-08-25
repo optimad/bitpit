@@ -61,7 +61,7 @@ public:
 	typedef PiercedVector<Cell>::iterator CellIterator;
 	typedef PiercedVector<Interface>::iterator InterfaceIterator;
 
-	PatchKernel(const int &id, const int &dimension, bool epxert);
+	PatchKernel(const int &id, const int &dimension, bool expert);
 
 	virtual ~PatchKernel();
 
