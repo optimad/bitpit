@@ -26,6 +26,7 @@
  * @defgroup IO Input/Output (IO)
  * @{
  * @defgroup GenericIO Generic
+ * @defgroup Binary Binary
  * @defgroup DuneGridFormat DuneGridFormat (DGF)
  * @defgroup STereoLithography STereoLithography (STL)
  * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
@@ -42,6 +43,8 @@
 
 #include "bitpit_version.hpp"
 
+#include "binary_archive.hpp"
+#include "binary_utils.hpp"
 #include "configuration.hpp"
 #include "logger.hpp"
 #include "FileHandler.hpp"

@@ -34,6 +34,7 @@ list(APPEND TESTS "test_IO_00001")
 list(APPEND TESTS "test_IO_00002")
 list(APPEND TESTS "test_IO_00003")
 list(APPEND TESTS "test_IO_00004")
+list(APPEND TESTS "test_IO_00005")
 
 set(IO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests fo the IO module" FORCE)
 
