@@ -74,7 +74,6 @@ class LevelSet{
     bool                                        m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
     bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
     bool                                        m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
-    bool                                        m_propagateV;           /**< Flag for value propagation from narrow band (default = false) */
 
     public:
     ~LevelSet() ;
@@ -183,7 +182,6 @@ class LevelSetKernel{
     void                                        filterOutsideNarrowBand( double ) ;
 
     void                                        propagateSign( std::unordered_map<int, std::unique_ptr<LevelSetObject>> & ) ;
-    void                                        propagateValue( LevelSetObject *) ;
 
     void                                        dump( std::fstream &);
     void                                        restore( std::fstream &);
@@ -205,8 +203,6 @@ class LevelSetKernel{
 # endif
 
     protected:
-    void                                        solveEikonal( double, double );
-    virtual double                              updateEikonal( double, double, const long &, const std::unordered_map<long,short> & ) ; 
 
 };
 
@@ -218,9 +214,6 @@ class LevelSetCartesian : public LevelSetKernel{
     private:
     double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, std::unordered_map<int, std::unique_ptr<LevelSetObject>> &objects );
     double                                      computeRSearchFromCell( long id ) ;
-
-    double                                      updateEikonal( double, double, const long &, const std::unordered_map<long,short> & ) ; 
-
     public:
     virtual ~LevelSetCartesian();
     LevelSetCartesian( VolCartesian & );
