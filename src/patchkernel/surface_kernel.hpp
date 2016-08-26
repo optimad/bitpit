@@ -41,10 +41,6 @@ public:
         // Types definitions
         typedef double (SurfaceKernel::*eval_f_)(const long&, int&) const;
 
-	SurfaceKernel(bool expert);
-	SurfaceKernel(const int &patch_dim, const int &space_dim, bool expert);
-	SurfaceKernel(const int &id, const int &patch_dim, const int &space_dim, bool expert);
-
         int getSpaceDimension(void) const;
 
 	virtual ~SurfaceKernel();
@@ -71,6 +67,10 @@ private:
 
 protected:
         int                     m_spaceDim;
+
+	SurfaceKernel(bool expert);
+	SurfaceKernel(const int &patch_dim, const int &space_dim, bool expert);
+	SurfaceKernel(const int &id, const int &patch_dim, const int &space_dim, bool expert);
         
 };
 

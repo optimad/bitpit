@@ -32,10 +32,6 @@ namespace bitpit {
 class VolumeKernel : public PatchKernel {
 
 public:
-	VolumeKernel(bool epxert);
-	VolumeKernel(const int &dimension, bool epxert);
-	VolumeKernel(const int &id, const int &dimension, bool epxert);
-
 	virtual ~VolumeKernel();
 
 	bool isPointInside(const double &x, const double &y, const double &z);
@@ -48,6 +44,11 @@ public:
 
 	virtual double evalInterfaceArea(const long &id)const = 0;
         virtual std::array<double,3> evalInterfaceNormal(const long &id)const = 0;
+
+protected:
+	VolumeKernel(bool epxert);
+	VolumeKernel(const int &dimension, bool epxert);
+	VolumeKernel(const int &id, const int &dimension, bool epxert);
 
 };
 
