@@ -54,6 +54,7 @@ friend class PatchInfo;
 #if BITPIT_ENABLE_MPI==1
 friend class PatchGlobalInfo;
 #endif
+friend class PatchManager;
 
 public:
 	typedef PiercedVector<Vertex>::iterator VertexIterator;

@@ -22,21 +22,53 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#define __BITPIT_MODULE_PATCH_KERNEL_HPP__
+#ifndef __BITPIT_PATCH_MANAGER_HPP__
+#define __BITPIT_PATCH_MANAGER_HPP__
 
-/*!
- * @defgroup patchkernel Patch kernel
- */
-
-#include "bitpit_version.hpp"
+#include <memory>
+#include <unordered_map>
 
 #include "index_generator.hpp"
-#include "patch_info.hpp"
-#include "patch_kernel.hpp"
-#include "patch_manager.hpp"
-#include "surface_kernel.hpp"
-#include "volume_kernel.hpp"
-#include "adaption.hpp"
+
+namespace bitpit {
+
+class PatchManager {
+
+friend class PatchKernel;
+
+public:
+	static int const NULL_PATCH_ID;
+
+    static PatchManager & manager();
+
+private:
+    static std::unique_ptr<PatchManager> m_manager;
+
+	IndexGenerator m_idGenerator;
+	std::vector<PatchKernel *> m_patchOrder;
+	std::unordered_map<PatchKernel *, int> m_patchIds;
+
+	PatchManager();
+
+    PatchManager(PatchManager const&) = delete;
+    PatchManager& operator=(PatchManager const&) = delete;
+
+	int registerPatch(PatchKernel *patch, int id = NULL_PATCH_ID);
+	void unregisterPatch(PatchKernel *patch);
+
+};
+
+/*!
+    \brief The namespace 'patch' contains routines for interacting with the
+    patch manager.
+*/
+namespace patch {
+
+    // Generic global functions
+    PatchManager & manager();
+
+}
+
+}
 
 #endif
