@@ -60,23 +60,49 @@ namespace bitpit {
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
-	: m_nInternals(0), m_nGhosts(0),
-	  m_lastInternalId(Element::NULL_ID),
-	  m_firstGhostId(Element::NULL_ID),
-	  m_boxFrozen(false), m_boxDirty(true),
-	  m_adaptionDirty(true), m_expert(expert), m_hasCustomTolerance(false),
-	  m_rank(0), m_nProcessors(1)
-#if BITPIT_ENABLE_MPI==1
-	  , m_communicator(MPI_COMM_NULL), m_partitioned(false)
-#endif
+	: m_expert(expert)
 {
+	// Initialize the patch
+	initialize();
+
 	// Register the patch
 	patch::manager().registerPatch(this, id);
 
 	// Set the dimension
 	setDimension(dimension);
+}
+
+/*!
+	Initialize the patch
+*/
+void PatchKernel::initialize()
+{
+	// Id
+	m_id = PatchManager::NULL_PATCH_ID;
+
+	// Cell count
+	m_nInternals = 0;
+	m_nGhosts    = 0;
+
+	m_lastInternalId = Element::NULL_ID;
+	m_firstGhostId   = Element::NULL_ID;
+
+	// Dimension
+	m_dimension = -1;
+
+	// Adaption
+	m_adaptionDirty = true;
+
+	// Parallel
+	m_rank        = 0;
+	m_nProcessors = 1;
+#if BITPIT_ENABLE_MPI==1
+	m_partitioned  = false;
+	m_communicator = MPI_COMM_NULL;
+#endif
 
 	// Initialize the geometrical tolerance to a default value
+	m_hasCustomTolerance = false;
 	_setTol(DEFAULT_TOLERANCE);
 
 	// Initializes the bounding box
