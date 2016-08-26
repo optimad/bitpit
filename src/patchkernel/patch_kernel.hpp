@@ -42,32 +42,11 @@
 
 #include "adaption.hpp"
 #include "cell.hpp"
+#include "index_generator.hpp"
 #include "interface.hpp"
 #include "vertex.hpp"
 
 namespace bitpit {
-
-class IndexGenerator {
-
-public:
-	static const long NULL_ID;
-
-	IndexGenerator();
-
-	long generateId();
-	long getLatestId();
-	long getHighestId();
-	bool isIdAssigned(long id);
-	void setAssignedId(long id);
-	void trashId(const long &id);
-	void reset();
-
-private:
-	long m_latest;
-	long m_highest;
-	std::deque<long> m_trash;
-
-};
 
 class PatchKernel : public VTKBaseStreamer {
 

@@ -22,20 +22,35 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#define __BITPIT_MODULE_PATCH_KERNEL_HPP__
+#ifndef __BITPIT_INDEX_GENERATOR_HPP__
+#define __BITPIT_INDEX_GENERATOR_HPP__
 
-/*!
- * @defgroup patchkernel Patch kernel
- */
+#include <deque>
 
-#include "bitpit_version.hpp"
+namespace bitpit {
 
-#include "index_generator.hpp"
-#include "patch_info.hpp"
-#include "patch_kernel.hpp"
-#include "surface_kernel.hpp"
-#include "volume_kernel.hpp"
-#include "adaption.hpp"
+class IndexGenerator {
+
+public:
+	static const long NULL_ID;
+
+	IndexGenerator();
+
+	long generateId();
+	long getLatestId();
+	long getHighestId();
+	bool isIdAssigned(long id);
+	void setAssignedId(long id);
+	void trashId(const long &id);
+	void reset();
+
+private:
+	long m_latest;
+	long m_highest;
+	std::deque<long> m_trash;
+
+};
+
+}
 
 #endif
