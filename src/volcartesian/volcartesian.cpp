@@ -45,6 +45,16 @@ namespace bitpit {
 */
 
 /*!
+	Creates an uninitialized patch.
+*/
+VolCartesian::VolCartesian()
+	: VolumeKernel(false)
+{
+	initialize();
+	reset();
+}
+
+/*!
 	Creates a new patch.
 
 	\param id is the id of the patch
