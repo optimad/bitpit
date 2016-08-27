@@ -32,6 +32,7 @@ get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 set(TESTS "")
 list(APPEND TESTS "test_volcartesian_00001")
 list(APPEND TESTS "test_volcartesian_00002")
+list(APPEND TESTS "test_volcartesian_00003")
 
 set(VOLCARTESIAN_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the volcartesian module" FORCE)
 

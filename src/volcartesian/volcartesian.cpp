@@ -126,6 +126,20 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 }
 
 /*!
+	Creates a new patch restoring the patch saved in the specified stream.
+
+	\param stream is the stream to read from
+*/
+VolCartesian::VolCartesian(std::istream stream)
+	: VolumeKernel(false)
+{
+	initialize();
+	reset();
+
+	restore(stream);
+}
+
+/*!
 	Reset the patch.
 */
 void VolCartesian::reset()
@@ -887,7 +901,19 @@ int VolCartesian::_getDumpVersion() const
  */
 void VolCartesian::_dump(std::ostream &stream)
 {
-	throw std::runtime_error ("Dump is not implemented for the VolCartesian patch");
+	IO::binary::write(stream, m_minCoords[0]);
+	IO::binary::write(stream, m_minCoords[1]);
+	IO::binary::write(stream, m_minCoords[2]);
+
+	IO::binary::write(stream, m_maxCoords[0] - m_minCoords[0]);
+	IO::binary::write(stream, m_maxCoords[1] - m_minCoords[1]);
+	IO::binary::write(stream, m_maxCoords[2] - m_minCoords[2]);
+
+	IO::binary::write(stream, m_nCells1D[0]);
+	IO::binary::write(stream, m_nCells1D[1]);
+	IO::binary::write(stream, m_nCells1D[2]);
+
+	IO::binary::write(stream, m_memoryMode);
 }
 
 /*!
@@ -897,7 +923,34 @@ void VolCartesian::_dump(std::ostream &stream)
  */
 void VolCartesian::_restore(std::istream &stream)
 {
-	throw std::runtime_error ("Restore is not implemented for the VolCartesian patch");
+	// Origin
+	std::array<double, 3> origin;
+	IO::binary::read(stream, origin[0]);
+	IO::binary::read(stream, origin[1]);
+	IO::binary::read(stream, origin[2]);
+
+	setOrigin(origin);
+
+	// Lengths
+	std::array<double, 3> lengths;
+	IO::binary::read(stream, lengths[0]);
+	IO::binary::read(stream, lengths[1]);
+	IO::binary::read(stream, lengths[2]);
+
+	setLengths(lengths);
+
+	// Discretization
+	std::array<int, 3> nCells;
+	IO::binary::read(stream, nCells[0]);
+	IO::binary::read(stream, nCells[1]);
+	IO::binary::read(stream, nCells[2]);
+
+	setDiscretization(nCells);
+
+	// Memory mode
+	MemoryMode memoryMode;
+	IO::binary::read(stream, memoryMode);
+	setMemoryMode(memoryMode);
 }
 
 /*!
