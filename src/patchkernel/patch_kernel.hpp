@@ -50,6 +50,8 @@ namespace bitpit {
 class IndexGenerator {
 
 public:
+	static const long NULL_ID;
+
 	IndexGenerator();
 
 	long generateId();

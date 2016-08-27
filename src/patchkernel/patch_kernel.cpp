@@ -50,11 +50,13 @@ namespace bitpit {
 	\brief The IndexGenerator class allows to generate unique ids.
 */
 
+const long IndexGenerator::NULL_ID = std::numeric_limits<long>::min();
+
 /*!
 	Creates a new generator.
 */
 IndexGenerator::IndexGenerator()
-	: m_latest(-1), m_highest(-1)
+	: m_latest(NULL_ID), m_highest(NULL_ID)
 {
 
 }
@@ -72,8 +74,13 @@ long IndexGenerator::generateId()
 	// If the trash is empty generate a new id otherwise recycle the first id
 	// in the trash.
 	if (m_trash.empty()) {
-		assert(m_highest < std::numeric_limits<long>::max());
-		m_latest = ++m_highest;
+		if (m_highest == NULL_ID) {
+			m_highest = 0;
+		} else {
+			assert(m_highest < std::numeric_limits<long>::max());
+			++m_highest;
+		}
+		m_latest = m_highest;
 	} else {
 		m_latest = m_trash.front();
 		m_trash.pop_front();
@@ -175,7 +182,7 @@ void IndexGenerator::trashId(const long &id)
 	// We only keep track of the latest assigned id, if we trash that id we
 	// have no information of the previous assigned id.
 	if (id == m_latest) {
-		m_latest = -1;
+		m_latest = NULL_ID;
 	}
 }
 
@@ -184,8 +191,8 @@ void IndexGenerator::trashId(const long &id)
 */
 void IndexGenerator::reset()
 {
-	m_latest  = -1;
-	m_highest = -1;
+	m_latest  = NULL_ID;
+	m_highest = NULL_ID;
 	m_trash.clear();
 }
 
