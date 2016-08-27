@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
     VTKUnstructuredGrid &vtk = patch_2D->getVTK() ;
 	vtk.setName("cartesian_uniform_patch_2D");
-	patch_2D->update();
+	patch_2D->setMemoryMode(VolCartesian::MEMORY_NORMAL);
 
 	log::cout() << "\n  >> 2D location test" << std::endl;
 	log::cout() << std::endl;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
     VTKUnstructuredGrid &vtk = patch_3D->getVTK() ;
 	vtk.setName("cartesian_uniform_patch_3D");
-	patch_3D->update();
+	patch_3D->setMemoryMode(VolCartesian::MEMORY_NORMAL);
 
 	log::cout() << "\n  >> 3D location test" << std::endl;
 	log::cout() << std::endl;

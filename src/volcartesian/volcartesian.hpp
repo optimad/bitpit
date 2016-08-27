@@ -42,6 +42,11 @@ public:
 	using PatchKernel::getCellType;
 	using PatchKernel::getInterfaceType;
 
+	enum MemoryMode {
+		MEMORY_NORMAL,
+		MEMORY_LIGHT
+	};
+
 	VolCartesian();
 	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   const std::array<double, 3> &lengths, const std::array<int, 3> &nCells);
@@ -74,6 +79,9 @@ public:
 
 	std::array<double, 3> getSpacing() const;
 	double getSpacing(const int &direction) const;
+
+	void setMemoryMode(MemoryMode mode);
+	MemoryMode getMemoryMode();
 
 	bool isPointInside(const std::array<double, 3> &point);
 	bool isPointInside(const long &id, const std::array<double, 3> &point);
@@ -130,6 +138,8 @@ protected:
 	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
 private:
+	MemoryMode m_memoryMode;
+
 	std::array<double, 3> m_cellSpacings;
 	std::array<double, 3> m_minCoords;
 	std::array<double, 3> m_maxCoords;
@@ -155,6 +165,8 @@ private:
 	void initialize();
 	void initializeInterfaceArea();
 	void initializeCellVolume();
+
+	void setMemoryMode(MemoryMode mode, bool updatePatch);
 
 	void addVertices();
 	std::array<double, 3> evalVertexCoords(const long &id);

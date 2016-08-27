@@ -147,8 +147,10 @@ void VolCartesian::reset()
 	m_nCells      = 0;
 	m_nInterfaces = 0;
 
-	// Reset patch data structures
-	VolumeKernel::reset();
+	// Set the light memory mode
+	//
+	// This will reset the patch data structures.
+	setMemoryMode(MemoryMode::MEMORY_LIGHT);
 }
 
 /*!
@@ -156,6 +158,9 @@ void VolCartesian::reset()
 */
 void VolCartesian::initialize()
 {
+	// Set the light memory mode
+	m_memoryMode = MemoryMode::MEMORY_LIGHT;
+
 	// Normals
 	int i = 0;
 	for (int n = 0; n < 3; n++) {
@@ -307,6 +312,11 @@ void VolCartesian::setDiscretization(const std::array<int, 3> &nCells)
 
 	// Cell volume
 	initializeCellVolume();
+
+	// Create cells, vertices and interfaces
+	if (getMemoryMode() == MemoryMode::MEMORY_NORMAL) {
+		update();
+	}
 }
 
 /*!
@@ -459,6 +469,59 @@ std::array<double, 3> VolCartesian::getSpacing() const
 }
 
 /*!
+	Set the memory mode.
+
+	\param mode is the memory mode that will be set
+*/
+void VolCartesian::setMemoryMode(MemoryMode mode)
+{
+	setMemoryMode(mode, true);
+}
+
+/*!
+	Set the memory mode.
+
+	\param mode is the memory mode that will be set
+	\param updatePatch if set to true, updates the data structures to switch
+	into the specified mode, otherwise only the memory-mode flag is updated
+	and the data structures needs to be updated externally
+*/
+void VolCartesian::setMemoryMode(MemoryMode mode, bool updatePatch)
+{
+	if (mode == m_memoryMode) {
+		return;
+	}
+
+	// Set the mode
+	m_memoryMode = mode;
+
+	// Update the data structures
+	if (updatePatch) {
+		switch (mode) {
+
+		case MemoryMode::MEMORY_NORMAL:
+			update();
+			break;
+
+		case MemoryMode::MEMORY_LIGHT:
+			VolumeKernel::reset();
+			break;
+
+		}
+	}
+}
+
+/*!
+	Get the current memory mode.
+
+	\result The current memory mode.
+*/
+VolCartesian::MemoryMode VolCartesian::getMemoryMode()
+{
+	return m_memoryMode;
+}
+
+/*!
 	Get cell spacing along the specificed direction.
 
 	\param[in] direction is the direction along which the spacing is
@@ -524,6 +587,9 @@ const std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdapti
 	} else {
 		adaptionData.emplace_back();
 	}
+
+	// Updating the adaption brings the patch is in normal memory mode
+	setMemoryMode(MemoryMode::MEMORY_NORMAL, false);
 
 	// Done
 	return adaptionData;
