@@ -166,6 +166,8 @@ private:
 	void initializeInterfaceArea();
 	void initializeCellVolume();
 
+	void __reset();
+
 	void setMemoryMode(MemoryMode mode, bool updatePatch);
 
 	void addVertices();

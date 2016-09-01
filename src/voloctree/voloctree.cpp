@@ -73,6 +73,13 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 {
 	initialize();
 
+	// Reset
+	//
+	// The function that resets the patch is virtual, but since is called
+	// from the constructor of the patch kernel only the base function is
+	// called.
+	__reset(false);
+
 	// Initialize local edges/vertex/faces association
 	if (getDimension() == 3) {
 		m_octantLocalFacesOnVertex.reserve(8);
@@ -146,6 +153,38 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	}
 
 	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);
+}
+
+/*!
+	Internal function to reset the patch.
+*/
+void VolOctree::reset()
+{
+	// Reset the patch kernel
+	VolumeKernel::reset();
+
+	// Reset the current patch
+	__reset(true);
+}
+
+/*!
+	Reset the patch.
+*/
+void VolOctree::__reset(bool resetTree)
+{
+	// Reset the tree
+	if (resetTree) {
+		m_tree.reset();
+		m_tree.setOrigin(std::array<double, 3>{0., 0., 0.});
+		m_tree.setL(1.);
+	}
+
+	// Reset cell-to-octants maps
+	m_cellToOctant.clear();
+	m_octantToCell.clear();
+
+	m_cellToGhost.clear();
+	m_ghostToCell.clear();
 }
 
 /*!

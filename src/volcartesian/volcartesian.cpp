@@ -51,7 +51,7 @@ VolCartesian::VolCartesian()
 	: VolumeKernel(false)
 {
 	initialize();
-	reset();
+	__reset();
 }
 
 /*!
@@ -70,7 +70,7 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 	: VolumeKernel(id, dimension, false)
 {
 	initialize();
-	reset();
+	__reset();
 
 	setOrigin(origin);
 	setLengths(lengths);
@@ -93,7 +93,7 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 	: VolumeKernel(id, dimension, false)
 {
 	initialize();
-	reset();
+	__reset();
 
 	setOrigin(origin);
 	setLengths({{length, length, length}});
@@ -116,7 +116,7 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 	: VolumeKernel(id, dimension, false)
 {
 	initialize();
-	reset();
+	__reset();
 
 	setOrigin(origin);
 	setLengths({{length, length, length}});
@@ -134,15 +134,25 @@ VolCartesian::VolCartesian(std::istream stream)
 	: VolumeKernel(false)
 {
 	initialize();
-	reset();
-
 	restore(stream);
+}
+
+/*!
+	Internal function to reset the patch.
+*/
+void VolCartesian::reset()
+{
+	// Reset the patch kernel
+	VolumeKernel::reset();
+
+	// Reset the current patch
+	__reset();
 }
 
 /*!
 	Reset the patch.
 */
-void VolCartesian::reset()
+void VolCartesian::__reset()
 {
 	// Reset geometry and discretization
 	m_minCoords = {{0., 0., 0.}};

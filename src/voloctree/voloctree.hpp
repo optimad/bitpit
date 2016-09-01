@@ -75,6 +75,8 @@ public:
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 
+	void reset();
+
 	double evalCellVolume(const long &id) const;
 	double evalCellSize(const long &id) const;
 	std::array<double, 3> evalCellCentroid(const long &id) const;
@@ -210,6 +212,8 @@ private:
 
 	void initialize();
 	void initializeTreeGeometry();
+
+	void __reset(bool resetTree);
 
 	bool set_marker(const long &id, const int8_t &value);
 
