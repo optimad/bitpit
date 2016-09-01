@@ -293,12 +293,18 @@ void ElementInfo::initializeVertexInfo()
 	// Face data
 	nFaces = 1;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	face_type[0] = VERTEX;
+
+	facesInfo[0] = this;
 
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	faceConnect[0] = std::vector<int>(nVertices);
 	faceConnect[0][0] = 0;
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -328,13 +334,18 @@ void ElementInfo::initializeLineInfo()
 	// Face data
 	nFaces = 2;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		face_type[k]       = VERTEX;
+		facesInfo[k]      = &vertexInfo;
 		faceConnect[k]    = std::vector<int>(vertexInfo.nVertices);
 		faceConnect[k][0] = k;
 	}
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -365,14 +376,19 @@ void ElementInfo::initializeTriangleInfo()
 	// Face data
 	nFaces = 3;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		face_type[k]       = LINE;
+		facesInfo[k]      = &lineInfo;
 		faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
 		faceConnect[k][0] = k;
 		faceConnect[k][1] = (k + 1) % nVertices;
 	}
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -403,10 +419,13 @@ void ElementInfo::initializePixelInfo()
 	// Face data
 	nFaces = 4;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		face_type[k]    = LINE;
+		facesInfo[k]   = &lineInfo;
 		faceConnect[k] = std::vector<int>(lineInfo.nVertices);
 	}
 
@@ -421,6 +440,8 @@ void ElementInfo::initializePixelInfo()
 
 	faceConnect[3][0] = 3;
 	faceConnect[3][1] = 2;
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -451,14 +472,19 @@ void ElementInfo::initializeQuadInfo()
 	// Face data
 	nFaces = 4;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		face_type[k]       = LINE;
+		facesInfo[k]      = &lineInfo;
 		faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
 		faceConnect[k][0] = k;
 		faceConnect[k][1] = (k + 1) % nVertices;
 	}
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -506,10 +532,13 @@ void ElementInfo::initializeTetraInfo()
 	// Face data
 	nFaces = 4;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		face_type[k]    = TRIANGLE;
+		facesInfo[k]   = &triangleInfo;
 		faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
 	}
 
@@ -528,6 +557,8 @@ void ElementInfo::initializeTetraInfo()
 	faceConnect[3][0] = 0;
 	faceConnect[3][1] = 1;
 	faceConnect[3][2] = 3;
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -593,10 +624,13 @@ void ElementInfo::initializeVoxelInfo()
 	// Face data
 	nFaces = 6;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		face_type[k]    = PIXEL;
+		facesInfo[k]   = &pixelInfo;
 		faceConnect[k] = std::vector<int>(pixelInfo.nVertices);
 	}
 
@@ -629,6 +663,8 @@ void ElementInfo::initializeVoxelInfo()
 	faceConnect[5][1] = 5;
 	faceConnect[5][2] = 6;
 	faceConnect[5][3] = 7;
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -694,10 +730,13 @@ void ElementInfo::initializeHexahedronInfo()
 	// Face data
 	nFaces = 6;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		face_type[k]    = QUAD;
+		facesInfo[k]   = &quadInfo;
 		faceConnect[k] = std::vector<int>(quadInfo.nVertices);
 	}
 
@@ -730,6 +769,8 @@ void ElementInfo::initializeHexahedronInfo()
 	faceConnect[5][1] = 2;
 	faceConnect[5][2] = 3;
 	faceConnect[5][3] = 7;
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -784,14 +825,18 @@ void ElementInfo::initializePyramidInfo()
 	// Face data
 	nFaces = 5;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		if (k == 0) {
 			face_type[k]    = QUAD;
+			facesInfo[k]   = &quadInfo;
 			faceConnect[k] = std::vector<int>(quadInfo.nVertices);
 		} else {
 			face_type[k]    = TRIANGLE;
+			facesInfo[k]   = &triangleInfo;
 			faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
 		}
 	}
@@ -816,6 +861,8 @@ void ElementInfo::initializePyramidInfo()
 	faceConnect[4][0] = 2;
 	faceConnect[4][1] = 3;
 	faceConnect[4][2] = 4;
+
+	initializeFaceEdges(facesInfo);
 }
 
 /*!
@@ -873,14 +920,18 @@ void ElementInfo::initializeWedgeInfo()
 	// Face data
 	nFaces = 5;
 
+	std::vector<ElementInfo *> facesInfo(nFaces);
+
 	face_type = std::vector<Type>(nFaces);
 	faceConnect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		if (k == 0 || k == 1) {
 			face_type[k]    = TRIANGLE;
+			facesInfo[k]   = &triangleInfo;
 			faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
 		} else {
 			face_type[k]    = QUAD;
+			facesInfo[k]   = &quadInfo;
 			faceConnect[k] = std::vector<int>(quadInfo.nVertices);
 		}
 	}
@@ -907,6 +958,55 @@ void ElementInfo::initializeWedgeInfo()
 	faceConnect[4][1] = 2;
 	faceConnect[4][2] = 0;
 	faceConnect[4][3] = 3;
+
+	initializeFaceEdges(facesInfo);
+}
+
+/*!
+	Initializes the list of edges associated to the faces
+*/
+void ElementInfo::initializeFaceEdges(const std::vector<ElementInfo *> &facesInfo)
+{
+	faceEdges = std::vector<std::vector<int>>(nFaces);
+	for (int k = 0; k < nFaces; ++k) {
+		const ElementInfo &faceInfo = *(facesInfo[k]);
+
+		int nFaceEdges = faceInfo.nFaces;
+		for (int i = 0; i < nFaceEdges; ++i) {
+			// Number of vertices of the edge associated to the face
+			int nFaceEdgeVertices = faceInfo.faceConnect[i].size();
+
+			// Connectivity of the edge associated to the face
+			const std::vector<int> &localFaceEdgeConnect = faceInfo.faceConnect[i];
+
+			std::vector<int> faceEdgeConnect(nFaceEdgeVertices);
+			for (int n = 0; n < nFaceEdgeVertices; ++n) {
+				int localVertexId = localFaceEdgeConnect[n];
+				int vertexId      = faceConnect[k][localVertexId];
+
+				faceEdgeConnect[n] = vertexId;
+			}
+
+			// Search the edge that has the same connectivity of the face edge
+			for (int j = 0; j < nEdges; ++j) {
+				// If face edge and the guess edge have a different number of
+				// vertices, the two edge cannot be the same.
+				int nGuessEdgeVertices = edgeConnect[j].size();
+				if (nGuessEdgeVertices != nFaceEdgeVertices) {
+					continue;
+				}
+
+				// If the connecitivity of the face edge and the one of the
+				// guess edge are the same, the two edges coincides.
+				const std::vector<int> commonVertices = utils::intersectionVector(faceEdgeConnect, edgeConnect[j]);
+				if (commonVertices.size() == nFaceEdgeVertices) {
+					faceEdges[k].push_back(j);
+				}
+			}
+		}
+
+		assert(faceEdges[k].size() == nFaceEdges);
+	}
 }
 
 /*!

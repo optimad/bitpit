@@ -80,6 +80,7 @@ public:
 
 	std::vector<Type> face_type;
 	std::vector<std::vector<int>> faceConnect;
+	std::vector<std::vector<int>> faceEdges;
 
 	std::vector<Type> edge_type;
 	std::vector<std::vector<int>> edgeConnect;
@@ -102,6 +103,7 @@ private:
 	void initializePyramidInfo();
 	void initializeWedgeInfo();
 
+	void initializeFaceEdges(const std::vector<ElementInfo *> &facesInfo = std::vector<ElementInfo *>());
 };
 
 class Element {
