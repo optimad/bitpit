@@ -76,6 +76,7 @@ public:
 			double length, double dh);
 
 	void reset();
+	void setDimension(int dimension);
 
 	double evalCellVolume(const long &id) const;
 	double evalCellSize(const long &id) const;
@@ -214,6 +215,7 @@ private:
 	void initializeTreeGeometry();
 
 	void __reset(bool resetTree);
+	void __setDimension(int dimension);
 
 	bool set_marker(const long &id, const int8_t &value);
 

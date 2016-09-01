@@ -80,48 +80,12 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	// called.
 	__reset(false);
 
-	// Initialize local edges/vertex/faces association
-	if (getDimension() == 3) {
-		m_octantLocalFacesOnVertex.reserve(8);
-		m_octantLocalFacesOnVertex.push_back({{0, 2, 4}});
-		m_octantLocalFacesOnVertex.push_back({{1, 2, 4}});
-		m_octantLocalFacesOnVertex.push_back({{0, 3, 4}});
-		m_octantLocalFacesOnVertex.push_back({{1, 3, 4}});
-		m_octantLocalFacesOnVertex.push_back({{0, 2, 5}});
-		m_octantLocalFacesOnVertex.push_back({{1, 2, 5}});
-		m_octantLocalFacesOnVertex.push_back({{0, 3, 5}});
-		m_octantLocalFacesOnVertex.push_back({{1, 3, 5}});
-
-		m_octantLocalEdgesOnVertex.reserve(8);
-		m_octantLocalEdgesOnVertex.push_back({{0, 2,  4}});
-		m_octantLocalEdgesOnVertex.push_back({{1, 2,  5}});
-		m_octantLocalEdgesOnVertex.push_back({{0, 3,  6}});
-		m_octantLocalEdgesOnVertex.push_back({{1, 3,  7}});
-		m_octantLocalEdgesOnVertex.push_back({{4, 8, 10}});
-		m_octantLocalEdgesOnVertex.push_back({{5, 9, 10}});
-		m_octantLocalEdgesOnVertex.push_back({{6, 8, 11}});
-		m_octantLocalEdgesOnVertex.push_back({{7, 9, 11}});
-
-		m_octantLocalFacesOnEdge.reserve(12);
-		m_octantLocalFacesOnEdge.push_back({{0, 4}});
-		m_octantLocalFacesOnEdge.push_back({{1, 4}});
-		m_octantLocalFacesOnEdge.push_back({{2, 4}});
-		m_octantLocalFacesOnEdge.push_back({{3, 4}});
-		m_octantLocalFacesOnEdge.push_back({{0, 2}});
-		m_octantLocalFacesOnEdge.push_back({{1, 2}});
-		m_octantLocalFacesOnEdge.push_back({{0, 3}});
-		m_octantLocalFacesOnEdge.push_back({{1, 3}});
-		m_octantLocalFacesOnEdge.push_back({{0, 5}});
-		m_octantLocalFacesOnEdge.push_back({{1, 5}});
-		m_octantLocalFacesOnEdge.push_back({{2, 5}});
-		m_octantLocalFacesOnEdge.push_back({{3, 5}});
-	} else {
-		m_octantLocalFacesOnVertex.reserve(4);
-		m_octantLocalFacesOnVertex.push_back({{0, 2}});
-		m_octantLocalFacesOnVertex.push_back({{1, 2}});
-		m_octantLocalFacesOnVertex.push_back({{0, 3}});
-		m_octantLocalFacesOnVertex.push_back({{1, 3}});
-	}
+	// Set the dimension
+	//
+	// The function that sets the dimension is virtual, but since is called
+	// from the constructor of the patch kernel only the base function is
+	// called.
+	__setDimension(dimension);
 
 	// Set the bounding
 	setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
@@ -133,26 +97,6 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 
 	// Info sull'octree
 	initializeTreeGeometry();
-
-	// Info of the cell type
-	ElementInfo::Type cellType;
-	if (isThreeDimensional()) {
-		cellType = ElementInfo::VOXEL;
-	} else {
-		cellType = ElementInfo::PIXEL;
-	}
-
-	m_cellTypeInfo = &ElementInfo::getElementInfo(cellType);
-
-	// Info on the interface type
-	ElementInfo::Type interfaceType;
-	if (isThreeDimensional()) {
-		interfaceType = ElementInfo::PIXEL;
-	} else {
-		interfaceType = ElementInfo::LINE;
-	}
-
-	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);
 }
 
 /*!
@@ -206,6 +150,93 @@ void VolOctree::initialize()
 
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
+}
+
+/*!
+	Sets the dimension of the patch.
+
+	\param dimension the dimension of the patch
+*/
+void VolOctree::setDimension(int dimension)
+{
+	VolumeKernel::setDimension(dimension);
+
+	__setDimension(dimension);
+}
+
+/*!
+	Internal function to set the dimension of the patch.
+
+	\param dimension the dimension of the patch
+*/
+void VolOctree::__setDimension(int dimension)
+{
+	// Initialize local edges/vertex/faces association
+	std::vector<std::vector<int>>().swap(m_octantLocalFacesOnVertex);
+	std::vector<std::vector<int>>().swap(m_octantLocalEdgesOnVertex);
+	std::vector<std::vector<int>>().swap(m_octantLocalFacesOnEdge);
+
+	if (dimension == 3) {
+		m_octantLocalFacesOnVertex.reserve(8);
+		m_octantLocalFacesOnVertex.push_back({{0, 2, 4}});
+		m_octantLocalFacesOnVertex.push_back({{1, 2, 4}});
+		m_octantLocalFacesOnVertex.push_back({{0, 3, 4}});
+		m_octantLocalFacesOnVertex.push_back({{1, 3, 4}});
+		m_octantLocalFacesOnVertex.push_back({{0, 2, 5}});
+		m_octantLocalFacesOnVertex.push_back({{1, 2, 5}});
+		m_octantLocalFacesOnVertex.push_back({{0, 3, 5}});
+		m_octantLocalFacesOnVertex.push_back({{1, 3, 5}});
+
+		m_octantLocalEdgesOnVertex.reserve(8);
+		m_octantLocalEdgesOnVertex.push_back({{0, 2,  4}});
+		m_octantLocalEdgesOnVertex.push_back({{1, 2,  5}});
+		m_octantLocalEdgesOnVertex.push_back({{0, 3,  6}});
+		m_octantLocalEdgesOnVertex.push_back({{1, 3,  7}});
+		m_octantLocalEdgesOnVertex.push_back({{4, 8, 10}});
+		m_octantLocalEdgesOnVertex.push_back({{5, 9, 10}});
+		m_octantLocalEdgesOnVertex.push_back({{6, 8, 11}});
+		m_octantLocalEdgesOnVertex.push_back({{7, 9, 11}});
+
+		m_octantLocalFacesOnEdge.reserve(12);
+		m_octantLocalFacesOnEdge.push_back({{0, 4}});
+		m_octantLocalFacesOnEdge.push_back({{1, 4}});
+		m_octantLocalFacesOnEdge.push_back({{2, 4}});
+		m_octantLocalFacesOnEdge.push_back({{3, 4}});
+		m_octantLocalFacesOnEdge.push_back({{0, 2}});
+		m_octantLocalFacesOnEdge.push_back({{1, 2}});
+		m_octantLocalFacesOnEdge.push_back({{0, 3}});
+		m_octantLocalFacesOnEdge.push_back({{1, 3}});
+		m_octantLocalFacesOnEdge.push_back({{0, 5}});
+		m_octantLocalFacesOnEdge.push_back({{1, 5}});
+		m_octantLocalFacesOnEdge.push_back({{2, 5}});
+		m_octantLocalFacesOnEdge.push_back({{3, 5}});
+	} else {
+		m_octantLocalFacesOnVertex.reserve(4);
+		m_octantLocalFacesOnVertex.push_back({{0, 2}});
+		m_octantLocalFacesOnVertex.push_back({{1, 2}});
+		m_octantLocalFacesOnVertex.push_back({{0, 3}});
+		m_octantLocalFacesOnVertex.push_back({{1, 3}});
+	}
+
+	// Info of the cell type
+	ElementInfo::Type cellType;
+	if (dimension == 3) {
+		cellType = ElementInfo::VOXEL;
+	} else {
+		cellType = ElementInfo::PIXEL;
+	}
+
+	m_cellTypeInfo = &ElementInfo::getElementInfo(cellType);
+
+	// Info on the interface type
+	ElementInfo::Type interfaceType;
+	if (dimension == 3) {
+		interfaceType = ElementInfo::PIXEL;
+	} else {
+		interfaceType = ElementInfo::LINE;
+	}
+
+	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);
 }
 
 /*!
