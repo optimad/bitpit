@@ -84,7 +84,7 @@ public:
 
 	int getId() const;
 	int getDimension() const;
-	void setDimension(int dimension);
+	virtual void setDimension(int dimension);
 	bool isThreeDimensional() const;
 
 	virtual long getVertexCount() const;
