@@ -224,9 +224,9 @@ private:
 
 	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
-	void resetCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
-	                         std::vector<RenumberInfo> &renumberedOctants,
-	                         std::vector<OctantInfo> &addOctants);
+	void updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
+	                          std::vector<RenumberInfo> &renumberedOctants,
+	                          std::vector<OctantInfo> &addOctants);
 
 	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds);
 	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo);

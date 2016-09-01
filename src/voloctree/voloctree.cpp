@@ -711,7 +711,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	// Reset cell-to-octant and octant-to-cell map
 	log::cout() << ">> Resetting cell-to-octant and octant-to-cell maps...";
 
-	resetCellOctantMaps(deletedOctants, renumberedOctants, addedOctants);
+	updateCellOctantMaps(deletedOctants, renumberedOctants, addedOctants);
 	std::vector<RenumberInfo>().swap(renumberedOctants);
 
 	log::cout() << " Done" << std::endl;
@@ -905,13 +905,16 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 }
 
 /*!
-	Renumber a list of octants.
+	Update the cell-to-octants maps
 
-	\param renumberedOctants is the list of octant to renumber
+	\param deletedOctants contains the information about the deleted octants
+	\param renumberedOctants contains the information about the renumbered
+	octants
+	\param addedOctants contains the information about the added octants
 */
-void VolOctree::resetCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
-                                    std::vector<RenumberInfo> &renumberedOctants,
-                                    std::vector<OctantInfo> &addedOctants)
+void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
+                                     std::vector<RenumberInfo> &renumberedOctants,
+                                     std::vector<OctantInfo> &addedOctants)
 {
 	// Reset the ghost maps
 	m_cellToGhost.clear();
