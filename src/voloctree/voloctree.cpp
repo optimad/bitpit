@@ -69,10 +69,9 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 #if BITPIT_ENABLE_MPI==1
 	         , MPI_COMM_NULL
 #endif
-	        ),
-	  m_lastTreeOperation(OP_INITIALIZATION)
+	        )
 {
-	log::cout() << ">> Initializing Octree mesh\n";
+	initialize();
 
 	// Initialize local edges/vertex/faces association
 	if (getDimension() == 3) {
@@ -118,7 +117,6 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	}
 
 	// Set the bounding
-	setBoundingBoxFrozen(true);
 	setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
 
 	// Inizializzazione dell'octree
@@ -148,9 +146,20 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	}
 
 	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);
+}
 
-	// Info sulle interfacce
-	for (int i = 0; i < dimension; i++) {
+/*!
+	Initialize the data structures of the patch.
+*/
+void VolOctree::initialize()
+{
+	log::cout() << ">> Initializing Octree mesh" << std::endl;
+
+	// Last operation
+	m_lastTreeOperation = OP_INITIALIZATION;
+
+	// Normals
+	for (int i = 0; i < 3; i++) {
 		for (int n = -1; n <= 1; n += 2) {
 			std::array<double, 3> normal = {{0.0, 0.0, 0.0}};
 			normal[i] = n;
@@ -158,6 +167,9 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 			m_normals.push_back(normal);
 		}
 	}
+
+	// Set the bounding box as frozen
+	setBoundingBoxFrozen(true);
 }
 
 /*!

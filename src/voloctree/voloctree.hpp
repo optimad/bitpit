@@ -217,6 +217,7 @@ private:
 
 	std::vector<std::array<double, 3> > m_normals;
 
+	void initialize();
 	void initializeTreeGeometry();
 
 	bool set_marker(const long &id, const int8_t &value);
