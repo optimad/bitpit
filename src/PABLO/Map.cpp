@@ -20,8 +20,9 @@ using namespace std;
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
 
-/*!Default constructor.
+/*!Creates a new transformation of coordinates.
  * Origin of octree in reference domain in (0,0,0) and side length 1.
+ * \param[in] dim The space dimension of the m_octree.
  */
 Map::Map(uint8_t dim){
     initialize(dim);
