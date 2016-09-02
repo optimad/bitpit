@@ -81,17 +81,7 @@ namespace bitpit {
         // Write info log
         log::manager().create(logfile, false, m_nproc, m_rank);
         m_log = &log::cout(logfile);
-        (*m_log) << log::context("PABLO");
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << " " << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
-        (*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
-        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)) << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << " " << endl;
+        printHeader();
     };
 
     // =============================================================================== //
@@ -173,20 +163,7 @@ namespace bitpit {
         // Write info log
         log::manager().create(logfile, false, m_nproc, m_rank);
         m_log = &log::cout(logfile);
-        (*m_log) << log::context("PABLO");
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << " " << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << "- PABLO restart -" << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
-        (*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
-        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)) << endl;
-        (*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << " " << endl;
+        printHeader();
     };
 
     // =============================================================================== //
@@ -207,6 +184,26 @@ namespace bitpit {
     // =================================================================================== //
     // METHODS
     // =================================================================================== //
+
+    /*! Print the initial PABLO header.
+     */
+    void
+    ParaTree::printHeader(){
+        (*m_log) << log::context("PABLO");
+        (*m_log) << "---------------------------------------------" << endl;
+        (*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
+        (*m_log) << "---------------------------------------------" << endl;
+        (*m_log) << " " << endl;
+        (*m_log) << "---------------------------------------------" << endl;
+        (*m_log) << "- PABLO restart -" << endl;
+        (*m_log) << "---------------------------------------------" << endl;
+        (*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
+        (*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
+        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)) << endl;
+        (*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
+        (*m_log) << "---------------------------------------------" << endl;
+        (*m_log) << " " << endl;
+    }
 
     // =================================================================================== //
     // BASIC GET/SET METHODS
