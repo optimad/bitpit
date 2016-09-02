@@ -54,20 +54,11 @@ constexpr int Octant::sm_CoeffEdgeCenter[12][3];
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
 
-///*! Default constructor of an octant.
-// * It builds a 2D zero-level octant with origin in (0,0,0).
-// */
-//Octant::Octant(){
-//	m_dim = 2;
-//	m_x = m_y = m_z = 0;
-//	m_level = 0;
-//	m_marker = 0;
-//	//default constructor of bitset is zero value -> set boundary condition true for faces
-//	for (uint8_t i=0; i<4; i++){
-//		m_info[i] = true;
-//	}
-//	m_info[14] = true;
-//};
+/*! Create a dummy octant.
+ */
+Octant::Octant(){
+	initialize();
+};
 
 /*! Custom constructor of an octant.
  * It builds a 2D or 3D zero-level octant with origin in (0,0,0).

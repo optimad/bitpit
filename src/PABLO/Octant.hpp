@@ -124,7 +124,7 @@ private:
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
 public:
-//	Octant();
+	Octant();
 	Octant(const Octant &octant);
 private:
 	Octant(uint8_t dim);
