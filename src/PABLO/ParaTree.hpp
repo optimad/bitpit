@@ -172,6 +172,7 @@ namespace bitpit {
         int 		getRank();
         int 		getNproc();
         Logger& 	getLog();
+        void 		setDummyComm();
 #if BITPIT_ENABLE_MPI==1
         void		setComm(MPI_Comm communicator);
         void		freeComm();

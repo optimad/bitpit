@@ -67,15 +67,18 @@ namespace bitpit {
         m_errorFlag = 0;
         m_maxDepth = 0;
         m_globalNumOctants = getNumOctants();
-        m_rank = 0;
-        m_nproc = 1;
-        m_serial = true;
-        createPartitionInfo();
+
 #if BITPIT_ENABLE_MPI==1
         if (comm != MPI_COMM_NULL) {
             setComm(comm);
+        } else {
+            setDummyComm();
         }
+#else
+        setDummyComm();
 #endif
+        m_serial = true;
+
         m_periodic.resize(m_global.m_nfaces, false);
         m_tol = 1.0e-14;
         // Write info log
@@ -141,13 +144,11 @@ namespace bitpit {
             m_octree.m_octants[i] = oct;
         }
 
-        m_rank = 0;
-        m_nproc = 1;
-        createPartitionInfo();
 #if BITPIT_ENABLE_MPI==1
         setComm(comm);
         m_serial = (m_nproc == 1);
 #else
+        setDummyComm();
         m_serial = true;
 #endif
 
@@ -270,6 +271,24 @@ namespace bitpit {
     Logger&
     ParaTree::getLog(){
         return (*m_log);
+    }
+
+    /*! Set dummy MPI information.
+     */
+    void
+    ParaTree::setDummyComm()
+    {
+        // Set a null communicator
+#if BITPIT_ENABLE_MPI==1
+        m_comm = MPI_COMM_NULL;
+#endif
+
+        // Get dummy MPI information
+        m_rank  = 0;
+        m_nproc = 1;
+
+        // Initialize partition data
+        createPartitionInfo();
     }
 
 #if BITPIT_ENABLE_MPI==1
