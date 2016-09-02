@@ -41,15 +41,20 @@ namespace bitpit {
     // =================================================================================== //
     // CONSTRUCTORS AND OPERATORS
     // =================================================================================== //
-#if BITPIT_ENABLE_MPI==1
     /*! Default constructor of PabloUniform.
      * It sets the Origin in (0,0,0) and side of length 1.
      * \param[in] dim The space dimension of the octree.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+#if BITPIT_ENABLE_MPI==1
+    /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
     PabloUniform::PabloUniform(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):ParaTree(dim,maxlevel,logfile,comm){
+#else
+    PabloUniform::PabloUniform(uint8_t dim, int8_t maxlevel, std::string logfile):ParaTree(dim,maxlevel,logfile){
+#endif
         m_origin = { {0,0,0} };
         m_L = 1.0;
     };
@@ -61,41 +66,20 @@ namespace bitpit {
      * \param[in] dim The space dimension of the octree.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+#if BITPIT_ENABLE_MPI==1
+    /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
     PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):ParaTree(dim,maxlevel,logfile,comm){
-        m_origin[0] = X;
-        m_origin[1] = Y;
-        m_origin[2] = Z;
-        m_L = L;
-    };
 #else
-    /*! Default Constructor of PabloUniform.
-     * It sets the Origin in (0,0,0) and side of length 1.
-     * \param[in] dim The space dimension of the octree.
-     * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
-     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-     */
-    PabloUniform::PabloUniform(uint8_t dim, int8_t maxlevel, std::string logfile):ParaTree(dim,maxlevel,logfile){
-        m_origin = { {0,0,0} };
-        m_L = 1.0;
-    };
-
-    /*! Custom constructor of PabloUniform.
-     * It sets the Origin in (X,Y,Z) and side of length L.
-     * \param[in] X,Y,Z Coordinates of the origin in physical domain,
-     * \param[in] L Length of the side in physical domain.
-     * \param[in] dim The space dimension of the octree.
-     * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
-     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-     */
     PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, std::string logfile):ParaTree(dim,maxlevel,logfile){
+#endif
         m_origin[0] = X;
         m_origin[1] = Y;
         m_origin[2] = Z;
         m_L = L;
     };
-#endif
 
     // =================================================================================== //
     // METHODS
