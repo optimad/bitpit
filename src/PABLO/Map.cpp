@@ -23,8 +23,8 @@ using namespace std;
 /*!Default constructor.
  * Origin of octree in reference domain in (0,0,0) and side length 1.
  */
-Map::Map(uint8_t dim_){
-    initialize(dim_);
+Map::Map(uint8_t dim){
+    initialize(dim);
 };
 
 // =================================================================================== //
