@@ -89,6 +89,15 @@ namespace bitpit {
     public:
         static const std::string	DEFAULT_LOG_FILE;			/**<Default name of logger file.*/
 
+        enum Operation {
+            OP_NONE,
+            OP_INIT,
+            OP_ADAPT_MAPPED,
+            OP_ADAPT_UNMAPPED,
+            OP_LOADBALANCE_FIRST,
+            OP_LOADBALANCE
+        };
+
     private:
         //undistributed members
         std::vector<uint64_t>	m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each processor*/
@@ -131,7 +140,7 @@ namespace bitpit {
         //info member
         uint64_t				m_status;						/**<Label of actual m_status of octree (incremental after an adpat
                                                                    with at least one modifyed element).*/
-        std::string				m_lastOp;						/**<Last adapting operation type (adapt or loadbalance).*/
+        Operation				m_lastOp;						/**<Last operation perforfmed by the octree (initialization, adapt (mapped or unmapped), loadbalance (first or not).*/
 
         //log member
         Logger* 				m_log;							/**<Log object pointer*/
@@ -177,6 +186,7 @@ namespace bitpit {
         int 		getNproc();
         Logger& 	getLog();
         void 		setDummyComm();
+        Operation	getLastOperation();
 #if BITPIT_ENABLE_MPI==1
         void		setComm(MPI_Comm communicator);
         void		freeComm();
@@ -559,6 +569,7 @@ namespace bitpit {
 
             m_sentIdx.clear();
             std::array<uint32_t,4> limits = {{0,0,0,0}};
+            m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
 
                 uint32_t* partition = new uint32_t [m_nproc];
@@ -571,6 +582,7 @@ namespace bitpit {
 
                 if(m_serial)
                     {
+                        m_lastOp = OP_LOADBALANCE_FIRST;
                         (*m_log) << " " << endl;
                         (*m_log) << " Initial Serial distribution : " << endl;
                         for(int ii=0; ii<m_nproc; ii++){
@@ -1109,6 +1121,7 @@ namespace bitpit {
 
             m_sentIdx.clear();
             std::array<uint32_t,4> limits = {{0,0,0,0}};
+            m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
 
                 uint32_t* partition = new uint32_t [m_nproc];
@@ -1116,6 +1129,7 @@ namespace bitpit {
 
                 if(m_serial)
                     {
+                        m_lastOp = OP_LOADBALANCE_FIRST;
                         (*m_log) << " " << endl;
                         (*m_log) << " Initial Serial distribution : " << endl;
                         for(int ii=0; ii<m_nproc; ii++){

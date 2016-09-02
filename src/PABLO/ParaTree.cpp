@@ -265,6 +265,8 @@ namespace bitpit {
 
         m_octree.reset(true);
         m_globalNumOctants = getNumOctants();
+
+        m_lastOp = OP_INIT;
     }
 
     /*! Print the initial PABLO header.
@@ -373,6 +375,14 @@ namespace bitpit {
 
         // Initialize partition data
         createPartitionInfo();
+    }
+
+    /*!Get the last operation perforfmed by the octree (initialization, adapt (mapped or unmapped), loadbalance (first or not).
+     * \return Last operation performed by the octree.
+     */
+    ParaTree::Operation
+    ParaTree::getLastOperation(){
+        return m_lastOp;
     }
 
 #if BITPIT_ENABLE_MPI==1
@@ -2640,7 +2650,7 @@ namespace bitpit {
         mapper.swap(mapper);
         isghost.swap(isghost);
         rank.swap(rank);
-        if (m_lastOp == "adapt"){
+        if (m_lastOp == OP_ADAPT_MAPPED){
             getMapping(idx, mapper, isghost);
             int n = isghost.size();
             rank.resize(n);
@@ -2648,14 +2658,14 @@ namespace bitpit {
                 rank[i] = m_rank;
             }
         }
-        else if (m_lastOp == "loadbalance" || m_lastOp == "firstloadbalance"){
+        else if (m_lastOp == OP_LOADBALANCE || m_lastOp == OP_LOADBALANCE_FIRST){
             uint64_t gidx = getGlobalIdx(idx);
             mapper[0] = gidx;
             for (int iproc=0; iproc<m_nproc; ++iproc){
                 if (m_partitionRangeGlobalIdx0[iproc]>=gidx){
                     if (iproc > 0)
                         mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] + 1;
-                    rank[0] = (m_lastOp == "firstloadbalance" ? m_rank : iproc);
+                    rank[0] = (m_lastOp == OP_LOADBALANCE_FIRST ? m_rank : iproc);
                     isghost[0] = false;
                     break;
                 }
@@ -3128,7 +3138,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " LOAD BALANCE " << endl;
 
-        m_lastOp = "loadbalance";
+        m_lastOp = OP_LOADBALANCE;
         if (m_nproc>1){
 
             uint32_t* partition = new uint32_t [m_nproc];
@@ -3178,7 +3188,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " LOAD BALANCE " << endl;
 
-        m_lastOp = "loadbalance";
+        m_lastOp = OP_LOADBALANCE;
         if (m_nproc>1){
 
             uint32_t* partition = new uint32_t [m_nproc];
@@ -3223,7 +3233,7 @@ namespace bitpit {
 
         if(m_serial)
             {
-                m_lastOp = "firstloadbalance";
+                m_lastOp = OP_LOADBALANCE_FIRST;
                 (*m_log) << " " << endl;
                 (*m_log) << " Initial Serial distribution : " << endl;
                 for(int ii=0; ii<m_nproc; ii++){
@@ -3698,11 +3708,14 @@ namespace bitpit {
         // m_mapIdx init
         u32vector().swap(m_mapIdx);
         if (mapflag) {
-            m_lastOp = "adapt";
+            m_lastOp = OP_ADAPT_MAPPED;
             m_mapIdx.resize(nocts0);
             for (uint32_t i=0; i<nocts0; i++){
                 m_mapIdx[i] = i;
             }
+        }
+        else{
+            m_lastOp = OP_ADAPT_UNMAPPED;
         }
 
         bool globalDone = false;
