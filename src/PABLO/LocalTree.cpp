@@ -46,6 +46,13 @@ namespace bitpit {
     // CONSTRUCTORS AND OPERATORS
     // =================================================================================== //
 
+    /*!Defaut constructor.
+     */
+    LocalTree::LocalTree() {
+        initialize();
+        reset(false);
+    };
+
     /*!Dimensional and default constructor.
      * \param[in] dim Space dimension of octree.
      */
