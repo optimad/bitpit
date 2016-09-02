@@ -78,10 +78,12 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm ) : m_octree(dim),m_trans(dim){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm )
 #else
-    ParaTree::ParaTree(uint8_t dim, std::string logfile ) : m_octree(dim),m_trans(dim){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile )
 #endif
+        : m_octree(dim), m_trans(dim)
+    {
 #if BITPIT_ENABLE_MPI==1
         initialize(dim, logfile, comm);
 #else
@@ -105,10 +107,12 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile, MPI_Comm comm):m_octree(dim),m_trans(dim){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile, MPI_Comm comm)
 #else
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile ):m_octree(dim),m_trans(m_dim){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile )
 #endif
+        : m_octree(dim), m_trans(dim)
+    {
 #if BITPIT_ENABLE_MPI==1
         initialize(dim, logfile, comm);
 #else
