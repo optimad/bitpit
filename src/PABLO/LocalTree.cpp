@@ -62,7 +62,7 @@ namespace bitpit {
         m_firstDesc = octf;
         m_lastDesc = octl;
         m_ghosts.clear();
-        m_sizeGhosts = 0;
+        m_sizeGhosts = m_ghosts.size();
         m_localMaxDepth = 0;
         m_balanceCodim = 1;
         m_periodic.resize(m_dim*2);
