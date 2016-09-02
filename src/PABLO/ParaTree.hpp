@@ -298,8 +298,8 @@ namespace bitpit {
         double	 	getLocalMaxSize();
         double	 	getLocalMinSize();
         uint8_t 	getBalanceCodimension() const;
-        const Octant & getFirstDesc() const;
-        const Octant & getLastDesc() const;
+        uint64_t 	getFirstDescMorton() const;
+        uint64_t 	getLastDescMorton() const;
         uint64_t 	getLastDescMorton(uint32_t idx);
         octantIterator	getInternalOctantsBegin();
         octantIterator	getInternalOctantsEnd();
@@ -342,8 +342,8 @@ namespace bitpit {
         // PRIVATE GET/SET METHODS															   //
         // =================================================================================== //
     private:
-        void 		setFirstDesc();
-        void 		setLastDesc();
+        void 		setFirstDescMorton();
+        void 		setLastDescMorton();
 
         // =================================================================================== //
         // OTHER METHODS												    			       //
@@ -421,7 +421,6 @@ namespace bitpit {
         void 		setPboundGhosts();
         void 		commMarker();
 #endif
-        void 		updateAfterCoarse();
         void 		updateAfterCoarse(u32vector & mapidx);
         void 		balance21(bool const first);
         void		createPartitionInfo();

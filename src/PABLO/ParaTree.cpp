@@ -174,8 +174,8 @@ namespace bitpit {
         m_serial = true;
 #endif
 
-        setFirstDesc();
-        setLastDesc();
+        setFirstDescMorton();
+        setLastDescMorton();
         m_octree.updateLocalMaxDepth();
         updateAdapt();
 #if BITPIT_ENABLE_MPI==1
@@ -1487,17 +1487,15 @@ namespace bitpit {
     /*!Get the first possible descendant with maximum refinement level of the local tree.
      * \return Constant reference to the first finest descendant of the local tree.
      */
-    const
-        Octant & ParaTree::getFirstDesc() const{
-        return m_octree.getFirstDesc();
+     uint64_t ParaTree::getFirstDescMorton() const {
+        return m_octree.getFirstDescMorton();
     };
 
     /*!Get the last possible descendant with maximum refinement level of the local tree.
      * \return Constant reference to the last finest descendant of the local tree.
      */
-    const
-        Octant & ParaTree::getLastDesc() const{
-        return m_octree.getLastDesc();
+     uint64_t ParaTree::getLastDescMorton() const {
+        return m_octree.getLastDescMorton();
     };
 
     /*!Get the morton index of the last possible descendant with maximum refinement level of a target octant.
@@ -1841,15 +1839,15 @@ namespace bitpit {
     /*! Set the first finer descendant of the local tree.
      */
     void
-    ParaTree::setFirstDesc(){
-        m_octree.setFirstDesc();
+    ParaTree::setFirstDescMorton(){
+        m_octree.setFirstDescMorton();
     };
 
     /*! Set the last finer descendant of the local tree.
      */
     void
-    ParaTree::setLastDesc(){
-        m_octree.setLastDesc();
+    ParaTree::setLastDescMorton(){
+        m_octree.setLastDescMorton();
     };
 
     // =================================================================================== //
@@ -2001,6 +1999,8 @@ namespace bitpit {
     uint32_t
     ParaTree::getPointOwnerIdx(dvector point){
         uint32_t noctants = m_octree.m_octants.size();
+        if(noctants==0)
+            return numeric_limits<uint32_t>::max();
         uint32_t idxtry = noctants/2;
         uint32_t x, y, z;
         uint64_t morton, mortontry;
@@ -2077,6 +2077,8 @@ namespace bitpit {
     uint32_t
     ParaTree::getPointOwnerIdx(dvector point, bool & isghost){
         uint32_t noctants = m_octree.m_octants.size();
+        if(noctants==0)
+            return numeric_limits<uint32_t>::max();
         uint32_t idxtry = noctants/2;
         uint32_t x, y, z;
         uint64_t morton, mortontry;
@@ -2242,6 +2244,8 @@ namespace bitpit {
     uint32_t
     ParaTree::getPointOwnerIdx(darray3 point){
         uint32_t noctants = m_octree.m_octants.size();
+        if(noctants==0)
+            return numeric_limits<uint32_t>::max();
         uint32_t idxtry = noctants/2;
         uint32_t x, y, z;
         uint64_t morton, mortontry;
@@ -2326,6 +2330,8 @@ namespace bitpit {
     uint32_t
     ParaTree::getPointOwnerIdx(darray3 point, bool & isghost){
         uint32_t noctants = m_octree.m_octants.size();
+        if(noctants==0)
+            return numeric_limits<uint32_t>::max();
         uint32_t idxtry = noctants/2;
         uint32_t x, y, z;
         uint64_t morton, mortontry;
@@ -2689,20 +2695,11 @@ namespace bitpit {
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
 
             // Coarse
-            if (mapper_flag){
-                while(m_octree.globalCoarse(m_mapIdx));
-                updateAfterCoarse(m_mapIdx);
-                balance21(false);
-                while(m_octree.refine(m_mapIdx));
-                updateAdapt();
-            }
-            else{
-                while(m_octree.globalCoarse(m_mapIdx));
-                updateAfterCoarse();
-                balance21(false);
-                while(m_octree.refine(m_mapIdx));
-                updateAdapt();
-            }
+            while(m_octree.globalCoarse(m_mapIdx));
+            updateAfterCoarse(m_mapIdx);
+            balance21(false);
+            while(m_octree.refine(m_mapIdx));
+            updateAdapt();
 
             if (m_octree.getNumOctants() < nocts){
                 globalDone = true;
@@ -2726,22 +2723,13 @@ namespace bitpit {
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 
             // Coarse
-            if (mapper_flag){
-                while(m_octree.globalCoarse(m_mapIdx));
-                updateAfterCoarse(m_mapIdx);
-                setPboundGhosts();
-                balance21(false);
-                while(m_octree.refine(m_mapIdx));
-                updateAdapt();
-            }
-            else{
-                while(m_octree.globalCoarse(m_mapIdx));
-                updateAfterCoarse();
-                setPboundGhosts();
-                balance21(false);
-                while(m_octree.refine(m_mapIdx));
-                updateAdapt();
-            }
+            while(m_octree.globalCoarse(m_mapIdx));
+            updateAfterCoarse(m_mapIdx);
+            setPboundGhosts();
+            balance21(false);
+            while(m_octree.refine(m_mapIdx));
+            updateAdapt();
+
             setPboundGhosts();
             bool localDone = false;
             if (m_octree.getNumOctants() < nocts){
@@ -2777,6 +2765,9 @@ namespace bitpit {
         if (morton <= m_partitionLastDesc[0]) {
             return 0;
         }
+        if (morton > m_partitionLastDesc[m_nproc-1]) {
+            return -1;
+        }
 
         // Find the partition using a bisection method
         int p = -1;
@@ -2797,6 +2788,13 @@ namespace bitpit {
             }
             length = end - beg;
             seed = beg + length/2;
+        }
+        if(beg!=0){
+            while(m_partitionLastDesc[beg] == m_partitionLastDesc[beg-1]){
+                --beg;
+                if(beg==0)
+                    break;
+            }
         }
         p = beg;
         return p;
@@ -3709,11 +3707,6 @@ namespace bitpit {
                         m_partitionRangeGlobalIdx[p] += rbuff[pp];
                     --m_partitionRangeGlobalIdx[p];
                 }
-                //update partition_range_position
-                uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
-                m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
-                uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
-                m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
                 delete [] rbuff; rbuff = NULL;
             }
 #endif
@@ -4120,14 +4113,23 @@ namespace bitpit {
             --m_partitionRangeGlobalIdx[p];
         }
         //update first last descendant
-        m_octree.setFirstDesc();
-        m_octree.setLastDesc();
+        if(getNumOctants()==0){
+            Octant octDesc(m_dim,m_global.m_maxLevel,pow(2,m_global.m_maxLevel),pow(2,m_global.m_maxLevel),(m_dim > 2 ? pow(2,m_global.m_maxLevel) : 0),m_global.m_maxLevel);
+            m_octree.m_lastDescMorton = octDesc.computeMorton();
+            m_octree.m_firstDescMorton = std::numeric_limits<uint64_t>::max();
+        }
+        else{
+            m_octree.setFirstDescMorton();
+            m_octree.setLastDescMorton();
+        }
+
         //update partition_range_position
-        uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
+        uint64_t lastDescMorton = m_octree.getLastDescMorton();
         m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
-        uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
+        uint64_t firstDescMorton = m_octree.getFirstDescMorton();
         m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
         m_serial = false;
+
         delete [] rbuff; rbuff = NULL;
     }
 
@@ -4478,28 +4480,6 @@ namespace bitpit {
     }
 #endif
 
-    /*! Update the distributed octree over the processes after a coarsening procedure.
-     */
-    void
-    ParaTree::updateAfterCoarse(){
-        m_mapIdx.clear();
-#if BITPIT_ENABLE_MPI==1
-        if(m_serial){
-#endif
-            updateAdapt();
-#if BITPIT_ENABLE_MPI==1
-        }
-        else{
-            //Only if parallel
-            updateAdapt();
-            uint64_t lastDescMortonPre   = (m_rank == 0) ? 0 : m_partitionLastDesc[m_rank-1];
-            uint64_t firstDescMortonPost = (m_rank < m_nproc - 1) ? m_partitionFirstDesc[m_rank+1] : m_partitionLastDesc[m_rank];
-            m_octree.checkCoarse(lastDescMortonPre, firstDescMortonPost, m_mapIdx);
-            updateAdapt();
-        }
-#endif
-    }
-
     /*! Update the distributed octree over the processes after a coarsening procedure
      * and track the change in a mapper.
      * \param[out] mapidx Mapper from new octants to old octants.
@@ -4517,12 +4497,50 @@ namespace bitpit {
         }
         else{
             //Only if parallel
+            m_octree.checkCoarse(mapidx);
             updateAdapt();
 
-            uint64_t lastDescMortonPre   = (m_rank == 0) ? 0 : m_partitionLastDesc[m_rank-1];
-            uint64_t firstDescMortonPost = (m_rank < m_nproc - 1) ? m_partitionFirstDesc[m_rank+1] : m_partitionLastDesc[m_rank];
-            m_octree.checkCoarse(lastDescMortonPre, firstDescMortonPost, mapidx);
-            updateAdapt();
+            //update partition_range_position
+            uint64_t lastDescMorton = m_octree.getLastDescMorton();
+            m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
+            uint64_t firstDescMorton = m_octree.getFirstDescMorton();
+            m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
+
+            //correct first and last desc morton for empty partitions
+            if (m_nproc>1){
+
+                //Last desc
+                //Attention rank = 0 can't be empty
+                for (int p = 1; p < m_nproc; ++p){
+                    if (m_partitionRangeGlobalIdx[p] == m_partitionRangeGlobalIdx[p-1]){
+                        m_partitionLastDesc[p] = m_partitionLastDesc[p-1];
+                        if (m_rank == p){
+                            m_octree.m_lastDescMorton = m_partitionLastDesc[p-1];
+                        }
+                    }
+                }
+
+                //first desc
+                //attention! Last desc of last rank (if empty partition) is the maximum uint64_t
+                int pp = m_nproc-1;
+                if (m_partitionRangeGlobalIdx[pp] == m_partitionRangeGlobalIdx[pp-1]){
+                    m_partitionFirstDesc[pp] = std::numeric_limits<uint64_t>::max();
+                    if (m_rank == pp){
+                        m_octree.m_firstDescMorton = std::numeric_limits<uint64_t>::max();
+                    }
+                }
+                for (int p = pp-1; p > 0; --p){
+                    if (m_partitionRangeGlobalIdx[p] == m_partitionRangeGlobalIdx[p-1]){
+                        m_partitionFirstDesc[p] = m_partitionFirstDesc[p+1];
+                        if (m_rank == p){
+                            m_octree.m_firstDescMorton = m_partitionFirstDesc[p+1];
+                        }
+                    }
+                }
+
+            }//end if nprocs>1
+
+
         }
 
 #endif
@@ -4667,8 +4685,8 @@ namespace bitpit {
         m_partitionLastDesc.resize(m_nproc);
         m_partitionRangeGlobalIdx.resize(m_nproc);
         m_partitionRangeGlobalIdx0.resize(m_nproc);
-        uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
-        uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
+        uint64_t lastDescMorton = m_octree.getLastDescMorton();
+        uint64_t firstDescMorton = m_octree.getFirstDescMorton();
         for(int p = 0; p < m_nproc; ++p){
             m_partitionRangeGlobalIdx0[p] = 0;
             m_partitionRangeGlobalIdx[p]  = m_globalNumOctants - 1;

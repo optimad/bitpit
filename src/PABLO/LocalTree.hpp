@@ -119,8 +119,8 @@ private:
 	octvector				m_ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
 	intervector				m_intersections;		/**< Local vector of intersections */
 	u64vector 				m_globalIdxGhosts;		/**< Global index of the ghost octants (size = size_ghosts) */
-	Octant 					m_firstDesc;			/**< First (Morton order) most refined octant possible in local partition */
-	Octant			 		m_lastDesc;				/**< Last (Morton order) most refined octant possible in local partition */
+	uint64_t 				m_firstDescMorton;		/**< Morton number of first (Morton order) most refined octant possible in local partition */
+	uint64_t			 	m_lastDescMorton;		/**< Morton number of last (Morton order) most refined octant possible in local partition */
 	uint32_t 				m_sizeGhosts;			/**< Size of vector of ghost octants */
 	uint32_t 				m_sizeOctants;			/**< Size of vector of local octants */
 	uint8_t					m_localMaxDepth;		/**< Reached max depth in local tree */
@@ -153,8 +153,8 @@ private:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 private:
-	const Octant&	getFirstDesc() const;
-	const Octant&	getLastDesc() const;
+	uint64_t		getFirstDescMorton() const;
+	uint64_t		getLastDescMorton() const;
 	uint32_t 		getNumGhosts() const;
 	uint32_t 		getNumOctants() const;
 	uint8_t 		getLocalMaxDepth() const;
@@ -170,8 +170,8 @@ private:
 	void 			setMarker(int32_t idx, int8_t marker);
 	void 			setBalance(int32_t idx, bool balance);
 	void 			setBalanceCodim(uint8_t b21codim);
-	void 			setFirstDesc();
-	void 			setLastDesc();
+	void 			setFirstDescMorton();
+	void 			setLastDescMorton();
 	void 			setPeriodic(bvector & periodic);
 
 	// =================================================================================== //
@@ -192,7 +192,7 @@ private:
 	bool 		coarse(u32vector & mapidx);
 	bool 		globalRefine(u32vector & mapidx);
 	bool 		globalCoarse(u32vector & mapidx);
-	void 		checkCoarse(uint64_t lastDescPre, uint64_t firstDescPost, u32vector & mapidx);
+	void 		checkCoarse(u32vector & mapidx);
 	void 		updateLocalMaxDepth();
 
     
