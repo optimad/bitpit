@@ -62,41 +62,41 @@ Octant::Octant(){
 
 /*! Custom constructor of an octant.
  * It builds a 2D or 3D zero-level octant with origin in (0,0,0).
- * \param[in] dim_ Dimension of octant (2/3 for 2D/3D octant).
+ * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
  */
-Octant::Octant(uint8_t dim_){
-	initialize(dim_, 0, true);
+Octant::Octant(uint8_t dim){
+	initialize(dim, 0, true);
 };
 
 /*! Custom constructor of an octant.
  * It builds a 2D or 3D octant with user defined origin and level.
- * \param[in] dim_ Dimension of octant (2/3 for 2D/3D octant).
- * \param[in] level_ Refinement level of octant (0 for root octant).
- * \param[in] x_,y_,z_ Coordinates of the origin of the octant (default values for z=0).
+ * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
+ * \param[in] level Refinement level of octant (0 for root octant).
+ * \param[in] x,y,z Coordinates of the origin of the octant (default values for z=0).
  */
-Octant::Octant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
-	initialize(dim_, level_, true);
+Octant::Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
+	initialize(dim, level, true);
 
 	// Set the coordinates
-	m_x = x_;
-	m_y = y_;
-	m_z = (m_dim-2)*z_;
+	m_x = x;
+	m_y = y;
+	m_z = (m_dim-2) * z;
 };
 
 /*! Custom constructor of an octant.
  * It builds a 2D or 3D octant with user defined origin, level and boundary conditions.
  * \param[in] bound Boundary condition for the faces of the octant (the same for each face).
- * \param[in] dim_ Dimension of octant (2/3 for 2D/3D octant).
- * \param[in] level_ Refinement level of octant (0 for root octant).
- * \param[in] x_,y_,z_ Coordinates of the origin of the octant (default values for z=0).
+ * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
+ * \param[in] level Refinement level of octant (0 for root octant).
+ * \param[in] x,y,z Coordinates of the origin of the octant (default values for z=0).
  */
-Octant::Octant(bool bound, uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
-	initialize(dim_, level_, bound);
+Octant::Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
+	initialize(dim, level, bound);
 
 	// Set the coordinates
-	m_x = x_;
-	m_y = y_;
-	m_z = (m_dim-2)*z_;
+	m_x = x;
+	m_y = y;
+	m_z = (m_dim-2) * z;
 };
 
 /*! Copy constructor of an octant.
