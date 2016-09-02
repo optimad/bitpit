@@ -184,6 +184,7 @@ private:
 
 	void	initialize();
 	void	initialize(uint8_t dim);
+	void	reset(bool createRoot);
 
 	Octant& 		extractOctant(uint32_t idx);
 	const Octant&	extractOctant(uint32_t idx) const;

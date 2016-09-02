@@ -50,18 +50,8 @@ namespace bitpit {
      * \param[in] dim Space dimension of octree.
      */
     LocalTree::LocalTree(uint8_t dim){
-        Octant oct0(m_dim);
-        Octant octf(m_dim,m_global.m_maxLevel,0,0,0);
-        Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
-        m_octants.clear();
-        m_octants.push_back(oct0);
-        m_sizeOctants = m_octants.size();
-        m_firstDescMorton = octf.computeMorton();
-        m_lastDescMorton = octl.computeMorton();
-        m_ghosts.clear();
-        m_sizeGhosts = m_ghosts.size();
-        m_localMaxDepth = 0;
-        initialize(maxlevel, dim);
+        initialize(dim);
+        reset(true);
     };
 
     /*!Default destructor.
@@ -289,6 +279,31 @@ namespace bitpit {
             m_periodic.resize(m_dim*2);
         }
     }
+
+    /*!Reset the octree.
+     */
+    void
+    LocalTree::reset(bool createRoot){
+        m_octants.clear();
+        m_ghosts.clear();
+
+        m_localMaxDepth = 0;
+
+        std::fill(m_periodic.begin(), m_periodic.end(), false);
+
+        if (createRoot) {
+            m_octants.push_back(Octant(m_dim));
+
+            Octant firstDesc(m_global.m_maxLevel,0,0,0);
+            m_firstDescMorton = firstDesc.computeMorton();
+
+            Octant lastDesc(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
+            m_lastDescMorton = lastDesc.computeMorton();
+        }
+
+        m_sizeGhosts  = m_ghosts.size();
+        m_sizeOctants = m_octants.size();
+    };
 
     /*!Extract an octant of the octree.
      * \param[in] idx Local index of the target octant.
