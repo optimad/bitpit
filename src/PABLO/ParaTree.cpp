@@ -1433,7 +1433,7 @@ namespace bitpit {
      */
     uint32_t
     ParaTree::getNumGhosts() const{
-        return m_octree.getSizeGhost();
+        return m_octree.getNumGhosts();
     };
 
     /** Get the local number of nodes.
@@ -1783,7 +1783,7 @@ namespace bitpit {
      */
     Octant*
     ParaTree::getGhostOctant(uint32_t idx) {
-        if (idx < m_octree.getSizeGhost()){
+        if (idx < m_octree.getNumGhosts()){
             return &m_octree.m_ghosts[idx] ;
         }
         return NULL;

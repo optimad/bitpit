@@ -155,7 +155,7 @@ private:
 private:
 	const Octant&	getFirstDesc() const;
 	const Octant&	getLastDesc() const;
-	uint32_t 		getSizeGhost() const;
+	uint32_t 		getNumGhosts() const;
 	uint32_t 		getNumOctants() const;
 	uint8_t 		getLocalMaxDepth() const;
 	int8_t 			getMarker(int32_t idx);

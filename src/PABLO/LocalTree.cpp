@@ -100,7 +100,7 @@ namespace bitpit {
      * \return Number of ghosts.
      */
     uint32_t
-    LocalTree::getSizeGhost() const{
+    LocalTree::getNumGhosts() const{
         return m_sizeGhosts;
     };
 
