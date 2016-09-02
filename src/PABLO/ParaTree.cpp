@@ -51,22 +51,18 @@ namespace bitpit {
     // CONSTRUCTORS AND OPERATORS														   //
     // =================================================================================== //
 
-#if BITPIT_ENABLE_MPI==1
     /*! Default constructor of ParaTree.
      * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
      * \param[in] dim The space dimension of the m_octree.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+#if BITPIT_ENABLE_MPI==1
+    /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
     ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
-    /*! Default constructor of ParaTree.
-     * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
-     * \param[in] dim The space dimension of the m_octree.
-     * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
-     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-     */
     ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
 #endif
         m_global.setGlobal(maxlevel, m_dim);
@@ -102,7 +98,6 @@ namespace bitpit {
 
     // =============================================================================== //
 
-#if BITPIT_ENABLE_MPI==1
     /*! Constructor of ParaTree for restart a simulation with input parameters.
      * For each process it builds a vector of octants. The input parameters are :
      * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
@@ -110,18 +105,13 @@ namespace bitpit {
      * \param[in] dim The space dimension of the m_octree.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+#if BITPIT_ENABLE_MPI==1
+    /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
     ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
-        /*! Constructor of ParaTree for restart a simulation with input parameters.
-         * For each process it builds a vector of octants. The input parameters are :
-         * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
-         * \param[in] levels Level of each octant.
-         * \param[in] dim The space dimension of the m_octree.
-         * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
-         * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-         */
     ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile ):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
 #endif
         uint8_t lev, iface;
