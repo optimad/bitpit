@@ -74,16 +74,7 @@ constexpr int Octant::sm_CoeffEdgeCenter[12][3];
  * \param[in] dim_ Dimension of octant (2/3 for 2D/3D octant).
  */
 Octant::Octant(uint8_t dim_){
-	m_dim = dim_;
-	m_x = m_y = m_z = 0;
-	m_level = 0;
-	m_marker = 0;
-	uint8_t nf = m_dim*2;
-	//default constructor of bitset is zero value -> set boundary condition true for faces
-	for (uint8_t i=0; i<nf; i++){
-		m_info[i] = true;
-	}
-	m_info[14] = true;
+	initialize(dim_, 0, true);
 };
 
 /*! Custom constructor of an octant.
@@ -93,20 +84,12 @@ Octant::Octant(uint8_t dim_){
  * \param[in] x_,y_,z_ Coordinates of the origin of the octant (default values for z=0).
  */
 Octant::Octant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
-	m_dim = dim_;
+	initialize(dim_, level_, true);
+
+	// Set the coordinates
 	m_x = x_;
 	m_y = y_;
 	m_z = (m_dim-2)*z_;
-	m_level = level_;
-	m_marker = 0;
-	//default constructor of bitset is zero value -> set boundary condition true for faces
-	if (m_level==0){
-		uint8_t nf = m_dim*2;
-		for (uint8_t i=0; i<nf; i++){
-			m_info[i] = true;
-		}
-	}
-	m_info[14] = true;
 };
 
 /*! Custom constructor of an octant.
@@ -117,20 +100,12 @@ Octant::Octant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_)
  * \param[in] x_,y_,z_ Coordinates of the origin of the octant (default values for z=0).
  */
 Octant::Octant(bool bound, uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
-	m_dim = dim_;
+	initialize(dim_, level_, bound);
+
+	// Set the coordinates
 	m_x = x_;
 	m_y = y_;
 	m_z = (m_dim-2)*z_;
-	m_level = level_;
-	m_marker = 0;
-	//default constructor of bitset is zero value -> set boundary condition bound for faces
-	if (m_level==0){
-		uint8_t nf = m_dim*2;
-		for (uint8_t i=0; i<nf; i++){
-			m_info[i] = bound;
-		}
-	}
-	m_info[14] = true;
 };
 
 /*! Copy constructor of an octant.
@@ -160,6 +135,45 @@ bool Octant::operator ==(const Octant & oct2){
 // =================================================================================== //
 // METHODS
 // =================================================================================== //
+
+/*! Initialize a dummy octant.
+ */
+void
+Octant::initialize() {
+	initialize(0, 0, false);
+}
+
+/*! Initialize the octant.
+ * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
+ * \param[in] level Refinement level of octant (0 for root octant).
+ * \param[in] bound Boundary condition for the faces of the octant (the same for each face).
+ */
+void
+Octant::initialize(uint8_t dim, uint8_t level, bool bound) {
+	m_dim   = dim;
+	m_level = level;
+
+	// Reset the marker
+	m_marker = 0;
+
+	// Set the coordinates
+	m_x = 0;
+	m_y = 0;
+	m_z = 0;
+
+	// Initialize octant info
+	m_info.reset();
+	m_info[14] = true;
+
+	// If this is the root octant we need to set the boundary condition bound
+	// for faces
+	if (m_dim >= 2 && m_level == 0) {
+		uint8_t nf = m_dim*2;
+		for (uint8_t i=0; i<nf; i++){
+			m_info[i] = bound;
+		}
+	}
+};
 
 // =================================================================================== //
 // BASIC GET/SET METHODS
