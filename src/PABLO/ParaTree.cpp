@@ -54,7 +54,7 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
     /*! Default constructor of ParaTree.
      * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
-     * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+     * \param[in] dim The space dimension of the m_octree.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
@@ -63,7 +63,7 @@ namespace bitpit {
 #else
     /*! Default constructor of ParaTree.
      * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
-     * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+     * \param[in] dim The space dimension of the m_octree.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
@@ -107,7 +107,7 @@ namespace bitpit {
      * For each process it builds a vector of octants. The input parameters are :
      * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
      * \param[in] levels Level of each octant.
-     * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+     * \param[in] dim The space dimension of the m_octree.
      * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
@@ -118,7 +118,7 @@ namespace bitpit {
          * For each process it builds a vector of octants. The input parameters are :
          * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
          * \param[in] levels Level of each octant.
-         * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+         * \param[in] dim The space dimension of the m_octree.
          * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
          * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
          */

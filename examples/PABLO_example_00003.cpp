@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 		log::cout() << consoleVerbosity(log::QUIET);
 
 		/**<Instantation of a 2D pablo uniform object.*/
-		PabloUniform pablo3;
+		PabloUniform pablo3(2);
 
 		/**<Refine globally four level and write the octree.*/
 		for (iter=1; iter<5; iter++){

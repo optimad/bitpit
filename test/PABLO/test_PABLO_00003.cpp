@@ -47,7 +47,7 @@ void test01() {
 	log::cout() << consoleVerbosity(log::QUIET);
 
 	/**<Instantation of a 2D para_tree object.*/
-	ParaTree pablo;
+	ParaTree pablo(2);
 
     /**<Set 2:1 balance only through faces.*/
     pablo.setBalanceCodimension(1);

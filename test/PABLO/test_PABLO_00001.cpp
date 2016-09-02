@@ -49,7 +49,7 @@ void test01() {
 	log::cout() << consoleVerbosity(log::QUIET);
 
     /**<Instantation of a 2D para_tree object with default constructor.*/
-    ParaTree ptreedefault;
+    ParaTree ptreedefault(2);
     /**<Write the para_tree in physical domain.*/
     ptreedefault.write("Pablo001_default");
 

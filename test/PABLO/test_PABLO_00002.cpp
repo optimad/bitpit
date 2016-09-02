@@ -47,7 +47,7 @@ void test01() {
 	log::cout() << consoleVerbosity(log::QUIET);
 
 	/**<Instantation of a 2D para_tree object.*/
-    ParaTree pablo;
+    ParaTree pablo(2);
 
     /**<Compute the connectivity and write the para_tree.*/
     pablo.computeConnectivity();

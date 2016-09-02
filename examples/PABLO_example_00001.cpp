@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 		log::cout() << consoleVerbosity(log::QUIET);
 
 		/**<Instantation of a 2D pablo uniform object.*/
-		PabloUniform pablo1;
+		PabloUniform pablo1(2);
 
 		/**<Compute the connectivity and write the octree.*/
 		pablo1.computeConnectivity();

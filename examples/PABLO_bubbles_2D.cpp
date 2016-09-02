@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 		log::cout() << consoleVerbosity(log::QUIET);
 
 		/**<Instantation of a 2D para_tree object and its default (bitpit) logfile.*/
-		PabloUniform pabloBB;
+		PabloUniform pabloBB(2);
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);

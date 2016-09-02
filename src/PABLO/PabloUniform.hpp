@@ -73,10 +73,10 @@ namespace bitpit {
         // =================================================================================== //
     public:
 #if BITPIT_ENABLE_MPI==1
-        PabloUniform(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "PABLO", MPI_Comm comm = MPI_COMM_WORLD);
+        PabloUniform(uint8_t dim, int8_t maxlevel = 20, std::string logfile = "PABLO", MPI_Comm comm = MPI_COMM_WORLD);
         PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "PABLO", MPI_Comm comm = MPI_COMM_WORLD);
 #else
-        PabloUniform(uint8_t dim = 2, int8_t maxlevel = 20,std::string logfile = "PABLO");
+        PabloUniform(uint8_t dim, int8_t maxlevel = 20,std::string logfile = "PABLO");
         PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "PABLO");
 #endif
 

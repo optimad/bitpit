@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 		log::cout() << consoleVerbosity(log::QUIET);
 
 		/**<Instantation of a 2D pablo uniform object.*/
-		PabloUniform pablo4;
+		PabloUniform pablo4(2);
 
 		/**<Set NO 2:1 balance for the octree (ancestor octant).*/
 		int idx = 0;

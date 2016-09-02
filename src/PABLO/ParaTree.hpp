@@ -148,10 +148,10 @@ namespace bitpit {
         // =================================================================================== //
     public:
 #if BITPIT_ENABLE_MPI==1
-        ParaTree(uint8_t dim = 2, int8_t maxlevel = DEFAULT_MAX_LEVELS, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        ParaTree(uint8_t dim, int8_t maxlevel = DEFAULT_MAX_LEVELS, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
         ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = DEFAULT_MAX_LEVELS,  std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
 #else
-        ParaTree(uint8_t dim = 2, int8_t maxlevel = DEFAULT_MAX_LEVELS,  std::string logfile = DEFAULT_LOG_FILE);
+        ParaTree(uint8_t dim, int8_t maxlevel = DEFAULT_MAX_LEVELS,  std::string logfile = DEFAULT_LOG_FILE);
         ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = DEFAULT_MAX_LEVELS,  std::string logfile = DEFAULT_LOG_FILE);
 #endif
         ~ParaTree();

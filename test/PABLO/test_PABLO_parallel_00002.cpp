@@ -47,7 +47,7 @@ void testParallel01() {
     log::cout() << consoleVerbosity(log::QUIET);
 
     /**<Instantation of a 2D para_tree object.*/
-    ParaTree pablo;
+    ParaTree pablo(2);
 
     /**<Set NO 2:1 balance for the octree.*/
     uint32_t idx=0;
