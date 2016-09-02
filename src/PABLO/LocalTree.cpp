@@ -278,7 +278,7 @@ namespace bitpit {
         m_balanceCodim = 1;
 
         if (m_dim > 0) {
-            m_global.setGlobal(m_dim);
+            m_global.initialize(m_dim);
             m_periodic.resize(m_dim*2);
         }
     }

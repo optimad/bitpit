@@ -1951,7 +1951,7 @@ namespace bitpit {
     void
     ParaTree::setDim(uint8_t dim){
         m_dim = dim;
-        m_global.setGlobal(m_dim);
+        m_global.initialize(m_dim);
         m_periodic.resize(m_global.m_nfaces, false);
     }
 

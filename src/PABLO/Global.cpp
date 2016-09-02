@@ -219,7 +219,7 @@ Global::getOppface(uint8_t oppface_[6])  {
  * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
  */
 void
-Global::setGlobal(uint8_t dim){
+Global::initialize(uint8_t dim){
 
 	if (dim>3) dim = 3;
 	if (dim<2) dim = 2;

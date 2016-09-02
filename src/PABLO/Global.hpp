@@ -112,7 +112,7 @@ private:
 	uint8_t 	getOctantBytes();
 	void 		getOppface(uint8_t oppface[6]);
 
-	void 		setGlobal(uint8_t dim);
+	void 		initialize(uint8_t dim);
 
 };
 
