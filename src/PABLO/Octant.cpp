@@ -72,7 +72,9 @@ Octant::Octant(uint8_t dim){
  * It builds a 2D or 3D octant with user defined origin and level.
  * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
  * \param[in] level Refinement level of octant (0 for root octant).
- * \param[in] x,y,z Coordinates of the origin of the octant (default values for z=0).
+ * \param[in] x X-coordinates of the origin of the octant.
+ * \param[in] y Y-coordinates of the origin of the octant.
+ * \param[in] z Z-Coordinates of the origin of the octant (The default value is 0).
  */
 Octant::Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
 	initialize(dim, level, true);
@@ -88,7 +90,9 @@ Octant::Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
  * \param[in] bound Boundary condition for the faces of the octant (the same for each face).
  * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
  * \param[in] level Refinement level of octant (0 for root octant).
- * \param[in] x,y,z Coordinates of the origin of the octant (default values for z=0).
+ * \param[in] x X-coordinates of the origin of the octant.
+ * \param[in] y Y-coordinates of the origin of the octant.
+ * \param[in] z Z-Coordinates of the origin of the octant (The default value is 0).
  */
 Octant::Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
 	initialize(dim, level, bound);
