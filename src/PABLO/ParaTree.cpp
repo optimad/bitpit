@@ -3128,6 +3128,7 @@ namespace bitpit {
 
                 m_octree.m_octants.assign(first, last);
                 octvector(m_octree.m_octants).swap(m_octree.m_octants);
+                m_octree.m_sizeOctants = m_octree.m_octants.size();
 
                 first = octantsCopy.end();
                 last = octantsCopy.end();
@@ -3478,6 +3479,7 @@ namespace bitpit {
                 }
                 uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
                 m_octree.m_octants.resize(newCounter, Octant(m_dim, m_global.m_maxLevel));
+                m_octree.m_sizeOctants = m_octree.m_octants.size();
                 //MOVE RESIDENTS IN RIGHT POSITION
                 uint32_t resCounter = nofNewHead + nofResidents - 1;
                 for(uint32_t k = 0; k < nofResidents ; ++k){
@@ -3511,6 +3513,7 @@ namespace bitpit {
                     }
                 }
                 octvector(m_octree.m_octants).swap(m_octree.m_octants);
+                m_octree.m_sizeOctants = m_octree.m_octants.size();
 
                 delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
                 delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
@@ -4103,6 +4106,8 @@ namespace bitpit {
     ParaTree::updateLoadBalance() {
         m_octree.updateLocalMaxDepth();
         uint64_t* rbuff = new uint64_t[m_nproc];
+        //update sizes
+        m_octree.m_sizeOctants = m_octree.m_octants.size();
         uint64_t local_num_octants = m_octree.getNumOctants();
         m_errorFlag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,rbuff,1,MPI_UINT64_T,m_comm);
         for (int iproc=0; iproc<m_nproc; iproc++){

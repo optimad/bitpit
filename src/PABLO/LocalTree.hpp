@@ -122,6 +122,7 @@ private:
 	Octant 					m_firstDesc;			/**< First (Morton order) most refined octant possible in local partition */
 	Octant			 		m_lastDesc;				/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 				m_sizeGhosts;			/**< Size of vector of ghost octants */
+	uint32_t 				m_sizeOctants;			/**< Size of vector of local octants */
 	uint8_t					m_localMaxDepth;		/**< Reached max depth in local tree */
 	uint8_t 				m_balanceCodim;			/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through faces (default);
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 2 = 2:1 balance through edges and faces;

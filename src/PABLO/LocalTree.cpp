@@ -58,6 +58,7 @@ namespace bitpit {
         Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1), m_global.m_maxLevel);
         m_octants.clear();
         m_octants.push_back(oct0);
+        m_sizeOctants = m_octants.size();
         m_firstDesc = octf;
         m_lastDesc = octl;
         m_ghosts.clear();
@@ -319,6 +320,7 @@ namespace bitpit {
         uint8_t 		nchm1 = m_global.m_nchildren-1, ich;
         bool 			dorefine = false;
 
+        m_sizeOctants = m_octants.size();
         nocts = m_octants.size();
         for (idx=0; idx<nocts; idx++){
             if(m_octants[idx].getMarker() > 0 && m_octants[idx].getLevel() < m_global.m_maxLevel){
@@ -332,11 +334,13 @@ namespace bitpit {
                 }
             }
         }
+        m_sizeOctants = m_octants.size();
         if (offset > 0){
             if(mapsize > 0){
                 mapidx.resize(m_octants.size()+offset);
             }
             m_octants.resize(m_octants.size()+offset, Octant(m_dim, m_global.m_maxLevel));
+            m_sizeOctants = m_octants.size();
             blockidx = last_child_index[0]-nchm1;
             idx = m_octants.size();
             ilastch = last_child_index.size()-1;
@@ -372,6 +376,7 @@ namespace bitpit {
         }
 
         octvector(m_octants).swap(m_octants);
+        m_sizeOctants = m_octants.size();
         nocts = m_octants.size();
 
         setFirstDesc();
@@ -413,6 +418,7 @@ namespace bitpit {
         idx2_gh = 0;
 
         nocts = nocts0 = m_octants.size();
+        m_sizeOctants = m_octants.size();
         m_sizeGhosts = m_ghosts.size();
 
 
@@ -499,6 +505,7 @@ namespace bitpit {
         }
         m_octants.resize(nblock, Octant(m_dim, m_global.m_maxLevel));
         octvector(m_octants).swap(m_octants);
+        m_sizeOctants = m_octants.size();
         nocts = m_octants.size();
         if(mapsize > 0){
             mapidx.resize(nocts);
@@ -568,8 +575,10 @@ namespace bitpit {
                 }
                 father.setMarker(markerfather);
                 m_octants.resize(nocts-offset, Octant(m_dim, m_global.m_maxLevel));
+                m_sizeOctants = m_octants.size();
                 m_octants.push_back(father);
                 octvector(m_octants).swap(m_octants);
+                m_sizeOctants = m_octants.size();
                 nocts = m_octants.size();
                 if(mapsize > 0){
                     mapidx.resize(nocts);
@@ -577,6 +586,8 @@ namespace bitpit {
             }
 
         }
+
+        m_sizeOctants = m_octants.size();
 
         // Set final first and last desc
         if(nocts>0){
