@@ -182,6 +182,9 @@ private:
 	// OTHER METHODS
 	// =================================================================================== //
 
+	void	initialize();
+	void	initialize(uint8_t dim);
+
 	Octant& 		extractOctant(uint32_t idx);
 	const Octant&	extractOctant(uint32_t idx) const;
 	Octant& 		extractGhostOctant(uint32_t idx);

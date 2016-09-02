@@ -50,8 +50,6 @@ namespace bitpit {
      * \param[in] dim Space dimension of octree.
      */
     LocalTree::LocalTree(uint8_t dim){
-        m_dim = dim;
-        m_global.setGlobal(m_dim);
         Octant oct0(m_dim);
         Octant octf(m_dim,m_global.m_maxLevel,0,0,0);
         Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
@@ -63,8 +61,7 @@ namespace bitpit {
         m_ghosts.clear();
         m_sizeGhosts = m_ghosts.size();
         m_localMaxDepth = 0;
-        m_balanceCodim = 1;
-        m_periodic.resize(m_dim*2);
+        initialize(maxlevel, dim);
     };
 
     /*!Default destructor.
@@ -270,6 +267,28 @@ namespace bitpit {
     // =================================================================================== //
     // OTHER METHODS
     // =================================================================================== //
+
+    /*!Initialize a dummy octree.
+     */
+    void
+    LocalTree::initialize() {
+        initialize(0);
+    }
+
+    /*!Initialize the octree.
+     * \param[in] maxlevel Maximum refinement level of the octree.
+     * \param[in] dim Space dimension of octree.
+     */
+    void
+    LocalTree::initialize(uint8_t dim) {
+        m_dim          = dim;
+        m_balanceCodim = 1;
+
+        if (m_dim > 0) {
+            m_global.setGlobal(m_dim);
+            m_periodic.resize(m_dim*2);
+        }
+    }
 
     /*!Extract an octant of the octree.
      * \param[in] idx Local index of the target octant.
