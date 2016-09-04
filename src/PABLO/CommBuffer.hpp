@@ -23,8 +23,8 @@
  \*---------------------------------------------------------------------------*/
 
 #if BITPIT_ENABLE_MPI==1
-#ifndef __BITPIT_COMMBUFFER_HPP__
-#define __BITPIT_COMMBUFFER_HPP__
+#ifndef __BITPIT_PABLO_COMMBUFFER_HPP__
+#define __BITPIT_PABLO_COMMBUFFER_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -117,5 +117,5 @@ namespace bitpit {
 
 }
 
-#endif /* __BITPIT_COMMBUFFER_HPP__ */
+#endif /* __BITPIT_PABLO_COMMBUFFER_HPP__ */
 #endif /* NOMPI */

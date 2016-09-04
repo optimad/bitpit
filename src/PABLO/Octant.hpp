@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_OCTANT_HPP__
-#define __BITPIT_OCTANT_HPP__
+#ifndef __BITPIT_PABLO_OCTANT_HPP__
+#define __BITPIT_PABLO_OCTANT_HPP__
 
 // INCLUDES                                                                            //
 #include "inlinedFunct.hpp"
@@ -212,4 +212,4 @@ private:
 
 }
 
-#endif /* __BITPIT_OCTANT_HPP__ */
+#endif /* __BITPIT_PABLO_OCTANT_HPP__ */

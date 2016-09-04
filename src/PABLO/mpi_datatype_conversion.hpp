@@ -23,8 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 #if BITPIT_ENABLE_MPI==1
-#ifndef __BITPIT_MPI_DATATYPE_CONVERSION_HPP__
-#define __BITPIT_MPI_DATATYPE_CONVERSION_HPP__
+#ifndef __BITPIT_PABLO_MPI_DATATYPE_CONVERSION_HPP__
+#define __BITPIT_PABLO_MPI_DATATYPE_CONVERSION_HPP__
 
 #include <mpi.h>
 #include <stdint.h>
@@ -80,5 +80,5 @@ inline MPI_Datatype convert<int8_t>(){return MPI_INT8_T;}
 
 }
 
-#endif /* __BITPIT_MPI_DATATYPE_CONVERSION_HPP__ */
+#endif /* __BITPIT_PABLO_MPI_DATATYPE_CONVERSION_HPP__ */
 #endif /* NOMPI */

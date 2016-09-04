@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MAP_HPP__
-#define __BITPIT_MAP_HPP__
+#ifndef __BITPIT_PABLO_MAP_HPP__
+#define __BITPIT_PABLO_MAP_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -128,4 +128,4 @@ private:
 
 }
 
-#endif /* __BITPIT_MAP_HPP__ */
+#endif /* __BITPIT_PABLO_MAP_HPP__ */

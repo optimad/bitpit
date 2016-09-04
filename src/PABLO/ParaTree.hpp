@@ -22,8 +22,8 @@
  *
  \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PARA_TREE_HPP__
-#define __BITPIT_PARA_TREE_HPP__
+#ifndef __BITPIT_PABLO_PARA_TREE_HPP__
+#define __BITPIT_PABLO_PARA_TREE_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //

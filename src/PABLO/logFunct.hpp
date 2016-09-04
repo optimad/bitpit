@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_PABLO_LOG_FUNCT_HPP__
-# define __BITPIT_PABLO_LOG_FUNCT_HPP__
+# ifndef __BITPIT_PABLO_PABLO_LOG_FUNCT_HPP__
+# define __BITPIT_PABLO_PABLO_LOG_FUNCT_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //

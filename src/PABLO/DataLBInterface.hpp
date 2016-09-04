@@ -24,8 +24,8 @@
 
 // Communications Class for Load Balancing
 
-#ifndef __BITPIT_DATA_LB_INTERFACE_HPP__
-#define __BITPIT_DATA_LB_INTERFACE_HPP__
+#ifndef __BITPIT_PABLO_DATA_LB_INTERFACE_HPP__
+#define __BITPIT_PABLO_DATA_LB_INTERFACE_HPP__
 
 namespace bitpit {
   
@@ -98,4 +98,4 @@ private:
 
 #include "DataLBInterface.tpp"
 
-#endif /* __BITPIT_DATA_LB_INTERFACE_HPP__ */
+#endif /* __BITPIT_PABLO_DATA_LB_INTERFACE_HPP__ */

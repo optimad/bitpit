@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_ARRAY_HPP__
-#define __BITPIT_ARRAY_HPP__
+#ifndef __BITPIT_PABLO_ARRAY_HPP__
+#define __BITPIT_PABLO_ARRAY_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -73,4 +73,4 @@ private:
 
 }
 
-#endif /* __BITPIT_ARRAY_HPP__ */
+#endif /* __BITPIT_PABLO_ARRAY_HPP__ */
