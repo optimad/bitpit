@@ -30,6 +30,8 @@ namespace bitpit {
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
+const int8_t Global::m_maxLevel = 20;
+
 /*!Get the bytes occupation of a boolean.
  * \return Bytes occupation of a boolean.
  */
@@ -212,16 +214,13 @@ Global::getOppface(uint8_t oppface_[6])  {
 }
 
 /*! Initialization of static global variables.
- * \param[in] maxlevel Space dimension; only value equal to 2 or 3 are accepted.
  * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
  */
 void
-Global::setGlobal(int8_t maxlevel, uint8_t dim){
+Global::setGlobal(uint8_t dim){
 
 	if (dim>3) dim = 3;
 	if (dim<2) dim = 2;
-
-	m_maxLevel = maxlevel;
 
 	m_maxLength 			= uint32_t(1<<m_maxLevel);
 	m_nchildren 			= 1<<dim;

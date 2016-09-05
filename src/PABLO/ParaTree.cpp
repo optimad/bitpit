@@ -44,7 +44,6 @@ namespace bitpit {
     // CLASS IMPLEMENTATION                                                                //
     // =================================================================================== //
 
-    const int			ParaTree::DEFAULT_MAX_LEVELS = 20;
     const std::string	ParaTree::DEFAULT_LOG_FILE   = "PABLO";
 
     // =================================================================================== //
@@ -54,18 +53,17 @@ namespace bitpit {
     /*! Default constructor of ParaTree.
      * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
      * \param[in] dim The space dimension of the m_octree.
-     * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
 #if BITPIT_ENABLE_MPI==1
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm ) : m_octree(dim),m_trans(Global::getMaxLevel(),dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
-    ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile ) : m_octree(dim),m_trans(Global::getMaxLevel(), dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
 #endif
-        m_global.setGlobal(maxlevel, m_dim);
+        m_global.setGlobal(m_dim);
         m_errorFlag = 0;
         m_maxDepth = 0;
         m_globalNumOctants = getNumOctants();
@@ -103,22 +101,21 @@ namespace bitpit {
      * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
      * \param[in] levels Level of each octant.
      * \param[in] dim The space dimension of the m_octree.
-     * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
 #if BITPIT_ENABLE_MPI==1
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile, MPI_Comm comm):m_octree(dim),m_trans(Global::getMaxLevel(),dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile ):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile ):m_octree(dim),m_trans(Global::getMaxLevel(),dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
 #endif
         uint8_t lev, iface;
         uint32_t x0, y0, z0;
         uint32_t NumOctants = XYZ.size();
         m_dim = dim;
-        m_global.setGlobal(maxlevel, m_dim);
+        m_global.setGlobal(m_dim);
         m_octree.m_octants.resize(NumOctants, Octant(m_dim, m_global.m_maxLevel));
         for (uint32_t i=0; i<NumOctants; i++){
             lev = uint8_t(levels[i]);
@@ -618,14 +615,6 @@ namespace bitpit {
     double
     ParaTree::getTol(){
         return m_tol;
-    };
-
-    /*!Set the maximum refinement level allowed for the octree.
-     * \param[in] maxlevel Maximum refinement level.
-     */
-    void
-    ParaTree::setMaxLevel(int8_t maxlevel){
-        m_global.m_maxLevel = maxlevel;
     };
 
     /*! Set the periodic condition of a target boundary (implicitly set the periodic face).

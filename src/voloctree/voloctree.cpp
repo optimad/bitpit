@@ -65,7 +65,7 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
 	: VolumeKernel(id, dimension, false),
 	  m_tree(origin[0], origin[1], origin[2], length, dimension,
-	         PabloUniform::DEFAULT_MAX_LEVELS, PabloUniform::DEFAULT_LOG_FILE
+	         PabloUniform::DEFAULT_LOG_FILE
 #if BITPIT_ENABLE_MPI==1
 	         , MPI_COMM_NULL
 #endif

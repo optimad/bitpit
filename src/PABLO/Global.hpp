@@ -61,6 +61,8 @@ class Global{
 	// MEMBERS
 	// =================================================================================== //
 private:
+	static const int8_t   m_maxLevel;		/**< Maximum allowed refinement level of octree */
+
 	uint32_t m_maxLength;			/**< Length of the logical domain */
 	uint8_t  m_nchildren;			/**< Number of children of an octant */
 	uint8_t  m_nfaces;				/**< Number of faces of an octant */
@@ -79,7 +81,6 @@ private:
 	int8_t   m_normals[6][3];		/**< Components (x,y,z) of the normals per face (z=0 in 2D) */
 	int8_t   m_edgeCoeffs[12][3];	/**< Components (x,y,z) of the "normals" per edge */
 	int8_t   m_nodeCoeffs[8][3];	/**< Components (x,y,z) of the "normals" per node */
-	int8_t   m_maxLevel;			/**< Maximum allowed refinement level of octree */
 
 	// =================================================================================== //
 	// METHODS
@@ -88,6 +89,8 @@ private:
 	// =================================================================================== //
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
+	static int8_t 		getMaxLevel();
+
 	uint8_t 	getBoolBytes();
 	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]);
 	void 		getEdgeface(uint8_t edgeface[12][2]);
@@ -96,7 +99,6 @@ private:
 	uint8_t 	getLevelBytes();
 	uint8_t 	getMarkerBytes();
 	uint32_t 	getMaxLength();
-	int8_t 		getMaxLevel();
 	uint8_t 	getNchildren();
 	uint8_t 	getNedges();
 	uint8_t 	getNfaces();
@@ -108,7 +110,7 @@ private:
 	uint8_t 	getOctantBytes();
 	void 		getOppface(uint8_t oppface[6]);
 
-	void 		setGlobal(int8_t maxlevel, uint8_t dim);
+	void 		setGlobal(uint8_t dim);
 
 };
 

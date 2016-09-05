@@ -47,12 +47,11 @@ namespace bitpit {
     // =================================================================================== //
 
     /*!Dimensional and default constructor.
-     * \param[in] maxlevel Maximum refinement level of the octree.
      * \param[in] dim Space dimension of octree.
      */
-    LocalTree::LocalTree(int8_t maxlevel, uint8_t dim){
+    LocalTree::LocalTree(uint8_t dim){
         m_dim = dim;
-        m_global.setGlobal(maxlevel, m_dim);
+        m_global.setGlobal(m_dim);
         Octant oct0(m_dim, m_global.m_maxLevel);
         Octant octf(m_dim,m_global.m_maxLevel,0,0,0, m_global.m_maxLevel);
         Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1), m_global.m_maxLevel);

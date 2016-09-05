@@ -62,11 +62,10 @@ void test01() {
     /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
     double X, Y, Z, L;
     X = 10.0; Y = 20.0; Z = 0.0; L = 250.0;
-    int dim, maxlevel;
+    int dim;
     dim = 2;
-    maxlevel = 20;
     /**<Instantation of a 2D para_tree object with custom constructor.*/
-    PabloUniform ptreecustom(X,Y,Z,L,dim,maxlevel,"custom");
+    PabloUniform ptreecustom(X,Y,Z,L,dim,"custom");
     /**<Write the para_tree in physical domain.*/
     ptreecustom.write("Pablo001_custom");
 
