@@ -24,18 +24,39 @@ using namespace std;
  * Origin of octree in reference domain in (0,0,0) and side length 1.
  */
 Map::Map(uint8_t dim_){
-	m_origin[0] = m_origin[1] = m_origin[2] = 0.0;
-	m_L = 1.0;
-	m_dim = dim_;
-	m_nnodes = 1<<m_dim;
-	m_nnodesPerFace = 1<<(m_dim-1);
-	m_maxLength = Global::getMaxLength();
-	m_maxLength_1 = 1/double(m_maxLength);
+    initialize(dim_);
 };
 
 // =================================================================================== //
 // METHODS
 // =================================================================================== //
+
+/*! Initialize a dummy transformation of coordinates.
+ */
+void Map::initialize(){
+    initialize(0);
+}
+
+/*! Initialize the transformation of coordinates.
+ *  Origin of octree in reference domain in (0,0,0) and side length 1.
+ * \param[in] dim The space dimension of the m_octree.
+ */
+void Map::initialize(uint8_t dim){
+    m_dim = dim;
+    if (m_dim > 0) {
+        m_nnodes        = 1<<m_dim;
+        m_nnodesPerFace = 1<<(m_dim-1);
+
+        m_maxLength   = Global::getMaxLength();
+        m_maxLength_1 = 1/double(m_maxLength);
+    }
+
+    m_origin[0] = 0.;
+    m_origin[1] = 0.;
+    m_origin[2] = 0.;
+
+    m_L = 1.0;
+};
 
 /*! Transformation of coordinates X,Y,Z (logical->physical).
  * \param[in] X Coordinates from logical domain.
