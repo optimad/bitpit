@@ -1,6 +1,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include "Global.hpp"
 #include "Map.hpp"
 #include <cmath>
 
@@ -22,14 +23,13 @@ using namespace std;
 /*!Default constructor.
  * Origin of octree in reference domain in (0,0,0) and side length 1.
  */
-Map::Map(int8_t maxlevel, uint8_t dim_){
-	maxlevel = int8_t(max(0,min(int(maxlevel),20)));
+Map::Map(uint8_t dim_){
 	m_origin[0] = m_origin[1] = m_origin[2] = 0.0;
 	m_L = 1.0;
 	m_dim = dim_;
 	m_nnodes = 1<<m_dim;
 	m_nnodesPerFace = 1<<(m_dim-1);
-	m_maxLength = uint32_t(1<<maxlevel);
+	m_maxLength = Global::getMaxLength();
 	m_maxLength_1 = 1/double(m_maxLength);
 };
 

@@ -91,8 +91,8 @@ private:
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
-	Map(int8_t maxlevel, uint8_t dim_);
-//	Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_);
+	Map(uint8_t dim_);
+//	Map(double & X, double & Y, double & Z, double & LL, uint8_t dim_);
 
 	// =================================================================================== //
 	// METHODS

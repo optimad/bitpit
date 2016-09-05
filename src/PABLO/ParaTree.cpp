@@ -59,9 +59,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm ) : m_octree(dim),m_trans(Global::getMaxLevel(),dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm ) : m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
-    ParaTree::ParaTree(uint8_t dim, std::string logfile ) : m_octree(dim),m_trans(Global::getMaxLevel(), dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile ) : m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
 #endif
         m_global.setGlobal(m_dim);
         m_errorFlag = 0;
@@ -107,9 +107,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile, MPI_Comm comm):m_octree(dim),m_trans(Global::getMaxLevel(),dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile, MPI_Comm comm):m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile ):m_octree(dim),m_trans(Global::getMaxLevel(),dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile ):m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
 #endif
         uint8_t lev, iface;
         uint32_t x0, y0, z0;
