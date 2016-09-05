@@ -54,8 +54,7 @@ namespace bitpit {
 #else
     PabloUniform::PabloUniform(uint8_t dim, std::string logfile):ParaTree(dim,logfile){
 #endif
-        m_origin = { {0,0,0} };
-        m_L = 1.0;
+        __reset();
     };
 
     /*! Custom constructor of PabloUniform.
@@ -73,6 +72,8 @@ namespace bitpit {
 #else
     PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, std::string logfile):ParaTree(dim,logfile){
 #endif
+        __reset();
+
         m_origin[0] = X;
         m_origin[1] = Y;
         m_origin[2] = Z;
@@ -82,6 +83,22 @@ namespace bitpit {
     // =================================================================================== //
     // METHODS
     // =================================================================================== //
+
+    /*! Reset the octree
+     */
+    void
+    PabloUniform::reset(){
+        ParaTree::reset();
+        __reset();
+    }
+
+    /*! Internal function to reset the octree
+     */
+    void
+    PabloUniform::__reset(){
+        m_origin = {{0,0,0}};
+        m_L = 1.0;
+    }
 
     // =================================================================================== //
     // BASIC GET/SET METHODS															   //
