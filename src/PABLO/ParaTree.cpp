@@ -82,8 +82,7 @@ namespace bitpit {
         m_periodic.resize(m_global.m_nfaces, false);
         m_tol = 1.0e-14;
         // Write info log
-        log::manager().create(logfile, false, m_nproc, m_rank);
-        m_log = &log::cout(logfile);
+        initializeLogger(logfile);
         printHeader();
     };
 
@@ -162,8 +161,7 @@ namespace bitpit {
         m_periodic.resize(m_global.m_nfaces, false);
         m_tol = 1.0e-14;
         // Write info log
-        log::manager().create(logfile, false, m_nproc, m_rank);
-        m_log = &log::cout(logfile);
+        initializeLogger(logfile);
         printHeader();
     };
 
@@ -182,6 +180,14 @@ namespace bitpit {
     // =================================================================================== //
     // METHODS
     // =================================================================================== //
+
+    /*! Initialize the logger
+     */
+    void
+    ParaTree::initializeLogger(const std::string &logfile){
+        log::manager().create(logfile, false, m_nproc, m_rank);
+        m_log = &log::cout(logfile);
+    }
 
     /*! Print the initial PABLO header.
      */
