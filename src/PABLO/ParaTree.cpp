@@ -50,6 +50,25 @@ namespace bitpit {
     // CONSTRUCTORS AND OPERATORS														   //
     // =================================================================================== //
 
+    /*! Default empty constructor of ParaTree.
+     */
+#if BITPIT_ENABLE_MPI==1
+    /*!
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     */
+    ParaTree::ParaTree(std::string logfile, MPI_Comm comm )
+#else
+    ParaTree::ParaTree(std::string logfile )
+#endif
+    {
+#if BITPIT_ENABLE_MPI==1
+        initialize(logfile, comm);
+#else
+        initialize(logfile);
+#endif
+        reset();
+    }
+
     /*! Default constructor of ParaTree.
      * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
      * \param[in] dim The space dimension of the m_octree.
