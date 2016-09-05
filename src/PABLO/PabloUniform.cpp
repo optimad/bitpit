@@ -41,6 +41,19 @@ namespace bitpit {
     // =================================================================================== //
     // CONSTRUCTORS AND OPERATORS
     // =================================================================================== //
+    /*! Default empty constructor of PabloUniform.
+	 */
+#if BITPIT_ENABLE_MPI==1
+    /*!
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     */
+    PabloUniform::PabloUniform(std::string logfile, MPI_Comm comm):ParaTree(logfile,comm){
+#else
+    PabloUniform::PabloUniform(std::string logfile):ParaTree(logfile){
+#endif
+        __reset();
+    }
+
     /*! Default constructor of PabloUniform.
      * It sets the Origin in (0,0,0) and side of length 1.
      * \param[in] dim The space dimension of the octree.

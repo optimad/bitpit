@@ -78,9 +78,11 @@ namespace bitpit {
         void	__reset();
     public:
 #if BITPIT_ENABLE_MPI==1
+        PabloUniform(std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
         PabloUniform(uint8_t dim, std::string logfile = "PABLO", MPI_Comm comm = MPI_COMM_WORLD);
         PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, std::string logfile = "PABLO", MPI_Comm comm = MPI_COMM_WORLD);
 #else
+        PabloUniform(std::string logfile = DEFAULT_LOG_FILE);
         PabloUniform(uint8_t dim, std::string logfile = "PABLO");
         PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, std::string logfile = "PABLO");
 #endif
