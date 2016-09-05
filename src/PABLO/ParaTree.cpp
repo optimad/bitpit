@@ -68,12 +68,7 @@ namespace bitpit {
 #else
         initialize(dim, logfile);
 #endif
-
-        m_errorFlag = 0;
-        m_maxDepth = 0;
-        m_globalNumOctants = getNumOctants();
-
-        m_tol = 1.0e-14;
+        reset();
 
         printHeader();
     };
@@ -100,6 +95,7 @@ namespace bitpit {
 #else
         initialize(dim, logfile);
 #endif
+        reset();
 
         uint8_t lev, iface;
         uint32_t x0, y0, z0;
@@ -148,7 +144,6 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         setPboundGhosts();
 #endif
-        m_tol = 1.0e-14;
 
         printHeader();
     };
@@ -234,6 +229,19 @@ namespace bitpit {
     ParaTree::initializeLogger(const std::string &logfile){
         log::manager().create(logfile, false, m_nproc, m_rank);
         m_log = &log::cout(logfile);
+    }
+
+    /*! Reset the octree
+     */
+    void
+    ParaTree::reset(){
+        m_tol = 1.0e-14;
+
+        m_errorFlag = 0;
+        m_maxDepth  = 0;
+
+        m_octree.reset(true);
+        m_globalNumOctants = getNumOctants();
     }
 
     /*! Print the initial PABLO header.

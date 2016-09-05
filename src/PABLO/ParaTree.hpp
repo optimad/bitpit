@@ -159,6 +159,8 @@ namespace bitpit {
         // METHODS																			   //
         // =================================================================================== //
 
+        virtual void	reset();
+
         void	printHeader();
         void	printFooter();
 
