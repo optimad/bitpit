@@ -31,6 +31,8 @@ namespace bitpit {
 // =================================================================================== //
 
 const int8_t Global::m_maxLevel = 20;
+const uint32_t Global::m_maxLength = uint32_t(1 << Global::m_maxLevel);
+
 
 /*!Get the bytes occupation of a boolean.
  * \return Bytes occupation of a boolean.
@@ -222,7 +224,6 @@ Global::setGlobal(uint8_t dim){
 	if (dim>3) dim = 3;
 	if (dim<2) dim = 2;
 
-	m_maxLength 			= uint32_t(1<<m_maxLevel);
 	m_nchildren 			= 1<<dim;
 	m_nfaces 				= 2*dim;
 	m_nnodes				= 1<<dim;

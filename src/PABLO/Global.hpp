@@ -62,8 +62,8 @@ class Global{
 	// =================================================================================== //
 private:
 	static const int8_t   m_maxLevel;		/**< Maximum allowed refinement level of octree */
+	static const uint32_t m_maxLength;		/**< Length of the logical domain */
 
-	uint32_t m_maxLength;			/**< Length of the logical domain */
 	uint8_t  m_nchildren;			/**< Number of children of an octant */
 	uint8_t  m_nfaces;				/**< Number of faces of an octant */
 	uint8_t  m_nedges;				/**< Number of edges of an octant */
@@ -90,6 +90,7 @@ private:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 	static int8_t 		getMaxLevel();
+	static uint32_t 	getMaxLength();
 
 	uint8_t 	getBoolBytes();
 	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]);
@@ -98,7 +99,6 @@ private:
 	uint8_t 	getGlobalIndexBytes();
 	uint8_t 	getLevelBytes();
 	uint8_t 	getMarkerBytes();
-	uint32_t 	getMaxLength();
 	uint8_t 	getNchildren();
 	uint8_t 	getNedges();
 	uint8_t 	getNfaces();
