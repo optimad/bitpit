@@ -155,16 +155,26 @@ double distancePointSegment(
         std::array< double, 3 > const &Q1,
         std::array< double, 3 > const &Q2,
         std::array< double, 3 >       &xP,
-        std::array< double, 2 >       &lambda
+        std::array< double, 2 >       &lambda,
+        int                      &flag
         ) {
 
     std::array<double,3>    n = Q2 -Q1;
     double                  t =  -dotProduct(n,Q1-P) / dotProduct(n,n) ;;
 
+    flag = 0;
+    if ( t<= 0. ) {
+        flag = 1;
+    }
+    else if ( t>= 1.) {
+        flag = 2;
+    }
+
     t = std::max( std::min( t, 1.), 0. ) ;
 
     lambda[0] = 1. - t ;
     lambda[1] = t ;
+
 
     xP = Q1 + t*n ;
 
@@ -298,7 +308,8 @@ double distancePointTriangle(
         std::array< double, 3 > const &Q1,
         std::array< double, 3 > const &Q2,
         std::array< double, 3 >       &xP,
-        std::array< double, 3 >       &lambda
+        std::array< double, 3 >       &lambda,
+        int                           &flag
         ) {
 
     int                 i, vertex0, vertex1 ;
@@ -306,6 +317,7 @@ double distancePointTriangle(
     int                 count, oneNegative ;
     std::array<int,2>   twoNegative ;
     std::array<double,2>   lambdaLocal ;
+    int                    flagLocal ;
 
     double              d;
 
@@ -339,23 +351,38 @@ double distancePointTriangle(
     };
 
     if( count == 0){
+        flag = 0 ;
         xP = Q0 +b[0]*s0 +b[1]*s1 ;
         d  = norm2( P - xP)  ;
 
     } else if( count == 1){
         vertex0 = (oneNegative +1) %3 ;
         vertex1 = (vertex0     +1) %3 ;
-        d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal)  ;
+        d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal, flagLocal)  ;
         lambda[oneNegative] = 0. ;
         lambda[vertex0] = lambdaLocal[0] ;
         lambda[vertex1] = lambdaLocal[1] ;
 
+        if( flagLocal ==0 ){
+            flag    = -(vertex0+1) ;
+        }
+
+        else if( flagLocal == 1){
+            flag = vertex0+1 ; 
+        }
+        
+        else if( flagLocal == 2){
+            flag = vertex1+1 ; 
+        };
+
     } else {
         vertex0 = 3 -twoNegative[0] -twoNegative[1] ;
+        flag    = (vertex0 +1) ;
         lambda.fill(0.);
         lambda[vertex0] = 1. ;
         xP      = *r[vertex0] ;
         d       = norm2( P - xP)  ;
+
 
     }
 
@@ -592,9 +619,10 @@ std::vector<double> distanceCloudTriangle(
             d  = norm2( P - xP)  ;
 
         } else if( count == 1){
+            int flagLocal ;
             vertex0 = (oneNegative +1) %3 ;
             vertex1 = (vertex0     +1) %3 ;
-            d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal)  ;
+            d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal, flagLocal)  ;
             lambda[oneNegative] = 0. ;
             lambda[vertex0] = lambdaLocal[0] ;
             lambda[vertex1] = lambdaLocal[1] ;
@@ -796,9 +824,10 @@ std::vector<double> distanceCloudSimplex(
 
         array3D xPInt ;
         std::array<double,2> lambda ;
+        int flag ;
 
         for( int i=0; i<N; ++i ){
-            d[i] = distancePointSegment(P[i], V[0], V[1], xPInt, lambda);
+            d[i] = distancePointSegment(P[i], V[0], V[1], xPInt, lambda, flag);
         }
 
         return(d) ;

@@ -77,9 +77,9 @@ static const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;
 double              distancePointPlane( array3D const &, array3D const &, array3D const &, array3D & ) ;
 double              distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, int & ) ;
-double              distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, std::array<double,2> & ) ;
+double              distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, std::array<double,2> &, int & ) ;
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, int & ) ;
-double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;
+double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int & ) ;
 double              distancePointSimplex( array3D const &, std::vector<array3D> const &, array3D &, int & );
 
 
