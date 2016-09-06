@@ -201,9 +201,7 @@ namespace bitpit {
         initializeLogger(logfile);
 
         // Set the dimension to a dummy value
-        m_dim = 0;
-        m_global.setGlobal(0);
-        m_periodic.resize(0);
+        setDim(0);
     }
 
     /*! Initialize the octree
@@ -223,14 +221,11 @@ namespace bitpit {
 #endif
 
         // Initialize the dimension
-        m_dim = dim;
         if (dim < 2 || dim > 3) {
             throw std::runtime_error ("Invalid value for the dimension");
         }
 
-        m_global.setGlobal(m_dim);
-
-        m_periodic.resize(m_global.m_nfaces, false);
+        setDim(dim);
     }
 
     /*! Initialize the logger
@@ -1919,6 +1914,15 @@ namespace bitpit {
     // =================================================================================== //
     // PRIVATE GET/SET METHODS
     // =================================================================================== //
+
+    /*! Set the dimension
+     */
+    void
+    ParaTree::setDim(uint8_t dim){
+        m_dim = dim;
+        m_global.setGlobal(m_dim);
+        m_periodic.resize(m_global.m_nfaces, false);
+    }
 
     /*! Set the first finer descendant of the local tree.
      */

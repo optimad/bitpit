@@ -346,6 +346,7 @@ namespace bitpit {
         // PRIVATE GET/SET METHODS															   //
         // =================================================================================== //
     private:
+        void		setDim(uint8_t dim);
         void 		setFirstDescMorton();
         void 		setLastDescMorton();
 
