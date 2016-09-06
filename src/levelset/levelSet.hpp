@@ -230,7 +230,7 @@ class LevelSetObject{
     short                                       getSign(const long &) const;
 
     virtual int                                 getPart(const long &) const ;
-    virtual long                                getSupport(const long &i) const;
+    virtual long                                getSupport(const long &) const;
     virtual int                                 getSupportCount(const long &) const ;
 
     double                                      getSizeNarrowBand() const;

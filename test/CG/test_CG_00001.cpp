@@ -464,6 +464,7 @@ int main(
         // Scope variables ------------------------------------------------------ //
         array<double, 3>            A, B, C, P0, Q, lambda;
         double                      d ;
+        int flag ;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         A.fill(0.0);
@@ -476,7 +477,7 @@ int main(
         P0[0] = P0[1] = 1.;
         P0[2] = -2.0;
 
-        d = CGElem::distancePointTriangle(P0, A, B, C, Q, lambda);
+        d = CGElem::distancePointTriangle(P0, A, B, C, Q, lambda, flag);
 
         // Output message ------------------------------------------------------- //
         cout << " - DISTANCE BETWEEN POINT AND TRIANGLE" << endl;

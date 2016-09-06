@@ -154,7 +154,11 @@ void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
         nV = segment.getVertexCount() ;
 
         vertexNormal.resize(nV) ;
+        vertexNormal.shrink_to_fit() ;
+
         vertexGradient.resize(nV) ;
+        vertexGradient.shrink_to_fit() ;
+
         for(i=0; i<nV; ++i){
             vertexGradient[i] = m_segmentation->evalVertexNormal(segId,i) ;
             vertexNormal[i] = m_segmentation->evalLimitedVertexNormal(segId,i,m_featureAngle) ;
@@ -498,8 +502,9 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
         long id1 = cell.getVertex(1) ;
 
         std::array<double,2> lambda ;
+        int flag ;
 
-        d= CGElem::distancePointSegment( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), x, lambda ) ;
+        d= CGElem::distancePointSegment( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), x, lambda, flag ) ;
 
         g  = lambda[0] *itrGradient->second[0] ;
         g += lambda[1] *itrGradient->second[1] ;
@@ -513,19 +518,16 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
             n = g ;
         }
 
+
     } else if (nV == 3){
         long id0 = cell.getVertex(0) ;
         long id1 = cell.getVertex(1) ;
         long id2 = cell.getVertex(2) ;
 
         std::array<double,3> lambda ;
+        int flag ;
 
-        d= CGElem::distancePointTriangle( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), m_segmentation->getVertexCoords(id2), x, lambda ) ;
-
-        g  = lambda[0] *itrGradient->second[0] ;
-        g += lambda[1] *itrGradient->second[1] ;
-        g += lambda[2] *itrGradient->second[2] ;
-        g /= norm2(g) ;
+        d= CGElem::distancePointTriangle( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), m_segmentation->getVertexCoords(id2), x, lambda, flag ) ;
 
         if( itrNormal != m_vertexNormal.end() ){
             n  = lambda[0] *itrNormal->second[0] ;
@@ -533,7 +535,20 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
             n += lambda[2] *itrNormal->second[2] ;
             n /= norm2(n) ;
         } else {
-            n = g ;
+            n  = lambda[0] *itrGradient->second[0] ;
+            n += lambda[1] *itrGradient->second[1] ;
+            n += lambda[2] *itrGradient->second[2] ;
+        }
+
+        if(flag == 0) { //projects on triangle
+            g = m_segmentation->evalFacetNormal(i) ;
+
+        } else if (flag < 0) { // projects on edge
+            g = m_segmentation->evalEdgeNormal(i,-flag-1) ;
+
+        } else { // projects on vertex
+            g = itrGradient->second[flag-1] ;
+
         }
 
     } else{
