@@ -353,6 +353,13 @@ namespace bitpit {
         // OTHER METHODS												    			       //
         // =================================================================================== //
 
+#if BITPIT_ENABLE_MPI==1
+        void	initialize(const std::string &logfile, MPI_Comm comm);
+        void	initialize(uint8_t dim, const std::string &logfile, MPI_Comm comm);
+#else
+        void	initialize(const std::string &logfile);
+        void	initialize(uint8_t dim, const std::string &logfile);
+#endif
         void	initializeLogger(const std::string &logfile);
 
         // =================================================================================== //

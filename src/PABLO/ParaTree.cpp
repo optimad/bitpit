@@ -59,30 +59,22 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm ) : m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm ) : m_octree(dim),m_trans(dim){
 #else
-    ParaTree::ParaTree(uint8_t dim, std::string logfile ) : m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
+    ParaTree::ParaTree(uint8_t dim, std::string logfile ) : m_octree(dim),m_trans(dim){
 #endif
-        m_global.setGlobal(m_dim);
+#if BITPIT_ENABLE_MPI==1
+        initialize(dim, logfile, comm);
+#else
+        initialize(dim, logfile);
+#endif
+
         m_errorFlag = 0;
         m_maxDepth = 0;
         m_globalNumOctants = getNumOctants();
 
-#if BITPIT_ENABLE_MPI==1
-        if (comm != MPI_COMM_NULL) {
-            setComm(comm);
-        } else {
-            setDummyComm();
-        }
-#else
-        setDummyComm();
-#endif
-        m_serial = true;
-
-        m_periodic.resize(m_global.m_nfaces, false);
         m_tol = 1.0e-14;
-        // Write info log
-        initializeLogger(logfile);
+
         printHeader();
     };
 
@@ -99,15 +91,19 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile, MPI_Comm comm):m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile, MPI_Comm comm):m_octree(dim),m_trans(dim){
 #else
-    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile ):m_octree(dim),m_trans(dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
+    ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, std::string logfile ):m_octree(dim),m_trans(m_dim){
 #endif
+#if BITPIT_ENABLE_MPI==1
+        initialize(dim, logfile, comm);
+#else
+        initialize(dim, logfile);
+#endif
+
         uint8_t lev, iface;
         uint32_t x0, y0, z0;
         uint32_t NumOctants = XYZ.size();
-        m_dim = dim;
-        m_global.setGlobal(m_dim);
         m_octree.m_octants.resize(NumOctants, Octant(m_dim));
         for (uint32_t i=0; i<NumOctants; i++){
             lev = uint8_t(levels[i]);
@@ -143,13 +139,7 @@ namespace bitpit {
             m_octree.m_octants[i] = oct;
         }
 
-#if BITPIT_ENABLE_MPI==1
-        setComm(comm);
         m_serial = (m_nproc == 1);
-#else
-        setDummyComm();
-        m_serial = true;
-#endif
 
         setFirstDescMorton();
         setLastDescMorton();
@@ -158,10 +148,8 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         setPboundGhosts();
 #endif
-        m_periodic.resize(m_global.m_nfaces, false);
         m_tol = 1.0e-14;
-        // Write info log
-        initializeLogger(logfile);
+
         printHeader();
     };
 
@@ -180,6 +168,70 @@ namespace bitpit {
     // =================================================================================== //
     // METHODS
     // =================================================================================== //
+
+    /*! Initialize a dummy octree
+     */
+#if BITPIT_ENABLE_MPI==1
+    /*!
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     */
+    void
+    ParaTree::initialize(const std::string &logfile, MPI_Comm comm) {
+#else
+    void
+    ParaTree::initialize(const std::string &logfile) {
+#endif
+        // Set a dummy communicator
+        //
+        // We alyasy need to set the dummy communicator to initialize the
+        // communications data structures.
+        setDummyComm();
+
+#if BITPIT_ENABLE_MPI==1
+        // Set the communicator
+        if (comm != MPI_COMM_NULL) {
+            setComm(comm);
+        }
+#endif
+
+        // The octree is serial
+        m_serial = true;
+
+        // Initialize the logger
+        initializeLogger(logfile);
+
+        // Set the dimension to a dummy value
+        m_dim = 0;
+        m_global.setGlobal(0);
+        m_periodic.resize(0);
+    }
+
+    /*! Initialize the octree
+     * \param[in] dim The space dimension of the octree.
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+    void
+#if BITPIT_ENABLE_MPI==1
+    ParaTree::initialize(uint8_t dim, const std::string &logfile, MPI_Comm comm) {
+#else
+    ParaTree::initialize(uint8_t dim, const std::string &logfile) {
+#endif
+#if BITPIT_ENABLE_MPI==1
+        initialize(logfile, comm);
+#else
+        initialize(logfile);
+#endif
+
+        // Initialize the dimension
+        m_dim = dim;
+        if (dim < 2 || dim > 3) {
+            throw std::runtime_error ("Invalid value for the dimension");
+        }
+
+        m_global.setGlobal(m_dim);
+
+        m_periodic.resize(m_global.m_nfaces, false);
+    }
 
     /*! Initialize the logger
      */
