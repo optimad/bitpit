@@ -72,6 +72,7 @@ public:
 		}
 	};
 
+	VolOctree();
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 

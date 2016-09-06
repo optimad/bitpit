@@ -53,6 +53,27 @@ namespace bitpit {
 */
 
 /*!
+	Creates an uninitialized patch.
+*/
+VolOctree::VolOctree()
+	: VolumeKernel(false),
+	  m_tree(PabloUniform::DEFAULT_LOG_FILE
+#if BITPIT_ENABLE_MPI==1
+	         , MPI_COMM_NULL
+#endif
+	  )
+{
+	initialize();
+
+	// Reset
+	//
+	// The function that resets the patch is virtual, but since is called
+	// from the constructor of the patch kernel only the base function is
+	// called.
+	__reset(false);
+}
+
+/*!
 	Creates a new patch.
 
 	\param id is the id that will be assigned to the patch
