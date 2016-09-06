@@ -113,8 +113,9 @@ class Logger : public std::ostream
 {
 
 public:
-    Logger(std::ostream *consoleStream, std::ofstream *fileStream,
-        const int &nProcessors = 1, const int &rank = 0);
+    Logger(const std::string &name,
+           std::ostream *consoleStream, std::ofstream *fileStream,
+           const int &nProcessors = 1, const int &rank = 0);
 
     int getProcessorCount();
     int getRank();
@@ -145,7 +146,7 @@ public:
     void setFileVerbosity(log::Verbosity verbosity);
     log::Verbosity getFileVerbosity();
 
-    std::string getName();
+    std::string getName() const;
 
     void println(const std::string &line);
     void println(const std::string &line, log::Priority priority);
@@ -158,6 +159,7 @@ public:
     void print(const std::string &line, log::Priority priority, log::Visibility visibility);
 
 private:
+    std::string m_name;
     int m_nProcessors;
     int m_rank;
     LoggerBuffer m_buffer;

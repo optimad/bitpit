@@ -395,9 +395,10 @@ const std::string LoggerBuffer::getTimestamp() const
 
     The constructor is private so that it can not be called.
 */
-Logger::Logger(std::ostream *consoleStream, std::ofstream *fileStream,
-            const int &nProcessors, const int &rank)
-    : m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
+Logger::Logger(const std::string &name,
+               std::ostream *consoleStream, std::ofstream *fileStream,
+               const int &nProcessors, const int &rank)
+    : m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
     m_priority(log::NORMAL), m_visibility(log::MASTER),
     m_consoleVerbosity(log::NORMAL), m_fileVerbosity(log::NORMAL)
 {
@@ -670,6 +671,16 @@ int Logger::getProcessorCount()
 int Logger::getRank()
 {
     return m_rank;
+}
+
+/*!
+    Gets the name of the logger
+
+    \result The name of the logger.
+*/
+std::string Logger::getName() const
+{
+    return m_name;
 }
 
 /*!
@@ -1138,7 +1149,7 @@ void LoggerManager::_create(const std::string &name, bool reset,
     std::ostream &consoleStream = std::cout;
 
     // Create the logger
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(&consoleStream, &fileStream, nProcessors, rank));
+    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessors, rank));
     m_loggerUsers[name] = 1;
 }
 
@@ -1157,7 +1168,7 @@ void LoggerManager::_create(const std::string &name, Logger &master)
     int rank        = master.getRank();
     int nProcessors = master.getProcessorCount();
 
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(&consoleStream, &fileStream, nProcessors, rank));
+    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessors, rank));
     m_loggerUsers[name] = 1;
 
     // Import logger settings
