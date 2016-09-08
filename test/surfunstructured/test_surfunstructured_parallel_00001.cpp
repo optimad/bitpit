@@ -315,7 +315,7 @@ SurfUnstructured                     envelope(0);
 
     // Export mesh ---------------------------------------------------------- //
     stringstream                f1, f2;
-    f1 << "test_00001_subtest001_step" << step_id;
+    f1 << "test00001_subtest001_step" << step_id;
     mesh.write(f1.str());
     log::cout() << "(rank #" << mesh.getRank() << ", mesh exported to \"" << f1.str() << ".vtu\")" << endl;
     f2 << "P" << utils::zeroPadNumber(6, mesh.getRank()) << "_env_step" << step_id;
