@@ -1164,7 +1164,11 @@ PatchKernel::CellIterator PatchKernel::internalBegin()
 */
 PatchKernel::CellIterator PatchKernel::internalEnd()
 {
-	return ++m_cells.getIterator(m_lastInternalId);
+	if (m_nInternals > 0) {
+		return ++m_cells.getIterator(m_lastInternalId);
+	} else {
+		return m_cells.end();
+	}
 }
 
 /*!
