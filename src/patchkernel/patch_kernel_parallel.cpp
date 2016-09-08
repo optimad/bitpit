@@ -1037,6 +1037,9 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     // one internal neighbour.
     std::unordered_set<int> involvedRanks;
     involvedRanks.insert(recvRank);
+    for (const auto &entry : ownershipNotifications) {
+        involvedRanks.insert(entry.first);
+    }
 
     auto itr = m_ghostOwners.cbegin();
     while (itr != m_ghostOwners.cend()) {
