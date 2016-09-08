@@ -525,13 +525,11 @@ SurfUnstructured            mesh(0);
 if (mesh.getRank() == 0) {
 
     // Scope variables ------------------------------------------------------ //
-    stringstream                out_msg;
 
     // Output message ------------------------------------------------------- //
-    out_msg << "** ================================================================= **" << endl;
-    out_msg << "** Test #00001 - sub-test #002 - Testing mesh partitioning           **" << endl;
-    out_msg << "** ================================================================= **" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #002 - Testing mesh partitioning           **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
 }
 
 // ========================================================================== //
@@ -545,31 +543,31 @@ if (mesh.getRank() == 0) {
     stringstream                        out_msg;
 
     // Load stl geometry ---------------------------------------------------- //
-    out_msg << "** Rank#0, initializing mesh" << endl;
-    out_msg << "   generating simple quad mesh" << endl;
+    log::cout() << "** Rank#0, initializing mesh" << endl;
+    log::cout() << "   generating simple quad mesh" << endl;
     generateTestQuadMesh(8, 8, mesh);
 
     // Build adjacency ------------------------------------------------------ //
-    out_msg << "   building adjacencies" << endl;
+    log::cout() << "   building adjacencies" << endl;
     t0 = high_resolution_clock::now();
     mesh.buildAdjacencies();
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Display Stats -------------------------------------------------------- //
     mesh.displayTopologyStats(out_msg, 3);
+    log::cout() << out_msg.str() << endl;
 
     // Export final mesh ---------------------------------------------------- //
-    out_msg << "   exporting initial mesh" << endl;
+    log::cout() << "   exporting initial mesh" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest002_init");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
-
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 }
+
 
 // ========================================================================== //
 // INITIAL PARTIONING                                                         //
@@ -585,37 +583,33 @@ if (mesh.getRank() == 0) {
                                                    44,45,46,47,
                                                    52,53,54,55,
                                                    60,61,62,63};
-    stringstream                        out_msg;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
     // Send cells to neighboring processors --------------------------------- //
-    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+    log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
-    out_msg << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
+    log::cout() << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
     t0 = high_resolution_clock::now();
     mesh.sendCells(0, 1, cell_list1);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
-    out_msg << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
+    log::cout() << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
     mesh.sendCells(0, 2, cell_list2);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Export mesh ---------------------------------------------------------- //
-    out_msg << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
+    log::cout() << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest002_step0");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 }
 
 // ========================================================================== //
@@ -626,29 +620,26 @@ if (mesh.getRank() == 0) {
     // Scope variables ------------------------------------------------------ //
     vector<long>                        cell_list{18,19,20,21,22,23,
                                                   26,27,28,29,30,31};
-    stringstream                        out_msg;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
     // Send cells to neighboring processors --------------------------------- //
-    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+    log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
-    out_msg << "   sending cell: " << cell_list << " from 0 to 2" << endl;
+    log::cout() << "   sending cell: " << cell_list << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
     mesh.sendCells(0, 2, cell_list);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Export mesh ---------------------------------------------------------- //
-    out_msg << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
+    log::cout() << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest002_step1");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 }
 
 
@@ -658,13 +649,11 @@ if (mesh.getRank() == 0) {
 if (mesh.getRank() == 0) {
 
     // Scope variables ------------------------------------------------------ //
-    stringstream        out_msg;
 
     // Output message ------------------------------------------------------- //
-    out_msg << "** ================================================================= **" << endl;
-    out_msg << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
-    out_msg << "** ================================================================= **" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
 }
 return 0;
 
@@ -721,13 +710,11 @@ SurfUnstructured            mesh(0);
 if (mesh.getRank() == 0) {
 
     // Scope variables ------------------------------------------------------ //
-    stringstream                out_msg;
 
     // Output message ------------------------------------------------------- //
-    out_msg << "** ================================================================= **" << endl;
-    out_msg << "** Test #00001 - sub-test #003 - Testing mesh partitioning           **" << endl;
-    out_msg << "** ================================================================= **" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #003 - Testing mesh partitioning           **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
 }
 
 // ========================================================================== //
@@ -741,29 +728,29 @@ if (mesh.getRank() == 0) {
     stringstream                        out_msg;
 
     // Load stl geometry ---------------------------------------------------- //
-    out_msg << "** Rank#0, initializing mesh" << endl;
-    out_msg << "   generating simple quad mesh" << endl;
+    log::cout() << "** Rank#0, initializing mesh" << endl;
+    log::cout() << "   generating simple quad mesh" << endl;
     generateTestQuadMesh(9, 9, mesh);
 
     // Build adjacency ------------------------------------------------------ //
-    out_msg << "   building adjacencies" << endl;
+    log::cout() << "   building adjacencies" << endl;
     t0 = high_resolution_clock::now();
     mesh.buildAdjacencies();
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Display Stats -------------------------------------------------------- //
     mesh.displayTopologyStats(out_msg, 3);
+    log::cout() << out_msg.str() << endl;
 
     // Export final mesh ---------------------------------------------------- //
-    out_msg << "   exporting initial mesh" << endl;
+    log::cout() << "   exporting initial mesh" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest003_init");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
 }
 
@@ -782,45 +769,40 @@ if (mesh.getRank() == 0) {
     vector<long>                        cell_list3{60,61,62,
                                                    69,70,71,
                                                    78,79,80};
-    stringstream                        out_msg;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
     // Send cells to neighboring processors --------------------------------- //
-    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+    log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
-    out_msg << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
+    log::cout() << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
     t0 = high_resolution_clock::now();
     mesh.sendCells(0, 1, cell_list1);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
-    out_msg << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
+    log::cout() << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
     mesh.sendCells(0, 2, cell_list2);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
-    out_msg << "   sending cell: " << cell_list3 << " from 0 to 3" << endl;
+    log::cout() << "   sending cell: " << cell_list3 << " from 0 to 3" << endl;
     t0 = high_resolution_clock::now();
     mesh.sendCells(0, 3, cell_list3);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Export mesh ---------------------------------------------------------- //
-    out_msg << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
+    log::cout() << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest003_step0");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 }
 
 // ========================================================================== //
@@ -832,29 +814,26 @@ if (mesh.getRank() == 0) {
     vector<long>                        cell_list{28,29,30,31,32,33,34,35,
                                                   37,38,39,40,41,42,43,44,
                                                   46,47,48,49,50,51,52,53};
-    stringstream                        out_msg;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
     // Send cells to neighboring processors --------------------------------- //
-    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+    log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
-    out_msg << "   sending cell: " << cell_list << " from 0 to 3" << endl;
+    log::cout() << "   sending cell: " << cell_list << " from 0 to 3" << endl;
     t0 = high_resolution_clock::now();
     mesh.sendCells(0, 3, cell_list);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Export mesh ---------------------------------------------------------- //
-    out_msg << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
+    log::cout() << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest003_step1");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 }
 
 
@@ -864,13 +843,11 @@ if (mesh.getRank() == 0) {
 if (mesh.getRank() == 0) {
 
     // Scope variables ------------------------------------------------------ //
-    stringstream        out_msg;
 
     // Output message ------------------------------------------------------- //
-    out_msg << "** ================================================================= **" << endl;
-    out_msg << "** Test #00001 - sub-test #003 - completed!                          **" << endl;
-    out_msg << "** ================================================================= **" << endl;
-    log::cout() << out_msg.str() << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #003 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
 }
 return 0;
 
