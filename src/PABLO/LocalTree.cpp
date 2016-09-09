@@ -417,8 +417,8 @@ namespace bitpit {
 
         idx2_gh = 0;
 
-        nocts = nocts0 = m_octants.size();
         m_sizeOctants = m_octants.size();
+        nocts0 = m_sizeOctants;
         m_sizeGhosts = m_ghosts.size();
 
         //------------------------------------------ //
@@ -436,7 +436,7 @@ namespace bitpit {
         }
 
         // Check and coarse internal octants
-        for (idx=0; idx<nocts; idx++){
+        for (idx=0; idx<m_sizeOctants; idx++){
             if(m_octants[idx].getMarker() < 0 && m_octants[idx].getLevel() > 0){
                 nbro = 0;
                 father = m_octants[idx].buildFather();
@@ -455,13 +455,13 @@ namespace bitpit {
                 }
             }
         }
-        uint32_t nblock = nocts;
+        uint32_t nblock = m_sizeOctants;
         uint32_t nfchild = first_child_index.size();
         if (nidx!=0){
-            nblock = nocts - nidx*nchm1;
+            nblock = m_sizeOctants - nidx*nchm1;
             nidx = 0;
             for (idx=0; idx<nblock; idx++){
-                if (idx+offset < nocts){
+                if (idx+offset < m_sizeOctants){
                     if (nidx < nfchild){
                         if (idx+offset == first_child_index[nidx]){
                             markerfather = -m_global.m_maxLevel;
@@ -505,13 +505,12 @@ namespace bitpit {
         m_octants.resize(nblock, Octant(m_dim, m_global.m_maxLevel));
         octvector(m_octants).swap(m_octants);
         m_sizeOctants = m_octants.size();
-        nocts = m_octants.size();
         if(mapsize > 0){
-            mapidx.resize(nocts);
+            mapidx.resize(m_sizeOctants);
         }
 
         // End on ghosts
-        if (m_ghosts.size() && nocts > 0 && idx2_gh < m_sizeGhosts){
+        if (m_ghosts.size() && m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
             if (m_ghosts[idx2_gh].buildFather() == m_octants[nocts-1].buildFather()){
                 father = m_ghosts[idx2_gh].buildFather();
                 for (uint32_t iii=0; iii<17; iii++){
@@ -537,7 +536,7 @@ namespace bitpit {
                     marker = m_ghosts[idx].getMarker();
                 }
                 nend = 0;
-                idx = nocts-1;
+                idx = m_sizeOctants-1;
                 marker = m_octants[idx].getMarker();
                 if (idx==0) wstop = true;
                 while(marker < 0 && m_octants[idx].buildFather() == father){
@@ -574,14 +573,13 @@ namespace bitpit {
                     docoarse = true;
                 }
                 father.setMarker(markerfather);
-                m_octants.resize(nocts-offset, Octant(m_dim, m_global.m_maxLevel));
+                m_octants.resize(m_sizeOctants-offset, Octant(m_dim, m_global.m_maxLevel));
                 m_sizeOctants = m_octants.size();
                 m_octants.push_back(father);
                 octvector(m_octants).swap(m_octants);
                 m_sizeOctants = m_octants.size();
-                nocts = m_octants.size();
                 if(mapsize > 0){
-                    mapidx.resize(nocts);
+                    mapidx.resize(m_sizeOctants);
                 }
             }
 
