@@ -397,7 +397,6 @@ namespace bitpit {
 
         u32vector		first_child_index;
         Octant			father(m_dim, m_global.m_maxLevel);
-        uint32_t 		nocts, nocts0;
         uint32_t 		idx, idx2;
         uint32_t 		offset;
         uint32_t 		idx2_gh;
@@ -418,7 +417,6 @@ namespace bitpit {
         idx2_gh = 0;
 
         m_sizeOctants = m_octants.size();
-        nocts0 = m_sizeOctants;
         m_sizeGhosts = m_ghosts.size();
 
         //------------------------------------------ //
@@ -442,7 +440,7 @@ namespace bitpit {
                 father = m_octants[idx].buildFather();
                 // Check if family is to be refined
                 for (idx2=idx; idx2<idx+m_global.m_nchildren; idx2++){
-                    if (idx2<nocts){
+                    if (idx2<m_sizeOctants){
                         if(m_octants[idx2].getMarker() < 0 && m_octants[idx2].buildFather() == father){
                             nbro++;
                         }
@@ -470,7 +468,7 @@ namespace bitpit {
                                 father.m_info[iii] = false;
                             }
                             for(idx2=0; idx2<m_global.m_nchildren; idx2++){
-                                if (idx2 < nocts){
+                                if (idx2 < m_sizeOctants){
                                     if (markerfather < m_octants[idx+offset+idx2].getMarker()+1){
                                         markerfather = m_octants[idx+offset+idx2].getMarker()+1;
                                     }
@@ -511,7 +509,7 @@ namespace bitpit {
 
         // End on ghosts
         if (m_ghosts.size() && m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
-            if (m_ghosts[idx2_gh].buildFather() == m_octants[nocts-1].buildFather()){
+            if (m_ghosts[idx2_gh].buildFather() == m_octants[m_sizeOctants-1].buildFather()){
                 father = m_ghosts[idx2_gh].buildFather();
                 for (uint32_t iii=0; iii<17; iii++){
                     father.m_info[iii] = false;
@@ -564,7 +562,7 @@ namespace bitpit {
             if (nend != 0){
                 for (idx=0; idx < nend; idx++){
                     for (uint32_t iii=0; iii<16; iii++){
-                        father.m_info[iii] = father.m_info[iii] || m_octants[nocts-idx-1].m_info[iii];
+                        father.m_info[iii] = father.m_info[iii] || m_octants[m_sizeOctants-idx-1].m_info[iii];
                     }
                 }
                 father.m_info[13] = true;
