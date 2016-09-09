@@ -77,7 +77,8 @@ SurfaceKernel::SurfaceKernel(const int &patch_dim, const int& space_dim, bool ex
 {
     initialize();
 
-    m_spaceDim = space_dim;
+    // Set the sapce dimension
+    setSpaceDimension(space_dim);
 }
 
 /*!
@@ -109,6 +110,22 @@ void SurfaceKernel::initialize()
 {
     // Space dimension
     m_spaceDim = -1;
+}
+
+/*!
+	Sets the dimension of the working space.
+
+	\param dimension the dimension of the working patch
+*/
+void SurfaceKernel::setSpaceDimension(int dimension)
+{
+    // If the dimension was already assigned, reset the patch
+    if (m_spaceDim > 0 && m_spaceDim != dimension) {
+        reset();
+    }
+
+    // Set the dimension
+    m_spaceDim = dimension;
 }
 
 /*!

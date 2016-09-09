@@ -41,6 +41,7 @@ public:
         // Types definitions
         typedef double (SurfaceKernel::*eval_f_)(const long&, int&) const;
 
+        void setSpaceDimension(int dimension);
         int getSpaceDimension(void) const;
 
 	virtual ~SurfaceKernel();
