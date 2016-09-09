@@ -178,7 +178,8 @@ void    FileHandler::incrementCounter(){
 std::string  FileHandler::getPath(){
   std::stringstream filename ;
 
-  filename << directory << "/"<<name ;
+  if (!directory.empty()) filename << directory << "/";
+  filename << name;
   if(parallel) filename <<".b"<< bitpit::utils::zeroPadNumber(4, block)    ;
   if(series)   filename <<"." << bitpit::utils::zeroPadNumber(4, counter)  ;
   filename <<"."<< appendix  ;
