@@ -1769,7 +1769,7 @@ namespace bitpit {
      */
     Octant*
     ParaTree::getOctant(uint32_t idx) {
-        if (idx < m_octree.getNumOctants()){
+        if (idx < getNumOctants()){
             return &m_octree.m_octants[idx] ;
         }
         return NULL;
@@ -1803,7 +1803,7 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         };
 #endif
-        return m_octree.getNumOctants();
+        return getNumOctants();
     };
 
     /*! Get the nature of an octant.
@@ -2572,7 +2572,7 @@ namespace bitpit {
     bool
     ParaTree::adaptGlobalRefine(bool mapper_flag) {
         //TODO recoding for adapting with abs(marker) > 1
-        uint32_t nocts = m_octree.getNumOctants();
+        uint32_t nocts = getNumOctants();
         vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
         for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
@@ -2601,7 +2601,7 @@ namespace bitpit {
             (*m_log) << " " << endl;
 
             (*m_log) << " " << endl;
-            (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
+            (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
 
             // Refine
             if (mapper_flag){
@@ -2611,10 +2611,10 @@ namespace bitpit {
                 while(m_octree.globalRefine(m_mapIdx));
             }
 
-            if (m_octree.getNumOctants() > nocts)
+            if (getNumOctants() > nocts)
                 globalDone = true;
-            (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
-            nocts = m_octree.getNumOctants();
+            (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
+            nocts = getNumOctants();
             updateAdapt();
 
             (*m_log) << " " << endl;
@@ -2638,12 +2638,12 @@ namespace bitpit {
             }
 
             bool localDone = false;
-            if (m_octree.getNumOctants() > nocts)
+            if (getNumOctants() > nocts)
                 localDone = true;
             updateAdapt();
             setPboundGhosts();
             (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
-            nocts = m_octree.getNumOctants();
+            nocts = getNumOctants();
 
             m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
             (*m_log) << " " << endl;
@@ -2660,7 +2660,7 @@ namespace bitpit {
     bool
     ParaTree::adaptGlobalCoarse(bool mapper_flag) {
         //TODO recoding for adapting with abs(marker) > 1
-        uint32_t nocts = m_octree.getNumOctants();
+        uint32_t nocts = getNumOctants();
         vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
         for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
@@ -2692,7 +2692,7 @@ namespace bitpit {
             balance21(true);
 
             (*m_log) << " " << endl;
-            (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
+            (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
 
             // Coarse
             while(m_octree.globalCoarse(m_mapIdx));
@@ -2701,10 +2701,10 @@ namespace bitpit {
             while(m_octree.refine(m_mapIdx));
             updateAdapt();
 
-            if (m_octree.getNumOctants() < nocts){
+            if (getNumOctants() < nocts){
                 globalDone = true;
             }
-            nocts = m_octree.getNumOctants();
+            nocts = getNumOctants();
 
             (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
             (*m_log) << " " << endl;
@@ -2732,10 +2732,10 @@ namespace bitpit {
 
             setPboundGhosts();
             bool localDone = false;
-            if (m_octree.getNumOctants() < nocts){
+            if (getNumOctants() < nocts){
                 localDone = true;
             }
-            nocts = m_octree.getNumOctants();
+            nocts = getNumOctants();
 
             m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
             (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
@@ -3468,7 +3468,7 @@ namespace bitpit {
                 MPI_Waitall(nReq,req,stats);
 
                 //MOVE RESIDENT TO BEGIN IN OCTANTS
-                uint32_t resEnd = m_octree.getNumOctants() - tailOffset;
+                uint32_t resEnd = getNumOctants() - tailOffset;
                 uint32_t nofResidents = resEnd - headOffset;
                 int octCounter = 0;
                 for(uint32_t i = headOffset; i < resEnd; ++i){
@@ -3569,7 +3569,7 @@ namespace bitpit {
         //TODO recoding for adapting with abs(marker) > 1
 
         m_sentIdx.clear();
-        uint32_t nocts = m_octree.getNumOctants();
+        uint32_t nocts = getNumOctants();
         vector<Octant >::iterator iter, iterend = m_octree.m_octants.end();
 
         for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
@@ -3600,23 +3600,23 @@ namespace bitpit {
             balance21(true);
 
             (*m_log) << " " << endl;
-            (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
+            (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
 
             // Refine
             while(m_octree.refine(m_mapIdx));
             if (m_octree.getNumOctants() > nocts)
                 globalDone = true;
-            (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
-            nocts = m_octree.getNumOctants();
+            (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
+            nocts = getNumOctants();
             updateAdapt();
 
             // Coarse
             while(m_octree.coarse(m_mapIdx));
             updateAfterCoarse(m_mapIdx);
-            if (m_octree.getNumOctants() < nocts){
+            if (getNumOctants() < nocts){
                 globalDone = true;
             }
-            nocts = m_octree.getNumOctants();
+            nocts = getNumOctants();
 
             (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
             (*m_log) << " " << endl;
@@ -3637,22 +3637,22 @@ namespace bitpit {
             // Refine
             while(m_octree.refine(m_mapIdx));
             bool localDone = false;
-            if (m_octree.getNumOctants() > nocts)
+            if (getNumOctants() > nocts)
                 localDone = true;
             updateAdapt();
             setPboundGhosts();
             (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
-            nocts = m_octree.getNumOctants();
+            nocts = getNumOctants();
 
 
             // Coarse
             while(m_octree.coarse(m_mapIdx));
             updateAfterCoarse(m_mapIdx);
             setPboundGhosts();
-            if (m_octree.getNumOctants() < nocts){
+            if (getNumOctants() < nocts){
                 localDone = true;
             }
-            nocts = m_octree.getNumOctants();
+            nocts = getNumOctants();
 
             m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
             (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
@@ -3675,7 +3675,7 @@ namespace bitpit {
                     m_partitionRangeGlobalIdx0[iproc] = m_partitionRangeGlobalIdx[iproc];
                 }
                 m_maxDepth = m_octree.m_localMaxDepth;
-                m_globalNumOctants = m_octree.getNumOctants();
+                m_globalNumOctants = getNumOctants();
                 for(int p = 0; p < m_nproc; ++p){
                     m_partitionRangeGlobalIdx[p] = m_globalNumOctants - 1;
                 }
@@ -3696,7 +3696,7 @@ namespace bitpit {
                 //update m_maxDepth
                 m_errorFlag = MPI_Allreduce(&m_octree.m_localMaxDepth,&m_maxDepth,1,MPI_UINT8_T,MPI_MAX,m_comm);
                 //update m_globalNumOctants
-                uint64_t local_num_octants = m_octree.getNumOctants();
+                uint64_t local_num_octants = getNumOctants();
                 m_errorFlag = MPI_Allreduce(&local_num_octants,&m_globalNumOctants,1,MPI_UINT64_T,MPI_SUM,m_comm);
                 //update m_partitionRangeGlobalIdx
                 uint64_t* rbuff = new uint64_t[m_nproc];
@@ -4101,7 +4101,7 @@ namespace bitpit {
         uint64_t* rbuff = new uint64_t[m_nproc];
         //update sizes
         m_octree.m_sizeOctants = m_octree.m_octants.size();
-        uint64_t local_num_octants = m_octree.getNumOctants();
+        uint64_t local_num_octants = getNumOctants();
         m_errorFlag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,rbuff,1,MPI_UINT64_T,m_comm);
         for (int iproc=0; iproc<m_nproc; iproc++){
             m_partitionRangeGlobalIdx0[iproc] = m_partitionRangeGlobalIdx[iproc];
