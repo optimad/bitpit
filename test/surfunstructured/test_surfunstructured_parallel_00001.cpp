@@ -558,6 +558,12 @@ if (mesh.getRank() == 0) {
     // Display Stats -------------------------------------------------------- //
     mesh.displayTopologyStats(out_msg, 3);
     log::cout() << out_msg.str() << endl;
+}
+
+{
+    // Scope variables ------------------------------------------------------ //
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
 
     // Export final mesh ---------------------------------------------------- //
     log::cout() << "   exporting initial mesh" << endl;
@@ -743,6 +749,12 @@ if (mesh.getRank() == 0) {
     // Display Stats -------------------------------------------------------- //
     mesh.displayTopologyStats(out_msg, 3);
     log::cout() << out_msg.str() << endl;
+}
+
+{
+    // Scope variables ------------------------------------------------------ //
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
 
     // Export final mesh ---------------------------------------------------- //
     log::cout() << "   exporting initial mesh" << endl;
