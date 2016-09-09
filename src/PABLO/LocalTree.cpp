@@ -109,7 +109,7 @@ namespace bitpit {
      */
     uint32_t
     LocalTree::getNumOctants() const{
-        return m_octants.size();
+        return m_sizeOctants;
     };
 
     /*! Get max depth reached in local tree
