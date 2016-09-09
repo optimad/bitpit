@@ -793,6 +793,38 @@ bool VolCartesian::_enableCellBalancing(const long &id, bool enabled)
 }
 
 /*!
+ *  Get the version associated to the binary dumps.
+ *
+ *  \result The version associated to the binary dumps.
+ */
+int VolCartesian::_getDumpVersion() const
+{
+	const int DUMP_VERSION = 1;
+
+	return DUMP_VERSION;
+}
+
+/*!
+ *  Write the patch to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void VolCartesian::_dump(std::ostream &stream)
+{
+	throw std::runtime_error ("Dump is not implemented for the VolCartesian patch");
+}
+
+/*!
+ *  Restore the patch from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void VolCartesian::_restore(std::istream &stream)
+{
+	throw std::runtime_error ("Restore is not implemented for the VolCartesian patch");
+}
+
+/*!
 	Checks if the specified point is inside a cell.
 
 	\param[in] id is the idof the cell

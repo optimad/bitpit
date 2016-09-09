@@ -1464,6 +1464,38 @@ void VolOctree::_resetTol()
 }
 
 /*!
+ *  Get the version associated to the binary dumps.
+ *
+ *  \result The version associated to the binary dumps.
+ */
+int VolOctree::_getDumpVersion() const
+{
+	const int DUMP_VERSION = 1;
+
+	return DUMP_VERSION;
+}
+
+/*!
+ *  Write the patch to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void VolOctree::_dump(std::ostream &stream)
+{
+	throw std::runtime_error ("Dump is not implemented for the VolOctree patch");
+}
+
+/*!
+ *  Restore the patch from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void VolOctree::_restore(std::istream &stream)
+{
+	throw std::runtime_error ("Restore is not implemented for the VolOctree patch");
+}
+
+/*!
 	Gets the origin of the patch.
 
 	The origin is the lower-left-back corner of the box that defines the patch

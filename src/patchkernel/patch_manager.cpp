@@ -115,6 +115,58 @@ PatchManager::PatchManager()
 }
 
 /*!
+ *  Write the patch manager data to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void PatchManager::dump(std::ostream &stream)
+{
+	m_idGenerator.dump(stream);
+}
+
+/*!
+ *  Restore the patch manager data from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void PatchManager::restore(std::istream &stream)
+{
+	m_idGenerator.restore(stream);
+}
+
+/*!
+ *  Write the registered patches and the patch manager data to the specified
+ *  stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void PatchManager::dumpAll(std::ostream &stream)
+{
+	for (PatchKernel *patch : m_patchOrder) {
+		patch->dump(stream);
+	}
+
+	dump(stream);
+}
+
+/*!
+ *  Restore the registered patches and the patch manager data from the
+ *  specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void PatchManager::restoreAll(std::istream &stream)
+{
+	m_idGenerator.reset();
+
+	for (PatchKernel *patch : m_patchOrder) {
+		patch->restore(stream);
+	}
+
+	restore(stream);
+}
+
+/*!
     @ingroup patchkernel
     @{
 */

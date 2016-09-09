@@ -26,6 +26,7 @@
 #define __BITPIT_PATCH_MANAGER_HPP__
 
 #include <memory>
+#include <iostream>
 #include <unordered_map>
 
 #include "index_generator.hpp"
@@ -40,6 +41,12 @@ public:
 	static int const NULL_PATCH_ID;
 
     static PatchManager & manager();
+
+	void dump(std::ostream &stream);
+	void restore(std::istream &stream);
+
+	void dumpAll(std::ostream &stream);
+	void restoreAll(std::istream &stream);
 
 private:
     static std::unique_ptr<PatchManager> m_manager;

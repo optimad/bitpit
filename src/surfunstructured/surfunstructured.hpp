@@ -63,6 +63,10 @@ protected:
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);
 
+	int _getDumpVersion() const;
+	void _dump(std::ostream &stream);
+	void _restore(std::istream &stream);
+
 	static ElementInfo::Type getSTLFacetType(int nFacetVertices);
 	static ElementInfo::Type getDGFFacetType(int nFacetVertices);
 

@@ -137,6 +137,38 @@ bool SurfUnstructured::_enableCellBalancing(const long &id, bool enabled)
 }
 
 /*!
+ *  Get the version associated to the binary dumps.
+ *
+ *  \result The version associated to the binary dumps.
+ */
+int SurfUnstructured::_getDumpVersion() const
+{
+	const int DUMP_VERSION = 1;
+
+	return DUMP_VERSION;
+}
+
+/*!
+ *  Write the patch to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void SurfUnstructured::_dump(std::ostream &stream)
+{
+	throw std::runtime_error ("Dump is not implemented for the SurfUnstructured patch");
+}
+
+/*!
+ *  Restore the patch from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void SurfUnstructured::_restore(std::istream &stream)
+{
+	throw std::runtime_error ("Restore is not implemented for the SurfUnstructured patch");
+}
+
+/*!
  * Locates the cell the contains the point.
  *
  * If the point is not inside the patch, the function returns the id of the

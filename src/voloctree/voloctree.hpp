@@ -115,6 +115,10 @@ protected:
 	void _setTol(double tolerance);
 	void _resetTol();
 
+	int _getDumpVersion() const;
+	void _dump(std::ostream &stream);
+	void _restore(std::istream &stream);
+
 	std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
 	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 

@@ -3719,6 +3719,118 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 }
 
 /*!
+ *  Get the version associated to the binary dumps.
+ *
+ *  \result The version associated to the binary dumps.
+ */
+int PatchKernel::getDumpVersion() const
+{
+	const int KERNEL_DUMP_VERSION = 1;
+
+	return (KERNEL_DUMP_VERSION + _getDumpVersion());
+}
+
+/*!
+ *  Write the patch to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void PatchKernel::dump(std::ostream &stream)
+{
+	// Version
+	IO::binary::write(stream, getDumpVersion());
+
+	// Generic information
+	IO::binary::write(stream, m_id);
+	IO::binary::write(stream, m_dimension);
+	IO::binary::write(stream, m_vtk.getName());
+#if BITPIT_ENABLE_MPI==1
+	IO::binary::write(stream, m_partitioned);
+#else
+	IO::binary::write(stream, false);
+#endif
+
+	// Specific dump
+	_dump(stream);
+
+	// Geometric tolerance
+	IO::binary::write(stream, (int) m_hasCustomTolerance);
+	if (m_hasCustomTolerance) {
+		IO::binary::write(stream, m_tolerance);
+	}
+
+	// Index generators
+	m_vertexIdGenerator.dump(stream);
+	m_cellIdGenerator.dump(stream);
+	m_interfaceIdGenerator.dump(stream);
+}
+
+/*!
+ *  Restore the patch from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ *  \param reregister is true the patch will be unregistered and then
+ *  registered again using the id found in the binary archive
+ */
+void PatchKernel::restore(std::istream &stream, bool reregister)
+{
+	// Reset the patch
+	reset();
+
+	// Version
+	int version;
+	IO::binary::read(stream, version);
+	if (version != getDumpVersion()) {
+		throw std::runtime_error ("The version of the file does not match the required version");
+	}
+
+	// Id
+	int id;
+	IO::binary::read(stream, id);
+	if (reregister) {
+		patch::manager().unregisterPatch(this);
+		patch::manager().registerPatch(this, id);
+	}
+
+	// Dimension
+	int dimension;
+	IO::binary::read(stream, dimension);
+	setDimension(dimension);
+
+	// Name
+	std::string name;
+	IO::binary::read(stream, name);
+	m_vtk.setName(name);
+
+	// Partioned flag
+#if BITPIT_ENABLE_MPI==1
+	IO::binary::read(stream, m_partitioned);
+#else
+	bool dummyPartitioned;
+	IO::binary::read(stream, dummyPartitioned);
+#endif
+
+	// Specific restore
+	_restore(stream);
+
+	// Geometric tolerance
+	int hasCustomTolerance;
+	IO::binary::read(stream, hasCustomTolerance);
+	if (hasCustomTolerance) {
+		double tolerance;
+		IO::binary::read(stream, tolerance);
+		setTol(tolerance);
+	} else {
+		resetTol();
+	}
+
+	// Index generators
+	m_vertexIdGenerator.restore(stream);
+	m_cellIdGenerator.restore(stream);
+	m_interfaceIdGenerator.restore(stream);
+}
+
+/*!
 	@}
 */
 
