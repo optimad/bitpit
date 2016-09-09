@@ -72,7 +72,7 @@ namespace bitpit {
         m_global.setGlobal(maxlevel, m_dim);
         m_errorFlag = 0;
         m_maxDepth = 0;
-        m_globalNumOctants = m_octree.getNumOctants();
+        m_globalNumOctants = getNumOctants();
         m_rank = 0;
         m_nproc = 1;
         m_serial = true;
