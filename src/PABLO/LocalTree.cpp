@@ -623,11 +623,10 @@ namespace bitpit {
     bool
     LocalTree::globalCoarse(u32vector & mapidx){
 
-        uint32_t 	idx, nocts;
+        uint32_t 	idx;
         bool 		dorefine = false;
 
-        nocts = m_octants.size();
-        for (idx=0; idx<nocts; idx++){
+        for (idx=0; idx<m_sizeOctants; idx++){
             m_octants[idx].setMarker(-1);
         }
         for (idx=0; idx<m_sizeGhosts; idx++){
