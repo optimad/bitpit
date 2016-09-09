@@ -319,15 +319,14 @@ namespace bitpit {
 
         u32vector		last_child_index;
         octvector 		children(0,Octant(m_dim, m_global.m_maxLevel));
-        uint32_t 		idx, nocts, ilastch;
+        uint32_t 		idx, ilastch;
         uint32_t 		offset = 0, blockidx;
         uint32_t		mapsize = mapidx.size();
         uint8_t 		nchm1 = m_global.m_nchildren-1, ich;
         bool 			dorefine = false;
 
         m_sizeOctants = m_octants.size();
-        nocts = m_octants.size();
-        for (idx=0; idx<nocts; idx++){
+        for (idx=0; idx<m_sizeOctants; idx++){
             if(m_octants[idx].getMarker() > 0 && m_octants[idx].getLevel() < m_global.m_maxLevel){
                 last_child_index.push_back(idx+nchm1+offset);
                 offset += nchm1;
@@ -342,12 +341,12 @@ namespace bitpit {
         m_sizeOctants = m_octants.size();
         if (offset > 0){
             if(mapsize > 0){
-                mapidx.resize(m_octants.size()+offset);
+                mapidx.resize(m_sizeOctants+offset);
             }
-            m_octants.resize(m_octants.size()+offset, Octant(m_dim, m_global.m_maxLevel));
+            m_octants.resize(m_sizeOctants+offset, Octant(m_dim, m_global.m_maxLevel));
             m_sizeOctants = m_octants.size();
             blockidx = last_child_index[0]-nchm1;
-            idx = m_octants.size();
+            idx = m_sizeOctants;
             ilastch = last_child_index.size()-1;
 
             while (idx>blockidx){
@@ -382,7 +381,6 @@ namespace bitpit {
 
         octvector(m_octants).swap(m_octants);
         m_sizeOctants = m_octants.size();
-        nocts = m_octants.size();
 
         return dorefine;
 
