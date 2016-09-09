@@ -155,9 +155,6 @@ void VolOctree::initialize()
 {
 	log::cout() << ">> Initializing Octree mesh" << std::endl;
 
-	// Last operation
-	m_lastTreeOperation = OP_INITIALIZATION;
-
 	// Normals
 	for (int i = 0; i < 3; i++) {
 		for (int n = -1; n <= 1; n += 2) {
@@ -395,11 +392,6 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 
 	bool buildMapping = (getCellCount() != 0);
 	bool updated = m_tree.adapt(buildMapping);
-	if (trackAdaption) {
-		m_lastTreeOperation = OP_ADAPTION_MAPPED;
-	} else {
-		m_lastTreeOperation = OP_ADAPTION_UNMAPPED;
-	}
 
 	if (!updated) {
 		log::cout() << " Already updated" << std::endl;
@@ -426,14 +418,14 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	bool importAll = (getCellCount() == 0);
 
 	// Last operation on the tree
-	TreeOperation lastTreeOperation = m_lastTreeOperation;
-	if (lastTreeOperation == OP_ADAPTION_UNMAPPED && !importAll) {
+	ParaTree::Operation lastTreeOperation = m_tree.getLastOperation();
+	if (lastTreeOperation == ParaTree::OP_ADAPT_UNMAPPED && !importAll) {
 		throw std::runtime_error ("Unable to sync the patch after an unmapped adaption");
 	}
 
 	// If the patch is partitioned the bounding box can not be considered
 	// frozen
-	if (lastTreeOperation == OP_LOAD_BALANCE) {
+	if (lastTreeOperation == ParaTree::OP_LOADBALANCE || lastTreeOperation == ParaTree::OP_LOADBALANCE_FIRST) {
 		setBoundingBoxFrozen(false);
 	}
 
@@ -485,7 +477,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		adaption::Type adaptionType = adaption::TYPE_NONE;
 		if (importAll) {
 			adaptionType = adaption::TYPE_CREATION;
-		} else if (lastTreeOperation == OP_ADAPTION_MAPPED) {
+		} else if (lastTreeOperation == ParaTree::OP_ADAPT_MAPPED) {
 			bool isNewR = m_tree.getIsNewR(treeId);
 			if (isNewR) {
 				adaptionType = adaption::TYPE_REFINEMENT;
@@ -498,7 +490,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				}
 			}
 #if BITPIT_ENABLE_MPI==1
-		} else if (lastTreeOperation == OP_LOAD_BALANCE) {
+		} else if (lastTreeOperation == ParaTree::OP_LOADBALANCE || lastTreeOperation == ParaTree::OP_LOADBALANCE_FIRST) {
 			if (currentRank != mapper_octantRank.front()) {
 				adaptionType = adaption::TYPE_PARTITION_RECV;
 			} else if (treeId != mapper_octantMap.front()) {

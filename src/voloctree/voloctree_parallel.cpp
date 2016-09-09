@@ -63,7 +63,6 @@ const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges
 	log::cout() << ">> Load balancing...";
 
 	m_tree.loadBalance();
-	m_lastTreeOperation = OP_LOAD_BALANCE;
 
 	log::cout() << " Done" << std::endl;
 

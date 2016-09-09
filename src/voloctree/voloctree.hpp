@@ -129,13 +129,6 @@ protected:
 private:
 	typedef std::bitset<72> OctantHash;
 
-	enum TreeOperation {
-		OP_INITIALIZATION,
-		OP_ADAPTION_MAPPED,
-		OP_ADAPTION_UNMAPPED,
-		OP_LOAD_BALANCE
-	};
-
 	struct RenumberInfo {
 		RenumberInfo()
 			: cellId(Cell::NULL_ID), newTreeId(0)
@@ -212,8 +205,6 @@ private:
 	std::vector<double> m_tree_dh;
 	std::vector<double> m_tree_area;
 	std::vector<double> m_tree_volume;
-
-	TreeOperation m_lastTreeOperation;
 
 	std::vector<std::array<double, 3> > m_normals;
 
