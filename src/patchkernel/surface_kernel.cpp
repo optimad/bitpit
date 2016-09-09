@@ -62,6 +62,7 @@ const unsigned short SurfaceKernel::SELECT_ALL      = 3;
 SurfaceKernel::SurfaceKernel(bool expert)
 	: PatchKernel(expert)
 {
+	initialize();
 }
 
 /*!
@@ -74,6 +75,8 @@ SurfaceKernel::SurfaceKernel(bool expert)
 SurfaceKernel::SurfaceKernel(const int &patch_dim, const int& space_dim, bool expert)
 	: PatchKernel(patch_dim, expert)
 {
+    initialize();
+
     m_spaceDim = space_dim;
 }
 
@@ -97,6 +100,15 @@ SurfaceKernel::SurfaceKernel(const int &id, const int &patch_dim, const int& spa
 SurfaceKernel::~SurfaceKernel()
 {
 
+}
+
+/*!
+	Initialize the patch
+*/
+void SurfaceKernel::initialize()
+{
+    // Space dimension
+    m_spaceDim = -1;
 }
 
 /*!

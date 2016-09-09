@@ -62,6 +62,8 @@ public:
         std::vector<double> computeHistogram(eval_f_, std::vector<double>&, long&, int n_int = 8, unsigned short mask = SELECT_ALL) const;
 
 private:
+        void initialize();
+
         bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &) const;
         void displayHistogram(const long&, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0) const;
 
