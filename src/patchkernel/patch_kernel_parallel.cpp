@@ -1005,18 +1005,16 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 		// an internal cell. If the processors is sending all its cells
 		// there will be no ghosts cell.
 		bool moveToGhosts = false;
-		if ((long) cellsToSend.size() < m_nInternals) {
-			if (cellsToSendFrame.count(cellId) == 0) {
-				moveToGhosts = false;
-			} else {
-				auto neighs = findCellNeighs(cellId);
-				int nNeighs = neighs.size();
-				for (int j = 0; j < nNeighs; ++j) {
-					long neighId = neighs[j];
-					if (m_ghostOwners.count(neighId) == 0) {
-						moveToGhosts = true;
-						break;
-					}
+		if (cellsToSendFrame.count(cellId) == 0) {
+			moveToGhosts = false;
+		} else {
+			auto neighs = findCellNeighs(cellId);
+			int nNeighs = neighs.size();
+			for (int j = 0; j < nNeighs; ++j) {
+				long neighId = neighs[j];
+				if (m_ghostOwners.count(neighId) == 0) {
+					moveToGhosts = true;
+					break;
 				}
 			}
 		}
