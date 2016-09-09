@@ -647,12 +647,10 @@ namespace bitpit {
     LocalTree::checkCoarse(u32vector & mapidx){
 
         uint32_t        idx;
-        uint32_t         nocts;
         uint32_t         mapsize = mapidx.size();
         uint8_t         toDelete = 0;
 
-        nocts = getNumOctants();
-        if (nocts>0){
+        if (m_sizeOctants>0){
 
             idx = 0;
             //After coarse a coarsen family can be partitioned over
@@ -660,28 +658,29 @@ namespace bitpit {
             // but the first (or all the) octants of this partition have marker = -1.
             idx = 0;
             int marker = m_octants[idx].getMarker();
-            while(marker < 0 && idx < nocts){
+            while(marker < 0 && idx < m_sizeOctants){
                 toDelete++;
                 idx++;
-                if (idx<nocts) marker = m_octants[idx].getMarker();
+                if (idx<m_sizeOctants) marker = m_octants[idx].getMarker();
             }
 
 
-            if (nocts>toDelete){
-                for(idx=0; idx<nocts-toDelete; idx++){
+            if (m_sizeOctants>toDelete){
+                for(idx=0; idx<m_sizeOctants-toDelete; idx++){
                     m_octants[idx] = m_octants[idx+toDelete];
                     if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
                 }
-                m_octants.resize(nocts-toDelete, Octant(m_dim, m_global.m_maxLevel));
+                m_octants.resize(m_sizeOctants-toDelete, Octant(m_dim, m_global.m_maxLevel));
+                m_sizeOctants = m_octants.size();
                 if (mapsize>0){
-                    mapidx.resize(nocts-toDelete);
+                    mapidx.resize(m_sizeOctants);
                 }
             }
             else{
                 m_octants.clear();
                 mapidx.clear();
             }
-            nocts = getNumOctants();
+            m_sizeOctants = m_octants.size();
 
             setFirstDescMorton();
 
