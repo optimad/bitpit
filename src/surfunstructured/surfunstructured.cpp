@@ -43,6 +43,14 @@ namespace bitpit {
 */
 
 /*!
+	Creates an uninitialized patch.
+*/
+SurfUnstructured::SurfUnstructured()
+	: SurfaceKernel(true)
+{
+}
+
+/*!
 	Creates a new patch.
 
 	\param id is the id of the patch

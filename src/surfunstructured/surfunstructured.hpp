@@ -39,6 +39,7 @@ public:
 	using PatchKernel::locatePoint;
 
         // Constructors
+	SurfUnstructured();
 	SurfUnstructured(const int &id, int patch_dim = 2, int space_dim = 3);
 
         // Setters
