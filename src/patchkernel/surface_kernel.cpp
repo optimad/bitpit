@@ -130,6 +130,8 @@ void SurfaceKernel::setSpaceDimension(int dimension)
 
 /*!
  * Returns the number of dimensions of the working space (set at patch construction)
+ *
+ * \result The number of dimensions.
  */
 int SurfaceKernel::getSpaceDimension(void) const
 {
