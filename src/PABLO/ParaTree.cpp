@@ -3166,24 +3166,24 @@ namespace bitpit {
                 }
                 if(lh < 0)
                     lh = - 1;
-                else if(lh > (int32_t)(m_octree.m_octants.size() - 1))
-                    lh = m_octree.m_octants.size() - 1;
+                else if(lh > (int32_t)(getNumOctants() - 1))
+                    lh = getNumOctants() - 1;
 
                 if(m_rank == m_nproc - 1)
-                    ft = m_octree.m_octants.size();
+                    ft = getNumOctants();
                 else if(m_rank == 0)
                     ft = (int32_t)(newPartitionRangeGlobalidx[m_rank] + 1);
                 else{
                     ft = (int32_t)(newPartitionRangeGlobalidx[m_rank] - m_partitionRangeGlobalIdx[m_rank -1]);
                 }
-                if(ft > (int32_t)(m_octree.m_octants.size() - 1))
-                    ft = m_octree.m_octants.size();
+                if(ft > (int32_t)(getNumOctants() - 1))
+                    ft = getNumOctants();
                 else if(ft < 0)
                     ft = 0;
 
                 //compute size Head and size Tail
                 uint32_t headSize = (uint32_t)(lh + 1);
-                uint32_t tailSize = (uint32_t)(m_octree.m_octants.size() - ft);
+                uint32_t tailSize = (uint32_t)(getNumOctants() - ft);
                 uint32_t headOffset = headSize;
                 uint32_t tailOffset = tailSize;
 
@@ -4024,7 +4024,7 @@ namespace bitpit {
             }
             boundary_proc[iproc] = j;
         }
-        nocts = m_octree.m_octants.size();
+        nocts = getNumOctants();
         sum = 0;
         dimcomm = 0;
         indcomm = 0;
