@@ -602,33 +602,33 @@ void ElementInfo::initializeVoxelInfo()
 
 	faceConnect[0][0] = 2;
 	faceConnect[0][1] = 0;
-	faceConnect[0][2] = 4;
-	faceConnect[0][3] = 6;
+	faceConnect[0][2] = 6;
+	faceConnect[0][3] = 4;
 
 	faceConnect[1][0] = 1;
 	faceConnect[1][1] = 3;
-	faceConnect[1][2] = 7;
-	faceConnect[1][3] = 5;
+	faceConnect[1][2] = 5;
+	faceConnect[1][3] = 7;
 
 	faceConnect[2][0] = 0;
 	faceConnect[2][1] = 1;
-	faceConnect[2][2] = 5;
-	faceConnect[2][3] = 4;
+	faceConnect[2][2] = 4;
+	faceConnect[2][3] = 5;
 
 	faceConnect[3][0] = 3;
 	faceConnect[3][1] = 2;
-	faceConnect[3][2] = 6;
-	faceConnect[3][3] = 7;
+	faceConnect[3][2] = 7;
+	faceConnect[3][3] = 6;
 
 	faceConnect[4][0] = 2;
 	faceConnect[4][1] = 3;
-	faceConnect[4][2] = 1;
-	faceConnect[4][3] = 0;
+	faceConnect[4][2] = 0;
+	faceConnect[4][3] = 1;
 
 	faceConnect[5][0] = 4;
 	faceConnect[5][1] = 5;
-	faceConnect[5][2] = 7;
-	faceConnect[5][3] = 6;
+	faceConnect[5][2] = 6;
+	faceConnect[5][3] = 7;
 }
 
 /*!
