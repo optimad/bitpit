@@ -32,6 +32,7 @@
 
 #include "bitpit_SA.hpp"
 
+#include "patch_info.hpp"
 #include "patch_kernel.hpp"
 #include "utils.hpp"
 
@@ -176,6 +177,7 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	m_vtk.addData("PID", VTKFieldType::SCALAR, VTKLocation::CELL, vtkInt, this);
 	m_vtk.addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, vtkLong, this);
 #if BITPIT_ENABLE_MPI==1
+	m_vtk.addData("cellGlobalIndex", VTKFieldType::SCALAR, VTKLocation::CELL, vtkLong, this);
 	m_vtk.addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL, vtkInt, this);
 #endif
 }
@@ -3690,6 +3692,11 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 			genericIO::flushBINARY(stream, vertex.getId());
 		}
 #if BITPIT_ENABLE_MPI==1
+	} else if (name == "cellGlobalIndex") {
+		PatchGlobalInfo globalInfo(this);
+		for (const Cell &cell : m_cells) {
+			genericIO::flushBINARY(stream, globalInfo.getCellGlobalId(cell.getId()));
+		}
 	} else if (name == "rank") {
 		for (Cell &cell : m_cells) {
 			if (cell.isInterior()) {
