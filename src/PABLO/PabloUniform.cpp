@@ -429,7 +429,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    PabloUniform::getNormal(uint32_t idx, uint8_t & iface, darray3 & normal) {
+    PabloUniform::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) {
         ParaTree::getNormal(idx, iface, normal);
     }
 
@@ -439,7 +439,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    PabloUniform::getNormal(uint32_t idx, uint8_t & iface){
+    PabloUniform::getNormal(uint32_t idx, uint8_t iface){
         return ParaTree::getNormal(idx, iface);
     }
 
@@ -647,7 +647,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    PabloUniform::getNormal(Octant* oct, uint8_t & iface, darray3 & normal) {
+    PabloUniform::getNormal(Octant* oct, uint8_t iface, darray3 & normal) {
         ParaTree::getNormal(oct, iface, normal);
     }
 
@@ -657,7 +657,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    PabloUniform::getNormal(Octant* oct, uint8_t & iface){
+    PabloUniform::getNormal(Octant* oct, uint8_t iface){
         return ParaTree::getNormal(oct, iface);
     }
 

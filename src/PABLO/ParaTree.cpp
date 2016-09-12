@@ -1203,7 +1203,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    ParaTree::getNormal(uint32_t idx, uint8_t & iface, darray3 & normal) {
+    ParaTree::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) {
         i8array3 normal_;
         m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals);
         m_trans.mapNormals(normal_, normal);
@@ -1215,7 +1215,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    ParaTree::getNormal(uint32_t idx, uint8_t & iface){
+    ParaTree::getNormal(uint32_t idx, uint8_t iface){
         darray3 normal;
         i8array3 normal_;
         m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals);
@@ -1600,7 +1600,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    ParaTree::getNormal(Octant* oct, uint8_t & iface, darray3 & normal) {
+    ParaTree::getNormal(Octant* oct, uint8_t iface, darray3 & normal) {
         i8array3 normal_;
         oct->getNormal(iface, normal_, m_global.m_normals);
         m_trans.mapNormals(normal_, normal);
@@ -1612,7 +1612,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    ParaTree::getNormal(Octant* oct, uint8_t & iface){
+    ParaTree::getNormal(Octant* oct, uint8_t iface){
         darray3 normal;
         i8array3 normal_;
         oct->getNormal(iface, normal_, m_global.m_normals);

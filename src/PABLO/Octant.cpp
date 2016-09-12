@@ -507,7 +507,7 @@ u32array3		Octant::getNode(uint8_t inode) const{
  * \param[out] normal Array[3] with components (with z=0) of the normal of face.
  * \param[in] normals Global structure with components of face normals of a reference octant.
  */
-void		Octant::getNormal(uint8_t & iface, i8array3 & normal, int8_t (&normals)[6][3]) const{
+void		Octant::getNormal(uint8_t iface, i8array3 & normal, int8_t (&normals)[6][3]) const{
 	uint8_t		i;
 	for (i = 0; i < 3; i++){
 		normal[i] = normals[iface][i];

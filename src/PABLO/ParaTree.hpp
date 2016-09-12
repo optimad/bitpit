@@ -247,8 +247,8 @@ namespace bitpit {
         void 		getNode(uint32_t idx, uint8_t inode, darray3& node);
         void 		getNodes(uint32_t idx, darr3vector & nodes);
         darr3vector getNodes(uint32_t idx);
-        void 		getNormal(uint32_t idx, uint8_t & iface, darray3 & normal);
-        darray3 	getNormal(uint32_t idx, uint8_t & iface);
+        void 		getNormal(uint32_t idx, uint8_t iface, darray3 & normal);
+        darray3 	getNormal(uint32_t idx, uint8_t iface);
         int8_t 		getMarker(uint32_t idx);
         uint8_t 	getLevel(uint32_t idx) const;
         uint64_t 	getMorton(uint32_t idx);
@@ -287,8 +287,8 @@ namespace bitpit {
         void 		getNode(Octant* oct, uint8_t inode, darray3& node);
         void 		getNodes(Octant* oct, darr3vector & nodes);
         darr3vector getNodes(Octant* oct);
-        void 		getNormal(Octant* oct, uint8_t & iface, darray3 & normal);
-        darray3 	getNormal(Octant* oct, uint8_t & iface);
+        void 		getNormal(Octant* oct, uint8_t iface, darray3 & normal);
+        darray3 	getNormal(Octant* oct, uint8_t iface);
         int8_t 		getMarker(Octant* oct);
         uint8_t 	getLevel(const Octant* oct) const;
         uint64_t 	getMorton(Octant* oct);
