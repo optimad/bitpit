@@ -740,15 +740,13 @@ namespace bitpit {
             return;
         }
 
-        // If the face is a boundary it has no neighbours
+        // If a face is a boundary, it can have neighbours only if periodic
         if (oct->m_info[iface]){
-            return;
-        }
+            // Use the proper function for searching periodic neighbours
+            if (m_periodic[iface]){
+                findPeriodicNeighbours(oct, iface, neighbours, isghost);
+            }
 
-        // If the face is a periodic face use the proper function for searching
-        // the neighbours
-        if (m_periodic[iface]){
-            findPeriodicNeighbours(oct, iface, neighbours, isghost);
             return;
         }
 
