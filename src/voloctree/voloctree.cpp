@@ -367,9 +367,10 @@ std::array<double, 3> VolOctree::evalCellCentroid(const long &id) const
 */
 double VolOctree::evalCellSize(const long &id) const
 {
-	int level = getCellLevel(id);
+	OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
 
-	return m_tree_dh[level];
+	return m_tree.getSize(octant);
 }
 
 /*!
