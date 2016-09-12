@@ -333,9 +333,10 @@ void VolOctree::setBoundingBox()
 */
 double VolOctree::evalCellVolume(const long &id) const
 {
-	int level = getCellLevel(id);
+	OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
 
-	return m_tree_volume[level];
+	return m_tree.getVolume(octant);
 }
 
 /*!
