@@ -382,10 +382,12 @@ double VolOctree::evalCellSize(const long &id) const
 double VolOctree::evalInterfaceArea(const long &id) const
 {
 	const Interface &interface = getInterface(id);
-	int owner = interface.getOwner();
-	int level = getCellLevel(owner);
+	long owner = interface.getOwner();
 
-	return m_tree_area[level];
+	OctantInfo octantInfo = getCellOctant(owner);
+	const Octant *octant = getOctantPointer(octantInfo);
+
+	return m_tree.getArea(octant);
 }
 
 /*!
