@@ -1414,7 +1414,7 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 
 	// Sort the cells beased on their tree level
 	int maxLevel = m_tree.getMaxDepth();
-	size_t averageSize = cellIds.size() / maxLevel;
+	size_t averageSize = cellIds.size() / (maxLevel + 1);
 	std::vector<std::vector<long>> hierarchicalCellIds(maxLevel + 1);
 	for (int level = 0; level <= maxLevel; ++level) {
 		hierarchicalCellIds[level].reserve(averageSize);
