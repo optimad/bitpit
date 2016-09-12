@@ -115,9 +115,6 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
 	m_tree.setMarker((uint32_t) 0, initial_level);
-
-	// Info sull'octree
-	initializeTreeGeometry();
 }
 
 /*!
@@ -170,16 +167,6 @@ void VolOctree::__reset(bool resetTree)
 void VolOctree::initialize()
 {
 	log::cout() << ">> Initializing Octree mesh" << std::endl;
-
-	// Normals
-	for (int i = 0; i < 3; i++) {
-		for (int n = -1; n <= 1; n += 2) {
-			std::array<double, 3> normal = {{0.0, 0.0, 0.0}};
-			normal[i] = n;
-
-			m_normals.push_back(normal);
-		}
-	}
 
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
@@ -270,30 +257,6 @@ void VolOctree::__setDimension(int dimension)
 	}
 
 	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);
-}
-
-/*!
-	Initializes octree geometry.
-*/
-void VolOctree::initializeTreeGeometry()
-{
-	int maxLevels = m_tree.getMaxLevel();
-	double length = m_tree.getL();
-
-	m_tree_dh.clear();
-	m_tree_area.clear();
-	m_tree_volume.clear();
-
-	m_tree_dh.reserve(maxLevels);
-	m_tree_area.reserve(maxLevels);
-	m_tree_volume.reserve(maxLevels);
-	for(int i = 0; i < maxLevels; i++) {
-	    double levelLength = length / ((double) pow(2,i));
-
-	    m_tree_dh.push_back(pow(levelLength, 1.));
-	    m_tree_area.push_back(pow(levelLength, (double) (getDimension() - 1)));
-	    m_tree_volume.push_back(pow(levelLength, (double) (getDimension())));
-	}
 }
 
 /*!
@@ -1660,9 +1623,6 @@ void VolOctree::_restore(std::istream &stream)
 #endif
 	m_tree.restore(stream);
 
-	// Initialize tree geometry
-	initializeTreeGeometry();
-
 	// Restore octant to cell map
 	size_t nOctants = m_tree.getNumOctants();
 	m_cellToOctant.reserve(nOctants);
@@ -1767,9 +1727,6 @@ void VolOctree::setLength(double length)
 	// Set the length
 	m_tree.setL(length);
 
-	// Upadate the geometry
-	initializeTreeGeometry();
-
 	// Set the new bounding box
 	setBoundingBox();
 
@@ -1815,8 +1772,6 @@ void VolOctree::scale(std::array<double, 3> scaling)
 	}
 
 	m_tree.setL(m_tree.getL() * scaling[0]);
-
-	initializeTreeGeometry();
 
 	VolumeKernel::scale(scaling);
 

@@ -212,12 +212,6 @@ private:
 
 	PabloUniform m_tree;
 
-	std::vector<double> m_tree_dh;
-	std::vector<double> m_tree_area;
-	std::vector<double> m_tree_volume;
-
-	std::vector<std::array<double, 3> > m_normals;
-
 	void initialize();
 	void initializeTreeGeometry();
 
