@@ -37,6 +37,7 @@ list(APPEND TESTS "test_voloctree_00004")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_voloctree_parallel_00001")
 	list(APPEND TESTS "test_voloctree_parallel_00002:3")
+	list(APPEND TESTS "test_voloctree_parallel_00003:3")
 endif ()
 
 
