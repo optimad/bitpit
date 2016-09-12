@@ -400,8 +400,12 @@ std::array<double, 3> VolOctree::evalInterfaceNormal(const long &id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
+	long owner = interface.getOwner();
 
-	return m_normals[ownerFace];
+	OctantInfo octantInfo = getCellOctant(owner);
+	const Octant *octant = getOctantPointer(octantInfo);
+
+	return m_tree.getNormal(octant, (uint8_t) ownerFace);
 }
 
 /*!
