@@ -319,6 +319,8 @@ Octant::setMarker(int8_t marker){
  */
 void
 Octant::setBalance(bool balance){
+	if (balance != m_info[14])
+		m_info[15] = true;
 	m_info[14] = balance;
 };
 
