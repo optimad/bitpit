@@ -22,19 +22,46 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#define __BITPIT_MODULE_PATCH_KERNEL_HPP__
+#ifndef __BITPIT_PATCH_INFO_HPP__
+#define __BITPIT_PATCH_INFO_HPP__
 
-/*!
- * @defgroup patchkernel Patch kernel
- */
+#include <unordered_map>
+#include <vector>
 
-#include "bitpit_version.hpp"
+namespace bitpit {
 
-#include "patch_info.hpp"
-#include "patch_kernel.hpp"
-#include "surface_kernel.hpp"
-#include "volume_kernel.hpp"
-#include "adaption.hpp"
+class PatchKernel;
+
+class PatchInfo {
+
+public:
+	virtual void extract(PatchKernel const *patch) = 0;
+
+protected:
+	PatchKernel const *m_patch;
+
+};
+
+#if BITPIT_ENABLE_MPI==1
+class PatchGlobalInfo : public PatchInfo {
+
+public:
+	PatchGlobalInfo(PatchKernel const *patch);
+
+	void extract(PatchKernel const *patch);
+
+	int getCellRankFromLocal(long id);
+	int getCellRankFromGlobal(long id);
+	long getCellGlobalId(long id);
+	const std::unordered_map<long, long> & getCellGlobalMap();
+
+private:
+	std::unordered_map<long, long> m_cellLocalToGlobalMap;
+	std::vector<long> m_nGlobalInternals;
+
+};
+#endif
+
+}
 
 #endif

@@ -36,6 +36,9 @@
 #include <unordered_map>
 
 #include "bitpit_IO.hpp"
+#if BITPIT_ENABLE_MPI==1
+#	include "bitpit_communications.hpp"
+#endif
 
 #include "adaption.hpp"
 #include "cell.hpp"
@@ -60,25 +63,12 @@ private:
 
 };
 
-template<class T, class T1>
-class UnaryPredicate;
-
-template<class T, class T1>
-bool operator==(const std::pair<T, T1> &pair_, const UnaryPredicate<T, T1> &pred_) { return ( pred_.value == pair_.second ); }
-
-template<class T, class T1>
-class UnaryPredicate {
-    private:
-    T                                   value;
-    public:
-    UnaryPredicate(
-        T                               value_
-    ) : value(value_) {}
-    template<class U, class U1>
-    friend bool operator==(const std::pair<U, U1>&, const UnaryPredicate<U, U1>&);
-};
-
 class PatchKernel : public VTKBaseStreamer {
+
+friend class PatchInfo;
+#if BITPIT_ENABLE_MPI==1
+friend class PatchGlobalInfo;
+#endif
 
 public:
 	typedef PiercedVector<Vertex>::iterator VertexIterator;
