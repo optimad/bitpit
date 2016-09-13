@@ -987,7 +987,7 @@ namespace bitpit {
 
                         //MOVE RESIDENT TO BEGIN IN OCTANTS
                         m_octree.m_sizeOctants = m_octree.m_octants.size();
-                        uint32_t resEnd = m_octree.getNumOctants() - tailOffset;
+                        uint32_t resEnd = m_octree.m_sizeOctants - tailOffset;
                         uint32_t nofResidents = resEnd - headOffset;
                         uint32_t octCounter = 0;
                         for(uint32_t i = headOffset; i < resEnd; ++i){
@@ -1533,7 +1533,7 @@ namespace bitpit {
 
                         //MOVE RESIDENT TO BEGIN IN OCTANTS
                         m_octree.m_sizeOctants = m_octree.m_octants.size();
-                        uint32_t resEnd = m_octree.getNumOctants() - tailOffset;
+                        uint32_t resEnd = m_octree.m_sizeOctants - tailOffset;
                         uint32_t nofResidents = resEnd - headOffset;
                         uint32_t octCounter = 0;
                         for(uint32_t i = headOffset; i < resEnd; ++i){
