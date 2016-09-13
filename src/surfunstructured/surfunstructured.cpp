@@ -64,6 +64,17 @@ SurfUnstructured::SurfUnstructured(const int &id, int patch_dim, int space_dim)
 }
 
 /*!
+	Creates a new patch restoring the patch saved in the specified stream.
+
+	\param stream is the stream to read from
+*/
+SurfUnstructured::SurfUnstructured(std::istream stream)
+	: SurfaceKernel(false)
+{
+	restore(stream);
+}
+
+/*!
  * Enables or disables expert mode.
  *
  * When expert mode is enabled, it will be possible to change the
@@ -163,7 +174,44 @@ int SurfUnstructured::_getDumpVersion() const
  */
 void SurfUnstructured::_dump(std::ostream &stream)
 {
-	throw std::runtime_error ("Dump is not implemented for the SurfUnstructured patch");
+#if BITPIT_ENABLE_MPI==1
+	// Dump works only for serial calculations
+	if (getProcessorCount() != 1) {
+		throw std::runtime_error ("Dump of surfunstructured is implemented only for serial calculations.");
+	}
+#endif
+
+	// Space dimension
+	IO::binary::write(stream, getSpaceDimension());
+
+	// Save the vertices
+	IO::binary::write(stream, getVertexCount());
+
+	for (const Vertex &vertex : m_vertices) {
+		IO::binary::write(stream, vertex.getId());
+
+		std::array<double, 3> coords = vertex.getCoords();
+		IO::binary::write(stream, coords[0]);
+		IO::binary::write(stream, coords[1]);
+		IO::binary::write(stream, coords[2]);
+	}
+
+	// Save the cells
+	IO::binary::write(stream, getInternalCount());
+	IO::binary::write(stream, getGhostCount());
+
+	for (const Cell &cell: m_cells) {
+		const ElementInfo &cellInfo = cell.getInfo();
+
+		IO::binary::write(stream, cell.getId());
+		IO::binary::write(stream, cell.getPID());
+		IO::binary::write(stream, cellInfo.type);
+
+		const long *cellConnect = cell.getConnect();
+		for (int i = 0; i < cellInfo.nVertices; ++i) {
+			IO::binary::write(stream, cellConnect[i]);
+		}
+	}
 }
 
 /*!
@@ -173,7 +221,72 @@ void SurfUnstructured::_dump(std::ostream &stream)
  */
 void SurfUnstructured::_restore(std::istream &stream)
 {
-	throw std::runtime_error ("Restore is not implemented for the SurfUnstructured patch");
+#if BITPIT_ENABLE_MPI==1
+	// Restore works only for serial calculations
+	if (getProcessorCount() != 1) {
+		throw std::runtime_error ("Restore of surfunstructured is implemented only for serial calculations.");
+	}
+#endif
+
+	// Space dimension
+	int spaceDimension;
+	IO::binary::read(stream, spaceDimension);
+	setSpaceDimension(spaceDimension);
+
+	// Restore the vertices
+	long nVertices;
+	IO::binary::read(stream, nVertices);
+
+	reserveVertices(nVertices);
+	for (long i = 0; i < nVertices; ++i) {
+		long id;
+		IO::binary::read(stream, id);
+
+		std::array<double, 3> coords;
+		IO::binary::read(stream, coords[0]);
+		IO::binary::read(stream, coords[1]);
+		IO::binary::read(stream, coords[2]);
+
+		addVertex(coords, id);
+	}
+
+	// Restore the cells
+	long nInternals;
+	IO::binary::read(stream, nInternals);
+
+	long nGhosts;
+	IO::binary::read(stream, nGhosts);
+
+	long nCells = nInternals + nGhosts;
+
+	reserveCells(nCells);
+	for (long i = 0; i < nCells; ++i) {
+		long id;
+		IO::binary::read(stream, id);
+
+		int PID;
+		IO::binary::read(stream, PID);
+
+		ElementInfo::Type type;
+		IO::binary::read(stream, type);
+		const ElementInfo &cellInfo = ElementInfo::getElementInfo(type);
+
+		int nCellVertices = cellInfo.nVertices;
+		std::vector<long> connect(nCellVertices, Vertex::NULL_ID);
+		for (int k = 0; k < nCellVertices; ++k) {
+			IO::binary::read(stream, connect[k]);
+		}
+
+		CellIterator cellIterator = addCell(type, true, connect, id);
+		cellIterator->setPID(PID);
+	}
+
+	// Build ghost exchange data
+#if BITPIT_ENABLE_MPI==1
+	if (getProcessorCount()) {
+		buildGhostExchangeData();
+	}
+#endif
 }
 
 /*!
