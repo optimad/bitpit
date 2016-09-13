@@ -173,6 +173,30 @@ namespace bitpit {
 
     // =============================================================================== //
 
+    /*!
+        Creates a new octree restoring the octree saved in the specified stream.
+
+        \param stream is the stream to read from
+    */
+#if BITPIT_ENABLE_MPI==1
+    /*!
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     */
+    ParaTree::ParaTree(std::istream stream, std::string logfile, MPI_Comm comm)
+#else
+    ParaTree::ParaTree(std::istream stream, std::string logfile)
+#endif
+    {
+#if BITPIT_ENABLE_MPI==1
+        initialize(logfile, comm);
+#else
+        initialize(logfile);
+#endif
+        restore(stream);
+    }
+
+    // =============================================================================== //
+
     /*! Default Destructor of ParaTree.
      */
     ParaTree::~ParaTree(){
@@ -268,6 +292,273 @@ namespace bitpit {
 
         m_lastOp = OP_INIT;
     }
+
+    // =============================================================================== //
+
+    /*! Get the version associated to the binary dumps.
+     *
+     *  \result The version associated to the binary dumps.
+     */
+    int ParaTree::getDumpVersion() const
+    {
+        const int DUMP_VERSION = 1;
+
+        return DUMP_VERSION;
+    }
+
+    // =============================================================================== //
+
+    /*! Write the octree to the specified stream.
+     *
+     *  \param stream is the stream to write to
+     *  \param full is the flag for a complete dump with mapping structureof last operation of the tree
+     */
+    void ParaTree::dump(std::ostream &stream, bool full)
+    {
+        // Version
+        IO::binary::write(stream, getDumpVersion());
+
+        // Tree data
+        IO::binary::write(stream, getNproc());
+
+        IO::binary::write(stream, getDim());
+
+        IO::binary::write(stream, getSerial());
+        IO::binary::write(stream, getMaxDepth());
+        IO::binary::write(stream, getStatus());
+        IO::binary::write(stream, getBalanceCodimension());
+
+        for (int i = 0; i < m_global.m_nfaces; i++) {
+            IO::binary::write(stream, getPeriodic(i));
+        }
+
+        // Octant data
+        uint32_t nOctants = getNumOctants();
+        IO::binary::write(stream, nOctants);
+
+        uint32_t nGlobalOctants = getGlobalNumOctants();
+        IO::binary::write(stream, nGlobalOctants);
+
+        for (uint32_t i = 0; i < nOctants; i++) {
+            const Octant &octant = m_octree.m_octants[i];
+
+            IO::binary::write(stream, octant.getLevel());
+            IO::binary::write(stream, octant.getX());
+            IO::binary::write(stream, octant.getY());
+            IO::binary::write(stream, octant.getZ());
+
+            for (size_t k = 0; k < octant.m_info.size(); ++k) {
+                IO::binary::write(stream, octant.m_info[k]);
+            }
+
+            IO::binary::write(stream, octant.getBalance());
+            IO::binary::write(stream, octant.getMarker());
+        }
+
+        // Information about partitioning
+        for (int k = 0; k < m_nproc; ++k) {
+            IO::binary::write(stream, m_partitionFirstDesc[k]);
+        }
+
+        for (int k = 0; k < m_nproc; ++k) {
+            IO::binary::write(stream, m_partitionLastDesc[k]);
+        }
+
+        for (int k = 0; k < m_nproc; ++k) {
+            IO::binary::write(stream, m_partitionRangeGlobalIdx[k]);
+        }
+
+        // Extended information (mapping, ...)
+        IO::binary::write(stream, full);
+        if (full) {
+            IO::binary::write(stream, m_lastOp);
+            if (m_lastOp == OP_ADAPT_MAPPED){
+                for (auto idx : m_mapIdx) {
+                    IO::binary::write(stream, idx);
+                }
+
+                IO::binary::write(stream, m_octree.m_lastGhostBros.size());
+                for (auto lastGhostBrother : m_octree.m_lastGhostBros) {
+                    IO::binary::write(stream, lastGhostBrother);
+                }
+            }
+            else if (m_lastOp == OP_LOADBALANCE || m_lastOp == OP_LOADBALANCE_FIRST){
+                for (int i = 0; i < m_nproc; ++i) {
+                    IO::binary::write(stream, m_partitionRangeGlobalIdx0[i]);
+                }
+            }
+        }
+
+    }
+
+    // =============================================================================== //
+
+    /*! Restore the octree from the specified stream.
+     *
+     *  \param stream Stream to read from.
+     */
+    void ParaTree::restore(std::istream &stream)
+    {
+        // Version
+        int version;
+        IO::binary::read(stream, version);
+        if (version != getDumpVersion()) {
+            throw std::runtime_error ("The version of the file does not match the required version");
+        }
+
+        // Check if the number of processors matches
+        int nProcs;
+        IO::binary::read(stream, nProcs);
+        if (nProcs != m_nproc) {
+            throw std::runtime_error ("The restart was saved with a different number of processors.");
+        }
+
+        // Reset the current octree
+        reset();
+
+        // Initialize the tree
+        uint8_t dimension;
+        IO::binary::read(stream, dimension);
+
+        m_octree.initialize(dimension);
+        m_trans.initialize(dimension);
+        initialize(dimension, m_log->getName(), m_comm);
+        reset();
+
+        // Set tree properties
+        IO::binary::read(stream, m_serial);
+        IO::binary::read(stream, m_maxDepth);
+        IO::binary::read(stream, m_status);
+
+        bool balanceCodimension;
+        IO::binary::read(stream, balanceCodimension);
+        setBalanceCodimension(balanceCodimension);
+
+        for (int i = 0; i < m_global.m_nfaces; i++) {
+            bool periodicBorder;
+            IO::binary::read(stream, periodicBorder);
+            if (periodicBorder){
+            	setPeriodic(i);
+            }
+        }
+
+        // Restore octants
+        uint32_t nOctants;
+        IO::binary::read(stream, nOctants);
+        m_octree.m_sizeOctants = nOctants;
+
+        uint32_t nGlobalOctants;
+        IO::binary::read(stream, nGlobalOctants);
+        m_globalNumOctants = nGlobalOctants;
+
+        m_octree.m_octants.clear();
+        m_octree.m_octants.reserve(nOctants);
+        for (uint32_t i = 0; i < nOctants; i++) {
+            // Create octant
+            uint8_t level;
+            IO::binary::read(stream, level);
+
+            uint32_t x;
+            IO::binary::read(stream, x);
+
+            uint32_t y;
+            IO::binary::read(stream, y);
+
+            uint32_t z;
+            IO::binary::read(stream, z);
+
+            Octant octant(false, m_dim, level, x, y, z);
+
+            // Set octant info
+            for (size_t k = 0; k < octant.m_info.size(); ++k) {
+                bool bit;
+                IO::binary::read(stream, bit);
+                octant.m_info.set(k, bit);
+            }
+
+            // Set octant 2:1 balance
+            bool balance21;
+            IO::binary::read(stream, balance21);
+            octant.setBalance(balance21);
+
+            // Set marker
+            int8_t marker;
+            IO::binary::read(stream, marker);
+            octant.setMarker(marker);
+
+            // Add octant to the list
+            m_octree.m_octants.push_back(std::move(octant));
+        }
+
+        m_octree.updateLocalMaxDepth();
+
+        // Set first last descendant
+        m_partitionFirstDesc.resize(m_nproc);
+        for (int k = 0; k < m_nproc; ++k) {
+            uint64_t descendant;
+            IO::binary::read(stream, descendant);
+            m_partitionFirstDesc[k] = descendant;
+        }
+        m_octree.m_firstDescMorton = m_partitionFirstDesc[m_rank];
+
+        m_partitionLastDesc.resize(m_nproc);
+        for (int k = 0; k < m_nproc; ++k) {
+            uint64_t descendant;
+            IO::binary::read(stream, descendant);
+            m_partitionLastDesc[k] = descendant;
+        }
+        m_octree.m_lastDescMorton = m_partitionLastDesc[m_rank];
+
+        // Set partitions and parallel information
+        m_partitionRangeGlobalIdx.resize(m_nproc);
+        for (int k = 0; k < m_nproc; ++k) {
+            uint64_t rangeGlobalIdx;
+            IO::binary::read(stream, rangeGlobalIdx);
+            m_partitionRangeGlobalIdx[k] = rangeGlobalIdx;
+        }
+
+#if BITPIT_ENABLE_MPI==1
+        if (!m_serial) {
+            setPboundGhosts();
+        }
+#endif
+
+        // Full restore (i.e. restore with mapper of last operation)
+        m_mapIdx.clear();
+
+        for (int i = 0; i < m_nproc; ++i) {
+            m_partitionRangeGlobalIdx0[i] = 0;
+        }
+
+        bool full;
+        IO::binary::read(stream, full);
+        if (full) {
+            IO::binary::read(stream, m_lastOp);
+            if (m_lastOp == OP_ADAPT_MAPPED) {
+                m_mapIdx.resize(m_octree.m_octants.size());
+                for (size_t i = 0; i < m_octree.m_octants.size(); ++i) {
+                    IO::binary::read(stream, m_mapIdx[i]);
+                }
+
+                size_t lastGhostBrosSize;
+                IO::binary::read(stream, lastGhostBrosSize);
+                m_octree.m_lastGhostBros.resize(lastGhostBrosSize);
+                for (size_t i = 0; i < lastGhostBrosSize; ++i) {
+                    IO::binary::read(stream, m_octree.m_lastGhostBros[i]);
+                }
+            }
+            else if (m_lastOp == OP_LOADBALANCE || m_lastOp == OP_LOADBALANCE_FIRST){
+                for (int i = 0; i < m_nproc; ++i) {
+                    IO::binary::read(stream, m_partitionRangeGlobalIdx0[i]);
+                }
+            }
+        }
+        else {
+            m_lastOp = OP_INIT;
+        }
+    }
+
+    // =============================================================================== //
 
     /*! Print the initial PABLO header.
      */

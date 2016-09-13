@@ -159,10 +159,12 @@ namespace bitpit {
         ParaTree(std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
         ParaTree(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
         ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        ParaTree(std::istream stream, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
 #else
         ParaTree(std::string logfile = DEFAULT_LOG_FILE);
         ParaTree(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE);
         ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, std::string logfile = DEFAULT_LOG_FILE);
+        ParaTree(std::istream stream, std::string logfile = DEFAULT_LOG_FILE);
 #endif
         ~ParaTree();
 
@@ -171,6 +173,10 @@ namespace bitpit {
         // =================================================================================== //
 
         virtual void	reset();
+
+        virtual int		getDumpVersion() const;
+        virtual void	dump(std::ostream &stream, bool full = true);
+        virtual void	restore(std::istream &stream);
 
         void	printHeader();
         void	printFooter();

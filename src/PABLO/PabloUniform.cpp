@@ -113,6 +113,49 @@ namespace bitpit {
         m_L = 1.0;
     }
 
+    /*! Get the version associated to the binary dumps.
+     *
+     *  \result The version associated to the binary dumps.
+     */
+    int
+    PabloUniform::getDumpVersion() const
+    {
+        const int DUMP_VERSION = 1;
+
+        return (DUMP_VERSION + ParaTree::getDumpVersion());
+    }
+
+    /*! Write the octree to the specified stream.
+    *
+    *  \param stream is the stream to write to
+    *  \param full is the flag for a complete dump with mapping structureof last operation of the tree
+    */
+    void
+    PabloUniform::dump(std::ostream &stream, bool full)
+    {
+        ParaTree::dump(stream, full);
+
+        IO::binary::write(stream, m_origin[0]);
+        IO::binary::write(stream, m_origin[1]);
+        IO::binary::write(stream, m_origin[2]);
+        IO::binary::write(stream, m_L);
+    }
+
+    /*! Restore the octree from the specified stream.
+    *
+    *  \param stream is the stream to read from
+    */
+    void
+    PabloUniform::restore(std::istream &stream)
+    {
+        ParaTree::restore(stream);
+
+        IO::binary::read(stream, m_origin[0]);
+        IO::binary::read(stream, m_origin[1]);
+        IO::binary::read(stream, m_origin[2]);
+        IO::binary::read(stream, m_L);
+    }
+
     // =================================================================================== //
     // BASIC GET/SET METHODS															   //
     // =================================================================================== //
