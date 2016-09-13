@@ -28,7 +28,6 @@
 #include "bitpit_common.hpp"
 #include "bitpit_communications.hpp"
 #include "ParaTree.hpp"
-#include "Array.hpp"
 #include <sstream>
 #include <iomanip>
 #include <fstream>
@@ -4481,17 +4480,18 @@ namespace bitpit {
                 }
 
                 //Build receiver sources
-                vector<Array> recvs(m_nproc);
-                recvs[m_rank] = Array((uint32_t)sendBuffers.size()+1,-1);
-                recvs[m_rank].m_array[0] = m_rank;
+                vector<vector<int>> recvs(m_nproc);
+                recvs[m_rank].resize((uint32_t)sendBuffers.size()+1, -1);
+                recvs[m_rank][0] = m_rank;
                 int counter = 1;
                 map<int,CommBuffer>::iterator sitend = sendBuffers.end();
                 for(map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-                    recvs[m_rank].m_array[counter] = sit->first;
+                    recvs[m_rank][counter] = sit->first;
                     ++counter;
                 }
+                int nofLocalRecvs = recvs[m_rank].size();
                 int* nofRecvsPerProc = new int[m_nproc];
-                m_errorFlag = MPI_Allgather(&recvs[m_rank].m_arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,m_comm);
+                m_errorFlag = MPI_Allgather(&nofLocalRecvs,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,m_comm);
                 int globalRecvsBuffSize = 0;
                 int* displays = new int[m_nproc];
                 for(int pp = 0; pp < m_nproc; ++pp){
@@ -4502,7 +4502,7 @@ namespace bitpit {
                     }
                 }
                 int* globalRecvsBuff = new int[globalRecvsBuffSize];
-                m_errorFlag = MPI_Allgatherv(recvs[m_rank].m_array,recvs[m_rank].m_arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,m_comm);
+                m_errorFlag = MPI_Allgatherv(recvs[m_rank].data(),recvs[m_rank].size(),MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,m_comm);
 
                 vector<set<int> > sendersPerProc(m_nproc);
                 for(int pin = 0; pin < m_nproc; ++pin){
