@@ -1,0 +1,86 @@
+
+#main.home {
+    padding: 0 0 200px 0;
+}
+
+#main .bitpit-introduction .content > :first-child {
+    margin-top: 0 !important;
+}
+
+#main .bitpit-introduction .content > :last-child {
+    margin-bottom: 0 !important;
+}
+
+#main .bitpit-introduction .content h1 {
+    margin-bottom: 30px;
+}
+
+#main .module-list {
+    text-align: center;
+
+    color: #F8F8F8;
+    background-color: #13496C;
+    padding: 50px 75px 50px 75px;
+}
+
+#main .module-list .content {
+    padding: 0 0 0 0;
+}
+
+#main .module-list .content > .module-info:first-child {
+    margin-left: 0;
+}
+
+#main .module-list .module-info {
+    display: inline-block;
+    width: 350px;
+    vertical-align:top;
+
+    margin-left: 35px;
+
+    overflow: hidden;
+    text-align: justify;
+}
+
+#main .module-list .module-info h1 {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    text-decoration: none;
+
+    position:relative;
+
+    padding: 0 0 10px 0;
+    margin: 0 0 20px 0;
+
+    font-size: 40px;
+    color: #3A92C9;
+}
+
+#main .module-list .module-info h1::after {
+    background: #F8F8F8 none repeat scroll 0 0;
+    content: "";
+
+    display: block;
+
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    position: absolute;
+}
+
+#main .module-list .module-info h1 a {
+    color: #3A92C9;
+    text-decoration: none;
+    font-weight: 400;
+    outline: none;
+}
+
+#main .module-list .module-info p {
+    font-size: 16px;
+    text-align: center;
+    color: #F8F8F8;
+}
