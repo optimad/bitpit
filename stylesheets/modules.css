@@ -1,8 +1,4 @@
 
-#banner.PABLO {
-    background-color: #73B5DD;
-}
-
 #banner.module .background {
     position: absolute;
     top: 0;
@@ -15,4 +11,6 @@
 
 #banner.module .title p {
     font-size: 14px;
+
+    color: #f8f8f8;
 }
