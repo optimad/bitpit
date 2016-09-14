@@ -937,17 +937,16 @@ long VolCartesian::getCellLinearId(const std::array<int, 3> &ijk) const
 */
 std::array<int, 3> VolCartesian::getCellCartesianId(long const &idx) const
 {
-	int ijPlane = m_nCells1D[0] * m_nCells1D[1];
+	int offset_ij = m_nCells1D[0] * m_nCells1D[1];
 
 	std::array<int, 3> id;
-	id[0] = idx % m_nCells1D[0];
-	if (isThreeDimensional()) {
-		id[2] = idx / ijPlane;
-		id[1] = (idx - id[2] * ijPlane) / m_nCells1D[0];
-	} else {
-		id[2] = -1;
-		id[1] = idx / m_nCells1D[0];
-	}
+	id[2] = idx / offset_ij;
+	id[1] = (idx - id[2] * offset_ij) / m_nCells1D[0];
+	id[0] = idx - (idx / m_nCells1D[0]) * m_nCells1D[0];
+
+	// Set to -1 the z-index for 2D patches
+	unsigned int isThreeDimensionalFlag = isThreeDimensional();
+	id[2] = id[2] * isThreeDimensionalFlag - !isThreeDimensionalFlag;
 
 	return id;
 }
