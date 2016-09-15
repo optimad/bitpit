@@ -391,7 +391,7 @@ namespace bitpit {
     /*! Coarse local tree: coarse one time family of octants with marker <0
      * (if at least one octant of family has marker>=0 set marker=0 for the entire family)
      * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
-     * \return	true is coarsening done
+     * \return	true coarsening can continue
      */
     bool
     LocalTree::coarse(u32vector & mapidx){
@@ -642,48 +642,48 @@ namespace bitpit {
 
     /*! Delete overlapping octants after coarse local tree. Check if first octants of the partition
      * have marker = -1 (after coarse only the octants to be deleted have marker =-1).
-     * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
+     * \param[in] partLastDesc Last descendant of process before the actual
+     * \param[out] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
      */
     void
-    LocalTree::checkCoarse(u32vector & mapidx){
+    LocalTree::checkCoarse(uint64_t partLastDesc, u32vector & mapidx){
 
         uint32_t        idx;
-        uint32_t         mapsize = mapidx.size();
+        uint32_t        mapsize = mapidx.size();
         uint8_t         toDelete = 0;
 
         if (m_sizeOctants>0){
 
             idx = 0;
-            //After coarse a coarsen family can be partitioned over
-            // more than two processes. If this happens toDelete is even = 0
-            // but the first (or all the) octants of this partition have marker = -1.
-            idx = 0;
-            int marker = m_octants[idx].getMarker();
-            while(marker < 0 && idx < m_sizeOctants){
-                toDelete++;
-                idx++;
-                if (idx<m_sizeOctants) marker = m_octants[idx].getMarker();
-            }
+            if (m_octants[idx].computeMorton() < partLastDesc){
 
+                Octant father0 = m_octants[idx].buildFather();
+                Octant father = father0;
 
-            if (m_sizeOctants>toDelete){
-                for(idx=0; idx<m_sizeOctants-toDelete; idx++){
-                    m_octants[idx] = m_octants[idx+toDelete];
-                    if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
+                while(father == father0 && idx < m_sizeOctants){
+                    toDelete++;
+                    idx++;
+                    if (idx<m_sizeOctants) father = m_octants[idx].buildFather();
                 }
-                m_octants.resize(m_sizeOctants-toDelete, Octant(m_dim, m_global.m_maxLevel));
+
+                if (m_sizeOctants>toDelete){
+                    for(idx=0; idx<m_sizeOctants-toDelete; idx++){
+                        m_octants[idx] = m_octants[idx+toDelete];
+                        if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
+                    }
+                    m_octants.resize(m_sizeOctants-toDelete, Octant(m_dim, m_global.m_maxLevel));
+                    m_sizeOctants = m_octants.size();
+                    if (mapsize>0){
+                        mapidx.resize(m_sizeOctants);
+                    }
+                }
+                else{
+                    m_octants.clear();
+                    mapidx.clear();
+                }
                 m_sizeOctants = m_octants.size();
-                if (mapsize>0){
-                    mapidx.resize(m_sizeOctants);
-                }
+                setFirstDescMorton();
             }
-            else{
-                m_octants.clear();
-                mapidx.clear();
-            }
-            m_sizeOctants = m_octants.size();
-
-            setFirstDescMorton();
 
         }
     };

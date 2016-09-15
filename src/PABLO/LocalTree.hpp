@@ -192,7 +192,7 @@ private:
 	bool 		coarse(u32vector & mapidx);
 	bool 		globalRefine(u32vector & mapidx);
 	bool 		globalCoarse(u32vector & mapidx);
-	void 		checkCoarse(u32vector & mapidx);
+	void 		checkCoarse(uint64_t partLastDesc, u32vector & mapidx);
 	void 		updateLocalMaxDepth();
 
     
