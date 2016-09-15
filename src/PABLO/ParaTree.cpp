@@ -4498,26 +4498,12 @@ namespace bitpit {
         }
         else{
 
-            //temporary update partition_range_position
-            uint64_t lastDescMorton = m_octree.getLastDescMorton();
-            m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
-            uint64_t firstDescMorton = m_octree.getFirstDescMorton();
-            m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
-
-            //Only if parallel
-            if (m_rank>0){
-                uint64_t maxLastDescPre = 0;
-                for (int k=0; k<m_rank; k++){
-                    maxLastDescPre = max(maxLastDescPre, m_partitionLastDesc[k]);
-                }
-                m_octree.checkCoarse(maxLastDescPre, mapidx);
-            }
             updateAdapt();
 
             //update partition_range_position
-            lastDescMorton = m_octree.getLastDescMorton();
+            uint64_t lastDescMorton = m_octree.getLastDescMorton();
             m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
-            firstDescMorton = m_octree.getFirstDescMorton();
+            uint64_t firstDescMorton = m_octree.getFirstDescMorton();
             m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
 
             //correct first and last desc morton for empty partitions

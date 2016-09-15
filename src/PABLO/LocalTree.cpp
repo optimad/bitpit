@@ -391,7 +391,7 @@ namespace bitpit {
     /*! Coarse local tree: coarse one time family of octants with marker <0
      * (if at least one octant of family has marker>=0 set marker=0 for the entire family)
      * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
-     * \return	true coarsening can continue
+     * \return true coarsening can continue (impossible for now forced one refinement for call)
      */
     bool
     LocalTree::coarse(u32vector & mapidx){
@@ -400,11 +400,12 @@ namespace bitpit {
         Octant			father(m_dim, m_global.m_maxLevel);
         uint32_t 		idx, idx2;
         uint32_t 		offset;
+        uint32_t 		idx1_gh;
         uint32_t 		idx2_gh;
         uint32_t 		nidx;
         uint32_t		mapsize = mapidx.size();
         int8_t 			markerfather, marker;
-        uint8_t 		nbro, nend;
+        uint8_t 		nbro, nend, nstart;
         uint8_t 		nchm1 = m_global.m_nchildren-1;
         bool 			docoarse = false;
         bool 			wstop = false;
@@ -412,19 +413,31 @@ namespace bitpit {
         //------------------------------------------ //
         // Initialization
 
-        nbro = nend = 0;
+        m_sizeOctants = m_octants.size();
+        m_sizeGhosts = m_ghosts.size();
+
+        if (m_sizeOctants == 0) return false;
+
+        nbro = nend = nstart = 0;
         nidx = offset = 0;
 
         idx2_gh = 0;
-
-        m_sizeOctants = m_octants.size();
-        m_sizeGhosts = m_ghosts.size();
+        idx1_gh = m_sizeGhosts - 1;
 
         //------------------------------------------ //
 
         // Set index for start and end check for ghosts
         if (m_ghosts.size()){
             bool check = true;
+            while(check){
+                check = idx1_gh < m_sizeGhosts;
+                if (check){
+                    check = m_ghosts[idx1_gh].computeMorton() > m_firstDescMorton;
+                }
+                if (check) idx1_gh--;
+            }
+
+            check = true;
             while(check){
                 check = idx2_gh < m_sizeGhosts;
                 if (check){
@@ -481,9 +494,10 @@ namespace bitpit {
                             father.m_info[13] = true;
                             father.m_info[15] = false;
                             father.setMarker(markerfather);
-                            if (markerfather < 0 && mapsize == 0){
-                                docoarse = true;
-                            }
+                            //Impossible in this version
+//                            if (markerfather < 0 && mapsize == 0){
+//                                docoarse = true;
+//                            }
                             m_octants[idx] = father;
                             if(mapsize > 0) mapidx[idx] = mapidx[idx+offset];
                             offset += nchm1;
@@ -508,85 +522,180 @@ namespace bitpit {
             mapidx.resize(m_sizeOctants);
         }
 
-        // End on ghosts
-        if (m_ghosts.size() && m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
-            if (m_ghosts[idx2_gh].buildFather() == m_octants[m_sizeOctants-1].buildFather()){
-                father = m_ghosts[idx2_gh].buildFather();
-                for (uint32_t iii=0; iii<17; iii++){
-                    father.m_info[iii] = false;
-                }
-                markerfather = m_ghosts[idx2_gh].getMarker()+1;
-                nbro = 0;
-                idx = idx2_gh;
-                marker = m_ghosts[idx].getMarker();
-                while(marker < 0 && m_ghosts[idx].buildFather() == father){
-                    nbro++;
-                    if (markerfather < m_ghosts[idx].getMarker()+1){
-                        markerfather = m_ghosts[idx].getMarker()+1;
-                    }
-                    for (uint32_t iii=0; iii<m_global.m_nfaces; iii++){
-                        father.m_info[iii] = father.m_info[iii] || m_ghosts[idx].m_info[iii];
-                    }
-                    father.m_info[14] = father.m_info[14] || m_ghosts[idx].m_info[14];
-                    idx++;
-                    if(idx == m_sizeGhosts){
-                        break;
-                    }
+        //Check ghosts
+        if (m_ghosts.size()){
+            // Start on ghosts
+            if (m_sizeOctants > 0 && idx1_gh < m_sizeGhosts){
+                if (m_ghosts[idx1_gh].buildFather() == m_octants[0].buildFather()){
+                    father = m_ghosts[idx1_gh].buildFather();
+                    nbro = 0;
+                    idx = idx1_gh;
                     marker = m_ghosts[idx].getMarker();
-                }
-                nend = 0;
-                idx = m_sizeOctants-1;
-                marker = m_octants[idx].getMarker();
-                if (idx==0) wstop = true;
-                while(marker < 0 && m_octants[idx].buildFather() == father){
-                    nbro++;
-                    nend++;
-                    if (markerfather < m_octants[idx].getMarker()+1){
-                        markerfather = m_octants[idx].getMarker()+1;
+                    bool waszero = (idx == 0);
+                    while(marker < 0 && m_ghosts[idx].buildFather() == father){
+                        nbro++;
+                        if(waszero){
+                            break;
+                        }
+                        idx--;
+                        if(idx == 0){
+                            waszero = true;
+                        }
+                        marker = m_ghosts[idx].getMarker();
                     }
-                    idx--;
-                    if (wstop){
-                        break;
-                    }
-                    if (idx==0){
-                        wstop = true;
-                    }
+                    nstart = 0;
+                    idx = 0;
                     marker = m_octants[idx].getMarker();
-                }
-                if (nbro == m_global.m_nchildren){
-                    offset = nend;
-                }
-                else{
-                    nend = 0;
-                }
-            }
-            if (nend != 0){
-                for (idx=0; idx < nend; idx++){
-                    for (uint32_t iii=0; iii<16; iii++){
-                        father.m_info[iii] = father.m_info[iii] || m_octants[m_sizeOctants-idx-1].m_info[iii];
+                    if (idx==m_sizeOctants-1) wstop = true;
+                    while(marker < 0 && m_octants[idx].buildFather() == father){
+                        nbro++;
+                        nstart++;
+                        if (wstop){
+                            break;
+                        }
+                        idx++;
+                        if (idx==m_sizeOctants-1){
+                            wstop = true;
+                        }
+                        marker = m_octants[idx].getMarker();
+                    }
+                    if (nbro == m_global.m_nchildren){
+                        offset = nstart;
+                    }
+                    else{
+                        nstart = 0;
                     }
                 }
-                father.m_info[13] = true;
-                father.m_info[15] = false;
-                if (markerfather < 0 && mapsize == 0){
-                    docoarse = true;
-                }
-                father.setMarker(markerfather);
-                m_octants.resize(m_sizeOctants-offset, Octant(m_dim, m_global.m_maxLevel));
-                m_sizeOctants = m_octants.size();
-                m_octants.push_back(father);
-                octvector(m_octants).swap(m_octants);
-                m_sizeOctants = m_octants.size();
-                if(mapsize > 0){
-                    mapidx.resize(m_sizeOctants);
+                if (nstart != 0){
+                    for (idx=0; idx<m_sizeOctants; idx++){
+                        if (idx+offset < m_sizeOctants){
+                            m_octants[idx] = m_octants[idx+offset];
+                            if(mapsize > 0) mapidx[idx] = mapidx[idx+offset];
+                        }
+                    }
+                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim, m_global.m_maxLevel));
+                    octvector(m_octants).swap(m_octants);
+                    m_sizeOctants = m_octants.size();
+                    if(mapsize > 0){
+                        mapidx.resize(m_sizeOctants);
+                    }
                 }
             }
 
-        }
+
+            //Verify family between more then two processes
+            if (m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
+
+                if (m_ghosts[idx2_gh].buildFather() == father){
+
+                    if (m_ghosts[idx2_gh].buildFather() == m_octants[m_sizeOctants-1].buildFather()){
+
+                        uint64_t idx22_gh = idx2_gh;
+                        marker = m_ghosts[idx22_gh].getMarker();
+                        while(marker < 0 && m_ghosts[idx22_gh].buildFather() == father){
+                            nbro++;
+                            idx22_gh++;
+                            if(idx22_gh == m_sizeGhosts){
+                                break;
+                            }
+                            marker = m_ghosts[idx22_gh].getMarker();
+                        }
+
+                        if (nbro == m_global.m_nchildren){
+                            m_octants.clear();
+                            m_sizeOctants = 0;
+                            if(mapsize > 0){
+                                mapidx.clear();
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+
+            // End on ghosts
+            if (m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
+                if (m_ghosts[idx2_gh].buildFather() == m_octants[m_sizeOctants-1].buildFather()){
+                    father = m_ghosts[idx2_gh].buildFather();
+                    for (uint32_t iii=0; iii<17; iii++){
+                        father.m_info[iii] = false;
+                    }
+                    markerfather = m_ghosts[idx2_gh].getMarker()+1;
+                    nbro = 0;
+                    idx = idx2_gh;
+                    marker = m_ghosts[idx].getMarker();
+                    while(marker < 0 && m_ghosts[idx].buildFather() == father){
+                        nbro++;
+                        if (markerfather < m_ghosts[idx].getMarker()+1){
+                            markerfather = m_ghosts[idx].getMarker()+1;
+                        }
+                        for (uint32_t iii=0; iii<m_global.m_nfaces; iii++){
+                            father.m_info[iii] = father.m_info[iii] || m_ghosts[idx].m_info[iii];
+                        }
+                        father.m_info[14] = father.m_info[14] || m_ghosts[idx].m_info[14];
+                        idx++;
+                        if(idx == m_sizeGhosts){
+                            break;
+                        }
+                        marker = m_ghosts[idx].getMarker();
+                    }
+                    nend = 0;
+                    idx = m_sizeOctants-1;
+                    marker = m_octants[idx].getMarker();
+                    if (idx==0) wstop = true;
+                    while(marker < 0 && m_octants[idx].buildFather() == father){
+                        nbro++;
+                        nend++;
+                        if (markerfather < m_octants[idx].getMarker()+1){
+                            markerfather = m_octants[idx].getMarker()+1;
+                        }
+                        idx--;
+                        if (wstop){
+                            break;
+                        }
+                        if (idx==0){
+                            wstop = true;
+                        }
+                        marker = m_octants[idx].getMarker();
+                    }
+                    if (nbro == m_global.m_nchildren){
+                        offset = nend;
+                    }
+                    else{
+                        nend = 0;
+                    }
+                }
+                if (nend != 0){
+                    for (idx=0; idx < nend; idx++){
+                        for (uint32_t iii=0; iii<16; iii++){
+                            father.m_info[iii] = father.m_info[iii] || m_octants[m_sizeOctants-idx-1].m_info[iii];
+                        }
+                    }
+                    father.m_info[13] = true;
+                    father.m_info[15] = false;
+                    //Impossible in this version
+                    //                if (markerfather < 0 && mapsize == 0){
+                        //                    docoarse = true;
+                        //                }
+                    father.setMarker(markerfather);
+                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim, m_global.m_maxLevel));
+                    m_octants.push_back(father);
+                    octvector(m_octants).swap(m_octants);
+                    m_sizeOctants = m_octants.size();
+                    if(mapsize > 0){
+                        mapidx.resize(m_sizeOctants);
+                    }
+                }
+            }
+
+        }//end if ghosts size
 
         m_sizeOctants = m_octants.size();
 
         // Set final last desc
+        setFirstDescMorton();
         setLastDescMorton();
 
         return docoarse;
@@ -619,7 +728,7 @@ namespace bitpit {
 
     /*! Refine local tree: corse one time all the octants
      * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
-     * \return	true if coarsening done
+     * \return	true if coarsening can continue (impossible in this version)
      */
     bool
     LocalTree::globalCoarse(u32vector & mapidx){
