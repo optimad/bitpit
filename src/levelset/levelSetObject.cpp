@@ -435,47 +435,45 @@ void LevelSetObject::propagateSign( LevelSetKernel *visitee ) {
  * Writes LevelSetObject to stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetObject::dump( std::fstream &stream ){
+void LevelSetObject::dump( std::ostream &stream ){
 
     bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
 
-    bitpit::genericIO::flushBINARY(stream, m_id) ;
-    bitpit::genericIO::flushBINARY(stream, m_RSearch);
-    bitpit::genericIO::flushBINARY(stream, (long) m_ls.size() ) ;
+    IO::binary::write(stream, m_id) ;
+    IO::binary::write(stream, m_RSearch);
+    IO::binary::write(stream, (long) m_ls.size() ) ;
 
     for( infoItr=m_ls.begin(); infoItr!=infoEnd; ++infoItr){
-        bitpit::genericIO::flushBINARY(stream, infoItr.getId()) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->value) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->gradient) ;
+        IO::binary::write(stream, infoItr.getId()) ;
+        IO::binary::write(stream, infoItr->value) ;
+        IO::binary::write(stream, infoItr->gradient) ;
     };
 
-    dumpDerived(stream) ;
-    return;
+    _dump(stream) ;
 };
 
 /*!
  * Reads LevelSetObject from stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetObject::restore( std::fstream &stream ){
+void LevelSetObject::restore( std::istream &stream ){
 
     long i, n, id;
     LevelSetInfo cellInfo;
 
-    bitpit::genericIO::absorbBINARY(stream, m_id) ;
-    bitpit::genericIO::absorbBINARY(stream, m_RSearch);
-    bitpit::genericIO::absorbBINARY(stream, n);
+    IO::binary::read(stream, m_id) ;
+    IO::binary::read(stream, m_RSearch);
+    IO::binary::read(stream, n);
 
     m_ls.reserve(n);
     for( i=0; i<n; ++i){
-        bitpit::genericIO::absorbBINARY(stream, id) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.value) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.gradient) ;
+        IO::binary::read(stream, id) ;
+        IO::binary::read(stream, cellInfo.value) ;
+        IO::binary::read(stream, cellInfo.gradient) ;
         m_ls.insert(id, cellInfo) ;
     };
 
-    restoreDerived(stream) ;
-    return;
+    _restore(stream) ;
 };
 
 #if BITPIT_ENABLE_MPI

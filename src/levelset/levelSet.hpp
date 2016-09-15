@@ -114,8 +114,8 @@ class LevelSet{
     void                                        setSign(bool);
     void                                        setPropagateSign(bool) ;
 
-    void                                        dump( std::fstream &);
-    void                                        restore( std::fstream &);
+    void                                        dump( std::ostream &);
+    void                                        restore( std::istream &);
 
     void                                        compute( ) ;
     void                                        update( const std::vector<adaption::Info> & ) ;
@@ -211,6 +211,9 @@ class LevelSetObject{
     double                                      m_RSearch;      /**< Size of narrow band */
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
 
+    virtual void                                _dump( std::ostream &) =0 ;
+    virtual void                                _restore( std::istream &) =0 ;
+
     public:
     virtual ~LevelSetObject();
     LevelSetObject(int);
@@ -247,11 +250,8 @@ class LevelSetObject{
 
     void                                        propagateSign( LevelSetKernel * ) ;
 
-    void                                        dump( std::fstream &) ;
-    virtual void                                dumpDerived( std::fstream &) =0 ;
-
-    void                                        restore( std::fstream &) ;
-    virtual void                                restoreDerived( std::fstream &) =0 ;
+    void                                        dump( std::ostream &) ;
+    void                                        restore( std::istream &) ;
 
 # if BITPIT_ENABLE_MPI
     bool                                        assureMPI(LevelSetKernel * ) ;
@@ -326,9 +326,6 @@ class LevelSetSegmentation : public LevelSetObject {
     int                                         getSupportCount(const long &) const ;
     const std::vector<long> &                   getSimplexList(const long &) const ;
 
-    void                                        dumpDerived( std::fstream &) ;
-    void                                        restoreDerived( std::fstream &) ;
-
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const ;
 
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &) ;
@@ -358,6 +355,9 @@ class LevelSetSegmentation : public LevelSetObject {
     SegmentToCellMap                            extractSegmentToCellMap( const std::vector<adaption::Info> & ) ;
 
     int                                         getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch ) ;
+
+    void                                        _dump( std::ostream &) ;
+    void                                        _restore( std::istream &) ;
 };
 
 }

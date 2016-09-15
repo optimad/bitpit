@@ -1045,51 +1045,46 @@ void LevelSetSegmentation::filterOutsideNarrowBandDerived( double search ){
  * Writes LevelSetSegmentation to stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
+void LevelSetSegmentation::_dump( std::ostream &stream ){
+
+    IO::binary::write( stream, m_seg.size() ) ;
 
     bitpit::PiercedVector<SegInfo>::iterator segItr, segEnd = m_seg.end() ;
-
-    bitpit::genericIO::flushBINARY( stream, (long) m_seg.size() ) ;
-
     for( segItr = m_seg.begin(); segItr != segEnd; ++segItr){
-        bitpit::genericIO::flushBINARY( stream, segItr.getId() );
-        bitpit::genericIO::flushBINARY( stream, segItr->segments.size() );
-        bitpit::genericIO::flushBINARY( stream, segItr->segments );
-        bitpit::genericIO::flushBINARY( stream, segItr->distances );
+        IO::binary::write( stream, segItr.getId() );
+        IO::binary::write( stream, segItr->segments.size() );
+        IO::binary::write( stream, segItr->segments );
+        IO::binary::write( stream, segItr->distances );
     }
-
-    return;
 };
 
 /*!
  * Reads LevelSetSegmentation from stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
+void LevelSetSegmentation::_restore( std::istream &stream ){
 
-    int     s;
-    long    i, n, id;
-    SegInfo cellData ;
+    size_t segSize;
+    IO::binary::read( stream, segSize ) ;
+    m_seg.reserve(segSize);
 
-    bitpit::genericIO::absorbBINARY( stream, n ) ;
+    for( size_t i=0; i<segSize; ++i){
+        long id;
+        IO::binary::read( stream, id );
 
-    m_seg.reserve(n);
+        long nSegments;
+        IO::binary::read( stream, nSegments );
 
-    for( i=0; i<n; ++i){
-        bitpit::genericIO::absorbBINARY( stream, id );
-        bitpit::genericIO::absorbBINARY( stream, s );
+        SegInfo cellData ;
 
-        cellData.segments.resize(s) ;
-        bitpit::genericIO::absorbBINARY( stream, cellData.segments );
+        cellData.segments.resize(nSegments) ;
+        IO::binary::read( stream, cellData.segments );
 
-        cellData.distances.resize(s) ;
-        bitpit::genericIO::absorbBINARY( stream, cellData.distances );
+        cellData.distances.resize(nSegments) ;
+        IO::binary::read( stream, cellData.distances );
 
         m_seg.insert(id,cellData) ;
-
     }
-
-    return;
 };
 
 # if BITPIT_ENABLE_MPI

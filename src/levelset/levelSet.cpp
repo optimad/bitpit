@@ -630,14 +630,14 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
  * Writes LevelSetKernel to stream in binary format
  * @param[in] stream output stream
  */
-void LevelSet::dump( std::fstream &stream ){
+void LevelSet::dump( std::ostream &stream ){
 
-    bitpit::genericIO::flushBINARY(stream, m_userRSearch);
-    bitpit::genericIO::flushBINARY(stream, m_signedDF);
-    bitpit::genericIO::flushBINARY(stream, m_propagateS);
+    IO::binary::write(stream, m_userRSearch);
+    IO::binary::write(stream, m_signedDF);
+    IO::binary::write(stream, m_propagateS);
 
-    for( const auto &visitor : m_object ){
-        visitor.second->dump( stream ) ;
+    for( const auto &object : m_object ){
+        object.second->dump( stream ) ;
     }
 
 
@@ -648,14 +648,14 @@ void LevelSet::dump( std::fstream &stream ){
  * Reads LevelSetKernel from stream in binary format
  * @param[in] stream output stream
  */
-void LevelSet::restore( std::fstream &stream ){
+void LevelSet::restore( std::istream &stream ){
 
-    bitpit::genericIO::absorbBINARY(stream, m_userRSearch);
-    bitpit::genericIO::absorbBINARY(stream, m_signedDF);
-    bitpit::genericIO::absorbBINARY(stream, m_propagateS);
+    IO::binary::read(stream, m_userRSearch);
+    IO::binary::read(stream, m_signedDF);
+    IO::binary::read(stream, m_propagateS);
 
-    for( const auto &visitor : m_object ){
-        visitor.second->restore( stream ) ;
+    for( const auto &object : m_object ){
+        object.second->restore( stream ) ;
     }
 
 
