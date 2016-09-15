@@ -1775,12 +1775,36 @@ namespace bitpit {
         return NULL;
     };
 
+    /** Get an octant as constant pointer to the target octant.
+     * \param[in] idx Local index of target octant.
+     * \return Constant pointer to target octant.
+     */
+    const Octant*
+    ParaTree::getOctant(uint32_t idx) const {
+        if (idx < m_octree.getNumOctants()){
+            return &m_octree.m_octants[idx] ;
+        }
+        return NULL;
+    };
+
     /** Get a ghost octant as pointer to the target octant.
      * \param[in] idx Local index (in ghosts structure) of target ghost octant.
      * \return Pointer to target ghost octant.
      */
     Octant*
     ParaTree::getGhostOctant(uint32_t idx) {
+        if (idx < m_octree.getNumGhosts()){
+            return &m_octree.m_ghosts[idx] ;
+        }
+        return NULL;
+    };
+
+    /** Get a ghost octant as constant pointer to the target octant.
+     * \param[in] idx Local index (in ghosts structure) of target ghost octant.
+     * \return Constant pointer to target ghost octant.
+     */
+    const Octant*
+    ParaTree::getGhostOctant(uint32_t idx) const {
         if (idx < m_octree.getNumGhosts()){
             return &m_octree.m_ghosts[idx] ;
         }

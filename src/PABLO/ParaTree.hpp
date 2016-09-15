@@ -332,7 +332,9 @@ namespace bitpit {
         // OTHER GET/SET METHODS															   //
         // =================================================================================== //
         Octant*	getOctant(uint32_t idx);
+        const Octant* getOctant(uint32_t idx) const;
         Octant*	getGhostOctant(uint32_t idx);
+        const Octant* getGhostOctant(uint32_t idx) const;
         uint32_t 		getIdx(Octant oct);
         bool 			getIsGhost(Octant* oct);
         bool 			getIsGhost(Octant oct);
