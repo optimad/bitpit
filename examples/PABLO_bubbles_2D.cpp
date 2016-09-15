@@ -92,9 +92,6 @@ int main(int argc, char *argv[]) {
 		uint32_t idx = 0;
 		pabloBB.setBalance(idx,true);
 
-		/**<Set periodic condition on face 0 (and 1) (test 2:1 balance for periodic boundaries).*/
-		pabloBB.setPeriodic(0);
-
 		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<4; iter++){
 			pabloBB.adaptGlobalRefine();
