@@ -199,6 +199,25 @@ for (it_ = vec_1.begin(); it_ != vec_1.end(); ++it_) {
 
 return(intersect); }
 
+/*!
+    \ingroup commonUtils
+
+    Check if a type is iterable
+ */
+template <typename T>
+auto is_iterable_impl(int) -> decltype (
+    std::begin(std::declval<T&>()) != std::end(std::declval<T&>()),   // begin/end and operator !=
+    ++std::declval<decltype(std::begin(std::declval<T&>()))&>(), // operator ++
+    *std::begin(std::declval<T&>()),                             // operator*
+    std::true_type{}
+);
+
+template <typename T>
+std::false_type is_iterable_impl(...);
+
+template <typename T>
+using is_iterable = decltype(is_iterable_impl<T>(0));
+
 }
 
 }
