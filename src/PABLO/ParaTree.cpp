@@ -3457,7 +3457,6 @@ namespace bitpit {
                 }
                 nReq = 0;
                 for(set<int>::iterator sendit = sendersPerProc[m_rank].begin(); sendit != senditend; ++sendit){
-                    //nofBytesOverProc += recvBuffers[sit->first].m_commBufferSize;
                     m_errorFlag = MPI_Irecv(recvBuffers[*sendit].m_commBuffer,recvBuffers[*sendit].m_commBufferSize,MPI_PACKED,*sendit,m_rank,m_comm,&req[nReq]);
                     ++nReq;
                 }
@@ -3987,8 +3986,6 @@ namespace bitpit {
         uint8_t* glbdimcomm = new uint8_t[m_nproc];
         uint8_t* glbindcomm = new uint8_t[m_nproc];
 
-        //	uint32_t division_result = 0;
-        //	uint32_t remind = 0;
         uint32_t Dh = uint32_t(pow(double(2),double(m_global.m_maxLevel-level)));
         uint32_t istart, nocts, rest, forw, backw;
         uint32_t i = 0, iproc, j;
@@ -3996,23 +3993,12 @@ namespace bitpit {
         int32_t* pointercomm;
         int32_t* deplace = new int32_t[m_nproc-1];
 
-
-        //	division_result = uint32_t(m_globalNumOctants/(uint64_t)m_nproc);
-        //	remind = (uint32_t)(m_globalNumOctants%(uint64_t)m_nproc);
-        //	for(uint32_t i = 0; i < (uint32_t)m_nproc; ++i)
-        //		if(i<remind)
-        //			partition_temp[i] = division_result + 1;
-        //		else
-        //			partition_temp[i] = division_result;
-        //
         if (weight==NULL){
             computePartition(partition_temp);
         }
         else{
             computePartition(partition_temp, weight);
         }
-
-
 
         j = 0;
         sum = 0;

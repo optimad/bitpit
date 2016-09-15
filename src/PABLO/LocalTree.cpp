@@ -368,7 +368,6 @@ namespace bitpit {
                         //More Refinement to do
                         dorefine = true;
                     }
-                    //delete []children;
                     if (ilastch != 0){
                         ilastch--;
                     }
@@ -1000,7 +999,8 @@ namespace bitpit {
 
             //Build Morton number of virtual neigh of same size
             Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
-            Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
+            Morton = samesizeoct.computeMorton();
+
             // Search morton in octants
             // If a even face morton is lower than morton of oct, if odd higher
             // ---> can i search only before or after idx in octants
@@ -1145,7 +1145,7 @@ namespace bitpit {
 
             //Build Morton number of virtual neigh of same size
             Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size, m_global.m_maxLevel);
-            Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
+            Morton = samesizeoct.computeMorton();
 
             //SEARCH IN GHOSTS
             if (m_ghosts.size()>0 && !onlyinternal){
@@ -1412,7 +1412,7 @@ namespace bitpit {
 
             //Build Morton number of virtual neigh of same size
             Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size, m_global.m_maxLevel);
-            Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
+            Morton = samesizeoct.computeMorton();
 
             //SEARCH IN GHOSTS
 
@@ -1479,7 +1479,6 @@ namespace bitpit {
                         u32array3 coordtry1 = { {1,1,1} };
                         while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
                             for (int idim=0; idim<m_dim; idim++){
-                                //Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
                                 Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                                 Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
                                 coord1[idim] 	= coord[idim] + size;
@@ -1571,7 +1570,6 @@ namespace bitpit {
                     u32array3 coordtry1 = { {1,1,1} };
                     while(Mortontry <= Mortonlast && idxtry <= noctants-1){
                         for (int idim=0; idim<m_dim; idim++){
-                            //Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
                             Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                             Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
                             coord1[idim] 	= coord[idim] + size;
@@ -2255,7 +2253,6 @@ namespace bitpit {
             int32_t jump = getNumOctants()/2;
             idxtry = uint32_t(getNumOctants()/2);
             Mortontry = m_octants[idxtry].computeMorton();
-            //		jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
             while(abs(jump) > 0){
 
                 Mortontry = m_octants[idxtry].computeMorton();
@@ -2729,7 +2726,6 @@ namespace bitpit {
 
                     //Balance through faces
                     for (iface=0; iface<m_global.m_nfaces; iface++){
-                        //					if(!it->getBound(iface)){
 						findNeighbours(idx, iface, neigh, isghost);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
@@ -2760,14 +2756,12 @@ namespace bitpit {
 								};
 							}
 						}
-                        //					}
 						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                            //if(!it->getBound(m_global.m_edgeFace[iedge][0]) && !it->getBound(m_global.m_edgeFace[iedge][1])){
 							findEdgeNeighbours(idx, iedge, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2796,7 +2790,6 @@ namespace bitpit {
 									}
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
@@ -2804,7 +2797,6 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_global.m_nnodes; inode++){
-                            //if(!it->getBound(m_global.m_nodeFace[inode][0]) && !it->getBound(m_global.m_nodeFace[inode][1]) && !it->getBound(m_global.m_nodeFace[inode][m_dim-1])){
 							findNodeNeighbours(idx, inode, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2833,7 +2825,6 @@ namespace bitpit {
 									}
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
@@ -2870,7 +2861,6 @@ namespace bitpit {
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                            //if(it->getPbound(m_global.m_edgeFace[iedge][0]) == true || it->getPbound(m_global.m_edgeFace[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -2882,7 +2872,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -2890,7 +2879,6 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_global.m_nnodes; inode++){
-                            //if(it->getPbound(m_global.m_nodeFace[inode][0]) == true || it->getPbound(m_global.m_nodeFace[inode][1]) == true || it->getPbound(m_global.m_nodeFace[inode][m_dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -2902,7 +2890,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -2952,7 +2939,6 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                                //if(!m_octants[idx].getPbound(m_global.m_edgeFace[iedge][0]) || !m_octants[idx].getPbound(m_global.m_edgeFace[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2973,7 +2959,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
@@ -2981,7 +2966,6 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_global.m_nnodes; inode++){
-                                //if(!m_octants[idx].getPbound(m_global.m_nodeFace[inode][0]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][1]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][m_dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3002,7 +2986,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
@@ -3048,7 +3031,6 @@ namespace bitpit {
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                            //if(it->getPbound(m_global.m_edgeFace[iedge][0]) == true || it->getPbound(m_global.m_edgeFace[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -3060,7 +3042,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -3068,7 +3049,6 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_global.m_nnodes; inode++){
-                            //if(it->getPbound(m_global.m_nodeFace[inode][0]) == true || it->getPbound(m_global.m_nodeFace[inode][1]) == true || it->getPbound(m_global.m_nodeFace[inode][m_dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -3080,7 +3060,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -3130,7 +3109,6 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                                //if(!m_octants[idx].getPbound(m_global.m_edgeFace[iedge][0]) || !m_octants[idx].getPbound(m_global.m_edgeFace[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3151,7 +3129,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
@@ -3159,7 +3136,6 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_global.m_nnodes; inode++){
-                                //if(!m_octants[idx].getPbound(m_global.m_nodeFace[inode][0]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][1]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][m_dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3180,7 +3156,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
@@ -3236,7 +3211,6 @@ namespace bitpit {
 
                     //Balance through faces
                     for (iface=0; iface<m_global.m_nfaces; iface++){
-                        //					if(!it->getBound(iface)){
 						findNeighbours(idx, iface, neigh, isghost);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
@@ -3268,14 +3242,12 @@ namespace bitpit {
 
 							}
 						}
-                        //					}
 						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                            //if(!it->getBound(m_global.m_edgeFace[iedge][0]) && !it->getBound(m_global.m_edgeFace[iedge][1])){
 							findEdgeNeighbours(idx, iedge, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -3304,7 +3276,6 @@ namespace bitpit {
 									}
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
@@ -3312,7 +3283,6 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_global.m_nnodes; inode++){
-                            //if(!it->getBound(m_global.m_nodeFace[inode][0]) && !it->getBound(m_global.m_nodeFace[inode][1]) && !it->getBound(m_global.m_nodeFace[inode][m_dim-1])){
 							findNodeNeighbours(idx, inode, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -3341,7 +3311,6 @@ namespace bitpit {
 									}
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
@@ -3378,7 +3347,6 @@ namespace bitpit {
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                            //if(it->getPbound(m_global.m_edgeFace[iedge][0]) == true || it->getPbound(m_global.m_edgeFace[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -3390,7 +3358,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -3398,7 +3365,6 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_global.m_nnodes; inode++){
-                            //if(it->getPbound(m_global.m_nodeFace[inode][0]) == true || it->getPbound(m_global.m_nodeFace[inode][1]) == true || it->getPbound(m_global.m_nodeFace[inode][m_dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -3410,7 +3376,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -3460,7 +3425,6 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                                //if(!m_octants[idx].getPbound(m_global.m_edgeFace[iedge][0]) || !m_octants[idx].getPbound(m_global.m_edgeFace[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3481,7 +3445,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
@@ -3489,7 +3452,6 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_global.m_nnodes; inode++){
-                                //if(!m_octants[idx].getPbound(m_global.m_nodeFace[inode][0]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][1]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][m_dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3510,7 +3472,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
@@ -3556,7 +3517,6 @@ namespace bitpit {
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                            //if(it->getPbound(m_global.m_edgeFace[iedge][0]) == true || it->getPbound(m_global.m_edgeFace[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -3568,7 +3528,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -3576,7 +3535,6 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_global.m_nnodes; inode++){
-                            //if(it->getPbound(m_global.m_nodeFace[inode][0]) == true || it->getPbound(m_global.m_nodeFace[inode][1]) == true || it->getPbound(m_global.m_nodeFace[inode][m_dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -3588,7 +3546,6 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-                            //}
 							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
@@ -3638,7 +3595,6 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_global.m_nedges; iedge++){
-                                //if(!m_octants[idx].getPbound(m_global.m_edgeFace[iedge][0]) || !m_octants[idx].getPbound(m_global.m_edgeFace[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3659,7 +3615,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
@@ -3667,7 +3622,6 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_global.m_nnodes; inode++){
-                                //if(!m_octants[idx].getPbound(m_global.m_nodeFace[inode][0]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][1]) || !m_octants[idx].getPbound(m_global.m_nodeFace[inode][m_dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3688,7 +3642,6 @@ namespace bitpit {
 										};
 									}
 								}
-                                //}
 								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
