@@ -57,6 +57,7 @@ class Global{
 	friend class ParaTree;
 	friend class LocalTree;
 	friend class Map;
+	friend class Octant;
 
 	// =================================================================================== //
 	// MEMBERS

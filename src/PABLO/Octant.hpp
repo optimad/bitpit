@@ -120,8 +120,6 @@ private:
 														{0,2,1},{2,2,1},{0,1,2},
 														{2,1,2},{1,0,2},{1,2,2}};  /**< Static member for internal use. */
 
-	static int8_t			sm_maxLevel;				/**<Static member: maximum allowed refinement level of the octree. */
-
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
@@ -129,9 +127,9 @@ public:
 //	Octant();
 	Octant(const Octant &octant);
 private:
-	Octant(uint8_t dim, int8_t maxlevel = 20);
-	Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0, int8_t maxlevel = 20);
-	Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0, int8_t maxlevel = 20);
+	Octant(uint8_t dim);
+	Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
+	Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
 	bool operator ==(const Octant & oct2);
 
 	// =================================================================================== //

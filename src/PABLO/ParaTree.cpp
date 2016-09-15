@@ -116,13 +116,13 @@ namespace bitpit {
         uint32_t NumOctants = XYZ.size();
         m_dim = dim;
         m_global.setGlobal(m_dim);
-        m_octree.m_octants.resize(NumOctants, Octant(m_dim, m_global.m_maxLevel));
+        m_octree.m_octants.resize(NumOctants, Octant(m_dim));
         for (uint32_t i=0; i<NumOctants; i++){
             lev = uint8_t(levels[i]);
             x0 = uint32_t(XYZ[i][0]);
             y0 = uint32_t(XYZ[i][1]);
             z0 = uint32_t(XYZ[i][2]);
-            Octant oct(false, m_dim, lev, x0, y0, z0, m_global.m_maxLevel);
+            Octant oct(false, m_dim, lev, x0, y0, z0);
             oct.setBalance(true);
             if (x0 == 0){
                 iface = 0;
@@ -1681,7 +1681,7 @@ namespace bitpit {
     darray3
     ParaTree::getCenter(const Intersection* inter) const {
         darray3 center;
-        Octant oct(m_dim, m_global.m_maxLevel);
+        Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
@@ -1701,7 +1701,7 @@ namespace bitpit {
     darr3vector
     ParaTree::getNodes(Intersection* inter){
         darr3vector nodes;
-        Octant oct(m_dim, m_global.m_maxLevel);
+        Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
@@ -1726,7 +1726,7 @@ namespace bitpit {
     darray3
     ParaTree::getNormal(Intersection* inter){
         darray3 normal;
-        Octant oct(m_dim, m_global.m_maxLevel);
+        Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
@@ -3478,7 +3478,7 @@ namespace bitpit {
                     ++octCounter;
                 }
                 uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
-                m_octree.m_octants.resize(newCounter, Octant(m_dim, m_global.m_maxLevel));
+                m_octree.m_octants.resize(newCounter, Octant(m_dim));
                 m_octree.m_sizeOctants = m_octree.m_octants.size();
                 //MOVE RESIDENTS IN RIGHT POSITION
                 uint32_t resCounter = nofNewHead + nofResidents - 1;
@@ -3502,7 +3502,7 @@ namespace bitpit {
                         m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&y,1,MPI_UINT32_T,m_comm);
                         m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&z,1,MPI_UINT32_T,m_comm);
                         m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&l,1,MPI_UINT8_T,m_comm);
-                        m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z,m_global.m_maxLevel);
+                        m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                         m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
                         m_octree.m_octants[newCounter].setMarker(m);
                         for(int j = 0; j < 17; ++j){
@@ -4104,7 +4104,7 @@ namespace bitpit {
         }
         //update first last descendant
         if(getNumOctants()==0){
-            Octant octDesc(m_dim,m_global.m_maxLevel,pow(2,m_global.m_maxLevel),pow(2,m_global.m_maxLevel),(m_dim > 2 ? pow(2,m_global.m_maxLevel) : 0),m_global.m_maxLevel);
+            Octant octDesc(m_dim,m_global.m_maxLevel,pow(2,m_global.m_maxLevel),pow(2,m_global.m_maxLevel),(m_dim > 2 ? pow(2,m_global.m_maxLevel) : 0));
             m_octree.m_lastDescMorton = octDesc.computeMorton();
             m_octree.m_firstDescMorton = std::numeric_limits<uint64_t>::max();
         }
@@ -4333,7 +4333,7 @@ namespace bitpit {
         uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
         m_octree.m_sizeGhosts = nofGhosts;
         m_octree.m_ghosts.clear();
-        m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim, m_global.m_maxLevel));
+        m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim));
         m_octree.m_globalIdxGhosts.resize(nofGhosts);
 
         //UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
@@ -4349,7 +4349,7 @@ namespace bitpit {
                 m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&y,1,MPI_UINT32_T,m_comm);
                 m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&z,1,MPI_UINT32_T,m_comm);
                 m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&l,1,MPI_UINT8_T,m_comm);
-                m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z,m_global.m_maxLevel);
+                m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
                 m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
                 m_octree.m_ghosts[ghostCounter].setMarker(m);
                 for(int j = 0; j < 17; ++j){

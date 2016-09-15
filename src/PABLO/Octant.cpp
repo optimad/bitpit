@@ -25,6 +25,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include "Global.hpp"
 #include "Octant.hpp"
 #include <algorithm>
 #include <cmath>
@@ -48,7 +49,6 @@ using namespace std;
 constexpr int Octant::sm_CoeffNode[8][3];
 constexpr int Octant::sm_CoeffFaceCenter[6][3];
 constexpr int Octant::sm_CoeffEdgeCenter[12][3];
-int8_t Octant::sm_maxLevel;
 
 // =================================================================================== //
 // CONSTRUCTORS AND OPERATORS
@@ -59,7 +59,6 @@ int8_t Octant::sm_maxLevel;
 // */
 //Octant::Octant(){
 //	m_dim = 2;
-//	sm_maxLevel = 20;
 //	m_x = m_y = m_z = 0;
 //	m_level = 0;
 //	m_marker = 0;
@@ -73,11 +72,9 @@ int8_t Octant::sm_maxLevel;
 /*! Custom constructor of an octant.
  * It builds a 2D or 3D zero-level octant with origin in (0,0,0).
  * \param[in] dim_ Dimension of octant (2/3 for 2D/3D octant).
- * \param[in] maxlevel Maximum refinement level of the octree.
  */
-Octant::Octant(uint8_t dim_, int8_t maxlevel){
+Octant::Octant(uint8_t dim_){
 	m_dim = dim_;
-	sm_maxLevel = maxlevel;
 	m_x = m_y = m_z = 0;
 	m_level = 0;
 	m_marker = 0;
@@ -92,13 +89,11 @@ Octant::Octant(uint8_t dim_, int8_t maxlevel){
 /*! Custom constructor of an octant.
  * It builds a 2D or 3D octant with user defined origin and level.
  * \param[in] dim_ Dimension of octant (2/3 for 2D/3D octant).
- * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] level_ Refinement level of octant (0 for root octant).
  * \param[in] x_,y_,z_ Coordinates of the origin of the octant (default values for z=0).
  */
-Octant::Octant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_, int8_t maxlevel){
+Octant::Octant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
 	m_dim = dim_;
-	sm_maxLevel = maxlevel;
 	m_x = x_;
 	m_y = y_;
 	m_z = (m_dim-2)*z_;
@@ -118,13 +113,11 @@ Octant::Octant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_,
  * It builds a 2D or 3D octant with user defined origin, level and boundary conditions.
  * \param[in] bound Boundary condition for the faces of the octant (the same for each face).
  * \param[in] dim_ Dimension of octant (2/3 for 2D/3D octant).
- * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] level_ Refinement level of octant (0 for root octant).
  * \param[in] x_,y_,z_ Coordinates of the origin of the octant (default values for z=0).
  */
-Octant::Octant(bool bound, uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_, int8_t maxlevel){
+Octant::Octant(bool bound, uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
 	m_dim = dim_;
-	sm_maxLevel = maxlevel;
 	m_x = x_;
 	m_y = y_;
 	m_z = (m_dim-2)*z_;
@@ -150,7 +143,6 @@ Octant::Octant(const Octant &octant){
 	m_level = octant.m_level;
 	m_marker = octant.m_marker;
 	m_info = octant.m_info;
-	sm_maxLevel = octant.sm_maxLevel;
 };
 
 /*! Check if two octants are equal (no check on info)
@@ -162,7 +154,6 @@ bool Octant::operator ==(const Octant & oct2){
 	check = check && (m_y == oct2.m_y);
 	check = check && (m_z == oct2.m_z);
 	check = check && (m_level == oct2.m_level);
-	check = check && (sm_maxLevel == oct2.sm_maxLevel);
 	return check;
 }
 
@@ -352,7 +343,7 @@ Octant::setPbound(uint8_t face, bool flag){
  */
 uint32_t
 Octant::getSize() const{
-	uint32_t size = uint32_t(1<<(sm_maxLevel-m_level));
+	uint32_t size = uint32_t(1<<(Global::getMaxLevel()-m_level));
 	return size;
 };
 
@@ -531,7 +522,7 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 
 	u32array3 node = getNode(inode);
 
-	return keyXYZ(node[0], node[1], node[2], sm_maxLevel);
+	return keyXYZ(node[0], node[1], node[2], Global::getMaxLevel());
 };
 
 // =================================================================================== //
@@ -544,9 +535,9 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 Octant	Octant::buildLastDesc(){
 	u32array3 delta = { {0,0,0} };
 	for (int i=0; i<m_dim; i++){
-		delta[i] = (uint32_t)(1 << (sm_maxLevel - m_level)) - 1;
+		delta[i] = (uint32_t)(1 << (Global::getMaxLevel() - m_level)) - 1;
 	}
-	Octant last_desc(m_dim, sm_maxLevel, (m_x+delta[0]), (m_y+delta[1]), (m_z+delta[2]), sm_maxLevel);
+	Octant last_desc(m_dim, Global::getMaxLevel(), (m_x+delta[0]), (m_y+delta[1]), (m_z+delta[2]));
 	return last_desc;
 };
 
@@ -563,9 +554,9 @@ Octant	Octant::buildFather(){
 	xx[2] = m_z;
 	delta[2] = 0;
 	for (int i=0; i<m_dim; i++){
-		delta[i] = xx[i]%(uint32_t(1 << (sm_maxLevel - max(0,(m_level-1)))));
+		delta[i] = xx[i]%(uint32_t(1 << (Global::getMaxLevel() - max(0,(m_level-1)))));
 	}
-	Octant father(m_dim, max(0,m_level-1), m_x-delta[0], m_y-delta[1], m_z-delta[2], sm_maxLevel);
+	Octant father(m_dim, max(0,m_level-1), m_x-delta[0], m_y-delta[1], m_z-delta[2]);
 	return father;
 };
 
@@ -578,8 +569,8 @@ vector< Octant >	Octant::buildChildren(){
 	uint8_t xf,yf,zf;
 	int nchildren = 1<<m_dim;
 
-	if (this->m_level < sm_maxLevel){
-		vector< Octant > children(nchildren, Octant(m_dim, sm_maxLevel));
+	if (this->m_level < Global::getMaxLevel()){
+		vector< Octant > children(nchildren, Octant(m_dim));
 		for (int i=0; i<nchildren; i++){
 			switch (i) {
 			case 0 :
@@ -718,7 +709,7 @@ vector< Octant >	Octant::buildChildren(){
 		return children;
 	}
 	else{
-		vector< Octant > children(0, Octant(m_dim, sm_maxLevel));
+		vector< Octant > children(0, Octant(m_dim));
 		return children;
 	}
 };
@@ -736,8 +727,8 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
 	uint32_t i,cx,cy,cz;
 	int nchildren = 1<<m_dim;
 
-	nneigh = (m_level < sm_maxLevel) ? nchildren/2 : 1;
-	dh = (m_level < sm_maxLevel) ? getSize()/2 : getSize();
+	nneigh = (m_level < Global::getMaxLevel()) ? nchildren/2 : 1;
+	dh = (m_level < Global::getMaxLevel()) ? getSize()/2 : getSize();
 	dh2 = getSize();
 
 	if (m_info[iface]){
@@ -823,8 +814,8 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 	uint32_t nneigh, nline;
 	uint32_t i,cx,cy,cz;
 
-	nneigh = (m_level < sm_maxLevel) ? uint32_t(1<<((m_dim-1)*(maxdepth-m_level))) : 1;
-	dh = (m_level < sm_maxLevel) ? uint32_t(1<<(sm_maxLevel - maxdepth)) : getSize();
+	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<((m_dim-1)*(maxdepth-m_level))) : 1;
+	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(Global::getMaxLevel() - maxdepth)) : getSize();
 	dh2 = getSize();
 	nline = uint32_t(1<<(maxdepth-m_level));
 
@@ -934,8 +925,8 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 	int32_t cx,cy,cz;
 	uint8_t iface1, iface2;
 
-	nneigh = (m_level < sm_maxLevel) ? 2 : 1;
-	dh = (m_level < sm_maxLevel) ? getSize()/2 : getSize();
+	nneigh = (m_level < Global::getMaxLevel()) ? 2 : 1;
+	dh = (m_level < Global::getMaxLevel()) ? getSize()/2 : getSize();
 	dh2 = getSize();
 	iface1 = edgeface[iedge][0];
 	iface2 = edgeface[iedge][1];
@@ -1093,8 +1084,8 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 	uint8_t iface1, iface2;
 
 
-	nneigh = (m_level < sm_maxLevel) ? uint32_t(1<<(maxdepth-m_level)) : 1;
-	dh = (m_level < sm_maxLevel) ? uint32_t(1<<(sm_maxLevel - maxdepth)) : getSize();
+	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(maxdepth-m_level)) : 1;
+	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(Global::getMaxLevel() - maxdepth)) : getSize();
 	dh2 = getSize();
 	iface1 = edgeface[iedge][0];
 	iface2 = edgeface[iedge][1];
@@ -1273,7 +1264,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 	uint8_t iface[3];
 
 	nneigh = 1;
-	dh = (m_level < sm_maxLevel) ? uint32_t(1<<(sm_maxLevel - maxdepth)) : getSize();
+	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(Global::getMaxLevel() - maxdepth)) : getSize();
 	dh2 = getSize();
 	for (int i=0; i<m_dim; i++){
 		iface[i] = nodeface[inode][i];
@@ -1381,7 +1372,7 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface){
 	uint64_t Morton = this->computeMorton();
 	uint32_t dh;
 	dh = getSize();
-	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
+	uint32_t maxLength = uint32_t(1<<Global::getMaxLevel());
 
 	if (!m_info[iface]){
 		return Morton;
@@ -1428,8 +1419,8 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface){
  * may be not living in octree).
  */
 Octant Octant::computePeriodicOctant(uint8_t iface) const {
-	Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z, sm_maxLevel);
-	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
+	Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z);
+	uint32_t maxLength = uint32_t(1<<Global::getMaxLevel());
 	uint32_t dh = this->getSize();
 
 	if (!m_info[iface]){
@@ -1488,7 +1479,7 @@ array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
 	coord[1] = this->m_y;
 	coord[2] = this->m_z;
 	int64_t dh = this->getSize();
-	int64_t maxLength = int64_t(1<<sm_maxLevel);
+	int64_t maxLength = int64_t(1<<Global::getMaxLevel());
 
 	switch (iface) {
 	case 0 :

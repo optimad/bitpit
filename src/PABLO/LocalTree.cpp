@@ -52,9 +52,9 @@ namespace bitpit {
     LocalTree::LocalTree(uint8_t dim){
         m_dim = dim;
         m_global.setGlobal(m_dim);
-        Octant oct0(m_dim, m_global.m_maxLevel);
-        Octant octf(m_dim,m_global.m_maxLevel,0,0,0, m_global.m_maxLevel);
-        Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1), m_global.m_maxLevel);
+        Octant oct0(m_dim);
+        Octant octf(m_dim,m_global.m_maxLevel,0,0,0);
+        Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
         m_octants.clear();
         m_octants.push_back(oct0);
         m_sizeOctants = m_octants.size();
@@ -250,7 +250,7 @@ namespace bitpit {
             x = lastOctant->m_x + delta;
             y = lastOctant->m_y + delta;
             z = lastOctant->m_z + (m_dim-2)*delta;
-            Octant lastDesc = Octant(m_dim, m_global.m_maxLevel,x,y,z, m_global.m_maxLevel);
+            Octant lastDesc = Octant(m_dim, m_global.m_maxLevel,x,y,z);
             m_lastDescMorton = lastDesc.computeMorton();
         }
     };
@@ -317,7 +317,7 @@ namespace bitpit {
     LocalTree::refine(u32vector & mapidx){
 
         u32vector		last_child_index;
-        octvector 		children(0,Octant(m_dim, m_global.m_maxLevel));
+        octvector 		children(0,Octant(m_dim));
         uint32_t 		idx, ilastch;
         uint32_t 		offset = 0, blockidx;
         uint32_t		mapsize = mapidx.size();
@@ -342,7 +342,7 @@ namespace bitpit {
             if(mapsize > 0){
                 mapidx.resize(m_sizeOctants+offset);
             }
-            m_octants.resize(m_sizeOctants+offset, Octant(m_dim, m_global.m_maxLevel));
+            m_octants.resize(m_sizeOctants+offset, Octant(m_dim));
             m_sizeOctants = m_octants.size();
             blockidx = last_child_index[0]-nchm1;
             idx = m_sizeOctants;
@@ -395,7 +395,7 @@ namespace bitpit {
     LocalTree::coarse(u32vector & mapidx){
 
         u32vector		first_child_index;
-        Octant			father(m_dim, m_global.m_maxLevel);
+        Octant			father(m_dim);
         uint32_t 		idx, idx2;
         uint32_t 		offset;
         uint32_t 		idx1_gh;
@@ -513,7 +513,7 @@ namespace bitpit {
                 }
             }
         }
-        m_octants.resize(nblock, Octant(m_dim, m_global.m_maxLevel));
+        m_octants.resize(nblock, Octant(m_dim));
         octvector(m_octants).swap(m_octants);
         m_sizeOctants = m_octants.size();
         if(mapsize > 0){
@@ -571,7 +571,7 @@ namespace bitpit {
                             if(mapsize > 0) mapidx[idx] = mapidx[idx+offset];
                         }
                     }
-                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim, m_global.m_maxLevel));
+                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim));
                     octvector(m_octants).swap(m_octants);
                     m_sizeOctants = m_octants.size();
                     if(mapsize > 0){
@@ -678,7 +678,7 @@ namespace bitpit {
                         //                    docoarse = true;
                         //                }
                     father.setMarker(markerfather);
-                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim, m_global.m_maxLevel));
+                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim));
                     m_octants.push_back(father);
                     octvector(m_octants).swap(m_octants);
                     m_sizeOctants = m_octants.size();
@@ -778,7 +778,7 @@ namespace bitpit {
                         m_octants[idx] = m_octants[idx+toDelete];
                         if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
                     }
-                    m_octants.resize(m_sizeOctants-toDelete, Octant(m_dim, m_global.m_maxLevel));
+                    m_octants.resize(m_sizeOctants-toDelete, Octant(m_dim));
                     m_sizeOctants = m_octants.size();
                     if (mapsize>0){
                         mapidx.resize(m_sizeOctants);
@@ -864,7 +864,7 @@ namespace bitpit {
         //
 
         //Build Morton number of virtual neigh of same size
-        Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
+        Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
         Morton = samesizeoct.computeMorton();
         // Search morton in octants
         // If a even face morton is lower than morton of oct, if odd higher
@@ -997,7 +997,7 @@ namespace bitpit {
             const Octant* octghost = &m_ghosts[idxghost];
 
             //Build Morton number of virtual neigh of same size
-            Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
+            Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
             Morton = samesizeoct.computeMorton();
 
             // Search morton in octants
@@ -1143,7 +1143,7 @@ namespace bitpit {
         if (oct->m_info[iface1] == false && oct->m_info[iface2] == false){
 
             //Build Morton number of virtual neigh of same size
-            Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size, m_global.m_maxLevel);
+            Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
             Morton = samesizeoct.computeMorton();
 
             //SEARCH IN GHOSTS
@@ -1410,7 +1410,7 @@ namespace bitpit {
         if (oct->m_info[iface1] == false && oct->m_info[iface2] == false && oct->m_info[iface3] == false){
 
             //Build Morton number of virtual neigh of same size
-            Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size, m_global.m_maxLevel);
+            Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size);
             Morton = samesizeoct.computeMorton();
 
             //SEARCH IN GHOSTS
@@ -2348,7 +2348,7 @@ namespace bitpit {
     void
     LocalTree::preBalance21(bool internal){
 
-        Octant 			father(m_dim, m_global.m_maxLevel), lastdesc(m_dim, m_global.m_maxLevel);
+        Octant 			father(m_dim), lastdesc(m_dim);
         uint64_t 		mortonld;
         uint32_t 		nocts;
         uint32_t 		idx, idx2, idx0, last_idx;
@@ -2523,7 +2523,7 @@ namespace bitpit {
     void
     LocalTree::preBalance21(u32vector& newmodified){
 
-        Octant 				father(m_dim, m_global.m_maxLevel), lastdesc(m_dim, m_global.m_maxLevel);
+        Octant 				father(m_dim), lastdesc(m_dim);
         uint64_t 			mortonld;
         uint32_t 			nocts;
         uint32_t 			idx, idx2, idx0, last_idx;

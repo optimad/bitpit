@@ -996,7 +996,7 @@ namespace bitpit {
                             ++octCounter;
                         }
                         uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
-                        m_octree.m_octants.resize(newCounter, Octant(m_dim, m_global.m_maxLevel));
+                        m_octree.m_octants.resize(newCounter, Octant(m_dim));
                         userData.resize(newCounter);
                         //MOVE RESIDENTS IN RIGHT POSITION
                         uint32_t resCounter = nofNewHead + nofResidents - 1;
@@ -1021,7 +1021,7 @@ namespace bitpit {
                                 m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&z,1,MPI_UINT32_T,m_comm);
                                 m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&l,1,MPI_UINT8_T,m_comm);
                                 //m_octree.m_octants[newCounter] = Class_Octant<2>(l,x,y);
-                                m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z,m_global.m_maxLevel);
+                                m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                                 m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&m,1,MPI_INT8_T,m_comm);
                                 m_octree.m_octants[newCounter].setMarker(m);
                                 for(int j = 0; j < 17; ++j){
@@ -1543,7 +1543,7 @@ namespace bitpit {
                             ++octCounter;
                         }
                         uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
-                        m_octree.m_octants.resize(newCounter, Octant(m_dim, m_global.m_maxLevel));
+                        m_octree.m_octants.resize(newCounter, Octant(m_dim));
                         userData.resize(newCounter);
                         //MOVE RESIDENTS IN RIGHT POSITION
                         uint32_t resCounter = nofNewHead + nofResidents - 1;
@@ -1570,7 +1570,7 @@ namespace bitpit {
                                 m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&z,1,MPI_UINT32_T,m_comm);
                                 m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&l,1,MPI_UINT8_T,m_comm);
                                 //m_octree.m_octants[newCounter] = Class_Octant<2>(l,x,y);
-                                m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z,m_global.m_maxLevel);
+                                m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                                 m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&m,1,MPI_INT8_T,m_comm);
                                 m_octree.m_octants[newCounter].setMarker(m);
                                 for(int j = 0; j < 17; ++j){
