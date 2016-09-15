@@ -364,7 +364,7 @@ namespace bitpit {
                     if (children[0].getLevel() > m_localMaxDepth){
                         m_localMaxDepth = children[0].getLevel();
                     }
-                    if (children[0].getMarker() > 0 && mapsize == 0){
+                    if (children[0].getMarker()){
                         //More Refinement to do
                         dorefine = true;
                     }
