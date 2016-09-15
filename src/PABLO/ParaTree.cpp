@@ -2696,7 +2696,7 @@ namespace bitpit {
 
             // Coarse
             while(m_octree.globalCoarse(m_mapIdx));
-            updateAfterCoarse(m_mapIdx);
+            updateAfterCoarse();
             balance21(false);
             while(m_octree.refine(m_mapIdx));
             updateAdapt();
@@ -2724,7 +2724,7 @@ namespace bitpit {
 
             // Coarse
             while(m_octree.globalCoarse(m_mapIdx));
-            updateAfterCoarse(m_mapIdx);
+            updateAfterCoarse();
             setPboundGhosts();
             balance21(false);
             while(m_octree.refine(m_mapIdx));
@@ -3610,7 +3610,7 @@ namespace bitpit {
 
             // Coarse
             while(m_octree.coarse(m_mapIdx));
-            updateAfterCoarse(m_mapIdx);
+            updateAfterCoarse();
             if (getNumOctants() < nocts0){
                 globalDone = true;
             }
@@ -3645,7 +3645,7 @@ namespace bitpit {
 
             // Coarse
             while(m_octree.coarse(m_mapIdx));
-            updateAfterCoarse(m_mapIdx);
+            updateAfterCoarse();
             setPboundGhosts();
             if (getNumOctants() < nocts0){
                 localDone = true;
@@ -4469,14 +4469,11 @@ namespace bitpit {
 
     /*! Update the distributed octree over the processes after a coarsening procedure
      * and track the change in a mapper.
-     * \param[out] mapidx Mapper from new octants to old octants.
-     * I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt.
      */
     void
-    ParaTree::updateAfterCoarse(u32vector & mapidx){
-#if BITPIT_ENABLE_MPI==0
-        BITPIT_UNUSED(mapidx);
-#else
+    ParaTree::updateAfterCoarse(){
+
+#if BITPIT_ENABLE_MPI==1
         if(m_serial){
 #endif
             updateAdapt();
@@ -4523,12 +4520,8 @@ namespace bitpit {
                         }
                     }
                 }
-
             }//end if nprocs>1
-
-
         }
-
 #endif
     }
 

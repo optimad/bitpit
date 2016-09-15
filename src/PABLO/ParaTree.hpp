@@ -421,7 +421,7 @@ namespace bitpit {
         void 		setPboundGhosts();
         void 		commMarker();
 #endif
-        void 		updateAfterCoarse(u32vector & mapidx);
+        void 		updateAfterCoarse();
         void 		balance21(bool const first);
         void		createPartitionInfo();
 
