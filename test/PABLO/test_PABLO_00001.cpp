@@ -31,7 +31,7 @@ using namespace bitpit;
 
 // =================================================================================== //
 
-void test001() {
+void test01() {
 
 	/**<Instantation and setup of a default (named bitpit) logfile.*/
 	int nproc;
@@ -88,7 +88,7 @@ int main( int argc, char *argv[] ) {
 #endif
 		/**<Calling Pablo Test routines*/
 
-        test001() ;
+        test01() ;
 
 #if BITPIT_ENABLE_MPI==1
 	}

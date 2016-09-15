@@ -29,7 +29,7 @@ using namespace std;
 using namespace bitpit;
 
 // =================================================================================== //
-void test006() {
+void test05() {
 
 	/**<Instantation and setup of a default (named bitpit) logfile.*/
 	int nproc;
@@ -47,22 +47,22 @@ void test006() {
 	log::cout() << consoleVerbosity(log::QUIET);
 
 	/**<Instantation of a 2D para_tree object.*/
-	ParaTree pablo6(2);
+	ParaTree pablo(2);
 
     /**<Set 2:1 balance only through faces.*/
-    pablo6.setBalanceCodimension(1);
+    pablo.setBalanceCodimension(1);
     uint32_t idx=0;
-    pablo6.setBalance(idx,false);
+    pablo.setBalance(idx,false);
 
     /**<Compute the connectivity and write the para_tree.*/
-    pablo6.computeConnectivity();
-    pablo6.write("Pablo006_iter0");
+    pablo.computeConnectivity();
+    pablo.write("Pablo006_iter0");
 
     /**<Refine globally one level and write the para_tree.*/
     for (int iter=1; iter<2; iter++){
-        pablo6.adaptGlobalRefine();
-        pablo6.updateConnectivity();
-        pablo6.write("Pablo006_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo.adaptGlobalRefine();
+        pablo.updateConnectivity();
+        pablo.write("Pablo006_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
     /**<Define a center point and a radius.*/
@@ -73,24 +73,24 @@ void test006() {
     /**<Simple adapt() [refine] 2 times the octants with at least one node inside the circle.*/
     int fiter;
     for (int iter=2; iter<8; iter++){
-        uint32_t nocts = pablo6.getNumOctants();
+        uint32_t nocts = pablo.getNumOctants();
         for (unsigned int i=0; i<nocts; i++){
             /**<Compute the nodes of the octant.*/
-            vector<array<double,3> > nodes = pablo6.getNodes(i);
+            vector<array<double,3> > nodes = pablo.getNodes(i);
             for (int j=0; j<4; j++){
                 double x = nodes[j][0];
                 double y = nodes[j][1];
                 if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-                    pablo6.setMarker(i, 1);
+                    pablo.setMarker(i, 1);
                 }
             }
         }
         /**<Adapt octree.*/
-        pablo6.adapt();
+        pablo.adapt();
 
         /**<Update the connectivity and write the para_tree.*/
-        pablo6.updateConnectivity();
-        pablo6.write("Pablo006_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo.updateConnectivity();
+        pablo.write("Pablo006_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
     /**<Simple adapt() [coarse] 2 times the octants with at least one node inside the 2nd circle.*/
@@ -99,58 +99,58 @@ void test006() {
     xc2 = yc2 = 0.5;
     double radius2 = 0.25;
     for (int iter=8; iter<12; iter++){
-        uint32_t nocts = pablo6.getNumOctants();
+        uint32_t nocts = pablo.getNumOctants();
         for (unsigned int i=0; i<nocts; i++){
             /**<Compute the nodes of the octant.*/
-            vector<array<double,3> > nodes = pablo6.getNodes(i);
+            vector<array<double,3> > nodes = pablo.getNodes(i);
             for (int j=0; j<4; j++){
                 double x = nodes[j][0];
                 double y = nodes[j][1];
                 if ((pow((x-xc2),2.0)+pow((y-yc2),2.0) <= pow(radius2,2.0))){
-                    pablo6.setMarker(i, -1);
+                    pablo.setMarker(i, -1);
                 }
             }
         }
         /**<Adapt octree.*/
-        pablo6.adapt();
+        pablo.adapt();
 
         /**<Update the connectivity and write the para_tree.*/
-        pablo6.updateConnectivity();
-        pablo6.write("Pablo006_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo.updateConnectivity();
+        pablo.write("Pablo006_iter"+to_string(static_cast<unsigned long long>(iter)));
         fiter = iter;
     }
 
 
-    uint32_t nocts = pablo6.getNumOctants();
+    uint32_t nocts = pablo.getNumOctants();
     vector<double> data(nocts);
     for (unsigned int i=0; i<nocts; i++){
-        pablo6.setBalance(i,true);
+        pablo.setBalance(i,true);
         data[i] = i;
     }
 
     /**<Update the connectivity and write the para_tree.*/
-    pablo6.updateConnectivity();
-    pablo6.writeTest("Pablo006_iter"+to_string(static_cast<unsigned long long>(fiter+1)),data);
+    pablo.updateConnectivity();
+    pablo.writeTest("Pablo006_iter"+to_string(static_cast<unsigned long long>(fiter+1)),data);
 
     /**<Adapt octree.*/
-    pablo6.adapt(true);
+    pablo.adapt(true);
 
     /**<Mapping data. */
-    nocts = pablo6.getNumOctants();
+    nocts = pablo.getNumOctants();
     vector<double> dataNew(nocts);
     vector<uint32_t> mapper;
     vector<bool> isghost;
     vector<int> vrank;
     for (unsigned int i=0; i<nocts; i++){
-        pablo6.getMapping(i, mapper, isghost, vrank);
+        pablo.getMapping(i, mapper, isghost, vrank);
         dataNew[i] = data[mapper[0]];
     }
     data = dataNew;
     dataNew.clear();
 
     /**<Update the connectivity and write the para_tree.*/
-    pablo6.updateConnectivity();
-    pablo6.writeTest("Pablo006_iter"+to_string(static_cast<unsigned long long>(fiter+2)), data);
+    pablo.updateConnectivity();
+    pablo.writeTest("Pablo006_iter"+to_string(static_cast<unsigned long long>(fiter+2)), data);
 
     return ;
 }
@@ -168,7 +168,7 @@ int main( int argc, char *argv[] ) {
 	BITPIT_UNUSED(argv);
 #endif
 		/**<Calling Pablo Test routines*/
-        test006() ;
+        test05() ;
 
 #if BITPIT_ENABLE_MPI==1
 	}

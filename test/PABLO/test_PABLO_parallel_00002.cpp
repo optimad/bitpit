@@ -29,7 +29,7 @@ using namespace std;
 using namespace bitpit;
 
 // =================================================================================== //
-void testParallel001() {
+void testParallel01() {
 
     /**<Instantation and setup of a default (named bitpit) logfile.*/
     int nproc;
@@ -47,50 +47,50 @@ void testParallel001() {
     log::cout() << consoleVerbosity(log::QUIET);
 
     /**<Instantation of a 2D para_tree object.*/
-    ParaTree pablo12;
+    ParaTree pablo;
 
     /**<Set NO 2:1 balance for the octree.*/
     uint32_t idx=0;
-    pablo12.setBalance(idx,false);
+    pablo.setBalance(idx,false);
 
     /**<Compute the connectivity and write the para_tree.*/
-    pablo12.updateConnectivity();
-    pablo12.write("PabloParallelEmptyPartitions_serial");
+    pablo.updateConnectivity();
+    pablo.write("PabloParallelEmptyPartitions_serial");
 
     /**<GLOBAL REFINE*/
-    pablo12.adaptGlobalRefine();
-    pablo12.setMarker(2,1);
-    pablo12.adapt();
+    pablo.adaptGlobalRefine();
+    pablo.setMarker(2,1);
+    pablo.adapt();
 
 #if BITPIT_ENABLE_MPI==1
     /**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
-    pablo12.loadBalance();
+    pablo.loadBalance();
 #endif
 
-//    if(pablo12.getRank()==1 || pablo12.getRank()==2){
-//        uint32_t nocts = pablo12.getNumOctants();
+//    if(pablo.getRank()==1 || pablo.getRank()==2){
+//        uint32_t nocts = pablo.getNumOctants();
 //        for(uint32_t i = 0; i < nocts; ++i)
-//            pablo12.setMarker(i,-1);
+//            pablo.setMarker(i,-1);
 //    }
 
-    uint32_t nocts = pablo12.getNumOctants();
+    uint32_t nocts = pablo.getNumOctants();
     for(uint32_t i = 0; i < nocts; ++i){
-        if(pablo12.getLevel(i) > 1)
-            pablo12.setMarker(i,-1);
+        if(pablo.getLevel(i) > 1)
+            pablo.setMarker(i,-1);
     }
 
-    pablo12.adapt();
+    pablo.adapt();
 
-    pablo12.adaptGlobalCoarse();
+    pablo.adaptGlobalCoarse();
 
 #if BITPIT_ENABLE_MPI==1
     /**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
-    pablo12.loadBalance();
+    pablo.loadBalance();
 #endif
 
     /**<Compute the connectivity and write the para_tree.*/
-    pablo12.updateConnectivity();
-    pablo12.write("PabloParallelEmptyPartitions_parallel");
+    pablo.updateConnectivity();
+    pablo.write("PabloParallelEmptyPartitions_parallel");
 
     return ;
 }
@@ -106,7 +106,7 @@ int main( int argc, char *argv[] ) {
 #endif
 
     /**<Calling Pablo Test routines*/
-    testParallel001() ;
+    testParallel01() ;
 
 #if BITPIT_ENABLE_MPI==1
     MPI_Finalize();

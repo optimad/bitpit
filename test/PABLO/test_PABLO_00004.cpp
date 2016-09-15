@@ -29,7 +29,7 @@ using namespace std;
 using namespace bitpit;
 
 // =================================================================================== //
-void test004() {
+void test01() {
 
     int iter = 0;
     int dim = 3;
@@ -50,11 +50,11 @@ void test004() {
 	log::cout() << consoleVerbosity(log::QUIET);
 
 	/**<Instantation of a 3D para_tree object.*/
-    ParaTree pablo104(3);
+    ParaTree pablo(3);
 
     /**<Refine globally four level and write the para_tree.*/
     for (iter=1; iter<4; iter++){
-        pablo104.adaptGlobalRefine();
+        pablo.adaptGlobalRefine();
     }
 
     /**<Define a center point and a radius.*/
@@ -63,13 +63,13 @@ void test004() {
     double radius = 0.25;
 
     /**<Define vectors of data.*/
-    uint32_t nocts = pablo104.getNumOctants();
+    uint32_t nocts = pablo.getNumOctants();
     vector<double> oct_data(nocts, 0.0);
 
     /**<Assign a data to the octants with at least one node inside the cylinder.*/
     for (unsigned int i=0; i<nocts; i++){
         /**<Compute the nodes of the octant.*/
-        vector<array<double,3> > nodes = pablo104.getNodes(i);
+        vector<array<double,3> > nodes = pablo.getNodes(i);
         for (int j=0; j<8; j++){
             double x = nodes[j][0];
             double y = nodes[j][1];
@@ -81,8 +81,8 @@ void test004() {
 
     /**<Update the connectivity and write the para_tree.*/
     iter = 0;
-    pablo104.updateConnectivity();
-    pablo104.writeTest("Pablo004_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
+    pablo.updateConnectivity();
+    pablo.writeTest("Pablo004_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
     /**<Smoothing iterations on initial data*/
     int start = 1;
@@ -106,7 +106,7 @@ void test004() {
                     nfaces = 8;
                 }
                 for (iface=0; iface<nfaces; iface++){
-                    pablo104.findNeighbours(i,iface,codim,neigh_t,isghost_t);
+                    pablo.findNeighbours(i,iface,codim,neigh_t,isghost_t);
                     neigh.insert(neigh.end(), neigh_t.begin(), neigh_t.end());
                     isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
                 }
@@ -125,8 +125,8 @@ void test004() {
         }
 
         /**<Update the connectivity and write the para_tree.*/
-        pablo104.updateConnectivity();
-        pablo104.writeTest("Pablo004_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
+        pablo.updateConnectivity();
+        pablo.writeTest("Pablo004_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
 
         oct_data = oct_data_smooth;
     };
@@ -146,7 +146,7 @@ int main( int argc, char *argv[] ) {
 	BITPIT_UNUSED(argv);
 #endif
 		/**<Calling Pablo Test routines*/
-        test004() ;
+        test01() ;
 
 #if BITPIT_ENABLE_MPI==1
 	}
