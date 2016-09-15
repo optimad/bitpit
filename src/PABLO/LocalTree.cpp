@@ -352,6 +352,7 @@ namespace bitpit {
             while (idx>blockidx){
                 idx--;
                 if(idx == last_child_index[ilastch]){
+                    m_octants[idx-offset].m_info[15] = false;
                     children = m_octants[idx-offset].buildChildren();
                     for (ich=0; ich<m_global.m_nchildren; ich++){
                         m_octants[idx-ich] = (children[nchm1-ich]);
@@ -478,7 +479,7 @@ namespace bitpit {
                                 }
                             }
                             father.m_info[13] = true;
-                            father.m_info[15] = true;
+                            father.m_info[15] = false;
                             father.setMarker(markerfather);
                             if (markerfather < 0 && mapsize == 0){
                                 docoarse = true;
@@ -566,7 +567,7 @@ namespace bitpit {
                     }
                 }
                 father.m_info[13] = true;
-                father.m_info[15] = true;
+                father.m_info[15] = false;
                 if (markerfather < 0 && mapsize == 0){
                     docoarse = true;
                 }

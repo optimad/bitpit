@@ -3575,7 +3575,6 @@ namespace bitpit {
         for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
             iter->m_info[12] = false;
             iter->m_info[13] = false;
-            iter->m_info[15] = false;
         }
 
         // m_mapIdx init

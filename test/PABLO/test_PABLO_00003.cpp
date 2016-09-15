@@ -71,6 +71,7 @@ void test003() {
     double radius = 0.4;
 
     /**<Simple adapt() [refine] 6 times the octants with at least one node inside the circle.*/
+    int fiter;
     for (int iter=3; iter<9; iter++){
         uint32_t nocts = pablo2.getNumOctants();
         for (unsigned int i=0; i<nocts; i++){
@@ -109,6 +110,7 @@ void test003() {
                     pablo2.setMarker(i, -1);
                 }
             }
+            if (iter == 11) pablo2.setBalance(i,false);
         }
         /**<Adapt octree.*/
         pablo2.adapt();
@@ -116,7 +118,21 @@ void test003() {
         /**<Update the connectivity and write the para_tree.*/
         pablo2.updateConnectivity();
         pablo2.write("Pablo003_iter"+to_string(static_cast<unsigned long long>(iter)));
+        fiter = iter;
     }
+
+
+    uint32_t nocts = pablo2.getNumOctants();
+    for (unsigned int i=0; i<nocts; i++){
+        pablo2.setBalance(i,true);
+    }
+
+    /**<Adapt octree.*/
+    pablo2.adapt();
+
+    /**<Update the connectivity and write the para_tree.*/
+    pablo2.updateConnectivity();
+    pablo2.write("Pablo003_iter"+to_string(static_cast<unsigned long long>(fiter+1)));
 
     return ;
 }
