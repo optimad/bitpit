@@ -75,6 +75,7 @@ public:
 	VolOctree();
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
+	VolOctree(std::istream stream);
 
 	void reset();
 	void setDimension(int dimension);

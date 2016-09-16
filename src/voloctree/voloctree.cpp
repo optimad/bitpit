@@ -121,6 +121,18 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 }
 
 /*!
+	Creates a new patch restoring the patch saved in the specified stream.
+
+	\param stream is the stream to read from
+*/
+VolOctree::VolOctree(std::istream stream)
+	: VolumeKernel(false)
+{
+	initialize();
+	restore(stream);
+}
+
+/*!
 	Internal function to reset the patch.
 */
 void VolOctree::reset()
@@ -1579,7 +1591,17 @@ int VolOctree::_getDumpVersion() const
  */
 void VolOctree::_dump(std::ostream &stream)
 {
-	throw std::runtime_error ("Dump is not implemented for the VolOctree patch");
+	m_tree.dump(stream);
+
+	size_t nOctants = m_octantToCell.size();
+	for (size_t n = 0; n < nOctants; ++n) {
+		IO::binary::write(stream, m_octantToCell.at(n));
+	}
+
+	size_t nGhosts = m_ghostToCell.size();
+	for (size_t n = 0; n < nGhosts; ++n) {
+		IO::binary::write(stream, m_ghostToCell.at(n));
+	}
 }
 
 /*!
@@ -1589,7 +1611,44 @@ void VolOctree::_dump(std::ostream &stream)
  */
 void VolOctree::_restore(std::istream &stream)
 {
-	throw std::runtime_error ("Restore is not implemented for the VolOctree patch");
+	// Restore the tree
+#if ENABLE_MPI==1
+	m_tree.setComm(getCommunicator());
+#endif
+	m_tree.restore(stream);
+
+	// Initialize tree geometry
+	initializeTreeGeometry();
+
+	// Restore octant to cell map
+	size_t nOctants = m_tree.getNumOctants();
+	m_cellToOctant.reserve(nOctants);
+	m_octantToCell.reserve(nOctants);
+	for (size_t n = 0; n < nOctants; ++n) {
+		long cellId;
+		IO::binary::read(stream, cellId);
+
+		m_cellToOctant.insert({cellId, n});
+		m_octantToCell.insert({n, cellId});
+	}
+
+	// Restore ghost to cell map
+	size_t nGhosts = m_tree.getNumGhosts();
+	m_cellToGhost.reserve(nGhosts);
+	m_ghostToCell.reserve(nGhosts);
+	for (size_t n = 0; n < nGhosts; ++n) {
+		long cellId;
+		IO::binary::read(stream, cellId);
+
+		m_cellToGhost.insert({cellId, n});
+		m_ghostToCell.insert({n, cellId});
+	}
+
+	// Sync the patch
+	sync(false, false);
+
+	// The bounding box is frozen, it is not updated automatically
+	setBoundingBox();
 }
 
 /*!
