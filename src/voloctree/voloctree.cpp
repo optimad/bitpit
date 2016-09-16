@@ -1076,18 +1076,6 @@ void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
 	Imports a list of octants into the patch.
 
 	\param octantInfoList is the list of octant to import
-*/
-std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList)
-{
-	StitchInfo stitchInfo;
-
-	return importCells(octantInfoList, stitchInfo);
-}
-
-/*!
-	Imports a list of octants into the patch.
-
-	\param octantInfoList is the list of octant to import
 	\param stitchInfo is the list of vertices that will be used to stitch the
 	the new octants
 */

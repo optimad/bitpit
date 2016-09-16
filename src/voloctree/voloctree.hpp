@@ -230,7 +230,6 @@ private:
 	                          std::vector<RenumberInfo> &renumberedOctants,
 	                          std::vector<OctantInfo> &addOctants);
 
-	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds);
 	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo);
 	StitchInfo deleteCells(std::vector<DeleteInfo> &deletedOctants);
 
