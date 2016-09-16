@@ -812,7 +812,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     SegmentToCellMap segmentToCellMap;
     segmentToCellMap.reserve(m_segmentation->getCellCount());
 
-    log::cout() << "  Extracting segment-to-cell map from Cartesian patch... " << std::endl;
+    log::cout() << "  Extracting segment-to-cell map from Octree patch... " << std::endl;
 
     // mesh size corresponding to RSearch
     size = visitee->computeSizeFromRSearch( RSearch ) ;
