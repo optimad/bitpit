@@ -199,8 +199,6 @@ public:
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	bool isBoundingBoxDirty(bool global = false) const;
 	void updateBoundingBox(bool forcedUpdated = false);
-	void addPointToBoundingBox(const std::array<double, 3> &point);
-	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 
 	std::unordered_map<long, long> binSortVertex(PiercedVector<Vertex> vertices, int nBins = 128);
     std::unordered_map<long, long> binSortVertex(int nBins = 128);
@@ -400,6 +398,8 @@ protected:
 	void setAdaptionDirty(bool dirty);
 	void setExpert(bool expert);
 
+	void addPointToBoundingBox(const std::array<double, 3> &point);
+	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 #if BITPIT_ENABLE_MPI==1
 	virtual const std::vector<adaption::Info> _balancePartition(bool trackChanges);
 
