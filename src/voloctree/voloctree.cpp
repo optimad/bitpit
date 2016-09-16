@@ -304,7 +304,24 @@ void VolOctree::setBoundingBox()
 	std::array<double, 3> minPoint;
 	std::array<double, 3> maxPoint;
 
+	// Get the bounding box from the tree
 	m_tree.getBoundingBox(minPoint, maxPoint);
+
+	// The tree is only evaluating the bounding box of the internal octants,
+	// we need to consider also ghosts cells.
+	for (auto ghostItr = ghostBegin(); ghostItr != ghostEnd(); ++ghostItr) {
+		const long *ghostConnect = ghostItr->getConnect();
+		int nGhostVertices = ghostItr->getVertexCount();
+		for (int i = 0; i < nGhostVertices; ++i) {
+			const std::array<double, 3> coords = m_vertices[ghostConnect[i]].getCoords();
+			for (int d = 0; d < 3; ++d) {
+				minPoint[d] = std::min(coords[d], minPoint[d]);
+				maxPoint[d] = std::max(coords[d], maxPoint[d]);
+			}
+		}
+	}
+
+	// Set the bounding box
 	setBoundingBox(minPoint, maxPoint);
 }
 
