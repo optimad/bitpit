@@ -109,7 +109,7 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	__setDimension(dimension);
 
 	// Set the bounding
-	setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
+	setBoundingBox();
 
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
@@ -282,6 +282,18 @@ void VolOctree::initializeTreeGeometry()
 	    m_tree_area.push_back(pow(levelLength, (double) (getDimension() - 1)));
 	    m_tree_volume.push_back(pow(levelLength, (double) (getDimension())));
 	}
+}
+
+/*!
+	Set the bounding box
+ */
+void VolOctree::setBoundingBox()
+{
+	std::array<double, 3> minPoint;
+	std::array<double, 3> maxPoint;
+
+	m_tree.getBoundingBox(minPoint, maxPoint);
+	setBoundingBox(minPoint, maxPoint);
 }
 
 /*!
@@ -512,12 +524,6 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	ParaTree::Operation lastTreeOperation = m_tree.getLastOperation();
 	if (lastTreeOperation == ParaTree::OP_ADAPT_UNMAPPED && !importAll) {
 		throw std::runtime_error ("Unable to sync the patch after an unmapped adaption");
-	}
-
-	// If the patch is partitioned the bounding box can not be considered
-	// frozen
-	if (lastTreeOperation == ParaTree::OP_LOADBALANCE || lastTreeOperation == ParaTree::OP_LOADBALANCE_FIRST) {
-		setBoundingBoxFrozen(false);
 	}
 
 	// Info on the tree
@@ -1630,10 +1636,8 @@ void VolOctree::translate(std::array<double, 3> translation)
 
 	VolumeKernel::translate(translation);
 
-	// If the bounding box is fronzen it is not updated automatically
-	if (isBoundingBoxFrozen()) {
-		setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
-	}
+	// The bounding box is frozen, it is not updated automatically
+	setBoundingBox();
 }
 
 /*!
@@ -1659,10 +1663,8 @@ void VolOctree::setLength(double length)
 	// Upadate the geometry
 	initializeTreeGeometry();
 
-	// If the bounding box is fronzen it is not updated automatically
-	if (isBoundingBoxFrozen()) {
-		setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
-	}
+	// Set the new bounding box
+	setBoundingBox();
 
 	// If needed, update the discretization
 	if (m_vertices.size() > 0) {
@@ -1711,10 +1713,8 @@ void VolOctree::scale(std::array<double, 3> scaling)
 
 	VolumeKernel::scale(scaling);
 
-	// If the bounding box is fronzen it is not updated automatically
-	if (isBoundingBoxFrozen()) {
-		setBoundingBox(m_tree.getOrigin(), m_tree.getOrigin() + m_tree.getL());
-	}
+	// The bounding box is frozen, it is not updated automatically
+	setBoundingBox();
 }
 
 /*!

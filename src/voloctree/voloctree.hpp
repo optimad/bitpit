@@ -131,6 +131,8 @@ protected:
 #endif
 
 private:
+	using PatchKernel::setBoundingBox;
+
 	typedef std::bitset<72> OctantHash;
 
 	struct RenumberInfo {
@@ -214,6 +216,8 @@ private:
 
 	void initialize();
 	void initializeTreeGeometry();
+
+	void setBoundingBox();
 
 	void __reset(bool resetTree);
 	void __setDimension(int dimension);
