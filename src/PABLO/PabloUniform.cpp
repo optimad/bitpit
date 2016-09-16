@@ -644,25 +644,32 @@ namespace bitpit {
      */
     void
     PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1){
-        darray3		cnode0, cnode1;
-        uint32_t 	nocts = ParaTree::getNumOctants();
-        uint32_t	id = 0;
-        uint8_t 	nnodes = ParaTree::getNnodes();
+        // If the octree is serial we can evaluate the bounding box easily
+        // otherwise we need to scan all the octants
+        if (getSerial()) {
+            P0 = getOrigin();
+            P1 = P0 + getL();
+        } else {
+            darray3		cnode0, cnode1;
+            uint32_t 	nocts = ParaTree::getNumOctants();
+            uint32_t	id = 0;
+            uint8_t 	nnodes = ParaTree::getNnodes();
 
-        P0 = ParaTree::getNode(id, 0);
-        P1 = ParaTree::getNode(nocts-1, nnodes-1);
+            P0 = ParaTree::getNode(id, 0);
+            P1 = ParaTree::getNode(nocts-1, nnodes-1);
 
-        for (id=0; id<nocts; id++){
-            cnode0 = ParaTree::getNode(id, 0);
-            cnode1 = ParaTree::getNode(id, nnodes-1);
-            for (int i=0; i<3; i++){
-                P0[i] = min(P0[i], (double)cnode0[i]);
-                P1[i] = max(P1[i], (double)cnode1[i]);
+            for (id=0; id<nocts; id++){
+                cnode0 = ParaTree::getNode(id, 0);
+                cnode1 = ParaTree::getNode(id, nnodes-1);
+                for (int i=0; i<3; i++){
+                    P0[i] = min(P0[i], (double)cnode0[i]);
+                    P1[i] = max(P1[i], (double)cnode1[i]);
+                }
             }
-        }
-        for (int i=0; i<3; i++){
-            P0[i] = m_origin[i] + m_L * P0[i];
-            P1[i] = m_origin[i] + m_L * P1[i];
+            for (int i=0; i<3; i++){
+                P0[i] = m_origin[i] + m_L * P0[i];
+                P1[i] = m_origin[i] + m_L * P1[i];
+            }
         }
     };
 
