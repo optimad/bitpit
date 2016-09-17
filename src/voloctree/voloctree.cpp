@@ -807,7 +807,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	// Remove deleted octants
 	StitchInfo stitchInfo;
-	if (deletedOctants.size() > 0) {
+	if (!importAll && deletedOctants.size() > 0) {
 		log::cout() << ">> Removing non-existing cells...";
 
 		// Track changes
