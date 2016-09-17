@@ -65,7 +65,7 @@ const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges
 	m_tree.loadBalance();
 
 	// Sync the patch
-	const std::vector<adaption::Info> adaptionData = sync(trackChanges);
+	const std::vector<adaption::Info> adaptionData = sync(true, trackChanges);
 
 	// The bounding box is frozen, it is not updated automatically
 	setBoundingBox();
