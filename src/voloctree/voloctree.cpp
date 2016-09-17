@@ -503,17 +503,20 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	log::cout() << " Done" << std::endl;
 
 	// Sync the patch
-	return sync(trackAdaption);
+	return sync(true, trackAdaption);
 }
 
 /*!
 	Syncronizes the patch with the underlying octree.
 
+	\param updateOctantMaps if set to true the cell-to-octant maps will
+	be updated, otherwise the function assumes that someone has already
+	updated those maps
 	\param trackChanges if set to true the changes to the patch will be
 	tracked
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
+const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool trackChanges)
 {
 	log::cout() << ">> Syncing patch..." << std::endl;
 
@@ -798,12 +801,14 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	setExpert(true);
 
 	// Reset cell-to-octant and octant-to-cell map
-	log::cout() << ">> Resetting cell-to-octant and octant-to-cell maps...";
+	if (updateOctantMaps) {
+		log::cout() << ">> Resetting cell-to-octant and octant-to-cell maps...";
 
-	updateCellOctantMaps(deletedOctants, renumberedOctants, addedOctants);
-	std::vector<RenumberInfo>().swap(renumberedOctants);
+		updateCellOctantMaps(deletedOctants, renumberedOctants, addedOctants);
+		std::vector<RenumberInfo>().swap(renumberedOctants);
 
-	log::cout() << " Done" << std::endl;
+		log::cout() << " Done" << std::endl;
+	}
 
 	// Remove deleted octants
 	StitchInfo stitchInfo;

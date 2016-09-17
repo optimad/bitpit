@@ -67,7 +67,7 @@ const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges
 	log::cout() << " Done" << std::endl;
 
 	// Sync the patch
-	return sync(trackChanges);
+	return sync(true, trackChanges);
 }
 
 /*!

@@ -233,7 +233,7 @@ private:
 	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo);
 	StitchInfo deleteCells(std::vector<DeleteInfo> &deletedOctants);
 
-	const std::vector<adaption::Info> sync(bool trackChanges);
+	const std::vector<adaption::Info> sync(bool updateOctantMaps, bool trackChanges);
 
 	std::vector<long> findCellCodimensionNeighs(const long &id, const int &index,
 		const int &codimension, const std::vector<long> &blackList) const;
