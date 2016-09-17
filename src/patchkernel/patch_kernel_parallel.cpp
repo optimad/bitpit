@@ -79,7 +79,9 @@ void PatchKernel::setCommunicator(MPI_Comm communicator)
 	MPI_Comm_rank(m_communicator, &m_rank);
 
 	// Set parallel data for the VTK output
-	m_vtk.setParallel(m_nProcessors, m_rank);
+	if (m_nProcessors > 1) {
+		m_vtk.setParallel(m_nProcessors, m_rank);
+	}
 }
 
 /*!
