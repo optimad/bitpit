@@ -643,6 +643,36 @@ PatchKernel::VertexIterator PatchKernel::vertexEnd()
 }
 
 /*!
+	Returns a constant iterator pointing to the specified vertex.
+
+	\result A constant iterator to the specified vertex.
+*/
+PatchKernel::VertexConstIterator PatchKernel::getVertexConstIterator(const long &id) const
+{
+	return m_vertices.getConstIterator(id);
+}
+
+/*!
+	Returns a constant iterator pointing to the first vertex.
+
+	\result A constant iterator to the first vertex.
+*/
+PatchKernel::VertexConstIterator PatchKernel::vertexConstBegin() const
+{
+	return m_vertices.cbegin();
+}
+
+/*!
+	Returns a constant iterator pointing to last vertex.
+
+	\result A constant iterator to the last vertex.
+*/
+PatchKernel::VertexConstIterator PatchKernel::vertexConstEnd() const
+{
+	return m_vertices.cend();
+}
+
+/*!
 	Generates a new unique id for the vertices.
 
 	\result A new unique id for the vertices.
@@ -1219,6 +1249,80 @@ PatchKernel::CellIterator PatchKernel::ghostBegin()
 PatchKernel::CellIterator PatchKernel::ghostEnd()
 {
 	return m_cells.end();
+}
+
+/*!
+	Returns a constant iterator pointing to the specified cell.
+
+	\result A constant iterator to the specified cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::getCellConstIterator(const long &id) const
+{
+	return m_cells.getConstIterator(id);
+}
+
+/*!
+	Returns a constant iterator pointing to the first cell.
+
+	\result A constant iterator to the first cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::cellConstBegin() const
+{
+	return m_cells.cbegin();
+}
+
+/*!
+	Returns a constant iterator pointing to last cell.
+
+	\result A constant iterator to the last cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::cellConstEnd() const
+{
+	return m_cells.cend();
+}
+
+/*!
+	Returns a constant iterator pointing to the first internal cell.
+
+	\result A constant iterator to the first internal cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::internalConstBegin() const
+{
+	return m_cells.cbegin();
+}
+
+/*!
+	Returns a constant iterator pointing to the end of the list of internal cells.
+
+	\result A constant iterator to the end of the list of internal cells.
+*/
+PatchKernel::CellConstIterator PatchKernel::internalConstEnd() const
+{
+	if (m_nInternals > 0) {
+		return ++m_cells.getConstIterator(m_lastInternalId);
+	} else {
+		return m_cells.cend();
+	}
+}
+
+/*!
+    Returns a constant iterator to the first ghost cells within the cell list.
+
+    \result A constant iterator to the first ghost cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::ghostConstBegin() const
+{
+    return m_cells.getConstIterator(m_firstGhostId);
+}
+
+/*!
+	Returns a constant iterator to the end of the list of ghost cells.
+
+	\result A constant iterator to the end of the list of ghost cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::ghostConstEnd() const
+{
+	return m_cells.cend();
 }
 
 /*!
@@ -2203,6 +2307,36 @@ PatchKernel::InterfaceIterator PatchKernel::interfaceBegin()
 PatchKernel::InterfaceIterator PatchKernel::interfaceEnd()
 {
 	return m_interfaces.end();
+}
+
+/*!
+	Returns a constant iterator pointing to the specified interface.
+
+	\result A constant iterator to the specified interface.
+*/
+PatchKernel::InterfaceConstIterator PatchKernel::getInterfaceConstIterator(const long &id) const
+{
+	return m_interfaces.getConstIterator(id);
+}
+
+/*!
+	Returnsa a constant iterator pointing to the first interface.
+
+	\result A constant iterator to the first interface.
+*/
+PatchKernel::InterfaceConstIterator PatchKernel::interfaceConstBegin() const
+{
+	return m_interfaces.cbegin();
+}
+
+/*!
+	Returns a constant iterator pointing to last interface.
+
+	\result A constant iterator to the last interface.
+*/
+PatchKernel::InterfaceConstIterator PatchKernel::interfaceConstEnd() const
+{
+	return m_interfaces.cend();
 }
 
 /*!

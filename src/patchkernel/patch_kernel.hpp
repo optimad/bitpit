@@ -62,6 +62,10 @@ public:
 	typedef PiercedVector<Cell>::iterator CellIterator;
 	typedef PiercedVector<Interface>::iterator InterfaceIterator;
 
+	typedef PiercedVector<Vertex>::const_iterator VertexConstIterator;
+	typedef PiercedVector<Cell>::const_iterator CellConstIterator;
+	typedef PiercedVector<Interface>::const_iterator InterfaceConstIterator;
+
 	virtual ~PatchKernel();
 
 	virtual void reset();
@@ -106,6 +110,10 @@ public:
 	VertexIterator getVertexIterator(const long &id);
 	VertexIterator vertexBegin();
 	VertexIterator vertexEnd();
+
+	VertexConstIterator getVertexConstIterator(const long &id) const;
+	VertexConstIterator vertexConstBegin() const;
+	VertexConstIterator vertexConstEnd() const;
 
 	virtual long getCellCount() const;
 	long getInternalCount() const;
@@ -154,6 +162,14 @@ public:
 	CellIterator ghostBegin();
 	CellIterator ghostEnd();
 
+	CellConstIterator getCellConstIterator(const long &id) const;
+	CellConstIterator cellConstBegin() const;
+	CellConstIterator cellConstEnd() const;
+	CellConstIterator internalConstBegin() const;
+	CellConstIterator internalConstEnd() const;
+	CellConstIterator ghostConstBegin() const;
+	CellConstIterator ghostConstEnd() const;
+
 	virtual long getInterfaceCount() const;
 	PiercedVector<Interface> &getInterfaces();
 	Interface &getInterface(const long &id);
@@ -172,6 +188,10 @@ public:
 	InterfaceIterator getInterfaceIterator(const long &id);
 	InterfaceIterator interfaceBegin();
 	InterfaceIterator interfaceEnd();
+
+	InterfaceConstIterator getInterfaceConstIterator(const long &id) const;
+	InterfaceConstIterator interfaceConstBegin() const;
+	InterfaceConstIterator interfaceConstEnd() const;
 
 	long countFaces() const;
 	long countFreeFaces() const;
