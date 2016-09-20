@@ -66,6 +66,91 @@ public:
 	typedef PiercedVector<Cell>::const_iterator CellConstIterator;
 	typedef PiercedVector<Interface>::const_iterator InterfaceConstIterator;
 
+	/*!
+		Functional for compare the position of two cells
+	*/
+	struct CellPositionLess
+	{
+		CellPositionLess(PatchKernel &patch, bool native = true)
+			: m_patch(patch), m_native(native)
+		{
+		}
+
+		bool operator()(const long &id_1, const long &id_2) const
+		{
+			std::array<double, 3> centroid_1;
+			std::array<double, 3> centroid_2;
+			if (m_native) {
+				centroid_1 = m_patch.evalCellCentroid(id_1);
+				centroid_2 = m_patch.evalCellCentroid(id_2);
+			} else {
+				centroid_1 = m_patch.PatchKernel::evalCellCentroid(id_1);
+				centroid_2 = m_patch.PatchKernel::evalCellCentroid(id_2);
+			}
+
+			for (int k = 0; k < 3; ++k) {
+				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
+					continue;
+				}
+
+				return centroid_1[k] < centroid_2[k];
+			}
+
+			// If we are here the two cell centroids coincide. It's not
+			// possible to define an order for the two cells.
+			std::ostringstream stream;
+			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
+			stream << "The two cells have the same centroid.";
+			throw std::runtime_error (stream.str());
+		}
+
+		PatchKernel &m_patch;
+		bool m_native;
+	};
+
+	/*!
+		Functional for compare the position of two cells
+	*/
+	struct CellPositionGreater
+	{
+		CellPositionGreater(PatchKernel &patch, bool native = true)
+			: m_patch(patch), m_native(native)
+		{
+		}
+
+		bool operator()(const long &id_1, const long &id_2) const
+		{
+			std::array<double, 3> centroid_1;
+			std::array<double, 3> centroid_2;
+			if (m_native) {
+				centroid_1 = m_patch.evalCellCentroid(id_1);
+				centroid_2 = m_patch.evalCellCentroid(id_2);
+			} else {
+				centroid_1 = m_patch.PatchKernel::evalCellCentroid(id_1);
+				centroid_2 = m_patch.PatchKernel::evalCellCentroid(id_2);
+			}
+
+			for (int k = 0; k < 3; ++k) {
+				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
+					continue;
+				}
+
+				return centroid_1[k] > centroid_2[k];
+			}
+
+			// If we are here the two cell centroids coincide. It's not
+			// possible to define an order for the two cells.
+			std::ostringstream stream;
+			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
+			stream << "The two cells have the same centroid.";
+			throw std::runtime_error (stream.str());
+		}
+
+		PatchKernel &m_patch;
+		bool m_native;
+	};
+
+
 	virtual ~PatchKernel();
 
 	virtual void reset();
@@ -287,90 +372,6 @@ public:
 #endif
 
 protected:
-	/*!
-		Functional for compare the position of two cells
-	*/
-	struct CellPositionLess
-	{
-		CellPositionLess(PatchKernel &patch, bool native = true)
-			: m_patch(patch), m_native(native)
-		{
-		}
-
-		bool operator()(const long &id_1, const long &id_2) const
-		{
-			std::array<double, 3> centroid_1;
-			std::array<double, 3> centroid_2;
-			if (m_native) {
-				centroid_1 = m_patch.evalCellCentroid(id_1);
-				centroid_2 = m_patch.evalCellCentroid(id_2);
-			} else {
-				centroid_1 = m_patch.PatchKernel::evalCellCentroid(id_1);
-				centroid_2 = m_patch.PatchKernel::evalCellCentroid(id_2);
-			}
-
-			for (int k = 0; k < 3; ++k) {
-				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
-					continue;
-				}
-
-				return centroid_1[k] < centroid_2[k];
-			}
-
-			// If we are here the two cell centroids coincide. It's not
-			// possible to define an order for the two cells.
-			std::ostringstream stream;
-			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
-			stream << "The two cells have the same centroid.";
-			throw std::runtime_error (stream.str());
-		}
-
-		PatchKernel &m_patch;
-		bool m_native;
-	};
-
-	/*!
-		Functional for compare the position of two cells
-	*/
-	struct CellPositionGreater
-	{
-		CellPositionGreater(PatchKernel &patch, bool native = true)
-			: m_patch(patch), m_native(native)
-		{
-		}
-
-		bool operator()(const long &id_1, const long &id_2) const
-		{
-			std::array<double, 3> centroid_1;
-			std::array<double, 3> centroid_2;
-			if (m_native) {
-				centroid_1 = m_patch.evalCellCentroid(id_1);
-				centroid_2 = m_patch.evalCellCentroid(id_2);
-			} else {
-				centroid_1 = m_patch.PatchKernel::evalCellCentroid(id_1);
-				centroid_2 = m_patch.PatchKernel::evalCellCentroid(id_2);
-			}
-
-			for (int k = 0; k < 3; ++k) {
-				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
-					continue;
-				}
-
-				return centroid_1[k] > centroid_2[k];
-			}
-
-			// If we are here the two cell centroids coincide. It's not
-			// possible to define an order for the two cells.
-			std::ostringstream stream;
-			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
-			stream << "The two cells have the same centroid.";
-			throw std::runtime_error (stream.str());
-		}
-
-		PatchKernel &m_patch;
-		bool m_native;
-	};
-
 	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
