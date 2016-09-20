@@ -2916,7 +2916,9 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 				//
 				// The interface is owned by the cell that has only one
 				// adjacency, i.e., by the cell that owns the smallest of
-				// the two faces.
+				// the two faces. If the faces of both cells have the same
+				// size, the interface is owned by the cell with the "lower
+				// positioning".
 				long intrOwnerId;
 				Cell *intrOwner;
 				int intrOwnerFace;
@@ -2925,7 +2927,21 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 				Cell *intrNeigh = nullptr;
 				int intrNeighFace = -1;
 
+				bool cellOwnsInterface = false;
 				if (nFaceAdjacencies == 1 || neighId < 0) {
+					if (neighId >= 0) {
+						int nNeighFaceAdjacencies = neigh->getAdjacencyCount(neighFace);
+						if (nNeighFaceAdjacencies == 1) {
+							cellOwnsInterface = CellPositionLess(*this)(cellId, neighId);
+						} else {
+							cellOwnsInterface = true;
+						}
+					} else {
+						cellOwnsInterface = true;
+					}
+				}
+
+				if (cellOwnsInterface) {
 					intrOwnerId   = cellId;
 					intrOwner     = &cell;
 					intrOwnerFace = face;
