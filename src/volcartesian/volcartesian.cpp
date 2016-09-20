@@ -1547,7 +1547,7 @@ int VolCartesian::linearVertexInterpolation(std::array<double,3> &point,
 		cWeights[d][0] = 1.0 - cWeights[d][1];
 	}
 
-	for (int d = 0; d < dimension; ++d) {
+	for (int d = dimension; d < 3; ++d) {
 		cStencil[d][0] = 0;
 		cWeights[d][0] = 1.;
 	}
