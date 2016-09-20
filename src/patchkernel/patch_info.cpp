@@ -33,26 +33,65 @@ namespace bitpit {
 
 /*!
 	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\class PatchInfo
 
 	\brief The PatchInfo class provides an interface for defining patch info.
 */
 
 /*!
-	@}
+	Default constructor
 */
+PatchInfo::PatchInfo()
+{
+}
+
+/*!
+	Destructor
+*/
+PatchInfo::~PatchInfo()
+{
+}
+
+/*!
+	Resets the information.
+*/
+void PatchInfo::reset()
+{
+	m_patch = nullptr;
+	_reset();
+}
+
+/*!
+	Extracts the information.
+
+	\param patch is patch from which the informations will be extracted
+*/
+void PatchInfo::extract(PatchKernel const *patch)
+{
+	// Reset information
+	reset();
+	if (patch == nullptr) {
+		return;
+	}
+
+	// Extract new information
+	m_patch = patch;
+	_extract(patch);
+}
+
+/*!
+	Updates the information.
+
+	\param patch is patch from which the informations will be extracted
+*/
+void PatchInfo::update()
+{
+	extract(m_patch);
+}
 
 #if BITPIT_ENABLE_MPI==1
 /*!
 	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\class PatchGlobalInfo
 
 	\brief Global information about the patch.
@@ -60,27 +99,37 @@ namespace bitpit {
 
 /*!
 	Creates a new info.
+
+	\param patch is patch from which the informations will be extracted
 */
 PatchGlobalInfo::PatchGlobalInfo(PatchKernel const *patch)
 {
+	reset();
+
 	extract(patch);
 }
 
 /*!
-	Extracts the global information from the patch.
+	Internal function to reset the information.
+*/
+void PatchGlobalInfo::_reset()
+{
+	m_cellLocalToGlobalMap.clear();
+	m_nGlobalInternals.clear();
+}
+
+/*!
+	Internal function to extract global information from the patch.
 
 	\param patch is patch from which the informations will be extracted
 */
-void PatchGlobalInfo::extract(PatchKernel const *patch)
+void PatchGlobalInfo::_extract(PatchKernel const *patch)
 {
-	m_patch = patch;
-
 	long globalId;
 
 	size_t exchangeDataSize = sizeof(globalId);
 	std::unique_ptr<DataCommunicator> dataCommunicator;
 
-	// Initialize the communication of the ghost global ids
 	if (m_patch->getProcessorCount() > 1) {
 		// Create the data communicator
 		dataCommunicator = std::unique_ptr<DataCommunicator>(new DataCommunicator(m_patch->getCommunicator()));
@@ -163,7 +212,7 @@ void PatchGlobalInfo::extract(PatchKernel const *patch)
 	\param id is the local id of the cell
 	\return The rank of the specified cell.
 */
-int PatchGlobalInfo::getCellRankFromLocal(long id)
+int PatchGlobalInfo::getCellRankFromLocal(long id) const
 {
 	auto ghostOwnerItr = m_patch->m_ghostOwners.find(id);
 	if (ghostOwnerItr != m_patch->m_ghostOwners.end()) {
@@ -179,7 +228,7 @@ int PatchGlobalInfo::getCellRankFromLocal(long id)
 	\param id is the global id of the cell
 	\return The rank of the specified cell.
 */
-int PatchGlobalInfo::getCellRankFromGlobal(long id)
+int PatchGlobalInfo::getCellRankFromGlobal(long id) const
 {
 	long offset = 0;
 	for (int k = 0; k < m_patch->getProcessorCount(); ++k) {
@@ -198,7 +247,7 @@ int PatchGlobalInfo::getCellRankFromGlobal(long id)
 	\param id is the local id of the cell
 	\return The global id of the specified cell.
 */
-long PatchGlobalInfo::getCellGlobalId(long id)
+long PatchGlobalInfo::getCellGlobalId(long id) const
 {
 	return m_cellLocalToGlobalMap.at(id);
 }
@@ -208,14 +257,10 @@ long PatchGlobalInfo::getCellGlobalId(long id)
 
 	\result The map between local indexes and global indexes.
 */
-const std::unordered_map<long, long> & PatchGlobalInfo::getCellGlobalMap()
+const std::unordered_map<long, long> & PatchGlobalInfo::getCellGlobalMap() const
 {
 	return m_cellLocalToGlobalMap;
 }
-
-/*!
-	@}
-*/
 #endif
 
 }

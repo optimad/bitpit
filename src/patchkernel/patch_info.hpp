@@ -35,25 +35,35 @@ class PatchKernel;
 class PatchInfo {
 
 public:
-	virtual void extract(PatchKernel const *patch) = 0;
+	PatchInfo();
+
+	virtual ~PatchInfo();
+
+	void reset();
+	void extract(PatchKernel const *patch);
+	void update();
 
 protected:
 	PatchKernel const *m_patch;
 
+	virtual void _reset() = 0;
+	virtual void _extract(PatchKernel const *patch) = 0;
 };
 
 #if BITPIT_ENABLE_MPI==1
 class PatchGlobalInfo : public PatchInfo {
 
 public:
-	PatchGlobalInfo(PatchKernel const *patch);
+	PatchGlobalInfo(PatchKernel const *patch = nullptr);
 
-	void extract(PatchKernel const *patch);
+	int getCellRankFromLocal(long id) const;
+	int getCellRankFromGlobal(long id) const;
+	long getCellGlobalId(long id) const;
+	const std::unordered_map<long, long> & getCellGlobalMap() const;
 
-	int getCellRankFromLocal(long id);
-	int getCellRankFromGlobal(long id);
-	long getCellGlobalId(long id);
-	const std::unordered_map<long, long> & getCellGlobalMap();
+protected:
+	void _reset();
+	void _extract(PatchKernel const *patch);
 
 private:
 	std::unordered_map<long, long> m_cellLocalToGlobalMap;
