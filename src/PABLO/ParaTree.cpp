@@ -1687,7 +1687,7 @@ namespace bitpit {
      */
     double
     ParaTree::getArea(Intersection* inter) {
-        uint32_t Area;
+        uint64_t Area;
         if(inter->m_finer && inter->m_isghost)
             Area = m_octree.extractGhostOctant(inter->m_owners[1]).getArea();
         else
