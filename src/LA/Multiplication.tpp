@@ -639,7 +639,7 @@ std::array< std::array<T, d2> , d1> matmul(
     int i, j;
 
     std::array< std::array<T, d2> , d1> Q;
-    std::array< std::array<T, d2> , d3> Tr;
+    std::array< std::array<T, d3> , d2> Tr;
 
     Tr = transpose( N ) ;
 
