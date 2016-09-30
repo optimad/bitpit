@@ -77,6 +77,17 @@ id_t PiercedIterator<value_t, id_t, value_no_cv_t>::getId(const id_t &fallback) 
 }
 
 /*!
+	Gets the position of the current element.
+
+	\return The position of the current element.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+std::size_t PiercedIterator<value_t, id_t, value_no_cv_t>::getRawIndex() const noexcept
+{
+	return m_pos;
+}
+
+/*!
 	Pre-increment operator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
