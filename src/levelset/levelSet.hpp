@@ -207,6 +207,8 @@ class LevelSetObject{
     private:
     int                                         m_id;           /**< identifier of object */
 
+    void                                        assignSign( int sign, const std::unordered_set<long> &cells ) ;
+
     protected:
     double                                      m_RSearch;      /**< Size of narrow band */
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */

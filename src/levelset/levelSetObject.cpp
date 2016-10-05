@@ -432,6 +432,32 @@ void LevelSetObject::propagateSign( LevelSetKernel *visitee ) {
 
 
 /*!
+ * Assign the sign to the specified list of cells.
+ *
+ * \param sign is the sign that will be assiged to the cells
+ * \param cells is the list of cells
+ */
+void LevelSetObject::assignSign(int sign, const std::unordered_set<long> &cells) {
+
+    for (long id : cells) {
+        // Get the info associated to the id
+        //
+        // A new info needs to be created only if the sign to assign is
+        // different from the default sign.
+        PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;
+        if( infoItr == m_ls.end() && sign != levelSetDefaults::SIGN ){
+            infoItr = m_ls.reclaim(id) ;
+        }
+
+        // Update the sign
+        if( infoItr != m_ls.end() ) {
+            (*infoItr).value = sign * levelSetDefaults::VALUE;
+        }
+    }
+
+}
+
+/*!
  * Writes LevelSetObject to stream in binary format
  * @param[in] stream output stream
  */
