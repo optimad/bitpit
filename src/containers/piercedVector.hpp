@@ -323,7 +323,7 @@ public:
 	iterator find(id_t id);
 	std::size_t evalFlatIndex(id_t id);
 
-	std::vector<id_t> getIds(bool ordered = true);
+	std::vector<id_t> getIds(bool ordered = true) const;
 	id_t getSizeMarker(const size_t &targetSize, const id_t &fallback = -1);
 
 	// Methods that extract the contents of the container
@@ -535,9 +535,9 @@ private:
 	void holesSortPending();
 	void holesSortRegular();
 
-	std::size_t findPrevUsedPos(std::size_t pos);
-	std::size_t findNextUsedPos(std::size_t pos);
-	bool isPosEmpty(std::size_t pos);
+	std::size_t findPrevUsedPos(std::size_t pos) const;
+	std::size_t findNextUsedPos(std::size_t pos) const;
+	bool isPosEmpty(std::size_t pos) const;
 	std::size_t getPosFromId(id_t id) const;
     void setPosId(const std::size_t &pos, const id_t &id);
 	void setEmptyPosId(const std::size_t &pos, const std::size_t &nextUsedPos);

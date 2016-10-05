@@ -1168,7 +1168,7 @@ std::size_t PiercedVector<value_t, id_t>::evalFlatIndex(id_t id)
 			vector.
 */
 template<typename value_t, typename id_t>
-std::vector<id_t> PiercedVector<value_t, id_t>::getIds(bool ordered)
+std::vector<id_t> PiercedVector<value_t, id_t>::getIds(bool ordered) const
 {
 	// Initialize the vector wth the ids
 	std::vector<id_t> ids;
@@ -2258,7 +2258,7 @@ void PiercedVector<value_t, id_t>::holesSortRegular()
 			position.
 */
 template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::findPrevUsedPos(std::size_t pos)
+std::size_t PiercedVector<value_t, id_t>::findPrevUsedPos(std::size_t pos) const
 {
 	std::size_t prev_pos = pos;
 	while (true) {
@@ -2286,7 +2286,7 @@ std::size_t PiercedVector<value_t, id_t>::findPrevUsedPos(std::size_t pos)
 			position.
 */
 template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::findNextUsedPos(std::size_t pos)
+std::size_t PiercedVector<value_t, id_t>::findNextUsedPos(std::size_t pos) const
 {
 	std::size_t next_pos   = pos;
 	std::size_t next_delta = 1;
@@ -2315,7 +2315,7 @@ std::size_t PiercedVector<value_t, id_t>::findNextUsedPos(std::size_t pos)
 	\result true is the position is empty, false otherwise.
 */
 template<typename value_t, typename id_t>
-bool PiercedVector<value_t, id_t>::isPosEmpty(std::size_t pos)
+bool PiercedVector<value_t, id_t>::isPosEmpty(std::size_t pos) const
 {
 	return (m_ids[pos] < 0);
 }
