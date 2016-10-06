@@ -345,7 +345,11 @@ namespace bitpit {
 
         m_octree.initialize(dimension);
         m_trans.initialize(dimension);
+#if BITPIT_ENABLE_MPI==1
         initialize(dimension, m_log->getName(), m_comm);
+#else
+        initialize(dimension, m_log->getName());
+#endif
         reset();
 
         // Set tree properties
