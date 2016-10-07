@@ -55,6 +55,12 @@ namespace levelSetDefaults{
     const std::vector<long>                 LIST;                       /**< Default value for list of elements in narrow band */
 };
 
+enum class LevelSetBooleanOperation{
+    UNION =0,
+    INTERSECTION =1,
+    SUBTRACTION =2
+};
+
 class LevelSetInfo{
     public:
     double                                  value ;                     /**< Levelset value */
@@ -91,6 +97,7 @@ class LevelSet{
     int                                         addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( std::unique_ptr<LevelSetObject> && ) ;
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
+    int                                         addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
     void                                        addProcessingOrder( int) ;
     const LevelSetObject &                      getObject( int ) const ;
     int                                         getObjectCount( ) const ;
@@ -271,6 +278,45 @@ class LevelSetObject{
     void                                        readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ;
     virtual void                                readCommunicationBufferDerived( const std::vector<long> &, RecvBuffer & )  ;
 # endif 
+
+};
+
+class LevelSetBoolean: public LevelSetObject{
+
+    private:
+    LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
+    LevelSetObject*                             m_objPtr1;              /**< pointer to first object */
+    LevelSetObject*                             m_objPtr2;              /**< pointer to second object */
+    int                                         m_objId1;               /**< identifier of first object */
+    int                                         m_objId2;               /**< identifier of second object */
+
+    protected:
+    void                                        _dump( std::ostream &);
+    void                                        _restore( std::istream &);
+
+    public:
+    ~LevelSetBoolean();
+    LevelSetBoolean(int, LevelSetBooleanOperation, LevelSetObject*, LevelSetObject*);
+    LevelSetBoolean(const LevelSetBoolean &);
+
+    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const;
+    LevelSetBoolean*                            clone() const ;
+    void                                        clearDerived( ) ;
+
+    int                                         getPart(const long &) const ;
+    long                                        getSupport(const long &) const;
+    int                                         getSupportCount(const long &) const ;
+
+    void                                        setSizeNarrowBand(double) ;
+
+    double                                      computeSizeNarrowBand( );
+    void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &) ;
+    void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &);
+
+    LevelSetBooleanOperation                    getBooleanOperation() const;
+    LevelSetObject*                             getClosestObject(const long &) const ;
+    LevelSetInfo                                booleanOperation(const long &) const ;
+
 
 };
 
