@@ -1093,6 +1093,43 @@ std::array<int, 3> VolCartesian::locateClosestVertexCartesian(std::array<double,
 }
 
 /*!
+	Locates the closest cell to point.
+
+	If the point is not inside the patch, the function returns the id of the
+	cell the point projects on.
+
+	\param[in] point is the point to be checked
+	\result Returns the linear id of the closest cell to the point.
+*/
+long VolCartesian::locateClosestCell(const std::array<double, 3> &point)
+{
+    std::array<int, 3> pointIjk = locateClosestCellCartesian(point);
+    return getCellLinearId(pointIjk);
+}
+
+/*!
+	Locates the cell the closest cell to the point.
+
+	If the point is not inside the patch, the function returns the id of the
+	cell the point projects on.
+
+	\param[in] point is the point to be checked
+	\result Returns the cartesian id of the closest cell to the point.
+*/
+std::array<int, 3> VolCartesian::locateClosestCellCartesian(const std::array<double, 3> &point)
+{
+	std::array<int,3> ijk({{0,0,0}});
+
+    for( int i=0; i<getDimension(); ++i){
+	    ijk[i] = std::floor((point[i] - m_minCoords[i]) / m_cellSpacings[i]);
+        ijk[i] = std::max( ijk[i], 0 );
+        ijk[i] = std::min( ijk[i], m_nCells1D[i]-1 );
+    }
+
+	return ijk;
+}
+
+/*!
 	Converts the cell cartesian notation to a linear notation
 */
 long VolCartesian::getCellLinearId(const int &i, const int &j, const int &k) const
