@@ -39,6 +39,7 @@ list(APPEND TESTS "test_PABLO_00006")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_PABLO_parallel_00001")
 	list(APPEND TESTS "test_PABLO_parallel_00002")
+	list(APPEND TESTS "test_PABLO_parallel_00003")
 endif()
 
 set(PABLO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the PABLO module" FORCE)
