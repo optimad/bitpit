@@ -574,7 +574,7 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
  */
 bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vector<std::array<double,3>> &VS, std::vector<int> &I){
 
-    VolumeKernel                        &mesh = *(visitee->getMesh()) ;
+    VolCartesian                        &mesh = *(static_cast<VolCartesian*>(visitee->getMesh()));
 
     bool                                found(false) ;
     int                                 dim( mesh.getDimension() ) ;
@@ -583,21 +583,23 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 
     mesh.getBoundingBox(B0, B1) ;
 
-    B0 = B0 - getSizeNarrowBand() ;
-    B1 = B1 + getSizeNarrowBand() ;
+    for( int i=0; i<dim; ++i){
+        B0[i] -= getSizeNarrowBand() ;
+        B1[i] += getSizeNarrowBand() ;
+    }
 
     I.clear() ;
 
     for( const auto &P : VS){
         if(  CGElem::intersectPointBox( P, B0, B1, dim ) ) {
-            I.push_back( mesh.locatePoint(P) );
+            I.push_back( mesh.locateClosestCell(P) );
             found =  true ;
         };
     }
 
     if( !found && CGElem::intersectBoxSimplex( B0, B1, VS, VP, dim ) ) {
         for( const auto &P : VP){
-            I.push_back( mesh.locatePoint(P) );
+            I.push_back( mesh.locateClosestCell(P) );
             found = true ;
         };
     }
@@ -738,7 +740,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
         // Segments vertex ------------------------------------------------------ //
         VS  = getSimplexVertices( i ) ;
-        seedNarrowBand( visitee, VS, stack ) ; //TODO check if seed is found correctly if segmentation is outside grid but within narrow band
+        seedNarrowBand( visitee, VS, stack );
 
 
         //-----------------------------------------------------------------
@@ -806,7 +808,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     int                         i;
     double                      size ;
 
-    std::array<double,3>        C0, C1, G0, G1, octrBB0, octrBB1, triBB0, triBB1 ;
+    std::array<double,3>        C0, C1, octrBB0, octrBB1, triBB0, triBB1 ;
     PiercedVector<SegInfo>::iterator data;
 
     SegmentToCellMap segmentToCellMap;
@@ -820,12 +822,12 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     mesh.getBoundingBox(octrBB0,octrBB1) ;
     getBoundingBox( triBB0, triBB1 );
 
-    G0 = triBB0 - RSearch ;
-    G1 = triBB1 + RSearch ;
+    triBB0 -= RSearch ;
+    triBB1 += RSearch ;
 
-    if( CGElem::intersectBoxBox(octrBB0,octrBB1,G0,G1,C0,C1) ) { //intersect two Bounding Boxes around geometry and local grid
+    if( CGElem::intersectBoxBox(octrBB0,octrBB1,triBB0,triBB1,C0,C1) ) { //intersect two Bounding Boxes around geometry and local grid
 
-        // snap bounding box to grid and create cartesian grid
+        // snap bounding box to octree grid and create cartesian grid
         std::array<int,3>    nc ;
 
         for( i=0; i<dim; ++i){
