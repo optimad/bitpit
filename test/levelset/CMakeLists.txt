@@ -56,6 +56,7 @@ add_custom_command(
     TARGET "test_levelset_00003" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/naca0012.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/naca0012.dgf"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/square.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/square.dgf"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/rectangle.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/rectangle.dgf"
 )
 
 if (ENABLE_MPI)
