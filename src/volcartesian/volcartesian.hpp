@@ -89,6 +89,8 @@ public:
 	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
 	long locateClosestVertex(std::array<double,3> const &point) const;
 	std::array<int, 3> locateClosestVertexCartesian(std::array<double,3> const &point) const;
+	long locateClosestCell(std::array<double,3> const &point);
+	std::array<int, 3> locateClosestCellCartesian(std::array<double,3> const &point);
 
 	std::vector<long> extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax);
 	std::vector<long> extractCellSubSet(int const &idxMin, int const &idxMax);
