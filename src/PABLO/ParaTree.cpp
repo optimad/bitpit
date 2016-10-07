@@ -134,6 +134,75 @@ namespace bitpit {
     // METHODS
     // =================================================================================== //
 
+#if BITPIT_ENABLE_MPI==1
+    /*! Internal function to initialize the communications
+     * \param[in] comm The MPI communicator used by the parallel octree.
+     */
+    void
+    ParaTree::_initializeCommunications(MPI_Comm comm) {
+        // Set a null communicator
+        m_comm = MPI_COMM_NULL;
+
+        // Set the real communicator and initialize partition data
+        if (comm != MPI_COMM_NULL) {
+            setComm(comm);
+        } else {
+            _initializePartitions();
+        }
+    }
+#endif
+
+    /*! Internal function to initialize the partitions
+     *  We always need to initialize the partitions communicator, if MPI is
+     *  disabled a dummy initialization will be performed.
+     */
+    void
+    ParaTree::_initializePartitions() {
+#if BITPIT_ENABLE_MPI==1
+        // Set MPI information
+        if (isCommSet()) {
+            MPI_Comm_size(m_comm, &m_nproc);
+            MPI_Comm_rank(m_comm, &m_rank);
+        } else {
+            m_rank  = 0;
+            m_nproc = 1;
+        }
+#else
+        // Set dummy MPI information
+        m_rank  = 0;
+        m_nproc = 1;
+#endif
+
+        // Create the data structures for storing partion information
+        m_partitionFirstDesc.resize(m_nproc);
+        m_partitionLastDesc.resize(m_nproc);
+        m_partitionRangeGlobalIdx.resize(m_nproc);
+        m_partitionRangeGlobalIdx0.resize(m_nproc);
+        uint64_t lastDescMorton = m_octree.getLastDescMorton();
+        uint64_t firstDescMorton = m_octree.getFirstDescMorton();
+        for(int p = 0; p < m_nproc; ++p){
+            m_partitionRangeGlobalIdx0[p] = 0;
+            m_partitionRangeGlobalIdx[p]  = m_globalNumOctants - 1;
+            m_partitionLastDesc[p]  = lastDescMorton;
+            m_partitionFirstDesc[p] = firstDescMorton;
+        }
+    }
+
+    /*! Internal function to initialize a dummy octree
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+    void
+    ParaTree::_initialize(uint8_t dim, const std::string &logfile) {
+        // The octree is serial
+        m_serial = true;
+
+        // Initialize the logger
+        initializeLogger(logfile);
+
+        // Set the dimension to a dummy value
+        setDim(dim);
+    }
+
     /*! Initialize a dummy octree
      */
 #if BITPIT_ENABLE_MPI==1
@@ -146,27 +215,16 @@ namespace bitpit {
     void
     ParaTree::initialize(const std::string &logfile) {
 #endif
-        // Set a dummy communicator
-        //
-        // We alyasy need to set the dummy communicator to initialize the
-        // communications data structures.
-        setDummyComm();
-
 #if BITPIT_ENABLE_MPI==1
-        // Set the communicator
-        if (comm != MPI_COMM_NULL) {
-            setComm(comm);
-        }
+        // Initialize communications
+        _initializeCommunications(comm);
+#else
+        // Initialize partitions
+        _initializePartitions();
 #endif
 
-        // The octree is serial
-        m_serial = true;
-
-        // Initialize the logger
-        initializeLogger(logfile);
-
-        // Set the dimension to a dummy value
-        setDim(0);
+        // Initialized the tree
+        _initialize(0, logfile);
     }
 
     /*! Initialize the octree
@@ -180,17 +238,36 @@ namespace bitpit {
     ParaTree::initialize(uint8_t dim, const std::string &logfile) {
 #endif
 #if BITPIT_ENABLE_MPI==1
-        initialize(logfile, comm);
+        // Initialize communications
+        _initializeCommunications(comm);
 #else
-        initialize(logfile);
+        // Initialize partitions
+        _initializePartitions();
 #endif
 
-        // Initialize the dimension
+        // Initialized the tree
         if (dim < 2 || dim > 3) {
             throw std::runtime_error ("Invalid value for the dimension");
         }
 
-        setDim(dim);
+        _initialize(dim, logfile);
+    }
+
+    /*! Re-initializes the octree
+     * \param[in] dim The space dimension of the octree.
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+    void
+    ParaTree::reinitialize(uint8_t dim, const std::string &logfile) {
+        // Initialize partitions
+        _initializePartitions();
+
+        // Initialized the tree
+        if (dim < 2 || dim > 3) {
+            throw std::runtime_error ("Invalid value for the dimension");
+        }
+
+        _initialize(dim, logfile);
     }
 
     /*! Initialize the logger
@@ -336,20 +413,13 @@ namespace bitpit {
             throw std::runtime_error ("The restart was saved with a different number of processors.");
         }
 
-        // Reset the current octree
-        reset();
-
         // Initialize the tree
         uint8_t dimension;
         IO::binary::read(stream, dimension);
 
         m_octree.initialize(dimension);
         m_trans.initialize(dimension);
-#if BITPIT_ENABLE_MPI==1
-        initialize(dimension, m_log->getName(), m_comm);
-#else
-        initialize(dimension, m_log->getName());
-#endif
+        reinitialize(dimension, m_log->getName());
         reset();
 
         // Set tree properties
@@ -577,24 +647,6 @@ namespace bitpit {
         return (*m_log);
     }
 
-    /*! Set dummy MPI information.
-     */
-    void
-    ParaTree::setDummyComm()
-    {
-        // Set a null communicator
-#if BITPIT_ENABLE_MPI==1
-        m_comm = MPI_COMM_NULL;
-#endif
-
-        // Get dummy MPI information
-        m_rank  = 0;
-        m_nproc = 1;
-
-        // Initialize partition data
-        createPartitionInfo();
-    }
-
     /*!Get the last operation perforfmed by the octree (initialization, adapt (mapped or unmapped), loadbalance (first or not).
      * \return Last operation performed by the octree.
      */
@@ -628,12 +680,8 @@ namespace bitpit {
         // be used.
         MPI_Comm_dup(communicator, &m_comm);
 
-        // Get MPI information
-        MPI_Comm_size(m_comm, &m_nproc);
-        MPI_Comm_rank(m_comm, &m_rank);
-
         // Initialize partition data
-        createPartitionInfo();
+        _initializePartitions();
     }
 
     /*!
@@ -5003,26 +5051,6 @@ namespace bitpit {
 
 #endif /* NOMPI */
     };
-
-    /*! Create the data structures for storing partion information
-     */
-    void
-    ParaTree::createPartitionInfo()
-    {
-        // Create new partition info
-        m_partitionFirstDesc.resize(m_nproc);
-        m_partitionLastDesc.resize(m_nproc);
-        m_partitionRangeGlobalIdx.resize(m_nproc);
-        m_partitionRangeGlobalIdx0.resize(m_nproc);
-        uint64_t lastDescMorton = m_octree.getLastDescMorton();
-        uint64_t firstDescMorton = m_octree.getFirstDescMorton();
-        for(int p = 0; p < m_nproc; ++p){
-            m_partitionRangeGlobalIdx0[p] = 0;
-            m_partitionRangeGlobalIdx[p]  = m_globalNumOctants - 1;
-            m_partitionLastDesc[p]  = lastDescMorton;
-            m_partitionFirstDesc[p] = firstDescMorton;
-        }
-    }
 
     // =================================================================================== //
     // TESTING OUTPUT METHODS												    			   //

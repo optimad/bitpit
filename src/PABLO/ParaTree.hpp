@@ -189,7 +189,6 @@ namespace bitpit {
         int 		getRank();
         int 		getNproc();
         Logger& 	getLog();
-        void 		setDummyComm();
         Operation	getLastOperation();
 #if BITPIT_ENABLE_MPI==1
         void		setComm(MPI_Comm communicator);
@@ -373,6 +372,12 @@ namespace bitpit {
         // =================================================================================== //
 
 #if BITPIT_ENABLE_MPI==1
+        void	_initializeCommunications(MPI_Comm comm);
+#endif
+        void	_initializePartitions();
+        void	_initialize(uint8_t dim, const std::string &logfile);
+
+#if BITPIT_ENABLE_MPI==1
         void	initialize(const std::string &logfile, MPI_Comm comm);
         void	initialize(uint8_t dim, const std::string &logfile, MPI_Comm comm);
 #else
@@ -380,6 +385,7 @@ namespace bitpit {
         void	initialize(uint8_t dim, const std::string &logfile);
 #endif
         void	initializeLogger(const std::string &logfile);
+        void	reinitialize(uint8_t dim, const std::string &logfile);
 
         // =================================================================================== //
         // OTHER OCTANT BASED METHODS												    	   //
