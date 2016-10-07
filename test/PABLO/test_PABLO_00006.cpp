@@ -129,6 +129,7 @@ int main(int argc, char *argv[]) {
     std::cout << " Restored Length : " << octreeRestored.getL() << std::endl;
 
     // Write the restored octree
+    octreeRestored.computeConnectivity();
     octreeRestored.write("Pablo005_restored");
 
 #if BITPIT_ENABLE_MPI==1
