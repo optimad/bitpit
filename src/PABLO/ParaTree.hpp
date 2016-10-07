@@ -387,6 +387,8 @@ namespace bitpit {
         void	initializeLogger(const std::string &logfile);
         void	reinitialize(uint8_t dim, const std::string &logfile);
 
+        void	reset(bool createRoot);
+
         // =================================================================================== //
         // OTHER OCTANT BASED METHODS												    	   //
         // =================================================================================== //

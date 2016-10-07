@@ -66,7 +66,7 @@ namespace bitpit {
 #else
         initialize(logfile);
 #endif
-        reset();
+        reset(true);
     }
 
     /*! Default constructor of ParaTree.
@@ -89,7 +89,7 @@ namespace bitpit {
 #else
         initialize(dim, logfile);
 #endif
-        reset();
+        reset(true);
 
         printHeader();
     };
@@ -282,12 +282,19 @@ namespace bitpit {
      */
     void
     ParaTree::reset(){
+        reset(true);
+    }
+
+    /*! Reset the octree
+     */
+    void
+    ParaTree::reset(bool createRoot){
         m_tol = 1.0e-14;
 
         m_errorFlag = 0;
         m_maxDepth  = 0;
 
-        m_octree.reset(true);
+        m_octree.reset(createRoot);
         m_globalNumOctants = getNumOctants();
 
         m_lastOp = OP_INIT;
@@ -420,7 +427,7 @@ namespace bitpit {
         m_octree.initialize(dimension);
         m_trans.initialize(dimension);
         reinitialize(dimension, m_log->getName());
-        reset();
+        reset(false);
 
         // Set tree properties
         IO::binary::read(stream, m_serial);
