@@ -4546,6 +4546,7 @@ namespace bitpit {
         int countpbd = 0;
         int countint = 0;
         for(LocalTree::octvector::iterator it = begin; it != end; ++it){
+            pbd = false;
             set<int> procs;
             //Virtual Face Neighbors
             for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
