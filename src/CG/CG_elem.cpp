@@ -1955,8 +1955,10 @@ void unionAABB(
         ){
 
 
-    C0 = std::min( A0, B0) ;
-    C1 = std::max( A1, B1) ;
+    for( int i=0; i<3; ++i){
+        C0[i] = std::min( A0[i], B0[i]) ;
+        C1[i] = std::max( A1[i], B1[i]) ;
+    }
 
 
     return;
@@ -1984,8 +1986,7 @@ void unionAABB(
         C1 =  A1[0] ;
 
         for( i=1; i<n; ++i){
-            C0 = std::min( C0, A0[i] ) ;
-            C1 = std::max( C1, A1[i] ) ;
+            unionAABB( A0[i], A1[i], C0, C1, C0, C1);
         };
     };
 
