@@ -687,31 +687,42 @@ namespace bitpit {
      */
     void
     PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1){
+        // If there are no octants the bounding box is empty
+        uint32_t nocts = ParaTree::getNumOctants();
+        if (nocts == 0) {
+            P0 = getOrigin();
+            P1 = P0;
+
+            return;
+        }
+
         // If the octree is serial we can evaluate the bounding box easily
         // otherwise we need to scan all the octants
         if (getSerial()) {
             P0 = getOrigin();
-            P1 = P0 + getL();
-        } else {
-            darray3		cnode0, cnode1;
-            uint32_t 	nocts = ParaTree::getNumOctants();
-            uint32_t	id = 0;
-            uint8_t 	nnodes = ParaTree::getNnodes();
-
-            P0 = ParaTree::getNode(id, 0);
-            P1 = ParaTree::getNode(nocts-1, nnodes-1);
-
-            for (id=0; id<nocts; id++){
-                cnode0 = ParaTree::getNode(id, 0);
-                cnode1 = ParaTree::getNode(id, nnodes-1);
-                for (int i=0; i<3; i++){
-                    P0[i] = min(P0[i], (double)cnode0[i]);
-                    P1[i] = max(P1[i], (double)cnode1[i]);
-                }
+            P1 = P0;
+            for (int i=0; i<ParaTree::getDim(); i++){
+                P1[i] += getL();
             }
-            for (int i=0; i<3; i++){
-                P0[i] = m_origin[i] + m_L * P0[i];
-                P1[i] = m_origin[i] + m_L * P1[i];
+
+            return;
+        }
+
+        // If the octree is parallel we need to scan all the octants
+        darray3		cnode0, cnode1;
+
+        uint32_t	id = 0;
+        uint8_t 	nnodes = ParaTree::getNnodes();
+
+        P0 = getNode(id, 0);
+        P1 = getNode(nocts-1, nnodes-1);
+
+        for (id=0; id<nocts; id++){
+            cnode0 = getNode(id, 0);
+            cnode1 = getNode(id, nnodes-1);
+            for (int i=0; i<ParaTree::getDim(); i++){
+                P0[i] = min(P0[i], cnode0[i]);
+                P1[i] = max(P1[i], cnode1[i]);
             }
         }
     };
