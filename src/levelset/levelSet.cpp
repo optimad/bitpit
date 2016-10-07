@@ -279,6 +279,30 @@ int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
     return objectId;
 };
 
+/*!
+ * Adds a boolean operation
+ * @param[in] operation boolean operation
+ * @param[in] id1 id of first operand
+ * @param[in] id2 id of second operand
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &id1, const int &id2, int id ) {
+
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
+
+    LevelSetObject *ptr1 = m_object.at(id1).get() ;
+    LevelSetObject *ptr2 = m_object.at(id2).get() ;
+
+    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr1, ptr2 ) )  ;
+
+    addProcessingOrder(id) ;
+
+    return id;
+};
+
 
 /*!
  * Adds the object to the processing order.
