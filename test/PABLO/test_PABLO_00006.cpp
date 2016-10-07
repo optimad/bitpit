@@ -110,11 +110,11 @@ int main(int argc, char *argv[]) {
     octree.adapt(false);
 
     octree.computeConnectivity();
-    octree.write("Pablo005_original");
+    octree.write("Pablo_00006_original");
 
     // Dump the tree
     std::string header = "2D PABLO";
-    OBinaryArchive binaryWriter2D("Pablo005_dump", archiveVersion, header);
+    OBinaryArchive binaryWriter2D("Pablo_00006_dump", archiveVersion, header);
     octree.dump(binaryWriter2D.getStream());
     binaryWriter2D.close();
 
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
     PabloUniform octreeRestored;
 
     // Restore the tree
-    IBinaryArchive binaryReader2D("Pablo005_dump");
+    IBinaryArchive binaryReader2D("Pablo_00006_dump");
     octreeRestored.restore(binaryReader2D.getStream());
 
     std::cout << " Restored Origin : ( " << octreeRestored.getX0() << ", " << octreeRestored.getY0() << ", " << octreeRestored.getZ0() << " )" << std::endl;
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     // Write the restored octree
     octreeRestored.computeConnectivity();
-    octreeRestored.write("Pablo005_restored");
+    octreeRestored.write("Pablo_00006_restored");
 
 #if BITPIT_ENABLE_MPI==1
     MPI_Finalize();
