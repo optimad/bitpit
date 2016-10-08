@@ -41,6 +41,7 @@ namespace bitpit{
  */
 enum class RBFBasisFunction{
     WENDLANDC2 = 1,/**< Compact support Wendland C2 function */
+    LINEAR = 2,/**< Compact support linear function */
 };
 
 /*!
@@ -145,6 +146,7 @@ protected:
  */
 namespace rbf{
 double                          wendlandc2( const double &) ;
+double                          linear( const double &) ;
 }
 
 }

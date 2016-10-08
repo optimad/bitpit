@@ -119,9 +119,13 @@ void RBF::setFunction( const RBFBasisFunction &bfunc ){
 
     switch(bfunc){
 
-        case( RBFBasisFunction::WENDLANDC2):
-            setFunction( rbf::wendlandc2);
-            break;
+    case( RBFBasisFunction::WENDLANDC2):
+        setFunction( rbf::wendlandc2);
+        break;
+
+    case( RBFBasisFunction::LINEAR):
+        setFunction( rbf::linear);
+        break;
 
         default:
             setFunction( rbf::wendlandc2);
@@ -920,14 +924,30 @@ int RBF::solveLSQ(){
  * @return rbf value
  */
 double rbf::wendlandc2( const double &dist ){
-	
-	if( dist > 1){
-		return 0.;
-	} else{
-		return( pow(1.-dist,4)*(4.*dist+1.) ) ;
-		
-	}
-	
+
+    if( dist > 1){
+        return 0.;
+    } else{
+        return( pow(1.-dist,4)*(4.*dist+1.) ) ;
+
+    }
+
+};
+
+/*!
+ * Linear function
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::linear( const double &dist ){
+
+    if( dist > 1){
+        return 0.;
+    } else{
+        return( 1-dist ) ;
+
+    }
+
 }; 
 
 
