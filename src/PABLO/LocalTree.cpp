@@ -289,8 +289,14 @@ namespace bitpit {
     LocalTree::reset(bool createRoot){
         m_octants.clear();
         m_ghosts.clear();
+        m_globalIdxGhosts.clear();
+
+        m_lastGhostBros.clear();
 
         m_localMaxDepth = 0;
+
+        clearConnectivity();
+        intervector().swap(m_intersections);
 
         std::fill(m_periodic.begin(), m_periodic.end(), false);
 
@@ -302,6 +308,10 @@ namespace bitpit {
 
             Octant lastDesc(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
             m_lastDescMorton = lastDesc.computeMorton();
+        } else {
+            Octant octDesc(m_dim,m_global.m_maxLevel,pow(2,m_global.m_maxLevel),pow(2,m_global.m_maxLevel),(m_dim > 2 ? pow(2,m_global.m_maxLevel) : 0));
+            m_lastDescMorton  = octDesc.computeMorton();
+            m_firstDescMorton = std::numeric_limits<uint64_t>::max();
         }
 
         m_sizeGhosts  = m_ghosts.size();

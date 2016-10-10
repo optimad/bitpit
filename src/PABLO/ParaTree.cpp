@@ -289,15 +289,26 @@ namespace bitpit {
      */
     void
     ParaTree::reset(bool createRoot){
-        m_tol = 1.0e-14;
-
+        m_tol       = 1.0e-14;
+        m_serial    = true;
         m_errorFlag = 0;
+
         m_maxDepth  = 0;
 
         m_octree.reset(createRoot);
         m_globalNumOctants = getNumOctants();
 
         m_lastOp = OP_INIT;
+
+        m_bordersPerProc.clear();
+        m_internals.clear();
+        m_pborders.clear();
+
+        m_sentIdx.clear();
+
+        std::fill(m_periodic.begin(), m_periodic.end(), false);
+
+        _initializePartitions();
     }
 
     // =============================================================================== //
