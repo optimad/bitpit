@@ -61,6 +61,7 @@ class LevelSetInfo{
     std::array<double,3>                    gradient ;                  /**< Levelset gradient */
 
     LevelSetInfo() ;
+    LevelSetInfo( const double &, const std::array<double,3> &) ;
 };
 
 class LevelSet{
