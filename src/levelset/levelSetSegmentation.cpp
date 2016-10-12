@@ -73,7 +73,7 @@ LevelSetSegmentation::~LevelSetSegmentation() {
  * @param[in] id identifier of object
  * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetObject(id) {
+LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetObject(id,true) {
     setFeatureAngle(angle) ;
 };
 

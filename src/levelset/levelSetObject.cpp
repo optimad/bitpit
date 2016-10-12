@@ -50,7 +50,7 @@ LevelSetObject::~LevelSetObject( ){
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject( int id) : m_id(id){
+LevelSetObject::LevelSetObject( int id, bool primary) : m_id(id), m_primary(primary){
 };
 
 /*!
@@ -61,6 +61,13 @@ int LevelSetObject::getId( ) const {
     return m_id ;
 };
 
+/*!
+ * If the levelset is primary (e.g. of a surface triangulation) or not (e.g. derived by boolean operations between two levelsets)
+ * @return if object is primary
+ */
+bool LevelSetObject::isPrimary( ) const {
+    return m_primary ;
+};
 
 /*!
  * Returns reference to LevelSetInfo
@@ -677,6 +684,7 @@ void LevelSetObject::dump( std::ostream &stream ){
     bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
 
     IO::binary::write(stream, m_id) ;
+    IO::binary::write(stream, m_primary) ;
     IO::binary::write(stream, m_RSearch);
     IO::binary::write(stream, (long) m_ls.size() ) ;
 
@@ -699,6 +707,7 @@ void LevelSetObject::restore( std::istream &stream ){
     LevelSetInfo cellInfo;
 
     IO::binary::read(stream, m_id) ;
+    IO::binary::read(stream, m_primary) ;
     IO::binary::read(stream, m_RSearch);
     IO::binary::read(stream, n);
 
