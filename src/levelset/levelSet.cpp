@@ -253,6 +253,8 @@ int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
     int objectId = object->getId();
     m_object[objectId] = std::move(object) ;
 
+    addProcessingOrder(objectId) ;
+
     return objectId;
 };
 
@@ -266,8 +268,50 @@ int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
     int objectId = object->getId();
     m_object[objectId] = std::unique_ptr<LevelSetObject>(object->clone())  ;
 
+    addProcessingOrder(objectId) ;
+
     return objectId;
 };
+
+
+/*!
+ * Adds the object to the processing order.
+ *
+ * The insertion order determines the processing order 
+ * but priority is given to primary objects. 
+ *
+ * This function must be called whan a new object is inserted into m_objects.
+ *
+ * @param[in] objectId the id of the newly added object
+ */
+void LevelSet::addProcessingOrder( int objectId ) {
+
+    bool primary = m_object.at(objectId)->isPrimary() ;
+
+    if(primary){
+        std::vector<int>::iterator orderItr = m_order.begin() ;
+        bool iterate( orderItr != m_order.end()) ;
+
+        while(iterate){
+            int id = *orderItr ;
+            if( m_object.at(id)->isPrimary() ){
+                ++orderItr ;
+                iterate = orderItr != m_order.end() ;
+            } else {
+                iterate = false;
+            }
+        }
+
+        m_order.insert(orderItr,objectId) ;
+
+    } else {
+        m_order.push_back(objectId) ;
+
+    }
+
+    return ;
+};
+
 
 /*!
  * Get a constant reference to the specified object.
@@ -543,14 +587,15 @@ void LevelSet::compute(){
 
     double RSearch ;
 
-    for( const auto &visitor : m_object ){
+    for( int objectId : m_order){
+        auto &visitor = *(m_object.at(objectId)) ;
         if( !m_userRSearch){
-            RSearch = m_kernel->computeSizeNarrowBand( visitor.second.get() )  ;
-            visitor.second->setSizeNarrowBand(RSearch) ;
+            RSearch = m_kernel->computeSizeNarrowBand(&visitor)  ;
+            visitor.setSizeNarrowBand(RSearch) ;
         }
 
-        visitor.second->computeLSInNarrowBand( m_kernel.get(), RSearch, m_signedDF) ;
-        if( m_propagateS ) visitor.second->propagateSign( m_kernel.get() ) ;
+        visitor.computeLSInNarrowBand( m_kernel.get(), RSearch, m_signedDF) ;
+        if( m_propagateS ) visitor.propagateSign( m_kernel.get() ) ;
     }
 
 
@@ -586,38 +631,40 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
     // Evaluate new narrow band size
     double newRSearch ;
-    for( const auto &visitor : m_object ){
+    for( int objectId : m_order){
+        auto &visitor = *(m_object.at(objectId)) ;
+
         if (updateNarrowBand) {
 
             if(m_userRSearch){
-                newRSearch = visitor.second->getSizeNarrowBand() ;
+                newRSearch = visitor.getSizeNarrowBand() ;
             } else {
-                newRSearch = m_kernel->updateSizeNarrowBand( mapper, visitor.second.get() )  ;
+                newRSearch = m_kernel->updateSizeNarrowBand( mapper, &visitor )  ;
             };
 
-            visitor.second->updateLSInNarrowBand( m_kernel.get(), mapper, newRSearch, m_signedDF ) ;
+            visitor.updateLSInNarrowBand( m_kernel.get(), mapper, newRSearch, m_signedDF ) ;
 
         } else {
-            visitor.second->clearAfterMeshAdaption(mapper) ;
+            visitor.clearAfterMeshAdaption(mapper) ;
         }
 
 
 #if BITPIT_ENABLE_MPI
         // Parallel communications
         if (sendList.size() > 0 || recvList.size() > 0) {
-            visitor.second->communicate( m_kernel.get(), sendList, recvList, &mapper ) ;
+            visitor.communicate( m_kernel.get(), sendList, recvList, &mapper ) ;
         }
 
-        visitor.second->exchangeGhosts( m_kernel.get() ) ;
+        visitor.exchangeGhosts( m_kernel.get() ) ;
 #endif
 
     // Finish narrow band update
         if (updateNarrowBand) {
-            newRSearch = m_kernel->computeSizeNarrowBandFromLS( visitor.second.get(), m_signedDF );
-            visitor.second->filterOutsideNarrowBand(newRSearch) ;
-            visitor.second->setSizeNarrowBand(newRSearch) ;
+            newRSearch = m_kernel->computeSizeNarrowBandFromLS( &visitor, m_signedDF );
+            visitor.filterOutsideNarrowBand(newRSearch) ;
+            visitor.setSizeNarrowBand(newRSearch) ;
 
-            if( m_propagateS ) visitor.second->propagateSign( m_kernel.get() ) ;
+            if( m_propagateS ) visitor.propagateSign( m_kernel.get() ) ;
         }
 
     }
@@ -632,6 +679,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
  */
 void LevelSet::dump( std::ostream &stream ){
 
+    IO::binary::write(stream, m_order);
     IO::binary::write(stream, m_userRSearch);
     IO::binary::write(stream, m_signedDF);
     IO::binary::write(stream, m_propagateS);
@@ -650,6 +698,7 @@ void LevelSet::dump( std::ostream &stream ){
  */
 void LevelSet::restore( std::istream &stream ){
 
+    IO::binary::read(stream, m_order);
     IO::binary::read(stream, m_userRSearch);
     IO::binary::read(stream, m_signedDF);
     IO::binary::read(stream, m_propagateS);
