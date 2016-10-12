@@ -253,7 +253,7 @@ class LevelSetObject{
 
     double                                      getSizeNarrowBand() const;
     bool                                        isInNarrowBand(const long &) const;
-    void                                        setSizeNarrowBand(double) ;
+    virtual void                                setSizeNarrowBand(double) ;
 
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
