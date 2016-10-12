@@ -25,7 +25,8 @@
 #define __BITPIT_CONFIGURATION_CONFIG_HPP__
 
 #include <memory>
-#include <unordered_map>
+#include <map>
+#include <vector>
 
 namespace bitpit {
 
@@ -35,10 +36,14 @@ class Config
 
 public:
     typedef Config Section;
-    typedef std::unordered_map<std::string, std::string> Options;
-    typedef std::unordered_map<std::string, std::unique_ptr<Config>> Sections;
+    typedef std::vector<Section *> MultiSection;
+    typedef std::vector<const Section *> ConstMultiSection;
+    typedef std::map<std::string, std::string> Options;
+    typedef std::multimap<std::string, std::unique_ptr<Config>> Sections;
 
-    Config();
+    Config(bool multiSections);
+
+    bool isMultiSectionsEnabled() const;
 
     int getOptionCount() const;
     Options & getOptions();
@@ -50,8 +55,11 @@ public:
     bool removeOption(const std::string &key);
 
     int getSectionCount() const;
+    int getSectionCount(const std::string &key) const;
     Sections & getSections();
     const Sections & getSections() const;
+    MultiSection getSections(const std::string &key);
+    ConstMultiSection getSections(const std::string &key) const;
     bool hasSection(const std::string &key) const;
     Section & getSection(const std::string &key);
     const Section & getSection(const std::string &key) const;
@@ -75,6 +83,7 @@ public:
     void set(const std::string &key, const T &value);
 
 private:
+    bool m_multiSections;
     std::unique_ptr<Options> m_options;
     std::unique_ptr<Sections> m_sections;
 

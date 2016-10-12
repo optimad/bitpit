@@ -64,7 +64,7 @@ void readNode(xmlNodePtr root, Config *config)
         std::string key(reinterpret_cast<const char*>(node->name));
         if (isSection) {
             Config::Section *section;
-            if (config->hasSection(key)) {
+            if (!config->isMultiSectionsEnabled() && config->hasSection(key)) {
                 section = &(config->getSection(key));
             } else {
                 section = &(config->addSection(key));

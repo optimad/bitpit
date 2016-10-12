@@ -43,11 +43,25 @@ namespace bitpit {
 
 /*!
     Create a new configuration.
+
+    \param multiSections if set to true the configuration will allow multiple
+    sections with the same name
 */
-Config::Config()
+Config::Config(bool multiSections)
+    : m_multiSections(multiSections),
+      m_options(std::unique_ptr<Options>(new Options())),
+      m_sections(std::unique_ptr<Sections>(new Sections()))
 {
-    m_options  = std::unique_ptr<Options>(new Options());
-    m_sections = std::unique_ptr<Sections>(new Sections());
+}
+
+/*!
+    Returns true if multi-sections are enabled.
+
+    \result Returns true if multi-sections are enabled.
+*/
+bool Config::isMultiSectionsEnabled() const
+{
+    return m_multiSections;
 }
 
 /*!
@@ -157,6 +171,17 @@ int Config::getSectionCount() const
 }
 
 /*!
+    Count the number of sections with the specified name.
+
+    \param key is the name of the section
+    \result The number of sections with the specified name.
+*/
+int Config::getSectionCount(const std::string &key) const
+{
+    return m_sections->count(key);
+}
+
+/*!
     Gets a reference to the stored sections.
 
     \result A reference to the stored sections.
@@ -177,6 +202,44 @@ const Config::Sections & Config::getSections() const
 }
 
 /*!
+    Gets a list of pointers to the sections with the specified name.
+
+    \param key is the name of the section
+    \result A list of pointers to the sections with the specified name.
+*/
+Config::MultiSection Config::getSections(const std::string &key)
+{
+    MultiSection sections;
+    sections.reserve(getSectionCount(key));
+
+    auto range = m_sections->equal_range(key);
+    for (auto itr = range.first; itr != range.second; ++itr) {
+        sections.push_back(itr->second.get());
+    }
+
+    return sections;
+}
+
+/*!
+    Gets a list of constant pointers to the sections with the specified name.
+
+    \param key is the name of the section
+    \result A list of constant pointers to the sections with the specified name.
+*/
+Config::ConstMultiSection Config::getSections(const std::string &key) const
+{
+    ConstMultiSection sections;
+    sections.reserve(getSectionCount(key));
+
+    auto range = m_sections->equal_range(key);
+    for (auto itr = range.first; itr != range.second; ++itr) {
+        sections.push_back(const_cast<const Section *>(itr->second.get()));
+    }
+
+    return sections;
+}
+
+/*!
     Checks if the specified section exists.
 
     \param key is the name of the section
@@ -184,7 +247,7 @@ const Config::Sections & Config::getSections() const
 */
 bool Config::hasSection(const std::string &key) const
 {
-    return (m_sections->count(key) > 0);
+    return (getSectionCount(key) > 0);
 }
 
 /*!
@@ -210,7 +273,12 @@ Config::Section & Config::getSection(const std::string &key)
 */
 const Config::Section & Config::getSection(const std::string &key) const
 {
-    return *(m_sections->at(key));
+    auto sectionItr = m_sections->find(key);
+    if (sectionItr == m_sections->end()) {
+        throw std::runtime_error("The section named \"" + key + "\" does not esists");
+    }
+
+    return *(sectionItr->second);
 }
 
 /*!
@@ -223,13 +291,13 @@ const Config::Section & Config::getSection(const std::string &key) const
 */
 Config::Section & Config::addSection(const std::string &key)
 {
-    if (hasSection(key)) {
+    if (!m_multiSections && hasSection(key)) {
         throw std::runtime_error("A section named \"" + key + "\" already esists");
     }
 
-    (*m_sections)[key] = std::unique_ptr<Section>(new Section());
+    auto sectionItr = m_sections->emplace(key, std::unique_ptr<Section>(new Section(m_multiSections)));
 
-    return *((*m_sections)[key]);
+    return *(sectionItr->second);
 }
 
 /*!

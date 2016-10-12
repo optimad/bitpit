@@ -52,8 +52,24 @@ const int ConfigParser::VERSION_UNDEFINED = -1;
 
 /*!
     Construct a new configuration parser.
+
+    \param root is the name of the root element
 */
 ConfigParser::ConfigParser(const std::string &root)
+    : Config(false)
+{
+    reset(root);
+}
+
+/*!
+    Construct a new configuration parser.
+
+    \param root is the name of the root element
+    \param multiSections if set to true the configuration parser will allow
+    multiple sections with the same name
+*/
+ConfigParser::ConfigParser(const std::string &root, bool multiSections)
+    : Config(multiSections)
 {
     reset(root);
 }
@@ -65,6 +81,21 @@ ConfigParser::ConfigParser(const std::string &root)
     \param version is the required version
 */
 ConfigParser::ConfigParser(const std::string &root, const int &version)
+    : Config(false)
+{
+    reset(root, version);
+}
+
+/*!
+    Construct a new configuration parser.
+
+    \param root is the name of the root element
+    \param version is the required version
+    \param multiSections if set to true the configuration parser will allow
+    multiple sections with the same name
+*/
+ConfigParser::ConfigParser(const std::string &root, const int &version, bool multiSections)
+    : Config(multiSections)
 {
     reset(root, version);
 }
