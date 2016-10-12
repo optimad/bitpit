@@ -119,8 +119,9 @@ void                computeAABBTriangle( array3D const &, array3D const &, array
 void                computeAABBSimplex( std::vector<array3D> const &, array3D &, array3D & ) ;
 
 void                unionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
+void                intersectionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
+void                subtractionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
 void                unionAABB( std::vector<array3D>  const &, std::vector<array3D> const &, array3D &, array3D & );
-
 //levelset    bool IntersectLineSurface(
 //levelset            array3D  const  &,                                                // (input)  first point on surface
 //levelset            array3D  const  &,                                                // (input)  normal of first point on surface

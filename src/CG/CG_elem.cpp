@@ -1995,6 +1995,69 @@ void unionAABB(
 };
 
 /*!
+ * computes the intersection of two axis aligned bounding boxes
+ * @param[in] A0 min point of first bounding box
+ * @param[in] A1 max point of first bounding box
+ * @param[in] B0 min point of second bounding box
+ * @param[in] B1 max point of second bounding box
+ * @param[out] C0 min point of union bounding box
+ * @param[out] C1 max point of union bounding box
+ */
+void intersectionAABB(
+        std::array<double,3>  const              & A0,
+        std::array<double,3>  const              & A1,
+        std::array<double,3>  const              & B0,
+        std::array<double,3>  const              & B1,
+        std::array<double,3>                     & C0,
+        std::array<double,3>                     & C1
+        ){
+
+    intersectBoxBox( A0, A1, B0, B1, C0, C1 );
+    return;
+};
+
+/*!
+ * computes the relative complement two axis aligned bounding boxes
+ * @param[in] A0 min point of first bounding box
+ * @param[in] A1 max point of first bounding box
+ * @param[in] B0 min point of second bounding box
+ * @param[in] B1 max point of second bounding box
+ * @param[out] C0 min point of union bounding box
+ * @param[out] C1 max point of union bounding box
+ */
+void subtractionAABB(
+        std::array<double,3>  const              & A0,
+        std::array<double,3>  const              & A1,
+        std::array<double,3>  const              & B0,
+        std::array<double,3>  const              & B1,
+        std::array<double,3>                     & C0,
+        std::array<double,3>                     & C1
+        ){
+
+    // X direction
+    if( B0[1]<=A0[1] && B0[2]<=A0[2] && B1[1]>=A1[1] && B1[2]>=A1[2] ){
+        C0[0] = ( B0[0]<=A0[0] && B1[0]>=A0[0] ) ? B1[0] : A0[0] ;
+        C1[0] = ( B0[0]<=A1[0] && B1[0]>=A1[0] ) ? B0[0] : A1[0] ;
+    }
+
+    // Y direction
+    if( B0[0]<=A0[0] && B0[2]<=A0[2] && B1[0]>=A1[0] && B1[2]>=A1[2] ){
+        C0[1] = ( B0[1]<=A0[1] && B1[1]>=A0[1] ) ? B1[1] : A0[2] ;
+        C1[1] = ( B0[1]<=A1[1] && B1[1]>=A1[1] ) ? B0[1] : A1[2] ;
+    }
+
+    // Z direction
+    if( B0[0]<=A0[0] && B0[1]<=A0[1] && B1[0]>=A1[0] && B1[1]>=A1[1] ){
+        C0[2] = ( B0[2]<=A0[2] && B1[2]>=A0[2] ) ? B1[2] : A0[2] ;
+        C1[2] = ( B0[2]<=A1[2] && B1[2]>=A1[2] ) ? B0[2] : A1[2] ;
+    }
+
+
+    return;
+};
+
+
+/*!
  * computes the face coordiantes of a box
  * @param[in] i face index
  * @param[in] A0 min point of bounding box
