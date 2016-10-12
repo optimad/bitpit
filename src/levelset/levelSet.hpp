@@ -69,6 +69,7 @@ class LevelSet{
     std::unique_ptr<LevelSetKernel>                             m_kernel ;              /**< LevelSet computational kernel */
     std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_object ;              /**< Objects defining the boundaries */
 
+    std::vector<int>                            m_order ;               /**< Processing order of objects */
     bool                                        m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
     bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
     bool                                        m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
@@ -89,6 +90,7 @@ class LevelSet{
     int                                         addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( std::unique_ptr<LevelSetObject> && ) ;
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
+    void                                        addProcessingOrder( int) ;
     const LevelSetObject &                      getObject( int ) const ;
     int                                         getObjectCount( ) const ;
     std::vector<int>                            getObjectIds( ) const ;
