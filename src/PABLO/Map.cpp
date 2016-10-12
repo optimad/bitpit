@@ -68,7 +68,7 @@ void Map::initialize(uint8_t dim){
  * \param[in] X Coordinates from logical domain.
  * \return Coordinates in physical domain.
  */
-darray3 Map::mapCoordinates(u32array3 const & X){
+darray3 Map::mapCoordinates(u32array3 const & X) const {
 	darray3 coords;
 	for (int i=0; i<3; ++i){
 		coords[i] = m_maxLength_1 * double(X[i]);
@@ -80,7 +80,7 @@ darray3 Map::mapCoordinates(u32array3 const & X){
  * \param[in] X Coordinate X from logical domain.
  * \return Coordinate X in physical domain.
  */
-double Map::mapX(uint32_t const & X){
+double Map::mapX(uint32_t const & X) const {
 	return m_maxLength_1 * double(X);
 };
 
@@ -88,7 +88,7 @@ double Map::mapX(uint32_t const & X){
  * \param[in] Y Coordinate Y from logical domain.
  * \return Coordinate Y in physical domain.
  */
-double Map::mapY(uint32_t const & Y){
+double Map::mapY(uint32_t const & Y) const {
 	return m_maxLength_1 * double(Y);
 };
 
@@ -96,7 +96,7 @@ double Map::mapY(uint32_t const & Y){
  * \param[in] Z Coordinate Z from logical domain.
  * \return Coordinate Z in physical domain.
  */
-double Map::mapZ(uint32_t const & Z){
+double Map::mapZ(uint32_t const & Z) const {
 	return m_maxLength_1 * double(Z);
 };
 
@@ -104,7 +104,7 @@ double Map::mapZ(uint32_t const & Z){
  * \param[in] X Coordinates from physical domain.
  * \return Coordinates in logical domain.
  */
-u32array3 Map::mapCoordinates(darray3 const & X){
+u32array3 Map::mapCoordinates(darray3 const & X) const {
 	u32array3 coords;
 	for (int i=0; i<3; ++i){
 		coords[i] = (uint32_t)(double(m_maxLength) * X[i]);
@@ -116,7 +116,7 @@ u32array3 Map::mapCoordinates(darray3 const & X){
  * \param[in] X Coordinate X from physical domain.
  * \return Coordinate X in logical domain.
  */
-uint32_t Map::mapX(double const & X){
+uint32_t Map::mapX(double const & X) const {
 	return (uint32_t)(double(m_maxLength) * X);
 };
 
@@ -124,7 +124,7 @@ uint32_t Map::mapX(double const & X){
  * \param[in] Y Coordinate Y from physical domain.
  * \return Coordinate Y in logical domain.
  */
-uint32_t Map::mapY(double const & Y){
+uint32_t Map::mapY(double const & Y) const {
 	return (uint32_t)(double(m_maxLength) * Y);
 };
 
@@ -132,7 +132,7 @@ uint32_t Map::mapY(double const & Y){
  * \param[in] Z Coordinate Z from physical domain.
  * \return Coordinate Z in logical domain.
  */
-uint32_t Map::mapZ(double const & Z){
+uint32_t Map::mapZ(double const & Z) const {
 	return (uint32_t)(double(m_maxLength) * Z);
 };
 
@@ -140,7 +140,7 @@ uint32_t Map::mapZ(double const & Z){
  * \param[in] size Size of octant from logical domain.
  * \return Size of octant in physical domain.
  */
-double Map::mapSize(uint32_t const & size){
+double Map::mapSize(uint32_t const & size) const {
 	return m_maxLength_1 *double(size);
 };
 
@@ -148,7 +148,7 @@ double Map::mapSize(uint32_t const & size){
  * \param[in] area Area of octant from logical domain.
  * \return Area of octant in physical domain.
  */
-double Map::mapArea(uint64_t const & area){
+double Map::mapArea(uint64_t const & area) const {
 	return ((1/pow(double(m_maxLength),(m_dim-1)))*double(area));
 };
 
@@ -156,7 +156,7 @@ double Map::mapArea(uint64_t const & area){
  * \param[in] volume Volume of octant from logical domain.
  * \return Coordinate Volume of octant in physical domain.
  */
-double Map::mapVolume(uint64_t const & volume){
+double Map::mapVolume(uint64_t const & volume) const {
 	return ((1/pow(double(m_maxLength),m_dim))*double(volume));
 };
 
@@ -184,7 +184,7 @@ void Map::mapCenter(darray3 & center, darray3 & mapcenter) const {
  * \param[in] nodes Pointer to coordinates of nodes from logical domain.
  * \param[out] mapnodes Coordinates of nodes in physical domain.
  */
-void Map::mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes){
+void Map::mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes) const {
 	mapnodes.resize(m_nnodes);
 	for (int i=0; i<m_nnodes; i++){
 		for (int j=0; j<3; j++){
@@ -197,7 +197,7 @@ void Map::mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes){
  * \param[in] nodes Vector of coordinates of nodes from logical domain.
  * \param[out] mapnodes Coordinates of nodes in physical domain.
  */
-void Map::mapNodes(u32arr3vector nodes, darr3vector & mapnodes){
+void Map::mapNodes(u32arr3vector nodes, darr3vector & mapnodes) const {
 	mapnodes.resize(m_nnodes);
 	for (int i=0; i<m_nnodes; i++){
 		for (int j=0; j<3; j++){
@@ -210,7 +210,7 @@ void Map::mapNodes(u32arr3vector nodes, darr3vector & mapnodes){
  * \param[in] node Coordinates of  the node from logical domain.
  * \param[out] mapnode Coordinates of the node in physical domain.
  */
-void Map::mapNode(u32array3 & node, darray3 & mapnode){
+void Map::mapNode(u32array3 & node, darray3 & mapnode) const {
 	for (int j=0; j<3; j++){
 		mapnode[j] = m_maxLength_1 * double(node[j]);
 	}
@@ -220,7 +220,7 @@ void Map::mapNode(u32array3 & node, darray3 & mapnode){
  * \param[in] nodes Pointer to coordinates of nodes from logical domain.
  * \param[out] mapnodes Coordinates of nodes in physical domain.
  */
-void Map::mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes){
+void Map::mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes) const {
 	mapnodes.resize(m_nnodesPerFace);
 	for (int i=0; i<m_nnodesPerFace; i++){
 		for (int j=0; j<3; j++){
@@ -233,7 +233,7 @@ void Map::mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes){
  * \param[in] nodes Pointer to coordinates of nodes from logical domain.
  * \param[out] mapnodes Coordinates of nodes in physical domain.
  */
-void Map::mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes){
+void Map::mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes) const {
 	mapnodes.resize(m_nnodesPerFace);
 	for (int i=0; i<m_nnodesPerFace; i++){
 		for (int j=0; j<3; j++){
@@ -246,7 +246,7 @@ void Map::mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes){
  * \param[in] normal Pointer to components of normal from logical domain.
  * \param[out] mapnormal components of normal in physical domain.
  */
-void Map::mapNormals(i8array3 normal, darray3 & mapnormal){
+void Map::mapNormals(i8array3 normal, darray3 & mapnormal) const {
 	mapnormal[0] = double(normal[0]);
 	mapnormal[1] = double(normal[1]);
 	mapnormal[2] = double(normal[2]);

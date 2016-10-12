@@ -102,25 +102,25 @@ private:
 	void initialize();
 	void initialize(uint8_t dim);
 
-	darray3 mapCoordinates(u32array3 const & X);
-	double mapX(uint32_t const & X);
-	double mapY(uint32_t const & Y);
-	double mapZ(uint32_t const & Z);
-	u32array3 mapCoordinates(darray3 const & X);
-	uint32_t mapX(double const & X);
-	uint32_t mapY(double const & Y);
-	uint32_t mapZ(double const & Z);
-	double mapSize(uint32_t const & size);
-	double mapArea(uint64_t const & area);
-	double mapVolume(uint64_t const & volume);
+	darray3 mapCoordinates(u32array3 const & X) const;
+	double mapX(uint32_t const & X) const;
+	double mapY(uint32_t const & Y) const;
+	double mapZ(uint32_t const & Z) const;
+	u32array3 mapCoordinates(darray3 const & X) const;
+	uint32_t mapX(double const & X) const;
+	uint32_t mapY(double const & Y) const;
+	uint32_t mapZ(double const & Z) const;
+	double mapSize(uint32_t const & size) const;
+	double mapArea(uint64_t const & area) const;
+	double mapVolume(uint64_t const & volume) const;
 	void mapCenter(double* & center, darray3 & mapcenter) const;
 	void mapCenter(darray3 & center, darray3 & mapcenter) const;
-	void mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes);
-	void mapNodes(u32arr3vector nodes, darr3vector & mapnodes);
-	void mapNode(u32array3 & node, darray3 & mapnode);
-	void mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes);
-	void mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes);
-	void mapNormals(i8array3 normal, darray3 & mapnormal);
+	void mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes) const;
+	void mapNodes(u32arr3vector nodes, darr3vector & mapnodes) const;
+	void mapNode(u32array3 & node, darray3 & mapnode) const;
+	void mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes) const;
+	void mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes) const;
+	void mapNormals(i8array3 normal, darray3 & mapnormal) const;
 
 };
 
