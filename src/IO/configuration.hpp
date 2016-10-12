@@ -36,9 +36,6 @@ class ConfigParser : public Config
 {
 
 public:
-    typedef std::unordered_map<std::string, std::string> Options;
-    typedef std::unordered_map<std::string, ConfigParser> Sections;
-
     ConfigParser(const std::string &root);
     ConfigParser(const std::string &root, const int &version);
 
