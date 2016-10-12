@@ -203,9 +203,9 @@ class LevelSetOctree : public LevelSetKernel{
 
 class LevelSetObject{
 
-
     private:
     int                                         m_id;           /**< identifier of object */
+    bool                                        m_primary;      /**< identifier of object */
 
     void                                        assignSign( int sign, const std::unordered_set<long> &cells ) ;
 
@@ -218,9 +218,10 @@ class LevelSetObject{
 
     public:
     virtual ~LevelSetObject();
-    LevelSetObject(int);
+    LevelSetObject(int,bool);
 
     virtual int                                 getId() const ;
+    bool                                        isPrimary() const ;
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
     virtual LevelSetObject*                     clone() const = 0;
 
