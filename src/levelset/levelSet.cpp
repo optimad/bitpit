@@ -57,9 +57,15 @@ namespace bitpit {
 /*!
  * Default constructor
  */
-LevelSetInfo::LevelSetInfo() {
-    value = levelSetDefaults::VALUE ;
-    gradient = levelSetDefaults::GRADIENT ;
+LevelSetInfo::LevelSetInfo() :value(levelSetDefaults::VALUE), gradient(levelSetDefaults::GRADIENT) {
+}
+
+/*!
+ * Complete constructor
+ * @param[in] v value of levelset function
+ * @param[in] g gradient of levelset function
+ */
+LevelSetInfo::LevelSetInfo(const double &v, const std::array<double,3> &g) :value(v), gradient(g) {
 }
 
 /*!
