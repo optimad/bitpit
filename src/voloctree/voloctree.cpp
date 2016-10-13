@@ -525,10 +525,11 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	// Updating the tree
 	log::cout() << ">> Adapting tree...";
 
-	bool buildMapping = (getCellCount() != 0);
-	bool updated = m_tree.adapt(buildMapping);
+	bool emtpyPatch   = (getCellCount() == 0);
+	bool buildMapping = !emtpyPatch;
+	bool updated = m_tree->adapt(buildMapping);
 
-	if (!updated) {
+	if (!updated && !emtpyPatch) {
 		log::cout() << " Already updated" << std::endl;
 		return std::vector<adaption::Info>();
 	}
