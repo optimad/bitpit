@@ -60,11 +60,10 @@ VolOctree::VolOctree()
 {
 	// Create the tree
 #if BITPIT_ENABLE_MPI==1
-	m_treeInternal = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
+	m_tree = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
 #else
-	m_treeInternal = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE));
+	m_tree = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE));
 #endif
-	m_tree = m_treeInternal.get();
 
 	// Initialize
 	initialize();
@@ -92,15 +91,14 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 {
 	// Create the tree
 #if BITPIT_ENABLE_MPI==1
-	m_treeInternal = std::unique_ptr<PabloUniform>(
+	m_tree = std::unique_ptr<PabloUniform>(
 	    new PabloUniform(origin[0], origin[1], origin[2], length, dimension,
 	                     PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
 #else
-	m_treeInternal = std::unique_ptr<PabloUniform>(
+	m_tree = std::unique_ptr<PabloUniform>(
 	    new PabloUniform(origin[0], origin[1], origin[2], length, dimension,
 	                     PabloUniform::DEFAULT_LOG_FILE));
 #endif
-	m_tree = m_treeInternal.get();
 
 	// Initialize
 	initialize();
@@ -129,6 +127,52 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 }
 
 /*!
+	Creates a new patch.
+
+	\param id is the id that will be assigned to the patch
+	\param tree is the tree that will be used
+	\param adopter is a pointer to the tree adopter
+*/
+VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
+	: VolumeKernel(id, tree->getDim(), false)
+{
+	// Associate the tree
+	m_tree.swap(tree);
+
+	// Initialize
+	initialize();
+
+	// Reset
+	//
+	// The function that resets the patch is virtual, but since is called
+	// from the constructor of the patch kernel only the base function is
+	// called.
+	__reset(false);
+
+	// Set the dimension
+	//
+	// The function that sets the dimension is virtual, but since is called
+	// from the constructor of the patch kernel only the base function is
+	// called.
+	__setDimension(m_tree->getDim());
+
+	// Set the communicator
+	PatchKernel::setCommunicator(m_tree->getComm());
+
+	// Set the partitioned flag
+	setPartitioned(!m_tree->getSerial());
+
+	// Sync the patch with the tree
+	sync(true, false);
+
+	// Set the bounding
+	setBoundingBox();
+
+	// Set the aopter
+	setTreeAdopter(adopter);
+}
+
+/*!
 	Creates a new patch restoring the patch saved in the specified stream.
 
 	\param stream is the stream to read from
@@ -138,6 +182,16 @@ VolOctree::VolOctree(std::istream stream)
 {
 	initialize();
 	restore(stream);
+}
+
+/*!
+	Destructor.
+*/
+VolOctree::~VolOctree()
+{
+	if (m_treeAdopter) {
+		m_treeAdopter->swap(m_tree);
+	}
 }
 
 /*!
@@ -178,6 +232,9 @@ void VolOctree::__reset(bool resetTree)
 void VolOctree::initialize()
 {
 	log::cout() << ">> Initializing Octree mesh" << std::endl;
+
+	// Reset the tree entruster
+	m_treeAdopter = nullptr;
 
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
@@ -423,6 +480,17 @@ PabloUniform & VolOctree::getTree()
 const PabloUniform & VolOctree::getTree() const
 {
 	return *m_tree;
+}
+
+/*!
+	Sets the tree adopter, i.e., the pointer that will take the ownership of
+	the tree when the patch is desctructed.
+
+	\param adopter is a pointer to the tree adopter
+*/
+void VolOctree::setTreeAdopter(std::unique_ptr<PabloUniform> *adopter)
+{
+	m_treeAdopter = adopter;
 }
 
 /*!

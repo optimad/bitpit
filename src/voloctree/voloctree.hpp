@@ -75,7 +75,10 @@ public:
 	VolOctree();
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
+	VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
 	VolOctree(std::istream stream);
+
+	~VolOctree();
 
 	void reset();
 	void setDimension(int dimension);
@@ -96,6 +99,7 @@ public:
 
 	PabloUniform & getTree();
 	const PabloUniform & getTree() const;
+	void setTreeAdopter(std::unique_ptr<PabloUniform> *entruster);
 
 	bool isPointInside(const std::array<double, 3> &point);
 	bool isPointInside(const long &id, const std::array<double, 3> &point);
@@ -211,8 +215,8 @@ private:
 	std::unordered_map<uint32_t, long> m_octantToCell;
 	std::unordered_map<uint32_t, long> m_ghostToCell;
 
-	PabloUniform *m_tree;
-	std::unique_ptr<PabloUniform> m_treeInternal;
+	std::unique_ptr<PabloUniform> m_tree;
+	std::unique_ptr<PabloUniform> *m_treeAdopter;
 
 	void initialize();
 	void initializeTreeGeometry();
