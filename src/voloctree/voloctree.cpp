@@ -893,7 +893,6 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
 		addedOctants.emplace_back(treeId, false);
 	}
-	addedOctants.shrink_to_fit();
 #endif
 
 	// Remove unmapped octants
