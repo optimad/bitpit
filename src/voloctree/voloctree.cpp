@@ -472,6 +472,24 @@ Octant * VolOctree::getOctantPointer(const OctantInfo &octantInfo)
 }
 
 /*!
+    Gets a constant pointer to the specified octant.
+
+    \param octantInfo the data of the octant
+    \result The constant pointer of the specified octant
+*/
+const Octant * VolOctree::getOctantPointer(const OctantInfo &octantInfo) const
+{
+    const Octant *octant;
+    if (octantInfo.internal) {
+        octant = m_tree.getOctant(octantInfo.id);
+    } else {
+        octant = m_tree.getGhostOctant(octantInfo.id);
+    }
+
+    return octant;
+}
+
+/*!
 	Evaluates a unique hash for the octant.
 
 	\param octantInfo the data of the octant

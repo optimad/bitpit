@@ -92,6 +92,7 @@ public:
 
 	long getOctantId(const OctantInfo &octantInfo) const;
 	Octant * getOctantPointer(const OctantInfo &octantInfo);
+	const Octant * getOctantPointer(const OctantInfo &octantInfo) const;
 
 	PabloUniform & getTree();
 
