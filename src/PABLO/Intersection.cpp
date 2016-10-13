@@ -135,25 +135,25 @@ bool Intersection::operator ==(const Intersection & intersection){
 // =================================================================================== //
 /*!Get the owner with exiting normal;
  */
-uint32_t Intersection::getOut(){
+uint32_t Intersection::getOut() const {
 	return m_owners[m_out];
 };
 
 /*!Get the owner with entering normal;
  */
-uint32_t Intersection::getIn(){
+uint32_t Intersection::getIn() const {
 	return m_owners[!m_out];
 };
 
 /*!Get the owner with exiting normal;
  */
-bool Intersection::getOutIsGhost(){
+bool Intersection::getOutIsGhost() const {
 	return m_outisghost;
 };
 
 /*!Get the owner with smaller size;
  */
-uint32_t Intersection::getFiner(){
+uint32_t Intersection::getFiner() const {
 	return m_owners[m_finer];
 };
 
@@ -161,7 +161,7 @@ uint32_t Intersection::getFiner(){
  * \param[out] normal Components of the exiting normal.
  * \param[in] normals Basic matrix with components of the elementary normals.
  */
-void Intersection::getNormal(int8_t normal[3], int8_t normals[6][3]){
+void Intersection::getNormal(int8_t normal[3], int8_t normals[6][3]) const {
 	for (int i=0; i<m_dim; i++){
 		normal[i] = normals[m_iface][i];
 	}
@@ -170,21 +170,21 @@ void Intersection::getNormal(int8_t normal[3], int8_t normals[6][3]){
 /*!Get the boundary condition of the intersection;
  * \return Boolean true/false if the intersection is/is not a boundary intersection
  */
-bool Intersection::getBound(){
+bool Intersection::getBound() const {
 	return m_bound;
 };
 
 /*!Get the ghost information about the intersection;
  * \return Boolean true/false if the intersection is/is not a ghost intersection
  */
-bool Intersection::getIsGhost(){
+bool Intersection::getIsGhost() const {
 	return m_isghost;
 };
 
 /*!Get the partition boundary condition of the intersection;
  * \return Boolean true/false if the intersection is/is not a process boundary intersection
  */
-bool Intersection::getPbound(){
+bool Intersection::getPbound() const {
 	return m_pbound;
 };
 

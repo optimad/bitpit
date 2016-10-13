@@ -107,14 +107,14 @@ private:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 
-	uint32_t getOut();
-	bool getOutIsGhost();
-	uint32_t getIn();
-	uint32_t getFiner();
-	void getNormal(int8_t normal[3], int8_t normals[6][3]);
-	bool getBound();
-	bool getIsGhost();
-	bool getPbound();
+	uint32_t getOut() const;
+	bool getOutIsGhost() const;
+	uint32_t getIn() const;
+	uint32_t getFiner() const;
+	void getNormal(int8_t normal[3], int8_t normals[6][3]) const;
+	bool getBound() const;
+	bool getIsGhost() const;
+	bool getPbound() const;
 
 };
 
