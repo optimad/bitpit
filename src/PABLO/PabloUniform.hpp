@@ -111,73 +111,73 @@ namespace bitpit {
         // =================================================================================== //
         // INDEX BASED METHODS																   //
         // =================================================================================== //
-        darray3 	getCoordinates(uint32_t idx);
-        double 		getX(uint32_t idx);
-        double 		getY(uint32_t idx);
-        double 		getZ(uint32_t idx);
-        double 		getSize(uint32_t idx);
-        double 		getArea(uint32_t idx);
-        double 		getVolume(uint32_t idx);
+        darray3 	getCoordinates(uint32_t idx) const;
+        double 		getX(uint32_t idx) const;
+        double 		getY(uint32_t idx) const;
+        double 		getZ(uint32_t idx) const;
+        double 		getSize(uint32_t idx) const;
+        double 		getArea(uint32_t idx) const;
+        double 		getVolume(uint32_t idx) const;
         void 		getCenter(uint32_t idx, darray3& center) const;
         darray3 	getCenter(uint32_t idx) const;
         darray3 	getFaceCenter(uint32_t idx, uint8_t iface) const;
         void 		getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const;
-        darray3 	getNode(uint32_t idx, uint8_t inode);
-        void 		getNode(uint32_t idx, uint8_t inode, darray3& node);
-        void 		getNodes(uint32_t idx, darr3vector & nodes);
-        darr3vector getNodes(uint32_t idx);
-        void 		getNormal(uint32_t idx, uint8_t iface, darray3 & normal);
-        darray3 	getNormal(uint32_t idx, uint8_t iface);
+        darray3 	getNode(uint32_t idx, uint8_t inode) const;
+        void 		getNode(uint32_t idx, uint8_t inode, darray3& node) const;
+        void 		getNodes(uint32_t idx, darr3vector & nodes) const;
+        darr3vector getNodes(uint32_t idx) const;
+        void 		getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const;
+        darray3 	getNormal(uint32_t idx, uint8_t iface) const;
 
         // =================================================================================== //
         // POINTER BASED METHODS															   //
         // =================================================================================== //
-        darray3 	getCoordinates(Octant* oct);
-        double 		getX(Octant* oct);
-        double 		getY(Octant* oct);
-        double 		getZ(Octant* oct);
-        double 		getSize(Octant* oct);
-        double 		getArea(Octant* oct);
-        double 		getVolume(Octant* oct);
+        darray3 	getCoordinates(const Octant* oct) const;
+        double 		getX(const Octant* oct) const;
+        double 		getY(const Octant* oct) const;
+        double 		getZ(const Octant* oct) const;
+        double 		getSize(const Octant* oct) const;
+        double 		getArea(const Octant* oct) const;
+        double 		getVolume(const Octant* oct) const;
         void 		getCenter(const Octant* oct, darray3& center) const;
         darray3 	getCenter(const Octant* oct) const;
         darray3 	getFaceCenter(const Octant* oct, uint8_t iface) const;
         void 		getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const;
-        darray3 	getNode(Octant* oct, uint8_t inode);
-        void 		getNode(Octant* oct, uint8_t inode, darray3& node);
-        void 		getNodes(Octant* oct, darr3vector & nodes);
-        darr3vector getNodes(Octant* oct);
-        void 		getNormal(Octant* oct, uint8_t iface, darray3 & normal);
-        darray3 	getNormal(Octant* oct, uint8_t iface);
+        darray3 	getNode(const Octant* oct, uint8_t inode) const;
+        void 		getNode(const Octant* oct, uint8_t inode, darray3& node) const;
+        void 		getNodes(const Octant* oct, darr3vector & nodes) const;
+        darr3vector getNodes(const Octant* oct) const;
+        void 		getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const;
+        darray3 	getNormal(const Octant* oct, uint8_t iface) const;
 
         // =================================================================================== //
         // LOCAL TREE GET/SET METHODS														   //
         // =================================================================================== //
-        double	 	getLocalMaxSize();
-        double	 	getLocalMinSize();
-        void 		getBoundingBox(darray3 & P0, darray3 & P1);
+        double	 	getLocalMaxSize() const;
+        double	 	getLocalMinSize() const;
+        void 		getBoundingBox(darray3 & P0, darray3 & P1) const;
 
         // =================================================================================== //
         // INTERSECTION GET/SET METHODS														   //
         // =================================================================================== //
-        double 		getSize(Intersection* inter);
-        double 		getArea(Intersection* inter);
+        double 		getSize(const Intersection* inter) const;
+        double 		getArea(const Intersection* inter) const;
         darray3 	getCenter(const Intersection* inter) const;
-        darr3vector getNodes(Intersection* inter);
-        darray3 	getNormal(Intersection* inter);
+        darr3vector getNodes(const Intersection* inter) const;
+        darray3 	getNormal(const Intersection* inter) const;
 
         // =================================================================================== //
         // OTHER OCTANT BASED METHODS												    	   //
         // =================================================================================== //
         Octant* getPointOwner(darray3 point);
-        uint32_t getPointOwnerIdx(darray3 point);
+        uint32_t getPointOwnerIdx(darray3 point) const;
         Octant* getPointOwner(darray3 point, bool & isghost);
-        uint32_t getPointOwnerIdx(darray3 point, bool & isghost);
+        uint32_t getPointOwnerIdx(darray3 point, bool & isghost) const;
 
         // =================================================================================== //
         // OTHER PARATREE BASED METHODS												    	   //
         // =================================================================================== //
-        darray3 	getNodeCoordinates(uint32_t inode);
+        darray3 	getNodeCoordinates(uint32_t inode) const;
 
     };
 

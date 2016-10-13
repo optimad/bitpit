@@ -233,7 +233,7 @@ namespace bitpit {
      * \return Coordinates X,Y,Z of node 0.
      */
     darray3
-    PabloUniform::getCoordinates(uint32_t idx){
+    PabloUniform::getCoordinates(uint32_t idx) const {
         darray3 coords, coords_;
         coords_ = ParaTree::getCoordinates(idx);
         for (int i=0; i<3; i++){
@@ -247,7 +247,7 @@ namespace bitpit {
      * \return Coordinate X of node 0.
      */
     double
-    PabloUniform::getX(uint32_t idx){
+    PabloUniform::getX(uint32_t idx) const {
         double X, X_;
         X_ = ParaTree::getX(idx);
         X = m_origin[0] + m_L * X_;
@@ -259,7 +259,7 @@ namespace bitpit {
      * \return Coordinate Y of node 0.
      */
     double
-    PabloUniform::getY(uint32_t idx){
+    PabloUniform::getY(uint32_t idx) const {
         double X, X_;
         X_ = ParaTree::getY(idx);
         X = m_origin[0] + m_L * X_;
@@ -271,7 +271,7 @@ namespace bitpit {
      * \return Coordinate Z of node 0.
      */
     double
-    PabloUniform::getZ(uint32_t idx){
+    PabloUniform::getZ(uint32_t idx) const {
         double X, X_;
         X_ = ParaTree::getZ(idx);
         X = m_origin[0] + m_L * X_;
@@ -283,7 +283,7 @@ namespace bitpit {
      * \return Size of octant.
      */
     double
-    PabloUniform::getSize(uint32_t idx){
+    PabloUniform::getSize(uint32_t idx) const {
         return m_L * ParaTree::getSize(idx);
     };
 
@@ -292,7 +292,7 @@ namespace bitpit {
      * \return Area of octant.
      */
     double
-    PabloUniform::getArea(uint32_t idx){
+    PabloUniform::getArea(uint32_t idx) const {
         double area = ParaTree::getArea(idx);
         for (int i=1; i<ParaTree::getDim(); i++){
             area *= m_L;
@@ -305,7 +305,7 @@ namespace bitpit {
      * \return Volume of octant.
      */
     double
-    PabloUniform::getVolume(uint32_t idx){
+    PabloUniform::getVolume(uint32_t idx) const {
         double volume = ParaTree::getVolume(idx);
         for (int i=0; i<ParaTree::getDim(); i++){
             volume *= m_L;
@@ -371,7 +371,7 @@ namespace bitpit {
      * \return Coordinates of of the inode-th node of octant.
      */
     darray3
-    PabloUniform::getNode(uint32_t idx, uint8_t inode){
+    PabloUniform::getNode(uint32_t idx, uint8_t inode) const {
         darray3 node, node_ = ParaTree::getNode(idx, inode);
         for (int i=0; i<3; i++){
             node[i] = m_origin[i] + m_L * node_[i];
@@ -385,7 +385,7 @@ namespace bitpit {
      * \param[out] node Coordinates of of the inode-th node of octant.
      */
     void
-    PabloUniform::getNode(uint32_t idx, uint8_t inode, darray3& node){
+    PabloUniform::getNode(uint32_t idx, uint8_t inode, darray3& node) const {
         darray3 node_ = ParaTree::getNode(idx, inode);
         for (int i=0; i<3; i++){
             node[i] = m_origin[i] + m_L * node_[i];
@@ -397,7 +397,7 @@ namespace bitpit {
      * \param[out] nodes Coordinates of the nodes of octant.
      */
     void
-    PabloUniform::getNodes(uint32_t idx, darr3vector & nodes){
+    PabloUniform::getNodes(uint32_t idx, darr3vector & nodes) const {
         darray3vector nodes_ = ParaTree::getNodes(idx);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
@@ -412,7 +412,7 @@ namespace bitpit {
      * \return nodes Coordinates of the nodes of octant.
      */
     darr3vector
-    PabloUniform::getNodes(uint32_t idx){
+    PabloUniform::getNodes(uint32_t idx) const {
         darray3vector nodes, nodes_ = ParaTree::getNodes(idx);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
@@ -429,7 +429,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    PabloUniform::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) {
+    PabloUniform::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const {
         ParaTree::getNormal(idx, iface, normal);
     }
 
@@ -439,7 +439,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    PabloUniform::getNormal(uint32_t idx, uint8_t iface){
+    PabloUniform::getNormal(uint32_t idx, uint8_t iface) const {
         return ParaTree::getNormal(idx, iface);
     }
 
@@ -451,7 +451,7 @@ namespace bitpit {
      * \return Coordinates of node 0.
      */
     darray3
-    PabloUniform::getCoordinates(Octant* oct){
+    PabloUniform::getCoordinates(const Octant* oct) const {
         darray3 coords, coords_;
         coords_ = ParaTree::getCoordinates(oct);
         for (int i=0; i<3; i++){
@@ -465,7 +465,7 @@ namespace bitpit {
      * \return Coordinate X of node 0.
      */
     double
-    PabloUniform::getX(Octant* oct){
+    PabloUniform::getX(const Octant* oct) const {
         double X, X_;
         X_ = ParaTree::getX(oct);
         X = m_origin[0] + m_L * X_;
@@ -477,7 +477,7 @@ namespace bitpit {
      * \return Coordinate Y of node 0.
      */
     double
-    PabloUniform::getY(Octant* oct){
+    PabloUniform::getY(const Octant* oct) const {
         double X, X_;
         X_ = ParaTree::getY(oct);
         X = m_origin[0] + m_L * X_;
@@ -489,7 +489,7 @@ namespace bitpit {
      * \return Coordinate Z of node 0.
      */
     double
-    PabloUniform::getZ(Octant* oct){
+    PabloUniform::getZ(const Octant* oct) const {
         double X, X_;
         X_ = ParaTree::getZ(oct);
         X = m_origin[0] + m_L * X_;
@@ -501,7 +501,7 @@ namespace bitpit {
      * \return Size of octant.
      */
     double
-    PabloUniform::getSize(Octant* oct){
+    PabloUniform::getSize(const Octant* oct) const {
         return m_L * ParaTree::getSize(oct);
     };
 
@@ -510,7 +510,7 @@ namespace bitpit {
      * \return Area of octant.
      */
     double
-    PabloUniform::getArea(Octant* oct){
+    PabloUniform::getArea(const Octant* oct) const {
         double area = ParaTree::getArea(oct);
         for (int i=1; i<ParaTree::getDim(); i++){
             area *= m_L;
@@ -523,7 +523,7 @@ namespace bitpit {
      * \return Volume of octant.
      */
     double
-    PabloUniform::getVolume(Octant* oct){
+    PabloUniform::getVolume(const Octant* oct) const {
         double volume = ParaTree::getVolume(oct);
         for (int i=0; i<ParaTree::getDim(); i++){
             volume *= m_L;
@@ -589,7 +589,7 @@ namespace bitpit {
      * \return Coordinates of the center of the inode-th of octant.
      */
     darray3
-    PabloUniform::getNode(Octant* oct, uint8_t inode){
+    PabloUniform::getNode(const Octant* oct, uint8_t inode) const {
         darray3 node, node_ = ParaTree::getNode(oct, inode);
         for (int i=0; i<3; i++){
             node[i] = m_origin[i] + m_L * node_[i];
@@ -603,7 +603,7 @@ namespace bitpit {
      * \param[out] node Coordinates of the center of the inode-th of octant.
      */
     void
-    PabloUniform::getNode(Octant* oct, uint8_t inode, darray3& node){
+    PabloUniform::getNode(const Octant* oct, uint8_t inode, darray3& node) const {
         darray3 node_ = ParaTree::getNode(oct, inode);
         for (int i=0; i<3; i++){
             node[i] = m_origin[i] + m_L * node_[i];
@@ -615,7 +615,7 @@ namespace bitpit {
      * \param[out] nodes Coordinates of the nodes of octant.
      */
     void
-    PabloUniform::getNodes(Octant* oct, darr3vector & nodes){
+    PabloUniform::getNodes(const Octant* oct, darr3vector & nodes) const {
         darray3vector nodes_ = ParaTree::getNodes(oct);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
@@ -630,7 +630,7 @@ namespace bitpit {
      * \return nodes Coordinates of the nodes of octant.
      */
     darr3vector
-    PabloUniform::getNodes(Octant* oct){
+    PabloUniform::getNodes(const Octant* oct) const {
         darray3vector nodes, nodes_ = ParaTree::getNodes(oct);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
@@ -647,7 +647,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    PabloUniform::getNormal(Octant* oct, uint8_t iface, darray3 & normal) {
+    PabloUniform::getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const {
         ParaTree::getNormal(oct, iface, normal);
     }
 
@@ -657,7 +657,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    PabloUniform::getNormal(Octant* oct, uint8_t iface){
+    PabloUniform::getNormal(const Octant* oct, uint8_t iface) const {
         return ParaTree::getNormal(oct, iface);
     }
 
@@ -668,7 +668,7 @@ namespace bitpit {
      * \return Local current maximum size of the local partition of the octree.
      */
     double
-    PabloUniform::getLocalMaxSize(){
+    PabloUniform::getLocalMaxSize() const {
         return m_L * ParaTree::getLocalMaxSize();
     };
 
@@ -676,7 +676,7 @@ namespace bitpit {
      * \return Local current minimum size of the local partition of the octree.
      */
     double
-    PabloUniform::getLocalMinSize(){
+    PabloUniform::getLocalMinSize() const {
         return m_L * ParaTree::getLocalMinSize();
     };
 
@@ -686,7 +686,7 @@ namespace bitpit {
      *  \param[out] P1 Array with coordinates of the last point (highest coordinates).
      */
     void
-    PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1){
+    PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1) const {
         // If there are no octants the bounding box is empty
         uint32_t nocts = ParaTree::getNumOctants();
         if (nocts == 0) {
@@ -736,7 +736,7 @@ namespace bitpit {
      * \return Size of intersection.
      */
     double
-    PabloUniform::getSize(Intersection* inter){
+    PabloUniform::getSize(const Intersection* inter) const {
         return m_L * ParaTree::getSize(inter);
     };
 
@@ -745,7 +745,7 @@ namespace bitpit {
      * \return Area of intersection.
      */
     double
-    PabloUniform::getArea(Intersection* inter){
+    PabloUniform::getArea(const Intersection* inter) const {
         double area =  ParaTree::getArea(inter);
         for (int i=1; i<ParaTree::getDim(); i++){
             area *= m_L;
@@ -771,7 +771,7 @@ namespace bitpit {
      * \return Coordinates of the nodes of intersection.
      */
     darr3vector
-    PabloUniform::getNodes(Intersection* inter){
+    PabloUniform::getNodes(const Intersection* inter) const {
         darr3vector nodes, nodes_ = ParaTree::getNodes(inter);
         nodes.resize(ParaTree::getNnodesperface());
         for (int j=0; j<ParaTree::getNnodesperface(); j++){
@@ -787,7 +787,7 @@ namespace bitpit {
      * \return Coordinates of the normal of intersection.
      */
     darray3
-    PabloUniform::getNormal(Intersection* inter){
+    PabloUniform::getNormal(const Intersection* inter) const {
         return ParaTree::getNormal(inter);
     }
 
@@ -825,7 +825,7 @@ namespace bitpit {
      * (max uint32_t representable if point outside of the domain).
      */
     uint32_t
-    PabloUniform::getPointOwnerIdx(darray3 point){
+    PabloUniform::getPointOwnerIdx(darray3 point) const {
         for (int i=0; i<3; i++){
             point[i] = (point[i] - m_origin[i])/m_L;
         }
@@ -838,7 +838,7 @@ namespace bitpit {
      * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
      */
     uint32_t
-    PabloUniform::getPointOwnerIdx(darray3 point, bool & isghost){
+    PabloUniform::getPointOwnerIdx(darray3 point, bool & isghost) const {
         for (int i=0; i<3; i++){
             point[i] = (point[i] - m_origin[i])/m_L;
         }
@@ -854,7 +854,7 @@ namespace bitpit {
      * \return Vector with the coordinates of the node.
      */
     darray3
-    PabloUniform::getNodeCoordinates(uint32_t inode){
+    PabloUniform::getNodeCoordinates(uint32_t inode) const {
         darray3 node = ParaTree::getNodeCoordinates(inode);
         for (int i=0; i<3; i++){
             node[i] = m_origin[i] + m_L * node[i];
