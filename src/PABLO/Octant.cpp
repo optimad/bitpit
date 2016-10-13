@@ -507,7 +507,7 @@ u32array3		Octant::getNode(uint8_t inode) const{
  * \param[out] normal Array[3] with components (with z=0) of the normal of face.
  * \param[in] normals Global structure with components of face normals of a reference octant.
  */
-void		Octant::getNormal(uint8_t iface, i8array3 & normal, int8_t (&normals)[6][3]) const{
+void		Octant::getNormal(uint8_t iface, i8array3 & normal, const int8_t (&normals)[6][3]) const{
 	uint8_t		i;
 	for (i = 0; i < 3; i++){
 		normal[i] = normals[iface][i];
@@ -541,7 +541,7 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 /** Build the last descendant octant of this octant.
  * \return Last descendant octant.
  */
-Octant	Octant::buildLastDesc(){
+Octant	Octant::buildLastDesc() const {
 	u32array3 delta = { {0,0,0} };
 	for (int i=0; i<m_dim; i++){
 		delta[i] = (uint32_t)(1 << (Global::getMaxLevel() - m_level)) - 1;
@@ -555,7 +555,7 @@ Octant	Octant::buildLastDesc(){
 /** Build the father octant of this octant.
  * \return Father octant.
  */
-Octant	Octant::buildFather(){
+Octant	Octant::buildFather() const {
 	uint32_t delta[3];
 	uint32_t xx[3];
 	xx[0] = m_x;
@@ -574,7 +574,7 @@ Octant	Octant::buildFather(){
 /** Builds children of octant.
  *   \return Ordered (by Z-index) vector of children[nchildren] (info update)
  */
-vector< Octant >	Octant::buildChildren(){
+vector< Octant >	Octant::buildChildren() const {
 	uint8_t xf,yf,zf;
 	int nchildren = 1<<m_dim;
 
@@ -730,7 +730,7 @@ vector< Octant >	Octant::buildChildren(){
  * \param[out] sizehf Number of possible neighbours.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf){
+vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf) const {
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	uint32_t i,cx,cy,cz;
@@ -818,7 +818,7 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
  * \param[out] sizem Number of possible neighbours.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizem){
+vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizem) const {
 	uint32_t dh,dh2;
 	uint32_t nneigh, nline;
 	uint32_t i,cx,cy,cz;
@@ -906,7 +906,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
  * \param[out] sizeneigh Number of possible neighbours.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> Octant::computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizeneigh){
+vector<uint64_t> Octant::computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizeneigh) const {
 	vector<uint64_t> Morton;
 	if (getNotBalance()){
 		return computeMinSizeMorton(iface,
@@ -927,7 +927,7 @@ vector<uint64_t> Octant::computeVirtualMorton(uint8_t iface, const uint8_t & max
  * \param[in] edgeface Local edge-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf, uint8_t (&edgeface)[12][2]){
+vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf, uint8_t (&edgeface)[12][2]) const {
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	uint32_t i;
@@ -1085,7 +1085,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
  * \param[in] edgeface Local edge-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizem, uint8_t (&edgeface)[12][2]){
+vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizem, uint8_t (&edgeface)[12][2]) const {
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	uint32_t i;
@@ -1244,7 +1244,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
  * \param[in] edgeface Local edge-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t>		Octant::computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t balance_codim, uint8_t (&edgeface)[12][2]){
+vector<uint64_t>		Octant::computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t balance_codim, uint8_t (&edgeface)[12][2]) const {
 
 	if(!getNotBalance() && balance_codim > 1){
 		return computeEdgeHalfSizeMorton(iedge,
@@ -1265,7 +1265,7 @@ vector<uint64_t>		Octant::computeEdgeVirtualMorton(uint8_t iedge, const uint8_t 
  * \param[in] nodeface Local node-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxdepth,uint32_t & sizem, uint8_t (&nodeface)[8][3]){
+uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxdepth,uint32_t & sizem, uint8_t (&nodeface)[8][3]) const {
 
 	uint32_t dh,dh2;
 	uint32_t nneigh;
@@ -1365,7 +1365,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
  * \param[in] nodeface Local node-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t (&nodeface)[8][3]){
+uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t (&nodeface)[8][3]) const {
 
 	return computeNodeMinSizeMorton(inode, maxdepth,
 			sizeneigh, nodeface);
@@ -1377,7 +1377,7 @@ uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxde
  * \param[in] iface Local index of the face target.
  * \return Periodic neighbour morton number.
  */
-uint64_t Octant::computePeriodicMorton(uint8_t iface){
+uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
 	uint64_t Morton = this->computeMorton();
 	uint32_t dh;
 	dh = getSize();
