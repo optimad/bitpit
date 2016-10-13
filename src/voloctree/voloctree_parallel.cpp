@@ -47,7 +47,7 @@ void VolOctree::setCommunicator(MPI_Comm communicator)
 {
 	PatchKernel::setCommunicator(communicator);
 
-	m_tree.setComm(communicator);
+	m_tree->setComm(communicator);
 }
 
 /*!
@@ -62,7 +62,7 @@ const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges
 	// Updating the tree
 	log::cout() << ">> Load balancing...";
 
-	m_tree.loadBalance();
+	m_tree->loadBalance();
 
 	// Sync the patch
 	const std::vector<adaption::Info> adaptionData = sync(true, trackChanges);

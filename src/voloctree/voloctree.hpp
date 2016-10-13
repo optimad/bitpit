@@ -211,7 +211,8 @@ private:
 	std::unordered_map<uint32_t, long> m_octantToCell;
 	std::unordered_map<uint32_t, long> m_ghostToCell;
 
-	PabloUniform m_tree;
+	PabloUniform *m_tree;
+	std::unique_ptr<PabloUniform> m_treeInternal;
 
 	void initialize();
 	void initializeTreeGeometry();

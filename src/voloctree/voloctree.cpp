@@ -56,13 +56,17 @@ namespace bitpit {
 	Creates an uninitialized patch.
 */
 VolOctree::VolOctree()
-	: VolumeKernel(false),
-	  m_tree(PabloUniform::DEFAULT_LOG_FILE
-#if BITPIT_ENABLE_MPI==1
-	         , MPI_COMM_NULL
-#endif
-	  )
+	: VolumeKernel(false)
 {
+	// Create the tree
+#if BITPIT_ENABLE_MPI==1
+	m_treeInternal = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
+#else
+	m_treeInternal = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE));
+#endif
+	m_tree = m_treeInternal.get();
+
+	// Initialize
 	initialize();
 
 	// Reset
@@ -84,14 +88,21 @@ VolOctree::VolOctree()
 */
 VolOctree::VolOctree(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
-	: VolumeKernel(id, dimension, false),
-	  m_tree(origin[0], origin[1], origin[2], length, dimension,
-	         PabloUniform::DEFAULT_LOG_FILE
-#if BITPIT_ENABLE_MPI==1
-	         , MPI_COMM_NULL
-#endif
-	        )
+	: VolumeKernel(id, dimension, false)
 {
+	// Create the tree
+#if BITPIT_ENABLE_MPI==1
+	m_treeInternal = std::unique_ptr<PabloUniform>(
+	    new PabloUniform(origin[0], origin[1], origin[2], length, dimension,
+	                     PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
+#else
+	m_treeInternal = std::unique_ptr<PabloUniform>(
+	    new PabloUniform(origin[0], origin[1], origin[2], length, dimension,
+	                     PabloUniform::DEFAULT_LOG_FILE));
+#endif
+	m_tree = m_treeInternal.get();
+
+	// Initialize
 	initialize();
 
 	// Reset
@@ -114,7 +125,7 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
-	m_tree.setMarker((uint32_t) 0, initial_level);
+	m_tree->setMarker((uint32_t) 0, initial_level);
 }
 
 /*!
@@ -148,9 +159,9 @@ void VolOctree::__reset(bool resetTree)
 {
 	// Reset the tree
 	if (resetTree) {
-		m_tree.reset();
-		m_tree.setOrigin(std::array<double, 3>{0., 0., 0.});
-		m_tree.setL(1.);
+		m_tree->reset();
+		m_tree->setOrigin(std::array<double, 3>{0., 0., 0.});
+		m_tree->setL(1.);
 	}
 
 	// Reset cell-to-octants maps
@@ -272,7 +283,7 @@ void VolOctree::setBoundingBox()
 	std::array<double, 3> maxPoint;
 
 	// Get the bounding box from the tree
-	m_tree.getBoundingBox(minPoint, maxPoint);
+	m_tree->getBoundingBox(minPoint, maxPoint);
 
 	// The tree is only evaluating the bounding box of the internal octants,
 	// we need to consider also ghosts cells.
@@ -303,7 +314,7 @@ double VolOctree::evalCellVolume(const long &id) const
 	OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
 
-	return m_tree.getVolume(octant);
+	return m_tree->getVolume(octant);
 }
 
 /*!
@@ -318,12 +329,12 @@ std::array<double, 3> VolOctree::evalCellCentroid(const long &id) const
 
 	const Octant *octant;
 	if (octantInfo.internal) {
-		octant = m_tree.getOctant(octantInfo.id);
+		octant = m_tree->getOctant(octantInfo.id);
 	} else {
-		octant = m_tree.getGhostOctant(octantInfo.id);
+		octant = m_tree->getGhostOctant(octantInfo.id);
 	}
 
-	return m_tree.getCenter(octant);
+	return m_tree->getCenter(octant);
 }
 
 /*!
@@ -337,7 +348,7 @@ double VolOctree::evalCellSize(const long &id) const
 	OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
 
-	return m_tree.getSize(octant);
+	return m_tree->getSize(octant);
 }
 
 /*!
@@ -354,7 +365,7 @@ double VolOctree::evalInterfaceArea(const long &id) const
 	OctantInfo octantInfo = getCellOctant(owner);
 	const Octant *octant = getOctantPointer(octantInfo);
 
-	return m_tree.getArea(octant);
+	return m_tree->getArea(octant);
 }
 
 /*!
@@ -372,7 +383,7 @@ std::array<double, 3> VolOctree::evalInterfaceNormal(const long &id) const
 	OctantInfo octantInfo = getCellOctant(owner);
 	const Octant *octant = getOctantPointer(octantInfo);
 
-	return m_tree.getNormal(octant, (uint8_t) ownerFace);
+	return m_tree->getNormal(octant, (uint8_t) ownerFace);
 }
 
 /*!
@@ -401,7 +412,7 @@ VolOctree::OctantInfo VolOctree::getCellOctant(const long &id) const
 */
 PabloUniform & VolOctree::getTree()
 {
-	return m_tree;
+	return *m_tree;
 }
 
 /*!
@@ -411,7 +422,7 @@ PabloUniform & VolOctree::getTree()
 */
 const PabloUniform & VolOctree::getTree() const
 {
-	return m_tree;
+	return *m_tree;
 }
 
 /*!
@@ -448,9 +459,9 @@ Octant * VolOctree::getOctantPointer(const OctantInfo &octantInfo)
 {
 	Octant *octant;
 	if (octantInfo.internal) {
-		octant = m_tree.getOctant(octantInfo.id);
+		octant = m_tree->getOctant(octantInfo.id);
 	} else {
-		octant = m_tree.getGhostOctant(octantInfo.id);
+		octant = m_tree->getGhostOctant(octantInfo.id);
 	}
 
 	return octant;
@@ -466,9 +477,9 @@ const Octant * VolOctree::getOctantPointer(const OctantInfo &octantInfo) const
 {
     const Octant *octant;
     if (octantInfo.internal) {
-        octant = m_tree.getOctant(octantInfo.id);
+        octant = m_tree->getOctant(octantInfo.id);
     } else {
-        octant = m_tree.getGhostOctant(octantInfo.id);
+        octant = m_tree->getGhostOctant(octantInfo.id);
     }
 
     return octant;
@@ -482,8 +493,8 @@ const Octant * VolOctree::getOctantPointer(const OctantInfo &octantInfo) const
 */
 VolOctree::OctantHash VolOctree::evaluateOctantHash(const OctantInfo &octantInfo)
 {
-	uint8_t level   = m_tree.getLevel(octantInfo.id);
-	uint64_t morton = m_tree.getMorton(octantInfo.id);
+	uint8_t level   = m_tree->getLevel(octantInfo.id);
+	uint64_t morton = m_tree->getMorton(octantInfo.id);
 
 	OctantHash octantHash;
 	octantHash |= morton;
@@ -505,11 +516,11 @@ int VolOctree::getCellLevel(const long &id) const
 
 	const Octant* octant;
 	if (octantInfo.internal) {
-		octant = m_tree.getOctant(octantInfo.id);
+		octant = m_tree->getOctant(octantInfo.id);
 	} else {
-		octant = m_tree.getGhostOctant(octantInfo.id);
+		octant = m_tree->getGhostOctant(octantInfo.id);
 	}
-	return m_tree.getLevel(octant);
+	return m_tree->getLevel(octant);
 }
 
 /*!
@@ -557,19 +568,19 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 	bool importAll = (getCellCount() == 0);
 
 	// Last operation on the tree
-	ParaTree::Operation lastTreeOperation = m_tree.getLastOperation();
+	ParaTree::Operation lastTreeOperation = m_tree->getLastOperation();
 	if (lastTreeOperation == ParaTree::OP_ADAPT_UNMAPPED && !importAll) {
 		throw std::runtime_error ("Unable to sync the patch after an unmapped adaption");
 	}
 
 	// Info on the tree
-	long nOctants = m_tree.getNumOctants();
+	long nOctants = m_tree->getNumOctants();
 	long nPreviousOctants = m_octantToCell.size();
 
 	log::cout() << ">> Number of octants : " << nOctants << std::endl;
 
 	// Info on the tree
-	long nGhostsOctants = m_tree.getNumGhosts();
+	long nGhostsOctants = m_tree->getNumGhosts();
 	long nPreviousGhosts = m_ghostToCell.size();
 
 	// Initialize tracking data
@@ -603,7 +614,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 		std::vector<bool> mapper_ghostFlag;
 		std::vector<int> mapper_octantRank;
 		if (!importAll) {
-			m_tree.getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
+			m_tree->getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
 		}
 
 		// Adaption type
@@ -611,11 +622,11 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 		if (importAll) {
 			adaptionType = adaption::TYPE_CREATION;
 		} else if (lastTreeOperation == ParaTree::OP_ADAPT_MAPPED) {
-			bool isNewR = m_tree.getIsNewR(treeId);
+			bool isNewR = m_tree->getIsNewR(treeId);
 			if (isNewR) {
 				adaptionType = adaption::TYPE_REFINEMENT;
 			} else {
-				bool isNewC = m_tree.getIsNewC(treeId);
+				bool isNewC = m_tree->getIsNewC(treeId);
 				if (isNewC) {
 					adaptionType = adaption::TYPE_COARSENING;
 				} else if (treeId != mapper_octantMap.front()) {
@@ -776,7 +787,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 
 #if BITPIT_ENABLE_MPI==1
 	// Cells that have been send to other processors need to be removed
-	std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree.getSentIdx();
+	std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree->getSentIdx();
 	for (const auto &rankEntry : sendOctants) {
 		int rank = rankEntry.first;
 
@@ -1048,11 +1059,11 @@ void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
 	m_ghostToCell.clear();
 
 	// Reserve space for the maps
-	long nOctants = m_tree.getNumOctants();
+	long nOctants = m_tree->getNumOctants();
 	m_cellToOctant.reserve(nOctants);
 	m_octantToCell.reserve(nOctants);
 
-	long nGhostsOctants = m_tree.getNumGhosts();
+	long nGhostsOctants = m_tree->getNumGhosts();
 	m_cellToGhost.reserve(nGhostsOctants);
 	m_ghostToCell.reserve(nGhostsOctants);
 
@@ -1125,10 +1136,10 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 	for (OctantInfo &octantInfo : octantInfoList) {
 		Octant *octant = getOctantPointer(octantInfo);
 		for (int k = 0; k < nCellVertices; ++k) {
-			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
+			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
 			if (stitchInfo.count(vertexTreeMorton) == 0) {
 				// Vertex coordinates
-				std::array<double, 3> nodeCoords = m_tree.getNode(octant, k);
+				std::array<double, 3> nodeCoords = m_tree->getNode(octant, k);
 
 				// Create the vertex
 				VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
@@ -1155,7 +1166,7 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 		// Cell connectivity
 		std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
 		for (int k = 0; k < nCellVertices; ++k) {
-			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
+			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
 			cellConnect[k] = stitchInfo.at(vertexTreeMorton);
 		}
 
@@ -1165,8 +1176,8 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 		// If the cell is a ghost set its owner
 #if BITPIT_ENABLE_MPI==1
 		if (!octantInfo.internal) {
-			uint64_t globalTreeId = m_tree.getGhostGlobalIdx(octantInfo.id);
-			int rank = m_tree.getOwnerRank(globalTreeId);
+			uint64_t globalTreeId = m_tree->getGhostGlobalIdx(octantInfo.id);
+			int rank = m_tree->getOwnerRank(globalTreeId);
 
 			setGhostOwner(cellId, rank, false);
 		}
@@ -1324,7 +1335,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 
 		for (int k = 0; k < nCellVertices; ++k) {
 			long vertexId = cellConnect[k];
-			uint64_t vertexTreeMorton = m_tree.getNodeMorton(octant, k);
+			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
 			stitchVertices.insert({vertexTreeMorton, vertexId});
 			deadVertices.erase(vertexId);
 		}
@@ -1355,7 +1366,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 			const std::vector<int> &localFaceConnect = cellLocalFaceConnect[ownerFace];
 			for (int k = 0; k < nInterfaceVertices; ++k) {
 				long vertexId = ownerCellConnect[localFaceConnect[k]];
-				uint64_t vertexTreeMorton = m_tree.getNodeMorton(ownerOctant, localFaceConnect[k]);
+				uint64_t vertexTreeMorton = m_tree->getNodeMorton(ownerOctant, localFaceConnect[k]);
 				stitchVertices.insert({vertexTreeMorton, vertexId});
 				deadVertices.erase(vertexId);
 			}
@@ -1381,7 +1392,7 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 	// Face information
 	int nCellFaces = 2 * getDimension();
 	uint8_t oppositeFace[nCellFaces];
-	m_tree.getOppface(oppositeFace);
+	m_tree->getOppface(oppositeFace);
 
 	// Reset the adjacencies
 	if (resetAdjacencies) {
@@ -1391,7 +1402,7 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 	}
 
 	// Sort the cells beased on their tree level
-	int maxLevel = m_tree.getMaxDepth();
+	int maxLevel = m_tree->getMaxDepth();
 	size_t averageSize = cellIds.size() / (maxLevel + 1);
 	std::vector<std::vector<long>> hierarchicalCellIds(maxLevel + 1);
 	for (int level = 0; level <= maxLevel; ++level) {
@@ -1421,9 +1432,9 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 				std::vector<uint32_t> neighTreeIds;
 				std::vector<bool> neighGhostFlags;
 				if (octantInfo.internal) {
-					m_tree.findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
+					m_tree->findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
 				} else {
-					m_tree.findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
+					m_tree->findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
 				}
 
 				// Set the adjacencies
@@ -1487,7 +1498,7 @@ bool VolOctree::set_marker(const long &id, const int8_t &value)
 		return false;
 	}
 
-	m_tree.setMarker(octantInfo.id, value);
+	m_tree->setMarker(octantInfo.id, value);
 
 	return true;
 }
@@ -1505,7 +1516,7 @@ bool VolOctree::_enableCellBalancing(const long &id, bool enabled)
 		return false;
 	}
 
-	m_tree.setBalance(octantInfo.id, enabled);
+	m_tree->setBalance(octantInfo.id, enabled);
 
 	return true;
 }
@@ -1518,7 +1529,7 @@ bool VolOctree::_enableCellBalancing(const long &id, bool enabled)
  */
 bool VolOctree::isPointInside(const std::array<double, 3> &point)
 {
-	return (m_tree.getPointOwner(point) != nullptr);
+	return (m_tree->getPointOwner(point) != nullptr);
 }
 
 /*!
@@ -1560,12 +1571,12 @@ bool VolOctree::isPointInside(const long &id, const std::array<double, 3> &point
 */
 long VolOctree::locatePoint(const std::array<double, 3> &point)
 {
-	Octant *octant = m_tree.getPointOwner(point);
-	if (m_tree.getPointOwner(point) == nullptr) {
+	Octant *octant = m_tree->getPointOwner(point);
+	if (m_tree->getPointOwner(point) == nullptr) {
 		return Element::NULL_ID;
 	}
 
-	OctantInfo octantInfo(m_tree.getIdx(octant), true);
+	OctantInfo octantInfo(m_tree->getIdx(octant), true);
 	return getOctantId(octantInfo);
 }
 
@@ -1577,7 +1588,7 @@ long VolOctree::locatePoint(const std::array<double, 3> &point)
 */
 void VolOctree::_setTol(double tolerance)
 {
-	m_tree.setTol(tolerance);
+	m_tree->setTol(tolerance);
 
 	VolumeKernel::_setTol(tolerance);
 }
@@ -1587,9 +1598,9 @@ void VolOctree::_setTol(double tolerance)
 */
 void VolOctree::_resetTol()
 {
-	m_tree.setTol();
+	m_tree->setTol();
 
-	double tolerance = m_tree.getTol();
+	double tolerance = m_tree->getTol();
 	VolumeKernel::_setTol(tolerance);
 }
 
@@ -1612,7 +1623,7 @@ int VolOctree::_getDumpVersion() const
  */
 void VolOctree::_dump(std::ostream &stream)
 {
-	m_tree.dump(stream);
+	m_tree->dump(stream);
 
 	size_t nOctants = m_octantToCell.size();
 	for (size_t n = 0; n < nOctants; ++n) {
@@ -1634,12 +1645,12 @@ void VolOctree::_restore(std::istream &stream)
 {
 	// Restore the tree
 #if ENABLE_MPI==1
-	m_tree.setComm(getCommunicator());
+	m_tree->setComm(getCommunicator());
 #endif
-	m_tree.restore(stream);
+	m_tree->restore(stream);
 
 	// Restore octant to cell map
-	size_t nOctants = m_tree.getNumOctants();
+	size_t nOctants = m_tree->getNumOctants();
 	m_cellToOctant.reserve(nOctants);
 	m_octantToCell.reserve(nOctants);
 	for (size_t n = 0; n < nOctants; ++n) {
@@ -1651,7 +1662,8 @@ void VolOctree::_restore(std::istream &stream)
 	}
 
 	// Restore ghost to cell map
-	size_t nGhosts = m_tree.getNumGhosts();
+	size_t nGhosts = m_tree->getNumGhosts();
+
 	m_cellToGhost.reserve(nGhosts);
 	m_ghostToCell.reserve(nGhosts);
 	for (size_t n = 0; n < nGhosts; ++n) {
@@ -1691,7 +1703,7 @@ long VolOctree::_getCellNativeIndex(long id) const
 */
 std::array<double, 3> VolOctree::getOrigin() const
 {
-	return m_tree.getOrigin();
+	return m_tree->getOrigin();
 }
 
 /*!
@@ -1714,7 +1726,7 @@ void VolOctree::setOrigin(const std::array<double, 3> &origin)
  */
 void VolOctree::translate(std::array<double, 3> translation)
 {
-	m_tree.setOrigin(m_tree.getOrigin() + translation);
+	m_tree->setOrigin(m_tree->getOrigin() + translation);
 
 	VolumeKernel::translate(translation);
 
@@ -1729,7 +1741,7 @@ void VolOctree::translate(std::array<double, 3> translation)
 */
 double VolOctree::getLength() const
 {
-	return m_tree.getL();
+	return m_tree->getL();
 }
 
 /*!
@@ -1740,7 +1752,7 @@ double VolOctree::getLength() const
 void VolOctree::setLength(double length)
 {
 	// Set the length
-	m_tree.setL(length);
+	m_tree->setL(length);
 
 	// Set the new bounding box
 	setBoundingBox();
@@ -1748,7 +1760,7 @@ void VolOctree::setLength(double length)
 	// If needed, update the discretization
 	if (m_vertices.size() > 0) {
 		// Create tree connectivity
-		m_tree.computeConnectivity();
+		m_tree->computeConnectivity();
 
 		// Update vertex coordinates
 		std::unordered_set<long> alreadyEvaluated;
@@ -1759,14 +1771,14 @@ void VolOctree::setLength(double length)
 				long vertexId = cell.getVertex(k);
 				if (alreadyEvaluated.count(vertexId) == 0) {
 					Vertex &vertex = m_vertices.at(vertexId);
-					vertex.setCoords(m_tree.getNode(octant, k));
+					vertex.setCoords(m_tree->getNode(octant, k));
 					alreadyEvaluated.insert(vertexId);
 				}
 			}
 		}
 
 		// Destroy tree connectivity
-		m_tree.clearConnectivity();
+		m_tree->clearConnectivity();
 	}
 }
 
@@ -1786,7 +1798,7 @@ void VolOctree::scale(std::array<double, 3> scaling)
 		return;
 	}
 
-	m_tree.setL(m_tree.getL() * scaling[0]);
+	m_tree->setL(m_tree->getL() * scaling[0]);
 
 	VolumeKernel::scale(scaling);
 
@@ -1886,9 +1898,9 @@ std::vector<long> VolOctree::findCellCodimensionNeighs(const long &id, const int
 	std::vector<uint32_t> neighTreeIds;
 	std::vector<bool> neighGhostFlags;
 	if (octantInfo.internal) {
-		m_tree.findNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
+		m_tree->findNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
 	} else {
-		m_tree.findGhostNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
+		m_tree->findGhostNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
 	}
 
 	int nNeighs = neighTreeIds.size();
