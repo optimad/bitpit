@@ -191,6 +191,10 @@ void VolOctree::setDimension(int dimension)
 */
 void VolOctree::__setDimension(int dimension)
 {
+	if (m_tree->getDim() > 0 && dimension != m_tree->getDim()) {
+		throw std::runtime_error ("The dimension does not match the dimension of the octree.");
+	}
+
 	// Initialize local edges/vertex/faces association
 	std::vector<std::vector<int>>().swap(m_octantLocalFacesOnVertex);
 	std::vector<std::vector<int>>().swap(m_octantLocalEdgesOnVertex);
