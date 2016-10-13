@@ -114,7 +114,7 @@ namespace bitpit {
      * \return Marker of the octant.
      */
     int8_t
-    LocalTree::getMarker(int32_t idx){
+    LocalTree::getMarker(int32_t idx) const {
         return m_octants[idx].getMarker();
     };
 
@@ -132,7 +132,7 @@ namespace bitpit {
      * \return Morton index of the octant.
      */
     uint64_t
-    LocalTree::computeMorton(int32_t idx){
+    LocalTree::computeMorton(int32_t idx) const {
         return m_octants[idx].computeMorton();
     };
 
@@ -143,7 +143,7 @@ namespace bitpit {
      * \return Morton index of the octant.
      */
     uint64_t
-    LocalTree::computeNodeMorton(int32_t idx, uint8_t inode){
+    LocalTree::computeNodeMorton(int32_t idx, uint8_t inode) const {
         return m_octants[idx].computeNodeMorton(inode);
     };
 
@@ -152,7 +152,7 @@ namespace bitpit {
      * \return Level of the ghost octant.
      */
     uint8_t
-    LocalTree::getGhostLevel(int32_t idx){
+    LocalTree::getGhostLevel(int32_t idx) const {
         return m_ghosts[idx].getLevel();
     };
 
@@ -161,7 +161,7 @@ namespace bitpit {
      * \return Morton index of the octant.
      */
     uint64_t
-    LocalTree::computeGhostMorton(int32_t idx){
+    LocalTree::computeGhostMorton(int32_t idx) const {
         return m_ghosts[idx].computeMorton();
     };
 
@@ -172,7 +172,7 @@ namespace bitpit {
      * \return Morton index of the octant.
      */
     uint64_t
-    LocalTree::computeGhostNodeMorton(int32_t idx, uint8_t inode){
+    LocalTree::computeGhostNodeMorton(int32_t idx, uint8_t inode) const {
         return m_ghosts[idx].computeNodeMorton(inode);
     };
 
@@ -181,7 +181,7 @@ namespace bitpit {
      * \return Has the octant to be balanced?
      */
     bool
-    LocalTree::getBalance(int32_t idx){
+    LocalTree::getBalance(int32_t idx) const{
         return m_octants[idx].getBalance();
     };
 
@@ -3944,7 +3944,7 @@ namespace bitpit {
      * \return Local index of the target octant (=nocts if target Morton not found).
      */
     uint32_t
-    LocalTree::findMorton(uint64_t Morton){
+    LocalTree::findMorton(uint64_t Morton) const {
 
         uint32_t 		nocts = m_octants.size();
         uint32_t 		idx = nocts/2;
@@ -3987,7 +3987,7 @@ namespace bitpit {
      * \return Index of the target ghost octant (=nghosts if target Morton not found).
      */
     uint32_t
-    LocalTree::findGhostMorton(uint64_t Morton){
+    LocalTree::findGhostMorton(uint64_t Morton) const {
         uint32_t 		nocts = m_ghosts.size();
         uint32_t 		idx = nocts/2;
         uint64_t 		Mortontry = m_ghosts[idx].computeMorton();

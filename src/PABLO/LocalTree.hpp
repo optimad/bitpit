@@ -158,14 +158,14 @@ private:
 	uint32_t 		getNumGhosts() const;
 	uint32_t 		getNumOctants() const;
 	uint8_t 		getLocalMaxDepth() const;
-	int8_t 			getMarker(int32_t idx);
+	int8_t 			getMarker(int32_t idx) const;
 	uint8_t 		getLevel(int32_t idx) const;
-	uint64_t 		computeMorton(int32_t idx);
-	uint64_t 		computeNodeMorton(int32_t idx, uint8_t inode);
-	uint8_t 		getGhostLevel(int32_t idx);
-	uint64_t 		computeGhostMorton(int32_t idx);
-	uint64_t 		computeGhostNodeMorton(int32_t idx, uint8_t inode);
-	bool 			getBalance(int32_t idx);
+	uint64_t 		computeMorton(int32_t idx) const;
+	uint64_t 		computeNodeMorton(int32_t idx, uint8_t inode) const;
+	uint8_t 		getGhostLevel(int32_t idx) const;
+	uint64_t 		computeGhostMorton(int32_t idx) const;
+	uint64_t 		computeGhostNodeMorton(int32_t idx, uint8_t inode) const;
+	bool 			getBalance(int32_t idx) const;
 	uint8_t 		getBalanceCodim() const;
 	void 			setMarker(int32_t idx, int8_t marker);
 	void 			setBalance(int32_t idx, bool balance);
@@ -236,8 +236,8 @@ private:
 
 	void 		computeIntersections();
 
-	uint32_t 	findMorton(uint64_t Morton);
-	uint32_t 	findGhostMorton(uint64_t Morton);
+	uint32_t 	findMorton(uint64_t Morton) const;
+	uint32_t 	findGhostMorton(uint64_t Morton) const;
 
 	void 		computeConnectivity();
 	void 		clearConnectivity();
