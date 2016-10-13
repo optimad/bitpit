@@ -401,6 +401,16 @@ PabloUniform & VolOctree::getTree()
 }
 
 /*!
+	\brief Gets constant a reference to the octree associated with the patch.
+
+	\result A constant reference to the octree associated to the patch.
+*/
+const PabloUniform & VolOctree::getTree() const
+{
+	return m_tree;
+}
+
+/*!
 	Gets the id of the specified octant.
 
 	\param octantInfo the data of the octant

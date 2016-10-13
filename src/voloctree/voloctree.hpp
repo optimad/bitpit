@@ -95,6 +95,7 @@ public:
 	const Octant * getOctantPointer(const OctantInfo &octantInfo) const;
 
 	PabloUniform & getTree();
+	const PabloUniform & getTree() const;
 
 	bool isPointInside(const std::array<double, 3> &point);
 	bool isPointInside(const long &id, const std::array<double, 3> &point);
