@@ -182,40 +182,40 @@ namespace bitpit {
         // =================================================================================== //
         // BASIC GET/SET METHODS															   //
         // =================================================================================== //
-        uint8_t 	getDim();
-        uint64_t 	getGlobalNumOctants();
-        bool		getSerial();
-        bool		getParallel();
-        int 		getRank();
-        int 		getNproc();
+        uint8_t 	getDim() const;
+        uint64_t 	getGlobalNumOctants() const;
+        bool		getSerial() const;
+        bool		getParallel() const;
+        int 		getRank() const;
+        int 		getNproc() const;
         Logger& 	getLog();
-        Operation	getLastOperation();
+        Operation	getLastOperation() const;
 #if BITPIT_ENABLE_MPI==1
         void		setComm(MPI_Comm communicator);
         void		freeComm();
         MPI_Comm	getComm() const;
         bool		isCommSet() const;
 #endif
-        std::vector<uint64_t> &getPartitionRangeGlobalIdx();
-        darray3		getOrigin();
-        double		getX0();
-        double		getY0();
-        double		getZ0();
-        double		getL();
-        int 		getMaxLevel();
-        uint32_t 	getMaxLength();
-        uint8_t 	getNnodes();
-        uint8_t 	getNfaces();
-        uint8_t 	getNedges();
-        uint8_t 	getNchildren();
-        uint8_t 	getNnodesperface();
-        void 		getNormals(int8_t normals[6][3]);
-        void 		getOppface(uint8_t oppface[6]);
-        void 		getFacenode(uint8_t facenode[6][4]);
-        void 		getNodeface(uint8_t nodeface[8][3]);
-        void 		getEdgeface(uint8_t edgeface[12][2]);
-        void 		getNodecoeffs(int8_t nodecoeffs[8][3]);
-        void 		getEdgecoeffs(int8_t edgecoeffs[12][3]);
+        const std::vector<uint64_t> &getPartitionRangeGlobalIdx() const;
+        darray3		getOrigin() const;
+        double		getX0() const;
+        double		getY0() const;
+        double		getZ0() const;
+        double		getL() const;
+        int 		getMaxLevel() const;
+        uint32_t 	getMaxLength() const;
+        uint8_t 	getNnodes() const;
+        uint8_t 	getNfaces() const;
+        uint8_t 	getNedges() const;
+        uint8_t 	getNchildren() const;
+        uint8_t 	getNnodesperface() const;
+        void 		getNormals(int8_t normals[6][3]) const;
+        void 		getOppface(uint8_t oppface[6]) const;
+        void 		getFacenode(uint8_t facenode[6][4]) const;
+        void 		getNodeface(uint8_t nodeface[8][3]) const;
+        void 		getEdgeface(uint8_t edgeface[12][2]) const;
+        void 		getNodecoeffs(int8_t nodecoeffs[8][3]) const;
+        void 		getEdgecoeffs(int8_t edgecoeffs[12][3]) const;
         int8_t		(*getNormals())[3];
         uint8_t		(*getOppface());
         uint8_t 	(*getFacenode())[4];
@@ -223,103 +223,103 @@ namespace bitpit {
         uint8_t 	(*getEdgeface())[2];
         int8_t 		(*getNodecoeffs())[3];
         int8_t 		(*getEdgecoeffs())[3];
-        bvector		getPeriodic();
-        double		getTol();
-        bool		getPeriodic(uint8_t i);
+        bvector		getPeriodic() const;
+        double		getTol() const;
+        bool		getPeriodic(uint8_t i) const;
         void		setPeriodic(uint8_t i);
         void		setTol(double tol = 1.0e-14);
 
         // =================================================================================== //
         // INDEX BASED METHODS																   //
         // =================================================================================== //
-        darray3 	getCoordinates(uint32_t idx);
-        double 		getX(uint32_t idx);
-        double 		getY(uint32_t idx);
-        double 		getZ(uint32_t idx);
-        double 		getSize(uint32_t idx);
-        double 		getArea(uint32_t idx);
-        double 		getVolume(uint32_t idx);
+        darray3 	getCoordinates(uint32_t idx) const;
+        double 		getX(uint32_t idx) const;
+        double 		getY(uint32_t idx) const;
+        double 		getZ(uint32_t idx) const;
+        double 		getSize(uint32_t idx) const;
+        double 		getArea(uint32_t idx) const;
+        double 		getVolume(uint32_t idx) const;
         void 		getCenter(uint32_t idx, darray3& center) const;
         darray3 	getCenter(uint32_t idx) const;
         darray3 	getFaceCenter(uint32_t idx, uint8_t iface) const;
         void 		getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const;
-        darray3 	getNode(uint32_t idx, uint8_t inode);
-        void 		getNode(uint32_t idx, uint8_t inode, darray3& node);
-        void 		getNodes(uint32_t idx, darr3vector & nodes);
-        darr3vector getNodes(uint32_t idx);
-        void 		getNormal(uint32_t idx, uint8_t iface, darray3 & normal);
-        darray3 	getNormal(uint32_t idx, uint8_t iface);
-        int8_t 		getMarker(uint32_t idx);
+        darray3 	getNode(uint32_t idx, uint8_t inode) const;
+        void 		getNode(uint32_t idx, uint8_t inode, darray3& node) const;
+        void 		getNodes(uint32_t idx, darr3vector & nodes) const;
+        darr3vector getNodes(uint32_t idx) const;
+        void 		getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const;
+        darray3 	getNormal(uint32_t idx, uint8_t iface) const;
+        int8_t 		getMarker(uint32_t idx) const;
         uint8_t 	getLevel(uint32_t idx) const;
-        uint64_t 	getMorton(uint32_t idx);
-        uint64_t 	getNodeMorton(uint32_t idx, uint8_t inode);
-        bool 		getBalance(uint32_t idx);
-        bool		getBound(uint32_t idx, uint8_t iface);
-        bool		getBound(uint32_t idx);
-        bool		getPbound(uint32_t idx, uint8_t iface);
-        bool		getPbound(uint32_t idx);
-        bool 		getIsNewR(uint32_t idx);
-        bool 		getIsNewC(uint32_t idx);
-        uint64_t 	getGlobalIdx(uint32_t idx);
-        uint64_t 	getGhostGlobalIdx(uint32_t idx);
-        uint32_t    getLocalIdx(uint64_t gidx);
-        uint32_t    getLocalIdx(uint64_t gidx,int rank);
-        uint32_t    getGhostLocalIdx(uint64_t gidx);
-        octantID	getPersistentIdx(uint32_t idx);
+        uint64_t 	getMorton(uint32_t idx) const;
+        uint64_t 	getNodeMorton(uint32_t idx, uint8_t inode) const;
+        bool 		getBalance(uint32_t idx) const;
+        bool		getBound(uint32_t idx, uint8_t iface) const;
+        bool		getBound(uint32_t idx) const;
+        bool		getPbound(uint32_t idx, uint8_t iface) const;
+        bool		getPbound(uint32_t idx) const;
+        bool 		getIsNewR(uint32_t idx) const;
+        bool 		getIsNewC(uint32_t idx) const;
+        uint64_t 	getGlobalIdx(uint32_t idx) const;
+        uint64_t 	getGhostGlobalIdx(uint32_t idx) const;
+        uint32_t    getLocalIdx(uint64_t gidx) const;
+        uint32_t    getLocalIdx(uint64_t gidx,int rank) const;
+        uint32_t    getGhostLocalIdx(uint64_t gidx) const;
+        octantID	getPersistentIdx(uint32_t idx) const;
         void 		setMarker(uint32_t idx, int8_t marker);
         void 		setBalance(uint32_t idx, bool balance);
 
         // =================================================================================== //
         // POINTER BASED METHODS															   //
         // =================================================================================== //
-        darray3 	getCoordinates(Octant* oct);
-        double 		getX(Octant* oct);
-        double 		getY(Octant* oct);
-        double 		getZ(Octant* oct);
-        double 		getSize(Octant* oct);
-        double 		getArea(Octant* oct);
-        double 		getVolume(Octant* oct);
+        darray3 	getCoordinates(const Octant* oct) const;
+        double 		getX(const Octant* oct) const;
+        double 		getY(const Octant* oct) const;
+        double 		getZ(const Octant* oct) const;
+        double 		getSize(const Octant* oct) const;
+        double 		getArea(const Octant* oct) const;
+        double 		getVolume(const Octant* oct) const;
         void 		getCenter(const Octant* oct, darray3& center) const;
         darray3 	getCenter(const Octant* oct) const;
         darray3 	getFaceCenter(const Octant* oct, uint8_t iface) const;
         void 		getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const;
-        darray3 	getNode(Octant* oct, uint8_t inode);
-        void 		getNode(Octant* oct, uint8_t inode, darray3& node);
-        void 		getNodes(Octant* oct, darr3vector & nodes);
-        darr3vector getNodes(Octant* oct);
-        void 		getNormal(Octant* oct, uint8_t iface, darray3 & normal);
-        darray3 	getNormal(Octant* oct, uint8_t iface);
-        int8_t 		getMarker(Octant* oct);
+        darray3 	getNode(const Octant* oct, uint8_t inode) const;
+        void 		getNode(const Octant* oct, uint8_t inode, darray3& node) const;
+        void 		getNodes(const Octant* oct, darr3vector & nodes) const;
+        darr3vector getNodes(const Octant* oct) const;
+        void 		getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const;
+        darray3 	getNormal(const Octant* oct, uint8_t iface) const;
+        int8_t 		getMarker(const Octant* oct) const;
         uint8_t 	getLevel(const Octant* oct) const;
-        uint64_t 	getMorton(Octant* oct);
-        uint64_t 	getNodeMorton(Octant* oct, uint8_t inode);
-        bool 		getBalance(Octant* oct);
-        bool		getBound(Octant* oct, uint8_t iface);
-        bool		getBound(Octant* oct);
-        bool		getPbound(Octant* oct, uint8_t iface);
-        bool		getPbound(Octant* oct);
-        bool 		getIsNewR(Octant* oct);
-        bool 		getIsNewC(Octant* oct);
-        uint32_t 	getIdx(Octant* oct);
-        uint64_t 	getGlobalIdx(Octant* oct);
-        octantID	getPersistentIdx(Octant* oct);
+        uint64_t 	getMorton(const Octant* oct) const;
+        uint64_t 	getNodeMorton(const Octant* oct, uint8_t inode) const;
+        bool 		getBalance(const Octant* oct) const;
+        bool		getBound(const Octant* oct, uint8_t iface) const;
+        bool		getBound(const Octant* oct) const;
+        bool		getPbound(const Octant* oct, uint8_t iface) const;
+        bool		getPbound(const Octant* oct) const;
+        bool 		getIsNewR(const Octant* oct) const;
+        bool 		getIsNewC(const Octant* oct) const;
+        uint32_t 	getIdx(const Octant* oct) const;
+        uint64_t 	getGlobalIdx(const Octant* oct) const;
+        octantID	getPersistentIdx(const Octant* oct) const;
         void 		setMarker(Octant* oct, int8_t marker);
         void 		setBalance(Octant* oct, bool balance);
 
         // =================================================================================== //
         // LOCAL TREE GET/SET METHODS														   //
         // =================================================================================== //
-        uint64_t 	getStatus();
+        uint64_t 	getStatus() const;
         uint32_t 	getNumOctants() const;
         uint32_t 	getNumGhosts() const;
         uint32_t 	getNumNodes() const;
         uint8_t 	getLocalMaxDepth() const;
-        double	 	getLocalMaxSize();
-        double	 	getLocalMinSize();
+        double	 	getLocalMaxSize() const;
+        double	 	getLocalMinSize() const;
         uint8_t 	getBalanceCodimension() const;
         uint64_t 	getFirstDescMorton() const;
         uint64_t 	getLastDescMorton() const;
-        uint64_t 	getLastDescMorton(uint32_t idx);
+        uint64_t 	getLastDescMorton(uint32_t idx) const;
         octantIterator	getInternalOctantsBegin();
         octantIterator	getInternalOctantsEnd();
         octantIterator	getPboundOctantsBegin();
@@ -329,23 +329,23 @@ namespace bitpit {
         // =================================================================================== //
         // INTERSECTION GET/SET METHODS														   //
         // =================================================================================== //
-        uint32_t 	getNumIntersections();
+        uint32_t 	getNumIntersections() const;
         Intersection* getIntersection(uint32_t idx);
         uint8_t 	getLevel(const Intersection* inter) const;
-        bool 		getFiner(Intersection* inter);
-        bool 		getBound(Intersection* inter);
-        bool 		getIsGhost(Intersection* inter);
-        bool 		getPbound(Intersection* inter);
-        uint8_t 	getFace(Intersection* inter);
-        u32vector 	getOwners(Intersection* inter);
-        uint32_t 	getIn(Intersection* inter);
-        uint32_t 	getOut(Intersection* inter);
-        bool		getOutIsGhost(Intersection* inter);
-        double 		getSize(Intersection* inter);
-        double 		getArea(Intersection* inter);
+        bool 		getFiner(const Intersection* inter) const;
+        bool 		getBound(const Intersection* inter) const;
+        bool 		getIsGhost(const Intersection* inter) const;
+        bool 		getPbound(const Intersection* inter) const;
+        uint8_t 	getFace(const Intersection* inter) const;
+        u32vector 	getOwners(const Intersection* inter) const;
+        uint32_t 	getIn(const Intersection* inter) const;
+        uint32_t 	getOut(const Intersection* inter) const;
+        bool		getOutIsGhost(const Intersection* inter) const;
+        double 		getSize(const Intersection* inter) const;
+        double 		getArea(const Intersection* inter) const;
         darray3 	getCenter(const Intersection* inter) const;
-        darr3vector getNodes(Intersection* inter);
-        darray3 	getNormal(Intersection* inter);
+        darr3vector getNodes(const Intersection* inter) const;
+        darray3 	getNormal(const Intersection* inter) const;
 
         // =================================================================================== //
         // OTHER GET/SET METHODS															   //
@@ -354,10 +354,10 @@ namespace bitpit {
         const Octant* getOctant(uint32_t idx) const;
         Octant*	getGhostOctant(uint32_t idx);
         const Octant* getGhostOctant(uint32_t idx) const;
-        uint32_t 		getIdx(Octant oct);
-        bool 			getIsGhost(Octant* oct);
-        bool 			getIsGhost(Octant oct);
-        const std::unordered_map<int,std::array<uint32_t,4> > & getSentIdx();
+        uint32_t 		getIdx(const Octant oct) const;
+        bool 			getIsGhost(const Octant* oct) const;
+        bool 			getIsGhost(const Octant oct) const;
+        const std::unordered_map<int,std::array<uint32_t,4> > & getSentIdx() const;
 
         // =================================================================================== //
         // PRIVATE GET/SET METHODS															   //
@@ -401,36 +401,36 @@ namespace bitpit {
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         Octant* 	getPointOwner(dvector point);
         Octant* 	getPointOwner(dvector point, bool & isghost);
-        uint32_t 	getPointOwnerIdx(dvector point);
-        uint32_t 	getPointOwnerIdx(dvector point, bool & isghost);
+        uint32_t 	getPointOwnerIdx(dvector point) const;
+        uint32_t 	getPointOwnerIdx(dvector point, bool & isghost) const;
         Octant* 	getPointOwner(darray3 point);
         Octant* 	getPointOwner(darray3 point, bool & isghost);
-        uint32_t 	getPointOwnerIdx(darray3 point);
-        uint32_t 	getPointOwnerIdx(darray3 point, bool & isghost);
-        void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost);
-        void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank);
+        uint32_t 	getPointOwnerIdx(darray3 point) const;
+        uint32_t 	getPointOwnerIdx(darray3 point, bool & isghost) const;
+        void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const;
+        void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
 
         // =================================================================================== //
         // OTHER PARATREE BASED METHODS												    	   //
         // =================================================================================== //
         uint8_t		getMaxDepth() const;
-        int 		findOwner(const uint64_t & morton);
-        int             getOwnerRank(const uint64_t & globalIdx);
+        int 		findOwner(const uint64_t & morton) const;
+        int 		getOwnerRank(const uint64_t & globalIdx) const;
         bool 		adapt(bool mapper_flag = false);
         bool 		adaptGlobalRefine(bool mapper_flag = false);
         bool 		adaptGlobalCoarse(bool mapper_flag = false);
         void 		computeConnectivity();
         void 		clearConnectivity();
         void 		updateConnectivity();
-        const u32vector2D & getConnectivity();
-        const u32vector & getConnectivity(uint32_t idx);
-        const u32vector & getConnectivity(Octant* oct);
-        const u32arr3vector & getNodes();
-        const u32array3 & getNodeLogicalCoordinates(uint32_t inode);
-        darray3 	getNodeCoordinates(uint32_t inode);
-        const u32vector2D & getGhostConnectivity();
-        const u32vector & getGhostConnectivity(uint32_t idx);
-        const u32vector & getGhostConnectivity(Octant* oct);
+        const u32vector2D & getConnectivity() const;
+        const u32vector & getConnectivity(uint32_t idx) const;
+        const u32vector & getConnectivity(Octant* oct) const;
+        const u32arr3vector & getNodes() const;
+        const u32array3 & getNodeLogicalCoordinates(uint32_t inode) const;
+        darray3 	getNodeCoordinates(uint32_t inode) const;
+        const u32vector2D & getGhostConnectivity() const;
+        const u32vector & getGhostConnectivity(uint32_t idx) const;
+        const u32vector & getGhostConnectivity(const Octant* oct) const;
         bool        check21Balance();
 #if BITPIT_ENABLE_MPI==1
         void 		loadBalance(dvector* weight = NULL);

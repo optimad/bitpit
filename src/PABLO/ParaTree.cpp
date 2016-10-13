@@ -613,7 +613,7 @@ namespace bitpit {
      * \return Dimension of the octree (2D/3D).
      */
     uint8_t
-    ParaTree::getDim(){
+    ParaTree::getDim() const {
         return m_dim;
     };
 
@@ -621,7 +621,7 @@ namespace bitpit {
      * \return Global number of octants.
      */
     uint64_t
-    ParaTree::getGlobalNumOctants(){
+    ParaTree::getGlobalNumOctants() const {
         return m_globalNumOctants;
     };
 
@@ -629,7 +629,7 @@ namespace bitpit {
      * \return Is the octree serial?.
      */
     bool
-    ParaTree::getSerial(){
+    ParaTree::getSerial() const {
         return m_serial;
     };
 
@@ -637,7 +637,7 @@ namespace bitpit {
      * \return Is the octree distributed?.
      */
     bool
-    ParaTree::getParallel(){
+    ParaTree::getParallel() const {
         return (!m_serial);
     };
 
@@ -645,7 +645,7 @@ namespace bitpit {
      * \return Rank of local process.
      */
     int
-    ParaTree::getRank(){
+    ParaTree::getRank() const {
         return m_rank;
     };
 
@@ -653,7 +653,7 @@ namespace bitpit {
      * \return Number of processes.
      */
     int
-    ParaTree::getNproc(){
+    ParaTree::getNproc() const {
         return m_nproc;
     };
 
@@ -669,7 +669,7 @@ namespace bitpit {
      * \return Last operation performed by the octree.
      */
     ParaTree::Operation
-    ParaTree::getLastOperation(){
+    ParaTree::getLastOperation() const {
         return m_lastOp;
     }
 
@@ -744,8 +744,8 @@ namespace bitpit {
      * \return Pointer to m_partitionRangeGlobalIdx (global array containing global
      * index of the last existing octant in each processor).
      */
-    std::vector<uint64_t> &
-    ParaTree::getPartitionRangeGlobalIdx(){
+    const std::vector<uint64_t> &
+    ParaTree::getPartitionRangeGlobalIdx() const {
         return m_partitionRangeGlobalIdx;
     };
 
@@ -753,7 +753,7 @@ namespace bitpit {
      * \return Coordinates of the origin.
      */
     darray3
-    ParaTree::getOrigin(){
+    ParaTree::getOrigin() const {
         return m_trans.m_origin;
     };
 
@@ -761,7 +761,7 @@ namespace bitpit {
      * \return Coordinate X of the origin.
      */
     double
-    ParaTree::getX0(){
+    ParaTree::getX0() const {
         return m_trans.m_origin[0];
     };
 
@@ -769,7 +769,7 @@ namespace bitpit {
      * \return Coordinate Y of the origin.
      */
     double
-    ParaTree::getY0(){
+    ParaTree::getY0() const {
         return m_trans.m_origin[1];
     };
 
@@ -777,7 +777,7 @@ namespace bitpit {
      * \return Coordinate Z of the origin.
      */
     double
-    ParaTree::getZ0(){
+    ParaTree::getZ0() const {
         return m_trans.m_origin[2];
     };
 
@@ -785,7 +785,7 @@ namespace bitpit {
      * \return Length of the octree.
      */
     double
-    ParaTree::getL(){
+    ParaTree::getL() const {
         return m_trans.m_L;
     };
 
@@ -793,7 +793,7 @@ namespace bitpit {
      * \return Maximum refinement level for the octree.
      */
     int
-    ParaTree::getMaxLevel(){
+    ParaTree::getMaxLevel() const {
         return m_global.m_maxLevel;
     };
 
@@ -801,7 +801,7 @@ namespace bitpit {
      * \return Length of the octree in logical domain.
      */
     uint32_t
-    ParaTree::getMaxLength(){
+    ParaTree::getMaxLength() const {
         return m_global.m_maxLength;
     }
 
@@ -809,7 +809,7 @@ namespace bitpit {
      * \return Number of nodes for octant.
      */
     uint8_t
-    ParaTree::getNnodes(){
+    ParaTree::getNnodes() const {
         return m_global.m_nnodes;
     }
 
@@ -817,7 +817,7 @@ namespace bitpit {
      * \return Number of faces for octant.
      */
     uint8_t
-    ParaTree::getNfaces(){
+    ParaTree::getNfaces() const {
         return m_global.m_nfaces;
     }
 
@@ -825,7 +825,7 @@ namespace bitpit {
      * \return Number of edges for octant.
      */
     uint8_t
-    ParaTree::getNedges(){
+    ParaTree::getNedges() const {
         return m_global.m_nedges;
     }
 
@@ -833,7 +833,7 @@ namespace bitpit {
      * \return Number of children for octant.
      */
     uint8_t
-    ParaTree::getNchildren(){
+    ParaTree::getNchildren() const {
         return m_global.m_nchildren;
     }
 
@@ -841,7 +841,7 @@ namespace bitpit {
      * \return Number of nodes for face for an octant.
      */
     uint8_t
-    ParaTree::getNnodesperface(){
+    ParaTree::getNnodesperface() const {
         return m_global.m_nnodesPerFace;
     }
 
@@ -849,7 +849,7 @@ namespace bitpit {
      * \param[out] normals Normals array[6][3] to the faces of an octant.
      */
     void
-    ParaTree::getNormals(int8_t normals[6][3]){
+    ParaTree::getNormals(int8_t normals[6][3]) const {
         for (int i=0; i<6; i++){
             for (int j=0; j<3; j++){
                 normals[i][j] = m_global.m_normals[i][j];
@@ -863,7 +863,7 @@ namespace bitpit {
      * face of an octant neighbour through the i-th face of the current octant).
      */
     void
-    ParaTree::getOppface(uint8_t oppface[6]){
+    ParaTree::getOppface(uint8_t oppface[6]) const {
         for (int j=0; j<6; j++){
             oppface[j] = m_global.m_oppFace[j];
         }
@@ -874,7 +874,7 @@ namespace bitpit {
      * of the i-th face of an octant.
      */
     void
-    ParaTree::getFacenode(uint8_t facenode[6][4]){
+    ParaTree::getFacenode(uint8_t facenode[6][4]) const {
         for (int i=0; i<6; i++){
             for (int j=0; j<4; j++){
                 facenode[i][j] = m_global.m_faceNode[i][j];
@@ -887,7 +887,7 @@ namespace bitpit {
      * sharing the i-th node of an octant.
      */
     void
-    ParaTree::getNodeface(uint8_t nodeface[8][3]){
+    ParaTree::getNodeface(uint8_t nodeface[8][3]) const {
         for (int i=0; i<8; i++){
             for (int j=0; j<3; j++){
                 nodeface[i][j] = m_global.m_nodeFace[i][j];
@@ -900,7 +900,7 @@ namespace bitpit {
      * faces sharing the i-th edge of an octant.
      */
     void
-    ParaTree::getEdgeface(uint8_t edgeface[12][2]){
+    ParaTree::getEdgeface(uint8_t edgeface[12][2]) const {
         for (int i=0; i<12; i++){
             for (int j=0; j<2; j++){
                 edgeface[i][j] = m_global.m_edgeFace[i][j];
@@ -912,7 +912,7 @@ namespace bitpit {
      * \param[out] nodecoeffs Components (x,y,z) of the "normals" of the nodes.
      */
     void
-    ParaTree::getNodecoeffs(int8_t nodecoeffs[8][3]){
+    ParaTree::getNodecoeffs(int8_t nodecoeffs[8][3]) const {
         for (int i=0; i<8; i++){
             nodecoeffs[i][2] = 0;
             for (int j=0; j<m_dim; j++){
@@ -925,7 +925,7 @@ namespace bitpit {
      * \param[out] edgecoeffs Components (x,y,z) of the "normals" per edge.
      */
     void
-    ParaTree::getEdgecoeffs(int8_t edgecoeffs[12][3]){
+    ParaTree::getEdgecoeffs(int8_t edgecoeffs[12][3]) const {
         for (int i=0; i<12; i++){
             for (int j=0; j<3; j++){
                 edgecoeffs[i][j] = m_global.m_edgeCoeffs[i][j];
@@ -998,7 +998,7 @@ namespace bitpit {
      * \return Vector with the periodic conditions (true/false) of each boundary.
      */
     bvector
-    ParaTree::getPeriodic(){
+    ParaTree::getPeriodic() const {
         return m_periodic;
     };
 
@@ -1007,14 +1007,14 @@ namespace bitpit {
      * \return Boolean with the periodic conditions (true/false) of the target boundary.
      */
     bool
-    ParaTree::getPeriodic(uint8_t i){
+    ParaTree::getPeriodic(uint8_t i) const {
         return m_periodic[i];
     };
 
     /*!Get the tolerance used in geometric operations.
      */
     double
-    ParaTree::getTol(){
+    ParaTree::getTol() const {
         return m_tol;
     };
 
@@ -1045,7 +1045,7 @@ namespace bitpit {
      * \return Coordinates X,Y,Z of node 0.
      */
     darray3
-    ParaTree::getCoordinates(uint32_t idx) {
+    ParaTree::getCoordinates(uint32_t idx) const {
         return m_trans.mapCoordinates(m_octree.m_octants[idx].getCoordinates());
     }
 
@@ -1054,7 +1054,7 @@ namespace bitpit {
      * \return Coordinate X of node 0.
      */
     double
-    ParaTree::getX(uint32_t idx) {
+    ParaTree::getX(uint32_t idx) const {
         return m_trans.mapX(m_octree.m_octants[idx].getX());
     }
 
@@ -1063,7 +1063,7 @@ namespace bitpit {
      * \return Coordinate Y of node 0.
      */
     double
-    ParaTree::getY(uint32_t idx) {
+    ParaTree::getY(uint32_t idx) const {
         return m_trans.mapY(m_octree.m_octants[idx].getY());
     }
 
@@ -1072,7 +1072,7 @@ namespace bitpit {
      * \return Coordinate Z of node 0.
      */
     double
-    ParaTree::getZ(uint32_t idx) {
+    ParaTree::getZ(uint32_t idx) const {
         return m_trans.mapZ(m_octree.m_octants[idx].getZ());
     }
 
@@ -1081,7 +1081,7 @@ namespace bitpit {
      * \return Size of octant.
      */
     double
-    ParaTree::getSize(uint32_t idx) {
+    ParaTree::getSize(uint32_t idx) const {
         return m_trans.mapSize(m_octree.m_octants[idx].getSize());
     }
 
@@ -1090,7 +1090,7 @@ namespace bitpit {
      * \return Area of octant.
      */
     double
-    ParaTree::getArea(uint32_t idx) {
+    ParaTree::getArea(uint32_t idx) const {
         return m_trans.mapArea(m_octree.m_octants[idx].getArea());
     }
 
@@ -1099,7 +1099,7 @@ namespace bitpit {
      * \return Volume of octant.
      */
     double
-    ParaTree::getVolume(uint32_t idx) {
+    ParaTree::getVolume(uint32_t idx) const {
         return m_trans.mapVolume(m_octree.m_octants[idx].getVolume());
     }
 
@@ -1155,7 +1155,7 @@ namespace bitpit {
      * \return Coordinates of the inode-th node of octant.
      */
     darray3
-    ParaTree::getNode(uint32_t idx, uint8_t inode) {
+    ParaTree::getNode(uint32_t idx, uint8_t inode) const {
         darray3 node;
         u32array3 node_ = m_octree.m_octants[idx].getNode(inode);
         m_trans.mapNode(node_, node);
@@ -1168,7 +1168,7 @@ namespace bitpit {
      * \param[out] node Coordinates of the inode-th node of octant.
      */
     void
-    ParaTree::getNode(uint32_t idx, uint8_t inode, darray3& node) {
+    ParaTree::getNode(uint32_t idx, uint8_t inode, darray3& node) const {
         u32array3 node_ = m_octree.m_octants[idx].getNode(inode);
         m_trans.mapNode(node_, node);
     }
@@ -1178,7 +1178,7 @@ namespace bitpit {
      * \param[out] nodes Coordinates of the nodes of octant.
      */
     void
-    ParaTree::getNodes(uint32_t idx, darr3vector & nodes) {
+    ParaTree::getNodes(uint32_t idx, darr3vector & nodes) const {
         u32arr3vector nodes_;
         m_octree.m_octants[idx].getNodes(nodes_);
         m_trans.mapNodes(nodes_, nodes);
@@ -1189,7 +1189,7 @@ namespace bitpit {
      * \return nodes Coordinates of the nodes of octant.
      */
     darr3vector
-    ParaTree::getNodes(uint32_t idx){
+    ParaTree::getNodes(uint32_t idx) const{
         darr3vector nodes;
         u32arr3vector nodes_;
         m_octree.m_octants[idx].getNodes(nodes_);
@@ -1203,7 +1203,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    ParaTree::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) {
+    ParaTree::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const {
         i8array3 normal_;
         m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals);
         m_trans.mapNormals(normal_, normal);
@@ -1215,7 +1215,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    ParaTree::getNormal(uint32_t idx, uint8_t iface){
+    ParaTree::getNormal(uint32_t idx, uint8_t iface) const {
         darray3 normal;
         i8array3 normal_;
         m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals);
@@ -1228,7 +1228,7 @@ namespace bitpit {
      * \return Marker of octant.
      */
     int8_t
-    ParaTree::getMarker(uint32_t idx){
+    ParaTree::getMarker(uint32_t idx) const {
         return m_octree.getMarker(idx);
     };
 
@@ -1246,7 +1246,7 @@ namespace bitpit {
      * \return morton Morton index of the octant.
      */
     uint64_t
-    ParaTree::getMorton(uint32_t idx){
+    ParaTree::getMorton(uint32_t idx) const {
         return m_octree.computeMorton(idx);
     };
 
@@ -1257,7 +1257,7 @@ namespace bitpit {
      * \return Morton index of the node.
      */
     uint64_t
-    ParaTree::getNodeMorton(uint32_t idx, uint8_t inode){
+    ParaTree::getNodeMorton(uint32_t idx, uint8_t inode) const {
         return m_octree.computeNodeMorton(idx, inode);
     };
 
@@ -1266,7 +1266,7 @@ namespace bitpit {
      * \return Has octant to be balanced?
      */
     bool
-    ParaTree::getBalance(uint32_t idx){
+    ParaTree::getBalance(uint32_t idx) const {
         return m_octree.getBalance(idx);
     };
 
@@ -1276,7 +1276,7 @@ namespace bitpit {
      * \return Is the face a boundary face?
      */
     bool
-    ParaTree::getBound(uint32_t idx, uint8_t iface){
+    ParaTree::getBound(uint32_t idx, uint8_t iface) const {
         return m_octree.m_octants[idx].getBound(iface);
     }
 
@@ -1285,7 +1285,7 @@ namespace bitpit {
      * \return Is the octant a boundary octant?
      */
     bool
-    ParaTree::getBound(uint32_t idx){
+    ParaTree::getBound(uint32_t idx) const {
         return m_octree.m_octants[idx].getBound();
     }
 
@@ -1295,7 +1295,7 @@ namespace bitpit {
      * \return Is the face a partition boundary face?
      */
     bool
-    ParaTree::getPbound(uint32_t idx, uint8_t iface){
+    ParaTree::getPbound(uint32_t idx, uint8_t iface) const {
         return m_octree.m_octants[idx].getPbound(iface);
     }
 
@@ -1304,7 +1304,7 @@ namespace bitpit {
      * \return Is the octant a partition boundary octant?
      */
     bool
-    ParaTree::getPbound(uint32_t idx){
+    ParaTree::getPbound(uint32_t idx) const {
         return m_octree.m_octants[idx].getPbound();
     }
 
@@ -1313,7 +1313,7 @@ namespace bitpit {
      * \return Is octant new?
      */
     bool
-    ParaTree::getIsNewR(uint32_t idx){
+    ParaTree::getIsNewR(uint32_t idx) const {
         return m_octree.m_octants[idx].getIsNewR();
     };
 
@@ -1322,7 +1322,7 @@ namespace bitpit {
      * \return Is octant new?
      */
     bool
-    ParaTree::getIsNewC(uint32_t idx){
+    ParaTree::getIsNewC(uint32_t idx) const {
         return m_octree.m_octants[idx].getIsNewC();
     };
 
@@ -1331,7 +1331,7 @@ namespace bitpit {
      * \return Global index of octant.
      */
     uint64_t
-    ParaTree::getGlobalIdx(uint32_t idx){
+    ParaTree::getGlobalIdx(uint32_t idx) const {
         if (m_rank){
             return m_partitionRangeGlobalIdx[m_rank-1] + uint64_t(idx + 1);
         }
@@ -1346,7 +1346,7 @@ namespace bitpit {
      * \return Local index of octant.
      */
     uint32_t
-    ParaTree::getLocalIdx(uint64_t gidx,int rank){
+    ParaTree::getLocalIdx(uint64_t gidx,int rank) const {
         if (rank){
             return uint32_t(gidx - 1 - m_partitionRangeGlobalIdx[rank-1]);
         }
@@ -1360,7 +1360,7 @@ namespace bitpit {
      * \return Local index of octant.
      */
     uint32_t
-    ParaTree::getLocalIdx(uint64_t gidx){
+    ParaTree::getLocalIdx(uint64_t gidx) const {
         if (m_rank){
             return uint32_t(gidx - 1 - m_partitionRangeGlobalIdx[m_rank-1]);
         }
@@ -1374,10 +1374,10 @@ namespace bitpit {
      * \return Local index of the ghost octant.
      */
     uint32_t
-    ParaTree::getGhostLocalIdx(uint64_t gidx){
+    ParaTree::getGhostLocalIdx(uint64_t gidx) const {
 
         uint32_t index;
-        typename u64vector::iterator findResult;
+        typename u64vector::const_iterator findResult;
         findResult = std::find(m_octree.m_globalIdxGhosts.begin(),m_octree.m_globalIdxGhosts.end(),gidx);
         if(findResult != m_octree.m_globalIdxGhosts.end()){
             index = std::distance(m_octree.m_globalIdxGhosts.begin(),findResult);
@@ -1394,7 +1394,7 @@ namespace bitpit {
      * \return Global index of ghost octant.
      */
     uint64_t
-    ParaTree::getGhostGlobalIdx(uint32_t idx){
+    ParaTree::getGhostGlobalIdx(uint32_t idx) const {
         if (idx<m_octree.m_sizeGhosts){
             return m_octree.m_globalIdxGhosts[idx];
         };
@@ -1407,7 +1407,7 @@ namespace bitpit {
      * i.e. a bitset composed by Morton index and level of octant.
      */
     bitset<72>
-    ParaTree::getPersistentIdx(uint32_t idx){
+    ParaTree::getPersistentIdx(uint32_t idx) const {
         bitset<72> persistent = getMorton(idx);
         bitset<72> level = getLevel(idx);
         persistent <<= 8;
@@ -1442,7 +1442,7 @@ namespace bitpit {
      * \return Coordinates of node 0.
      */
     darray3
-    ParaTree::getCoordinates(Octant* oct) {
+    ParaTree::getCoordinates(const Octant* oct) const {
         return m_trans.mapCoordinates(oct->getCoordinates());
     }
 
@@ -1451,7 +1451,7 @@ namespace bitpit {
      * \return Coordinate X of node 0.
      */
     double
-    ParaTree::getX(Octant* oct) {
+    ParaTree::getX(const Octant* oct) const {
         return m_trans.mapX(oct->getX());
     }
 
@@ -1460,7 +1460,7 @@ namespace bitpit {
      * \return Coordinate Y of node 0.
      */
     double
-    ParaTree::getY(Octant* oct) {
+    ParaTree::getY(const Octant* oct) const {
         return m_trans.mapY(oct->getY());
     }
 
@@ -1469,7 +1469,7 @@ namespace bitpit {
      * \return Coordinate Z of node 0.
      */
     double
-    ParaTree::getZ(Octant* oct) {
+    ParaTree::getZ(const Octant* oct) const {
         return m_trans.mapZ(oct->getZ());
     }
 
@@ -1478,7 +1478,7 @@ namespace bitpit {
      * \return Size of octant.
      */
     double
-    ParaTree::getSize(Octant* oct) {
+    ParaTree::getSize(const Octant* oct) const {
         return m_trans.mapSize(oct->getSize());
     }
 
@@ -1487,7 +1487,7 @@ namespace bitpit {
      * \return Area of octant.
      */
     double
-    ParaTree::getArea(Octant* oct) {
+    ParaTree::getArea(const Octant* oct) const {
         return m_trans.mapArea(oct->getArea());
     }
 
@@ -1496,7 +1496,7 @@ namespace bitpit {
      * \return Volume of octant.
      */
     double
-    ParaTree::getVolume(Octant* oct) {
+    ParaTree::getVolume(const Octant* oct) const {
         return m_trans.mapVolume(oct->getVolume());
     }
 
@@ -1552,7 +1552,7 @@ namespace bitpit {
      * \return Coordinates of the inode-th node of octant.
      */
     darray3
-    ParaTree::getNode(Octant* oct, uint8_t inode) {
+    ParaTree::getNode(const Octant* oct, uint8_t inode) const {
         darray3 node;
         u32array3 node_ = oct->getNode(inode);
         m_trans.mapNode(node_, node);
@@ -1565,7 +1565,7 @@ namespace bitpit {
      * \param[out] node Coordinates of the inode-th node of octant.
      */
     void
-    ParaTree::getNode(Octant* oct, uint8_t inode, darray3& node) {
+    ParaTree::getNode(const Octant* oct, uint8_t inode, darray3& node) const {
         u32array3 node_ = oct->getNode(inode);
         m_trans.mapNode(node_, node);
     }
@@ -1575,7 +1575,7 @@ namespace bitpit {
      * \param[out] nodes Coordinates of the nodes of octant.
      */
     void
-    ParaTree::getNodes(Octant* oct, darr3vector & nodes) {
+    ParaTree::getNodes(const Octant* oct, darr3vector & nodes) const {
         u32arr3vector nodes_;
         oct->getNodes(nodes_);
         m_trans.mapNodes(nodes_, nodes);
@@ -1586,7 +1586,7 @@ namespace bitpit {
      * \return nodes Coordinates of the nodes of octant.
      */
     darr3vector
-    ParaTree::getNodes(Octant* oct){
+    ParaTree::getNodes(const Octant* oct) const {
         darr3vector nodes;
         u32arr3vector nodes_;
         oct->getNodes(nodes_);
@@ -1600,7 +1600,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    ParaTree::getNormal(Octant* oct, uint8_t iface, darray3 & normal) {
+    ParaTree::getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const {
         i8array3 normal_;
         oct->getNormal(iface, normal_, m_global.m_normals);
         m_trans.mapNormals(normal_, normal);
@@ -1612,7 +1612,7 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    ParaTree::getNormal(Octant* oct, uint8_t iface){
+    ParaTree::getNormal(const Octant* oct, uint8_t iface) const {
         darray3 normal;
         i8array3 normal_;
         oct->getNormal(iface, normal_, m_global.m_normals);
@@ -1625,7 +1625,7 @@ namespace bitpit {
      * \return Marker of octant.
      */
     int8_t
-    ParaTree::getMarker(Octant* oct){
+    ParaTree::getMarker(const Octant* oct) const {
         return oct->getMarker();
     };
 
@@ -1643,7 +1643,7 @@ namespace bitpit {
      * \return morton Morton index of the octant.
      */
     uint64_t
-    ParaTree::getMorton(Octant* oct){
+    ParaTree::getMorton(const Octant* oct) const {
         return oct->computeMorton();
     };
 
@@ -1654,7 +1654,7 @@ namespace bitpit {
      * \return Morton index of the node.
      */
     uint64_t
-    ParaTree::getNodeMorton(Octant* oct, uint8_t inode){
+    ParaTree::getNodeMorton(const Octant* oct, uint8_t inode) const {
         return oct->computeNodeMorton(inode);
     };
 
@@ -1663,7 +1663,7 @@ namespace bitpit {
      * \return Has octant to be balanced?
      */
     bool
-    ParaTree::getBalance(Octant* oct){
+    ParaTree::getBalance(const Octant* oct) const {
         return oct->getBalance();
     };
 
@@ -1673,7 +1673,7 @@ namespace bitpit {
      * \return Is the face a boundary face?
      */
     bool
-    ParaTree::getBound(Octant* oct, uint8_t iface){
+    ParaTree::getBound(const Octant* oct, uint8_t iface) const {
         return oct->getBound(iface);
     }
 
@@ -1682,7 +1682,7 @@ namespace bitpit {
      * \return Is the octant a boundary octant?
      */
     bool
-    ParaTree::getBound(Octant* oct){
+    ParaTree::getBound(const Octant* oct) const {
         return oct->getBound();
     }
 
@@ -1692,7 +1692,7 @@ namespace bitpit {
      * \return Is the face a partition boundary face?
      */
     bool
-    ParaTree::getPbound(Octant* oct, uint8_t iface){
+    ParaTree::getPbound(const Octant* oct, uint8_t iface) const {
         return oct->getPbound(iface);
     }
 
@@ -1701,7 +1701,7 @@ namespace bitpit {
      * \return Is the octant a partition boundary octant?
      */
     bool
-    ParaTree::getPbound(Octant* oct){
+    ParaTree::getPbound(const Octant* oct) const {
         return oct->getPbound();
     }
 
@@ -1710,7 +1710,7 @@ namespace bitpit {
      * \return Is octant new?
      */
     bool
-    ParaTree::getIsNewR(Octant* oct){
+    ParaTree::getIsNewR(const Octant* oct) const {
         return oct->getIsNewR();
     };
 
@@ -1719,7 +1719,7 @@ namespace bitpit {
      * \return Is octant new?
      */
     bool
-    ParaTree::getIsNewC(Octant* oct){
+    ParaTree::getIsNewC(const Octant* oct) const {
         return oct->getIsNewC();
     };
 
@@ -1728,7 +1728,7 @@ namespace bitpit {
      * \return Local index of octant.
      */
     uint32_t
-    ParaTree::getIdx(Octant* oct){
+    ParaTree::getIdx(const Octant* oct) const {
 #if BITPIT_ENABLE_MPI==1
         if (getIsGhost(oct)){
             return m_octree.findGhostMorton(oct->computeMorton());
@@ -1742,7 +1742,7 @@ namespace bitpit {
      * \return Global index of octant.
      */
     uint64_t
-    ParaTree::getGlobalIdx(Octant* oct){
+    ParaTree::getGlobalIdx(const Octant* oct) const {
 #if BITPIT_ENABLE_MPI==1
         if (getIsGhost(oct)){
             uint32_t idx = m_octree.findGhostMorton(oct->computeMorton());
@@ -1762,7 +1762,7 @@ namespace bitpit {
      * i.e. a bitset composed by Morton index and level of octant.
      */
     bitset<72>
-    ParaTree::getPersistentIdx(Octant* oct){
+    ParaTree::getPersistentIdx(const Octant* oct) const {
         bitset<72> persistent = getMorton(oct);
         bitset<72> level = getLevel(oct);
         persistent <<= 8;
@@ -1796,7 +1796,7 @@ namespace bitpit {
      * 	\return Status label of the octree.
      */
     uint64_t
-    ParaTree::getStatus(){
+    ParaTree::getStatus()const {
         return m_status;
     }
 
@@ -1836,7 +1836,7 @@ namespace bitpit {
      * \return Local current minimum size of the local partition of the octree.
      */
     double
-    ParaTree::getLocalMinSize(){
+    ParaTree::getLocalMinSize() const {
         uint32_t size = uint32_t(1<<(m_global.m_maxLevel-m_octree.getLocalMaxDepth()));
         return m_trans.mapSize(size);
     };
@@ -1845,7 +1845,7 @@ namespace bitpit {
      * \return Local current maximum size of the local partition of the octree.
      */
     double
-    ParaTree::getLocalMaxSize(){
+    ParaTree::getLocalMaxSize() const {
         uint32_t nocts = getNumOctants();
         double octSize = 0;
         double size = 0;
@@ -1883,7 +1883,7 @@ namespace bitpit {
      * \return Morton index of the last finest descendant of the target octant.
      */
     uint64_t
-    ParaTree::getLastDescMorton(uint32_t idx) {
+    ParaTree::getLastDescMorton(uint32_t idx) const {
         return m_octree.m_octants[idx].buildLastDesc().computeMorton();
     };
 
@@ -1891,7 +1891,7 @@ namespace bitpit {
      * \return Iterator begin of the local internal octants (dereferencing results in a pointer to an octant).
      */
     octantIterator
-    ParaTree::getInternalOctantsBegin(){
+    ParaTree::getInternalOctantsBegin() {
         return m_internals.begin();
     }
 
@@ -1899,7 +1899,7 @@ namespace bitpit {
      * \return Iterator end of the local internal octants (dereferencing results in a pointer to an octant).
      */
     octantIterator
-    ParaTree::getInternalOctantsEnd(){
+    ParaTree::getInternalOctantsEnd() {
         return m_internals.end();
     }
 
@@ -1907,7 +1907,7 @@ namespace bitpit {
      * \return Iterator begin of the local border of process octants (dereferencing results in a pointer to an octant).
      */
     octantIterator
-    ParaTree::getPboundOctantsBegin(){
+    ParaTree::getPboundOctantsBegin() {
         return m_pborders.begin();
     }
 
@@ -1915,7 +1915,7 @@ namespace bitpit {
      * \return Iterator end of the local border of process octants (dereferencing results in a pointer to an octant).
      */
     octantIterator
-    ParaTree::getPboundOctantsEnd(){
+    ParaTree::getPboundOctantsEnd() {
         return m_pborders.end();
     }
 
@@ -1935,7 +1935,7 @@ namespace bitpit {
      * \return Local number of intersections.
      */
     uint32_t
-    ParaTree::getNumIntersections() {
+    ParaTree::getNumIntersections() const {
         return m_octree.m_intersections.size();
     }
 
@@ -1968,7 +1968,7 @@ namespace bitpit {
      * \return The finer octant of the owners of intersection (false/true = 0/1).
      */
     bool
-    ParaTree::getFiner(Intersection* inter) {
+    ParaTree::getFiner(const Intersection* inter) const {
         return inter->m_finer;
     }
 
@@ -1977,7 +1977,7 @@ namespace bitpit {
      * \return Boundary or not boundary?.
      */
     bool
-    ParaTree::getBound(Intersection* inter) {
+    ParaTree::getBound(const Intersection* inter) const {
         return inter->getBound();
     }
 
@@ -1986,7 +1986,7 @@ namespace bitpit {
      * \return Ghost or not ghost?.
      */
     bool
-    ParaTree::getIsGhost(Intersection* inter) {
+    ParaTree::getIsGhost(const Intersection* inter) const {
         return inter->getIsGhost();
     }
 
@@ -1995,7 +1995,7 @@ namespace bitpit {
      * \return Process boundary or not boundary?.
      */
     bool
-    ParaTree::getPbound(Intersection* inter) {
+    ParaTree::getPbound(const Intersection* inter) const {
         return inter->getPbound();
     }
 
@@ -2004,7 +2004,7 @@ namespace bitpit {
      * \return Face index of the finer octant of intersection (owners[getFiner(inter)]).
      */
     uint8_t
-    ParaTree::getFace(Intersection* inter) {
+    ParaTree::getFace(const Intersection* inter) const {
         return inter->m_iface;
     }
 
@@ -2013,7 +2013,7 @@ namespace bitpit {
      * \return A couple of octants owners of intersection.
      */
     u32vector
-    ParaTree::getOwners(Intersection* inter) {
+    ParaTree::getOwners(const Intersection* inter) const {
         u32vector owners(2);
         owners[0] = inter->m_owners[0];
         owners[1] = inter->m_owners[1];
@@ -2025,7 +2025,7 @@ namespace bitpit {
      * \return Index of the octant owner with inner normal.
      */
     uint32_t
-    ParaTree::getIn(Intersection* inter) {
+    ParaTree::getIn(const Intersection* inter) const {
         return inter->getIn();
     }
 
@@ -2034,7 +2034,7 @@ namespace bitpit {
      * \return Index of the octant owner with outer normal.
      */
     uint32_t
-    ParaTree::getOut(Intersection* inter) {
+    ParaTree::getOut(const Intersection* inter) const {
         return inter->getOut();
     }
 
@@ -2043,7 +2043,7 @@ namespace bitpit {
      * \return Is the octant owner with outer normal a ghost octant?.
      */
     bool
-    ParaTree::getOutIsGhost(Intersection* inter) {
+    ParaTree::getOutIsGhost(const Intersection* inter) const {
         return inter->getOutIsGhost();
     }
 
@@ -2052,7 +2052,7 @@ namespace bitpit {
      * \return Size of intersection.
      */
     double
-    ParaTree::getSize(Intersection* inter) {
+    ParaTree::getSize(const Intersection* inter) const {
         uint32_t Size;
         if(inter->m_finer && inter->m_isghost)
             Size = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]).getSize();
@@ -2066,7 +2066,7 @@ namespace bitpit {
      * \return Area of intersection.
      */
     double
-    ParaTree::getArea(Intersection* inter) {
+    ParaTree::getArea(const Intersection* inter) const {
         uint64_t Area;
         if(inter->m_finer && inter->m_isghost)
             Area = m_octree.extractGhostOctant(inter->m_owners[1]).getArea();
@@ -2100,7 +2100,7 @@ namespace bitpit {
      * \return Coordinates of the nodes of intersection.
      */
     darr3vector
-    ParaTree::getNodes(Intersection* inter){
+    ParaTree::getNodes(const Intersection* inter) const {
         darr3vector nodes;
         Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
@@ -2125,7 +2125,7 @@ namespace bitpit {
      * \return Coordinates of the normal of intersection.
      */
     darray3
-    ParaTree::getNormal(Intersection* inter){
+    ParaTree::getNormal(const Intersection* inter) const {
         darray3 normal;
         Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
@@ -2196,7 +2196,7 @@ namespace bitpit {
      * \return Local index of octant.
      */
     uint32_t
-    ParaTree::getIdx(Octant oct){
+    ParaTree::getIdx(const Octant oct) const {
 #if BITPIT_ENABLE_MPI==1
         if (getIsGhost(oct)){
             return m_octree.findGhostMorton(oct.computeMorton());
@@ -2215,7 +2215,7 @@ namespace bitpit {
      * \return Is octant ghost?
      */
     bool
-    ParaTree::getIsGhost(Octant* oct){
+    ParaTree::getIsGhost(const Octant* oct) const {
         return oct->m_info[16];
     };
 
@@ -2224,7 +2224,7 @@ namespace bitpit {
      * \return Is octant ghost?
      */
     bool
-    ParaTree::getIsGhost(Octant oct){
+    ParaTree::getIsGhost(const Octant oct) const {
         return oct.m_info[16];
     };
 
@@ -2232,7 +2232,7 @@ namespace bitpit {
      * \return an unordered map associating rank to sent elements given by index extremes of a chunck
      */
     const std::unordered_map<int,std::array<uint32_t,4> > &
-    ParaTree::getSentIdx(){
+    ParaTree::getSentIdx() const {
         return m_sentIdx;
     };
 
@@ -2410,7 +2410,7 @@ namespace bitpit {
      * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
      */
     uint32_t
-    ParaTree::getPointOwnerIdx(dvector point){
+    ParaTree::getPointOwnerIdx(dvector point) const {
         uint32_t noctants = m_octree.m_octants.size();
         if(noctants==0)
             return numeric_limits<uint32_t>::max();
@@ -2488,7 +2488,7 @@ namespace bitpit {
      * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
      */
     uint32_t
-    ParaTree::getPointOwnerIdx(dvector point, bool & isghost){
+    ParaTree::getPointOwnerIdx(dvector point, bool & isghost) const {
         uint32_t noctants = m_octree.m_octants.size();
         if(noctants==0)
             return numeric_limits<uint32_t>::max();
@@ -2655,7 +2655,7 @@ namespace bitpit {
      * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
      */
     uint32_t
-    ParaTree::getPointOwnerIdx(darray3 point){
+    ParaTree::getPointOwnerIdx(darray3 point) const {
         uint32_t noctants = m_octree.m_octants.size();
         if(noctants==0)
             return numeric_limits<uint32_t>::max();
@@ -2741,7 +2741,7 @@ namespace bitpit {
      * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
      */
     uint32_t
-    ParaTree::getPointOwnerIdx(darray3 point, bool & isghost){
+    ParaTree::getPointOwnerIdx(darray3 point, bool & isghost) const {
         uint32_t noctants = m_octree.m_octants.size();
         if(noctants==0)
             return numeric_limits<uint32_t>::max();
@@ -2882,7 +2882,7 @@ namespace bitpit {
      * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
      */
     void
-    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost){
+    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost) const {
 
         uint32_t	i, nocts = getNumOctants();
         uint32_t	nghbro = m_octree.m_lastGhostBros.size();;
@@ -2926,7 +2926,7 @@ namespace bitpit {
      * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
      */
     void
-    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank){
+    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const {
 
         mapper.resize(1);
         isghost.resize(1);
@@ -3173,7 +3173,7 @@ namespace bitpit {
      * \return Rank of the process owning the element
      */
     int
-    ParaTree::findOwner(const uint64_t & morton) {
+    ParaTree::findOwner(const uint64_t & morton) const {
         // Early return if the requested morton is on first partition
         if (morton <= m_partitionLastDesc[0]) {
             return 0;
@@ -3219,9 +3219,9 @@ namespace bitpit {
      * \return Rank of the process owning the element
      */
     int
-    ParaTree::getOwnerRank(const uint64_t & globalIndex) {
+    ParaTree::getOwnerRank(const uint64_t & globalIndex) const {
         // Get the iterator point to the onwer rank
-        std::vector<uint64_t>::iterator rankItr = std::lower_bound (m_partitionRangeGlobalIdx.begin(), m_partitionRangeGlobalIdx.end(), globalIndex);
+        std::vector<uint64_t>::const_iterator rankItr = std::lower_bound (m_partitionRangeGlobalIdx.begin(), m_partitionRangeGlobalIdx.end(), globalIndex);
 
         // Get the onwer rank
         int ownerRank;
@@ -3260,7 +3260,7 @@ namespace bitpit {
      * the connectivity of each octant (4/8 indices of nodes for 2D/3D case).
      */
     const u32vector2D &
-    ParaTree::getConnectivity(){
+    ParaTree::getConnectivity() const {
         return m_octree.m_connectivity;
     }
 
@@ -3270,7 +3270,7 @@ namespace bitpit {
      * (4/8 indices of nodes for 2D/3D case).
      */
     const u32vector &
-    ParaTree::getConnectivity(uint32_t idx){
+    ParaTree::getConnectivity(uint32_t idx) const {
         return m_octree.m_connectivity[idx];
     }
 
@@ -3279,7 +3279,7 @@ namespace bitpit {
      * \return Constant reference to the connectivity of the octant (4/8 indices of nodes for 2D/3D case).
      */
     const u32vector &
-    ParaTree::getConnectivity(Octant* oct){
+    ParaTree::getConnectivity(Octant* oct) const {
         return m_octree.m_connectivity[getIdx(oct)];
     }
 
@@ -3287,7 +3287,7 @@ namespace bitpit {
      * \return Constant reference to the nodes matrix [nnodes*3] with the coordinates of the nodes.
      */
     const u32arr3vector &
-    ParaTree::getNodes(){
+    ParaTree::getNodes() const {
         return m_octree.m_nodes;
     }
 
@@ -3296,7 +3296,7 @@ namespace bitpit {
      * \return Constant reference to a vector containing the coordinates of the node.
      */
     const u32array3 &
-    ParaTree::getNodeLogicalCoordinates(uint32_t inode){
+    ParaTree::getNodeLogicalCoordinates(uint32_t inode) const {
         return m_octree.m_nodes[inode];
     }
 
@@ -3305,7 +3305,7 @@ namespace bitpit {
      * \return Vector with the coordinates of the node.
      */
     darray3
-    ParaTree::getNodeCoordinates(uint32_t inode){
+    ParaTree::getNodeCoordinates(uint32_t inode) const {
         return m_trans.mapCoordinates(m_octree.m_nodes[inode]);
     }
 
@@ -3314,7 +3314,7 @@ namespace bitpit {
      * the connectivity of each octant (4/8 indices of nodes for 2D/3D case).
      */
     const u32vector2D &
-    ParaTree::getGhostConnectivity(){
+    ParaTree::getGhostConnectivity() const {
         return m_octree.m_ghostsConnectivity;
     }
 
@@ -3324,7 +3324,7 @@ namespace bitpit {
      * (4/8 indices of nodes for 2D/3D case).
      */
     const u32vector &
-    ParaTree::getGhostConnectivity(uint32_t idx){
+    ParaTree::getGhostConnectivity(uint32_t idx) const {
         return m_octree.m_ghostsConnectivity[idx];
     }
 
@@ -3334,7 +3334,7 @@ namespace bitpit {
      * (4/8 indices of nodes for 2D/3D case).
      */
     const u32vector &
-    ParaTree::getGhostConnectivity(Octant* oct){
+    ParaTree::getGhostConnectivity(const Octant* oct) const {
         return m_octree.m_ghostsConnectivity[getIdx(oct)];
     }
 
