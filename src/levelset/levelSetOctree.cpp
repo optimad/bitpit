@@ -49,6 +49,9 @@ LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast
     m_octree = &patch ;
 };
 
+VolOctree* LevelSetOctree::getOctreeMesh() const{
+    return m_octree ;
+}
 /*!
  * Calculation of the necessary size of the narrow band around a LevelSetObject in order to guarantee one cell center on each side of the object
  * @param[in] visitor reference object 
