@@ -181,6 +181,7 @@ class LevelSetCartesian : public LevelSetKernel{
     virtual ~LevelSetCartesian();
     LevelSetCartesian( VolCartesian & );
 
+    VolCartesian *                              getCartesianMesh() const;
     double                                      computeSizeNarrowBand( LevelSetObject* );
     double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, LevelSetObject* );
     double                                      computeRSearchFromCell( long id ) ;
@@ -196,6 +197,7 @@ class LevelSetOctree : public LevelSetKernel{
     virtual ~LevelSetOctree();
     LevelSetOctree( VolOctree & );
 
+    VolOctree *                                 getOctreeMesh() const;
     double                                      computeSizeNarrowBand( LevelSetObject* );
     double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, LevelSetObject* );
     double                                      computeRSearchFromCell( long id ) ;

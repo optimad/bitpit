@@ -49,6 +49,9 @@ LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSetKernel( (sta
     m_cartesian = &patch ;
 };
 
+VolCartesian* LevelSetCartesian::getCartesianMesh() const{
+    return m_cartesian ;
+}
 /*!
  * Calculate size of narrow band in order to guarantee one element on each side of geometry
  * @param[in] visitor reference object 
