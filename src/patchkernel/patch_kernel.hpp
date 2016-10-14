@@ -339,6 +339,11 @@ public:
 	void dump(std::ostream &stream);
 	void restore(std::istream &stream, bool reregister = false);
 
+	void consecutiveRenumberVertices(long offset = 0);
+	void consecutiveRenumberCells(long offset = 0);
+	void consecutiveRenumberInterfaces(long offset = 0);
+	void consecutiveRenumber(long offsetVertices, long offsetCells, long offsetInterfaces);
+
 #if BITPIT_ENABLE_MPI==1
 	virtual void setCommunicator(MPI_Comm communicator);
 	void freeCommunicator();
@@ -490,8 +495,15 @@ private:
 	void setId(int id);
 
 	std::array<double, 3> evalElementCentroid(const Element &element) const;
+
+	template<typename item_t, typename id_t = long>
+	std::unordered_map<id_t, id_t> consecutiveRenumberItem(PiercedVector<item_t, id_t> &container, long offset);
+
 };
 
 }
+
+// Template implementation
+#include "patch_kernel.tpp"
 
 #endif

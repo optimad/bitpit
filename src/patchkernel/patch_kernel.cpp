@@ -3869,6 +3869,125 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 }
 
 /*!
+ *  Renumbers vertices ID consecutively, starting from a given offset.
+ *
+ *  \param[in] offset is the starting id
+ */
+void PatchKernel::consecutiveRenumberVertices(long offset)
+{
+	// Renumber vertices
+	std::unordered_map<long, long > map = consecutiveRenumberItem(m_vertices, offset);
+	
+	// Renumber cell connectivity
+	for(Cell &cell : m_cells) {
+		int nCellVertices = cell.getVertexCount();
+		long * cellConnect = cell.getConnect();
+		for (int j=0; j < nCellVertices; ++j) {
+			cellConnect[j] = map[cellConnect[j]];
+		}
+	}
+
+	// Renumber interface connectivity
+	for(Interface &interface : getInterfaces()) {
+		int nInterfaceVertices = interface.getVertexCount();
+		long * interfaceConnect = interface.getConnect();
+		for (int j=0; j < nInterfaceVertices; ++j) {
+			interfaceConnect[j] = map[interfaceConnect[j]];
+		}
+	}
+}	
+
+/*!
+ *  Renumbers cells consecutively, starting from a given offset.
+ *
+ *  \param[in] offset is the starting id
+ */
+void PatchKernel::consecutiveRenumberCells(long offset)
+{
+	// Renumber cells
+	std::unordered_map<long, long > map = consecutiveRenumberItem(m_cells, offset);
+	
+	// Renumber cell adjacencies
+	for (auto &cell: m_cells) {
+		long *adjacencies = cell.getAdjacencies();
+		int nCellAdjacencies = cell.getAdjacencyCount();
+		for (int i = 0; i < nCellAdjacencies; ++i) {
+			long &neighId = adjacencies[i];
+			if (neighId == -1) {
+				continue;
+			}
+
+			neighId = map[neighId];
+		}
+	}
+	
+	// Renumber interface owner and neighbour
+	for (Interface &interface: m_interfaces) {
+		long ownerId = interface.getOwner();
+		int ownerFace = interface.getOwnerFace();
+		interface.setOwner(map.at(ownerId), ownerFace);
+
+		long neighId = interface.getNeigh();
+		if (neighId >= 0) {
+			int neighFace = interface.getNeighFace();
+			interface.setNeigh(map.at(neighId), neighFace);
+		}
+	}
+
+	// Renumber last internal and first ghost markers
+	if (m_lastInternalId >= 0) {
+		m_lastInternalId = map.at(m_lastInternalId);
+	}
+
+	if (m_firstGhostId >= 0) {
+		m_firstGhostId = map.at(m_firstGhostId);
+	}
+
+	// Rebuild the ghost information
+#if BITPIT_ENABLE_MPI==1
+	buildGhostExchangeData();
+#endif
+}	
+
+/*!
+ *  Renumbers interfaces consecutively, starting from a given offset.
+ *
+ *  \param[in] offset is the starting id
+ */
+void PatchKernel::consecutiveRenumberInterfaces(long offset)
+{
+	// Renumber interfaces
+	std::unordered_map<long, long > map = consecutiveRenumberItem(m_interfaces, offset);
+	
+	// Renumber cell interfaces
+	for (Cell &cell: m_cells) {
+		long *interfaces = cell.getInterfaces();
+		int nCellInterfaces = cell.getInterfaceCount();
+		for (int i = 0; i < nCellInterfaces; ++i) {
+			long &interfaceId = interfaces[i];
+			if (interfaceId >= 0) {
+				interfaceId = map.at(interfaceId);
+			}
+		}
+	}
+}
+
+/*!
+ *  Renumbering vertices, cells and interfaces consecutively, starting from
+ *  given offsets.
+ *
+ *  \param[in] vertexOffset is the starting id of the vertices
+ *  \param[in] cellOffset is the starting id of the cells
+ *  \param[in] interfaceOffset is the starting id of the interfaces
+ */
+void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long interfaceOffset)
+{
+	consecutiveRenumberVertices(vertexOffset);
+	consecutiveRenumberCells(cellOffset);
+	consecutiveRenumberInterfaces(interfaceOffset);
+}
+
+/*!
  *  Get the version associated to the binary dumps.
  *
  *  \result The version associated to the binary dumps.
