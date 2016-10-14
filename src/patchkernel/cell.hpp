@@ -107,8 +107,8 @@ private:
 	bool m_interior;
 	int m_pid;
 
-	bitpit::CollapsedVector2D<long> m_interfaces;
-	bitpit::CollapsedVector2D<long> m_adjacencies;
+	bitpit::FlatVector2D<long> m_interfaces;
+	bitpit::FlatVector2D<long> m_adjacencies;
 
 	void _initialize(bool interior, bool storeNeighbourhood);
 

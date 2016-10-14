@@ -25,8 +25,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __BITPIT_COLLAPSED_VECTOR_2D_HPP__
-#define __BITPIT_COLLAPSED_VECTOR_2D_HPP__
+#ifndef __BITPIT_FLAT_VECTOR_2D_HPP__
+#define __BITPIT_FLAT_VECTOR_2D_HPP__
 
 #include <vector>
 #include <cassert>
@@ -37,11 +37,11 @@
 
 namespace bitpit{
 	template<class T>
-	class CollapsedVector2D;
+	class FlatVector2D;
 }
 
 /*!
-	Stream operator from class CollapsedVector2D to communication buffer.
+	Stream operator from class FlatVector2D to communication buffer.
 	Stream data from vector to communication buffer
 
 	\param[in] buffer is the output memory stream
@@ -49,7 +49,7 @@ namespace bitpit{
 	\result Returns the same output stream received in input.
 */
 template<class T>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::CollapsedVector2D<T> &vector)
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::FlatVector2D<T> &vector)
 {
 	typename std::vector<T>::const_iterator           it;
 	typename std::vector<size_t>::const_iterator      jt;
@@ -66,7 +66,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::C
 }
 
 /*!
-	Input stream operator from Communication buffer for class CollapsedVector2D.
+	Input stream operator from Communication buffer for class FlatVector2D.
 	Stream data from communication buffer to vector.
 
 	\param[in] buffer is the input memory stream
@@ -74,7 +74,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::C
 	\result Returns the same input stream received in input.
 */
 template<class T>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::CollapsedVector2D<T> &vector)
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::FlatVector2D<T> &vector)
 {
     size_t                      size_m_v, size_m_index;
     size_t                      i;
@@ -106,21 +106,21 @@ namespace bitpit{
 	@brief Metafunction for generation of a collapsed vector of arrays.
 
 	@details
-	Usage: Use <tt>CollapsedVector2D<Type></tt> to declare a
+	Usage: Use <tt>FlatVector2D<Type></tt> to declare a
 	collapsed vector of arrays.
 
 	@tparam T The type of the objects stored in the vector
 */
 
 template <class T>
-class CollapsedVector2D
+class FlatVector2D
 {
 
 // Friendship(s)
 template<class U>
-friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream &buffer, const CollapsedVector2D<U> &vector);
+friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream &buffer, const FlatVector2D<U> &vector);
 template<class U>
-friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream &buffer, CollapsedVector2D<U> &vector);
+friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream &buffer, FlatVector2D<U> &vector);
 
 // Members and methods
 public:
@@ -128,44 +128,44 @@ public:
 	/*!
 		Default constructor
 	*/
-	CollapsedVector2D(bool initialize = true)
+	FlatVector2D(bool initialize = true)
 		: m_index(initialize ? 1 : 0, 0L)
 	{
 	}
 
 	/*!
-		Creates a new CollapsedVector2D
+		Creates a new FlatVector2D
 
 		\param subArraySizes is a vector with the sizes of the sub-array
 		to create
 		\param value is the value that will be use to initialize the
 		element of the sub-arrays
 	*/
-	CollapsedVector2D(const std::vector<int> &subArraySizes, const T &value = T())
+	FlatVector2D(const std::vector<int> &subArraySizes, const T &value = T())
 	{
 		initialize(subArraySizes, value);
 	}
 
 	/*!
-		Creates a new CollapsedVector2D
+		Creates a new FlatVector2D
 
 		\param nSubArrays is the number of sub-arrays
 		\param subArraySize is the size of every sub-array
 		\param value is the value that will be use to initialize the
 		element of the sub-arrays
 	*/
-	CollapsedVector2D(const int &nSubArrays, const int &subArraySize, const T &value = T())
+	FlatVector2D(const int &nSubArrays, const int &subArraySize, const T &value = T())
 	{
 		initialize(nSubArrays, subArraySize, value);
 	}
 
 	/*!
-		Creates a new CollapsedVector2D
+		Creates a new FlatVector2D
 
 		\param vector2D is a 2D vector that will be used to initialize
 		the newly created container
 	*/
-	CollapsedVector2D(const std::vector<std::vector<T> > &vector2D)
+	FlatVector2D(const std::vector<std::vector<T> > &vector2D)
 	{
 		initialize(vector2D);
 	}
@@ -173,7 +173,7 @@ public:
 	/*!
 		Copy constructor
 	*/
-	CollapsedVector2D(const CollapsedVector2D &other)
+	FlatVector2D(const FlatVector2D &other)
 	{
 		// Copy the elements
 		std::vector<T> new_v(other.m_v);
@@ -190,10 +190,10 @@ public:
 		Assigns new contents to the container, replacing its current
 		contents, and modifying its size accordingly.
 	*/
-	CollapsedVector2D & operator= (const CollapsedVector2D &other)
+	FlatVector2D & operator= (const FlatVector2D &other)
 	{
 		if (this != &other) {
-			CollapsedVector2D temporary(other);
+			FlatVector2D temporary(other);
 			temporary.swap(*this);
 		}
 
@@ -206,7 +206,7 @@ public:
 		The move assignment operator "steals" the resources held by the
 		argument.
 	*/
-	CollapsedVector2D & operator= (CollapsedVector2D &&other) = default;
+	FlatVector2D & operator= (FlatVector2D &&other) = default;
 
 	/*!
 		Initializes the container
@@ -352,7 +352,7 @@ public:
 
 		\param other is another collapsed-vector container of the same type
 	*/
-	void swap(CollapsedVector2D &other)
+	void swap(FlatVector2D &other)
 	{
 		m_index.swap(other.m_index);
 		m_v.swap(other.m_v);
@@ -374,7 +374,7 @@ public:
 
 		\result true if the collapsed-vectors are equal, false otherwise.
 	*/
-	bool operator==(const CollapsedVector2D& rhs) const
+	bool operator==(const FlatVector2D& rhs) const
 	{
 		return m_index == rhs.m_index && m_v == rhs.m_v;
 	}

@@ -1227,7 +1227,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     std::unordered_set<long> recvCells;
 	recvCells.reserve(nRecvCells);
 
-    std::unordered_map<long, CollapsedVector2D<long>> linkAdjacencies;
+    std::unordered_map<long, FlatVector2D<long>> linkAdjacencies;
 
     for (long i = 0; i < nRecvCells; ++i) {
         // Cell data
@@ -1307,7 +1307,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 
             // Save the adjacencies of the received cell, this adjacencies
             // will link together the recevied cell to the existing ones.
-            CollapsedVector2D<long> &recvAdjacencies = linkAdjacencies[localCellId];
+            FlatVector2D<long> &recvAdjacencies = linkAdjacencies[localCellId];
 
             int nCellFaces = recvCell.getFaceCount();
             recvAdjacencies.reserve(nCellFaces);
@@ -1361,7 +1361,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         Cell &cell = m_cells[cellId];
 
         int nCellFaces = cell.getFaceCount();
-        CollapsedVector2D<long> &cellLinkAdjacencies = entry.second;
+        FlatVector2D<long> &cellLinkAdjacencies = entry.second;
         for (int face = 0; face < nCellFaces; ++face) {
             int nFaceLinkAdjacencies = cellLinkAdjacencies.sub_array_size(face);
             for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
