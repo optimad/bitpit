@@ -629,7 +629,7 @@ public:
 		\param j is the index of the element that will be removed
 		\param value is the value that will be set
 	*/
-	void set(const int &i, const int &j, T value)
+	void set(const int &i, const int &j, const T &value)
 	{
 		assert(indexValid(i, j));
 		(*this)[i][j] = value;
