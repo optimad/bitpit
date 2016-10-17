@@ -103,11 +103,11 @@ namespace bitpit{
 */
 
 /*!
-    @brief Metafunction for generation of a collapsed vector of arrays.
+    @brief Metafunction for generation of a flattened vector of vectors.
 
     @details
-    Usage: Use <tt>FlatVector2D<Type></tt> to declare a
-    collapsed vector of arrays.
+    Usage: Use <tt>FlatVector2D<Type></tt> to declare a flattened vector of
+    vectors.
 
     @tparam T The type of the objects stored in the vector
 */
@@ -126,7 +126,7 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream &buffer, Fla
 public:
 
     /*!
-        Default constructor
+        Default constructor.
     */
     FlatVector2D(bool initialize = true)
         : m_index(initialize ? 1 : 0, 0L)
@@ -134,36 +134,35 @@ public:
     }
 
     /*!
-        Creates a new FlatVector2D
+        Creates a new container.
 
-        \param subArraySizes is a vector with the sizes of the sub-array
-        to create
-        \param value is the value that will be use to initialize the
-        element of the sub-arrays
+        \param sizes are the sizes of the vectors
+        \param value is the value that will be use to initialize the items of
+        the vectors
     */
-    FlatVector2D(const std::vector<int> &subArraySizes, const T &value = T())
+    FlatVector2D(const std::vector<int> &sizes, const T &value = T())
     {
-        initialize(subArraySizes, value);
+        initialize(sizes, value);
     }
 
     /*!
-        Creates a new FlatVector2D
+        Creates a new container.
 
-        \param nSubArrays is the number of sub-arrays
-        \param subArraySize is the size of every sub-array
+        \param nVectors is the number of vectors
+        \param size is the size of the vectors
         \param value is the value that will be use to initialize the
-        element of the sub-arrays
+        items of the vectors
     */
-    FlatVector2D(const int &nSubArrays, const int &subArraySize, const T &value = T())
+    FlatVector2D(const int &nVectors, const int &size, const T &value = T())
     {
-        initialize(nSubArrays, subArraySize, value);
+        initialize(nVectors, size, value);
     }
 
     /*!
-        Creates a new FlatVector2D
+        Creates a new container.
 
-        \param vector2D is a 2D vector that will be used to initialize
-        the newly created container
+        \param vector2D is a 2D vector that will be used to initialize the
+        newly created container
     */
     FlatVector2D(const std::vector<std::vector<T> > &vector2D)
     {
@@ -171,11 +170,11 @@ public:
     }
 
     /*!
-        Copy constructor
+        Copy constructor.
     */
     FlatVector2D(const FlatVector2D &other)
     {
-        // Copy the elements
+        // Copy the items
         std::vector<T> new_v(other.m_v);
         std::vector<std::size_t> new_index(other.m_index);
 
@@ -185,12 +184,12 @@ public:
     }
 
     /*!
-        Copy assignment operator
+        Copy assignment operator.
 
-        Assigns new contents to the container, replacing its current
-        contents, and modifying its size accordingly.
+        Assigns new contents to the container, replacing its current contents,
+        and modifying its size accordingly.
     */
-    FlatVector2D & operator= (const FlatVector2D &other)
+    FlatVector2D & operator=(const FlatVector2D &other)
     {
         if (this != &other) {
             FlatVector2D temporary(other);
@@ -201,24 +200,23 @@ public:
     }
 
     /*!
-        Move assignment operator
+        Move assignment operator.
 
         The move assignment operator "steals" the resources held by the
         argument.
     */
-    FlatVector2D & operator= (FlatVector2D &&other) = default;
+    FlatVector2D & operator=(FlatVector2D &&other) = default;
 
     /*!
-        Initializes the container
+        Initializes the container.
 
-        \param subArraySizes is a vector with the sizes of the sub-array
-        to create
-        \param value is the value that will be use to initialize the
-        element of the sub-arrays
+        \param sizes are the sizes of the vectors
+        \param value is the value that will be use to initialize the items of
+        the vectors
     */
-    void initialize(const std::vector<int> &subArraySizes, const T &value = T())
+    void initialize(const std::vector<int> &sizes, const T &value = T())
     {
-        int nSubArrays = subArraySizes.size();
+        int nVectors = sizes.size();
 
         // Destroy the container
         //
@@ -231,28 +229,28 @@ public:
         // Initialize the indexes
         //
         // Clear the vector before the resize to reduce memory fragmentation
-        m_index.resize(nSubArrays + 1);
+        m_index.resize(nVectors + 1);
         m_index.shrink_to_fit();
-        for (int i = 0; i < nSubArrays; ++i) {
-            m_index[i+1] = m_index[i] + subArraySizes[i];
+        for (int i = 0; i < nVectors; ++i) {
+            m_index[i+1] = m_index[i] + sizes[i];
         }
 
         // Initialize the storage
         //
         // Clear the vector before the resize to reduce memory fragmentation
-        m_v.assign(m_index[nSubArrays], value);
+        m_v.assign(m_index[nVectors], value);
         m_v.shrink_to_fit();
     }
 
     /*!
-        Initializes the container
+        Initializes the container.
 
-        \param nSubArrays is the number of sub-arrays
-        \param subArraySize is the size of every sub-array
-        \param value is the value that will be use to initialize the
-        element of the sub-arrays
+        \param nVectors is the number of vectors
+        \param size is the size of the vectors
+        \param value is the value that will be use to initialize the items of
+        the vectors
     */
-    void initialize(const int &nSubArrays, const int &subArraySize, const T &value = T())
+    void initialize(const int &nVectors, const int &size, const T &value = T())
     {
         // Destroy the container
         //
@@ -263,26 +261,26 @@ public:
         destroy();
 
         // Initialize the indexes
-        m_index.resize(nSubArrays + 1);
+        m_index.resize(nVectors + 1);
         m_index.shrink_to_fit();
-        for (int i = 0; i < nSubArrays; ++i) {
-            m_index[i+1] = m_index[i] + subArraySize;
+        for (int i = 0; i < nVectors; ++i) {
+            m_index[i+1] = m_index[i] + size;
         }
 
         // Initialize the storage
-        m_v.assign(m_index[nSubArrays], value);
+        m_v.assign(m_index[nVectors], value);
         m_v.shrink_to_fit();
     }
 
     /*!
-        Initializes the container
+        Initializes the container.
 
-        \param vector2D is a 2D vector that will be used to initialize
-        the container
+        \param vector2D is a 2D vector that will be used to initialize the
+        container
     */
     void initialize(const std::vector<std::vector<T> > &vector2D)
     {
-        int nSubArrays = vector2D.size();
+        int nVectors = vector2D.size();
 
         // Destroy the container
         //
@@ -293,18 +291,18 @@ public:
         destroy();
 
         // Initialize the indexes
-        m_index.resize(nSubArrays + 1);
+        m_index.resize(nVectors + 1);
         m_index.shrink_to_fit();
-        for (int i = 0; i < nSubArrays; ++i) {
+        for (int i = 0; i < nVectors; ++i) {
             m_index[i+1] = m_index[i] + vector2D[i].size();
         }
 
         // Initialize the storage
-        m_v.resize(m_index[nSubArrays]);
+        m_v.resize(m_index[nVectors]);
         m_v.shrink_to_fit();
 
         int k = 0;
-        for (int i = 0; i < nSubArrays; ++i) {
+        for (int i = 0; i < nVectors; ++i) {
             int subArraySize = vector2D[i].size();
             for (int j = 0; j < subArraySize; ++j) {
                 m_v[k++] = vector2D[i][j];
@@ -313,7 +311,7 @@ public:
     }
 
     /*!
-        Destroy the container
+        Destroy the container.
 
         After calling this function the container will be non-functional
         until it is re-initialized.
@@ -329,28 +327,28 @@ public:
     }
 
     /*!
-        Requests a change in capacity
+        Requests a change in capacity.
 
-        Requests that the collpased-vector capacity be at least enough
-        to contain nSubArrays sub-arrays and nElemnts elements.
+        Requests that the collpased-vector capacity be at least enough to
+        contain nVectors vectors and nItems items.
 
-        \param nSubArrays is the minimum number of sub-arrays that the
-        collapsed-vector should be able to contain
-        \param nElemnts is the minimum number of elements that the
-        collapsed-vector should be able to contain
+        \param nVectors is the minimum number of vectors that the container
+        should be able to contain
+        \param nItems is the minimum number of items that the container should
+        be able to contain
     */
-    void reserve(int nSubArrays, int nElemnts = 0)
+    void reserve(int nVectors, int nItems = 0)
     {
-        m_index.reserve(nSubArrays + 1);
-        if (nElemnts > 0) {
-            m_v.reserve(nElemnts);
+        m_index.reserve(nVectors + 1);
+        if (nItems > 0) {
+            m_v.reserve(nItems);
         }
     }
 
     /*!
-        Swaps the contents
+        Swaps the contents.
 
-        \param other is another collapsed-vector container of the same type
+        \param other is another container of the same type
     */
     void swap(FlatVector2D &other)
     {
@@ -359,7 +357,7 @@ public:
     }
 
     /*!
-        Sets the specified value as the value for all the elements in the
+        Sets the specified value as the value for all the items in the
         container.
 
         \param value is the value to fill the container with
@@ -370,9 +368,9 @@ public:
     }
 
     /*!
-        Tests whether two collapsed-vectors are equal
+        Tests whether two containers are equal.
 
-        \result true if the collapsed-vectors are equal, false otherwise.
+        \result true if the containers are equal, false otherwise.
     */
     bool operator==(const FlatVector2D& rhs) const
     {
@@ -380,7 +378,7 @@ public:
     }
 
     /*!
-        Tests whether collapsed-vector is empty
+        Tests whether the container is empty.
 
         \result true if the container size is 0, false otherwise.
     */
@@ -390,10 +388,10 @@ public:
     }
 
     /*!
-        Clears content
+        Clears content.
 
-        Removes all elements from the collapsed-vector (which are
-        destroyed), leaving the container with a size of 0.
+        Removes all items from the container (which are destroyed), leaving
+        the container with a size of 0.
     */
     void clear()
     {
@@ -407,17 +405,17 @@ public:
 
         Requests the container to reduce its capacity to fit its size.
     */
-    void shrink_to_fit()
+    void shrinkToFit()
     {
         m_v.shrink_to_fit();
         m_index.shrink_to_fit();
     }
 
     /*!
-        Returns a direct pointer to the memory vector used internally
-        by the container to store its elements.
+        Returns a direct pointer to the memory vector used internally by the
+        container to store its items.
 
-        \result A pointer to the first element in the vector used
+        \result A pointer to the first item in the vector used
                 internally by the container.
 
     */
@@ -428,7 +426,7 @@ public:
 
     /*!
         Returns a constant reference to the vector used internally by the
-        container to store its elements.
+        container to store its items.
 
         \result A constant reference to the vector used internally by the
         container.
@@ -440,28 +438,28 @@ public:
     }
 
     /*!
-        Adds an empty sub-array at the end
+        Adds an empty vector at the end.
 
-        Adds an empty element at the end of the vector, after its current
-        last element.
+        Adds an empty vector at the end of the container, after its current
+        last vector.
     */
-    void push_back()
+    void pushBack()
     {
-        push_back(0, NULL);
+        pushBack(0);
     }
 
     /*!
-        Adds a sub-array with the specified size at the end
+        Adds a vector with the specified size at the end.
 
-        Adds a sub-array with the specified size at the end of the vector,
-        after its current last element. The content of value is copied
-        (or moved) to the new sub-array.
+        Adds a vector with the specified size at the end of the vector,
+        after its current last item. The content of value is copied
+        (or moved) to the new vector.
 
-        \param subArraySize is the size of the sub-array
+        \param subArraySize is the size of the vector
         \param value is the value to be copied (or moved) to the new
-        element
+        item
     */
-    void push_back(const int &subArraySize, const T &value)
+    void pushBack(const int &subArraySize, const T &value = T())
     {
         std::size_t previousLastIndex = m_index.back();
         m_index.emplace_back();
@@ -472,14 +470,14 @@ public:
     }
 
     /*!
-        Adds the specified sub-array at the end
+        Adds the specified vector at the end.
 
-        Adds the specified sub-array at the end of the vector, after its
-        current last element.
+        Adds the specified vector at the end of the vector, after its current
+        last item.
 
-        \param subArray is the sub-array that will be added
+        \param subArray is the vector that will be added
     */
-    void push_back(const std::vector<T> &subArray)
+    void pushBack(const std::vector<T> &subArray)
     {
         int subArraySize = subArray.size();
 
@@ -497,13 +495,13 @@ public:
     }
 
     /*!
-        Adds an element to the last sub-array
+        Adds an item to the last vector.
 
-        Adds an element at the end of to the last sub-array.
+        Adds an item at the end of to the last vector.
 
         \param value is the value that will be added
     */
-    void push_back_in_sub_array(const T& value)
+    void pushBackItem(const T& value)
     {
         m_index.back()++;
 
@@ -513,14 +511,14 @@ public:
     }
 
     /*!
-        Adds an element to the specified sub-array
+        Adds an item to the specified vector.
 
-        Adds an element at the end of to the specified last sub-array.
+        Adds an item at the end of to the specified last vector.
 
-        \param i is the index of the sub-array
+        \param i is the index of the vector
         \param value is the value that will be added
     */
-    void push_back_in_sub_array(const int &i, const T& value)
+    void pushBackItem(const int &i, const T& value)
     {
         assert(indexValid(i));
 
@@ -533,12 +531,12 @@ public:
     }
 
     /*!
-        Deletes last sub-array
+        Deletes last vector.
 
-        Removes the last sub-array in the collapsed-vector, effectively
-        reducing the container size by one.
+        Removes the last vector in the container, effectively reducing the
+        container size by one.
     */
-    void pop_back()
+    void popBack()
     {
         if (size() == 0) {
             return;
@@ -549,14 +547,13 @@ public:
     }
 
     /*!
-        Deletes last element from last sub-array
+        Deletes last item from last vector.
 
-        Removes the last element from the last sub-array in the
-        collapsed-vector.
+        Removes the last item from the last vector in the container.
     */
-    void pop_back_in_sub_array()
+    void popBackItem()
     {
-        if (sub_array_size(size() - 1) == 0) {
+        if (getItemCount(size() - 1) == 0) {
             return;
         }
 
@@ -565,18 +562,17 @@ public:
     }
 
     /*!
-        Deletes last element from specified sub-array
+        Deletes last item from specified vector.
 
-        Removes the last element from the specified sub-array in the
-        collapsed-vector.
+        Removes the last item from the specified vector in the container.
 
-        \param i is the index of the sub-array
+        \param i is the index of the vector
     */
-    void pop_back_in_sub_array(const int &i)
+    void popBackItem(const int &i)
     {
         assert(indexValid(i));
 
-        if (sub_array_size(i) == 0) {
+        if (getItemCount(i) == 0) {
             return;
         }
 
@@ -589,12 +585,12 @@ public:
     }
 
     /*!
-        Deletes specified sub-array
+        Deletes specified vector.
 
-        Removes from the collapsed-vector the specified sub-array,
-        effectively reducing the container size by one.
+        Removes from the container the specified vector, effectively reducing
+        the container size by one.
 
-        \param i is the index of the sub-array
+        \param i is the index of the vector
     */
     void erase(const int &i)
     {
@@ -605,12 +601,12 @@ public:
     }
 
     /*!
-        Deletes the specified element from a sub-array
+        Deletes the specified item from a vector.
 
-        \param i is the index of the sub-array
-        \param j is the index of the element that will be removed
+        \param i is the index of the vector
+        \param j is the index of the item that will be removed
     */
-    void erase(const int &i, const int &j)
+    void eraseItem(const int &i, const int &j)
     {
         assert(indexValid(i, j));
 
@@ -623,49 +619,49 @@ public:
     }
 
     /*!
-        Sets the value of the specified element in a sub-array
+        Sets the value of the specified item in a vector.
 
-        \param i is the index of the sub-array
-        \param j is the index of the element that will be removed
+        \param i is the index of the vector
+        \param j is the index of the item that will be removed
         \param value is the value that will be set
     */
-    void set(const int &i, const int &j, const T &value)
+    void setItem(const int &i, const int &j, const T &value)
     {
         assert(indexValid(i, j));
         (*this)[i][j] = value;
     }
 
     /*!
-        Gets a reference of the specified element in a sub-array
+        Gets a reference of the specified item in a vector.
 
-        \param i is the index of the sub-array
-        \param j is the index of the element that will be removed
-        \return A reference to the requested value.
+        \param i is the index of the vector
+        \param j is the index of the item that will be removed
+        \result A reference to the requested value.
     */
-    T & get(const int &i, const int &j)
+    T & getItem(const int &i, const int &j)
     {
         assert(indexValid(i, j));
         return (*this)[i][j];
     }
 
     /*!
-        Gets a constant reference of the specified element in a sub-array
+        Gets a constant reference of the specified item in a vector.
 
-        \param i is the index of the sub-array
-        \param j is the index of the element that will be removed
-        \return A constant reference to the requested value.
+        \param i is the index of the vector
+        \param j is the index of the item that will be removed
+        \result A constant reference to the requested value.
     */
-    const T & get(const int &i, const int &j) const
+    const T & getItem(const int &i, const int &j) const
     {
         assert(indexValid(i, j));
         return (*this)[i][j];
     }
 
     /*!
-        Gets a pointer to the first element of the specified sub-array
+        Gets a pointer to the first item of the specified vector.
 
-        \param i is the index of the sub-array
-        \return A pointer to the first element of the sub-array.
+        \param i is the index of the vector
+        \result A pointer to the first item of the specified vector.
     */
     const T * get(const int &i) const
     {
@@ -675,9 +671,9 @@ public:
     }
 
     /*!
-        Gets a pointer to the first element of the last sub-array
+        Gets a pointer to the first item of the last vector.
 
-        \return A pointer to the first element of the sub-array.
+        \result A pointer to the first item of the vector.
     */
     T * back()
     {
@@ -685,9 +681,9 @@ public:
     }
 
     /*!
-        Gets a pointer to the first element of the first sub-array
+        Gets a pointer to the first item of the first vector.
 
-        \return A pointer to the first element of the sub-array.
+        \result A pointer to the first item of the vector.
     */
     T * first()
     {
@@ -695,9 +691,9 @@ public:
     }
 
     /*!
-        Returns the number of sub-arrays in the collapsed-vector
+        Returns the number of vectors in the container
 
-        \return The number of sub-arrays in the collapsed-vector.
+        \result The number of vectors in the container.
     */
     int size() const
     {
@@ -705,32 +701,11 @@ public:
     }
 
     /*!
-        Returns the total size of all the sub-arrays
-
-        \return The total size of all the sub-arrays.
-    */
-    int sub_arrays_total_size() const
-    {
-        return m_index[size()];
-    }
-
-    /*!
-        Returns the size of the specified sub-array
-
-        \param i is the index of the sub-array
-        \return The size of the sub-array.
-    */
-    int sub_array_size(int i) const
-    {
-        return m_index[i + 1] - m_index[i];
-    }
-
-    /*!
         Returns the size of the storage space currently allocated for
-        storing sub-arrays, expressed in terms of elements.
+        storing vectors, expressed in terms of items.
 
-        \return The size of the storage space currently allocated for
-        storing sub-arrays, expressed in terms of elements.
+        \result The size of the storage space currently allocated for
+        storing vectors, expressed in terms of items.
     */
     int capacity() const
     {
@@ -738,13 +713,34 @@ public:
     }
 
     /*!
-        Returns the size of the storage space currently allocated for
-        storing sub-arrays elements, expressed in terms of elements.
+        Returns the total size of all the vectors.
 
-        \return The size of the storage space currently allocated for
-        storing sub-arrays elements, expressed in terms of elements.
+        \result The total size of all the vectors.
     */
-    int sub_array_capacity() const
+    int getItemCount() const
+    {
+        return m_index[size()];
+    }
+
+    /*!
+        Returns the size of the specified vector.
+
+        \param i is the index of the vector
+        \result The size of the vector.
+    */
+    int getItemCount(int i) const
+    {
+        return m_index[i + 1] - m_index[i];
+    }
+
+    /*!
+        Returns the size of the storage space currently allocated for
+        storing vectors items, expressed in terms of items.
+
+        \result The size of the storage space currently allocated for
+        storing vectors items, expressed in terms of items.
+    */
+    int getItemCapacity() const
     {
         return m_v.capacity();
     }
@@ -754,7 +750,7 @@ public:
 
         \result The buffer size (in bytes) required to store the container.
     */
-    size_t get_binary_size()
+    size_t getBinarySize()
     {
         return ((2 + m_index.size())*sizeof(size_t) + m_v.size() * sizeof(T));
     }
@@ -764,12 +760,10 @@ private:
     std::vector<std::size_t> m_index;
 
     /*!
-        Returns a constant pointer to the first element of the specified
-        sub-array.
+        Returns a constant pointer to the first item of the specified vector.
 
-        \param i is the index of the sub-array
-        \return A constant pointer to the first element of the specified
-        sub-array
+        \param i is the index of the vector
+        \result A constant pointer to the first item of the specified vector.
     */
     const T* operator[](const int &i) const
     {
@@ -780,12 +774,10 @@ private:
     }
 
     /*!
-        Returns a pointer to the first element of the specified
-        sub-array.
+        Returns a pointer to the first item of the specified vector.
 
-        \param i is the index of the sub-array
-        \return A pointer to the first element of the specified
-        sub-array
+        \param i is the index of the vector
+        \result A pointer to the first item of the specified vector.
     */
     T* operator[](const int &i)
     {
@@ -796,10 +788,10 @@ private:
     }
 
     /*!
-        Checks if the specified index is valid
+        Checks if the specified index is valid.
 
-        \param i is the index of the sub-array
-        \return true if the index is vaid, false otherwise.
+        \param i is the index of the vector
+        \result true if the index is vaid, false otherwise.
     */
     bool indexValid(const int &i) const
     {
@@ -809,9 +801,9 @@ private:
     /*!
         Checks if the specified indexes are valid
 
-        \param i is the index of the sub-array
-        \param j is the index of the element in the sub-array
-        \return true if the indexes are vaid, false otherwise.
+        \param i is the index of the vector
+        \param j is the index of the item in the vector
+        \result true if the indexes are vaid, false otherwise.
     */
     bool indexValid(const int &i, const int &j) const
     {

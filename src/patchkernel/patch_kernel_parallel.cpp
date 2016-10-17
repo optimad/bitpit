@@ -1320,7 +1320,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                     faceAdjacencies.push_back(recvCell.getAdjacency(face, k));
                 }
 
-                recvAdjacencies.push_back(faceAdjacencies);
+                recvAdjacencies.pushBack(faceAdjacencies);
             }
         }
 
@@ -1363,9 +1363,9 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         int nCellFaces = cell.getFaceCount();
         FlatVector2D<long> &cellLinkAdjacencies = entry.second;
         for (int face = 0; face < nCellFaces; ++face) {
-            int nFaceLinkAdjacencies = cellLinkAdjacencies.sub_array_size(face);
+            int nFaceLinkAdjacencies = cellLinkAdjacencies.getItemCount(face);
             for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
-                long senderAdjacencyId = cellLinkAdjacencies.get(face, k);
+                long senderAdjacencyId = cellLinkAdjacencies.getItem(face, k);
                 long localAdjacencyId  = recvCellMap[senderAdjacencyId];
                 if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
                     continue;

@@ -204,7 +204,7 @@ int Cell::getPID() const
 void Cell::deleteInterfaces()
 {
 	m_interfaces.clear();
-	m_interfaces.shrink_to_fit();
+	m_interfaces.shrinkToFit();
 }
 
 /*!
@@ -246,19 +246,19 @@ void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 		int delta = m_interfaces.size() - getFaceCount();
 		if (delta > 0) {
 			for (int i = 0; i < delta; ++i) {
-				m_interfaces.pop_back();
+				m_interfaces.popBack();
 			}
 		} else if (delta < 0) {
 			for (int i = 0; i < delta; ++i) {
-				m_interfaces.push_back(1, NULL_ID);
+				m_interfaces.pushBack(1, NULL_ID);
 			}
 		}
 	}
 
 	// Check that there is at least one interfaces for each face
 	for (int i = 0; i < m_interfaces.size(); ++i) {
-		if (m_interfaces.sub_array_size(i) == 0) {
-			m_interfaces.push_back_in_sub_array(i, NULL_ID);
+		if (m_interfaces.getItemCount(i) == 0) {
+			m_interfaces.pushBackItem(i, NULL_ID);
 		}
 	}
 }
@@ -272,7 +272,7 @@ void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 */
 void Cell::setInterface(const int &face, const int &index, const long &interface)
 {
-	m_interfaces.set(face, index, interface);
+	m_interfaces.setItem(face, index, interface);
 }
 
 /*!
@@ -291,15 +291,15 @@ void Cell::pushInterface(const int &face, const long &interface)
 	// If there is only one interface stored for the specified face and
 	// that interface is negative, we need to overwrite the value and
 	// not add another interface.
-	if (m_interfaces.sub_array_size(face) == 1) {
-		if (m_interfaces.get(face, 0) < 0) {
-			m_interfaces.set(face, 0, interface);
+	if (m_interfaces.getItemCount(face) == 1) {
+		if (m_interfaces.getItem(face, 0) < 0) {
+			m_interfaces.setItem(face, 0, interface);
 			return;
 		}
 	}
 
 	// There are multiple adjacency, we need to add the interface.
-	m_interfaces.push_back_in_sub_array(face, interface);
+	m_interfaces.pushBackItem(face, interface);
 }
 
 /*!
@@ -313,13 +313,13 @@ void Cell::deleteInterface(const int &face, const int &i)
 {
 	// If there is only one interface stored for the specified face, we
 	// need to overwrite the value and not delete the interface.
-	if (m_interfaces.sub_array_size(face) == 1) {
-		m_interfaces.set(face, 0, NULL_ID);
+	if (m_interfaces.getItemCount(face) == 1) {
+		m_interfaces.setItem(face, 0, NULL_ID);
 		return;
 	}
 
 	// There are multiple interfaces, we need to delete the interface.
-	m_interfaces.erase(face, i);
+	m_interfaces.eraseItem(face, i);
 }
 
 /*!
@@ -332,7 +332,7 @@ void Cell::deleteInterface(const int &face, const int &i)
 */
 int Cell::getInterfaceCount() const
 {
-	return m_interfaces.sub_arrays_total_size();
+	return m_interfaces.getItemCount();
 }
 
 /*!
@@ -346,7 +346,7 @@ int Cell::getInterfaceCount() const
 */
 int Cell::getInterfaceCount(const int &face) const
 {
-	return m_interfaces.sub_array_size(face);
+	return m_interfaces.getItemCount(face);
 }
 
 /*!
@@ -358,7 +358,7 @@ int Cell::getInterfaceCount(const int &face) const
 */
 long Cell::getInterface(const int &face, const int &index) const
 {
-	return m_interfaces.get(face, index);
+	return m_interfaces.getItem(face, index);
 }
 
 /*!
@@ -434,7 +434,7 @@ int Cell::findInterface(const int &interface)
 void Cell::deleteAdjacencies()
 {
 	m_adjacencies.clear();
-	m_adjacencies.shrink_to_fit();
+	m_adjacencies.shrinkToFit();
 }
 
 /*!
@@ -476,19 +476,19 @@ void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 		int delta = m_adjacencies.size() - getFaceCount();
 		if (delta > 0) {
 			for (int i = 0; i < delta; ++i) {
-				m_adjacencies.pop_back();
+				m_adjacencies.popBack();
 			}
 		} else if (delta < 0) {
 			for (int i = 0; i < delta; ++i) {
-				m_adjacencies.push_back(1, NULL_ID);
+				m_adjacencies.pushBack(1, NULL_ID);
 			}
 		}
 	}
 
 	// Check that there is at least one adjacency for each face
 	for (int i = 0; i < m_adjacencies.size(); ++i) {
-		if (m_adjacencies.sub_array_size(i) == 0) {
-			m_adjacencies.push_back_in_sub_array(i, NULL_ID);
+		if (m_adjacencies.getItemCount(i) == 0) {
+			m_adjacencies.pushBackItem(i, NULL_ID);
 		}
 	}
 }
@@ -502,7 +502,7 @@ void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 */
 void Cell::setAdjacency(const int &face, const int &index, const long &adjacency)
 {
-	m_adjacencies.set(face, index, adjacency);
+	m_adjacencies.setItem(face, index, adjacency);
 }
 
 /*!
@@ -521,15 +521,15 @@ void Cell::pushAdjacency(const int &face, const long &adjacency)
 	// If there is only one adjacency stored for the specified face and
 	// that adjacency is negative, we need to overwrite the value and
 	// not add another adjacency.
-	if (m_adjacencies.sub_array_size(face) == 1) {
-		if (m_adjacencies.get(face, 0) < 0) {
-			m_adjacencies.set(face, 0, adjacency);
+	if (m_adjacencies.getItemCount(face) == 1) {
+		if (m_adjacencies.getItem(face, 0) < 0) {
+			m_adjacencies.setItem(face, 0, adjacency);
 			return;
 		}
 	}
 
 	// There are multiple adjacency, we need to add the adjacency.
-	m_adjacencies.push_back_in_sub_array(face, adjacency);
+	m_adjacencies.pushBackItem(face, adjacency);
 }
 
 /*!
@@ -543,13 +543,13 @@ void Cell::deleteAdjacency(const int &face, const int &i)
 {
 	// If there is only one adjacency stored for the specified face, we
 	// need to overwrite that value and not delete the adjacency.
-	if (m_adjacencies.sub_array_size(face) == 1) {
-		m_adjacencies.set(face, 0, NULL_ID);
+	if (m_adjacencies.getItemCount(face) == 1) {
+		m_adjacencies.setItem(face, 0, NULL_ID);
 		return;
 	}
 
 	// There are multiple adjacencies, we need to delete the adjacency.
-	m_adjacencies.erase(face, i);
+	m_adjacencies.eraseItem(face, i);
 }
 
 /*!
@@ -562,7 +562,7 @@ void Cell::deleteAdjacency(const int &face, const int &i)
 */
 int Cell::getAdjacencyCount() const
 {
-	return m_adjacencies.sub_arrays_total_size();
+	return m_adjacencies.getItemCount();
 }
 
 /*!
@@ -576,7 +576,7 @@ int Cell::getAdjacencyCount() const
 */
 int Cell::getAdjacencyCount(const int &face) const
 {
-	return m_adjacencies.sub_array_size(face);
+	return m_adjacencies.getItemCount(face);
 }
 
 /*!
@@ -588,7 +588,7 @@ int Cell::getAdjacencyCount(const int &face) const
 */
 long Cell::getAdjacency(const int &face, const int &index) const
 {
-	return m_adjacencies.get(face, index);
+	return m_adjacencies.getItem(face, index);
 }
 
 /*!
@@ -799,7 +799,7 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 */
 unsigned int Cell::getBinarySize()
 {
-    return (Element::getBinarySize() + m_interfaces.get_binary_size() + m_adjacencies.get_binary_size());
+    return (Element::getBinarySize() + m_interfaces.getBinarySize() + m_adjacencies.getBinarySize());
 }
 
 // Explicit instantiation of the Cell containers
