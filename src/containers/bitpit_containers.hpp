@@ -37,7 +37,7 @@
 #include "bitpit_version.hpp"
 
 #include "binary_stream.hpp"
-#include "flatVector2D.tpp"
+#include "flatVector2D.hpp"
 #include "piercedVector.hpp"
 
 #endif
