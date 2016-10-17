@@ -22,9 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-//
-// Written by Andrea Iob <andrea_iob@hotmail.com>
-//
 #ifndef __BITPIT_FLAT_VECTOR_2D_TPP__
 #define __BITPIT_FLAT_VECTOR_2D_TPP__
 
