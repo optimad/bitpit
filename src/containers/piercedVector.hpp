@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PIERCED_VECTOR_TPP__
-#define __BITPIT_PIERCED_VECTOR_TPP__
+#ifndef __BITPIT_PIERCED_VECTOR_HPP__
+#define __BITPIT_PIERCED_VECTOR_HPP__
 
 #include <algorithm>
 #include <cassert>
