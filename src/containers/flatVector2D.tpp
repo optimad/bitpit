@@ -514,7 +514,7 @@ void FlatVector2D<T>::pushBackItem(const T& value)
 template <class T>
 void FlatVector2D<T>::pushBackItem(const int &i, const T& value)
 {
-    assert(indexValid(i));
+    assert(isIndexValid(i));
 
     m_v.insert(m_v.begin() + m_index[i+1], value);
 
@@ -567,7 +567,7 @@ void FlatVector2D<T>::popBackItem()
 template <class T>
 void FlatVector2D<T>::popBackItem(const int &i)
 {
-    assert(indexValid(i));
+    assert(isIndexValid(i));
 
     if (getItemCount(i) == 0) {
         return;
@@ -592,7 +592,7 @@ void FlatVector2D<T>::popBackItem(const int &i)
 template <class T>
 void FlatVector2D<T>::erase(const int &i)
 {
-    assert(indexValid(i));
+    assert(isIndexValid(i));
 
     m_v.erase(m_v.begin() + m_index[i], m_v.begin() + m_index[i+1] - 1);
     m_index.erase(m_index.begin() + i + 1);
@@ -607,7 +607,7 @@ void FlatVector2D<T>::erase(const int &i)
 template <class T>
 void FlatVector2D<T>::eraseItem(const int &i, const int &j)
 {
-    assert(indexValid(i, j));
+    assert(isIndexValid(i, j));
 
     m_v.erase(m_v.begin() + m_index[i] + j);
 
@@ -627,7 +627,7 @@ void FlatVector2D<T>::eraseItem(const int &i, const int &j)
 template <class T>
 void FlatVector2D<T>::setItem(const int &i, const int &j, const T &value)
 {
-    assert(indexValid(i, j));
+    assert(isIndexValid(i, j));
     (*this)[i][j] = value;
 }
 
@@ -641,7 +641,7 @@ void FlatVector2D<T>::setItem(const int &i, const int &j, const T &value)
 template <class T>
 T & FlatVector2D<T>::getItem(const int &i, const int &j)
 {
-    assert(indexValid(i, j));
+    assert(isIndexValid(i, j));
     return (*this)[i][j];
 }
 
@@ -655,7 +655,7 @@ T & FlatVector2D<T>::getItem(const int &i, const int &j)
 template <class T>
 const T & FlatVector2D<T>::getItem(const int &i, const int &j) const
 {
-    assert(indexValid(i, j));
+    assert(isIndexValid(i, j));
     return (*this)[i][j];
 }
 
@@ -669,7 +669,7 @@ template <class T>
 const T * FlatVector2D<T>::get(const int &i) const
 {
     assert(!empty());
-    assert(indexValid(i));
+    assert(isIndexValid(i));
     return (*this)[i];
 }
 
@@ -775,7 +775,7 @@ size_t FlatVector2D<T>::getBinarySize()
 template <class T>
 const T* FlatVector2D<T>::operator[](const int &i) const
 {
-    assert(indexValid(i));
+    assert(isIndexValid(i));
 
     int index = m_index[i];
     return &m_v[index];
@@ -790,7 +790,7 @@ const T* FlatVector2D<T>::operator[](const int &i) const
 template <class T>
 T* FlatVector2D<T>::operator[](const int &i)
 {
-    assert(indexValid(i));
+    assert(isIndexValid(i));
 
     int index = m_index[i];
     return &m_v[index];
@@ -803,7 +803,7 @@ T* FlatVector2D<T>::operator[](const int &i)
     \result true if the index is vaid, false otherwise.
 */
 template <class T>
-bool FlatVector2D<T>::indexValid(const int &i) const
+bool FlatVector2D<T>::isIndexValid(const int &i) const
 {
     return (i >= 0 && i < size());
 }
@@ -816,9 +816,9 @@ bool FlatVector2D<T>::indexValid(const int &i) const
     \result true if the indexes are vaid, false otherwise.
 */
 template <class T>
-bool FlatVector2D<T>::indexValid(const int &i, const int &j) const
+bool FlatVector2D<T>::isIndexValid(const int &i, const int &j) const
 {
-    if (!indexValid(i)) {
+    if (!isIndexValid(i)) {
         return false;
     }
 

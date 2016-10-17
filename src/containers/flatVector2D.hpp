@@ -139,8 +139,8 @@ private:
 
     const T* operator[](const int &i) const;
     T* operator[](const int &i);
-    bool indexValid(const int &i) const;
-    bool indexValid(const int &i, const int &j) const;
+    bool isIndexValid(const int &i) const;
+    bool isIndexValid(const int &i, const int &j) const;
 
 };
 
