@@ -413,6 +413,20 @@ T * FlatVector2D<T>::data() noexcept
 }
 
 /*!
+    Returns a direct constant pointer to the memory vector used internally by
+    the container to store its items.
+
+    \result A constant pointer to the first item in the vector used
+            internally by the container.
+
+*/
+template <class T>
+const T * FlatVector2D<T>::data() const noexcept
+{
+    return m_v.data();
+}
+
+/*!
     Returns a constant reference to the vector used internally by the
     container to store its items.
 

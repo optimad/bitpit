@@ -101,6 +101,7 @@ public:
     void shrinkToFit();
 
     T * data() noexcept;
+    const T * data() const noexcept;
     const std::vector<T> & vector() const;
 
     void pushBack();
