@@ -656,7 +656,7 @@ namespace bitpit {
                         }
                         if(lh < 0)
                             lh = - 1;
-                        else if(lh > m_octree.m_octants.size() - 1)
+                        else if(lh > (int64_t) m_octree.m_octants.size() - 1)
                             lh = m_octree.m_octants.size() - 1;
 
                         if(m_rank == m_nproc - 1)
@@ -781,7 +781,7 @@ namespace bitpit {
                                         buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
                                     }
                                     else{
-                                        for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
+                                        for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
                                             buffSize += userData.size(i);
                                         }
                                     }
@@ -797,7 +797,7 @@ namespace bitpit {
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
                                     m_sentIdx.insert(procLimits);
 
-                                    for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
+                                    for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
                                         //pack octants from lh - partition[p] to lh
                                         //const Class_Octant<2> & octant = m_octree.m_octants[i];
                                         const Octant & octant = m_octree.m_octants[i];
@@ -1205,7 +1205,7 @@ namespace bitpit {
                         }
                         if(lh < 0)
                             lh = - 1;
-                        else if(lh > m_octree.m_octants.size() - 1)
+                        else if(lh > (int64_t) m_octree.m_octants.size() - 1)
                             lh = m_octree.m_octants.size() - 1;
 
                         if(m_rank == m_nproc - 1)
@@ -1330,7 +1330,7 @@ namespace bitpit {
                                         buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
                                     }
                                     else{
-                                        for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
+                                        for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
                                             buffSize += userData.size(i);
                                         }
                                     }
@@ -1346,7 +1346,7 @@ namespace bitpit {
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
                                     m_sentIdx.insert(procLimits);
 
-                                    for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
+                                    for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
                                         //pack octants from lh - partition[p] to lh
                                         //const Class_Octant<2> & octant = m_octree.m_octants[i];
                                         const Octant & octant = m_octree.m_octants[i];
