@@ -295,7 +295,8 @@ Config::Section & Config::addSection(const std::string &key)
         throw std::runtime_error("A section named \"" + key + "\" already esists");
     }
 
-    auto sectionItr = m_sections->emplace(key, std::unique_ptr<Section>(new Section(m_multiSections)));
+    std::unique_ptr<Section> section = std::unique_ptr<Section>(new Section(m_multiSections));
+    auto sectionItr = m_sections->insert(std::make_pair(key, std::move(section)));
 
     return *(sectionItr->second);
 }
