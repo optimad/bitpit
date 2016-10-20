@@ -470,6 +470,7 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::updateId(const id_t &currentId, const id_t &updatedId)
 {
 	fillPos(getPosFromId(currentId), updatedId);
+	m_pos.erase(currentId);
 }
 
 /*!
