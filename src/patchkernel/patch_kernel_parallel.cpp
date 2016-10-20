@@ -250,7 +250,7 @@ const std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> 
 	}
 
 	// Patch is now partitioned
-	m_partitioned = true;
+	setPartitioned(true);
 
 	return adaptionData;
 }
@@ -307,7 +307,7 @@ const std::vector<adaption::Info> PatchKernel::balancePartition(bool trackChange
 	updateBoundingBox();
 
 	// Patch is now partitioned
-	m_partitioned = true;
+	setPartitioned(true);
 
 	// Done
 	return adaptionData;
@@ -321,6 +321,16 @@ const std::vector<adaption::Info> PatchKernel::balancePartition(bool trackChange
 bool PatchKernel::isPartitioned() const
 {
 	return m_partitioned;
+}
+
+/*!
+	Sets the partitioned flag.
+
+	\param partitioned is the flag that will be set
+*/
+void PatchKernel::setPartitioned(bool partitioned)
+{
+	m_partitioned = partitioned;
 }
 
 /*!

@@ -433,6 +433,8 @@ protected:
 #if BITPIT_ENABLE_MPI==1
 	virtual const std::vector<adaption::Info> _balancePartition(bool trackChanges);
 
+	void setPartitioned(bool partitioned);
+
 	void setGhostOwner(int id, int rank, bool updateExchangeData = false);
 	void unsetGhostOwner(int id, bool updateExchangeData = false);
 	void clearGhostOwners(bool updateExchangeData = false);
