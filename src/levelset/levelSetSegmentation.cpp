@@ -73,7 +73,7 @@ LevelSetSegmentation::~LevelSetSegmentation() {
  * @param[in] id identifier of object
  * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetObject(id,true) {
+LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetCachedObject(id) {
     setFeatureAngle(angle) ;
 };
 
@@ -619,7 +619,7 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
 /*!
  * Clear the segmentation and the specified kernel.
  */
-void LevelSetSegmentation::clearDerived( ){
+void LevelSetSegmentation::__clear( ){
 
     m_seg.clear() ;
 }
@@ -843,7 +843,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
         LevelSetCartesian       auxLS(cmesh) ;
         LevelSetSegmentation    objLS(*this) ;
 
-        double                  localRSearch = (1 + std::sqrt(3.) / 2.) * auxLS.computeSizeNarrowBand(this) ;
+        double                  localRSearch = (1 + std::sqrt(3.) / 2.) * objLS.computeSizeNarrowBand(&auxLS) ;
 
         objLS.setSizeNarrowBand(localRSearch);
         SegmentToCellMap auxSegmentToCellMap = extractSegmentToCellMap( &auxLS, localRSearch ) ;
@@ -989,7 +989,7 @@ int LevelSetSegmentation::getNarrowBandResizeDirection( LevelSetOctree *visitee,
  * are not in the mesh anymore
  * @param[in] mapper information concerning mesh adaption
  */
-void LevelSetSegmentation::clearAfterMeshAdaptionDerived( const std::vector<adaption::Info> &mapper ){
+void LevelSetSegmentation::__clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
 
     log::cout() << "  Clearing segment info... " << std::endl;
 
@@ -1023,7 +1023,7 @@ void LevelSetSegmentation::clearAfterMeshAdaptionDerived( const std::vector<adap
  * Clears data structure outside narrow band
  * @param[in] search size of narrow band
  */
-void LevelSetSegmentation::filterOutsideNarrowBandDerived( double search ){
+void LevelSetSegmentation::__filterOutsideNarrowBand( double search ){
 
     long id ;
 
@@ -1047,7 +1047,7 @@ void LevelSetSegmentation::filterOutsideNarrowBandDerived( double search ){
  * Writes LevelSetSegmentation to stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetSegmentation::_dump( std::ostream &stream ){
+void LevelSetSegmentation::__dump( std::ostream &stream ){
 
     IO::binary::write( stream, m_seg.size() ) ;
 
@@ -1064,7 +1064,7 @@ void LevelSetSegmentation::_dump( std::ostream &stream ){
  * Reads LevelSetSegmentation from stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetSegmentation::_restore( std::istream &stream ){
+void LevelSetSegmentation::__restore( std::istream &stream ){
 
     size_t segSize;
     IO::binary::read( stream, segSize ) ;
@@ -1096,7 +1096,7 @@ void LevelSetSegmentation::_restore( std::istream &stream ){
  * @param[in] sendList list of cells to be sent
  * @param[in,out] dataBuffer buffer for second communication containing data
  */
-void LevelSetSegmentation::writeCommunicationBufferDerived( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
+void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
 
     long nItems(0), counter(0) ;
 
@@ -1139,7 +1139,7 @@ void LevelSetSegmentation::writeCommunicationBufferDerived( const std::vector<lo
  * @param[in] recvList list of cells to be received
  * @param[in,out] dataBuffer buffer containing the data
  */
-void LevelSetSegmentation::readCommunicationBufferDerived( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
+void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
 
     long    nItems, index, id ;
 

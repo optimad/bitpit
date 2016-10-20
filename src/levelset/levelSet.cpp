@@ -620,10 +620,14 @@ void LevelSet::compute(){
     for( int objectId : m_order){
         auto &visitor = *(m_object.at(objectId)) ;
         if( !m_userRSearch){
-            RSearch = m_kernel->computeSizeNarrowBand(&visitor)  ;
+            RSearch = visitor.computeSizeNarrowBand(m_kernel.get())  ;
             visitor.setSizeNarrowBand(RSearch) ;
         }
+    }
 
+
+    for( int objectId : m_order){
+        auto &visitor = *(m_object.at(objectId)) ;
         visitor.computeLSInNarrowBand( m_kernel.get(), RSearch, m_signedDF) ;
         if( m_propagateS ) visitor.propagateSign( m_kernel.get() ) ;
     }
@@ -661,23 +665,27 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
     // Evaluate new narrow band size
     double newRSearch ;
+    if (updateNarrowBand && !m_userRSearch) {
+
+        for( int objectId : m_order){
+            auto &visitor = *(m_object.at(objectId)) ;
+            newRSearch = visitor.updateSizeNarrowBand(m_kernel.get(), mapper)  ;
+            visitor.setSizeNarrowBand(newRSearch) ;
+        }
+    }
+
+    // Update ls in narrow band
     for( int objectId : m_order){
         auto &visitor = *(m_object.at(objectId)) ;
 
         if (updateNarrowBand) {
-
-            if(m_userRSearch){
-                newRSearch = visitor.getSizeNarrowBand() ;
-            } else {
-                newRSearch = m_kernel->updateSizeNarrowBand( mapper, &visitor )  ;
-            };
-
+            newRSearch = visitor.getSizeNarrowBand() ;
             visitor.updateLSInNarrowBand( m_kernel.get(), mapper, newRSearch, m_signedDF ) ;
 
         } else {
             visitor.clearAfterMeshAdaption(mapper) ;
-        }
 
+        }
 
 #if BITPIT_ENABLE_MPI
         // Parallel communications
@@ -687,16 +695,24 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
         visitor.exchangeGhosts( m_kernel.get() ) ;
 #endif
+        if (updateNarrowBand && m_propagateS) {
+            visitor.propagateSign( m_kernel.get() ) ;
+        }
+    }
 
     // Finish narrow band update
-        if (updateNarrowBand) {
-            newRSearch = m_kernel->computeSizeNarrowBandFromLS( &visitor, m_signedDF );
-            visitor.filterOutsideNarrowBand(newRSearch) ;
-            visitor.setSizeNarrowBand(newRSearch) ;
+    if (updateNarrowBand) {
 
-            if( m_propagateS ) visitor.propagateSign( m_kernel.get() ) ;
+        for( int objectId : m_order){
+            auto &visitor = *(m_object.at(objectId)) ;
+            newRSearch = m_kernel->computeSizeNarrowBandFromLS( &visitor, m_signedDF );
+            visitor.setSizeNarrowBand(newRSearch) ;
         }
 
+        for( int objectId : m_order){
+            auto &visitor = *(m_object.at(objectId)) ;
+            visitor.filterOutsideNarrowBand(newRSearch) ;
+        }
     }
 
     return;
