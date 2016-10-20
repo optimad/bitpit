@@ -24,11 +24,15 @@
 
 # include <cassert>
 
-# include "levelSet.hpp"
-
 # include "bitpit_common.hpp"
 # include "bitpit_operators.hpp"
-# include "bitpit_CG.hpp"
+
+# include "logger.hpp"
+# include "binary_utils.hpp"
+# include "adaption.hpp"
+
+# include "levelSetObject.hpp"
+# include "levelSetBoolean.hpp"
 
 namespace bitpit {
 

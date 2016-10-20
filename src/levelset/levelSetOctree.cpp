@@ -22,10 +22,9 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# include "levelSet.hpp"
-
-# include "bitpit_SA.hpp"
-# include "bitpit_CG.hpp"
+# include "bitpit_voloctree.hpp"
+# include "levelSetKernel.hpp"
+# include "levelSetOctree.hpp"
 
 namespace bitpit {
 

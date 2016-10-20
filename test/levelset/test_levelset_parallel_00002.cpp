@@ -49,6 +49,9 @@
 
 // bitpit
 # include "bitpit_CG.hpp"
+# include "bitpit_IO.hpp"
+# include "bitpit_surfunstructured.hpp"
+# include "bitpit_voloctree.hpp"
 # include "bitpit_levelset.hpp"
 
 // ========================================================================== //

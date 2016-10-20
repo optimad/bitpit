@@ -46,6 +46,9 @@
 # include <chrono>
 
 // bitpit
+# include "bitpit_IO.hpp"
+# include "bitpit_surfunstructured.hpp"
+# include "bitpit_voloctree.hpp"
 # include "bitpit_levelset.hpp"
 
 // ========================================================================== //

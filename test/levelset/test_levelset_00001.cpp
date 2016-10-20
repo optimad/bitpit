@@ -45,12 +45,17 @@
 # include <ctime>
 # include <chrono>
 
+# include <array>
+
 #if BITPIT_ENABLE_MPI==1
 # include <mpi.h>
 #endif
 
 // bitpit
+# include "bitpit_IO.hpp"
 # include "bitpit_levelset.hpp"
+# include "bitpit_surfunstructured.hpp"
+# include "bitpit_volcartesian.hpp"
 
 // ========================================================================== //
 // NAMESPACES                                                                 //

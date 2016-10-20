@@ -47,6 +47,9 @@
 #endif
 
 // bitpit
+# include "bitpit_IO.hpp"
+# include "bitpit_surfunstructured.hpp"
+# include "bitpit_volcartesian.hpp"
 # include "bitpit_levelset.hpp"
 
 // ========================================================================== //
