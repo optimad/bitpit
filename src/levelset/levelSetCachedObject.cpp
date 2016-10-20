@@ -46,7 +46,7 @@ namespace bitpit {
 /*!
 	@ingroup levelset
 	@interface LevelSetCachedObject
-	@brief Interface class for all objects with respect to whom the levelset function may be computed.
+	@brief Interface class for all objects which need to store the discrete values of levelset function.
 */
 
 /*!
@@ -63,7 +63,9 @@ LevelSetCachedObject::LevelSetCachedObject(int id) : LevelSetObject(id,true){
 };
 
 /*!
- * Returns reference to LevelSetInfo
+ * Get LevelSetInfo of cell
+ * @param[in] i cell idex
+ * @return LevelSetInfo of cell
 */
 LevelSetInfo LevelSetCachedObject::getLevelSetInfo( const long &i)const{
     if( ! m_ls.exists(i) ){
@@ -75,7 +77,7 @@ LevelSetInfo LevelSetCachedObject::getLevelSetInfo( const long &i)const{
 } 
 
 /*!
- * Get the Sdf value of the i-th local element of the octree mesh.
+ * Get the levelset value of cell
  * @param[in] i cell index
  * @return levelset value in cell
  */
@@ -90,7 +92,7 @@ double LevelSetCachedObject::getLS( const long &i)const {
 };
 
 /*!
- * Get the Sdf gradient vector of the i-th local element of the octree mesh.
+ * Get the levelset gradient of cell
  * @param[in] i cell index
  * @return levelset gradient in cell 
  */

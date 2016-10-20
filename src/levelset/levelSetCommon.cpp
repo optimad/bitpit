@@ -36,13 +36,6 @@ namespace bitpit {
  * LevelSetInfo conatins the following information
  * - distance to closest object
  * - gradient of level set function
- * - the id of the closest object
- * - the patch of closest object which contains the projection point
- * - the id of the surface element closest to the projection point 
- *
- * If a grid point lies within the narrow band of an object, all of these information are available, provided that the clsest object may provide them.
- * On the contrary, if the grid point lies were the levelset has been propagated not all of these information may be available; 
- * in particular the object, patch and segment may be set to the default values.
  *
 */
 
