@@ -24,13 +24,22 @@
 
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
+# include "bitpit_communications.hpp"
 # endif
-
 # include <stack>
-# include "levelSet.hpp"
 
 # include "bitpit_operators.hpp"
 # include "bitpit_CG.hpp"
+# include "bitpit_patchkernel.hpp"
+# include "bitpit_volcartesian.hpp"
+# include "bitpit_voloctree.hpp"
+
+# include "levelSetKernel.hpp"
+# include "levelSetCartesian.hpp"
+# include "levelSetOctree.hpp"
+# include "levelSetObject.hpp"
+# include "levelSetCachedObject.hpp"
+# include "levelSet.hpp"
 
 namespace bitpit {
 

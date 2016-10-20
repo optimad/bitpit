@@ -22,26 +22,29 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_LEVELSET_HPP__
-#define __BITPIT_MODULE_LEVELSET_HPP__
+# ifndef __BITPIT_LEVELSET_CARTESIAN_HPP__
+# define __BITPIT_LEVELSET_CARTESIAN_HPP__
 
-/*!
- * @defgroup levelset LevelSet
- */
 
-#include "bitpit_version.hpp"
+namespace bitpit{
 
-#include "levelSetCommon.hpp"
+class VolCartesian;
+class LevelSetKernel;
 
-#include "levelSetKernel.hpp"
-#include "levelSetCartesian.hpp"
-#include "levelSetOctree.hpp"
+class LevelSetCartesian : public LevelSetKernel{
 
-#include "levelSetObject.hpp"
-#include "levelSetCachedObject.hpp"
-#include "levelSetSegmentation.hpp"
-#include "levelSetBoolean.hpp"
+    private:
+    VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
 
-#include "levelSet.hpp"
+    public:
+    virtual ~LevelSetCartesian();
+    LevelSetCartesian( VolCartesian & );
+
+    VolCartesian *                              getCartesianMesh() const;
+    double                                      computeRSearchFromCell( long id ) ;
+
+};
+
+}
 
 #endif

@@ -22,10 +22,11 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# include "levelSet.hpp"
+# include "bitpit_volcartesian.hpp"
 
-# include "bitpit_SA.hpp"
-# include "bitpit_CG.hpp"
+# include "levelSetKernel.hpp"
+# include "levelSetCartesian.hpp"
+
 
 namespace bitpit {
 

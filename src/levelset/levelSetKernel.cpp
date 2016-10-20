@@ -24,17 +24,15 @@
 
 
 # if BITPIT_ENABLE_MPI
-# include <mpi.h>
-# include "communications.hpp"
+# include "bitpit_communications.hpp"
 # endif
 
-# include <unordered_set>
-
-# include "bitpit_SA.hpp"
-# include "bitpit_CG.hpp"
 # include "bitpit_operators.hpp"
+# include "bitpit_CG.hpp"
+# include "bitpit_patchkernel.hpp"
 
-# include "levelSet.hpp"
+# include "levelSetObject.hpp"
+# include "levelSetKernel.hpp"
 
 namespace bitpit {
 
@@ -49,7 +47,6 @@ namespace bitpit {
  * Default constructor.
  */
 LevelSetKernel::LevelSetKernel() {
-
     m_mesh = NULL ;
 
 #if BITPIT_ENABLE_MPI

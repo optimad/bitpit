@@ -22,15 +22,20 @@
  *
 \*---------------------------------------------------------------------------*/
 
+# include <vector>
+# include <stack>
+
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
+# include "bitpit_communications.hpp"
 # endif
-
-# include <stack>
-# include "levelSet.hpp"
 
 # include "bitpit_operators.hpp"
 # include "bitpit_CG.hpp"
+# include "bitpit_patchkernel.hpp"
+
+# include "levelSetKernel.hpp"
+# include "levelSetObject.hpp"
 
 namespace bitpit {
 

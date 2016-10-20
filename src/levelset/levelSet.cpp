@@ -22,51 +22,24 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# if BITPIT_ENABLE_MPI
-# include <mpi.h>
-# endif
-
-# include <unordered_set>
-
-# include "bitpit_SA.hpp"
 # include "bitpit_operators.hpp"
+# include "bitpit_patchkernel.hpp"
+# include "bitpit_surfunstructured.hpp"
+# include "bitpit_volcartesian.hpp"
+# include "bitpit_voloctree.hpp"
+
+# include "levelSetCommon.hpp"
+# include "levelSetKernel.hpp"
+# include "levelSetCartesian.hpp"
+# include "levelSetOctree.hpp"
+# include "levelSetObject.hpp"
+# include "levelSetCachedObject.hpp"
+# include "levelSetBoolean.hpp"
+# include "levelSetSegmentation.hpp"
 
 # include "levelSet.hpp"
 
 namespace bitpit {
-
-/*!
- * @ingroup levelset
- * @class  LevelSetInfo
- *
- * @brief  A public container which includes all information provided by LevelSet
- *
- * LevelSetInfo conatins the following information
- * - distance to closest object
- * - gradient of level set function
- * - the id of the closest object
- * - the patch of closest object which contains the projection point
- * - the id of the surface element closest to the projection point 
- *
- * If a grid point lies within the narrow band of an object, all of these information are available, provided that the clsest object may provide them.
- * On the contrary, if the grid point lies were the levelset has been propagated not all of these information may be available; 
- * in particular the object, patch and segment may be set to the default values.
- *
-*/
-
-/*!
- * Default constructor
- */
-LevelSetInfo::LevelSetInfo() :value(levelSetDefaults::VALUE), gradient(levelSetDefaults::GRADIENT) {
-}
-
-/*!
- * Complete constructor
- * @param[in] v value of levelset function
- * @param[in] g gradient of levelset function
- */
-LevelSetInfo::LevelSetInfo(const double &v, const std::array<double,3> &g) :value(v), gradient(g) {
-}
 
 /*!
  * @ingroup levelset
@@ -765,7 +738,6 @@ void LevelSet::restore( std::istream &stream ){
  * @return true if parallel
  */
 bool LevelSet::assureMPI( ){
-
     return(m_kernel->assureMPI() ) ;
 }
 

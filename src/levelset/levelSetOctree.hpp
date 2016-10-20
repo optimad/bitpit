@@ -22,26 +22,30 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_LEVELSET_HPP__
-#define __BITPIT_MODULE_LEVELSET_HPP__
+# ifndef __BITPIT_LEVELSET_OCTREE_HPP__
+# define __BITPIT_LEVELSET_OCTREE_HPP__
 
-/*!
- * @defgroup levelset LevelSet
- */
+namespace bitpit{
 
-#include "bitpit_version.hpp"
+class VolOctree;
+class LevelSetKernel ;
 
-#include "levelSetCommon.hpp"
+class LevelSetOctree : public LevelSetKernel{
 
-#include "levelSetKernel.hpp"
-#include "levelSetCartesian.hpp"
-#include "levelSetOctree.hpp"
+    private:
+    VolOctree*                                  m_octree ;       /**< Pointer to underlying octree mesh*/
 
-#include "levelSetObject.hpp"
-#include "levelSetCachedObject.hpp"
-#include "levelSetSegmentation.hpp"
-#include "levelSetBoolean.hpp"
+    public:
+    virtual ~LevelSetOctree();
+    LevelSetOctree( VolOctree & );
 
-#include "levelSet.hpp"
+    VolOctree *                                 getOctreeMesh() const;
+    double                                      computeRSearchFromCell(long);
+
+    double                                      computeRSearchFromLevel(uint8_t);
+    double                                      computeSizeFromRSearch(double);
+};
+
+}
 
 #endif

@@ -28,6 +28,9 @@
 
 #include <mpi.h>
 
+#include "bitpit_IO.hpp"
+#include "bitpit_surfunstructured.hpp"
+#include "bitpit_voloctree.hpp"
 #include "bitpit_levelset.hpp"
 
 using namespace std;
