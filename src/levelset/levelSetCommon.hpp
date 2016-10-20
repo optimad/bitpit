@@ -31,6 +31,10 @@
 
 namespace bitpit{
 
+/*!
+ * @ingroup levelset
+ * @brief namespace containing default values
+ */
 namespace levelSetDefaults{
     const double                            VALUE = 1.e18 ;             /**< Default value for levelset function */
     const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */

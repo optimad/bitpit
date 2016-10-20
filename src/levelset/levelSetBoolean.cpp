@@ -53,7 +53,9 @@ LevelSetBoolean::~LevelSetBoolean(){
 /*!
  * Constructor
  * @param[in] id identifier of object
- * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
+ * @param[in] op type of boolean operation
+ * @param[in] ptr1 pointer to first object
+ * @param[in] ptr2 pointer to second object
  */
 LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetObject *ptr1, LevelSetObject *ptr2  ) :LevelSetObject(id,false) {
     m_operation = op;
@@ -77,14 +79,16 @@ LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetObject(
 };
 
 /*!
- * Returns reference to LevelSetInfo
+ * Returns LevelSetInfo 
+ * @param[in] i cell index
+ * @return LevelSetInfo
 */
 LevelSetInfo LevelSetBoolean::getLevelSetInfo( const long &i)const{
     return booleanOperation(i) ;
 } 
 
 /*!
- * Get the Sdf value of the i-th local element of the octree mesh.
+ * Get the levelset value
  * @param[in] i cell index
  * @return levelset value in cell
  */
@@ -93,7 +97,7 @@ double LevelSetBoolean::getLS( const long &i)const {
 };
 
 /*!
- * Get the Sdf gradient vector of the i-th local element of the octree mesh.
+ * Get the levelset gradient
  * @param[in] i cell index
  * @return levelset gradient in cell 
  */
@@ -130,9 +134,9 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
 }
 
 /*!
- * Gets the closest support within the narrow band of cell
- * @param[in] id index of cell
- * @return closest segment in narrow band
+ * Gets the closest part index
+ * @param[in] id cell index
+ * @return closest part
  */
 int LevelSetBoolean::getPart( const long &id ) const{
     LevelSetObject *objPtr = getClosestObject(id) ;
@@ -141,7 +145,7 @@ int LevelSetBoolean::getPart( const long &id ) const{
 
 /*!
  * Gets the closest support within the narrow band of cell
- * @param[in] id index of cell
+ * @param[in] id cell index
  * @return closest segment in narrow band
  */
 long LevelSetBoolean::getSupport( const long &id ) const{
@@ -151,7 +155,7 @@ long LevelSetBoolean::getSupport( const long &id ) const{
 
 /*!
  * Gets the number of support items within the narrow band of cell
- * @param[in] id index of cell
+ * @param[in] id cell index
  * @return number of segments in narrow band 
  */
 int LevelSetBoolean::getSupportCount( const long &id ) const{
@@ -178,7 +182,9 @@ double LevelSetBoolean::computeSizeNarrowBand(LevelSetKernel* visitee){
 };
 
 /*!
- * Computes the size of the narrow band
+ * Updates the size of the narrow band after mesh has been modified
+ * @param[in] visitee LevelSetKernel
+ * @param[in] mapper descriptor of mesh modifications
  * @return size of the narrow band.
  */
 double LevelSetBoolean::updateSizeNarrowBand(LevelSetKernel* visitee, const std::vector<adaption::Info> &mapper){
@@ -229,7 +235,7 @@ LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
 
 /*
  * Determines the closest object
- * @param[in] id id of cell
+ * @param[in] id cell index
  * @return pointer to closest LevelSetObject
  */
 LevelSetObject* LevelSetBoolean::getClosestObject( const long &id) const{
@@ -253,7 +259,7 @@ LevelSetObject* LevelSetBoolean::getClosestObject( const long &id) const{
 
 /*
  * Performs the bolean operation
- * @param[in] id id of cell
+ * @param[in] id cell index
  * @return resulting levelset value and gradient in LevelSetInfo
  */
 LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
