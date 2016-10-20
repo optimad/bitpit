@@ -97,13 +97,11 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( LevelSetObject *visitor, con
     // local narrow band (ie. size of the narrowband evalauted using the
     // cell).
     double newRSearch = 0.;
-
     int factor  ;
-    auto &lsInfo= visitor->getLevelSetInfo() ;
 
-    for (auto itr = lsInfo.begin(); itr != lsInfo.end(); ++itr) {
+    for (auto &cell : getMesh()->getCells() ) {
         // Discard cells outside the narrow band
-        long id = itr.getId() ;
+        long id = cell.getId() ;
         if( !visitor->isInNarrowBand(id) ) {
             continue;
         }
@@ -111,7 +109,6 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( LevelSetObject *visitor, con
         // Evaluate local search radius
         std::array<double,3> myCenter = computeCellCentroid(id) ;
 
-        const Cell &cell = m_mesh->getCell(id) ;
         const long* neighbours = cell.getAdjacencies() ;
         int N = cell.getAdjacencyCount() ;
 

@@ -103,18 +103,37 @@ int main( int argc, char *argv[]){
     std::cout << "n. vertex: " << STL1->getVertexCount() << std::endl;
     std::cout << "n. simplex: " << STL1->getCellCount() << std::endl;
 
+    // Third Input geometry
+    std::unique_ptr<bitpit::SurfUnstructured> STL2( new bitpit::SurfUnstructured (0,1,dimensions) );
+
+    std::cout << " - Loading stl geometry" << std::endl;
+
+    STL2->importDGF("./data/rectangle.dgf");
+
+    STL2->deleteCoincidentVertices() ;
+    STL2->buildAdjacencies() ;
+
+    STL2->getVTK().setName("geometry_003_2") ;
+    STL2->write() ;
+
+    std::cout << "n. vertex: " << STL2->getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL2->getCellCount() << std::endl;
+
     // ========================================================================== //
     // CREATE MESH                                                                //
     // ========================================================================== //
     std::cout << " - Setting mesh" << std::endl;
-    std::array<double,3>    meshMin0, meshMax0;
-    std::array<double,3>    meshMin1, meshMax1;
+    std::array<double,3>    mesh0, mesh1;
     std::array<double,3>    meshMin, meshMax, delta ;
     double                  h(0), dh ;
 
-    STL0->getBoundingBox( meshMin0, meshMax0 ) ;
-    STL1->getBoundingBox( meshMin1, meshMax1 ) ;
-    bitpit::CGElem::unionAABB( meshMin0, meshMax0, meshMin1, meshMax1, meshMin, meshMax ) ;
+    STL0->getBoundingBox( meshMin, meshMax ) ;
+
+    STL1->getBoundingBox( mesh0, mesh1 ) ;
+    bitpit::CGElem::unionAABB( meshMin, meshMax, mesh0, mesh1, meshMin, meshMax ) ;
+
+    STL2->getBoundingBox( mesh0, mesh1 ) ;
+    bitpit::CGElem::unionAABB( meshMin, meshMax, mesh0, mesh1, meshMin, meshMax ) ;
 
     delta = meshMax -meshMin ;
     meshMin -=  0.1*delta ;
@@ -133,22 +152,27 @@ int main( int argc, char *argv[]){
 
     // COMPUTE LEVEL SET in NARROW BAND
     std::chrono::time_point<std::chrono::system_clock>    start, end;
-    int                                         elapsed_init, elapsed_refi(0);
+    int elapsed_init, elapsed_refi(0);
 
     bitpit::LevelSet                levelset;
 
     std::vector<bitpit::adaption::Info> mapper ;
-    int                             id0, id1 ;
-    std::vector<double>             LS, LS0, LS1 ;
-    std::vector<double>::iterator   itLS, itLS0, itLS1 ;
+    int                             id0, id1, id2, id3, id4;
+    std::vector<double>             LS0, LS1, LS2, LS3, LS4;
+    std::vector<double>::iterator   it0, it1, it2, it3, it4;
 
     levelset.setMesh(&mesh) ;
     id0 = levelset.addObject(std::move(STL0),M_PI) ;
     id1 = levelset.addObject(std::move(STL1),M_PI) ;
+    id2 = levelset.addObject(std::move(STL2),M_PI) ;
+    id3 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,id0,id1) ;
+    id4 = levelset.addObject(bitpit::LevelSetBooleanOperation::SUBTRACTION,id3,id2) ;
 
-    mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().addData("ls0", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS0) ;
     mesh.getVTK().addData("ls1", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS1) ;
+    mesh.getVTK().addData("ls2", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS2) ;
+    mesh.getVTK().addData("ls3", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS3) ;
+    mesh.getVTK().addData("ls4", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS4) ;
     mesh.getVTK().setName("levelset_003") ;
     mesh.getVTK().setCounter() ;
 
@@ -161,24 +185,30 @@ int main( int argc, char *argv[]){
     elapsed_init = chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
     // Export level set ------------------------------------------------------- //
-    std::cout << " Narrow Band id " << id0 << " " << levelset.getSizeNarrowBand(id0) << endl;
-    std::cout << " Narrow Band id " << id1 << " " << levelset.getSizeNarrowBand(id1) << endl;
     std::cout << " - Exporting data" << endl;
 
-    LS.resize(mesh.getCellCount() ) ;
     LS0.resize(mesh.getCellCount() ) ;
     LS1.resize(mesh.getCellCount() ) ;
-    itLS = LS.begin() ;
-    itLS0 = LS0.begin() ;
-    itLS1 = LS1.begin() ;
+    LS2.resize(mesh.getCellCount() ) ;
+    LS3.resize(mesh.getCellCount() ) ;
+    LS4.resize(mesh.getCellCount() ) ;
+    it0 = LS0.begin() ;
+    it1 = LS1.begin() ;
+    it2 = LS2.begin() ;
+    it3 = LS3.begin() ;
+    it4 = LS4.begin() ;
     for( auto & cell : mesh.getCells() ){
         const long &cellId = cell.getId() ;
-        *itLS = levelset.getLS(cellId) ;
-        *itLS0 = levelset.getLS(cellId, id0) ;
-        *itLS1 = levelset.getLS(cellId, id1) ;
-        ++itLS ;
-        ++itLS0 ;
-        ++itLS1 ;
+        *it0 = levelset.getLS(cellId, id0) ;
+        *it1 = levelset.getLS(cellId, id1) ;
+        *it2 = levelset.getLS(cellId, id2) ;
+        *it3 = levelset.getLS(cellId, id3) ;
+        *it4 = levelset.getLS(cellId, id4) ;
+        ++it0 ;
+        ++it1 ;
+        ++it2 ;
+        ++it3 ;
+        ++it4 ;
     };
 
     mesh.write() ;
@@ -192,8 +222,14 @@ int main( int argc, char *argv[]){
                 mesh.markCellForRefinement(id) ;
             }
 
-            if( i<1) {
+            if( i<3) {
                 if( std::abs(levelset.getLS(id,id1)) < mesh.evalCellSize(id)  ){
+                    mesh.markCellForRefinement(id) ;
+                }
+            }
+
+            if( i<6) {
+                if( std::abs(levelset.getLS(id,id2)) < mesh.evalCellSize(id)  ){
                     mesh.markCellForRefinement(id) ;
                 }
             }
@@ -206,23 +242,28 @@ int main( int argc, char *argv[]){
 
         elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
-        std::cout << "Refinement " << i << " Narrow Band id " << id0 << " " << levelset.getSizeNarrowBand(id0) << endl;
-        std::cout << "Refinement " << i << " Narrow Band id " << id1 << " " << levelset.getSizeNarrowBand(id1) << endl;
-
-        LS.resize(mesh.getCellCount() ) ;
         LS0.resize(mesh.getCellCount() ) ;
         LS1.resize(mesh.getCellCount() ) ;
-        itLS = LS.begin() ;
-        itLS0 = LS0.begin() ;
-        itLS1 = LS1.begin() ;
+        LS2.resize(mesh.getCellCount() ) ;
+        LS3.resize(mesh.getCellCount() ) ;
+        LS4.resize(mesh.getCellCount() ) ;
+        it0 = LS0.begin() ;
+        it1 = LS1.begin() ;
+        it2 = LS2.begin() ;
+        it3 = LS3.begin() ;
+        it4 = LS4.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &cellId = cell.getId() ;
-            *itLS = levelset.getLS(cellId) ;
-            *itLS0 = levelset.getLS(cellId, id0) ;
-            *itLS1 = levelset.getLS(cellId, id1) ;
-            ++itLS ;
-            ++itLS0 ;
-            ++itLS1 ;
+            *it0 = levelset.getLS(cellId, id0) ;
+            *it1 = levelset.getLS(cellId, id1) ;
+            *it2 = levelset.getLS(cellId, id2) ;
+            *it3 = levelset.getLS(cellId, id3) ;
+            *it4 = levelset.getLS(cellId, id4) ;
+            ++it0 ;
+            ++it1 ;
+            ++it2 ;
+            ++it3 ;
+            ++it4 ;
         };
         mesh.write() ;
     }

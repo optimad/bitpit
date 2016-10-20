@@ -107,7 +107,6 @@ class LevelSet{
     void                                        clearObject();
     void                                        clearObject( int );
 
-
     int                                         getClosestObject(const long &) const ;
     LevelSetInfo                                getLevelSetInfo(const long &, int objectId=levelSetDefaults::OBJECT) const ;
     double                                      getLS(const long &, int objectId=levelSetDefaults::OBJECT) const;
@@ -138,7 +137,8 @@ class LevelSet{
 
 class LevelSetKernel{
 
-    public:
+    private:
+    std::unordered_map<long, std::array<double,3>> m_cellCentroids; /**< Cached cell center coordinates*/
 
     protected:
     VolumeKernel*                               m_mesh ;        /**< Pointer to underlying mesh*/
@@ -147,9 +147,6 @@ class LevelSetKernel{
     MPI_Comm                                    m_commMPI ;     /**< MPI communicator */
 # endif
 
-    private:
-    std::unordered_map<long, std::array<double,3>> m_cellCentroids; /**< Cached cell center coordinates*/
-
     public:
     virtual ~LevelSetKernel() ;
     LevelSetKernel() ;
@@ -157,9 +154,7 @@ class LevelSetKernel{
 
     VolumeKernel*                               getMesh() const ;
 
-    virtual double                              computeSizeNarrowBand( LevelSetObject* )=0;
     virtual double                              computeSizeNarrowBandFromLS( LevelSetObject*, const bool & );
-    virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> &, LevelSetObject* )=0;
     virtual double                              computeRSearchFromCell( long id ) = 0;
 
     void                                        clearGeometryCache(  ) ;
@@ -175,8 +170,6 @@ class LevelSetKernel{
     bool                                        assureMPI() ;
 # endif
 
-    protected:
-
 };
 
 class LevelSetCartesian : public LevelSetKernel{
@@ -189,8 +182,6 @@ class LevelSetCartesian : public LevelSetKernel{
     LevelSetCartesian( VolCartesian & );
 
     VolCartesian *                              getCartesianMesh() const;
-    double                                      computeSizeNarrowBand( LevelSetObject* );
-    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, LevelSetObject* );
     double                                      computeRSearchFromCell( long id ) ;
 
 };
@@ -205,8 +196,6 @@ class LevelSetOctree : public LevelSetKernel{
     LevelSetOctree( VolOctree & );
 
     VolOctree *                                 getOctreeMesh() const;
-    double                                      computeSizeNarrowBand( LevelSetObject* );
-    double                                      updateSizeNarrowBand( const std::vector<adaption::Info> &, LevelSetObject* );
     double                                      computeRSearchFromCell( long id ) ;
 
     double                                      computeRSearchFromLevel( uint8_t ) ;
@@ -219,66 +208,113 @@ class LevelSetObject{
     int                                         m_id;           /**< identifier of object */
     bool                                        m_primary;      /**< identifier of object */
 
-    void                                        assignSign( int sign, const std::unordered_set<long> &cells ) ;
 
     protected:
     double                                      m_RSearch;      /**< Size of narrow band */
-    PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
 
-    virtual void                                _dump( std::ostream &) =0 ;
-    virtual void                                _restore( std::istream &) =0 ;
+    virtual void                                _clear();
+    virtual void                                _clearAfterMeshAdaption(const std::vector<adaption::Info>&) ;
+    virtual void                                _filterOutsideNarrowBand(double) ;
+    virtual void                                _dump(std::ostream &);
+    virtual void                                _restore( std::istream &);
+
+# if BITPIT_ENABLE_MPI
+    virtual void                                writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ; 
+    virtual void                                _writeCommunicationBuffer(const std::vector<long>&, SendBuffer&)  ;
+    virtual void                                readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ; 
+    virtual void                                _readCommunicationBuffer(const std::vector<long>&, RecvBuffer&)  ;
+# endif 
 
     public:
     virtual ~LevelSetObject();
     LevelSetObject(int,bool);
 
-    virtual int                                 getId() const ;
+    virtual LevelSetObject*                     clone() const =0;
+    void                                        clear();
+
+    int                                         getId() const ;
     bool                                        isPrimary() const ;
-    virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
-    virtual LevelSetObject*                     clone() const = 0;
 
-    void                                        clear( ) ;
-    virtual void                                clearDerived( )=0 ;
-
-    PiercedVector<LevelSetInfo>&                getLevelSetInfo() ;
-    LevelSetInfo                                getLevelSetInfo(const long &) const ;
-
-    double                                      getLS(const long &) const;
-    std::array<double,3>                        getGradient(const long &) const ;
-    short                                       getSign(const long &) const;
+    virtual LevelSetInfo                        getLevelSetInfo(const long &) const =0;
+    virtual double                              getLS(const long &) const =0; 
+    virtual std::array<double,3>                getGradient(const long &) const =0 ; 
 
     virtual int                                 getPart(const long &) const ;
     virtual long                                getSupport(const long &) const;
     virtual int                                 getSupportCount(const long &) const ;
 
-    double                                      getSizeNarrowBand() const;
+    short                                       getSign(const long &) const;
+    virtual void                                propagateSign(LevelSetKernel*) ; 
+
     bool                                        isInNarrowBand(const long &) const;
+    double                                      getSizeNarrowBand() const;
     virtual void                                setSizeNarrowBand(double) ;
 
-    virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
-    virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
-    virtual void                                clearAfterMeshAdaption( const std::vector<adaption::Info> & ) ;
-    virtual void                                clearAfterMeshAdaptionDerived( const std::vector<adaption::Info> & ) ;
+    virtual double                              computeSizeNarrowBand(LevelSetKernel*)=0;
+    virtual void                                computeLSInNarrowBand(LevelSetKernel*, const double &, const bool &) ;
 
-    void                                        filterOutsideNarrowBand( double ) ;
-    virtual void                                filterOutsideNarrowBandDerived( double ) ;
+    virtual double                              updateSizeNarrowBand(LevelSetKernel*, const std::vector<adaption::Info> &);
+    virtual void                                updateLSInNarrowBand(LevelSetKernel*, const std::vector<adaption::Info> &, const double &, const bool &) ;
+    void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
+    void                                        filterOutsideNarrowBand(double);  ;
 
-    void                                        propagateSign( LevelSetKernel * ) ;
-
-    void                                        dump( std::ostream &) ;
-    void                                        restore( std::istream &) ;
+    void                                        dump(std::ostream &); 
+    void                                        restore(std::istream &); 
 
 # if BITPIT_ENABLE_MPI
     bool                                        assureMPI(LevelSetKernel * ) ;
     void                                        exchangeGhosts(LevelSetKernel * ) ;
     void                                        communicate( LevelSetKernel *, std::unordered_map<int,std::vector<long>> &, std::unordered_map<int,std::vector<long>> &, std::vector<adaption::Info> const *mapper=NULL ) ;
-
-    void                                        writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ;
-    virtual void                                writeCommunicationBufferDerived( const std::vector<long> &, SendBuffer & )  ;
-    void                                        readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ;
-    virtual void                                readCommunicationBufferDerived( const std::vector<long> &, RecvBuffer & )  ;
 # endif 
 
+};
+
+class LevelSetCachedObject : public LevelSetObject{
+
+    private:
+    void                                        assignSign( int sign, const std::unordered_set<long> &cells ) ;
+
+    protected:
+    PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
+    virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
+
+    void                                        _clear( ) ;
+    virtual void                                __clear() ;
+
+    double                                      _computeSizeNarrowBand(LevelSetCartesian*);
+    double                                      _computeSizeNarrowBand(LevelSetOctree*);
+
+    double                                      _updateSizeNarrowBand(LevelSetCartesian*, const std::vector<adaption::Info> &);
+    double                                      _updateSizeNarrowBand(LevelSetOctree*, const std::vector<adaption::Info> &);
+    void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
+    virtual void                                __clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
+    void                                        _filterOutsideNarrowBand(double);
+    virtual void                                __filterOutsideNarrowBand(double);
+
+    void                                        _dump( std::ostream &) ; 
+    virtual void                                __dump(std::ostream &) ; 
+    void                                        _restore( std::istream &) ; 
+    virtual void                                __restore(std::istream &) ; 
+
+# if BITPIT_ENABLE_MPI
+    void                                        _writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ; 
+    virtual void                                __writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ; 
+    void                                        _readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ; 
+    virtual void                                __readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ; 
+# endif 
+
+    public:
+    virtual ~LevelSetCachedObject();
+    LevelSetCachedObject(int);
+
+    LevelSetInfo                                getLevelSetInfo(const long &) const ;
+    double                                      getLS(const long &) const;
+    std::array<double,3>                        getGradient(const long &) const ;
+
+    void                                        propagateSign(LevelSetKernel*);
+
+    double                                      computeSizeNarrowBand(LevelSetKernel*);
+    double                                      updateSizeNarrowBand(LevelSetKernel*, const std::vector<adaption::Info> &);
 };
 
 class LevelSetBoolean: public LevelSetObject{
@@ -299,9 +335,11 @@ class LevelSetBoolean: public LevelSetObject{
     LevelSetBoolean(int, LevelSetBooleanOperation, LevelSetObject*, LevelSetObject*);
     LevelSetBoolean(const LevelSetBoolean &);
 
-    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const;
     LevelSetBoolean*                            clone() const ;
-    void                                        clearDerived( ) ;
+
+    LevelSetInfo                                getLevelSetInfo(const long &) const;
+    double                                      getLS(const long &) const; 
+    std::array<double,3>                        getGradient(const long &) const; 
 
     int                                         getPart(const long &) const ;
     long                                        getSupport(const long &) const;
@@ -309,18 +347,17 @@ class LevelSetBoolean: public LevelSetObject{
 
     void                                        setSizeNarrowBand(double) ;
 
-    double                                      computeSizeNarrowBand( );
+    double                                      computeSizeNarrowBand(LevelSetKernel*);
+    double                                      updateSizeNarrowBand(LevelSetKernel*,const std::vector<adaption::Info> &);
     void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &) ;
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &);
 
     LevelSetBooleanOperation                    getBooleanOperation() const;
     LevelSetObject*                             getClosestObject(const long &) const ;
     LevelSetInfo                                booleanOperation(const long &) const ;
-
-
 };
 
-class LevelSetSegmentation : public LevelSetObject {
+class LevelSetSegmentation : public LevelSetCachedObject {
 
     private:
     struct SegInfo{
@@ -359,43 +396,23 @@ class LevelSetSegmentation : public LevelSetObject {
     std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexGradient;            /**< vertex gradient */
     PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
 
+    protected:
 
-    public:
-    virtual ~LevelSetSegmentation();
-    LevelSetSegmentation(int,double angle=2.*M_PI);
-    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> &&, double angle=2.*M_PI);
-    LevelSetSegmentation(int, SurfUnstructured*, double angle=2.*M_PI);
-    LevelSetSegmentation(const LevelSetSegmentation&);
+    void                                        __clear() ;
+    void                                        __dump( std::ostream &) ;
+    void                                        __restore( std::istream &) ;
 
-    LevelSetSegmentation*                       clone() const ;
-    void                                        clearDerived( ) ;
-
-    void                                        setSegmentation( std::unique_ptr<SurfUnstructured> && ) ;
-    void                                        setSegmentation( SurfUnstructured * ) ;
-    const SurfUnstructured &                    getSegmentation() const ;
-    void                                        setFeatureAngle(double) ;
-
-    virtual int                                 getPart(const long &) const ;
-    long                                        getSupport(const long &i) const;
-    int                                         getSupportCount(const long &) const ;
-    const std::vector<long> &                   getSimplexList(const long &) const ;
-
-    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const ;
-
-    bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &) ;
-
-    void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
-    void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
-
-    void                                        clearAfterMeshAdaptionDerived( const std::vector<adaption::Info> & ) ;
-    void                                        filterOutsideNarrowBandDerived( double) ;
+    void                                        __clearAfterMeshAdaption( const std::vector<adaption::Info> & ) ;
+    void                                        __filterOutsideNarrowBand( double) ;
 
 # if BITPIT_ENABLE_MPI
-    void                                        writeCommunicationBufferDerived( const std::vector<long> &, SendBuffer & ) ;
-    void                                        readCommunicationBufferDerived( const std::vector<long> &, RecvBuffer & ) ;
+    void                                        __writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ;
+    void                                        __readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ;
 # endif
 
-    protected:
+    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const ;
+    bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &) ;
+
     std::vector<std::array<double,3>>           getSimplexVertices( const long & ) const ;
 
     std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *visitee, const double &search, SegmentToCellMap &segmentToCellMap ) ;
@@ -410,8 +427,27 @@ class LevelSetSegmentation : public LevelSetObject {
 
     int                                         getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch ) ;
 
-    void                                        _dump( std::ostream &) ;
-    void                                        _restore( std::istream &) ;
+    public:
+    virtual ~LevelSetSegmentation();
+    LevelSetSegmentation(int,double angle=2.*M_PI);
+    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> &&, double angle=2.*M_PI);
+    LevelSetSegmentation(int, SurfUnstructured*, double angle=2.*M_PI);
+    LevelSetSegmentation(const LevelSetSegmentation&);
+
+    LevelSetSegmentation*                       clone() const ;
+
+    void                                        setSegmentation( std::unique_ptr<SurfUnstructured> && ) ;
+    void                                        setSegmentation( SurfUnstructured * ) ;
+    const SurfUnstructured &                    getSegmentation() const ;
+    void                                        setFeatureAngle(double) ;
+
+    virtual int                                 getPart(const long &) const ;
+    long                                        getSupport(const long &i) const;
+    int                                         getSupportCount(const long &) const ;
+    const std::vector<long> &                   getSimplexList(const long &) const ;
+
+    void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
+    void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
 };
 
 }

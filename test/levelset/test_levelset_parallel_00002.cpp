@@ -146,17 +146,18 @@ int main( int argc, char *argv[]){
     bitpit::LevelSet                levelset;
 
     std::vector<bitpit::adaption::Info> mapper ;
-    int                             id0, id1 ;
-    std::vector<double>             LS, LS0, LS1 ;
-    std::vector<double>::iterator   itLS, itLS0, itLS1 ;
+    int                             id0, id1, id2 ;
+    std::vector<double>             LS0, LS1, LS2 ;
+    std::vector<double>::iterator   it0, it1, it2 ;
 
     levelset.setMesh(&mesh) ;
     id0 = levelset.addObject(std::move(STL0),M_PI) ;
     id1 = levelset.addObject(std::move(STL1),M_PI) ;
+    id2 = levelset.addObject(bitpit::LevelSetBooleanOperation::INTERSECTION,id0,id1) ;
 
-    mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().addData("ls0", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS0) ;
     mesh.getVTK().addData("ls1", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS1) ;
+    mesh.getVTK().addData("ls2", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS2) ;
     mesh.getVTK().setName("levelset_parallel_002") ;
 
     levelset.setPropagateSign(true);
@@ -169,24 +170,21 @@ int main( int argc, char *argv[]){
 
 
     // Export level set ------------------------------------------------------- //
-    std::cout << " Narrow Band id " << id0 << " " << levelset.getSizeNarrowBand(id0) << endl;
-    std::cout << " Narrow Band id " << id1 << " " << levelset.getSizeNarrowBand(id1) << endl;
     std::cout << " - Exporting data" << endl;
-
-    LS.resize(mesh.getCellCount() ) ;
     LS0.resize(mesh.getCellCount() ) ;
     LS1.resize(mesh.getCellCount() ) ;
-    itLS = LS.begin() ;
-    itLS0 = LS0.begin() ;
-    itLS1 = LS1.begin() ;
+    LS2.resize(mesh.getCellCount() ) ;
+    it0 = LS0.begin() ;
+    it1 = LS1.begin() ;
+    it2 = LS2.begin() ;
     for( auto & cell : mesh.getCells() ){
-        const long &cellId = cell.getId() ;
-        *itLS = levelset.getLS(cellId) ;
-        *itLS0 = levelset.getLS(cellId, id0 ) ;
-        *itLS1 = levelset.getLS(cellId, id1 ) ;
-        ++itLS ;
-        ++itLS0 ;
-        ++itLS1 ;
+        const long &cellId = cell.getId();
+        *it0 = levelset.getLS(cellId,id0);
+        *it1 = levelset.getLS(cellId,id1);
+        *it2 = levelset.getLS(cellId,id2);
+        ++it0;
+        ++it1;
+        ++it2;
     };
 
     if(rank==0){
@@ -208,10 +206,9 @@ int main( int argc, char *argv[]){
             }
 
             if( i<4){
-            if( std::abs(levelset.getLS(id,id1)) < mesh.evalCellSize(id) ){
-                mesh.markCellForRefinement(id) ;
-            }
-
+                if( std::abs(levelset.getLS(id,id1)) < mesh.evalCellSize(id) ){
+                    mesh.markCellForRefinement(id) ;
+                }
             }
         }
 
@@ -225,20 +222,20 @@ int main( int argc, char *argv[]){
         std::cout << "Refinement " << i << " Narrow Band id " << id0 << " " << levelset.getSizeNarrowBand(id0) << endl;
         std::cout << "Refinement " << i << " Narrow Band id " << id1 << " " << levelset.getSizeNarrowBand(id1) << endl;
 
-        LS.resize(mesh.getCellCount() ) ;
-        LS0.resize(mesh.getCellCount() ) ;
-        LS1.resize(mesh.getCellCount() ) ;
-        itLS = LS.begin() ;
-        itLS0 = LS0.begin() ;
-        itLS1 = LS1.begin() ;
+        LS0.resize(mesh.getCellCount());
+        LS1.resize(mesh.getCellCount());
+        LS2.resize(mesh.getCellCount());
+        it0 = LS0.begin() ;
+        it1 = LS1.begin() ;
+        it2 = LS2.begin() ;
         for( auto & cell : mesh.getCells() ){
-            const long &cellId = cell.getId() ;
-            *itLS = levelset.getLS(cellId) ;
-            *itLS0 = levelset.getLS(cellId,id0) ;
-            *itLS1 = levelset.getLS(cellId,id1) ;
-            ++itLS ;
-            ++itLS0 ;
-            ++itLS1 ;
+            const long &cellId = cell.getId();
+            *it0 = levelset.getLS(cellId,id0);
+            *it1 = levelset.getLS(cellId,id1);
+            *it2 = levelset.getLS(cellId,id2);
+            ++it0 ;
+            ++it1 ;
+            ++it2 ;
         };
         mesh.write() ;
     }

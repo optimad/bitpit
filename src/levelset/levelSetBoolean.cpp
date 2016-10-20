@@ -73,6 +73,31 @@ LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetObject(
 };
 
 /*!
+ * Returns reference to LevelSetInfo
+*/
+LevelSetInfo LevelSetBoolean::getLevelSetInfo( const long &i)const{
+    return booleanOperation(i) ;
+} 
+
+/*!
+ * Get the Sdf value of the i-th local element of the octree mesh.
+ * @param[in] i cell index
+ * @return levelset value in cell
+ */
+double LevelSetBoolean::getLS( const long &i)const {
+    return booleanOperation(i).value ;
+};
+
+/*!
+ * Get the Sdf gradient vector of the i-th local element of the octree mesh.
+ * @param[in] i cell index
+ * @return levelset gradient in cell 
+ */
+std::array<double,3> LevelSetBoolean::getGradient(const long &i) const {
+    return booleanOperation(i).gradient ;
+};
+
+/*!
  * Writes LevelSetBoolean to stream in binary format
  * @param[in] stream output stream
  */
@@ -93,42 +118,11 @@ void LevelSetBoolean::_restore( std::istream &stream ){
 };
 
 /*!
- * Computes axis aligned bounding box of object
- * @param[out] minP minimum point
- * @param[out] maxP maximum point
- */
-void LevelSetBoolean::getBoundingBox( std::array<double,3> &minPoint, std::array<double,3> &maxPoint ) const {
-    std::array<double,3> min1, max1 ;
-    std::array<double,3> min2, max2 ;
-
-    m_objPtr1->getBoundingBox(min1,max1) ;
-    m_objPtr2->getBoundingBox(min2,max2) ;
-
-    if( m_operation == LevelSetBooleanOperation::UNION ){
-        bitpit::CGElem::unionAABB( min1, max1, min2, max2, minPoint, maxPoint );
-
-    } else if( m_operation == LevelSetBooleanOperation::INTERSECTION ){
-        bitpit::CGElem::intersectionAABB( min1, max1, min2, max2, minPoint, maxPoint );
-
-    } else if( m_operation == LevelSetBooleanOperation::SUBTRACTION ){
-        bitpit::CGElem::subtractionAABB( min1, max1, min2, max2, minPoint, maxPoint );
-    }
-
-
-};
-
-/*!
  * Clones the object
  * @return pointer to cloned object
  */
 LevelSetBoolean* LevelSetBoolean::clone() const {
     return new LevelSetBoolean( *this ); 
-}
-
-/*!
- * Clear the segmentation and the specified kernel.
- */
-void LevelSetBoolean::clearDerived( ){
 }
 
 /*!
@@ -152,6 +146,15 @@ long LevelSetBoolean::getSupport( const long &id ) const{
 };
 
 /*!
+ * Gets the number of support items within the narrow band of cell
+ * @param[in] id index of cell
+ * @return number of segments in narrow band 
+ */
+int LevelSetBoolean::getSupportCount( const long &id ) const{
+    return m_objPtr1->getSupportCount(id)+m_objPtr2->getSupportCount(id);
+};
+
+/*!
  * Manually set the size of the narrow band.
  * @param[in] r size of the narrow band.
  */
@@ -162,19 +165,21 @@ void LevelSetBoolean::setSizeNarrowBand(double r){
 };
 
 /*!
- * Gets the number of support items within the narrow band of cell
- * @param[in] id index of cell
- * @return number of segments in narrow band 
+ * Computes the size of the narrow band
+ * @return size of the narrow band.
  */
-int LevelSetBoolean::getSupportCount( const long &id ) const{
-    return m_objPtr1->getSupportCount(id)+m_objPtr2->getSupportCount(id);
+double LevelSetBoolean::computeSizeNarrowBand(LevelSetKernel* visitee){
+    BITPIT_UNUSED(visitee);
+    return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
 };
 
 /*!
  * Computes the size of the narrow band
  * @return size of the narrow band.
  */
-double LevelSetBoolean::computeSizeNarrowBand(){
+double LevelSetBoolean::updateSizeNarrowBand(LevelSetKernel* visitee, const std::vector<adaption::Info> &mapper){
+    BITPIT_UNUSED(visitee);
+    BITPIT_UNUSED(mapper);
     return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
 };
 
@@ -186,21 +191,11 @@ double LevelSetBoolean::computeSizeNarrowBand(){
  */
 void LevelSetBoolean::computeLSInNarrowBand( LevelSetKernel *visitee, const double &RSearch, const bool &signd ){
 
+    BITPIT_UNUSED(visitee) ;
     BITPIT_UNUSED(RSearch) ;
     BITPIT_UNUSED(signd) ;
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
-    
-    for( const auto &cell : visitee->getMesh()->getCells() ){
-        long id = cell.getId() ;
-        LevelSetInfo info = booleanOperation(id) ;
-
-        if( std::abs(info.value) <= getSizeNarrowBand() ){
-            m_ls.emplace( id,info);
-        }
-    }
-
-    return;
 };
 
 /*!
@@ -213,37 +208,26 @@ void LevelSetBoolean::computeLSInNarrowBand( LevelSetKernel *visitee, const doub
 void LevelSetBoolean::updateLSInNarrowBand( LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
 
     BITPIT_UNUSED(visitee);
+    BITPIT_UNUSED(mapper);
     BITPIT_UNUSED(RSearch);
     BITPIT_UNUSED(signd);
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
-
-    clearAfterMeshAdaption(mapper);
-
-    for ( const auto &info : mapper ){
-        // Consider only changes on cells
-        if( info.entity != adaption::Entity::ENTITY_CELL ){
-            continue;
-        }
-
-        // Associate the childs to the list of parent's segments
-        for ( const long & id : info.current ){
-            LevelSetInfo info = booleanOperation(id) ;
-
-            if( std::abs(info.value) <= RSearch ){
-                m_ls.emplace( id,info);
-            }
-        }
-    }
-
-    
-    return;
 };
 
+/*
+ * Returns the boolean operation
+ * @return boolean operation
+ */
 LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
     return m_operation;
 }
 
+/*
+ * Determines the closest object
+ * @param[in] id id of cell
+ * @return pointer to closest LevelSetObject
+ */
 LevelSetObject* LevelSetBoolean::getClosestObject( const long &id) const{
 
     double value1 = m_objPtr1->getLS(id) ;
@@ -263,6 +247,11 @@ LevelSetObject* LevelSetBoolean::getClosestObject( const long &id) const{
     return nullptr;
 }
 
+/*
+ * Performs the bolean operation
+ * @param[in] id id of cell
+ * @return resulting levelset value and gradient in LevelSetInfo
+ */
 LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
 
     LevelSetInfo info1 = m_objPtr1->getLevelSetInfo(id); 
@@ -281,8 +270,6 @@ LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
 
     assert(false);
     return LevelSetInfo() ;
-
-
 }
 
 }
