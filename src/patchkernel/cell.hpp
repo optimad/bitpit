@@ -75,7 +75,9 @@ public:
 	int getInterfaceCount(const int &face) const;
 	long getInterface(const int &face, const int &index = 0) const;
 	const long * getInterfaces() const;
+	long * getInterfaces();
 	const long * getInterfaces(const int &face) const;
+	long * getInterfaces(const int &face);
 	int findInterface(const int &face, const int &interface);
 	int findInterface(const int &interface);
 

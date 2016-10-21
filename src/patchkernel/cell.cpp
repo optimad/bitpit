@@ -394,6 +394,27 @@ const long * Cell::getInterfaces(const int &face) const
 }
 
 /*!
+	Gets a pointer to the interfaces of the cell.
+
+	\result A pointer to the interfaces of the cell.
+*/
+long * Cell::getInterfaces()
+{
+	return m_interfaces.get(0);
+}
+
+/*!
+	Gets a pointer to the interfaces of the given face of the cell.
+
+	\param face the face of the cell
+	\result A pointer to the interfaces of the given face of the cell.
+*/
+long * Cell::getInterfaces(const int &face)
+{
+	return m_interfaces.get(face);
+}
+
+/*!
 	Find the specified interface among the interfaces of the given face.
 
 	The function returns the position in the interface face list of the
