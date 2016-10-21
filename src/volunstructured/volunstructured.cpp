@@ -195,6 +195,38 @@ bool VolUnstructured::_enableCellBalancing(const long &id, bool enabled)
 }
 
 /*!
+ *  Get the version associated to the binary dumps.
+ *
+ *  \result The version associated to the binary dumps.
+ */
+int VolUnstructured::_getDumpVersion() const
+{
+	const int DUMP_VERSION = 1;
+
+	return DUMP_VERSION;
+}
+
+/*!
+ *  Write the patch to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void VolUnstructured::_dump(std::ostream &stream)
+{
+	throw std::runtime_error ("Dump of volunstructured is not implemented yet.");
+}
+
+/*!
+ *  Restore the patch from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void VolUnstructured::_restore(std::istream &stream)
+{
+	throw std::runtime_error ("Restore of volunstructured is not implemented yet.");
+}
+
+/*!
  * Checks if the specified point is inside the patch.
  *
  * \param[in] point is the point to be checked
