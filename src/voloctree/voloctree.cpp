@@ -1191,7 +1191,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 	std::unordered_set<long> deadInterfaces;
 	std::unordered_set<long> danglingCells;
 	for (long cellId : deadCells) {
-		Cell &cell = m_cells[cellId];
+		const Cell &cell = m_cells[cellId];
 
 		// List vertices to remove
 		//
