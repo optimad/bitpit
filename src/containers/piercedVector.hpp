@@ -583,8 +583,8 @@ private:
 	void setFirstUsedPos(const std::size_t &updated_first_pos);
 	void setLastUsedPos(const std::size_t &updated_last_pos);
 
+	void storageShrink(size_t n, bool force = false);
 	std::size_t storageSize() const;
-	void storageResize(size_t n);
 
 };
 

@@ -636,7 +636,7 @@ void PiercedVector<value_t, id_t>::popBack()
 		clear();
 	} else {
 		std::size_t updated_last_pos = findPrevUsedPos(m_last_pos);
-		setLastUsedPos(updated_last_pos);
+		storageShrink(updated_last_pos + 1);
 	}
 }
 
@@ -786,7 +786,7 @@ void PiercedVector<value_t, id_t>::resize(std::size_t n)
 	std::size_t updated_last_pos = getPosFromId(last_id);
 
 	// Update the last position
-	setLastUsedPos(updated_last_pos);
+	storageShrink(updated_last_pos + 1);
 }
 
 /*!
@@ -868,6 +868,9 @@ void PiercedVector<value_t, id_t>::squeeze()
 		// Reset first and last counters
 		setFirstUsedPos(0);
 		setLastUsedPos(size() - 1);
+
+		// Shrink the container
+		storageShrink(size(), true);
 	}
 
 	// Shrink to fit
@@ -1754,8 +1757,12 @@ std::size_t PiercedVector<value_t, id_t>::fillPosInsert(const std::size_t &pos, 
 		throw std::out_of_range ("Unable to insert elements past the last position");
 	}
 
-	// Extend the container
+	// Update the last position
 	setLastUsedPos(storageSize());
+
+	// Extend the container
+	m_v.emplace_back();
+	m_ids.emplace_back();
 
 	// Make room for the new element
 	if (pos < m_last_pos) {
@@ -2025,7 +2032,7 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 			clear();
 		} else {
 			std::size_t updated_last_pos = findPrevUsedPos(m_last_pos);
-			setLastUsedPos(updated_last_pos);
+			storageShrink(updated_last_pos + 1);
 		}
 		return;
 	}
@@ -2437,17 +2444,54 @@ void PiercedVector<value_t, id_t>::setFirstUsedPos(const std::size_t &updated_fi
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::setLastUsedPos(const std::size_t &updated_last_pos)
 {
-	// Hole needs to be updated only if last position has been decrease
-	bool update_holes = (holesCount() > 0) && (updated_last_pos < m_last_pos);
+	m_last_pos = updated_last_pos;
+}
+
+/*!
+	Shrink the container so that it contains n raw position.
+
+	\param n is the new container storage size, expressed in number of raw
+	positions.
+*/
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::storageShrink(std::size_t n, bool force)
+{
+	size_t initialStorageSize = storageSize();
+
+	// We can only shrink the container
+	if (n > initialStorageSize) {
+		throw std::out_of_range ("The container can only be shrunk");
+	}
+
+	// Check if we actually need to shrink the container
+	if (n == initialStorageSize && !force) {
+		return;
+	}
+
+	// When the new last position is before the first one this is equivalent
+	// to a clear
+	if (n < (m_first_pos + 1)) {
+		clear();
+		return;
+	}
+
+	// Delete the ids of the elements that will be removed
+	for (std::size_t pos = n; pos < initialStorageSize; ++pos) {
+		id_t id = m_ids[pos];
+		if (id >= 0) {
+			m_pos.erase(id);
+		}
+	}
+
+	// Resize the internal vectors
+	m_ids.resize(n);
+	m_v.resize(n);
 
 	// Update the last position
-	m_last_pos = updated_last_pos;
-
-	// Resize the vector
-	storageResize(m_last_pos + 1);
+	setLastUsedPos(n - 1);
 
 	// If we don't need to update the holes we can exit now
-	if (!update_holes) {
+	if (holesCount() == 0) {
 		return;
 	}
 
@@ -2483,34 +2527,6 @@ template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::storageSize() const
 {
 	return m_v.size();
-}
-
-/*!
-	Resize the storage.
-
-	\param n is the new container size, expressed in number of
-	elements.
-*/
-template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::storageResize(size_t n)
-{
-	std::size_t initialSize = storageSize();
-	if (n == initialSize + 1) {
-		m_v.emplace_back();
-		m_ids.emplace_back();
-	} else {
-		// Delete the ids of the elements that will be removed
-		for (std::size_t pos = n; pos < initialSize; ++pos) {
-			id_t id = m_ids[pos];
-			if (id >= 0) {
-				m_pos.erase(id);
-			}
-		}
-
-		// Resize the internal vectors
-		m_ids.resize(n);
-		m_v.resize(n);
-	}
 }
 
 }
