@@ -632,12 +632,16 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 {
 	log::cout() << ">> Syncing patch..." << std::endl;
 
-	// If the current mesh is empty we need to import all the octants
-	bool importAll = (getCellCount() == 0);
+	// Detect if we are in import-from-scratch mode
+	//
+	// In import-from-scratch mode we start form an empty patch and we need
+	// to import all the octants of the tree. If we are importing the tree
+	// from scratch there are no cells to delete/renumber.
+	bool importFromScratch = (getCellCount() == 0);
 
 	// Last operation on the tree
 	ParaTree::Operation lastTreeOperation = m_tree->getLastOperation();
-	if (lastTreeOperation == ParaTree::OP_ADAPT_UNMAPPED && !importAll) {
+	if (lastTreeOperation == ParaTree::OP_ADAPT_UNMAPPED && !importFromScratch) {
 		throw std::runtime_error ("Unable to sync the patch after an unmapped adaption");
 	}
 
@@ -672,8 +676,10 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 	std::vector<DeleteInfo> deletedOctants;
 
 	addedOctants.reserve(nOctants + nGhostsOctants);
-	renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
-	deletedOctants.reserve(nPreviousOctants + nPreviousGhosts);
+	if (!importFromScratch) {
+		renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
+		deletedOctants.reserve(nPreviousOctants + nPreviousGhosts);
+	}
 
 	uint32_t treeId = 0;
 	while (treeId < (uint32_t) nOctants) {
@@ -681,13 +687,13 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 		std::vector<uint32_t> mapper_octantMap;
 		std::vector<bool> mapper_ghostFlag;
 		std::vector<int> mapper_octantRank;
-		if (!importAll) {
+		if (!importFromScratch) {
 			m_tree->getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
 		}
 
 		// Adaption type
 		adaption::Type adaptionType = adaption::TYPE_NONE;
-		if (importAll) {
+		if (importFromScratch) {
 			adaptionType = adaption::TYPE_CREATION;
 		} else if (lastTreeOperation == ParaTree::OP_ADAPT_MAPPED) {
 			bool isNewR = m_tree->getIsNewR(treeId);
@@ -746,7 +752,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 
 		// Current tree ids that will be imported
 		long nCurrentTreeIds;
-		if (importAll) {
+		if (importFromScratch) {
 			nCurrentTreeIds = nOctants - treeId;
 		} else if (adaptionType == adaption::TYPE_REFINEMENT) {
 			nCurrentTreeIds = pow(2, getDimension());
@@ -762,22 +768,27 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 		// Cells that will be removed
 		//
 		// Mark the cells associated to previous local octants for deletion.
-		int nPreviousTreeIds = mapper_octantMap.size();
-		for (int k = 0; k < nPreviousTreeIds; ++k) {
+		int nPreviousTreeIds;
+		if (!importFromScratch) {
+			nPreviousTreeIds = mapper_octantMap.size();
+			for (int k = 0; k < nPreviousTreeIds; ++k) {
 #if BITPIT_ENABLE_MPI==1
-			// Only local cells can be deleted
-			if (mapper_octantRank[k] != currentRank) {
-				continue;
-			}
+				// Only local cells can be deleted
+				if (mapper_octantRank[k] != currentRank) {
+					continue;
+				}
 #endif
 
-			// Mark previous octant for deletion
-			uint32_t previousTreeId = mapper_octantMap[k];
-			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
-			long cellId = getOctantId(previousOctantInfo);
-			deletedOctants.emplace_back(cellId, adaptionType);
+				// Mark previous octant for deletion
+				uint32_t previousTreeId = mapper_octantMap[k];
+				OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
+				long cellId = getOctantId(previousOctantInfo);
+				deletedOctants.emplace_back(cellId, adaptionType);
 
-			unmappedOctants[previousTreeId] = false;
+				unmappedOctants[previousTreeId] = false;
+			}
+		} else {
+			nPreviousTreeIds = 0;
 		}
 
 		// Adaption tracking
@@ -854,57 +865,62 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 	log::cout() << " Done" << std::endl;
 
 #if BITPIT_ENABLE_MPI==1
-	// Cells that have been send to other processors need to be removed
-	std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree->getSentIdx();
-	for (const auto &rankEntry : sendOctants) {
-		int rank = rankEntry.first;
-
-		adaption::Type deletionType;
-		if (rank == currentRank) {
-			deletionType = adaption::TYPE_DELETION;
-		} else {
-			deletionType = adaption::TYPE_PARTITION_SEND;
-		}
-
-		for (int k = 0; k < 2; ++k) {
-			uint32_t beginTreeId = rankEntry.second[2 * k];
-			uint32_t endTreeId   = rankEntry.second[2 * k + 1];
-			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
-				OctantInfo octantInfo(treeId, true);
-				long cellId = getOctantId(octantInfo);
-				deletedOctants.emplace_back(cellId, deletionType, rank);
-				unmappedOctants[treeId] = false;
-			}
-		}
-	}
-
-	// Previous ghosts cells need to be removed
-	if (nPreviousGhosts > 0) {
-		clearGhostOwners(true);
-
-		for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
-			OctantInfo ghostOctantInfo(ghostTreeId, false);
-			long ghostId = getOctantId(ghostOctantInfo);
-			deletedOctants.emplace_back(ghostId, adaption::TYPE_DELETION);
-		}
-	}
-
 	// New ghost octants need to be added
 	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
 		addedOctants.emplace_back(treeId, false);
 	}
 #endif
 
-	// Remove unmapped octants
-	//
-	// A coarsening that merges cells from different processors, can leave, on
-	// the processors which own the ghost octants involved in the coarsening,
-	// some octants that are not mapped.
-	for (uint32_t previousTreeId = 0; previousTreeId < nPreviousOctants; ++previousTreeId) {
-		if (unmappedOctants[previousTreeId]) {
-			OctantInfo octantInfo = OctantInfo(previousTreeId, true);
-			long cellId = getOctantId(octantInfo);
-			deletedOctants.emplace_back(cellId, adaption::TYPE_DELETION);
+	// Remove octants that are no more in the tree
+	if (!importFromScratch) {
+#if BITPIT_ENABLE_MPI==1
+		// Cells that have been send to other processors need to be removed
+		std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree->getSentIdx();
+		for (const auto &rankEntry : sendOctants) {
+			int rank = rankEntry.first;
+
+			adaption::Type deletionType;
+			if (rank == currentRank) {
+				deletionType = adaption::TYPE_DELETION;
+			} else {
+				deletionType = adaption::TYPE_PARTITION_SEND;
+			}
+
+			for (int k = 0; k < 2; ++k) {
+				uint32_t beginTreeId = rankEntry.second[2 * k];
+				uint32_t endTreeId   = rankEntry.second[2 * k + 1];
+				for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
+					OctantInfo octantInfo(treeId, true);
+					long cellId = getOctantId(octantInfo);
+					deletedOctants.emplace_back(cellId, deletionType, rank);
+					unmappedOctants[treeId] = false;
+				}
+			}
+		}
+
+		// Previous ghosts cells need to be removed
+		if (nPreviousGhosts > 0) {
+			clearGhostOwners(true);
+
+			for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
+				OctantInfo ghostOctantInfo(ghostTreeId, false);
+				long ghostId = getOctantId(ghostOctantInfo);
+				deletedOctants.emplace_back(ghostId, adaption::TYPE_DELETION);
+			}
+		}
+#endif
+
+		// Remove unmapped octants
+		//
+		// A coarsening that merges cells from different processors, can leave, on
+		// the processors which own the ghost octants involved in the coarsening,
+		// some octants that are not mapped.
+		for (uint32_t previousTreeId = 0; previousTreeId < nPreviousOctants; ++previousTreeId) {
+			if (unmappedOctants[previousTreeId]) {
+				OctantInfo octantInfo = OctantInfo(previousTreeId, true);
+				long cellId = getOctantId(octantInfo);
+				deletedOctants.emplace_back(cellId, adaption::TYPE_DELETION);
+			}
 		}
 	}
 
@@ -923,7 +939,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 
 	// Remove deleted octants
 	StitchInfo stitchInfo;
-	if (!importAll && deletedOctants.size() > 0) {
+	if (deletedOctants.size() > 0) {
 		log::cout() << ">> Removing non-existing cells...";
 
 		// Track changes
