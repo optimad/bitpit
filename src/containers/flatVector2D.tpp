@@ -671,13 +671,27 @@ const T & FlatVector2D<T>::getItem(const int &i, const int &j) const
 }
 
 /*!
+    Gets a constant pointer to the first item of the specified vector.
+
+    \param i is the index of the vector
+    \result A constant pointer to the first item of the specified vector.
+*/
+template <class T>
+const T * FlatVector2D<T>::get(const int &i) const
+{
+    assert(!empty());
+    assert(isIndexValid(i));
+    return (*this)[i];
+}
+
+/*!
     Gets a pointer to the first item of the specified vector.
 
     \param i is the index of the vector
     \result A pointer to the first item of the specified vector.
 */
 template <class T>
-const T * FlatVector2D<T>::get(const int &i) const
+T * FlatVector2D<T>::get(const int &i)
 {
     assert(!empty());
     assert(isIndexValid(i));

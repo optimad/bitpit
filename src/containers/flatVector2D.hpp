@@ -121,6 +121,7 @@ public:
     T & getItem(const int &i, const int &j);
     const T & getItem(const int &i, const int &j) const;
     const T * get(const int &i) const;
+    T * get(const int &i);
 
     T * back();
     T * first();
