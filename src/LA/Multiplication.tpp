@@ -795,7 +795,7 @@ std::array<T, d1> matmul(
 
     std::array<T, d1>      z;
 
-    for( int i=0; i<d1; i++){
+    for( size_t i=0; i<d1; i++){
         z[i]= dotProduct( M[i], x);
     }
 
