@@ -158,6 +158,14 @@ private:
 /*!
 	\ingroup containers
 
+	@brief Base class for the pierced vectors.
+*/
+class BasePiercedVector {
+};
+
+/*!
+	\ingroup containers
+
 	@brief Metafunction for generating a pierced vector.
 
 	@details
@@ -176,8 +184,7 @@ private:
 	@tparam id_t The type of the ids to associate to the elements
 */
 template<typename value_t, typename id_t = long>
-class PiercedVector
-{
+class PiercedVector : public BasePiercedVector {
 	static_assert(std::is_integral<id_t>::value, "Signed integer required for id.");
 	static_assert(std::numeric_limits<id_t>::is_signed, "Signed integer required for id.");
 
