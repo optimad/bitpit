@@ -793,7 +793,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
 				Cell &owner = m_cells[ownerId];
 
 				int ownerFace = 2 * direction;
-				if (counters[direction] == 0) {
+				if (counters[direction] == interfaceCount1D[direction] - 1) {
 					ownerFace++;
 				}
 
