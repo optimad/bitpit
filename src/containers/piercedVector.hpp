@@ -356,6 +356,9 @@ public:
 	iterator getIterator(const id_t &id) noexcept;
 	const_iterator getConstIterator(const id_t &id) const noexcept;
 
+	iterator getIteratorFromRawIndex(const std::size_t &pos) noexcept;
+	const_iterator getConstIteratorFromRawIndex(const std::size_t &pos) const noexcept;
+
 	iterator begin() noexcept;
 	iterator end() noexcept;
 	const_iterator begin() const noexcept;

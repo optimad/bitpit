@@ -1480,6 +1480,30 @@ typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_
 }
 
 /*!
+	Gets an iterator pointing to the specified position.
+
+	\param id is the id of the specified iterator.
+	\result An iterator pointing to the specified position.
+*/
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::getIteratorFromRawIndex(const std::size_t &rawIndex) noexcept
+{
+	return getIteratorFromPos(rawIndex);
+}
+
+/*!
+	Gets a constant iterator pointing to the specified position.
+
+	\param id is the id of the specified iterator.
+	\result A constant iterator pointing to the specified position.
+*/
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::getConstIteratorFromRawIndex(const std::size_t &rawIndex) const noexcept
+{
+	return getConstIteratorFromPos(rawIndex);
+}
+
+/*!
 	Returns an iterator pointing to the first element in the
 	vector.
 
