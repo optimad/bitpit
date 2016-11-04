@@ -331,11 +331,11 @@ void VolCartesian::setDiscretization(const std::array<int, 3> &nCells)
 	}
 	log::cout() << "  - Total interface count: " << m_nInterfaces << "\n";
 
-	// Interface area
-	initializeInterfaceArea();
-
 	// Cell volume
 	initializeCellVolume();
+
+	// Interface area
+	initializeInterfaceArea();
 
 	// Create cells, vertices and interfaces
 	if (getMemoryMode() == MemoryMode::MEMORY_NORMAL) {
@@ -1565,9 +1565,9 @@ void VolCartesian::scale(std::array<double, 3> scaling)
 		m_cellSpacings[n] *= scaling[n];
 	}
 
-	initializeInterfaceArea();
-
 	initializeCellVolume();
+
+	initializeInterfaceArea();
 
 	setBoundingBox(m_minCoords, m_maxCoords);
 
