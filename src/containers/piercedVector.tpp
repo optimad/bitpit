@@ -132,7 +132,7 @@ PiercedIterator<value_t, id_t, value_no_cv_t> PiercedIterator<value_t, id_t, val
 			iterator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-value_t & PiercedIterator<value_t, id_t, value_no_cv_t>::operator*() const
+__PI_REFERENCE__ PiercedIterator<value_t, id_t, value_no_cv_t>::operator*() const
 {
 	return m_container->m_v[m_pos];
 }
@@ -144,7 +144,7 @@ value_t & PiercedIterator<value_t, id_t, value_no_cv_t>::operator*() const
 			iterator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-value_t * PiercedIterator<value_t, id_t, value_no_cv_t>::operator->() const
+__PI_POINTER__ PiercedIterator<value_t, id_t, value_no_cv_t>::operator->() const
 {
 	return &(m_container->m_v[m_pos]);
 }
@@ -1279,7 +1279,7 @@ id_t PiercedVector<value_t, id_t>::getSizeMarker(const size_t &targetSize, const
 
 */
 template<typename value_t, typename id_t>
-value_t * PiercedVector<value_t, id_t>::data() noexcept
+__PV_POINTER__ PiercedVector<value_t, id_t>::data() noexcept
 {
 	return m_v.data();
 }
@@ -1291,7 +1291,7 @@ value_t * PiercedVector<value_t, id_t>::data() noexcept
 	\result A reference to the last element of the vector.
 */
 template<typename value_t, typename id_t>
-value_t & PiercedVector<value_t, id_t>::back()
+__PV_REFERENCE__ PiercedVector<value_t, id_t>::back()
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1307,7 +1307,7 @@ value_t & PiercedVector<value_t, id_t>::back()
 	\result A constant reference to the last element of the vector.
 */
 template<typename value_t, typename id_t>
-const value_t & PiercedVector<value_t, id_t>::back() const
+__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::back() const
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1323,7 +1323,7 @@ const value_t & PiercedVector<value_t, id_t>::back() const
 	\result A reference to the first element of the vector.
 */
 template<typename value_t, typename id_t>
-value_t & PiercedVector<value_t, id_t>::front()
+__PV_REFERENCE__ PiercedVector<value_t, id_t>::front()
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1339,7 +1339,7 @@ value_t & PiercedVector<value_t, id_t>::front()
 	\result A constant reference to the first element of the vector.
 */
 template<typename value_t, typename id_t>
-const value_t & PiercedVector<value_t, id_t>::front() const
+__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::front() const
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1357,7 +1357,7 @@ const value_t & PiercedVector<value_t, id_t>::front() const
 	\result A reference to the element with the specified id.
 */
 template<typename value_t, typename id_t>
-value_t & PiercedVector<value_t, id_t>::at(const id_t &id)
+__PV_REFERENCE__ PiercedVector<value_t, id_t>::at(const id_t &id)
 {
 	return (*this)[id];
 }
@@ -1372,7 +1372,7 @@ value_t & PiercedVector<value_t, id_t>::at(const id_t &id)
 			id.
 */
 template<typename value_t, typename id_t>
-const value_t & PiercedVector<value_t, id_t>::at(const id_t &id) const
+__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::at(const id_t &id) const
 {
 	return (*this)[id];
 }
@@ -1384,7 +1384,7 @@ const value_t & PiercedVector<value_t, id_t>::at(const id_t &id) const
 	\result A reference to the element in the specified position.
 */
 template<typename value_t, typename id_t>
-value_t & PiercedVector<value_t, id_t>::rawAt(const std::size_t &pos)
+__PV_REFERENCE__ PiercedVector<value_t, id_t>::rawAt(const std::size_t &pos)
 {
 	return m_v[pos];
 }
@@ -1398,7 +1398,7 @@ value_t & PiercedVector<value_t, id_t>::rawAt(const std::size_t &pos)
 			position.
 */
 template<typename value_t, typename id_t>
-const value_t & PiercedVector<value_t, id_t>::rawAt(const std::size_t &pos) const
+__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::rawAt(const std::size_t &pos) const
 {
 	return m_v[pos];
 }
@@ -1428,7 +1428,7 @@ std::size_t PiercedVector<value_t, id_t>::rawIndex(id_t id) const
 			id.
 */
 template<typename value_t, typename id_t>
-const value_t & PiercedVector<value_t, id_t>::operator[](const id_t &id) const
+__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::operator[](const id_t &id) const
 {
 	std::size_t pos = getPosFromId(id);
 
@@ -1444,7 +1444,7 @@ const value_t & PiercedVector<value_t, id_t>::operator[](const id_t &id) const
 	\result A reference to the element with the specified id.
 */
 template<typename value_t, typename id_t>
-value_t & PiercedVector<value_t, id_t>::operator[](const id_t &id)
+__PV_REFERENCE__ PiercedVector<value_t, id_t>::operator[](const id_t &id)
 {
 	std::size_t pos = getPosFromId(id);
 

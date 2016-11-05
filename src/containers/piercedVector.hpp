@@ -25,6 +25,14 @@
 #ifndef __BITPIT_PIERCED_VECTOR_HPP__
 #define __BITPIT_PIERCED_VECTOR_HPP__
 
+#define  __PI_REFERENCE__ typename PiercedIterator<value_t, id_t, value_no_cv_t>::reference
+#define  __PI_POINTER__   typename PiercedIterator<value_t, id_t, value_no_cv_t>::pointer
+
+#define __PV_REFERENCE__       typename PiercedVector<value_t, id_t>::reference
+#define __PV_CONST_REFERENCE__ typename PiercedVector<value_t, id_t>::const_reference
+#define __PV_POINTER__         typename PiercedVector<value_t, id_t>::pointer
+#define __PV_CONST_POINTER__   typename PiercedVector<value_t, id_t>::const_pointer
+
 #include <algorithm>
 #include <cassert>
 #include <iterator>
@@ -112,8 +120,8 @@ public:
 	PiercedIterator& operator++();
 	PiercedIterator operator++(int);
 
-	value_t & operator*() const;
-	value_t * operator->() const;
+	__PI_REFERENCE__ operator*() const;
+	__PI_POINTER__ operator->() const;
 
 	template<typename U = value_t, typename U_no_cv = value_no_cv_t,
              typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type = 0>
@@ -230,6 +238,26 @@ public:
 	typedef typename std::vector<value_t>::const_iterator raw_const_iterator;
 
 	/*!
+		Reference
+	*/
+	typedef typename std::vector<value_t>::reference reference;
+
+	/*!
+		Constant reference
+	*/
+	typedef typename std::vector<value_t>::const_reference const_reference;
+
+	/*!
+		Pointer
+	*/
+	typedef typename std::vector<value_t>::pointer pointer;
+
+	/*!
+		Constant pointer
+	*/
+	typedef typename std::vector<value_t>::const_pointer const_pointer;
+
+	/*!
 		Functional for compare the position of two elements
 	*/
 	struct positionLess
@@ -334,23 +362,23 @@ public:
 	id_t getSizeMarker(const size_t &targetSize, const id_t &fallback = -1);
 
 	// Methods that extract the contents of the container
-	value_t * data() noexcept;
+	__PV_POINTER__ data() noexcept;
 
-	value_t & back();
-	const value_t & back() const;
+	__PV_REFERENCE__ back();
+	__PV_CONST_REFERENCE__ back() const;
 
-	value_t & front();
-	const value_t & front() const;
+	__PV_REFERENCE__ front();
+	__PV_CONST_REFERENCE__ front() const;
 
-	value_t & at(const id_t &id);
-	const value_t & at(const id_t &id) const;
+	__PV_REFERENCE__ at(const id_t &id);
+	__PV_CONST_REFERENCE__ at(const id_t &id) const;
 
-	value_t & rawAt(const std::size_t &pos);
-	const value_t & rawAt(const std::size_t &pos) const;
+	__PV_REFERENCE__ rawAt(const std::size_t &pos);
+	__PV_CONST_REFERENCE__ rawAt(const std::size_t &pos) const;
 	std::size_t rawIndex(id_t id) const;
 
-	const value_t & operator[](const id_t &id) const;
-	value_t & operator[](const id_t &id);
+	__PV_CONST_REFERENCE__ operator[](const id_t &id) const;
+	__PV_REFERENCE__ operator[](const id_t &id);
 
 	// Iterators
 	iterator getIterator(const id_t &id) noexcept;
