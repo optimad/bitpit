@@ -2407,6 +2407,7 @@ namespace bitpit {
         // Initialization
 
         nbro = 0;
+        idx=0;
         idx2_gh = idx0 = 0;
         idx1_gh=0;
 
@@ -2582,6 +2583,7 @@ namespace bitpit {
         // Initialization
 
         nbro = 0;
+        idx=0;
         idx2_gh = idx0 = 0;
         idx1_gh=0;
 
