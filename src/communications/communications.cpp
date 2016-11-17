@@ -161,13 +161,20 @@ void DataCommunicator::discoverSends(int discoverTag)
     clearAllSends();
 
     // Send the size of the messages that the processors want to receive
+    //
+    // We need to use buffered sends to be sure that the data to transfer
+    // will not be overwritten during the loop over the receive list.
+    int commBufferSize = m_recvIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
+    std::vector<char> commBuffer(commBufferSize);
+    MPI_Buffer_attach(commBuffer.data(), commBufferSize);
+
     for (auto &entry : m_recvIds) {
         int rank = entry.first;
         RecvBuffer &buffer = getRecvBuffer(rank);
         long dataSize = buffer.capacity();
 
         MPI_Request dataSizeRequest;
-        MPI_Isend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
+        MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
 
         // MPI_Isend initiates an asynchronous (background) data transfer.
         // The actual data transfer might not happen unless one of the
@@ -208,6 +215,9 @@ void DataCommunicator::discoverSends(int discoverTag)
         MPI_Barrier(m_communicator);
     }
 
+    // Deatach the buffer
+    MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
+
     // Set the sends
     for (auto &entry : dataSizes) {
         setSend(entry.first, entry.second);
@@ -237,13 +247,20 @@ void DataCommunicator::discoverRecvs(int discoverTag)
 	clearAllRecvs();
 
 	// Send the size of the messages that will be send
+	//
+	// We need to use buffered sends to be sure that the data to transfer
+	// will not be overwritten during the loop over the send list.
+	int commBufferSize = m_sendIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
+	std::vector<char> commBuffer(commBufferSize);
+	MPI_Buffer_attach(commBuffer.data(), commBufferSize);
+
 	for (auto &entry : m_sendIds) {
 		int rank = entry.first;
 		SendBuffer &buffer = getSendBuffer(rank);
 		long dataSize = buffer.capacity();
 
 		MPI_Request dataSizeRequest;
-		MPI_Isend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
+		MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
 
 		// MPI_Isend initiates an asynchronous (background) data transfer.
 		// The actual data transfer might not happen unless one of the
@@ -283,6 +300,9 @@ void DataCommunicator::discoverRecvs(int discoverTag)
 	if (discoverTag == m_tag) {
 		MPI_Barrier(m_communicator);
 	}
+
+	// Deatach the buffer
+	MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
 
 	// Set the receives
 	for (auto &entry : dataSizes) {
