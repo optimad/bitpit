@@ -1652,6 +1652,18 @@ void VolOctree::_restore(std::istream &stream)
 }
 
 /*!
+	Get the native index of a cell.
+
+	\param id is the id of the cell
+	\result The native index of a cell.
+*/
+long VolOctree::_getCellNativeIndex(long id) const
+{
+	OctantInfo octantInfo = getCellOctant(id);
+	return octantInfo.id;
+}
+
+/*!
 	Gets the origin of the patch.
 
 	The origin is the lower-left-back corner of the box that defines the patch

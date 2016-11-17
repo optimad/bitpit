@@ -124,6 +124,8 @@ protected:
 	void _dump(std::ostream &stream);
 	void _restore(std::istream &stream);
 
+	long _getCellNativeIndex(long id) const;
+
 	std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
 	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
