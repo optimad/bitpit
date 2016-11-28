@@ -1828,6 +1828,17 @@ long PatchKernel::countOrphanCells() const
 }
 
 /*!
+	Get the native index of a cell.
+
+	\param id is the id of the cell
+	\result The native index of a cell.
+*/
+long PatchKernel::_getCellNativeIndex(long id) const
+{
+	return id;
+}
+
+/*!
 	Extracts all the neighbours of the specified cell
 
 	\param id is the id of the cell

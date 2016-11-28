@@ -419,6 +419,8 @@ protected:
 	virtual void _dump(std::ostream &stream) = 0;
 	virtual void _restore(std::istream &stream) = 0;
 
+	virtual long _getCellNativeIndex(long id) const;
+
 	virtual std::vector<long> _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
 	virtual std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
 	virtual std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;

@@ -159,13 +159,20 @@ void PatchGlobalInfo::_extract(PatchKernel const *patch)
 
 	// Evalaute the global id of the internal cells
 	if (m_patch->getInternalCount() > 0) {
-		auto cbeginInternals = m_patch->m_cells.cbegin();
-		auto cendInternals   = ++m_patch->m_cells.getConstIterator(m_patch->m_lastInternalId);
+		std::map<long,long> nativeIds;
+		for (auto itr = m_patch->internalConstBegin(); itr != m_patch->internalConstEnd(); ++itr) {
+			long id = itr.getId();
+			long nativeId = m_patch->_getCellNativeIndex(id);
+
+			nativeIds.insert({nativeId, id});
+		}
 
 		globalId = offset;
-		for (auto cellItr = cbeginInternals; cellItr != cendInternals; ++cellItr) {
-			m_cellLocalToGlobalMap.insert({cellItr.getId(), globalId++});
+		for (auto itr = nativeIds.begin(); itr != nativeIds.end(); ++itr) {
+			m_cellLocalToGlobalMap.insert({itr->second, globalId++});
 		}
+
+		std::map<long,long>().swap(nativeIds);
 	}
 
 	// Communicate the global id of the ghost cells
