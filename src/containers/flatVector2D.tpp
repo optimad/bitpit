@@ -699,6 +699,42 @@ T * FlatVector2D<T>::get(const int &i)
 }
 
 /*!
+    Sets the value of the specified item in a vector.
+
+    \param k is the raw index
+    \param value is the value that will be set
+*/
+template <class T>
+void FlatVector2D<T>::rawSetItem(const int &k, const T &value)
+{
+    m_v[k] = value;
+}
+
+/*!
+    Gets a reference of the specified item in a vector.
+
+    \param k is the raw index
+    \result A reference to the requested value.
+*/
+template <class T>
+T & FlatVector2D<T>::rawGetItem(const int &k)
+{
+    return m_v[k];
+}
+
+/*!
+    Gets a constant reference of the specified item in a vector.
+
+    \param k is the raw index
+    \result A constant reference to the requested value.
+*/
+template <class T>
+const T & FlatVector2D<T>::rawGetItem(const int &k) const
+{
+    return m_v[k];
+}
+
+/*!
     Gets a pointer to the first item of the last vector.
 
     \result A pointer to the first item of the vector.

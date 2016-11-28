@@ -123,6 +123,10 @@ public:
     const T * get(const int &i) const;
     T * get(const int &i);
 
+    void rawSetItem(const int &k, const T &value);
+    T & rawGetItem(const int &k);
+    const T & rawGetItem(const int &k) const;
+
     T * back();
     T * first();
 
