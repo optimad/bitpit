@@ -781,6 +781,20 @@ int FlatVector2D<T>::capacity() const
 }
 
 /*!
+    Merge the arrays together.
+*/
+template <class T>
+void FlatVector2D<T>::merge()
+{
+    if (size() == 0) {
+        return;
+    }
+
+    m_index[1] = m_index.back();
+    m_index.resize(2);
+}
+
+/*!
     Returns the total size of all the vectors.
 
     \result The total size of all the vectors.

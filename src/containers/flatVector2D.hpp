@@ -133,6 +133,8 @@ public:
     int size() const;
     int capacity() const;
 
+    void merge();
+
     int getItemCount() const;
     int getItemCount(int i) const;
     int getItemCapacity() const;
