@@ -155,10 +155,7 @@ void PatchGlobalInfo::_extract(PatchKernel const *patch)
 	}
 
 	// Evaluate the offset for the current partition
-	long offset = 0;
-	for (int i = 0; i < m_patch->getRank() - 1; ++i) {
-		offset += m_nGlobalInternals[i];
-	}
+	long offset = getCellGlobalOffset();
 
 	// Evalaute the global id of the internal cells
 	if (m_patch->getInternalCount() > 0) {
@@ -250,6 +247,32 @@ int PatchGlobalInfo::getCellRankFromGlobal(long id) const
 long PatchGlobalInfo::getCellGlobalId(long id) const
 {
 	return m_cellLocalToGlobalMap.at(id);
+}
+
+/*!
+	Return the offset of the global numbering for the current parition.
+
+	\result The offset of the global numbering for the current parition.
+*/
+long PatchGlobalInfo::getCellGlobalOffset() const
+{
+	return getCellGlobalOffset(m_patch->getRank());
+}
+
+/*!
+	Return the offset of the global numbering for the specified parition.
+
+	\param rank is the rank
+	\result The offset of the global numbering for the current parition.
+*/
+long PatchGlobalInfo::getCellGlobalOffset(int rank) const
+{
+	long offset = 0;
+	for (int i = 0; i < rank; ++i) {
+		offset += m_nGlobalInternals[i];
+	}
+
+	return offset;
 }
 
 /*!

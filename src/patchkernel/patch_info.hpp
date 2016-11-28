@@ -59,6 +59,9 @@ public:
 	int getCellRankFromLocal(long id) const;
 	int getCellRankFromGlobal(long id) const;
 	long getCellGlobalId(long id) const;
+
+	long getCellGlobalOffset() const;
+	long getCellGlobalOffset(int rank) const;
 	const std::unordered_map<long, long> & getCellGlobalMap() const;
 
 protected:
