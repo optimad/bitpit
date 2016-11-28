@@ -41,8 +41,9 @@ namespace bitpit {
 /*!
 	Default constructor
 */
-PatchInfo::PatchInfo()
+PatchInfo::PatchInfo(PatchKernel const *patch)
 {
+	setPatch(patch);
 }
 
 /*!
@@ -53,30 +54,35 @@ PatchInfo::~PatchInfo()
 }
 
 /*!
+	Sets the patch associated to the info.
+*/
+void PatchInfo::setPatch(PatchKernel const *patch)
+{
+	m_patch = patch;
+}
+
+/*!
 	Resets the information.
 */
 void PatchInfo::reset()
 {
-	m_patch = nullptr;
 	_reset();
 }
 
 /*!
 	Extracts the information.
-
-	\param patch is patch from which the informations will be extracted
 */
-void PatchInfo::extract(PatchKernel const *patch)
+void PatchInfo::extract()
 {
-	// Reset information
-	reset();
-	if (patch == nullptr) {
+	if (m_patch == nullptr) {
 		return;
 	}
 
+	// Reset information
+	reset();
+
 	// Extract new information
-	m_patch = patch;
-	_extract(patch);
+	_extract();
 }
 
 /*!
@@ -86,7 +92,7 @@ void PatchInfo::extract(PatchKernel const *patch)
 */
 void PatchInfo::update()
 {
-	extract(m_patch);
+	extract();
 }
 
 #if BITPIT_ENABLE_MPI==1
@@ -103,10 +109,9 @@ void PatchInfo::update()
 	\param patch is patch from which the informations will be extracted
 */
 PatchGlobalInfo::PatchGlobalInfo(PatchKernel const *patch)
+	: PatchInfo(patch)
 {
-	reset();
-
-	extract(patch);
+	extract();
 }
 
 /*!
@@ -120,10 +125,8 @@ void PatchGlobalInfo::_reset()
 
 /*!
 	Internal function to extract global information from the patch.
-
-	\param patch is patch from which the informations will be extracted
 */
-void PatchGlobalInfo::_extract(PatchKernel const *patch)
+void PatchGlobalInfo::_extract()
 {
 	long globalId;
 
