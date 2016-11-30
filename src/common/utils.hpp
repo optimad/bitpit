@@ -39,6 +39,10 @@
 #include <vector>
 #include <map>
 
+// Stringification macro
+#define BITPIT_STR2(X) #X
+#define BITPIT_STR(X) BITPIT_STR2(X)
+
 // Macros to allow using oveload in preprocessing macro
 #define BITPIT_CAT(A, B) A ## B
 
