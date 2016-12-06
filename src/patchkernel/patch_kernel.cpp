@@ -1248,7 +1248,11 @@ PatchKernel::CellIterator PatchKernel::internalEnd()
 */
 PatchKernel::CellIterator PatchKernel::ghostBegin()
 {
-    return m_cells.getIterator(m_firstGhostId);
+	if (m_nGhosts > 0) {
+		return m_cells.getIterator(m_firstGhostId);
+	} else {
+		return m_cells.end();
+	}
 }
 
 /*!
