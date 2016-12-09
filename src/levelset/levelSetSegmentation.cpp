@@ -841,7 +841,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
         LevelSetCartesian       auxLS(cmesh) ;
         LevelSetSegmentation    objLS(*this) ;
 
-        double                  localRSearch = auxLS.computeSizeNarrowBand(this) ;
+        double                  localRSearch = (1 + std::sqrt(3.) / 2.) * auxLS.computeSizeNarrowBand(this) ;
 
         objLS.setSizeNarrowBand(localRSearch);
         SegmentToCellMap auxSegmentToCellMap = extractSegmentToCellMap( &auxLS, localRSearch ) ;
