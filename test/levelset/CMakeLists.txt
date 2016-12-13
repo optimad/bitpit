@@ -36,6 +36,7 @@ list(APPEND TESTS "test_levelset_00003")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_levelset_parallel_00001:3")
 	list(APPEND TESTS "test_levelset_parallel_00002:3")
+	list(APPEND TESTS "test_levelset_parallel_00003:3")
 endif()
 
 set(LEVELSET_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the levelset module" FORCE)
