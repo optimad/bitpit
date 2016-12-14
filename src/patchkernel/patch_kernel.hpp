@@ -178,6 +178,7 @@ public:
 
 	virtual long getVertexCount() const;
 	PiercedVector<Vertex> &getVertices();
+	const PiercedVector<Vertex> &getVertices() const;
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;

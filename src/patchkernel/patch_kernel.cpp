@@ -591,6 +591,16 @@ PiercedVector<Vertex> & PatchKernel::getVertices()
 }
 
 /*!
+	Gets a constant reference to the vertices owned by the patch.
+
+	\return A constant reference to the vertices owned by the patch.
+*/
+const PiercedVector<Vertex> & PatchKernel::getVertices() const
+{
+	return m_vertices;
+}
+
+/*!
 	Gets a reference to the vertex with the specified id.
 
 	\param id is the id of the requested vertex
