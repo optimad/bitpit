@@ -257,6 +257,7 @@ public:
 
 	virtual long getInterfaceCount() const;
 	PiercedVector<Interface> &getInterfaces();
+	const PiercedVector<Interface> & getInterfaces() const;
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
 	virtual ElementInfo::Type getInterfaceType(const long &id) const;

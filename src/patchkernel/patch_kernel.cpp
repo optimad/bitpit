@@ -2247,6 +2247,16 @@ PiercedVector<Interface> & PatchKernel::getInterfaces()
 }
 
 /*!
+	Gets a constant reference to the interfaces owned by the patch.
+
+	\return A constant reference to the interfaces owned by the patch.
+*/
+const PiercedVector<Interface> & PatchKernel::getInterfaces() const
+{
+	return m_interfaces;
+}
+
+/*!
 	Gets a reference to the interface with the specified id.
 
 	\param id is the id of the requested interface
