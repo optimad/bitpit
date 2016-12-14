@@ -624,6 +624,27 @@ const long * Cell::getAdjacencies(const int &face) const
 }
 
 /*!
+	Gets a pointer to the adjacencies of the cell.
+
+	\result A pointer to the adjacencies of the cell.
+*/
+long * Cell::getAdjacencies()
+{
+	return m_adjacencies.get(0);
+}
+
+/*!
+	Gets a pointer to the adjacencies of the given face of the cell.
+
+	\param face the face of the cell
+	\result A pointer to the adjacencies of the given face of the cell.
+*/
+long * Cell::getAdjacencies(const int &face)
+{
+	return m_adjacencies.get(face);
+}
+
+/*!
 	Find the specified adjacency among the adjacencies of the given face.
 
 	The function returns the position in the adjacency face list of the

@@ -89,7 +89,9 @@ public:
 	int getAdjacencyCount(const int &face) const;
 	long getAdjacency(const int &face, const int &index = 0) const;
 	const long * getAdjacencies() const;
+	long * getAdjacencies();
 	const long * getAdjacencies(const int &face) const;
+	long * getAdjacencies(const int &face);
 	int findAdjacency(const int &face, const int &adjacency);
 	int findAdjacency(const int &adjacency);
         int findVertex(const long &vertex) const;
