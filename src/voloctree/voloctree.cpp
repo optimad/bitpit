@@ -214,7 +214,7 @@ void VolOctree::__reset(bool resetTree)
 	// Reset the tree
 	if (resetTree) {
 		m_tree->reset();
-		m_tree->setOrigin(std::array<double, 3>{0., 0., 0.});
+		m_tree->setOrigin(std::array<double, 3>{{0., 0., 0.}});
 		m_tree->setL(1.);
 	}
 
