@@ -58,6 +58,8 @@ class PatchGlobalInfo : public PatchInfo {
 public:
 	PatchGlobalInfo(PatchKernel const *patch = nullptr);
 
+	long getCellGlobalCount() const;
+
 	int getCellRankFromLocal(long id) const;
 	int getCellRankFromGlobal(long id) const;
 	long getCellGlobalId(long id) const;

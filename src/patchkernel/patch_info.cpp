@@ -214,6 +214,22 @@ void PatchGlobalInfo::_extract()
 }
 
 /*!
+	Gets the global number of cells.
+
+	\param id is the local id of the cell
+	\return The rank of the specified cell.
+*/
+long PatchGlobalInfo::getCellGlobalCount() const
+{
+	long nGlobalCells = 0;
+	for (long count : m_nGlobalInternals) {
+		nGlobalCells += count;
+	}
+
+	return nGlobalCells;
+}
+
+/*!
 	Gets the rank of the cell with the specified local id
 
 	\param id is the local id of the cell
