@@ -300,6 +300,7 @@ double distancePointTriangle(
  * @param[in] Q2 third triangle vertex
  * @param[out] xP closest point on triangle
  * @param[out] lambda barycentric coordinates of projection point
+ * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
  * @return distance
  */
 double distancePointTriangle(
