@@ -40,6 +40,7 @@ list(APPEND TESTS "test_surfunstructured_00007")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_surfunstructured_parallel_00001:4")
 	list(APPEND TESTS "test_surfunstructured_parallel_00002:2")
+	list(APPEND TESTS "test_surfunstructured_parallel_00003:4")
 endif ()
 
 set(SURFUNSTRUCTURED_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the surfunstructured module" FORCE)
@@ -85,6 +86,11 @@ add_custom_command(
 if (ENABLE_MPI)
 	add_custom_command(
 		TARGET "test_surfunstructured_parallel_00002" PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
+	)
+
+	add_custom_command(
+		TARGET "test_surfunstructured_parallel_00003" PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
 	)
 endif ()
