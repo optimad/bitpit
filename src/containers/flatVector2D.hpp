@@ -139,7 +139,7 @@ public:
     int getItemCount(int i) const;
     int getItemCapacity() const;
 
-    size_t getBinarySize();
+    size_t getBinarySize() const;
 
 private:
     std::vector<T> m_v;

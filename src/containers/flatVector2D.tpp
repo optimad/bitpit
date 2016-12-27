@@ -836,7 +836,7 @@ int FlatVector2D<T>::getItemCapacity() const
     \result The buffer size (in bytes) required to store the container.
 */
 template <class T>
-size_t FlatVector2D<T>::getBinarySize()
+size_t FlatVector2D<T>::getBinarySize() const
 {
     return ((2 + m_index.size())*sizeof(size_t) + m_v.size() * sizeof(T));
 }
