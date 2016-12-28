@@ -202,7 +202,7 @@ void LevelSetCachedObject::__clear( ){
  */
 double LevelSetCachedObject::computeSizeNarrowBand( LevelSetKernel *visitee ){
 
-    double RSearch;
+    double RSearch(levelSetDefaults::VALUE);
 
     if( dynamic_cast<LevelSetCartesian*>(visitee) != nullptr ){
         LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(visitee) ;
@@ -344,7 +344,7 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
  */
 double LevelSetCachedObject::updateSizeNarrowBand(LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper){
 
-    double R;
+    double R(levelSetDefaults::VALUE);
 
     if( dynamic_cast<LevelSetCartesian*>(visitee) != nullptr ){
         LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(visitee) ;
