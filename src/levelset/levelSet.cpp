@@ -437,17 +437,21 @@ std::array<double,3> LevelSet::getGradient(const long &cellId, int objectId) con
  * @return id of closest object
  */
 int LevelSet::getClosestObject(const long &cellId) const {
-    double value(levelSetDefaults::VALUE) ;
-    int objectId(levelSetDefaults::OBJECT) ;
+
+    double distance, minDistance(levelSetDefaults::VALUE) ;
+    int objectId, closestObjectId(levelSetDefaults::OBJECT) ;
 
     for( auto &object : m_object){
-        if( object.second->getLS(cellId) < value){
-            value = object.second->getLS(cellId) ;
-            objectId = object.first ;
+        objectId = object.first ;
+        distance = std::abs(object.second->getLS(cellId));
+
+        if( distance < minDistance){
+            minDistance = distance ;
+            closestObjectId = objectId;
         }
     }
 
-    return objectId ;
+    return closestObjectId ;
 };
 
 /*!
