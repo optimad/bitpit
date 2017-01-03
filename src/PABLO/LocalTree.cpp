@@ -924,8 +924,10 @@ namespace bitpit {
             if (idxtry > noctants-1) idxtry = noctants-1;
         }
         else{
-            jump = int32_t((noctants)/2+1);//TODO why +1, compare to old findGhost
+            jump = int32_t((noctants)/2);
             idxtry = uint32_t(jump);
+            if (idxtry > noctants-1)
+                idxtry = noctants-1;
         }
         while(abs(jump) > 0){
             Mortontry = m_octants[idxtry].computeMorton();
