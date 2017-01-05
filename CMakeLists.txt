@@ -443,10 +443,17 @@ if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
 	find_package(LAPACK REQUIRED)
 
 	foreach (LAPACK_LIBRARY_PATH IN LISTS LAPACK_LIBRARIES)
+		set(LAPACKE_FORCE_STATIC 0 CACHE BOOL "Use LAPACKe static libraries")
+		mark_as_advanced(LAPACKE_FORCE_STATIC)
+
 		get_filename_component(FILE_NAME "${LAPACK_LIBRARY_PATH}" NAME_WE)
 		if ("${FILE_NAME}" STREQUAL "liblapack")
 			get_filename_component(FILE_DIR "${LAPACK_LIBRARY_PATH}" PATH)
-			get_filename_component(FILE_EXT "${LAPACK_LIBRARY_PATH}" EXT)
+			if (LAPACKE_FORCE_STATIC)
+				SET(FILE_EXT ".a")
+			else ()
+				get_filename_component(FILE_EXT "${LAPACK_LIBRARY_PATH}" EXT)
+			endif ()
 
 			file(TO_NATIVE_PATH "${FILE_DIR}/liblapacke${FILE_EXT}" LAPACKE_LIB_PATH)
 			list (APPEND LAPACK_LIBRARIES "${LAPACKE_LIB_PATH}")
