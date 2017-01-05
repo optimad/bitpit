@@ -50,6 +50,7 @@ foreach(TEST_ENTRY IN LISTS IO_TEST_ENTRIES)
 	list(APPEND TEST_TARGETS "${TEST_NAME}")
 
     add_executable(${TEST_NAME} "${TEST_SOURCES}")
+    target_link_libraries(${TEST_NAME} ${MPI_CXX_LIBRARIES})
     target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
 endforeach()

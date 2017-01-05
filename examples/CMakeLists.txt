@@ -72,6 +72,7 @@ if(BUILD_EXAMPLES)
 		list(APPEND EXAMPLES_SOURCES ${EXAMPLE_SOURCES})
 
 		add_executable(${EXAMPLE_NAME} "${EXAMPLE_SOURCES}")
+		target_link_libraries(${EXAMPLE_NAME} ${MPI_CXX_LIBRARIES})
 		target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})
 		target_link_libraries(${EXAMPLE_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
 		install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}/examples)

@@ -146,64 +146,28 @@ function(addModuleIncludeDirectories MODULE_NAME)
 endfunction()
 
 #------------------------------------------------------------------------------------#
-# External dependencies
+# MPI
 #------------------------------------------------------------------------------------#
 if (ENABLE_MPI)
-	find_package(MPI)
+    find_package(MPI)
+
+    include_directories("${MPI_INCLUDE_PATH}")
+
+    if(MPI_C_COMPILE_FLAGS)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}")
+    endif()
+
+    if(MPI_CXX_COMPILE_FLAGS)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
+    endif()
+
+    if(MPI_CXX_LINK_FLAGS)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MPI_CXX_LINK_FLAGS}")
+    endif()
 endif()
 
 #------------------------------------------------------------------------------------#
-# Customized build types
-#------------------------------------------------------------------------------------#
-
-# GNU Profiling
-SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used by the C++ compiler during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_GNUPROFILING)
-
-SET(CMAKE_C_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used by the C compiler during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_C_FLAGS_GNUPROFILING)
-
-SET(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used for linking binaries during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING)
-
-SET(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used by the shared libraries linker during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING)
-
-# Scalasca Profiling
-SET(CMAKE_CXX_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
-    "Flags used by the C++ compiler during Scalasca profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_SCALASCAPROFILING)
-
-SET(CMAKE_C_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
-    "Flags used by the C compiler during Scalasca builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_C_FLAGS_SCALASCAPROFILING)
-
-SET(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
-    "Flags used for linking binaries during Scalasca builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING)
-
-SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
-    "Flags used by the shared libraries linker during Scalasca builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
-
-# Set build type variable
-if(NOT CMAKE_BUILD_TYPE)
-	# Set default build type to Debug
-	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
-		"Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel GNUProfiling ScalascaProfiling."
-		FORCE)
-
-	# Set the possible values of build type for the GUI
-	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-	"MinSizeRel" "RelWithDebInfo" "GNUProfiling" "ScalascaProfiling")
-endif()
-
-#------------------------------------------------------------------------------------#
-# Compilation settings
+# Compiler settings
 #------------------------------------------------------------------------------------#
 set (BITPIT_DEFINITIONS_PRIVATE "")
 set (BITPIT_DEFINITIONS_PUBLIC "")
@@ -217,18 +181,6 @@ endif()
 
 if (ENABLE_MPI)
 	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=1")
-
-	if (MPI_C_FOUND)
-		set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
-	else()
-		set(CMAKE_C_COMPILER mpicc)
-	endif()
-
-	if (MPI_CXX_FOUND)
-		set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-	else()
-		set(CMAKE_CXX_COMPILER mpic++)
-	endif()
 else ()
 	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=0")
 endif()
@@ -299,6 +251,56 @@ endif ()
 # Add the definitions
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PRIVATE})
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PUBLIC})
+
+#------------------------------------------------------------------------------------#
+# Customized build types
+#------------------------------------------------------------------------------------#
+
+# GNU Profiling
+SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the C++ compiler during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_GNUPROFILING)
+
+SET(CMAKE_C_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the C compiler during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_C_FLAGS_GNUPROFILING)
+
+SET(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used for linking binaries during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING)
+
+SET(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the shared libraries linker during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING)
+
+# Scalasca Profiling
+SET(CMAKE_CXX_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
+    "Flags used by the C++ compiler during Scalasca profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_C_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
+    "Flags used by the C compiler during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_C_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
+    "Flags used for linking binaries during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
+    "Flags used by the shared libraries linker during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
+
+# Set build type variable
+if(NOT CMAKE_BUILD_TYPE)
+	# Set default build type to Debug
+	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
+		"Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel GNUProfiling ScalascaProfiling."
+		FORCE)
+
+	# Set the possible values of build type for the GUI
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+	"MinSizeRel" "RelWithDebInfo" "GNUProfiling" "ScalascaProfiling")
+endif()
 
 #------------------------------------------------------------------------------------#
 # Library version
