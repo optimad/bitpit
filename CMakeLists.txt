@@ -91,35 +91,6 @@ function(hideModule MODULE_NAME)
 	endif ()
 endfunction()
 
-function(getTestName TEST_ENTRY TEST_NAME)
-	string(REGEX REPLACE ":[^:]*$" "" TEST_ENTRY_STRIPPED ${TEST_ENTRY})
-	set(${TEST_NAME} "${TEST_ENTRY_STRIPPED}" PARENT_SCOPE)
-endfunction()
-
-function(isTestParallel TEST_ENTRY PARALLEL_FLAG)
-	if (TEST_ENTRY MATCHES "parallel")
-		set(${PARALLEL_FLAG} "1" PARENT_SCOPE)
-	else ()
-		set(${PARALLEL_FLAG} "0" PARENT_SCOPE)
-	endif ()
-endfunction()
-
-function(getTestNumProcs TEST_ENTRY DEFAULT_N_PROCS N_PROCS)
-	isTestParallel("${TEST_ENTRY}" IS_TEST_PARALLEL)
-	if (NOT IS_TEST_PARALLEL)
-		set(${N_PROCS} "1" PARENT_SCOPE)
-		return()
-	endif ()
-
-	string(REGEX MATCH "[^:]*$" TEST_ENTRY_MATCH ${TEST_ENTRY})
-	if ("${TEST_ENTRY_MATCH}" STREQUAL "${TEST_ENTRY}")
-		set(${N_PROCS} "${DEFAULT_N_PROCS}" PARENT_SCOPE)
-		return()
-	endif ()
-
-	set(${N_PROCS} "${TEST_ENTRY_MATCH}" PARENT_SCOPE)
-endfunction()
-
 function(addModuleIncludeDirectories MODULE_NAME)
     set (EXTRA_ARGUMENTS ${ARGN})
     list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
@@ -487,33 +458,8 @@ add_subdirectory(cmake)
 add_subdirectory(examples)
 
 # Tests
+enable_testing()
 add_subdirectory(test)
 
 # Docs
 add_subdirectory(doc)
-
-#------------------------------------------------------------------------------------#
-# Tests
-#------------------------------------------------------------------------------------#
-enable_testing()
-
-foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-	isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
-	string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
-	if (MODULE_ENABLED AND DEFINED ${UPPER_MODULE_NAME}_TEST_ENTRIES)
-		foreach(TEST_ENTRY IN LISTS ${UPPER_MODULE_NAME}_TEST_ENTRIES)
-			getTestName("${TEST_ENTRY}" TEST_NAME)
-			isTestParallel("${TEST_ENTRY}" IS_TEST_PARALLEL)
-			if (${IS_TEST_PARALLEL})
-				if (ENABLE_MPI)
-					getTestNumProcs("${TEST_ENTRY}" "${MPIEXEC_MAX_NUMPROCS}" N_PROCS)
-					add_test(NAME ${TEST_NAME} COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${N_PROCS} ${MPIEXEC_POSTFLAGS} ${TEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test/${MODULE_NAME}")
-				endif ()
-			else ()
-				add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test/${MODULE_NAME}")
-			endif ()
-		endforeach ()
-	endif ()
-endforeach ()
-
-add_custom_target(check DEPENDS tests COMMAND ${CMAKE_MAKE_PROGRAM} test)

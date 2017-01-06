@@ -34,25 +34,9 @@ list(APPEND TESTS "test_volcartesian_00001")
 list(APPEND TESTS "test_volcartesian_00002")
 list(APPEND TESTS "test_volcartesian_00003")
 
-set(VOLCARTESIAN_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the volcartesian module" FORCE)
+# Test extra libraries
+set(TEST_EXTRA_LIBRARIES "")
 
-# Rules to build the tests
-addModuleIncludeDirectories(${MODULE_NAME})
-
-set(TEST_TARGETS "")
-foreach(TEST_ENTRY IN LISTS VOLCARTESIAN_TEST_ENTRIES)
-	getTestName("${TEST_ENTRY}" TEST_NAME)
-	set(TEST_SOURCES "${TEST_NAME}.cpp")
-	list(APPEND TEST_TARGETS "${TEST_NAME}")
-
-	add_executable(${TEST_NAME} "${TEST_SOURCES}")
-	target_link_libraries(${TEST_NAME} ${MPI_CXX_LIBRARIES})
-	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
-endforeach()
-set(VOLCARTESIAN_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the volcartesian module" FORCE)
-
-add_custom_target(tests-volcartesian DEPENDS ${TEST_TARGETS})
-add_custom_target(clean-tests-volcartesian COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-unset(TEST_TARGETS)
+# Add tests
+addModuleTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+unset(TESTS)

@@ -42,25 +42,9 @@ if (ENABLE_MPI)
 	list(APPEND TESTS "test_PABLO_parallel_00003")
 endif()
 
-set(PABLO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the PABLO module" FORCE)
+# Test extra libraries
+set(TEST_EXTRA_LIBRARIES "")
 
-# Rules to build the tests
-addModuleIncludeDirectories(${MODULE_NAME})
-
-set(TEST_TARGETS "")
-foreach(TEST_ENTRY IN LISTS PABLO_TEST_ENTRIES)
-	getTestName("${TEST_ENTRY}" TEST_NAME)
-	set(TEST_SOURCES "${TEST_NAME}.cpp")
-	list(APPEND TEST_TARGETS "${TEST_NAME}")
-
-	add_executable(${TEST_NAME} "${TEST_SOURCES}")
-	target_link_libraries(${TEST_NAME} ${MPI_CXX_LIBRARIES})
-	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
-endforeach()
-set(PABLO_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the PABLO module" FORCE)
-
-add_custom_target(tests-PABLO DEPENDS ${TEST_TARGETS})
-add_custom_target(clean-tests-PABLO COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-unset(TEST_TARGETS)
+# Add tests
+addModuleTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+unset(TESTS)

@@ -43,28 +43,12 @@ if (ENABLE_MPI)
 	list(APPEND TESTS "test_surfunstructured_parallel_00003:4")
 endif ()
 
-set(SURFUNSTRUCTURED_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the surfunstructured module" FORCE)
+# Test extra libraries
+set(TEST_EXTRA_LIBRARIES "")
 
-# Rules to build the tests
-addModuleIncludeDirectories(${MODULE_NAME})
-
-set(TEST_TARGETS "")
-foreach(TEST_ENTRY IN LISTS SURFUNSTRUCTURED_TEST_ENTRIES)
-	getTestName("${TEST_ENTRY}" TEST_NAME)
-	set(TEST_SOURCES "${TEST_NAME}.cpp")
-	list(APPEND TEST_TARGETS "${TEST_NAME}")
-
-	add_executable(${TEST_NAME} "${TEST_SOURCES}")
-	target_link_libraries(${TEST_NAME} ${MPI_CXX_LIBRARIES})
-	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
-endforeach()
-set(SURFUNSTRUCTURED_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the surfunstructured module" FORCE)
-
-add_custom_target(tests-surfunstructured DEPENDS ${TEST_TARGETS})
-add_custom_target(clean-tests-surfunstructured COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-unset(TEST_TARGETS)
+# Add tests
+addModuleTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+unset(TESTS)
 
 # Data files
 add_custom_command(

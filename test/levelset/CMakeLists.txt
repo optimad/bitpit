@@ -39,27 +39,14 @@ if (ENABLE_MPI)
 	list(APPEND TESTS "test_levelset_parallel_00003:3")
 endif()
 
-set(LEVELSET_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the levelset module" FORCE)
+# Test extra libraries
+set(TEST_EXTRA_LIBRARIES "")
 
-# Rules to build the tests
-addModuleIncludeDirectories(${MODULE_NAME})
+# Add tests
+addModuleTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+unset(TESTS)
 
-set(TEST_TARGETS "")
-foreach(TEST_ENTRY IN LISTS LEVELSET_TEST_ENTRIES)
-	getTestName("${TEST_ENTRY}" TEST_NAME)
-	set(TEST_SOURCES "${TEST_NAME}.cpp")
-	list(APPEND TEST_TARGETS "${TEST_NAME}")
-
-	add_executable(${TEST_NAME} "${TEST_SOURCES}")
-	target_link_libraries(${TEST_NAME} ${MPI_CXX_LIBRARIES})
-	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
-endforeach()
-set(LEVELSET_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the levelset module" FORCE)
-
-add_custom_target(tests-levelset DEPENDS ${TEST_TARGETS})
-add_custom_target(clean-tests-levelset COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
+# Data files
 add_custom_command(
     TARGET "test_levelset_00002" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube1.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube1.stl"
@@ -82,5 +69,3 @@ if (ENABLE_MPI)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/square.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/square.dgf"
 	)
 endif ()
-
-unset(TEST_TARGETS)
