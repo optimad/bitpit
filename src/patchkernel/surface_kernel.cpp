@@ -26,7 +26,7 @@
 
 #include <cmath>
 #include <limits>
-#include <stack>
+#include <set>
 #if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #endif
@@ -770,9 +770,9 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
 #endif
 
     // Initialize the seed
-    std::stack<long> toVisit;
+    std::set<long> toVisit;
     if (seed != Element::NULL_ID) {
-        toVisit.push(seed);
+        toVisit.insert(seed);
         if (invert) {
             flipCellOrientation(seed);
 #if BITPIT_ENABLE_MPI==1
@@ -788,8 +788,9 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
     bool completed = false;
     while (!completed) {
         while (orientable && !toVisit.empty()) {
-            long cellId = toVisit.top();
-            toVisit.pop();
+            auto toVisitBegin = toVisit.begin();
+            long cellId = *toVisitBegin;
+            toVisit.erase(toVisitBegin);
 
             visited.insert(cellId);
 
@@ -820,7 +821,7 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
 #endif
                     }
 
-                    toVisit.push(neighId);
+                    toVisit.insert(neighId);
                 } else if (!isNeighOriented) {
                     orientable = false;
                     break;
@@ -864,7 +865,7 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
                 bool ghostFlipped;
                 buffer >> ghostFlipped;
                 if (ghostFlipped) {
-                    toVisit.push(cellId);
+                    toVisit.insert(cellId);
                     flipCellOrientation(cellId);
                 }
             }
