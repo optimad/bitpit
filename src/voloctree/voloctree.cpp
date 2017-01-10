@@ -156,11 +156,13 @@ VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::u
 	// called.
 	__setDimension(m_tree->getDim());
 
+#if BITPIT_ENABLE_MPI==1
 	// Set the communicator
 	PatchKernel::setCommunicator(m_tree->getComm());
 
 	// Set the partitioned flag
 	setPartitioned(!m_tree->getSerial());
+#endif
 
 	// Sync the patch with the tree
 	sync(true, false);
