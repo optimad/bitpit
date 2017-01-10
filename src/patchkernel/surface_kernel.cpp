@@ -26,6 +26,14 @@
 
 #include <cmath>
 #include <limits>
+#include <stack>
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
+
+#if BITPIT_ENABLE_MPI==1
+#include <bitpit_communications.hpp>
+#endif
 
 #include "surface_kernel.hpp"
 
@@ -693,6 +701,368 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, con
     normal = normal/norm2(normal);
 
     return(normal);
+}
+
+
+/*!
+ * Adjust the orientation of all facets of the local partition according to the
+ * orientation of the first facet stored.
+ *
+ * The routine checks whether the surface is orientable; if the surface is not
+ * orientable false is returned (with some normals flipped until the
+ * orientablity condition has been violated), otherwise true is returned (with
+ * all facet orientations coherent with the reference facet).
+ *
+ * \return Returns true if the surface is orientable, false otherwise.
+ */
+bool SurfaceKernel::adjustCellOrientation()
+{
+    long id = Element::NULL_ID;
+
+#if BITPIT_ENABLE_MPI==1
+    if (getRank() == 0) {
+        id = getCells().begin()->getId();
+    }
+#else
+    id = getCells().begin()->getId();
+#endif
+
+    return adjustCellOrientation(id);
+}
+
+
+/*!
+ * Adjust the orientation of all facets of the local partition according to the
+ * orientation of a given facet.
+ *
+ * The routine checks whether the surface is orientable; if the surface is not
+ * orientable false is returned (with some normals flipped until the
+ * orientablity condition has been violated), otherwise true is returned (with
+ * all facet orientations coherent with the reference facet).
+ *
+ * \param[in] seed is the id of reference facet. For parallel computaions, if
+ * a partition does not know how to orient its facets, Element::NULL_ID should
+ * be passed for these partitions
+ * \param[in] invert controls if the orientation should be the same of the
+ * seed of should be inverted with respect to the seed
+ * \return Returns true if the surface is orientable, false otherwise.
+ */
+bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
+{
+    assert(getCells().exists(seed));
+
+#if BITPIT_ENABLE_MPI==1
+    // Initialize ghost communications
+    std::unordered_set<long> flipped;
+    DataCommunicator ghostComm(getCommunicator());
+
+    for (auto &entry : getGhostExchangeSources()) {
+        const int rank = entry.first;
+        const std::vector<long> sources = entry.second;
+        ghostComm.setSend(rank, sources.size() * sizeof(bool));
+    }
+
+    for (auto &entry : getGhostExchangeTargets()) {
+        const int rank = entry.first;
+        const std::vector<long> targets = entry.second;
+        ghostComm.setRecv(rank, targets.size() * sizeof(bool));
+    }
+#endif
+
+    // Initialize the seed
+    std::stack<long> toVisit;
+    if (seed != Element::NULL_ID) {
+        toVisit.push(seed);
+        if (invert) {
+            flipCellOrientation(seed);
+#if BITPIT_ENABLE_MPI==1
+            flipped.insert(seed);
+#endif
+        }
+    }
+
+    // Orient the surface
+    std::unordered_set<long> visited;
+
+    bool orientable = true;
+    bool completed = false;
+    while (!completed) {
+        while (orientable && !toVisit.empty()) {
+            long cellId = toVisit.top();
+            toVisit.pop();
+
+            visited.insert(cellId);
+
+            const auto &cell = getCell(cellId);
+            const long *adjacencyIds = cell.getAdjacencies();
+            const long *interfaceIds = cell.getInterfaces();
+            const int nInterfaces = cell.getInterfaceCount();
+
+            for (int i = 0; i < nInterfaces; ++i) {
+                const long neighId = adjacencyIds[i];
+                if (neighId < 0) {
+                    continue;
+                }
+
+#if BITPIT_ENABLE_MPI==1
+                const auto &neigh = getCell(neighId);
+                if (!neigh.isInterior()) {
+                    continue;
+                }
+#endif
+
+                bool isNeighOriented = sameOrientationAtInterface(interfaceIds[i]);
+                if (visited.count(neighId) == 0) {
+                    if (!isNeighOriented) {
+                        flipCellOrientation(neighId);
+#if BITPIT_ENABLE_MPI==1
+                        flipped.insert(neighId);
+#endif
+                    }
+
+                    toVisit.push(neighId);
+                } else if (!isNeighOriented) {
+                    orientable = false;
+                    break;
+                }
+            }
+        }
+
+#if BITPIT_ENABLE_MPI==1
+        // Comunicate the orientable flag among the partitions
+        MPI_Allreduce(MPI_IN_PLACE, &orientable, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+#endif
+
+        // If the surface is not orientable we can exit
+        if (!orientable) {
+            break;
+        }
+
+#if BITPIT_ENABLE_MPI==1
+        // Add seeds from other partitions
+        ghostComm.startAllRecvs();
+
+        for(auto &entry : getGhostExchangeSources()) {
+            int rank = entry.first;
+            SendBuffer &buffer = ghostComm.getSendBuffer(rank);
+            for (long cellId : entry.second) {
+                if (flipped.count(cellId) > 0) {
+                    buffer << true;
+                } else {
+                    buffer << false;
+                }
+            }
+            ghostComm.startSend(rank);
+        }
+
+        int nPendingRecvs = ghostComm.getRecvCount();
+        while (nPendingRecvs != 0) {
+            int rank = ghostComm.waitAnyRecv();
+            RecvBuffer buffer = ghostComm.getRecvBuffer(rank);
+
+            for (long cellId : getGhostExchangeTargets(rank)) {
+                bool ghostFlipped;
+                buffer >> ghostFlipped;
+                if (ghostFlipped) {
+                    toVisit.push(cellId);
+                    flipCellOrientation(cellId);
+                }
+            }
+
+            --nPendingRecvs;
+        }
+
+        ghostComm.waitAllSends();
+
+        // Clear list of flipped cells
+        flipped.clear();
+#endif
+
+        // Detect if the orientation is completed
+        completed = (toVisit.size() == 0);
+#if BITPIT_ENABLE_MPI==1
+        MPI_Allreduce(MPI_IN_PLACE, &completed, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+#endif
+    }
+
+    return orientable;
+}
+
+/*!
+ * Check if the cells sharing an interface have the same orientation.
+ *
+ * Two cells have the same orientation, if the two cell connectivity vectors
+ * cycle through the common interface with opposite order.
+ *
+ * \param[in] id is the id of the interface
+ * \return Returns true if the cells sharing an interface have the same
+ * orientation.
+ */
+bool SurfaceKernel::sameOrientationAtInterface(const long &id)
+{
+    const auto &face = getInterface(id);
+    if (face.isBorder()) {
+        return true;
+    }
+
+    const long ownerId = face.getOwner();
+    const auto &owner = getCell(ownerId);
+
+    const long neighId = face.getNeigh();
+    const auto &neigh = getCell(neighId);
+
+    if (face.getType() == ElementInfo::Type::VERTEX) {
+        const long* ownerConnect = owner.getConnect();
+        const long* neighConnect = neigh.getConnect();
+        if (ownerConnect[0] == neighConnect[0] || ownerConnect[1] == neighConnect[1]) {
+            return false;
+        }
+    } else if (face.getType() == ElementInfo::Type::LINE) {
+        const int ownerFace= face.getOwnerFace();
+        std::vector<long> ownerConnect = owner.getFaceConnect(ownerFace);
+
+        const int neighFace= face.getNeighFace();
+        std::vector<long> neighConnect = neigh.getFaceConnect(neighFace);
+
+        if (ownerConnect[0] != neighConnect[1] || ownerConnect[1] != neighConnect[0]) {
+            return false;
+        }
+    } else {
+        throw std::runtime_error ("Type of element not supported in SurfaceKernel");
+    }
+
+    return true;
+}
+
+/*!
+ * Flips the orientation of a cell.
+ *
+ * \param[in] id is the id of cell that will be flipped
+ */
+void SurfaceKernel::flipCellOrientation(const long &id)
+{
+    int top, end;
+    auto &cell = getCell(id);
+
+    //
+    // In order to flip the orientation of cell,
+    // the connectivity will be inverted
+    //
+    int nCellVertices = cell.getVertexCount();
+    const long *cellConnect = cell.getConnect();
+    std::unique_ptr<long[]> newCellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
+    for (int j = 0; j < nCellVertices; ++j) {
+        newCellConnect[j] = cellConnect[j];
+    }
+
+    top = 0;
+    end = nCellVertices - 1;
+    for (int j = 0; j < (int) std::floor(nCellVertices/2); ++j) {
+        std::swap(newCellConnect[top], newCellConnect[end]);
+        ++top;
+        --end;
+    }
+
+    //
+    // The numbering of the adjacencies and interfaces must be 
+    // changed according the new connectivity. This implies that
+    // all numbering must be inverted, but the last entry of the
+    // adjacencies and interfaces. Since both adjacencies and
+    // interfaces are grouped by faces, in a second step each
+    // ordering within a face must be inverted
+    //
+    int faceCount = cell.getFaceCount();
+    std::vector<std::vector<long>> newAdjacency, newInterface;
+    newAdjacency.resize(faceCount);
+    newInterface.resize(faceCount);
+
+    // Copy original ordering in newAdjacency and newInterface
+    //
+    for (int f = 0; f < faceCount; ++f) {
+        std::vector<long> &locAdj = newAdjacency[f];
+        std::vector<long> &locInt = newInterface[f];
+
+        int nCellAdjacencies = cell.getAdjacencyCount(f);
+        const long *adjacency = cell.getAdjacencies(f);
+        const long *interface = cell.getInterfaces(f);
+
+        locAdj.resize(nCellAdjacencies);
+        locInt.resize(nCellAdjacencies);
+        for (int j = 0; j < nCellAdjacencies; ++j) {
+            locAdj[j] = adjacency[j];
+            locInt[j] = interface[j];
+        }
+
+    }
+
+    //
+    // Invert entire face based ordering but tha last entry
+    //
+    top = 0;
+    end = faceCount - 2;
+    for (int f = 0; f < std::max(1, (int) std::floor((faceCount - 1) / 2)); ++f) {
+        std::swap(newAdjacency[top], newAdjacency[end]);
+        std::swap(newInterface[top], newInterface[end]);
+        ++top;
+        --end;
+    }
+
+    //
+    // Invert all enties within one face
+    //
+    for (int f = 0; f < faceCount; ++f) {
+        std::vector<long> &locAdj =newAdjacency[f];
+        std::vector<long> &locInt =newInterface[f];
+        int nFaceAdjacencies = locAdj.size();
+
+        top = 0;
+        end = nFaceAdjacencies - 1;
+        for (int j = 0; j<(int) std::floor(nFaceAdjacencies / 2); ++j) {
+            std::swap(locAdj[top], locAdj[end]);
+            std::swap(locInt[top], locInt[end]);
+            ++top;
+            --end;
+        }
+    }
+
+    cell.setConnect(std::move(newCellConnect));
+
+    if (newAdjacency[0].size() != 0) {
+        cell.setAdjacencies(newAdjacency);
+    }
+
+    if (newInterface[0].size() != 0) {
+        cell.setInterfaces(newInterface);
+
+        //
+        // For the interfaces, we need to correct either
+        // ownerFace or neighFace, respectivly.
+        //
+        const long* intPtr = cell.getInterfaces(); 
+        int interfaceCount = cell.getInterfaceCount();
+        for (int i=0; i<interfaceCount; ++i) {
+            long interfaceId = intPtr[i];
+            if (interfaceId < 0) {
+                continue;
+            }
+
+            Interface &interface=getInterface(interfaceId);
+            long owner = interface.getOwner();
+            if (owner == id) {
+                int ownerFace = interface.getOwnerFace();
+                if (ownerFace != faceCount - 1) {
+                    ownerFace = faceCount - 2 - ownerFace;
+                    interface.setOwner(id,ownerFace);
+                }
+            } else {
+                int neighFace = interface.getNeighFace();
+                if (neighFace != faceCount - 1) {
+                    neighFace = faceCount - 2 - neighFace;
+                    interface.setNeigh(id,neighFace);
+                }
+            }
+        }
+    }
 }
 
 /*!

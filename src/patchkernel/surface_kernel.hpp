@@ -59,6 +59,10 @@ public:
         virtual std::array<double, 3> evalLimitedVertexNormal(const long&, const int&, const double&) const;
         double evalCellSize(const long &id) const;
 
+        bool adjustCellOrientation();
+        bool adjustCellOrientation(const long &id, const bool &flip = false);
+        void flipCellOrientation(const long &id);
+
         void displayQualityStats(ostream&, unsigned int padding = 0) const;
         std::vector<double> computeHistogram(eval_f_, std::vector<double>&, long&, int n_int = 8, unsigned short mask = SELECT_ALL) const;
 
@@ -67,6 +71,8 @@ private:
 
         bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &) const;
         void displayHistogram(const long&, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0) const;
+
+        bool sameOrientationAtInterface(const long &id);
 
 protected:
         int                     m_spaceDim;
