@@ -928,7 +928,7 @@ void PiercedVector<value_t, id_t>::swap(PiercedVector& x) noexcept
 			it can hold.
 */
 template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::capacity()
+std::size_t PiercedVector<value_t, id_t>::capacity() const
 {
 	return m_v.capacity();
 }

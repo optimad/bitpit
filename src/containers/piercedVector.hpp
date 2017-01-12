@@ -344,7 +344,7 @@ public:
 	void swap(PiercedVector& x) noexcept;
 
 	// Methods that extract information on the container
-	std::size_t capacity();
+	std::size_t capacity() const;
 	bool contiguous() const;
 	void dump();
 	bool empty() const;
