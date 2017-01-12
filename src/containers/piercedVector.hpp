@@ -357,6 +357,7 @@ public:
 	const_iterator find(id_t id) const;
 	iterator find(id_t id);
 	std::size_t evalFlatIndex(id_t id);
+	std::size_t getRawIndex(id_t id) const;
 
 	std::vector<id_t> getIds(bool ordered = true) const;
 	id_t getSizeMarker(const size_t &targetSize, const id_t &fallback = -1);

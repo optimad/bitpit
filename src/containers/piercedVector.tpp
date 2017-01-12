@@ -1159,6 +1159,23 @@ std::size_t PiercedVector<value_t, id_t>::evalFlatIndex(id_t id)
 }
 
 /*!
+	Gets the position in the storage vector of the element with the
+	specified id.
+
+	If there is no element with the specified id, an exception is
+	thrown.
+
+	\param id the id to look for
+	\result The position in the storage vector of the element with
+	the specified id.
+*/
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::getRawIndex(id_t id) const
+{
+	return getPosFromId(id);
+}
+
+/*!
 	Gets a vector containing the ids of the elements stored in
 	the vector.
 
