@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
     log::cout() << "Restoring 3D patch..." << std::endl;
 
     VolOctree *patch_3D_restored = new VolOctree();
-    patch_3D->setCommunicator(MPI_COMM_WORLD);
+    patch_3D_restored->setCommunicator(MPI_COMM_WORLD);
     IBinaryArchive binaryReader3D("octree_uniform_patch_3D", rank);
     patch_3D_restored->restore(binaryReader3D.getStream());
     binaryReader3D.close();
