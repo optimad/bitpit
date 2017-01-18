@@ -366,7 +366,7 @@ namespace bitpit {
             IO::binary::write(stream, octant.getZ());
 
             for (size_t k = 0; k < octant.m_info.size(); ++k) {
-                IO::binary::write(stream, octant.m_info[k]);
+                IO::binary::write(stream, (bool) octant.m_info[k]);
             }
 
             IO::binary::write(stream, octant.getBalance());
