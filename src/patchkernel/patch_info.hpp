@@ -47,8 +47,13 @@ protected:
 	PatchKernel const *m_patch;
 
 	PatchInfo(PatchKernel const *patch);
+
+	void setPatch(PatchKernel const *patch, bool initialize);
+
+	virtual void _init() = 0;
 	virtual void _reset() = 0;
 	virtual void _extract() = 0;
+
 };
 
 #if BITPIT_ENABLE_MPI==1
@@ -68,6 +73,7 @@ public:
 	const std::unordered_map<long, long> & getCellGlobalMap() const;
 
 protected:
+	void _init();
 	void _reset();
 	void _extract();
 

@@ -40,10 +40,14 @@ namespace bitpit {
 
 /*!
 	Default constructor
+
+	\param patch is patch from which the informations will be extracted
+	\param init is the function that will be call to initialize the patch
 */
 PatchInfo::PatchInfo(PatchKernel const *patch)
+	: m_patch(nullptr)
 {
-	setPatch(patch);
+	setPatch(patch, false);
 }
 
 /*!
@@ -55,10 +59,34 @@ PatchInfo::~PatchInfo()
 
 /*!
 	Sets the patch associated to the info.
+
+	\param patch is patch from which the informations will be extracted
 */
 void PatchInfo::setPatch(PatchKernel const *patch)
 {
+	setPatch(patch, true);
+}
+
+/*!
+	Sets the patch associated to the info.
+
+	\param patch is patch from which the informations will be extracted
+	\param initialize if set to true the initializatino function will be called
+*/
+void PatchInfo::setPatch(PatchKernel const *patch, bool initialize)
+{
+	// Reset information
+	if (m_patch != nullptr) {
+		reset();
+	}
+
+	// Set the patch
 	m_patch = patch;
+
+	// Call initialization
+	if (initialize) {
+		_init();
+	}
 }
 
 /*!
@@ -111,7 +139,16 @@ void PatchInfo::update()
 PatchGlobalInfo::PatchGlobalInfo(PatchKernel const *patch)
 	: PatchInfo(patch)
 {
+	PatchGlobalInfo::_init();
+
 	extract();
+}
+
+/*!
+	Internal function to initialize the information.
+*/
+void PatchGlobalInfo::_init()
+{
 }
 
 /*!
