@@ -308,26 +308,19 @@ VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, V
  */
 void VTK::removeData( std::string name ){
 
-    std::vector<VTKField>::iterator  i_, j_ ;
-    bool                             found ;
+    std::vector<VTKField>::iterator  fieldItr = m_data.begin();
 
-    found     = false ;
+    while( fieldItr != m_data.end()){
 
-    for ( i_ = m_data.begin(); i_ != m_data.end(); i_++){
-        if( i_->getName() == name){
-            j_ = i_ ;
-            found     = true ;
-        };
-    };
+        if( fieldItr->getName() == name){
+            fieldItr = m_data.erase(fieldItr);
+            return;
+        } else {
+            fieldItr++;
+        }
+    } 
 
-    if( found ){
-        m_data.erase(j_);
-    }
-
-    else{
-        log::cout() << "did not find field for removing: " << name << std::endl;
-    };
-
+    log::cout() << "did not find field for removing in VTK: " << name << std::endl;
 
     return ;
 
