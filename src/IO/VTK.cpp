@@ -466,6 +466,7 @@ void VTK::checkAllFields(){
             field.enable() ;
         } else {
             field.disable() ;
+            log::cout() << "Data field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
         }
     };
 
@@ -474,7 +475,7 @@ void VTK::checkAllFields(){
             field.enable() ;
         } else {
             field.disable() ;
-            log::cout() << "Geometry Field " << field.getName() << "has not all metadata" << std::endl ;
+            log::cout() << "Geometry field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
         }
     };
 
