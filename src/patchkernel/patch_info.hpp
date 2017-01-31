@@ -35,8 +35,6 @@ class PatchKernel;
 class PatchInfo {
 
 public:
-	PatchInfo(PatchKernel const *patch = nullptr);
-
 	virtual ~PatchInfo();
 
 	void setPatch(PatchKernel const *patch);
@@ -48,6 +46,7 @@ public:
 protected:
 	PatchKernel const *m_patch;
 
+	PatchInfo(PatchKernel const *patch);
 	virtual void _reset() = 0;
 	virtual void _extract() = 0;
 };
