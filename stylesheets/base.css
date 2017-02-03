@@ -75,7 +75,7 @@ a {
     height: 9px;
 
     border-top: 1px solid #BFBFBF;
-    background-color: rgba(36, 115, 152, 0.85);
+    background-color: rgba(36, 115, 152, 0.9);
 }
 
 #header .logo {
@@ -180,10 +180,10 @@ a {
     padding: 10px 0 10px 0;
     margin: 0;
 
-    background-color: rgba(36, 115, 152, 0.85);
+    background-color: rgba(36, 115, 152, 0.9);
     background-clip: padding-box;
     border-top: 10px solid transparent;
-    border-bottom: 5px solid rgba(156, 198, 229, 0.85);
+    border-bottom: 5px solid rgba(156, 198, 229, 0.9);
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
 }
@@ -203,6 +203,7 @@ a {
     line-height: 27px;
 }
 
+#header .menu li .sub-menu li a,
 #header .menu li .sub-menu li a:visited,
 #header .menu li .sub-menu li a:active {
     color: #FCFCFC;
@@ -229,7 +230,7 @@ a {
     margin: 0;
     box-sizing: border-box;
 
-    height: 300px;
+    height: 400px;
     width: 100%;
 }
 
@@ -458,7 +459,7 @@ a {
 
 .downloads p {
     margin: 0 0 1rem 0;
-    font-size: 0.85em;
+    font-size: 0.9em;
 }
 
 span.date  {
@@ -485,7 +486,7 @@ span.date  {
 }
 
 .figure p {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 900;
 
     margin: 5px 0 0 0;
