@@ -1,7 +1,0 @@
-<map id="Input/Output (IO)" name="Input/Output (IO)">
-<area shape="rect" id="node1" href="$group__STereoLithography.xhtml" title="STereoLithography (STL)" alt="" coords="179,5,357,32"/>
-<area shape="rect" id="node3" href="$group__Logger.xhtml" title="Logger" alt="" coords="235,56,301,83"/>
-<area shape="rect" id="node4" href="$group__VisualizationToolKit.xhtml" title="VisualizationToolKit\l (VTK)" alt="" coords="196,107,340,149"/>
-<area shape="rect" id="node5" href="$group__GenericIO.xhtml" title="Generic" alt="" coords="233,173,303,200"/>
-<area shape="rect" id="node6" href="$group__DuneGridFormat.xhtml" title="DuneGridFormat (DGF)" alt="" coords="185,224,351,251"/>
-</map>
