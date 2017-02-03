@@ -24,10 +24,6 @@ sections:
                 name: RBF
                 url: RBF.html
 
-    examples:
-        name: Examples
-        url:
-
     documentation:
         name: Documentation
 
