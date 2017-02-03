@@ -26,37 +26,37 @@ extra-scripts:
 
     <div id="main" class="home">
 
-        <div class="content-box bitpit-introduction">
+        <div class="content-box left bitpit-overview">
             <div class="image">
                 <img alt="bitpit Logo" src="{{ site.baseurl }}/images/bitpit_logo_cube.png" />
             </div>
 
             <div class="content">
-                <h1>A quick look at bitpit</h1>
+                <h1>bitpit overview</h1>
 
                 <p>
-                bitpit is a open source C++ library for scientific High Performance Computing. Within bitpit different modules factorize the typical effort which is needed to derived a real-life application code. Main efforts are dedicated to handle differnt types of computational meshes, their runtime adaptation and data transfer for parallel applications.
+                bitpit is a open source modular library for scientific computing developed by
+                <a class="optimad" href="http://www.optimad.it">Optimad Engineering Srl</a>. The goal of bitpit
+                is to ease the burden of writing scientific programs provinding the common bulding blocks needed
+                by every scientific application.
                 </p>
 
-                <p>
-                bitpit is developed and maintained by <a class="optimad" href="http://www.optimad.it">Optimad Engineering Srl</a>
-                and is distributed under the <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html">GNU Lesser General Public License v3.0</a>.
-                </p>
-
-                <p>
-                The framework consists of a number of modules.
+                <p class="button">
+                <a href="{{ site.baseurl }}/modules/overview.html">Read more</a>
                 </p>
             </div>
         </div>
 
-        <div class="content-box module-list">
+        <div class="content-box bitpit-modules dark">
             <div class="content">
+                <h1>bitpit modules</h1>
+
                 {% for module in site.modules %}
                     {% if module.highlights %}
                     <div class="module-info">
-                        <h1><a href="{{ site.baseurl }}/{{ module.url }}" >{{ module.name }}</a></h1>
+                        <h2><a href="{{ site.baseurl }}/modules/index.html#{{ module.name }}" >{{ module.name }}</a></h2>
                         <p>
-                        {{ module.description }}
+                        {{ module.short_description }}
                         </p>
                     </div>
                     {% endif %}
@@ -66,32 +66,23 @@ extra-scripts:
             </div>
         </div>
 
-        <div class="content-box">
+        <div class="content-box right bitpit-license">
             <div class="image">
-                <img alt="bitpit Logo" src="{{ site.baseurl }}/images/bitpit_logo_cube.png" />
+                <img alt="bitpit Logo" src="{{ site.baseurl }}/images/bitpit_adaptive.png" />
             </div>
 
             <div class="content">
-                <h1>XXX</h1>
+                <h1>bitpit license</h1>
 
                 <p>
-                Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
-                ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis
-                dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies
-                nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.
-                Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.
-                In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam
-                dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus.
-                Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean
-                leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam
-                lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus
-                viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet.
-                Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi.
-                Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum
-                rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum.
-                Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas
-                nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,
+                bitpit is free and open source, distributed<br/>under the
+                <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html">GNU Lesser General Public License v3</a>
+                </p>
+
+                <p class="button">
+                <a href="{{ site.baseurl }}/license.html">Read more</a>
                 </p>
             </div>
         </div>
+
     </div>

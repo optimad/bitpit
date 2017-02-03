@@ -3,84 +3,182 @@
     padding: 0 0 200px 0;
 }
 
-#main .bitpit-introduction .content > :first-child {
+#main.home > :first-child {
+    margin-top: 25px !important;
+}
+
+#main.home .content-box {
+    position: relative;
+
+    text-align: center;
+
+    min-height: 300px;
+
+    padding: 75px 25px 75px 25px;
+    margin: 25px 0 25px 0;
+}
+
+#main.home .content-box.dark {
+    background-color: #13496C;
+}
+
+#main.home .content-box.left .content {
+    padding: 0 500px 0 100px;
+}
+
+#main.home .content-box.right .content {
+    padding: 0 100px 0 500px;
+}
+
+#main.home .content-box.right .content {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+#main.home .content-box .image {
+    width: 350px;
+
+    text-align: center;
+
+    position: absolute;
+    top: 50%;
+    right: 75px;
+    transform: translateY(-50%);
+}
+
+#main.home .content-box.left .image {
+    right: 75px;
+}
+
+#main.home .content-box.right .image {
+    left: 75px;
+}
+
+#main.home .content-box .image img {
+    width: 100%;
+    height: auto;
+}
+
+#main.home .content-box .content > :first-child {
     margin-top: 0 !important;
 }
 
-#main .bitpit-introduction .content > :last-child {
+#main.home .content-box .content > :last-child {
     margin-bottom: 0 !important;
 }
 
-#main .bitpit-introduction .content h1 {
-    margin-bottom: 30px;
-}
-
-#main .module-list {
+#main.home .content-box h1 {
+    margin-bottom: 25px;
     text-align: center;
-
-    color: #F8F8F8;
-    background-color: #13496C;
-    padding: 50px 75px 50px 75px;
+    border: none;
+    font-size: 2.5rem;
 }
 
-#main .module-list .content {
+#main.home .content-box p {
+    text-align: center;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 400;
+    color: #444444;
+}
+
+#main.home .content-box p.button {
+    text-align: center;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: 40px;
+    border-radius: 5px;
+    line-height: auto;
+    background-color: #13496C;
+    cursor: pointer;
+}
+
+#main.home .content-box p.button,
+#main.home .content-box p.button a
+{
+    color: #F8F8F8;
+}
+
+#main.home .content-box p.button a
+{
+    display: block;
+    padding: 10px 25px 10px 25px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+#main.home .content-box.dark h1,
+#main.home .content-box.dark h2,
+#main.home .content-box.dark a {
+    color: #6DB7E6;
+}
+
+#main.home .content-box.dark p {
+    color: #F8F8F8;
+}
+
+#main.home .bitpit-modules {
+    padding: 50px 75px 10px 75px;
+}
+
+#main.home .bitpit-modules .content {
     padding: 0 0 0 0;
 }
 
-#main .module-list .content > .module-info:first-child {
+#main.home .bitpit-modules .content > .module-info:first-child {
     margin-left: 0;
 }
 
-#main .module-list .module-info {
+#main.home .bitpit-modules h1,
+#main.home .bitpit-modules h2
+{
+    text-align: center;
+
+    padding: 0 0 10px 0;
+    margin: 0 0 20px 0;
+}
+
+#main.home .bitpit-modules a {
+    text-decoration: none;
+    font-weight: 400;
+    outline: none;
+}
+
+#main.home .bitpit-modules p {
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+}
+
+#main.home .bitpit-modules .module-info {
     display: inline-block;
-    width: 350px;
+    width: 400px;
     vertical-align:top;
 
-    margin-left: 35px;
+    margin-left: 40px;
+    margin-bottom: 40px;
 
     overflow: hidden;
     text-align: justify;
 }
 
-#main .module-list .module-info h1 {
-    text-align: center;
-    margin: 0;
-    padding: 0;
-
-    border: 0;
-    text-decoration: none;
-
-    position:relative;
-
-    padding: 0 0 10px 0;
-    margin: 0 0 20px 0;
-
-    font-size: 40px;
-    color: #3A92C9;
+#main.home .bitpit-modules .module-info h2 {
+    font-size: 30px;
+	margin-bottom: 10px;
 }
 
-#main .module-list .module-info h1::after {
+#main.home .bitpit-modules .module-info h2::after {
     background: #F8F8F8 none repeat scroll 0 0;
     content: "";
 
     display: block;
 
     bottom: 0;
-    left: 10%;
-    right: 10%;
+    left: 0;
+    right: 0;
     height: 2px;
     position: absolute;
-}
-
-#main .module-list .module-info h1 a {
-    color: #3A92C9;
-    text-decoration: none;
-    font-weight: 400;
-    outline: none;
-}
-
-#main .module-list .module-info p {
-    font-size: 16px;
-    text-align: center;
-    color: #F8F8F8;
 }

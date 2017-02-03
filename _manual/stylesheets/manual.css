@@ -11,7 +11,7 @@
 }
 
 body, table, div, p, dl {
-    font: 400 14px/22px Roboto,sans-serif;
+    font: 400 16px/22px Roboto,sans-serif;
 }
 
 /* @group Heading Levels */
@@ -286,7 +286,9 @@ div.contents {
     margin-left: 12px;
     margin-right: 8px;
 
-    padding-bottom: 56px;
+    padding-left: 15%;
+    padding-right: 15%;
+    padding-bottom: 100px;
 }
 
 td.indexkey {

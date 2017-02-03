@@ -1,7 +1,127 @@
 ---
 layout: default
-title: Modules
+title: A quick look at bitpit
 section: modules
 ---
 
-<h1>bitpit modules</h1>
+<span class="anchor" id="overview"></span>
+<h1>A quick look at bitpit</h1>
+
+<p>
+During the develpment of scientific applications it is always necessary to spend time developing basic
+functionalities which are common to many scientific programs. For example, applications that deals with
+finite volume or finite element methods always uses some kind of spatial discretization of the physical
+domain and thus require code to handle computational meshes. Although essential to the application, the
+development of these common functionalities is time consuming and subtracts time to the development
+of the main functionalities of the application.
+</p>
+
+<p>
+Each module of the <strong>bitpit</strong> library is developed to address a specific aspect of real-life
+application development. Modules can be used as building blocks to quickly develop a high-perfomance
+scientific application. The library consist of several modules ranging from low level functionalities like
+algebrical operators to high level functionalities like the evaluation of distance functions on
+computational meshes.
+</p>
+
+<p>
+<strong>bitpit</strong> is free software developed by <a class="optimad" href="http://www.optimad.it">Optimad
+Engineering Srl</a> and licensed under the <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html">GNU Lesser General Public License v3</a>.
+</p>
+
+<h2>Basic modules</h2>
+
+<h3>Operators</h3>
+
+<ul>
+    <li>basic algebrical operators (sum, difference, multiplication, division) for the std::vector
+    and std::array containers</li>
+    <li>basic mathematic functions like dot product, cross product, norm, absolute value, ... for the std::vector
+    and std::array containers</li>
+    <li>stream operators and display functions for the std::vector and std::array containers</li>
+</ul>
+
+<h3>Containers</h3>
+
+<p>This module provides containers useful for scientific applications:</p>
+
+<ul>
+    <li>an associative container based on the std::vector which allows fast insertion and deletion
+    of elements and guarantees a </li>
+    <li>a 2D linearized vector</li>
+    <li>binary buffers useful for parallel data exchange</li>
+</ul>
+
+<h3>Communications</h3>
+
+<p>The communications module provides high levle methods for handling MPI parallel communications.</p>
+
+<h2>IO - Input Output</h2>
+
+<p>This module provides methods for reading and writing common data files like DGF (Dune Grid Format),
+STL (STereo Litography) and VTK (Visualization ToolKit) files. It also provides methods for handling
+log files.</p>
+
+<h2>LA - Linear Algebra</h2>
+
+<p><strong>LA</strong> provides methods for handling small dense linear systems stored as
+std::vector or std::array. It
+
+<ul>
+    <li>creation of basic matrices, like identity and diagonal matrices</li>
+    <li>basic matrix operations like transpose and matrix multiplication</li>
+    <li>solution of linear systems</li>
+</ul>
+
+<h2>Radial Basis Functions manipulator (RBF)</h2>
+
+<p>The <strong>RBF</strong> module allows to efficiently handle Radial Basis Function interpolation and
+parameterization even with a large set of nodes.</p>
+
+<h2>SA - Sort algorithms</h2>
+
+    bitpit::LIFOStack manage insertion and extraction uding the Last-In-First-Out pragma
+    bitpit::KdTree sorts vertices in a d-dimensional Euclidean space in a Kd-tree structure
+    bitpit::MinPQueue & bitpit::MaxPQueue manage a binary tree which ensures that the root element has the smalles/largest value in the tree
+
+<h2>Computational Geometry (CG)</h2>
+
+<p>CG module provides methods for computational geometry.</p>
+
+<h2>Mesh modules</h2>
+
+<h3>PABLO - PArallel Balanced Linear Octree</h3>
+
+<p>
+PABLO is a stand-alone module which provides a parallel linear octree/quadtree. bitpit::ParaTree provides connectivity/adjecency information only, whereas bitpit::PabloUniform provides aditionally all geometrical information for an Octree within and rectangular domain. Message passing paradigm is transparent to the user since PABLO has embedded MPI calls. By this way, the user can easily perform data communications and dynamic load-balance by calling straightforward high level methods.
+<br/>
+PABLO allows adaptive mesh refinement by generating non-conforming grid with hanging nodes. Additional features available in PABLO are: 2:1 balancing between octants and a easy way to generate and store intersections between octants.
+</p>
+
+<h3>Patch kernel</h3>
+
+<p>
+<strong>PatchKernel</strong> is the base mesh container of bitpit. It defines basic elements like vertices, interfaces and cells and basic data structures used by the other mesh modules. It provides a homogenous interface class to all types of meshes and two specialized derived classes, for surface and volume meshes.
+</p>
+
+<h3>Surface meshes</h3>
+
+<p>
+<strong>SurfUnstructured</strong> is the container for surface segmentations and has methods tp read, write and
+modify surface triangulations.
+</p>
+
+<h3>Volume meshes</h3>
+
+<p>
+<strong>VolCartesian</strong> and <strong>VolOctree</strong> are the modules that handles Cartesian and Octree meshes.
+They share a common interface through <strong>VolumeKernel</strong> but each patch provides specific optimized methods.
+</p>
+
+<h2>Levelset</h2>
+
+<p>
+The <strong>Levelset</strong> module provides method for evaluating signed and unsigned distance from generic objects
+immersed in a computational mesh
+</p>
+

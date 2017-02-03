@@ -1,7 +1,172 @@
 ---
 layout: default
-title: Modules
+title: A quick look at bitpit
 section: modules
 ---
 
-<h1>bitpit modules</h1>
+<span class="anchor" id="overview"></span>
+<h1>A quick look at bitpit</h1>
+
+<p>
+Nowadays, every scientific field needs software applications that uses computing
+capabilities to understand and solve complex problems. Even if the main objectives of all these applications
+may be very different from each other, there are some functionalities that are common across a wide variety of
+scientific programs. For example, applications that deal with finite volume or finite element methods
+always use some kind of spatial discretization of the physical domain and thus require code to handle
+computational meshes. Although essential, developing code to addresses these common tasks
+is time consuming and subtracts time to the development of the main functionalities of the application.
+</p>
+
+<p>
+Each module of the <strong>bitpit</strong> library is developed to address a specific aspect of real-life
+application development. Modules can be used as building blocks to quickly develop a high-performance
+scientific application. The library consist of several modules ranging from low level functionalities like
+algebraic operators to high level capabilities like the evaluation of a distance functions on
+computational meshes.
+</p>
+
+<p>
+<strong>bitpit</strong> is free software developed by <a class="optimad" href="http://www.optimad.it">Optimad
+Engineering Srl</a> and licensed under the <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html">GNU Lesser General Public License v3</a>.
+</p>
+
+<span class="anchor" id="mesh"></span>
+<h2>Mesh modules</h2>
+
+<span class="anchor" id="PABLO"></span>
+<h3>PABLO - PArallel Balanced Linear Octree</h3>
+
+<p>
+<strong>PABLO</strong> implements a parallel linear octree/quadtree capable of
+generating non-conformal grids with hanging nodes. Adaptive mesh refinement,
+dynamic load-balance among partitions and 2:1 balancing between octants
+are some of the main features of <strong>PABLO</strong>. Communication
+of data defined on the octants is transparent to the user since the necessary
+low level MPI calls are completely handled by the module.
+</p>
+
+<span class="anchor" id="patchkernel"></span>
+<h3>Patch kernel</h3>
+
+<p>
+<strong>PatchKernel</strong> is the base mesh container of <strong>bitpit</strong>. It defines
+the basic objects like vertices, cells and interfaces necessary for implementing high level mesh
+capabilities. It also provides a homogeneous interface class for defining surface and volume meshes.
+</p>
+
+<span class="anchor" id="mesh_surface"></span>
+<span class="anchor" id="surfunstructured"></span>
+<h3>Surface meshes</h3>
+
+<p>
+<strong>SurfUnstructured</strong> is the container for surface segmentations and has methods to
+read, write and modify surface triangulations.
+</p>
+
+<span class="anchor" id="mesh_volume"></span>
+<span class="anchor" id="volcartesian"></span>
+<span class="anchor" id="voloctree"></span>
+<h3>Volume meshes</h3>
+
+<p>
+<strong>VolCartesian</strong> and <strong>VolOctree</strong> are the modules that handle Cartesian and
+octree meshes respectively. They share a common interface through <strong>VolumeKernel</strong>,
+however each mesh provides specific optimized methods.
+</p>
+
+<span class="anchor" id="levelset"></span>
+<h2>Levelset</h2>
+
+<p>
+The <strong>Levelset</strong> module provides methods for evaluating signed and unsigned distance functions
+from generic objects immersed in a computational mesh.
+</p>
+
+<span class="anchor" id="RBF"></span>
+<h2>Radial Basis Functions manipulator (RBF)</h2>
+
+<p>
+The <strong>RBF</strong> module allows to efficiently handle Radial Basis Function interpolation
+and parametrization even with a large set of nodes.</p>
+
+<span class="anchor" id="CG"></span>
+<h2>Computational Geometry (CG)</h2>
+
+<p>The <strong>CG</strong> module provides methods for computational geometry.</p>
+
+<span class="anchor" id="LA"></span>
+<h2>LA - Linear Algebra</h2>
+
+<p>
+The <strong>LA</strong> module provides methods for handling small dense matrices stored as
+STL vectors or as STL arrays. It provides the following capabilities:
+</p>
+
+<ul>
+    <li>creation of basic matrices, like identity and diagonal matrices;</li>
+    <li>basic matrix operations like transpose and matrix multiplication;</li>
+    <li>solution of linear systems.</li>
+</ul>
+
+<span class="anchor" id="SA"></span>
+<h2>SA - Sort algorithms</h2>
+
+<p>
+The <strong>SA</strong> module defines some data structures useful for sorting
+purposes:
+</p>
+
+<ul>
+    <li>a data structure for the insertion and the extraction of elements according
+    to the last-in first-out accounting;</li>
+    <li>a Kd-tree structure for sorting points of a d-dimensional Euclidean space;</li>
+    <li>a binary tree which ensures that the root element always contains the smallest/largest value
+    of the tree.</li>
+</ul>
+
+<span class="anchor" id="IO"></span>
+<h2>IO - Input Output</h2>
+
+<p>This module provides methods for reading and writing common data files like DGF (Dune Grid Format),
+STL (STereo Litography) and VTK (Visualization ToolKit). It also provides methods for handling
+console output and log files.</p>
+
+<span class="anchor" id="basic"></span>
+<h2>Basic modules</h2>
+
+<span class="anchor" id="containers"></span>
+<h3>Containers</h3>
+
+<p>
+This module provides containers not present in the STL C++ library and specifically designed for scientific
+applications:
+</p>
+
+<ul>
+    <li>an associative container based on the STL vector which allows fast insertion and deletion
+    of elements and guarantees that the elements are stored in a contiguous chunk of memory;</li>
+    <li>a two-dimensional linearized vector that avoids the overhead of nesting to STL vectors;</li>
+    <li>binary buffers optimized for parallel data exchange.</li>
+</ul>
+
+<span class="anchor" id="communications"></span>
+<h3>Communications</h3>
+
+<p>The <strong>communications</strong> module provides high level methods for handling MPI parallel
+communications.</p>
+
+<span class="anchor" id="operators"></span>
+<h3>Operators</h3>
+
+<p>
+The STL C++ library is extended to support basic operations on arrays and vectors. In particular
+the module <strong>Operators</strong> provides the following capabilities:
+</p>
+
+<ul>
+    <li>basic algebraic operators (sum, difference, multiplication, division) for STL vector
+    and STL array containers;</li>
+    <li>basic mathematic functions (dot product, cross product, norm, absolute value, ...) for STL vector
+    and STL array containers;</li>
+    <li>stream operators and display functions for STL vector and STL array containers.</li>
+</ul>

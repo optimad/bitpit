@@ -10,19 +10,23 @@ collections:
     output: true
 
 sections:
-    modules:
-        name: Modules
+    #modules:
+    #    name: Modules
+    #
+    #    subsections:
+    #        overview:
+    #            name: Overview
+    #            url: overview.html
+    #        PABLO:
+    #            name: PABLO
+    #            url: PABLO.html
+    #        RBF:
+    #            name: RBF
+    #            url: RBF.html
 
-        subsections:
-            overview:
-                name: Overview
-                url: overview.html
-            PABLO:
-                name: PABLO
-                url: PABLO.html
-            RBF:
-                name: RBF
-                url: RBF.html
+    modules:
+        name: Overview
+        url: index.html
 
     documentation:
         name: Documentation

@@ -1,7 +1,7 @@
 
 @font-face{
     font-family: "Sansation";
-    src: url('../extra/fonts/Sansation_Regular.ttf');
+    src: url('../extra/fonts/Sansation_Regular.ttf') format('truetype');
 }
 
 html,
@@ -11,12 +11,16 @@ body {
 
     height: 100%;
     width: 100%;
+
+    font-size: 19px;
+
+    font-family: Lato,"Helvetica Neue",Helvetica,sans-serif;
 }
 
 h1 {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 400;
-    margin: 2.5rem 0 0.75rem 0;
+    margin: 2.5rem 0 3rem 0;
 
     color: #3A92C9;
     font-family: "Sansation",sans-serif;
@@ -25,7 +29,7 @@ h1 {
 h2 {
     font-size: 1.5rem;
     font-weight: 400;
-    margin: 1.5rem 0 0.75em 0;
+    margin: 1.5rem 0 0.5em 0;
 
     color: #3A92C9;
     font-family: "Sansation",sans-serif;
@@ -33,6 +37,7 @@ h2 {
 
 h3 {
     font-size: 1.15rem;
+    font-weight: 400;
     margin: 1.25rem 0 0.5rem 0;
 
     color: #3A92C9;
@@ -41,7 +46,13 @@ h3 {
 
 p {
     font-size: 1rem;
+    line-height: 1.5rem;
+    text-align: justify;
 
+    margin: 0.75rem 0 0.75rem 0;
+}
+
+ul {
     margin: 0.5rem 0 0.5rem 0;
 }
 
@@ -107,7 +118,7 @@ a {
     width: 100%;
 
     line-height: 50px;
-    font-size: 14px;
+    font-size: 16px;
     list-style: none;
 
     background-color: #FCFCFC;
@@ -333,7 +344,7 @@ a {
 #main {
     position: relative;
 
-    padding: 25px 75px 250px 75px;
+    padding: 75px 16% 250px 16%;
     margin: 0;
 
     color: #383838;
@@ -373,41 +384,8 @@ a {
     color: #3A92C9;
 }
 
-#main > :first-child,
-#main .content-box > :first-child {
+#main > :first-child {
     margin-top: 0 !important;
-}
-
-#main > :last-child,
-#main .content-box > :last-child {
-    margin-bottom: 0 !important;
-}
-
-#main .content-box {
-    position: relative;
-
-    padding: 125px 75px 125px 75px;
-    margin: 0;
-}
-
-#main .content-box .content {
-    padding: 0 400px 0 0;
-}
-
-#main .content-box .image {
-    width: 350px;
-
-    text-align: center;
-
-    position: absolute;
-    top: 50%;
-    right: 75px;
-    transform: translateY(-50%);
-}
-
-#main .content-box .image img {
-    width: 100%;
-    height: auto;
 }
 
 #main p .codebox {
@@ -423,10 +401,9 @@ a {
     position: absolute;
 
     bottom: 0;
-    height: 200px;
 
     box-sizing: border-box;
-    padding: 25px 125px 20px 125px;
+    padding: 25px 75px 25px 75px;
     width: 100%;
 
     color: #F8F8F8;
@@ -439,8 +416,14 @@ a {
     margin: 0;
     padding: 0;
 
-    line-height: 25px;
-    font-size: 12px;
+    line-height: 1.2rem;
+    font-size: 0.9rem;
+}
+
+#footer .copyright {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #BFBFBF;
 }
 
 #footer a,
