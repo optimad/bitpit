@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="227.18866mm"
+   height="81.84446mm"
+   viewBox="0 0 804.99918 290.00005"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="bitpit_logo_2.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="333.24115"
+     inkscape:cy="-257.50175"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1858"
+     inkscape:window-height="1043"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
+    <sodipodi:guide
+       position="213.15779,251.94168"
+       orientation="0,1"
+       id="guide3342" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline"
+     transform="translate(-125.24331,-387.50417)">
+    <path
+       sodipodi:nodetypes="cssccccccssssccccccc"
+       style="fill:#063d64;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 125.24331,387.50419 0,145 c 0,52.46705 42.53295,95 95,95 52.46705,0 95,-42.53295 95,-95 -0.0294,-51.51927 -41.11797,-93.62594 -92.6211,-94.91602 l 0,-0.084 -2.3789,0 -24.50031,0 0,55 24.50031,0 c 22.09139,0 40,17.90861 40,40 0,22.09139 -17.90861,40 -40,40 -22.09139,0 -40,-17.90861 -40,-40 l 0,-32.14258 0,-7.85742 0,-55 0,-20 0,-30 -55,0 z"
+       id="rect3336"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/andrea/work/customers/optimad/present/20150716_bitpit/website/images/zz.png"
+       inkscape:export-xdpi="6.1578941"
+       inkscape:export-ydpi="6.1578941" />
+    <path
+       style="fill:#0283bb;fill-opacity:1;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 330.24331,437.50419 0,53 53,0 0,-53 z m 68.5,0 0,68.5 -68.5,0 0,53 68.5,0 0,68.5 53,0 0,-68.5 68.5,0 0,-53 -68.5,0 0,-68.5 z m -68.5,137 0,53 53,0 0,-53 z"
+       id="rect4272"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccccccccccccccccc" />
+    <path
+       sodipodi:nodetypes="cssccccccssssccccccc"
+       inkscape:connector-curvature="0"
+       style="display:inline;fill:#063d64;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 535.24252,677.50419 0,-144.99999 c 0,-52.46705 42.53295,-95 95,-95 52.46706,-1e-5 95.00001,42.53294 95.00001,95 -0.0294,51.51927 -41.11798,93.62593 -92.62111,94.91601 l 0,0.084 -2.3789,0 -24.49952,0 0,-54.99999 24.49952,0 c 22.09139,0 40.00001,-17.90861 40.00001,-40 0,-22.09139 -17.90862,-40.00001 -40.00001,-40 -22.09139,0 -40,17.90861 -40,40 l 0,32.14258 0,7.85742 0,54.99999 0,20 0,30 -55,0 z"
+       id="rect3336-3" />
+    <path
+       inkscape:connector-curvature="0"
+       style="display:inline;fill:#0283bb;fill-opacity:1;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 740.24251,437.50419 0,53 53,0 0,-53 z m 68.5,0 0,68.5 -68.5,0 0,53 68.5,0 0,68.5 53,0 0,-68.5 68.5,0 0,-53 -68.5,0 0,-68.5 z m -68.5,137 0,53 53,0 0,-53 z"
+       id="rect4272-5"
+       sodipodi:nodetypes="ccccccccccccccccccccccc" />
+  </g>
+</svg>

@@ -75,6 +75,46 @@ a {
     z-index: 500;
 }
 
+#header .logo {
+    position: absolute;
+
+    top: 0;
+    left: 75px;
+
+    width: 140px;
+    height: 50px;
+
+    box-sizing: border-box;
+
+    line-height: 50px;
+    font-family: "Sansation",sans-serif;
+
+    z-index: 600;
+}
+
+#header .logo a {
+    padding: 0;
+    cursor: pointer;
+
+    font-weight: 900;
+    font-size: 30px;
+
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+
+    background-image: url("../images/bitpit.svg");
+    background-size: 111px 40px;
+    background-repeat: no-repeat;
+    background-position: left center;
+}
+
+#header .logo a:visited,
+#header .logo a:active {
+    color: #404040;
+}
+
 #header .menu-line {
     display: block;
     position: absolute;
@@ -87,23 +127,6 @@ a {
 
     border-top: 1px solid #BFBFBF;
     background-color: rgba(36, 115, 152, 0.9);
-}
-
-#header .logo {
-    position: absolute;
-
-    top: 0;
-    left: 75px;
-
-    width: 100px;
-    height: 50px;
-
-    box-sizing: border-box;
-
-    line-height: 50px;
-    font-family: "Sansation",sans-serif;
-
-    z-index: 600;
 }
 
 #header .menu {
@@ -144,8 +167,7 @@ a {
 }
 
 #header .menu li a,
-#header .menu li span,
-#header .logo a {
+#header .menu li span{
     display: block;
     box-sizing: border-box;
     padding: 0 15px 0 15px;
@@ -158,25 +180,14 @@ a {
     color: #404040;
 }
 
-#header .logo a {
-    padding: 0;
-    cursor: pointer;
-}
-
 #header .menu li span {
     cursor: default;
 }
 
 #header .menu li a:visited,
-#header .menu li a:active,
-#header .logo a:visited,
-#header .logo a:active {
+#header .menu li a:active
+{
     color: #404040;
-}
-
-#header .logo a {
-    font-weight: 900;
-    font-size: 30px;
 }
 
 #header .menu li .sub-menu {
