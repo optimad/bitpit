@@ -371,11 +371,13 @@ int main() {
 	
 	{ // output of undeformed control cloud
 		std::vector<int> conn;
-		for(int i=0; i<(int)(controlNodes.size()); ++i) conn.push_back(i);
+		int sCN = controlNodes.size();
+		for(int i=0; i<sCN; ++i) conn.push_back(i);
 		bitpit::VTKUnstructuredGrid   output( "./", "orgCPointCloud", bitpit::VTKElementType::VERTEX);
-        output.setGeomData( bitpit::VTKUnstructuredField::POINTS, points ) ;
-        output.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, connectivity ) ;
+        output.setGeomData( bitpit::VTKUnstructuredField::POINTS, controlNodes ) ;
+        output.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, conn ) ;
         output.setDimensions(conn.size(),controlNodes.size());
+		output.setCodex(bitpit::VTKFormat::ASCII);
 		output.write() ;
 	}
 	
@@ -421,9 +423,10 @@ int main() {
 		for(int i=0; i<(int)(controlNodes.size()); ++i) conn.push_back(i);
 		
 		bitpit::VTKUnstructuredGrid   output( "./", "defCPointCloud", bitpit::VTKElementType::VERTEX);
-        output.setDimensions(conn.size(),controlNodes.size());
-        output.setGeomData( bitpit::VTKUnstructuredField::POINTS, points ) ;
-        output.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, connectivity ) ;
+        output.setGeomData( bitpit::VTKUnstructuredField::POINTS, controlNodes ) ;
+        output.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, conn ) ;
+		output.setDimensions(conn.size(),controlNodes.size());
+		output.setCodex(bitpit::VTKFormat::ASCII);
 		output.write() ;
 	}
 	

@@ -30,14 +30,14 @@
 #include "SortAlgorithms.hpp"
 #include "rbf.hpp"
 
-namespace bitpit{
+namespace bitpit {
 
 /*!
  * @ingroup RBF
  * @{
  *
- * @class RBF
- * @brief Handling of Radial Basis Function with a large set of nodes.
+ * @class RBFKernel
+ * @brief Base class to handle Radial Basis Function with a large set of nodes.
  *
  * The class can be used in two different ways:
  *	- as interpolator, given a set of external fields
@@ -46,49 +46,52 @@ namespace bitpit{
  * The User can switch between modes, according to its needs.
  * Some internal methods of the class can change their behaviour according
  * to the class mode selected. Please check documentation of each single method to
- * appreciate the differences. Default mode of the class is the "INTERP" RBFMode
+ * appreciate the differences. Default mode of the class is the "INTERP" RBFMode::
+ * The actual abstract class does not implement the type of node you want to use; it
+ * can be a 3D point or an unstructured mesh. Anyway what you have to do in deriving your own
+ * RBF class is to specify a type of node you want to use and implement an evaluator
+ * of distances node/node or anywhere point in space/node.
  *
  */
 
 /*!
  * Destructor
  */
-RBF::~RBF(){
+RBFKernel::~RBFKernel(){
     m_fPtr = NULL;
 }
 
 /*!
- * Default constructor. Requires optionally statements of type of RBFBasisFunction
- * which must be used. RBFMode is INTERP, by default. Use RBFMode::setMode for changing it.
+ * Default constructor. RBFBasisFunction is WENDLANDC2 by default. RBFMode is 
+ * INTERP, by default. Use setFunction and setMode for changing it.
  */
-RBF::RBF( RBFBasisFunction bfunc) {
-
-    m_supportRadius = 1.;
-    m_nodes         = 0;
-    m_fields        = 0;
-
-    m_mode = RBFMode::INTERP;
-
-    m_maxFields = -1;
-    m_node.clear();
-    m_value.clear();
-    m_weight.clear();
-    m_active.clear();
-
-    setFunction( bfunc );
+RBFKernel::RBFKernel() {
+	
+	m_supportRadius = 1.;
+	m_nodes         = 0;
+	m_fields        = 0;
+	
+	m_mode = RBFMode::INTERP;
+	
+	m_maxFields = -1;
+	m_value.clear();
+	m_weight.clear();
+	m_activeNodes.clear();
+	
+	setFunction( RBFBasisFunction::WENDLANDC2);
 }
 
 /*!
  * Copy Constructor
  */
-RBF::RBF(const RBF & other){
+RBFKernel::RBFKernel(const RBFKernel & other){
     *this = other;
 }
 
 /*!
  * Copy Operator
  */
-RBF & RBF::operator=(const RBF & other){
+RBFKernel & RBFKernel::operator=(const RBFKernel & other){
 
     m_fields = other.m_fields;
     m_nodes = other.m_nodes;
@@ -98,11 +101,10 @@ RBF & RBF::operator=(const RBF & other){
 
     m_mode = other.m_mode;
 
-    m_node = other.m_node;
     m_value = other.m_value;
     m_weight = other.m_weight;
 
-    m_active = other.m_active;
+    m_activeNodes = other.m_activeNodes;
     m_error = other.m_error;
 
     m_maxFields = other.m_maxFields;
@@ -114,7 +116,7 @@ RBF & RBF::operator=(const RBF & other){
  * Sets the rbf function to be used. Supported in both modes.
  * @param[in] bfunc basis function to be used
  */
-void RBF::setFunction( const RBFBasisFunction &bfunc ){
+void RBFKernel::setFunction( const RBFBasisFunction &bfunc ){
 
     switch(bfunc){
 
@@ -126,9 +128,21 @@ void RBF::setFunction( const RBFBasisFunction &bfunc ){
         setFunction( rbf::linear);
         break;
 
-        default:
-            setFunction( rbf::wendlandc2);
-            break;
+	case( RBFBasisFunction::GAUSS90):
+		setFunction( rbf::gauss90);
+		break;
+
+	case( RBFBasisFunction::GAUSS95):
+		setFunction( rbf::gauss95);
+		break;
+
+	case( RBFBasisFunction::GAUSS99):
+		setFunction( rbf::gauss99);
+		break;
+		
+    default:
+        setFunction( rbf::wendlandc2);
+        break;
     }
 
     return;
@@ -138,18 +152,18 @@ void RBF::setFunction( const RBFBasisFunction &bfunc ){
  * Sets the rbf function to a user specified function. Supported in both modes.
  * @param[in] bfunc basis function to be used
  */
-void RBF::setFunction( double (&bfunc)(const double &) ){
+void RBFKernel::setFunction( double (&bfunc)(const double &) ){
     m_fPtr = bfunc;
     return;
 }
 
 /*!
- * Gets the number of data set attached to RBF nodes.
+ * Gets the number of data set attached to RBFKernel nodes.
  * In INTERP mode, it is the number of different field that need to be interpolated;
  * In PARAM  mode, it identifies the dimension of the weights array for each node.
  * @return  number of data
  */
-int RBF::getDataCount(  ){
+int RBFKernel::getDataCount(  ){
     return m_fields;
 }
 
@@ -157,36 +171,28 @@ int RBF::getDataCount(  ){
  * Get the number of active nodes. Supported in both nodes
  * @return  number of active nodes
  */
-int RBF::getActiveCount(  ){
+int RBFKernel::getActiveCount(  ){
 
     int nActive(0);
 
-    for( auto && active : m_active)
+    for( auto && active : m_activeNodes)
         nActive += (int) active;
 
     return nActive;
 }
 
 /*!
- * Gets the total number of nodes, active or not. Supported in both modes.
- * @return  number of available RBF nodes
- */
-int RBF::getTotalNodesCount(  ){
-    return m_nodes;
-}
-
-/*!
  * Get the indices of the active nodes. Supported in both modes.
  * @return  indices of active nodes
  */
-std::vector<int> RBF::getActiveSet(  ){
+std::vector<int> RBFKernel::getActiveSet(  ){
 
     int                 i(0);
     std::vector<int>    activeSet;
 
     activeSet.reserve( getActiveCount() );
 
-    for( auto && active : m_active){
+    for( auto && active : m_activeNodes){
         if( active )
             activeSet.push_back(i);
         ++i;
@@ -200,30 +206,31 @@ std::vector<int> RBF::getActiveSet(  ){
  * @param[in] n index of node to be checked
  * @return true if active
  */
-bool RBF::isActive( const int &n ){
-    return m_active[n];
+bool RBFKernel::isActive( const int &n ){
+    if(n<0 || n >= int(m_activeNodes.size()))	return false;
+	return m_activeNodes[n];
 }
 
 /*!
- * Activate a node in your RBF node list. Supported in both modes.
+ * Activate a node in your RBFKernel node list. Supported in both modes.
  * @param[in] n index of node to be activated
  * @return	boolean, true if node is activated successfully, false if not
  */
-bool	RBF::activateNode(const int & n){
+bool	RBFKernel::activateNode(const int & n){
     bool check = false;
     if(n>=0 && n<m_nodes){
-        m_active[n] = true;
+        m_activeNodes[n] = true;
         check = true;
     }
     return check;
 }
 
 /*!
- * Activate a node ensamble in your RBF node list. Supported in both modes.
+ * Activate a node ensamble in your RBFKernel node list. Supported in both modes.
  * @param[in] list list of node indices to be activated
  * @return	boolean, true if all nodes are activated successfully, false if at least one of them is not
  */
-bool	RBF::activateNode(const std::vector<int> & list){
+bool	RBFKernel::activateNode(const std::vector<int> & list){
     if(list.empty()) return false;
     bool check = true;
     for(auto && index : list){
@@ -233,34 +240,34 @@ bool	RBF::activateNode(const std::vector<int> & list){
 }
 
 /*!
- * Activate all nodes actually available in your RBF node list. Supported in both modes.
+ * Activate all nodes actually available in your RBFKernel node list. Supported in both modes.
  */
-void	RBF::activateAllNodes(){
-    for(auto && active : m_active){
+void	RBFKernel::activateAllNodes(){
+    for(auto && active : m_activeNodes){
         active = true;
     }
 }
 
 /*!
- * Deactivate a node in your RBF node list.  Supported in both modes.
+ * Deactivate a node in your RBFKernel node list.  Supported in both modes.
  * @param[in] n index of node to be dactivated
  * @return	boolean, true if node is activated successfully, false if not
  */
-bool	RBF::deactivateNode(const int & n ){
+bool	RBFKernel::deactivateNode(const int & n ){
     bool check = false;
     if(n>=0 && n<m_nodes){
-        m_active[n] = false;
+        m_activeNodes[n] = false;
         check=  true;
     }
     return check;
 }
 
 /*!
- * Deactivate a node ensamble in your RBF node list.  Supported in both modes.
+ * Deactivate a node ensamble in your RBFKernel node list.  Supported in both modes.
  * @param[in] list list of node indices to be deactivated
  * @return	boolean, true if all nodes are deactivated successfully, false if at least one of them is not
  */
-bool	RBF::deactivateNode(const std::vector<int> & list){
+bool	RBFKernel::deactivateNode(const std::vector<int> & list){
     if(list.empty()) return false;
     bool check = true;
     for(auto && index : list){
@@ -270,29 +277,29 @@ bool	RBF::deactivateNode(const std::vector<int> & list){
 }
 
 /*!
- * Deactivate all nodes actually available in your RBF node list.  Supported in both modes.
+ * Deactivate all nodes actually available in your RBFKernel node list.  Supported in both modes.
  */
-void	RBF::deactivateAllNodes(){
-    for(auto && active : m_active){
+void	RBFKernel::deactivateAllNodes(){
+    for(auto && active : m_activeNodes){
         active = false;
     }
 }
 
 /*!
- * Set the support radius of all RBF kernel functions. Supported in both modes.
+ * Set the support radius of all RBFKernel kernel functions. Supported in both modes.
  * @param[in] radius support radius
  */
-void RBF::setSupportRadius( const double & radius ){
+void RBFKernel::setSupportRadius( const double & radius ){
     m_supportRadius = radius;
     return;
 }
 
 /*!
- * Return currently set support radius used by all RBF kernel functions.
+ * Return currently set support radius used by all RBFKernel kernel functions.
  * Supported in both modes.
  * @return support radius
  */
-double RBF::getSupportRadius(){
+double RBFKernel::getSupportRadius(){
     return m_supportRadius;
 }
 
@@ -300,7 +307,7 @@ double RBF::getSupportRadius(){
  * Return currently usage mode of your class.
  * @return class mode
  */
-RBFMode RBF::getMode(){
+RBFMode RBFKernel::getMode(){
     return m_mode;
 }
 
@@ -308,7 +315,7 @@ RBFMode RBF::getMode(){
  * Set usage mode of your class.
  * @param[in] mode class mode. Ref to RBFMode enum
  */
-void RBF::setMode(RBFMode mode){
+void RBFKernel::setMode(RBFMode mode){
     m_mode = mode;
 }
 
@@ -317,9 +324,9 @@ void RBF::setMode(RBFMode mode){
  * In INTERP mode, set each field value at the target node
  * In PARAM mode, set the weight coefficient array at node
  * @param[in] id id of node
- * @param[in] value  data values to be set as RBF parameters for the given node
+ * @param[in] value  data values to be set as RBFKernel parameters for the given node
  */
-void RBF::setDataToNode( const int &id, const std::vector<double> &value ){
+void RBFKernel::setDataToNode( const int &id, const std::vector<double> &value ){
 
     if(id<0 || id >= m_fields) return;
 
@@ -350,14 +357,14 @@ void RBF::setDataToNode( const int &id, const std::vector<double> &value ){
  * @param[in] id id of data
  * @param[in] value  data values
  */
-void RBF::setDataToAllNodes( const int &id, const std::vector<double> &value ){
+void RBFKernel::setDataToAllNodes( const int &id, const std::vector<double> &value ){
 
     if(id<0 || id >= m_fields) return;
 
     int size = m_value[id].size();
 
     if((int)(value.size()) != size){
-        std::cout<<"Mismatch dimension between data vector and current data container. One or both does not match RBF nodes count.";
+        std::cout<<"Mismatch dimension between data vector and current data container. One or both does not match RBFKernel nodes count.";
         std::cout<<"This may lead to nasty errors. Use fitDataToNodes to reshape container or fit your data vector first!"<<std::endl;
         std::cout<<"Data could not be set"<<std::endl;
         return;
@@ -372,99 +379,13 @@ void RBF::setDataToAllNodes( const int &id, const std::vector<double> &value ){
 }
 
 /*!
- * Adds a RBF node and sets it to active. Does not manage duplicated nodes.
- * Supported in both modes.
- * @param[in] node  coordinates of node to be added
- * @return id of node within class
- */
-int RBF::addNode( const std::array<double,3> &node ){
-    m_node.push_back(node);
-    m_active.push_back(true);
-    m_nodes++;
-    return m_nodes;
-}
-
-/*!
- * Adds a list of RBF nodes and sets them to active. Does not manage duplicated nodes.
- * Supported in both modes.
- * @param[in] node  coordinates of nodes to be added
- * @return id of node within class
- */
-std::vector<int> RBF::addNode( const std::vector<std::array<double,3>> &node ){
-
-    int                 i( m_nodes );
-    std::vector<int>    ids;
-
-    ids.resize( node.size() );
-
-    for( auto & id:ids ){
-        id = i;
-        ++i;
-    }
-
-    m_node.insert( m_node.end(), node.begin(), node.end() );
-    m_nodes += node.size();
-
-    m_active.resize( m_nodes, true );
-
-    return ids;
-}
-
-/*! Remove pre-existent node. RBF Node list is resized and renumbered after extraction.
- * Supported in both modes.
- * @param[in] id id of node
- * @return boolean, true if successfully extracted, false otherwise
- */
-bool RBF::removeNode(int id){
-
-    if(id < 0 || id >=m_nodes) return false;
-
-    m_nodes--;
-    m_node.erase(m_node.begin()+id);
-    m_active.erase(m_active.begin()+id);
-    return(true);
-}
-
-/*! Remove pre-existent set of nodes. RBF nodal list is resized and renumbered after extraction.
- *  Supported in both modes.
- * @param[in] list id list of candidates to extraction
- * @return boolean, true if all nodes are successfully extracted, false if any of them or none are extracted
- */
-bool RBF::removeNode(std::vector<int> & list){
-
-    std::set<int> setList;
-    for(auto && id : list) setList.insert(id);
-
-    int extracted = 0;
-    for(auto && id : setList){
-        if(id>=0 && id <m_nodes){;
-            m_nodes--;
-            int index = id-extracted;
-            m_node.erase(m_node.begin() + index);
-            m_active.erase(m_active.begin() + index);
-            extracted++;
-            }
-    }
-    return(extracted == (int)(list.size()));
-}
-
-/*!
- * Remove all nodes in RBF nodal list. Supported in both modes.
- */
-void RBF::removeAllNodes(){
-    m_nodes = 0;
-    m_node.clear();
-    m_active.clear();
-}
-
-/*!
- * Increment container size for RBF control data.The RBF::fitDataToNodes() method
+ * Increment container size for RBFKernel control data.The RBFKernel::fitDataToNodes() method
  * is implicitly called, to ensure dimension consistency between data dimension
- * and number of RBF nodes. Use RBF::setDataToAllNodes to fill them.
+ * and number of RBFKernel nodes. Use RBFKernel::setDataToAllNodes to fill them.
  * In INTERP mode, increments and fits fields container, in PARAM mode, the weights one.
  * @return id of virtual data within the class
  */
-int RBF::addData( ){
+int RBFKernel::addData( ){
     if(m_fields == m_maxFields){
         std::cout<<"max number of data set reached"<<std::endl;
         return -1;
@@ -475,16 +396,16 @@ int RBF::addData( ){
 }
 
 /*!
- * Adds data attached to RBF nodes to current set, a field to be interpolated in INTERP mode,
- * a RBF weight component in PARAM mode.
- * Note: data vector is added even if its size is different from actual number of RBF nodes.
+ * Adds data attached to RBFKernel nodes to current set, a field to be interpolated in INTERP mode,
+ * a RBFKernel weight component in PARAM mode.
+ * Note: data vector is added even if its size is different from actual number of RBFKernel nodes.
  * To ensure consistency use fitDataToNodes() method.
  *
- * @param[in] data values of weight/fields for each RBF node
+ * @param[in] data values of weight/fields for each RBFKernel node
  * @return id of data within the class
  *
  */
-int RBF::addData( const std::vector<double> & data ){
+int RBFKernel::addData( const std::vector<double> & data ){
 
     if(m_fields == m_maxFields){
         std::cout<<"max number of data set reached"<<std::endl;
@@ -501,7 +422,7 @@ int RBF::addData( const std::vector<double> & data ){
  * \param[in] id id of node
  * \return boolean, true if successfully extracted, false otherwise
  */
-bool RBF::removeData(int id){
+bool RBFKernel::removeData(int id){
 
     if(id<0 || id >=m_fields) return false;
 
@@ -512,13 +433,13 @@ bool RBF::removeData(int id){
 }
 
 /*! Remove pre-existent set of data. RBF Data list is resized and renumbered after extraction.
- * In RBFType::PARAM mode data are meant as RBF weights
- * In RBFType::INTERP mode data are meant as fields to be interpolated
+ * In PARAM mode data are meant as RBF weights
+ * In INTERP mode data are meant as fields to be interpolated
  *
  * \param[in] list id list of candidates to extraction
  * \return boolean, true if all data set are successfully extracted, false if any of them are not extracted
  */
-bool RBF::removeData(std::vector<int> & list){
+bool RBFKernel::removeData(std::vector<int> & list){
 
     std::set<int> setList;
     for(auto && id : list) setList.insert(id);
@@ -538,10 +459,10 @@ bool RBF::removeData(std::vector<int> & list){
 }
 
 /*!
- * Remove all data set in RBF nodal list. All fields for interpolation in INTERP mode,
+ * Remove all data set in RBF list. All fields for interpolation in INTERP mode,
  * or all RBF weights for PARAM mode
  */
-void RBF::removeAllData(){
+void RBFKernel::removeAllData(){
     m_fields = 0;
     if(m_mode == RBFMode::INTERP)	m_value.clear();
     else							m_weight.clear();
@@ -555,7 +476,7 @@ void RBF::removeAllData(){
  * @return vector containing interpolated/parameterized values.
  *
  */
-std::vector<double> RBF::evalRBF( const std::array<double,3> &point){
+std::vector<double> RBFKernel::evalRBF( const std::array<double,3> &point){
 
     std::vector<double> values(m_fields, 0.);
     int                 i, j;
@@ -563,8 +484,8 @@ std::vector<double> RBF::evalRBF( const std::array<double,3> &point){
 
     for( i=0; i<m_nodes; ++i ){
 
-        if( m_active[i] ) {
-            dist = norm2( point - m_node[i] ) / m_supportRadius;
+        if( m_activeNodes[i] ) {
+            dist = calcDist(point, i) / m_supportRadius;
             basis = evalBasis( dist );
 
             for( j=0; j<m_fields; ++j){
@@ -578,13 +499,45 @@ std::vector<double> RBF::evalRBF( const std::array<double,3> &point){
 }
 
 /*!
+ * Evaluates the RBF on a target RBF node. Supported in both modes.
+ * Its size matches the number of fields/weights attached to RBF.
+ *
+ * @param[in] jnode index of the RBF node in the node list 
+ * @return vector containing interpolated/parameterized values.
+ *
+ */
+std::vector<double> RBFKernel::evalRBF(int jnode){
+	
+	std::vector<double> values(m_fields, 0.);
+	int                 i, j;
+	double              dist, basis;
+	
+	if(jnode<0 || jnode>= m_nodes ) return values;
+	
+	for( i=0; i<m_nodes; ++i ){
+		
+		if( m_activeNodes[i] ) {
+			dist = calcDist(jnode, i) / m_supportRadius;
+			basis = evalBasis( dist );
+			
+			for( j=0; j<m_fields; ++j){
+				values[j] += basis * m_weight[j][i];
+			}
+		}
+		
+	}
+	
+	return values;
+}
+
+/*!
  * Calculates the RBF weights using all currently active nodes and just given target fields.
  * Regular LU solver for linear system A*X=B is employed (LAPACKE dgesv).
  * Supported ONLY in INTERP mode.
  *
  * @return integer error flag . If 0-successfull computation, if 1-errors occurred, if -1 dummy method call
  */
-int RBF::solve(){
+int RBFKernel::solve(){
     if(m_mode == RBFMode::PARAM)	return -1;
     int  j, k;
     double dist;
@@ -617,7 +570,7 @@ int RBF::solve(){
     for( const auto &i : activeSet ){
         for( const auto &j : activeSet ){
 
-            dist = norm2(m_node[j] - m_node[i]) / m_supportRadius;
+            dist = calcDist(j,i) / m_supportRadius;
             a[k] = evalBasis( dist );
             k++;
         }
@@ -655,12 +608,12 @@ int RBF::solve(){
 
 /*!
  * Determines effective set of nodes to be used using greedy algorithm and calculate weights on them.
- * Automatically choose which set of RBF nodes is active or not, according to the given tolerance.
+ * Automatically choose which set of RBFKernel nodes is active or not, according to the given tolerance.
  * Supported ONLY in INTERP mode.
  * @param[in] tolerance error tolerance for adding nodes
  * @return integer error flag . If 0-successfull computation and tolerance met, if 1-errors occurred, not enough nodes, if -1 dummy method call
  */
-int RBF::greedy( const double &tolerance){
+int RBFKernel::greedy( const double &tolerance){
 
     if(m_mode == RBFMode::PARAM)	return -1;
 
@@ -670,7 +623,7 @@ int RBF::greedy( const double &tolerance){
 
     m_error.resize(m_nodes);
 
-    for( auto && active : m_active )
+    for( auto && active : m_activeNodes )
         active = false;
 
     for( i=0; i<m_nodes; ++i){
@@ -687,7 +640,7 @@ int RBF::greedy( const double &tolerance){
         i = addGreedyPoint();
 
         if( i != -1) {
-            m_active[i] = true;
+            m_activeNodes[i] = true;
 
             //solve();
             solveLSQ();
@@ -708,14 +661,14 @@ int RBF::greedy( const double &tolerance){
 
 /*!
  * Check dimensions of already available data and resize them to current
- * RBF node list dimension. The method resizes all data structures to current RBF
+ * RBFKernel node list dimension. The method resizes all data structures to current RBFKernel
  * node list dimension and does not destroy any previous stored data within such
  * dimension. Anyway, mismatches definitions could occur. Please
- * use RBF::setDataToAllNodesto load your data again.
- * In RBFMode::PARAM mode data are meant as RBF weights
+ * use RBFKernel::setDataToAllNodesto load your data again.
+ * In RBFMode::PARAM mode data are meant as RBFKernel weights
  * In RBFMode::INTERP mode data are meant as fields to be interpolated
  */
-void RBF::fitDataToNodes(){
+void RBFKernel::fitDataToNodes(){
 
     for (int i=0;i<m_fields; ++i){
         fitDataToNodes(i);
@@ -724,28 +677,28 @@ void RBF::fitDataToNodes(){
 
 /*!
  * Check dimensions id-th data and resize it to current
- * RBF node list dimension. The method resizes id-th data structure to current RBF
+ * RBFKernel node list dimension. The method resizes id-th data structure to current RBFKernel
  * node list dimension and does not destroy any previous stored data within such
  * dimension. Anyway, mismatches definitions could occur. Please
- * use RBF::setDataToAllNodes to load your data again.
- * In RBFMode::PARAM mode data are meant as RBF weights
+ * use RBFKernel::setDataToAllNodes to load your data again.
+ * In RBFMode::PARAM mode data are meant as RBFKernel weights
  * In RBFMode::INTERP mode data are meant as fields to be interpolated
  * @param[in] id id of data
  */
-void RBF::fitDataToNodes(int id){
+void RBFKernel::fitDataToNodes(int id){
     if(m_mode != RBFMode::PARAM)    m_value[id].resize(m_nodes, 0.0);
     else                            m_weight[id].resize(m_nodes,0.0);
 }
 
 
-//PROTECTED RBF CLASS METHODS IMPLEMENTATION
+//PROTECTED RBFKernel CLASS METHODS IMPLEMENTATION
 
 /*!
  * Evaluates the basis function. Supported in both modes
  * @param[in] dist distance
  * @return value of basis function
  */
-double RBF::evalBasis( const double &dist ){
+double RBFKernel::evalBasis( const double &dist ){
     return (*m_fPtr)(dist);
 }
 
@@ -754,27 +707,24 @@ double RBF::evalBasis( const double &dist ){
  * Determines which node has to be added to active set. Supported only in INTERP mode.
  * @return index with max error; if no index available, or dummy call -1 is returned
  */
-int RBF::addGreedyPoint( ){
+int RBFKernel::addGreedyPoint( ){
     if(m_mode == RBFMode::PARAM) return -1;
 
     int     i(0), index(-1), nA( getActiveCount() );
-    double  maxError(0.), penal;
-    std::array<double,3>    myCoord;
+    double  maxError(0.); //, penal;
 
     std::vector<int>     active( getActiveSet() );
 
     for( auto error : m_error ){
 
-        if(!m_active[i] ){
+        if(!m_activeNodes[i] ){
 
-            myCoord = m_node[i];
-
-            if( nA != 0){
-                penal = 1.e18;
-                for( auto j : active ){
-                    penal = std::min(penal, norm2( myCoord - m_node[j] )) ;
-                }
-            }
+//             if( nA != 0){
+//                 penal = 1.e18;
+//                 for( auto j : active ){
+//                     penal = std::min(penal, calcDist(i,j)) ;
+//                 }
+//             }
 
             if( error > maxError ){
                 maxError = error;
@@ -795,16 +745,16 @@ int RBF::addGreedyPoint( ){
  * Supported only in INTERP mode.
  * @return max error, if lesser then 0, dummy call triggered.
  */
-double RBF::evalError( ){
+double RBFKernel::evalError( ){
     if(m_mode == RBFMode::PARAM) return -1.0;
     int                     i(0), j(0);
     //int 					index;
     double                  maxError(0), relError, realValue, norm;
     std::vector<double>     reconValues;
 
-    for( auto &point : m_node ){
+    for( int iX=0; iX< m_nodes; ++iX ){
 
-        reconValues = evalRBF( point );
+        reconValues = evalRBF( iX );
 
         j=0;
         norm = 0.;
@@ -833,12 +783,12 @@ double RBF::evalError( ){
 }
 
 /*!
- * Calculates the RBF weights using all active nodes and just given target fields.
+ * Calculates the RBFKernel weights using all active nodes and just given target fields.
  * Compute weights as solution of a linear least squares problem (LAPACKE dglsd).
  * Supported ONLY in INTERP mode.
  * \return integer error flag . If 0-successfull computation, if 1-errors occurred , -1 dummy call
  */
-int RBF::solveLSQ(){
+int RBFKernel::solveLSQ(){
     if(m_mode == RBFMode::PARAM) return -1;
     int i, j, k;
     double dist;
@@ -875,7 +825,7 @@ int RBF::solveLSQ(){
     k=0;
     for( const auto &j : activeSet ){
         for( i=0; i<nP; ++i){
-            dist = norm2(m_node[j] - m_node[i]) / m_supportRadius;
+            dist = calcDist(j,i) / m_supportRadius;
             a[k] = evalBasis( dist );
             k++;
         }
@@ -909,6 +859,173 @@ int RBF::solveLSQ(){
     return(0);
 }
 
+
+
+// RBF derived class implementation
+
+/*!
+ * @ingroup RBF
+ * @{
+ *
+ * @class RBF
+ * @brief Class to handle Radial Basis Function with a large set of 3D points as nodes.
+ *
+ * The class specializes RBFKernel and employs a 3D point cloud as set of RBF nodes.
+ *
+ */
+
+/*!
+ * Destructor
+ */
+RBF::~RBF(){
+}
+
+// /*!
+//  * Default constructor. RBFBasisFunction::WENDLANDC2 is default. RBFMode is 
+//  * INTERP, by default. Use setMode for changing it.
+//  */
+// RBF::RBF(): RBFKernel() {
+// 	m_node.clear();
+// }
+
+/*!
+ * Default constructor. Requires optionally statements of type of RBFBasisFunction
+ * which must be used. RBFMode is INTERP, by default. Use setMode for changing it.
+ */
+RBF::RBF( RBFBasisFunction bfunc) {
+	m_node.clear();
+	setFunction( bfunc );
+}
+
+/*!
+ * Copy Constructor
+ */
+RBF::RBF(const RBF & other){
+	*this = other;
+}
+
+/*!
+ * Copy Operator
+ */
+RBF & RBF::operator=(const RBF & other){
+	
+	*(static_cast<RBFKernel*>(this)) = *(static_cast<const RBFKernel *>(&other));
+	m_node = other.m_node;
+	return(*this);
+}
+
+/*!
+ * Gets the total number of nodes, active or not. Supported in both modes.
+ * @return  number of available RBF nodes
+ */
+int RBF::getTotalNodesCount(  ){
+	return m_nodes;
+}
+
+/*!
+ * Adds a RBF node and sets it to active. Does not manage duplicated nodes.
+ * Supported in both modes.
+ * @param[in] node  coordinates of node to be added
+ * @return id of node within class
+ */
+int RBF::addNode( const std::array<double,3> &node ){
+	m_node.push_back(node);
+	m_activeNodes.push_back(true);
+	m_nodes++;
+	return m_nodes;
+}
+
+/*!
+ * Adds a list of RBF nodes and sets them to active. Does not manage duplicated nodes.
+ * Supported in both modes.
+ * @param[in] node  coordinates of nodes to be added
+ * @return id of node within class
+ */
+std::vector<int> RBF::addNode( const std::vector<std::array<double,3>> &node ){
+	
+	int                 i( m_nodes );
+	std::vector<int>    ids;
+	
+	ids.resize( node.size() );
+	
+	for( auto & id:ids ){
+		id = i;
+		++i;
+	}
+	
+	m_node.insert( m_node.end(), node.begin(), node.end() );
+	m_nodes += node.size();
+	
+	m_activeNodes.resize( m_nodes, true );
+	
+	return ids;
+}
+
+/*! Remove pre-existent node. RBF Node list is resized and renumbered after extraction.
+ * Supported in both modes.
+ * @param[in] id id of node
+ * @return boolean, true if successfully extracted, false otherwise
+ */
+bool RBF::removeNode(int id){
+	
+	if(id < 0 || id >=m_nodes) return false;
+	
+	m_nodes--;
+	m_node.erase(m_node.begin()+id);
+	m_activeNodes.erase(m_activeNodes.begin()+id);
+	return(true);
+}
+
+/*! Remove pre-existent set of nodes. RBF nodal list is resized and renumbered after extraction.
+ *  Supported in both modes.
+ * @param[in] list id list of candidates to extraction
+ * @return boolean, true if all nodes are successfully extracted, false if any of them or none are extracted
+ */
+bool RBF::removeNode(std::vector<int> & list){
+	
+	std::set<int> setList;
+	for(auto && id : list) setList.insert(id);
+	
+	int extracted = 0;
+	for(auto && id : setList){
+		if(id>=0 && id <m_nodes){;
+			m_nodes--;
+			int index = id-extracted;
+			m_node.erase(m_node.begin() + index);
+			m_activeNodes.erase(m_activeNodes.begin() + index);
+			extracted++;
+		}
+	}
+	return(extracted == (int)(list.size()));
+}
+
+/*!
+ * Remove all nodes in RBF nodal list. Supported in both modes.
+ */
+void RBF::removeAllNodes(){
+	m_nodes = 0;
+	m_node.clear();
+	m_activeNodes.clear();
+}
+
+/*!
+ * Calculate distances between two RBF nodes in the list of class availables
+ * @param[in] i i-th node in the list
+ * @param[in] j j-th node in the list
+ */
+double RBF::calcDist(int i, int j){
+	return norm2(m_node[i]-m_node[j]);
+}
+
+/*!
+ * Calculate distances between a 3D point in space and a RBF node in the list of class availables
+ * @param[in] point std::array<double,3> coordinates of the point
+ * @param[in] j j-th RBF node in the list
+ */
+double RBF::calcDist(const std::array<double,3>& point, int j){
+	return norm2(point-m_node[j]);
+}
+
 // RBF NAMESPACE UTILITIES
 
 /*!
@@ -940,6 +1057,39 @@ double rbf::linear( const double &dist ){
         return( 1-dist );
     }
 
+}
+
+/*!
+ * Non compact gaussian function with 0.1 value at dist equal to 1 
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::gauss90( const double &dist ){
+	double eps = pow(-1.0*log(0.1),0.5);
+	return( exp(-1.0*pow(dist*eps,2) ) );
+	
+}
+
+/*!
+ * Non compact gaussian function with 0.05 value at dist equal to 1 
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::gauss95( const double &dist ){
+	double eps = pow(-1.0*log(0.05),0.5);
+	return( exp(-1.0*pow(dist*eps,2) ) );
+	
+}
+
+/*!
+ * Non compact gaussian function with 0.01 value at dist equal to 1 
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::gauss99( const double &dist ){
+	double eps = pow(-1.0*log(0.01),0.5);
+	return( exp(-1.0*pow(dist*eps,2) ) );
+	
 }
 
 /*!
