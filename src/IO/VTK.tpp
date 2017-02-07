@@ -64,6 +64,27 @@ VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, s
 };
 
 /*!
+ * Add user data for input or output. 
+ * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
+ * @tparam T type of data to be written or read
+ * @param[in] name name of field
+ * @param[in] comp type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
+ * @param[in] loc location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in] streamer data streamer
+ */
+template<class T>
+VTKField& VTK::addData( std::string name, VTKFieldType comp, VTKLocation loc, VTKBaseStreamer *streamer ){
+
+    VTKField&   field = addData( name, streamer ) ;
+
+    field.setFieldType(comp) ;
+    field.setLocation(loc) ;
+    field.setDataType( VTKTypes::whichType<T>() ) ;
+
+    return field ;
+};
+
+/*!
  * Associates the NativeStreamer to a geometrical field
  * @tparam T type of std::vector<>
  * @param[in] fieldEnum which geometrical field 
@@ -85,6 +106,25 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, std::vect
 }
 
 /*!
+ * Associates streamer to a geometrical field
+ * @tparam T type of data to be written or read
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] streamer pointer to data streamer
+ */
+template<class T>
+void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseStreamer *streamer ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = m_geometry[index] ;
+
+    field.setDataType( VTKTypes::whichType<T>() ) ;
+    field.setStreamer( *streamer ) ;
+
+    return;
+
+};
+
+/*!
  * Associates the NativeStreamer to a geometrical field
  * @tparam T type of std::vector<>
  * @param[in] fieldEnum which geometrical field 
@@ -104,4 +144,23 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, std::vector
 
     return ;
 }
+
+/*!
+ * Associates streamer to a geometrical field
+ * @tparam T type of data to be written or read
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] streamer VTKBaseStreamer
+ */
+template<class T>
+void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKBaseStreamer *streamer ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = m_geometry[index] ;
+
+    field.setDataType( VTKTypes::whichType<T>() ) ;
+    field.setStreamer( *streamer ) ;
+
+    return;
+
+};
 }

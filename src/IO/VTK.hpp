@@ -317,10 +317,15 @@ class VTK{
         void                    setDataCodex( VTKFormat );
 
         VTKField&               addData( std::string, VTKBaseStreamer* = NULL ) ;
-        VTKField&               addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseStreamer* =NULL ) ;
+
+        BITPIT_DEPRECATED( VTKField&  addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
+
+        template<class T>
+        VTKField&               addData( std::string, VTKFieldType, VTKLocation, VTKBaseStreamer* =NULL ) ;
 
         template<class T>
         VTKField&               addData( std::string, std::vector<T> & ) ;
+
         template<class T>
         VTKField&               addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
 
@@ -402,7 +407,11 @@ class VTKUnstructuredGrid : public VTK {
         template<class T>
         void                    setGeomData( VTKUnstructuredField, std::vector<T> & ) ;
         void                    setGeomData( VTKUnstructuredField, VTKBaseStreamer* = NULL ) ;
-        void                    setGeomData( VTKUnstructuredField, VTKDataType, VTKBaseStreamer* =NULL ) ;
+
+        BITPIT_DEPRECATED( void setGeomData( VTKUnstructuredField, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
+
+        template<class T>
+        void setGeomData( VTKUnstructuredField, VTKBaseStreamer* =NULL );
 
         uint64_t                getNConnectivity( ) ; 
         uint64_t                calcFieldSize( const VTKField &) ;
@@ -447,7 +456,10 @@ class VTKRectilinearGrid : public VTK{
         template<class T>
         void                    setGeomData( VTKRectilinearField, std::vector<T> & ) ;
         void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* = NULL ) ;
-        void                    setGeomData( VTKRectilinearField, VTKDataType, VTKBaseStreamer* =NULL ) ;
+        BITPIT_DEPRECATED( void setGeomData( VTKRectilinearField, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
+
+        template<class T>
+        void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* =NULL ) ;
 
         void                    setGlobalIndex( std::vector<extension3D_t> ) ;
         void                    setGlobalIndex( std::vector<extension2D_t> ) ;

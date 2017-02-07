@@ -150,24 +150,19 @@ void PatchKernel::initialize()
 	m_vtk.setName(convert.str());
 	m_vtk.setCodex(VTKFormat::APPENDED);
 
-	// Get VTK data types
-	VTKDataType vtkInt    = VTKTypes::whichType<int>();
-	VTKDataType vtkLong   = VTKTypes::whichType<long>();
-	VTKDataType vtkDouble = VTKTypes::whichType<double>();
-
 	// Set VTK Geom Data
-	m_vtk.setGeomData(VTKUnstructuredField::POINTS, vtkDouble, this);
-	m_vtk.setGeomData(VTKUnstructuredField::OFFSETS, vtkInt, this);
-	m_vtk.setGeomData(VTKUnstructuredField::TYPES, vtkInt, this);
-	m_vtk.setGeomData(VTKUnstructuredField::CONNECTIVITY, vtkLong, this);
+	m_vtk.setGeomData<double>(VTKUnstructuredField::POINTS, this);
+	m_vtk.setGeomData<int>(VTKUnstructuredField::OFFSETS, this);
+	m_vtk.setGeomData<int>(VTKUnstructuredField::TYPES, this);
+	m_vtk.setGeomData<long>(VTKUnstructuredField::CONNECTIVITY, this);
 
 	// Add VTK basic patch data
-	m_vtk.addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, vtkLong, this);
-	m_vtk.addData("PID", VTKFieldType::SCALAR, VTKLocation::CELL, vtkInt, this);
-	m_vtk.addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, vtkLong, this);
+	m_vtk.addData<long>("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
+	m_vtk.addData<int>("PID", VTKFieldType::SCALAR, VTKLocation::CELL, this);
+	m_vtk.addData<long>("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, this);
 #if BITPIT_ENABLE_MPI==1
-	m_vtk.addData("cellGlobalIndex", VTKFieldType::SCALAR, VTKLocation::CELL, vtkLong, this);
-	m_vtk.addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL, vtkInt, this);
+	m_vtk.addData<long>("cellGlobalIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
+	m_vtk.addData<int>("rank", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 #endif
 }
 
