@@ -64,7 +64,7 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
                 genericIO::flushBINARY(str, type );
         
         } else if(name == "offsets" ){
-            uint8_t     n = vtk::getNNodeInElement(m_homogeneousType) ;
+            uint8_t     n = vtk::getElementNodeCount(m_homogeneousType) ;
             uint64_t    offset(0) ;
             for( unsigned int i=0; i<m_cells; ++i){
                 offset += n ;
@@ -80,7 +80,7 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
                 genericIO::flushASCII(str, type );
         
         } else if(name == "offsets" ){
-            uint8_t     n = vtk::getNNodeInElement(m_homogeneousType) ;
+            uint8_t     n = vtk::getElementNodeCount(m_homogeneousType) ;
             uint64_t    offset(0) ;
             for( unsigned int i=0; i<m_cells; ++i){
                 offset += n ;
@@ -198,7 +198,7 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint
     m_connectivity  = nconn ;
 
     if( m_homogeneousType != VTKElementType::UNDEFINED ){
-        m_connectivity = ncells *vtk::getNNodeInElement( m_homogeneousType ) ;
+        m_connectivity = ncells *vtk::getElementNodeCount( m_homogeneousType ) ;
         m_unstructuredStreamer.setGrid(m_homogeneousType, ncells );
     }
 
@@ -565,7 +565,7 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
 
     } else if( name == "connectivity" ){
        if( m_homogeneousType != VTKElementType::UNDEFINED){
-            comp = vtk::getNNodeInElement( m_homogeneousType ) ;
+            comp = vtk::getElementNodeCount( m_homogeneousType ) ;
 
        } else {
            comp = 1;

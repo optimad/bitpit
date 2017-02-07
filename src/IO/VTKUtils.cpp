@@ -32,7 +32,7 @@ namespace bitpit{
  *  @param[in] t element type
  *  @return number of vertices of element type
  */
-uint8_t vtk::getNNodeInElement( const VTKElementType & t){
+uint8_t vtk::getElementNodeCount( const VTKElementType & t){
     int myType = static_cast<std::underlying_type<VTKElementType>::type>(t);
 
     switch (myType){
