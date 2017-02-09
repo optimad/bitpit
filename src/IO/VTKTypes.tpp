@@ -109,46 +109,25 @@ VTKDataType VTKTypes::registerType(VTKDataType VTKType)
 
 /*!
  *  Determines the basic VTK type from argument.
- *  @tparam     T           type of argument
- *  @param[in]  dummy       argument type to be deduced
- *  @return     basic VTK type 
+ *  @tparam T type of argument
+ *  @tparam nesting level of nesting
+ *  @return basic VTK type 
  */
-template<class T>
-VTKDataType VTKTypes::whichType( const T &dummy ){
-
-    BITPIT_UNUSED(dummy) ;
-
+template<typename T, int nesting, typename std::enable_if<std::is_pod<T>::value&&!utils::is_iterable<T>::value>::type*>
+VTKDataType VTKTypes::whichType( ){
     return whichType(typeid(T)) ;
 };
 
 /*!
  *  Determines the basic VTK type from argument.
- *  @tparam     T           type of argument
- *  @param[in]  dummy      argument type to be deduced
- *  @return     basic VTK type 
+ *  @tparam T type of argument
+ *  @tparam nesting level of nesting
+ *  @return basic VTK type 
  */
-template<class T>
-VTKDataType VTKTypes::whichType( const std::vector<T> &dummy ){
-
-    BITPIT_UNUSED(dummy) ;
-
-    T dummy2 ;
-
-    return whichType(dummy2) ;
-};
-
-/*!
- *  Determines the basic VTK type from argument.
- *  @tparam     T           type of argument
- *  @param[in]  dummy      argument type to be deduced
- *  @return     basic VTK type 
- */
-template<class T, size_t d>
-VTKDataType VTKTypes::whichType( const std::array<T,d> &dummy ){
-
-    BITPIT_UNUSED(dummy) ;
-
-    return whichType(typeid(T)) ;
+template<typename T, int nesting, typename std::enable_if<utils::is_iterable<T>::value>::type*>
+VTKDataType VTKTypes::whichType( ){
+    static_assert(nesting < 1,"Nested containers are not valid VTK data");
+    return whichType<typename T::value_type,nesting+1>();
 };
 
 }

@@ -158,14 +158,12 @@ class VTKTypes{
 
         static VTKDataType      whichType( const std::type_info & ) ;
 
-        template<class T>
-        static VTKDataType      whichType( const T &) ;
+        template<typename T, int nesting=0, typename std::enable_if<std::is_pod<T>::value && !utils::is_iterable<T>::value>::type* = nullptr>
+        static VTKDataType      whichType();
 
-        template<class T>
-        static VTKDataType      whichType( const std::vector<T> & ) ;
+        template<typename T, int nesting=0, typename std::enable_if<utils::is_iterable<T>::value>::type* = nullptr>
+        static VTKDataType      whichType();
 
-        template<class T, size_t d>
-        static VTKDataType      whichType( const std::array<T,d> & ) ;
 };
 
 class VTKBaseContainer{
@@ -219,7 +217,7 @@ class VTKNativeStreamer : public VTKBaseStreamer {
         VTKNativeStreamer( const VTKNativeStreamer & );
         ~VTKNativeStreamer();
 
-        template< class T>
+        template<class T>
         void                    addData( std::string, std::vector<T> & ) ;
         void                    removeData( std::string ) ;
         void                    flushData( std::fstream &, std::string, VTKFormat) ;

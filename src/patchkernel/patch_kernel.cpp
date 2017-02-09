@@ -151,9 +151,9 @@ void PatchKernel::initialize()
 	m_vtk.setCodex(VTKFormat::APPENDED);
 
 	// Get VTK data types
-	VTKDataType vtkInt    = VTKTypes::whichType(int());
-	VTKDataType vtkLong   = VTKTypes::whichType(long());
-	VTKDataType vtkDouble = VTKTypes::whichType(double());
+	VTKDataType vtkInt    = VTKTypes::whichType<int>();
+	VTKDataType vtkLong   = VTKTypes::whichType<long>();
+	VTKDataType vtkDouble = VTKTypes::whichType<double>();
 
 	// Set VTK Geom Data
 	m_vtk.setGeomData(VTKUnstructuredField::POINTS, vtkDouble, this);

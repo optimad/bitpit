@@ -34,7 +34,7 @@ template<class T>
 VTKField& VTK::addData( std::string name, std::vector<T> &data ){
 
     VTKField& field= addData( name, &m_nativeStreamer) ;
-    field.setDataType( VTKTypes::whichType(data)) ;
+    field.setDataType( VTKTypes::whichType<T>()) ;
 
     m_nativeStreamer.addData(name,data) ;
 
@@ -79,7 +79,7 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, std::vect
     m_nativeStreamer.addData(name,data) ;
 
     field.setStreamer( m_nativeStreamer) ;
-    field.setDataType( VTKTypes::whichType(data)) ;
+    field.setDataType( VTKTypes::whichType<T>()) ;
 
     return ;
 }
@@ -100,7 +100,7 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, std::vector
     m_nativeStreamer.addData(name,data) ;
 
     field.setStreamer( m_nativeStreamer) ;
-    field.setDataType( VTKTypes::whichType(data)) ;
+    field.setDataType( VTKTypes::whichType<T>()) ;
 
     return ;
 }
