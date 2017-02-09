@@ -83,8 +83,6 @@ void VTKVectorContainer<T>::flushData( std::fstream &str, VTKFormat format){
 
     }
 
-    return ;
-
 }
 
 /*!
@@ -108,8 +106,6 @@ void VTKVectorContainer<T>::absorbData( std::fstream &str, VTKFormat format, uin
 
     }
 
-    return ;
-
 }
 
 /*!
@@ -124,7 +120,6 @@ void VTKVectorContainer<T>::resize( std::true_type, uint64_t entries, uint8_t co
     BITPIT_UNUSED(components) ;
     m_ptr->resize(entries) ;
 
-    return ;
 }
 
 /*!
@@ -143,7 +138,6 @@ void VTKVectorContainer<T>::resize( std::false_type, uint64_t entries, uint8_t c
         vtk::allocate( element, components) ;
     }
 
-    return ;
 }
 
 /*!
@@ -163,8 +157,6 @@ void VTKNativeStreamer::addData( std::string name, std::vector<T> &data ){
     
     std::unique_ptr<VTKBaseContainer> temp = std::unique_ptr<VTKBaseContainer>( new VTKVectorContainer<T>(data) ) ;
     m_field.emplace( name, std::move(temp) ) ;
-
-    return ;
 
 }
 

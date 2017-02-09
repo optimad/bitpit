@@ -96,7 +96,6 @@ VTKField& VTKField::operator=( const VTKField & other){
  */
 void VTKField::setName( std::string  name){ 
     m_name= name; 
-    return; 
 };
 
 /*!
@@ -105,7 +104,6 @@ void VTKField::setName( std::string  name){
  */
 void VTKField::setDataType( VTKDataType type){
     m_dataType= type; 
-    return; 
 };
 
 /*!
@@ -114,7 +112,6 @@ void VTKField::setDataType( VTKDataType type){
  */
 void VTKField::setLocation( VTKLocation loc ){ 
     m_location= loc; 
-    return; 
 };
 
 /*!
@@ -123,7 +120,6 @@ void VTKField::setLocation( VTKLocation loc ){
  */
 void VTKField::setCodification( VTKFormat cod ){ 
     m_codification= cod; 
-    return; 
 };
 
 /*!
@@ -132,7 +128,6 @@ void VTKField::setCodification( VTKFormat cod ){
  */
 void VTKField::setFieldType( VTKFieldType type ){ 
     m_fieldType= type; 
-    return; 
 };
 
 /*!
@@ -141,7 +136,6 @@ void VTKField::setFieldType( VTKFieldType type ){
  */
 void VTKField::setPosition( std::fstream::pos_type pos ){ 
     m_position =pos ; 
-    return; 
 };
 
 /*!
@@ -150,7 +144,6 @@ void VTKField::setPosition( std::fstream::pos_type pos ){
  */
 void VTKField::setOffset( uint64_t off){ 
     m_offset= off; 
-    return; 
 };
 
 /*!
@@ -159,7 +152,6 @@ void VTKField::setOffset( uint64_t off){
  */
 void VTKField::setStreamer(VTKBaseStreamer& streamer ){ 
     m_streamer= &streamer; 
-    return; 
 };
 
 /*!
@@ -266,7 +258,6 @@ bool VTKField::hasAllMetaData() const{
  */
 void  VTKField::write( std::fstream &str) const{ 
     m_streamer->flushData( str, m_name, m_codification) ;
-    return ;
 }
 
 /*!
@@ -277,8 +268,8 @@ void  VTKField::write( std::fstream &str) const{
  */
 void VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
     m_streamer->absorbData( str, m_name, m_codification, entries, components) ;
-    return ;
 };
+
 /*!
  * @}
  */

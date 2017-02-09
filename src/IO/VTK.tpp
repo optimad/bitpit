@@ -102,7 +102,6 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, std::vect
     field.setStreamer( m_nativeStreamer) ;
     field.setDataType( VTKTypes::whichType<T>()) ;
 
-    return ;
 }
 
 /*!
@@ -119,8 +118,6 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseSt
 
     field.setDataType( VTKTypes::whichType<T>() ) ;
     field.setStreamer( *streamer ) ;
-
-    return;
 
 };
 
@@ -142,7 +139,6 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, std::vector
     field.setStreamer( m_nativeStreamer) ;
     field.setDataType( VTKTypes::whichType<T>()) ;
 
-    return ;
 }
 
 /*!
@@ -159,8 +155,6 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKBaseStre
 
     field.setDataType( VTKTypes::whichType<T>() ) ;
     field.setStreamer( *streamer ) ;
-
-    return;
 
 };
 }

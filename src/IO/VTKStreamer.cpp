@@ -66,7 +66,6 @@ void VTKBaseStreamer::flushData( std::fstream &str, std::string name, VTKFormat 
     BITPIT_UNUSED(name) ;
     BITPIT_UNUSED(format) ;
 
-    return;
 };
 
 /*!
@@ -85,7 +84,6 @@ void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat
     BITPIT_UNUSED(entries) ;
     BITPIT_UNUSED(components) ;
 
-    return;
 };
 
 /*!
@@ -133,7 +131,6 @@ void VTKNativeStreamer::removeData( std::string name){
         m_field.erase( fieldItr) ;
     }
 
-    return;
 };
 
 /*!
@@ -150,7 +147,6 @@ void VTKNativeStreamer::flushData( std::fstream &str, std::string name, VTKForma
         fieldItr->second->flushData(str,format) ;
     }
 
-    return;
 };
 
 /*!
@@ -169,7 +165,6 @@ void VTKNativeStreamer::absorbData( std::fstream &str, std::string name, VTKForm
         fieldItr->second->absorbData( str, format, entries, components ) ;
     }
 
-    return;
 };
 
 }

@@ -93,7 +93,6 @@ void  VTK::setHeaderType( std::string st){
         log::cout() << "Unsupported HeaderType " << st << std::endl ;
     };
 
-    return; 
 } ;
 
 /*! 
@@ -114,7 +113,6 @@ void  VTK::setNames( std::string dir, std::string name ){
   setDirectory(dir);
   setName(name);
 
-  return ;
 };
 
 /*!
@@ -125,7 +123,6 @@ void  VTK::setName( std::string name ){
 
   m_fh.setName(name);
 
-  return ;
 };
 
 /*!
@@ -136,7 +133,6 @@ void  VTK::setDirectory( std::string dir ){
 
   m_fh.setDirectory(dir);
 
-  return ;
 };
 
 /*!
@@ -166,7 +162,6 @@ void  VTK::setCounter( int counter){
   m_fh.setSeries(true) ;
   m_fh.setCounter(counter) ;
 
-  return; 
 } ;
 
 /*!
@@ -213,7 +208,6 @@ void  VTK::setParallel( uint16_t procs, uint16_t rank){
    m_fh.setBlock( rank ) ;
   };
 
-  return; 
 } ;
 
 /*!
@@ -225,7 +219,6 @@ void  VTK::setCodex( VTKFormat cod) {
     setGeomCodex( cod) ;
     setDataCodex( cod) ;
 
-    return ;
 };
 
 /*!
@@ -237,7 +230,7 @@ void  VTK::setGeomCodex( VTKFormat cod ) {
     m_geomCodex = cod ;
     for( auto &field : m_geometry)
         field.setCodification( cod ) ;
-    return;
+
 };
 
 /*!
@@ -250,7 +243,6 @@ void  VTK::setDataCodex( VTKFormat cod ) {
     for( auto &field : m_data)
         field.setCodification( cod ) ;
 
-    return ;
 };
 
 /*!
@@ -322,8 +314,6 @@ void VTK::removeData( std::string name ){
 
     log::cout() << "did not find field for removing in VTK: " << name << std::endl;
 
-    return ;
-
 };
 
 /*!
@@ -342,8 +332,6 @@ void VTK::enableData( std::string name ){
     };
 
 
-    return ;
-
 };
 
 /*!
@@ -360,9 +348,6 @@ void VTK::disableData( std::string name ){
     } else{
         log::cout() << "did not find field for disabling: " << name << std::endl;
     };
-
-
-    return ;
 
 };
 
@@ -444,8 +429,6 @@ void VTK::calcAppendedOffsets(){
         }; 
     };
 
-
-    return ;
 };
 
 /*!
@@ -472,7 +455,6 @@ void VTK::checkAllFields(){
         }
     };
 
-    return ;
 };
 
 /*!
@@ -510,7 +492,6 @@ void VTK::write( VTKWriteMode writeMode ){
         setCounter(counter) ;
     }
 
-    return ;
 };
 
 /*!
@@ -528,7 +509,6 @@ void VTK::write( std::string name, VTKWriteMode writeMode ){
     write(writeMode) ;
     setName(oldName) ;
 
-    return ;
 };
 
 /*!
@@ -692,8 +672,6 @@ void VTK::writeData( ){
     // Closing Appended Secyion
     str.close();
 
-    return ;
-
 };
 
 /*!
@@ -760,8 +738,6 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
 
     };
 
-    return ;
-
 };
 
 /*!
@@ -773,8 +749,6 @@ void VTK::writeDataArray( std::fstream &str, VTKField &field ){
 
     str << vtk::convertDataArrayToString( field )  << std::endl ;
     str << "        </DataArray>" << std::endl ;
-
-    return ;
 
 };
 
@@ -788,8 +762,6 @@ void VTK::writePDataArray( std::fstream &str, VTKField &field ){
     str << vtk::convertPDataArrayToString( field ) << std::endl ;
     str << "        </PDataArray>" << std::endl ;
 
-    return ;
-
 };
 
 /*!
@@ -801,7 +773,6 @@ void VTK::read( ){
     checkAllFields() ;
     readData( ) ;
 
-    return ;
 };
 
 /*!
@@ -876,7 +847,6 @@ void VTK::readData( ){
 
     str.close();
 
-    return ; 
 };
 
 /*!
@@ -956,7 +926,6 @@ void VTK::readDataHeader( std::fstream &str ){
 
     };
 
-    return ;
 };
 
 /*!

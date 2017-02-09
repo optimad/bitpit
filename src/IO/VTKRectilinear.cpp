@@ -69,7 +69,6 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name ) :VTK
 
     setNames( dir, name ) ;
 
-    return ;
 };
 
 /*!  
@@ -92,7 +91,6 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( n1, n2, m1, m2, l1, l2) ;
     setGeomCodex( codex ) ;
 
-    return ;
 };
 
 /*!  
@@ -113,7 +111,6 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( 0, n-1, 0, m-1, 0, l-1) ;
     setGeomCodex( codex ) ;
 
-    return ;
 };
 
 /*!  
@@ -134,7 +131,6 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( n1, n2, m1, m2, 0, 0) ;
     setGeomCodex( codex ) ;
 
-    return ;
 };
 
 /*!  
@@ -153,7 +149,6 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( 0, n-1, 0, m-1, 0, 0) ;
     setGeomCodex( codex ) ;
 
-    return ;
 };
 
 /*!  
@@ -215,8 +210,6 @@ void VTKRectilinearGrid::readMetaInformation( ){
     setDimensions( m_localIndex[0][0], m_localIndex[0][1], m_localIndex[1][0], m_localIndex[1][1], m_localIndex[2][0], m_localIndex[2][1] ) ;
     str.close() ; 
 
-    return ;
-
 };
 
 /*!  
@@ -271,7 +264,6 @@ void VTKRectilinearGrid::writeMetaInformation( ){
 
     str.close() ;
 
-    return ;
 };
 
 /*!  
@@ -334,8 +326,6 @@ void VTKRectilinearGrid::writeCollection( ){
 
     str.close() ;
 
-
-    return ;
 };
 
 /*!  
@@ -369,7 +359,6 @@ void VTKRectilinearGrid::setDimensions( int n1, int n2, int m1, int m2, int l1, 
         m_points = m_points *  ( m_localIndex[d][1] -m_localIndex[d][0] +1 ) ;
     };
 
-    return ;
 };
 
 /*!  
@@ -381,7 +370,7 @@ void VTKRectilinearGrid::setDimensions( int n1, int n2, int m1, int m2, int l1, 
 void VTKRectilinearGrid::setDimensions( int n, int m, int l ){
 
     this->setDimensions( 0, n-1, 0, m-1, 0, l-1 );
-    return ;
+
 };
 
 /*!  
@@ -394,7 +383,7 @@ void VTKRectilinearGrid::setDimensions( int n, int m, int l ){
 void VTKRectilinearGrid::setDimensions( int n1, int n2, int m1, int m2 ){
 
     this->setDimensions( n1, n2, m1, m2, 0, 0 );
-    return ;
+
 };
 
 /*!  
@@ -406,7 +395,6 @@ void VTKRectilinearGrid::setDimensions( int n, int m ){
 
     this->setDimensions( 0, n-1, 0, m-1, 0, 0 );
 
-    return ;
 };
 
 /*!  
@@ -425,7 +413,6 @@ void VTKRectilinearGrid::setGlobalDimensions( int I, int J, int K ){
     m_globalIndex[2][0] = 0;
     m_globalIndex[2][1] = K;
 
-    return;
 };
 
 /*!
@@ -439,8 +426,6 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKBaseStre
     VTKField& field = m_geometry[index] ;
 
     field.setStreamer( *streamer ) ;
-
-    return;
 
 };
 
@@ -457,8 +442,6 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKDataType
 
     field.setDataType( type ) ;
     field.setStreamer( *streamer ) ;
-
-    return;
 
 };
 
@@ -477,7 +460,6 @@ void VTKRectilinearGrid::setGlobalDimensions( int I, int J ){
     m_globalIndex[2][0] = 0;
     m_globalIndex[2][1] = 0;
 
-    return;
 };
 
 /*!  
@@ -492,7 +474,6 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension3D_t> loc ){
 
     m_procIndex   = loc ;
 
-    return;
 };
 
 /*!  
@@ -512,7 +493,6 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension2D_t> loc ){
         m_procIndex[i][2]   = {{0,0}} ;
     }
 
-    return;
 };
 
 /*!

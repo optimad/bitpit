@@ -43,7 +43,6 @@ void VTKUnstructuredGridStreamer::setGrid( VTKElementType type, long n){
     m_homogeneousType = type ;
     m_cells = n ;
 
-    return;
 }
 
 /*!
@@ -91,7 +90,6 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
 
     }
 
-    return;
 };
 
 /*!
@@ -147,7 +145,6 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
 VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name ):VTKUnstructuredGrid( ){
 
     setNames( dir, name ) ; 
-    return ;
 
 };
 
@@ -161,7 +158,6 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name ):VT
 VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name, VTKElementType type ):VTKUnstructuredGrid( dir, name ){
 
     setElementType( type ) ;
-    return ;
 
 };
 
@@ -180,7 +176,6 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type ){
     m_geometry[2].setDataType( VTKDataType::UInt8) ; 
     m_geometry[2].setStreamer(m_unstructuredStreamer) ;
 
-    return ;
 
 };
 
@@ -202,7 +197,6 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint
         m_unstructuredStreamer.setGrid(m_homogeneousType, ncells );
     }
 
-    return ;
 };
 
 /*!  
@@ -216,7 +210,6 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, VTKE
     setElementType( type );
     setDimensions( ncells, npoints );
 
-    return ;
 };
 
 /*!
@@ -230,7 +223,6 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseSt
     VTKField& field = m_geometry[index] ;
 
     field.setStreamer( *streamer ) ;
-    return;
 
 };
 
@@ -248,7 +240,6 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKDataTy
     field.setDataType( type ) ;
     field.setStreamer( *streamer ) ;
 
-    return;
 
 };
 
@@ -373,7 +364,6 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
 
     str.close() ;
 
-    return ;
 };
 
 /*!  
@@ -424,7 +414,6 @@ void VTKUnstructuredGrid::writeCollection( ){
     str.close() ;
 
 
-    return ;
 };
 
 /*!  
@@ -481,7 +470,6 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     };
 
 
-    return ;
 };
 
 /*!
