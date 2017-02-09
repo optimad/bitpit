@@ -128,7 +128,6 @@ int main()
         vtk.setGeomData( bitpit::VTKUnstructuredField::POINTS, Ipoints) ;
         vtk.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, Iconnectivity) ;
         vtk.addData( "press", Ipressure) ;
-        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, Ipressure ) ;
 
         vtk.read() ;
 
