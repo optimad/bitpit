@@ -749,8 +749,6 @@ bool SurfaceKernel::adjustCellOrientation()
  */
 bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
 {
-    assert(getCells().exists(seed));
-
 #if BITPIT_ENABLE_MPI==1
     // Initialize ghost communications
     std::unordered_set<long> flipped;
@@ -772,6 +770,7 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
     // Initialize the seed
     std::set<long> toVisit;
     if (seed != Element::NULL_ID) {
+        assert(getCells().exists(seed));
         toVisit.insert(seed);
         if (invert) {
             flipCellOrientation(seed);
