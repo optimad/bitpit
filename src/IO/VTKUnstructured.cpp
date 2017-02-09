@@ -90,7 +90,7 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
 
     }
 
-};
+}
 
 /*!
  * @ingroup VisualizationToolKit
@@ -107,7 +107,7 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
  */
 VTKUnstructuredGrid::~VTKUnstructuredGrid( ) {
 
-};
+}
 
 /*!  
  *  Default constructor.
@@ -134,7 +134,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
     m_geometry[0].setFieldType( VTKFieldType::VECTOR ) ;
     m_geometry[0].setDataType( VTKDataType::Float64 ) ;
 
-};
+}
 
 /*!  
  *  Constructor.
@@ -146,7 +146,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name ):VT
 
     setNames( dir, name ) ; 
 
-};
+}
 
 /*!  
  *  Constructor for grid with homogeneous element type
@@ -159,7 +159,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name, VTK
 
     setElementType( type ) ;
 
-};
+}
 
 /*!  
  *  Tell VTKUnstructuredGrid that grid is made homogeously of one element type; 
@@ -177,7 +177,7 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type ){
     m_geometry[2].setStreamer(m_unstructuredStreamer) ;
 
 
-};
+}
 
 /*!  
  *  sets the size of the unstructured grid. 
@@ -197,7 +197,7 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint
         m_unstructuredStreamer.setGrid(m_homogeneousType, ncells );
     }
 
-};
+}
 
 /*!  
  *  sets the size of the unstructured grid for a homogenous grid.
@@ -210,7 +210,7 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, VTKE
     setElementType( type );
     setDimensions( ncells, npoints );
 
-};
+}
 
 /*!
  * Associates streamer to a geometrical field
@@ -224,7 +224,7 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseSt
 
     field.setStreamer( *streamer ) ;
 
-};
+}
 
 /*!
  * Associates streamer to a geometrical field
@@ -241,7 +241,7 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKDataTy
     field.setStreamer( *streamer ) ;
 
 
-};
+}
 
 /*!  
  *  Reads "type" information of existing grid and calculates the correspondng connectivity size.
@@ -262,7 +262,7 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
     //Read appended data
     //Go to the initial position of the appended section
-    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){} ;
+    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){}
 
     str >> c_;
     while( c_ != '_') str >> c_;
@@ -288,8 +288,8 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
         if( m_headerType== "UInt64") {
             genericIO::absorbBINARY( str, nbytes64 ) ;
             nconn = nbytes64 /VTKTypes::sizeOfType( m_geometry[3].getDataType() ) ;
-        };
-    };
+        }
+    }
 
 
     //Read geometry
@@ -307,17 +307,17 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
             temp.clear() ;
             bitpit::utils::convertString( line, temp) ;
             nconn += temp.size() ;
-        };
+        }
 
 
-    };
+    }
 
     str.close();
 
     return nconn ;
 
 
-};
+}
 
 /*!  
  *  Writes entire VTU but the data.
@@ -364,7 +364,7 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
 
     str.close() ;
 
-};
+}
 
 /*!  
  *  Writes collection file for parallel output. 
@@ -406,7 +406,7 @@ void VTKUnstructuredGrid::writeCollection( ){
     for( int i=0; i<m_procs; i++){
         fho.setBlock(i) ;
         str << "    <Piece  Source=\"" << fho.getPath() <<  "\"/>" << std::endl;
-    };
+    }
 
     str << "  </PUnstructuredGrid>"  << std::endl;
     str << "</VTKFile>" << std::endl;
@@ -414,7 +414,7 @@ void VTKUnstructuredGrid::writeCollection( ){
     str.close() ;
 
 
-};
+}
 
 /*!  
  *  Reads meta data of VTU file (grid size, data fields, codex, position of data within file).
@@ -432,15 +432,15 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     getline( str, line);
     while( ! bitpit::utils::keywordInString( line, "<VTKFile")){
         getline(str, line);
-    };
+    }
 
     if( bitpit::utils::getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
-    };
+    }
 
     while( ! bitpit::utils::keywordInString( line, "<Piece")){
         getline(str, line);
-    };
+    }
 
     bitpit::utils::getAfterKeyword( line, "NumberOfPoints", '\"', temp) ;
     bitpit::utils::convertString( temp, m_points );
@@ -457,8 +457,8 @@ void VTKUnstructuredGrid::readMetaInformation( ){
         str.seekg( position) ;
         if( ! readDataArray( str, field ) ) {
             log::cout() << field.getName() << " DataArray not found" << std::endl ;
-        };
-    };
+        }
+    }
 
 
     str.close() ;
@@ -467,10 +467,10 @@ void VTKUnstructuredGrid::readMetaInformation( ){
         setDimensions( m_cells, m_points, calcSizeConnectivity() ) ;
     } else {
         setDimensions( m_cells, m_points ) ;
-    };
+    }
 
 
-};
+}
 
 /*!
  * Calculates the size (in bytes) of a field
@@ -484,7 +484,7 @@ uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ){
 
     return bytes ;
 
-};
+}
 
 /*!
  * Calculates the number of entries of a field
@@ -530,7 +530,7 @@ uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
 
     return entries ;
 
-};
+}
 
 /*!
  * Calculates the compnents of a field
@@ -571,7 +571,7 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
 
     return comp ;
 
-};
+}
 
 /*!  
  *  Returns the size of the connectivity information
@@ -580,6 +580,6 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
 uint64_t VTKUnstructuredGrid::getNConnectivity( ){
 
     return m_connectivity ;
-};
+}
 
 }

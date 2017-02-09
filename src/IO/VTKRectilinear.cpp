@@ -57,7 +57,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( ) :VTK() {
         field.setCodification(m_geomCodex);
     }
 
-} ;
+}
 
 /*!  
  *  Constructor for parallel 3D grid.
@@ -69,7 +69,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name ) :VTK
 
     setNames( dir, name ) ;
 
-};
+}
 
 /*!  
  *  Constructor for parallel 3D grid.
@@ -91,7 +91,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( n1, n2, m1, m2, l1, l2) ;
     setGeomCodex( codex ) ;
 
-};
+}
 
 /*!  
  *  Constructor for serial 3D grids.
@@ -111,7 +111,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( 0, n-1, 0, m-1, 0, l-1) ;
     setGeomCodex( codex ) ;
 
-};
+}
 
 /*!  
  *  Constructor for parallel 2D grid.
@@ -131,7 +131,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( n1, n2, m1, m2, 0, 0) ;
     setGeomCodex( codex ) ;
 
-};
+}
 
 /*!  
  *  Constructor for serial 2D grid.
@@ -149,13 +149,13 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
     setDimensions( 0, n-1, 0, m-1, 0, 0) ;
     setGeomCodex( codex ) ;
 
-};
+}
 
 /*!  
  *  Destructor 
  */
 VTKRectilinearGrid::~VTKRectilinearGrid( ){
-} ;
+}
 
 /*!  
  *  Reads meta data of VTR file (grid size, data fields, codex, position of data within file).
@@ -175,15 +175,15 @@ void VTKRectilinearGrid::readMetaInformation( ){
     getline( str, line);
     while( ! bitpit::utils::keywordInString( line, "<VTKFile")){
         getline(str, line);
-    };
+    }
 
     if( bitpit::utils::getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
-    };
+    }
 
     while( ! bitpit::utils::keywordInString( line, "<Piece")){
         getline(str, line);
-    };
+    }
 
     bitpit::utils::getAfterKeyword( line, "Extent", '\"', temp) ;
     bitpit::utils::convertString( temp, extensions );
@@ -203,14 +203,14 @@ void VTKRectilinearGrid::readMetaInformation( ){
         str.seekg( position) ;
         if( ! readDataArray( str, field ) ) {
             log::cout() << field.getName() << " DataArray not found" << std::endl ;
-        };
-    };
+        }
+    }
 
 
     setDimensions( m_localIndex[0][0], m_localIndex[0][1], m_localIndex[1][0], m_localIndex[1][1], m_localIndex[2][0], m_localIndex[2][1] ) ;
     str.close() ; 
 
-};
+}
 
 /*!  
  *  Writes entire VTR but the data.
@@ -264,7 +264,7 @@ void VTKRectilinearGrid::writeMetaInformation( ){
 
     str.close() ;
 
-};
+}
 
 /*!  
  *  Writes collection file for parallel output. 
@@ -319,14 +319,14 @@ void VTKRectilinearGrid::writeCollection( ){
             << index[1][0] << " " << index[1][1] << " "
             << index[2][0] << " " << index[2][1] << " "
             << "\" Source= \"" << fho.getPath() << "\"/>" << std::endl;
-    };
+    }
 
     str << "  </PRectilinearGrid>"  << std::endl;
     str << "</VTKFile>" << std::endl;
 
     str.close() ;
 
-};
+}
 
 /*!  
  *  sets the dimension for 3D parallel grids.
@@ -357,9 +357,9 @@ void VTKRectilinearGrid::setDimensions( int n1, int n2, int m1, int m2, int l1, 
     for(int d=0; d<m_dimensions; ++d){
         m_cells = m_cells *  ( m_localIndex[d][1] -m_localIndex[d][0] ) ;
         m_points = m_points *  ( m_localIndex[d][1] -m_localIndex[d][0] +1 ) ;
-    };
+    }
 
-};
+}
 
 /*!  
  *  sets the dimension for 3D serial grids.
@@ -371,7 +371,7 @@ void VTKRectilinearGrid::setDimensions( int n, int m, int l ){
 
     this->setDimensions( 0, n-1, 0, m-1, 0, l-1 );
 
-};
+}
 
 /*!  
  *  sets the dimension for 2D parallel grids.
@@ -384,7 +384,7 @@ void VTKRectilinearGrid::setDimensions( int n1, int n2, int m1, int m2 ){
 
     this->setDimensions( n1, n2, m1, m2, 0, 0 );
 
-};
+}
 
 /*!  
  *  sets the dimension for 2D serial grids.
@@ -395,7 +395,7 @@ void VTKRectilinearGrid::setDimensions( int n, int m ){
 
     this->setDimensions( 0, n-1, 0, m-1, 0, 0 );
 
-};
+}
 
 /*!  
  *  sets the global 3D grid information for parallel output.
@@ -413,7 +413,7 @@ void VTKRectilinearGrid::setGlobalDimensions( int I, int J, int K ){
     m_globalIndex[2][0] = 0;
     m_globalIndex[2][1] = K;
 
-};
+}
 
 /*!
  * Associates streamer to a geometrical field
@@ -427,7 +427,7 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKBaseStre
 
     field.setStreamer( *streamer ) ;
 
-};
+}
 
 /*!
  * Associates streamer to a geometrical field
@@ -443,7 +443,7 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKDataType
     field.setDataType( type ) ;
     field.setStreamer( *streamer ) ;
 
-};
+}
 
 /*!  
  *  sets the global 2D grid information for parallel output.
@@ -460,7 +460,7 @@ void VTKRectilinearGrid::setGlobalDimensions( int I, int J ){
     m_globalIndex[2][0] = 0;
     m_globalIndex[2][1] = 0;
 
-};
+}
 
 /*!  
  *  sets the global 3D grid information for parallel output.
@@ -474,7 +474,7 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension3D_t> loc ){
 
     m_procIndex   = loc ;
 
-};
+}
 
 /*!  
  *  sets the global 2D grid information for parallel output.
@@ -493,7 +493,7 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension2D_t> loc ){
         m_procIndex[i][2]   = {{0,0}} ;
     }
 
-};
+}
 
 /*!
  * Calculates the size (in bytes) of a field
@@ -507,7 +507,7 @@ uint64_t VTKRectilinearGrid::calcFieldSize( const VTKField &field ){
 
     return bytes ;
 
-};
+}
 
 /*!
  * Calculates the number of entries of a field
@@ -550,7 +550,7 @@ uint64_t VTKRectilinearGrid::calcFieldEntries( const VTKField &field ){
 
     return entries ;
 
-};
+}
 
 /*!
  * Calculates the compnents of a field
@@ -575,7 +575,7 @@ uint8_t VTKRectilinearGrid::calcFieldComponents( const VTKField &field ){
 
     return comp ;
 
-};
+}
 
 /*!
  *   @}

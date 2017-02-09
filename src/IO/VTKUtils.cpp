@@ -55,10 +55,10 @@ uint8_t vtk::getElementNodeCount( const VTKElementType & t){
             return(20);
         default:
             return(0);
-    };
+    }
 
 
-};
+}
 
 /*!
  * Converts a string into a Field information.
@@ -85,7 +85,7 @@ bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
 
         if( bitpit::utils::getAfterKeyword( line, "NumberOfComponents=", '\"', com)  ){
             bitpit::utils::convertString( com, components ) ;
-        };
+        }
 
         if(components==3)
             comp=VTKFieldType::VECTOR ;
@@ -106,7 +106,7 @@ bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
             }
             else{
                 success = false ;
-            };
+            }
         }
 
         return success ;
@@ -114,10 +114,10 @@ bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
 
     else{
         return false ;
-    };
+    }
 
 
-};
+}
 
 /*!
  * Converts a Field information to string as requested by VTK format.
@@ -140,14 +140,14 @@ std::string  vtk::convertDataArrayToString( const VTKField &field ){
 
     if( field.getCodification() == VTKFormat::APPENDED ){
         os << "offset=\"" << field.getOffset() << "\" " ;
-    };
+    }
 
     os << ">" ;
 
     return( os.str() ) ;       
 
 
-};
+}
 
 /*!
  * Converts a parallel field information to string as requested by VTK format.
@@ -170,7 +170,7 @@ std::string  vtk::convertPDataArrayToString( const VTKField &field ){
 
     return( os.str() ) ;
 
-};
+}
 
 /*!
  * Converts a VTKLocation into string for DataArray format
@@ -188,8 +188,8 @@ std::string vtk::convertEnumToString( const VTKLocation &loc ){
             return("Undefined") ;
         default:
             return("Undefined") ;
-    };
-};
+    }
+}
 
 /*!
  * Converts a VTKFormat into string for DataArray format
@@ -207,8 +207,8 @@ std::string vtk::convertEnumToString( const VTKFormat &cod ){
             return("Undefined") ;
         default:
             return("Undefined") ;
-    };
-};
+    }
+}
 
 /*!
  * Converts a VTKDataType into string for DataArray format
@@ -242,8 +242,8 @@ std::string vtk::convertEnumToString( const VTKDataType &type ){
             return("Undefined");
         default:
             return("Undefined") ;
-    };
-};
+    }
+}
 
 /*!
  * Converts a std::string as read in vtk file to VTKLocation
@@ -265,9 +265,9 @@ bool vtk::convertStringToEnum(  const std::string &str, VTKLocation &loc ){
     } else {
         loc = VTKLocation::UNDEFINED ;
         return(false);
-    };
+    }
 
-};
+}
 
 /*!
  * Converts a std::string as read in vtk file to VTKFormat  
@@ -289,9 +289,9 @@ bool vtk::convertStringToEnum( const  std::string &str, VTKFormat &cod ){
     } else {
         cod = VTKFormat::UNDEFINED ;
         return(false);
-    };
+    }
 
-};
+}
 
 /*!
  * Converts a std::string as read in vtk file to VTKDataType 
@@ -356,7 +356,7 @@ bool vtk::convertStringToEnum( const std::string &str, VTKDataType &type ){
         return(false);
     }
 
-};
+}
 
 
 }

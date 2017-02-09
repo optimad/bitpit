@@ -39,14 +39,14 @@ namespace bitpit{
  */
 VTKBaseContainer::VTKBaseContainer( ){
 
-};
+}
 
 /*!
  * Destructor
  */
 VTKBaseContainer::~VTKBaseContainer( ){
 
-};
+}
 
 /*!
  * @ingroup VisualizationToolKit
@@ -66,7 +66,7 @@ void VTKBaseStreamer::flushData( std::fstream &str, std::string name, VTKFormat 
     BITPIT_UNUSED(name) ;
     BITPIT_UNUSED(format) ;
 
-};
+}
 
 /*!
  * Reads data from stream 
@@ -84,7 +84,7 @@ void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat
     BITPIT_UNUSED(entries) ;
     BITPIT_UNUSED(components) ;
 
-};
+}
 
 /*!
  * @ingroup VisualizationToolKit
@@ -99,14 +99,14 @@ void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat
 VTKNativeStreamer::~VTKNativeStreamer(){
 
     m_field.clear() ;
-};
+}
 
 /*!
  * Constructor
  */
 VTKNativeStreamer::VTKNativeStreamer( ) {
 
-};
+}
 
 /*!
  * Copy constructor
@@ -117,7 +117,7 @@ VTKNativeStreamer::VTKNativeStreamer( const VTKNativeStreamer &other ) {
         m_field[entry.first] = std::unique_ptr<VTKBaseContainer>(entry.second->clone()) ;
     }
 
-};
+}
 
 /*!
  * Removes a field from streamer
@@ -131,7 +131,7 @@ void VTKNativeStreamer::removeData( std::string name){
         m_field.erase( fieldItr) ;
     }
 
-};
+}
 
 /*!
  * Writes data to stream 
@@ -147,7 +147,7 @@ void VTKNativeStreamer::flushData( std::fstream &str, std::string name, VTKForma
         fieldItr->second->flushData(str,format) ;
     }
 
-};
+}
 
 /*!
  * Reads data from stream 
@@ -165,6 +165,6 @@ void VTKNativeStreamer::absorbData( std::fstream &str, std::string name, VTKForm
         fieldItr->second->absorbData( str, format, entries, components ) ;
     }
 
-};
+}
 
 }

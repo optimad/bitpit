@@ -153,7 +153,7 @@ void VTKNativeStreamer::addData( std::string name, std::vector<T> &data ){
 
     if( fieldItr!=m_field.end() ){
         m_field.erase(fieldItr) ;
-    };
+    }
     
     std::unique_ptr<VTKBaseContainer> temp = std::unique_ptr<VTKBaseContainer>( new VTKVectorContainer<T>(data) ) ;
     m_field.emplace( name, std::move(temp) ) ;

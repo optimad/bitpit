@@ -92,7 +92,7 @@ uint8_t VTKTypes::sizeOfType( const VTKDataType & type ){
 
         default:
            return(0);
-    };
+    }
 
 }
 

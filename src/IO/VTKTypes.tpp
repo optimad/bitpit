@@ -116,7 +116,7 @@ VTKDataType VTKTypes::registerType(VTKDataType VTKType)
 template<typename T, int nesting, typename std::enable_if<std::is_pod<T>::value&&!utils::is_iterable<T>::value>::type*>
 VTKDataType VTKTypes::whichType( ){
     return whichType(typeid(T)) ;
-};
+}
 
 /*!
  *  Determines the basic VTK type from argument.
@@ -128,6 +128,6 @@ template<typename T, int nesting, typename std::enable_if<utils::is_iterable<T>:
 VTKDataType VTKTypes::whichType( ){
     static_assert(nesting < 1,"Nested containers are not valid VTK data");
     return whichType<typename T::value_type,nesting+1>();
-};
+}
 
 }

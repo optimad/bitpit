@@ -37,7 +37,7 @@ namespace bitpit{
  * Destructor
  */
 VTKField::~VTKField(){
-};
+}
 
 
 /*!
@@ -54,7 +54,7 @@ VTKField::VTKField(){
     m_streamer        = NULL ;
     m_enabled         = true ;
 
-};
+}
 
 /*!
  * Copy constructor
@@ -62,7 +62,7 @@ VTKField::VTKField(){
  */
 VTKField::VTKField( const VTKField &other){
     *this = other ;
-};
+}
 
 /*!
  * Constructor
@@ -70,7 +70,7 @@ VTKField::VTKField( const VTKField &other){
  */
 VTKField::VTKField( std::string name ): VTKField() {
     setName(name) ;
-};
+}
 
 /*!
  * Assignment operator
@@ -88,7 +88,7 @@ VTKField& VTKField::operator=( const VTKField & other){
     m_enabled = other.m_enabled ;
 
     return *this;
-};
+}
 
 /*!
  * set name of data field
@@ -96,7 +96,7 @@ VTKField& VTKField::operator=( const VTKField & other){
  */
 void VTKField::setName( std::string  name){ 
     m_name= name; 
-};
+}
 
 /*!
  * set type of data field
@@ -104,7 +104,7 @@ void VTKField::setName( std::string  name){
  */
 void VTKField::setDataType( VTKDataType type){
     m_dataType= type; 
-};
+}
 
 /*!
  * set location of data field
@@ -112,7 +112,7 @@ void VTKField::setDataType( VTKDataType type){
  */
 void VTKField::setLocation( VTKLocation loc ){ 
     m_location= loc; 
-};
+}
 
 /*!
  * set codification of data field
@@ -120,7 +120,7 @@ void VTKField::setLocation( VTKLocation loc ){
  */
 void VTKField::setCodification( VTKFormat cod ){ 
     m_codification= cod; 
-};
+}
 
 /*!
  * set type of data field
@@ -128,7 +128,7 @@ void VTKField::setCodification( VTKFormat cod ){
  */
 void VTKField::setFieldType( VTKFieldType type ){ 
     m_fieldType= type; 
-};
+}
 
 /*!
  * set position of data field
@@ -136,7 +136,7 @@ void VTKField::setFieldType( VTKFieldType type ){
  */
 void VTKField::setPosition( std::fstream::pos_type pos ){ 
     m_position =pos ; 
-};
+}
 
 /*!
  * set offset of data field for appended output
@@ -144,7 +144,7 @@ void VTKField::setPosition( std::fstream::pos_type pos ){
  */
 void VTKField::setOffset( uint64_t off){ 
     m_offset= off; 
-};
+}
 
 /*!
  * set streamer for reading and writing 
@@ -152,7 +152,7 @@ void VTKField::setOffset( uint64_t off){
  */
 void VTKField::setStreamer(VTKBaseStreamer& streamer ){ 
     m_streamer= &streamer; 
-};
+}
 
 /*!
  * Enables the field for writing/reading
@@ -174,7 +174,7 @@ void VTKField::disable(){
  */
 std::string VTKField::getName() const{ 
     return m_name; 
-};
+}
 
 /*!
  * get type of field
@@ -182,7 +182,7 @@ std::string VTKField::getName() const{
  */
 VTKFieldType VTKField::getFieldType() const{ 
     return m_fieldType; 
-};
+}
 
 /*!
  * get type of data field
@@ -190,7 +190,7 @@ VTKFieldType VTKField::getFieldType() const{
  */
 VTKDataType VTKField::getDataType() const{ 
     return m_dataType; 
-};
+}
 
 /*!
  * get location of data field
@@ -198,7 +198,7 @@ VTKDataType VTKField::getDataType() const{
  */
 VTKLocation VTKField::getLocation() const{ 
     return m_location; 
-};
+}
 
 /*!
  * get codification of data field
@@ -206,7 +206,7 @@ VTKLocation VTKField::getLocation() const{
  */
 VTKFormat VTKField::getCodification() const{ 
     return m_codification; 
-};
+}
 
 /*!
  * get offset in appended section
@@ -214,7 +214,7 @@ VTKFormat VTKField::getCodification() const{
  */
 uint64_t VTKField::getOffset() const{ 
     return m_offset; 
-};
+}
 
 /*!
  * get position of data field in VTK file. 
@@ -223,7 +223,7 @@ uint64_t VTKField::getOffset() const{
  */
 std::fstream::pos_type   VTKField::getPosition() const{ 
     return m_position; 
-};
+}
 
 /*!
  * Returns if field is enabled for readind/writing
@@ -231,7 +231,7 @@ std::fstream::pos_type   VTKField::getPosition() const{
  */
 bool VTKField::isEnabled() const{ 
     return m_enabled; 
-};
+}
 
 /*!
  * Check if all information of field has been set
@@ -250,7 +250,7 @@ bool VTKField::hasAllMetaData() const{
 
     return allData;
 
-};
+}
 
 /*!
  * Writes the field through its streamer to file
@@ -268,7 +268,7 @@ void  VTKField::write( std::fstream &str) const{
  */
 void VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
     m_streamer->absorbData( str, m_name, m_codification, entries, components) ;
-};
+}
 
 /*!
  * @}

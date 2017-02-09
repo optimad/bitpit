@@ -61,7 +61,7 @@ VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, s
 
     return field ;
 
-};
+}
 
 /*!
  * Add user data for input or output. 
@@ -82,7 +82,7 @@ VTKField& VTK::addData( std::string name, VTKFieldType comp, VTKLocation loc, VT
     field.setDataType( VTKTypes::whichType<T>() ) ;
 
     return field ;
-};
+}
 
 /*!
  * Associates the NativeStreamer to a geometrical field
@@ -119,7 +119,7 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseSt
     field.setDataType( VTKTypes::whichType<T>() ) ;
     field.setStreamer( *streamer ) ;
 
-};
+}
 
 /*!
  * Associates the NativeStreamer to a geometrical field
@@ -156,5 +156,6 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKBaseStre
     field.setDataType( VTKTypes::whichType<T>() ) ;
     field.setStreamer( *streamer ) ;
 
-};
+}
+
 }

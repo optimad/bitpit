@@ -55,7 +55,7 @@ VTK::VTK(){
     m_cells = 0;
     m_points= 0;
 
-};
+}
 
 /*! 
  * Constructor referes to a serial VTK file with appended binary data.
@@ -67,7 +67,7 @@ VTK::VTK( std::string dir,  std::string name ):
 
     setNames(dir, name) ;
 
-};
+}
 
 /*!
  * Destructor
@@ -77,7 +77,7 @@ VTK::~VTK(){
     m_data.clear();
     m_geometry.clear();
 
-} ;
+}
 
 /*! 
  * set header type for appended binary output
@@ -91,9 +91,9 @@ void  VTK::setHeaderType( std::string st){
 
     else{
         log::cout() << "Unsupported HeaderType " << st << std::endl ;
-    };
+    }
 
-} ;
+}
 
 /*! 
  * Get header type for appended binary output
@@ -101,7 +101,7 @@ void  VTK::setHeaderType( std::string st){
  */
 std::string  VTK::getHeaderType( ) const{ 
     return m_headerType ;
-};
+}
 
 /*! 
  * set directory and name for VTK file
@@ -113,7 +113,7 @@ void  VTK::setNames( std::string dir, std::string name ){
   setDirectory(dir);
   setName(name);
 
-};
+}
 
 /*!
  * set name for VTK file
@@ -123,7 +123,7 @@ void  VTK::setName( std::string name ){
 
   m_fh.setName(name);
 
-};
+}
 
 /*!
  * set directory for VTK file
@@ -133,7 +133,7 @@ void  VTK::setDirectory( std::string dir ){
 
   m_fh.setDirectory(dir);
 
-};
+}
 
 /*!
  * Get the name of the VTK file
@@ -142,7 +142,7 @@ void  VTK::setDirectory( std::string dir ){
 std::string  VTK::getName() const {
 
   return m_fh.getName();
-};
+}
 
 /*!
  * Get the directory where the VTK file will be saved
@@ -151,7 +151,7 @@ std::string  VTK::getName() const {
 std::string  VTK::getDirectory() const {
 
   return m_fh.getDirectory();
-};
+}
 
 /*!
  * Activates output for time series. sets series to true first output index to input
@@ -162,7 +162,7 @@ void  VTK::setCounter( int counter){
   m_fh.setSeries(true) ;
   m_fh.setCounter(counter) ;
 
-} ;
+}
 
 /*!
  * De-activates output for time series. 
@@ -174,7 +174,7 @@ int  VTK::unsetCounter( ){
   m_fh.setSeries(false) ;
 
   return counter; 
-} ;
+}
 
 /*!
  * Returns the time index of the following file
@@ -184,7 +184,7 @@ int  VTK::getCounter( ) const{
 
   return m_fh.getCounter( ) ;
 
-} ;
+}
 
 /*!
  * Activates parallel output
@@ -206,9 +206,9 @@ void  VTK::setParallel( uint16_t procs, uint16_t rank){
   else {
    m_fh.setParallel(true) ;
    m_fh.setBlock( rank ) ;
-  };
+  }
 
-} ;
+}
 
 /*!
  * sets codex for geometry and data
@@ -219,7 +219,7 @@ void  VTK::setCodex( VTKFormat cod) {
     setGeomCodex( cod) ;
     setDataCodex( cod) ;
 
-};
+}
 
 /*!
  * sets codex for geometry only
@@ -231,7 +231,7 @@ void  VTK::setGeomCodex( VTKFormat cod ) {
     for( auto &field : m_geometry)
         field.setCodification( cod ) ;
 
-};
+}
 
 /*!
  * sets codex for data only
@@ -243,7 +243,7 @@ void  VTK::setDataCodex( VTKFormat cod ) {
     for( auto &field : m_data)
         field.setCodification( cod ) ;
 
-};
+}
 
 /*!
  * Add user data for input or output. 
@@ -260,7 +260,7 @@ VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
         if(  ! getDataByName( name, ptr ) ) {
             m_data.push_back( VTKField( name ) ) ;
             ptr = &(m_data.back()) ;
-        };
+        }
 
         ptr->setCodification(m_dataCodex) ;
         ptr->setStreamer(*streamer) ;
@@ -271,7 +271,7 @@ VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
 
     return *ptr ;
 
-};
+}
 
 /*!
  * Add user data for input or output. 
@@ -292,7 +292,7 @@ VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, V
 
     return field ;
 
-};
+}
 
 /*!
  * Removes user data from input or output 
@@ -314,7 +314,7 @@ void VTK::removeData( std::string name ){
 
     log::cout() << "did not find field for removing in VTK: " << name << std::endl;
 
-};
+}
 
 /*!
  * Enables field for reading and writing
@@ -329,10 +329,10 @@ void VTK::enableData( std::string name ){
 
     } else{
         log::cout() << "did not find field for enabling: " << name << std::endl;
-    };
+    }
 
 
-};
+}
 
 /*!
  * Disables field for reading and writing
@@ -347,9 +347,9 @@ void VTK::disableData( std::string name ){
 
     } else{
         log::cout() << "did not find field for disabling: " << name << std::endl;
-    };
+    }
 
-};
+}
 
 /*!
  * Finds user data field through name. 
@@ -365,11 +365,11 @@ bool VTK::getDataByName( const std::string &name, VTKField*& the_field ){
         if( field.getName() == name ){
             the_field = &field ;
             return true ;
-        };
-    };
+        }
+    }
 
     return false ;
-};
+}
 
 /*!
  * Finds geometry data field through name. 
@@ -385,11 +385,11 @@ bool VTK::getGeomByName( const std::string &name, VTKField*& the_field ){
         if( field.getName() == name ){
             the_field = &field ;
             return true ;
-        };
-    };
+        }
+    }
 
     return false ;
-};
+}
 
 /*!
  * Calculates the offsets of all geometry and data fields for appended output.
@@ -406,30 +406,30 @@ void VTK::calcAppendedOffsets(){
 
     else if( getHeaderType() == "UInt64") {
         HeaderByte = sizeof(uint64_t) ;
-    };
+    }
 
     for( auto & field : m_data ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
             field.setOffset( offset) ;
             offset += HeaderByte + calcFieldSize(field) ;
-        };
-    };
+        }
+    }
 
     for( auto & field : m_data ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL) {
             field.setOffset( offset) ;
             offset += HeaderByte + calcFieldSize(field)  ;
-        };
-    };
+        }
+    }
 
     for( auto & field : m_geometry ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED ) {
             field.setOffset( offset) ;
             offset += HeaderByte + calcFieldSize(field)  ;
-        }; 
-    };
+        }
+    }
 
-};
+}
 
 /*!
  * Check all geometry fields and user data for available metadata.
@@ -444,7 +444,7 @@ void VTK::checkAllFields(){
             field.disable() ;
             log::cout() << "Data field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
         }
-    };
+    }
 
     for( auto & field : m_geometry ){
         if( field.hasAllMetaData()){
@@ -453,9 +453,9 @@ void VTK::checkAllFields(){
             field.disable() ;
             log::cout() << "Geometry field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
         }
-    };
+    }
 
-};
+}
 
 /*!
  * Writes entire VTK file (headers and data).
@@ -492,7 +492,7 @@ void VTK::write( VTKWriteMode writeMode ){
         setCounter(counter) ;
     }
 
-};
+}
 
 /*!
  * Writes entire VTK file (headers and data).
@@ -509,7 +509,7 @@ void VTK::write( std::string name, VTKWriteMode writeMode ){
     write(writeMode) ;
     setName(oldName) ;
 
-};
+}
 
 /*!
  * Writes data only in VTK file
@@ -546,8 +546,8 @@ void VTK::writeData( ){
 
                 delete [] buffer ;
 
-            };
-        }; 
+            }
+        }
 
         for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII && field.getLocation() == VTKLocation::CELL ) {
@@ -564,8 +564,8 @@ void VTK::writeData( ){
                 genericIO::flushBINARY( str, buffer, length) ;
 
                 delete [] buffer ;
-            };
-        }; 
+            }
+        }
 
         for( auto &field : m_geometry ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII ) {
@@ -582,8 +582,8 @@ void VTK::writeData( ){
                 genericIO::flushBINARY( str, buffer, length) ;
 
                 delete [] buffer ;
-            };
-        }; 
+            }
+        }
 
         str.seekg( temp.getPosition() ) ;
 
@@ -597,7 +597,7 @@ void VTK::writeData( ){
         std::fstream::pos_type  position_appended ;
 
         //Go to the initial position of the appended section
-        while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){} ;
+        while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){}
 
         str >> c_;
         while( c_ != '_') str >> c_;
@@ -626,9 +626,9 @@ void VTK::writeData( ){
                 else{
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
-                };
+                }
                 field.write(str) ;
-            };
+            }
         } 
 
         for( auto &field : m_data ){
@@ -642,10 +642,10 @@ void VTK::writeData( ){
                 else{
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
-                };
+                }
                 field.write(str) ;
 
-            };
+            }
         } 
 
         //Writing Geometry Data
@@ -659,20 +659,20 @@ void VTK::writeData( ){
                 else{
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
-                };
+                }
                 field.write(str) ;
-            };
-        };
+            }
+        }
 
         genericIO::flushBINARY( str, buffer, length) ;
 
         delete [] buffer ;
-    };
+    }
 
     // Closing Appended Secyion
     str.close();
 
-};
+}
 
 /*!
  * Writes data headers in strean
@@ -701,9 +701,9 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
             if( field.isEnabled() && field.getLocation() == location){
                 if(      field.getFieldType() == VTKFieldType::SCALAR ) scalars <<  field.getName() << " " ;
                 else if( field.getFieldType() == VTKFieldType::VECTOR ) vectors <<  field.getName() << " " ;
-            };
+            }
 
-        };
+        }
 
         scalars << "\"" ;
         vectors << "\"" ;
@@ -718,7 +718,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
             str << "      <" ;
             if( parallel )  str << "P" ;
             str << "CellData " ;
-        };
+        }
 
         str << " Scalars=" << scalars.str()
             << " Vectors=" << vectors.str()
@@ -728,7 +728,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
         for( auto &field : m_data ){
             if( field.isEnabled() && field.getLocation() == location && !parallel) writeDataArray( str, field ) ;
             if( field.isEnabled() && field.getLocation() == location &&  parallel) writePDataArray( str, field ); 
-        };
+        }
 
         str << "      </" ;
         if( parallel )  str << "P" ;
@@ -736,9 +736,9 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
         if( location == VTKLocation::POINT) str << "PointData> " << std::endl;
         if( location == VTKLocation::CELL)  str << "CellData> "  << std::endl;
 
-    };
+    }
 
-};
+}
 
 /*!
  * Writes data array related to a field in strean
@@ -750,7 +750,7 @@ void VTK::writeDataArray( std::fstream &str, VTKField &field ){
     str << vtk::convertDataArrayToString( field )  << std::endl ;
     str << "        </DataArray>" << std::endl ;
 
-};
+}
 
 /*!
  * Writes parallel data array related to a field in strean
@@ -762,7 +762,7 @@ void VTK::writePDataArray( std::fstream &str, VTKField &field ){
     str << vtk::convertPDataArrayToString( field ) << std::endl ;
     str << "        </PDataArray>" << std::endl ;
 
-};
+}
 
 /*!
  * Reads entire VTK file (headers and data).
@@ -773,7 +773,7 @@ void VTK::read( ){
     checkAllFields() ;
     readData( ) ;
 
-};
+}
 
 /*!
  * Reads data only from VTK file
@@ -791,7 +791,7 @@ void VTK::readData( ){
 
     //Read appended data
     //Go to the initial position of the appended section
-    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){} ;
+    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){}
 
     str >> c_;
     while( c_ != '_') str >> c_;
@@ -814,8 +814,8 @@ void VTK::readData( ){
             if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
-        };
-    };
+        }
+    }
 
     //Read appended m_geometry
     for( auto & field : m_geometry ){
@@ -826,28 +826,28 @@ void VTK::readData( ){
             if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
-        };
-    };
+        }
+    }
 
     //Read ascii data
     for( auto & field : m_data ){
         if( field.isEnabled() &&  field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
-        };
-    };
+        }
+    }
 
     //Read ascii geometry
     for( auto & field : m_geometry ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
-        };
-    };
+        }
+    }
 
     str.close();
 
-};
+}
 
 /*!
  * Reads data headers from strean.
@@ -901,7 +901,7 @@ void VTK::readDataHeader( std::fstream &str ){
 
                 else{
                     pos_ =  0 ; 
-                };
+                }
 
                 temp.setPosition( pos_ ) ;
 
@@ -916,17 +916,17 @@ void VTK::readDataHeader( std::fstream &str ){
                     ptemp->setFieldType( temp.getFieldType() ) ;
                     ptemp->setCodification( temp.getCodification() ) ;
 
-                };
+                }
 
-            };
+            }
 
             if( ! getline( str, line) ) read = false ;
             if( bitpit::utils::keywordInString( line, loc) ) read=false ;
-        }; 
+        }
 
-    };
+    }
 
-};
+}
 
 /*!
  * Reads data array from stream and stores in field information
@@ -944,15 +944,15 @@ bool VTK::readDataArray( std::fstream &str, VTKField &field  ){
 
                 if( field.getCodification() == VTKFormat::ASCII) {
                     field.setPosition( str.tellg() ) ;
-                };
+                }
 
                 return true ;
-            };
-        };
-    };
+            }
+        }
+    }
 
     return false ; 
 
-};
+}
 
 }
