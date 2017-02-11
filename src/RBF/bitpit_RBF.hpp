@@ -23,7 +23,7 @@
  \*---------------------------------------------------------------------------*/
 
 /*!
- * @defgroup RBF RadialBasisFunctions
+ * @defgroup RBF Radial Basis Functions (RBF)
  *
  */
 
