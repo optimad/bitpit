@@ -937,6 +937,7 @@ RBF::RBF( RBFBasisFunction bfunc)
  * Copy Constructor
  */
 RBF::RBF(const RBF & other)
+    : RBFKernel(other)
 {
     *this = other;
 }
