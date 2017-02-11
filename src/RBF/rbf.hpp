@@ -163,7 +163,7 @@ private:
 };
 
 /*!
- * @ingroup  RadialBasisFunction
+ * @ingroup  RBF
  * @brief Utility fuctions for RBF
  */
 namespace rbf
