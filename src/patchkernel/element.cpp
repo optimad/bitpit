@@ -974,13 +974,13 @@ void ElementInfo::initializeFaceEdges(const std::vector<ElementInfo *> &facesInf
 		int nFaceEdges = faceInfo.nFaces;
 		for (int i = 0; i < nFaceEdges; ++i) {
 			// Number of vertices of the edge associated to the face
-			int nFaceEdgeVertices = faceInfo.faceConnect[i].size();
+			std::size_t nFaceEdgeVertices = faceInfo.faceConnect[i].size();
 
 			// Connectivity of the edge associated to the face
 			const std::vector<int> &localFaceEdgeConnect = faceInfo.faceConnect[i];
 
 			std::vector<int> faceEdgeConnect(nFaceEdgeVertices);
-			for (int n = 0; n < nFaceEdgeVertices; ++n) {
+			for (std::size_t n = 0; n < nFaceEdgeVertices; ++n) {
 				int localVertexId = localFaceEdgeConnect[n];
 				int vertexId      = faceConnect[k][localVertexId];
 
@@ -991,7 +991,7 @@ void ElementInfo::initializeFaceEdges(const std::vector<ElementInfo *> &facesInf
 			for (int j = 0; j < nEdges; ++j) {
 				// If face edge and the guess edge have a different number of
 				// vertices, the two edge cannot be the same.
-				int nGuessEdgeVertices = edgeConnect[j].size();
+				std::size_t nGuessEdgeVertices = edgeConnect[j].size();
 				if (nGuessEdgeVertices != nFaceEdgeVertices) {
 					continue;
 				}
