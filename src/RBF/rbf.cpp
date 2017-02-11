@@ -26,8 +26,10 @@
 
 #include <cmath>
 #include <set>
-#include "Operators.hpp"
-#include "SortAlgorithms.hpp"
+
+#include "bitpit_operators.hpp"
+#include "bitpit_SA.hpp"
+
 #include "rbf.hpp"
 
 namespace bitpit {
