@@ -860,6 +860,9 @@ int RBFKernel::solveLSQ(){
 }
 
 
+/*!
+ * @}
+ */
 
 // RBF derived class implementation
 
