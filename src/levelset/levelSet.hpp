@@ -59,6 +59,8 @@ class LevelSet{
     bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
     bool                                        m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
 
+    int                                         registerObject( std::unique_ptr<LevelSetObject> && ) ;
+    int                                         registerObject( const std::unique_ptr<LevelSetObject> & ) ;
     void                                        addProcessingOrder(int) ;
     bool                                        removeProcessingOrder(int) ;
 # if BITPIT_ENABLE_MPI
@@ -83,8 +85,8 @@ class LevelSet{
     int                                         addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
     int                                         addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
     int                                         addObject( const std::vector<long> &, const long &, const bool &, int id=levelSetDefaults::OBJECT ) ;
-    int                                         addObject( std::unique_ptr<LevelSetObject> && ) ;
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
+
 
     void                                        removeObjects();
     bool                                        removeObject(int);

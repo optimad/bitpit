@@ -136,7 +136,7 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, doubl
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation), angle ) ;
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
-    return addObject(std::unique_ptr<LevelSetObject>(object));
+    return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
 /*!
@@ -155,7 +155,7 @@ int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) 
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation, angle) ;
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
-    return addObject(std::unique_ptr<LevelSetObject>(object));
+    return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
 /*!
@@ -182,7 +182,7 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
 
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
-    return addObject(std::unique_ptr<LevelSetObject>(object));
+    return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
 /*!
@@ -207,7 +207,7 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
 
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
-    return addObject(std::unique_ptr<LevelSetObject>(object));
+    return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
 /*!
@@ -227,11 +227,7 @@ int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &i
     LevelSetObject *ptr1 = m_object.at(id1).get() ;
     LevelSetObject *ptr2 = m_object.at(id2).get() ;
 
-    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr1, ptr2 ) )  ;
-
-    addProcessingOrder(id) ;
-
-    return id;
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr1, ptr2 ) ));
 }
 
 /*!
@@ -249,10 +245,7 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
 
     assert(m_kernel);
 
-    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, *m_kernel->getMesh()) )  ;
-    addProcessingOrder(id) ;
-
-    return id;
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, *m_kernel->getMesh()) ) );
 }
 
 /*!
@@ -270,23 +263,29 @@ int LevelSet::addObject( const std::vector<long> &list, const long &refInterface
 
     assert(m_kernel);
 
-    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, refInterface, invert, *m_kernel->getMesh()) )  ;
-    addProcessingOrder(id) ;
-
-    return id;
-}
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, refInterface, invert, *m_kernel->getMesh()) )  );
+};
 
 /*!
  * Adds a generic LevelSetObject
  * @param[in] object generic object
  * @return the index associated to the object
  */
-int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
+int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
+    return registerObject(object);
+};
+
+/*!
+ * Adds a generic LevelSetObject
+ * @param[in] object generic object
+ * @return the index associated to the object
+ */
+int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 
     int objectId = object->getId();
     m_object[objectId] = std::move(object) ;
 
-    addProcessingOrder(objectId) ;
+    addProcessingOrder(objectId);
 
     return objectId;
 }
@@ -296,12 +295,12 @@ int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
  * @param[in] object generic object
  * @return the index associated to the object
  */
-int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
+int LevelSet::registerObject( const std::unique_ptr<LevelSetObject> &object ) {
 
     int objectId = object->getId();
     m_object[objectId] = std::unique_ptr<LevelSetObject>(object->clone())  ;
 
-    addProcessingOrder(objectId) ;
+    addProcessingOrder(objectId);
 
     return objectId;
 }
@@ -386,7 +385,6 @@ bool LevelSet::removeProcessingOrder(int objectId){
     
     return false ;
 }
-
 
 /*!
  * Get a constant reference to the specified object.
