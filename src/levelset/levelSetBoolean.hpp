@@ -73,7 +73,7 @@ class LevelSetBoolean: public LevelSetObject{
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &);
 
     LevelSetBooleanOperation                    getBooleanOperation() const;
-    LevelSetObject*                             getClosestObject(const long &) const ;
+    LevelSetObject*                             getDeterminingObject(const long &) const ;
     LevelSetInfo                                booleanOperation(const long &) const ;
 };
 
