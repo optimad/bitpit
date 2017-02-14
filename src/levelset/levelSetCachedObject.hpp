@@ -86,10 +86,10 @@ class LevelSetCachedObject : public LevelSetObject{
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
 
-    void                                        propagateSign(LevelSetKernel*);
+    void                                        propagateSign();
 
-    double                                      computeSizeNarrowBand(LevelSetKernel*);
-    double                                      updateSizeNarrowBand(LevelSetKernel*, const std::vector<adaption::Info> &);
+    double                                      computeSizeNarrowBand();
+    double                                      updateSizeNarrowBand(const std::vector<adaption::Info> &);
 };
 
 

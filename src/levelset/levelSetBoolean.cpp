@@ -157,32 +157,27 @@ void LevelSetBoolean::setSizeNarrowBand(double r){
  * Computes the size of the narrow band
  * @return size of the narrow band.
  */
-double LevelSetBoolean::computeSizeNarrowBand(LevelSetKernel* visitee){
-    BITPIT_UNUSED(visitee);
+double LevelSetBoolean::computeSizeNarrowBand(){
     return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
 }
 
 /*!
  * Updates the size of the narrow band after mesh has been modified
- * @param[in] visitee LevelSetKernel
  * @param[in] mapper descriptor of mesh modifications
  * @return size of the narrow band.
  */
-double LevelSetBoolean::updateSizeNarrowBand(LevelSetKernel* visitee, const std::vector<adaption::Info> &mapper){
-    BITPIT_UNUSED(visitee);
+double LevelSetBoolean::updateSizeNarrowBand(const std::vector<adaption::Info> &mapper){
     BITPIT_UNUSED(mapper);
     return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
 }
 
 /*!
  * Computes the levelset function within the narrow band
- * @param[in] visitee pointer to mesh
  * @param[in] RSearch size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetBoolean::computeLSInNarrowBand( LevelSetKernel *visitee, const double &RSearch, const bool &signd ){
+void LevelSetBoolean::computeLSInNarrowBand( const double &RSearch, const bool &signd ){
 
-    BITPIT_UNUSED(visitee) ;
     BITPIT_UNUSED(RSearch) ;
     BITPIT_UNUSED(signd) ;
 
@@ -191,14 +186,12 @@ void LevelSetBoolean::computeLSInNarrowBand( LevelSetKernel *visitee, const doub
 
 /*!
  * Updates the levelset function within the narrow band after mesh adaptation.
- * @param[in] visitee pointer to mesh
  * @param[in] mapper information concerning mesh adaption 
  * @param[in] RSearch size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetBoolean::updateLSInNarrowBand( LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
+void LevelSetBoolean::updateLSInNarrowBand( const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
 
-    BITPIT_UNUSED(visitee);
     BITPIT_UNUSED(mapper);
     BITPIT_UNUSED(RSearch);
     BITPIT_UNUSED(signd);

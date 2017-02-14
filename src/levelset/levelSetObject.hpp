@@ -47,10 +47,11 @@ class LevelSetObject{
 
     private:
     int                                         m_id;           /**< identifier of object */
-    bool                                        m_primary;      /**< identifier of object */
+    bool                                        m_primary;      /**< if object is of primary type */
 
 
     protected:
+    LevelSetKernel*                             m_kernelPtr;    /**< pointer to kernel */
     double                                      m_RSearch;      /**< Size of narrow band */
 
     virtual void                                _clear();
@@ -70,6 +71,8 @@ class LevelSetObject{
     virtual ~LevelSetObject();
     LevelSetObject(int,bool);
 
+    void                                        setKernel(LevelSetKernel *);
+
     virtual LevelSetObject*                     clone() const =0;
     void                                        clear();
 
@@ -83,17 +86,19 @@ class LevelSetObject{
     virtual int                                 getPart(const long &) const ;
 
     short                                       getSign(const long &) const;
-    virtual void                                propagateSign(LevelSetKernel*) ; 
+    virtual void                                propagateSign() ; 
 
     bool                                        isInNarrowBand(const long &) const;
     double                                      getSizeNarrowBand() const;
     virtual void                                setSizeNarrowBand(double) ;
 
-    virtual double                              computeSizeNarrowBand(LevelSetKernel*)=0;
-    virtual void                                computeLSInNarrowBand(LevelSetKernel*, const double &, const bool &) ;
+    bool                                        intersectSurface(const long &) const;
 
-    virtual double                              updateSizeNarrowBand(LevelSetKernel*, const std::vector<adaption::Info> &);
-    virtual void                                updateLSInNarrowBand(LevelSetKernel*, const std::vector<adaption::Info> &, const double &, const bool &) ;
+    virtual double                              computeSizeNarrowBand()=0;
+    virtual void                                computeLSInNarrowBand(const double &, const bool &) ;
+
+    virtual double                              updateSizeNarrowBand(const std::vector<adaption::Info> &);
+    virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &) ;
     void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
     void                                        filterOutsideNarrowBand(double);  ;
 
@@ -101,9 +106,9 @@ class LevelSetObject{
     void                                        restore(std::istream &); 
 
 # if BITPIT_ENABLE_MPI
-    bool                                        assureMPI(LevelSetKernel * ) ;
-    void                                        exchangeGhosts(LevelSetKernel * ) ;
-    void                                        communicate( LevelSetKernel *, std::unordered_map<int,std::vector<long>> &, std::unordered_map<int,std::vector<long>> &, std::vector<adaption::Info> const *mapper=NULL ) ;
+    bool                                        assureMPI() ;
+    void                                        exchangeGhosts() ;
+    void                                        communicate( std::unordered_map<int,std::vector<long>> &, std::unordered_map<int,std::vector<long>> &, std::vector<adaption::Info> const *mapper=NULL ) ;
 # endif 
 
 };

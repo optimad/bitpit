@@ -136,8 +136,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     int                                         getSupportCount(const long &) const ;
     const std::vector<long> &                   getSimplexList(const long &) const ;
 
-    void                                        computeLSInNarrowBand(LevelSetKernel *, const double &, const bool &);
-    void                                        updateLSInNarrowBand(LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &) ;
+    void                                        computeLSInNarrowBand(const double &, const bool &);
+    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &) ;
 };
 
 }

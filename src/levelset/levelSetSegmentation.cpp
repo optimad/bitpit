@@ -628,41 +628,39 @@ void LevelSetSegmentation::__clear( ){
 
 /*!
  * Computes the levelset function within the narrow band
- * @param[in] visitee pointer to mesh
  * @param[in] RSearch size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetKernel *visitee, const double &RSearch, const bool &signd ){
+void LevelSetSegmentation::computeLSInNarrowBand( const double &RSearch, const bool &signd ){
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
     SegmentToCellMap segmentToCellMap;
-    if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(visitee) ){
+    if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
         segmentToCellMap = extractSegmentToCellMap( lsCartesian, RSearch ) ;
 
-    } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(visitee) ){
+    } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
         segmentToCellMap = extractSegmentToCellMap( lsOctree, RSearch ) ;
 
     }
 
-    std::unordered_set<long> addedCells = createSegmentInfo(visitee, RSearch, segmentToCellMap) ;
+    std::unordered_set<long> addedCells = createSegmentInfo(m_kernelPtr, RSearch, segmentToCellMap) ;
 
-    createLevelsetInfo( visitee, signd, addedCells );
+    createLevelsetInfo( m_kernelPtr, signd, addedCells );
 }
 
 /*!
  * Updates the levelset function within the narrow band after mesh adaptation.
- * @param[in] visitee pointer to mesh
  * @param[in] mapper information concerning mesh adaption 
  * @param[in] RSearch size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
+void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
 
     // Update is not implemented for Cartesian patches
-    if( dynamic_cast<LevelSetCartesian*>(visitee) ){
+    if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
         clear( ) ;
-        computeLSInNarrowBand( visitee, RSearch, signd ) ;
+        computeLSInNarrowBand( RSearch, signd ) ;
         return;
     }
 
@@ -670,7 +668,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
 
     // Detect changes in narrow band size
     int narrowBandResizeDirection = 0;
-    if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(visitee) ){
+    if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
         narrowBandResizeDirection = getNarrowBandResizeDirection( lsOctree, RSearch ) ;
     }
 
@@ -678,7 +676,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
     // levelset, we need to rebuild it from scratch.
     if (narrowBandResizeDirection > 0) {
         clear( ) ;
-        computeLSInNarrowBand( visitee, RSearch, signd ) ;
+        computeLSInNarrowBand( RSearch, signd ) ;
         return;
     }
 
@@ -693,9 +691,9 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
     // Evaluate the levelset for the newly added elements
     std::unordered_set<long> addedCells;
     if (segmentToCellMap.size() != 0 ) {
-        addedCells = createSegmentInfo(visitee, RSearch, segmentToCellMap) ;
+        addedCells = createSegmentInfo(m_kernelPtr, RSearch, segmentToCellMap) ;
 
-        createLevelsetInfo( visitee, signd, addedCells );
+        createLevelsetInfo( m_kernelPtr, signd, addedCells );
     }
 
 }
@@ -841,8 +839,9 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
         LevelSetCartesian       auxLS(cmesh) ;
         LevelSetSegmentation    objLS(*this) ;
+        objLS.setKernel(&auxLS);
 
-        double                  localRSearch = (1 + std::sqrt(3.) / 2.) * objLS.computeSizeNarrowBand(&auxLS) ;
+        double localRSearch = (1 + std::sqrt(3.) / 2.) * objLS.computeSizeNarrowBand() ;
 
         objLS.setSizeNarrowBand(localRSearch);
         SegmentToCellMap auxSegmentToCellMap = extractSegmentToCellMap( &auxLS, localRSearch ) ;

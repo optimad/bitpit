@@ -56,6 +56,15 @@ LevelSetObject::~LevelSetObject( ){
  * @param[in] id id assigned to object
  */
 LevelSetObject::LevelSetObject( int id, bool primary) : m_id(id), m_primary(primary){
+    m_kernelPtr=nullptr;
+}
+
+/*!
+ * Sets the kernel for the object
+ * @param[in] kernel is the LevelSetKernel
+ */
+void LevelSetObject::setKernel(LevelSetKernel *kernel) {
+    m_kernelPtr = kernel;
 }
 
 /*!
@@ -95,10 +104,8 @@ short LevelSetObject::getSign(const long &i)const{
 
 /*!
  * Propgates the sign to levelset function throughout the grid
- * @param[in] visitee mesh
  */
-void LevelSetObject::propagateSign(LevelSetKernel* visitee){
-    BITPIT_UNUSED(visitee);
+void LevelSetObject::propagateSign(){
 }
 
 /*!
@@ -128,36 +135,30 @@ void LevelSetObject::setSizeNarrowBand(double r){
 
 /*!
  * Calculates the value and gradient of the levelset function within the narrow band
- * @param[in] visitee mesh
  * @param[in] RSeach size of the narrow band.
  * @param[in] signd if signed distances should be calculted
  */
-void LevelSetObject::computeLSInNarrowBand(LevelSetKernel* visitee, const double &RSearch, const bool &signd){
-    BITPIT_UNUSED(visitee);
+void LevelSetObject::computeLSInNarrowBand(const double &RSearch, const bool &signd){
     BITPIT_UNUSED(RSearch);
     BITPIT_UNUSED(signd);
 }
 
 /*!
  * Updates the size of the narrow band after mesh adaption
- * @param[in] visitee mesh
  * @param[in] mapper information regarding mesh adaption
  * @return size of narrow band
  */
-double LevelSetObject::updateSizeNarrowBand(LevelSetKernel* visitee, const std::vector<adaption::Info> &mapper){
-    BITPIT_UNUSED(visitee);
+double LevelSetObject::updateSizeNarrowBand(const std::vector<adaption::Info> &mapper){
     BITPIT_UNUSED(mapper);
     return getSizeNarrowBand();
 }
 
 /*!
  * Updates the value and gradient of the levelset function within the narrow band
- * @param[in] visitee mesh
  * @param[in] RSeach size of the narrow band.
  * @param[in] signd if signed distances should be calculted
  */
-void LevelSetObject::updateLSInNarrowBand(LevelSetKernel* visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd){
-    BITPIT_UNUSED(visitee);
+void LevelSetObject::updateLSInNarrowBand(const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd){
     BITPIT_UNUSED(mapper);
     BITPIT_UNUSED(RSearch);
     BITPIT_UNUSED(signd);
@@ -254,35 +255,34 @@ void LevelSetObject::_restore( std::istream &stream ){
  * If not serial processing is necessary
  * @return true if parallel
  */
-bool LevelSetObject::assureMPI(LevelSetKernel *visitee){
+bool LevelSetObject::assureMPI(){
 
-    return(visitee->assureMPI() ) ;
+    return(m_kernelPtr->assureMPI() ) ;
 }
 
 /*!
  * Update of ghost cell;
  */
-void LevelSetObject::exchangeGhosts(LevelSetKernel *visitee){
+void LevelSetObject::exchangeGhosts(){
 
-    std::unordered_map<int,std::vector<long>> &sendList =  visitee->getMesh()->getGhostExchangeSources() ;
-    std::unordered_map<int,std::vector<long>> &recvList =  visitee->getMesh()->getGhostExchangeTargets() ;
+    std::unordered_map<int,std::vector<long>> &sendList =  m_kernelPtr->getMesh()->getGhostExchangeSources() ;
+    std::unordered_map<int,std::vector<long>> &recvList =  m_kernelPtr->getMesh()->getGhostExchangeTargets() ;
 
-    communicate(visitee,sendList,recvList);
+    communicate(sendList,recvList);
 }
 
 /*!
  * communicates data structures of kernel and objects.
  * If mapper!=NULL, clearAfterMeshAdaption of kernel and objects will be called between send and receive.
- * @param[in] visitee LevelSetKernel containing the mesh
  * @param[in] sendList list of elements to be send
  * @param[in] recvList list of elements to be received
  * @param[in] mapper mapper containing mesh modifications
  */
-void LevelSetObject::communicate( LevelSetKernel *visitee, std::unordered_map<int,std::vector<long>> &sendList, std::unordered_map<int,std::vector<long>> &recvList, std::vector<adaption::Info> const *mapper){
+void LevelSetObject::communicate( std::unordered_map<int,std::vector<long>> &sendList, std::unordered_map<int,std::vector<long>> &recvList, std::vector<adaption::Info> const *mapper){
 
-    if( assureMPI(visitee) ){
+    if( assureMPI() ){
 
-        MPI_Comm meshComm = visitee->getCommunicator() ;
+        MPI_Comm meshComm = m_kernelPtr->getCommunicator() ;
 
         DataCommunicator    sizeCommunicator(meshComm) ; 
         DataCommunicator    dataCommunicator(meshComm) ; 
