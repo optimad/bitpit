@@ -170,6 +170,11 @@ int main( int argc, char *argv[]){
     id2 = levelset.addObject(std::move(STL2),M_PI) ;
     id3 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,id0,id1) ;
     id4 = levelset.addObject(bitpit::LevelSetBooleanOperation::SUBTRACTION,id3,id2) ;
+    const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
+    const bitpit::LevelSetObject &object1 = levelset.getObject(id1);
+    const bitpit::LevelSetObject &object2 = levelset.getObject(id2);
+    const bitpit::LevelSetObject &object3 = levelset.getObject(id3);
+    const bitpit::LevelSetObject &object4 = levelset.getObject(id4);
 
     mesh.getVTK().addData("ls0", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS0) ;
     mesh.getVTK().addData("ls1", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS1) ;
@@ -202,11 +207,11 @@ int main( int argc, char *argv[]){
     it4 = LS4.begin() ;
     for( auto & cell : mesh.getCells() ){
         const long &cellId = cell.getId() ;
-        *it0 = levelset.getLS(cellId, id0) ;
-        *it1 = levelset.getLS(cellId, id1) ;
-        *it2 = levelset.getLS(cellId, id2) ;
-        *it3 = levelset.getLS(cellId, id3) ;
-        *it4 = levelset.getLS(cellId, id4) ;
+        *it0 = object0.getLS(cellId) ;
+        *it1 = object1.getLS(cellId) ;
+        *it2 = object2.getLS(cellId) ;
+        *it3 = object3.getLS(cellId) ;
+        *it4 = object4.getLS(cellId) ;
         ++it0 ;
         ++it1 ;
         ++it2 ;
@@ -221,18 +226,18 @@ int main( int argc, char *argv[]){
 
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            if( std::abs(levelset.getLS(id,id0)) < mesh.evalCellSize(id)  ){
+            if( std::abs(object0.getLS(id)) < mesh.evalCellSize(id)  ){
                 mesh.markCellForRefinement(id) ;
             }
 
             if( i<3) {
-                if( std::abs(levelset.getLS(id,id1)) < mesh.evalCellSize(id)  ){
+                if( std::abs(object1.getLS(id)) < mesh.evalCellSize(id)  ){
                     mesh.markCellForRefinement(id) ;
                 }
             }
 
             if( i<6) {
-                if( std::abs(levelset.getLS(id,id2)) < mesh.evalCellSize(id)  ){
+                if( std::abs(object2.getLS(id)) < mesh.evalCellSize(id)  ){
                     mesh.markCellForRefinement(id) ;
                 }
             }
@@ -257,11 +262,11 @@ int main( int argc, char *argv[]){
         it4 = LS4.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &cellId = cell.getId() ;
-            *it0 = levelset.getLS(cellId, id0) ;
-            *it1 = levelset.getLS(cellId, id1) ;
-            *it2 = levelset.getLS(cellId, id2) ;
-            *it3 = levelset.getLS(cellId, id3) ;
-            *it4 = levelset.getLS(cellId, id4) ;
+            *it0 = object0.getLS(cellId) ;
+            *it1 = object1.getLS(cellId) ;
+            *it2 = object2.getLS(cellId) ;
+            *it3 = object3.getLS(cellId) ;
+            *it4 = object4.getLS(cellId) ;
             ++it0 ;
             ++it1 ;
             ++it2 ;

@@ -84,15 +84,6 @@ class LevelSet{
     void                                        clearObject();
     void                                        clearObject( int );
 
-    int                                         getClosestObject(const long &) const ;
-    LevelSetInfo                                getLevelSetInfo(const long &, int objectId=levelSetDefaults::OBJECT) const ;
-    double                                      getLS(const long &, int objectId=levelSetDefaults::OBJECT) const;
-    std::array<double,3>                        getGradient(const long &, int objectId=levelSetDefaults::OBJECT) const ;
-    std::pair<int,int>                          getClosestPart(const long &, int objectId=levelSetDefaults::OBJECT) const ;
-    short                                       getSign(const long &, int objectId=levelSetDefaults::OBJECT) const;
-    bool                                        isInNarrowBand(const long &, int ) const ;
-
-    double                                      getSizeNarrowBand( const int &) const;
     void                                        setSizeNarrowBand(double) ;
 
     void                                        setSign(bool);

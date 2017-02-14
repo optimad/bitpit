@@ -112,7 +112,7 @@ int main( int argc, char *argv[]){
 #if BITPIT_ENABLE_MPI==1
     MPI_Init(&argc, &argv);
 #endif
-    int                    dimensions(2) ;
+    int dimensions(2) ;
 
     // Input geometry
     std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(0,1,dimensions) );
@@ -145,14 +145,15 @@ int main( int argc, char *argv[]){
     VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
 
     // Compute level set  in narrow band
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    int                                      elapsed_seconds;
+    LevelSet levelset ;
+    int id0;
 
-    LevelSet                levelset ;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    int elapsed_seconds;
 
     levelset.setMesh(&mesh) ;
 
-    levelset.addObject(std::move(STL),M_PI) ;
+    id0 = levelset.addObject(std::move(STL),M_PI) ;
 
     start = std::chrono::system_clock::now();
     levelset.compute( ) ;
@@ -165,9 +166,11 @@ int main( int argc, char *argv[]){
     mesh.update() ;
     std::vector<double> LS(mesh.getCellCount() ) ;
     std::vector<double>::iterator it = LS.begin() ;
+    const LevelSetObject &object0 = levelset.getObject(id0);
+
     for( auto & cell : mesh.getCells() ){
         const long &id = cell.getId() ;
-        *it = levelset.getLS(id) ;
+        *it = object0.getLS(id) ;
         ++it ;
     };
 

@@ -119,7 +119,8 @@ int main( int argc, char *argv[]){
     std::vector<double>::iterator   itLS;
 
     levelset.setMesh(&mesh);
-    levelset.addObject(std::move(STL),M_PI);
+    int id0 = levelset.addObject(std::move(STL),M_PI);
+    const bitpit::LevelSetObject &object = levelset.getObject(id0);
 
     mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS);
 
@@ -140,7 +141,7 @@ int main( int argc, char *argv[]){
     itLS = LS.begin();
     for (auto & cell : mesh.getCells() ){
         const long &id = cell.getId();
-        *itLS = levelset.getLS(id);
+        *itLS = object.getLS(id);
         ++itLS;
     }
 
@@ -151,7 +152,7 @@ int main( int argc, char *argv[]){
 
         for (auto & cell : mesh.getCells() ){
             const long &id = cell.getId();
-            if( std::abs(levelset.getLS(id)) < 100. ){
+            if( std::abs(object.getLS(id)) < 100. ){
                 mesh.markCellForRefinement(id);
             }
         }
@@ -167,7 +168,7 @@ int main( int argc, char *argv[]){
         itLS = LS.begin();
         for (auto & cell : mesh.getCells() ){
             const long &id = cell.getId();
-            *itLS = levelset.getLS(id);
+            *itLS = object.getLS(id);
             ++itLS;
         }
 

@@ -157,6 +157,9 @@ int main( int argc, char *argv[]){
     id0 = levelset.addObject(std::move(STL0),M_PI) ;
     id1 = levelset.addObject(std::move(STL1),M_PI) ;
     id2 = levelset.addObject(bitpit::LevelSetBooleanOperation::INTERSECTION,id0,id1) ;
+    const bitpit::LevelSetObject &object0 = levelset.getObject(id0) ;
+    const bitpit::LevelSetObject &object1 = levelset.getObject(id1) ;
+    const bitpit::LevelSetObject &object2 = levelset.getObject(id2) ;
 
     mesh.getVTK().addData("ls0", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS0) ;
     mesh.getVTK().addData("ls1", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS1) ;
@@ -182,9 +185,9 @@ int main( int argc, char *argv[]){
     it2 = LS2.begin() ;
     for( auto & cell : mesh.getCells() ){
         const long &cellId = cell.getId();
-        *it0 = levelset.getLS(cellId,id0);
-        *it1 = levelset.getLS(cellId,id1);
-        *it2 = levelset.getLS(cellId,id2);
+        *it0 = object0.getLS(cellId);
+        *it1 = object1.getLS(cellId);
+        *it2 = object2.getLS(cellId);
         ++it0;
         ++it1;
         ++it2;
@@ -204,12 +207,12 @@ int main( int argc, char *argv[]){
 
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            if( std::abs(levelset.getLS(id,id0)) < mesh.evalCellSize(id) ){
+            if( std::abs(object0.getLS(id)) < mesh.evalCellSize(id) ){
                 mesh.markCellForRefinement(id) ;
             }
 
             if( i<4){
-                if( std::abs(levelset.getLS(id,id1)) < mesh.evalCellSize(id) ){
+                if( std::abs(object1.getLS(id)) < mesh.evalCellSize(id) ){
                     mesh.markCellForRefinement(id) ;
                 }
             }
@@ -222,8 +225,8 @@ int main( int argc, char *argv[]){
 
         elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
 
-        std::cout << "Refinement " << i << " Narrow Band id " << id0 << " " << levelset.getSizeNarrowBand(id0) << endl;
-        std::cout << "Refinement " << i << " Narrow Band id " << id1 << " " << levelset.getSizeNarrowBand(id1) << endl;
+        std::cout << "Refinement " << i << " Narrow Band id " << id0 << " " << object0.getSizeNarrowBand() << endl;
+        std::cout << "Refinement " << i << " Narrow Band id " << id1 << " " << object1.getSizeNarrowBand() << endl;
 
         LS0.resize(mesh.getCellCount());
         LS1.resize(mesh.getCellCount());
@@ -233,9 +236,9 @@ int main( int argc, char *argv[]){
         it2 = LS2.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &cellId = cell.getId();
-            *it0 = levelset.getLS(cellId,id0);
-            *it1 = levelset.getLS(cellId,id1);
-            *it2 = levelset.getLS(cellId,id2);
+            *it0 = object0.getLS(cellId);
+            *it1 = object1.getLS(cellId);
+            *it2 = object2.getLS(cellId);
             ++it0 ;
             ++it1 ;
             ++it2 ;
