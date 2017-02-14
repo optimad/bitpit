@@ -284,6 +284,8 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
         auxLS.setSign(false) ;
         auxLS.compute( ) ;
 
+        const LevelSetObject &obj = auxLS.getObject(objectId);
+
         std::array<int,3>   i0;
         std::array<int,3>   i1;
         int                 _i, _j, _k, index, twoDAdjust; 
@@ -309,7 +311,7 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
                     for( _i=i0[0]; _i<i1[0]; ++_i){
 
                         index = cmesh.getCellLinearId( _i, _j, _k) ;
-                        flagged = flagged || auxLS.isInNarrowBand(index,objectId) ;
+                        flagged = flagged || obj.isInNarrowBand(index) ;
 
                     };
                 };

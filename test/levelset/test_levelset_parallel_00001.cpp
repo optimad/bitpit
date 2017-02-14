@@ -114,17 +114,18 @@ int main( int argc, char *argv[]){
     mesh.update() ;
 
     // Compute level set in narrow band
-    std::chrono::time_point<std::chrono::system_clock>    start, end;
-    int                                         elapsed_init, elapsed_refi(0);
+    bitpit::LevelSet levelset;
+    int id0;
 
-    bitpit::LevelSet                levelset;
+    std::chrono::time_point<std::chrono::system_clock>    start, end;
+    int elapsed_init, elapsed_refi(0);
 
     std::vector<bitpit::adaption::Info> mapper ;
-    std::vector<double>             LS ;
+    std::vector<double> LS ;
     std::vector<double>::iterator   itLS ;
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject(std::move(STL),M_PI) ;
+    id0 = levelset.addObject(std::move(STL),M_PI) ;
 
     mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_parallel_001_initial") ;
@@ -140,11 +141,13 @@ int main( int argc, char *argv[]){
     if (rank == 0) {
         cout << " - Exporting data" << endl;
 
+        const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
+
         LS.resize(mesh.getCellCount() ) ;
         itLS = LS.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;
-            *itLS = levelset.getLS(id) ;
+            *itLS = object0.getLS(id) ;
             ++itLS ;
         };
 
@@ -157,6 +160,7 @@ int main( int argc, char *argv[]){
 
     mapper = mesh.partition(MPI_COMM_WORLD, true) ;
     levelset.update(mapper) ;
+    const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
 
     // Write mesh
     if (rank == 0) {
@@ -167,59 +171,39 @@ int main( int argc, char *argv[]){
     itLS = LS.begin() ;
     for( auto & cell : mesh.getCells() ){
         const long &id = cell.getId() ;
-        *itLS = levelset.getLS(id) ;
+        *itLS = object0.getLS(id) ;
         ++itLS ;
     };
 
     mesh.write() ;
 
-//    std::fstream    file ;
-//    file.open("levelset_004.dump", std::ios::out | std::ios::binary );
-//
-//    levelset.dump(file);
-//    geometry.dump(file) ;
-//    file.close();
+    //Refinement
+    for( int i=0; i<3; ++i){
 
-//    {// dump levelset to file and restor into new class
-//
-//        bitpit::LevelSetOctree          levelset2(mesh);
-//        bitpit::LevelSetSegmentation    geometry2(0,&STL);
-//
-//        std::fstream    file ;
-//        file.open("levelset_004.dump", std::ios::in | std::ios::binary );
-//
-//        levelset2.restore(file);
-//        geometry2.restore(file);
-//
-//
-        //Refinement
-        for( int i=0; i<3; ++i){
-
-            for( auto & cell : mesh.getCells() ){
-                const long &id = cell.getId() ;
-                if( std::abs(levelset.getLS(id)) < 100. ){
-                    mesh.markCellForRefinement(id) ;
-                }
+        for( auto & cell : mesh.getCells() ){
+            const long &id = cell.getId() ;
+            if( std::abs(object0.getLS(id)) < 100. ){
+                mesh.markCellForRefinement(id) ;
             }
-
-            mapper = mesh.update(true) ;
-            start = std::chrono::system_clock::now();
-            levelset.update(mapper) ;
-            end = std::chrono::system_clock::now();
-
-            elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
-
-            LS.resize(mesh.getCellCount() ) ;
-            itLS = LS.begin() ;
-            for( auto & cell : mesh.getCells() ){
-                const long &id = cell.getId() ;
-                *itLS = levelset.getLS(id) ;
-                ++itLS ;
-            };
-
-            mesh.write() ;
         }
-//    }
+
+        mapper = mesh.update(true) ;
+        start = std::chrono::system_clock::now();
+        levelset.update(mapper) ;
+        end = std::chrono::system_clock::now();
+
+        elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
+
+        LS.resize(mesh.getCellCount() ) ;
+        itLS = LS.begin() ;
+        for( auto & cell : mesh.getCells() ){
+            const long &id = cell.getId() ;
+            *itLS = object0.getLS(id) ;
+            ++itLS ;
+        };
+
+        mesh.write() ;
+    }
 
     cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
     cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;

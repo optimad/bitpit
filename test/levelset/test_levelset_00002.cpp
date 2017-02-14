@@ -98,13 +98,15 @@ int main( int argc, char *argv[]){
     VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
 
     // Compute level set  in narrow band
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    int                                      elapsed_seconds;
+    LevelSet levelset ;
+    int id0;
 
-    LevelSet                levelset ;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    int elapsed_seconds;
+
 
     levelset.setMesh(&mesh) ;
-    levelset.addObject( std::move(STL), M_PI ) ;
+    id0 = levelset.addObject( std::move(STL), M_PI ) ;
 
     levelset.setPropagateSign(true) ;
     start = std::chrono::system_clock::now();
@@ -118,24 +120,18 @@ int main( int argc, char *argv[]){
     mesh.update() ;
     std::vector<double> LS(mesh.getCellCount() ) ;
     std::vector<std::array<double,3>> LG(mesh.getCellCount() ) ;
+    const LevelSetObject &object0 = levelset.getObject(id0);
 
-    {
-        std::vector<double>::iterator it = LS.begin() ;
-        for( auto & cell : mesh.getCells() ){
-            const long &id = cell.getId() ;
-            *it = levelset.getLS(id) ;
-            ++it ;
-        };
-    }
+    std::vector<double>::iterator itLS = LS.begin() ;
+    std::vector<std::array<double,3>>::iterator itLG = LG.begin() ;
 
-    {
-        std::vector<std::array<double,3>>::iterator it = LG.begin() ;
-        for( auto & cell : mesh.getCells() ){
-            const long &id = cell.getId() ;
-            *it = levelset.getGradient(id) ;
-            ++it ;
-        };
-    }
+    for( auto & cell : mesh.getCells() ){
+        const long &id = cell.getId() ;
+        *itLS = object0.getLS(id) ;
+        *itLG = object0.getGradient(id) ;
+        ++itLS ;
+        ++itLG ;
+    };
 
     mesh.getVTK().addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
     mesh.getVTK().addData("lg", VTKFieldType::VECTOR, VTKLocation::CELL, LG) ;
