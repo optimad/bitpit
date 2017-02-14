@@ -74,14 +74,14 @@ LevelSet::LevelSet() {
     m_signedDF    = true ;
     m_propagateS  = false;
 
-};
+}
 
 /*!
  * Destructor of LevelSet
 */
 LevelSet::~LevelSet(){
     clear() ;
-};
+}
 
 /*!
  * Sets the grid on which the levelset function should be computed.
@@ -98,23 +98,18 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
     
     } else{
         log::cout() << "Mesh non supported in LevelSet::setMesh()" << std::endl ;
-    }; 
+    } 
 
-    return;
-};
+}
 
 /*!
  * Sets the grid on which the levelset function should be computed.
  * @param[in] cartesian cartesian patch
  */
 void LevelSet::setMesh( VolCartesian* cartesian ) {
-
     LevelSetKernel *kernel = new LevelSetCartesian( *cartesian) ;
-
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
-
-    return;
-};
+}
 
 /*!
  * Sets the grid on which the levelset function should be computed.
@@ -123,8 +118,7 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
 void LevelSet::setMesh( VolOctree* octree ) {
     LevelSetKernel *kernel = new LevelSetOctree( *octree) ;
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
-    return;
-};
+}
 
 /*!
  * Adds a LevelSetSegmentation object
@@ -143,7 +137,7 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, doubl
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return addObject(std::unique_ptr<LevelSetObject>(object));
-};
+}
 
 /*!
  * Adds a LevelSetSegmentation object
@@ -162,7 +156,7 @@ int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) 
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return addObject(std::unique_ptr<LevelSetObject>(object));
-};
+}
 
 /*!
  * Adds a LevelSetSegmentation object
@@ -189,7 +183,7 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return addObject(std::unique_ptr<LevelSetObject>(object));
-};
+}
 
 /*!
  * Adds a LevelSetSegmentation object
@@ -214,7 +208,7 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return addObject(std::unique_ptr<LevelSetObject>(object));
-};
+}
 
 /*!
  * Adds a boolean operation
@@ -238,7 +232,7 @@ int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &i
     addProcessingOrder(id) ;
 
     return id;
-};
+}
 
 /*!
  * Adds a LevelSetMask object composed of the external envelope of a list of mesh cells.
@@ -259,7 +253,7 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
     addProcessingOrder(id) ;
 
     return id;
-};
+}
 
 /*!
  * Adds a LevelSetMask object composed of a list of interfaces
@@ -280,7 +274,7 @@ int LevelSet::addObject( const std::vector<long> &list, const long &refInterface
     addProcessingOrder(id) ;
 
     return id;
-};
+}
 
 /*!
  * Adds a generic LevelSetObject
@@ -295,7 +289,7 @@ int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
     addProcessingOrder(objectId) ;
 
     return objectId;
-};
+}
 
 /*!
  * Adds a generic LevelSetObject
@@ -310,7 +304,7 @@ int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
     addProcessingOrder(objectId) ;
 
     return objectId;
-};
+}
 
 /*!
  * Remove all levelset objects
@@ -318,7 +312,7 @@ int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
 void LevelSet::removeObjects() {
     m_object.clear();
     m_order.clear();
-};
+}
 
 /*!
  * Remove a levelset object
@@ -334,7 +328,7 @@ bool LevelSet::removeObject(int id) {
     } 
 
     return false;
-};
+}
 
 /*!
  * Adds the object to the processing order.
@@ -371,8 +365,7 @@ void LevelSet::addProcessingOrder( int objectId ) {
 
     }
 
-    return ;
-};
+}
 
 /*!
  * Removes the object from the processing order.
@@ -392,7 +385,7 @@ bool LevelSet::removeProcessingOrder(int objectId){
     }
     
     return false ;
-};
+}
 
 
 /*!
@@ -403,7 +396,7 @@ bool LevelSet::removeProcessingOrder(int objectId){
  */
 const LevelSetObject & LevelSet::getObject( int id) const{
     return *(m_object.at(id)) ;
-};
+}
 
 /*!
  * Get the number of levelset objects
@@ -411,7 +404,7 @@ const LevelSetObject & LevelSet::getObject( int id) const{
  */
 int LevelSet::getObjectCount( ) const{
     return m_object.size() ;
-};
+}
 
 /*!
  * Get the ids of the bodies.
@@ -425,7 +418,7 @@ std::vector<int> LevelSet::getObjectIds( ) const{
     }
 
     return ids ;
-};
+}
 
 /*!
  * Clear LevelSet entirely, deleteing kernel and objects
@@ -433,7 +426,7 @@ std::vector<int> LevelSet::getObjectIds( ) const{
 void LevelSet::clear(){
     m_kernel.reset();
     removeObjects();
-};
+}
 
 /*!
  * Set if the signed or unsigned levelset function should be computed.
@@ -442,7 +435,7 @@ void LevelSet::clear(){
 void LevelSet::setSign(bool flag){
     m_signedDF = flag;
 
-};
+}
 
 /*!
  * Set if the levelset sign has to be propagated from the narrow band to the whole domain.
@@ -450,7 +443,7 @@ void LevelSet::setSign(bool flag){
  */
 void LevelSet::setPropagateSign(bool flag){
     m_propagateS = flag;
-};
+}
 
 /*!
  * Manually set the physical size of the narrow band.
@@ -461,7 +454,7 @@ void LevelSet::setSizeNarrowBand(double r){
     for( auto &object :m_object){
         object.second->setSizeNarrowBand(r) ;
     }
-};
+}
 
 /*!
  * Computes levelset on given mesh with respect to the objects.
@@ -486,8 +479,6 @@ void LevelSet::compute(){
         if( m_propagateS ) visitor.propagateSign( m_kernel.get() ) ;
     }
 
-
-    return ;
 }
 
 /*!
@@ -568,10 +559,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
             visitor.filterOutsideNarrowBand(newRSearch) ;
         }
     }
-
-    return;
-
-};
+}
 
 /*! 
  * Writes LevelSetKernel to stream in binary format
@@ -587,10 +575,7 @@ void LevelSet::dump( std::ostream &stream ){
     for( const auto &object : m_object ){
         object.second->dump( stream ) ;
     }
-
-
-    return ;
-};
+}
 
 /*! 
  * Reads LevelSetKernel from stream in binary format
@@ -606,9 +591,6 @@ void LevelSet::restore( std::istream &stream ){
     for( const auto &object : m_object ){
         object.second->restore( stream ) ;
     }
-
-
-    return ;
 }
 
 #if BITPIT_ENABLE_MPI
