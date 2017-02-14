@@ -139,7 +139,7 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
  * @return closest part
  */
 int LevelSetBoolean::getPart( const long &id ) const{
-    LevelSetObject *objPtr = getClosestObject(id) ;
+    LevelSetObject *objPtr = getDeterminingObject(id) ;
     return objPtr->getPart(id) ;
 }
 
@@ -214,7 +214,7 @@ LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
  */
 double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
 
-    LevelSetObject *objectPtr = getClosestObject(id);
+    LevelSetObject *objectPtr = getDeterminingObject(id);
     if (!objectPtr) {
         return (- levelSetDefaults::SIZE);
     }
@@ -227,7 +227,7 @@ double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
  * @param[in] id cell index
  * @return pointer to closest LevelSetObject
  */
-LevelSetObject* LevelSetBoolean::getClosestObject( const long &id) const{
+LevelSetObject* LevelSetBoolean::getDeterminingObject( const long &id) const{
 
     double value1 = m_objPtr1->getLS(id) ;
     double value2 = m_objPtr2->getLS(id) ;
