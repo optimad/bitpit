@@ -37,7 +37,6 @@ namespace adaption{
     class Info ;
 }
 class LevelSetObject ;
-class LevelSetKernel ;
 
 class LevelSetBoolean: public LevelSetObject{
 
@@ -67,10 +66,10 @@ class LevelSetBoolean: public LevelSetObject{
 
     void                                        setSizeNarrowBand(double) ;
 
-    double                                      computeSizeNarrowBand(LevelSetKernel*);
-    double                                      updateSizeNarrowBand(LevelSetKernel*,const std::vector<adaption::Info> &);
-    void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &) ;
-    void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &);
+    double                                      computeSizeNarrowBand();
+    double                                      updateSizeNarrowBand(const std::vector<adaption::Info> &);
+    void                                        computeLSInNarrowBand(const double &, const bool &) ;
+    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &);
 
     LevelSetBooleanOperation                    getBooleanOperation() const;
     LevelSetObject*                             getClosestObject(const long &) const ;

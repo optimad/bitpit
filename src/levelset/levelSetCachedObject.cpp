@@ -196,19 +196,18 @@ void LevelSetCachedObject::__clear( ){
 
 /*!
  * Calculation of the necessary size of the narrow band for a generic LevelSetKernel
- * @param[in] visitee LevelSetKernel
  * @return size of narrow band
  */
-double LevelSetCachedObject::computeSizeNarrowBand( LevelSetKernel *visitee ){
+double LevelSetCachedObject::computeSizeNarrowBand(){
 
     double RSearch(levelSetDefaults::VALUE);
 
-    if( dynamic_cast<LevelSetCartesian*>(visitee) != nullptr ){
-        LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(visitee) ;
+    if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) != nullptr ){
+        LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ;
         RSearch = _computeSizeNarrowBand(cartesian) ;
 
-    } else if( dynamic_cast<LevelSetOctree*>(visitee) != nullptr ){
-        LevelSetOctree* octree = dynamic_cast<LevelSetOctree*>(visitee) ;
+    } else if( dynamic_cast<LevelSetOctree*>(m_kernelPtr) != nullptr ){
+        LevelSetOctree* octree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ;
         RSearch = _computeSizeNarrowBand(octree) ;
     }
 
@@ -326,7 +325,7 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
     } //endif intersect
 
 # if BITPIT_ENABLE_MPI
-    if( assureMPI(visitee) ){
+    if( assureMPI() ){
         double reducedRSearch ;
         MPI_Comm meshComm = visitee->getCommunicator() ;
         MPI_Allreduce( &RSearch, &reducedRSearch, 1, MPI_DOUBLE, MPI_MAX, meshComm );
@@ -340,19 +339,18 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
 /*!
  * Update the size of the narrow band after an adaptation of the mesh
  * @param[in] mapper mesh modifications
- * @param[in] visitee Cartesian LevelSetKernel
  * @return size of narrow band
  */
-double LevelSetCachedObject::updateSizeNarrowBand(LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper){
+double LevelSetCachedObject::updateSizeNarrowBand(const std::vector<adaption::Info> &mapper){
 
     double R(levelSetDefaults::VALUE);
 
-    if( dynamic_cast<LevelSetCartesian*>(visitee) != nullptr ){
-        LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(visitee) ;
+    if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) != nullptr ){
+        LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ;
         R= _updateSizeNarrowBand(cartesian,mapper) ;
 
-    } else if( dynamic_cast<LevelSetOctree*>(visitee) != nullptr ){
-        LevelSetOctree* octree = dynamic_cast<LevelSetOctree*>(visitee) ;
+    } else if( dynamic_cast<LevelSetOctree*>(m_kernelPtr) != nullptr ){
+        LevelSetOctree* octree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ;
         R= _updateSizeNarrowBand(octree,mapper) ;
     }
 
@@ -489,7 +487,7 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetOctree *visitee, cons
     }
 
 # if BITPIT_ENABLE_MPI
-    if( assureMPI(visitee) ) {
+    if( assureMPI() ) {
         double reducedRSearch ;
         MPI_Comm meshComm = visitee->getCommunicator() ;
         MPI_Allreduce( &newRSearch, &reducedRSearch, 1, MPI_DOUBLE, MPI_MAX, meshComm );
@@ -504,9 +502,9 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetOctree *visitee, cons
 /*!
  * Propagate the sign of the signed distance function from narrow band to entire domain
  */
-void LevelSetCachedObject::propagateSign( LevelSetKernel *visitee ) {
+void LevelSetCachedObject::propagateSign() {
 
-    VolumeKernel const &mesh = *(visitee->getMesh()) ;
+    VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
 
     // Save the bounding boxes of the object
     std::array<double,3> boxMin;
@@ -688,19 +686,19 @@ void LevelSetCachedObject::propagateSign( LevelSetKernel *visitee ) {
 #if BITPIT_ENABLE_MPI
     // If the communicator is not set we can exit because the calculation
     // is serial
-    if (!visitee->isCommunicatorSet()) {
+    if (!m_kernelPtr->isCommunicatorSet()) {
         return;
     }
 
     // If there is only one processor we can exit
     int nProcs;
-    MPI_Comm_size(visitee->getCommunicator(), &nProcs);
+    MPI_Comm_size(m_kernelPtr->getCommunicator(), &nProcs);
     if (nProcs == 1) {
         return;
     }
 
     // Initialize the communicator for exchanging the sign among partitions
-    DataCommunicator dataCommunicator(visitee->getCommunicator());
+    DataCommunicator dataCommunicator(m_kernelPtr->getCommunicator());
     dataCommunicator.setTag(108) ;
 
     int sign;
@@ -734,7 +732,7 @@ void LevelSetCachedObject::propagateSign( LevelSetKernel *visitee ) {
         }
 
         bool globallyComplete;
-        MPI_Allreduce(&locallyComplete, &globallyComplete, 1, MPI_C_BOOL, MPI_LAND, visitee->getCommunicator());
+        MPI_Allreduce(&locallyComplete, &globallyComplete, 1, MPI_C_BOOL, MPI_LAND, m_kernelPtr->getCommunicator());
         if (globallyComplete) {
             return;
         }

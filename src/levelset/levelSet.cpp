@@ -282,6 +282,9 @@ int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
  */
 int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 
+    assert(m_kernel && " levelset: setMesh must be called befor addObject");
+    object->setKernel(m_kernel.get());
+
     int objectId = object->getId();
     m_object[objectId] = std::move(object) ;
 
@@ -296,6 +299,9 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
  * @return the index associated to the object
  */
 int LevelSet::registerObject( const std::unique_ptr<LevelSetObject> &object ) {
+
+    assert(m_kernel && " levelset: setMesh must be called befor addObject");
+    object->setKernel(m_kernel.get());
 
     int objectId = object->getId();
     m_object[objectId] = std::unique_ptr<LevelSetObject>(object->clone())  ;
@@ -465,7 +471,7 @@ void LevelSet::compute(){
     for( int objectId : m_order){
         auto &visitor = *(m_object.at(objectId)) ;
         if( !m_userRSearch){
-            RSearch = visitor.computeSizeNarrowBand(m_kernel.get())  ;
+            RSearch = visitor.computeSizeNarrowBand()  ;
             visitor.setSizeNarrowBand(RSearch) ;
         }
     }
@@ -474,8 +480,8 @@ void LevelSet::compute(){
     for( int objectId : m_order){
         auto &visitor = *(m_object.at(objectId)) ;
         RSearch = visitor.getSizeNarrowBand();
-        visitor.computeLSInNarrowBand( m_kernel.get(), RSearch, m_signedDF) ;
-        if( m_propagateS ) visitor.propagateSign( m_kernel.get() ) ;
+        visitor.computeLSInNarrowBand( RSearch, m_signedDF) ;
+        if( m_propagateS ) visitor.propagateSign() ;
     }
 
 }
@@ -513,7 +519,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
         for( int objectId : m_order){
             auto &visitor = *(m_object.at(objectId)) ;
-            newRSearch = visitor.updateSizeNarrowBand(m_kernel.get(), mapper)  ;
+            newRSearch = visitor.updateSizeNarrowBand(mapper)  ;
             visitor.setSizeNarrowBand(newRSearch) ;
         }
     }
@@ -524,7 +530,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
         if (updateNarrowBand) {
             newRSearch = visitor.getSizeNarrowBand() ;
-            visitor.updateLSInNarrowBand( m_kernel.get(), mapper, newRSearch, m_signedDF ) ;
+            visitor.updateLSInNarrowBand( mapper, newRSearch, m_signedDF ) ;
 
         } else {
             visitor.clearAfterMeshAdaption(mapper) ;
@@ -534,13 +540,13 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 #if BITPIT_ENABLE_MPI
         // Parallel communications
         if (sendList.size() > 0 || recvList.size() > 0) {
-            visitor.communicate( m_kernel.get(), sendList, recvList, &mapper ) ;
+            visitor.communicate( sendList, recvList, &mapper ) ;
         }
 
-        visitor.exchangeGhosts( m_kernel.get() ) ;
+        visitor.exchangeGhosts() ;
 #endif
         if (updateNarrowBand && m_propagateS) {
-            visitor.propagateSign( m_kernel.get() ) ;
+            visitor.propagateSign() ;
         }
     }
 
