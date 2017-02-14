@@ -33,14 +33,6 @@ namespace bitpit {
 
 /*!
 	\ingroup voloctree
-	\class OctreeLevelInfo
-
-	\brief The OctreeLevelInfo class defines the information associated to
-	an octree level.
-*/
-
-/*!
-	\ingroup voloctree
 	@{
 */
 
