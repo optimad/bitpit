@@ -50,8 +50,52 @@ LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSetKernel( (sta
     m_cartesian = &patch ;
 }
 
+/*!
+ * Returns a pointer to VolCartesian
+ * @return pointer to VolCartesian
+ */
 VolCartesian* LevelSetCartesian::getCartesianMesh() const{
     return m_cartesian ;
+}
+
+/*!
+ * Computes the radius of the incircle of the specfified cell.
+ * @param[in] id is the index of cell
+ * @return radius of incircle
+ */
+double LevelSetCartesian::computeCellIncircle(long id) {
+
+    BITPIT_UNUSED(id);
+
+    int dim = m_cartesian->getDimension();
+    std::array<double,3> spacing = m_cartesian->getSpacing();
+    double minSpacing = std::numeric_limits<double>::max() ;
+
+    for(int i=0; i<dim; ++i){
+        minSpacing = std::min( minSpacing, spacing[i] );
+    }
+
+    return 0.5*minSpacing;
+}
+
+/*!
+ * Computes the radius of the circumcircle of the specfified cell.
+ * @param[in] id is the index of cell
+ * @return radius of incircle
+ */
+double LevelSetCartesian::computeCellCircumcircle( long id ) {
+
+    BITPIT_UNUSED(id);
+
+    int dim = m_cartesian->getDimension();
+    std::array<double,3> spacing = m_cartesian->getSpacing();
+    double maxSpacing = -std::numeric_limits<double>::max() ;
+
+    for(int i=0; i<dim; ++i){
+        maxSpacing = std::max( maxSpacing, spacing[i] );
+    }
+
+    return 0.5*sqrt((float) dim)*maxSpacing;
 }
 
 /*!

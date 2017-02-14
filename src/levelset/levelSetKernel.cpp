@@ -204,7 +204,71 @@ const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) {
 
 }
 
+/*!
+ * Computes the radius of the incircle of the specfified cell.
+ * @param[in] id is the index of cell
+ * @return radius of incircle
+ */
+double LevelSetKernel::computeCellIncircle( long id ) {
 
+    VolumeKernel *patch = getMesh();
+    Cell &cell = patch->getCell(id);
+
+    const long* interfaceIds = cell.getInterfaces();
+    int interfaceCount = cell.getInterfaceCount();
+    
+    std::array<double,3> cellCenter = computeCellCentroid(id);
+
+    double radius = std::numeric_limits<double>::max() ;
+    for (int k = 0; k < interfaceCount; ++k) {
+        long interfaceId = interfaceIds[k];
+        double r = norm2(cellCenter - patch->evalInterfaceCentroid(interfaceId));
+        radius = std::min(radius, r);
+    }
+
+    int vertexCount = cell.getInterfaceCount();
+    for (int k = 0; k < vertexCount; ++k) {
+        long vertexId = cell.getVertex(k);
+        double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
+        radius = std::min(radius, r);
+    }
+
+    return radius;
+
+}
+
+/*!
+ * Computes the radius of the circumcircle of the specfified cell.
+ * @param[in] id is the index of cell
+ * @return radius of incircle
+ */
+double LevelSetKernel::computeCellCircumcircle( long id ) {
+
+    VolumeKernel *patch = getMesh();
+    Cell &cell = patch->getCell(id);
+
+    const long* interfaceIds = cell.getInterfaces();
+    int interfaceCount = cell.getInterfaceCount();
+
+    std::array<double,3> cellCenter = computeCellCentroid(id);
+
+    double radius = -std::numeric_limits<double>::max() ;
+    for (int k = 0; k < interfaceCount; ++k) {
+        long interfaceId = interfaceIds[k];
+        double r = norm2(cellCenter - patch->evalInterfaceCentroid(interfaceId));
+        radius = std::max(radius, r);
+    }
+
+    int vertexCount = cell.getInterfaceCount();
+    for (int k = 0; k < vertexCount; ++k) {
+        long vertexId = cell.getVertex(k);
+        double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
+        radius = std::max(radius, r);
+    }
+
+    return radius;
+
+}
 /*!
  * Checks if the specified cell is inside the given bounding box
  * @param[in] id is the id of the cell

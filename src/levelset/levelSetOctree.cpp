@@ -48,9 +48,33 @@ LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast
     m_octree = &patch ;
 }
 
+/*!
+ * Returns a pointer to VolOctree
+ * @return pointer to VolOctree
+ */
 VolOctree* LevelSetOctree::getOctreeMesh() const{
     return m_octree ;
 }
+
+/*!
+ * Computes the radius of the incircle of the specfified cell.
+ * @param[in] id is the index of cell
+ * @return radius of incircle
+ */
+double LevelSetOctree::computeCellIncircle(long id) {
+    return 0.5*m_octree->evalCellSize(id);
+}
+
+/*!
+ * Computes the radius of the circumcircle of the specfified cell.
+ * @param[in] id is the index of cell
+ * @return radius of incircle
+ */
+double LevelSetOctree::computeCellCircumcircle( long id ) {
+    int dim = m_octree->getDimension();
+    return 0.5*sqrt(dim)*m_octree->evalCellSize(id);
+}
+
 /*!
  * Compute size of narrow band given a cell.
  * This function assumes that the octree is balanced 2:1
