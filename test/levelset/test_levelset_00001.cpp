@@ -127,8 +127,6 @@ int main( int argc, char *argv[]){
     log::cout() << "n. vertex: " << STL->getVertexCount() << std::endl;
     log::cout() << "n. simplex: " << STL->getCellCount() << std::endl;
 
-
-
     // create cartesian mesh around geometry 
     log::cout() << " - Setting mesh" << std::endl;
     std::array<double,3>     meshMin, meshMax, delta ;
@@ -143,17 +141,30 @@ int main( int argc, char *argv[]){
     delta = meshMax -meshMin ;
 
     VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
+    mesh.update() ;
 
-    // Compute level set  in narrow band
-    LevelSet levelset ;
-    int id0;
+    // mark cells within R=0.5
+    std::unordered_set<long> mask;
 
+    for( auto & cell : mesh.getCells() ){
+        const long &id = cell.getId() ;
+        std::array<double,3> center = mesh.evalCellCentroid(id);
+        double r = norm2(center);
+        if(r<=0.5){
+            mask.insert(id);
+        }
+    };
+
+    // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock> start, end;
     int elapsed_seconds;
 
+    LevelSet levelset ;
+
     levelset.setMesh(&mesh) ;
 
-    id0 = levelset.addObject(std::move(STL),M_PI) ;
+    int id0 = levelset.addObject(std::move(STL),M_PI) ;
+    int id1 = levelset.addObject(mask) ;
 
     start = std::chrono::system_clock::now();
     levelset.compute( ) ;
@@ -163,18 +174,24 @@ int main( int argc, char *argv[]){
     log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
     log::cout() << " - Exporting data" << std::endl;
-    mesh.update() ;
-    std::vector<double> LS(mesh.getCellCount() ) ;
-    std::vector<double>::iterator it = LS.begin() ;
-    const LevelSetObject &object0 = levelset.getObject(id0);
 
+    const LevelSetObject &object0 = levelset.getObject(id0);
+    const LevelSetObject &object1 = levelset.getObject(id1);
+
+    std::vector<double> LS0(mesh.getCellCount()) ;
+    std::vector<double> LS1(mesh.getCellCount()) ;
+    std::vector<double>::iterator it0 = LS0.begin() ;
+    std::vector<double>::iterator it1 = LS1.begin() ;
     for( auto & cell : mesh.getCells() ){
-        const long &id = cell.getId() ;
-        *it = object0.getLS(id) ;
-        ++it ;
+        const long &cellId = cell.getId() ;
+        *it0 = object0.getLS(cellId) ;
+        *it1 = object1.getLS(cellId) ;
+        ++it0 ;
+        ++it1 ;
     };
 
-    mesh.getVTK().addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
+    mesh.getVTK().addData("ls0", VTKFieldType::SCALAR, VTKLocation::CELL, LS0) ;
+    mesh.getVTK().addData("ls1", VTKFieldType::SCALAR, VTKLocation::CELL, LS1) ;
     mesh.getVTK().setName("levelset_001") ;
     mesh.write() ;
 
