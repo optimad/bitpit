@@ -50,7 +50,7 @@ namespace bitpit {
  * Default constructor 
  */
 LevelSetSegmentation::SegInfo::SegInfo( ) {
-};
+}
 
 /*!
  * Constructor
@@ -59,7 +59,7 @@ LevelSetSegmentation::SegInfo::SegInfo( ) {
  */
 LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &_segments, const std::vector<double> &_distances )
     : segments(_segments), distances(_distances) {
-};
+}
 
 /*!
 	@ingroup    levelset
@@ -74,7 +74,7 @@ LevelSetSegmentation::~LevelSetSegmentation() {
     m_segmentation = NULL;
     m_vertexNormal.clear() ;
     m_vertexGradient.clear() ;
-};
+}
 
 /*!
  * Constructor
@@ -83,7 +83,7 @@ LevelSetSegmentation::~LevelSetSegmentation() {
  */
 LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetCachedObject(id) {
     setFeatureAngle(angle) ;
-};
+}
 
 /*!
  * Constructor
@@ -93,7 +93,7 @@ LevelSetSegmentation::LevelSetSegmentation(int id, double angle) :LevelSetCached
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL, double angle) :LevelSetSegmentation(id,angle) {
     setSegmentation( std::move(STL) );
-};
+}
 
 /*!
  * Constructor
@@ -103,7 +103,7 @@ LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstruct
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL, double angle) :LevelSetSegmentation(id,angle) {
     setSegmentation( STL );
-};
+}
 
 /*!
  * Copy constructor.
@@ -120,7 +120,7 @@ LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) :
     if (m_own != nullptr) {
         m_own = unique_ptr<SurfUnstructured>(new SurfUnstructured(*(other.m_own)));
     }
-};
+}
 
 /*!
  * Clones the object
@@ -183,7 +183,7 @@ void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
             m_vertexNormal.insert({{segId,vertexNormal}}) ;
         }
 
-    };
+    }
 }
 
 /*!
@@ -192,7 +192,7 @@ void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
  */
 const SurfUnstructured & LevelSetSegmentation::getSegmentation() const {
     return *m_segmentation ;
-};
+}
 
 /*!
  * Set feature angle
@@ -200,7 +200,7 @@ const SurfUnstructured & LevelSetSegmentation::getSegmentation() const {
  */
 void LevelSetSegmentation::setFeatureAngle( double angle){
     m_featureAngle= angle;
-};
+}
 
 /*!
  * Gets the closest support within the narrow band of cell
@@ -216,7 +216,7 @@ int LevelSetSegmentation::getPart( const long &id ) const{
         return levelSetDefaults::PART ;
     }
 
-};
+}
 
 /*!
  * Gets the closest support within the narrow band of cell
@@ -231,7 +231,7 @@ long LevelSetSegmentation::getSupport( const long &id ) const{
         return levelSetDefaults::SUPPORT ;
     }
 
-};
+}
 
 /*!
  * Gets the number of support items within the narrow band of cell
@@ -246,7 +246,7 @@ int LevelSetSegmentation::getSupportCount( const long &id ) const{
         return 0 ;
     }
 
-};
+}
 
 /*!
  * Get the list of simplices wich contain the cell centroid in their narrow band.
@@ -259,9 +259,9 @@ const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &i) co
         return levelSetDefaults::LIST;
     } else {
         return ( m_seg[i].segments );
-    };
+    }
 
-};
+}
 
 /*!
  * Aggregate cell vertex coordinates in one vector
@@ -278,14 +278,14 @@ std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( cons
     for( n=0; n<N; ++n){
         j = cell.getVertex(n) ;
         VS[n] = m_segmentation->getVertexCoords(j);
-    };
+    }
 
     if( N > 3){
         log::cout() << "levelset: only segments and triangles supported in LevelSetSegmentation !!" << std::endl ;
     }
 
     return VS;
-};
+}
 
 /*!
  * Create the segment information for the specified segment-to-cell map
@@ -562,17 +562,11 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
     } else{
         log::cout() << " simplex not supported in LevelSetSegmentation::infoFromSimplex " << nV << std::endl ;
         
-    };
-
-
-
+    }
 
     s = sign( dotProduct(g, p - x) );
 
-
-    return ;
-
-};
+}
 
 /*!
  * Finds seed points in narrow band within a cartesian mesh for one simplex
@@ -602,18 +596,18 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
         if(  CGElem::intersectPointBox( P, B0, B1, dim ) ) {
             I.push_back( mesh.locateClosestCell(P) );
             found =  true ;
-        };
+        }
     }
 
     if( !found && CGElem::intersectBoxSimplex( B0, B1, VS, VP, dim ) ) {
         for( const auto &P : VP){
             I.push_back( mesh.locateClosestCell(P) );
             found = true ;
-        };
+        }
     }
 
     return found ;
-};
+}
 
 /*!
  * Computes axis aligned bounding box of object
@@ -622,7 +616,7 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
  */
 void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
     m_segmentation->getBoundingBox(minP,maxP) ;
-};
+}
 
 /*!
  * Clear the segmentation and the specified kernel.
@@ -649,14 +643,12 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetKernel *visitee, const
     } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(visitee) ){
         segmentToCellMap = extractSegmentToCellMap( lsOctree, RSearch ) ;
 
-    };
+    }
 
     std::unordered_set<long> addedCells = createSegmentInfo(visitee, RSearch, segmentToCellMap) ;
 
     createLevelsetInfo( visitee, signd, addedCells );
-
-    return;
-};
+}
 
 /*!
  * Updates the levelset function within the narrow band after mesh adaptation.
@@ -706,8 +698,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
         createLevelsetInfo( visitee, signd, addedCells );
     }
 
-    return;
-};
+}
 
 /*!
  * Determines the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle) for cartesian meshes
@@ -762,7 +753,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
             for( size_t k = 0; k < stackSize; ++k) {
                 long cell = stack[k];
                 cloud[k] = visitee->computeCellCentroid(cell) ;
-            };
+            }
 
             d = CGElem::distanceCloudSimplex( cloud, VS); 
             vit = d.begin() ;
@@ -777,14 +768,14 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
                         if( flag[neigh] != i) {
                             temp.push_back( neigh) ;
                             flag[neigh] = i ;
-                        };
+                        }
                     }
 
                 } //end if distance
 
                 ++vit ;
 
-            };
+            }
 
             stack.clear() ;
             stack.swap( temp ) ;
@@ -843,7 +834,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
             C1[i] =  octrBB0[i] + size * ( (int) ( ( C1[i] - octrBB0[i] ) / size ) +1 ) ;
 
             nc[i] = round( ( C1[i] - C0[i] ) /size ) ;
-        };
+        }
 
         // calculate LS triangle lists on cartesian mesh and map on pablo
         VolCartesian            cmesh( 0, dim, C0, C1-C0, nc) ;
@@ -872,15 +863,15 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
                     segmentToCellMap[segment].push_back(id);
                 }
 
-            };
+            }
 
-        };
+        }
 
-    }; //endif intersect
+    } //endif intersect
 
     return segmentToCellMap;
 
-};
+}
 
 /*!
  * Extract the map that links segments and cells
@@ -1023,9 +1014,7 @@ void LevelSetSegmentation::__clearAfterMeshAdaption( const std::vector<adaption:
     }
 
     m_seg.flush();
-
-    return ;
-};
+}
 
 /*!
  * Clears data structure outside narrow band
@@ -1040,16 +1029,14 @@ void LevelSetSegmentation::__filterOutsideNarrowBand( double search ){
         id = segItr.getId() ;
         if( ! isInNarrowBand(id) ){
             m_seg.erase(id,true) ;
-        };
-    };
+        }
+    }
 
     m_seg.flush() ;
 
     updateSegmentList( search) ;
 
-
-    return ;
-};
+}
 
 /*!
  * Writes LevelSetSegmentation to stream in binary format
@@ -1066,7 +1053,7 @@ void LevelSetSegmentation::__dump( std::ostream &stream ){
         IO::binary::write( stream, segItr->segments );
         IO::binary::write( stream, segItr->distances );
     }
-};
+}
 
 /*!
  * Reads LevelSetSegmentation from stream in binary format
@@ -1095,7 +1082,7 @@ void LevelSetSegmentation::__restore( std::istream &stream ){
 
         m_seg.insert(id,cellData) ;
     }
-};
+}
 
 # if BITPIT_ENABLE_MPI
 
@@ -1130,17 +1117,15 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
             dataBuffer << (size_t) seginfo.segments.size() ;
             for( const long & seg : seginfo.segments ){
                 dataBuffer << seg ;
-            };
+            }
             for( const double & distance : seginfo.distances ){
                 dataBuffer << distance ;
-            };
+            }
         }
 
         ++counter ;
     }
-
-    return;
-};
+}
 
 /*!
  * Processing of communication buffer into data structure
@@ -1178,9 +1163,7 @@ void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &r
             dataBuffer >> segItr->distances[s] ;
         }
     }
-
-    return;
-};
+}
 # endif
 
 }

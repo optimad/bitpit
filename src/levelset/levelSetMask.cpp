@@ -50,7 +50,7 @@ namespace bitpit {
  * Destructor
  */
 LevelSetMask::~LevelSetMask() {
-};
+}
 
 /*!
  * Constructor
@@ -82,7 +82,7 @@ LevelSetMask::LevelSetMask(int id, const std::unordered_set<long> &mask, const V
 
     std::unique_ptr<SurfUnstructured> segmentation(envelope) ;
     setSegmentation(std::move(segmentation));
-};
+}
 
 /*!
  * Constructor
@@ -110,7 +110,7 @@ LevelSetMask::LevelSetMask(int id, const std::vector<long> &list, const long &in
 
     std::unique_ptr<SurfUnstructured> segmentation(envelope) ;
     setSegmentation(std::move(segmentation));
-};
+}
 
 /*!
  * Extracts the external envelope and create a new patch from it

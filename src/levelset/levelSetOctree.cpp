@@ -39,14 +39,14 @@ namespace bitpit {
  */
 LevelSetOctree::~LevelSetOctree( ){
     m_octree = NULL ;
-};
+}
 
 /*!
  * Constructor
  */
 LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
     m_octree = &patch ;
-};
+}
 
 VolOctree* LevelSetOctree::getOctreeMesh() const{
     return m_octree ;
@@ -59,7 +59,7 @@ VolOctree* LevelSetOctree::getOctreeMesh() const{
 double LevelSetOctree::computeRSearchFromCell( long id ){
     int level = m_octree->getCellLevel(id) ;
     return  computeRSearchFromLevel( level ) ;
-};
+}
 
 /*!
  * Compute size of narrow band given the coarsest element level which is crossed by geometry.
@@ -68,7 +68,7 @@ double LevelSetOctree::computeRSearchFromCell( long id ){
  */
 double LevelSetOctree::computeRSearchFromLevel( uint8_t level){
     return  (m_octree->getTree()).levelToSize(level) *sqrt(11.) /2. ;
-};
+}
 
 /*!
  * Compute size of smallest octants greater than a given size (typically the size of the narrow band)
@@ -86,10 +86,10 @@ double LevelSetOctree::computeSizeFromRSearch( double r){
     while( size <= r ) {
         level-- ;
         size = tree.levelToSize(level) ;
-    };
+    }
 
     return size ;
 
-};
+}
 
 }

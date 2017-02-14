@@ -49,14 +49,14 @@ namespace bitpit {
  * Destructor
  */
 LevelSetObject::~LevelSetObject( ){
-};
+}
 
 /*!
  * Constructor
  * @param[in] id id assigned to object
  */
 LevelSetObject::LevelSetObject( int id, bool primary) : m_id(id), m_primary(primary){
-};
+}
 
 /*!
  * Get the id 
@@ -64,7 +64,7 @@ LevelSetObject::LevelSetObject( int id, bool primary) : m_id(id), m_primary(prim
  */
 int LevelSetObject::getId( ) const {
     return m_id ;
-};
+}
 
 /*!
  * If the levelset is primary (e.g. of a surface triangulation) or not (e.g. derived by boolean operations between two levelsets)
@@ -72,7 +72,7 @@ int LevelSetObject::getId( ) const {
  */
 bool LevelSetObject::isPrimary( ) const {
     return m_primary ;
-};
+}
 
 /*!
  * Get the object and part id of projection point
@@ -82,7 +82,7 @@ bool LevelSetObject::isPrimary( ) const {
 int LevelSetObject::getPart(const long &i) const {
     BITPIT_UNUSED(i) ;
     return levelSetDefaults::PART ;
-};
+}
 
 /*!
  * Get the sign of the levelset function
@@ -91,7 +91,7 @@ int LevelSetObject::getPart(const long &i) const {
  */
 short LevelSetObject::getSign(const long &i)const{
     return ( static_cast<short>(sign(getLS(i) )) );
-};
+}
 
 /*!
  * Propgates the sign to levelset function throughout the grid
@@ -108,7 +108,7 @@ void LevelSetObject::propagateSign(LevelSetKernel* visitee){
  */
 bool LevelSetObject::isInNarrowBand(const long &i)const{
     return ( std::abs(getLS(i)) <= m_RSearch );
-};
+}
 
 /*!
  * Get the current size of the narrow band.
@@ -116,7 +116,7 @@ bool LevelSetObject::isInNarrowBand(const long &i)const{
  */
 double LevelSetObject::getSizeNarrowBand()const{
     return m_RSearch;
-};
+}
 
 /*!
  * Manually set the size of the narrow band.
@@ -124,7 +124,7 @@ double LevelSetObject::getSizeNarrowBand()const{
  */
 void LevelSetObject::setSizeNarrowBand(double r){
     m_RSearch = r;
-};
+}
 
 /*!
  * Calculates the value and gradient of the levelset function within the narrow band
@@ -136,7 +136,7 @@ void LevelSetObject::computeLSInNarrowBand(LevelSetKernel* visitee, const double
     BITPIT_UNUSED(visitee);
     BITPIT_UNUSED(RSearch);
     BITPIT_UNUSED(signd);
-};
+}
 
 /*!
  * Updates the size of the narrow band after mesh adaption
@@ -148,7 +148,7 @@ double LevelSetObject::updateSizeNarrowBand(LevelSetKernel* visitee, const std::
     BITPIT_UNUSED(visitee);
     BITPIT_UNUSED(mapper);
     return getSizeNarrowBand();
-};
+}
 
 /*!
  * Updates the value and gradient of the levelset function within the narrow band
@@ -161,7 +161,7 @@ void LevelSetObject::updateLSInNarrowBand(LevelSetKernel* visitee, const std::ve
     BITPIT_UNUSED(mapper);
     BITPIT_UNUSED(RSearch);
     BITPIT_UNUSED(signd);
-};
+}
 
 /*! 
  * Deletes non-existing items and items outside the narrow band after grid adaption.
@@ -169,7 +169,7 @@ void LevelSetObject::updateLSInNarrowBand(LevelSetKernel* visitee, const std::ve
  */
 void LevelSetObject::clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
     _clearAfterMeshAdaption( mapper ) ;
-};
+}
 
 /*!
  * Clears data structure after mesh modification
@@ -185,7 +185,7 @@ void LevelSetObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> 
  */
 void LevelSetObject::filterOutsideNarrowBand( double newRSearch ){
     _filterOutsideNarrowBand(newRSearch) ;
-};
+}
 
 /*!
  * Clears data structure outside narrow band
@@ -206,7 +206,6 @@ void LevelSetObject::clear( ){
  * Clears all levelset information stored in derived class
  */
 void LevelSetObject::_clear( ){
-    return ;
 }
 
 /*!
@@ -218,7 +217,7 @@ void LevelSetObject::dump( std::ostream &stream ){
     IO::binary::write(stream, m_primary) ;
     IO::binary::write(stream, m_RSearch);
     _dump(stream) ;
-};
+}
 
 /*!
  * Writes LevelSetObject to stream in binary format
@@ -226,7 +225,7 @@ void LevelSetObject::dump( std::ostream &stream ){
  */
 void LevelSetObject::_dump( std::ostream &stream ){
     BITPIT_UNUSED(stream);
-};
+}
 
 /*!
  * Reads LevelSetObject from stream in binary format
@@ -237,7 +236,7 @@ void LevelSetObject::restore( std::istream &stream ){
     IO::binary::read(stream, m_primary) ;
     IO::binary::read(stream, m_RSearch);
     _restore(stream) ;
-};
+}
 
 /*!
  * Reads LevelSetObject from stream in binary format
@@ -245,7 +244,7 @@ void LevelSetObject::restore( std::istream &stream ){
  */
 void LevelSetObject::_restore( std::istream &stream ){
     BITPIT_UNUSED(stream);
-};
+}
 
 #if BITPIT_ENABLE_MPI
 
@@ -269,8 +268,6 @@ void LevelSetObject::exchangeGhosts(LevelSetKernel *visitee){
     std::unordered_map<int,std::vector<long>> &recvList =  visitee->getMesh()->getGhostExchangeTargets() ;
 
     communicate(visitee,sendList,recvList);
-
-    return ;
 }
 
 /*!
@@ -380,8 +377,6 @@ void LevelSetObject::communicate( LevelSetKernel *visitee, std::unordered_map<in
         dataCommunicator.finalize() ;
 
     }
-
-    return ;
 }
 
 /*!
@@ -392,7 +387,7 @@ void LevelSetObject::communicate( LevelSetKernel *visitee, std::unordered_map<in
 void LevelSetObject::writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
     _writeCommunicationBuffer( sendList, dataBuffer) ;
     dataBuffer.squeeze( ) ;
-};
+}
 
 /*!
  * Flushing of data to communication buffers for partitioning
@@ -402,7 +397,7 @@ void LevelSetObject::writeCommunicationBuffer( const std::vector<long> &sendList
 void LevelSetObject::_writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
     BITPIT_UNUSED(sendList) ;
     BITPIT_UNUSED(dataBuffer) ;
-};
+}
 
 /*!
  * Processing of communication buffer into data structure
@@ -411,7 +406,7 @@ void LevelSetObject::_writeCommunicationBuffer( const std::vector<long> &sendLis
  */
 void LevelSetObject::readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
     _readCommunicationBuffer(recvList, dataBuffer) ;
-};
+}
 
 /*!
  * Processing of communication buffer into data structure
@@ -421,7 +416,7 @@ void LevelSetObject::readCommunicationBuffer( const std::vector<long> &recvList,
 void LevelSetObject::_readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
     BITPIT_UNUSED(recvList) ;
     BITPIT_UNUSED(dataBuffer) ;
-};
+}
 
 #endif 
 

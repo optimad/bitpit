@@ -53,7 +53,7 @@ LevelSetKernel::LevelSetKernel() {
     m_commMPI = MPI_COMM_NULL;
 # endif
 
-};
+}
 
 /*!
  * Constructor
@@ -61,7 +61,7 @@ LevelSetKernel::LevelSetKernel() {
  */
 LevelSetKernel::LevelSetKernel( VolumeKernel *patch): LevelSetKernel() {
     m_mesh = patch ;
-};
+}
 
 /*!
  * Destructor of LevelSetKernel
@@ -73,7 +73,7 @@ LevelSetKernel::~LevelSetKernel(){
     freeCommunicator();
 # endif
 
-};
+}
 
 /*!
  * Returns pointer to underlying mesh.
@@ -144,7 +144,7 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( LevelSetObject *visitor, con
 
     return newRSearch;
 
-};
+}
 
 /*!
  * Clears the geometry cache.
@@ -235,7 +235,7 @@ double LevelSetKernel::isCellInsideBoundingBox( long id, std::array<double, 3> m
     }
 
     return CGElem::intersectBoxBox(minPoint, maxPoint, cellMinPoint, cellMaxPoint);
-};
+}
 
 # if BITPIT_ENABLE_MPI
 

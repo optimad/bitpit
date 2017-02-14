@@ -48,7 +48,7 @@ namespace bitpit {
 LevelSetBoolean::~LevelSetBoolean(){
     m_objPtr1 = nullptr;
     m_objPtr2 = nullptr;
-};
+}
 
 /*!
  * Constructor
@@ -63,7 +63,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetO
     m_objPtr2 = ptr2;
     m_objId1 = ptr1->getId() ;
     m_objId2 = ptr2->getId() ;
-};
+}
 
 /*!
  * Copy constructor.
@@ -76,7 +76,7 @@ LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetObject(
     m_objPtr2 = other.m_objPtr2;
     m_objId1 = other.m_objId1 ;
     m_objId2 = other.m_objId2 ;
-};
+}
 
 /*!
  * Returns LevelSetInfo 
@@ -94,7 +94,7 @@ LevelSetInfo LevelSetBoolean::getLevelSetInfo( const long &i)const{
  */
 double LevelSetBoolean::getLS( const long &i)const {
     return booleanOperation(i).value ;
-};
+}
 
 /*!
  * Get the levelset gradient
@@ -103,7 +103,7 @@ double LevelSetBoolean::getLS( const long &i)const {
  */
 std::array<double,3> LevelSetBoolean::getGradient(const long &i) const {
     return booleanOperation(i).gradient ;
-};
+}
 
 /*!
  * Writes LevelSetBoolean to stream in binary format
@@ -113,7 +113,7 @@ void LevelSetBoolean::_dump( std::ostream &stream ){
 
     IO::binary::write( stream, m_objId1 ) ;
     IO::binary::write( stream, m_objId2 ) ;
-};
+}
 
 /*!
  * Reads LevelSetBoolean from stream in binary format
@@ -123,7 +123,7 @@ void LevelSetBoolean::_restore( std::istream &stream ){
 
     IO::binary::read( stream, m_objId1 ) ;
     IO::binary::read( stream, m_objId2 ) ;
-};
+}
 
 /*!
  * Clones the object
@@ -141,7 +141,7 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
 int LevelSetBoolean::getPart( const long &id ) const{
     LevelSetObject *objPtr = getClosestObject(id) ;
     return objPtr->getPart(id) ;
-};
+}
 
 /*!
  * Manually set the size of the narrow band.
@@ -151,7 +151,7 @@ void LevelSetBoolean::setSizeNarrowBand(double r){
     m_RSearch = r;
     m_objPtr1->setSizeNarrowBand(r);
     m_objPtr2->setSizeNarrowBand(r);
-};
+}
 
 /*!
  * Computes the size of the narrow band
@@ -160,7 +160,7 @@ void LevelSetBoolean::setSizeNarrowBand(double r){
 double LevelSetBoolean::computeSizeNarrowBand(LevelSetKernel* visitee){
     BITPIT_UNUSED(visitee);
     return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
-};
+}
 
 /*!
  * Updates the size of the narrow band after mesh has been modified
@@ -172,7 +172,7 @@ double LevelSetBoolean::updateSizeNarrowBand(LevelSetKernel* visitee, const std:
     BITPIT_UNUSED(visitee);
     BITPIT_UNUSED(mapper);
     return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
-};
+}
 
 /*!
  * Computes the levelset function within the narrow band
@@ -187,7 +187,7 @@ void LevelSetBoolean::computeLSInNarrowBand( LevelSetKernel *visitee, const doub
     BITPIT_UNUSED(signd) ;
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
-};
+}
 
 /*!
  * Updates the levelset function within the narrow band after mesh adaptation.
@@ -204,7 +204,7 @@ void LevelSetBoolean::updateLSInNarrowBand( LevelSetKernel *visitee, const std::
     BITPIT_UNUSED(signd);
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
-};
+}
 
 /*
  * Returns the boolean operation

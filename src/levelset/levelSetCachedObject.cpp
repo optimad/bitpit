@@ -53,14 +53,14 @@ namespace bitpit {
  * Destructor
  */
 LevelSetCachedObject::~LevelSetCachedObject( ){
-};
+}
 
 /*!
  * Constructor
  * @param[in] id id assigned to object
  */
 LevelSetCachedObject::LevelSetCachedObject(int id) : LevelSetObject(id,true){
-};
+}
 
 /*!
  * Get LevelSetInfo of cell
@@ -72,7 +72,7 @@ LevelSetInfo LevelSetCachedObject::getLevelSetInfo( const long &i)const{
         return (  LevelSetInfo() );
     } else {
         return m_ls[i] ;
-    };
+    }
 
 } 
 
@@ -87,9 +87,9 @@ double LevelSetCachedObject::getLS( const long &i)const {
         return levelSetDefaults::VALUE;
     } else {
         return (  m_ls[i].value );
-    };
+    }
 
-};
+}
 
 /*!
  * Get the levelset gradient of cell
@@ -102,9 +102,9 @@ std::array<double,3> LevelSetCachedObject::getGradient(const long &i) const {
         return levelSetDefaults::GRADIENT;
     } else {
         return (  m_ls[i].gradient );
-    };
+    }
 
-};
+}
 
 /*! 
  * Deletes non-existing items after grid adaption.
@@ -132,7 +132,7 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
     __clearAfterMeshAdaption( mapper ) ;
 
     return ;
-};
+}
 
 /*! 
  * Deletes non-existing items after grid adaption in derived classes
@@ -164,14 +164,13 @@ void LevelSetCachedObject::_filterOutsideNarrowBand( double newRSearch ){
             ++lsItr ;
         }
 
-    };
+    }
 
     m_ls.flush() ;
 
     __filterOutsideNarrowBand(newRSearch) ;
 
-    return ;
-};
+}
 
 /*! 
  * Deletes items outside the narrow band after grid adaption in derived classes
@@ -214,7 +213,7 @@ double LevelSetCachedObject::computeSizeNarrowBand( LevelSetKernel *visitee ){
     }
 
     return RSearch;
-};
+}
 
 /*!
  * Calculation of the necessary size of the narrow band for a cartesian mesh
@@ -228,10 +227,10 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetCartesian *visitee 
 
     for( int d=0; d<mesh->getDimension(); ++d){
         RSearch = std::max( RSearch, mesh->getSpacing(d) ) ;
-    };
+    }
 
     return RSearch;
-};
+}
 
 /*!
  * Calculation of the necessary size of the narrow band for an octree mesh
@@ -272,7 +271,7 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
             C1[i] =  octrBB0[i] + size * ( (int) ( ( C1[i] - octrBB0[i] ) / size ) +1 ) ;
 
             nc[i] = round( ( C1[i] - C0[i] ) /size ) ;
-        };
+        }
 
         // calculate LS on cartesian mesh and calculate RSearch by finding largest cell throughout flagged cartesian cells
         VolCartesian            cmesh( 0, mesh.getDimension(), C0, C1-C0, nc ) ;
@@ -313,18 +312,18 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
                         index = cmesh.getCellLinearId( _i, _j, _k) ;
                         flagged = flagged || obj.isInNarrowBand(index) ;
 
-                    };
-                };
-            };
+                    }
+                }
+            }
             
             if(flagged) 
                 level = std::min( level, mesh.getCellLevel( cell.getId() ) ) ;
 
-        };
+        }
 
         RSearch = visitee->computeRSearchFromLevel( level ) ;
 
-    }; //endif intersect
+    } //endif intersect
 
 # if BITPIT_ENABLE_MPI
     if( assureMPI(visitee) ){
@@ -336,7 +335,7 @@ double LevelSetCachedObject::_computeSizeNarrowBand( LevelSetOctree *visitee ){
 #endif
 
     return RSearch;
-};
+}
 
 /*!
  * Update the size of the narrow band after an adaptation of the mesh
@@ -358,7 +357,7 @@ double LevelSetCachedObject::updateSizeNarrowBand(LevelSetKernel *visitee, const
     }
 
     return R;
-};
+}
 
 /*!
  * Update the size of the narrow band after an adaptation of the cartesian mesh
@@ -375,10 +374,10 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetCartesian *visitee, c
 
     for( int d=0; d<mesh.getDimension(); ++d){
         newRSearch = std::max( newRSearch, mesh.getSpacing(d) ) ;
-    };
+    }
 
     return newRSearch;
-};
+}
 
 /*!
  * Update the size of the narrow band after an adaptation of the octree mesh
@@ -500,7 +499,7 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetOctree *visitee, cons
 
     return newRSearch;
 
-};
+}
 
 /*!
  * Propagate the sign of the signed distance function from narrow band to entire domain
@@ -903,10 +902,10 @@ void LevelSetCachedObject::_dump( std::ostream &stream ){
         IO::binary::write(stream, infoItr.getId()) ;
         IO::binary::write(stream, infoItr->value) ;
         IO::binary::write(stream, infoItr->gradient) ;
-    };
+    }
 
     __dump(stream) ;
-};
+}
 
 /*!
  * Writes information of derived class to stream in binary format
@@ -933,10 +932,10 @@ void LevelSetCachedObject::_restore( std::istream &stream ){
         IO::binary::read(stream, cellInfo.value) ;
         IO::binary::read(stream, cellInfo.gradient) ;
         m_ls.insert(id, cellInfo) ;
-    };
+    }
 
     __restore(stream) ;
-};
+}
 
 /*!
  * Reads information of derived class from stream in binary format
@@ -984,9 +983,7 @@ void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &s
     __writeCommunicationBuffer( sendList, dataBuffer) ;
 
     dataBuffer.squeeze( ) ;
-
-    return;
-};
+}
 
 /*!
  * Flushing of data of derived class to communication buffers for partitioning
@@ -1028,9 +1025,7 @@ void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &re
     }
 
     __readCommunicationBuffer( recvList, dataBuffer ) ;
-
-    return;
-};
+}
 
 /*!
  * Processing of communication buffer of derived class into data structure

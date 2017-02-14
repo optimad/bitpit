@@ -41,14 +41,14 @@ namespace bitpit {
  */
 LevelSetCartesian::~LevelSetCartesian( ){
     m_cartesian = NULL ;
-};
+}
 
 /*!
  * Constructor
  */
 LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
     m_cartesian = &patch ;
-};
+}
 
 VolCartesian* LevelSetCartesian::getCartesianMesh() const{
     return m_cartesian ;
@@ -67,10 +67,10 @@ double LevelSetCartesian::computeRSearchFromCell( long id ){
 
     for( int d=0; d<m_cartesian->getDimension(); ++d){
         newRSearch = std::max( newRSearch, m_cartesian->getSpacing(d) ) ;
-    };
+    }
 
     return newRSearch;
 
-};
+}
 
 }
