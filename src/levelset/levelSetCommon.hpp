@@ -60,6 +60,12 @@ enum class LevelSetBooleanOperation{
     SUBTRACTION =2
 };
 
+enum class LevelSetIntersectionStatus{
+    FALSE=0,
+    TRUE=1,
+    CLOSE=2
+};
+
 }
 
 #endif
