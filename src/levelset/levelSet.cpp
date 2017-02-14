@@ -473,6 +473,7 @@ void LevelSet::compute(){
 
     for( int objectId : m_order){
         auto &visitor = *(m_object.at(objectId)) ;
+        RSearch = visitor.getSizeNarrowBand();
         visitor.computeLSInNarrowBand( m_kernel.get(), RSearch, m_signedDF) ;
         if( m_propagateS ) visitor.propagateSign( m_kernel.get() ) ;
     }
