@@ -288,6 +288,39 @@ std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( cons
 }
 
 /*!
+ * Get size of support triangle
+ * @param[in] i cell index
+ * @return charcteristic size of support triangle
+ */
+double LevelSetSegmentation::getSurfaceFeatureSize( const long &i ) const {
+
+    long support = getSupport(i);
+    if (support == levelSetDefaults::SUPPORT) {
+        return (- levelSetDefaults::SIZE);
+    }
+
+    return getSegmentSize(support);
+}
+
+/*!
+ * Get the sie of a segment
+ * @param[in] id is the id of the segment
+ * @return charcteristic size of the segment
+ */
+double LevelSetSegmentation::getSegmentSize( long id ) const {
+
+    int spaceDimension = m_segmentation->getSpaceDimension();
+    if (spaceDimension == 2) {
+        return m_segmentation->evalCellArea(id); //TODO check
+    } else if (spaceDimension == 3) {
+        int dummy;
+        return m_segmentation->evalMinEdgeLength(id, dummy);
+    }
+
+    return (- levelSetDefaults::SIZE);
+}
+
+/*!
  * Create the segment information for the specified segment-to-cell map
  * @param[in] visitee visited mesh
  * @param[in] search size of narrow band

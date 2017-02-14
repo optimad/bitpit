@@ -39,8 +39,9 @@ namespace levelSetDefaults{
     const double                            VALUE = 1.e18 ;             /**< Default value for levelset function */
     const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */
     const short                             SIGN = 1;                   /**< Default value for the sign */
+    const double                            SIZE = 1.e18 ;              /**< Default value for surface feature */
     const int                               OBJECT = -1 ;               /**< Default value for closest object  */
-    const int                               PART  = -1 ;               /**< Default value for closest patch  */
+    const int                               PART  = -1 ;                /**< Default value for closest patch  */
     const long                              SUPPORT = -1 ;              /**< Default value for closest support element */
     const std::vector<long>                 LIST;                       /**< Default value for list of elements in narrow band */
 };
