@@ -36,6 +36,7 @@
 # include "levelSetCachedObject.hpp"
 # include "levelSetBoolean.hpp"
 # include "levelSetSegmentation.hpp"
+# include "levelSetMask.hpp"
 
 # include "levelSet.hpp"
 
@@ -120,16 +121,13 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
  * @param[in] octree octree patch
  */
 void LevelSet::setMesh( VolOctree* octree ) {
-
     LevelSetKernel *kernel = new LevelSetOctree( *octree) ;
-
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
-
     return;
 };
 
 /*!
- * Adds a surface segmentation
+ * Adds a LevelSetSegmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -142,14 +140,13 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, doubl
     }
 
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation), angle ) ;
-
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return addObject(std::unique_ptr<LevelSetObject>(object));
 };
 
 /*!
- * Adds a surface segmentation
+ * Adds a LevelSetSegmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -162,14 +159,13 @@ int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) 
     }
 
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation, angle) ;
-
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return addObject(std::unique_ptr<LevelSetObject>(object));
 };
 
 /*!
- * Adds a surface segmentation
+ * Adds a LevelSetSegmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -196,7 +192,7 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
 };
 
 /*!
- * Adds a surface segmentation
+ * Adds a LevelSetSegmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -218,6 +214,72 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return addObject(std::unique_ptr<LevelSetObject>(object));
+};
+
+/*!
+ * Adds a boolean operation
+ * @param[in] operation boolean operation
+ * @param[in] id1 id of first operand
+ * @param[in] id2 id of second operand
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &id1, const int &id2, int id ) {
+
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
+
+    LevelSetObject *ptr1 = m_object.at(id1).get() ;
+    LevelSetObject *ptr2 = m_object.at(id2).get() ;
+
+    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr1, ptr2 ) )  ;
+
+    addProcessingOrder(id) ;
+
+    return id;
+};
+
+/*!
+ * Adds a LevelSetMask object composed of the external envelope of a list of mesh cells.
+ * The function setMesh() must have been called prior.
+ * @param[in] list list of indices of cells
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
+
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
+
+    assert(m_kernel);
+
+    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, *m_kernel->getMesh()) )  ;
+    addProcessingOrder(id) ;
+
+    return id;
+};
+
+/*!
+ * Adds a LevelSetMask object composed of a list of interfaces
+ * The function setMesh() must have been called prior.
+ * @param[in] list list of indices of interfaces
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+int LevelSet::addObject( const std::vector<long> &list, const long &refInterface, const bool &invert, int id ) {
+
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
+
+    assert(m_kernel);
+
+    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, refInterface, invert, *m_kernel->getMesh()) )  ;
+    addProcessingOrder(id) ;
+
+    return id;
 };
 
 /*!
@@ -248,30 +310,6 @@ int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
     addProcessingOrder(objectId) ;
 
     return objectId;
-};
-
-/*!
- * Adds a boolean operation
- * @param[in] operation boolean operation
- * @param[in] id1 id of first operand
- * @param[in] id2 id of second operand
- * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
- * @return identifier of new object
- */
-int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &id1, const int &id2, int id ) {
-
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_object.size();
-    }
-
-    LevelSetObject *ptr1 = m_object.at(id1).get() ;
-    LevelSetObject *ptr2 = m_object.at(id2).get() ;
-
-    m_object[id] = std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr1, ptr2 ) )  ;
-
-    addProcessingOrder(id) ;
-
-    return id;
 };
 
 /*!

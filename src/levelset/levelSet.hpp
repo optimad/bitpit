@@ -29,6 +29,7 @@
 # include <array>
 # include <vector>
 # include <unordered_map>
+# include <unordered_set>
 # include <memory>
 
 # include "levelSetCommon.hpp"
@@ -60,6 +61,9 @@ class LevelSet{
 
     void                                        addProcessingOrder(int) ;
     bool                                        removeProcessingOrder(int) ;
+# if BITPIT_ENABLE_MPI
+    bool                                        assureMPI() ;
+# endif
 
     public:
     ~LevelSet() ;
@@ -76,9 +80,11 @@ class LevelSet{
     int                                         addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                                         addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
+    int                                         addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
+    int                                         addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
+    int                                         addObject( const std::vector<long> &, const long &, const bool &, int id=levelSetDefaults::OBJECT ) ;
     int                                         addObject( std::unique_ptr<LevelSetObject> && ) ;
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
-    int                                         addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
 
     void                                        removeObjects();
     bool                                        removeObject(int);
@@ -97,11 +103,6 @@ class LevelSet{
 
     void                                        compute( ) ;
     void                                        update( const std::vector<adaption::Info> & ) ;
-    private:
-# if BITPIT_ENABLE_MPI
-    bool                                        assureMPI() ;
-# endif
-
 };
 
 }
