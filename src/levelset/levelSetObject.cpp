@@ -134,6 +134,30 @@ void LevelSetObject::setSizeNarrowBand(double r){
 }
 
 /*!
+ * Check if cell intersects the surface
+ * @param[in] i cell index
+ * @return indicator regarding intersection
+ */
+LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i) const{
+    if( !isInNarrowBand(i)){
+        return LevelSetIntersectionStatus::FALSE;
+    }
+
+    double circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
+    if(std::abs(getLS(i)) > circumcircle){
+        return LevelSetIntersectionStatus::FALSE;
+    }
+
+    double incircle = m_kernelPtr->computeCellIncircle(i) ;
+    if(std::abs(getLS(i)) <= incircle){
+        return LevelSetIntersectionStatus::TRUE;
+    }
+
+    return LevelSetIntersectionStatus::CLOSE;
+}
+
+
+/*!
  * Calculates the value and gradient of the levelset function within the narrow band
  * @param[in] RSeach size of the narrow band.
  * @param[in] signd if signed distances should be calculted
