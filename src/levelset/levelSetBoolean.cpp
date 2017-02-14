@@ -207,6 +207,21 @@ LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
     return m_operation;
 }
 
+/*!
+ * Get surface feature size
+ * @param[in] id cell index
+ * @return charcteristic size
+ */
+double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
+
+    LevelSetObject *objectPtr = getClosestObject(id);
+    if (!objectPtr) {
+        return (- levelSetDefaults::SIZE);
+    }
+
+    return objectPtr->getSurfaceFeatureSize(id);
+}
+
 /*
  * Determines the closest object
  * @param[in] id cell index

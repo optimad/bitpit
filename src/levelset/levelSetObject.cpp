@@ -156,6 +156,15 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i) const
     return LevelSetIntersectionStatus::CLOSE;
 }
 
+/*!
+ * Returns the characterstic size at the support
+ * @param[in] i cell index
+ * @return feature size
+ */
+double LevelSetObject::getSurfaceFeatureSize(const long &i) const{
+    BITPIT_UNUSED(i);
+    return (- levelSetDefaults::SIZE);
+}
 
 /*!
  * Calculates the value and gradient of the levelset function within the narrow band

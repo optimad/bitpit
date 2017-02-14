@@ -86,6 +86,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexGradient;            /**< vertex gradient */
     PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
 
+    double                                      getSegmentSize( long ) const;
+
     protected:
 
     void                                        __clear() ;
@@ -135,6 +137,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     long                                        getSupport(const long &i) const;
     int                                         getSupportCount(const long &) const ;
     const std::vector<long> &                   getSimplexList(const long &) const ;
+
+    double                                      getSurfaceFeatureSize(const long &) const;
 
     void                                        computeLSInNarrowBand(const double &, const bool &);
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &) ;
