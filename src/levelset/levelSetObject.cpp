@@ -85,25 +85,6 @@ int LevelSetObject::getPart(const long &i) const {
 };
 
 /*!
- * Gets the number of support items within the narrow band of cell
- * @param[in] id index of cell
- */
-int LevelSetObject::getSupportCount( const long &id )const{
-    BITPIT_UNUSED( id) ;
-    return 0;
-}
-
-/*!
- * Gets the closest support within the narrow band of cell
- * @param[in] id index of cell
- * @return closest segment in narrow band
- */
-long LevelSetObject::getSupport( const long &id )const{
-    BITPIT_UNUSED(id) ;
-    return levelSetDefaults::SUPPORT ;
-}
-
-/*!
  * Get the sign of the levelset function
  * @param[in] i cell index
  * @return sign of levelset
