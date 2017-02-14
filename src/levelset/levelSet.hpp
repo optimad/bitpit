@@ -58,11 +58,15 @@ class LevelSet{
     bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
     bool                                        m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
 
+    void                                        addProcessingOrder(int) ;
+    bool                                        removeProcessingOrder(int) ;
+
     public:
     ~LevelSet() ;
     LevelSet() ;
 
     LevelSet(LevelSet&& other) = default;
+    void                                        clear();
 
     void                                        setMesh( VolumeKernel* ) ;
     void                                        setMesh( VolCartesian* ) ;
@@ -75,14 +79,13 @@ class LevelSet{
     int                                         addObject( std::unique_ptr<LevelSetObject> && ) ;
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
     int                                         addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
-    void                                        addProcessingOrder( int) ;
+
+    void                                        removeObjects();
+    bool                                        removeObject(int);
+
     const LevelSetObject &                      getObject( int ) const ;
     int                                         getObjectCount( ) const ;
     std::vector<int>                            getObjectIds( ) const ;
-
-    void                                        clear();
-    void                                        clearObject();
-    void                                        clearObject( int );
 
     void                                        setSizeNarrowBand(double) ;
 

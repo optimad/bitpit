@@ -79,9 +79,7 @@ LevelSet::LevelSet() {
  * Destructor of LevelSet
 */
 LevelSet::~LevelSet(){
-
-    m_object.clear() ;
-
+    clear() ;
 };
 
 /*!
@@ -276,6 +274,29 @@ int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &i
     return id;
 };
 
+/*!
+ * Remove all levelset objects
+ */
+void LevelSet::removeObjects() {
+    m_object.clear();
+    m_order.clear();
+};
+
+/*!
+ * Remove a levelset object
+ * @param[in] id id of object to be removed
+ * @return true if object has been found and removed
+ */
+bool LevelSet::removeObject(int id) {
+    if( m_object.count(id) != 0){
+        m_object.erase(id);
+        bool found = removeProcessingOrder(id);
+        assert(found);
+        return true;
+    } 
+
+    return false;
+};
 
 /*!
  * Adds the object to the processing order.
@@ -315,6 +336,26 @@ void LevelSet::addProcessingOrder( int objectId ) {
     return ;
 };
 
+/*!
+ * Removes the object from the processing order.
+ * This function must be called whan a object is removed fromm_objects.
+ * @param[in] objectId the id of the newly added object
+ * @return true if object has been found and removed
+ */
+bool LevelSet::removeProcessingOrder(int objectId){
+
+    std::vector<int>::iterator orderItr;
+
+    for(orderItr=m_order.begin(); orderItr!=m_order.end(); orderItr++){
+        if(*orderItr==objectId){
+            m_order.erase(orderItr);
+            return true;
+        }
+    }
+    
+    return false ;
+};
+
 
 /*!
  * Get a constant reference to the specified object.
@@ -349,32 +390,11 @@ std::vector<int> LevelSet::getObjectIds( ) const{
 };
 
 /*!
- * Clear LevelSet entirely
+ * Clear LevelSet entirely, deleteing kernel and objects
  */
 void LevelSet::clear(){
-
-    m_kernel.reset() ;
-
-    m_object.clear() ;
-    return ;
-};
-
-/*!
- * Clear all LevelSet Objects but leave kernel unaltered
- */
-void LevelSet::clearObject(){
-    m_object.clear() ;
-    return ;
-};
-
-/*!
- * Clear only one LevelSet Object
- * @param[in] id Id of object to be deleted
- */
-void LevelSet::clearObject(int id){
-
-    m_object.erase(id) ;
-    return ;
+    m_kernel.reset();
+    removeObjects();
 };
 
 /*!
