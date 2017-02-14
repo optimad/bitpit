@@ -64,6 +64,8 @@ class LevelSetKernel{
 
     virtual double                              computeSizeNarrowBandFromLS(LevelSetObject*, const bool &);
     virtual double                              computeRSearchFromCell(long) = 0;
+    virtual double                              computeCellIncircle(long);
+    virtual double                              computeCellCircumcircle(long);
 
     void                                        clearGeometryCache();
     void                                        updateGeometryCache(const std::vector<adaption::Info> &);

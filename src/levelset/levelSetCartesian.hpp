@@ -41,7 +41,10 @@ class LevelSetCartesian : public LevelSetKernel{
     LevelSetCartesian( VolCartesian & );
 
     VolCartesian *                              getCartesianMesh() const;
+
     double                                      computeRSearchFromCell( long id ) ;
+    double                                      computeCellIncircle(long);
+    double                                      computeCellCircumcircle(long);
 
 };
 
