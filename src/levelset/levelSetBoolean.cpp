@@ -144,25 +144,6 @@ int LevelSetBoolean::getPart( const long &id ) const{
 };
 
 /*!
- * Gets the closest support within the narrow band of cell
- * @param[in] id cell index
- * @return closest segment in narrow band
- */
-long LevelSetBoolean::getSupport( const long &id ) const{
-    LevelSetObject *objPtr = getClosestObject(id) ;
-    return objPtr->getSupport(id) ;
-};
-
-/*!
- * Gets the number of support items within the narrow band of cell
- * @param[in] id cell index
- * @return number of segments in narrow band 
- */
-int LevelSetBoolean::getSupportCount( const long &id ) const{
-    return m_objPtr1->getSupportCount(id)+m_objPtr2->getSupportCount(id);
-};
-
-/*!
  * Manually set the size of the narrow band.
  * @param[in] r size of the narrow band.
  */

@@ -477,50 +477,6 @@ std::pair<int,int> LevelSet::getClosestPart(const long &cellId, int objectId) co
 };
 
 /*!
- * Get the object and support id of the projection point
- * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
- * @param[in] cellId index of cell
- * @param[in] objectId index of object
- * @return pair containing object and support id
- */
-std::pair<int,long> LevelSet::getClosestSupport(const long &cellId, int objectId) const {
-
-    if( objectId == levelSetDefaults::OBJECT){
-        objectId = getClosestObject(cellId) ;
-    }
-    long supportId = levelSetDefaults::SUPPORT ;
-
-    if(objectId!=levelSetDefaults::OBJECT){
-        supportId = m_object.at(objectId)->getSupport(cellId) ;
-    }
-
-    return ( std::make_pair(objectId, supportId) );
-};
-
-/*!
- * Get the number of items which fall in the support radius of the cell
- * If levelSetDefaults::OBJECT is passed as objectId, the information of the closest object are returned, otherwise those of the indicated object.
- * @param[in] cellId index of cell
- * @param[in] objectId index of object
- * @return total number of items in narrow band
- */
-int LevelSet::getSupportCount(const long &cellId, int objectId) const {
-
-
-    if( objectId == levelSetDefaults::OBJECT){
-        objectId = getClosestObject(cellId) ;
-    }
-
-    if( objectId != levelSetDefaults::OBJECT){
-        return m_object.at(objectId)->getSupportCount(cellId) ;
-
-    } else {
-        return 0 ;
-    }
-
-};
-
-/*!
  * Get the sign of the levelset function
  * If levelSetDefaults::OBJECT is passed as objectId, the sign of the composed levelset is returned, otherwise those of the indicated object.
  * @param[in] cellId index of cell

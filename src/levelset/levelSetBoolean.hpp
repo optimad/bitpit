@@ -64,8 +64,6 @@ class LevelSetBoolean: public LevelSetObject{
     std::array<double,3>                        getGradient(const long &) const; 
 
     int                                         getPart(const long &) const ;
-    long                                        getSupport(const long &) const;
-    int                                         getSupportCount(const long &) const ;
 
     void                                        setSizeNarrowBand(double) ;
 
