@@ -34,13 +34,6 @@
 
 namespace bitpit {
 
-struct OctreeLevelInfo{
-    int    level;
-    double h;
-    double area;
-    double volume;
-};
-
 class VolOctree : public VolumeKernel {
 
 public:
