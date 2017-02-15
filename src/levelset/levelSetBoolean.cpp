@@ -246,12 +246,15 @@ LevelSetObject* LevelSetBoolean::getDeterminingObject( const long &id) const{
     return nullptr;
 }
 
-/*
+/*!
  * Performs the bolean operation
+ * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
  * @param[in] id cell index
  * @return resulting levelset value and gradient in LevelSetInfo
  */
 LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
+
+
 
     LevelSetInfo info1 = m_objPtr1->getLevelSetInfo(id); 
     LevelSetInfo info2 = m_objPtr2->getLevelSetInfo(id); 
@@ -263,7 +266,7 @@ LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
         return (info1.value>=info2.value) ? info1 : info2 ;
     
     } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
-        return (info1.value>=-1.*info2.value) ? info1 : LevelSetInfo(-1.*info2.value,-1.*-1.*info2.gradient) ;
+        return (info1.value>=-1.*info2.value) ? info1 : LevelSetInfo(-1.*info2.value,-1.*info2.gradient) ;
 
     }
 
