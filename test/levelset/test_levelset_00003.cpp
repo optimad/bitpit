@@ -163,6 +163,8 @@ int main( int argc, char *argv[]){
     int                             id0, id1, id2, id3, id4;
     std::vector<double>             LS0, LS1, LS2, LS3, LS4;
     std::vector<double>::iterator   it0, it1, it2, it3, it4;
+    std::vector<std::array<double,3>> LG4;
+    std::vector<std::array<double,3>>::iterator itLG4;
 
     levelset.setMesh(&mesh) ;
     id0 = levelset.addObject(std::move(STL0),M_PI) ;
@@ -181,6 +183,7 @@ int main( int argc, char *argv[]){
     mesh.getVTK().addData("ls2", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS2) ;
     mesh.getVTK().addData("ls3", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS3) ;
     mesh.getVTK().addData("ls4", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS4) ;
+    mesh.getVTK().addData("ls4_grad", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, LG4) ;
     mesh.getVTK().setName("levelset_003") ;
     mesh.getVTK().setCounter() ;
 
@@ -200,11 +203,13 @@ int main( int argc, char *argv[]){
     LS2.resize(mesh.getCellCount() ) ;
     LS3.resize(mesh.getCellCount() ) ;
     LS4.resize(mesh.getCellCount() ) ;
+    LG4.resize(mesh.getCellCount() ) ;
     it0 = LS0.begin() ;
     it1 = LS1.begin() ;
     it2 = LS2.begin() ;
     it3 = LS3.begin() ;
     it4 = LS4.begin() ;
+    itLG4 = LG4.begin() ;
     for( auto & cell : mesh.getCells() ){
         const long &cellId = cell.getId() ;
         *it0 = object0.getLS(cellId) ;
@@ -212,11 +217,13 @@ int main( int argc, char *argv[]){
         *it2 = object2.getLS(cellId) ;
         *it3 = object3.getLS(cellId) ;
         *it4 = object4.getLS(cellId) ;
+        *itLG4 = object4.getGradient(cellId) ;
         ++it0 ;
         ++it1 ;
         ++it2 ;
         ++it3 ;
         ++it4 ;
+        ++itLG4 ;
     };
 
     mesh.write() ;
@@ -255,11 +262,13 @@ int main( int argc, char *argv[]){
         LS2.resize(mesh.getCellCount() ) ;
         LS3.resize(mesh.getCellCount() ) ;
         LS4.resize(mesh.getCellCount() ) ;
+        LG4.resize(mesh.getCellCount() ) ;
         it0 = LS0.begin() ;
         it1 = LS1.begin() ;
         it2 = LS2.begin() ;
         it3 = LS3.begin() ;
         it4 = LS4.begin() ;
+        itLG4 = LG4.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &cellId = cell.getId() ;
             *it0 = object0.getLS(cellId) ;
@@ -267,11 +276,13 @@ int main( int argc, char *argv[]){
             *it2 = object2.getLS(cellId) ;
             *it3 = object3.getLS(cellId) ;
             *it4 = object4.getLS(cellId) ;
+            *itLG4 = object4.getGradient(cellId) ;
             ++it0 ;
             ++it1 ;
             ++it2 ;
             ++it3 ;
             ++it4 ;
+            ++itLG4 ;
         };
         mesh.write() ;
     }
