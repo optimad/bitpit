@@ -42,10 +42,7 @@ class LevelSetBoolean: public LevelSetObject{
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
-    LevelSetObject*                             m_objPtr1;              /**< pointer to first object */
-    LevelSetObject*                             m_objPtr2;              /**< pointer to second object */
-    int                                         m_objId1;               /**< identifier of first object */
-    int                                         m_objId2;               /**< identifier of second object */
+    std::vector<LevelSetObject*>                m_objPtr;               /**< pointers to objects */
 
     protected:
     void                                        _dump( std::ostream &);
@@ -54,6 +51,7 @@ class LevelSetBoolean: public LevelSetObject{
     public:
     ~LevelSetBoolean();
     LevelSetBoolean(int, LevelSetBooleanOperation, LevelSetObject*, LevelSetObject*);
+    LevelSetBoolean(int, LevelSetBooleanOperation, std::vector<LevelSetObject*>);
     LevelSetBoolean(const LevelSetBoolean &);
 
     LevelSetBoolean*                            clone() const ;

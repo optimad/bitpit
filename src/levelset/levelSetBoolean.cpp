@@ -46,12 +46,11 @@ namespace bitpit {
  * Destructor
  */
 LevelSetBoolean::~LevelSetBoolean(){
-    m_objPtr1 = nullptr;
-    m_objPtr2 = nullptr;
+    m_objPtr.clear();
 }
 
 /*!
- * Constructor
+ * Constructor taking two objects.
  * @param[in] id identifier of object
  * @param[in] op type of boolean operation
  * @param[in] ptr1 pointer to first object
@@ -59,10 +58,20 @@ LevelSetBoolean::~LevelSetBoolean(){
  */
 LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetObject *ptr1, LevelSetObject *ptr2  ) :LevelSetObject(id,false) {
     m_operation = op;
-    m_objPtr1 = ptr1;
-    m_objPtr2 = ptr2;
-    m_objId1 = ptr1->getId() ;
-    m_objId2 = ptr2->getId() ;
+    m_objPtr.push_back(ptr1);
+    m_objPtr.push_back(ptr2);
+}
+
+/*!
+ * Constructor taking a vector of objects.
+ * The boolean operation will be applied recursivly on each entry.
+ * @param[in] id identifier of object
+ * @param[in] op type of boolean operation
+ * @param[in] objPtr vector of pointers to objects
+ */
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, std::vector<LevelSetObject*> objPtr ) :LevelSetObject(id,false) {
+    m_operation = op;
+    m_objPtr = objPtr;
 }
 
 /*!
@@ -72,10 +81,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetO
  */
 LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetObject(other.getId(),false) {
     m_operation = other.m_operation;
-    m_objPtr1 = other.m_objPtr1;
-    m_objPtr2 = other.m_objPtr2;
-    m_objId1 = other.m_objId1 ;
-    m_objId2 = other.m_objId2 ;
+    m_objPtr = other.m_objPtr;
 }
 
 /*!
@@ -110,9 +116,7 @@ std::array<double,3> LevelSetBoolean::getGradient(const long &i) const {
  * @param[in] stream output stream
  */
 void LevelSetBoolean::_dump( std::ostream &stream ){
-
-    IO::binary::write( stream, m_objId1 ) ;
-    IO::binary::write( stream, m_objId2 ) ;
+    BITPIT_UNUSED(stream);
 }
 
 /*!
@@ -120,9 +124,7 @@ void LevelSetBoolean::_dump( std::ostream &stream ){
  * @param[in] stream output stream
  */
 void LevelSetBoolean::_restore( std::istream &stream ){
-
-    IO::binary::read( stream, m_objId1 ) ;
-    IO::binary::read( stream, m_objId2 ) ;
+    BITPIT_UNUSED(stream);
 }
 
 /*!
@@ -149,8 +151,9 @@ int LevelSetBoolean::getPart( const long &id ) const{
  */
 void LevelSetBoolean::setSizeNarrowBand(double r){
     m_RSearch = r;
-    m_objPtr1->setSizeNarrowBand(r);
-    m_objPtr2->setSizeNarrowBand(r);
+    for( auto objPtr : m_objPtr){
+        objPtr->setSizeNarrowBand(r);
+    }
 }
 
 /*!
@@ -158,7 +161,12 @@ void LevelSetBoolean::setSizeNarrowBand(double r){
  * @return size of the narrow band.
  */
 double LevelSetBoolean::computeSizeNarrowBand(){
-    return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
+    double r = -std::numeric_limits<double>::max() ;
+    for( auto objPtr : m_objPtr){
+        r = std::max(r, objPtr->getSizeNarrowBand());
+    }
+
+    return r;
 }
 
 /*!
@@ -168,7 +176,7 @@ double LevelSetBoolean::computeSizeNarrowBand(){
  */
 double LevelSetBoolean::updateSizeNarrowBand(const std::vector<adaption::Info> &mapper){
     BITPIT_UNUSED(mapper);
-    return std::max( m_objPtr1->getSizeNarrowBand(), m_objPtr2->getSizeNarrowBand() );
+    return computeSizeNarrowBand();
 }
 
 /*!
@@ -223,27 +231,44 @@ double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
 }
 
 /*
- * Determines the closest object
+ * Determines the relevant object
+ * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
  * @param[in] id cell index
  * @return pointer to closest LevelSetObject
  */
 LevelSetObject* LevelSetBoolean::getDeterminingObject( const long &id) const{
 
-    double value1 = m_objPtr1->getLS(id) ;
-    double value2 = m_objPtr2->getLS(id) ;
-    
-    if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
-        return (value1<=value2) ? m_objPtr1 : m_objPtr2 ;
+    double result, second;
+    LevelSetObject *resPtr, *secPtr;
 
-    } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
-        return (value1>=value2) ? m_objPtr1 : m_objPtr2 ;
+    result = m_objPtr[0]->getLS(id);
+    resPtr = m_objPtr[0];
 
-    } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
-        return (value1>=-1.*value2) ? m_objPtr1 : m_objPtr2 ;
+    for( size_t n=1; n<m_objPtr.size(); ++n){
+        second = m_objPtr[n]->getLS(id) ;
+        secPtr = m_objPtr[n];
 
+        if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
+            if(result>second) {
+                result = second;
+                resPtr = secPtr;
+            }
+
+        } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
+            if(result<second) {
+                result = second;
+                resPtr = secPtr;
+            }
+
+        } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
+            if(result<-1.*second) {
+                result = -1.*second;
+                resPtr = secPtr;
+            }
+        }
     }
 
-    return nullptr;
+    return resPtr;
 }
 
 /*!
@@ -254,24 +279,33 @@ LevelSetObject* LevelSetBoolean::getDeterminingObject( const long &id) const{
  */
 LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
 
+    LevelSetInfo result, second;
 
+    result = m_objPtr[0]->getLevelSetInfo(id);
 
-    LevelSetInfo info1 = m_objPtr1->getLevelSetInfo(id); 
-    LevelSetInfo info2 = m_objPtr2->getLevelSetInfo(id); 
+    for( size_t n=1; n<m_objPtr.size(); ++n){
+        second = m_objPtr[n]->getLevelSetInfo(id) ;
 
-    if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
-        return (info1.value<=info2.value) ? info1 : info2 ;
+        if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
+            if(result.value>second.value) {
+                result = second;
+            }
 
-    } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
-        return (info1.value>=info2.value) ? info1 : info2 ;
-    
-    } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
-        return (info1.value>=-1.*info2.value) ? info1 : LevelSetInfo(-1.*info2.value,-1.*info2.gradient) ;
+        } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
+            if(result.value<second.value) {
+                result = second;
+            }
 
+        } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
+            if(result.value<-1.*second.value) {
+                second.value *= -1.;
+                second.gradient *= -1.;
+                result = second;
+            }
+        }
     }
 
-    assert(false);
-    return LevelSetInfo() ;
+    return result;
 }
 
 }
