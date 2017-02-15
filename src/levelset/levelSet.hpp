@@ -86,6 +86,7 @@ class LevelSet{
     int                                         addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
     int                                         addObject( const std::vector<long> &, const long &, const bool &, int id=levelSetDefaults::OBJECT ) ;
     int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
+    int                     addObject( const LevelSetBooleanOperation &, const std::vector<int> &, int id=levelSetDefaults::OBJECT ) ;
 
 
     void                                        removeObjects();

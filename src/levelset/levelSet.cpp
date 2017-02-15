@@ -211,7 +211,7 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
 }
 
 /*!
- * Adds a boolean operation
+ * Adds a boolean operation between two objects
  * @param[in] operation boolean operation
  * @param[in] id1 id of first operand
  * @param[in] id2 id of second operand
@@ -230,6 +230,26 @@ int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &i
     return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr1, ptr2 ) ));
 }
 
+/*!
+ * Adds a boolean operation between that will be applied recursivly to a series of objects
+ * @param[in] operation boolean operation
+ * @param[in] ids vector with indices of operand objects
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+int LevelSet::addObject( const LevelSetBooleanOperation &operation, const std::vector<int> &ids, int id ) {
+
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_object.size();
+    }
+
+    std::vector<LevelSetObject*> ptr;
+    for( const int &id : ids){
+        ptr.push_back( m_object.at(id).get() );
+    }
+
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr) ));
+}
 /*!
  * Adds a LevelSetMask object composed of the external envelope of a list of mesh cells.
  * The function setMesh() must have been called prior.
