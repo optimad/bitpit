@@ -54,17 +54,17 @@ class LevelSet{
     std::unique_ptr<LevelSetKernel>                             m_kernel ;              /**< LevelSet computational kernel */
     std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_object ;              /**< Objects defining the boundaries */
 
-    std::vector<int>                            m_order ;               /**< Processing order of objects */
-    bool                                        m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
-    bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
-    bool                                        m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
+    std::vector<int>        m_order ;               /**< Processing order of objects */
+    bool                    m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
+    bool                    m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
+    bool                    m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
 
-    int                                         registerObject( std::unique_ptr<LevelSetObject> && ) ;
-    int                                         registerObject( const std::unique_ptr<LevelSetObject> & ) ;
-    void                                        addProcessingOrder(int) ;
-    bool                                        removeProcessingOrder(int) ;
+    int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
+    int                     registerObject( const std::unique_ptr<LevelSetObject> & ) ;
+    void                    addProcessingOrder(int) ;
+    bool                    removeProcessingOrder(int) ;
 # if BITPIT_ENABLE_MPI
-    bool                                        assureMPI() ;
+    bool                    assureMPI() ;
 # endif
 
     public:
@@ -72,40 +72,40 @@ class LevelSet{
     LevelSet() ;
 
     LevelSet(LevelSet&& other) = default;
-    void                                        clear();
+    void                    clear();
 
-    void                                        setMesh( VolumeKernel* ) ;
-    void                                        setMesh( VolCartesian* ) ;
-    void                                        setMesh( VolOctree* ) ;
+    void                    setMesh( VolumeKernel* ) ;
+    void                    setMesh( VolCartesian* ) ;
+    void                    setMesh( VolOctree* ) ;
 
-    int                                         addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
-    int                                         addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
-    int                                         addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
-    int                                         addObject( const std::vector<long> &, const long &, const bool &, int id=levelSetDefaults::OBJECT ) ;
-    int                                         addObject( const std::unique_ptr<LevelSetObject> & ) ;
+    int                     addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
+    int                     addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
+    int                     addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;
+    int                     addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
+    int                     addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( const LevelSetBooleanOperation &, const std::vector<int> &, int id=levelSetDefaults::OBJECT ) ;
+    int                     addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
+    int                     addObject( const std::vector<long> &, const long &, const bool &, int id=levelSetDefaults::OBJECT ) ;
+    int                     addObject( const std::unique_ptr<LevelSetObject> & ) ;
 
 
-    void                                        removeObjects();
-    bool                                        removeObject(int);
+    void                    removeObjects();
+    bool                    removeObject(int);
 
-    const LevelSetObject &                      getObject( int ) const ;
-    int                                         getObjectCount( ) const ;
-    std::vector<int>                            getObjectIds( ) const ;
+    const LevelSetObject &  getObject( int ) const ;
+    int                     getObjectCount( ) const ;
+    std::vector<int>        getObjectIds( ) const ;
 
-    void                                        setSizeNarrowBand(double) ;
+    void                    setSizeNarrowBand(double) ;
 
-    void                                        setSign(bool);
-    void                                        setPropagateSign(bool) ;
+    void                    setSign(bool);
+    void                    setPropagateSign(bool) ;
 
-    void                                        dump( std::ostream &);
-    void                                        restore( std::istream &);
+    void                    dump( std::ostream &);
+    void                    restore( std::istream &);
 
-    void                                        compute( ) ;
-    void                                        update( const std::vector<adaption::Info> & ) ;
+    void                    compute( ) ;
+    void                    update( const std::vector<adaption::Info> & ) ;
 };
 
 }
