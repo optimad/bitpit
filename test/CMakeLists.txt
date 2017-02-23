@@ -72,7 +72,7 @@ function(addModuleTests MODULE_NAME TEST_ENTRIES TEST_LIBRARIES)
         endif ()
 
         isTestParallel("${TEST_ENTRY}" IS_TEST_PARALLEL)
-        if (NOT ENABLE_MPI)
+        if (IS_TEST_PARALLEL AND NOT ENABLE_MPI)
             return ()
         endif ()
 
