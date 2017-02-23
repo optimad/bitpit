@@ -44,6 +44,10 @@ class LevelSetBoolean: public LevelSetObject{
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
     std::vector<LevelSetObject*>                m_objPtr;               /**< pointers to objects */
 
+    LevelSetInfo                                booleanOperation(const long &) const ;
+    LevelSetBooleanOperation                    getBooleanOperation() const;
+    LevelSetObject*                             getDeterminingObject(const long &) const ;
+
     protected:
     void                                        _dump( std::ostream &);
     void                                        _restore( std::istream &);
@@ -70,9 +74,6 @@ class LevelSetBoolean: public LevelSetObject{
     void                                        computeLSInNarrowBand(const double &, const bool &) ;
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &);
 
-    LevelSetBooleanOperation                    getBooleanOperation() const;
-    LevelSetObject*                             getDeterminingObject(const long &) const ;
-    LevelSetInfo                                booleanOperation(const long &) const ;
 };
 
 }
