@@ -141,7 +141,7 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
  * @return closest part
  */
 int LevelSetBoolean::getPart( const long &id ) const{
-    LevelSetObject *objPtr = getDeterminingObject(id) ;
+    LevelSetObject *objPtr = getCompetentObject(id) ;
     return objPtr->getPart(id) ;
 }
 
@@ -222,7 +222,7 @@ LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
  */
 double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
 
-    LevelSetObject *objectPtr = getDeterminingObject(id);
+    LevelSetObject *objectPtr = getCompetentObject(id);
     if (!objectPtr) {
         return (- levelSetDefaults::SIZE);
     }
@@ -231,12 +231,12 @@ double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
 }
 
 /*
- * Determines the relevant object
+ * Determines the relevant object which determines the levelset value in the cell
  * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
  * @param[in] id cell index
- * @return pointer to closest LevelSetObject
+ * @return pointer to competent LevelSetObject
  */
-LevelSetObject* LevelSetBoolean::getDeterminingObject( const long &id) const{
+LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id) const{
 
     double result, second;
     LevelSetObject *resPtr, *secPtr;
