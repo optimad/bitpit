@@ -62,10 +62,10 @@ function(getTestNumProcs TEST_ENTRY DEFAULT_N_PROCS N_PROCS)
 endfunction()
 
 # Add a test
-function(addModuleTests MODULE_NAME TEST_ENTRY TEST_LIBRARIES)
+function(addModuleTests MODULE_NAME TEST_ENTRIES TEST_LIBRARIES)
     # Add single tests
     set(TARGETS "")
-    foreach (TEST_ENTRY IN LISTS TESTS)
+    foreach (TEST_ENTRY IN LISTS TEST_ENTRIES)
         isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
         if (NOT MODULE_ENABLED)
             return ()
