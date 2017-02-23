@@ -46,7 +46,7 @@ class LevelSetBoolean: public LevelSetObject{
 
     LevelSetInfo                                booleanOperation(const long &) const ;
     LevelSetBooleanOperation                    getBooleanOperation() const;
-    LevelSetObject*                             getDeterminingObject(const long &) const ;
+    LevelSetObject*                             getCompetentObject(const long &) const ;
 
     protected:
     void                                        _dump( std::ostream &);
