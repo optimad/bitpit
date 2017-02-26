@@ -348,6 +348,7 @@ bool LevelSet::removeObject(int id) {
     if( m_object.count(id) != 0){
         m_object.erase(id);
         bool found = removeProcessingOrder(id);
+        BITPIT_UNUSED(found);
         assert(found);
         return true;
     } 
