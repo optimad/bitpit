@@ -750,20 +750,26 @@ bool SurfaceKernel::adjustCellOrientation()
 bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
 {
 #if BITPIT_ENABLE_MPI==1
+    // Check if the communications are needed
+    bool ghostExchangeNeeded = isPartitioned();
+
     // Initialize ghost communications
     std::unordered_set<long> flipped;
-    DataCommunicator ghostComm(getCommunicator());
+    std::unique_ptr<DataCommunicator> ghostComm;
+    if (ghostExchangeNeeded) {
+        ghostComm = std::unique_ptr<DataCommunicator>(new DataCommunicator(getCommunicator()));
 
-    for (auto &entry : getGhostExchangeSources()) {
-        const int rank = entry.first;
-        const std::vector<long> sources = entry.second;
-        ghostComm.setSend(rank, sources.size() * sizeof(bool));
-    }
+        for (auto &entry : getGhostExchangeSources()) {
+            const int rank = entry.first;
+            const std::vector<long> sources = entry.second;
+            ghostComm->setSend(rank, sources.size() * sizeof(bool));
+        }
 
-    for (auto &entry : getGhostExchangeTargets()) {
-        const int rank = entry.first;
-        const std::vector<long> targets = entry.second;
-        ghostComm.setRecv(rank, targets.size() * sizeof(bool));
+        for (auto &entry : getGhostExchangeTargets()) {
+            const int rank = entry.first;
+            const std::vector<long> targets = entry.second;
+            ghostComm->setRecv(rank, targets.size() * sizeof(bool));
+        }
     }
 #endif
 
@@ -775,7 +781,9 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
         if (invert) {
             flipCellOrientation(seed);
 #if BITPIT_ENABLE_MPI==1
-            flipped.insert(seed);
+            if (ghostExchangeNeeded) {
+                flipped.insert(seed);
+            }
 #endif
         }
     }
@@ -805,9 +813,11 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
                 }
 
 #if BITPIT_ENABLE_MPI==1
-                const auto &neigh = getCell(neighId);
-                if (!neigh.isInterior()) {
-                    continue;
+                if (ghostExchangeNeeded) {
+                    const auto &neigh = getCell(neighId);
+                    if (!neigh.isInterior()) {
+                        continue;
+                    }
                 }
 #endif
 
@@ -816,7 +826,9 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
                     if (!isNeighOriented) {
                         flipCellOrientation(neighId);
 #if BITPIT_ENABLE_MPI==1
-                        flipped.insert(neighId);
+                        if (ghostExchangeNeeded) {
+                            flipped.insert(neighId);
+                        }
 #endif
                     }
 
@@ -830,7 +842,9 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
 
 #if BITPIT_ENABLE_MPI==1
         // Comunicate the orientable flag among the partitions
-        MPI_Allreduce(MPI_IN_PLACE, &orientable, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+        if (ghostExchangeNeeded) {
+            MPI_Allreduce(MPI_IN_PLACE, &orientable, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+        }
 #endif
 
         // If the surface is not orientable we can exit
@@ -839,49 +853,53 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
         }
 
 #if BITPIT_ENABLE_MPI==1
-        // Add seeds from other partitions
-        ghostComm.startAllRecvs();
+        if (ghostExchangeNeeded) {
+            // Add seeds from other partitions
+            ghostComm->startAllRecvs();
 
-        for(auto &entry : getGhostExchangeSources()) {
-            int rank = entry.first;
-            SendBuffer &buffer = ghostComm.getSendBuffer(rank);
-            for (long cellId : entry.second) {
-                if (flipped.count(cellId) > 0) {
-                    buffer << true;
-                } else {
-                    buffer << false;
+            for(auto &entry : getGhostExchangeSources()) {
+                int rank = entry.first;
+                SendBuffer &buffer = ghostComm->getSendBuffer(rank);
+                for (long cellId : entry.second) {
+                    if (flipped.count(cellId) > 0) {
+                        buffer << true;
+                    } else {
+                        buffer << false;
+                    }
                 }
-            }
-            ghostComm.startSend(rank);
-        }
-
-        int nPendingRecvs = ghostComm.getRecvCount();
-        while (nPendingRecvs != 0) {
-            int rank = ghostComm.waitAnyRecv();
-            RecvBuffer buffer = ghostComm.getRecvBuffer(rank);
-
-            for (long cellId : getGhostExchangeTargets(rank)) {
-                bool ghostFlipped;
-                buffer >> ghostFlipped;
-                if (ghostFlipped) {
-                    toVisit.insert(cellId);
-                    flipCellOrientation(cellId);
-                }
+                ghostComm->startSend(rank);
             }
 
-            --nPendingRecvs;
+            int nPendingRecvs = ghostComm->getRecvCount();
+            while (nPendingRecvs != 0) {
+                int rank = ghostComm->waitAnyRecv();
+                RecvBuffer buffer = ghostComm->getRecvBuffer(rank);
+
+                for (long cellId : getGhostExchangeTargets(rank)) {
+                    bool ghostFlipped;
+                    buffer >> ghostFlipped;
+                    if (ghostFlipped) {
+                        toVisit.insert(cellId);
+                        flipCellOrientation(cellId);
+                    }
+                }
+
+                --nPendingRecvs;
+            }
+
+            ghostComm->waitAllSends();
+
+            // Clear list of flipped cells
+            flipped.clear();
         }
-
-        ghostComm.waitAllSends();
-
-        // Clear list of flipped cells
-        flipped.clear();
 #endif
 
         // Detect if the orientation is completed
         completed = (toVisit.size() == 0);
 #if BITPIT_ENABLE_MPI==1
-        MPI_Allreduce(MPI_IN_PLACE, &completed, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+        if (ghostExchangeNeeded) {
+            MPI_Allreduce(MPI_IN_PLACE, &completed, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+        }
 #endif
     }
 
