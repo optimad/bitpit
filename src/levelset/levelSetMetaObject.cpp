@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+# include "bitpit_common.hpp"
+
 # include "levelSetObject.hpp"
 # include "levelSetMetaObject.hpp"
 
@@ -60,6 +62,7 @@ bool LevelSetMetaObject::isPrimary() const{
  * @return index of object
 */
 int LevelSetMetaObject::getPrimaryObjectId( const long &id) const{
+    BITPIT_UNUSED(id);
     return levelSetDefaults::OBJECT;
 } 
 
