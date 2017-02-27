@@ -22,27 +22,25 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_LEVELSET_HPP__
-#define __BITPIT_MODULE_LEVELSET_HPP__
+# ifndef __BITPIT_LEVELSET_META_HPP__
+# define __BITPIT_LEVELSET_META_HPP__
 
-/*!
- * @defgroup levelset LevelSet
- */
+namespace bitpit{
 
-#include "bitpit_version.hpp"
+class LevelSetObject;
 
-#include "levelSetCommon.hpp"
+class LevelSetMetaObject : public LevelSetObject{
+    public:
+    LevelSetMetaObject(int);
+    virtual ~LevelSetMetaObject();
 
-#include "levelSetKernel.hpp"
-#include "levelSetCartesian.hpp"
-#include "levelSetOctree.hpp"
+    bool            isPrimary() const;
+    virtual int     getPrimaryObjectId( const long &) const;
 
-#include "levelSetObject.hpp"
-#include "levelSetMetaObject.hpp"
-#include "levelSetCachedObject.hpp"
-#include "levelSetSegmentation.hpp"
-#include "levelSetBoolean.hpp"
+};
 
-#include "levelSet.hpp"
 
-#endif
+
+}
+
+#endif 

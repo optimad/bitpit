@@ -33,6 +33,7 @@
 # include "levelSetCartesian.hpp"
 # include "levelSetOctree.hpp"
 # include "levelSetObject.hpp"
+# include "levelSetMetaObject.hpp"
 # include "levelSetCachedObject.hpp"
 # include "levelSetBoolean.hpp"
 # include "levelSetSegmentation.hpp"

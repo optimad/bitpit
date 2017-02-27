@@ -47,8 +47,6 @@ class LevelSetObject{
 
     private:
     int                                         m_id;           /**< identifier of object */
-    bool                                        m_primary;      /**< if object is of primary type */
-
 
     protected:
     LevelSetKernel*                             m_kernelPtr;    /**< pointer to kernel */
@@ -69,7 +67,7 @@ class LevelSetObject{
 
     public:
     virtual ~LevelSetObject();
-    LevelSetObject(int,bool);
+    LevelSetObject(int);
 
     void                                        setKernel(LevelSetKernel *);
 
@@ -77,7 +75,7 @@ class LevelSetObject{
     void                                        clear();
 
     int                                         getId() const ;
-    bool                                        isPrimary() const ;
+    virtual bool                                isPrimary() const ;
 
     virtual LevelSetInfo                        getLevelSetInfo(const long &) const =0;
     virtual double                              getLS(const long &) const =0; 

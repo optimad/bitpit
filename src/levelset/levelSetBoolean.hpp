@@ -36,9 +36,11 @@ namespace bitpit{
 namespace adaption{
     class Info ;
 }
-class LevelSetObject ;
 
-class LevelSetBoolean: public LevelSetObject{
+class LevelSetObject ;
+class LevelSetMetaObject ;
+
+class LevelSetBoolean: public LevelSetMetaObject {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
@@ -73,6 +75,8 @@ class LevelSetBoolean: public LevelSetObject{
     double                                      updateSizeNarrowBand(const std::vector<adaption::Info> &);
     void                                        computeLSInNarrowBand(const double &, const bool &) ;
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &);
+
+    int                                         getPrimaryObjectId(const long &) const;
 
 };
 

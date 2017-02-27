@@ -59,7 +59,7 @@ LevelSetCachedObject::~LevelSetCachedObject( ){
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetCachedObject::LevelSetCachedObject(int id) : LevelSetObject(id,true){
+LevelSetCachedObject::LevelSetCachedObject(int id) : LevelSetObject(id){
 }
 
 /*!
