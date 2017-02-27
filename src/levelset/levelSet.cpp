@@ -424,7 +424,7 @@ bool LevelSet::removeProcessingOrder(int objectId){
  * Get a constant reference to the specified object.
  * If the specified id does not exist an exception is thrown.
  * @param id is the object id
- * @return pointer to levelset object
+ * @return reference to levelset object
  */
 const LevelSetObject & LevelSet::getObject( int id) const{
     return *(m_objects.at(id)) ;
