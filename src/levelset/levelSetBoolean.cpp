@@ -142,6 +142,11 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
  */
 int LevelSetBoolean::getPart( const long &id ) const{
     LevelSetObject *objPtr = getCompetentObject(id) ;
+
+    if( objPtr == nullptr){
+        return levelSetDefaults::PART;
+    }
+
     return objPtr->getPart(id) ;
 }
 
@@ -238,6 +243,10 @@ double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
  */
 LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id) const{
 
+    if(m_objPtr.size()==0){ 
+        return nullptr;
+    }
+
     double result, second;
     LevelSetObject *resPtr, *secPtr;
 
@@ -279,8 +288,11 @@ LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id) const{
  */
 LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
 
-    LevelSetInfo result, second;
+    if(m_objPtr.size()==0){ 
+        return LevelSetInfo();
+    }
 
+    LevelSetInfo result, second;
     result = m_objPtr[0]->getLevelSetInfo(id);
 
     for( size_t n=1; n<m_objPtr.size(); ++n){
