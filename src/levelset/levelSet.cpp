@@ -97,8 +97,12 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
         setMesh(octree) ;
     
     } else{
-        log::cout() << "Mesh non supported in LevelSet::setMesh()" << std::endl ;
+        throw std::runtime_error ("Mesh non supported in LevelSet::setMesh()");
     } 
+
+    for( auto &obj : m_object){
+        obj.second->setKernel(m_kernel.get());
+    }
 
 }
 
@@ -263,7 +267,7 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
         id = m_object.size();
     }
 
-    assert(m_kernel);
+    assert(m_kernel && " levelset: setMesh must be called befor adding a LevelSetMask object ");
 
     return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, *m_kernel->getMesh()) ) );
 }
@@ -281,7 +285,7 @@ int LevelSet::addObject( const std::vector<long> &list, const long &refInterface
         id = m_object.size();
     }
 
-    assert(m_kernel);
+    assert(m_kernel && " levelset: setMesh must be called befor adding a LevelSetMask object ");
 
     return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, refInterface, invert, *m_kernel->getMesh()) )  );
 };
@@ -302,8 +306,9 @@ int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
  */
 int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 
-    assert(m_kernel && " levelset: setMesh must be called befor addObject");
-    object->setKernel(m_kernel.get());
+    if( m_kernel){
+        object->setKernel(m_kernel.get());
+    }
 
     int objectId = object->getId();
     m_object[objectId] = std::move(object) ;
@@ -320,8 +325,9 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
  */
 int LevelSet::registerObject( const std::unique_ptr<LevelSetObject> &object ) {
 
-    assert(m_kernel && " levelset: setMesh must be called befor addObject");
-    object->setKernel(m_kernel.get());
+    if( m_kernel){
+        object->setKernel(m_kernel.get());
+    }
 
     int objectId = object->getId();
     m_object[objectId] = std::unique_ptr<LevelSetObject>(object->clone())  ;
@@ -487,6 +493,8 @@ void LevelSet::setSizeNarrowBand(double r){
  */
 void LevelSet::compute(){
 
+    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::compute()");
+
     double RSearch ;
 
     for( int objectId : m_order){
@@ -512,6 +520,8 @@ void LevelSet::compute(){
  * @param[in] mapper mapper conatining mesh modifications
  */
 void LevelSet::update( const std::vector<adaption::Info> &mapper ){
+
+    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::update()");
 
     // Udate the cache of the kernel
     m_kernel->updateGeometryCache( mapper ) ;
