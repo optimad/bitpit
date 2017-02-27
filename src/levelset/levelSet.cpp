@@ -422,12 +422,26 @@ bool LevelSet::removeProcessingOrder(int objectId){
 
 /*!
  * Get a constant reference to the specified object.
- * If hte specified id does not exist an exception is thrown.
+ * If the specified id does not exist an exception is thrown.
  * @param id is the object id
  * @return pointer to levelset object
  */
 const LevelSetObject & LevelSet::getObject( int id) const{
     return *(m_object.at(id)) ;
+}
+
+/*!
+ * Get vector of pointers to all object.
+ * @return vector of pointers to levelset objects
+ */
+std::vector<LevelSetObject const *>  LevelSet::getObjects( ) const{
+    std::vector<LevelSetObject const *> objects;
+    objects.reserve(m_object.size());
+    for( auto const &obj : m_object){
+        objects.push_back( obj.second.get() ) ;
+    }
+
+    return objects;
 }
 
 /*!

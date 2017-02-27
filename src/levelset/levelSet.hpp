@@ -88,11 +88,11 @@ class LevelSet{
     int                     addObject( const std::vector<long> &, const long &, const bool &, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( const std::unique_ptr<LevelSetObject> & ) ;
 
-
     void                    removeObjects();
     bool                    removeObject(int);
 
     const LevelSetObject &  getObject( int ) const ;
+    std::vector<LevelSetObject const *> getObjects( ) const ;
     int                     getObjectCount( ) const ;
     std::vector<int>        getObjectIds( ) const ;
 
