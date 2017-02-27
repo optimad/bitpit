@@ -434,7 +434,7 @@ const LevelSetObject & LevelSet::getObject( int id) const{
  * Get vector of pointers to all object.
  * @return vector of pointers to levelset objects
  */
-std::vector<LevelSetObject const *>  LevelSet::getObjects( ) const{
+std::vector<LevelSetObject const *>  LevelSet::getObjectPtrs( ) const{
     std::vector<LevelSetObject const *> objects;
     objects.reserve(m_objects.size());
     for( auto const &obj : m_objects){

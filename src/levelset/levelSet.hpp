@@ -92,7 +92,7 @@ class LevelSet{
     bool                    removeObject(int);
 
     const LevelSetObject &  getObject( int ) const ;
-    std::vector<LevelSetObject const *> getObjects( ) const ;
+    std::vector<LevelSetObject const *> getObjectPtrs( ) const ;
     int                     getObjectCount( ) const ;
     std::vector<int>        getObjectIds( ) const ;
 
