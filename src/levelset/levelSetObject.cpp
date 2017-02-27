@@ -55,7 +55,7 @@ LevelSetObject::~LevelSetObject( ){
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject( int id, bool primary) : m_id(id), m_primary(primary){
+LevelSetObject::LevelSetObject(int id) : m_id(id){
     m_kernelPtr=nullptr;
 }
 
@@ -80,7 +80,7 @@ int LevelSetObject::getId( ) const {
  * @return if object is primary
  */
 bool LevelSetObject::isPrimary( ) const {
-    return m_primary ;
+    return true;
 }
 
 /*!
@@ -248,7 +248,6 @@ void LevelSetObject::_clear( ){
  */
 void LevelSetObject::dump( std::ostream &stream ){
     IO::binary::write(stream, m_id) ;
-    IO::binary::write(stream, m_primary) ;
     IO::binary::write(stream, m_RSearch);
     _dump(stream) ;
 }
@@ -267,7 +266,6 @@ void LevelSetObject::_dump( std::ostream &stream ){
  */
 void LevelSetObject::restore( std::istream &stream ){
     IO::binary::read(stream, m_id) ;
-    IO::binary::read(stream, m_primary) ;
     IO::binary::read(stream, m_RSearch);
     _restore(stream) ;
 }

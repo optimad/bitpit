@@ -22,27 +22,45 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_LEVELSET_HPP__
-#define __BITPIT_MODULE_LEVELSET_HPP__
+# include "levelSetObject.hpp"
+# include "levelSetMetaObject.hpp"
+
+namespace bitpit {
 
 /*!
- * @defgroup levelset LevelSet
+	@ingroup levelset
+	@interface LevelSetMetaObject
+	@brief Interface class for all objects, which depend on other LevelSetObjects
+*/
+
+/*!
+ * Constructor
  */
+LevelSetMetaObject::LevelSetMetaObject(int id) : LevelSetObject(id){
+}
 
-#include "bitpit_version.hpp"
 
-#include "levelSetCommon.hpp"
+/*!
+ * Destructor
+ */
+LevelSetMetaObject::~LevelSetMetaObject(){
+}
 
-#include "levelSetKernel.hpp"
-#include "levelSetCartesian.hpp"
-#include "levelSetOctree.hpp"
+/*!
+ * If the object is primary 
+ * @return true
+*/
+bool LevelSetMetaObject::isPrimary() const{
+    return false;
+} 
 
-#include "levelSetObject.hpp"
-#include "levelSetMetaObject.hpp"
-#include "levelSetCachedObject.hpp"
-#include "levelSetSegmentation.hpp"
-#include "levelSetBoolean.hpp"
+/*!
+ * Returns the index of the object, which is responsabile for determining the levellset value of the cell
+ * @param[in] id cell index
+ * @return index of object
+*/
+int LevelSetMetaObject::getPrimaryObjectId( const long &id) const{
+    return levelSetDefaults::OBJECT;
+} 
 
-#include "levelSet.hpp"
-
-#endif
+}

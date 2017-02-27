@@ -32,6 +32,7 @@
 # include "adaption.hpp"
 
 # include "levelSetObject.hpp"
+# include "levelSetMetaObject.hpp"
 # include "levelSetBoolean.hpp"
 
 namespace bitpit {
@@ -56,7 +57,7 @@ LevelSetBoolean::~LevelSetBoolean(){
  * @param[in] ptr1 pointer to first object
  * @param[in] ptr2 pointer to second object
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetObject *ptr1, LevelSetObject *ptr2  ) :LevelSetObject(id,false) {
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetObject *ptr1, LevelSetObject *ptr2  ) :LevelSetMetaObject(id) {
     m_operation = op;
     m_objPtr.push_back(ptr1);
     m_objPtr.push_back(ptr2);
@@ -69,7 +70,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetO
  * @param[in] op type of boolean operation
  * @param[in] objPtr vector of pointers to objects
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, std::vector<LevelSetObject*> objPtr ) :LevelSetObject(id,false) {
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, std::vector<LevelSetObject*> objPtr ) :LevelSetMetaObject(id) {
     m_operation = op;
     m_objPtr = objPtr;
 }
@@ -79,7 +80,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, std::vect
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetObject(other.getId(),false) {
+LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObject(other.getId()) {
     m_operation = other.m_operation;
     m_objPtr = other.m_objPtr;
 }
@@ -318,6 +319,23 @@ LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
     }
 
     return result;
+}
+
+/*!
+ * Get the index of the primary object
+ * @param[in] cellId cell index
+ * @return primary object
+ */
+int LevelSetBoolean::getPrimaryObjectId(const long &cellId) const{
+
+    LevelSetObject *obj = getCompetentObject(cellId);
+
+    if( LevelSetMetaObject *meta = dynamic_cast<LevelSetMetaObject*>(obj) ){
+        return meta->getPrimaryObjectId(cellId);
+    }
+
+    return obj->getId();
+    
 }
 
 }
