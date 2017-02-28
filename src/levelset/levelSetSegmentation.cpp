@@ -321,6 +321,46 @@ double LevelSetSegmentation::getSegmentSize( long id ) const {
 }
 
 /*!
+ * Get the smallest characterstic size within the triangultaion
+ * @return smallest charcteristic size within the triangulation
+ */
+double LevelSetSegmentation::getMinSurfaceFeatureSize( ) const {
+
+    bool   minimumValid = false;
+    double minimumSize  = levelSetDefaults::SIZE;
+    for( const Cell &cell : m_segmentation->getCells() ){
+        double segmentSize = getSegmentSize(cell.getId());
+        if (segmentSize < 0) {
+            continue;
+        }
+
+        minimumValid = true;
+        minimumSize  = std::min(segmentSize, minimumSize);
+    }
+
+    if (!minimumValid) {
+        minimumSize = - levelSetDefaults::SIZE;
+    }
+
+    return minimumSize;
+}
+
+/*!
+ * Get the largest characterstic size within the triangultaion
+ * @return largest charcteristic size within the triangulation
+ */
+double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
+
+    double maximumSize = - levelSetDefaults::SIZE;
+    for( const Cell &cell : m_segmentation->getCells() ){
+        double segmentSize = getSegmentSize(cell.getId());
+        maximumSize = std::max(segmentSize, maximumSize);
+    }
+
+    return maximumSize;
+}
+
+/*!
  * Create the segment information for the specified segment-to-cell map
  * @param[in] visitee visited mesh
  * @param[in] search size of narrow band

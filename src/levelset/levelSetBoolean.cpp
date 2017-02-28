@@ -236,6 +236,46 @@ double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
     return objectPtr->getSurfaceFeatureSize(id);
 }
 
+/*!
+ * Get the smallest surface feature size
+ * @return charcteristic size
+ */
+double LevelSetBoolean::getMinSurfaceFeatureSize() const {
+
+    bool   minimumValid = false;
+    double minimumSize  = levelSetDefaults::SIZE;
+    for( const auto & object : m_objPtr ){
+        double objectMinimumSize = object->getMinSurfaceFeatureSize();
+        if (objectMinimumSize < 0) {
+            continue;
+        }
+
+        minimumValid = true;
+        minimumSize  = std::min(objectMinimumSize, minimumSize);
+    }
+
+    if (!minimumValid) {
+        minimumSize = - levelSetDefaults::SIZE;
+    }
+
+    return minimumSize;
+}
+
+/*!
+ * Get the largest surface feature size
+ * @return charcteristic size
+ */
+double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
+
+    double maximumSize = - levelSetDefaults::SIZE;
+    for( const auto & object : m_objPtr ){
+        double objectMaximumSize = object->getMaxSurfaceFeatureSize();
+        maximumSize = std::max(objectMaximumSize, maximumSize);
+    }
+
+    return maximumSize;
+}
+
 /*
  * Determines the relevant object which determines the levelset value in the cell
  * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
