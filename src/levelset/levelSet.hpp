@@ -92,7 +92,16 @@ class LevelSet{
     bool                    removeObject(int);
 
     const LevelSetObject &  getObject( int ) const ;
+    const LevelSetObject *  getObjectPtr( int ) const ;
     std::vector<LevelSetObject const *> getObjectPtrs( ) const ;
+
+    template<typename T>
+    const T &               getObject( int ) const ;
+    template<typename T>
+    const T *               getObjectPtr( int ) const ;
+    template<typename T>
+    std::vector<T const *>  getObjectPtrs( ) const ;
+
     int                     getObjectCount( ) const ;
     std::vector<int>        getObjectIds( ) const ;
 
@@ -109,5 +118,8 @@ class LevelSet{
 };
 
 }
+
+// Template implementation
+#include "levelSet.tpp"
 
 #endif
