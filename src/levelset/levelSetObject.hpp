@@ -92,6 +92,8 @@ class LevelSetObject{
 
     LevelSetIntersectionStatus                  intersectSurface(const long &) const;
     virtual double                              getSurfaceFeatureSize(const long &) const;
+    virtual double                              getMinSurfaceFeatureSize() const;
+    virtual double                              getMaxSurfaceFeatureSize() const;
 
     virtual double                              computeSizeNarrowBand()=0;
     virtual void                                computeLSInNarrowBand(const double &, const bool &) ;

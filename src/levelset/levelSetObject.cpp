@@ -167,6 +167,22 @@ double LevelSetObject::getSurfaceFeatureSize(const long &i) const{
 }
 
 /*!
+ * Returns the minimum surface feature size
+ * @return feature size
+ */
+double LevelSetObject::getMinSurfaceFeatureSize() const{
+    return (- levelSetDefaults::SIZE);
+}
+
+/*!
+ * Returns the maximum surface feature size
+ * @return feature size
+ */
+double LevelSetObject::getMaxSurfaceFeatureSize() const{
+    return (- levelSetDefaults::SIZE);
+}
+
+/*!
  * Calculates the value and gradient of the levelset function within the narrow band
  * @param[in] RSeach size of the narrow band.
  * @param[in] signd if signed distances should be calculted

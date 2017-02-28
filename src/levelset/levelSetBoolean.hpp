@@ -68,6 +68,8 @@ class LevelSetBoolean: public LevelSetMetaObject {
 
     int                                         getPart(const long &) const ;
     double                                      getSurfaceFeatureSize(const long &) const;
+    double                                      getMinSurfaceFeatureSize() const;
+    double                                      getMaxSurfaceFeatureSize() const;
 
     void                                        setSizeNarrowBand(double) ;
 

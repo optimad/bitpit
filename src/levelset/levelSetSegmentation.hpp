@@ -139,6 +139,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     const std::vector<long> &                   getSimplexList(const long &) const ;
 
     double                                      getSurfaceFeatureSize(const long &) const;
+    double                                      getMinSurfaceFeatureSize() const;
+    double                                      getMaxSurfaceFeatureSize() const;
 
     void                                        computeLSInNarrowBand(const double &, const bool &);
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &) ;
