@@ -473,7 +473,8 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
 
 /*!
  * Update the segment list associated to the cells, keeping only the segments
- * with a distance from the body less than the specified narrow band size.
+ * with a distance from the body less than the specified narrow band size plus
+ * the cell circumcenter.
  * @param[in] search size of narrow band
  */
 void LevelSetSegmentation::updateSegmentList( const double &search) {
@@ -481,7 +482,12 @@ void LevelSetSegmentation::updateSegmentList( const double &search) {
 
     log::cout() << "  Updating segment list for cells inside narrow band... " << std::endl;
 
-    for ( SegInfo &segInfo : m_seg ) {
+    bitpit::PiercedVector<SegInfo>::iterator segEnd = m_seg.end();
+    for (bitpit::PiercedVector<SegInfo>::iterator segItr = m_seg.begin(); segItr != segEnd; ++segItr) {
+        // The filter radius is the narrow band size plus the cell circumcenter.
+        long cellId = segItr.getId() ;
+        double filterRadius = search + m_kernelPtr->computeCellCircumcircle(cellId);
+
         // Starting from the farthest segment (the last in the list) we loop
         // backwards until we find the first segment with a distance less
         // that the specified narrow band size.
@@ -490,13 +496,13 @@ void LevelSetSegmentation::updateSegmentList( const double &search) {
         // cells outside the narrow band have already been removed. Therefore
         // we need to perform the check up to the second segment (the first one
         // is in the narrow band).
-        std::vector<double> &distances = segInfo.distances;
+        std::vector<double> &distances = segItr->distances;
         size_t nCurrentSegments = distances.size();
 
         size_t nSegmentsToKeep = 1;
         for( size_t k = nCurrentSegments - 1; k >= 1; --k) {
             double distance = distances[k];
-            if ( distance <= search ){
+            if ( distance <= filterRadius ){
                 nSegmentsToKeep = k + 1;
                 break;
             }
@@ -506,7 +512,7 @@ void LevelSetSegmentation::updateSegmentList( const double &search) {
             distances.resize(nSegmentsToKeep);
             distances.shrink_to_fit();
 
-            std::vector<long> &segments = segInfo.segments;
+            std::vector<long> &segments = segItr->segments;
             segments.resize(nSegmentsToKeep);
             segments.shrink_to_fit();
         }

@@ -610,6 +610,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
         for( int objectId : m_order){
             auto &visitor = *(m_objects.at(objectId)) ;
+            newRSearch = visitor.getSizeNarrowBand();
             visitor.filterOutsideNarrowBand(newRSearch) ;
         }
     }
