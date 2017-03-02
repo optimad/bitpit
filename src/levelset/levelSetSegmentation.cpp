@@ -587,18 +587,28 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
 
         d= CGElem::distancePointSegment( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), x, lambda, flag ) ;
 
-        g  = lambda[0] *itrGradient->second[0] ;
-        g += lambda[1] *itrGradient->second[1] ;
-        g /= norm2(g) ;
+        g = p-x;
+        g /= norm2(g);
+
+        n  = lambda[0] *itrGradient->second[0] ;
+        n += lambda[1] *itrGradient->second[1] ;
+        n /= norm2(n) ;
+
+        g *= sign(dotProduct(g,n));
 
         if( itrNormal != m_vertexNormal.end() ){
             n  = lambda[0] *itrNormal->second[0] ;
             n += lambda[1] *itrNormal->second[1] ;
             n /= norm2(n) ;
-        } else {
-            n = g ;
         }
 
+        double kappa ;
+        maxval(lambda,kappa);
+        kappa = 1. -kappa;
+
+        n *= kappa;
+        n += (1.-kappa)*g;
+        n /= norm2(n);
 
     } else if (nV == 3){
         long id0 = cell.getVertex(0) ;
@@ -609,6 +619,9 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
         int flag ;
 
         d= CGElem::distancePointTriangle( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), m_segmentation->getVertexCoords(id2), x, lambda, flag ) ;
+
+        g = p-x;
+        g /= norm2(g);
 
         if( itrNormal != m_vertexNormal.end() ){
             n  = lambda[0] *itrNormal->second[0] ;
@@ -621,16 +634,15 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
             n += lambda[2] *itrGradient->second[2] ;
         }
 
-        if(flag == 0) { //projects on triangle
-            g = m_segmentation->evalFacetNormal(i) ;
+        g *= sign(dotProduct(g,n));
 
-        } else if (flag < 0) { // projects on edge
-            g = m_segmentation->evalEdgeNormal(i,-flag-1) ;
+        double kappa ;
+        maxval(lambda,kappa);
+        kappa = 1. -kappa;
 
-        } else { // projects on vertex
-            g = itrGradient->second[flag-1] ;
-
-        }
+        n *= kappa;
+        n += (1.-kappa)*g;
+        n /= norm2(n);
 
     } else{
         log::cout() << " simplex not supported in LevelSetSegmentation::infoFromSimplex " << nV << std::endl ;
