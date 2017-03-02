@@ -163,13 +163,13 @@ int main( int argc, char *argv[]){
     int                             id0, id1, id2, id3, id4, id5;
     std::vector<double>             LS0, LS1, LS2, LS3, LS4, LS5;
     std::vector<double>::iterator   it0, it1, it2, it3, it4, it5;
-    std::vector<std::array<double,3>> LG4;
-    std::vector<std::array<double,3>>::iterator itLG4;
+    std::vector<std::array<double,3>> LG2, LG4;
+    std::vector<std::array<double,3>>::iterator itLG2, itLG4;
 
     levelset.setMesh(&mesh) ;
     id0 = levelset.addObject(std::move(STL0),M_PI) ;
     id1 = levelset.addObject(std::move(STL1),M_PI) ;
-    id2 = levelset.addObject(std::move(STL2),M_PI) ;
+    id2 = levelset.addObject(std::move(STL2),M_PI/10.) ;
 
     id3 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,id0,id1) ;
     id4 = levelset.addObject(bitpit::LevelSetBooleanOperation::SUBTRACTION,id3,id2) ;
@@ -193,6 +193,7 @@ int main( int argc, char *argv[]){
     mesh.getVTK().addData("ls3", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS3) ;
     mesh.getVTK().addData("ls4", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS4) ;
     mesh.getVTK().addData("ls5", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS5) ;
+    mesh.getVTK().addData("ls2_grad", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, LG2) ;
     mesh.getVTK().addData("ls4_grad", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, LG4) ;
     mesh.getVTK().setName("levelset_003") ;
     mesh.getVTK().setCounter() ;
@@ -214,6 +215,7 @@ int main( int argc, char *argv[]){
     LS3.resize(mesh.getCellCount() ) ;
     LS4.resize(mesh.getCellCount() ) ;
     LS5.resize(mesh.getCellCount() ) ;
+    LG2.resize(mesh.getCellCount() ) ;
     LG4.resize(mesh.getCellCount() ) ;
     it0 = LS0.begin() ;
     it1 = LS1.begin() ;
@@ -221,6 +223,7 @@ int main( int argc, char *argv[]){
     it3 = LS3.begin() ;
     it4 = LS4.begin() ;
     it5 = LS5.begin() ;
+    itLG2 = LG2.begin() ;
     itLG4 = LG4.begin() ;
     for( auto & cell : mesh.getCells() ){
         const long &cellId = cell.getId() ;
@@ -230,6 +233,7 @@ int main( int argc, char *argv[]){
         *it3 = object3.getLS(cellId) ;
         *it4 = object4.getLS(cellId) ;
         *it5 = object5.getLS(cellId) ;
+        *itLG2 = object2.getGradient(cellId) ;
         *itLG4 = object4.getGradient(cellId) ;
         ++it0 ;
         ++it1 ;
@@ -237,6 +241,7 @@ int main( int argc, char *argv[]){
         ++it3 ;
         ++it4 ;
         ++it5 ;
+        ++itLG2 ;
         ++itLG4 ;
     };
 
@@ -277,6 +282,7 @@ int main( int argc, char *argv[]){
         LS3.resize(mesh.getCellCount() ) ;
         LS4.resize(mesh.getCellCount() ) ;
         LS5.resize(mesh.getCellCount() ) ;
+        LG2.resize(mesh.getCellCount() ) ;
         LG4.resize(mesh.getCellCount() ) ;
         it0 = LS0.begin() ;
         it1 = LS1.begin() ;
@@ -284,6 +290,7 @@ int main( int argc, char *argv[]){
         it3 = LS3.begin() ;
         it4 = LS4.begin() ;
         it5 = LS5.begin() ;
+        itLG2 = LG2.begin() ;
         itLG4 = LG4.begin() ;
         for( auto & cell : mesh.getCells() ){
             const long &cellId = cell.getId() ;
@@ -293,6 +300,7 @@ int main( int argc, char *argv[]){
             *it3 = object3.getLS(cellId) ;
             *it4 = object4.getLS(cellId) ;
             *it5 = object5.getLS(cellId) ;
+            *itLG2 = object2.getGradient(cellId) ;
             *itLG4 = object4.getGradient(cellId) ;
             ++it0 ;
             ++it1 ;
@@ -300,6 +308,7 @@ int main( int argc, char *argv[]){
             ++it3 ;
             ++it4 ;
             ++it5 ;
+            ++itLG2 ;
             ++itLG4 ;
         };
         mesh.write() ;
