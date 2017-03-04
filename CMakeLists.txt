@@ -444,6 +444,10 @@ if (MODULE_IO_ENABLED)
     list (APPEND BITPIT_EXTERNAL_INCLUDE_DIRECTORIES "${LIBXML2_INCLUDE_DIR}")
 endif()
 
+if (ENABLE_MPI)
+    list (APPEND BITPIT_EXTERNAL_LIBRARIES "${MPI_CXX_LIBRARIES}")
+endif()
+
 #------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#
