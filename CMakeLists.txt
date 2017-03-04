@@ -429,7 +429,7 @@ if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
 			endif ()
 
 			file(TO_NATIVE_PATH "${FILE_DIR}/liblapacke${FILE_EXT}" LAPACKE_LIB_PATH)
-			list (APPEND LAPACK_LIBRARIES "${LAPACKE_LIB_PATH}")
+			list (INSERT LAPACK_LIBRARIES 0 "${LAPACKE_LIB_PATH}")
 		endif ()
 	endforeach ()
 
