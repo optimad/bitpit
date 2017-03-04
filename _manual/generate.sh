@@ -24,8 +24,8 @@ cp "${MANUAL_ROOT_DIR}/doxygen_header.html" "${MANUAL_BUILD_DIR}"
 
 # Configration files needed by jekyll
 JEKYLL_CONFIG_GLOBAL="${JEKYLL_ROOT_DIR}/_config.yml"
-JEKYLL_CONFIG_LOCAL="${JEKYLL_ROOT_DIR}/_config_local.yml"
-JEKYLL_CONFIG_MANUAL="${MANUAL_BUILD_DIR}/_config_manual.yml"
+JEKYLL_CONFIG_LOCAL="${JEKYLL_ROOT_DIR}/_config.local.yml"
+JEKYLL_CONFIG_MANUAL="${MANUAL_BUILD_DIR}/_config.manual.yml"
 
 JEKYLL_CONFIG_MANUAL_CONTENTS="""
 layouts_dir:  ${MANUAL_BUILD_DIR}/_layouts
