@@ -158,9 +158,6 @@ function(addTest TEST_NAME TEST_SOURCES TEST_LIBRARIES WORKING_DIRECTORY N_PROCS
 
     # Add test target
     add_executable(${TEST_NAME} "${TEST_SOURCES}")
-    if (ENABLE_MPI)
-        target_link_libraries(${TEST_NAME} ${MPI_CXX_LIBRARIES})
-    endif ()
     target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
     target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
     target_link_libraries(${TEST_NAME} ${TEST_LIBRARIES})
