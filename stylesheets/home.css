@@ -14,7 +14,7 @@
 
     min-height: 300px;
 
-    padding: 75px 25px 75px 25px;
+    padding: 75px 75px 75px 75px;
     margin: 25px 0 25px 0;
 }
 
@@ -22,20 +22,25 @@
     background-color: #13496C;
 }
 
+#main.home .content-box .content {
+    padding: 0 50px 0 50px;
+}
+
+#main.home .content-box.left .content,
 #main.home .content-box.left .content {
-    padding: 0 500px 0 100px;
-}
-
-#main.home .content-box.right .content {
-    padding: 0 100px 0 500px;
-}
-
-#main.home .content-box.right .content {
     position: absolute;
     top: 50%;
     left: 0;
     right: 0;
     transform: translateY(-50%);
+}
+
+#main.home .content-box.left .content {
+    padding: 0 650px 0 100px;
+}
+
+#main.home .content-box.right .content {
+    padding: 0 100px 0 650px;
 }
 
 #main.home .content-box .image {
@@ -45,16 +50,16 @@
 
     position: absolute;
     top: 50%;
-    right: 75px;
+    right: 175px;
     transform: translateY(-50%);
 }
 
 #main.home .content-box.left .image {
-    right: 75px;
+    right: 175px;
 }
 
 #main.home .content-box.right .image {
-    left: 75px;
+    left: 175px;
 }
 
 #main.home .content-box .image img {
@@ -94,6 +99,11 @@
     line-height: auto;
     background-color: #13496C;
     cursor: pointer;
+}
+
+#main.home .content-box p.button.light
+{
+    background-color: #6DB7E6;
 }
 
 #main.home .content-box p.button,
