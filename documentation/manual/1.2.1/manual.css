@@ -2,8 +2,7 @@
 
 #manual {
     position: relative;
-    margin: 0 0 150px 0;
-    padding-top: 10px;
+    margin: 10px 0 250px 0;
 }
 
 #side-nav {
@@ -11,8 +10,12 @@
     bottom: 32px;
 }
 
+#main-menu {
+    z-index: 50;
+}
+
 body, table, div, p, dl {
-    font: 400 16px/22px Roboto,sans-serif;
+    font: 400 14px/22px Roboto,sans-serif;
 }
 
 /* @group Heading Levels */
@@ -287,9 +290,7 @@ div.contents {
     margin-left: 12px;
     margin-right: 8px;
 
-    padding-left: 15%;
-    padding-right: 15%;
-    padding-bottom: 100px;
+    padding-bottom: 56px;
 }
 
 td.indexkey {
@@ -338,7 +339,7 @@ div.center img {
 
 address.footer {
     color: #F8F8F8;
-    background-color: #363636;
+    background-color: #262626;
     text-align: right;
     padding-right: 12px;
     padding-top: 5px;
@@ -347,7 +348,7 @@ address.footer {
     box-sizing: border-box;
     position: absolute;
     width: 100%;
-    bottom: 150px;
+    bottom: 200px;
     left: 0;
 }
 
