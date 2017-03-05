@@ -43,9 +43,12 @@ sections:
         name: Downloads
         url:
 
+# Some gems, like jekyll-mentions, need to parse single html files. If those
+# file contain closing divs (which were open elsewhere) the parser will see
+# there's an extra div and remove it as it was never opened. When generating
+# the programmer's manual we open some divs in a header.html file and close
+# them in a separate footer.html file. For being able to generate the
+# programmer's manual these gems cannot be used.
 gems:
-   - jekyll-mentions
-   - jemoji
-   - jekyll-redirect-from
-   - jekyll-sitemap
-   - jekyll-feed
+   - jekyll-coffeescript
+   - jekyll-paginate
