@@ -26,13 +26,22 @@
     padding: 0 50px 0 50px;
 }
 
-#main.home .content-box.left .content,
-#main.home .content-box.left .content {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
+#main.home .content-box.centered {
+    height: 375px;
+    font-size: 0;
+    overflow: hidden;
+}
+
+#main.home .content-box.centered:before {
+    content: '\200B';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+#main.home .content-box.centered .content {
+    display: inline-block;
+    vertical-align: middle;
 }
 
 #main.home .content-box.left .content {
@@ -137,10 +146,6 @@
 
 #main.home .bitpit-modules .content {
     padding: 0 0 0 0;
-}
-
-#main.home .bitpit-modules .content > .module-info:first-child {
-    margin-left: 0;
 }
 
 #main.home .bitpit-modules h1,
