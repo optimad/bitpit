@@ -740,8 +740,8 @@ int RBFKernel::addGreedyPoint( )
         return -1;
     }
 
-    int     i(0), index(-1), nA( getActiveCount() );
-    double  maxError(0.); //, penal;
+    int     i(0), index(-1);
+    double  maxError(0.); 
 
     std::vector<int>     active( getActiveSet() );
 
@@ -749,15 +749,7 @@ int RBFKernel::addGreedyPoint( )
 
         if(!m_activeNodes[i] ){
 
-//             if( nA != 0) {
-//                 penal = 1.e18;
-//                 for( auto j : active ) {
-//                     penal = std::min(penal, calcDist(i,j)) ;
-//                 }
-//             }
-
-            if( error > maxError )
-{
+            if( error > maxError ) {
                 maxError = error;
                 index = i;
             }
