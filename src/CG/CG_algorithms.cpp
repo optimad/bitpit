@@ -26,15 +26,7 @@
 
 namespace bitpit {
 
-/*!
-    \brief Namespace for basic computational geometry functions
-*/
 namespace CGAlgorithms{
-
-/*!
-    \ingroup CG
-    \{
-*/
 
 // -------------------------------------------------------------------------- //
 double grad1DUpdate(
@@ -682,10 +674,6 @@ while (heap.heap_size > 0) {
 } //next item
 
 }
-
-/*!
-    \}
-*/
 
 }
 

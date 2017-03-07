@@ -37,8 +37,8 @@
 namespace bitpit {
 
 /*!
-    @ingroup levelset
     @interface  LevelSetKernel
+    @ingroup levelset
     @brief  Mesh specific implementation to calculate the levelset function
 
 */

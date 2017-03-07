@@ -32,12 +32,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\class IndexGenerator
+	\ingroup patchkernel
 
 	\brief The IndexGenerator class allows to generate unique ids.
 */
@@ -241,9 +237,5 @@ void IndexGenerator::restore(std::istream &stream)
 		IO::binary::read(stream, m_trash[i]);
 	}
 }
-
-/*!
-	@}
-*/
 
 }

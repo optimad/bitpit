@@ -30,11 +30,6 @@ namespace bitpit{
 namespace genericIO{
 
 /*!
- * @ingroup GenericIO
- * @{
- */
-
-/*!
  * Writes uint_8 data as formatted integer 
  * @param[in]   str     file stream to be copied; file needs already to be opened
  * @param[in]   data    data to be written
@@ -75,9 +70,6 @@ void copyUntilEOFInString( std::fstream &str, char*& buffer, int &length){
     return;
 };
 
-/*!
- * @}
- */
 }
 
 }

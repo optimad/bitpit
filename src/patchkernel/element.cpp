@@ -71,12 +71,8 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 namespace bitpit {
 
 /*!
-	\ingroup patchelements
-	@{
-*/
-
-/*!
 	\class ElementInfo
+	\ingroup patchelements
 
 	\brief The ElementInfo class allow to define elements information.
 
@@ -1010,16 +1006,8 @@ void ElementInfo::initializeFaceEdges(const std::vector<ElementInfo *> &facesInf
 }
 
 /*!
-	@}
-*/
-
-/*!
-	\ingroup patchelements
-	@{
-*/
-
-/*!
 	\class Element
+	\ingroup patchelements
 
 	\brief The Element class provides an interface for defining elements.
 
@@ -1430,9 +1418,5 @@ unsigned int Element::getBinarySize()
 
 // Explicit instantiation of the Element containers
 template class PiercedVector<Element>;
-
-/*!
-	@}
-*/
 
 }

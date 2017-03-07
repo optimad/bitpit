@@ -29,15 +29,7 @@ using namespace std;
 
 namespace bitpit {
 
-/*!
-    \brief Namespace for generic utility functions
-*/
 namespace utils {
-
-/*!
-    \ingroup commonUtils
-    \{
-*/
 
 // ---------------------------------------------------------------------------------- //
 /*!
@@ -95,11 +87,6 @@ bool getAfterKeyword( string line_, string key_, char del_, string& result_){
   };
 
 };
-
-
-/*!
-   \}
- */
 
 }
 

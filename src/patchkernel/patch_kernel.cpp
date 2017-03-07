@@ -40,12 +40,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\class PatchKernel
+	\ingroup patchkernel
 
 	\brief The PatchKernel class provides an interface for defining patches.
 
@@ -4128,9 +4124,5 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	m_cellIdGenerator.restore(stream);
 	m_interfaceIdGenerator.restore(stream);
 }
-
-/*!
-	@}
-*/
 
 }

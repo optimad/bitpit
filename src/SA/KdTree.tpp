@@ -37,13 +37,9 @@
 namespace bitpit{
 
 /*!
- \ingroup   SortAlgorithms
- \{
- */
-
-/*!
-
     \class KdNode
+    \ingroup SortAlgorithms
+
     \brief class for kd-tree node.
 
     Store the informatino of a node in kd-tree data structure.
@@ -792,11 +788,5 @@ if (((*(nodes[prev_].object_))[dim] <= (*P_)[dim] + h)
 return ;
 
 };
-
-
-
-/*!
- \}
- */
 
 }

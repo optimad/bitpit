@@ -30,8 +30,8 @@
 namespace bitpit {
 
 /*!
-	@ingroup levelset
 	@interface LevelSetMetaObject
+	@ingroup levelset
 	@brief Interface class for all objects, which depend on other LevelSetObjects
 */
 

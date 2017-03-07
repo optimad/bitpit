@@ -31,10 +31,6 @@ namespace bitpit {
 
 /*!
 	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\brief The namespace 'adaption' contains the routines and the data
 	structures for handling patch adaption.
 */
@@ -224,16 +220,8 @@ std::vector<Info> InfoCollection::dump()
 }
 
 /*!
-	@}
-*/
-
-/*!
-	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\class FlatMapping
+	\ingroup patchkernel
 
 	\brief The FlatMapping class allows to generate a mapping between an
 	id-base numeration to a continuous-index numeration.
@@ -285,16 +273,8 @@ const std::vector<long> & FlatMapping::getMapping() const
 }
 
 /*!
-	@}
-*/
-
-/*!
-	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\class CellFlatMapping
+	\ingroup patchkernel
 
 	\brief The CellFlatMapping class allows to generate a cell mapping
 	between an id-base numeration to a continuous-index numeration.

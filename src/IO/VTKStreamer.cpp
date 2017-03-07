@@ -26,11 +26,9 @@
 
 namespace bitpit{
 
-
-
 /*!
- * @ingroup VisualizationToolKit
  * @interface VTKBaseContainer
+ * @ingroup VisualizationToolKit
  * @brief An interface class to all containers that are batively supported by VTK
  */
 

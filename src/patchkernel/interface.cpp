@@ -35,12 +35,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup patchelements
-	@{
-*/
-
-/*!
 	\class Interface
+	\ingroup patchelements
 
 	\brief The Interface class defines the interfaces among cells.
 
@@ -334,9 +330,5 @@ void Interface::display(std::ostream &out, unsigned short int indent) const
 
 // Explicit instantiation of the Interface containers
 template class PiercedVector<Interface>;
-
-/*!
-	@}
-*/
 
 }

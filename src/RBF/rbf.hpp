@@ -31,13 +31,8 @@
 namespace bitpit{
 
 /*!
- * @ingroup RBF
- * @{
- */
-
-/*!
- *
  * @enum RBFBasisFunction
+ * @ingroup RBF
  * @brief Enum class defining types of RBF kernel functions that could be used in bitpit::RBF class
  */
 enum class RBFBasisFunction {
@@ -58,17 +53,14 @@ enum class RBFBasisFunction {
 };
 
 /*!
-* @enum RBFMode
-* @brief Enum class defining behaviour of the bitpit::RBF class
-*/
+ * @enum RBFMode
+ * @ingroup RBF
+ * @brief Enum class defining behaviour of the bitpit::RBF class
+ */
 enum class RBFMode {
     INTERP = 1, /**< RBF class interpolate external field data */
     PARAM  = 2  /**< RBF class used as pure parameterizator*/
 };
-
-/*!
- * @}
- */
 
 class RBFKernel{
 

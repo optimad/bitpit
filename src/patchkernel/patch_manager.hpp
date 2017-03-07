@@ -66,6 +66,8 @@ private:
 };
 
 /*!
+    \ingroup patchkernel
+
     \brief The namespace 'patch' contains routines for interacting with the
     patch manager.
 */

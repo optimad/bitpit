@@ -28,11 +28,6 @@ namespace bitpit {
 
 namespace IO {
 
-/*!
-    @ingroup Binary
-    @{
-*/
-
 namespace binary {
 
 /*!
@@ -64,10 +59,6 @@ void read(std::istream &stream, std::string &string)
 }
 
 }
-
-/*!
-    @}
-*/
 
 }
 

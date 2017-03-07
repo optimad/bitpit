@@ -30,9 +30,7 @@
 namespace bitpit {
 
   /*!
-    \ingroup PABLO
-    @{
-    
+    \ingroup		PABLO
     \date			09/sep/2015
     \authors		Edoardo Lombardi
     \authors		Marco Cisternino
@@ -80,8 +78,6 @@ private:
 	Impl& getImpl();
 	const Impl& getImpl() const;
 };
-
-/*  @{ */
 
 }
 

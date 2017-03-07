@@ -28,8 +28,8 @@
 namespace bitpit {
 
 /*!
+ * @class LevelSetInfo
  * @ingroup levelset
- * @class  LevelSetInfo
  *
  * @brief  A public container which includes all information provided by LevelSet
  *

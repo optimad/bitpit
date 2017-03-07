@@ -47,9 +47,8 @@ typedef std::vector<Intersection>	 	intervector;
 /*!
  * LocalTree.hpp
  *
- *  \ingroup    PABLO
- *  @{
- *  \date		15/dec/2015
+ *	\ingroup	PABLO
+ *	\date		15/dec/2015
  *	\authors	Edoardo Lombardi
  *	\authors	Marco Cisternino
  *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.

@@ -78,12 +78,8 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 namespace bitpit {
 
 /*!
-	\ingroup patchelements
-	@{
-*/
-
-/*!
 	\class Cell
+	\ingroup patchelements
 
 	\brief The Cell class defines the cells.
 
@@ -857,9 +853,5 @@ unsigned int Cell::getBinarySize()
 
 // Explicit instantiation of the Cell containers
 template class PiercedVector<Cell>;
-
-/*!
-	@}
-*/
 
 }

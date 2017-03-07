@@ -44,8 +44,8 @@
 namespace bitpit {
 
 /*!
+ * @class LevelSet
  * @ingroup levelset
- * @class  LevelSet
  *
  * @brief  Level Set driver class
  *

@@ -33,11 +33,6 @@ using namespace std;
 namespace bitpit {
 
 /*!
-	\ingroup voloctree
-	@{
-*/
-
-/*!
 	Sets the MPI communicator to be used for parallel communications.
 
 	\param communicator is the communicator to be used for parallel
@@ -75,10 +70,6 @@ const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges
 
 	return adaptionData;
 }
-
-/*!
-	@}
-*/
 
 }
 

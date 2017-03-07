@@ -27,8 +27,8 @@
 namespace bitpit {
 
 /*!
-    \ingroup communications
     \class SendBuffer
+    \ingroup communications
 
     @brief Buffer to be used for send communications.
 */
@@ -53,8 +53,8 @@ void SendBuffer::squeeze()
 }
 
 /*!
-    \ingroup communications
     \class RecvBuffer
+    \ingroup communications
 
     @brief Buffer to be used for receive communications.
 */

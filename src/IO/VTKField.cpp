@@ -25,10 +25,10 @@
 #include "VTK.hpp"
 
 namespace bitpit{
+
 /*!
- * @ingroup VisualizationToolKit
- * @{
  * @class VTKField
+ * @ingroup VisualizationToolKit
  * @brief VTKField handles geometry and data field information for the VTK format
  *
  */
@@ -269,9 +269,5 @@ void  VTKField::write( std::fstream &str) const{
 void VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
     m_streamer->absorbData( str, m_name, m_codification, entries, components) ;
 }
-
-/*!
- * @}
- */
 
 }

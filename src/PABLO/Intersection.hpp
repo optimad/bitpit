@@ -40,8 +40,7 @@ namespace bitpit {
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 /*!
- *  \ingroup        PABLO
- *  @{
+ *	\ingroup		PABLO
  *	\date			16/dec/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -117,9 +116,6 @@ private:
 	bool getPbound() const;
 
 };
-
-
-/*  @} */
 
 }
 

@@ -27,9 +27,8 @@
 namespace bitpit{
 
 /*! 
- * @ingroup VisualizationToolKit
- * @{
  * @class VTKRectilinearGrid
+ * @ingroup VisualizationToolKit
  * @brief VTK input output for Rectilinear Meshes
  *
  * VTKRectilinearGrid provides methods to read and write parallel and serial rectlinear meshes and data. 
@@ -576,9 +575,5 @@ uint8_t VTKRectilinearGrid::calcFieldComponents( const VTKField &field ){
     return comp ;
 
 }
-
-/*!
- *   @}
- */
 
 }

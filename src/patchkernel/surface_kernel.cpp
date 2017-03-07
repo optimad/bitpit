@@ -39,14 +39,9 @@
 
 namespace bitpit {
 
-
-/*!
-	\ingroup surfacepatches
-	@{
-*/
-
 /*!
 	\class SurfaceKernel
+	\ingroup surfacepatches
 
 	\brief The SurfaceKernel class provides an interface for defining
 	surface patches.
@@ -1330,9 +1325,5 @@ bool SurfaceKernel::compareSelectedTypes(const unsigned short &mask_, const Elem
     unsigned short       masked = m_selectionTypes.at(type_);
     return ( (mask_ & masked) == masked );
 }
-
-/*!
-	@}
-*/
 
 }

@@ -53,8 +53,7 @@ typedef std::vector<darray3>		darr3vector;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 /*!
- *  \ingroup        PABLO
- *  @{
+ *	\ingroup		PABLO
  *	\date			17/dec/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -123,8 +122,6 @@ private:
 	void mapNormals(i8array3 normal, darray3 & mapnormal) const;
 
 };
-
-/* @} */
 
 }
 

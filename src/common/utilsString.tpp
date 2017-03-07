@@ -40,11 +40,6 @@ namespace bitpit{
 
 namespace utils{
 
-/*!
-   \ingroup commonUtils
-   \{
- */
-
 // Trimming operators =============================================================== //
 
 // ---------------------------------------------------------------------------------- //
@@ -411,10 +406,6 @@ void  convertString( std::string input_, std::array<T,n> &output_) {
 
   return ;
 };
-
-/*!
-   \}
- */
 
 }
 

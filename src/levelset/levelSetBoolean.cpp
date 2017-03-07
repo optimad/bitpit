@@ -38,8 +38,8 @@
 namespace bitpit {
 
 /*!
-	@ingroup    levelset
 	@class      LevelSetBoolean
+	@ingroup    levelset
 	@brief      Class which deals with boolean operation between two LevelSetObjects
 */
 

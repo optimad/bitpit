@@ -38,6 +38,7 @@
 namespace bitpit{
 
 /*!
+ * @ingroup GenericIO
  * @brief contains routines for reading/writing in ASCII/BINARY format
  */
 namespace genericIO{

@@ -249,6 +249,7 @@ private:
 
 
 /*!
+    \ingroup Logger
     \brief The namespace 'log' contains routines for interacting with the
     message logger.
 */

@@ -230,11 +230,6 @@ return; }
 
 // Input routines =========================================================== //
 
-/*!
-  \ingroup dgf
-  \{
-*/
-
 // -------------------------------------------------------------------------- //
 /*!
     Read data block from dgf file.
@@ -326,7 +321,6 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup dgf
     Read vertex data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -422,7 +416,6 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup dgf
     Read cell data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -520,7 +513,6 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup dgf
     Write data block to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -565,7 +557,6 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup dgf
     Write vertex data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -620,7 +611,6 @@ return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup dgf
     Write cell data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file

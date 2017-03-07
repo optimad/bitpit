@@ -68,12 +68,8 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in_stream, bitpit::Vert
 namespace bitpit {
 
 /*!
-	\ingroup patchelements
-	@{
-*/
-
-/*!
 	\class Vertex
+	\ingroup patchelements
 
 	\brief The Vertex class defines the vertexs.
 
@@ -298,9 +294,5 @@ unsigned int Vertex::getBinarySize()
 
 // Explicit instantiation of the Vertex containers
 template class PiercedVector<Vertex>;
-
-/*!
-	@}
-*/
 
 }

@@ -26,14 +26,9 @@
 
 namespace bitpit {
 
-
-/*!
-	\ingroup volumepatches
-	@{
-*/
-
 /*!
 	\class VolumeKernel
+	\ingroup volumepatches
 
 	\brief The VolumeKernel class provides an interface for defining
 	volume patches.
@@ -108,9 +103,5 @@ bool VolumeKernel::isPointInside(const long &id, const double &x, const double &
 {
 	return isPointInside(id, {{x, y, z}});
 }
-
-/*!
-	@}
-*/
 
 }

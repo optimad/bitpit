@@ -46,8 +46,7 @@ namespace bitpit {
     // CLASS DEFINITION                                                                    //
     // =================================================================================== //
     /*!
-     *  \ingroup        PABLO
-     *  @{
+     *	\ingroup		PABLO
      *	\date			25/jan/2016
      *	\authors		Edoardo Lombardi
      *	\authors		Marco Cisternino

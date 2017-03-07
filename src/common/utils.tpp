@@ -35,8 +35,6 @@ namespace bitpit {
 namespace utils {
 
 /*!
-	\ingroup commonUtils
-
 	Adds an id to an ordered list of unique ids.
 
 	\tparam T is the type of elements contained in the list
@@ -71,8 +69,6 @@ bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator compara
 };
 
 /*!
-	\ingroup commonUtils
-
 	Search a value in an ordered list of unique ids.
 
 	\tparam T is the type of elements contained in the list
@@ -101,8 +97,6 @@ typename std::vector<T>::const_iterator findInOrderedVector(const T &value, cons
 };
 
 /*!
-    \ingroup commonUtils
-    *
     Order a vector according to a reordering vector.
 
     \tparam order_t is the type of data that needs to be reordered
@@ -200,8 +194,6 @@ for (it_ = vec_1.begin(); it_ != vec_1.end(); ++it_) {
 return(intersect); }
 
 /*!
-    \ingroup commonUtils
-
     Check if a type is iterable
  */
 template <typename T>

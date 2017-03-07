@@ -32,15 +32,7 @@
 
 namespace bitpit{
 
-/*!
-    \brief Namespace for basic computational geometry functions
-*/
 namespace CGElem{
-
-/*!
-    \ingroup CG
-    \{
-*/
 
 /*!
  * Computes distance point to line in 3D
@@ -2211,10 +2203,6 @@ void rotateVector(
         + (1.0 - cos(theta)) * dotProduct(a, v) * a;
 
     return; };
-
-/*!
-    \}
-*/
 
 }
 

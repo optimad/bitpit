@@ -62,8 +62,7 @@ namespace bitpit {
     // =================================================================================== //
 
     /*!
-     *  \ingroup        PABLO
-     *  @{
+     *	\ingroup		PABLO
      *	\date			17/dec/2015
      *	\authors		Marco Cisternino
      *	\authors		Edoardo Lombardi
@@ -1673,8 +1672,6 @@ namespace bitpit {
 
 
     };
-
-    /*  @}  */
 
 }
 

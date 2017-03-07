@@ -35,10 +35,8 @@
 namespace bitpit {
 
 /*!
- * @ingroup RBF
- * @{
- *
  * @class RBFKernel
+ * @ingroup RBF
  * @brief Base class to handle Radial Basis Function with a large set of nodes.
  *
  * The class can be used in two different ways:
@@ -938,17 +936,11 @@ int RBFKernel::solveLSQ()
     return(0);
 }
 
-/*!
- * @}
- */
-
 // RBF derived class implementation
 
 /*!
- * @ingroup RBF
- * @{
- *
  * @class RBF
+ * @ingroup RBF
  * @brief Class to handle Radial Basis Function with a large set of 3D points as nodes.
  *
  * The class specializes RBFKernel and employs a 3D point cloud as set of RBF nodes.
@@ -1310,9 +1302,5 @@ double rbf::c2c2( const double &dist )
         return (1.0 -10.0*pow(dist,3) +15.0*pow(dist,4) -6.0*pow(dist,5));
     }
 }
-
-/*!
- * @}
- */
 
 }

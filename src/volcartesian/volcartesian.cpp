@@ -32,12 +32,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup volumepatches
-	@{
-*/
-
-/*!
 	\class VolCartesian
+	\ingroup volumepatches
 
 	\brief The VolCartesian defines a Cartesian patch.
 
@@ -1883,9 +1879,5 @@ std::array<double, 3> VolCartesian::evalCellCentroid(const long &id) const
 
 	return centroid;
 }
-
-/*!
-	@}
-*/
 
 }

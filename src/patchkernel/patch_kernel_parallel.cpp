@@ -43,13 +43,6 @@ using namespace chrono;
 namespace bitpit {
 
 /*!
-	\ingroup patchkernel
-	@{
-
-	\class PatchKernel
-*/
-
-/*!
 	Sets the MPI communicator to be used for parallel communications.
 
 	\param communicator is the communicator to be used for parallel
@@ -1491,10 +1484,6 @@ adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &r
 	// Return adaption info
     return adaptionInfo;
 }
-
-/*!
-	@}
-*/
 
 }
 

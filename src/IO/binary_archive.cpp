@@ -29,8 +29,9 @@
 namespace bitpit {
 
 /*!
-    \ingroup Binary
     \class BinaryArchive
+    \ingroup Binary
+
     \brief Base class for binary archives.
 
     The BinaryArchive is the blas class from which input and output binary

@@ -46,11 +46,8 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::FlatVec
 namespace bitpit{
 
 /*!
-    \ingroup containers
-    @{
-*/
+    @ingroup containers
 
-/*!
     @brief Metafunction for generation of a flattened vector of vectors.
 
     @details

@@ -33,8 +33,7 @@
 namespace bitpit {
 
 /*!
- *  \ingroup        PABLO
- *  @{
+ *	\ingroup		PABLO
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -115,8 +114,6 @@ private:
 	void 		initialize(uint8_t dim);
 
 };
-
-/*  @} */
 
 }
 

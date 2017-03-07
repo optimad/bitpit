@@ -80,6 +80,7 @@ private:
 
 
 /*!
+    \ingroup Configuration
     \brief The namespace 'config' contains routines for interacting with the
     global configuration file parser.
 */

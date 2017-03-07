@@ -41,8 +41,8 @@
 namespace bitpit {
 
 /*!
-	@ingroup    levelset
 	@class      LevelSetSegmentation::SegInfo
+	@ingroup    levelset
 	@brief      Information about the segments
 */
 
@@ -62,8 +62,8 @@ LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &_segments, cons
 }
 
 /*!
-	@ingroup    levelset
 	@class      LevelSetSegmentation
+	@ingroup    levelset
 	@brief      Implements visitor pattern fo segmentated geometries
 */
 

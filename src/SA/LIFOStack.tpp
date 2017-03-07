@@ -36,16 +36,14 @@
 
 namespace bitpit{
 
-/*!
- \ingroup   SortAlgorithms
- \{
- */
 // ========================================================================== //
 // TEMPLATE IMPLEMENTATIONS                                                   //
 // ========================================================================== //
 
 /*!
     \class LIFOStack
+    \ingroup SortAlgorithms
+
     \brief class for Last In First Out stack
 
     Manage insertion and extraction from/to a  list of object
@@ -438,8 +436,5 @@ for (int i = 0; i < TOPSTK-1; i++) {
 out << STACK[TOPSTK-1] << "]" << std::endl;
 
 return; };
-/*!
- \}
- */
 
 }

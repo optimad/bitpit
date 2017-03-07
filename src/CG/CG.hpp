@@ -42,6 +42,12 @@
 namespace bitpit{
 
 // Basic computational geometry ============================================= //
+
+/*!
+    \ingroup CG
+
+    \brief Namespace for basic computational geometry functions
+*/
 namespace CGElem{
 
 typedef std::array<double,3> array3D ;
@@ -173,6 +179,12 @@ void faceOfBox(
 }
 
 // Algorithms =============================================================== //
+
+/*!
+    \ingroup CG
+
+    \brief Namespace for basic computational geometry functions
+*/
 namespace CGAlgorithms {
 
 double grad1DUpdate(                                                      // Update the local solution to the 1D grad limiting equation on a vertex of a 1D manifold

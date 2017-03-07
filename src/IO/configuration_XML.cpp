@@ -36,11 +36,6 @@ namespace config {
 namespace XML {
 
 /*!
-    @ingroup Configuration
-    @{
-*/
-
-/*!
     Default encoding.
 */
 const std::string DEFAULT_ENCODING = "ISO-8859-1";
@@ -161,10 +156,6 @@ xmlChar * encodeString(const std::string &in, const std::string &encoding)
 
     return out;
 }
-
-/*!
-    @}
-*/
 
 }
 

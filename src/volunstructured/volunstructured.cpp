@@ -29,12 +29,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup volumepatches
-	@{
-*/
-
-/*!
 	\class VolUnstructured
+	\ingroup volumepatches
 
 	\brief The VolUnstructured class defines a dummy unstructured volume
 	patch.
@@ -276,9 +272,5 @@ long VolUnstructured::locatePoint(const std::array<double, 3> &point)
 
 	return false;
 }
-
-/*!
-	@}
-*/
 
 }

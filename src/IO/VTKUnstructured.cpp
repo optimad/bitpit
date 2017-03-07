@@ -27,12 +27,10 @@
 namespace bitpit{
 
 /*!
- * @ingroup VisualizationToolKit
  * @class VTKUnstructuredGridStreamer
+ * @ingroup VisualizationToolKit
  * @brief Streamer for VTKUnstructuredGrid if the grid is made of homogeneous types
- *
  */
-
 
 /*!
  * Sets the type of and numer of elements to be written
@@ -93,8 +91,8 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
 }
 
 /*!
- * @ingroup VisualizationToolKit
  * @class VTKUnstructuredGrid
+ * @ingroup VisualizationToolKit
  * @brief VTK input output for Unstructured Meshes
  *
  * VTKUnstructuredGrid provides methods to read and write parallel and serial unstructured meshes and data. 

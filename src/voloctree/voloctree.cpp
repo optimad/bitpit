@@ -32,12 +32,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup volumepatches
-	@{
-*/
-
-/*!
 	\class VolOctree
+	\ingroup volumepatches
 
 	\brief The VolOctree defines a Octree patch.
 
@@ -1992,9 +1988,5 @@ std::vector<long> VolOctree::findCellCodimensionNeighs(const long &id, const int
 
 	return neighs;
 }
-
-/*!
-	@}
-*/
 
 }

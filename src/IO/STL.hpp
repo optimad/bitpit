@@ -53,8 +53,8 @@ namespace bitpit{
 // CLASSES                                                                    //
 // ========================================================================== //
 /*!
- * @ingroup  STereoLithography
  * @struct STLData
+ * @ingroup STereoLithography
  * @brief structure holding meta-information
  */
 struct STLData {

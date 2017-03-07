@@ -55,6 +55,11 @@
 
 namespace bitpit {
 
+/*!
+    \ingroup commonUtils
+
+    \brief Namespace for generic utility functions
+*/
 namespace utils {
 
 template <typename T, typename Comparator = std::less<T> >
@@ -190,6 +195,8 @@ struct DoubleFloatingEqual
 }
 
 /*!
+	\ingroup commonUtils
+
 	\brief Functions for generating the hash of data types.
 */
 namespace hashing {

@@ -28,12 +28,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	\class PatchManager
+	\ingroup patchkernel
 
 	\brief The PatchManager oversee the handling of the patches.
 */
@@ -166,11 +162,6 @@ void PatchManager::restoreAll(std::istream &stream)
 	restore(stream);
 }
 
-/*!
-    \ingroup patchkernel
-    @{
-*/
-
 // Patch manager global functions
 namespace patch {
 
@@ -187,9 +178,5 @@ namespace patch {
     }
 
 }
-
-/*!
-    @}
-*/
 
 }

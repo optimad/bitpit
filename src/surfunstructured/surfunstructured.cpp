@@ -29,12 +29,8 @@
 namespace bitpit {
 
 /*!
-	\ingroup surfacepatches
-	@{
-*/
-
-/*!
 	\class SurfUnstructured
+	\ingroup surfacepatches
 
 	\brief The SurfUnstructured class defines an unstructured surface
 	triangulation.
@@ -862,10 +858,5 @@ ElementInfo::Type SurfUnstructured::getDGFFacetType(int nFacetVertices)
 
     }
 }
-
-
-/*!
-	@}
-*/
 
 }

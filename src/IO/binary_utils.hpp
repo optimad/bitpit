@@ -36,6 +36,7 @@ namespace bitpit {
 namespace IO {
 
 /*!
+    \ingroup Binary
     \brief The namespace 'binary' contains routines for handling binary
     archives.
 */

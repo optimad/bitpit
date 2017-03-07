@@ -30,11 +30,6 @@ namespace bitpit{
 namespace genericIO{
 
 /*!
- * @ingroup GenericIO
- * @{
- */
-
-/*!
  * Writes a POD data type to file stream in ascii format using scientific format
  * @tparam  data_T  type of POD data
  * @param[in]   str     file stream
@@ -968,9 +963,6 @@ void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data, long N ){
     return ;
 };
 
-/*!
- * @}
- */
 }
 
 }

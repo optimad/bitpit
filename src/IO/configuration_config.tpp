@@ -30,11 +30,6 @@
 namespace bitpit {
 
 /*!
-    @ingroup Configuration
-    @{
-*/
-
-/*!
     Gets the specified option.
 
     If the option does not exists an exception is thrown.
@@ -90,10 +85,6 @@ void Config::set(const std::string &key, const T &value)
         throw std::runtime_error("Unable to convert the option \"" + key + "\"");
     }
 }
-
-/*!
-    @}
-*/
 
 }
 

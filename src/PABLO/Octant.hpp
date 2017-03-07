@@ -51,8 +51,7 @@ typedef std::vector<u32array3>				u32arr3vector;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 /*!
- *  \ingroup        PABLO
- *  @{
+ *	\ingroup		PABLO
  *	\date			10/dec/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -206,9 +205,6 @@ private:
 	Octant computePeriodicOctant(uint8_t iface) const;
 	std::array<int64_t,3> getPeriodicCoord(uint8_t iface) const;
 };
-
-
-/*  @} */
 
 }
 

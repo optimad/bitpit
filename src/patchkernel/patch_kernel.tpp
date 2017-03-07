@@ -30,11 +30,6 @@
 namespace bitpit {
 
 /*!
-	\ingroup patchkernel
-	@{
-*/
-
-/*!
 	Renumber the ids of the items in the specified container.
 
 	\param container is the container

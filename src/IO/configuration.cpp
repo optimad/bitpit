@@ -32,13 +32,8 @@
 namespace bitpit {
 
 /*!
-    @ingroup Configuration
-    @{
-*/
-
-/*!
     \class ConfigParser
-
+    \ingroup Configuration
     \brief Configuration file parser
 
     This class implements a configuration file parser.
@@ -243,13 +238,8 @@ void ConfigParser::write(const std::string &filename) const
 }
 
 /*!
-    @ingroup Configuration
-    @{
-*/
-
-/*!
     \class GlobalConfigParser
-
+    \ingroup Configuration
     \brief Global configuration file parser
 
     This class implements a global configuration file parser.
@@ -299,15 +289,6 @@ GlobalConfigParser & GlobalConfigParser::parser()
 
     return *m_parser;
 }
-
-/*!
-    @}
-*/
-
-/*!
-    @ingroup Configuration
-    @{
-*/
 
 // Routines for interacting with the global configuration file parser
 namespace config {
@@ -362,9 +343,5 @@ namespace config {
     }
 
 }
-
-/*!
-    @}
-*/
 
 }

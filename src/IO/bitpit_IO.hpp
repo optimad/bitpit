@@ -25,17 +25,16 @@
 /*!
  * @defgroup IO Input/Output (IO)
  * @{
- * @defgroup GenericIO Generic
- * @defgroup Binary Binary
- * @defgroup DuneGridFormat DuneGridFormat (DGF)
- * @defgroup STereoLithography STereoLithography (STL)
- * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
- * @{
- * @defgroup VTKEnums VTK Enumerations
+ *     @defgroup GenericIO Generic
+ *     @defgroup Binary Binary
+ *     @defgroup DuneGridFormat DuneGridFormat (DGF)
+ *     @defgroup STereoLithography STereoLithography (STL)
+ *     @defgroup VisualizationToolKit VisualizationToolKit (VTK)
+ *     @{
+ *         @defgroup VTKEnums VTK Enumerations
+ *     @}
+ *     @defgroup Logger Logger
  * @}
- * @defgroup Logger Logger
- * @}
- *
  */
 
 #ifndef __BITPIT_MODULE_IO_HPP__

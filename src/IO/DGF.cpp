@@ -49,12 +49,8 @@ using namespace std;
 namespace bitpit{
 
 /*!
-    \ingroup DuneGridFormat
-    \{
- */
-
-/*!
     \class DGFObj
+    \ingroup DuneGridFormat
     \brief Interface to DGF I/O function
 
     This class has been designed to allow an easy interface between end-user
@@ -878,10 +874,6 @@ void DGFObj::appendSData(
 close("app");
 
 return; }
-
-/*!
-    \}
- */
 
 // Scanning routines ======================================================== //
 

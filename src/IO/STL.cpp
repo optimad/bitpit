@@ -49,11 +49,6 @@ using namespace std;
 namespace bitpit{
 
 /*!
- * @ingroup STereoLithography
- * @{
- */
-
-/*!
     \class STLObj
     \brief Interface to STL I/O function
 
@@ -799,10 +794,6 @@ void STLObj::load(
 close("in");
 
 return; };
-
-/*!
- * @}
- */
 
 // Scanning routines ======================================================== //
 

@@ -54,10 +54,8 @@ static VTKDataType VTKTypeIndex_double = VTKTypes::registerType<double>();
 static VTKDataType VTKTypeIndex_VTKElement = VTKTypes::registerType<VTKElementType>();
 
 /*!
- * @ingroup    VisualizationToolKit
- * @{
- *
  * @class VTKTypes
+ * @ingroup VisualizationToolKit
  * @brief VTK data types handling
  */
 
@@ -111,9 +109,5 @@ VTKDataType VTKTypes::whichType( const std::type_info & typeInfo ){
     return m_types.at(typeInfo);
 
 }
-
-/*!
- * @}
- */
 
 }

@@ -29,12 +29,8 @@
 namespace bitpit {
 
 /*!
-    @ingroup Configuration
-    @{
-*/
-
-/*!
     \class Config
+    \ingroup Configuration
 
     \brief Configuration storage
 
@@ -377,9 +373,5 @@ void Config::dump(std::ostream &out, int indentLevel) const
         entry.second->dump(out, indentLevel);
     }
 }
-
-/*!
-    @}
-*/
 
 }

@@ -35,18 +35,15 @@
 // ========================================================================== //
 
 namespace bitpit{
-/*!
- \ingroup   SortAlgorithms
- \{
- */
 
 // ========================================================================== //
 // TEMPLATE IMPLEMENTATIONS FOR MinPQueue                                     //
 // ========================================================================== //
 
 /*!
-
     \class MinPQueue
+    \ingroup SortAlgorithms
+
     \brief class for min priority queue.
 
     Class for priority element insertion and extraction. Elements inserted in
@@ -1666,7 +1663,5 @@ void MaxPQueue<T, T1>::display(
 
     return; 
 }
-/*!
- \}
- */
+
 }

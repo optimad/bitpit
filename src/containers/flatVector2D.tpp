@@ -96,11 +96,6 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::FlatVec
 namespace bitpit{
 
 /*!
-    \ingroup containers
-    @{
-*/
-
-/*!
     Default constructor.
 */
 template <class T>
@@ -899,10 +894,6 @@ bool FlatVector2D<T>::isIndexValid(const int &i, const int &j) const
 
     return (j >= 0 && j < (int) (m_index[i+1] - m_index[i]));
 }
-
-/*!
-    @}
-*/
 
 }
 

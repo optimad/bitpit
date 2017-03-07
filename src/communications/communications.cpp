@@ -31,12 +31,8 @@
 namespace bitpit {
 
 /*!
-    \ingroup communications
-    @{
-*/
-
-/*!
     \class DataCommunicator
+    \ingroup communications
 
     \brief The DataCommunicator class provides the infrastructure needed to
     exchange data among processors.
@@ -900,9 +896,5 @@ void DataCommunicator::cancelAllRecvs()
 }
 
 }
-
-/*!
-* @}
-*/
 
 #endif

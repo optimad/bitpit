@@ -37,13 +37,8 @@
 namespace bitpit{
 
 /*!
-    @ingroup Logger
-    @{
-*/
-
-/*!
     \class LoggerBuffer
-
+    \ingroup Logger
     \brief Stream buffer for the message logger.
 
     This class implements a stream buffer used by the message logger.
@@ -372,17 +367,8 @@ const std::string LoggerBuffer::getTimestamp() const
 }
 
 /*!
-    @}
-*/
-
-/*!
-    @ingroup Logger
-    @{
-*/
-
-/*!
     \class Logger
-
+    \ingroup Logger
     \brief Message logger.
 
     This class implements a message logger. The logger allows to write
@@ -785,17 +771,8 @@ void Logger::print(const std::string &message, log::Priority priority, log::Visi
 }
 
 /*!
-    @}
-*/
-
-/*!
-    @ingroup Logger
-    @{
-*/
-
-/*!
     \class LoggerManager
-
+    \ingroup Logger
     \brief Manager for the loggers.
 
     This class implements a manager for the loggers. The manager allowes the
@@ -1236,15 +1213,6 @@ std::string LoggerManager::getDefaultDirectory() const
     return m_defaultDirectory;
 }
 
-/*!
-    @}
-*/
-
-/*!
-    @ingroup Logger
-    @{
-*/
-
 // Logger global functions
 namespace log {
 
@@ -1500,9 +1468,5 @@ namespace log {
         return LoggerManipulator<int>(setIndentation, delta);
     }
 }
-
-/*!
-    @}
-*/
 
 }

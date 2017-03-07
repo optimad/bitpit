@@ -38,12 +38,9 @@ namespace bitpit{
 // ========================================================================== //
 
 /*!
- * @ingroup BinaryStream
- * @{
- */
-
-/*!
  * @class   IBinaryStream
+ * @ingroup BinaryStream
+ *
  * @brief   creates input binary stream
  */
 
@@ -279,21 +276,14 @@ void IBinaryStream::read(
     current_pos += vec.size();
 }
 
-/*!
- * @}
- */
-
 // ========================================================================== //
 // IMPLEMENTATIONS OF METHODS FOR CLASS OBinaryStream                           //
 // ========================================================================== //
 
 /*!
- * @ingroup BinaryStream
- * @{
- */
-
-/*!
  * @class   OBinaryStream
+ * @ingroup BinaryStream
+ *
  * @brief   creates output binary stream
  */
 
@@ -598,8 +588,3 @@ bitpit::OBinaryStream& operator<<(
 
     return ostm;
 }
-
-
-/*!
- * @}
- */

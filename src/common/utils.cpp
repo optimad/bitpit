@@ -32,9 +32,6 @@
 
 namespace bitpit {
 
-/*!
-    \brief Namespace for generic utility functions
-*/
 namespace utils {
 
 template bool addToOrderedVector<>(const long&, std::vector<long>&, std::less<long>);
@@ -42,11 +39,6 @@ template bool addToOrderedVector<>(const unsigned long&, std::vector<unsigned lo
 
 template std::vector<long>::const_iterator findInOrderedVector<>(const long&, const std::vector<long>&, std::less<long>);
 template std::vector<unsigned long>::const_iterator findInOrderedVector<>(const unsigned long&, const std::vector<unsigned long>&, std::less<unsigned long>);
-
-/*!
-    \ingroup commonUtils
-    \{
-*/
 
 /*!
     Extract n integers in the interval [0,m] without replacement.
@@ -118,10 +110,6 @@ for (i = 0; i < n; i++) {
 
 
 return; }
-
-/*!
-    \}
-*/
 
 }
 
