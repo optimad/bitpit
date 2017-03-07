@@ -26,7 +26,7 @@
 #define __BITPIT_MODULE_PABLO_HPP__
 
 /*!
- * @defgroup PABLO PABLO (Octree)
+ * @defgroup PABLO Octree (PABLO)
  */
 
 #include "bitpit_version.hpp"
