@@ -25,10 +25,6 @@
 #ifndef __BITPIT_MODULE_SURFUNSTRUCTURED_HPP__
 #define __BITPIT_MODULE_SURFUNSTRUCTURED_HPP__
 
-/*!
- *	@defgroup surfunstructured Unstructured surface patch
- */
-
 #include "bitpit_version.hpp"
 
 #include "surfunstructured.hpp"

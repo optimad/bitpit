@@ -29,7 +29,7 @@
 namespace bitpit {
 
 /*!
-	\ingroup surfunstructured
+	\ingroup surfacepatches
 	@{
 */
 

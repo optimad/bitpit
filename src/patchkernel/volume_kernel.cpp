@@ -28,7 +28,7 @@ namespace bitpit {
 
 
 /*!
-	\ingroup patchkernel
+	\ingroup volumepatches
 	@{
 */
 

@@ -78,7 +78,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 namespace bitpit {
 
 /*!
-	\ingroup patchkernel
+	\ingroup patchelements
 	@{
 */
 

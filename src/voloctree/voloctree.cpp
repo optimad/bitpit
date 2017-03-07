@@ -32,7 +32,7 @@
 namespace bitpit {
 
 /*!
-	\ingroup voloctree
+	\ingroup volumepatches
 	@{
 */
 
