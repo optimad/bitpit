@@ -167,7 +167,7 @@ void PatchManager::restoreAll(std::istream &stream)
 }
 
 /*!
-    @ingroup patchkernel
+    \ingroup patchkernel
     @{
 */
 

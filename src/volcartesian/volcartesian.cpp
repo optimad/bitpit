@@ -32,7 +32,7 @@
 namespace bitpit {
 
 /*!
-	\ingroup volcartesian
+	\ingroup volumepatches
 	@{
 */
 

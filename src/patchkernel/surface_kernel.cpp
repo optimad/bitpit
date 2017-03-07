@@ -41,7 +41,7 @@ namespace bitpit {
 
 
 /*!
-	\ingroup patchkernel
+	\ingroup surfacepatches
 	@{
 */
 

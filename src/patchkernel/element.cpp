@@ -71,7 +71,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 namespace bitpit {
 
 /*!
-	\ingroup patchkernel
+	\ingroup patchelements
 	@{
 */
 
@@ -1014,7 +1014,7 @@ void ElementInfo::initializeFaceEdges(const std::vector<ElementInfo *> &facesInf
 */
 
 /*!
-	\ingroup patchkernel
+	\ingroup patchelements
 	@{
 */
 

@@ -25,10 +25,6 @@
 #ifndef __BITPIT_MODULE_VOLUNSTRUCTURED_HPP__
 #define __BITPIT_MODULE_VOLUNSTRUCTURED_HPP__
 
-/*!
- *	@defgroup volunstructured Unstructured volume patch
- */
-
 #include "bitpit_version.hpp"
 
 #include "volunstructured.hpp"

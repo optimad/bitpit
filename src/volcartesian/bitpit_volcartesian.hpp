@@ -25,10 +25,6 @@
 #ifndef __BITPIT_MODULE_VOLCARTESIAN_HPP__
 #define __BITPIT_MODULE_VOLCARTESIAN_HPP__
 
-/*!
- *	@defgroup volcartesian Cartesian volume patch
- */
-
 #include "bitpit_version.hpp"
 
 #include "volcartesian.hpp"
