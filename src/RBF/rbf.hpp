@@ -46,7 +46,15 @@ enum class RBFBasisFunction {
     LINEAR     = 2,  /**< Compact support linear function */
     GAUSS90    = 3,  /**< Non compact gaussian with 90% of reduction at unary radius */
     GAUSS95    = 4,  /**< Non compact gaussian with 95% of reduction at unary radius */
-    GAUSS99    = 5   /**< Non compact gaussian with 99% of reduction at unary radius */
+    GAUSS99    = 5,  /**< Non compact gaussian with 99% of reduction at unary radius */
+    C1C0       = 6,  /**< Compact quadratic funct, C1 on r=0, C0 on r=1, 0 outside */
+    C2C0       = 7,  /**< Compact cubic funct, C2 on r=0, C0 on r=1, 0 outside */
+    C0C1       = 8,  /**< Compact quadratic funct, C0 on r=0, C1 on r=1, 0 outside */
+    C1C1       = 9,  /**< Compact cubic funct, C1 on r=0, C1 on r=1, 0 outside */
+    C2C1       = 10, /**< Compact biquadratic funct, C2 on r=0, C1 on r=1, 0 outside */
+    C0C2       = 11, /**< Compact cubic funct, C0 on r=0, C2 on r=1, 0 outside */
+    C1C2       = 12, /**< Compact biquadratic funct, C1 on r=0, C2 on r=1, 0 outside */
+    C2C2       = 13, /**< Compact poly (degree 5) funct, C2 on r=0, C2 on r=1, 0 outside */
 };
 
 /*!
@@ -175,6 +183,14 @@ namespace rbf
     double                  gauss90(const double &);
     double                  gauss95(const double &);
     double                  gauss99(const double &);
+    double                  c1c0(const double &);
+    double                  c2c0(const double &);
+    double                  c0c1(const double &);
+    double                  c1c1(const double &);
+    double                  c2c1(const double &);
+    double                  c0c2(const double &);
+    double                  c1c2(const double &);
+    double                  c2c2(const double &);
 }
 
 }
