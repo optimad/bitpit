@@ -126,26 +126,32 @@ void RBFKernel::setFunction( const RBFBasisFunction &bfunc )
 
     case( RBFBasisFunction::WENDLANDC2):
         setFunction( rbf::wendlandc2);
+        m_typef = RBFBasisFunction::WENDLANDC2;
         break;
 
     case( RBFBasisFunction::LINEAR):
         setFunction( rbf::linear);
+        m_typef = RBFBasisFunction::LINEAR;
         break;
 
     case( RBFBasisFunction::GAUSS90):
         setFunction( rbf::gauss90);
+        m_typef = RBFBasisFunction::GAUSS90;
         break;
 
     case( RBFBasisFunction::GAUSS95):
         setFunction( rbf::gauss95);
+        m_typef = RBFBasisFunction::GAUSS95;
         break;
 
     case( RBFBasisFunction::GAUSS99):
         setFunction( rbf::gauss99);
+        m_typef = RBFBasisFunction::GAUSS99;
         break;
 
     default:
         setFunction( rbf::wendlandc2);
+        m_typef = RBFBasisFunction::WENDLANDC2;
         break;
     }
 }
@@ -157,6 +163,16 @@ void RBFKernel::setFunction( const RBFBasisFunction &bfunc )
 void RBFKernel::setFunction( double (&bfunc)(const double &) )
 {
     m_fPtr = bfunc;
+    m_typef = RBFBasisFunction::CUSTOM;
+}
+
+/*!
+ * Gets the type of RBFBasisFunction linked to the class.
+ * @return  type of RBFBasisFunction linked
+ */
+RBFBasisFunction RBFKernel::getFunctionType(  )
+{
+    return m_typef;
 }
 
 /*!

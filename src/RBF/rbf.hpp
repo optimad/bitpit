@@ -41,6 +41,7 @@ namespace bitpit{
  * @brief Enum class defining types of RBF kernel functions that could be used in bitpit::RBF class
  */
 enum class RBFBasisFunction {
+    CUSTOM     = 0,  /**<Identify custom linked support function */
     WENDLANDC2 = 1,  /**< Compact support Wendland C2 function */
     LINEAR     = 2,  /**< Compact support linear function */
     GAUSS90    = 3,  /**< Non compact gaussian with 90% of reduction at unary radius */
@@ -67,7 +68,7 @@ private:
     int     m_fields;                               /**<Number of data fields defined on RBF nodes.*/
     RBFMode m_mode;                                 /**<Behaviour of RBF class (interpolation or parametrization).*/
     double  m_supportRadius;                        /**<Support radius of function used as Radiabl Basis Function.*/
-
+    RBFBasisFunction m_typef;                       /**<Recognize type of RBF shape function actually in the class. */
     double  (*m_fPtr)(const double &);
 
     std::vector<double>                 m_error;    /**<Interpolation error of a field evaluated on each RBF node (auxiliary memeber used in Greedy algorithm).*/
@@ -88,6 +89,7 @@ public:
     void                    setFunction(const RBFBasisFunction &);
     void                    setFunction(double (&funct)(const double &));
 
+    RBFBasisFunction        getFunctionType();
     int                     getDataCount();
     int                     getActiveCount();
     std::vector<int>        getActiveSet();
