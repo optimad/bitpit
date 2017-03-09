@@ -149,6 +149,46 @@ void RBFKernel::setFunction( const RBFBasisFunction &bfunc )
         m_typef = RBFBasisFunction::GAUSS99;
         break;
 
+    case( RBFBasisFunction::C1C0):
+        setFunction( rbf::c1c0);
+        m_typef = RBFBasisFunction::C1C0;
+        break;
+
+    case( RBFBasisFunction::C2C0):
+        setFunction( rbf::c2c0);
+        m_typef = RBFBasisFunction::C2C0;
+        break;
+
+    case( RBFBasisFunction::C0C1):
+        setFunction( rbf::c0c1);
+        m_typef = RBFBasisFunction::C0C1;
+        break;
+
+    case( RBFBasisFunction::C1C1):
+        setFunction( rbf::c1c1);
+        m_typef = RBFBasisFunction::C1C1;
+        break;
+
+    case( RBFBasisFunction::C2C1):
+        setFunction( rbf::c2c1);
+        m_typef = RBFBasisFunction::C2C1;
+        break;
+
+    case( RBFBasisFunction::C0C2):
+        setFunction( rbf::c0c2);
+        m_typef = RBFBasisFunction::C0C2;
+        break;
+
+    case( RBFBasisFunction::C1C2):
+        setFunction( rbf::c1c2);
+        m_typef = RBFBasisFunction::C1C2;
+        break;
+
+    case( RBFBasisFunction::C2C2):
+        setFunction( rbf::c2c2);
+        m_typef = RBFBasisFunction::C2C2;
+        break;
+
     default:
         setFunction( rbf::wendlandc2);
         m_typef = RBFBasisFunction::WENDLANDC2;
@@ -1149,6 +1189,126 @@ double rbf::gauss99( const double &dist )
     double eps = pow(-1.0*log(0.01),0.5);
 
     return exp(-1.0*pow(dist*eps,2));
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C1 continuity at dist=0, C0 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c1c0( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0-pow(dist,2));
+    }
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C2 continuity at dist=0, C0 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c2c0( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0-pow(dist,3));
+    }
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C0 continuity at dist=0, C1 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c0c1( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0- 2.0*dist + pow(dist,2));
+    }
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C1 continuity at dist=0, C1 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c1c1( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0-3.0*pow(dist,2)+2.0*pow(dist,3));
+    }
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C2 continuity at dist=0, C1 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c2c1( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0- 4.0*pow(dist,3) + 3.0*pow(dist,4));
+    }
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C0 continuity at dist=0, C2 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c0c2( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0 -3.0*dist +3.0*pow(dist,2) - pow(dist,3));
+    }
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C1 continuity at dist=0, C2 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c1c2( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0 -6.0*pow(dist,2) + 8.0*pow(dist,3) - 3.0*pow(dist,4));
+    }
+}
+
+/*!
+ * Polynomial function defined between 0,1. Preserve C2 continuity at dist=0, C2 continuity at dist=1.
+ * At dist > 1 is 0.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::c2c2( const double &dist )
+{
+    if( dist > 1) {
+        return 0.;
+    } else{
+        return (1.0 -10.0*pow(dist,3) +15.0*pow(dist,4) -6.0*pow(dist,5));
+    }
 }
 
 /*!
