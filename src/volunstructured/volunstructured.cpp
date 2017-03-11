@@ -36,10 +36,11 @@ namespace bitpit {
 /*!
 	\class VolUnstructured
 
-	\brief The VolUnstructured class defines an unstructured volume
-	triangulation.
+	\brief The VolUnstructured class defines a dummy unstructured volume
+	patch.
 
-	VolUnstructured defines an unstructured volume triangulation.
+	VolUnstructured defines a dummy unstructured volume patch. This is just
+	a dummy interface, the real implementation will come in a future release.
 */
 
 /*!
