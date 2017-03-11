@@ -213,6 +213,8 @@ int VolUnstructured::_getDumpVersion() const
  */
 void VolUnstructured::_dump(std::ostream &stream)
 {
+    BITPIT_UNUSED(stream);
+
 	throw std::runtime_error ("Dump of volunstructured is not implemented yet.");
 }
 
@@ -223,6 +225,8 @@ void VolUnstructured::_dump(std::ostream &stream)
  */
 void VolUnstructured::_restore(std::istream &stream)
 {
+    BITPIT_UNUSED(stream);
+
 	throw std::runtime_error ("Restore of volunstructured is not implemented yet.");
 }
 
