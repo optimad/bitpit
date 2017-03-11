@@ -1,0 +1,7 @@
+<map id="bitpit::VolumeKernel" name="bitpit::VolumeKernel">
+<area shape="rect" id="node4" href="$classbitpit_1_1VolCartesian.html" title="The VolCartesian defines a Cartesian patch. " alt="" coords="5,229,140,256"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1VolOctree.html" title="The VolOctree defines a Octree patch. " alt="" coords="164,229,280,256"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1VolUnstructured.html" title="The VolUnstructured class defines a dummy unstructured volume patch. " alt="" coords="304,229,455,256"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches. " alt="" coords="157,80,287,107"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form. " alt="" coords="137,5,307,32"/>
+</map>
