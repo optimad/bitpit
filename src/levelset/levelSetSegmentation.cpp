@@ -606,15 +606,17 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
             n  = lambda[0] *itrNormal->second[0] ;
             n += lambda[1] *itrNormal->second[1] ;
             n /= norm2(n) ;
+
+            double kappa ;
+            maxval(lambda,kappa);
+            kappa = 1. -kappa;
+
+            n *= kappa;
+            n += (1.-kappa)*g;
+            n /= norm2(n);
+
         }
 
-        double kappa ;
-        maxval(lambda,kappa);
-        kappa = 1. -kappa;
-
-        n *= kappa;
-        n += (1.-kappa)*g;
-        n /= norm2(n);
 
     } else if (nV == 3){
         long id0 = cell.getVertex(0) ;
@@ -629,26 +631,29 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
         g = p-x;
         g /= norm2(g);
 
+        n  = lambda[0] *itrGradient->second[0] ;
+        n += lambda[1] *itrGradient->second[1] ;
+        n += lambda[2] *itrGradient->second[2] ;
+
+        g *= sign(dotProduct(g,n));
+
         if( itrNormal != m_vertexNormal.end() ){
             n  = lambda[0] *itrNormal->second[0] ;
             n += lambda[1] *itrNormal->second[1] ;
             n += lambda[2] *itrNormal->second[2] ;
             n /= norm2(n) ;
-        } else {
-            n  = lambda[0] *itrGradient->second[0] ;
-            n += lambda[1] *itrGradient->second[1] ;
-            n += lambda[2] *itrGradient->second[2] ;
+
+            double kappa ;
+            maxval(lambda,kappa);
+            kappa = 1. -kappa;
+
+            n *= kappa;
+            n += (1.-kappa)*g;
+            n /= norm2(n);
+
         }
 
-        g *= sign(dotProduct(g,n));
 
-        double kappa ;
-        maxval(lambda,kappa);
-        kappa = 1. -kappa;
-
-        n *= kappa;
-        n += (1.-kappa)*g;
-        n /= norm2(n);
 
     } else{
         log::cout() << " simplex not supported in LevelSetSegmentation::infoFromSimplex " << nV << std::endl ;
