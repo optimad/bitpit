@@ -468,6 +468,16 @@ a {
     left: 0;
 }
 
+#footer .legal {
+    position: absolute;
+
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    height: 1.75rem;
+}
+
 #footer strong,
 #footer strong a {
     font-weight: 800;
@@ -487,6 +497,13 @@ a {
     color: #F8F8F8;
     text-decoration: none;
     font-weight: auto;
+}
+
+#footer .legal p {
+    line-height: 1.75rem;
+    font-size: 0.65rem;
+
+    text-align: center;
 }
 
 .big {
