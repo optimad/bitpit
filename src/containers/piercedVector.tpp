@@ -51,6 +51,17 @@ void PiercedIterator<value_t, id_t, value_no_cv_t>::swap(PiercedIterator& other)
 }
 
 /*!
+	Get a constant reference of the container associated with the iterator.
+
+	\result A constant reference of the container associated with the iterator.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+typename PiercedIterator<value_t, id_t, value_no_cv_t>::container_type & PiercedIterator<value_t, id_t, value_no_cv_t>::getContainer() const
+{
+	return *m_container;
+}
+
+/*!
 	Gets the id of the current element.
 
 	\param fallback is the fallback value to be returned if the iterator

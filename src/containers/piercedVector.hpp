@@ -93,6 +93,11 @@ private:
 
 public:
 	/*!
+		Constant container
+	*/
+	typedef container_t container_type;
+
+	/*!
 		Type of data stored in the container
 	*/
 	typedef value_t value_type;
@@ -111,6 +116,8 @@ public:
 
 	// General methods
 	void swap(PiercedIterator& other) noexcept;
+
+	container_type & getContainer() const;
 
 	// Methos to extract information on the current element
 	id_t getId(const id_t &fallback = -1) const noexcept;
