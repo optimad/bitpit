@@ -38,5 +38,6 @@
 #include "binary_stream.hpp"
 #include "flatVector2D.hpp"
 #include "piercedVector.hpp"
+#include "piercedRange.hpp"
 
 #endif
