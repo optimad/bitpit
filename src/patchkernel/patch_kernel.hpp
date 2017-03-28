@@ -74,6 +74,13 @@ public:
 	typedef PiercedRange<const Cell> CellConstRange;
 	typedef PiercedRange<const Interface> InterfaceConstRange;
 
+	enum WriteTarget {
+		WRITE_TARGET_CELLS_ALL
+#if BITPIT_ENABLE_MPI
+		, WRITE_TARGET_CELLS_INTERNAL
+#endif
+	};
+
 	/*!
 		Functional for compare the position of two cells
 	*/
@@ -340,6 +347,9 @@ public:
 	void displayInterfaces(std::ostream &out, unsigned int padding = 0) const;
 
 	VTKUnstructuredGrid & getVTK();
+	WriteTarget getVTKWriteTarget() const;
+	void setVTKWriteTarget(WriteTarget targetCells);
+	const PatchKernel::CellConstRange & getVTKCellWriteRange() const;
 	void write(VTKWriteMode mode = VTKWriteMode::DEFAULT);
 	void write(std::string name, VTKWriteMode mode = VTKWriteMode::DEFAULT);
 
@@ -402,6 +412,9 @@ protected:
 	long m_firstGhostId;
 
 	VTKUnstructuredGrid m_vtk ;
+	WriteTarget m_vtkWriteTarget;
+	CellConstRange m_vtkCellRange;
+	std::unordered_map<long, long> m_vtkVertexMap;
 
 	PatchKernel(bool expert);
 	PatchKernel(const int &dimension, bool expert);

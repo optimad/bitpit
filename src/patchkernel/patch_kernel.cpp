@@ -139,6 +139,9 @@ void PatchKernel::initialize()
 	setBoundingBoxFrozen(false);
 	clearBoundingBox();
 
+	// Set VTK write target
+	m_vtkWriteTarget = WRITE_TARGET_CELLS_ALL;
+
 	// Set VTK information
 	std::ostringstream convert;
 	convert << getId();
@@ -415,12 +418,39 @@ void PatchKernel::write(std::string filename, VTKWriteMode mode)
 */
 void PatchKernel::write(VTKWriteMode mode)
 {
-	// Set thedimensinos of the mesh
-	long connectSize = 0;
-	for (const Cell &cell : m_cells) {
-		connectSize += cell.getInfo().nVertices;
+	// Set VTK targets
+	long vtkCellCount = 0;
+	if (m_vtkWriteTarget == WRITE_TARGET_CELLS_ALL) {
+		m_vtkCellRange = CellConstRange(&m_cells);
+
+		vtkCellCount = getCellCount();
+#if BITPIT_ENABLE_MPI==1
+	} else if (m_vtkWriteTarget == WRITE_TARGET_CELLS_INTERNAL) {
+		m_vtkCellRange = CellConstRange(internalConstBegin(), internalConstEnd());
+
+		vtkCellCount = getInternalCount();
+#endif
 	}
-	m_vtk.setDimensions(m_cells.size(), m_vertices.size(), connectSize);
+
+	// Set thedimensinos of the mesh
+	std::unordered_map<long, long>().swap(m_vtkVertexMap);
+
+	long vtkVertexCount = 0;
+	long vtkConnectSize = 0;
+	for (const Cell &cell : getVTKCellWriteRange()) {
+		const int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
+		for (int k = 0; k < nCellVertices; ++k) {
+			long vertexId = cellConnect[k];
+
+			auto vertexMapItr = m_vtkVertexMap.find(vertexId);
+			if (vertexMapItr == m_vtkVertexMap.end()) {
+				m_vtkVertexMap[vertexId] = vtkVertexCount++;
+			}
+		}
+		vtkConnectSize += nCellVertices;
+	}
+	m_vtk.setDimensions(vtkCellCount, vtkVertexCount, vtkConnectSize);
 
 	// Write the mesh
 	m_vtk.write(mode);
@@ -3936,6 +3966,36 @@ VTKUnstructuredGrid & PatchKernel::getVTK()
 }
 
 /*!
+	Get the VTK write target.
+
+	\result The VTK write target.
+*/
+PatchKernel::WriteTarget PatchKernel::getVTKWriteTarget() const
+{
+	return m_vtkWriteTarget;
+}
+
+/*!
+	Set the VTK write target.
+
+	\param writeTarget is the VTK write target.
+*/
+void PatchKernel::setVTKWriteTarget(WriteTarget writeTarget)
+{
+	m_vtkWriteTarget = writeTarget;
+}
+
+/*!
+	Get the VTK cell write range.
+
+	\result The VTK cell write range.
+*/
+const PatchKernel::CellConstRange & PatchKernel::getVTKCellWriteRange() const
+{
+	return m_vtkCellRange;
+}
+
+/*!
  *  Interface for writing data to stream.
  *
  *  @param[in] stream is the stream to write to
@@ -3950,23 +4010,23 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 	assert(format == VTKFormat::APPENDED);
 	BITPIT_UNUSED(format);
 
-	static std::unordered_map<long, long> vertexMap;
-
 	if (name == "Points") {
-		long vertexId = 0;
-		for (Vertex &vertex : m_vertices) {
-			vertexMap[vertex.getId()] = vertexId++;
+		std::vector<const Vertex *> vertexList(m_vtkVertexMap.size());
+		for (const auto &entry : m_vtkVertexMap) {
+			vertexList[entry.second] = &m_vertices.at(entry.first);
+		}
 
-			genericIO::flushBINARY(stream, vertex.getCoords());
+		for (const Vertex *vertex : vertexList) {
+			genericIO::flushBINARY(stream, vertex->getCoords());
 		}
 	} else if (name == "offsets") {
 		int offset = 0;
-		for (Cell &cell : m_cells) {
+		for (const Cell &cell : getVTKCellWriteRange()) {
 			offset += cell.getInfo().nVertices;
 			genericIO::flushBINARY(stream, offset);
 		}
 	} else if (name == "types") {
-		for (Cell &cell : m_cells) {
+		for (const Cell &cell : getVTKCellWriteRange()) {
 			VTKElementType VTKType;
 			switch (cell.getType())  {
 
@@ -4019,35 +4079,41 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 			genericIO::flushBINARY(stream, (int) VTKType);
 		}
 	} else if (name == "connectivity") {
-		for (Cell &cell : m_cells) {
-			for (int i = 0; i < cell.getInfo().nVertices; ++i) {
-				genericIO::flushBINARY(stream, vertexMap.at(cell.getVertex(i)));
+		for (const Cell &cell : getVTKCellWriteRange()) {
+			const long *cellConnect = cell.getConnect();
+			const int nCellVertices = cell.getVertexCount();
+			for (int k = 0; k < nCellVertices; ++k) {
+				long vertexId = cellConnect[k];
+				long vtkVertexId = m_vtkVertexMap.at(vertexId);
+				genericIO::flushBINARY(stream, vtkVertexId);
 			}
 		}
-
-		vertexMap.clear();
-		std::unordered_map<long, long>().swap(vertexMap);
 	} else if (name == "cellIndex") {
-		for (const Cell &cell : m_cells) {
+		for (const Cell &cell : getVTKCellWriteRange()) {
 			genericIO::flushBINARY(stream, cell.getId());
 		}
 	} else if (name == "PID") {
-		for (const Cell &cell : m_cells) {
+		for (const Cell &cell : getVTKCellWriteRange()) {
 			genericIO::flushBINARY(stream, cell.getPID());
 		}
 	} else if (name == "vertexIndex") {
-		for (const Vertex &vertex : m_vertices) {
-			genericIO::flushBINARY(stream, vertex.getId());
+		std::vector<long> vertexList(m_vtkVertexMap.size());
+		for (const auto &entry : m_vtkVertexMap) {
+			vertexList[entry.second] = entry.first;
+		}
+
+		for (long id : vertexList) {
+			genericIO::flushBINARY(stream, id);
 		}
 #if BITPIT_ENABLE_MPI==1
 	} else if (name == "cellGlobalIndex") {
 		PatchGlobalInfo globalInfo(this);
-		for (const Cell &cell : m_cells) {
+		for (const Cell &cell : getVTKCellWriteRange()) {
 			genericIO::flushBINARY(stream, globalInfo.getCellGlobalId(cell.getId()));
 		}
 	} else if (name == "rank") {
-		for (auto itr = cellBegin(); itr != cellEnd(); ++itr) {
-			genericIO::flushBINARY(stream, getCellRank(itr.getId()));
+		for (const Cell &cell : getVTKCellWriteRange()) {
+			genericIO::flushBINARY(stream, getCellRank(cell.getId()));
 		}
 #endif
 	}
@@ -4204,6 +4270,9 @@ void PatchKernel::dump(std::ostream &stream)
 	IO::binary::write(stream, false);
 #endif
 
+	// VTK data
+	IO::binary::write(stream, m_vtkWriteTarget);
+
 	// Specific dump
 	_dump(stream);
 
@@ -4263,6 +4332,9 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	bool dummyPartitioned;
 	IO::binary::read(stream, dummyPartitioned);
 #endif
+
+	// VTK data
+	IO::binary::read(stream, m_vtkWriteTarget);
 
 	// Specific restore
 	_restore(stream);
