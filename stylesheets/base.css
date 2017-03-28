@@ -6,11 +6,15 @@
 
 html,
 body {
+    position: relative;
+
     padding: 0;
     margin: 0;
 
     height: 100%;
     width: 100%;
+
+    min-width: 900px;
 
     font-size: 19px;
 

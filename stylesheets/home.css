@@ -27,7 +27,7 @@
 }
 
 #main.home .content-box.centered {
-    height: 375px;
+    height: 400px;
     font-size: 0;
     overflow: hidden;
 }
@@ -45,11 +45,11 @@
 }
 
 #main.home .content-box.left .content {
-    padding: 0 650px 0 100px;
+    padding: 0 400px 0 0;
 }
 
 #main.home .content-box.right .content {
-    padding: 0 100px 0 650px;
+    padding: 0 0 0 400px;
 }
 
 #main.home .content-box .image {
@@ -59,16 +59,15 @@
 
     position: absolute;
     top: 50%;
-    right: 175px;
     transform: translateY(-50%);
 }
 
 #main.home .content-box.left .image {
-    right: 175px;
+    right: 75px;
 }
 
 #main.home .content-box.right .image {
-    left: 175px;
+    left: 75px;
 }
 
 #main.home .content-box .image img {
@@ -88,13 +87,13 @@
     margin-bottom: 25px;
     text-align: center;
     border: none;
-    font-size: 2.5rem;
+    font-size: 2.25rem;
 }
 
 #main.home .content-box p {
     text-align: center;
-    font-size: 1.5rem;
-    line-height: 2rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
     font-weight: 400;
     color: #444444;
 }
