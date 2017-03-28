@@ -66,6 +66,14 @@ public:
 	typedef PiercedVector<Cell>::const_iterator CellConstIterator;
 	typedef PiercedVector<Interface>::const_iterator InterfaceConstIterator;
 
+	typedef PiercedRange<Vertex> VertexRange;
+	typedef PiercedRange<Cell> CellRange;
+	typedef PiercedRange<Interface> InterfaceRange;
+
+	typedef PiercedRange<const Vertex> VertexConstRange;
+	typedef PiercedRange<const Cell> CellConstRange;
+	typedef PiercedRange<const Interface> InterfaceConstRange;
+
 	/*!
 		Functional for compare the position of two cells
 	*/
