@@ -26,6 +26,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "bitpit_common.hpp"
+#include "bitpit_communications.hpp"
 #include "ParaTree.hpp"
 #include "Array.hpp"
 #include <sstream>
@@ -5347,7 +5348,7 @@ namespace bitpit {
         uint8_t l;
         int8_t m;
         bool info[17];
-        map<int,CommBuffer> sendBuffers;
+        DataCommunicator ghostCommunicator(m_comm);
         map<int,vector<uint32_t> >::iterator bitend = m_bordersPerProc.end();
         uint32_t pbordersOversize = 0;
         for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
@@ -5355,8 +5356,8 @@ namespace bitpit {
             int buffSize = bit->second.size() * (int)ceil((double)(m_global.m_octantBytes + m_global.m_globalIndexBytes) / (double)(CHAR_BIT/8));
             int key = bit->first;
             const vector<uint32_t> & value = bit->second;
-            sendBuffers[key] = CommBuffer(buffSize,'a',m_comm);
-            int pos = 0;
+            ghostCommunicator.setSend(key,buffSize);
+            SendBuffer &sendBuffer = ghostCommunicator.getSendBuffer(key);
             int nofBorders = value.size();
             for(int i = 0; i < nofBorders; ++i){
                 //the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
@@ -5369,103 +5370,65 @@ namespace bitpit {
                 global_index = getGlobalIdx(value[i]);
                 for(int i = 0; i < 17; ++i)
                     info[i] = octant.m_info[i];
-                m_errorFlag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
-                m_errorFlag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
-                m_errorFlag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
-                m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
-                m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
+                sendBuffer << x;
+                sendBuffer << y;
+                sendBuffer << z;
+                sendBuffer << l;
+                sendBuffer << m;
                 for(int j = 0; j < 17; ++j){
-                    MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
+                    sendBuffer << info[j];
                 }
-                m_errorFlag = MPI_Pack(&global_index,1,MPI_UINT64_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
+                sendBuffer << global_index;
             }
         }
 
-        //COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
-        //the size of every borders buffer is communicated to the right process in order to build the receive buffer
-        //and stored in the recvBufferSizePerProc structure
-        MPI_Request* req = new MPI_Request[sendBuffers.size()*20];
-        MPI_Status* stats = new MPI_Status[sendBuffers.size()*20];
-        int nReq = 0;
-        map<int,int> recvBufferSizePerProc;
-        map<int,CommBuffer>::iterator sitend = sendBuffers.end();
-        for(map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-            recvBufferSizePerProc[sit->first] = 0;
-            m_errorFlag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,m_rank,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        map<int,CommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
-        for(map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-            m_errorFlag =  MPI_Isend(&rsit->second.m_commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        MPI_Waitall(nReq,req,stats);
+        ghostCommunicator.discoverRecvs();
+        ghostCommunicator.startAllRecvs();
 
-        //COMMUNICATE THE BUFFERS TO THE RECEIVERS
-        //recvBuffers structure is declared and each buffer is initialized to the right size
-        //then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
-        //at the same time every process compute the size in bytes of all the ghost octants
-        uint32_t nofBytesOverProc = 0;
-        map<int,CommBuffer> recvBuffers;
-        map<int,int>::iterator ritend = recvBufferSizePerProc.end();
-        for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-            recvBuffers[rit->first] = CommBuffer(rit->second,'a',m_comm);
+        int nofBytesOverProc = 0;
+        std::vector<int> recvsRanks = ghostCommunicator.getRecvRanks();
+        std::sort(recvsRanks.begin(),recvsRanks.end());
+        for(int i : recvsRanks){
+            nofBytesOverProc += ghostCommunicator.getRecvBuffer(i).getSize();
         }
-        nReq = 0;
-        for(map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-            nofBytesOverProc += recvBuffers[sit->first].m_commBufferSize;
-            m_errorFlag = MPI_Irecv(recvBuffers[sit->first].m_commBuffer,recvBuffers[sit->first].m_commBufferSize,MPI_PACKED,sit->first,m_rank,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        for(map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-            m_errorFlag =  MPI_Isend(rsit->second.m_commBuffer,rsit->second.m_commBufferSize,MPI_PACKED,rsit->first,rsit->first,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        MPI_Waitall(nReq,req,stats);
-
-        //COMPUTE GHOSTS SIZE IN BYTES
-        //number of ghosts in every process is obtained through the size in bytes of the single octant
-        //and ghost vector in local tree is resized
-        //uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
         uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
         m_octree.m_sizeGhosts = nofGhosts;
         m_octree.m_ghosts.clear();
         m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim));
         m_octree.m_globalIdxGhosts.resize(nofGhosts);
 
+        ghostCommunicator.startAllSends();
+
         //UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
         //every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
         //every ghost octant is built and put in the ghost vector
         uint32_t ghostCounter = 0;
-        map<int,CommBuffer>::iterator rritend = recvBuffers.end();
-        for(map<int,CommBuffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
-            int pos = 0;
-            int nofGhostsPerProc = int(rrit->second.m_commBufferSize / (uint32_t) (m_global.m_octantBytes + m_global.m_globalIndexBytes));
+        for(int rank : recvsRanks){
+            ghostCommunicator.waitRecv(rank);
+
+            RecvBuffer &recvBuffer = ghostCommunicator.getRecvBuffer(rank);
+            int nofGhostsPerProc = int(recvBuffer.getSize() / (uint32_t) (m_global.m_octantBytes + m_global.m_globalIndexBytes));
             for(int i = 0; i < nofGhostsPerProc; ++i){
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&x,1,MPI_UINT32_T,m_comm);
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&y,1,MPI_UINT32_T,m_comm);
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&z,1,MPI_UINT32_T,m_comm);
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&l,1,MPI_UINT8_T,m_comm);
+                recvBuffer >> x;
+                recvBuffer >> y;
+                recvBuffer >> z;
+                recvBuffer >> l;
+
                 m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
+                recvBuffer >> m;
                 m_octree.m_ghosts[ghostCounter].setMarker(m);
                 for(int j = 0; j < 17; ++j){
-                    m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&info[j],1,MPI_C_BOOL,m_comm);
+                    recvBuffer >> info[j];
                     m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
                 }
                 m_octree.m_ghosts[ghostCounter].m_info[16] = true;
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&global_index,1,MPI_UINT64_T,m_comm);
+                recvBuffer >> global_index;
                 m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
                 ++ghostCounter;
             }
         }
-        recvBuffers.clear();
-        sendBuffers.clear();
-        recvBufferSizePerProc.clear();
 
-        delete [] req; req = NULL;
-        delete [] stats; stats = NULL;
-
+        ghostCommunicator.waitAllSends();
     }
 
     /*! Communicate the marker of the octants and the auxiliary info[15].
