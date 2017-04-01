@@ -160,23 +160,27 @@ void DataCommunicator::discoverSends(int discoverTag)
     //
     // We need to use buffered sends to be sure that the data to transfer
     // will not be overwritten during the loop over the receive list.
-    int commBufferSize = m_recvIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
-    std::vector<char> commBuffer(commBufferSize);
-    MPI_Buffer_attach(commBuffer.data(), commBufferSize);
+    int commBufferSize = 0;
+    std::vector<char> commBuffer;
+    if (m_recvIds.size() != 0) {
+        commBufferSize = m_recvIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
+        commBuffer.resize(commBufferSize);
+        MPI_Buffer_attach(commBuffer.data(), commBufferSize);
 
-    for (auto &entry : m_recvIds) {
-        int rank = entry.first;
-        RecvBuffer &buffer = getRecvBuffer(rank);
-        long dataSize = buffer.capacity();
+        for (auto &entry : m_recvIds) {
+            int rank = entry.first;
+            RecvBuffer &buffer = getRecvBuffer(rank);
+            long dataSize = buffer.capacity();
 
-        MPI_Request dataSizeRequest;
-        MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
+            MPI_Request dataSizeRequest;
+            MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
 
-        // MPI_Isend initiates an asynchronous (background) data transfer.
-        // The actual data transfer might not happen unless one of the
-        // MPI_Wait* or MPI_Test* calls has been made on the request.
-        int completeFlag;
-        MPI_Test(&dataSizeRequest, &completeFlag, MPI_STATUS_IGNORE);
+            // MPI_Isend initiates an asynchronous (background) data transfer.
+            // The actual data transfer might not happen unless one of the
+            // MPI_Wait* or MPI_Test* calls has been made on the request.
+            int completeFlag;
+            MPI_Test(&dataSizeRequest, &completeFlag, MPI_STATUS_IGNORE);
+        }
     }
 
     // Raise a barrier to make sure that all the sends starts
@@ -212,7 +216,9 @@ void DataCommunicator::discoverSends(int discoverTag)
     }
 
     // Deatach the buffer
-    MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
+    if (m_recvIds.size() != 0) {
+        MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
+    }
 
     // Set the sends
     for (auto &entry : dataSizes) {
@@ -246,23 +252,27 @@ void DataCommunicator::discoverRecvs(int discoverTag)
 	//
 	// We need to use buffered sends to be sure that the data to transfer
 	// will not be overwritten during the loop over the send list.
-	int commBufferSize = m_sendIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
-	std::vector<char> commBuffer(commBufferSize);
-	MPI_Buffer_attach(commBuffer.data(), commBufferSize);
+	int commBufferSize = 0;
+	std::vector<char> commBuffer;
+	if (m_sendIds.size() != 0) {
+		commBufferSize = m_sendIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
+		commBuffer.resize(commBufferSize);
+		MPI_Buffer_attach(commBuffer.data(), commBufferSize);
 
-	for (auto &entry : m_sendIds) {
-		int rank = entry.first;
-		SendBuffer &buffer = getSendBuffer(rank);
-		long dataSize = buffer.capacity();
+		for (auto &entry : m_sendIds) {
+			int rank = entry.first;
+			SendBuffer &buffer = getSendBuffer(rank);
+			long dataSize = buffer.capacity();
 
-		MPI_Request dataSizeRequest;
-		MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
+			MPI_Request dataSizeRequest;
+			MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
 
-		// MPI_Isend initiates an asynchronous (background) data transfer.
-		// The actual data transfer might not happen unless one of the
-		// MPI_Wait* or MPI_Test* calls has been made on the request.
-		int completeFlag;
-		MPI_Test(&dataSizeRequest, &completeFlag, MPI_STATUS_IGNORE);
+			// MPI_Isend initiates an asynchronous (background) data transfer.
+			// The actual data transfer might not happen unless one of the
+			// MPI_Wait* or MPI_Test* calls has been made on the request.
+			int completeFlag;
+			MPI_Test(&dataSizeRequest, &completeFlag, MPI_STATUS_IGNORE);
+		}
 	}
 
 	// Raise a barrier to make sure that all the sends starts
@@ -298,7 +308,9 @@ void DataCommunicator::discoverRecvs(int discoverTag)
 	}
 
 	// Deatach the buffer
-	MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
+	if (m_sendIds.size() != 0) {
+		MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
+	}
 
 	// Set the receives
 	for (auto &entry : dataSizes) {
