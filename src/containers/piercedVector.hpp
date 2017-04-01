@@ -578,13 +578,13 @@ private:
 
 	void piercePos(const std::size_t &pos, bool flush = true);
 
-	void holesClear(bool release = true);
+	void holesClear(bool release = false);
+	void holesClearPending(bool release = false);
+	void holesResize(size_t offset, size_t nRegulars, size_t nPendings, bool release = true);
 	std::size_t holesCount() const;
 	std::size_t holesCountPending() const;
 	std::size_t holesCountRegular() const;
 	void holesFlush();
-	void holesClearPending();
-	void holesClearPending(const long &offset, const long &nRegulars);
 	void holesSortPending();
 	void holesSortRegular();
 

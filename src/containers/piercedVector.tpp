@@ -2138,16 +2138,56 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::holesClear(bool release)
 {
-	m_holes.clear();
+	// Clear the vector
+	holesResize(0, 0, 0, release);
+
+	// There are no holes, therefore all holes are sorted
+	m_holes_regular_sorted = true;
+	m_holes_pending_sorted = true;
+}
+
+/*!
+	Clear pending holes
+
+	\param relase if set to true the memory previously hold by holes'
+	container will be released
+*/
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holesClearPending(bool release)
+{
+	// Clear section of the container associated with the pending holes
+	long offset    = std::distance(m_holes.begin(), m_holes_regular_begin);
+	long nRegulars = holesCountRegular();
+	holesResize(offset, nRegulars, 0, release);
+
+	// There are no pending holes, therefore pending holes are sorted
+	m_holes_pending_sorted = true;
+}
+
+/*!
+	Resize the container of the pending holes
+
+	\param offset is the distance between the first regular hole and the
+	begin of the hole's container
+	\param nRegulars is the number of regulars holes
+	\param nPendings  the number of pending holes
+	\param relase if set to true the memory previously hold by holes'
+	container will be released
+*/
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holesResize(size_t offset, size_t nRegulars, size_t nPendings, bool release)
+{
 	if (release) {
-		hole_container().swap(m_holes);
+		m_holes.shrink_to_fit();
 	}
 
-	// Clearing peinding holes updates also the iterators of the regular ones
-	holesClearPending(0, 0);
+	m_holes.reserve(offset + nRegulars + MAX_PENDING_HOLES);
+	m_holes.resize(offset + nRegulars + nPendings);
 
-	// There are no regular holes, therefore the regular holes are sorted
-	m_holes_regular_sorted = true;
+	m_holes_regular_begin = m_holes.begin() + offset;
+	m_holes_regular_end   = m_holes_regular_begin + nRegulars;
+	m_holes_pending_begin = m_holes_regular_end;
+	m_holes_pending_end   = m_holes_pending_begin + nPendings;
 }
 
 /*!
@@ -2259,56 +2299,24 @@ void PiercedVector<value_t, id_t>::holesFlush()
 	}
 
 	// Move the holes at the beginning of the vector
-	//
-	// The iterators will be updated when clearing the pending holes.
 	std::size_t nRegulars = holesCountRegular();
 	if (m_holes_regular_begin != m_holes.begin()) {
 		std::size_t offset = std::distance(m_holes.begin(), m_holes_regular_begin);
 		for (std::size_t k = 0; k < nRegulars; ++k) {
 			m_holes[k] = m_holes[k + offset];
 		}
+
+		m_holes_regular_begin = m_holes.begin();
+		m_holes_regular_end   = m_holes_regular_begin + nRegulars;
 	}
 
 	// Resize the vector
-	holesClearPending(0, nRegulars);
+	holesClearPending();
 
 	// There are no more dirty positions
 	m_first_dirty_pos = m_last_pos + 1;
 }
 
-/*!
-	Reset pending holes
-*/
-template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::holesClearPending()
-{
-	long offset    = std::distance(m_holes.begin(), m_holes_regular_begin);
-	long nRegulars = holesCountRegular();
-
-	holesClearPending(offset, nRegulars);
-}
-
-/*!
-	Reset pending holes
-
-	\param offset is the distance between the first regulat hole and the
-	begin of the hole's container
-	\param nRegulars is the number of regulars holes in the hole's
-	container
-*/
-template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::holesClearPending(const long &offset, const long &nRegulars)
-{
-	m_holes.reserve(offset + nRegulars + MAX_PENDING_HOLES);
-	m_holes.resize(offset + nRegulars);
-
-	m_holes_regular_begin = m_holes.begin() + offset;
-	m_holes_regular_end   = m_holes_regular_begin + nRegulars;
-	m_holes_pending_begin = m_holes_regular_end;
-	m_holes_pending_end   = m_holes_pending_begin;
-
-	m_holes_pending_sorted = true;
-}
 
 /*!
 	Sort the list of pending holes in descendent order
