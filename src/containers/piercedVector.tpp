@@ -2131,6 +2131,9 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 
 /*!
 	Clear the list of available holes.
+
+	\param relase if set to true the memory previously hold by holes'
+	container will be released
 */
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::holesClear(bool release)
