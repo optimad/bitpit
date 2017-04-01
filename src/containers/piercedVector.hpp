@@ -568,17 +568,18 @@ private:
 	iterator getIteratorFromPos(const std::size_t &pos) noexcept;
 	const_iterator getConstIteratorFromPos(const std::size_t &pos) const noexcept;
 
-	StoragePosition fillPos(const std::size_t &pos, const id_t &id);
-	StoragePosition fillPosAppend(const id_t &id);
-	StoragePosition fillPosInsert(const std::size_t &pos, const id_t &id);
-	StoragePosition fillPosHead(const id_t &id);
-	StoragePosition fillPosTail(const id_t &id);
-	StoragePosition fillPosAfter(const std::size_t &referencePos, const id_t &id);
-	StoragePosition fillPosBefore(const std::size_t &referencePos, const id_t &id);
+	StoragePosition fillHead(const id_t &id);
+	StoragePosition fillTail(const id_t &id);
+	StoragePosition fillBefore(const std::size_t &referencePos, const id_t &id);
+	StoragePosition fillAfter(const std::size_t &referencePos, const id_t &id);
+	StoragePosition fillHole(const hole_iterator &holeItr, const id_t &id);
+	StoragePosition fillAppend(const id_t &id);
+	StoragePosition fillInsert(const std::size_t &pos, const id_t &id);
 
-	void piercePos(const std::size_t &pos, bool flush = true);
+	void pierce(const std::size_t &pos, bool flush = true);
 
 	void holesClear(bool release = false);
+	void holesClearRegular(bool release = false);
 	void holesClearPending(bool release = false);
 	void holesResize(size_t offset, size_t nRegulars, size_t nPendings, bool release = true);
 	std::size_t holesCount() const;
@@ -594,13 +595,12 @@ private:
 	std::size_t findNextUsedPos(std::size_t pos) const;
 	bool isPosEmpty(std::size_t pos) const;
 	std::size_t getPosFromId(id_t id) const;
-	void setPosId(const std::size_t &pos, const id_t &id);
-	void appendPosId(const id_t &id);
-	void insertPosId(const std::size_t &pos, const id_t &id);
-	void setEmptyPosId(const std::size_t &pos, const std::size_t &nextUsedPos);
 	void setBeginPos(const std::size_t &pos);
 	void setEndPos(const std::size_t &pos);
-	void swapPos(const std::size_t &pos_1, const id_t &id_1, const std::size_t &pos_2, const id_t &id_2);
+
+	void setPosId(const std::size_t &pos, const id_t &id);
+	void setPosEmptyId(const std::size_t &pos, const std::size_t &nextUsedPos);
+	void swapPosIds(const std::size_t &pos_1, const id_t &id_1, const std::size_t &pos_2, const id_t &id_2);
 
 	void storageShrink(size_t n, bool force = false);
 	std::size_t storageSize() const;
