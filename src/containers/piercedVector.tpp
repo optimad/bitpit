@@ -2153,7 +2153,7 @@ void PiercedVector<value_t, id_t>::holesClear(bool release)
 	\result The number of available holes.
 */
 template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::holesCount()
+std::size_t PiercedVector<value_t, id_t>::holesCount() const
 {
 	return holesCountPending() + holesCountRegular();
 }
@@ -2164,7 +2164,7 @@ std::size_t PiercedVector<value_t, id_t>::holesCount()
 	\result The number of pending holes.
 */
 template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::holesCountPending()
+std::size_t PiercedVector<value_t, id_t>::holesCountPending() const
 {
 	return std::distance(m_holes_pending_begin, m_holes_pending_end);
 }
@@ -2175,7 +2175,7 @@ std::size_t PiercedVector<value_t, id_t>::holesCountPending()
 	\result The number of regular holes.
 */
 template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::holesCountRegular()
+std::size_t PiercedVector<value_t, id_t>::holesCountRegular() const
 {
 	return std::distance(m_holes_regular_begin, m_holes_regular_end);
 }
