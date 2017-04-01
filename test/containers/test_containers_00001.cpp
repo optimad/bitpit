@@ -82,7 +82,7 @@ int main()
 	// Deleting all elements of the container
 	int id_erase;
 
-	std::cout << std::endl << "::: Testing deletion of all elements of the container :::" << std::endl;
+	std::cout << std::endl << "::: Testing deletion of elements :::" << std::endl;
 	std::cout << std::endl;
 
 	nElements = container.size();
