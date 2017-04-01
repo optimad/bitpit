@@ -1014,7 +1014,7 @@ std::size_t PiercedVector<value_t, id_t>::capacity() const
 template<typename value_t, typename id_t>
 bool PiercedVector<value_t, id_t>::contiguous() const
 {
-	return m_holes.empty();
+	return (holesCount() == 0);
 }
 
 /*!
@@ -1873,17 +1873,18 @@ typename PiercedVector<value_t, id_t>::StoragePosition PiercedVector<value_t, id
 	long nPendings = holesCountPending();
 	long nHoles    = nRegulars + nPendings;
 	if (nHoles != 0) {
-		// Sort the holes
+		// Get the position to fill
+		//
+		// The holes are sorted, the position to fill is the last pending
+		// or regular hole.
+		std::size_t pos;
 		if (m_holes_pending_begin != m_holes_pending_end) {
 			holesSortPending();
+			pos = *(m_holes_pending_end - 1);
 		} else {
 			holesSortRegular();
+			pos = *(m_holes_regular_end - 1);
 		}
-
-		// The last element of the hole's container is the hole we need to
-		// use if we are filling from the head.
-		std::size_t pos = m_holes.back();
-		m_holes.pop_back();
 
 		// Update the iterators
 		if (nHoles == 1) {
@@ -2107,13 +2108,13 @@ void PiercedVector<value_t, id_t>::piercePos(const std::size_t &pos, bool flush)
 	}
 
 	// If the list of pending holes is full, flush the holes.
-	if (m_holes.size() == m_holes.capacity()) {
+	if (m_holes_pending_end == m_holes.end()) {
 		holesFlush();
 	}
 
 	// Add the hole at the end of the pending holes
-	m_holes.push_back(pos);
-	m_holes_pending_end = m_holes.end();
+	*m_holes_pending_end = pos;
+	m_holes_pending_end++;
 
 	// Check if pending holes are still sorted
 	if (m_holes_pending_sorted) {
@@ -2181,8 +2182,7 @@ void PiercedVector<value_t, id_t>::holesResize(size_t offset, size_t nRegulars, 
 		m_holes.shrink_to_fit();
 	}
 
-	m_holes.reserve(offset + nRegulars + MAX_PENDING_HOLES);
-	m_holes.resize(offset + nRegulars + nPendings);
+	m_holes.resize(offset + nRegulars + MAX_PENDING_HOLES);
 
 	m_holes_regular_begin = m_holes.begin() + offset;
 	m_holes_regular_end   = m_holes_regular_begin + nRegulars;
@@ -2677,11 +2677,6 @@ void PiercedVector<value_t, id_t>::storageShrink(std::size_t n, bool force)
 	if (m_holes_pending_begin == m_holes_pending_end) {
 		m_holes_pending_begin = m_holes_regular_end;
 		m_holes_pending_end   = m_holes_pending_begin;
-	}
-
-	// Resize the hole's container
-	if (m_holes_pending_end != m_holes.end()) {
-		m_holes.resize(std::distance(m_holes.begin(), m_holes_pending_end));
 	}
 }
 
