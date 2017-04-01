@@ -131,6 +131,9 @@ int main(int argc, char *argv[]) {
 		++nCompletedRecvs;
 	}
 
+	// Wait all sends
+	dataCommunicator.startAllSends();
+
 	// Finalize MPI
 	MPI_Finalize();
 }
