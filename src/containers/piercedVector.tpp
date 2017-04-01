@@ -2300,7 +2300,7 @@ void PiercedVector<value_t, id_t>::holesFlush()
 
 	// Move the holes at the beginning of the vector
 	std::size_t nRegulars = holesCountRegular();
-	if (m_holes_regular_begin != m_holes.begin()) {
+	if (nRegulars != 0 && m_holes_regular_begin != m_holes.begin()) {
 		std::size_t offset = std::distance(m_holes.begin(), m_holes_regular_begin);
 		for (std::size_t k = 0; k < nRegulars; ++k) {
 			m_holes[k] = m_holes[k + offset];
