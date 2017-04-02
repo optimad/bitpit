@@ -33,27 +33,29 @@ namespace bitpit {
 class IndexGenerator {
 
 public:
-	static const long NULL_ID;
+    static const long NULL_ID;
 
-	IndexGenerator();
+    IndexGenerator();
 
-	long generateId();
-	long getLatestId();
-	long getHighestId();
-	bool isIdAssigned(long id);
-	void setAssignedId(long id);
-	void trashId(const long &id);
-	void reset();
+    long generate();
+    bool isAssigned(long id);
+    void setAssigned(long id);
+    void trash(const long &id);
 
-	void dump(std::ostream &stream);
-	void restore(std::istream &stream);
+    long getLatest();
+    long getHighest();
+
+    void reset();
+
+    void dump(std::ostream &stream);
+    void restore(std::istream &stream);
 
 private:
-	long m_latest;
-	long m_highest;
-	std::deque<long> m_trash;
+    long m_latest;
+    long m_highest;
+    std::deque<long> m_trash;
 
-	int getBinaryArchiveVersion();
+    int getBinaryArchiveVersion();
 
 };
 

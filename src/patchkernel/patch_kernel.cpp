@@ -722,7 +722,7 @@ long PatchKernel::generateVertexId()
 		return Vertex::NULL_ID;
 	}
 
-	return m_vertexIdGenerator.generateId();
+	return m_vertexIdGenerator.generate();
 }
 
 /*!
@@ -837,7 +837,7 @@ bool PatchKernel::deleteVertex(const long &id, bool delayed)
 
 	// Delete the vertex
 	m_vertices.erase(id, delayed);
-	m_vertexIdGenerator.trashId(id);
+	m_vertexIdGenerator.trash(id);
 
 	return true;
 }
@@ -1383,7 +1383,7 @@ long PatchKernel::generateCellId()
 		return Element::NULL_ID;
 	}
 
-	return m_cellIdGenerator.generateId();
+	return m_cellIdGenerator.generate();
 }
 
 /*!
@@ -1656,7 +1656,7 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	// Delete cell
 	bool isInternal = m_cells.at(id).isInterior();
 	m_cells.erase(id, delayed);
-	m_cellIdGenerator.trashId(id);
+	m_cellIdGenerator.trash(id);
 	if (isInternal) {
 		m_nInternals--;
 		if (m_nInternals == 0) {
@@ -2425,7 +2425,7 @@ long PatchKernel::generateInterfaceId()
 		return Element::NULL_ID;
 	}
 
-	return m_interfaceIdGenerator.generateId();
+	return m_interfaceIdGenerator.generate();
 }
 
 /*!
@@ -2574,7 +2574,7 @@ bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delaye
 
 	// Delete interface
 	m_interfaces.erase(id, delayed);
-	m_interfaceIdGenerator.trashId(id);
+	m_interfaceIdGenerator.trash(id);
 
 	return true;
 }

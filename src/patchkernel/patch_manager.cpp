@@ -65,11 +65,11 @@ PatchManager & PatchManager::manager()
 int PatchManager::registerPatch(PatchKernel *patch, int id)
 {
 	if (id >= 0) {
-		if (m_idGenerator.isIdAssigned(id)) {
+		if (m_idGenerator.isAssigned(id)) {
 			throw std::runtime_error ("A patch with the same id already exists");
 		}
 	} else {
-		id = m_idGenerator.generateId();
+		id = m_idGenerator.generate();
 	}
 
 	patch->setId(id);
@@ -92,7 +92,7 @@ void PatchManager::unregisterPatch(PatchKernel *patch)
 	}
 
 	int id = iterator->second;
-	m_idGenerator.trashId(id);
+	m_idGenerator.trash(id);
 
 	m_patchIds.erase(iterator);
 	for (auto itr = m_patchOrder.begin(); itr != m_patchOrder.end(); ++itr) {

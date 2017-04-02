@@ -37,7 +37,6 @@
 
 #include "bitpit_version.hpp"
 
-#include "index_generator.hpp"
 #include "patch_info.hpp"
 #include "patch_kernel.hpp"
 #include "patch_manager.hpp"

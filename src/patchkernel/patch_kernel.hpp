@@ -43,7 +43,6 @@
 
 #include "adaption.hpp"
 #include "cell.hpp"
-#include "index_generator.hpp"
 #include "interface.hpp"
 #include "vertex.hpp"
 
