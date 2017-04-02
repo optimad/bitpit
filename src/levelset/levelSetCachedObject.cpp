@@ -699,7 +699,6 @@ void LevelSetCachedObject::propagateSign() {
 
     // Initialize the communicator for exchanging the sign among partitions
     DataCommunicator dataCommunicator(m_kernelPtr->getCommunicator());
-    dataCommunicator.setTag(108) ;
 
     int sign;
     size_t dataSize = sizeof(sign);

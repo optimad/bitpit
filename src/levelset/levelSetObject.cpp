@@ -334,10 +334,6 @@ void LevelSetObject::communicate( std::unordered_map<int,std::vector<long>> &sen
         DataCommunicator    sizeCommunicator(meshComm) ; 
         DataCommunicator    dataCommunicator(meshComm) ; 
 
-        int offset = 2*getId() ;
-        sizeCommunicator.setTag(offset+0) ;
-        dataCommunicator.setTag(offset+1) ;
-
         /* Start receiving of first communications which contain the sizes
          * of the communications of the exchanged data
         */
