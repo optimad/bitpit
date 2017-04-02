@@ -41,7 +41,10 @@ class DataCommunicator
 {
 
 public:
+    static const int TAG_AUTO = -1;
+
     DataCommunicator(MPI_Comm communicator);
+    ~DataCommunicator();
 
     const MPI_Comm & getCommunicator() const;
 
@@ -104,11 +107,10 @@ public:
     void cancelAllRecvs();
 
 private:
-    static int DEFAULT_TAG;
-
     MPI_Comm m_communicator;
     int m_rank;
     int m_tag;
+    bool m_customTag;
     bool m_recvsContinuous;
 
     std::vector<int> m_recvRanks;

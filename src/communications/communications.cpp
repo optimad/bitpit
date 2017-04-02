@@ -27,6 +27,7 @@
 #include "bitpit_IO.hpp"
 
 #include "communications.hpp"
+#include "communications_tags.hpp"
 
 namespace bitpit {
 
@@ -38,17 +39,30 @@ namespace bitpit {
     exchange data among processors.
 */
 
-int DataCommunicator::DEFAULT_TAG = 0;
-
 /*!
     Creates a new communicator for data exchange.
 */
 DataCommunicator::DataCommunicator(MPI_Comm communicator)
     : m_communicator(communicator), m_rank(-1),
-    m_tag(DEFAULT_TAG), m_recvsContinuous(false)
+    m_recvsContinuous(false)
 {
     // Get MPI information
     MPI_Comm_rank(m_communicator, &m_rank);
+
+    // Set a tag
+    setTag(TAG_AUTO);
+}
+
+/*!
+    Creates a new communicator for data exchange.
+*/
+DataCommunicator::~DataCommunicator()
+{
+    if (!m_customTag) {
+        if (m_rank == 0) {
+            communications::tags().trash(m_tag);
+        }
+    }
 }
 
 /*!
@@ -74,13 +88,28 @@ void DataCommunicator::finalize()
 }
 
 /*!
-    Sets the tag to be used for the communications
+    Sets a custom tag to be used for the communications.
 
-    \param tag is the tag to use
+    By default, a unique tag is generated in the constructor. However, using
+    this function, it is possible to assign a custom tag.
+
+    \param tag is the custom tag to use
 */
 void DataCommunicator::setTag(int tag)
 {
-    m_tag = tag;
+    if (tag == TAG_AUTO) {
+        if (m_rank == 0) {
+            m_tag = communications::tags().generate();
+        }
+
+        MPI_Bcast(&m_tag, 1, MPI_INT, 0, m_communicator);
+
+        m_customTag = false;
+    } else {
+        m_tag = tag;
+
+        m_customTag = true;
+    }
 }
 
 /*!
