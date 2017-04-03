@@ -151,9 +151,6 @@ class IBinaryStream {
     void read(                                                            // Read data from memory location pointed by t and store into stream buffer
         T                           &t                                    // (input) data to be imported in the stream buffer
     );
-    void read(                                                            // Explicit template specialization of IBinaryStream::read for vector<char>
-        std::vector<char>           &vec                                  // (input) source vector
-    );
     void read(                                                                // Read data from memory location pointed by p and store into stream buffer
         char                        *p,                                   // (input) pointer to memory location
         size_t                       size                                 // (input) size (in bytes) of data to be read
@@ -230,9 +227,6 @@ class OBinaryStream {
     void write(                                                           // Write char array to internal buffer
         const char                  *p,                                   // (input) pointer to char array
         size_t                       size                                 // (input) size of data chunk to be written in the internal buffer
-    );
-    void write(                                                           // Write vector of char to internal buffer
-        const std::vector<char>     &vec                                  // (input) vector of char to be written in the internal buffer
     );
 
     // Friendship(s) ==================================================== //

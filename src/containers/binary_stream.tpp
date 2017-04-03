@@ -39,12 +39,7 @@ template<typename T>
 void IBinaryStream::read(
     T                           &t
 ) {
-    if ( eof() || ( current_pos + sizeof(T) ) > buffer.size() ) {
-        throw std::runtime_error("Bad memory access!");
-    }
-
-    std::memcpy(reinterpret_cast<void*>( &t ), &buffer[current_pos], sizeof(T));
-    current_pos += sizeof(T);
+    read(reinterpret_cast<char*>( &t ),sizeof(T));
 }
 
 // ========================================================================== //
@@ -62,9 +57,7 @@ template<typename T>
 void OBinaryStream::write(
     const T                     &t
 ) {
-    std::vector<char> vec(sizeof(T));
-    memcpy( reinterpret_cast<void*>( &vec[0] ), reinterpret_cast<const void*>( &t ), sizeof(T) );
-    write(vec);
+    write(reinterpret_cast<const char*>( &t ),sizeof(T));
 }
 
 }

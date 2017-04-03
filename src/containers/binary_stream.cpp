@@ -258,24 +258,6 @@ void IBinaryStream::read(
     current_pos += size;
 }
 
-// -------------------------------------------------------------------------- //
-/*!
-        Read data from std::vector<char> and store content into stream buffer
-
-        \param[in] vec vector of char
-
-*/
-void IBinaryStream::read(
-    std::vector<char>           &vec
-) {
-    if ( eof() || ( current_pos + vec.size() ) > buffer.size() ) {
-        throw std::runtime_error("Bad memory access!");
-    }
-
-    std::memcpy(reinterpret_cast<void*>(&vec[0]), &buffer[current_pos], vec.size());
-    current_pos += vec.size();
-}
-
 // ========================================================================== //
 // IMPLEMENTATIONS OF METHODS FOR CLASS OBinaryStream                           //
 // ========================================================================== //
@@ -476,36 +458,6 @@ void OBinaryStream::write(
         buffer[current_pos] = p[i];
         ++current_pos;
     } // next i
-}
-
-// -------------------------------------------------------------------------- //
-/*!
-        Write vector of char to internal buffer
-
-        \param[in] vec vector of char to be written in the internal buffer
-        buffer
-
-*/
-
-void OBinaryStream::write(
-    const vector<char>          &vec
-) {
-    if ( buffer.size() - current_pos < vec.size() ) {
-        // We should take into account the current position in the buffer only
-        // when the buffer is not empty. That's because when the buffer is
-        // empty, the current position is set to 0 but there are not elements
-        // in the buffer.
-        size_t bufferSize = vec.size();
-        if (!buffer.empty()) {
-            bufferSize += (current_pos + 1);
-        }
-
-        buffer.resize(bufferSize);
-    }
-    for(size_t i = 0; i < vec.size(); ++i) {
-        buffer[current_pos] = vec[i];
-        ++current_pos;
-    } //next i
 }
 
 }
