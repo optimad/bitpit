@@ -1,0 +1,52 @@
+
+#cookie-warning {
+    padding: 0;
+    display: none;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
+    background-color: rgba(0,0,0,.9);
+    color: white;
+}
+
+#cookie-warning h3 {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    line-height: normal;
+    padding: 5px 175px 0 10px;
+}
+
+
+#cookie-warning p {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.65rem;
+    line-height: normal;
+    padding: 5px 175px 5px 10px;
+}
+
+#cookie-warning p.button {
+    text-align: center;
+    padding: 5px 15px 5px 15px;
+    vertical-align: middle;
+    display: inline-block;
+    border-radius: 5px;
+
+    background-color: #13496C;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.85rem;
+
+    height: 20px;
+    width: 75px;
+    line-height: 20px;
+
+    right: 45px;
+    position: absolute;
+    top: 50%;
+    margin: 0;
+
+    transform: translateY(-50%);
+}

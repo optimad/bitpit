@@ -22,11 +22,13 @@
     <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700'>
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/normalize.css" />
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/base.css" />
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/cookies.css" />
 {% for stylesheet in page.extra-css %}
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/{{stylesheet}}" />
 {% endfor %}
 
     <script type="text/javascript" src="{{ site.baseurl }}/scripts/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="{{ site.baseurl }}/scripts/cookies.js"></script>
 {% for script in page.extra-scripts %}
     <script type="text/javascript" src="{{ site.baseurl }}/scripts/{{script}}"></script>
 {% endfor %}
@@ -45,6 +47,19 @@
 </head>
 
 <body>
+
+<div id="cookie-warning">
+        <p id="accept-cookies" class="button">Continue</p>
+
+        <h3>Our website uses cookies</h3>
+
+        <p>
+        This website uses cookies. By continuing to use this website you are
+        giving consent to cookies being used. For information on cookies
+        and how you can disable them visit our
+        <a href="{{ site.baseurl }}/privacy.html">Privacy Policy</a>.
+        </p>
+</div>
 
 {% if page.layout == 'home' %}
 {% assign home_class = 'home' %}
