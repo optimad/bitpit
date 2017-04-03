@@ -180,13 +180,44 @@ class BasePiercedVector {
 	Usage: use <tt>PiercedVector<value_t, id_t></tt> to declare a pierced
 	vector.
 
-	Internally all the holes are stored in a single vector. The first part
-	of this vector contains the "regular" holes, whereas the last part
-	contains the "pending" holes. The space reserved to the pending holes
-	is fixed. When this space if full, the 'holes_flush' function will be
-	called and all pending holes will be converted to regular holes.
-	New positions for inserting new elements will be searched first among
-	the pending holes and then among the regular holes.
+	Internally all the holes are stored in a single vector. The first part of
+	this vector contains the "regular" holes, whereas the last part contains
+	the "pending" holes. The space reserved to the pending holes is fixed.
+	To track begin and end of pending/regular holes section, two couple of
+	begin/end iterators are used.
+
+	         /------ Regular holes begin
+	         |
+	         |                     /------ Regular holes end
+	         |                     |
+	         v                     v
+	    |-+-+R+R+R+R+R+R+R+R+R+R+R+-+-+-+-+-+P+P+P+P+P+P+P+-+-+-+-+-+-|
+	     <   REGULAR HOLES SECTION   >   <     MAX PENDING HOLES     >
+	                                         ^             ^
+	                                         |             |
+	               Pending holes begin ------/             |
+	                                                       |
+	                               Pending holes end ------/
+
+	At the beginning, the vector of the holes will have a size equal to the
+	maximum number of pending holes. When an element is deleted, its position
+	is marked as a pending hole and it is inserted at the end of the existing
+	pending holes (or after the regular holes if there are no pending holes).
+	When the maximum number of pending holes is reached, the hole's vector
+	is flushed. First, pending holes are then converted to regular holes.
+	The difference between pending and regular holes is that the position of
+	a pending hole is just marked as empty, whereas the position of a regular
+	hole contains the distance from the next non-epty element (to speed-up
+	vector traversal). Once the positions associated to the pending holes are
+	updated, pending holes are moved into the regular holes and all the holes
+	are compacted at the beginning of the holes' vector. Finally, the vector
+	is resized: the new size of the vector is the number of regular holes plus
+	the maximum number of allowed pending holes.
+
+	When a new element needs to be inserted in the element, first a suitable
+	position is searched in the pending holes, if no suitable positions is
+	found, the search is extended to regular holes. If, among the holes, there
+	is no suitable position, a new element is added in the container.
 
 	@tparam value_t The type of the elements stored in the vector
 	@tparam id_t The type of the ids to associate to the elements
