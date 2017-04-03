@@ -56,19 +56,18 @@ inline void DataLBInterface<Impl>::move(const uint32_t from, const uint32_t to) 
 /*! Its user specification writes the e element data to be communicated
  * during the load balance in the buffer.
  *
- * The user has not to care about the buffer but a char buffer is available in PABLO,
- * Class_Comm_Buffer. This class has an important method, Class_Comm_Buffer#write.
- * This method has to be used to allocate any single element datum
+ * The user has to use the buffer buff as an output binary stream.
+ * A stream operator (<<) is provided to allocate any single element datum
  * in the communication buffer, as follow
  * ~~~~~~~~~~~~~~~~~~~{.c}
- * buff.write(userdatum)
+ * buff << userdatum
  * ~~~~~~~~~~~~~~~~~~~
  * where userdatum can be any MPI compatible POD variable associated to the e element.
  * In case of a vector of double, called userdata, to store data,
  * ~~~~~~~~~~~~~~~~~~~{.c}
- * buff.write(userdata[e])
+ * buff << userdata[e]
  * ~~~~~~~~~~~~~~~~~~~
- * \param[in] buff Template communication buffer
+ * \param[in] buff Output communication buffer
  * \param[in] e The element local index
  */
 template<class Impl>
@@ -80,19 +79,18 @@ inline void DataLBInterface<Impl>::gather(Buffer& buff,	const uint32_t e) {
 /*! Its user specification reads the e element data from the communication buffer
  * and store them in the user data container.
  *
- * The user has not to care about the buffer but a char buffer is available in PABLO,
- * Class_Comm_Buffer. This class has an important method, Class_Comm_Buffer#read().
- * This method has to be used to read any single element datum from
+ * The user has to use the buffer buff as an input binary stream.
+ * A stream operator (>>) is provided to read any single element datum from
  * the communication buffer, as follow
  * ~~~~~~~~~~~~~~~~~~~{.c}
- * buff.read(userdatum)
+ * buff >> userdatum
  * ~~~~~~~~~~~~~~~~~~~
  * where userdatum can be any MPI compatible POD variable associated to the e element.
  * In case of a vector of double, called userdata, to store data,
  * ~~~~~~~~~~~~~~~~~~~{.c}
- * buff.read(userdata[e])
+ * buff >> userdata[e]
  * ~~~~~~~~~~~~~~~~~~~
- * \param[in] buff Template communication buffer
+ * \param[in] buff Input communication buffer
  * \param[in] e The element local index
  */
 template<class Impl>

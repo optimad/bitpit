@@ -50,13 +50,13 @@ inline void UserDataLB<D>::move(const uint32_t from, const uint32_t to) {
 template<class D>
 template<class Buffer>
 inline void UserDataLB<D>::gather(Buffer& buff, const uint32_t e) {
-	buff.write(data[e]);
+	buff << data[e];
 }
 
 template<class D>
 template<class Buffer>
 inline void UserDataLB<D>::scatter(Buffer& buff, const uint32_t e) {
-	buff.read(data[e]);
+	buff >> data[e];
 }
 
 template<class D>
