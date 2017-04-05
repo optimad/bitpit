@@ -4280,7 +4280,7 @@ namespace bitpit {
                 uint32_t tailOffset = tailSize;
 
                 //build send buffers
-                DataCommunicator lbCommunicator(m_comm);//NEW
+                DataCommunicator lbCommunicator(m_comm);
 
                 //Compute first predecessor and first successor to send buffers to
                 int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
@@ -4324,14 +4324,14 @@ namespace bitpit {
                                 nofElementsFromSuccessiveToPrevious  = headSize;
 
                             int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                             limits[1] = (uint32_t)lh + 1;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
 
                             for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
-                                //PACK octants from 0 to lh in sendBuffer[p]
+                                //WRITE octants from 0 to lh in sendBuffer[p]
                                 const Octant & octant = m_octree.m_octants[i];
                                 x = octant.getX();
                                 y = octant.getY();
@@ -4360,14 +4360,14 @@ namespace bitpit {
                         else{
                             nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
                             int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                             limits[1] = (uint32_t)lh + 1;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
 
                             for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
-                                //pack octants from lh - partition[p] to lh
+                                //WRITE octants from lh - partition[p] to lh
                                 const Octant & octant = m_octree.m_octants[i];
                                 x = octant.getX();
                                 y = octant.getY();
@@ -4405,14 +4405,14 @@ namespace bitpit {
                                 nofElementsFromPreviousToSuccessive = tailSize;
 
                             int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = ft;
                             limits[1] = ft + nofElementsFromPreviousToSuccessive;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
 
                             for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
-                                //PACK octants from ft to octantsSize-1
+                                //WRITE octants from ft to octantsSize-1
                                 const Octant & octant = m_octree.m_octants[i];
                                 x = octant.getX();
                                 y = octant.getY();
@@ -4440,15 +4440,15 @@ namespace bitpit {
                         else{
                             nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
                             int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
                             limits[0] = ft;
                             limits[1] = endOctants + 1;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
 
                             for(uint32_t i = ft; i <= endOctants; ++i ){
-                                //PACK octants from ft to ft + partition[p] -1
+                                //WRITE octants from ft to ft + partition[p] -1
                                 const Octant & octant = m_octree.m_octants[i];
                                 x = octant.getX();
                                 y = octant.getY();
@@ -4512,7 +4512,7 @@ namespace bitpit {
 
                 lbCommunicator.startAllSends();
 
-                //UNPACK BUFFERS AND BUILD NEW OCTANTS
+                //READ BUFFERS AND BUILD NEW OCTANTS
                 newCounter = 0;
                 bool jumpResident = false;
                 for(int rank : recvRanks){
@@ -5275,11 +5275,10 @@ namespace bitpit {
 
         MPI_Barrier(m_comm);
 
-        //PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
+        //WRITE BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (buffSize) TO BE SENT TO THE RIGHT PROCESS (key)
         //it visits every element in m_bordersPerProc (one for every neighbor proc)
-        //for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
-        //this map has an entry CommBuffer for every proc containing the size in bytes of the buffer and the octants
-        //to be sent to that proc packed in a char* buffer
+        //for every element it visits the border octants it contains and write them in the bitpit communication structure, DataCommunicator
+        //this structure has a buffer for every proc containing the octants to be sent to that proc written in a char* buffer
         uint64_t global_index;
         uint32_t x,y,z;
         uint8_t l;
@@ -5297,7 +5296,6 @@ namespace bitpit {
             SendBuffer &sendBuffer = ghostCommunicator.getSendBuffer(key);
             int nofBorders = value.size();
             for(int i = 0; i < nofBorders; ++i){
-                //the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
                 const Octant & octant = m_octree.m_octants[value[i]];
                 x = octant.getX();
                 y = octant.getY();
@@ -5336,8 +5334,8 @@ namespace bitpit {
 
         ghostCommunicator.startAllSends();
 
-        //UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
-        //every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
+        //READ BUFFERS AND BUILD GHOSTS CONTAINER OF LOCALTREE
+        //every receive buffer is visited,and read octant by octant.
         //every ghost octant is built and put in the ghost vector
         uint32_t ghostCounter = 0;
         for(int rank : recvsRanks){
@@ -5377,11 +5375,10 @@ namespace bitpit {
             return;
         }
 
-        //PACK (mpi) LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
+        //WRITE LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (buffSize) TO BE SENT TO THE RIGHT PROCESS (key)
         //it visits every element in m_bordersPerProc (one for every neighbor proc)
-        //for every element it visits the border octants it contains and pack its marker in a new structure, sendBuffers
-        //this map has an entry CommBuffer for every proc containing the size in bytes of the buffer and the octants marker
-        //to be sent to that proc packed in a char* buffer
+        //for every element it visits the border octants it contains and write them in the bitpit communication structure, DataCommunicator
+        //this structure has a buffer for every proc containing the octants to be sent to that proc written in a char* buffer
         int8_t marker;
         bool mod;
         DataCommunicator markerCommunicator(m_comm);
@@ -5408,9 +5405,9 @@ namespace bitpit {
         markerCommunicator.startAllRecvs();
 		markerCommunicator.startAllSends();
 
-		//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
-        //every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
-        //every ghost octant is built and put in the ghost vector
+        //READ BUFFERS AND BUILD GHOSTS CONTAINER OF LOCALTREE
+        //every receive buffer is visited, and read octant by octant.
+        //every ghost octant level and marker are updated
         uint32_t ghostCounter = 0;
         vector<int> recvRanks = markerCommunicator.getRecvRanks();
         std::sort(recvRanks.begin(),recvRanks.end());

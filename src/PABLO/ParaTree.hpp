@@ -795,8 +795,8 @@ namespace bitpit {
                 uint32_t headOffset = headSize;
                 uint32_t tailOffset = tailSize;
 
-                //build send buffers
-                DataCommunicator lbCommunicator(m_comm);//NEW
+                //Communicator declaration
+                DataCommunicator lbCommunicator(m_comm);
 
                 //Compute first predecessor and first successor to send buffers to
                 int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
@@ -851,8 +851,8 @@ namespace bitpit {
                             }
                             //add room for int, number of octants in this buffer
                             buffSize += sizeof(int);
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
                             sendBuffer << nofElementsFromSuccessiveToPrevious;
 
@@ -897,15 +897,13 @@ namespace bitpit {
                             }
                             //add room for int, number of octants in this buffer
                             buffSize += sizeof(int);
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
                             sendBuffer << nofElementsFromSuccessiveToPrevious;
-                            //USE BUFFER POS
 
                             for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
-                                //pack octants from lh - partition[p] to lh
-                                //const Class_Octant<2> & octant = m_octree.m_octants[i];
+                                //WRITE octants from lh - partition[p] to lh
                                 const Octant & octant = m_octree.m_octants[i];
                                 x = octant.getX();
                                 y = octant.getY();
@@ -955,11 +953,10 @@ namespace bitpit {
                             }
                             //add room for int, number of octants in this buffer
                             buffSize += sizeof(int);
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
                             sendBuffer << nofElementsFromPreviousToSuccessive;
-                            //USE BUFFER POS
 
                             for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
                                 const Octant & octant = m_octree.m_octants[i];
@@ -1002,14 +999,13 @@ namespace bitpit {
                             }
                             //add room for int, number of octants in this buffer
                             buffSize += sizeof(int);
-                            lbCommunicator.setSend(p,buffSize);//NEW
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
+                            lbCommunicator.setSend(p,buffSize);
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
                             sendBuffer << nofElementsFromPreviousToSuccessive;
 
                             for(uint32_t i = ft; i <= endOctants; ++i ){
-                                //PACK octants from ft to ft + partition[p] -1
-                                //const Class_Octant<2> & octant = m_octree.m_octants[i];
+                                //WRITE octants from ft to ft + partition[p] -1
                                 const Octant & octant = m_octree.m_octants[i];
                                 x = octant.getX();
                                 y = octant.getY();
@@ -1044,7 +1040,7 @@ namespace bitpit {
                 uint32_t nofNewHead = 0;
                 uint32_t nofNewTail = 0;
 
-                //Unpack number of octants per sender
+                //READ number of octants per sender
                 std::map<int,uint32_t> nofNewOverProcs;
                 int nCompletedRecvs = 0;
                 while(nCompletedRecvs < lbCommunicator.getRecvCount()){
@@ -1082,7 +1078,7 @@ namespace bitpit {
                     userData.move(nofResidents - k - 1,resCounter - k);
                 }
 
-                //UNPACK BUFFERS AND BUILD NEW OCTANTS
+                //READ BUFFERS AND BUILD NEW OCTANTS
                 newCounter = 0;
                 bool jumpResident = false;
 
@@ -1100,7 +1096,6 @@ namespace bitpit {
                         recvBuffer >> y;
                         recvBuffer >> z;
                         recvBuffer >> l;
-                        //m_octree.m_octants[newCounter] = Class_Octant<2>(l,x,y);
                         m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                         recvBuffer >> m;
                         m_octree.m_octants[newCounter].setMarker(m);
