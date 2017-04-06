@@ -30,7 +30,6 @@
 // =================================================================================== //
 #if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
-#include "CommBuffer.hpp"
 #include "DataLBInterface.hpp"
 #include "DataCommInterface.hpp"
 #include "communications.hpp"
