@@ -545,21 +545,24 @@ int DataCommunicator::getRecvCount()
 }
 
 /*!
-    Get the list of ranks for with a send has been set.
+    Get a constant reference to the list of ranks for which a send has been set.
 
-    \result The list of ranks for with a send has been set.
+    \result A constant reference to the list of ranks for with a send has been
+    set.
 */
-const std::vector<int> DataCommunicator::getSendRanks() const
+const std::vector<int> & DataCommunicator::getSendRanks() const
 {
     return m_sendRanks;
 }
 
 /*!
-    Get the list of ranks for with a receive has been set.
+    Get a constant reference to the list of ranks for which a receive has been
+    set.
 
-    \result The list of ranks for with a receive has been set.
+    \result A constant reference to the list of ranks for with a receive has
+    been set.
 */
-const std::vector<int> DataCommunicator::getRecvRanks() const
+const std::vector<int> & DataCommunicator::getRecvRanks() const
 {
     return m_recvRanks;
 }

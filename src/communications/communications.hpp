@@ -77,8 +77,8 @@ public:
     int getSendCount();
     int getRecvCount();
 
-    const std::vector<int> getSendRanks() const;
-    const std::vector<int> getRecvRanks() const;
+    const std::vector<int> & getSendRanks() const;
+    const std::vector<int> & getRecvRanks() const;
 
     SendBuffer & getSendBuffer(int rank);
     RecvBuffer & getRecvBuffer(int rank);
