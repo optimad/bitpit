@@ -4323,7 +4323,7 @@ namespace bitpit {
                             if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
                                 nofElementsFromSuccessiveToPrevious  = headSize;
 
-                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)m_global.m_octantBytes;
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
@@ -4359,7 +4359,7 @@ namespace bitpit {
                         }
                         else{
                             nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)m_global.m_octantBytes;
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
@@ -4404,7 +4404,7 @@ namespace bitpit {
                             if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
                                 nofElementsFromPreviousToSuccessive = tailSize;
 
-                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)m_global.m_octantBytes;
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = ft;
@@ -4439,7 +4439,7 @@ namespace bitpit {
                         }
                         else{
                             nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
-                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)m_global.m_octantBytes;
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
@@ -4486,7 +4486,7 @@ namespace bitpit {
                 std::sort(recvRanks.begin(),recvRanks.end());
                 for(auto i : recvRanks){
                     long bufferSize = lbCommunicator.getRecvBuffer(i).getSize();
-                    uint32_t nofNewPerProc = (uint32_t)(bufferSize / (uint32_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8)));
+                    uint32_t nofNewPerProc = (uint32_t)(bufferSize / (uint32_t)m_global.m_octantBytes);
                     if(i < m_rank)
                         nofNewHead += nofNewPerProc;
                     else if(i > m_rank)
@@ -4519,7 +4519,7 @@ namespace bitpit {
                     lbCommunicator.waitRecv(rank);
                     RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
                     long bufferSize = recvBuffer.getSize();
-                    uint32_t nofNewPerProc = (uint32_t)(bufferSize / (uint32_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8)));
+                    uint32_t nofNewPerProc = (uint32_t)(bufferSize / (uint32_t)m_global.m_octantBytes);
                     if(rank > m_rank && !jumpResident){
                         newCounter += nofResidents ;
                         jumpResident = true;
