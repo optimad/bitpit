@@ -539,8 +539,13 @@ void VTK::writeData( ){
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
                 field.write( str ) ;
-
                 position_insert = str.tellg();
+
+                if(position_insert==field.getPosition()){
+                    log::cout() << "Error VTK: No data has been written for field " << field.getName() << std::endl;
+                    assert(false);
+                }
+
                 str << std::endl ;
                 genericIO::flushBINARY( str, buffer, length) ;
 
@@ -558,8 +563,13 @@ void VTK::writeData( ){
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
                 field.write( str ) ;
-
                 position_insert = str.tellg();
+
+                if(position_insert==field.getPosition()){
+                    log::cout() << "Error VTK: No data has been written for field " << field.getName() << std::endl;
+                    assert(false);
+                }
+
                 str << std::endl ;
                 genericIO::flushBINARY( str, buffer, length) ;
 
@@ -576,8 +586,13 @@ void VTK::writeData( ){
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
                 field.write( str ) ;
-
                 position_insert = str.tellg();
+
+                if(position_insert==field.getPosition()){
+                    log::cout() << "Error VTK: No data has been written for field " << field.getName() << std::endl;
+                    assert(false);
+                }
+
                 str << std::endl ;
                 genericIO::flushBINARY( str, buffer, length) ;
 
@@ -595,6 +610,7 @@ void VTK::writeData( ){
         char                    c_;
         std::string             line ;
         std::fstream::pos_type  position_appended ;
+        std::fstream::pos_type  position_before_write ;
 
         //Go to the initial position of the appended section
         while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){}
@@ -627,7 +643,13 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
+
+                position_before_write = str.tellg();
                 field.write(str) ;
+                if( (uint64_t) str.tellg()-position_before_write != calcFieldSize(field) ){
+                    log::cout() << "Error VTK: Data written do not corrispond to size of field " << field.getName() << std::endl;
+                    assert(false);
+                }
             }
         } 
 
@@ -643,7 +665,13 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
+
+                position_before_write = str.tellg();
                 field.write(str) ;
+                if( (uint64_t) str.tellg()-position_before_write != calcFieldSize(field) ){
+                    log::cout() << "Error VTK: Data written do not corrispond to size of field " << field.getName() << std::endl;
+                    assert(false);
+                }
 
             }
         } 
@@ -660,7 +688,13 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
+
+                position_before_write = str.tellg();
                 field.write(str) ;
+                if( (uint64_t) str.tellg()-position_before_write != calcFieldSize(field) ){
+                    log::cout() << "Error VTK: Data written do not corrispond to size of field " << field.getName() << std::endl;
+                    assert(false);
+                }
             }
         }
 
@@ -813,7 +847,14 @@ void VTK::readData( ){
             if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
             if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
+            std::fstream::pos_type position_before = str.tellg();
+
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
+
+            if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
+                log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
+            }
+
         }
     }
 
@@ -825,7 +866,13 @@ void VTK::readData( ){
             if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
             if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
+            std::fstream::pos_type position_before = str.tellg();
+
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
+
+            if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
+                log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
+            }
         }
     }
 
@@ -834,6 +881,10 @@ void VTK::readData( ){
         if( field.isEnabled() &&  field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
+
+            if(str.tellg()==field.getPosition()){
+                log::cout() << "Warning VTK: No data have been read for field " << field.getName() << std::endl;
+            }
         }
     }
 
@@ -842,6 +893,10 @@ void VTK::readData( ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
+
+            if(str.tellg()==field.getPosition()){
+                log::cout() << "Warning VTK: No data have been read for field " << field.getName() << std::endl;
+            }
         }
     }
 
