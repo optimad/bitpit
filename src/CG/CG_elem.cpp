@@ -1041,49 +1041,37 @@ bool intersectPlanePlane(
         std::array<double, 3>       &nl
         ) {
 
-    // Parameters
-    double const                    tol = 1.0e-14;
+    double const tol = 1.0e-14;
+    double n12 = dotProduct(n1, n2);
+    double detCB = 1.0-n12*n12;
 
-    // Local variables
-    double                          s;
-    std::array< double, 3>               v;
-
-    // ========================================================================== //
-    // CHECK DEGENERATE CONDITIONS                                                //
-    // ========================================================================== //
-    if (std::abs(dotProduct(n1, n2) - 1.0) <= tol) { return(false); }
-
-    // ========================================================================== //
-    // FIND INTERSECTION LINE                                                     //
-    // ========================================================================== //
-
-    // Line direction
-    nl = crossProduct(n1, n2);
-    nl = nl/norm2(nl);
-
-    // Point onto the line
-    s = dotProduct(P1, n1) - dotProduct(P2, n2);
-    v = n1 - n2;
-    if (std::abs(v[2]) > tol) {
-        Pl[0] = P1[0];
-        Pl[1] = P1[1];
-        Pl[2] = (s - Pl[0]*v[0] - Pl[1]*v[1])/v[2];
+    // check degenerate condition
+    if( std::abs(detCB) <= tol) { 
+        return false ; 
     }
 
-    else if( std::abs(v[1]) > tol) {
+    nl = crossProduct(n1,n2);
+    nl /= norm2(nl);
 
-        Pl[0] = P1[0];
-        Pl[2] = P1[2];
-        Pl[1] = (s - Pl[0]*v[0] - Pl[2]*v[2])/v[1];
-    }
+    // if planes intersect, determine the closest point
+    // to P1 and P2 as anchor point. The augmented functional
+    // I = 0.5*[ (Pl-P1)^2 + (Pl-P2)^2] + lambda1[ n1.(Pl-P1) ] +lambda2[ n2.(Pl-P2) ]
+    // where lambda1 and lambda2 are Lagrange multipliers.
+    // The optimality conditions I,Pl I,lambda1 I,lambda2 are 
+    // solved using the Schur complment
 
-    else {
-        Pl[1] = P1[1];
-        Pl[2] = P1[2];
-        Pl[0] = (s - Pl[1]*v[1] - Pl[2]*v[2])/v[0];
-    }
+    std::array<double,3>  dP = P2-P1;
+    std::array<double,2>  rhs = {{ dotProduct(n1,dP) , -dotProduct(n2,dP) }};
 
-    return(true); 
+    double det1 = rhs[0] - n12*rhs[1];
+    double det2 = rhs[1] - n12*rhs[0];
+    double lambda1 = det1 /detCB;
+    double lambda2 = det2 /detCB;
+
+    Pl = P1 +P2 -lambda1*n1 -lambda2*n2;
+    Pl *= 0.5;
+
+    return true ; 
 
 };
 

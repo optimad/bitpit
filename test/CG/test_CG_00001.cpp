@@ -91,15 +91,16 @@ int main(
         // Scope variables ------------------------------------------------------ //
         array<double, 3>            P0, P1, n0, n1;
         array<double, 3>            nL, PL;
+        bool intersect;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         P0.fill(0.0);
         n0.fill(0.0);
         n0[2] = 1.0;
-        P1.fill(0.0);
+        P1.fill(1.0);
         n1.fill(0.0);
         n1[0] = 1.0;
-        CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
+        intersect = CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN PLANES" << endl;
@@ -110,8 +111,11 @@ int main(
         cout << "    2nd plane: " << endl;
         cout << "      P1: " << P1 << endl;
         cout << "      n1: " << n1 << endl;
-        cout << "    intersection line is: "
-            << "(P: " << PL << ", n: " << nL << ")" << endl;
+        if(intersect){
+            cout << "    intersection line is: " << "(P: " << PL << ", n: " << nL << ")" << endl;
+        } else {
+            cout << "    Planes do not intersect " << endl;
+        }
         cout << endl;
 
         // Compute intersection (Test 2) ---------------------------------------- //
@@ -121,7 +125,7 @@ int main(
         P1.fill(0.0);
         n1.fill(0.0);
         n1[2] = 1.0;
-        CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
+        intersect = CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
 
         // Output message ------------------------------------------------------- //
         cout << "  Test 2 " << endl;
@@ -131,8 +135,11 @@ int main(
         cout << "    2nd plane: " << endl;
         cout << "      P1: " << P1 << endl;
         cout << "      n1: " << n1 << endl;
-        cout << "    intersection line is: "
-            << "(P: " << PL << ", n: " << nL << ")" << endl;
+        if(intersect){
+            cout << "    intersection line is: " << "(P: " << PL << ", n: " << nL << ")" << endl;
+        } else {
+            cout << "    Planes do not intersect " << endl;
+        }
         cout << endl;
     }
 
