@@ -31,6 +31,18 @@ namespace IO {
 namespace binary {
 
 /*!
+    Write the given container to the specified stream in binary format.
+
+    \param stream is the stream to write to
+    \param container is the container to write
+*/
+template<>
+void write(std::ostream &stream, const std::vector<bool> &container)
+{
+    std::copy(container.begin(), container.end(), std::ostream_iterator<bool>(stream));
+}
+
+/*!
     Write the given string to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -41,6 +53,18 @@ void write(std::ostream &stream, const std::string &string)
     size_t size = string.length() + 1;
     write(stream, size);
     write(stream, string.c_str(), size);
+}
+
+/*!
+    Read the given container to the specified stream in binary format.
+
+    \param stream is the stream to write to
+    \param container is the container to write
+*/
+template<>
+void read(std::istream &stream, std::vector<bool> &container)
+{
+    std::copy(std::istream_iterator<bool>(stream), {}, std::back_inserter(container));
 }
 
 /*!
