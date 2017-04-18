@@ -91,12 +91,14 @@ double              distancePointTriangle( array3D const &, array3D const &, arr
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int & ) ;
 double              distancePointSimplex( array3D const &, std::vector<array3D> const &, array3D &, int & );
 
-
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, std::vector<int> & );
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<array3D> &, std::vector<int> & );
-
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> * const, std::vector<array3D> * const );
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &);
+
+double              distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &);
+double              distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
+
 
 bool                intersectPointSegment( array3D const &, array3D const &, array3D const & ) ;
 bool                intersectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const & ) ;

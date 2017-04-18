@@ -877,6 +877,59 @@ std::vector<double> distanceCloudSimplex(
 };
 
 /*!
+ * Computes distance between two lines in 3D
+ * @param[in] n0 direction of first line
+ * @param[in] P0 point on first line
+ * @param[in] n1 direction of second line
+ * @param[in] P1 point on second line
+ * @return distance
+ */
+double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1, array3D const &n1)
+{
+    array3D xP0, xP1;
+    return distanceLineLine( P0, n0, P1, n1, xP0, xP1);
+}
+
+/*!
+ * Computes distance between two lines in 3D
+ * @param[in] n0 direction of first line
+ * @param[in] P0 point on first line
+ * @param[in] n1 direction of second line
+ * @param[in] P1 point on second line
+ * @param[out] xP0 projection of line1 on line0
+ * @param[out] xP1 projection of line0 on line1
+ * @return distance
+ */
+double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1, array3D const &n1, array3D &xP0, array3D &xP1)
+{
+    double n01 = dotProduct(n0,n1);
+    double det = 1. - n01*n01;
+
+    // check if lines are parallel 
+    if( std::abs(det) < 1.e-12){
+        double distance = distancePointLine(P0, P1, n1, xP1);
+        xP0 = projectPointLine(xP1, P0, n0);
+        return distance;
+    }
+
+
+    std::array<double,3> dP = P1-P0;
+    double rhs0 =  dotProduct(dP,n0);
+    double rhs1 = -dotProduct(dP,n1);
+
+    double det0 = rhs0 +rhs1*n01;
+    double det1 = rhs1 +rhs0*n01;
+
+    double s0 = det0/det;
+    double s1 = det1/det;
+
+    xP0 = P0 +s0*n0;
+    xP1 = P1 +s1*n1;
+
+    return norm2( xP0 - xP1); 
+}
+
+/*!
  * Computes intersection between two lines in 3D
  * @param[in] n1 direction of first line
  * @param[in] P1 point on first line
