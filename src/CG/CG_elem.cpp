@@ -78,7 +78,7 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
             zeros[count] = i ;
             ++count ;
         }
-    };
+    }
 
     if( count == 1){
         int vertex0 = (zeros[0] +1) %3;
@@ -87,6 +87,42 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
     } else if (count == 2) {
         count = 3 -zeros[0] -zeros[1] +1 ;
 
+    }
+
+    return count;
+};
+
+/*!
+ * Converts barycentric coordinates of a point on a simplex to a flag that indicates where the point lies.
+ * Flag = 0 Point lies within the simplex
+ * Flag = i Point coincides with the ith vertex of simplex or lies within the area spanned by the edges incident in the ith vertex
+ * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
+ * @param[in] lambda barycentric coordinates of point
+ * @return flag
+ */
+int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
+{
+
+    int N = lambda.size();
+    int count = 0;
+    std::array<int,3> positives = {{0,0,0}};
+
+    for( int i=0; i<N; ++i){
+        if ( lambda[i] > 0.) {
+            positives[count] = i ;
+            ++count ;
+        }
+    }
+
+    if( count == 1){
+        count = positives[0] +1;
+
+    } else if (count==2) {
+        int vertex0 = positives[0] +1;
+        count = -(vertex0+1) ;
+
+    } else {
+        count = 0;
     }
 
     return count;
