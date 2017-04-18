@@ -112,6 +112,98 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
     return lambda[0]*Q0 +lambda[1]*Q1;
 }
 
+/*!
+ * Computes projection of point on triangle
+ * @param[in] P point coordinates
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
+ * @return coordinates of projection point
+ */
+array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2)
+{
+    array3D lambda;
+    return projectPointTriangle( P, Q0, Q1, Q2, &lambda[0] );
+}
+
+/*!
+ * Computes projection of point on triangle
+ * @param[in] P point coordinates
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
+ * @param[out] lambda barycentric coordinates of projection point
+ * @return coordinates of projection point
+ */
+array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &lambda)
+{
+    return projectPointTriangle( P, Q0, Q1, Q2, &lambda[0] );
+}
+
+/*!
+ * Computes projection of point on triangle
+ * @param[in] P point coordinates
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
+ * @param[out] lambda barycentric coordinates of projection point
+ * @return coordinates of projection point
+ */
+array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda)
+{
+
+    array3D s0 = Q1-Q0 ;
+    array3D s1 = Q2-Q0 ;
+    array3D rP = P -Q0 ;
+
+    std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}} ;
+
+    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
+    double b[2] = { dotProduct(s0,rP), dotProduct(s1,rP) } ;
+
+
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, 1, A, 2, b, 2 ) ;
+    assert( info == 0 );
+    BITPIT_UNUSED( info ) ;
+
+    lambda[0] = 1. -b[0] -b[1] ;
+    lambda[1] = b[0] ;
+    lambda[2] = b[1] ;
+
+    int count = 0;
+    std::array<int,2> negatives = {{ 0, 0 }};
+
+    for( int i=0; i<3; ++i){
+        if( lambda[i] < 0){
+            negatives[count] = i ;
+            ++count ;
+        }
+    };
+
+    array3D xP;
+    if( count == 0){
+        xP = Q0 +b[0]*s0 +b[1]*s1 ;
+
+    } else if( count == 1){
+        std::array<double,2>   lambdaLocal ;
+        int vertex0 = (negatives[0] +1) %3 ;
+        int vertex1 = (vertex0     +1) %3 ;
+        xP = projectPointSegment(P, *r[vertex0], *r[vertex1], lambdaLocal);
+        lambda[negatives[0]] = 0. ;
+        lambda[vertex0] = lambdaLocal[0] ;
+        lambda[vertex1] = lambdaLocal[1] ;
+
+    } else {
+        int vertex0 = 3 -negatives[0] -negatives[1] ;
+        lambda[0] = 0.;
+        lambda[1] = 0.;
+        lambda[2] = 0.;
+        lambda[vertex0] = 1. ;
+        xP = *r[vertex0] ;
+
+    }
+
+}
 
 /*!
  * Computes distance point to line in 3D
