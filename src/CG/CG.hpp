@@ -96,6 +96,8 @@ array3D             projectPointSegment( array3D const &, array3D const &, array
 array3D             projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const & );
 array3D             projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D & );
 array3D             projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, double * );
+array3D             projectPointSimplex( array3D const &, std::vector<array3D> const & );
+array3D             projectPointSimplex( array3D const &, std::vector<array3D> const &, std::vector<double> & );
 
 
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;

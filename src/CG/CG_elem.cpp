@@ -310,6 +310,82 @@ array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const
 }
 
 /*!
+ * Computes projection of point onto a generic simplex
+ * @param[in] P point coordinates
+ * @param[in] V simplex vertices coordinates
+ * @return coordinates of projection point
+ */
+array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V)
+{
+    std::vector<double> lambda;
+    return projectPointSimplex( P, V, lambda);
+}
+
+/*!
+ * Computes projection of point onto a generic simplex
+ * @param[in] P point coordinates
+ * @param[in] V simplex vertices coordinates
+ * @param[out] lambda baycentric coordinates of projection point
+ * @return coordinates of projection point
+ */
+array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, std::vector<double> &lambda)
+{
+
+    int vertexCount(V.size());
+    lambda.resize(vertexCount);
+    lambda.shrink_to_fit();
+
+    if (vertexCount == 2) { //segment
+        return projectPointSegment(P, V[0], V[1], lambda.data());
+
+    } else if (vertexCount == 3) { //triangle
+        return projectPointTriangle(P, V[0], V[1], V[2], lambda.data());
+
+    } else { //generic convec polygon
+        double distance, minDistance(std::numeric_limits<double>::max());
+        int minTriangle;
+        array3D localLambda, minLambda;
+
+        // Compute the distance from each triangle in the simplex
+        int triangleCount = vertexCount - 2;
+
+        int vertex0 = 0;
+        int vertex1 = 1;
+        int vertex2 = 2;
+        for (int triangle=0; triangle < triangleCount; ++triangle) {
+
+            distance = distancePointTriangle(P, V[vertex0], V[vertex1], V[vertex2], localLambda);
+
+            if (distance <= minDistance) {
+
+                minDistance = distance;
+
+                minLambda = localLambda;
+                minTriangle = triangle;
+            }
+
+            vertex1++;
+            vertex2++;
+
+        } //next triangle
+
+        lambda.assign(vertexCount,0.);
+        vertex0 = 0;
+        vertex1 = 1+minTriangle;
+        vertex2 = 2+minTriangle;
+        lambda[vertex0] = minLambda[0];
+        lambda[vertex1] = minLambda[1];
+        lambda[vertex2] = minLambda[2];
+
+        return reconstructPointFromBarycentricTriangle( V[vertex0], V[vertex1], V[vertex2], minLambda);
+
+    }
+
+    BITPIT_UNREACHABLE("CANNOT BE REACHED");
+
+};
+
+/*!
  * Computes distance point to line in 3D
  * @param[in] P point coordinates
  * @param[in] Q point on line
