@@ -64,6 +64,56 @@ array3D projectPointPlane( array3D const &P, array3D const &Q, array3D const &n 
 }
 
 /*!
+ * Computes projection of point on line in 3D
+ * @param[in] P point coordinates
+ * @param[in] Q point on plane
+ * @param[in] n plane normal
+ * @return projection point
+ */
+array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1)
+{
+    std::array<double,2> lambda;
+    return projectPointSegment( P, Q0, Q1, &lambda[0] );
+}
+
+/*!
+ * Computes projection of point on line in 3D
+ * @param[in] P point coordinates
+ * @param[in] Q point on plane
+ * @param[in] n plane normal
+ * @param[out] lambda barycentric coordinates of projection point 
+ * @return projection point
+ */
+array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1, std::array<double,2> &lambda )
+{
+    return projectPointSegment( P, Q0, Q1, &lambda[0]);
+}
+
+/*!
+ * Computes projection of point on line in 3D
+ * @param[in] P point coordinates
+ * @param[in] Q point on plane
+ * @param[in] n plane normal
+ * @param[out] lambda barycentric coordinates of projection point 
+ * @return projection point
+ */
+array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1, double *lambda )
+{
+
+    array3D n = Q1 -Q0;
+    double t =  -dotProduct(n,Q0-P) / dotProduct(n,n) ;
+
+    // Restrict projection onto the segment
+    t = std::max( std::min( t, 1.), 0. ) ;
+
+    lambda[0] = 1. - t ;
+    lambda[1] = t ;
+
+    return lambda[0]*Q0 +lambda[1]*Q1;
+}
+
+
+/*!
  * Computes distance point to line in 3D
  * @param[in] P point coordinates
  * @param[in] Q point on line
