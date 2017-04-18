@@ -88,6 +88,7 @@ array3D             reconstructPointFromBarycentricSegment( array3D const &, arr
 array3D             reconstructPointFromBarycentricSegment( array3D const &, array3D const &, double* ); 
 array3D             reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, std::array<double,3> const & ); 
 array3D             reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, double * ); 
+array3D             reconstructPointFromBarycentricSimplex( std::vector<array3D> const &, std::vector<double> const & ); 
 
 array3D             projectPointLine( array3D const &, array3D const &, array3D const & );
 array3D             projectPointPlane( array3D const &, array3D const &, array3D const & );

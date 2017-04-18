@@ -179,6 +179,24 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
 }
 
 /*!
+ * Reconstructs a point from barycentric coordinates of a simplex
+ * @param[in] V vertices of simplex
+ * @param[in] lambda barycentric coordinates
+ * @return reconstructed Point
+ */
+array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &V, std::vector<double> const &lambda)
+{
+    array3D xP = {{0.,0.,0.}};
+    int N(V.size());
+
+    for(int i=0; i<N; ++i){
+        xP += lambda[i]*V[i];
+    }
+
+    return xP;
+}
+
+/*!
  * Computes projection of point on line in 3D
  * @param[in] P point coordinates
  * @param[in] Q point on line
