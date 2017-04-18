@@ -35,6 +35,23 @@ namespace bitpit{
 namespace CGElem{
 
 /*!
+    \ingroup CG
+    \{
+*/
+
+/*!
+ * Computes projection of point on line in 3D
+ * @param[in] P point coordinates
+ * @param[in] Q point on line
+ * @param[in] n line direction
+ * @return projection point
+ */
+array3D projectPointLine( array3D const &P, array3D const &Q, array3D const &n )
+{
+    return Q + dotProduct(P - Q, n) * n;
+}
+
+/*!
  * Computes distance point to line in 3D
  * @param[in] P point coordinates
  * @param[in] Q point on line
