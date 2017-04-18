@@ -81,6 +81,7 @@ static const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
 
 
 array3D             projectPointLine( array3D const &, array3D const &, array3D const & );
+array3D             projectPointPlane( array3D const &, array3D const &, array3D const & );
 
 
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;

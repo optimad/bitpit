@@ -52,6 +52,18 @@ array3D projectPointLine( array3D const &P, array3D const &Q, array3D const &n )
 }
 
 /*!
+ * Computes projection of point on line in 3D
+ * @param[in] P point coordinates
+ * @param[in] Q point on plane
+ * @param[in] n plane normal
+ * @return projection point
+ */
+array3D projectPointPlane( array3D const &P, array3D const &Q, array3D const &n )
+{
+    return P - dotProduct(P - Q, n) * n;
+}
+
+/*!
  * Computes distance point to line in 3D
  * @param[in] P point coordinates
  * @param[in] Q point on line
