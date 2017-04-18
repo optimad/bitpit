@@ -74,7 +74,7 @@ void BinaryArchive::open(const std::string &name, const std::string &extension,
     }
 
     FileHandler fileHandler("", name, extension);
-    if (block > 0) {
+    if (block >= 0) {
         fileHandler.setParallel(true);
         fileHandler.setBlock(block);
     }
