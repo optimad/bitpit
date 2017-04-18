@@ -427,111 +427,27 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
 /*!
  * Computes distance point to triangle
  * @param[in] P point coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
  * @param[out] xP closest point on triangle
  * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
  * @return distance
  */
 double distancePointTriangle(
         std::array< double, 3 > const &P,
+        std::array< double, 3 > const &Q0,
         std::array< double, 3 > const &Q1,
         std::array< double, 3 > const &Q2,
-        std::array< double, 3 > const &Q3,
         std::array< double, 3 >       &xP,
         int                      &flag
         ) {
 
-    std::array< std::array< double, 3 >, 3 > r = {{Q1, Q2, Q3}} ;
-
-    double              d;
-    std::array< double, 3 >  n;
-    int                 k, i, j, vertex0, vertex1 ;
-
-    int                 count, oneNegative, flagLocal ;
-    std::array<int,2>        twoNegative ;
-
-    double              *A = new double [6]  ; 
-    double              *lambda = new double [ 3 ] ;
-
-
-    // Project P onto the plane supporting the triangle
-    n = crossProduct(Q2 - Q1, Q3 - Q1);
-    n = n/norm(n, 2);
-    d = distancePointPlane(P,Q1,n,xP);
-
-    k = 0 ;
-    for( i=0; i<2; ++i){ //columns
-        for( j=0; j<3; ++j){ //rows
-
-            A[k] =  r[i][j] - r[2][j] ;
-            ++k ;
-
-        };
-    };
-
-
-    d  = distancePointPlane(P,Q1,n,xP );
-
-    lambda[0] = xP[0] -r[2][0] ;
-    lambda[1] = xP[1] -r[2][1];
-    lambda[2] = xP[2] -r[2][2];
-
-    int info = LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, 1, A, 3, lambda, 3 ) ;
-    assert( info == 0 ) ;
-    BITPIT_UNUSED( info ) ;
-
-
-    lambda[2] = 1. -lambda[0] -lambda[1] ;
-
-    count = 0;
-    twoNegative.fill(0.) ;
-    for( i=0; i<3; ++i){
-        if( lambda[i] < 0){
-            oneNegative = i;
-            twoNegative[count] = i ;
-            ++count ;
-        }
-    };
-
-    if( count == 0){
-        flag = 0 ;
-    }
-
-    else{
-        if( count == 1){
-            vertex0 = (oneNegative +1) %3 ;
-            vertex1 = (vertex0     +1) %3 ;
-            d       =  distancePointSegment(P,r[vertex0],r[vertex1],xP, flagLocal)  ;
-
-            if( flagLocal ==0 ){
-                flag    = -(vertex0+1) ;
-            }
-
-            else if( flagLocal == 1){
-                flag = vertex0+1 ; 
-            }
-            
-            else if( flagLocal == 2){
-                flag = vertex1+1 ; 
-            };
-            
-        }
-
-        else{
-            vertex0 = 3 -twoNegative[0] -twoNegative[1] ;
-            flag    = (vertex0 +1) ;
-            xP      = r[vertex0] ;
-            d       = norm2( P - xP)  ;
-        };
-
-    };
-
-    delete[] A ;
-    delete[] lambda ;
-
-    return d;
+    std::array<double,3> lambda;
+    double distance =  distancePointTriangle( P, Q0, Q1, Q2, lambda);
+    flag = convertBarycentricToFlagTriangle(lambda);
+    xP = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda);
+    return distance;
 
 };
 
@@ -556,83 +472,41 @@ double distancePointTriangle(
         int                           &flag
         ) {
 
-    int                 i, vertex0, vertex1 ;
+    xP = projectPointTriangle(P, Q0, Q1, Q2, lambda);
+    flag = convertBarycentricToFlagTriangle(lambda);
 
-    int                 count, oneNegative ;
-    std::array<int,2>   twoNegative ;
-    std::array<double,2>   lambdaLocal ;
-    int                    flagLocal ;
+    return norm2(P-xP);
 
-    double              d;
+};
 
-    std::array<double,3>    s0 = Q1-Q0 ;
-    std::array<double,3>    s1 = Q2-Q0 ;
-    std::array<double,3>    rP = P -Q0 ;
+/*!
+ * Computes distance point to triangle
+ * @param[in] P point coordinates
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
+ * @return distance
+ */
+double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2)
+{
+    array3D xP = projectPointTriangle(P, Q0, Q1, Q2);
+    return norm2(P-xP);
 
-    std::array<const std::array<double,3>*,3> r = {{&Q0, &Q1, &Q2}} ;
+};
 
-    double              A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
-    double              b[2] = { dotProduct(s0,rP), dotProduct(s1,rP) } ;
-
-
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, 1, A, 2, b, 2 ) ;
-    assert( info == 0 );
-    BITPIT_UNUSED( info ) ;
-
-    lambda[0] = 1. -b[0] -b[1] ;
-    lambda[1] = b[0] ;
-    lambda[2] = b[1] ;
-
-
-    count = 0;
-    twoNegative.fill(0.) ;
-    for( i=0; i<3; ++i){
-        if( lambda[i] < 0){
-            oneNegative = i;
-            twoNegative[count] = i ;
-            ++count ;
-        }
-    };
-
-    if( count == 0){
-        flag = 0 ;
-        xP = Q0 +b[0]*s0 +b[1]*s1 ;
-        d  = norm2( P - xP)  ;
-
-    } else if( count == 1){
-        vertex0 = (oneNegative +1) %3 ;
-        vertex1 = (vertex0     +1) %3 ;
-        d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal, flagLocal)  ;
-        lambda[oneNegative] = 0. ;
-        lambda[vertex0] = lambdaLocal[0] ;
-        lambda[vertex1] = lambdaLocal[1] ;
-
-        if( flagLocal ==0 ){
-            flag    = -(vertex0+1) ;
-        }
-
-        else if( flagLocal == 1){
-            flag = vertex0+1 ; 
-        }
-        
-        else if( flagLocal == 2){
-            flag = vertex1+1 ; 
-        };
-
-    } else {
-        vertex0 = 3 -twoNegative[0] -twoNegative[1] ;
-        flag    = (vertex0 +1) ;
-        lambda.fill(0.);
-        lambda[vertex0] = 1. ;
-        xP      = *r[vertex0] ;
-        d       = norm2( P - xP)  ;
-
-
-    }
-
-
-    return d;
-
+/*!
+ * Computes distance point to triangle
+ * @param[in] P point coordinates
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
+ * @param[out] lambda barycentric coordinates of projection point
+ * @return distance
+ */
+double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &lambda)
+{
+    array3D xP = projectPointTriangle(P, Q0, Q1, Q2, lambda);
+    return norm2(P-xP);
 };
 
 /*!
