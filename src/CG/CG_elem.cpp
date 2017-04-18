@@ -960,63 +960,44 @@ std::vector<double> distanceCloudTriangle(
  * @param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
  * @return distance
  */
-double distancePointSimplex(
-        std::array< double, 3 >            const &P,
-        std::vector< std::array< double, 3 > >  const &V,
-        std::array< double, 3 >                  &xP,
-        int                                 &flag
-        ) {
-    // Local variables
-    int                     local, n( V.size() );
-    double                  d = 1.0e+18, dT;
-    std::array< double, 3>       xT;
+double distancePointSimplex( array3D const &P, std::vector<array3D> const &V, array3D &xP, int &flag)
+{
 
-    // Counters
-    int                     i, j, p, m;
+    std::vector<double> lambda;
+    double distance = distancePointSimplex( P, V, lambda);
+    xP = reconstructPointFromBarycentricSimplex( V, lambda );
+    flag = convertBarycentricToFlagSimplex( lambda );
 
-    if (n == 2) {
+    return distance; 
 
-        // Segment -------------------------------------------------------------- //
-        d = distancePointSegment(P, V[0], V[1], xP, flag);
+};
 
-    }
-    if (n == 3) {
+/*!
+ * Computes distances of point to generic simplex
+ * @param[in] P point coordinates
+ * @param[in] V simplex vertices coordinates
+ * @return distance
+ */
+double distancePointSimplex( array3D const &P, std::vector<array3D> const &V)
+{
+    std::vector<double> lambda(V.size());
+    return distancePointSimplex( P, V, lambda);
 
-        // Triangle ------------------------------------------------------------- //
-        d = distancePointTriangle(P, V[0], V[1], V[2], xP, flag);
+};
 
-    }
-    else {
+/*!
+ * Computes distances of point to generic simplex
+ * @param[in] P point coordinates
+ * @param[in] V simplex vertices coordinates
+ * @param[out] lambda barycentric coordinates
+ * @return distance
+ */
+double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std::vector<double> &lambda)
+{
+    array3D xP = projectPointSimplex( P, V, lambda);
+    return norm2(P-xP); 
 
-        // Generic convex polygon ----------------------------------------------- //
-
-        // Compute the distance from each triangle in the simplex
-        p = n - 2;
-        m = 0;
-        j = 1;
-        while (m < p) {
-            i = j;
-            j = i+1;
-            dT = distancePointTriangle(P, V[0], V[i], V[j], xT, local);
-            if (dT <= d) {
-                d = dT;
-                xP = xT;
-                switch (local) {
-                    case -1 : { if (m == 0) {flag = -1;} break; }
-                    case -2 : { flag = -i; break; }
-                    case -3 : { if (m == p-1) {flag = -j;} break; }
-                    case 0  : { flag =  0; break; }
-                    case 1  : { flag =  1; break; }
-                    case 2  : { flag =  i; break; }
-                    case 3  : { flag =  j; break; }
-                }
-            }
-            m++;
-        } //next i
-
-    }
-
-    return(d); };
+};
 
 /*!
  * Computes distances of point cloud to generic simplex

@@ -114,7 +114,9 @@ BITPIT_DEPRECATED( double distancePointTriangle( array3D const &, array3D const 
 BITPIT_DEPRECATED( double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int & )) ;
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &);
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &);
-double              distancePointSimplex( array3D const &, std::vector<array3D> const &, array3D &, int & );
+BITPIT_DEPRECATED( double distancePointSimplex( array3D const &, std::vector<array3D> const &, array3D &, int & )) ;
+double              distancePointSimplex( array3D const &, std::vector<array3D> const & );
+double              distancePointSimplex( array3D const &, std::vector<array3D> const &, std::vector<double> & );
 
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, std::vector<int> & );
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<array3D> &, std::vector<int> & );
