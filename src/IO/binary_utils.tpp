@@ -127,6 +127,7 @@ void read(std::istream &stream, std::vector<T> &container)
     size_t size;
     read(stream, size);
 
+    container.resize(size);
     read(stream, container.data(), size * sizeof(T));
 }
 
