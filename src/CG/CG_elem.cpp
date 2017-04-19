@@ -736,120 +736,27 @@ std::vector<double> distanceCloudTriangle(
         std::vector< int >                   &flag
         ) {
 
-    int                         N( P.size() ) ;
+    int N( P.size() );
+    std::vector<array3D> lambda;
+    std::vector<double> d = distanceCloudTriangle( P, Q1, Q2, Q3, lambda );
 
-    std::array< std::array<double,3>, 3 > r = {{Q1, Q2, Q3}} ;
-    double                      *A = new double [6]  ; 
-    double                      *ptrlambda = new double [ 3*N ] ;
+    flag.resize(N);
+    flag.shrink_to_fit();
+    std::vector<int>::iterator flagItr = flag.begin();
 
-    // Local variables
-    std::vector<double>      d(N);
-    std::array< double, 3 >  n;
-    int                 i, j, k, vertex0, vertex1;
+    xP.resize(N);
+    xP.shrink_to_fit();
+    std::vector<array3D>::iterator xPItr = xP.begin();
 
-    std::array< double, 3 >  lambda ;
-    int                 count, oneNegative, flagLocal ;
-    std::array<int,2>        twoNegative ;
+    for( auto const &l : lambda){
+        *xPItr   = reconstructPointFromBarycentricTriangle( Q1, Q2, Q3, l);
+        *flagItr = convertBarycentricToFlagTriangle(l);
 
+        ++xPItr;
+        ++flagItr;
+    }
 
-    xP.resize(N) ;
-    flag.resize(N) ;
-
-    // Project P onto the plane supporting the triangle
-    n = crossProduct(Q2 - Q1, Q3 - Q1);
-    n = n/norm(n, 2);
-
-    k = 0 ;
-    for( i=0; i<2; ++i){ //columns
-        for( j=0; j<3; ++j){ //rows
-
-            A[k] =  r[i][j] - r[2][j] ;
-            ++k ;
-
-        };
-    };
-
-
-    i=0 ;
-    k=0 ;
-    for( const auto & p :P){
-
-        d[i]  = distancePointPlane( p, Q1, n, xP[i] );
-
-        ptrlambda[k  ] = xP[i][0] -r[2][0] ;
-        ptrlambda[k+1] = xP[i][1] -r[2][1];
-        ptrlambda[k+2] = xP[i][2] -r[2][2];
-
-        k += 3 ;
-        i++ ;
-    };
-
-    int info = LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, N, A, 3, ptrlambda, 3 ) ;
-    assert( info == 0 );
-    BITPIT_UNUSED( info ) ;
-
-    j =0 ;
-    for( k=0; k<N; ++k) {
-
-        lambda[0] = ptrlambda[j] ;
-        lambda[1] = ptrlambda[j+1] ;
-        lambda[2] = 1. -lambda[0] -lambda[1] ;
-
-        j += 3 ;
-
-        i = 0 ;
-        count = 0;
-        twoNegative.fill(0.) ;
-
-        for( const auto& value : lambda){
-            if( value < 0){
-                oneNegative = i;
-                twoNegative[count] = i ;
-                ++count ;
-            }
-
-            ++i;
-        };
-
-        if( count == 0){
-            flag[k] = 0 ;
-        }
-
-        else{
-            if( count == 1){
-                vertex0 = (oneNegative +1) %3 ;
-                vertex1 = (vertex0     +1) %3 ;
-
-                d[k]       =  distancePointSegment( P[k],r[vertex0],r[vertex1],xP[k], flagLocal)  ;
-
-                if( flagLocal ==0 ){
-                    flag[k]    = -(vertex0+1) ;
-                }
-
-                else if( flagLocal == 1){
-                    flag[k] = vertex0+1 ; 
-                }
-
-                else if( flagLocal == 2){
-                    flag[k] = vertex1+1 ; 
-                };
-            }
-
-            else{
-                vertex0 = 3 -twoNegative[0] -twoNegative[1] ;
-                flag[k] = (vertex0 +1) ;
-                xP[k]   = r[vertex0] ;
-                d[k]    =  norm2( P[k] - r[vertex0] )  ;
-            };
-
-        };
-
-    };
-
-    delete[] A ;
-    delete[] ptrlambda ;
-
-    return d ;
+    return d;
 
 };
 
@@ -872,110 +779,79 @@ std::vector<double> distanceCloudTriangle(
         std::vector<array3D>* const lambdaExt
         ) {
 
-    int                     N( cloud.size() ) ;
-    std::vector<double>     ds(N,0.);
+    int N(cloud.size());
 
-    int                     i, n, vertex0, vertex1;
+    std::vector<array3D> xP, lambda;
 
-    int                     count, oneNegative ;
-    std::array<int,2>       twoNegative ;
-    std::array<double,2>    lambdaLocal ;
+    std::vector<array3D> *xPPtr = ( xPExt == nullptr) ? &xP : xPExt;
+    std::vector<array3D> *lambdaPtr = ( lambdaExt == nullptr) ? &lambda : lambdaExt;
+    
+    xPPtr->resize(N);
+    lambdaPtr->resize(N);
 
-    array3D                 xPInt, lambdaInt ;
-    array3D                *xPPtr, *lambdaPtr ;
+    _projectPointsTriangle( N, cloud.data(), Q0, Q1, Q2, &(xPPtr->at(0)), &(*lambdaPtr)[0][0] );
 
-    array3D    s0 = Q1-Q0 ;
-    array3D    s1 = Q2-Q0 ;
+    std::vector<array3D>::iterator projection = xPPtr->begin();
 
-    std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}} ;
+    std::vector<double> d(N);
+    std::vector<double>::iterator distance = d.begin();
 
-    double                  A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
-    double                  *B = new double [2*N] ;
-    std::array<double,3>    rP;
+    for( const auto &point : cloud){
+        *distance = norm2( point - *projection);
 
-    for( i=0; i<N; ++i){
-        rP = cloud[i] -Q0 ;
-        B[2*i]   = dotProduct(s0,rP) ; 
-        B[2*i+1] = dotProduct(s1,rP) ; 
+        ++projection;
+        ++distance;
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, N, A, 2, B, 2 ) ;
-    assert( info == 0 );
-    BITPIT_UNUSED( info ) ;
+    return d;
 
-    if( xPExt != nullptr) {
-        xPExt->resize(N) ;
-        xPPtr = &(xPExt->at(0) ) ;
-    } else {
-        xPPtr = &xPInt ;
+};
+
+/*!
+ * Computes distances of point cloud to triangle
+ * @param[in] cloud point cloud coordinates
+ * @param[in] Q1 first triangle vertex
+ * @param[in] Q2 second triangle vertex
+ * @param[in] Q3 third triangle vertex
+ * @return distances
+ */
+std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2)
+{ 
+
+    std::vector<array3D> lambda(cloud.size());
+    return distanceCloudTriangle( cloud, Q0, Q1, Q2, lambda);
+};
+
+/*!
+ * Computes distances of point cloud to triangle
+ * @param[in] cloud point cloud coordinates
+ * @param[in] Q1 first triangle vertex
+ * @param[in] Q2 second triangle vertex
+ * @param[in] Q3 third triangle vertex
+ * @param[out] lambda barycentric coordinates of projection points
+ * @return distances
+ */
+std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D> &lambda )
+{ 
+    int N(cloud.size());
+
+    lambda.resize(N);
+
+    std::vector<array3D> xP(N);
+    _projectPointsTriangle( N, cloud.data(), Q0, Q1, Q2, xP.data(), &lambda[0][0]);
+
+    std::vector<double> d(N);
+    std::vector<double>::iterator distance = d.begin();
+
+    std::vector<array3D>::iterator projection = xP.begin();
+    for( const auto &point : cloud){
+        *distance = norm2( point - *projection);
+
+        ++projection;
+        ++distance;
     }
 
-    if( lambdaExt != nullptr) {
-        lambdaExt->resize(N) ;
-        lambdaPtr = &(lambdaExt->at(0) ) ;
-    } else {
-        lambdaPtr = &lambdaInt ;
-    }
-
-    for(n=0; n<N; ++n){
-
-        const array3D &P = cloud[n] ;
-        array3D &lambda = *lambdaPtr ;
-        array3D &xP = *xPPtr ;
-        double &d = ds[n] ;
-        double *b = &B[2*n] ;
-
-        lambda[0] = 1. -b[0] -b[1] ;
-        lambda[1] = b[0] ;
-        lambda[2] = b[1] ;
-
-
-        count = 0;
-        twoNegative.fill(0.) ;
-        for( i=0; i<3; ++i){
-            if( lambda[i] < 0){
-                oneNegative = i;
-                twoNegative[count] = i ;
-                ++count ;
-            }
-        };
-
-        if( count == 0){
-            xP = Q0 +b[0]*s0 +b[1]*s1 ;
-            d  = norm2( P - xP)  ;
-
-        } else if( count == 1){
-            int flagLocal ;
-            vertex0 = (oneNegative +1) %3 ;
-            vertex1 = (vertex0     +1) %3 ;
-            d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal, flagLocal)  ;
-            lambda[oneNegative] = 0. ;
-            lambda[vertex0] = lambdaLocal[0] ;
-            lambda[vertex1] = lambdaLocal[1] ;
-
-        } else {
-            vertex0 = 3 -twoNegative[0] -twoNegative[1] ;
-            lambda.fill(0.);
-            lambda[vertex0] = 1. ;
-            xP      = *r[vertex0] ;
-            d       = norm2( P - xP)  ;
-
-        }
-
-        if( xPExt != nullptr){
-            ++xPPtr ;
-        }
-
-        if( lambdaExt != nullptr){
-            ++lambdaPtr ;
-        }
-
-    }
-
-    delete [] B ;
-
-    return ds ;
-
+    return d;
 };
 
 /*!
