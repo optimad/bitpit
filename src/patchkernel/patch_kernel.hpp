@@ -453,6 +453,12 @@ protected:
 	void removeGhostFromExchangeTargets(const long ghostId);
 #endif
 
+	template<typename item_t, typename id_t = long>
+	std::unordered_map<id_t, id_t> consecutiveItemRenumbering(PiercedVector<item_t, id_t> &container, long offset);
+
+	template<typename item_t, typename id_t = long>
+	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
+
 private:
 	double DEFAULT_TOLERANCE = 1e-14;
 
@@ -501,12 +507,6 @@ private:
 	void setId(int id);
 
 	std::array<double, 3> evalElementCentroid(const Element &element) const;
-
-	template<typename item_t, typename id_t = long>
-	std::unordered_map<id_t, id_t> consecutiveItemRenumbering(PiercedVector<item_t, id_t> &container, long offset);
-
-	template<typename item_t, typename id_t = long>
-	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 };
 
 }
