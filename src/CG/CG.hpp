@@ -107,14 +107,17 @@ array3D             restrictPointTriangle( array3D const &, array3D const &, arr
 
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;
 double              distancePointPlane( array3D const &, array3D const &, array3D const &, array3D & ) ;
+
 BITPIT_DEPRECATED( double distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, int & ));
 BITPIT_DEPRECATED( double distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, std::array<double,2> &, int & )) ;
 double              distancePointSegment( array3D const &, array3D const &, array3D const & );
 double              distancePointSegment( array3D const &, array3D const &, array3D const &, std::array<double,2> & );
+
 BITPIT_DEPRECATED( double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, int & )) ;
 BITPIT_DEPRECATED( double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int & )) ;
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &);
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &);
+
 BITPIT_DEPRECATED( double distancePointSimplex( array3D const &, std::vector<array3D> const &, array3D &, int & )) ;
 double              distancePointSimplex( array3D const &, std::vector<array3D> const & );
 double              distancePointSimplex( array3D const &, std::vector<array3D> const &, std::vector<double> & );
@@ -124,8 +127,9 @@ BITPIT_DEPRECATED( std::vector<double> distanceCloudTriangle( std::vector<array3
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &);
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> & );
 
+BITPIT_DEPRECATED( std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<array3D> &, std::vector<int> & ) );
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &);
-std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<array3D> &, std::vector<int> & );
+std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<std::vector<double>> &);
 
 double              distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &);
 double              distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);

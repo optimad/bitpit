@@ -909,144 +909,154 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std
  * @param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
  * @return distance
  */
-std::vector<double> distanceCloudSimplex(
-        std::vector< std::array< double, 3 > >  const &P,
-        std::vector< std::array< double, 3 > >  const &V,
-        std::vector< std::array< double, 3 > >        &xP,
-        std::vector< int >                       &flag
-        ) {
+std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<array3D> &xP, std::vector<int> &flag)
+{
 
+    std::vector<std::vector<double>> lambda;
+    std::vector<double> d = distanceCloudSimplex( cloud, V, lambda);
 
-    // Local variables
-    int                     N( P.size() ), n( V.size() );
-    std::vector<double>          d(N,1.0e+18) ;
+    int cloudCount( cloud.size() );
 
-    // Counters
+    xP.resize(cloudCount);
+    xP.shrink_to_fit();
+    std::vector<array3D>::iterator xPItr = xP.begin();
 
-    if (n == 2) { //Segment
+    flag.resize(cloudCount);
+    flag.shrink_to_fit();
+    std::vector<int>::iterator flagItr = flag.begin();
 
-        int     i ;
+    for( const auto &l : lambda){
+        *flagItr = convertBarycentricToFlagSimplex( l );
+        *xPItr = reconstructPointFromBarycentricSimplex( V, l ); 
 
-        xP.resize(N) ;
-        flag.resize(N) ;
-
-        i= 0 ;
-        for( const auto & point :P ){
-            d[i] = distancePointSegment(point, V[0], V[1], xP[i], flag[i]);
-            ++i ;
-        }
-
+        ++xPItr;
+        ++flagItr;
     }
 
-    else if (n == 3) {  // Triangle ------------------------------------------------------------- //
-
-        d = distanceCloudTriangle(P, V[0], V[1], V[2], xP, flag);
-
-    }
-
-    else { // Generic convex polygon ----------------------------------------------- //
-
-        int                             i, j, p, m, t;
-
-        std::vector< int >                   local;
-        std::vector< double >                dT;
-        std::vector< std::array< double, 3> >     xT;
-
-        p = n - 2;
-        m = 0;
-        j = 1;
-
-        while (m < p) { // foreach triangle
-            i = j;
-            j = i+1;
-            dT = distanceCloudTriangle(P, V[0], V[i], V[j], xT, local);
-
-            for( t=0; t<N; ++t ){ //foreach point of cloud
-
-                if (dT[t] <= d[t]) {
-                    d[t] = dT[t];
-                    xP[t] = xT[t];
-                    switch (local[t]) {
-                        case -1 : { if (m == 0) {flag[t] = -1;} break; }
-                        case -2 : { flag[t] = -i; break; }
-                        case -3 : { if (m == p-1) {flag[t] = -j;} break; }
-                        case 0  : { flag[t] =  0; break; }
-                        case 1  : { flag[t] =  1; break; }
-                        case 2  : { flag[t] =  i; break; }
-                        case 3  : { flag[t] =  j; break; }
-                    }
-                }
-            } //foreach point in cloud
-
-            m++;
-
-        } // end triangles
-    } //end generic polygon
-
-    return(d); 
-
+    return d; 
 };
 
 /*!
  * Computes distances of point cloud to generic simplex
  * @param[in] P point cloud coordinates
  * @param[in] V simplex vertices coordinates
- * @param[inout] xPExt pointer to std::vector to be filled with the projection point; 
  * @return distance
  */
-std::vector<double> distanceCloudSimplex(
-        std::vector<array3D>  const &P,
-        std::vector<array3D>  const &V
-        ) {
-    int                 N(P.size()), n(V.size());
+std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::vector<array3D> const &V)
+{
+    int cloudCount(P.size()), vertexCount(V.size());
 
 
-    if (n == 2) { //Segment
+    if (vertexCount == 2) { //Segment
+        std::vector<double> d(cloudCount) ;
 
-        std::vector<double> d(N) ;
-
-        array3D xPInt ;
-        std::array<double,2> lambda ;
-        int flag ;
-
-        for( int i=0; i<N; ++i ){
-            d[i] = distancePointSegment(P[i], V[0], V[1], xPInt, lambda, flag);
+        for( int i=0; i<cloudCount; ++i ){
+            d[i] = distancePointSegment(P[i], V[0], V[1]);
         }
 
-        return(d) ;
+        return d;
 
-    }
+    } else if (vertexCount == 3) {  // Triangle 
+        return distanceCloudTriangle(P, V[0], V[1], V[2]);
 
-    else if (n == 3) {  // Triangle ------------------------------------------------------------- //
+    } else { // Generic convex polygon 
 
-        return( distanceCloudTriangle(P, V[0], V[1], V[2], nullptr, nullptr ) );
+        std::vector<double> d(cloudCount,std::numeric_limits<double>::max()) ;
 
-    }
+        int triangleCount = vertexCount - 2;
+        int vertex0 = 0;
+        int vertex1 = 1;
+        int vertex2 = 2;
 
-    else { // Generic convex polygon ----------------------------------------------- //
-
-        std::vector<double> d(N,1.e18) ;
-        int i, j, p, m;
-
-        p = n - 2;
-        m = 0;
-        j = 1;
-
-        while (m < p) { // foreach triangle
-            i = j;
-            j = i+1;
-            std::vector<double> dT = distanceCloudTriangle(P, V[0], V[i], V[j], nullptr, nullptr);
+        for (int triangle=0; triangle < triangleCount; ++triangle) { // foreach triangle
+            std::vector<double> dT = distanceCloudTriangle(P, V[vertex0], V[vertex1], V[vertex2]);
 
             d = min(d,dT) ;
 
-            m++;
+            ++vertex1;
+            ++vertex2;
 
-        } // end triangles
+        }
 
-        return(d); 
+        return d; 
     }
 
+    BITPIT_UNREACHABLE("CANNOT REACH");
 
+
+};
+
+/*!
+ * Computes distances of point cloud to generic simplex
+ * @param[in] cloud point cloud coordinates
+ * @param[in] V simplex vertices coordinates
+ * @param[out] lambda barycentric coordinates of projectio points
+ * @return distance
+ */
+std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<std::vector<double>> &lambda)
+{
+    int cloudCount(cloud.size()), vertexCount(V.size());
+
+    lambda.resize(cloudCount, std::vector<double>(vertexCount,0) );
+    lambda.shrink_to_fit();
+
+    if (vertexCount == 2) { //Segment
+        std::vector<double> d(cloudCount) ;
+        d.shrink_to_fit();
+
+        std::vector<double>::iterator dItr = d.begin();
+        std::vector<std::vector<double>>::iterator lambdaItr = lambda.begin();
+
+        array3D proj;
+
+        for( auto const &point : cloud ){
+            proj = projectPointSegment(point, V[0], V[1], lambdaItr->data());
+            *dItr = norm2( point-proj);
+            ++dItr;
+            ++lambdaItr;
+        }
+
+        return d;
+
+    } else if (vertexCount == 3) {  // Triangle 
+        std::vector<array3D> lambdaTemp(cloudCount) ;
+        auto lambdaItr = lambda.begin();
+        std::vector<double> d =  distanceCloudTriangle(cloud, V[0], V[1], V[2], lambdaTemp);
+        for(auto const &l : lambdaTemp){
+            std::copy( l.begin(), l.end(), lambdaItr->begin());
+            ++lambdaItr;
+        }
+
+    } else { // Generic convex polygon 
+
+        std::vector<double> d(cloudCount,std::numeric_limits<double>::max()) ;
+        std::vector<double> dTemp(cloudCount) ;
+        std::vector<array3D> lambdaTemp(cloudCount) ;
+
+        int triangleCount = vertexCount - 2;
+        int vertex0 = 0;
+        int vertex1 = 1;
+        int vertex2 = 2;
+
+        for (int triangle=0; triangle < triangleCount; ++triangle) { // foreach triangle
+            dTemp = distanceCloudTriangle(cloud, V[vertex0], V[vertex1], V[vertex2], lambdaTemp);
+
+            for(int i=0; i< cloudCount; ++i){
+                if( dTemp[i] < d[i]){
+                    d[i] = dTemp[i];
+                    std::copy( lambdaTemp[i].begin(), lambdaTemp[i].end(), lambda[i].begin());
+                }
+            }
+
+            ++vertex1;
+            ++vertex2;
+
+        }
+
+        return d; 
+    }
+
+    BITPIT_UNREACHABLE("CANNOT REACH");
 };
 
 /*!
