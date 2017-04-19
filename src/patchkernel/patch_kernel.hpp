@@ -505,6 +505,8 @@ private:
 	template<typename item_t, typename id_t = long>
 	std::unordered_map<id_t, id_t> consecutiveItemRenumbering(PiercedVector<item_t, id_t> &container, long offset);
 
+	template<typename item_t, typename id_t = long>
+	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 };
 
 }

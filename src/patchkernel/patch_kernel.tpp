@@ -38,6 +38,33 @@ namespace bitpit {
 template<typename item_t, typename id_t>
 std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVector<item_t, id_t> &container, long offset)
 {
+	// Build renumber map
+	std::unordered_map<id_t, id_t> renumberMap;
+
+	id_t counter = offset;
+	for(const item_t &item : container) {
+		id_t id_original = item.getId();
+		id_t id_final    = counter++;
+
+		renumberMap.insert({id_original, id_final});
+	}
+
+	// Renumber items
+	mappedItemRenumbering(container, renumberMap);
+
+	return renumberMap;
+}
+
+/*!
+	Renumber the ids of the items in the specified container.
+
+	\param container is the container
+	\param renumberMap is the map that will be used for the renumer
+*/
+template<typename item_t, typename id_t>
+void PatchKernel::mappedItemRenumbering(PiercedVector<item_t, id_t> &container,
+                                        const std::unordered_map<id_t, id_t> &renumberMap)
+{
 	// Find an unused id
 	id_t unusedId = std::numeric_limits<id_t>::max();
 	while (container.exists(unusedId)) {
@@ -48,15 +75,15 @@ std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVe
 	}
 
 	// Renumber the items
-	std::unordered_map<id_t, id_t> renumberMap;
 	std::unordered_map<id_t, id_t> conflictMap;
 
-	id_t counter = offset;
 	for(const item_t &item : container) {
-		id_t id_current     = item.getId();
-		id_t id_consecutive = counter++;
+		// Original id of the item
+		//
+		// To get the original id of the item we use the conflict map, once
+		// we get the id of an item we can remove it from the conflict map.
+		id_t id_current = item.getId();
 
-		// Update renumber map
 		id_t id_original;
 		auto conflictMapItr = conflictMap.find(id_current);
 		if (conflictMapItr != conflictMap.end()) {
@@ -66,17 +93,18 @@ std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVe
 			id_original = id_current;
 		}
 
-		renumberMap.insert({id_original, id_consecutive});
+		// Final id of the item
+		id_t id_final = renumberMap.at(id_original);
 
 		// Nothing else to do if the item has already the correct id, otherwise
 		// we need to renumber the item.
-		if (id_current == id_consecutive) {
+		if (id_current == id_final) {
 			continue;
 		}
 
-		// Check if the consecutive id is already in the container.
+		// Check if the final id is already in the container.
 		//
-		// If there is a conflict, the item that holds the consecutive id will
+		// If there is a conflict, the item that holds the final id will
 		// be temporarly renumbered with the unused id find before, the current
 		// item will be renumberd with is final id and eventually the item with
 		// the temporary id will be assoicated with the, now avilable, id of
@@ -85,13 +113,13 @@ std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVe
 		id_t conflic_id_new;
 		id_t conflic_id_tmp;
 
-		bool conflict = container.exists(id_consecutive);
+		bool conflict = container.exists(id_final);
 		if (conflict) {
 			if (unusedId < 0) {
-				throw std::runtime_error ("Renumbering requires an unused id, but all ids are used.");
+				throw std::runtime_error("Renumbering requires an unused id, but all ids are used.");
 			}
 
-			conflic_id_old = id_consecutive;
+			conflic_id_old = id_final;
 			conflic_id_new = id_current;
 			conflic_id_tmp = unusedId;
 		}
@@ -105,8 +133,8 @@ std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVe
 		}
 
 		// Renumber of the current element
-		container[id_current].setId(id_consecutive);
-		container.updateId(id_current, id_consecutive);
+		container[id_current].setId(id_final);
+		container.updateId(id_current, id_final);
 
 		// Renumber the conflicting element with the previous id of the item
 		if (conflict) {
@@ -123,8 +151,6 @@ std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVe
 			}
 		}
 	}
-
-	return renumberMap;
 }
 
 }
