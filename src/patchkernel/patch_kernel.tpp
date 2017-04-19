@@ -43,10 +43,10 @@ std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVe
 
 	id_t counter = offset;
 	for(const item_t &item : container) {
-		id_t id_original = item.getId();
-		id_t id_final    = counter++;
+		id_t originalId = item.getId();
+		id_t finalId    = counter++;
 
-		renumberMap.insert({id_original, id_final});
+		renumberMap.insert({originalId, finalId});
 	}
 
 	// Renumber items
@@ -82,23 +82,23 @@ void PatchKernel::mappedItemRenumbering(PiercedVector<item_t, id_t> &container,
 		//
 		// To get the original id of the item we use the conflict map, once
 		// we get the id of an item we can remove it from the conflict map.
-		id_t id_current = item.getId();
+		id_t currentId = item.getId();
 
-		id_t id_original;
-		auto conflictMapItr = conflictMap.find(id_current);
+		id_t originalId;
+		auto conflictMapItr = conflictMap.find(currentId);
 		if (conflictMapItr != conflictMap.end()) {
-			id_original = conflictMapItr->second;
+			originalId = conflictMapItr->second;
 			conflictMap.erase(conflictMapItr);
 		} else {
-			id_original = id_current;
+			originalId = currentId;
 		}
 
 		// Final id of the item
-		id_t id_final = renumberMap.at(id_original);
+		id_t finalId = renumberMap.at(originalId);
 
 		// Nothing else to do if the item has already the correct id, otherwise
 		// we need to renumber the item.
-		if (id_current == id_final) {
+		if (currentId == finalId) {
 			continue;
 		}
 
@@ -109,19 +109,19 @@ void PatchKernel::mappedItemRenumbering(PiercedVector<item_t, id_t> &container,
 		// item will be renumberd with is final id and eventually the item with
 		// the temporary id will be assoicated with the, now avilable, id of
 		// the current item.
-		id_t conflic_id_old;
-		id_t conflic_id_new;
-		id_t conflic_id_tmp;
+		id_t oldConflictId;
+		id_t newConflicdId;
+		id_t tmpConflictId;
 
-		bool conflict = container.exists(id_final);
+		bool conflict = container.exists(finalId);
 		if (conflict) {
 			if (unusedId < 0) {
 				throw std::runtime_error("Renumbering requires an unused id, but all ids are used.");
 			}
 
-			conflic_id_old = id_final;
-			conflic_id_new = id_current;
-			conflic_id_tmp = unusedId;
+			oldConflictId = finalId;
+			newConflicdId = currentId;
+			tmpConflictId = unusedId;
 		}
 
 		// Temporary renumber of the conflicting item
@@ -129,24 +129,24 @@ void PatchKernel::mappedItemRenumbering(PiercedVector<item_t, id_t> &container,
 		// There is no need to change the id of the element, it is sufficient
 		// update the container. The id will be updated later.
 		if (conflict) {
-			container.updateId(conflic_id_old, conflic_id_tmp);
+			container.updateId(oldConflictId, tmpConflictId);
 		}
 
 		// Renumber of the current element
-		container[id_current].setId(id_final);
-		container.updateId(id_current, id_final);
+		container[currentId].setId(finalId);
+		container.updateId(currentId, finalId);
 
 		// Renumber the conflicting element with the previous id of the item
 		if (conflict) {
-			container.updateId(conflic_id_tmp, conflic_id_new);
-			container[conflic_id_new].setId(conflic_id_new);
+			container.updateId(tmpConflictId, newConflicdId);
+			container[newConflicdId].setId(newConflicdId);
 
 			// Update conflic map
-			auto conflictMapItr = conflictMap.find(conflic_id_old);
+			auto conflictMapItr = conflictMap.find(oldConflictId);
 			if (conflictMapItr == conflictMap.end()) {
-				conflictMap.insert({conflic_id_new, conflic_id_old});
+				conflictMap.insert({newConflicdId, oldConflictId});
 			} else {
-				conflictMap.insert({conflic_id_new, conflictMapItr->second});
+				conflictMap.insert({newConflicdId, conflictMapItr->second});
 				conflictMap.erase(conflictMapItr);
 			}
 		}
