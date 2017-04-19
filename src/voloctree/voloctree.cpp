@@ -153,7 +153,7 @@ VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::u
 #endif
 
 	// Sync the patch with the tree
-	sync(true, false);
+	sync(true, true, false);
 
 	// Set the bounding
 	setBoundingBox();
@@ -605,7 +605,7 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	log::cout() << " Done" << std::endl;
 
 	// Sync the patch
-	return sync(true, trackAdaption);
+	return sync(true, true, trackAdaption);
 }
 
 /*!
@@ -614,11 +614,13 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	\param updateOctantMaps if set to true the cell-to-octant maps will
 	be updated, otherwise the function assumes that someone has already
 	updated those maps
+	\param generateInterfaces check if the interfaces of the imported cells
+	will be generated
 	\param trackChanges if set to true the changes to the patch will be
 	tracked
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool trackChanges)
+const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges)
 {
 	log::cout() << ">> Syncing patch..." << std::endl;
 
@@ -1022,7 +1024,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool tr
 	if (addedOctants.size() > 0) {
 		log::cout() << ">> Importing new octants...";
 
-		createdCells = importCells(addedOctants, stitchInfo);
+		createdCells = importCells(addedOctants, stitchInfo, generateInterfaces);
 
 		log::cout() << " Done" << std::endl;
 		log::cout() << ">> Octants imported: " <<  addedOctants.size() << std::endl;
@@ -1200,9 +1202,11 @@ void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
 	\param octantInfoList is the list of octant to import
 	\param stitchInfo is the list of vertices that will be used to stitch the
 	the new octants
+	\param generateInterfaces check if the interfaces of the imprted cells
+	will be generated
 */
 std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList,
-                                           StitchInfo &stitchInfo)
+										 StitchInfo &stitchInfo, bool generateInterfaces)
 {
 	// Create the new vertices
 	int nCellVertices = m_cellTypeInfo->nVertices;
@@ -1262,7 +1266,9 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 
 	// Build adjacencies
 	updateAdjacencies(createdCells, false);
-	updateInterfaces(createdCells, false);
+	if (generateInterfaces) {
+		updateInterfaces(createdCells, false);
+	}
 
 	// Done
 	return createdCells;
@@ -1684,7 +1690,7 @@ void VolOctree::_resetTol()
  */
 int VolOctree::_getDumpVersion() const
 {
-	const int DUMP_VERSION = 1;
+	const int DUMP_VERSION = 2;
 
 	return DUMP_VERSION;
 }
@@ -1707,6 +1713,9 @@ void VolOctree::_dump(std::ostream &stream)
 	for (size_t n = 0; n < nGhosts; ++n) {
 		IO::binary::write(stream, m_ghostToCell.at(n));
 	}
+
+	// Dump interfaces
+	dumpInterfaces(stream);
 }
 
 /*!
@@ -1748,7 +1757,18 @@ void VolOctree::_restore(std::istream &stream)
 	}
 
 	// Sync the patch
-	sync(false, false);
+	sync(false, false, false);
+
+	//
+	// Restore the interfaces
+	//
+	setExpert(true);
+	restoreInterfaces(stream);
+	setExpert(false);
+
+    //
+    // Restore patch data
+    //
 
 	// The bounding box is frozen, it is not updated automatically
 	setBoundingBox();

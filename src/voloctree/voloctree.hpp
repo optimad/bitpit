@@ -226,10 +226,10 @@ private:
 	                          std::vector<RenumberInfo> &renumberedOctants,
 	                          std::vector<OctantInfo> &addOctants);
 
-	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo);
+	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo, bool generateInterfaces);
 	StitchInfo deleteCells(std::vector<DeleteInfo> &deletedOctants);
 
-	const std::vector<adaption::Info> sync(bool updateOctantMaps, bool trackChanges);
+	const std::vector<adaption::Info> sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges);
 
 	std::vector<long> findCellCodimensionNeighs(const long &id, const int &index,
 		const int &codimension, const std::vector<long> &blackList) const;
