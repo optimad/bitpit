@@ -3918,7 +3918,7 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 void PatchKernel::consecutiveRenumberVertices(long offset)
 {
 	// Renumber vertices
-	std::unordered_map<long, long > map = consecutiveRenumberItem(m_vertices, offset);
+	std::unordered_map<long, long > map = consecutiveItemRenumbering(m_vertices, offset);
 	
 	// Renumber cell connectivity
 	for(Cell &cell : m_cells) {
@@ -3947,7 +3947,7 @@ void PatchKernel::consecutiveRenumberVertices(long offset)
 void PatchKernel::consecutiveRenumberCells(long offset)
 {
 	// Renumber cells
-	std::unordered_map<long, long > map = consecutiveRenumberItem(m_cells, offset);
+	std::unordered_map<long, long > map = consecutiveItemRenumbering(m_cells, offset);
 	
 	// Renumber cell adjacencies
 	for (auto &cell: m_cells) {
@@ -3999,7 +3999,7 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 void PatchKernel::consecutiveRenumberInterfaces(long offset)
 {
 	// Renumber interfaces
-	std::unordered_map<long, long > map = consecutiveRenumberItem(m_interfaces, offset);
+	std::unordered_map<long, long > map = consecutiveItemRenumbering(m_interfaces, offset);
 	
 	// Renumber cell interfaces
 	for (Cell &cell: m_cells) {

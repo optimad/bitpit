@@ -503,7 +503,7 @@ private:
 	std::array<double, 3> evalElementCentroid(const Element &element) const;
 
 	template<typename item_t, typename id_t = long>
-	std::unordered_map<id_t, id_t> consecutiveRenumberItem(PiercedVector<item_t, id_t> &container, long offset);
+	std::unordered_map<id_t, id_t> consecutiveItemRenumbering(PiercedVector<item_t, id_t> &container, long offset);
 
 };
 

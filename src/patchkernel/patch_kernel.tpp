@@ -36,7 +36,7 @@ namespace bitpit {
 	\param offset is the offset that will be used
 */
 template<typename item_t, typename id_t>
-std::unordered_map<id_t, id_t> PatchKernel::consecutiveRenumberItem(PiercedVector<item_t, id_t> &container, long offset)
+std::unordered_map<id_t, id_t> PatchKernel::consecutiveItemRenumbering(PiercedVector<item_t, id_t> &container, long offset)
 {
 	// Find an unused id
 	id_t unusedId = std::numeric_limits<id_t>::max();
