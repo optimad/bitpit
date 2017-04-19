@@ -367,6 +367,32 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 }
 
 /*!
+ * Computes distances of point cloud to triangle
+ * @param[in] cloud point cloud coordinates
+ * @param[in] Q1 first triangle vertex
+ * @param[in] Q2 second triangle vertex
+ * @param[in] Q3 third triangle vertex
+ * @param[inout] xPExt pointer to std::vector to be filled with the projection point; 
+ * @param[inout] lambdas pointer to sd::vector to be filled with barycentric coordinates of projection points
+ * @return distances
+ */
+std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D> &lambda )
+{
+   
+    int cloudCount(cloud.size()); 
+
+    std::vector<array3D> xP(cloudCount);
+    xP.shrink_to_fit();
+
+    lambda.resize(cloudCount);
+    lambda.shrink_to_fit();
+
+    _projectPointsTriangle( cloudCount, cloud.data(), Q0, Q1, Q2, xP.data(), &lambda[0][0]);
+
+    return xP ;
+
+};
+
 /*!
  * Computes distances of point cloud to triangle
  * @param[in] cloud point cloud coordinates
