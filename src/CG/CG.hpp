@@ -90,6 +90,7 @@ array3D             reconstructPointFromBarycentricTriangle( array3D const &, ar
 array3D             reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, double * ); 
 array3D             reconstructPointFromBarycentricSimplex( std::vector<array3D> const &, std::vector<double> const & ); 
 
+void                _projectPointsTriangle( int, array3D const *, array3D const &, array3D const &, array3D const &, array3D *, double *);
 array3D             projectPointLine( array3D const &, array3D const &, array3D const & );
 array3D             projectPointPlane( array3D const &, array3D const &, array3D const & );
 array3D             projectPointSegment( array3D const &, array3D const &, array3D const & );
@@ -97,10 +98,11 @@ array3D             projectPointSegment( array3D const &, array3D const &, array
 array3D             projectPointSegment( array3D const &, array3D const &, array3D const &, double* );
 array3D             projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const & );
 array3D             projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D & );
-array3D             projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, double * );
 array3D             projectPointSimplex( array3D const &, std::vector<array3D> const & );
 array3D             projectPointSimplex( array3D const &, std::vector<array3D> const &, std::vector<double> & );
 
+array3D             restrictPointTriangle( array3D const &, array3D const &, array3D const &, array3D &);
+array3D             restrictPointTriangle( array3D const &, array3D const &, array3D const &, double *);
 
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;
 double              distancePointPlane( array3D const &, array3D const &, array3D const &, array3D & ) ;
