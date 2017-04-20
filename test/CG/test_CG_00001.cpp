@@ -112,6 +112,7 @@ int main(
     {
         // Scope variables ------------------------------------------------------ //
         array<double, 3>            P, P0, P1, n0, n1;
+        bool intersect;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         P0.fill(0.0);
@@ -121,7 +122,7 @@ int main(
         P1[2] = 1.0;
         n1.fill(0.0);
         n1[2] = 1.0;
-        CGElem::intersectLinePlane(P0, n0, P1, n1, P);
+        intersect = CGElem::intersectLinePlane(P0, n0, P1, n1, P);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN LINE AND PLANE" << endl;
@@ -132,7 +133,11 @@ int main(
         cout << "    plane: " << endl;
         cout << "      P1: " << P1 << endl;
         cout << "      n1: " << n1 << endl;
-        cout << "    intersection point is: " << P << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
 
         // Compute intersection (Test 2) ---------------------------------------- //
@@ -142,7 +147,7 @@ int main(
         P1.fill(0.0);
         n1.fill(0.0);
         n1[1] = 1.0;
-        CGElem::intersectLinePlane(P0, n0, P1, n1, P);
+        intersect = CGElem::intersectLinePlane(P0, n0, P1, n1, P);
 
         // Output message ------------------------------------------------------- //
         cout << "  Test 2 " << endl;
@@ -152,7 +157,11 @@ int main(
         cout << "    plane: " << endl;
         cout << "      P1: " << P1 << endl;
         cout << "      n1: " << n1 << endl;
-        cout << "    intersection points is: " << P << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
     }
 
@@ -162,6 +171,7 @@ int main(
     {
         // Scope variables ------------------------------------------------------ //
         array<double, 3>            P, Q0, Q1, P1, n1;
+        bool intersect;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         Q0.fill(0.0);
@@ -171,7 +181,7 @@ int main(
         P1[2] = 1.0;
         n1.fill(0.0);
         n1[2] = 1.0;
-        CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
+        intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN SEGMENT AND PLANE" << endl;
@@ -182,7 +192,11 @@ int main(
         cout << "    plane: " << endl;
         cout << "      P1: " << P1 << endl;
         cout << "      n1: " << n1 << endl;
-        cout << "    intersection point is: " << P << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
 
         // Compute intersection (Test 2) ---------------------------------------- //
@@ -192,7 +206,7 @@ int main(
         P1.fill(0.0);
         n1.fill(0.0);
         n1[1] = 1.0;
-        CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
+        intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
 
         // Output message ------------------------------------------------------- //
         cout << "  Test 2 " << endl;
@@ -202,7 +216,11 @@ int main(
         cout << "    plane: " << endl;
         cout << "      P1: " << P1 << endl;
         cout << "      n1: " << n1 << endl;
-        cout << "    intersection points is: " << P << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
     }
 
@@ -212,6 +230,7 @@ int main(
     {
         // Scope variables ------------------------------------------------------ //
         array<double, 3>            A, B, C, P, Q, n;
+        bool intersect;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         A.fill(0.0);
@@ -223,7 +242,7 @@ int main(
         P[2] = 1.0;
         n.fill(0.0);
         n[2] = 1.0;
-        CGElem::intersectLineTriangle(P, n, A, B, C, Q);
+        intersect = CGElem::intersectLineTriangle(P, n, A, B, C, Q);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN LINE AND TRIANGLE" << endl;
@@ -235,7 +254,11 @@ int main(
         cout << "      A: " << A << endl;
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
-        cout << "    intersection point is: " << Q << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
 
         // Compute intersection (Test 2) ---------------------------------------- //
@@ -250,7 +273,7 @@ int main(
         P[2] = 1.0;
         n.fill(0.0);
         n[2] = 1.0;
-        CGElem::intersectLineTriangle( P, n, A, B, C, Q);
+        intersect = CGElem::intersectLineTriangle( P, n, A, B, C, Q);
 
         // Output message ------------------------------------------------------- //
         cout << "  Test 2 " << endl;
@@ -261,7 +284,11 @@ int main(
         cout << "      A: " << A << endl;
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
-        cout << "    intersection point is: " << Q << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
     }
 
@@ -271,6 +298,7 @@ int main(
     {
         // Scope variables ------------------------------------------------------ //
         array<double, 3>            A, B, C, P0, P1, Q;
+        bool intersect ;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         A.fill(0.0);
@@ -284,7 +312,7 @@ int main(
         P1.fill(0.0);
         P1[0] = P1[1] = 0.5;
         P1[2] = 1.0;
-        CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
+        intersect = CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN LINE AND TRIANGLE" << endl;
@@ -296,7 +324,11 @@ int main(
         cout << "      A: " << A << endl;
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
-        cout << "    intersection point is: " << Q << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
 
         // Compute intersection (Test 2) ---------------------------------------- //
@@ -309,7 +341,7 @@ int main(
         P0[2] = 1.0;
         P1.fill(0.0);
         P1[2] = 2.0;
-        CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
+        intersect = CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
 
         // Output message ------------------------------------------------------- //
         cout << "  Test 2 " << endl;
@@ -320,7 +352,11 @@ int main(
         cout << "      A: " << A << endl;
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
-        cout << "    intersection point is: " << Q << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
     }
 
@@ -331,6 +367,7 @@ int main(
         // Scope variables ------------------------------------------------------ //
         vector< array<double, 3> >      V(4);
         array<double, 3>                P, Q, n;
+        bool intersect;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         V[0].fill(0.0);
@@ -349,7 +386,7 @@ int main(
         P[2] = 1.0;
         n.fill(0.0);
         n[2] = 1.0;
-        CGElem::intersectLineSimplex(P, n, V, Q);
+        intersect = CGElem::intersectLineSimplex(P, n, V, Q);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN LINE AND SIMPLEX" << endl;
@@ -359,7 +396,11 @@ int main(
         cout << "      n: " << n << endl;
         cout << "    simplex: " << endl;
         cout << "      V: " << V << endl;
-        cout << "    intersection point is: " << Q << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
 
         // Compute intersection (Test 2) ---------------------------------------- //
@@ -374,12 +415,12 @@ int main(
         V[3].fill(0.0);
         V[3][1] = 1.0;
 
-        P[0] = 0.1;
+        P[0] =-0.1;
         P[1] = 0.9;
         P[2] = 1.0;
         n.fill(0.0);
         n[2] = 1.0;
-        CGElem::intersectLineSimplex(P, n, V, Q);
+        intersect = CGElem::intersectLineSimplex(P, n, V, Q);
 
         // Output message ------------------------------------------------------- //
         cout << "  Test 2 " << endl;
@@ -388,7 +429,11 @@ int main(
         cout << "      n: " << n << endl;
         cout << "    simplex: " << endl;
         cout << "      V: " << V << endl;
-        cout << "    intersection point is: " << Q << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
         cout << endl;
     }
 
@@ -498,8 +543,9 @@ int main(
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 1" << endl;
         cout << "  Test 1 " << endl;
-        cout << "    segment: " << endl;
+        cout << "    point0: " << endl;
         cout << "      P0: " << P[0] << endl;
+        cout << "    point1: " << endl;
         cout << "      P1: " << P[1] << endl;
         cout << "    triangle: " << endl;
         cout << "      A: " << A << endl;
@@ -548,24 +594,25 @@ int main(
         P[1][2] = 1.0;
         
         //d = CGElem::distanceCloudTriangle(P, A, B, C, nullptr, nullptr);
-        //d = CGElem::distanceCloudTriangle(P, A, B, C, &Q, &lambda);
-        d = CGElem::distanceCloudSimplex(P,VS);
+        d = CGElem::distanceCloudTriangle(P, A, B, C, lambda);
+        //d = CGElem::distanceCloudSimplex(P,VS);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 2" << endl;
         cout << "  Test 1 " << endl;
-        cout << "    segment: " << endl;
+        cout << "    point0: " << endl;
         cout << "      P0: " << P[0] << endl;
+        cout << "    point1: " << endl;
         cout << "      P1: " << P[1] << endl;
         cout << "    triangle: " << endl;
         cout << "      A: " << A << endl;
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
         cout << "    distance to point 0 is: " << d[0] << endl;
-        cout << "    projection point 0 is: " << Q[0] << endl;
+        cout << "    projection point 0 is: " << CGElem::reconstructPointFromBarycentricTriangle( A, B, C, lambda[0] ) << endl;
         cout << "    barycentric coordinates of projection point: " << lambda[0] << endl;
         cout << "    distance to point 1 is: " << d[1] << endl;
-        cout << "    projection point 1 is: " << Q[1] << endl;
+        cout << "    projection point 1 is: " << CGElem::reconstructPointFromBarycentricTriangle( A, B, C, lambda[1] ) << endl;
         cout << "    barycentric coordinates of projection point: " << lambda[1] << endl;
         cout << endl;
 
@@ -599,8 +646,6 @@ int main(
         cout << "      n1: " << n1 << endl;
         cout << "    distance is: " << d << endl;
         cout << endl;
-        exit(1);
-
     }
 
     // ========================================================================== //
