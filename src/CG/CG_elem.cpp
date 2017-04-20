@@ -1251,21 +1251,18 @@ bool intersectSegmentPlane(
         std::array<double, 3>       &P
         ) {
 
-    std::array<double, 3>        n;
+    std::array<double, 3> n, xP;
 
-
-    // ========================================================================== //
-    // FIND INTERSECTION BETWEEN SEGMENT'S SUPPORTING LINE AND PLANE              //
-    // ========================================================================== //
     n = Q2 - Q1;
-    n = n/norm2(n);
-    if (   intersectLinePlane(Q1, n, P2, n2,P) ) {
-        if (intersectPointSegment(P, Q1, Q2)) {    
-            return(true);
-        }
+    n /= norm2(n);
+
+    if ( intersectLinePlane(Q1, n, P2, n2, xP) && intersectPointSegment(xP, Q1, Q2) ) {
+        P = xP;
+        return true;
     }
 
-    return(false); };
+    return false ; 
+};
 
 /*!
  * Computes intersection between two planes
