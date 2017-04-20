@@ -2015,70 +2015,21 @@ bool intersectPointSegment(
  * @param[in] A first vertex of triangle
  * @param[in] B second vertex of triangle
  * @param[in] C third vertex of triangle
- * @return if point lies on segment
+ * @return if point lies on triangle
  */
-bool intersectPointTriangle(
-        std::array<double, 3> const  &P,
-        std::array<double, 3> const  &A,
-        std::array<double, 3> const  &B,
-        std::array<double, 3> const  &C
-        ) {
+bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &B, array3D const &C)
+{
 
-    bool                    check = false;
-    std::array<double, 3>        xlim, ylim, zlim;
+    array3D xP, lambda;
 
-    // ========================================================================== //
-    // CHECK IF POINT LIES OUTSIDE TRIANGLE'S BOUNDING BOX                        //
-    // ========================================================================== //
-    xlim[0] = std::min(std::min(A[0], B[0]), C[0]);
-    xlim[1] = std::max(std::max(A[0], B[0]), C[0]);
-    ylim[0] = std::min(std::min(A[1], B[1]), C[1]);
-    ylim[1] = std::max(std::max(A[1], B[1]), C[1]);
-    zlim[0] = std::min(std::min(A[2], B[2]), C[2]);
-    zlim[1] = std::max(std::max(A[2], B[2]), C[2]);
+    _projectPointsPlane( 1, &P, A, B, C, &xP, &lambda[0]);
 
-    // ========================================================================== //
-    // CHECK IF POINT LIES INSIDE TRIANGLE                                        //
-    // ========================================================================== //
-    if (((P[0] >= xlim[0]) && (P[0] <= xlim[1]))
-            && ((P[1] >= ylim[0]) && (P[1] <= ylim[1]))
-            && ((P[2] >= zlim[0]) && (P[2] <= zlim[1]))) {
-
-        // Scope variables
-        double                  den;
-        std::array<double, 2>        AA, BB, CC, PP;
-        std::array<double, 3>        u, v, w, x, y, z;
-        std::array<double, 3>        xi;
-
-        // Initialize scope variables
-        u = B - A;
-        v = C - A;
-        w = P - A;
-
-        // Compute local ref. frame
-        x = u/norm2(u);
-        z = crossProduct(x, v);
-        z = z/norm2(z);
-        y = crossProduct(z, x);
-
-        // Map triangle's vertices into local ref. frame
-        AA[0] = 0.0;                   AA[1] = 0.0;
-        BB[0] = dotProduct(u, x);     BB[1] = dotProduct(u, y);
-        CC[0] = dotProduct(v, x);     CC[1] = dotProduct(v, y);
-        PP[0] = dotProduct(w, x);     PP[1] = dotProduct(w, y);
-
-        // Compute baricentric coordinates
-        den = ((BB[1] - CC[1])*(AA[0] - CC[0]) + (CC[0] - BB[0])*(AA[1] - CC[1]));
-        xi[0] = ((BB[1] - CC[1]) * (PP[0] - CC[0]) + (CC[0] - BB[0]) * (PP[1] - CC[1]))/den;
-        xi[1] = ((CC[1] - AA[1]) * (PP[0] - CC[0]) + (AA[0] - CC[0]) * (PP[1] - CC[1]))/den;
-        xi[2] = 1.0 - xi[0] - xi[1];
-
-        // Point-in-triangle condition
-        check = !((xi[0] < 0.0) || (xi[1] < 0.0) || (xi[2] < 0.0));
-
+    for( const auto &l : lambda){
+        if(l<0.) return false;
     }
 
-    return(check); };
+    return true;
+};
 
 /*!
  * checks if points lies within axis aligned box
