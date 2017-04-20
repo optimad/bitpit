@@ -1122,30 +1122,22 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
  * @return if intersect
  */
 bool intersectLineLine(
-        std::array<double, 3> const &n1,
         std::array<double, 3> const &P1,
-        std::array<double, 3> const &n2,
+        std::array<double, 3> const &n1,
         std::array<double, 3> const &P2,
+        std::array<double, 3> const &n2,
         std::array<double, 3>       &P
         ) {
 
-    // Local variables
-    double                  xi, delta, den;
-
-    delta = dotProduct(n1, n2);
-    if (std::abs((std::abs(delta) - 1.0)) < 1.0e-12) {
-        return false ;
+    double tol = 1.e-12;
+    array3D xP1, xP2;
+    if( distanceLineLine(P1,n1,P2,n2,xP1,xP2) < tol){
+        P = xP1;
+        return true;
     }
 
-    else {
-        den = (1.0 - pow(delta, 2));
-        xi = (dotProduct(P2, n1)
-                - dotProduct(P1, n1)
-                + delta * (dotProduct(P1, n2) - dotProduct(P2, n2))) / den;
-        P = P1 + xi * n1;
-    }
+    return false;
 
-    return(true); 
 };
 
 /*!
