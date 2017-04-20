@@ -1409,30 +1409,22 @@ bool intersectLineSimplex(
         std::array<double, 3>                &Q
         ) {
 
-    // Local variables
-    int                     m;
-    std::array<double, 3>        A, B, C;
+    int nTriangles = V.size() -2;
 
-    // Counters
-    int                     i;
+    int vertex0 = 0;
+    int vertex1 = 1;
+    int vertex2 = 2;
+    for( int i=0; i< nTriangles; ++i){
 
-    m = V.size();
+        if( intersectLineTriangle(P, n, V[vertex0], V[vertex1], V[vertex2], Q) ) { 
+            return true ; 
+        }
 
-    i = 1;
-    for( i=1; i< m-1; ++i){
+        ++vertex1;
+        ++vertex2;
+    }
 
-        // Split simplex into triangles
-        A = V[0];
-        B = V[i];
-        C = V[(i+1)%m];
-
-        // Compute intersection
-        if( intersectLineTriangle(A, B, C, P, n, Q) ) { return(true); }
-
-
-    } //next i
-
-    return(false); 
+    return false ; 
 };
 
 /*!
