@@ -38,76 +38,40 @@
 using namespace std;
 using namespace bitpit;
 
-// ========================================================================== //
-// IMPLEMENTATIONS                                                            //
-// ========================================================================== //
-// -------------------------------------------------------------------------- //
 int main(
     void
     ) {
 
-
     // ========================================================================== //
-    // INTERSECTION BETWEEN PLANES                                                //
+    // INTERSECTION BETWEEN POINT AND BOX                                         //
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
-        array<double, 3>            P0, P1, n0, n1;
-        array<double, 3>            nL, PL;
-        bool intersect;
+        array<double, 3>            A0, A1, B;
+        bool                        intersect ;
 
         // Compute intersection (Test 1) ---------------------------------------- //
-        P0.fill(0.0);
-        n0.fill(0.0);
-        n0[2] = 1.0;
-        P1.fill(1.0);
-        n1.fill(0.0);
-        n1[0] = 1.0;
-        intersect = CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
+        A0.fill(0.) ;
+        A1.fill(1.) ;
+
+        B = {{0.25,0.25,0.25}} ;
+
+        intersect = CGElem::intersectPointBox( B, A0, A1) ;
 
         // Output message ------------------------------------------------------- //
-        cout << " - INTERSECTION BETWEEN PLANES" << endl;
-        cout << "  Test 1 " << endl;
-        cout << "    1st plane: " << endl;
-        cout << "      P0: " << P0 << endl;
-        cout << "      n0: " << n0 << endl;
-        cout << "    2nd plane: " << endl;
-        cout << "      P1: " << P1 << endl;
-        cout << "      n1: " << n1 << endl;
-        if(intersect){
-            cout << "    intersection line is: " << "(P: " << PL << ", n: " << nL << ")" << endl;
-        } else {
-            cout << "    Planes do not intersect " << endl;
-        }
+        cout << " - INTERSECTION BETWEEN POINT AND  AXIS ALIGNED BOX" << endl;
+        cout << "  BOX 1 " << endl;
+        cout << "     A0: " << A0 << endl;
+        cout << "     A1: " << A1 << endl;
+        cout << "  Point " << endl;
+        cout << "     B: " << B << endl;
+        cout << " intersect? " << intersect << endl ;
         cout << endl;
 
-        // Compute intersection (Test 2) ---------------------------------------- //
-        P0.fill(0.0);
-        n0.fill(0.0);
-        n0[2] = 1.0;
-        P1.fill(0.0);
-        n1.fill(0.0);
-        n1[2] = 1.0;
-        intersect = CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
-
-        // Output message ------------------------------------------------------- //
-        cout << "  Test 2 " << endl;
-        cout << "    1st plane: " << endl;
-        cout << "      P0: " << P0 << endl;
-        cout << "      n0: " << n0 << endl;
-        cout << "    2nd plane: " << endl;
-        cout << "      P1: " << P1 << endl;
-        cout << "      n1: " << n1 << endl;
-        if(intersect){
-            cout << "    intersection line is: " << "(P: " << PL << ", n: " << nL << ")" << endl;
-        } else {
-            cout << "    Planes do not intersect " << endl;
-        }
-        cout << endl;
     }
 
     // ========================================================================== //
-    // INTERSECTION BETWEEN PLANE AND LINE                                        //
+    // INTERSECTION BETWEEN LINE AND PLANE                                        //
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
@@ -154,65 +118,6 @@ int main(
         cout << "    line: " << endl;
         cout << "      P0: " << P0 << endl;
         cout << "      n0: " << n0 << endl;
-        cout << "    plane: " << endl;
-        cout << "      P1: " << P1 << endl;
-        cout << "      n1: " << n1 << endl;
-        if(intersect){
-            cout << "    intersection point is: " << P << endl;
-        } else {
-            cout << "    do not intersect " << endl;
-        }
-        cout << endl;
-    }
-
-    // ========================================================================== //
-    // INTERSECTION BETWEEN PLANE AND SEGMENT                                     //
-    // ========================================================================== //
-    {
-        // Scope variables ------------------------------------------------------ //
-        array<double, 3>            P, Q0, Q1, P1, n1;
-        bool intersect;
-
-        // Compute intersection (Test 1) ---------------------------------------- //
-        Q0.fill(0.0);
-        Q1.fill(0.0);
-        Q1[2] = 1.0;
-        P1.fill(0.0);
-        P1[2] = 1.0;
-        n1.fill(0.0);
-        n1[2] = 1.0;
-        intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
-
-        // Output message ------------------------------------------------------- //
-        cout << " - INTERSECTION BETWEEN SEGMENT AND PLANE" << endl;
-        cout << "  Test 1 " << endl;
-        cout << "    segment: " << endl;
-        cout << "      Q0: " << Q0 << endl;
-        cout << "      Q1: " << Q1 << endl;
-        cout << "    plane: " << endl;
-        cout << "      P1: " << P1 << endl;
-        cout << "      n1: " << n1 << endl;
-        if(intersect){
-            cout << "    intersection point is: " << P << endl;
-        } else {
-            cout << "    do not intersect " << endl;
-        }
-        cout << endl;
-
-        // Compute intersection (Test 2) ---------------------------------------- //
-        Q0.fill(0.0);
-        Q1.fill(0.0);
-        Q1[2] = 0.5;
-        P1.fill(0.0);
-        n1.fill(0.0);
-        n1[1] = 1.0;
-        intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
-
-        // Output message ------------------------------------------------------- //
-        cout << "  Test 2 " << endl;
-        cout << "    line: " << endl;
-        cout << "      Q0: " << Q0 << endl;
-        cout << "      Q1: " << Q1 << endl;
         cout << "    plane: " << endl;
         cout << "      P1: " << P1 << endl;
         cout << "      n1: " << n1 << endl;
@@ -280,74 +185,6 @@ int main(
         cout << "    line: " << endl;
         cout << "      P: " << P << endl;
         cout << "      n: " << n << endl;
-        cout << "    triangle: " << endl;
-        cout << "      A: " << A << endl;
-        cout << "      B: " << B << endl;
-        cout << "      C: " << C << endl;
-        if(intersect){
-            cout << "    intersection point is: " << Q << endl;
-        } else {
-            cout << "    do not intersect " << endl;
-        }
-        cout << endl;
-    }
-
-    // ========================================================================== //
-    // INTERSECTION BETWEEN SEGMENT AND TRIANGLE                                  //
-    // ========================================================================== //
-    {
-        // Scope variables ------------------------------------------------------ //
-        array<double, 3>            A, B, C, P0, P1, Q;
-        bool intersect ;
-
-        // Compute intersection (Test 1) ---------------------------------------- //
-        A.fill(0.0);
-        B.fill(0.0);
-        B[0] = 1.0;
-        C.fill(0.0);
-        C[1] = 1.0;
-        P0.fill(0.0);
-        P0[0] = P0[1] = 0.5;
-        P0[2] = -1.0;
-        P1.fill(0.0);
-        P1[0] = P1[1] = 0.5;
-        P1[2] = 1.0;
-        intersect = CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
-
-        // Output message ------------------------------------------------------- //
-        cout << " - INTERSECTION BETWEEN LINE AND TRIANGLE" << endl;
-        cout << "  Test 1 " << endl;
-        cout << "    segment: " << endl;
-        cout << "      P0: " << P0 << endl;
-        cout << "      P1: " << P1 << endl;
-        cout << "    triangle: " << endl;
-        cout << "      A: " << A << endl;
-        cout << "      B: " << B << endl;
-        cout << "      C: " << C << endl;
-        if(intersect){
-            cout << "    intersection point is: " << Q << endl;
-        } else {
-            cout << "    do not intersect " << endl;
-        }
-        cout << endl;
-
-        // Compute intersection (Test 2) ---------------------------------------- //
-        A.fill(0.0);
-        B.fill(0.0);
-        B[0] = 1.0;
-        C.fill(0.0);
-        C[1] = 1.0;
-        P0.fill(0.0);
-        P0[2] = 1.0;
-        P1.fill(0.0);
-        P1[2] = 2.0;
-        intersect = CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
-
-        // Output message ------------------------------------------------------- //
-        cout << "  Test 2 " << endl;
-        cout << "    segment: " << endl;
-        cout << "      P0: " << P0 << endl;
-        cout << "      P1: " << P1 << endl;
         cout << "    triangle: " << endl;
         cout << "      A: " << A << endl;
         cout << "      B: " << B << endl;
@@ -435,6 +272,224 @@ int main(
             cout << "    do not intersect " << endl;
         }
         cout << endl;
+    }
+
+    // ========================================================================== //
+    // INTERSECTION BETWEEN SEGMENT AND PLANE                                     //
+    // ========================================================================== //
+    {
+        // Scope variables ------------------------------------------------------ //
+        array<double, 3>            P, Q0, Q1, P1, n1;
+        bool intersect;
+
+        // Compute intersection (Test 1) ---------------------------------------- //
+        Q0.fill(0.0);
+        Q1.fill(0.0);
+        Q1[2] = 1.0;
+        P1.fill(0.0);
+        P1[2] = 1.0;
+        n1.fill(0.0);
+        n1[2] = 1.0;
+        intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
+
+        // Output message ------------------------------------------------------- //
+        cout << " - INTERSECTION BETWEEN SEGMENT AND PLANE" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    segment: " << endl;
+        cout << "      Q0: " << Q0 << endl;
+        cout << "      Q1: " << Q1 << endl;
+        cout << "    plane: " << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "      n1: " << n1 << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
+        cout << endl;
+
+        // Compute intersection (Test 2) ---------------------------------------- //
+        Q0.fill(0.0);
+        Q1.fill(0.0);
+        Q1[2] = 0.5;
+        P1.fill(0.0);
+        n1.fill(0.0);
+        n1[1] = 1.0;
+        intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
+
+        // Output message ------------------------------------------------------- //
+        cout << "  Test 2 " << endl;
+        cout << "    line: " << endl;
+        cout << "      Q0: " << Q0 << endl;
+        cout << "      Q1: " << Q1 << endl;
+        cout << "    plane: " << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "      n1: " << n1 << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
+        cout << endl;
+    }
+
+    // ========================================================================== //
+    // INTERSECTION BETWEEN SEGMENT AND TRIANGLE                                  //
+    // ========================================================================== //
+    {
+        // Scope variables ------------------------------------------------------ //
+        array<double, 3>            A, B, C, P0, P1, Q;
+        bool intersect ;
+
+        // Compute intersection (Test 1) ---------------------------------------- //
+        A.fill(0.0);
+        B.fill(0.0);
+        B[0] = 1.0;
+        C.fill(0.0);
+        C[1] = 1.0;
+        P0.fill(0.0);
+        P0[0] = P0[1] = 0.5;
+        P0[2] = -1.0;
+        P1.fill(0.0);
+        P1[0] = P1[1] = 0.5;
+        P1[2] = 1.0;
+        intersect = CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
+
+        // Output message ------------------------------------------------------- //
+        cout << " - INTERSECTION BETWEEN LINE AND TRIANGLE" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    segment: " << endl;
+        cout << "      P0: " << P0 << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "    triangle: " << endl;
+        cout << "      A: " << A << endl;
+        cout << "      B: " << B << endl;
+        cout << "      C: " << C << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
+        cout << endl;
+
+        // Compute intersection (Test 2) ---------------------------------------- //
+        A.fill(0.0);
+        B.fill(0.0);
+        B[0] = 1.0;
+        C.fill(0.0);
+        C[1] = 1.0;
+        P0.fill(0.0);
+        P0[2] = 1.0;
+        P1.fill(0.0);
+        P1[2] = 2.0;
+        intersect = CGElem::intersectSegmentTriangle(P0, P1, A, B, C, Q);
+
+        // Output message ------------------------------------------------------- //
+        cout << "  Test 2 " << endl;
+        cout << "    segment: " << endl;
+        cout << "      P0: " << P0 << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "    triangle: " << endl;
+        cout << "      A: " << A << endl;
+        cout << "      B: " << B << endl;
+        cout << "      C: " << C << endl;
+        if(intersect){
+            cout << "    intersection point is: " << Q << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
+        cout << endl;
+    }
+
+    // ========================================================================== //
+    // INTERSECTION BETWEEN PLANE AND PLANE                                       //
+    // ========================================================================== //
+    {
+        // Scope variables ------------------------------------------------------ //
+        array<double, 3>            P0, P1, n0, n1;
+        array<double, 3>            nL, PL;
+        bool intersect;
+
+        // Compute intersection (Test 1) ---------------------------------------- //
+        P0.fill(0.0);
+        n0.fill(0.0);
+        n0[2] = 1.0;
+        P1.fill(1.0);
+        n1.fill(0.0);
+        n1[0] = 1.0;
+        intersect = CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
+
+        // Output message ------------------------------------------------------- //
+        cout << " - INTERSECTION BETWEEN PLANES" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    1st plane: " << endl;
+        cout << "      P0: " << P0 << endl;
+        cout << "      n0: " << n0 << endl;
+        cout << "    2nd plane: " << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "      n1: " << n1 << endl;
+        if(intersect){
+            cout << "    intersection line is: " << "(P: " << PL << ", n: " << nL << ")" << endl;
+        } else {
+            cout << "    Planes do not intersect " << endl;
+        }
+        cout << endl;
+
+        // Compute intersection (Test 2) ---------------------------------------- //
+        P0.fill(0.0);
+        n0.fill(0.0);
+        n0[2] = 1.0;
+        P1.fill(0.0);
+        n1.fill(0.0);
+        n1[2] = 1.0;
+        intersect = CGElem::intersectPlanePlane(P0, n0, P1, n1, PL, nL);
+
+        // Output message ------------------------------------------------------- //
+        cout << "  Test 2 " << endl;
+        cout << "    1st plane: " << endl;
+        cout << "      P0: " << P0 << endl;
+        cout << "      n0: " << n0 << endl;
+        cout << "    2nd plane: " << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "      n1: " << n1 << endl;
+        if(intersect){
+            cout << "    intersection line is: " << "(P: " << PL << ", n: " << nL << ")" << endl;
+        } else {
+            cout << "    Planes do not intersect " << endl;
+        }
+        cout << endl;
+    }
+
+    // ========================================================================== //
+    // INTERSECTION BETWEEN BOX AND BOX                                           //
+    // ========================================================================== //
+    {
+        // Scope variables ------------------------------------------------------ //
+        array<double, 3>            A0, A1, B0, B1, C0, C1;
+        bool                        intersect ;
+
+        // Compute intersection (Test 1) ---------------------------------------- //
+        A0.fill(0.) ;
+        A1.fill(1.) ;
+
+        B0 = {{-0.25,0.25,0.25}} ;
+        B1 = {{0.75,1.25,0.99}} ;
+
+        intersect = CGElem::intersectBoxBox( A0, A1, B0, B1, C0, C1) ;
+
+        // Output message ------------------------------------------------------- //
+        cout << " - INTERSECTION BETWEEN TWO AXIS ALIGNED BOXES" << endl;
+        cout << "  BOX 1 " << endl;
+        cout << "     A0: " << A0 << endl;
+        cout << "     A1: " << A1 << endl;
+        cout << "  BOX 2 " << endl;
+        cout << "     B0: " << B0 << endl;
+        cout << "     B1: " << B1 << endl;
+        cout << "INTERSECTION?" << intersect << endl;
+        cout << "     C0: " << C0 << endl;
+        cout << "     C1: " << C1 << endl;
+        cout << endl;
+
     }
 
     // ========================================================================== //
@@ -646,66 +701,6 @@ int main(
         cout << "      n1: " << n1 << endl;
         cout << "    distance is: " << d << endl;
         cout << endl;
-    }
-
-    // ========================================================================== //
-    // intersection Boxes
-    // ========================================================================== //
-    {
-        // Scope variables ------------------------------------------------------ //
-        array<double, 3>            A0, A1, B0, B1, C0, C1;
-        bool                        intersect ;
-
-        // Compute intersection (Test 1) ---------------------------------------- //
-        A0.fill(0.) ;
-        A1.fill(1.) ;
-
-        B0 = {{-0.25,0.25,0.25}} ;
-        B1 = {{0.75,1.25,0.99}} ;
-
-        intersect = CGElem::intersectBoxBox( A0, A1, B0, B1, C0, C1) ;
-
-        // Output message ------------------------------------------------------- //
-        cout << " - INTERSECTION BETWEEN TWO AXIS ALIGNED BOXES" << endl;
-        cout << "  BOX 1 " << endl;
-        cout << "     A0: " << A0 << endl;
-        cout << "     A1: " << A1 << endl;
-        cout << "  BOX 2 " << endl;
-        cout << "     B0: " << B0 << endl;
-        cout << "     B1: " << B1 << endl;
-        cout << "INTERSECTION?" << intersect << endl;
-        cout << "     C0: " << C0 << endl;
-        cout << "     C1: " << C1 << endl;
-        cout << endl;
-
-    }
-
-    // ========================================================================== //
-    // Point in Box
-    // ========================================================================== //
-    {
-        // Scope variables ------------------------------------------------------ //
-        array<double, 3>            A0, A1, B;
-        bool                        intersect ;
-
-        // Compute intersection (Test 1) ---------------------------------------- //
-        A0.fill(0.) ;
-        A1.fill(1.) ;
-
-        B = {{0.25,0.25,0.25}} ;
-
-        intersect = CGElem::intersectPointBox( B, A0, A1) ;
-
-        // Output message ------------------------------------------------------- //
-        cout << " - INTERSECTION BETWEEN POINT AND  AXIS ALIGNED BOX" << endl;
-        cout << "  BOX 1 " << endl;
-        cout << "     A0: " << A0 << endl;
-        cout << "     A1: " << A1 << endl;
-        cout << "  Point " << endl;
-        cout << "     B: " << B << endl;
-        cout << " intersect? " << intersect << endl ;
-        cout << endl;
-
     }
 
     return 0; 
