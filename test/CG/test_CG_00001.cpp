@@ -71,6 +71,63 @@ int main(
     }
 
     // ========================================================================== //
+    // INTERSECTION BETWEEN LINE AND LINE                                         //
+    // ========================================================================== //
+    {
+        array<double,3> P, P0, P1, n0, n1;
+        bool intersect;
+
+        // Compute intersection (Test 1) ---------------------------------------- //
+        P0 = {{ 0., 0., 0. }};
+        n0 = {{ 1., 1., 0. }};
+        P1 = {{ 3., 0., 0. }};
+        n1 = {{-1., 2., 0. }};
+
+        n0 /= norm2(n0);
+        n1 /= norm2(n1);
+        intersect = CGElem::intersectLineLine(P0, n0, P1, n1, P);
+
+        cout << " - INTERSECTION BETWEEN LINE AND LINE" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    line0: " << endl;
+        cout << "      P0: " << P0 << endl;
+        cout << "      n0: " << n0 << endl;
+        cout << "    line1: " << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "      n1: " << n1 << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
+        cout << endl;
+
+        // Compute intersection (Test 2) ---------------------------------------- //
+        P0 = {{ 0., 0., 0. }};
+        n0 = {{ 1., 1., 0. }};
+        P1 = {{ 3., 0., 0. }};
+        n1 = {{-1., 2., 1. }};
+
+        n0 /= norm2(n0);
+        n1 /= norm2(n1);
+        intersect = CGElem::intersectLineLine(P0, n0, P1, n1, P);
+
+        cout << "  Test 2 " << endl;
+        cout << "    line0: " << endl;
+        cout << "      P0: " << P0 << endl;
+        cout << "      n0: " << n0 << endl;
+        cout << "    line1: " << endl;
+        cout << "      P1: " << P1 << endl;
+        cout << "      n1: " << n1 << endl;
+        if(intersect){
+            cout << "    intersection point is: " << P << endl;
+        } else {
+            cout << "    do not intersect " << endl;
+        }
+        cout << endl;
+    }
+
+    // ========================================================================== //
     // INTERSECTION BETWEEN LINE AND PLANE                                        //
     // ========================================================================== //
     {
