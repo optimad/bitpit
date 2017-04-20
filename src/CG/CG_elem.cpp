@@ -1142,9 +1142,9 @@ bool intersectLineLine(
 
 /*!
  * Computes intersection between two segments in 3D
- * @param[in] P1 star point of first segment
+ * @param[in] P1 start point of first segment
  * @param[in] P2 end point of first segment
- * @param[in] Q1 star point of second segment
+ * @param[in] Q1 start point of second segment
  * @param[in] Q2 end point of second segment
  * @param[out] x intersection point if intersect, else unaltered
  * @return if intersect
@@ -1180,7 +1180,7 @@ bool intersectSegmentSegment(
     // ========================================================================== //
     // CHECK IF INTERSECTION POINTS LIES INSIDE EACH SEGMENT                      //
     // ========================================================================== //
-    if ( intersectLineLine(nP, P1, nQ, Q1,x) ) {
+    if ( intersectLineLine(P1, nP, Q1, nQ, x) ) {
         lxP = dotProduct(x - P1, nP);
         lxQ = dotProduct(x - Q1, nQ);
 
