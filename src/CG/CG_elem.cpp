@@ -440,6 +440,53 @@ void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q
 };
 
 /*!
+ * Project a point cloud on a plane described by a triangle
+ * @param[in] cloud point cloud coordinates
+ * @param[in] Q1 first triangle vertex
+ * @param[in] Q2 second triangle vertex
+ * @param[in] Q3 third triangle vertex
+ * @param[out] proj pointer to the projection point; 
+ * @param[out] lambdas pointer to barycentric coordinates of projection points
+ * @return distances
+ */
+void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
+{
+
+    array3D s0 = Q1-Q0;
+    array3D s1 = Q2-Q0;
+
+    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
+    double *B = new double [2*nPoints] ;
+
+    for( int i=0; i<nPoints; ++i){
+        array3D rP = *point -Q0 ;
+        B[2*i]   = dotProduct(s0,rP) ; 
+        B[2*i+1] = dotProduct(s1,rP) ; 
+        ++point;
+    }
+
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 ) ;
+    assert( info == 0 );
+    BITPIT_UNUSED( info ) ;
+
+    for( int i=0; i<nPoints; ++i){
+
+        double *b = &B[2*i] ;
+
+        lambda[0] = 1. -b[0] -b[1] ;
+        lambda[1] = b[0] ;
+        lambda[2] = b[1] ;
+
+        *proj = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda);
+        lambda +=3 ;
+        proj += 1;
+    }
+
+    delete [] B ;
+};
+
+
+/*!
  * Computes projection of point onto a generic simplex
  * @param[in] P point coordinates
  * @param[in] V simplex vertices coordinates
