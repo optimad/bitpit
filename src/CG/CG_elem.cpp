@@ -1477,26 +1477,24 @@ bool intersectSegmentSimplex(
         std::array<double, 3>                &Q 
         ) {
 
+    int nTriangles = V.size() -2;
 
-    // Local variables
-    int                     m(V.size());
-    std::array<double, 3>        A, B, C;
-    int                     i;
+    int vertex0 = 0;
+    int vertex1 = 1;
+    int vertex2 = 2;
+    for( int i=0; i< nTriangles; ++i){
 
+        if( intersectSegmentTriangle(P0, P1, V[vertex0], V[vertex1], V[vertex2], Q) ) { 
+            return true ; 
+        }
 
-    for( i=1; i<m-1; ++i){
+        ++vertex1;
+        ++vertex2;
+    }
 
-        // Split simplex into triangles
-        A = V[0];
-        B = V[i];
-        C = V[(i+1)%m];
+    return false;
+}
 
-        // Compute intersection
-        if( intersectSegmentTriangle(A, B, C, P0, P1, Q) ) { return(true); };
-
-    } //next i
-
-    return(false); };
 
 /*!
  * Computes intersection between two axis aligned bounding boxes
