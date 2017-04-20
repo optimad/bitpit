@@ -1702,6 +1702,7 @@ int VolOctree::_getDumpVersion() const
  */
 void VolOctree::_dump(std::ostream &stream)
 {
+	// Dump tree data
 	m_tree->dump(stream);
 
 	size_t nOctants = m_octantToCell.size();
@@ -1725,7 +1726,9 @@ void VolOctree::_dump(std::ostream &stream)
  */
 void VolOctree::_restore(std::istream &stream)
 {
-	// Restore the tree
+	//
+	// Restore tree data
+	//
 #if ENABLE_MPI==1
 	m_tree->setComm(getCommunicator());
 #endif
@@ -1756,7 +1759,9 @@ void VolOctree::_restore(std::istream &stream)
 		m_ghostToCell.insert({n, cellId});
 	}
 
+	//
 	// Sync the patch
+	//
 	sync(false, false, false);
 
 	//
@@ -1766,11 +1771,10 @@ void VolOctree::_restore(std::istream &stream)
 	restoreInterfaces(stream);
 	setExpert(false);
 
-    //
-    // Restore patch data
-    //
-
-	// The bounding box is frozen, it is not updated automatically
+	//
+	// Restore bounding box
+	//
+	// The bounding box is frozen, it is necessary to update it manually.
 	setBoundingBox();
 }
 
