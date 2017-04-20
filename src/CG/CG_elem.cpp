@@ -1383,18 +1383,17 @@ bool intersectLineTriangle(
         std::array<double, 3>       &Q
         ) {
 
-    std::array<double, 3>        nT;
+    std::array<double, 3> nT, xP;
 
-    // Compute triangle normal
-    nT = crossProduct(B - A, C - A);
-    nT = nT/norm2(nT);
+    nT  = crossProduct(B - A, C - A);
+    nT /= norm2(nT);
 
-    // Compute intersection with line and triangle's supporting plane
-    if ( !intersectLinePlane(P, n, A, nT, Q) ) { return(false); };
+    if ( !intersectLinePlane(P, n, A, nT, xP) && !intersectPointTriangle(xP, A, B, C) ) { 
+        return(false); 
+    };
 
-    if (!intersectPointTriangle(Q, A, B, C)) { return(false); }
-
-    return(true); 
+    Q = xP;
+    return true ; 
 };
 
 /*!
@@ -1416,17 +1415,17 @@ bool intersectSegmentTriangle(
         std::array<double, 3>       &Q
         ) {
 
-    // Local variables
-    std::array<double, 3>        n;
+    std::array<double, 3> n, xP;
 
-    n = P1 - P0;
-    n = n/norm2(n);
+    n  = P1 - P0;
+    n /= norm2(n);
 
-    if ( !intersectLineTriangle(P0, n, A, B, C, Q) ) { return(false); }
+    if ( !intersectLineTriangle(P0, n, A, B, C, xP) && !intersectPointSegment(xP, P0, P1) ) { 
+        return false ; 
+    }
 
-    if ( !intersectPointSegment(Q, P0, P1) ) { return(false); }
-
-    return(true); 
+    Q = xP;
+    return true ; 
 
 };
 
