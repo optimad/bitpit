@@ -825,55 +825,65 @@ void VTK::readData( ){
 
     //Read appended data
     //Go to the initial position of the appended section
-    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){}
-
-    str >> c_;
-    while( c_ != '_') str >> c_;
-
-    position_appended = str.tellg();
-
-
-    str.close();
-    str.clear();
-
-    //Open in binary for read
-    str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
-
-    //Read appended data
-    for( auto & field : m_data){
-        if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
-            str.seekg( position_appended) ;
-            str.seekg( field.getOffset(), std::ios::cur) ;
-            if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
-            if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
-
-            std::fstream::pos_type position_before = str.tellg();
-
-            field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
-
-            if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
-                log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
-            }
-
-        }
+    bool foundAppendedSection = false;
+    while( !foundAppendedSection && getline(str, line) ){
+        foundAppendedSection = bitpit::utils::keywordInString( line, "<AppendedData"); 
     }
 
-    //Read appended m_geometry
-    for( auto & field : m_geometry ){
-        if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
-            str.seekg( position_appended) ;
-            str.seekg( field.getOffset(), std::ios::cur) ;
-            if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
-            if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
+    if( foundAppendedSection){
+        str >> c_;
+        while( c_ != '_') str >> c_;
 
-            std::fstream::pos_type position_before = str.tellg();
+        position_appended = str.tellg();
 
-            field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
+        str.close();
+        str.clear();
 
-            if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
-                log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
+        //Open in binary for read
+        str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
+
+        //Read appended data
+        for( auto & field : m_data){
+            if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
+                str.seekg( position_appended) ;
+                str.seekg( field.getOffset(), std::ios::cur) ;
+                if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
+                if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
+
+                std::fstream::pos_type position_before = str.tellg();
+
+                field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
+
+                if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
+                    log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
+                }
+
             }
         }
+
+        //Read appended m_geometry
+        for( auto & field : m_geometry ){
+            if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
+                str.seekg( position_appended) ;
+                str.seekg( field.getOffset(), std::ios::cur) ;
+                if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
+                if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
+
+                std::fstream::pos_type position_before = str.tellg();
+
+                field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
+
+                if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
+                    log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
+                }
+            }
+        }
+
+        str.close();
+        str.clear();
+
+        //ReOpen in for ascii read
+        str.open( m_fh.getPath( ), std::ios::in ) ;
     }
 
     //Read ascii data
