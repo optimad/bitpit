@@ -153,7 +153,7 @@ void SurfUnstructured::_dump(std::ostream &stream)
 	utils::binary::write(stream, getGhostCount());
 
 	for (const Cell &cell: m_cells) {
-		const ElementInfo &cellInfo = cell.getInfo();
+		const ReferenceElementInfo &cellInfo = cell.getInfo();
 
 		utils::binary::write(stream, cell.getId());
 		utils::binary::write(stream, cell.getPID());
@@ -221,7 +221,7 @@ void SurfUnstructured::_restore(std::istream &stream)
 
 		ElementType type;
 		utils::binary::read(stream, type);
-		const ElementInfo &cellInfo = ElementInfo::getElementInfo(type);
+		const ReferenceElementInfo &cellInfo = ReferenceElementInfo::getReferenceElementInfo(type);
 
 		int nCellVertices = cellInfo.nVertices;
 		std::vector<long> connect(nCellVertices, Vertex::NULL_ID);

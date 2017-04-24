@@ -361,7 +361,7 @@ void VolOctree::__setDimension(int dimension)
 		cellType = ElementType::PIXEL;
 	}
 
-	m_cellTypeInfo = &ElementInfo::getElementInfo(cellType);
+	m_cellTypeInfo = &ReferenceElementInfo::getReferenceElementInfo(cellType);
 
 	// Info on the interface type
 	ElementType interfaceType;
@@ -371,7 +371,7 @@ void VolOctree::__setDimension(int dimension)
 		interfaceType = ElementType::LINE;
 	}
 
-	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);
+	m_interfaceTypeInfo = &ReferenceElementInfo::getReferenceElementInfo(interfaceType);
 }
 
 /*!

@@ -210,8 +210,8 @@ private:
 	std::vector<std::vector<int>> m_octantLocalFacesOnEdge;
 	std::vector<std::vector<int>> m_octantLocalEdgesOnVertex;
 
-	const ElementInfo *m_cellTypeInfo;
-	const ElementInfo *m_interfaceTypeInfo;
+	const ReferenceElementInfo *m_cellTypeInfo;
+	const ReferenceElementInfo *m_interfaceTypeInfo;
 
 	std::unordered_map<long, uint32_t, Element::IdHasher> m_cellToOctant;
 	std::unordered_map<long, uint32_t, Element::IdHasher> m_cellToGhost;

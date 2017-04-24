@@ -101,8 +101,8 @@ Cell::Cell()
 */
 Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type), m_pid(0),
-      m_interfaces(storeNeighbourhood ? ElementInfo::getElementInfo(type).nFaces : 0, 1, NULL_ID),
-      m_adjacencies(storeNeighbourhood ? ElementInfo::getElementInfo(type).nFaces : 0, 1, NULL_ID)
+      m_interfaces(storeNeighbourhood ? ReferenceElementInfo::getReferenceElementInfo(type).nFaces : 0, 1, NULL_ID),
+      m_adjacencies(storeNeighbourhood ? ReferenceElementInfo::getReferenceElementInfo(type).nFaces : 0, 1, NULL_ID)
 {
 	_initialize(interior, false, false);
 }

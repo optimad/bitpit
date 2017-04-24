@@ -32,6 +32,7 @@
 #include "bitpit_containers.hpp"
 
 #include "element_type.hpp"
+#include "element_reference.hpp"
 
 namespace bitpit {
 	class Element;
@@ -41,56 +42,6 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Element& e
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Element& element);
 
 namespace bitpit {
-
-class ElementInfo {
-
-public:
-	ElementType type;
-	int dimension;
-
-	int nVertices;
-	int nEdges;
-	int nFaces;
-
-	static const ElementInfo undefinedInfo;
-	static const ElementInfo vertexInfo;
-	static const ElementInfo lineInfo;
-	static const ElementInfo triangleInfo;
-	static const ElementInfo pixelInfo;
-	static const ElementInfo quadInfo;
-	static const ElementInfo tetraInfo;
-	static const ElementInfo voxelInfo;
-	static const ElementInfo hexahedronInfo;
-	static const ElementInfo pyramidInfo;
-	static const ElementInfo wedgeInfo;
-
-	std::vector<ElementType> face_type;
-	std::vector<std::vector<int>> faceConnect;
-	std::vector<std::vector<int>> faceEdges;
-
-	std::vector<ElementType> edge_type;
-	std::vector<std::vector<int>> edgeConnect;
-
-	ElementInfo();
-	ElementInfo(ElementType type);
-
-	static const ElementInfo & getElementInfo(ElementType type);
-
-private:
-	void initializeUndefinedInfo();
-	void initializeVertexInfo();
-	void initializeLineInfo();
-	void initializeTriangleInfo();
-	void initializePixelInfo();
-	void initializeQuadInfo();
-	void initializeTetraInfo();
-	void initializeVoxelInfo();
-	void initializeHexahedronInfo();
-	void initializePyramidInfo();
-	void initializeWedgeInfo();
-
-	void initializeFaceEdges(const std::vector<ElementInfo *> &facesInfo = std::vector<ElementInfo *>());
-};
 
 class Element {
 
@@ -142,7 +93,7 @@ public:
 
 	void initialize(long id, ElementType type);
 
-	const ElementInfo & getInfo() const;
+	const ReferenceElementInfo & getInfo() const;
 
 	void setId(const long &id);
 	long getId() const;
