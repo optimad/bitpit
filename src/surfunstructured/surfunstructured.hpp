@@ -70,8 +70,8 @@ protected:
 	void _dump(std::ostream &stream);
 	void _restore(std::istream &stream);
 
-	static ElementInfo::Type getSTLFacetType(int nFacetVertices);
-	static ElementInfo::Type getDGFFacetType(int nFacetVertices);
+	static ElementType getSTLFacetType(int nFacetVertices);
+	static ElementType getDGFFacetType(int nFacetVertices);
 
 	unsigned short importSTL(STLObj &STL, int PIDOffset, bool PIDSquash);
 

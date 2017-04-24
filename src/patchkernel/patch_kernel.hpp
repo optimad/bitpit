@@ -267,16 +267,16 @@ public:
 	const PiercedVector<Cell> &getCells() const;
 	Cell &getCell(const long &id);
 	const Cell &getCell(const long &id) const;
-	virtual ElementInfo::Type getCellType(const long &id) const;
+	virtual ElementType getCellType(const long &id) const;
 	Cell &getLastInternal();
 	const Cell &getLastInternal() const;
 	Cell &getFirstGhost();
 	const Cell &getFirstGhost() const;
 	long generateCellId();
-	CellIterator addCell(ElementInfo::Type type, const long &id = Element::NULL_ID);
-	CellIterator addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ID);
-	CellIterator addCell(ElementInfo::Type type, bool interior, std::unique_ptr<long[]> &&connect, const long &id = Element::NULL_ID);
-	CellIterator addCell(ElementInfo::Type type, bool interior, const std::vector<long> &connect, const long &id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, const long &id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, bool interior, const long &id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connect, const long &id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, bool interior, const std::vector<long> &connect, const long &id = Element::NULL_ID);
 	CellIterator addCell(const Cell &source, long id = Element::NULL_ID);
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
@@ -331,9 +331,9 @@ public:
 	const PiercedVector<Interface> & getInterfaces() const;
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
-	virtual ElementInfo::Type getInterfaceType(const long &id) const;
+	virtual ElementType getInterfaceType(const long &id) const;
 	long generateInterfaceId();
-	InterfaceIterator addInterface(ElementInfo::Type type, const long &id = Element::NULL_ID);
+	InterfaceIterator addInterface(ElementType type, const long &id = Element::NULL_ID);
 	InterfaceIterator addInterface(const Interface &source, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(Interface &&source, long id = Element::NULL_ID);
 	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
@@ -598,8 +598,8 @@ private:
 	void buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
 
 	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
-	InterfaceIterator createInterface(ElementInfo::Type type, long id = Element::NULL_ID);
-	CellIterator createCell(ElementInfo::Type type, bool interior, long id = Element::NULL_ID);
+	InterfaceIterator createInterface(ElementType type, long id = Element::NULL_ID);
+	CellIterator createCell(ElementType type, bool interior, long id = Element::NULL_ID);
 
 	int findAdjoinNeighFace(const long &cellId, const long &neighId) const;
 

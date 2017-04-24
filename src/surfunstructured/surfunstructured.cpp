@@ -219,7 +219,7 @@ void SurfUnstructured::_restore(std::istream &stream)
 		int PID;
 		utils::binary::read(stream, PID);
 
-		ElementInfo::Type type;
+		ElementType type;
 		utils::binary::read(stream, type);
 		const ElementInfo &cellInfo = ElementInfo::getElementInfo(type);
 
@@ -769,24 +769,24 @@ unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exp
 *
 * \result The element type of a facet with the specified number of vertices.
 */
-ElementInfo::Type SurfUnstructured::getSTLFacetType(int nFacetVertices)
+ElementType SurfUnstructured::getSTLFacetType(int nFacetVertices)
 {
     switch(nFacetVertices) {
 
     case 1:
-        return ElementInfo::VERTEX;
+        return ElementType::VERTEX;
 
     case 2:
-        return ElementInfo::LINE;
+        return ElementType::LINE;
 
     case 3:
-        return ElementInfo::TRIANGLE;
+        return ElementType::TRIANGLE;
 
     case 4:
-        return ElementInfo::QUAD;
+        return ElementType::QUAD;
 
     default:
-        return ElementInfo::UNDEFINED;
+        return ElementType::UNDEFINED;
 
     }
 }
@@ -939,24 +939,24 @@ unsigned short SurfUnstructured::exportDGF(const string &dgf_name)
 *
 * \result The element type of a facet with the specified number of vertices.
 */
-ElementInfo::Type SurfUnstructured::getDGFFacetType(int nFacetVertices)
+ElementType SurfUnstructured::getDGFFacetType(int nFacetVertices)
 {
     switch(nFacetVertices) {
 
     case 1:
-        return ElementInfo::VERTEX;
+        return ElementType::VERTEX;
 
     case 2:
-        return ElementInfo::LINE;
+        return ElementType::LINE;
 
     case 3:
-        return ElementInfo::TRIANGLE;
+        return ElementType::TRIANGLE;
 
     case 4:
-        return ElementInfo::QUAD;
+        return ElementType::QUAD;
 
     default:
-        return ElementInfo::UNDEFINED;
+        return ElementType::UNDEFINED;
 
     }
 }

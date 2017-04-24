@@ -49,9 +49,9 @@ namespace bitpit {
 	SurfaceKernel is the base class for defining surface patches.
 */
 
-const std::map<ElementInfo::Type, unsigned short>  SurfaceKernel::m_selectionTypes({
-                                {ElementInfo::QUAD,     SurfaceKernel::SELECT_QUAD},
-                                {ElementInfo::TRIANGLE, SurfaceKernel::SELECT_TRIANGLE}
+const std::map<ElementType, unsigned short>  SurfaceKernel::m_selectionTypes({
+                                {ElementType::QUAD,     SurfaceKernel::SELECT_QUAD},
+                                {ElementType::TRIANGLE, SurfaceKernel::SELECT_TRIANGLE}
                                 });
 const unsigned short SurfaceKernel::SELECT_TRIANGLE = 1;
 const unsigned short SurfaceKernel::SELECT_QUAD     = 2;
@@ -168,7 +168,7 @@ double SurfaceKernel::evalCellSize(const long &id) const
 
 /*!
  * Evaluate facet area for a cell with specified ID. If cell is of type
- * ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
+ * ElementType::VERTEX or ElementType::LINE, returns 0.0
  * 
  * \param[in] id cell ID
  * 
@@ -189,14 +189,14 @@ double SurfaceKernel::evalCellArea(const long &id) const
     // ====================================================================== //
     // EVALUATE FACET AREA                                                    //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)) return 0.0;
-    if (cell_->getType() == ElementInfo::LINE) {
+    if ((cell_->getType() == ElementType::UNDEFINED)
+     || (cell_->getType() == ElementType::VERTEX)) return 0.0;
+    if (cell_->getType() == ElementType::LINE) {
         return ( norm2(m_vertices[cell_->getVertex(0)].getCoords()
                      - m_vertices[cell_->getVertex(1)].getCoords()) );
     }
     array<double, 3>            d1, d2;
-    if (cell_->getType() == ElementInfo::TRIANGLE) {
+    if (cell_->getType() == ElementType::TRIANGLE) {
         d1 = m_vertices[cell_->getVertex(1)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
         d2 = m_vertices[cell_->getVertex(2)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
         return (0.5*norm2(crossProduct(d1, d2)));
@@ -220,7 +220,7 @@ double SurfaceKernel::evalCellArea(const long &id) const
 /*!
  *  Evaluate the length of the edge with specified local index
  *  for e cell with specified ID.
- *  If the cell is of type ElementInfo::VERTEX or ElementInfo::LINE
+ *  If the cell is of type ElementType::VERTEX or ElementType::LINE
  *  returns 0.0.
  * 
  *  \param[in] id cell id
@@ -243,9 +243,9 @@ double SurfaceKernel::evalEdgeLength(const long &id, const int &edge_id) const
     // ====================================================================== //
     // COMPUTE MIN EDGE SIZE                                                  //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::LINE)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
+    if ((cell_->getType() == ElementType::LINE)
+     || (cell_->getType() == ElementType::VERTEX)
+     || (cell_->getType() == ElementType::UNDEFINED)) return 0.0;
 
     double edge_length = 0.0;
     vector<int> face_loc_connect(2, Vertex::NULL_ID);
@@ -259,7 +259,7 @@ double SurfaceKernel::evalEdgeLength(const long &id, const int &edge_id) const
 
 /*!
  *  Evaluate the minimal edge length for e cell with specified ID.
- *  If the cell is of type ElementInfo::VERTEX or ElementInfo::LINE
+ *  If the cell is of type ElementType::VERTEX or ElementType::LINE
  *  returns 0.0.
  * 
  *  \param[in] id cell id
@@ -283,9 +283,9 @@ double SurfaceKernel::evalMinEdgeLength(const long &id, int &edge_id) const
     // ====================================================================== //
     // COMPUTE MIN EDGE SIZE                                                  //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::LINE)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
+    if ((cell_->getType() == ElementType::LINE)
+     || (cell_->getType() == ElementType::VERTEX)
+     || (cell_->getType() == ElementType::UNDEFINED)) return 0.0;
 
     double edge_length = std::numeric_limits<double>::max(), tmp;
     n_faces = cell_->getFaceCount();
@@ -302,7 +302,7 @@ double SurfaceKernel::evalMinEdgeLength(const long &id, int &edge_id) const
 
 /*!
  *  Evaluate the maximal edge length for e cell with specified ID.
- *  If the cell is of type ElementInfo::VERTEX or ElementInfo::LINE
+ *  If the cell is of type ElementType::VERTEX or ElementType::LINE
  *  returns 0.0.
  * 
  *  \param[in] id cell id
@@ -326,9 +326,9 @@ double SurfaceKernel::evalMaxEdgeLength(const long &id, int &edge_id) const
     // ====================================================================== //
     // COMPUTE MIN EDGE SIZE                                                  //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::LINE)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
+    if ((cell_->getType() == ElementType::LINE)
+     || (cell_->getType() == ElementType::VERTEX)
+     || (cell_->getType() == ElementType::UNDEFINED)) return 0.0;
 
     double edge_length = std::numeric_limits<double>::min(), tmp;
     n_faces = cell_->getFaceCount();
@@ -345,7 +345,7 @@ double SurfaceKernel::evalMaxEdgeLength(const long &id, int &edge_id) const
 
 /*!
  * Evaluate the angle at specified vertex for a cell with specified ID.
- * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, a returns zero.
+ * If cell is of type ElementType::VERTEX or ElementType::LINE, a returns zero.
  * 
  * \param[in] id cell global ID
  * \param[in] vertex_id vertex local ID
@@ -364,9 +364,9 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id) co
     // ====================================================================== //
     // EVALUATE ANGLE AT SPECIFIED VERTEX                                     //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)) return 0.0;
-    if (cell_->getType() == ElementInfo::LINE) {
+    if ((cell_->getType() == ElementType::UNDEFINED)
+     || (cell_->getType() == ElementType::VERTEX)) return 0.0;
+    if (cell_->getType() == ElementType::LINE) {
         if (m_spaceDim - getDimension() == 1)   return M_PI;
         else                                    return 0.0;
     }
@@ -388,7 +388,7 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id) co
 
 /*!
  * Evaluate the minimal angle at vertex for a cell with specified ID.
- * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, a returns zero.
+ * If cell is of type ElementType::VERTEX or ElementType::LINE, a returns zero.
  *
  * \param[in] id cell id
  * \param[in,out] vertex_id on output stores the local index of vertex with minimal angle
@@ -410,9 +410,9 @@ double SurfaceKernel::evalMinAngleAtVertex(const long&id, int &vertex_id) const
     // ====================================================================== //
     // COMPUTE MINIMAL ANGLE                                                  //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+    if ((cell_->getType() == ElementType::UNDEFINED)
+     || (cell_->getType() == ElementType::VERTEX)
+     || (cell_->getType() == ElementType::LINE)) return 0.0;
 
     double angle = std::numeric_limits<double>::max(), tmp;
     int n_vert = cell_->getVertexCount();
@@ -429,7 +429,7 @@ double SurfaceKernel::evalMinAngleAtVertex(const long&id, int &vertex_id) const
 
 /*!
  * Evaluate the maximal angle at vertex for a cell with specified ID.
- * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, a returns zero.
+ * If cell is of type ElementType::VERTEX or ElementType::LINE, a returns zero.
  *
  * \param[in] id cell id
  * \param[in,out] vertex_id on output stores the local index of vertex with minimal angle
@@ -451,9 +451,9 @@ double SurfaceKernel::evalMaxAngleAtVertex(const long&id, int &vertex_id) const
     // ====================================================================== //
     // COMPUTE MINIMAL ANGLE                                                  //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+    if ((cell_->getType() == ElementType::UNDEFINED)
+     || (cell_->getType() == ElementType::VERTEX)
+     || (cell_->getType() == ElementType::LINE)) return 0.0;
 
     double angle = std::numeric_limits<double>::min(), tmp;
     int n_vert = cell_->getVertexCount();
@@ -471,7 +471,7 @@ double SurfaceKernel::evalMaxAngleAtVertex(const long&id, int &vertex_id) const
 /*!
  * Evalute the aspect ratio for a cell with specified ID. The aspect ratio
  * is defined as the ratio between the longest and the shortest edge.
- * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
+ * If cell is of type ElementType::VERTEX or ElementType::LINE, returns 0.0
  * 
  * \param[in] id cell ID
  * \param[in,out] edge_id on output stores the index of the shortest edge
@@ -493,9 +493,9 @@ double SurfaceKernel::evalAspectRatio(const long &id, int &edge_id) const
     // ====================================================================== //
     // EVALUATE ASPECT RATIO                                                  //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+    if ((cell_->getType() == ElementType::UNDEFINED)
+     || (cell_->getType() == ElementType::VERTEX)
+     || (cell_->getType() == ElementType::LINE)) return 0.0;
 
     double                      l_edge;
     double                      m_edge = std::numeric_limits<double>::max();
@@ -516,7 +516,7 @@ double SurfaceKernel::evalAspectRatio(const long &id, int &edge_id) const
 
 /*!
  * Evaluate facet normal for a cell with specified ID.
- * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
+ * If cell is of type ElementType::VERTEX or ElementType::LINE, returns 0.0
  * 
  * \param[in] id cell ID
  * 
@@ -538,10 +538,10 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
     // ====================================================================== //
     // COMPUTE NORMAL                                                         //
     // ====================================================================== //
-    if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)) return normal;
+    if ((cell_->getType() == ElementType::UNDEFINED)
+     || (cell_->getType() == ElementType::VERTEX)) return normal;
     
-    if (cell_->getType() == ElementInfo::LINE) {
+    if (cell_->getType() == ElementType::LINE) {
         if (m_spaceDim - getDimension() == 1) {
             std::array<double, 3>       z = {{0.0, 0.0, 1.0}};
             normal = m_vertices[cell_->getVertex(1)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
@@ -550,7 +550,7 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
         else return normal;
     }
 
-    if (cell_->getType() == ElementInfo::TRIANGLE) {
+    if (cell_->getType() == ElementType::TRIANGLE) {
         array<double, 3>                d1, d2;
         d1 = m_vertices[cell_->getVertex(1)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
         d2 = m_vertices[cell_->getVertex(2)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
@@ -905,13 +905,13 @@ bool SurfaceKernel::sameOrientationAtInterface(const long &id)
     const long neighId = face.getNeigh();
     const auto &neigh = getCell(neighId);
 
-    if (face.getType() == ElementInfo::Type::VERTEX) {
+    if (face.getType() == ElementType::VERTEX) {
         const long* ownerConnect = owner.getConnect();
         const long* neighConnect = neigh.getConnect();
         if (ownerConnect[0] == neighConnect[0] || ownerConnect[1] == neighConnect[1]) {
             return false;
         }
-    } else if (face.getType() == ElementInfo::Type::LINE) {
+    } else if (face.getType() == ElementType::LINE) {
         const int ownerFace= face.getOwnerFace();
         std::vector<long> ownerConnect = owner.getFaceConnect(ownerFace);
 
@@ -1301,7 +1301,7 @@ void SurfaceKernel::displayHistogram(
  * \param[in] mask_ selection mask_
  * \param[in] type_ element type
 */
-bool SurfaceKernel::compareSelectedTypes(const unsigned short &mask_, const ElementInfo::Type &type_) const
+bool SurfaceKernel::compareSelectedTypes(const unsigned short &mask_, const ElementType &type_) const
 {
     unsigned short       masked = m_selectionTypes.at(type_);
     return ( (mask_ & masked) == masked );

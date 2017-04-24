@@ -80,7 +80,7 @@ int subtest_001(
     }
 
     for (int j = 0; j < 4; ++j) {
-        auto it = mesh->addCell(ElementInfo::TRIANGLE, true, conns[j], j);
+        auto it = mesh->addCell(ElementType::TRIANGLE, true, conns[j], j);
         it->setPID(j);
     }
 

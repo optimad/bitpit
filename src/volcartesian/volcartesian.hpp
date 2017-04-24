@@ -65,12 +65,12 @@ public:
 	long getVertexCount() const;
 
 	long getCellCount() const;
-	ElementInfo::Type getCellType() const;
-	ElementInfo::Type getCellType(const long &id) const;
+	ElementType getCellType() const;
+	ElementType getCellType(const long &id) const;
 
 	long getInterfaceCount() const;
-	ElementInfo::Type getInterfaceType() const;
-	ElementInfo::Type getInterfaceType(const long &id) const;
+	ElementType getInterfaceType() const;
+	ElementType getInterfaceType(const long &id) const;
 
 	double evalCellVolume(const long &id) const;
 	double evalCellSize(const long &id) const;

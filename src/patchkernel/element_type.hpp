@@ -1,0 +1,48 @@
+/*---------------------------------------------------------------------------*\
+ *
+ *  bitpit
+ *
+ *  Copyright (C) 2015-2017 OPTIMAD engineering Srl
+ *
+ *  -------------------------------------------------------------------------
+ *  License
+ *  This file is part of bitpit.
+ *
+ *  bitpit is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License v3 (LGPL)
+ *  as published by the Free Software Foundation.
+ *
+ *  bitpit is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ *  License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
+ *
+\*---------------------------------------------------------------------------*/
+
+#ifndef __BITPIT_ELEMENT_TYPE_HPP__
+#define __BITPIT_ELEMENT_TYPE_HPP__
+
+namespace bitpit {
+
+enum ElementType {
+    UNDEFINED  = -1,
+    VERTEX     = 1,
+    LINE       = 3,
+    TRIANGLE   = 5,
+    POLYGON    = 7,
+    PIXEL      = 8,
+    QUAD       = 9,
+    TETRA      = 10,
+    VOXEL      = 11,
+    HEXAHEDRON = 12,
+    WEDGE      = 13,
+    PYRAMID    = 14,
+    POLYHEDRON = 42
+};
+
+}
+
+#endif

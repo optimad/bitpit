@@ -38,7 +38,7 @@ class Interface : public Element {
 
 public:
 	Interface();
-	Interface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	Interface(const long &id, ElementType type = ElementType::UNDEFINED);
 
 	Interface(const Interface &other) = default;
 	Interface(Interface&& other) = default;
@@ -47,7 +47,7 @@ public:
 
 	void swap(Interface &other) noexcept;
 
-	void initialize(long id, ElementInfo::Type type);
+	void initialize(long id, ElementType type);
 
 	bool isBorder() const;
 

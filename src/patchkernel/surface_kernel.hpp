@@ -36,7 +36,7 @@ public:
         static const unsigned short SELECT_TRIANGLE;
         static const unsigned short SELECT_QUAD;
         static const unsigned short SELECT_ALL;
-        static const std::map<ElementInfo::Type, unsigned short>     m_selectionTypes;
+        static const std::map<ElementType, unsigned short>     m_selectionTypes;
 
         // Types definitions
         typedef double (SurfaceKernel::*eval_f_)(const long&, int&) const;
@@ -69,7 +69,7 @@ public:
 private:
         void initialize();
 
-        bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &) const;
+        bool compareSelectedTypes(const unsigned short &, const ElementType &) const;
         void displayHistogram(const long&, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0) const;
 
         bool sameOrientationAtInterface(const long &id);

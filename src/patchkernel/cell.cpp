@@ -99,7 +99,7 @@ Cell::Cell()
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeighbourhood)
+Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type), m_pid(0),
       m_interfaces(storeNeighbourhood ? ElementInfo::getElementInfo(type).nFaces : 0, 1, NULL_ID),
       m_adjacencies(storeNeighbourhood ? ElementInfo::getElementInfo(type).nFaces : 0, 1, NULL_ID)
@@ -132,7 +132,7 @@ void Cell::swap(Cell &other) noexcept
 	\param storeNeighbourhood if true the structures to store adjacencies
 	and interfaces will be initialized
 */
-void Cell::initialize(long id, ElementInfo::Type type, bool interior, bool storeNeighbourhood)
+void Cell::initialize(long id, ElementType type, bool interior, bool storeNeighbourhood)
 {
 	Element::initialize(id, type);
 
@@ -234,7 +234,7 @@ void Cell::deleteInterfaces()
 */
 void Cell::resetInterfaces(bool storeInterfaces)
 {
-	if (!storeInterfaces || getType() == ElementInfo::UNDEFINED) {
+	if (!storeInterfaces || getType() == ElementType::UNDEFINED) {
 		deleteInterfaces();
 	} else {
 		m_interfaces.initialize(getFaceCount(), 1, NULL_ID);
@@ -248,7 +248,7 @@ void Cell::resetInterfaces(bool storeInterfaces)
 */
 void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 {
-	if (getType() == ElementInfo::UNDEFINED) {
+	if (getType() == ElementType::UNDEFINED) {
 	    return;
 	}
 
@@ -479,7 +479,7 @@ void Cell::deleteAdjacencies()
 */
 void Cell::resetAdjacencies(bool storeAdjacencies)
 {
-	if (!storeAdjacencies || getType() == ElementInfo::UNDEFINED) {
+	if (!storeAdjacencies || getType() == ElementType::UNDEFINED) {
 		deleteAdjacencies();
 	} else {
 		m_adjacencies.initialize(getFaceCount(), 1, NULL_ID);
@@ -493,7 +493,7 @@ void Cell::resetAdjacencies(bool storeAdjacencies)
 */
 void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 {
-	if (getType() == ElementInfo::UNDEFINED) {
+	if (getType() == ElementType::UNDEFINED) {
 	    return;
 	}
 
@@ -736,7 +736,7 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 	// ====================================================================== //
 	// DISPLAY INFOS                                                          //
 	// ====================================================================== //
-	if (getType() == ElementInfo::UNDEFINED) {
+	if (getType() == ElementType::UNDEFINED) {
 	    out << t_s << "cell type:    (unknown)" << std::endl;
 	    return;
 	}

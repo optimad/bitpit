@@ -147,16 +147,16 @@ void generateTestTriangulation(
 			connectivity[0] = i;
 			connectivity[1] = i + 1 + off;
 			connectivity[2] = i + off;
-			mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+			mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 			connectivity[0] = i;
 			connectivity[1] = i + 1;
 			connectivity[2] = i + 1 + off;
-			mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+			mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 		} //next i
 		connectivity[0] = i;
 		connectivity[1] = i + 1 + off;
 		connectivity[2] = i + off;
-		mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+		mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 
 		// 1-row ---------------------------------------------------------------- //
 		off = 9;
@@ -164,30 +164,30 @@ void generateTestTriangulation(
 			connectivity[0] = i;
 			connectivity[1] = i + 1;
 			connectivity[2] = i + off;
-			mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+			mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 			connectivity[0] = i + 1;
 			connectivity[1] = i + 1 + off;
 			connectivity[2] = i + off;
-			mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+			mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 		} //next i
 		connectivity[0] = i;
 		connectivity[1] = i + 1;
 		connectivity[2] = i + off;
-		mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+		mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 
 		// Orthogonal element --------------------------------------------------- //
 		connectivity[0] = 3;
 		connectivity[1] = 12;
 		connectivity[2] = 25;
-		mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+		mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 		connectivity[0] = 12;
 		connectivity[1] = 26;
 		connectivity[2] = 25;
-		mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+		mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 		connectivity[0] = 12;
 		connectivity[1] = 21;
 		connectivity[2] = 26;
-		mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+		mesh.addCell(ElementType::TRIANGLE, true, connectivity);
 	}
 
 }

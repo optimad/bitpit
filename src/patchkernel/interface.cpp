@@ -54,7 +54,7 @@ Interface::Interface()
 /*!
 	Creates a new interface.
 */
-Interface::Interface(const long &id, ElementInfo::Type type)
+Interface::Interface(const long &id, ElementType type)
 	: Element(id, type)
 {
 	_initialize(NULL_ID, -1, NULL_ID, -1);
@@ -83,7 +83,7 @@ void Interface::swap(Interface &other) noexcept
 	\param id is the id of the element
 	\param type is the type of the element
 */
-void Interface::initialize(long id, ElementInfo::Type type)
+void Interface::initialize(long id, ElementType type)
 {
 	Element::initialize(id, type);
 
@@ -315,7 +315,7 @@ void Interface::display(std::ostream &out, unsigned short int indent) const
 	std::string t_s = std::string(indent, ' ');
 
 	// If the type is unknown there are no information to display
-	if (getType() == ElementInfo::UNDEFINED) {
+	if (getType() == ElementType::UNDEFINED) {
 	    out << t_s << "interface type:    (unknown)" << std::endl;
 	    return;
 	}

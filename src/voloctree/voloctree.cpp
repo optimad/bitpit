@@ -354,21 +354,21 @@ void VolOctree::__setDimension(int dimension)
 	}
 
 	// Info of the cell type
-	ElementInfo::Type cellType;
+	ElementType cellType;
 	if (dimension == 3) {
-		cellType = ElementInfo::VOXEL;
+		cellType = ElementType::VOXEL;
 	} else {
-		cellType = ElementInfo::PIXEL;
+		cellType = ElementType::PIXEL;
 	}
 
 	m_cellTypeInfo = &ElementInfo::getElementInfo(cellType);
 
 	// Info on the interface type
-	ElementInfo::Type interfaceType;
+	ElementType interfaceType;
 	if (dimension == 3) {
-		interfaceType = ElementInfo::PIXEL;
+		interfaceType = ElementType::PIXEL;
 	} else {
-		interfaceType = ElementInfo::LINE;
+		interfaceType = ElementType::LINE;
 	}
 
 	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);

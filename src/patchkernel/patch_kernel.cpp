@@ -1524,7 +1524,7 @@ const Cell & PatchKernel::getCell(const long &id) const
 	\param id is the id of the requested cell
 	\return The element type for the cell with the specified id.
 */
-ElementInfo::Type PatchKernel::getCellType(const long &id) const
+ElementType PatchKernel::getCellType(const long &id) const
 {
 	return m_cells[id].getType();
 }
@@ -1749,7 +1749,7 @@ long PatchKernel::generateCellId()
 	\param interior is true if the cell is an interior cell, false otherwise
 	\return An iterator pointing to the newly created cell.
 */
-PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool interior, long id)
+PatchKernel::CellIterator PatchKernel::createCell(ElementType type, bool interior, long id)
 {
 	if (id < 0) {
 		id = generateCellId();
@@ -1811,7 +1811,7 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 	for the cell
 	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, const long &id)
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1831,7 +1831,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, const lon
 	for the cell
 	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior, const long &id)
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1854,7 +1854,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool inte
 	for the cell
 	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior,
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
                                    std::unique_ptr<long[]> &&connect, const long &id)
 {
 	if (!isExpert()) {
@@ -1880,7 +1880,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool inte
 	for the cell
 	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior,
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
 								   const std::vector<long> &connect, const long &id)
 {
 	if (!isExpert()) {
@@ -2348,7 +2348,7 @@ void PatchKernel::findCellFaceNeighs(const long &id, std::vector<long> *neighs) 
 	// count is evaluated using the ElementInfo associated to the cell.
 	int nCellFaces;
 	if (m_cells.size() == 0) {
-		ElementInfo::Type cellType = getCellType(id);
+		ElementType cellType = getCellType(id);
 		const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
 		nCellFaces = cellTypeInfo.nFaces;
 	} else {
@@ -2464,7 +2464,7 @@ void PatchKernel::findCellEdgeNeighs(const long &id, bool complete, std::vector<
 	// count is evaluated using the ElementInfo associated to the cell.
 	int nCellEdges;
 	if (m_cells.size() == 0) {
-		ElementInfo::Type cellType = getCellType(id);
+		ElementType cellType = getCellType(id);
 		const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
 		nCellEdges = cellTypeInfo.nEdges;
 	} else {
@@ -2598,7 +2598,7 @@ void PatchKernel::findCellVertexNeighs(const long &id, bool complete, std::vecto
 	// count is evaluated using the ElementInfo associated to the cell.
 	int nCellVertices;
 	if (m_cells.size() == 0) {
-		ElementInfo::Type cellType = getCellType(id);
+		ElementType cellType = getCellType(id);
 		const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
 		nCellVertices = cellTypeInfo.nVertices;
 	} else {
@@ -2708,7 +2708,7 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 
 		// Add negihbours of faces that owns the vertex to the scan list
 		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
-			const ElementInfo::Type &faceType = scanCell.getFaceType(i);
+			const ElementType &faceType = scanCell.getFaceType(i);
 			const int nFaceVertices = ElementInfo::getElementInfo(faceType).nVertices;
 			const std::vector<long> faceConnect = scanCell.getFaceConnect(i);
 
@@ -2891,7 +2891,7 @@ const Interface & PatchKernel::getInterface(const long &id) const
 	\param id is the id of the requested interface
 	\return The element type for the interface with the specified id.
 */
-ElementInfo::Type PatchKernel::getInterfaceType(const long &id) const
+ElementType PatchKernel::getInterfaceType(const long &id) const
 {
 	return m_interfaces[id].getType();
 }
@@ -2979,7 +2979,7 @@ long PatchKernel::generateInterfaceId()
 	for the interface
 	\return An iterator pointing to the newly created interface.
 */
-PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type type, long id)
+PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type, long id)
 {
 	if (id < 0) {
 		id = generateInterfaceId();
@@ -3004,7 +3004,7 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 	for the interface
 	\return An iterator pointing to the added interface.
 */
-PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementInfo::Type type, const long &id)
+PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type, const long &id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -3723,7 +3723,7 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 
 		const int nCellFaces = cell.getFaceCount();
 		for (int face = 0; face < nCellFaces; face++) {
-			ElementInfo::Type faceType = cell.getFaceType(face);
+			ElementType faceType = cell.getFaceType(face);
 			int nFaceVertices = ElementInfo::getElementInfo(faceType).nVertices;
 
 			// Build face connectivity
@@ -3954,7 +3954,7 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 	}
 
 	// Create the interface
-	ElementInfo::Type interfaceType = intrOwner->getFaceType(intrOwnerFace);
+	ElementType interfaceType = intrOwner->getFaceType(intrOwnerFace);
 	InterfaceIterator interfaceIterator = addInterface(interfaceType, interfaceId);
 	Interface &interface = *interfaceIterator;
 	if (interfaceId < 0) {
@@ -4522,7 +4522,7 @@ void PatchKernel::extractEnvelope(PatchKernel &envelope) const
 			}
 
 			// Add face to envelope
-			ElementInfo::Type faceType = cell.getFaceType(i);
+			ElementType faceType = cell.getFaceType(i);
 			envelope.addCell(faceType, true, std::move(faceEnvelopeConnect));
 		}
 	}
@@ -4688,43 +4688,43 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 			VTKElementType VTKType;
 			switch (cell.getType())  {
 
-			case ElementInfo::VERTEX:
+			case ElementType::VERTEX:
 				VTKType = VTKElementType::VERTEX;
 				break;
 
-			case ElementInfo::LINE:
+			case ElementType::LINE:
 				VTKType = VTKElementType::LINE;
 				break;
 
-			case ElementInfo::TRIANGLE:
+			case ElementType::TRIANGLE:
 				VTKType = VTKElementType::TRIANGLE;
 				break;
 
-			case ElementInfo::PIXEL:
+			case ElementType::PIXEL:
 				VTKType = VTKElementType::PIXEL;
 				break;
 
-			case ElementInfo::QUAD:
+			case ElementType::QUAD:
 				VTKType = VTKElementType::QUAD;
 				break;
 
-			case ElementInfo::TETRA:
+			case ElementType::TETRA:
 				VTKType = VTKElementType::TETRA;
 				break;
 
-			case ElementInfo::VOXEL:
+			case ElementType::VOXEL:
 				VTKType = VTKElementType::VOXEL;
 				break;
 
-			case ElementInfo::HEXAHEDRON:
+			case ElementType::HEXAHEDRON:
 				VTKType = VTKElementType::HEXAHEDRON;
 				break;
 
-			case ElementInfo::WEDGE:
+			case ElementType::WEDGE:
 				VTKType = VTKElementType::WEDGE;
 				break;
 
-			case ElementInfo::PYRAMID:
+			case ElementType::PYRAMID:
 				VTKType = VTKElementType::PYRAMID;
 				break;
 

@@ -31,6 +31,8 @@
 
 #include "bitpit_containers.hpp"
 
+#include "element_type.hpp"
+
 namespace bitpit {
 	class Element;
 }
@@ -43,23 +45,7 @@ namespace bitpit {
 class ElementInfo {
 
 public:
-	enum Type {
-		UNDEFINED  = -1,
-		VERTEX     = 1,
-		LINE       = 3,
-		TRIANGLE   = 5,
-		POLYGON    = 7,
-		PIXEL      = 8,
-		QUAD       = 9,
-		TETRA      = 10,
-		VOXEL      = 11,
-		HEXAHEDRON = 12,
-		WEDGE      = 13,
-		PYRAMID    = 14,
-		POLYHEDRON = 42
-	};
-
-	Type type;
+	ElementType type;
 	int dimension;
 
 	int nVertices;
@@ -78,17 +64,17 @@ public:
 	static const ElementInfo pyramidInfo;
 	static const ElementInfo wedgeInfo;
 
-	std::vector<Type> face_type;
+	std::vector<ElementType> face_type;
 	std::vector<std::vector<int>> faceConnect;
 	std::vector<std::vector<int>> faceEdges;
 
-	std::vector<Type> edge_type;
+	std::vector<ElementType> edge_type;
 	std::vector<std::vector<int>> edgeConnect;
 
 	ElementInfo();
-	ElementInfo(ElementInfo::Type type);
+	ElementInfo(ElementType type);
 
-	static const ElementInfo & getElementInfo(ElementInfo::Type type);
+	static const ElementInfo & getElementInfo(ElementType type);
 
 private:
 	void initializeUndefinedInfo();
@@ -145,7 +131,7 @@ public:
 	};
 
 	Element();
-	Element(long id, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	Element(long id, ElementType type = ElementType::UNDEFINED);
 
 	Element(const Element &other);
 	Element(Element&& other) = default;
@@ -154,15 +140,15 @@ public:
 
 	void swap(Element &other) noexcept;
 
-	void initialize(long id, ElementInfo::Type type);
+	void initialize(long id, ElementType type);
 
 	const ElementInfo & getInfo() const;
 
 	void setId(const long &id);
 	long getId() const;
 	
-	void setType(ElementInfo::Type type);
-	ElementInfo::Type getType() const;
+	void setType(ElementType type);
+	ElementType getType() const;
 
 	int getDimension() const;
 	bool isThreeDimensional() const;
@@ -174,7 +160,7 @@ public:
 	int findVertex(long vertexId) const;
 
 	int getFaceCount() const;
-	ElementInfo::Type getFaceType(const int &face) const;
+	ElementType getFaceType(const int &face) const;
 	const std::vector<int> & getFaceLocalConnect(const int &face) const;
 	std::vector<long> getFaceConnect(int face) const;
 
@@ -193,11 +179,11 @@ public:
 private:
 	long m_id;
 
-	ElementInfo::Type m_type;
+	ElementType m_type;
 
 	std::unique_ptr<long[]> m_connect;
 
-	void _initialize(long id, ElementInfo::Type type);
+	void _initialize(long id, ElementType type);
 
 };
 

@@ -182,13 +182,13 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
     assert( itrGradient != getVertexGradients().end() ) ;
 
     const Cell &cell = m_surface->getCell(segmentId) ;
-    ElementInfo::Type cellType = cell.getType();
+    ElementType cellType = cell.getType();
 
     std::array<double,3> projectionCoords;
 
     switch (cellType) {
 
-    case ElementInfo::VERTEX :
+    case ElementType::VERTEX :
     {
         long id = cell.getVertex(0) ;
 
@@ -200,7 +200,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
         break;
     }
 
-    case ElementInfo::LINE:
+    case ElementType::LINE:
     {
         long id0 = cell.getVertex(0) ;
         long id1 = cell.getVertex(1) ;
@@ -224,7 +224,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
         break;
     }
 
-    case ElementInfo::TRIANGLE:
+    case ElementType::TRIANGLE:
     {
         long id0 = cell.getVertex(0) ;
         long id1 = cell.getVertex(1) ;
@@ -651,7 +651,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
         m_segmentation->getSegmentVertexCoords( segmentId, &VS ) ;
         seedNarrowBand( visitee, VS, searchRadius, stack );
 
-        ElementInfo::Type segmentType = segment.getType();
+        ElementType segmentType = segment.getType();
 
 
         // propagate from seed
@@ -670,7 +670,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
 
             switch (segmentType) {
 
-            case ElementInfo::VERTEX :
+            case ElementType::VERTEX :
             {
                 for( size_t k=0; k<stackSize; ++k){
                     cloudDistance[k] = norm2( cloud[k]-VS[0]);
@@ -678,7 +678,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
                 break;
             }
 
-            case ElementInfo::LINE:
+            case ElementType::LINE:
             {
                 for( size_t k=0; k<stackSize; ++k){
                     cloudDistance[k] = CGElem::distancePointSegment( cloud[k], VS[0], VS[1]);
@@ -686,7 +686,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
                 break;
             }
 
-            case ElementInfo::TRIANGLE:
+            case ElementType::TRIANGLE:
             {
                 cloudDistance = CGElem::distanceCloudTriangle( cloud, VS[0], VS[1], VS[2]); 
                 break;

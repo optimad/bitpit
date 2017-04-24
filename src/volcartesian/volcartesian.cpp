@@ -367,7 +367,7 @@ long VolCartesian::getCellCount() const
 	\param id is the id of the requested cell
 	\return The element type for the cell with the specified id.
 */
-ElementInfo::Type VolCartesian::getCellType(const long &id) const
+ElementType VolCartesian::getCellType(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -379,12 +379,12 @@ ElementInfo::Type VolCartesian::getCellType(const long &id) const
 
 	\return The element type for the cells in the patch.
 */
-ElementInfo::Type VolCartesian::getCellType() const
+ElementType VolCartesian::getCellType() const
 {
 	if (isThreeDimensional()) {
-		return ElementInfo::VOXEL;
+		return ElementType::VOXEL;
 	} else {
-		return ElementInfo::PIXEL;
+		return ElementType::PIXEL;
 	}
 }
 
@@ -404,7 +404,7 @@ long VolCartesian::getInterfaceCount() const
 	\param id is the id of the requested interface
 	\return The element type for the interface with the specified id.
 */
-ElementInfo::Type VolCartesian::getInterfaceType(const long &id) const
+ElementType VolCartesian::getInterfaceType(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -416,12 +416,12 @@ ElementInfo::Type VolCartesian::getInterfaceType(const long &id) const
 
 	\return The element type for the interfaces in the patch.
 */
-ElementInfo::Type VolCartesian::getInterfaceType() const
+ElementType VolCartesian::getInterfaceType() const
 {
 	if (isThreeDimensional()) {
-		return ElementInfo::PIXEL;
+		return ElementType::PIXEL;
 	} else {
-		return ElementInfo::LINE;
+		return ElementType::LINE;
 	}
 }
 
@@ -682,7 +682,7 @@ void VolCartesian::addCells()
 	log::cout() << "  >> Creating cells\n";
 
 	// Info on the cells
-	ElementInfo::Type cellType = getCellType();
+	ElementType cellType = getCellType();
 
 	// Create the cells
 	log::cout() << "    - Cell count: " << m_nCells << "\n";
@@ -752,7 +752,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
 	log::cout() << "  >> Creating interfaces normal to direction " << direction << "\n";
 
 	// Info on the interfaces
-	ElementInfo::Type interfaceType = getInterfaceType();
+	ElementType interfaceType = getInterfaceType();
 
 	const ElementInfo &interfaceTypeInfo = ElementInfo::getElementInfo(interfaceType);
 	const int nInterfaceVertices = interfaceTypeInfo.nVertices;

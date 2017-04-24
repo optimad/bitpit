@@ -466,10 +466,10 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
         // Evaluate the distance from the cell
         double cellDistance;
 
-        ElementInfo::Type cellType = cell.getType();
+        ElementType cellType = cell.getType();
         switch (cellType) {
 
-        case ElementInfo::LINE:
+        case ElementType::LINE:
         {
             const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cell.getVertex(0));
             const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cell.getVertex(1));
@@ -478,7 +478,7 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
             break;
         }
 
-        case ElementInfo::TRIANGLE:
+        case ElementType::TRIANGLE:
         {
             const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cell.getVertex(0));
             const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cell.getVertex(1));
@@ -488,8 +488,8 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
             break;
         }
 
-        case ElementInfo::PIXEL:
-        case ElementInfo::QUAD:
+        case ElementType::PIXEL:
+        case ElementType::QUAD:
         {
             std::vector<std::array<double, 3>> vertexCoords;
             int nVertices = cell.getVertexCount();
