@@ -66,7 +66,7 @@ public:
     ReferenceElementInfo();
     ReferenceElementInfo(ElementType type);
 
-    static const ReferenceElementInfo & getReferenceElementInfo(ElementType type);
+    static const ReferenceElementInfo & getInfo(ElementType type);
 
 private:
     void initializeUndefinedInfo();

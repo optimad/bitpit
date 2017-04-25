@@ -120,7 +120,7 @@ ReferenceElementInfo::ReferenceElementInfo(ElementType type)
     \param type is the type of element
     \result The information for the specified element type.
 */
-const ReferenceElementInfo & ReferenceElementInfo::getReferenceElementInfo(ElementType type)
+const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 {
     switch (type) {
 

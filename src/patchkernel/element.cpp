@@ -220,7 +220,7 @@ long Element::getId() const
 */
 const ReferenceElementInfo & Element::getInfo() const
 {
-	return ReferenceElementInfo::getReferenceElementInfo(m_type);
+	return ReferenceElementInfo::getInfo(m_type);
 }
 
 /*!

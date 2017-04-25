@@ -754,7 +754,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
 	// Info on the interfaces
 	ElementType interfaceType = getInterfaceType();
 
-	const ReferenceElementInfo &interfaceTypeInfo = ReferenceElementInfo::getReferenceElementInfo(interfaceType);
+	const ReferenceElementInfo &interfaceTypeInfo = ReferenceElementInfo::getInfo(interfaceType);
 	const int nInterfaceVertices = interfaceTypeInfo.nVertices;
 	std::array<int, 3> interfaceCount1D = getInterfaceCountDirection(direction);
 

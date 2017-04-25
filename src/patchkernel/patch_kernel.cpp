@@ -1755,7 +1755,7 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementType type, bool interio
 		id = generateCellId();
 	}
 
-	const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getReferenceElementInfo(type);
+	const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(type);
 	if (cellTypeInfo.dimension > getDimension()) {
 		return cellEnd();
 	}
@@ -2349,7 +2349,7 @@ void PatchKernel::findCellFaceNeighs(const long &id, std::vector<long> *neighs) 
 	int nCellFaces;
 	if (m_cells.size() == 0) {
 		ElementType cellType = getCellType(id);
-		const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getReferenceElementInfo(cellType);
+		const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(cellType);
 		nCellFaces = cellTypeInfo.nFaces;
 	} else {
 		const Cell &cell = getCell(id);
@@ -2465,7 +2465,7 @@ void PatchKernel::findCellEdgeNeighs(const long &id, bool complete, std::vector<
 	int nCellEdges;
 	if (m_cells.size() == 0) {
 		ElementType cellType = getCellType(id);
-		const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getReferenceElementInfo(cellType);
+		const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(cellType);
 		nCellEdges = cellTypeInfo.nEdges;
 	} else {
 		const Cell &cell = getCell(id);
@@ -2599,7 +2599,7 @@ void PatchKernel::findCellVertexNeighs(const long &id, bool complete, std::vecto
 	int nCellVertices;
 	if (m_cells.size() == 0) {
 		ElementType cellType = getCellType(id);
-		const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getReferenceElementInfo(cellType);
+		const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(cellType);
 		nCellVertices = cellTypeInfo.nVertices;
 	} else {
 		const Cell &cell = getCell(id);
@@ -2709,7 +2709,7 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 		// Add negihbours of faces that owns the vertex to the scan list
 		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
 			const ElementType &faceType = scanCell.getFaceType(i);
-			const int nFaceVertices = ReferenceElementInfo::getReferenceElementInfo(faceType).nVertices;
+			const int nFaceVertices = ReferenceElementInfo::getInfo(faceType).nVertices;
 			const std::vector<long> faceConnect = scanCell.getFaceConnect(i);
 
 			// Discard faces that don't own the vertex
@@ -2985,7 +2985,7 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type, lo
 		id = generateInterfaceId();
 	}
 
-	const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getReferenceElementInfo(type);
+	const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(type);
 	if (cellTypeInfo.dimension > (getDimension() - 1)) {
 		return interfaceEnd();
 	}
@@ -3724,7 +3724,7 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 		const int nCellFaces = cell.getFaceCount();
 		for (int face = 0; face < nCellFaces; face++) {
 			ElementType faceType = cell.getFaceType(face);
-			int nFaceVertices = ReferenceElementInfo::getReferenceElementInfo(faceType).nVertices;
+			int nFaceVertices = ReferenceElementInfo::getInfo(faceType).nVertices;
 
 			// Build face connectivity
 			std::vector<long> faceConnect = cell.getFaceConnect(face);

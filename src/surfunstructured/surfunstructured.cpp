@@ -221,7 +221,7 @@ void SurfUnstructured::_restore(std::istream &stream)
 
 		ElementType type;
 		utils::binary::read(stream, type);
-		const ReferenceElementInfo &cellInfo = ReferenceElementInfo::getReferenceElementInfo(type);
+		const ReferenceElementInfo &cellInfo = ReferenceElementInfo::getInfo(type);
 
 		int nCellVertices = cellInfo.nVertices;
 		std::vector<long> connect(nCellVertices, Vertex::NULL_ID);
