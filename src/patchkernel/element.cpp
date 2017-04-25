@@ -359,7 +359,7 @@ ElementType Element::getFaceType(const int &face) const
 /*!
 	Gets the local connectivity of the specified face of the element.
 
-	\param face is the face for which the connectiviy is reqested
+	\param face is the face for which the connectivity is reqested
 	\result The local connectivity of the specified face of the element.
 */
 const std::vector<int> & Element::getFaceLocalConnect(const int &face) const
@@ -381,7 +381,7 @@ const std::vector<int> & Element::getFaceLocalConnect(const int &face) const
 /*!
 	Gets the connectivity of the specified face of the element.
 
-	\param face is the face for which the connectiviy is reqested
+	\param face is the face for which the connectivity is reqested
 	\result The connectivity of the specified face of the element.
 */
 std::vector<long> Element::getFaceConnect(int face) const
@@ -423,7 +423,7 @@ int Element::getEdgeCount() const
 /*!
 	Gets the local connectivity of the specified edge of the element.
 
-	\param edge is the edge for which the connectiviy is reqested
+	\param edge is the edge for which the connectivity is reqested
 	\result The local connectivity of the specified edge of the element.
 */
 const std::vector<int> & Element::getEdgeLocalConnect(const int &edge) const
@@ -445,7 +445,7 @@ const std::vector<int> & Element::getEdgeLocalConnect(const int &edge) const
 /*!
 	Gets the connectivity of the specified edge of the element.
 
-	\param edge is the edge for which the connectiviy is reqested
+	\param edge is the edge for which the connectivity is reqested
 	\result The connectivity of the specified edge of the element.
 */
 std::vector<long> Element::getEdgeConnect(int edge) const
