@@ -26,10 +26,12 @@
 #define __BITPIT_MODULE_OPERATORS_HPP__
 
 /*! 
- * @defgroup operators Operators
+ * @defgroup OperatorsFunctions Operators and Functions
  * @{
- * @defgroup MathFunctions Mathematical functions
- * @defgroup Operators Operators
+ * @defgroup DisplayFunctions Display Functions
+ * @defgroup MathOperators Mathematical Operators
+ * @defgroup MathFunctions Mathematical Functions
+ * @defgroup StreamOperators Stream Operators
  * @}
  */
 
