@@ -191,10 +191,10 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint
 
     m_cells        = ncells ;
     m_points       = npoints ;
-    m_connectivity  = nconn ;
+    m_nConnectivityEntries  = nconn ;
 
     if( m_homogeneousType != VTKElementType::UNDEFINED ){
-        m_connectivity = ncells *vtk::getElementNodeCount( m_homogeneousType ) ;
+        m_nConnectivityEntries = ncells *vtk::getElementNodeCount( m_homogeneousType ) ;
         m_unstructuredStreamer.setGrid(m_homogeneousType, ncells );
     }
 
@@ -513,7 +513,7 @@ uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
         entries = m_cells ;
 
     } else if( name == "connectivity"){
-        entries = m_connectivity ;
+        entries = m_nConnectivityEntries ;
 
     } else{
 
@@ -586,7 +586,7 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
  */
 uint64_t VTKUnstructuredGrid::getNConnectivity( ){
 
-    return m_connectivity ;
+    return m_nConnectivityEntries ;
 }
 
 }

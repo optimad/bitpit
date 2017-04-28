@@ -381,7 +381,7 @@ class VTKUnstructuredGridStreamer :public VTKBaseStreamer{
 class VTKUnstructuredGrid : public VTK {
 
     protected:
-        uint64_t                m_connectivity ;            /**< size of the connectivity information */
+        uint64_t                m_nConnectivityEntries ;            /**< size of the connectivity information */
         VTKElementType          m_homogeneousType ;         /**< type of element mesh is made of */
         VTKUnstructuredGridStreamer     m_unstructuredStreamer;     /**< streamer if unstructured grid is of homogenous type */
 
