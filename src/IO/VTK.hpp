@@ -418,6 +418,10 @@ class VTKUnstructuredGrid : public VTK {
         uint64_t                calcFieldSize( const VTKField &) ;
         uint64_t                calcFieldEntries( const VTKField &) ;
         uint8_t                 calcFieldComponents( const VTKField &) ;
+
+    private:
+        int                     getFieldGeomId( VTKUnstructuredField field ) ;
+
 };
 
 class VTKRectilinearGrid : public VTK{

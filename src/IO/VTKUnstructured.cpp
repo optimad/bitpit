@@ -127,10 +127,14 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
 
     m_fh.setAppendix("vtu");
 
-    m_geometry.push_back( VTKField("Points") ) ;
-    m_geometry.push_back( VTKField("offsets") ) ;
-    m_geometry.push_back( VTKField("types") ) ;
-    m_geometry.push_back( VTKField("connectivity") ) ;
+    int nGeomFields = 4;
+
+    m_geometry.resize(nGeomFields);
+
+    m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)]       = VTKField("Points") ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::OFFSETS)]      = VTKField("offsets") ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::TYPES)]        = VTKField("types") ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] = VTKField("connectivity") ;
 
     for( auto & field : m_geometry ){
         field.setLocation( VTKLocation::CELL ) ;
@@ -139,9 +143,9 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
         field.setCodification(m_geomCodex);
     }
 
-    m_geometry[0].setLocation( VTKLocation::POINT ) ;
-    m_geometry[0].setFieldType( VTKFieldType::VECTOR ) ;
-    m_geometry[0].setDataType( VTKDataType::Float64 ) ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)].setLocation( VTKLocation::POINT ) ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)].setFieldType( VTKFieldType::VECTOR ) ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)].setDataType( VTKDataType::Float64 ) ;
 
     setElementType(elementType);
 
@@ -175,12 +179,14 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type ){
     m_homogeneousInfoStreamer.setElementType( m_elementType );
 
     // Types
-    m_geometry[2].setDataType( VTKDataType::UInt8) ;
-    m_geometry[2].setStreamer(m_homogeneousInfoStreamer) ;
+    int types_gid = getFieldGeomId(VTKUnstructuredField::TYPES);
+    m_geometry[types_gid].setDataType( VTKDataType::UInt8) ;
+    m_geometry[types_gid].setStreamer(m_homogeneousInfoStreamer) ;
 
     // Offsets
-    m_geometry[1].setDataType( VTKDataType::UInt64) ;
-    m_geometry[1].setStreamer(m_homogeneousInfoStreamer) ;
+    int offsets_gid = getFieldGeomId(VTKUnstructuredField::OFFSETS);
+    m_geometry[offsets_gid].setDataType( VTKDataType::UInt64) ;
+    m_geometry[offsets_gid].setStreamer(m_homogeneousInfoStreamer) ;
 
 }
 
@@ -213,7 +219,7 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint
  */
 void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseStreamer *streamer ){
 
-    int      index = static_cast<int>(fieldEnum) ;
+    int      index = getFieldGeomId(fieldEnum) ;
     VTKField& field = m_geometry[index] ;
 
     field.setStreamer( *streamer ) ;
@@ -228,7 +234,7 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseSt
  */
 void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKDataType type, VTKBaseStreamer *streamer ){
 
-    int      index = static_cast<int>(fieldEnum) ;
+    int      index = getFieldGeomId(fieldEnum) ;
     VTKField& field = m_geometry[index] ;
 
     field.setDataType( type ) ;
@@ -254,6 +260,9 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
 
     str.open( m_fh.getPath( ), std::ios::in ) ;
 
+    // Geometry id of the connectivity
+    int connectivity_gid = getFieldGeomId(VTKUnstructuredField::CONNECTIVITY);
+
     //Read appended data
     //Go to the initial position of the appended section
     while( getline(str, line) && (! bitpit::utils::string::keywordInString( line, "<AppendedData")) ){}
@@ -270,25 +279,25 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
     //Open in binary for read
     str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
 
-    if( m_geometry[3].getCodification() == VTKFormat::APPENDED ){
+    if( m_geometry[connectivity_gid].getCodification() == VTKFormat::APPENDED ){
         str.seekg( position_appended) ;
-        str.seekg( m_geometry[3].getOffset(), std::ios::cur) ;
+        str.seekg( m_geometry[connectivity_gid].getOffset(), std::ios::cur) ;
 
         if( m_headerType== "UInt32") {
             genericIO::absorbBINARY( str, nbytes32 ) ;
-            nconn = nbytes32 /VTKTypes::sizeOfType( m_geometry[3].getDataType() ) ;
+            nconn = nbytes32 /VTKTypes::sizeOfType( m_geometry[connectivity_gid].getDataType() ) ;
         }
 
         if( m_headerType== "UInt64") {
             genericIO::absorbBINARY( str, nbytes64 ) ;
-            nconn = nbytes64 /VTKTypes::sizeOfType( m_geometry[3].getDataType() ) ;
+            nconn = nbytes64 /VTKTypes::sizeOfType( m_geometry[connectivity_gid].getDataType() ) ;
         }
     }
 
 
     //Read geometry
-    if(  m_geometry[3].getCodification() == VTKFormat::ASCII ){
-        str.seekg( m_geometry[3].getPosition() ) ;
+    if(  m_geometry[connectivity_gid].getCodification() == VTKFormat::ASCII ){
+        str.seekg( m_geometry[connectivity_gid].getPosition() ) ;
 
         std::string              line ;
         std::vector<uint64_t>    temp;
@@ -336,13 +345,13 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
 
     //Wring Geometry Information
     str << "      <Points>" << std::endl ;;
-    writeDataArray( str, m_geometry[0] ) ;
+    writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)] ) ;
     str << "      </Points>" << std::endl;
 
     str << "      <Cells>" << std::endl ;;
-    writeDataArray( str, m_geometry[1] ) ;
-    writeDataArray( str, m_geometry[2] ) ;
-    writeDataArray( str, m_geometry[3] ) ;
+    writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::OFFSETS)] ) ;
+    writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::TYPES)] ) ;
+    writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] ) ;
     str << "      </Cells>" << std::endl;
 
     //Closing Piece
@@ -392,7 +401,7 @@ void VTKUnstructuredGrid::writeCollection( ){
 
     //Wring Geometry Information
     str << "      <PPoints>" << std::endl;
-    writePDataArray( str, m_geometry[0] ) ;
+    writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)] ) ;
     str << std::endl ;
     str << "      </PPoints>" << std::endl;
 
@@ -580,6 +589,16 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
 uint64_t VTKUnstructuredGrid::getNConnectivity( ){
 
     return m_nConnectivityEntries ;
+}
+
+/*!
+ *  Returns the geometry index associated to the specified field.
+ *  @param[in] field field
+ *  @return geometry index associated to the field
+ */
+int VTKUnstructuredGrid::getFieldGeomId( VTKUnstructuredField field ){
+
+    return static_cast<std::underlying_type<VTKElementType>::type>(field) ;
 }
 
 }
