@@ -59,8 +59,8 @@ public:
 protected:
     ReferenceElementInfo(int _dimension, ElementType _type, int _nVertices, int _nFaces, int _nEdges);
 
-    ReferenceElementInfo(ReferenceElementInfo const&) = delete;
-    ReferenceElementInfo& operator=(ReferenceElementInfo const&) = delete;
+    ReferenceElementInfo(ReferenceElementInfo const &) = delete;
+    ReferenceElementInfo & operator=(ReferenceElementInfo const &) = delete;
 
     void initializeFaceEdges(const std::vector<const ReferenceElementInfo *> &facesInfo);
 
@@ -80,8 +80,8 @@ friend class ReferenceElementInfo;
 protected:
     ReferenceTetraInfo();
 
-    ReferenceTetraInfo(ReferenceTetraInfo const&) = delete;
-    ReferenceTetraInfo& operator=(ReferenceTetraInfo const&) = delete;
+    ReferenceTetraInfo(ReferenceTetraInfo const &) = delete;
+    ReferenceTetraInfo & operator=(ReferenceTetraInfo const &) = delete;
 
 };
 
@@ -92,8 +92,8 @@ friend class ReferenceElementInfo;
 protected:
     ReferenceVoxelInfo();
 
-    ReferenceVoxelInfo(ReferenceVoxelInfo const&) = delete;
-    ReferenceVoxelInfo& operator=(ReferenceVoxelInfo const&) = delete;
+    ReferenceVoxelInfo(ReferenceVoxelInfo const &) = delete;
+    ReferenceVoxelInfo & operator=(ReferenceVoxelInfo const &) = delete;
 
 };
 
@@ -104,8 +104,8 @@ friend class ReferenceElementInfo;
 protected:
     ReferenceHexahedronInfo();
 
-    ReferenceHexahedronInfo(ReferenceHexahedronInfo const&) = delete;
-    ReferenceHexahedronInfo& operator=(ReferenceHexahedronInfo const&) = delete;
+    ReferenceHexahedronInfo(ReferenceHexahedronInfo const &) = delete;
+    ReferenceHexahedronInfo & operator=(ReferenceHexahedronInfo const &) = delete;
 
 };
 
@@ -116,8 +116,8 @@ friend class ReferenceElementInfo;
 protected:
     ReferencePyramidInfo();
 
-    ReferencePyramidInfo(ReferencePyramidInfo const&) = delete;
-    ReferencePyramidInfo& operator=(ReferencePyramidInfo const&) = delete;
+    ReferencePyramidInfo(ReferencePyramidInfo const &) = delete;
+    ReferencePyramidInfo & operator=(ReferencePyramidInfo const &) = delete;
 
 };
 
@@ -128,8 +128,8 @@ friend class ReferenceElementInfo;
 protected:
     ReferenceWedgeInfo();
 
-    ReferenceWedgeInfo(ReferenceWedgeInfo const&) = delete;
-    ReferenceWedgeInfo& operator=(ReferenceWedgeInfo const&) = delete;
+    ReferenceWedgeInfo(ReferenceWedgeInfo const &) = delete;
+    ReferenceWedgeInfo & operator=(ReferenceWedgeInfo const &) = delete;
 
 };
 
@@ -150,8 +150,8 @@ friend class ReferenceWedgeInfo;
 protected:
     ReferenceTriangleInfo();
 
-    ReferenceTriangleInfo(ReferenceTriangleInfo const&) = delete;
-    ReferenceTriangleInfo& operator=(ReferenceTriangleInfo const&) = delete;
+    ReferenceTriangleInfo(ReferenceTriangleInfo const &) = delete;
+    ReferenceTriangleInfo & operator=(ReferenceTriangleInfo const &) = delete;
 
 };
 
@@ -163,8 +163,8 @@ friend class ReferenceVoxelInfo;
 protected:
     ReferencePixelInfo();
 
-    ReferencePixelInfo(ReferencePixelInfo const&) = delete;
-    ReferencePixelInfo& operator=(ReferencePixelInfo const&) = delete;
+    ReferencePixelInfo(ReferencePixelInfo const &) = delete;
+    ReferencePixelInfo & operator=(ReferencePixelInfo const &) = delete;
 
 };
 
@@ -178,8 +178,8 @@ friend class ReferenceWedgeInfo;
 protected:
     ReferenceQuadInfo();
 
-    ReferenceQuadInfo(ReferenceQuadInfo const&) = delete;
-    ReferenceQuadInfo& operator=(ReferenceQuadInfo const&) = delete;
+    ReferenceQuadInfo(ReferenceQuadInfo const &) = delete;
+    ReferenceQuadInfo & operator=(ReferenceQuadInfo const &) = delete;
 
 };
 
@@ -205,8 +205,8 @@ friend class ReferenceWedgeInfo;
 protected:
     ReferenceLineInfo();
 
-    ReferenceLineInfo(ReferenceLineInfo const&) = delete;
-    ReferenceLineInfo& operator=(ReferenceLineInfo const&) = delete;
+    ReferenceLineInfo(ReferenceLineInfo const &) = delete;
+    ReferenceLineInfo & operator=(ReferenceLineInfo const &) = delete;
 
 };
 
@@ -228,8 +228,8 @@ friend class ReferenceQuadInfo;
 protected:
     ReferenceVertexInfo();
 
-    ReferenceVertexInfo(ReferenceVertexInfo const&) = delete;
-    ReferenceVertexInfo& operator=(ReferenceVertexInfo const&) = delete;
+    ReferenceVertexInfo(ReferenceVertexInfo const &) = delete;
+    ReferenceVertexInfo & operator=(ReferenceVertexInfo const &) = delete;
 
 };
 
