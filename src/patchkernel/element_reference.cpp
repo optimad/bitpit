@@ -643,28 +643,28 @@ ReferenceWedgeInfo::ReferenceWedgeInfo()
         }
     }
 
-    faceConnect[0][0] = 1;
-    faceConnect[0][1] = 0;
+    faceConnect[0][0] = 0;
+    faceConnect[0][1] = 1;
     faceConnect[0][2] = 2;
 
-    faceConnect[1][0] = 3;
-    faceConnect[1][1] = 4;
+    faceConnect[1][0] = 4;
+    faceConnect[1][1] = 3;
     faceConnect[1][2] = 5;
 
-    faceConnect[2][0] = 3;
-    faceConnect[2][1] = 0;
-    faceConnect[2][2] = 1;
-    faceConnect[2][3] = 4;
+    faceConnect[2][0] = 4;
+    faceConnect[2][1] = 1;
+    faceConnect[2][2] = 0;
+    faceConnect[2][3] = 3;
 
-    faceConnect[3][0] = 4;
-    faceConnect[3][1] = 1;
-    faceConnect[3][2] = 2;
-    faceConnect[3][3] = 5;
+    faceConnect[3][0] = 1;
+    faceConnect[3][1] = 4;
+    faceConnect[3][2] = 5;
+    faceConnect[3][3] = 2;
 
-    faceConnect[4][0] = 5;
-    faceConnect[4][1] = 2;
-    faceConnect[4][2] = 0;
-    faceConnect[4][3] = 3;
+    faceConnect[4][0] = 3;
+    faceConnect[4][1] = 0;
+    faceConnect[4][2] = 2;
+    faceConnect[4][3] = 5;
 
     initializeFaceEdges(facesInfo);
 }
