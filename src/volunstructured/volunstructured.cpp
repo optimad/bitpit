@@ -101,9 +101,30 @@ void VolUnstructured::setExpert(bool expert)
 */
 double VolUnstructured::evalCellVolume(const long &id) const
 {
-	BITPIT_UNUSED(id);
+	const Cell &cell = getCell(id);
+	assert(cell.hasInfo());
 
-	return 0;
+	std::array<double, 3> *vertexCoordinates;
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
+
+	if (cell.hasInfo()) {
+		vertexCoordinates = coordinatesPool.data();
+
+		const int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
+		for (int i = 0; i < nCellVertices; ++i) {
+			vertexCoordinates[i] = getVertex(cellConnect[i]).getCoords();
+		}
+	}
+
+	double volume;
+	if (isThreeDimensional()) {
+		volume = cell.evalVolume(vertexCoordinates);
+	} else {
+		volume = cell.evalArea(vertexCoordinates);
+	}
+
+	return volume;
 }
 
 /*!
@@ -114,9 +135,25 @@ double VolUnstructured::evalCellVolume(const long &id) const
 */
 double VolUnstructured::evalCellSize(const long &id) const
 {
-	BITPIT_UNUSED(id);
+	const Cell &cell = getCell(id);
+	assert(cell.hasInfo());
 
-	return 0;
+	std::array<double, 3> *vertexCoordinates;
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
+
+	if (cell.hasInfo()) {
+		vertexCoordinates = coordinatesPool.data();
+
+		const int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
+		for (int i = 0; i < nCellVertices; ++i) {
+			vertexCoordinates[i] = getVertex(cellConnect[i]).getCoords();
+		}
+	}
+
+	double size = cell.evalSize(vertexCoordinates);
+
+	return size;
 }
 
 /*!
@@ -127,9 +164,30 @@ double VolUnstructured::evalCellSize(const long &id) const
 */
 double VolUnstructured::evalInterfaceArea(const long &id) const
 {
-	BITPIT_UNUSED(id);
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
 
-	return 0;
+	const Interface &interface = getInterface(id);
+	assert(interface.hasInfo());
+
+	std::array<double, 3> *vertexCoordinates;
+	if (interface.hasInfo()) {
+		vertexCoordinates = coordinatesPool.data();
+	}
+
+	const int nInterfaceVertices = interface.getVertexCount();
+	const long *interfaceConnect = interface.getConnect();
+	for (int i = 0; i < nInterfaceVertices; ++i) {
+		vertexCoordinates[i] = getVertex(interfaceConnect[i]).getCoords();
+	}
+
+	double area;
+	if (isThreeDimensional()) {
+		area = interface.evalArea(vertexCoordinates);
+	} else {
+		area = interface.evalLength(vertexCoordinates);
+	}
+
+	return area;
 }
 
 /*!
@@ -140,9 +198,38 @@ double VolUnstructured::evalInterfaceArea(const long &id) const
 */
 std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
 {
-	BITPIT_UNUSED(id);
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
 
-	return {{0., 0., 0.}};
+	const Interface &interface = getInterface(id);
+	assert(interface.hasInfo());
+
+	std::array<double, 3> *vertexCoordinates;
+	if (interface.hasInfo()) {
+		vertexCoordinates = coordinatesPool.data();
+	}
+
+	const int nInterfaceVertices = interface.getVertexCount();
+	const long *interfaceConnect = interface.getConnect();
+	for (int i = 0; i < nInterfaceVertices; ++i) {
+		vertexCoordinates[i] = getVertex(interfaceConnect[i]).getCoords();
+	}
+
+	std::array<double, 3> orientation = {{0., 0., 0.}};
+	if (!isThreeDimensional()) {
+		long ownerId = interface.getOwner();
+		const Cell &owner = getCell(ownerId);
+
+		const int nOwnerVertices = owner.getVertexCount();
+		const long *ownerConnect = owner.getConnect();
+
+		const std::array<double, 3> &V_A = getVertex(ownerConnect[0]).getCoords();
+		const std::array<double, 3> &V_B = getVertex(ownerConnect[1]).getCoords();
+		const std::array<double, 3> &V_Z = getVertex(ownerConnect[nOwnerVertices - 1]).getCoords();
+
+		orientation = crossProduct(V_B - V_A, V_Z - V_A);
+	}
+
+	return interface.evalNormal(vertexCoordinates, orientation);
 }
 
 /*!
