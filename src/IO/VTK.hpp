@@ -394,7 +394,8 @@ class VTKUnstructuredGrid : public VTK {
 
     protected:
         void                    writeCollection() ;  
-        uint64_t                calcSizeConnectivity( ) ;
+
+        uint64_t                readConnectivityEntries( ) ;
 
     public:
         void                    readMetaInformation() ;

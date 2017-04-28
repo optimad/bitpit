@@ -248,7 +248,7 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKDataTy
  *  Reads "type" information of existing grid and calculates the correspondng connectivity size.
  *  @return size of the connectivity information
  */
-uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
+uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
 
     uint64_t                 nconn(0) ;
 
@@ -465,7 +465,7 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     str.close() ;
 
     if( m_homogeneousType == VTKElementType::UNDEFINED) {
-        setDimensions( m_cells, m_points, calcSizeConnectivity() ) ;
+        setDimensions( m_cells, m_points, readConnectivityEntries() ) ;
     } else {
         // Metadata information read form file may not match the information
         // set in our own streamer. If the grid is homogeneous, we need to
