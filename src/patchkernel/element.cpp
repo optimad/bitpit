@@ -543,6 +543,172 @@ long Element::getVertex(const int &vertex) const
 }
 
 /*!
+	Evaluates the characteristics size of the element.
+
+	\param coordinates are the coordinate of the vertices
+	\result The characteristics size of the element.
+*/
+double Element::evalSize(const std::array<double, 3> *coordinates) const
+{
+	switch (m_type) {
+
+	case ElementType::POLYGON:
+	case ElementType::POLYHEDRON:
+	case ElementType::UNDEFINED:
+	{
+		return 0.;
+	}
+
+	default:
+    {
+		const ReferenceElementInfo &referenceInfo = static_cast<const ReferenceElementInfo &>(getInfo());
+
+		return referenceInfo.evalSize(coordinates);
+	}
+
+	}
+}
+
+
+/*!
+	Evaluates the volume of the element.
+
+	\param coordinates are the coordinate of the vertices
+	\result The volume of the element.
+*/
+double Element::evalVolume(const std::array<double, 3> *coordinates) const
+{
+	assert(getDimension() == 3);
+
+	switch (m_type) {
+
+	case ElementType::POLYGON:
+	case ElementType::POLYHEDRON:
+	case ElementType::UNDEFINED:
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+	{
+		const Reference3DElementInfo &referenceInfo = static_cast<const Reference3DElementInfo &>(getInfo());
+
+		return referenceInfo.evalVolume(coordinates);
+
+		break;
+	}
+
+	}
+}
+
+/*!
+	Evaluates the area of the element.
+
+	\param coordinates are the coordinate of the vertices
+	\result The area of the specified element.
+*/
+double Element::evalArea(const std::array<double, 3> *coordinates) const
+{
+	assert(getDimension() == 2);
+
+	switch (m_type) {
+
+	case ElementType::POLYGON:
+	case ElementType::POLYHEDRON:
+	case ElementType::UNDEFINED:
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+	{
+		const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(getInfo());
+
+		return referenceInfo.evalArea(coordinates);
+	}
+
+	}
+}
+
+/*!
+	Evaluates the length of the element.
+
+	\param coordinates are the coordinate of the vertices
+	\result The length of the element.
+*/
+double Element::evalLength(const std::array<double, 3> *coordinates) const
+{
+	assert(getDimension() == 1);
+
+	switch (m_type) {
+
+	case ElementType::POLYGON:
+	case ElementType::POLYHEDRON:
+	case ElementType::UNDEFINED:
+	{
+		return 0.;
+	}
+
+	default:
+	{
+		const Reference1DElementInfo &referenceInfo = static_cast<const Reference1DElementInfo &>(getInfo());
+
+		return referenceInfo.evalLength(coordinates);
+	}
+
+	}
+}
+
+/*!
+	Evaluates the normal of an element.
+
+	\param coordinates are the coordinate of the vertices
+	\param orientation is a vector carring the additional information needed
+	to un-ambigously define a normal to the element (e.g., when evaluating
+	the normal of a one-dimensional element, this versor is perpendicular to
+	the plane where the normal should lie)
+	\param point are the element reference coordinates of the point where the
+	normal should be evaluated
+	\result The normal of the element.
+*/
+std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinates,
+										  const std::array<double, 3> &orientation,
+										  const std::array<double, 3> &point) const
+{
+	assert(getDimension() != 3);
+
+	switch (m_type) {
+
+	case ElementType::POLYGON:
+	case ElementType::POLYHEDRON:
+	case ElementType::UNDEFINED:
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+	{
+		int dimension = getDimension();
+		if (dimension == 2) {
+			const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(getInfo());
+
+			return referenceInfo.evalNormal(coordinates, point);
+		} else if (dimension == 1) {
+			const Reference1DElementInfo &referenceInfo = static_cast<const Reference1DElementInfo &>(getInfo());
+
+			return referenceInfo.evalNormal(coordinates, orientation, point);
+		} else {
+			return orientation;
+		}
+	}
+
+	}
+}
+
+/*!
         Returns the buffer size required to communicate cell data
 
         \result buffer size (in bytes)

@@ -126,6 +126,14 @@ public:
 
 	static const long NULL_ID;
 
+	double evalSize(const std::array<double, 3> *coordinates) const;
+
+	double evalVolume(const std::array<double, 3> *coordinates) const;
+	double evalArea(const std::array<double, 3> *coordinates) const;
+	double evalLength(const std::array<double, 3> *coordinates) const;
+
+	std::array<double, 3> evalNormal(const std::array<double, 3> *coordinates, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+
 	unsigned int getBinarySize();
 
 private:

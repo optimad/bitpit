@@ -37,6 +37,10 @@ namespace bitpit {
 class ReferenceElementInfo {
 
 public:
+    static const int MAX_ELEM_VERTICES = 8;
+    static const int MAX_ELEM_FACES    = 6;
+    static const int MAX_ELEM_EDGES    = 12;
+
     static bool hasInfo(ElementType type);
     static const ReferenceElementInfo & getInfo(ElementType type);
 
@@ -56,6 +60,8 @@ public:
 
     virtual ~ReferenceElementInfo();
 
+    virtual double evalSize(const std::array<double, 3> *vertexCoords) const = 0;
+
 protected:
     ReferenceElementInfo(int _dimension, ElementType _type, int _nVertices, int _nFaces, int _nEdges);
 
@@ -68,6 +74,11 @@ protected:
 
 class Reference3DElementInfo : public ReferenceElementInfo {
 
+public:
+    virtual double evalVolume(const std::array<double, 3> *vertexCoords) const = 0;
+    double evalSurfaceArea(const std::array<double, 3> *vertexCoords) const;
+    double evalEdgePerimeter(const std::array<double, 3> *vertexCoords) const;
+
 protected:
     Reference3DElementInfo(ElementType type, int nVertices, int nFaces);
 
@@ -76,6 +87,11 @@ protected:
 class ReferenceTetraInfo : public Reference3DElementInfo {
 
 friend class ReferenceElementInfo;
+
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalVolume(const std::array<double, 3> *vertexCoords) const;
 
 protected:
     ReferenceTetraInfo();
@@ -89,6 +105,11 @@ class ReferenceVoxelInfo : public Reference3DElementInfo {
 
 friend class ReferenceElementInfo;
 
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+
 protected:
     ReferenceVoxelInfo();
 
@@ -100,6 +121,11 @@ protected:
 class ReferenceHexahedronInfo : public Reference3DElementInfo {
 
 friend class ReferenceElementInfo;
+
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalVolume(const std::array<double, 3> *vertexCoords) const;
 
 protected:
     ReferenceHexahedronInfo();
@@ -113,6 +139,11 @@ class ReferencePyramidInfo : public Reference3DElementInfo {
 
 friend class ReferenceElementInfo;
 
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+
 protected:
     ReferencePyramidInfo();
 
@@ -125,6 +156,11 @@ class ReferenceWedgeInfo : public Reference3DElementInfo {
 
 friend class ReferenceElementInfo;
 
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+
 protected:
     ReferenceWedgeInfo();
 
@@ -134,6 +170,12 @@ protected:
 };
 
 class Reference2DElementInfo : public ReferenceElementInfo {
+
+public:
+    virtual double evalArea(const std::array<double, 3> *vertexCoords) const = 0;
+    double evalPerimeter(const std::array<double, 3> *vertexCoords) const;
+
+    virtual std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const = 0;
 
 protected:
     Reference2DElementInfo(ElementType type, int nVertices);
@@ -147,6 +189,13 @@ friend class ReferenceTetraInfo;
 friend class ReferencePyramidInfo;
 friend class ReferenceWedgeInfo;
 
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalArea(const std::array<double, 3> *vertexCoords) const;
+
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+
 protected:
     ReferenceTriangleInfo();
 
@@ -159,6 +208,13 @@ class ReferencePixelInfo : public Reference2DElementInfo {
 
 friend class ReferenceElementInfo;
 friend class ReferenceVoxelInfo;
+
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalArea(const std::array<double, 3> *vertexCoords) const;
+
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
 
 protected:
     ReferencePixelInfo();
@@ -175,6 +231,13 @@ friend class ReferenceHexahedronInfo;
 friend class ReferencePyramidInfo;
 friend class ReferenceWedgeInfo;
 
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalArea(const std::array<double, 3> *vertexCoords) const;
+
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+
 protected:
     ReferenceQuadInfo();
 
@@ -184,6 +247,11 @@ protected:
 };
 
 class Reference1DElementInfo : public ReferenceElementInfo {
+
+public:
+    virtual double evalLength(const std::array<double, 3> *vertexCoords) const = 0;
+
+    virtual std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const = 0;
 
 protected:
     Reference1DElementInfo(ElementType type);
@@ -202,6 +270,13 @@ friend class ReferenceHexahedronInfo;
 friend class ReferencePyramidInfo;
 friend class ReferenceWedgeInfo;
 
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    double evalLength(const std::array<double, 3> *vertexCoords) const;
+
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const ;
+
 protected:
     ReferenceLineInfo();
 
@@ -211,6 +286,9 @@ protected:
 };
 
 class Reference0DElementInfo : public ReferenceElementInfo {
+
+public:
+    virtual std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{1., 0., 0.}}) const = 0;
 
 protected:
     Reference0DElementInfo(ElementType type);
@@ -224,6 +302,11 @@ friend class ReferenceLineInfo;
 friend class ReferenceTriangleInfo;
 friend class ReferencePixelInfo;
 friend class ReferenceQuadInfo;
+
+public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const;
+
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{1., 0., 0.}}) const;
 
 protected:
     ReferenceVertexInfo();
