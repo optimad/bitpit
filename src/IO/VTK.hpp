@@ -414,7 +414,7 @@ class VTKUnstructuredGrid : public VTK {
         template<class T>
         void setGeomData( VTKUnstructuredField, VTKBaseStreamer* =NULL );
 
-        uint64_t                getNConnectivity( ) ; 
+        uint64_t                calcConnectivityEntries( ) ;
         uint64_t                calcFieldSize( const VTKField &) ;
         uint64_t                calcFieldEntries( const VTKField &) ;
         uint8_t                 calcFieldComponents( const VTKField &) ;

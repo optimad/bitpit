@@ -586,9 +586,9 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
  *  Returns the size of the connectivity information
  *  @return size of connectivity
  */
-uint64_t VTKUnstructuredGrid::getNConnectivity( ){
+uint64_t VTKUnstructuredGrid::calcConnectivityEntries( ){
 
-    return m_nConnectivityEntries ;
+    return calcFieldEntries( m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] ) ;
 }
 
 /*!
