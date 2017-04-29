@@ -127,7 +127,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
 
     m_fh.setAppendix("vtu");
 
-    int nGeomFields = 4;
+    int nGeomFields = 6;
 
     m_geometry.resize(nGeomFields);
 
@@ -135,6 +135,8 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
     m_geometry[getFieldGeomId(VTKUnstructuredField::OFFSETS)]      = VTKField("offsets") ;
     m_geometry[getFieldGeomId(VTKUnstructuredField::TYPES)]        = VTKField("types") ;
     m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] = VTKField("connectivity") ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_STREAMS)] = VTKField("faces") ;
+    m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_OFFSETS)] = VTKField("faceoffsets") ;
 
     for( auto & field : m_geometry ){
         field.setLocation( VTKLocation::CELL ) ;
@@ -146,6 +148,9 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
     m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)].setLocation( VTKLocation::POINT ) ;
     m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)].setFieldType( VTKFieldType::VECTOR ) ;
     m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)].setDataType( VTKDataType::Float64 ) ;
+
+    m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_STREAMS)].disable();
+    m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_OFFSETS)].disable();
 
     setElementType(elementType);
 
@@ -184,9 +189,11 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type ){
     m_geometry[types_gid].setStreamer(m_homogeneousInfoStreamer) ;
 
     // Offsets
-    int offsets_gid = getFieldGeomId(VTKUnstructuredField::OFFSETS);
-    m_geometry[offsets_gid].setDataType( VTKDataType::UInt64) ;
-    m_geometry[offsets_gid].setStreamer(m_homogeneousInfoStreamer) ;
+    if ( m_elementType != VTKElementType::POLYGON && m_elementType != VTKElementType::POLYHEDRON) {
+        int offsets_gid = getFieldGeomId(VTKUnstructuredField::OFFSETS);
+        m_geometry[offsets_gid].setDataType( VTKDataType::UInt64) ;
+        m_geometry[offsets_gid].setStreamer(m_homogeneousInfoStreamer) ;
+    }
 
 }
 
@@ -197,17 +204,46 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type ){
  *  @param[in] npoints number of points
  *  @param[in] nconn size of the connectivity information;
  */
-void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint64_t nconn ){
+void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint64_t nconn, uint64_t nfacestream ){
 
-    m_cells  = ncells ;
+    // Grid size
     m_points = npoints ;
 
-    if ( m_elementType == VTKElementType::UNDEFINED ) {
-        m_nConnectivityEntries = nconn ;
-        assert( (m_nCells != 0 && m_nConnectivityEntries != 0) || (m_nCells == 0 && m_nConnectivityEntries == 0) );
-    } else {
+    m_cells = ncells ;
+    if ( m_elementType != VTKElementType::UNDEFINED ) {
         m_homogeneousInfoStreamer.setCellCount( ncells );
-        m_nConnectivityEntries = ncells *vtk::getElementNodeCount( m_elementType ) ;
+    }
+
+    // Connectivity
+    bool unevenConnectivity = false;
+    unevenConnectivity |= ( m_elementType == VTKElementType::UNDEFINED ) ;
+    unevenConnectivity |= ( m_elementType == VTKElementType::POLYGON ) ;
+    unevenConnectivity |= ( m_elementType == VTKElementType::POLYHEDRON ) ;
+
+    if ( unevenConnectivity ) {
+        m_nConnectivityEntries = nconn ;
+    } else {
+        m_nConnectivityEntries = m_cells *vtk::getElementNodeCount( m_elementType ) ;
+    }
+
+    assert( (m_cells != 0 && m_nConnectivityEntries != 0) || (m_cells == 0 && m_nConnectivityEntries == 0) );
+
+    // Face stream
+    bool faceSteamEnabled = false;
+    faceSteamEnabled |= ( m_elementType == VTKElementType::POLYGON ) ;
+    faceSteamEnabled |= ( m_elementType == VTKElementType::POLYHEDRON ) ;
+    faceSteamEnabled |= ( m_elementType == VTKElementType::UNDEFINED && nfacestream > 0 ) ;
+
+    if ( faceSteamEnabled ) {
+        m_nFaceStreamEntries = nfacestream ;
+
+        m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_STREAMS)].enable();
+        m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_OFFSETS)].enable();
+    } else {
+        m_nFaceStreamEntries = 0 ;
+
+        m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_STREAMS)].disable();
+        m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_OFFSETS)].disable();
     }
 
 }
@@ -352,6 +388,10 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
     writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::OFFSETS)] ) ;
     writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::TYPES)] ) ;
     writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] ) ;
+    if (m_nFaceStreamEntries) {
+        writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_STREAMS)] ) ;
+        writeDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_OFFSETS)] ) ;
+    }
     str << "      </Cells>" << std::endl;
 
     //Closing Piece
@@ -526,6 +566,12 @@ uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
     } else if( name == "connectivity"){
         entries = m_nConnectivityEntries ;
 
+    } else if( name == "faces"){
+        entries = m_nFaceStreamEntries ;
+
+    } else if( name == "faceoffsets"){
+        entries = m_cells ;
+
     } else{
 
         VTKLocation location( field.getLocation() ) ;
@@ -577,6 +623,12 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
            comp = 1;
 
        }
+
+    } else if( name == "faces" ){
+        comp = 1 ;
+
+    } else if( name == "faceoffsets" ){
+        comp = 1 ;
 
     } else{
 

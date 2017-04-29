@@ -131,10 +131,12 @@ enum class VTKElementType {
  * Enum class listing different geometry fields used by VTKUnstructuredGrid
  */
 enum class VTKUnstructuredField {
-    POINTS      = 0,
-    OFFSETS     = 1,
-    TYPES       = 2,
-    CONNECTIVITY =3 
+    POINTS       = 0,
+    OFFSETS      = 1,
+    TYPES        = 2,
+    CONNECTIVITY = 3,
+    FACE_STREAMS = 4,
+    FACE_OFFSETS = 5
 };
 
 /*!
@@ -388,6 +390,7 @@ class VTKUnstructuredGrid : public VTK {
         };
 
         uint64_t                m_nConnectivityEntries ;            /**< size of the connectivity information */
+        uint64_t                m_nFaceStreamEntries ;              /**< size of the face stream information */
         VTKElementType          m_elementType ;                     /**< type of element mesh is made of */
         HomogeneousInfoStreamer m_homogeneousInfoStreamer;          /**< streamer if unstructured grid is of homogenous type */
 
@@ -408,7 +411,7 @@ class VTKUnstructuredGrid : public VTK {
         void                    readMetaInformation() ;
         void                    writeMetaInformation() ;
 
-        void                    setDimensions( uint64_t , uint64_t , uint64_t nconn = 0 ) ;
+        void                    setDimensions( uint64_t , uint64_t , uint64_t nconn = 0 , uint64_t nfacestream = 0 ) ;
 
         template<class T>
         void                    setGeomData( VTKUnstructuredField, std::vector<T> & ) ;
@@ -485,6 +488,8 @@ class VTKRectilinearGrid : public VTK{
  */
 namespace vtk{
     uint8_t                     getElementNodeCount( const VTKElementType & ) ;
+    uint8_t                     getElementNodeCount( const VTKElementType &, int face) ;
+    uint8_t                     getElementFaceCount( const VTKElementType & type) ;
 
     std::string                 convertDataArrayToString( const VTKField & ) ;
     std::string                 convertPDataArrayToString( const VTKField & ) ;
