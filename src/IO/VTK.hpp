@@ -106,19 +106,24 @@ enum class VTKLocation {
  * Enum class listing different element types supported by VTKUnstructuredGrid
  */
 enum class VTKElementType {
-    UNDEFINED  = -1,
-    VERTEX     = 1,
-    LINE       = 3,
-    TRIANGLE   = 5,
-    POLYGON    = 7,
-    PIXEL      = 8,
-    QUAD       = 9,
-    TETRA      = 10,
-    VOXEL      = 11,
-    HEXAHEDRON = 12,
-    WEDGE      = 13,
-    PYRAMID    = 14,
-    POLYHEDRON = 42
+    UNDEFINED            = -1,
+    VERTEX               = 1,
+    LINE                 = 3,
+    TRIANGLE             = 5,
+    POLYGON              = 7,
+    PIXEL                = 8,
+    QUAD                 = 9,
+    TETRA                = 10,
+    VOXEL                = 11,
+    HEXAHEDRON           = 12,
+    WEDGE                = 13,
+    PYRAMID              = 14,
+    QUADRATIC_EDGE       = 21,
+    QUADRATIC_TRIANGLE   = 22,
+    QUADRATIC_QUAD       = 23,
+    QUADRATIC_TETRA      = 24,
+    QUADRATIC_HEXAHEDRON = 25,
+    POLYHEDRON           = 42
 };
 
 /*!
