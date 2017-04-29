@@ -3721,8 +3721,7 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 
 		const int nCellFaces = cell.getFaceCount();
 		for (int face = 0; face < nCellFaces; face++) {
-			ElementType faceType = cell.getFaceType(face);
-			int nFaceVertices = ReferenceElementInfo::getInfo(faceType).nVertices;
+			int nFaceVertices = cell.getFaceVertexCount(face);
 
 			// Build face connectivity
 			std::vector<long> faceConnect = cell.getFaceConnect(face);
