@@ -116,6 +116,7 @@ public:
 
 	int getFaceCount() const;
 	ElementType getFaceType(const int &face) const;
+	int getFaceVertexCount(const int &face) const;
 	const std::vector<int> & getFaceLocalConnect(const int &face) const;
 	std::vector<long> getFaceConnect(int face) const;
 

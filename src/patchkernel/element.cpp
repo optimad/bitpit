@@ -357,6 +357,34 @@ ElementType Element::getFaceType(const int &face) const
 }
 
 /*!
+	Gets the number of vertices of the specified face.
+
+	\param face is the face for which the number of vertices is requested
+	\result The number of vertices of the specified face.
+*/
+int Element::getFaceVertexCount(const int &face) const
+{
+	switch (m_type) {
+
+	case (ElementType::POLYGON):
+	case (ElementType::POLYHEDRON):
+	case (ElementType::UNDEFINED):
+    {
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+    }
+
+	default:
+    {
+		ElementType faceType = getFaceType(face);
+
+		return ReferenceElementInfo::getInfo(faceType).nVertices;
+    }
+
+	}
+}
+
+/*!
 	Gets the local connectivity of the specified face of the element.
 
 	\param face is the face for which the connectivity is reqested
