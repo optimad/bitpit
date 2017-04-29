@@ -482,6 +482,15 @@ void VTKUnstructuredGrid::readMetaInformation( ){
 }
 
 /*!
+ *  Returns the size of the connectivity information
+ *  @return size of connectivity
+ */
+uint64_t VTKUnstructuredGrid::calcConnectivityEntries( ){
+
+    return calcFieldEntries( m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] ) ;
+}
+
+/*!
  * Calculates the size (in bytes) of a field
  * @param[in] field field 
  * @return size of the field
@@ -580,15 +589,6 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
 
     return comp ;
 
-}
-
-/*!  
- *  Returns the size of the connectivity information
- *  @return size of connectivity
- */
-uint64_t VTKUnstructuredGrid::calcConnectivityEntries( ){
-
-    return calcFieldEntries( m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] ) ;
 }
 
 /*!
