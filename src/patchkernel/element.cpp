@@ -466,26 +466,49 @@ std::vector<long> Element::getEdgeConnect(int edge) const
 /*!
 	Gets the dimension of the element.
 
+	\param type the type of the element
 	\return The dimension of the element
 */
-int Element::getDimension() const
+int Element::getDimension(ElementType type)
 {
-	switch (m_type) {
+	switch (type) {
 
-	case (ElementType::POLYGON):
+	case ElementType::POLYGON:
 		return 2;
 
-	case (ElementType::POLYHEDRON):
+	case ElementType::POLYHEDRON:
 		return 3;
 
-	case (ElementType::UNDEFINED):
+	case ElementType::UNDEFINED:
 		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
 
 	default:
-		return getInfo().dimension;
+		return ReferenceElementInfo::getInfo(type).dimension;
 
 	}
+}
+
+/*!
+	Gets the dimension of the element.
+
+	\return The dimension of the element
+*/
+int Element::getDimension() const
+{
+	return getDimension(m_type);
+}
+
+/*!
+	Returns true if the element is a three-dimensional element.
+
+	\param type the type of the element
+	\return Returns true if the element is a three-dimensional element,
+	false otherwise.
+*/
+bool Element::isThreeDimensional(ElementType type)
+{
+	return (getDimension(type) == 3);
 }
 
 /*!

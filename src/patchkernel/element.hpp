@@ -81,6 +81,9 @@ public:
 		}
 	};
 
+	static int getDimension(ElementType type);
+	static bool isThreeDimensional(ElementType type);
+
 	Element();
 	Element(long id, ElementType type = ElementType::UNDEFINED);
 
