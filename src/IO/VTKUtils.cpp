@@ -32,29 +32,44 @@ namespace bitpit{
  *  @param[in] t element type
  *  @return number of vertices of element type
  */
-uint8_t vtk::getElementNodeCount( const VTKElementType & t){
-    int myType = static_cast<std::underlying_type<VTKElementType>::type>(t);
+uint8_t vtk::getElementNodeCount( const VTKElementType & type){
 
-    switch (myType){
+    switch (type){
 
-        case 1: 
-            return(1);
-        case 3: 
-            return(2);
-        case 5: case 21: 
-            return(3);
-        case 8: case 9:  case 10: 
-            return(4);
-        case 11: case 12: case 23: case 24: 
-            return(8);
-        case 13: case 22: 
-            return(6);
-        case 14: 
-            return(5) ;
-        case 25: 
-            return(20);
+        case VTKElementType::VERTEX:
+            return 1 ;
+
+        case VTKElementType::LINE:
+            return 2 ;
+
+        case VTKElementType::TRIANGLE:
+        case VTKElementType::QUADRATIC_EDGE:
+            return 3 ;
+
+        case VTKElementType::PIXEL:
+        case VTKElementType::QUAD:
+        case VTKElementType::TETRA:
+            return 4 ;
+
+        case VTKElementType::VOXEL:
+        case VTKElementType::HEXAHEDRON:
+        case VTKElementType::QUADRATIC_QUAD:
+        case VTKElementType::QUADRATIC_TETRA:
+            return 8 ;
+
+        case VTKElementType::WEDGE:
+        case VTKElementType::QUADRATIC_TRIANGLE:
+            return 6 ;
+
+        case VTKElementType::PYRAMID:
+            return 5 ;
+
+        case VTKElementType::QUADRATIC_HEXAHEDRON:
+            return 20 ;
+
         default:
-            return(0);
+            return 0 ;
+
     }
 
 
