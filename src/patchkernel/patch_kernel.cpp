@@ -1755,8 +1755,7 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementType type, bool interio
 		id = generateCellId();
 	}
 
-	const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(type);
-	if (cellTypeInfo.dimension > getDimension()) {
+	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
 	}
 
@@ -2985,8 +2984,7 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type, lo
 		id = generateInterfaceId();
 	}
 
-	const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(type);
-	if (cellTypeInfo.dimension > (getDimension() - 1)) {
+	if (Interface::getDimension(type) > (getDimension() - 1)) {
 		return interfaceEnd();
 	}
 
