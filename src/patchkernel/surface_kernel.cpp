@@ -219,25 +219,25 @@ double SurfaceKernel::evalCellArea(const long &id) const
 }
 
 /*!
- *  Evaluate the length of the edge with specified local index
- *  for e cell with specified ID.
- *  If the cell is of type ElementType::VERTEX or ElementType::LINE
- *  returns 0.0.
+ *  Evaluate the length of the edge with specified local index for the cell
+ *  with specified Iid.
+ *
+ *  If the cell is of type ElementType::VERTEX or ElementType::LINE returns 0.
  * 
- *  \param[in] id cell id
- *  \param[in] edge_id edge local index
- * 
- *  \result minimal edge length
+ *  \param[in] cellId is the cell id
+ *  \param[in] edgeId is the edge local index
+ *  \result The edge length.
 */
-double SurfaceKernel::evalEdgeLength(const long &id, const int &edge_id) const
+double SurfaceKernel::evalEdgeLength(const long &cellId, const int &edgeId) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
     // ====================================================================== //
 
     // Local variables
-    const Cell                           *cell_ = &m_cells[id];
-    ConstProxyVector<long>               cellVertexIds = cell_->getVertexIds();
+    const Cell                           &cell = m_cells[cellId];
+    std::vector<long>                    faceConnect;
+    double                               edge_length;
 
     // Counters
     // none
@@ -245,18 +245,26 @@ double SurfaceKernel::evalEdgeLength(const long &id, const int &edge_id) const
     // ====================================================================== //
     // COMPUTE MIN EDGE SIZE                                                  //
     // ====================================================================== //
-    if ((cell_->getType() == ElementType::LINE)
-     || (cell_->getType() == ElementType::VERTEX)
-     || (cell_->getType() == ElementType::UNDEFINED)) return 0.0;
+    switch (cell.getType()) {
 
-    double edge_length = 0.0;
-    vector<int> face_loc_connect(2, Vertex::NULL_ID);
-    face_loc_connect = cell_->getFaceLocalConnect(edge_id);
-    face_loc_connect[0] = cellVertexIds[face_loc_connect[0]];
-    face_loc_connect[1] = cellVertexIds[face_loc_connect[1]];
-    edge_length = norm2(m_vertices[face_loc_connect[0]].getCoords() - m_vertices[face_loc_connect[1]].getCoords());
+    case ElementType::LINE:
+    case ElementType::VERTEX:
+    case ElementType::UNDEFINED:
+    {
+        edge_length = 0.;
+    }
 
-    return(edge_length);
+    default:
+    {
+        faceConnect = cell.getFaceConnect(edgeId);
+        const Vertex &vertex_0 = m_vertices[faceConnect[0]];
+        const Vertex &vertex_1 = m_vertices[faceConnect[1]];
+        edge_length = norm2(vertex_0.getCoords() - vertex_1.getCoords());
+    }
+
+    }
+
+    return edge_length;
 }
 
 /*!
