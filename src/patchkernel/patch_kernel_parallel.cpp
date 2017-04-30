@@ -1509,7 +1509,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 
         Cell recvCell;
         cellBuffer >> recvCell;
-        long senderCellId = recvCell.getId();
+        long recvCellId = recvCell.getId();
         long *recvCellConnect = recvCell.getConnect();
 
         // Set cell interior flag
@@ -1519,8 +1519,8 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         // Remap connectivity
         int nCellVertices = recvCell.getVertexCount();
         for (int j = 0; j < nCellVertices; ++j) {
-            long senderVertexId = recvCellConnect[j];
-            long localVertexId  = recvVertexMap.at(senderVertexId);
+            long recvVertexId  = recvCellConnect[j];
+            long localVertexId = recvVertexMap.at(recvVertexId);
 
             recvCellConnect[j] = localVertexId;
         }
@@ -1552,8 +1552,8 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                     break;
                 }
             }
-        } else if (senderGhostsToPromote.count(senderCellId) > 0) {
-            localCellId = senderGhostsToPromote[senderCellId];
+        } else if (senderGhostsToPromote.count(recvCellId) > 0) {
+            localCellId = senderGhostsToPromote[recvCellId];
         }
 
         // If the cell is not a duplicate add it in the cell data structure,
@@ -1605,7 +1605,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         }
 
         // Add the cell to the cell map
-        recvCellMap.insert({{senderCellId, localCellId}});
+        recvCellMap.insert({{recvCellId, localCellId}});
     }
 
     // Remap adjacencies
