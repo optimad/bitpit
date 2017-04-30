@@ -574,6 +574,31 @@ int Element::getVertexCount() const
 }
 
 /*!
+	Gets the list of the vertex ids.
+
+	\result The list of the vertex ids.
+*/
+ConstProxyVector<long> Element::getVertexIds() const
+{
+	switch (m_type) {
+
+	case (ElementType::POLYGON):
+	case (ElementType::POLYHEDRON):
+	case (ElementType::UNDEFINED):
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+	{
+		return ConstProxyVector<long>(getConnect(), getVertexCount());
+	}
+
+	}
+}
+
+/*!
 	Evaluates the characteristics size of the element.
 
 	\param coordinates are the coordinate of the vertices

@@ -125,6 +125,7 @@ public:
 	std::vector<long> getEdgeConnect(int edge) const;
 
 	int getVertexCount() const;
+	ConstProxyVector<long> getVertexIds() const;
 
 	static const long NULL_ID;
 
