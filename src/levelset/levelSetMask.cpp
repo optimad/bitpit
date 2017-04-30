@@ -175,14 +175,14 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::v
 
     for( const long &faceIndex : list){
         auto const &interface = mesh.getInterface(faceIndex);
-        const long *faceConnect = interface.getConnect();
-        int nFaceVertices = interface.getVertexCount();
+        ConstProxyVector<long> faceVertexIds = interface.getVertexIds();
+        int nFaceVertices = faceVertexIds.size();
 
         // Add face vertices to the envelope and get face
         // connectivity in the envelope
         std::unique_ptr<long[]> faceEnvelopeConnect = std::unique_ptr<long[]>(new long[nFaceVertices]);
         for (int j = 0; j < nFaceVertices; ++j) {
-        	long vertexId = faceConnect[j];
+        	long vertexId = faceVertexIds[j];
         
         	// If the vertex is not yet in the envelope
         	// add it.

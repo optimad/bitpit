@@ -163,10 +163,10 @@ double LevelSetKernel::computeCellIncircle( long id ) {
         radius = std::min(radius, r);
     }
 
-    int vertexCount = cell.getInterfaceCount();
-    const long *cellConnect = cell.getConnect();
-    for (int k = 0; k < vertexCount; ++k) {
-        long vertexId = cellConnect[k];
+    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+    int nCellVertices = cellVertexIds.size();
+    for (int k = 0; k < nCellVertices; ++k) {
+        long vertexId = cellVertexIds[k];
         double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
         radius = std::min(radius, r);
     }
@@ -197,10 +197,10 @@ double LevelSetKernel::computeCellCircumcircle( long id ) {
         radius = std::max(radius, r);
     }
 
-    int vertexCount = cell.getInterfaceCount();
-    const long *cellConnect = cell.getConnect();
-    for (int k = 0; k < vertexCount; ++k) {
-        long vertexId = cellConnect[k];
+    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+    int nCellVertices = cellVertexIds.size();
+    for (int k = 0; k < nCellVertices; ++k) {
+        long vertexId = cellVertexIds[k];
         double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
         radius = std::max(radius, r);
     }
@@ -238,10 +238,10 @@ double LevelSetKernel::isCellInsideBoundingBox( long id, std::array<double, 3> m
     cellMinPoint.fill(   std::numeric_limits<double>::max() ) ;
     cellMaxPoint.fill( - std::numeric_limits<double>::max() ) ;
 
-    int nVertices = cell.getVertexCount();
-    const long *cellConnect = cell.getConnect();
-    for (int i = 0; i < nVertices; ++i) {
-        long vertexId = cellConnect[i];
+    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+    int nCellVertices = cellVertexIds.size();
+    for (int i = 0; i < nCellVertices; ++i) {
+        long vertexId = cellVertexIds[i];
         std::array<double, 3> vertexCoords = m_mesh->getVertexCoords(vertexId);
         for (int d = 0; d < 3; ++d) {
             cellMinPoint[d] = std::min( vertexCoords[d] - tolerance, cellMinPoint[d]) ;
