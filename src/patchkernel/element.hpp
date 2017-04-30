@@ -27,6 +27,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "bitpit_containers.hpp"
@@ -125,6 +126,7 @@ public:
 	std::vector<long> getEdgeConnect(int edge) const;
 
 	int getVertexCount() const;
+	void renumberVertices(const std::unordered_map<long, long> &map);
 	ConstProxyVector<long> getVertexIds() const;
 
 	static const long NULL_ID;

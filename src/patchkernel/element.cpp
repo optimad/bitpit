@@ -598,6 +598,37 @@ ConstProxyVector<long> Element::getVertexIds() const
 }
 
 /*!
+	Renumber the vertices of a cell.
+
+	\param map is the map that will be used for the renumbering
+*/
+void Element::renumberVertices(const std::unordered_map<long, long> &map)
+{
+	switch (m_type) {
+
+	case ElementType::POLYGON:
+	case ElementType::POLYHEDRON:
+	case ElementType::UNDEFINED:
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+    {
+		int nVertices = getVertexCount();
+		long *connectivity = getConnect();
+		for (int k = 0; k < nVertices; ++k) {
+			connectivity[k] = map.at(connectivity[k]);
+		}
+
+		break;
+	}
+
+	}
+}
+
+/*!
 	Evaluates the characteristics size of the element.
 
 	\param coordinates are the coordinate of the vertices
