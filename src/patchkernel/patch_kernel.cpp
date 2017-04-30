@@ -3625,57 +3625,31 @@ long PatchKernel::locatePoint(const double &x, const double &y, const double &z)
 }
 
 /*!
- * Check whether the i-th face on cell "cell_1" is the same as the j-th face
- * on cell "cell_2".
+ * Check whether the face "face_A" on cell "cell_A" is the same as the face
+ * "face_B" on cell "cell_B".
  * 
- * \param[in] cell_1 global ID of the 1st cell
- * \param[in] i      local index of face to be checked on cell_1
- * \param[in] cell_2 global ID of the 2nd cell
- * \param[in] j      local index of face to be checked on cell_2
- * 
- * \result returns true if face (cell_1, i) and face (cell_2, j) are the same.
+ * \param[in] cellId_A is the index of the first cell
+ * \param[in] face_A is the face on the first cell
+ * \param[in] cellId_A is the index of the second cell
+ * \param[in] face_A is the face on the second cell
+ * \result Returns true if the two faces are the same.
 */
-bool PatchKernel::isSameFace(
-    const long                  &cell_1,
-    const int                   &i,
-    const long                  &cell_2,
-    const int                   &j
-) {
+bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_B)
+{
+	const Cell &cell_A = m_cells[cellId_A];
+	const Cell &cell_B = m_cells[cellId_B];
+	if (cell_A.getFaceType(face_A) != cell_B.getFaceType(face_B)) {
+		return false;
+	}
 
-// ========================================================================== //
-// VARIABLES DECLARATION                                                      //
-// ========================================================================== //
+	std::vector<long> faceConnect_A = cell_A.getFaceConnect(face_A);
+	std::vector<long> faceConnect_B = cell_B.getFaceConnect(face_B);
 
-// Local variables
-bool                            check = false;
-std::vector<int>                face_loc_connect_A, face_loc_connect_B;
-Cell                            *cell_1_ = &m_cells[cell_1], *cell_2_ = &m_cells[cell_2];
+	std::sort(faceConnect_A.begin(), faceConnect_A.end());
+	std::sort(faceConnect_B.begin(), faceConnect_B.end());
 
-// Counters
-size_t                          k;
-
-// ========================================================================== //
-// CHECK FOR COINCIDENT FACES                                                 //
-// ========================================================================== //
-face_loc_connect_A = cell_1_->getFaceLocalConnect(i);
-face_loc_connect_B = cell_2_->getFaceLocalConnect(j);
-if (face_loc_connect_A.size() == face_loc_connect_B.size()) {
-    ConstProxyVector<long> cellVertexIds_1_ = cell_1_->getVertexIds();
-    for (k = 0; k < face_loc_connect_A.size(); ++k) {
-        face_loc_connect_A[k] = cellVertexIds_1_[face_loc_connect_A[k]];
-    } //next i
-    ConstProxyVector<long> cellVertexIds_2_ = cell_2_->getVertexIds();
-    for (k = 0; k < face_loc_connect_B.size(); ++k) {
-        face_loc_connect_B[k] = cellVertexIds_2_[face_loc_connect_B[k]];
-    } //next i
-    std::sort(face_loc_connect_A.begin(), face_loc_connect_A.end());
-    std::sort(face_loc_connect_B.begin(), face_loc_connect_B.end());
-    check = (face_loc_connect_A == face_loc_connect_B);
+	return (faceConnect_A == faceConnect_B);
 }
-
-return(check);
-    
-};
 
 /*!
 	Fill adjacencies info for each cell.

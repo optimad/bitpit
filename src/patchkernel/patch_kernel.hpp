@@ -365,7 +365,7 @@ public:
 
 	long locatePoint(const double &x, const double &y, const double &z);
 	virtual long locatePoint(const std::array<double, 3> &point) = 0;
-        bool isSameFace(const long &, const int&, const long&, const int&);
+	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B);
 
 	virtual void buildAdjacencies(bool resetAdjacencies = true);
 	virtual void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
