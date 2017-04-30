@@ -388,10 +388,10 @@ void VolOctree::setBoundingBox()
 	// The tree is only evaluating the bounding box of the internal octants,
 	// we need to consider also ghosts cells.
 	for (auto ghostItr = ghostBegin(); ghostItr != ghostEnd(); ++ghostItr) {
-		const long *ghostConnect = ghostItr->getConnect();
-		int nGhostVertices = ghostItr->getVertexCount();
+		ConstProxyVector<long> ghostVertexIds = ghostItr->getVertexIds();
+		int nGhostVertices = ghostVertexIds.size();
 		for (int i = 0; i < nGhostVertices; ++i) {
-			const std::array<double, 3> coords = m_vertices[ghostConnect[i]].getCoords();
+			const std::array<double, 3> coords = m_vertices[ghostVertexIds[i]].getCoords();
 			for (int d = 0; d < 3; ++d) {
 				minPoint[d] = std::min(coords[d], minPoint[d]);
 				maxPoint[d] = std::max(coords[d], maxPoint[d]);
@@ -1470,10 +1470,9 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 		//
 		// For now, all cell vertices will be listed. Later, the vertex of
 		// the dangling faces will be removed from the list.
-		int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cellConnect[k];
+			long vertexId = cellVertexIds[k];
 			deadVertices.insert(vertexId);
 		}
 
@@ -1570,13 +1569,13 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 	for (const long cellId : danglingCells) {
 		// Vertices of the cell
 		const Cell &cell = m_cells[cellId];
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 
 		OctantInfo octantInfo = getCellOctant(cellId);
 		Octant *octant = getOctantPointer(octantInfo);
 
 		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cellConnect[k];
+			long vertexId = cellVertexIds[k];
 			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
 			stitchVertices.insert({vertexTreeMorton, vertexId});
 			deadVertices.erase(vertexId);
@@ -1600,14 +1599,14 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 			int ownerFace = interface.getOwnerFace();
 
 			const Cell &ownerCell = m_cells[ownerId];
-			const long *ownerCellConnect = ownerCell.getConnect();
+			ConstProxyVector<long> ownerCellVertexIds = ownerCell.getVertexIds();
 
 			OctantInfo ownerOctantInfo = getCellOctant(ownerId);
 			Octant *ownerOctant = getOctantPointer(ownerOctantInfo);
 
 			const std::vector<int> &localFaceConnect = cellLocalFaceConnect[ownerFace];
 			for (int k = 0; k < nInterfaceVertices; ++k) {
-				long vertexId = ownerCellConnect[localFaceConnect[k]];
+				long vertexId = ownerCellVertexIds[localFaceConnect[k]];
 				uint64_t vertexTreeMorton = m_tree->getNodeMorton(ownerOctant, localFaceConnect[k]);
 				stitchVertices.insert({vertexTreeMorton, vertexId});
 				deadVertices.erase(vertexId);
@@ -1784,13 +1783,13 @@ bool VolOctree::isPointInside(const std::array<double, 3> &point)
 bool VolOctree::isPointInside(const long &id, const std::array<double, 3> &point)
 {
 	const Cell &cell = m_cells[id];
-	const long *cellConnect = cell.getConnect();
+	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 
     int lowerLeftVertex  = 0;
 	int upperRightVertex = pow(2, getDimension()) - 1;
 
-	std::array<double, 3> lowerLeft  = getVertexCoords(cellConnect[lowerLeftVertex]);
-	std::array<double, 3> upperRight = getVertexCoords(cellConnect[upperRightVertex]);
+	std::array<double, 3> lowerLeft  = getVertexCoords(cellVertexIds[lowerLeftVertex]);
+	std::array<double, 3> upperRight = getVertexCoords(cellVertexIds[upperRightVertex]);
 
 	const double EPS = getTol();
     for (int d = 0; d < 3; ++d){
@@ -2028,9 +2027,9 @@ void VolOctree::setLength(double length)
 		for (const Cell &cell : m_cells) {
 			OctantInfo octantInfo = getCellOctant(cell.getId());
 			Octant *octant = getOctantPointer(octantInfo);
-			const long *cellConnect = cell.getConnect();
+			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 			for (int k = 0; k < m_cellTypeInfo->nVertices; ++k) {
-				long vertexId = cellConnect[k];
+				long vertexId = cellVertexIds[k];
 				if (alreadyEvaluated.count(vertexId) == 0) {
 					Vertex &vertex = m_vertices.at(vertexId);
 					vertex.setCoords(m_tree->getNode(octant, k));
