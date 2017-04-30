@@ -197,10 +197,10 @@ int                             nV, nE;
     } //next v_
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
-        const long *cellConnect = c_->getConnect();
-        n_vert = c_->getVertexCount();
+        ConstProxyVector<long> cellVertexIds = c_->getVertexIds();
+        n_vert = cellVertexIds.size();
         for (i = 0; i < n_vert; ++i) {
-            id = cellConnect[i];
+            id = cellVertexIds[i];
             vnormals[vertex_mapper[id]] = mesh.evalVertexNormal(c_->getId(), i);
         } //next i
     } //next c_
@@ -412,10 +412,10 @@ int                             nV, nS, nE;
     } //next v_
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
-        const long *cellConnect = c_->getConnect();
-        n_vert = c_->getVertexCount();
+        ConstProxyVector<long> cellVertexIds = c_->getVertexIds();
+        n_vert = cellVertexIds.size();
         for (i = 0; i < n_vert; ++i) {
-            id = cellConnect[i];
+            id = cellVertexIds[i];
             vnormals[vertex_mapper[id]] = mesh.evalVertexNormal(c_->getId(), i);
         } //next i
     } //next c_
