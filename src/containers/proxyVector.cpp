@@ -22,25 +22,13 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- * @defgroup containers Containers
- * @{
- * @defgroup BinaryStream Binary stream
- * @}
- *
- */
-
-#ifndef __BITPIT_MODULE_CONTAINERS_HPP__
-#define __BITPIT_MODULE_CONTAINERS_HPP__
-
-#include "bitpit_version.hpp"
-
-#include "binary_stream.hpp"
-#include "flatVector2D.hpp"
-#include "piercedKernel.hpp"
-#include "piercedStorage.hpp"
-#include "piercedVector.hpp"
-#include "piercedStorageRange.hpp"
 #include "proxyVector.hpp"
 
-#endif
+namespace bitpit{
+
+// Some commonly used ProxyVectors are instantiated explicitly
+template class ProxyVector<int>;
+template class ProxyVector<long>;
+template class ProxyVector<double>;
+
+}
