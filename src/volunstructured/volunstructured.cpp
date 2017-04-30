@@ -110,10 +110,10 @@ double VolUnstructured::evalCellVolume(const long &id) const
 	if (cell.hasInfo()) {
 		vertexCoordinates = coordinatesPool.data();
 
-		const int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		const int nCellVertices = cellVertexIds.size();
 		for (int i = 0; i < nCellVertices; ++i) {
-			vertexCoordinates[i] = getVertex(cellConnect[i]).getCoords();
+			vertexCoordinates[i] = getVertex(cellVertexIds[i]).getCoords();
 		}
 	}
 
@@ -144,10 +144,10 @@ double VolUnstructured::evalCellSize(const long &id) const
 	if (cell.hasInfo()) {
 		vertexCoordinates = coordinatesPool.data();
 
-		const int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		const int nCellVertices = cellVertexIds.size();
 		for (int i = 0; i < nCellVertices; ++i) {
-			vertexCoordinates[i] = getVertex(cellConnect[i]).getCoords();
+			vertexCoordinates[i] = getVertex(cellVertexIds[i]).getCoords();
 		}
 	}
 
@@ -174,10 +174,10 @@ double VolUnstructured::evalInterfaceArea(const long &id) const
 		vertexCoordinates = coordinatesPool.data();
 	}
 
-	const int nInterfaceVertices = interface.getVertexCount();
-	const long *interfaceConnect = interface.getConnect();
+	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
+	int nInterfaceVertices = interfaceVertexIds.size();
 	for (int i = 0; i < nInterfaceVertices; ++i) {
-		vertexCoordinates[i] = getVertex(interfaceConnect[i]).getCoords();
+		vertexCoordinates[i] = getVertex(interfaceVertexIds[i]).getCoords();
 	}
 
 	double area;
@@ -208,10 +208,10 @@ std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
 		vertexCoordinates = coordinatesPool.data();
 	}
 
-	const int nInterfaceVertices = interface.getVertexCount();
-	const long *interfaceConnect = interface.getConnect();
+	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
+	const int nInterfaceVertices = interfaceVertexIds.size();
 	for (int i = 0; i < nInterfaceVertices; ++i) {
-		vertexCoordinates[i] = getVertex(interfaceConnect[i]).getCoords();
+		vertexCoordinates[i] = getVertex(interfaceVertexIds[i]).getCoords();
 	}
 
 	std::array<double, 3> orientation = {{0., 0., 0.}};
@@ -219,12 +219,12 @@ std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
 		long ownerId = interface.getOwner();
 		const Cell &owner = getCell(ownerId);
 
-		const int nOwnerVertices = owner.getVertexCount();
-		const long *ownerConnect = owner.getConnect();
+		ConstProxyVector<long> ownerVertexIds = owner.getVertexIds();
+		const int nOwnerVertices = ownerVertexIds.size();
 
-		const std::array<double, 3> &V_A = getVertex(ownerConnect[0]).getCoords();
-		const std::array<double, 3> &V_B = getVertex(ownerConnect[1]).getCoords();
-		const std::array<double, 3> &V_Z = getVertex(ownerConnect[nOwnerVertices - 1]).getCoords();
+		const std::array<double, 3> &V_A = getVertex(ownerVertexIds[0]).getCoords();
+		const std::array<double, 3> &V_B = getVertex(ownerVertexIds[1]).getCoords();
+		const std::array<double, 3> &V_Z = getVertex(ownerVertexIds[nOwnerVertices - 1]).getCoords();
 
 		orientation = crossProduct(V_B - V_A, V_Z - V_A);
 	}
