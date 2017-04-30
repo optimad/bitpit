@@ -2023,7 +2023,7 @@ void VolOctree::setLength(double length)
 
 		// Update vertex coordinates
 		std::unordered_set<long> alreadyEvaluated;
-		for (Cell &cell : m_cells) {
+		for (const Cell &cell : m_cells) {
 			OctantInfo octantInfo = getCellOctant(cell.getId());
 			Octant *octant = getOctantPointer(octantInfo);
 			for (int k = 0; k < m_cellTypeInfo->nVertices; ++k) {
