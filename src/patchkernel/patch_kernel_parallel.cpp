@@ -1510,20 +1510,14 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         Cell recvCell;
         cellBuffer >> recvCell;
         long recvCellId = recvCell.getId();
-        long *recvCellConnect = recvCell.getConnect();
+        ConstProxyVector<long> recvVertexIds = recvCell.getVertexIds();
 
         // Set cell interior flag
         bool recvIsInterior = (recvCellOwner == m_rank);
         recvCell.setInterior(recvIsInterior);
 
         // Remap connectivity
-        int nCellVertices = recvCell.getVertexCount();
-        for (int j = 0; j < nCellVertices; ++j) {
-            long recvVertexId  = recvCellConnect[j];
-            long localVertexId = recvVertexMap.at(recvVertexId);
-
-            recvCellConnect[j] = localVertexId;
-        }
+        recvCell.renumberVertices(recvVertexMap);
 
         // Check if the cells is a duplicate
         long localCellId = Cell::NULL_ID;
@@ -1540,7 +1534,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                 int nGhostVertices = ghostVertexIds.size();
                 for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
                     long ghostVertexId = ghostVertexIds[vertex];
-                    long recvVertexId  = recvCellConnect[vertex];
+                    long recvVertexId  = recvVertexIds[vertex];
                     if (ghostVertexId != recvVertexId) {
                         cellsCoincide = false;
                         break;

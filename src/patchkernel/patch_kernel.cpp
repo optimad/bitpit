@@ -4796,20 +4796,12 @@ void PatchKernel::consecutiveRenumberVertices(long offset)
 	
 	// Renumber cell connectivity
 	for(Cell &cell : m_cells) {
-		int nCellVertices = cell.getVertexCount();
-		long * cellConnect = cell.getConnect();
-		for (int j=0; j < nCellVertices; ++j) {
-			cellConnect[j] = map[cellConnect[j]];
-		}
+		cell.renumberVertices(map);
 	}
 
 	// Renumber interface connectivity
 	for(Interface &interface : getInterfaces()) {
-		int nInterfaceVertices = interface.getVertexCount();
-		long * interfaceConnect = interface.getConnect();
-		for (int j=0; j < nInterfaceVertices; ++j) {
-			interfaceConnect[j] = map[interfaceConnect[j]];
-		}
+		interface.renumberVertices(map);
 	}
 }	
 
