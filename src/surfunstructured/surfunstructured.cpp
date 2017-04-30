@@ -280,9 +280,8 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
 
     // Local variables
     bool                                        check;
-    int                                         n_faces, n_adj, n_vert;
+    int                                         n_faces, n_adj;
     long                                        id;
-    vector<int>                                 face_loc_connect;
     vector<long>                                face_connect;
 
     // Counters
@@ -319,14 +318,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
                 check = check && (id > c_->getAdjacency(i, j));
             } //next j
             if (check) {
-                face_loc_connect = c_->getFaceLocalConnect(i);
-                n_vert = face_loc_connect.size();
-                face_connect.resize(n_vert);
-                j_ = face_connect.begin();
-                for (i_ = face_loc_connect.cbegin(); i_ != face_loc_connect.cend(); ++i_) {
-                    *j_ = cellVertexIds[*i_];
-                    ++j_;
-                } //next i_
+                face_connect = c_->getFaceConnect(i);
                 net.addCell(c_->getFaceType(i), true, face_connect);
             }
         } //next i
