@@ -1233,8 +1233,8 @@ long PatchKernel::countFreeVertices() const
 				continue;
 			}
 
-			std::vector<long> faceConnect = cell.getFaceConnect(i);
-			freeVertices.insert(faceConnect.begin(), faceConnect.end());
+			ConstProxyVector<long> faceVertexIds = cell.getFaceVertexIds(i);
+			freeVertices.insert(faceVertexIds.begin(), faceVertexIds.end());
 		}
 	}
 
@@ -2715,14 +2715,13 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 
 		// Add negihbours of faces that owns the vertex to the scan list
 		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
-			const ElementType &faceType = scanCell.getFaceType(i);
-			const int nFaceVertices = ReferenceElementInfo::getInfo(faceType).nVertices;
-			const std::vector<long> faceConnect = scanCell.getFaceConnect(i);
-
 			// Discard faces that don't own the vertex
+			ConstProxyVector<long> faceVertexIds = scanCell.getFaceVertexIds(i);
+			const int nFaceVertices = faceVertexIds.size();
+
 			bool faceOwnsVertex = false;
 			for (int k = 0; k < nFaceVertices; ++k) {
-				if (faceConnect[k] == vertexId) {
+				if (faceVertexIds[k] == vertexId) {
 					faceOwnsVertex = true;
 					break;
 				}
@@ -3642,13 +3641,15 @@ bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_
 		return false;
 	}
 
-	std::vector<long> faceConnect_A = cell_A.getFaceConnect(face_A);
-	std::vector<long> faceConnect_B = cell_B.getFaceConnect(face_B);
+	ConstProxyVector<long> faceVertexIds_A = cell_A.getFaceVertexIds(face_A);
+	std::vector<long> sortedFaceVertexIds_A(faceVertexIds_A.begin(), faceVertexIds_A.end());
+	std::sort(sortedFaceVertexIds_A.begin(), sortedFaceVertexIds_A.end());
 
-	std::sort(faceConnect_A.begin(), faceConnect_A.end());
-	std::sort(faceConnect_B.begin(), faceConnect_B.end());
+	ConstProxyVector<long> faceVertexIds_B = cell_B.getFaceVertexIds(face_B);
+	std::vector<long> sortedFaceVertexIds_B(faceVertexIds_B.begin(), faceVertexIds_B.end());
+	std::sort(sortedFaceVertexIds_B.begin(), sortedFaceVertexIds_B.end());
 
-	return (faceConnect_A == faceConnect_B);
+	return (sortedFaceVertexIds_A == sortedFaceVertexIds_B);
 }
 
 /*!
@@ -3708,21 +3709,21 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 		for (int face = 0; face < nCellFaces; face++) {
 			int nFaceVertices = cell.getFaceVertexCount(face);
 
-			// Build face connectivity
-			std::vector<long> faceConnect = cell.getFaceConnect(face);
+			// Get vertex ids of the face
+			ConstProxyVector<long> faceVertexIds = cell.getFaceVertexIds(face);
 
 			// Build list of neighbour candidates
 			//
 			// Consider all the cells that shares the same vertices of the
 			// current face, but discard the cells that are already adjacencies
 			// for this face.
-			long firstVertexId = faceConnect[0];
+			long firstVertexId = faceVertexIds[0];
 			std::vector<long> candidates = vertexToCellsMap[firstVertexId];
 			utils::eraseValue(candidates, cellId);
 
 			int j = 1;
 			while (candidates.size() > 0 && j < nFaceVertices) {
-				long vertexId = faceConnect[j];
+				long vertexId = faceVertexIds[j];
 				candidates = utils::intersectionVector(candidates, vertexToCellsMap[vertexId]);
 				j++;
 			}

@@ -236,7 +236,6 @@ double SurfaceKernel::evalEdgeLength(const long &cellId, const int &edgeId) cons
 
     // Local variables
     const Cell                           &cell = m_cells[cellId];
-    std::vector<long>                    faceConnect;
     double                               edge_length;
 
     // Counters
@@ -256,9 +255,9 @@ double SurfaceKernel::evalEdgeLength(const long &cellId, const int &edgeId) cons
 
     default:
     {
-        faceConnect = cell.getFaceConnect(edgeId);
-        const Vertex &vertex_0 = m_vertices[faceConnect[0]];
-        const Vertex &vertex_1 = m_vertices[faceConnect[1]];
+        ConstProxyVector<long> faceVertexIds = cell.getFaceVertexIds(edgeId);
+        const Vertex &vertex_0 = m_vertices[faceVertexIds[0]];
+        const Vertex &vertex_1 = m_vertices[faceVertexIds[1]];
         edge_length = norm2(vertex_0.getCoords() - vertex_1.getCoords());
     }
 
@@ -925,13 +924,13 @@ bool SurfaceKernel::sameOrientationAtInterface(const long &id)
             return false;
         }
     } else if (face.getType() == ElementType::LINE) {
-        const int ownerFace= face.getOwnerFace();
-        std::vector<long> ownerConnect = owner.getFaceConnect(ownerFace);
+        const int ownerFace = face.getOwnerFace();
+        ConstProxyVector<long> ownerVertexIds = owner.getFaceVertexIds(ownerFace);
 
-        const int neighFace= face.getNeighFace();
-        std::vector<long> neighConnect = neigh.getFaceConnect(neighFace);
+        const int neighFace = face.getNeighFace();
+        ConstProxyVector<long> neighVertexIds = neigh.getFaceVertexIds(neighFace);
 
-        if (ownerConnect[0] != neighConnect[1] || ownerConnect[1] != neighConnect[0]) {
+        if (ownerVertexIds[0] != neighVertexIds[1] || ownerVertexIds[1] != neighVertexIds[0]) {
             return false;
         }
     } else {
