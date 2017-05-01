@@ -87,11 +87,37 @@ namespace bitpit {
 */
 
 /*!
+	Create the storage for interfaces or adjacencies.
+
+	This function is called in the initializer list of the constructor, care
+	must be taken to ensure that all members needed by the function are
+	already initialized at the time the function is called.
+
+	\param storeNeighbourhood defines is the cell should store neighbourhood
+	information
+*/
+bitpit::FlatVector2D<long> Cell::createNeighbourhoodStorage(bool storeNeighbourhood)
+{
+	ElementType type = getType();
+	if (!storeNeighbourhood || type == ElementType::UNDEFINED) {
+		return bitpit::FlatVector2D<long>(false);
+	}
+
+	int nFaces = getFaceCount();
+	if (nFaces <= 0) {
+		return bitpit::FlatVector2D<long>(false);
+	}
+
+	return bitpit::FlatVector2D<long>(nFaces, 1, NULL_ID);
+}
+
+/*!
 	Default constructor.
 */
 Cell::Cell()
 	: Element(), m_interior(true), m_pid(0),
-      m_interfaces(false), m_adjacencies(false)
+      m_interfaces(createNeighbourhoodStorage(false)),
+      m_adjacencies(createNeighbourhoodStorage(false))
 {
 
 }
@@ -107,8 +133,8 @@ Cell::Cell()
 */
 Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type), m_pid(0),
-      m_interfaces(storeNeighbourhood ? ReferenceElementInfo::getInfo(type).nFaces : 0, 1, NULL_ID),
-      m_adjacencies(storeNeighbourhood ? ReferenceElementInfo::getInfo(type).nFaces : 0, 1, NULL_ID)
+      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
+      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
 }
@@ -224,8 +250,7 @@ int Cell::getPID() const
 */
 void Cell::deleteInterfaces()
 {
-	m_interfaces.clear();
-	m_interfaces.shrinkToFit();
+	resetInterfaces(false);
 }
 
 /*!
@@ -246,11 +271,7 @@ void Cell::deleteInterfaces()
 */
 void Cell::resetInterfaces(bool storeInterfaces)
 {
-	if (!storeInterfaces || getType() == ElementType::UNDEFINED) {
-		deleteInterfaces();
-	} else {
-		m_interfaces.initialize(getFaceCount(), 1, NULL_ID);
-	}
+	m_interfaces = createNeighbourhoodStorage(storeInterfaces);
 }
 
 /*!
@@ -469,8 +490,7 @@ int Cell::findInterface(const int &interface)
 */
 void Cell::deleteAdjacencies()
 {
-	m_adjacencies.clear();
-	m_adjacencies.shrinkToFit();
+	resetAdjacencies(false);
 }
 
 /*!
@@ -491,11 +511,7 @@ void Cell::deleteAdjacencies()
 */
 void Cell::resetAdjacencies(bool storeAdjacencies)
 {
-	if (!storeAdjacencies || getType() == ElementType::UNDEFINED) {
-		deleteAdjacencies();
-	} else {
-		m_adjacencies.initialize(getFaceCount(), 1, NULL_ID);
-	}
+	m_adjacencies = createNeighbourhoodStorage(storeAdjacencies);
 }
 
 /*!
