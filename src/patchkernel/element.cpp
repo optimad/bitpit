@@ -314,6 +314,27 @@ int Element::findVertex(long vertexId) const
 }
 
 /*!
+	Gets the size of the connectivity of the element.
+
+	\result The size of the connectivity of the element.
+*/
+int Element::getConnectSize() const
+{
+	switch (m_type) {
+
+	case (ElementType::POLYGON):
+	case (ElementType::POLYHEDRON):
+	case (ElementType::UNDEFINED):
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+
+	default:
+		return getVertexCount();
+
+	}
+}
+
+/*!
 	Gets the number of faces of the element.
 
 	\result The number of vertices of the element

@@ -111,6 +111,7 @@ public:
 	
 	void setConnect(std::unique_ptr<long[]> &&connect);
 	void unsetConnect();
+	int getConnectSize() const;
 	const long * getConnect() const;
 	long * getConnect();
 	int findVertex(long vertexId) const;
