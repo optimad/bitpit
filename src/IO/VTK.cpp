@@ -525,7 +525,6 @@ void VTK::writeData( ){
     { // Write Ascii
 
         position_insert = str.tellg();
-        VTKField    temp ;
 
         //Writing first point data then cell data
         for( auto &field : m_data ){
@@ -598,8 +597,8 @@ void VTK::writeData( ){
             }
         }
 
-        str.seekg( temp.getPosition() ) ;
-
+        // Position the stream at the beginning of the stream
+        str.seekg(0, std::ios::beg);
 
     }
 
