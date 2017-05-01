@@ -598,6 +598,44 @@ ConstProxyVector<long> Element::getVertexIds() const
 }
 
 /*!
+	Gets the list of vertex ids for the specified face of the element.
+
+	\param face is the face for which the vertex ids is reqested
+	\result The list of vertex ids for the specified face of the element.
+*/
+ConstProxyVector<long> Element::getFaceVertexIds(int face) const
+{
+	switch (m_type) {
+
+	case (ElementType::POLYGON):
+	case (ElementType::POLYHEDRON):
+	case (ElementType::UNDEFINED):
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+	{
+		const std::vector<int> &localFaceVertexIds = getFaceLocalConnect(face);
+		int nFaceVertices = localFaceVertexIds.size();
+
+		ConstProxyVector<long> cellVertexIds = getVertexIds();
+
+		std::vector<long> faceVertexIds(nFaceVertices);
+		for (int k = 0; k < nFaceVertices; ++k) {
+			int localVertexId = localFaceVertexIds[k];
+			long vertexId = cellVertexIds[localVertexId];
+			faceVertexIds[k] = vertexId;
+		}
+
+		return ConstProxyVector<long>(std::move(faceVertexIds));
+	}
+
+	}
+}
+
+/*!
 	Renumber the vertices of a cell.
 
 	\param map is the map that will be used for the renumbering

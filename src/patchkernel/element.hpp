@@ -120,6 +120,7 @@ public:
 	int getFaceVertexCount(const int &face) const;
 	const std::vector<int> & getFaceLocalConnect(const int &face) const;
 	std::vector<long> getFaceConnect(int face) const;
+	ConstProxyVector<long> getFaceVertexIds(int face) const;
 
 	int getEdgeCount() const;
 	const std::vector<int> & getEdgeLocalConnect(const int &edge) const;
