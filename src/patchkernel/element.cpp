@@ -100,7 +100,7 @@ Element::Element()
 /*!
 	Creates a new element.
 
-	\param id the id of the element
+	\param id is the id that will be assigned to the element
 	\param type is the type of the element
 */
 Element::Element(long id, ElementType type)

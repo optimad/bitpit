@@ -98,6 +98,12 @@ Cell::Cell()
 
 /*!
 	Creates a new cell.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
+	\param interior defines is the cell is interior or ghost
+	\param storeNeighbourhood defines is the cell should store neighbourhood
+	information
 */
 Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type), m_pid(0),
@@ -141,6 +147,12 @@ void Cell::initialize(long id, ElementType type, bool interior, bool storeNeighb
 
 /*!
 	Internal function to initialize the data structures of the cell.
+
+	\param interior if true the cell is flagged as interior
+	\param initializeNeighbourhood defines if neighbourhood information will
+	be initialized
+	\param storeNeighbourhood defines is the cell should store neighbourhood
+	information
 */
 void Cell::_initialize(bool interior, bool initializeNeighbourhood, bool storeNeighbourhood)
 {

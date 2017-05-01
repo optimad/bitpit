@@ -53,6 +53,9 @@ Interface::Interface()
 
 /*!
 	Creates a new interface.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
 */
 Interface::Interface(const long &id, ElementType type)
 	: Element(id, type)
