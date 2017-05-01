@@ -440,18 +440,14 @@ void VTK::calcAppendedOffsets(){
 void VTK::checkAllFields(){
 
     for( auto & field : m_data ){
-        if( field.isEnabled() && field.hasAllMetaData() ) {
-            field.enable() ;
-        } else {
+        if( field.isEnabled() && !field.hasAllMetaData() ) {
             field.disable() ;
             log::cout() << "Data field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
         }
     }
 
     for( auto & field : m_geometry ){
-        if( field.hasAllMetaData()){
-            field.enable() ;
-        } else {
+        if( field.isEnabled() && !field.hasAllMetaData() ) {
             field.disable() ;
             log::cout() << "Geometry field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
         }
