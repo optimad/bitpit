@@ -1176,11 +1176,6 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 {
 	switch (m_type) {
 
-	case (ElementType::POLYGON):
-	{
-		return getFaceConnect(face);
-	}
-
 	case (ElementType::POLYHEDRON):
 	{
 		int facePos = getFaceStreamPosition(face);
@@ -1197,19 +1192,7 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 
 	default:
 	{
-		ConstProxyVector<int> localFaceVertexIds = getFaceLocalConnect(face);
-		int nFaceVertices = localFaceVertexIds.size();
-
-		ConstProxyVector<long> cellVertexIds = getVertexIds();
-
-		std::vector<long> faceVertexIds(nFaceVertices);
-		for (int k = 0; k < nFaceVertices; ++k) {
-			int localVertexId = localFaceVertexIds[k];
-			long vertexId = cellVertexIds[localVertexId];
-			faceVertexIds[k] = vertexId;
-		}
-
-		return ConstProxyVector<long>(std::move(faceVertexIds));
+		return getFaceConnect(face);
 	}
 
 	}
