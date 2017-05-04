@@ -1931,17 +1931,48 @@ std::vector<long> VolOctree::_findCellVertexNeighs(const long &id, const int &ve
 	int codimension = getDimension();
 	neighs = findCellCodimensionNeighs(id, vertex, codimension, blackList);
 
-	// Add edge neighbours or face neighbours
+	// Add edge and face neighbours
+	//
+	// Get all face and edge neighbours and select the ones that contains the
+	// vertex for which the neighbours are requested. On un-balanced trees
+	// the vertex can be inside the face/edge of the neighbour (hanging nodes).
+	// To correctly consider these neighbours, the following logic can be
+	// used:
+	//   - if a face/edge neighbour has the same level or a lower level than
+	//     the current cell, then it certainly is also a vertex neighbour;
+	//   - if a face/edge neighbour has a higher level than the current cell,
+	//     it is necessary to check if the neighbour actually contains the
+	//     vertex.
+	//
+	// NOTE: in three dimension the function "_findCellEdgeNeighs" will return
+	// both edge and face neighbours.
+	const OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
+	int octantLevel = m_tree->getLevel(octant);
 	if (isThreeDimensional()) {
 		for (int edge : m_octantLocalEdgesOnVertex[vertex]) {
-			for (auto &neigh : _findCellEdgeNeighs(id, edge, blackList)) {
-				utils::addToOrderedVector<long>(neigh, neighs);
+			for (long &neighId : _findCellEdgeNeighs(id, edge, blackList)) {
+				const OctantInfo neighOctantInfo = getCellOctant(neighId);
+				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
+				int neighOctantLevel = m_tree->getLevel(neighOctant);
+				if (neighOctantLevel <= octantLevel) {
+					utils::addToOrderedVector<long>(neighId, neighs);
+				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
+					utils::addToOrderedVector<long>(neighId, neighs);
+				}
 			}
 		}
 	} else {
 		for (int face : m_octantLocalFacesOnVertex[vertex]) {
-			for (auto &neigh : _findCellFaceNeighs(id, face, blackList)) {
-				utils::addToOrderedVector<long>(neigh, neighs);
+			for (long &neighId : _findCellFaceNeighs(id, face, blackList)) {
+				const OctantInfo neighOctantInfo = getCellOctant(neighId);
+				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
+				int neighOctantLevel = m_tree->getLevel(neighOctant);
+				if (neighOctantLevel <= octantLevel) {
+					utils::addToOrderedVector<long>(neighId, neighs);
+				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
+					utils::addToOrderedVector<long>(neighId, neighs);
+				}
 			}
 		}
 	}
