@@ -4325,6 +4325,48 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 }
 
 /*!
+	Get the coordinates of the specified element
+
+	\param element is the element
+	\param staticStorage is a pointer to the static storage where the
+	coordinaets of element with a can be stored
+	\result The coordinates of the element.
+*/
+ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates(const Element &element, std::array<double, 3> *staticStorage) const
+{
+	std::unique_ptr<std::vector<std::array<double, 3>>> dynamicStorage;
+	std::array<double, 3> *storage;
+
+	// Get the vertices ids
+	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
+	const int nElementVertices = elementVertexIds.size();
+
+	// Store coordinates in storage
+	bool useStaticPool = (staticStorage != nullptr) && element.hasInfo();
+	if (useStaticPool) {
+		storage = staticStorage;
+	} else {
+		dynamicStorage = std::unique_ptr<std::vector<std::array<double, 3>>>(new std::vector<std::array<double, 3>>(nElementVertices));
+		storage = dynamicStorage->data();
+	}
+
+	for (int i = 0; i < nElementVertices; ++i) {
+		storage[i] = getVertex(elementVertexIds[i]).getCoords();
+	}
+
+	// Build the proxy vector with the coordinates
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
+	if (useStaticPool) {
+		vertexCoordinates.set(staticStorage, nElementVertices);
+	} else {
+		vertexCoordinates.set(std::move(*dynamicStorage));
+		dynamicStorage.release();
+	}
+
+	return vertexCoordinates;
+}
+
+/*!
 	Sort patch vertices on regular bins.
 
 	\param[in] nBins (default = 128) is the number of bins (on each space

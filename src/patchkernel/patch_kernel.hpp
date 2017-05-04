@@ -41,6 +41,7 @@
 #if BITPIT_ENABLE_MPI==1
 #	include "bitpit_communications.hpp"
 #endif
+#include "bitpit_containers.hpp"
 
 #include "adaption.hpp"
 #include "cell.hpp"
@@ -548,6 +549,8 @@ protected:
 
 	template<typename item_t, typename id_t = long>
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
+
+	ConstProxyVector<std::array<double, 3>> getElementVertexCoordinates(const Element &element, std::array<double, 3> *staticStorage = nullptr) const;
 
 private:
 	double DEFAULT_TOLERANCE = 1e-14;
