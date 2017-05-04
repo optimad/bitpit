@@ -373,13 +373,7 @@ double VolOctree::evalCellVolume(const long &id) const
 std::array<double, 3> VolOctree::evalCellCentroid(const long &id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
-
-	const Octant *octant;
-	if (octantInfo.internal) {
-		octant = m_tree->getOctant(octantInfo.id);
-	} else {
-		octant = m_tree->getGhostOctant(octantInfo.id);
-	}
+	const Octant *octant = getOctantPointer(octantInfo);
 
 	return m_tree->getCenter(octant);
 }
