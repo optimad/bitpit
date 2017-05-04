@@ -146,6 +146,32 @@ public:
 	unsigned int getBinarySize();
 
 private:
+	class Tesselation {
+
+	friend class Element;
+
+	public:
+		Tesselation();
+
+		int importVertexCoordinates(const std::array<double, 3> &coordinates);
+		int importVertexCoordinates(std::array<double, 3> &&coordinates);
+		std::vector<int> importVertexCoordinates(const std::array<double, 3> * coordinates, int nVertices);
+
+		void importPolygon(const std::vector<int> &vertexIds);
+		void importPolyhedron(const std::vector<int> &vertexIds, const std::vector<std::vector<int>> &faceVertexIds);
+
+		int getTileCount() const;
+		ElementType getTileType(int tile) const;
+		std::vector<std::array<double, 3>> getTileVertexCoordinates(int tile) const;
+
+	private:
+		int m_nTiles;
+		std::vector<ElementType> m_types;
+		std::vector<std::vector<int>> m_connects;
+
+		std::vector<std::array<double, 3>> m_coordinates;
+	};
+
 	long m_id;
 
 	ElementType m_type;
@@ -154,6 +180,8 @@ private:
 
 	void _initialize(long id, ElementType type = ElementType::UNDEFINED, int connectSize = 0);
 	void _initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
+
+	Tesselation generateTesselation(const std::array<double, 3> *coordinates) const;
 
 };
 

@@ -26,6 +26,7 @@
 #include <limits>
 
 #include "bitpit_common.hpp"
+#include "bitpit_operators.hpp"
 
 #include "element.hpp"
 
@@ -76,6 +77,215 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 }
 
 namespace bitpit {
+
+/*!
+	\class Tesselation
+	\ingroup patchelements
+
+	\brief The Tesselation class allows to tessalete polygons and polyhedrons.
+
+	The Tesselation class allows to divde polygons and polyhedrons elements
+	"regular" elements, i.e., elements that are associated to a reference
+	element.
+*/
+
+/*!
+	Constructor.
+*/
+Element::Tesselation::Tesselation()
+	: m_nTiles(0)
+{
+}
+
+/*!
+	Import the specified vertex coordinates in the tesselation.
+
+	\param coordinates are the coordinates of the vertex
+	\result The id associated by the tesselation to the imported vertex
+	coordinates.
+*/
+int Element::Tesselation::importVertexCoordinates(const std::array<double, 3> &coordinates)
+{
+    return importVertexCoordinates(std::array<double, 3>(coordinates));
+}
+
+/*!
+	Import the specified vertex coordinates in the tesselation.
+
+	\param coordinates are the coordinates of the vertex
+	\result The id associated by the tesselation to the imported vertex
+	coordinates.
+*/
+int Element::Tesselation::importVertexCoordinates(std::array<double, 3> &&coordinates)
+{
+    m_coordinates.push_back(std::move(coordinates));
+
+    return (m_coordinates.size() - 1);
+}
+
+/*!
+	Import the specified vertex coordinates in the tesselation.
+
+	\param coordinates are the coordinates of the vertices
+	\param nVertices is the number of vertices
+	\result The ids associated by the tesselation to the imported vertex
+	coordinates.
+*/
+std::vector<int> Element::Tesselation::importVertexCoordinates(const std::array<double, 3> *coordinates, int nVertices)
+{
+    int nStoredVertices = m_coordinates.size();
+    m_coordinates.reserve(nStoredVertices + nVertices);
+
+    std::vector<int> ids(nVertices);
+    for (int k = 0; k < nVertices; ++k) {
+        m_coordinates.push_back(coordinates[k]);
+        ids[k] = nStoredVertices++;
+    }
+
+    return ids;
+}
+
+/*!
+	Import the specified polygon in the tesselation.
+
+	\param vertexIds are the ids of the polygon's vertices
+*/
+void Element::Tesselation::importPolygon(const std::vector<int> &vertexIds)
+{
+	int nVertices = vertexIds.size();
+	if (nVertices == 3 || nVertices == 4) {
+		m_nTiles++;
+		m_types.push_back(nVertices == 3 ? ElementType::TRIANGLE : ElementType::QUAD);
+		m_connects.push_back(vertexIds);
+
+		return;
+	}
+
+	// Add the centroid
+	std::array<double, 3> centroid = {{0., 0., 0.}};
+	for (int k = 0; k < nVertices; ++k) {
+		centroid += m_coordinates[vertexIds[k]];
+	}
+	centroid = centroid / double(nVertices);
+
+	int centroidId = importVertexCoordinates(std::move(centroid));
+
+	// Decompose the polygon in triangles
+	//
+	// Each triangle is composed by the two vertices of a side and by the
+	// centroid.
+	ElementType tileType = ElementType::TRIANGLE;
+	int nTileVertices = ReferenceElementInfo::getInfo(tileType).nVertices;
+
+	int nSides = nVertices;
+	m_types.resize(m_nTiles + nSides, tileType);
+	m_connects.resize(m_nTiles + nSides, std::vector<int>(nTileVertices));
+	for (int i = 0; i < nSides; ++i) {
+		m_nTiles++;
+		for (int k = 0; k < nTileVertices; ++k) {
+		m_connects[i][k] = (i + k) % nVertices;
+		}
+		m_connects[i][nTileVertices] = centroidId;
+	}
+}
+
+/*!
+	Import the specified polygon in the tesselation.
+
+	\param vertexIds are the ids of the polygon's vertices
+	\param faceVertexIds are the ids of the polygon's face vertices
+*/
+void Element::Tesselation::importPolyhedron(const std::vector<int> &vertexIds, const std::vector<std::vector<int>> &faceVertexIds)
+{
+	int nFaces    = faceVertexIds.size();
+	int nVertices = vertexIds.size();
+
+	// Generate the tesselation of the surface
+	for (int i = 0; i < nFaces; ++i) {
+		importPolygon(faceVertexIds[i]);
+	}
+
+	// Add the centroid of the element to the tesselation
+	std::array<double, 3> centroid = {{0., 0., 0.}};
+	for (int k = 0; k < nVertices; ++k) {
+		centroid += m_coordinates[vertexIds[k]];
+	}
+	centroid = centroid / double(nVertices);
+
+	int centroidTesselationId = importVertexCoordinates(std::move(centroid));
+
+	// Decompose the polyhedron in prisms and pyramids.
+	//
+	// Each prism/pyramid has a tile of the surface tesselation as the
+	// base and the centroid of the element as the apex. Since we have
+	// already generated the surface tesselation, we can "convert" the
+	// two-dimensional tiles of that tesselation in three-dimensional
+	// tiles to obtain the volume tesselation.
+	for (int i = 0; i < m_nTiles; ++i) {
+		// Change the tile type
+		ElementType &tileType = m_types[i];
+		if (tileType == ElementType::TRIANGLE) {
+			tileType = ElementType::TETRA;
+		} else if (tileType == ElementType::QUAD) {
+			tileType = ElementType::PYRAMID;
+		} else {
+			BITPIT_UNREACHABLE("Unsupported tile");
+			throw std::runtime_error ("Unsupported tile");
+		}
+
+		// Fix the order of the connectivity the match the order of the
+		// three-dimensional element
+		if (tileType == ElementType::TETRA) {
+			std::swap(m_connects[i][0], m_connects[i][2]);
+		} else if (tileType == ElementType::PYRAMID) {
+			std::swap(m_connects[i][1], m_connects[i][3]);
+		}
+
+		// Add the centroid to the tile connectivity
+		m_connects[i].push_back(centroidTesselationId);
+	}
+}
+
+/*!
+	Get the tiles contained in the tesselation.
+
+	\result The tiles contained in the tesselation.
+*/
+int Element::Tesselation::getTileCount() const
+{
+    return m_nTiles;
+}
+
+/*!
+	Get the type of the specified tile.
+
+	\param tile is the tile
+	\result The type of the specified tile.
+*/
+ElementType Element::Tesselation::getTileType(int tile) const
+{
+    return m_types[tile];
+}
+
+/*!
+	Get the coordinates of the vertices of the specified tile.
+
+	\param tile is the tile
+	\result The coordinates of the vertices of the specified tile..
+*/
+std::vector<std::array<double, 3>> Element::Tesselation::getTileVertexCoordinates(int tile) const
+{
+    const ElementType tileType = getTileType(tile);
+    const int nTileVertices = ReferenceElementInfo::getInfo(tileType).nVertices;
+    const std::vector<int> &tileConnect = m_connects[tile];
+
+    std::vector<std::array<double, 3>> coordinates(nTileVertices);
+    for (int i = 0; i < nTileVertices; ++i) {
+        coordinates[i] = m_coordinates[tileConnect[i]];
+    }
+
+    return coordinates;
+}
 
 /*!
 	\class Element
@@ -911,6 +1121,66 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 	}
 
 	}
+}
+
+/*!
+	Generate a tesselation for the element.
+
+	\param coordinates are the coordinate of the vertices
+	\result A tesselation for the element.
+*/
+Element::Tesselation Element::generateTesselation(const std::array<double, 3> *coordinates) const
+{
+	Tesselation tesselation;
+
+	// Add the coordinates of the vertices to the tesselation
+	int nVertices = getVertexCount();
+	std::vector<int> vertexTesselationIds = tesselation.importVertexCoordinates(coordinates, nVertices);
+
+	// Generate the tesselation
+	ElementType type = getType();
+	switch(type) {
+
+	case ElementType::POLYGON:
+	{
+		tesselation.importPolygon(vertexTesselationIds);
+
+		break;
+	}
+
+	case ElementType::POLYHEDRON:
+	{
+		int nFaces = getFaceCount();
+		std::vector<std::vector<int>> faceTesselationIds(nFaces);
+		for (int i = 0; i < nFaces; ++i) {
+			ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(i);
+			int nFaceVertices = getFaceVertexCount(i);
+
+			faceTesselationIds[i].resize(nFaceVertices);
+			for (int k = 0; k < nFaceVertices; ++k) {
+				faceTesselationIds[i][k] = vertexTesselationIds[localFaceConnect[k]];
+			}
+		}
+
+		tesselation.importPolyhedron(vertexTesselationIds, faceTesselationIds);
+
+		break;
+	}
+
+	default:
+	{
+		assert(ReferenceElementInfo::hasInfo(type));
+
+		tesselation.m_nTiles = 1;
+		tesselation.m_types.push_back(type);
+		tesselation.m_connects.push_back(vertexTesselationIds);
+
+		break;
+	}
+
+	}
+
+	return tesselation;
 }
 
 /*!
