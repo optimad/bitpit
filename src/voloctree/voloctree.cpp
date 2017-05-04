@@ -1906,9 +1906,29 @@ std::vector<long> VolOctree::_findCellEdgeNeighs(const long &id, const int &edge
 	neighs = findCellCodimensionNeighs(id, edge, codimension, blackList);
 
 	// Add face neighbours
+	//
+	// Get all face neighbours and select the ones that contains the edge
+	// for which the neighbours are requested. To correctly consider these
+	// neighbours, the following logic can be used:
+	//   - if a face/edge neighbour has the same level or a lower level than
+	//     the current cell, then it certainly is also a vertex neighbour;
+	//   - if a face/edge neighbour has a higher level than the current cell,
+	//     it is necessary to check if the neighbour actually contains the
+	//     edge.
+	//
+	const OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
+	int octantLevel = m_tree->getLevel(octant);
 	for (int face : m_octantLocalFacesOnEdge[edge]) {
-		for (auto &neigh : _findCellFaceNeighs(id, face, blackList)) {
-			utils::addToOrderedVector<long>(neigh, neighs);
+		for (auto &neighId : _findCellFaceNeighs(id, face, blackList)) {
+			const OctantInfo neighOctantInfo = getCellOctant(neighId);
+			const Octant *neighOctant = getOctantPointer(neighOctantInfo);
+			int neighOctantLevel = m_tree->getLevel(neighOctant);
+			if (neighOctantLevel <= octantLevel) {
+				utils::addToOrderedVector<long>(neighId, neighs);
+			} else if (m_tree->isEdgeOnOctant(octant, edge, neighOctant)) {
+				utils::addToOrderedVector<long>(neighId, neighs);
+			}
 		}
 	}
 
