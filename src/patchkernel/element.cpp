@@ -1284,8 +1284,6 @@ double Element::evalVolume(const std::array<double, 3> *coordinates) const
 		const Reference3DElementInfo &referenceInfo = static_cast<const Reference3DElementInfo &>(getInfo());
 
 		return referenceInfo.evalVolume(coordinates);
-
-		break;
 	}
 
 	}
