@@ -735,6 +735,31 @@ int Element::getEdgeCount() const
 }
 
 /*!
+	Gets the type of the specified edge of the element.
+
+	\result The type of specified edge of the element
+*/
+ElementType Element::getEdgeType(const int &edge) const
+{
+	BITPIT_UNUSED(edge);
+
+	int dimension = getDimension();
+	switch (dimension) {
+
+	case 0:
+		return ElementType::UNDEFINED;
+
+	case 1:
+	case 2:
+		return ElementType::VERTEX;
+
+	default:
+		return ElementType::LINE;
+
+	}
+}
+
+/*!
 	Gets the local connectivity of the specified edge of the element.
 
 	\param edge is the edge for which the connectivity is reqested

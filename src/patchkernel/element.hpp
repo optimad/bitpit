@@ -126,6 +126,7 @@ public:
 	ConstProxyVector<long> getFaceVertexIds(int face) const;
 
 	int getEdgeCount() const;
+	ElementType getEdgeType(const int &edge) const;
 	ConstProxyVector<int> getEdgeLocalConnect(const int &edge) const;
 	ConstProxyVector<long> getEdgeConnect(int edge) const;
 
