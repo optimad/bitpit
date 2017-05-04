@@ -147,6 +147,7 @@ const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 
     default:
         BITPIT_UNREACHABLE("Unsupported element");
+        throw std::runtime_error("Unsupported element");
 
     }
 }

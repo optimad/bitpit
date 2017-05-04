@@ -606,11 +606,9 @@ int Element::getConnectSize() const
 	case (ElementType::POLYHEDRON):
 		return getFaceStreamSize();
 
-	case (ElementType::UNDEFINED):
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-
 	default:
+		assert(m_type != ElementType::UNDEFINED);
+
 		return getVertexCount();
 
 	}
@@ -629,11 +627,9 @@ int Element::getFaceCount() const
 	case (ElementType::POLYHEDRON):
 		return getConnect()[0];
 
-	case (ElementType::UNDEFINED):
-		BITPIT_UNREACHABLE("Unsupported element");
-		return -1;
-
 	default:
+		assert(m_type != ElementType::UNDEFINED);
+
 		return getInfo().nFaces;
 
 	}
@@ -669,14 +665,11 @@ ElementType Element::getFaceType(const int &face) const
 
 		}
 	}
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		return ElementType::UNDEFINED;
-	}
 
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		return getInfo().face_type[face];
 	}
 
@@ -701,15 +694,10 @@ int Element::getFaceVertexCount(const int &face) const
 		return connectivity[facePos];
 	}
 
-	case (ElementType::UNDEFINED):
-    {
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-    }
-
-	case (ElementType::POLYGON):
 	default:
     {
+		assert(m_type != ElementType::UNDEFINED);
+
 		ElementType faceType = getFaceType(face);
 
 		return ReferenceElementInfo::getInfo(faceType).nVertices;
@@ -775,14 +763,10 @@ ConstProxyVector<int> Element::getFaceLocalConnect(const int &face) const
 		return ConstProxyVector<int>(std::move(localFaceConnect));
 	}
 
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		const std::vector<int> &localFaceConnect = getInfo().faceConnect[face];
 
 		return ConstProxyVector<int>(localFaceConnect.data(), localFaceConnect.size());
@@ -841,14 +825,10 @@ ConstProxyVector<long> Element::getFaceConnect(int face) const
 		return ConstProxyVector<long>(connectivity + faceConnectBegin, faceConnectSize);
 	}
 
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(face);
 		int faceConnectSize = localFaceConnect.size();
 
@@ -888,14 +868,10 @@ int Element::getEdgeCount() const
 		return nEdges;
 	}
 
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		return -1;
-	}
-
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		return getInfo().nEdges;
 	}
 
@@ -950,7 +926,6 @@ ConstProxyVector<int> Element::getEdgeLocalConnect(const int &edge) const
 	}
 
 	case (ElementType::POLYHEDRON):
-	case (ElementType::UNDEFINED):
 	{
 		ConstProxyVector<long> edgeVertexIds = getEdgeVertexIds(edge);
 		int nEdgeVertices = edgeVertexIds.size();
@@ -972,6 +947,8 @@ ConstProxyVector<int> Element::getEdgeLocalConnect(const int &edge) const
 
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		const std::vector<int> &localEdgeConnect = getInfo().edgeConnect[edge];
 
 		return ConstProxyVector<int>(localEdgeConnect.data(), localEdgeConnect.size());
@@ -1004,14 +981,10 @@ ConstProxyVector<long> Element::getEdgeConnect(int edge) const
 		return edgeConnects[edge];
 	}
 
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		ConstProxyVector<int> localEdgeConnect = getEdgeLocalConnect(edge);
 		int nEdgeVertices = localEdgeConnect.size();
 
@@ -1043,11 +1016,9 @@ int Element::getDimension(ElementType type)
 	case ElementType::POLYHEDRON:
 		return 3;
 
-	case ElementType::UNDEFINED:
-		BITPIT_UNREACHABLE("Unsupported element");
-		return -1;
-
 	default:
+		assert(type != ElementType::UNDEFINED);
+
 		return ReferenceElementInfo::getInfo(type).dimension;
 
 	}
@@ -1105,14 +1076,10 @@ int Element::getVertexCount() const
 		return getVertexIds().size();
 	}
 
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		return -1;
-	}
-
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		return getInfo().nVertices;
 	}
 
@@ -1152,14 +1119,10 @@ ConstProxyVector<long> Element::getVertexIds() const
 		return ConstProxyVector<long>(std::vector<long>(vertexIds.begin(), vertexIds.end()));
 	}
 
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		return ConstProxyVector<long>(getConnect(), getVertexCount());
 	}
 
@@ -1184,14 +1147,10 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 		return ConstProxyVector<long>(connectivity + facePos + 1, connectivity[facePos]);
 	}
 
-	case (ElementType::UNDEFINED):
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(m_type != ElementType::UNDEFINED);
+
 		return getFaceConnect(face);
 	}
 
@@ -1247,14 +1206,10 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 		break;
 	}
 
-	case ElementType::UNDEFINED:
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
     {
+		assert(m_type != ElementType::UNDEFINED);
+
 		int nVertices = getVertexCount();
 		long *connectivity = getConnect();
 		for (int k = 0; k < nVertices; ++k) {
@@ -1303,8 +1258,6 @@ double Element::evalSize(const std::array<double, 3> *coordinates) const
 */
 double Element::evalVolume(const std::array<double, 3> *coordinates) const
 {
-	assert(getDimension() == 3);
-
 	switch (m_type) {
 
 	case ElementType::POLYHEDRON:
@@ -1324,15 +1277,10 @@ double Element::evalVolume(const std::array<double, 3> *coordinates) const
 		return volume;
 	}
 
-	case ElementType::POLYGON:
-	case ElementType::UNDEFINED:
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(getDimension() == 3);
+
 		const Reference3DElementInfo &referenceInfo = static_cast<const Reference3DElementInfo &>(getInfo());
 
 		return referenceInfo.evalVolume(coordinates);
@@ -1351,8 +1299,6 @@ double Element::evalVolume(const std::array<double, 3> *coordinates) const
 */
 double Element::evalArea(const std::array<double, 3> *coordinates) const
 {
-	assert(getDimension() == 2);
-
 	switch (m_type) {
 
 	case ElementType::POLYGON:
@@ -1372,15 +1318,10 @@ double Element::evalArea(const std::array<double, 3> *coordinates) const
 		return area;
 	}
 
-	case ElementType::POLYHEDRON:
-	case ElementType::UNDEFINED:
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(getDimension() == 2);
+
 		const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(getInfo());
 
 		return referenceInfo.evalArea(coordinates);
@@ -1397,8 +1338,6 @@ double Element::evalArea(const std::array<double, 3> *coordinates) const
 */
 double Element::evalLength(const std::array<double, 3> *coordinates) const
 {
-	assert(getDimension() == 1);
-
 	switch (m_type) {
 
 	case ElementType::POLYGON:
@@ -1410,6 +1349,8 @@ double Element::evalLength(const std::array<double, 3> *coordinates) const
 
 	default:
 	{
+		assert(getDimension() == 1);
+
 		const Reference1DElementInfo &referenceInfo = static_cast<const Reference1DElementInfo &>(getInfo());
 
 		return referenceInfo.evalLength(coordinates);
@@ -1434,8 +1375,6 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 										  const std::array<double, 3> &orientation,
 										  const std::array<double, 3> &point) const
 {
-	assert(getDimension() != 3);
-
 	switch (m_type) {
 
 	case ElementType::POLYGON:
@@ -1472,15 +1411,10 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 		return normal;
 	}
 
-	case ElementType::POLYHEDRON:
-	case ElementType::UNDEFINED:
-	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
-	}
-
 	default:
 	{
+		assert(getDimension() != 3);
+
 		int dimension = getDimension();
 		if (dimension == 2) {
 			const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(getInfo());
