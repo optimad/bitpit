@@ -101,30 +101,16 @@ void VolUnstructured::setExpert(bool expert)
 */
 double VolUnstructured::evalCellVolume(const long &id) const
 {
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
+
 	const Cell &cell = getCell(id);
-	assert(cell.hasInfo());
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(cell, coordinatesStaticPool.data());
 
-	std::array<double, 3> *vertexCoordinates;
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
-
-	if (cell.hasInfo()) {
-		vertexCoordinates = coordinatesPool.data();
-
-		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-		const int nCellVertices = cellVertexIds.size();
-		for (int i = 0; i < nCellVertices; ++i) {
-			vertexCoordinates[i] = getVertex(cellVertexIds[i]).getCoords();
-		}
-	}
-
-	double volume;
 	if (isThreeDimensional()) {
-		volume = cell.evalVolume(vertexCoordinates);
+		return cell.evalVolume(vertexCoordinates.data());
 	} else {
-		volume = cell.evalArea(vertexCoordinates);
+		return cell.evalArea(vertexCoordinates.data());
 	}
-
-	return volume;
 }
 
 /*!
@@ -135,25 +121,12 @@ double VolUnstructured::evalCellVolume(const long &id) const
 */
 double VolUnstructured::evalCellSize(const long &id) const
 {
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
+
 	const Cell &cell = getCell(id);
-	assert(cell.hasInfo());
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(cell, coordinatesStaticPool.data());
 
-	std::array<double, 3> *vertexCoordinates;
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
-
-	if (cell.hasInfo()) {
-		vertexCoordinates = coordinatesPool.data();
-
-		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-		const int nCellVertices = cellVertexIds.size();
-		for (int i = 0; i < nCellVertices; ++i) {
-			vertexCoordinates[i] = getVertex(cellVertexIds[i]).getCoords();
-		}
-	}
-
-	double size = cell.evalSize(vertexCoordinates);
-
-	return size;
+	return cell.evalSize(vertexCoordinates.data());
 }
 
 /*!
@@ -164,30 +137,16 @@ double VolUnstructured::evalCellSize(const long &id) const
 */
 double VolUnstructured::evalInterfaceArea(const long &id) const
 {
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
 
 	const Interface &interface = getInterface(id);
-	assert(interface.hasInfo());
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(interface, coordinatesStaticPool.data());
 
-	std::array<double, 3> *vertexCoordinates;
-	if (interface.hasInfo()) {
-		vertexCoordinates = coordinatesPool.data();
-	}
-
-	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
-	int nInterfaceVertices = interfaceVertexIds.size();
-	for (int i = 0; i < nInterfaceVertices; ++i) {
-		vertexCoordinates[i] = getVertex(interfaceVertexIds[i]).getCoords();
-	}
-
-	double area;
 	if (isThreeDimensional()) {
-		area = interface.evalArea(vertexCoordinates);
+		return interface.evalArea(vertexCoordinates.data());
 	} else {
-		area = interface.evalLength(vertexCoordinates);
+		return interface.evalLength(vertexCoordinates.data());
 	}
-
-	return area;
 }
 
 /*!
@@ -198,21 +157,10 @@ double VolUnstructured::evalInterfaceArea(const long &id) const
 */
 std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
 {
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesPool;
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
 
 	const Interface &interface = getInterface(id);
-	assert(interface.hasInfo());
-
-	std::array<double, 3> *vertexCoordinates;
-	if (interface.hasInfo()) {
-		vertexCoordinates = coordinatesPool.data();
-	}
-
-	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
-	const int nInterfaceVertices = interfaceVertexIds.size();
-	for (int i = 0; i < nInterfaceVertices; ++i) {
-		vertexCoordinates[i] = getVertex(interfaceVertexIds[i]).getCoords();
-	}
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(interface, coordinatesStaticPool.data());
 
 	std::array<double, 3> orientation = {{0., 0., 0.}};
 	if (!isThreeDimensional()) {
@@ -229,7 +177,7 @@ std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
 		orientation = crossProduct(V_B - V_A, V_Z - V_A);
 	}
 
-	return interface.evalNormal(vertexCoordinates, orientation);
+	return interface.evalNormal(vertexCoordinates.data(), orientation);
 }
 
 /*!

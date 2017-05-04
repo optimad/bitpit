@@ -26,6 +26,7 @@
 
 #include "bitpit_common.hpp"
 #include "bitpit_IO.hpp"
+#include "bitpit_operators.hpp"
 #include "bitpit_volunstructured.hpp"
 
 using namespace bitpit;
@@ -88,10 +89,8 @@ int main(int argc, char *argv[]) {
     patch_2D->addCell(ElementType::TRIANGLE, true, std::vector<long>({{11, 19, 16}}));
     patch_2D->addCell(ElementType::TRIANGLE, true, std::vector<long>({{13, 16, 19}}));
     patch_2D->addCell(ElementType::TRIANGLE, true, std::vector<long>({{13, 18, 16}}));
-    patch_2D->addCell(ElementType::TRIANGLE, true, std::vector<long>({{ 7,  6, 14}}));
     patch_2D->addCell(ElementType::TRIANGLE, true, std::vector<long>({{14, 15,  7}}));
-    patch_2D->addCell(ElementType::TRIANGLE, true, std::vector<long>({{ 8, 14,  6}}));
-    patch_2D->addCell(ElementType::TRIANGLE, true, std::vector<long>({{ 6,  2,  8}}));
+    patch_2D->addCell(ElementType::POLYGON,  true, std::vector<long>({{ 5,  2,  8, 14, 7, 6}}));
 
     patch_2D->buildAdjacencies();
     patch_2D->buildInterfaces();
@@ -110,6 +109,11 @@ int main(int argc, char *argv[]) {
 
     log::cout() << " - Total volume : " << volume_2D << std::endl;
 
+    double volume_expected_2D = 1.0;
+    if (std::abs(volume_2D - volume_expected_2D) > 1e-12) {
+        throw std::runtime_error("Volume of the 2D patch doesn't match the expected value");
+    }
+
     log::cout() << std::endl;
     log::cout() << ">> 2D surface area\n";
     log::cout() << std::endl;
@@ -124,6 +128,11 @@ int main(int argc, char *argv[]) {
     }
 
     log::cout() << " - Surface area : " << surfaceArea_2D << std::endl;
+
+    double surfaceArea_expected_2D = 4.0;
+    if (std::abs(surfaceArea_2D - surfaceArea_expected_2D) > 1e-12) {
+        throw std::runtime_error("Surface area of the 2D patch doesn't match the expected value");
+    }
 
     log::cout() << std::endl;
     log::cout() << ">> 2D bounding box\n";
@@ -140,7 +149,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<long> neighs_2D;
 
-    long cellId_2D = 7;
+    long cellId_2D = 19;
     log::cout() << std::endl;
     log::cout() << "Cell id: " << cellId_2D << std::endl << std::endl;
 
@@ -214,6 +223,15 @@ int main(int argc, char *argv[]) {
     patch_3D->addVertex({{1.00000000, 0.00000000, -3.00000000}}, 41);
     patch_3D->addVertex({{1.00000000, 1.00000000, -3.00000000}}, 42);
     patch_3D->addVertex({{0.00000000, 1.00000000, -3.00000000}}, 43);
+    patch_3D->addVertex({{0.00000000, 0.00000000, -4.00000000}}, 44);
+    patch_3D->addVertex({{1.00000000, 0.00000000, -4.00000000}}, 45);
+    patch_3D->addVertex({{1.00000000, 1.00000000, -4.00000000}}, 46);
+    patch_3D->addVertex({{0.00000000, 1.00000000, -4.00000000}}, 47);
+    patch_3D->addVertex({{0.50000000, 0.00000000, -4.00000000}}, 48);
+    patch_3D->addVertex({{1.00000000, 0.50000000, -4.00000000}}, 49);
+    patch_3D->addVertex({{0.50000000, 1.00000000, -4.00000000}}, 50);
+    patch_3D->addVertex({{0.33333333, 0.66666666, -4.00000000}}, 51);
+    patch_3D->addVertex({{0.00000000, 0.50000000, -4.00000000}}, 52);
 
     patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{29, 22, 25, 20}}));
     patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{18, 26, 27, 29}}));
@@ -284,6 +302,24 @@ int main(int argc, char *argv[]) {
     patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{35, 36, 39, 33}}));
     patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{32, 35, 33, 36}}));
     patch_3D->addCell(ElementType::HEXAHEDRON, true, std::vector<long>({{42, 43, 40, 41, 38, 39, 36, 37}}));
+    patch_3D->addCell(ElementType::POLYHEDRON, true, std::vector<long>({{11,
+                                                                         4, 42, 43, 40, 41,
+                                                                         5, 52, 51, 50, 49, 48,
+                                                                         3, 41, 40, 48,
+                                                                         3, 42, 41, 49,
+                                                                         3, 43, 42, 50,
+                                                                         3, 40, 43, 52,
+                                                                         3, 43, 51, 52,
+                                                                         3, 43, 50, 51,
+                                                                         3, 42, 49, 50,
+                                                                         3, 41, 48, 49,
+                                                                         3, 40, 52, 48
+                                                                       }}));
+    patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{52, 51, 47, 43}}));
+    patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{51, 50, 47, 43}}));
+    patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{44, 48, 52, 40}}));
+    patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{48, 45, 49, 41}}));
+    patch_3D->addCell(ElementType::TETRA,      true, std::vector<long>({{50, 49, 46, 42}}));
 
     patch_3D->buildAdjacencies();
     patch_3D->buildInterfaces();
@@ -302,6 +338,11 @@ int main(int argc, char *argv[]) {
 
     log::cout() << " - Total volume : " << volume_3D << std::endl;
 
+    double volume_expected_3D = 5.0;
+    if (std::abs(volume_3D - volume_expected_3D) > 1e-12) {
+        throw std::runtime_error("Volume of the 3D patch doesn't match the expected value");
+    }
+
     log::cout() << std::endl;
     log::cout() << ">> 3D surface area\n";
     log::cout() << std::endl;
@@ -316,6 +357,51 @@ int main(int argc, char *argv[]) {
     }
 
     log::cout() << "  Surface area : " << surfaceArea_3D << std::endl;
+
+    double surfaceArea_expected_3D = 22.0;
+    if (std::abs(surfaceArea_3D - surfaceArea_expected_3D) > 1e-12) {
+        throw std::runtime_error("Surface area of the 3D patch doesn't match the expected value");
+    }
+
+    log::cout() << std::endl;
+    log::cout() << ">> 3D divergence\n";
+    log::cout() << std::endl;
+
+    std::array<double, 3> field = {{1., 2., 3.}};
+
+    double divergence_3D = 0.;
+    for (const Cell &cell : patch_3D->getCells()) {
+        long cellId = cell.getId();
+        int nCellInterfaces = cell.getInterfaceCount();
+        const long *interfaces = cell.getInterfaces();
+
+        double cellDivergence_3D = 0.;
+        for (int k = 0; k < nCellInterfaces; ++k) {
+            long interfaceId = interfaces[k];
+            const Interface &interface = patch_3D->getInterface(interfaceId);
+
+            double area = patch_3D->evalInterfaceArea(interfaceId);
+            std::array<double, 3> normal = patch_3D->evalInterfaceNormal(interfaceId);
+
+            int sign = 1;
+            if (cellId != interface.getOwner()) {
+                sign *= -1;
+            }
+
+            cellDivergence_3D += sign * area * dotProduct(field, normal);
+        }
+        cellDivergence_3D /= patch_3D->evalCellVolume(cell.getId());
+
+        divergence_3D += std::abs(cellDivergence_3D);
+    }
+
+    log::cout() << "  Field      : " << field << std::endl;
+    log::cout() << "  Divergence : " << divergence_3D << std::endl;
+
+    double divergence_expected_3D = 0.0;
+    if (std::abs(divergence_3D - divergence_expected_3D) > 1e-12) {
+        throw std::runtime_error("Divergence of the 3D patch doesn't match the expected value");
+    }
 
     log::cout() << std::endl;
     log::cout() << ">> 3D bounding box\n";
@@ -332,7 +418,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<long> neighs_3D;
 
-    long cellId_3D = 13;
+    long cellId_3D = 69;
     log::cout() << std::endl;
     log::cout() << "Cell id: " << cellId_3D << std::endl << std::endl;
 
