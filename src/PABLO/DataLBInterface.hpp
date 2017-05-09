@@ -27,6 +27,8 @@
 #ifndef __BITPIT_PABLO_DATA_LB_INTERFACE_HPP__
 #define __BITPIT_PABLO_DATA_LB_INTERFACE_HPP__
 
+#include <stdint.h>
+
 namespace bitpit {
   
   /*!
