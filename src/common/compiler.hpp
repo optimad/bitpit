@@ -25,9 +25,20 @@
 #ifndef __BITPIT_COMPILER_HPP__
 #define __BITPIT_COMPILER_HPP__
 
+/*! \file */
+
+/*!
+ * @ingroup macro
+ * @{
+ */
+
 /**
- * Unreachable macro. Useful for suppressing "control reaches end of non-void
- * function" warnings.
+ * Unreachable macro.
+ *
+ * Useful for suppressing "control reaches end of non-void function" warnings.
+ *
+ * @param str is the error message that will be displayed it the unreachable
+ * code is reached
  */
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
 #define BITPIT_UNREACHABLE(str)    \
@@ -51,6 +62,8 @@ do {                         \
 
 /*!
  * Unused macro.
+ *
+ * @param variable is the name of variable to be marked as unused
  */
 #define BITPIT_UNUSED(variable)     \
 do {                  \
@@ -59,7 +72,9 @@ do {                  \
 
 
 /*!
- * Deprecated macro
+ * Deprecated macro.
+ *
+ * @param func id the function/method to be marked as deprecated
  */
 #if defined __GNUC__
 #   define BITPIT_DEPRECATED(func) func __attribute__ ((deprecated))
@@ -71,5 +86,9 @@ do {                  \
 #   pragma message("WARNING: You need to implement DEPRECATED for this compiler")
 #   define BITPIT_DEPRECATED(func) func
 #endif
+
+/*!
+ * @}
+ */
 
 #endif

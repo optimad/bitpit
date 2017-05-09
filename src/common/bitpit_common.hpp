@@ -28,6 +28,7 @@
  * @defgroup common Common
  * @{
  * @defgroup commonUtils Utils
+ * @defgroup macro Macros
  * @}
  *
  */
