@@ -60,7 +60,7 @@ int main( int argc, char *argv[]){
 
     bitpit::log::cout() << " - Loading stl geometry" << std::endl;
 
-    STL->importSTL("./data/cube1.stl", true);
+    STL->importSTL("./data/cube.stl", true);
 
     STL->deleteCoincidentVertices();
     STL->buildAdjacencies();
