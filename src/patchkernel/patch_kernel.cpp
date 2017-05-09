@@ -691,7 +691,9 @@ long PatchKernel::generateVertexId()
 	Creates a new vertex with the specified id.
 
 	\param coords are the coordinates of the vertex
-	\param id is the id of the new vertex
+	\param id is the id that will be assigned to the newly created vertex.
+	If a negative id value is specified, a new unique id will be generated
+	for the vertex
 	\return An iterator pointing to the newly created vertex.
 */
 PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3> &coords, long id)
@@ -715,8 +717,9 @@ PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3
 	Adds a new vertex with the specified coordinates.
 
 	\param coords are the coordinates of the vertex
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created vertex.
+	If a negative id value is specified, a new unique id will be generated
+	for the vertex
 	\return An iterator pointing to the added vertex.
 */
 PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &coords, const long &id)
@@ -732,8 +735,9 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created vertex.
+	If a negative id value is specified, a new unique id will be generated
+	for the vertex
 	\return An iterator pointing to the added vertex.
 */
 PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id)
@@ -755,8 +759,8 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created vertex.
+	If a negative id value is specified, the id of the source will be used
 	\return An iterator pointing to the added vertex.
 */
 PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
@@ -1348,7 +1352,9 @@ long PatchKernel::generateCellId()
 	Creates a new cell with the specified id.
 
 	\param type is the type of the cell
-	\param id is the id of the new cell
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
 	\param interior is true if the cell is an interior cell, false otherwise
 	\return An iterator pointing to the newly created cell.
 */
@@ -1413,8 +1419,9 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 	Adds a new cell with the specified id.
 
 	\param type is the type of the cell
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, const long &id)
@@ -1432,8 +1439,9 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, const lon
 	\param type is the type of the cell
 	\param interior is true if the cell is the interior of the patch,
 	false otherwise
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior, const long &id)
@@ -1454,8 +1462,9 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool inte
 	\param interior defines if the cell is in the interior of the patch
 	or if it's a ghost cell
 	\param connect is the connectivity of the cell
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior,
@@ -1479,8 +1488,9 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool inte
 	\param interior defines if the cell is in the interior of the patch
 	or if it's a ghost cell
 	\param connect is the connectivity of the cell
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior,
@@ -1508,8 +1518,9 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool inte
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
@@ -1531,8 +1542,8 @@ PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, the id of the source will be used
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
@@ -2383,7 +2394,9 @@ long PatchKernel::generateInterfaceId()
 	Creates a new interface with the specified id.
 
 	\param type is the type of the interface
-	\param id is the id of the new interface
+	\param id is the id that will be assigned to the newly created interface.
+	If a negative id value is specified, a new unique id will be generated
+	for the interface
 	\return An iterator pointing to the newly created interface.
 */
 PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type type, long id)
@@ -2410,8 +2423,9 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 	Adds a new interface with the specified id.
 
 	\param type is the type of the interface
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created interface.
+	If a negative id value is specified, a new unique id will be generated
+	for the interface
 	\return An iterator pointing to the added interface.
 */
 PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementInfo::Type type, const long &id)
@@ -2429,8 +2443,9 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementInfo::Type type,
 	Adds the specified interface to the patch.
 
 	\param source is the interface that will be added
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
+	\param id is the id that will be assigned to the newly created interface.
+	If a negative id value is specified, a new unique id will be generated
+	for the interface
 	\return An iterator pointing to the added interface.
 */
 PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source, long id)
@@ -2452,7 +2467,8 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source
 	Adds the specified interface to the patch.
 
 	\param source is the interface that will be added
-	\param id is the id that will be assigned to the interface
+	\param id is the id that will be assigned to the newly created interface.
+	If a negative id value is specified, the id of the source will be used
 	\return An iterator pointing to the added interface.
 
 */
