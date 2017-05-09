@@ -212,7 +212,6 @@ private:
 	std::unique_ptr<PabloUniform> *m_treeAdopter;
 
 	void initialize();
-	void initializeTreeGeometry();
 
 	void setBoundingBox();
 
