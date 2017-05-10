@@ -82,6 +82,7 @@ private:
 	int8_t   m_normals[6][3];		/**< Components (x,y,z) of the normals per face (z=0 in 2D) */
 	int8_t   m_edgeCoeffs[12][3];	/**< Components (x,y,z) of the "normals" per edge */
 	int8_t   m_nodeCoeffs[8][3];	/**< Components (x,y,z) of the "normals" per node */
+	uint8_t  m_parallelEdges[12][3];/**< Parallel edges per edge */
 
 	// =================================================================================== //
 	// METHODS
@@ -110,6 +111,8 @@ private:
 	void 		getNormals(int8_t normals[6][3]);
 	uint8_t 	getOctantBytes();
 	void 		getOppface(uint8_t oppface[6]);
+	void 		getParallelEdges(uint8_t parallelEdges[12][3]);
+	void 		getParallelEdges(uint8_t edge, uint8_t parallelEdges[]) const;
 
 	void 		initialize(uint8_t dim);
 
