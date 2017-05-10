@@ -215,6 +215,29 @@ Global::getOppface(uint8_t oppface_[6])  {
 	}
 }
 
+/*! Get the indeces of the parallel edges for each edge.
+* \param[out] parallelEdges[i][j] = matrix containing parallelEdges j for each edge i
+*/
+void
+Global::getParallelEdges(uint8_t parallelEdges[12][3]){
+    for(int i = 0; i < 12; ++i){
+        for(int j = 0; j < 3; ++j){
+            parallelEdges[i][j] = m_parallelEdges[i][j];
+        }
+    }
+}
+
+/*! Get the indeces of the parallel edges for an edge.
+* \param[in] edge Edge index
+* \param[out] parallelEdges matrix containing parallelEdges for each edge
+*/
+void
+Global::getParallelEdges(uint8_t edge, uint8_t parallelEdges[]) const {
+    for(int j = 0; j < 3; ++j){
+        parallelEdges[j] = m_parallelEdges[edge][j];
+    }
+}
+
 /*! Initialization of static global variables.
  * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
  */
@@ -397,6 +420,43 @@ Global::initialize(uint8_t dim){
 	m_nodeCoeffs[7][0] =  1;
 	m_nodeCoeffs[7][1] =  1;
 	m_nodeCoeffs[7][2] =  1;
+
+	m_parallelEdges[0][0] = 1;
+	m_parallelEdges[0][1] = 8;
+	m_parallelEdges[0][2] = 9;
+	m_parallelEdges[1][0] = 0;
+	m_parallelEdges[1][1] = 8;
+	m_parallelEdges[1][2] = 9;
+	m_parallelEdges[2][0] = 3;
+	m_parallelEdges[2][1] = 10;
+	m_parallelEdges[2][2] = 11;
+	m_parallelEdges[3][0] = 2;
+	m_parallelEdges[3][1] = 10;
+	m_parallelEdges[3][2] = 11;
+	m_parallelEdges[4][0] = 5;
+	m_parallelEdges[4][1] = 6;
+	m_parallelEdges[4][2] = 7;
+	m_parallelEdges[5][0] = 4;
+	m_parallelEdges[5][1] = 6;
+	m_parallelEdges[5][2] = 7;
+	m_parallelEdges[6][0] = 4;
+	m_parallelEdges[6][1] = 5;
+	m_parallelEdges[6][2] = 7;
+	m_parallelEdges[7][0] = 4;
+	m_parallelEdges[7][1] = 5;
+	m_parallelEdges[7][2] = 6;
+	m_parallelEdges[8][0] = 0;
+	m_parallelEdges[8][1] = 1;
+	m_parallelEdges[8][2] = 9;
+	m_parallelEdges[9][0] = 0;
+	m_parallelEdges[9][1] = 1;
+	m_parallelEdges[9][2] = 8;
+	m_parallelEdges[10][0] = 2;
+	m_parallelEdges[10][1] = 3;
+	m_parallelEdges[10][2] = 11;
+	m_parallelEdges[11][0] = 2;
+	m_parallelEdges[11][1] = 3;
+	m_parallelEdges[11][2] = 10;
 
 }
 
