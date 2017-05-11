@@ -2957,6 +2957,53 @@ namespace bitpit {
         }
     };
 
+    /** Check if an edge lies on the specified octant.
+     * \param[in] edgeOctant Pointer to the octant owning the edge
+     * \param[in] edgeIndex Local index of the edge
+     * \param[in] octant Pointer to the octant for which the check has to be
+     * berformed
+     */
+    bool
+    ParaTree::isEdgeOnOctant(const Octant* edgeOctant, uint8_t edgeIndex, const Octant* octant) const {
+
+        // Edges are only defined on three-dimensional trees.
+        int dim = octant->getDim();
+        assert(dim == 3);
+
+        // Get the coordinates of the edge
+        uint8_t edgeNodes[2];
+        m_global.getEdgeNode(edgeIndex, edgeNodes);
+        std::array<uint32_t, 3> minEdgeCoords = edgeOctant->getNode(edgeNodes[0]);
+        std::array<uint32_t, 3> maxEdgeCoords = edgeOctant->getNode(edgeNodes[1]);
+
+        // Get minimum/maximum coordinates of the contant
+        std::array<uint32_t, 3> minOctantCoords = octant->getNode(0);
+        std::array<uint32_t, 3> maxOctantCoords = octant->getNode(7);
+
+        // Check if the edge intersects the bounding box octant
+        //
+        // NOTE: since the octants are cubes, the bounding box coincides with
+        //       the octant.
+        for (int i = 0; i < dim; ++i) {
+            // Minimum/maximum i-th coordinate of the edge
+            uint32_t minEdgeCoord = minEdgeCoords[i];
+            uint32_t maxEdgeCoord = maxEdgeCoords[i];
+
+            // Minimum/maximum i-th coordinate of the octant
+            uint32_t minOctantBBCoord = minOctantCoords[i];
+            uint32_t maxOctantBBCoord = maxOctantCoords[i];
+
+            // Check if the edge intersects the octant
+            if (minEdgeCoord < minOctantBBCoord && maxEdgeCoord < minOctantBBCoord) {
+                return false;
+            } else if (minEdgeCoord > maxOctantBBCoord && maxEdgeCoord > maxOctantBBCoord) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // =================================================================================== //
     // OTHER PARATREE BASED METHODS												    			   //
     // =================================================================================== //
