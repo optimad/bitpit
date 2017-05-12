@@ -37,6 +37,10 @@
 # The module can also look for the following environment variables if paths
 # are not given as cmake variable: LAPACKE_DIR, LAPACKE_INCDIR, LAPACKE_LIBDIR
 #
+# If the static version of the LAPACKE libraries is required, please add the
+# following in your CMakeLists.txt before calling find_package(LAPACKE):
+# set(LAPACKE_STATIC TRUE)
+#
 # LAPACKE could be directly embedded in LAPACK library (ex: Intel MKL) so that
 # we test a lapacke function with the lapack libraries found and set LAPACKE
 # variables to LAPACK ones if test is successful. To skip this feature and
@@ -243,23 +247,35 @@ if (LAPACK_FOUND)
     # Try to find the lapacke lib in the given paths
     # ----------------------------------------------
 
+    # name of the lapacke library
+    set(LAPACKE_lapacke_NAMES "lapacke")
+    if(LAPACKE_STATIC)
+        if(WIN32)
+            set(LAPACKE_lapacke_NAMES "liblapacke.lib")
+        endif()
+
+        if(UNIX)
+            set(LAPACKE_lapacke_NAMES "liblapacke.a")
+        endif()
+    endif()
+
     # call cmake macro to find the lib path
     if(LAPACKE_LIBDIR)
       set(LAPACKE_lapacke_LIBRARY "LAPACKE_lapacke_LIBRARY-NOTFOUND")
       find_library(LAPACKE_lapacke_LIBRARY
-        NAMES lapacke
+        NAMES ${LAPACKE_lapacke_NAMES}
         HINTS ${LAPACKE_LIBDIR})
     else()
       if(LAPACKE_DIR)
         set(LAPACKE_lapacke_LIBRARY "LAPACKE_lapacke_LIBRARY-NOTFOUND")
         find_library(LAPACKE_lapacke_LIBRARY
-          NAMES lapacke
+          NAMES ${LAPACKE_lapacke_NAMES}
           HINTS ${LAPACKE_DIR}
           PATH_SUFFIXES lib lib32 lib64)
       else()
         set(LAPACKE_lapacke_LIBRARY "LAPACKE_lapacke_LIBRARY-NOTFOUND")
         find_library(LAPACKE_lapacke_LIBRARY
-          NAMES lapacke
+          NAMES ${LAPACKE_lapacke_NAMES}
           HINTS ${_lib_env})
       endif()
     endif()
