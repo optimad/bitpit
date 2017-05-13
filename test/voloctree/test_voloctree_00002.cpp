@@ -23,12 +23,125 @@
 \*---------------------------------------------------------------------------*/
 
 #include <array>
+#include <vector>
 
 #include "bitpit_common.hpp"
 #include "bitpit_IO.hpp"
 #include "bitpit_voloctree.hpp"
 
 using namespace bitpit;
+
+/**
+    Test for vertex neighbours
+*/
+void test_vertex_neighs(VolOctree *patch, std::vector<int> &vertexNeighData)
+{
+    // Group cells according to their level
+    std::map<int, std::vector<long>> cellLevelGropus;
+    for (const Cell &cell : patch->getCells()) {
+        long cellId = cell.getId();
+        int level = patch->getCellLevel(cellId);
+        cellLevelGropus[level].push_back(cellId);
+    }
+
+    // Evaluate the vertex ring for some randome vertices
+    int nCellVertices = std::pow(2, patch->getDimension());
+
+    int nLevels = cellLevelGropus.size();
+    for (const auto &entry : cellLevelGropus) {
+        int level = entry.first;
+        if (level < nLevels - 2) {
+            continue;
+        }
+
+        const std::vector<long> &cellList = entry.second;
+        for (long cellId : cellList) {
+            int vertex = rand() % nCellVertices;
+            std::vector<long> vertexRing = patch->findCellVertexNeighs(cellId, vertex);
+            vertexRing.push_back(cellId);
+
+            // Consider only cells that are not part of previously evaluated
+            // rings
+            bool skipCell = false;
+            for (long ringId : vertexRing) {
+                long ringFlatIndex = patch->getCells().evalFlatIndex(ringId);
+                if (vertexNeighData[ringFlatIndex] != 0) {
+                    skipCell = true;;
+                    break;
+                }
+            }
+
+            if (skipCell) {
+                continue;
+            }
+
+            // Mark the cells that are part of the ring
+            for (long ringId : vertexRing) {
+                long ringFlatIndex = patch->getCells().evalFlatIndex(ringId);
+                vertexNeighData[ringFlatIndex] += (vertex + 1);
+                if (ringId == cellId) {
+                    vertexNeighData[ringFlatIndex] *= - 1;
+                }
+            }
+        }
+    }
+}
+
+/**
+    Test for edge neighbours
+*/
+void test_edge_neighs(VolOctree *patch, std::vector<int> &edgeNeighData)
+{
+    // Group cells according to their level
+    std::map<int, std::vector<long>> cellLevelGropus;
+    for (const Cell &cell : patch->getCells()) {
+        long cellId = cell.getId();
+        int level = patch->getCellLevel(cellId);
+        cellLevelGropus[level].push_back(cellId);
+    }
+
+    // Evaluate the vertex ring for some randome vertices
+    int nCellVertices = std::pow(2, patch->getDimension());
+
+    int nLevels = cellLevelGropus.size();
+    for (const auto &entry : cellLevelGropus) {
+        int level = entry.first;
+        if (level < nLevels - 2) {
+            continue;
+        }
+
+        const std::vector<long> &cellList = entry.second;
+        for (long cellId : cellList) {
+            int edge = rand() % nCellVertices;
+            std::vector<long> edgeRing = patch->findCellEdgeNeighs(cellId, edge);
+            edgeRing.push_back(cellId);
+
+            // Consider only cells that are not part of previously evaluated
+            // rings
+            bool skipCell = false;
+            for (long ringId : edgeRing) {
+                long ringFlatIndex = patch->getCells().evalFlatIndex(ringId);
+                if (edgeNeighData[ringFlatIndex] != 0) {
+                    skipCell = true;;
+                    break;
+                }
+            }
+
+            if (skipCell) {
+                continue;
+            }
+
+            // Mark the cells that are part of the ring
+            for (long ringId : edgeRing) {
+                long ringFlatIndex = patch->getCells().evalFlatIndex(ringId);
+                edgeNeighData[ringFlatIndex] += (edge + 1);
+                if (ringId == cellId) {
+                    edgeNeighData[ringFlatIndex] *= - 1;
+                }
+            }
+        }
+    }
+}
 
 /**
     Test for the 2D patch.
@@ -90,6 +203,18 @@ void test_2D(const std::array<double, 3> &origin, double length, double dh)
         nCells = patch->getCellCount();
         log::cout() << ">> Final number of cells... " << nCells << std::endl;
     }
+    patch->write();
+
+    log::cout() << std::endl;
+    log::cout() << ">> Test neighbour search" << std::endl;
+
+    long nCells = patch->getCellCount();
+    std::vector<int> vertexNeighData(nCells, 0);
+
+    patch->getVTK().addData("vertexNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, vertexNeighData);
+
+    test_vertex_neighs(patch, vertexNeighData);
+
     patch->write();
 }
 
@@ -153,6 +278,21 @@ void test_3D(const std::array<double, 3> &origin, double length, double dh)
         nCells = patch->getCellCount();
         log::cout() << ">> Final number of cells... " << nCells << std::endl;
     }
+    patch->write();
+
+    log::cout() << std::endl;
+    log::cout() << ">> Test neighbour search" << std::endl;
+
+    long nCells = patch->getCellCount();
+    std::vector<int> vertexNeighData(nCells, 0);
+    std::vector<int> edgeNeighData(nCells, 0);
+
+    patch->getVTK().addData("vertexNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, vertexNeighData);
+    patch->getVTK().addData("edgeNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, edgeNeighData);
+
+    test_vertex_neighs(patch, vertexNeighData);
+    test_edge_neighs(patch, edgeNeighData);
+
     patch->write();
 }
 
