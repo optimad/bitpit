@@ -2957,6 +2957,47 @@ namespace bitpit {
         }
     };
 
+    /** Check if a node lies on the specified octant.
+     * \param[in] nodeOctant Pointer to the octant owning the node
+     * \param[in] nodeIndex Local index of the node
+     * \param[in] octant Pointer to the octant for which the check has to be
+     * berformed
+     */
+    bool
+    ParaTree::isNodeOnOctant(const Octant *nodeOctant, uint8_t nodeIndex, const Octant *octant) const {
+
+        int dim = octant->getDim();
+
+        // Get the coordinates of the node
+        std::array<uint32_t, 3> nodeCoords = nodeOctant->getNode(nodeIndex);
+
+        // Get minimum/maximum coordinates of the contant
+        std::array<uint32_t, 3> minOctantCoords = octant->getNode(0);
+        std::array<uint32_t, 3> maxOctantCoords = octant->getNode(3 + 4 * (dim - 2));
+
+        // Check if the node intersects the bounding box octant
+        //
+        // NOTE: since the octants are cubes, the bounding box coincides with
+        //       the octant.
+        for (int i = 0; i < dim; ++i) {
+            // I-th coordinate of the node
+            uint32_t nodeCoord = nodeCoords[i];
+
+            // Minimum/maximum i-th coordinate of the octant
+            uint32_t minOctantBBCoord = minOctantCoords[i];
+            uint32_t maxOctantBBCoord = maxOctantCoords[i];
+
+            // Check if the node intersects the octant
+            if (nodeCoord < minOctantBBCoord) {
+                return false;
+            } else if (nodeCoord > maxOctantBBCoord) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /** Check if an edge lies on the specified octant.
      * \param[in] edgeOctant Pointer to the octant owning the edge
      * \param[in] edgeIndex Local index of the edge
