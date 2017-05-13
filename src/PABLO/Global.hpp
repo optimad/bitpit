@@ -79,6 +79,7 @@ private:
 	uint8_t  m_nodeFace[8][3];		/**< nodeface[i][0:1] = local indices of faces sharing the i-th node of an octant */
 	uint8_t  m_faceNode[6][4];		/**< facenode[i][0:1] = local indices of nodes of the i-th face of an octant */
 	uint8_t  m_edgeFace[12][2];		/**< edgeface[i][0:1] = local indices of faces sharing the i-th edge of an octant */
+	uint8_t  m_edgeNode[12][2];		/**< edgeNode[i][0:1] = local indices of nodes of the i-th edge of an octant */
 	int8_t   m_normals[6][3];		/**< Components (x,y,z) of the normals per face (z=0 in 2D) */
 	int8_t   m_edgeCoeffs[12][3];	/**< Components (x,y,z) of the "normals" per edge */
 	int8_t   m_nodeCoeffs[8][3];	/**< Components (x,y,z) of the "normals" per node */
@@ -97,6 +98,8 @@ private:
 	uint8_t 	getBoolBytes();
 	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]);
 	void 		getEdgeface(uint8_t edgeface[12][2]);
+	void 		getEdgeNode(uint8_t edgeNode[12][2]);
+	void 		getEdgeNode(uint8_t edge, uint8_t edgeNode[2]) const;
 	void 		getFacenode(uint8_t facenode[6][4]);
 	uint8_t 	getGlobalIndexBytes();
 	uint8_t 	getLevelBytes();
