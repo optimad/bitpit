@@ -30,133 +30,159 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
+/**
+    Test for the 2D patch.
 
-	log::manager().initialize(log::COMBINED);
-	log::cout() << "Testing adaption on octree patch" << std::endl;
+    \param origin is the origin of the domain
+    \param length is the length of the domain
+    \param dh is the maximum cell size
+*/
+void test_2D(const std::array<double, 3> &origin, double length, double dh)
+{
+    log::cout() << std::endl;
+    log::cout() << "  :: 2D adaption test ::" << std::endl;
+
+    log::cout() << std::endl;
+    log::cout() << ">> Creating the patch" << std::endl;
+
+    VolOctree *patch = new VolOctree(0, 2, origin, length, dh);
+    patch->getVTK().setName("octree_adapted_patch_2D");
+    patch->update();
+    patch->write();
+
+    log::cout() << std::endl;
+    log::cout() << ">> Adapting patch" << std::endl;
+
+    for (int k = 0; k < 5; ++k) {
+        long nCells = patch->getCellCount();
+        log::cout() << std::endl;
+        log::cout() << ">> Marking the cells to adapt... " << std::endl;
+
+        for (int i = 0; i < 150; ++i) {
+            long cellId = rand() % nCells;
+            if (!patch->getCells().exists(cellId)) {
+                continue;
+            }
+
+            for (auto neighId : patch->findCellNeighs(cellId)) {
+                for (auto coarseId : patch->findCellNeighs(neighId)) {
+                    patch->markCellForCoarsening(coarseId);
+                }
+            }
+        }
+
+        for (int i = 0; i < 200; ++i) {
+            long cellId = rand() % nCells;
+            if (!patch->getCells().exists(cellId)) {
+                continue;
+            }
+
+            for (auto neighId : patch->findCellNeighs(cellId)) {
+                patch->markCellForRefinement(neighId);
+            }
+        }
+
+        log::cout() << std::endl;
+        log::cout() << ">> Initial number of cells... " << nCells << std::endl;
+
+        patch->update();
+
+        nCells = patch->getCellCount();
+        log::cout() << ">> Final number of cells... " << nCells << std::endl;
+    }
+    patch->write();
+}
+
+/**
+    Test for the 3D patch.
+
+    \param origin is the origin of the domain
+    \param length is the length of the domain
+    \param dh is the maximum cell size
+*/
+void test_3D(const std::array<double, 3> &origin, double length, double dh)
+{
+    log::cout() << std::endl;
+    log::cout() << "  :: 3D adaption test ::" << std::endl;
+
+    log::cout() << std::endl;
+    log::cout() << ">> Creating patch" << std::endl;
+
+    VolOctree *patch = new VolOctree(0, 3, origin, length, dh);
+    patch->getVTK().setName("octree_adapted_patch_3D");
+    patch->update();
+    patch->write();
+
+    log::cout() << std::endl;
+    log::cout() << ">> Adapting patch" << std::endl;
+
+    for (int k = 0; k < 5; ++k) {
+        long nCells = patch->getCellCount();
+        log::cout() << std::endl;
+        log::cout() << ">> Marking the cells to adapt... " << std::endl;
+
+        for (int i = 0; i < 150; ++i) {
+            long cellId = rand() % nCells;
+            if (!patch->getCells().exists(cellId)) {
+                continue;
+            }
+
+            for (auto neighId : patch->findCellNeighs(cellId)) {
+                for (auto coarseId : patch->findCellNeighs(neighId)) {
+                    patch->markCellForCoarsening(coarseId);
+                }
+            }
+        }
+
+        for (int i = 0; i < 200; ++i) {
+            long cellId = rand() % nCells;
+            if (!patch->getCells().exists(cellId)) {
+                continue;
+            }
+
+            for (auto neighId : patch->findCellNeighs(cellId)) {
+                patch->markCellForRefinement(neighId);
+            }
+        }
+
+        log::cout() << std::endl;
+        log::cout() << ">> Initial number of cells... " << nCells << std::endl;
+
+        patch->update();
+
+        nCells = patch->getCellCount();
+        log::cout() << ">> Final number of cells... " << nCells << std::endl;
+    }
+    patch->write();
+}
+
+/**
+    Main proggram.
+*/
+int main(int argc, char *argv[])
+{
+    log::manager().initialize(log::COMBINED);
+    log::cout() << "Testing adaption on octree patch" << std::endl;
 
 #if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc,&argv);
+    MPI_Init(&argc,&argv);
 #else
-	BITPIT_UNUSED(argc);
-	BITPIT_UNUSED(argv);
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
 #endif
 
-	std::array<double, 3> origin = {{0., 0., 0.}};
-	double length = 20;
-	double dh = 1.0;
+    std::array<double, 3> origin = {{0., 0., 0.}};
+    double length = 20;
+    double dh = 1.0;
 
-	std::srand(1);
+    std::srand(1);
 
-	log::cout() << std::endl;
-	log::cout() << "  :: 2D adaption test ::" << std::endl;
+    test_2D(origin, length, dh);
 
-	log::cout() << std::endl;
-	log::cout() << ">> Creating the patch" << std::endl;
-
-	VolOctree *patch_2D = new VolOctree(0, 2, origin, length, dh);
-	patch_2D->getVTK().setName("octree_adapted_patch_2D");
-	patch_2D->update();
-	patch_2D->write();
-
-	log::cout() << std::endl;
-	log::cout() << ">> Adapting patch" << std::endl;
-
-	for (int k = 0; k < 5; ++k) {
-		long nCells = patch_2D->getCellCount();
-		log::cout() << std::endl;
-		log::cout() << ">> Marking the cells to adapt... " << std::endl;
-
-		for (int i = 0; i < 150; ++i) {
-			long cellId = rand() % nCells;
-			if (!patch_2D->getCells().exists(cellId)) {
-				continue;
-			}
-
-			for (auto neighId : patch_2D->findCellNeighs(cellId)) {
-				for (auto coarseId : patch_2D->findCellNeighs(neighId)) {
-					patch_2D->markCellForCoarsening(coarseId);
-				}
-			}
-		}
-
-		for (int i = 0; i < 200; ++i) {
-			long cellId = rand() % nCells;
-			if (!patch_2D->getCells().exists(cellId)) {
-				continue;
-			}
-
-			for (auto neighId : patch_2D->findCellNeighs(cellId)) {
-				patch_2D->markCellForRefinement(neighId);
-			}
-		}
-
-		log::cout() << std::endl;
-		log::cout() << ">> Initial number of cells... " << nCells << std::endl;
-
-		patch_2D->update();
-
-		nCells = patch_2D->getCellCount();
-		log::cout() << ">> Final number of cells... " << nCells << std::endl;
-	}
-	patch_2D->write();
-
-	log::cout() << std::endl;
-	log::cout() << "  :: 3D adaption test ::" << std::endl;
-
-	log::cout() << std::endl;
-	log::cout() << ">> Creating patch" << std::endl;
-
-	VolOctree *patch_3D = new VolOctree(0, 3, origin, length, dh);
-	patch_3D->getVTK().setName("octree_adapted_patch_3D");
-	patch_3D->update();
-	patch_3D->write();
-
-	log::cout() << std::endl;
-	log::cout() << ">> Adapting patch" << std::endl;
-
-	for (int k = 0; k < 5; ++k) {
-		long nCells = patch_3D->getCellCount();
-		log::cout() << std::endl;
-		log::cout() << ">> Marking the cells to adapt... " << std::endl;
-
-		for (int i = 0; i < 150; ++i) {
-			long cellId = rand() % nCells;
-			if (!patch_3D->getCells().exists(cellId)) {
-				continue;
-			}
-
-			for (auto neighId : patch_3D->findCellNeighs(cellId)) {
-				for (auto coarseId : patch_3D->findCellNeighs(neighId)) {
-					patch_3D->markCellForCoarsening(coarseId);
-				}
-			}
-		}
-
-		for (int i = 0; i < 200; ++i) {
-			long cellId = rand() % nCells;
-			if (!patch_3D->getCells().exists(cellId)) {
-				continue;
-			}
-
-			for (auto neighId : patch_3D->findCellNeighs(cellId)) {
-				patch_3D->markCellForRefinement(neighId);
-			}
-		}
-
-		log::cout() << std::endl;
-		log::cout() << ">> Initial number of cells... " << nCells << std::endl;
-
-		patch_3D->update();
-		
-		nCells = patch_3D->getCellCount();
-		log::cout() << ">> Final number of cells... " << nCells << std::endl;
-	}
-	patch_3D->write();
+    test_3D(origin, length, dh);
 
 #if BITPIT_ENABLE_MPI==1
-	MPI_Finalize();
+    MPI_Finalize();
 #endif
 
 }
-
