@@ -3045,6 +3045,48 @@ namespace bitpit {
         return true;
     }
 
+    /** Check if a face lies on the specified octant.
+     * \param[in] faceOctant Pointer to the octant owning the face
+     * \param[in] faceIndex Local index of the face
+     * \param[in] octant Pointer to the octant for which the check has to be
+     * berformed
+     */
+    bool
+    ParaTree::isFaceOnOctant(const Octant* faceOctant, uint8_t faceIndex, const Octant* octant) const {
+
+        int dim = octant->getDim();
+
+        // Get minimum/maximum coordinates of the face
+        uint8_t faceNodes[6][4];
+        m_global.getFacenode(faceNodes);
+        std::array<uint32_t, 3> minFaceCoords = faceOctant->getNode(faceNodes[faceIndex][0]);
+        std::array<uint32_t, 3> maxFaceCoords = faceOctant->getNode(faceNodes[faceIndex][2 * dim - 1]);
+
+        // Get minimum/maximum coordinates of the contant
+        std::array<uint32_t, 3> minOctantCoords = octant->getNode(0);
+        std::array<uint32_t, 3> maxOctantCoords = octant->getNode(3 + 4 * (dim - 2));
+
+        // Check if the face intersects the bounding box octant
+        for (int i = 0; i < dim; ++i) {
+            // Minimum/maximum i-th coordinate of the face
+            uint32_t minFaceCoord = minFaceCoords[i];
+            uint32_t maxFaceCoord = maxFaceCoords[i];
+
+            // Minimum/maximum i-th coordinate of the octant
+            uint32_t minOctantBBCoord = minOctantCoords[i];
+            uint32_t maxOctantBBCoord = maxOctantCoords[i];
+
+            // Check if the face intersects the octant
+            if (minFaceCoord < minOctantBBCoord && maxFaceCoord < minOctantBBCoord) {
+                return false;
+            } else if (minFaceCoord > maxOctantBBCoord && maxFaceCoord > maxOctantBBCoord) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // =================================================================================== //
     // OTHER PARATREE BASED METHODS												    			   //
     // =================================================================================== //

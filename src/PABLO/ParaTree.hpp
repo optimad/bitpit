@@ -411,6 +411,7 @@ namespace bitpit {
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
         bool 		isNodeOnOctant(const Octant* nodeOctant, uint8_t nodeIndex, const Octant* octant) const;
         bool 		isEdgeOnOctant(const Octant* edgeOctant, uint8_t edgeIndex, const Octant* octant) const;
+        bool 		isFaceOnOctant(const Octant* faceOctant, uint8_t faceIndex, const Octant* octant) const;
 
         // =================================================================================== //
         // OTHER PARATREE BASED METHODS												    	   //
