@@ -38,7 +38,7 @@ const uint32_t Global::m_maxLength = uint32_t(1 << Global::m_maxLevel);
  * \return Bytes occupation of a boolean.
  */
 uint8_t
-Global::getBoolBytes()  {
+Global::getBoolBytes() const {
 	return m_boolBytes;
 }
 
@@ -46,7 +46,7 @@ Global::getBoolBytes()  {
  * \return Components (x,y,z) of the "normals" per edge.
  */
 void
-Global::getEdgecoeffs(int8_t edgecoeffs_[12][3])  {
+Global::getEdgecoeffs(int8_t edgecoeffs_[12][3]) const {
 	for (int i=0; i<12; i++){
 		for (int j=0; j<3; j++){
 		edgecoeffs_[i][j] = m_edgeCoeffs[i][j];
@@ -59,7 +59,7 @@ Global::getEdgecoeffs(int8_t edgecoeffs_[12][3])  {
  * the i-th edge of an octant.
  */
 void
-Global::getEdgeface(uint8_t edgeface_[12][2])  {
+Global::getEdgeface(uint8_t edgeface_[12][2]) const {
 	for (int i=0; i<12; i++){
 		for (int j=0; j<2; j++){
 			edgeface_[i][j] = m_edgeFace[i][j];
@@ -72,7 +72,7 @@ Global::getEdgeface(uint8_t edgeface_[12][2])  {
  * the i-th edge of an octant.
  */
 void
-Global::getEdgeNode(uint8_t edgeNode[12][2]){
+Global::getEdgeNode(uint8_t edgeNode[12][2]) const {
     for(int i = 0; i < 12; ++i){
         for(int j = 0; j < 2; ++j){
             edgeNode[i][j] = m_edgeNode[i][j];
@@ -86,7 +86,7 @@ Global::getEdgeNode(uint8_t edgeNode[12][2]){
  * the edge edge of an octant.
  */
 void
-Global::getEdgeNode(uint8_t edge, uint8_t edgeNode[2]) const{
+Global::getEdgeNode(uint8_t edge, uint8_t edgeNode[2]) const {
     for(int j = 0; j < 2; ++j){
         edgeNode[j] = m_edgeNode[edge][j];
     }
@@ -97,7 +97,7 @@ Global::getEdgeNode(uint8_t edge, uint8_t edgeNode[2]) const{
  * of the i-th face of an octant.
  */
 void
-Global::getFacenode(uint8_t facenode_[6][4])  {
+Global::getFacenode(uint8_t facenode_[6][4]) const {
 	for (int i=0; i<6; i++){
 		for (int j=0; j<4; j++){
 			facenode_[i][j] = m_faceNode[i][j];
@@ -109,7 +109,7 @@ Global::getFacenode(uint8_t facenode_[6][4])  {
  * \return Bytes occupation of a global index.
  */
 uint8_t
-Global::getGlobalIndexBytes()  {
+Global::getGlobalIndexBytes() const {
 	return m_globalIndexBytes;
 }
 
@@ -117,7 +117,7 @@ Global::getGlobalIndexBytes()  {
  * \return Bytes occupation of level.
  */
 uint8_t
-Global::getLevelBytes()  {
+Global::getLevelBytes() const {
 	return m_levelBytes;
 }
 
@@ -125,7 +125,7 @@ Global::getLevelBytes()  {
  * \return Bytes occupation of marker.
  */
 uint8_t
-Global::getMarkerBytes()  {
+Global::getMarkerBytes() const {
 	return m_markerBytes;
 }
 
@@ -149,7 +149,7 @@ Global::getMaxLevel()  {
  * \return Number of children of an octant.
  */
 uint8_t
-Global::getNchildren()  {
+Global::getNchildren() const {
 	return m_nchildren;
 }
 
@@ -157,7 +157,7 @@ Global::getNchildren()  {
  * \return Number of edges of an octant.
  */
 uint8_t
-Global::getNedges()  {
+Global::getNedges() const {
 	return m_nedges;
 }
 
@@ -165,7 +165,7 @@ Global::getNedges()  {
  * \return Number of faces of an octant.
  */
 uint8_t
-Global::getNfaces()  {
+Global::getNfaces() const {
 	return m_nfaces;
 }
 
@@ -173,7 +173,7 @@ Global::getNfaces()  {
  * \return Number of nodes of an octant.
  */
 uint8_t
-Global::getNnodes()  {
+Global::getNnodes() const {
 	return m_nnodes;
 }
 
@@ -181,7 +181,7 @@ Global::getNnodes()  {
  * \return Number of nodes of a face of an octant.
  */
 uint8_t
-Global::getNnodesperface()  {
+Global::getNnodesperface() const {
 	return m_nnodesPerFace;
 }
 
@@ -189,7 +189,7 @@ Global::getNnodesperface()  {
  * \return Components (x,y,z) of the "normals" per node.
  */
 void
-Global::getNodecoeffs(int8_t nodecoeffs_[8][3])  {
+Global::getNodecoeffs(int8_t nodecoeffs_[8][3]) const {
 	for (int i=0; i<8; i++){
 		for (int j=0; j<3; j++){
 			nodecoeffs_[i][j] = m_nodeCoeffs[i][j];
@@ -202,7 +202,7 @@ Global::getNodecoeffs(int8_t nodecoeffs_[8][3])  {
  * sharing the i-th node of an octant.
  */
 void
-Global::getNodeface(uint8_t nodeface_[8][3])  {
+Global::getNodeface(uint8_t nodeface_[8][3]) const {
 	for (int i=0; i<8; i++){
 		for (int j=0; j<3; j++){
 			nodeface_[i][j] = m_nodeFace[i][j];
@@ -214,7 +214,7 @@ Global::getNodeface(uint8_t nodeface_[8][3])  {
  * \return Components (x,y,z) of the normals per face (z=0 in 2D).
  */
 void
-Global::getNormals(int8_t normals_[6][3])  {
+Global::getNormals(int8_t normals_[6][3]) const {
 	for (int i=0; i<6; i++){
 		for (int j=0; j<3; j++){
 			normals_[i][j] = m_normals[i][j];
@@ -226,7 +226,7 @@ Global::getNormals(int8_t normals_[6][3])  {
  * \return Bytes occupation of an octant.
  */
 uint8_t
-Global::getOctantBytes()  {
+Global::getOctantBytes() const {
 	return m_octantBytes;
 }
 /*! Get the index of the opposite face of each face.
@@ -234,7 +234,7 @@ Global::getOctantBytes()  {
 * through the i-th face of the current octant.
 */
 void
-Global::getOppface(uint8_t oppface_[6])  {
+Global::getOppface(uint8_t oppface_[6]) const {
 	for (int j=0; j<6; j++){
 		oppface_[j] = m_oppFace[j];
 	}
@@ -244,7 +244,7 @@ Global::getOppface(uint8_t oppface_[6])  {
 * \param[out] parallelEdges[i][j] = matrix containing parallelEdges j for each edge i
 */
 void
-Global::getParallelEdges(uint8_t parallelEdges[12][3]){
+Global::getParallelEdges(uint8_t parallelEdges[12][3]) const {
     for(int i = 0; i < 12; ++i){
         for(int j = 0; j < 3; ++j){
             parallelEdges[i][j] = m_parallelEdges[i][j];
@@ -267,7 +267,7 @@ Global::getParallelEdges(uint8_t edge, uint8_t parallelEdges[]) const {
  * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
  */
 void
-Global::initialize(uint8_t dim){
+Global::initialize(uint8_t dim) {
 
 	if (dim>3) dim = 3;
 	if (dim<2) dim = 2;
