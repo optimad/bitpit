@@ -1232,6 +1232,7 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 
 	// Add the cells
 	size_t octantInfoListSize = octantInfoList.size();
+	m_cells.reserve(m_cells.size() + octantInfoListSize);
 
 	std::vector<long> createdCells(octantInfoListSize);
 	for (size_t k = 0; k < octantInfoListSize; ++k) {
