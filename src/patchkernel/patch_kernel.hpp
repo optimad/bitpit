@@ -408,6 +408,9 @@ protected:
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
 
+	void dumpInterfaces(std::ostream &stream);
+	void restoreInterfaces(std::istream &stream);
+
 	virtual const std::vector<adaption::Info> _updateAdaption(bool trackAdaption) = 0;
 	virtual bool _markCellForRefinement(const long &id) = 0;
 	virtual bool _markCellForCoarsening(const long &id) = 0;

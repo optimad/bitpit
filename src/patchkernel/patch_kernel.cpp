@@ -2650,6 +2650,96 @@ long PatchKernel::countFreeFaces() const
 }
 
 /*!
+ *  Write the interfaces to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void PatchKernel::dumpInterfaces(std::ostream &stream)
+{
+	long nInterfaces = getInterfaceCount();
+	IO::binary::write(stream, nInterfaces);
+
+	std::unordered_set<long> dumpedInterfaces(nInterfaces);
+	for (const Cell &cell : getCells()) {
+		long cellId = cell.getId();
+		IO::binary::write(stream, cellId);
+
+		int nCellInterfaces = cell.getInterfaceCount();
+		const long *interfaces = cell.getInterfaces();
+		for (int i = 0; i < nCellInterfaces; ++i) {
+			long interfaceId = interfaces[i];
+			if (interfaceId < 0 || dumpedInterfaces.count(interfaceId) > 0) {
+				continue;
+			}
+
+			const Interface &interface = m_interfaces.at(interfaceId);
+			const long interfaceOwnerId = interface.getOwner();
+			const long interfaceNeighId = interface.getNeigh();
+
+			IO::binary::write(stream, interfaceId);
+			if (cellId == interfaceOwnerId) {
+				IO::binary::write(stream, interface.getOwnerFace());
+				IO::binary::write(stream, interfaceNeighId);
+				if (interfaceNeighId >= 0) {
+					IO::binary::write(stream, interface.getNeighFace());
+				}
+			} else {
+				IO::binary::write(stream, interface.getNeighFace());
+				IO::binary::write(stream, interfaceOwnerId);
+				IO::binary::write(stream, interface.getOwnerFace());
+			}
+
+			dumpedInterfaces.insert(interfaceId);
+		}
+
+		// There are no more interfaces for this cell
+		IO::binary::write(stream, Interface::NULL_ID);
+	}
+}
+
+/*!
+ *  Restore the interfaces from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void PatchKernel::restoreInterfaces(std::istream &stream)
+{
+	long nInterfaces;
+	IO::binary::read(stream, nInterfaces);
+	m_interfaces.reserve(nInterfaces);
+
+	long nCells = getCellCount();
+	for (long n = 0; n < nCells; ++n) {
+		long cellId;
+		IO::binary::read(stream, cellId);
+		Cell &cell = m_cells.at(cellId);
+
+		while (true) {
+			long interfaceId;
+			IO::binary::read(stream, interfaceId);
+			if (interfaceId < 0) {
+				break;
+			}
+
+			int face;
+			IO::binary::read(stream, face);
+
+			long otherCellId;
+			IO::binary::read(stream, otherCellId);
+
+			Cell *otherCell = nullptr;
+			int otherFace = -1;
+			if (otherCellId >= 0) {
+				otherCell = &m_cells.at(otherCellId);
+				IO::binary::read(stream, otherFace);
+			}
+
+			buildCellInterface(&cell, face, otherCell, otherFace, interfaceId);
+		}
+	}
+}
+
+/*!
 	Sorts internal vertex storage in ascending id order.
 */
 bool PatchKernel::sortVertices()
