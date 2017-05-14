@@ -498,6 +498,8 @@ private:
 
 	void initialize();
 
+	void buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
+
 	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
 	InterfaceIterator createInterface(ElementInfo::Type type, long id = Element::NULL_ID);
 	CellIterator createCell(ElementInfo::Type type, bool interior, long id = Element::NULL_ID);
