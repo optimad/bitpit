@@ -98,8 +98,8 @@ private:
 	uint8_t 	getBoolBytes() const;
 	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]) const;
 	void 		getEdgeface(uint8_t edgeface[12][2]) const;
-	void 		getEdgeNode(uint8_t edgeNode[12][2]) const;
-	void 		getEdgeNode(uint8_t edge, uint8_t edgeNode[2]) const;
+	void 		getEdgenode(uint8_t edgeNode[12][2]) const;
+	void 		getEdgenode(uint8_t edge, uint8_t edgeNode[2]) const;
 	void 		getFacenode(uint8_t facenode[6][4]) const;
 	uint8_t 	getGlobalIndexBytes() const;
 	uint8_t 	getLevelBytes() const;
