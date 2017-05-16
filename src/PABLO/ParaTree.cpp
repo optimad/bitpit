@@ -3013,7 +3013,7 @@ namespace bitpit {
 
         // Get the coordinates of the edge
         uint8_t edgeNodes[2];
-        m_global.getEdgeNode(edgeIndex, edgeNodes);
+        m_global.getEdgenode(edgeIndex, edgeNodes);
         std::array<uint32_t, 3> minEdgeCoords = edgeOctant->getNode(edgeNodes[0]);
         std::array<uint32_t, 3> maxEdgeCoords = edgeOctant->getNode(edgeNodes[1]);
 

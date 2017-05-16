@@ -72,7 +72,7 @@ Global::getEdgeface(uint8_t edgeface_[12][2]) const {
  * the i-th edge of an octant.
  */
 void
-Global::getEdgeNode(uint8_t edgeNode[12][2]) const {
+Global::getEdgenode(uint8_t edgeNode[12][2]) const {
     for(int i = 0; i < 12; ++i){
         for(int j = 0; j < 2; ++j){
             edgeNode[i][j] = m_edgeNode[i][j];
@@ -86,7 +86,7 @@ Global::getEdgeNode(uint8_t edgeNode[12][2]) const {
  * the edge edge of an octant.
  */
 void
-Global::getEdgeNode(uint8_t edge, uint8_t edgeNode[2]) const {
+Global::getEdgenode(uint8_t edge, uint8_t edgeNode[2]) const {
     for(int j = 0; j < 2; ++j){
         edgeNode[j] = m_edgeNode[edge][j];
     }
