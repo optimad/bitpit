@@ -195,7 +195,7 @@ void ReferenceElementInfo::initializeFaceEdges(const std::vector<const Reference
             }
         }
 
-        assert(faceEdges[k].size() == nFaceEdges);
+        assert((int) faceEdges[k].size() == nFaceEdges);
     }
 }
 

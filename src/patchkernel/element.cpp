@@ -1620,7 +1620,7 @@ std::vector<ConstProxyVector<long>> Element::evalEdgeConnects(int nRequestedEdge
 		}
 	}
 
-	assert(edgeSet.size() == nRequestedEdges);
+	assert((int) edgeSet.size() == nRequestedEdges);
 
 	return edgeConnects;
 }
