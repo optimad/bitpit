@@ -381,7 +381,7 @@ namespace bitpit {
             else{
                 if (m_octants[idx].m_marker > 0){
                     m_octants[idx].m_marker = 0;
-                    m_octants[idx].m_info[15] = false;
+                    m_octants[idx].m_info[Octant::INFO_AUX] = false;
                 }
             }
         }
@@ -399,7 +399,7 @@ namespace bitpit {
             while (idx>blockidx){
                 idx--;
                 if(idx == last_child_index[ilastch]){
-                    m_octants[idx-offset].m_info[15] = false;
+                    m_octants[idx-offset].m_info[Octant::INFO_AUX] = false;
                     children = m_octants[idx-offset].buildChildren();
                     for (ich=0; ich<m_global.m_nchildren; ich++){
                         m_octants[idx-ich] = (children[nchm1-ich]);
@@ -524,7 +524,7 @@ namespace bitpit {
                         if (idx+offset == first_child_index[nidx]){
                             markerfather = -m_global.m_maxLevel;
                             father = m_octants[idx+offset].buildFather();
-                            for (uint32_t iii=0; iii<17; iii++){
+                            for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                                 father.m_info[iii] = false;
                             }
                             for(idx2=0; idx2<m_global.m_nchildren; idx2++){
@@ -532,13 +532,13 @@ namespace bitpit {
                                     if (markerfather < m_octants[idx+offset+idx2].getMarker()+1){
                                         markerfather = m_octants[idx+offset+idx2].getMarker()+1;
                                     }
-                                    for (uint32_t iii=0; iii<17; iii++){
+                                    for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                                         father.m_info[iii] = father.m_info[iii] || m_octants[idx+offset+idx2].m_info[iii];
                                     }
                                 }
                             }
-                            father.m_info[13] = true;
-                            father.m_info[15] = false;
+                            father.m_info[Octant::INFO_NEW4COARSENING] = true;
+                            father.m_info[Octant::INFO_AUX] = false;
                             father.setMarker(markerfather);
                             //Impossible in this version
 //                            if (markerfather < 0 && mapsize == 0){
@@ -665,7 +665,7 @@ namespace bitpit {
             if (m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
                 if (m_ghosts[idx2_gh].buildFather() == m_octants[m_sizeOctants-1].buildFather()){
                     father = m_ghosts[idx2_gh].buildFather();
-                    for (uint32_t iii=0; iii<17; iii++){
+                    for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                         father.m_info[iii] = false;
                     }
                     markerfather = m_ghosts[idx2_gh].getMarker()+1;
@@ -680,7 +680,7 @@ namespace bitpit {
                         for (uint32_t iii=0; iii<m_global.m_nfaces; iii++){
                             father.m_info[iii] = father.m_info[iii] || m_ghosts[idx].m_info[iii];
                         }
-                        father.m_info[14] = father.m_info[14] || m_ghosts[idx].m_info[14];
+                        father.m_info[Octant::INFO_BALANCED] = father.m_info[Octant::INFO_BALANCED] || m_ghosts[idx].m_info[Octant::INFO_BALANCED];
                         idx++;
                         if(idx == m_sizeGhosts){
                             break;
@@ -715,12 +715,12 @@ namespace bitpit {
                 }
                 if (nend != 0){
                     for (idx=0; idx < nend; idx++){
-                        for (uint32_t iii=0; iii<16; iii++){
+                        for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT - 1; iii++){
                             father.m_info[iii] = father.m_info[iii] || m_octants[m_sizeOctants-idx-1].m_info[iii];
                         }
                     }
-                    father.m_info[13] = true;
-                    father.m_info[15] = false;
+                    father.m_info[Octant::INFO_NEW4COARSENING] = true;
+                    father.m_info[Octant::INFO_AUX] = false;
                     //Impossible in this version
                     //                if (markerfather < 0 && mapsize == 0){
                         //                    docoarse = true;
@@ -2465,7 +2465,7 @@ namespace bitpit {
                         for(uint32_t ii=0; ii<idx; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[15]=true;
+                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
                             }
                         }
                         //Clean ghost index to structure for mapper in case of coarsening a broken family
@@ -2511,7 +2511,7 @@ namespace bitpit {
                         for(uint32_t ii=idx+1; ii<nocts; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[15]=true;
+                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
                             }
                         }
                         //Clean ghost index to structure for mapper in case of coarsening a broken family
@@ -2558,7 +2558,7 @@ namespace bitpit {
                         else{
                             if (idx<=last_idx){
                                 m_octants[idx].setMarker(0);
-                                m_octants[idx].m_info[15]=true;
+                                m_octants[idx].m_info[Octant::INFO_AUX]=true;
                             }
                         }
                     }
@@ -2649,7 +2649,7 @@ namespace bitpit {
                         for(uint32_t ii=0; ii<idx; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[15]=true;
+                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
                                 newmodified.push_back(ii);
                             }
                         }
@@ -2696,7 +2696,7 @@ namespace bitpit {
                         for(uint32_t ii=idx+1; ii<nocts; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[15]=true;
+                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
                                 newmodified.push_back(ii);
                             }
                         }
@@ -2742,7 +2742,7 @@ namespace bitpit {
                 else{
                     if (idx<=last_idx){
                         m_octants[idx].setMarker(0);
-                        m_octants[idx].m_info[15]=true;
+                        m_octants[idx].m_info[Octant::INFO_AUX]=true;
                         newmodified.push_back(idx);
                     }
                 }
@@ -2780,7 +2780,7 @@ namespace bitpit {
             oend = m_octants.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (it->getBalance() && (it->getMarker() != 0 || it->m_info[15]) ){
+                if (it->getBalance() && (it->getMarker() != 0 || it->m_info[Octant::INFO_AUX]) ){
                     targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
                     //Balance through faces
@@ -2792,13 +2792,13 @@ namespace bitpit {
 								{
 									if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
 									else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 										m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-										m_octants[neigh[i]].m_info[15] = true;
+										m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(neigh[i]);
 										Bdone = true;
 									}
@@ -2808,7 +2808,7 @@ namespace bitpit {
 								{
 									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
@@ -2828,13 +2828,13 @@ namespace bitpit {
 									{
 										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[15] = true;
+											m_octants[idx].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
 										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[15] = true;
+											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(neigh[i]);
 											Bdone = true;
 										}
@@ -2843,7 +2843,7 @@ namespace bitpit {
 								else{
 									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
@@ -2863,13 +2863,13 @@ namespace bitpit {
 									{
 										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[15] = true;
+											m_octants[idx].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
 										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[15] = true;
+											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(neigh[i]);
 											Bdone = true;
 										}
@@ -2878,7 +2878,7 @@ namespace bitpit {
 								else{
 									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
@@ -2896,7 +2896,7 @@ namespace bitpit {
             oend = m_ghosts.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && (it->getMarker() != 0 || it->m_info[15]) ){
+                if (!it->getNotBalance() && (it->getMarker() != 0 || it->m_info[Octant::INFO_AUX]) ){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
@@ -2908,7 +2908,7 @@ namespace bitpit {
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                     m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[15] = true;
+                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                     modified.push_back(neigh[i]);
                                     Bdone = true;
                                 }
@@ -2926,7 +2926,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -2944,7 +2944,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -2978,13 +2978,13 @@ namespace bitpit {
                                         {
                                             if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
                                                 m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[15] = true;
+                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(idx);
                                                 Bdone = true;
                                             }
                                             else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                                 m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[15] = true;
+                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(neigh[i]);
                                                 Bdone = true;
                                             }
@@ -3005,13 +3005,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3032,13 +3032,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3066,7 +3066,7 @@ namespace bitpit {
             oend = m_ghosts.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && it->m_info[15]){
+                if (!it->getNotBalance() && it->m_info[Octant::INFO_AUX]){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
@@ -3078,7 +3078,7 @@ namespace bitpit {
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                     m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[15] = true;
+                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                     modified.push_back(neigh[i]);
                                     Bdone = true;
                                 }
@@ -3096,7 +3096,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3114,7 +3114,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3148,13 +3148,13 @@ namespace bitpit {
                                         {
                                             if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
                                                 m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[15] = true;
+                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(idx);
                                                 Bdone = true;
                                             }
                                             else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                                 m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[15] = true;
+                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(neigh[i]);
                                                 Bdone = true;
                                             }
@@ -3175,13 +3175,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3202,13 +3202,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3265,7 +3265,7 @@ namespace bitpit {
             oend = m_octants.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if ((!it->getNotBalance()) && ((it->m_info[15]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
+                if ((!it->getNotBalance()) && ((it->m_info[Octant::INFO_AUX]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
                     targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
                     //Balance through faces
@@ -3277,13 +3277,13 @@ namespace bitpit {
 								{
 									if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
 									else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 										m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-										m_octants[neigh[i]].m_info[15] = true;
+										m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(neigh[i]);
 										Bdone = true;
 									}
@@ -3293,7 +3293,7 @@ namespace bitpit {
 								{
 									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
@@ -3314,13 +3314,13 @@ namespace bitpit {
 									{
 										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[15] = true;
+											m_octants[idx].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
 										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[15] = true;
+											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(neigh[i]);
 											Bdone = true;
 										}
@@ -3329,7 +3329,7 @@ namespace bitpit {
 								else{
 									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
@@ -3349,13 +3349,13 @@ namespace bitpit {
 									{
 										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[15] = true;
+											m_octants[idx].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
 										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[15] = true;
+											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 											modified.push_back(neigh[i]);
 											Bdone = true;
 										}
@@ -3364,7 +3364,7 @@ namespace bitpit {
 								else{
 									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[15] = true;
+										m_octants[idx].m_info[Octant::INFO_AUX] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
@@ -3382,7 +3382,7 @@ namespace bitpit {
             oend = m_ghosts.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && (it->m_info[15] || (it->getIsNewC() || it->getIsNewR()))){
+                if (!it->getNotBalance() && (it->m_info[Octant::INFO_AUX] || (it->getIsNewC() || it->getIsNewR()))){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
@@ -3394,7 +3394,7 @@ namespace bitpit {
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                     m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[15] = true;
+                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                     modified.push_back(neigh[i]);
                                     Bdone = true;
                                 }
@@ -3412,7 +3412,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3430,7 +3430,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3464,13 +3464,13 @@ namespace bitpit {
                                         {
                                             if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
                                                 m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[15] = true;
+                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(idx);
                                                 Bdone = true;
                                             }
                                             else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                                 m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[15] = true;
+                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(neigh[i]);
                                                 Bdone = true;
                                             }
@@ -3491,13 +3491,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3518,13 +3518,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3552,7 +3552,7 @@ namespace bitpit {
             oend = m_ghosts.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && (it->m_info[15] || (it->getIsNewC() || it->getIsNewR()))){
+                if (!it->getNotBalance() && (it->m_info[Octant::INFO_AUX] || (it->getIsNewC() || it->getIsNewR()))){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
@@ -3564,7 +3564,7 @@ namespace bitpit {
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                     m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[15] = true;
+                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                     modified.push_back(neigh[i]);
                                     Bdone = true;
                                 }
@@ -3582,7 +3582,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3600,7 +3600,7 @@ namespace bitpit {
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[15] = true;
+									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3634,13 +3634,13 @@ namespace bitpit {
                                         {
                                             if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
                                                 m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[15] = true;
+                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(idx);
                                                 Bdone = true;
                                             }
                                             else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
                                                 m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[15] = true;
+                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
                                                 newmodified.push_back(neigh[i]);
                                                 Bdone = true;
                                             }
@@ -3661,13 +3661,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3688,13 +3688,13 @@ namespace bitpit {
 										{
 											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[15] = true;
+												m_octants[idx].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[15] = true;
+												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}

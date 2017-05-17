@@ -159,7 +159,7 @@ Octant::initialize(uint8_t dim, uint8_t level, bool bound) {
 
 	// Initialize octant info
 	m_info.reset();
-	m_info[14] = true;
+	m_info[OctantInfo::INFO_BALANCED] = true;
 
 	// If this is the root octant we need to set the boundary condition bound
 	// for faces
@@ -249,7 +249,9 @@ Octant::getBound(uint8_t face) const{
  */
 bool
 Octant::getBound() const{
-	return m_info[0]||m_info[1]||m_info[2]||m_info[3]||((m_dim-2)*(m_info[4]||m_info[5]));
+	return m_info[OctantInfo::INFO_BOUNDFACE0]||m_info[OctantInfo::INFO_BOUNDFACE1]||
+	        m_info[OctantInfo::INFO_BOUNDFACE2]||m_info[OctantInfo::INFO_BOUNDFACE3]||
+	        ((m_dim-2)*(m_info[OctantInfo::INFO_BOUNDFACE4]||m_info[OctantInfo::INFO_BOUNDFACE5]));
 };
 
 /*! Set the boundary flag to true on an octant face.
@@ -274,38 +276,40 @@ Octant::getPbound(uint8_t face) const{
  */
 bool
 Octant::getPbound() const{
-	return m_info[6]||m_info[7]||m_info[8]||m_info[9]||((m_dim-2)*(m_info[10]||m_info[11]));
+	return m_info[OctantInfo::INFO_PBOUNDFACE0]||m_info[OctantInfo::INFO_PBOUNDFACE1]||
+	        m_info[OctantInfo::INFO_PBOUNDFACE2]||m_info[OctantInfo::INFO_PBOUNDFACE3]||
+	        ((m_dim-2)*(m_info[OctantInfo::INFO_PBOUNDFACE4]||m_info[OctantInfo::INFO_PBOUNDFACE5]));
 };
 
 /*! Get if the octant is new after a refinement.
  * \return true if the the octant is new after a refinement.
  */
 bool
-Octant::getIsNewR() const{return m_info[12];};
+Octant::getIsNewR() const{return m_info[OctantInfo::INFO_NEW4REFINEMENT];};
 
 /*! Get if the octant is new after a coarsening.
  * \return true if the the octant is new after a coarsening.
  */
 bool
-Octant::getIsNewC() const{return m_info[13];};
+Octant::getIsNewC() const{return m_info[OctantInfo::INFO_NEW4COARSENING];};
 
 /*! Get if the octant is a scary ghost octant.
  * \return true if the octant is a ghost octant.
  */
 bool
-Octant::getIsGhost() const{return m_info[16];};
+Octant::getIsGhost() const{return m_info[OctantInfo::INFO_GHOST];};
 
 /*! Get if the octant is a balancing-blocked octant.
  * \return false if the octant has to be balanced.
  */
 bool
-Octant::getNotBalance() const{return !m_info[14];};
+Octant::getNotBalance() const{return !m_info[OctantInfo::INFO_BALANCED];};
 
 /*! Get if the octant has to be balanced.
  * \return true if the octant has to be balanced.
  */
 bool
-Octant::getBalance() const{return (m_info[14]);};
+Octant::getBalance() const{return (m_info[OctantInfo::INFO_BALANCED]);};
 
 /*! Set the refinement marker of an octant.
  * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
@@ -313,7 +317,7 @@ Octant::getBalance() const{return (m_info[14]);};
 void
 Octant::setMarker(int8_t marker){
 	if (marker != m_marker)
-		m_info[15] = true;
+		m_info[OctantInfo::INFO_AUX] = true;
 	this->m_marker = marker;
 };
 
@@ -322,9 +326,9 @@ Octant::setMarker(int8_t marker){
  */
 void
 Octant::setBalance(bool balance){
-	if (balance != m_info[14])
-		m_info[15] = true;
-	m_info[14] = balance;
+	if (balance != m_info[OctantInfo::INFO_BALANCED])
+		m_info[OctantInfo::INFO_AUX] = true;
+	m_info[OctantInfo::INFO_BALANCED] = balance;
 };
 
 /*! Set the level of an octant.
@@ -588,7 +592,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				// Update interior face bound and pbound
 				xf=1; yf=3; zf=5;
 				oct.m_info[xf] = oct.m_info[xf+6] = false;
@@ -602,7 +606,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				uint32_t dh = oct.getSize();
 				oct.m_x += dh;
 				// Update interior face bound and pbound
@@ -618,7 +622,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				uint32_t dh = oct.getSize();
 				oct.m_y += dh;
 				// Update interior face bound and pbound
@@ -634,7 +638,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				uint32_t dh = oct.getSize();
 				oct.m_x += dh;
 				oct.m_y += dh;
@@ -651,7 +655,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				uint32_t dh = oct.getSize();
 				oct.m_z += dh;
 				// Update interior face bound and pbound
@@ -667,7 +671,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				uint32_t dh = oct.getSize();
 				oct.m_x += dh;
 				oct.m_z += dh;
@@ -684,7 +688,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				uint32_t dh = oct.getSize();
 				oct.m_y += dh;
 				oct.m_z += dh;
@@ -701,7 +705,7 @@ vector< Octant >	Octant::buildChildren() const {
 				Octant oct(*this);
 				oct.setMarker(max(0,oct.m_marker-1));
 				oct.setLevel(oct.m_level+1);
-				oct.m_info[12]=true;
+				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
 				uint32_t dh = oct.getSize();
 				oct.m_x += dh;
 				oct.m_y += dh;

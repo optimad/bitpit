@@ -83,41 +83,64 @@ class Octant{
 
 	friend class LocalTree;
 	friend class ParaTree;
+    friend class Global;
+
+    // =================================================================================== //
+    // STATIC MEMBERS
+    // =================================================================================== //
+
+    static constexpr int    sm_CoeffNode[8][3]        = {{0,0,0},{1,0,0},{0,1,0},
+                                                        {1,1,0},{0,0,1},{1,0,1},
+                                                        {0,1,1},{1,1,1}}; /**< Static member for internal use. */
+
+    static constexpr int    sm_CoeffFaceCenter[6][3]  = {{0,1,1},{2,1,1},{1,0,1},
+                                                        {1,2,1},{1,1,0},{1,1,2}}; /**< Static member for internal use. */
+
+    static constexpr int    sm_CoeffEdgeCenter[12][3] = {{0,1,0},{2,1,0},{1,0,0},
+                                                        {1,2,0},{0,0,1},{2,0,1},
+                                                        {0,2,1},{2,2,1},{0,1,2},
+                                                        {2,1,2},{1,0,2},{1,2,2}};  /**< Static member for internal use. */
 
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //
+    enum OctantInfo {
+        INFO_BOUNDFACE0     = 0,  /**< Identifier to access face bound information in bitset info for face 0 */
+        INFO_BOUNDFACE1     = 1,  /**< Identifier to access face bound information in bitset info for face 1 */
+        INFO_BOUNDFACE2     = 2,  /**< Identifier to access face bound information in bitset info for face 2 */
+        INFO_BOUNDFACE3     = 3,  /**< Identifier to access face bound information in bitset info for face 3 */
+        INFO_BOUNDFACE4     = 4,  /**< Identifier to access face bound information in bitset info for face 4 */
+        INFO_BOUNDFACE5     = 5,  /**< Identifier to access face bound information in bitset info for face 5 */
+        INFO_PBOUNDFACE0    = 6,  /**< Identifier to access face process bound information in bitset info for face 0 */
+        INFO_PBOUNDFACE1    = 7,  /**< Identifier to access face process bound information in bitset info for face 1 */
+        INFO_PBOUNDFACE2    = 8,  /**< Identifier to access face process bound information in bitset info for face 2 */
+        INFO_PBOUNDFACE3    = 9,  /**< Identifier to access face process bound information in bitset info for face 3 */
+        INFO_PBOUNDFACE4    = 10, /**< Identifier to access face process bound information in bitset info for face 4 */
+        INFO_PBOUNDFACE5    = 11, /**< Identifier to access face process bound information in bitset info for face 5 */
+        INFO_NEW4REFINEMENT = 12, /**< Identifier to access the bit storing if the octant is new for refinement */
+        INFO_NEW4COARSENING = 13, /**< Identifier to access the bit storing if the octant is new for coarsening */
+        INFO_BALANCED       = 14, /**< Identifier to access the bit storing if the octant has to be kept unbalanced */
+        INFO_AUX            = 15, /**< Identifier to access an auxiliary bit */
+        INFO_GHOST          = 16, /**< Identifier to access ghost information about the octant */
+
+        INFO_ITEM_COUNT     = 17  /**< Number of items contained in the enum */
+    };
+
 private:
-	uint32_t		  	m_x;			/**< Coordinate x */
-	uint32_t		  	m_y;			/**< Coordinate y */
-	uint32_t		  	m_z;			/**< Coordinate z (2D case = 0)*/
-	uint8_t   			m_level;		/**< Refinement level (0=root) */
-	int8_t    			m_marker;		/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
-	std::bitset<17> 	m_info;			/**< -Info[0..6]: true if 0..6 face is a boundary face [bound] \n
-										-Info[6..11]: true if 6..11 face is a process boundary face [pbound] \n
+	uint32_t		  	            m_x;			/**< Coordinate x */
+	uint32_t		  	            m_y;			/**< Coordinate y */
+	uint32_t		  	            m_z;			/**< Coordinate z (2D case = 0)*/
+	uint8_t   			            m_level;		/**< Refinement level (0=root) */
+	int8_t    			            m_marker;		/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
+	std::bitset<INFO_ITEM_COUNT> 	m_info;			/**< -Info[0..5]: true if 0..5 face is a boundary face [bound] \n
+										-Info[6..11]: true if 0..6 face is a process boundary face [pbound] \n
 										-Info[12/13]: true if octant is new after refinement/coarsening \n
-										-Info[14]   : true if balancing is not required for this octant \n
+										-Info[14]   : true if balancing is required for this octant \n
 										-Info[15]   : Aux
 										-Info[16]   : true if octant is a scary ghost */
 	uint8_t				m_dim;			/**< Dimension of octant (2D/3D) */
 
 	//TODO add bitset for edge & node
-
-	// =================================================================================== //
-	// STATIC MEMBERS
-	// =================================================================================== //
-
-	static constexpr int 	sm_CoeffNode[8][3] 		  = {{0,0,0},{1,0,0},{0,1,0},
-														{1,1,0},{0,0,1},{1,0,1},
-														{0,1,1},{1,1,1}}; /**< Static member for internal use. */
-
-	static constexpr int 	sm_CoeffFaceCenter[6][3]  = {{0,1,1},{2,1,1},{1,0,1},
-														{1,2,1},{1,1,0},{1,1,2}}; /**< Static member for internal use. */
-
-	static constexpr int 	sm_CoeffEdgeCenter[12][3] =	{{0,1,0},{2,1,0},{1,0,0},
-														{1,2,0},{0,0,1},{2,0,1},
-														{0,2,1},{2,2,1},{0,1,2},
-														{2,1,2},{1,0,2},{1,2,2}};  /**< Static member for internal use. */
 
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS

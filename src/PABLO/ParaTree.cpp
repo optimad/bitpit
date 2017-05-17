@@ -485,7 +485,7 @@ namespace bitpit {
             utils::binary::write(stream, octant.getY());
             utils::binary::write(stream, octant.getZ());
 
-            for (size_t k = 0; k < octant.m_info.size(); ++k) {
+            for (size_t k = 0; k < Octant::INFO_ITEM_COUNT; ++k) {
                 utils::binary::write(stream, (bool) octant.m_info[k]);
             }
 
@@ -605,7 +605,7 @@ namespace bitpit {
             Octant octant(false, m_dim, level, x, y, z);
 
             // Set octant info
-            for (size_t k = 0; k < octant.m_info.size(); ++k) {
+            for (size_t k = 0; k < Octant::INFO_ITEM_COUNT; ++k) {
                 bool bit;
                 utils::binary::read(stream, bit);
                 octant.m_info.set(k, bit);
@@ -2429,7 +2429,7 @@ namespace bitpit {
      */
     bool
     ParaTree::getIsGhost(const Octant* oct) const {
-        return oct->m_info[16];
+        return oct->m_info[Octant::INFO_GHOST];
     };
 
     /*! Get a map of elements sent to the other processes during load balance
@@ -3354,9 +3354,9 @@ namespace bitpit {
         vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
         for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
-            iter->m_info[12] = false;
-            iter->m_info[13] = false;
-            iter->m_info[15] = false;
+            iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
+            iter->m_info[Octant::INFO_NEW4COARSENING] = false;
+            iter->m_info[Octant::INFO_AUX] = false;
         }
 
         // Initialize mapping
@@ -3437,9 +3437,9 @@ namespace bitpit {
         vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
         for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
-            iter->m_info[12] = false;
-            iter->m_info[13] = false;
-            iter->m_info[15] = false;
+            iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
+            iter->m_info[Octant::INFO_NEW4COARSENING] = false;
+            iter->m_info[Octant::INFO_AUX] = false;
         }
 
         m_mapIdx.clear();
@@ -4245,7 +4245,7 @@ namespace bitpit {
                 uint32_t x,y,z;
                 uint8_t l;
                 int8_t m;
-                bool info[17];
+                bool info[Octant::INFO_ITEM_COUNT];
                 int intBuffer = 0;
                 int contatore = 0;
                 //build send buffers from Head
@@ -4274,14 +4274,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int ii = 0; ii < 17; ++ii)
+                                for(int ii = 0; ii < Octant::INFO_ITEM_COUNT; ++ii)
                                     info[ii] = octant.m_info[ii];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                             }
@@ -4310,14 +4310,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int i = 0; i < 17; ++i)
+                                for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i)
                                     info[i] = octant.m_info[i];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                             }
@@ -4355,14 +4355,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int ii = 0; ii < 17; ++ii)
+                                for(int ii = 0; ii < Octant::INFO_ITEM_COUNT; ++ii)
                                     info[ii] = octant.m_info[ii];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                             }
@@ -4391,14 +4391,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int ii = 0; ii < 17; ++ii)
+                                for(int ii = 0; ii < Octant::INFO_ITEM_COUNT; ++ii)
                                     info[ii] = octant.m_info[ii];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                             }
@@ -4468,7 +4468,7 @@ namespace bitpit {
                         m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                         recvBuffer >> m;
                         m_octree.m_octants[newCounter].setMarker(m);
-                        for(int j = 0; j < 17; ++j){
+                        for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                             recvBuffer >> info[j];
                             m_octree.m_octants[newCounter].m_info[j] = info[j];
                         }
@@ -4533,8 +4533,8 @@ namespace bitpit {
         vector<Octant >::iterator iter, iterend = m_octree.m_octants.end();
 
         for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
-            iter->m_info[12] = false;
-            iter->m_info[13] = false;
+            iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
+            iter->m_info[Octant::INFO_NEW4COARSENING] = false;
         }
 
         // m_mapIdx init
@@ -5220,7 +5220,7 @@ namespace bitpit {
         uint32_t x,y,z;
         uint8_t l;
         int8_t m;
-        bool info[17];
+        bool info[Octant::INFO_ITEM_COUNT];
         DataCommunicator ghostCommunicator(m_comm);
         map<int,vector<uint32_t> >::iterator bitend = m_bordersPerProc.end();
         uint32_t pbordersOversize = 0;
@@ -5240,14 +5240,14 @@ namespace bitpit {
                 l = octant.getLevel();
                 m = octant.getMarker();
                 global_index = getGlobalIdx(value[i]);
-                for(int i = 0; i < 17; ++i)
+                for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i)
                     info[i] = octant.m_info[i];
                 sendBuffer << x;
                 sendBuffer << y;
                 sendBuffer << z;
                 sendBuffer << l;
                 sendBuffer << m;
-                for(int j = 0; j < 17; ++j){
+                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                     sendBuffer << info[j];
                 }
                 sendBuffer << global_index;
@@ -5289,11 +5289,11 @@ namespace bitpit {
                 m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
                 recvBuffer >> m;
                 m_octree.m_ghosts[ghostCounter].setMarker(m);
-                for(int j = 0; j < 17; ++j){
+                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                     recvBuffer >> info[j];
                     m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
                 }
-                m_octree.m_ghosts[ghostCounter].m_info[16] = true;
+                m_octree.m_ghosts[ghostCounter].m_info[Octant::INFO_GHOST] = true;
                 recvBuffer >> global_index;
                 m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
                 ++ghostCounter;
@@ -5332,7 +5332,7 @@ namespace bitpit {
             for(int i = 0; i < nofBorders; ++i){
                 const Octant & octant = m_octree.m_octants[value[i]];
                 marker = octant.getMarker();
-                mod	= octant.m_info[15];
+                mod	= octant.m_info[Octant::INFO_AUX];
                 sendBuffer << marker;
                 sendBuffer << mod;
             }
@@ -5356,7 +5356,7 @@ namespace bitpit {
                 recvBuffer >> marker;
                 m_octree.m_ghosts[ghostCounter].setMarker(marker);
                 recvBuffer >> mod;
-                m_octree.m_ghosts[ghostCounter].m_info[15] = mod;
+                m_octree.m_ghosts[ghostCounter].m_info[Octant::INFO_AUX] = mod;
                 ++ghostCounter;
             }
         }

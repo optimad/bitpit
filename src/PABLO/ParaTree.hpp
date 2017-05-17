@@ -815,7 +815,7 @@ namespace bitpit {
                 uint32_t x,y,z;
                 uint8_t l;
                 int8_t m;
-                bool info[17];
+                bool info[Octant::INFO_ITEM_COUNT];
                 int intBuffer = 0;
                 int contatore = 0;
                 //build send buffers from Head
@@ -853,14 +853,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int j = 0; j < 17; ++j)
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j)
                                     info[j] = octant.m_info[j];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                                 userData.gather(sendBuffer,i);
@@ -900,14 +900,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int j = 0; j < 17; ++j)
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j)
                                     info[j] = octant.m_info[j];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                                 userData.gather(sendBuffer,i);
@@ -955,14 +955,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int j = 0; j < 17; ++j)
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j)
                                     info[j] = octant.m_info[j];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                                 userData.gather(sendBuffer,i);
@@ -1002,14 +1002,14 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
-                                for(int j = 0; j < 17; ++j)
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j)
                                     info[j] = octant.m_info[j];
                                 sendBuffer << x;
                                 sendBuffer << y;
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
-                                for(int j = 0; j < 17; ++j){
+                                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
                                 userData.gather(sendBuffer,i);
@@ -1089,7 +1089,7 @@ namespace bitpit {
                         m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                         recvBuffer >> m;
                         m_octree.m_octants[newCounter].setMarker(m);
-                        for(int j = 0; j < 17; ++j){
+                        for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                             recvBuffer >> info[j];
                             m_octree.m_octants[newCounter].m_info[j] = info[j];
                         }
