@@ -50,9 +50,11 @@ void VolOctree::setCommunicator(MPI_Comm communicator)
 
 	\param trackChanges if set to true the changes to the patch will be
 	tracked
+	\param squeezeStorage if set to true the vector that store patch information
+	will be squeezed after the synchronization
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges)
+const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges, bool squeezeStorage)
 {
 	// Updating the tree
 	log::cout() << ">> Load balancing...";
@@ -60,7 +62,7 @@ const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges
 	m_tree->loadBalance();
 
 	// Sync the patch
-	const std::vector<adaption::Info> adaptionData = sync(true, true, trackChanges);
+	const std::vector<adaption::Info> adaptionData = sync(true, true, trackChanges, squeezeStorage);
 
 	// The bounding box is frozen, it is not updated automatically
 	setBoundingBox();

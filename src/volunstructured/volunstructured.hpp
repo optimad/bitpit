@@ -55,7 +55,7 @@ public:
 	long locatePoint(const std::array<double, 3> &point);
 
 protected:
-	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
+	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption, bool squeezeStorage);
 	bool _markCellForRefinement(const long &id);
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);

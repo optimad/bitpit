@@ -181,12 +181,14 @@ PatchKernel::~PatchKernel()
 
 	\param trackAdaption if set to true the changes to the patch will be
 	tracked
+	\param squeezeStorage if set to true the vector that store patch information
+	will be squeezed after the synchronization
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption)
+const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeezeStorage)
 {
-	const std::vector<adaption::Info> adaptionInfo = updateAdaption(trackAdaption);
+	const std::vector<adaption::Info> adaptionInfo = updateAdaption(trackAdaption, squeezeStorage);
 
 	updateBoundingBox();
 
@@ -198,17 +200,19 @@ const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption)
 
 	\param trackAdaption if set to true the changes to the patch will be
 	tracked
+	\param squeezeStorage if set to true the vector that store patch information
+	will be squeezed after the synchronization
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption)
+const std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption, bool squeezeStorage)
 {
 	std::vector<adaption::Info> adaptionInfo;
 	if (!isAdaptionDirty(true)) {
 		return adaptionInfo;
 	}
 
-	adaptionInfo = _updateAdaption(trackAdaption);
+	adaptionInfo = _updateAdaption(trackAdaption, squeezeStorage);
 
 	m_cells.flush();
 	m_interfaces.flush();
