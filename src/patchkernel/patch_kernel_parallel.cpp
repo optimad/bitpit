@@ -142,7 +142,7 @@ int PatchKernel::getProcessorCount() const
 
 	\param communicator is the communicator that will be used
 	\param cellRanks are the ranks of the cells after the partitioning
-	\param trackChanges if set to true, the changes to the patche will be
+	\param trackChanges if set to true, the changes to the patch will be
 	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
@@ -159,7 +159,7 @@ const std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, 
 	to a specific processor according to the specified input.
 
 	\param cellRanks are the ranks of the cells after the partitioning.
-	\param trackChanges if set to true, the changes to the patche will be
+	\param trackChanges if set to true, the changes to the patch will be
 	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
@@ -253,7 +253,7 @@ const std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> 
 	a criteria that tries to balance the load among the processors.
 
 	\param communicator is the communicator that will be used
-	\param trackChanges if set to true, the changes to the patche will be
+	\param trackChanges if set to true, the changes to the patch will be
 	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
@@ -269,7 +269,7 @@ const std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, 
 	Partitions the patch among the processors. The partitioning is done using
 	a criteria that tries to balance the load among the processors.
 
-	\param trackChanges if set to true, the changes to the patche will be
+	\param trackChanges if set to true, the changes to the patch will be
 	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partition.
@@ -283,6 +283,8 @@ const std::vector<adaption::Info> PatchKernel::partition(bool trackChanges)
 	Tries to balance the computational load among the processors redistributing
 	the cells among the processors.
 
+	\param trackChanges if set to true, the changes to the patch will be
+	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
@@ -330,6 +332,8 @@ void PatchKernel::setPartitioned(bool partitioned)
 	Internal function that tries to balance the computational load among the
 	processors moving redistributing the cells among the processors.
 
+	\param trackChanges if set to true the changes to the patch will be
+	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */

@@ -179,6 +179,8 @@ PatchKernel::~PatchKernel()
 /*!
 	Updates the patch
 
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
@@ -194,6 +196,8 @@ const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption)
 /*!
 	Updates the adaption
 
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
