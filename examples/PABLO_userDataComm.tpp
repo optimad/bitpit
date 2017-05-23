@@ -47,19 +47,21 @@ inline size_t UserDataComm<Data>::fixedSize() const {
 template<class Data>
 inline size_t UserDataComm<Data>::size(const uint32_t e) const {
 	BITPIT_UNUSED(e);
-	return sizeof(double);
+	return sizeof(double)+sizeof(float);
 };
 
 template<class Data>
 template<class Buffer>
 inline void UserDataComm<Data>::gather(Buffer& buff, const uint32_t e) {
-	buff << data[e];
+	buff << data.doubleData[e];
+	buff << data.floatData[e];
 };
 
 template<class Data>
 template<class Buffer>
 inline void UserDataComm<Data>::scatter(Buffer& buff,	const uint32_t e) {
-	buff >> ghostData[e];
+	buff >> ghostData.doubleData[e];
+	buff >> ghostData.floatData[e];
 };
 
 /* endcond

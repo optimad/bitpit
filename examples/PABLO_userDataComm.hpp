@@ -45,7 +45,7 @@ public:
 	Data & data;
 	Data & ghostData;
 
-        size_t fixedSize() const;
+	size_t fixedSize() const;
 	size_t size(const uint32_t e) const;
 
 	template<class Buffer>

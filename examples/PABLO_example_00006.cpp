@@ -116,6 +116,17 @@ using namespace bitpit;
 */
 // =================================================================================== //
 
+class Data{
+public:
+    vector<double> doubleData;
+    vector<float> floatData;
+    Data(uint32_t nocts): doubleData(nocts,0.0), floatData(nocts,0.0){};
+    Data(Data& rhs){
+        this->doubleData = rhs.doubleData;
+        this->floatData = rhs.floatData;
+    }
+};
+
 int main(int argc, char *argv[]) {
 
 #if BITPIT_ENABLE_MPI==1
@@ -162,7 +173,9 @@ int main(int argc, char *argv[]) {
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo6.getNumOctants();
 		uint32_t nghosts = pablo6.getNumGhosts();
-		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		//vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		Data octdata(nocts), ghostdata(nghosts);
+
 
 		/**<Assign a data to the octants with at least one node inside the circle.*/
 		for (unsigned int i=0; i<nocts; i++){
@@ -171,7 +184,9 @@ int main(int argc, char *argv[]) {
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					oct_data[i] = 1.0;
+					//oct_data[i] = 1.0;
+				    octdata.doubleData[i] = 1.0;
+				    octdata.floatData[i] = 1.0;
 				}
 			}
 		}
@@ -185,7 +200,9 @@ int main(int argc, char *argv[]) {
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					ghost_data[i] = 1.0;
+					//ghost_data[i] = 1.0;
+				    ghostdata.doubleData[i] = 1.0;
+				    ghostdata.floatData[i] = 1.0;
 				}
 			}
 		}
@@ -193,12 +210,13 @@ int main(int argc, char *argv[]) {
 		/**<Update the connectivity and write the para_tree.*/
 		iter = 0;
 		pablo6.updateConnectivity();
-		pablo6.writeTest("pablo00006_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
+		pablo6.writeTest("pablo00006_double_iter"+to_string(static_cast<unsigned long long>(iter)), octdata.doubleData);
 
 		/**<Smoothing iterations on initial data*/
 		int start = iter + 1;
 		for (iter=start; iter<start+25; iter++){
-			vector<double> oct_data_smooth(nocts, 0.0);
+			//vector<double> oct_data_smooth(nocts, 0.0);
+		    Data octdatasmooth(nocts);
 			vector<uint32_t> neigh, neigh_t;
 			vector<bool> isghost, isghost_t;
 			uint8_t iface, nfaces, codim;
@@ -222,29 +240,35 @@ int main(int argc, char *argv[]) {
 				}
 
 				/**<Smoothing data with the average over the one ring neighbours of octants*/
-				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
+				//oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
+				octdatasmooth.doubleData[i] = octdata.doubleData[i]/(neigh.size()+1);
+				octdatasmooth.floatData[i] = octdata.floatData[i]/(neigh.size()+1);
 				for (unsigned int j=0; j<neigh.size(); j++){
 					if (isghost[j]){
-						oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
+						//oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
+						octdatasmooth.doubleData[i] += ghostdata.doubleData[neigh[j]]/(neigh.size()+1);
+						octdatasmooth.floatData[i] += ghostdata.floatData[neigh[j]]/(neigh.size()+1);
 					}
 					else{
-						oct_data_smooth[i] += oct_data[neigh[j]]/(neigh.size()+1);
+						//oct_data_smooth[i] += oct_data[neigh[j]]/(neigh.size()+1);
+						octdatasmooth.doubleData[i] += octdata.doubleData[neigh[j]]/(neigh.size()+1);
+						octdatasmooth.floatData[i] += octdata.floatData[neigh[j]]/(neigh.size()+1);
 					}
 				}
 			}
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo6.updateConnectivity();
-			pablo6.writeTest("pablo00006_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
+			pablo6.writeTest("pablo00006_iter"+to_string(static_cast<unsigned long long>(iter)), octdatasmooth.doubleData);
 
 #if BITPIT_ENABLE_MPI==1
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
-			UserDataComm<vector<double> > data_comm(oct_data_smooth, ghost_data);
+			UserDataComm<Data> data_comm(octdatasmooth, ghostdata);
 			pablo6.communicate(data_comm);
 
 #endif
-			oct_data = oct_data_smooth;
-
+			octdata.doubleData = octdatasmooth.doubleData;
+			octdata.floatData = octdatasmooth.floatData;
 		}
 #if BITPIT_ENABLE_MPI==1
 	}
