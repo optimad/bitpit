@@ -38,6 +38,7 @@ namespace CGElem{
     \{
 */
 
+
 /*!
  * Converts barycentric coordinates of a point on a segment to a flag that indicates where the point lies.
  * Flag = 0 Point lies within the segment
@@ -803,6 +804,21 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
     array3D xP = projectPointTriangle(P, Q0, Q1, Q2, lambda);
     return norm2(P-xP);
 };
+
+/*!
+ * Computes distance point to semi-infinite cone surface
+ * @param[in] point point coordinates
+ * @param[in] apex cone apex
+ * @param[in] axis cone axis
+ * @param[in] alpha cone half angle
+ * @return distance
+ */
+double distancePointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha){
+
+    array3D xP = projectPointCone( point, apex, axis, alpha);
+    return norm2(point-xP);
+
+}
 
 /*!
  * Computes distances of point cloud to triangle

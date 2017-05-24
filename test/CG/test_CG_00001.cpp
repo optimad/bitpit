@@ -626,6 +626,75 @@ int main(
     }
 
     // ========================================================================== //
+    // Distance Point Cone
+    // ========================================================================== //
+    {
+        // Scope variables ------------------------------------------------------ //
+        array<double, 3> point, apex, axis;
+        double alpha, distance;
+
+        // Compute distance (Test 1) ---------------------------------------- //
+        point = {{ 1., 1., 0. }};
+        apex  = {{ 0., 0., 0. }};
+        axis  = {{ 1., 0., 0. }};
+       
+        alpha = 15. /180. *M_PI; 
+
+        distance = CGElem::distancePointCone( point, apex, axis, alpha);
+
+        cout << " - DISTANCE BETWEEN POINT AND CONE" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    point: " << endl;
+        cout << "      p: " << point << endl;
+        cout << "    cone: " << endl;
+        cout << "      apex: " << apex << endl;
+        cout << "      axis: " << axis << endl;
+        cout << "      angle: " << alpha << endl;
+        cout << "    distance to point is: " << distance << endl;
+        cout << endl;
+
+        // Compute distance (Test 2) ---------------------------------------- //
+        point = {{ 1., 1., 0. }};
+        apex  = {{ 0., 0., 0. }};
+        axis  = {{ 1., 0., 0. }};
+       
+        alpha = 22.5 /180. *M_PI; 
+
+        distance = CGElem::distancePointCone( point, apex, axis, alpha);
+
+        cout << " - DISTANCE BETWEEN POINT AND CONE" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    point: " << endl;
+        cout << "      p: " << point << endl;
+        cout << "    cone: " << endl;
+        cout << "      apex: " << apex << endl;
+        cout << "      axis: " << axis << endl;
+        cout << "      angle: " << alpha << endl;
+        cout << "    distance to point is: " << distance << endl;
+        cout << endl;
+
+        // Compute distance (Test 3) ---------------------------------------- //
+        point = {{ -1., -1., -1. }};
+        apex  = {{ 0., 0., 0. }};
+        axis  = {{ 1., 0., 0. }};
+       
+        alpha = 22.5/180. *M_PI; 
+
+        distance = CGElem::distancePointCone( point, apex, axis, alpha);
+
+        cout << " - DISTANCE BETWEEN POINT AND CONE" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    point: " << endl;
+        cout << "      p: " << point << endl;
+        cout << "    cone: " << endl;
+        cout << "      apex: " << apex << endl;
+        cout << "      axis: " << axis << endl;
+        cout << "      angle: " << alpha << endl;
+        cout << "    distance to point is: " << distance << endl;
+        cout << endl;
+    }
+
+    // ========================================================================== //
     // Distance Cloud Triangle 1st algorithm
     // ========================================================================== //
     {
