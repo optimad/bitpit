@@ -464,6 +464,12 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     if( m_homogeneousType == VTKElementType::UNDEFINED) {
         setDimensions( m_cells, m_points, calcSizeConnectivity() ) ;
     } else {
+        // Metadata information read form file may not match the information
+        // set in our own streamer. If the grid is homogeneous, we need to
+        // reset all metadata that can't be overwritten.
+        setElementType(m_homogeneousType) ;
+
+        // Set the dimension of the grid
         setDimensions( m_cells, m_points ) ;
     }
 
