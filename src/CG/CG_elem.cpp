@@ -565,6 +565,46 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
 };
 
 /*!
+ * Computes projection point on semi-infinite cone surface
+ * @param[in] point point coordinates
+ * @param[in] apex cone apex
+ * @param[in] axis cone axis
+ * @param[in] alpha cone half angle
+ * @return projection point
+ */
+array3D projectPointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha){
+
+
+    if( alpha <= M_PI/2. ) { //accute cone angle
+
+        array3D versor = point-apex;
+        versor /= norm2(versor);
+
+        double cosPointAxis = dotProduct(versor,axis);
+        double cosCriticalAngle = cos(alpha+M_PI/2.);
+
+        if( cosPointAxis <= cosCriticalAngle ){ //point projects on cone apex
+            return apex;
+
+        } else { // point projects on cone surface
+
+            array3D planeNormal = crossProduct(axis,versor);
+            planeNormal /= norm2(planeNormal);
+
+            array3D direction = rotateVector(apex+axis,planeNormal,alpha);
+
+            return projectPointLine(point,apex,direction);
+
+        } 
+
+    } else { // abtuse cone angle -> project on complement
+        return projectPointCone( point, apex, -1.*axis, M_PI-alpha);
+
+    }
+
+}
+
+/*!
  * Computes distance point to line in 3D
  * @param[in] P point coordinates
  * @param[in] Q point on line

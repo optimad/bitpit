@@ -101,10 +101,12 @@ array3D             projectPointTriangle( array3D const &, array3D const &, arra
 array3D             projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D & );
 array3D             projectPointSimplex( array3D const &, std::vector<array3D> const & );
 array3D             projectPointSimplex( array3D const &, std::vector<array3D> const &, std::vector<double> & );
+array3D             projectPointCone( array3D const &, array3D const &, array3D const &, double const &);
 std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &);
 
 array3D             restrictPointTriangle( array3D const &, array3D const &, array3D const &, array3D &);
 array3D             restrictPointTriangle( array3D const &, array3D const &, array3D const &, double *);
+
 
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;
 double              distancePointPlane( array3D const &, array3D const &, array3D const &, array3D & ) ;
