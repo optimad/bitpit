@@ -181,12 +181,7 @@ void                unionAABB( std::vector<array3D>  const &, std::vector<array3
 //levelset            );
 
 
-void rotateVector(
-        std::array<double, 3>                    &,
-        std::array<double, 3> const              &,
-        double                                     
-        );
-
+array3D rotateVector( array3D const &, array3D const &, double);
 
 void vertexOfBox(
         int              const              &,     

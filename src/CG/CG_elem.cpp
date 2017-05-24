@@ -2405,21 +2405,22 @@ void vertexOfBox(
 
 /*!
  * rotates a vector in 3D using Rodrigues' formula.
- * @param[in,out] v vector to be rotated
- * @param[in] a rotation axis
+ * @param[in] vector vector to be rotated
+ * @param[in] axis rotation axis
  * @param[in] theta rotation angle
+ * @return rotated vector
  */
-void rotateVector(
-        std::array<double, 3>       &v,
-        std::array<double, 3> const &a,
-        double                  theta
-        ) {
+array3D rotateVector( array3D const &vector, array3D const &axis, double theta){
 
-    v = cos(theta) * v
-        + sin(theta) * crossProduct(a, v)
-        + (1.0 - cos(theta)) * dotProduct(a, v) * a;
+    array3D rotated;
+    double cosTheta = cos(theta);
 
-    return; };
+    rotated  = cosTheta * vector;
+    rotated += sin(theta) * crossProduct(axis,vector);
+    rotated += (1.0 - cosTheta) * dotProduct(axis,vector) * axis;
+
+    return rotated; 
+};
 
 }
 
