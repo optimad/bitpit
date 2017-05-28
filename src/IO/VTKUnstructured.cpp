@@ -57,8 +57,9 @@ void VTKUnstructuredGridStreamer::flushData( std::fstream &str, std::string name
 
         if(name == "types" ){
             uint8_t type = (uint8_t) m_homogeneousType ;
-            for( unsigned int i=0; i<m_cells; ++i)
+            for( unsigned int i=0; i<m_cells; ++i){
                 genericIO::flushBINARY(str, type );
+            }
         
         } else if(name == "offsets" ){
             uint8_t     n = vtk::getElementNodeCount(m_homogeneousType) ;
