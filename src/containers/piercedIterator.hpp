@@ -41,15 +41,15 @@ class PiercedVector;
 /*!
     \ingroup containers
 
-    @brief Iterator for the class PiercedVector
+    \brief Iterator for the class PiercedVector
 
     Usage: use <tt>PiercedVector<value_t, id_t>::iterator</tt>
     to declare an iterator for a pierced vector, use
     <tt>PiercedVector<vaue_t, id_t>::const_iterator</tt> to declare
     a const iterator for a pierced vector.
 
-    @tparam value_t The type of the elements stored in the vector
-    @tparam id_t The type of the ids to associate to the elements
+    \tparam value_t The type of the elements stored in the vector
+    \tparam id_t The type of the ids to associate to the elements
 */
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type>
