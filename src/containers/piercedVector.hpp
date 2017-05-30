@@ -45,7 +45,7 @@ namespace bitpit {
 /*!
     \ingroup containers
 
-    @brief Base class for the pierced vectors.
+    \brief Base class for the pierced vectors.
 */
 class BasePiercedVector {
 };
@@ -53,9 +53,9 @@ class BasePiercedVector {
 /*!
     \ingroup containers
 
-    @brief Metafunction for generating a pierced vector.
+    \brief Metafunction for generating a pierced vector.
 
-    @details
+    \details
     Usage: use <tt>PiercedVector<value_t, id_t></tt> to declare a pierced
     vector.
 
@@ -98,8 +98,8 @@ class BasePiercedVector {
     found, the search is extended to regular holes. If, among the holes, there
     is no suitable position, a new element is added in the container.
 
-    @tparam value_t The type of the elements stored in the vector
-    @tparam id_t The type of the ids to associate to the elements
+    \tparam value_t The type of the elements stored in the vector
+    \tparam id_t The type of the ids to associate to the elements
 */
 template<typename value_t, typename id_t = long>
 class PiercedVector : public BasePiercedVector {
