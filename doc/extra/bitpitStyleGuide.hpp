@@ -440,22 +440,54 @@ ugly), but try to avoid excess.  Instead, put the comments at the head
 of the function, telling people what it does, and possibly WHY it does
 it.
 
-Each class should be fully commented with a \\class comment block, formatted like those in the <B>%bitpit</B> core classes. <B>The arguments of the class constructor are very important</B>,
-as they tell developers how to include the class declaration in their code.  This information goes into the "Detailed
-Description" portion of the class documentation.  This block should include any features or limitations of the class.
-
-Each method of a class in both the public and private interfaces should be commented, <B>Including any arguments and return values</B>.
-See the <B>%bitpit</B> classes for examples of how to format these comments.  As a rule of thumb, your code should run through
-Doxygen without generating any warnings; in fact, Doxygen is sometimes helpful at pointing out inconsistencies in your
-class declaration.
-
 Try to keep header files free of comments; when comments are inside headers,
 all users of those headers must be recompiled if a comment is changed.
 
-It's also important to comment data, whether they are basic types or derived
-types.  To this end, use just one data declaration per line (no commas for
-multiple data declarations).  This leaves you room for a small comment on each
-item, explaining its use.
+Each class should be fully commented with a doxygen comment block. A doxygen
+comment block is a special comment block with some additional markings, so
+doxygen knows it is a piece of structured text that needs to end up in the
+generated documentation. The preferred way to mark a doxygen comment block
+is the JavaDoc style, which consist of a C-style comment block starting with
+two *'s, like this:
+\verbatim
+    \**
+    * ... text ...
+    */
+\endverbatim
+The doxygen comment block of a class should include a general description of
+the class and a list of its features and possible limitations.
+
+A doxygen comment block should be added for every method of a class (both
+public and private methos should be commented), this comment block should
+contain a general description of the method and a description of all the
+arguments and the return value of the method. For instance:
+\verbatim
+    /**
+    * \brief Brief description.
+    *        Brief description continued.
+    *
+    *  Detailed description starts here.
+    *
+    *  \param var detailed description of the parameter
+    *  \result Detailed description of the return value.
+    */
+\endverbatim
+
+To document the members of a file, struct, union, class, or enum, it is sometimes
+desired to place the documentation block after the member instead of before.
+For this purpose an additional < marker is required in the comment block.
+Note that this also works for the parameters of a function. For instance:
+\verbatim
+    int var; /**< Detailed description after the member */
+\endverbatim
+To simplify the documentation of class members, define just one member per
+line (no commas for multiple members declarations).
+
+Doxygen commands should start with a backslash (\\).
+
+As a rule of thumb, the code should run through doxygen without generating any
+warnings; in fact, doxygen is sometimes helpful at pointing out inconsistencies
+in your class declaration.
 
 \section git Git Repository Practices
 As most of our code repositories uses git as the revision control system, it is important to decide on a workflow that can be followed by the individual developer. The way that any individual developer interact with the upstream git repository can have an important impact on other developers and the ability to identify and manage individual changes.  This set of guidelines and practices attempts to establish some standards for how developers will interact with the upstream git repository.
