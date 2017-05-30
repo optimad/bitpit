@@ -28,14 +28,10 @@
 #define  __PI_REFERENCE__ typename PiercedIterator<value_t, id_t, value_no_cv_t>::reference
 #define  __PI_POINTER__   typename PiercedIterator<value_t, id_t, value_no_cv_t>::pointer
 
-#include <algorithm>
 #include <cassert>
 #include <iterator>
 #include <limits>
-#include <unordered_map>
-#include <memory>
 #include <type_traits>
-#include <vector>
 
 namespace bitpit{
 
