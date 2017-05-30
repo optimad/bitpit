@@ -30,12 +30,9 @@
 #define __PV_POINTER__         typename PiercedVector<value_t, id_t>::pointer
 #define __PV_CONST_POINTER__   typename PiercedVector<value_t, id_t>::const_pointer
 
-#include <algorithm>
 #include <cassert>
-#include <iterator>
 #include <limits>
 #include <unordered_map>
-#include <memory>
 #include <type_traits>
 #include <vector>
 
