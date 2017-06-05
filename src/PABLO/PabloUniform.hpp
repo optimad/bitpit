@@ -181,6 +181,11 @@ namespace bitpit {
         // =================================================================================== //
         darray3 	getNodeCoordinates(uint32_t inode) const;
 
+        // =================================================================================== //
+        // TESTING OUTPUT METHODS													    	   //
+        // =================================================================================== //
+        void        write(std::string filename);
+        void        writeTest(std::string filename, dvector data);
     };
 
 }
