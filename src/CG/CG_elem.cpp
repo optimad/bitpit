@@ -1898,62 +1898,81 @@ bool intersectBoxSimplex(
  * @return if intersect
  */
 bool intersectBoxSimplex(
-        std::array<double, 3> const              &A1,
-        std::array<double, 3> const              &A2,
-        std::vector< std::array<double, 3> > const    &VS,
-        std::vector< std::array<double, 3> >          &P,
+        array3D const              &A1,
+        array3D const              &A2,
+        std::vector< array3D > const    &VS,
+        std::vector< array3D >          &P,
         int                                 dim
         ){
 
-    int                         n  ;
+    int n  ;
 
     P.clear() ;
 
     { //Check if Triangle Boundig Box and Box overlap -> necessary condition
 
-        std::array<double,3>             B1, B2 ;
+        array3D             B1, B2 ;
         computeAABBSimplex( VS, B1, B2) ;
 
-        if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { return(false); }
+        if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
+            return false; 
+        }
     }
 
 
     n = VS.size() ;
     if( n == 2){ //segment
-        return( intersectSegmentBox( VS[0], VS[1], A1, A2, P, dim ) ) ;
+        return intersectSegmentBox( VS[0], VS[1], A1, A2, P, dim );
+
+    } else if( n == 3){ //triangle
+        return intersectBoxTriangle( VS[0], VS[1], VS[2], A1, A2, P );
+
+    } else{  //generic convex polygon split into triangles
+
+        bool intersect(false) ;
+        std::vector< array3D >  partial ;
+
+        int trianglesCount = n - 2;
+        int vertex0 = 0;
+        int vertex1 = 1;
+        int vertex2 = 2;
+
+        for (int m=0; m<trianglesCount; ++m) {
+
+            if( intersectBoxTriangle( A1, A2, VS[vertex0], VS[vertex1], VS[vertex2], partial ) ){
+                intersect = true;
+
+                for( auto &candidate : partial){
+
+                    auto PItr = P.begin();
+                    bool iterate = PItr!=P.end();
+                    while(iterate){
+
+                        iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidate ), 0. );
+                    
+                        if(iterate){
+                            ++PItr;
+                        }
+                        iterate &= PItr!=P.end();
+                    }
+
+                    if(PItr==P.end()){
+                        P.push_back(candidate);
+                    }
+
+                }
+
+            }
+
+            ++vertex1;
+            ++vertex2;
+
+        }
+
+
+        return intersect;
     }
-
-    else if( n == 3){ //triangle
-        return(  intersectBoxTriangle( VS[0], VS[1], VS[2], A1, A2, P ) ) ;
-    }
-
-    else{  //generic convex polygon split into triangles
-
-        bool                        intersect(false) ;
-        int                         i, j, m, p ;
-        std::vector< std::array<double, 3> >  partial ;
-
-        p = n - 2;
-        m = 0;
-        j = 1;
-        while (m < p) {
-            i = j;
-            j = i+1;
-
-            if( intersectBoxTriangle( A1, A2, VS[0], VS[i], VS[j], partial ) ){
-                intersect = true ;
-                P.insert( P.begin(), partial.begin(), partial.end() ) ;
-            };
-
-            m++;
-        } //next i
-
-        return intersect ;
-
-    };
-
-
-};
+}
 
 
 
