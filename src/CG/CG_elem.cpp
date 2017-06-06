@@ -146,6 +146,8 @@ bool validBarycentric(double const *lambdaPtr, int n )
 int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
 {
 
+    assert( validBarycentric(&lambda[0],2) );
+
     if (lambda[0]>=1.) {
         return 1;
 
@@ -167,6 +169,8 @@ int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
  */
 int convertBarycentricToFlagTriangle( array3D const &lambda)
 {
+
+    assert( validBarycentric(&lambda[0],3) );
 
     int count = 0;
     std::array<int,2> zeros = {{0,0}};
@@ -202,6 +206,8 @@ int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
 {
 
     int N = lambda.size();
+    assert( validBarycentric(&lambda[0],N) );
+
     int count = 0;
     std::array<int,3> positives = {{0,0,0}};
 
@@ -235,6 +241,8 @@ int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
  */
 array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, std::array<double,2> &lambda)
 {
+    assert( validBarycentric(&lambda[0],2) );
+
     return lambda[0]*Q0 +lambda[1]*Q1;
 }
 
@@ -247,6 +255,8 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
  */
 array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, double *lambda)
 {
+    assert( validBarycentric(&lambda[0],2) );
+
     return lambda[0]*Q0 +lambda[1]*Q1;
 }
 
@@ -260,6 +270,8 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
  */
 array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, std::array<double,3> const &lambda)
 {
+    assert( validBarycentric(&lambda[0],3) );
+
     return lambda[0]*Q0 +lambda[1]*Q1 +lambda[2]*Q2;
 }
 
@@ -273,6 +285,8 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
  */
 array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda)
 {
+    assert( validBarycentric(&lambda[0],3) );
+
     return lambda[0]*Q0 +lambda[1]*Q1 +lambda[2]*Q2;
 }
 
@@ -286,6 +300,7 @@ array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &V, s
 {
     array3D xP = {{0.,0.,0.}};
     int N(V.size());
+    assert( validBarycentric(&lambda[0],N) );
 
     for(int i=0; i<N; ++i){
         xP += lambda[i]*V[i];
@@ -303,6 +318,7 @@ array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &V, s
  */
 array3D projectPointLine( array3D const &P, array3D const &Q, array3D const &n )
 {
+    assert( validLine(Q,n) );
     return Q + dotProduct(P - Q, n) * n;
 }
 
@@ -315,6 +331,7 @@ array3D projectPointLine( array3D const &P, array3D const &Q, array3D const &n )
  */
 array3D projectPointPlane( array3D const &P, array3D const &Q, array3D const &n )
 {
+    assert( validPlane(Q,n) );
     return P - dotProduct(P - Q, n) * n;
 }
 
@@ -355,6 +372,7 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
 array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1, double *lambda )
 {
 
+    assert( validSegment(Q0,Q1) );
     array3D n = Q1 -Q0;
     double t =  -dotProduct(n,Q0-P) / dotProduct(n,n) ;
 
@@ -423,6 +441,8 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
  */
 array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda)
 {
+
+    assert( validBarycentric(&lambda[0], 3) );
 
     std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}} ;
 
@@ -504,6 +524,8 @@ std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, ar
 void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
 {
 
+    assert( validTriangle(Q0,Q1,Q2) );
+
     array3D s0 = Q1-Q0;
     array3D s1 = Q2-Q0;
 
@@ -549,6 +571,8 @@ void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q
  */
 void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
 {
+
+    assert( validTriangle(Q0,Q1,Q2) );
 
     array3D s0 = Q1-Q0;
     array3D s1 = Q2-Q0;
@@ -1285,6 +1309,10 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
  */
 double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1, array3D const &n1, array3D &xP0, array3D &xP1)
 {
+
+    assert( validLine(P0,n0) );
+    assert( validLine(P1,n1) );
+
     double n01 = dotProduct(n0,n1);
     double det = 1. - n01*n01;
 
@@ -1451,6 +1479,8 @@ bool intersectSegmentPlane(
         std::array<double, 3>       &P
         ) {
 
+    assert( validSegment(Q1,Q2) );
+    assert( validPlane(P2,n2) );
     std::array<double, 3> n, xP;
 
     n = Q2 - Q1;
@@ -1483,6 +1513,8 @@ bool intersectPlanePlane(
         std::array<double, 3>       &nl
         ) {
 
+    assert( validPlane(P1,n1) );
+    assert( validPlane(P2,n2) );
     double const tol = 1.0e-14;
     double n12 = dotProduct(n1, n2);
     double detCB = 1.0-n12*n12;
@@ -1568,6 +1600,8 @@ bool intersectSegmentTriangle(
         std::array<double, 3>       &Q
         ) {
 
+    assert( validSegment(P0,P1) );
+    assert( validTriangle(A,B,C) );
     std::array<double, 3> n, xP;
 
     n  = P1 - P0;
@@ -1595,6 +1629,8 @@ bool intersectLineSimplex(
         std::vector<std::array<double, 3> > const &V,
         std::array<double, 3>                &Q
         ) {
+
+    assert( validLine(P,n) );
 
     int nTriangles = V.size() -2;
 
@@ -1629,6 +1665,7 @@ bool intersectSegmentSimplex(
         std::array<double, 3>                &Q 
         ) {
 
+    assert( validSegment(P0,P1) );
     int nTriangles = V.size() -2;
 
     int vertex0 = 0;
@@ -2455,6 +2492,7 @@ void faceOfBox(
         std::array<double, 3>       &P3
         ) {
 
+    assert(i<6);
     int     v0, v1, v2, v3;
 
     v0 = boxFaceVertexConnectivity[i][0] ;
@@ -2488,6 +2526,7 @@ void edgeOfBox(
         std::array<double, 3>       &P1
         ) {
 
+    assert(i<12);
     int     v0, v1;
 
     v0 = boxEdgeVertexConnectivity[i][0] ;
@@ -2564,8 +2603,11 @@ void vertexOfBox(
             P[2] = A1[2] ;
             break;
 
-    };
+        default:
+            assert(false);
+            break;
 
+    }
 
     return;
 
