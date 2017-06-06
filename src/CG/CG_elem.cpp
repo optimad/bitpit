@@ -1744,7 +1744,7 @@ bool intersectSegmentBox(
         std::vector< std::array<double,3> > E ;
         E.resize(4) ;
 
-        for( i=0; i<12; ++i){
+        for( i=0; i<6; ++i){
             faceOfBox( i, A1, A2, E[0], E[1], E[2], E[3]) ;
 
             if( intersectSegmentSimplex(V1,V2,E,p) ) { return(true); } ;
