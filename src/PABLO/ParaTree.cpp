@@ -260,6 +260,9 @@ namespace bitpit {
         // Set a null communicator
         m_comm = MPI_COMM_NULL;
 
+        //Set the number of ghost layers
+        m_nofGhostLayers = 1;
+
         // Set the real communicator and initialize partition data
         if (comm != MPI_COMM_NULL) {
             setComm(comm);
@@ -2454,6 +2457,27 @@ namespace bitpit {
     ParaTree::getLoadBalanceRanges() const {
         return m_loadBalanceRanges;
     };
+
+    /*! Get the number of ghosts layers
+     * \return the number of ghosts layers
+     */
+    std::size_t
+    ParaTree::getNofGhostLayers() const {
+        return m_nofGhostLayers;
+    };
+
+    /*! Set the number of ghosts layers
+     * \param[in] nofGhostLayers The number of ghost layers in the ghost halo
+     */
+    void
+    ParaTree::setNofGhostLayers(std::size_t nofGhostLayers) {
+        if (m_nofGhostLayers != 1) {
+            throw std::runtime_error ("Only one layer of ghosts can be built!");
+        }
+
+        m_nofGhostLayers = nofGhostLayers;
+    };
+
 
     // =================================================================================== //
     // PRIVATE GET/SET METHODS

@@ -132,6 +132,7 @@ namespace bitpit {
         int 					m_nproc;						/**<Number of processes of the job*/
         uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
         Global					m_global;						/**<Global variables*/
+        std::size_t 			m_nofGhostLayers;				/**<Global number of ghost layers from the process boundary expressing the depth of the ghost halo*/
 
         //distributed members
         int 					m_rank;							/**<Local m_rank of process*/
@@ -391,6 +392,8 @@ namespace bitpit {
         bool getIsGhost(const Octant* oct) const;
         int getGhostLayer(const Octant* oct) const;
         const LoadBalanceRanges & getLoadBalanceRanges() const;
+        std::size_t getNofGhostLayers() const;
+        void setNofGhostLayers(std::size_t nofGhostLayers);
 
         // =================================================================================== //
         // PRIVATE GET/SET METHODS															   //
