@@ -592,7 +592,7 @@ array3D projectPointCone( array3D const &point, array3D const &apex, array3D con
             array3D planeNormal = crossProduct(axis,versor);
             planeNormal /= norm2(planeNormal);
 
-            array3D direction = rotateVector(apex+axis,planeNormal,alpha);
+            array3D direction = rotateVector(axis,planeNormal,alpha);
 
             return projectPointLine(point,apex,direction);
 
