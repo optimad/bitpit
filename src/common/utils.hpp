@@ -56,7 +56,7 @@
 namespace bitpit {
 
 /*!
-    \ingroup commonUtils
+    \ingroup common::utils
 
     \brief Namespace for generic utility functions
 */
@@ -195,7 +195,7 @@ struct DoubleFloatingEqual
 }
 
 /*!
-	\ingroup commonUtils
+	\ingroup common::utils
 
 	\brief Functions for generating the hash of data types.
 */

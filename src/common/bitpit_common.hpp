@@ -27,7 +27,7 @@
 /*!
  * @defgroup common Common
  * @{
- * @defgroup commonUtils Utils
+ * @defgroup common::utils Utils
  * @defgroup macro Macros
  * @}
  *
