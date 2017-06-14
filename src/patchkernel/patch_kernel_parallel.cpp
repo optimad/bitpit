@@ -1288,6 +1288,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 
     std::unordered_map<long, FlatVector2D<long>> linkAdjacencies;
 
+    m_cells.reserve(nRecvCells);
     for (long i = 0; i < nRecvCells; ++i) {
         // Cell data
         int recvCellOwner;
