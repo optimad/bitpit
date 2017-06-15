@@ -20,31 +20,29 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
- \*---------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
+#ifndef __BITPIT_UTILS_HPP__
+#define __BITPIT_UTILS_HPP__
 
+/*! \file */
+
+#include "commonUtils.hpp"
+#include "binaryUtils.hpp"
+#include "hashingUtils.hpp"
+#include "stringUtils.hpp"
+
+namespace bitpit {
 
 /*!
- * @defgroup common Common
- * @{
- * @defgroup common::utils Utils
- *     @{
- *     @defgroup common::utils::string String utils
- *     @defgroup common::utils::binary Binary utils
-  *     @defgroup common::utils::hashing Hashing utils
- *     @}
- * @defgroup macro Macros
- * @}
- *
- */
+    \ingroup common::utils
 
+    \brief Namespace for generic utility functions
+*/
+namespace utils {
 
-#ifndef __BITPIT_MODULE_COMMON_HPP__
-#define __BITPIT_MODULE_COMMON_HPP__
+}
 
-#include "bitpit_version.hpp"
-
-#include "compiler.hpp"
-#include "utils.hpp"
+}
 
 #endif

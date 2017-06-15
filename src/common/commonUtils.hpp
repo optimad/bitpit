@@ -55,11 +55,6 @@
 
 namespace bitpit {
 
-/*!
-    \ingroup common::utils
-
-    \brief Namespace for generic utility functions
-*/
 namespace utils {
 
 template <typename T, typename Comparator = std::less<T> >
