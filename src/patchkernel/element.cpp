@@ -1100,13 +1100,29 @@ void Element::initialize(long id, ElementInfo::Type type)
 */
 void Element::_initialize(long id, ElementInfo::Type type)
 {
+	// Set the id
 	setId(id);
 
+	// Get previous connect size
+	int previousConnectSize;
+	if (type != ElementInfo::UNDEFINED) {
+		if (m_connect) {
+			assert(getType() != ElementInfo::UNDEFINED);
+			previousConnectSize = getInfo().nVertices;
+		} else {
+			previousConnectSize = 0;
+		}
+	}
+
+	// Set element type
 	setType(type);
 
-	if (getType() != ElementInfo::UNDEFINED) {
-		const int &nVertices = getInfo().nVertices;
-		setConnect(std::unique_ptr<long[]>(new long[nVertices]));
+	// Set connectivity
+	if (type != ElementInfo::UNDEFINED) {
+		int connectSize = getInfo().nVertices;
+		if (connectSize != previousConnectSize) {
+			setConnect(std::unique_ptr<long[]>(new long[connectSize]));
+		}
 	} else {
 		unsetConnect();
 	}
