@@ -130,6 +130,22 @@ Cell & Cell::operator=(const Cell& other)
 	return (*this);
 }
 
+/**
+* Exchanges the content of the cell by the content the specified other cell.
+*
+* \param other is another cell whose content is swapped with that of this cell.
+*/
+void Cell::swap(Cell &other) noexcept
+{
+	Element::swap(other);
+
+	std::swap(other.m_interior, m_interior);
+	std::swap(other.m_pid, m_pid);
+
+	other.m_interfaces.swap(m_interfaces);
+	other.m_adjacencies.swap(m_adjacencies);
+}
+
 /*!
 	Initializes the data structures of the cell.
 

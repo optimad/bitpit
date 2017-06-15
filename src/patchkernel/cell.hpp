@@ -58,6 +58,8 @@ public:
 	Cell& operator = (const Cell &other);
 	Cell& operator=(Cell&& other) = default;
 
+	void swap(Cell &other) noexcept;
+
 	void initialize(ElementInfo::Type type, bool interior, bool storeNeighbourhood = true);
 
 	bool isInterior() const;
