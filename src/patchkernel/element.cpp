@@ -1064,6 +1064,20 @@ Element & Element::operator=(const Element& other)
 	return (*this);
 }
 
+/**
+* Exchanges the content of the element by the content the specified other
+* element.
+*
+* \param other is another element whose content is swapped with that of this
+* element
+*/
+void Element::swap(Element &other) noexcept
+{
+	std::swap(other.m_id, m_id);
+	std::swap(other.m_type, m_type);
+	std::swap(other.m_connect, m_connect);
+}
+
 /*!
 	Initializes the data structures of the element.
 

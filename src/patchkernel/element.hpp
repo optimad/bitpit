@@ -152,6 +152,8 @@ public:
 	Element& operator = (const Element &other);
 	Element& operator=(Element&& other) = default;
 
+	void swap(Element &other) noexcept;
+
 	void initialize(ElementInfo::Type type);
 
 	const ElementInfo & getInfo() const;
