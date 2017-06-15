@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_UTILS_HPP__
-#define __BITPIT_UTILS_HPP__
+#ifndef __BITPIT_COMMON_UTILS_HPP__
+#define __BITPIT_COMMON_UTILS_HPP__
 
 /*! \file */
 
@@ -135,5 +135,8 @@ struct DoubleFloatingEqual
 }
 
 }
+
+// Template implementation
+#include "commonUtils.tpp"
 
 #endif

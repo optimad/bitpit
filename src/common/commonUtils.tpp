@@ -22,14 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_UTILS_TPP__
-#define __BITPIT_UTILS_TPP__
+#ifndef __BITPIT_COMMON_UTILS_TPP__
+#define __BITPIT_COMMON_UTILS_TPP__
 
 /*! \file */
-
-#include <algorithm>
-#include <vector>
-#include <map>
 
 namespace bitpit {
 

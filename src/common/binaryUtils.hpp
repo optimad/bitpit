@@ -30,8 +30,8 @@
 #include <limits>
 #include <vector>
 
-#include "utils.hpp"
-#include "utils.tpp"
+#include "commonUtils.hpp"
+#include "commonUtils.tpp"
 
 namespace bitpit {
 

@@ -46,8 +46,8 @@
 
 #include "binaryUtils.hpp"
 #include "compiler.hpp"
-#include "utils.hpp"
-#include "utils.tpp"
+#include "commonUtils.hpp"
+#include "commonUtils.tpp"
 #include "hashingUtils.hpp"
 #include "stringUtils.hpp"
 

@@ -22,13 +22,12 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#define __BITPIT_UTILS_SRC__
+#define __BITPIT_COMMON_UTILS_SRC__
 
 #include <iostream>
 #include <cmath>
 
-#include "utils.hpp"
-#include "utils.tpp"
+#include "commonUtils.hpp"
 
 namespace bitpit {
 
