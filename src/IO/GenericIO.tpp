@@ -417,7 +417,7 @@ void  lineStream( std::fstream &str, data_T &data){
     expected = 1;
 
     getline( str, line );
-    bitpit::utils::trim( line );
+    bitpit::utils::string::trim( line );
 
     std::stringstream ss( line );
 
@@ -458,7 +458,7 @@ void  lineStream( std::fstream &str, std::vector<data_T> &data){
     int                   expected(data.size()) ;
 
     getline( str, line );
-    bitpit::utils::trim( line );
+    bitpit::utils::string::trim( line );
 
     std::stringstream ss( line );
 
@@ -509,7 +509,7 @@ void  lineStream( std::fstream &str, std::array<data_T,d> &data){
     expected = d ;
 
     getline( str, line );
-    bitpit::utils::trim( line );
+    bitpit::utils::string::trim( line );
 
     std::stringstream ss( line );
 
@@ -553,7 +553,7 @@ void  lineStream( std::fstream &str, data_T *data, int nr ){
     expected = nr ;
 
     getline( str, line );
-    bitpit::utils::trim( line );
+    bitpit::utils::string::trim( line );
 
     std::stringstream ss( line );
 
@@ -759,7 +759,7 @@ void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data ){
     while( str.good() && read ) {
     
         getline( str, line );
-        bitpit::utils::trim( line );
+        bitpit::utils::string::trim( line );
     
         std::stringstream ss( line );
     
@@ -794,7 +794,7 @@ void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data, long N
     while( str.good() && read ) {
     
         getline( str, line );
-        bitpit::utils::trim( line );
+        bitpit::utils::string::trim( line );
     
         std::stringstream ss( line );
     

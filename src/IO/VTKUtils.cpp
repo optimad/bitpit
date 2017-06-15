@@ -78,13 +78,13 @@ bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
     bool  success(true) ;
 
 
-    if( bitpit::utils::keywordInString( line, "<DataArray ") ){  
-        success = success && bitpit::utils::getAfterKeyword( line, "type=", '\"', typ) ;
-        success = success && bitpit::utils::getAfterKeyword( line, "Name=", '\"', name) ;
-        success = success && bitpit::utils::getAfterKeyword( line, "format=", '\"', code) ;
+    if( bitpit::utils::string::keywordInString( line, "<DataArray ") ){
+        success = success && bitpit::utils::string::getAfterKeyword( line, "type=", '\"', typ) ;
+        success = success && bitpit::utils::string::getAfterKeyword( line, "Name=", '\"', name) ;
+        success = success && bitpit::utils::string::getAfterKeyword( line, "format=", '\"', code) ;
 
-        if( bitpit::utils::getAfterKeyword( line, "NumberOfComponents=", '\"', com)  ){
-            bitpit::utils::convertString( com, components ) ;
+        if( bitpit::utils::string::getAfterKeyword( line, "NumberOfComponents=", '\"', com)  ){
+            bitpit::utils::string::convertString( com, components ) ;
         }
 
         if(components==3)
@@ -100,8 +100,8 @@ bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
             field.setFieldType(comp) ;
 
         if(code=="appended") {
-            if( bitpit::utils::getAfterKeyword( line, "offset=", '\"', offs) ){
-                bitpit::utils::convertString( offs, offset ) ;
+            if( bitpit::utils::string::getAfterKeyword( line, "offset=", '\"', offs) ){
+                bitpit::utils::string::convertString( offs, offset ) ;
                 field.setOffset(offset) ;
             }
             else{

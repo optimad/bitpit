@@ -76,7 +76,7 @@ int main(
     cout << "  std::string s =\"" << s << "\"" << endl;
 
     // left trimming ---------------------------------------------------------------- //
-    cout << "  ltrim(s) = \"" << bitpit::utils::ltrim(s) << "\"" << endl;
+    cout << "  ltrim(s) = \"" << bitpit::utils::string::ltrim(s) << "\"" << endl;
     cout << endl;
 }
 
@@ -94,7 +94,7 @@ int main(
     cout << "  std::string s =\"" << s << "\"" << endl;
 
     // left trimming ---------------------------------------------------------------- //
-    cout << "  rtrim(s) = \"" << bitpit::utils::rtrim(s) << "\"" << endl;
+    cout << "  rtrim(s) = \"" << bitpit::utils::string::rtrim(s) << "\"" << endl;
     cout << endl;
 }
 
@@ -112,7 +112,7 @@ int main(
     cout << "  std::string s =\"" << s << "\"" << endl;
 
     // left trimming ---------------------------------------------------------------- //
-    cout << "  trim(s) = \"" << bitpit::utils::trim(s) << "\"" << endl;
+    cout << "  trim(s) = \"" << bitpit::utils::string::trim(s) << "\"" << endl;
     cout << endl;
 }
 
@@ -131,7 +131,7 @@ int main(
     cout << "  std::string s =\"" << s << "\"" << endl;
 
     // left trimming ---------------------------------------------------------------- //
-    cout << "  lfill(20, s, '*') = \"" << bitpit::utils::lfill(20, s, '*') << "\"" << endl;
+    cout << "  lfill(20, s, '*') = \"" << bitpit::utils::string::lfill(20, s, '*') << "\"" << endl;
     cout << endl;
 }
 
@@ -150,7 +150,7 @@ int main(
     cout << "  std::string s =\"" << s << "\"" << endl;
 
     // left trimming ---------------------------------------------------------------- //
-    cout << "  lfill(20, s, '*') = \"" << bitpit::utils::rfill(20, s, '*') << "\"" << endl;
+    cout << "  lfill(20, s, '*') = \"" << bitpit::utils::string::rfill(20, s, '*') << "\"" << endl;
     cout << endl;
 }
 
@@ -166,8 +166,8 @@ int main(
     string                       s;
 
     // Padding strings -------------------------------------------------------------- //
-    cout << "  zeroPadNumber(6, 14) =\"" << bitpit::utils::zeroPadNumber(6, x) << "\"" << endl;
-    cout << "  zeroPadNumber(3, 1283) =\"" << bitpit::utils::zeroPadNumber(3, y) << "\"" << endl;
+    cout << "  zeroPadNumber(6, 14) =\"" << bitpit::utils::string::zeroPadNumber(6, x) << "\"" << endl;
+    cout << "  zeroPadNumber(3, 1283) =\"" << bitpit::utils::string::zeroPadNumber(3, y) << "\"" << endl;
     cout << endl;
 }
 
@@ -190,15 +190,15 @@ int main(
     cout << "  std::string s0 = \"" << s0 << "\"" << endl;
     cout << "  std::string s1 = \"" << s1 << "\"" << endl;
     cout << "  std::string s2 = \"" << s2 << "\"" << endl;
-    bitpit::utils::convertString(s0, x);
+    bitpit::utils::string::convertString(s0, x);
     cout << "  convertString(s0, x), x = " << x << endl;
-    bitpit::utils::convertString(s1, v);
+    bitpit::utils::string::convertString(s1, v);
     cout << "  convertString(s1, v), v = ";
 	for (size_t i = 0; i < v.size(); ++i) {
 		cout << v[i] << "   ";
 	}
     cout << endl;
-    bitpit::utils::convertString(s2, a);
+    bitpit::utils::string::convertString(s2, a);
     cout << "  convertString(s2, a), a = ";
 	for (size_t i = 0; i < a.size(); ++i) {
 		cout << a[i] << "   ";
@@ -219,7 +219,7 @@ int main(
 
     // Padding strings -------------------------------------------------------------- //
     cout << "  std::string s = \"" << s << "\"" << endl;
-    bitpit::utils::getAfterKeyword(s, "field_1", ';', field);
+    bitpit::utils::string::getAfterKeyword(s, "field_1", ';', field);
     cout << "  getAfterKeyword(s \"field_1\", ';', field), field = \"" << field << "\"" << endl;
     cout << endl;
 }

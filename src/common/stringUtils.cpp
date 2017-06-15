@@ -30,6 +30,8 @@ namespace bitpit {
 
 namespace utils {
 
+namespace string {
+
 // ---------------------------------------------------------------------------------- //
 /*!
     Given an input string containing several fields separated by a delimiter,
@@ -45,17 +47,17 @@ namespace utils {
 
     \result boolean flag, (true) if search key has been found, (false) otherwise
 */
-bool getAfterKeyword( string line_, string key_, char del_, string& result_){
+bool getAfterKeyword( std::string line_, std::string key_, char del_, std::string& result_){
 
   std::size_t c1, c2, pos ;
 
-  string::iterator it;
+  std::string::iterator it;
 
   result_.clear() ;
 
   pos = line_.find( key_);
 
-  if( pos == string::npos ){
+  if( pos == std::string::npos ){
       return false;
   }
 
@@ -86,6 +88,8 @@ bool getAfterKeyword( string line_, string key_, char del_, string& result_){
   };
 
 };
+
+}
 
 }
 

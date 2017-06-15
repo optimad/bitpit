@@ -291,7 +291,7 @@ while (!file_handle.eof() && check) {
     // Get current line
     start_pos = file_handle.tellg();
     std::getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -365,7 +365,7 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 sline << "VERTEXDATA " << data_name << std::endl;
 header = sline.str();
-header = utils::trim(header);
+header = utils::string::trim(header);
 
 // ========================================================================== //
 // SCAN DGF FILE LOOKING FOR DATASET WITH SPECIFIED NAME                      //
@@ -377,7 +377,7 @@ while (start_pos != current_pos) {
 
     // Get current line
     std::getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -460,7 +460,7 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 sline << "SIMPLEXDATA " << data_name << std::endl;
 header = sline.str();
-header = utils::trim(header);
+header = utils::string::trim(header);
 
 // ========================================================================== //
 // SCAN DGF FILE LOOKING FOR DATASET WITH SPECIFIED NAME                      //
@@ -472,7 +472,7 @@ while (start_pos != current_pos) {
 
     // Get current line
     std::getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -598,10 +598,10 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 
 // Data header -------------------------------------------------------------- //
-Data_name = utils::trim(Data_name);
+Data_name = utils::string::trim(Data_name);
 sheader << "VERTEXDATA " << Data_name << std::endl;
 header = sheader.str();
-header = utils::trim(header);
+header = utils::string::trim(header);
 file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //
@@ -652,10 +652,10 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 
 // Data header -------------------------------------------------------------- //
-Data_name = utils::trim(Data_name);
+Data_name = utils::string::trim(Data_name);
 sheader << "SIMPLEXDATA " << Data_name << std::endl;
 header = sheader.str();
-header = utils::trim(header);
+header = utils::string::trim(header);
 file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //

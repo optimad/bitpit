@@ -180,8 +180,8 @@ std::string  FileHandler::getPath(){
 
   if (!directory.empty()) filename << directory << "/";
   filename << name;
-  if(parallel) filename <<".b"<< bitpit::utils::zeroPadNumber(4, block)    ;
-  if(series)   filename <<"." << bitpit::utils::zeroPadNumber(4, counter)  ;
+  if(parallel) filename <<".b"<< bitpit::utils::string::zeroPadNumber(4, block)    ;
+  if(series)   filename <<"." << bitpit::utils::string::zeroPadNumber(4, counter)  ;
   filename <<"."<< appendix  ;
 
   return filename.str() ;

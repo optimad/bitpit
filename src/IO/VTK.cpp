@@ -613,7 +613,7 @@ void VTK::writeData( ){
         std::fstream::pos_type  position_before_write ;
 
         //Go to the initial position of the appended section
-        while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){}
+        while( getline(str, line) && (! bitpit::utils::string::keywordInString( line, "<AppendedData")) ){}
 
         str >> c_;
         while( c_ != '_') str >> c_;
@@ -827,7 +827,7 @@ void VTK::readData( ){
     //Go to the initial position of the appended section
     bool foundAppendedSection = false;
     while( !foundAppendedSection && getline(str, line) ){
-        foundAppendedSection = bitpit::utils::keywordInString( line, "<AppendedData"); 
+        foundAppendedSection = bitpit::utils::string::keywordInString( line, "<AppendedData");
     }
 
     if( foundAppendedSection){
@@ -954,7 +954,7 @@ void VTK::readDataHeader( std::fstream &str ){
 
         read= true ; 
         if( ! getline( str, line) ) read = false ;
-        if( bitpit::utils::keywordInString( line, loc) ) read=false ;
+        if( bitpit::utils::string::keywordInString( line, loc) ) read=false ;
 
 
         while( read ){
@@ -986,7 +986,7 @@ void VTK::readDataHeader( std::fstream &str ){
             }
 
             if( ! getline( str, line) ) read = false ;
-            if( bitpit::utils::keywordInString( line, loc) ) read=false ;
+            if( bitpit::utils::string::keywordInString( line, loc) ) read=false ;
         }
 
     }
@@ -1004,7 +1004,7 @@ bool VTK::readDataArray( std::fstream &str, VTKField &field  ){
 
     while( getline(str, line)  ){
 
-        if( bitpit::utils::keywordInString( line, field.getName() ) ){
+        if( bitpit::utils::string::keywordInString( line, field.getName() ) ){
             if( vtk::convertStringToDataArray( line, field  ) ){
 
                 if( field.getCodification() == VTKFormat::ASCII) {

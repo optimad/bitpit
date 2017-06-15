@@ -43,6 +43,8 @@ namespace bitpit {
 
 namespace utils {
 
+namespace string {
+
 // Trimming operators =============================================================== //
 
 // ---------------------------------------------------------------------------------- //
@@ -409,6 +411,8 @@ void  convertString( std::string input_, std::array<T,n> &output_) {
 
   return ;
 };
+
+}
 
 }
 

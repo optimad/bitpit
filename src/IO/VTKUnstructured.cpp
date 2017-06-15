@@ -261,7 +261,7 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
     //Read appended data
     //Go to the initial position of the appended section
-    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){}
+    while( getline(str, line) && (! bitpit::utils::string::keywordInString( line, "<AppendedData")) ){}
 
     str >> c_;
     while( c_ != '_') str >> c_;
@@ -301,10 +301,10 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
         nconn = 0 ;
 
         getline( str, line) ;
-        while( ! bitpit::utils::keywordInString(line,"/DataArray") ) {
+        while( ! bitpit::utils::string::keywordInString(line,"/DataArray") ) {
 
             temp.clear() ;
-            bitpit::utils::convertString( line, temp) ;
+            bitpit::utils::string::convertString( line, temp) ;
             nconn += temp.size() ;
         }
 
@@ -429,23 +429,23 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     str.open( m_fh.getPath( ), std::ios::in ) ;
 
     getline( str, line);
-    while( ! bitpit::utils::keywordInString( line, "<VTKFile")){
+    while( ! bitpit::utils::string::keywordInString( line, "<VTKFile")){
         getline(str, line);
     }
 
-    if( bitpit::utils::getAfterKeyword( line, "header_type", '\"', temp) ){
+    if( bitpit::utils::string::getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
     }
 
-    while( ! bitpit::utils::keywordInString( line, "<Piece")){
+    while( ! bitpit::utils::string::keywordInString( line, "<Piece")){
         getline(str, line);
     }
 
-    bitpit::utils::getAfterKeyword( line, "NumberOfPoints", '\"', temp) ;
-    bitpit::utils::convertString( temp, m_points );
+    bitpit::utils::string::getAfterKeyword( line, "NumberOfPoints", '\"', temp) ;
+    bitpit::utils::string::convertString( temp, m_points );
 
-    bitpit::utils::getAfterKeyword( line, "NumberOfCells", '\"', temp) ;
-    bitpit::utils::convertString( temp, m_cells );
+    bitpit::utils::string::getAfterKeyword( line, "NumberOfCells", '\"', temp) ;
+    bitpit::utils::string::convertString( temp, m_cells );
 
 
     position = str.tellg() ;

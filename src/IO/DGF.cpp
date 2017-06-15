@@ -125,7 +125,7 @@ DGFObj::DGFObj(
 // ========================================================================== //
 
 // General info
-dgf_name = utils::trim(filename);
+dgf_name = utils::string::trim(filename);
 
 // Error flags
 err = 0;
@@ -930,7 +930,7 @@ while (!file_handle.eof()
     // Get next line
     current_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1021,7 +1021,7 @@ while (!file_handle.eof()) {
 
     // Get current line
     getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1127,7 +1127,7 @@ while (!file_handle.eof()
     // Get current line
     current_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1208,7 +1208,7 @@ while ((!file_handle.eof()) && (word.compare("#") != 0)) {
 
     // Get current line
     getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1307,7 +1307,7 @@ while (!file_handle.eof()
 
     // Get current line
     getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1395,7 +1395,7 @@ while (!file_handle.eof()
 
     // Get current line
     getline(file_handle, line);
-    line = utils::trim(line);
+    line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
 

@@ -318,7 +318,7 @@ SurfUnstructured                     envelope(0);
     f1 << "test00001_subtest001_step" << step_id;
     mesh.write(f1.str());
     log::cout() << "(rank #" << mesh.getRank() << ", mesh exported to \"" << f1.str() << ".vtu\")" << endl;
-    f2 << "P" << utils::zeroPadNumber(6, mesh.getRank()) << "_env_step" << step_id;
+    f2 << "P" << utils::string::zeroPadNumber(6, mesh.getRank()) << "_env_step" << step_id;
     envelope.write(f2.str());
     log::cout() << "(rank #" << mesh.getRank() << ", mesh external envelope exported to \"" << f2.str() << ".vtu\")" << endl;
 }
@@ -404,7 +404,7 @@ if (mesh.getRank() == 0) {
     // Export mesh ---------------------------------------------------------- //
     mesh.write("test00001_subtest001_step0");
     log::cout() << "(rank #" << mesh.getRank() << ", mesh exported to \"test00001_subtest001_step0.vtu\")" << endl;
-    name << "P" << utils::zeroPadNumber(6, mesh.getRank()) <<"_env_step0";
+    name << "P" << utils::string::zeroPadNumber(6, mesh.getRank()) <<"_env_step0";
     envelope.write(name.str());
     log::cout() << "(rank #" << mesh.getRank() << ", mesh external envelope exported to " << name.str() << ".vtu)" << endl;
     log::cout() << endl;

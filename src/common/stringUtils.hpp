@@ -37,12 +37,14 @@
 
 namespace bitpit {
 
-/*!
-    \ingroup common::utils
-
-    \brief Namespace for generic utility functions
-*/
 namespace utils {
+
+/*!
+    \ingroup common::utils::string
+
+    \brief Namespace for string utility functions
+*/
+namespace string {
 
 // Trimming operators --------------------------------------------------------------- //
 inline std::string &ltrim(                                                     // STRING LEFT TRIMMING
@@ -103,6 +105,8 @@ void  convertString(                                                            
         std::string                              ,                                    // (input) string
         std::array<T,n>                         &                                     // (input/output) array used to store data
         );
+
+}
 
 }
 
