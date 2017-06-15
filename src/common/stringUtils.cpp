@@ -22,8 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include"utils.hpp"
-#include"utils.tpp"
+#include "stringUtils.hpp"
 
 using namespace std;      
 

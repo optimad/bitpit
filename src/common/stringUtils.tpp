@@ -36,9 +36,12 @@
 // All rights reserved.                                                               //
 // ================================================================================== //
 
-namespace bitpit{
+#ifndef __BITPIT_STRING_UTILS_TPP__
+#define __BITPIT_STRING_UTILS_TPP__
 
-namespace utils{
+namespace bitpit {
+
+namespace utils {
 
 // Trimming operators =============================================================== //
 
@@ -410,3 +413,5 @@ void  convertString( std::string input_, std::array<T,n> &output_) {
 }
 
 }
+
+#endif

@@ -91,66 +91,6 @@ void extractWithoutReplacement(                                               //
     std::vector<int>           &                                              // (input/output) list of extracted value
 );
 
-// Trimming operators --------------------------------------------------------------- //
-inline std::string &ltrim(                                                     // STRING LEFT TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-inline std::string &rtrim(                                                     // STRING RIGHT TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-inline std::string &trim(                                                      // STRING TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-
-// Padding operators ---------------------------------------------------------------- //
-inline std::string lfill(                                                     // Left filler for input string
-        const int                               &,                            // (input) Final string length
-        std::string                             &,                            // (input) input string
-        char                                                                  // (input) char used as filler
-);
-inline std::string rfill(                                                     // Right filler for input string
-        const int                               &,                            // (input) Final string length
-        std::string                             &,                            // (input) input string
-        char                                                                  // (input) char used as filler
-);
-inline std::string zeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
-        int                                      ,                                    // (input) number of char in std::string
-        int                                                                           // (input) integer to be padded
-        );
-
-// Input stream operator ------------------------------------------------------------ //
-bool getAfterKeyword(                                                               // EXTRACT FIELD AFTER SPECIFIC KEYWORD
-        std::string                              ,                                    // (input) std::string
-        std::string                              ,                                    // (input) keyword
-        char                                     ,                                    // (input) field delimiter
-        std::string                             &                                     // (input/output) field found
-        );
-
-// returns true if key_ is present in line ------------------------------------------ //
-inline bool keywordInString(                                                 // SEARCH KEYWORD IN STRING
-        std::string                              ,                                    // (input) input string            
-        std::string                                                                   // (input) keyword
-        ) ;
-
-// converts a string to fundamental data types and vectors or arrays of them -------- //
-template <class T>
-void convertString(                                                                  // EXTRACT SCALAR FROM STRING
-        std::string                              ,                                    // (input) input string
-        T                                       &                                     // (input/output) scalar
-        );
-
-template <class T>
-void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO VECTOR
-        std::string                              ,                                    // (input) string
-        std::vector<T>                          &                                     // (input/output) vector used to store string
-        );
-
-template <class T, size_t n>
-void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO ARRAY
-        std::string                              ,                                    // (input) string
-        std::array<T,n>                         &                                     // (input/output) array used to store data
-        );
-
 /*!
 	Functor to compare two double precision floating point numbers.
 
@@ -262,5 +202,4 @@ struct hash<std::tuple<TT...>>
 
 }
 
-# include "utilsString.tpp"
 #endif

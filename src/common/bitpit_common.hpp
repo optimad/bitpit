@@ -42,5 +42,6 @@
 #include "compiler.hpp"
 #include "utils.hpp"
 #include "utils.tpp"
+#include "stringUtils.hpp"
 
 #endif
