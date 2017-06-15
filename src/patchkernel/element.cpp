@@ -1041,14 +1041,13 @@ Element::Element(const long &id, ElementInfo::Type type)
 	Copy constructor
 */
 Element::Element(const Element &other)
-	: m_id(other.m_id), m_type(other.m_type)
+	: m_id(other.m_id)
 {
+	_initialize(other.m_type);
+
 	if (other.m_connect) {
-		int nVertices = other.getVertexCount();
-		setConnect(std::unique_ptr<long[]>(new long[nVertices]));
-		std::copy(other.m_connect.get(), other.m_connect.get() + nVertices, m_connect.get());
-	} else {
-		unsetConnect();
+		int connectSize = getInfo().nVertices;
+		std::copy(other.m_connect.get(), other.m_connect.get() + connectSize, m_connect.get());
 	}
 }
 
