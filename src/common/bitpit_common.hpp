@@ -31,6 +31,7 @@
  *     @{
  *     @defgroup common::utils::string String utils
  *     @defgroup common::utils::binary Binary utils
+  *     @defgroup common::utils::hashing Hashing utils
  *     @}
  * @defgroup macro Macros
  * @}
@@ -47,6 +48,7 @@
 #include "compiler.hpp"
 #include "utils.hpp"
 #include "utils.tpp"
+#include "hashingUtils.hpp"
 #include "stringUtils.hpp"
 
 #endif

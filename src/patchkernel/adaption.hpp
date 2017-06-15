@@ -94,7 +94,7 @@ namespace adaption
 	private:
 		typedef std::tuple<int, int, int> infoData_t;
 
-		std::unordered_map<infoData_t, std::size_t, hashing::hash<infoData_t>> m_cache;
+		std::unordered_map<infoData_t, std::size_t, utils::hashing::hash<infoData_t>> m_cache;
 		std::unordered_set<int> m_cachedTypes;
 		std::vector<Info> m_collection;
 	};
