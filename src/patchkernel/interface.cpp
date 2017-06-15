@@ -66,24 +66,23 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 }
 
 /*!
-        Copy-constructor
+	Copy-constructor
 */
 Interface::Interface(const Interface &other)
-	: Element(other)
+	: Element(other),
+	  m_owner(other.m_owner), m_ownerFace(other.m_ownerFace),
+	  m_neigh(other.m_neigh), m_neighFace(other.m_neighFace)
 {
-	*this = other;
+
 }
 
 /*!
 	Copy assignament operator
 */
-Interface & Interface::operator=(const Interface& other)
+Interface & Interface::operator=(const Interface &other)
 {
-	Element::operator=(other);
-	m_owner     = other.m_owner;
-	m_ownerFace = other.m_ownerFace;
-	m_neigh     = other.m_neigh;
-	m_neighFace = other.m_neighFace;
+	Interface tmp(other);
+	swap(tmp);
 
 	return (*this);
 }
