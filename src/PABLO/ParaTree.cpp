@@ -2374,6 +2374,81 @@ namespace bitpit {
 
     };
 
+    /** Finds all the neighbours of a node
+    * \param[in] oct Pointer to current octant
+    * \param[in] inode Index of node passed through for neighbours finding
+    * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+    * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
+    */
+    void
+    ParaTree::findAllNodeNeighbours(Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const {
+
+        u32vector neigh_edge, neigh_face;
+        bvector isghost_edge, isghost_face;
+
+        // Get vertex neighbours
+        int dim = getDim();
+        m_octree.findNodeNeighbours(oct, false, 0, inode, neighbours, isghost, false);
+
+        int octantLevel = getLevel(oct);
+        if (dim == 3) {
+            for (int edge : m_global.m_nodeEdge[inode]) {
+                findNeighbours(oct, edge, 2, neigh_edge, isghost_edge);
+                for (int i = 0; i < neigh_edge.size(); ++i) {
+                    const Octant* neighOctant;
+                    if (isghost_edge[i]==0) {
+                        neighOctant = &m_octree.m_octants[neigh_edge[i]];
+                    }
+                    else {
+                        neighOctant = &m_octree.m_ghosts[neigh_edge[i]];
+                    }
+                    int neighOctantLevel = getLevel(neighOctant);
+                    if (neighOctantLevel <= octantLevel) {
+                        neighbours.push_back(neigh_edge[i]);
+                        isghost.push_back(isghost_edge[i]);
+                    } else if (isNodeOnOctant(oct, inode, neighOctant)) {
+                        neighbours.push_back(neigh_edge[i]);
+                        isghost.push_back(isghost_edge[i]);
+                    }
+                }
+            }
+        }
+        for (int j = 0; j < dim; ++j) {
+            int face = m_global.m_nodeFace[inode][j];
+            findNeighbours(oct, face, 1, neigh_face, isghost_face);
+            for (int i = 0; i < neigh_face.size(); ++i) {
+                const Octant* neighOctant;
+                if (isghost_face[i]==0) {
+                    neighOctant = &m_octree.m_octants[neigh_face[i]];
+                }
+                else {
+                    neighOctant = &m_octree.m_ghosts[neigh_face[i]];
+                }
+                int neighOctantLevel = getLevel(neighOctant);
+                if (neighOctantLevel <= octantLevel) {
+                    neighbours.push_back(neigh_face[i]);
+                    isghost.push_back(isghost_face[i]);
+                } else if (isNodeOnOctant(oct, inode, neighOctant)) {
+                    neighbours.push_back(neigh_face[i]);
+                    isghost.push_back(isghost_face[i]);
+                }
+            }
+        }
+    };
+
+    /** Finds all the neighbours of a node
+    * \param[in] idx Index of current octant
+    * \param[in] inode Index of node passed through for neighbours finding
+    * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+    * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
+    */
+    void
+    ParaTree::findAllNodeNeighbours(uint32_t idx, uint32_t inode, u32vector & neighbours, bvector & isghost) {
+
+        Octant* oct = getOctant(idx);
+        findAllNodeNeighbours(oct, inode, neighbours, isghost);
+    };
+
     /** Get the internal octant owner of an input point.
      * \param[in] point Coordinates of target point.
      * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).

@@ -398,6 +398,8 @@ namespace bitpit {
         void 		findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const ;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
+        void 		findAllNodeNeighbours(uint32_t idx, uint32_t inode, u32vector & neighbours, bvector & isghost);
+        void 		findAllNodeNeighbours(Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const;
         Octant* 	getPointOwner(dvector point);
         Octant* 	getPointOwner(dvector point, bool & isghost);
         uint32_t 	getPointOwnerIdx(dvector point) const;

@@ -103,6 +103,19 @@ Global::getFacenode(uint8_t facenode_[6][4]) const {
 			facenode_[i][j] = m_faceNode[i][j];
 		}
 	}
+};
+
+/*! Get the connectivity node-edge.
+ * \param[out] nodeEdge_ nodeedge[i][0:2] = local indices of edges
+ * sharing the i-th node of an octant.
+ */
+void
+Global::getNodeedge(uint8_t nodeedge_[8][3]) const {
+    for (int i=0; i<8; i++){
+        for (int j=0; j<3; j++){
+            nodeedge_[i][j] = m_nodeEdge[i][j];
+        }
+    }
 }
 
 /*!Get the bytes occupation of the global index of an octant.
@@ -314,6 +327,31 @@ Global::initialize(uint8_t dim) {
 	m_nodeFace[7][0] = 1;
 	m_nodeFace[7][1] = 3;
 	m_nodeFace[7][2] = 5;
+
+	m_nodeEdge[0][0] = 0;
+	m_nodeEdge[0][1] = 2;
+	m_nodeEdge[0][2] = 4;
+	m_nodeEdge[1][0] = 1;
+	m_nodeEdge[1][1] = 2;
+	m_nodeEdge[1][2] = 5;
+	m_nodeEdge[2][0] = 0;
+	m_nodeEdge[2][1] = 3;
+	m_nodeEdge[2][2] = 6;
+	m_nodeEdge[3][0] = 1;
+	m_nodeEdge[3][1] = 3;
+	m_nodeEdge[3][2] = 7;
+	m_nodeEdge[4][0] = 4;
+	m_nodeEdge[4][1] = 8;
+	m_nodeEdge[4][2] = 10;
+	m_nodeEdge[5][0] = 5;
+	m_nodeEdge[5][1] = 9;
+	m_nodeEdge[5][2] = 10;
+	m_nodeEdge[6][0] = 6;
+	m_nodeEdge[6][1] = 8;
+	m_nodeEdge[6][2] = 11;
+	m_nodeEdge[7][0] = 7;
+	m_nodeEdge[7][1] = 9;
+	m_nodeEdge[7][2] = 11;
 
 	m_edgeNode[0][0] = 0;
 	m_edgeNode[0][1] = 2;

@@ -77,6 +77,7 @@ private:
 	uint8_t  m_boolBytes;			/**< Bytes occupation of a boolean */
 	uint8_t  m_oppFace[6];			/**< oppface[i] = Index of the face of an octant neighbour through the i-th face of the current octant */
 	uint8_t  m_nodeFace[8][3];		/**< nodeface[i][0:1] = local indices of faces sharing the i-th node of an octant */
+	uint8_t  m_nodeEdge[8][3];		/**< nodeedge[i][0:1] = local indices of edges sharing the i-th node of an octant */
 	uint8_t  m_faceNode[6][4];		/**< facenode[i][0:1] = local indices of nodes of the i-th face of an octant */
 	uint8_t  m_edgeFace[12][2];		/**< edgeface[i][0:1] = local indices of faces sharing the i-th edge of an octant */
 	uint8_t  m_edgeNode[12][2];		/**< edgeNode[i][0:1] = local indices of nodes of the i-th edge of an octant */
@@ -101,6 +102,7 @@ private:
 	void 		getEdgenode(uint8_t edgeNode[12][2]) const;
 	void 		getEdgenode(uint8_t edge, uint8_t edgeNode[2]) const;
 	void 		getFacenode(uint8_t facenode[6][4]) const;
+	void 		getNodeedge(uint8_t nodeegde_[8][3]) const;
 	uint8_t 	getGlobalIndexBytes() const;
 	uint8_t 	getLevelBytes() const;
 	uint8_t 	getMarkerBytes() const;
