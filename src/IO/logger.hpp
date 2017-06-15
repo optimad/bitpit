@@ -28,7 +28,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "utils.hpp"
+#include "bitpit_common.hpp"
+
 #include "FileHandler.hpp"
 
 #define BITPIT_DEBUG_COUT(...) BITPIT_OVERLOAD_CALL(BITPIT_DEBUG_COUT, __VA_ARGS__)
