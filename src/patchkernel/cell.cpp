@@ -111,21 +111,20 @@ Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeig
         Copy-constructor
 */
 Cell::Cell(const Cell &other)
-	: Element(other)
+	: Element(other),
+	  m_interior(other.m_interior), m_pid(other.m_pid),
+	  m_interfaces(other.m_interfaces), m_adjacencies(other.m_adjacencies)
 {
-	*this = other;
+
 }
 
 /*!
-	Copy assignament operator
+	Copy assignment operator
 */
-Cell & Cell::operator=(const Cell& other)
+Cell & Cell::operator=(const Cell &other)
 {
-	Element::operator=(other);
-	m_interior    = other.m_interior;
-	m_pid         = other.m_pid;
-	m_interfaces  = other.m_interfaces;
-	m_adjacencies = other.m_adjacencies;
+	Cell tmp(other);
+	swap(tmp);
 
 	return (*this);
 }
