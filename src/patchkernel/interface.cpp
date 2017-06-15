@@ -30,7 +30,6 @@
 
 #include "cell.hpp"
 #include "interface.hpp"
-#include "utils.hpp"
 
 namespace bitpit {
 
