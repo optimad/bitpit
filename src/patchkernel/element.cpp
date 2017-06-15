@@ -1021,8 +1021,9 @@ const long Element::NULL_ID = std::numeric_limits<long>::min();
 	Default constructor.
 */
 Element::Element()
-	: m_type(ElementInfo::UNDEFINED)
 {
+	_initialize(ElementInfo::UNDEFINED);
+
 	setId(NULL_ID);
 }
 
