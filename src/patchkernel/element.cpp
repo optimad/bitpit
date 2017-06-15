@@ -1041,18 +1041,8 @@ Element::Element(const long &id, ElementInfo::Type type)
 	Copy constructor
 */
 Element::Element(const Element &other)
+	: m_id(other.m_id), m_type(other.m_type)
 {
-	*this = other;
-}
-
-/*!
-	Copy-assignament operator.
-*/
-Element & Element::operator=(const Element& other)
-{
-	m_id   = other.m_id;
-	m_type = other.m_type;
-
 	if (other.m_connect) {
 		int nVertices = other.getVertexCount();
 		setConnect(std::unique_ptr<long[]>(new long[nVertices]));
@@ -1060,8 +1050,17 @@ Element & Element::operator=(const Element& other)
 	} else {
 		unsetConnect();
 	}
+}
 
-	return (*this);
+/*!
+	Copy-assignament operator.
+*/
+Element & Element::operator=(const Element &other)
+{
+	Element tmp(other);
+	swap(tmp);
+
+	return *this;
 }
 
 /**
