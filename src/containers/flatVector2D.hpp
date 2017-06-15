@@ -89,7 +89,7 @@ public:
 
     void destroy();
     void reserve(int nVectors, int nItems = 0);
-    void swap(FlatVector2D &other);
+    void swap(FlatVector2D &other) noexcept;
     bool operator==(const FlatVector2D& rhs) const;
     void fill(T &value);
     bool empty() const;

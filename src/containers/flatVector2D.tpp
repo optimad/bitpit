@@ -324,7 +324,7 @@ void FlatVector2D<T>::reserve(int nVectors, int nItems)
     \param other is another container of the same type
 */
 template <class T>
-void FlatVector2D<T>::swap(FlatVector2D &other)
+void FlatVector2D<T>::swap(FlatVector2D &other) noexcept
 {
     m_index.swap(other.m_index);
     m_v.swap(other.m_v);
