@@ -60,6 +60,8 @@ public:
 	Vertex& operator = (const Vertex &other) = default;
 	Vertex& operator=(Vertex &&other) = default;
 
+	void swap(Vertex &other) noexcept;
+
 	bool operator==(const Vertex &other);
 
 	double & operator[](int coord_id);

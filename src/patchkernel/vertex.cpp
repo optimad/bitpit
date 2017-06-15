@@ -106,6 +106,19 @@ Vertex::Vertex(const long &id, const std::array<double, 3> &coords)
 	setCoords(coords);
 }
 
+/**
+* Exchanges the content of the vertex by the content the specified other
+* vertex.
+*
+* \param other is another vertex whose content is swapped with that of this
+* vertex.
+*/
+void Vertex::swap(Vertex &other) noexcept
+{
+	std::swap(other.m_id, m_id);
+	std::swap(other.m_coords, m_coords);
+}
+
 /*!
 	Comparison operator
 
