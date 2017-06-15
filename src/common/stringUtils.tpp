@@ -22,20 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-// ================================================================================== //
-//                               STRING OPERATORS                                     //
-//                                                                                    //
-// Basic operators for string.                                                        //
-// ================================================================================== //
-// INFO                                                                               //
-// ================================================================================== //
-// Author     : Alessandro Alaia                                                      //
-// Date       : Jul 16, 2013                                                          //
-// Version    : v1.0                                                                  //
-//                                                                                    //
-// All rights reserved.                                                               //
-// ================================================================================== //
-
 #ifndef __BITPIT_STRING_UTILS_TPP__
 #define __BITPIT_STRING_UTILS_TPP__
 
@@ -45,372 +31,245 @@ namespace utils {
 
 namespace string {
 
-// Trimming operators =============================================================== //
-
-// ---------------------------------------------------------------------------------- //
 /*!
-    Left-trim operator for std::string.
-    Remove left trailing spaces from string. For instance, if the input string is
-    "  test_string  ", on output this function returns "test_string  "
-
-    \param[in] s input string
-
-    \result reference to input string
+* Left-trim operator for std::string.
+*
+* Remove left trailing spaces from string. For instance, if the input string is
+* "  test_string  ", on output this function returns "test_string  "
+*
+* \param[in] s is the input string
+* \result A reference to the input string.
 */
- inline std::string &ltrim(
-    std::string &s
-) {
+inline std::string & ltrim(std::string &s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), not1(std::ptr_fun<int, int>(std::isspace))));
 
-// ================================================================================== //
-// VARIABLES DECLARATION                                                              //
-// ================================================================================== //
-
-// Local variables
-// none
-
-// Counters
-// none
-
-// ================================================================================== //
-// TRIM STRING                                                                        //
-// ================================================================================== //
-s.erase(s.begin(), std::find_if(s.begin(), s.end(), not1(std::ptr_fun<int, int>(std::isspace))));
-
-return(s); };
-
-// ---------------------------------------------------------------------------------- //
-/*!
-    Right-trim operator for std::string.
-    Remove right blank spaces from string. For instance, if the input string is
-    "  test_string  ", on output this function returns "  test_string"
-
-    \param[in] s input string
-
-    \result reference to input string
-*/
- inline std::string &rtrim(
-    std::string &s
-) {
-
-// ================================================================================== //
-// VARIABLES DECLARATION                                                              //
-// ================================================================================== //
-
-// Local variables
-// none
-
-// Counters
-// none
-
-// ================================================================================== //
-// TRIM STRING                                                                        //
-// ================================================================================== //
-s.erase(std::find_if(s.rbegin(), s.rend(), not1(std::ptr_fun<int, int>(isspace))).base(), s.end());
-
-return(s); };
-
-// ---------------------------------------------------------------------------------- //
-/*!
-    Trim operator for std::string.
-    Remove left/right blank spaces from string. For instance, if the input string is
-    "  test_string  ", on output this function returns "test_string"
-
-    \param[in] s input string
-
-    \result reference to input string
-*/
- inline std::string &trim(
-    std::string &s
-) {
-
-// ================================================================================== //
-// VARIABLES DECLARATION                                                              //
-// ================================================================================== //
-
-// Local variables
-// none
-
-// Counters
-// none
-
-// ================================================================================== //
-// TRIM STRING                                                                        //
-// ================================================================================== //
-return(ltrim(rtrim(s))); };
-
-// ---------------------------------------------------------------------------------- //
-/*!
-    String left-filler. Create a string composed of the input string left-filled
-    with a specified character. E.g.
-    given the input string s = "test", lfill(10, s, '_') will return
-    "______test".
-    
-    \param[in] nchar length of the final string
-    \param[in] s input string
-    \param[in] c char used as filler
-    
-*/
- inline std::string lfill(
-     const int &nchar,
-     std::string &s,
-     char         c
-) {
-
-// ================================================================================== //
-// VARIABLES DECLARATION                                                              //
-// ================================================================================== //
-
-// Local variables
-std::stringstream               ss;
-
-// Counters
-// none
-
-// ================================================================================== //
-// BUILD THE OUTPUT STRING                                                            //
-// ================================================================================== //
-ss << std::string(nchar - s.length(), c) << s;
-
-return(ss.str());
+    return s;
 }
 
-// ---------------------------------------------------------------------------------- //
 /*!
-    String right-filler. Create a string composed of the input string right-filled
-    with a specified character. E.g.
-    given the input string s = "test", rfill(10, s, '_') will return
-    "test______".
-    
-    \param[in] nchar length of the final string
-    \param[in] s input string
-    \param[in] c char used as filler
-    
+* Right-trim operator for std::string.
+* Remove right blank spaces from string. For instance, if the input string is
+* "  test_string  ", on output this function returns "  test_string"
+*
+* \param[in] s is the input string
+* \result A reference to the input string.
 */
- inline std::string rfill(
-     const int &nchar,
-     std::string &s,
-     char         c
-) {
+inline std::string &rtrim(std::string &s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), not1(std::ptr_fun<int, int>(isspace))).base(), s.end());
 
-// ================================================================================== //
-// VARIABLES DECLARATION                                                              //
-// ================================================================================== //
-
-// Local variables
-std::stringstream               ss;
-
-// Counters
-// none
-
-// ================================================================================== //
-// BUILD THE OUTPUT STRING                                                            //
-// ================================================================================== //
-ss << s << std::string(nchar - s.length(), c);
-
-return(ss.str());
+    return s;
 }
 
-// Padding operators ================================================================ //
-
-// ---------------------------------------------------------------------------------- //
 /*!
-    Given an integer, returns a string of length nchar, composed of the input number
-    and nchar - ndigits '0' characters (where ndigits is the number of digits of the input integer)
-    in the following format "000xxx".
-    If ndigits > nchar, the output string will contaiens ndigits characters storing the
-    digits of the input number.
-    For instance, if nchar = 4 and num = 3, this function returns the string "0003".
-    If nchar = 4, and num = 12345, this function returns "12345".
-
-    \param[in] nchar string length
-    \param[in] num input integer
-
-    \result returns a string storing the input number in the format 000xxx.
+* Trim operator for std::string.
+* Remove left/right blank spaces from string. For instance, if the input string is
+* "  test_string  ", on output this function returns "test_string"
+*
+* \param[in] s is the input string
+* \result A reference to the input string.
 */
- inline std::string zeroPadNumber(
-    int nchar,
-    int num
-) {
+inline std::string &trim(std::string &s)
+{
+    return ltrim(rtrim(s));
+}
 
-// ================================================================================== //
-// VARIABLES DECLARATION                                                              //
-// ================================================================================== //
-
-//  Local variables
-std::ostringstream          ss;
-
-// Counters
-// none
-
-// ================================================================================== //
-// PADDING                                                                            //
-// ================================================================================== //
-ss << std::setw(nchar) << std::setfill('0') << num;
-
-return (ss.str()); };
-
-// ---------------------------------------------------------------------------------- //
 /*!
-    Check whether a string contains the kwyword or not.
-
-    \param[in] line_ input string
-    \param[in] key_ search key
-    
-    \result boolean flag (true) if the keyword has been found, (false) otherwise.
+* String left-filler. Create a string composed of the input string left-filled
+* with a specified character. E.g.
+* given the input string s = "test", lfill(10, s, '_') will return
+* "______test".
+*
+* \param[in] nchars is the final length of the string
+* \param[in] s is the input string
+* \param[in] c is the char used as filler
 */
- inline bool keywordInString( std::string line_, std::string key_){
-  bool exist= ( line_.find( key_) != std::string::npos ) ;
-  return exist  ;
-};
+inline std::string lfill(const int &nchars, std::string &s, char c)
+{
+    std::stringstream ss;
+    ss << std::string(nchars - s.length(), c) << s;
 
-// ---------------------------------------------------------------------------------- //
+    return ss.str();
+}
+
 /*!
-    Convertes a string into fundamental data type.
-
-    If no data of type T can be extracted from the input string a 0 value,
-    will be stored in output_.
-    If multiple values can be extracted from the input string, only the first
-    value will be saved in output_.
-
-    \param[in] input_ input string
-    \param[in,out] output_ variable storing the value read from string.
+* String right-filler. Create a string composed of the input string right-filled
+* with a specified character. E.g.
+* given the input string s = "test", rfill(10, s, '_') will return
+* "test______".
+*
+* \param[in] nchars is the final length of the string
+* \param[in] s is the input string
+* \param[in] c is the char used as filler
 */
-template <class T>
-void  convertString( std::string input_, T &output_ ){
+inline std::string rfill(const int &nchars, std::string &s, char c)
+{
+    std::stringstream ss;
+    ss << s << std::string(nchars - s.length(), c);
 
-  std::vector<T>    temp_;
-  T            x_;
+    return ss.str();
+}
 
-  temp_.clear() ;
-
-  trim( input_ );
-  std::stringstream ss_( input_ );
-
-  while( ss_.good() ){
-    ss_ >> x_ ;
-    temp_.push_back(x_);
-  };
-
- 
-  if( temp_.size() == 0 ){
-    std::cout << " no useful information in string " << input_   << std::endl;
-    std::cout << " casting zero                   " <<  std::endl;
-
-    x_ = static_cast<T> (0) ; 
-  } 
-
-  else if( temp_.size() == 1){
-    x_ = temp_[0] ;
-  }
-
-  else if( temp_.size() > 1){
-    std::cout << " more than one element in string " << input_   << std::endl;
-    std::cout << " assigning first element             "  << std::endl;
-
-    x_ = temp_[0] ; 
-  };
-
-
-  output_ = x_ ;
-  return ;
-
-};
-
-// ---------------------------------------------------------------------------------- //
 /*!
-    Convertes a string into a vector of fundamental data type.
+* Given an integer, returns a string of length nchars, composed of the input number
+* and nchars - ndigits '0' characters (where ndigits is the number of digits of the input integer)
+* in the following format "000xxx".
+* If ndigits > nchars, the output string will contaiens ndigits characters storing the
+* digits of the input number.
+* For instance, if nchars = 4 and num = 3, this function returns the string "0003".
+* If nchars = 4, and num = 12345, this function returns "12345".
+*
+* \param[in] nchars is the final length of the string
+* \param[in] num is the input integer
+* \result A string storing the input number in the format 000xxx.
+*/
+inline std::string zeroPadNumber(int nchars, int num)
+{
+    std::ostringstream ss;
+    ss << std::setw(nchars) << std::setfill('0') << num;
 
-    If no data of type T can be extracted from the input string a void vector is returned.
-    Values extracted from string are pushed at the end of the vector.
+    return ss.str();
+}
 
-    \param[in] input_ input string
-    \param[in,out] output_ vector storing the value extracted from string.
+/*!
+* Check whether a string contains the kwyword or not.
+*
+* \param[in] line is the input string
+* \param[in] key is the search key
+* \result Return true if the keyword has been found, false otherwise.
+*/
+inline bool keywordInString(std::string line, std::string key)
+{
+    return (line.find(key) != std::string::npos);
+}
+
+/*!
+* Convertes a string into fundamental data type.
+*
+* If no data of type T can be extracted from the input string a 0 value,
+* will be stored in output.
+* If multiple values can be extracted from the input string, only the first
+* value will be saved in output.
+*
+* \param[in] input is the input string
+* \param[out] output on output contains the value extracted from the input
+* string
 */
 template <class T>
-void  convertString( std::string input_, std::vector<T> &output_){
+void convertString(std::string input, T &output)
+{
+    trim(input);
+    std::stringstream ss(input);
 
-  std::vector<T>    temp_;
-  T            x_;
+    T x;
+    std::vector<T> tmp;
+    while (ss.good()) {
+        ss >> x;
+        tmp.push_back(x);
+    }
 
-  temp_.clear() ;
+    if (tmp.size() == 0) {
+        std::cout << " no useful information in string " << input   << std::endl;
+        std::cout << " casting zero                   " <<  std::endl;
 
-  trim( input_ );
-  std::stringstream ss_( input_ );
+        x = static_cast<T> (0);
+    } else if (tmp.size() == 1) {
+        x = tmp[0];
+    } else if(tmp.size() > 1) {
+        std::cout << " more than one element in string " << input   << std::endl;
+        std::cout << " assigning first element             "  << std::endl;
 
-  while( ss_.good() ){
-    ss_ >> x_ ;
-    temp_.push_back(x_);
-  };
+        x = tmp[0];
+    }
 
- 
-  if( temp_.size() == 0 ){
-    std::cout << " no useful information in string " << input_   << std::endl;
-    std::cout << " returning void vector          " <<  std::endl;
-  } ;
+    output = x;
+}
 
-  output_= temp_ ;
-  return ;
-};
-
-// ---------------------------------------------------------------------------------- //
 /*!
-    Convertes a string into a arrayof fundamental data type.
+* Convertes a string into a vector of fundamental data type.
+*
+* If no data of type T can be extracted from the input string a void vector is returned.
+* Values extracted from string are pushed at the end of the vector.
+*
+* \param[in] input is the input string
+* \param[out] output on output contains the values extracted from the input
+* string
+*/
+template <class T>
+void convertString(std::string input, std::vector<T> &output)
+{
+    output.clear();
 
-    If no data of type T can be extracted from the input string a void array with null
-    elements is returned.
-    If the number of elements which can be extracted from the input string is larger
-    than the array size, only the first n elements are saved in the array.
+    trim(input);
+    std::stringstream ss(input);
 
-    \param[in] input_ input string
-    \param[in,out] output_ array storing the value extracted from string.
+    T x;
+    std::vector<T> tmp;
+    while (ss.good()) {
+        ss >> x;
+        tmp.push_back(x);
+    }
+
+    if (tmp.size() == 0) {
+        std::cout << " no useful information in string " << input   << std::endl;
+        std::cout << " returning void vector          " <<  std::endl;
+    };
+
+    output = tmp;
+}
+
+/*!
+* Convertes a string into a arrayof fundamental data type.
+*
+* If no data of type T can be extracted from the input string a void array with null
+* elements is returned.
+* If the number of elements which can be extracted from the input string is larger
+* than the array size, only the first n elements are saved in the array.
+*
+* \param[in] input is the input string
+* \param[out] output on output contains the values extracted from the input
+* string
 */
 template <class T, size_t n>
-void  convertString( std::string input_, std::array<T,n> &output_) {
+void convertString(std::string input, std::array<T,n> &output)
+{
+    T x;
+    std::vector<T> tmp;
 
-  std::vector<T>    temp_;
-  T            x_;
+    tmp.clear();
 
-  temp_.clear() ;
+    trim(input);
+    std::stringstream ss(input);
 
-  trim( input_ );
-  std::stringstream ss_( input_ );
+    while (ss.good()) {
+        ss >> x;
+        tmp.push_back(x);
+    }
 
-  while( ss_.good() ){
-    ss_ >> x_ ;
-    temp_.push_back(x_);
-  };
+    if (tmp.size() < n) {
+        std::cout << " not enough useful information in string " << input   << std::endl;
+        std::cout << " casting zero into missing elements      " <<  std::endl;
 
+        x = static_cast<T>(0);
+        output.fill(x);
 
-  if( temp_.size() < n ){
-    std::cout << " not enough useful information in string " << input_   << std::endl;
-    std::cout << " casting zero into missing elements      " <<  std::endl;
+        for(size_t i=0; i<tmp.size(); i++) {
+            output[i] = tmp[i];
+        }
+    } else if (tmp.size() == n) {
+        for(size_t i = 0; i < n; i++) {
+            output[i] = tmp[i];
+        }
+    } else if (tmp.size() > n) {
+        std::cout << " more than " << n << " elements in string " << input   << std::endl;
+        std::cout << " assigning first element " << n << " elements "   << std::endl;
 
-    x_ = static_cast<T> (0) ;
-    output_.fill( x_ ) ;
-
-    for(size_t i=0; i<temp_.size(); i++){
-      output_[i] = temp_[i] ;
-    };
-  }
-
-  else if( temp_.size() == n){
-    for(size_t i=0; i<n; i++){
-      output_[i] = temp_[i] ;
-    };
-  }
-
-  else if( temp_.size() > n){
-    std::cout << " more than " << n << " elements in string " << input_   << std::endl;
-    std::cout << " assigning first element " << n << " elements "   << std::endl;
-
-    for(size_t i=0; i<n; i++){
-      output_[i] = temp_[i] ;
-    };
-  };
-
-
-  return ;
-};
+        for(size_t i = 0; i < n; i++) {
+            output[i] = tmp[i];
+        }
+    }
+}
 
 }
 

@@ -46,65 +46,29 @@ namespace utils {
 */
 namespace string {
 
-// Trimming operators --------------------------------------------------------------- //
-inline std::string &ltrim(                                                     // STRING LEFT TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-inline std::string &rtrim(                                                     // STRING RIGHT TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-inline std::string &trim(                                                      // STRING TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
+// Trimming operators
+inline std::string &ltrim(std::string &s);
+inline std::string &rtrim(std::string &s);
+inline std::string &trim(std::string &s);
 
-// Padding operators ---------------------------------------------------------------- //
-inline std::string lfill(                                                     // Left filler for input string
-        const int                               &,                            // (input) Final string length
-        std::string                             &,                            // (input) input string
-        char                                                                  // (input) char used as filler
-);
-inline std::string rfill(                                                     // Right filler for input string
-        const int                               &,                            // (input) Final string length
-        std::string                             &,                            // (input) input string
-        char                                                                  // (input) char used as filler
-);
-inline std::string zeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
-        int                                      ,                                    // (input) number of char in std::string
-        int                                                                           // (input) integer to be padded
-        );
+// Padding operators
+inline std::string lfill(const int &nchars, std::string &s, char c);
+inline std::string rfill(const int &nchars, std::string &s, char c);
+inline std::string zeroPadNumber(int nchars, int num);
 
-// Input stream operator ------------------------------------------------------------ //
-bool getAfterKeyword(                                                               // EXTRACT FIELD AFTER SPECIFIC KEYWORD
-        std::string                              ,                                    // (input) std::string
-        std::string                              ,                                    // (input) keyword
-        char                                     ,                                    // (input) field delimiter
-        std::string                             &                                     // (input/output) field found
-        );
+// Keyword search
+bool getAfterKeyword(std::string line, std::string key, char del, std::string &result);
+inline bool keywordInString(std::string line, std::string key);
 
-// returns true if key_ is present in line ------------------------------------------ //
-inline bool keywordInString(                                                 // SEARCH KEYWORD IN STRING
-        std::string                              ,                                    // (input) input string            
-        std::string                                                                   // (input) keyword
-        ) ;
-
-// converts a string to fundamental data types and vectors or arrays of them -------- //
+// Conversion
 template <class T>
-void convertString(                                                                  // EXTRACT SCALAR FROM STRING
-        std::string                              ,                                    // (input) input string
-        T                                       &                                     // (input/output) scalar
-        );
+void convertString(std::string input, T &output);
 
 template <class T>
-void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO VECTOR
-        std::string                              ,                                    // (input) string
-        std::vector<T>                          &                                     // (input/output) vector used to store string
-        );
+void convertString(std::string input, std::vector<T> &output);
 
 template <class T, size_t n>
-void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO ARRAY
-        std::string                              ,                                    // (input) string
-        std::array<T,n>                         &                                     // (input/output) array used to store data
-        );
+void convertString(std::string input, std::array<T,n> &output);
 
 }
 

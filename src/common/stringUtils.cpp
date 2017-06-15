@@ -24,7 +24,7 @@
 
 #include "stringUtils.hpp"
 
-using namespace std;      
+using namespace std;
 
 namespace bitpit {
 
@@ -32,62 +32,52 @@ namespace utils {
 
 namespace string {
 
-// ---------------------------------------------------------------------------------- //
 /*!
-    Given an input string containing several fields separated by a delimiter,
-    returns the field after the specified search key.
-    For instance, if the input string is str = "field_1 ; field_2 ; field_3"
-    getAfterKeyword(str, "field_1, ';', output) returns
-    output = "field_2"
-
-    \param[in] line_ input string
-    \param[in] key_ search key
-    \param[in] del_ delimiter char
-    \param[in,out] result_ on output stores the field after the search key
-
-    \result boolean flag, (true) if search key has been found, (false) otherwise
+* Given an input string containing several fields separated by a delimiter,
+* returns the field after the specified search key.
+* For instance, if the input string is str = "field_1 ; field_2 ; field_3"
+* getAfterKeyword(str, "field_1, ';', output) returns
+* output = "field_2"
+*
+* \param[in] line input string
+* \param[in] key search key
+* \param[in] del delimiter char
+* \param[in,out] result on output stores the field after the search key
+*
+* \result boolean flag, (true) if search key has been found, (false) otherwise
 */
-bool getAfterKeyword( std::string line_, std::string key_, char del_, std::string& result_){
+bool getAfterKeyword(std::string line, std::string key, char del, std::string &result)
+{
+    result.clear();
 
-  std::size_t c1, c2, pos ;
+    std::size_t  pos = line.find(key);
+    if (pos == std::string::npos) {
+        return false;
+    }
 
-  std::string::iterator it;
-
-  result_.clear() ;
-
-  pos = line_.find( key_);
-
-  if( pos == std::string::npos ){
-      return false;
-  }
-
-  else{
-
-    it= line_.begin();
+    std::string::iterator it = line.begin();
     advance(it, pos);
-    advance(it, key_.size() ) ;
+    advance(it, key.size());
 
-    while( (*it) != del_){
-      it++;
-    };
-    c1= it- line_.begin() +1;
+    while ((*it) != del) {
+        it++;
+    }
+    std::size_t c1= it- line.begin() + 1;
 
     it++;
 
-    while( (*it) != del_){
-      it++;
-    };
-    c2= it- line_.begin()-1;
+    while ((*it) != del) {
+        it++;
+    }
+    std::size_t c2 = it - line.begin() - 1;
 
-    pos= c2 -c1 +1;
+    pos= c2 - c1 + 1;
 
-    result_= line_.substr( c1, pos) ;
-    trim( result_ ) ;
+    result = line.substr(c1, pos);
+    trim(result);
 
     return true;
-  };
-
-};
+}
 
 }
 
