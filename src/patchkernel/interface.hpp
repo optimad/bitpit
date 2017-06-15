@@ -45,6 +45,8 @@ public:
 	Interface& operator = (const Interface &other);
 	Interface& operator=(Interface&& other) = default;
 
+	void swap(Interface &other) noexcept;
+
 	bool isBorder() const;
 
 	std::array<std::array<double, 3>, 3> evalRotationFromCartesian();

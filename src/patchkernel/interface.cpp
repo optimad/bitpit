@@ -88,6 +88,23 @@ Interface & Interface::operator=(const Interface& other)
 	return (*this);
 }
 
+/**
+* Exchanges the content of the interface by the content the specified other
+* interface.
+*
+* \param other is another interface whose content is swapped with that of this
+* interface
+*/
+void Interface::swap(Interface &other) noexcept
+{
+	Element::swap(other);
+
+	std::swap(other.m_owner, m_owner);
+	std::swap(other.m_ownerFace, m_ownerFace);
+	std::swap(other.m_neigh, m_neigh);
+	std::swap(other.m_neighFace, m_neighFace);
+}
+
 /*!
 	Evaluates the rotation matrix from the Cartesian coordinate system
 	to a coordinate system build starting from the specified versor.
