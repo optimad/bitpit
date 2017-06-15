@@ -30,12 +30,12 @@
 #	include <mpi.h>
 #endif
 
+#include "bitpit_common.hpp"
 #include "bitpit_SA.hpp"
 
 #include "patch_info.hpp"
 #include "patch_kernel.hpp"
 #include "patch_manager.hpp"
-#include "utils.hpp"
 
 namespace bitpit {
 
