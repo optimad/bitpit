@@ -92,44 +92,44 @@ void extractWithoutReplacement(                                               //
 );
 
 /*!
-	Functor to compare two double precision floating point numbers.
+    Functor to compare two double precision floating point numbers.
 
-	See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 */
 struct DoubleFloatingEqual
 {
-	/*!
-		Compares the specified double precision floating point numbers
-		and returns true if the numbers match.
+    /*!
+        Compares the specified double precision floating point numbers
+        and returns true if the numbers match.
 
-		\param x if the first value to compare
-		\param y if the second value to compare
-		\result Returns true if the numbers match, false otherwise.
-	*/
-	bool operator()(const double &x, const double &y) const
-	{
-		const double ABS_MAX_DIFF = 1e-14;
-		const double REL_MAX_DIFF = DBL_EPSILON;
+        \param x if the first value to compare
+        \param y if the second value to compare
+        \result Returns true if the numbers match, false otherwise.
+    */
+    bool operator()(const double &x, const double &y) const
+    {
+        const double ABS_MAX_DIFF = 1e-14;
+        const double REL_MAX_DIFF = DBL_EPSILON;
 
-		// Check if the numbers are really close (needed when comparing
-		// numbers near zero).
-		double diff = std::abs(x - y);
-		if (diff <= ABS_MAX_DIFF) {
-			return true;
-		}
+        // Check if the numbers are really close (needed when comparing
+        // numbers near zero).
+        double diff = std::abs(x - y);
+        if (diff <= ABS_MAX_DIFF) {
+            return true;
+        }
 
-		// Check if the numbers have the same sign
-		if ((x < 0 && y > 0) || (x > 0 && y < 0)) {
-			return false;
-		}
+        // Check if the numbers have the same sign
+        if ((x < 0 && y > 0) || (x > 0 && y < 0)) {
+            return false;
+        }
 
-		// Compare using a relative difference
-		double abs_x   = std::abs(x);
-		double abs_y   = std::abs(y);
-		double largest = (abs_y > abs_x) ? abs_y : abs_x;
+        // Compare using a relative difference
+        double abs_x   = std::abs(x);
+        double abs_y   = std::abs(y);
+        double largest = (abs_y > abs_x) ? abs_y : abs_x;
 
-		return (diff <= largest * REL_MAX_DIFF);
-	}
+        return (diff <= largest * REL_MAX_DIFF);
+    }
 };
 
 }

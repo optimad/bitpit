@@ -36,74 +36,74 @@ namespace bitpit {
 namespace utils {
 
 /*!
-	Adds an id to an ordered list of unique ids.
-
-	\tparam T is the type of elements contained in the list
-	\tparam Comparator is the type of the binary function used for the
-	comparison of the elements
-
-	\param value is the value to be added
-	\param list is the ordered list
-	\param comparator is a binary function that accepts two arguments (the first
-	of the type pointed by ForwardIterator, and the second, always val), and
-	returns a value convertible to bool. The value returned indicates whether
-	the first argument is considered to go before the second. The function
-	shall not modify any of its arguments. This can either be a function
-	pointer or a function object.
-	\result Returns true is the id was added to the list, false otherwise.
+* Adds an id to an ordered list of unique ids.
+*
+* \tparam T is the type of elements contained in the list
+* \tparam Comparator is the type of the binary function used for the
+* comparison of the elements
+*
+* \param value is the value to be added
+* \param list is the ordered list
+* \param comparator is a binary function that accepts two arguments (the first
+* of the type pointed by ForwardIterator, and the second, always val), and
+* returns a value convertible to bool. The value returned indicates whether
+* the first argument is considered to go before the second. The function
+* shall not modify any of its arguments. This can either be a function
+* pointer or a function object.
+* \result Returns true is the id was added to the list, false otherwise.
 */
 template <typename T, typename Comparator>
 bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator comparator)
 {
-	if (list.empty()) {
-		list.push_back(value);
-		return true;
-	}
+    if (list.empty()) {
+        list.push_back(value);
+        return true;
+    }
 
-	typename std::vector<T>::iterator itr = std::lower_bound(list.begin(), list.end(), value, comparator);
-	if (itr == list.end() || *itr != value) {
-		list.insert(itr, value);
-		return true;
-	} else {
-		return false;
-	}
+    typename std::vector<T>::iterator itr = std::lower_bound(list.begin(), list.end(), value, comparator);
+    if (itr == list.end() || *itr != value) {
+        list.insert(itr, value);
+        return true;
+    } else {
+        return false;
+    }
 };
 
 /*!
-	Search a value in an ordered list of unique ids.
-
-	\tparam T is the type of elements contained in the list
-	\tparam Comparator is the type of the binary function used for the
-	comparison of the elements
-
-	\param value is the value to be searched for
-	\param list is the ordered list
-	\param comparator is a binary function that accepts two arguments (the first
-	of the type pointed by ForwardIterator, and the second, always val), and
-	returns a value convertible to bool. The value returned indicates whether
-	the first argument is considered to go before the second. The function
-	shall not modify any of its arguments. This can either be a function
-	pointer or a function object.
-	\result Returns true is the value is in the list, false otherwise.
+* Search a value in an ordered list of unique ids.
+*
+* \tparam T is the type of elements contained in the list
+* \tparam Comparator is the type of the binary function used for the
+* comparison of the elements
+*
+* \param value is the value to be searched for
+* \param list is the ordered list
+* \param comparator is a binary function that accepts two arguments (the first
+* of the type pointed by ForwardIterator, and the second, always val), and
+* returns a value convertible to bool. The value returned indicates whether
+* the first argument is considered to go before the second. The function
+* shall not modify any of its arguments. This can either be a function
+* pointer or a function object.
+* \result Returns true is the value is in the list, false otherwise.
 */
 template <typename T, typename Comparator>
 typename std::vector<T>::const_iterator findInOrderedVector(const T &value, const std::vector<T> &list, Comparator comparator)
 {
-	typename std::vector<T>::const_iterator itr = std::lower_bound(list.begin(), list.end(), value, comparator);
-	if (itr == list.end() || *itr != value) {
-		return list.end();
-	}
+    typename std::vector<T>::const_iterator itr = std::lower_bound(list.begin(), list.end(), value, comparator);
+    if (itr == list.end() || *itr != value) {
+        return list.end();
+    }
 
-	return itr;
+    return itr;
 };
 
 /*!
-    Order a vector according to a reordering vector.
-
-    \tparam order_t is the type of data that needs to be reordered
-    \param order is a reference to the reording vector
-    \param v is a reference to the vector that will be reordered
-    \param size is the size of the vector that will be reordered
+* Order a vector according to a reordering vector.
+*
+* \tparam order_t is the type of data that needs to be reordered
+* \param order is a reference to the reording vector
+* \param v is a reference to the vector that will be reordered
+* \param size is the size of the vector that will be reordered
 */
 template<typename T>
 void reorderVector(std::vector<size_t>& order, std::vector<T>& v, const size_t &size)
@@ -123,85 +123,56 @@ void reorderVector(std::vector<size_t>& order, std::vector<T>& v, const size_t &
 }
 
 /*!
-    Remove a element with specified value from input std::vector.
-
-    \param[in,out] vec   inptut vector set. On output stores the input vector
-    deprived by the element with specified value.
-    \param[in]     value value of element to be removed from the input vector.
+* Remove a element with specified value from input std::vector.
+*
+* \param[in,out] vec is the inptut vector set. On output stores the input
+* vector deprived by the element with specified value
+* \param[in] value is the value of element to be removed from the input vector
 */
 template<class T>
-void eraseValue(
-    std::vector<T>              &vec,
-    const T                     &value
-) {
-
-// ========================================================================== //
-// VARIABLES DECLARATION                                                      //
-// ========================================================================== //
-
-// Local variables
-// none
-
-// Counters
-typename std::vector<T>::iterator             it;
-
-// ========================================================================== //
-// PERFORM SET DIFFERENCE                                                     //
-// ========================================================================== //
-it = find(vec.begin(), vec.end(), value);
-if (it != vec.end()) {
-    vec.erase(it);
+void eraseValue(std::vector<T> &vec, const T &value)
+{
+    typename std::vector<T>::iterator it = find(vec.begin(), vec.end(), value);
+    if (it != vec.end()) {
+        vec.erase(it);
+    }
 }
 
-return; }
-
 /*!
-    Compute intersection between two std::vectors.
-
-    \param[in] vec_1 1st argument for intersection.
-    \param[in] vec_2 2nd argument for intersection.
-
-    \result on output returns a vector storing the common elements of the input
-    vectors.
+* Compute intersection between two std::vectors.
+*
+* \param[in] vec_1 is the 1st argument for intersection.
+* \param[in] vec_2 is the 2nd argument for intersection.
+* \result Returns a vector storing the common elements of the input vectors.
 */
 template<class T>
-std::vector<T> intersectionVector(
-    const std::vector<T>        &vec_1,
-    const std::vector<T>        &vec_2
-) {
+std::vector<T> intersectionVector(const std::vector<T> &vec_1, const std::vector<T> &vec_2)
+{
+    std::vector<T> intersect;
+    std::map<T, bool> storage;
 
-// ========================================================================== //
-// VARIABLES DECLARATION                                                      //
-// ========================================================================== //
+    intersect.reserve(std::min(vec_1.size(), vec_2.size()));
+    for (auto cit_ = vec_2.begin(); cit_ != vec_2.end(); ++cit_) {
+        storage[*cit_] = true;
+    }
 
-// Local variables
-std::map<T, bool>                               storage;
-std::vector<T>                                  intersect;
+    for (auto it_ = vec_1.begin(); it_ != vec_1.end(); ++it_) {
+        if (storage[*it_]) {
+            intersect.push_back(*it_);
+        }
+    }
 
-// Counters
-typename std::vector<T>::const_iterator         it_, cit_;
-
-// ========================================================================== //
-// PERFORM SET INTERSECTION                                                   //
-// ========================================================================== //
-intersect.reserve( std::min( vec_1.size(), vec_2.size() ) );
-for (cit_ = vec_2.begin(); cit_ != vec_2.end(); ++cit_) {
-    storage[*cit_] = true;
-} //next cit_
-for (it_ = vec_1.begin(); it_ != vec_1.end(); ++it_) {
-    if (storage[*it_]) { intersect.push_back(*it_); }
+    return intersect;
 }
 
-return(intersect); }
-
 /*!
-    Check if a type is iterable
- */
+* Check if a type is iterable
+*/
 template <typename T>
 auto is_iterable_impl(int) -> decltype (
     std::begin(std::declval<T&>()) != std::end(std::declval<T&>()),   // begin/end and operator !=
-    ++std::declval<decltype(std::begin(std::declval<T&>()))&>(), // operator ++
-    *std::begin(std::declval<T&>()),                             // operator*
+    ++std::declval<decltype(std::begin(std::declval<T&>()))&>(),      // operator ++
+    *std::begin(std::declval<T&>()),                                  // operator*
     std::true_type{}
 );
 

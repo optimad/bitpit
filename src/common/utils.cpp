@@ -41,75 +41,39 @@ template std::vector<long>::const_iterator findInOrderedVector<>(const long&, co
 template std::vector<unsigned long>::const_iterator findInOrderedVector<>(const unsigned long&, const std::vector<unsigned long>&, std::less<unsigned long>);
 
 /*!
-    Extract n integers in the interval [0,m] without replacement.
-    if n = m+1, returns a random permutation of {0, 1, 2, ..., m}
-
-    \param[in] n number of extraction
-    \param[in] m upper bound of extraction interval
-    \param[in,out] list vector with size n, storing extracted values
+* Extract n integers in the interval [0,m] without replacement.
+* if n = m+1, returns a random permutation of {0, 1, 2, ..., m}
+*
+* \param[in] n is the number of extraction
+* \param[in] m is the upper bound of extraction interval
+* \param[in,out] list is a vector with size n, storing extracted values
 */
-void extractWithoutReplacement(
-    int                 n,
-    int                 m,
-    std::vector<int>    &list
-) {
+void extractWithoutReplacement(int n, int m, std::vector<int> &list)
+{
+    // Initialize variables
+    if (n > m+1) {
+        std::cout << "error" << std::endl;
+        return;
+    }
 
-// ========================================================================== //
-// void Extract_wo_Repl(                                                      //
-//     int                 n,                                                 //
-//     int                 m,                                                 //
-//     vector<int>        &list)                                              //
-//                                                                            //
-// Extract n integers in the interval [0, m] without replacement.             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - n           : int, number of samples to be extracted                     //
-// - m           : int, upper bound of extraction interval                    //
-// - list        : ivector1D, list of extracted values                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
+    // Resize input variables
+    list.resize(n);
 
-// ========================================================================== //
-// VARIABLES DECLARATION                                                      //
-// ========================================================================== //
+    // Initialize extraction set
+    int N = m;
+    std::vector<int> set(m+1, -1);
+    for (int i = 0; i < m+1; i++) {
+        set[i] = i;
+    }
 
-// Local variables
-int                 N;
-std::vector<int>    set(m+1, -1);
-
-// Counters
-int                 i, index;
-
-// ========================================================================== //
-// INITIALIZE VARIABLES                                                       //
-// ========================================================================== //
-if (n > m+1) { std::cout << "error" << std::endl; return; }
-
-// Resize input variables
-list.resize(n);
-
-// Initialize extraction set
-N = m;
-for (i = 0; i < m+1; i++) {
-    set[i] = i;
-} //next i
-
-// ========================================================================== //
-// EXTRACT INTEGERS WITHOUT REPLACEMENT                                       //
-// ========================================================================== //
-for (i = 0; i < n; i++) {
-    index = (int) round(((double) N) * ((double) rand())/((double) RAND_MAX));
-    list[i] = set[index];
-    set[index] = set[N];
-    N--;
-} //next i
-
-
-return; }
+    // Extract integers without replacement
+    for (int i = 0; i < n; i++) {
+        int index = (int) round(((double) N) * ((double) rand())/((double) RAND_MAX));
+        list[i] = set[index];
+        set[index] = set[N];
+        N--;
+    }
+}
 
 }
 
