@@ -38,9 +38,16 @@
 */
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element &element)
 {
-	buffer >> element.m_type;
-	buffer >> element.m_id;
-	element._initialize(element.m_type);
+	// Initialize the element
+	bitpit::ElementInfo::Type type;
+	buffer >> type;
+
+	long id;
+	buffer >> id;
+
+	element._initialize(id, type);
+
+	// Set the connectivity
 	int nVertices = element.getVertexCount();
 	for (int i = 0; i < nVertices; ++i) {
 	    buffer >> element.m_connect[i];
@@ -1022,28 +1029,26 @@ const long Element::NULL_ID = std::numeric_limits<long>::min();
 */
 Element::Element()
 {
-	_initialize(ElementInfo::UNDEFINED);
-
-	setId(NULL_ID);
+	_initialize(NULL_ID, ElementInfo::UNDEFINED);
 }
 
 /*!
 	Creates a new element.
-*/
-Element::Element(const long &id, ElementInfo::Type type)
-{
-	_initialize(type);
 
-	setId(id);
+	\param id the id of the element
+	\param type is the type of the element
+*/
+Element::Element(long id, ElementInfo::Type type)
+{
+	_initialize(id, type);
 }
 
 /*!
 	Copy constructor
 */
 Element::Element(const Element &other)
-	: m_id(other.m_id)
 {
-	_initialize(other.m_type);
+	_initialize(other.m_id, other.m_type);
 
 	if (other.m_connect) {
 		int connectSize = getInfo().nVertices;
@@ -1079,20 +1084,24 @@ void Element::swap(Element &other) noexcept
 /*!
 	Initializes the data structures of the element.
 
+	\param id the id of the element
 	\param type the type of the element
 */
-void Element::initialize(ElementInfo::Type type)
+void Element::initialize(long id, ElementInfo::Type type)
 {
-	_initialize(type);
+	_initialize(id, type);
 }
 
 /*!
 	Internal function to initialize the data structures of the element.
 
+	\param id the id of the element
 	\param type the type of the element
 */
-void Element::_initialize(ElementInfo::Type type)
+void Element::_initialize(long id, ElementInfo::Type type)
 {
+	setId(id);
+
 	setType(type);
 
 	if (getType() != ElementInfo::UNDEFINED) {

@@ -148,14 +148,15 @@ void Cell::swap(Cell &other) noexcept
 /*!
 	Initializes the data structures of the cell.
 
+	\param id is the id of the element
 	\param type is the type of the element
 	\param interior if true the cell is flagged as interior
 	\param storeNeighbourhood if true the structures to store adjacencies
 	and interfaces will be initialized
 */
-void Cell::initialize(ElementInfo::Type type, bool interior, bool storeNeighbourhood)
+void Cell::initialize(long id, ElementInfo::Type type, bool interior, bool storeNeighbourhood)
 {
-	Element::initialize(type);
+	Element::initialize(id, type);
 
 	_initialize(interior, true, storeNeighbourhood);
 }

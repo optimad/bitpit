@@ -1445,10 +1445,9 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 			m_firstGhostId = id;
 		}
 	}
-	iterator->setId(id);
 
 	// Initialize the cell
-	iterator->initialize(type, interior, true);
+	iterator->initialize(id, type, interior, true);
 
 	return iterator;
 }
@@ -2449,10 +2448,9 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
-    iterator->setId(id);
 
 	// Initialize the interface
-	iterator->initialize(type);
+	iterator->initialize(id, type);
 
 	return iterator;
 }

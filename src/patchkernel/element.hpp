@@ -145,7 +145,7 @@ public:
 	};
 
 	Element();
-	Element(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	Element(long id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 
 	Element(const Element &other);
 	Element(Element&& other) = default;
@@ -154,7 +154,7 @@ public:
 
 	void swap(Element &other) noexcept;
 
-	void initialize(ElementInfo::Type type);
+	void initialize(long id, ElementInfo::Type type);
 
 	const ElementInfo & getInfo() const;
 
@@ -196,7 +196,7 @@ private:
 
 	std::unique_ptr<long[]> m_connect;
 
-	void _initialize(ElementInfo::Type type);
+	void _initialize(long id, ElementInfo::Type type);
 
 };
 
