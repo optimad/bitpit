@@ -62,6 +62,8 @@ public:
 
 	void swap(Vertex &other) noexcept;
 
+	void initialize(long id, const std::array<double, 3> &coords);
+
 	bool operator==(const Vertex &other);
 
 	double & operator[](int coord_id);
@@ -89,6 +91,8 @@ public:
 private:
 	long m_id;
 	std::array<double, 3> m_coords;
+
+	void _initialize(long id, const std::array<double, 3> &coords);
 
 };
 

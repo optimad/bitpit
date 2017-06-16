@@ -742,8 +742,9 @@ PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3
 
 	// Add the vertex
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
-    iterator->setId(id);
-	iterator->setCoords(coords);
+
+	// Initialize the vertex
+	iterator->initialize(id, coords);
 
 	// Update the bounding box
 	addPointToBoundingBox(iterator->getCoords());
