@@ -47,6 +47,8 @@ public:
 
 	void swap(Interface &other) noexcept;
 
+	void initialize(long id, ElementInfo::Type type);
+
 	bool isBorder() const;
 
 	std::array<std::array<double, 3>, 3> evalRotationFromCartesian();
@@ -77,6 +79,8 @@ private:
 
 	long m_neigh;
 	int m_neighFace;
+
+	void _initialize(long owner, long ownerFace, long neigh, long neighFace);
 
 };
 

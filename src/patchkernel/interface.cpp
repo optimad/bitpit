@@ -46,33 +46,27 @@ namespace bitpit {
 	Default constructor.
 */
 Interface::Interface()
-	: Element(),
-	  m_owner(NULL_ID), m_ownerFace(-1),
-	  m_neigh(NULL_ID), m_neighFace(-1)
+	: Element()
 {
-
+	_initialize(NULL_ID, -1, NULL_ID, -1);
 }
 
 /*!
 	Creates a new interface.
 */
 Interface::Interface(const long &id, ElementInfo::Type type)
-	: Element(id, type),
-	  m_owner(NULL_ID), m_ownerFace(-1),
-	  m_neigh(NULL_ID), m_neighFace(-1)
+	: Element(id, type)
 {
-
+	_initialize(NULL_ID, -1, NULL_ID, -1);
 }
 
 /*!
 	Copy-constructor
 */
 Interface::Interface(const Interface &other)
-	: Element(other),
-	  m_owner(other.m_owner), m_ownerFace(other.m_ownerFace),
-	  m_neigh(other.m_neigh), m_neighFace(other.m_neighFace)
+	: Element(other)
 {
-
+	_initialize(NULL_ID, -1, NULL_ID, -1);
 }
 
 /*!
@@ -101,6 +95,36 @@ void Interface::swap(Interface &other) noexcept
 	std::swap(other.m_ownerFace, m_ownerFace);
 	std::swap(other.m_neigh, m_neigh);
 	std::swap(other.m_neighFace, m_neighFace);
+}
+
+/*!
+	Initializes the data structures of the interface.
+
+	\param id is the id of the element
+	\param type is the type of the element
+*/
+void Interface::initialize(long id, ElementInfo::Type type)
+{
+	Element::initialize(id, type);
+
+	_initialize(NULL_ID, -1, NULL_ID, -1);
+}
+
+/*!
+	Internal function to initialize the data structures of the interface.
+
+	\param owner is the cell on the "owner" side of the interface
+	\param ownerFace is the owner face on the interface
+	\param neigh is the cell on the "neighbour" side of the interface
+	\param neighFace is the neighbour face on the interface
+*/
+void Interface::_initialize(long owner, long ownerFace, long neigh, long neighFace)
+{
+	m_owner     = owner;
+	m_ownerFace = ownerFace;
+
+	m_neigh     = neigh;
+	m_neighFace = neighFace;
 }
 
 /*!
