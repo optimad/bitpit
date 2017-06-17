@@ -187,28 +187,48 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
 {
     int nVectors = sizes.size();
 
-    // Destroy the container
+    int nItems = 0;
+    for (int i = 0; i < nVectors; ++i) {
+        nItems += sizes[i];
+    }
+
+    // Check if the container need reallocation
+    //
+    // If the current number of items is different from the number of items
+    // the container should contain after the initialization, a reallocation
+    // is needed.
+    bool reallocateIndex  = (nVectors != size());
+    bool reallocateValues = (nItems != getItemCount());
+
+    // Destroy current data structures
     //
     // Index and the storage data will probabily be stored in memory
     // regions contigous to each other. To reduce memory fragmentation
     // it's better to deallocate the container before updating its
     // data structures.
-    destroy();
+    if (reallocateIndex || reallocateValues) {
+        destroy(reallocateIndex, reallocateValues);
+    }
 
     // Initialize the indexes
-    //
-    // Clear the vector before the resize to reduce memory fragmentation
-    m_index.resize(nVectors + 1);
-    m_index.shrink_to_fit();
+    if (reallocateIndex) {
+        m_index.resize(nVectors + 1);
+        m_index.shrink_to_fit();
+    }
+
     for (int i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + sizes[i];
     }
 
     // Initialize the storage
-    //
-    // Clear the vector before the resize to reduce memory fragmentation
-    m_v.assign(m_index[nVectors], value);
-    m_v.shrink_to_fit();
+    if (reallocateValues) {
+        m_v.assign(m_index[nVectors], value);
+        m_v.shrink_to_fit();
+    } else {
+        for (int k = 0; k < nItems; ++k) {
+            m_v[k] = value;
+        }
+    }
 }
 
 /*!
@@ -222,24 +242,45 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
 template <class T>
 void FlatVector2D<T>::initialize(const int &nVectors, const int &size, const T &value)
 {
+    int nItems = nVectors * size;
+
+    // Check if the container need reallocation
+    //
+    // If the current number of items is different from the number of items
+    // the container should contain after the initialization, a reallocation
+    // is needed.
+    bool reallocateIndex  = (nVectors != this->size());
+    bool reallocateValues = (nItems != getItemCount());
+
     // Destroy the container
     //
     // Index and the storage data will probabily be stored in memory
     // regions contigous to each other. To reduce memory fragmentation
     // it's better to deallocate the container before updating its
     // data structures.
-    destroy();
+    if (reallocateIndex || reallocateValues) {
+        destroy(reallocateIndex, reallocateValues);
+    }
 
     // Initialize the indexes
-    m_index.resize(nVectors + 1);
-    m_index.shrink_to_fit();
+    if (reallocateIndex) {
+        m_index.resize(nVectors + 1);
+        m_index.shrink_to_fit();
+    }
+
     for (int i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + size;
     }
 
     // Initialize the storage
-    m_v.assign(m_index[nVectors], value);
-    m_v.shrink_to_fit();
+    if (reallocateValues) {
+        m_v.assign(m_index[nVectors], value);
+        m_v.shrink_to_fit();
+    } else {
+        for (int k = 0; k < nItems; ++k) {
+            m_v[k] = value;
+        }
+    }
 }
 
 /*!
@@ -253,24 +294,44 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
 {
     int nVectors = vector2D.size();
 
-    // Destroy the container
+    int nItems = 0;
+    for (int i = 0; i < nVectors; ++i) {
+        nItems += vector2D[i].size();
+    }
+
+    // Check if the container need reallocation
+    //
+    // If the current number of items is different from the number of items
+    // the container should contain after the initialization, a reallocation
+    // is needed.
+    bool reallocateIndex  = (nVectors != size());
+    bool reallocateValues = (nItems != getItemCount());
+
+    // Destroy current data structures
     //
     // Index and the storage data will probabily be stored in memory
     // regions contigous to each other. To reduce memory fragmentation
     // it's better to deallocate the container before updating its
     // data structures.
-    destroy();
+    if (reallocateIndex || reallocateValues) {
+        destroy(reallocateIndex, reallocateValues);
+    }
 
     // Initialize the indexes
-    m_index.resize(nVectors + 1);
-    m_index.shrink_to_fit();
+    if (reallocateIndex) {
+        m_index.resize(nVectors + 1);
+        m_index.shrink_to_fit();
+    }
+
     for (int i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + vector2D[i].size();
     }
 
     // Initialize the storage
-    m_v.resize(m_index[nVectors]);
-    m_v.shrink_to_fit();
+    if (reallocateValues) {
+        m_v.resize(m_index[nVectors]);
+        m_v.shrink_to_fit();
+    }
 
     int k = 0;
     for (int i = 0; i < nVectors; ++i) {
@@ -286,16 +347,34 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
 
     After calling this function the container will be non-functional
     until it is re-initialized.
-
 */
 template <class T>
 void FlatVector2D<T>::destroy()
 {
-    m_index.clear();
-    m_index.shrink_to_fit();
+    destroy(true, true);
+}
 
-    m_v.clear();
-    m_v.shrink_to_fit();
+/*!
+    Destroy the container.
+
+    After calling this function the container will be non-functional
+    until it is re-initialized.
+
+    \param destroyIndex if true the index data structure will be destoryed
+    \param destroyValues if true the values data structure will be destoryed
+*/
+template <class T>
+void FlatVector2D<T>::destroy(bool destroyIndex, bool destroyValues)
+{
+    if (destroyIndex) {
+        m_index.clear();
+        m_index.shrink_to_fit();
+    }
+
+    if (destroyValues) {
+        m_v.clear();
+        m_v.shrink_to_fit();
+    }
 }
 
 /*!

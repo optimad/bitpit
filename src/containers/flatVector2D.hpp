@@ -147,6 +147,8 @@ private:
     bool isIndexValid(const int &i) const;
     bool isIndexValid(const int &i, const int &j) const;
 
+    void destroy(bool destroyIndex, bool destroyValues);
+
 };
 
 }
