@@ -2445,10 +2445,7 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 		return interfaceEnd();
 	}
 
-	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
-
-	// Initialize the interface
-	iterator->initialize(id, type);
+	PiercedVector<Interface>::iterator iterator = m_interfaces.emreclaim(id, id, type);
 
 	return iterator;
 }
