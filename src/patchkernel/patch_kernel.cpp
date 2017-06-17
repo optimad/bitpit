@@ -741,10 +741,7 @@ PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3
 	}
 
 	// Add the vertex
-	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
-
-	// Initialize the vertex
-	iterator->initialize(id, coords);
+	PiercedVector<Vertex>::iterator iterator = m_vertices.emreclaim(id, id, coords);
 
 	// Update the bounding box
 	addPointToBoundingBox(iterator->getCoords());
@@ -1415,9 +1412,9 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 		// If there are ghosts cells, the internal cell should be inserted
 		// before the first ghost cell.
 		if (m_firstGhostId < 0) {
-			iterator = m_cells.reclaim(id);
+			iterator = m_cells.emreclaim(id, id, type, interior, true);
 		} else {
-			iterator = m_cells.reclaimBefore(m_firstGhostId, id);
+			iterator = m_cells.emreclaimBefore(m_firstGhostId, id, id, type, interior, true);
 		}
 		m_nInternals++;
 
