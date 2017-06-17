@@ -797,7 +797,7 @@ void FlatVector2D<T>::merge()
 template <class T>
 int FlatVector2D<T>::getItemCount() const
 {
-    return m_index[size()];
+    return m_v.size();
 }
 
 /*!
