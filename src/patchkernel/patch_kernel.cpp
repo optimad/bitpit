@@ -1433,9 +1433,9 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 		// If there are internal cells, the ghost cell should be inserted
 		// after the last internal cell.
 		if (m_lastInternalId < 0) {
-			iterator = m_cells.reclaim(id);
+			iterator = m_cells.emreclaim(id, id, type, interior, true);
 		} else {
-			iterator = m_cells.reclaimAfter(m_lastInternalId, id);
+			iterator = m_cells.emreclaimAfter(m_lastInternalId, id, id, type, interior, true);
 		}
 		m_nGhosts++;
 
@@ -1446,9 +1446,6 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 			m_firstGhostId = id;
 		}
 	}
-
-	// Initialize the cell
-	iterator->initialize(id, type, interior, true);
 
 	return iterator;
 }
