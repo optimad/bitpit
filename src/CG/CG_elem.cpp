@@ -2122,7 +2122,7 @@ void computeAABBSimplex(std::vector<array3D> const &VS, array3D &P0, array3D &P1
 }
 
 /*!
- * computes the union of two axis aligned bounding boxes
+ * computes the bounding box of the union of two axis aligned bounding boxes
  * @param[in] A0 min point of first bounding box
  * @param[in] A1 max point of first bounding box
  * @param[in] B0 min point of second bounding box
@@ -2141,7 +2141,7 @@ void unionAABB( array3D const &A0, array3D const &A1, array3D const &B0, array3D
 }
 
 /*!
- * computes the union of several axis aligned bounding boxes
+ * computes the bounding box of the union of several axis aligned bounding boxes
  * @param[in] A0 min points of bounding boxes
  * @param[in] A1 max points of bounding boxes
  * @param[out] C0 min point of union bounding box
@@ -2164,13 +2164,13 @@ void unionAABB(std::vector<array3D> const &A0, std::vector<array3D> const &A1, a
 }
 
 /*!
- * computes the intersection of two axis aligned bounding boxes
+ * computes the bounding box of the intersection of two axis aligned bounding boxes
  * @param[in] A0 min point of first bounding box
  * @param[in] A1 max point of first bounding box
  * @param[in] B0 min point of second bounding box
  * @param[in] B1 max point of second bounding box
- * @param[out] C0 min point of union bounding box
- * @param[out] C1 max point of union bounding box
+ * @param[out] C0 min point of intersection of boxes
+ * @param[out] C1 max point of intersection of boxes
  */
 void intersectionAABB(array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D  &C1)
 {
@@ -2179,13 +2179,13 @@ void intersectionAABB(array3D const &A0, array3D const &A1, array3D const &B0, a
 }
 
 /*!
- * computes the relative complement two axis aligned bounding boxes
+ * computes the bounding box of the relative complement two axis aligned bounding boxes
  * @param[in] A0 min point of first bounding box
  * @param[in] A1 max point of first bounding box
  * @param[in] B0 min point of second bounding box
  * @param[in] B1 max point of second bounding box
- * @param[out] C0 min point of union bounding box
- * @param[out] C1 max point of union bounding box
+ * @param[out] C0 min point of relative complement
+ * @param[out] C1 max point of relative complement
  */
 void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D  &C1)
 {
