@@ -366,44 +366,44 @@ class VTK{
 
 };
 
-class VTKUnstructuredGridStreamer :public VTKBaseStreamer{
-
-    private:
-        VTKElementType          m_homogeneousType ;         /**< the type of cells */
-        long                    m_cells ;                   /**< numer of cells */
-    
-        void                    flushData( std::fstream &, std::string, VTKFormat) ;
-    
-    public:
-        void                    setGrid( VTKElementType, long) ;
-};
-
 class VTKUnstructuredGrid : public VTK {
 
     protected:
+        class HomogeneousInfoStreamer :public VTKBaseStreamer{
+
+            private:
+                VTKElementType          m_type ;                    /**< the type of cells */
+                long                    m_nCells ;                  /**< numer of cells */
+
+                void                    flushData( std::fstream &, std::string, VTKFormat) ;
+
+            public:
+                void                    setElementType( VTKElementType) ;
+                void                    setCellCount( long) ;
+        };
+
         uint64_t                m_nConnectivityEntries ;            /**< size of the connectivity information */
-        VTKElementType          m_homogeneousType ;         /**< type of element mesh is made of */
-        VTKUnstructuredGridStreamer     m_unstructuredStreamer;     /**< streamer if unstructured grid is of homogenous type */
+        VTKElementType          m_elementType ;                     /**< type of element mesh is made of */
+        HomogeneousInfoStreamer m_homogeneousInfoStreamer;          /**< streamer if unstructured grid is of homogenous type */
 
     public:
     ~VTKUnstructuredGrid();
 
-    VTKUnstructuredGrid();
-    VTKUnstructuredGrid( std::string , std::string ) ;
-    VTKUnstructuredGrid( std::string , std::string, VTKElementType ) ;
+    VTKUnstructuredGrid( VTKElementType elementType = VTKElementType::UNDEFINED );
+    VTKUnstructuredGrid( std::string , std::string , VTKElementType elementType = VTKElementType::UNDEFINED ) ;
 
     protected:
         void                    writeCollection() ;  
 
         uint64_t                readConnectivityEntries( ) ;
 
+        void                    setElementType( VTKElementType ) ;
+
     public:
         void                    readMetaInformation() ;
         void                    writeMetaInformation() ;
 
-        void                    setElementType( VTKElementType ) ;
-        void                    setDimensions( uint64_t , uint64_t , uint64_t nconn_=0 ) ;
-        void                    setDimensions( uint64_t , uint64_t , VTKElementType ) ;
+        void                    setDimensions( uint64_t , uint64_t , uint64_t nconn = 0 ) ;
 
         template<class T>
         void                    setGeomData( VTKUnstructuredField, std::vector<T> & ) ;
