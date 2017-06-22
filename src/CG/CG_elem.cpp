@@ -240,7 +240,7 @@ int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
  * @param[in] lambda barycentric coordinates
  * @param[out] reconstructed point
  */
-array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, std::array<double,2> &lambda)
+array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, std::array<double,2> const &lambda)
 {
     assert( validBarycentric(&lambda[0],2) );
 
@@ -254,7 +254,7 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
  * @param[in] lambda barycentric coordinates
  * @param[out] reconstructed point
  */
-array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, double *lambda)
+array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, double const *lambda)
 {
     assert( validBarycentric(&lambda[0],2) );
 
@@ -284,7 +284,7 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
  * @param[in] lambda barycentric coordinates
  * @param[out] reconstructed point
  */
-array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda)
+array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, double const *lambda)
 {
     assert( validBarycentric(&lambda[0],3) );
 
