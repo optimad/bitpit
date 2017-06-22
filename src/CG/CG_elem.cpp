@@ -232,6 +232,47 @@ int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
 
     return count;
 }
+/*!
+ * Computes Generalized Barycentric Coordinates of a point in convex polygons or polyedra.
+ * No check is performed to check convexity.
+ * Formula [6] of \ref{igeometry.caltech.edu/pubs/MHBD02.pdf} is implemented.
+ * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
+ * @param[in] p point
+ * @param[in] vertex vertex coordinates of polygon
+ * @parm[out] lambda generalized barycentric coordinates of p
+ */
+void computeGeneralizedBarycentric( array3D const &p, std::vector<array3D> const &vertex, std::vector<double> &lambda)
+{
+    int vertexCount=vertex.size();
+
+    lambda.resize(vertexCount);
+
+    std::vector<double> area(vertexCount);
+    for( int i=0; i<vertexCount; ++i){
+        int next = (i +1) %vertexCount;
+        area[i] = areaTriangle( vertex[i], vertex[next], p);
+    }
+
+    double sumWeight(0);
+
+    for( int i=0; i<vertexCount; ++i){
+        int prev = (i +vertexCount -1) %vertexCount;
+        int next = (i +1) %vertexCount;
+        lambda[i]  = areaTriangle(vertex[prev], vertex[i], vertex[next]);
+
+        for( int j=0; j<vertexCount; ++j){
+            if( j==prev || j==i){
+                continue;
+            }
+
+            lambda[i] *= area[j];
+        }
+
+        sumWeight += lambda[i];
+    }
+
+    lambda /= sumWeight;
+}
 
 /*!
  * Reconstructs a point from barycentric coordinates of a segment

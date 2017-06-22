@@ -90,6 +90,8 @@ int                 convertBarycentricToFlagTriangle( std::array<double,3> const
 int                 convertBarycentricToFlagSegment( std::array<double,2> const &);
 int                 convertBarycentricToFlagSimplex( std::vector<double> const &);
 
+void                computeGeneralizedBarycentric( array3D const &, std::vector<array3D> const &, std::vector<double> &);
+
 array3D             reconstructPointFromBarycentricSegment( array3D const &, array3D const &, std::array<double,2> const & ); 
 array3D             reconstructPointFromBarycentricSegment( array3D const &, array3D const &, double const * ); 
 array3D             reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, std::array<double,3> const & ); 
