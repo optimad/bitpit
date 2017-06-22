@@ -2349,6 +2349,17 @@ array3D rotateVector( array3D const &vector, array3D const &axis, double theta){
     return rotated; 
 }
 
+/*!
+ * computes the area of an triangle
+ * @param[in] a first vertex coordinates
+ * @param[in] b second vertex coordinates
+ * @param[in] c third vertex coordinates
+ */
+double areaTriangle( array3D const &a, array3D const &b, array3D const &c)
+{
+    return 0.5 *norm2(crossProduct(b-a,c-a));
+}
+
 }
 
 }
