@@ -2953,6 +2953,21 @@ std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
 }
 
 /*!
+	Updates the patch.
+
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the update.
+*/
+std::vector<adaption::Info> PatchKernel::_updateAdaption(bool trackAdaption)
+{
+	BITPIT_UNUSED(trackAdaption);
+
+	assert(false && "The patch needs to implement _updateAdaption");
+
+	return std::vector<adaption::Info>();
+}
+
+/*!
 	Marks a cell for refinement.
 
 	Default implementation is a no-op function.

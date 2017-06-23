@@ -457,9 +457,8 @@ protected:
 	void setSpawnStatus(SpawnStatus status);
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
 
-	virtual std::vector<adaption::Info> _updateAdaption(bool trackAdaption) = 0;
-
 	void setAdaptionStatus(AdaptionStatus status);
+	virtual std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 	virtual bool _markCellForRefinement(const long &id);
 	virtual bool _markCellForCoarsening(const long &id);
 	virtual bool _enableCellBalancing(const long &id, bool enabled);

@@ -624,26 +624,6 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 }
 
 /*!
-	Updates the patch.
-
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the update.
-*/
-std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
-{
-	log::cout() << ">> Updating cartesian mesh\n";
-
-	// Adaption info
-	std::vector<adaption::Info> adaptionData;
-	if (trackAdaption) {
-
-	}
-
-	// Done
-	return adaptionData;
-}
-
-/*!
 	Creates the vertices of the patch.
 */
 void VolCartesian::addVertices()
