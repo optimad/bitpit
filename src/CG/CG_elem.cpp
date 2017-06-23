@@ -206,25 +206,24 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
 int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
 {
 
-    int N = lambda.size();
-    assert( validBarycentric(&lambda[0],N) );
+    int N(lambda.size());
+    int count(0);
+    int firstPositive(N);
 
-    int count = 0;
-    std::array<int,3> positives = {{0,0,0}};
+    assert( validBarycentric(&lambda[0],N) );
 
     for( int i=0; i<N; ++i){
         if ( lambda[i] > 0.) {
-            positives[count] = i;
+            firstPositive = std::min( firstPositive, i);
             ++count;
         }
     }
 
     if( count == 1){
-        count = positives[0] +1;
+        count = firstPositive +1;
 
     } else if (count==2) {
-        int vertex0 = positives[0] +1;
-        count = -(vertex0+1);
+        count = -(firstPositive+1);
 
     } else {
         count = 0;
