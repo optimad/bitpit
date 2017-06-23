@@ -435,9 +435,11 @@ protected:
 	void restoreInterfaces(std::istream &stream);
 
 	virtual const std::vector<adaption::Info> _updateAdaption(bool trackAdaption, bool squeezeStorage) = 0;
-	virtual bool _markCellForRefinement(const long &id) = 0;
-	virtual bool _markCellForCoarsening(const long &id) = 0;
-	virtual bool _enableCellBalancing(const long &id, bool enabled) = 0;
+
+	virtual bool _markCellForRefinement(const long &id);
+	virtual bool _markCellForCoarsening(const long &id);
+	virtual bool _enableCellBalancing(const long &id, bool enabled);
+
 	virtual void _setTol(double tolerance);
 	virtual void _resetTol();
 

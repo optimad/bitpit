@@ -127,9 +127,6 @@ public:
 
 protected:
 	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption, bool squeezeStorage);
-	bool _markCellForRefinement(const long &id);
-	bool _markCellForCoarsening(const long &id);
-	bool _enableCellBalancing(const long &id, bool enabled);
 
 	int _getDumpVersion() const;
 	void _dump(std::ostream &stream);

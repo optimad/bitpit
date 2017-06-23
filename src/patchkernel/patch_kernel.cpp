@@ -2807,6 +2807,52 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 }
 
 /*!
+	Marks a cell for refinement.
+
+	Default implementation is a no-op function.
+
+	\param id the cell to be refined
+	\result Returns true if the marker was properly set, false otherwise.
+*/
+bool PatchKernel::_markCellForRefinement(const long &id)
+{
+	BITPIT_UNUSED(id);
+
+	return false;
+}
+
+/*!
+	Marks a cell for coarsening.
+
+	Default implementation is a no-op function.
+
+	\param id the cell to be refined
+	\result Returns true if the marker was properly set, false otherwise.
+*/
+bool PatchKernel::_markCellForCoarsening(const long &id)
+{
+	BITPIT_UNUSED(id);
+
+	return false;
+}
+
+/*!
+	Enables cell balancing.
+
+	Default implementation is a no-op function.
+
+	\param id the cell to be refined
+	\result Returns true if the falg was properly set, false otherwise.
+*/
+bool PatchKernel::_enableCellBalancing(const long &id, bool enabled)
+{
+	BITPIT_UNUSED(id);
+	BITPIT_UNUSED(enabled);
+
+	return false;
+}
+
+/*!
 	Sorts internal vertex storage in ascending id order.
 */
 bool PatchKernel::sortVertices()

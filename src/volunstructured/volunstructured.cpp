@@ -147,53 +147,6 @@ const std::vector<adaption::Info> VolUnstructured::_updateAdaption(bool trackAda
 }
 
 /*!
-	Marks a cell for refinement.
-
-	This is a void function since mesh refinement is not implemented
-	for SurfTri patches.
-
-	\param id is the id of the cell that needs to be refined
-*/
-bool VolUnstructured::_markCellForRefinement(const long &id)
-{
-	BITPIT_UNUSED(id);
-
-	return false;
-}
-
-/*!
-	Marks a cell for coarsening.
-
-	This is a void function since mesh refinement is not implemented
-	for SurfTri patches.
-
-	\param id the cell to be refined
-*/
-bool VolUnstructured::_markCellForCoarsening(const long &id)
-{
-	BITPIT_UNUSED(id);
-
-	return false;
-}
-
-/*!
-	Enables cell balancing.
-
-	This is a void function since mesh refinement is not implemented
-	for SurfTri patches.
-
-	\param id is the id of the cell
-	\param enabled defines if enable the balancing for the specified cell
-*/
-bool VolUnstructured::_enableCellBalancing(const long &id, bool enabled)
-{
-	BITPIT_UNUSED(id);
-	BITPIT_UNUSED(enabled);
-
-	return false;
-}
-
-/*!
  *  Get the version associated to the binary dumps.
  *
  *  \result The version associated to the binary dumps.
