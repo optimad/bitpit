@@ -434,7 +434,7 @@ protected:
 	void dumpInterfaces(std::ostream &stream);
 	void restoreInterfaces(std::istream &stream);
 
-	virtual const std::vector<adaption::Info> _updateAdaption(bool trackAdaption, bool squeezeStorage) = 0;
+	virtual const std::vector<adaption::Info> _updateAdaption(bool trackAdaption) = 0;
 
 	virtual bool _markCellForRefinement(const long &id);
 	virtual bool _markCellForCoarsening(const long &id);
@@ -459,7 +459,7 @@ protected:
 	void addPointToBoundingBox(const std::array<double, 3> &point);
 	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 #if BITPIT_ENABLE_MPI==1
-	virtual const std::vector<adaption::Info> _balancePartition(bool trackChanges, bool squeezeStorage);
+	virtual const std::vector<adaption::Info> _balancePartition(bool trackChanges);
 
 	void setPartitioned(bool partitioned);
 
@@ -525,6 +525,9 @@ private:
 #endif
 
 	void initialize();
+
+	void beginAlteration();
+	void endAlteration(bool squeezeStorage = false);
 
 	void buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
 

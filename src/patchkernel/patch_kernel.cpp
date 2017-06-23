@@ -215,15 +215,46 @@ const std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption
 		return adaptionInfo;
 	}
 
-	adaptionInfo = _updateAdaption(trackAdaption, squeezeStorage);
+	// Begin patch alteration
+	beginAlteration();
 
+	// Alter patch
+	adaptionInfo = _updateAdaption(trackAdaption);
+
+	// End patch alteration
+	endAlteration(squeezeStorage);
+
+	return adaptionInfo;
+}
+
+/*!
+	Begin patch alteration.
+*/
+void PatchKernel::beginAlteration()
+{
+	// Nothing to do
+}
+
+/*!
+	End patch alteration.
+
+	\param squeezeStorage if set to true patch data structures will be
+	squeezed after the adaption
+*/
+void PatchKernel::endAlteration(bool squeezeStorage)
+{
+	// Flush data structures
 	m_cells.flush();
 	m_interfaces.flush();
 	m_vertices.flush();
 
-	setAdaptionDirty(false);
+	// Squeeze data structures
+	if (squeezeStorage) {
+		squeeze();
+	}
 
-	return adaptionInfo;
+	// Update geometric information
+	updateBoundingBox();
 }
 
 /*!

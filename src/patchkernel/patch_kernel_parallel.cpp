@@ -184,6 +184,9 @@ const std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> 
 		return adaptionData;
 	}
 
+	// Start patch alteration
+	beginAlteration();
+
 	// Build the send map
 	std::unordered_map<int, std::vector<long>> sendMap;
 
@@ -246,13 +249,11 @@ const std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> 
 		}
 	}
 
-	// Squeeze the storage
-	if (squeezeStorage) {
-		squeeze();
-	}
-
 	// Patch is now partitioned
 	setPartitioned(true);
+
+	// Complete patch alteration
+	endAlteration(squeezeStorage);
 
 	return adaptionData;
 }
@@ -310,14 +311,17 @@ const std::vector<adaption::Info> PatchKernel::balancePartition(bool trackChange
 		throw std::runtime_error ("There is no communicator set for the patch.");
 	}
 
-	// Balance patch
-	const std::vector<adaption::Info> adaptionData = _balancePartition(trackChanges, squeezeStorage);
+	// Start patch alteration
+	beginAlteration();
 
-	// Update the bouding box
-	updateBoundingBox();
+	// Balance patch
+	const std::vector<adaption::Info> adaptionData = _balancePartition(trackChanges);
 
 	// Patch is now partitioned
 	setPartitioned(true);
+
+	// End patch alteration
+	endAlteration(squeezeStorage);
 
 	// Done
 	return adaptionData;
@@ -349,15 +353,12 @@ void PatchKernel::setPartitioned(bool partitioned)
 
 	\param trackChanges if set to true the changes to the patch will be
 	tracked
-	\param squeezeStorage if set to true the vector that store patch information
-	will be squeezed after the synchronization
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<adaption::Info> PatchKernel::_balancePartition(bool trackChanges, bool squeezeStorage)
+const std::vector<adaption::Info> PatchKernel::_balancePartition(bool trackChanges)
 {
 	BITPIT_UNUSED(trackChanges);
-	BITPIT_UNUSED(squeezeStorage);
 
 	log::cout() << "The patch does not implement a algortihm for balacing the partition" << std::endl;
 

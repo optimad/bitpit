@@ -112,7 +112,7 @@ public:
 #endif
 
 protected:
-	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption, bool squeezeStorage);
+	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);
@@ -129,7 +129,7 @@ protected:
 	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
 #if BITPIT_ENABLE_MPI==1
-	const std::vector<adaption::Info> _balancePartition(bool trackChanges, bool squeezeStorage);
+	const std::vector<adaption::Info> _balancePartition(bool trackChanges);
 #endif
 
 private:
@@ -229,7 +229,7 @@ private:
 	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo, bool generateInterfaces);
 	StitchInfo deleteCells(std::vector<DeleteInfo> &deletedOctants);
 
-	const std::vector<adaption::Info> sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges, bool squeezeStorage);
+	const std::vector<adaption::Info> sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges);
 
 	std::vector<long> findCellCodimensionNeighs(const long &id, const int &index,
 		const int &codimension, const std::vector<long> &blackList) const;

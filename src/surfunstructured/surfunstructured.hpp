@@ -61,7 +61,7 @@ public:
         unsigned short exportDGF(const std::string &);
 
 protected:
-	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption, bool squeezeStorage);
+	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 	int _getDumpVersion() const;
 	void _dump(std::ostream &stream);
 	void _restore(std::istream &stream);

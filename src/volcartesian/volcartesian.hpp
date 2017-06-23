@@ -126,7 +126,7 @@ public:
 	bool isVertexCartesianIdValid(const std::array<int, 3> &ijk) const;
 
 protected:
-	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption, bool squeezeStorage);
+	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 
 	int _getDumpVersion() const;
 	void _dump(std::ostream &stream);

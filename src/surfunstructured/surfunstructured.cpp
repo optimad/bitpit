@@ -90,10 +90,8 @@ void SurfUnstructured::setExpert(bool expert)
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<adaption::Info> SurfUnstructured::_updateAdaption(bool trackAdaption, bool squeezeStorage)
+const std::vector<adaption::Info> SurfUnstructured::_updateAdaption(bool trackAdaption)
 {
-	BITPIT_UNUSED(squeezeStorage);
-
 	std::cout << ">> Updating surface triangulation mesh\n";
 
 	// Adaption info

@@ -153,7 +153,7 @@ VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::u
 #endif
 
 	// Sync the patch with the tree
-	sync(true, true, false, false);
+	sync(true, true, false);
 
 	// Set the bounding
 	setBoundingBox();
@@ -580,11 +580,9 @@ int VolOctree::getCellLevel(const long &id) const
 
 	\param trackAdaption if set to true the changes to the patch will be
 	tracked
-	\param squeezeStorage if set to true the vector that store patch information
-	will be squeezed after the synchronization
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption, bool squeezeStorage)
+const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 {
 
 	// Updating the tree
@@ -601,7 +599,7 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption,
 	log::cout() << " Done" << std::endl;
 
 	// Sync the patch
-	return sync(true, true, trackAdaption, squeezeStorage);
+	return sync(true, true, trackAdaption);
 }
 
 /*!
@@ -614,11 +612,9 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption,
 	will be generated
 	\param trackChanges if set to true the changes to the patch will be
 	tracked
-	\param squeezeStorage if set to true the vector that store patch information
-	will be squeezed after the synchronization
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges, bool squeezeStorage)
+const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges)
 {
 	log::cout() << ">> Syncing patch..." << std::endl;
 
@@ -1035,11 +1031,6 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool ge
 #if BITPIT_ENABLE_MPI==1
 	buildGhostExchangeData();
 #endif
-
-	// Squeeze the patch
-	if (squeezeStorage) {
-		squeeze();
-	}
 
 	// Disable advanced editing
 	setExpert(false);
@@ -1767,7 +1758,7 @@ void VolOctree::_restore(std::istream &stream)
 	//
 	// Sync the patch
 	//
-	sync(false, false, false, false);
+	sync(false, false, false);
 
 	//
 	// Restore the interfaces
