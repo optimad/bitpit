@@ -148,7 +148,7 @@ void LevelSetCachedObject::__clearAfterMeshAdaption( const std::vector<adaption:
  */
 void LevelSetCachedObject::_filterOutsideNarrowBand( double newRSearch ){
 
-    PiercedIterator<LevelSetInfo> lsItr = m_ls.begin() ;
+    PiercedVector<LevelSetInfo>::iterator lsItr = m_ls.begin() ;
     while( lsItr != m_ls.end() ){
 
 
