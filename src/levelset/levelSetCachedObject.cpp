@@ -655,7 +655,7 @@ void LevelSetCachedObject::propagateSign() {
                     // propagate is different from the default sign.
                     PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;
                     if( infoItr == m_ls.end() && seedSign != levelSetDefaults::SIGN ){
-                        infoItr = m_ls.reclaim(id) ;
+                        infoItr = m_ls.emplace(id) ;
                     }
 
                     // Update the value
@@ -875,7 +875,7 @@ void LevelSetCachedObject::assignSign(int sign, const std::unordered_set<long> &
         // different from the default sign.
         PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;
         if( infoItr == m_ls.end() && sign != levelSetDefaults::SIGN ){
-            infoItr = m_ls.reclaim(id) ;
+            infoItr = m_ls.emplace(id) ;
         }
 
         // Update the sign
@@ -1012,7 +1012,7 @@ void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &re
         // Assign the data of the element
         PiercedVector<LevelSetInfo>::iterator infoItr ;
         if( !m_ls.exists(id)){
-            infoItr = m_ls.reclaim(id) ;
+            infoItr = m_ls.emplace(id) ;
         } else {
             infoItr = m_ls.getIterator(id) ;
         }

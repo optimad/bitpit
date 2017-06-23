@@ -546,7 +546,7 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
 
         PiercedVector<LevelSetInfo>::iterator lsInfoItr ;
         if( !m_ls.exists(id)){
-            lsInfoItr = m_ls.reclaim(id) ;
+            lsInfoItr = m_ls.emplace(id) ;
         } else {
             lsInfoItr = m_ls.getIterator(id) ;
         }
