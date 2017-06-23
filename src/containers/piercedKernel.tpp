@@ -729,6 +729,79 @@ id_t PiercedKernel<id_t>::getSizeMarker(std::size_t targetSize, const id_t &fall
 }
 
 /**
+* Gets a constant iterator pointing to the specified element.
+*
+* \param id is the id of the specified iterator.
+* \result A constant iterator pointing to the specified element.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::getConstIterator(const id_t &id) const noexcept
+{
+    const std::size_t pos = getPos(id);
+
+    return getConstIteratorFromPos(pos);
+}
+
+/**
+* Gets a constant iterator pointing to the specified position.
+*
+* \param id is the id of the specified iterator.
+* \result A constant iterator pointing to the specified position.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::getConstIteratorFromRawIndex(const std::size_t &rawIndex) const noexcept
+{
+    return getConstIteratorFromPos(rawIndex);
+}
+
+/*!
+* Returns a constant iterator pointing to the first element in the vector.
+*
+* \result A constant iterator pointing to the first element in the vector.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::begin() const noexcept
+{
+    return cbegin();
+}
+
+/*!
+* Returns a constant iterator referring to the past-the-end element in the
+* vector.
+*
+* \result A constant iterator referring to the past-the-end element in the
+* vector.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::end() const noexcept
+{
+    return cend();
+}
+
+/*!
+* Returns an conts_iterator pointing to the first element in the vector.
+*
+* \result A const_iterator pointing to the first element in the vector.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::cbegin() const noexcept
+{
+    return getConstIteratorFromPos(m_begin_pos);
+}
+
+/*!
+* Returns an const_iterator referring to the past-the-end element in the
+* vector.
+*
+* \result A const_iterator referring to the past-the-end element in the vector.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::cend() const noexcept
+{
+    return getConstIteratorFromPos(m_end_pos);
+}
+
+/**
 * Gets the position of the element with the specified id.
 *
 * If there is no element with the specified id, an exception is thrown.
@@ -2060,6 +2133,19 @@ void PiercedKernel<id_t>::dump(std::ostream &stream) const
 
     // Synchronization data
     PiercedSyncMaster::dump(stream);
+}
+
+/**
+* Gets a constant iterator pointing to the element in the specified position.
+*
+* \param pos is the position of the element
+* \result A constant iterator pointing to the element in the specified
+* position.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::getConstIteratorFromPos(const std::size_t &pos) const noexcept
+{
+    return const_iterator(this, pos);
 }
 
 }

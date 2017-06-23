@@ -35,6 +35,7 @@
 #include <bitpit_common.hpp>
 
 #include "piercedSync.hpp"
+#include "piercedKernelIterator.hpp"
 
 namespace bitpit {
 
@@ -108,6 +109,9 @@ static_assert(std::numeric_limits<id_t>::is_signed, "Signed integer required for
 template<typename PSI_value_t, typename PSI_id_t, typename PSI_value_no_cv_t>
 friend class PiercedStorageIterator;
 
+template<typename PKI_id_t>
+friend class PiercedKernelIterator;
+
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
 
@@ -116,6 +120,16 @@ public:
     * Type of ids stored in the kernel
     */
     typedef id_t id_type;
+
+    /**
+    * Constant iterator
+    */
+    typedef PiercedKernelIterator<id_t> const_iterator;
+
+    /**
+    * Raw iterator
+    */
+    typedef typename std::vector<id_t>::const_iterator raw_const_iterator;
 
     /**
     * Functional for compare the position of two elements
@@ -186,6 +200,16 @@ public:
 
     std::vector<id_t> getIds(bool ordered = true) const;
     id_t getSizeMarker(std::size_t targetSize, const id_t &fallback = -1);
+
+    // Iterators
+    const_iterator getConstIterator(const id_t &id) const noexcept;
+
+    const_iterator getConstIteratorFromRawIndex(const std::size_t &rawIndex) const noexcept;
+
+    const_iterator begin() const noexcept;
+    const_iterator end() const noexcept;
+    const_iterator cbegin() const noexcept;
+    const_iterator cend() const noexcept;
 
     // Methods to handle the storage
     void registerStorage(PiercedSyncSlave *storage, PiercedSyncMaster::SyncMode syncMode);
@@ -321,6 +345,9 @@ protected:
     std::size_t getPos(id_t id) const;
     std::size_t getFirstUsedPos() const;
     std::size_t getLastUsedPos() const;
+
+    // Iterators
+    const_iterator getConstIteratorFromPos(const std::size_t &pos) const noexcept;
 
 private:
     /**
