@@ -165,6 +165,14 @@ public:
 		bool m_native;
 	};
 
+	/*!
+		Adaption status
+	*/
+	enum AdaptionStatus {
+		ADAPTION_UNSUPPORTED = -1,
+		ADAPTION_CLEAN,
+		ADAPTION_DIRTY
+	};
 
 	virtual ~PatchKernel();
 
@@ -327,7 +335,7 @@ public:
 	std::unordered_map<long, long> binSortVertex(PiercedVector<Vertex> vertices, int nBins = 128);
     std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
-	bool isAdaptionDirty(bool global = false) const;
+	AdaptionStatus getAdaptionStatus(bool global = false) const;
 	const std::vector<adaption::Info> updateAdaption(bool trackAdaption = true, bool squeezeStorage = false);
 
 	virtual void translate(std::array<double, 3> translation);
@@ -436,6 +444,7 @@ protected:
 
 	virtual const std::vector<adaption::Info> _updateAdaption(bool trackAdaption) = 0;
 
+	void setAdaptionStatus(AdaptionStatus status);
 	virtual bool _markCellForRefinement(const long &id);
 	virtual bool _markCellForCoarsening(const long &id);
 	virtual bool _enableCellBalancing(const long &id, bool enabled);
@@ -453,7 +462,6 @@ protected:
 	virtual std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
 	virtual std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
-	void setAdaptionDirty(bool dirty);
 	void setExpert(bool expert);
 
 	void addPointToBoundingBox(const std::array<double, 3> &point);
@@ -497,7 +505,7 @@ private:
 	std::array<int, 3> m_boxMinCounter;
 	std::array<int, 3> m_boxMaxCounter;
 
-	bool m_adaptionDirty;
+	AdaptionStatus m_adaptionStatus;
 
 	bool m_expert;
 

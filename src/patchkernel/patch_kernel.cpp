@@ -120,8 +120,8 @@ void PatchKernel::initialize()
 	// Dimension
 	m_dimension = -1;
 
-	// Adaption
-	m_adaptionDirty = true;
+	// Set the adaption as dirty
+	setAdaptionStatus(ADAPTION_DIRTY);
 
 	// Parallel
 	m_rank        = 0;
@@ -211,7 +211,7 @@ const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool s
 const std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption, bool squeezeStorage)
 {
 	std::vector<adaption::Info> adaptionInfo;
-	if (!isAdaptionDirty(true)) {
+	if (getAdaptionStatus(true) == ADAPTION_CLEAN) {
 		return adaptionInfo;
 	}
 
@@ -267,7 +267,7 @@ void PatchKernel::markCellForRefinement(const long &id)
 	bool updated = _markCellForRefinement(id);
 
 	if (updated) {
-		setAdaptionDirty(true);
+		setAdaptionStatus(ADAPTION_DIRTY);
 	}
 }
 
@@ -281,7 +281,7 @@ void PatchKernel::markCellForCoarsening(const long &id)
 	bool updated = _markCellForCoarsening(id);
 
 	if (updated) {
-		setAdaptionDirty(true);
+		setAdaptionStatus(ADAPTION_DIRTY);
 	}
 }
 
@@ -296,7 +296,7 @@ void PatchKernel::enableCellBalancing(const long &id, bool enabled)
 	bool updated = _enableCellBalancing(id, enabled);
 
 	if (updated) {
-		setAdaptionDirty(true);
+		setAdaptionStatus(ADAPTION_DIRTY);
 	}
 }
 
@@ -488,42 +488,36 @@ void PatchKernel::write(VTKWriteMode mode)
 }
 
 /*!
-	Flags the patch for adaption update.
+	Returns the current adaption status.
 
-	\param dirty if true, then patch is informed that the patch needs to
-	adapt after a refinement, coarsening, ... and thus the current data
-	structures are not valid anymore.
+	\param global if set to true the adaption status will be
+	\return The current adaption status.
 */
-void PatchKernel::setAdaptionDirty(bool dirty)
+PatchKernel::AdaptionStatus PatchKernel::getAdaptionStatus(bool global) const
 {
-	if (m_adaptionDirty == dirty) {
-		return;
-	}
+	int adaptionStatus = static_cast<int>(m_adaptionStatus);
 
-	m_adaptionDirty = dirty;
-}
-
-/*!
-	Returns true if the the patch needs to update after an adaption.
-
-	\return This method returns true to indicate the patch needs to update
-	its data strucutres. Otherwise, it returns false.
-*/
-bool PatchKernel::isAdaptionDirty(bool global) const
-{
-	bool isDirty = m_adaptionDirty;
 #if BITPIT_ENABLE_MPI==1
 	if (global && isCommunicatorSet()) {
 		const auto &communicator = getCommunicator();
-		MPI_Allreduce(const_cast<bool *>(&m_adaptionDirty), &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+		MPI_Allreduce(MPI_IN_PLACE, &adaptionStatus, 1, MPI_INT, MPI_MAX, communicator);
 	}
 #else
 	BITPIT_UNUSED(global);
 #endif
 
-	return isDirty;
+	return static_cast<AdaptionStatus>(adaptionStatus);
 }
 
+/*!
+	Set the current adaption status.
+
+	\param status is the adaption status that will be set
+*/
+void PatchKernel::setAdaptionStatus(AdaptionStatus status)
+{
+	m_adaptionStatus = status;
+}
 
 /*!
 	Returns true if the the patch needs to update its data strucutres.
@@ -533,7 +527,10 @@ bool PatchKernel::isAdaptionDirty(bool global) const
 */
 bool PatchKernel::isDirty(bool global) const
 {
-	return (isAdaptionDirty(global) || isBoundingBoxDirty(global));
+	bool adaptionDirty    = (getAdaptionStatus(global) == ADAPTION_DIRTY);
+	bool boundingBoxDirty = isBoundingBoxDirty(global);
+
+	return (adaptionDirty || boundingBoxDirty);
 }
 
 /*!
