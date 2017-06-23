@@ -178,6 +178,9 @@ void VolCartesian::__reset()
 */
 void VolCartesian::initialize()
 {
+	// This patch need to be spawn
+	setSpawnStatus(SPAWN_NEEDED);
+
 	// Set the light memory mode
 	m_memoryMode = MemoryMode::MEMORY_LIGHT;
 
@@ -554,14 +557,20 @@ double VolCartesian::getSpacing(const int &direction) const
 }
 
 /*!
-	Updates the patch.
+	Generates the patch.
 
+	\param trackSpawn if set to true the changes to the patch will be tracked
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
+std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 {
-	log::cout() << ">> Updating cartesian mesh\n";
+	std::vector<adaption::Info> updateInfo;
+
+	// If the patch is in 'normal' mode there is nothing to do.
+	if (getMemoryMode() == MEMORY_NORMAL) {
+		return updateInfo;
+	}
 
 	// Enable advanced editing
 	setExpert(true);
@@ -581,10 +590,9 @@ std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
 	setExpert(false);
 
 	// Adaption info
-	std::vector<adaption::Info> adaptionData;
-	if (trackAdaption) {
-		adaptionData.emplace_back();
-		adaption::Info &adaptionCellInfo = adaptionData.back();
+	if (trackSpawn) {
+		updateInfo.emplace_back();
+		adaption::Info &adaptionCellInfo = updateInfo.back();
 		adaptionCellInfo.type   = adaption::TYPE_CREATION;
 		adaptionCellInfo.entity = adaption::ENTITY_CELL;
 		adaptionCellInfo.current.reserve(m_cells.size());
@@ -594,8 +602,8 @@ std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
 			cellId = cell.getId();
 		}
 
-		adaptionData.emplace_back();
-		adaption::Info &adaptionInterfaceInfo = adaptionData.back();
+		updateInfo.emplace_back();
+		adaption::Info &adaptionInterfaceInfo = updateInfo.back();
 		adaptionInterfaceInfo.type   = adaption::TYPE_CREATION;
 		adaptionInterfaceInfo.entity = adaption::ENTITY_INTERFACE;
 		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
@@ -605,11 +613,31 @@ std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
 			interfaceId = interface.getId();
 		}
 	} else {
-		adaptionData.emplace_back();
+		updateInfo.emplace_back();
 	}
 
 	// Updating the adaption brings the patch is in normal memory mode
 	setMemoryMode(MemoryMode::MEMORY_NORMAL, false);
+
+	// Done
+	return updateInfo;
+}
+
+/*!
+	Updates the patch.
+
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the update.
+*/
+std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
+{
+	log::cout() << ">> Updating cartesian mesh\n";
+
+	// Adaption info
+	std::vector<adaption::Info> adaptionData;
+	if (trackAdaption) {
+
+	}
 
 	// Done
 	return adaptionData;

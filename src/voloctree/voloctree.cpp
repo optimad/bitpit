@@ -226,6 +226,12 @@ void VolOctree::initialize()
 	// Reset the tree entruster
 	m_treeAdopter = nullptr;
 
+	// This patch need to be spawn
+	setSpawnStatus(SPAWN_NEEDED);
+
+	// This patch supports adaption
+	setAdaptionStatus(ADAPTION_CLEAN);
+
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
 }
@@ -573,6 +579,28 @@ int VolOctree::getCellLevel(const long &id) const
 		octant = m_tree->getGhostOctant(octantInfo.id);
 	}
 	return m_tree->getLevel(octant);
+}
+
+/*!
+	Generates the patch.
+
+	\param trackSpawn if set to true the changes to the patch will be tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the update.
+*/
+std::vector<adaption::Info> VolOctree::_spawn(bool trackSpawn)
+{
+	std::vector<adaption::Info> updateInfo;
+
+	// Perform initial import
+	bool emtpyPatch = (getCellCount() == 0);
+	ParaTree::Operation lastTreeOperation = m_tree->getLastOperation();
+	if (lastTreeOperation == ParaTree::OP_INIT && emtpyPatch) {
+		m_tree->adapt();
+		updateInfo = sync(true, true, trackSpawn);
+	}
+
+	return updateInfo;
 }
 
 /*!

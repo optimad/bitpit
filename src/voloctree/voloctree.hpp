@@ -112,6 +112,8 @@ public:
 #endif
 
 protected:
+	std::vector<adaption::Info> _spawn(bool trackSpawn);
+
 	std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
 	bool _markCellForCoarsening(const long &id);

@@ -120,8 +120,17 @@ void PatchKernel::initialize()
 	// Dimension
 	m_dimension = -1;
 
-	// Set the adaption as dirty
-	setAdaptionStatus(ADAPTION_DIRTY);
+	// Set the spawn as unneeded
+	//
+	// Specific implementation will set the appropriate status during their
+	// initialization.
+	setSpawnStatus(SPAWN_UNNEEDED);
+
+	// Set the adaption as unsupported
+	//
+	// Specific implementation will set the appropriate status during their
+	// initialization.
+	setAdaptionStatus(ADAPTION_UNSUPPORTED);
 
 	// Parallel
 	m_rank        = 0;
@@ -180,26 +189,93 @@ PatchKernel::~PatchKernel()
 }
 
 /*!
-	Updates the patch
+	Commit all pending changes.
 
 	\param trackAdaption if set to true the changes to the patch will be
 	tracked
-	\param squeezeStorage if set to true the vector that store patch information
-	will be squeezed after the synchronization
+	\param squeezeStorage if set to true patch data structures will be
+	squeezed after the update
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
 std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> adaptionInfo = updateAdaption(trackAdaption, squeezeStorage);
+	std::vector<adaption::Info> updateInfo;
 
-	updateBoundingBox();
+	// Check if there are pending changes
+	bool spawnNeeed       = (getSpawnStatus() == SPAWN_NEEDED);
+	bool adaptionDirty    = (getAdaptionStatus(true) == ADAPTION_DIRTY);
+	bool boundingBoxDirty = isBoundingBoxDirty();
 
-	return adaptionInfo;
+	bool pendingChanges = (spawnNeeed || adaptionDirty || boundingBoxDirty);
+	if (!pendingChanges) {
+		return updateInfo;
+	}
+
+	// Spawn
+	if (spawnNeeed) {
+		mergeAdaptionInfo(spawn(trackAdaption), updateInfo);
+	}
+
+	// Adaption
+	if (adaptionDirty) {
+		mergeAdaptionInfo(updateAdaption(trackAdaption, squeezeStorage), updateInfo);
+	}
+
+	// Update bounding box
+	//
+	// Previous updates may already have updated the bounding box, before
+	// doing the update re-check if it is still dirty.
+	boundingBoxDirty = isBoundingBoxDirty();
+	if (boundingBoxDirty) {
+		updateBoundingBox();
+	}
+
+	return updateInfo;
 }
 
 /*!
-	Updates the adaption
+	Generates the patch.
+
+	\param trackSpawn if set to true the changes to the patch will be tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the spawn.
+*/
+std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
+{
+	std::vector<adaption::Info> spawnInfo;
+
+#if BITPIT_ENABLE_MPI==1
+	// This is a collevtive operation and should be called by all processes
+	if (isCommunicatorSet()) {
+		const auto &communicator = getCommunicator();
+		MPI_Barrier(communicator);
+	}
+#endif
+
+	// Check spawn status
+	SpawnStatus spawnStatus = getSpawnStatus();
+	if (spawnStatus == SPAWN_UNNEEDED || spawnStatus == SPAWN_DONE) {
+		return spawnInfo;
+	}
+
+	// Begin patch alteration
+	beginAlteration();
+
+	// Alter patch
+	spawnInfo = _spawn(trackSpawn);
+
+	// End patch alteration
+	endAlteration(true);
+
+	// Spwan is done
+	setSpawnStatus(SPAWN_DONE);
+
+	// Done
+	return spawnInfo;
+}
+
+/*!
 
 	\param trackAdaption if set to true the changes to the patch will be
 	tracked
@@ -488,6 +564,29 @@ void PatchKernel::write(VTKWriteMode mode)
 }
 
 /*!
+	Returns the current spawn status.
+
+	\return The current spawn status.
+*/
+PatchKernel::SpawnStatus PatchKernel::getSpawnStatus() const
+{
+	// There is no need to check the spawn status globally because the spawn
+	// status will always be the same on all the processors
+
+	return m_spawnStatus;
+}
+
+/*!
+	Set the current spawn status.
+
+	\param status is the spawn status that will be set
+*/
+void PatchKernel::setSpawnStatus(SpawnStatus status)
+{
+	m_spawnStatus = status;
+}
+
+/*!
 	Returns the current adaption status.
 
 	\param global if set to true the adaption status will be
@@ -527,10 +626,11 @@ void PatchKernel::setAdaptionStatus(AdaptionStatus status)
 */
 bool PatchKernel::isDirty(bool global) const
 {
+	bool spawnNeeed       = (getSpawnStatus() == SPAWN_NEEDED);
 	bool adaptionDirty    = (getAdaptionStatus(global) == ADAPTION_DIRTY);
 	bool boundingBoxDirty = isBoundingBoxDirty(global);
 
-	return (adaptionDirty || boundingBoxDirty);
+	return (spawnNeeed || adaptionDirty || boundingBoxDirty);
 }
 
 /*!
@@ -2835,6 +2935,24 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 }
 
 /*!
+	Generates the patch.
+
+	Default implementation is a no-op function.
+
+	\param trackSpawn if set to true the changes to the patch will be tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the spawn.
+*/
+std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
+{
+	BITPIT_UNUSED(trackSpawn);
+
+	assert(true && "The patch needs to implement _spawn");
+
+	return std::vector<adaption::Info>();
+}
+
+/*!
 	Marks a cell for refinement.
 
 	Default implementation is a no-op function.
@@ -4457,6 +4575,24 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	m_vertexIdGenerator.restore(stream);
 	m_cellIdGenerator.restore(stream);
 	m_interfaceIdGenerator.restore(stream);
+}
+
+/*!
+ *  Merge the specified adaption info.
+ *
+ *  \param[in] source is the source adaption info
+ *  \param[in,out] desintation is the destination adaption info
+ */
+void PatchKernel::mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination)
+{
+	if (source.empty()) {
+		return;
+	} else if (destination.empty()) {
+		destination.swap(source);
+		return;
+	}
+
+	throw std::runtime_error ("Unable to merge the adaption info.");
 }
 
 }
