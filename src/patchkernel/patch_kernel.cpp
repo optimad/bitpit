@@ -433,6 +433,11 @@ void PatchKernel::endAlteration(bool squeezeStorage)
 
 	// Update geometric information
 	updateBoundingBox();
+
+	// Synchronize storage
+	m_cells.sync();
+	m_interfaces.sync();
+	m_vertices.sync();
 }
 
 /*!
