@@ -927,7 +927,7 @@ void absorbBINARY( std::fstream &str, data_T *data, int nr ){
 template< class data_T >
 void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data ){
 
-    bitpit::PiercedIterator<data_T> dataItr, dataEnd = data.end() ;
+    typename bitpit::PiercedVector<data_T>::iterator dataItr, dataEnd = data.end() ;
 
     for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
         absorbBINARY(str,*dataItr) ;
