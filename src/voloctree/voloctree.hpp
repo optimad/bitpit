@@ -114,7 +114,9 @@ public:
 protected:
 	std::vector<adaption::Info> _spawn(bool trackSpawn);
 
-	std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
+	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption);
+	std::vector<adaption::Info> _adaptionAlter(bool trackAdaption);
+	void _adaptionCleanup();
 	bool _markCellForRefinement(const long &id);
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);

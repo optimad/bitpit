@@ -604,15 +604,96 @@ std::vector<adaption::Info> VolOctree::_spawn(bool trackSpawn)
 }
 
 /*!
-	Updates the patch.
+	Prepares the patch for performing the adaption.
 
-	\param trackAdaption if set to true the changes to the patch will be
-	tracked
-	\result Returns all the changes applied to the patch.
+	NOTE: only cells are tracked.
+
+	\param trackAdaption if set to true the function will return the changes
+	that will be performed in the alter step
+	\result If the adaption is tracked, returns a vector of adaption::Info that
+	can be used to discover what changes will be performed in the alter step,
+	otherwise an empty vector will be returned.
 */
-std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
+std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 {
+	BITPIT_UNUSED(trackAdaption);
 
+	if (getSpawnStatus() == SPAWN_NEEDED) {
+		throw std::runtime_error ("The initial import has not been performed.");
+	}
+
+	// Call pre-adapt routine
+	m_tree->preadapt();
+
+	// Track adaption changes
+	adaption::InfoCollection adaptionData;
+	if (trackAdaption) {
+		// Current rank
+		int currentRank = -1;
+#if BITPIT_ENABLE_MPI==1
+		currentRank = getRank();
+#endif
+
+		// Track internal octants that will be coarsend/refined
+		long nOctants = m_tree->getNumOctants();
+
+
+		uint32_t treeId = 0;
+		while (treeId < (uint32_t) nOctants) {
+			int8_t marker = m_tree->getPreMarker(treeId);
+			if (marker == 0) {
+				treeId++;
+				continue;
+			}
+
+			int nUpdatedOctants;
+			adaption::Type adaptionType;
+			if (marker > 0) {
+				nUpdatedOctants = 1;
+				adaptionType    = adaption::TYPE_REFINEMENT;
+			} else {
+				nUpdatedOctants = pow(2, getDimension());
+				adaptionType    = adaption::TYPE_COARSENING;
+			}
+
+			std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, currentRank);
+			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+			adaptionInfo.previous.reserve(nUpdatedOctants);
+			for (int k = 0; k < nUpdatedOctants; ++k) {
+				OctantInfo octantInfo(treeId, true);
+
+				adaptionInfo.previous.emplace_back();
+				long &cellId = adaptionInfo.previous.back();
+				cellId = getOctantId(octantInfo);
+				treeId++;
+			}
+		}
+
+		// Ghost cells will be removed
+		std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
+		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+		adaptionInfo.previous.reserve(getGhostCount());
+		for (auto itr = ghostBegin(); itr != ghostEnd(); ++itr) {
+			adaptionInfo.previous.emplace_back();
+			long &deletedGhostId = adaptionInfo.previous.back();
+			deletedGhostId = itr.getId();
+		}
+	}
+
+	return adaptionData.dump();
+}
+
+/*!
+	Alter the patch performing the adpation.
+
+	\param trackAdaption if set to true the function will return the changes
+	done to the patch during the adaption
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
+*/
+std::vector<adaption::Info> VolOctree::_adaptionAlter(bool trackAdaption)
+{
 	// Updating the tree
 	log::cout() << ">> Adapting tree...";
 
@@ -628,6 +709,14 @@ std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 
 	// Sync the patch
 	return sync(true, true, trackAdaption);
+}
+
+/*!
+	Cleanup patch data structured after the adaption.
+*/
+void VolOctree::_adaptionCleanup()
+{
+	// Nothing to do
 }
 
 /*!

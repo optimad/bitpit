@@ -180,7 +180,9 @@ public:
 	enum AdaptionStatus {
 		ADAPTION_UNSUPPORTED = -1,
 		ADAPTION_CLEAN,
-		ADAPTION_DIRTY
+		ADAPTION_DIRTY,
+		ADAPTION_PREPARED,
+		ADAPTION_ALTERED
 	};
 
 	virtual ~PatchKernel();
@@ -198,6 +200,12 @@ public:
 
 	SpawnStatus getSpawnStatus() const;
 	std::vector<adaption::Info> spawn(bool trackSpawn);
+
+	AdaptionStatus getAdaptionStatus(bool global = false) const;
+	std::vector<adaption::Info> adaption(bool trackAdaption = true, bool squeezeStorage = false);
+	std::vector<adaption::Info> adaptionPrepare(bool trackAdaption = true);
+	std::vector<adaption::Info> adaptionAlter(bool trackAdaption = true, bool squeezeStorage = false);
+	void adaptionCleanup();
 
 	void markCellForRefinement(const long &id);
 	void markCellForCoarsening(const long &id);
@@ -347,9 +355,6 @@ public:
 	std::unordered_map<long, long> binSortVertex(PiercedVector<Vertex> vertices, int nBins = 128);
     std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
-	AdaptionStatus getAdaptionStatus(bool global = false) const;
-	std::vector<adaption::Info> updateAdaption(bool trackAdaption = true, bool squeezeStorage = false);
-
 	virtual void translate(std::array<double, 3> translation);
 	void translate(double sx, double sy, double sz);
 	virtual void scale(std::array<double, 3> scaling);
@@ -458,7 +463,9 @@ protected:
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
 
 	void setAdaptionStatus(AdaptionStatus status);
-	virtual std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
+	virtual std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption);
+	virtual std::vector<adaption::Info> _adaptionAlter(bool trackAdaption);
+	virtual void _adaptionCleanup();
 	virtual bool _markCellForRefinement(const long &id);
 	virtual bool _markCellForCoarsening(const long &id);
 	virtual bool _enableCellBalancing(const long &id, bool enabled);

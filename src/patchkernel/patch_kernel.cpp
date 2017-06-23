@@ -219,7 +219,7 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 
 	// Adaption
 	if (adaptionDirty) {
-		mergeAdaptionInfo(updateAdaption(trackAdaption, squeezeStorage), updateInfo);
+		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), updateInfo);
 	}
 
 	// Update bounding box
@@ -276,31 +276,133 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 }
 
 /*!
+	Execute patch adaption.
 
 	\param trackAdaption if set to true the changes to the patch will be
 	tracked
-	\param squeezeStorage if set to true the vector that store patch information
-	will be squeezed after the synchronization
+	\param squeezeStorage if set to true patch data structures will be
+	squeezed after the update
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption, bool squeezeStorage)
+std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squeezeStorage)
 {
 	std::vector<adaption::Info> adaptionInfo;
-	if (getAdaptionStatus(true) == ADAPTION_CLEAN) {
+
+	// Check adaption status
+	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
+	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
 		return adaptionInfo;
+	} else if (adaptionStatus != ADAPTION_DIRTY) {
+		throw std::runtime_error ("An adaption is already in progress.");
+	}
+
+	adaptionPrepare(false);
+
+	adaptionInfo = adaptionAlter(trackAdaption, squeezeStorage);
+
+	adaptionCleanup();
+
+	return adaptionInfo;
+}
+
+/*!
+	Prepares the patch for performing the adaption.
+
+	The patch will prepare its data structured for the adaption and optionally
+	track the changes that will be performed to the patch. During this phase
+	no changes will be performed to the patch.
+
+	\param trackAdaption if set to true the function will return the changes
+	that will be performed in the alter step
+	\result If the adaption is tracked, returns a vector of adaption::Info that
+	can be used to discover what changes will be performed in the alter step,
+	otherwise an empty vector will be returned.
+*/
+std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
+{
+	std::vector<adaption::Info> adaptionInfo;
+
+	// Check adaption status
+	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
+	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
+		return adaptionInfo;
+	} else if (adaptionStatus != ADAPTION_DIRTY) {
+		throw std::runtime_error ("An adaption is already in progress.");
+	}
+
+	// Execute the adaption preparation
+	adaptionInfo = _adaptionPrepare(trackAdaption);
+
+	// Update the status
+	setAdaptionStatus(ADAPTION_PREPARED);
+
+	return adaptionInfo;
+}
+
+/*!
+	Alter the patch performing the adpation.
+
+	The actual modification of the patch takes place during this phase. After
+	this phase the adapton is completed and the patch is in its final state.
+	Optionally the patch can track the changes performed to the patch.
+
+	\param trackAdaption if set to true the function will return the changes
+	done to the patch during the adaption
+	\param squeezeStorage if set to true patch data structures will be
+	squeezed after the adaption
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
+*/
+std::vector<adaption::Info> PatchKernel::adaptionAlter(bool trackAdaption, bool squeezeStorage)
+{
+	std::vector<adaption::Info> adaptionInfo;
+
+	// Check adaption status
+	AdaptionStatus adaptionStatus = getAdaptionStatus();
+	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
+		return adaptionInfo;
+	} else if (adaptionStatus != ADAPTION_PREPARED) {
+		throw std::runtime_error ("The prepare function has not been called.");
 	}
 
 	// Begin patch alteration
 	beginAlteration();
 
 	// Alter patch
-	adaptionInfo = _updateAdaption(trackAdaption);
+	adaptionInfo = _adaptionAlter(trackAdaption);
 
 	// End patch alteration
 	endAlteration(squeezeStorage);
 
+	// Update the status
+	setAdaptionStatus(ADAPTION_ALTERED);
+
 	return adaptionInfo;
+}
+
+/*!
+	Cleanup patch data structured after the adaption.
+
+	The patch will only clean-up the data structures needed for adaption.
+*/
+void PatchKernel::adaptionCleanup()
+{
+	AdaptionStatus adaptionStatus = getAdaptionStatus();
+	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
+		return;
+	} else if (adaptionStatus == ADAPTION_PREPARED) {
+		throw std::runtime_error ("It is not yet possible to abort an adaption.");
+	} else if (adaptionStatus != ADAPTION_ALTERED) {
+		throw std::runtime_error ("The alter function has not been called.");
+	}
+
+	// Complete the adaption
+	_adaptionCleanup();
+
+	// Update the status
+	setAdaptionStatus(ADAPTION_CLEAN);
 }
 
 /*!
@@ -2953,18 +3055,50 @@ std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
 }
 
 /*!
-	Updates the patch.
+	Prepares the patch for performing the adaption.
 
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the update.
+	Default implementation is a no-op function.
+
+	\param trackAdaption if set to true the function will return the changes
+	that will be performed in the alter step
+	\result If the adaption is tracked, returns a vector of adaption::Info that
+	can be used to discover what changes will be performed in the alter step,
+	otherwise an empty vector will be returned.
 */
-std::vector<adaption::Info> PatchKernel::_updateAdaption(bool trackAdaption)
+std::vector<adaption::Info> PatchKernel::_adaptionPrepare(bool trackAdaption)
 {
 	BITPIT_UNUSED(trackAdaption);
 
-	assert(false && "The patch needs to implement _updateAdaption");
+	return std::vector<adaption::Info>();
+}
+
+/*!
+	Alter the patch performing the adpation.
+
+	Default implementation is a no-op function.
+
+	\param trackAdaption if set to true the function will return the changes
+	done to the patch during the adaption
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
+*/
+std::vector<adaption::Info> PatchKernel::_adaptionAlter(bool trackAdaption)
+{
+	BITPIT_UNUSED(trackAdaption);
+
+	assert(false && "The patch needs to implement _adaptionAlter");
 
 	return std::vector<adaption::Info>();
+}
+
+/*!
+	Cleanup patch data structured after the adaption.
+
+	Default implementation is a no-op function.
+*/
+void PatchKernel::_adaptionCleanup()
+{
 }
 
 /*!
