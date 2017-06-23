@@ -32,7 +32,6 @@
 #include <vector>
 
 #include "piercedKernel.hpp"
-#include "piercedIterator.hpp"
 #include "piercedStorage.hpp"
 
 #define __PV_REFERENCE__       typename PiercedVector<value_t, id_t>::reference
