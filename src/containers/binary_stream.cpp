@@ -516,27 +516,3 @@ bitpit::OBinaryStream& operator << (
 
     return ostm;
 }
-
-// -------------------------------------------------------------------------- //
-/*!
-        Stream char array to internal buffer.
-
-        \param[in] ostm output stream
-        \param[in] val pointer to char array
-
-*/
-bitpit::OBinaryStream& operator<<(
-    bitpit::OBinaryStream                 &ostm,
-    const char                  *val
-) {
-    int size = strlen(val);
-
-    ostm.write(size);
-
-    if(size<=0)
-        return ostm;
-
-    ostm.write(val, size);
-
-    return ostm;
-}

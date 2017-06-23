@@ -76,10 +76,6 @@ bitpit::OBinaryStream& operator<<(                                              
     bitpit::OBinaryStream                     &ostm,                                // (input) output stream
     const std::string               &val                                  // (input) string to be streamed
 );
-bitpit::OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
-    bitpit::OBinaryStream                     &ostm,                                // (input) output stream
-    const char                      *val                                  // (input) char array to be streamed
-);
 
 namespace bitpit{
 
@@ -233,7 +229,6 @@ class OBinaryStream {
     template<typename T>
     friend OBinaryStream& (::operator<<) ( OBinaryStream&, const T& );
     friend OBinaryStream& (::operator<< <>) ( OBinaryStream&, const std::string& );
-    friend OBinaryStream& (::operator<<) ( OBinaryStream&, const char* );
 };
 
 }
