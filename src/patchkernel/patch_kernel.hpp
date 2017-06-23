@@ -185,7 +185,7 @@ public:
 	bool reserveCells(size_t nCells);
 	bool reserveInterfaces(size_t nInterfaces);
 
-	const std::vector<adaption::Info> update(bool trackAdaption = true, bool squeezeStorage = false);
+	std::vector<adaption::Info> update(bool trackAdaption = true, bool squeezeStorage = false);
 
 	void markCellForRefinement(const long &id);
 	void markCellForCoarsening(const long &id);
@@ -336,7 +336,7 @@ public:
     std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
 	AdaptionStatus getAdaptionStatus(bool global = false) const;
-	const std::vector<adaption::Info> updateAdaption(bool trackAdaption = true, bool squeezeStorage = false);
+	std::vector<adaption::Info> updateAdaption(bool trackAdaption = true, bool squeezeStorage = false);
 
 	virtual void translate(std::array<double, 3> translation);
 	void translate(double sx, double sy, double sz);
@@ -396,11 +396,11 @@ public:
 	std::vector<long> & getGhostExchangeSources(int rank);
 	const std::vector<long> & getGhostExchangeSources(int rank) const;
 
-	const std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges, bool squeezeStorage = false);
-	const std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges, bool squeezeStorage = false);
-	const std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackChanges, bool squeezeStorage = false);
-	const std::vector<adaption::Info> partition(bool trackChanges, bool squeezeStorage = false);
-	const std::vector<adaption::Info> balancePartition(bool trackChanges, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackChanges, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(bool trackChanges, bool squeezeStorage = false);
+	std::vector<adaption::Info> balancePartition(bool trackChanges, bool squeezeStorage = false);
 	bool isPartitioned() const;
 
 	adaption::Info sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
@@ -442,7 +442,7 @@ protected:
 	void dumpInterfaces(std::ostream &stream);
 	void restoreInterfaces(std::istream &stream);
 
-	virtual const std::vector<adaption::Info> _updateAdaption(bool trackAdaption) = 0;
+	virtual std::vector<adaption::Info> _updateAdaption(bool trackAdaption) = 0;
 
 	void setAdaptionStatus(AdaptionStatus status);
 	virtual bool _markCellForRefinement(const long &id);
@@ -467,7 +467,7 @@ protected:
 	void addPointToBoundingBox(const std::array<double, 3> &point);
 	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 #if BITPIT_ENABLE_MPI==1
-	virtual const std::vector<adaption::Info> _balancePartition(bool trackChanges);
+	virtual std::vector<adaption::Info> _balancePartition(bool trackChanges);
 
 	void setPartitioned(bool partitioned);
 

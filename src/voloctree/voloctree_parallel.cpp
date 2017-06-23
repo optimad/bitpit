@@ -52,7 +52,7 @@ void VolOctree::setCommunicator(MPI_Comm communicator)
 	tracked
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges)
+std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges)
 {
 	// Updating the tree
 	log::cout() << ">> Load balancing...";
@@ -60,7 +60,7 @@ const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges
 	m_tree->loadBalance();
 
 	// Sync the patch
-	const std::vector<adaption::Info> adaptionData = sync(true, true, trackChanges);
+	std::vector<adaption::Info> adaptionData = sync(true, true, trackChanges);
 
 	// The bounding box is frozen, it is not updated automatically
 	setBoundingBox();

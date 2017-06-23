@@ -189,9 +189,9 @@ PatchKernel::~PatchKernel()
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeezeStorage)
+std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeezeStorage)
 {
-	const std::vector<adaption::Info> adaptionInfo = updateAdaption(trackAdaption, squeezeStorage);
+	std::vector<adaption::Info> adaptionInfo = updateAdaption(trackAdaption, squeezeStorage);
 
 	updateBoundingBox();
 
@@ -208,7 +208,7 @@ const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool s
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption, bool squeezeStorage)
+std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption, bool squeezeStorage)
 {
 	std::vector<adaption::Info> adaptionInfo;
 	if (getAdaptionStatus(true) == ADAPTION_CLEAN) {

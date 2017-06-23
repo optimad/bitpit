@@ -582,7 +582,7 @@ int VolOctree::getCellLevel(const long &id) const
 	tracked
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
+std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 {
 
 	// Updating the tree
@@ -614,7 +614,7 @@ const std::vector<adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	tracked
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges)
+std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges)
 {
 	log::cout() << ">> Syncing patch..." << std::endl;
 

@@ -559,7 +559,7 @@ double VolCartesian::getSpacing(const int &direction) const
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
+std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
 {
 	log::cout() << ">> Updating cartesian mesh\n";
 
