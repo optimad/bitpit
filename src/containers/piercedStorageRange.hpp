@@ -29,6 +29,9 @@
 
 namespace bitpit {
 
+template<typename PKR_id_t>
+class PiercedKernelRange;
+
 template<typename PS_value_t, typename PS_id_t>
 class PiercedStorage;
 
@@ -118,6 +121,8 @@ public:
 
     // General methods
     void swap(PiercedStorageRange &other) noexcept;
+
+    const PiercedKernelRange<id_t> & getKernelRange() const;
 
     // Methods to get begin and end
     template<typename U = value_t, typename U_no_cv = value_no_cv_t,

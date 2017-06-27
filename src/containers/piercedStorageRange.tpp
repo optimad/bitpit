@@ -95,6 +95,16 @@ void PiercedStorageRange<value_t, id_t, value_no_cv_t>::swap(PiercedStorageRange
     std::swap(m_end_pos, other.m_end_pos);
 }
 
+/*!
+* Get a constant reference to the kernel range.
+*
+* \result A constant reference to the kernel range.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+const PiercedKernelRange<id_t> & PiercedStorageRange<value_t, id_t, value_no_cv_t>::getKernelRange() const
+{
+    return static_cast<const PiercedKernelRange<id_t> &>(*this);
+}
 
 /*!
 * Returns an iterator pointing to the first element in the range.
