@@ -293,6 +293,111 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::pu
 }
 
 /**
+* The container is extended by inserting a new element. If the element can
+* reuse an existing position that position will be initialize using args
+* as the argument for its initialization otherwise a new element will be
+* created in-place using args as the arguments for its construction.
+*
+* This function is only enabled if the object stored in the container has
+* an initialization function with a signature like "void initialize(Args...)".
+*
+* \param id is the id that will be associated to the element
+* \param args are the arguments forwarded to construct or initialize the
+* new element
+* \result An iterator that points to the the newly inserted element.
+*/
+template<typename value_t, typename id_t>
+template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaim(id_t id, Args&&... args)
+{
+    // Fill a position
+    FillAction emplaceAction = PiercedKernel<id_t>::fillHead(id);
+
+    // Create the new value in-place
+    return emreclaimValue<Args...>(emplaceAction, std::forward<Args>(args)...);
+}
+
+/**
+* The container is extended by inserting a new element. The element will have
+* a position that is between the element with the specified reference id and
+* the end of the container. If the element can reuse an existing position
+* that position will be initialize using args as the argument for its
+* initialization otherwise a new element will be created in-place using args
+* as the arguments for its construction.
+*
+* This function is only enabled if the object stored in the container has
+* an initialization function with a signature like "void initialize(Args...)".
+*
+* \param referenceId is the id of the element after which the
+* new element will be inserted
+* \param id is the id that will be associated to the element
+* \param args are the arguments forwarded to construct the new element
+* \result An iterator that points to the newly inserted element.
+*/
+template<typename value_t, typename id_t>
+template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimAfter(const id_t &referenceId, id_t id, Args&&... args)
+{
+    // Fill a position
+    FillAction emplaceAction = PiercedKernel<id_t>::fillAfter(referenceId, id);
+
+    // Create the new value in-place
+    return emreclaimValue(emplaceAction, std::forward<Args>(args)...);
+}
+
+/**
+* Inserts a new element at the end of the container, right after its current
+* last element. If the element can reuse an existing position that position
+* will be initialize using args as the argument for its initialization
+* otherwise a new element will be created in-place using args as the arguments
+* for its construction.
+*
+* This function is only enabled if the object stored in the container has
+* an initialization function with a signature like "void initialize(Args...)".
+*
+* \param id is the id that will be associated to the element
+* \param args are the arguments forwarded to construct the new element
+*/
+template<typename value_t, typename id_t>
+template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+void PiercedVector<value_t, id_t>::emreclaimBack(id_t id, Args&&... args)
+{
+    // Fill a position
+    FillAction emplaceAction = PiercedKernel<id_t>::fillAppend(id);
+
+    // Create the new value in-place
+    emreclaimValue(emplaceAction, std::forward<Args>(args)...);
+}
+
+/**
+* The container is extended by inserting a new element. The element will have
+* a position that is between the beginning of the container and the element
+* with the specified reference id. If the element can reuse an existing
+* position that position will be initialize using args as the argument for its
+* initialization otherwise a new element will be created in-place using args
+* as the arguments for its construction.
+*
+* This function is only enabled if the object stored in the container has
+* an initialization function with a signature like "void initialize(Args...)".
+*
+* \param referenceId is the id of the element before which the
+* new element will be inserted
+* \param id is the id that will be associated to the element
+* \param args are the arguments forwarded to construct the new element
+* \result An iterator that points to the newly inserted element.
+*/
+template<typename value_t, typename id_t>
+template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimBefore(const id_t &referenceId, id_t id, Args&&... args)
+{
+    // Fill a position
+    FillAction emplaceAction = PiercedKernel<id_t>::fillBefore(referenceId, id);
+
+    // Create the new value in-place
+    return emreclaimValue(emplaceAction, std::forward<Args>(args)...);
+}
+
+/**
 * The container is extended by inserting a new element. This new element is
 * constructed in place using args as the arguments for its construction.
 *
@@ -1009,6 +1114,60 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
         PiercedStorage<value_t, id_t>::rawPushBack(value);
+        pos = PiercedKernel<id_t>::getLastUsedPos();
+        break;
+    }
+
+    default:
+    {
+        BITPIT_UNREACHABLE("This action is not handled");
+        break;
+    }
+
+    }
+
+    // Return the iterator to the position where the element was inserted
+    return PiercedStorage<value_t, id_t>::getIteratorFromPos(pos);
+}
+
+/**
+* Insert the specified element constructing it in-place.
+*
+* This function is only enabled if the object stored in the container has
+* an initialization function with a signature like "void initialize(Args...)".
+*
+* \param action is the fill action that defines how to insert the element
+* \param args are the arguments forwarded to the elements' construct when
+* synchronizing the action
+*/
+template<typename value_t, typename id_t>
+template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimValue(const FillAction &action, Args&&... args)
+{
+    std::size_t pos = action.info[PiercedSyncAction::INFO_POS];
+    switch (static_cast<typename FillAction::FillActionType>(action.type)) {
+
+    case FillAction::TYPE_OVERWRITE:
+    {
+        PiercedStorage<value_t, id_t>::rawInitialize(pos, std::forward<Args>(args)...);
+        break;
+    }
+
+    case FillAction::TYPE_INSERT:
+    {
+        // Since we are increasing the sotrage by an element at the time
+        // calling a reserve will hurt performance badly because this will
+        // prevent the automatic reallocation of the storage.
+        PiercedStorage<value_t, id_t>::rawEmplace(pos, std::forward<Args>(args)...);
+        break;
+    }
+
+    case FillAction::TYPE_APPEND:
+    {
+        // Since we are increasing the sotrage by an element at the time
+        // calling a reserve will hurt performance badly because this will
+        // prevent the automatic reallocation of the storage.
+        PiercedStorage<value_t, id_t>::rawEmplaceBack(std::forward<Args>(args)...);
         pos = PiercedKernel<id_t>::getLastUsedPos();
         break;
     }

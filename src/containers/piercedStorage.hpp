@@ -113,6 +113,28 @@ private:
 
     public:
         static const bool value = has_dump<T>();
+
+    };
+
+    /**
+    * Checks if the elements stored in the storage have initialize capability
+    */
+    template <typename T, typename Ret, typename... Args>
+    class check_initialize
+    {
+
+    private:
+        template<typename C>
+        static constexpr auto test_initialize(C *)
+            -> typename std::is_same<decltype(std::declval<C>().initialize(std::declval<Args>()...)), Ret>::type;
+
+        template<typename class_t>
+        static constexpr auto test_initialize(...)
+            -> std::false_type;
+
+    public:
+        static const bool value = std::is_same<decltype(test_initialize<T>(nullptr)), std::true_type>();
+
     };
 
 public:
@@ -210,6 +232,15 @@ public:
     static constexpr bool has_dump()
     {
         return check_dump<value_t>::value;
+    };
+
+    /**
+    * Checks if the storage has the 'initialize' capability
+    */
+    template<typename... Args>
+    static constexpr bool has_initialize()
+    {
+        return check_initialize<value_t, void, Args...>::value;
     };
 
     // Constructors and initialization
@@ -324,6 +355,12 @@ protected:
     void rawReorder(const std::vector<std::size_t> &permutations);
 
     void rawResize(std::size_t n, const value_t &value = value_t());
+
+    template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type * = nullptr>
+    void rawInitialize(std::size_t pos, Args&&... args);
+    template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type * = nullptr>
+    void rawInitialize(std::size_t pos, std::size_t k, Args&&... args);
+
     void rawInsert(std::size_t pos, std::size_t n, const value_t &value);
     void rawPushBack(const value_t &value);
     template<typename T = value_t, typename std::enable_if<!std::is_same<T, bool>::value>::type * = nullptr, typename... Args>

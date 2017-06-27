@@ -443,6 +443,35 @@ void PiercedStorage<value_t, id_t>::rawResize(std::size_t n, const value_t &valu
 }
 
 /**
+* Initialize an element.
+*
+* \param pos is the position of the element to initialize
+* \param args are the arguments forwarded to initialize the new element
+*/
+template<typename value_t, typename id_t>
+template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type *>
+void PiercedStorage<value_t, id_t>::rawInitialize(std::size_t pos, Args&&... args)
+{
+    for (std::size_t k = 0; k < m_nFields; ++k) {
+        rawInitialize(pos, k, std::forward<Args>(args)...);
+    }
+}
+
+/**
+* Initialize the specified field of an element.
+*
+* \param pos is the position of the element to initialize
+* \param k is the index of the field to initialize
+* \param args are the arguments forwarded to initialize the new element
+*/
+template<typename value_t, typename id_t>
+template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type *>
+void PiercedStorage<value_t, id_t>::rawInitialize(std::size_t pos, std::size_t k, Args&&... args)
+{
+    rawAt(pos, k).initialize(std::forward<Args>(args)...);
+}
+
+/**
 * Insert the specified number of elements in the storage
 *
 * \param pos is the position where the new elements will be inserted
