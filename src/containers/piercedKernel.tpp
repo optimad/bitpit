@@ -1907,6 +1907,161 @@ void PiercedKernel<id_t>::shrink(std::size_t n, bool force)
     processSyncAction(syncAction);
 }
 
+/**
+* Register the specified storage
+*
+* \param storage is the storage that will be registered
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename id_t>
+void PiercedKernel<id_t>::registerStorage(PiercedSyncSlave *storage, PiercedSyncMaster::SyncMode syncMode)
+{
+    registerSlave(storage, syncMode);
+}
+
+/**
+* Unregister the specified storage->
+*
+* \param storage is the storage that will be unregistered
+*/
+template<typename id_t>
+void PiercedKernel<id_t>::unregisterStorage(const PiercedSyncSlave *storage)
+{
+    unregisterSlave(storage);
+}
+
+/**
+* Check if te specified storage is registered.
+*
+* \param storage is the storage to check
+*/
+template<typename id_t>
+bool PiercedKernel<id_t>::isStorageRegistered(const PiercedSyncSlave *storage) const
+{
+    return isSlaveRegistered(storage);
+}
+
+/**
+* Get the synchronization mode for the specified storage
+*
+* \param storage is the storage for which the synchronization mode is requested
+* \result The synchronization mode of the storage->
+*/
+template<typename id_t>
+typename PiercedSyncMaster::SyncMode PiercedKernel<id_t>::getStorageSyncMode(const PiercedSyncSlave *storage) const
+{
+    return getSlaveSyncMode(storage);
+}
+
+/**
+* Restore the vector.
+*
+* \param stream is the stream data should be read from
+*/
+template<typename id_t>
+void PiercedKernel<id_t>::restore(std::istream &stream)
+{
+    // Ids data
+    std::size_t nIds;
+    utils::binary::read(stream, nIds);
+    m_pos.reserve(nIds);
+    for (std::size_t n = 0; n < nIds; ++n) {
+        std::size_t id;
+        utils::binary::read(stream, id);
+
+        std::size_t pos;
+        utils::binary::read(stream, pos);
+
+        m_pos.insert({id, pos});
+    }
+
+    // Postions data
+    std::size_t nPositions;
+    utils::binary::read(stream, nPositions);
+    m_ids.resize(nPositions);
+    for (std::size_t n = 0; n < nPositions; ++n) {
+        std::size_t id;
+        utils::binary::read(stream, id);
+
+        m_ids[n] = id;
+    }
+
+    utils::binary::read(stream, m_begin_pos);
+    utils::binary::read(stream, m_end_pos);
+    utils::binary::read(stream, m_dirty_begin_pos);
+
+    // Holes data
+    std::size_t nHoles = size();
+    utils::binary::read(stream, nHoles);
+    m_holes.resize(nHoles);
+    for (std::size_t n = 0; n < nHoles; ++n) {
+        std::size_t pos;
+        utils::binary::read(stream, pos);
+
+        m_holes[n] = pos;
+    }
+
+    std::size_t distance;
+    utils::binary::read(stream, distance);
+    m_holes_regular_begin = m_holes.begin() + distance;
+    utils::binary::read(stream, distance);
+    m_holes_regular_end = m_holes.begin() + distance;
+    utils::binary::read(stream, distance);
+    m_holes_pending_begin = m_holes.begin() + distance;
+    utils::binary::read(stream, distance);
+    m_holes_pending_end = m_holes.begin() + distance;
+    utils::binary::read(stream, m_holes_regular_sorted);
+    utils::binary::read(stream, m_holes_pending_sorted);
+
+    // Synchronization data
+    PiercedSyncMaster::restore(stream);
+}
+
+/**
+* Dump the vector.
+*
+* \param stream is the stream data should be written to
+*/
+template<typename id_t>
+void PiercedKernel<id_t>::dump(std::ostream &stream) const
+{
+    // Ids data
+    std::size_t nIds = size();
+    utils::binary::write(stream, nIds);
+    for (const auto &entry : m_pos) {
+        utils::binary::write(stream, entry.first);
+        utils::binary::write(stream, entry.second);
+    }
+
+    // Postions data
+    std::size_t nPositions = size();
+    utils::binary::write(stream, nPositions);
+    for (std::size_t pos : m_ids) {
+        utils::binary::write(stream, pos);
+    }
+
+    utils::binary::write(stream, m_begin_pos);
+    utils::binary::write(stream, m_end_pos);
+    utils::binary::write(stream, m_dirty_begin_pos);
+
+    // Holes data
+    std::size_t nHoles = size();
+    utils::binary::write(stream, nHoles);
+    for (std::size_t hole : m_holes) {
+        utils::binary::write(stream, hole);
+    }
+
+    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_regular_begin));
+    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_regular_end));
+    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_pending_begin));
+    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_pending_end));
+    utils::binary::write(stream, m_holes_regular_sorted);
+    utils::binary::write(stream, m_holes_pending_sorted);
+
+    // Synchronization data
+    PiercedSyncMaster::dump(stream);
+}
+
 }
 
 #endif

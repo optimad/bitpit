@@ -85,6 +85,10 @@ public:
     std::array<std::size_t, INFO_COUNT> info;
     std::unique_ptr<std::vector<std::size_t>> data;
 
+    // Dump and restore
+    void restore(std::istream &stream);
+    void dump(std::ostream &stream) const;
+
 };
 
 /**
@@ -183,6 +187,10 @@ protected:
     void swap(PiercedSyncMaster &x) noexcept;
 
     void processSyncAction(const PiercedSyncAction &action);
+
+    // Dump and restore
+    void restore(std::istream &stream);
+    void dump(std::ostream &stream) const;
 
 private:
     bool m_syncEnabled;

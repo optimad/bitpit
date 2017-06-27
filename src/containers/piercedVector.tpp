@@ -901,6 +901,34 @@ typename PiercedSyncMaster::SyncMode PiercedVector<value_t, id_t>::getStorageSyn
 }
 
 /**
+* Restore the container.
+*
+* \param stream is the stream data should be read from
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type *>
+void PiercedVector<value_t, id_t>::restore(std::istream &stream)
+{
+    PiercedKernel<id_t>::restore(stream);
+
+    PiercedStorage<T, id_t>::restore(stream);
+}
+
+/**
+* Dump the container.
+*
+* \param stream is the stream data should be written to
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type *>
+void PiercedVector<value_t, id_t>::dump(std::ostream &stream) const
+{
+    PiercedKernel<id_t>::dump(stream);
+
+    PiercedStorage<T, id_t>::dump(stream);
+}
+
+/**
 * Reclaim the specified element.
 *
 * \param action is the fill action that defines how to reclaim the element

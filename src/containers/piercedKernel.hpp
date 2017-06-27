@@ -195,6 +195,10 @@ public:
 
     using PiercedSyncMaster::sync;
 
+    // Dump and restore
+    void restore(std::istream &stream);
+    void dump(std::ostream &stream) const;
+
 protected:
     /**
     * Fill action

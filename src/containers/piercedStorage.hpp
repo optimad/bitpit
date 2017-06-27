@@ -65,6 +65,56 @@ class PiercedStorage : public BasePiercedStorage {
 template<typename PI_value_t, typename PI_id_t, typename PI_value_no_cv_t>
 friend class PiercedIterator;
 
+private:
+    /**
+    * Checks if the elements stored in the storage have restore capability
+    */
+    template <typename T>
+    class check_restore
+    {
+
+    private:
+        template<typename class_t>
+        static std::true_type test_restore(decltype(std::declval<class_t>().restore(std::declval<std::ostream &>())) *);
+
+        template<typename class_t>
+        static std::false_type test_restore(...);
+
+        template<typename class_t>
+        static constexpr bool has_restore()
+        {
+            return std::is_same<decltype(test_restore<class_t>(nullptr)), std::true_type>();
+        };
+
+    public:
+        static const bool value = has_restore<T>();
+
+    };
+
+    /**
+    * Checks if the elements stored in the storage have dump capability
+    */
+    template <typename T>
+    class check_dump
+    {
+
+    private:
+        template<typename class_t>
+        static std::true_type test_dump(decltype(std::declval<class_t>().dump(std::declval<std::istream &>())) *);
+
+        template<typename class_t>
+        static std::false_type test_dump(...);
+
+        template<typename class_t>
+        static constexpr bool has_dump()
+        {
+            return std::is_same<decltype(test_dump<class_t>(nullptr)), std::true_type>();
+        };
+
+    public:
+        static const bool value = has_dump<T>();
+    };
+
 public:
     // Template typedef
 
@@ -145,6 +195,22 @@ public:
     * Constant range
     */
     typedef PiercedRange<const value_t, id_t> const_range;
+
+    /**
+    * Checks if the storage has the 'restore' capability
+    */
+    static constexpr bool has_restore()
+    {
+        return check_restore<value_t>::value;
+    };
+
+    /**
+    * Checks if the storage has the 'dump' capability
+    */
+    static constexpr bool has_dump()
+    {
+        return check_dump<value_t>::value;
+    };
 
     // Constructors and initialization
     PiercedStorage();
@@ -230,6 +296,13 @@ public:
     raw_const_iterator rawCbegin() const noexcept;
     raw_const_iterator rawCend() const noexcept;
 
+    // Dump and restore
+    template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value || PiercedStorage<T, id_t>::has_restore()>::type * = nullptr>
+    void restore(std::istream &stream);
+
+    template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value || PiercedStorage<T, id_t>::has_dump()>::type * = nullptr>
+    void dump(std::ostream &stream) const;
+
 protected:
     // Methos for getting information on the storage
     std::size_t rawSize() const;
@@ -274,6 +347,18 @@ private:
 
     const PiercedKernel<id_t> *m_kernel;
     PiercedSyncMaster *m_master;
+
+    template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value>::type * = nullptr>
+    void restoreField(std::istream &stream, T &value);
+
+    template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_restore()>::type * = nullptr>
+    void restoreField(std::istream &stream, T &object);
+
+    template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value>::type * = nullptr>
+    void dumpField(std::ostream &stream, const T &value) const;
+
+    template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump()>::type * = nullptr>
+    void dumpField(std::ostream &stream, const T &object) const;
 
 };
 

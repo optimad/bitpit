@@ -1153,6 +1153,107 @@ typename PiercedStorage<value_t, id_t>::raw_const_iterator PiercedStorage<value_
 }
 
 /**
+* Restore the storage.
+*
+* \param stream is the stream data should be read from
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<std::is_pod<T>::value || PiercedStorage<T, id_t>::has_restore()>::type *>
+void PiercedStorage<value_t, id_t>::restore(std::istream &stream)
+{
+    // Size
+    std::size_t nElements;
+    utils::binary::read(stream, nElements);
+    rawResize(nElements);
+
+    // Fill the storage
+    auto begin_itr = m_fields.cbegin() + m_kernel->m_begin_pos;
+    auto end_itr   = m_fields.cbegin() + m_kernel->m_end_pos;
+
+    size_t pos = m_kernel->m_begin_pos;
+    for (auto itr = begin_itr; itr != end_itr; ++itr) {
+        restoreField(stream, m_fields[pos]);
+        ++pos;
+    }
+}
+
+/**
+* Restore a field.
+*
+* \param stream is the stream data should be read from
+* \param value on output will contain the restored value
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<std::is_pod<T>::value>::type *>
+void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, T &value)
+{
+    utils::binary::read(stream, value);
+}
+
+
+/**
+* Restore a field.
+*
+* \param stream is the stream data should be read from
+* \param object on output will contain the restored object
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_restore()>::type *>
+void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, T &object)
+{
+    object.restore(stream);
+}
+
+/**
+* Dump the storage.
+*
+* \param stream is the stream data should be written to
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<std::is_pod<T>::value || PiercedStorage<T, id_t>::has_dump()>::type *>
+void PiercedStorage<value_t, id_t>::dump(std::ostream &stream) const
+{
+    // Size
+    utils::binary::write(stream, rawSize());
+
+    // Fileds
+    auto begin_itr = m_fields.cbegin() + m_kernel->m_begin_pos;
+    auto end_itr   = m_fields.cbegin() + m_kernel->m_end_pos;
+
+    size_t pos = m_kernel->m_begin_pos;
+    for (auto itr = begin_itr; itr != end_itr; ++itr) {
+        dumpField(stream, m_fields[pos]);
+        ++pos;
+    }
+}
+
+/**
+* Dump a field.
+*
+* \param stream is the stream data should be written to
+* \param value is the value that will be dumped
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<std::is_pod<T>::value>::type *>
+void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const T &value) const
+{
+    utils::binary::write(stream, value);
+}
+
+/**
+* Dump a field.
+*
+* \param stream is the stream data should be written to
+* \param object is the object that will be dumped
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump()>::type *>
+void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const T &object) const
+{
+    object.dump(stream);
+}
+
+/**
 * Gets an iterator pointing to the element in the specified position.
 *
 * \param pos is the position of the element

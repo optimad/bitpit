@@ -103,6 +103,49 @@ void PiercedSyncAction::importData(const std::vector<std::size_t> &values)
 }
 
 /**
+* Restore the action.
+*
+* \param stream is the stream data should be read from
+*/
+void PiercedSyncAction::restore(std::istream &stream)
+{
+    int actionType;
+    utils::binary::read(stream, actionType);
+    type = static_cast<ActionType>(actionType);
+
+    for (int k = 0; k < INFO_COUNT; ++k) {
+        utils::binary::read(stream, info[k]);
+    }
+
+    std::size_t dataSize;
+    utils::binary::read(stream, dataSize);
+    data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(dataSize));
+    for (std::size_t k = 0; k < dataSize; ++k) {
+        utils::binary::read(stream, (*data)[k]);
+    }
+}
+
+/**
+* Dump the action.
+*
+* \param stream is the stream data should be written to
+*/
+void PiercedSyncAction::dump(std::ostream &stream) const
+{
+    utils::binary::write(stream, static_cast<int>(type));
+
+    for (int k = 0; k < INFO_COUNT; ++k) {
+        utils::binary::write(stream, info[k]);
+    }
+
+    std::size_t dataSize = data->size();
+    utils::binary::write(stream, dataSize);
+    for (std::size_t k = 0; k < dataSize; ++k) {
+        utils::binary::write(stream, (*data)[k]);
+    }
+}
+
+/**
 * \class PiercedSyncSlave
 * \ingroup containers
 *
@@ -338,6 +381,35 @@ void PiercedSyncMaster::setSyncEnabled(bool enabled)
 bool PiercedSyncMaster::isSyncEnabled() const
 {
     return m_syncEnabled;
+}
+
+/**
+* Restore the object.
+*
+* \param stream is the stream data should be read from
+*/
+void PiercedSyncMaster::restore(std::istream &stream)
+{
+    std::size_t journalSize;
+    utils::binary::read(stream, journalSize);
+    m_syncJournal.resize(journalSize);
+    for (PiercedSyncAction &action : m_syncJournal) {
+        action.restore(stream);
+    }
+}
+
+/**
+* Dump the object.
+*
+* \param stream is the stream data should be written to
+*/
+void PiercedSyncMaster::dump(std::ostream &stream) const
+{
+    std::size_t journalSize = m_syncJournal.size();
+    utils::binary::write(stream, journalSize);
+    for (const PiercedSyncAction &action : m_syncJournal) {
+        action.dump(stream);
+    }
 }
 
 }

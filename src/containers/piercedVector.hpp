@@ -268,6 +268,13 @@ public:
 
     using PiercedKernel<id_t>::sync;
 
+    // Dump and restore
+    template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type * = nullptr>
+    void restore(std::istream &stream);
+
+    template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type * = nullptr>
+    void dump(std::ostream &stream) const;
+
 private:
     typedef typename PiercedKernel<id_t>::FillAction FillAction;
     typedef typename PiercedKernel<id_t>::MoveAction MoveAction;
