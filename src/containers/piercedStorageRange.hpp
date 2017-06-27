@@ -122,6 +122,8 @@ public:
     // General methods
     void swap(PiercedStorageRange &other) noexcept;
 
+    storage_type & getStorage() const;
+
     const PiercedKernelRange<id_t> & getKernelRange() const;
 
     // Methods to get begin and end

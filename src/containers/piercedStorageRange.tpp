@@ -96,6 +96,17 @@ void PiercedStorageRange<value_t, id_t, value_no_cv_t>::swap(PiercedStorageRange
 }
 
 /*!
+* Get a constant reference of the storage associated with the range.
+*
+* \result A constant reference of the storage associated with the range.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::storage_type & PiercedStorageRange<value_t, id_t, value_no_cv_t>::getStorage() const
+{
+    return *m_storage;
+}
+
+/*!
 * Get a constant reference to the kernel range.
 *
 * \result A constant reference to the kernel range.
