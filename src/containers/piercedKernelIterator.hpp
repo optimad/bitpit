@@ -45,7 +45,6 @@ class PiercedKernel;
 */
 template<typename id_t = long>
 class PiercedKernelIterator
-    : public std::iterator<std::forward_iterator_tag, id_t, std::ptrdiff_t, const id_t*, const id_t&>
 {
 
 template<typename PK_id_t>
@@ -70,6 +69,31 @@ private:
     typedef Kernel<id_t> kernel_t;
 
 public:
+    /*!
+    * Iterator category
+    */
+    typedef std::forward_iterator_tag iterator_category;
+
+    /*!
+    * Value type
+    */
+    typedef id_t value_type;
+
+    /*!
+    * Difference type
+    */
+    typedef std::ptrdiff_t difference_type;
+
+    /*!
+    * Pointer type
+    */
+    typedef const id_t * pointer;
+
+    /*!
+    * Reference type
+    */
+    typedef const id_t & reference;
+
     /**
     * Kernel type
     */
