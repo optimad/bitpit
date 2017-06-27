@@ -27,6 +27,8 @@
 
 #include <stdexcept>
 
+#include "piercedKernel.hpp"
+
 namespace bitpit {
 
 template<typename PKR_id_t>

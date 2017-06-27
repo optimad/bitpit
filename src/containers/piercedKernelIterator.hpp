@@ -51,6 +51,9 @@ class PiercedKernelIterator
 template<typename PK_id_t>
 friend class PiercedKernel;
 
+template<typename PSI_value_t, typename PSI_id_t, typename PSI_value_no_cv_t>
+friend class PiercedStorageIterator;
+
 private:
     /**
     * Kernel.

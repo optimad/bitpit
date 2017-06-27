@@ -51,7 +51,7 @@ class PiercedStorage;
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type>
 class PiercedStorageIterator
-    : public std::iterator<std::forward_iterator_tag, value_no_cv_t, std::ptrdiff_t, value_t*, value_t&>
+    : protected bitpit::PiercedKernelIterator<id_t>
 {
 
 friend class PiercedStorageIterator<value_no_cv_t, id_t, value_no_cv_t>;
@@ -86,20 +86,52 @@ private:
     typedef typename storage_t::kernel_t kernel_t;
 
 public:
+    /**
+    * Id type
+    */
+    typedef id_t id_type;
+
+    /*!
+    * Iterator category
+    */
+    typedef std::forward_iterator_tag iterator_category;
+
+    /*!
+    * Value type
+    */
+    typedef value_t value_type;
+
+    /*!
+    * Difference type
+    */
+    typedef std::ptrdiff_t difference_type;
+
+    /*!
+    * Pointer type
+    */
+    typedef
+        typename std::conditional<std::is_const<value_t>::value,
+            typename Storage<value_no_cv_t, id_t>::const_pointer,
+            typename Storage<value_no_cv_t, id_t>::pointer
+        >::type
+
+        pointer;
+
+    /*!
+    * Reference type
+    */
+    typedef
+        typename std::conditional<std::is_const<value_t>::value,
+            typename Storage<value_no_cv_t, id_t>::const_reference,
+            typename Storage<value_no_cv_t, id_t>::reference
+        >::type
+
+        reference;
+
     /*!
     *Constant container
     */
     typedef storage_t storage_type;
-
-    /**
-    * Type of values in the storage
-    */
-    typedef value_t value_type;
-
-    /**
-    * Type of ids in the kernel
-    */
-    typedef id_t id_type;
 
     // Constructors
     PiercedStorageIterator();
@@ -112,8 +144,9 @@ public:
     const PiercedKernelIterator<id_t> & getKernelIterator() const;
 
     // Methos to extract information on the current element
-    id_t getId(const id_t &fallback = -1) const noexcept;
-    std::size_t getRawIndex() const noexcept;
+    using PiercedKernelIterator<id_t>::getId;
+    using PiercedKernelIterator<id_t>::getRawIndex;
+
     __PSI_REFERENCE__ getValue(std::size_t k = 0) const;
 
     // Operators
@@ -134,7 +167,7 @@ public:
          typename other_value_no_cv_t = typename std::remove_cv<value_t>::type>
     bool operator==(const PiercedStorageIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
     {
-        return (m_storage == rhs.m_storage) && (m_pos == rhs.m_pos);
+        return (PiercedKernelIterator<id_t>::operator==(rhs) && m_storage == rhs.m_storage);
     }
 
     /**
@@ -144,7 +177,7 @@ public:
          typename other_value_no_cv_t = typename std::remove_cv<value_t>::type>
     bool operator!=(const PiercedStorageIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
     {
-        return (m_storage != rhs.m_storage) || (m_pos != rhs.m_pos);
+        return (PiercedKernelIterator<id_t>::operator!=(rhs) || m_storage != rhs.m_storage);
     }
 
 private:
@@ -152,16 +185,6 @@ private:
     * Internal pointer to the storage.
     */
     storage_t *m_storage;
-
-    /**
-    * Internal pointer to the kernel.
-    */
-    const kernel_t *m_kernel;
-
-    /**
-    * Position inside the kernel.
-    */
-    std::size_t m_pos;
 
     // Constructors
     explicit PiercedStorageIterator(storage_t *storage, const std::size_t &pos);
