@@ -25,6 +25,8 @@
 #ifndef __BITPIT_PIERCED_RANGE_HPP__
 #define __BITPIT_PIERCED_RANGE_HPP__
 
+#include <stdexcept>
+
 namespace bitpit {
 
 template<typename PS_value_t, typename PS_id_t>
