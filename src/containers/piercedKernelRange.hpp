@@ -69,6 +69,8 @@ public:
     PiercedKernelRange();
     PiercedKernelRange(kernel_t *kernel);
     PiercedKernelRange(kernel_t *kernel, id_t first, id_t last);
+    PiercedKernelRange(const kernel_t *kernel);
+    PiercedKernelRange(const kernel_t *kernel, id_t first, id_t last);
     PiercedKernelRange(const_iterator begin, const_iterator end);
 
     // General methods

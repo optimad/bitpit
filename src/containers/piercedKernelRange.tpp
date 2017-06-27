@@ -42,7 +42,7 @@ PiercedKernelRange<id_t>::PiercedKernelRange()
 * Constructor.
 */
 template<typename id_t>
-PiercedKernelRange<id_t>::PiercedKernelRange(kernel_t *kernel)
+PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel)
     : m_kernel(kernel),
       m_begin_pos(kernel->cbegin().getRawIndex()),
       m_end_pos(kernel->cend().getRawIndex())
@@ -56,7 +56,7 @@ PiercedKernelRange<id_t>::PiercedKernelRange(kernel_t *kernel)
 * \param last is the id of the last element in the range
 */
 template<typename id_t>
-PiercedKernelRange<id_t>::PiercedKernelRange(kernel_t *kernel, id_t first, id_t last)
+PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel, id_t first, id_t last)
     : m_kernel(kernel),
       m_begin_pos(kernel->getRawIndex(first)),
       m_end_pos(kernel->getRawIndex(last) + 1)
