@@ -30,6 +30,7 @@
  * @defgroup common::utils Utils
  *     @{
  *     @defgroup common::utils::string String utils
+ *     @defgroup common::utils::binary Binary utils
  *     @}
  * @defgroup macro Macros
  * @}
@@ -42,6 +43,7 @@
 
 #include "bitpit_version.hpp"
 
+#include "binaryUtils.hpp"
 #include "compiler.hpp"
 #include "utils.hpp"
 #include "utils.tpp"

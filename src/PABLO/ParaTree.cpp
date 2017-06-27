@@ -334,75 +334,75 @@ namespace bitpit {
     void ParaTree::dump(std::ostream &stream, bool full)
     {
         // Version
-        IO::binary::write(stream, getDumpVersion());
+        utils::binary::write(stream, getDumpVersion());
 
         // Tree data
-        IO::binary::write(stream, getNproc());
+        utils::binary::write(stream, getNproc());
 
-        IO::binary::write(stream, getDim());
+        utils::binary::write(stream, getDim());
 
-        IO::binary::write(stream, getSerial());
-        IO::binary::write(stream, getMaxDepth());
-        IO::binary::write(stream, getStatus());
-        IO::binary::write(stream, getBalanceCodimension());
+        utils::binary::write(stream, getSerial());
+        utils::binary::write(stream, getMaxDepth());
+        utils::binary::write(stream, getStatus());
+        utils::binary::write(stream, getBalanceCodimension());
 
         for (int i = 0; i < m_global.m_nfaces; i++) {
-            IO::binary::write(stream, getPeriodic(i));
+            utils::binary::write(stream, getPeriodic(i));
         }
 
         // Octant data
         uint32_t nOctants = getNumOctants();
-        IO::binary::write(stream, nOctants);
+        utils::binary::write(stream, nOctants);
 
         uint32_t nGlobalOctants = getGlobalNumOctants();
-        IO::binary::write(stream, nGlobalOctants);
+        utils::binary::write(stream, nGlobalOctants);
 
         for (uint32_t i = 0; i < nOctants; i++) {
             const Octant &octant = m_octree.m_octants[i];
 
-            IO::binary::write(stream, octant.getLevel());
-            IO::binary::write(stream, octant.getX());
-            IO::binary::write(stream, octant.getY());
-            IO::binary::write(stream, octant.getZ());
+            utils::binary::write(stream, octant.getLevel());
+            utils::binary::write(stream, octant.getX());
+            utils::binary::write(stream, octant.getY());
+            utils::binary::write(stream, octant.getZ());
 
             for (size_t k = 0; k < octant.m_info.size(); ++k) {
-                IO::binary::write(stream, (bool) octant.m_info[k]);
+                utils::binary::write(stream, (bool) octant.m_info[k]);
             }
 
-            IO::binary::write(stream, octant.getBalance());
-            IO::binary::write(stream, octant.getMarker());
+            utils::binary::write(stream, octant.getBalance());
+            utils::binary::write(stream, octant.getMarker());
         }
 
         // Information about partitioning
         for (int k = 0; k < m_nproc; ++k) {
-            IO::binary::write(stream, m_partitionFirstDesc[k]);
+            utils::binary::write(stream, m_partitionFirstDesc[k]);
         }
 
         for (int k = 0; k < m_nproc; ++k) {
-            IO::binary::write(stream, m_partitionLastDesc[k]);
+            utils::binary::write(stream, m_partitionLastDesc[k]);
         }
 
         for (int k = 0; k < m_nproc; ++k) {
-            IO::binary::write(stream, m_partitionRangeGlobalIdx[k]);
+            utils::binary::write(stream, m_partitionRangeGlobalIdx[k]);
         }
 
         // Extended information (mapping, ...)
-        IO::binary::write(stream, full);
+        utils::binary::write(stream, full);
         if (full) {
-            IO::binary::write(stream, m_lastOp);
+            utils::binary::write(stream, m_lastOp);
             if (m_lastOp == OP_ADAPT_MAPPED){
                 for (auto idx : m_mapIdx) {
-                    IO::binary::write(stream, idx);
+                    utils::binary::write(stream, idx);
                 }
 
-                IO::binary::write(stream, m_octree.m_lastGhostBros.size());
+                utils::binary::write(stream, m_octree.m_lastGhostBros.size());
                 for (auto lastGhostBrother : m_octree.m_lastGhostBros) {
-                    IO::binary::write(stream, lastGhostBrother);
+                    utils::binary::write(stream, lastGhostBrother);
                 }
             }
             else if (m_lastOp == OP_LOADBALANCE || m_lastOp == OP_LOADBALANCE_FIRST){
                 for (int i = 0; i < m_nproc; ++i) {
-                    IO::binary::write(stream, m_partitionRangeGlobalIdx0[i]);
+                    utils::binary::write(stream, m_partitionRangeGlobalIdx0[i]);
                 }
             }
         }
@@ -419,21 +419,21 @@ namespace bitpit {
     {
         // Version
         int version;
-        IO::binary::read(stream, version);
+        utils::binary::read(stream, version);
         if (version != getDumpVersion()) {
             throw std::runtime_error ("The version of the file does not match the required version");
         }
 
         // Check if the number of processors matches
         int nProcs;
-        IO::binary::read(stream, nProcs);
+        utils::binary::read(stream, nProcs);
         if (nProcs != m_nproc) {
             throw std::runtime_error ("The restart was saved with a different number of processors.");
         }
 
         // Initialize the tree
         uint8_t dimension;
-        IO::binary::read(stream, dimension);
+        utils::binary::read(stream, dimension);
 
         m_octree.initialize(dimension);
         m_trans.initialize(dimension);
@@ -441,17 +441,17 @@ namespace bitpit {
         reset(false);
 
         // Set tree properties
-        IO::binary::read(stream, m_serial);
-        IO::binary::read(stream, m_maxDepth);
-        IO::binary::read(stream, m_status);
+        utils::binary::read(stream, m_serial);
+        utils::binary::read(stream, m_maxDepth);
+        utils::binary::read(stream, m_status);
 
         bool balanceCodimension;
-        IO::binary::read(stream, balanceCodimension);
+        utils::binary::read(stream, balanceCodimension);
         setBalanceCodimension(balanceCodimension);
 
         for (int i = 0; i < m_global.m_nfaces; i++) {
             bool periodicBorder;
-            IO::binary::read(stream, periodicBorder);
+            utils::binary::read(stream, periodicBorder);
             if (periodicBorder){
             	setPeriodic(i);
             }
@@ -459,11 +459,11 @@ namespace bitpit {
 
         // Restore octants
         uint32_t nOctants;
-        IO::binary::read(stream, nOctants);
+        utils::binary::read(stream, nOctants);
         m_octree.m_sizeOctants = nOctants;
 
         uint32_t nGlobalOctants;
-        IO::binary::read(stream, nGlobalOctants);
+        utils::binary::read(stream, nGlobalOctants);
         m_globalNumOctants = nGlobalOctants;
 
         m_octree.m_octants.clear();
@@ -471,34 +471,34 @@ namespace bitpit {
         for (uint32_t i = 0; i < nOctants; i++) {
             // Create octant
             uint8_t level;
-            IO::binary::read(stream, level);
+            utils::binary::read(stream, level);
 
             uint32_t x;
-            IO::binary::read(stream, x);
+            utils::binary::read(stream, x);
 
             uint32_t y;
-            IO::binary::read(stream, y);
+            utils::binary::read(stream, y);
 
             uint32_t z;
-            IO::binary::read(stream, z);
+            utils::binary::read(stream, z);
 
             Octant octant(false, m_dim, level, x, y, z);
 
             // Set octant info
             for (size_t k = 0; k < octant.m_info.size(); ++k) {
                 bool bit;
-                IO::binary::read(stream, bit);
+                utils::binary::read(stream, bit);
                 octant.m_info.set(k, bit);
             }
 
             // Set octant 2:1 balance
             bool balance21;
-            IO::binary::read(stream, balance21);
+            utils::binary::read(stream, balance21);
             octant.setBalance(balance21);
 
             // Set marker
             int8_t marker;
-            IO::binary::read(stream, marker);
+            utils::binary::read(stream, marker);
             octant.setMarker(marker);
 
             // Add octant to the list
@@ -511,7 +511,7 @@ namespace bitpit {
         m_partitionFirstDesc.resize(m_nproc);
         for (int k = 0; k < m_nproc; ++k) {
             uint64_t descendant;
-            IO::binary::read(stream, descendant);
+            utils::binary::read(stream, descendant);
             m_partitionFirstDesc[k] = descendant;
         }
         m_octree.m_firstDescMorton = m_partitionFirstDesc[m_rank];
@@ -519,7 +519,7 @@ namespace bitpit {
         m_partitionLastDesc.resize(m_nproc);
         for (int k = 0; k < m_nproc; ++k) {
             uint64_t descendant;
-            IO::binary::read(stream, descendant);
+            utils::binary::read(stream, descendant);
             m_partitionLastDesc[k] = descendant;
         }
         m_octree.m_lastDescMorton = m_partitionLastDesc[m_rank];
@@ -528,7 +528,7 @@ namespace bitpit {
         m_partitionRangeGlobalIdx.resize(m_nproc);
         for (int k = 0; k < m_nproc; ++k) {
             uint64_t rangeGlobalIdx;
-            IO::binary::read(stream, rangeGlobalIdx);
+            utils::binary::read(stream, rangeGlobalIdx);
             m_partitionRangeGlobalIdx[k] = rangeGlobalIdx;
         }
 
@@ -546,25 +546,25 @@ namespace bitpit {
         }
 
         bool full;
-        IO::binary::read(stream, full);
+        utils::binary::read(stream, full);
         if (full) {
-            IO::binary::read(stream, m_lastOp);
+            utils::binary::read(stream, m_lastOp);
             if (m_lastOp == OP_ADAPT_MAPPED) {
                 m_mapIdx.resize(m_octree.m_octants.size());
                 for (size_t i = 0; i < m_octree.m_octants.size(); ++i) {
-                    IO::binary::read(stream, m_mapIdx[i]);
+                    utils::binary::read(stream, m_mapIdx[i]);
                 }
 
                 size_t lastGhostBrosSize;
-                IO::binary::read(stream, lastGhostBrosSize);
+                utils::binary::read(stream, lastGhostBrosSize);
                 m_octree.m_lastGhostBros.resize(lastGhostBrosSize);
                 for (size_t i = 0; i < lastGhostBrosSize; ++i) {
-                    IO::binary::read(stream, m_octree.m_lastGhostBros[i]);
+                    utils::binary::read(stream, m_octree.m_lastGhostBros[i]);
                 }
             }
             else if (m_lastOp == OP_LOADBALANCE || m_lastOp == OP_LOADBALANCE_FIRST){
                 for (int i = 0; i < m_nproc; ++i) {
-                    IO::binary::read(stream, m_partitionRangeGlobalIdx0[i]);
+                    utils::binary::read(stream, m_partitionRangeGlobalIdx0[i]);
                 }
             }
         }

@@ -22,8 +22,9 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include "bitpit_common.hpp"
+
 #include "binary_archive.hpp"
-#include "binary_utils.hpp"
 #include "FileHandler.hpp"
 
 namespace bitpit {
@@ -170,10 +171,10 @@ void IBinaryArchive::open(const std::string &name, const std::string &extension,
     BinaryArchive::open(name, extension, std::ios::in | std::ios_base::binary, block);
 
     // Read the header
-    IO::binary::read(*this, m_header);
+    utils::binary::read(*this, m_header);
 
     // Read the version
-    IO::binary::read(*this, m_version);
+    utils::binary::read(*this, m_version);
 }
 
 /*!
@@ -340,10 +341,10 @@ void OBinaryArchive::open(const std::string &name, const std::string &extension,
     // Write the header
     std::string archiveHeader(header);
     archiveHeader.resize(HEADER_SIZE, ' ');
-    IO::binary::write(*this, archiveHeader);
+    utils::binary::write(*this, archiveHeader);
 
     // Write the version
-    IO::binary::write(*this, version);
+    utils::binary::write(*this, version);
 }
 
 /*!

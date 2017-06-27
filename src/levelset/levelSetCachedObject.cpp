@@ -892,13 +892,13 @@ void LevelSetCachedObject::assignSign(int sign, const std::unordered_set<long> &
  */
 void LevelSetCachedObject::_dump( std::ostream &stream ){
 
-    IO::binary::write(stream, (long) m_ls.size() ) ;
+    utils::binary::write(stream, (long) m_ls.size() ) ;
     bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
 
     for( infoItr=m_ls.begin(); infoItr!=infoEnd; ++infoItr){
-        IO::binary::write(stream, infoItr.getId()) ;
-        IO::binary::write(stream, infoItr->value) ;
-        IO::binary::write(stream, infoItr->gradient) ;
+        utils::binary::write(stream, infoItr.getId()) ;
+        utils::binary::write(stream, infoItr->value) ;
+        utils::binary::write(stream, infoItr->gradient) ;
     }
 
     __dump(stream) ;
@@ -921,13 +921,13 @@ void LevelSetCachedObject::_restore( std::istream &stream ){
     long i, n, id;
     LevelSetInfo cellInfo;
 
-    IO::binary::read(stream, n);
+    utils::binary::read(stream, n);
 
     m_ls.reserve(n);
     for( i=0; i<n; ++i){
-        IO::binary::read(stream, id) ;
-        IO::binary::read(stream, cellInfo.value) ;
-        IO::binary::read(stream, cellInfo.gradient) ;
+        utils::binary::read(stream, id) ;
+        utils::binary::read(stream, cellInfo.value) ;
+        utils::binary::read(stream, cellInfo.gradient) ;
         m_ls.insert(id, cellInfo) ;
     }
 

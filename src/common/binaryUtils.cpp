@@ -22,11 +22,11 @@
 *
 \*---------------------------------------------------------------------------*/
 
-#include "binary_utils.hpp"
+#include "binaryUtils.hpp"
 
 namespace bitpit {
 
-namespace IO {
+namespace utils {
 
 namespace binary {
 

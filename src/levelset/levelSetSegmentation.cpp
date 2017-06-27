@@ -1139,14 +1139,14 @@ void LevelSetSegmentation::__filterOutsideNarrowBand( double search ){
  */
 void LevelSetSegmentation::__dump( std::ostream &stream ){
 
-    IO::binary::write( stream, m_seg.size() ) ;
+    utils::binary::write( stream, m_seg.size() ) ;
 
     bitpit::PiercedVector<SegInfo>::iterator segItr, segEnd = m_seg.end() ;
     for( segItr = m_seg.begin(); segItr != segEnd; ++segItr){
-        IO::binary::write( stream, segItr.getId() );
-        IO::binary::write( stream, segItr->segments.size() );
-        IO::binary::write( stream, segItr->segments );
-        IO::binary::write( stream, segItr->distances );
+        utils::binary::write( stream, segItr.getId() );
+        utils::binary::write( stream, segItr->segments.size() );
+        utils::binary::write( stream, segItr->segments );
+        utils::binary::write( stream, segItr->distances );
     }
 }
 
@@ -1157,23 +1157,23 @@ void LevelSetSegmentation::__dump( std::ostream &stream ){
 void LevelSetSegmentation::__restore( std::istream &stream ){
 
     size_t segSize;
-    IO::binary::read( stream, segSize ) ;
+    utils::binary::read( stream, segSize ) ;
     m_seg.reserve(segSize);
 
     for( size_t i=0; i<segSize; ++i){
         long id;
-        IO::binary::read( stream, id );
+        utils::binary::read( stream, id );
 
         long nSegments;
-        IO::binary::read( stream, nSegments );
+        utils::binary::read( stream, nSegments );
 
         SegInfo cellData ;
 
         cellData.segments.resize(nSegments) ;
-        IO::binary::read( stream, cellData.segments );
+        utils::binary::read( stream, cellData.segments );
 
         cellData.distances.resize(nSegments) ;
-        IO::binary::read( stream, cellData.distances );
+        utils::binary::read( stream, cellData.distances );
 
         m_seg.insert(id,cellData) ;
     }

@@ -43,7 +43,6 @@
 #include "bitpit_version.hpp"
 
 #include "binary_archive.hpp"
-#include "binary_utils.hpp"
 #include "configuration.hpp"
 #include "index_generator.hpp"
 #include "logger.hpp"

@@ -28,7 +28,6 @@
 # include "bitpit_operators.hpp"
 
 # include "logger.hpp"
-# include "binary_utils.hpp"
 # include "adaption.hpp"
 
 # include "levelSetObject.hpp"

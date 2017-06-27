@@ -135,10 +135,10 @@ namespace bitpit {
     {
         ParaTree::dump(stream, full);
 
-        IO::binary::write(stream, m_origin[0]);
-        IO::binary::write(stream, m_origin[1]);
-        IO::binary::write(stream, m_origin[2]);
-        IO::binary::write(stream, m_L);
+        utils::binary::write(stream, m_origin[0]);
+        utils::binary::write(stream, m_origin[1]);
+        utils::binary::write(stream, m_origin[2]);
+        utils::binary::write(stream, m_L);
     }
 
     /*! Restore the octree from the specified stream.
@@ -150,10 +150,10 @@ namespace bitpit {
     {
         ParaTree::restore(stream);
 
-        IO::binary::read(stream, m_origin[0]);
-        IO::binary::read(stream, m_origin[1]);
-        IO::binary::read(stream, m_origin[2]);
-        IO::binary::read(stream, m_L);
+        utils::binary::read(stream, m_origin[0]);
+        utils::binary::read(stream, m_origin[1]);
+        utils::binary::read(stream, m_origin[2]);
+        utils::binary::read(stream, m_L);
     }
 
     // =================================================================================== //

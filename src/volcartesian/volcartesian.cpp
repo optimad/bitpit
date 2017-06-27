@@ -909,19 +909,19 @@ int VolCartesian::_getDumpVersion() const
  */
 void VolCartesian::_dump(std::ostream &stream)
 {
-	IO::binary::write(stream, m_minCoords[0]);
-	IO::binary::write(stream, m_minCoords[1]);
-	IO::binary::write(stream, m_minCoords[2]);
+	utils::binary::write(stream, m_minCoords[0]);
+	utils::binary::write(stream, m_minCoords[1]);
+	utils::binary::write(stream, m_minCoords[2]);
 
-	IO::binary::write(stream, m_maxCoords[0] - m_minCoords[0]);
-	IO::binary::write(stream, m_maxCoords[1] - m_minCoords[1]);
-	IO::binary::write(stream, m_maxCoords[2] - m_minCoords[2]);
+	utils::binary::write(stream, m_maxCoords[0] - m_minCoords[0]);
+	utils::binary::write(stream, m_maxCoords[1] - m_minCoords[1]);
+	utils::binary::write(stream, m_maxCoords[2] - m_minCoords[2]);
 
-	IO::binary::write(stream, m_nCells1D[0]);
-	IO::binary::write(stream, m_nCells1D[1]);
-	IO::binary::write(stream, m_nCells1D[2]);
+	utils::binary::write(stream, m_nCells1D[0]);
+	utils::binary::write(stream, m_nCells1D[1]);
+	utils::binary::write(stream, m_nCells1D[2]);
 
-	IO::binary::write(stream, m_memoryMode);
+	utils::binary::write(stream, m_memoryMode);
 }
 
 /*!
@@ -933,31 +933,31 @@ void VolCartesian::_restore(std::istream &stream)
 {
 	// Origin
 	std::array<double, 3> origin;
-	IO::binary::read(stream, origin[0]);
-	IO::binary::read(stream, origin[1]);
-	IO::binary::read(stream, origin[2]);
+	utils::binary::read(stream, origin[0]);
+	utils::binary::read(stream, origin[1]);
+	utils::binary::read(stream, origin[2]);
 
 	setOrigin(origin);
 
 	// Lengths
 	std::array<double, 3> lengths;
-	IO::binary::read(stream, lengths[0]);
-	IO::binary::read(stream, lengths[1]);
-	IO::binary::read(stream, lengths[2]);
+	utils::binary::read(stream, lengths[0]);
+	utils::binary::read(stream, lengths[1]);
+	utils::binary::read(stream, lengths[2]);
 
 	setLengths(lengths);
 
 	// Discretization
 	std::array<int, 3> nCells;
-	IO::binary::read(stream, nCells[0]);
-	IO::binary::read(stream, nCells[1]);
-	IO::binary::read(stream, nCells[2]);
+	utils::binary::read(stream, nCells[0]);
+	utils::binary::read(stream, nCells[1]);
+	utils::binary::read(stream, nCells[2]);
 
 	setDiscretization(nCells);
 
 	// Memory mode
 	MemoryMode memoryMode;
-	IO::binary::read(stream, memoryMode);
+	utils::binary::read(stream, memoryMode);
 	setMemoryMode(memoryMode);
 }
 

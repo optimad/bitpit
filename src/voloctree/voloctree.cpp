@@ -1711,12 +1711,12 @@ void VolOctree::_dump(std::ostream &stream)
 
 	size_t nOctants = m_octantToCell.size();
 	for (size_t n = 0; n < nOctants; ++n) {
-		IO::binary::write(stream, m_octantToCell.at(n));
+		utils::binary::write(stream, m_octantToCell.at(n));
 	}
 
 	size_t nGhosts = m_ghostToCell.size();
 	for (size_t n = 0; n < nGhosts; ++n) {
-		IO::binary::write(stream, m_ghostToCell.at(n));
+		utils::binary::write(stream, m_ghostToCell.at(n));
 	}
 
 	// Dump interfaces
@@ -1744,7 +1744,7 @@ void VolOctree::_restore(std::istream &stream)
 	m_octantToCell.reserve(nOctants);
 	for (size_t n = 0; n < nOctants; ++n) {
 		long cellId;
-		IO::binary::read(stream, cellId);
+		utils::binary::read(stream, cellId);
 
 		m_cellToOctant.insert({cellId, n});
 		m_octantToCell.insert({n, cellId});
@@ -1757,7 +1757,7 @@ void VolOctree::_restore(std::istream &stream)
 	m_ghostToCell.reserve(nGhosts);
 	for (size_t n = 0; n < nGhosts; ++n) {
 		long cellId;
-		IO::binary::read(stream, cellId);
+		utils::binary::read(stream, cellId);
 
 		m_cellToGhost.insert({cellId, n});
 		m_ghostToCell.insert({n, cellId});

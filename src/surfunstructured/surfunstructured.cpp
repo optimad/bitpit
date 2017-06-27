@@ -180,34 +180,34 @@ void SurfUnstructured::_dump(std::ostream &stream)
 #endif
 
 	// Space dimension
-	IO::binary::write(stream, getSpaceDimension());
+	utils::binary::write(stream, getSpaceDimension());
 
 	// Save the vertices
-	IO::binary::write(stream, getVertexCount());
+	utils::binary::write(stream, getVertexCount());
 
 	for (const Vertex &vertex : m_vertices) {
-		IO::binary::write(stream, vertex.getId());
+		utils::binary::write(stream, vertex.getId());
 
 		std::array<double, 3> coords = vertex.getCoords();
-		IO::binary::write(stream, coords[0]);
-		IO::binary::write(stream, coords[1]);
-		IO::binary::write(stream, coords[2]);
+		utils::binary::write(stream, coords[0]);
+		utils::binary::write(stream, coords[1]);
+		utils::binary::write(stream, coords[2]);
 	}
 
 	// Save the cells
-	IO::binary::write(stream, getInternalCount());
-	IO::binary::write(stream, getGhostCount());
+	utils::binary::write(stream, getInternalCount());
+	utils::binary::write(stream, getGhostCount());
 
 	for (const Cell &cell: m_cells) {
 		const ElementInfo &cellInfo = cell.getInfo();
 
-		IO::binary::write(stream, cell.getId());
-		IO::binary::write(stream, cell.getPID());
-		IO::binary::write(stream, cellInfo.type);
+		utils::binary::write(stream, cell.getId());
+		utils::binary::write(stream, cell.getPID());
+		utils::binary::write(stream, cellInfo.type);
 
 		const long *cellConnect = cell.getConnect();
 		for (int i = 0; i < cellInfo.nVertices; ++i) {
-			IO::binary::write(stream, cellConnect[i]);
+			utils::binary::write(stream, cellConnect[i]);
 		}
 	}
 }
@@ -228,51 +228,51 @@ void SurfUnstructured::_restore(std::istream &stream)
 
 	// Space dimension
 	int spaceDimension;
-	IO::binary::read(stream, spaceDimension);
+	utils::binary::read(stream, spaceDimension);
 	setSpaceDimension(spaceDimension);
 
 	// Restore the vertices
 	long nVertices;
-	IO::binary::read(stream, nVertices);
+	utils::binary::read(stream, nVertices);
 
 	reserveVertices(nVertices);
 	for (long i = 0; i < nVertices; ++i) {
 		long id;
-		IO::binary::read(stream, id);
+		utils::binary::read(stream, id);
 
 		std::array<double, 3> coords;
-		IO::binary::read(stream, coords[0]);
-		IO::binary::read(stream, coords[1]);
-		IO::binary::read(stream, coords[2]);
+		utils::binary::read(stream, coords[0]);
+		utils::binary::read(stream, coords[1]);
+		utils::binary::read(stream, coords[2]);
 
 		addVertex(coords, id);
 	}
 
 	// Restore the cells
 	long nInternals;
-	IO::binary::read(stream, nInternals);
+	utils::binary::read(stream, nInternals);
 
 	long nGhosts;
-	IO::binary::read(stream, nGhosts);
+	utils::binary::read(stream, nGhosts);
 
 	long nCells = nInternals + nGhosts;
 
 	reserveCells(nCells);
 	for (long i = 0; i < nCells; ++i) {
 		long id;
-		IO::binary::read(stream, id);
+		utils::binary::read(stream, id);
 
 		int PID;
-		IO::binary::read(stream, PID);
+		utils::binary::read(stream, PID);
 
 		ElementInfo::Type type;
-		IO::binary::read(stream, type);
+		utils::binary::read(stream, type);
 		const ElementInfo &cellInfo = ElementInfo::getElementInfo(type);
 
 		int nCellVertices = cellInfo.nVertices;
 		std::vector<long> connect(nCellVertices, Vertex::NULL_ID);
 		for (int k = 0; k < nCellVertices; ++k) {
-			IO::binary::read(stream, connect[k]);
+			utils::binary::read(stream, connect[k]);
 		}
 
 		CellIterator cellIterator = addCell(type, true, connect, id);

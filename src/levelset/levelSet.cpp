@@ -622,10 +622,10 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
  */
 void LevelSet::dump( std::ostream &stream ){
 
-    IO::binary::write(stream, m_order);
-    IO::binary::write(stream, m_userRSearch);
-    IO::binary::write(stream, m_signedDF);
-    IO::binary::write(stream, m_propagateS);
+    utils::binary::write(stream, m_order);
+    utils::binary::write(stream, m_userRSearch);
+    utils::binary::write(stream, m_signedDF);
+    utils::binary::write(stream, m_propagateS);
 
     for( const auto &object : m_objects ){
         object.second->dump( stream ) ;
@@ -638,10 +638,10 @@ void LevelSet::dump( std::ostream &stream ){
  */
 void LevelSet::restore( std::istream &stream ){
 
-    IO::binary::read(stream, m_order);
-    IO::binary::read(stream, m_userRSearch);
-    IO::binary::read(stream, m_signedDF);
-    IO::binary::read(stream, m_propagateS);
+    utils::binary::read(stream, m_order);
+    utils::binary::read(stream, m_userRSearch);
+    utils::binary::read(stream, m_signedDF);
+    utils::binary::read(stream, m_propagateS);
 
     for( const auto &object : m_objects ){
         object.second->restore( stream ) ;

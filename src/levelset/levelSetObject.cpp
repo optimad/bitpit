@@ -263,8 +263,8 @@ void LevelSetObject::_clear( ){
  * @param[in] stream output stream
  */
 void LevelSetObject::dump( std::ostream &stream ){
-    IO::binary::write(stream, m_id) ;
-    IO::binary::write(stream, m_RSearch);
+    utils::binary::write(stream, m_id) ;
+    utils::binary::write(stream, m_RSearch);
     _dump(stream) ;
 }
 
@@ -281,8 +281,8 @@ void LevelSetObject::_dump( std::ostream &stream ){
  * @param[in] stream output stream
  */
 void LevelSetObject::restore( std::istream &stream ){
-    IO::binary::read(stream, m_id) ;
-    IO::binary::read(stream, m_RSearch);
+    utils::binary::read(stream, m_id) ;
+    utils::binary::read(stream, m_RSearch);
     _restore(stream) ;
 }
 

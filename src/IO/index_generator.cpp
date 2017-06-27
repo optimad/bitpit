@@ -201,13 +201,13 @@ int IndexGenerator::getBinaryArchiveVersion()
  */
 void IndexGenerator::dump(std::ostream &stream)
 {
-    IO::binary::write(stream, getBinaryArchiveVersion());
-    IO::binary::write(stream, m_latest);
-    IO::binary::write(stream, m_highest);
+    utils::binary::write(stream, getBinaryArchiveVersion());
+    utils::binary::write(stream, m_latest);
+    utils::binary::write(stream, m_highest);
 
-    IO::binary::write(stream, m_trash.size());
+    utils::binary::write(stream, m_trash.size());
     for (long id : m_trash) {
-        IO::binary::write(stream, id);
+        utils::binary::write(stream, id);
     }
 }
 
@@ -220,21 +220,21 @@ void IndexGenerator::restore(std::istream &stream)
 {
     // Version
     int version;
-    IO::binary::read(stream, version);
+    utils::binary::read(stream, version);
     if (version != getBinaryArchiveVersion()) {
         throw std::runtime_error ("The version of the file does not match the required version");
     }
 
     // Generator data
-    IO::binary::read(stream, m_latest);
-    IO::binary::read(stream, m_highest);
+    utils::binary::read(stream, m_latest);
+    utils::binary::read(stream, m_highest);
 
     size_t nTrashedIds;
-    IO::binary::read(stream, nTrashedIds);
+    utils::binary::read(stream, nTrashedIds);
 
     m_trash.resize(nTrashedIds);
     for (size_t i = 0; i < nTrashedIds; ++i) {
-        IO::binary::read(stream, m_trash[i]);
+        utils::binary::read(stream, m_trash[i]);
     }
 }
 

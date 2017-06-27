@@ -2695,12 +2695,12 @@ long PatchKernel::countFreeFaces() const
 void PatchKernel::dumpInterfaces(std::ostream &stream)
 {
 	long nInterfaces = getInterfaceCount();
-	IO::binary::write(stream, nInterfaces);
+	utils::binary::write(stream, nInterfaces);
 
 	std::unordered_set<long> dumpedInterfaces(nInterfaces);
 	for (const Cell &cell : getCells()) {
 		long cellId = cell.getId();
-		IO::binary::write(stream, cellId);
+		utils::binary::write(stream, cellId);
 
 		int nCellInterfaces = cell.getInterfaceCount();
 		const long *interfaces = cell.getInterfaces();
@@ -2714,24 +2714,24 @@ void PatchKernel::dumpInterfaces(std::ostream &stream)
 			const long interfaceOwnerId = interface.getOwner();
 			const long interfaceNeighId = interface.getNeigh();
 
-			IO::binary::write(stream, interfaceId);
+			utils::binary::write(stream, interfaceId);
 			if (cellId == interfaceOwnerId) {
-				IO::binary::write(stream, interface.getOwnerFace());
-				IO::binary::write(stream, interfaceNeighId);
+				utils::binary::write(stream, interface.getOwnerFace());
+				utils::binary::write(stream, interfaceNeighId);
 				if (interfaceNeighId >= 0) {
-					IO::binary::write(stream, interface.getNeighFace());
+					utils::binary::write(stream, interface.getNeighFace());
 				}
 			} else {
-				IO::binary::write(stream, interface.getNeighFace());
-				IO::binary::write(stream, interfaceOwnerId);
-				IO::binary::write(stream, interface.getOwnerFace());
+				utils::binary::write(stream, interface.getNeighFace());
+				utils::binary::write(stream, interfaceOwnerId);
+				utils::binary::write(stream, interface.getOwnerFace());
 			}
 
 			dumpedInterfaces.insert(interfaceId);
 		}
 
 		// There are no more interfaces for this cell
-		IO::binary::write(stream, Interface::NULL_ID);
+		utils::binary::write(stream, Interface::NULL_ID);
 	}
 }
 
@@ -2743,33 +2743,33 @@ void PatchKernel::dumpInterfaces(std::ostream &stream)
 void PatchKernel::restoreInterfaces(std::istream &stream)
 {
 	long nInterfaces;
-	IO::binary::read(stream, nInterfaces);
+	utils::binary::read(stream, nInterfaces);
 	m_interfaces.reserve(nInterfaces);
 
 	long nCells = getCellCount();
 	for (long n = 0; n < nCells; ++n) {
 		long cellId;
-		IO::binary::read(stream, cellId);
+		utils::binary::read(stream, cellId);
 		Cell &cell = m_cells.at(cellId);
 
 		while (true) {
 			long interfaceId;
-			IO::binary::read(stream, interfaceId);
+			utils::binary::read(stream, interfaceId);
 			if (interfaceId < 0) {
 				break;
 			}
 
 			int face;
-			IO::binary::read(stream, face);
+			utils::binary::read(stream, face);
 
 			long otherCellId;
-			IO::binary::read(stream, otherCellId);
+			utils::binary::read(stream, otherCellId);
 
 			Cell *otherCell = nullptr;
 			int otherFace = -1;
 			if (otherCellId >= 0) {
 				otherCell = &m_cells.at(otherCellId);
-				IO::binary::read(stream, otherFace);
+				utils::binary::read(stream, otherFace);
 			}
 
 			buildCellInterface(&cell, face, otherCell, otherFace, interfaceId);
@@ -4258,28 +4258,28 @@ int PatchKernel::getDumpVersion() const
 void PatchKernel::dump(std::ostream &stream)
 {
 	// Version
-	IO::binary::write(stream, getDumpVersion());
+	utils::binary::write(stream, getDumpVersion());
 
 	// Generic information
-	IO::binary::write(stream, m_id);
-	IO::binary::write(stream, m_dimension);
-	IO::binary::write(stream, m_vtk.getName());
+	utils::binary::write(stream, m_id);
+	utils::binary::write(stream, m_dimension);
+	utils::binary::write(stream, m_vtk.getName());
 #if BITPIT_ENABLE_MPI==1
-	IO::binary::write(stream, m_partitioned);
+	utils::binary::write(stream, m_partitioned);
 #else
-	IO::binary::write(stream, false);
+	utils::binary::write(stream, false);
 #endif
 
 	// VTK data
-	IO::binary::write(stream, m_vtkWriteTarget);
+	utils::binary::write(stream, m_vtkWriteTarget);
 
 	// Specific dump
 	_dump(stream);
 
 	// Geometric tolerance
-	IO::binary::write(stream, (int) m_hasCustomTolerance);
+	utils::binary::write(stream, (int) m_hasCustomTolerance);
 	if (m_hasCustomTolerance) {
-		IO::binary::write(stream, m_tolerance);
+		utils::binary::write(stream, m_tolerance);
 	}
 
 	// Index generators
@@ -4302,14 +4302,14 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 
 	// Version
 	int version;
-	IO::binary::read(stream, version);
+	utils::binary::read(stream, version);
 	if (version != getDumpVersion()) {
 		throw std::runtime_error ("The version of the file does not match the required version");
 	}
 
 	// Id
 	int id;
-	IO::binary::read(stream, id);
+	utils::binary::read(stream, id);
 	if (reregister) {
 		patch::manager().unregisterPatch(this);
 		patch::manager().registerPatch(this, id);
@@ -4317,34 +4317,34 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 
 	// Dimension
 	int dimension;
-	IO::binary::read(stream, dimension);
+	utils::binary::read(stream, dimension);
 	setDimension(dimension);
 
 	// Name
 	std::string name;
-	IO::binary::read(stream, name);
+	utils::binary::read(stream, name);
 	m_vtk.setName(name);
 
 	// Partioned flag
 #if BITPIT_ENABLE_MPI==1
-	IO::binary::read(stream, m_partitioned);
+	utils::binary::read(stream, m_partitioned);
 #else
 	bool dummyPartitioned;
-	IO::binary::read(stream, dummyPartitioned);
+	utils::binary::read(stream, dummyPartitioned);
 #endif
 
 	// VTK data
-	IO::binary::read(stream, m_vtkWriteTarget);
+	utils::binary::read(stream, m_vtkWriteTarget);
 
 	// Specific restore
 	_restore(stream);
 
 	// Geometric tolerance
 	int hasCustomTolerance;
-	IO::binary::read(stream, hasCustomTolerance);
+	utils::binary::read(stream, hasCustomTolerance);
 	if (hasCustomTolerance) {
 		double tolerance;
-		IO::binary::read(stream, tolerance);
+		utils::binary::read(stream, tolerance);
 		setTol(tolerance);
 	} else {
 		resetTol();

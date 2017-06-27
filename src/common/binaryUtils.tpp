@@ -22,12 +22,12 @@
 *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_BINARY_UTILS_TPP__
-#define __BITPIT_BINARY_UTILS_TPP__
+#ifndef __BITPIT_COMMON_BINARY_UTILS_TPP__
+#define __BITPIT_COMMON_BINARY_UTILS_TPP__
 
 namespace bitpit {
 
-namespace IO {
+namespace utils {
 
 namespace binary {
 
