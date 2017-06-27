@@ -68,6 +68,11 @@ private:
 
 public:
     /**
+    * Kernel type
+    */
+    typedef kernel_t kernel_type;
+
+    /**
     * Type of ids in the kernel
     */
     typedef id_t id_type;
@@ -77,6 +82,8 @@ public:
 
     // General methods
     void swap(PiercedKernelIterator& other) noexcept;
+
+    const kernel_type & getKernel() const;
 
     // Methos to extract information on the current element
     id_t getId(const id_t &fallback = -1) const noexcept;

@@ -59,6 +59,17 @@ void PiercedKernelIterator<id_t>::swap(PiercedKernelIterator& other) noexcept
     std::swap(m_pos, other.m_pos);
 }
 
+/*!
+* Get a constant reference of the kernel associated with the iterator.
+*
+* \result A constant reference of the kernel associated with the iterator.
+*/
+template<typename id_t>
+const typename PiercedKernelIterator<id_t>::kernel_type & PiercedKernelIterator<id_t>::getKernel() const
+{
+    return *m_kernel;
+}
+
 /**
 * Gets the id of the current element.
 *
