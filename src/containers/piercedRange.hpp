@@ -27,6 +27,9 @@
 
 namespace bitpit {
 
+template<typename PS_value_t, typename PS_id_t>
+class PiercedStorage;
+
 /*!
     @brief The PiercedRange allow to iterate using range-based loops over
     a PiercedStorage.
