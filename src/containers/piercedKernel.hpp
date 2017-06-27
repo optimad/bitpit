@@ -36,6 +36,7 @@
 
 #include "piercedSync.hpp"
 #include "piercedKernelIterator.hpp"
+#include "piercedKernelRange.hpp"
 
 namespace bitpit {
 
@@ -112,6 +113,9 @@ friend class PiercedStorageIterator;
 template<typename PKI_id_t>
 friend class PiercedKernelIterator;
 
+template<typename PKR_id_t>
+friend class PiercedKernelRange;
+
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
 
@@ -130,6 +134,11 @@ public:
     * Raw iterator
     */
     typedef typename std::vector<id_t>::const_iterator raw_const_iterator;
+
+    /**
+    * Constant range
+    */
+    typedef PiercedKernelRange<id_t> const_range;
 
     /**
     * Functional for compare the position of two elements
