@@ -176,10 +176,10 @@ private:
     storage_t *m_storage;
 
     /*! Begin */
-    size_t m_begin_pos;
+    std::size_t m_begin_pos;
 
     /*! End */
-    size_t m_end_pos;
+    std::size_t m_end_pos;
 
 };
 
