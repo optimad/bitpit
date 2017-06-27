@@ -109,6 +109,8 @@ public:
 
     storage_type & getStorage() const;
 
+    const PiercedKernelIterator<id_t> & getKernelIterator() const;
+
     // Methos to extract information on the current element
     id_t getId(const id_t &fallback = -1) const noexcept;
     std::size_t getRawIndex() const noexcept;

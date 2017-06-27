@@ -71,6 +71,17 @@ typename PiercedStorageIterator<value_t, id_t, value_no_cv_t>::storage_type & Pi
     return *m_storage;
 }
 
+/*!
+* Get a constant reference to the kernel iterator.
+*
+* \result A constant reference to the kernel iterator.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+const PiercedKernelIterator<id_t> & PiercedStorageIterator<value_t, id_t, value_no_cv_t>::getKernelIterator() const
+{
+    return static_cast<const PiercedKernelIterator<id_t> &>(*this);
+}
+
 /**
 * Gets the id of the current element.
 *
