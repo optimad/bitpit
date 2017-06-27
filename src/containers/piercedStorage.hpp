@@ -27,8 +27,8 @@
 
 #include <vector>
 
-#include "piercedIterator.hpp"
 #include "piercedRange.hpp"
+#include "piercedStorageIterator.hpp"
 #include "piercedKernel.hpp"
 #include "piercedSync.hpp"
 
@@ -63,7 +63,7 @@ class PiercedStorage : public BasePiercedStorage {
 
 // Friendships
 template<typename PI_value_t, typename PI_id_t, typename PI_value_no_cv_t>
-friend class PiercedIterator;
+friend class PiercedStorageIterator;
 
 private:
     /**
@@ -191,12 +191,12 @@ public:
     /**
     * Iterator
     */
-    typedef PiercedIterator<value_t, id_t> iterator;
+    typedef PiercedStorageIterator<value_t, id_t> iterator;
 
     /**
     * Constant iterator
     */
-    typedef PiercedIterator<const value_t, id_t> const_iterator;
+    typedef PiercedStorageIterator<const value_t, id_t> const_iterator;
 
     /**
     * Raw iterator

@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PIERCED_ITERATOR_HPP__
-#define __BITPIT_PIERCED_ITERATOR_HPP__
+#ifndef __BITPIT_PIERCED_STORAGE_ITERATOR_HPP__
+#define __BITPIT_PIERCED_STORAGE_ITERATOR_HPP__
 
 #include <cassert>
 #include <iterator>
@@ -32,8 +32,8 @@
 
 #include "piercedKernel.hpp"
 
-#define  __PI_REFERENCE__ typename PiercedIterator<value_t, id_t, value_no_cv_t>::reference
-#define  __PI_POINTER__   typename PiercedIterator<value_t, id_t, value_no_cv_t>::pointer
+#define  __PSI_REFERENCE__ typename PiercedStorageIterator<value_t, id_t, value_no_cv_t>::reference
+#define  __PSI_POINTER__   typename PiercedStorageIterator<value_t, id_t, value_no_cv_t>::pointer
 
 namespace bitpit{
 
@@ -50,11 +50,11 @@ class PiercedStorage;
 */
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type>
-class PiercedIterator
+class PiercedStorageIterator
     : public std::iterator<std::forward_iterator_tag, value_no_cv_t, std::ptrdiff_t, value_t*, value_t&>
 {
 
-friend class PiercedIterator<value_no_cv_t, id_t, value_no_cv_t>;
+friend class PiercedStorageIterator<value_no_cv_t, id_t, value_no_cv_t>;
 
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
@@ -102,35 +102,35 @@ public:
     typedef id_t id_type;
 
     // Constructors
-    PiercedIterator();
+    PiercedStorageIterator();
 
     // General methods
-    void swap(PiercedIterator& other) noexcept;
+    void swap(PiercedStorageIterator& other) noexcept;
 
     storage_type & getStorage() const;
 
     // Methos to extract information on the current element
     id_t getId(const id_t &fallback = -1) const noexcept;
     std::size_t getRawIndex() const noexcept;
-    __PI_REFERENCE__ getValue(std::size_t k = 0) const;
+    __PSI_REFERENCE__ getValue(std::size_t k = 0) const;
 
     // Operators
-    PiercedIterator& operator++();
-    PiercedIterator operator++(int);
+    PiercedStorageIterator& operator++();
+    PiercedStorageIterator operator++(int);
 
-    __PI_REFERENCE__ operator*() const;
-    __PI_POINTER__ operator->() const;
+    __PSI_REFERENCE__ operator*() const;
+    __PSI_POINTER__ operator->() const;
 
     template<typename U = value_t, typename U_no_cv = value_no_cv_t,
              typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type = 0>
-    operator PiercedIterator<const U_no_cv, id_t>() const;
+    operator PiercedStorageIterator<const U_no_cv, id_t>() const;
 
     /**
     * Two-way comparison.
     */
     template<typename other_value_t, typename other_id_t = long,
          typename other_value_no_cv_t = typename std::remove_cv<value_t>::type>
-    bool operator==(const PiercedIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
+    bool operator==(const PiercedStorageIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
     {
         return (m_storage == rhs.m_storage) && (m_pos == rhs.m_pos);
     }
@@ -140,7 +140,7 @@ public:
     */
     template<typename other_value_t, typename other_id_t = long,
          typename other_value_no_cv_t = typename std::remove_cv<value_t>::type>
-    bool operator!=(const PiercedIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
+    bool operator!=(const PiercedStorageIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
     {
         return (m_storage != rhs.m_storage) || (m_pos != rhs.m_pos);
     }
@@ -162,13 +162,13 @@ private:
     std::size_t m_pos;
 
     // Constructors
-    explicit PiercedIterator(storage_t *storage, const std::size_t &pos);
+    explicit PiercedStorageIterator(storage_t *storage, const std::size_t &pos);
 
 };
 
 }
 
 // Include the implementation
-#include "piercedIterator.tpp"
+#include "piercedStorageIterator.tpp"
 
 #endif

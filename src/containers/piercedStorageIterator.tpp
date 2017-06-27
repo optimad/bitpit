@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PIERCED_ITERATOR_TPP__
-#define __BITPIT_PIERCED_ITERATOR_TPP__
+#ifndef __BITPIT_PIERCED_STORAGE_ITERATOR_TPP__
+#define __BITPIT_PIERCED_STORAGE_ITERATOR_TPP__
 
 namespace bitpit {
 
@@ -31,7 +31,7 @@ namespace bitpit {
 * Creates a new uninitialized iterator
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedIterator<value_t, id_t, value_no_cv_t>::PiercedIterator()
+PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator()
     : m_storage(nullptr), m_kernel(nullptr), m_pos(0)
 {
 }
@@ -41,7 +41,7 @@ PiercedIterator<value_t, id_t, value_no_cv_t>::PiercedIterator()
 * base iterator recevied in input.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedIterator<value_t, id_t, value_no_cv_t>::PiercedIterator(storage_t *storage, const std::size_t &pos)
+PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator(storage_t *storage, const std::size_t &pos)
     : m_storage(storage), m_kernel(&(m_storage->getKernel())), m_pos(pos)
 {
 }
@@ -53,7 +53,7 @@ PiercedIterator<value_t, id_t, value_no_cv_t>::PiercedIterator(storage_t *storag
 * \param other the iterator to exchange values with
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-void PiercedIterator<value_t, id_t, value_no_cv_t>::swap(PiercedIterator& other) noexcept
+void PiercedStorageIterator<value_t, id_t, value_no_cv_t>::swap(PiercedStorageIterator& other) noexcept
 {
     std::swap(m_storage, other.m_storage);
     std::swap(m_kernel, other.m_kernel);
@@ -66,7 +66,7 @@ void PiercedIterator<value_t, id_t, value_no_cv_t>::swap(PiercedIterator& other)
 * \result A constant reference of the storage associated with the iterator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-typename PiercedIterator<value_t, id_t, value_no_cv_t>::storage_type & PiercedIterator<value_t, id_t, value_no_cv_t>::getStorage() const
+typename PiercedStorageIterator<value_t, id_t, value_no_cv_t>::storage_type & PiercedStorageIterator<value_t, id_t, value_no_cv_t>::getStorage() const
 {
     return *m_storage;
 }
@@ -78,7 +78,7 @@ typename PiercedIterator<value_t, id_t, value_no_cv_t>::storage_type & PiercedIt
 * points to an invalid position.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-id_t PiercedIterator<value_t, id_t, value_no_cv_t>::getId(const id_t &fallback) const noexcept
+id_t PiercedStorageIterator<value_t, id_t, value_no_cv_t>::getId(const id_t &fallback) const noexcept
 {
     id_t id;
     if (m_pos >= m_kernel->m_end_pos) {
@@ -101,7 +101,7 @@ id_t PiercedIterator<value_t, id_t, value_no_cv_t>::getId(const id_t &fallback) 
 * \return The position of the current element.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-std::size_t PiercedIterator<value_t, id_t, value_no_cv_t>::getRawIndex() const noexcept
+std::size_t PiercedStorageIterator<value_t, id_t, value_no_cv_t>::getRawIndex() const noexcept
 {
     return m_pos;
 }
@@ -113,7 +113,7 @@ std::size_t PiercedIterator<value_t, id_t, value_no_cv_t>::getRawIndex() const n
 * \return The values of the current element.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-__PI_REFERENCE__ PiercedIterator<value_t, id_t, value_no_cv_t>::getValue(std::size_t k) const
+__PSI_REFERENCE__ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::getValue(std::size_t k) const
 {
     if (m_pos >= m_kernel->m_end_pos) {
         throw std::out_of_range("Iterator points to an invalid position.");
@@ -126,7 +126,7 @@ __PI_REFERENCE__ PiercedIterator<value_t, id_t, value_no_cv_t>::getValue(std::si
 * Pre-increment operator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedIterator<value_t, id_t, value_no_cv_t> & PiercedIterator<value_t, id_t, value_no_cv_t>::operator++()
+PiercedStorageIterator<value_t, id_t, value_no_cv_t> & PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator++()
 {
     std::size_t delta = 1;
     while (true) {
@@ -151,9 +151,9 @@ PiercedIterator<value_t, id_t, value_no_cv_t> & PiercedIterator<value_t, id_t, v
 * Post-increment operator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedIterator<value_t, id_t, value_no_cv_t> PiercedIterator<value_t, id_t, value_no_cv_t>::operator++(int)
+PiercedStorageIterator<value_t, id_t, value_no_cv_t> PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator++(int)
 {
-    PiercedIterator tmp(m_storage, m_pos);
+    PiercedStorageIterator tmp(m_storage, m_pos);
 
     ++(*this);
 
@@ -166,7 +166,7 @@ PiercedIterator<value_t, id_t, value_no_cv_t> PiercedIterator<value_t, id_t, val
 * \result A reference to the element currently pointed to by the iterator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-__PI_REFERENCE__ PiercedIterator<value_t, id_t, value_no_cv_t>::operator*() const
+__PSI_REFERENCE__ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator*() const
 {
     return m_storage->rawAt(m_pos, 0);
 }
@@ -177,7 +177,7 @@ __PI_REFERENCE__ PiercedIterator<value_t, id_t, value_no_cv_t>::operator*() cons
 * \result A reference to the element currently pointed to by the iterator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-__PI_POINTER__ PiercedIterator<value_t, id_t, value_no_cv_t>::operator->() const
+__PSI_POINTER__ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator->() const
 {
     return m_storage->rawData(m_pos);
 }
@@ -188,9 +188,9 @@ __PI_POINTER__ PiercedIterator<value_t, id_t, value_no_cv_t>::operator->() const
 template<typename value_t, typename id_t, typename value_no_cv_t>
 template<typename U, typename U_no_cv,
          typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
-PiercedIterator<value_t, id_t, value_no_cv_t>::operator PiercedIterator<const U_no_cv, id_t>() const
+PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator PiercedStorageIterator<const U_no_cv, id_t>() const
 {
-    return PiercedIterator<const U_no_cv, id_t>(m_storage, m_pos);
+    return PiercedStorageIterator<const U_no_cv, id_t>(m_storage, m_pos);
 }
 
 }

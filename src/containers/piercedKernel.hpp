@@ -105,8 +105,8 @@ static_assert(std::is_integral<id_t>::value, "Signed integer required for id.");
 static_assert(std::numeric_limits<id_t>::is_signed, "Signed integer required for id.");
 
 // Friendships
-template<typename PI_value_t, typename PI_id_t, typename PI_value_no_cv_t>
-friend class PiercedIterator;
+template<typename PSI_value_t, typename PSI_id_t, typename PSI_value_no_cv_t>
+friend class PiercedStorageIterator;
 
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
