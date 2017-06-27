@@ -67,11 +67,9 @@ public:
 
     // Constructors
     PiercedKernelRange();
-    PiercedKernelRange(kernel_t *kernel);
-    PiercedKernelRange(kernel_t *kernel, id_t first, id_t last);
     PiercedKernelRange(const kernel_t *kernel);
     PiercedKernelRange(const kernel_t *kernel, id_t first, id_t last);
-    PiercedKernelRange(const_iterator begin, const_iterator end);
+    PiercedKernelRange(const const_iterator &begin, const const_iterator &end);
 
     // General methods
     void swap(PiercedKernelRange &other) noexcept;
@@ -127,7 +125,7 @@ public:
         return false;
     }
 
-private:
+protected:
     /*! Container */
     const kernel_t *m_kernel;
 

@@ -80,11 +80,6 @@ private:
 
         storage_t;
 
-    /**
-    * Kernel type
-    */
-    typedef typename storage_t::kernel_t kernel_t;
-
 public:
     /**
     * Id type

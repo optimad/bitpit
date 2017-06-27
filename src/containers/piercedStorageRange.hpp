@@ -28,6 +28,7 @@
 #include <stdexcept>
 
 #include "piercedKernel.hpp"
+#include "piercedKernelRange.hpp"
 
 namespace bitpit {
 
@@ -43,7 +44,7 @@ class PiercedStorage;
 */
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type>
-class PiercedStorageRange
+class PiercedStorageRange : protected PiercedKernelRange<id_t>
 {
 
 friend class PiercedStorageRange<value_no_cv_t, id_t, value_no_cv_t>;
@@ -94,11 +95,6 @@ private:
     */
     typedef typename storage_t::const_iterator const_iterator_t;
 
-    /**
-    * Kernel type
-    */
-    typedef typename storage_t::kernel_t kernel_t;
-
 public:
     /*! Type of container */
     typedef storage_t storage_type;
@@ -119,7 +115,7 @@ public:
     PiercedStorageRange();
     PiercedStorageRange(storage_t *storage);
     PiercedStorageRange(storage_t *storage, id_t first, id_t last);
-    PiercedStorageRange(iterator begin, iterator end);
+    PiercedStorageRange(const iterator &begin, const iterator &end);
 
     // General methods
     void swap(PiercedStorageRange &other) noexcept;
@@ -149,15 +145,11 @@ public:
     template<typename other_value_t, typename other_id_t = long>
     bool operator==(const PiercedStorageRange<other_value_t, other_id_t> &rhs) const
     {
-        if (m_storage == rhs.m_storage) {
+        if (PiercedKernelRange<id_t>::operator!=(rhs)) {
             return false;
         }
 
-        if (m_begin_pos == rhs.m_begin_pos) {
-            return false;
-        }
-
-        if (m_end_pos == rhs.m_end_pos) {
+        if (m_storage != rhs.m_storage) {
             return false;
         }
 
@@ -170,15 +162,11 @@ public:
     template<typename other_value_t, typename other_id_t = long>
     bool operator!=(const PiercedStorageRange<other_value_t, other_id_t> &rhs) const
     {
+        if (PiercedKernelRange<id_t>::operator!=(rhs)) {
+            return true;
+        }
+
         if (m_storage != rhs.m_storage) {
-            return true;
-        }
-
-        if (m_begin_pos == rhs.m_begin_pos) {
-            return true;
-        }
-
-        if (m_end_pos != rhs.m_end_pos) {
             return true;
         }
 
@@ -186,14 +174,8 @@ public:
     }
 
 private:
-    /*! Container */
+    /*! Storage */
     storage_t *m_storage;
-
-    /*! Begin */
-    std::size_t m_begin_pos;
-
-    /*! End */
-    std::size_t m_end_pos;
 
 };
 

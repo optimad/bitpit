@@ -32,9 +32,7 @@ namespace bitpit {
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange()
-    : m_storage(nullptr),
-      m_begin_pos(-1),
-      m_end_pos(-1)
+    : PiercedKernelRange<id_t>(), m_storage(nullptr)
 {
 }
 
@@ -43,9 +41,7 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange()
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t *storage)
-    : m_storage(storage),
-      m_begin_pos(storage->cbegin().getRawIndex()),
-      m_end_pos(storage->cend().getRawIndex())
+    : PiercedKernelRange<id_t>(&(storage->getKernel())), m_storage(storage)
 {
 }
 
@@ -57,9 +53,7 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t *storage, id_t first, id_t last)
-    : m_storage(storage),
-      m_begin_pos(storage->getRawIndex(first)),
-      m_end_pos(storage->getRawIndex(last) + 1)
+    : PiercedKernelRange<id_t>(&(storage->getKernel()), first, last), m_storage(storage)
 {
 }
 
@@ -70,10 +64,8 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t
 * \param end is the end of the range
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(iterator begin, iterator end)
-    : m_storage(&(begin.getStorage())),
-      m_begin_pos(begin.getRawIndex()),
-      m_end_pos(end.getRawIndex())
+PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(const iterator &begin, const iterator &end)
+    : PiercedKernelRange<id_t>(begin.getKernelIterator(), end.getKernelIterator()), m_storage(&(begin.getStorage()))
 {
     if (&(begin.getStorage()) != &(end.getStorage())) {
         throw std::runtime_error("The two iterators belong to different storages");
@@ -89,10 +81,9 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(iterator 
 template<typename value_t, typename id_t, typename value_no_cv_t>
 void PiercedStorageRange<value_t, id_t, value_no_cv_t>::swap(PiercedStorageRange &other) noexcept
 {
-    std::swap(m_storage, other.m_storage);
+    PiercedKernelRange<id_t>::swap(other);
 
-    std::swap(m_begin_pos, other.m_begin_pos);
-    std::swap(m_end_pos, other.m_end_pos);
+    std::swap(m_storage, other.m_storage);
 }
 
 /*!
@@ -127,7 +118,7 @@ template<typename U, typename U_no_cv,
          typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::begin() noexcept
 {
-    return m_storage->getIteratorFromRawIndex(m_begin_pos);
+    return m_storage->getIteratorFromRawIndex(PiercedKernelRange<id_t>::m_begin_pos);
 }
 
 /*!
@@ -142,7 +133,7 @@ template<typename U, typename U_no_cv,
          typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::end() noexcept
 {
-    return m_storage->getIteratorFromRawIndex(m_end_pos);
+    return m_storage->getIteratorFromRawIndex(PiercedKernelRange<id_t>::m_end_pos);
 }
 
 /*!
@@ -153,7 +144,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::iterator PiercedStor
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::begin() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(m_begin_pos);
+    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_begin_pos);
 }
 
 /*!
@@ -166,7 +157,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator Pierc
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::end() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(m_end_pos);
+    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_end_pos);
 }
 
 /*!
@@ -177,7 +168,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator Pierc
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::cbegin() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(m_begin_pos);
+    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_begin_pos);
 }
 
 /*!
@@ -190,7 +181,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator Pierc
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::cend() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(m_end_pos);
+    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_end_pos);
 }
 
 }

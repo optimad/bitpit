@@ -70,7 +70,7 @@ PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel, id_t first,
 * \param end is the end of the range
 */
 template<typename id_t>
-PiercedKernelRange<id_t>::PiercedKernelRange(const_iterator begin, const_iterator end)
+PiercedKernelRange<id_t>::PiercedKernelRange(const const_iterator &begin, const const_iterator &end)
     : m_kernel(&(begin.getKernel())),
       m_begin_pos(begin.getRawIndex()),
       m_end_pos(end.getRawIndex())
