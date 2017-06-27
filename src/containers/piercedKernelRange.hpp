@@ -74,6 +74,8 @@ public:
     // General methods
     void swap(PiercedKernelRange &other) noexcept;
 
+    const kernel_type & getKernel() const;
+
     // Methods to get begin and end
     const_iterator begin() const noexcept;
     const_iterator end() const noexcept;

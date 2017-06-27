@@ -95,6 +95,17 @@ void PiercedKernelRange<id_t>::swap(PiercedKernelRange &other) noexcept
 }
 
 /*!
+* Get a constant reference of the kernel associated with the range.
+*
+* \result A constant reference of the kernel associated with the range.
+*/
+template<typename id_t>
+const typename PiercedKernelRange<id_t>::kernel_type & PiercedKernelRange<id_t>::getKernel() const
+{
+    return *m_kernel;
+}
+
+/*!
 * Returns a constant iterator pointing to the first element in the range.
 *
 * \result A constant iterator pointing to the first element in the range.
