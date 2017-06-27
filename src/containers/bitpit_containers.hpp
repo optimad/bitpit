@@ -40,6 +40,6 @@
 #include "piercedKernel.hpp"
 #include "piercedStorage.hpp"
 #include "piercedVector.hpp"
-#include "piercedRange.hpp"
+#include "piercedStorageRange.hpp"
 
 #endif

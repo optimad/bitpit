@@ -27,7 +27,7 @@
 
 #include <vector>
 
-#include "piercedRange.hpp"
+#include "piercedStorageRange.hpp"
 #include "piercedStorageIterator.hpp"
 #include "piercedKernel.hpp"
 #include "piercedSync.hpp"
@@ -211,12 +211,12 @@ public:
     /**
     * Range
     */
-    typedef PiercedRange<value_t, id_t> range;
+    typedef PiercedStorageRange<value_t, id_t> range;
 
     /**
     * Constant range
     */
-    typedef PiercedRange<const value_t, id_t> const_range;
+    typedef PiercedStorageRange<const value_t, id_t> const_range;
 
     /**
     * Checks if the storage has the 'restore' capability

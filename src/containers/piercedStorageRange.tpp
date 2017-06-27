@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PIERCED_RANGE_TPP__
-#define __BITPIT_PIERCED_RANGE_TPP__
+#ifndef __BITPIT_PIERCED_STORAGE_RANGE_TPP__
+#define __BITPIT_PIERCED_STORAGE_RANGE_TPP__
 
 namespace bitpit {
 
@@ -31,7 +31,7 @@ namespace bitpit {
 * Constructor.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange()
+PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange()
     : m_storage(nullptr),
       m_begin_pos(-1),
       m_end_pos(-1)
@@ -42,7 +42,7 @@ PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange()
 * Constructor.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(storage_t *storage)
+PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t *storage)
     : m_storage(storage),
       m_begin_pos(storage->cbegin().getRawIndex()),
       m_end_pos(storage->cend().getRawIndex())
@@ -56,7 +56,7 @@ PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(storage_t *storage)
 * \param last is the id of the last element in the range
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(storage_t *storage, id_t first, id_t last)
+PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t *storage, id_t first, id_t last)
     : m_storage(storage),
       m_begin_pos(storage->getRawIndex(first)),
       m_end_pos(storage->getRawIndex(last) + 1)
@@ -70,7 +70,7 @@ PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(storage_t *storage, id_
 * \param end is the end of the range
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(iterator begin, iterator end)
+PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(iterator begin, iterator end)
     : m_storage(&(begin.getStorage())),
       m_begin_pos(begin.getRawIndex()),
       m_end_pos(end.getRawIndex())
@@ -87,7 +87,7 @@ PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(iterator begin, iterato
 * \param other the iterator to exchange values with
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-void PiercedRange<value_t, id_t, value_no_cv_t>::swap(PiercedRange &other) noexcept
+void PiercedStorageRange<value_t, id_t, value_no_cv_t>::swap(PiercedStorageRange &other) noexcept
 {
     std::swap(m_storage, other.m_storage);
 
@@ -104,7 +104,7 @@ void PiercedRange<value_t, id_t, value_no_cv_t>::swap(PiercedRange &other) noexc
 template<typename value_t, typename id_t, typename value_no_cv_t>
 template<typename U, typename U_no_cv,
          typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
-typename PiercedRange<value_t, id_t, value_no_cv_t>::iterator PiercedRange<value_t, id_t, value_no_cv_t>::begin() noexcept
+typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::begin() noexcept
 {
     return m_storage->getIteratorFromRawIndex(m_begin_pos);
 }
@@ -119,7 +119,7 @@ typename PiercedRange<value_t, id_t, value_no_cv_t>::iterator PiercedRange<value
 template<typename value_t, typename id_t, typename value_no_cv_t>
 template<typename U, typename U_no_cv,
          typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
-typename PiercedRange<value_t, id_t, value_no_cv_t>::iterator PiercedRange<value_t, id_t, value_no_cv_t>::end() noexcept
+typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::end() noexcept
 {
     return m_storage->getIteratorFromRawIndex(m_end_pos);
 }
@@ -130,7 +130,7 @@ typename PiercedRange<value_t, id_t, value_no_cv_t>::iterator PiercedRange<value
 * \result A constant iterator pointing to the first element in the range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::begin() const noexcept
+typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::begin() const noexcept
 {
     return m_storage->getConstIteratorFromRawIndex(m_begin_pos);
 }
@@ -143,7 +143,7 @@ typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange
 * range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::end() const noexcept
+typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::end() const noexcept
 {
     return m_storage->getConstIteratorFromRawIndex(m_end_pos);
 }
@@ -154,7 +154,7 @@ typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange
 * \result A constant iterator pointing to the first element in the range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::cbegin() const noexcept
+typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::cbegin() const noexcept
 {
     return m_storage->getConstIteratorFromRawIndex(m_begin_pos);
 }
@@ -167,7 +167,7 @@ typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange
 * range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::cend() const noexcept
+typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::cend() const noexcept
 {
     return m_storage->getConstIteratorFromRawIndex(m_end_pos);
 }

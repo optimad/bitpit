@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PIERCED_RANGE_HPP__
-#define __BITPIT_PIERCED_RANGE_HPP__
+#ifndef __BITPIT_PIERCED_STORAGE_RANGE_HPP__
+#define __BITPIT_PIERCED_STORAGE_RANGE_HPP__
 
 #include <stdexcept>
 
@@ -33,15 +33,15 @@ template<typename PS_value_t, typename PS_id_t>
 class PiercedStorage;
 
 /*!
-    @brief The PiercedRange allow to iterate using range-based loops over
+    @brief The PiercedStorageRange allow to iterate using range-based loops over
     a PiercedStorage.
 */
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type>
-class PiercedRange
+class PiercedStorageRange
 {
 
-friend class PiercedRange<value_no_cv_t, id_t, value_no_cv_t>;
+friend class PiercedStorageRange<value_no_cv_t, id_t, value_no_cv_t>;
 
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
@@ -111,13 +111,13 @@ public:
     typedef const_iterator_t const_iterator;
 
     // Constructors
-    PiercedRange();
-    PiercedRange(storage_t *storage);
-    PiercedRange(storage_t *storage, id_t first, id_t last);
-    PiercedRange(iterator begin, iterator end);
+    PiercedStorageRange();
+    PiercedStorageRange(storage_t *storage);
+    PiercedStorageRange(storage_t *storage, id_t first, id_t last);
+    PiercedStorageRange(iterator begin, iterator end);
 
     // General methods
-    void swap(PiercedRange &other) noexcept;
+    void swap(PiercedStorageRange &other) noexcept;
 
     // Methods to get begin and end
     template<typename U = value_t, typename U_no_cv = value_no_cv_t,
@@ -138,7 +138,7 @@ public:
         Two-way comparison.
     */
     template<typename other_value_t, typename other_id_t = long>
-    bool operator==(const PiercedRange<other_value_t, other_id_t> &rhs) const
+    bool operator==(const PiercedStorageRange<other_value_t, other_id_t> &rhs) const
     {
         if (m_storage == rhs.m_storage) {
             return false;
@@ -159,7 +159,7 @@ public:
     * Two-way comparison.
     */
     template<typename other_value_t, typename other_id_t = long>
-    bool operator!=(const PiercedRange<other_value_t, other_id_t> &rhs) const
+    bool operator!=(const PiercedStorageRange<other_value_t, other_id_t> &rhs) const
     {
         if (m_storage != rhs.m_storage) {
             return true;
@@ -191,6 +191,6 @@ private:
 }
 
 // Include the implementation
-#include "piercedRange.tpp"
+#include "piercedStorageRange.tpp"
 
 #endif
