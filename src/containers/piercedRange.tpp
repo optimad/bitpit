@@ -28,68 +28,68 @@
 namespace bitpit {
 
 /*!
-    Constructor.
+* Constructor.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange()
-    : m_container(nullptr),
+    : m_storage(nullptr),
       m_begin_pos(-1),
       m_end_pos(-1)
 {
 }
 
 /*!
-    Constructor.
+* Constructor.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(container_t *container)
-    : m_container(container),
-      m_begin_pos(container->cbegin().getRawIndex()),
-      m_end_pos(container->cend().getRawIndex())
+PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(storage_t *storage)
+    : m_storage(storage),
+      m_begin_pos(storage->cbegin().getRawIndex()),
+      m_end_pos(storage->cend().getRawIndex())
 {
 }
 
 /*!
-    Constructor.
-
-    \param first is the id of the first element in the range
-    \param last is the id of the last element in the range
+* Constructor.
+*
+* \param first is the id of the first element in the range
+* \param last is the id of the last element in the range
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(container_t *container, id_t first, id_t last)
-    : m_container(container),
-      m_begin_pos(container->getRawIndex(first)),
-      m_end_pos(container->getRawIndex(last) + 1)
+PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(storage_t *storage, id_t first, id_t last)
+    : m_storage(storage),
+      m_begin_pos(storage->getRawIndex(first)),
+      m_end_pos(storage->getRawIndex(last) + 1)
 {
 }
 
 /*!
-    Constructor.
-
-    \param begin is the begin of the range
-    \param end is the end of the range
+* Constructor.
+*
+* \param begin is the begin of the range
+* \param end is the end of the range
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedRange<value_t, id_t, value_no_cv_t>::PiercedRange(iterator begin, iterator end)
-    : m_container(&(begin.getContainer())),
+    : m_storage(&(begin.getStorage())),
       m_begin_pos(begin.getRawIndex()),
       m_end_pos(end.getRawIndex())
 {
-    if (&(begin.getContainer()) != &(end.getContainer())) {
-        throw std::runtime_error("The two iterators belong to different containers");
+    if (&(begin.getStorage()) != &(end.getStorage())) {
+        throw std::runtime_error("The two iterators belong to different storages");
     }
 }
 
 /*!
-    Exchanges the values of the current iterator and
-    the iterator recevied as argument.
-
-    \param other the iterator to exchange values with
+* Exchanges the values of the current iterator and
+* the iterator recevied as argument.
+*
+* \param other the iterator to exchange values with
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 void PiercedRange<value_t, id_t, value_no_cv_t>::swap(PiercedRange &other) noexcept
 {
-    std::swap(m_container, other.m_container);
+    std::swap(m_storage, other.m_storage);
 
     std::swap(m_begin_pos, other.m_begin_pos);
     std::swap(m_end_pos, other.m_end_pos);
@@ -97,79 +97,79 @@ void PiercedRange<value_t, id_t, value_no_cv_t>::swap(PiercedRange &other) noexc
 
 
 /*!
-    Returns an iterator pointing to the first element in the range.
-
-    \result An iterator pointing to the first element in the range.
+* Returns an iterator pointing to the first element in the range.
+*
+* \result An iterator pointing to the first element in the range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 template<typename U, typename U_no_cv,
          typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
 typename PiercedRange<value_t, id_t, value_no_cv_t>::iterator PiercedRange<value_t, id_t, value_no_cv_t>::begin() noexcept
 {
-    return m_container->getIteratorFromRawIndex(m_begin_pos);
+    return m_storage->getIteratorFromRawIndex(m_begin_pos);
 }
 
 /*!
-    Returns a constant iterator pointing to the past-the-end element in the
-    range.
-
-    \result A constant iterator pointing to the past-the-end element in the
-    range.
+* Returns a constant iterator pointing to the past-the-end element in the
+* range.
+*
+* \result A constant iterator pointing to the past-the-end element in the
+* range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 template<typename U, typename U_no_cv,
          typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
 typename PiercedRange<value_t, id_t, value_no_cv_t>::iterator PiercedRange<value_t, id_t, value_no_cv_t>::end() noexcept
 {
-    return m_container->getIteratorFromRawIndex(m_end_pos);
+    return m_storage->getIteratorFromRawIndex(m_end_pos);
 }
 
 /*!
-    Returns a constant iterator pointing to the first element in the range.
-
-    \result A constant iterator pointing to the first element in the range.
+* Returns a constant iterator pointing to the first element in the range.
+*
+* \result A constant iterator pointing to the first element in the range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::begin() const noexcept
 {
-    return m_container->getConstIteratorFromRawIndex(m_begin_pos);
+    return m_storage->getConstIteratorFromRawIndex(m_begin_pos);
 }
 
 /*!
-    Returns a constant iterator pointing to the past-the-end element in the
-    range.
-
-    \result A constant iterator pointing to the past-the-end element in the
-    range.
+* Returns a constant iterator pointing to the past-the-end element in the
+* range.
+*
+* \result A constant iterator pointing to the past-the-end element in the
+* range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::end() const noexcept
 {
-    return m_container->getConstIteratorFromRawIndex(m_end_pos);
+    return m_storage->getConstIteratorFromRawIndex(m_end_pos);
 }
 
 /*!
-    Returns a constant iterator pointing to the first element in the range.
-
-    \result A constant iterator pointing to the first element in the range.
+* Returns a constant iterator pointing to the first element in the range.
+*
+* \result A constant iterator pointing to the first element in the range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::cbegin() const noexcept
 {
-    return m_container->getConstIteratorFromRawIndex(m_begin_pos);
+    return m_storage->getConstIteratorFromRawIndex(m_begin_pos);
 }
 
 /*!
-    Returns a constant iterator pointing to the past-the-end element in the
-    range.
-
-    \result A constant iterator pointing to the past-the-end element in the
-    range.
+* Returns a constant iterator pointing to the past-the-end element in the
+* range.
+*
+* \result A constant iterator pointing to the past-the-end element in the
+* range.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedRange<value_t, id_t, value_no_cv_t>::cend() const noexcept
 {
-    return m_container->getConstIteratorFromRawIndex(m_end_pos);
+    return m_storage->getConstIteratorFromRawIndex(m_end_pos);
 }
 
 }

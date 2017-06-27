@@ -65,13 +65,13 @@ public:
 	typedef PiercedVector<Cell>::const_iterator CellConstIterator;
 	typedef PiercedVector<Interface>::const_iterator InterfaceConstIterator;
 
-	typedef PiercedRange<Vertex> VertexRange;
-	typedef PiercedRange<Cell> CellRange;
-	typedef PiercedRange<Interface> InterfaceRange;
+	typedef PiercedVector<Vertex>::range VertexRange;
+	typedef PiercedVector<Cell>::range CellRange;
+	typedef PiercedVector<Interface>::range InterfaceRange;
 
-	typedef PiercedRange<const Vertex> VertexConstRange;
-	typedef PiercedRange<const Cell> CellConstRange;
-	typedef PiercedRange<const Interface> InterfaceConstRange;
+	typedef PiercedVector<Vertex>::const_range VertexConstRange;
+	typedef PiercedVector<Cell>::const_range CellConstRange;
+	typedef PiercedVector<Interface>::const_range InterfaceConstRange;
 
 	enum WriteTarget {
 		WRITE_TARGET_CELLS_ALL

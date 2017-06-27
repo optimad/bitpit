@@ -25,64 +25,73 @@
 #ifndef __BITPIT_PIERCED_RANGE_HPP__
 #define __BITPIT_PIERCED_RANGE_HPP__
 
-#include "piercedVector.hpp"
-
 namespace bitpit {
 
 /*!
     @brief The PiercedRange allow to iterate using range-based loops over
-    a PiercedVector.
+    a PiercedStorage.
 */
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type>
 class PiercedRange
 {
 
+friend class PiercedRange<value_no_cv_t, id_t, value_no_cv_t>;
+
+template<typename PS_value_t, typename PS_id_t>
+friend class PiercedStorage;
+
 private:
-    /*!
-        Container.
+    /**
+    * Storage.
     */
-    template<typename PV_value_t, typename PV_id_t>
-    using Container = PiercedVector<PV_value_t, PV_id_t>;
+    template<typename PS_value_t, typename PS_id_t>
+    using Storage = PiercedStorage<PS_value_t, PS_id_t>;
 
-    /*
-        Container type
-
-        When building a const_range the iterator has to be declared const.
+    /**
+    * Storage type
+    *
+    * When building a const_iterator the pointer to the storage has to be
+    * declared const.
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
-            const Container<value_no_cv_t, id_t>,
-            Container<value_no_cv_t, id_t>
+            const Storage<value_no_cv_t, id_t>,
+            Storage<value_no_cv_t, id_t>
         >::type
 
-        container_t;
+        storage_t;
 
     /*
-        Iterator type
-
-        When building a const_iterator the pointer to the container has to
-        be declared const.
+    * Iterator type
+    *
+    * When building a const_iterator the pointer to the container has to
+    * be declared const.
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
-            typename container_t::const_iterator,
-            typename container_t::iterator
+            typename storage_t::const_iterator,
+            typename storage_t::iterator
         >::type
 
         iterator_t;
 
     /*
-        Const iterator type
-
-        When building a const_iterator the pointer to the container has to
-        be declared const.
+    * Const iterator type
+    *
+    * When building a const_iterator the pointer to the container has to
+    * be declared const.
     */
-    typedef typename container_t::const_iterator const_iterator_t;
+    typedef typename storage_t::const_iterator const_iterator_t;
+
+    /**
+    * Kernel type
+    */
+    typedef typename storage_t::kernel_t kernel_t;
 
 public:
     /*! Type of container */
-    typedef container_t container_type;
+    typedef storage_t storage_type;
 
     /*! Type of data stored in the container */
     typedef value_t value_type;
@@ -98,8 +107,8 @@ public:
 
     // Constructors
     PiercedRange();
-    PiercedRange(container_t *container);
-    PiercedRange(container_t *container, id_t first, id_t last);
+    PiercedRange(storage_t *storage);
+    PiercedRange(storage_t *storage, id_t first, id_t last);
     PiercedRange(iterator begin, iterator end);
 
     // General methods
@@ -126,7 +135,7 @@ public:
     template<typename other_value_t, typename other_id_t = long>
     bool operator==(const PiercedRange<other_value_t, other_id_t> &rhs) const
     {
-        if (m_container == rhs.m_container) {
+        if (m_storage == rhs.m_storage) {
             return false;
         }
 
@@ -142,12 +151,12 @@ public:
     }
 
     /*!
-        Two-way comparison.
+    * Two-way comparison.
     */
     template<typename other_value_t, typename other_id_t = long>
     bool operator!=(const PiercedRange<other_value_t, other_id_t> &rhs) const
     {
-        if (m_container != rhs.m_container) {
+        if (m_storage != rhs.m_storage) {
             return true;
         }
 
@@ -164,7 +173,7 @@ public:
 
 private:
     /*! Container */
-    container_t *m_container;
+    storage_t *m_storage;
 
     /*! Begin */
     size_t m_begin_pos;

@@ -22,24 +22,23 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- * @defgroup containers Containers
- * @{
- * @defgroup BinaryStream Binary stream
- * @}
- *
- */
-
-#ifndef __BITPIT_MODULE_CONTAINERS_HPP__
-#define __BITPIT_MODULE_CONTAINERS_HPP__
-
-#include "bitpit_version.hpp"
-
-#include "binary_stream.hpp"
-#include "flatVector2D.hpp"
 #include "piercedKernel.hpp"
-#include "piercedStorage.hpp"
-#include "piercedVector.hpp"
-#include "piercedRange.hpp"
 
-#endif
+namespace bitpit {
+
+/**
+* \ingroup containers
+* \class BasePiercedKernel
+*
+* \brief Base class for the pierced kernel.
+*/
+
+/**
+* Constructs an empty base pierced kernel.
+*/
+BasePiercedKernel::BasePiercedKernel()
+    : PiercedSyncMaster()
+{
+}
+
+}
