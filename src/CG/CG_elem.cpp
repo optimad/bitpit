@@ -140,7 +140,8 @@ bool validBarycentric(double const *lambdaPtr, int n )
 /*!
  * Converts barycentric coordinates of a point on a segment to a flag that indicates where the point lies.
  * Flag = 0 Point lies within the segment
- * Flag = i Point coincides with the ith vertex of triangle or lies on the adjacent side of the segment
+ * Flag = 1 Point coincides with the first vertex or is positioned befor the line
+ * Flag = 2 Point coincides with the second vertex or is positioned after the line
  * @param[in] lambda barycentric coordinates of point
  * @return flag
  */
@@ -528,13 +529,13 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 }
 
 /*!
- * Computes distances of point cloud to triangle
+ * Projects a point cloud onto a triangle. 
+ * Projection points are the closest points to the original points within the triangle.
  * @param[in] cloud point cloud coordinates
  * @param[in] Q1 first triangle vertex
  * @param[in] Q2 second triangle vertex
  * @param[in] Q3 third triangle vertex
- * @param[inout] xPExt pointer to std::vector to be filled with the projection point; 
- * @param[inout] lambdas pointer to sd::vector to be filled with barycentric coordinates of projection points
+ * @param[inout] lambda barycentric coordinates of projection points
  * @return distances
  */
 std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D> &lambda )
@@ -555,13 +556,15 @@ std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, ar
 }
 
 /*!
- * Computes distances of point cloud to triangle
- * @param[in] cloud point cloud coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
+ * Projects points on a triangle.
+ * Projection points are the closest points to the original points within the triangle.
+ * @param[in] nPoints number of points
+ * @param[in] points pointer to points' coordinates
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
  * @param[out] proj pointer to the projection point; 
- * @param[out] lambdas pointer to barycentric coordinates of projection points
+ * @param[out] lambda pointer to barycentric coordinates of projection points
  * @return distances
  */
 void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
@@ -603,13 +606,14 @@ void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q
 }
 
 /*!
- * Project a point cloud on a plane described by a triangle
- * @param[in] cloud point cloud coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
+ * Project points on a plane described by a triangle
+ * @param[in] nPoints number of points
+ * @param[in] points pointer to points' coordinates
+ * @param[in] Q0 first triangle vertex
+ * @param[in] Q1 second triangle vertex
+ * @param[in] Q2 third triangle vertex
  * @param[out] proj pointer to the projection point; 
- * @param[out] lambdas pointer to barycentric coordinates of projection points
+ * @param[out] lambda pointer to barycentric coordinates of projection points
  * @return distances
  */
 void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
