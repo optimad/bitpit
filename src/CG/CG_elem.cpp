@@ -2252,6 +2252,43 @@ void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, ar
 
 
 /*!
+ * computes the edge coordiantes of a triangle
+ * @param[in] i edge index
+ * @param[in] V0 first vertex of triangle
+ * @param[in] V1 second vertex of triangle
+ * @param[in] V2 third vertex of triangle
+ * @param[out] P0 first vertex of edge
+ * @param[out] P1 first vertex of edge
+ */
+void edgeOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P0, array3D &P1)
+{
+    switch(i){
+
+        case 0:
+            P0 = V0;
+            P1 = V1;
+            break;
+
+        case 1:
+            P0 = V1;
+            P1 = V2;
+            break;
+
+        case 2:
+            P0 = V2;
+            P1 = V0;
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+
+    return;
+}
+
+
+/*!
  * computes the face coordiantes of a box
  * @param[in] i face index
  * @param[in] A0 min point of bounding box
