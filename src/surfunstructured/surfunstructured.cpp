@@ -553,6 +553,49 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
     return 0;
 }
 
+/*!
+ * Export surface tasselation in a STL format. No check is perfomed on element type
+ * therefore tasselation containing vertex, line or quad elements will produce
+ * ill-formed stl triangulation.
+ *
+ * \param[in] stl_name name of the stl file
+ * \param[in] isBinary flag for binary (true) or ASCII (false) file
+ * \param[in] exportInternalsOnly flag for exporting only internal cells (true), or
+ * internal and ghost cells (false).
+ *
+ * \result on output returns an error flag for I/O error.
+ */
+unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary, bool exportInternalsOnly)
+{
+    return exportSTLSingle(stl_name, isBinary, exportInternalsOnly);
+}
+
+/*!
+ * Export surface tasselation in a STL format. No check is perfomed on element type
+ * therefore tasselation containing vertex, line or quad elements will produce
+ * ill-formed stl triangulation. Overloading supporting the the ascii multi-solid mode export.
+ *
+ * \param[in] stl_name name of the stl file
+ * \param[in] isBinary flag for binary (true) or ASCII (false) file
+ * \param[in] isMulti flag to write in ASCII multi-solid mode (true) or not (false).
+ * If true, isBinary flag will be ignored.
+ * \param[in] exportInternalsOnly flag for exporting only internal cells (true), or
+ * internal+ghost cells (false).
+ *
+ * \result on output returns an error flag for I/O error.
+ */
+unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary, const bool &isMulti, bool exportInternalsOnly)
+{
+    unsigned short flag = 0;
+    if (isMulti) {
+        flag = exportSTLMulti(stl_name, exportInternalsOnly);
+    } else {
+        flag = exportSTLSingle(stl_name, isBinary, exportInternalsOnly);
+    }
+
+    return flag;
+}
+
 //TODO: normals??
 //TODO: error flag on output
 //TODO: conversion of quad into tria
@@ -568,7 +611,7 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
  * 
  * \result on output returns an error flag for I/O error.
 */
-unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary, bool exportInternalsOnly)
+unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const bool &isBinary, bool exportInternalsOnly)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -661,6 +704,109 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
     return 0;
 }
 
+/*!
+ * Export surface tasselation in a STL Multi Solid format, in ascii mode only. Binary is not supported for STL Multisolid.
+ * No check is perfomed on element type therefore tasselation containing vertex, line or quad elements will produce
+ * ill-formed stl triangulation. If available, ghost cells will be written in a stand-alone solid.
+ *
+ * \param[in] stl_name name of the stl file
+ * \param[in] exportInternalsOnly flag for exporting only internal cells (true),
+ * or internal+ghost cells (false).
+ *
+ * \result on output returns an error flag for I/O error 0-done, >0 errors.
+ */
+unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exportInternalsOnly)
+{
+    int                                         nTotVertex;
+    vector<array<double, 3>>                    totVertexList;
+    unordered_map<long, long>                   vertexMap;
+
+    int                                         nLocSimplex;
+    vector<array<double, 3>>                    normalLocList;
+    vector<array<int,3>>                        connectivityLocList;
+
+    STLObj STL(stl_name, false);
+
+    STL.open("out");
+    if (STL.err != 0) {
+        return STL.err;
+    }
+
+    // Create the vertex map
+    nTotVertex = getVertexCount();
+    totVertexList.resize(nTotVertex);
+    unsigned int count_v = 0;
+    for(const Vertex &v: getVertices()){
+        totVertexList[count_v] = v.getCoords();
+        vertexMap[v.getId()] = count_v;
+        ++count_v;
+    }
+
+    // Export the internal cells
+    for(int pid : getInternalPIDs()){
+        std::vector<long> cells = getInternalsByPID(pid);
+
+        nLocSimplex = (int) cells.size();
+        connectivityLocList.resize(nLocSimplex);
+        normalLocList.resize(nLocSimplex);
+
+        vector<array<int,3>>::iterator itC = connectivityLocList.begin();
+        vector<array<double, 3>>::iterator itN = normalLocList.begin();
+
+        // Fill local connectivity and normals structures
+        for (auto id : cells) {
+            // Fill connectivity
+            const Cell &cell = getCell(id);
+            for (int iloc = 0; iloc<3; ++iloc) {
+                (*itC)[iloc] = vertexMap[cell.getConnect()[iloc]];
+            }
+
+            // Fill normal
+            *itN = std::move(evalFacetNormal(cell.getId()));
+
+            // Increment  iterators
+            itC++;
+            itN++;
+        }
+
+        // Write the solid associated to the current PID
+        STL.saveSolid(std::to_string(pid), nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+    }
+
+    // Export ghost cells
+    long nGhosts = getGhostCount();
+    if (!exportInternalsOnly && nGhosts > 0) {
+        nLocSimplex = nGhosts;
+        connectivityLocList.resize(nLocSimplex);
+        normalLocList.resize(nLocSimplex);
+
+        vector<array<int,3>>::iterator itC = connectivityLocList.begin();
+        vector<array<double, 3>>::iterator itN = normalLocList.begin();
+
+        // Fill local connectivity and normals structures
+		CellConstIterator endItr = ghostConstEnd();
+        for (CellConstIterator itr = ghostConstBegin(); itr != endItr; ++itr) {
+            // Fill connectivity
+            for (int iloc = 0; iloc<3; ++iloc) {
+                (*itC)[iloc] = vertexMap[itr->getConnect()[iloc]];
+            }
+
+            // Fill normal
+            *itN = std::move(evalFacetNormal(itr.getId()));
+
+            // Increment iterators
+            itC++;
+            itN++;
+        }
+
+        // Write the solid associated to the ghosts
+        STL.saveSolid("ghosts", nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+    }
+
+    STL.close("out");
+
+    return 0;
+}
 
 /*!
 * Get the element type of a facet with the specified number of vertices.

@@ -56,6 +56,7 @@ public:
         unsigned short importSTL(const std::string &, int PIDOffset = 0, bool PIDSquah = false);
         unsigned short importSTL(const std::string &, const bool &, int PIDOffset = 0, bool PIDSquah = false);
         unsigned short exportSTL(const std::string &, const bool &, bool flag = true);
+        unsigned short exportSTL(const std::string &, const bool &, const bool &, bool flag);
         unsigned short importDGF(const std::string &, int PIDOffset = 0, bool PIDSquah = false);
         unsigned short exportDGF(const std::string &);
 
@@ -73,6 +74,9 @@ protected:
 	static ElementInfo::Type getDGFFacetType(int nFacetVertices);
 
 	unsigned short importSTL(STLObj &STL, int PIDOffset, bool PIDSquash);
+
+	unsigned short exportSTLSingle(const std::string &, const bool &, bool flag = true);
+	unsigned short exportSTLMulti(const std::string &, bool flag = true);
 
 private:
 
