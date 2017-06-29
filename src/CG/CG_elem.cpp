@@ -2251,6 +2251,33 @@ void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, ar
 }
 
 /*!
+ * returns the vertex coordiantes of a segment given its index
+ * @param[in] i edge index
+ * @param[in] V0 first vertex of segment
+ * @param[in] V1 second vertex of segment
+ * @param[out] P vertex
+ */
+void vertexOfSegment(int const &i, array3D const &V0, array3D const &V1, array3D &P)
+{
+    switch(i){
+
+        case 0:
+            P = V0;
+            break;
+
+        case 1:
+            P = V1;
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+
+    return;
+}
+
+/*!
  * returns the vertex coordiantes of a triangle given its index
  * @param[in] i edge index
  * @param[in] V0 first vertex of triangle

@@ -196,6 +196,7 @@ void                unionAABB( std::vector<array3D>  const &, std::vector<array3
 array3D rotateVector( array3D const &, array3D const &, double);
 double areaTriangle( array3D const &, array3D const &, array3D const &);
 
+void vertexOfSegment( int const &, array3D const &, array3D const &, array3D &);
 void vertexOfBox(
         int              const              &,     
         std::array<double, 3> const              &,
