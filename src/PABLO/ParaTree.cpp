@@ -1232,6 +1232,20 @@ namespace bitpit {
         return m_octree.getMarker(idx);
     };
 
+    /*! Get the refinement marker of an octant after a preadapt.
+    * \param[in] idx Local index of target octant.
+    * \return Marker of octant.
+    * NOTE: if a last operation is not preadapt, it calls preadapt method.
+    */
+    int8_t
+    ParaTree::getPreMarker(uint32_t idx){
+        if (m_lastOp != OP_PRE_ADAPT) {
+            throw std::runtime_error("Last operation different from preadapt, unable to call getPreMarker function");
+        }
+
+        return m_octree.getMarker(idx);
+    };
+
     /*! Get the level of an octant.
      * \param[in] idx Local index of target octant.
      * \return Level of octant.
@@ -1634,6 +1648,20 @@ namespace bitpit {
      */
     int8_t
     ParaTree::getMarker(const Octant* oct) const {
+        return oct->getMarker();
+    };
+
+    /*! Get the refinement marker of an octant after a preadapt.
+     * \param[in] oct Pointer to the target octant
+     * \return Marker of octant.
+     * NOTE: if a last operation is not preadapt, it calls preadapt method.
+     */
+    int8_t
+    ParaTree::getPreMarker(Octant* oct){
+        if (m_lastOp != OP_PRE_ADAPT) {
+            throw std::runtime_error("Last operation different from preadapt, unable to call getPreMarker function");
+        }
+
         return oct->getMarker();
     };
 
@@ -3049,6 +3077,36 @@ namespace bitpit {
                     break;
                 }
             }
+        }
+    };
+
+    /** Get octants with marker different from zero and the related markers.
+        * The methods has to be called after a apredapt, otherwise it calls preadapt method.
+        * \param[out] idx Vector of local indices of octants with marler different from zero.
+        * \param[out] markers Vector with markers related to octants in the idx list.
+        */
+    void
+    ParaTree::getPreMapping(u32vector & idx, vector<int8_t> & mapper)
+    {
+        if (m_lastOp != OP_PRE_ADAPT) {
+            throw std::runtime_error("Last operation different from preadapt, unable to call getPreMarker function");
+        }
+
+        idx.clear();
+        mapper.clear();
+        idx.reserve(getNumOctants());
+        mapper.reserve(getNumOctants());
+        octantIterator it, itb = getInternalOctantsBegin(), ite = getInternalOctantsEnd();
+
+        int count = 0;
+        int8_t marker;
+        for (it=itb; it!=ite; it++){
+            marker = (*it)->getMarker();
+            if (marker != 0){
+                idx.push_back(count);
+                mapper.push_back(marker);
+            }
+            count++;
         }
     };
 

@@ -266,6 +266,7 @@ namespace bitpit {
         uint32_t    getLocalIdx(uint64_t gidx,int rank) const;
         uint32_t    getGhostLocalIdx(uint64_t gidx) const;
         octantID	getPersistentIdx(uint32_t idx) const;
+        int8_t 		getPreMarker(uint32_t idx);
         void 		setMarker(uint32_t idx, int8_t marker);
         void 		setBalance(uint32_t idx, bool balance);
 
@@ -303,6 +304,7 @@ namespace bitpit {
         uint32_t 	getIdx(const Octant* oct) const;
         uint64_t 	getGlobalIdx(const Octant* oct) const;
         octantID	getPersistentIdx(const Octant* oct) const;
+        int8_t 		getPreMarker(Octant* oct);
         void 		setMarker(Octant* oct, int8_t marker);
         void 		setBalance(Octant* oct, bool balance);
 
@@ -411,6 +413,7 @@ namespace bitpit {
         uint32_t 	getPointOwnerIdx(darray3 point, bool & isghost) const;
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const;
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
+        void        getPreMapping(u32vector & idx, vector<int8_t> & mapper);
         bool 		isNodeOnOctant(const Octant* nodeOctant, uint8_t nodeIndex, const Octant* octant) const;
         bool 		isEdgeOnOctant(const Octant* edgeOctant, uint8_t edgeIndex, const Octant* octant) const;
         bool 		isFaceOnOctant(const Octant* faceOctant, uint8_t faceIndex, const Octant* octant) const;
