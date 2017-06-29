@@ -169,6 +169,22 @@ class STLObj {
         std::vector<std::array<int,3> >         &,                            // (input/output) triangle-vertex connectivity
         T2                                      & ...                         // (input/optional) other stl solids
     );
+    void saveSolid(                                                           // Export next stl solid to stl file (appending)
+        std::string                              ,                            // (input) solid name
+        int                                     &,                            // (input/output) number of stl vertices
+        int                                     &,                            // (input/output) number of stl facets
+        std::vector<std::vector<double> >       &,                            // (input) vertex coordinate list
+        std::vector<std::vector<double> >       &,                            // (input) unit normal to each triangle
+        std::vector<std::vector<int> >          &                             // (input) triangle-vertex connectivity
+    );
+    void saveSolid(                                                           // Export next stl solid to stl file (appending)
+        std::string                              ,                            // (input) solid name
+        int                                     &,                            // (input/output) number of stl vertices
+        int                                     &,                            // (input/output) number of stl facets
+        std::vector<std::array<double,3> >      &,                            // (input) vertex coordinate list
+        std::vector<std::array<double,3> >      &,                            // (input) unit normal to each triangle
+        std::vector<std::array<int,3> >         &                             // (input) triangle-vertex connectivity
+    );
     template <typename ... T2>
     void save(                                                                // Export stl solid to stl file
         std::string                              ,                            // (input) solid name

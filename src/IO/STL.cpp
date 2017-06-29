@@ -742,6 +742,62 @@ else            { stl::readSolidASCII(ifile_handle, false, nV, nT, V, N, T); }
 
 return; };
 
+// -------------------------------------------------------------------------- //
+/*!
+    Save single solid data appending to the the stl file associated to the interface.
+    This routine assumes that the output stream is already open, in append mode.
+
+    \param[in]  sname label associated to the solid.
+    \param[in]  nV number of vertices of current solid.
+    \param[in]  nT number of facets of current solid.
+    \param[in]  V vertex coordinates list.
+    \param[in]  N facet normals.
+    \param[in]  T facet->vertex connectivity.
+ */
+void STLObj::saveSolid(
+    std::string                                 sname,
+    int                                         &nV,
+    int                                         &nT,
+    std::vector<std::vector<double> >           &V,
+    std::vector<std::vector<double> >           &N,
+    std::vector<std::vector<int> >              &T
+) {
+
+    // Export solid
+    if (stl_type) { stl::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+    else          { stl::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
+
+    return;
+}
+
+/*!
+*   Save single solid data appending to the the stl file associated to the interface.
+*   Overloading for vertices and facet normals passed as std::vector< std::array< double,3> >.
+*   This routine assumes that the output stream is already open, in append mode.
+*
+*    \param[in]  sname label associated to the solid.
+*    \param[in]  nV number of vertices of current solid.
+*    \param[in]  nT number of facets of current solid.
+*    \param[in]  V vertex coordinates list.
+*    \param[in]  N facet normals.
+*    \param[in]  T facet->vertex connectivity.
+*/
+void STLObj::saveSolid(
+    std::string                                 sname,
+    int                                         &nV,
+    int                                         &nT,
+    std::vector<std::array<double,3> >          &V,
+    std::vector<std::array<double,3> >          &N,
+    std::vector<std::array<int,3> >             &T
+) {
+
+    // Export solid
+    if (stl_type) { stl::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+    else          { stl::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
+
+    return;
+}
+// -------------------------------------------------------------------------- //
 
 // Private methods ---------------------------------------------------------- //
 
