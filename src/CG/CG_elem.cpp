@@ -1642,68 +1642,193 @@ bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, ar
 }
 
 /*!
- * Computes intersection between an axis aligned bounding box and a triangle
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] V1 first vertex of triangle
- * @param[in] V2 first vertex of triangle
- * @param[in] V3 first vertex of triangle
+ * Checks if an axis aligned bounding box and a triangle intersect
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
+ * @param[in] V0 first vertex of triangle
+ * @param[in] V1 second vertex of triangle
+ * @param[in] V2 third vertex of triangle
+ * @param[in] dim number of dimensions to be checked
  * @return if intersect
  */
-bool intersectBoxTriangle(array3D const &A1, array3D const &A2, array3D const &V1, array3D const &V2, array3D const &V3)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, int dim)
 {
-
-    array3D B1, B2;
-
-    //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    computeAABBTriangle( V1, V2, V3, B1, B2);
-
-    if( !intersectBoxBox( A1, A2, B1, B2) ) { 
-        return false; 
-    }
-
-    //Check if Triangle Box edges intersection 
-    array3D P;
-    for( int i=0; i<12; ++i){
-        edgeOfBox( i, A1, A2, B1, B2);
-        if( intersectSegmentTriangle(B1,B2,V1,V2,V3,P)) { 
-            return true; 
-        }
-    }
-
-    return false;
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, false, false, false, nullptr, nullptr, dim);
 }
 
+/*!
+ * Checks if an axis aligned bounding box and a triangle intersect
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
+ * @param[in] V0 first vertex of triangle
+ * @param[in] V1 second vertex of triangle
+ * @param[in] V2 third vertex of triangle
+ * @param[out] P intersection points between triangle and the box edges
+ * @return if intersect
+ */
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, std::vector<array3D> &P)
+{
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, false, false, true, &P, nullptr);
+}
+
+/*!
+ * Checks if an axis aligned bounding box and a triangle intersect
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
+ * @param[in] V0 first vertex of triangle
+ * @param[in] V1 second vertex of triangle
+ * @param[in] V2 third vertex of triangle
+ * @param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
+ * @param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * @param[in] triangleEdgeBoxFaceIntersections if true, the intersections between the edges of the triangle and the hull of the box will be added to the intersection points P
+ * @param[out] P calculated intersection points 
+ * @param[in] dim number of dimensions to be checked
+ * @return if intersect
+ */
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> P, int dim)
+{
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertice, triangleBoxEdgeIntersection, triangleEdgeBoxFaceIntersections, &P, nullptr, dim);
+}
+
+/*!
+ * Checks if an axis aligned bounding box and a triangle intersect
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
+ * @param[in] V0 first vertex of triangle
+ * @param[in] V1 second vertex of triangle
+ * @param[in] V2 third vertex of triangle
+ * @param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
+ * @param[in] triangleEdgeBoxHullIntersections if true, the intersections between the edges of the triangle and the outer hull of the box will be added to the intersection points P
+ * @param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * @param[out] P calculated intersection points 
+ * @param[out] flag has the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
+ * @param[in] dim number of dimensions to be checked
+ * @return if intersect
+ */
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> P, std::vector<int> flag, int dim)
+{
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertice, triangleEdgeBoxHullIntersections, triangleBoxEdgeIntersection, &P, &flag, dim);
+}
 
 /*!
  * Computes intersection between an axis aligned bounding box and a triangle
  * @param[in] A1 min point of first box
  * @param[in] A2 max point of first box
  * @param[in] V1 first vertex of triangle
- * @param[in] V2 first vertex of triangle
- * @param[in] V3 first vertex of triangle
- * @param[out] P intersection points between triangle and box edges
+ * @param[in] V2 second vertex of triangle
+ * @param[in] V3 third vertex of triangle
+ * @param[out] intrPtr pointed vector will hold intersection points between triangle edges and box faces
+ * @param[out] flagPtr pointed vector will have the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
  * @return if intersect
  */
-bool intersectBoxTriangle(array3D const &A1, array3D const &A2, array3D const &V1, array3D const &V2, array3D const &V3, std::vector<array3D> &P)
+bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
 
     bool intersect(false);
-    array3D B1, B2, p;
+    bool addFlag( flagPtr!=nullptr);
+    bool computeIntersection(interiorTriangleVertice||triangleBoxEdgeIntersection||triangleEdgeBoxHullIntersections);
 
-    P.clear();
+    assert( ! (computeIntersection && (intrPtr==nullptr) ) );
 
-    //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    computeAABBTriangle( V1, V2, V3, B1, B2);
+    if(computeIntersection){
+        intrPtr->clear();
+    }
 
-    if( !intersectBoxBox( A1, A2, B1, B2) ) { return(false); }
+    if(addFlag){
+        flagPtr->clear();
+    }
 
-    //Check if Triangle Box edges intersection 
-    for( int i=0; i<12; ++i){
-        edgeOfBox( i, A1, A2, B1, B2);
-        if( intersectSegmentTriangle(B1,B2,V1,V2,V3,p)) {
-            P.push_back(p);
+    //check if Triangle Boundig Box and Box overlap -> necessary condition
+    array3D B0, B1;
+    computeAABBTriangle( V0, V1, V2, B0, B1);
+
+    if( !intersectBoxBox( A0, A1, B0, B1, dim) ) { 
+        return false; 
+    }
+
+    //check if triangle vertices are within the box
+    for( int i=0; i<3; ++i){
+        vertexOfTriangle(i, V0, V1, V2, B0);
+        if( intersectPointBox(B0, A0, A1, dim) ){
             intersect = true;
+            if(!interiorTriangleVertice) break;
+
+            intrPtr->push_back(B0);
+            if(addFlag) flagPtr->push_back(0);
+        }
+    }
+
+    //check if triangle edges and box faces intersect
+    if( !intersect || triangleEdgeBoxHullIntersections) {
+
+        for( int edge=0; edge<3; ++edge){
+
+            edgeOfTriangle(edge, V0, V1, V2, B0, B1);
+
+            if(dim==2){
+                array3D p;
+                array3D faceVertex0, faceVertex1;
+
+                for( int face=0; face<4; ++face){
+                    edgeOfBox( face, A0, A1, faceVertex0, faceVertex1);
+
+                    if( intersectSegmentSegment(B0, B1, faceVertex0, faceVertex1, p) ){
+                        intersect=true;
+                        if(!triangleEdgeBoxHullIntersections) break;
+
+                        intrPtr->push_back(p);
+                        if(addFlag) flagPtr->push_back(1);
+                    }
+
+                }
+
+            } else if(dim==3){
+                array3D p;
+                std::vector<array3D> V(4);
+
+                for( int face=0; face<6; ++face){
+                    faceOfBox( face, A0, A1, V[0], V[1], V[2], V[3] );
+
+                    if( intersectSegmentSimplex( B0, B1, V, p ) ) {
+                        intersect=true;
+                        if(!triangleEdgeBoxHullIntersections) break;
+
+                        intrPtr->push_back(p);
+                        if(addFlag) flagPtr->push_back(1);
+                    }
+                }
+            }
+        }
+    }
+
+    //check if triangle and box edges (dim=3) or box vertices (dim=2) intersect
+    if( !intersect || triangleBoxEdgeIntersection ) {
+
+        array3D p;
+
+        if(dim==2){
+            for( int i=0; i<4; ++i){
+                vertexOfBox( i, A0, A1, B0);
+                if( intersectPointTriangle(B0,V0,V1,V2)) {
+                    intersect = true;
+                    if(!triangleBoxEdgeIntersection) break;
+
+                    intrPtr->push_back(B0);
+                    if(addFlag) flagPtr->push_back(2);
+                }
+            }
+
+        } else if(dim==3){
+            for( int i=0; i<12; ++i){
+                edgeOfBox( i, A0, A1, B0, B1);
+                if( intersectSegmentTriangle(B0,B1,V0,V1,V2,p)) {
+                    intersect = true;
+                    if(!triangleBoxEdgeIntersection) break;
+
+                    intrPtr->push_back(p);
+                    if(addFlag) flagPtr->push_back(2);
+                }
+            }
         }
     }
 
@@ -1712,110 +1837,156 @@ bool intersectBoxTriangle(array3D const &A1, array3D const &A2, array3D const &V
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
- * @param[in] V1 start point of segment
- * @param[in] V2 end point of segment
- * @param[in] A1 min point of box
- * @param[in] A2 max point of box
+ * @param[in] V0 start point of segment
+ * @param[in] V1 end point of segment
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectSegmentBox( array3D const &V1, array3D const &V2, array3D const &A1, array3D const &A2, int dim)
+bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, int dim)
 {
-
-    array3D     B1, B2, p;
-
-    //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    computeAABBSegment( V1, V2, B1, B2);
-    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
-        return false;
-    }
-
-    //Check if Triangle Box edges intersection 
-    if( dim == 2){
-
-        for( int i=0; i<4; ++i){
-            edgeOfBox( i, A1, A2, B1, B2);
-
-            if( intersectSegmentSegment(B1,B2,V1,V2,p)) { 
-                return true; 
-            }
-
-        }
-
-    } else if (dim == 3){ //3D
-
-        std::vector<array3D> E(4);
-
-        for( int i=0; i<6; ++i){
-            faceOfBox( i, A1, A2, E[0], E[1], E[2], E[3]);
-
-            if( intersectSegmentSimplex(V1,V2,E,p) ) { 
-                return true; 
-            }
-
-        }
-
-    }
-
-    BITPIT_UNREACHABLE(" Nr dimensions must be 2 or 3 in CGElem::intersectSegmentBox");
+    return _intersectSegmentBox( V0, V1, A0, A1, false, false, nullptr, nullptr, dim);
 }
-
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
- * @param[in] V1 start point of segment
- * @param[in] V2 end point of segment
- * @param[in] A1 min point of box
- * @param[in] A2 max point of box
+ * @param[in] V0 start point of segment
+ * @param[in] V1 end point of segment
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
+ * @param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
+ * @param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * @param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
+ * @param[in] dim number of dimension to be checked
+ * @return if intersect
+ */
+bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, int dim)
+{
+    return _intersectSegmentBox( V0, V1, A0, A1, interiorSegmentVertice, segmentBoxHullIntersection, &P, nullptr, dim);
+}
+
+/*!
+ * Computes intersection between an axis aligned bounding box and a segment
+ * @param[in] V0 start point of segment
+ * @param[in] V1 end point of segment
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
+ * @param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
+ * @param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * @param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
+ * @param[out] flag indicates for each intersection if it belongs to interiorSegmentVertice (flag=0) or segmentHullIntersection (flag=1)
+ * @param[in] dim number of dimension to be checked
+ * @return if intersect
+ */
+bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+{
+    return _intersectSegmentBox( V0, V1, A0, A1, interiorSegmentVertice, segmentBoxHullIntersection, &P, &flag, dim);
+}
+
+/*!
+ * Computes intersection between an axis aligned bounding box and a segment
+ * @param[in] V0 start point of segment
+ * @param[in] V1 end point of segment
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
  * @param[out] P intersection point segment and box faces
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectSegmentBox(array3D const &V1, array3D const &V2, array3D const &A1, array3D const &A2, std::vector<array3D> &P, int dim)
+bool intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, std::vector<array3D> &P, int dim)
+{
+    return _intersectSegmentBox( V0, V1, A0, A1, false, true, &P, nullptr, dim);
+}
+
+/*!
+ * Computes intersection between an axis aligned bounding box and a segment
+ * @param[in] V0 start point of segment
+ * @param[in] V1 end point of segment
+ * @param[in] A0 min point of box
+ * @param[in] A1 max point of box
+ * @param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
+ * @param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * @param[in,out] intrPtr pointer to the list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
+ * @param[in,out] flagPtr if (!=nullptr), for each intersection point a flag will be inserted indicatingif it belongs to interiorSegmentVertice (flag=0) or segmentBoxHullIntersection (flag=1)
+ * @param[in] dim number of dimension to be checked
+ * @return if intersect
+ */
+bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
 
     bool intersect(false);
-    array3D p, B1, B2;
 
-    P.clear();
+    bool addFlag(flagPtr!=nullptr);
+    bool computeIntersection(interiorSegmentVertice||segmentBoxHullIntersection);
 
-    //Check if segment Boundig Box and Box overlap -> necessary condition
-    computeAABBSegment( V1, V2, B1, B2);
-    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
-        return false; 
+    assert( ! (computeIntersection && (intrPtr==nullptr) ) );
+
+    if(computeIntersection){
+        intrPtr->clear();
     }
 
-    if( dim == 2){ //check if box edge and segment intersect
-
-        for( int i=0; i<4; ++i){
-            edgeOfBox( i, A1, A2, B1, B2);
-
-            if( intersectSegmentSegment(B1,B2,V1,V2,p)) {
-                intersect = true;
-                P.push_back(p);
-            }
-        }
-
-        return intersect;
-
-    } else if( dim==3 ) { //3D check if box face and segment intersect
-
-        std::vector< array3D > E(4);
-
-        for( int i=0; i<6; ++i){
-            faceOfBox( i, A1, A2, E[0], E[1], E[2], E[3]);
-
-            if( intersectSegmentSimplex(V1,V2,E,p) ) {
-                intersect = true;
-                P.push_back(p);
-            }
-        }
-
-        return intersect;
-
+    if(addFlag){
+        intrPtr->clear();
     }
 
-    BITPIT_UNREACHABLE(" Nr dimensions must be 2 or 3 in CGElem::intersectSegmentBox");
+    array3D p, B0, B1;
+
+    //check if segment boundig box and Box overlap
+    computeAABBSegment( V0, V1, B0, B1);
+    if( !intersectBoxBox( A0, A1, B0, B1, dim) ) { 
+        return false;
+    }
+
+    //check segment points
+    for( int i=0; i<2; ++i){
+        vertexOfSegment(i, V0, V1, B0);
+
+        if( intersectPointBox(B0,A0,A1) ){
+            intersect = true;
+            if(!interiorSegmentVertice) break;
+
+            intrPtr->push_back(V0);
+            if(addFlag) flagPtr->push_back(0);
+        }
+    }
+
+    //check if segment intersects outer hull of box
+    if( !intersect || segmentBoxHullIntersection){
+        if( dim == 2){ //check if box edge and segment intersect
+
+            for( int i=0; i<4; ++i){
+                edgeOfBox( i, A0, A1, B0, B1);
+
+                if( intersectSegmentSegment(B0,B1,V0,V1,p)) {
+                    intersect = true;
+                    if(!segmentBoxHullIntersection) break;
+
+                    intrPtr->push_back(p);
+                    if(addFlag) flagPtr->push_back(1);
+                }
+            }
+
+
+        } else if( dim==3 ) { //3D check if box face and segment intersect
+
+            std::vector< array3D > E(4);
+
+            for( int i=0; i<6; ++i){
+                faceOfBox( i, A0, A1, E[0], E[1], E[2], E[3]);
+
+                if( intersectSegmentSimplex(V0,V1,E,p) ) {
+                    intersect = true;
+                    if(!segmentBoxHullIntersection) break;
+
+                    intrPtr->push_back(p);
+                    if(addFlag) flagPtr->push_back(1);
+                }
+            }
+        }
+    }
+
+    return intersect;
 
 }
 

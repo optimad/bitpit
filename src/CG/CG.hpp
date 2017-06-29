@@ -161,15 +161,24 @@ bool                intersectSegmentSegment( array3D const &, array3D const &, a
 bool                intersectSegmentPlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool                intersectSegmentTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool                intersectSegmentSimplex( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ) ;
+
 bool                intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3 ) ;
-bool                intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, int  dim = 3 ) ;
+bool                intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, int dim=3 );
+bool                intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 );
+bool                _intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> *, std::vector<int> *, int  dim = 3 ) ;
+BITPIT_DEPRECATED (bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, int dim=3 ) );
 
 bool                intersectPlanePlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;
 
 bool                intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3 ) ;
 bool                intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int  dim = 3 ) ;
-bool                intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const & ) ;
-bool                intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> & ) ;
+
+
+bool                intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, int dim=3 ) ;
+bool                intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> &, int dim=3 ) ;
+bool                intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 ) ;
+bool                _intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> *, std::vector<int> *, int dim=3 ) ;
+BITPIT_DEPRECATED( bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &));
 bool                intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, int dim=3 ) ;
 bool                intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, std::vector<array3D> &, int dim=3 ) ;
 
