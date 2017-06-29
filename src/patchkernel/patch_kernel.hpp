@@ -255,6 +255,7 @@ public:
 	std::vector<long> findCellVertexOneRing(const long &id, const int &vertex) const;
     void findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx);
 	std::set<int> getInternalPIDs();
+	std::vector<long> getInternalsByPID(int pid);
 
 	CellIterator getCellIterator(const long &id);
 	CellIterator cellBegin();

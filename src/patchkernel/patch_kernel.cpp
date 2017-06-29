@@ -2306,6 +2306,25 @@ std::set<int> PatchKernel::getInternalPIDs()
 }
 
 /*!
+ * Get all the internal cells which belongs to the specified PID.
+ *
+ * \param pid is the PID
+ * \return All the internal cells which belongs to the specified PID.
+ */
+std::vector<long> PatchKernel::getInternalsByPID(int pid)
+{
+	std::vector<long> cells;
+	CellConstIterator endItr = internalConstEnd();
+	for (CellConstIterator itr = internalConstBegin(); itr != endItr; ++itr) {
+		if (itr->getPID() == pid){
+			cells.push_back(itr.getId());
+		}
+	}
+
+	return cells;
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch
