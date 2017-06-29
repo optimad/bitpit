@@ -222,6 +222,7 @@ void faceOfBox(
         );
 
 
+void vertexOfTriangle( int const &, array3D const &, array3D const &, array3D const &, array3D &);
 void edgeOfTriangle( int const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
 
 

@@ -2250,6 +2250,37 @@ void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, ar
     return;
 }
 
+/*!
+ * returns the vertex coordiantes of a triangle given its index
+ * @param[in] i edge index
+ * @param[in] V0 first vertex of triangle
+ * @param[in] V1 second vertex of triangle
+ * @param[in] V2 third vertex of triangle
+ * @param[out] P vertex
+ */
+void vertexOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P)
+{
+    switch(i){
+
+        case 0:
+            P = V0;
+            break;
+
+        case 1:
+            P = V1;
+            break;
+
+        case 2:
+            P = V2;
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+
+    return;
+}
 
 /*!
  * computes the edge coordiantes of a triangle
