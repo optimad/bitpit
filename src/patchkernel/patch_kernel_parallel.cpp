@@ -290,22 +290,6 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool t
 */
 std::vector<adaption::Info> PatchKernel::partition(bool trackChanges, bool squeezeStorage)
 {
-	return balancePartition(trackChanges, squeezeStorage);
-}
-
-/*!
-	Tries to balance the computational load among the processors redistributing
-	the cells among the processors.
-
-	\param trackChanges if set to true, the changes to the patch will be
-	tracked
-	\param squeezeStorage if set to true the vector that store patch information
-	will be squeezed after the synchronization
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the partitioning.
-*/
-std::vector<adaption::Info> PatchKernel::balancePartition(bool trackChanges, bool squeezeStorage)
-{
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
 		throw std::runtime_error ("There is no communicator set for the patch.");
@@ -315,7 +299,7 @@ std::vector<adaption::Info> PatchKernel::balancePartition(bool trackChanges, boo
 	beginAlteration();
 
 	// Balance patch
-	std::vector<adaption::Info> adaptionData = _balancePartition(trackChanges);
+	std::vector<adaption::Info> adaptionData = _partition(trackChanges);
 
 	// Patch is now partitioned
 	setPartitioned(true);
@@ -356,7 +340,7 @@ void PatchKernel::setPartitioned(bool partitioned)
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-std::vector<adaption::Info> PatchKernel::_balancePartition(bool trackChanges)
+std::vector<adaption::Info> PatchKernel::_partition(bool trackChanges)
 {
 	BITPIT_UNUSED(trackChanges);
 
