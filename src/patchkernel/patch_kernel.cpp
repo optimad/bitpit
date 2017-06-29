@@ -1357,7 +1357,11 @@ PatchKernel::CellConstIterator PatchKernel::internalConstEnd() const
 */
 PatchKernel::CellConstIterator PatchKernel::ghostConstBegin() const
 {
-    return m_cells.getConstIterator(m_firstGhostId);
+	if (m_nGhosts > 0) {
+		return m_cells.getConstIterator(m_firstGhostId);
+	} else {
+		return m_cells.cend();
+	}
 }
 
 /*!
