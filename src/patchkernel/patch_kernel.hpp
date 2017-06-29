@@ -32,6 +32,7 @@
 #if BITPIT_ENABLE_MPI==1
 #	include <mpi.h>
 #endif
+#include <set>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -253,6 +254,7 @@ public:
 	std::vector<long> findCellVertexNeighs(const long &id, const int &vertex) const;
 	std::vector<long> findCellVertexOneRing(const long &id, const int &vertex) const;
     void findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx);
+	std::set<int> getInternalPIDs();
 
 	CellIterator getCellIterator(const long &id);
 	CellIterator cellBegin();

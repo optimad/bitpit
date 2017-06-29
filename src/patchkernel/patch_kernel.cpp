@@ -2290,6 +2290,22 @@ void PatchKernel::findFaceNeighCell(const long &cell_idx, const long &neigh_idx,
 }
 
 /*!
+ * Get the PIDs of the internal cells.
+ *
+ * \return The PIDs of the internal cells.
+ */
+std::set<int> PatchKernel::getInternalPIDs()
+{
+	std::set<int> list;
+	CellConstIterator endItr = internalConstEnd();
+	for (CellConstIterator itr = internalConstBegin(); itr != endItr; ++itr) {
+		list.insert(itr->getPID());
+	}
+
+	return list;
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch
