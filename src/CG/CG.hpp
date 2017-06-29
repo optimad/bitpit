@@ -179,8 +179,12 @@ bool                intersectBoxTriangle( array3D const &, array3D const &, arra
 bool                intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 ) ;
 bool                _intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> *, std::vector<int> *, int dim=3 ) ;
 BITPIT_DEPRECATED( bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &));
+
 bool                intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, int dim=3 ) ;
-bool                intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, std::vector<array3D> &, int dim=3 ) ;
+bool                intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, int dim=3);
+bool                intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3);
+bool                _intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> *, std::vector<int> *, int dim=3 ) ;
+BITPIT_DEPRECATED( bool intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, std::vector<array3D> &, int dim=3) );
 
 void                computeAABBSegment( array3D const &, array3D const &, array3D &, array3D & ) ;
 void                computeAABBTriangle( array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;

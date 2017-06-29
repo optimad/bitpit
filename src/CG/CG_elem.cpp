@@ -1927,7 +1927,7 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
     }
 
     if(addFlag){
-        intrPtr->clear();
+        flagPtr->clear();
     }
 
     array3D p, B0, B1;
@@ -2000,40 +2000,33 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
  */
 bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, int dim )
 {
+    return _intersectBoxSimplex(A1, A2, VS, false, false, false, nullptr, nullptr, dim);
+}
 
-    //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    array3D     B1, B2;
-    computeAABBSimplex( VS, B1, B2);
-    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
-        return false ; 
-    }
+/*!
+ * Computes intersection between an axis aligned bounding box and a simplex
+ * @param[in] A1 min point of first box
+ * @param[in] A2 max point of first box
+ * @param[in] VS simplex vertices coordinates
+ * @param[in] dim number of dimension to be checked
+ * @return if intersect
+ */
+bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxFaceIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> &P, int dim)
+{
+    return _intersectBoxSimplex(A1, A2, VS, innerSimplexPoints, simplexEdgeBoxFaceIntersection, simplexBoxEdgeIntersection, &P, nullptr, dim);
+}
 
-    int vertexCount = VS.size();
-
-    if( vertexCount == 2){ //segment
-        return intersectSegmentBox( VS[0], VS[1], A1, A2, dim );
-
-    } else if( vertexCount == 3){ //triangle
-        return  intersectBoxTriangle( A1, A2, VS[0], VS[1], VS[2] );
-
-    } else{ // generic convex polygon
-        int triangleCount = vertexCount - 2;
-        int vertex0 = 0;
-        int vertex1 = 1;
-        int vertex2 = 2;
-        for(int triangle=0; triangle<triangleCount; ++triangle) {
-
-            if( intersectBoxTriangle( A1, A2, VS[vertex0], VS[vertex1], VS[vertex2] ) ){
-                return true;
-            }
-
-            ++vertex1;
-            ++vertex2;
-        }
-
-    }
-
-    return false;
+/*!
+ * Computes intersection between an axis aligned bounding box and a simplex
+ * @param[in] A1 min point of first box
+ * @param[in] A2 max point of first box
+ * @param[in] VS simplex vertices coordinates
+ * @param[in] dim number of dimension to be checked
+ * @return if intersect
+ */
+bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxFaceIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+{
+    return _intersectBoxSimplex(A1, A2, VS, innerSimplexPoints, simplexEdgeBoxFaceIntersection, simplexBoxEdgeIntersection, &P, &flag, dim);
 }
 
 /*!
@@ -2047,25 +2040,56 @@ bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<arra
  */
 bool intersectBoxSimplex(array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, std::vector<array3D> &P, int dim)
 {
+return _intersectBoxSimplex(A1, A2, VS, false, true, false, &P, nullptr, dim);
 
-    //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    array3D             B1, B2;
-    computeAABBSimplex( VS, B1, B2);
-    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
+}
+
+/*!
+ * Computes intersection between an axis aligned bounding box and a simplex
+ * @param[in] A1 min point of first box
+ * @param[in] A2 max point of first box
+ * @param[in] VS simplex vertices coordinates
+ * @param[out] P intersection points simplex box edges
+ * @param[in] dim number of dimension to be checked
+ * @return if intersect
+ */
+bool _intersectBoxSimplex(array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxHullIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
+{
+
+    array3D B0, B1;
+
+    //check if simplex boundig box and box overlap -> necessary condition
+    computeAABBSimplex( VS, B0, B1);
+    if( !intersectBoxBox( A0, A1, B0, B1, dim) ) { 
         return false; 
     }
     
     int vertexCount = VS.size();
     if(vertexCount == 2){ //segment
-        return intersectSegmentBox( VS[0], VS[1], A1, A2, P, dim );
+        return _intersectSegmentBox( VS[0], VS[1], A0, A1, innerSimplexPoints, simplexEdgeBoxHullIntersection, intrPtr, flagPtr, dim);
 
     } else if(vertexCount == 3){ //triangle
-        return intersectBoxTriangle( VS[0], VS[1], VS[2], A1, A2, P );
+        return _intersectBoxTriangle( VS[0], VS[1], VS[2], A0, A1, innerSimplexPoints, simplexEdgeBoxHullIntersection, simplexBoxEdgeIntersection, intrPtr, flagPtr, dim);
 
     } else{  //generic convex polygon split into triangles
 
+        bool addFlag(flagPtr!=nullptr);
+        bool computeIntersection(innerSimplexPoints || simplexEdgeBoxHullIntersection || simplexBoxEdgeIntersection);
+
+        assert( ! (computeIntersection && (intrPtr==nullptr) ) );
+
+        if(computeIntersection){
+            intrPtr->clear();
+        }
+
+        if(addFlag){
+            intrPtr->clear();
+        }
+
+
         bool intersect(false);
-        std::vector<array3D>  partial;
+        std::vector<array3D> partialIntr;
+        std::vector<int> partialFlag;
 
         int trianglesCount = vertexCount -2;
         int vertex0 = 0;
@@ -2074,25 +2098,63 @@ bool intersectBoxSimplex(array3D const &A1, array3D const &A2, std::vector<array
 
         for (int triangle=0; triangle<trianglesCount; ++triangle) {
 
-            if( intersectBoxTriangle( A1, A2, VS[vertex0], VS[vertex1], VS[vertex2], partial ) ){
+            if( _intersectBoxTriangle( A0, A1, VS[vertex0], VS[vertex1], VS[vertex2], innerSimplexPoints, simplexEdgeBoxHullIntersection, simplexBoxEdgeIntersection, &partialIntr, &partialFlag ) ){
+
                 intersect = true;
+                if(!computeIntersection) break;
 
-                for( auto &candidate : partial){
+                int intrCount = partialIntr.size();
+                for( int i=0; i<intrCount; ++i){
 
-                    auto PItr = P.begin();
-                    bool iterate = PItr!=P.end();
+                    array3D &candidateCoord = partialIntr[i];
+                    int candidateFlag = partialFlag[i];
+
+                    //prune duplicate points
+                    auto PItr = intrPtr->begin();
+                    bool iterate = (PItr!=intrPtr->end());
                     while(iterate){
 
-                        iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidate ), 0. );
+                        iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidateCoord ), 0. );
                     
                         if(iterate){
                             ++PItr;
                         }
-                        iterate &= PItr!=P.end();
+                        iterate &= PItr!=intrPtr->end();
                     }
 
-                    if(PItr==P.end()){
-                        P.push_back(candidate);
+                    if(PItr!=intrPtr->end()){
+                        continue;
+                    }
+
+
+                    //need to check if real segments are intersected or 
+                    //artifical segments due to decomposition of polygon
+                    //into triangles
+                    bool realIntersection = true;
+                    if(candidateFlag==1){
+                        realIntersection = false;
+                        std::array<bool,3> realSegment = {{false,true,false}};
+                        realSegment[0] = (vertex1==1); 
+                        realSegment[2] = (vertex2==vertexCount-1); 
+
+                        for(int j=0; j<3; ++j){
+                            if( !realSegment[j] ){
+                                continue;
+                            }
+
+                            edgeOfTriangle(j, VS[vertex0], VS[vertex1], VS[vertex2], B0, B1);
+                            realIntersection |= intersectPointSegment(candidateCoord, B0, B1);
+
+                        }
+                    }
+
+                    if(!realIntersection){
+                        continue;
+                    }
+
+                    intrPtr->push_back(candidateCoord);
+                    if(addFlag){
+                        flagPtr->push_back(candidateFlag);
                     }
 
                 }
