@@ -69,8 +69,6 @@ IBinaryStream::IBinaryStream(
     size_t                      capacity
 ) {
     current_pos = 0;
-    buffer.clear();
-    buffer.reserve(capacity);
     setCapacity(capacity);
 }
 
@@ -88,8 +86,7 @@ IBinaryStream::IBinaryStream(
     size_t                       capacity
 ) {
     current_pos = 0;
-    buffer.clear();
-    buffer.reserve(capacity);
+    setCapacity(capacity);
     buffer.assign(buf_, buf_ + capacity);
 }
 
@@ -105,8 +102,7 @@ IBinaryStream::IBinaryStream(
     const std::vector<char>          &vec
 ) {
     current_pos = 0;
-    buffer.clear();
-    buffer.reserve(vec.size());
+    setCapacity(vec.size());
     buffer.assign(vec.begin(), vec.end());
 }
 
@@ -158,8 +154,7 @@ void IBinaryStream::open(
     size_t                       capacity
 ) {
     current_pos = 0;
-    buffer.clear();
-    buffer.reserve(capacity);
+    setCapacity(capacity);
     buffer.assign(mem, mem + capacity);
 }
 
@@ -340,8 +335,7 @@ size_t OBinaryStream::capacity(
 void OBinaryStream::open(
     size_t                       capacity
 ) {
-    buffer.reserve(capacity);
-    buffer.resize(capacity);
+    setCapacity(capacity);
 }
 
 // -------------------------------------------------------------------------- //
@@ -452,7 +446,7 @@ void OBinaryStream::write(
             bufferSize += (current_pos + 1);
         }
 
-        buffer.resize(bufferSize);
+        setCapacity(bufferSize);
     }
     for (size_t i = 0;  i < size; ++i) {
         buffer[current_pos] = p[i];
