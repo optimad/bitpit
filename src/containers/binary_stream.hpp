@@ -56,7 +56,37 @@ bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &stream, const std::str
 // Binary stream
 namespace bitpit{
 
-class IBinaryStream {
+class BinaryStream {
+
+public:
+    bool eof() const;
+
+    std::streampos tellg() const;
+    bool seekg(std::size_t pos);
+    bool seekg(std::streamoff offset, std::ios_base::seekdir way);
+
+    char * data();
+    const char * data() const;
+
+    std::size_t capacity() const;
+
+protected:
+    std::vector<char> m_buffer;
+    std::size_t m_pos;
+
+    BinaryStream();
+    BinaryStream(std::size_t capacity);
+    BinaryStream(const char *buffer, std::size_t capacity);
+    BinaryStream(const std::vector<char> &buffer);
+
+    void open(const char *buffer, std::size_t capacity);
+    void open(std::size_t capacity);
+
+    void setCapacity(std::size_t capacity);
+
+};
+
+class IBinaryStream : public BinaryStream {
 
 template<typename T>
 friend IBinaryStream & (::operator>>)(IBinaryStream &stream, T &value);
@@ -68,29 +98,18 @@ public:
     IBinaryStream(const std::vector<char> &buffer);
 
     void open(const char *buffer, std::size_t capacity);
-    bool eof() const;
+    void open(std::size_t capacity);
 
-    std::ifstream::pos_type tellg() const;
-    bool seekg(std::size_t pos);
-    bool seekg(std::streamoff offset, std::ios_base::seekdir way);
-
-    char * data();
-    const char * data() const;
-
-    void setCapacity(std::size_t capacity);
-    std::size_t capacity() const;
+    using BinaryStream::setCapacity;
 
 private:
-    std::vector<char> m_buffer;
-    std::size_t m_pos;
-
     template<typename T>
     void read(T &value);
     void read(char *data, std::size_t size);
 
 };
 
-class OBinaryStream {
+class OBinaryStream : public BinaryStream {
 
 template<typename T>
 friend OBinaryStream & (::operator<<)(OBinaryStream &stream, const T &value);
@@ -100,24 +119,11 @@ public:
     OBinaryStream(std::size_t capacity);
 
     void open(std::size_t capacity);
-    bool eof() const;
 
-    std::ofstream::pos_type tellg() const;
-    bool seekg(std::size_t pos);
-    bool seekg(std::streamoff offset, std::ios_base::seekdir way);
-
+    using BinaryStream::setCapacity;
     void squeeze();
 
-    char * data();
-    const char * data() const;
-
-    void setCapacity(std::size_t capacity);
-    std::size_t capacity() const;
-
 private:
-    std::vector<char> m_buffer;
-    std::size_t m_pos;
-
     template<typename T>
     void write(const T &value);
     void write(const char *data, std::size_t size);

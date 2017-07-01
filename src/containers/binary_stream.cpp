@@ -68,10 +68,10 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::stri
 namespace bitpit {
 
 /*!
-* \class IBinaryStream
+* \class BinaryStream
 * \ingroup BinaryStream
 *
-* \brief Output binary stream.
+* \brief Base class for defining input and output binary streams.
 */
 
 /*!
@@ -79,7 +79,7 @@ namespace bitpit {
 *
 * Initialize an empty binary stream.
 */
-IBinaryStream::IBinaryStream()
+BinaryStream::BinaryStream()
     : m_pos(0)
 {
 }
@@ -91,7 +91,7 @@ IBinaryStream::IBinaryStream()
 *
 * \param[in] capacity is the stream capacity
 */
-IBinaryStream::IBinaryStream(std::size_t capacity)
+BinaryStream::BinaryStream(std::size_t capacity)
     : m_pos(0)
 {
     setCapacity(capacity);
@@ -106,8 +106,7 @@ IBinaryStream::IBinaryStream(std::size_t capacity)
 * \param[in] buffer is the buffer that contains the data
 * \param[in] capacity is the buffer capacity
 */
-IBinaryStream::IBinaryStream(const char *buffer, std::size_t capacity)
-    : m_pos(0)
+BinaryStream::BinaryStream(const char *buffer, std::size_t capacity)
 {
     open(buffer, capacity);
 }
@@ -120,8 +119,7 @@ IBinaryStream::IBinaryStream(const char *buffer, std::size_t capacity)
 *
 * \param[in] buffer is the buffer that contains the data
 */
-IBinaryStream::IBinaryStream(const std::vector<char> &buffer)
-    : m_pos(0)
+BinaryStream::BinaryStream(const std::vector<char> &buffer)
 {
     open(buffer.data(), buffer.size());
 }
@@ -133,12 +131,23 @@ IBinaryStream::IBinaryStream(const std::vector<char> &buffer)
 * \param[in] buffer is the buffer that contains the data
 * \param[in] capacity is the buffer capacity
 */
-void IBinaryStream::open(const char *buffer, std::size_t capacity)
+void BinaryStream::open(const char *buffer, std::size_t capacity)
+{
+    open(capacity);
+
+    m_buffer.assign(buffer, buffer + capacity);
+}
+
+/*!
+* Open a binary stream with the specified capacity.
+*
+* \param[in] capacity is the buffer capacity
+*/
+void BinaryStream::open(std::size_t capacity)
 {
     m_pos = 0;
 
     setCapacity(capacity);
-    m_buffer.assign(buffer, buffer + capacity);
 }
 
 /*!
@@ -146,7 +155,7 @@ void IBinaryStream::open(const char *buffer, std::size_t capacity)
 *
 * \result Returns true if end of file condition is met, false otherwise.
 */
-bool IBinaryStream::eof() const
+bool BinaryStream::eof() const
 {
     return (m_pos >= m_buffer.size());
 }
@@ -156,7 +165,7 @@ bool IBinaryStream::eof() const
 *
 * \result Returns the cursor position within the stream.
 */
-std::ifstream::pos_type IBinaryStream::tellg() const
+std::streampos BinaryStream::tellg() const
 {
     return m_pos;
 }
@@ -167,7 +176,7 @@ std::ifstream::pos_type IBinaryStream::tellg() const
 * \param[in] pos is the cursor new position
 * \result Returns true if new position is valid, false otherwise.
 */
-bool IBinaryStream::seekg(std::size_t pos)
+bool BinaryStream::seekg(std::size_t pos)
 {
     if (pos >= m_buffer.size()) {
         return false;
@@ -183,7 +192,7 @@ bool IBinaryStream::seekg(std::size_t pos)
 *
 * \return A pointer to the internal data.
 */
-char * IBinaryStream::data()
+char * BinaryStream::data()
 {
     return m_buffer.data();
 }
@@ -193,7 +202,7 @@ char * IBinaryStream::data()
 *
 * \return A constant pointer to the internal data.
 */
-const char * IBinaryStream::data() const
+const char * BinaryStream::data() const
 {
     return m_buffer.data();
 }
@@ -205,7 +214,7 @@ const char * IBinaryStream::data() const
 * \param[in] way is the offset direction
 * \result Returns rue if new position is valid, false otherwise.
 */
-bool IBinaryStream::seekg(std::streamoff offset, std::ios_base::seekdir way)
+bool BinaryStream::seekg(std::streamoff offset, std::ios_base::seekdir way)
 {
     if ((way == std::ios_base::beg) && (offset < (long) m_buffer.size())) {
         m_pos = offset;
@@ -225,7 +234,7 @@ bool IBinaryStream::seekg(std::streamoff offset, std::ios_base::seekdir way)
 *
 * \param[in] capacity is the new capacity (in bytes) of the stream
 */
-void IBinaryStream::setCapacity(std::size_t capacity)
+void BinaryStream::setCapacity(std::size_t capacity)
 {
     m_buffer.resize(capacity);
 }
@@ -235,9 +244,87 @@ void IBinaryStream::setCapacity(std::size_t capacity)
 *
 * \return The capacity of the stream
 */
-std::size_t IBinaryStream::capacity() const
+std::size_t BinaryStream::capacity() const
 {
     return m_buffer.size();
+}
+
+/*!
+* \class IBinaryStream
+* \ingroup BinaryStream
+*
+* \brief Output binary stream.
+*/
+
+/*!
+* Constructor.
+*
+* Initialize an empty binary stream.
+*/
+IBinaryStream::IBinaryStream()
+    : BinaryStream()
+{
+}
+
+/*!
+* Constructor.
+*
+* Initialize an empty binary stream with the assigned capacity.
+*
+* \param[in] capacity is the stream capacity
+*/
+IBinaryStream::IBinaryStream(std::size_t capacity)
+    : BinaryStream(capacity)
+{
+}
+
+/*!
+* Constructor.
+*
+* Initialize a binary stream with the data contained in the specified buffer.
+* The data is copied from the input buffer to the internal buffer.
+*
+* \param[in] buffer is the buffer that contains the data
+* \param[in] capacity is the buffer capacity
+*/
+IBinaryStream::IBinaryStream(const char *buffer, std::size_t capacity)
+    : BinaryStream(buffer, capacity)
+{
+}
+
+/*!
+* Constructor.
+*
+* Initialize a binary stream with the data contained in the specified buffer.
+* The data is copied from the input buffer to the internal buffer.
+*
+* \param[in] buffer is the buffer that contains the data
+*/
+IBinaryStream::IBinaryStream(const std::vector<char> &buffer)
+    : BinaryStream(buffer)
+{
+}
+
+/*!
+* Open a binary stream with the specified capacity.
+*
+* \param[in] capacity is the buffer capacity
+*/
+void IBinaryStream::open(std::size_t capacity)
+{
+    BinaryStream::open(capacity);
+}
+
+/*!
+* Open a binary stream initializing it with the data contained in the
+* specified buffer.
+*
+* \param[in] buffer is the buffer that contains the data
+* \param[in] capacity is the buffer capacity
+*/
+void IBinaryStream::open(const char *buffer, std::size_t capacity)
+{
+    BinaryStream::open(buffer, capacity);
 }
 
 /*!
@@ -270,7 +357,7 @@ void IBinaryStream::read(char *data, std::size_t size)
 * Initialize an empty binary stream.
 */
 OBinaryStream::OBinaryStream()
-    : m_pos(0)
+    : BinaryStream()
 {
 }
 
@@ -282,78 +369,18 @@ OBinaryStream::OBinaryStream()
 * \param[in] capacity is the capacity of the stream
 */
 OBinaryStream::OBinaryStream(std::size_t capacity)
-    : m_pos(0)
+    : BinaryStream(capacity)
 {
-    open(capacity);
 }
 
 /*!
-* Open a stream with the specified capacity.
+* Open a binary stream with the specified capacity.
 *
-* \param[in] capacity is the capacity (in bytes) of the stream
+* \param[in] capacity is the buffer capacity
 */
 void OBinaryStream::open(std::size_t capacity)
 {
-    setCapacity(capacity);
-}
-
-/*!
-* Returns true if end of file condition is met.
-*
-* \result Returns true if end of file condition is met, false otherwise.
-*/
-bool OBinaryStream::eof() const
-{
-    return (m_pos >= m_buffer.size());
-}
-
-/*!
-* Returns the cursor position within the stream.
-*
-* \result Returns the cursor position within the stream.
-*/
-std::ofstream::pos_type OBinaryStream::tellg() const
-{
-    return m_pos;
-}
-
-/*!
-* Set the cursor position within the stream.
-*
-* \param[in] pos is the cursor new position
-* \result Returns true if new position is valid, false otherwise.
-*/
-bool OBinaryStream::seekg(std::size_t pos)
-{
-    if (pos >= m_buffer.size()) {
-        return false;
-    }
-
-    m_pos = pos;
-
-    return true;
-}
-
-/*!
-* Set the cursor position within the stream.
-*
-* \param[in] offset is the offset value, relative to the way parameter
-* \param[in] way is the offset direction
-* \result Returns rue if new position is valid, false otherwise.
-*/
-bool OBinaryStream::seekg(std::streamoff offset, std::ios_base::seekdir way)
-{
-    if ((way == std::ios_base::beg) && (offset < (long) m_buffer.size())) {
-        m_pos = offset;
-    } else if ((way == std::ios_base::cur) && (m_pos + offset < m_buffer.size())) {
-        m_pos += offset;
-    } else if ((way == std::ios_base::end) && ((long) m_buffer.size() - offset >= 0)) {
-        m_pos = m_buffer.size() - offset;
-    } else {
-        return false;
-    }
-
-    return true;
+    BinaryStream::open(capacity);
 }
 
 /*!
@@ -363,46 +390,6 @@ bool OBinaryStream::seekg(std::streamoff offset, std::ios_base::seekdir way)
 void OBinaryStream::squeeze()
 {
     setCapacity(m_pos);
-}
-
-/*!
-* Get a pointer the internal data.
-*
-* \return A pointer to the internal data.
-*/
-char * OBinaryStream::data()
-{
-    return m_buffer.data();
-}
-
-/*!
-* Get a cnstant pointer the internal data.
-*
-* \return A constant pointer to the internal data.
-*/
-const char * OBinaryStream::data() const
-{
-    return m_buffer.data();
-}
-
-/*!
-* Set the capacity of the stream.
-*
-* \param[in] capacity is the new capacity (in bytes) of the stream
-*/
-void OBinaryStream::setCapacity(std::size_t capacity)
-{
-    m_buffer.resize(capacity);
-}
-
-/*!
-* Capacity of the stream.
-*
-* \return The capacity (in bytes) of the stream.
-*/
-std::size_t OBinaryStream::capacity() const
-{
-    return m_buffer.size();
 }
 
 /*!
