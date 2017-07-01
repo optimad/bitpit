@@ -25,11 +25,6 @@
 #ifndef __BITPIT_BINARY_STREAM_HPP__
 #define __BITPIT_BINARY_STREAM_HPP__
 
-// ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
-
-// Standard Template Library
 #include <vector>
 #include <string>
 #include <fstream>
@@ -37,203 +32,100 @@
 #include <iostream>
 #include <stdexcept>
 
-// Bitpit
-// none
+// Forward declarations
+namespace bitpit {
 
-// Others
-// none
-
-// ========================================================================== //
-// TYPES DEFINITIONS                                                          //
-// ========================================================================== //
-// none
-
-// Forward declarations ------------------------------------------------- //
-namespace bitpit{
 class IBinaryStream;
 class OBinaryStream;
+
 };
 
-
-// Function prototypes -------------------------------------------------- //
+// Stream operators
 template<typename T>
-bitpit::IBinaryStream& operator>>(                                                  // Stream operator for class IBinaryStream
-    bitpit::IBinaryStream                     &istm,                                // (input) input stream
-    T                               &val                                  // (input) value to be streamed
-);
-template<>
-bitpit::IBinaryStream& operator>>(                                                  // Explicit specialization of input stream operator for std::string
-    bitpit::IBinaryStream                     &istm,                                // (input) input stream
-    std::string                     &val                                  // (input) string to be streamed
-);
-template<typename T>
-bitpit::OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
-    bitpit::OBinaryStream                     &ostm,                                // (input) output stream
-    const T                         &val                                  // (input) value to be streamed
-);
-template<>
-bitpit::OBinaryStream& operator<<(                                                  // Explicit specialization of input stream operator for std::string
-    bitpit::OBinaryStream                     &ostm,                                // (input) output stream
-    const std::string               &val                                  // (input) string to be streamed
-);
+bitpit::IBinaryStream & operator>>(bitpit::IBinaryStream &stream, T &value);
 
+template<>
+bitpit::IBinaryStream & operator>>(bitpit::IBinaryStream &stream, std::string &value);
+
+template<typename T>
+bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &stream, const T &value);
+
+template<>
+bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &stream, const std::string &value);
+
+// Binary stream
 namespace bitpit{
 
-// Class IBinaryStream ---------------------------------------------------- //
 class IBinaryStream {
 
-    // Member(s) ======================================================== //
-    private:
+template<typename T>
+friend IBinaryStream & (::operator>>)(IBinaryStream &stream, T &value);
 
-    std::vector<char>               buffer;                               // stream buffer
-    size_t                          current_pos;                          // Cursor position
+public:
+    IBinaryStream(void);
+    IBinaryStream(std::size_t capacity);
+    IBinaryStream(const char *buffer, std::size_t capacity);
+    IBinaryStream(const std::vector<char> &buffer);
 
-    // Constructor(s) =================================================== //
-    public:
+    void open(const char *buffer, std::size_t capacity);
+    bool eof() const;
 
-    IBinaryStream(                                                          // Default constructor (empty stream)
-        void                                                              // (input) none
-    );
-    IBinaryStream(                                                          // Custom constructor #1 (empty stream with known capacity);
-        size_t                       capacity                               // (input) buffer capacity
-    );
-    IBinaryStream(                                                          // Custom constructor #2 (stream pointing to memory location)
-        const char*                  buf_,                                // (input) pointer to memory location
-        size_t                       capacity                             // (input) buffer capacity
-    );
-    IBinaryStream(                                                          // Custom constructor #3 (stream initialized from std::vector<char>)
-        const std::vector<char>          &vec                                  // (input) vector used for initialization
-    );
+    std::ifstream::pos_type tellg() const;
+    bool seekg(std::size_t pos);
+    bool seekg(std::streamoff offset, std::ios_base::seekdir way);
 
-    // Destructor(s) ==================================================== //
-    // default
+    const std::vector<char> & data();
+    char * rawData();
 
-    // Public method(s) ================================================= //
-    public:
-    void setCapacity(                                                     // Set the capacity of the stream
-        size_t                       capacity                             // (input) new capacity (in bytes) of stream
-    );
-    size_t capacity(                                                  // Capacity of the stream
-        void
-    ) const;
-    void open(                                                            // Open input stream from memory location
-        const char                  *mem,                                 // (input) pointer to memory location
-        size_t                       capacity                             // (input) capacity (in bytes) of memory chunk
-    );
-    bool eof(                                                             // Flag for eof
-        void                                                              // (input) none
-    ) const;
-    std::ifstream::pos_type tellg(                                             // Returns current position of cursor in the buffer
-        void                                                              // (input) none
-    ) const;
-    bool seekg (                                                          // Set cursor position in the current buffer
-        size_t                       pos                                  // (input) position
-    );
-    bool seekg (                                                          // Set cursor position in the current buffer
-        std::streamoff               offset,                              // (input) offset with respect to the specified direction
-        std::ios_base::seekdir       way                                  // (input) offset direction
-    );
-    const std::vector<char>& data(                                 // Returns reference to buffer
-        void                                                              // (input) none
-    ) { return(buffer); }
-    char* rawData(                                                     // Returns pointer to buffer
-        void                                                              // (input) none
-    ) { return( buffer.data() ); }
+    void setCapacity(std::size_t capacity);
+    std::size_t capacity() const;
 
-    // Private methods(s) =============================================== //
-    private:
+private:
+    std::vector<char> m_buffer;
+    std::size_t m_pos;
 
     template<typename T>
-    void read(                                                            // Read data from memory location pointed by t and store into stream buffer
-        T                           &t                                    // (input) data to be imported in the stream buffer
-    );
-    void read(                                                                // Read data from memory location pointed by p and store into stream buffer
-        char                        *p,                                   // (input) pointer to memory location
-        size_t                       size                                 // (input) size (in bytes) of data to be read
-    );
+    void read(T &value);
+    void read(char *data, std::size_t size);
 
-    // Friendships ====================================================== //
-    template< typename T >
-    friend IBinaryStream& (::operator >>) (IBinaryStream&, T& );
 };
 
-// Class OBinaryStream ---------------------------------------------------- //
 class OBinaryStream {
 
-    // Member(s) ======================================================== //
-    private:
+template<typename T>
+friend OBinaryStream & (::operator<<)(OBinaryStream &stream, const T &value);
 
-    size_t                           current_pos;                         // Cursor current position
-    std::vector<char>                buffer;                              // Buffer
+public:
+    OBinaryStream();
+    OBinaryStream(std::size_t capacity);
 
-    // Constructor(s) =================================================== //
-    public:
+    void open(std::size_t capacity);
+    bool eof() const;
 
-    OBinaryStream(                                                          // Default constructor (create empty object)
-        void                                                              // (input) none
-    );
-    OBinaryStream(                                                          // Custom constructor #1 (create an empty object with buffer of specified capacity)
-        size_t                       capacity                               // (input) none
-    );
+    std::ofstream::pos_type tellg() const;
+    bool seekg(std::size_t pos);
+    bool seekg(std::streamoff offset, std::ios_base::seekdir way);
 
-    // Destructor(s) ==================================================== //
-    // none
+    void squeeze();
 
-    // Public method(s) ================================================= //
-    void setCapacity(                                                     // Set the capacity of the stream
-        size_t                       capacity                             // (input) new capacity (in bytes) of stream
-    );
-    size_t capacity(                                                      // Capacity of the stream
-        void
-    ) const;
-	void open(                                                            // Open output stream
-        size_t                       capacity                             // (input) stream capacity
-    );
-    bool eof(                                                             // Flag for eof
-        void                                                              // (input) none
-    ) const;
-    std::ifstream::pos_type tellg(                                             // Returns current position of cursor in the buffer
-        void                                                              // (input) none
-    ) const;
-    bool seekg (                                                          // Set cursor position in the current buffer
-        size_t                       pos                                  // (input) position
-    );
-    bool seekg (                                                          // Set cursor position in the current buffer
-        std::streamoff               offset,                              // (input) offset with respect to the specified direction
-        std::ios_base::seekdir       way                                  // (input) offset direction
-    );
-    void squeeze(                                                         // Squeeze the stream to fit the data
-        void                                                              // (input) none
-    );
-    const std::vector<char>& data(                                        // Returns reference to buffer
-        void                                                              // (input) none
-    ) { return(buffer); }
-    char* rawData(                                                     // Returns pointer to buffer
-        void                                                              // (input) none
-    ) { return( buffer.data() ); }
+    const std::vector<char> & data();
+    char * rawData();
 
-    // Private method(s) ================================================ //
-    private:
+    void setCapacity(std::size_t capacity);
+    std::size_t capacity() const;
+
+private:
+    std::vector<char> m_buffer;
+    std::size_t m_pos;
 
     template<typename T>
-    void write(                                                           // Write data to internal buffer
-        const T                     &t                                    // (input) data to be written in the internal buffer
-    );
-    void write(                                                           // Write char array to internal buffer
-        const char                  *p,                                   // (input) pointer to char array
-        size_t                       size                                 // (input) size of data chunk to be written in the internal buffer
-    );
-
-    // Friendship(s) ==================================================== //
-    template<typename T>
-    friend OBinaryStream& (::operator<<) ( OBinaryStream&, const T& );
+    void write(const T &value);
+    void write(const char *data, std::size_t size);
 };
 
 }
 
-// ========================================================================== //
-// TEMPLATES                                                                  //
-// ========================================================================== //
-# include "binary_stream.tpp"
+// Template implementation
+#include "binary_stream.tpp"
 
 #endif

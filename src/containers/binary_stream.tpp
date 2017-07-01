@@ -22,85 +22,58 @@
  *
 \*---------------------------------------------------------------------------*/
 
-// ========================================================================== //
-// TEMPLATE IMPLEMENTATIONS FOR CLASS IBinaryStream                             //
-// ========================================================================== //
-
-namespace bitpit{
-
-// -------------------------------------------------------------------------- //
 /*!
-        Read data from memory location and store in the stream buffer.
-
-        \param[in] t data to be stored in the stream buffer
-
+* Write the specified value into the stream.
+*
+* \param[in] stream is the input stream
+* \param[in] value is the value to be streamed
+* \result Returns the updated input stream.
 */
 template<typename T>
-void IBinaryStream::read(
-    T                           &t
-) {
-    read(reinterpret_cast<char*>( &t ),sizeof(T));
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, T &value)
+{
+    stream.read(value);
+
+    return stream;
 }
 
-// ========================================================================== //
-// TEMPLATE IMPLEMENTATIONS FOR CLASS OBinaryStream                             //
-// ========================================================================== //
-
-// -------------------------------------------------------------------------- //
 /*!
-        Write data from memory to internal buffer.
-
-        \param[in] t data to be stored in the stream buffer
-
+* Write the specified value into the stream.
+*
+* \param[in] stream is the output stream
+* \param[in] value is the value to be streamed
+* \result Returns the updated output stream.
 */
 template<typename T>
-void OBinaryStream::write(
-    const T                     &t
-) {
-    write(reinterpret_cast<const char*>( &t ),sizeof(T));
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const T &value)
+{
+    stream.write(value);
+
+    return stream;
 }
 
-}
+namespace bitpit {
 
-// ========================================================================== //
-// OPERATORS                                                                  //
-// ========================================================================== //
-
-// -------------------------------------------------------------------------- //
 /*!
-        Input stream operator for class IBinaryStream.
-
-        \param[in] istm input stream
-        \param[in] val  value to be streamed
-
-        \result updated input stream
-
+* Read the specified value from the stream.
+*
+* \param[in] value is the value that will be read
 */
 template<typename T>
-bitpit::IBinaryStream& operator>> (
-    bitpit::IBinaryStream       &istm,
-    T                           &val
-) {
-    istm.read(val);
-    return istm;
+void IBinaryStream::read(T &value)
+{
+    read(reinterpret_cast<char *>(&value), sizeof(T));
 }
 
-// -------------------------------------------------------------------------- //
 /*!
-        Output stream operator for class IBinaryStream.
-
-        \param[in] ostm output stream
-        \param[in] val  value to be streamed
-
-        \result updated input stream
-
+* Write the specified value into the stream.
+*
+* \param[in] value is the value that will be written
 */
 template<typename T>
-bitpit::OBinaryStream& operator<< (
-    bitpit::OBinaryStream       &ostm,
-    const T                     &val
-) {
-    ostm.write(val);
+void OBinaryStream::write(const T &value)
+{
+    write(reinterpret_cast<const char *>(&value), sizeof(T));
+}
 
-    return ostm;
 }
