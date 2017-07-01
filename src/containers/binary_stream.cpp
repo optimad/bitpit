@@ -109,8 +109,7 @@ IBinaryStream::IBinaryStream(std::size_t capacity)
 IBinaryStream::IBinaryStream(const char *buffer, std::size_t capacity)
     : m_pos(0)
 {
-    setCapacity(capacity);
-    m_buffer.assign(buffer, buffer + capacity);
+    open(buffer, capacity);
 }
 
 /*!
@@ -124,8 +123,7 @@ IBinaryStream::IBinaryStream(const char *buffer, std::size_t capacity)
 IBinaryStream::IBinaryStream(const std::vector<char> &buffer)
     : m_pos(0)
 {
-    setCapacity(buffer.size());
-    m_buffer.assign(buffer.begin(), buffer.end());
+    open(buffer.data(), buffer.size());
 }
 
 /*!
