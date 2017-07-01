@@ -637,7 +637,7 @@ void DataCommunicator::_startSend(int dstRank)
     OBinaryStream &buffer = sendBuffer.getBack();
 
     // Start the send
-    MPI_Isend(buffer.rawData(), buffer.capacity(), MPI_CHAR, dstRank, m_tag,
+    MPI_Isend(buffer.data(), buffer.capacity(), MPI_CHAR, dstRank, m_tag,
               m_communicator, &m_sendRequests[id]);
 }
 
@@ -678,7 +678,7 @@ void DataCommunicator::_startRecv(int srcRank)
     buffer.seekg(0);
 
     // Start the receive
-    MPI_Irecv(buffer.rawData(), buffer.capacity(), MPI_CHAR, srcRank, m_tag,
+    MPI_Irecv(buffer.data(), buffer.capacity(), MPI_CHAR, srcRank, m_tag,
             m_communicator, &m_recvRequests[id]);
 }
 

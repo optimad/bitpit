@@ -179,21 +179,21 @@ bool IBinaryStream::seekg(std::size_t pos)
 }
 
 /*!
-* Get the internal data.
+* Get a pointer the internal data.
 *
-* \return The internal data.
+* \return A pointer to the internal data.
 */
-const std::vector<char> & IBinaryStream::data()
+char * IBinaryStream::data()
 {
-    return m_buffer;
+    return m_buffer.data();
 }
 
 /*!
-* Get the internal data.
+* Get a cnstant pointer the internal data.
 *
-* \return The internal data.
+* \return A constant pointer to the internal data.
 */
-char * IBinaryStream::rawData()
+const char * IBinaryStream::data() const
 {
     return m_buffer.data();
 }
@@ -366,21 +366,21 @@ void OBinaryStream::squeeze()
 }
 
 /*!
-* Get the internal data.
+* Get a pointer the internal data.
 *
-* \return The internal data.
+* \return A pointer to the internal data.
 */
-const std::vector<char> & OBinaryStream::data()
+char * OBinaryStream::data()
 {
-    return m_buffer;
+    return m_buffer.data();
 }
 
 /*!
-* Get the internal data.
+* Get a cnstant pointer the internal data.
 *
-* \return The internal data.
+* \return A constant pointer to the internal data.
 */
-char * OBinaryStream::rawData()
+const char * OBinaryStream::data() const
 {
     return m_buffer.data();
 }

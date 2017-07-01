@@ -74,8 +74,8 @@ public:
     bool seekg(std::size_t pos);
     bool seekg(std::streamoff offset, std::ios_base::seekdir way);
 
-    const std::vector<char> & data();
-    char * rawData();
+    char * data();
+    const char * data() const;
 
     void setCapacity(std::size_t capacity);
     std::size_t capacity() const;
@@ -108,8 +108,8 @@ public:
 
     void squeeze();
 
-    const std::vector<char> & data();
-    char * rawData();
+    char * data();
+    const char * data() const;
 
     void setCapacity(std::size_t capacity);
     std::size_t capacity() const;
