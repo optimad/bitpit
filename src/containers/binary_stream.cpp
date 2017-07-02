@@ -23,6 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 #include <cassert>
+#include <limits>
+#include <cmath>
 
 #include "binary_stream.hpp"
 
@@ -82,7 +84,7 @@ namespace bitpit {
 * Initialize an empty binary stream.
 */
 BinaryStream::BinaryStream()
-    : m_size(0), m_pos(0)
+    : m_size(0), m_pos(0), m_chunkSize(1)
 {
 }
 
@@ -256,11 +258,58 @@ void BinaryStream::setSize(std::size_t size)
 /*!
 * Requests that the stream capacity be at least the specified number of bytes.
 *
+* The function will guarantee that the capacity of the buffer will always
+* contain an integer number of chunks and that the number of chunks will
+* fit in an 'int' type of variable. To obtain this, when the requested
+* capacity is greater than the maximum integer value, the buffer is
+* allocated in chunks of 2^n bytes, where n is choosen to obtain a number
+* of chunks that fits in an 'int' type of variable.
+*
 * \param[in] capacity is the new size (in bytes) of the stream
 */
 void BinaryStream::setCapacity(std::size_t capacity)
 {
-    m_buffer.resize(capacity);
+    m_chunkSize = 1;
+    std::size_t nChunks = capacity;
+    while (nChunks > std::numeric_limits<int>::max()) {
+        m_chunkSize = 2 * m_chunkSize;
+        nChunks     = (1 + ((capacity - 1) / m_chunkSize));
+    }
+
+    m_buffer.resize(nChunks * m_chunkSize);
+}
+
+/*!
+* Get chunk size value
+*
+* NOTE: by design the number of chunk needs to be an integer. The reason
+* being that this parameter has to be passed to some function that expects
+* an integer number (i.e., MPI functions can only build new data-types
+* composed by an integer number of items).
+*
+* \return The chunk size.
+*/
+int BinaryStream::getChunkSize()
+{
+    return m_chunkSize;
+}
+
+/*!
+* Get the number of chuncks contained in the stream.
+*
+* The stream will automaticall adjust its capacity to always fit an integer
+* number of chunks.
+*
+* NOTE: by design the number of chunk needs to be an integer. The reason
+* being that this parameter has to be passed to some function that expects
+* an integer number (i.e., MPI functions can only send/receive an integer
+* number of items).
+*
+* \return The number of chuncks contained in the stream.
+*/
+int BinaryStream::getChunkCount()
+{
+    return (getCapacity() / m_chunkSize);
 }
 
 /*!

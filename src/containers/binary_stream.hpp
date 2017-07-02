@@ -73,6 +73,9 @@ public:
 
     std::size_t getCapacity() const;
 
+    int getChunkSize();
+    int getChunkCount();
+
 protected:
     std::vector<char> m_buffer;
     std::size_t m_size;
@@ -87,6 +90,9 @@ protected:
     void open(std::size_t capacity);
 
     void setCapacity(std::size_t capacity);
+
+private:
+    int m_chunkSize;
 
 };
 
