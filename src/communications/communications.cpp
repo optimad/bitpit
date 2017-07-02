@@ -637,7 +637,10 @@ void DataCommunicator::_startSend(int dstRank)
     OBinaryStream &buffer = sendBuffer.getBack();
 
     // Start the send
-    MPI_Isend(buffer.data(), buffer.getSize(), MPI_CHAR, dstRank, m_tag,
+    int chunkSize = buffer.getChunkSize();
+    MPI_Datatype chunkDataType = getChunkDataType(chunkSize);
+
+    MPI_Isend(buffer.data(), buffer.getChunkCount(), chunkDataType, dstRank, m_tag,
               m_communicator, &m_sendRequests[id]);
 }
 
@@ -678,8 +681,11 @@ void DataCommunicator::_startRecv(int srcRank)
     buffer.seekg(0);
 
     // Start the receive
-    MPI_Irecv(buffer.data(), buffer.getSize(), MPI_CHAR, srcRank, m_tag,
-            m_communicator, &m_recvRequests[id]);
+    int chunkSize = buffer.getChunkSize();
+    MPI_Datatype chunkDataType = getChunkDataType(chunkSize);
+
+    MPI_Irecv(buffer.data(), buffer.getChunkCount(), chunkDataType, srcRank, m_tag,
+              m_communicator, &m_recvRequests[id]);
 }
 
 /*!
@@ -937,6 +943,25 @@ void DataCommunicator::cancelAllRecvs()
     for (int rank : m_recvRanks) {
         cancelRecv(rank);
     }
+}
+
+/*!
+    Get the MPI data type associate to a data chunk.
+
+    \param chunkSize is the size of the data chunk
+    \result The MPI data type associate to a data chunk.
+*/
+MPI_Datatype DataCommunicator::getChunkDataType(int chunkSize) const
+{
+    MPI_Datatype chunkDataType;
+    if (chunkSize == 1) {
+        chunkDataType = MPI_CHAR;
+    } else {
+        MPI_Type_contiguous(chunkSize, MPI_CHAR, &chunkDataType);
+        MPI_Type_commit(&chunkDataType);
+    }
+
+    return chunkDataType;
 }
 
 }

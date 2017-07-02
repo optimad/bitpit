@@ -126,6 +126,8 @@ private:
     void _startSend(int dstRank);
     void _startRecv(int srcRank);
 
+    MPI_Datatype getChunkDataType(int chunkSize) const;
+
 };
 
 }
