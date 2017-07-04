@@ -4280,7 +4280,7 @@ namespace bitpit {
                 uint32_t tailOffset = tailSize;
 
                 //build send buffers
-                map<int,CommBuffer> sendBuffers;
+                DataCommunicator lbCommunicator(m_comm);//NEW
 
                 //Compute first predecessor and first successor to send buffers to
                 int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
@@ -4324,9 +4324,8 @@ namespace bitpit {
                                 nofElementsFromSuccessiveToPrevious  = headSize;
 
                             int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
-                            int pos = 0;
-
+                            lbCommunicator.setSend(p,buffSize);//NEW
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                             limits[1] = (uint32_t)lh + 1;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
@@ -4341,13 +4340,13 @@ namespace bitpit {
                                 m = octant.getMarker();
                                 for(int ii = 0; ii < 17; ++ii)
                                     info[ii] = octant.m_info[ii];
-                                m_errorFlag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                sendBuffer << x;
+                                sendBuffer << y;
+                                sendBuffer << z;
+                                sendBuffer << l;
+                                sendBuffer << m;
                                 for(int j = 0; j < 17; ++j){
-                                    MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                    sendBuffer << info[j];
                                 }
                             }
                             if(nofElementsFromSuccessiveToPrevious == headSize)
@@ -4361,9 +4360,8 @@ namespace bitpit {
                         else{
                             nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
                             int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
-                            int pos = 0;
-
+                            lbCommunicator.setSend(p,buffSize);//NEW
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                             limits[1] = (uint32_t)lh + 1;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
@@ -4378,13 +4376,13 @@ namespace bitpit {
                                 m = octant.getMarker();
                                 for(int i = 0; i < 17; ++i)
                                     info[i] = octant.m_info[i];
-                                m_errorFlag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                sendBuffer << x;
+                                sendBuffer << y;
+                                sendBuffer << z;
+                                sendBuffer << l;
+                                sendBuffer << m;
                                 for(int j = 0; j < 17; ++j){
-                                    MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                    sendBuffer << info[j];
                                 }
                             }
                             lh -= nofElementsFromSuccessiveToPrevious;
@@ -4407,9 +4405,8 @@ namespace bitpit {
                                 nofElementsFromPreviousToSuccessive = tailSize;
 
                             int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
-                            int pos = 0;
-
+                            lbCommunicator.setSend(p,buffSize);//NEW
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
                             limits[0] = ft;
                             limits[1] = ft + nofElementsFromPreviousToSuccessive;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
@@ -4424,13 +4421,13 @@ namespace bitpit {
                                 m = octant.getMarker();
                                 for(int ii = 0; ii < 17; ++ii)
                                     info[ii] = octant.m_info[ii];
-                                m_errorFlag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                sendBuffer << x;
+                                sendBuffer << y;
+                                sendBuffer << z;
+                                sendBuffer << l;
+                                sendBuffer << m;
                                 for(int j = 0; j < 17; ++j){
-                                    MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                    sendBuffer << info[j];
                                 }
                             }
                             if(nofElementsFromPreviousToSuccessive == tailSize)
@@ -4443,10 +4440,9 @@ namespace bitpit {
                         else{
                             nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
                             int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
-                            sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
+                            lbCommunicator.setSend(p,buffSize);//NEW
+                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);//NEW
                             uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
-                            int pos = 0;
-
                             limits[0] = ft;
                             limits[1] = endOctants + 1;
                             std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
@@ -4461,13 +4457,13 @@ namespace bitpit {
                                 m = octant.getMarker();
                                 for(int ii = 0; ii < 17; ++ii)
                                     info[ii] = octant.m_info[ii];
-                                m_errorFlag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
-                                m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                sendBuffer << x;
+                                sendBuffer << y;
+                                sendBuffer << z;
+                                sendBuffer << l;
+                                sendBuffer << m;
                                 for(int j = 0; j < 17; ++j){
-                                    MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+                                    sendBuffer << info[j];
                                 }
                             }
                             ft += nofElementsFromPreviousToSuccessive;
@@ -4479,81 +4475,23 @@ namespace bitpit {
                     }
                 }
 
-                //Build receiver sources
-                vector<vector<int>> recvs(m_nproc);
-                recvs[m_rank].resize((uint32_t)sendBuffers.size()+1, -1);
-                recvs[m_rank][0] = m_rank;
-                int counter = 1;
-                map<int,CommBuffer>::iterator sitend = sendBuffers.end();
-                for(map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-                    recvs[m_rank][counter] = sit->first;
-                    ++counter;
-                }
-                int nofLocalRecvs = recvs[m_rank].size();
-                int* nofRecvsPerProc = new int[m_nproc];
-                m_errorFlag = MPI_Allgather(&nofLocalRecvs,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,m_comm);
-                int globalRecvsBuffSize = 0;
-                int* displays = new int[m_nproc];
-                for(int pp = 0; pp < m_nproc; ++pp){
-                    displays[pp] = 0;
-                    globalRecvsBuffSize += nofRecvsPerProc[pp];
-                    for(int ppp = 0; ppp < pp; ++ppp){
-                        displays[pp] += nofRecvsPerProc[ppp];
-                    }
-                }
-                int* globalRecvsBuff = new int[globalRecvsBuffSize];
-                m_errorFlag = MPI_Allgatherv(recvs[m_rank].data(),recvs[m_rank].size(),MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,m_comm);
 
-                vector<set<int> > sendersPerProc(m_nproc);
-                for(int pin = 0; pin < m_nproc; ++pin){
-                    for(int k = displays[pin]+1; k < displays[pin] + nofRecvsPerProc[pin]; ++k){
-                        sendersPerProc[globalRecvsBuff[k]].insert(globalRecvsBuff[displays[pin]]);
-                    }
-                }
+                lbCommunicator.discoverRecvs();
+                lbCommunicator.startAllRecvs();
 
-                //Communicate Octants (size)
-                MPI_Request* req = new MPI_Request[sendBuffers.size()+sendersPerProc[m_rank].size()];
-                MPI_Status* stats = new MPI_Status[sendBuffers.size()+sendersPerProc[m_rank].size()];
-                int nReq = 0;
-                map<int,int> recvBufferSizePerProc;
-                set<int>::iterator senditend = sendersPerProc[m_rank].end();
-                for(set<int>::iterator sendit = sendersPerProc[m_rank].begin(); sendit != senditend; ++sendit){
-                    recvBufferSizePerProc[*sendit] = 0;
-                    m_errorFlag = MPI_Irecv(&recvBufferSizePerProc[*sendit],1,MPI_UINT32_T,*sendit,m_rank,m_comm,&req[nReq]);
-                    ++nReq;
-                }
-                map<int,CommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
-                for(map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-                    m_errorFlag =  MPI_Isend(&rsit->second.m_commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,m_comm,&req[nReq]);
-                    ++nReq;
-                }
-                MPI_Waitall(nReq,req,stats);
-
-                //COMMUNICATE THE BUFFERS TO THE RECEIVERS
-                //recvBuffers structure is declared and each buffer is initialized to the right size
-                //then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
                 uint32_t nofNewHead = 0;
                 uint32_t nofNewTail = 0;
-                map<int,CommBuffer> recvBuffers;
-                map<int,int>::iterator ritend = recvBufferSizePerProc.end();
-                for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-                    recvBuffers[rit->first] = CommBuffer(rit->second,'a',m_comm);
-                    uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8)));
-                    if(rit->first < m_rank)
+
+                vector<int> recvRanks = lbCommunicator.getRecvRanks();
+                std::sort(recvRanks.begin(),recvRanks.end());
+                for(auto i : recvRanks){
+                    long bufferSize = lbCommunicator.getRecvBuffer(i).getSize();
+                    uint32_t nofNewPerProc = (uint32_t)(bufferSize / (uint32_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8)));
+                    if(i < m_rank)
                         nofNewHead += nofNewPerProc;
-                    else if(rit->first > m_rank)
+                    else if(i > m_rank)
                         nofNewTail += nofNewPerProc;
                 }
-                nReq = 0;
-                for(set<int>::iterator sendit = sendersPerProc[m_rank].begin(); sendit != senditend; ++sendit){
-                    m_errorFlag = MPI_Irecv(recvBuffers[*sendit].m_commBuffer,recvBuffers[*sendit].m_commBufferSize,MPI_PACKED,*sendit,m_rank,m_comm,&req[nReq]);
-                    ++nReq;
-                }
-                for(map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-                    m_errorFlag =  MPI_Isend(rsit->second.m_commBuffer,rsit->second.m_commBufferSize,MPI_PACKED,rsit->first,rsit->first,m_comm,&req[nReq]);
-                    ++nReq;
-                }
-                MPI_Waitall(nReq,req,stats);
 
                 //MOVE RESIDENT TO BEGIN IN OCTANTS
                 uint32_t resEnd = getNumOctants() - tailOffset;
@@ -4572,41 +4510,40 @@ namespace bitpit {
                     m_octree.m_octants[resCounter - k] = m_octree.m_octants[nofResidents - k - 1];
                 }
 
+                lbCommunicator.startAllSends();
+
                 //UNPACK BUFFERS AND BUILD NEW OCTANTS
                 newCounter = 0;
                 bool jumpResident = false;
-                map<int,CommBuffer>::iterator rbitend = recvBuffers.end();
-                for(map<int,CommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
-                    uint32_t nofNewPerProc = (uint32_t)(rbit->second.m_commBufferSize / (uint32_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8)));
-                    int pos = 0;
-                    if(rbit->first > m_rank && !jumpResident){
+                for(int rank : recvRanks){
+                    lbCommunicator.waitRecv(rank);
+                    RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
+                    long bufferSize = recvBuffer.getSize();
+                    uint32_t nofNewPerProc = (uint32_t)(bufferSize / (uint32_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8)));
+                    if(rank > m_rank && !jumpResident){
                         newCounter += nofResidents ;
                         jumpResident = true;
                     }
                     for(int i = nofNewPerProc - 1; i >= 0; --i){
-                        m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&x,1,MPI_UINT32_T,m_comm);
-                        m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&y,1,MPI_UINT32_T,m_comm);
-                        m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&z,1,MPI_UINT32_T,m_comm);
-                        m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&l,1,MPI_UINT8_T,m_comm);
+                        recvBuffer >> x;
+                        recvBuffer >> y;
+                        recvBuffer >> z;
+                        recvBuffer >> l;
                         m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
-                        m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
+                        recvBuffer >> m;
                         m_octree.m_octants[newCounter].setMarker(m);
                         for(int j = 0; j < 17; ++j){
-                            m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&info[j],1,MPI_C_BOOL,m_comm);
+                            recvBuffer >> info[j];
                             m_octree.m_octants[newCounter].m_info[j] = info[j];
                         }
                         ++newCounter;
                     }
                 }
+                lbCommunicator.waitAllSends();
                 octvector(m_octree.m_octants).swap(m_octree.m_octants);
                 m_octree.m_sizeOctants = m_octree.m_octants.size();
 
                 delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
-                delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
-                delete [] displays; displays = NULL;
-                delete [] req; req = NULL;
-                delete [] stats; stats = NULL;
-                delete [] globalRecvsBuff; globalRecvsBuff = NULL;
                 //Update and ghosts here
                 updateLoadBalance();
                 setPboundGhosts();
