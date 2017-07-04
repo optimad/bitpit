@@ -391,7 +391,7 @@ void IBinaryStream::read(char *data, std::size_t size)
 * Initialize an empty binary stream.
 */
 OBinaryStream::OBinaryStream()
-    : BinaryStream()
+    : BinaryStream(), m_expandable(true)
 {
 }
 
@@ -403,8 +403,41 @@ OBinaryStream::OBinaryStream()
 * \param[in] capacity is the size of the stream
 */
 OBinaryStream::OBinaryStream(std::size_t size)
-    : BinaryStream(size)
+    : BinaryStream(size), m_expandable(size == 0)
 {
+}
+
+/*!
+* Open a binary stream with the specified size.
+*
+* \param[in] capacity is the buffer size
+*/
+void OBinaryStream::open(std::size_t size)
+{
+    // Set the stream expandable to allow changing its capacity
+    m_expandable = true;
+
+    // Open a stream with the desidered capacity
+    BinaryStream::open(size);
+
+    // Set the definitive expandable flag
+    m_expandable = (size == 0);
+}
+
+/*!
+* Set the size of the stream, expressed in bytes.
+*
+* If the buffer is not expandable an exception is thrown.
+*
+* \param[in] size is the new size (in bytes) of the stream
+*/
+void OBinaryStream::setSize(std::size_t size)
+{
+    if (!m_expandable) {
+        throw std::runtime_error("Stream is not expandable.");
+    }
+
+    BinaryStream::setSize(size);
 }
 
 /*!
@@ -413,7 +446,16 @@ OBinaryStream::OBinaryStream(std::size_t size)
 */
 void OBinaryStream::squeeze()
 {
+    bool expandableFlag = m_expandable;
+
+    // Set the stream expandable to allow changing its size
+    m_expandable = true;
+
+    // Update the size of the stream
     setSize(tellg());
+
+    // Set the expandable flag back to its initial value
+    m_expandable = expandableFlag;
 }
 
 /*!
@@ -426,6 +468,8 @@ void OBinaryStream::squeeze()
 void OBinaryStream::write(const char *data, std::size_t size)
 {
     if (getSize() - m_pos < size) {
+        // If the stream is not expandable, the request for a new size
+        // will throw an exception.
         std::size_t bufferSize = getSize() + size;
         setSize(bufferSize);
     }

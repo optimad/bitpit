@@ -120,9 +120,14 @@ public:
     OBinaryStream();
     OBinaryStream(std::size_t size);
 
+    void open(std::size_t size);
+
+    void setSize(std::size_t size);
     void squeeze();
 
 private:
+    bool m_expandable;
+
     template<typename T>
     void write(const T &value);
     void write(const char *data, std::size_t size);
