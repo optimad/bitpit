@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <cassert>
+
 #include "binary_stream.hpp"
 
 /*!
@@ -80,21 +82,21 @@ namespace bitpit {
 * Initialize an empty binary stream.
 */
 BinaryStream::BinaryStream()
-    : m_pos(0)
+    : m_size(0), m_pos(0)
 {
 }
 
 /*!
 * Constructor.
 *
-* Initialize an empty binary stream with the assigned capacity.
+* Initialize an empty binary stream with the assigned size.
 *
-* \param[in] capacity is the stream capacity
+* \param[in] size is the requested stream size
 */
-BinaryStream::BinaryStream(std::size_t capacity)
+BinaryStream::BinaryStream(std::size_t size)
     : m_pos(0)
 {
-    setCapacity(capacity);
+    setSize(size);
 }
 
 /*!
@@ -104,7 +106,7 @@ BinaryStream::BinaryStream(std::size_t capacity)
 * The data is copied from the input buffer to the internal buffer.
 *
 * \param[in] buffer is the buffer that contains the data
-* \param[in] capacity is the buffer capacity
+* \param[in] capacity is the data capacity
 */
 BinaryStream::BinaryStream(const char *buffer, std::size_t capacity)
 {
@@ -129,35 +131,25 @@ BinaryStream::BinaryStream(const std::vector<char> &buffer)
 * specified buffer.
 *
 * \param[in] buffer is the buffer that contains the data
-* \param[in] capacity is the buffer capacity
+* \param[in] size is the size (in bytes) of the data
 */
-void BinaryStream::open(const char *buffer, std::size_t capacity)
+void BinaryStream::open(const char *buffer, std::size_t size)
 {
-    open(capacity);
+    open(size);
 
-    m_buffer.assign(buffer, buffer + capacity);
+    m_buffer.assign(buffer, buffer + size);
 }
 
 /*!
-* Open a binary stream with the specified capacity.
+* Open a binary stream with the specified size.
 *
-* \param[in] capacity is the buffer capacity
+* \param[in] size is the buffer size
 */
-void BinaryStream::open(std::size_t capacity)
+void BinaryStream::open(std::size_t size)
 {
     m_pos = 0;
 
-    setCapacity(capacity);
-}
-
-/*!
-* Returns true if end of file condition is met.
-*
-* \result Returns true if end of file condition is met, false otherwise.
-*/
-bool BinaryStream::eof() const
-{
-    return (m_pos >= m_buffer.size());
+    setSize(size);
 }
 
 /*!
@@ -178,7 +170,7 @@ std::streampos BinaryStream::tellg() const
 */
 bool BinaryStream::seekg(std::size_t pos)
 {
-    if (pos >= m_buffer.size()) {
+    if (pos >= getSize()) {
         return false;
     }
 
@@ -208,6 +200,16 @@ const char * BinaryStream::data() const
 }
 
 /*!
+* Returns true if end of file condition is met.
+*
+* \result Returns true if end of file condition is met, false otherwise.
+*/
+bool BinaryStream::eof() const
+{
+    return (m_pos >= getSize());
+}
+
+/*!
 * Set the cursor position within the stream.
 *
 * \param[in] offset is the offset value, relative to the way parameter
@@ -216,12 +218,12 @@ const char * BinaryStream::data() const
 */
 bool BinaryStream::seekg(std::streamoff offset, std::ios_base::seekdir way)
 {
-    if ((way == std::ios_base::beg) && (offset < (long) m_buffer.size())) {
+    if ((way == std::ios_base::beg) && (offset < (long) getSize())) {
         m_pos = offset;
-    } else if ((way == std::ios_base::cur) && (m_pos + offset < m_buffer.size())) {
+    } else if ((way == std::ios_base::cur) && (m_pos + offset < getSize())) {
         m_pos += offset;
-    } else if ((way == std::ios_base::end) && ((long) m_buffer.size() - offset >= 0)) {
-        m_pos = m_buffer.size() - offset;
+    } else if ((way == std::ios_base::end) && ((long) getSize() - offset >= 0)) {
+        m_pos = getSize() - offset;
     } else {
         return false;
     }
@@ -230,9 +232,31 @@ bool BinaryStream::seekg(std::streamoff offset, std::ios_base::seekdir way)
 }
 
 /*!
-* Set the capacity of the stream.
+* Return the size of the stream, expressed in bytes.
 *
-* \param[in] capacity is the new capacity (in bytes) of the stream
+* \result The size of the stream, expressed in bytes.
+*/
+std::size_t BinaryStream::getSize() const
+{
+    return m_size;
+}
+
+/*!
+* Set the size of the stream, expressed in bytes.
+*
+* \param[in] size is the new size (in bytes) of the stream
+*/
+void BinaryStream::setSize(std::size_t size)
+{
+    setCapacity(size);
+
+    m_size = size;
+}
+
+/*!
+* Requests that the stream capacity be at least the specified number of bytes.
+*
+* \param[in] capacity is the new size (in bytes) of the stream
 */
 void BinaryStream::setCapacity(std::size_t capacity)
 {
@@ -240,11 +264,21 @@ void BinaryStream::setCapacity(std::size_t capacity)
 }
 
 /*!
-* Get the capacity of the stream.
+* Returns the size of the storage space currently allocated for the stream,
+* expressed in bytes.
 *
-* \return The capacity of the stream
+* Capacity is not necessarily equal to the stream size; it can be equal
+* or greater. The extra space can not be used for storing data, but
+* can be used to guarantee a minimum internal storage size.
+*
+* Notice that this capacity does not suppose a limit on the size of the stream.
+* When this capacity is exhausted and more is needed, it is automatically
+* expanded by the (reallocating it storage space).
+*
+* \return The size of the storage space currently allocated for the stream,
+* expressed in bytes.
 */
-std::size_t BinaryStream::capacity() const
+std::size_t BinaryStream::getCapacity() const
 {
     return m_buffer.size();
 }
@@ -269,12 +303,12 @@ IBinaryStream::IBinaryStream()
 /*!
 * Constructor.
 *
-* Initialize an empty binary stream with the assigned capacity.
+* Initialize an empty binary stream with the assigned size.
 *
-* \param[in] capacity is the stream capacity
+* \param[in] size is the stream size
 */
-IBinaryStream::IBinaryStream(std::size_t capacity)
-    : BinaryStream(capacity)
+IBinaryStream::IBinaryStream(std::size_t size)
+    : BinaryStream(size)
 {
 }
 
@@ -285,10 +319,10 @@ IBinaryStream::IBinaryStream(std::size_t capacity)
 * The data is copied from the input buffer to the internal buffer.
 *
 * \param[in] buffer is the buffer that contains the data
-* \param[in] capacity is the buffer capacity
+* \param[in] size is the data size
 */
-IBinaryStream::IBinaryStream(const char *buffer, std::size_t capacity)
-    : BinaryStream(buffer, capacity)
+IBinaryStream::IBinaryStream(const char *buffer, std::size_t size)
+    : BinaryStream(buffer, size)
 {
 }
 
@@ -306,13 +340,13 @@ IBinaryStream::IBinaryStream(const std::vector<char> &buffer)
 }
 
 /*!
-* Open a binary stream with the specified capacity.
+* Open a binary stream with the specified size.
 *
-* \param[in] capacity is the buffer capacity
+* \param[in] size is the buffer size
 */
-void IBinaryStream::open(std::size_t capacity)
+void IBinaryStream::open(std::size_t size)
 {
-    BinaryStream::open(capacity);
+    BinaryStream::open(size);
 }
 
 /*!
@@ -320,11 +354,11 @@ void IBinaryStream::open(std::size_t capacity)
 * specified buffer.
 *
 * \param[in] buffer is the buffer that contains the data
-* \param[in] capacity is the buffer capacity
+* \param[in] size is the buffer size
 */
-void IBinaryStream::open(const char *buffer, std::size_t capacity)
+void IBinaryStream::open(const char *buffer, std::size_t size)
 {
-    BinaryStream::open(buffer, capacity);
+    BinaryStream::open(buffer, size);
 }
 
 /*!
@@ -336,7 +370,7 @@ void IBinaryStream::open(const char *buffer, std::size_t capacity)
 */
 void IBinaryStream::read(char *data, std::size_t size)
 {
-    if (eof() || (m_pos + size) > m_buffer.size()) {
+    if (eof() || (m_pos + size) > getSize()) {
         throw std::runtime_error("Bad memory access!");
     }
 
@@ -364,32 +398,22 @@ OBinaryStream::OBinaryStream()
 /*!
 * Constructor.
 *
-* Initialize a binary stream with the specified capacity.
+* Initialize a binary stream with the specified size.
 *
-* \param[in] capacity is the capacity of the stream
+* \param[in] capacity is the size of the stream
 */
-OBinaryStream::OBinaryStream(std::size_t capacity)
-    : BinaryStream(capacity)
+OBinaryStream::OBinaryStream(std::size_t size)
+    : BinaryStream(size)
 {
 }
 
 /*!
-* Open a binary stream with the specified capacity.
-*
-* \param[in] capacity is the buffer capacity
-*/
-void OBinaryStream::open(std::size_t capacity)
-{
-    BinaryStream::open(capacity);
-}
-
-/*!
-* Requests the stream to reduce its capacity to fit the data currently
-* contained in the stream.
+* Requests the stream to reduce its size to fit the data currently contained
+* in the stream.
 */
 void OBinaryStream::squeeze()
 {
-    setCapacity(m_pos);
+    setSize(tellg());
 }
 
 /*!
@@ -401,17 +425,9 @@ void OBinaryStream::squeeze()
 */
 void OBinaryStream::write(const char *data, std::size_t size)
 {
-    if (m_buffer.size() - m_pos < size) {
-        // We should take into account the current position in the buffer only
-        // when the buffer is not empty. That's because when the buffer is
-        // empty, the current position is set to 0 but there are no elements
-        // in the buffer.
-        std::size_t bufferSize = size;
-        if (!m_buffer.empty()) {
-            bufferSize += (m_pos + 1);
-        }
-
-        setCapacity(bufferSize);
+    if (getSize() - m_pos < size) {
+        std::size_t bufferSize = getSize() + size;
+        setSize(bufferSize);
     }
 
     for (std::size_t i = 0;  i < size; ++i) {

@@ -36,13 +36,13 @@ namespace bitpit {
 /*!
     Creates a new send buffer
 */
-SendBuffer::SendBuffer(size_t capacity, bool doubleBuffer)
-    : CommunicationBuffer(capacity, doubleBuffer)
+SendBuffer::SendBuffer(size_t size, bool doubleBuffer)
+    : CommunicationBuffer(size, doubleBuffer)
 {
 }
 
 /*!
-    Requests the buffer to reduce its capacity to fit the data currently
+    Requests the buffer to reduce its size to fit the data currently
     contained in the stream.
 */
 void SendBuffer::squeeze()
@@ -62,8 +62,8 @@ void SendBuffer::squeeze()
 /*!
     Creates a new receive buffer
 */
-RecvBuffer::RecvBuffer(size_t capacity, bool doubleBuffer)
-    : CommunicationBuffer(capacity, doubleBuffer)
+RecvBuffer::RecvBuffer(size_t size, bool doubleBuffer)
+    : CommunicationBuffer(size, doubleBuffer)
 {
 }
 

@@ -143,8 +143,8 @@ void DataCommunicator::setRecvsContinuous(bool enabled)
 
     int nRecvBuffers = m_recvBuffers.size();
     for (int k = 0; k < nRecvBuffers; ++k) {
-        size_t capacity = m_recvBuffers[k].capacity();
-        m_recvBuffers[k] = RecvBuffer(capacity, enabled);
+        size_t size = m_recvBuffers[k].getSize();
+        m_recvBuffers[k] = RecvBuffer(size, enabled);
     }
 
     m_recvsContinuous = enabled;
@@ -199,10 +199,10 @@ void DataCommunicator::discoverSends(int discoverTag)
         for (auto &entry : m_recvIds) {
             int rank = entry.first;
             RecvBuffer &buffer = getRecvBuffer(rank);
-            long dataSize = buffer.capacity();
+            long size = buffer.getSize();
 
             MPI_Request dataSizeRequest;
-            MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
+            MPI_Ibsend(&size, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
 
             // MPI_Isend initiates an asynchronous (background) data transfer.
             // The actual data transfer might not happen unless one of the
@@ -291,10 +291,10 @@ void DataCommunicator::discoverRecvs(int discoverTag)
 		for (auto &entry : m_sendIds) {
 			int rank = entry.first;
 			SendBuffer &buffer = getSendBuffer(rank);
-			long dataSize = buffer.capacity();
+			long size = buffer.getSize();
 
 			MPI_Request dataSizeRequest;
-			MPI_Ibsend(&dataSize, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
+			MPI_Ibsend(&size, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
 
 			// MPI_Isend initiates an asynchronous (background) data transfer.
 			// The actual data transfer might not happen unless one of the
@@ -498,7 +498,7 @@ void DataCommunicator::resizeSend(int rank, long size)
 
     // Resize the buffer
     int id = m_sendIds[rank];
-    m_sendBuffers[id].setCapacity(size);
+    m_sendBuffers[id].setSize(size);
 }
 
 /*!
@@ -521,7 +521,7 @@ void DataCommunicator::resizeRecv(int rank, long size)
 
     // Resize the buffer
     int id = m_recvIds[rank];
-    m_recvBuffers[id].setCapacity(size);
+    m_recvBuffers[id].setSize(size);
 }
 
 /*!
@@ -637,7 +637,7 @@ void DataCommunicator::_startSend(int dstRank)
     OBinaryStream &buffer = sendBuffer.getBack();
 
     // Start the send
-    MPI_Isend(buffer.data(), buffer.capacity(), MPI_CHAR, dstRank, m_tag,
+    MPI_Isend(buffer.data(), buffer.getSize(), MPI_CHAR, dstRank, m_tag,
               m_communicator, &m_sendRequests[id]);
 }
 
@@ -678,7 +678,7 @@ void DataCommunicator::_startRecv(int srcRank)
     buffer.seekg(0);
 
     // Start the receive
-    MPI_Irecv(buffer.data(), buffer.capacity(), MPI_CHAR, srcRank, m_tag,
+    MPI_Irecv(buffer.data(), buffer.getSize(), MPI_CHAR, srcRank, m_tag,
             m_communicator, &m_recvRequests[id]);
 }
 

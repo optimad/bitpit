@@ -963,7 +963,7 @@ void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &s
     }
 
     dataBuffer << nItems ;
-    dataBuffer.setCapacity(dataBuffer.capacity() +nItems* (sizeof(long) +4*sizeof(double)) ) ;
+    dataBuffer.setSize(dataBuffer.getSize() +nItems* (sizeof(long) +4*sizeof(double)) ) ;
 
 
     for( const auto &index : sendList){

@@ -61,10 +61,10 @@ class CommunicationBuffer
 {
 
 public:
-    CommunicationBuffer(size_t capacity = 0, bool doubleBuffer = false);
+    CommunicationBuffer(size_t size = 0, bool doubleBuffer = false);
 
-    void setCapacity(size_t capacity);
-    size_t capacity() const;
+    size_t getSize() const;
+    void setSize(size_t size);
 
     bool seekg (size_t pos);
     std::ifstream::pos_type tellg(void) const;
@@ -95,7 +95,7 @@ class SendBuffer : public CommunicationBuffer<RawSendBuffer>
     friend SendBuffer & (::operator<<) (SendBuffer &buffer, const T &value);
 
 public:
-    SendBuffer(size_t capacity = 0, bool doubleBuffer = false);
+    SendBuffer(size_t size = 0, bool doubleBuffer = false);
 
     void squeeze();
 
@@ -109,7 +109,7 @@ class RecvBuffer : public CommunicationBuffer<RawRecvBuffer>
     friend RecvBuffer & (::operator>>) (RecvBuffer &buffer, T &value);
 
 public:
-    RecvBuffer(size_t capacity = 0, bool doubleBuffer = false);
+    RecvBuffer(size_t size = 0, bool doubleBuffer = false);
 
 };
 

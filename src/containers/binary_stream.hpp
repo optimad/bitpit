@@ -68,10 +68,14 @@ public:
     char * data();
     const char * data() const;
 
-    std::size_t capacity() const;
+    virtual void setSize(std::size_t size);
+    std::size_t getSize() const;
+
+    std::size_t getCapacity() const;
 
 protected:
     std::vector<char> m_buffer;
+    std::size_t m_size;
     std::size_t m_pos;
 
     BinaryStream();
@@ -93,14 +97,12 @@ friend IBinaryStream & (::operator>>)(IBinaryStream &stream, T &value);
 
 public:
     IBinaryStream(void);
-    IBinaryStream(std::size_t capacity);
-    IBinaryStream(const char *buffer, std::size_t capacity);
+    IBinaryStream(std::size_t size);
+    IBinaryStream(const char *buffer, std::size_t size);
     IBinaryStream(const std::vector<char> &buffer);
 
-    void open(const char *buffer, std::size_t capacity);
-    void open(std::size_t capacity);
-
-    using BinaryStream::setCapacity;
+    void open(const char *buffer, std::size_t size);
+    void open(std::size_t size);
 
 private:
     template<typename T>
@@ -116,11 +118,8 @@ friend OBinaryStream & (::operator<<)(OBinaryStream &stream, const T &value);
 
 public:
     OBinaryStream();
-    OBinaryStream(std::size_t capacity);
+    OBinaryStream(std::size_t size);
 
-    void open(std::size_t capacity);
-
-    using BinaryStream::setCapacity;
     void squeeze();
 
 private:

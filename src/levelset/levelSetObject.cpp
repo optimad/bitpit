@@ -363,7 +363,7 @@ void LevelSetObject::communicate( std::unordered_map<int,std::vector<long>> &sen
             writeCommunicationBuffer( entry.second, dataBuffer ) ;
 
             // Write size of databuffer in sizebuffer
-            sizeBuffer << dataBuffer.capacity() ;
+            sizeBuffer << dataBuffer.getSize() ;
 
             // Start sending
             sizeCommunicator.startSend(rank);

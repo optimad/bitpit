@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 
 	for (int i = 0; i < nProcs; ++i) {
 		RecvBuffer &recvBuffer = dataCommunicator.getRecvBuffer(i);
-		int dataSize = recvBuffer.capacity();
+		int dataSize = recvBuffer.getSize();
 		log::cout() << "Discovered a receive from " << i << " with size " << dataSize << std::endl;
 
 		int expectedDataSize = getSendCount(rank) * sizeof(data[0]);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 	// Start sending data
 	for (int i = 0; i < nProcs; ++i) {
 		SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(i);
-		int nSendVaues = sendBuffer.capacity() / sizeof(data[0]);
+		int nSendVaues = sendBuffer.getSize() / sizeof(data[0]);
 		for (int n = 0; n < nSendVaues; ++n) {
 			sendBuffer << data[n];
 		}
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 		log::cout() << "Receiving data from " << rank << std::endl;
 
 		RecvBuffer &recvBuffer = dataCommunicator.getRecvBuffer(rank);
-		int nRecvValues = recvBuffer.capacity() / sizeof(double);
+		int nRecvValues = recvBuffer.getSize() / sizeof(double);
 		for (int n = 0; n < nRecvValues; ++n) {
 			double value;
 			recvBuffer >> value;

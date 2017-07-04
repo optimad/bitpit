@@ -1201,7 +1201,7 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
     }
 
     dataBuffer << nItems ;
-    dataBuffer.setCapacity(dataBuffer.capacity() +nItems* (sizeof(long) +sizeof(size_t)) +counter*(sizeof(long)+sizeof(double))) ;
+    dataBuffer.setSize(dataBuffer.getSize() +nItems* (sizeof(long) +sizeof(size_t)) +counter*(sizeof(long)+sizeof(double))) ;
 
     //determine elements to send
     counter= 0 ;

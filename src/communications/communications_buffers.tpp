@@ -31,12 +31,12 @@ namespace bitpit {
     Create a new communication buffer
  */
 template<typename RawBufferType>
-CommunicationBuffer<RawBufferType>::CommunicationBuffer(size_t capacity, bool doubleBuffer)
+CommunicationBuffer<RawBufferType>::CommunicationBuffer(size_t size, bool doubleBuffer)
 {
     // Create the buffers
-    m_buffers.emplace_back(capacity);
+    m_buffers.emplace_back(size);
     if (doubleBuffer) {
-        m_buffers.emplace_back(capacity);
+        m_buffers.emplace_back(size);
     }
 
     // Assign the front and back buffers
@@ -45,27 +45,27 @@ CommunicationBuffer<RawBufferType>::CommunicationBuffer(size_t capacity, bool do
 }
 
 /*!
-    Set the capacity of the buffer
+    Get the size of the buffer
 
-    \param capacity is the capacity of the buffer
+    \result The size of the buffer.
  */
 template<typename RawBufferType>
-void CommunicationBuffer<RawBufferType>::setCapacity(size_t capacity)
+size_t CommunicationBuffer<RawBufferType>::getSize() const
 {
-    for (RawBufferType & buffer : m_buffers) {
-        buffer.setCapacity(capacity);
-    }
+    return m_front->getSize();
 }
 
 /*!
-    Get the capacity of the buffer
+    Set the size of the buffer
 
-    \result The capacity of the buffer.
+    \param size is the size of the buffer
  */
 template<typename RawBufferType>
-size_t CommunicationBuffer<RawBufferType>::capacity() const
+void CommunicationBuffer<RawBufferType>::setSize(size_t size)
 {
-    return m_front->capacity();
+    for (RawBufferType & buffer : m_buffers) {
+        buffer.setSize(size);
+    }
 }
 
 /*!
