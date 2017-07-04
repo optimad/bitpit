@@ -88,6 +88,8 @@ namespace bitpit {
     public:
         static const std::string	DEFAULT_LOG_FILE;			/**<Default name of logger file.*/
 
+        typedef std::unordered_map<int, std::array<uint32_t, 2>> ExchangeRanges;
+
         enum Operation {
             OP_NONE,
             OP_INIT,
@@ -98,7 +100,51 @@ namespace bitpit {
             OP_LOADBALANCE
         };
 
+        struct LoadBalanceRanges {
+            enum ExchangeAction {
+                ACTION_UNDEFINED = -1,
+                ACTION_NONE,
+                ACTION_SEND,
+                ACTION_DELETE,
+                ACTION_RECEIVE
+            };
+
+            ExchangeAction sendAction;
+            ExchangeRanges sendRanges;
+
+            ExchangeAction recvAction;
+            ExchangeRanges recvRanges;
+
+            LoadBalanceRanges()
+                : sendAction(ACTION_UNDEFINED), recvAction(ACTION_UNDEFINED)
+            {
+            }
+
+            LoadBalanceRanges(bool serial, ExchangeRanges _sendRanges, ExchangeRanges _recvRanges)
+                : sendRanges(_sendRanges), recvRanges(_recvRanges)
+            {
+                if (serial) {
+                    sendAction = ACTION_DELETE;
+                    recvAction = ACTION_NONE;
+                } else {
+                    sendAction = ACTION_SEND;
+                    recvAction = ACTION_RECEIVE;
+                }
+            }
+
+            void clear()
+            {
+                sendAction = ACTION_UNDEFINED;
+                sendRanges.clear();
+
+                recvAction = ACTION_UNDEFINED;
+                recvRanges.clear();
+            }
+        };
+
     private:
+        typedef std::unordered_map<int, std::array<uint64_t, 2>> PartitionIntersections;
+
         //undistributed members
         std::vector<uint64_t>	m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each processor*/
         std::vector<uint64_t>	m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each processor*/
@@ -445,8 +491,18 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         void 		loadBalance(dvector* weight = NULL);
         void 		loadBalance(uint8_t & level, dvector* weight = NULL);
+
+        LoadBalanceRanges evalLoadBalanceRanges(dvector *weights);
+        LoadBalanceRanges evalLoadBalanceRanges(uint8_t level, dvector *weights);
     private:
         void 		privateLoadBalance(uint32_t* partition);
+
+        LoadBalanceRanges evalLoadBalanceRanges(const uint32_t *updatedPartition);
+
+        ExchangeRanges evalLoadBalanceSendRanges(const uint32_t *updatedPartition);
+        ExchangeRanges evalLoadBalanceRecvRanges(const uint32_t *updatedPartition);
+
+        PartitionIntersections evalPartitionIntersections(const uint32_t *schema_A, int rank_A, const uint32_t *schema_B);
 #endif
     public:
         double		levelToSize(uint8_t & level);

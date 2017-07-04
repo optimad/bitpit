@@ -3839,6 +3839,257 @@ namespace bitpit {
 
     };
 
+    /**
+     * Evaluate the elements of the current partition that will be exchanged
+     * with other processors during the load balance.
+     *
+     * \param[in] weights are the weights of the local octants (if a null
+     * pointer is given a uniform distribution is used)
+     * \return The ranges of local ids that will be exchanged with other
+     * processors.
+     */
+    ParaTree::LoadBalanceRanges
+    ParaTree::evalLoadBalanceRanges(dvector *weights){
+
+        // If there is only one processor no octants can be exchanged
+        if (m_nproc == 1) {
+            LoadBalanceRanges loadBalanceInfo;
+            loadBalanceInfo.sendAction = LoadBalanceRanges::ACTION_NONE;
+            loadBalanceInfo.recvAction = LoadBalanceRanges::ACTION_NONE;
+
+            return loadBalanceInfo;
+        }
+
+        // Compute updated partition
+        std::vector<uint32_t> updatedPartition(m_nproc);
+        if (weights) {
+            computePartition(updatedPartition.data(), weights);
+        } else {
+            computePartition(updatedPartition.data());
+        }
+
+        // Evaluate send ranges
+        return evalLoadBalanceRanges(updatedPartition.data());
+    }
+
+    /**
+     * Evaluate the elements of the current partition that will be exchanged
+     * with other processors during the load balance.
+     *
+     * The families of octants of a desired level are retained compact on the
+     * same process.
+     *
+     * \param[in] level is the level of the families that will be retained
+     * compact on the same process
+     * \param[in] weights are the weights of the local octants (if a null
+     * pointer is given a uniform distribution is used)
+     * \return The ranges of local ids that will be exchanged with other
+     * processors.
+     */
+    ParaTree::LoadBalanceRanges
+    ParaTree::evalLoadBalanceRanges(uint8_t level, dvector *weights){
+
+        // If there is only one processor no octants can be sent
+        if (m_nproc == 1) {
+            LoadBalanceRanges loadBalanceInfo;
+            loadBalanceInfo.sendAction = LoadBalanceRanges::ACTION_NONE;
+            loadBalanceInfo.recvAction = LoadBalanceRanges::ACTION_NONE;
+
+            return loadBalanceInfo;
+        }
+
+        // Compute updated partition
+        std::vector<uint32_t> updatedPartition(m_nproc);
+        computePartition(updatedPartition.data(), level, weights);
+
+        // Evaluate send ranges
+        return evalLoadBalanceRanges(updatedPartition.data());
+    }
+
+    /**
+     * Evaluate the elements of the current partition that will be exchanged
+     * with other processors during the load balance.
+     *
+     * \param[in] updatePartition is the pointer to the updated pattition
+     * \return The ranges of local ids that will be exchanged with other
+     * processors.
+     */
+    ParaTree::LoadBalanceRanges
+    ParaTree::evalLoadBalanceRanges(const uint32_t *updatedPartition){
+
+        // If there is only one processor no octants can be sent
+        if (m_nproc == 1) {
+             LoadBalanceRanges loadBalanceInfo;
+            loadBalanceInfo.sendAction = LoadBalanceRanges::ACTION_NONE;
+            loadBalanceInfo.recvAction = LoadBalanceRanges::ACTION_NONE;
+
+            return loadBalanceInfo;
+        }
+
+        ExchangeRanges sendRanges = evalLoadBalanceSendRanges(updatedPartition);
+        ExchangeRanges recvRanges = evalLoadBalanceRecvRanges(updatedPartition);
+
+        return LoadBalanceRanges(m_serial, std::move(sendRanges), std::move(recvRanges));
+    }
+
+    /**
+     * Evaluate the elements of the current partition that will be sent to
+     * other processors after the load balance.
+     *
+     * \param[in] updatePartition is the pointer to the updated pattition
+     * \return The range of local ids that will be sent to other processors.
+     */
+    ParaTree::ExchangeRanges
+    ParaTree::evalLoadBalanceSendRanges(const uint32_t *updatedPartition){
+
+        ExchangeRanges sendRanges;
+
+        // If there is only one processor no octants can be sent
+        if (m_nproc == 1) {
+            return sendRanges;
+        }
+
+        // Compute current partition schema
+        std::vector<uint32_t> currentPartition(m_nproc, 0);
+        if (!m_serial) {
+            currentPartition[0] = m_partitionRangeGlobalIdx[0] + 1;
+            for (int i = 1; i < m_nproc; ++i) {
+                currentPartition[i] = m_partitionRangeGlobalIdx[i] - m_partitionRangeGlobalIdx[i - 1];
+            }
+        } else {
+            currentPartition[m_rank] = getNumOctants();
+        }
+
+        // Get the intersections
+        PartitionIntersections globalIntersections = evalPartitionIntersections(currentPartition.data(), m_rank, updatedPartition);
+
+        // Evaluate the send local indexes
+        uint64_t offset = 0;
+        for (int i = 0; i < m_rank; ++i) {
+            offset += currentPartition[i];
+        }
+
+        for (const auto &intersectionEntry : globalIntersections) {
+            int rank = intersectionEntry.first;
+            const std::array<uint64_t, 2> &intersection = intersectionEntry.second;
+
+            std::array<uint32_t, 2> &sendRange = sendRanges[rank];
+            sendRange[0] = intersection[0] - offset;
+            sendRange[1] = intersection[1] - offset;
+        }
+
+        return sendRanges;
+    }
+
+    /**
+     * Evaluate the elements of the current partition that will be received
+     * from other processors after the load balance.
+     *
+     * \param[in] updatePartition is the pointer to the updated pattition
+     * \return The range of local ids that will be received from other
+     * processors.
+     */
+    ParaTree::ExchangeRanges
+    ParaTree::evalLoadBalanceRecvRanges(const uint32_t *updatedPartition){
+
+        ExchangeRanges recvRanges;
+
+        // If there is only one processor no octants can be received
+        if (m_nproc == 1) {
+            return recvRanges;
+        }
+
+        // Compute current partition schema
+        std::vector<uint32_t> currentPartition(m_nproc, 0);
+        if (!m_serial) {
+            currentPartition[0] = m_partitionRangeGlobalIdx[0] + 1;
+            for (int i = 1; i < m_nproc; ++i) {
+                currentPartition[i] = m_partitionRangeGlobalIdx[i] - m_partitionRangeGlobalIdx[i - 1];
+            }
+        } else {
+            currentPartition[m_rank] = getNumOctants();
+        }
+
+        // Get the intersections
+        PartitionIntersections globalIntersections = evalPartitionIntersections(currentPartition.data(), m_rank, updatedPartition);
+
+        // Evaluate the receive local indexes
+        uint64_t offset = 0;
+        for (int i = 0; i < m_rank; ++i) {
+            offset += updatedPartition[i];
+        }
+
+        for (const auto &intersectionEntry : globalIntersections) {
+            int rank = intersectionEntry.first;
+            const std::array<uint64_t, 2> &intersection = intersectionEntry.second;
+
+            std::array<uint32_t, 2> &recvRange = recvRanges[rank];
+            recvRange[0] = intersection[0] - offset;
+            recvRange[1] = intersection[1] - offset;
+        }
+
+        return recvRanges;
+    }
+
+    /**
+     * Compute the intersections of the specified partition defined whithin
+     * the partition schema A with all the partitions defined whithin the
+     * partition schema B.
+     *
+     * Intersections are evaluated in global indexes.
+     *
+     * \param[in] partition_A are the number of octants contained in each
+     * partition of the partition schema A
+     * \param[in] rank_A is the rank associated to the partition for which the
+     * intersections will be evaluated
+     * \param[in] partition_B are the number of octants contained in each
+     * partition of the partition schema B
+     * \result The intersections of the specified partition defined whithin
+     * the partition schema A with all the partitions defined whithin the
+     * partition schema B.
+     */
+    ParaTree::PartitionIntersections
+    ParaTree::evalPartitionIntersections(const uint32_t *partition_A, int rank_A, const uint32_t *partition_B){
+
+        PartitionIntersections intersections;
+
+        // If the partition is empty there are no intersections.
+        if (partition_A[rank_A] == 0) {
+            return intersections;
+        }
+
+        // Calculate partition offsets
+        std::vector<uint64_t> offsets_A(m_nproc + 1, 0);
+        std::vector<uint64_t> offsets_B(m_nproc + 1, 0);
+        for (int i = 0; i < m_nproc; ++i) {
+            offsets_A[i + 1] = offsets_A[i] + partition_A[i];
+            offsets_B[i + 1] = offsets_B[i] + partition_B[i];
+        }
+
+        uint64_t beginGlobalId_A = offsets_A[m_rank];
+        uint64_t endGlobalId_A   = offsets_A[m_rank + 1];
+
+        auto firstRankItr = std::upper_bound(offsets_B.begin(), offsets_B.end(), beginGlobalId_A);
+        assert(firstRankItr != offsets_B.begin());
+        firstRankItr--;
+
+        for (auto itr = firstRankItr; itr != offsets_B.end(); ++itr) {
+            int rank_B = std::distance(offsets_B.begin(), itr);
+            uint64_t beginGlobalId_B = offsets_B[rank_B];
+            uint64_t endGlobalId_B   = offsets_B[rank_B + 1];
+
+            std::array<uint64_t, 2> &intersection = intersections[rank_B];
+            intersection[0] = std::max(beginGlobalId_A, beginGlobalId_B);
+            intersection[1] = std::min(endGlobalId_A, endGlobalId_B);
+
+            if (endGlobalId_B >= endGlobalId_A) {
+                break;
+            }
+        }
+
+        return intersections;
+    }
+
     /** Distribute Load-Balancing the octants of the whole tree over
      * the processes of the job following a given partition distribution.
      * Until loadBalance is not called for the first time the mesh is serial.
