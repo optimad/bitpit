@@ -3007,34 +3007,40 @@ namespace bitpit {
     void
     ParaTree::getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost) const {
 
-        uint32_t	i, nocts = getNumOctants();
-        uint32_t	nghbro = m_octree.m_lastGhostBros.size();;
+        if (idx >= m_mapIdx.size()){
+            throw std::runtime_error ("Invalid value for input index in getMapping");
+        }
 
-        mapper.clear();
-        isghost.clear();
+        // Coarsening has to be handled separately, all other changes can just
+        // return the value stored in the mapper.
+        if (getIsNewC(idx)){
+            // Count the children
+            int nChildren = m_global.m_nchildren;
 
-        if (idx < m_mapIdx.size()){
-
-            mapper.push_back(m_mapIdx[idx]);
-            isghost.push_back(false);
-            if (getIsNewC(idx)){
-                if (idx < nocts-1 || !nghbro){
-                    for (i=1; i<m_global.m_nchildren; i++){
-                        mapper.push_back(m_mapIdx[idx]+i);
-                        isghost.push_back(false);
-                    }
-                }
-                else if (idx == nocts-1 && nghbro){
-                    for (i=1; i<m_global.m_nchildren-nghbro; i++){
-                        mapper.push_back(m_mapIdx[idx]+i);
-                        isghost.push_back(false);
-                    }
-                    for (i=0; i<nghbro; i++){
-                        mapper.push_back(m_octree.m_lastGhostBros[i]);
-                        isghost.push_back(true);
-                    }
-                }
+            int nInternalChildren = nChildren;
+            if (idx == (getNumOctants() - 1)) {
+                nInternalChildren -= m_octree.m_lastGhostBros.size();
             }
+
+            // Fill the mapper
+            mapper.resize(nChildren);
+            isghost.resize(nChildren);
+
+            for (int i = 0; i < nInternalChildren; i++){
+                mapper[i]  = m_mapIdx[idx] + i;
+                isghost[i] = false;
+            }
+
+            for (int i = nInternalChildren; i < nChildren; i++){
+                mapper[i]  = m_octree.m_lastGhostBros[i - nInternalChildren];
+                isghost[i] = true;
+            }
+        } else {
+            mapper.resize(1);
+            isghost.resize(1);
+
+            mapper[0]  = m_mapIdx[idx];
+            isghost[0] = false;
         }
 
     };
