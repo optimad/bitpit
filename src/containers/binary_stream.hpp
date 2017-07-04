@@ -155,7 +155,6 @@ class IBinaryStream {
     // Friendships ====================================================== //
     template< typename T >
     friend IBinaryStream& (::operator >>) (IBinaryStream&, T& );
-    friend IBinaryStream& (::operator >> <>) (IBinaryStream&, std::string& );
 };
 
 // Class OBinaryStream ---------------------------------------------------- //
@@ -228,7 +227,6 @@ class OBinaryStream {
     // Friendship(s) ==================================================== //
     template<typename T>
     friend OBinaryStream& (::operator<<) ( OBinaryStream&, const T& );
-    friend OBinaryStream& (::operator<< <>) ( OBinaryStream&, const std::string& );
 };
 
 }
