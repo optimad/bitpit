@@ -44,6 +44,10 @@ namespace bitpit {
 SurfUnstructured::SurfUnstructured()
 	: SurfaceKernel(true)
 {
+#if BITPIT_ENABLE_MPI==1
+	// This patch supports partitioning
+	setPartitioningStatus(PARTITIONING_CLEAN);
+#endif
 }
 
 /*!
@@ -56,7 +60,10 @@ SurfUnstructured::SurfUnstructured()
 SurfUnstructured::SurfUnstructured(const int &id, int patch_dim, int space_dim)
 	: SurfaceKernel(id, patch_dim, space_dim, true)
 {
-
+#if BITPIT_ENABLE_MPI==1
+	// This patch supports partitioning
+	setPartitioningStatus(PARTITIONING_CLEAN);
+#endif
 }
 
 /*!
@@ -67,6 +74,12 @@ SurfUnstructured::SurfUnstructured(const int &id, int patch_dim, int space_dim)
 SurfUnstructured::SurfUnstructured(std::istream stream)
 	: SurfaceKernel(false)
 {
+#if BITPIT_ENABLE_MPI==1
+	// This patch supports partitioning
+	setPartitioningStatus(PARTITIONING_CLEAN);
+#endif
+
+	// Restore the patch
 	restore(stream);
 }
 

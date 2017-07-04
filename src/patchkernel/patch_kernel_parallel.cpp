@@ -332,6 +332,34 @@ void PatchKernel::setPartitioned(bool partitioned)
 }
 
 /*!
+	Returns the current partitioning status.
+
+	\param global if set to true the partitioning status will be
+	\return The current partitioning status.
+*/
+PatchKernel::PartitioningStatus PatchKernel::getPartitioningStatus(bool global) const
+{
+	int partitioningStatus = static_cast<int>(m_partitioningStatus);
+
+	if (global && isCommunicatorSet()) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(MPI_IN_PLACE, &partitioningStatus, 1, MPI_INT, MPI_MAX, communicator);
+	}
+
+	return static_cast<PartitioningStatus>(partitioningStatus);
+}
+
+/*!
+	Set the current partitioning status.
+
+	\param status is the partitioning status that will be set
+*/
+void PatchKernel::setPartitioningStatus(PartitioningStatus status)
+{
+	m_partitioningStatus = status;
+}
+
+/*!
 	Internal function that tries to balance the computational load among the
 	processors moving redistributing the cells among the processors.
 

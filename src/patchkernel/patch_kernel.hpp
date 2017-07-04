@@ -185,6 +185,14 @@ public:
 		ADAPTION_ALTERED
 	};
 
+	/*!
+		Partitioning status
+	*/
+	enum PartitioningStatus {
+		PARTITIONING_UNSUPPORTED = -1,
+		PARTITIONING_CLEAN
+	};
+
 	virtual ~PatchKernel();
 
 	virtual void reset();
@@ -413,6 +421,7 @@ public:
 	std::vector<long> & getGhostExchangeSources(int rank);
 	const std::vector<long> & getGhostExchangeSources(int rank) const;
 
+	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false);
@@ -490,6 +499,7 @@ protected:
 	virtual std::vector<adaption::Info> _partition(bool trackPartitioning);
 
 	void setPartitioned(bool partitioned);
+	void setPartitioningStatus(PartitioningStatus status);
 
 	void setGhostOwner(int id, int rank, bool updateExchangeData = false);
 	void unsetGhostOwner(int id, bool updateExchangeData = false);
@@ -542,6 +552,7 @@ private:
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
 	bool m_partitioned;
+	PartitioningStatus m_partitioningStatus;
 
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;

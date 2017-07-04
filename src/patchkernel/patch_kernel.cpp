@@ -138,6 +138,12 @@ void PatchKernel::initialize()
 #if BITPIT_ENABLE_MPI==1
 	m_partitioned  = false;
 	m_communicator = MPI_COMM_NULL;
+
+	// Set the partitioning as unsupported
+	//
+	// Specific implementation will set the appropriate status during their
+	// initialization.
+	setPartitioningStatus(PARTITIONING_UNSUPPORTED);
 #endif
 
 	// Initialize the geometrical tolerance to a default value
