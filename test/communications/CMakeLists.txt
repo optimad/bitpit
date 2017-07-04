@@ -32,6 +32,7 @@ get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 set(TESTS "")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_communications_parallel_00001")
+	list(APPEND TESTS "test_communications_parallel_00002")
 endif ()
 
 # Test extra libraries
