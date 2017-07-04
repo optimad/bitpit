@@ -419,7 +419,7 @@ void IBinaryStream::open(const char *buffer, std::size_t size)
 */
 void IBinaryStream::read(char *data, std::size_t size)
 {
-    if (eof() || (m_pos + size) > getSize()) {
+    if ((m_pos + size) > getSize()) {
         throw std::runtime_error("Bad memory access!");
     }
 
