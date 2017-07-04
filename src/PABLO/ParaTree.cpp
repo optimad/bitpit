@@ -3057,12 +3057,6 @@ namespace bitpit {
     void
     ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const {
 
-        mapper.resize(1);
-        isghost.resize(1);
-        rank.resize(1);
-        mapper.swap(mapper);
-        isghost.swap(isghost);
-        rank.swap(rank);
         if (m_lastOp == OP_ADAPT_MAPPED){
             getMapping(idx, mapper, isghost);
             int n = isghost.size();
@@ -3072,6 +3066,9 @@ namespace bitpit {
             }
         }
         else if (m_lastOp == OP_LOADBALANCE || m_lastOp == OP_LOADBALANCE_FIRST){
+            mapper.resize(1);
+            isghost.resize(1);
+            rank.resize(1);
             uint64_t gidx = getGlobalIdx(idx);
             mapper[0] = gidx;
             for (int iproc=0; iproc<m_nproc; ++iproc){
