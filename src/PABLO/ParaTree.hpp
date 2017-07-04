@@ -91,6 +91,7 @@ namespace bitpit {
         enum Operation {
             OP_NONE,
             OP_INIT,
+            OP_PRE_ADAPT,
             OP_ADAPT_MAPPED,
             OP_ADAPT_UNMAPPED,
             OP_LOADBALANCE_FIRST,
@@ -420,7 +421,9 @@ namespace bitpit {
         uint8_t		getMaxDepth() const;
         int 		findOwner(const uint64_t & morton) const;
         int 		getOwnerRank(const uint64_t & globalIdx) const;
-        bool 		adapt(bool mapper_flag = false);
+        void        preadapt();
+        bool        checkToAdapt();
+        bool        adapt(bool mapper_flag = false);
         bool 		adaptGlobalRefine(bool mapper_flag = false);
         bool 		adaptGlobalCoarse(bool mapper_flag = false);
         void 		computeConnectivity();

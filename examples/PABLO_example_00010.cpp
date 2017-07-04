@@ -144,6 +144,7 @@ int main(int argc, char *argv[]) {
 			}
 
 			/**<Adapt the octree.*/
+			pablo10.preadapt();
 			pablo10.adapt();
 
 #if BITPIT_ENABLE_MPI==1

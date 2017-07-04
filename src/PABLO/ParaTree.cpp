@@ -1421,6 +1421,10 @@ namespace bitpit {
      */
     void
     ParaTree::setMarker(uint32_t idx, int8_t marker){
+        if (m_lastOp == OP_PRE_ADAPT) {
+            throw std::runtime_error("It is not possible to update the tree until the adaption is completed");
+        }
+
         m_octree.setMarker(idx, marker);
     };
 
@@ -1430,6 +1434,10 @@ namespace bitpit {
      */
     void
     ParaTree::setBalance(uint32_t idx, bool balance){
+        if (m_lastOp == OP_PRE_ADAPT) {
+            throw std::runtime_error("It is not possible to update the tree until the adaption is completed");
+        }
+
         m_octree.setBalance(idx, balance);
     };
 
@@ -1776,6 +1784,10 @@ namespace bitpit {
      */
     void
     ParaTree::setMarker(Octant* oct, int8_t marker){
+        if (m_lastOp == OP_PRE_ADAPT) {
+            throw std::runtime_error("It is not possible to update the tree until the adaption is completed");
+        }
+
         oct->setMarker(marker);
     };
 
@@ -1785,6 +1797,10 @@ namespace bitpit {
      */
     void
     ParaTree::setBalance(Octant* oct, bool balance){
+        if (m_lastOp == OP_PRE_ADAPT) {
+            throw std::runtime_error("It is not possible to update the tree until the adaption is completed");
+        }
+
         oct->setBalance(balance);
     };
 
@@ -1924,6 +1940,10 @@ namespace bitpit {
      */
     void
     ParaTree::setBalanceCodimension(uint8_t b21codim){
+        if (m_lastOp == OP_PRE_ADAPT) {
+            throw std::runtime_error("It is not possible to update the tree until the adaption is completed");
+        }
+
         m_octree.setBalanceCodim(b21codim);
     };
 
@@ -3166,11 +3186,60 @@ namespace bitpit {
     // OTHER PARATREE BASED METHODS												    			   //
     // =================================================================================== //
 
+
+    /** Pre-adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+     *
+     *  The user can call pre-adapt and then adapt or only adapt, however after the
+     *  pre-adapt function has been called the adapt function is mandatory.
+     *
+     */
+    void
+    ParaTree::preadapt(){
+
+        balance21(true);
+
+        m_lastOp = OP_PRE_ADAPT;
+
+        (*m_log) << "---------------------------------------------" << endl;
+        (*m_log) << " PRE-ADAPT " << endl;
+
+        (*m_log) << " " << endl;
+        (*m_log) << "---------------------------------------------" << endl;
+
+    };
+
+    /** Check to control if the tree has to be adapted.
+     * \return Boolean true if at least one octant has marker not zero.
+     */
+    bool
+    ParaTree::checkToAdapt(){
+
+        bool lcheck = false;
+        bool gcheck = false;
+        octvector::iterator it = m_octree.m_octants.begin();
+        octvector::iterator itend = m_octree.m_octants.end();
+        while(!lcheck && it != itend){
+            lcheck = (it->getMarker() != 0);
+            it++;
+        }
+        if (m_nproc == 1){
+            gcheck = lcheck;
+        }
+        else{
+#if BITPIT_ENABLE_MPI==1
+        m_errorFlag = MPI_Allreduce(&lcheck,&gcheck,1,MPI_C_BOOL,MPI_LOR,m_comm);
+#endif
+        }
+        return gcheck;
+    };
+
     /** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
      * \param[in] mapper_flag True/False if you want/don't want to track the changes in structure octant by a mapper.
      * \n NOTE: if mapper_flag = true the adapt method ends after a single level (refining/coarsening) adaptation.
      * \n The resulting markers will be increased/decreased by one.
-     * \return Boolean if adapt has done something.
+     * \return Boolean true if adapt has done something.
+     * \n NOTE: if  pre-adapt method is called before an adapt call the adapt method
+     * do not perform pre-adapt process (no 2:1 balance check).
      */
     bool
     ParaTree::adapt(bool mapper_flag){
@@ -4216,7 +4285,9 @@ namespace bitpit {
             (*m_log) << " " << endl;
 
             // 2:1 Balance
-            balance21(true);
+            if (m_lastOp != OP_PRE_ADAPT) {
+                balance21(true);
+            }
 
             (*m_log) << " " << endl;
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
@@ -4248,7 +4319,9 @@ namespace bitpit {
             (*m_log) << " " << endl;
 
             // 2:1 Balance
-            balance21(true);
+            if (m_lastOp != OP_PRE_ADAPT) {
+                balance21(true);
+            }
 
             (*m_log) << " " << endl;
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
