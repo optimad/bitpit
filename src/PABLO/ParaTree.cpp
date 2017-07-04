@@ -5372,6 +5372,11 @@ namespace bitpit {
      */
     void
     ParaTree::commMarker() {
+        // If the tree is not partitioned, there is nothing to communicate.
+        if (m_serial) {
+            return;
+        }
+
         //PACK (mpi) LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
         //it visits every element in m_bordersPerProc (one for every neighbor proc)
         //for every element it visits the border octants it contains and pack its marker in a new structure, sendBuffers
@@ -5379,90 +5384,49 @@ namespace bitpit {
         //to be sent to that proc packed in a char* buffer
         int8_t marker;
         bool mod;
-        map<int,CommBuffer> sendBuffers;
+        DataCommunicator markerCommunicator(m_comm);
         map<int,vector<uint32_t> >::iterator bitend = m_bordersPerProc.end();
         uint32_t pbordersOversize = 0;
         for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
             pbordersOversize += bit->second.size();
-            int buffSize = bit->second.size() * (int)ceil((double)(m_global.m_markerBytes + m_global.m_boolBytes) / (double)(CHAR_BIT/8));
+            long buffSize = bit->second.size() * (int)ceil((double)(m_global.m_markerBytes + m_global.m_boolBytes) / (double)(CHAR_BIT/8));
             int key = bit->first;
             const vector<uint32_t> & value = bit->second;
-            sendBuffers[key] = CommBuffer(buffSize,'a',m_comm);
-            int pos = 0;
+            markerCommunicator.setSend(key,buffSize);
+            SendBuffer sendBuffer = markerCommunicator.getSendBuffer(key);
             int nofBorders = value.size();
             for(int i = 0; i < nofBorders; ++i){
-                //the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
                 const Octant & octant = m_octree.m_octants[value[i]];
                 marker = octant.getMarker();
                 mod	= octant.m_info[15];
-                m_errorFlag = MPI_Pack(&marker,1,MPI_INT8_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
-                m_errorFlag = MPI_Pack(&mod,1,MPI_C_BOOL,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
+                sendBuffer << marker;
+                sendBuffer << mod;
             }
         }
 
-        //COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
-        //the size of every borders buffer is communicated to the right process in order to build the receive buffer
-        //and stored in the recvBufferSizePerProc structure
-        MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
-        MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
-        int nReq = 0;
-        map<int,int> recvBufferSizePerProc;
-        map<int,CommBuffer>::iterator sitend = sendBuffers.end();
-        for(map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-            recvBufferSizePerProc[sit->first] = 0;
-            m_errorFlag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,m_rank,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        map<int,CommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
-        for(map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-            m_errorFlag =  MPI_Isend(&rsit->second.m_commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        MPI_Waitall(nReq,req,stats);
+        markerCommunicator.discoverRecvs();
+        markerCommunicator.startAllRecvs();
+		markerCommunicator.startAllSends();
 
-        //COMMUNICATE THE BUFFERS TO THE RECEIVERS
-        //recvBuffers structure is declared and each buffer is initialized to the right size
-        //then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
-        //at the same time every process compute the size in bytes of all the level and marker of ghost octants
-        uint32_t nofBytesOverProc = 0;
-        map<int,CommBuffer> recvBuffers;
-        map<int,int>::iterator ritend = recvBufferSizePerProc.end();
-        for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-            recvBuffers[rit->first] = CommBuffer(rit->second,'a',m_comm);
-        }
-        nReq = 0;
-        for(map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-            nofBytesOverProc += recvBuffers[sit->first].m_commBufferSize;
-            m_errorFlag = MPI_Irecv(recvBuffers[sit->first].m_commBuffer,recvBuffers[sit->first].m_commBufferSize,MPI_PACKED,sit->first,m_rank,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        for(map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-            m_errorFlag =  MPI_Isend(rsit->second.m_commBuffer,rsit->second.m_commBufferSize,MPI_PACKED,rsit->first,rsit->first,m_comm,&req[nReq]);
-            ++nReq;
-        }
-        MPI_Waitall(nReq,req,stats);
-
-        //UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
+		//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
         //every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
         //every ghost octant is built and put in the ghost vector
         uint32_t ghostCounter = 0;
-        map<int,CommBuffer>::iterator rritend = recvBuffers.end();
-        for(map<int,CommBuffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
-            int pos = 0;
-            int nofGhostsPerProc = int(rrit->second.m_commBufferSize / ((uint32_t) (m_global.m_markerBytes + m_global.m_boolBytes)));
+        vector<int> recvRanks = markerCommunicator.getRecvRanks();
+        std::sort(recvRanks.begin(),recvRanks.end());
+        for(int rank : recvRanks){
+            markerCommunicator.waitRecv(rank);
+            RecvBuffer & recvBuffer = markerCommunicator.getRecvBuffer(rank);
+            int nofGhostsPerProc = int(recvBuffer.getSize() / ((uint32_t) (m_global.m_markerBytes + m_global.m_boolBytes)));
             for(int i = 0; i < nofGhostsPerProc; ++i){
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&marker,1,MPI_INT8_T,m_comm);
+                recvBuffer >> marker;
                 m_octree.m_ghosts[ghostCounter].setMarker(marker);
-                m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&mod,1,MPI_C_BOOL,m_comm);
+                recvBuffer >> mod;
                 m_octree.m_ghosts[ghostCounter].m_info[15] = mod;
                 ++ghostCounter;
             }
         }
-        recvBuffers.clear();
-        sendBuffers.clear();
-        recvBufferSizePerProc.clear();
-        delete [] req; req = NULL;
-        delete [] stats; stats = NULL;
+        markerCommunicator.waitAllSends();
 
     }
 #endif
