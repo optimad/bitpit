@@ -133,7 +133,9 @@ protected:
 	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
 #if BITPIT_ENABLE_MPI==1
-	std::vector<adaption::Info> _partition(bool trackPartitioning);
+	std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning) override;
+	std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning) override;
+	void _partitioningCleanup() override;
 #endif
 
 private:

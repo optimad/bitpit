@@ -177,83 +177,19 @@ std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> &cellR
 		throw std::runtime_error ("There is no communicator set for the patch.");
 	}
 
-	// Check if the patch allow custom partition
-	if (!isExpert()) {
-		log::cout() << "The patch does not allow custom partition" << std::endl;
-
+	// Check partitioning status
+	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
+	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
 		return partitioningData;
+	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
-	// Start patch alteration
-	beginAlteration();
+	partitioningPrepare(cellRanks, false);
 
-	// Build the send map
-	std::unordered_map<int, std::vector<long>> sendMap;
+	partitioningData = partitioningAlter(trackPartitioning, squeezeStorage);
 
-	auto cellItr = cellBegin();
-	for (int k = 0; k < getInternalCount(); ++k) {
-		const int &rank = cellRanks[k];
-		if (rank == getRank()) {
-			cellItr++;
-			continue;
-		}
-
-		sendMap[rank].push_back(cellItr->getId());
-
-		cellItr++;
-	}
-
-	// Local sender-receiver pairs
-	std::vector<int> localPairs;
-	localPairs.reserve(2 * sendMap.size());
-	for (const auto &entry : sendMap) {
-		localPairs.push_back(getRank());
-		localPairs.push_back(entry.first);
-	}
-
-	// Exchange the size of the communication
-	int globalPairsSize = localPairs.size();
-	std::vector<int> globalPairsSizes(getProcessorCount());
-	MPI_Allgather(&globalPairsSize, 1, MPI_INT, globalPairsSizes.data(), 1, MPI_INT, getCommunicator());
-
-	std::vector<int> globalPairsOffsets(getProcessorCount());
-	globalPairsOffsets[0] = 0;
-	for (int i = 1; i < getProcessorCount(); ++i) {
-		globalPairsOffsets[i] = globalPairsOffsets[i-1] + globalPairsSizes[i-1];
-	}
-
-	// Global sender-receiver pairs
-	std::vector<int> globalPairs;
-	globalPairs.resize(globalPairsOffsets.back() + globalPairsSizes.back());
-
-	MPI_Allgatherv(localPairs.data(), localPairs.size(), MPI_INT, globalPairs.data(),
-				   globalPairsSizes.data(), globalPairsOffsets.data(), MPI_INT,
-                   getCommunicator());
-
-	// Exchange the cells
-	std::vector<long> emptyCellList;
-	for (size_t i = 0; i < globalPairs.size(); i += 2) {
-		int srcRank = globalPairs[i];
-		int dstRank = globalPairs[i+1];
-
-		std::vector<long> *cellList;
-		if (srcRank == getRank()) {
-			cellList = &(sendMap[dstRank]);
-		} else {
-			cellList = &emptyCellList;
-		}
-
-		adaption::Info partitioningInfo = sendCells(srcRank, dstRank, *cellList);
-		if (trackPartitioning && partitioningInfo.type != adaption::TYPE_NONE) {
-			partitioningData.push_back(std::move(partitioningInfo));
-		}
-	}
-
-	// Patch is now partitioned
-	setPartitioned(true);
-
-	// Complete patch alteration
-	endAlteration(squeezeStorage);
+	partitioningCleanup();
 
 	return partitioningData;
 }
@@ -286,29 +222,276 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool t
 	\param squeezeStorage if set to true the vector that store patch information
 	will be squeezed after the synchronization
 	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the partition.
+	the changes done during the partitioning.
 */
 std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool squeezeStorage)
 {
+	std::vector<adaption::Info> partitioningData;
+
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
 		throw std::runtime_error ("There is no communicator set for the patch.");
 	}
 
-	// Start patch alteration
+	// Check partitioning status
+	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
+	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
+		return partitioningData;
+	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+		throw std::runtime_error ("A partitioning is already in progress.");
+	}
+
+	partitioningPrepare(false);
+
+	partitioningData = partitioningAlter(trackPartitioning, squeezeStorage);
+
+	partitioningCleanup();
+
+	return partitioningData;
+}
+
+/*!
+	Partitions the patch among the processors. Each cell will be assigned
+	to a specific processor according to the specified input.
+
+	\param communicator is the communicator that will be used
+	\param cellRanks are the ranks of the cells after the partitioning
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning)
+{
+	setCommunicator(communicator);
+
+	return partitioningPrepare(cellRanks, trackPartitioning);
+}
+
+/*!
+	Partitions the patch among the processors. Each cell will be assigned
+	to a specific processor according to the specified input.
+
+	\param cellRanks are the ranks of the cells after the partitioning.
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::vector<int> &cellRanks, bool trackPartitioning)
+{
+	std::vector<adaption::Info> partitioningData;
+
+	// Communicator has to be set
+	if (!isCommunicatorSet()) {
+		throw std::runtime_error ("There is no communicator set for the patch.");
+	}
+
+	// Check partitioning status
+	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
+	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
+		return partitioningData;
+	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+		throw std::runtime_error ("A partitioning is already in progress.");
+	}
+
+	// Build the list of ids to be sent
+	auto cellItr = cellBegin();
+	for (int k = 0; k < getInternalCount(); ++k) {
+		const int &rank = cellRanks[k];
+		if (rank == getRank()) {
+			cellItr++;
+			continue;
+		}
+
+		m_partitioningSends[rank].push_back(cellItr->getId());
+
+		cellItr++;
+	}
+
+	// Local sender-receiver pairs
+	std::vector<int> localPairs;
+	localPairs.reserve(2 * m_partitioningSends.size());
+	for (const auto &entry : m_partitioningSends) {
+		localPairs.push_back(getRank());
+		localPairs.push_back(entry.first);
+	}
+
+	// Prepare the communication for exchanging the sender/receiver pairs
+	int globalPairsSize = localPairs.size();
+	std::vector<int> globalPairsSizes(getProcessorCount());
+	MPI_Allgather(&globalPairsSize, 1, MPI_INT, globalPairsSizes.data(), 1, MPI_INT, getCommunicator());
+
+	std::vector<int> globalPairsOffsets(getProcessorCount());
+	globalPairsOffsets[0] = 0;
+	for (int i = 1; i < getProcessorCount(); ++i) {
+		globalPairsOffsets[i] = globalPairsOffsets[i-1] + globalPairsSizes[i-1];
+	}
+
+	// Global sender-receiver pairs
+	m_partitioningPairs.resize(globalPairsOffsets.back() + globalPairsSizes.back());
+
+	MPI_Allgatherv(localPairs.data(), localPairs.size(), MPI_INT, m_partitioningPairs.data(),
+				globalPairsSizes.data(), globalPairsOffsets.data(), MPI_INT,
+				getCommunicator());
+
+	// Build the information on the cells that will be sent
+	if (trackPartitioning) {
+		for (const auto &entry : m_partitioningSends) {
+			int receiver = entry.first;
+			const std::vector<long> &ids = entry.second;
+
+			partitioningData.emplace_back();
+			adaption::Info &partitioningInfo = partitioningData.back();
+			partitioningInfo.entity   = adaption::ENTITY_CELL;
+			partitioningInfo.type     = adaption::TYPE_PARTITION_SEND;
+			partitioningInfo.rank     = receiver;
+			partitioningInfo.previous = ids;
+		}
+	}
+
+	return partitioningData;
+}
+
+/*!
+	Partitions the patch among the processors. The partitioning is done using
+	a criteria that tries to balance the load among the processors.
+
+	\param communicator is the communicator that will be used
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicator, bool trackPartitioning)
+{
+	setCommunicator(communicator);
+
+	return partitioningPrepare(trackPartitioning);
+}
+
+/*!
+	Partitions the patch among the processors. The partitioning is done using
+	a criteria that tries to balance the load among the processors.
+
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartitioning)
+{
+	std::vector<adaption::Info> partitioningData;
+
+	// Check partitioning status
+	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
+	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
+		return partitioningData;
+	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+		throw std::runtime_error ("A partitioning is already in progress.");
+	}
+
+	// Execute the partitioning preparation
+	partitioningData = _partitioningPrepare(trackPartitioning);
+
+	// Update the status
+	setPartitioningStatus(PARTITIONING_PREPARED);
+
+	return partitioningData;
+}
+
+/*!
+	Alter the patch performing the partitioning.
+
+	The actual modification of the patch takes place during this phase. After
+	this phase the adapton is completed and the patch is in its final state.
+	Optionally the patch can track the changes performed to the patch.
+
+	\param trackPartitioning if set to true the function will return the changes
+	done to the patch during the partitioning
+	\param squeezeStorage if set to true patch data structures will be
+	squeezed after the partitioning
+	\result If the partitioning is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the partitioning, otherwise
+	an empty vector will be returned.
+*/
+std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+{
+	std::vector<adaption::Info> partitioningData;
+
+	// Check partitioning status
+	PartitioningStatus partitioningStatus = getPartitioningStatus();
+	if (partitioningStatus == PARTITIONING_UNSUPPORTED || partitioningStatus == PARTITIONING_CLEAN) {
+		return partitioningData;
+	} else if (partitioningStatus != PARTITIONING_PREPARED) {
+		throw std::runtime_error ("The prepare function has no been called.");
+	}
+
+	// Begin patch alteration
 	beginAlteration();
 
-	// Balance patch
-	std::vector<adaption::Info> partitioningData = _partition(trackPartitioning);
+	// Alter patch
+	if (m_partitioningSends.empty()) {
+		partitioningData = _partitioningAlter(trackPartitioning);
+	} else {
+		std::vector<long> emptyCellList;
+		for (size_t i = 0; i < m_partitioningPairs.size(); i += 2) {
+			int sender   = m_partitioningPairs[i];
+			int receiver = m_partitioningPairs[i+1];
 
-	// Patch is now partitioned
-	setPartitioned(true);
+			std::vector<long> *ids;
+			if (sender == getRank()) {
+				ids = &(m_partitioningSends[receiver]);
+			} else {
+				ids = &emptyCellList;
+			}
+
+			adaption::Info partitioningInfo = sendCells(sender, receiver, *ids);
+			if (trackPartitioning && partitioningInfo.type != adaption::TYPE_NONE) {
+				partitioningData.push_back(std::move(partitioningInfo));
+			}
+		}
+	}
 
 	// End patch alteration
 	endAlteration(squeezeStorage);
 
-	// Done
+	// The patch is now partitioned
+	setPartitioned(true);
+
+	// Update the status
+	setPartitioningStatus(PARTITIONING_ALTERED);
+
 	return partitioningData;
+}
+
+/*!
+	Cleanup patch data structured after the partitioning.
+
+	The patch will only clean-up the data structures needed during the
+	partitioning.
+*/
+void PatchKernel::partitioningCleanup()
+{
+	PartitioningStatus partitioningStatus = getPartitioningStatus();
+	if (partitioningStatus == PARTITIONING_UNSUPPORTED || partitioningStatus == PARTITIONING_CLEAN) {
+		return;
+	} else if (partitioningStatus == PARTITIONING_PREPARED) {
+		throw std::runtime_error ("It is not yet possible to abort a partitioning.");
+	} else if (partitioningStatus != PARTITIONING_ALTERED) {
+		throw std::runtime_error ("The alter function has no been called.");
+	}
+
+	// Clean-up the partitioning
+	_partitioningCleanup();
+
+	if (m_partitioningSends.empty()) {
+		std::unordered_map<int, std::vector<long>>().swap(m_partitioningSends);
+		std::vector<int>().swap(m_partitioningPairs);
+	}
+
+	// Update the status
+	setPartitioningStatus(PARTITIONING_CLEAN);
 }
 
 /*!
@@ -360,21 +543,50 @@ void PatchKernel::setPartitioningStatus(PartitioningStatus status)
 }
 
 /*!
-	Internal function that tries to balance the computational load among the
-	processors moving redistributing the cells among the processors.
+	Prepares the patch for performing the partitioning.
 
-	\param trackPartitioning if set to true the changes to the patch will be
-	tracked
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the update.
+	Default implementation is a no-op function.
+
+	\param trackPartitioninging if set to true the function will return the
+	changes that will be performed in the alter step
+	\result If the partitioning is tracked, returns a vector of adaption::Info
+	that can be used to discover what changes will be performed in the alter
+	step, otherwise an empty vector will be returned.
 */
-std::vector<adaption::Info> PatchKernel::_partition(bool trackPartitioning)
+std::vector<adaption::Info> PatchKernel::_partitioningPrepare(bool trackPartitioning)
 {
 	BITPIT_UNUSED(trackPartitioning);
 
-	log::cout() << "The patch does not implement a algortihm for balacing the partition" << std::endl;
+	return std::vector<adaption::Info>();
+}
+
+/*!
+	Alter the patch performing the partitioning.
+
+	Default implementation is a no-op function.
+
+	\param trackPartitioning if set to true the function will return the changes
+	done to the patch during the partitioning
+	\result If the partitioning is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
+*/
+std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioning)
+{
+	BITPIT_UNUSED(trackPartitioning);
+
+	assert(false && "The patch needs to implement _partitioningAlter");
 
 	return std::vector<adaption::Info>();
+}
+
+/*!
+	Cleanup patch data structured after the partitioning.
+
+	Default implementation is a no-op function.
+*/
+void PatchKernel::_partitioningCleanup()
+{
 }
 
 /*!

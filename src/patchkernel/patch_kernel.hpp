@@ -190,7 +190,9 @@ public:
 	*/
 	enum PartitioningStatus {
 		PARTITIONING_UNSUPPORTED = -1,
-		PARTITIONING_CLEAN
+		PARTITIONING_CLEAN,
+		PARTITIONING_PREPARED,
+		PARTITIONING_ALTERED
 	};
 
 	virtual ~PatchKernel();
@@ -421,12 +423,18 @@ public:
 	std::vector<long> & getGhostExchangeSources(int rank);
 	const std::vector<long> & getGhostExchangeSources(int rank) const;
 
+	bool isPartitioned() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(bool trackPartitioning, bool squeezeStorage = false);
-	bool isPartitioned() const;
+	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning);
+	std::vector<adaption::Info> partitioningPrepare(const std::vector<int> &cellRanks, bool trackPartitioning);
+	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, bool trackPartitioning);
+	std::vector<adaption::Info> partitioningPrepare(bool trackPartitioning);
+	std::vector<adaption::Info> partitioningAlter(bool trackPartitioning = true, bool squeezeStorage = false);
+	void partitioningCleanup();
 
 	adaption::Info sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
 #endif
@@ -496,10 +504,11 @@ protected:
 	void addPointToBoundingBox(const std::array<double, 3> &point);
 	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 #if BITPIT_ENABLE_MPI==1
-	virtual std::vector<adaption::Info> _partition(bool trackPartitioning);
-
 	void setPartitioned(bool partitioned);
 	void setPartitioningStatus(PartitioningStatus status);
+	virtual std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning);
+	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
+	virtual void _partitioningCleanup();
 
 	void setGhostOwner(int id, int rank, bool updateExchangeData = false);
 	void unsetGhostOwner(int id, bool updateExchangeData = false);
@@ -553,6 +562,9 @@ private:
 	MPI_Comm m_communicator;
 	bool m_partitioned;
 	PartitioningStatus m_partitioningStatus;
+
+	std::unordered_map<int, std::vector<long>> m_partitioningSends;
+	std::vector<int> m_partitioningPairs;
 
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
