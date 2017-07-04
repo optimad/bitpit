@@ -4323,7 +4323,7 @@ namespace bitpit {
                             if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
                                 nofElementsFromSuccessiveToPrevious  = headSize;
 
-                            int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
@@ -4359,7 +4359,7 @@ namespace bitpit {
                         }
                         else{
                             nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-                            int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
@@ -4404,7 +4404,7 @@ namespace bitpit {
                             if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
                                 nofElementsFromPreviousToSuccessive = tailSize;
 
-                            int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             limits[0] = ft;
@@ -4439,7 +4439,7 @@ namespace bitpit {
                         }
                         else{
                             nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
-                            int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
+                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
@@ -5289,7 +5289,7 @@ namespace bitpit {
         uint32_t pbordersOversize = 0;
         for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
             pbordersOversize += bit->second.size();
-            int buffSize = bit->second.size() * (int)ceil((double)(m_global.m_octantBytes + m_global.m_globalIndexBytes) / (double)(CHAR_BIT/8));
+            std::size_t buffSize = bit->second.size() * (std::size_t)ceil((double)(m_global.m_octantBytes + m_global.m_globalIndexBytes) / (double)(CHAR_BIT/8));
             int key = bit->first;
             const vector<uint32_t> & value = bit->second;
             ghostCommunicator.setSend(key,buffSize);
@@ -5386,7 +5386,7 @@ namespace bitpit {
         uint32_t pbordersOversize = 0;
         for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
             pbordersOversize += bit->second.size();
-            long buffSize = bit->second.size() * (int)ceil((double)(m_global.m_markerBytes + m_global.m_boolBytes) / (double)(CHAR_BIT/8));
+            std::size_t buffSize = bit->second.size() * (std::size_t)ceil((double)(m_global.m_markerBytes + m_global.m_boolBytes) / (double)(CHAR_BIT/8));
             int key = bit->first;
             const vector<uint32_t> & value = bit->second;
             markerCommunicator.setSend(key,buffSize);
