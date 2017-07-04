@@ -75,23 +75,23 @@ using namespace bitpit;
   \param[in] index of the internal element to be communicated.
   \return the size in bytes of the data tobe communicated for the element e
 
-  - <b><code>void gather(Buffer& buff, const uint32_t e)</code> method: </b> this method is automatically called by the manager and it is intended to write user data to the char communication buffer. The user has to specify in its implementation the way data can be written in the char buffer. The manager provide the user with a buffer and its write method in order to simply write POD data in the buffer.	The user has to define the way his data can be written in the buffer by decomposing them in POD data and by using the buffer write method to store them in the buffer. In this example we suppose that data is a container of POD data having the random access operator.
+  - <b><code>void gather(Buffer& buff, const uint32_t e)</code> method: </b> this method is automatically called by the manager and it is intended to write user data to the char communication buffer. The user has to specify in its implementation the way data can be written in the char buffer. The manager provide the user with a buffer and a stream insertion (<<) operator in order to simply write POD data in the buffer.	The user has to define the way his data can be written in the buffer by decomposing them in POD data and by using the stream insertion (<<) operator to store them in the buffer. In this example we suppose that data is a container of POD data having the random access operator.
   @code
   template<class Data>
   template<class Buffer>
   inline void UserDataComm<Data>::gather(Buffer& buff, const uint32_t e) {
-    buff.write(data[e]);
+    buff << data[e];
   };
   @endcode
   \param[in] e index of the internal element to be communicated.
-  \param[in] buff is the char buffer used to communicate user data. The user has not to take care of the buffer, but its method write and read. These methods are intended to write/read POD data to/fromthe buffer.
+  \param[in] buff is the char buffer used to communicate user data.
 
-  - <b><code>void scatter(Buffer& buff, const uint32_t e)</code> method: </b> this method is automatically called by the manager and it is intended to read user data from the char communication buffer and store them in the ghost data container. The user has to specify in its implementation the way data can be read from the char buffer.	The manager provide the user with a buffer and its read method in order to simply read POD data from the buffer. The user has to define the way his data can be read from the buffer by decomposing them in POD data and by using the buffer read method to take them from the buffer and to store them in the ghost data container. In this example we suppose that ghostData is a container of POD data having the random access operator.
+  - <b><code>void scatter(Buffer& buff, const uint32_t e)</code> method: </b> this method is automatically called by the manager and it is intended to read user data from the char communication buffer and store them in the ghost data container. The user has to specify in its implementation the way data can be read from the char buffer.	The manager provide the user with a buffer and its stream extraction (>>) operator in order to simply read POD data from the buffer. The user has to define the way his data can be read from the buffer by decomposing them in POD data and by using the buffer stream extraction (>>) operator to take them from the buffer and to store them in the ghost data container. In this example we suppose that ghostData is a container of POD data having the random access operator.
   @code
   template<class Data>
   template<class Buffer>
   inline void UserDataComm<Data>::scatter(Buffer& buff,	const uint32_t e) {
-    buff.read(ghostData[e]);
+    buff >> ghostData[e];
   };
   @endcode
   \param[in] e index of the ghost element to be communicated.

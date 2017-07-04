@@ -555,7 +555,7 @@ namespace bitpit {
         void
         communicate(DataCommInterface<Impl> & userData){
             //BUILD SEND BUFFERS
-            std::map<int,CommBuffer> sendBuffers;
+            DataCommunicator communicator(m_comm);
             size_t fixedDataSize = userData.fixedSize();
             std::map<int,u32vector >::iterator bitend = m_bordersPerProc.end();
             std::map<int,u32vector >::iterator bitbegin = m_bordersPerProc.begin();
@@ -575,66 +575,37 @@ namespace bitpit {
                 //enlarge buffer to store number of pborders from this proc
                 buffSize += sizeof(int);
                 //build buffer for this proc
-                sendBuffers[key] = CommBuffer(buffSize,'a',m_comm);
+                communicator.setSend(key,buffSize);
+                SendBuffer & sendBuffer = communicator.getSendBuffer(key);
                 //store number of pborders from this proc at the begining
-                MPI_Pack(&nofPbordersPerProc,1,MPI_INT,sendBuffers[key].m_commBuffer,sendBuffers[key].m_commBufferSize,&sendBuffers[key].m_pos,m_comm);
+                sendBuffer << nofPbordersPerProc;
 
                 //WRITE SEND BUFFERS
                 for(size_t j = 0; j < nofPbordersPerProc; ++j){
-                    userData.gather(sendBuffers[key],pborders[j]);
+                    userData.gather(sendBuffer,pborders[j]);
                 }
             }
 
-            //Communicate Buffers Size
-            MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
-            MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
-            int nReq = 0;
-            std::map<int,int> recvBufferSizePerProc;
-            std::map<int,CommBuffer>::iterator sitend = sendBuffers.end();
-            for(std::map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-                recvBufferSizePerProc[sit->first] = 0;
-                m_errorFlag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,m_rank,m_comm,&req[nReq]);
-                ++nReq;
-            }
-            std::map<int,CommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
-            for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-                m_errorFlag =  MPI_Isend(&rsit->second.m_commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,m_comm,&req[nReq]);
-                ++nReq;
-            }
-            MPI_Waitall(nReq,req,stats);
+            communicator.discoverRecvs();
+            communicator.startAllRecvs();
 
-            //Communicate Buffers
-            std::map<int,CommBuffer> recvBuffers;
-            std::map<int,int>::iterator ritend = recvBufferSizePerProc.end();
-            for(std::map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-                recvBuffers[rit->first] = CommBuffer(rit->second,'a',m_comm);
-            }
-            nReq = 0;
-            for(std::map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-                m_errorFlag = MPI_Irecv(recvBuffers[sit->first].m_commBuffer,recvBuffers[sit->first].m_commBufferSize,MPI_PACKED,sit->first,m_rank,m_comm,&req[nReq]);
-                ++nReq;
-            }
-            for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-                m_errorFlag =  MPI_Isend(rsit->second.m_commBuffer,rsit->second.m_commBufferSize,MPI_PACKED,rsit->first,rsit->first,m_comm,&req[nReq]);
-                ++nReq;
-            }
-            MPI_Waitall(nReq,req,stats);
+            communicator.startAllSends();
 
             //READ RECEIVE BUFFERS
             int ghostOffset = 0;
-            std::map<int,CommBuffer>::iterator rbitend = recvBuffers.end();
-            std::map<int,CommBuffer>::iterator rbitbegin = recvBuffers.begin();
-            for(std::map<int,CommBuffer>::iterator rbit = rbitbegin; rbit != rbitend; ++rbit){
+            vector<int> recvRanks = communicator.getRecvRanks();
+            std::sort(recvRanks.begin(),recvRanks.end());
+            for(int rank : recvRanks){
+                communicator.waitRecv(rank);
+                RecvBuffer & recvBuffer = communicator.getRecvBuffer(rank);
                 int nofGhostFromThisProc = 0;
-                MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&nofGhostFromThisProc,1,MPI_INT,m_comm);
+                recvBuffer >> nofGhostFromThisProc;
                 for(int k = 0; k < nofGhostFromThisProc; ++k){
-                    userData.scatter(rbit->second, k+ghostOffset);
+                    userData.scatter(recvBuffer, k+ghostOffset);
                 }
                 ghostOffset += nofGhostFromThisProc;
             }
-            delete [] req; req = NULL;
-            delete [] stats; stats = NULL;
-
+            communicator.waitAllSends();
         };
 
         /** Distribute Load-Balancing the octants (with user defined weights) of the whole tree and data provided by the user

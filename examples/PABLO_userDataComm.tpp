@@ -53,13 +53,13 @@ inline size_t UserDataComm<Data>::size(const uint32_t e) const {
 template<class Data>
 template<class Buffer>
 inline void UserDataComm<Data>::gather(Buffer& buff, const uint32_t e) {
-	buff.write(data[e]);
+	buff << data[e];
 };
 
 template<class Data>
 template<class Buffer>
 inline void UserDataComm<Data>::scatter(Buffer& buff,	const uint32_t e) {
-	buff.read(ghostData[e]);
+	buff >> ghostData[e];
 };
 
 /* endcond
