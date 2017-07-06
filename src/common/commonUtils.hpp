@@ -99,17 +99,19 @@ struct DoubleFloatingEqual
 
         \param x if the first value to compare
         \param y if the second value to compare
+        \param errorFactor is a factor proportional to the floating point
+        errors creeping in as a result of x and y computation
         \result Returns true if the numbers match, false otherwise.
     */
-    bool operator()(const double &x, const double &y) const
+    bool operator()(const double &x, const double &y, double errorFactor = 1.0) const
     {
-        const double ABS_MAX_DIFF = 1e-14;
-        const double REL_MAX_DIFF = DBL_EPSILON;
+        const double ABS_MAX_DIFF = 1e-15;
+        const double REL_MAX_DIFF = std::numeric_limits<double>::epsilon();
 
         // Check if the numbers are really close (needed when comparing
         // numbers near zero).
         double diff = std::abs(x - y);
-        if (diff <= ABS_MAX_DIFF) {
+        if (diff <= errorFactor * ABS_MAX_DIFF) {
             return true;
         }
 
@@ -123,7 +125,7 @@ struct DoubleFloatingEqual
         double abs_y   = std::abs(y);
         double largest = (abs_y > abs_x) ? abs_y : abs_x;
 
-        return (diff <= largest * REL_MAX_DIFF);
+        return (diff <= errorFactor * largest * REL_MAX_DIFF);
     }
 };
 
