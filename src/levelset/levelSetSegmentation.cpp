@@ -812,8 +812,6 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
     std::vector<int>                        flag( mesh.getCellCount(), -1);
 
-    int                                     i, N( m_segmentation->getCellCount() );
-
     std::vector<long>                       neighs ;
 
     stack.reserve(128) ;
@@ -827,12 +825,13 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     // --------------------------------------------------------------------------
     // COMPUTE THE SDF VALUE AT EACH MESH POINT                                   //
     //
-    for (i = 0; i < N; i++) {
+    for (const Cell &segment : m_segmentation->getCells()) {
+        long segmentId = segment.getId();
 
-        std::vector<long> &cellList = segmentToCellMap[i] ;
+        std::vector<long> &cellList = segmentToCellMap[segmentId] ;
 
         // Segments vertex ------------------------------------------------------ //
-        VS  = getSimplexVertices( i ) ;
+        VS  = getSimplexVertices( segmentId ) ;
         seedNarrowBand( visitee, VS, stack );
 
 
@@ -859,9 +858,9 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
                     neighs  = mesh.findCellFaceNeighs(cell) ;
 
                     for( const auto &  neigh : neighs){
-                        if( flag[neigh] != i) {
+                        if( flag[neigh] != segmentId) {
                             temp.push_back( neigh) ;
-                            flag[neigh] = i ;
+                            flag[neigh] = segmentId ;
                         }
                     }
 
@@ -882,7 +881,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
         std::sort( cellList.begin(), cellList.end() ) ;
         cellList.erase( std::unique(cellList.begin(), cellList.end()), cellList.end() ) ;
 
-    } //end for i
+    }
 
     return segmentToCellMap ;
 
