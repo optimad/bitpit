@@ -88,19 +88,29 @@ long                                    i;
     std::vector<long>                        connect(2, Element::NULL_ID);
 
     // Create vertex list --------------------------------------------------- //
+    //
+    // Use non-consecutive vertex ids to test if the levelset can handle them.
+    const long vertexIdOffset = 101;
+    const long vertexIdStride = 2;
+
     point[2] = 0.0;
     for (i = 0; i < N; ++i) {
         theta = ((double) i) * dtheta;
         point[0] = R * cos( theta );
         point[1] = R * sin( theta );
-        mesh.addVertex(point);
+        mesh.addVertex(point, vertexIdOffset + vertexIdStride * i);
     } //next i
 
     // Create simplex list -------------------------------------------------- //
+    //
+    // Use non-consecutive cell ids to test if the levelset can handle them.
+    const long cellIdOffset = 202;
+    const long cellIdStride = 3;
+
     for (i = 0; i < N; ++i) {
-        connect[0] = i;
-        connect[1] = (i+1) % N;
-        mesh.addCell(ElementInfo::LINE, true, connect);
+        connect[0] = vertexIdOffset + vertexIdStride * i;
+        connect[1] = vertexIdOffset + vertexIdStride * (i + 1) % N;
+        mesh.addCell(ElementInfo::LINE, true, connect, cellIdOffset + cellIdStride * i);
     } //next i
 }
 
