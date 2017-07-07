@@ -169,7 +169,7 @@ namespace bitpit {
                                                                    if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
                                                                 */
         //elements sent during last loadbalance operation
-        std::unordered_map<int,std::array<uint32_t,4> >	   m_sentIdx;											  /**<Local mapper for sent elements. Each element refers to the receiver rank and collect the */
+        LoadBalanceRanges         m_loadBalanceRanges;											  /**<Local mapper for sent elements. Each element refers to the receiver rank and collect the */
 
         //auxiliary members
         int 					m_errorFlag;					/**<MPI error flag*/
@@ -405,7 +405,7 @@ namespace bitpit {
         uint32_t 		getIdx(const Octant oct) const;
         bool 			getIsGhost(const Octant* oct) const;
         bool 			getIsGhost(const Octant oct) const;
-        const std::unordered_map<int,std::array<uint32_t,4> > & getSentIdx() const;
+        const LoadBalanceRanges & getLoadBalanceRanges() const;
 
         // =================================================================================== //
         // PRIVATE GET/SET METHODS															   //
@@ -645,7 +645,6 @@ namespace bitpit {
             (*m_log) << "---------------------------------------------" << endl;
             (*m_log) << " LOAD BALANCE " << endl;
 
-            m_sentIdx.clear();
             std::array<uint32_t,4> limits = {{0,0,0,0}};
             m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
@@ -678,7 +677,6 @@ namespace bitpit {
                         limits[2] = limits[1] + partition[m_rank];
                         limits[3] = m_octree.m_octants.size();
                         std::pair<int,std::array<uint32_t,4> > procLimits(m_rank,limits);
-                        m_sentIdx.insert(procLimits);
 
                         m_octree.m_octants.assign(first, last);
                         octvector(m_octree.m_octants).swap(m_octree.m_octants);
@@ -807,7 +805,6 @@ namespace bitpit {
                                     limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                                     limits[1] = (uint32_t)lh + 1;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
                                         //PACK octants from 0 to lh in sendBuffer[p]
@@ -861,7 +858,6 @@ namespace bitpit {
                                     limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                                     limits[1] = (uint32_t)lh + 1;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
                                         //pack octants from lh - partition[p] to lh
@@ -923,7 +919,6 @@ namespace bitpit {
                                     limits[0] = ft;
                                     limits[1] = ft + nofElementsFromPreviousToSuccessive;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
                                         //PACK octants from ft to octantsSize-1
@@ -975,7 +970,6 @@ namespace bitpit {
                                     limits[0] = ft;
                                     limits[1] = ft + nofElementsFromPreviousToSuccessive;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(uint32_t i = ft; i <= endOctants; ++i ){
                                         //PACK octants from ft to ft + partition[p] -1
@@ -1158,6 +1152,12 @@ namespace bitpit {
                         userData.resizeGhost(nofGhosts);
 
                     }
+
+                std::unordered_map<int, std::array<uint32_t, 2>> sendRanges = evalLoadBalanceSendRanges(partition);
+                std::unordered_map<int, std::array<uint32_t, 2>> recvRanges = evalLoadBalanceRecvRanges(partition);
+
+                m_loadBalanceRanges = LoadBalanceRanges(m_serial, sendRanges, recvRanges);
+
                 delete [] partition;
                 partition = NULL;
 
@@ -1173,6 +1173,8 @@ namespace bitpit {
 
             }
             else{
+                m_loadBalanceRanges.clear();
+
                 (*m_log) << " " << endl;
                 (*m_log) << " Serial partition : " << endl;
                 (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
@@ -1197,7 +1199,6 @@ namespace bitpit {
             (*m_log) << "---------------------------------------------" << endl;
             (*m_log) << " LOAD BALANCE " << endl;
 
-            m_sentIdx.clear();
             std::array<uint32_t,4> limits = {{0,0,0,0}};
             m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
@@ -1225,7 +1226,6 @@ namespace bitpit {
                         limits[2] = limits[1] + partition[m_rank];
                         limits[3] = m_octree.m_octants.size();
                         std::pair<int,std::array<uint32_t,4> > procLimits(m_rank,limits);
-                        m_sentIdx.insert(procLimits);
 
                         m_octree.m_octants.assign(first, last);
                         octvector(m_octree.m_octants).swap(m_octree.m_octants);
@@ -1356,7 +1356,6 @@ namespace bitpit {
                                     limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                                     limits[1] = (uint32_t)lh + 1;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
                                         //PACK octants from 0 to lh in sendBuffer[p]
@@ -1410,7 +1409,6 @@ namespace bitpit {
                                     limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
                                     limits[1] = (uint32_t)lh + 1;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
                                         //pack octants from lh - partition[p] to lh
@@ -1472,7 +1470,6 @@ namespace bitpit {
                                     limits[0] = ft;
                                     limits[1] = ft + nofElementsFromPreviousToSuccessive;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
                                         //PACK octants from ft to octantsSize-1
@@ -1524,7 +1521,6 @@ namespace bitpit {
                                     limits[0] = ft;
                                     limits[1] = endOctants + 1;
                                     std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
-                                    m_sentIdx.insert(procLimits);
 
                                     for(uint32_t i = ft; i <= endOctants; ++i ){
                                         //PACK octants from ft to ft + partition[p] -1
@@ -1710,6 +1706,12 @@ namespace bitpit {
                         userData.resizeGhost(nofGhosts);
 
                     }
+
+                std::unordered_map<int, std::array<uint32_t, 2>> sendRanges = evalLoadBalanceSendRanges(partition);
+                std::unordered_map<int, std::array<uint32_t, 2>> recvRanges = evalLoadBalanceRecvRanges(partition);
+
+                m_loadBalanceRanges = LoadBalanceRanges(m_serial, sendRanges, recvRanges);
+
                 delete [] partition;
                 partition = NULL;
 
@@ -1725,6 +1727,8 @@ namespace bitpit {
 
             }
             else{
+                m_loadBalanceRanges.clear();
+
                 (*m_log) << " " << endl;
                 (*m_log) << " Serial partition : " << endl;
                 (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;

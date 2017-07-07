@@ -865,26 +865,27 @@ const std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool ge
 	if (!importFromScratch) {
 #if BITPIT_ENABLE_MPI==1
 		// Cells that have been send to other processors need to be removed
-		std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree->getSentIdx();
-		for (const auto &rankEntry : sendOctants) {
+		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->getLoadBalanceRanges();
+		for (const auto &rankEntry : loadBalanceRanges.sendRanges) {
 			int rank = rankEntry.first;
+			if (rank == currentRank) {
+				continue;
+			}
 
 			adaption::Type deletionType;
-			if (rank == currentRank) {
+			if (loadBalanceRanges.sendAction == PabloUniform::LoadBalanceRanges::ACTION_DELETE) {
 				deletionType = adaption::TYPE_DELETION;
 			} else {
 				deletionType = adaption::TYPE_PARTITION_SEND;
 			}
 
-			for (int k = 0; k < 2; ++k) {
-				uint32_t beginTreeId = rankEntry.second[2 * k];
-				uint32_t endTreeId   = rankEntry.second[2 * k + 1];
-				for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
-					OctantInfo octantInfo(treeId, true);
-					long cellId = getOctantId(octantInfo);
-					deletedOctants.emplace_back(cellId, deletionType, rank);
-					unmappedOctants[treeId] = false;
-				}
+			uint32_t beginTreeId = rankEntry.second[0];
+			uint32_t endTreeId   = rankEntry.second[1];
+			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
+				OctantInfo octantInfo(treeId, true);
+				long cellId = getOctantId(octantInfo);
+				deletedOctants.emplace_back(cellId, deletionType, rank);
+				unmappedOctants[treeId] = false;
 			}
 		}
 
