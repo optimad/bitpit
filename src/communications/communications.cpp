@@ -748,6 +748,10 @@ void DataCommunicator::waitSend(int rank)
 */
 void DataCommunicator::waitAllSends()
 {
+    if (m_sendRequests.size() == 0) {
+        return;
+    }
+
     // Wait for all sends to complete
     MPI_Waitall(m_sendRequests.size(), m_sendRequests.data(), MPI_STATUS_IGNORE);
 
@@ -837,6 +841,10 @@ void DataCommunicator::waitRecv(int rank)
 */
 void DataCommunicator::waitAllRecvs()
 {
+    if (m_recvRequests.size() == 0) {
+        return;
+    }
+
     // Wait for all the receives to complete
     MPI_Waitall(m_recvRequests.size(), m_recvRequests.data(), MPI_STATUS_IGNORE);
 
