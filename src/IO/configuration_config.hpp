@@ -43,6 +43,8 @@ public:
 
     Config(bool multiSections);
 
+    virtual ~Config();
+
     bool isMultiSectionsEnabled() const;
 
     int getOptionCount() const;

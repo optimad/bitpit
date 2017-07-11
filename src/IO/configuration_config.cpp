@@ -51,6 +51,13 @@ Config::Config(bool multiSections)
 }
 
 /*!
+    Destructor.
+*/
+Config::~Config()
+{
+}
+
+/*!
     Returns true if multi-sections are enabled.
 
     \result Returns true if multi-sections are enabled.
