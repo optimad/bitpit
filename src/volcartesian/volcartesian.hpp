@@ -54,7 +54,7 @@ public:
 			   double length, int nCells1D);
 	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   double length, double dh);
-	VolCartesian(std::istream stream);
+	VolCartesian(std::istream &stream);
 
 	void reset();
 

@@ -126,7 +126,7 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 
 	\param stream is the stream to read from
 */
-VolCartesian::VolCartesian(std::istream stream)
+VolCartesian::VolCartesian(std::istream &stream)
 	: VolumeKernel(false)
 {
 	initialize();
