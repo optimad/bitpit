@@ -2442,7 +2442,7 @@ namespace bitpit {
         if (dim == 3) {
             for (int edge : m_global.m_nodeEdge[inode]) {
                 findNeighbours(oct, edge, 2, neigh_edge, isghost_edge);
-                for (int i = 0; i < neigh_edge.size(); ++i) {
+                for (std::size_t i = 0; i < neigh_edge.size(); ++i) {
                     const Octant* neighOctant;
                     if (isghost_edge[i]==0) {
                         neighOctant = &m_octree.m_octants[neigh_edge[i]];
@@ -2464,7 +2464,7 @@ namespace bitpit {
         for (int j = 0; j < dim; ++j) {
             int face = m_global.m_nodeFace[inode][j];
             findNeighbours(oct, face, 1, neigh_face, isghost_face);
-            for (int i = 0; i < neigh_face.size(); ++i) {
+            for (std::size_t i = 0; i < neigh_face.size(); ++i) {
                 const Octant* neighOctant;
                 if (isghost_face[i]==0) {
                     neighOctant = &m_octree.m_octants[neigh_face[i]];
