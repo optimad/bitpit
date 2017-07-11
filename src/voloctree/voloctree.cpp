@@ -167,7 +167,7 @@ VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::u
 
 	\param stream is the stream to read from
 */
-VolOctree::VolOctree(std::istream stream)
+VolOctree::VolOctree(std::istream &stream)
 	: VolumeKernel(false)
 {
 	initialize();

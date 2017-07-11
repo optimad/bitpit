@@ -69,7 +69,7 @@ public:
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 	VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
-	VolOctree(std::istream stream);
+	VolOctree(std::istream &stream);
 
 	~VolOctree();
 
