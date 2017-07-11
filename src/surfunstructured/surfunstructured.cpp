@@ -71,7 +71,7 @@ SurfUnstructured::SurfUnstructured(const int &id, int patch_dim, int space_dim)
 
 	\param stream is the stream to read from
 */
-SurfUnstructured::SurfUnstructured(std::istream stream)
+SurfUnstructured::SurfUnstructured(std::istream &stream)
 	: SurfaceKernel(false)
 {
 #if BITPIT_ENABLE_MPI==1
