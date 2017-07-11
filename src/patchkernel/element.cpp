@@ -152,8 +152,8 @@ const ElementInfo ElementInfo::wedgeInfo      = ElementInfo(ElementInfo::WEDGE);
 	Default constructor
 */
 ElementInfo::ElementInfo()
-	: type(UNDEFINED)
 {
+    initializeUndefinedInfo();
 }
 
 /*!
