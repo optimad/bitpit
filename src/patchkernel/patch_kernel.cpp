@@ -4014,7 +4014,7 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
     direction)
     \result Returns the bin index associated to each vertex.
 */
-std::unordered_map<long, long> PatchKernel::binSortVertex(PiercedVector<Vertex> vertices, int nBins)
+std::unordered_map<long, long> PatchKernel::binSortVertex(const PiercedVector<Vertex> &vertices, int nBins)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -4025,7 +4025,6 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(PiercedVector<Vertex> 
 
     // Counters
     long                                i, j, k;
-    PiercedVector<Vertex>::iterator     V, E = vertices.end();
 
     // ====================================================================== //
     // ASSOCIATE EACH VERTEX WITH A BIN                                       //
@@ -4041,7 +4040,8 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(PiercedVector<Vertex> 
 
     // Loop over vertices
     std::unordered_map<long, long> bin_index;
-    for (V = vertices.begin(); V != E; ++V) {
+    PiercedVector<Vertex>::const_iterator E = vertices.cend();
+    for (PiercedVector<Vertex>::const_iterator V = vertices.cbegin(); V != E; ++V) {
         i = std::min(nBins - 1L, long((V->getCoords()[0] - m_boxMinPoint[0]) / dx));
         j = std::min(nBins - 1L, long((V->getCoords()[1] - m_boxMinPoint[1]) / dy));
         k = std::min(nBins - 1L, long((V->getCoords()[2] - m_boxMinPoint[2]) / dz));

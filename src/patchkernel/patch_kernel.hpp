@@ -362,7 +362,7 @@ public:
 	bool isBoundingBoxDirty(bool global = false) const;
 	void updateBoundingBox(bool forcedUpdated = false);
 
-	std::unordered_map<long, long> binSortVertex(PiercedVector<Vertex> vertices, int nBins = 128);
+	std::unordered_map<long, long> binSortVertex(const PiercedVector<Vertex> &vertices, int nBins = 128);
     std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
 	virtual void translate(std::array<double, 3> translation);
