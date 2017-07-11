@@ -105,9 +105,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(std::istream stream, std::string logfile, MPI_Comm comm)
+    ParaTree::ParaTree(std::istream &stream, std::string logfile, MPI_Comm comm)
 #else
-    ParaTree::ParaTree(std::istream stream, std::string logfile)
+    ParaTree::ParaTree(std::istream &stream, std::string logfile)
 #endif
     {
 #if BITPIT_ENABLE_MPI==1

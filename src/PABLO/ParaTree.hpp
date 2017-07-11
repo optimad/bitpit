@@ -204,11 +204,11 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         ParaTree(std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
         ParaTree(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
-        ParaTree(std::istream stream, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        ParaTree(std::istream &stream, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
 #else
         ParaTree(std::string logfile = DEFAULT_LOG_FILE);
         ParaTree(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE);
-        ParaTree(std::istream stream, std::string logfile = DEFAULT_LOG_FILE);
+        ParaTree(std::istream &stream, std::string logfile = DEFAULT_LOG_FILE);
 #endif
         ~ParaTree();
 
