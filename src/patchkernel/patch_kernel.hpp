@@ -425,6 +425,7 @@ public:
 
 	bool isPartitioned() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
+	double evalPartitioningUnbalance();
 	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false);

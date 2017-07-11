@@ -542,6 +542,37 @@ void PatchKernel::setPartitioningStatus(PartitioningStatus status)
 	m_partitioningStatus = status;
 }
 
+
+/*!
+	Evaluate partitioning load unbalance index.
+
+	\result Partitioning load unbalance index.
+*/
+double PatchKernel::evalPartitioningUnbalance()
+{
+	if (!isPartitioned()) {
+		return 0.;
+	}
+
+	// Evaluate partition weight
+	double localWeight = getInternalCount();
+
+	// Evalaute global weights
+	double totalWeight;
+	MPI_Allreduce(&localWeight, &totalWeight, 1, MPI_DOUBLE, MPI_SUM, getCommunicator());
+
+	double minimumWeight;
+	MPI_Allreduce(&localWeight, &minimumWeight, 1, MPI_DOUBLE, MPI_MIN, getCommunicator());
+
+	double maximumWeight;
+	MPI_Allreduce(&localWeight, &maximumWeight, 1, MPI_DOUBLE, MPI_MAX, getCommunicator());
+
+	// Evaluate the unbalance
+	double unbalance = (maximumWeight - minimumWeight) / totalWeight;
+
+	return unbalance;
+}
+
 /*!
 	Prepares the patch for performing the partitioning.
 
