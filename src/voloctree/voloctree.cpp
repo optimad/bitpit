@@ -223,6 +223,10 @@ void VolOctree::initialize()
 {
 	log::cout() << ">> Initializing Octree mesh" << std::endl;
 
+	// Reset the cell and interface type info
+	m_cellTypeInfo      = nullptr;
+	m_interfaceTypeInfo = nullptr;
+
 	// Reset the tree entruster
 	m_treeAdopter = nullptr;
 
