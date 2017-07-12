@@ -2077,8 +2077,12 @@ bool _intersectBoxSimplex(array3D const &A0, array3D const &A1, std::vector<arra
 
     } else{  //generic convex polygon split into triangles
 
+        bool intersect(false);
         bool addFlag(flagPtr!=nullptr);
         bool computeIntersection(innerSimplexPoints || simplexEdgeBoxHullIntersection || simplexBoxEdgeIntersection);
+        array3D V0, V1, V2;
+        std::vector<array3D> partialIntr;
+        std::vector<int> partialFlag;
 
         assert( ! (computeIntersection && (intrPtr==nullptr) ) );
 
@@ -2087,22 +2091,17 @@ bool _intersectBoxSimplex(array3D const &A0, array3D const &A1, std::vector<arra
         }
 
         if(addFlag){
-            intrPtr->clear();
+            flagPtr->clear();
         }
 
-
-        bool intersect(false);
-        std::vector<array3D> partialIntr;
-        std::vector<int> partialFlag;
-
-        int trianglesCount = vertexCount -2;
-        int vertex0 = 0;
-        int vertex1 = 1;
-        int vertex2 = 2;
-
+        // check if triangle vertices lie within box
+        // or if triangles intersect edges of box
+        computeIntersection = innerSimplexPoints || simplexBoxEdgeIntersection;
+        int trianglesCount = polygonSubtriangleCount(VS);
         for (int triangle=0; triangle<trianglesCount; ++triangle) {
+            subtriangleOfPolygon(triangle, VS, V0, V1, V2);
 
-            if( _intersectBoxTriangle( A0, A1, VS[vertex0], VS[vertex1], VS[vertex2], innerSimplexPoints, simplexEdgeBoxHullIntersection, simplexBoxEdgeIntersection, &partialIntr, &partialFlag ) ){
+            if( _intersectBoxTriangle( A0, A1, V0, V1, V2, innerSimplexPoints, false, simplexBoxEdgeIntersection, &partialIntr, &partialFlag, dim ) ){
 
                 intersect = true;
                 if(!computeIntersection) break;
@@ -2130,43 +2129,56 @@ bool _intersectBoxSimplex(array3D const &A0, array3D const &A1, std::vector<arra
                         continue;
                     }
 
-
-                    //need to check if real segments are intersected or 
-                    //artifical segments due to decomposition of polygon
-                    //into triangles
-                    bool realIntersection = true;
-                    if(candidateFlag==1){
-                        realIntersection = false;
-                        std::array<bool,3> realSegment = {{false,true,false}};
-                        realSegment[0] = (vertex1==1); 
-                        realSegment[2] = (vertex2==vertexCount-1); 
-
-                        for(int j=0; j<3; ++j){
-                            if( !realSegment[j] ){
-                                continue;
-                            }
-
-                            edgeOfTriangle(j, VS[vertex0], VS[vertex1], VS[vertex2], B0, B1);
-                            realIntersection |= intersectPointSegment(candidateCoord, B0, B1);
-
-                        }
-                    }
-
-                    if(!realIntersection){
-                        continue;
-                    }
-
                     intrPtr->push_back(candidateCoord);
                     if(addFlag){
                         flagPtr->push_back(candidateFlag);
                     }
-
                 }
-
             }
+        }
 
-            ++vertex1;
-            ++vertex2;
+        // check if edges of polygon intersect box face
+        computeIntersection = simplexEdgeBoxHullIntersection;
+        int edgesCount = polygonEdgesCount(VS);
+        if(!intersect || simplexEdgeBoxHullIntersection){
+            for (int edge=0; edge<edgesCount; ++edge) {
+                edgeOfPolygon(edge, VS, V0, V1);
+
+                if( _intersectSegmentBox( V0, V1, A0, A1, false, simplexEdgeBoxHullIntersection, &partialIntr, &partialFlag, dim) ){
+
+                    intersect = true;
+                    if(!computeIntersection) break;
+
+                    int intrCount = partialIntr.size();
+                    for( int i=0; i<intrCount; ++i){
+
+                        array3D &candidateCoord = partialIntr[i];
+                        int candidateFlag = partialFlag[i];
+
+                        //prune duplicate points
+                        auto PItr = intrPtr->begin();
+                        bool iterate = (PItr!=intrPtr->end());
+                        while(iterate){
+
+                            iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidateCoord ), 0. );
+                        
+                            if(iterate){
+                                ++PItr;
+                            }
+                            iterate &= PItr!=intrPtr->end();
+                        }
+
+                        if(PItr!=intrPtr->end()){
+                            continue;
+                        }
+
+                        intrPtr->push_back(candidateCoord);
+                        if(addFlag){
+                            flagPtr->push_back(candidateFlag);
+                        }
+                    }
+                }
+            }
         }
 
         return intersect;
