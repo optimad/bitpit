@@ -691,17 +691,17 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
     } else { //generic convec polygon
         double distance, minDistance(std::numeric_limits<double>::max());
         int minTriangle;
+        array3D V0, V1, V2;
         array3D localLambda, minLambda;
 
         // Compute the distance from each triangle in the simplex
-        int triangleCount = vertexCount - 2;
+        int triangleCount = polygonSubtriangleCount(V);
 
-        int vertex0 = 0;
-        int vertex1 = 1;
-        int vertex2 = 2;
         for (int triangle=0; triangle < triangleCount; ++triangle) {
 
-            distance = distancePointTriangle(P, V[vertex0], V[vertex1], V[vertex2], localLambda);
+            subtriangleOfPolygon( triangle, V, V0, V1, V2);
+
+            distance = distancePointTriangle(P, V0, V1, V2, localLambda);
 
             if (distance <= minDistance) {
 
@@ -711,15 +711,13 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
                 minTriangle = triangle;
             }
 
-            vertex1++;
-            vertex2++;
 
         } //next triangle
 
         lambda.assign(vertexCount,0.);
-        vertex0 = 0;
-        vertex1 = 1+minTriangle;
-        vertex2 = 2+minTriangle;
+        int vertex0 = 0;
+        int vertex1 = 1+minTriangle;
+        int vertex2 = 2+minTriangle;
         lambda[vertex0] = minLambda[0];
         lambda[vertex1] = minLambda[1];
         lambda[vertex2] = minLambda[2];
@@ -1171,19 +1169,14 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::ve
 
         std::vector<double> d(cloudCount,std::numeric_limits<double>::max());
 
-        int triangleCount = vertexCount - 2;
-        int vertex0 = 0;
-        int vertex1 = 1;
-        int vertex2 = 2;
+        int triangleCount = polygonSubtriangleCount(V);
+        array3D V0, V1, V2;
 
         for (int triangle=0; triangle < triangleCount; ++triangle) { // foreach triangle
-            std::vector<double> dT = distanceCloudTriangle(P, V[vertex0], V[vertex1], V[vertex2]);
+            subtriangleOfPolygon( triangle, V, V0, V1, V2);
+            std::vector<double> dT = distanceCloudTriangle(P, V0, V1, V2);
 
             d = min(d,dT);
-
-            ++vertex1;
-            ++vertex2;
-
         }
 
         return d; 
@@ -1239,13 +1232,12 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
         std::vector<double> dTemp(cloudCount);
         std::vector<array3D> lambdaTemp(cloudCount);
 
-        int triangleCount = vertexCount - 2;
-        int vertex0 = 0;
-        int vertex1 = 1;
-        int vertex2 = 2;
+        int triangleCount = polygonSubtriangleCount(V);
+        array3D V0, V1, V2;
 
         for (int triangle=0; triangle < triangleCount; ++triangle) { // foreach triangle
-            dTemp = distanceCloudTriangle(cloud, V[vertex0], V[vertex1], V[vertex2], lambdaTemp);
+            subtriangleOfPolygon( triangle, V, V0, V1, V2);
+            dTemp = distanceCloudTriangle(cloud, V0, V1, V2, lambdaTemp);
 
             for(int i=0; i< cloudCount; ++i){
                 if( dTemp[i] < d[i]){
@@ -1253,10 +1245,6 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
                     std::copy( lambdaTemp[i].begin(), lambdaTemp[i].end(), lambda[i].begin());
                 }
             }
-
-            ++vertex1;
-            ++vertex2;
-
         }
 
         return d; 
@@ -1548,19 +1536,15 @@ bool intersectLineSimplex( array3D const &P, array3D const &n, std::vector<array
 {
     assert( validLine(P,n) );
 
-    int nTriangles = V.size() -2;
+    int nTriangles = polygonSubtriangleCount(V);
+    array3D V0, V1, V2;
 
-    int vertex0 = 0;
-    int vertex1 = 1;
-    int vertex2 = 2;
     for( int i=0; i< nTriangles; ++i){
+        subtriangleOfPolygon(i, V, V0, V1, V2);
 
-        if( intersectLineTriangle(P, n, V[vertex0], V[vertex1], V[vertex2], Q) ) { 
+        if( intersectLineTriangle(P, n, V0, V1, V2, Q) ) { 
             return true; 
         }
-
-        ++vertex1;
-        ++vertex2;
     }
 
     return false; 
@@ -1578,19 +1562,15 @@ bool intersectSegmentSimplex( array3D const &P0, array3D const &P1, std::vector<
 {
     assert( validSegment(P0,P1) );
 
-    int nTriangles = V.size() -2;
+    int nTriangles = polygonSubtriangleCount(V);
+    array3D V0, V1, V2;
 
-    int vertex0 = 0;
-    int vertex1 = 1;
-    int vertex2 = 2;
     for( int i=0; i< nTriangles; ++i){
+        subtriangleOfPolygon(i, V, V0, V1, V2);
 
-        if( intersectSegmentTriangle(P0, P1, V[vertex0], V[vertex1], V[vertex2], Q) ) { 
+        if( intersectSegmentTriangle(P0, P1, V0, V1, V2, Q) ) { 
             return true; 
         }
-
-        ++vertex1;
-        ++vertex2;
     }
 
     return false;
