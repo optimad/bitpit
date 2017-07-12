@@ -2776,7 +2776,7 @@ void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0,
  */
 void subtriangleOfPolygon( int const &triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
 {
-    assert(triangle<V.size()-2);
+    assert(triangle<polygonSubtriangleCount(V));
 
     V0 = V[0];
     V1 = V[triangle+1];
