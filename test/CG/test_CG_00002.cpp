@@ -816,8 +816,8 @@ bool testIntersectBoxSimplex(){
     
     std::vector<array3D> insects;
     
-    check &= intersectBoxSimplex(min0,max0,polygon,insects,3);
-    check &= (insects.size() == 2);
+    check &= intersectBoxSimplex(min0,max0,polygon,true,true,true,insects,3);
+    check &= (insects.size() == 4);
     
     return check;
 }
