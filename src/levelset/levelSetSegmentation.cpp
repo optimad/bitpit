@@ -386,7 +386,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
                 countItr = nSegmentsPerCell.insert( { cell, 0 } ).first;
             }
 
-            *(countItr)++;
+            countItr->second++;
         }
     }
 
