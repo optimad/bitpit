@@ -2733,12 +2733,37 @@ double areaTriangle( array3D const &a, array3D const &b, array3D const &c)
 }
 
 /*
+ * Gets the number of edges of a polygon
+ * @return number of edges
+ */
+int polygonEdgesCount( std::vector<array3D> const &V)
+{
+    return V.size();
+}
+
+/*
  * Gets the number of subtriangles of a polygon
  * @return number of subtriangles
  */
 int polygonSubtriangleCount( std::vector<array3D> const &V)
 {
     return V.size()-2;
+}
+
+/*
+ * Gets the edge coordinates of a convex polygon
+ * @param[in] edge index
+ * @param[in] V polgon vertices
+ * @param[in] V0 first vertice coordinates of edge
+ * @param[in] V1 second vertice coordinates of edge
+ */
+void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0, array3D &V1)
+{
+    assert(edge<polygonEdgesCount(V));
+
+    V0 = V[edge];
+    V1 = V[(edge+1) %V.size()];
+    return;
 }
 
 /*
