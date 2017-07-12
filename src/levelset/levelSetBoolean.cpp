@@ -328,31 +328,29 @@ LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id) const{
  */
 LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
 
-    if(m_objPtr.size()==0){ 
+    if(m_objPtr.empty()){
         return LevelSetInfo();
     }
 
-    LevelSetInfo result, second;
-    result = m_objPtr[0]->getLevelSetInfo(id);
-
+    LevelSetInfo result = m_objPtr[0]->getLevelSetInfo(id);
     for( size_t n=1; n<m_objPtr.size(); ++n){
-        second = m_objPtr[n]->getLevelSetInfo(id) ;
+        double value = m_objPtr[n]->getLS(id) ;
 
         if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
-            if(result.value>second.value) {
-                result = second;
+            if(result.value>value) {
+                result = m_objPtr[n]->getLevelSetInfo(id);
             }
 
         } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
-            if(result.value<second.value) {
-                result = second;
+            if(result.value<value) {
+                result = m_objPtr[n]->getLevelSetInfo(id);
             }
 
         } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
-            if(result.value<-1.*second.value) {
-                second.value *= -1.;
-                second.gradient *= -1.;
-                result = second;
+            if(result.value<-value) {
+                result = m_objPtr[n]->getLevelSetInfo(id);
+                result.value *= -1.;
+                result.gradient *= -1.;
             }
         }
     }
