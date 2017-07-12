@@ -379,11 +379,11 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
 
         for ( long cell : cellList ) {
             auto countItr = nSegmentsPerCell.find( cell );
-            if ( countItr == nSegmentsPerCell.end() ) {
-                countItr = nSegmentsPerCell.insert( { cell, 0 } ).first;
+            if ( countItr != nSegmentsPerCell.end() ) {
+                countItr->second++;
+            } else {
+                nSegmentsPerCell.emplace( cell, 1 );
             }
-
-            countItr->second++;
         }
     }
 
