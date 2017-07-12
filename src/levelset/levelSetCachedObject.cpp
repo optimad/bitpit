@@ -68,11 +68,13 @@ LevelSetCachedObject::LevelSetCachedObject(int id) : LevelSetObject(id){
  * @return LevelSetInfo of cell
 */
 LevelSetInfo LevelSetCachedObject::getLevelSetInfo( const long &i)const{
-    if( ! m_ls.exists(i) ){
-        return (  LevelSetInfo() );
-    } else {
-        return m_ls[i] ;
+
+    auto itr = m_ls.find(i);
+    if ( itr == m_ls.end() ){
+        return LevelSetInfo();
     }
+
+    return *itr;
 
 } 
 
@@ -83,11 +85,12 @@ LevelSetInfo LevelSetCachedObject::getLevelSetInfo( const long &i)const{
  */
 double LevelSetCachedObject::getLS( const long &i)const {
 
-    if( ! m_ls.exists(i) ){
+    auto itr = m_ls.find(i);
+    if ( itr == m_ls.end() ){
         return levelSetDefaults::VALUE;
-    } else {
-        return (  m_ls[i].value );
     }
+
+    return itr->value;
 
 }
 
@@ -98,11 +101,12 @@ double LevelSetCachedObject::getLS( const long &i)const {
  */
 std::array<double,3> LevelSetCachedObject::getGradient(const long &i) const {
 
-    if( ! m_ls.exists(i) ){
+    auto itr = m_ls.find(i);
+    if ( itr == m_ls.end() ){
         return levelSetDefaults::GRADIENT;
-    } else {
-        return (  m_ls[i].gradient );
     }
+
+    return itr->gradient;
 
 }
 
