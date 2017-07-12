@@ -107,7 +107,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     std::vector<std::array<double,3>>           getSimplexVertices( const long &) const;
 
-    std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *, const double &, SegmentToCellMap &) ;
+    std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *, const double &, const SegmentToCellMap &) ;
     void                                        updateSegmentList( const double &) ;
 
     void                                        createLevelsetInfo( LevelSetKernel *, const bool &, std::unordered_set<long> &) ;

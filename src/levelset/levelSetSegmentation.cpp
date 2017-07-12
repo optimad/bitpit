@@ -368,7 +368,7 @@ double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
  */
 std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel *visitee,
                                                                   const double &search,
-                                                                  SegmentToCellMap &segmentToCellMap ){
+                                                                  const SegmentToCellMap &segmentToCellMap ){
 
     log::cout() << "  Creating segment info... " << std::endl;
 
@@ -392,7 +392,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
     std::vector<std::array<double,3>> cloud ;
 
     // Add the segments info
-    for ( auto mapItr = segmentToCellMap.begin(); mapItr != segmentToCellMap.end(); ) {
+    for ( auto mapItr = segmentToCellMap.begin(); mapItr != segmentToCellMap.end(); ++mapItr) {
         // Segment data
         long segment = mapItr->first ;
         std::vector<std::array<double,3>> VS = getSimplexVertices( segment ) ;
@@ -431,8 +431,6 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
             segInfoItr->segments.push_back(segment) ;
             segInfoItr->distances.push_back(segmentDistance) ;
         }
-
-        mapItr = segmentToCellMap.erase( mapItr );
     }
 
     // Order the segments from the closes to the farthest from the body
