@@ -1271,90 +1271,88 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	int8_t cx,cy,cz;
-	uint8_t iface[3];
+
+	for (int i=0; i<m_dim; i++){
+		uint8_t iface = nodeface[inode][i];
+		if (m_info[iface]) {
+			sizem = 0;
+			return this->computeMorton();
+		}
+	}
 
 	nneigh = 1;
 	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(Global::getMaxLevel() - maxdepth)) : getSize();
 	dh2 = getSize();
-	for (int i=0; i<m_dim; i++){
-		iface[i] = nodeface[inode][i];
-	}
 
-	if (m_info[iface[0]] || m_info[iface[1]] || m_info[iface[m_dim-1]]){
-		sizem = 0;
-		return this->computeMorton();
+	uint64_t Morton = this->computeMorton();
+	switch (inode) {
+	case 0 :
+	{
+		cx = -1;
+		cy = -1;
+		cz = -1*(m_dim-2);
+		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 	}
-	else{
-		uint64_t Morton = this->computeMorton();
-		switch (inode) {
-		case 0 :
-		{
-			cx = -1;
-			cy = -1;
-			cz = -1*(m_dim-2);
-			Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-		}
-		break;
-		case 1 :
-		{
-			cx = 1;
-			cy = -1;
-			cz = -1*(m_dim-2);
-			Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-		}
-		break;
-		case 2 :
-		{
-			cx = -1;
-			cy = 1;
-			cz = -1*(m_dim-2);
-			Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-		}
-		break;
-		case 3 :
-		{
-			cx = 1;
-			cy = 1;
-			cz = -1*(m_dim-2);
-			Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-		}
-		break;
-		case 4 :
-		{
-			cx = -1;
-			cy = -1;
-			cz = 1;
-			Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-		}
-		break;
-		case 5 :
-		{
-			cx = 1;
-			cy = -1;
-			cz = 1;
-			Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-		}
-		break;
-		case 6 :
-		{
-			cx = -1;
-			cy = 1;
-			cz = 1;
-			Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
-		}
-		break;
-		case 7 :
-		{
-			cx = 1;
-			cy = 1;
-			cz = 1;
-			Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
-		}
-		break;
-		}
-		sizem = nneigh;
-		return Morton;
+	break;
+	case 1 :
+	{
+		cx = 1;
+		cy = -1;
+		cz = -1*(m_dim-2);
+		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 	}
+	break;
+	case 2 :
+	{
+		cx = -1;
+		cy = 1;
+		cz = -1*(m_dim-2);
+		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+	}
+	break;
+	case 3 :
+	{
+		cx = 1;
+		cy = 1;
+		cz = -1*(m_dim-2);
+		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+	}
+	break;
+	case 4 :
+	{
+		cx = -1;
+		cy = -1;
+		cz = 1;
+		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+	}
+	break;
+	case 5 :
+	{
+		cx = 1;
+		cy = -1;
+		cz = 1;
+		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+	}
+	break;
+	case 6 :
+	{
+		cx = -1;
+		cy = 1;
+		cz = 1;
+		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+	}
+	break;
+	case 7 :
+	{
+		cx = 1;
+		cy = 1;
+		cz = 1;
+		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+	}
+	break;
+	}
+	sizem = nneigh;
+	return Morton;
 
 };
 
