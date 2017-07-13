@@ -718,6 +718,9 @@ int RBFKernel::greedy( const double &tolerance)
 
     }
 
+    ios::fmtflags streamFlags(log::cout().flags());
+
+    int errorFlag = 0;
     while( error > tolerance) {
         i = addGreedyPoint();
 
@@ -732,12 +735,15 @@ int RBFKernel::greedy( const double &tolerance)
             log::cout() << std::scientific;
             log::cout() << " error now " << error << " active nodes" << getActiveCount() << " / " << m_nodes << std::endl;
         } else {
-            return 1;
+            errorFlag = 1;
+            break;
 
         }
     }
 
-    return 0;
+    log::cout().flags(streamFlags);
+
+    return errorFlag;
 }
 
 /*!
