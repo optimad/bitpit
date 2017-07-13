@@ -2532,6 +2532,9 @@ if (!file_handle.good()) { return(1); };
 // WRITE STL SOLID                                                              //
 // ============================================================================ //
 
+// Save stream flags ---------------------------------------------------------- //
+std::ios::fmtflags streamFlags(file_handle.flags());
+
 // Solid header --------------------------------------------------------------- //
 sheader << "solid " << solid_name;
 header = sheader.str();
@@ -2581,6 +2584,9 @@ header = sheader.str();
 header = utils::string::trim(header);
 file_handle << header << endl;
 sheader.str("");
+
+// Restor stream flags -------------------------------------------------------- //
+file_handle.flags(streamFlags);
 
 return(err); };
 
@@ -2639,6 +2645,9 @@ if (!file_handle.good()) { return(1); };
 // WRITE STL SOLID                                                              //
 // ============================================================================ //
 
+// Save stream flags ---------------------------------------------------------- //
+std::ios::fmtflags streamFlags(file_handle.flags());
+
 // Solid header --------------------------------------------------------------- //
 sheader << "solid " << solid_name;
 header = sheader.str();
@@ -2688,6 +2697,9 @@ header = sheader.str();
 header = utils::string::trim(header);
 file_handle << header << endl;
 sheader.str("");
+
+// Restor stream flags -------------------------------------------------------- //
+file_handle.flags(streamFlags);
 
 return(err); };
 
