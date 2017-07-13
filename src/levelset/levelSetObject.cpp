@@ -55,8 +55,7 @@ LevelSetObject::~LevelSetObject( ){
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject(int id) : m_id(id){
-    m_kernelPtr=nullptr;
+LevelSetObject::LevelSetObject(int id) : m_id(id), m_kernelPtr(nullptr), m_RSearch(0.) {
 }
 
 /*!
