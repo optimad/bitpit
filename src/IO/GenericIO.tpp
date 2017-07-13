@@ -22,7 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include "logger.hpp"
 #include "Operators.hpp"
 
 namespace bitpit {
