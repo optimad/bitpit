@@ -2307,12 +2307,10 @@ namespace bitpit {
                 if (idxtry > noctants-1){
                     if (jump > 0){
                         idxtry = noctants - 1;
-                        Mortontry = m_octants[idxtry].computeMorton();
                         jump = 0;
                     }
                     else if (jump < 0){
                         idxtry = 0;
-                        Mortontry = m_octants[idxtry].computeMorton();
                         jump = 0;
                     }
                 }
