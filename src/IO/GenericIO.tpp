@@ -22,12 +22,12 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include"logger.hpp"
-#include"Operators.hpp"
+#include "logger.hpp"
+#include "Operators.hpp"
 
-namespace bitpit{
+namespace bitpit {
 
-namespace genericIO{
+namespace genericIO {
 
 /*!
  * Writes a POD data type to file stream in ascii format using scientific format
@@ -35,16 +35,16 @@ namespace genericIO{
  * @param[in]   str     file stream
  * @param[in]   data    data to be written
  */
-template< class data_T >
-void flushASCII( std::fstream &str, const data_T &data ){
-
+template<class data_T>
+void flushASCII(std::fstream &str, const data_T &data)
+{
     std::ios::fmtflags streamFlags(str.flags());
 
-    str << std::setprecision(8) << std::scientific ;
+    str << std::setprecision(8) << std::scientific;
     str << data << " ";
 
     str.flags(streamFlags);
-};
+}
 
 /*!
  * Writes a vector of POD data type to file stream in ascii format using scientific format on a single line
@@ -52,11 +52,11 @@ void flushASCII( std::fstream &str, const data_T &data ){
  * @param[in]   str     file stream
  * @param[in]   data    data to be written
  */
-template< class data_T >
-void flushASCII( std::fstream &str, const std::vector<data_T> &data ){
-
-    flushASCII( str, data.size(), data) ;
-};
+template<class data_T>
+void flushASCII(std::fstream &str, const std::vector<data_T> &data)
+{
+    flushASCII(str, data.size(), data);
+}
 
 /*!
  * Writes a vector of POD data type to file stream in ascii format using scientific format putting a fixed number of elements per line
@@ -65,45 +65,41 @@ void flushASCII( std::fstream &str, const std::vector<data_T> &data ){
  * @param[in]   elements_per_line     number of entries per line
  * @param[in]   data    data to be written
  */
-template< class data_T >
-void flushASCII( std::fstream &str, int elements_per_line, const std::vector<data_T> &data ){
+template<class data_T>
+void flushASCII(std::fstream &str, int elements_per_line, const std::vector<data_T> &data)
+{
+    int i(0), j(0), k(0);
+    int nr;
 
-    int i(0), j(0), k(0) ;
-    int nr ;
+    int lines, this_line;
 
-    int lines, this_line ;
+    bool next(true);
 
-    bool next(true) ;
-
-    nr = data.size() ;
-    lines = (nr-1) /elements_per_line + 1;
+    nr = data.size();
+    lines = (nr - 1) /elements_per_line + 1;
 
     std::ios::fmtflags streamFlags(str.flags());
 
-    str << std::setprecision(8) << std::scientific ;
+    str << std::setprecision(8) << std::scientific;
 
+    while (next) {
+        this_line = std::min(elements_per_line, nr - k);
 
-    while( next ) {
-
-        this_line = std::min( elements_per_line, nr - k ) ;
-
-        for( j=0; j<this_line; j++){
-            flushASCII( str, data[k] ) ;
-            k++ ;
-        };
-
-        i++ ;
-        if( i<lines){
-            str << std::endl;
+        for (j=0; j<this_line; j++) {
+            flushASCII(str, data[k]);
+            k++;
         }
-        else{
-            next = false;
-        };
 
-    };
+        i++;
+        if (i<lines) {
+            str << std::endl;
+        } else {
+            next = false;
+        }
+    }
 
     str.flags(streamFlags);
-};
+}
 
 /*!
  * Writes a array of POD data type to file stream in ascii format using scientific format on one single line
@@ -113,10 +109,10 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::vector<dat
  * @param[in]       data    data to be written
  */
 template< class data_T, size_t d >
-void flushASCII( std::fstream &str, const std::array<data_T,d> &data ){
-
-    flushASCII( str, d, data ) ;
-};
+void flushASCII(std::fstream &str, const std::array<data_T,d> &data)
+{
+    flushASCII(str, d, data);
+}
 
 /*!
  * Writes a std::array of POD data type to file stream in ascii format using scientific format putting a fixed number of elements per line
@@ -127,43 +123,39 @@ void flushASCII( std::fstream &str, const std::array<data_T,d> &data ){
  * @param[in]       data    data to be written
  */
 template< class data_T, size_t d >
-void flushASCII( std::fstream &str, int elements_per_line, const std::array<data_T,d> &data ){
+void flushASCII(std::fstream &str, int elements_per_line, const std::array<data_T,d> &data)
+{
+    int i(0), j(0), k(0);
+    int nr;
 
-    int i(0), j(0), k(0) ;
-    int nr ;
+    int lines, this_line;
 
-    int lines, this_line ;
+    bool next(true);
 
-    bool next(true) ;
-
-    nr = d ;
-    lines = nr /elements_per_line ;
+    nr = d;
+    lines = nr /elements_per_line;
 
     std::ios::fmtflags streamFlags(str.flags());
 
-    str << std::setprecision(8) << std::scientific ;
+    str << std::setprecision(8) << std::scientific;
 
-
-    while( next ) {
-
-        this_line = std::min( elements_per_line, nr - k ) ;
-        for( j=0; j<this_line; j++){
-            flushASCII( str, data[k] ) ;
-            k++ ;
-        };
-
-        i++ ;
-        if( i<lines){
-            str << std::endl;
+    while (next) {
+        this_line = std::min(elements_per_line, nr - k);
+        for (j=0; j<this_line; j++) {
+            flushASCII(str, data[k]);
+            k++;
         }
-        else{
-            next = false;
-        };
 
-    };
+        i++;
+        if (i<lines) {
+            str << std::endl;
+        } else {
+            next = false;
+        }
+    }
 
     str.flags(streamFlags);
-};
+}
 
 /*!
  * Writes a C array of POD data type to file stream in ascii format using scientific format putting a fixed number of elements per line
@@ -173,42 +165,38 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::array<data
  * @param[in]       data    data to be written
  * @param[in]       nr      size of the C array
  */
-template< class data_T >
-void flushASCII( std::fstream &str, int elements_per_line, const data_T *data, int nr ){
+template<class data_T>
+void flushASCII(std::fstream &str, int elements_per_line, const data_T *data, int nr)
+{
+    int i(0), j(0), k(0);
 
-    int i(0), j(0), k(0) ;
+    int lines, this_line;
 
-    int lines, this_line ;
+    bool next(true);
 
-    bool next(true) ;
-
-    lines = nr /elements_per_line ;
+    lines = nr /elements_per_line;
 
     std::ios::fmtflags streamFlags(str.flags());
 
-    str << std::setprecision(8) << std::scientific ;
+    str << std::setprecision(8) << std::scientific;
 
-
-    while( next ) {
-
-        this_line = std::min( elements_per_line, nr - k ) ;
-        for( j=0; j<this_line; j++){
-            flushASCII( str, data[k] ) ;
-            k++ ;
-        };
-
-        i++ ;
-        if( i<lines){
-            str << std::endl;
+    while (next) {
+        this_line = std::min(elements_per_line, nr - k);
+        for (j = 0; j < this_line; j++) {
+            flushASCII(str, data[k]);
+            k++;
         }
-        else{
-            next = false;
-        };
 
-    };
+        i++;
+        if (i<lines) {
+            str << std::endl;
+        } else {
+            next = false;
+        }
+    }
 
     str.flags(streamFlags);
-};
+}
 
 /*!
  * Writes a bitpit::PiercedVector file stream in ascii format.
@@ -219,51 +207,48 @@ void flushASCII( std::fstream &str, int elements_per_line, const data_T *data, i
  * @param[in]       data    data to be written
  * @param[in]       writeIndex if indices should be written too
  */
-template< class data_T >
-void flushASCII( std::fstream &str, int elements_per_line, const PiercedVector<data_T> &data, bool writeIndex ){
+template<class data_T>
+void flushASCII(std::fstream &str, int elements_per_line, const PiercedVector<data_T> &data, bool writeIndex)
+{
+    typename bitpit::PiercedVector<data_T>::const_iterator dataItr =data.begin();
 
-    typename bitpit::PiercedVector<data_T>::const_iterator dataItr =data.begin() ;
+    int i(0), j(0), k(0);
+    int nr;
 
-    int i(0), j(0), k(0) ;
-    int nr ;
+    int lines, this_line;
 
-    int lines, this_line ;
+    bool next(true);
 
-    bool next(true) ;
-
-    nr = data.size() ;
+    nr = data.size();
     lines = (nr-1) /elements_per_line + 1;
 
     std::ios::fmtflags streamFlags(str.flags());
 
-    str << std::setprecision(8) << std::scientific ;
+    str << std::setprecision(8) << std::scientific;
 
+    while (next) {
 
-    while( next ) {
+        this_line = std::min(elements_per_line, nr - k);
 
-        this_line = std::min( elements_per_line, nr - k ) ;
-
-        for( j=0; j<this_line; j++){
-            if(writeIndex){
-                flushASCII( str, dataItr.getId() ) ;
+        for (j=0; j<this_line; j++) {
+            if (writeIndex) {
+                flushASCII(str, dataItr.getId());
             }
-            flushASCII( str, *dataItr ) ;
-            k++ ;
-            dataItr++ ;
-        };
-
-        i++ ;
-        if( i<lines){
-            str << std::endl;
+            flushASCII(str, *dataItr);
+            k++;
+            dataItr++;
         }
-        else{
-            next = false;
-        };
 
-    };
+        i++;
+        if (i<lines) {
+            str << std::endl;
+        } else {
+            next = false;
+        }
+    }
 
     str.flags(streamFlags);
-};
+}
 
 /*!
  * Writes a POD data type to file stream in binary format.
@@ -272,14 +257,14 @@ void flushASCII( std::fstream &str, int elements_per_line, const PiercedVector<d
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
  */
-template< class data_T >
-void flushBINARY( std::fstream &str, const data_T &data ){
-
+template<class data_T>
+void flushBINARY(std::fstream &str, const data_T &data)
+{
     int nbytes;
-    nbytes = sizeof(data_T) ;
+    nbytes = sizeof(data_T);
 
-    str.write( reinterpret_cast<const char*>(&data), nbytes ) ;
-};
+    str.write(reinterpret_cast<const char*>(&data), nbytes);
+}
 
 /*!
  * Writes a std::vector of POD data type to file stream in binary format.
@@ -288,15 +273,15 @@ void flushBINARY( std::fstream &str, const data_T &data ){
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
  */
-template< class data_T >
-void flushBINARY( std::fstream &str, const std::vector<data_T> &data ){
-
+template<class data_T>
+void flushBINARY(std::fstream &str, const std::vector<data_T> &data)
+{
     int nbytes, nr;
-    nr = data.size() ;
-    nbytes = sizeof(data_T) *nr ;
+    nr = data.size();
+    nbytes = sizeof(data_T) * nr;
 
-    str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-};
+    str.write(reinterpret_cast<const char*>(&data[0]), nbytes);
+}
 
 /*!
  * Writes a std::vector<std::vector> of POD data type to file stream in binary format.
@@ -304,14 +289,13 @@ void flushBINARY( std::fstream &str, const std::vector<data_T> &data ){
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
  */
-template< class data_T >
-void flushBINARY( std::fstream &str, const std::vector< std::vector<data_T> > &data ){
-
-
-    for( const auto &item : data){
-        flushBINARY( str, item ) ;
-    };
-};
+template<class data_T>
+void flushBINARY(std::fstream &str, const std::vector<std::vector<data_T>> &data)
+{
+    for (const auto &item : data) {
+        flushBINARY(str, item);
+    }
+}
 
 /*!
  * Writes a std::vector<std::array> of POD data type to file stream in binary format.
@@ -322,14 +306,14 @@ void flushBINARY( std::fstream &str, const std::vector< std::vector<data_T> > &d
  * @param[in]       data    data to be written
  */
 template< class data_T, size_t d >
-void flushBINARY( std::fstream &str, const std::vector< std::array<data_T,d> > &data ){
-
+void flushBINARY(std::fstream &str, const std::vector<std::array<data_T,d> > &data)
+{
     int nbytes, nr;
-    nr = data.size() ;
-    nbytes = sizeof(data_T) *nr *d ;
+    nr = data.size();
+    nbytes = sizeof(data_T) * nr * d;
 
-    str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-};
+    str.write(reinterpret_cast<const char*>(&data[0]), nbytes);
+}
 
 /*!
  * Writes a std::array of POD data type to file stream in binary format 
@@ -339,13 +323,13 @@ void flushBINARY( std::fstream &str, const std::vector< std::array<data_T,d> > &
  * @param[in]       data    data to be written
  */
 template< class data_T, size_t d >
-void flushBINARY( std::fstream &str, const std::array<data_T,d> &data ){
-
+void flushBINARY(std::fstream &str, const std::array<data_T,d> &data)
+{
     int nbytes;
-    nbytes = sizeof(data_T)*d ;
+    nbytes = sizeof(data_T)*d;
 
-    str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-};
+    str.write(reinterpret_cast<const char*>(&data[0]), nbytes);
+}
 
 /*!
  * Writes a C array of POD data type to file stream in binary format 
@@ -354,14 +338,14 @@ void flushBINARY( std::fstream &str, const std::array<data_T,d> &data ){
  * @param[in]       data    data to be written
  * @param[in]       nr      size of the C array
  */
-template< class data_T >
-void flushBINARY( std::fstream &str, const data_T *data, int nr ){
-
+template<class data_T>
+void flushBINARY(std::fstream &str, const data_T *data, int nr)
+{
     int nbytes;
-    nbytes = sizeof(data_T) *nr ;
+    nbytes = sizeof(data_T) *nr;
 
-    str.write( reinterpret_cast<const char*>(data), nbytes ) ;
-};
+    str.write(reinterpret_cast<const char*>(data), nbytes);
+}
 
 /*!
  * Writes a bitpit::PiercedVector file stream in binary format.
@@ -371,24 +355,22 @@ void flushBINARY( std::fstream &str, const data_T *data, int nr ){
  * @param[in]       data    data to be written
  * @param[in]       writeIndex if indices should be written
  */
-template< class data_T >
-void flushBINARY( std::fstream &str, const PiercedVector<data_T> &data, bool writeIndex ){
+template<class data_T>
+void flushBINARY(std::fstream &str, const PiercedVector<data_T> &data, bool writeIndex)
+{
+    typename PiercedVector<data_T>::const_iterator dataItr, dataEnd = data.end();
 
-    typename PiercedVector<data_T>::const_iterator dataItr, dataEnd = data.end() ;
-
-    if( writeIndex){
-        for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
-            flushBINARY( str, dataItr.getId() ) ;
-            flushBINARY( str, *dataItr) ;
+    if (writeIndex) {
+        for (dataItr = data.begin(); dataItr != dataEnd; ++dataItr) {
+            flushBINARY(str, dataItr.getId());
+            flushBINARY(str, *dataItr);
         }
-
-    } else { 
-        for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
-            flushBINARY( str, *dataItr) ;
+    } else {
+        for (dataItr = data.begin(); dataItr != dataEnd; ++dataItr) {
+            flushBINARY(str, *dataItr);
         }
-
-    };
-};
+    }
+}
 
 /*!
  * Reads one line into templated data type.
@@ -398,37 +380,35 @@ void flushBINARY( std::fstream &str, const PiercedVector<data_T> &data, bool wri
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
  */
-template< class data_T >
-void  lineStream( std::fstream &str, data_T &data){
-
+template<class data_T>
+void  lineStream(std::fstream &str, data_T &data)
+{
     std::vector<data_T> temp;
     data_T         x_;
     std::string         line;
-    int            expected, read(0) ;
+    int            expected, read(0);
 
     expected = 1;
 
-    getline( str, line );
-    bitpit::utils::string::trim( line );
+    getline(str, line);
+    bitpit::utils::string::trim(line);
 
-    std::stringstream ss( line );
+    std::stringstream ss(line);
 
-    while( ss.good() ){
-        ss >> x_ ;
+    while (ss.good()) {
+        ss >> x_;
         temp.push_back(x_);
-        read++ ;
-    };
-
-    if( read != expected){
-        std::cout << " Not expected nr of element in line" << std::endl;
-        std::cout << " Expected number: "<< expected << std::endl ; 
-        std::cout << " Actual number: "<< read << std::endl ; 
+        read++;
     }
 
-    else{
+    if (read != expected) {
+        std::cout << " Not expected nr of element in line" << std::endl;
+        std::cout << " Expected number: "<< expected << std::endl;
+        std::cout << " Actual number: "<< read << std::endl;
+    } else {
         data=temp[0];
-    };
-};
+    }
+}
 
 /*!
  * Reads one line into std::vector of templated data type.
@@ -440,39 +420,37 @@ void  lineStream( std::fstream &str, data_T &data){
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
  */
-template< class data_T >
-void  lineStream( std::fstream &str, std::vector<data_T> &data){
-
+template<class data_T>
+void  lineStream(std::fstream &str, std::vector<data_T> &data)
+{
     std::string           line;
-    int                   expected(data.size()) ;
+    int                   expected(data.size());
 
-    getline( str, line );
-    bitpit::utils::string::trim( line );
+    getline(str, line);
+    bitpit::utils::string::trim(line);
 
-    std::stringstream ss( line );
+    std::stringstream ss(line);
 
-    if( expected == 0) {
-        data_T  x_;
-        while( ss.good() ){
-            ss >> x_ ;
+    if (expected == 0) {
+        data_T x_;
+        while (ss.good()) {
+            ss >> x_;
             data.push_back(x_);
-        };
-
+        }
     } else {
-        int read(0) ;
-        while( ss.good() && read<expected){
-            ss >> data[read] ;
-            read++ ;
-        };
-
-        if( expected != read){
-            std::cout << " Not expected nr of element in line" << std::endl;
-            std::cout << " Expected number: "<< expected << std::endl ; 
-            std::cout << " Actual number: "<< read << std::endl ; 
+        int read(0);
+        while (ss.good() && read<expected) {
+            ss >> data[read];
+            read++;
         }
 
+        if (expected != read) {
+            std::cout << " Not expected nr of element in line" << std::endl;
+            std::cout << " Expected number: "<< expected << std::endl;
+            std::cout << " Actual number: "<< read << std::endl;
+        }
     }
-};
+}
 
 /*!
  * Reads one line into std::array of templated data type and templated size
@@ -485,35 +463,34 @@ void  lineStream( std::fstream &str, std::vector<data_T> &data){
  * @param[in]       data    data to be written
  */
 template< class data_T, size_t d >
-void  lineStream( std::fstream &str, std::array<data_T,d> &data){
-
+void  lineStream(std::fstream &str, std::array<data_T,d> &data)
+{
     std::vector<data_T> temp;
     data_T              x_;
     std::string         line;
-    int                 expected, read(0), i ;
+    int                 expected, read(0), i;
 
-    expected = d ;
+    expected = d;
 
-    getline( str, line );
-    bitpit::utils::string::trim( line );
+    getline(str, line);
+    bitpit::utils::string::trim(line);
 
-    std::stringstream ss( line );
+    std::stringstream ss(line);
 
-    while( ss.good() ){
-        ss >> x_ ;
+    while (ss.good()) {
+        ss >> x_;
         temp.push_back(x_);
-        read++ ;
-    };
-
-    if( expected == read){
-        for(i=0; i<read; i++) data[i] = temp[i] ;
+        read++;
     }
-    else{
+
+    if (expected == read) {
+        for (i=0; i<read; i++) data[i] = temp[i];
+    } else {
         std::cout << " Not expected nr of element in line" << std::endl;
-        std::cout << " Expected number: "<< expected << std::endl ; 
-        std::cout << " Actual number: "<< read << std::endl ; 
-    };
-};
+        std::cout << " Expected number: "<< expected << std::endl;
+        std::cout << " Actual number: "<< read << std::endl;
+    }
+}
 
 /*!
  * Reads one line into C array of templated data type and given size.
@@ -525,36 +502,35 @@ void  lineStream( std::fstream &str, std::array<data_T,d> &data){
  * @param[in]       data    data to be written
  * @param[in]       nr      number of elements to be read
  */
-template< class data_T >
-void  lineStream( std::fstream &str, data_T *data, int nr ){
-
+template<class data_T>
+void  lineStream(std::fstream &str, data_T *data, int nr)
+{
     std::vector<data_T> temp;
     data_T              x_;
     std::string         line;
-    int                 expected, read(0), i ;
+    int                 expected, read(0), i;
 
-    expected = nr ;
+    expected = nr;
 
-    getline( str, line );
-    bitpit::utils::string::trim( line );
+    getline(str, line);
+    bitpit::utils::string::trim(line);
 
-    std::stringstream ss( line );
+    std::stringstream ss(line);
 
-    while( ss.good() ){
-        ss >> x_ ;
+    while (ss.good()) {
+        ss >> x_;
         temp.push_back(x_);
-        read++ ;
-    };
-
-    if( expected == read){
-        for(i=0; i<read; i++) data[i] = temp[i] ;
+        read++;
     }
-    else{
+
+    if (expected == read) {
+        for (i=0; i<read; i++) data[i] = temp[i];
+    } else {
         std::cout << " Not expected nr of element in line" << std::endl;
-        std::cout << " Expected number: "<< expected << std::endl ; 
-        std::cout << " Actual number: "<< read << std::endl ; 
-    };
-};
+        std::cout << " Expected number: "<< expected << std::endl;
+        std::cout << " Actual number: "<< read << std::endl;
+    }
+}
 
 /*!
  * Reads a templated data type from file stream in ascii 
@@ -563,11 +539,11 @@ void  lineStream( std::fstream &str, data_T *data, int nr ){
  * @param[in]   str     file stream
  * @param[in]   data    data to be read
  */
-template< class data_T >
-void absorbASCII( std::fstream &str, data_T &data ){
-
-    str >> data ;
-};
+template<class data_T>
+void absorbASCII(std::fstream &str, data_T &data)
+{
+    str >> data;
+}
 
 /*!
  * Reads a std::vector of data type from file stream in ascii.
@@ -578,42 +554,38 @@ void absorbASCII( std::fstream &str, data_T &data ){
  * @param[in]   str     file stream
  * @param[in]   data    data to be read
  */
-template< class data_T >
-void absorbASCII( std::fstream &str, std::vector<data_T> &data ){
-
+template<class data_T>
+void absorbASCII(std::fstream &str, std::vector<data_T> &data)
+{
     std::vector<data_T>             temp;
 
     typename std::vector<data_T>::iterator   itrData, begData, endData;
     typename std::vector<data_T>::iterator   itrTemp, begTemp, endTemp;
 
-    begData = data.begin() ;
-    endData = data.end() ;
+    begData = data.begin();
+    endData = data.end();
 
-    itrData = begData ;
+    itrData = begData;
 
-    while( str.good() && itrData!=endData ) {
+    while (str.good() && itrData!=endData) {
+        temp.clear();
+        lineStream(str, temp);
 
-        temp.clear() ;
-        lineStream( str, temp) ;
+        begTemp = temp.begin();
+        endTemp = temp.end();
 
-        begTemp = temp.begin() ;
-        endTemp = temp.end() ;
-
-        for( itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData); ){
-            *itrData = *itrTemp ;
+        for (itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData);) {
+            *itrData = *itrTemp;
 
             ++itrTemp;
             ++itrData;
+        }
+    }
 
-        };
-
-
-    };
-
-    if( itrData != endData ) {
-        std::cout << "Not enough elements found to fill vector" << std::endl ;
-    };
-};
+    if (itrData != endData) {
+        std::cout << "Not enough elements found to fill vector" << std::endl;
+    }
+}
 
 /*!
  * Reads a std::array of data type from file stream in ascii.
@@ -626,41 +598,37 @@ void absorbASCII( std::fstream &str, std::vector<data_T> &data ){
  * @param[in]   data    data to be read
  */
 template< class data_T, size_t d >
-void absorbASCII( std::fstream &str, std::array<data_T,d> &data ){
-
+void absorbASCII(std::fstream &str, std::array<data_T,d> &data)
+{
     std::vector<data_T>             temp;
 
     typename std::array<data_T,d>::iterator  itrData, begData, endData;
     typename std::vector<data_T>::iterator   itrTemp, begTemp, endTemp;
 
-    begData = data.begin() ;
-    endData = data.end() ;
+    begData = data.begin();
+    endData = data.end();
 
-    itrData = begData ;
+    itrData = begData;
 
-    while( str.good() && itrData!=endData ) {
+    while (str.good() && itrData!=endData) {
+        temp.clear();
+        lineStream(str, temp);
 
-        temp.clear() ;
-        lineStream( str, temp) ;
+        begTemp = temp.begin();
+        endTemp = temp.end();
 
-        begTemp = temp.begin() ;
-        endTemp = temp.end() ;
-
-        for( itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData); ){
-            *itrData = *itrTemp ;
+        for (itrTemp = begTemp; (itrTemp!=endTemp && itrData!=endData);) {
+            *itrData = *itrTemp;
 
             ++itrTemp;
             ++itrData;
+        }
+    }
 
-        };
-
-
-    };
-
-    if( itrData != endData ) {
-        std::cout << "Not enough elements found to fill array" << std::endl ;
-    };
-};
+    if (itrData != endData) {
+        std::cout << "Not enough elements found to fill array" << std::endl;
+    }
+}
 
 /*!
  * Reads a C array of data type from file stream in ascii.
@@ -672,43 +640,38 @@ void absorbASCII( std::fstream &str, std::array<data_T,d> &data ){
  * @param[in]   data    pointer to C array
  * @param[in]   nr      number of elements
  */
-template< class data_T >
-void absorbASCII( std::fstream &str, data_T *data, int nr ){
-
-
+template<class data_T>
+void absorbASCII(std::fstream &str, data_T *data, int nr)
+{
     std::vector<data_T>                      temp;
 
     data_T*                                  itrData, begData, endData;
     typename std::vector<data_T>::iterator   itrTemp, begTemp, endTemp;
 
-    begData = &data[0] ;
-    endData = &data[nr-1] ;
+    begData = &data[0];
+    endData = &data[nr-1];
 
-    itrData = begData ;
+    itrData = begData;
 
-    while( str.good() && itrData!=endData ) {
+    while (str.good() && itrData!=endData) {
+        temp.clear();
+        lineStream(str, temp);
 
-        temp.clear() ;
-        lineStream( str, temp) ;
+        begTemp = temp.begin();
+        endTemp = temp.end();
 
-        begTemp = temp.begin() ;
-        endTemp = temp.end() ;
-
-        for( itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData); ){
-            *itrData = *itrTemp ;
+        for (itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData);) {
+            *itrData = *itrTemp;
 
             ++itrTemp;
             ++itrData;
+        }
+    }
 
-        };
-
-
-    };
-
-    if( itrData != endData ) {
-        std::cout << "Not enough elements found to fill array" << std::endl ;
-    };
-};
+    if (itrData != endData) {
+        std::cout << "Not enough elements found to fill array" << std::endl;
+    }
+}
 
 /*!
  * Reads only the values of the elemnts of a bitpit::PiercedVector from file stream in ascii format.
@@ -716,29 +679,28 @@ void absorbASCII( std::fstream &str, data_T *data, int nr ){
  * @param[in]   str     file stream
  * @param[in]   data    data to be read
  */
-template< class data_T >
-void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data ){
-
-    bool    read(true) ;
+template<class data_T>
+void absorbASCII(std::fstream &str, bitpit::PiercedVector<data_T> &data)
+{
+    bool    read(true);
     std::string line;
 
-    typename bitpit::PiercedVector<data_T>::iterator  dataItr = data.begin(), dataEnd = data.end() ;
+    typename bitpit::PiercedVector<data_T>::iterator  dataItr = data.begin(), dataEnd = data.end();
 
-    while( str.good() && read ) {
-    
-        getline( str, line );
-        bitpit::utils::string::trim( line );
-    
-        std::stringstream ss( line );
-    
-        while( ss.good() && read ){
-            ss >> *dataItr ;
+    while (str.good() && read) {
+        getline(str, line);
+        bitpit::utils::string::trim(line);
+
+        std::stringstream ss(line);
+
+        while (ss.good() && read) {
+            ss >> *dataItr;
             ++dataItr;
 
-            read = dataItr != dataEnd ;
-        };
+            read = dataItr != dataEnd;
+        }
     }
-};
+}
 
 /*!
  * Reads a bitpit::PiercedVector from file stream in ascii format, both indices and values of its elements.
@@ -748,31 +710,29 @@ void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data ){
  * @param[in]   data    data to be read
  * @param[in]   N number of elements to br read
  */
-template< class data_T >
-void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data, long N ){
-
-
-    bool    read(true) ;
+template<class data_T>
+void absorbASCII(std::fstream &str, bitpit::PiercedVector<data_T> &data, long N)
+{
+    bool    read(true);
     long    n(0), index;
     data_T  value;
     std::string line;
 
-    while( str.good() && read ) {
-    
-        getline( str, line );
-        bitpit::utils::string::trim( line );
-    
-        std::stringstream ss( line );
-    
-        while( ss.good() && read ){
-            ss >> index ;
-            ss >> value ;
+    while (str.good() && read) {
+        getline(str, line);
+        bitpit::utils::string::trim(line);
+
+        std::stringstream ss(line);
+
+        while (ss.good() && read) {
+            ss >> index;
+            ss >> value;
             data.insert(index,value);
             ++n;
-            read = n<N ;
-        };
+            read = n<N;
+        }
     }
-};
+}
 
 /*!
  * Reads a templated data type from file stream in binary
@@ -780,14 +740,14 @@ void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data, long N
  * @param[in]   str     file stream
  * @param[in]   data    data to be read
  */
-template< class data_T >
-void absorbBINARY( std::fstream &str, data_T &data ){
+template<class data_T>
+void absorbBINARY(std::fstream &str, data_T &data)
+{
+    int nbytes;
+    nbytes = sizeof(data_T);
 
-    int nbytes ;
-    nbytes = sizeof(data_T) ;
-
-    str.read( reinterpret_cast<char*>(&data), nbytes ) ;
-};
+    str.read(reinterpret_cast<char*>(&data), nbytes);
+}
 
 /*!
  * Reads a std::vector of templated POD data type from file stream in binary format
@@ -795,15 +755,15 @@ void absorbBINARY( std::fstream &str, data_T &data ){
  * @param[in]   str     file stream
  * @param[in]   data    data to be read
  */
-template< class data_T >
-void absorbBINARY( std::fstream &str, std::vector<data_T> &data ){
-
+template<class data_T>
+void absorbBINARY(std::fstream &str, std::vector<data_T> &data)
+{
     int nbytes, nr;
-    nr = data.size() ;
-    nbytes = sizeof(data_T) *nr ;
+    nr = data.size();
+    nbytes = sizeof(data_T) *nr;
 
-    str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-};
+    str.read(reinterpret_cast<char*>(&data[0]), nbytes);
+}
 
 /*!
  * Reads a std::vector of std::vector of templated POD data type from file stream in binary format
@@ -811,13 +771,13 @@ void absorbBINARY( std::fstream &str, std::vector<data_T> &data ){
  * @param[in]   str     file stream
  * @param[in]   data    data to be read
  */
-template< class data_T >
-void absorbBINARY( std::fstream &str, std::vector< std::vector<data_T> > &data ){
-
-    for( auto &item: data ){
-        absorbBINARY( str, item ) ;
-    };
-};
+template<class data_T>
+void absorbBINARY(std::fstream &str, std::vector<std::vector<data_T>> &data)
+{
+    for (auto &item: data) {
+        absorbBINARY(str, item);
+    }
+}
 
 /*!
  * Reads a std::vector of std::array of templated POD data type of templated size from file stream in binary
@@ -827,14 +787,14 @@ void absorbBINARY( std::fstream &str, std::vector< std::vector<data_T> > &data )
  * @param[in]   data    data to be read
  */
 template< class data_T, size_t d >
-void absorbBINARY( std::fstream &str, std::vector< std::array<data_T,d> > &data ){
-
+void absorbBINARY(std::fstream &str, std::vector<std::array<data_T,d> > &data)
+{
     int  nbytes, nr;
-    nr = data.size() ;
-    nbytes = sizeof(data_T) *nr *d ;
+    nr = data.size();
+    nbytes = sizeof(data_T) *nr *d;
 
-    str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-};
+    str.read(reinterpret_cast<char*>(&data[0]), nbytes);
+}
 
 /*!
  * Reads a std::array of templated POD data type of templated size from file stream in binary format
@@ -844,13 +804,13 @@ void absorbBINARY( std::fstream &str, std::vector< std::array<data_T,d> > &data 
  * @param[in]   data    data to be read
  */
 template< class data_T, size_t d >
-void absorbBINARY( std::fstream &str, std::array<data_T,d> &data ){
-
+void absorbBINARY(std::fstream &str, std::array<data_T,d> &data)
+{
     int nbytes;
-    nbytes = sizeof(data_T) *d ;
+    nbytes = sizeof(data_T) *d;
 
-    str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-};
+    str.read(reinterpret_cast<char*>(&data[0]), nbytes);
+}
 
 /*!
  * Reads a C array of templated data type from file stream in binary format
@@ -859,14 +819,14 @@ void absorbBINARY( std::fstream &str, std::array<data_T,d> &data ){
  * @param[in]   data    data to be read
  * @param[in]   nr      number of elements to be read
  */
-template< class data_T >
-void absorbBINARY( std::fstream &str, data_T *data, int nr ){
-
+template<class data_T>
+void absorbBINARY(std::fstream &str, data_T *data, int nr)
+{
     int nbytes;
-    nbytes = sizeof(data_T) *nr ;
+    nbytes = sizeof(data_T) *nr;
 
-    str.read( reinterpret_cast<char*>(data), nbytes ) ;
-};
+    str.read(reinterpret_cast<char*>(data), nbytes);
+}
 
 /*!
  * Reads a bitpit::PiercedVector file stream in binary format.
@@ -876,15 +836,15 @@ void absorbBINARY( std::fstream &str, data_T *data, int nr ){
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
  */
-template< class data_T >
-void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data ){
+template<class data_T>
+void absorbBINARY(std::fstream &str, PiercedVector<data_T> &data)
+{
+    typename bitpit::PiercedVector<data_T>::iterator dataItr, dataEnd = data.end();
 
-    typename bitpit::PiercedVector<data_T>::iterator dataItr, dataEnd = data.end() ;
-
-    for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
-        absorbBINARY(str,*dataItr) ;
+    for (dataItr = data.begin(); dataItr != dataEnd; ++dataItr) {
+        absorbBINARY(str, *dataItr);
     }
-};
+}
 
 /*!
  * Reads a bitpit::PiercedVector file stream in binary format, both the indices and data of its elements.
@@ -895,21 +855,21 @@ void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data ){
  * @param[in]       data    data to be written
  * @param[in]       readIndex if indices should be written
  */
-template< class data_T >
-void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data, long N ){
+template<class data_T>
+void absorbBINARY(std::fstream &str, PiercedVector<data_T> &data, long N)
+{
+    long n, index;
+    data_T value;
 
-    long n, index ;
-    data_T value ;
+    data.reserve(N);
 
-    data.reserve(N) ;
+    for (n=0; n<N; ++n) {
+        absorbBINARY(str,index);
+        absorbBINARY(str,value);
 
-    for( n=0; n<N; ++n){
-        absorbBINARY(str,index) ;
-        absorbBINARY(str,value) ;
-
-        data.insert(index,value) ;
+        data.insert(index,value);
     }
-};
+}
 
 }
 

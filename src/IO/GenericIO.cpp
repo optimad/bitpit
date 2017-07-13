@@ -24,52 +24,49 @@
 
 #include "GenericIO.hpp"
 
+namespace bitpit {
 
-namespace bitpit{
-
-namespace genericIO{
+namespace genericIO {
 
 /*!
  * Writes uint_8 data as formatted integer 
- * @param[in]   str     file stream to be copied; file needs already to be opened
- * @param[in]   data    data to be written
+ * @param[in] str file stream to be copied; file needs already to be opened
+ * @param[in] data data to be written
  */
-template< >
-void flushASCII( std::fstream &str, const uint8_t &data ){
-
+template<>
+void flushASCII(std::fstream &str, const uint8_t &data)
+{
     std::ios::fmtflags streamFlags(str.flags());
 
-    str << std::setprecision(8) << std::scientific ;
+    str << std::setprecision(8) << std::scientific;
     str << unsigned(data) << " ";
 
     str.flags(streamFlags);
-
-};
-
+}
 
 /*!
  * Copies entire file into a char array
- * @param[in]   str     file stream to be copied; file nneds already to be opened
- * @param[out]  buffer  char array containing entire array
- * @param[out]  length  number of elements which hvae benn copied
+ * @param[in] str file stream to be copied; file nneds already to be opened
+ * @param[out] buffer char array containing entire array
+ * @param[out] length number of elements which hvae benn copied
  */
-void copyUntilEOFInString( std::fstream &str, char*& buffer, int &length){
+void copyUntilEOFInString(std::fstream &str, char *&buffer, int &length)
+{
+    std::fstream::pos_type position_insert, position_eof;
 
-    std::fstream::pos_type   position_insert, position_eof ;
-
-    position_insert = str.tellg() ;
+    position_insert = str.tellg();
 
     str.seekg(0, str.end);
     position_eof = str.tellg();
 
-    length = position_eof - position_insert ;
-    buffer = new char[length] ;
+    length = position_eof - position_insert;
+    buffer = new char[length];
 
     str.seekg(position_insert);
-    str.read(buffer,length ) ;
+    str.read(buffer, length);
 
     str.seekg(position_insert);
-};
+}
 
 }
 
