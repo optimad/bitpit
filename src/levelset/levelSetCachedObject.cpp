@@ -202,12 +202,10 @@ double LevelSetCachedObject::computeSizeNarrowBand(){
 
     double RSearch(levelSetDefaults::VALUE);
 
-    if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) != nullptr ){
-        LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ;
+    if( LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
         RSearch = _computeSizeNarrowBand(cartesian) ;
 
-    } else if( dynamic_cast<LevelSetOctree*>(m_kernelPtr) != nullptr ){
-        LevelSetOctree* octree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ;
+    } else if( LevelSetOctree* octree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
         RSearch = _computeSizeNarrowBand(octree) ;
     }
 
@@ -345,12 +343,10 @@ double LevelSetCachedObject::updateSizeNarrowBand(const std::vector<adaption::In
 
     double R(levelSetDefaults::VALUE);
 
-    if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) != nullptr ){
-        LevelSetCartesian* cartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ;
+    if( LevelSetCartesian *cartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
         R= _updateSizeNarrowBand(cartesian,mapper) ;
 
-    } else if( dynamic_cast<LevelSetOctree*>(m_kernelPtr) != nullptr ){
-        LevelSetOctree* octree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ;
+    } else if( LevelSetOctree *octree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
         R= _updateSizeNarrowBand(octree,mapper) ;
     }
 
