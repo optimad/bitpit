@@ -23,6 +23,7 @@ using namespace std;
 /*!Default constructor.
  */
 Map::Map(){
+    initialize();
 };
 
 /*!Creates a new transformation of coordinates.
