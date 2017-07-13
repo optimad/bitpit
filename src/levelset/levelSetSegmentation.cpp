@@ -206,8 +206,9 @@ void LevelSetSegmentation::setFeatureAngle( double angle){
  */
 int LevelSetSegmentation::getPart( const long &id ) const{
 
-    if( m_seg.exists(id)){
-        long support = m_seg.at(id).segments.front() ;
+    auto itr = m_seg.find(id) ;
+    if( itr != m_seg.end() ){
+        long support = itr->segments.front() ;
         return m_segmentation->getCell(support).getPID();
     } else {
         return levelSetDefaults::PART ;
@@ -222,8 +223,9 @@ int LevelSetSegmentation::getPart( const long &id ) const{
  */
 long LevelSetSegmentation::getSupport( const long &id ) const{
 
-    if( m_seg.exists(id)){
-        return m_seg.at(id).segments.front() ;
+    auto itr = m_seg.find(id) ;
+    if( itr != m_seg.end() ){
+        return itr->segments.front() ;
     } else {
         return levelSetDefaults::SUPPORT ;
     }
@@ -237,8 +239,9 @@ long LevelSetSegmentation::getSupport( const long &id ) const{
  */
 int LevelSetSegmentation::getSupportCount( const long &id ) const{
 
-    if( m_seg.exists(id)){
-        return m_seg.at(id).segments.size() ;
+    auto itr = m_seg.find(id) ;
+    if( itr != m_seg.end() ){
+        return itr->segments.size() ;
     } else {
         return 0 ;
     }
@@ -250,12 +253,13 @@ int LevelSetSegmentation::getSupportCount( const long &id ) const{
  * @param[in] i cell index
  * @return set with indices of simplices
  */
-const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &i) const{
+const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &id) const{
 
-    if( !m_seg.exists(i) ){
-        return levelSetDefaults::LIST;
+    auto itr = m_seg.find(id) ;
+    if( itr != m_seg.end() ){
+        return itr->segments ;
     } else {
-        return ( m_seg[i].segments );
+        return levelSetDefaults::LIST;
     }
 
 }
