@@ -28,6 +28,7 @@
 #include "Global.hpp"
 #include "Octant.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <iostream>
 
@@ -402,13 +403,13 @@ Octant::getFaceCenter(uint8_t iface) const{
 	double	dh_2;
 	darray3 center;
 
+	assert(iface < m_dim*2);
+
 	dh_2 = double(getSize())*0.5;
-	uint8_t nf = m_dim*2;
-	if (iface < nf){
-		center[0] = (double)m_x + (double)sm_CoeffFaceCenter[iface][0] * dh_2;
-		center[1] = (double)m_y + (double)sm_CoeffFaceCenter[iface][1] * dh_2;
-		center[2] = (double)m_z + double(m_dim-2) * (double)sm_CoeffFaceCenter[iface][2] * dh_2;
-	}
+	center[0] = (double)m_x + (double)sm_CoeffFaceCenter[iface][0] * dh_2;
+	center[1] = (double)m_y + (double)sm_CoeffFaceCenter[iface][1] * dh_2;
+	center[2] = (double)m_z + double(m_dim-2) * (double)sm_CoeffFaceCenter[iface][2] * dh_2;
+
 	return center;
 };
 
