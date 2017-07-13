@@ -98,7 +98,7 @@ RBFKernel & RBFKernel::operator=(const RBFKernel & other)
     m_fields = other.m_fields;
     m_nodes = other.m_nodes;
     m_supportRadius = other.m_supportRadius;
-
+    m_typef = other.m_typef;
     m_fPtr = other.m_fPtr;
 
     m_mode = other.m_mode;
