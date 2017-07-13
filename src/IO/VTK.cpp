@@ -24,6 +24,8 @@
 
 #include "VTK.hpp"
 
+#include "logger.hpp"
+
 namespace bitpit{
 /*!
  * @ingroup VisualizationToolKit
