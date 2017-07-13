@@ -2258,7 +2258,6 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         };
 #endif
-        return getNumOctants();
     };
 
     /*! Get the nature of an octant.
