@@ -807,6 +807,8 @@ void LevelSetCachedObject::propagateSign() {
                     }
                 }
 
+                assert(region >= 0);
+
                 // Assign the sign to the region
                 if (regionType[region] != REGION_UNKNOWN) {
                     continue;
