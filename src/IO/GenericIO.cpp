@@ -44,7 +44,6 @@ void flushASCII( std::fstream &str, const uint8_t &data ){
 
     str.flags(streamFlags);
 
-    return ;
 };
 
 
@@ -70,8 +69,6 @@ void copyUntilEOFInString( std::fstream &str, char*& buffer, int &length){
     str.read(buffer,length ) ;
 
     str.seekg(position_insert);
-
-    return;
 };
 
 }

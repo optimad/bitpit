@@ -44,8 +44,6 @@ void flushASCII( std::fstream &str, const data_T &data ){
     str << data << " ";
 
     str.flags(streamFlags);
-
-    return ;
 };
 
 /*!
@@ -58,8 +56,6 @@ template< class data_T >
 void flushASCII( std::fstream &str, const std::vector<data_T> &data ){
 
     flushASCII( str, data.size(), data) ;
-
-    return ;
 };
 
 /*!
@@ -107,8 +103,6 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::vector<dat
     };
 
     str.flags(streamFlags);
-
-    return ;
 };
 
 /*!
@@ -122,7 +116,6 @@ template< class data_T, size_t d >
 void flushASCII( std::fstream &str, const std::array<data_T,d> &data ){
 
     flushASCII( str, d, data ) ;
-    return ;
 };
 
 /*!
@@ -170,8 +163,6 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::array<data
     };
 
     str.flags(streamFlags);
-
-    return ;
 };
 
 /*!
@@ -217,8 +208,6 @@ void flushASCII( std::fstream &str, int elements_per_line, const data_T *data, i
     };
 
     str.flags(streamFlags);
-
-    return ;
 };
 
 /*!
@@ -274,9 +263,6 @@ void flushASCII( std::fstream &str, int elements_per_line, const PiercedVector<d
     };
 
     str.flags(streamFlags);
-
-    return ;
-    return ;
 };
 
 /*!
@@ -293,8 +279,6 @@ void flushBINARY( std::fstream &str, const data_T &data ){
     nbytes = sizeof(data_T) ;
 
     str.write( reinterpret_cast<const char*>(&data), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -312,8 +296,6 @@ void flushBINARY( std::fstream &str, const std::vector<data_T> &data ){
     nbytes = sizeof(data_T) *nr ;
 
     str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -329,8 +311,6 @@ void flushBINARY( std::fstream &str, const std::vector< std::vector<data_T> > &d
     for( const auto &item : data){
         flushBINARY( str, item ) ;
     };
-
-    return ;
 };
 
 /*!
@@ -349,8 +329,6 @@ void flushBINARY( std::fstream &str, const std::vector< std::array<data_T,d> > &
     nbytes = sizeof(data_T) *nr *d ;
 
     str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -367,8 +345,6 @@ void flushBINARY( std::fstream &str, const std::array<data_T,d> &data ){
     nbytes = sizeof(data_T)*d ;
 
     str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -385,8 +361,6 @@ void flushBINARY( std::fstream &str, const data_T *data, int nr ){
     nbytes = sizeof(data_T) *nr ;
 
     str.write( reinterpret_cast<const char*>(data), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -414,8 +388,6 @@ void flushBINARY( std::fstream &str, const PiercedVector<data_T> &data, bool wri
         }
 
     };
-
-    return ;
 };
 
 /*!
@@ -456,9 +428,6 @@ void  lineStream( std::fstream &str, data_T &data){
     else{
         data=temp[0];
     };
-
-    return;
-
 };
 
 /*!
@@ -503,9 +472,6 @@ void  lineStream( std::fstream &str, std::vector<data_T> &data){
         }
 
     }
-
-    return;
-
 };
 
 /*!
@@ -547,9 +513,6 @@ void  lineStream( std::fstream &str, std::array<data_T,d> &data){
         std::cout << " Expected number: "<< expected << std::endl ; 
         std::cout << " Actual number: "<< read << std::endl ; 
     };
-
-    return;
-
 };
 
 /*!
@@ -591,9 +554,6 @@ void  lineStream( std::fstream &str, data_T *data, int nr ){
         std::cout << " Expected number: "<< expected << std::endl ; 
         std::cout << " Actual number: "<< read << std::endl ; 
     };
-
-    return;
-
 };
 
 /*!
@@ -607,8 +567,6 @@ template< class data_T >
 void absorbASCII( std::fstream &str, data_T &data ){
 
     str >> data ;
-
-    return ;
 };
 
 /*!
@@ -655,9 +613,6 @@ void absorbASCII( std::fstream &str, std::vector<data_T> &data ){
     if( itrData != endData ) {
         std::cout << "Not enough elements found to fill vector" << std::endl ;
     };
-
-
-    return ;
 };
 
 /*!
@@ -705,10 +660,6 @@ void absorbASCII( std::fstream &str, std::array<data_T,d> &data ){
     if( itrData != endData ) {
         std::cout << "Not enough elements found to fill array" << std::endl ;
     };
-
-
-
-    return ;
 };
 
 /*!
@@ -757,9 +708,6 @@ void absorbASCII( std::fstream &str, data_T *data, int nr ){
     if( itrData != endData ) {
         std::cout << "Not enough elements found to fill array" << std::endl ;
     };
-
-
-    return ;
 };
 
 /*!
@@ -790,8 +738,6 @@ void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data ){
             read = dataItr != dataEnd ;
         };
     }
-   
-    return ;
 };
 
 /*!
@@ -826,8 +772,6 @@ void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data, long N
             read = n<N ;
         };
     }
-
-    return ;
 };
 
 /*!
@@ -843,8 +787,6 @@ void absorbBINARY( std::fstream &str, data_T &data ){
     nbytes = sizeof(data_T) ;
 
     str.read( reinterpret_cast<char*>(&data), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -861,8 +803,6 @@ void absorbBINARY( std::fstream &str, std::vector<data_T> &data ){
     nbytes = sizeof(data_T) *nr ;
 
     str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -877,8 +817,6 @@ void absorbBINARY( std::fstream &str, std::vector< std::vector<data_T> > &data )
     for( auto &item: data ){
         absorbBINARY( str, item ) ;
     };
-
-    return ;
 };
 
 /*!
@@ -896,8 +834,6 @@ void absorbBINARY( std::fstream &str, std::vector< std::array<data_T,d> > &data 
     nbytes = sizeof(data_T) *nr *d ;
 
     str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -914,8 +850,6 @@ void absorbBINARY( std::fstream &str, std::array<data_T,d> &data ){
     nbytes = sizeof(data_T) *d ;
 
     str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -932,8 +866,6 @@ void absorbBINARY( std::fstream &str, data_T *data, int nr ){
     nbytes = sizeof(data_T) *nr ;
 
     str.read( reinterpret_cast<char*>(data), nbytes ) ;
-
-    return ;
 };
 
 /*!
@@ -952,8 +884,6 @@ void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data ){
     for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
         absorbBINARY(str,*dataItr) ;
     }
-
-    return ;
 };
 
 /*!
@@ -979,8 +909,6 @@ void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data, long N ){
 
         data.insert(index,value) ;
     }
-
-    return ;
 };
 
 }
