@@ -80,6 +80,7 @@ void read(std::istream &stream, std::string &string)
     char * cstring = new char [size];
     read(stream, cstring, size);
     string = cstring;
+    delete[] cstring;
 }
 
 }
