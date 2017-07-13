@@ -196,6 +196,9 @@ namespace bitpit {
         // The octree is serial
         m_serial = true;
 
+        // Initialize the status
+        m_status = 0;
+
         // Initialize the logger
         initializeLogger(logfile);
 
