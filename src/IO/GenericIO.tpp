@@ -38,8 +38,12 @@ namespace genericIO{
 template< class data_T >
 void flushASCII( std::fstream &str, const data_T &data ){
 
+    std::ios::fmtflags streamFlags(str.flags());
+
     str << std::setprecision(8) << std::scientific ;
     str << data << " ";
+
+    str.flags(streamFlags);
 
     return ;
 };
@@ -78,6 +82,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::vector<dat
     nr = data.size() ;
     lines = (nr-1) /elements_per_line + 1;
 
+    std::ios::fmtflags streamFlags(str.flags());
+
     str << std::setprecision(8) << std::scientific ;
 
 
@@ -99,6 +105,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::vector<dat
         };
 
     };
+
+    str.flags(streamFlags);
 
     return ;
 };
@@ -138,6 +146,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::array<data
     nr = d ;
     lines = nr /elements_per_line ;
 
+    std::ios::fmtflags streamFlags(str.flags());
+
     str << std::setprecision(8) << std::scientific ;
 
 
@@ -158,6 +168,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const std::array<data
         };
 
     };
+
+    str.flags(streamFlags);
 
     return ;
 };
@@ -181,6 +193,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const data_T *data, i
 
     lines = nr /elements_per_line ;
 
+    std::ios::fmtflags streamFlags(str.flags());
+
     str << std::setprecision(8) << std::scientific ;
 
 
@@ -201,6 +215,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const data_T *data, i
         };
 
     };
+
+    str.flags(streamFlags);
 
     return ;
 };
@@ -229,6 +245,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const PiercedVector<d
     nr = data.size() ;
     lines = (nr-1) /elements_per_line + 1;
 
+    std::ios::fmtflags streamFlags(str.flags());
+
     str << std::setprecision(8) << std::scientific ;
 
 
@@ -254,6 +272,8 @@ void flushASCII( std::fstream &str, int elements_per_line, const PiercedVector<d
         };
 
     };
+
+    str.flags(streamFlags);
 
     return ;
     return ;

@@ -37,8 +37,12 @@ namespace genericIO{
 template< >
 void flushASCII( std::fstream &str, const uint8_t &data ){
 
+    std::ios::fmtflags streamFlags(str.flags());
+
     str << std::setprecision(8) << std::scientific ;
     str << unsigned(data) << " ";
+
+    str.flags(streamFlags);
 
     return ;
 };
