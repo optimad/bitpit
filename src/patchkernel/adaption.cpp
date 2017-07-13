@@ -413,7 +413,7 @@ void CellFlatMapping::update(const std::vector<adaption::Info> adaptionData)
 
 	// Update numbering and mapping past the flat id with the first change
 	m_numbering.resize(nCurrentCells);
-	auto cellIterator = m_patch->getCells().getConstIterator(firstChangedId);
+	auto cellIterator = m_patch->getCells().find(firstChangedId);
 	for (long flatId = firstChangedFlatId; flatId < nCurrentCells; ++flatId) {
 		long cellId = cellIterator->getId();
 

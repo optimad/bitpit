@@ -545,7 +545,7 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
         if( !m_ls.exists(id)){
             lsInfoItr = m_ls.emplace(id) ;
         } else {
-            lsInfoItr = m_ls.getIterator(id) ;
+            lsInfoItr = m_ls.find(id) ;
         }
 
         if( d < std::abs(lsInfoItr->value) ){
@@ -1240,7 +1240,7 @@ void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &r
         if( !m_seg.exists(id)){
             segItr = m_seg.emplace(id) ;
         } else {
-            segItr = m_seg.getIterator(id) ;
+            segItr = m_seg.find(id) ;
         }
 
         size_t nSegs ;

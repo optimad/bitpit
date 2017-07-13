@@ -731,27 +731,30 @@ id_t PiercedKernel<id_t>::getSizeMarker(std::size_t targetSize, const id_t &fall
 /**
 * Gets a constant iterator pointing to the specified element.
 *
-* \param id is the id of the specified iterator.
+* \param id is the id
 * \result A constant iterator pointing to the specified element.
 */
 template<typename id_t>
-typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::getConstIterator(const id_t &id) const noexcept
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::find(const id_t &id) const noexcept
 {
-    const std::size_t pos = getPos(id);
-
-    return getConstIteratorFromPos(pos);
+    auto iterator = m_pos.find(id);
+    if (iterator != m_pos.end()) {
+        return rawFind(iterator->second);
+    } else {
+        return end();
+    }
 }
 
 /**
 * Gets a constant iterator pointing to the specified position.
 *
-* \param id is the id of the specified iterator.
+* \param pos is the position
 * \result A constant iterator pointing to the specified position.
 */
 template<typename id_t>
-typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::getConstIteratorFromRawIndex(const std::size_t &rawIndex) const noexcept
+typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::rawFind(std::size_t pos) const noexcept
 {
-    return getConstIteratorFromPos(rawIndex);
+    return const_iterator(this, pos);
 }
 
 /*!
@@ -786,7 +789,7 @@ typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::end() const no
 template<typename id_t>
 typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::cbegin() const noexcept
 {
-    return getConstIteratorFromPos(m_begin_pos);
+    return rawFind(m_begin_pos);
 }
 
 /*!
@@ -798,7 +801,7 @@ typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::cbegin() const
 template<typename id_t>
 typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::cend() const noexcept
 {
-    return getConstIteratorFromPos(m_end_pos);
+    return rawFind(m_end_pos);
 }
 
 /**
@@ -2133,19 +2136,6 @@ void PiercedKernel<id_t>::dump(std::ostream &stream) const
 
     // Synchronization data
     PiercedSyncMaster::dump(stream);
-}
-
-/**
-* Gets a constant iterator pointing to the element in the specified position.
-*
-* \param pos is the position of the element
-* \result A constant iterator pointing to the element in the specified
-* position.
-*/
-template<typename id_t>
-typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::getConstIteratorFromPos(const std::size_t &pos) const noexcept
-{
-    return const_iterator(this, pos);
 }
 
 }

@@ -144,7 +144,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::iterator PiercedStor
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::begin() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_begin_pos);
+    return m_storage->rawFind(PiercedKernelRange<id_t>::m_begin_pos);
 }
 
 /*!
@@ -157,7 +157,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator Pierc
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::end() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_end_pos);
+    return m_storage->rawFind(PiercedKernelRange<id_t>::m_end_pos);
 }
 
 /*!
@@ -168,7 +168,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator Pierc
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::cbegin() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_begin_pos);
+    return m_storage->rawFind(PiercedKernelRange<id_t>::m_begin_pos);
 }
 
 /*!
@@ -181,7 +181,7 @@ typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator Pierc
 template<typename value_t, typename id_t, typename value_no_cv_t>
 typename PiercedStorageRange<value_t, id_t, value_no_cv_t>::const_iterator PiercedStorageRange<value_t, id_t, value_no_cv_t>::cend() const noexcept
 {
-    return m_storage->getConstIteratorFromRawIndex(PiercedKernelRange<id_t>::m_end_pos);
+    return m_storage->rawFind(PiercedKernelRange<id_t>::m_end_pos);
 }
 
 }

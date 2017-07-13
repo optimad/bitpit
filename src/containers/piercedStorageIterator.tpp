@@ -47,6 +47,17 @@ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator(sto
 }
 
 /**
+* Creates a new iterator and initializes it with the position of the const
+* base iterator recevied in input.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator(storage_t *storage, const bitpit::PiercedKernelIterator<id_t> &iterator)
+    : PiercedKernelIterator<id_t>(iterator), m_storage(storage)
+{
+    assert(&(iterator.getKernel()) == &(storage->getKernel()));
+}
+
+/**
 * Exchanges the values of the current iterator and the iterator recevied as
 * argument.
 *

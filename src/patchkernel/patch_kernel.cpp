@@ -899,7 +899,7 @@ const Vertex & PatchKernel::getVertex(const long &id) const
 */
 PatchKernel::VertexIterator PatchKernel::getVertexIterator(const long &id)
 {
-	return m_vertices.getIterator(id);
+	return m_vertices.find(id);
 }
 
 /*!
@@ -929,7 +929,7 @@ PatchKernel::VertexIterator PatchKernel::vertexEnd()
 */
 PatchKernel::VertexConstIterator PatchKernel::getVertexConstIterator(const long &id) const
 {
-	return m_vertices.getConstIterator(id);
+	return m_vertices.find(id);
 }
 
 /*!
@@ -1466,7 +1466,7 @@ const Cell & PatchKernel::getFirstGhost() const
 */
 PatchKernel::CellIterator PatchKernel::getCellIterator(const long &id)
 {
-	return m_cells.getIterator(id);
+	return m_cells.find(id);
 }
 
 /*!
@@ -1507,7 +1507,7 @@ PatchKernel::CellIterator PatchKernel::internalBegin()
 PatchKernel::CellIterator PatchKernel::internalEnd()
 {
 	if (m_nInternals > 0) {
-		return ++m_cells.getIterator(m_lastInternalId);
+		return ++m_cells.find(m_lastInternalId);
 	} else {
 		return m_cells.end();
 	}
@@ -1521,7 +1521,7 @@ PatchKernel::CellIterator PatchKernel::internalEnd()
 PatchKernel::CellIterator PatchKernel::ghostBegin()
 {
 	if (m_nGhosts > 0) {
-		return m_cells.getIterator(m_firstGhostId);
+		return m_cells.find(m_firstGhostId);
 	} else {
 		return m_cells.end();
 	}
@@ -1544,7 +1544,7 @@ PatchKernel::CellIterator PatchKernel::ghostEnd()
 */
 PatchKernel::CellConstIterator PatchKernel::getCellConstIterator(const long &id) const
 {
-	return m_cells.getConstIterator(id);
+	return m_cells.find(id);
 }
 
 /*!
@@ -1585,7 +1585,7 @@ PatchKernel::CellConstIterator PatchKernel::internalConstBegin() const
 PatchKernel::CellConstIterator PatchKernel::internalConstEnd() const
 {
 	if (m_nInternals > 0) {
-		return ++m_cells.getConstIterator(m_lastInternalId);
+		return ++m_cells.find(m_lastInternalId);
 	} else {
 		return m_cells.cend();
 	}
@@ -1599,7 +1599,7 @@ PatchKernel::CellConstIterator PatchKernel::internalConstEnd() const
 PatchKernel::CellConstIterator PatchKernel::ghostConstBegin() const
 {
 	if (m_nGhosts > 0) {
-		return m_cells.getConstIterator(m_firstGhostId);
+		return m_cells.find(m_firstGhostId);
 	} else {
 		return m_cells.cend();
 	}
@@ -1911,7 +1911,7 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 			} else if (m_nInternals == 0) {
 				m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Element::NULL_ID);
 			} else {
-				CellIterator first_ghost_iterator = ++m_cells.getIterator(m_lastInternalId);
+				CellIterator first_ghost_iterator = ++m_cells.find(m_lastInternalId);
 				m_firstGhostId = first_ghost_iterator->getId();
 			}
 		}
@@ -1986,7 +1986,7 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 	}
 
 	// Get the iterator pointing to the updated position of the element
-	CellIterator iterator = m_cells.getIterator(id);
+	CellIterator iterator = m_cells.find(id);
 
 	// Update the interior flag
 	iterator->setInterior(false);
@@ -2024,7 +2024,7 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 	}
 
 	// Get the iterator pointing to the updated position of the element
-	CellIterator iterator = m_cells.getIterator(id);
+	CellIterator iterator = m_cells.find(id);
 
 	// Update the interior flag
 	iterator->setInterior(true);
@@ -2635,7 +2635,7 @@ ElementInfo::Type PatchKernel::getInterfaceType(const long &id) const
 */
 PatchKernel::InterfaceIterator PatchKernel::getInterfaceIterator(const long &id)
 {
-	return m_interfaces.getIterator(id);
+	return m_interfaces.find(id);
 }
 
 /*!
@@ -2665,7 +2665,7 @@ PatchKernel::InterfaceIterator PatchKernel::interfaceEnd()
 */
 PatchKernel::InterfaceConstIterator PatchKernel::getInterfaceConstIterator(const long &id) const
 {
-	return m_interfaces.getConstIterator(id);
+	return m_interfaces.find(id);
 }
 
 /*!

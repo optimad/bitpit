@@ -102,6 +102,17 @@ id_t PiercedKernelIterator<id_t>::getId(const id_t &fallback) const noexcept
 template<typename id_t>
 std::size_t PiercedKernelIterator<id_t>::getRawIndex() const noexcept
 {
+    return getPos();
+}
+
+/**
+* Gets the position of the current element.
+*
+* \return The position of the current element.
+*/
+template<typename id_t>
+std::size_t PiercedKernelIterator<id_t>::getPos() const noexcept
+{
     return m_pos;
 }
 

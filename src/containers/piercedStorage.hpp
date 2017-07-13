@@ -307,11 +307,11 @@ public:
     void rawSet(std::size_t pos, std::size_t nFields, std::size_t offset, const value_t *values);
 
     // Iterators
-    iterator getIterator(const id_t &id) noexcept;
-    const_iterator getConstIterator(const id_t &id) const noexcept;
+    iterator find(const id_t &id) noexcept;
+    const_iterator find(const id_t &id) const noexcept;
 
-    iterator getIteratorFromRawIndex(const std::size_t &pos) noexcept;
-    const_iterator getConstIteratorFromRawIndex(const std::size_t &pos) const noexcept;
+    iterator rawFind(std::size_t pos) noexcept;
+    const_iterator rawFind(std::size_t pos) const noexcept;
 
     iterator begin() noexcept;
     iterator end() noexcept;
@@ -373,10 +373,6 @@ protected:
     void rawEmplaceBack(bool value = false);
     template<typename... Args>
     void rawEmreplace(std::size_t pos, Args&&... args);
-
-    // Iterators
-    iterator getIteratorFromPos(const std::size_t &pos) noexcept;
-    const_iterator getConstIteratorFromPos(const std::size_t &pos) const noexcept;
 
 private:
     const std::size_t m_nFields;

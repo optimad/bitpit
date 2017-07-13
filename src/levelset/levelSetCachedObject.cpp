@@ -1014,7 +1014,7 @@ void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &re
         if( !m_ls.exists(id)){
             infoItr = m_ls.emplace(id) ;
         } else {
-            infoItr = m_ls.getIterator(id) ;
+            infoItr = m_ls.find(id) ;
         }
 
         dataBuffer >> infoItr->value ;

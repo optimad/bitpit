@@ -242,16 +242,11 @@ public:
     __PV_CONST_REFERENCE__ operator[](id_t id) const;
     __PV_REFERENCE__ operator[](id_t id);
 
-    const_iterator find(id_t id) const;
-    iterator find(id_t id);
+    using PiercedStorage<value_t, id_t>::find;
+
+    using PiercedStorage<value_t, id_t>::rawFind;
 
     // Iterators
-    using PiercedStorage<value_t, id_t>::getIterator;
-    using PiercedStorage<value_t, id_t>::getConstIterator;
-
-    using PiercedStorage<value_t, id_t>::getIteratorFromRawIndex;
-    using PiercedStorage<value_t, id_t>::getConstIteratorFromRawIndex;
-
     using PiercedStorage<value_t, id_t>::begin;
     using PiercedStorage<value_t, id_t>::end;
     using PiercedStorage<value_t, id_t>::cbegin;

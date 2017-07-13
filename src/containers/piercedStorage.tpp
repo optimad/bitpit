@@ -993,11 +993,11 @@ void PiercedStorage<value_t, id_t>::rawSet(std::size_t pos, std::size_t nFields,
 * \result An iterator pointing to the specified element.
 */
 template<typename value_t, typename id_t>
-typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::getIterator(const id_t &id) noexcept
+typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::find(const id_t &id) noexcept
 {
-    const std::size_t pos = m_kernel->getPos(id);
+    typename PiercedKernel<id_t>::const_iterator iterator = m_kernel->find(id);
 
-    return getIteratorFromPos(pos);
+    return rawFind(iterator.getPos());
 }
 
 /**
@@ -1007,11 +1007,11 @@ typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::
 * \result A constant iterator pointing to the specified element.
 */
 template<typename value_t, typename id_t>
-typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::getConstIterator(const id_t &id) const noexcept
+typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::find(const id_t &id) const noexcept
 {
-    const std::size_t pos = m_kernel->getPos(id);
+    typename PiercedKernel<id_t>::const_iterator iterator = m_kernel->find(id);
 
-    return getConstIteratorFromPos(pos);
+    return rawFind(iterator.getPos());
 }
 
 /**
@@ -1021,9 +1021,9 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 * \result An iterator pointing to the specified position.
 */
 template<typename value_t, typename id_t>
-typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::getIteratorFromRawIndex(const std::size_t &rawIndex) noexcept
+typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::rawFind(std::size_t pos) noexcept
 {
-    return getIteratorFromPos(rawIndex);
+    return iterator(this, pos);
 }
 
 /**
@@ -1033,9 +1033,9 @@ typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::
 * \result A constant iterator pointing to the specified position.
 */
 template<typename value_t, typename id_t>
-typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::getConstIteratorFromRawIndex(const std::size_t &rawIndex) const noexcept
+typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::rawFind(std::size_t pos) const noexcept
 {
-    return getConstIteratorFromPos(rawIndex);
+    return const_iterator(this, pos);
 }
 
 /*!
@@ -1046,7 +1046,7 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::begin() noexcept
 {
-    return getIteratorFromPos(m_kernel->m_begin_pos);
+    return rawFind(m_kernel->m_begin_pos);
 }
 
 /*!
@@ -1057,7 +1057,7 @@ typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::end() noexcept
 {
-    return getIteratorFromPos(m_kernel->m_end_pos);
+    return rawFind(m_kernel->m_end_pos);
 }
 
 /*!
@@ -1092,7 +1092,7 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::cbegin() const noexcept
 {
-    return getConstIteratorFromPos(m_kernel->m_begin_pos);
+    return rawFind(m_kernel->m_begin_pos);
 }
 
 /*!
@@ -1104,7 +1104,7 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::cend() const noexcept
 {
-    return getConstIteratorFromPos(m_kernel->m_end_pos);
+    return rawFind(m_kernel->m_end_pos);
 }
 
 /*!
@@ -1280,31 +1280,6 @@ template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump()
 void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const T &object) const
 {
     object.dump(stream);
-}
-
-/**
-* Gets an iterator pointing to the element in the specified position.
-*
-* \param pos is the position of the element
-* \result An iterator pointing to the element in the specified position.
-*/
-template<typename value_t, typename id_t>
-typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::getIteratorFromPos(const std::size_t &pos) noexcept
-{
-    return iterator(this, pos);
-}
-
-/**
-* Gets a constant iterator pointing to the element in the specified position.
-*
-* \param pos is the position of the element
-* \result A constant iterator pointing to the element in the specified
-* position.
-*/
-template<typename value_t, typename id_t>
-typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::getConstIteratorFromPos(const std::size_t &pos) const noexcept
-{
-    return const_iterator(this, pos);
 }
 
 }

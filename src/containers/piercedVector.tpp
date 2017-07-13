@@ -270,7 +270,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::re
     PiercedStorage<value_t, id_t>::rawSet(pos, std::move(value));
 
     // Return the iterator that points to the element
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(pos);
+    return PiercedStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -501,7 +501,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
     PiercedStorage<value_t, id_t>::rawEmreplace(pos, std::forward<Args>(args)...);
 
     // Return the iterator that points to the element
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(pos);
+    return PiercedStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -833,49 +833,6 @@ __PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::back() const
 }
 
 /**
-* Returns a constant iterator to the first element with the specified id.
-*
-* If no such element is found, the function returns a constant iterator
-* referring to the past-the-end element of the container.
-*
-* \param id is the id to look for
-* \result Returns a constant iterator to the first element with the
-* specified id. If no such element is found, the function returns a
-* constant iterator referring to the past-the-end element of the
-* container.
-*/
-template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::find(id_t id) const
-{
-    if (!PiercedKernel<id_t>::contains(id)) {
-        return cend();
-    }
-
-    return getConstIterator(id);
-}
-
-/**
-* Returns an iterator to the first element with the specified id.
-*
-* If no such element is found, the function returns a constant iterator
-* referring to the past-the-end element of the container.
-*
-* \param id is the id to look for
-* \result Returns an iterator to the first element with the specified id.
-* If no such element is found, the function returns an iterator referring
-* to the past-the-end element of the container.
-*/
-template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::find(id_t id)
-{
-    if (!PiercedKernel<id_t>::contains(id)) {
-        return end();
-    }
-
-    return getIterator(id);
-}
-
-/**
 * Returns a reference to the element with the specified id.
 *
 * If there is no element with the specified id, an exception is thrown.
@@ -1078,7 +1035,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::re
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(pos);
+    return PiercedStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1127,7 +1084,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(pos);
+    return PiercedStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1181,7 +1138,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(pos);
+    return PiercedStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1232,7 +1189,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(pos);
+    return PiercedStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1285,7 +1242,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
     PiercedStorage<value_t, id_t>::rawEmreplace(posOld);
 
     // Return the iterator to the new position
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(posNew);
+    return PiercedStorage<value_t, id_t>::rawFind(posNew);
 }
 
 /**
@@ -1326,7 +1283,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::er
     // Return the iterator to the next element
     std::size_t nextPos = action.info[PiercedSyncAction::INFO_POS_NEXT];
 
-    return PiercedStorage<value_t, id_t>::getIteratorFromPos(nextPos);
+    return PiercedStorage<value_t, id_t>::rawFind(nextPos);
 }
 
 /**

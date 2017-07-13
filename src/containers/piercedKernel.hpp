@@ -211,9 +211,9 @@ public:
     id_t getSizeMarker(std::size_t targetSize, const id_t &fallback = -1);
 
     // Iterators
-    const_iterator getConstIterator(const id_t &id) const noexcept;
+    const_iterator find(const id_t &id) const noexcept;
 
-    const_iterator getConstIteratorFromRawIndex(const std::size_t &rawIndex) const noexcept;
+    const_iterator rawFind(std::size_t pos) const noexcept;
 
     const_iterator begin() const noexcept;
     const_iterator end() const noexcept;
@@ -354,9 +354,6 @@ protected:
     std::size_t getPos(id_t id) const;
     std::size_t getFirstUsedPos() const;
     std::size_t getLastUsedPos() const;
-
-    // Iterators
-    const_iterator getConstIteratorFromPos(const std::size_t &pos) const noexcept;
 
 private:
     /**
