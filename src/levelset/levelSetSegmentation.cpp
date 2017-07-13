@@ -543,11 +543,9 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
         std::array<double,3>  n, xP;
         infoFromSimplex(centroid, support, d, s, xP, n);
 
-        PiercedVector<LevelSetInfo>::iterator lsInfoItr ;
-        if( !m_ls.exists(id)){
+        PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(id) ;
+        if( lsInfoItr == m_ls.end() ){
             lsInfoItr = m_ls.emplace(id) ;
-        } else {
-            lsInfoItr = m_ls.find(id) ;
         }
 
         if( d < std::abs(lsInfoItr->value) ){
