@@ -1129,7 +1129,7 @@ double rbf::wendlandc2( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return pow(1.-dist,4)*(4.*dist+1.);
+        return std::pow(1.-dist,4)*(4.*dist+1.);
     }
 }
 
@@ -1154,9 +1154,9 @@ double rbf::linear( const double &dist )
  */
 double rbf::gauss90( const double &dist )
 {
-    double eps = pow(-1.0*log(0.1),0.5);
+    double eps = std::pow(-1.0*std::log(0.1),0.5);
 
-    return exp(-1.0*pow(dist*eps,2));
+    return std::exp(-1.0*std::pow(dist*eps,2));
 }
 
 /*!
@@ -1166,9 +1166,9 @@ double rbf::gauss90( const double &dist )
  */
 double rbf::gauss95( const double &dist )
 {
-    double eps = pow(-1.0*log(0.05),0.5);
+    double eps = std::pow(-1.0*std::log(0.05),0.5);
 
-    return exp(-1.0*pow(dist*eps,2));
+    return std::exp(-1.0*std::pow(dist*eps,2));
 }
 
 /*!
@@ -1178,9 +1178,9 @@ double rbf::gauss95( const double &dist )
  */
 double rbf::gauss99( const double &dist )
 {
-    double eps = pow(-1.0*log(0.01),0.5);
+    double eps = std::pow(-1.0*std::log(0.01),0.5);
 
-    return exp(-1.0*pow(dist*eps,2));
+    return std::exp(-1.0*std::pow(dist*eps,2));
 }
 
 /*!
@@ -1194,7 +1194,7 @@ double rbf::c1c0( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0-pow(dist,2));
+        return (1.0-std::pow(dist,2));
     }
 }
 
@@ -1209,7 +1209,7 @@ double rbf::c2c0( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0-pow(dist,3));
+        return (1.0-std::pow(dist,3));
     }
 }
 
@@ -1224,7 +1224,7 @@ double rbf::c0c1( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0- 2.0*dist + pow(dist,2));
+        return (1.0- 2.0*dist + std::pow(dist,2));
     }
 }
 
@@ -1239,7 +1239,7 @@ double rbf::c1c1( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0-3.0*pow(dist,2)+2.0*pow(dist,3));
+        return (1.0-3.0*std::pow(dist,2)+2.0*std::pow(dist,3));
     }
 }
 
@@ -1254,7 +1254,7 @@ double rbf::c2c1( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0- 4.0*pow(dist,3) + 3.0*pow(dist,4));
+        return (1.0- 4.0*std::pow(dist,3) + 3.0*std::pow(dist,4));
     }
 }
 
@@ -1269,7 +1269,7 @@ double rbf::c0c2( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0 -3.0*dist +3.0*pow(dist,2) - pow(dist,3));
+        return (1.0 -3.0*dist +3.0*std::pow(dist,2) - std::pow(dist,3));
     }
 }
 
@@ -1284,7 +1284,7 @@ double rbf::c1c2( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0 -6.0*pow(dist,2) + 8.0*pow(dist,3) - 3.0*pow(dist,4));
+        return (1.0 -6.0*std::pow(dist,2) + 8.0*std::pow(dist,3) - 3.0*std::pow(dist,4));
     }
 }
 
@@ -1299,7 +1299,7 @@ double rbf::c2c2( const double &dist )
     if( dist > 1) {
         return 0.;
     } else{
-        return (1.0 -10.0*pow(dist,3) +15.0*pow(dist,4) -6.0*pow(dist,5));
+        return (1.0 -10.0*std::pow(dist,3) +15.0*std::pow(dist,4) -6.0*std::pow(dist,5));
     }
 }
 
