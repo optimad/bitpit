@@ -533,7 +533,7 @@ bool RBFKernel::removeData(std::vector<int> & list)
             m_fields--;
             int index = id-extracted;
             if(m_mode == RBFMode::INTERP) m_value.erase(m_value.begin()+index);
-            else                          m_weight.erase(m_value.begin()+index);
+            else                          m_weight.erase(m_weight.begin()+index);
 
             extracted++;
         }
