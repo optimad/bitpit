@@ -28,6 +28,7 @@
 #include <set>
 
 #include "bitpit_operators.hpp"
+#include "bitpit_IO.hpp"
 #include "bitpit_SA.hpp"
 
 #include "rbf.hpp"
@@ -410,9 +411,9 @@ void RBFKernel::setDataToNode( const int &id, const std::vector<double> &value )
     }
 
     if((int)(value.size()) != m_fields) {
-        std::cout<<"Mismatch dimension between value vector size and number of data attached to rbf.";
-        std::cout<<"This may lead to nasty errors. Check it with getDataCount()!"<<std::endl;
-        std::cout<<"Data could not be set"<<std::endl;
+        log::cout() << "Mismatch dimension between value vector size and number of data attached to rbf.";
+        log::cout() << "This may lead to nasty errors. Check it with getDataCount()!" << std::endl;
+        log::cout() << "Data could not be set" << std::endl;
         return;
     }
 
@@ -444,9 +445,9 @@ void RBFKernel::setDataToAllNodes( const int &id, const std::vector<double> &val
     int size = m_value[id].size();
 
     if((int)(value.size()) != size) {
-        std::cout<<"Mismatch dimension between data vector and current data container. One or both does not match RBFKernel nodes count.";
-        std::cout<<"This may lead to nasty errors. Use fitDataToNodes to reshape container or fit your data vector first!"<<std::endl;
-        std::cout<<"Data could not be set"<<std::endl;
+        log::cout() << "Mismatch dimension between data vector and current data container. One or both does not match RBFKernel nodes count.";
+        log::cout() << "This may lead to nasty errors. Use fitDataToNodes to reshape container or fit your data vector first!" << std::endl;
+        log::cout() << "Data could not be set" << std::endl;
         return;
     }
     if(m_mode != RBFMode::PARAM) {
@@ -466,7 +467,7 @@ void RBFKernel::setDataToAllNodes( const int &id, const std::vector<double> &val
 int RBFKernel::addData( )
 {
     if(m_fields == m_maxFields) {
-        std::cout<<"max number of data set reached"<<std::endl;
+        log::cout() << "Maximum number of data set reached" << std::endl;
         return -1;
     }
     m_fields++;
@@ -487,7 +488,7 @@ int RBFKernel::addData( )
 int RBFKernel::addData( const std::vector<double> & data )
 {
     if(m_fields == m_maxFields) {
-        std::cout<<"max number of data set reached"<<std::endl;
+        log::cout() << "Maximum number of data set reached" << std::endl;
         return -1;
     }
     if(m_mode == RBFMode::INTERP)    m_value.push_back(data);
@@ -728,8 +729,8 @@ int RBFKernel::greedy( const double &tolerance)
 
             error = evalError();
 
-            std::cout << std::scientific;
-            std::cout << " error now " << error << " active nodes" << getActiveCount() << " / " << m_nodes << std::endl;
+            log::cout() << std::scientific;
+            log::cout() << " error now " << error << " active nodes" << getActiveCount() << " / " << m_nodes << std::endl;
         } else {
             return 1;
 
