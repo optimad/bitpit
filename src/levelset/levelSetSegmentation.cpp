@@ -71,9 +71,6 @@ LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &_segments, cons
  * Destructor
  */
 LevelSetSegmentation::~LevelSetSegmentation() {
-    m_segmentation = NULL;
-    m_vertexNormal.clear() ;
-    m_vertexGradient.clear() ;
 }
 
 /*!
