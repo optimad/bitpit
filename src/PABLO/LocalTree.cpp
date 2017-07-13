@@ -2094,7 +2094,7 @@ namespace bitpit {
 							idxtry++;
 							Mortontry = m_ghosts[idxtry].computeMorton();
 						}
-						while(idxtry > 0 && m_ghosts[idxtry].computeMorton() > Morton){
+						while(idxtry > 0 && Mortontry > Morton){
 							idxtry--;
 							Mortontry = m_ghosts[idxtry].computeMorton();
 						}
