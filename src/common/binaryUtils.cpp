@@ -52,7 +52,7 @@ void write(std::ostream &stream, const std::string &string)
 {
     size_t size = string.length() + 1;
     write(stream, size);
-    write(stream, string.c_str(), size);
+    write(stream, string.data(), size);
 }
 
 /*!
