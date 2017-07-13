@@ -326,99 +326,56 @@ void LevelSetObject::exchangeGhosts(){
  */
 void LevelSetObject::communicate( std::unordered_map<int,std::vector<long>> &sendList, std::unordered_map<int,std::vector<long>> &recvList, std::vector<adaption::Info> const *mapper){
 
-    if( assureMPI() ){
-
-        MPI_Comm meshComm = m_kernelPtr->getCommunicator() ;
-
-        DataCommunicator    sizeCommunicator(meshComm) ; 
-        DataCommunicator    dataCommunicator(meshComm) ; 
-
-        /* Start receiving of first communications which contain the sizes
-         * of the communications of the exchanged data
-        */
-	    for (const auto entry : recvList) {
-            int rank = entry.first;
-
-            sizeCommunicator.setRecv( rank, sizeof(long) ) ;
-            sizeCommunicator.startRecv(rank);
-        }
-
-        /* Fill the databuffer with its content from the LevelSetObject 
-         * base class and specific derived class. Fill the sizebuffer
-         * with the size of the databuffer. Start sending both buffers
-         */
-	    for (const auto entry : sendList) {
-
-	    	// Get the send buffer
-	    	int rank = entry.first;
-
-            sizeCommunicator.setSend(rank, sizeof(long) ) ;
-            dataCommunicator.setSend(rank, 0 ) ;
-
-            SendBuffer &sizeBuffer = sizeCommunicator.getSendBuffer(rank);
-            SendBuffer &dataBuffer = dataCommunicator.getSendBuffer(rank);
-
-            // Write data in databuffer
-            writeCommunicationBuffer( entry.second, dataBuffer ) ;
-
-            // Write size of databuffer in sizebuffer
-            sizeBuffer << dataBuffer.getSize() ;
-
-            // Start sending
-            sizeCommunicator.startSend(rank);
-            dataCommunicator.startSend(rank);
-	    }
-
-        
-        /* Check which size communications have arrived. For those which are
-         * available read the size of the databuffer and start receiving.
-         * Proceed once all sizeBuffers have arrived.
-         */
-        int nCompletedRecvs(0);
-        long dataSize;
-
-        while (nCompletedRecvs < sizeCommunicator.getRecvCount()) {
-            int rank = sizeCommunicator.waitAnyRecv();
-            RecvBuffer &sizeBuffer = sizeCommunicator.getRecvBuffer(rank);
-
-            sizeBuffer >> dataSize ;
-
-            dataCommunicator.setRecv(rank,dataSize) ;
-            dataCommunicator.startRecv(rank) ;
-
-            ++nCompletedRecvs;
-        }
-        
-
-        /* In case of mesh adaption, the ids of the moved items must be freed 
-         * in order to avoid conflicts when ids are recycled
-         */
-        if( mapper!=NULL){
-            clearAfterMeshAdaption(*mapper);
-        }
-
-        /* Check which data communications have arrived. For those which are
-         * available start reading the databuffer into the data structure of
-         * LevelSetObject and its derived classes.
-         */
-        nCompletedRecvs = 0;
-        while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
-            int rank = dataCommunicator.waitAnyRecv();
-
-            RecvBuffer &dataBuffer = dataCommunicator.getRecvBuffer(rank);
-            readCommunicationBuffer( recvList[rank], dataBuffer ) ;
-
-            ++nCompletedRecvs;
-        }
-        
-
-        sizeCommunicator.waitAllSends();
-        sizeCommunicator.finalize() ;
-
-        dataCommunicator.waitAllSends();
-        dataCommunicator.finalize() ;
-
+    if (!assureMPI()) {
+        return;
     }
+
+    // Create a data communicator
+    MPI_Comm meshComm = m_kernelPtr->getCommunicator() ;
+    DataCommunicator dataCommunicator(meshComm) ;
+
+    // Fill the send buffer with the  content from the LevelSetObject base
+    // class and the specific derived class.
+    for (const auto entry : sendList) {
+        // Create an empty send
+        int rank = entry.first;
+        dataCommunicator.setSend(rank, 0);
+
+        // Write data in the buffer
+        SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
+        writeCommunicationBuffer(entry.second, buffer);
+    }
+
+    // Discover the receives
+    dataCommunicator.discoverRecvs();
+
+    // Start the sends
+    dataCommunicator.startAllRecvs();
+
+    // In case of mesh adaption, the ids of the moved items must be freed
+    // in order to avoid conflicts when ids are recycled
+    if (mapper) {
+        clearAfterMeshAdaption(*mapper);
+    }
+
+    // Start the sends
+    dataCommunicator.startAllSends();
+
+    // Check which data communications have arrived. For those which are
+    // available start reading the databuffer into the data structure of
+    // LevelSetObject and its derived classes.
+    int nCompletedRecvs = 0;
+    while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
+        int rank = dataCommunicator.waitAnyRecv();
+
+        RecvBuffer &dataBuffer = dataCommunicator.getRecvBuffer(rank);
+        readCommunicationBuffer(recvList.at(rank), dataBuffer);
+
+        ++nCompletedRecvs;
+    }
+
+    dataCommunicator.waitAllSends();
+    dataCommunicator.finalize();
 }
 
 /*!
