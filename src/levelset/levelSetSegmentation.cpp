@@ -1188,12 +1188,11 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
 
     //determine number of elements to send
     for( const auto &index : sendList){
-        if( m_seg.exists(index)){
+        auto seginfoItr = m_seg.find(index) ;
+        if( seginfoItr != m_seg.end() ){
             nItems++ ;
-            const auto &seginfo = m_seg[index] ;
-            counter += seginfo.segments.size() ;
+            counter += seginfoItr->segments.size() ;
         }
-
     }
 
     dataBuffer << nItems ;
@@ -1202,14 +1201,14 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
     //determine elements to send
     counter= 0 ;
     for( const auto &index : sendList){
-        if( m_seg.exists(index)){
-            const auto &seginfo = m_seg[index] ;
+        auto seginfoItr = m_seg.find(index) ;
+        if( seginfoItr != m_seg.end() ){
             dataBuffer << counter ;
-            dataBuffer << (size_t) seginfo.segments.size() ;
-            for( const long & seg : seginfo.segments ){
+            dataBuffer << (size_t) seginfoItr->segments.size() ;
+            for( const long & seg : seginfoItr->segments ){
                 dataBuffer << seg ;
             }
-            for( const double & distance : seginfo.distances ){
+            for( const double & distance : seginfoItr->distances ){
                 dataBuffer << distance ;
             }
         }
@@ -1236,11 +1235,9 @@ void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &r
         id = recvList[index] ;
 
         // Assign the data of the element
-        PiercedVector<SegInfo>::iterator segItr ;
-        if( !m_seg.exists(id)){
+        PiercedVector<SegInfo>::iterator segItr = m_seg.find(id) ;
+        if( segItr == m_seg.end() ){
             segItr = m_seg.emplace(id) ;
-        } else {
-            segItr = m_seg.find(id) ;
         }
 
         size_t nSegs ;

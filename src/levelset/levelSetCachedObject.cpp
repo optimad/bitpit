@@ -971,11 +971,11 @@ void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &s
 
 
     for( const auto &index : sendList){
-        if( m_ls.exists(index)){
-            const auto &lsinfo = m_ls[index] ;
+        auto lsInfoItr = m_ls.find(index) ;
+        if( lsInfoItr != m_ls.end() ){
             dataBuffer << counter ;
-            dataBuffer << lsinfo.value ;
-            dataBuffer << lsinfo.gradient ;
+            dataBuffer << lsInfoItr->value ;
+            dataBuffer << lsInfoItr->gradient ;
             ++nItems ;
         }
         ++counter ;
@@ -1014,11 +1014,9 @@ void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &re
         id = recvList[index] ;
 
         // Assign the data of the element
-        PiercedVector<LevelSetInfo>::iterator infoItr ;
-        if( !m_ls.exists(id)){
+        PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;
+        if( infoItr == m_ls.end() ){
             infoItr = m_ls.emplace(id) ;
-        } else {
-            infoItr = m_ls.find(id) ;
         }
 
         dataBuffer >> infoItr->value ;
