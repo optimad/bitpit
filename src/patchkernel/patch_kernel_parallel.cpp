@@ -986,13 +986,16 @@ void PatchKernel::removeGhostFromExchangeTargets(const long ghostId)
 void PatchKernel::addExchangeSources(const std::vector<long> &ghostIds)
 {
 	// Get the sources
+	std::vector<long> neighIds;
 	std::unordered_map<int, std::unordered_set<long>> ghostSources;
 	for (long ghostId : ghostIds) {
 		// Owner of the ghost
 		int rank = m_ghostOwners[ghostId];
 
 		// The internal neighbourss will be sources for the rank
-		for (long neighId : findCellNeighs(ghostId)) {
+		neighIds.clear();
+		findCellNeighs(ghostId, &neighIds);
+		for (long neighId : neighIds) {
 			if (m_ghostOwners.count(neighId) > 0) {
 				continue;
 			}
@@ -1047,6 +1050,8 @@ adaption::Info PatchKernel::sendCells(const int &sendRank, const int &recvRank, 
  */
 adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend)
 {
+    std::vector<long> neighIds;
+
     //
     // Initialize adaption info
     //
@@ -1113,10 +1118,9 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     // will not be sent.
     std::unordered_set<long> cellsToSendFrame;
 	for (long cellId : cellsToSend) {
-		auto neighs = findCellNeighs(cellId);
-		int nNeighs = neighs.size();
-		for (int j = 0; j < nNeighs; ++j) {
-			long neighId = neighs[j];
+		neighIds.clear();
+		findCellNeighs(cellId, &neighIds);
+		for (long neighId : neighIds) {
 			if (cellRankOnReceiver.count(neighId) == 0) {
 				cellsToSendFrame.insert(cellId);
 				break;
@@ -1137,10 +1141,9 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     // Cells owned by receiver are already on the receiver, so there is no
     // need to send them.
     for (long cellId : cellsToSendFrame) {
-        auto neighs = findCellNeighs(cellId);
-        int nNeighs = neighs.size();
-        for (int j = 0; j < nNeighs; ++j) {
-            long neighId = neighs[j];
+        neighIds.clear();
+        findCellNeighs(cellId, &neighIds);
+        for (long neighId : neighIds) {
             if (cellRankOnReceiver.count(neighId) > 0) {
                 continue;
             }
@@ -1323,10 +1326,9 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 		if (cellsToSendFrame.count(cellId) == 0) {
 			moveToGhosts = false;
 		} else {
-			auto neighs = findCellNeighs(cellId);
-			int nNeighs = neighs.size();
-			for (int j = 0; j < nNeighs; ++j) {
-				long neighId = neighs[j];
+			neighIds.clear();
+			findCellNeighs(cellId, &neighIds);
+			for (long neighId : neighIds) {
 				if (m_ghostOwners.count(neighId) == 0) {
 					moveToGhosts = true;
 					break;
@@ -1358,11 +1360,10 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     while (itr != m_ghostOwners.cend()) {
         long ghostId = itr->first;
 
-        bool keep   = false;
-        auto neighs = findCellNeighs(ghostId);
-        int nNeighs = neighs.size();
-        for (int j = 0; j < nNeighs; ++j) {
-			long neighId = neighs[j];
+        neighIds.clear();
+        findCellNeighs(ghostId, &neighIds);
+        bool keep = false;
+        for (long neighId : neighIds) {
 			if (m_ghostOwners.count(neighId) == 0) {
                 keep = true;
                 break;
