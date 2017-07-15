@@ -283,14 +283,23 @@ public:
 	long countOrphanCells() const;
 	virtual std::array<double, 3> evalCellCentroid(const long &id) const;
 	std::vector<long> findCellNeighs(const long &id) const;
+	void findCellNeighs(const long &id, std::vector<long> *neighs) const;
 	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
+	void findCellNeighs(const long &id, int codimension, bool complete, std::vector<long> *neighs) const;
 	std::vector<long> findCellFaceNeighs(const long &id) const;
+	void findCellFaceNeighs(const long &id, std::vector<long> *neighs) const;
 	std::vector<long> findCellFaceNeighs(const long &id, const int &face) const;
+	void findCellFaceNeighs(const long &id, const int &face, std::vector<long> *neighs) const;
 	std::vector<long> findCellEdgeNeighs(const long &id, bool complete = true) const;
+	void findCellEdgeNeighs(const long &id, bool complete, std::vector<long> *neighs) const;
 	std::vector<long> findCellEdgeNeighs(const long &id, const int &edge) const;
+	void findCellEdgeNeighs(const long &id, const int &edge, std::vector<long> *neighs) const;
 	std::vector<long> findCellVertexNeighs(const long &id, bool complete = true) const;
+	void findCellVertexNeighs(const long &id, bool complete, std::vector<long> *neighs) const;
 	std::vector<long> findCellVertexNeighs(const long &id, const int &vertex) const;
+	void findCellVertexNeighs(const long &id, const int &vertex, std::vector<long> *neighs) const;
 	std::vector<long> findCellVertexOneRing(const long &id, const int &vertex) const;
+	void findCellVertexOneRing(const long &id, const int &vertex, std::vector<long> *neighs) const;
     void findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx);
 	std::set<int> getInternalPIDs();
 	std::vector<long> getInternalsByPID(int pid);
@@ -496,9 +505,9 @@ protected:
 
 	virtual long _getCellNativeIndex(long id) const;
 
-	virtual std::vector<long> _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
-	virtual std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
-	virtual std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+	virtual void _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const;
+	virtual void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const;
+	virtual void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const;
 
 	void setExpert(bool expert);
 

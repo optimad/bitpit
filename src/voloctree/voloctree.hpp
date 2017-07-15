@@ -129,8 +129,8 @@ protected:
 
 	long _getCellNativeIndex(long id) const;
 
-	std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
-	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+	void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const;
+	void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const;
 
 #if BITPIT_ENABLE_MPI==1
 	std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning) override;
@@ -237,8 +237,8 @@ private:
 
 	std::vector<adaption::Info> sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges);
 
-	std::vector<long> findCellCodimensionNeighs(const long &id, const int &index,
-		const int &codimension, const std::vector<long> &blackList) const;
+	void findCellCodimensionNeighs(const long &id, const int &index,
+		const int &codimension, const std::vector<long> &blackList, std::vector<long> *neighs) const;
 };
 
 }

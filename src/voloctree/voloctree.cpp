@@ -2035,19 +2035,21 @@ void VolOctree::scale(std::array<double, 3> scaling)
 	\param id is the id of the cell
 	\param edge is an edge of the cell
 	\param blackList is a list of cells that are excluded from the search
-	\result The neighbours of the specified cell for the given edge.
+	\param[in,out] neighs is the vector were the neighbours of the specified
+	cell for the given edge will be stored. The vector is not cleared before
+	adding the neighbours, it is extended by appending all the neighbours
+	found by this function
 */
-std::vector<long> VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+void VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
-	std::vector<long> neighs;
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
-		return neighs;
+		return;
 	}
 
 	// Get edge neighbours
 	int codimension = getDimension() - 1;
-	neighs = findCellCodimensionNeighs(id, edge, codimension, blackList);
+	findCellCodimensionNeighs(id, edge, codimension, blackList, neighs);
 
 	// Add face neighbours
 	//
@@ -2060,23 +2062,24 @@ std::vector<long> VolOctree::_findCellEdgeNeighs(const long &id, const int &edge
 	//     it is necessary to check if the neighbour actually contains the
 	//     edge.
 	//
+	std::vector<long> faceNeighs;
 	const OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
 	int octantLevel = m_tree->getLevel(octant);
 	for (int face : m_octantLocalFacesOnEdge[edge]) {
-		for (auto &neighId : _findCellFaceNeighs(id, face, blackList)) {
+		faceNeighs.clear();
+		_findCellFaceNeighs(id, face, blackList, &faceNeighs);
+		for (long neighId : faceNeighs) {
 			const OctantInfo neighOctantInfo = getCellOctant(neighId);
 			const Octant *neighOctant = getOctantPointer(neighOctantInfo);
 			int neighOctantLevel = m_tree->getLevel(neighOctant);
 			if (neighOctantLevel <= octantLevel) {
-				utils::addToOrderedVector<long>(neighId, neighs);
+				utils::addToOrderedVector<long>(neighId, *neighs);
 			} else if (m_tree->isEdgeOnOctant(octant, edge, neighOctant)) {
-				utils::addToOrderedVector<long>(neighId, neighs);
+				utils::addToOrderedVector<long>(neighId, *neighs);
 			}
 		}
 	}
-
-	return neighs;
 }
 
 /*!
@@ -2085,15 +2088,16 @@ std::vector<long> VolOctree::_findCellEdgeNeighs(const long &id, const int &edge
 	\param id is the id of the cell
 	\param vertex is a local vertex of the cell
 	\param blackList is a list of cells that are excluded from the search
-	\result The neighbours of the specified cell for the given vertex.
+	\param[in,out] neighs is the vector were the neighbours of the specified
+	cell for the given vertex will be stored. The vector is not cleared before
+	adding the neighbours, it is extended by appending all the neighbours
+	found by this function
 */
-std::vector<long> VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
-	std::vector<long> neighs;
-
 	// Get vertex neighbours
 	int codimension = getDimension();
-	neighs = findCellCodimensionNeighs(id, vertex, codimension, blackList);
+	findCellCodimensionNeighs(id, vertex, codimension, blackList, neighs);
 
 	// Add edge and face neighbours
 	//
@@ -2114,34 +2118,38 @@ std::vector<long> VolOctree::_findCellVertexNeighs(const long &id, const int &ve
 	const Octant *octant = getOctantPointer(octantInfo);
 	int octantLevel = m_tree->getLevel(octant);
 	if (isThreeDimensional()) {
+		std::vector<long> edgeNeighs;
 		for (int edge : m_octantLocalEdgesOnVertex[vertex]) {
-			for (long &neighId : _findCellEdgeNeighs(id, edge, blackList)) {
+			edgeNeighs.clear();
+			_findCellEdgeNeighs(id, edge, blackList, &edgeNeighs);
+			for (long neighId : edgeNeighs) {
 				const OctantInfo neighOctantInfo = getCellOctant(neighId);
 				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
 				int neighOctantLevel = m_tree->getLevel(neighOctant);
 				if (neighOctantLevel <= octantLevel) {
-					utils::addToOrderedVector<long>(neighId, neighs);
+					utils::addToOrderedVector<long>(neighId, *neighs);
 				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
-					utils::addToOrderedVector<long>(neighId, neighs);
+					utils::addToOrderedVector<long>(neighId, *neighs);
 				}
 			}
 		}
 	} else {
+		std::vector<long> faceNeighs;
 		for (int face : m_octantLocalFacesOnVertex[vertex]) {
-			for (long &neighId : _findCellFaceNeighs(id, face, blackList)) {
+			faceNeighs.clear();
+			_findCellFaceNeighs(id, face, blackList, &faceNeighs);
+			for (long neighId : faceNeighs) {
 				const OctantInfo neighOctantInfo = getCellOctant(neighId);
 				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
 				int neighOctantLevel = m_tree->getLevel(neighOctant);
 				if (neighOctantLevel <= octantLevel) {
-					utils::addToOrderedVector<long>(neighId, neighs);
+					utils::addToOrderedVector<long>(neighId, *neighs);
 				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
-					utils::addToOrderedVector<long>(neighId, neighs);
+					utils::addToOrderedVector<long>(neighId, *neighs);
 				}
 			}
 		}
 	}
-
-	return neighs;
 }
 
 /*!
@@ -2156,13 +2164,13 @@ std::vector<long> VolOctree::_findCellVertexNeighs(const long &id, const int &ve
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours for the given codimension of the specified cell.
 */
-std::vector<long> VolOctree::findCellCodimensionNeighs(const long &id, const int &index,
-											           const int &codimension, const std::vector<long> &blackList) const
+void VolOctree::findCellCodimensionNeighs(const long &id, const int &index,
+                                          const int &codimension, const std::vector<long> &blackList,
+                                          std::vector<long> *neighs) const
 {
-	std::vector<long> neighs;
 	int dimension = getDimension();
 	if (codimension > dimension || codimension <= 0) {
-		return neighs;
+		return;
 	}
 
 	OctantInfo octantInfo = getCellOctant(id);
@@ -2181,11 +2189,9 @@ std::vector<long> VolOctree::findCellCodimensionNeighs(const long &id, const int
 		long neighId = getOctantId(neighOctantInfo);
 
 		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
-			utils::addToOrderedVector<long>(neighId, neighs);
+			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
 	}
-
-	return neighs;
 }
 
 }
