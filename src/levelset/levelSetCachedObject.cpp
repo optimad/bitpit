@@ -457,11 +457,14 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetOctree *visitee, cons
     // We need to consider only the cells that are inside the bounding box
     // defined by the objects, or the cells that have at least a neighbout
     // inside the bounding box defined by the objects.
+    std::vector<long> faceNeighs;
     for ( long cellId : narrowBandCells ){
         // Discard cells that are not in the bounding box
         bool discardCell = ! isInsideObjectBox.at(cellId) ;
         if ( discardCell ) {
-            for ( long neighId : mesh.findCellFaceNeighs(cellId) ) {
+            faceNeighs.clear();
+            mesh.findCellFaceNeighs(cellId, &faceNeighs);
+            for ( long neighId : faceNeighs ) {
                 if ( narrowBandCells.count(neighId) == 0 ) {
                     continue;
                 }
@@ -504,6 +507,7 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetOctree *visitee, cons
  */
 void LevelSetCachedObject::propagateSign() {
 
+    std::vector<long> faceNeighs;
     VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
 
     // Save the bounding boxes of the object
@@ -580,7 +584,9 @@ void LevelSetCachedObject::propagateSign() {
             }
 
             // Add the unassigned neighboors to the seeds
-            for (long neigh : mesh.findCellFaceNeighs(seed)) {
+            faceNeighs.clear();
+            mesh.findCellFaceNeighs(seed, &faceNeighs);
+            for (long neigh : faceNeighs) {
                 if (alreadyAssigned.count(neigh) == 0) {
                     seeds.push(neigh);
                 }
@@ -631,7 +637,9 @@ void LevelSetCachedObject::propagateSign() {
                 // If a seed is surrounded only by items already evaluated,
                 // it can't propagate the sign to anyone.
                 std::stack<long> processList;
-                for (long neigh : mesh.findCellFaceNeighs(seed)) {
+                faceNeighs.clear();
+                mesh.findCellFaceNeighs(seed, &faceNeighs);
+                for (long neigh : faceNeighs) {
                     if (alreadyEvaluated.count(neigh) == 0) {
                         processList.push(neigh);
                     }
@@ -664,8 +672,9 @@ void LevelSetCachedObject::propagateSign() {
                     }
 
                     // Add non-evaluated neighs to the process list
-                    std::vector<long> neighs = mesh.findCellFaceNeighs( id ) ;
-                    for (long neigh : neighs) {
+                    faceNeighs.clear();
+                    mesh.findCellFaceNeighs(id, &faceNeighs);
+                    for (long neigh : faceNeighs) {
                         if (alreadyEvaluated.count(neigh) == 0) {
                             processList.push(neigh);
                         }

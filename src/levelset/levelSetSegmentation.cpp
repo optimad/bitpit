@@ -852,7 +852,8 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
                 if ( *vit <= RSearch ) {
 
                     cellList.push_back( cell ) ;
-                    neighs  = mesh.findCellFaceNeighs(cell) ;
+                    neighs.clear();
+                    mesh.findCellFaceNeighs(cell, &neighs) ;
 
                     for( const auto &  neigh : neighs){
                         if( flag[neigh] != segmentId) {
