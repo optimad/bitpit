@@ -96,6 +96,7 @@ int main( int argc, char *argv[]){
     delta = meshMax -meshMin ;
 
     VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
+    mesh.update() ;
 
     // Compute level set  in narrow band
     LevelSet levelset ;
@@ -117,7 +118,6 @@ int main( int argc, char *argv[]){
     std::cout << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
     std::cout << " - Exporting data" << std::endl;
-    mesh.update() ;
     std::vector<double> LS(mesh.getCellCount() ) ;
     std::vector<std::array<double,3>> LG(mesh.getCellCount() ) ;
     const LevelSetObject &object0 = levelset.getObject(id0);
