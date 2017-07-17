@@ -47,7 +47,8 @@ class LevelSetObject;
 class LevelSetCachedObject : public LevelSetObject{
 
     private:
-    void                                        assignSign( int sign, const std::unordered_set<long> &cells ) ;
+    void                                        setSign( long id, int sign ) ;
+    void                                        propagateSeedSign( const std::vector<long> &seeds, long *nUnassigned, PiercedStorage<bool, long> *signAssigned ) ;
 
     protected:
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */

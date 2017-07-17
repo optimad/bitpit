@@ -90,6 +90,17 @@ VolumeKernel* LevelSetKernel::getMesh() const{
  */
 double LevelSetKernel::computeSizeNarrowBandFromLS( LevelSetObject *visitor, const bool &signd ){
 
+    // Detect the cells in the narrowband
+    VolumeKernel::CellConstIterator cellBegin = m_mesh->cellConstBegin();
+    VolumeKernel::CellConstIterator cellEnd   = m_mesh->cellConstEnd();
+
+    PiercedStorage<bool, long> isInNarrowBand(1, &(m_mesh->getCells()));
+    for (auto itr = cellBegin; itr != cellEnd; ++itr) {
+        long id = itr.getId();
+        std::size_t rawIndex = itr.getRawIndex();
+        isInNarrowBand.rawAt(rawIndex) = visitor->isInNarrowBand(id);
+    }
+
     // We need to consider only the cells with a levelset value less than
     // local narrow band (ie. size of the narrowband evalauted using the
     // cell).

@@ -503,400 +503,302 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetOctree *visitee, cons
 }
 
 /*!
- * Propagate the sign of the signed distance function from narrow band to entire domain
+ * Propagate the sign of the signed distance function from narrow band to
+ * entire domain.
  */
 void LevelSetCachedObject::propagateSign() {
 
-    std::vector<long> faceNeighs;
     VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
 
-    // Save the bounding boxes of the object
+    VolumeKernel::CellConstIterator cellBegin = mesh.cellConstBegin();
+    VolumeKernel::CellConstIterator cellEnd   = mesh.cellConstEnd();
+
+    PiercedStorage<bool, long> signAssigned(1, &(m_kernelPtr->getMesh()->getCells()));
+    signAssigned.fill(false);
+
+    long nUnassigned = mesh.getCellCount();
+
+    std::vector<long> seeds;
+    seeds.reserve(mesh.getCellCount());
+
+    // Evaluate the bounding box of the object
     std::array<double,3> boxMin;
     std::array<double,3> boxMax;
     getBoundingBox(boxMin, boxMax);
 
-    // Identify the regions
+    // Identify the cells that have a known sign
     //
-    // A region is a group of cells that share at leas a face. There are three
-    // type of regions: external, internal, narrowband, and unknown.
+    // The sign of the cells in the narrowband is known because for those cells
+    // we know the value of the levelset. We don't need to set the sign of the
+    // cells in the narrowband, instead they will be used as seeds for
+    // propagating the sign to other cells.
     //
-    // An 'external' region is outside all bodies, an 'internal' region is
-    // inside of at least one body, a 'narrowband' region contains at least
-    // one cell in the narrow band, whereas it is not easly possible to find
-    // out the position of an 'unknown' region.
-    const int REGION_EXTERNAL   = 0;
-    const int REGION_INTERNAL   = 1;
-    const int REGION_NARROWBAND = 2;
-    const int REGION_UNKNOWN    = 3;
+    // The sign of external cells will always be positive. An external cell is
+    // a cell outside the bounding box of the object. Alsot the external cells
+    // can be usesd as seeds for sign propagation.
+    for (auto itr = cellBegin; itr != cellEnd; ++itr) {
+        long cellId = itr.getId();
 
-    const std::vector<long> &cellIds = mesh.getCells().getIds();
+        // Process cells in the narrowband
+        if (isInNarrowBand(cellId)) {
+            std::size_t cellRawId = itr.getRawIndex();
+            signAssigned.rawAt(cellRawId) = true;
+            --nUnassigned;
 
-    int nRegions = 0;
-    std::vector<int> regionType;
-    std::vector<std::unordered_set<long>> regionCellList;
-    std::unordered_set<long> alreadyAssigned;
-    for (long id : cellIds) {
-        // Skip the cell if is already assigned to a region
-        if (alreadyAssigned.count(id) != 0) {
+            seeds.push_back(cellId);
+
             continue;
         }
 
-        // Creat a new region
-        int region = nRegions++;
-        regionType.push_back(REGION_EXTERNAL);
-        regionCellList.emplace_back();
+        // Process external cells
+        std::array<double, 3> centroid = mesh.evalCellCentroid(cellId);
 
-        // Find all the cells that belongs to the region
-        std::stack<long> seeds;
-        seeds.push(id);
-
-        while (!seeds.empty()) {
-            long seed = seeds.top();
-            seeds.pop();
-
-            // Seeds assigned to a region has already been processed
-            if (alreadyAssigned.count(seed) != 0) {
-                continue;
-            }
-
-            // Assign the current region to the seed
-            regionCellList[region].insert(seed);
-
-            // Detect the region type
-            if (regionType[region] != REGION_NARROWBAND) {
-                if (isInNarrowBand(seed)) {
-                    regionType[region] = REGION_NARROWBAND;
-                } else if (regionType[region] != REGION_UNKNOWN) {
-                    std::array<double, 3> centroid = mesh.evalCellCentroid(seed);
-
-                    bool isInside = true;
-                    for (int i = 0; i < 3; ++i) {
-                        if (centroid[i] < boxMin[i] || centroid[i] > boxMax[i]) {
-                            isInside = false;
-                            break;
-                        }
-                    }
-
-                    if (isInside) {
-                        regionType[region] = REGION_UNKNOWN;
-                    }
-                }
-            }
-
-            // Add the unassigned neighboors to the seeds
-            faceNeighs.clear();
-            mesh.findCellFaceNeighs(seed, &faceNeighs);
-            for (long neigh : faceNeighs) {
-                if (alreadyAssigned.count(neigh) == 0) {
-                    seeds.push(neigh);
-                }
-            }
-
-            // The cell has been assigned to a region
-            alreadyAssigned.insert(seed);
-        }
-    }
-
-    // According to the region type propagate the sign.
-    //
-    // If a region is 'external', all its cells have a positive levelset. If
-    // a region is 'narrowband' it is possible to propagate the sign of the
-    // narrowband to the whole region. All the cells of an 'unknown' region
-    // will have the same sign, but the value hasto be obtain from the
-    // neighbouring partitions.
-    for (int region = 0; region < nRegions; ++region) {
-        if (regionType[region] == REGION_EXTERNAL) {
-            assignSign(1, regionCellList[region]);
-        } else if (regionType[region] == REGION_NARROWBAND) {
-            // The seeds are the cells in the narrowband of the region
-            std::stack<long> seeds;
-            std::unordered_set<long> alreadyEvaluated;
-            for (long id : regionCellList[region]) {
-                if (!isInNarrowBand(id)) {
-                    continue;
-                }
-
-                seeds.push(id);
-                alreadyEvaluated.insert(id);
-            }
-
-            // Propagate the sign
-            while (!seeds.empty()) {
-                long seed = seeds.top();
-                seeds.pop();
-
-                // Discard seeds with a LS value equal to 0
-                double ls = getLS(seed);
-                if (utils::DoubleFloatingEqual()(std::abs(ls), (double) 0.)) {
-                    continue;
-                }
-
-                // Start filling the process list with the neighbours of the
-                // seeds that has not yet been evaluated.
-                //
-                // If a seed is surrounded only by items already evaluated,
-                // it can't propagate the sign to anyone.
-                std::stack<long> processList;
-                faceNeighs.clear();
-                mesh.findCellFaceNeighs(seed, &faceNeighs);
-                for (long neigh : faceNeighs) {
-                    if (alreadyEvaluated.count(neigh) == 0) {
-                        processList.push(neigh);
-                    }
-                }
-
-                if (processList.empty()) {
-                    continue;
-                }
-
-                // Get the sign of the seed
-                short seedSign = getSign(seed);
-
-                // Propagate the sign
-                while (!processList.empty()) {
-                    long id = processList.top();
-                    processList.pop();
-
-                    // Get the value associated to the id
-                    //
-                    // A new value needs to be created only if the sign to
-                    // propagate is different from the default sign.
-                    PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;
-                    if( infoItr == m_ls.end() && seedSign != levelSetDefaults::SIGN ){
-                        infoItr = m_ls.emplace(id) ;
-                    }
-
-                    // Update the value
-                    if( infoItr != m_ls.end() ) {
-                        (*infoItr).value = seedSign * levelSetDefaults::VALUE;
-                    }
-
-                    // Add non-evaluated neighs to the process list
-                    faceNeighs.clear();
-                    mesh.findCellFaceNeighs(id, &faceNeighs);
-                    for (long neigh : faceNeighs) {
-                        if (alreadyEvaluated.count(neigh) == 0) {
-                            processList.push(neigh);
-                        }
-                    }
-
-                    // The cell has been processeed
-                    alreadyEvaluated.insert(id);
-                }
-
-                // If all cells have been evaluated we can stop the propagation
-                if (alreadyEvaluated.size() == regionCellList[region].size()) {
-                    break;
-                }
-            }
-        }
-    }
-
-#if BITPIT_ENABLE_MPI
-    // If the communicator is not set we can exit because the calculation
-    // is serial
-    if (!m_kernelPtr->isCommunicatorSet()) {
-        return;
-    }
-
-    // If there is only one processor we can exit
-    int nProcs;
-    MPI_Comm_size(m_kernelPtr->getCommunicator(), &nProcs);
-    if (nProcs == 1) {
-        return;
-    }
-
-    // Initialize the communicator for exchanging the sign among partitions
-    DataCommunicator dataCommunicator(m_kernelPtr->getCommunicator());
-
-    int sign;
-    size_t dataSize = sizeof(sign);
-
-    // Set the receives
-    for (const auto entry : mesh.getGhostExchangeTargets()) {
-        const int rank = entry.first;
-        const auto &list = entry.second;
-
-        dataCommunicator.setRecv(rank, list.size() * dataSize);
-    }
-
-    // Set the sends
-    for (const auto entry : mesh.getGhostExchangeSources()) {
-        const int rank = entry.first;
-        auto &list = entry.second;
-
-        dataCommunicator.setSend(rank, list.size() * dataSize);
-    }
-
-    // Communicate the sign among the partitions
-    while (true) {
-        // If all partitions have propgate the sign on all cells we can exit
-        bool locallyComplete = true;
-        for (int region = 0; region < nRegions; ++region) {
-            if (regionType[region] == REGION_UNKNOWN) {
-                locallyComplete = false;
+        bool isExternal = false;
+        for (int i = 0; i < 3; ++i) {
+            if (centroid[i] < boxMin[i] || centroid[i] > boxMax[i]) {
+                isExternal = true;
                 break;
             }
         }
 
-        bool globallyComplete;
-        MPI_Allreduce(&locallyComplete, &globallyComplete, 1, MPI_C_BOOL, MPI_LAND, m_kernelPtr->getCommunicator());
-        if (globallyComplete) {
-            return;
-        }
+        if (isExternal) {
+            setSign(cellId, 1);
+            std::size_t cellRawId = itr.getRawIndex();
+            signAssigned.rawAt(cellRawId) = true;
+            --nUnassigned;
 
-        // Start the receives
+            seeds.push_back(cellId);
+
+            continue;
+        }
+    }
+
+    // Use the seeds to propagate the sign
+    propagateSeedSign(seeds, &nUnassigned, &signAssigned);
+
+#if BITPIT_ENABLE_MPI
+    // If there are cells with an unknown sign, data communication among
+    // ghost cells is needed. At this point, it is only possible to have
+    // cells with an unknown sign for It is not possible to have
+    long nGlobalUnassigned = nUnassigned;
+    if (mesh.isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &nGlobalUnassigned, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
+    }
+
+    if (nGlobalUnassigned != 0) {
+        assert(mesh.isPartitioned());
+        assert(mesh.getProcessorCount() != 1);
+
+        // Initialize the communicator for exchanging the sign of the ghosts
+        DataCommunicator dataCommunicator(m_kernelPtr->getCommunicator());
+
+        int sign;
+        size_t dataSize = sizeof(sign);
+
+        // Set the receives
         for (const auto entry : mesh.getGhostExchangeTargets()) {
             const int rank = entry.first;
-            dataCommunicator.startRecv(rank);
+            const auto &list = entry.second;
+
+            dataCommunicator.setRecv(rank, list.size() * dataSize);
         }
 
-        // Start the sends
+        // Set the sends
         for (const auto entry : mesh.getGhostExchangeSources()) {
             const int rank = entry.first;
             auto &list = entry.second;
-            SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
 
-            for (long id : list) {
-                // Detect the region associated to the ghost
-                int region = -1;
-                for (int k = 0; k < nRegions; ++k) {
-                    if (regionCellList[k].count(id) != 0) {
-                        region = k;
-                        break;
+            dataCommunicator.setSend(rank, list.size() * dataSize);
+        }
+
+        // Communicate the sign among the partitions
+        while (nGlobalUnassigned != 0) {
+            // Start the receives
+            for (const auto entry : mesh.getGhostExchangeTargets()) {
+                const int rank = entry.first;
+                dataCommunicator.startRecv(rank);
+            }
+
+            // Start the sends
+            for (const auto entry : mesh.getGhostExchangeSources()) {
+                const int rank = entry.first;
+                auto &sendIds = entry.second;
+                SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
+
+                for (long cellId : sendIds) {
+                    int sign = getSign(cellId);
+                    buffer << sign;
+                }
+
+                dataCommunicator.startSend(rank);
+            }
+
+            // Receive the sign
+            //
+            // If we discovee the sign of a ghost, we can usi it as a seed.
+            int nCompletedRecvs = 0;
+            while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
+                int rank = dataCommunicator.waitAnyRecv();
+                const auto &recvIds = mesh.getGhostExchangeTargets(rank);
+                RecvBuffer &buffer = dataCommunicator.getRecvBuffer(rank);
+
+                // Receive data and detect new seeds
+                seeds.clear();
+                for (long cellId : recvIds) {
+                    buffer >> sign;
+
+                    std::size_t cellRawId = mesh.getCells().getRawIndex(cellId);
+                    if (!signAssigned.rawAt(cellRawId)) {
+                        if (sign != 0) {
+                            seeds.push_back(cellId);
+                            signAssigned.rawAt(cellRawId) = true;
+                        }
+                    } else {
+                        assert(getSign(cellId) == sign);
                     }
                 }
 
-                assert(region >= 0);
+                ++nCompletedRecvs;
 
-                // Detect the sign to communicate.
-                if (regionType[region] == REGION_UNKNOWN) {
-                    sign = 0;
-                } else if (regionType[region] == REGION_EXTERNAL) {
-                    sign = 1;
-                } else if (regionType[region] == REGION_INTERNAL) {
-                    sign = -1;
-                } else {
-                    sign = getSign(id);
+                // Propagate the sign of the newly identified seeds
+                if (seeds.size() > 0) {
+                    propagateSeedSign(seeds, &nUnassigned, &signAssigned);
                 }
-
-                buffer << sign;
             }
 
-            dataCommunicator.startSend(rank);
-        }
+            // Wait to the sends to finish
+            dataCommunicator.waitAllSends();
 
-        // Check if it is possible to detect the sign of an unkown region
-        std::vector<int> regionSign(nRegions, 0);
-        for (int region = 0; region < nRegions; ++region) {
-            if (regionType[region] == REGION_EXTERNAL) {
-                regionSign[region] = 1;
-            } else if (regionType[region] == REGION_INTERNAL) {
-                regionSign[region] = -1;
-            }
-        }
-
-        int nCompletedRecvs = 0;
-        while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
-            int rank = dataCommunicator.waitAnyRecv();
-            const auto &list = mesh.getGhostExchangeTargets(rank);
-            RecvBuffer &buffer = dataCommunicator.getRecvBuffer(rank);
-
-
-            for (long id : list) {
-                buffer >> sign;
-                if (sign == 0) {
-                    continue;
-                }
-
-                // Detect the region associated to the ghost
-                int region = -1;
-                for (int k = 0; k < nRegions; ++k) {
-                    if (regionCellList[k].count(id) != 0) {
-                        region = k;
-                        break;
-                    }
-                }
-
-                assert(region >= 0);
-
-                // Assign the sign to the region
-                if (regionType[region] != REGION_UNKNOWN) {
-                    continue;
-                } else if (regionSign[region] != 0) {
-                    assert(sign == regionSign[region]);
-                    continue;
-                }
-
-                regionSign[region] = sign;
-            }
-
-            ++nCompletedRecvs;
-        }
-
-        dataCommunicator.waitAllSends();
-
-        // Set the sign of the fixable unkown regions
-        for (int region = 0; region < nRegions; ++region) {
-            if (regionType[region] != REGION_UNKNOWN) {
-                continue;
-            }
-
-            sign = regionSign[region];
-            if (sign == 0) {
-                continue;
-            }
-
-            // Set the type of the region
-            if (sign > 0) {
-                regionType[region] = REGION_EXTERNAL;
-            } else if (sign < 0) {
-                regionType[region] = REGION_INTERNAL;
-            }
-
-            // Assign the sign to the whole region
-            assignSign(sign, regionCellList[region]);
+            // Update the global counter for cells with an unknow sign
+            nGlobalUnassigned = nUnassigned;
+            MPI_Allreduce(MPI_IN_PLACE, &nGlobalUnassigned, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
         }
     }
 #else
     // Check that the sign has been propagated into all regions
-    bool complete = true;
-    for (int region = 0; region < nRegions; ++region) {
-        if (regionType[region] == REGION_UNKNOWN) {
-            complete = false;
-            break;
-        }
-    }
-
-    assert(complete);
+    assert(nUnassigned == 0)
 #endif
-
 }
 
 /*!
- * Assign the sign to the specified list of cells.
+ * Propagate the sign of the signed distance function from the specified
+ * seeds to all reachable cells.
  *
- * \param sign is the sign that will be assiged to the cells
- * \param cells is the list of cells
+ * \param seeds are the seeds to be used for sign propagation
+ * \param[in,out] nUnassigned is the number of cells for which the sign is
+ * still unassigned. On output, this number will be updated so it's possible
+ * to keep track of the cells whose sign is not yet assigned
+ * \param[in,out] signAssigned is a flag that states if the sign of a
+ * cell has been assigned. On output, this flag will be updated for
+ * all the cells whose sign has been set
+ * \result The number of cells for which the sign has been set during this
+ * function call.
  */
-void LevelSetCachedObject::assignSign(int sign, const std::unordered_set<long> &cells) {
+void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
+                                             long *nUnassigned, PiercedStorage<bool, long> *signAssigned) {
 
-    for (long id : cells) {
-        // Get the info associated to the id
-        //
-        // A new info needs to be created only if the sign to assign is
-        // different from the default sign.
-        PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;
-        if( infoItr == m_ls.end() && sign != levelSetDefaults::SIGN ){
-            infoItr = m_ls.emplace(id) ;
+    VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
+
+    std::vector<long> processList;
+
+    std::size_t seedCursor = seeds.size();
+    while (seedCursor != 0) {
+        // Get a seed
+        --seedCursor;
+        long seedId = seeds[seedCursor];
+
+        // Clear process list
+        processList.clear();
+
+        // Start filling the process list with the neighbours of the seed
+        // that have an unknown sign. If the seed is sourrounded only by
+        // cell for which the sign value is know, the seed can't be used
+        // to propagate the sign
+        const Cell &seed = mesh.getCell(seedId);
+        const long *seedNeighs = seed.getAdjacencies() ;
+        int nSeedNeighs = seed.getAdjacencyCount() ;
+        for(int n = 0; n < nSeedNeighs; ++n){
+            long neighId = seedNeighs[n] ;
+            if (neighId < 0) {
+                continue;
+            } else if (signAssigned->at(neighId)) {
+                continue;
+            }
+
+            processList.push_back(neighId);
         }
 
-        // Update the sign
-        if( infoItr != m_ls.end() ) {
-            (*infoItr).value = sign * levelSetDefaults::VALUE;
+        if (processList.empty()) {
+            continue;
+        }
+
+        // Get the sign of the seed
+        int seedSign = getSign(seedId);
+
+        // Propagate the sign
+        while (!processList.empty()) {
+            long cellId = processList.back();
+            processList.resize(processList.size() - 1);
+
+            // Consider only cells with an unknown sign
+            //
+            // The process list is not unique, it can contain duplcates, so
+            // we need to make sure not to process a cell multiple times.
+            // If the sign of the cell is know, this means that it has
+            // already been processed.
+            if (signAssigned->at(cellId)) {
+                continue;
+            }
+
+            // Set the sign of the cell
+            setSign(cellId, seedSign);
+            signAssigned->at(cellId) = true;
+            --(*nUnassigned);
+
+            // If there are no more unassigned cell we can exit
+            if (*nUnassigned == 0) {
+                return;
+            }
+
+            // Add cells with unknow sign to the process list
+            const Cell &cell = mesh.getCell(cellId);
+            const long *cellNeighs = cell.getAdjacencies() ;
+            int nCellNeighs = cell.getAdjacencyCount() ;
+            for(int n = 0; n < nCellNeighs; ++n){
+                long neighId = cellNeighs[n] ;
+                if (neighId < 0) {
+                    continue;
+                } else if (signAssigned->at(neighId)) {
+                    continue;
+                }
+
+                processList.push_back(neighId);
+            }
         }
     }
+}
 
+/*!
+ * Set the sign of the specified cell.
+ *
+ * \param id is the id of the cell
+ * \param sign is the sign that will be assiged to the cell
+ */
+void LevelSetCachedObject::setSign(long id, int sign) {
+
+    // The sign has to be set only if it is different from the default sign
+    if (sign == levelSetDefaults::SIGN) {
+        return;
+    }
+
+    // Get the info associated to the id
+    PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id);
+    if (infoItr == m_ls.end()){
+        infoItr = m_ls.emplace(id);
+    }
+
+    // Update the sign
+    (*infoItr).value = sign * levelSetDefaults::VALUE;
 }
 
 /*!
