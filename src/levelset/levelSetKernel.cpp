@@ -104,56 +104,63 @@ double LevelSetKernel::computeSizeNarrowBandFromLS( LevelSetObject *visitor, con
     // We need to consider only the cells with a levelset value less than
     // local narrow band (ie. size of the narrowband evalauted using the
     // cell).
-    double newRSearch = 0.;
-    int factor  ;
+    double RSearch = 0.;
+    for (auto itr = cellBegin; itr != cellEnd; ++itr) {
+        std::size_t rawIndex = itr.getRawIndex();
+        const Cell &cell = *itr;
 
-    for (auto &cell : getMesh()->getCells() ) {
         // Discard cells outside the narrow band
         long id = cell.getId() ;
-        if( !visitor->isInNarrowBand(id) ) {
+        if( !isInNarrowBand.rawAt(rawIndex) ) {
             continue;
         }
 
         // Evaluate local search radius
         std::array<double,3> myCenter = computeCellCentroid(id) ;
 
-        const long* neighbours = cell.getAdjacencies() ;
-        int N = cell.getAdjacencyCount() ;
+        int mySign = visitor->getSign(id);
+        const LevelSetInfo &myLevelSetInfo = visitor->getLevelSetInfo(id);
 
-        double localRSearch = 0. ;
-        for(int n=0; n<N; ++n){
+        const long *neighbours = cell.getAdjacencies() ;
+        int nNeighbours = cell.getAdjacencyCount() ;
+
+        for(int n=0; n<nNeighbours; ++n){
             long neighId = neighbours[n] ;
             if (neighId < 0) {
                 continue;
             }
 
-            if( visitor->isInNarrowBand(neighId)){
-                factor = (int) signd * visitor->getSign(id) + (int) (!signd) ;
-                std::array<double,3> diff = computeCellCentroid(neighId) - myCenter ;
-                if( factor *dotProduct(diff, visitor->getGradient(id)) < 0){
-                    localRSearch = std::max( localRSearch, norm2(diff) );
-                }
+            if (!isInNarrowBand.at(neighId)) {
+                continue;
             }
-        } 
 
-        // Discard cells with a levelset greater than the local narrow band
-        if ( std::abs( visitor->getLS(id) ) > (localRSearch + m_mesh->getTol()) ) {
-            continue;
+            // Consider only search radiuses greater than the current value
+            std::array<double,3> distance = computeCellCentroid(neighId) - myCenter ;
+            double localRSearch = norm2(distance);
+            if (localRSearch < RSearch) {
+                continue;
+            }
+
+            // Discard cells with a levelset greater than the local search radius
+            if ( std::abs( myLevelSetInfo.value ) > (localRSearch + m_mesh->getTol()) ) {
+                break;
+            }
+
+            // Check if this cell-neighbour pair increases the search radius
+            int factor = (int) signd * mySign + (int) (!signd) ;
+            if( factor *dotProduct(distance, myLevelSetInfo.gradient) < 0){
+                RSearch = localRSearch;
+            }
         }
-
-        // Update the levelset
-        newRSearch = std::max( localRSearch, newRSearch );
     }
 
 # if BITPIT_ENABLE_MPI
     if( assureMPI() ) {
-        double reducedRSearch ;
-        MPI_Allreduce( &newRSearch, &reducedRSearch, 1, MPI_DOUBLE, MPI_MAX, m_commMPI );
-        newRSearch = reducedRSearch ;
+        MPI_Allreduce( MPI_IN_PLACE, &RSearch, 1, MPI_DOUBLE, MPI_MAX, m_commMPI );
     }
 #endif
 
-    return newRSearch;
+    return RSearch;
 
 }
 
