@@ -1251,7 +1251,8 @@ bool VolCartesian::isVertexCartesianIdValid(const std::array<int, 3> &ijk) const
 
 	\param id is the id of the cell
 	\param face is a face of the cell
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\result The neighbours of the specified cell for the given face.
 */
 void VolCartesian::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const
@@ -1268,7 +1269,7 @@ void VolCartesian::_findCellFaceNeighs(const long &id, const int &face, const st
 
 	if (isCellCartesianIdValid(neighIjk)) {
 		long neighId = getCellLinearId(neighIjk);
-		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
 			neighs->push_back(neighId);
 		}
 	}
@@ -1281,7 +1282,8 @@ void VolCartesian::_findCellFaceNeighs(const long &id, const int &face, const st
 
 	\param id is the id of the cell
 	\param edge is an edge of the cell
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given edge will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
@@ -1298,7 +1300,7 @@ void VolCartesian::_findCellEdgeNeighs(const long &id, const int &edge, const st
 	std::array<int, 3> diagNeighIjk(getCellCartesianId(id) + m_edgeNeighDeltas[edge]);
 	if (isCellCartesianIdValid(diagNeighIjk)) {
 		long diagNeighId = getCellLinearId(diagNeighIjk);
-		if (std::find(blackList.begin(), blackList.end(), diagNeighId) == blackList.end()) {
+		if (utils::findInOrderedVector<long>(diagNeighId, blackList) == blackList.end()) {
 			utils::addToOrderedVector<long>(diagNeighId, *neighs);
 		}
 	}
@@ -1314,7 +1316,8 @@ void VolCartesian::_findCellEdgeNeighs(const long &id, const int &edge, const st
 
 	\param id is the id of the cell
 	\param vertex is a vertex of the cell
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given vertex will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
@@ -1337,7 +1340,7 @@ void VolCartesian::_findCellVertexNeighs(const long &id, const int &vertex, cons
 		// Get the linear neighbour index and, if it's not on the blacklist,
 		// add it to the list of neighbours
 		long neighId = getCellLinearId(neighIjk);
-		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
 			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
 	}
