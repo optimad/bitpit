@@ -2280,7 +2280,8 @@ void PatchKernel::findCellFaceNeighs(const long &id, const int &face, std::vecto
 
 	\param id is the id of the cell
 	\param face is a face of the cell
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given face will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
@@ -2295,7 +2296,7 @@ void PatchKernel::_findCellFaceNeighs(const long &id, const int &face, const std
 			continue;
 		}
 
-		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
 			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
 	}
@@ -2406,7 +2407,8 @@ void PatchKernel::findCellEdgeNeighs(const long &id, const int &edge, std::vecto
 
 	\param id is the id of the cell
 	\param edge is an edge of the cell
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given edge will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
@@ -2551,7 +2553,8 @@ void PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, std::v
 
 	\param id is the id of the cell
 	\param vertex is a local vertex of the cell
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given vertex will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
@@ -2591,7 +2594,7 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 		}
 
 		// Add the current cell to the neighoburs
-		if (scanId != id && std::find(blackList.begin(), blackList.end(), scanId) == blackList.end()) {
+		if (scanId != id && utils::findInOrderedVector<long>(scanId, blackList) == blackList.end()) {
 			utils::addToOrderedVector<long>(scanId, *neighs);
 		}
 
