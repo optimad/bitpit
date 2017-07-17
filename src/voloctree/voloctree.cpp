@@ -2034,7 +2034,8 @@ void VolOctree::scale(std::array<double, 3> scaling)
 
 	\param id is the id of the cell
 	\param edge is an edge of the cell
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given edge will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
@@ -2088,6 +2089,7 @@ void VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::
 	\param id is the id of the cell
 	\param vertex is a local vertex of the cell
 	\param blackList is a list of cells that are excluded from the search
+	The blacklist has to be a unique list of ordered cell ids.
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given vertex will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
@@ -2161,7 +2163,8 @@ void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const s
 	\param id is the id of the cell
 	\param codimension is the co-dimension
 	\param index is the local index of the entity (vertex, edge or face)
-	\param blackList is a list of cells that are excluded from the search
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
 	\result The neighbours for the given codimension of the specified cell.
 */
 void VolOctree::findCellCodimensionNeighs(const long &id, const int &index,
@@ -2188,7 +2191,7 @@ void VolOctree::findCellCodimensionNeighs(const long &id, const int &index,
 		OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
 		long neighId = getOctantId(neighOctantInfo);
 
-		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
 			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
 	}
