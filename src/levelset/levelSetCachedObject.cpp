@@ -386,120 +386,133 @@ double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetCartesian *visitee, c
 double LevelSetCachedObject::_updateSizeNarrowBand(LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper){
 
     VolOctree const &mesh = *(visitee->getOctreeMesh());
-    double  newRSearch(0.) ;
 
-    bool coarseningInNarrowBand=false ;
+    VolumeKernel::CellConstIterator cellBegin = mesh.cellConstBegin();
+    VolumeKernel::CellConstIterator cellEnd   = mesh.cellConstEnd();
 
-    // assumes that LS information is relevant to OLD!!! grid
-    // scrrens old narrow band for coarsest elements
-
-    //
-    // Get the bounding box of the objects
-    std::array<double, 3> objectsMinPoint;
-    std::array<double, 3> objectsMaxPoint;
-    getBoundingBox( objectsMinPoint, objectsMaxPoint ) ;
+    // Bounding box of the object
+    std::array<double,3> boxMin;
+    std::array<double,3> boxMax;
+    getBoundingBox(boxMin, boxMax);
 
     //
-    // Cells in the narrow band
+    // Detect the R-Search-modifiers cells
     //
-    std::unordered_set<long> narrowBandCells;
+    // A cell is makerd as R-Search-modifier if it contributes (directly of
+    // indirectly) to narrow band size evaluation. The contribution is direct
+    // if the narrow band size is influenced by the size of the cell, it is
+    // indirect if the narrow band size is influenced by the size of the
+    // cell's neighbours.
+    //
+    // Since levelset information are still relative to the old grid, we need
+    // to consider updated cells and non-updated cells separately:
+    //  - for non-updated cells we can use the levelset information, since
+    //    those information are still valid for cells that have not been
+    //    updated. A non-updated cell will be marked as R-Search-modifier if
+    //    it is inside the narrow band;
+    //  - for updated cells we cannot use the levelset information, and we
+    //    need to relay only on adaption information. An updated cell will
+    //    be marked as R-Search-modifier if its parent was in the narrowband
+    //    and if the cell is inside the bounding box of the object.
+    //
+    // Once we have the cells that are direct R-Search-modifier we can flag
+    // indirect R-Search-modifier.
+    PiercedStorage<bool, long> isRSearchModifier(1, &(visitee->getOctreeMesh()->getCells()));
+    isRSearchModifier.fill(false);
 
-    // First insert the new cells added to the narrow band
-    std::unordered_set<long> removedNBCells;
-    for ( auto & info : mapper ){
+    // Scan the update information to flag the updated cells
+    bool coarseningInNarrowBand = false;
+    std::unordered_set<long> updatedCells;
+    for ( const auto &info : mapper ){
         if( info.entity != adaption::Entity::ENTITY_CELL){
             continue;
         }
 
-        bool parentInNarrowBand = false;
-        for ( auto & parent : info.previous){
-            if( isInNarrowBand(parent) ){
-                parentInNarrowBand = true;
-                if( info.type == adaption::Type::TYPE_COARSENING ){
-                    coarseningInNarrowBand=true ;
+        bool previouslyInNarrowBand = false;
+        for ( auto & previousId : info.previous){
+            if ( isInNarrowBand(previousId)){
+                previouslyInNarrowBand = true;
+                if (info.type == adaption::Type::TYPE_COARSENING) {
+                    coarseningInNarrowBand = true;
                 }
+
                 break;
             }
         }
 
-        if (parentInNarrowBand) {
-            for ( auto & parent : info.previous){
-                removedNBCells.insert(parent);
-            }
-
-            for( auto &child : info.current){
-                narrowBandCells.insert(child);
+        for ( auto &currentId : info.current){
+            updatedCells.insert(currentId);
+            if (previouslyInNarrowBand) {
+                isRSearchModifier.at(currentId) = visitee->isCellInsideBoundingBox( currentId, boxMin, boxMax );
             }
         }
     }
 
-    // Now add the cells that were in the narrow band befor and have not been
-    // updated
-    for (auto cell : mesh.getCells()) {
-        long id = cell.getId() ;
-        if( removedNBCells.count(id) > 0 || !isInNarrowBand(id) ) {
+    // Flag the non-updated cells
+    for (auto itr = cellBegin; itr != cellEnd; ++itr) {
+        long cellId = itr.getId();
+        if (updatedCells.count(cellId) != 0) {
             continue;
         }
 
-        narrowBandCells.insert(id);
+        std::size_t cellRawId = itr.getRawIndex();
+        isRSearchModifier.rawAt(cellRawId) = isInNarrowBand(cellId);
     }
 
-    // Evaluate if the cells in the narrow band are inside the bounding box
-    // defined by the objects.
-    std::unordered_map<long, bool> isInsideObjectBox;
-    for ( long cellId : narrowBandCells ){
-        isInsideObjectBox.insert( { cellId, visitee->isCellInsideBoundingBox( cellId, objectsMinPoint, objectsMaxPoint ) } );
-    }
-
+    // Flag the cells that are indirect R-Search-modifier
     //
-    // Get the miminum level in the narrow band
-    //
-    // We need to consider only the cells that are inside the bounding box
-    // defined by the objects, or the cells that have at least a neighbout
-    // inside the bounding box defined by the objects.
-    std::vector<long> faceNeighs;
-    for ( long cellId : narrowBandCells ){
-        // Discard cells that are not in the bounding box
-        bool discardCell = ! isInsideObjectBox.at(cellId) ;
-        if ( discardCell ) {
-            faceNeighs.clear();
-            mesh.findCellFaceNeighs(cellId, &faceNeighs);
-            for ( long neighId : faceNeighs ) {
-                if ( narrowBandCells.count(neighId) == 0 ) {
-                    continue;
-                }
-
-                if (isInsideObjectBox.at(neighId)) {
-                    discardCell = false ;
-                    break ;
-                }
-            }
-        }
-
-        if (discardCell) {
+    // These are the cells that have at least a neighbour which was explicitly
+    // marked as R-Search-modifier.
+    for (auto itr = cellBegin; itr != cellEnd; ++itr) {
+        // No need to process cells that are already flagged
+        std::size_t cellRawId = itr.getRawIndex();
+        if (isRSearchModifier.rawAt(cellRawId)) {
             continue;
         }
 
-        // Update the level
-        newRSearch = std::max( newRSearch, visitee->computeRSearchFromCell(cellId) ) ;
-
+        // Mark the cells with at least a neighbour marked as R-Search-modifier
+        const Cell &cell = *itr;
+        const long *neighbours = cell.getAdjacencies() ;
+        int nNeighbours = cell.getAdjacencyCount() ;
+        for (int n = 0; n < nNeighbours; ++n) {
+            long neighId = neighbours[n] ;
+            if (neighId < 0) {
+                continue;
+            } else if (isRSearchModifier.at(neighId)) {
+                isRSearchModifier.rawAt(cellRawId) = true;
+                break;
+            }
+        }
     }
 
-    if(coarseningInNarrowBand==false){
-        newRSearch = std::min( newRSearch, getSizeNarrowBand() ) ;
+    // Evaluate the narrow band size
+    //
+    // We need to consider only cells that are marked as R-Search-modifiers.
+    double RSearch = 0.;
+    for (auto itr = cellBegin; itr != cellEnd; ++itr) {
+        std::size_t cellRawId = itr.getRawIndex();
+        if (!isRSearchModifier.rawAt(cellRawId)) {
+            continue;
+        }
+
+        long cellId = itr.getId();
+        RSearch = std::max( RSearch, visitee->computeRSearchFromCell(cellId) ) ;
+    }
+
+    // The size of the narrow band can be shrunk only if there was no
+    // coarsegning inside the narrow band.
+    if (!coarseningInNarrowBand) {
+        RSearch = std::min( RSearch, getSizeNarrowBand() ) ;
     }
 
 # if BITPIT_ENABLE_MPI
+    // Update the narrowband size across the processors
     if( assureMPI() ) {
-        double reducedRSearch ;
-        MPI_Comm meshComm = visitee->getCommunicator() ;
-        MPI_Allreduce( &newRSearch, &reducedRSearch, 1, MPI_DOUBLE, MPI_MAX, meshComm );
-        newRSearch = reducedRSearch ;
+        MPI_Allreduce( MPI_IN_PLACE, &RSearch, 1, MPI_DOUBLE, MPI_MAX, visitee->getCommunicator() );
     }
 #endif
 
-    return newRSearch;
-
+    return RSearch;
 }
 
 /*!
