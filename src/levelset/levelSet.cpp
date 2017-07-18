@@ -288,7 +288,7 @@ int LevelSet::addObject( const std::vector<long> &list, const long &refInterface
 
     assert(m_kernel && " levelset: setMesh must be called befor adding a LevelSetMask object ");
 
-    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, refInterface, invert, *m_kernel->getMesh()) )  );
+    return registerObject( std::move(std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, refInterface, invert, *m_kernel->getMesh())) )  );
 };
 
 /*!
