@@ -47,6 +47,33 @@ class LevelSetCartesian;
 class LevelSetOctree;
 class LevelSetCachedObject;
 
+class SegmentationKernel {
+
+public:
+    SegmentationKernel();
+    SegmentationKernel(const SurfUnstructured *surface, double featureAngle);
+    SegmentationKernel(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle);
+
+    const SurfUnstructured & getSurface() const;
+    double getFeatureAngle() const;
+
+    const SurfUnstructured & getSurface();
+
+    const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
+    const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;
+
+private:
+    const SurfUnstructured *m_surface;
+    std::shared_ptr<const SurfUnstructured> m_ownedSurface;
+    double m_featureAngle;
+
+    std::unordered_map<long, std::vector< std::array<double,3>>> m_vertexNormals;
+    std::unordered_map<long, std::vector< std::array<double,3>>> m_vertexGradients;
+
+    void setSurface( const SurfUnstructured *surface, double featureAngle);
+
+};
+
 class LevelSetSegmentation : public LevelSetCachedObject {
 
     private:
@@ -76,14 +103,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     typedef std::unordered_map<long, std::vector<long>> SegmentToCellMap ;
 
-    int                                         m_dimension ;               /**< number of space dimensions */
+    std::shared_ptr<const SegmentationKernel> m_segmentation;
 
-    const SurfUnstructured*                     m_segmentation;             /**< surface segmentation */
-    std::unique_ptr<const SurfUnstructured>     m_own;                      /**< owner of surface segmentation */
-    double                                      m_featureAngle;             /**< critical angle between facets */
-
-    std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexNormal;            /**< vertex normals */
-    std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexGradient;            /**< vertex gradient */
     PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
 
     double                                      getSegmentSize( long ) const;
@@ -128,10 +149,9 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     LevelSetSegmentation*                       clone() const ;
 
-    void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * M_PI) ;
-    void                                        setSegmentation(const SurfUnstructured *, double featureAngle = 2. * M_PI) ;
-    const SurfUnstructured &                    getSegmentation() const ;
-    double                                      getFeatureAngle() const;
+    void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&patch, double featureAngle = 2. * M_PI) ;
+    void                                        setSegmentation(const SurfUnstructured *patch, double featureAngle = 2. * M_PI) ;
+    const SegmentationKernel &                  getSegmentation() const ;
 
     virtual int                                 getPart(const long &) const ;
     long                                        getSupport(const long &i) const;

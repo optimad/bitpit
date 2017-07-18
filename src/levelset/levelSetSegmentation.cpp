@@ -41,6 +41,103 @@
 namespace bitpit {
 
 /*!
+    @class      SegmentationKernel
+    @ingroup    levelset
+    @brief      Segmentation kernel
+*/
+
+/*!
+ * Default constructor
+ */
+SegmentationKernel::SegmentationKernel( ) : m_surface(nullptr), m_featureAngle(0) {
+}
+
+/*!
+ * Constructor
+ */
+SegmentationKernel::SegmentationKernel( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle ) {
+
+    m_ownedSurface = std::shared_ptr<const SurfUnstructured>(surface.release());
+
+    setSurface(m_ownedSurface.get(), featureAngle);
+}
+
+/*!
+ * Constructor
+ */
+SegmentationKernel::SegmentationKernel( const SurfUnstructured *surface, double featureAngle ) {
+
+    setSurface(surface, featureAngle);
+}
+
+/*!
+ * Get feature angle
+ * @return feature angle used when calculating face normals;
+ */
+double SegmentationKernel::getFeatureAngle() const {
+    return m_featureAngle;
+}
+
+/*!
+ * Get segmentation vertex normals
+ * @return segmentation vertex normals;
+ */
+const std::unordered_map<long, std::vector< std::array<double,3>>> & SegmentationKernel::getVertexNormals() const {
+    return m_vertexNormals;
+}
+
+/*!
+ * Get segmentation vertex gradients
+ * @return segmentation vertex gradients;
+ */
+const std::unordered_map<long, std::vector< std::array<double,3>>> & SegmentationKernel::getVertexGradients() const {
+    return m_vertexGradients;
+}
+
+/*!
+ * Get segmentation surface
+ * @return segmentation surface;
+ */
+const SurfUnstructured & SegmentationKernel::getSurface() const {
+    return *m_surface;
+}
+
+/*!
+ * Set the surface
+ * @param[in] patch pointer to surface
+ */
+void SegmentationKernel::setSurface( const SurfUnstructured *surface, double featureAngle){
+
+    std::vector<std::array<double,3>> vertexNormal ;
+    std::vector<std::array<double,3>> vertexGradient ;
+
+    m_surface      = surface;
+    m_featureAngle = featureAngle;
+
+    double tol = m_surface->getTol() ;
+    for( const Cell &segment : m_surface->getCells() ){
+        long segmentId = segment.getId() ;
+        int nVertices  = segment.getVertexCount() ;
+
+        vertexNormal.resize(nVertices) ;
+        vertexGradient.resize(nVertices) ;
+
+        double misalignment = 0. ;
+        for( int i = 0; i < nVertices; ++i ){
+            vertexGradient[i] = m_surface->evalVertexNormal(segmentId, i) ;
+            vertexNormal[i]   = m_surface->evalLimitedVertexNormal(segmentId, i, m_featureAngle) ;
+
+            misalignment += norm2(vertexGradient[i] - vertexNormal[i]) ;
+        }
+
+        m_vertexGradients.insert({{segmentId, vertexGradient}}) ;
+        if( misalignment >= tol ){
+            m_vertexNormals.insert({{segmentId, vertexNormal}}) ;
+        }
+    }
+}
+
+/*!
 	@class      LevelSetSegmentation::SegInfo
 	@ingroup    levelset
 	@brief      Information about the segments
@@ -77,7 +174,7 @@ LevelSetSegmentation::~LevelSetSegmentation() {
  * Constructor
  * @param[in] id identifier of object
  */
-LevelSetSegmentation::LevelSetSegmentation(int id) : LevelSetCachedObject(id), m_dimension(0), m_segmentation(nullptr) {
+LevelSetSegmentation::LevelSetSegmentation(int id) : LevelSetCachedObject(id), m_segmentation(nullptr) {
 }
 
 /*!
@@ -105,16 +202,9 @@ LevelSetSegmentation::LevelSetSegmentation( int id, const SurfUnstructured *STL,
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) : LevelSetSegmentation(other.getId() ) {
+LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) : LevelSetCachedObject(other), m_seg(other.m_seg) {
 
-    m_segmentation = other.m_segmentation; 
-    m_dimension = other.m_dimension ;
-    m_featureAngle = other.m_featureAngle ;
-    m_vertexNormal = other.m_vertexNormal ;
-    m_vertexGradient = other.m_vertexGradient ;
-    if (m_own != nullptr) {
-        m_own = unique_ptr<const SurfUnstructured>(new SurfUnstructured(*(other.m_own)));
-    }
+    m_segmentation = other.m_segmentation ;
 }
 
 /*!
@@ -127,66 +217,28 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
 
 /*!
  * Set the segmentation
- * @param[in] segmentation unique pointer to surface mesh
+ * @param[in] patch pointer to surface
  */
-void LevelSetSegmentation::setSegmentation( std::unique_ptr<const SurfUnstructured> &&segmentation, double featureAngle){
+void LevelSetSegmentation::setSegmentation( const SurfUnstructured *surface, double featureAngle){
 
-    m_own = std::move(segmentation) ;
-
-    setSegmentation( m_own.get(), featureAngle );
+    m_segmentation = std::make_shared<const SegmentationKernel>(surface, featureAngle);
 }
 
 /*!
  * Set the segmentation
- * @param[in] segmentation pointer to surface mesh
+ * @param[in] patch pointer to surface
  */
-void LevelSetSegmentation::setSegmentation( const SurfUnstructured *segmentation, double featureAngle){
+void LevelSetSegmentation::setSegmentation( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle){
 
-    std::vector<std::array<double,3>> vertexNormal ;
-    std::vector<std::array<double,3>> vertexGradient ;
-
-    m_segmentation = segmentation;
-    m_dimension = m_segmentation->getSpaceDimension() ;
-    m_featureAngle = featureAngle;
-
-    double tol = m_segmentation->getTol() ;
-
-    for( auto & segment : m_segmentation->getCells() ){
-        long segmentId = segment.getId() ;
-        int nVertices  = segment.getVertexCount() ;
-
-        vertexNormal.resize(nVertices) ;
-        vertexGradient.resize(nVertices) ;
-
-        double misalignment = 0. ;
-        for( int i = 0; i < nVertices; ++i ){
-            vertexGradient[i] = m_segmentation->evalVertexNormal(segmentId, i) ;
-            vertexNormal[i]   = m_segmentation->evalLimitedVertexNormal(segmentId, i, m_featureAngle) ;
-
-            misalignment += norm2(vertexGradient[i] - vertexNormal[i]) ;
-        }
-
-        m_vertexGradient.insert({{segmentId, vertexGradient}}) ;
-        if( misalignment >= tol ){
-            m_vertexNormal.insert({{segmentId, vertexNormal}}) ;
-        }
-    }
+    m_segmentation = std::make_shared<const SegmentationKernel>(std::move(surface), featureAngle);
 }
 
 /*!
  * Get a constant refernce to the segmentation
  * @return constant reference to the segmentation
  */
-const SurfUnstructured & LevelSetSegmentation::getSegmentation() const {
+const SegmentationKernel & LevelSetSegmentation::getSegmentation() const {
     return *m_segmentation ;
-}
-
-/*!
- * Get feature angle
- * @return feature angle used when calculating face normals;
- */
-double LevelSetSegmentation::getFeatureAngle() const {
-    return m_featureAngle;
 }
 
 /*!
@@ -198,8 +250,9 @@ int LevelSetSegmentation::getPart( const long &id ) const{
 
     auto itr = m_seg.find(id) ;
     if( itr != m_seg.end() ){
+        const SurfUnstructured &m_surface = m_segmentation->getSurface();
         long support = itr->segments.front() ;
-        return m_segmentation->getCell(support).getPID();
+        return m_surface.getCell(support).getPID();
     } else {
         return levelSetDefaults::PART ;
     }
@@ -261,14 +314,16 @@ const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &id) c
  */
 std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( const long &i ) const {
 
-    const Cell &cell = m_segmentation->getCell(i) ;
+    const SurfUnstructured &m_surface = m_segmentation->getSurface();
+
+    const Cell &cell = m_surface.getCell(i) ;
 
     int                                     j, n, N (cell.getVertexCount()) ;
     std::vector<std::array<double,3>>       VS(N) ;
 
     for( n=0; n<N; ++n){
         j = cell.getVertex(n) ;
-        VS[n] = m_segmentation->getVertexCoords(j);
+        VS[n] = m_surface.getVertexCoords(j);
     }
 
     if( N > 3){
@@ -300,12 +355,14 @@ double LevelSetSegmentation::getSurfaceFeatureSize( const long &i ) const {
  */
 double LevelSetSegmentation::getSegmentSize( long id ) const {
 
-    int spaceDimension = m_segmentation->getSpaceDimension();
+    const SurfUnstructured &m_surface = m_segmentation->getSurface();
+
+    int spaceDimension = m_surface.getSpaceDimension();
     if (spaceDimension == 2) {
-        return m_segmentation->evalCellArea(id); //TODO check
+        return m_surface.evalCellArea(id); //TODO check
     } else if (spaceDimension == 3) {
         int dummy;
-        return m_segmentation->evalMinEdgeLength(id, dummy);
+        return m_surface.evalMinEdgeLength(id, dummy);
     }
 
     return (- levelSetDefaults::SIZE);
@@ -317,9 +374,11 @@ double LevelSetSegmentation::getSegmentSize( long id ) const {
  */
 double LevelSetSegmentation::getMinSurfaceFeatureSize( ) const {
 
+    const SurfUnstructured &m_surface = m_segmentation->getSurface();
+
     bool   minimumValid = false;
     double minimumSize  = levelSetDefaults::SIZE;
-    for( const Cell &cell : m_segmentation->getCells() ){
+    for( const Cell &cell : m_surface.getCells() ){
         double segmentSize = getSegmentSize(cell.getId());
         if (segmentSize < 0) {
             continue;
@@ -342,8 +401,10 @@ double LevelSetSegmentation::getMinSurfaceFeatureSize( ) const {
  */
 double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
 
+    const SurfUnstructured &m_surface = m_segmentation->getSurface();
+
     double maximumSize = - levelSetDefaults::SIZE;
-    for( const Cell &cell : m_segmentation->getCells() ){
+    for( const Cell &cell : m_surface.getCells() ){
         double segmentSize = getSegmentSize(cell.getId());
         maximumSize = std::max(segmentSize, maximumSize);
     }
@@ -558,16 +619,18 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
 
     std::array<double,3> g ;
 
-    const Cell &cell = m_segmentation->getCell(i) ;
+    const SurfUnstructured &m_surface = m_segmentation->getSurface();
+
+    const Cell &cell = m_surface.getCell(i) ;
     int nV = cell.getVertexCount() ;
 
-    auto itrNormal = m_vertexNormal.find(i) ;
-    auto itrGradient = m_vertexGradient.find(i) ;
-    assert( itrGradient != m_vertexGradient.end() ) ;
+    auto itrNormal = m_segmentation->getVertexNormals().find(i) ;
+    auto itrGradient = m_segmentation->getVertexGradients().find(i) ;
+    assert( itrGradient != m_segmentation->getVertexGradients().end() ) ;
 
     if( nV == 1){
         long id = cell.getVertex(0) ;
-        d = norm2( p- m_segmentation->getVertexCoords(id) ) ;
+        d = norm2( p- m_surface.getVertexCoords(id) ) ;
         g.fill(0.) ;
         n.fill(0.) ;
 
@@ -578,7 +641,7 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
         std::array<double,2> lambda ;
         int flag ;
 
-        d= CGElem::distancePointSegment( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), x, lambda, flag ) ;
+        d= CGElem::distancePointSegment( p, m_surface.getVertexCoords(id0), m_surface.getVertexCoords(id1), x, lambda, flag ) ;
 
         g = p-x;
         g /= norm2(g);
@@ -589,7 +652,7 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
 
         g *= sign(dotProduct(g,n));
 
-        if( itrNormal != m_vertexNormal.end() ){
+        if( itrNormal != m_segmentation->getVertexNormals().end() ){
             n  = lambda[0] *itrNormal->second[0] ;
             n += lambda[1] *itrNormal->second[1] ;
             n /= norm2(n) ;
@@ -613,7 +676,7 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
         std::array<double,3> lambda ;
         int flag ;
 
-        d= CGElem::distancePointTriangle( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), m_segmentation->getVertexCoords(id2), x, lambda, flag ) ;
+        d= CGElem::distancePointTriangle( p, m_surface.getVertexCoords(id0), m_surface.getVertexCoords(id1), m_surface.getVertexCoords(id2), x, lambda, flag ) ;
 
         g = p-x;
         g /= norm2(g);
@@ -624,7 +687,7 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
 
         g *= sign(dotProduct(g,n));
 
-        if( itrNormal != m_vertexNormal.end() ){
+        if( itrNormal != m_segmentation->getVertexNormals().end() ){
             n  = lambda[0] *itrNormal->second[0] ;
             n += lambda[1] *itrNormal->second[1] ;
             n += lambda[2] *itrNormal->second[2] ;
@@ -698,7 +761,8 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
  * @param[out] maxP maximum point
  */
 void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
-    m_segmentation->getBoundingBox(minP,maxP) ;
+    const SurfUnstructured &m_surface = m_segmentation->getSurface();
+    m_surface.getBoundingBox(minP,maxP) ;
 }
 
 /*!
@@ -791,6 +855,8 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     VolumeKernel                            &mesh = *(visitee->getMesh() ) ;
     std::vector<std::array<double,3>>       VS(3);
 
+    const SurfUnstructured                  &m_surface = m_segmentation->getSurface();
+
     std::vector< int >                      stack, temp ;
     std::vector< std::array<double,3> >     cloud ;
 
@@ -805,14 +871,14 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     temp.reserve(128) ;
 
     SegmentToCellMap segmentToCellMap;
-    segmentToCellMap.reserve(m_segmentation->getCellCount());
+    segmentToCellMap.reserve(m_surface.getCellCount());
 
     log::cout() << "  Extracting segment-to-cell map from octree patch... " << std::endl;
 
     // --------------------------------------------------------------------------
     // COMPUTE THE SDF VALUE AT EACH MESH POINT                                   //
     //
-    for (const Cell &segment : m_segmentation->getCells()) {
+    for (const Cell &segment : m_surface.getCells()) {
         long segmentId = segment.getId();
 
         std::vector<long> &cellList = segmentToCellMap[segmentId] ;
@@ -883,6 +949,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCellMap( LevelSetOctree *visitee, const double &RSearch){
 
     VolumeKernel                &mesh = *(visitee->getMesh()) ;
+    const SurfUnstructured      &m_surface = m_segmentation->getSurface();
     int                         dim(mesh.getDimension()) ;
     long                        id, icart;
     int                         i;
@@ -892,7 +959,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
     PiercedVector<SegInfo>::iterator data;
 
     SegmentToCellMap segmentToCellMap;
-    segmentToCellMap.reserve(m_segmentation->getCellCount());
+    segmentToCellMap.reserve(m_surface.getCellCount());
 
     log::cout() << "  Extracting segment-to-cell map from Octree patch... " << std::endl;
 
