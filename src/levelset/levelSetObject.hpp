@@ -70,6 +70,8 @@ class LevelSetObject{
     LevelSetObject(int);
 
     void                                        setKernel(LevelSetKernel *);
+    LevelSetKernel *                            getKernel();
+    const LevelSetKernel *                      getKernel() const;
 
     virtual LevelSetObject*                     clone() const =0;
     void                                        clear();

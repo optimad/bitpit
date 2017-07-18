@@ -67,6 +67,22 @@ void LevelSetObject::setKernel(LevelSetKernel *kernel) {
 }
 
 /*!
+ * Gets a pointer to the kernel for the object
+ * @return A pointer to the kernel for the object
+ */
+LevelSetKernel * LevelSetObject::getKernel() {
+    return m_kernelPtr;
+}
+
+/*!
+ * Gets a constant pointer to the kernel for the object
+ * @return A constant pointer to the kernel for the object
+ */
+const LevelSetKernel * LevelSetObject::getKernel() const {
+    return m_kernelPtr;
+}
+
+/*!
  * Get the id 
  * @return id of the object
  */
