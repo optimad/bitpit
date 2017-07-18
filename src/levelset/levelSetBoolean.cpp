@@ -79,7 +79,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, std::vect
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObject(other.getId()) {
+LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObject(other) {
     m_operation = other.m_operation;
     m_objPtr = other.m_objPtr;
 }
