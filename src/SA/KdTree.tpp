@@ -86,6 +86,10 @@ KdNode<T, T1>::KdNode(
 lchild_ = -1;
 rchild_ = -1;
 
+object_ = nullptr;
+
+label = T1();
+
 return; }
 
 // Destructor(s) ============================================================ //
