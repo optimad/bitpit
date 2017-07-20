@@ -78,8 +78,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     int                                         m_dimension ;               /**< number of space dimensions */
 
-    SurfUnstructured*                           m_segmentation;             /**< surface segmentation */
-    std::unique_ptr<SurfUnstructured>           m_own;                      /**< owner of surface segmentation */
+    const SurfUnstructured*                     m_segmentation;             /**< surface segmentation */
+    std::unique_ptr<const SurfUnstructured>     m_own;                      /**< owner of surface segmentation */
     double                                      m_featureAngle;             /**< critical angle between facets */
 
     std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexNormal;            /**< vertex normals */
@@ -122,14 +122,14 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     public:
     virtual ~LevelSetSegmentation();
     LevelSetSegmentation(int);
-    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> &&, double featureAngle = 2. * M_PI);
-    LevelSetSegmentation(int, SurfUnstructured*, double featureAngle = 2. * M_PI);
+    LevelSetSegmentation(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * M_PI);
+    LevelSetSegmentation(int, const SurfUnstructured*, double featureAngle = 2. * M_PI);
     LevelSetSegmentation(const LevelSetSegmentation&);
 
     LevelSetSegmentation*                       clone() const ;
 
-    void                                        setSegmentation(std::unique_ptr<SurfUnstructured> &&, double featureAngle = 2. * M_PI) ;
-    void                                        setSegmentation(SurfUnstructured *, double featureAngle = 2. * M_PI) ;
+    void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * M_PI) ;
+    void                                        setSegmentation(const SurfUnstructured *, double featureAngle = 2. * M_PI) ;
     const SurfUnstructured &                    getSegmentation() const ;
     double                                      getFeatureAngle() const;
 

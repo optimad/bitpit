@@ -86,7 +86,7 @@ LevelSetSegmentation::LevelSetSegmentation(int id) : LevelSetCachedObject(id), m
  * @param[in] STL unique pointer to surface mesh
  * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentation(id) {
+LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentation(id) {
     setSegmentation( std::move(STL), featureAngle );
 }
 
@@ -96,7 +96,7 @@ LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstruct
  * @param[in] STL pointer to surface mesh
  * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL, double featureAngle) :LevelSetSegmentation(id) {
+LevelSetSegmentation::LevelSetSegmentation( int id, const SurfUnstructured *STL, double featureAngle) :LevelSetSegmentation(id) {
     setSegmentation( STL, featureAngle );
 }
 
@@ -113,7 +113,7 @@ LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) :
     m_vertexNormal = other.m_vertexNormal ;
     m_vertexGradient = other.m_vertexGradient ;
     if (m_own != nullptr) {
-        m_own = unique_ptr<SurfUnstructured>(new SurfUnstructured(*(other.m_own)));
+        m_own = unique_ptr<const SurfUnstructured>(new SurfUnstructured(*(other.m_own)));
     }
 }
 
@@ -129,7 +129,7 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
  * Set the segmentation
  * @param[in] segmentation unique pointer to surface mesh
  */
-void LevelSetSegmentation::setSegmentation( std::unique_ptr<SurfUnstructured> &&segmentation, double featureAngle){
+void LevelSetSegmentation::setSegmentation( std::unique_ptr<const SurfUnstructured> &&segmentation, double featureAngle){
 
     m_own = std::move(segmentation) ;
 
@@ -140,7 +140,7 @@ void LevelSetSegmentation::setSegmentation( std::unique_ptr<SurfUnstructured> &&
  * Set the segmentation
  * @param[in] segmentation pointer to surface mesh
  */
-void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation, double featureAngle){
+void LevelSetSegmentation::setSegmentation( const SurfUnstructured *segmentation, double featureAngle){
 
     std::vector<std::array<double,3>> vertexNormal ;
     std::vector<std::array<double,3>> vertexGradient ;
@@ -261,7 +261,7 @@ const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &id) c
  */
 std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( const long &i ) const {
 
-    Cell &cell = m_segmentation->getCell(i) ;
+    const Cell &cell = m_segmentation->getCell(i) ;
 
     int                                     j, n, N (cell.getVertexCount()) ;
     std::vector<std::array<double,3>>       VS(N) ;
@@ -558,7 +558,7 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
 
     std::array<double,3> g ;
 
-    Cell &cell = m_segmentation->getCell(i) ;
+    const Cell &cell = m_segmentation->getCell(i) ;
     int nV = cell.getVertexCount() ;
 
     auto itrNormal = m_vertexNormal.find(i) ;
