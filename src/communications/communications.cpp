@@ -24,6 +24,8 @@
 
 #if BITPIT_ENABLE_MPI==1
 
+#include <unistd.h>
+
 #include "bitpit_IO.hpp"
 
 #include "communications.hpp"
@@ -50,7 +52,7 @@ DataCommunicator::DataCommunicator(MPI_Comm communicator)
     MPI_Comm_rank(m_communicator, &m_rank);
 
     // Set a tag
-    setTag(TAG_AUTO);
+    setTags(TAG_AUTO, TAG_AUTO);
 }
 
 /*!
@@ -58,9 +60,15 @@ DataCommunicator::DataCommunicator(MPI_Comm communicator)
 */
 DataCommunicator::~DataCommunicator()
 {
-    if (!m_customTag) {
+    if (!m_customExchangeTag) {
         if (m_rank == 0) {
-            communications::tags().trash(m_tag);
+            communications::tags().trash(m_exchangeTag);
+        }
+    }
+
+    if (!m_customDiscoverTag) {
+        if (m_rank == 0) {
+            communications::tags().trash(m_discoverTag);
         }
     }
 }
@@ -88,38 +96,105 @@ void DataCommunicator::finalize()
 }
 
 /*!
-    Sets a custom tag to be used for the communications.
+    Sets the tag to be used for the data exchange.
+
+    By default, a unique tag for data exchange is generated in the constructor.
+    However, using this function, it is possible to assign a custom tag.
+
+    \param exchangeTag is the custom tag to be used for data exchange
+*/
+void DataCommunicator::setTag(int exchangeTag)
+{
+    setExchangeTag(exchangeTag);
+}
+
+/*!
+    Sets the tags to be used for the communications.
+
+    By default, unique tags are generated in the constructor. However, using
+    this function, it is possible to assign custom tags.
+
+    \param exchangeTag is the custom tag to be used for data exchange
+    \param discoverTag is the custom tag to be used for data size discover
+*/
+void DataCommunicator::setTags(int exchangeTag, int discoverTag)
+{
+    setExchangeTag(exchangeTag);
+    setDiscoverTag(discoverTag);
+}
+
+/*!
+    Sets the tag to be used for data exchange
 
     By default, a unique tag is generated in the constructor. However, using
     this function, it is possible to assign a custom tag.
 
-    \param tag is the custom tag to use
+    \param tag is the custom tag to be used for data exchange
 */
-void DataCommunicator::setTag(int tag)
+void DataCommunicator::setExchangeTag(int tag)
 {
-    if (tag == TAG_AUTO) {
+    m_customExchangeTag = (tag != TAG_AUTO);
+    if (m_customExchangeTag) {
+        m_exchangeTag = tag;
+    } else {
         if (m_rank == 0) {
-            m_tag = communications::tags().generate();
+            m_exchangeTag = communications::tags().generate();
         }
 
-        MPI_Bcast(&m_tag, 1, MPI_INT, 0, m_communicator);
-
-        m_customTag = false;
-    } else {
-        m_tag = tag;
-
-        m_customTag = true;
+        MPI_Bcast(&m_exchangeTag, 1, MPI_INT, 0, m_communicator);
     }
 }
 
 /*!
-    Gets the tag to be used for the communications
+    Sets the tag to be used for data size discover
 
-    \result The tag to be used for the communications.
+    By default, a unique tag is generated in the constructor. However, using
+    this function, it is possible to assign a custom tag.
+
+    \param tag is the custom tag to be used for data size discover
+*/
+void DataCommunicator::setDiscoverTag(int tag)
+{
+    m_customDiscoverTag = (tag != TAG_AUTO);
+    if (m_customDiscoverTag) {
+        m_discoverTag = tag;
+    } else {
+        if (m_rank == 0) {
+            m_discoverTag = communications::tags().generate();
+        }
+
+        MPI_Bcast(&m_discoverTag, 1, MPI_INT, 0, m_communicator);
+    }
+}
+
+/*!
+    Gets the tag to be used for data exchange communications
+
+    \result The tag to be used for data exchange communications.
 */
 int DataCommunicator::getTag() const
 {
-    return m_tag;
+    return getExchangeTag();
+}
+
+/*!
+    Gets the tag to be used for data exchange communications
+
+    \result The tag to be used for data exchange communications.
+*/
+int DataCommunicator::getExchangeTag() const
+{
+    return m_exchangeTag;
+}
+
+/*!
+    Gets the tag to be used for data size discover communications
+
+    \result The tag to be used for data size discover communications.
+*/
+int DataCommunicator::getDiscoverTag() const
+{
+    return m_discoverTag;
 }
 
 /*!
@@ -165,186 +240,120 @@ bool DataCommunicator::areRecvsContinuous()
 
 /*!
     Discover the sends inspecting the receives that the user has already set.
-
-    For the communications needed to discover the sends it will be used
-    se same tag set in the communicator.
 */
 void DataCommunicator::discoverSends()
-{
-    discoverSends(m_tag);
-}
-
-/*!
-    Discover the sends inspecting the receives that the user has already set.
-
-    \param discoverTag is the tag to be used for the communications needed
-    to discover the sends
-*/
-void DataCommunicator::discoverSends(int discoverTag)
 {
     // Cancel current sends
     clearAllSends();
 
-    // Send the size of the messages that the processors want to receive
-    //
-    // We need to use buffered sends to be sure that the data to transfer
-    // will not be overwritten during the loop over the receive list.
-    int commBufferSize = 0;
-    std::vector<char> commBuffer;
-    if (m_recvIds.size() != 0) {
-        commBufferSize = m_recvIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
-        commBuffer.resize(commBufferSize);
-        MPI_Buffer_attach(commBuffer.data(), commBufferSize);
+    // Send the data sizes with a synchronous send
+    int nRecvs = getRecvCount();
 
-        for (auto &entry : m_recvIds) {
-            int rank = entry.first;
-            RecvBuffer &buffer = getRecvBuffer(rank);
-            long size = buffer.getSize();
-
-            MPI_Request dataSizeRequest;
-            MPI_Ibsend(&size, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
-
-            // MPI_Isend initiates an asynchronous (background) data transfer.
-            // The actual data transfer might not happen unless one of the
-            // MPI_Wait* or MPI_Test* calls has been made on the request.
-            int completeFlag;
-            MPI_Test(&dataSizeRequest, &completeFlag, MPI_STATUS_IGNORE);
-        }
+    std::vector<long> discoverSizes(nRecvs, 0);
+    std::vector<MPI_Request> discoverRequests(nRecvs, MPI_REQUEST_NULL);
+    for (int i = 0; i < nRecvs; ++i) {
+        int rank = m_recvRanks[i];
+        RecvBuffer &buffer = m_recvBuffers[i];
+        discoverSizes[i] = buffer.getSize();
+        MPI_Issend(discoverSizes.data() + i, 1, MPI_LONG, rank, m_discoverTag, m_communicator, discoverRequests.data() + i);
     }
 
-    // Raise a barrier to make sure that all the sends starts
-    MPI_Barrier(m_communicator);
-
-    // Receive the data size of the messages that the processors want to receive
-    std::unordered_map<int, long> dataSizes;
+    // Receive the data sizes and set the sends
+    MPI_Request exchangeCompletedRequest = MPI_REQUEST_NULL;
     while (true) {
-        // Probe for messages
-        int messageAvailable;
-        MPI_Status status;
-
-        MPI_Iprobe(MPI_ANY_SOURCE, discoverTag, m_communicator, &messageAvailable, &status);
-        if (!messageAvailable) {
-            break;
+        // If there are messagea available receive them and set the sends
+        int messageAvailable = 1;
+        while (messageAvailable) {
+            MPI_Status status;
+            MPI_Iprobe(MPI_ANY_SOURCE, m_discoverTag, m_communicator, &messageAvailable, &status);
+            if (messageAvailable) {
+                long dataSize;
+                MPI_Recv(&dataSize, 1, MPI_LONG, status.MPI_SOURCE, m_discoverTag, m_communicator, MPI_STATUS_IGNORE);
+                setSend(status.MPI_SOURCE, dataSize);
+            }
         }
 
-        // Receive the data size that will be received from the source
-        long dataSize;
-        MPI_Recv(&dataSize, 1, MPI_LONG, status.MPI_SOURCE, discoverTag, m_communicator, MPI_STATUS_IGNORE);
-        dataSizes[status.MPI_SOURCE] = dataSize;
-    }
+        // If all the sends are complete notify it
+        if (exchangeCompletedRequest == MPI_REQUEST_NULL) {
+            int discoverSendsCompleted;
+            MPI_Testall(discoverRequests.size(), discoverRequests.data(), &discoverSendsCompleted, MPI_STATUSES_IGNORE);
+            if (discoverSendsCompleted) {
+                MPI_Ibarrier(m_communicator, &exchangeCompletedRequest);
+            }
+        }
 
-    // Wait that all processors correctly receive the data to communicate.
-    //
-    // Without the barrier some processors may start the receives while other
-    // are still waiting to receive the data sizes. Since the probe for the
-    // data size will accept message for all sources, if a processor start
-    // receiveing data it will intefere with the other processors still
-    // receiving the data sizes.
-    if (discoverTag == m_tag) {
-        MPI_Barrier(m_communicator);
-    }
-
-    // Deatach the buffer
-    if (m_recvIds.size() != 0) {
-        MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
-    }
-
-    // Set the sends
-    for (auto &entry : dataSizes) {
-        setSend(entry.first, entry.second);
+        // If all sends are completed, check if also the other processes have
+        // completed the sends. Sice these are synchronous sends, they will
+        // be makred as completed only when the corresponding receive has
+        // completed. When all processes have completed the send/recevies
+        // all sizes have been exchanged.
+        if (exchangeCompletedRequest != MPI_REQUEST_NULL) {
+            int exchangeCompleted = 0;
+            MPI_Test(&exchangeCompletedRequest, &exchangeCompleted, MPI_STATUS_IGNORE);
+            if (exchangeCompleted) {
+                break;
+            }
+        }
     }
 }
 
 /*!
     Discover the receives inspecting the sends that the user has already set.
-
-    For the communications needed to discover the receives it will be used
-    se same tag set in the communicator.
 */
 void DataCommunicator::discoverRecvs()
 {
-	discoverRecvs(m_tag);
-}
+    // Cancel current receives
+    clearAllRecvs();
 
-/*!
-    Discover the receives inspecting the sends that the user has already set.
+    // Send the data sizes with a synchronous send
+    int nSends = getSendCount();
 
-    \param discoverTag is the tag to be used for the communications needed
-    to discover the receives
-*/
-void DataCommunicator::discoverRecvs(int discoverTag)
-{
-	// Cancel current receives
-	clearAllRecvs();
+    std::vector<long> discoverSizes(nSends, 0);
+    std::vector<MPI_Request> discoverRequests(nSends, MPI_REQUEST_NULL);
+    for (int i = 0; i < nSends; ++i) {
+        int rank = m_sendRanks[i];
+        SendBuffer &buffer = m_sendBuffers[i];
+        discoverSizes[i] = buffer.getSize();
+        MPI_Issend(discoverSizes.data() + i, 1, MPI_LONG, rank, m_discoverTag, m_communicator, discoverRequests.data() + i);
+    }
 
-	// Send the size of the messages that will be send
-	//
-	// We need to use buffered sends to be sure that the data to transfer
-	// will not be overwritten during the loop over the send list.
-	int commBufferSize = 0;
-	std::vector<char> commBuffer;
-	if (m_sendIds.size() != 0) {
-		commBufferSize = m_sendIds.size() * (sizeof(long) + MPI_BSEND_OVERHEAD);
-		commBuffer.resize(commBufferSize);
-		MPI_Buffer_attach(commBuffer.data(), commBufferSize);
+    // Receive the data sizes and set the receives
+    MPI_Request exchangeCompletedRequest = MPI_REQUEST_NULL;
+    while (true) {
+        // If there are messagea available receive them and set the receives
+        int messageAvailable = 1;
+        while (messageAvailable) {
+            MPI_Status status;
+            MPI_Iprobe(MPI_ANY_SOURCE, m_discoverTag, m_communicator, &messageAvailable, &status);
+            if (messageAvailable) {
+                long dataSize;
+                MPI_Recv(&dataSize, 1, MPI_LONG, status.MPI_SOURCE, m_discoverTag, m_communicator, MPI_STATUS_IGNORE);
+                setRecv(status.MPI_SOURCE, dataSize);
+            }
+        }
 
-		for (auto &entry : m_sendIds) {
-			int rank = entry.first;
-			SendBuffer &buffer = getSendBuffer(rank);
-			long size = buffer.getSize();
+        // If all the sends are complete notify it
+        if (exchangeCompletedRequest == MPI_REQUEST_NULL) {
+            int discoverSendsCompleted;
+            MPI_Testall(discoverRequests.size(), discoverRequests.data(), &discoverSendsCompleted, MPI_STATUSES_IGNORE);
+            if (discoverSendsCompleted) {
+                MPI_Ibarrier(m_communicator, &exchangeCompletedRequest);
+            }
+        }
 
-			MPI_Request dataSizeRequest;
-			MPI_Ibsend(&size, 1, MPI_LONG, rank, discoverTag, m_communicator, &dataSizeRequest);
-
-			// MPI_Isend initiates an asynchronous (background) data transfer.
-			// The actual data transfer might not happen unless one of the
-			// MPI_Wait* or MPI_Test* calls has been made on the request.
-			int completeFlag;
-			MPI_Test(&dataSizeRequest, &completeFlag, MPI_STATUS_IGNORE);
-		}
-	}
-
-	// Raise a barrier to make sure that all the sends starts
-	MPI_Barrier(m_communicator);
-
-	// Receive the data size of the sends
-	std::unordered_map<int, long> dataSizes;
-	while (true) {
-		// Probe for messages
-		int messageAvailable;
-		MPI_Status status;
-
-		MPI_Iprobe(MPI_ANY_SOURCE, discoverTag, m_communicator, &messageAvailable, &status);
-		if (!messageAvailable) {
-			break;
-		}
-
-		// Receive the data size that will be received from the source
-		long dataSize;
-		MPI_Recv(&dataSize, 1, MPI_LONG, status.MPI_SOURCE, discoverTag, m_communicator, MPI_STATUS_IGNORE);
-		dataSizes[status.MPI_SOURCE] = dataSize;
-	}
-
-	// Wait that all processors correctly receive the data to communicate.
-	//
-	// Without the barrier some processors may start the receives while other
-	// are still waiting to receive the data sizes. Since the probe for the
-	// data size will accept message for all sources, if a processor start
-	// receiveing data it will intefere with the other processors still
-	// receiving the data sizes.
-	if (discoverTag == m_tag) {
-		MPI_Barrier(m_communicator);
-	}
-
-	// Deatach the buffer
-	if (m_sendIds.size() != 0) {
-		MPI_Buffer_detach(commBuffer.data(), &commBufferSize);
-	}
-
-	// Set the receives
-	for (auto &entry : dataSizes) {
-		setRecv(entry.first, entry.second);
-	}
+        // If all sends are completed, check if also the other processes have
+        // completed the sends. Sice these are synchronous sends, they will
+        // be makred as completed only when the corresponding receive has
+        // completed. When all processes have completed the send/recevies
+        // all sizes have been exchanged.
+        if (exchangeCompletedRequest != MPI_REQUEST_NULL) {
+            int exchangeCompleted = 0;
+            MPI_Test(&exchangeCompletedRequest, &exchangeCompleted, MPI_STATUS_IGNORE);
+            if (exchangeCompleted) {
+                break;
+            }
+        }
+    }
 }
 
 /*!
@@ -640,7 +649,7 @@ void DataCommunicator::_startSend(int dstRank)
     int chunkSize = buffer.getChunkSize();
     MPI_Datatype chunkDataType = getChunkDataType(chunkSize);
 
-    MPI_Isend(buffer.data(), buffer.getChunkCount(), chunkDataType, dstRank, m_tag,
+    MPI_Isend(buffer.data(), buffer.getChunkCount(), chunkDataType, dstRank, m_exchangeTag,
               m_communicator, &m_sendRequests[id]);
 }
 
@@ -684,7 +693,7 @@ void DataCommunicator::_startRecv(int srcRank)
     int chunkSize = buffer.getChunkSize();
     MPI_Datatype chunkDataType = getChunkDataType(chunkSize);
 
-    MPI_Irecv(buffer.data(), buffer.getChunkCount(), chunkDataType, srcRank, m_tag,
+    MPI_Irecv(buffer.data(), buffer.getChunkCount(), chunkDataType, srcRank, m_exchangeTag,
               m_communicator, &m_recvRequests[id]);
 }
 

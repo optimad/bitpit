@@ -50,8 +50,13 @@ public:
 
     void finalize();
 
-    void setTag(int tag);
+    void setTag(int exchangeTag);
+    void setTags(int exchangeTag, int discoverTag);
+    void setExchangeTag(int tag);
+    void setDiscoverTag(int tag);
     int getTag() const;
+    int getExchangeTag() const;
+    int getDiscoverTag() const;
 
     void clearAllSends();
     void clearAllRecvs();
@@ -109,8 +114,10 @@ public:
 private:
     MPI_Comm m_communicator;
     int m_rank;
-    int m_tag;
-    bool m_customTag;
+    int m_exchangeTag;
+    int m_discoverTag;
+    bool m_customExchangeTag;
+    bool m_customDiscoverTag;
     bool m_recvsContinuous;
 
     std::vector<int> m_recvRanks;
