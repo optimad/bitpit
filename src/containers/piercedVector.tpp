@@ -36,7 +36,7 @@ namespace bitpit {
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector()
     : PiercedKernel<id_t>(),
-      PiercedStorage<value_t, id_t>(1, static_cast<PiercedKernel<id_t> *>(this), PiercedKernel<id_t>::SYNC_MODE_DISABLED)
+      PiercedStorage<value_t, id_t>(1, this, PiercedKernel<id_t>::SYNC_MODE_DISABLED)
 {
 }
 
@@ -52,7 +52,7 @@ PiercedVector<value_t, id_t>::PiercedVector()
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
     : PiercedKernel<id_t>(n),
-      PiercedStorage<value_t, id_t>(1, static_cast<PiercedKernel<id_t> *>(this), PiercedKernel<id_t>::SYNC_MODE_DISABLED)
+      PiercedStorage<value_t, id_t>(1, this, PiercedKernel<id_t>::SYNC_MODE_DISABLED)
 {
 }
 
