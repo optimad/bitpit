@@ -3961,7 +3961,7 @@ void PatchKernel::setBoundingBox(const std::array<double, 3> &minPoint, const st
 	\param[out] minPoint on output stores the minimum point of the patch
 	\param[out] maxPoint on output stores the maximum point of the patch
 */
-void PatchKernel::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+void PatchKernel::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const
 {
 	minPoint = m_boxMinPoint;
 	maxPoint = m_boxMaxPoint;
