@@ -76,30 +76,28 @@ LevelSetSegmentation::~LevelSetSegmentation() {
 /*!
  * Constructor
  * @param[in] id identifier of object
- * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation(int id, double angle) : LevelSetCachedObject(id), m_dimension(0), m_segmentation(nullptr) {
-    setFeatureAngle(angle) ;
+LevelSetSegmentation::LevelSetSegmentation(int id) : LevelSetCachedObject(id), m_dimension(0), m_segmentation(nullptr) {
 }
 
 /*!
  * Constructor
  * @param[in] id identifier of object
  * @param[in] STL unique pointer to surface mesh
- * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
+ * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL, double angle) :LevelSetSegmentation(id,angle) {
-    setSegmentation( std::move(STL) );
+LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentation(id) {
+    setSegmentation( std::move(STL), featureAngle );
 }
 
 /*!
  * Constructor
  * @param[in] id identifier of object
  * @param[in] STL pointer to surface mesh
- * @param[in] angle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
+ * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL, double angle) :LevelSetSegmentation(id,angle) {
-    setSegmentation( STL );
+LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL, double featureAngle) :LevelSetSegmentation(id) {
+    setSegmentation( STL, featureAngle );
 }
 
 /*!
@@ -131,24 +129,25 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
  * Set the segmentation
  * @param[in] segmentation unique pointer to surface mesh
  */
-void LevelSetSegmentation::setSegmentation( std::unique_ptr<SurfUnstructured> &&segmentation){
+void LevelSetSegmentation::setSegmentation( std::unique_ptr<SurfUnstructured> &&segmentation, double featureAngle){
 
     m_own = std::move(segmentation) ;
 
-    setSegmentation( m_own.get() );
+    setSegmentation( m_own.get(), featureAngle );
 }
 
 /*!
  * Set the segmentation
  * @param[in] segmentation pointer to surface mesh
  */
-void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
+void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation, double featureAngle){
 
     std::vector<std::array<double,3>> vertexNormal ;
     std::vector<std::array<double,3>> vertexGradient ;
 
     m_segmentation = segmentation;
     m_dimension = m_segmentation->getSpaceDimension() ;
+    m_featureAngle = featureAngle;
 
     double tol = m_segmentation->getTol() ;
 
@@ -183,11 +182,11 @@ const SurfUnstructured & LevelSetSegmentation::getSegmentation() const {
 }
 
 /*!
- * Set feature angle
- * @param[in] angle feature angle to be used when calculating face normals;
+ * Get feature angle
+ * @return feature angle used when calculating face normals;
  */
-void LevelSetSegmentation::setFeatureAngle( double angle){
-    m_featureAngle= angle;
+double LevelSetSegmentation::getFeatureAngle() const {
+    return m_featureAngle;
 }
 
 /*!

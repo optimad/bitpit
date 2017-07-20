@@ -121,17 +121,17 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     public:
     virtual ~LevelSetSegmentation();
-    LevelSetSegmentation(int,double angle=2.*M_PI);
-    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> &&, double angle=2.*M_PI);
-    LevelSetSegmentation(int, SurfUnstructured*, double angle=2.*M_PI);
+    LevelSetSegmentation(int);
+    LevelSetSegmentation(int, std::unique_ptr<SurfUnstructured> &&, double featureAngle = 2. * M_PI);
+    LevelSetSegmentation(int, SurfUnstructured*, double featureAngle = 2. * M_PI);
     LevelSetSegmentation(const LevelSetSegmentation&);
 
     LevelSetSegmentation*                       clone() const ;
 
-    void                                        setSegmentation(std::unique_ptr<SurfUnstructured> &&) ;
-    void                                        setSegmentation(SurfUnstructured *) ;
+    void                                        setSegmentation(std::unique_ptr<SurfUnstructured> &&, double featureAngle = 2. * M_PI) ;
+    void                                        setSegmentation(SurfUnstructured *, double featureAngle = 2. * M_PI) ;
     const SurfUnstructured &                    getSegmentation() const ;
-    void                                        setFeatureAngle(double) ;
+    double                                      getFeatureAngle() const;
 
     virtual int                                 getPart(const long &) const ;
     long                                        getSupport(const long &i) const;

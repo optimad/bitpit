@@ -176,11 +176,11 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
         id = m_objects.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id,angle) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
     if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation.get()) ){
         segmentation.release();
         std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
-        lsSeg->setSegmentation( std::move(surfUnstructuredUPtr) );
+        lsSeg->setSegmentation( std::move(surfUnstructuredUPtr), angle );
     } else {
         throw std::runtime_error ("Segmentation type not supported");
     }
@@ -203,9 +203,9 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
         id = m_objects.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id,angle) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
     if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation)){
-        lsSeg->setSegmentation( surfUnstructured );
+        lsSeg->setSegmentation( surfUnstructured, angle );
     } else {
         throw std::runtime_error ("Segmentation type not supported");
     }
