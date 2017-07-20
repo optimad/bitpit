@@ -144,42 +144,33 @@ void LevelSetSegmentation::setSegmentation( std::unique_ptr<SurfUnstructured> &&
  */
 void LevelSetSegmentation::setSegmentation( SurfUnstructured *segmentation){
 
-    std::vector<std::array<double,3>>   vertexNormal, vertexGradient ;
+    std::vector<std::array<double,3>> vertexNormal ;
+    std::vector<std::array<double,3>> vertexGradient ;
 
     m_segmentation = segmentation;
     m_dimension = m_segmentation->getSpaceDimension() ;
 
-    int  i, nV;
-    long segId ;
-    double norm, tol = m_segmentation->getTol() ;
+    double tol = m_segmentation->getTol() ;
 
     for( auto & segment : m_segmentation->getCells() ){
+        long segmentId = segment.getId() ;
+        int nVertices  = segment.getVertexCount() ;
 
-        segId = segment.getId() ;
-        nV = segment.getVertexCount() ;
+        vertexNormal.resize(nVertices) ;
+        vertexGradient.resize(nVertices) ;
 
-        vertexNormal.resize(nV) ;
-        vertexNormal.shrink_to_fit() ;
+        double misalignment = 0. ;
+        for( int i = 0; i < nVertices; ++i ){
+            vertexGradient[i] = m_segmentation->evalVertexNormal(segmentId, i) ;
+            vertexNormal[i]   = m_segmentation->evalLimitedVertexNormal(segmentId, i, m_featureAngle) ;
 
-        vertexGradient.resize(nV) ;
-        vertexGradient.shrink_to_fit() ;
-
-        for(i=0; i<nV; ++i){
-            vertexGradient[i] = m_segmentation->evalVertexNormal(segId,i) ;
-            vertexNormal[i] = m_segmentation->evalLimitedVertexNormal(segId,i,m_featureAngle) ;
+            misalignment += norm2(vertexGradient[i] - vertexNormal[i]) ;
         }
 
-        m_vertexGradient.insert({{segId,vertexGradient}}) ;
-
-        norm = 0. ;
-        for(i=0; i<nV; ++i){
-            norm += norm2(vertexGradient[i] - vertexNormal[i]) ;
+        m_vertexGradient.insert({{segmentId, vertexGradient}}) ;
+        if( misalignment >= tol ){
+            m_vertexNormal.insert({{segmentId, vertexNormal}}) ;
         }
-
-        if( norm >= tol ){
-            m_vertexNormal.insert({{segId,vertexNormal}}) ;
-        }
-
     }
 }
 
