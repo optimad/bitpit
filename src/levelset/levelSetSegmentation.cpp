@@ -1053,7 +1053,6 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
         std::vector<long> &cellList = segmentToCellMap.at(segment) ;
         std::sort( cellList.begin(), cellList.end() ) ;
         cellList.erase( std::unique(cellList.begin(), cellList.end()), cellList.end() ) ;
-        cellList.shrink_to_fit();
     }
 
     return segmentToCellMap;
