@@ -62,12 +62,12 @@ LevelSetMask::LevelSetMask(int id, const std::unordered_set<long> &mask, const V
 
     std::unordered_map<long,long> meshToEnvelope ;
 
-    SurfUnstructured *envelope = new SurfUnstructured(extractCellEnvelope(mask,mesh,meshToEnvelope)) ;
+    std::unique_ptr<SurfUnstructured> segmentation = extractCellEnvelope(mask,mesh,meshToEnvelope) ;
 
     long intrIndex = meshToEnvelope.begin()->first;
     long enveIndex = meshToEnvelope.begin()->second;
 
-    bool sameOrientation = sameInterfaceEnvelopeOrientation(mesh, intrIndex, *envelope, enveIndex); 
+    bool sameOrientation = sameInterfaceEnvelopeOrientation(mesh, intrIndex, *segmentation, enveIndex);
 
     auto const &interface = mesh.getInterface(intrIndex);
     long ownerId = interface.getOwner();
@@ -75,12 +75,11 @@ LevelSetMask::LevelSetMask(int id, const std::unordered_set<long> &mask, const V
 
     bool flip = (sameOrientation == invert);
 
-    bool orientable = envelope->adjustCellOrientation( enveIndex, flip);
+    bool orientable = segmentation->adjustCellOrientation( enveIndex, flip);
     if( !orientable){
         throw std::runtime_error ("Error in LevelSetMask");
     }
 
-    std::unique_ptr<SurfUnstructured> segmentation(envelope) ;
     setSegmentation(std::move(segmentation));
 }
 
@@ -96,19 +95,18 @@ LevelSetMask::LevelSetMask(int id, const std::vector<long> &list, const long &in
 
     std::unordered_map<long,long> meshToEnvelope ;
 
-    SurfUnstructured *envelope = new SurfUnstructured(extractFaceEnvelope(list,mesh,meshToEnvelope)) ;
+    std::unique_ptr<SurfUnstructured> segmentation = extractFaceEnvelope(list,mesh,meshToEnvelope) ;
 
     long enveIndex = meshToEnvelope.at(intrIndex);
-    bool sameOrientation = sameInterfaceEnvelopeOrientation(mesh, intrIndex, *envelope, enveIndex); 
+    bool sameOrientation = sameInterfaceEnvelopeOrientation(mesh, intrIndex, *segmentation, enveIndex);
 
     bool flip = (sameOrientation == invert);
 
-    bool orientable = envelope->adjustCellOrientation( enveIndex, flip);
+    bool orientable = segmentation->adjustCellOrientation( enveIndex, flip);
     if( !orientable){
         throw std::runtime_error ("Error in LevelSetMask");
     }
 
-    std::unique_ptr<SurfUnstructured> segmentation(envelope) ;
     setSegmentation(std::move(segmentation));
 }
 
@@ -121,7 +119,7 @@ LevelSetMask::LevelSetMask(int id, const std::vector<long> &list, const long &in
  * If the nullptr is passed, a local map will be used.
  * @return surface mesh
 */
-SurfUnstructured LevelSetMask::extractCellEnvelope(const std::unordered_set<long> &mask, const VolumeKernel &mesh, std::unordered_map<long,long> &meshToEnvelope){
+std::unique_ptr<SurfUnstructured> LevelSetMask::extractCellEnvelope(const std::unordered_set<long> &mask, const VolumeKernel &mesh, std::unordered_map<long,long> &meshToEnvelope){
 
     std::vector<long> list;
 
@@ -152,9 +150,9 @@ SurfUnstructured LevelSetMask::extractCellEnvelope(const std::unordered_set<long
  * @param[in] meshToEnvelope map which hosts the index association between the cells of the envelope and the faces of the mesh.
  * @return surface mesh
 */
-SurfUnstructured LevelSetMask::extractFaceEnvelope(const std::vector<long> &list, const VolumeKernel &mesh, std::unordered_map<long,long> &meshToEnvelope){
+std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::vector<long> &list, const VolumeKernel &mesh, std::unordered_map<long,long> &meshToEnvelope){
 
-    SurfUnstructured envelope(0,mesh.getDimension()-1,mesh.getDimension());
+    std::unique_ptr<SurfUnstructured> envelope = std::unique_ptr<SurfUnstructured>(new SurfUnstructured(0,mesh.getDimension()-1,mesh.getDimension()));
 
 	// ====================================================================== //
 	// RESIZE DATA STRUCTURES                                                 //
@@ -167,8 +165,8 @@ SurfUnstructured LevelSetMask::extractFaceEnvelope(const std::vector<long> &list
         nVertices += interface.getVertexCount() ;
     }
 
-	envelope.reserveVertices(nVertices);
-	envelope.reserveCells(nCells);
+	envelope->reserveVertices(nVertices);
+	envelope->reserveCells(nCells);
 
 	// ====================================================================== //
 	// LOOP OVER CELLS                                                        //
@@ -190,7 +188,7 @@ SurfUnstructured LevelSetMask::extractFaceEnvelope(const std::vector<long> &list
         	// add it.
         	if (vertexMap.count(vertexId) == 0) {
         		const Vertex &vertex = mesh.getVertex(vertexId);
-        		auto envelopeVertex = envelope.addVertex(vertex);
+        		auto envelopeVertex = envelope->addVertex(vertex);
         		vertexMap[vertexId] = envelopeVertex->getId();
         	}
         
@@ -200,16 +198,16 @@ SurfUnstructured LevelSetMask::extractFaceEnvelope(const std::vector<long> &list
 
         // Add face to envelope
         ElementInfo::Type faceType = interface.getType();
-        PatchKernel::CellIterator cellItr = envelope.addCell(faceType, true, std::move(faceEnvelopeConnect));
+        PatchKernel::CellIterator cellItr = envelope->addCell(faceType, true, std::move(faceEnvelopeConnect));
         meshToEnvelope.insert({{faceIndex,cellItr->getId()}});
 	}
 
-    envelope.squeeze();
-    envelope.buildAdjacencies();
-    envelope.buildInterfaces();
+    envelope->squeeze();
+    envelope->buildAdjacencies();
+    envelope->buildInterfaces();
 
-    envelope.getVTK().setName("geometry_002") ;
-    envelope.write() ;
+    envelope->getVTK().setName("geometry_002") ;
+    envelope->write() ;
 
     return envelope;
 
