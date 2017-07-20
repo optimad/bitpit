@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
     log::cout() << "Testing communications" << std::endl;
 
     DataCommunicator dataCommunicator(MPI_COMM_WORLD);
-    dataCommunicator.setTag(0);
 
     // Data info
     typedef short DataType;

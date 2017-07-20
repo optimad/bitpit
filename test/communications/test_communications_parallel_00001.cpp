@@ -56,7 +56,6 @@ int main(int argc, char *argv[]) {
 	log::cout() << "Testing communications" << "\n";
 
 	DataCommunicator dataCommunicator(MPI_COMM_WORLD);
-	dataCommunicator.setTag(0);
 
 	// Create data to send
 	std::vector<double> data(nProcs + 1);
