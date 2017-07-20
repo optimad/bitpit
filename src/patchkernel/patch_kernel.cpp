@@ -185,8 +185,6 @@ void PatchKernel::initialize()
 */
 PatchKernel::~PatchKernel()
 {
-	reset();
-
 #if BITPIT_ENABLE_MPI==1
 	freeCommunicator();
 #endif
