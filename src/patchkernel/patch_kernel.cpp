@@ -3619,6 +3619,16 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
  */
 void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId)
 {
+	// Validate the input
+	assert(cell_1);
+	assert(face_1 >= 0);
+
+	if (cell_2) {
+		assert(face_2 >= 0);
+	} else {
+        assert(face_2 < 0);
+	}
+
 	// Get the id of the first cell
 	long id_1 = cell_1->getId();
 
@@ -3635,44 +3645,43 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 	// the two faces. If the faces of both cells have the same
 	// size, the interface is owned by the cell with the "lower
 	// positioning".
-	long intrOwnerId;
-	Cell *intrOwner;
-	int intrOwnerFace;
-
-	long intrNeighId;
-	Cell *intrNeigh = nullptr;
-	int intrNeighFace = -1;
-
-	bool cellOwnsInterface = false;
-	if (cell_1->getAdjacencyCount(face_1) == 1 || id_2 < 0) {
-		if (id_2 >= 0) {
-			if (cell_2->getAdjacencyCount(face_2) == 1) {
-				cellOwnsInterface = CellPositionLess(*this)(id_1, id_2);
-			} else {
-				cellOwnsInterface = true;
-			}
-		} else {
-			cellOwnsInterface = true;
+	bool cellOwnsInterface = true;
+	if (cell_2) {
+		if (cell_1->getAdjacencyCount(face_1) > 1) {
+			cellOwnsInterface = false;
+		} else if (cell_2->getAdjacencyCount(face_2) == 1) {
+			assert(cell_1->getAdjacencyCount(face_1) == 1);
+			cellOwnsInterface = CellPositionLess(*this)(id_1, id_2);
 		}
 	}
 
+	Cell *intrOwner;
+	Cell *intrNeigh;
+	long intrOwnerId;
+	long intrNeighId;
+	int intrOwnerFace;
+	int intrNeighFace;
 	if (cellOwnsInterface) {
 		intrOwnerId   = id_1;
-		intrOwner	 = cell_1;
+		intrOwner     = cell_1;
 		intrOwnerFace = face_1;
 
-		intrNeighId = id_2;
-		if (intrNeighId >= 0) {
-			intrNeigh	 = cell_2;
+		if (cell_2) {
+			intrNeighId   = id_2;
+			intrNeigh     = cell_2;
 			intrNeighFace = face_2;
+		} else {
+			intrNeighId   = Cell::NULL_ID;
+			intrNeigh     = nullptr;
+			intrNeighFace = -1;
 		}
 	} else {
 		intrOwnerId   = id_2;
-		intrOwner	 = cell_2;
+		intrOwner     = cell_2;
 		intrOwnerFace = face_2;
 
 		intrNeighId   = id_1;
-		intrNeigh	 = cell_1;
+		intrNeigh     = cell_1;
 		intrNeighFace = face_1;
 	}
 
@@ -3716,7 +3725,7 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 	// neighbour there will be only one interface on that face, so there are
 	// no ordering issues.
 	intrOwner->pushInterface(intrOwnerFace, interfaceId);
-	if (intrNeighId >= 0) {
+	if (intrNeigh) {
 		intrNeigh->pushInterface(intrNeighFace, interfaceId);
 
 		// Fix adjacency order on the owner cell
