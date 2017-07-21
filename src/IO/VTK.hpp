@@ -263,6 +263,7 @@ class VTKField{
         VTKFormat               getCodification() const;
         uint64_t                getOffset() const;
         std::fstream::pos_type  getPosition() const; 
+        const VTKBaseStreamer & getStreamer() const;
         bool                    isEnabled() const ;
         bool                    hasAllMetaData() const ;
 

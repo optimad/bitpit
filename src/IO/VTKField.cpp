@@ -226,6 +226,14 @@ std::fstream::pos_type   VTKField::getPosition() const{
 }
 
 /*!
+ * get streamer of data field
+ * @return streamer of data field
+ */
+const VTKBaseStreamer & VTKField::getStreamer() const {
+    return *m_streamer;
+}
+
+/*!
  * Returns if field is enabled for readind/writing
  * @return true if enabled
  */
