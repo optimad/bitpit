@@ -125,6 +125,7 @@ VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::u
 	: VolumeKernel(id, tree->getDim(), false)
 {
 	// Associate the tree
+	assert(tree);
 	m_tree.swap(tree);
 
 	// Initialize
