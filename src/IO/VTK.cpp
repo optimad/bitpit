@@ -265,6 +265,31 @@ void VTK::setGeomData( VTKField &&field ){
 }
 
 /*!
+ * Add user data for input or output.
+ * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
+ * @param[in] name name of field
+ * @param[in] streamer data streamer
+ */
+VTKField& VTK::addData( VTKField &&field ){
+
+    const std::string &name = field.getName();
+    if( findGeomData(name) ){
+        log::cout() << "Not admissible to add user data with same name as geometry field " << name << std::endl ;
+    }
+
+    int id = _findFieldIndex( name, m_data ) ;
+    if (id >= 0) {
+        m_data[id] = std::move(field);
+    } else {
+        id = m_data.size();
+        m_data.push_back(std::move(field));
+    }
+
+    return m_data[id] ;
+
+}
+
+/*!
  * Add user data for input or output. 
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in] name name of field

@@ -325,6 +325,8 @@ class VTK{
 
         void                    setGeomData( VTKField &&field ) ;
 
+        VTKField&               addData( VTKField &&field ) ;
+
         VTKField&               addData( std::string, VTKBaseStreamer* = NULL ) ;
 
         BITPIT_DEPRECATED( VTKField&  addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
