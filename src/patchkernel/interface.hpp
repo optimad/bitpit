@@ -42,7 +42,7 @@ public:
 
 	Interface(const Interface &other) = default;
 	Interface(Interface&& other) = default;
-	Interface& operator = (const Interface &other);
+	Interface& operator = (const Interface &other) = default;
 	Interface& operator=(Interface&& other) = default;
 
 	void swap(Interface &other) noexcept;

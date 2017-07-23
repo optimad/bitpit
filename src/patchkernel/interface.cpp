@@ -60,17 +60,6 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 	_initialize(NULL_ID, -1, NULL_ID, -1);
 }
 
-/*!
-	Copy assignament operator
-*/
-Interface & Interface::operator=(const Interface &other)
-{
-	Interface tmp(other);
-	swap(tmp);
-
-	return (*this);
-}
-
 /**
 * Exchanges the content of the interface by the content the specified other
 * interface.
