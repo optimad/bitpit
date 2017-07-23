@@ -333,7 +333,7 @@ protected:
     FillAction fillAfter(id_t referenceId, id_t id);
     FillAction fillBefore(id_t referenceId, id_t id);
     FillAction fillAppend(id_t id);
-    FillAction fillHole(const holes_iterator &holeItr, id_t id);
+    FillAction fillHole(std::size_t hole, id_t id);
     FillAction fillInsert(std::size_t pos, id_t id);
 
     MoveAction moveAfter(id_t referenceId, id_t id, bool flush = false);
@@ -466,22 +466,22 @@ private:
     /**
     * Iterator pointing to the first regular hole
     */
-    holes_iterator m_holes_regular_begin;
+    std::size_t m_holes_regular_begin;
 
     /**
     * Iterator pointing to the last regular hole
     */
-    holes_iterator m_holes_regular_end;
+    std::size_t m_holes_regular_end;
 
     /**
     * Iterator pointing to the first pending hole
     */
-    holes_iterator m_holes_pending_begin;
+    std::size_t m_holes_pending_begin;
 
     /**
     * Iterator pointing to the last pending hole
     */
-    holes_iterator m_holes_pending_end;
+    std::size_t m_holes_pending_end;
 
     /**
     * Tracks if the regular holes are sorted

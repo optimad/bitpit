@@ -257,7 +257,7 @@ std::vector<std::size_t> PiercedKernel<id_t>::squeeze()
         // Move the elements
         std::size_t firstPosToUpdate;
         if (m_begin_pos == 0) {
-            firstPosToUpdate = *(m_holes_regular_end - 1);
+            firstPosToUpdate = m_holes[m_holes_regular_end - 1];
         } else {
             firstPosToUpdate = 0;
         }
@@ -268,7 +268,7 @@ std::vector<std::size_t> PiercedKernel<id_t>::squeeze()
 
         std::size_t offset = 0;
         for (std::size_t pos = firstPosToUpdate; pos < m_end_pos; pos++) {
-            if (offset < nHoles && *(m_holes_regular_end - offset - 1) == pos) {
+            if (offset < nHoles && m_holes[m_holes_regular_end - offset - 1] == pos) {
                 permutations[m_end_pos - 1 - offset] = pos;
                 ++offset;
                 continue;
@@ -370,23 +370,23 @@ void PiercedKernel<id_t>::dump() const
     std::cout << std::endl;
     std::cout << " size: " << size() << std::endl;
 
-    std::cout << " m_holes_regular_begin: " << std::distance<holes_const_iterator>(m_holes.begin(), m_holes_regular_begin) << std::endl;
-    std::cout << " m_holes_regular_end  : " << std::distance<holes_const_iterator>(m_holes.begin(), m_holes_regular_end) << std::endl;
+    std::cout << " m_holes_regular_begin: " << m_holes_regular_begin << std::endl;
+    std::cout << " m_holes_regular_end  : " << m_holes_regular_end << std::endl;
 
     std::cout << std::endl;
     std::cout << " Regular holes: " << std::endl;
-    for (auto k = m_holes_regular_begin; k < m_holes_regular_end; ++k) {
-        std::cout << *k << std::endl;
+    for (std::size_t k = m_holes_regular_begin; k < m_holes_regular_end; ++k) {
+        std::cout << m_holes[k] << std::endl;
     }
 
     std::cout << std::endl;
-    std::cout << " m_holes_pending_begin: " << std::distance<holes_const_iterator>(m_holes.begin(), m_holes_pending_begin) << std::endl;
-    std::cout << " m_holes_pending_end  : " << std::distance<holes_const_iterator>(m_holes.begin(), m_holes_pending_end) << std::endl;
+    std::cout << " m_holes_pending_begin: " << m_holes_pending_begin << std::endl;
+    std::cout << " m_holes_pending_end  : " << m_holes_pending_end << std::endl;
 
     std::cout << std::endl;
     std::cout << " Pending holes" << std::endl;
-    for (auto k = m_holes_pending_begin; k < m_holes_pending_end; ++k) {
-        std::cout << *k << std::endl;
+    for (std::size_t k = m_holes_pending_begin; k < m_holes_pending_end; ++k) {
+        std::cout << m_holes[k] << std::endl;
     }
 
     std::cout << std::endl;
@@ -594,8 +594,10 @@ std::size_t PiercedKernel<id_t>::evalFlatIndex(id_t id)
     // Subtract pending holes before position
     if (holesCountPending() > 0) {
         holesSortPending();
-        auto holes_itr = std::upper_bound(m_holes_pending_begin, m_holes_pending_end, pos, std::greater<std::size_t>());
-        std::size_t nHolesBefore = std::distance(holes_itr, m_holes_pending_end);
+        holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
+        holes_iterator pending_end_itr   = m_holes.begin() + m_holes_pending_end;
+        auto holes_itr = std::upper_bound(pending_begin_itr, pending_end_itr, pos, std::greater<std::size_t>());
+        std::size_t nHolesBefore = std::distance(holes_itr, pending_end_itr);
 
         flat -= nHolesBefore;
     }
@@ -603,8 +605,10 @@ std::size_t PiercedKernel<id_t>::evalFlatIndex(id_t id)
     // Subtract regular holes before position
     if (holesCountRegular() > 0) {
         holesSortRegular();
-        auto holes_itr = std::upper_bound(m_holes_regular_begin, m_holes_regular_end, pos, std::greater<std::size_t>());
-        std::size_t nHolesBefore = std::distance(holes_itr, m_holes_regular_end);
+        holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
+        holes_iterator regular_end_itr   = m_holes.begin() + m_holes_regular_end;
+        auto holes_itr = std::upper_bound(regular_begin_itr, regular_end_itr, pos, std::greater<std::size_t>());
+        std::size_t nHolesBefore = std::distance(holes_itr, regular_end_itr);
 
         flat -= nHolesBefore;
     }
@@ -689,8 +693,11 @@ id_t PiercedKernel<id_t>::getSizeMarker(std::size_t targetSize, const id_t &fall
 
     // Iterate to find the position before wihch there is the
     // requeste number of element.
-    holes_iterator regular_holes_itr = m_holes_regular_end;
-    holes_iterator pending_holes_itr = m_holes_pending_end;
+    holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
+    holes_iterator regular_hole_itr  = m_holes.begin() + m_holes_regular_end;
+
+    holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
+    holes_iterator pending_hole_itr  = m_holes.begin() + m_holes_pending_end;
 
     std::size_t nEmpties  = 0;
     std::size_t markerPos = targetSize;
@@ -701,16 +708,16 @@ id_t PiercedKernel<id_t>::getSizeMarker(std::size_t targetSize, const id_t &fall
 
         // Count the number of holes and pending deletes before the
         // current marker position
-        if (regular_holes_itr != m_holes_regular_begin) {
-            holes_iterator itr_previous = regular_holes_itr;
-            regular_holes_itr = std::upper_bound(m_holes_regular_begin, regular_holes_itr, markerPos, std::greater<std::size_t>());
-            nEmpties += std::distance(regular_holes_itr, itr_previous);
+        if (regular_hole_itr != regular_begin_itr) {
+            holes_iterator itr_previous = regular_hole_itr;
+            regular_hole_itr = std::upper_bound(regular_begin_itr, regular_hole_itr, markerPos, std::greater<std::size_t>());
+            nEmpties += std::distance(regular_hole_itr, itr_previous);
         }
 
-        if (pending_holes_itr != m_holes_pending_begin) {
-            holes_iterator itr_previous = pending_holes_itr;
-            pending_holes_itr = std::upper_bound(m_holes_pending_begin, pending_holes_itr, markerPos, std::greater<std::size_t>());
-            nEmpties += std::distance(pending_holes_itr, itr_previous);
+        if (pending_hole_itr != pending_begin_itr) {
+            holes_iterator itr_previous = pending_hole_itr;
+            pending_hole_itr = std::upper_bound(pending_begin_itr, pending_hole_itr, markerPos, std::greater<std::size_t>());
+            nEmpties += std::distance(pending_hole_itr, itr_previous);
         }
 
         // Get the marker size
@@ -943,9 +950,9 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillAfter(id_t ref
         // The first hole is the one with the highest position, if the
         // position of this hole is greater than the reference position
         // it is possible to use it.
-        holes_iterator holeItr = m_holes_pending_begin;
-        if (*holeItr > referencePos) {
-            return fillHole(holeItr, id);
+        std::size_t hole = m_holes_pending_begin;
+        if (m_holes[hole] > referencePos) {
+            return fillHole(hole, id);
         }
     }
 
@@ -957,9 +964,9 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillAfter(id_t ref
         // The first hole is the one with the highest position, if the
         // position of this hole is greater than the reference position
         // it is possible to use it.
-        holes_iterator holeItr = m_holes_regular_begin;
-        if (*holeItr > referencePos) {
-            return fillHole(holeItr, id);
+        std::size_t hole = m_holes_regular_begin;
+        if (m_holes[hole] > referencePos) {
+            return fillHole(hole, id);
         }
     }
 
@@ -991,9 +998,9 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillBefore(id_t re
         // The last hole is the one with the lowest position, if the
         // position of this hole is greater than the reference position
         // it is possible to use it.
-        holes_iterator holeItr = m_holes_pending_end - 1;
-        if (*holeItr < referencePos) {
-            return fillHole(holeItr, id);
+        std::size_t hole = m_holes_pending_end - 1;
+        if (m_holes[hole] < referencePos) {
+            return fillHole(hole, id);
         }
     }
 
@@ -1005,9 +1012,9 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillBefore(id_t re
         // The last hole is the one with the lowest position, if the
         // position of this hole is greater than the reference position
         // it is possible to use it.
-        holes_iterator holeItr = m_holes_regular_end - 1;
-        if (*holeItr < referencePos) {
-            return fillHole(holeItr, id);
+        std::size_t hole = m_holes_regular_end - 1;
+        if (m_holes[hole] < referencePos) {
+            return fillHole(hole, id);
         }
     }
 
@@ -1057,24 +1064,24 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillAppend(id_t id
 * \result The synchronization action associated with the fill.
 */
 template<typename id_t>
-typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillHole(const holes_iterator &holeItr, id_t id)
+typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillHole(std::size_t hole, id_t id)
 {
     // Validate the id
     validateId(id);
 
     // Get the position of the hole
-    std::size_t pos = *holeItr;
+    std::size_t pos = m_holes[hole];
 
     // Fill the hole
     setPosId(pos, id);
 
     // Remove the holes from the kernel
-    if (holeItr >= m_holes_pending_begin) {
+    if (hole >= m_holes_pending_begin) {
         int nPendings = holesCountPending();
         if (nPendings > 1) {
-            if (holeItr == (m_holes_pending_end - 1)) {
+            if (hole == (m_holes_pending_end - 1)) {
                 --m_holes_pending_end;
-            } else if (holeItr == m_holes_pending_begin) {
+            } else if (hole == m_holes_pending_begin) {
                 ++m_holes_pending_begin;
             } else {
                 throw std::out_of_range("Only holes at the beginning or at the end of the kernel can be filled");
@@ -1085,9 +1092,9 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillHole(const hol
     } else {
         int nRegulars = holesCountRegular();
         if (nRegulars > 1) {
-            if (holeItr == (m_holes_regular_end - 1)) {
+            if (hole == (m_holes_regular_end - 1)) {
                 --m_holes_regular_end;
-            } else if (holeItr == m_holes_regular_begin) {
+            } else if (hole == m_holes_regular_begin) {
                 ++m_holes_regular_begin;
             } else {
                 throw std::out_of_range("Only holes at the beginning or at the end of the kernel can be filled");
@@ -1178,18 +1185,24 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillInsert(std::si
 
     // Update the regular holes
     if (m_holes_regular_begin != m_holes_regular_end) {
-        holes_iterator change_begin = m_holes_regular_begin;
-        holes_iterator change_end   = upper_bound(m_holes_regular_begin, m_holes_regular_end, pos, std::greater<std::size_t>());
-        for (auto itr = change_begin; itr != change_end; itr++) {
+        holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
+        holes_iterator regular_end_itr   = m_holes.begin() + m_holes_regular_end;
+
+        holes_iterator update_begin_itr = regular_begin_itr;
+        holes_iterator update_end_itr   = upper_bound(regular_begin_itr, regular_end_itr, pos, std::greater<std::size_t>());
+        for (auto itr = update_begin_itr; itr != update_end_itr; itr++) {
             (*itr)++;
         }
     }
 
     // Update the pending holes
     if (m_holes_pending_begin != m_holes_pending_end) {
-        holes_iterator change_begin = m_holes_pending_begin;
-        holes_iterator change_end   = upper_bound(m_holes_pending_begin, m_holes_pending_end, pos, std::greater<std::size_t>());
-        for (auto itr = change_begin; itr != change_end; itr++) {
+        holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
+        holes_iterator pending_end_itr   = m_holes.begin() + m_holes_pending_end;
+
+        holes_iterator update_begin_itr = pending_begin_itr;
+        holes_iterator update_end_itr   = upper_bound(pending_begin_itr, pending_end_itr, pos, std::greater<std::size_t>());
+        for (auto itr = update_begin_itr; itr != update_end_itr; itr++) {
             (*itr)++;
         }
     }
@@ -1467,18 +1480,18 @@ void PiercedKernel<id_t>::pierce(std::size_t pos, bool flush)
     }
 
     // If the list of pending holes is full, flush the holes.
-    if (m_holes_pending_end == m_holes.end()) {
+    if (m_holes_pending_end == m_holes.size()) {
         holesFlush();
     }
 
     // Add the hole at the end of the pending holes
-    *m_holes_pending_end = pos;
+    m_holes[m_holes_pending_end] = pos;
     m_holes_pending_end++;
 
     // Check if pending holes are still sorted
     if (m_holes_pending_sorted) {
         std::size_t nPendings = holesCountPending();
-        if (nPendings > 1 && (*(m_holes_pending_end - 1) > *(m_holes_pending_end - 2))) {
+        if (nPendings > 1 && (m_holes[m_holes_pending_end - 1] > m_holes[m_holes_pending_end - 2])) {
             m_holes_pending_sorted = false;
         }
     }
@@ -1521,7 +1534,7 @@ void PiercedKernel<id_t>::holesClearRegular(bool release)
     }
 
     // Reset regulr holes iterators
-    m_holes_regular_begin = m_holes.begin();
+    m_holes_regular_begin = 0;
     m_holes_regular_end   = m_holes_regular_begin;
 
     // There are no holes, therefore all holes are sorted
@@ -1538,7 +1551,7 @@ template<typename id_t>
 void PiercedKernel<id_t>::holesClearPending(bool release)
 {
     // Clear section of the kernel associated with the pending holes
-    long offset    = std::distance(m_holes.begin(), m_holes_regular_begin);
+    long offset    = m_holes_regular_begin;
     long nRegulars = holesCountRegular();
     holesResize(offset, nRegulars, 0, release);
 
@@ -1565,7 +1578,7 @@ void PiercedKernel<id_t>::holesResize(std::size_t offset, std::size_t nRegulars,
 
     m_holes.resize(offset + nRegulars + MAX_PENDING_HOLES);
 
-    m_holes_regular_begin = m_holes.begin() + offset;
+    m_holes_regular_begin = offset;
     m_holes_regular_end   = m_holes_regular_begin + nRegulars;
     m_holes_pending_begin = m_holes_regular_end;
     m_holes_pending_end   = m_holes_pending_begin + nPendings;
@@ -1590,7 +1603,7 @@ std::size_t PiercedKernel<id_t>::holesCount() const
 template<typename id_t>
 std::size_t PiercedKernel<id_t>::holesCountPending() const
 {
-    return std::distance(m_holes_pending_begin, m_holes_pending_end);
+    return (m_holes_pending_end - m_holes_pending_begin);
 }
 
 /**
@@ -1601,7 +1614,7 @@ std::size_t PiercedKernel<id_t>::holesCountPending() const
 template<typename id_t>
 std::size_t PiercedKernel<id_t>::holesCountRegular() const
 {
-    return std::distance(m_holes_regular_begin, m_holes_regular_end);
+    return (m_holes_regular_end - m_holes_regular_begin);
 }
 
 /**
@@ -1628,15 +1641,15 @@ void PiercedKernel<id_t>::holesFlush()
     // updated.
     holesSortPending();
 
-    auto itr = m_holes_pending_begin;
+    auto hole = m_holes_pending_begin;
     std::size_t pos = m_end_pos;
     do {
-        if (*itr >= pos) {
-            itr++;
+        if (m_holes[hole] >= pos) {
+            hole++;
             continue;
         }
 
-        pos = *itr;
+        pos = m_holes[hole];
         std::size_t next_used_pos = findNextUsedPos(pos);
         do {
             setPosEmptyId(pos, next_used_pos);
@@ -1646,25 +1659,25 @@ void PiercedKernel<id_t>::holesFlush()
                 break;
             }
         } while (isPosEmpty(pos));
-    } while (pos > 0 && itr != m_holes_pending_end);
+    } while (pos > 0 && hole != m_holes_pending_end);
 
     // Move the pending holes into the list of regular holes
-    for (auto itr = m_holes_pending_begin; itr != m_holes_pending_end; ++itr) {
-        std::size_t pos = *itr;
+    for (std::size_t hole = m_holes_pending_begin; hole < m_holes_pending_end; ++hole) {
+        std::size_t pos = m_holes[hole];
 
         // If there is space available at the beginning of the holes, try
         // using pending holes to fill that gap.
-        if (m_holes_regular_begin != m_holes.begin()) {
+        if (m_holes_regular_begin != 0) {
             --m_holes_regular_begin;
-            *m_holes_regular_begin = pos;
+            m_holes[m_holes_regular_begin] = pos;
 
             // Regular holes are no more sorted
             if (m_holes_regular_sorted) {
                 m_holes_regular_sorted = false;
             }
         } else {
-            if (itr != m_holes_regular_end) {
-                *m_holes_regular_end = pos;
+            if (hole != m_holes_regular_end) {
+                m_holes[m_holes_regular_end] = pos;
             }
             ++m_holes_regular_end;
             ++m_holes_pending_begin;
@@ -1672,7 +1685,7 @@ void PiercedKernel<id_t>::holesFlush()
             // Check if regular holes are still sorted
             if (m_holes_regular_sorted) {
                 std::size_t nRegulars = holesCountRegular();
-                if (nRegulars > 1 && (*(m_holes_regular_end - 1) > *(m_holes_regular_end - 2))) {
+                if (nRegulars > 1 && (m_holes[m_holes_regular_end - 1] > m_holes[m_holes_regular_end - 2])) {
                     m_holes_regular_sorted = false;
                 }
             }
@@ -1681,13 +1694,12 @@ void PiercedKernel<id_t>::holesFlush()
 
     // Move the holes at the beginning of the vector
     std::size_t nRegulars = holesCountRegular();
-    if (nRegulars != 0 && m_holes_regular_begin != m_holes.begin()) {
-        std::size_t offset = std::distance(m_holes.begin(), m_holes_regular_begin);
+    if (nRegulars != 0 && m_holes_regular_begin != 0) {
         for (std::size_t k = 0; k < nRegulars; ++k) {
-            m_holes[k] = m_holes[k + offset];
+            m_holes[k] = m_holes[m_holes_regular_begin + k];
         }
 
-        m_holes_regular_begin = m_holes.begin();
+        m_holes_regular_begin = 0;
         m_holes_regular_end   = m_holes_regular_begin + nRegulars;
     }
 
@@ -1709,7 +1721,9 @@ void PiercedKernel<id_t>::holesSortPending()
         return;
     }
 
-    std::sort(m_holes_pending_begin, m_holes_pending_end, std::greater<std::size_t>());
+    holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
+    holes_iterator pending_end_itr   = m_holes.begin() + m_holes_pending_end;
+    std::sort(pending_begin_itr, pending_end_itr, std::greater<std::size_t>());
     m_holes_pending_sorted = true;
 }
 
@@ -1723,7 +1737,9 @@ void PiercedKernel<id_t>::holesSortRegular()
         return;
     }
 
-    std::sort(m_holes_regular_begin, m_holes_regular_end, std::greater<std::size_t>());
+    holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
+    holes_iterator regular_end_itr   = m_holes.begin() + m_holes_regular_end;
+    std::sort(regular_begin_itr, regular_end_itr, std::greater<std::size_t>());
     m_holes_regular_sorted = true;
 }
 
@@ -1963,15 +1979,21 @@ void PiercedKernel<id_t>::shrink(std::size_t n, bool force)
 
     // Remove regular holes beyond the updated last position
     holesSortRegular();
-    m_holes_regular_begin = std::lower_bound(m_holes_regular_begin, m_holes_regular_end, m_end_pos - 1, std::greater<std::size_t>());
+    holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
+    holes_iterator regular_end_itr   = m_holes.begin() + m_holes_regular_end;
+    regular_begin_itr = std::lower_bound(regular_begin_itr, regular_end_itr, m_end_pos - 1, std::greater<std::size_t>());
+    m_holes_regular_begin = std::distance(m_holes.begin(), regular_begin_itr);
     if (m_holes_regular_begin == m_holes_regular_end) {
-        m_holes_regular_begin = m_holes.begin();
+        m_holes_regular_begin = 0;
         m_holes_regular_end   = m_holes_regular_begin;
     }
 
     // Remove pending holes beyond the updated last position
     holesSortPending();
-    m_holes_pending_begin = std::lower_bound(m_holes_pending_begin, m_holes_pending_end, m_end_pos - 1, std::greater<std::size_t>());
+    holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
+    holes_iterator pending_end_itr   = m_holes.begin() + m_holes_pending_end;
+    pending_begin_itr = std::lower_bound(pending_begin_itr, pending_end_itr, m_end_pos - 1, std::greater<std::size_t>());
+    m_holes_pending_begin = std::distance(m_holes.begin(), pending_begin_itr);
     if (m_holes_pending_begin == m_holes_pending_end) {
         m_holes_pending_begin = m_holes_regular_end;
         m_holes_pending_end   = m_holes_pending_begin;
@@ -2077,15 +2099,10 @@ void PiercedKernel<id_t>::restore(std::istream &stream)
         m_holes[n] = pos;
     }
 
-    std::size_t distance;
-    utils::binary::read(stream, distance);
-    m_holes_regular_begin = m_holes.begin() + distance;
-    utils::binary::read(stream, distance);
-    m_holes_regular_end = m_holes.begin() + distance;
-    utils::binary::read(stream, distance);
-    m_holes_pending_begin = m_holes.begin() + distance;
-    utils::binary::read(stream, distance);
-    m_holes_pending_end = m_holes.begin() + distance;
+    utils::binary::read(stream, m_holes_regular_begin);
+    utils::binary::read(stream, m_holes_regular_end);
+    utils::binary::read(stream, m_holes_pending_begin);
+    utils::binary::read(stream, m_holes_pending_end);
     utils::binary::read(stream, m_holes_regular_sorted);
     utils::binary::read(stream, m_holes_pending_sorted);
 
@@ -2127,10 +2144,10 @@ void PiercedKernel<id_t>::dump(std::ostream &stream) const
         utils::binary::write(stream, hole);
     }
 
-    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_regular_begin));
-    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_regular_end));
-    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_pending_begin));
-    utils::binary::write(stream, std::distance<holes_const_iterator>(m_holes.begin(), m_holes_pending_end));
+    utils::binary::write(stream, m_holes_regular_begin);
+    utils::binary::write(stream, m_holes_regular_end);
+    utils::binary::write(stream, m_holes_pending_begin);
+    utils::binary::write(stream, m_holes_pending_end);
     utils::binary::write(stream, m_holes_regular_sorted);
     utils::binary::write(stream, m_holes_pending_sorted);
 
