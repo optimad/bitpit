@@ -55,7 +55,7 @@ public:
 
 	Cell(const Cell &other) = default;
 	Cell(Cell&& other) = default;
-	Cell& operator = (const Cell &other);
+	Cell& operator = (const Cell &other) = default;
 	Cell& operator=(Cell&& other) = default;
 
 	void swap(Cell &other) noexcept;

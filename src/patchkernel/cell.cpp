@@ -107,17 +107,6 @@ Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeig
 	_initialize(interior, false, false);
 }
 
-/*!
-	Copy assignment operator
-*/
-Cell & Cell::operator=(const Cell &other)
-{
-	Cell tmp(other);
-	swap(tmp);
-
-	return (*this);
-}
-
 /**
 * Exchanges the content of the cell by the content the specified other cell.
 *
