@@ -40,7 +40,7 @@ public:
 	Interface();
 	Interface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 
-	Interface(const Interface &other);
+	Interface(const Interface &other) = default;
 	Interface(Interface&& other) = default;
 	Interface& operator = (const Interface &other);
 	Interface& operator=(Interface&& other) = default;

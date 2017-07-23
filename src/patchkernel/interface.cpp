@@ -61,15 +61,6 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 }
 
 /*!
-	Copy-constructor
-*/
-Interface::Interface(const Interface &other)
-	: Element(other)
-{
-	_initialize(NULL_ID, -1, NULL_ID, -1);
-}
-
-/*!
 	Copy assignament operator
 */
 Interface & Interface::operator=(const Interface &other)
