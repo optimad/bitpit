@@ -340,6 +340,17 @@ class VTK{
         void                    enableData( std::string ) ;
         void                    disableData( std::string ) ;
 
+        std::vector<VTKField>::const_iterator    getDataBegin( ) const ;
+        std::vector<VTKField>::const_iterator    getDataEnd( ) const ;
+
+        std::vector<VTKField>::const_iterator    getGeomDataBegin( ) const ;
+        std::vector<VTKField>::const_iterator    getGeomDataEnd( ) const ;
+
+        std::size_t             getDataCount( ) const ;
+        std::size_t             getGeomDataCount( ) const ;
+
+        const VTKField *        findData( const std::string & name ) const ;
+        const VTKField *        findGeomData( const std::string & name ) const ;
 
         void                    read() ;
         virtual void            readMetaInformation() = 0 ; 
@@ -363,8 +374,18 @@ class VTK{
         bool                    readDataArray( std::fstream &, VTKField &);
 
         //General Purpose
-        bool                    getDataByName( const std::string &, VTKField*& ) ;
-        bool                    getGeomByName( const std::string &, VTKField*& ) ;
+        std::vector<std::string> getFieldNames( const std::vector<VTKField> &fields ) const;
+
+        VTKField *              getData( std::size_t id );
+        const VTKField *        getData( std::size_t id ) const ;
+        VTKField *              getGeomData( std::size_t id );
+        const VTKField *        getGeomData( std::size_t id ) const ;
+
+        VTKField *              _findData( const std::string & name);
+        VTKField *              _findGeomData( const std::string & name);
+
+        int                     _findFieldIndex( const std::string &name, const std::vector<VTKField> &fields ) const;
+
         void                    calcAppendedOffsets() ;
         virtual uint64_t        calcFieldSize( const VTKField &) =0;
         virtual uint64_t        calcFieldEntries( const VTKField &) =0;

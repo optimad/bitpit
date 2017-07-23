@@ -255,11 +255,12 @@ void  VTK::setDataCodex( VTKFormat cod ) {
  */
 VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
 
-    VTKField *ptr(NULL), *test(NULL) ;
+    VTKField *ptr = nullptr ;
 
-    if( ! getGeomByName(name, test) ){
+    if( ! findGeomData(name) ){
 
-        if(  ! getDataByName( name, ptr ) ) {
+        ptr = _findData( name ) ;
+        if(  ! ptr ) {
             m_data.push_back( VTKField( name ) ) ;
             ptr = &(m_data.back()) ;
         }
@@ -324,9 +325,9 @@ void VTK::removeData( std::string name ){
  */
 void VTK::enableData( std::string name ){
 
-    VTKField* field ;
+    VTKField *field = _findData(name);
 
-    if( getDataByName(name,field) ) {
+    if( field ) {
         field->enable() ;
 
     } else{
@@ -342,9 +343,9 @@ void VTK::enableData( std::string name ){
  */
 void VTK::disableData( std::string name ){
 
-    VTKField* field ;
+    VTKField *field = _findData(name);
 
-    if( getDataByName(name,field) ) {
+    if( field ) {
         field->disable() ;
 
     } else{
@@ -354,43 +355,203 @@ void VTK::disableData( std::string name ){
 }
 
 /*!
- * Finds user data field through name. 
- * @param[in] name name of field to be found
- * @param[out] the_field pointer to the filed if found; if not found value is not altered
- * \return true if field has been found, else false
+ * Get the list of the names of the fields.
+ * \return the list of the names of the fields.
  */
-bool VTK::getDataByName( const std::string &name, VTKField*& the_field ){
+std::vector<std::string> VTK::getFieldNames( const std::vector<VTKField> &fields ) const {
 
-    the_field = NULL ;
-
-    for( auto &field : m_data ){
-        if( field.getName() == name ){
-            the_field = &field ;
-            return true ;
-        }
+    std::size_t nFields = fields.size();
+    std::vector<std::string> names(nFields);
+    for (std::size_t i = 0; i < nFields; ++i) {
+        names[i] = fields[i].getName();
     }
 
-    return false ;
+    return names;
 }
 
 /*!
- * Finds geometry data field through name. 
- * @param[in] name name of field to be found
- * @param[out] the_field pointer to the filed if found; if not found value is not altered
- * \return true if field has been found, else false
+ * Get the a constant iterator pointing to the first data field.
+ * \return a constant iterator pointing to the first data field.
  */
-bool VTK::getGeomByName( const std::string &name, VTKField*& the_field ){
+std::vector<VTKField>::const_iterator VTK::getDataBegin( ) const {
 
-    the_field = NULL ;
+    return m_data.cbegin();
+}
 
-    for( auto &field : m_geometry ){
-        if( field.getName() == name ){
-            the_field = &field ;
-            return true ;
+/*!
+ * Get the a constant iterator pointing to the past-the-element data field.
+ * \return a constant iterator pointing to the past-the-element data field.
+ */
+std::vector<VTKField>::const_iterator VTK::getDataEnd( ) const {
+
+    return m_data.cend();
+}
+
+/*!
+ * Get the a constant iterator pointing to the first geometry field.
+ * \return a constant iterator pointing to the first geometry field.
+ */
+std::vector<VTKField>::const_iterator VTK::getGeomDataBegin( ) const {
+
+    return m_geometry.cbegin();
+}
+
+/*!
+ * Get the a constant iterator pointing to the past-the-element geometry field.
+ * \return a constant iterator pointing to the past-the-element geometry field.
+ */
+std::vector<VTKField>::const_iterator VTK::getGeomDataEnd( ) const {
+
+    return m_geometry.cend();
+}
+
+/*!
+ * Get the number of data fields.
+ * \return the number of data
+ */
+std::size_t VTK::getDataCount( ) const {
+
+    return m_data.size();
+}
+
+/*!
+ * Get the number of geometry fields.
+ * \return the number of geometry fields.
+ */
+std::size_t VTK::getGeomDataCount( ) const {
+
+    return m_geometry.size();
+}
+
+/*!
+ * Finds the data field with the specified name.
+ * @param[in] name name of field to be found
+ * \return A constant pointer to the field with the specified name, if such a
+ * field does not exists a null pointer is returned.
+ */
+const VTKField * VTK::findData( const std::string &name ) const {
+
+    int id = _findFieldIndex(name, m_data) ;
+    if (id >= 0) {
+        return getData(id);
+    } else {
+        return nullptr;
+    }
+}
+
+/*!
+ * Finds the data field with the specified name.
+ * @param[in] name name of field to be found
+ * \return A pointer to the field with the specified name, if such a field does
+ * not exists a null pointer is returned.
+ */
+VTKField * VTK::_findData( const std::string &name ) {
+
+    int id = _findFieldIndex(name, m_data) ;
+    if (id >= 0) {
+        return getData(id);
+    } else {
+        return nullptr;
+    }
+}
+
+/*!
+ * Finds the geometry field with the specified name.
+ * @param[in] name name of field to be found
+ * \return A constant pointer to the field with the specified name, if such a
+ * field does not exists a null pointer is returned.
+ */
+const VTKField * VTK::findGeomData( const std::string &name ) const {
+
+    int id = _findFieldIndex(name, m_geometry) ;
+    if (id >= 0) {
+        return getGeomData(id);
+    } else {
+        return nullptr;
+    }
+}
+
+/*!
+ * Finds the geometry field with the specified name.
+ * @param[in] name name of field to be found
+ * \return A pointer to the field with the specified name, if such a field does
+ * not exists a null pointer is returned.
+ */
+VTKField * VTK::_findGeomData( const std::string &name ) {
+
+    int id = _findFieldIndex(name, m_geometry) ;
+    if (id >= 0) {
+        return getGeomData(id);
+    } else {
+        return nullptr;
+    }
+}
+
+/*!
+ * Gets a constant pointer to the data field with the specified index.
+ * @param[in] index index of the field
+ * \return A constant pointer to the field with the specified index.
+ */
+const VTKField * VTK::getData( std::size_t id ) const {
+
+    assert(id < m_data.size());
+
+    return m_data.data() + id;
+}
+
+/*!
+ * Gets a pointer to the data field with the specified index.
+ * @param[in] index index of the field
+ * \return A pointer to the field with the specified index.
+ */
+VTKField * VTK::getData( std::size_t id ) {
+
+    assert(id < m_data.size());
+
+    return m_data.data() + id;
+}
+
+/*!
+ * Gets a constant pointer to the geometry field with the specified index.
+ * @param[in] index index of the field
+ * \return A constant pointer to the field with the specified index.
+ */
+const VTKField * VTK::getGeomData( std::size_t id ) const {
+
+    assert(id < m_geometry.size());
+
+    return m_geometry.data() + id;
+}
+
+/*!
+ * Gets a pointer to the geometry field with the specified index.
+ * @param[in] index index of the field
+ * \return A pointer to the field with the specified index.
+ */
+VTKField * VTK::getGeomData( std::size_t id ) {
+
+    assert(id < m_geometry.size());
+
+    return m_geometry.data() + id;
+}
+
+/*!
+ * Finds the field with the specified name.
+ * @param[in] name name of field to be found
+ * @param[in] fields is the list of fields among which the requested field will
+ * be searched
+ * \return The index of the specified field, if such a field does not exists,
+ * -1 is returned.
+ */
+int VTK::_findFieldIndex( const std::string &name, const std::vector<VTKField> &fields ) const {
+
+    for( std::size_t i = 0; i < fields.size(); ++i ) {
+        if( fields[i].getName() == name ){
+            return i ;
         }
     }
 
-    return false ;
+    return -1 ;
 }
 
 /*!
@@ -967,7 +1128,8 @@ void VTK::readDataHeader( std::fstream &str ){
 
                 temp.setPosition( pos_ ) ;
 
-                if( ! getDataByName( temp.getName(), ptemp )) {
+                ptemp = _findData( temp.getName() );
+                if( !ptemp ) {
                     m_data.push_back( VTKField( temp ) ) ;
                 }
 
