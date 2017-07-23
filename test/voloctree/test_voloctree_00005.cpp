@@ -121,12 +121,16 @@ int main(int argc, char *argv[]) {
     // Create the patch from the existing tree
     //
 
-    VolOctree *patch_2D;
+    // Create the original patch
+    VolOctree *patch_2D_original = new VolOctree(0, std::move(treePointer), &treePointer);
+    patch_2D_original->getVTK().setName("octree_patch_from_tree_2D_initial");
+    patch_2D_original->update();
 
-    // Create the patch
-    patch_2D = new VolOctree(0, std::move(treePointer), &treePointer);
-    patch_2D->getVTK().setName("octree_patch_from_tree_2D_initial");
-    patch_2D->update();
+    // Clone the patch
+    std::unique_ptr<VolOctree> patch_2D = PatchKernel::clone(patch_2D_original);
+
+    // Delete the original patch
+    delete patch_2D_original;
 
     // Show patch info
     log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
@@ -166,11 +170,8 @@ int main(int argc, char *argv[]) {
     patch_2D->getVTK().setName("octree_patch_from_tree_2D_refined");
     patch_2D->write();
 
-    // Destroy the patch
-    delete patch_2D;
-
     // The tree has now being adopted and can used again.
-    patch_2D = new VolOctree(0, std::move(treePointer), &treePointer);
+    patch_2D = std::unique_ptr<VolOctree>(new VolOctree(0, std::move(treePointer), &treePointer));
     patch_2D->getVTK().setName("octree_patch_from_adopted_tree_2D_initial");
     patch_2D->update();
 
