@@ -373,7 +373,7 @@ protected:
     void rawEmreplace(std::size_t pos, Args&&... args);
 
 private:
-    const std::size_t m_nFields;
+    std::size_t m_nFields;
     container_t m_fields;
 
     const PiercedKernel<id_t> *m_const_kernel;
