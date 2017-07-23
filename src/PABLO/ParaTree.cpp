@@ -678,6 +678,8 @@ namespace bitpit {
 
 #if BITPIT_ENABLE_MPI==1
     /*! Set the MPI communicator to be used for parallel communications.
+     * The tree will not use the specified communicator directly, instead a
+     * duplicates is ceated.
      * \param communicator is the communicator to be used for parallel
      * communications.
      */
