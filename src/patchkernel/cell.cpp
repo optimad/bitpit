@@ -108,17 +108,6 @@ Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeig
 }
 
 /*!
-        Copy-constructor
-*/
-Cell::Cell(const Cell &other)
-	: Element(other),
-	  m_interior(other.m_interior), m_pid(other.m_pid),
-	  m_interfaces(other.m_interfaces), m_adjacencies(other.m_adjacencies)
-{
-
-}
-
-/*!
 	Copy assignment operator
 */
 Cell & Cell::operator=(const Cell &other)

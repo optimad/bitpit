@@ -53,7 +53,7 @@ public:
 	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED,
 	     bool interior = true, bool storeNeighbourhood = true);
 
-	Cell(const Cell &other);
+	Cell(const Cell &other) = default;
 	Cell(Cell&& other) = default;
 	Cell& operator = (const Cell &other);
 	Cell& operator=(Cell&& other) = default;
