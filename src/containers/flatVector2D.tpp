@@ -144,21 +144,6 @@ FlatVector2D<T>::FlatVector2D(const std::vector<std::vector<T> > &vector2D)
 }
 
 /*!
-    Copy constructor.
-*/
-template <class T>
-FlatVector2D<T>::FlatVector2D(const FlatVector2D &other)
-{
-    // Copy the items
-    std::vector<T> new_v(other.m_v);
-    std::vector<std::size_t> new_index(other.m_index);
-
-    // Assign the new memory to the object
-    m_v.swap(new_v);
-    m_index.swap(new_index);
-}
-
-/*!
     Copy assignment operator.
 
     Assigns new contents to the container, replacing its current contents,

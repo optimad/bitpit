@@ -71,7 +71,7 @@ public:
     FlatVector2D(const std::vector<int> &sizes, const T &value = T());
     FlatVector2D(const int &nVectors, const int &size, const T &value = T());
     FlatVector2D(const std::vector<std::vector<T> > &vector2D);
-    FlatVector2D(const FlatVector2D &other);
+    FlatVector2D(const FlatVector2D &other) = default;
 
     FlatVector2D & operator=(const FlatVector2D &other);
 
