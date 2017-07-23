@@ -73,7 +73,13 @@ public:
     FlatVector2D(const std::vector<std::vector<T> > &vector2D);
     FlatVector2D(const FlatVector2D &other) = default;
 
-    FlatVector2D & operator=(const FlatVector2D &other);
+    /*!
+        Copy assignment operator.
+
+        Assigns new contents to the container, replacing its current contents,
+        and modifying its size accordingly.
+    */
+    FlatVector2D & operator=(const FlatVector2D &other) = default;
 
     /*!
         Move assignment operator.

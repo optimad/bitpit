@@ -144,23 +144,6 @@ FlatVector2D<T>::FlatVector2D(const std::vector<std::vector<T> > &vector2D)
 }
 
 /*!
-    Copy assignment operator.
-
-    Assigns new contents to the container, replacing its current contents,
-    and modifying its size accordingly.
-*/
-template <class T>
-FlatVector2D<T> & FlatVector2D<T>::operator=(const FlatVector2D &other)
-{
-    if (this != &other) {
-        FlatVector2D temporary(other);
-        temporary.swap(*this);
-    }
-
-    return *this;
-}
-
-/*!
     Initializes the container.
 
     \param sizes are the sizes of the vectors
