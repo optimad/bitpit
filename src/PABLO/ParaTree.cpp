@@ -707,6 +707,56 @@ namespace bitpit {
         _initializePartitions();
     }
 
+    /*! Set the MPI communicator to be used for parallel communications.
+     * If the communicator is already set, it will be replaced with the new
+     * one only if the two communicators are equivalent, i.e., the rank
+     * of the processes have to be the same in both communicators.
+     * The tree will not use the specified communicator directly, instead a
+     * duplicates is ceated.
+     * Previous communicator will be freed or returned depending on
+     * the received arguments.
+     * \param communicator is the communicator to be used for parallel
+     * communications.
+     * \param[in,out] previousCommunicator if a valid pointer is received,
+     * on output this parameter will contain the previous communicator.
+     * If this patameter is a null pointer, the previous communicator
+     * will be freed.
+     */
+    void
+    ParaTree::replaceComm(MPI_Comm communicator, MPI_Comm *previousCommunicator)
+    {
+        // The communicator has to be already set
+        if (!isCommSet()) {
+            throw std::runtime_error ("PABLO communicator is not set");
+        }
+
+        // Check if the communicator is valid
+        //
+        // The communicator should be equaivalent to the one currently set,
+        // i.e., the rank of the processes have to be the same in both
+        // communicators.
+        int updatedRank;
+        MPI_Comm_rank(communicator, &updatedRank);
+        int currentRank = getRank();
+
+        int isValid = (updatedRank == currentRank) ? 1 : 0;
+        MPI_Allreduce(MPI_IN_PLACE, &isValid, 1, MPI_INT, MPI_LAND, m_comm);
+        if (!isValid) {
+            throw std::runtime_error ("New communicator is not valid");
+        }
+
+        // Handle previous communicator
+        if (previousCommunicator) {
+            *previousCommunicator = m_comm;
+            m_comm = MPI_COMM_NULL;
+        } else {
+            freeComm();
+        }
+
+        // Set the communicator
+        setComm(communicator);
+    }
+
     /*!
      * Free the MPI communicator
      */

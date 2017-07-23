@@ -238,6 +238,7 @@ namespace bitpit {
         Operation	getLastOperation() const;
 #if BITPIT_ENABLE_MPI==1
         void		setComm(MPI_Comm communicator);
+        void		replaceComm(MPI_Comm communicator, MPI_Comm *previousCommunicator = nullptr);
         void		freeComm();
         MPI_Comm	getComm() const;
         bool		isCommSet() const;
