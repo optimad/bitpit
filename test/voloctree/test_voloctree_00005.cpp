@@ -52,7 +52,8 @@ int main(int argc, char *argv[]) {
     double z_0 = 30.;
     double l   = 1.5;
 
-    PabloUniform octree(x_0, y_0, z_0, l, 2);
+    std::unique_ptr<PabloUniform> treePointer = std::unique_ptr<PabloUniform>(new PabloUniform(x_0, y_0, z_0, l, 2));
+    PabloUniform &octree = *treePointer;
 
     std::cout << " Origin : ( " << octree.getX0() << ", " << octree.getY0() << ", " << octree.getZ0() << " )" << std::endl;
     std::cout << " Length : " << octree.getL() << std::endl;
@@ -121,7 +122,6 @@ int main(int argc, char *argv[]) {
     //
 
     VolOctree *patch_2D;
-    std::unique_ptr<PabloUniform> treePointer = std::unique_ptr<PabloUniform>(&octree);
 
     // Create the patch
     patch_2D = new VolOctree(0, std::move(treePointer), &treePointer);
