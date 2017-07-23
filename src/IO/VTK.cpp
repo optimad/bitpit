@@ -248,6 +248,23 @@ void  VTK::setDataCodex( VTKFormat cod ) {
 }
 
 /*!
+ * Set the specified geometry field.
+ * @param[in] field is the field that will be set
+ */
+void VTK::setGeomData( VTKField &&field ){
+
+    const std::string &name = field.getName();
+    int id = _findFieldIndex( name, m_geometry ) ;
+    if( id < 0 ){
+        log::cout() << "The field " << name << "is not an admissible geometry field." << std::endl ;
+        return;
+    }
+
+    m_geometry[id] = std::move(field);
+
+}
+
+/*!
  * Add user data for input or output. 
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in] name name of field

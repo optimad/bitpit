@@ -323,6 +323,8 @@ class VTK{
         void                    setGeomCodex( VTKFormat );
         void                    setDataCodex( VTKFormat );
 
+        void                    setGeomData( VTKField &&field ) ;
+
         VTKField&               addData( std::string, VTKBaseStreamer* = NULL ) ;
 
         BITPIT_DEPRECATED( VTKField&  addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
@@ -429,6 +431,8 @@ class VTKUnstructuredGrid : public VTK {
         void                    setElementType( VTKElementType ) ;
 
     public:
+        using                   VTK::setGeomData;
+
         void                    readMetaInformation() ;
         void                    writeMetaInformation() ;
 
@@ -476,6 +480,8 @@ class VTKRectilinearGrid : public VTK{
         void                    writeCollection() ;  
 
     public:
+        using                   VTK::setGeomData;
+
         void                    readMetaInformation() ;
         void                    writeMetaInformation() ;
 
