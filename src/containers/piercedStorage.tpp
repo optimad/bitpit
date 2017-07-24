@@ -64,6 +64,38 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel
 }
 
 /**
+* Constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+* \param kernel is the kernel that will be set
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel)
+    : m_nFields(x.m_nFields), m_fields(x.m_fields),
+      m_const_kernel(nullptr), m_kernel(nullptr)
+{
+    PiercedSyncMaster::SyncMode syncMode = x.getSyncMode();
+    if (kernel) {
+        setKernel(kernel, syncMode);
+    } else if (x.m_kernel) {
+        setKernel(x.m_kernel, syncMode);
+    }
+}
+
+/**
+* Copy constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x)
+    : PiercedStorage<value_t, id_t>(x, nullptr)
+{
+}
+
+/**
 * Destructor
 */
 template<typename value_t, typename id_t>
