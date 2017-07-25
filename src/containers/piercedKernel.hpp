@@ -47,10 +47,6 @@ protected:
 
 };
 
-template<typename PS_value_t, typename PS_id_t>
-class PiercedStorage;
-
-
 /**
 * \ingroup containers
 *
