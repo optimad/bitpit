@@ -39,7 +39,7 @@
 
 namespace bitpit {
 
-class BasePiercedStorage : protected virtual PiercedSyncSlave {
+class BasePiercedStorage : public PiercedSyncSlave {
 
 protected:
     BasePiercedStorage();

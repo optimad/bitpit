@@ -99,13 +99,14 @@ public:
 */
 class PiercedSyncSlave {
 
-public:
-    virtual void commitSyncAction(const PiercedSyncAction &action) = 0;
+friend class PiercedSyncMaster;
 
 protected:
     PiercedSyncSlave();
 
     void swap(PiercedSyncSlave &x) noexcept;
+
+    virtual void commitSyncAction(const PiercedSyncAction &action) = 0;
 
 };
 
