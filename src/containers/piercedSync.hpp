@@ -135,6 +135,7 @@ public:
         SYNC_MODE_ITR_END = SYNC_MODE_ITR_BEGIN + SYNC_MODE_ITR_COUNT
     };
 
+protected:
     /**
     * Hash function for SyncMode enum
     */
@@ -174,7 +175,6 @@ public:
 
     void sync();
 
-protected:
     void swap(PiercedSyncMaster &x) noexcept;
 
     void processSyncAction(const PiercedSyncAction &action);

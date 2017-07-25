@@ -40,7 +40,7 @@
 
 namespace bitpit {
 
-class BasePiercedKernel : protected virtual PiercedSyncMaster {
+class BasePiercedKernel : public PiercedSyncMaster {
 
 protected:
     BasePiercedKernel();
