@@ -337,7 +337,7 @@ void LevelSetObject::communicate( std::unordered_map<int,std::vector<long>> &sen
         /* Start receiving of first communications which contain the sizes
          * of the communications of the exchanged data
         */
-	    for (const auto entry : sendList) {
+	    for (const auto entry : recvList) {
             int rank = entry.first;
 
             sizeCommunicator.setRecv( rank, sizeof(long) ) ;
