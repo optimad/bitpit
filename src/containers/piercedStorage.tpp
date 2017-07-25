@@ -134,6 +134,17 @@ const PiercedKernel<id_t> & PiercedStorage<value_t, id_t>::getKernel() const
 }
 
 /**
+* Gets the syncronization mode of the storage.
+*
+* \result The synchronization mode of the storage.
+*/
+template<typename value_t, typename id_t>
+PiercedSyncMaster::SyncMode PiercedStorage<value_t, id_t>::getSyncMode() const
+{
+    return m_const_kernel->getSlaveSyncMode(this);
+}
+
+/**
 * Gets a constant reference to the synchronization master of the storage
 *
 * \result A constant reference to the synchronization master of the storage.

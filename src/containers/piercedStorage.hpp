@@ -256,6 +256,7 @@ public:
     void unsetKernel();
     const PiercedKernel<id_t> & getKernel() const;
 
+    PiercedSyncMaster::SyncMode getSyncMode() const;
     const PiercedSyncMaster & getSyncMaster() const;
 
     // Methods that modify the container as a whole
