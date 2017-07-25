@@ -94,19 +94,10 @@ public:
 /**
 * \ingroup containers
 *
-* \brief Base class for handling pierced synchronization.
-*/
-class PiercedSync {
-
-};
-
-/**
-* \ingroup containers
-*
 * \brief Base class for defining an object that acts like a slave in pierced
 * synchronization.
 */
-class PiercedSyncSlave : public PiercedSync {
+class PiercedSyncSlave {
 
 public:
     virtual void commitSyncAction(const PiercedSyncAction &action) = 0;
@@ -124,7 +115,7 @@ protected:
 * \brief Base class for defining an object that acts like a master in pierced
 * synchronization.
 */
-class PiercedSyncMaster : public PiercedSync {
+class PiercedSyncMaster {
 
 public:
     /**
