@@ -245,19 +245,17 @@ public:
 
     // Constructors and initialization
     PiercedStorage();
-    PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel = nullptr, PiercedSyncMaster::SyncMode syncMode = PiercedSyncMaster::SYNC_MODE_DISABLED);
+    PiercedStorage(std::size_t nFields);
+    PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
 
     ~PiercedStorage();
 
     std::size_t getFieldCount() const;
 
     void setKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    void setKernel(const PiercedKernel<id_t> *kernel);
     void unsetKernel();
     const PiercedKernel<id_t> & getKernel() const;
 
-    void setSyncMaster(PiercedSyncMaster *master, PiercedSyncMaster::SyncMode syncMode);
-    void unsetSyncMaster();
     const PiercedSyncMaster & getSyncMaster() const;
 
     // Methods that modify the container as a whole
@@ -377,8 +375,8 @@ private:
     const std::size_t m_nFields;
     container_t m_fields;
 
-    const PiercedKernel<id_t> *m_kernel;
-    PiercedSyncMaster *m_master;
+    const PiercedKernel<id_t> *m_const_kernel;
+    PiercedKernel<id_t> *m_kernel;
 
     template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value>::type * = nullptr>
     void restoreField(std::istream &stream, T &value);
