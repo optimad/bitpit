@@ -2070,12 +2070,10 @@ namespace bitpit {
 					if (idxtry > m_ghosts.size()-1){
 						if (jump > 0){
 							idxtry = m_ghosts.size() - 1;
-							Mortontry = m_ghosts[idxtry].computeMorton();
 							jump = 0;
 						}
 						else if (jump < 0){
 							idxtry = 0;
-							Mortontry = m_ghosts[idxtry].computeMorton();
 							jump = 0;
 						}
 					}
