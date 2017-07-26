@@ -754,6 +754,8 @@ void LevelSetCachedObject::propagateSign() {
                     }
                 }
 
+                assert(region >= 0);
+
                 // Detect the sign to communicate.
                 if (regionType[region] == REGION_UNKNOWN) {
                     sign = 0;
