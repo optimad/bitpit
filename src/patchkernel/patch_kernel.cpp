@@ -641,7 +641,7 @@ void PatchKernel::write(VTKWriteMode mode)
 	// Set VTK targets
 	long vtkCellCount = 0;
 	if (m_vtkWriteTarget == WRITE_TARGET_CELLS_ALL) {
-		m_vtkCellRange = CellConstRange(&m_cells.getStorage());
+		m_vtkCellRange = CellConstRange(cellConstBegin(), cellConstEnd());
 
 		vtkCellCount = getCellCount();
 #if BITPIT_ENABLE_MPI==1
