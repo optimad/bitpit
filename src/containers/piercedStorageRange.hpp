@@ -120,8 +120,6 @@ public:
     // General methods
     void swap(PiercedStorageRange &other) noexcept;
 
-    storage_type & getStorage() const;
-
     const PiercedKernelRange<id_t> & getKernelRange() const;
 
     // Methods to get begin and end
@@ -149,10 +147,6 @@ public:
             return false;
         }
 
-        if (m_storage != rhs.m_storage) {
-            return false;
-        }
-
         return true;
     }
 
@@ -166,16 +160,12 @@ public:
             return true;
         }
 
-        if (m_storage != rhs.m_storage) {
-            return true;
-        }
-
         return false;
     }
 
 private:
-    /*! Storage */
-    storage_t *m_storage;
+    iterator m_begin;
+    iterator m_end;
 
 };
 
