@@ -32,9 +32,8 @@ namespace bitpit {
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange()
-    : m_kernel(nullptr),
-      m_begin_pos(-1),
-      m_end_pos(-1)
+    : m_cbegin(),
+      m_cend()
 {
 }
 
@@ -43,9 +42,8 @@ PiercedKernelRange<id_t>::PiercedKernelRange()
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel)
-    : m_kernel(kernel),
-      m_begin_pos(kernel->cbegin().getRawIndex()),
-      m_end_pos(kernel->cend().getRawIndex())
+    : m_cbegin(kernel->cbegin()),
+      m_cend(kernel->cend())
 {
 }
 
@@ -57,9 +55,8 @@ PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel)
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel, id_t first, id_t last)
-    : m_kernel(kernel),
-      m_begin_pos(kernel->getRawIndex(first)),
-      m_end_pos(kernel->getRawIndex(last) + 1)
+    : m_cbegin(kernel->find(first)),
+      m_cend(++(kernel->find(last)))
 {
 }
 
@@ -71,9 +68,8 @@ PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel, id_t first,
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange(const const_iterator &begin, const const_iterator &end)
-    : m_kernel(&(begin.getKernel())),
-      m_begin_pos(begin.getRawIndex()),
-      m_end_pos(end.getRawIndex())
+    : m_cbegin(begin),
+      m_cend(end)
 {
     if (&(begin.getKernel()) != &(end.getKernel())) {
         throw std::runtime_error("The two iterators belong to different kernels");
@@ -88,21 +84,8 @@ PiercedKernelRange<id_t>::PiercedKernelRange(const const_iterator &begin, const 
 template<typename id_t>
 void PiercedKernelRange<id_t>::swap(PiercedKernelRange &other) noexcept
 {
-    std::swap(m_kernel, other.m_kernel);
-
-    std::swap(m_begin_pos, other.m_begin_pos);
-    std::swap(m_end_pos, other.m_end_pos);
-}
-
-/*!
-* Get a constant reference of the kernel associated with the range.
-*
-* \result A constant reference of the kernel associated with the range.
-*/
-template<typename id_t>
-const typename PiercedKernelRange<id_t>::kernel_type & PiercedKernelRange<id_t>::getKernel() const
-{
-    return *m_kernel;
+    std::swap(m_cbegin, other.m_cbegin);
+    std::swap(m_cend, other.m_cend);
 }
 
 /*!
@@ -113,7 +96,7 @@ const typename PiercedKernelRange<id_t>::kernel_type & PiercedKernelRange<id_t>:
 template<typename id_t>
 typename PiercedKernelRange<id_t>::const_iterator PiercedKernelRange<id_t>::begin() const noexcept
 {
-    return m_kernel->getConstIteratorFromRawIndex(m_begin_pos);
+    return m_cbegin;
 }
 
 /*!
@@ -126,7 +109,7 @@ typename PiercedKernelRange<id_t>::const_iterator PiercedKernelRange<id_t>::begi
 template<typename id_t>
 typename PiercedKernelRange<id_t>::const_iterator PiercedKernelRange<id_t>::end() const noexcept
 {
-    return m_kernel->getConstIteratorFromRawIndex(m_end_pos);
+    return m_cend;
 }
 
 /*!
@@ -137,7 +120,7 @@ typename PiercedKernelRange<id_t>::const_iterator PiercedKernelRange<id_t>::end(
 template<typename id_t>
 typename PiercedKernelRange<id_t>::const_iterator PiercedKernelRange<id_t>::cbegin() const noexcept
 {
-    return m_kernel->getConstIteratorFromRawIndex(m_begin_pos);
+    return m_cbegin;
 }
 
 /*!
@@ -150,7 +133,7 @@ typename PiercedKernelRange<id_t>::const_iterator PiercedKernelRange<id_t>::cbeg
 template<typename id_t>
 typename PiercedKernelRange<id_t>::const_iterator PiercedKernelRange<id_t>::cend() const noexcept
 {
-    return m_kernel->getConstIteratorFromRawIndex(m_end_pos);
+    return m_cend;
 }
 
 }

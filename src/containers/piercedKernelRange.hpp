@@ -74,8 +74,6 @@ public:
     // General methods
     void swap(PiercedKernelRange &other) noexcept;
 
-    const kernel_type & getKernel() const;
-
     // Methods to get begin and end
     const_iterator begin() const noexcept;
     const_iterator end() const noexcept;
@@ -89,15 +87,11 @@ public:
     template<typename other_id_t = long>
     bool operator==(const PiercedKernelRange<other_id_t> &rhs) const
     {
-        if (m_kernel == rhs.m_kernel) {
+        if (m_cbegin == rhs.m_cbegin) {
             return false;
         }
 
-        if (m_begin_pos == rhs.m_begin_pos) {
-            return false;
-        }
-
-        if (m_end_pos == rhs.m_end_pos) {
+        if (m_cend == rhs.m_cend) {
             return false;
         }
 
@@ -110,15 +104,11 @@ public:
     template<typename other_id_t = long>
     bool operator!=(const PiercedKernelRange<other_id_t> &rhs) const
     {
-        if (m_kernel != rhs.m_kernel) {
+        if (m_cbegin == rhs.m_cbegin) {
             return true;
         }
 
-        if (m_begin_pos == rhs.m_begin_pos) {
-            return true;
-        }
-
-        if (m_end_pos != rhs.m_end_pos) {
+        if (m_cend != rhs.m_cend) {
             return true;
         }
 
@@ -126,14 +116,11 @@ public:
     }
 
 protected:
-    /*! Container */
-    const kernel_t *m_kernel;
-
     /*! Begin */
-    size_t m_begin_pos;
+    const_iterator m_cbegin;
 
     /*! End */
-    size_t m_end_pos;
+    const_iterator m_cend;
 
 };
 
