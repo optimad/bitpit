@@ -145,7 +145,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     LevelSetSegmentation(int);
     LevelSetSegmentation(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * M_PI);
     LevelSetSegmentation(int, const SurfUnstructured*, double featureAngle = 2. * M_PI);
-    LevelSetSegmentation(const LevelSetSegmentation&);
 
     LevelSetSegmentation*                       clone() const ;
 

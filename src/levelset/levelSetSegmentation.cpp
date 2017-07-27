@@ -198,16 +198,6 @@ LevelSetSegmentation::LevelSetSegmentation( int id, const SurfUnstructured *STL,
 }
 
 /*!
- * Copy constructor.
- * Assigns same id to new object;
- * @param[in] other object to be coppied
- */
-LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) : LevelSetCachedObject(other), m_seg(other.m_seg) {
-
-    m_segmentation = other.m_segmentation ;
-}
-
-/*!
  * Clones the object
  * @return pointer to cloned object
  */
