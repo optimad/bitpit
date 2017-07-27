@@ -143,6 +143,8 @@ public:
     // Contructors
     PiercedVector();
     PiercedVector(std::size_t n);
+    PiercedVector(const PiercedVector<value_t, id_t> &x);
+    PiercedVector(PiercedVector<value_t, id_t> &&x) = default;
 
     // Methods that modify the contents of the container
     using PiercedKernel<id_t>::updateId;
