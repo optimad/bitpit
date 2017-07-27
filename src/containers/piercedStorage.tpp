@@ -179,17 +179,6 @@ const PiercedKernel<id_t> & PiercedStorage<value_t, id_t>::getKernel() const
 }
 
 /**
-* Gets a reference to the synchronization master of the storage
-*
-* \result A reference to the synchronization master of the storage.
-*/
-template<typename value_t, typename id_t>
-PiercedSyncMaster & PiercedStorage<value_t, id_t>::getSyncMaster()
-{
-    return *m_master;
-}
-
-/**
 * Gets a constant reference to the synchronization master of the storage
 *
 * \result A constant reference to the synchronization master of the storage.

@@ -258,7 +258,6 @@ public:
 
     void setSyncMaster(PiercedSyncMaster *master, PiercedSyncMaster::SyncMode syncMode);
     void unsetSyncMaster();
-    PiercedSyncMaster & getSyncMaster();
     const PiercedSyncMaster & getSyncMaster() const;
 
     // Methods that modify the container as a whole
