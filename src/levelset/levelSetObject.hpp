@@ -49,6 +49,8 @@ class LevelSetObject{
     int                                         m_id;           /**< identifier of object */
 
     protected:
+    LevelSetObject(const LevelSetObject &other) = default;
+
     LevelSetKernel*                             m_kernelPtr;    /**< pointer to kernel */
     double                                      m_RSearch;      /**< Size of narrow band */
 
