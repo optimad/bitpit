@@ -557,6 +557,23 @@ bool PiercedKernel<id_t>::contains(id_t id) const
     return (m_pos.count(id) != 0);
 }
 
+/**
+* Searches the container for elements with the specified id and returns the
+* number of matches.
+*
+* Because all ids in a pierced kernel are unique, the function can only return
+* 1 (if the element is found) or zero (otherwise).
+*
+* \param id is the id to look for
+* \result Returns 1 if the pierced kernel contains an element wit the specified
+* id, or zero otherwise.
+*/
+template<typename id_t>
+std::size_t PiercedKernel<id_t>::count(id_t id) const
+{
+    return m_pos.count(id);
+}
+
 /*!
 * Gets the raw index associated to the element with the specified id.
 *

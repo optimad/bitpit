@@ -270,6 +270,7 @@ public:
 
     // Methods that extract information about the elements of the kernel
     bool contains(id_t id) const;
+    std::size_t count(id_t id) const;
     std::size_t getRawIndex(id_t id) const;
     std::size_t evalFlatIndex(id_t id);
 
