@@ -84,6 +84,16 @@ SurfUnstructured::SurfUnstructured(std::istream &stream)
 }
 
 /*!
+	Creates a clone of the pach.
+
+	\result A clone of the pach.
+*/
+std::unique_ptr<PatchKernel> SurfUnstructured::clone() const
+{
+	return std::unique_ptr<SurfUnstructured>(new SurfUnstructured(*this));
+}
+
+/*!
  * Enables or disables expert mode.
  *
  * When expert mode is enabled, it will be possible to change the

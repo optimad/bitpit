@@ -73,6 +73,8 @@ public:
 
 	~VolOctree();
 
+	std::unique_ptr<PatchKernel> clone() const;
+
 	void reset();
 	void setDimension(int dimension);
 
@@ -112,6 +114,8 @@ public:
 #endif
 
 protected:
+	VolOctree(const VolOctree &other);
+
 	std::vector<adaption::Info> _spawn(bool trackSpawn);
 
 	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption);

@@ -56,6 +56,8 @@ public:
 			   double length, double dh);
 	VolCartesian(std::istream &stream);
 
+	std::unique_ptr<PatchKernel> clone() const;
+
 	void reset();
 
 	void setDiscretization(const std::array<int, 3> &nCells);
@@ -126,6 +128,8 @@ public:
 	bool isVertexCartesianIdValid(const std::array<int, 3> &ijk) const;
 
 protected:
+	VolCartesian(const VolCartesian &other) = default;
+
 	std::vector<adaption::Info> _spawn(bool trackSpawn);
 
 	int _getDumpVersion() const;

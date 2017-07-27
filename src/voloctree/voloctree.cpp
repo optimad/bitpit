@@ -176,6 +176,33 @@ VolOctree::VolOctree(std::istream &stream)
 }
 
 /*!
+	Copy constructor.
+
+	\param stream is the stream to read from
+*/
+VolOctree::VolOctree(const VolOctree &other)
+	: VolumeKernel(other)
+{
+	m_octantLocalFacesOnVertex = other.m_octantLocalFacesOnVertex;
+	m_octantLocalFacesOnEdge   = other.m_octantLocalFacesOnEdge;
+	m_octantLocalEdgesOnVertex = other.m_octantLocalEdgesOnVertex;
+
+	m_cellTypeInfo      = other.m_cellTypeInfo;
+	m_interfaceTypeInfo = other.m_interfaceTypeInfo;
+
+	m_cellToOctant = other.m_cellToOctant;
+	m_cellToGhost  = other.m_cellToGhost;
+	m_octantToCell = other.m_octantToCell;
+	m_ghostToCell  = other.m_ghostToCell;
+
+	if (other.m_tree) {
+		m_tree = std::unique_ptr<PabloUniform>(new PabloUniform(*(other.m_tree)));
+	}
+
+	m_treeAdopter = other.m_treeAdopter;
+}
+
+/*!
 	Destructor.
 */
 VolOctree::~VolOctree()
@@ -183,6 +210,16 @@ VolOctree::~VolOctree()
 	if (m_treeAdopter) {
 		m_treeAdopter->swap(m_tree);
 	}
+}
+
+/*!
+	Creates a clone of the pach.
+
+	\result A clone of the pach.
+*/
+std::unique_ptr<PatchKernel> VolOctree::clone() const
+{
+	return std::unique_ptr<VolOctree>(new VolOctree(*this));
 }
 
 /*!

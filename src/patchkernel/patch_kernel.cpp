@@ -103,6 +103,104 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 }
 
 /*!
+	Copy constructor
+
+	\param other is another patch whose content is copied into this
+*/
+PatchKernel::PatchKernel(const PatchKernel &other)
+    : VTKBaseStreamer(other),
+      m_vertices(other.m_vertices),
+      m_cells(other.m_cells),
+      m_interfaces(other.m_interfaces),
+      m_vertexIdGenerator(other.m_vertexIdGenerator),
+      m_interfaceIdGenerator(other.m_interfaceIdGenerator),
+      m_cellIdGenerator(other.m_cellIdGenerator),
+      m_nInternals(other.m_nInternals),
+      m_nGhosts(other.m_nGhosts),
+      m_lastInternalId(other.m_lastInternalId),
+      m_firstGhostId(other.m_firstGhostId),
+      m_vtk(other.m_vtk),
+      m_vtkWriteTarget(other.m_vtkWriteTarget),
+      m_vtkVertexMap(other.m_vtkVertexMap),
+      m_boxFrozen(other.m_boxFrozen),
+      m_boxDirty(other.m_boxDirty),
+      m_boxMinPoint(other.m_boxMinPoint),
+      m_boxMaxPoint(other.m_boxMaxPoint),
+      m_boxMinCounter(other.m_boxMinCounter),
+      m_boxMaxCounter(other.m_boxMaxCounter),
+      m_spawnStatus(other.m_spawnStatus),
+      m_adaptionStatus(other.m_adaptionStatus),
+      m_expert(other.m_expert),
+      m_dimension(other.m_dimension),
+      m_hasCustomTolerance(other.m_hasCustomTolerance),
+      m_tolerance(other.m_tolerance),
+      m_rank(other.m_rank),
+      m_nProcessors(other.m_nProcessors),
+#if BITPIT_ENABLE_MPI==1
+      m_communicator(MPI_COMM_NULL),
+      m_partitioned(other.m_partitioned),
+      m_partitioningStatus(other.m_partitioningStatus),
+      m_ghostOwners(other.m_ghostOwners),
+      m_ghostExchangeTargets(other.m_ghostExchangeTargets),
+      m_ghostExchangeSources(other.m_ghostExchangeSources)
+#endif
+{
+	// Register the patch
+	patch::manager().registerPatch(this);
+
+	// Update the VTK streamer
+	//
+	// The pointer to VTK streamers are copied, if there are pointer to the
+	// original object they have to be replace with a pointer to this object.
+	std::vector<std::string> streamedGeomFields;
+	streamedGeomFields.reserve(m_vtk.getGeomDataCount());
+	for (auto itr = m_vtk.getGeomDataBegin(); itr != m_vtk.getGeomDataEnd(); ++itr) {
+		const VTKField &field = *itr;
+		if (&field.getStreamer() != &other) {
+			continue;
+		}
+
+		streamedGeomFields.push_back(field.getName());
+	}
+
+	for (const std::string &name : streamedGeomFields) {
+		const VTKField &field = *(m_vtk.findGeomData(name));
+		VTKField updatedField(field);
+		updatedField.setStreamer(*this);
+
+		m_vtk.setGeomData(std::move(updatedField));
+	}
+
+	std::vector<std::string> streamedDataFields;
+	streamedDataFields.reserve(m_vtk.getDataCount());
+	for (auto itr = m_vtk.getDataBegin(); itr != m_vtk.getDataEnd(); ++itr) {
+		const VTKField &field = *itr;
+		if (&field.getStreamer() != &other) {
+			continue;
+		}
+
+		streamedDataFields.push_back(field.getName());
+	}
+
+	for (const std::string &name : streamedDataFields) {
+		const VTKField &field = *(m_vtk.findData(name));
+		VTKField updatedField(field);
+		updatedField.setStreamer(*this);
+
+		m_vtk.removeData(field.getName());
+		m_vtk.addData(std::move(updatedField));
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	// Set the communicator
+	MPI_Comm communicator = other.getCommunicator();
+	if (communicator != MPI_COMM_NULL) {
+		setCommunicator(communicator);
+	}
+#endif
+}
+
+/*!
 	Initialize the patch
 */
 void PatchKernel::initialize()

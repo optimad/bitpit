@@ -42,6 +42,8 @@ public:
 
 	~VolUnstructured();
 
+	std::unique_ptr<PatchKernel> clone() const;
+
 	void setExpert(bool expert);
 
 	double evalCellVolume(const long &id) const;
@@ -55,6 +57,8 @@ public:
 	long locatePoint(const std::array<double, 3> &point);
 
 protected:
+	VolUnstructured(const VolUnstructured &other) = default;
+
 	int _getDumpVersion() const;
 	void _dump(std::ostream &stream);
 	void _restore(std::istream &stream);

@@ -29,6 +29,16 @@
 
 namespace bitpit {
 
+template<typename patch_t>
+std::unique_ptr<patch_t> PatchKernel::clone(const patch_t *original)
+{
+	static_assert(std::is_base_of<PatchKernel, patch_t>::value, "Specified pointer is not derived from PatchKernel");
+
+	patch_t *clone = static_cast<patch_t *>(original->clone().release());
+
+	return std::unique_ptr<patch_t>(clone);
+}
+
 /*!
 	Renumber the ids of the items in the specified container.
 

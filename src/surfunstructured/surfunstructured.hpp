@@ -43,6 +43,9 @@ public:
 	SurfUnstructured(const int &id, int patch_dim = 2, int space_dim = 3);
 	SurfUnstructured(std::istream &stream);
 
+        // Clone
+        std::unique_ptr<PatchKernel> clone() const;
+
         // Setters
 	void setExpert(bool expert);
 
@@ -61,6 +64,8 @@ public:
         unsigned short exportDGF(const std::string &);
 
 protected:
+	SurfUnstructured(const SurfUnstructured &other) = default;
+
 	int _getDumpVersion() const;
 	void _dump(std::ostream &stream);
 	void _restore(std::istream &stream);

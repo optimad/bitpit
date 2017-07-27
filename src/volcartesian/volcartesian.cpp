@@ -134,6 +134,16 @@ VolCartesian::VolCartesian(std::istream &stream)
 }
 
 /*!
+	Creates a clone of the pach.
+
+	\result A clone of the pach.
+*/
+std::unique_ptr<PatchKernel> VolCartesian::clone()  const
+{
+	return std::unique_ptr<VolCartesian>(new VolCartesian(*this));
+}
+
+/*!
 	Internal function to reset the patch.
 */
 void VolCartesian::reset()

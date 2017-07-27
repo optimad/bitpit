@@ -197,6 +197,11 @@ public:
 
 	virtual ~PatchKernel();
 
+	template<typename patch_t>
+	static std::unique_ptr<patch_t> clone(const patch_t *original);
+
+	virtual std::unique_ptr<PatchKernel> clone() const = 0;
+
 	virtual void reset();
 	void resetVertices();
 	void resetCells();
@@ -472,6 +477,8 @@ protected:
 	PatchKernel(bool expert);
 	PatchKernel(const int &dimension, bool expert);
 	PatchKernel(const int &id, const int &dimension, bool expert);
+	PatchKernel(const PatchKernel &other);
+    PatchKernel & operator=(const PatchKernel &other) = delete;
 
 	void clearBoundingBox();
 	bool isBoundingBoxFrozen() const;
