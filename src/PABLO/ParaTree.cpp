@@ -4630,14 +4630,10 @@ namespace bitpit {
         // m_mapIdx init
         u32vector().swap(m_mapIdx);
         if (mapflag) {
-            m_lastOp = OP_ADAPT_MAPPED;
             m_mapIdx.resize(nocts0);
             for (uint32_t i=0; i<nocts0; i++){
                 m_mapIdx[i] = i;
             }
-        }
-        else{
-            m_lastOp = OP_ADAPT_UNMAPPED;
         }
 
         bool globalDone = false;
@@ -4716,6 +4712,15 @@ namespace bitpit {
             (*m_log) << "---------------------------------------------" << endl;
         }
 #endif
+
+        // Update last operation
+        if (mapflag) {
+            m_lastOp = OP_ADAPT_MAPPED;
+        }
+        else{
+            m_lastOp = OP_ADAPT_UNMAPPED;
+        }
+
         return globalDone;
     }
 
