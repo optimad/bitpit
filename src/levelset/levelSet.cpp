@@ -296,8 +296,9 @@ int LevelSet::addObject( const std::vector<long> &list, const long &refInterface
  * @param[in] object generic object
  * @return the index associated to the object
  */
-int LevelSet::addObject( const std::unique_ptr<LevelSetObject> &object ) {
-    return registerObject(object);
+int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
+
+    return registerObject(std::move(object));
 };
 
 /*!
@@ -312,26 +313,8 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
     }
 
     int objectId = object->getId();
+
     m_objects[objectId] = std::move(object) ;
-
-    addProcessingOrder(objectId);
-
-    return objectId;
-}
-
-/*!
- * Adds a generic LevelSetObject
- * @param[in] object generic object
- * @return the index associated to the object
- */
-int LevelSet::registerObject( const std::unique_ptr<LevelSetObject> &object ) {
-
-    if( m_kernel){
-        object->setKernel(m_kernel.get());
-    }
-
-    int objectId = object->getId();
-    m_objects[objectId] = std::unique_ptr<LevelSetObject>(object->clone())  ;
 
     addProcessingOrder(objectId);
 
