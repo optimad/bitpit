@@ -52,60 +52,6 @@ bool PiercedVectorKernel<id_t>::exists(id_t id) const
     return PiercedKernel<id_t>::contains(id);
 }
 
-/**
-* Register the specified storage
-*
-* \param storage is the storage that will be registered
-* \param syncMode is the synchronization mode that will be used for the storage
-*/
-template<typename id_t>
-template<typename data_t>
-void PiercedVectorKernel<id_t>::registerStorage(PiercedStorage<data_t, id_t> *storage, PiercedSyncMaster::SyncMode syncMode)
-{
-    storage->setKernel(this, syncMode);
-}
-
-/**
-* Unregister the specified storage->
-*
-* \param storage is the storage that will be unregistered
-*/
-template<typename id_t>
-template<typename data_t>
-void PiercedVectorKernel<id_t>::unregisterStorage(PiercedStorage<data_t, id_t> *storage)
-{
-    if (dynamic_cast<const BasePiercedStorage *>(this) == storage) {
-        throw std::out_of_range("Internal storage cannot be unregistered.");
-    }
-
-    storage->unsetKernel();
-}
-
-/**
-* Check if te specified storage is registered.
-*
-* \param storage is the storage to check
-*/
-template<typename id_t>
-template<typename data_t>
-bool PiercedVectorKernel<id_t>::isStorageRegistered(const PiercedStorage<data_t, id_t> *storage) const
-{
-    return PiercedKernel<id_t>::isSlaveRegistered(storage);
-}
-
-/**
-* Get the synchronization mode for the specified storage
-*
-* \param storage is the storage for which the synchronization mode is requested
-* \result The synchronization mode of the storage->
-*/
-template<typename id_t>
-template<typename data_t>
-typename PiercedSyncMaster::SyncMode PiercedVectorKernel<id_t>::getStorageSyncMode(const PiercedStorage<data_t, id_t> *storage) const
-{
-    return PiercedKernel<id_t>::getSlaveSyncMode(storage);
-}
-
 }
 
 #endif

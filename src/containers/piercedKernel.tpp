@@ -2023,52 +2023,6 @@ void PiercedKernel<id_t>::shrink(std::size_t n, bool force)
 }
 
 /**
-* Register the specified storage
-*
-* \param storage is the storage that will be registered
-* \param syncMode is the synchronization mode that will be used for the storage
-*/
-template<typename id_t>
-void PiercedKernel<id_t>::registerStorage(PiercedSyncSlave *storage, PiercedSyncMaster::SyncMode syncMode)
-{
-    registerSlave(storage, syncMode);
-}
-
-/**
-* Unregister the specified storage->
-*
-* \param storage is the storage that will be unregistered
-*/
-template<typename id_t>
-void PiercedKernel<id_t>::unregisterStorage(const PiercedSyncSlave *storage)
-{
-    unregisterSlave(storage);
-}
-
-/**
-* Check if te specified storage is registered.
-*
-* \param storage is the storage to check
-*/
-template<typename id_t>
-bool PiercedKernel<id_t>::isStorageRegistered(const PiercedSyncSlave *storage) const
-{
-    return isSlaveRegistered(storage);
-}
-
-/**
-* Get the synchronization mode for the specified storage
-*
-* \param storage is the storage for which the synchronization mode is requested
-* \result The synchronization mode of the storage->
-*/
-template<typename id_t>
-typename PiercedSyncMaster::SyncMode PiercedKernel<id_t>::getStorageSyncMode(const PiercedSyncSlave *storage) const
-{
-    return getSlaveSyncMode(storage);
-}
-
-/**
 * Restore the vector.
 *
 * \param stream is the stream data should be read from

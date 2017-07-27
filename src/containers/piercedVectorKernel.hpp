@@ -53,16 +53,6 @@ public:
     std::size_t rawIndex(id_t id) const;
     bool exists(id_t id) const;
 
-    // Methods for handing the synchronization
-    template<typename data_t>
-    void registerStorage(PiercedStorage<data_t, id_t> *storage, PiercedSyncMaster::SyncMode syncMode);
-    template<typename data_t>
-    void unregisterStorage(PiercedStorage<data_t, id_t> *storage);
-    template<typename data_t>
-    bool isStorageRegistered(const PiercedStorage<data_t, id_t> *storage) const;
-    template<typename data_t>
-    PiercedSyncMaster::SyncMode getStorageSyncMode(const PiercedStorage<data_t, id_t> *storage) const;
-
     // Dump and restore
     using PiercedKernel<id_t>::dump;
     using PiercedKernel<id_t>::restore;

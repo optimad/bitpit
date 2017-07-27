@@ -65,7 +65,7 @@ PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &x)
     : PiercedVectorKernel<id_t>(x),
-      PiercedVectorStorage<value_t, id_t>(x, this)
+      PiercedVectorStorage<value_t, id_t>(x, this, x.getSyncMode())
 {
 }
 

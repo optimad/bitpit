@@ -218,6 +218,13 @@ public:
     */
     typedef PiercedStorageRange<const value_t, id_t> const_range;
 
+    // Enums
+    enum KernelType {
+        KERNEL_NONE    = -1,
+        KERNEL_STATIC  =  0,
+        KERNEL_DYNAMIC =  1
+    };
+
     /**
     * Checks if the storage has the 'restore' capability
     */
@@ -246,8 +253,10 @@ public:
     // Constructors and initialization
     PiercedStorage();
     PiercedStorage(std::size_t nFields);
+    PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel);
     PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel);
+    PiercedStorage(const PiercedStorage<value_t, id_t> &x, const PiercedKernel<id_t> *kernel);
+    PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     PiercedStorage(const PiercedStorage<value_t, id_t> &x);
     PiercedStorage(PiercedStorage<value_t, id_t> &&x) = default;
 
@@ -255,12 +264,12 @@ public:
 
     std::size_t getFieldCount() const;
 
-    void setKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    void setStaticKernel(const PiercedKernel<id_t> *kernel);
+    void setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     void unsetKernel();
     const PiercedKernel<id_t> * getKernel() const;
-
+    KernelType getKernelType() const;
     PiercedSyncMaster::SyncMode getSyncMode() const;
-    const PiercedSyncMaster & getSyncMaster() const;
 
     // Methods that modify the container as a whole
     void swap(PiercedStorage &x) noexcept;

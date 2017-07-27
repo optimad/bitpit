@@ -319,11 +319,6 @@ public:
     std::size_t front() const;
 
     // Methods to handle the storage
-    void registerStorage(PiercedSyncSlave *storage, PiercedSyncMaster::SyncMode syncMode);
-    void unregisterStorage(const PiercedSyncSlave *storage);
-    bool isStorageRegistered(const PiercedSyncSlave *storage) const;
-    PiercedSyncMaster::SyncMode getStorageSyncMode(const PiercedSyncSlave *storage) const;
-
     using PiercedSyncMaster::sync;
 
     // Dump and restore

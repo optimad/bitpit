@@ -197,9 +197,6 @@ public:
     using PiercedVectorStorage<value_t, id_t>::find;
     using PiercedVectorStorage<value_t, id_t>::rawFind;
 
-    // Methods for handing the synchronization
-    using PiercedVectorStorage<value_t, id_t>::getSyncMaster;
-
     // Dump and restore
     template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type * = nullptr>
     void restore(std::istream &stream);
@@ -208,10 +205,11 @@ public:
     void dump(std::ostream &stream) const;
 
 protected:
-    using PiercedVectorStorage<value_t, id_t>::setKernel;
+    using PiercedVectorStorage<value_t, id_t>::setStaticKernel;
+    using PiercedVectorStorage<value_t, id_t>::setDynamicKernel;
     using PiercedVectorStorage<value_t, id_t>::unsetKernel;
     using PiercedVectorStorage<value_t, id_t>::getKernel;
-
+    using PiercedVectorStorage<value_t, id_t>::getKernelType;
     using PiercedVectorStorage<value_t, id_t>::getSyncMode;
 
 private:

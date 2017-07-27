@@ -54,13 +54,26 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields)
 *
 * \param nFields is the number of fields in the storage
 * \param kernel is the kernel that will be set
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel)
+    : BasePiercedStorage(), m_nFields(nFields), m_const_kernel(nullptr), m_kernel(nullptr)
+{
+    setStaticKernel(kernel);
+}
+
+/**
+* Constructor.
+*
+* \param nFields is the number of fields in the storage
+* \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : BasePiercedStorage(), m_nFields(nFields), m_const_kernel(nullptr), m_kernel(nullptr)
 {
-    setKernel(kernel, syncMode);
+    setDynamicKernel(kernel, syncMode);
 }
 
 /**
@@ -71,15 +84,78 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel
 * \param kernel is the kernel that will be set
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel)
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, const PiercedKernel<id_t> *kernel)
     : m_nFields(x.m_nFields), m_fields(x.m_fields),
       m_const_kernel(nullptr), m_kernel(nullptr)
 {
-    PiercedSyncMaster::SyncMode syncMode = x.getSyncMode();
-    if (kernel) {
-        setKernel(kernel, syncMode);
-    } else if (x.m_kernel) {
-        setKernel(x.m_kernel, syncMode);
+    KernelType kernelType = x.getKernelType();
+    switch (kernelType) {
+
+    case KERNEL_STATIC:
+    {
+        if (kernel) {
+            setStaticKernel(kernel);
+        } else {
+            setStaticKernel(x.m_const_kernel);
+        }
+        break;
+    }
+
+    case KERNEL_DYNAMIC:
+    {
+        throw std::runtime_error("Unable to set a dynamic kernel. The kernel received in input can be only used to set a static kernel");
+        break;
+    }
+
+    default:
+    {
+        break;
+    }
+
+    }
+}
+
+/**
+* Constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+* \param kernel is the kernel that will be set
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+    : m_nFields(x.m_nFields), m_fields(x.m_fields),
+      m_const_kernel(nullptr), m_kernel(nullptr)
+{
+    KernelType kernelType = x.getKernelType();
+    switch (kernelType) {
+
+    case KERNEL_STATIC:
+    {
+        if (kernel) {
+            setStaticKernel(kernel);
+        } else {
+            setStaticKernel(x.m_const_kernel);
+        }
+        break;
+    }
+
+    case KERNEL_DYNAMIC:
+    {
+        if (kernel) {
+            setDynamicKernel(kernel, syncMode);
+        } else {
+            setDynamicKernel(x.m_kernel, syncMode);
+        }
+        break;
+    }
+
+    default:
+    {
+        break;
+    }
+
     }
 }
 
@@ -118,11 +194,13 @@ std::size_t PiercedStorage<value_t, id_t>::getFieldCount() const
 /**
 * Sets the kernel that will be used by the storage
 *
+* The storage will NOT be synchronized with the kernel. Every change to the
+* kernel can potentially invalidate the link between kernel and storage.
+*
 * \param kernel is the kernel that will be set
-* \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::setKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+void PiercedStorage<value_t, id_t>::setStaticKernel(const PiercedKernel<id_t> *kernel)
 {
     if (!kernel) {
         throw std::runtime_error("Unable to set the kernel. Provided kernel is not valid.");
@@ -130,10 +208,28 @@ void PiercedStorage<value_t, id_t>::setKernel(PiercedKernel<id_t> *kernel, Pierc
         throw std::runtime_error("Unable to set the kernel. The kernel of the storage is already set.");
     }
 
-    m_kernel       = kernel;
+    m_kernel       = nullptr;
     m_const_kernel = kernel;
 
     rawResize(m_const_kernel->rawSize());
+}
+
+/**
+* Sets the kernel that will be used by the storage.
+*
+* The storage will dynamically synchronized with the kernel.
+*
+* \param kernel is the kernel that will be set
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename value_t, typename id_t>
+void PiercedStorage<value_t, id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+{
+    // Set the static kernel
+    setStaticKernel(kernel);
+
+    // Register the storage for dynamic synchronization
+    m_kernel = kernel;
     m_kernel->registerSlave(this, syncMode);
 }
 
@@ -143,14 +239,16 @@ void PiercedStorage<value_t, id_t>::setKernel(PiercedKernel<id_t> *kernel, Pierc
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::unsetKernel()
 {
-    if (!m_kernel) {
+    if (!m_const_kernel) {
         return;
     }
 
-    m_kernel->unregisterSlave(this);
-    rawClear(true);
+    if (m_kernel) {
+        m_kernel->unregisterSlave(this);
+        m_kernel = nullptr;
+    }
 
-    m_kernel       = nullptr;
+    rawClear(true);
     m_const_kernel = nullptr;
 }
 
@@ -166,6 +264,23 @@ const PiercedKernel<id_t> * PiercedStorage<value_t, id_t>::getKernel() const
 }
 
 /**
+* Get the type of kernel set for the storage.
+*
+* \return The type of kernel set for the storage.
+*/
+template<typename value_t, typename id_t>
+typename PiercedStorage<value_t, id_t>::KernelType PiercedStorage<value_t, id_t>::getKernelType() const
+{
+    if (m_kernel) {
+        return KERNEL_DYNAMIC;
+    } else if (m_const_kernel) {
+        return KERNEL_STATIC;
+    } else {
+        return KERNEL_NONE;
+    }
+}
+
+/**
 * Gets the syncronization mode of the storage.
 *
 * \result The synchronization mode of the storage.
@@ -173,18 +288,11 @@ const PiercedKernel<id_t> * PiercedStorage<value_t, id_t>::getKernel() const
 template<typename value_t, typename id_t>
 PiercedSyncMaster::SyncMode PiercedStorage<value_t, id_t>::getSyncMode() const
 {
-    return m_const_kernel->getSlaveSyncMode(this);
-}
-
-/**
-* Gets a constant reference to the synchronization master of the storage
-*
-* \result A constant reference to the synchronization master of the storage.
-*/
-template<typename value_t, typename id_t>
-const PiercedSyncMaster & PiercedStorage<value_t, id_t>::getSyncMaster() const
-{
-    return *m_const_kernel;
+    if (getKernelType() == KERNEL_NONE) {
+        return PiercedKernel<id_t>::SYNC_MODE_DISABLED;
+    } else {
+        return m_const_kernel->getSlaveSyncMode(this);
+    }
 }
 
 /**
