@@ -151,11 +151,36 @@ LevelSetSegmentation::SegInfo::SegInfo( ) {
 
 /*!
  * Constructor
+ * @param[in] capacity is the number of segments the data structure should
+ * be able to contain without requiring a reallocation of its internal
+ * structures
+ */
+LevelSetSegmentation::SegInfo::SegInfo( std::size_t capacity ) : segments(capacity), distances(capacity) {
+    segments.clear();
+    distances.clear();
+}
+
+/*!
+ * Constructor
  * @param[in] _segments is the list of segment's ids
  * @param[in] _distances is the list of segment's distances
  */
 LevelSetSegmentation::SegInfo::SegInfo( const std::vector<long> &_segments, const std::vector<double> &_distances )
     : segments(_segments), distances(_distances) {
+}
+
+/*!
+ * Constructor
+ * @param[in] capacity is the number of segments the data structure should
+ * be able to contain without requiring a reallocation of its internal
+ * structures
+ */
+void LevelSetSegmentation::SegInfo::initialize( std::size_t capacity ) {
+    segments.clear() ;
+    segments.reserve( capacity ) ;
+
+    distances.clear() ;
+    distances.reserve( capacity ) ;
 }
 
 /*!
@@ -465,9 +490,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
             auto segInfoItr = m_seg.find( cell ) ;
             if ( segInfoItr == m_seg.end() ) {
                 int segmentCount = nSegmentsPerCell.at(cell);
-                segInfoItr = m_seg.emplace( cell );
-                segInfoItr->segments.reserve( segmentCount );
-                segInfoItr->distances.reserve( segmentCount );
+                segInfoItr = m_seg.emreclaim( cell, segmentCount );
 
                 newSegInfo.insert( cell ) ;
             }
@@ -502,10 +525,7 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
 
         // Order vectors
         utils::reorderVector(distanceRank, distances, nSegments) ;
-        distances.shrink_to_fit();
-
         utils::reorderVector(segmentRank, segments, nSegments) ;
-        segments.shrink_to_fit();
     }
 
     return newSegInfo ;
@@ -549,12 +569,18 @@ void LevelSetSegmentation::updateSegmentList( const double &search) {
         }
 
         if (nSegmentsToKeep != nCurrentSegments) {
+            const double SHRINK_THRESHOLD = 0.5;
+
             distances.resize(nSegmentsToKeep);
-            distances.shrink_to_fit();
+            if (nSegmentsToKeep < SHRINK_THRESHOLD * distances.capacity()) {
+                distances.shrink_to_fit();
+            }
 
             std::vector<long> &segments = segItr->segments;
             segments.resize(nSegmentsToKeep);
-            segments.shrink_to_fit();
+            if (nSegmentsToKeep < SHRINK_THRESHOLD * segments.capacity()) {
+                segments.shrink_to_fit();
+            }
         }
     }
 }

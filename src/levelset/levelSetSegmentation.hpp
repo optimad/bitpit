@@ -82,7 +82,10 @@ class LevelSetSegmentation : public LevelSetCachedObject {
         std::vector<double>              distances ;               /**< list of segments distances within narrow band */
 
         SegInfo( ) ;
+        SegInfo( std::size_t capacity ) ;
         SegInfo( const std::vector<long> &_segments, const std::vector<double> &_distances ) ;
+
+        void initialize( std::size_t capacity ) ;
     };
 
     struct DistanceComparator
