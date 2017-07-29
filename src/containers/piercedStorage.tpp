@@ -160,9 +160,9 @@ void PiercedStorage<value_t, id_t>::unsetKernel()
 * \result A constant reference to the kernel of the storage.
 */
 template<typename value_t, typename id_t>
-const PiercedKernel<id_t> & PiercedStorage<value_t, id_t>::getKernel() const
+const PiercedKernel<id_t> * PiercedStorage<value_t, id_t>::getKernel() const
 {
-    return *m_const_kernel;
+    return m_const_kernel;
 }
 
 /**

@@ -257,7 +257,7 @@ public:
 
     void setKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     void unsetKernel();
-    const PiercedKernel<id_t> & getKernel() const;
+    const PiercedKernel<id_t> * getKernel() const;
 
     PiercedSyncMaster::SyncMode getSyncMode() const;
     const PiercedSyncMaster & getSyncMaster() const;

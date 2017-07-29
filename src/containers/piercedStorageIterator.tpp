@@ -42,7 +42,7 @@ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator()
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator(storage_t *storage, const std::size_t &pos)
-    : PiercedKernelIterator<id_t>(&(storage->getKernel()), pos), m_storage(storage)
+    : PiercedKernelIterator<id_t>(storage->getKernel(), pos), m_storage(storage)
 {
 }
 
