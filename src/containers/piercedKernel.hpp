@@ -172,63 +172,6 @@ public:
         const PiercedKernel<id_t> *m_kernel;
     };
 
-    // Sync mode
-    using PiercedSyncMaster::SyncMode;
-
-    // Contructors
-    PiercedKernel();
-    PiercedKernel(std::size_t n);
-
-    // Methods that modify the kernel as a whole
-    void clear(bool release = true);
-    void flush();
-    void reserve(std::size_t n);
-    void resize(std::size_t n);
-    std::vector<std::size_t> sort();
-    std::vector<std::size_t> squeeze();
-    void shrinkToFit();
-    void swap(PiercedKernel &x) noexcept;
-
-    // Methods that extract information about the kernel
-    bool contiguous() const;
-    void dump() const;
-    bool empty() const;
-    bool isIteratorSlow();
-    std::size_t maxSize() const;
-    std::size_t size() const;
-    std::size_t capacity() const;
-
-    // Methods that extract information about the elements of the kernel
-    bool contains(id_t id) const;
-    std::size_t getRawIndex(id_t id) const;
-    std::size_t evalFlatIndex(id_t id);
-
-    std::vector<id_t> getIds(bool ordered = true) const;
-    id_t getSizeMarker(std::size_t targetSize, const id_t &fallback = -1);
-
-    // Iterators
-    const_iterator find(const id_t &id) const noexcept;
-
-    const_iterator rawFind(std::size_t pos) const noexcept;
-
-    const_iterator begin() const noexcept;
-    const_iterator end() const noexcept;
-    const_iterator cbegin() const noexcept;
-    const_iterator cend() const noexcept;
-
-    // Methods to handle the storage
-    void registerStorage(PiercedSyncSlave *storage, PiercedSyncMaster::SyncMode syncMode);
-    void unregisterStorage(const PiercedSyncSlave *storage);
-    bool isStorageRegistered(const PiercedSyncSlave *storage) const;
-    PiercedSyncMaster::SyncMode getStorageSyncMode(const PiercedSyncSlave *storage) const;
-
-    using PiercedSyncMaster::sync;
-
-    // Dump and restore
-    void restore(std::istream &stream);
-    void dump(std::ostream &stream) const;
-
-protected:
     /**
     * Fill action
     */
@@ -302,24 +245,49 @@ protected:
         };
     };
 
-    /**
-    * Container used for storing holes
-    */
-    typedef std::vector<std::size_t> holes_container;
+    // Contructors
+    PiercedKernel();
+    PiercedKernel(std::size_t n);
 
-    /**
-    * Holes iterator
-    */
-    typedef holes_container::iterator holes_iterator;
+    // Methods that modify the kernel as a whole
+    void clear(bool release = true);
+    void flush();
+    void reserve(std::size_t n);
+    void resize(std::size_t n);
+    std::vector<std::size_t> sort();
+    std::vector<std::size_t> squeeze();
+    void shrinkToFit();
+    void swap(PiercedKernel &x) noexcept;
 
-    /**
-    * Holes const iterator
-    */
-    typedef holes_container::const_iterator holes_const_iterator;
+    // Methods that extract information about the kernel
+    bool contiguous() const;
+    void dump() const;
+    bool empty() const;
+    bool isIteratorSlow();
+    std::size_t maxSize() const;
+    std::size_t size() const;
+    std::size_t capacity() const;
+
+    // Methods that extract information about the elements of the kernel
+    bool contains(id_t id) const;
+    std::size_t getRawIndex(id_t id) const;
+    std::size_t evalFlatIndex(id_t id);
+
+    std::vector<id_t> getIds(bool ordered = true) const;
+    id_t getSizeMarker(std::size_t targetSize, const id_t &fallback = -1);
+
+    // Iterators
+    const_iterator find(const id_t &id) const noexcept;
+
+    const_iterator rawFind(std::size_t pos) const noexcept;
+
+    const_iterator begin() const noexcept;
+    const_iterator end() const noexcept;
+    const_iterator cbegin() const noexcept;
+    const_iterator cend() const noexcept;
 
     // Methods that extract information about the kernel
     void checkIntegrity() const;
-    std::size_t rawSize() const;
 
     // Methods that modify the elements stored in the kernel
     void updateId(const id_t &currentId, const id_t &updatedId);
@@ -344,6 +312,38 @@ protected:
     std::size_t back() const;
     std::size_t front() const;
 
+    // Methods to handle the storage
+    void registerStorage(PiercedSyncSlave *storage, PiercedSyncMaster::SyncMode syncMode);
+    void unregisterStorage(const PiercedSyncSlave *storage);
+    bool isStorageRegistered(const PiercedSyncSlave *storage) const;
+    PiercedSyncMaster::SyncMode getStorageSyncMode(const PiercedSyncSlave *storage) const;
+
+    using PiercedSyncMaster::sync;
+
+    // Dump and restore
+    void restore(std::istream &stream);
+    void dump(std::ostream &stream) const;
+
+protected:
+    /**
+    * Container used for storing holes
+    */
+    typedef std::vector<std::size_t> holes_container;
+
+    /**
+    * Holes iterator
+    */
+    typedef holes_container::iterator holes_iterator;
+
+    /**
+    * Holes const iterator
+    */
+    typedef holes_container::const_iterator holes_const_iterator;
+
+    // Methods that extract information about the kernel
+    std::size_t rawSize() const;
+
+    // Methods that extract information about the elements of the kernel
     std::size_t findPrevUsedPos(std::size_t pos) const;
     std::size_t findNextUsedPos(std::size_t pos) const;
     bool isPosEmpty(std::size_t pos) const;
