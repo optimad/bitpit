@@ -137,6 +137,11 @@ public:
     typedef PiercedKernelRange<id_t> const_range;
 
     /**
+    * Sync mode
+    */
+    using PiercedSyncMaster::SyncMode;
+
+    /**
     * Functional for compare the position of two elements
     */
     struct positionLess
