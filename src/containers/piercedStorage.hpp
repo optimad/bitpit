@@ -277,6 +277,12 @@ public:
     __PS_CONST_POINTER__ rawData(std::size_t pos, std::size_t offset = 0) const;
 
     // Methods for editing the items using their id
+    __PS_REFERENCE__ back(std::size_t k = 0);
+    __PS_CONST_REFERENCE__ back(std::size_t k = 0) const;
+
+    __PS_REFERENCE__ front(std::size_t k = 0);
+    __PS_CONST_REFERENCE__ front(std::size_t k = 0) const;
+
     __PS_REFERENCE__ at(id_t id, std::size_t k = 0);
     __PS_CONST_REFERENCE__ at(id_t id, std::size_t k = 0) const;
 

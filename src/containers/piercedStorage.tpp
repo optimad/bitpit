@@ -713,6 +713,79 @@ __PS_CONST_POINTER__ PiercedStorage<value_t, id_t>::rawData(std::size_t pos, std
 }
 
 /**
+* Returns a reference to the first element of the container.
+*
+* If the container is empty, an exception is thrown.
+*
+* \param k is the index of the requested field
+* \result A reference to the first element of the container.
+*/
+template<typename value_t, typename id_t>
+__PS_REFERENCE__ PiercedStorage<value_t, id_t>::front(std::size_t k)
+{
+    if (m_const_kernel->empty()) {
+        throw std::out_of_range("Vector is empty");
+    }
+
+    return rawAt(m_const_kernel->front(), k);
+}
+
+/**
+* Returns a constant reference to the first element of the container.
+*
+* If the container is empty, an exception is thrown.
+*
+* \param k is the index of the requested field
+* \result A constant reference to the first element of the container.
+*/
+template<typename value_t, typename id_t>
+__PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::front(std::size_t k) const
+{
+    if (m_const_kernel->empty()) {
+        throw std::out_of_range("Vector is empty");
+    }
+
+    return rawAt(m_const_kernel->front(), k);
+}
+
+/**
+* Returns a reference to the last element of the container.
+*
+* If the container is empty, an exception is thrown.
+*
+* \param k is the index of the requested field
+* \result A reference to the last element of the container.
+*/
+template<typename value_t, typename id_t>
+__PS_REFERENCE__ PiercedStorage<value_t, id_t>::back(std::size_t k)
+{
+    if (m_const_kernel->empty()) {
+        throw std::out_of_range("Vector is empty");
+    }
+
+    return rawAt(m_const_kernel->back(), k);
+}
+
+/**
+* Returns a constant reference to the last element of the container.
+*
+* If the container is empty, an exception is thrown.
+*
+* \param k is the index of the requested field
+* \result A constant reference to the last element of the container.
+*/
+template<typename value_t, typename id_t>
+__PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::back(std::size_t k) const
+{
+    if (m_const_kernel->empty()) {
+        throw std::out_of_range("Vector is empty");
+    }
+
+    return rawAt(m_const_kernel->back(), k);
+}
+
+
+/**
 * Gets a reference to the requested field of the specfied item.
 *
 * \param id is the id of the item
