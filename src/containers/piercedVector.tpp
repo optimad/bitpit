@@ -35,8 +35,8 @@ namespace bitpit {
 */
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector()
-    : PiercedKernel<id_t>(),
-      PiercedStorage<value_t, id_t>(1, this, PiercedKernel<id_t>::SYNC_MODE_DISABLED)
+    : PiercedVectorKernel<id_t>(),
+      PiercedVectorStorage<value_t, id_t>(1, this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED)
 {
 }
 
@@ -51,8 +51,8 @@ PiercedVector<value_t, id_t>::PiercedVector()
 */
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
-    : PiercedKernel<id_t>(n),
-      PiercedStorage<value_t, id_t>(1, this, PiercedKernel<id_t>::SYNC_MODE_DISABLED)
+    : PiercedVectorKernel<id_t>(n),
+      PiercedVectorStorage<value_t, id_t>(1, this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED)
 {
 }
 
@@ -64,8 +64,8 @@ PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
 */
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &x)
-    : PiercedKernel<id_t>(x),
-      PiercedStorage<value_t, id_t>(x, this)
+    : PiercedVectorKernel<id_t>(x),
+      PiercedVectorStorage<value_t, id_t>(x, this)
 {
 }
 
@@ -83,7 +83,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaim(id_t id)
 {
     // Fill a position
-    FillAction reclaimAction = PiercedKernel<id_t>::fillHead(id);
+    FillAction reclaimAction = PiercedVectorKernel<id_t>::fillHead(id);
 
     // Reclaim the element associated to the position
     return reclaimValue(reclaimAction);
@@ -109,7 +109,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaimAfter(const id_t &referenceId, id_t id)
 {
     // Fill a position
-    FillAction reclaimAction = PiercedKernel<id_t>::fillAfter(referenceId, id);
+    FillAction reclaimAction = PiercedVectorKernel<id_t>::fillAfter(referenceId, id);
 
     // Reclaim the element associated to the position
     return reclaimValue(reclaimAction);
@@ -130,7 +130,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaimBack(id_t id)
 {
     // Fill a position
-    FillAction reclaimAction = PiercedKernel<id_t>::fillAppend(id);
+    FillAction reclaimAction = PiercedVectorKernel<id_t>::fillAppend(id);
 
     // Reclaim the element associated to the position
     return reclaimValue(reclaimAction);
@@ -156,7 +156,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaimBefore(const id_t &referenceId, id_t id)
 {
     // Fill a position
-    FillAction reclaimAction = PiercedKernel<id_t>::fillBefore(referenceId, id);
+    FillAction reclaimAction = PiercedVectorKernel<id_t>::fillBefore(referenceId, id);
 
     // Reclaim the element associated to the position
     return reclaimValue(reclaimAction);
@@ -177,7 +177,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::moveBefore(const id_t &referenceId, id_t id, bool delayed)
 {
     // Update the position of the element in the kernel
-    MoveAction moveAction = PiercedKernel<id_t>::moveBefore(referenceId, id, !delayed);
+    MoveAction moveAction = PiercedVectorKernel<id_t>::moveBefore(referenceId, id, !delayed);
 
     // Move the element to the new position
     return moveValue(moveAction);
@@ -198,7 +198,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::moveAfter(const id_t &referenceId, id_t id, bool delayed)
 {
     // Update the position of the element in the kernel
-    MoveAction moveAction = PiercedKernel<id_t>::moveAfter(referenceId, id, !delayed);
+    MoveAction moveAction = PiercedVectorKernel<id_t>::moveAfter(referenceId, id, !delayed);
 
     // Move the element to the new position
     return moveValue(moveAction);
@@ -216,7 +216,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insert(id_t id, const value_t &value)
 {
     // Fill a position
-    FillAction insertAction = PiercedKernel<id_t>::fillHead(id);
+    FillAction insertAction = PiercedVectorKernel<id_t>::fillHead(id);
 
     // Insert the new value
     return insertValue(insertAction, value);
@@ -238,7 +238,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insertAfter(const id_t &referenceId, id_t id, const value_t &value)
 {
     // Fill a position
-    FillAction insertAction = PiercedKernel<id_t>::fillAfter(referenceId, id);
+    FillAction insertAction = PiercedVectorKernel<id_t>::fillAfter(referenceId, id);
 
     // Insert the new value
     return insertValue(insertAction, value);
@@ -260,7 +260,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insertBefore(const id_t &referenceId, id_t id, const value_t &value)
 {
     // Fill a position
-    FillAction insertAction = PiercedKernel<id_t>::fillBefore(referenceId, id);
+    FillAction insertAction = PiercedVectorKernel<id_t>::fillBefore(referenceId, id);
 
     // Insert the new value
     return insertValue(insertAction, value);
@@ -277,13 +277,13 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::replace(id_t id, value_t &&value)
 {
     // Position
-    std::size_t pos = PiercedKernel<id_t>::getPos(id);
+    std::size_t pos = PiercedVectorKernel<id_t>::getPos(id);
 
     // Replace the value
-    PiercedStorage<value_t, id_t>::rawSet(pos, std::move(value));
+    PiercedVectorStorage<value_t, id_t>::rawSet(pos, std::move(value));
 
     // Return the iterator that points to the element
-    return PiercedStorage<value_t, id_t>::rawFind(pos);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -299,7 +299,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::pushBack(id_t id, const value_t &value)
 {
     // Fill a position
-    FillAction insertAction = PiercedKernel<id_t>::fillAppend(id);
+    FillAction insertAction = PiercedVectorKernel<id_t>::fillAppend(id);
 
     // Insert the new value
     return insertValue(insertAction, value);
@@ -320,11 +320,11 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::pu
 * \result An iterator that points to the the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaim(id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillHead(id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillHead(id);
 
     // Create the new value in-place
     return emreclaimValue<Args...>(emplaceAction, std::forward<Args>(args)...);
@@ -348,11 +348,11 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 * \result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimAfter(const id_t &referenceId, id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillAfter(referenceId, id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillAfter(referenceId, id);
 
     // Create the new value in-place
     return emreclaimValue(emplaceAction, std::forward<Args>(args)...);
@@ -372,11 +372,11 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 * \param args are the arguments forwarded to construct the new element
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
 void PiercedVector<value_t, id_t>::emreclaimBack(id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillAppend(id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillAppend(id);
 
     // Create the new value in-place
     emreclaimValue(emplaceAction, std::forward<Args>(args)...);
@@ -400,11 +400,11 @@ void PiercedVector<value_t, id_t>::emreclaimBack(id_t id, Args&&... args)
 * \result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimBefore(const id_t &referenceId, id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillBefore(referenceId, id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillBefore(referenceId, id);
 
     // Create the new value in-place
     return emreclaimValue(emplaceAction, std::forward<Args>(args)...);
@@ -423,7 +423,7 @@ template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplace(id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillHead(id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillHead(id);
 
     // Create the new value in-place
     return emplaceValue(emplaceAction, std::forward<Args>(args)...);
@@ -445,7 +445,7 @@ template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplaceAfter(const id_t &referenceId, id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillAfter(referenceId, id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillAfter(referenceId, id);
 
     // Create the new value in-place
     return emplaceValue(emplaceAction, std::forward<Args>(args)...);
@@ -464,7 +464,7 @@ template<typename... Args>
 void PiercedVector<value_t, id_t>::emplaceBack(id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillAppend(id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillAppend(id);
 
     // Create the new value in-place
     emplaceValue(emplaceAction, std::forward<Args>(args)...);
@@ -488,7 +488,7 @@ template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplaceBefore(const id_t &referenceId, id_t id, Args&&... args)
 {
     // Fill a position
-    FillAction emplaceAction = PiercedKernel<id_t>::fillBefore(referenceId, id);
+    FillAction emplaceAction = PiercedVectorKernel<id_t>::fillBefore(referenceId, id);
 
     // Create the new value in-place
     return emplaceValue(emplaceAction, std::forward<Args>(args)...);
@@ -508,13 +508,13 @@ template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreplace(id_t id, Args&&... args)
 {
     // Position
-    std::size_t pos = PiercedKernel<id_t>::getPos(id);
+    std::size_t pos = PiercedVectorKernel<id_t>::getPos(id);
 
     // Replace the value
-    PiercedStorage<value_t, id_t>::rawEmreplace(pos, std::forward<Args>(args)...);
+    PiercedVectorStorage<value_t, id_t>::rawEmreplace(pos, std::forward<Args>(args)...);
 
     // Return the iterator that points to the element
-    return PiercedStorage<value_t, id_t>::rawFind(pos);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -536,7 +536,7 @@ template<typename value_t, typename id_t>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::erase(id_t id, bool delayed)
 {
     // Erase the position
-    EraseAction eraseAction = PiercedKernel<id_t>::erase(id, !delayed);
+    EraseAction eraseAction = PiercedVectorKernel<id_t>::erase(id, !delayed);
 
     // Erase the value
     return eraseValue(eraseAction);
@@ -554,7 +554,7 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::popBack()
 {
     // Erase the position
-    EraseAction eraseAction = PiercedKernel<id_t>::popBack();
+    EraseAction eraseAction = PiercedVectorKernel<id_t>::popBack();
 
     // Erase the value
     eraseValue(eraseAction);
@@ -570,7 +570,7 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::swap(id_t id_first, id_t id_second)
 {
     // Update the kernel
-    SwapAction swapAction = PiercedKernel<id_t>::swap(id_first, id_second);
+    SwapAction swapAction = PiercedVectorKernel<id_t>::swap(id_first, id_second);
 
     // Update the storage
     swapValues(swapAction);
@@ -588,10 +588,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::clear(bool release)
 {
     // Update the kernel
-    PiercedKernel<id_t>::clear(release);
+    PiercedVectorKernel<id_t>::clear(release);
 
     // Update the storage
-    PiercedStorage<value_t, id_t>::rawClear(release);
+    PiercedVectorStorage<value_t, id_t>::rawClear(release);
 }
 
 /**
@@ -610,10 +610,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::reserve(std::size_t n)
 {
     // Update the kernel
-    PiercedKernel<id_t>::reserve(n);
+    PiercedVectorKernel<id_t>::reserve(n);
 
     // Update the storgae
-    PiercedStorage<value_t, id_t>::rawReserve(n);
+    PiercedVectorStorage<value_t, id_t>::rawReserve(n);
 }
 
 /**
@@ -637,10 +637,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::resize(std::size_t n)
 {
     // Update the kernel
-    PiercedKernel<id_t>::resize(n);
+    PiercedVectorKernel<id_t>::resize(n);
 
     // Update the storage
-    PiercedStorage<value_t, id_t>::rawResize(PiercedKernel<id_t>::rawSize());
+    PiercedVectorStorage<value_t, id_t>::rawResize(PiercedVectorKernel<id_t>::rawSize());
 }
 
 /**
@@ -650,10 +650,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::sort()
 {
     // Update the kernel
-    std::vector<std::size_t> permutations = PiercedKernel<id_t>::sort();
+    std::vector<std::size_t> permutations = PiercedVectorKernel<id_t>::sort();
 
     // Update the storage
-    PiercedStorage<value_t, id_t>::rawReorder(permutations);
+    PiercedVectorStorage<value_t, id_t>::rawReorder(permutations);
 }
 
 /**
@@ -670,12 +670,12 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::squeeze()
 {
     // Update the kernel
-    std::vector<std::size_t> permutations = PiercedKernel<id_t>::squeeze();
+    std::vector<std::size_t> permutations = PiercedVectorKernel<id_t>::squeeze();
 
     // Update the storage
-    PiercedStorage<value_t, id_t>::rawReorder(permutations);
-    PiercedStorage<value_t, id_t>::rawResize(PiercedKernel<id_t>::rawSize());
-    PiercedStorage<value_t, id_t>::rawShrinkToFit();
+    PiercedVectorStorage<value_t, id_t>::rawReorder(permutations);
+    PiercedVectorStorage<value_t, id_t>::rawResize(PiercedVectorKernel<id_t>::rawSize());
+    PiercedVectorStorage<value_t, id_t>::rawShrinkToFit();
 }
 
 /**
@@ -692,10 +692,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::shrinkToFit()
 {
     // Update the kernel
-    PiercedKernel<id_t>::shrinkToFit();
+    PiercedVectorKernel<id_t>::shrinkToFit();
 
     // Update the storage
-    PiercedStorage<value_t, id_t>::rawShrinkToFit();
+    PiercedVectorStorage<value_t, id_t>::rawShrinkToFit();
 }
 
 /**
@@ -715,30 +715,30 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::swap(PiercedVector &x) noexcept
 {
     // Swap kernel data
-    PiercedKernel<id_t>::swap(x);
+    PiercedVectorKernel<id_t>::swap(x);
 
     // Swap storage data
-    PiercedStorage<value_t, id_t>::swap(x, false);
+    PiercedVectorStorage<value_t, id_t>::swap(x, false);
 }
 
 /**
-* Get the kernel of the vector.
+* Get a constant reference to the kernel of the vector.
 *
-* \result The kernel of the vector.
+* \result A constant reference to the kernel of the vector.
 */
 template<typename value_t, typename id_t>
-const PiercedKernel<id_t> & PiercedVector<value_t, id_t>::getKernel() const
+const PiercedVectorKernel<id_t> & PiercedVector<value_t, id_t>::getKernel() const
 {
     return *this;
 }
 
 /**
-* Get the storage of the vector.
+* Get a constant reference to the storage of the vector.
 *
-* \result The storage of the vector.
+* \result A constant reference to the storage of the vector.
 */
 template<typename value_t, typename id_t>
-const PiercedStorage<value_t, id_t> & PiercedVector<value_t, id_t>::getStorage() const
+const PiercedVectorStorage<value_t, id_t> & PiercedVector<value_t, id_t>::getStorage() const
 {
     return *this;
 }
@@ -749,230 +749,7 @@ const PiercedStorage<value_t, id_t> & PiercedVector<value_t, id_t>::getStorage()
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::dump()
 {
-    PiercedKernel<id_t>::dump();
-}
-
-/*!
-* Gets the raw index associated to the element with the specified id.
-*
-* \return The raw index associated to the element with the specified id.
-*/
-template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::rawIndex(id_t id) const
-{
-    return PiercedKernel<id_t>::getRawIndex(id);
-}
-
-
-/**
-* Checks if a given id exists in the container.
-*
-* \param id is the id to look for
-* \result Returns true is the given id exists in the container, otherwise it
-* returns false.
-*/
-template<typename value_t, typename id_t>
-bool PiercedVector<value_t, id_t>::exists(id_t id) const
-{
-    return PiercedKernel<id_t>::contains(id);
-}
-
-/**
-* Returns a reference to the first element of the container.
-*
-* If the container is empty, an exception is thrown.
-*
-* \result A reference to the first element of the container.
-*/
-template<typename value_t, typename id_t>
-__PV_REFERENCE__ PiercedVector<value_t, id_t>::front()
-{
-    if (PiercedKernel<id_t>::empty()) {
-        throw std::out_of_range("Vector is empty");
-    }
-
-    return rawAt(PiercedKernel<id_t>::front());
-}
-
-/**
-* Returns a constant reference to the first element of the container.
-*
-* If the container is empty, an exception is thrown.
-*
-* \result A constant reference to the first element of the container.
-*/
-template<typename value_t, typename id_t>
-__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::front() const
-{
-    if (PiercedKernel<id_t>::empty()) {
-        throw std::out_of_range("Vector is empty");
-    }
-
-    return rawAt(PiercedKernel<id_t>::front());
-}
-
-/**
-* Returns a reference to the last element of the container.
-*
-* If the container is empty, an exception is thrown.
-*
-* \result A reference to the last element of the container.
-*/
-template<typename value_t, typename id_t>
-__PV_REFERENCE__ PiercedVector<value_t, id_t>::back()
-{
-    if (PiercedKernel<id_t>::empty()) {
-        throw std::out_of_range("Vector is empty");
-    }
-
-    return rawAt(PiercedKernel<id_t>::back());
-}
-
-/**
-* Returns a constant reference to the last element of the container.
-*
-* If the container is empty, an exception is thrown.
-*
-* \result A constant reference to the last element of the container.
-*/
-template<typename value_t, typename id_t>
-__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::back() const
-{
-    if (PiercedKernel<id_t>::empty()) {
-        throw std::out_of_range("Vector is empty");
-    }
-
-    return rawAt(PiercedKernel<id_t>::back());
-}
-
-/**
-* Returns a reference to the element with the specified id.
-*
-* If there is no element with the specified id, an exception is thrown.
-*
-* \param id is the id of the element
-* \result A reference to the element with the specified id.
-*/
-template<typename value_t, typename id_t>
-__PV_REFERENCE__ PiercedVector<value_t, id_t>::at(id_t id)
-{
-    return PiercedStorage<value_t, id_t>::at(id, 0);
-}
-
-/**
-* Returns a constant reference to the element with the specified id.
-*
-* If there is no element with the specified id, an exception is thrown.
-*
-* \param id is the id of the element
-* \result A constant reference to the element with the specified id.
-*/
-template<typename value_t, typename id_t>
-__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::at(id_t id) const
-{
-    return PiercedStorage<value_t, id_t>::at(id, 0);
-}
-
-/**
-* Returns a reference to the element at the specified position.
-*
-* \param pos the position of the element
-* \result A reference to the element in the specified position.
-*/
-template<typename value_t, typename id_t>
-__PV_REFERENCE__ PiercedVector<value_t, id_t>::rawAt(std::size_t pos)
-{
-    return PiercedStorage<value_t, id_t>::rawAt(pos, 0);
-}
-
-/**
-* Returns a constant reference to the element at the specified position.
-*
-* \param pos the position of the element
-* \result A constant reference to the element in the specified position.
-*/
-template<typename value_t, typename id_t>
-__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::rawAt(std::size_t pos) const
-{
-    return PiercedStorage<value_t, id_t>::rawAt(pos, 0);
-}
-
-/**
-* Returns a constant reference to the element with the specified id.
-*
-* If there is no element with the specified id, an exception is thrown.
-*
-* \param id is the id of the element
-* \result A constant reference to the element with the specified id.
-*/
-template<typename value_t, typename id_t>
-__PV_CONST_REFERENCE__ PiercedVector<value_t, id_t>::operator[](id_t id) const
-{
-    return PiercedStorage<value_t, id_t>::at(id, 0);
-}
-
-/**
-* Returns a reference to the element with the specified id.
-*
-* If there is no element with the specified id, an exception is thrown.
-*
-* \param id is the id of the element
-* \result A reference to the element with the specified id.
-*/
-template<typename value_t, typename id_t>
-__PV_REFERENCE__ PiercedVector<value_t, id_t>::operator[](id_t id)
-{
-    return PiercedStorage<value_t, id_t>::at(id, 0);
-}
-
-/**
-* Register the specified storage
-*
-* \param storage is the storage that will be registered
-* \param syncMode is the synchronization mode that will be used for the storage
-*/
-template<typename value_t, typename id_t>
-template<typename data_t>
-void PiercedVector<value_t, id_t>::registerStorage(PiercedStorage<data_t, id_t> *storage, PiercedSyncMaster::SyncMode syncMode)
-{
-    storage->setKernel(this, syncMode);
-}
-
-/**
-* Unregister the specified storage
-*
-* \param storage is the storage that will be unregistered
-*/
-template<typename value_t, typename id_t>
-template<typename data_t>
-void PiercedVector<value_t, id_t>::unregisterStorage(PiercedStorage<data_t, id_t> *storage)
-{
-    storage->unsetKernel();
-}
-
-/**
-* Check if te specified storage is registered.
-*
-* \param storage is the storage to check
-*/
-template<typename value_t, typename id_t>
-template<typename data_t>
-bool PiercedVector<value_t, id_t>::isStorageRegistered(const PiercedStorage<data_t, id_t> *storage) const
-{
-    return PiercedKernel<id_t>::isSlaveRegistered(storage);
-}
-
-/**
-* Get the synchronization mode for the specified storage
-*
-* \param storage is the storage for which the synchronization mode is requested
-* \result The synchronization mode of the storage
-*/
-template<typename value_t, typename id_t>
-template<typename data_t>
-typename PiercedSyncMaster::SyncMode PiercedVector<value_t, id_t>::getStorageSyncMode(const PiercedStorage<data_t, id_t> *storage) const
-{
-    return PiercedKernel<id_t>::getSlaveSyncMode(storage);
+    PiercedVectorKernel<id_t>::dump();
 }
 
 /**
@@ -981,12 +758,12 @@ typename PiercedSyncMaster::SyncMode PiercedVector<value_t, id_t>::getStorageSyn
 * \param stream is the stream data should be read from
 */
 template<typename value_t, typename id_t>
-template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type *>
+template<typename T, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type *>
 void PiercedVector<value_t, id_t>::restore(std::istream &stream)
 {
-    PiercedKernel<id_t>::restore(stream);
+    PiercedVectorKernel<id_t>::restore(stream);
 
-    PiercedStorage<T, id_t>::restore(stream);
+    PiercedVectorStorage<T, id_t>::restore(stream);
 }
 
 /**
@@ -995,12 +772,12 @@ void PiercedVector<value_t, id_t>::restore(std::istream &stream)
 * \param stream is the stream data should be written to
 */
 template<typename value_t, typename id_t>
-template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type *>
+template<typename T, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type *>
 void PiercedVector<value_t, id_t>::dump(std::ostream &stream) const
 {
-    PiercedKernel<id_t>::dump(stream);
+    PiercedVectorKernel<id_t>::dump(stream);
 
-    PiercedStorage<T, id_t>::dump(stream);
+    PiercedVectorStorage<T, id_t>::dump(stream);
 }
 
 /**
@@ -1025,7 +802,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::re
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawEmplace(pos);
+        PiercedVectorStorage<value_t, id_t>::rawEmplace(pos);
         break;
     }
 
@@ -1034,8 +811,8 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::re
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawEmplaceBack();
-        pos = PiercedKernel<id_t>::getLastUsedPos();
+        PiercedVectorStorage<value_t, id_t>::rawEmplaceBack();
+        pos = PiercedVectorKernel<id_t>::getLastUsedPos();
         break;
     }
 
@@ -1048,7 +825,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::re
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::rawFind(pos);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1065,7 +842,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
 
     case FillAction::TYPE_OVERWRITE:
     {
-        PiercedStorage<value_t, id_t>::rawSet(pos, value);
+        PiercedVectorStorage<value_t, id_t>::rawSet(pos, value);
         break;
     }
 
@@ -1074,7 +851,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawInsert(pos, 1, value);
+        PiercedVectorStorage<value_t, id_t>::rawInsert(pos, 1, value);
         break;
     }
 
@@ -1083,8 +860,8 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawPushBack(value);
-        pos = PiercedKernel<id_t>::getLastUsedPos();
+        PiercedVectorStorage<value_t, id_t>::rawPushBack(value);
+        pos = PiercedVectorKernel<id_t>::getLastUsedPos();
         break;
     }
 
@@ -1097,7 +874,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::rawFind(pos);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1111,7 +888,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
 * synchronizing the action
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimValue(const FillAction &action, Args&&... args)
 {
     std::size_t pos = action.info[PiercedSyncAction::INFO_POS];
@@ -1119,7 +896,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 
     case FillAction::TYPE_OVERWRITE:
     {
-        PiercedStorage<value_t, id_t>::rawInitialize(pos, std::forward<Args>(args)...);
+        PiercedVectorStorage<value_t, id_t>::rawInitialize(pos, std::forward<Args>(args)...);
         break;
     }
 
@@ -1128,7 +905,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawEmplace(pos, std::forward<Args>(args)...);
+        PiercedVectorStorage<value_t, id_t>::rawEmplace(pos, std::forward<Args>(args)...);
         break;
     }
 
@@ -1137,8 +914,8 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawEmplaceBack(std::forward<Args>(args)...);
-        pos = PiercedKernel<id_t>::getLastUsedPos();
+        PiercedVectorStorage<value_t, id_t>::rawEmplaceBack(std::forward<Args>(args)...);
+        pos = PiercedVectorKernel<id_t>::getLastUsedPos();
         break;
     }
 
@@ -1151,7 +928,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::rawFind(pos);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1170,7 +947,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 
     case FillAction::TYPE_OVERWRITE:
     {
-        PiercedStorage<value_t, id_t>::rawEmreplace(pos, std::forward<Args>(args)...);
+        PiercedVectorStorage<value_t, id_t>::rawEmreplace(pos, std::forward<Args>(args)...);
         break;
     }
 
@@ -1179,7 +956,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawEmplace(pos, std::forward<Args>(args)...);
+        PiercedVectorStorage<value_t, id_t>::rawEmplace(pos, std::forward<Args>(args)...);
         break;
     }
 
@@ -1188,8 +965,8 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawEmplaceBack(std::forward<Args>(args)...);
-        pos = PiercedKernel<id_t>::getLastUsedPos();
+        PiercedVectorStorage<value_t, id_t>::rawEmplaceBack(std::forward<Args>(args)...);
+        pos = PiercedVectorKernel<id_t>::getLastUsedPos();
         break;
     }
 
@@ -1202,7 +979,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
     }
 
     // Return the iterator to the position where the element was inserted
-    return PiercedStorage<value_t, id_t>::rawFind(pos);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(pos);
 }
 
 /**
@@ -1220,7 +997,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
 
     case MoveAction::TYPE_MOVE_OVERWRITE:
     {
-        PiercedStorage<value_t, id_t>::rawSet(posNew, std::move(PiercedStorage<value_t, id_t>::rawAt(posOld)));
+        PiercedVectorStorage<value_t, id_t>::rawSet(posNew, std::move(PiercedVectorStorage<value_t, id_t>::rawAt(posOld)));
         break;
     }
 
@@ -1229,7 +1006,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawInsert(posNew, 1, std::move(PiercedStorage<value_t, id_t>::rawAt(posOld)));
+        PiercedVectorStorage<value_t, id_t>::rawInsert(posNew, 1, std::move(PiercedVectorStorage<value_t, id_t>::rawAt(posOld)));
         break;
     }
 
@@ -1238,8 +1015,8 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
         // prevent the automatic reallocation of the storage.
-        PiercedStorage<value_t, id_t>::rawPushBack(std::move(PiercedStorage<value_t, id_t>::rawAt(posOld)));
-        posNew = PiercedKernel<id_t>::getLastUsedPos();
+        PiercedVectorStorage<value_t, id_t>::rawPushBack(std::move(PiercedVectorStorage<value_t, id_t>::rawAt(posOld)));
+        posNew = PiercedVectorKernel<id_t>::getLastUsedPos();
         break;
     }
 
@@ -1252,10 +1029,10 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
     }
 
     // Clear the old position
-    PiercedStorage<value_t, id_t>::rawEmreplace(posOld);
+    PiercedVectorStorage<value_t, id_t>::rawEmreplace(posOld);
 
     // Return the iterator to the new position
-    return PiercedStorage<value_t, id_t>::rawFind(posNew);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(posNew);
 }
 
 /**
@@ -1281,7 +1058,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::er
     case EraseAction::TYPE_SHRINK:
     {
         std::size_t rawSize = action.info[PiercedSyncAction::INFO_SIZE];
-        PiercedStorage<value_t, id_t>::rawResize(rawSize);
+        PiercedVectorStorage<value_t, id_t>::rawResize(rawSize);
         break;
     }
 
@@ -1296,7 +1073,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::er
     // Return the iterator to the next element
     std::size_t nextPos = action.info[PiercedSyncAction::INFO_POS_NEXT];
 
-    return PiercedStorage<value_t, id_t>::rawFind(nextPos);
+    return PiercedVectorStorage<value_t, id_t>::rawFind(nextPos);
 }
 
 /**
@@ -1313,7 +1090,7 @@ void PiercedVector<value_t, id_t>::swapValues(const SwapAction &action)
     {
         std::size_t posFirst  = action.info[PiercedSyncAction::INFO_POS_FIRST];
         std::size_t posSecond = action.info[PiercedSyncAction::INFO_POS_SECOND];
-        PiercedStorage<value_t, id_t>::rawSwap(posFirst, posSecond);
+        PiercedVectorStorage<value_t, id_t>::rawSwap(posFirst, posSecond);
         break;
     }
 

@@ -26,13 +26,9 @@
 #define __BITPIT_PIERCED_VECTOR_HPP__
 
 #include <cassert>
-#include <limits>
-#include <unordered_map>
-#include <type_traits>
-#include <vector>
 
-#include "piercedKernel.hpp"
-#include "piercedStorage.hpp"
+#include "piercedVectorKernel.hpp"
+#include "piercedVectorStorage.hpp"
 
 #define __PV_REFERENCE__       typename PiercedVector<value_t, id_t>::reference
 #define __PV_CONST_REFERENCE__ typename PiercedVector<value_t, id_t>::const_reference
@@ -63,82 +59,56 @@ class BasePiercedVector {
 */
 template<typename value_t, typename id_t = long>
 class PiercedVector : public BasePiercedVector,
-                      private PiercedKernel<id_t>,
-                      private PiercedStorage<value_t, id_t> {
+                      public PiercedVectorKernel<id_t>,
+                      public PiercedVectorStorage<value_t, id_t> {
 
 public:
     // Typedefs
 
-    /**
-    * Kernel template
-    */
-    template<typename PK_id_t>
-    using Kernel = PiercedKernel<PK_id_t>;
-
-    /**
-    * Kernel type
-    */
-    typedef Kernel<id_t> kernel_type;
-
     /*!
-    * Type of data stored in the container
+    * Type of ids stored in the container
     */
-    typedef typename PiercedStorage<value_t, id_t>::value_type value_type;
+    typedef PiercedVectorKernel<id_t> kernel_type;
 
     /*!
     * Type of ids stored in the container
     */
-    typedef typename PiercedKernel<id_t>::id_type id_type;
+    typedef typename PiercedVectorKernel<id_t>::id_type id_type;
 
-    /**
-    * Reference
+    /*!
+    * Type of data stored in the container
     */
-    typedef typename PiercedStorage<value_t, id_t>::reference reference;
-
-    /**
-    * Constant reference
-    */
-    typedef typename PiercedStorage<value_t, id_t>::const_reference const_reference;
-
-    /**
-    * Pointer
-    */
-    typedef typename PiercedStorage<value_t, id_t>::pointer pointer;
-
-    /**
-    * Constant pointer
-    */
-    typedef typename PiercedStorage<value_t, id_t>::const_pointer const_pointer;
+    typedef typename PiercedVectorStorage<value_t, id_t>::value_type value_type;
 
     /**
     * Iterator
     */
-    typedef typename PiercedStorage<value_t, id_t>::iterator iterator;
+    typedef typename PiercedVectorStorage<value_t, id_t>::iterator iterator;
 
     /**
     * Constant iterator
     */
-    typedef typename PiercedStorage<value_t, id_t>::const_iterator const_iterator;
+    typedef typename PiercedVectorStorage<value_t, id_t>::const_iterator const_iterator;
 
     /**
     * Raw iterator
     */
-    typedef typename PiercedStorage<value_t, id_t>::raw_iterator raw_iterator;
+    typedef typename PiercedVectorStorage<value_t, id_t>::raw_iterator raw_iterator;
 
     /**
     * Raw constant iterator
     */
-    typedef typename PiercedStorage<value_t, id_t>::raw_const_iterator raw_const_iterator;
+    typedef typename PiercedVectorStorage<value_t, id_t>::raw_const_iterator raw_const_iterator;
 
     /**
     * Range
     */
-    typedef typename PiercedStorage<value_t, id_t>::range range;
+    typedef typename PiercedVectorStorage<value_t, id_t>::range range;
 
     /**
     * Constant range
     */
-    typedef typename PiercedStorage<value_t, id_t>::const_range const_range;
+    typedef typename PiercedVectorStorage<value_t, id_t>::const_range const_range;
 
     // Contructors
     PiercedVector();
@@ -147,8 +117,6 @@ public:
     PiercedVector(PiercedVector<value_t, id_t> &&x) = default;
 
     // Methods that modify the contents of the container
-    using PiercedKernel<id_t>::updateId;
-
     iterator reclaim(id_t id);
     iterator reclaimAfter(const id_t &referenceId, id_t id);
     iterator reclaimBack(id_t id);
@@ -165,13 +133,13 @@ public:
 
     iterator pushBack(id_t id, const value_t &value);
 
-    template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
     iterator emreclaim(id_t id, Args&&... args);
-    template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
     iterator emreclaimAfter(const id_t &referenceId, id_t id, Args&&... args);
-    template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
     void emreclaimBack(id_t id, Args&&... args);
-    template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
     iterator emreclaimBefore(const id_t &referenceId, id_t id, Args&&... args);
 
     template<typename... Args>
@@ -192,8 +160,6 @@ public:
     void swap(id_t id_first, id_t id_second);
 
     // Methods that modify the container as a whole
-    using PiercedKernel<id_t>::flush;
-
     void clear(bool release = true);
     void reserve(std::size_t n);
     void resize(std::size_t n);
@@ -203,92 +169,60 @@ public:
     void swap(PiercedVector &x) noexcept;
 
     // Methods that extract information about the container
-    using PiercedKernel<id_t>::capacity;
-    using PiercedKernel<id_t>::contiguous;
-    using PiercedKernel<id_t>::empty;
-    using PiercedKernel<id_t>::isIteratorSlow;
-    using PiercedKernel<id_t>::maxSize;
-    using PiercedKernel<id_t>::size;
-
-    const PiercedKernel<id_t> & getKernel() const;
-    const PiercedStorage<value_t, id_t> & getStorage() const;
+    const PiercedVectorKernel<id_t> & getKernel() const;
+    const PiercedVectorStorage<value_t, id_t> & getStorage() const;
 
     void dump();
 
-    // Methods that extract information on the contents of the container
-    using PiercedKernel<id_t>::contains;
-    using PiercedKernel<id_t>::getRawIndex;
-    using PiercedKernel<id_t>::evalFlatIndex;
-
-    std::size_t rawIndex(id_t id) const;
-    bool exists(id_t id) const;
-
-    using PiercedKernel<id_t>::getIds;
-    using PiercedKernel<id_t>::getSizeMarker;
-
     // Methods that extract the contents of the container
-    using PiercedStorage<value_t, id_t>::data;
+    using PiercedVectorStorage<value_t, id_t>::back;
+    using PiercedVectorStorage<value_t, id_t>::front;
 
-    __PV_REFERENCE__ back();
-    __PV_CONST_REFERENCE__ back() const;
+    using PiercedVectorStorage<value_t, id_t>::at;
+    using PiercedVectorStorage<value_t, id_t>::rawAt;
 
-    __PV_REFERENCE__ front();
-    __PV_CONST_REFERENCE__ front() const;
-
-    __PV_REFERENCE__ at(id_t id);
-    __PV_CONST_REFERENCE__ at(id_t id) const;
-
-    __PV_REFERENCE__ rawAt(std::size_t pos);
-    __PV_CONST_REFERENCE__ rawAt(std::size_t pos) const;
-
-    __PV_CONST_REFERENCE__ operator[](id_t id) const;
-    __PV_REFERENCE__ operator[](id_t id);
-
-    using PiercedStorage<value_t, id_t>::find;
-
-    using PiercedStorage<value_t, id_t>::rawFind;
+    using PiercedVectorStorage<value_t, id_t>::operator[];
 
     // Iterators
-    using PiercedStorage<value_t, id_t>::begin;
-    using PiercedStorage<value_t, id_t>::end;
-    using PiercedStorage<value_t, id_t>::cbegin;
-    using PiercedStorage<value_t, id_t>::cend;
+    using PiercedVectorStorage<value_t, id_t>::begin;
+    using PiercedVectorStorage<value_t, id_t>::end;
+    using PiercedVectorStorage<value_t, id_t>::cbegin;
+    using PiercedVectorStorage<value_t, id_t>::cend;
 
-    using PiercedStorage<value_t, id_t>::rawBegin;
-    using PiercedStorage<value_t, id_t>::rawEnd;
-    using PiercedStorage<value_t, id_t>::rawCbegin;
-    using PiercedStorage<value_t, id_t>::rawCend;
+    using PiercedVectorStorage<value_t, id_t>::rawBegin;
+    using PiercedVectorStorage<value_t, id_t>::rawEnd;
+    using PiercedVectorStorage<value_t, id_t>::rawCbegin;
+    using PiercedVectorStorage<value_t, id_t>::rawCend;
 
-    // External storage
-    using PiercedStorage<value_t, id_t>::getSyncMaster;
+    using PiercedVectorStorage<value_t, id_t>::find;
+    using PiercedVectorStorage<value_t, id_t>::rawFind;
 
-    template<typename data_t>
-    void registerStorage(PiercedStorage<data_t, id_t> *storage, PiercedSyncMaster::SyncMode syncMode);
-    template<typename data_t>
-    void unregisterStorage(PiercedStorage<data_t, id_t> *storage);
-    template<typename data_t>
-    bool isStorageRegistered(const PiercedStorage<data_t, id_t> *storage) const;
-    template<typename data_t>
-    PiercedSyncMaster::SyncMode getStorageSyncMode(const PiercedStorage<data_t, id_t> *storage) const;
-
-    using PiercedKernel<id_t>::sync;
+    // Methods for handing the synchronization
+    using PiercedVectorStorage<value_t, id_t>::getSyncMaster;
 
     // Dump and restore
-    template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type * = nullptr>
+    template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type * = nullptr>
     void restore(std::istream &stream);
 
-    template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_dump_restore>::type * = nullptr>
+    template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type * = nullptr>
     void dump(std::ostream &stream) const;
 
+protected:
+    using PiercedVectorStorage<value_t, id_t>::setKernel;
+    using PiercedVectorStorage<value_t, id_t>::unsetKernel;
+    using PiercedVectorStorage<value_t, id_t>::getKernel;
+
+    using PiercedVectorStorage<value_t, id_t>::getSyncMode;
+
 private:
-    typedef typename PiercedKernel<id_t>::FillAction FillAction;
-    typedef typename PiercedKernel<id_t>::MoveAction MoveAction;
-    typedef typename PiercedKernel<id_t>::SwapAction SwapAction;
-    typedef typename PiercedKernel<id_t>::EraseAction EraseAction;
+    typedef typename PiercedVectorKernel<id_t>::FillAction FillAction;
+    typedef typename PiercedVectorKernel<id_t>::MoveAction MoveAction;
+    typedef typename PiercedVectorKernel<id_t>::SwapAction SwapAction;
+    typedef typename PiercedVectorKernel<id_t>::EraseAction EraseAction;
 
     iterator reclaimValue(const FillAction &action);
     iterator insertValue(const FillAction &action, const value_t &value);
-    template<typename... Args, typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
     iterator emreclaimValue(const FillAction &action, Args&&... args);
     template<typename... Args>
     iterator emplaceValue(const FillAction &action, Args&&... args);
