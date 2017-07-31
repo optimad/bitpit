@@ -37,7 +37,7 @@
 namespace bitpit{
 
 namespace adaption{
-    class Info;
+    struct Info;
 }
 class VolumeKernel;
 class VolCartesian;

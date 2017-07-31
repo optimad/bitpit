@@ -36,7 +36,7 @@
 namespace bitpit{
 
 namespace adaption{
-    class Info;
+    struct Info;
 }
 class SurfUnstructured;
 class SendBuffer;
