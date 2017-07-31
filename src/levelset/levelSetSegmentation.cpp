@@ -138,7 +138,7 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
 }
 
 /*!
-	@class      LevelSetSegmentation::SegInfo
+	@struct     LevelSetSegmentation::SegInfo
 	@ingroup    levelset
 	@brief      Information about the segments
 */

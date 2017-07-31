@@ -46,8 +46,7 @@ namespace levelSetDefaults{
     const std::vector<long>                 LIST;                       /**< Default value for list of elements in narrow band */
 };
 
-class LevelSetInfo{
-    public:
+struct LevelSetInfo{
     double                                  value ;                     /**< Levelset value */
     std::array<double,3>                    gradient ;                  /**< Levelset gradient */
 
