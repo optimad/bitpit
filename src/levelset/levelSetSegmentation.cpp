@@ -138,6 +138,28 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
 }
 
 /*!
+ * Get the coordinates of the specified segment's vertices.
+ * @param[in] id segmment's id
+ * @param[out] coords on output will contain coordinates of the vertices
+ */
+void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array<double,3>> *coords ) const {
+
+    const Cell &segment = m_surface->getCell(id) ;
+    int nVertices = segment.getVertexCount() ;
+
+    coords->resize(nVertices);
+    for (int n = 0; n < nVertices; ++n) {
+        long vertexId = segment.getVertex(n) ;
+        (*coords)[n] = m_surface->getVertexCoords(vertexId);
+    }
+
+    if ( nVertices > 3 ) {
+        log::cout() << "levelset: only segments and triangles supported in LevelSetSegmentation !!" << std::endl ;
+    }
+}
+
+
+/*!
 	@struct     LevelSetSegmentation::SegInfo
 	@ingroup    levelset
 	@brief      Information about the segments
@@ -323,32 +345,6 @@ const std::vector<long> & LevelSetSegmentation::getSimplexList(const long &id) c
 }
 
 /*!
- * Aggregate cell vertex coordinates in one vector
- * @param[in] i cell index
- * @return coordinates of cell vertices
- */
-std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( const long &i ) const {
-
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    const Cell &cell = m_surface.getCell(i) ;
-
-    int                                     j, n, N (cell.getVertexCount()) ;
-    std::vector<std::array<double,3>>       VS(N) ;
-
-    for( n=0; n<N; ++n){
-        j = cell.getVertex(n) ;
-        VS[n] = m_surface.getVertexCoords(j);
-    }
-
-    if( N > 3){
-        log::cout() << "levelset: only segments and triangles supported in LevelSetSegmentation !!" << std::endl ;
-    }
-
-    return VS;
-}
-
-/*!
  * Get size of support triangle
  * @param[in] i cell index
  * @return charcteristic size of support triangle
@@ -462,10 +458,11 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
     std::vector<std::array<double,3>> cloud ;
 
     // Add the segments info
+    std::vector<std::array<double,3>> VS;
     for ( auto mapItr = segmentToCellMap.begin(); mapItr != segmentToCellMap.end(); ++mapItr) {
         // Segment data
         long segment = mapItr->first ;
-        std::vector<std::array<double,3>> VS = getSimplexVertices( segment ) ;
+        m_segmentation->getSegmentVertexCoords( segment, &VS ) ;
 
         // Cell data
         const std::vector<long> &cellList = mapItr->second ;
@@ -900,7 +897,7 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
         std::vector<long> &cellList = segmentToCellMap[segmentId] ;
 
         // Segments vertex ------------------------------------------------------ //
-        VS  = getSimplexVertices( segmentId ) ;
+        m_segmentation->getSegmentVertexCoords( segmentId, &VS ) ;
         seedNarrowBand( visitee, VS, stack );
 
 

@@ -59,6 +59,8 @@ public:
 
     const SurfUnstructured & getSurface();
 
+    void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
+
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;
 
@@ -128,8 +130,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const;
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &);
-
-    std::vector<std::array<double,3>>           getSimplexVertices( const long &) const;
 
     std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *, const double &, const SegmentToCellMap &) ;
     void                                        updateSegmentList( const double &) ;
