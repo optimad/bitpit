@@ -158,6 +158,125 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
     }
 }
 
+/*!
+ * Computes levelset relevant information at one point with respect to a segment
+ * @param[in] p coordinates of point
+ * @param[in] i index of segment
+ * @param[out] d distance point to segment
+ * @param[out] s sign of point wrt to segment, i.e. according to normal
+ * @param[out] x closest point on segment
+ * @param[out] n normal at closest point
+ */
+void SegmentationKernel::getSegmentInfo( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
+
+    std::array<double,3> g ;
+
+    auto itrNormal = getVertexNormals().find(i) ;
+    auto itrGradient = getVertexGradients().find(i) ;
+    assert( itrGradient != getVertexGradients().end() ) ;
+
+    const Cell &cell = m_surface->getCell(i) ;
+    int nVertices = cell.getVertexCount() ;
+    switch (nVertices) {
+
+    case 1:
+    {
+        long id = cell.getVertex(0) ;
+        d = norm2( p- m_surface->getVertexCoords(id) ) ;
+        g.fill(0.) ;
+        n.fill(0.) ;
+
+        break;
+    }
+
+    case 2:
+    {
+        long id0 = cell.getVertex(0) ;
+        long id1 = cell.getVertex(1) ;
+
+        std::array<double,2> lambda ;
+        int flag ;
+
+        d= CGElem::distancePointSegment( p, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), x, lambda, flag ) ;
+
+        g = p-x;
+        g /= norm2(g);
+
+        n  = lambda[0] *itrGradient->second[0] ;
+        n += lambda[1] *itrGradient->second[1] ;
+        n /= norm2(n) ;
+
+        g *= sign(dotProduct(g,n));
+
+        if( itrNormal != getVertexNormals().end() ){
+            n  = lambda[0] *itrNormal->second[0] ;
+            n += lambda[1] *itrNormal->second[1] ;
+            n /= norm2(n) ;
+
+            double kappa ;
+            maxval(lambda,kappa);
+            kappa = 1. -kappa;
+
+            n *= kappa;
+            n += (1.-kappa)*g;
+            n /= norm2(n);
+
+        }
+
+        break;
+    }
+
+    case 3:
+    {
+        long id0 = cell.getVertex(0) ;
+        long id1 = cell.getVertex(1) ;
+        long id2 = cell.getVertex(2) ;
+
+        std::array<double,3> lambda ;
+        int flag ;
+
+        d= CGElem::distancePointTriangle( p, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), x, lambda, flag ) ;
+
+        g = p-x;
+        g /= norm2(g);
+
+        n  = lambda[0] *itrGradient->second[0] ;
+        n += lambda[1] *itrGradient->second[1] ;
+        n += lambda[2] *itrGradient->second[2] ;
+
+        g *= sign(dotProduct(g,n));
+
+        if( itrNormal != getVertexNormals().end() ){
+            n  = lambda[0] *itrNormal->second[0] ;
+            n += lambda[1] *itrNormal->second[1] ;
+            n += lambda[2] *itrNormal->second[2] ;
+            n /= norm2(n) ;
+
+            double kappa ;
+            maxval(lambda,kappa);
+            kappa = 1. -kappa;
+
+            n *= kappa;
+            n += (1.-kappa)*g;
+            n /= norm2(n);
+
+        }
+
+        break;
+    }
+
+    default:
+    {
+        log::cout() << " Segment not supported in SegmentationKernel::getSegmentInfo " << nVertices << std::endl ;
+
+        break;
+    }
+
+    }
+
+    s = sign( dotProduct(g, p - x) );
+
+}
 
 /*!
 	@struct     LevelSetSegmentation::SegInfo
@@ -605,7 +724,7 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
 
         double                s, d;
         std::array<double,3>  n, xP;
-        infoFromSimplex(centroid, support, d, s, xP, n);
+        m_segmentation->getSegmentInfo(centroid, support, d, s, xP, n);
 
         PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(id) ;
         if( lsInfoItr == m_ls.end() ){
@@ -617,114 +736,6 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
             lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
         }
     }
-}
-
-/*!
- * Computes levelset relevant information at one point with respect to a simplex
- * @param[in] p coordinates of point
- * @param[in] i index of simplex
- * @param[out] d distance point to simplex
- * @param[out] s sign of point wrt to simplex, i.e. according to normal
- * @param[out] x closest point on simplex
- * @param[out] n normal at closest point
- */
-void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
-
-    std::array<double,3> g ;
-
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    const Cell &cell = m_surface.getCell(i) ;
-    int nV = cell.getVertexCount() ;
-
-    auto itrNormal = m_segmentation->getVertexNormals().find(i) ;
-    auto itrGradient = m_segmentation->getVertexGradients().find(i) ;
-    assert( itrGradient != m_segmentation->getVertexGradients().end() ) ;
-
-    if( nV == 1){
-        long id = cell.getVertex(0) ;
-        d = norm2( p- m_surface.getVertexCoords(id) ) ;
-        g.fill(0.) ;
-        n.fill(0.) ;
-
-    } else if( nV == 2){
-        long id0 = cell.getVertex(0) ;
-        long id1 = cell.getVertex(1) ;
-
-        std::array<double,2> lambda ;
-        int flag ;
-
-        d= CGElem::distancePointSegment( p, m_surface.getVertexCoords(id0), m_surface.getVertexCoords(id1), x, lambda, flag ) ;
-
-        g = p-x;
-        g /= norm2(g);
-
-        n  = lambda[0] *itrGradient->second[0] ;
-        n += lambda[1] *itrGradient->second[1] ;
-        n /= norm2(n) ;
-
-        g *= sign(dotProduct(g,n));
-
-        if( itrNormal != m_segmentation->getVertexNormals().end() ){
-            n  = lambda[0] *itrNormal->second[0] ;
-            n += lambda[1] *itrNormal->second[1] ;
-            n /= norm2(n) ;
-
-            double kappa ;
-            maxval(lambda,kappa);
-            kappa = 1. -kappa;
-
-            n *= kappa;
-            n += (1.-kappa)*g;
-            n /= norm2(n);
-
-        }
-
-
-    } else if (nV == 3){
-        long id0 = cell.getVertex(0) ;
-        long id1 = cell.getVertex(1) ;
-        long id2 = cell.getVertex(2) ;
-
-        std::array<double,3> lambda ;
-        int flag ;
-
-        d= CGElem::distancePointTriangle( p, m_surface.getVertexCoords(id0), m_surface.getVertexCoords(id1), m_surface.getVertexCoords(id2), x, lambda, flag ) ;
-
-        g = p-x;
-        g /= norm2(g);
-
-        n  = lambda[0] *itrGradient->second[0] ;
-        n += lambda[1] *itrGradient->second[1] ;
-        n += lambda[2] *itrGradient->second[2] ;
-
-        g *= sign(dotProduct(g,n));
-
-        if( itrNormal != m_segmentation->getVertexNormals().end() ){
-            n  = lambda[0] *itrNormal->second[0] ;
-            n += lambda[1] *itrNormal->second[1] ;
-            n += lambda[2] *itrNormal->second[2] ;
-            n /= norm2(n) ;
-
-            double kappa ;
-            maxval(lambda,kappa);
-            kappa = 1. -kappa;
-
-            n *= kappa;
-            n += (1.-kappa)*g;
-            n /= norm2(n);
-
-        }
-
-
-
-    } else{
-        log::cout() << " simplex not supported in LevelSetSegmentation::infoFromSimplex " << nV << std::endl ;
-        
-    }
-
-    s = sign( dotProduct(g, p - x) );
-
 }
 
 /*!

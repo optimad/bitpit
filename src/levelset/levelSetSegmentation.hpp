@@ -60,6 +60,7 @@ public:
     const SurfUnstructured & getSurface();
 
     void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
+    void getSegmentInfo( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const;
 
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;
@@ -135,7 +136,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        updateSegmentList( const double &) ;
 
     void                                        createLevelsetInfo( LevelSetKernel *, const bool &, std::unordered_set<long> &) ;
-    void                                        infoFromSimplex(const std::array<double,3> &, const long &, double &, double &, std::array<double,3> &,std::array<double,3> &) const ;
 
     SegmentToCellMap                            extractSegmentToCellMap( LevelSetCartesian *, const double &);
     SegmentToCellMap                            extractSegmentToCellMap( LevelSetOctree *, const double &);
