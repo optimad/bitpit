@@ -212,10 +212,13 @@ namespace bitpit {
 #endif
         ~ParaTree();
 
+    private:
+        ParaTree & operator=(const ParaTree & other) = delete;
+
         // =================================================================================== //
         // METHODS																			   //
         // =================================================================================== //
-
+    public:
         virtual void	reset();
 
         virtual int		getDumpVersion() const;
