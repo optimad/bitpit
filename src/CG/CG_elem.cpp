@@ -1737,11 +1737,10 @@ bool intersectSegmentBox(
 
             if( intersectSegmentSegment(E1,E2,V1,V2,p)) { return(true); } ;
 
-        };
+        }
 
-    }
 
-    { //3D
+    } else if (dim == 3){ //3D
 
         std::vector< std::array<double,3> > E ;
         E.resize(4) ;
@@ -1751,9 +1750,9 @@ bool intersectSegmentBox(
 
             if( intersectSegmentSimplex(V1,V2,E,p) ) { return(true); } ;
 
-        };
+        }
 
-    };
+    }
 
     return (false);
 
@@ -1807,9 +1806,7 @@ bool intersectSegmentBox(
 
         return( intersect ) ;
 
-    }
-
-    else { //3D check if box face and segment intersect
+    } else if( dim==3 ) { //3D check if box face and segment intersect
 
 
         std::vector< std::array<double,3> > E ;
