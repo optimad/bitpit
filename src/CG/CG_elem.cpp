@@ -1444,13 +1444,13 @@ bool intersectLineTriangle(
     nT  = crossProduct(B - A, C - A);
     nT /= norm2(nT);
 
-    if ( !intersectLinePlane(P, n, A, nT, xP) && !intersectPointTriangle(xP, A, B, C) ) { 
-        return(false); 
-    };
+    if ( intersectLinePlane(P, n, A, nT, xP) && intersectPointTriangle(xP, A, B, C) ) { 
+        Q = xP;
+        return true; 
+    }
 
-    Q = xP;
-    return true ; 
-};
+    return false; 
+}
 
 /*!
  * Computes intersection between triangle and a segment
