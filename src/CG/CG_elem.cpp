@@ -49,6 +49,7 @@ bool validSegment(const array3D &P0, const array3D &P1 )
 {
     return !utils::DoubleFloatingEqual()( norm2(P1-P0), 0.);
 }
+
 /*!
  * Checks if a line is valid
  * @param[in] P point on line;
@@ -157,7 +158,7 @@ int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
     } 
     
     return 0;
-};
+}
 
 /*!
  * Converts barycentric coordinates of a point on a triangle to a flag that indicates where the point lies.
@@ -177,22 +178,22 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
 
     for( int i=0; i<3; ++i){
         if ( lambda[i] <= 0.) {
-            zeros[count] = i ;
-            ++count ;
+            zeros[count] = i;
+            ++count;
         }
     }
 
     if( count == 1){
         int vertex0 = (zeros[0] +1) %3;
-        count = -(vertex0+1) ;
+        count = -(vertex0+1);
 
     } else if (count == 2) {
-        count = 3 -zeros[0] -zeros[1] +1 ;
+        count = 3 -zeros[0] -zeros[1] +1;
 
     }
 
     return count;
-};
+}
 
 /*!
  * Converts barycentric coordinates of a point on a simplex to a flag that indicates where the point lies.
@@ -213,8 +214,8 @@ int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
 
     for( int i=0; i<N; ++i){
         if ( lambda[i] > 0.) {
-            positives[count] = i ;
-            ++count ;
+            positives[count] = i;
+            ++count;
         }
     }
 
@@ -223,14 +224,14 @@ int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
 
     } else if (count==2) {
         int vertex0 = positives[0] +1;
-        count = -(vertex0+1) ;
+        count = -(vertex0+1);
 
     } else {
         count = 0;
     }
 
     return count;
-};
+}
 
 /*!
  * Reconstructs a point from barycentric coordinates of a segment
@@ -268,7 +269,7 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
  * @param[in] lambda barycentric coordinates
  * @param[out] reconstructed point
  */
-array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, std::array<double,3> const &lambda)
+array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D const &lambda)
 {
     assert( validBarycentric(&lambda[0],3) );
 
@@ -298,10 +299,10 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
  */
 array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &V, std::vector<double> const &lambda)
 {
-    array3D xP = {{0.,0.,0.}};
     int N(V.size());
     assert( validBarycentric(&lambda[0],N) );
 
+    array3D xP = {{0.,0.,0.}};
     for(int i=0; i<N; ++i){
         xP += lambda[i]*V[i];
     }
@@ -344,6 +345,7 @@ array3D projectPointPlane( array3D const &P, array3D const &Q, array3D const &n 
  */
 array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1)
 {
+
     std::array<double,2> lambda;
     return projectPointSegment( P, Q0, Q1, &lambda[0] );
 }
@@ -373,14 +375,15 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
 {
 
     assert( validSegment(Q0,Q1) );
+
     array3D n = Q1 -Q0;
-    double t =  -dotProduct(n,Q0-P) / dotProduct(n,n) ;
+    double t =  -dotProduct(n,Q0-P) / dotProduct(n,n);
 
     // Restrict projection onto the segment
-    t = std::max( std::min( t, 1.), 0. ) ;
+    t = std::max( std::min( t, 1.), 0. );
 
-    lambda[0] = 1. - t ;
-    lambda[1] = t ;
+    lambda[0] = 1. - t;
+    lambda[1] = t;
 
     return reconstructPointFromBarycentricSegment( Q0, Q1, lambda);
 }
@@ -415,7 +418,7 @@ array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const
     array3D xP;
     _projectPointsTriangle( 1, &P, Q0, Q1, Q2, &xP, lambda.data() );
 
-    return xP ;
+    return xP;
 }
 
 /*!
@@ -444,15 +447,15 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 
     assert( validBarycentric(&lambda[0], 3) );
 
-    std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}} ;
+    std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}};
 
     int count = 0;
     std::array<int,2> negatives = {{ 0, 0 }};
 
     for( int i=0; i<3; ++i){
         if( lambda[i] < 0){
-            negatives[count] = i ;
-            ++count ;
+            negatives[count] = i;
+            ++count;
         }
     }
 
@@ -460,23 +463,23 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
         return reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda );
 
     } else if( count == 1){
-        std::array<double,2>   lambdaLocal ;
+        std::array<double,2>   lambdaLocal;
         int vertex0 = (negatives[0] +1) %3;
         int vertex1 = (vertex0     +1) %3;
         array3D P = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda ); 
         array3D xP = projectPointSegment(P, *r[vertex0], *r[vertex1], lambdaLocal);
-        lambda[negatives[0]] = 0. ;
-        lambda[vertex0] = lambdaLocal[0] ;
-        lambda[vertex1] = lambdaLocal[1] ;
+        lambda[negatives[0]] = 0.;
+        lambda[vertex0] = lambdaLocal[0];
+        lambda[vertex1] = lambdaLocal[1];
         return xP;
 
     } else {
-        int vertex0 = 3 -negatives[0] -negatives[1] ;
+        int vertex0 = 3 -negatives[0] -negatives[1];
         lambda[0] = 0.;
         lambda[1] = 0.;
         lambda[2] = 0.;
-        lambda[vertex0] = 1. ;
-        return *r[vertex0] ;
+        lambda[vertex0] = 1.;
+        return *r[vertex0];
 
     }
 
@@ -507,9 +510,9 @@ std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, ar
 
     _projectPointsTriangle( cloudCount, cloud.data(), Q0, Q1, Q2, xP.data(), &lambda[0][0]);
 
-    return xP ;
+    return xP;
 
-};
+}
 
 /*!
  * Computes distances of point cloud to triangle
@@ -529,35 +532,35 @@ void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q
     array3D s0 = Q1-Q0;
     array3D s1 = Q2-Q0;
 
-    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
-    double *B = new double [2*nPoints] ;
+    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }  ; 
+    double *B = new double [2*nPoints];
 
     for( int i=0; i<nPoints; ++i){
-        array3D rP = *point -Q0 ;
-        B[2*i]   = dotProduct(s0,rP) ; 
-        B[2*i+1] = dotProduct(s1,rP) ; 
+        array3D rP = *point -Q0;
+        B[2*i]   = dotProduct(s0,rP); 
+        B[2*i+1] = dotProduct(s1,rP); 
         ++point;
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 ) ;
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 );
     assert( info == 0 );
-    BITPIT_UNUSED( info ) ;
+    BITPIT_UNUSED( info );
 
     for( int i=0; i<nPoints; ++i){
 
-        double *b = &B[2*i] ;
+        double *b = &B[2*i];
 
-        lambda[0] = 1. -b[0] -b[1] ;
-        lambda[1] = b[0] ;
-        lambda[2] = b[1] ;
+        lambda[0] = 1. -b[0] -b[1];
+        lambda[1] = b[0];
+        lambda[2] = b[1];
 
         *proj = restrictPointTriangle( Q0, Q1, Q2, lambda);
-        lambda +=3 ;
+        lambda +=3;
         proj += 1;
     }
 
-    delete [] B ;
-};
+    delete [] B;
+}
 
 /*!
  * Project a point cloud on a plane described by a triangle
@@ -577,36 +580,35 @@ void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, 
     array3D s0 = Q1-Q0;
     array3D s1 = Q2-Q0;
 
-    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
-    double *B = new double [2*nPoints] ;
+    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }  ; 
+    double *B = new double [2*nPoints];
 
     for( int i=0; i<nPoints; ++i){
-        array3D rP = *point -Q0 ;
-        B[2*i]   = dotProduct(s0,rP) ; 
-        B[2*i+1] = dotProduct(s1,rP) ; 
+        array3D rP = *point -Q0;
+        B[2*i]   = dotProduct(s0,rP); 
+        B[2*i+1] = dotProduct(s1,rP); 
         ++point;
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 ) ;
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 );
     assert( info == 0 );
-    BITPIT_UNUSED( info ) ;
+    BITPIT_UNUSED( info );
 
     for( int i=0; i<nPoints; ++i){
 
-        double *b = &B[2*i] ;
+        double *b = &B[2*i];
 
-        lambda[0] = 1. -b[0] -b[1] ;
-        lambda[1] = b[0] ;
-        lambda[2] = b[1] ;
+        lambda[0] = 1. -b[0] -b[1];
+        lambda[1] = b[0];
+        lambda[2] = b[1];
 
         *proj = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda);
-        lambda +=3 ;
+        lambda +=3;
         proj += 1;
     }
 
-    delete [] B ;
-};
-
+    delete [] B;
+}
 
 /*!
  * Computes projection of point onto a generic simplex
@@ -684,7 +686,7 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
 
     return xP;
 
-};
+}
 
 /*!
  * Computes projection point on semi-infinite cone surface
@@ -694,7 +696,8 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
  * @param[in] alpha cone half angle
  * @return projection point
  */
-array3D projectPointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha){
+array3D projectPointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha)
+{
 
 
     if( alpha <= M_PI/2. ) { //accute cone angle
@@ -734,16 +737,11 @@ array3D projectPointCone( array3D const &point, array3D const &apex, array3D con
  * @param[out] xP closest point on line
  * @return distance
  */
-double distancePointLine(
-        std::array< double, 3 > const &P,
-        std::array< double, 3 > const &Q,
-        std::array< double, 3 > const &n,
-        std::array< double, 3 > &xP
-        ) {
-
+double distancePointLine( array3D const &P, array3D const &Q, array3D const &n, array3D &xP) 
+{
     xP = projectPointLine(P,Q,n);
     return norm2( P-xP);
-};
+}
 
 /*!
  * Computes distance point to plane
@@ -753,13 +751,8 @@ double distancePointLine(
  * @param[out] xP closest point on line
  * @return distance
  */
-double distancePointPlane(
-        std::array< double, 3 > const &P,
-        std::array< double, 3 > const &Q,
-        std::array< double, 3 > const &n,
-        std::array< double, 3 > &xP
-        ) {
-
+double distancePointPlane( array3D const &P, array3D const &Q, array3D const &n, array3D &xP) 
+{
     xP = projectPointPlane(P,Q,n);
     return norm2(P-xP);
 }
@@ -773,21 +766,15 @@ double distancePointPlane(
  * @param[out] flag point mapping onto segment vertices (flag = 1, 2), or onto segment interior (flag = 0)
  * @return distance
  */
-double distancePointSegment(
-        std::array< double, 3 > const &P,
-        std::array< double, 3 > const &Q1,
-        std::array< double, 3 > const &Q2,
-        std::array< double, 3 >       &xP,
-        int                      &flag
-        ) {
-
+double distancePointSegment( array3D const &P, array3D const &Q1, array3D const &Q2, array3D &xP, int &flag)
+{
     std::array<double,2> lambda;
 
     double distance =  distancePointSegment(P, Q1, Q2, lambda); 
     xP = reconstructPointFromBarycentricSegment(Q1,Q2,lambda);
     flag = convertBarycentricToFlagSegment(lambda);
     return distance;
-};
+}
 
 /*!
  * Computes distance point to segment in 3D using barycentric coordinates
@@ -798,20 +785,13 @@ double distancePointSegment(
  * @param[out] lambda barycentric coordinates
  * @return distance
  */
-double distancePointSegment(
-        std::array< double, 3 > const &P,
-        std::array< double, 3 > const &Q1,
-        std::array< double, 3 > const &Q2,
-        std::array< double, 3 >       &xP,
-        std::array< double, 2 >       &lambda,
-        int                      &flag
-        ) {
-
+double distancePointSegment( array3D const &P, array3D const &Q1, array3D const &Q2, array3D &xP, std::array<double,2> &lambda, int &flag ) 
+{
     xP = projectPointSegment( P, Q1, Q2, lambda);
     flag = convertBarycentricToFlagSegment(lambda);
 
     return norm2(P-xP); 
-};
+}
 
 /*!
  * Computes distance point to segment in 3D using barycentric coordinates
@@ -824,7 +804,7 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
 { 
     array3D xP = projectPointSegment( P, Q0, Q1);
     return norm2(P-xP); 
-};
+}
 
 /*!
  * Computes distance point to segment in 3D using barycentric coordinates
@@ -839,7 +819,7 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
 {
     array3D xP = projectPointSegment( P, Q0, Q1, lambda);
     return norm2(P-xP); 
-};
+}
 
 /*!
  * Computes distance point to triangle
@@ -851,22 +831,14 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
  * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
  * @return distance
  */
-double distancePointTriangle(
-        std::array< double, 3 > const &P,
-        std::array< double, 3 > const &Q0,
-        std::array< double, 3 > const &Q1,
-        std::array< double, 3 > const &Q2,
-        std::array< double, 3 >       &xP,
-        int                      &flag
-        ) {
-
-    std::array<double,3> lambda;
+double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &xP, int &flag)
+{
+    array3D lambda;
     double distance =  distancePointTriangle( P, Q0, Q1, Q2, lambda);
     flag = convertBarycentricToFlagTriangle(lambda);
     xP = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda);
     return distance;
-
-};
+}
 
 /*!
  * Computes distance point to triangle
@@ -879,22 +851,12 @@ double distancePointTriangle(
  * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
  * @return distance
  */
-double distancePointTriangle(
-        std::array< double, 3 > const &P,
-        std::array< double, 3 > const &Q0,
-        std::array< double, 3 > const &Q1,
-        std::array< double, 3 > const &Q2,
-        std::array< double, 3 >       &xP,
-        std::array< double, 3 >       &lambda,
-        int                           &flag
-        ) {
-
+double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &xP, array3D &lambda, int &flag) 
+{
     xP = projectPointTriangle(P, Q0, Q1, Q2, lambda);
     flag = convertBarycentricToFlagTriangle(lambda);
-
     return norm2(P-xP);
-
-};
+}
 
 /*!
  * Computes distance point to triangle
@@ -908,8 +870,7 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
 {
     array3D xP = projectPointTriangle(P, Q0, Q1, Q2);
     return norm2(P-xP);
-
-};
+}
 
 /*!
  * Computes distance point to triangle
@@ -924,7 +885,7 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
 {
     array3D xP = projectPointTriangle(P, Q0, Q1, Q2, lambda);
     return norm2(P-xP);
-};
+}
 
 /*!
  * Computes distance point to semi-infinite cone surface
@@ -934,11 +895,10 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
  * @param[in] alpha cone half angle
  * @return distance
  */
-double distancePointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha){
-
+double distancePointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha)
+{
     array3D xP = projectPointCone( point, apex, axis, alpha);
     return norm2(point-xP);
-
 }
 
 /*!
@@ -951,14 +911,8 @@ double distancePointCone( array3D const &point, array3D const &apex, array3D con
  * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
  * @return distance
  */
-std::vector<double> distanceCloudTriangle(
-        std::vector< std::array< double, 3 > >    const &P,
-        std::array< double, 3 >              const &Q1,
-        std::array< double, 3 >              const &Q2,
-        std::array< double, 3 >              const &Q3,
-        std::vector< std::array< double, 3 > >    &xP,
-        std::vector< int >                   &flag
-        ) {
+std::vector<double> distanceCloudTriangle( std::vector<array3D> const &P, array3D const &Q1, array3D const &Q2, array3D const &Q3, std::vector<array3D> &xP, std::vector<int> &flag )
+{
 
     int N( P.size() );
     std::vector<array3D> lambda;
@@ -981,8 +935,7 @@ std::vector<double> distanceCloudTriangle(
     }
 
     return d;
-
-};
+}
 
 /*!
  * Computes distances of point cloud to triangle
@@ -994,14 +947,8 @@ std::vector<double> distanceCloudTriangle(
  * @param[inout] lambdas pointer to sd::vector to be filled with barycentric coordinates of projection points
  * @return distances
  */
-std::vector<double> distanceCloudTriangle(
-        std::vector<array3D> const &cloud,
-        array3D              const &Q0,
-        array3D              const &Q1,
-        array3D              const &Q2,
-        std::vector<array3D>* const xPExt,
-        std::vector<array3D>* const lambdaExt
-        ) {
+std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D>* const xPExt, std::vector<array3D>* const lambdaExt )
+{
 
     int N(cloud.size());
 
@@ -1028,8 +975,7 @@ std::vector<double> distanceCloudTriangle(
     }
 
     return d;
-
-};
+}
 
 /*!
  * Computes distances of point cloud to triangle
@@ -1041,10 +987,9 @@ std::vector<double> distanceCloudTriangle(
  */
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2)
 { 
-
     std::vector<array3D> lambda(cloud.size());
     return distanceCloudTriangle( cloud, Q0, Q1, Q2, lambda);
-};
+}
 
 /*!
  * Computes distances of point cloud to triangle
@@ -1076,7 +1021,7 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
     }
 
     return d;
-};
+}
 
 /*!
  * Computes distances of point to generic simplex
@@ -1088,15 +1033,13 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
  */
 double distancePointSimplex( array3D const &P, std::vector<array3D> const &V, array3D &xP, int &flag)
 {
-
     std::vector<double> lambda;
     double distance = distancePointSimplex( P, V, lambda);
     xP = reconstructPointFromBarycentricSimplex( V, lambda );
     flag = convertBarycentricToFlagSimplex( lambda );
 
     return distance; 
-
-};
+}
 
 /*!
  * Computes distances of point to generic simplex
@@ -1108,8 +1051,7 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V)
 {
     std::vector<double> lambda(V.size());
     return distancePointSimplex( P, V, lambda);
-
-};
+}
 
 /*!
  * Computes distances of point to generic simplex
@@ -1122,8 +1064,7 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std
 {
     array3D xP = projectPointSimplex( P, V, lambda);
     return norm2(P-xP); 
-
-};
+}
 
 /*!
  * Computes distances of point cloud to generic simplex
@@ -1135,7 +1076,6 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std
  */
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<array3D> &xP, std::vector<int> &flag)
 {
-
     std::vector<std::vector<double>> lambda;
     std::vector<double> d = distanceCloudSimplex( cloud, V, lambda);
 
@@ -1158,7 +1098,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
     }
 
     return d; 
-};
+}
 
 /*!
  * Computes distances of point cloud to generic simplex
@@ -1172,7 +1112,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::ve
 
 
     if (vertexCount == 2) { //Segment
-        std::vector<double> d(cloudCount) ;
+        std::vector<double> d(cloudCount);
 
         for( int i=0; i<cloudCount; ++i ){
             d[i] = distancePointSegment(P[i], V[0], V[1]);
@@ -1185,7 +1125,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::ve
 
     } else { // Generic convex polygon 
 
-        std::vector<double> d(cloudCount,std::numeric_limits<double>::max()) ;
+        std::vector<double> d(cloudCount,std::numeric_limits<double>::max());
 
         int triangleCount = vertexCount - 2;
         int vertex0 = 0;
@@ -1195,7 +1135,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::ve
         for (int triangle=0; triangle < triangleCount; ++triangle) { // foreach triangle
             std::vector<double> dT = distanceCloudTriangle(P, V[vertex0], V[vertex1], V[vertex2]);
 
-            d = min(d,dT) ;
+            d = min(d,dT);
 
             ++vertex1;
             ++vertex2;
@@ -1206,9 +1146,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::ve
     }
 
     BITPIT_UNREACHABLE("CANNOT REACH");
-
-
-};
+}
 
 /*!
  * Computes distances of point cloud to generic simplex
@@ -1225,7 +1163,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
     lambda.shrink_to_fit();
 
     if (vertexCount == 2) { //Segment
-        std::vector<double> d(cloudCount) ;
+        std::vector<double> d(cloudCount);
         d.shrink_to_fit();
 
         std::vector<double>::iterator dItr = d.begin();
@@ -1243,7 +1181,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
         return d;
 
     } else if (vertexCount == 3) {  // Triangle 
-        std::vector<array3D> lambdaTemp(cloudCount) ;
+        std::vector<array3D> lambdaTemp(cloudCount);
         auto lambdaItr = lambda.begin();
         std::vector<double> d =  distanceCloudTriangle(cloud, V[0], V[1], V[2], lambdaTemp);
         for(auto const &l : lambdaTemp){
@@ -1253,9 +1191,9 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
 
     } else { // Generic convex polygon 
 
-        std::vector<double> d(cloudCount,std::numeric_limits<double>::max()) ;
-        std::vector<double> dTemp(cloudCount) ;
-        std::vector<array3D> lambdaTemp(cloudCount) ;
+        std::vector<double> d(cloudCount,std::numeric_limits<double>::max());
+        std::vector<double> dTemp(cloudCount);
+        std::vector<array3D> lambdaTemp(cloudCount);
 
         int triangleCount = vertexCount - 2;
         int vertex0 = 0;
@@ -1281,7 +1219,7 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
     }
 
     BITPIT_UNREACHABLE("CANNOT REACH");
-};
+}
 
 /*!
  * Computes distance between two lines in 3D
@@ -1309,7 +1247,6 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
  */
 double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1, array3D const &n1, array3D &xP0, array3D &xP1)
 {
-
     assert( validLine(P0,n0) );
     assert( validLine(P1,n1) );
 
@@ -1324,7 +1261,7 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
     }
 
 
-    std::array<double,3> dP = P1-P0;
+    array3D dP = P1-P0;
     double rhs0 =  dotProduct(dP,n0);
     double rhs1 = -dotProduct(dP,n1);
 
@@ -1349,14 +1286,8 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
  * @param[out] P intersection point if intersect, else unaltered
  * @return if intersect
  */
-bool intersectLineLine(
-        std::array<double, 3> const &P1,
-        std::array<double, 3> const &n1,
-        std::array<double, 3> const &P2,
-        std::array<double, 3> const &n2,
-        std::array<double, 3>       &P
-        ) {
-
+bool intersectLineLine( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P)
+{
     double tol = 1.e-12;
     array3D xP1, xP2;
     if( distanceLineLine(P1,n1,P2,n2,xP1,xP2) < tol){
@@ -1365,8 +1296,7 @@ bool intersectLineLine(
     }
 
     return false;
-
-};
+}
 
 /*!
  * Computes intersection between two segments in 3D
@@ -1377,52 +1307,25 @@ bool intersectLineLine(
  * @param[out] x intersection point if intersect, else unaltered
  * @return if intersect
  */
-bool intersectSegmentSegment(
-        std::array<double, 3> const &P1,
-        std::array<double, 3> const &P2,
-        std::array<double, 3> const &Q1,
-        std::array<double, 3> const &Q2,
-        std::array<double, 3>       &x
-        ) {
+bool intersectSegmentSegment( array3D const &P1, array3D const &P2, array3D const &Q1, array3D const &Q2, array3D &x)
+{
+    assert( validSegment(P1,P2) );
+    assert( validSegment(Q1,Q2) );
 
-    // Parameters
-    double const                    abs_tol = 1.0e-14;
+    array3D nP = P2 - P1;
+    nP /= norm2(nP);
 
-    // Local variables
-    double                          lP, lQ, lxP, lxQ;
-    std::array<double, 3>                nP, nQ;
+    array3D nQ = Q2 - Q1;
+    nQ /= norm2(nQ);
 
-    // Counters
-    // none
-
-    // ========================================================================== //
-    // COMPUTE INTERSECTION POINT BETWEEN SUPPORTING LINES                        //
-    // ========================================================================== //
-    nP = P2 - P1;
-    lP = norm2(nP);
-    nP = nP/lP;
-    nQ = Q2 - Q1;
-    lQ = norm2(nQ);
-    nQ = nQ/lQ;
-
-    // ========================================================================== //
-    // CHECK IF INTERSECTION POINTS LIES INSIDE EACH SEGMENT                      //
-    // ========================================================================== //
-    if ( intersectLineLine(P1, nP, Q1, nQ, x) ) {
-        lxP = dotProduct(x - P1, nP);
-        lxQ = dotProduct(x - Q1, nQ);
-
-        if ( lxP <= lP + abs_tol && lxP >= -abs_tol && lxQ  <= lQ + abs_tol && lxQ  >= -abs_tol )  {
-
-            return(true);
-        }
-
+    array3D temp;
+    if( intersectLineLine(P1, nP, Q1, nQ, temp) && intersectPointSegment( temp, P1, P2) && intersectPointSegment(temp, Q1, Q2) ){
+        x = temp;
+        return true;
     }
 
-    return (false);
-
-
-};
+    return false;
+}
 
 /*!
  * Computes intersection between line and plane
@@ -1433,34 +1336,30 @@ bool intersectSegmentSegment(
  * @param[out] P intersection point if intersect, else unaltered
  * @return if intersect
  */
-bool intersectLinePlane(
-        std::array<double, 3> const &P1,
-        std::array<double, 3> const &n1,
-        std::array<double, 3> const &P2,
-        std::array<double, 3> const &n2,
-        std::array<double, 3>       &P
-        ) {
+bool intersectLinePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P)
+{
 
-    // Parameters
-    double const                tol = 1.0e-14;
+    assert( validLine(P1,n1) );
+    assert( validPlane(P2,n2) );
 
-    // Local variables
-    double                      s, xi;
+    double const tol = 1.0e-14;
 
     // ========================================================================== //
     // CHECK DEGENERATE CASES                                                     //
     // ========================================================================== //
-    s = dotProduct(n1, n2);
-    if (std::abs(s) < tol) { return(false); }
+    double s = dotProduct(n1, n2);
+    if (std::abs(s) < tol) { 
+        return false; 
+    }
 
     // ========================================================================== //
     // FIND INTERSECTION POINTS                                                   //
     // ========================================================================== //
-    xi = -dotProduct(P1 - P2, n2)/s;
-    P = P1 + xi * n1;
+    double xi = -dotProduct(P1 - P2, n2) /s;
+    P = P1 + xi *n1;
 
-    return(true); 
-};
+    return true; 
+}
 
 /*!
  * Computes intersection between segment and plane
@@ -1471,28 +1370,23 @@ bool intersectLinePlane(
  * @param[out] P intersection point if intersect, else unaltered
  * @return if intersect
  */
-bool intersectSegmentPlane(
-        std::array<double, 3> const &Q1,
-        std::array<double, 3> const &Q2,
-        std::array<double, 3> const &P2,
-        std::array<double, 3> const &n2,
-        std::array<double, 3>       &P
-        ) {
+bool intersectSegmentPlane( array3D const &Q1, array3D const &Q2, array3D const &P2, array3D const &n2, array3D &P)
+{
 
     assert( validSegment(Q1,Q2) );
     assert( validPlane(P2,n2) );
-    std::array<double, 3> n, xP;
 
-    n = Q2 - Q1;
+    array3D n = Q2 - Q1;
     n /= norm2(n);
 
+    array3D xP;
     if ( intersectLinePlane(Q1, n, P2, n2, xP) && intersectPointSegment(xP, Q1, Q2) ) {
         P = xP;
         return true;
     }
 
-    return false ; 
-};
+    return false; 
+}
 
 /*!
  * Computes intersection between two planes
@@ -1504,24 +1398,19 @@ bool intersectSegmentPlane(
  * @param[out] nl direction of intersection line
  * @return if intersect
  */
-bool intersectPlanePlane(
-        std::array<double, 3> const &P1,
-        std::array<double, 3> const &n1,
-        std::array<double, 3> const &P2,
-        std::array<double, 3> const &n2,
-        std::array<double, 3>       &Pl,
-        std::array<double, 3>       &nl
-        ) {
+bool intersectPlanePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &Pl, array3D &nl)
+{
 
     assert( validPlane(P1,n1) );
     assert( validPlane(P2,n2) );
+
     double const tol = 1.0e-14;
     double n12 = dotProduct(n1, n2);
     double detCB = 1.0-n12*n12;
 
     // check degenerate condition
     if( std::abs(detCB) <= tol) { 
-        return false ; 
+        return false; 
     }
 
     nl = crossProduct(n1,n2);
@@ -1534,7 +1423,7 @@ bool intersectPlanePlane(
     // The optimality conditions I,Pl I,lambda1 I,lambda2 are 
     // solved using the Schur complment
 
-    std::array<double,3>  dP = P2-P1;
+    array3D  dP = P2-P1;
     std::array<double,2>  rhs = {{ dotProduct(n1,dP) , -dotProduct(n2,dP) }};
 
     double det1 = rhs[0] - n12*rhs[1];
@@ -1545,9 +1434,9 @@ bool intersectPlanePlane(
     Pl = P1 +P2 -lambda1*n1 -lambda2*n2;
     Pl *= 0.5;
 
-    return true ; 
+    return true; 
 
-};
+}
 
 /*!
  * Computes intersection between triangle and a line
@@ -1559,20 +1448,15 @@ bool intersectPlanePlane(
  * @param[out] Q intersection point
  * @return if intersect
  */
-bool intersectLineTriangle(
-        std::array<double, 3> const &P,
-        std::array<double, 3> const &n,
-        std::array<double, 3> const &A,
-        std::array<double, 3> const &B,
-        std::array<double, 3> const &C,
-        std::array<double, 3>       &Q
-        ) {
+bool intersectLineTriangle( array3D const &P, array3D const &n, array3D const &A, array3D const &B, array3D const &C, array3D &Q)
+{
+    assert( validLine(P,n) );
+    assert( validTriangle(A,B,C) );
 
-    std::array<double, 3> nT, xP;
-
-    nT  = crossProduct(B - A, C - A);
+    array3D nT  = crossProduct(B - A, C - A);
     nT /= norm2(nT);
 
+    array3D xP;
     if ( intersectLinePlane(P, n, A, nT, xP) && intersectPointTriangle(xP, A, B, C) ) { 
         Q = xP;
         return true; 
@@ -1591,28 +1475,21 @@ bool intersectLineTriangle(
  * @param[out] Q intersection point
  * @return if intersect
  */
-bool intersectSegmentTriangle(
-        std::array<double, 3> const &P0,
-        std::array<double, 3> const &P1,
-        std::array<double, 3> const &A,
-        std::array<double, 3> const &B,
-        std::array<double, 3> const &C,
-        std::array<double, 3>       &Q
-        ) {
-
+bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D const &A, array3D const &B, array3D const &C, array3D &Q)
+{
     assert( validSegment(P0,P1) );
     assert( validTriangle(A,B,C) );
-    std::array<double, 3> n, xP;
 
-    n  = P1 - P0;
+    array3D n = P1 - P0;
     n /= norm2(n);
 
+    array3D xP;
     if ( intersectLineTriangle(P0, n, A, B, C, xP) && intersectPointSegment(xP, P0, P1)  ) { 
         Q = xP;
         return true; 
     }
 
-    return false ; 
+    return false; 
 }
 
 /*!
@@ -1623,13 +1500,8 @@ bool intersectSegmentTriangle(
  * @param[out] Q intersection point
  * @return if intersect
  */
-bool intersectLineSimplex(
-        std::array<double, 3> const          &P,
-        std::array<double, 3> const          &n,
-        std::vector<std::array<double, 3> > const &V,
-        std::array<double, 3>                &Q
-        ) {
-
+bool intersectLineSimplex( array3D const &P, array3D const &n, std::vector<array3D > const &V, array3D &Q)
+{
     assert( validLine(P,n) );
 
     int nTriangles = V.size() -2;
@@ -1640,15 +1512,15 @@ bool intersectLineSimplex(
     for( int i=0; i< nTriangles; ++i){
 
         if( intersectLineTriangle(P, n, V[vertex0], V[vertex1], V[vertex2], Q) ) { 
-            return true ; 
+            return true; 
         }
 
         ++vertex1;
         ++vertex2;
     }
 
-    return false ; 
-};
+    return false; 
+}
 
 /*!
  * Computes intersection between triangle and a segment
@@ -1658,14 +1530,10 @@ bool intersectLineSimplex(
  * @param[out] Q intersection point
  * @return if intersect
  */
-bool intersectSegmentSimplex(
-        std::array<double, 3> const          &P0,
-        std::array<double, 3> const          &P1,
-        std::vector<std::array<double, 3> > const &V,
-        std::array<double, 3>                &Q 
-        ) {
-
+bool intersectSegmentSimplex( array3D const &P0, array3D const &P1, std::vector<array3D > const &V, array3D &Q)
+{
     assert( validSegment(P0,P1) );
+
     int nTriangles = V.size() -2;
 
     int vertex0 = 0;
@@ -1674,7 +1542,7 @@ bool intersectSegmentSimplex(
     for( int i=0; i< nTriangles; ++i){
 
         if( intersectSegmentTriangle(P0, P1, V[vertex0], V[vertex1], V[vertex2], Q) ) { 
-            return true ; 
+            return true; 
         }
 
         ++vertex1;
@@ -1683,7 +1551,6 @@ bool intersectSegmentSimplex(
 
     return false;
 }
-
 
 /*!
  * Computes intersection between two axis aligned bounding boxes
@@ -1694,27 +1561,16 @@ bool intersectSegmentSimplex(
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectBoxBox(
-        std::array<double, 3> const              &A1,
-        std::array<double, 3> const              &A2,
-        std::array<double, 3> const              &B1,
-        std::array<double, 3> const              &B2,
-        int                                 dim
-        ){
-
-    int     d;
-
-    for( d=0; d<dim; ++d){
-
+bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, int dim)
+{
+    for( int d=0; d<dim; ++d){
         if( B1[d] > A2[d] || B2[d] < A1[d] ){
             return false;
-        };
-
-    };
+        }
+    }
 
     return true;
-
-};
+}
 
 /*!
  * Computes intersection between two axis aligned bounding boxes
@@ -1727,34 +1583,23 @@ bool intersectBoxBox(
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectBoxBox(
-        std::array<double, 3> const              &A1,
-        std::array<double, 3> const              &A2,
-        std::array<double, 3> const              &B1,
-        std::array<double, 3> const              &B2,
-        std::array<double, 3>                    &I1,
-        std::array<double, 3>                    &I2,
-        int                                 dim
-        ){
-
-    int     d;
-
-    for( d=0; d<dim; ++d){
+bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, array3D &I1, array3D &I2, int dim )
+{
+    for( int d=0; d<dim; ++d){
 
         if( B1[d] > A2[d] || B2[d] < A1[d] ){
             return false;
         }
 
         else{
-            I1[d] = std::max( A1[d], B1[d] ) ;
-            I2[d] = std::min( A2[d], B2[d] ) ;
-        };
+            I1[d] = std::max( A1[d], B1[d] );
+            I2[d] = std::min( A2[d], B2[d] );
+        }
 
-    };
+    }
 
     return true;
-
-};
+}
 
 /*!
  * Computes intersection between an axis aligned bounding box and a triangle
@@ -1765,32 +1610,29 @@ bool intersectBoxBox(
  * @param[in] V3 first vertex of triangle
  * @return if intersect
  */
-bool intersectBoxTriangle(
-        std::array<double, 3> const              &A1, 
-        std::array<double, 3> const              &A2,
-        std::array<double, 3> const              &V1,
-        std::array<double, 3> const              &V2,
-        std::array<double, 3> const              &V3
-        ){
+bool intersectBoxTriangle(array3D const &A1, array3D const &A2, array3D const &V1, array3D const &V2, array3D const &V3)
+{
 
-    std::array<double,3>     B1, B2, E1, E2, P ;
-
-    P.fill(0.0) ;
+    array3D B1, B2;
 
     //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    computeAABBTriangle( V1, V2, V3, B1, B2) ;
+    computeAABBTriangle( V1, V2, V3, B1, B2);
 
-    if( !intersectBoxBox( A1, A2, B1, B2) ) { return(false); }
+    if( !intersectBoxBox( A1, A2, B1, B2) ) { 
+        return false; 
+    }
 
     //Check if Triangle Box edges intersection 
+    array3D P;
     for( int i=0; i<12; ++i){
-        edgeOfBox( i, A1, A2, E1, E2) ;
-        if( intersectSegmentTriangle(E1,E2,V1,V2,V3,P)) { return(true); }
-    };
+        edgeOfBox( i, A1, A2, B1, B2);
+        if( intersectSegmentTriangle(B1,B2,V1,V2,V3,P)) { 
+            return true; 
+        }
+    }
 
-    return (false);
-
-};
+    return false;
+}
 
 
 /*!
@@ -1803,38 +1645,30 @@ bool intersectBoxTriangle(
  * @param[out] P intersection points between triangle and box edges
  * @return if intersect
  */
-bool intersectBoxTriangle(
-        std::array<double, 3> const              &A1,
-        std::array<double, 3> const              &A2,
-        std::array<double, 3> const              &V1,
-        std::array<double, 3> const              &V2,
-        std::array<double, 3> const              &V3,
-        std::vector< std::array<double, 3> >          &P
-        ){
+bool intersectBoxTriangle(array3D const &A1, array3D const &A2, array3D const &V1, array3D const &V2, array3D const &V3, std::vector<array3D> &P)
+{
 
-    bool                intersect(false) ;
-    std::array<double,3>     B1, B2, E1, E2, p ;
+    bool intersect(false);
+    array3D B1, B2, p;
 
-    P.clear() ;
-    P.reserve(3) ;
+    P.clear();
 
     //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    computeAABBTriangle( V1, V2, V3, B1, B2) ;
+    computeAABBTriangle( V1, V2, V3, B1, B2);
 
     if( !intersectBoxBox( A1, A2, B1, B2) ) { return(false); }
 
     //Check if Triangle Box edges intersection 
     for( int i=0; i<12; ++i){
-        edgeOfBox( i, A1, A2, E1, E2) ;
-        if( intersectSegmentTriangle(E1,E2,V1,V2,V3,p)) {
-            P.push_back( p );
-            intersect = true ;
-        } ;
-    };
+        edgeOfBox( i, A1, A2, B1, B2);
+        if( intersectSegmentTriangle(B1,B2,V1,V2,V3,p)) {
+            P.push_back(p);
+            intersect = true;
+        }
+    }
 
     return intersect;
-
-};
+}
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
@@ -1845,51 +1679,47 @@ bool intersectBoxTriangle(
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectSegmentBox(
-        std::array<double, 3> const              &V1,
-        std::array<double, 3> const              &V2,
-        std::array<double, 3> const              &A1,
-        std::array<double, 3> const              &A2,
-        int                                 dim
-        ){
+bool intersectSegmentBox( array3D const &V1, array3D const &V2, array3D const &A1, array3D const &A2, int dim)
+{
 
-    int                 i ;
-    std::array<double,3>     B1, B2, p ;
+    array3D     B1, B2, p;
 
     //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    computeAABBSegment( V1, V2, B1, B2) ;
-    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { return(false); }
+    computeAABBSegment( V1, V2, B1, B2);
+    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
+        return false;
+    }
 
     //Check if Triangle Box edges intersection 
     if( dim == 2){
 
-        std::array<double,3> E1, E2 ;
+        for( int i=0; i<4; ++i){
+            edgeOfBox( i, A1, A2, B1, B2);
 
-        for( i=0; i<4; ++i){
-            edgeOfBox( i, A1, A2, E1, E2) ;
-
-            if( intersectSegmentSegment(E1,E2,V1,V2,p)) { return(true); } ;
+            if( intersectSegmentSegment(B1,B2,V1,V2,p)) { 
+                return true; 
+            }
 
         }
 
-
     } else if (dim == 3){ //3D
 
-        std::vector< std::array<double,3> > E ;
-        E.resize(4) ;
+        std::vector<array3D> E(4);
 
-        for( i=0; i<6; ++i){
-            faceOfBox( i, A1, A2, E[0], E[1], E[2], E[3]) ;
+        for( int i=0; i<6; ++i){
+            faceOfBox( i, A1, A2, E[0], E[1], E[2], E[3]);
 
-            if( intersectSegmentSimplex(V1,V2,E,p) ) { return(true); } ;
+            if( intersectSegmentSimplex(V1,V2,E,p) ) { 
+                return true; 
+            }
 
         }
 
     }
 
-    return (false);
+    BITPIT_UNREACHABLE(" Nr dimensions must be 2 or 3 in CGElem::intersectSegmentBox");
+}
 
-};
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
@@ -1901,67 +1731,53 @@ bool intersectSegmentBox(
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectSegmentBox(
-        std::array<double, 3> const              &V1,
-        std::array<double, 3> const              &V2,
-        std::array<double, 3> const              &A1,
-        std::array<double, 3> const              &A2,
-        std::vector< std::array<double, 3> >          &P,
-        int                                 dim
-        ){
+bool intersectSegmentBox(array3D const &V1, array3D const &V2, array3D const &A1, array3D const &A2, std::vector<array3D> &P, int dim)
+{
 
-    bool                intersect(false) ;
-    int                 i ;
-    std::array<double,3>     p, B1, B2 ;
+    bool intersect(false);
+    array3D p, B1, B2;
 
-    P.clear() ;
+    P.clear();
 
     //Check if segment Boundig Box and Box overlap -> necessary condition
-    computeAABBSegment( V1, V2, B1, B2) ;
-    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { return(false); }
-
-    P.reserve(2) ;
+    computeAABBSegment( V1, V2, B1, B2);
+    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
+        return false; 
+    }
 
     if( dim == 2){ //check if box edge and segment intersect
 
+        for( int i=0; i<4; ++i){
+            edgeOfBox( i, A1, A2, B1, B2);
 
-        std::array<double,3> E1, E2 ;
+            if( intersectSegmentSegment(B1,B2,V1,V2,p)) {
+                intersect = true;
+                P.push_back(p);
+            }
+        }
 
-        for( i=0; i<4; ++i){
-            edgeOfBox( i, A1, A2, E1, E2) ;
-
-            if( intersectSegmentSegment(E1,E2,V1,V2,p)) {
-                intersect = true ;
-                P.push_back(p) ;
-            } ;
-
-        };
-
-        return( intersect ) ;
+        return intersect;
 
     } else if( dim==3 ) { //3D check if box face and segment intersect
 
+        std::vector< array3D > E(4);
 
-        std::vector< std::array<double,3> > E ;
-        E.resize(4) ;
-
-        for( i=0; i<12; ++i){
-            faceOfBox( i, A1, A2, E[0], E[1], E[2], E[3]) ;
+        for( int i=0; i<6; ++i){
+            faceOfBox( i, A1, A2, E[0], E[1], E[2], E[3]);
 
             if( intersectSegmentSimplex(V1,V2,E,p) ) {
-                intersect = true ;
-                P.push_back(p) ;
-            } ;
+                intersect = true;
+                P.push_back(p);
+            }
+        }
 
-        };
+        return intersect;
 
-        return intersect ;
+    }
 
-    };
+    BITPIT_UNREACHABLE(" Nr dimensions must be 2 or 3 in CGElem::intersectSegmentBox");
 
-
-};
-
+}
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
@@ -1971,56 +1787,43 @@ bool intersectSegmentBox(
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectBoxSimplex(
-        std::array<double, 3> const              &A1,
-        std::array<double, 3> const              &A2,
-        std::vector< std::array<double, 3> > const    &VS,
-        int                                 dim
-        ){
-
-    int                 i, j, n, m, p ;
-    std::array<double,3>     B1, B2 ;
+bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, int dim )
+{
 
     //Check if Triangle Boundig Box and Box overlap -> necessary condition
-    computeAABBSimplex( VS, B1, B2) ;
-
-    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { return(false); }
-
-    n = VS.size() ;
-
-    if( n == 2){
-        return( intersectSegmentBox( VS[0], VS[1], A1, A2, dim ) ) ;
+    array3D     B1, B2;
+    computeAABBSimplex( VS, B1, B2);
+    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
+        return false ; 
     }
 
-    else if( n == 3){
-        return(  intersectBoxTriangle( A1, A2, VS[0], VS[1], VS[2] ) ) ;
+    int vertexCount = VS.size();
+
+    if( vertexCount == 2){ //segment
+        return intersectSegmentBox( VS[0], VS[1], A1, A2, dim );
+
+    } else if( vertexCount == 3){ //triangle
+        return  intersectBoxTriangle( A1, A2, VS[0], VS[1], VS[2] );
+
+    } else{ // generic convex polygon
+        int triangleCount = vertexCount - 2;
+        int vertex0 = 0;
+        int vertex1 = 1;
+        int vertex2 = 2;
+        for(int triangle=0; triangle<triangleCount; ++triangle) {
+
+            if( intersectBoxTriangle( A1, A2, VS[vertex0], VS[vertex1], VS[vertex2] ) ){
+                return true;
+            }
+
+            ++vertex1;
+            ++vertex2;
+        }
+
     }
 
-    else{
-
-        // Generic convex polygon ----------------------------------------------- //
-
-        // Compute the distance from each triangle in the simplex
-        p = n - 2;
-        m = 0;
-        j = 1;
-        while (m < p) {
-            i = j;
-            j = i+1;
-
-            if( intersectBoxTriangle( A1, A2, VS[0], VS[i], VS[j] ) ){
-                return (true);
-            };
-
-            m++;
-        } //next i
-
-    };
-
-    return (false);
-
-};
-
+    return false;
+}
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
@@ -2031,47 +1834,34 @@ bool intersectBoxSimplex(
  * @param[in] dim number of dimension to be checked
  * @return if intersect
  */
-bool intersectBoxSimplex(
-        array3D const              &A1,
-        array3D const              &A2,
-        std::vector< array3D > const    &VS,
-        std::vector< array3D >          &P,
-        int                                 dim
-        ){
+bool intersectBoxSimplex(array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, std::vector<array3D> &P, int dim)
+{
 
-    int n  ;
-
-    P.clear() ;
-
-    { //Check if Triangle Boundig Box and Box overlap -> necessary condition
-
-        array3D             B1, B2 ;
-        computeAABBSimplex( VS, B1, B2) ;
-
-        if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
-            return false; 
-        }
+    //Check if Triangle Boundig Box and Box overlap -> necessary condition
+    array3D             B1, B2;
+    computeAABBSimplex( VS, B1, B2);
+    if( !intersectBoxBox( A1, A2, B1, B2, dim) ) { 
+        return false; 
     }
-
-
-    n = VS.size() ;
-    if( n == 2){ //segment
+    
+    int vertexCount = VS.size();
+    if(vertexCount == 2){ //segment
         return intersectSegmentBox( VS[0], VS[1], A1, A2, P, dim );
 
-    } else if( n == 3){ //triangle
+    } else if(vertexCount == 3){ //triangle
         return intersectBoxTriangle( VS[0], VS[1], VS[2], A1, A2, P );
 
     } else{  //generic convex polygon split into triangles
 
-        bool intersect(false) ;
-        std::vector< array3D >  partial ;
+        bool intersect(false);
+        std::vector<array3D>  partial;
 
-        int trianglesCount = n - 2;
+        int trianglesCount = vertexCount -2;
         int vertex0 = 0;
         int vertex1 = 1;
         int vertex2 = 2;
 
-        for (int m=0; m<trianglesCount; ++m) {
+        for (int triangle=0; triangle<trianglesCount; ++triangle) {
 
             if( intersectBoxTriangle( A1, A2, VS[vertex0], VS[vertex1], VS[vertex2], partial ) ){
                 intersect = true;
@@ -2100,9 +1890,7 @@ bool intersectBoxSimplex(
 
             ++vertex1;
             ++vertex2;
-
         }
-
 
         return intersect;
     }
@@ -2112,14 +1900,14 @@ bool intersectBoxSimplex(
 
 //to levelset // -------------------------------------------------------------------------- //
 //to levelset bool intersectLineSurface(
-//to levelset         std::array<double,3>  const  &x1,
-//to levelset         std::array<double,3>  const  &n1,
-//to levelset         std::array<double,3>  const  &x2,
-//to levelset         std::array<double,3>  const  &n2,
-//to levelset         std::array<double,3>  const  &xL,
-//to levelset         std::array<double,3>  const  &nL,
-//to levelset         std::array<double,3>         &xp,
-//to levelset         std::array<double,3>         &np
+//to levelset         array3D  const  &x1,
+//to levelset         array3D  const  &n1,
+//to levelset         array3D  const  &x2,
+//to levelset         array3D  const  &n2,
+//to levelset         array3D  const  &xL,
+//to levelset         array3D  const  &nL,
+//to levelset         array3D         &xp,
+//to levelset         array3D         &np
 //to levelset         ) {
 //to levelset 
 //to levelset     // ========================================================================== //
@@ -2139,46 +1927,46 @@ bool intersectBoxSimplex(
 //to levelset     // VARIABLES DECLARATION                                                      //
 //to levelset     // ========================================================================== //
 //to levelset 
-//to levelset     double                  w1(0), w2(0), w(0) ;
-//to levelset     std::array<double,3>         c1, c2 ;
-//to levelset     bool                    s1, s2 ;
+//to levelset     double                  w1(0), w2(0), w(0);
+//to levelset     array3D         c1, c2;
+//to levelset     bool                    s1, s2;
 //to levelset 
-//to levelset     s1      =   intersectLinePlane( xL, nL, x1, n1, c1) ;
-//to levelset     s2      =   intersectLinePlane( xL, nL, x2, n2, c2) ;
+//to levelset     s1      =   intersectLinePlane( xL, nL, x1, n1, c1);
+//to levelset     s2      =   intersectLinePlane( xL, nL, x2, n2, c2);
 //to levelset 
 //to levelset     if( s1 && s2) {
-//to levelset         w1      =   norm2( c2-x2) ;
-//to levelset         w2      =   norm2( c1-x1) ;
-//to levelset         w       =   w1+w2 ;
+//to levelset         w1      =   norm2( c2-x2);
+//to levelset         w2      =   norm2( c1-x1);
+//to levelset         w       =   w1+w2;
 //to levelset 
-//to levelset         w1      =   w1 /w ;
-//to levelset         w2      =   w2 /w ;
+//to levelset         w1      =   w1 /w;
+//to levelset         w2      =   w2 /w;
 //to levelset 
-//to levelset         xp      =   w1*c1 +w2*c2 ;
-//to levelset         np      =   w1*n1 +w2*n2 ;
+//to levelset         xp      =   w1*c1 +w2*c2;
+//to levelset         np      =   w1*n1 +w2*n2;
 //to levelset 
-//to levelset         np      =   np /norm2(np) ;
+//to levelset         np      =   np /norm2(np);
 //to levelset 
-//to levelset         return (true) ;
+//to levelset         return (true);
 //to levelset     }
 //to levelset 
 //to levelset     else if( s1 ){
-//to levelset         xp      =   c1 ;
-//to levelset         np      =   n1 ;
+//to levelset         xp      =   c1;
+//to levelset         np      =   n1;
 //to levelset 
-//to levelset         return(true) ;
+//to levelset         return(true);
 //to levelset     }
 //to levelset 
 //to levelset     else if( s2 ){
-//to levelset         xp      =   c2 ;
-//to levelset         np      =   n2 ;
+//to levelset         xp      =   c2;
+//to levelset         np      =   n2;
 //to levelset 
-//to levelset         return(true) ;
+//to levelset         return(true);
 //to levelset     }
 //to levelset 
 //to levelset     return (false); 
 //to levelset 
-//to levelset };
+//to levelset }
 
 /*!
  * checks if points lies on segment in 3D
@@ -2187,30 +1975,38 @@ bool intersectBoxSimplex(
  * @param[in] P2 end point of segment
  * @return if point lies on segment
  */
-bool intersectPointSegment(
-        std::array< double, 3> const &P,
-        std::array< double, 3> const &P1,
-        std::array< double, 3> const &P2
-        ) {
+bool intersectPointSegment( array3D const &P, array3D const &P1, array3D const &P2)
+{
+    assert( validSegment(P1,P2) );
 
-    double const        tol = 1.0e-14;
 
-    bool                check;
-    std::array<double, 3>    n1, n2;
-    double              d1, d2;
-
-    check = (norm2(P - P2) <= tol);
-    if (!check) {
-        n1 = P1 - P2;
-        d1 = norm2(n1);
-        n1 = n1/d1;
-        n2 = P - P2;
-        d2 = norm2(n2);
-        n2 = n2/d2;
-        check = ((dotProduct(n1, n2) >= 1.0 - tol) && (d2 <= d1));
+    if( utils::DoubleFloatingEqual()( norm2(P-P1), 0.) ){
+        return true;
     }
 
-    return(check); };
+    if( utils::DoubleFloatingEqual()( norm2(P-P2), 0.) ){
+        return true;
+    }
+
+    array3D segmentDir = P2 - P1;
+    double segmentLength = norm2(segmentDir);
+    segmentDir /= segmentLength;
+
+    array3D versor = P - P1;
+    double length = norm2(versor);
+    versor /= length;
+
+    if( length>segmentLength ){
+        return false;
+    }
+    
+    if( !utils::DoubleFloatingEqual()( dotProduct(versor,segmentDir), 1.) ){
+        return false;
+    }
+
+    return true; 
+
+}
 
 /*!
  * checks if points lies on triangle
@@ -2228,11 +2024,13 @@ bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &
     _projectPointsPlane( 1, &P, A, B, C, &xP, &lambda[0]);
 
     for( const auto &l : lambda){
-        if(l<0.) return false;
+        if(l<0.) {
+            return false;
+        }
     }
 
     return true;
-};
+}
 
 /*!
  * checks if points lies within axis aligned box
@@ -2242,25 +2040,18 @@ bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &
  * @param[in] dim number of dimensions to be checked
  * @return if point in box
  */
-bool intersectPointBox(
-        std::array<double, 3> const              &P,
-        std::array<double, 3> const              &B1,
-        std::array<double, 3> const              &B2,
-        int                                 dim
-        ){
+bool intersectPointBox( array3D const &P, array3D const &B1, array3D const &B2, int dim)
+{
 
-
-    int     d;
-
-    for( d=0; d<dim; ++d){
+    for( int d=0; d<dim; ++d){
 
         if( P[d]< B1[d] || P[d] > B2[d] ){
             return false;
-        };
-    };
+        }
+    }
 
-    return true ;
-};
+    return true;
+}
 
 /*!
  * computes axis aligned boundig box of a segment
@@ -2269,26 +2060,19 @@ bool intersectPointBox(
  * @param[out] P0 min point of bounding box
  * @param[out] P1 max point of bounding box
  */
-void computeAABBSegment(
-        std::array<double, 3> const &A,
-        std::array<double, 3> const &B,
-        std::array<double, 3>       &P0,
-        std::array<double, 3>       &P1
-        ) {
+void computeAABBSegment(array3D const &A, array3D const &B, array3D &P0, array3D &P1)
+{
 
-    int     i;
+    P0 = A;
+    P1 = A;
 
-    P0 = A ;
-    P1 = A ;
-
-    for(i=0; i<3; ++i){
-        P0[i] = std::min( P0[i], B[i] ) ;
-        P1[i] = std::max( P1[i], B[i] ) ;
-    };
+    for(int i=0; i<3; ++i){
+        P0[i] = std::min( P0[i], B[i] );
+        P1[i] = std::max( P1[i], B[i] );
+    }
 
     return;
-
-};
+}
 
 /*!
  * computes axis aligned boundig box of a triangle
@@ -2298,30 +2082,21 @@ void computeAABBSegment(
  * @param[out] P0 min point of bounding box
  * @param[out] P1 max point of bounding box
  */
-void computeAABBTriangle(
-        std::array<double, 3> const &A,
-        std::array<double, 3> const &B,
-        std::array<double, 3> const &C,
-        std::array<double, 3>       &P0,
-        std::array<double, 3>       &P1
-        ) {
+void computeAABBTriangle(array3D const &A, array3D const &B, array3D const &C, array3D &P0, array3D &P1)
+{
+    P0 = A;
+    P1 = A;
 
-    int     i;
+    for(int i=0; i<3; ++i){
+        P0[i] = std::min( P0[i], B[i] );
+        P0[i] = std::min( P0[i], C[i] );
 
-    P0 = A ;
-    P1 = A ;
-
-    for(i=0; i<3; ++i){
-        P0[i] = std::min( P0[i], B[i] ) ;
-        P0[i] = std::min( P0[i], C[i] ) ;
-
-        P1[i] = std::max( P1[i], B[i] ) ;
-        P1[i] = std::max( P1[i], C[i] ) ;
-    };
+        P1[i] = std::max( P1[i], B[i] );
+        P1[i] = std::max( P1[i], C[i] );
+    }
 
     return;
-
-};
+}
 
 /*!
  * computes axis aligned boundig box of a simplex
@@ -2329,27 +2104,22 @@ void computeAABBTriangle(
  * @param[out] P0 min point of bounding box
  * @param[out] P1 max point of bounding box
  */
-void computeAABBSimplex(
-        std::vector< std::array<double, 3> > const &VS,
-        std::array<double, 3>       &P0,
-        std::array<double, 3>       &P1
-        ) {
+void computeAABBSimplex(std::vector<array3D> const &VS, array3D &P0, array3D &P1)
+{
+    int  vertexCount(VS.size());
 
-    int     i, j, n(VS.size());
+    P0 = VS[0];
+    P1 = VS[0];
 
-    P0 = VS[0] ;
-    P1 = VS[0] ;
-
-    for( j=1; j<n; ++j){
-        for(i=0; i<3; ++i){
-            P0[i] = std::min( P0[i], VS[j][i] ) ;
-            P1[i] = std::max( P1[i], VS[j][i] ) ;
-        };
-    };
+    for( int j=1; j<vertexCount; ++j){
+        for( int i=0; i<3; ++i){
+            P0[i] = std::min( P0[i], VS[j][i] );
+            P1[i] = std::max( P1[i], VS[j][i] );
+        }
+    }
 
     return;
-
-};
+}
 
 /*!
  * computes the union of two axis aligned bounding boxes
@@ -2360,24 +2130,15 @@ void computeAABBSimplex(
  * @param[out] C0 min point of union bounding box
  * @param[out] C1 max point of union bounding box
  */
-void unionAABB(
-        std::array<double,3>  const              & A0,
-        std::array<double,3>  const              & A1,
-        std::array<double,3>  const              & B0,
-        std::array<double,3>  const              & B1,
-        std::array<double,3>                     & C0,
-        std::array<double,3>                     & C1
-        ){
-
-
+void unionAABB( array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D &C1)
+{
     for( int i=0; i<3; ++i){
-        C0[i] = std::min( A0[i], B0[i]) ;
-        C1[i] = std::max( A1[i], B1[i]) ;
+        C0[i] = std::min( A0[i], B0[i]);
+        C1[i] = std::max( A1[i], B1[i]);
     }
 
-
     return;
-};
+}
 
 /*!
  * computes the union of several axis aligned bounding boxes
@@ -2386,28 +2147,21 @@ void unionAABB(
  * @param[out] C0 min point of union bounding box
  * @param[out] C1 max point of union bounding box
  */
-void unionAABB(
-        std::vector<std::array<double,3> >  const     & A0,
-        std::vector<std::array<double,3> >  const     & A1,
-        std::array<double,3>                     & C0,
-        std::array<double,3>                     & C1
-        ){
+void unionAABB(std::vector<array3D> const &A0, std::vector<array3D> const &A1, array3D &C0, array3D &C1){
 
-
-    int     i, n( std::min(A0.size(), A1.size() ) ) ;
+    int n( std::min(A0.size(), A1.size() ) );
 
     if( n > 0 ){
-        C0 =  A0[0] ;
-        C1 =  A1[0] ;
+        C0 =  A0[0];
+        C1 =  A1[0];
 
-        for( i=1; i<n; ++i){
+        for( int i=1; i<n; ++i){
             unionAABB( A0[i], A1[i], C0, C1, C0, C1);
-        };
-    };
-
+        }
+    }
 
     return;
-};
+}
 
 /*!
  * computes the intersection of two axis aligned bounding boxes
@@ -2418,18 +2172,11 @@ void unionAABB(
  * @param[out] C0 min point of union bounding box
  * @param[out] C1 max point of union bounding box
  */
-void intersectionAABB(
-        std::array<double,3>  const              & A0,
-        std::array<double,3>  const              & A1,
-        std::array<double,3>  const              & B0,
-        std::array<double,3>  const              & B1,
-        std::array<double,3>                     & C0,
-        std::array<double,3>                     & C1
-        ){
-
+void intersectionAABB(array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D  &C1)
+{
     intersectBoxBox( A0, A1, B0, B1, C0, C1 );
     return;
-};
+}
 
 /*!
  * computes the relative complement two axis aligned bounding boxes
@@ -2440,36 +2187,28 @@ void intersectionAABB(
  * @param[out] C0 min point of union bounding box
  * @param[out] C1 max point of union bounding box
  */
-void subtractionAABB(
-        std::array<double,3>  const              & A0,
-        std::array<double,3>  const              & A1,
-        std::array<double,3>  const              & B0,
-        std::array<double,3>  const              & B1,
-        std::array<double,3>                     & C0,
-        std::array<double,3>                     & C1
-        ){
-
+void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D  &C1)
+{
     // X direction
     if( B0[1]<=A0[1] && B0[2]<=A0[2] && B1[1]>=A1[1] && B1[2]>=A1[2] ){
-        C0[0] = ( B0[0]<=A0[0] && B1[0]>=A0[0] ) ? B1[0] : A0[0] ;
-        C1[0] = ( B0[0]<=A1[0] && B1[0]>=A1[0] ) ? B0[0] : A1[0] ;
+        C0[0] = ( B0[0]<=A0[0] && B1[0]>=A0[0] ) ? B1[0] : A0[0];
+        C1[0] = ( B0[0]<=A1[0] && B1[0]>=A1[0] ) ? B0[0] : A1[0];
     }
 
     // Y direction
     if( B0[0]<=A0[0] && B0[2]<=A0[2] && B1[0]>=A1[0] && B1[2]>=A1[2] ){
-        C0[1] = ( B0[1]<=A0[1] && B1[1]>=A0[1] ) ? B1[1] : A0[2] ;
-        C1[1] = ( B0[1]<=A1[1] && B1[1]>=A1[1] ) ? B0[1] : A1[2] ;
+        C0[1] = ( B0[1]<=A0[1] && B1[1]>=A0[1] ) ? B1[1] : A0[2];
+        C1[1] = ( B0[1]<=A1[1] && B1[1]>=A1[1] ) ? B0[1] : A1[2];
     }
 
     // Z direction
     if( B0[0]<=A0[0] && B0[1]<=A0[1] && B1[0]>=A1[0] && B1[1]>=A1[1] ){
-        C0[2] = ( B0[2]<=A0[2] && B1[2]>=A0[2] ) ? B1[2] : A0[2] ;
-        C1[2] = ( B0[2]<=A1[2] && B1[2]>=A1[2] ) ? B0[2] : A1[2] ;
+        C0[2] = ( B0[2]<=A0[2] && B1[2]>=A0[2] ) ? B1[2] : A0[2];
+        C1[2] = ( B0[2]<=A1[2] && B1[2]>=A1[2] ) ? B0[2] : A1[2];
     }
 
-
     return;
-};
+}
 
 
 /*!
@@ -2482,32 +2221,23 @@ void subtractionAABB(
  * @param[out] P2 first vertex of face
  * @param[out] P3 first vertex of face
  */
-void faceOfBox(
-        int              const &i,
-        std::array<double, 3> const &A0,
-        std::array<double, 3> const &A1,
-        std::array<double, 3>       &P0,
-        std::array<double, 3>       &P1,
-        std::array<double, 3>       &P2,
-        std::array<double, 3>       &P3
-        ) {
+void faceOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1, array3D &P2, array3D &P3)
+{
 
     assert(i<6);
-    int     v0, v1, v2, v3;
 
-    v0 = boxFaceVertexConnectivity[i][0] ;
-    v1 = boxFaceVertexConnectivity[i][1] ;
-    v2 = boxFaceVertexConnectivity[i][2] ;
-    v3 = boxFaceVertexConnectivity[i][3] ;
+    int v0 = boxFaceVertexConnectivity[i][0];
+    int v1 = boxFaceVertexConnectivity[i][1];
+    int v2 = boxFaceVertexConnectivity[i][2];
+    int v3 = boxFaceVertexConnectivity[i][3];
 
-    vertexOfBox(v0, A0, A1, P0 ) ;
-    vertexOfBox(v1, A0, A1, P1 ) ;
-    vertexOfBox(v2, A0, A1, P2 ) ;
-    vertexOfBox(v3, A0, A1, P3 ) ;
+    vertexOfBox(v0, A0, A1, P0 );
+    vertexOfBox(v1, A0, A1, P1 );
+    vertexOfBox(v2, A0, A1, P2 );
+    vertexOfBox(v3, A0, A1, P3 );
 
     return;
-
-};
+}
 
 
 /*!
@@ -2518,26 +2248,18 @@ void faceOfBox(
  * @param[out] P0 first vertex of edge
  * @param[out] P1 first vertex of edge
  */
-void edgeOfBox(
-        int              const &i,
-        std::array<double, 3> const &A0,
-        std::array<double, 3> const &A1,
-        std::array<double, 3>       &P0,
-        std::array<double, 3>       &P1
-        ) {
-
+void edgeOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1)
+{
     assert(i<12);
-    int     v0, v1;
 
-    v0 = boxEdgeVertexConnectivity[i][0] ;
-    v1 = boxEdgeVertexConnectivity[i][1] ;
+    int v0 = boxEdgeVertexConnectivity[i][0];
+    int v1 = boxEdgeVertexConnectivity[i][1];
 
-    vertexOfBox(v0, A0, A1, P0 ) ;
-    vertexOfBox(v1, A0, A1, P1 ) ;
+    vertexOfBox(v0, A0, A1, P0 );
+    vertexOfBox(v1, A0, A1, P1 );
 
     return;
-
-};
+}
 
 /*!
  * computes the vertex coordiantes of a box
@@ -2546,61 +2268,57 @@ void edgeOfBox(
  * @param[in] A1 max point of bounding box
  * @param[out] P vertex coordinates
  */
-void vertexOfBox(
-        int              const &i,
-        std::array<double, 3> const &A0,
-        std::array<double, 3> const &A1,
-        std::array<double, 3>       &P
-        ) {
+void vertexOfBox(int  const &i, array3D const &A0, array3D const &A1, array3D &P)
+{
 
     switch(i){
 
         case 0:
-            P[0] = A0[0] ;
-            P[1] = A0[1] ;
-            P[2] = A0[2] ;
+            P[0] = A0[0];
+            P[1] = A0[1];
+            P[2] = A0[2];
             break;
 
         case 1:
-            P[0] = A1[0] ;
-            P[1] = A0[1] ;
-            P[2] = A0[2] ;
+            P[0] = A1[0];
+            P[1] = A0[1];
+            P[2] = A0[2];
             break;
 
         case 2:
-            P[0] = A0[0] ;
-            P[1] = A1[1] ;
-            P[2] = A0[2] ;
+            P[0] = A0[0];
+            P[1] = A1[1];
+            P[2] = A0[2];
             break;
 
         case 3:
-            P[0] = A1[0] ;
-            P[1] = A1[1] ;
-            P[2] = A0[2] ;
+            P[0] = A1[0];
+            P[1] = A1[1];
+            P[2] = A0[2];
             break;
 
         case 4:
-            P[0] = A0[0] ;
-            P[1] = A0[1] ;
-            P[2] = A1[2] ;
+            P[0] = A0[0];
+            P[1] = A0[1];
+            P[2] = A1[2];
             break;
 
         case 5:
-            P[0] = A1[0] ;
-            P[1] = A0[1] ;
-            P[2] = A1[2] ;
+            P[0] = A1[0];
+            P[1] = A0[1];
+            P[2] = A1[2];
             break;
 
         case 6:
-            P[0] = A0[0] ;
-            P[1] = A1[1] ;
-            P[2] = A1[2] ;
+            P[0] = A0[0];
+            P[1] = A1[1];
+            P[2] = A1[2];
             break;
 
         case 7:
-            P[0] = A1[0] ;
-            P[1] = A1[1] ;
-            P[2] = A1[2] ;
+            P[0] = A1[0];
+            P[1] = A1[1];
+            P[2] = A1[2];
             break;
 
         default:
@@ -2610,8 +2328,7 @@ void vertexOfBox(
     }
 
     return;
-
-};
+}
 
 /*!
  * rotates a vector in 3D using Rodrigues' formula.
@@ -2630,7 +2347,7 @@ array3D rotateVector( array3D const &vector, array3D const &axis, double theta){
     rotated += (1.0 - cosTheta) * dotProduct(axis,vector) * axis;
 
     return rotated; 
-};
+}
 
 }
 
