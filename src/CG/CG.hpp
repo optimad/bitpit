@@ -217,6 +217,8 @@ void vertexOfBox( int const &, array3D const &, array3D const &, array3D &);
 void edgeOfBox( int const &, array3D const &, array3D const &, array3D &, array3D &);
 void faceOfBox( int const &, array3D const &, array3D const &, array3D &, array3D &, array3D &, array3D & );
 
+int polygonSubtriangleCount(std::vector<array3D> const &);
+void subtriangleOfPolygon( int const &, std::vector<array3D> const &, array3D &, array3D &, array3D &);
 
 }
 

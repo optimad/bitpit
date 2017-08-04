@@ -2732,6 +2732,33 @@ double areaTriangle( array3D const &a, array3D const &b, array3D const &c)
     return 0.5 *norm2(crossProduct(b-a,c-a));
 }
 
+/*
+ * Gets the number of subtriangles of a polygon
+ * @return number of subtriangles
+ */
+int polygonSubtriangleCount( std::vector<array3D> const &V)
+{
+    return V.size()-2;
+}
+
+/*
+ * Gets the subtriangle vertices' coordinates of a convex polygon
+ * @param[in] triangle index of triangle
+ * @param[in] V polgon vertices
+ * @param[in] V0 first vertice coordinates of triangle
+ * @param[in] V1 second vertice coordinates of triangle
+ * @param[in] V2 third vertice coordinates of triangle
+ */
+void subtriangleOfPolygon( int const &triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
+{
+    assert(triangle<V.size()-2);
+
+    V0 = V[0];
+    V1 = V[triangle+1];
+    V2 = V[triangle+2];
+    return;
+}
+
 }
 
 }
