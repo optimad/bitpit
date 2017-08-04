@@ -22,12 +22,18 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# include "CG.hpp"
-
-# include "bitpit_operators.hpp"
+# include <cmath>
+# include <string>
+# include <iostream>
 
 # include <assert.h>
 # include <lapacke.h>
+
+# include "bitpit_operators.hpp"
+
+# include "CG.hpp"
+# include "CG_private.hpp"
+
 
 namespace bitpit{
 
