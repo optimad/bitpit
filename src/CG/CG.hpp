@@ -37,6 +37,7 @@
 # include <iostream>
 
 // bitpit library
+# include "bitpit_common.hpp"
 # include "bitpit_operators.hpp"
 
 namespace bitpit{
@@ -99,8 +100,10 @@ array3D             projectPointTriangle( array3D const &, array3D const &, arra
 
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;
 double              distancePointPlane( array3D const &, array3D const &, array3D const &, array3D & ) ;
-double              distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, int & ) ;
-double              distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, std::array<double,2> &, int & ) ;
+BITPIT_DEPRECATED( double distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, int & ));
+BITPIT_DEPRECATED( double distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, std::array<double,2> &, int & )) ;
+double              distancePointSegment( array3D const &, array3D const &, array3D const & );
+double              distancePointSegment( array3D const &, array3D const &, array3D const &, std::array<double,2> & );
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, int & ) ;
 double              distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int & ) ;
 double              distancePointSimplex( array3D const &, std::vector<array3D> const &, array3D &, int & );

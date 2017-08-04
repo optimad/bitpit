@@ -24,7 +24,6 @@
 
 # include "CG.hpp"
 
-# include "bitpit_common.hpp"
 # include "bitpit_operators.hpp"
 
 # include <assert.h>
@@ -213,7 +212,7 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
     lambda[0] = 1. - t ;
     lambda[1] = t ;
 
-    return lambda[0]*Q0 +lambda[1]*Q1;
+    return reconstructPointFromBarycentricSegment( Q0, Q1, lambda);
 }
 
 /*!
@@ -286,7 +285,7 @@ array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const
 
     array3D xP;
     if( count == 0){
-        xP = Q0 +b[0]*s0 +b[1]*s1 ;
+        xP = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda );
 
     } else if( count == 1){
         std::array<double,2>   lambdaLocal ;
@@ -307,6 +306,7 @@ array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const
 
     }
 
+    return xP;
 }
 
 /*!
@@ -324,16 +324,9 @@ double distancePointLine(
         std::array< double, 3 > &xP
         ) {
 
-    // Local variables
-    double         d;
-
-    // Project P onto the line
-    xP = Q + dotProduct(P - Q, n) * n;
-
-    // Distance between P and the line
-    d = norm(P - xP, 2);
-
-    return(d); };
+    xP = projectPointLine(P,Q,n);
+    return norm2( P-xP);
+};
 
 /*!
  * Computes distance point to plane
@@ -350,16 +343,8 @@ double distancePointPlane(
         std::array< double, 3 > &xP
         ) {
 
-    // Local variables
-    double      d;
-
-    // Project point P onto the plane
-    xP = P - dotProduct(P - Q, n) * n;
-
-    // Distance between P and its projection onto the plane
-    d = norm(P - xP,2);
-
-    return(d); 
+    xP = projectPointPlane(P,Q,n);
+    return norm2(P-xP);
 }
 
 /*!
@@ -379,33 +364,12 @@ double distancePointSegment(
         int                      &flag
         ) {
 
-    // Local variables
-    double             t, s, d;
-    std::array< double, 3 > n;
+    std::array<double,2> lambda;
 
-    // Project P onto the line supporting the segment
-    t = norm(Q2 - Q1, 2);
-    n = (Q2 - Q1)/t;
-    d = distancePointLine(P, Q1, n, xP);
-
-    // Restrict projection onto the segment
-    s = dotProduct(xP - Q1, n)/t;
-    s = std::min(std::max(s, 0.0), 1.0);
-    xP = Q1 + s*t*n;
-
-    // Compute the distance between the point and the segment
-    d = norm(P - xP, 2);
-
-    // Flag
-    flag = 0;
-    if (s == 0.0) {
-        flag = 1;
-    }
-    if (s == 1.0) {
-        flag = 2;
-    }
-
-    return(d); 
+    double distance =  distancePointSegment(P, Q1, Q2, lambda); 
+    xP = reconstructPointFromBarycentricSegment(Q1,Q2,lambda);
+    flag = convertBarycentricToFlagSegment(lambda);
+    return distance;
 };
 
 /*!
@@ -426,26 +390,38 @@ double distancePointSegment(
         int                      &flag
         ) {
 
-    std::array<double,3>    n = Q2 -Q1;
-    double                  t =  -dotProduct(n,Q1-P) / dotProduct(n,n) ;;
+    xP = projectPointSegment( P, Q1, Q2, lambda);
+    flag = convertBarycentricToFlagSegment(lambda);
 
-    flag = 0;
-    if ( t<= 0. ) {
-        flag = 1;
-    }
-    else if ( t>= 1.) {
-        flag = 2;
-    }
+    return norm2(P-xP); 
+};
 
-    t = std::max( std::min( t, 1.), 0. ) ;
+/*!
+ * Computes distance point to segment in 3D using barycentric coordinates
+ * @param[in] P point coordinates
+ * @param[in] Q0 segment starting point
+ * @param[in] Q1 segment ending point
+ * @return distance
+ */
+double distancePointSegment( array3D const &P, array3D const &Q0, array3D const &Q1)
+{ 
+    array3D xP = projectPointSegment( P, Q0, Q1);
+    return norm2(P-xP); 
+};
 
-    lambda[0] = 1. - t ;
-    lambda[1] = t ;
-
-
-    xP = Q1 + t*n ;
-
-    return( norm2(P-xP) ); 
+/*!
+ * Computes distance point to segment in 3D using barycentric coordinates
+ * @param[in] P point coordinates
+ * @param[in] Q1 segment starting point
+ * @param[in] Q2 segment ending point
+ * @param[out] xP closest point on line
+ * @param[out] lambda barycentric coordinates
+ * @return distance
+ */
+double distancePointSegment( array3D const &P, array3D const &Q0, array3D const &Q1, std::array<double,2> &lambda)
+{
+    array3D xP = projectPointSegment( P, Q0, Q1, lambda);
+    return norm2(P-xP); 
 };
 
 /*!
