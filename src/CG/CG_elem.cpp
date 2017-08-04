@@ -1476,14 +1476,13 @@ bool intersectSegmentTriangle(
     n  = P1 - P0;
     n /= norm2(n);
 
-    if ( !intersectLineTriangle(P0, n, A, B, C, xP) && !intersectPointSegment(xP, P0, P1) ) { 
-        return false ; 
+    if ( intersectLineTriangle(P0, n, A, B, C, xP) && intersectPointSegment(xP, P0, P1)  ) { 
+        Q = xP;
+        return true; 
     }
 
-    Q = xP;
-    return true ; 
-
-};
+    return false ; 
+}
 
 /*!
  * Computes intersection between triangle and a segment
