@@ -34,17 +34,19 @@
 
 namespace bitpit{
 
-// Basic computational geometry ============================================= //
 
-/*!
-    \ingroup CG
-
-    \brief Namespace for basic computational geometry functions
-*/
 namespace CGElem{
 
 typedef std::array<double,3> array3D ;
 
+/*!
+ *  \ingroup CGElem
+ *  \{
+ */
+
+/*!
+ * The edge vertex connectivty of a box
+ */
 static const std::array< std::array<int,2>,12> boxEdgeVertexConnectivity =
 {{
     std::array<int,2>{ {0,2} },
@@ -62,6 +64,9 @@ static const std::array< std::array<int,2>,12> boxEdgeVertexConnectivity =
 
 }};
 
+/*!
+ * The face vertex connectivty of a box
+ */
 static const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
 {{
     std::array<int,4>{ {0,2,6,4} },
@@ -71,6 +76,10 @@ static const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
     std::array<int,4>{ {0,1,3,2} },
     std::array<int,4>{ {4,5,7,6} }
 }};
+
+/*!
+ * \}
+ */
 
 bool validSegment( array3D const &, array3D const & );
 bool validLine( array3D const &, array3D const & );
@@ -231,11 +240,6 @@ void subtriangleOfPolygon( int const &, std::vector<array3D> const &, array3D &,
 
 // Algorithms =============================================================== //
 
-/*!
-    \ingroup CG
-
-    \brief Namespace for basic computational geometry functions
-*/
 namespace CGAlgorithms {
 
 double grad1DUpdate(                                                      // Update the local solution to the 1D grad limiting equation on a vertex of a 1D manifold

@@ -27,6 +27,10 @@
 
 /*!
  * @defgroup CG Computational Geometry (CG)
+ * @{
+ * @defgroup CGElem Elementary Computational Geometry (CGElem)
+ * @defgroup CGAlgorithms Computational Geometry Algorithms (CGAlgorithms)
+ * @}
  */
 
 #include "bitpit_version.hpp"

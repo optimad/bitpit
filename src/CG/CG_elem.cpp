@@ -39,22 +39,25 @@ namespace bitpit{
 
 namespace CGElem{
 
+
 /*!
-    \ingroup CG
-    \{
+ * \ingroup CGElem
+ * \{
 */
 
 /*!
+ * \private
  * Projects points on a triangle.
  * Projection points are the closest points to the original points within the triangle.
- * @param[in] nPoints number of points
- * @param[in] points pointer to points' coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[out] proj pointer to the projection point; 
- * @param[out] lambda pointer to barycentric coordinates of projection points
- * @return distances
+ *
+ * \param[in] nPoints number of points
+ * \param[in] points pointer to points' coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[out] proj pointer to the projection point; 
+ * \param[out] lambda pointer to barycentric coordinates of projection points
+ * \return distances
  */
 void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
 {
@@ -95,15 +98,17 @@ void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q
 }
 
 /*!
+ * \private
  * Project points on a plane described by a triangle
- * @param[in] nPoints number of points
- * @param[in] points pointer to points' coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[out] proj pointer to the projection point; 
- * @param[out] lambda pointer to barycentric coordinates of projection points
- * @return distances
+ *
+ * \param[in] nPoints number of points
+ * \param[in] points pointer to points' coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[out] proj pointer to the projection point; 
+ * \param[out] lambda pointer to barycentric coordinates of projection points
+ * \return distances
  */
 void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
 {
@@ -144,15 +149,16 @@ void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, 
 }
 
 /*!
+ * \private
  * Computes intersection between an axis aligned bounding box and a triangle
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] V1 first vertex of triangle
- * @param[in] V2 second vertex of triangle
- * @param[in] V3 third vertex of triangle
- * @param[out] intrPtr pointed vector will hold intersection points between triangle edges and box faces
- * @param[out] flagPtr pointed vector will have the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
- * @return if intersect
+ * \param[in] A1 min point of first box
+ * \param[in] A2 max point of first box
+ * \param[in] V1 first vertex of triangle
+ * \param[in] V2 second vertex of triangle
+ * \param[in] V3 third vertex of triangle
+ * \param[out] intrPtr pointed vector will hold intersection points between triangle edges and box faces
+ * \param[out] flagPtr pointed vector will have the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
+ * \return if intersect
  */
 bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
@@ -269,17 +275,18 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
 }
 
 /*!
+ * \private
  * Computes intersection between an axis aligned bounding box and a segment
- * @param[in] V0 start point of segment
- * @param[in] V1 end point of segment
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
- * @param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
- * @param[in,out] intrPtr pointer to the list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
- * @param[in,out] flagPtr if (!=nullptr), for each intersection point a flag will be inserted indicatingif it belongs to interiorSegmentVertice (flag=0) or segmentBoxHullIntersection (flag=1)
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] V0 start point of segment
+ * \param[in] V1 end point of segment
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
+ * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * \param[in,out] intrPtr pointer to the list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
+ * \param[in,out] flagPtr if (!=nullptr), for each intersection point a flag will be inserted indicatingif it belongs to interiorSegmentVertice (flag=0) or segmentBoxHullIntersection (flag=1)
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
@@ -360,16 +367,17 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
 }
 
 /*!
+ * \private
  * Computes intersection between an axis aligned bounding box and a simplex
- * @param[in] A0 min point of first box
- * @param[in] A1 max point of first box
- * @param[in] VS simplex vertices coordinates
- * @param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
- * @param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * @param[in] simplexBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
- * @param[out] P intersection points simplex box edges
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] simplexBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[out] P intersection points simplex box edges
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool _intersectBoxSimplex(array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxHullIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
@@ -395,16 +403,17 @@ bool _intersectBoxSimplex(array3D const &A0, array3D const &A1, std::vector<arra
 }
 
 /*!
+ * \private
  * Computes intersection between an axis aligned bounding box and a convex polygon
- * @param[in] A0 min point of first box
- * @param[in] A1 max point of first box
- * @param[in] VS polygon vertices coordinates
- * @param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
- * @param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * @param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
- * @param[out] P intersection points 
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] VS polygon vertices coordinates
+ * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[out] P intersection points 
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxHullIntersection, bool polygonBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
@@ -526,9 +535,9 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<arra
 
 /*!
  * Checks if a segment is valid
- * @param[in] P0 start point of segment
- * @param[in] P1 end point of segment
- * @return true if valid
+ * \param[in] P0 start point of segment
+ * \param[in] P1 end point of segment
+ * \return true if valid
  */
 bool validSegment(const array3D &P0, const array3D &P1 ) 
 {
@@ -537,9 +546,9 @@ bool validSegment(const array3D &P0, const array3D &P1 )
 
 /*!
  * Checks if a line is valid
- * @param[in] P point on line;
- * @param[in] n line direction
- * @return true if valid
+ * \param[in] P point on line;
+ * \param[in] n line direction
+ * \return true if valid
  */
 bool validLine(const array3D &P, const array3D &n ) 
 {
@@ -549,9 +558,9 @@ bool validLine(const array3D &P, const array3D &n )
 
 /*!
  * Checks if a plane is valid
- * @param[in] P point on plane
- * @param[in] n plane normal 
- * @return true if valid
+ * \param[in] P point on plane
+ * \param[in] n plane normal 
+ * \return true if valid
  */
 bool validPlane(const array3D &P, const array3D &n ) 
 {
@@ -561,10 +570,10 @@ bool validPlane(const array3D &P, const array3D &n )
 
 /*!
  * Checks if a triangle is valid
- * @param[in] P0 first triangle vertex
- * @param[in] P1 second triangle vertex
- * @param[in] P2 third triangle vertex
- * @return true if valid
+ * \param[in] P0 first triangle vertex
+ * \param[in] P1 second triangle vertex
+ * \param[in] P2 third triangle vertex
+ * \return true if valid
  */
 bool validTriangle(const array3D &P0, const array3D &P1, const array3D &P2 ) 
 {
@@ -594,9 +603,9 @@ bool validTriangle(const array3D &P0, const array3D &P1, const array3D &P2 )
 
 /*!
  * Checks if barycentric coordinates is valid
- * @param[in] lambdaPtr pointer to barycentric coordinates
- * @param[in] n number of points
- * @return true if valid
+ * \param[in] lambdaPtr pointer to barycentric coordinates
+ * \param[in] n number of points
+ * \return true if valid
  */
 bool validBarycentric(double const *lambdaPtr, int n )
 {
@@ -627,8 +636,8 @@ bool validBarycentric(double const *lambdaPtr, int n )
  * Flag = 0 Point lies within the segment
  * Flag = 1 Point coincides with the first vertex or is positioned befor the line
  * Flag = 2 Point coincides with the second vertex or is positioned after the line
- * @param[in] lambda barycentric coordinates of point
- * @return flag
+ * \param[in] lambda barycentric coordinates of point
+ * \return flag
  */
 int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
 {
@@ -651,8 +660,8 @@ int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
  * Flag = 0 Point lies within the triangle
  * Flag = i Point coincides with the ith vertex of triangle or lies within the area spanned by the edges incident in the ith vertex
  * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
- * @param[in] lambda barycentric coordinates of point
- * @return flag
+ * \param[in] lambda barycentric coordinates of point
+ * \return flag
  */
 int convertBarycentricToFlagTriangle( array3D const &lambda)
 {
@@ -686,8 +695,8 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
  * Flag = 0 Point lies within the simplex
  * Flag = i Point coincides with the ith vertex of simplex or lies within the area spanned by the edges incident in the ith vertex
  * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
- * @param[in] lambda barycentric coordinates of point
- * @return flag
+ * \param[in] lambda barycentric coordinates of point
+ * \return flag
  */
 int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
 {
@@ -723,8 +732,8 @@ int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
  * Flag = 0 Point lies within the simplex
  * Flag = i Point coincides with the ith vertex of simplex or lies within the area spanned by the edges incident in the ith vertex
  * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
- * @param[in] lambda barycentric coordinates of point
- * @return flag
+ * \param[in] lambda barycentric coordinates of point
+ * \return flag
  */
 int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
 {
@@ -746,9 +755,9 @@ int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
  * No check is performed to check convexity.
  * Formula [6] of \ref{igeometry.caltech.edu/pubs/MHBD02.pdf} is implemented.
  * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
- * @param[in] p point
- * @param[in] vertex vertex coordinates of polygon
- * @parm[out] lambda generalized barycentric coordinates of p
+ * \param[in] p point
+ * \param[in] vertex vertex coordinates of polygon
+ * \parm[out] lambda generalized barycentric coordinates of p
  */
 void computeGeneralizedBarycentric( array3D const &p, std::vector<array3D> const &vertex, std::vector<double> &lambda)
 {
@@ -785,10 +794,10 @@ void computeGeneralizedBarycentric( array3D const &p, std::vector<array3D> const
 
 /*!
  * Reconstructs a point from barycentric coordinates of a segment
- * @param[in] Q0 first vertex of segment
- * @param[in] Q1 second vertex of segment
- * @param[in] lambda barycentric coordinates
- * @param[out] reconstructed point
+ * \param[in] Q0 first vertex of segment
+ * \param[in] Q1 second vertex of segment
+ * \param[in] lambda barycentric coordinates
+ * \param[out] reconstructed point
  */
 array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, std::array<double,2> const &lambda)
 {
@@ -799,10 +808,10 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
 
 /*!
  * Reconstructs a point from barycentric coordinates of a segment
- * @param[in] Q0 first vertex of segment
- * @param[in] Q1 second vertex of segment
- * @param[in] lambda barycentric coordinates
- * @param[out] reconstructed point
+ * \param[in] Q0 first vertex of segment
+ * \param[in] Q1 second vertex of segment
+ * \param[in] lambda barycentric coordinates
+ * \param[out] reconstructed point
  */
 array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, double const *lambda)
 {
@@ -813,11 +822,11 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
 
 /*!
  * Reconstructs a point from barycentric coordinates of a triangle
- * @param[in] Q0 first vertex of triangle
- * @param[in] Q1 second vertex of triangle
- * @param[in] Q2 third vertex of triangle
- * @param[in] lambda barycentric coordinates
- * @param[out] reconstructed point
+ * \param[in] Q0 first vertex of triangle
+ * \param[in] Q1 second vertex of triangle
+ * \param[in] Q2 third vertex of triangle
+ * \param[in] lambda barycentric coordinates
+ * \param[out] reconstructed point
  */
 array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D const &lambda)
 {
@@ -828,11 +837,11 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
 
 /*!
  * Reconstructs a point from barycentric coordinates of a triangle
- * @param[in] Q0 first vertex of triangle
- * @param[in] Q1 second vertex of triangle
- * @param[in] Q2 third vertex of triangle
- * @param[in] lambda barycentric coordinates
- * @param[out] reconstructed point
+ * \param[in] Q0 first vertex of triangle
+ * \param[in] Q1 second vertex of triangle
+ * \param[in] Q2 third vertex of triangle
+ * \param[in] lambda barycentric coordinates
+ * \param[out] reconstructed point
  */
 array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, double const *lambda)
 {
@@ -843,9 +852,9 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
 
 /*!
  * Reconstructs a point from barycentric coordinates of a polygon
- * @param[in] V vertices of simplex
- * @param[in] lambda barycentric coordinates
- * @return reconstructed Point
+ * \param[in] V vertices of simplex
+ * \param[in] lambda barycentric coordinates
+ * \return reconstructed Point
  */
 array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &V, std::vector<double> const &lambda)
 {
@@ -862,9 +871,9 @@ array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &V, s
 
 /*!
  * Reconstructs a point from barycentric coordinates of a simplex
- * @param[in] V vertices of simplex
- * @param[in] lambda barycentric coordinates
- * @return reconstructed Point
+ * \param[in] V vertices of simplex
+ * \param[in] lambda barycentric coordinates
+ * \return reconstructed Point
  */
 array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &V, std::vector<double> const &lambda)
 {
@@ -873,10 +882,10 @@ array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &V, s
 
 /*!
  * Computes projection of point on line in 3D
- * @param[in] P point coordinates
- * @param[in] Q point on line
- * @param[in] n line direction
- * @return projection point
+ * \param[in] P point coordinates
+ * \param[in] Q point on line
+ * \param[in] n line direction
+ * \return projection point
  */
 array3D projectPointLine( array3D const &P, array3D const &Q, array3D const &n )
 {
@@ -886,10 +895,10 @@ array3D projectPointLine( array3D const &P, array3D const &Q, array3D const &n )
 
 /*!
  * Computes projection of point on line in 3D
- * @param[in] P point coordinates
- * @param[in] Q point on plane
- * @param[in] n plane normal
- * @return projection point
+ * \param[in] P point coordinates
+ * \param[in] Q point on plane
+ * \param[in] n plane normal
+ * \return projection point
  */
 array3D projectPointPlane( array3D const &P, array3D const &Q, array3D const &n )
 {
@@ -899,10 +908,10 @@ array3D projectPointPlane( array3D const &P, array3D const &Q, array3D const &n 
 
 /*!
  * Computes projection of point on line in 3D
- * @param[in] P point coordinates
- * @param[in] Q point on plane
- * @param[in] n plane normal
- * @return projection point
+ * \param[in] P point coordinates
+ * \param[in] Q point on plane
+ * \param[in] n plane normal
+ * \return projection point
  */
 array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1)
 {
@@ -913,11 +922,11 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
 
 /*!
  * Computes projection of point on line in 3D
- * @param[in] P point coordinates
- * @param[in] Q point on plane
- * @param[in] n plane normal
- * @param[out] lambda barycentric coordinates of projection point 
- * @return projection point
+ * \param[in] P point coordinates
+ * \param[in] Q point on plane
+ * \param[in] n plane normal
+ * \param[out] lambda barycentric coordinates of projection point 
+ * \return projection point
  */
 array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1, std::array<double,2> &lambda )
 {
@@ -926,11 +935,11 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
 
 /*!
  * Computes projection of point on line in 3D
- * @param[in] P point coordinates
- * @param[in] Q point on plane
- * @param[in] n plane normal
- * @param[out] lambda barycentric coordinates of projection point 
- * @return projection point
+ * \param[in] P point coordinates
+ * \param[in] Q point on plane
+ * \param[in] n plane normal
+ * \param[out] lambda barycentric coordinates of projection point 
+ * \return projection point
  */
 array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1, double *lambda )
 {
@@ -951,11 +960,11 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
 
 /*!
  * Computes projection of point on triangle
- * @param[in] P point coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @return coordinates of projection point
+ * \param[in] P point coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \return coordinates of projection point
  */
 array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2)
 {
@@ -967,12 +976,12 @@ array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const
 
 /*!
  * Computes projection of point on triangle
- * @param[in] P point coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[out] lambda barycentric coordinates of projection point
- * @return coordinates of projection point
+ * \param[in] P point coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[out] lambda barycentric coordinates of projection point
+ * \return coordinates of projection point
  */
 array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &lambda)
 {
@@ -984,11 +993,11 @@ array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const
 
 /*!
  * Restricts a point given in barycentric coordinates on the triangle
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[in,out] lambda barycentric coordinates before and after restriction
- * @return coordinates of restricted point
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[in,out] lambda barycentric coordinates before and after restriction
+ * \return coordinates of restricted point
  */
 array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &lambda)
 {
@@ -997,11 +1006,11 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 
 /*!
  * Restricts a point given in barycentric coordinates on the triangle
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[in,out] lambda barycentric coordinates before and after restriction
- * @return coordinates of restricted point
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[in,out] lambda barycentric coordinates before and after restriction
+ * \return coordinates of restricted point
  */
 array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda)
 {
@@ -1051,12 +1060,12 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 /*!
  * Projects a point cloud onto a triangle. 
  * Projection points are the closest points to the original points within the triangle.
- * @param[in] cloud point cloud coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
- * @param[inout] lambda barycentric coordinates of projection points
- * @return distances
+ * \param[in] cloud point cloud coordinates
+ * \param[in] Q1 first triangle vertex
+ * \param[in] Q2 second triangle vertex
+ * \param[in] Q3 third triangle vertex
+ * \param[inout] lambda barycentric coordinates of projection points
+ * \return distances
  */
 std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D> &lambda )
 {
@@ -1077,9 +1086,9 @@ std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, ar
 
 /*!
  * Computes projection of point onto a convex polygon
- * @param[in] P point coordinates
- * @param[in] V polygon vertices coordinates
- * @return coordinates of projection point
+ * \param[in] P point coordinates
+ * \param[in] V polygon vertices coordinates
+ * \return coordinates of projection point
  */
 array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V)
 {
@@ -1089,10 +1098,10 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V)
 
 /*!
  * Computes projection of point onto a convex polygon
- * @param[in] P point coordinates
- * @param[in] V polygon vertices coordinates
- * @param[out] lambda baycentric coordinates of projection point
- * @return coordinates of projection point
+ * \param[in] P point coordinates
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda baycentric coordinates of projection point
+ * \return coordinates of projection point
  */
 array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, std::vector<double> &lambda)
 {
@@ -1137,9 +1146,9 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
 
 /*!
  * Computes projection of point onto a generic simplex
- * @param[in] P point coordinates
- * @param[in] V simplex vertices coordinates
- * @return coordinates of projection point
+ * \param[in] P point coordinates
+ * \param[in] V simplex vertices coordinates
+ * \return coordinates of projection point
  */
 array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V)
 {
@@ -1149,10 +1158,10 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V)
 
 /*!
  * Computes projection of point onto a generic simplex
- * @param[in] P point coordinates
- * @param[in] V simplex vertices coordinates
- * @param[out] lambda baycentric coordinates of projection point
- * @return coordinates of projection point
+ * \param[in] P point coordinates
+ * \param[in] V simplex vertices coordinates
+ * \param[out] lambda baycentric coordinates of projection point
+ * \return coordinates of projection point
  */
 array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, std::vector<double> &lambda)
 {
@@ -1179,11 +1188,11 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
 
 /*!
  * Computes projection point on semi-infinite cone surface
- * @param[in] point point coordinates
- * @param[in] apex cone apex
- * @param[in] axis cone axis
- * @param[in] alpha cone half angle
- * @return projection point
+ * \param[in] point point coordinates
+ * \param[in] apex cone apex
+ * \param[in] axis cone axis
+ * \param[in] alpha cone half angle
+ * \return projection point
  */
 array3D projectPointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha)
 {
@@ -1220,11 +1229,11 @@ array3D projectPointCone( array3D const &point, array3D const &apex, array3D con
 
 /*!
  * Computes distance point to line in 3D
- * @param[in] P point coordinates
- * @param[in] Q point on line
- * @param[in] n line direction
- * @param[out] xP closest point on line
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q point on line
+ * \param[in] n line direction
+ * \param[out] xP closest point on line
+ * \return distance
  */
 double distancePointLine( array3D const &P, array3D const &Q, array3D const &n, array3D &xP) 
 {
@@ -1234,11 +1243,11 @@ double distancePointLine( array3D const &P, array3D const &Q, array3D const &n, 
 
 /*!
  * Computes distance point to plane
- * @param[in] P point coordinates
- * @param[in] Q point on plane
- * @param[in] n plane normal
- * @param[out] xP closest point on line
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q point on plane
+ * \param[in] n plane normal
+ * \param[out] xP closest point on line
+ * \return distance
  */
 double distancePointPlane( array3D const &P, array3D const &Q, array3D const &n, array3D &xP) 
 {
@@ -1248,12 +1257,12 @@ double distancePointPlane( array3D const &P, array3D const &Q, array3D const &n,
 
 /*!
  * Computes distance point to segment in 3D using a projection method
- * @param[in] P point coordinates
- * @param[in] Q1 segment starting point
- * @param[in] Q2 segment ending point
- * @param[out] xP closest point on line
- * @param[out] flag point mapping onto segment vertices (flag = 1, 2), or onto segment interior (flag = 0)
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q1 segment starting point
+ * \param[in] Q2 segment ending point
+ * \param[out] xP closest point on line
+ * \param[out] flag point mapping onto segment vertices (flag = 1, 2), or onto segment interior (flag = 0)
+ * \return distance
  */
 double distancePointSegment( array3D const &P, array3D const &Q1, array3D const &Q2, array3D &xP, int &flag)
 {
@@ -1267,12 +1276,12 @@ double distancePointSegment( array3D const &P, array3D const &Q1, array3D const 
 
 /*!
  * Computes distance point to segment in 3D using barycentric coordinates
- * @param[in] P point coordinates
- * @param[in] Q1 segment starting point
- * @param[in] Q2 segment ending point
- * @param[out] xP closest point on line
- * @param[out] lambda barycentric coordinates
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q1 segment starting point
+ * \param[in] Q2 segment ending point
+ * \param[out] xP closest point on line
+ * \param[out] lambda barycentric coordinates
+ * \return distance
  */
 double distancePointSegment( array3D const &P, array3D const &Q1, array3D const &Q2, array3D &xP, std::array<double,2> &lambda, int &flag ) 
 {
@@ -1284,10 +1293,10 @@ double distancePointSegment( array3D const &P, array3D const &Q1, array3D const 
 
 /*!
  * Computes distance point to segment in 3D using barycentric coordinates
- * @param[in] P point coordinates
- * @param[in] Q0 segment starting point
- * @param[in] Q1 segment ending point
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q0 segment starting point
+ * \param[in] Q1 segment ending point
+ * \return distance
  */
 double distancePointSegment( array3D const &P, array3D const &Q0, array3D const &Q1)
 { 
@@ -1297,12 +1306,12 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
 
 /*!
  * Computes distance point to segment in 3D using barycentric coordinates
- * @param[in] P point coordinates
- * @param[in] Q1 segment starting point
- * @param[in] Q2 segment ending point
- * @param[out] xP closest point on line
- * @param[out] lambda barycentric coordinates
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q1 segment starting point
+ * \param[in] Q2 segment ending point
+ * \param[out] xP closest point on line
+ * \param[out] lambda barycentric coordinates
+ * \return distance
  */
 double distancePointSegment( array3D const &P, array3D const &Q0, array3D const &Q1, std::array<double,2> &lambda)
 {
@@ -1312,13 +1321,13 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
 
 /*!
  * Computes distance point to triangle
- * @param[in] P point coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[out] xP closest point on triangle
- * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[out] xP closest point on triangle
+ * \param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
+ * \return distance
  */
 double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &xP, int &flag)
 {
@@ -1331,14 +1340,14 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
 
 /*!
  * Computes distance point to triangle
- * @param[in] P point coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[out] xP closest point on triangle
- * @param[out] lambda barycentric coordinates of projection point
- * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[out] xP closest point on triangle
+ * \param[out] lambda barycentric coordinates of projection point
+ * \param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
+ * \return distance
  */
 double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &xP, array3D &lambda, int &flag) 
 {
@@ -1349,11 +1358,11 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
 
 /*!
  * Computes distance point to triangle
- * @param[in] P point coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \return distance
  */
 double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2)
 {
@@ -1363,12 +1372,12 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
 
 /*!
  * Computes distance point to triangle
- * @param[in] P point coordinates
- * @param[in] Q0 first triangle vertex
- * @param[in] Q1 second triangle vertex
- * @param[in] Q2 third triangle vertex
- * @param[out] lambda barycentric coordinates of projection point
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[out] lambda barycentric coordinates of projection point
+ * \return distance
  */
 double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &lambda)
 {
@@ -1378,11 +1387,11 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
 
 /*!
  * Computes distance point to semi-infinite cone surface
- * @param[in] point point coordinates
- * @param[in] apex cone apex
- * @param[in] axis cone axis
- * @param[in] alpha cone half angle
- * @return distance
+ * \param[in] point point coordinates
+ * \param[in] apex cone apex
+ * \param[in] axis cone axis
+ * \param[in] alpha cone half angle
+ * \return distance
  */
 double distancePointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha)
 {
@@ -1392,13 +1401,13 @@ double distancePointCone( array3D const &point, array3D const &apex, array3D con
 
 /*!
  * Computes distances of point cloud to triangle
- * @param[in] P point cloud coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
- * @param[out] xP closest points on triangle
- * @param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
- * @return distance
+ * \param[in] P point cloud coordinates
+ * \param[in] Q1 first triangle vertex
+ * \param[in] Q2 second triangle vertex
+ * \param[in] Q3 third triangle vertex
+ * \param[out] xP closest points on triangle
+ * \param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
+ * \return distance
  */
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &P, array3D const &Q1, array3D const &Q2, array3D const &Q3, std::vector<array3D> &xP, std::vector<int> &flag )
 {
@@ -1428,13 +1437,13 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &P, array3
 
 /*!
  * Computes distances of point cloud to triangle
- * @param[in] cloud point cloud coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
- * @param[inout] xPExt pointer to std::vector to be filled with the projection point; 
- * @param[inout] lambdas pointer to sd::vector to be filled with barycentric coordinates of projection points
- * @return distances
+ * \param[in] cloud point cloud coordinates
+ * \param[in] Q1 first triangle vertex
+ * \param[in] Q2 second triangle vertex
+ * \param[in] Q3 third triangle vertex
+ * \param[inout] xPExt pointer to std::vector to be filled with the projection point; 
+ * \param[inout] lambdas pointer to sd::vector to be filled with barycentric coordinates of projection points
+ * \return distances
  */
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D>* const xPExt, std::vector<array3D>* const lambdaExt )
 {
@@ -1468,11 +1477,11 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
 
 /*!
  * Computes distances of point cloud to triangle
- * @param[in] cloud point cloud coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
- * @return distances
+ * \param[in] cloud point cloud coordinates
+ * \param[in] Q1 first triangle vertex
+ * \param[in] Q2 second triangle vertex
+ * \param[in] Q3 third triangle vertex
+ * \return distances
  */
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2)
 { 
@@ -1482,12 +1491,12 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
 
 /*!
  * Computes distances of point cloud to triangle
- * @param[in] cloud point cloud coordinates
- * @param[in] Q1 first triangle vertex
- * @param[in] Q2 second triangle vertex
- * @param[in] Q3 third triangle vertex
- * @param[out] lambda barycentric coordinates of projection points
- * @return distances
+ * \param[in] cloud point cloud coordinates
+ * \param[in] Q1 first triangle vertex
+ * \param[in] Q2 second triangle vertex
+ * \param[in] Q3 third triangle vertex
+ * \param[out] lambda barycentric coordinates of projection points
+ * \return distances
  */
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D> &lambda )
 { 
@@ -1514,11 +1523,11 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
 
 /*!
  * Computes distances of point to generic simplex
- * @param[in] P point coordinates
- * @param[in] V simplex vertices coordinates
- * @param[out] xP closest points on simplex
- * @param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] V simplex vertices coordinates
+ * \param[out] xP closest points on simplex
+ * \param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
+ * \return distance
  */
 double distancePointSimplex( array3D const &P, std::vector<array3D> const &V, array3D &xP, int &flag)
 {
@@ -1537,9 +1546,9 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V, ar
 
 /*!
  * Computes distances of point to generic simplex
- * @param[in] P point coordinates
- * @param[in] V simplex vertices coordinates
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] V simplex vertices coordinates
+ * \return distance
  */
 double distancePointSimplex( array3D const &P, std::vector<array3D> const &V)
 {
@@ -1558,10 +1567,10 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V)
 
 /*!
  * Computes distances of point to generic simplex
- * @param[in] P point coordinates
- * @param[in] V simplex vertices coordinates
- * @param[out] lambda barycentric coordinates
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] V simplex vertices coordinates
+ * \param[out] lambda barycentric coordinates
+ * \return distance
  */
 double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std::vector<double> &lambda)
 {
@@ -1591,11 +1600,11 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std
 
 /*!
  * Computes distances of point to a convex polygon
- * @param[in] P point coordinates
- * @param[in] V polygon vertices coordinates
- * @param[out] xP closest points on polygon
- * @param[out] flag point projecting onto polygon's interior (flag = 0), polygon's vertices (flag = 1, 2, ...) or polygon's edges (flag = -1, -2, -...)
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] V polygon vertices coordinates
+ * \param[out] xP closest points on polygon
+ * \param[out] flag point projecting onto polygon's interior (flag = 0), polygon's vertices (flag = 1, 2, ...) or polygon's edges (flag = -1, -2, -...)
+ * \return distance
  */
 double distancePointPolygon( array3D const &P, std::vector<array3D> const &V, array3D &xP, int &flag)
 {
@@ -1609,9 +1618,9 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V, ar
 
 /*!
  * Computes distances of point to a convex polygon
- * @param[in] P point coordinates
- * @param[in] V simplex vertices coordinates
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] V simplex vertices coordinates
+ * \return distance
  */
 double distancePointPolygon( array3D const &P, std::vector<array3D> const &V)
 {
@@ -1621,10 +1630,10 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V)
 
 /*!
  * Computes distances of point to a convex polygon
- * @param[in] P point coordinates
- * @param[in] V polygon vertices coordinates
- * @param[out] lambda barycentric coordinates
- * @return distance
+ * \param[in] P point coordinates
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda barycentric coordinates
+ * \return distance
  */
 double distancePointPolygon( array3D const &P, std::vector<array3D> const &V,std::vector<double> &lambda)
 {
@@ -1634,11 +1643,11 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V,std
 
 /*!
  * Computes distances of point cloud to a convex polygon
- * @param[in] P point cloud coordinates
- * @param[in] V polygon vertices coordinates
- * @param[out] xP closest points on simplex
- * @param[out] flag point projecting onto polygon's interior (flag = 0), polygon's vertices (flag = 1, 2, ...) or polygon's edges (flag = -1, -2, -...)
- * @return distance
+ * \param[in] P point cloud coordinates
+ * \param[in] V polygon vertices coordinates
+ * \param[out] xP closest points on simplex
+ * \param[out] flag point projecting onto polygon's interior (flag = 0), polygon's vertices (flag = 1, 2, ...) or polygon's edges (flag = -1, -2, -...)
+ * \return distance
  */
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<array3D> &xP, std::vector<int> &flag)
 {
@@ -1668,9 +1677,9 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std
 
 /*!
  * Computes distances of point cloud to a convex polygon
- * @param[in] P point cloud coordinates
- * @param[in] V polygon vertices coordinates
- * @return distance
+ * \param[in] P point cloud coordinates
+ * \param[in] V polygon vertices coordinates
+ * \return distance
  */
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &P, std::vector<array3D> const &V)
 {
@@ -1693,10 +1702,10 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &P, std::ve
 
 /*!
  * Computes distances of point cloud to a convex polygon
- * @param[in] cloud point cloud coordinates
- * @param[in] V polygon vertices coordinates
- * @param[out] lambda barycentric coordinates of the projection points
- * @return distance
+ * \param[in] cloud point cloud coordinates
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda barycentric coordinates of the projection points
+ * \return distance
  */
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<std::vector<double>> &lambda)
 {
@@ -1728,11 +1737,11 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std
 
 /*!
  * Computes distances of point cloud to generic simplex
- * @param[in] P point cloud coordinates
- * @param[in] V simplex vertices coordinates
- * @param[out] xP closest points on simplex
- * @param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
- * @return distance
+ * \param[in] P point cloud coordinates
+ * \param[in] V simplex vertices coordinates
+ * \param[out] xP closest points on simplex
+ * \param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
+ * \return distance
  */
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<array3D> &xP, std::vector<int> &flag)
 {
@@ -1763,9 +1772,9 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
 
 /*!
  * Computes distances of point cloud to generic simplex
- * @param[in] P point cloud coordinates
- * @param[in] V simplex vertices coordinates
- * @return distance
+ * \param[in] P point cloud coordinates
+ * \param[in] V simplex vertices coordinates
+ * \return distance
  */
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::vector<array3D> const &V)
 {
@@ -1793,10 +1802,10 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::ve
 
 /*!
  * Computes distances of point cloud to generic simplex
- * @param[in] cloud point cloud coordinates
- * @param[in] V simplex vertices coordinates
- * @param[out] lambda barycentric coordinates of projectio points
- * @return distance
+ * \param[in] cloud point cloud coordinates
+ * \param[in] V simplex vertices coordinates
+ * \param[out] lambda barycentric coordinates of projectio points
+ * \return distance
  */
 std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<std::vector<double>> &lambda)
 {
@@ -1842,11 +1851,11 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
 
 /*!
  * Computes distance between two lines in 3D
- * @param[in] n0 direction of first line
- * @param[in] P0 point on first line
- * @param[in] n1 direction of second line
- * @param[in] P1 point on second line
- * @return distance
+ * \param[in] n0 direction of first line
+ * \param[in] P0 point on first line
+ * \param[in] n1 direction of second line
+ * \param[in] P1 point on second line
+ * \return distance
  */
 double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1, array3D const &n1)
 {
@@ -1856,13 +1865,13 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
 
 /*!
  * Computes distance between two lines in 3D
- * @param[in] n0 direction of first line
- * @param[in] P0 point on first line
- * @param[in] n1 direction of second line
- * @param[in] P1 point on second line
- * @param[out] xP0 projection of line1 on line0
- * @param[out] xP1 projection of line0 on line1
- * @return distance
+ * \param[in] n0 direction of first line
+ * \param[in] P0 point on first line
+ * \param[in] n1 direction of second line
+ * \param[in] P1 point on second line
+ * \param[out] xP0 projection of line1 on line0
+ * \param[out] xP1 projection of line0 on line1
+ * \return distance
  */
 double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1, array3D const &n1, array3D &xP0, array3D &xP1)
 {
@@ -1898,12 +1907,12 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
 
 /*!
  * Computes intersection between two lines in 3D
- * @param[in] n1 direction of first line
- * @param[in] P1 point on first line
- * @param[in] n2 direction of second line
- * @param[in] P2 point on second line
- * @param[out] P intersection point if intersect, else unaltered
- * @return if intersect
+ * \param[in] n1 direction of first line
+ * \param[in] P1 point on first line
+ * \param[in] n2 direction of second line
+ * \param[in] P2 point on second line
+ * \param[out] P intersection point if intersect, else unaltered
+ * \return if intersect
  */
 bool intersectLineLine( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P)
 {
@@ -1919,12 +1928,12 @@ bool intersectLineLine( array3D const &P1, array3D const &n1, array3D const &P2,
 
 /*!
  * Computes intersection between two segments in 3D
- * @param[in] P1 start point of first segment
- * @param[in] P2 end point of first segment
- * @param[in] Q1 start point of second segment
- * @param[in] Q2 end point of second segment
- * @param[out] x intersection point if intersect, else unaltered
- * @return if intersect
+ * \param[in] P1 start point of first segment
+ * \param[in] P2 end point of first segment
+ * \param[in] Q1 start point of second segment
+ * \param[in] Q2 end point of second segment
+ * \param[out] x intersection point if intersect, else unaltered
+ * \return if intersect
  */
 bool intersectSegmentSegment( array3D const &P1, array3D const &P2, array3D const &Q1, array3D const &Q2, array3D &x)
 {
@@ -1948,12 +1957,12 @@ bool intersectSegmentSegment( array3D const &P1, array3D const &P2, array3D cons
 
 /*!
  * Computes intersection between line and plane
- * @param[in] P1 point on line
- * @param[in] n1 direction of line
- * @param[in] P2 point on plane
- * @param[in] n2 normal to plane
- * @param[out] P intersection point if intersect, else unaltered
- * @return if intersect
+ * \param[in] P1 point on line
+ * \param[in] n1 direction of line
+ * \param[in] P2 point on plane
+ * \param[in] n2 normal to plane
+ * \param[out] P intersection point if intersect, else unaltered
+ * \return if intersect
  */
 bool intersectLinePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P)
 {
@@ -1982,12 +1991,12 @@ bool intersectLinePlane( array3D const &P1, array3D const &n1, array3D const &P2
 
 /*!
  * Computes intersection between segment and plane
- * @param[in] Q1 start point of segment
- * @param[in] Q2 end point of segment
- * @param[in] P2 point on plane
- * @param[in] n2 normal to plane
- * @param[out] P intersection point if intersect, else unaltered
- * @return if intersect
+ * \param[in] Q1 start point of segment
+ * \param[in] Q2 end point of segment
+ * \param[in] P2 point on plane
+ * \param[in] n2 normal to plane
+ * \param[out] P intersection point if intersect, else unaltered
+ * \return if intersect
  */
 bool intersectSegmentPlane( array3D const &Q1, array3D const &Q2, array3D const &P2, array3D const &n2, array3D &P)
 {
@@ -2009,13 +2018,13 @@ bool intersectSegmentPlane( array3D const &Q1, array3D const &Q2, array3D const 
 
 /*!
  * Computes intersection between two planes
- * @param[in] P1 point on first plane
- * @param[in] n1 normal to first plane
- * @param[in] P2 point on second plane
- * @param[in] n2 normal to second plane
- * @param[out] Pl point on intersection line
- * @param[out] nl direction of intersection line
- * @return if intersect
+ * \param[in] P1 point on first plane
+ * \param[in] n1 normal to first plane
+ * \param[in] P2 point on second plane
+ * \param[in] n2 normal to second plane
+ * \param[out] Pl point on intersection line
+ * \param[out] nl direction of intersection line
+ * \return if intersect
  */
 bool intersectPlanePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &Pl, array3D &nl)
 {
@@ -2059,13 +2068,13 @@ bool intersectPlanePlane( array3D const &P1, array3D const &n1, array3D const &P
 
 /*!
  * Computes intersection between triangle and a line
- * @param[in] P point on plane
- * @param[in] n normal to plane
- * @param[in] A first vertex of triangle
- * @param[in] B second vertex of triangle
- * @param[in] C third vertex of triangle
- * @param[out] Q intersection point
- * @return if intersect
+ * \param[in] P point on plane
+ * \param[in] n normal to plane
+ * \param[in] A first vertex of triangle
+ * \param[in] B second vertex of triangle
+ * \param[in] C third vertex of triangle
+ * \param[out] Q intersection point
+ * \return if intersect
  */
 bool intersectLineTriangle( array3D const &P, array3D const &n, array3D const &A, array3D const &B, array3D const &C, array3D &Q)
 {
@@ -2086,13 +2095,13 @@ bool intersectLineTriangle( array3D const &P, array3D const &n, array3D const &A
 
 /*!
  * Computes intersection between triangle and a segment
- * @param[in] P0 start point of segment
- * @param[in] P1 end point of segment
- * @param[in] A first vertex of triangle
- * @param[in] B second vertex of triangle
- * @param[in] C third vertex of triangle
- * @param[out] Q intersection point
- * @return if intersect
+ * \param[in] P0 start point of segment
+ * \param[in] P1 end point of segment
+ * \param[in] A first vertex of triangle
+ * \param[in] B second vertex of triangle
+ * \param[in] C third vertex of triangle
+ * \param[out] Q intersection point
+ * \return if intersect
  */
 bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D const &A, array3D const &B, array3D const &C, array3D &Q)
 {
@@ -2113,11 +2122,11 @@ bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D con
 
 /*!
  * Computes intersection between triangle and a simplex
- * @param[in] P point on line
- * @param[in] n direction of line
- * @param[in] V simplex vertices coordinates
- * @param[out] Q intersection point
- * @return if intersect
+ * \param[in] P point on line
+ * \param[in] n direction of line
+ * \param[in] V simplex vertices coordinates
+ * \param[out] Q intersection point
+ * \return if intersect
  */
 bool intersectLineSimplex( array3D const &P, array3D const &n, std::vector<array3D > const &V, array3D &Q)
 {
@@ -2126,11 +2135,11 @@ bool intersectLineSimplex( array3D const &P, array3D const &n, std::vector<array
 
 /*!
  * Computes intersection between triangle and a convex polygon
- * @param[in] P point on line
- * @param[in] n direction of line
- * @param[in] V polygon vertices coordinates
- * @param[out] Q intersection point
- * @return if intersect
+ * \param[in] P point on line
+ * \param[in] n direction of line
+ * \param[in] V polygon vertices coordinates
+ * \param[out] Q intersection point
+ * \return if intersect
  */
 bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array3D > const &V, array3D &Q)
 {
@@ -2152,11 +2161,11 @@ bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array
 
 /*!
  * Computes intersection between a segment and a generic simplex
- * @param[in] P0 start point of segment
- * @param[in] P1 end point of segment
- * @param[in] V simplex vertices coordinates
- * @param[out] Q intersection point
- * @return if intersect
+ * \param[in] P0 start point of segment
+ * \param[in] P1 end point of segment
+ * \param[in] V simplex vertices coordinates
+ * \param[out] Q intersection point
+ * \return if intersect
  */
 bool intersectSegmentSimplex( array3D const &P0, array3D const &P1, std::vector<array3D > const &V, array3D &Q)
 {
@@ -2165,11 +2174,11 @@ bool intersectSegmentSimplex( array3D const &P0, array3D const &P1, std::vector<
 
 /*!
  * Computes intersection between a segment and a polygon
- * @param[in] P0 start point of segment
- * @param[in] P1 end point of segment
- * @param[in] V polygon vertices coordinates
- * @param[out] Q intersection point
- * @return if intersect
+ * \param[in] P0 start point of segment
+ * \param[in] P1 end point of segment
+ * \param[in] V polygon vertices coordinates
+ * \param[out] Q intersection point
+ * \return if intersect
  */
 bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::vector<array3D > const &V, array3D &Q)
 {
@@ -2191,12 +2200,12 @@ bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::vector<
 
 /*!
  * Computes intersection between two axis aligned bounding boxes
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] B1 min point of second box
- * @param[in] B2 max point of second box
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A1 min point of first box
+ * \param[in] A2 max point of first box
+ * \param[in] B1 min point of second box
+ * \param[in] B2 max point of second box
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, int dim)
 {
@@ -2211,14 +2220,14 @@ bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, ar
 
 /*!
  * Computes intersection between two axis aligned bounding boxes
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] B1 min point of second box
- * @param[in] B2 max point of second box
- * @param[out] I1 min point of intersection box
- * @param[out] I2 max point of intersection box
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A1 min point of first box
+ * \param[in] A2 max point of first box
+ * \param[in] B1 min point of second box
+ * \param[in] B2 max point of second box
+ * \param[out] I1 min point of intersection box
+ * \param[out] I2 max point of intersection box
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, array3D &I1, array3D &I2, int dim )
 {
@@ -2240,13 +2249,13 @@ bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, ar
 
 /*!
  * Checks if an axis aligned bounding box and a triangle intersect
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] V0 first vertex of triangle
- * @param[in] V1 second vertex of triangle
- * @param[in] V2 third vertex of triangle
- * @param[in] dim number of dimensions to be checked
- * @return if intersect
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] V0 first vertex of triangle
+ * \param[in] V1 second vertex of triangle
+ * \param[in] V2 third vertex of triangle
+ * \param[in] dim number of dimensions to be checked
+ * \return if intersect
  */
 bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, int dim)
 {
@@ -2255,13 +2264,13 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
 
 /*!
  * Checks if an axis aligned bounding box and a triangle intersect
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] V0 first vertex of triangle
- * @param[in] V1 second vertex of triangle
- * @param[in] V2 third vertex of triangle
- * @param[out] P intersection points between triangle and the box edges
- * @return if intersect
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] V0 first vertex of triangle
+ * \param[in] V1 second vertex of triangle
+ * \param[in] V2 third vertex of triangle
+ * \param[out] P intersection points between triangle and the box edges
+ * \return if intersect
  */
 bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, std::vector<array3D> &P)
 {
@@ -2270,17 +2279,17 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
 
 /*!
  * Checks if an axis aligned bounding box and a triangle intersect
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] V0 first vertex of triangle
- * @param[in] V1 second vertex of triangle
- * @param[in] V2 third vertex of triangle
- * @param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
- * @param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
- * @param[in] triangleEdgeBoxFaceIntersections if true, the intersections between the edges of the triangle and the hull of the box will be added to the intersection points P
- * @param[out] P calculated intersection points 
- * @param[in] dim number of dimensions to be checked
- * @return if intersect
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] V0 first vertex of triangle
+ * \param[in] V1 second vertex of triangle
+ * \param[in] V2 third vertex of triangle
+ * \param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
+ * \param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * \param[in] triangleEdgeBoxFaceIntersections if true, the intersections between the edges of the triangle and the hull of the box will be added to the intersection points P
+ * \param[out] P calculated intersection points 
+ * \param[in] dim number of dimensions to be checked
+ * \return if intersect
  */
 bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> P, int dim)
 {
@@ -2289,18 +2298,18 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
 
 /*!
  * Checks if an axis aligned bounding box and a triangle intersect
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] V0 first vertex of triangle
- * @param[in] V1 second vertex of triangle
- * @param[in] V2 third vertex of triangle
- * @param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
- * @param[in] triangleEdgeBoxHullIntersections if true, the intersections between the edges of the triangle and the outer hull of the box will be added to the intersection points P
- * @param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
- * @param[out] P calculated intersection points 
- * @param[out] flag has the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
- * @param[in] dim number of dimensions to be checked
- * @return if intersect
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] V0 first vertex of triangle
+ * \param[in] V1 second vertex of triangle
+ * \param[in] V2 third vertex of triangle
+ * \param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
+ * \param[in] triangleEdgeBoxHullIntersections if true, the intersections between the edges of the triangle and the outer hull of the box will be added to the intersection points P
+ * \param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * \param[out] P calculated intersection points 
+ * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
+ * \param[in] dim number of dimensions to be checked
+ * \return if intersect
  */
 bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> P, std::vector<int> flag, int dim)
 {
@@ -2309,12 +2318,12 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
- * @param[in] V0 start point of segment
- * @param[in] V1 end point of segment
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] V0 start point of segment
+ * \param[in] V1 end point of segment
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, int dim)
 {
@@ -2323,15 +2332,15 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
- * @param[in] V0 start point of segment
- * @param[in] V1 end point of segment
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
- * @param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
- * @param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] V0 start point of segment
+ * \param[in] V1 end point of segment
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
+ * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * \param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, int dim)
 {
@@ -2340,16 +2349,16 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
- * @param[in] V0 start point of segment
- * @param[in] V1 end point of segment
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
- * @param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
- * @param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
- * @param[out] flag indicates for each intersection if it belongs to interiorSegmentVertice (flag=0) or segmentHullIntersection (flag=1)
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] V0 start point of segment
+ * \param[in] V1 end point of segment
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
+ * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * \param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
+ * \param[out] flag indicates for each intersection if it belongs to interiorSegmentVertice (flag=0) or segmentHullIntersection (flag=1)
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
@@ -2358,13 +2367,13 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
 
 /*!
  * Computes intersection between an axis aligned bounding box and a segment
- * @param[in] V0 start point of segment
- * @param[in] V1 end point of segment
- * @param[in] A0 min point of box
- * @param[in] A1 max point of box
- * @param[out] P intersection point segment and box faces
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] V0 start point of segment
+ * \param[in] V1 end point of segment
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[out] P intersection point segment and box faces
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, std::vector<array3D> &P, int dim)
 {
@@ -2373,11 +2382,11 @@ bool intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] VS simplex vertices coordinates
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A1 min point of first box
+ * \param[in] A2 max point of first box
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, int dim )
 {
@@ -2386,14 +2395,14 @@ bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<arra
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] VS simplex vertices coordinates
- * @param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
- * @param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the simplex and the hull of the box should be added to the intersection list
- * @param[in] simplexBoxEdgeIntersection intersection between the simplex and the edges of the box should be added to the intersection list
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A1 min point of first box
+ * \param[in] A2 max point of first box
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the simplex and the hull of the box should be added to the intersection list
+ * \param[in] simplexBoxEdgeIntersection intersection between the simplex and the edges of the box should be added to the intersection list
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxFaceIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> &P, int dim)
 {
@@ -2402,14 +2411,14 @@ bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<arra
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] VS simplex vertices coordinates
- * @param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
- * @param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the simplex and the hull of the box should be added to the intersection list
- * @param[in] simplexBoxEdgeIntersection intersection between the simplex and the edges of the box should be added to the intersection list
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A1 min point of first box
+ * \param[in] A2 max point of first box
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the simplex and the hull of the box should be added to the intersection list
+ * \param[in] simplexBoxEdgeIntersection intersection between the simplex and the edges of the box should be added to the intersection list
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxFaceIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
@@ -2418,12 +2427,12 @@ bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<arra
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
- * @param[in] A1 min point of first box
- * @param[in] A2 max point of first box
- * @param[in] VS simplex vertices coordinates
- * @param[out] P intersection points simplex box edges
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A1 min point of first box
+ * \param[in] A2 max point of first box
+ * \param[in] VS simplex vertices coordinates
+ * \param[out] P intersection points simplex box edges
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxSimplex(array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, std::vector<array3D> &P, int dim)
 {
@@ -2432,11 +2441,11 @@ bool intersectBoxSimplex(array3D const &A1, array3D const &A2, std::vector<array
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
- * @param[in] A0 min point of first box
- * @param[in] A1 max point of first box
- * @param[in] VS simplex vertices coordinates
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, int dim )
 {
@@ -2445,14 +2454,14 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
 
 /*!
  * Computes intersection between an axis aligned bounding box and a convex polygon
- * @param[in] A0 min point of first box
- * @param[in] A1 max point of first box
- * @param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
- * @param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * @param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
- * @param[in] VS polygon vertices coordinates
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[in] VS polygon vertices coordinates
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersection, bool polygonBoxEdgeIntersection, std::vector<array3D> &P, int dim)
 {
@@ -2461,14 +2470,14 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
 
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
- * @param[in] A0 min point of first box
- * @param[in] A1 max point of first box
- * @param[in] VS simplex vertices coordinates
- * @param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
- * @param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * @param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
- * @param[in] dim number of dimension to be checked
- * @return if intersect
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[in] dim number of dimension to be checked
+ * \return if intersect
  */
 bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersection, bool polygonBoxEdgeIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
@@ -2548,10 +2557,10 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
 
 /*!
  * checks if points lies on segment in 3D
- * @param[in] P point coordinates
- * @param[in] P1 start point of segment
- * @param[in] P2 end point of segment
- * @return if point lies on segment
+ * \param[in] P point coordinates
+ * \param[in] P1 start point of segment
+ * \param[in] P2 end point of segment
+ * \return if point lies on segment
  */
 bool intersectPointSegment( array3D const &P, array3D const &P1, array3D const &P2)
 {
@@ -2588,11 +2597,11 @@ bool intersectPointSegment( array3D const &P, array3D const &P1, array3D const &
 
 /*!
  * checks if points lies on triangle
- * @param[in] P point coordinates
- * @param[in] A first vertex of triangle
- * @param[in] B second vertex of triangle
- * @param[in] C third vertex of triangle
- * @return if point lies on triangle
+ * \param[in] P point coordinates
+ * \param[in] A first vertex of triangle
+ * \param[in] B second vertex of triangle
+ * \param[in] C third vertex of triangle
+ * \return if point lies on triangle
  */
 bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &B, array3D const &C)
 {
@@ -2612,11 +2621,11 @@ bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &
 
 /*!
  * checks if points lies within axis aligned box
- * @param[in] P point coordinates
- * @param[in] B1 min coodinates of box
- * @param[in] B2 max coodinates of box
- * @param[in] dim number of dimensions to be checked
- * @return if point in box
+ * \param[in] P point coordinates
+ * \param[in] B1 min coodinates of box
+ * \param[in] B2 max coodinates of box
+ * \param[in] dim number of dimensions to be checked
+ * \return if point in box
  */
 bool intersectPointBox( array3D const &P, array3D const &B1, array3D const &B2, int dim)
 {
@@ -2633,10 +2642,10 @@ bool intersectPointBox( array3D const &P, array3D const &B1, array3D const &B2, 
 
 /*!
  * computes axis aligned boundig box of a segment
- * @param[in] A start point of segment
- * @param[in] B end point of segment
- * @param[out] P0 min point of bounding box
- * @param[out] P1 max point of bounding box
+ * \param[in] A start point of segment
+ * \param[in] B end point of segment
+ * \param[out] P0 min point of bounding box
+ * \param[out] P1 max point of bounding box
  */
 void computeAABBSegment(array3D const &A, array3D const &B, array3D &P0, array3D &P1)
 {
@@ -2654,11 +2663,11 @@ void computeAABBSegment(array3D const &A, array3D const &B, array3D &P0, array3D
 
 /*!
  * computes axis aligned boundig box of a triangle
- * @param[in] A first vertex of triangle
- * @param[in] B second vertex of triangle
- * @param[in] C third vertex of triangle
- * @param[out] P0 min point of bounding box
- * @param[out] P1 max point of bounding box
+ * \param[in] A first vertex of triangle
+ * \param[in] B second vertex of triangle
+ * \param[in] C third vertex of triangle
+ * \param[out] P0 min point of bounding box
+ * \param[out] P1 max point of bounding box
  */
 void computeAABBTriangle(array3D const &A, array3D const &B, array3D const &C, array3D &P0, array3D &P1)
 {
@@ -2678,9 +2687,9 @@ void computeAABBTriangle(array3D const &A, array3D const &B, array3D const &C, a
 
 /*!
  * computes axis aligned boundig box of a simplex
- * @param[in] VS simplex vertices coordinates
- * @param[out] P0 min point of bounding box
- * @param[out] P1 max point of bounding box
+ * \param[in] VS simplex vertices coordinates
+ * \param[out] P0 min point of bounding box
+ * \param[out] P1 max point of bounding box
  */
 void computeAABBSimplex(std::vector<array3D> const &VS, array3D &P0, array3D &P1)
 {
@@ -2690,9 +2699,9 @@ void computeAABBSimplex(std::vector<array3D> const &VS, array3D &P0, array3D &P1
 
 /*!
  * computes axis aligned boundig box of a polygon
- * @param[in] VS polygon vertices coordinates
- * @param[out] P0 min point of bounding box
- * @param[out] P1 max point of bounding box
+ * \param[in] VS polygon vertices coordinates
+ * \param[out] P0 min point of bounding box
+ * \param[out] P1 max point of bounding box
  */
 void computeAABBPolygon(std::vector<array3D> const &VS, array3D &P0, array3D &P1)
 {
@@ -2713,12 +2722,12 @@ void computeAABBPolygon(std::vector<array3D> const &VS, array3D &P0, array3D &P1
 
 /*!
  * computes the bounding box of the union of two axis aligned bounding boxes
- * @param[in] A0 min point of first bounding box
- * @param[in] A1 max point of first bounding box
- * @param[in] B0 min point of second bounding box
- * @param[in] B1 max point of second bounding box
- * @param[out] C0 min point of union bounding box
- * @param[out] C1 max point of union bounding box
+ * \param[in] A0 min point of first bounding box
+ * \param[in] A1 max point of first bounding box
+ * \param[in] B0 min point of second bounding box
+ * \param[in] B1 max point of second bounding box
+ * \param[out] C0 min point of union bounding box
+ * \param[out] C1 max point of union bounding box
  */
 void unionAABB( array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D &C1)
 {
@@ -2732,12 +2741,13 @@ void unionAABB( array3D const &A0, array3D const &A1, array3D const &B0, array3D
 
 /*!
  * computes the bounding box of the union of several axis aligned bounding boxes
- * @param[in] A0 min points of bounding boxes
- * @param[in] A1 max points of bounding boxes
- * @param[out] C0 min point of union bounding box
- * @param[out] C1 max point of union bounding box
+ * \param[in] A0 min points of bounding boxes
+ * \param[in] A1 max points of bounding boxes
+ * \param[out] C0 min point of union bounding box
+ * \param[out] C1 max point of union bounding box
  */
-void unionAABB(std::vector<array3D> const &A0, std::vector<array3D> const &A1, array3D &C0, array3D &C1){
+void unionAABB(std::vector<array3D> const &A0, std::vector<array3D> const &A1, array3D &C0, array3D &C1)
+{
 
     int n( std::min(A0.size(), A1.size() ) );
 
@@ -2755,12 +2765,12 @@ void unionAABB(std::vector<array3D> const &A0, std::vector<array3D> const &A1, a
 
 /*!
  * computes the bounding box of the intersection of two axis aligned bounding boxes
- * @param[in] A0 min point of first bounding box
- * @param[in] A1 max point of first bounding box
- * @param[in] B0 min point of second bounding box
- * @param[in] B1 max point of second bounding box
- * @param[out] C0 min point of intersection of boxes
- * @param[out] C1 max point of intersection of boxes
+ * \param[in] A0 min point of first bounding box
+ * \param[in] A1 max point of first bounding box
+ * \param[in] B0 min point of second bounding box
+ * \param[in] B1 max point of second bounding box
+ * \param[out] C0 min point of intersection of boxes
+ * \param[out] C1 max point of intersection of boxes
  */
 void intersectionAABB(array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D  &C1)
 {
@@ -2770,12 +2780,12 @@ void intersectionAABB(array3D const &A0, array3D const &A1, array3D const &B0, a
 
 /*!
  * computes the bounding box of the relative complement two axis aligned bounding boxes
- * @param[in] A0 min point of first bounding box
- * @param[in] A1 max point of first bounding box
- * @param[in] B0 min point of second bounding box
- * @param[in] B1 max point of second bounding box
- * @param[out] C0 min point of relative complement
- * @param[out] C1 max point of relative complement
+ * \param[in] A0 min point of first bounding box
+ * \param[in] A1 max point of first bounding box
+ * \param[in] B0 min point of second bounding box
+ * \param[in] B1 max point of second bounding box
+ * \param[out] C0 min point of relative complement
+ * \param[out] C1 max point of relative complement
  */
 void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, array3D const &B1, array3D &C0, array3D  &C1)
 {
@@ -2802,10 +2812,10 @@ void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, ar
 
 /*!
  * returns the vertex coordiantes of a segment given its index
- * @param[in] i edge index
- * @param[in] V0 first vertex of segment
- * @param[in] V1 second vertex of segment
- * @param[out] P vertex
+ * \param[in] i edge index
+ * \param[in] V0 first vertex of segment
+ * \param[in] V1 second vertex of segment
+ * \param[out] P vertex
  */
 void vertexOfSegment(int const &i, array3D const &V0, array3D const &V1, array3D &P)
 {
@@ -2829,11 +2839,11 @@ void vertexOfSegment(int const &i, array3D const &V0, array3D const &V1, array3D
 
 /*!
  * returns the vertex coordiantes of a triangle given its index
- * @param[in] i edge index
- * @param[in] V0 first vertex of triangle
- * @param[in] V1 second vertex of triangle
- * @param[in] V2 third vertex of triangle
- * @param[out] P vertex
+ * \param[in] i edge index
+ * \param[in] V0 first vertex of triangle
+ * \param[in] V1 second vertex of triangle
+ * \param[in] V2 third vertex of triangle
+ * \param[out] P vertex
  */
 void vertexOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P)
 {
@@ -2861,12 +2871,12 @@ void vertexOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3
 
 /*!
  * computes the edge coordiantes of a triangle
- * @param[in] i edge index
- * @param[in] V0 first vertex of triangle
- * @param[in] V1 second vertex of triangle
- * @param[in] V2 third vertex of triangle
- * @param[out] P0 first vertex of edge
- * @param[out] P1 first vertex of edge
+ * \param[in] i edge index
+ * \param[in] V0 first vertex of triangle
+ * \param[in] V1 second vertex of triangle
+ * \param[in] V2 third vertex of triangle
+ * \param[out] P0 first vertex of edge
+ * \param[out] P1 first vertex of edge
  */
 void edgeOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P0, array3D &P1)
 {
@@ -2895,16 +2905,15 @@ void edgeOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D 
     return;
 }
 
-
 /*!
  * computes the face coordiantes of a box
- * @param[in] i face index
- * @param[in] A0 min point of bounding box
- * @param[in] A1 max point of bounding box
- * @param[out] P0 first vertex of face
- * @param[out] P1 first vertex of face
- * @param[out] P2 first vertex of face
- * @param[out] P3 first vertex of face
+ * \param[in] i face index
+ * \param[in] A0 min point of bounding box
+ * \param[in] A1 max point of bounding box
+ * \param[out] P0 first vertex of face
+ * \param[out] P1 first vertex of face
+ * \param[out] P2 first vertex of face
+ * \param[out] P3 first vertex of face
  */
 void faceOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1, array3D &P2, array3D &P3)
 {
@@ -2924,14 +2933,13 @@ void faceOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, 
     return;
 }
 
-
 /*!
  * computes the edge coordiantes of a box
- * @param[in] i edge index
- * @param[in] A0 min point of bounding box
- * @param[in] A1 max point of bounding box
- * @param[out] P0 first vertex of edge
- * @param[out] P1 first vertex of edge
+ * \param[in] i edge index
+ * \param[in] A0 min point of bounding box
+ * \param[in] A1 max point of bounding box
+ * \param[out] P0 first vertex of edge
+ * \param[out] P1 first vertex of edge
  */
 void edgeOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1)
 {
@@ -2948,10 +2956,10 @@ void edgeOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, 
 
 /*!
  * computes the vertex coordiantes of a box
- * @param[in] i vertex index
- * @param[in] A0 min point of bounding box
- * @param[in] A1 max point of bounding box
- * @param[out] P vertex coordinates
+ * \param[in] i vertex index
+ * \param[in] A0 min point of bounding box
+ * \param[in] A1 max point of bounding box
+ * \param[out] P vertex coordinates
  */
 void vertexOfBox(int  const &i, array3D const &A0, array3D const &A1, array3D &P)
 {
@@ -3017,12 +3025,13 @@ void vertexOfBox(int  const &i, array3D const &A0, array3D const &A1, array3D &P
 
 /*!
  * rotates a vector in 3D using Rodrigues' formula.
- * @param[in] vector vector to be rotated
- * @param[in] axis rotation axis
- * @param[in] theta rotation angle
- * @return rotated vector
+ * \param[in] vector vector to be rotated
+ * \param[in] axis rotation axis
+ * \param[in] theta rotation angle
+ * \return rotated vector
  */
-array3D rotateVector( array3D const &vector, array3D const &axis, double theta){
+array3D rotateVector( array3D const &vector, array3D const &axis, double theta)
+{
 
     array3D rotated;
     double cosTheta = cos(theta);
@@ -3036,9 +3045,9 @@ array3D rotateVector( array3D const &vector, array3D const &axis, double theta){
 
 /*!
  * computes the area of an triangle
- * @param[in] a first vertex coordinates
- * @param[in] b second vertex coordinates
- * @param[in] c third vertex coordinates
+ * \param[in] a first vertex coordinates
+ * \param[in] b second vertex coordinates
+ * \param[in] c third vertex coordinates
  */
 double areaTriangle( array3D const &a, array3D const &b, array3D const &c)
 {
@@ -3047,7 +3056,7 @@ double areaTriangle( array3D const &a, array3D const &b, array3D const &c)
 
 /*
  * Gets the number of edges of a polygon
- * @return number of edges
+ * \return number of edges
  */
 int polygonEdgesCount( std::vector<array3D> const &V)
 {
@@ -3056,7 +3065,7 @@ int polygonEdgesCount( std::vector<array3D> const &V)
 
 /*
  * Gets the number of subtriangles of a polygon
- * @return number of subtriangles
+ * \return number of subtriangles
  */
 int polygonSubtriangleCount( std::vector<array3D> const &V)
 {
@@ -3065,10 +3074,10 @@ int polygonSubtriangleCount( std::vector<array3D> const &V)
 
 /*
  * Gets the edge coordinates of a convex polygon
- * @param[in] edge index
- * @param[in] V polgon vertices
- * @param[in] V0 first vertice coordinates of edge
- * @param[in] V1 second vertice coordinates of edge
+ * \param[in] edge index
+ * \param[in] V polgon vertices
+ * \param[in] V0 first vertice coordinates of edge
+ * \param[in] V1 second vertice coordinates of edge
  */
 void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0, array3D &V1)
 {
@@ -3081,11 +3090,11 @@ void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0,
 
 /*
  * Gets the subtriangle vertices' coordinates of a convex polygon
- * @param[in] triangle index of triangle
- * @param[in] V polgon vertices
- * @param[in] V0 first vertice coordinates of triangle
- * @param[in] V1 second vertice coordinates of triangle
- * @param[in] V2 third vertice coordinates of triangle
+ * \param[in] triangle index of triangle
+ * \param[in] V polgon vertices
+ * \param[in] V0 first vertice coordinates of triangle
+ * \param[in] V1 second vertice coordinates of triangle
+ * \param[in] V2 third vertice coordinates of triangle
  */
 void subtriangleOfPolygon( int const &triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
 {
@@ -3096,6 +3105,10 @@ void subtriangleOfPolygon( int const &triangle, std::vector<array3D> const &V, a
     V2 = V[triangle+2];
     return;
 }
+
+/*!
+ * \}
+*/
 
 }
 
