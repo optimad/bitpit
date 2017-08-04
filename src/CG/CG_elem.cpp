@@ -688,7 +688,7 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
     } else if (vertexCount == 3) { //triangle
         _projectPointsTriangle(1, &P, V[0], V[1], V[2], &xP, &lambda[0] );
 
-    } else { //generic convec polygon
+    } else { //generic convex polygon
         double distance, minDistance(std::numeric_limits<double>::max());
         int minTriangle;
         array3D V0, V1, V2;
@@ -711,18 +711,12 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
                 minTriangle = triangle;
             }
 
-
         } //next triangle
 
-        lambda.assign(vertexCount,0.);
-        int vertex0 = 0;
-        int vertex1 = 1+minTriangle;
-        int vertex2 = 2+minTriangle;
-        lambda[vertex0] = minLambda[0];
-        lambda[vertex1] = minLambda[1];
-        lambda[vertex2] = minLambda[2];
+        subtriangleOfPolygon( minTriangle, V, V0, V1, V2);
+        xP = reconstructPointFromBarycentricTriangle( V0, V1, V2, minLambda);
 
-        xP = reconstructPointFromBarycentricTriangle( V[vertex0], V[vertex1], V[vertex2], minLambda);
+        computeGeneralizedBarycentric( xP, V, lambda);
 
     }
 
