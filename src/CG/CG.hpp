@@ -82,6 +82,10 @@ static const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
 int                 convertBarycentricToFlagTriangle( std::array<double,3> const &);
 int                 convertBarycentricToFlagSegment( std::array<double,2> const &);
 
+array3D             reconstructPointFromBarycentricSegment( array3D const &, array3D const &, std::array<double,2> const & ); 
+array3D             reconstructPointFromBarycentricSegment( array3D const &, array3D const &, double* ); 
+array3D             reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, std::array<double,3> const & ); 
+array3D             reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, double * ); 
 
 array3D             projectPointLine( array3D const &, array3D const &, array3D const & );
 array3D             projectPointPlane( array3D const &, array3D const &, array3D const & );

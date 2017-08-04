@@ -94,6 +94,56 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
 };
 
 /*!
+ * Reconstructs a point from barycentric coordinates of a segment
+ * @param[in] Q0 first vertex of segment
+ * @param[in] Q1 second vertex of segment
+ * @param[in] lambda barycentric coordinates
+ * @param[out] reconstructed point
+ */
+array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, std::array<double,2> &lambda)
+{
+    return lambda[0]*Q0 +lambda[1]*Q1;
+}
+
+/*!
+ * Reconstructs a point from barycentric coordinates of a segment
+ * @param[in] Q0 first vertex of segment
+ * @param[in] Q1 second vertex of segment
+ * @param[in] lambda barycentric coordinates
+ * @param[out] reconstructed point
+ */
+array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, double *lambda)
+{
+    return lambda[0]*Q0 +lambda[1]*Q1;
+}
+
+/*!
+ * Reconstructs a point from barycentric coordinates of a triangle
+ * @param[in] Q0 first vertex of triangle
+ * @param[in] Q1 second vertex of triangle
+ * @param[in] Q2 third vertex of triangle
+ * @param[in] lambda barycentric coordinates
+ * @param[out] reconstructed point
+ */
+array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, std::array<double,3> const &lambda)
+{
+    return lambda[0]*Q0 +lambda[1]*Q1 +lambda[2]*Q2;
+}
+
+/*!
+ * Reconstructs a point from barycentric coordinates of a triangle
+ * @param[in] Q0 first vertex of triangle
+ * @param[in] Q1 second vertex of triangle
+ * @param[in] Q2 third vertex of triangle
+ * @param[in] lambda barycentric coordinates
+ * @param[out] reconstructed point
+ */
+array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda)
+{
+    return lambda[0]*Q0 +lambda[1]*Q1 +lambda[2]*Q2;
+}
+
+/*!
  * Computes projection of point on line in 3D
  * @param[in] P point coordinates
  * @param[in] Q point on line
