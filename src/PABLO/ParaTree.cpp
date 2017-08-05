@@ -130,6 +130,45 @@ namespace bitpit {
         printFooter();
     };
 
+    // =============================================================================== //
+
+    /*!
+     * Copy constructor of ParaTree.
+     * \param[in] other class of type ParaTree
+     */
+    ParaTree::ParaTree(const ParaTree & other)
+        : m_partitionFirstDesc(other.m_partitionFirstDesc),
+          m_partitionLastDesc(other.m_partitionLastDesc),
+          m_partitionRangeGlobalIdx(other.m_partitionRangeGlobalIdx),
+          m_partitionRangeGlobalIdx0(other.m_partitionRangeGlobalIdx0),
+          m_globalNumOctants(other.m_globalNumOctants),
+          m_nproc(other.m_nproc),
+          m_maxDepth(other.m_maxDepth),
+          m_global(other.m_global),
+          m_rank(other.m_rank),
+          m_octree(other.m_octree),
+          m_bordersPerProc(other.m_bordersPerProc),
+          m_internals(other.m_internals),
+          m_pborders(other.m_pborders),
+          m_mapIdx(other.m_mapIdx),
+          m_loadBalanceRanges(other.m_loadBalanceRanges),
+          m_serial(other.m_serial),
+          m_tol(other.m_tol),
+          m_trans(other.m_trans),
+          m_dim(other.m_dim),
+          m_periodic(other.m_periodic),
+          m_status(other.m_status),
+          m_lastOp(other.m_lastOp),
+          m_log(other.m_log)
+#if BITPIT_ENABLE_MPI==1
+          , m_comm(MPI_COMM_NULL)
+#endif
+    {
+#if BITPIT_ENABLE_MPI==1
+        setComm(other.m_comm);
+#endif
+    }
+
     // =================================================================================== //
     // METHODS
     // =================================================================================== //

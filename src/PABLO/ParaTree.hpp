@@ -212,6 +212,8 @@ namespace bitpit {
 #endif
         ~ParaTree();
 
+        ParaTree(const ParaTree & other);
+
     private:
         ParaTree & operator=(const ParaTree & other) = delete;
 
