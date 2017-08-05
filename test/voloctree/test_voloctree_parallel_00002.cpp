@@ -51,11 +51,15 @@ int main(int argc, char *argv[]) {
 	log::cout() << "  >> 2D octree patch" << "\n";
 
 	// Create the patch
-	VolOctree *patch_2D = new VolOctree(0, 2, origin, length, dh);
-	patch_2D->setCommunicator(MPI_COMM_WORLD);
-	patch_2D->getVTK().setName("octree_parallel_uniform_patch_2D");
-	patch_2D->update();
-	patch_2D->getVTK().setCounter(0);
+	VolOctree *patch_2D_original = new VolOctree(0, 2, origin, length, dh);
+	patch_2D_original->setCommunicator(MPI_COMM_WORLD);
+	patch_2D_original->getVTK().setName("octree_parallel_uniform_patch_2D");
+	patch_2D_original->update();
+	patch_2D_original->getVTK().setCounter(0);
+
+	// Clone the patch
+	std::unique_ptr<VolOctree> patch_2D = PatchKernel::clone(patch_2D_original);
+	delete patch_2D_original;
 
 	// Partition the patch
 	patch_2D->partition(true);
@@ -97,17 +101,19 @@ int main(int argc, char *argv[]) {
 					  MPI_C_BOOL, MPI_LAND, MPI_COMM_WORLD);
 	}
 
-	delete patch_2D;
-
 	// 3D Test
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
 	// Create the patch
-	VolOctree *patch_3D = new VolOctree(0, 3, origin, length, dh);
-	patch_3D->setCommunicator(MPI_COMM_WORLD);
-	patch_3D->getVTK().setName("octree_parallel_uniform_patch_3D");
-	patch_3D->update();
-	patch_3D->getVTK().setCounter(0);
+	VolOctree *patch_3D_original = new VolOctree(0, 3, origin, length, dh);
+	patch_3D_original->setCommunicator(MPI_COMM_WORLD);
+	patch_3D_original->getVTK().setName("octree_parallel_uniform_patch_3D");
+	patch_3D_original->update();
+	patch_3D_original->getVTK().setCounter(0);
+
+	// Clone the patch
+	std::unique_ptr<VolOctree> patch_3D = PatchKernel::clone(patch_3D_original);
+	delete patch_3D_original;
 
 	// Partition the patch
 	patch_3D->partition(true);
@@ -148,8 +154,6 @@ int main(int argc, char *argv[]) {
 		MPI_Allreduce(&local_keepCoargening, &keepCoarsening_3D, 1,
 					  MPI_C_BOOL, MPI_LAND, MPI_COMM_WORLD);
 	}
-
-	delete patch_3D;
 
 	MPI_Finalize();
 
