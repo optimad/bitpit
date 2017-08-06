@@ -152,6 +152,7 @@ namespace bitpit {
           m_pborders(other.m_pborders),
           m_mapIdx(other.m_mapIdx),
           m_loadBalanceRanges(other.m_loadBalanceRanges),
+          m_errorFlag(other.m_errorFlag),
           m_serial(other.m_serial),
           m_tol(other.m_tol),
           m_trans(other.m_trans),
