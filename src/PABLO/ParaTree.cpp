@@ -3423,17 +3423,13 @@ namespace bitpit {
             iter->m_info[15] = false;
         }
 
-        m_mapIdx.clear();
-        if (mapper_flag){
-            // m_mapIdx init
-            m_mapIdx.resize(nocts0);
-            u32vector(m_mapIdx).swap(m_mapIdx);
-
-            for (uint32_t i=0; i<nocts0; i++){
-                m_mapIdx[i] = i;
-            }
+        // Initialize mapping
+        u32vector(nocts0).swap(m_mapIdx);
+        for (uint32_t i=0; i<nocts0; i++){
+            m_mapIdx[i] = i;
         }
 
+        // Update tree
         bool globalDone = false;
 #if BITPIT_ENABLE_MPI==1
         if(m_serial){
@@ -3446,12 +3442,7 @@ namespace bitpit {
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
 
             // Refine
-            if (mapper_flag){
-                while(m_octree.globalRefine(m_mapIdx));
-            }
-            else{
-                while(m_octree.globalRefine(m_mapIdx));
-            }
+            while(m_octree.globalRefine(m_mapIdx));
 
             if (getNumOctants() > nocts0)
                 globalDone = true;
@@ -3472,12 +3463,7 @@ namespace bitpit {
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 
             // Refine
-            if (mapper_flag){
-                while(m_octree.globalRefine(m_mapIdx));
-            }
-            else{
-                while(m_octree.globalRefine(m_mapIdx));
-            }
+            while(m_octree.globalRefine(m_mapIdx));
 
             bool localDone = false;
             if (getNumOctants() > nocts0)
@@ -3492,6 +3478,15 @@ namespace bitpit {
             (*m_log) << "---------------------------------------------" << endl;
         }
 #endif
+
+        // Update last operation
+        if (mapper_flag) {
+            m_lastOp = OP_ADAPT_MAPPED;
+        }
+        else{
+            m_lastOp = OP_ADAPT_UNMAPPED;
+        }
+
         return globalDone;
     }
 
