@@ -49,6 +49,7 @@ VTKField::VTKField(){
     m_dataType        = VTKDataType::UNDEFINED ;
     m_location        = VTKLocation::UNDEFINED ;
     m_codification    = VTKFormat::UNDEFINED ;
+    m_offset          = 0 ;
     m_fieldType       = VTKFieldType::UNDEFINED ;
     m_position        = 0 ;
     m_streamer        = NULL ;
