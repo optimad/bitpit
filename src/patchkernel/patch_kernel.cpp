@@ -287,7 +287,12 @@ PatchKernel::~PatchKernel()
 	freeCommunicator();
 #endif
 
-	patch::manager().unregisterPatch(this);
+	try {
+		patch::manager().unregisterPatch(this);
+	} catch (const std::runtime_error &e) {
+		log::cout() << "Unable to unregister the patch" << std::endl;
+		log::cout() << " Error message: " << e.what() << endl;
+	}
 }
 
 /*!
