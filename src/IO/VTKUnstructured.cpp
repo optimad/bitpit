@@ -152,6 +152,9 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
     m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_STREAMS)].disable();
     m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_OFFSETS)].disable();
 
+    m_nConnectivityEntries = 0;
+    m_nFaceStreamEntries   = 0;
+
     setElementType(elementType);
 
 }
