@@ -322,14 +322,17 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
         str.seekg( position_appended) ;
         str.seekg( m_geometry[connectivity_gid].getOffset(), std::ios::cur) ;
 
+        int dataSize = VTKTypes::sizeOfType( m_geometry[connectivity_gid].getDataType() ) ;
+        assert(dataSize > 0) ;
+
         if( m_headerType== "UInt32") {
             genericIO::absorbBINARY( str, nbytes32 ) ;
-            nconn = nbytes32 /VTKTypes::sizeOfType( m_geometry[connectivity_gid].getDataType() ) ;
+            nconn = nbytes32 / dataSize ;
         }
 
         if( m_headerType== "UInt64") {
             genericIO::absorbBINARY( str, nbytes64 ) ;
-            nconn = nbytes64 /VTKTypes::sizeOfType( m_geometry[connectivity_gid].getDataType() ) ;
+            nconn = nbytes64 / dataSize ;
         }
     }
 
