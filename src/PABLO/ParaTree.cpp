@@ -4240,6 +4240,7 @@ namespace bitpit {
                 m_octree.m_ghosts.clear();
                 m_octree.m_sizeGhosts = 0;
                 //compute new partition range globalidx
+                assert(m_nproc > 0);
                 uint64_t* newPartitionRangeGlobalidx = new uint64_t[m_nproc];
                 for(int p = 0; p < m_nproc; ++p){
                     newPartitionRangeGlobalidx[p] = 0;
