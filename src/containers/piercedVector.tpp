@@ -70,6 +70,20 @@ PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &
 }
 
 /**
+* Copy assignment operator.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container.
+*/
+template<typename value_t, typename id_t>
+PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(PiercedVector<value_t, id_t> x)
+{
+    this->swap(x);
+
+    return *this;
+}
+
+/**
 * Gets an element from a the first position marked as empty and
 * assignes to it the specified id. Except for setting the id,
 * the element is not modified. Therefore it will still contain
