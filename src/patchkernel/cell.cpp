@@ -493,24 +493,18 @@ void Cell::resetAdjacencies(bool storeAdjacencies)
 */
 void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 {
-	m_adjacencies.initialize(adjacencies);
-
-	// The adjacency vector must have as many elements as faces
-	if (getType() != ElementInfo::UNDEFINED) {
-		int delta = m_adjacencies.size() - getFaceCount();
-		if (delta > 0) {
-			for (int i = 0; i < delta; ++i) {
-				m_adjacencies.popBack();
-			}
-		} else if (delta < 0) {
-			for (int i = 0; i < delta; ++i) {
-				m_adjacencies.pushBack(1, NULL_ID);
-			}
-		}
+	if (getType() == ElementInfo::UNDEFINED) {
+	    return;
 	}
 
-	// Check that there is at least one adjacency for each face
-	for (int i = 0; i < m_adjacencies.size(); ++i) {
+	// Initialize the adjacencies
+	assert(m_interfaces.size() == getFaceCount());
+	m_adjacencies.initialize(adjacencies);
+
+	// Check that there is at least one adjacency for each face. If the face
+	// is not associated to an adjacency, a dummy adjacency is added.
+	int nFaces = getFaceCount();
+	for (int i = 0; i < nFaces; ++i) {
 		if (m_adjacencies.getItemCount(i) == 0) {
 			m_adjacencies.pushBackItem(i, NULL_ID);
 		}
