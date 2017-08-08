@@ -561,6 +561,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         auto &visitor = *(m_objects.at(objectId)) ;
 
         if (updateNarrowBand) {
+            // clearAfeterMeshAdaption must be called within updateLSInNarrowBand
             newRSearch = visitor.getSizeNarrowBand() ;
             visitor.updateLSInNarrowBand( mapper, newRSearch, m_signedDF ) ;
 
