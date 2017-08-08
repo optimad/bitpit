@@ -137,8 +137,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<long> &);
 
     std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *, const double &, const SegmentToCellMap &) ;
-    void                                        updateSegmentList( const double &) ;
-
     void                                        createLevelsetInfo( LevelSetKernel *, const bool &, std::unordered_set<long> &) ;
 
     SegmentToCellMap                            extractSegmentToCellMap( LevelSetCartesian *, const double &);

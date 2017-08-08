@@ -657,60 +657,6 @@ std::unordered_set<long> LevelSetSegmentation::createSegmentInfo( LevelSetKernel
 }
 
 /*!
- * Update the segment list associated to the cells, keeping only the segments
- * with a distance from the body less than the specified narrow band size plus
- * the cell circumcenter.
- * @param[in] search size of narrow band
- */
-void LevelSetSegmentation::updateSegmentList( const double &search) {
-
-
-    log::cout() << "  Updating segment list for cells inside narrow band... " << std::endl;
-
-    bitpit::PiercedVector<SegInfo>::iterator segEnd = m_seg.end();
-    for (bitpit::PiercedVector<SegInfo>::iterator segItr = m_seg.begin(); segItr != segEnd; ++segItr) {
-        // The filter radius is the narrow band size plus the cell circumcenter.
-        long cellId = segItr.getId() ;
-        double filterRadius = search + m_kernelPtr->computeCellCircumcircle(cellId);
-
-        // Starting from the farthest segment (the last in the list) we loop
-        // backwards until we find the first segment with a distance less
-        // that the specified narrow band size.
-        //
-        // We know that the cell is inside the narrow band, because all the
-        // cells outside the narrow band have already been removed. Therefore
-        // we need to perform the check up to the second segment (the first one
-        // is in the narrow band).
-        std::vector<double> &distances = segItr->distances;
-        size_t nCurrentSegments = distances.size();
-
-        size_t nSegmentsToKeep = 1;
-        for( size_t k = nCurrentSegments - 1; k >= 1; --k) {
-            double distance = distances[k];
-            if ( distance <= filterRadius ){
-                nSegmentsToKeep = k + 1;
-                break;
-            }
-        }
-
-        if (nSegmentsToKeep != nCurrentSegments) {
-            const double SHRINK_THRESHOLD = 0.5;
-
-            distances.resize(nSegmentsToKeep);
-            if (nSegmentsToKeep < SHRINK_THRESHOLD * distances.capacity()) {
-                distances.shrink_to_fit();
-            }
-
-            std::vector<long> &segments = segItr->segments;
-            segments.resize(nSegmentsToKeep);
-            if (nSegmentsToKeep < SHRINK_THRESHOLD * segments.capacity()) {
-                segments.shrink_to_fit();
-            }
-        }
-    }
-}
-
-/*!
  * Create the levelset info for the specified cell list.
  *
  * This function assumes that the segment information for the specified cells
@@ -1092,8 +1038,6 @@ void LevelSetSegmentation::__filterOutsideNarrowBand( double search ){
     }
 
     m_seg.flush() ;
-
-    updateSegmentList( search) ;
 
 }
 
