@@ -248,24 +248,18 @@ void Cell::resetInterfaces(bool storeInterfaces)
 */
 void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 {
-	m_interfaces.initialize(interfaces);
-
-	// The interface vector must have as many elements as faces
-	if (getType() != ElementInfo::UNDEFINED) {
-		int delta = m_interfaces.size() - getFaceCount();
-		if (delta > 0) {
-			for (int i = 0; i < delta; ++i) {
-				m_interfaces.popBack();
-			}
-		} else if (delta < 0) {
-			for (int i = 0; i < delta; ++i) {
-				m_interfaces.pushBack(1, NULL_ID);
-			}
-		}
+	if (getType() == ElementInfo::UNDEFINED) {
+	    return;
 	}
 
-	// Check that there is at least one interfaces for each face
-	for (int i = 0; i < m_interfaces.size(); ++i) {
+	// Initialize the interfaces
+	assert(m_interfaces.size() == getFaceCount());
+	m_interfaces.initialize(interfaces);
+
+	// Check that there is at least one interfaces for each face. If the face
+	// is not associated to an interface, a dummy interface is added.
+	int nFaces = getFaceCount();
+	for (int i = 0; i < nFaces; ++i) {
 		if (m_interfaces.getItemCount(i) == 0) {
 			m_interfaces.pushBackItem(i, NULL_ID);
 		}
