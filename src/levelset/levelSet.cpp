@@ -176,17 +176,16 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
         id = m_objects.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
-    if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation.get()) ){
-        segmentation.release();
-        std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
-        lsSeg->setSegmentation( std::move(surfUnstructuredUPtr), angle );
-    } else {
+    SurfUnstructured *surfUnstructured = dynamic_cast<SurfUnstructured *>(segmentation.get());
+    if (!surfUnstructured) {
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
+    segmentation.release();
+    std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(surfUnstructuredUPtr), angle) ;
 
+    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
     return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
@@ -203,15 +202,14 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
         id = m_objects.size();
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id) ;
-    if( SurfUnstructured* surfUnstructured = dynamic_cast<SurfUnstructured*>(segmentation)){
-        lsSeg->setSegmentation( surfUnstructured, angle );
-    } else {
+    SurfUnstructured *surfUnstructured = dynamic_cast<SurfUnstructured *>(segmentation);
+    if (!surfUnstructured) {
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
+    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id,surfUnstructured, angle) ;
 
+    LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
     return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
