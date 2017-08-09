@@ -155,10 +155,7 @@ int LevelSetBoolean::getPart( const long &id ) const{
  * @param[in] r size of the narrow band.
  */
 void LevelSetBoolean::setSizeNarrowBand(double r){
-    m_RSearch = r;
-    for( auto objPtr : m_objPtr){
-        objPtr->setSizeNarrowBand(r);
-    }
+    BITPIT_UNUSED(r);
 }
 
 /*!
@@ -166,9 +163,9 @@ void LevelSetBoolean::setSizeNarrowBand(double r){
  * @return size of the narrow band.
  */
 double LevelSetBoolean::computeSizeNarrowBand(){
-    double r = -std::numeric_limits<double>::max() ;
+    double r = std::numeric_limits<double>::max() ;
     for( auto objPtr : m_objPtr){
-        r = std::max(r, objPtr->getSizeNarrowBand());
+        r = std::min(r, objPtr->getSizeNarrowBand());
     }
 
     return r;
