@@ -101,7 +101,7 @@ class LevelSetObject{
     virtual double                              getMaxSurfaceFeatureSize() const;
 
     virtual double                              computeSizeNarrowBand()=0;
-    virtual void                                computeLSInNarrowBand(const double &, const bool &) ;
+    virtual void                                computeLSInNarrowBand(bool, double);
 
     virtual double                              updateSizeNarrowBand(const std::vector<adaption::Info> &);
     virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &) ;

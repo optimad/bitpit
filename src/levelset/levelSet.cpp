@@ -508,7 +508,7 @@ void LevelSet::compute(){
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
         RSearch = visitor.getSizeNarrowBand();
-        visitor.computeLSInNarrowBand( RSearch, m_signedDF) ;
+        visitor.computeLSInNarrowBand( m_signedDF, RSearch) ;
         if( m_propagateS ) visitor.propagateSign() ;
     }
 

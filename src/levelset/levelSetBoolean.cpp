@@ -183,10 +183,10 @@ double LevelSetBoolean::updateSizeNarrowBand(const std::vector<adaption::Info> &
 
 /*!
  * Computes the levelset function within the narrow band
- * @param[in] RSearch size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
+ * @param[in] RSearch size of narrow band
  */
-void LevelSetBoolean::computeLSInNarrowBand( const double &RSearch, const bool &signd ){
+void LevelSetBoolean::computeLSInNarrowBand(bool signd, double RSearch){
 
     BITPIT_UNUSED(RSearch) ;
     BITPIT_UNUSED(signd) ;

@@ -577,18 +577,18 @@ void LevelSetSegmentation::__clear( ){
 
 /*!
  * Computes the levelset function within the narrow band
- * @param[in] RSearch size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
+ * @param[in] RSearch size of narrow band
  */
-void LevelSetSegmentation::computeLSInNarrowBand( const double &RSearch, const bool &signd ){
+void LevelSetSegmentation::computeLSInNarrowBand(bool signd, double RSearch ){
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
     if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
-        computeLSInNarrowBand( lsCartesian, RSearch, signd ) ;
+        computeLSInNarrowBand( lsCartesian, signd, RSearch ) ;
 
     } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        computeLSInNarrowBand( lsOctree, RSearch, signd ) ;
+        computeLSInNarrowBand( lsOctree, signd, RSearch ) ;
 
     }
 }
@@ -604,7 +604,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
     // Update is not implemented for Cartesian patches
     if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
         clear( ) ;
-        computeLSInNarrowBand( RSearch, signd ) ;
+        computeLSInNarrowBand(signd, RSearch) ;
         return;
     }
 
@@ -619,7 +619,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
 
 /*!
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, const double &RSearch, const bool &signd ){
+void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bool signd, double RSearch){
 
     VolumeKernel                            &mesh = *(visitee->getMesh() ) ;
     std::vector<std::array<double,3>>       VS(3);
@@ -726,7 +726,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, co
 
 /*!
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, const double &RSearch, const bool &signd){
+void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool signd, double RSearch){
 
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;

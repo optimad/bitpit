@@ -212,9 +212,9 @@ double LevelSetObject::getMaxSurfaceFeatureSize() const{
  * @param[in] RSeach size of the narrow band.
  * @param[in] signd if signed distances should be calculted
  */
-void LevelSetObject::computeLSInNarrowBand(const double &RSearch, const bool &signd){
-    BITPIT_UNUSED(RSearch);
+void LevelSetObject::computeLSInNarrowBand(bool signd, double RSearch){
     BITPIT_UNUSED(signd);
+    BITPIT_UNUSED(RSearch);
 }
 
 /*!
