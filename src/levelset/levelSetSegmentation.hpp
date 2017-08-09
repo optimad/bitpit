@@ -142,8 +142,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        createLevelsetInfo( LevelSetKernel *, const bool &, std::unordered_set<long> &) ;
 
     SegmentToCellMap                            extractSegmentToCellMap( LevelSetCartesian *, const double &);
-    SegmentToCellMap                            extractSegmentToCellMap( LevelSetOctree *, const double &);
-    SegmentToCellMap                            extractSegmentToCellMap( const std::vector<adaption::Info> & ) ;
+    void                                        computeLSInNarrowBand( LevelSetOctree *, const double &, const bool &);
+    void                                        updateLSInNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, const double &, const bool &) ;
 
     int                                         getNarrowBandResizeDirection( LevelSetOctree *, const double &) ;
 

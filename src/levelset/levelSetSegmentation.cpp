@@ -818,15 +818,13 @@ void LevelSetSegmentation::computeLSInNarrowBand( const double &RSearch, const b
     SegmentToCellMap segmentToCellMap;
     if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
         segmentToCellMap = extractSegmentToCellMap( lsCartesian, RSearch ) ;
+        std::unordered_set<long> addedCells = createSegmentInfo(m_kernelPtr, RSearch, segmentToCellMap) ;
+        createLevelsetInfo( m_kernelPtr, signd, addedCells );
 
     } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        segmentToCellMap = extractSegmentToCellMap( lsOctree, RSearch ) ;
+        computeLSInNarrowBand( lsOctree, RSearch, signd ) ;
 
     }
-
-    std::unordered_set<long> addedCells = createSegmentInfo(m_kernelPtr, RSearch, segmentToCellMap) ;
-
-    createLevelsetInfo( m_kernelPtr, signd, addedCells );
 }
 
 /*!
@@ -844,37 +842,12 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
         return;
     }
 
-    log::cout() << "Updating levelset within the narrow band... " << std::endl;
-
-    // Detect changes in narrow band size
-    int narrowBandResizeDirection = 0;
-    if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        narrowBandResizeDirection = getNarrowBandResizeDirection( lsOctree, RSearch ) ;
-    }
-
-    // If the narrow band size has been increased we can't just update the
-    // levelset, we need to rebuild it from scratch.
-    if (narrowBandResizeDirection > 0) {
-        clear( ) ;
-        computeLSInNarrowBand( RSearch, signd ) ;
+    if( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
+        log::cout() << "Updating levelset within the narrow band... " << std::endl;
+        updateLSInNarrowBand( lsOctree, mapper, RSearch, signd ) ;
         return;
     }
 
-    // If the narrow band size has been decreased or is the same as before
-    // it is possible to update the segment to cell association
-    SegmentToCellMap segmentToCellMap = extractSegmentToCellMap( mapper ) ;
-
-    // Prune previous segment info
-    //clearAfterMeshAdaptionDerived( mapper ) ;
-    clearAfterMeshAdaption( mapper ) ;
-
-    // Evaluate the levelset for the newly added elements
-    std::unordered_set<long> addedCells;
-    if (segmentToCellMap.size() != 0 ) {
-        addedCells = createSegmentInfo(m_kernelPtr, RSearch, segmentToCellMap) ;
-
-        createLevelsetInfo( m_kernelPtr, signd, addedCells );
-    }
 
 }
 
@@ -975,177 +948,97 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 }
 
 /*!
- * Determines the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle) for octree meshes
- * @param[in] visitee pointer to octree mesh
- * @param[in] RSearch size of narrow band
  */
-LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCellMap( LevelSetOctree *visitee, const double &RSearch){
+void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, const double &RSearch, const bool &signd){
 
-    VolumeKernel                &mesh = *(visitee->getMesh()) ;
-    const SurfUnstructured      &m_surface = m_segmentation->getSurface();
-    int                         dim(mesh.getDimension()) ;
-    long                        id, icart;
-    int                         i;
-    double                      size ;
 
-    std::array<double,3>        C0, C1, octrBB0, octrBB1, triBB0, triBB1 ;
-    PiercedVector<SegInfo>::iterator data;
+    VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    SegmentToCellMap segmentToCellMap;
-    segmentToCellMap.reserve(m_surface.getCellCount());
+    bool adaptiveSearch(RSearch<0);
+    double searchRadius = RSearch;
 
-    log::cout() << "  Extracting segment-to-cell map from Octree patch... " << std::endl;
+    long segmentId;
+    double distance;
+    std::unordered_set<long> addedCells;
 
-    // mesh size corresponding to RSearch
-    size = visitee->computeSizeFromRSearch( RSearch ) ;
+    for( const Cell &cell : mesh.getCells() ){
+        long cellId = cell.getId();
+        std::array<double, 3> cellCentroid = visitee->computeCellCentroid(cellId);
 
-    mesh.getBoundingBox(octrBB0,octrBB1) ;
-    getBoundingBox( triBB0, triBB1 );
-
-    triBB0 -= RSearch ;
-    triBB1 += RSearch ;
-
-    if( CGElem::intersectBoxBox(octrBB0,octrBB1,triBB0,triBB1,C0,C1) ) { //intersect two Bounding Boxes around geometry and local grid
-
-        // snap bounding box to octree grid and create cartesian grid
-        std::array<int,3>    nc ;
-
-        for( i=0; i<dim; ++i){
-            C0[i] =  octrBB0[i] + size *   (int) ( ( C0[i] - octrBB0[i] ) / size ) ;
-            C1[i] =  octrBB0[i] + size * ( (int) ( ( C1[i] - octrBB0[i] ) / size ) +1 ) ;
-
-            nc[i] = round( ( C1[i] - C0[i] ) /size ) ;
+        if(adaptiveSearch){
+            double cellSize = mesh.evalCellSize(cellId);
+            searchRadius = 0.5*sqrt(3.)*cellSize;
         }
 
-        // calculate LS triangle lists on cartesian mesh and map on pablo
-        VolCartesian            cmesh( 0, dim, C0, C1-C0, nc) ;
+        m_segmentation->m_searchTreeUPtr->findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
 
-        LevelSetCartesian       auxLS(cmesh) ;
-        LevelSetSegmentation    objLS(*this) ;
-        objLS.setKernel(&auxLS);
+        if(segmentId>=0){
 
-        double localRSearch = (1 + std::sqrt(3.) / 2.) * objLS.computeSizeNarrowBand() ;
+            double                s, d;
+            std::array<double,3>  n, xP;
+            m_segmentation->getSegmentInfo(cellCentroid, segmentId, d, s, xP, n);
 
-        objLS.setSizeNarrowBand(localRSearch);
-        SegmentToCellMap auxSegmentToCellMap = extractSegmentToCellMap( &auxLS, localRSearch ) ;
-        std::unordered_set<long> inNarrowBandCells = objLS.createSegmentInfo( &auxLS, localRSearch, auxSegmentToCellMap ) ;
-
-        for( auto & cell : mesh.getCells() ){
-            id = cell.getId() ;
-
-            const std::array<double,3> &C = visitee->computeCellCentroid(id) ;
-
-            icart = cmesh.locatePoint(C) ;
-            if ( icart != Cell::NULL_ID ) {
-                if( inNarrowBandCells.count(icart)== 0 ){
-                    continue;
-                }
-
-                for ( long segment : objLS.getSimplexList(icart) ) {
-                    segmentToCellMap[segment].push_back(id);
-                }
-
+            PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId) ;
+            if( lsInfoItr == m_ls.end() ){
+                lsInfoItr = m_ls.emplace(cellId) ;
             }
 
+            if( d < std::abs(lsInfoItr->value) ){
+                lsInfoItr->value    = ( signd *s  + (!signd) *1.   ) *d ;
+                lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
+            }
         }
-
-    } //endif intersect
-
-    return segmentToCellMap;
-
+    }
 }
 
 /*!
- * Extract the map that links segments and cells
- * @param[in] mapper information concerning mesh adaption
- * @return The map that links segments and cells
  */
-LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCellMap( const std::vector<adaption::Info> &mapper ){
+void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd){
 
-    log::cout() << "  Extracting segment-to-cell map from mapper... " << std::endl;
+    clearAfterMeshAdaption(mapper);
 
-    // Count the cells that will be associated to the segments
-    std::unordered_map<long, size_t> cellsPerSegment;
-    for ( const auto &info : mapper ){
-        // Consider only changes on cells
-        if( info.entity != adaption::Entity::ENTITY_CELL ){
+    VolumeKernel &mesh = *(visitee->getMesh()) ;
+
+    bool adaptiveSearch(RSearch<0);
+    double searchRadius = RSearch;
+
+    long segmentId;
+    double distance;
+
+    for( const auto &event : mapper ){
+
+        if( event.entity != adaption::Entity::ENTITY_CELL ){
             continue;
         }
 
-        // Get the number of child cells
-        long nChildElements = info.current.size() ;
-        if (nChildElements == 0) {
-            continue;
-        }
+        for( const long &cellId : event.current ){
+            std::array<double, 3> cellCentroid = visitee->computeCellCentroid(cellId);
 
-        // Associate the childs to the list of parent's segments
-        for ( const long & parent : info.previous ) {
-            PiercedVector<SegInfo>::const_iterator parentSegInfoItr = m_seg.find(parent) ;
-            if ( parentSegInfoItr == m_seg.cend() ) {
-                continue;
+            if(adaptiveSearch){
+                double cellSize = mesh.evalCellSize(cellId);
+                searchRadius = 0.5*sqrt(3.)*cellSize;
             }
 
-            for ( long segment : parentSegInfoItr->segments ) {
-                cellsPerSegment[segment] += nChildElements ;
-            }
-        }
-    }
+            m_segmentation->m_searchTreeUPtr->findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
 
-    // Extract the segment-to-cell map
-    SegmentToCellMap segmentToCellMap;
-    segmentToCellMap.reserve(cellsPerSegment.size());
+            if(segmentId>=0){
 
-    std::unordered_set<long> removeDuplicateList;
-    removeDuplicateList.reserve(cellsPerSegment.size());
+                double                s, d;
+                std::array<double,3>  n, xP;
+                m_segmentation->getSegmentInfo(cellCentroid, segmentId, d, s, xP, n);
 
-    for ( const auto &info : mapper ){
-        // Consider only changes on cells
-        if( info.entity != adaption::Entity::ENTITY_CELL ){
-            continue;
-        }
-
-        // Get the number of parent cells
-        long nParentCells = info.previous.size() ;
-        if (nParentCells == 0) {
-            continue;
-        }
-
-        // Get the number of child cells
-        long nChildElements = info.current.size() ;
-        if (nChildElements == 0) {
-            continue;
-        }
-
-        // Associate the childs to the list of parent's segments
-        bool possibleDuplicates = (nParentCells > 1);
-        for ( const long & parent : info.previous ) {
-            PiercedVector<SegInfo>::const_iterator parentSegInfoItr = m_seg.find(parent) ;
-            if ( parentSegInfoItr == m_seg.cend() ) {
-                continue;
-            }
-
-            for ( long segment : parentSegInfoItr->segments ) {
-                if ( possibleDuplicates ) {
-                    removeDuplicateList.insert( segment ) ;
+                PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId) ;
+                if( lsInfoItr == m_ls.end() ){
+                    lsInfoItr = m_ls.emplace(cellId) ;
                 }
 
-                std::vector<long> &cellList = segmentToCellMap[segment] ;
-                if ( cellList.capacity() == 0 ) {
-                    cellList.reserve( cellsPerSegment.at(segment) ) ;
+                if( d < std::abs(lsInfoItr->value) ){
+                    lsInfoItr->value    = ( signd *s  + (!signd) *1.   ) *d ;
+                    lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
                 }
-                cellList.insert( cellList.end(), info.current.begin(), info.current.end() ) ;
             }
         }
     }
-
-    // Remove duplicate entries
-    for ( long segment : removeDuplicateList ) {
-        std::vector<long> &cellList = segmentToCellMap.at(segment) ;
-        std::sort( cellList.begin(), cellList.end() ) ;
-        cellList.erase( std::unique(cellList.begin(), cellList.end()), cellList.end() ) ;
-    }
-
-    return segmentToCellMap;
 }
 
 /*!
