@@ -130,7 +130,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 # endif
 
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const;
-    bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &);
+    bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<long> &);
 
     std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *, const double &, const SegmentToCellMap &) ;
     void                                        updateSegmentList( const double &) ;

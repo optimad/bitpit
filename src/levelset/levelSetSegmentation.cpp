@@ -749,7 +749,7 @@ void LevelSetSegmentation::createLevelsetInfo( LevelSetKernel *visitee, const bo
  * @param[in] VS Simplex
  * @param[out] I indices of seed points
  */
-bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vector<std::array<double,3>> &VS, std::vector<int> &I){
+bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vector<std::array<double,3>> &VS, std::vector<long> &I){
 
     VolCartesian                        &mesh = *(static_cast<VolCartesian*>(visitee->getMesh()));
 
@@ -886,13 +886,13 @@ LevelSetSegmentation::SegmentToCellMap LevelSetSegmentation::extractSegmentToCel
 
     const SurfUnstructured                  &m_surface = m_segmentation->getSurface();
 
-    std::vector< int >                      stack, temp ;
+    std::vector<long>                       stack, temp ;
     std::vector< std::array<double,3> >     cloud ;
 
     std::vector<double>                     d;
     std::vector<double>::iterator           vit;
 
-    std::vector<int>                        flag( mesh.getCellCount(), -1);
+    std::vector<long>                       flag( mesh.getCellCount(), -1);
 
     std::vector<long>                       neighs ;
 
