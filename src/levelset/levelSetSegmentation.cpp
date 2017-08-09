@@ -164,113 +164,95 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
 
 /*!
  * Computes levelset relevant information at one point with respect to a segment
- * @param[in] p coordinates of point
- * @param[in] i index of segment
- * @param[out] d distance point to segment
- * @param[out] s sign of point wrt to segment, i.e. according to normal.
- * Care should be taken since the method could return erroneous information when
- * the point p lies on the normal plane. In this case s=0 but due to surface curvature
- * the point may not lie necessary on the surface. This sititaion is easily indentified
- * because the distance != 0.
- * @param[out] x closest point on segment
- * @param[out] n normal at closest point
+ *
+ * @param[in] pointCoords coordinates of point
+ * @param[in] segmentId index of segment
+ * @param[in] signd true is signed distance should be computed
+ * @param[out] distance distance point to segment
+ * @param[out] gradient levelset gradient
+ * @param[out] normal normal at closest point
  */
-void SegmentationKernel::getSegmentInfo( const std::array<double,3> &p, const long &i, const bool &signd, double &d, std::array<double,3> &g, std::array<double,3> &n ) const {
+void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords, const long &segmentId, const bool &signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const {
 
-    std::array<double,3> x ;
 
-    auto itrNormal = getVertexNormals().find(i) ;
-    auto itrGradient = getVertexGradients().find(i) ;
+    auto itrNormal = getVertexNormals().find(segmentId) ;
+    auto itrGradient = getVertexGradients().find(segmentId) ;
     assert( itrGradient != getVertexGradients().end() ) ;
 
-    const Cell &cell = m_surface->getCell(i) ;
-    int nVertices = cell.getVertexCount() ;
-    switch (nVertices) {
+    const Cell &cell = m_surface->getCell(segmentId) ;
+    ElementInfo::Type cellType = cell.getType();
 
-    case 1:
+    switch (cellType) {
+
+    case ElementInfo::VERTEX :
     {
         long id = cell.getVertex(0) ;
-        x = m_surface->getVertexCoords(id);
-        g = p-x;
-        d = norm2(g);
-        g /= d;
 
-        n = g;
+        gradient = pointCoords- m_surface->getVertexCoords(id);
+
+        distance = norm2(gradient) ;
+        gradient /= distance;
+
+        normal.fill(0.);
 
         break;
     }
 
-    case 2:
+    case ElementInfo::LINE:
     {
         long id0 = cell.getVertex(0) ;
         long id1 = cell.getVertex(1) ;
 
         std::array<double,2> lambda ;
+        std::array<double,3> x;
         int flag ;
 
-        d= CGElem::distancePointSegment( p, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), x, lambda, flag ) ;
+        distance = CGElem::distancePointSegment( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), x, lambda, flag ) ;
 
-        g = p-x;
-        g /= norm2(g);
-
-        n  = lambda[0] *itrGradient->second[0] ;
-        n += lambda[1] *itrGradient->second[1] ;
-        n /= norm2(n) ;
-
-        g *= sign(dotProduct(g,n));
+        gradient = pointCoords-x;
+        gradient /= norm2(gradient);
 
         if( itrNormal != getVertexNormals().end() ){
-            n  = lambda[0] *itrNormal->second[0] ;
-            n += lambda[1] *itrNormal->second[1] ;
-            n /= norm2(n) ;
+            normal  = lambda[0] *itrNormal->second[0] ;
+            normal += lambda[1] *itrNormal->second[1] ;
+            normal /= norm2(normal) ;
 
-            double kappa ;
-            maxval(lambda,kappa);
-            kappa = 1. -kappa;
-
-            n *= kappa;
-            n += (1.-kappa)*g;
-            n /= norm2(n);
+        } else {
+            normal  = lambda[0] *itrGradient->second[0] ;
+            normal += lambda[1] *itrGradient->second[1] ;
+            normal /= norm2(normal) ;
 
         }
 
         break;
     }
 
-    case 3:
+    case ElementInfo::TRIANGLE:
     {
         long id0 = cell.getVertex(0) ;
         long id1 = cell.getVertex(1) ;
         long id2 = cell.getVertex(2) ;
 
         std::array<double,3> lambda ;
+        std::array<double,3> x;
         int flag ;
 
-        d= CGElem::distancePointTriangle( p, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), x, lambda, flag ) ;
+        distance= CGElem::distancePointTriangle( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), x, lambda, flag ) ;
 
-        g = p-x;
-        g /= norm2(g);
-
-        n  = lambda[0] *itrGradient->second[0] ;
-        n += lambda[1] *itrGradient->second[1] ;
-        n += lambda[2] *itrGradient->second[2] ;
-        n /= norm2(n);
-
-        g *= sign(dotProduct(g,n));
+        gradient = pointCoords-x;
+        gradient /= norm2(gradient);
 
         if( itrNormal != getVertexNormals().end() ){
-            n  = lambda[0] *itrNormal->second[0] ;
-            n += lambda[1] *itrNormal->second[1] ;
-            n += lambda[2] *itrNormal->second[2] ;
-            n /= norm2(n) ;
+            normal  = lambda[0] *itrNormal->second[0] ;
+            normal += lambda[1] *itrNormal->second[1] ;
+            normal += lambda[2] *itrNormal->second[2] ;
+            normal /= norm2(normal) ;
 
-            double kappa ;
-            maxval(lambda,kappa);
-            kappa = 1. -kappa;
-
-            n *= kappa;
-            n += (1.-kappa)*g;
-            n /= norm2(n);
+        } else {
+            normal  = lambda[0] *itrGradient->second[0] ;
+            normal += lambda[1] *itrGradient->second[1] ;
+            normal += lambda[2] *itrGradient->second[2] ;
+            normal /= norm2(normal);
 
         }
 
@@ -279,17 +261,32 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &p, const lo
 
     default:
     {
-        log::cout() << " Segment not supported in SegmentationKernel::getSegmentInfo " << nVertices << std::endl ;
-
+        std::runtime_error ("Type of cell not supported.");
         break;
     }
 
     }
 
-    double s = sign( dotProduct(g, p - x) );
 
-    d *= ( signd *s  + (!signd) *1.);
-    n *= ( signd *1. + (!signd) *s ) ;
+    // the sign is computed by determining the side of point p
+    // with respect to the normal plane 
+    double s = sign( dotProduct(gradient, normal) );
+
+    // if p lies on the normal plane (s=0), but the distance is finite the sign must be evaluated
+    // considering the curvature of the surface. Anyhow this situation is not crucial because
+    // there should exists another element with smaller distance. The signed is put aribtrarly
+    // to positive
+    if(utils::DoubleFloatingEqual()(s,0.) && distance>0){
+        s = 1.;
+    } 
+
+    // If signed distance are computed, the distance value and gradient
+    // need to be changed accordingly. If unsigned distance are computed
+    // the orientation of the suraface normal is discarded and in order
+    // to agnostic with repect the two sides of the surface
+    distance *= ( signd *s  + (!signd) *1.);
+    gradient *= ( signd *s  + (!signd) *1.);
+    normal   *= ( signd *1. + (!signd) *s );
 
     return;
 
@@ -650,7 +647,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, co
                         m_segmentation->getSegmentInfo(cloud[k], segmentId, signd, distance, gradient, normal);
 
                         lsInfoItr->value    = distance;
-                        lsInfoItr->gradient = normal;
+                        lsInfoItr->gradient = gradient;
                 
                         PiercedVector<long>::iterator supportItr = m_support.find(cellId) ;
                         if( supportItr == m_support.end() ){
@@ -722,7 +719,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, const
 
             PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
             lsInfoItr->value    = distance;
-            lsInfoItr->gradient = normal;
+            lsInfoItr->gradient = gradient;
 
             PiercedVector<long>::iterator supportItr = m_support.emplace(cellId) ;
             *supportItr = segmentId;
@@ -770,7 +767,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
                 PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
                 lsInfoItr->value    = distance;
-                lsInfoItr->gradient = normal;
+                lsInfoItr->gradient = gradient;
 
                 PiercedVector<long>::iterator supportItr = m_support.emplace(cellId) ;
                 *supportItr = segmentId;
