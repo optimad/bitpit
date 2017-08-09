@@ -99,13 +99,23 @@ bool LevelSetObject::isPrimary( ) const {
 }
 
 /*!
- * Get the object and part id of projection point
+ * Get the part id of projection point
  * @param[in] i cell index
- * @return pair containing object and part id 
+ * @return part id 
  */
 int LevelSetObject::getPart(const long &i) const {
     BITPIT_UNUSED(i) ;
     return levelSetDefaults::PART ;
+}
+
+/*!
+ * Get the surface normal at the projection point. 
+ * The base implementation will return the levelset gradient.
+ * @param[in] i cell index
+ * @return surface normal
+ */
+std::array<double,3> LevelSetObject::getNormal(const long &i) const {
+    return getGradient(i);
 }
 
 /*!

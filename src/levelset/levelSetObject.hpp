@@ -86,6 +86,7 @@ class LevelSetObject{
     virtual std::array<double,3>                getGradient(const long &) const =0 ; 
 
     virtual int                                 getPart(const long &) const ;
+    virtual std::array<double,3>                getNormal(const long &) const; 
 
     short                                       getSign(const long &) const;
     virtual void                                propagateSign() ; 
