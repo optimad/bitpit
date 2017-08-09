@@ -163,7 +163,11 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
  * @param[in] p coordinates of point
  * @param[in] i index of segment
  * @param[out] d distance point to segment
- * @param[out] s sign of point wrt to segment, i.e. according to normal
+ * @param[out] s sign of point wrt to segment, i.e. according to normal.
+ * Care should be taken since the method could return erroneous information when
+ * the point p lies on the normal plane. In this case s=0 but due to surface curvature
+ * the point may not lie necessary on the surface. This sititaion is easily indentified
+ * because the distance != 0.
  * @param[out] x closest point on segment
  * @param[out] n normal at closest point
  */
@@ -243,6 +247,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &p, const lo
         n  = lambda[0] *itrGradient->second[0] ;
         n += lambda[1] *itrGradient->second[1] ;
         n += lambda[2] *itrGradient->second[2] ;
+        n /= norm2(n);
 
         g *= sign(dotProduct(g,n));
 
