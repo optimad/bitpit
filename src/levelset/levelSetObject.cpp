@@ -238,22 +238,6 @@ void LevelSetObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> 
 }
 
 /*! 
- * Deletes items outside the narrow band after grid adaption.
- * @param[in] newRSearch new size of narrow band
- */
-void LevelSetObject::filterOutsideNarrowBand( double newRSearch ){
-    _filterOutsideNarrowBand(newRSearch) ;
-}
-
-/*!
- * Clears data structure outside narrow band
- * @param[in] search size of narrow band
- */
-void LevelSetObject::_filterOutsideNarrowBand( double search ){
-    BITPIT_UNUSED(search) ;
-}
-
-/*! 
  * Clears all levelset information
  */
 void LevelSetObject::clear( ){

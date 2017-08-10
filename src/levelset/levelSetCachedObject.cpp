@@ -147,44 +147,6 @@ void LevelSetCachedObject::__clearAfterMeshAdaption( const std::vector<adaption:
 }
 
 /*! 
- * Deletes items outside the narrow band after grid adaption.
- * @param[in] newRSearch new size of narrow band
- */
-void LevelSetCachedObject::_filterOutsideNarrowBand( double newRSearch ){
-
-    PiercedVector<LevelSetInfo>::iterator lsItr = m_ls.begin() ;
-    while( lsItr != m_ls.end() ){
-
-
-        if( std::abs(lsItr->value) > newRSearch ){
-            if(lsItr->value>0){ 
-                lsItr = m_ls.erase( lsItr.getId(), true );
-            } else {
-                lsItr->value = -1.*levelSetDefaults::VALUE;
-                lsItr->gradient = levelSetDefaults::GRADIENT;
-                ++lsItr ;
-            }
-        } else {
-            ++lsItr ;
-        }
-
-    }
-
-    m_ls.flush() ;
-
-    __filterOutsideNarrowBand(newRSearch) ;
-
-}
-
-/*! 
- * Deletes items outside the narrow band after grid adaption in derived classes
- * @param[in] newRSearch new size of narrow band
- */
-void LevelSetCachedObject::__filterOutsideNarrowBand( double newRSearch ){
-    BITPIT_UNUSED(newRSearch);
-}
-
-/*! 
  * Clears all levelset information
  */
 void LevelSetCachedObject::_clear( ){

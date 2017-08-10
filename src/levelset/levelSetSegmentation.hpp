@@ -121,7 +121,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        __restore( std::istream &) ;
 
     void                                        __clearAfterMeshAdaption(const std::vector<adaption::Info> &);
-    void                                        __filterOutsideNarrowBand(double);
 
 # if BITPIT_ENABLE_MPI
     void                                        __writeCommunicationBuffer(const std::vector<long> &, SendBuffer &);

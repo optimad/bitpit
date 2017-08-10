@@ -60,8 +60,6 @@ class LevelSetCachedObject : public LevelSetObject{
 
     void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
     virtual void                                __clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
-    void                                        _filterOutsideNarrowBand(double);
-    virtual void                                __filterOutsideNarrowBand(double);
 
     void                                        _dump( std::ostream &) ; 
     virtual void                                __dump(std::ostream &) ; 

@@ -56,7 +56,6 @@ class LevelSetObject{
 
     virtual void                                _clear();
     virtual void                                _clearAfterMeshAdaption(const std::vector<adaption::Info>&) ;
-    virtual void                                _filterOutsideNarrowBand(double) ;
     virtual void                                _dump(std::ostream &);
     virtual void                                _restore( std::istream &);
 
@@ -103,7 +102,6 @@ class LevelSetObject{
     virtual void                                computeLSInNarrowBand(bool);
     virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, bool);
     void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
-    void                                        filterOutsideNarrowBand(double);  ;
 
     void                                        dump(std::ostream &); 
     void                                        restore(std::istream &); 

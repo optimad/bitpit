@@ -973,25 +973,6 @@ void LevelSetSegmentation::__clearAfterMeshAdaption( const std::vector<adaption:
 }
 
 /*!
- * Clears data structure outside narrow band
- * @param[in] search size of narrow band
- */
-void LevelSetSegmentation::__filterOutsideNarrowBand( double search ){
-
-    long id ;
-
-    bitpit::PiercedVector<SurfaceInfo>::iterator infoItr ;
-    for( infoItr = m_surfaceInfo.begin(); infoItr != m_surfaceInfo.end(); ++infoItr){
-        id = infoItr.getId();
-        if( std::abs(getLS(id)) > search ){
-            m_surfaceInfo.erase(id,true) ;
-        }
-    }
-
-    m_surfaceInfo.flush() ;
-}
-
-/*!
  * Writes LevelSetSegmentation to stream in binary format
  * @param[in] stream output stream
  */
