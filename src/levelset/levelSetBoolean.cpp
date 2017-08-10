@@ -151,14 +151,6 @@ int LevelSetBoolean::getPart( const long &id ) const{
 }
 
 /*!
- * Manually set the size of the narrow band.
- * @param[in] r size of the narrow band.
- */
-void LevelSetBoolean::setSizeNarrowBand(double r){
-    BITPIT_UNUSED(r);
-}
-
-/*!
  * Computes the levelset function within the narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  * @param[in] RSearch size of narrow band

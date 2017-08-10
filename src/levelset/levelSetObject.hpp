@@ -93,7 +93,7 @@ class LevelSetObject{
 
     bool                                        isInNarrowBand(const long &) const;
     double                                      getSizeNarrowBand() const;
-    virtual void                                setSizeNarrowBand(double) ;
+    void                                        setSizeNarrowBand(double) ;
 
     LevelSetIntersectionStatus                  intersectSurface(const long &) const;
     virtual double                              getSurfaceFeatureSize(const long &) const;

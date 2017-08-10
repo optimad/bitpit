@@ -71,8 +71,6 @@ class LevelSetBoolean: public LevelSetMetaObject {
     double                                      getMinSurfaceFeatureSize() const;
     double                                      getMaxSurfaceFeatureSize() const;
 
-    void                                        setSizeNarrowBand(double) ;
-
     void                                        computeLSInNarrowBand(bool, double) ;
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool, double);
 
