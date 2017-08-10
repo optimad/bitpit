@@ -288,7 +288,7 @@ typename PiercedStorage<value_t, id_t>::KernelType PiercedStorage<value_t, id_t>
 template<typename value_t, typename id_t>
 PiercedSyncMaster::SyncMode PiercedStorage<value_t, id_t>::getSyncMode() const
 {
-    if (getKernelType() == KERNEL_NONE) {
+    if (getKernelType() == KERNEL_NONE || getKernelType() == KERNEL_STATIC) {
         return PiercedKernel<id_t>::SYNC_MODE_DISABLED;
     } else {
         return m_const_kernel->getSlaveSyncMode(this);
