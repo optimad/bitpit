@@ -522,7 +522,7 @@ double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
  * @param[in] VS Simplex
  * @param[out] I indices of seed points
  */
-bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vector<std::array<double,3>> &VS, std::vector<long> &I){
+bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vector<std::array<double,3>> &VS, double searchRadius, std::vector<long> &I){
 
     VolCartesian                        &mesh = *(static_cast<VolCartesian*>(visitee->getMesh()));
 
@@ -534,8 +534,8 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
     mesh.getBoundingBox(B0, B1) ;
 
     for( int i=0; i<dim; ++i){
-        B0[i] -= getSizeNarrowBand() ;
-        B1[i] += getSizeNarrowBand() ;
+        B0[i] -= searchRadius;
+        B1[i] += searchRadius;
     }
 
     I.clear() ;
@@ -578,17 +578,16 @@ void LevelSetSegmentation::__clear( ){
 /*!
  * Computes the levelset function within the narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
- * @param[in] RSearch size of narrow band
  */
-void LevelSetSegmentation::computeLSInNarrowBand(bool signd, double RSearch ){
+void LevelSetSegmentation::computeLSInNarrowBand(bool signd){
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
     if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
-        computeLSInNarrowBand( lsCartesian, signd, RSearch ) ;
+        computeLSInNarrowBand( lsCartesian, signd) ;
 
     } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        computeLSInNarrowBand( lsOctree, signd, RSearch ) ;
+        computeLSInNarrowBand( lsOctree, signd) ;
 
     }
 }
@@ -597,20 +596,20 @@ void LevelSetSegmentation::computeLSInNarrowBand(bool signd, double RSearch ){
  * Updates the levelset function within the narrow band after mesh adaptation.
  * @param[in] mapper information concerning mesh adaption 
  * @param[in] signd if signed- or unsigned- distance function should be calculated
- * @param[in] RSearch size of narrow band
  */
-void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Info> &mapper, bool signd, double RSearch ){
+void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Info> &mapper, bool signd){
 
-    // Update is not implemented for Cartesian patches
-    if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
+    log::cout() << "Updating levelset within the narrow band... " << std::endl;
+    if( LevelSetCartesian* lsCartesian= dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
+
+        // Update is not implemented for Cartesian patches
         clear( ) ;
-        computeLSInNarrowBand(signd, RSearch) ;
+        computeLSInNarrowBand( lsCartesian, signd) ;
         return;
     }
 
     if( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        log::cout() << "Updating levelset within the narrow band... " << std::endl;
-        updateLSInNarrowBand( lsOctree, mapper, signd, RSearch ) ;
+        updateLSInNarrowBand( lsOctree, mapper, signd ) ;
         return;
     }
 
@@ -619,13 +618,14 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
 
 /*!
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bool signd, double RSearch){
+void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bool signd){
 
     VolCartesian &mesh = *(visitee->getCartesianMesh() ) ;
+    double searchRadius = m_RSearch;
 
-    if(RSearch<0.){
+    if(searchRadius<0.){
         for( int d=0; d < mesh.getDimension(); ++d){
-            RSearch = std::max( RSearch, mesh.getSpacing(d) ) ;
+            searchRadius = std::max( searchRadius, mesh.getSpacing(d) ) ;
         }
     }
 
@@ -652,7 +652,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
         // compute initial seeds, ie the cells where the vertices
         // of the surface element fall in and add them to stack
         m_segmentation->getSegmentVertexCoords( segmentId, &VS ) ;
-        seedNarrowBand( visitee, VS, stack );
+        seedNarrowBand( visitee, VS, searchRadius, stack );
 
 
         // propagate from seed
@@ -676,7 +676,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
                 double &cellDistance = cloudDistance[k];
 
                 // consider only cells within the search radius
-                if ( cellDistance <= RSearch ) {
+                if ( cellDistance <= searchRadius ) {
 
                     PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId) ;
                     if( lsInfoItr == m_ls.end() ){
@@ -733,12 +733,12 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
 
 /*!
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool signd, double RSearch){
+void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool signd){
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    bool adaptiveSearch(RSearch<0);
-    double searchRadius = RSearch;
+    bool adaptiveSearch(m_RSearch<0);
+    double searchRadius = m_RSearch;
     double factor = 0.5 *sqrt( (double) mesh.getDimension() );
 
     long segmentId;
@@ -837,14 +837,14 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
 /*!
  */
-void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, bool signd, double RSearch){
+void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, bool signd){
 
     clearAfterMeshAdaption(mapper);
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    bool adaptiveSearch(RSearch<0);
-    double searchRadius = RSearch;
+    bool adaptiveSearch(m_RSearch<0);
+    double searchRadius = m_RSearch;
     double factor = 0.5 *sqrt( (double) mesh.getDimension() );
 
     long segmentId;

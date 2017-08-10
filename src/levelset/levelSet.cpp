@@ -496,8 +496,7 @@ void LevelSet::compute(){
 
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
-        double RSearch = visitor.getSizeNarrowBand();
-        visitor.computeLSInNarrowBand( m_signedDF, RSearch) ;
+        visitor.computeLSInNarrowBand(m_signedDF) ;
         if(m_propagateS) visitor.propagateSign() ;
     }
 
@@ -538,8 +537,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
         if (compute) {
             // clearAfeterMeshAdaption must be called within updateLSInNarrowBand
-            double newRSearch = visitor.getSizeNarrowBand() ;
-            visitor.updateLSInNarrowBand( mapper, m_signedDF, newRSearch ) ;
+            visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
 
         } else {
             visitor.clearAfterMeshAdaption(mapper) ;
