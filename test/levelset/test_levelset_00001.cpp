@@ -109,7 +109,7 @@ long                                    i;
 
     for (i = 0; i < N; ++i) {
         connect[0] = vertexIdOffset + vertexIdStride * i;
-        connect[1] = vertexIdOffset + vertexIdStride * (i + 1) % N;
+        connect[1] = vertexIdOffset + vertexIdStride * ((i + 1) % N);
         mesh.addCell(ElementInfo::LINE, true, connect, cellIdOffset + cellIdStride * i);
     } //next i
 }
