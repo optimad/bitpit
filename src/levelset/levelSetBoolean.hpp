@@ -73,8 +73,6 @@ class LevelSetBoolean: public LevelSetMetaObject {
 
     void                                        setSizeNarrowBand(double) ;
 
-    double                                      computeSizeNarrowBand();
-    double                                      updateSizeNarrowBand(const std::vector<adaption::Info> &);
     void                                        computeLSInNarrowBand(bool, double) ;
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool, double);
 

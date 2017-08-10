@@ -159,29 +159,6 @@ void LevelSetBoolean::setSizeNarrowBand(double r){
 }
 
 /*!
- * Computes the size of the narrow band
- * @return size of the narrow band.
- */
-double LevelSetBoolean::computeSizeNarrowBand(){
-    double r = std::numeric_limits<double>::max() ;
-    for( auto objPtr : m_objPtr){
-        r = std::min(r, objPtr->getSizeNarrowBand());
-    }
-
-    return r;
-}
-
-/*!
- * Updates the size of the narrow band after mesh has been modified
- * @param[in] mapper descriptor of mesh modifications
- * @return size of the narrow band.
- */
-double LevelSetBoolean::updateSizeNarrowBand(const std::vector<adaption::Info> &mapper){
-    BITPIT_UNUSED(mapper);
-    return computeSizeNarrowBand();
-}
-
-/*!
  * Computes the levelset function within the narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  * @param[in] RSearch size of narrow band

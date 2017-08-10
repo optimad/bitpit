@@ -62,7 +62,6 @@ class LevelSetKernel{
 
     VolumeKernel*                               getMesh() const;
 
-    virtual double                              computeSizeNarrowBandFromLS(LevelSetObject*, const bool &);
     virtual double                              computeRSearchFromCell(long) = 0;
     virtual double                              computeCellIncircle(long);
     virtual double                              computeCellCircumcircle(long);

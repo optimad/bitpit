@@ -57,11 +57,7 @@ class LevelSetCachedObject : public LevelSetObject{
     void                                        _clear( ) ;
     virtual void                                __clear() ;
 
-    double                                      _computeSizeNarrowBand(LevelSetCartesian*);
-    double                                      _computeSizeNarrowBand(LevelSetOctree*);
 
-    double                                      _updateSizeNarrowBand(LevelSetCartesian*, const std::vector<adaption::Info> &);
-    double                                      _updateSizeNarrowBand(LevelSetOctree*, const std::vector<adaption::Info> &);
     void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
     virtual void                                __clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
     void                                        _filterOutsideNarrowBand(double);
@@ -89,8 +85,6 @@ class LevelSetCachedObject : public LevelSetObject{
 
     void                                        propagateSign();
 
-    double                                      computeSizeNarrowBand();
-    double                                      updateSizeNarrowBand(const std::vector<adaption::Info> &);
 };
 
 

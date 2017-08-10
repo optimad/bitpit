@@ -214,16 +214,6 @@ void LevelSetObject::computeLSInNarrowBand(bool signd, double RSearch){
 }
 
 /*!
- * Updates the size of the narrow band after mesh adaption
- * @param[in] mapper information regarding mesh adaption
- * @return size of narrow band
- */
-double LevelSetObject::updateSizeNarrowBand(const std::vector<adaption::Info> &mapper){
-    BITPIT_UNUSED(mapper);
-    return getSizeNarrowBand();
-}
-
-/*!
  * Updates the value and gradient of the levelset function within the narrow band
  * @param[in] mapper information regarding mesh adaption
  * @param[in] signd if signed distances should be calculted
