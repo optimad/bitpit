@@ -535,13 +535,10 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
 
+        visitor.clearAfterMeshAdaption(mapper) ;
+
         if (compute) {
-            // clearAfeterMeshAdaption must be called within updateLSInNarrowBand
             visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
-
-        } else {
-            visitor.clearAfterMeshAdaption(mapper) ;
-
         }
 
 #if BITPIT_ENABLE_MPI

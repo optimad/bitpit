@@ -839,8 +839,6 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
  */
 void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, bool signd){
 
-    clearAfterMeshAdaption(mapper);
-
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
     bool adaptiveSearch(m_RSearch<0);
