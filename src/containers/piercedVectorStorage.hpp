@@ -92,9 +92,10 @@ public:
     using PiercedStorage<value_t, id_t>::rawCend;
 
     // Methods for handing the synchronization
+    using PiercedStorage<value_t, id_t>::unsetKernel;
+
     void setStaticKernel(const PiercedVectorKernel<id_t> *kernel);
     void setDynamicKernel(PiercedVectorKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    void unsetKernel();
     const PiercedVectorKernel<id_t> * getKernel() const;
 
     // Dump and restore

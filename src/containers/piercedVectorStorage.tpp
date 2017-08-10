@@ -159,6 +159,45 @@ __PVS_REFERENCE__ PiercedVectorStorage<value_t, id_t>::operator[](id_t id)
     return PiercedStorage<value_t, id_t>::at(id, 0);
 }
 
+/**
+* Sets the kernel that will be used by the storage
+*
+* The storage will NOT be synchronized with the kernel. Every change to the
+* kernel can potentially invalidate the link between kernel and storage.
+*
+* \param kernel is the kernel that will be set
+*/
+template<typename value_t, typename id_t>
+void PiercedVectorStorage<value_t, id_t>::setStaticKernel(const PiercedVectorKernel<id_t> *kernel)
+{
+    PiercedStorage<value_t, id_t>::setStaticKernel(kernel);
+}
+
+/**
+* Sets the kernel that will be used by the storage.
+*
+* The storage will dynamically synchronized with the kernel.
+*
+* \param kernel is the kernel that will be set
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename value_t, typename id_t>
+void PiercedVectorStorage<value_t, id_t>::setDynamicKernel(PiercedVectorKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+{
+    PiercedStorage<value_t, id_t>::setDynamicKernel(kernel, syncMode);
+}
+
+/**
+* Gets a constant reference to the kernel of the storage
+*
+* \result A constant reference to the kernel of the storage.
+*/
+template<typename value_t, typename id_t>
+const PiercedVectorKernel<id_t> * PiercedVectorStorage<value_t, id_t>::getKernel() const
+{
+    return PiercedStorage<value_t, id_t>::getKernel();
+}
+
 }
 
 #endif
