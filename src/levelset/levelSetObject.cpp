@@ -164,10 +164,6 @@ void LevelSetObject::setSizeNarrowBand(double r){
  * @return indicator regarding intersection
  */
 LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i) const{
-    if( !isInNarrowBand(i)){
-        return LevelSetIntersectionStatus::FALSE;
-    }
-
     double circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
     if(std::abs(getLS(i)) > circumcircle){
         return LevelSetIntersectionStatus::FALSE;
