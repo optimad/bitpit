@@ -22,28 +22,33 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#define __BITPIT_MODULE_PATCH_KERNEL_HPP__
+# ifndef __BITPIT_SURFACE_SKD_TREE_HPP__
+# define __BITPIT_SURFACE_SKD_TREE_HPP__
 
-/*!
- * @defgroup patches Patches
- * @{
- * @defgroup patchelements Elements
- * @defgroup patchkernel Kernel
- * @defgroup surfacepatches Surface patches
- * @defgroup volumepatches Volume patches
- * @}
- */
-
-#include "bitpit_version.hpp"
-
-#include "patch_info.hpp"
-#include "patch_kernel.hpp"
-#include "patch_manager.hpp"
+#include "patch_skd_tree.hpp"
 #include "surface_kernel.hpp"
-#include "surface_skd_tree.hpp"
-#include "volume_kernel.hpp"
-#include "volume_skd_tree.hpp"
-#include "adaption.hpp"
+
+namespace bitpit {
+
+class SurfaceSkdTree : public PatchSkdTree {
+
+public:
+    SurfaceSkdTree(const SurfaceKernel *patch);
+
+    void clear(bool release);
+
+    double evalPointDistance(const std::array<double,3> &point) const;
+    double evalPointDistance(const std::array<double,3> &point, double maxDistance) const;
+
+    long findPointClosestCell(const std::array<double,3> &point, long *id, double *distance) const;
+    long findPointClosestCell(const std::array<double, 3> &point, double maxDistance, long *id, double *distance) const;
+
+private:
+    mutable std::vector<std::size_t> m_candidateIds;
+    mutable std::vector<double> m_candidateMinDistances;
+
+};
+
+}
 
 #endif

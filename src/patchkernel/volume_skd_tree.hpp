@@ -22,28 +22,21 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#define __BITPIT_MODULE_PATCH_KERNEL_HPP__
+# ifndef __BITPIT_VOLUME_SKD_TREE_HPP__
+# define __BITPIT_VOLUME_SKD_TREE_HPP__
 
-/*!
- * @defgroup patches Patches
- * @{
- * @defgroup patchelements Elements
- * @defgroup patchkernel Kernel
- * @defgroup surfacepatches Surface patches
- * @defgroup volumepatches Volume patches
- * @}
- */
-
-#include "bitpit_version.hpp"
-
-#include "patch_info.hpp"
-#include "patch_kernel.hpp"
-#include "patch_manager.hpp"
-#include "surface_kernel.hpp"
-#include "surface_skd_tree.hpp"
+#include "patch_skd_tree.hpp"
 #include "volume_kernel.hpp"
-#include "volume_skd_tree.hpp"
-#include "adaption.hpp"
+
+namespace bitpit {
+
+class VolumeSkdTree : public PatchSkdTree {
+
+public:
+    VolumeSkdTree(const VolumeKernel *patch);
+
+};
+
+}
 
 #endif

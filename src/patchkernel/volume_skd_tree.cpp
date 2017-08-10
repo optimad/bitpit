@@ -22,28 +22,25 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#define __BITPIT_MODULE_PATCH_KERNEL_HPP__
+#include "volume_skd_tree.hpp"
+
+namespace bitpit {
 
 /*!
- * @defgroup patches Patches
- * @{
- * @defgroup patchelements Elements
- * @defgroup patchkernel Kernel
- * @defgroup surfacepatches Surface patches
- * @defgroup volumepatches Volume patches
- * @}
- */
+* \class VolumeSkdTree
+*
+* \brief The VolumeSkdTree implements a Bounding Volume Hierarchy tree for
+* volume patches.
+*/
 
-#include "bitpit_version.hpp"
+/*!
+* Constructor.
+*
+* \param patch is the volume patch that will be use to build the tree
+*/
+VolumeSkdTree::VolumeSkdTree(const VolumeKernel *patch)
+    : PatchSkdTree(patch)
+{
+}
 
-#include "patch_info.hpp"
-#include "patch_kernel.hpp"
-#include "patch_manager.hpp"
-#include "surface_kernel.hpp"
-#include "surface_skd_tree.hpp"
-#include "volume_kernel.hpp"
-#include "volume_skd_tree.hpp"
-#include "adaption.hpp"
-
-#endif
+}
