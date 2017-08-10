@@ -671,7 +671,8 @@ void PiercedStorage<value_t, id_t>::rawEmreplace(std::size_t pos, Args&&... args
 
 /**
 * Exchanges the content of the storage by the content of x, which is another
-* storage object of the same type. Sizes may differ.
+* storage object of the same type. Sizes may differ but the number of fields
+* has to be the same.
 *
 * After the call to this member function, the elements in this storage are
 * those which were in x before the call, and the elements of x are those
@@ -685,27 +686,6 @@ void PiercedStorage<value_t, id_t>::rawEmreplace(std::size_t pos, Args&&... args
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::swap(PiercedStorage &x) noexcept
 {
-    swap(x, true);
-}
-
-/**
-* Exchanges the content of the storage by the content of x, which is another
-* storage object of the same type. Sizes may differ but the number of fields
-* has to be the same.
-*
-* After the call to this member function, the elements in this storage are
-* those which were in x before the call, and the elements of x are those
-* which were in this. All iterators, references and pointers remain valid
-* for the swapped objects.
-*
-* \param x is another storage of the same type (i.e., instantiated with the
-* same template parameters) whose content is swapped with that of this
-* storage.
-* \param swapKernel controls is the pointer to the kernel will be swapped
-*/
-template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::swap(PiercedStorage &x, bool swapKernel) noexcept
-{
     // It is only possible to swap two storages with the same number of field.
     // If this condition is not fulfilled we can not continue. However, we
     // cannot throw an exception because the function is declared snoexcept.
@@ -717,10 +697,8 @@ void PiercedStorage<value_t, id_t>::swap(PiercedStorage &x, bool swapKernel) noe
 
     PiercedSyncSlave::swap(x);
     std::swap(x.m_fields, m_fields);
-    if (swapKernel) {
-        std::swap(x.m_kernel, m_kernel);
-        std::swap(x.m_const_kernel, m_const_kernel);
-    }
+    std::swap(x.m_kernel, m_kernel);
+    std::swap(x.m_const_kernel, m_const_kernel);
 }
 
 /**

@@ -354,9 +354,6 @@ protected:
     // Methos for getting information on the storage
     std::size_t rawSize() const;
 
-    // Methods that modify the container as a whole
-    void swap(PiercedStorage &x, bool swapKernel) noexcept;
-
     // Methods for synchronizing the storage
     void commitSyncAction(const PiercedSyncAction &action);
 
