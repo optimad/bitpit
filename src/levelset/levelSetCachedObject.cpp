@@ -541,10 +541,11 @@ void LevelSetCachedObject::propagateSign() {
 
     // Identify the cells that have a known sign
     //
-    // The sign of the cells in the narrowband is known because for those cells
-    // we know the value of the levelset. We don't need to set the sign of the
-    // cells in the narrowband, instead they will be used as seeds for
-    // propagating the sign to other cells.
+    // We don't need to set the sign of cells associated to a levelset info,
+    // if a cell is associated to a levelset info we know its sign (the value
+    // contained in the levelset info may be a dummy value, but the sign is
+    // the correct one) and the cell can be used as seeds for propagating the
+    // sign to other cells.
     //
     // The sign of external cells will always be positive. An external cell is
     // a cell outside the bounding box of the object. Alsot the external cells
@@ -552,8 +553,8 @@ void LevelSetCachedObject::propagateSign() {
     for (auto itr = cellBegin; itr != cellEnd; ++itr) {
         long cellId = itr.getId();
 
-        // Process cells in the narrowband
-        if (isInNarrowBand(cellId)) {
+        // Process cells associated to a levelset info
+        if (m_ls.find(cellId) != m_ls.end()) {
             std::size_t cellRawId = itr.getRawIndex();
             signAssigned.rawAt(cellRawId) = true;
             --nUnassigned;
