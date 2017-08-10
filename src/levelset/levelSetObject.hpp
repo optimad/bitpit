@@ -104,7 +104,7 @@ class LevelSetObject{
     virtual void                                computeLSInNarrowBand(bool, double);
 
     virtual double                              updateSizeNarrowBand(const std::vector<adaption::Info> &);
-    virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &) ;
+    virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, bool, double) ;
     void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
     void                                        filterOutsideNarrowBand(double);  ;
 

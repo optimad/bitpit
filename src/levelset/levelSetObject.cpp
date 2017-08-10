@@ -229,13 +229,14 @@ double LevelSetObject::updateSizeNarrowBand(const std::vector<adaption::Info> &m
 
 /*!
  * Updates the value and gradient of the levelset function within the narrow band
- * @param[in] RSeach size of the narrow band.
+ * @param[in] mapper information regarding mesh adaption
  * @param[in] signd if signed distances should be calculted
+ * @param[in] RSeach size of the narrow band.
  */
-void LevelSetObject::updateLSInNarrowBand(const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd){
+void LevelSetObject::updateLSInNarrowBand(const std::vector<adaption::Info> &mapper, bool signd, double RSearch){
     BITPIT_UNUSED(mapper);
-    BITPIT_UNUSED(RSearch);
     BITPIT_UNUSED(signd);
+    BITPIT_UNUSED(RSearch);
 }
 
 /*! 

@@ -133,7 +133,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     void                                        computeLSInNarrowBand( LevelSetCartesian *, bool, double);
     void                                        computeLSInNarrowBand( LevelSetOctree *, bool, double);
-    void                                        updateLSInNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, const double &, const bool &) ;
+    void                                        updateLSInNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, bool, double);
 
     public:
     virtual ~LevelSetSegmentation();
@@ -156,7 +156,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     double                                      getMaxSurfaceFeatureSize() const;
 
     void                                        computeLSInNarrowBand(bool, double);
-    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, const double &, const bool &) ;
+    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool, double);
 };
 
 }

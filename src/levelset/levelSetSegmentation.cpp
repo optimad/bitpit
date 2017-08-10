@@ -596,10 +596,10 @@ void LevelSetSegmentation::computeLSInNarrowBand(bool signd, double RSearch ){
 /*!
  * Updates the levelset function within the narrow band after mesh adaptation.
  * @param[in] mapper information concerning mesh adaption 
- * @param[in] RSearch size of narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
+ * @param[in] RSearch size of narrow band
  */
-void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
+void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Info> &mapper, bool signd, double RSearch ){
 
     // Update is not implemented for Cartesian patches
     if( dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
@@ -610,7 +610,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
 
     if( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
         log::cout() << "Updating levelset within the narrow band... " << std::endl;
-        updateLSInNarrowBand( lsOctree, mapper, RSearch, signd ) ;
+        updateLSInNarrowBand( lsOctree, mapper, signd, RSearch ) ;
         return;
     }
 
@@ -766,7 +766,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
 /*!
  */
-void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd){
+void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, bool signd, double RSearch){
 
     clearAfterMeshAdaption(mapper);
 
