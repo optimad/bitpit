@@ -728,11 +728,21 @@ void PiercedVector<value_t, id_t>::shrinkToFit()
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::swap(PiercedVector &x) noexcept
 {
+    // The swap will swap also the slave-master information. This is not what
+    // we want, therefore the two pierced storage will be unregistered and the
+    // registered again after the swap.
+    PiercedVectorStorage<value_t, id_t>::unsetKernel();
+    x.PiercedVectorStorage<value_t, id_t>::unsetKernel();
+
     // Swap kernel data
     PiercedVectorKernel<id_t>::swap(x);
 
     // Swap storage data
-    PiercedVectorStorage<value_t, id_t>::swap(x, false);
+    PiercedVectorStorage<value_t, id_t>::swap(x);
+
+    // Re-register the storages
+    PiercedVectorStorage<value_t, id_t>::setDynamicKernel(this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
+    x.PiercedVectorStorage<value_t, id_t>::setDynamicKernel(&x, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
 }
 
 /**
