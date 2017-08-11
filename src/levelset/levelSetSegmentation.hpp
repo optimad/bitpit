@@ -145,8 +145,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        computeLSInNarrowBand( LevelSetOctree *, const double &, const bool &);
     void                                        updateLSInNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, const double &, const bool &) ;
 
-    int                                         getNarrowBandResizeDirection( LevelSetOctree *, const double &) ;
-
     public:
     virtual ~LevelSetSegmentation();
     LevelSetSegmentation(int);

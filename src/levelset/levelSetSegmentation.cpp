@@ -1042,21 +1042,6 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 }
 
 /*!
- * Detects if the requested narrow band size will make the narrow band grow
- * or shrink.
- * @param[in] visitee pointer to octree mesh
- * @param[in] newRSearch new size of narrow band
- * @return Returns 0 if the outer limit of the narrow band will not change,
- * +1 is the narrow band will be growth and -1 is the narrow band will shrink.
- */
-int LevelSetSegmentation::getNarrowBandResizeDirection( LevelSetOctree *visitee, const double &newRSearch){
-
-    double oldCellSize = visitee->computeSizeFromRSearch( getSizeNarrowBand() ) ;
-    double newCellSize = visitee->computeSizeFromRSearch( newRSearch ) ;
-
-    return sign( newCellSize - oldCellSize );
-}
-
 /*!
  * Prune the segment's info removing entries associated to cells that are
  * are not in the mesh anymore
