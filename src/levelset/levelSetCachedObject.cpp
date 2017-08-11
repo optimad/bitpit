@@ -595,7 +595,7 @@ void LevelSetCachedObject::propagateSign() {
     // ghost cells is needed. However it is only possibly to have cells with
     // an unknown sign for partinioned patches.
     long nGlobalUnassigned = nUnassigned;
-    if (mesh.isPartitioned()) {
+    if (assureMPI()) {
         MPI_Allreduce(MPI_IN_PLACE, &nGlobalUnassigned, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
     }
 
