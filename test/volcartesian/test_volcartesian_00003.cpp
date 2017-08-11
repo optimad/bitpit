@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 
 	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
 	patch_2D->getVTK().setName("cartesian_uniform_patch_2D");
-	patch_2D->setMemoryMode(VolCartesian::MEMORY_NORMAL);
+	patch_2D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 
 	log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
 	log::cout() << "Vertex count: " << patch_2D->getVertexCount() << std::endl;
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 
 	VolCartesian *patch_3D = new VolCartesian(1, 3, origin, length, dh);
 	patch_3D->getVTK().setName("cartesian_uniform_patch_3D");
-	patch_3D->setMemoryMode(VolCartesian::MEMORY_NORMAL);
+	patch_3D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 
 	log::cout() << "Cell count:   " << patch_3D->getCellCount() << std::endl;
 	log::cout() << "Vertex count: " << patch_3D->getVertexCount() << std::endl;

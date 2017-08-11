@@ -82,7 +82,7 @@ public:
 	std::array<double, 3> getSpacing() const;
 	double getSpacing(const int &direction) const;
 
-	void setMemoryMode(MemoryMode mode);
+	void switchMemoryMode(MemoryMode mode);
 	MemoryMode getMemoryMode();
 
 	bool isPointInside(const std::array<double, 3> &point);
@@ -169,7 +169,7 @@ private:
 	void initializeInterfaceArea();
 	void initializeCellVolume();
 
-	void setMemoryMode(MemoryMode mode, bool updatePatch);
+	void setMemoryMode(MemoryMode mode);
 
 	void addVertices();
 	std::array<double, 3> evalVertexCoords(const long &id);

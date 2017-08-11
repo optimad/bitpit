@@ -144,8 +144,8 @@ std::unique_ptr<PatchKernel> VolCartesian::clone()  const
 */
 void VolCartesian::reset()
 {
-	// Reset the patch kernel
-	VolumeKernel::reset();
+	// Switch to light memeory mode
+	switchMemoryMode(MEMORY_LIGHT);
 
 	// Reset geometry and discretization
 	m_minCoords = {{0., 0., 0.}};
@@ -163,11 +163,6 @@ void VolCartesian::reset()
 	m_nVertices   = 0;
 	m_nCells      = 0;
 	m_nInterfaces = 0;
-
-	// Set the light memory mode
-	//
-	// This will reset the patch data structures.
-	setMemoryMode(MemoryMode::MEMORY_LIGHT);
 }
 
 /*!
@@ -175,12 +170,6 @@ void VolCartesian::reset()
 */
 void VolCartesian::initialize()
 {
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
-
-	// Set the light memory mode
-	m_memoryMode = MemoryMode::MEMORY_LIGHT;
-
 	// Normals
 	int i = 0;
 	for (int n = 0; n < 3; n++) {
@@ -235,6 +224,15 @@ void VolCartesian::initialize()
 
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
+
+	// This patch need to be spawn
+	setSpawnStatus(SPAWN_NEEDED);
+
+	// Set the light memory mode
+	setMemoryMode(MemoryMode::MEMORY_LIGHT);
+
+	// Reset the patch
+	reset();
 }
 
 /*!
@@ -333,9 +331,13 @@ void VolCartesian::setDiscretization(const std::array<int, 3> &nCells)
 	// Interface area
 	initializeInterfaceArea();
 
-	// Create cells, vertices and interfaces
+	// Update patch data structures
 	if (getMemoryMode() == MemoryMode::MEMORY_NORMAL) {
-		update();
+		// Switch to light mode to reset patchdata structures
+		switchMemoryMode(MemoryMode::MEMORY_LIGHT);
+
+		// Swich back to normal mode to rebuild patchdata structures
+		switchMemoryMode(MemoryMode::MEMORY_NORMAL);
 	}
 }
 
@@ -489,46 +491,56 @@ std::array<double, 3> VolCartesian::getSpacing() const
 }
 
 /*!
-	Set the memory mode.
+	Switch to the specified memory mode.
+
+	\param mode is the memory mode that will be set
+*/
+void VolCartesian::switchMemoryMode(MemoryMode mode)
+{
+	if (mode == getMemoryMode()) {
+		return;
+	}
+
+	// Update the data structures
+	switch (mode) {
+
+	case MemoryMode::MEMORY_NORMAL:
+		// Spawn the patch to activate normal memory mode
+		spawn(false);
+
+		break;
+
+	case MemoryMode::MEMORY_LIGHT:
+		// To put the patch in memory mode we need to reset the generic data
+		// of the patch, therefore we can call the 'reset' implementation of
+		// the kernel.
+		VolumeKernel::reset();
+
+		// Now the patch needs to be spawn
+		setSpawnStatus(SPAWN_NEEDED);
+
+		// Set the light memory mode
+		setMemoryMode(mode);
+
+		break;
+
+	}
+}
+
+/*!
+	Function to set the memory mode flag.
+
+	This function just sets the flag to the specified value.
 
 	\param mode is the memory mode that will be set
 */
 void VolCartesian::setMemoryMode(MemoryMode mode)
 {
-	setMemoryMode(mode, true);
-}
-
-/*!
-	Set the memory mode.
-
-	\param mode is the memory mode that will be set
-	\param updatePatch if set to true, updates the data structures to switch
-	into the specified mode, otherwise only the memory-mode flag is updated
-	and the data structures needs to be updated externally
-*/
-void VolCartesian::setMemoryMode(MemoryMode mode, bool updatePatch)
-{
 	if (mode == m_memoryMode) {
 		return;
 	}
 
-	// Set the mode
 	m_memoryMode = mode;
-
-	// Update the data structures
-	if (updatePatch) {
-		switch (mode) {
-
-		case MemoryMode::MEMORY_NORMAL:
-			update();
-			break;
-
-		case MemoryMode::MEMORY_LIGHT:
-			VolumeKernel::reset();
-			break;
-
-		}
-	}
 }
 
 /*!
@@ -572,12 +584,6 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 	// Enable advanced editing
 	setExpert(true);
 
-	// Reset the mesh
-	//
-	// We need to reset only the generic data of the patch, therefore we call
-	// the 'reset' implementation of the kernel.
-	VolumeKernel::reset();
-
 	// Definition of the mesh
 	addVertices();
 	addCells();
@@ -614,7 +620,7 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 	}
 
 	// Updating the adaption brings the patch is in normal memory mode
-	setMemoryMode(MemoryMode::MEMORY_NORMAL, false);
+	setMemoryMode(MemoryMode::MEMORY_NORMAL);
 
 	// Done
 	return updateInfo;
@@ -887,6 +893,9 @@ void VolCartesian::_dump(std::ostream &stream)
  */
 void VolCartesian::_restore(std::istream &stream)
 {
+	// This patch need to be spawn
+	setSpawnStatus(SPAWN_NEEDED);
+
 	// Origin
 	std::array<double, 3> origin;
 	utils::binary::read(stream, origin[0]);
@@ -914,7 +923,7 @@ void VolCartesian::_restore(std::istream &stream)
 	// Memory mode
 	MemoryMode memoryMode;
 	utils::binary::read(stream, memoryMode);
-	setMemoryMode(memoryMode);
+	switchMemoryMode(memoryMode);
 }
 
 /*!
