@@ -592,8 +592,8 @@ void LevelSetCachedObject::propagateSign() {
 
 #if BITPIT_ENABLE_MPI
     // If there are cells with an unknown sign, data communication among
-    // ghost cells is needed. At this point, it is only possible to have
-    // cells with an unknown sign for It is not possible to have
+    // ghost cells is needed. However it is only possibly to have cells with
+    // an unknown sign for partinioned patches.
     long nGlobalUnassigned = nUnassigned;
     if (mesh.isPartitioned()) {
         MPI_Allreduce(MPI_IN_PLACE, &nGlobalUnassigned, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
