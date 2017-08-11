@@ -62,7 +62,7 @@ public:
     const SurfUnstructured & getSurface();
 
     void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
-    void getSegmentInfo( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const;
+    void getSegmentInfo( const std::array<double,3> &p, const long &i, const bool &signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
 
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;
@@ -84,17 +84,6 @@ private:
 class LevelSetSegmentation : public LevelSetCachedObject {
 
     private:
-    struct SegInfo{
-        std::vector<long>                segments ;                /**< list of segments within narrow band */
-        std::vector<double>              distances ;               /**< list of segments distances within narrow band */
-
-        SegInfo( ) ;
-        SegInfo( std::size_t capacity ) ;
-        SegInfo( const std::vector<long> &_segments, const std::vector<double> &_distances ) ;
-
-        void initialize( std::size_t capacity ) ;
-    };
-
     struct DistanceComparator
     {
         const std::vector<double> & m_vector;
@@ -111,11 +100,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
         }
     };
 
-    typedef std::unordered_map<long, std::vector<long>> SegmentToCellMap ;
-
     std::shared_ptr<const SegmentationKernel> m_segmentation;
-
-    PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
+    PiercedVector<long>                         m_support;                      /**< cell support information  */
 
     double                                      getSegmentSize( long ) const;
 
@@ -136,10 +122,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const;
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<long> &);
 
-    std::unordered_set<long>                    createSegmentInfo( LevelSetKernel *, const double &, const SegmentToCellMap &) ;
-    void                                        createLevelsetInfo( LevelSetKernel *, const bool &, std::unordered_set<long> &) ;
-
-    SegmentToCellMap                            extractSegmentToCellMap( LevelSetCartesian *, const double &);
+    void                                        computeLSInNarrowBand( LevelSetCartesian *, const double &, const bool &);
     void                                        computeLSInNarrowBand( LevelSetOctree *, const double &, const bool &);
     void                                        updateLSInNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, const double &, const bool &) ;
 
@@ -157,8 +140,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     virtual int                                 getPart(const long &) const ;
     long                                        getSupport(const long &i) const;
-    int                                         getSupportCount(const long &) const ;
-    const std::vector<long> &                   getSimplexList(const long &) const ;
 
     double                                      getSurfaceFeatureSize(const long &) const;
     double                                      getMinSurfaceFeatureSize() const;
