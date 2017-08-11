@@ -494,22 +494,11 @@ void LevelSet::compute(){
 
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::compute()");
 
-    double RSearch ;
-
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
-        if( !m_userRSearch){
-            RSearch = visitor.computeSizeNarrowBand()  ;
-            visitor.setSizeNarrowBand(RSearch) ;
-        }
-    }
-
-
-    for( int objectId : m_order){
-        auto &visitor = *(m_objects.at(objectId)) ;
-        RSearch = visitor.getSizeNarrowBand();
+        double RSearch = visitor.getSizeNarrowBand();
         visitor.computeLSInNarrowBand( m_signedDF, RSearch) ;
-        if( m_propagateS ) visitor.propagateSign() ;
+        if(m_propagateS) visitor.propagateSign() ;
     }
 
 }
@@ -526,7 +515,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     m_kernel->updateGeometryCache( mapper ) ;
 
     // Check the mapper to detect the operations to perform
-    bool updateNarrowBand = false;
+    bool compute = false;
     std::unordered_map<int,std::vector<long>> sendList, recvList ;
 
     for( const auto &event : mapper){
@@ -539,18 +528,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         } else if( event.type == adaption::Type::TYPE_PARTITION_RECV){
             recvList.insert({{event.rank,event.current}}) ;
         } else if( event.type != adaption::Type::TYPE_PARTITION_NOTICE){
-            updateNarrowBand = true ;
-        }
-    }
-
-    // Evaluate new narrow band size
-    double newRSearch ;
-    if (updateNarrowBand && !m_userRSearch) {
-
-        for( int objectId : m_order){
-            auto &visitor = *(m_objects.at(objectId)) ;
-            newRSearch = visitor.updateSizeNarrowBand(mapper)  ;
-            visitor.setSizeNarrowBand(newRSearch) ;
+            compute = true ;
         }
     }
 
@@ -558,9 +536,9 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
 
-        if (updateNarrowBand) {
+        if (compute) {
             // clearAfeterMeshAdaption must be called within updateLSInNarrowBand
-            newRSearch = visitor.getSizeNarrowBand() ;
+            double newRSearch = visitor.getSizeNarrowBand() ;
             visitor.updateLSInNarrowBand( mapper, m_signedDF, newRSearch ) ;
 
         } else {
@@ -576,26 +554,11 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
         visitor.exchangeGhosts() ;
 #endif
-        if (updateNarrowBand && m_propagateS) {
+        if (compute && m_propagateS) {
             visitor.propagateSign() ;
         }
     }
 
-    // Finish narrow band update
-    if (updateNarrowBand) {
-
-        for( int objectId : m_order){
-            auto &visitor = *(m_objects.at(objectId)) ;
-            newRSearch = m_kernel->computeSizeNarrowBandFromLS( &visitor, m_signedDF );
-            visitor.setSizeNarrowBand(newRSearch) ;
-        }
-
-        for( int objectId : m_order){
-            auto &visitor = *(m_objects.at(objectId)) ;
-            newRSearch = visitor.getSizeNarrowBand();
-            visitor.filterOutsideNarrowBand(newRSearch) ;
-        }
-    }
 }
 
 /*! 

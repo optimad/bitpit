@@ -621,7 +621,14 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
  */
 void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bool signd, double RSearch){
 
-    VolumeKernel                            &mesh = *(visitee->getMesh() ) ;
+    VolCartesian &mesh = *(visitee->getCartesianMesh() ) ;
+
+    if(RSearch<0.){
+        for( int d=0; d < mesh.getDimension(); ++d){
+            RSearch = std::max( RSearch, mesh.getSpacing(d) ) ;
+        }
+    }
+
     std::vector<std::array<double,3>>       VS(3);
 
     const SurfUnstructured                  &m_surface = m_segmentation->getSurface();
@@ -728,38 +735,102 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
  */
 void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool signd, double RSearch){
 
-
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
     bool adaptiveSearch(RSearch<0);
     double searchRadius = RSearch;
+    double factor = 0.5 *sqrt( (double) mesh.getDimension() );
 
     long segmentId;
     double distance;
     std::array<double,3> gradient, normal;
+    std::array<double,3> centroid, root;
+
+    std::unordered_set<long> intersects, prcoessed;
 
     for( const Cell &cell : mesh.getCells() ){
+
         long cellId = cell.getId();
-        std::array<double, 3> cellCentroid = visitee->computeCellCentroid(cellId);
+
+        centroid = visitee->computeCellCentroid(cellId);
 
         if(adaptiveSearch){
             double cellSize = mesh.evalCellSize(cellId);
-            searchRadius = 0.5*sqrt(3.)*cellSize;
+            searchRadius = factor *cellSize;
         }
 
-        m_segmentation->m_searchTreeUPtr->findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
+        m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
 
         if(segmentId>=0){
 
-            m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+            m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
 
-            PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
+            PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId);
+            lsInfoItr = m_ls.emplace(cellId) ;
             lsInfoItr->value    = distance;
             lsInfoItr->gradient = gradient;
 
             PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
             infoItr->support = segmentId;
             infoItr->normal = normal;
+
+            if(adaptiveSearch){
+                intersects.insert(cellId);
+            }
+
+        }
+             
+    }
+
+    if(!adaptiveSearch){
+        return;
+    }
+    
+    for( const long &cellId : intersects){
+
+        Cell const &cell = mesh.getCell(cellId);
+        LevelSetInfo const &intersect = getLevelSetInfo(cellId);
+        
+        centroid = visitee->computeCellCentroid(cellId);
+        root = centroid -intersect.value *intersect.gradient;
+
+        const long *neighbours = cell.getAdjacencies() ;
+        int nNeighbours = cell.getAdjacencyCount() ;
+        for (int n = 0; n < nNeighbours; ++n) {
+            long neighId = neighbours[n];
+
+            if (neighId < 0) {
+                continue;
+            }
+
+            // skip if neigh cell has already been processed
+            // either because it is intersected by surface or
+            // because it is a neigh to a previous intersect
+            if( m_ls.count(neighId) != 0 ){
+                continue;
+            }
+
+            centroid = visitee->computeCellCentroid(neighId);
+            searchRadius =  1.05 *norm2(centroid-root);
+            m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+
+            if(segmentId>=0){
+
+                m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+
+                PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(neighId) ;
+                lsInfoItr->value    = distance;
+                lsInfoItr->gradient = gradient;
+
+
+                PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(neighId);
+                infoItr->support = segmentId;
+                infoItr->normal = normal;
+
+            } else {
+                assert(false && "Should not pass here");
+            }
+
         }
     }
 }
@@ -774,12 +845,15 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
     bool adaptiveSearch(RSearch<0);
     double searchRadius = RSearch;
+    double factor = 0.5 *sqrt( (double) mesh.getDimension() );
 
     long segmentId;
-    std::array<double,3> cellCentroid;
+    std::array<double,3> centroid, root;
 
     double distance;
     std::array<double,3> gradient, normal;
+
+    std::vector<long> unprocessed;
 
     for( const auto &event : mapper ){
 
@@ -788,18 +862,18 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
         }
 
         for( const long &cellId : event.current ){
-            cellCentroid = visitee->computeCellCentroid(cellId);
+            centroid = visitee->computeCellCentroid(cellId);
 
             if(adaptiveSearch){
                 double cellSize = mesh.evalCellSize(cellId);
-                searchRadius = 0.5*sqrt(3.)*cellSize;
+                searchRadius =  factor *cellSize;
             }
 
-            m_segmentation->m_searchTreeUPtr->findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
+            m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
 
             if(segmentId>=0){
 
-                m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+                m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
 
                 PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
                 lsInfoItr->value    = distance;
@@ -808,7 +882,65 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
                 PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId) ;
                 infoItr->support = segmentId;
                 infoItr->normal = normal;
+
+            } else if(adaptiveSearch){
+                unprocessed.push_back(cellId);
             }
+
+        }
+    }
+
+    if(!adaptiveSearch){
+        return;
+    }
+
+    for( const long &cellId : unprocessed){
+
+        const Cell &cell = mesh.getCell(cellId);
+
+        const long *neighbours = cell.getAdjacencies() ;
+        int nNeighbours = cell.getAdjacencyCount() ;
+
+        int n=0;
+        bool iterate = (nNeighbours>0);
+
+        while(iterate){
+
+            long neighId = neighbours[n];
+
+            if(neighId>=0){
+                if( intersectSurface(neighId) >= LevelSetIntersectionStatus::TRUE){
+
+                    LevelSetInfo const &intersect = getLevelSetInfo(neighId);
+                    root = visitee->computeCellCentroid(neighId) -intersect.value *intersect.gradient;
+
+                    centroid = visitee->computeCellCentroid(cellId);
+
+                    searchRadius =  1.05 *norm2(centroid-root);
+                    m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+
+                    if(segmentId>=0){
+
+                        m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+
+                        PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
+                        lsInfoItr->value    = distance;
+                        lsInfoItr->gradient = gradient;
+
+
+                        PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
+                        infoItr->support = segmentId;
+                        infoItr->normal = normal;
+
+                    } else {
+                        assert(false && "Should not pass here");
+                    }
+                    iterate = false;
+                }
+            }
+
+            ++n;
+            iterate &= (n<nNeighbours);
         }
     }
 }
