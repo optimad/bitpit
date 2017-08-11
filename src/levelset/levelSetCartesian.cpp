@@ -27,7 +27,6 @@
 # include "levelSetKernel.hpp"
 # include "levelSetCartesian.hpp"
 
-
 namespace bitpit {
 
 /*!
@@ -96,25 +95,6 @@ double LevelSetCartesian::computeCellCircumcircle( long id ) {
     }
 
     return 0.5*sqrt((float) dim)*maxSpacing;
-}
-
-/*!
- * Compute size of narrow band given a cell.
- * @param[in] id is the id of the cell
- * @return size of narrow band
- */
-double LevelSetCartesian::computeRSearchFromCell( long id ){
-
-    BITPIT_UNUSED(id) ;
-
-    double newRSearch = 0. ;
-
-    for( int d=0; d<m_cartesian->getDimension(); ++d){
-        newRSearch = std::max( newRSearch, m_cartesian->getSpacing(d) ) ;
-    }
-
-    return newRSearch;
-
 }
 
 }

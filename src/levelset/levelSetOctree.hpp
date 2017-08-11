@@ -40,12 +40,8 @@ class LevelSetOctree : public LevelSetKernel{
     LevelSetOctree( VolOctree & );
 
     VolOctree *                                 getOctreeMesh() const;
-    double                                      computeRSearchFromCell(long);
     double                                      computeCellIncircle(long);
     double                                      computeCellCircumcircle(long);
-
-    double                                      computeRSearchFromLevel(uint8_t);
-    double                                      computeSizeFromRSearch(double);
 };
 
 }

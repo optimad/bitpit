@@ -206,6 +206,7 @@ double LevelSetKernel::computeCellCircumcircle( long id ) {
     return radius;
 
 }
+
 /*!
  * Checks if the specified cell is inside the given bounding box
  * @param[in] id is the id of the cell

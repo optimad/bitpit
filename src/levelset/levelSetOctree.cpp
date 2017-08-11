@@ -75,45 +75,4 @@ double LevelSetOctree::computeCellCircumcircle( long id ) {
     return 0.5*sqrt(dim)*m_octree->evalCellSize(id);
 }
 
-/*!
- * Compute size of narrow band given a cell.
- * This function assumes that the octree is balanced 2:1
- * @param[in] id is the id of the cell
- */
-double LevelSetOctree::computeRSearchFromCell( long id ){
-    int level = m_octree->getCellLevel(id) ;
-    return  computeRSearchFromLevel( level ) ;
-}
-
-/*!
- * Compute size of narrow band given the coarsest element level which is crossed by geometry.
- * This function assumes that the octree is balanced 2:1
- * @param[in] level the level of the coarsest octree
- */
-double LevelSetOctree::computeRSearchFromLevel( uint8_t level){
-    return  (m_octree->getTree()).levelToSize(level) *sqrt(11.) /2. ;
-}
-
-/*!
- * Compute size of smallest octants greater than a given size (typically the size of the narrow band)
- * @param[in] r limit size
- */
-double LevelSetOctree::computeSizeFromRSearch( double r){
-
-    PabloUniform &tree = m_octree->getTree() ;
-
-    uint8_t     level ( tree.getLocalMaxDepth() ) ;
-    double      size ;
-
-    size = tree.levelToSize(level) ;
-
-    while( size <= r ) {
-        level-- ;
-        size = tree.levelToSize(level) ;
-    }
-
-    return size ;
-
-}
-
 }
