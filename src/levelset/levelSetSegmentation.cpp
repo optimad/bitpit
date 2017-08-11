@@ -135,6 +135,10 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
             m_vertexNormals.insert({{segmentId, vertexNormal}}) ;
         }
     }
+
+    // Initialize search tree
+    m_searchTreeUPtr = std::unique_ptr<SurfaceSkdTree>(new SurfaceSkdTree(surface));
+    m_searchTreeUPtr->build();
 }
 
 /*!

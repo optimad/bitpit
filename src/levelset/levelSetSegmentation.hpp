@@ -39,6 +39,8 @@ namespace adaption{
     struct Info;
 }
 class SurfUnstructured;
+class SurfaceSkdTree;
+
 class SendBuffer;
 class RecvBuffer;
 
@@ -64,6 +66,8 @@ public:
 
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;
+
+    std::unique_ptr<SurfaceSkdTree> m_searchTreeUPtr;
 
 private:
     const SurfUnstructured *m_surface;
