@@ -1109,7 +1109,7 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
     lambda.resize(vertexCount);
 
     double distance, minDistance(std::numeric_limits<double>::max());
-    int minTriangle;
+    int minTriangle = -1;
     array3D V0, V1, V2;
     array3D localLambda, minLambda;
 
@@ -1132,6 +1132,7 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
 
     } //next triangle
 
+    assert(minTriangle >= 0);
     subtriangleOfPolygon( minTriangle, V, V0, V1, V2);
     xP = reconstructPointFromBarycentricTriangle( V0, V1, V2, minLambda);
 
