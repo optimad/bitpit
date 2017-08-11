@@ -135,9 +135,9 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_hasCustomTolerance(other.m_hasCustomTolerance),
       m_tolerance(other.m_tolerance),
       m_rank(other.m_rank),
-      m_nProcessors(other.m_nProcessors),
+      m_nProcessors(other.m_nProcessors)
 #if BITPIT_ENABLE_MPI==1
-      m_communicator(MPI_COMM_NULL),
+      , m_communicator(MPI_COMM_NULL),
       m_partitioned(other.m_partitioned),
       m_partitioningStatus(other.m_partitioningStatus),
       m_ghostOwners(other.m_ghostOwners),
