@@ -1090,7 +1090,7 @@ std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, ar
  */
 array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V)
 {
-    std::vector<double> lambda;
+    std::vector<double> lambda(V.size());
     return projectPointPolygon( P, V, lambda);
 }
 
@@ -1150,7 +1150,7 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
  */
 array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V)
 {
-    std::vector<double> lambda;
+    std::vector<double> lambda(V.size());
     return projectPointSimplex( P, V, lambda);
 }
 
@@ -1410,7 +1410,7 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &P, array3
 {
 
     int N( P.size() );
-    std::vector<array3D> lambda;
+    std::vector<array3D> lambda(N);
     std::vector<double> d = distanceCloudTriangle( P, Q1, Q2, Q3, lambda );
 
     flag.resize(N);
@@ -1603,7 +1603,7 @@ double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std
  */
 double distancePointPolygon( array3D const &P, std::vector<array3D> const &V, array3D &xP, int &flag)
 {
-    std::vector<double> lambda;
+    std::vector<double> lambda(V.size());
     double distance = distancePointPolygon( P, V, lambda);
     xP = reconstructPointFromBarycentricPolygon( V, lambda );
     flag = convertBarycentricToFlagPolygon( lambda );
@@ -1646,10 +1646,11 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V,std
  */
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<array3D> &xP, std::vector<int> &flag)
 {
-    std::vector<std::vector<double>> lambda;
-    std::vector<double> d = distanceCloudPolygon( cloud, V, lambda);
-
     int cloudCount( cloud.size() );
+    int vertexCount( V.size() );
+
+    std::vector<std::vector<double>> lambda( cloudCount, std::vector<double> (vertexCount));
+    std::vector<double> d = distanceCloudPolygon( cloud, V, lambda);
 
     xP.resize(cloudCount);
     std::vector<array3D>::iterator xPItr = xP.begin();
