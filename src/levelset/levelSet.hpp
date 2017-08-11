@@ -62,9 +62,6 @@ class LevelSet{
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
     void                    addProcessingOrder(int) ;
     bool                    removeProcessingOrder(int) ;
-# if BITPIT_ENABLE_MPI
-    bool                    assureMPI() ;
-# endif
 
     public:
     ~LevelSet() ;
@@ -113,7 +110,10 @@ class LevelSet{
     void                    restore( std::istream &);
 
     void                    compute( ) ;
-    void                    update( const std::vector<adaption::Info> & ) ;
+    void                    update( const std::vector<adaption::Info> & );
+# if BITPIT_ENABLE_MPI
+    void                    partition( const std::vector<adaption::Info> & );
+# endif
 };
 
 }

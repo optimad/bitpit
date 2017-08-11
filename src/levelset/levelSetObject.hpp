@@ -107,7 +107,6 @@ class LevelSetObject{
     void                                        restore(std::istream &); 
 
 # if BITPIT_ENABLE_MPI
-    bool                                        assureMPI() ;
     void                                        exchangeGhosts() ;
     void                                        communicate( std::unordered_map<int,std::vector<long>> &, std::unordered_map<int,std::vector<long>> &, std::vector<adaption::Info> const *mapper=NULL ) ;
 # endif 

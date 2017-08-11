@@ -193,7 +193,7 @@ int subtest_001(int rank)
     //Mesh Partitioning
     mapper = mesh.partition(MPI_COMM_WORLD, true) ;
     mesh.getVTK().setCounter() ;
-    levelset.update(mapper) ;
+    levelset.partition(mapper) ;
 
     //Refinement
     for( int i=0; i<10; ++i){

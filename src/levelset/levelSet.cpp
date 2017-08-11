@@ -114,6 +114,11 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
 void LevelSet::setMesh( VolCartesian* cartesian ) {
     LevelSetKernel *kernel = new LevelSetCartesian( *cartesian) ;
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
+
+    // Initialize the communicator
+    if (m_kernel->getMesh()->isPartitioned()) {
+        m_kernel->initializeCommunicator();
+    }
 }
 
 /*!
@@ -123,6 +128,11 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
 void LevelSet::setMesh( VolOctree* octree ) {
     LevelSetKernel *kernel = new LevelSetOctree( *octree) ;
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
+
+    // Initialize the communicator
+    if (m_kernel->getMesh()->isPartitioned()) {
+        m_kernel->initializeCommunicator();
+    }
 }
 
 /*!
@@ -489,6 +499,8 @@ void LevelSet::setSizeNarrowBand(double r){
 /*!
  * Computes levelset on given mesh with respect to the objects.
  * This routines needs to be called at least once.
+ * Each object should compute the levelset and associated
+ * information on both internal and ghost cells.
  */
 void LevelSet::compute(){
 
@@ -499,11 +511,13 @@ void LevelSet::compute(){
         visitor.computeLSInNarrowBand(m_signedDF) ;
         if(m_propagateS) visitor.propagateSign() ;
     }
-
 }
 
 /*!
  * Updates the levelset after mesh adaptation.
+ * Each object should compute the levelset and associated
+ * information on both internal and ghost cells.
+ *
  * @param[in] mapper mapper conatining mesh modifications
  */
 void LevelSet::update( const std::vector<adaption::Info> &mapper ){
@@ -513,10 +527,32 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     // Udate the cache of the kernel
     m_kernel->updateGeometryCache( mapper ) ;
 
-    // Check the mapper to detect the operations to perform
-    bool compute = false;
-    std::unordered_map<int,std::vector<long>> sendList, recvList ;
+    // Update ls in narrow band
+    for( int objectId : m_order){
+        auto &visitor = *(m_objects.at(objectId)) ;
+        visitor.clearAfterMeshAdaption(mapper) ;
+        visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
+        if(m_propagateS) visitor.propagateSign() ;
+    }
+}
 
+#if BITPIT_ENABLE_MPI
+/*!
+ * Updates the levelset after mesh partitioning.
+ * @param[in] mapper mapper conatining mesh modifications
+ */
+void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
+
+    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
+
+    // Set the communicator
+    m_kernel->initializeCommunicator();
+
+    // Udate the cache of the kernel
+    m_kernel->updateGeometryCache( mapper ) ;
+
+    // Compile send and receive lists
+    std::unordered_map<int,std::vector<long>> sendList, recvList ;
     for( const auto &event : mapper){
         if( event.entity != adaption::Entity::ENTITY_CELL){
             continue;
@@ -526,35 +562,17 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
             sendList.insert({{event.rank,event.previous}}) ;
         } else if( event.type == adaption::Type::TYPE_PARTITION_RECV){
             recvList.insert({{event.rank,event.current}}) ;
-        } else if( event.type != adaption::Type::TYPE_PARTITION_NOTICE){
-            compute = true ;
         }
     }
 
-    // Update ls in narrow band
+    // Communicate according to new partitioning
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
 
-        visitor.clearAfterMeshAdaption(mapper) ;
-
-        if (compute) {
-            visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
-        }
-
-#if BITPIT_ENABLE_MPI
-        // Parallel communications
-        if (sendList.size() > 0 || recvList.size() > 0) {
-            visitor.communicate( sendList, recvList, &mapper ) ;
-        }
-
-        visitor.exchangeGhosts() ;
-#endif
-        if (compute && m_propagateS) {
-            visitor.propagateSign() ;
-        }
+        visitor.communicate( sendList, recvList, &mapper ) ;
     }
-
 }
+#endif
 
 /*! 
  * Writes LevelSetKernel to stream in binary format
@@ -587,19 +605,6 @@ void LevelSet::restore( std::istream &stream ){
         object.second->restore( stream ) ;
     }
 }
-
-#if BITPIT_ENABLE_MPI
-/*!
- * Checks if MPI communicator is available in underlying mesh.
- * If available, MPI communicator is retreived from mesh (and duplicated if necessary) and parallel processing can be done.
- * If not serial processing is necessary
- * @return true if parallel
- */
-bool LevelSet::assureMPI( ){
-    return(m_kernel->assureMPI() ) ;
-}
-
-#endif 
 
 }
 

@@ -155,7 +155,7 @@ int subtest_001(int rank)
     mesh.getVTK().setName("levelset_parallel_001") ;
 
     mapper = mesh.partition(MPI_COMM_WORLD, true) ;
-    levelset.update(mapper) ;
+    levelset.partition(mapper) ;
     const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
 
     // Write mesh

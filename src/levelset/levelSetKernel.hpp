@@ -52,7 +52,7 @@ class LevelSetKernel{
     protected:
     VolumeKernel*                               m_mesh;        /**< Pointer to underlying mesh*/
 # if BITPIT_ENABLE_MPI
-    MPI_Comm                                    m_commMPI;     /**< MPI communicator */
+    MPI_Comm                                    m_communicator; /**< MPI communicator */
 # endif
 
     public:
@@ -72,10 +72,10 @@ class LevelSetKernel{
     double                                      isCellInsideBoundingBox(long, std::array<double,3> , std::array<double,3> );
 
 # if BITPIT_ENABLE_MPI
+    void                                        initializeCommunicator();
     MPI_Comm                                    getCommunicator() const;
     void                                        freeCommunicator();
     bool                                        isCommunicatorSet() const;
-    bool                                        assureMPI() ;
 # endif
 
 };

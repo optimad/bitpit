@@ -290,17 +290,6 @@ void LevelSetObject::_restore( std::istream &stream ){
 #if BITPIT_ENABLE_MPI
 
 /*!
- * Checks if MPI communicator is available in underlying mesh.
- * If available, MPI communicator is retreived from mesh (and duplicated if necessary) and parallel processing can be done.
- * If not serial processing is necessary
- * @return true if parallel
- */
-bool LevelSetObject::assureMPI(){
-
-    return(m_kernelPtr->assureMPI() ) ;
-}
-
-/*!
  * Update of ghost cell;
  */
 void LevelSetObject::exchangeGhosts(){
@@ -320,7 +309,7 @@ void LevelSetObject::exchangeGhosts(){
  */
 void LevelSetObject::communicate( std::unordered_map<int,std::vector<long>> &sendList, std::unordered_map<int,std::vector<long>> &recvList, std::vector<adaption::Info> const *mapper){
 
-    if (!assureMPI()) {
+    if (!m_kernelPtr->getMesh()->isPartitioned()) {
         return;
     }
 

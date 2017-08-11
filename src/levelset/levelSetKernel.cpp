@@ -50,7 +50,7 @@ LevelSetKernel::LevelSetKernel() {
     m_mesh = NULL ;
 
 #if BITPIT_ENABLE_MPI
-    m_commMPI = MPI_COMM_NULL;
+    m_communicator = MPI_COMM_NULL;
 # endif
 
 }
@@ -242,11 +242,32 @@ double LevelSetKernel::isCellInsideBoundingBox( long id, std::array<double, 3> m
 # if BITPIT_ENABLE_MPI
 
 /*!
+	Initializes the MPI communicator to be used for parallel communications.
+*/
+void LevelSetKernel::initializeCommunicator()
+{
+	// Communication can be set just once
+	if (isCommunicatorSet()) {
+		throw std::runtime_error ("Levelset communicator can be set just once");
+	}
+
+	// The communicator has to be valid
+	MPI_Comm communicator = m_mesh->getCommunicator();
+	if (communicator == MPI_COMM_NULL) {
+		throw std::runtime_error ("Levelset communicator is not valid");
+	}
+
+	// Create a duplicate of the patch communicator
+	MPI_Comm_dup(communicator, &m_communicator);
+}
+
+/*!
  * Returns the MPI communicator stored within LevelSetKernel
  * @return MPI communicator
  */
 MPI_Comm LevelSetKernel::getCommunicator() const {
-    return m_commMPI;
+
+    return m_communicator;
 }
 
 /*!
@@ -275,28 +296,7 @@ void LevelSetKernel::freeCommunicator() {
         return;
     }
 
-    MPI_Comm_free(&m_commMPI);
-}
-
-/*!
- * Checks if MPI communicator is available in underlying mesh.
- * If available MPI communicator is retreived from mesh and duplicated if necessary and parallel processing can be done.
- * If not serial processing is necessary
- * @return true if parallel
- */
-bool LevelSetKernel::assureMPI( ){
-
-    if (isCommunicatorSet()) {
-        return true ;
-    }
-
-    MPI_Comm meshComm = m_mesh->getCommunicator() ;
-    if( meshComm == MPI_COMM_NULL){
-        return false;
-    } else {
-        MPI_Comm_dup(m_mesh->getCommunicator(), &m_commMPI);
-        return true;
-    }
+    MPI_Comm_free(&m_communicator);
 }
 
 #endif
