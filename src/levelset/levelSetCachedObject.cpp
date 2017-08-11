@@ -646,9 +646,10 @@ void LevelSetCachedObject::propagateSign() {
                 dataCommunicator.startSend(rank);
             }
 
-            // Receive the sign
+            // Receive the sign and propagate the sign
             //
-            // If we discovee the sign of a ghost, we can usi it as a seed.
+            // If we discover the sign of a ghost, we can use it as a seed.
+            seeds.clear();
             int nCompletedRecvs = 0;
             while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
                 int rank = dataCommunicator.waitAnyRecv();
@@ -656,15 +657,16 @@ void LevelSetCachedObject::propagateSign() {
                 RecvBuffer &buffer = dataCommunicator.getRecvBuffer(rank);
 
                 // Receive data and detect new seeds
-                seeds.clear();
                 for (long cellId : recvIds) {
                     buffer >> sign;
 
                     std::size_t cellRawId = mesh.getCells().getRawIndex(cellId);
                     if (!signAssigned.rawAt(cellRawId)) {
                         if (sign != 0) {
-                            seeds.push_back(cellId);
+                            setSign(cellId, sign);
                             signAssigned.rawAt(cellRawId) = true;
+                            --nUnassigned;
+                            seeds.push_back(cellId);
                         }
                     } else {
                         assert(getSign(cellId) == sign);
@@ -672,11 +674,10 @@ void LevelSetCachedObject::propagateSign() {
                 }
 
                 ++nCompletedRecvs;
+            }
 
-                // Propagate the sign of the newly identified seeds
-                if (seeds.size() > 0) {
-                    propagateSeedSign(seeds, &nUnassigned, &signAssigned);
-                }
+            if (seeds.size() > 0) {
+                propagateSeedSign(seeds, &nUnassigned, &signAssigned);
             }
 
             // Wait to the sends to finish
