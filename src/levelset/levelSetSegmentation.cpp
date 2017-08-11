@@ -293,6 +293,26 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 }
 
 /*!
+ *  \class      SurfaceInfo
+ *  \ingroup    levelset
+ *  \brief      Stores information regarding the projection points, like support element and surface normal
+*/
+
+/*!
+ * Default constructor
+ */
+LevelSetSegmentation::SurfaceInfo::SurfaceInfo( ) : support(levelSetDefaults::SUPPORT), normal(levelSetDefaults::GRADIENT) 
+{
+}
+
+/*!
+ * Constructor
+ */
+LevelSetSegmentation::SurfaceInfo::SurfaceInfo( long index, std::array<double,3> vec ) : support(index), normal(vec)
+{
+}
+
+/*!
 	@class      LevelSetSegmentation
 	@ingroup    levelset
 	@brief      Implements visitor pattern fo segmentated geometries
@@ -384,15 +404,32 @@ int LevelSetSegmentation::getPart( const long &id ) const{
 }
 
 /*!
+ * Gets the surface normal at the projection point
+ * @param[in] id index of cell
+ * @return surface normal
+ */
+std::array<double,3> LevelSetSegmentation::getNormal( const long &id ) const{
+
+    auto itr = m_surfaceInfo.find(id) ;
+    if( itr != m_surfaceInfo.end() ){
+        return itr->normal;
+    } else {
+        return levelSetDefaults::GRADIENT ;
+    }
+
+}
+
+
+/*!
  * Gets the closest support within the narrow band of cell
  * @param[in] id index of cell
  * @return closest segment in narrow band
  */
 long LevelSetSegmentation::getSupport( const long &id ) const{
 
-    auto itr = m_support.find(id) ;
-    if( itr != m_support.end() ){
-        return *itr;
+    auto itr = m_surfaceInfo.find(id) ;
+    if( itr != m_surfaceInfo.end() ){
+        return itr->support;
     } else {
         return levelSetDefaults::SUPPORT ;
     }
@@ -535,7 +572,7 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
  */
 void LevelSetSegmentation::__clear( ){
 
-    m_support.clear() ;
+    m_surfaceInfo.clear() ;
 }
 
 /*!
@@ -649,12 +686,12 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, co
                         lsInfoItr->value    = distance;
                         lsInfoItr->gradient = gradient;
                 
-                        PiercedVector<long>::iterator supportItr = m_support.find(cellId) ;
-                        if( supportItr == m_support.end() ){
-                            supportItr = m_support.emplace(cellId) ;
+                        auto infoItr = m_surfaceInfo.find(cellId) ;
+                        if( infoItr == m_surfaceInfo.end() ){
+                            infoItr = m_surfaceInfo.emplace(cellId) ;
                         }
-
-                        *supportItr = segmentId;
+                        infoItr->support = segmentId;
+                        infoItr->normal = normal;
                     }
 
 
@@ -671,7 +708,6 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, co
                     }
 
                 } //end if distance
-
             }
 
             stack.clear() ;
@@ -721,9 +757,9 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, const
             lsInfoItr->value    = distance;
             lsInfoItr->gradient = gradient;
 
-            PiercedVector<long>::iterator supportItr = m_support.emplace(cellId) ;
-            *supportItr = segmentId;
-
+            PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
+            infoItr->support = segmentId;
+            infoItr->normal = normal;
         }
     }
 }
@@ -769,9 +805,9 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
                 lsInfoItr->value    = distance;
                 lsInfoItr->gradient = gradient;
 
-                PiercedVector<long>::iterator supportItr = m_support.emplace(cellId) ;
-                *supportItr = segmentId;
-
+                PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId) ;
+                infoItr->support = segmentId;
+                infoItr->normal = normal;
             }
         }
     }
@@ -797,15 +833,13 @@ void LevelSetSegmentation::__clearAfterMeshAdaption( const std::vector<adaption:
 
         // Remove info of previous cells
         for ( const long & parent : info.previous ) {
-            if ( m_support.find( parent ) == m_support.end() ) {
-                continue;
+            if ( m_surfaceInfo.find( parent ) != m_surfaceInfo.end() ) {
+                m_surfaceInfo.erase( parent, true ) ;
             }
-
-            m_support.erase( parent, true ) ;
         }
     }
 
-    m_support.flush();
+    m_surfaceInfo.flush();
 }
 
 /*!
@@ -816,16 +850,15 @@ void LevelSetSegmentation::__filterOutsideNarrowBand( double search ){
 
     long id ;
 
-    bitpit::PiercedVector<long>::iterator supportItr ;
-    for( supportItr = m_support.begin(); supportItr != m_support.end(); ++supportItr){
-        id = supportItr.getId() ;
-        if( ! isInNarrowBand(id) ){
-            m_support.erase(id,true) ;
+    bitpit::PiercedVector<SurfaceInfo>::iterator infoItr ;
+    for( infoItr = m_surfaceInfo.begin(); infoItr != m_surfaceInfo.end(); ++infoItr){
+        id = infoItr.getId();
+        if( std::abs(getLS(id)) > search ){
+            m_surfaceInfo.erase(id,true) ;
         }
     }
 
-    m_support.flush() ;
-
+    m_surfaceInfo.flush() ;
 }
 
 /*!
@@ -834,12 +867,13 @@ void LevelSetSegmentation::__filterOutsideNarrowBand( double search ){
  */
 void LevelSetSegmentation::__dump( std::ostream &stream ){
 
-    utils::binary::write( stream, m_support.size() ) ;
+    utils::binary::write( stream, m_surfaceInfo.size() ) ;
 
-    bitpit::PiercedVector<long>::iterator supportItr, supportEnd = m_support.end() ;
-    for( supportItr = m_support.begin(); supportItr != supportEnd; ++supportItr){
-        utils::binary::write( stream, supportItr.getId() );
-        utils::binary::write( stream, *supportItr );
+    bitpit::PiercedVector<SurfaceInfo>::iterator infoItr, infoEnd = m_surfaceInfo.end() ;
+    for( infoItr = m_surfaceInfo.begin(); infoItr != infoEnd; ++infoItr){
+        utils::binary::write( stream, infoItr.getId() );
+        utils::binary::write( stream, infoItr->support );
+        utils::binary::write( stream, infoItr->normal );
     }
 }
 
@@ -849,18 +883,22 @@ void LevelSetSegmentation::__dump( std::ostream &stream ){
  */
 void LevelSetSegmentation::__restore( std::istream &stream ){
 
-    size_t supportSize;
-    utils::binary::read( stream, supportSize ) ;
-    m_support.reserve(supportSize);
+    size_t size;
 
-    for( size_t i=0; i<supportSize; ++i){
-        long id;
+    long id;
+    long support;
+    std::array<double,3> normal;
+
+    utils::binary::read( stream, size ) ;
+    m_surfaceInfo.reserve(size);
+
+    for( size_t i=0; i<size; ++i){
         utils::binary::read( stream, id );
 
-        long support;
         utils::binary::read( stream, support );
+        utils::binary::read( stream, normal );
 
-        m_support.insert(id,support) ;
+        m_surfaceInfo.insert(id, SurfaceInfo(support,normal));
     }
 }
 
@@ -877,22 +915,23 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
 
     //determine number of elements to send
     for( const auto &index : sendList){
-        auto supportItr = m_support.find(index) ;
-        if( supportItr != m_support.end() ){
+        auto infoItr = m_surfaceInfo.find(index) ;
+        if( infoItr != m_surfaceInfo.end() ){
             nItems++ ;
         }
     }
 
     dataBuffer << nItems ;
-    dataBuffer.setSize(dataBuffer.getSize() +nItems* sizeof(long) );
+    dataBuffer.setSize(dataBuffer.getSize() +nItems* ( sizeof(long) +3.*sizeof(double) ));
 
     //determine elements to send
     long counter= 0 ;
     for( const auto &index : sendList){
-        auto supportItr = m_support.find(index) ;
-        if( supportItr != m_support.end() ){
+        auto infoItr = m_surfaceInfo.find(index) ;
+        if( infoItr != m_surfaceInfo.end() ){
             dataBuffer << counter ;
-            dataBuffer << *supportItr;
+            dataBuffer << infoItr->support;
+            dataBuffer << infoItr->normal;
         }
 
         ++counter;
@@ -906,23 +945,30 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
  */
 void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
 
-    long    nItems, index, id ;
+    long nItems, index, id ;
+    long support;
+    std::array<double,3> normal;
 
     dataBuffer >> nItems ;
 
-    for( int i=0; i<nItems; ++i){
+    for( long i=0; i<nItems; ++i){
 
-        // Determine the id of the element
-        dataBuffer >> index ;
+        // read buffer
+        dataBuffer >> index;
+        dataBuffer >> support;
+        dataBuffer >> normal;
+
+        // determine the id of the element
         id = recvList[index] ;
 
         // Assign the data of the element
-        PiercedVector<long>::iterator supportItr = m_support.find(id) ;
-        if( supportItr == m_support.end() ){
-            supportItr = m_support.emplace(id) ;
+        auto infoItr = m_surfaceInfo.find(id) ;
+        if( infoItr == m_surfaceInfo.end() ){
+            infoItr = m_surfaceInfo.emplace(id) ;
         }
+        infoItr->support = support;
+        infoItr->normal = normal;
 
-        dataBuffer >> *supportItr ;
     }
 }
 # endif

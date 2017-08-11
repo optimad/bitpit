@@ -100,8 +100,17 @@ class LevelSetSegmentation : public LevelSetCachedObject {
         }
     };
 
+    struct SurfaceInfo
+    {
+        long support;
+        std::array<double,3> normal;
+
+        SurfaceInfo();
+        SurfaceInfo(long, std::array<double,3>);
+    };
+
     std::shared_ptr<const SegmentationKernel> m_segmentation;
-    PiercedVector<long>                         m_support;                      /**< cell support information  */
+    PiercedVector<SurfaceInfo>                         m_surfaceInfo;                      /**< cell support information  */
 
     double                                      getSegmentSize( long ) const;
 
@@ -139,6 +148,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     const SegmentationKernel &                  getSegmentation() const ;
 
     virtual int                                 getPart(const long &) const ;
+    virtual std::array<double,3>                getNormal(const long &) const ;
     long                                        getSupport(const long &i) const;
 
     double                                      getSurfaceFeatureSize(const long &) const;
