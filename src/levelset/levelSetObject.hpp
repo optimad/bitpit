@@ -52,7 +52,7 @@ class LevelSetObject{
     LevelSetObject(const LevelSetObject &other) = default;
 
     LevelSetKernel*                             m_kernelPtr;    /**< pointer to kernel */
-    double                                      m_RSearch;      /**< Size of narrow band */
+    double                                      m_narrowBand;   /**< Size of narrow band */
 
     virtual void                                _clear();
     virtual void                                _clearAfterMeshAdaption(const std::vector<adaption::Info>&) ;

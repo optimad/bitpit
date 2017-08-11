@@ -55,7 +55,7 @@ class LevelSet{
     std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_objects ;              /**< Objects defining the boundaries */
 
     std::vector<int>        m_order ;               /**< Processing order of objects */
-    bool                    m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
+    bool                    m_useNarrowBand;        /**< Flag if user has set size of narrow band (default=false)  */
     bool                    m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
     bool                    m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
 

@@ -55,7 +55,7 @@ LevelSetObject::~LevelSetObject( ){
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject(int id) : m_id(id), m_kernelPtr(nullptr), m_RSearch(-10.) {
+LevelSetObject::LevelSetObject(int id) : m_id(id), m_kernelPtr(nullptr), m_narrowBand(-10.) {
 }
 
 /*!
@@ -139,8 +139,8 @@ void LevelSetObject::propagateSign(){
  * @return true/false if the centroid is in narrow band
  */
 bool LevelSetObject::isInNarrowBand(const long &i)const{
-    assert( m_RSearch > 0 && "Need to set size of narrow >0 before calling isInNarrowBand");
-    return ( std::abs(getLS(i)) <= m_RSearch );
+    assert( m_narrowBand > 0 && "Need to set size of narrow >0 before calling isInNarrowBand");
+    return ( std::abs(getLS(i)) <= m_narrowBand );
 }
 
 /*!
@@ -148,7 +148,7 @@ bool LevelSetObject::isInNarrowBand(const long &i)const{
  * @return size of the current narrow band
  */
 double LevelSetObject::getSizeNarrowBand()const{
-    return m_RSearch;
+    return m_narrowBand;
 }
 
 /*!
@@ -156,7 +156,7 @@ double LevelSetObject::getSizeNarrowBand()const{
  * @param[in] r size of the narrow band.
  */
 void LevelSetObject::setSizeNarrowBand(double r){
-    m_RSearch = r;
+    m_narrowBand = r;
 }
 
 /*!
@@ -257,7 +257,7 @@ void LevelSetObject::_clear( ){
  */
 void LevelSetObject::dump( std::ostream &stream ){
     utils::binary::write(stream, m_id) ;
-    utils::binary::write(stream, m_RSearch);
+    utils::binary::write(stream, m_narrowBand);
     _dump(stream) ;
 }
 
@@ -275,7 +275,7 @@ void LevelSetObject::_dump( std::ostream &stream ){
  */
 void LevelSetObject::restore( std::istream &stream ){
     utils::binary::read(stream, m_id) ;
-    utils::binary::read(stream, m_RSearch);
+    utils::binary::read(stream, m_narrowBand);
     _restore(stream) ;
 }
 

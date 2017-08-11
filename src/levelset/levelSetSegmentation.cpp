@@ -614,7 +614,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
 void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bool signd){
 
     VolCartesian &mesh = *(visitee->getCartesianMesh() ) ;
-    double searchRadius = m_RSearch;
+    double searchRadius = m_narrowBand;
 
     if(searchRadius<0.){
         for( int d=0; d < mesh.getDimension(); ++d){
@@ -758,8 +758,8 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    bool adaptiveSearch(m_RSearch<0);
-    double searchRadius = m_RSearch;
+    bool adaptiveSearch(m_narrowBand<0);
+    double searchRadius = m_narrowBand;
     double factor = 0.5 *sqrt( (double) mesh.getDimension() );
 
     long segmentId;
@@ -862,8 +862,8 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    bool adaptiveSearch(m_RSearch<0);
-    double searchRadius = m_RSearch;
+    bool adaptiveSearch(m_narrowBand<0);
+    double searchRadius = m_narrowBand;
     double factor = 0.5 *sqrt( (double) mesh.getDimension() );
 
     long segmentId;

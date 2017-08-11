@@ -70,7 +70,7 @@ LevelSet::LevelSet() {
 
     m_objects.clear() ;
 
-    m_userRSearch = false ;
+    m_useNarrowBand = false ;
 
     m_signedDF    = true ;
     m_propagateS  = false;
@@ -480,7 +480,7 @@ void LevelSet::setPropagateSign(bool flag){
  * @param[in] r Size of the narrow band.
  */
 void LevelSet::setSizeNarrowBand(double r){
-    m_userRSearch = true ;
+    m_useNarrowBand = true ;
     for( auto &object :m_objects){
         object.second->setSizeNarrowBand(r) ;
     }
@@ -563,7 +563,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 void LevelSet::dump( std::ostream &stream ){
 
     utils::binary::write(stream, m_order);
-    utils::binary::write(stream, m_userRSearch);
+    utils::binary::write(stream, m_useNarrowBand);
     utils::binary::write(stream, m_signedDF);
     utils::binary::write(stream, m_propagateS);
 
@@ -579,7 +579,7 @@ void LevelSet::dump( std::ostream &stream ){
 void LevelSet::restore( std::istream &stream ){
 
     utils::binary::read(stream, m_order);
-    utils::binary::read(stream, m_userRSearch);
+    utils::binary::read(stream, m_useNarrowBand);
     utils::binary::read(stream, m_signedDF);
     utils::binary::read(stream, m_propagateS);
 
