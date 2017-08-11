@@ -182,16 +182,16 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
     const Cell &cell = m_surface->getCell(segmentId) ;
     ElementInfo::Type cellType = cell.getType();
 
+    std::array<double,3> projectionCoords;
+
     switch (cellType) {
 
     case ElementInfo::VERTEX :
     {
         long id = cell.getVertex(0) ;
 
-        gradient = pointCoords- m_surface->getVertexCoords(id);
+        projectionCoords = m_surface->getVertexCoords(id);
 
-        distance = norm2(gradient) ;
-        gradient /= distance;
 
         normal.fill(0.);
 
@@ -202,15 +202,9 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
     {
         long id0 = cell.getVertex(0) ;
         long id1 = cell.getVertex(1) ;
-
         std::array<double,2> lambda ;
-        std::array<double,3> x;
-        int flag ;
 
-        distance = CGElem::distancePointSegment( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), x, lambda, flag ) ;
-
-        gradient = pointCoords-x;
-        gradient /= norm2(gradient);
+        projectionCoords = CGElem::projectPointSegment( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), lambda);
 
         if( itrNormal != getVertexNormals().end() ){
             normal  = lambda[0] *itrNormal->second[0] ;
@@ -234,13 +228,9 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
         long id2 = cell.getVertex(2) ;
 
         std::array<double,3> lambda ;
-        std::array<double,3> x;
-        int flag ;
 
-        distance= CGElem::distancePointTriangle( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), x, lambda, flag ) ;
+        projectionCoords = CGElem::projectPointTriangle( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), lambda );
 
-        gradient = pointCoords-x;
-        gradient /= norm2(gradient);
 
         if( itrNormal != getVertexNormals().end() ){
             normal  = lambda[0] *itrNormal->second[0] ;
@@ -267,6 +257,9 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 
     }
 
+    gradient = pointCoords-projectionCoords;
+    distance = norm2(gradient); 
+    gradient /= distance;
 
     // the sign is computed by determining the side of point p
     // with respect to the normal plane 
@@ -547,7 +540,7 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
         }
     }
 
-    if( !found && CGElem::intersectBoxSimplex( B0, B1, VS, VP, dim ) ) {
+    if( !found && CGElem::intersectBoxPolygon( B0, B1, VS, false, true, true, VP, dim ) ) {
         for( const auto &P : VP){
             I.push_back( mesh.locateClosestCell(P) );
             found = true ;
@@ -654,6 +647,8 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
         m_segmentation->getSegmentVertexCoords( segmentId, &VS ) ;
         seedNarrowBand( visitee, VS, searchRadius, stack );
 
+        ElementInfo::Type segmentType = segment.getType();
+
 
         // propagate from seed
         size_t stackSize = stack.size();
@@ -662,12 +657,43 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
             // put the cell centroids of the stack into a vector
             // and calculate the distances to the cloud
             cloud.resize(stackSize) ;
+            cloudDistance.resize(stackSize);
 
             for( size_t k = 0; k < stackSize; ++k) {
                 long cell = stack[k];
                 cloud[k] = visitee->computeCellCentroid(cell) ;
             }
-            cloudDistance = CGElem::distanceCloudSimplex( cloud, VS); 
+
+            switch (segmentType) {
+
+            case ElementInfo::VERTEX :
+            {
+                for( size_t k=0; k<stackSize; ++k){
+                    cloudDistance[k] = norm2( cloud[k]-VS[0]);
+                }
+                break;
+            }
+
+            case ElementInfo::LINE:
+            {
+                for( size_t k=0; k<stackSize; ++k){
+                    cloudDistance[k] = CGElem::distancePointSegment( cloud[k], VS[0], VS[1]);
+                }
+                break;
+            }
+
+            case ElementInfo::TRIANGLE:
+            {
+                cloudDistance = CGElem::distanceCloudTriangle( cloud, VS[0], VS[1], VS[2]); 
+                break;
+            }
+
+            default:
+            {
+                std::runtime_error ("Type of cell not supported.");
+                break;
+            }
+            }
 
             // check each cell of cloud individually
             for( size_t k = 0; k < stackSize; ++k) {
@@ -682,7 +708,6 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
                     if( lsInfoItr == m_ls.end() ){
                         lsInfoItr = m_ls.emplace(cellId) ;
                     }
-
 
                     // check if the computed distance is the closest distance
                     if( cellDistance < std::abs(lsInfoItr->value) ){
@@ -721,14 +746,10 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
             stack.swap( temp ) ;
             stackSize = stack.size() ;
 
-
         } //end while
-
-
     }
 
     return;
-
 }
 
 /*!
