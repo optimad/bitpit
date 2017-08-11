@@ -40,6 +40,103 @@ namespace CGElem{
 
 
 /*!
+ * Checks if a segment is valid
+ * @param[in] P0 start point of segment
+ * @param[in] P1 end point of segment
+ * @return true if valid
+ */
+bool validSegment(const array3D &P0, const array3D &P1 ) 
+{
+    return !utils::DoubleFloatingEqual()( norm2(P1-P0), 0.);
+}
+/*!
+ * Checks if a line is valid
+ * @param[in] P point on line;
+ * @param[in] n line direction
+ * @return true if valid
+ */
+bool validLine(const array3D &P, const array3D &n ) 
+{
+    BITPIT_UNUSED(P);
+    return utils::DoubleFloatingEqual()( norm2(n), 1.);
+}
+
+/*!
+ * Checks if a plane is valid
+ * @param[in] P point on plane
+ * @param[in] n plane normal 
+ * @return true if valid
+ */
+bool validPlane(const array3D &P, const array3D &n ) 
+{
+    BITPIT_UNUSED(P);
+    return utils::DoubleFloatingEqual()( norm2(n), 1.);
+}
+
+/*!
+ * Checks if a triangle is valid
+ * @param[in] P0 first triangle vertex
+ * @param[in] P1 second triangle vertex
+ * @param[in] P2 third triangle vertex
+ * @return true if valid
+ */
+bool validTriangle(const array3D &P0, const array3D &P1, const array3D &P2 ) 
+{
+
+    array3D v0 = P1 -P0;
+    if( utils::DoubleFloatingEqual()( norm2(v0), 0.) ){
+        return false;
+    }
+
+    array3D v1 = P2 -P1;
+    if( utils::DoubleFloatingEqual()( norm2(v1), 0.) ){
+        return false;
+    }
+
+    array3D v2 = P0 -P2;
+    if( utils::DoubleFloatingEqual()( norm2(v2), 0.) ){
+        return false;
+    }
+
+    array3D n = crossProduct( v0, -1.*v2);
+    if( utils::DoubleFloatingEqual()( norm2(n), 0. ) ){
+        return false;
+    }
+
+    return true;
+}
+
+/*!
+ * Checks if barycentric coordinates is valid
+ * @param[in] lambdaPtr pointer to barycentric coordinates
+ * @param[in] n number of points
+ * @return true if valid
+ */
+bool validBarycentric(double const *lambdaPtr, int n )
+{
+
+    double sum(-1.);
+    double maxValue(0.);
+
+    for(int i=0; i<n; ++i){
+
+        double value = lambdaPtr[i];
+        if( std::abs(value) > std::abs(maxValue) ){
+            sum -= maxValue;
+            maxValue = -value;
+
+        } else {
+            sum += value;
+
+        }
+
+    }
+
+    double accuracyFactor = std::max( 1., std::abs(maxValue) );
+    return utils::DoubleFloatingEqual()( sum, maxValue, accuracyFactor);
+}
+
+/*!
  * Converts barycentric coordinates of a point on a segment to a flag that indicates where the point lies.
  * Flag = 0 Point lies within the segment
  * Flag = i Point coincides with the ith vertex of triangle or lies on the adjacent side of the segment
