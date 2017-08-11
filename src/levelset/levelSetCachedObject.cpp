@@ -690,7 +690,7 @@ void LevelSetCachedObject::propagateSign() {
     }
 #else
     // Check that the sign has been propagated into all regions
-    assert(nUnassigned == 0)
+    assert(nUnassigned == 0);
 #endif
 }
 
