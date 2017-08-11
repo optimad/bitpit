@@ -139,6 +139,7 @@ void LevelSetObject::propagateSign(){
  * @return true/false if the centroid is in narrow band
  */
 bool LevelSetObject::isInNarrowBand(const long &i)const{
+    assert( m_RSearch > 0 && "Need to set size of narrow >0 before calling isInNarrowBand");
     return ( std::abs(getLS(i)) <= m_RSearch );
 }
 
