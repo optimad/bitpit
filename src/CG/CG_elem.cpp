@@ -1073,10 +1073,8 @@ std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, ar
     int cloudCount(cloud.size()); 
 
     std::vector<array3D> xP(cloudCount);
-    xP.shrink_to_fit();
 
     lambda.resize(cloudCount);
-    lambda.shrink_to_fit();
 
     _projectPointsTriangle( cloudCount, cloud.data(), Q0, Q1, Q2, xP.data(), &lambda[0][0]);
 
@@ -1109,7 +1107,6 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
 
     int vertexCount(V.size());
     lambda.resize(vertexCount);
-    lambda.shrink_to_fit();
 
     double distance, minDistance(std::numeric_limits<double>::max());
     int minTriangle;
@@ -1169,7 +1166,6 @@ array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, st
 
     int vertexCount(V.size());
     lambda.resize(vertexCount);
-    lambda.shrink_to_fit();
 
     if (vertexCount == 2) { //segment
         xP =  projectPointSegment(P, V[0], V[1], lambda.data());
@@ -1417,11 +1413,9 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &P, array3
     std::vector<double> d = distanceCloudTriangle( P, Q1, Q2, Q3, lambda );
 
     flag.resize(N);
-    flag.shrink_to_fit();
     std::vector<int>::iterator flagItr = flag.begin();
 
     xP.resize(N);
-    xP.shrink_to_fit();
     std::vector<array3D>::iterator xPItr = xP.begin();
 
     for( auto const &l : lambda){
@@ -1657,11 +1651,9 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std
     int cloudCount( cloud.size() );
 
     xP.resize(cloudCount);
-    xP.shrink_to_fit();
     std::vector<array3D>::iterator xPItr = xP.begin();
 
     flag.resize(cloudCount);
-    flag.shrink_to_fit();
     std::vector<int>::iterator flagItr = flag.begin();
 
     for( const auto &l : lambda){
@@ -1713,7 +1705,6 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std
 
     std::vector<double> d(cloudCount,std::numeric_limits<double>::max());
     lambda.resize(cloudCount, std::vector<double>(vertexCount,0) );
-    lambda.shrink_to_fit();
 
     std::vector<double> dTemp(cloudCount);
     std::vector<array3D> lambdaTemp(cloudCount);
@@ -1812,11 +1803,9 @@ std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std
     int cloudCount(cloud.size()), vertexCount(V.size());
 
     lambda.resize(cloudCount, std::vector<double>(vertexCount,0) );
-    lambda.shrink_to_fit();
 
     if (vertexCount == 2) { //Segment
         std::vector<double> d(cloudCount);
-        d.shrink_to_fit();
 
         std::vector<double>::iterator dItr = d.begin();
         std::vector<std::vector<double>>::iterator lambdaItr = lambda.begin();
