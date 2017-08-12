@@ -927,8 +927,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
             long neighId = neighbours[n];
 
             if(neighId>=0){
-                if( intersectSurface(neighId) >= LevelSetIntersectionStatus::TRUE){
-
+                if( intersectSurface(neighId,LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE){
 
                     centroid = visitee->computeCellCentroid(cellId);
                     root = computeProjectionPoint(neighId);

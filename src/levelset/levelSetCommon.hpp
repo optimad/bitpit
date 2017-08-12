@@ -38,6 +38,7 @@ namespace bitpit{
 namespace levelSetDefaults{
     const double                            VALUE = 1.e18 ;             /**< Default value for levelset function */
     const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */
+    const std::array<double,3>              POINT = {{0.,0.,0.}};       /**< Default value for levelset projection point */
     const short                             SIGN = 1;                   /**< Default value for the sign */
     const double                            SIZE = 1.e18 ;              /**< Default value for surface feature */
     const int                               OBJECT = -1 ;               /**< Default value for closest object  */
@@ -64,6 +65,13 @@ enum class LevelSetIntersectionStatus{
     FALSE=0,
     TRUE=1,
     CLOSE=2
+};
+
+enum class LevelSetIntersectionMode{
+    FAST_FUZZY=0,
+    FAST_GUARANTEE_TRUE=1,
+    FAST_GUARANTEE_FALSE=2,
+    ACCURATE=3
 };
 
 }

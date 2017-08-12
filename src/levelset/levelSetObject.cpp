@@ -176,21 +176,95 @@ void LevelSetObject::setSizeNarrowBand(double r){
 
 /*!
  * Check if cell intersects the surface
+ *
+ * If mode==LevelSetIntersectionMode::FAST_FUZZY the method will compare the levelset 
+ * value to the cell incircle and circumcircle. If the value is smaler than the 
+ * incircle LevelSetIntersectionStatus::TRUE is returned, if it is larger than the
+ * circumcircle LevelSetIntersectionStatus::FALSE is returned. If it is inbetwee
+ * LevelSetIntersectionStatus::CLOSE is returned.
+ *
+ * If mode==LevelSetIntersectionMode::FAST_GUARANTEE_TRUE and the levelset value is 
+ * smaller than the incircle LevelSetIntersectionStatus::TRUE is retuned, 
+ * otherwise LevelSetIntersectionStatus::FALSE.
+ *
+ * If mode==LevelSetIntersectionMode::FAST_GURANTEE_FALSE and the levelset value is 
+ * larger than the circumcircle LevelSetIntersectionStatus::FALSE is retuned, 
+ * otherwise LevelSetIntersectionStatus::TRUE.
+ *
+ * If mode==LevelSetIntersectionMode::ACCURATE, if LevelSetIntersectionMode::FUZZY 
+ * returns LevelSetIntersectionStatus::CLOSE, the intersection between the tangent
+ * plane at the projection point and the cell is performed additionally. 
+ * LevelSetIntersectionStatus::TRUE/::FALSE is returned accordingly. 
+ * Errors of the method are related to the ratio of surface curvature over cell size.
+ *
  * @param[in] i cell index
+ * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i) const{
-    double circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
-    if(std::abs(getLS(i)) > circumcircle){
-        return LevelSetIntersectionStatus::FALSE;
+LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, LevelSetIntersectionMode mode) const{
+
+    double incircle, circumcircle;
+
+    switch(mode){
+        case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
+            incircle = m_kernelPtr->computeCellIncircle(i) ;
+            if(std::abs(getLS(i)) <= incircle){
+                return LevelSetIntersectionStatus::TRUE;
+            } else {
+                return LevelSetIntersectionStatus::FALSE;
+            }
+
+            break;
+
+        case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
+            circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
+            if(std::abs(getLS(i)) > circumcircle){
+                return LevelSetIntersectionStatus::FALSE;
+            } else {
+                return LevelSetIntersectionStatus::TRUE;
+            }
+
+            break;
+
+        case LevelSetIntersectionMode::FAST_FUZZY:
+            circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
+            if(std::abs(getLS(i)) > circumcircle){
+                return LevelSetIntersectionStatus::FALSE;
+            }
+
+            incircle = m_kernelPtr->computeCellIncircle(i) ;
+            if(std::abs(getLS(i)) <= incircle){
+                return LevelSetIntersectionStatus::TRUE;
+            }
+
+            return LevelSetIntersectionStatus::CLOSE;
+
+            break;
+
+        case LevelSetIntersectionMode::ACCURATE:
+            circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
+            if(std::abs(getLS(i)) > circumcircle){
+                return LevelSetIntersectionStatus::FALSE;
+            }
+
+            incircle = m_kernelPtr->computeCellIncircle(i) ;
+            if(std::abs(getLS(i)) <= incircle){
+                return LevelSetIntersectionStatus::TRUE;
+            }
+
+            std::array<double,3> root = computeProjectionPoint(i);
+            std::array<double,3> normal = getNormal(i);
+            if( m_kernelPtr->intersectCellPlane(i,root,normal) ){
+                return LevelSetIntersectionStatus::TRUE;
+            } else {
+                return LevelSetIntersectionStatus::FALSE;
+            }
+
+            break;
     }
 
-    double incircle = m_kernelPtr->computeCellIncircle(i) ;
-    if(std::abs(getLS(i)) <= incircle){
-        return LevelSetIntersectionStatus::TRUE;
-    }
+    BITPIT_UNREACHABLE("cannot reach");
 
-    return LevelSetIntersectionStatus::CLOSE;
 }
 
 /*!

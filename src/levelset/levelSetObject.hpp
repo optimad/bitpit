@@ -95,7 +95,7 @@ class LevelSetObject{
     double                                      getSizeNarrowBand() const;
     void                                        setSizeNarrowBand(double) ;
 
-    LevelSetIntersectionStatus                  intersectSurface(const long &) const;
+    LevelSetIntersectionStatus                  intersectSurface(const long &, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
     virtual double                              getSurfaceFeatureSize(const long &) const;
     virtual double                              getMinSurfaceFeatureSize() const;
     virtual double                              getMaxSurfaceFeatureSize() const;
