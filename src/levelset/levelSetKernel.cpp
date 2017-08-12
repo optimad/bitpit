@@ -208,6 +208,16 @@ double LevelSetKernel::computeCellCircumcircle( long id ) {
 }
 
 /*!
+ * Check if a point lies within the cell
+ * @param[in] id is the cell index
+ * @param[in] pointCrords are the point coordinates
+ * @return true if point is inside, false otherwise
+ */
+bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoords){
+    return getMesh()->isPointInside(id,pointCoords);
+}
+
+/*!
  * Checks if the specified cell is inside the given bounding box
  * @param[in] id is the id of the cell
  * @param[in] minPoint is the lower left point of the boungind box

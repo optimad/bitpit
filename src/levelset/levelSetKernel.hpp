@@ -64,6 +64,7 @@ class LevelSetKernel{
 
     virtual double                              computeCellIncircle(long);
     virtual double                              computeCellCircumcircle(long);
+    bool                                        isPointInCell(long, const std::array<double,3> &);
 
     void                                        clearGeometryCache();
     void                                        updateGeometryCache(const std::vector<adaption::Info> &);
