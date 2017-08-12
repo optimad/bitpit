@@ -99,6 +99,21 @@ bool LevelSetObject::isPrimary( ) const {
 }
 
 /*!
+ * Computes the projection point of the cell center, i.e. the closest
+ * point to the cell center on the zero level set
+ * @param[in] i cell index
+ * @return the projection point
+ */
+std::array<double,3> LevelSetObject::computeProjectionPoint(const long &i) const{
+    double value = getLS(i);
+    if(utils::DoubleFloatingEqual()(value,levelSetDefaults::VALUE)){
+        return levelSetDefaults::POINT;
+    }
+
+    return m_kernelPtr->computeCellCentroid(i) -value *getGradient(i);
+}
+
+/*!
  * Get the part id of projection point
  * @param[in] i cell index
  * @return part id 

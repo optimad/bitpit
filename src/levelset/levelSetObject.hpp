@@ -83,6 +83,7 @@ class LevelSetObject{
     virtual LevelSetInfo                        getLevelSetInfo(const long &) const =0;
     virtual double                              getLS(const long &) const =0; 
     virtual std::array<double,3>                getGradient(const long &) const =0 ; 
+    std::array<double,3>                        computeProjectionPoint(const long &) const;
 
     virtual int                                 getPart(const long &) const ;
     virtual std::array<double,3>                getNormal(const long &) const; 

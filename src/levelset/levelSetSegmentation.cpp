@@ -810,10 +810,9 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
     for( const long &cellId : intersects){
 
         Cell const &cell = mesh.getCell(cellId);
-        LevelSetInfo const &intersect = getLevelSetInfo(cellId);
         
         centroid = visitee->computeCellCentroid(cellId);
-        root = centroid -intersect.value *intersect.gradient;
+        root = computeProjectionPoint(cellId);
 
         const long *neighbours = cell.getAdjacencies() ;
         int nNeighbours = cell.getAdjacencyCount() ;
@@ -930,10 +929,9 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
             if(neighId>=0){
                 if( intersectSurface(neighId) >= LevelSetIntersectionStatus::TRUE){
 
-                    LevelSetInfo const &intersect = getLevelSetInfo(neighId);
-                    root = visitee->computeCellCentroid(neighId) -intersect.value *intersect.gradient;
 
                     centroid = visitee->computeCellCentroid(cellId);
+                    root = computeProjectionPoint(neighId);
 
                     searchRadius =  1.05 *norm2(centroid-root);
                     m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
