@@ -27,6 +27,9 @@
 
 /*!
  * @defgroup levelset LevelSet
+ * @{
+ *     @defgroup levelsetEnums LevelSet Enumerations
+ * @}
  */
 
 #include "bitpit_version.hpp"

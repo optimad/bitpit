@@ -55,23 +55,37 @@ struct LevelSetInfo{
     LevelSetInfo( const double &, const std::array<double,3> &) ;
 };
 
+/*!
+ * @ingroup levelsetEnums
+ * Enum class defining different boolean operations
+ */
 enum class LevelSetBooleanOperation{
-    UNION =0,
-    INTERSECTION =1,
-    SUBTRACTION =2
+    UNION =0,                                                           /**< Union between two objects */
+    INTERSECTION =1,                                                    /**< Intersection between two objects */
+    SUBTRACTION =2                                                      /**< Substract object two from object one */
 };
 
+/*!
+ * @ingroup levelsetEnums
+ * Enum class defining the intersection between a cell and the zero levelset.
+ * For details see LevelSetObject::intersectSurface()
+ */
 enum class LevelSetIntersectionStatus{
-    FALSE=0,
-    TRUE=1,
-    CLOSE=2
+    FALSE=0,                                                            /**< Cell does not intersect zero levelset */
+    TRUE=1,                                                             /**< Cell does intersect zero levelset */
+    CLOSE=2                                                             /**< Zero levelset lies within cell incircle and circumcircle */
 };
 
+/*!
+ * @ingroup levelsetEnums
+ * Enum class describing the how the intersection between cell and zero levelset 
+ * should be computed
+ */
 enum class LevelSetIntersectionMode{
-    FAST_FUZZY=0,
-    FAST_GUARANTEE_TRUE=1,
-    FAST_GUARANTEE_FALSE=2,
-    ACCURATE=3
+    FAST_FUZZY=0,                   /**< Compares levelset value to cell incircle and circumcircle */
+    FAST_GUARANTEE_TRUE=1,          /**< All LevelSetIntersectionStatus::TRUE are accurate but LevelSetIntersectionStatus::FALSE may be wrong */
+    FAST_GUARANTEE_FALSE=2,         /**< All LevelSetIntersectionStatus::FALSE are accurate but LevelSetIntersectionStatus::TRUE may be wrong */
+    ACCURATE=3                      /**< Accurate but more costly checks */
 };
 
 }
