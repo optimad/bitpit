@@ -237,9 +237,13 @@ double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
  * Determines the relevant object which determines the levelset value in the cell
  * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
  * @param[in] id cell index
+ * @param[in,out] factor if is not null, on output it will contain the multiplier
+ * of the levelset function of the competent primary object according the boolean
+ * operation. In particular, for substractions the relevant levelset could be
+ * -1.0*levelset_primary_object.
  * @return pointer to competent LevelSetObject
  */
-LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id) const{
+LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id, double *factor) const{
 
     if(m_objPtr.size()==0){ 
         return nullptr;
@@ -273,6 +277,10 @@ LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id) const{
                 resPtr = secPtr;
             }
         }
+    }
+
+    if(factor){
+        *factor = (utils::DoubleFloatingEqual()(resPtr->getLS(id),result)) ? 1. : -1.;
     }
 
     return resPtr;
