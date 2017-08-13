@@ -115,10 +115,12 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
     LevelSetKernel *kernel = new LevelSetCartesian( *cartesian) ;
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
+# if BITPIT_ENABLE_MPI
     // Initialize the communicator
     if (m_kernel->getMesh()->isPartitioned()) {
         m_kernel->initializeCommunicator();
     }
+# endif
 }
 
 /*!
@@ -129,10 +131,12 @@ void LevelSet::setMesh( VolOctree* octree ) {
     LevelSetKernel *kernel = new LevelSetOctree( *octree) ;
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
+# if BITPIT_ENABLE_MPI
     // Initialize the communicator
     if (m_kernel->getMesh()->isPartitioned()) {
         m_kernel->initializeCommunicator();
     }
+# endif
 }
 
 /*!
