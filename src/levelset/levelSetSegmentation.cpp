@@ -175,6 +175,8 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
 void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords, const long &segmentId, const bool &signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const {
 
 
+    std::array<double,3> outwards;
+
     auto itrNormal = getVertexNormals().find(segmentId) ;
     auto itrGradient = getVertexGradients().find(segmentId) ;
     assert( itrGradient != getVertexGradients().end() ) ;
@@ -205,6 +207,9 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
         std::array<double,2> lambda ;
 
         projectionCoords = CGElem::projectPointSegment( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), lambda);
+        outwards  = lambda[0] *itrGradient->second[0] ;
+        outwards += lambda[1] *itrGradient->second[1] ;
+        outwards /= norm2(outwards) ;
 
         if( itrNormal != getVertexNormals().end() ){
             normal  = lambda[0] *itrNormal->second[0] ;
@@ -212,9 +217,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
             normal /= norm2(normal) ;
 
         } else {
-            normal  = lambda[0] *itrGradient->second[0] ;
-            normal += lambda[1] *itrGradient->second[1] ;
-            normal /= norm2(normal) ;
+            normal = outwards;
 
         }
 
@@ -230,6 +233,10 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
         std::array<double,3> lambda ;
 
         projectionCoords = CGElem::projectPointTriangle( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), lambda );
+        outwards  = lambda[0] *itrGradient->second[0] ;
+        outwards += lambda[1] *itrGradient->second[1] ;
+        outwards += lambda[2] *itrGradient->second[2] ;
+        outwards /= norm2(outwards);
 
 
         if( itrNormal != getVertexNormals().end() ){
@@ -239,10 +246,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
             normal /= norm2(normal) ;
 
         } else {
-            normal  = lambda[0] *itrGradient->second[0] ;
-            normal += lambda[1] *itrGradient->second[1] ;
-            normal += lambda[2] *itrGradient->second[2] ;
-            normal /= norm2(normal);
+            normal = outwards;
 
         }
 
@@ -263,7 +267,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 
     // the sign is computed by determining the side of point p
     // with respect to the normal plane 
-    double s = sign( dotProduct(gradient, normal) );
+    double s = sign( dotProduct(gradient, outwards) );
 
     // if p lies on the normal plane (s=0), but the distance is finite the sign must be evaluated
     // considering the curvature of the surface. Anyhow this situation is not crucial because
