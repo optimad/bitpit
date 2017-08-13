@@ -136,6 +136,23 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
 }
 
 /*!
+ * Gets the surface normal at the projection point
+ * @param[in] id cell index
+ * @return closest part
+ */
+std::array<double,3> LevelSetBoolean::getNormal( const long &id ) const{
+
+    double factor;
+    LevelSetObject *objPtr = getCompetentObject(id,&factor) ;
+
+    if( objPtr == nullptr){
+        return levelSetDefaults::GRADIENT;
+    }
+
+    return objPtr->getNormal(id) *factor; ;
+}
+
+/*!
  * Gets the closest part index
  * @param[in] id cell index
  * @return closest part

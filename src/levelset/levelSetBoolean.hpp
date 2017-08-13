@@ -66,6 +66,7 @@ class LevelSetBoolean: public LevelSetMetaObject {
     double                                      getLS(const long &) const; 
     std::array<double,3>                        getGradient(const long &) const; 
 
+    std::array<double,3>                        getNormal(const long &) const ;
     int                                         getPart(const long &) const ;
     double                                      getSurfaceFeatureSize(const long &) const;
     double                                      getMinSurfaceFeatureSize() const;
