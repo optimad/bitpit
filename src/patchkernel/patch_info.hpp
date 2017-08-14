@@ -56,6 +56,40 @@ protected:
 
 };
 
+class PatchNumberingInfo : public PatchInfo {
+
+public:
+	PatchNumberingInfo(PatchKernel const *patch = nullptr);
+
+	long getCellConsecutiveId(long id) const;
+	const std::unordered_map<long, long> & getCellConsecutiveMap() const;
+
+#if BITPIT_ENABLE_MPI==1
+	long getCellGlobalCount() const;
+	long getCellGlobalCountOffset() const;
+	long getCellGlobalCountOffset(int rank) const;
+
+	long getCellGlobalId(long id) const;
+	const std::unordered_map<long, long> & getCellGlobalMap() const;
+
+	int getCellRankFromLocal(long id) const;
+	int getCellRankFromConsecutive(long id) const;
+	int getCellRankFromGlobal(long id) const;
+#endif
+
+protected:
+	void _init();
+	void _reset();
+	void _extract();
+
+private:
+	std::unordered_map<long, long> m_cellLocalToConsecutiveMap;
+#if BITPIT_ENABLE_MPI==1
+	std::vector<long> m_nGlobalInternals;
+#endif
+
+};
+
 #if BITPIT_ENABLE_MPI==1
 class PatchGlobalInfo : public PatchInfo {
 

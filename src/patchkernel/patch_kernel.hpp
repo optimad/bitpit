@@ -52,6 +52,7 @@ namespace bitpit {
 class PatchKernel : public VTKBaseStreamer {
 
 friend class PatchInfo;
+friend class PatchNumberingInfo;
 #if BITPIT_ENABLE_MPI==1
 friend class PatchGlobalInfo;
 #endif
