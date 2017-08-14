@@ -90,34 +90,6 @@ private:
 
 };
 
-#if BITPIT_ENABLE_MPI==1
-class PatchGlobalInfo : public PatchInfo {
-
-public:
-	PatchGlobalInfo(PatchKernel const *patch = nullptr);
-
-	long getCellGlobalCount() const;
-
-	int getCellRankFromLocal(long id) const;
-	int getCellRankFromGlobal(long id) const;
-	long getCellGlobalId(long id) const;
-
-	long getCellGlobalOffset() const;
-	long getCellGlobalOffset(int rank) const;
-	const std::unordered_map<long, long> & getCellGlobalMap() const;
-
-protected:
-	void _init();
-	void _reset();
-	void _extract();
-
-private:
-	std::unordered_map<long, long> m_cellLocalToGlobalMap;
-	std::vector<long> m_nGlobalInternals;
-
-};
-#endif
-
 }
 
 #endif
