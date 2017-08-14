@@ -4740,9 +4740,9 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 		}
 #if BITPIT_ENABLE_MPI==1
 	} else if (name == "cellGlobalIndex") {
-		PatchGlobalInfo globalInfo(this);
+		PatchNumberingInfo numberingInfo(this);
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			genericIO::flushBINARY(stream, globalInfo.getCellGlobalId(cell.getId()));
+			genericIO::flushBINARY(stream, numberingInfo.getCellGlobalId(cell.getId()));
 		}
 	} else if (name == "rank") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
