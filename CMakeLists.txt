@@ -27,7 +27,7 @@
 #------------------------------------------------------------------------------------#
 cmake_minimum_required(VERSION 2.8)
 
-project("bitpit")
+project("bitpit" CXX)
 
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
@@ -412,6 +412,9 @@ set(BITPIT_EXTERNAL_INCLUDE_DIRECTORIES "")
 isModuleEnabled("CG" MODULE_CG_ENABLED)
 isModuleEnabled("RBF" MODULE_RBF_ENABLED)
 if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
+	enable_language(Fortran)
+	enable_language(C)
+
 	set(LAPACKE_STATIC 0 CACHE BOOL "Require LAPACKE static libraries")
 	mark_as_advanced(LAPACKE_STATIC)
 
