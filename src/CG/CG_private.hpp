@@ -37,6 +37,7 @@ typedef std::array<double,3> array3D ;
 void _projectPointsTriangle( int, array3D const *, array3D const &, array3D const &, array3D const &, array3D *, double *);
 void _projectPointsPlane( int, array3D const *, array3D const &, array3D const &, array3D const &, array3D *, double *);
 bool _intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> *, std::vector<int> *, int  dim = 3 ) ;
+bool _intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> *, int dim=3);
 bool _intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> *, std::vector<int> *, int dim=3 ) ;
 bool _intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> *, std::vector<int> *, int dim=3 );
 BITPIT_DEPRECATED( bool _intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> *, std::vector<int> *, int dim=3 ) );

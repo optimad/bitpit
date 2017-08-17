@@ -178,6 +178,8 @@ bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, arr
 bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 );
 
 bool intersectPlanePlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;
+bool intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, int dim=3);
+bool intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, int dim=3);
 
 bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3 ) ;
 bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int  dim = 3 ) ;

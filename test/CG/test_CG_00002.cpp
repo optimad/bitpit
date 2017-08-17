@@ -622,6 +622,40 @@ bool testIntersectPlanePlane(){
 }
 
 /*!
+ * \return true, test intersectPlaneBox passed
+ */
+bool testIntersectPlaneBox(){
+
+    bool check(true);
+    std::vector<array3D> intersects;
+    std::vector<array3D> expectedIntersects;
+
+    expectedIntersects.push_back( {{1.0,0.5,0.0}} );
+    expectedIntersects.push_back( {{1.0,1.0,0.5}} );
+    expectedIntersects.push_back( {{0.5,1.0,0.0}} );
+
+    array3D p0 = {{0.5,1.0,0.0}};
+    array3D n0 = {{1.0,1.0,-1.0}};
+    n0 /= norm2(n0);
+
+    array3D a0 = {{0.0,0.0,0.0}};
+    array3D a1 = {{1.0,1.0,1.0}};
+
+    check = intersectPlaneBox(p0,n0,a0,a1,intersects);
+    check &= (intersects.size() == 3);
+
+    if(check){
+        for( int i=0; i<3; ++i){
+            array3D diff(intersects[i]-expectedIntersects[i]);
+            double distance( norm2(diff) );
+            check &= utils::DoubleFloatingEqual()( distance, 0 );
+        }
+    }
+
+    return check;
+}
+
+/*!
  * \return true, test intersectLineTriangle passed
  */
 bool testIntersectLineTriangle(){
@@ -755,7 +789,6 @@ bool testIntersectBoxBox(){
     
     return check;
 }
-
 
 /*!
  * \return true, test intersectBoxTriangle passed
@@ -1181,6 +1214,10 @@ int main(
         std::cout<<"test on intersectPlanePlane "<<local<<std::endl;
         check &= local;
         
+        local = testIntersectPlaneBox();
+        std::cout<<"test on intersectPlaneBox "<<local<<std::endl;
+        check &= local;
+
         local = testIntersectLineTriangle();
         std::cout<<"test on intersectLineTriangle "<<local<<std::endl;
         check &= local;

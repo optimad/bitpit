@@ -368,6 +368,64 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
 
 /*!
  * \private
+ * Computes intersection between a plane and an axis aligned bounding box
+ * \param[in] P point on plane
+ * \param[in] N plane normal
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in,out] intrPtr if (intrPtr!=nullptr) the list of intersection points between the edges of the box and the plane.
+ * if (dim==3) the intersections will be ordered in counter-clockwise sense with respect to the plane normal.
+ * \param[in] dim number of dimensions
+ * \return if intersect
+ */
+bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, array3D const &A1, std::vector<array3D> *intrPtr, int dim)
+{
+
+    bool intersect(false);
+    bool computeIntersection(intrPtr);
+
+    if(computeIntersection){
+        intrPtr->clear();
+    } else if( intersectPointBox(P,A0,A1,dim)) {
+        return true;
+    }
+
+    // check if plane intersects the edges of the box
+    // and store eventually intersection points
+    int edgeCount = (dim==2) ? 4 : 12;
+    array3D E0, E1, V;
+
+    for(int i=0; i<edgeCount; ++i){
+        edgeOfBox(i, A0, A1, E0, E1);
+
+        if( intersectSegmentPlane( E0, E1, P, N, V) ){
+            intersect = true;
+
+            if(intrPtr){
+                intrPtr->push_back(V);
+            } else {
+                break;
+            }
+        }
+    }
+
+
+    // sort intersection points in couterclock-wise sense
+    if( dim==3 && intrPtr && intersect){
+
+        const array3D origin = intrPtr->at(0);
+
+        std::sort(intrPtr->begin(), intrPtr->end(), [&](const array3D &lhs, const array3D &rhs) -> bool {
+            array3D v = crossProduct(lhs-origin,rhs-origin);
+            return dotProduct(v, N) < 0;
+        } );
+    }
+
+    return intersect;
+}
+
+/*!
+ * \private
  * Computes intersection between an axis aligned bounding box and a simplex
  * \param[in] A0 min point of first box
  * \param[in] A1 max point of first box
@@ -2055,6 +2113,37 @@ bool intersectPlanePlane( array3D const &P1, array3D const &n1, array3D const &P
 
     return true; 
 
+}
+
+/*!
+ * Computes if plane a box intersect
+ * \param[in] P1 point on first plane
+ * \param[in] n1 normal to first plane
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] dim number of dimensions
+ * \return if intersect
+ */
+bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0, array3D const &A1, int dim)
+{
+    assert( validPlane(P1,n1) );
+    return _intersectPlaneBox( P1, n1, A0, A1, nullptr, dim);
+}
+
+/*!
+ * Computes if plane a box intersect and intersection points between plane and edges of box
+ * \param[in] P1 point on first plane
+ * \param[in] n1 normal to first plane
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[out] intersects intersection points
+ * \param[in] dim number of dimensions
+ * \return if intersect
+ */
+bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0, array3D const &A1, std::vector<array3D> &intersects, int dim)
+{
+    assert( validPlane(P1,n1) );
+    return _intersectPlaneBox( P1, n1, A0, A1, &intersects, dim);
 }
 
 /*!
