@@ -89,13 +89,13 @@ double LevelSetCartesian::computeCellCircumcircle( long id ) {
 
     int dim = m_cartesian->getDimension();
     std::array<double,3> spacing = m_cartesian->getSpacing();
-    double maxSpacing = -std::numeric_limits<double>::max() ;
+    double diagonalSquare = 0.0;
 
     for(int i=0; i<dim; ++i){
-        maxSpacing = std::max( maxSpacing, spacing[i] );
+        diagonalSquare += spacing[i]*spacing[i];
     }
 
-    return 0.5*sqrt((float) dim)*maxSpacing;
+    return 0.5*sqrt(diagonalSquare);
 }
 
 /*!

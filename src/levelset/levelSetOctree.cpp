@@ -73,7 +73,7 @@ double LevelSetOctree::computeCellIncircle(long id) {
  */
 double LevelSetOctree::computeCellCircumcircle( long id ) {
     int dim = m_octree->getDimension();
-    return 0.5*sqrt(dim)*m_octree->evalCellSize(id);
+    return 0.5*sqrt((float) dim)*m_octree->evalCellSize(id);
 }
 
 /*!
