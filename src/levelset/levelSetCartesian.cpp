@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 # include "bitpit_volcartesian.hpp"
+# include "bitpit_CG.hpp"
 
 # include "levelSetKernel.hpp"
 # include "levelSetCartesian.hpp"
@@ -95,6 +96,24 @@ double LevelSetCartesian::computeCellCircumcircle( long id ) {
     }
 
     return 0.5*sqrt((float) dim)*maxSpacing;
+}
+
+/*!
+ * Checks if a plane intersects the cell
+ * @param[in] id is the index of cell
+ * @param[in] root is a point on the plane
+ * @param[in] normal is the normal of the plane
+ * @return true if intersect
+ */
+bool LevelSetCartesian::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal ) {
+
+    std::array<double,3> centroid( computeCellCentroid(id) );
+    std::array<double,3> spacing( m_cartesian->getSpacing() );
+    std::array<double,3> minPoint( centroid -0.5*spacing );
+    std::array<double,3> maxPoint( centroid +0.5*spacing );
+
+    int dim = m_cartesian->getDimension();
+    return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim);
 }
 
 }

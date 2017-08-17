@@ -44,6 +44,7 @@ class LevelSetCartesian : public LevelSetKernel{
 
     double                                      computeCellIncircle(long);
     double                                      computeCellCircumcircle(long);
+    bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &);
 
 };
 

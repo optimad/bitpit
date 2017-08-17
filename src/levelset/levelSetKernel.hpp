@@ -64,6 +64,7 @@ class LevelSetKernel{
 
     virtual double                              computeCellIncircle(long);
     virtual double                              computeCellCircumcircle(long);
+    virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &) =0;
     bool                                        isPointInCell(long, const std::array<double,3> &);
 
     void                                        clearGeometryCache();
