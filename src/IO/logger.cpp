@@ -384,13 +384,11 @@ const std::string LoggerBuffer::getTimestamp() const
 Logger::Logger(const std::string &name,
                std::ostream *consoleStream, std::ofstream *fileStream,
                const int &nProcessors, const int &rank)
-    : m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
+    : std::ios(0), std::ostream(&m_buffer),
+    m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
     m_indentation(0), m_context(""), m_priority(log::NORMAL), m_visibility(log::MASTER),
     m_consoleVerbosity(log::NORMAL), m_fileVerbosity(log::NORMAL)
 {
-    // Assigne the buffer to the stream
-    rdbuf(&m_buffer);
-
     // Set buffer data
     setConsoleStream(consoleStream);
     setFileStream(fileStream);
