@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <array>
+#include <mpi.h>
 
 #include "bitpit_common.hpp"
 #include "bitpit_IO.hpp"
@@ -30,24 +31,18 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-	MPI_Init(&argc,&argv);
-
-	int nProcs;
-	int	rank;
-	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	log::manager().initialize(log::COMBINED, true, nProcs, rank);
-	log::cout().setVisibility(log::GLOBAL);
-	log::cout() << "Testing coarsening that merges octants from different processors" << "\n";
-
+/*!
+* Subtest 001
+*
+* Testing coarsening of a 2D patch that merges octants from different
+* processors.
+*/
+int subtest_001()
+{
 	std::array<double, 3> origin = {0., 0., 0.};
 	double length = 20;
 	double dh = 2;
 
-	// 2D Test
 	log::cout() << "  >> 2D octree patch" << "\n";
 
 	// Create the patch
@@ -101,7 +96,21 @@ int main(int argc, char *argv[]) {
 					  MPI_C_BOOL, MPI_LAND, MPI_COMM_WORLD);
 	}
 
-	// 3D Test
+	return 0;
+}
+
+/*!
+* Subtest 002
+*
+* Testing coarsening of a 3D patch that merges octants from different
+* processors.
+*/
+int subtest_002()
+{
+	std::array<double, 3> origin = {0., 0., 0.};
+	double length = 20;
+	double dh = 2;
+
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
 	// Create the patch
@@ -155,6 +164,42 @@ int main(int argc, char *argv[]) {
 					  MPI_C_BOOL, MPI_LAND, MPI_COMM_WORLD);
 	}
 
-	MPI_Finalize();
+	return 0;
+}
 
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+	MPI_Init(&argc,&argv);
+
+	// Initialize the logger
+	int nProcs;
+	int	rank;
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	log::manager().initialize(log::COMBINED, true, nProcs, rank);
+	log::cout().setVisibility(log::GLOBAL);
+
+	// Run the subtests
+    log::cout() << "Testing coarsening that merges octants from different processors" << std::endl;
+
+	int status;
+	try {
+		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002();
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
+	MPI_Finalize();
 }

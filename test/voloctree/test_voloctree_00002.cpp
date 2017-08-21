@@ -24,6 +24,9 @@
 
 #include <array>
 #include <vector>
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
 
 #include "bitpit_common.hpp"
 #include "bitpit_IO.hpp"
@@ -143,186 +146,208 @@ void test_edge_neighs(VolOctree *patch, std::vector<int> &edgeNeighData)
     }
 }
 
-/**
-    Test for the 2D patch.
-
-    \param origin is the origin of the domain
-    \param length is the length of the domain
-    \param dh is the maximum cell size
+/*!
+* Subtest 001
+*
+* Testing adaption of a 2D patch.
+*
+* \param origin is the origin of the domain
+* \param length is the length of the domain
+* \param dh is the maximum cell size
 */
-void test_2D(const std::array<double, 3> &origin, double length, double dh)
+int subtest_001(const std::array<double, 3> &origin, double length, double dh)
 {
-    log::cout() << std::endl;
-    log::cout() << "  :: 2D adaption test ::" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << "  :: 2D adaption test ::" << std::endl;
 
-    log::cout() << std::endl;
-    log::cout() << ">> Creating the patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Creating the patch" << std::endl;
 
-    VolOctree *patch = new VolOctree(0, 2, origin, length, dh);
-    patch->getVTK().setName("octree_adapted_patch_2D");
-    patch->update();
-    patch->write();
+	VolOctree *patch = new VolOctree(0, 2, origin, length, dh);
+	patch->getVTK().setName("octree_adapted_patch_2D");
+	patch->update();
+	patch->write();
 
-    log::cout() << std::endl;
-    log::cout() << ">> Adapting patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Adapting patch" << std::endl;
 
-    for (int k = 0; k < 5; ++k) {
-        long nCells = patch->getCellCount();
-        log::cout() << std::endl;
-        log::cout() << ">> Marking the cells to adapt... " << std::endl;
+	for (int k = 0; k < 5; ++k) {
+		long nCells = patch->getCellCount();
+		log::cout() << std::endl;
+		log::cout() << ">> Marking the cells to adapt... " << std::endl;
 
-        for (int i = 0; i < 150; ++i) {
-            long cellId = rand() % nCells;
-            if (!patch->getCells().exists(cellId)) {
-                continue;
-            }
+		for (int i = 0; i < 150; ++i) {
+			long cellId = rand() % nCells;
+			if (!patch->getCells().exists(cellId)) {
+				continue;
+			}
 
-            for (auto neighId : patch->findCellNeighs(cellId)) {
-                for (auto coarseId : patch->findCellNeighs(neighId)) {
-                    patch->markCellForCoarsening(coarseId);
-                }
-            }
-        }
+			for (auto neighId : patch->findCellNeighs(cellId)) {
+				for (auto coarseId : patch->findCellNeighs(neighId)) {
+					patch->markCellForCoarsening(coarseId);
+				}
+			}
+		}
 
-        for (int i = 0; i < 200; ++i) {
-            long cellId = rand() % nCells;
-            if (!patch->getCells().exists(cellId)) {
-                continue;
-            }
+		for (int i = 0; i < 200; ++i) {
+			long cellId = rand() % nCells;
+			if (!patch->getCells().exists(cellId)) {
+				continue;
+			}
 
-            for (auto neighId : patch->findCellNeighs(cellId)) {
-                patch->markCellForRefinement(neighId);
-            }
-        }
+			for (auto neighId : patch->findCellNeighs(cellId)) {
+				patch->markCellForRefinement(neighId);
+			}
+		}
 
-        log::cout() << std::endl;
-        log::cout() << ">> Initial number of cells... " << nCells << std::endl;
+		log::cout() << std::endl;
+		log::cout() << ">> Initial number of cells... " << nCells << std::endl;
 
-        patch->update();
+		patch->update();
 
-        nCells = patch->getCellCount();
-        log::cout() << ">> Final number of cells... " << nCells << std::endl;
-    }
-    patch->write();
+		nCells = patch->getCellCount();
+		log::cout() << ">> Final number of cells... " << nCells << std::endl;
+	}
+	patch->write();
 
-    log::cout() << std::endl;
-    log::cout() << ">> Test neighbour search" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Test neighbour search" << std::endl;
 
-    long nCells = patch->getCellCount();
-    std::vector<int> vertexNeighData(nCells, 0);
+	long nCells = patch->getCellCount();
+	std::vector<int> vertexNeighData(nCells, 0);
 
-    patch->getVTK().addData("vertexNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, vertexNeighData);
+	patch->getVTK().addData("vertexNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, vertexNeighData);
 
-    test_vertex_neighs(patch, vertexNeighData);
+	test_vertex_neighs(patch, vertexNeighData);
 
-    patch->write();
+	patch->write();
+
+	return 0;
 }
 
-/**
-    Test for the 3D patch.
-
-    \param origin is the origin of the domain
-    \param length is the length of the domain
-    \param dh is the maximum cell size
+/*!
+* Subtest 002
+*
+* Testing adaption of a 3D patch.
+*
+* \param origin is the origin of the domain
+* \param length is the length of the domain
+* \param dh is the maximum cell size
 */
-void test_3D(const std::array<double, 3> &origin, double length, double dh)
+int subtest_002(const std::array<double, 3> &origin, double length, double dh)
 {
-    log::cout() << std::endl;
-    log::cout() << "  :: 3D adaption test ::" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << "  :: 3D adaption test ::" << std::endl;
 
-    log::cout() << std::endl;
-    log::cout() << ">> Creating patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Creating patch" << std::endl;
 
-    VolOctree *patch = new VolOctree(0, 3, origin, length, dh);
-    patch->getVTK().setName("octree_adapted_patch_3D");
-    patch->update();
-    patch->write();
+	VolOctree *patch = new VolOctree(0, 3, origin, length, dh);
+	patch->getVTK().setName("octree_adapted_patch_3D");
+	patch->update();
+	patch->write();
 
-    log::cout() << std::endl;
-    log::cout() << ">> Adapting patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Adapting patch" << std::endl;
 
-    for (int k = 0; k < 5; ++k) {
-        long nCells = patch->getCellCount();
-        log::cout() << std::endl;
-        log::cout() << ">> Marking the cells to adapt... " << std::endl;
+	for (int k = 0; k < 5; ++k) {
+		long nCells = patch->getCellCount();
+		log::cout() << std::endl;
+		log::cout() << ">> Marking the cells to adapt... " << std::endl;
 
-        for (int i = 0; i < 150; ++i) {
-            long cellId = rand() % nCells;
-            if (!patch->getCells().exists(cellId)) {
-                continue;
-            }
+		for (int i = 0; i < 150; ++i) {
+			long cellId = rand() % nCells;
+			if (!patch->getCells().exists(cellId)) {
+				continue;
+			}
 
-            for (auto neighId : patch->findCellNeighs(cellId)) {
-                for (auto coarseId : patch->findCellNeighs(neighId)) {
-                    patch->markCellForCoarsening(coarseId);
-                }
-            }
-        }
+			for (auto neighId : patch->findCellNeighs(cellId)) {
+				for (auto coarseId : patch->findCellNeighs(neighId)) {
+					patch->markCellForCoarsening(coarseId);
+				}
+			}
+		}
 
-        for (int i = 0; i < 200; ++i) {
-            long cellId = rand() % nCells;
-            if (!patch->getCells().exists(cellId)) {
-                continue;
-            }
+		for (int i = 0; i < 200; ++i) {
+			long cellId = rand() % nCells;
+			if (!patch->getCells().exists(cellId)) {
+				continue;
+			}
 
-            for (auto neighId : patch->findCellNeighs(cellId)) {
-                patch->markCellForRefinement(neighId);
-            }
-        }
+			for (auto neighId : patch->findCellNeighs(cellId)) {
+				patch->markCellForRefinement(neighId);
+			}
+		}
 
-        log::cout() << std::endl;
-        log::cout() << ">> Initial number of cells... " << nCells << std::endl;
+		log::cout() << std::endl;
+		log::cout() << ">> Initial number of cells... " << nCells << std::endl;
 
-        patch->update();
+		patch->update();
 
-        nCells = patch->getCellCount();
-        log::cout() << ">> Final number of cells... " << nCells << std::endl;
-    }
-    patch->write();
+		nCells = patch->getCellCount();
+		log::cout() << ">> Final number of cells... " << nCells << std::endl;
+	}
+	patch->write();
 
-    log::cout() << std::endl;
-    log::cout() << ">> Test neighbour search" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Test neighbour search" << std::endl;
 
-    long nCells = patch->getCellCount();
-    std::vector<int> vertexNeighData(nCells, 0);
-    std::vector<int> edgeNeighData(nCells, 0);
+	long nCells = patch->getCellCount();
+	std::vector<int> vertexNeighData(nCells, 0);
+	std::vector<int> edgeNeighData(nCells, 0);
 
-    patch->getVTK().addData("vertexNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, vertexNeighData);
-    patch->getVTK().addData("edgeNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, edgeNeighData);
+	patch->getVTK().addData("vertexNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, vertexNeighData);
+	patch->getVTK().addData("edgeNeighData", VTKFieldType::SCALAR, VTKLocation::CELL, edgeNeighData);
 
-    test_vertex_neighs(patch, vertexNeighData);
-    test_edge_neighs(patch, edgeNeighData);
+	test_vertex_neighs(patch, vertexNeighData);
+	test_edge_neighs(patch, edgeNeighData);
 
-    patch->write();
+	patch->write();
+
+	return 0;
 }
 
-/**
-    Main proggram.
+/*!
+* Main program.
 */
 int main(int argc, char *argv[])
 {
-    log::manager().initialize(log::COMBINED);
-    log::cout() << "Testing adaption on octree patch" << std::endl;
-
 #if BITPIT_ENABLE_MPI==1
-    MPI_Init(&argc,&argv);
+	MPI_Init(&argc,&argv);
 #else
-    BITPIT_UNUSED(argc);
-    BITPIT_UNUSED(argv);
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
 #endif
 
-    std::array<double, 3> origin = {{0., 0., 0.}};
-    double length = 20;
-    double dh = 1.0;
+	// Initialize the logger
+	log::manager().initialize(log::COMBINED);
 
-    std::srand(1);
+	// Seed the random function
+	std::srand(1);
 
-    test_2D(origin, length, dh);
+	// Run the subtests
+	log::cout() << "Testing adaption of octree patches" << std::endl;
 
-    test_3D(origin, length, dh);
+	std::array<double, 3> origin = {{0., 0., 0.}};
+	double length = 20;
+	double dh = 1.0;
+
+	int status;
+	try {
+		status = subtest_001(origin, length, dh);
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002(origin, length, dh);
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
 
 #if BITPIT_ENABLE_MPI==1
-    MPI_Finalize();
+	MPI_Finalize();
 #endif
-
 }

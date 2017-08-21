@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <array>
+#include <mpi.h>
 
 #include "bitpit_common.hpp"
 #include "bitpit_IO.hpp"
@@ -30,24 +31,19 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-	MPI_Init(&argc,&argv);
-
-	int nProcs;
-	int	rank;
-	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	log::manager().initialize(log::COMBINED, true, nProcs, rank);
-	log::cout().setVisibility(log::GLOBAL);
-	log::cout() << "Testing octree patch" << "\n";
-
+/*!
+* Subtest 001
+*
+* Testing basic features of a parallel 2D patch.
+*
+* \param rank is the rank of the process
+*/
+int subtest_001(int rank)
+{
 	std::array<double, 3> origin = {0., 0., 0.};
 	double length = 20;
 	double dh = 1.0;
 
-	// 2D Test
 	log::cout() << "  >> 2D octree patch" << "\n";
 
 	// Create the patch
@@ -75,7 +71,22 @@ int main(int argc, char *argv[]) {
 
 	delete patch_2D;
 
-	// 3D Test
+	return 0;
+}
+
+/*!
+* Subtest 002
+*
+* Testing basic features of a parallel 2D patch.
+*
+* \param rank is the rank of the process
+*/
+int subtest_002(int rank)
+{
+	std::array<double, 3> origin = {0., 0., 0.};
+	double length = 20;
+	double dh = 1.0;
+
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
 	// Create the patch
@@ -103,6 +114,42 @@ int main(int argc, char *argv[]) {
 
 	delete patch_3D;
 
-	MPI_Finalize();
+	return 0;
+}
 
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+	MPI_Init(&argc,&argv);
+
+	// Initialize the logger
+	int nProcs;
+	int	rank;
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	log::manager().initialize(log::COMBINED, true, nProcs, rank);
+	log::cout().setVisibility(log::GLOBAL);
+
+	// Run the subtests
+    log::cout() << "Testing basic features of parallel octree patches" << std::endl;
+
+	int status;
+	try {
+		status = subtest_001(rank);
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002(rank);
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
+	MPI_Finalize();
 }

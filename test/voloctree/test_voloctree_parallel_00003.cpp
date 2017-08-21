@@ -30,34 +30,29 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-    MPI_Init(&argc,&argv);
-
-    int nProcs;
-    int rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    log::manager().initialize(log::COMBINED, true, nProcs, rank);
-    log::cout().setVisibility(log::GLOBAL);
-    log::cout() << "Testing dump/restore of a octree patch" << std::endl;
-
+/*!
+* Subtest 001
+*
+* Testing parallel dump/restore of a 2D octree patch.
+*
+* \param rank is the rank of the process
+* \param patch_2D is the patch that will be created by the test
+* \param patch_2D_restored is the patch that will be restored by the test
+*/
+int subtest_001(int rank, VolOctree *patch_2D, VolOctree *patch_2D_restored)
+{
     std::array<double, 3> origin = {{-8., -8., -8.}};
     double length = 16;
     double dh = 1;
 
     int archiveVersion = 1;
 
-    //
-    // 2D Test
-    //
     log::cout() << "  >> 2D octree patch" << std::endl;
 
     // Create the patch
     log::cout() << "Creating 2D patch..." << std::endl;
 
-    VolOctree *patch_2D = new VolOctree(0, 2, origin, length, dh);
+    patch_2D = new VolOctree(0, 2, origin, length, dh);
     patch_2D->setCommunicator(MPI_COMM_WORLD);
     patch_2D->getVTK().setName("octree_uniform_patch_2D");
     patch_2D->update();
@@ -144,15 +139,10 @@ int main(int argc, char *argv[]) {
     patch_2D->dump(binaryWriter2D.getStream());
     binaryWriter2D.close();
 
-    // Delete the patch
-    log::cout() << "Deleting 2D patch..." << std::endl;
-
-    delete patch_2D;
-
     // Restore the patch
     log::cout() << "Restoring 2D patch..." << std::endl;
 
-    VolOctree *patch_2D_restored = new VolOctree();
+    patch_2D_restored = new VolOctree();
     patch_2D_restored->setCommunicator(MPI_COMM_WORLD);
     IBinaryArchive binaryReader2D("octree_uniform_patch_2D", rank);
     patch_2D_restored->restore(binaryReader2D.getStream());
@@ -164,15 +154,29 @@ int main(int argc, char *argv[]) {
     patch_2D_restored->getVTK().setName("octree_uniform_patch_2D_restored");
     patch_2D_restored->write();
 
-    //
-    // 3D Test
-    //
-    log::cout() << "  >> 3D octree patch" << std::endl;
+    return 0;
+}
 
-    // Create the patch
+/*!
+* Subtest 002
+*
+* Testing dump/restore of a 3D octree patch.
+*
+* \param rank is the rank of the process
+* \param patch_3D is the patch that will be created by the test
+* \param patch_3D_restored is the patch that will be restored by the test
+*/
+int subtest_002(int rank, VolOctree *patch_3D, VolOctree *patch_3D_restored)
+{
+    std::array<double, 3> origin = {{-8., -8., -8.}};
+    double length = 16;
+    double dh = 1;
+
+    int archiveVersion = 1;
+
     log::cout() << "Creating 3D patch..." << std::endl;
 
-    VolOctree *patch_3D = new VolOctree(1, 3, origin, length, dh);
+    patch_3D = new VolOctree(1, 3, origin, length, dh);
     patch_3D->setCommunicator(MPI_COMM_WORLD);
     patch_3D->getVTK().setName("octree_uniform_patch_3D");
     patch_3D->update();
@@ -259,15 +263,10 @@ int main(int argc, char *argv[]) {
     patch_3D->dump(binaryWriter3D.getStream());
     binaryWriter3D.close();
 
-    // Delete the patch
-    log::cout() << "Deleting 3D patch..." << std::endl;
-
-    delete patch_3D;
-
     // Restore the patch
     log::cout() << "Restoring 3D patch..." << std::endl;
 
-    VolOctree *patch_3D_restored = new VolOctree();
+    patch_3D_restored = new VolOctree();
     patch_3D_restored->setCommunicator(MPI_COMM_WORLD);
     IBinaryArchive binaryReader3D("octree_uniform_patch_3D", rank);
     patch_3D_restored->restore(binaryReader3D.getStream());
@@ -279,9 +278,19 @@ int main(int argc, char *argv[]) {
     patch_3D_restored->getVTK().setName("octree_uniform_patch_3D_restored");
     patch_3D_restored->write();
 
-    //
-    // Patch Manager test
-    //
+    return 0;
+}
+
+/*!
+* Subtest 003
+*
+* Testing parallel dump/restore through the patch manager.
+*
+* \param rank is the rank of the process
+*/
+int subtest_003(int rank)
+{
+    int archiveVersion = 1;
 
     // Dump all the patches
     log::cout() << "Dumping patch manager..." << std::endl;
@@ -290,12 +299,6 @@ int main(int argc, char *argv[]) {
     OBinaryArchive binaryWriterPM("octree_uniform_patch_PM", archiveVersion, headerPM, rank);
     patch::manager().dumpAll(binaryWriterPM.getStream());
     binaryWriterPM.close();
-
-    // Delete old patches
-    log::cout() << "Deleting existing patches..." << std::endl;
-
-    delete patch_2D_restored;
-    delete patch_3D_restored;
 
     // Restore all the patches
     log::cout() << "Restoring patches through patch manager..." << std::endl;
@@ -321,6 +324,59 @@ int main(int argc, char *argv[]) {
     patch_3D_PM_restored->getVTK().setName("octree_uniform_patch_3D_restored_PM");
     patch_3D_PM_restored->write();
 
-    MPI_Finalize();
-
+    return 0;
 }
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+    MPI_Init(&argc, &argv);
+
+    // Initialize the logger
+    int nProcs;
+    int    rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    log::manager().initialize(log::COMBINED, true, nProcs, rank);
+    log::cout().setVisibility(log::GLOBAL);
+
+
+    // Run the subtests
+    log::cout() << "Testing dump/restore of parallel octree patches" << std::endl;
+
+    int status;
+    try {
+        VolOctree *patch_2D = nullptr;
+        VolOctree *patch_2D_restored = nullptr;
+        VolOctree *patch_3D = nullptr;
+        VolOctree *patch_3D_restored = nullptr;
+
+        status = subtest_001(rank, patch_2D, patch_2D_restored);
+        if (status != 0) {
+            return status;
+        }
+
+        status = subtest_002(rank, patch_3D, patch_3D_restored);
+        if (status != 0) {
+            return status;
+        }
+
+        status = subtest_003(rank);
+        if (status != 0) {
+            return status;
+        }
+
+        delete patch_2D;
+        delete patch_2D_restored;
+        delete patch_3D_restored;
+        delete patch_3D;
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
+
+    MPI_Finalize();
+}
+

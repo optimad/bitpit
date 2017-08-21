@@ -32,17 +32,14 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-#if BITPIT_ENABLE_MPI==1
-    MPI_Init(&argc,&argv);
-#else
-    BITPIT_UNUSED(argc);
-    BITPIT_UNUSED(argv);
-#endif
-
-    log::manager().initialize(log::COMBINED);
-    log::cout() << "Testing creating a patch from an existing tree" << std::endl;
+/*!
+* Subtest 001
+*
+* Testing creating a 2D patch from an existing tree
+*/
+int subtest_001()
+{
+    log::cout() << "  >> 2D octree patch" << "\n";
 
     //
     // Create the tree
@@ -179,8 +176,39 @@ int main(int argc, char *argv[]) {
     log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
     log::cout() << "Vertex count: " << patch_2D->getVertexCount() << std::endl;
 
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+    MPI_Init(&argc,&argv);
+#else
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
+#endif
+
+    // Initialize the logger
+    log::manager().initialize(log::COMBINED);
+
+    // Run the subtests
+    log::cout() << "Testing creating an octree patch from an existing tree" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
+
 #if BITPIT_ENABLE_MPI==1
     MPI_Finalize();
 #endif
-
 }
+
