@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
         std::size_t nRecvValues = recvBuffer.getSize() / sizeof(DataType);
         log::cout() << "  Number of values that will be received... " << nRecvValues << std::endl;
 
-        DataType value;
+        DataType value = 0;
         for (std::size_t n = 0; n < nRecvValues; ++n) {
             recvBuffer >> value;
         }
