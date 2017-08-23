@@ -572,7 +572,7 @@ namespace bitpit {
                     }
                 }
                 //enlarge buffer to store number of pborders from this proc
-                buffSize += sizeof(int);
+                buffSize += sizeof(size_t);
                 //build buffer for this proc
                 communicator.setSend(key,buffSize);
                 SendBuffer & sendBuffer = communicator.getSendBuffer(key);
@@ -597,9 +597,9 @@ namespace bitpit {
             for(int rank : recvRanks){
                 communicator.waitRecv(rank);
                 RecvBuffer & recvBuffer = communicator.getRecvBuffer(rank);
-                int nofGhostFromThisProc = 0;
+                size_t nofGhostFromThisProc = 0;
                 recvBuffer >> nofGhostFromThisProc;
-                for(int k = 0; k < nofGhostFromThisProc; ++k){
+                for(size_t k = 0; k < nofGhostFromThisProc; ++k){
                     userData.scatter(recvBuffer, k+ghostOffset);
                 }
                 ghostOffset += nofGhostFromThisProc;
@@ -848,8 +848,8 @@ namespace bitpit {
                                     buffSize += userData.size(i);
                                 }
                             }
-                            //add room for int, number of octants in this buffer
-                            buffSize += sizeof(int);
+                            //add room for uint32_t, number of octants in this buffer
+                            buffSize += sizeof(uint32_t);
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
@@ -894,8 +894,8 @@ namespace bitpit {
                                     buffSize += userData.size(i);
                                 }
                             }
-                            //add room for int, number of octants in this buffer
-                            buffSize += sizeof(int);
+                            //add room for uint32_t, number of octants in this buffer
+                            buffSize += sizeof(uint32_t);
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
@@ -950,8 +950,8 @@ namespace bitpit {
                                     buffSize += userData.size(i);
                                 }
                             }
-                            //add room for int, number of octants in this buffer
-                            buffSize += sizeof(int);
+                            //add room for uint32_t, number of octants in this buffer
+                            buffSize += sizeof(uint32_t);
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
@@ -996,8 +996,8 @@ namespace bitpit {
                                     buffSize += userData.size(i);
                                 }
                             }
-                            //add room for int, number of octants in this buffer
-                            buffSize += sizeof(int);
+                            //add room for uint32_t, number of octants in this buffer
+                            buffSize += sizeof(uint32_t);
                             lbCommunicator.setSend(p,buffSize);
                             SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
                             //store the number of octants at the beginning of the buffer
