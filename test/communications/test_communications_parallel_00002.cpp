@@ -135,12 +135,12 @@ int main(int argc, char *argv[]) {
         std::size_t nRecvValues = recvBuffer.getSize() / sizeof(DataType);
         log::cout() << "  Number of values that will be received... " << nRecvValues << std::endl;
 
-        short value;
+        DataType value;
         for (std::size_t n = 0; n < nRecvValues; ++n) {
             recvBuffer >> value;
         }
 
-        log::cout() << " Last recevied value... " << (short) value <<std::endl;
+        log::cout() << " Last recevied value... " << (int) value <<std::endl;
         if (value != LAST_VALUE) {
             log::cout() << "Wrong value." << std::endl;
             log::cout() << "   Current data value : " << value << std::endl;
