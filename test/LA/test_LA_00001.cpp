@@ -39,19 +39,51 @@
 // ========================================================================== //
 // INCLUDES                                                                   //
 // ========================================================================== //
-# include "test_LA_00001.hpp"
+
+// Standard Template Library
+# include <cmath>
+# include <array>
+# include <vector>
+# include <iostream>
+#if BITPIT_ENABLE_MPI==1
+# include <mpi.h>
+#endif
+
+// CC_lin
+# include "bitpit_LA.hpp"
+
+// ========================================================================== //
+// NAMESPACES                                                                 //
+// ========================================================================== //
+using namespace std;
+
+// ========================================================================== //
+// TYPES DEFINITIONS                                                          //
+// ========================================================================== //
+
+// Double vectors
+typedef vector<double>                  dvector1D;
+typedef vector<dvector1D>               dvector2D;
+typedef vector<dvector2D>               dvector3D;
+typedef vector<dvector3D>               dvector4D;
+
+// Integer vectors
+typedef vector<int>                     ivector1D;
+typedef vector<ivector1D>               ivector2D;
+typedef vector<ivector2D>               ivector3D;
+typedef vector<ivector3D>               ivector4D;
 
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
 
 // -------------------------------------------------------------------------- //
-void Test_000(
+int subtest_001(
     void
 ) {
 
 // ========================================================================== //
-// void Test_000(                                                             //
+// int subtest_001(                                                           //
 //     void)                                                                  //
 //                                                                            //
 // Basic matrix template demo.                                                //
@@ -161,15 +193,15 @@ void Test_000(
     cout << "DEMO: done!!" << endl;
 }
 
-return; };
+return 0; };
 
 // -------------------------------------------------------------------------- //
-void Test_001(
+int subtest_002(
     void
 ) {
 
 // ========================================================================== //
-// void Test_001(                                                             //
+// int subtest_002(                                                           //
 //     void)                                                                  //
 //                                                                            //
 // Basic matrix operations demo.                                              //
@@ -347,15 +379,15 @@ void Test_001(
     cout << "DEMO: done!!" << endl;
 }
 
-return; };
+return 0; };
 
 // -------------------------------------------------------------------------- //
-void Test_002(
+int subtest_003(
     void
 ) {
 
 // ========================================================================== //
-// void Test_002(                                                             //
+// int subtest_003(                                                           //
 //     void)                                                                  //
 //                                                                            //
 // Basic matrix manipulation demo.                                            //
@@ -491,15 +523,15 @@ void Test_002(
     cout << "DEMO: done!!" << endl;
 }
 
-return; };
+return 0; };
 
 // -------------------------------------------------------------------------- //
-void Test_003(
+int subtest_004(
     void
 ) {
 
 // ========================================================================== //
-// void Test_003(                                                             //
+// int subtest_004(                                                           //
 //     void)                                                                  //
 //                                                                            //
 // Basic linear system solver demo.                                           //
@@ -623,19 +655,58 @@ void Test_003(
     cout << "DEMO: done!!" << endl;
 }
 
-return; };
+return 0; };
 
 // ========================================================================== //
 // MAIN                                                                       //
 // ========================================================================== //
-int main()
+int main(int argc, char *argv[])
 {
+    // ====================================================================== //
+    // INITIALIZE MPI                                                         //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
 
-    Test_000();
-    Test_001();
-    Test_002();
-    Test_003();
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
 
-return(0);
+    // Local variabels
+    int                             status = 0;
 
-};
+    // ====================================================================== //
+    // RUN SUB-TESTS                                                          //
+    // ====================================================================== //
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return (10 + status);
+        }
+
+        status = subtest_002();
+        if (status != 0) {
+            return (20 + status);
+        }
+
+        status = subtest_003();
+        if (status != 0) {
+            return (30 + status);
+        }
+    } catch (const std::exception &exception) {
+        cout << exception.what();
+    }
+
+    // ====================================================================== //
+    // FINALIZE MPI                                                           //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
+
+    return status;
+}
