@@ -32,23 +32,18 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-#if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc,&argv);
-#else
-	BITPIT_UNUSED(argc);
-	BITPIT_UNUSED(argv);
-#endif
-
-	log::manager().initialize(log::COMBINED);
-	log::cout() << "Testing dump/restore of a unstructured surface patch" << std::endl;
-
+/*!
+* Subtest 001
+*
+* Testing dump/restore of a 2D octree patch.
+*
+* \param patch_2D is the patch that will be created by the test
+* \param patch_2D_restored is the patch that will be restored by the test
+*/
+int subtest_001(SurfUnstructured *patch_2D, SurfUnstructured *patch_2D_restored)
+{
 	int archiveVersion = 1;
 
-	//
-	// 2D Test
-	//
 	log::cout() << "  >> 2D unstructured surface patch" << std::endl;
 
 	// Create the patch
@@ -56,7 +51,7 @@ int main(int argc, char *argv[]) {
 
 	const std::string fielname_2D = "./data/cube.stl";
 
-	SurfUnstructured *patch_2D = new SurfUnstructured(0, 2, 2);
+	patch_2D = new SurfUnstructured(0, 2, 2);
 	patch_2D->importSTL(fielname_2D);
 	patch_2D->getVTK().setName("surfunstructured_patch_2D");
 
@@ -76,12 +71,10 @@ int main(int argc, char *argv[]) {
 	// Delete the patch
 	log::cout() << "Deleting 2D patch..." << std::endl;
 
-	delete patch_2D;
-
 	// Restore the patch
 	log::cout() << "Restoring 2D patch..." << std::endl;
 
-	SurfUnstructured *patch_2D_restored = new SurfUnstructured();
+	patch_2D_restored = new SurfUnstructured();
 	IBinaryArchive binaryReader2D("surfunstructured_patch_2D.dat");
 	patch_2D_restored->restore(binaryReader2D.getStream());
 	binaryReader2D.close();
@@ -92,22 +85,25 @@ int main(int argc, char *argv[]) {
 	patch_2D_restored->getVTK().setName("surfunstructured_patch_2D_restored");
 	patch_2D_restored->write();
 
-	//
-	// Patch Manager test
-	//
+    return 0;
+}
 
-	// Dump all the patches
+/*!
+* Subtest 002
+*
+* Testing dump/restore through the patch manager.
+*/
+int subtest_002()
+{
+    int archiveVersion = 1;
+
+    // Dump all the patches
 	log::cout() << "Dumping patch manager..." << std::endl;
 
 	std::string headerPM = "2D unstructured surface patch";
 	OBinaryArchive binaryWriterPM("surfunstructured_patch_PM.dat", archiveVersion, headerPM);
 	patch::manager().dumpAll(binaryWriterPM.getStream());
 	binaryWriterPM.close();
-
-	// Delete old patches
-	log::cout() << "Deleting existing patches..." << std::endl;
-
-	delete patch_2D_restored;
 
 	// Restore all the patches
 	log::cout() << "Restoring patches through patch manager..." << std::endl;
@@ -123,8 +119,49 @@ int main(int argc, char *argv[]) {
 	patch_2D_PM_restored->getVTK().setName("surfunstructured_patch_2D_restored_PM");
 	patch_2D_PM_restored->write();
 
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
 #if BITPIT_ENABLE_MPI==1
-	MPI_Finalize();
+    MPI_Init(&argc,&argv);
+#else
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
 #endif
 
+    // Initialize the logger
+    log::manager().initialize(log::COMBINED);
+
+    // Run the subtests
+    log::cout() << "Testing dump/restore of unstructured surface patches" << std::endl;
+
+    int status;
+    try {
+        SurfUnstructured *patch_2D = nullptr;
+        SurfUnstructured *patch_2D_restored = nullptr;
+
+        status = subtest_001(patch_2D, patch_2D_restored);
+        if (status != 0) {
+            return status;
+        }
+
+        status = subtest_002();
+        if (status != 0) {
+            return status;
+        }
+
+        delete patch_2D;
+        delete patch_2D_restored;
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
 }

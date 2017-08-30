@@ -36,6 +36,9 @@
 # include <array>
 # include <vector>
 # include <iostream>
+#if BITPIT_ENABLE_MPI==1
+# include <mpi.h>
+#endif
 
 // BitPit
 # include "bitpit_common.hpp"
@@ -89,17 +92,45 @@ int subtest_001(
 }
 
 // ========================================================================== //
-// MAIN FOR TEST #00006                                                       //
+// MAIN                                                                       //
 // ========================================================================== //
-int main(
-    void
-) {
+int main(int argc, char *argv[])
+{
+    // ====================================================================== //
+    // INITIALIZE MPI                                                         //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
 
-int                             err = 0;
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
 
-err = subtest_001();
-if (err > 0) return(10 + err);
+    // Local variabels
+    int                             status = 0;
 
-return err;
+    // ====================================================================== //
+    // RUN SUB-TESTS                                                          //
+    // ====================================================================== //
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return (10 + status);
+        }
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
 
+    // ====================================================================== //
+    // FINALIZE MPI                                                           //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
+
+    return status;
 }
