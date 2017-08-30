@@ -32,29 +32,23 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-#if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc,&argv);
-#else
-	BITPIT_UNUSED(argc);
-	BITPIT_UNUSED(argv);
-#endif
-
+/*!
+* Subtest 001
+*
+* Testing basic features of a 2D patch.
+*/
+int subtest_001()
+{
 	std::array<double, 3> minPoint;
 	std::array<double, 3> maxPoint;
 
 	std::vector<double> cellData;
 	std::vector<double> vertexData;
 
-	log::manager().initialize(log::COMBINED);
-	log::cout() << "Testing Cartesian patch" << "\n";
-
 	std::array<double, 3> origin = {{-10., -10., -10.}};
 	double length = 20;
 	double dh = 0.5;
 
-    { //2d test
 	log::cout() << "  >> 2D Cartesian patch" << "\n";
 
 	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
@@ -127,9 +121,27 @@ int main(int argc, char *argv[]) {
 	log::cout() << std::endl;
 
 	delete patch_2D;
-    }
 
-    { //3d test
+    return 0;
+}
+
+/*!
+* Subtest 002
+*
+* Testing basic features of a 3D patch.
+*/
+int subtest_002()
+{
+	std::array<double, 3> minPoint;
+	std::array<double, 3> maxPoint;
+
+	std::vector<double> cellData;
+	std::vector<double> vertexData;
+
+	std::array<double, 3> origin = {{-10., -10., -10.}};
+	double length = 20;
+	double dh = 0.5;
+
 	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
 	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
@@ -214,10 +226,44 @@ int main(int argc, char *argv[]) {
 	log::cout() << std::endl;
 
 	delete patch_3D;
-    }
+
+	return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	// Initialize the logger
+	log::manager().initialize(log::COMBINED);
+
+	// Run the subtests
+	log::cout() << "Testing basic features of Cartesian patches" << std::endl;
+
+	int status;
+	try {
+		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002();
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
 
 #if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
 #endif
-
 }

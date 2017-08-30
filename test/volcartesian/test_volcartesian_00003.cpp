@@ -32,33 +32,28 @@
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-#if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc,&argv);
-#else
-	BITPIT_UNUSED(argc);
-	BITPIT_UNUSED(argv);
-#endif
-
-	log::manager().initialize(log::COMBINED);
-	log::cout() << "Testing dump/restore of a Cartesian patch" << std::endl;
-
+/*!
+* Subtest 001
+*
+* Testing dump/restore of a 2D patch.
+*
+* \param patch_2D is the patch that will be created by the test
+* \param patch_2D_restored is the patch that will be restored by the test
+*/
+int subtest_001(VolCartesian *patch_2D, VolCartesian *patch_2D_restored)
+{
 	std::array<double, 3> origin = {{-10., -10., -10.}};
 	double length = 20;
 	double dh = 0.5;
 
 	int archiveVersion = 1;
 
-	//
-	// 2D Test
-	//
 	log::cout() << "  >> 2D Cartesian patch" << std::endl;
 
 	// Create the patch
 	log::cout() << "Creating 2D patch..." << std::endl;
 
-	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
+	patch_2D = new VolCartesian(0, 2, origin, length, dh);
 	patch_2D->getVTK().setName("cartesian_uniform_patch_2D");
 	patch_2D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 
@@ -83,7 +78,7 @@ int main(int argc, char *argv[]) {
 	// Restore the patch
 	log::cout() << "Restoring 2D patch..." << std::endl;
 
-	VolCartesian *patch_2D_restored = new VolCartesian();
+	patch_2D_restored = new VolCartesian();
 	IBinaryArchive binaryReader2D("cartesian_uniform_patch_2D");
 	patch_2D_restored->restore(binaryReader2D.getStream());
 	binaryReader2D.close();
@@ -94,15 +89,31 @@ int main(int argc, char *argv[]) {
 	patch_2D_restored->getVTK().setName("cartesian_uniform_patch_2D_restored");
 	patch_2D_restored->write();
 
-	//
-	// 3D Test
-	//
+	return 0;
+}
+
+/*!
+* Subtest 002
+*
+* Testing dump/restore of a 3D patch.
+*
+* \param patch_3D is the patch that will be created by the test
+* \param patch_3D_restored is the patch that will be restored by the test
+*/
+int subtest_002(VolCartesian *patch_3D, VolCartesian *patch_3D_restored)
+{
+	std::array<double, 3> origin = {{-10., -10., -10.}};
+	double length = 20;
+	double dh = 0.5;
+
+	int archiveVersion = 1;
+
 	log::cout() << "  >> 3D Cartesian patch" << std::endl;
 
 	// Create the patch
 	log::cout() << "Creating 3D patch..." << std::endl;
 
-	VolCartesian *patch_3D = new VolCartesian(1, 3, origin, length, dh);
+	patch_3D = new VolCartesian(1, 3, origin, length, dh);
 	patch_3D->getVTK().setName("cartesian_uniform_patch_3D");
 	patch_3D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 
@@ -127,7 +138,8 @@ int main(int argc, char *argv[]) {
 	// Restore the patch
 	log::cout() << "Restoring 3D patch..." << std::endl;
 
-	VolCartesian *patch_3D_restored = new VolCartesian();
+
+    patch_3D_restored = new VolCartesian();
 	IBinaryArchive binaryReader3D("cartesian_uniform_patch_3D");
 	patch_3D_restored->restore(binaryReader3D.getStream());
 	binaryReader3D.close();
@@ -138,9 +150,17 @@ int main(int argc, char *argv[]) {
 	patch_3D_restored->getVTK().setName("cartesian_uniform_patch_3D_restored");
 	patch_3D_restored->write();
 
-	//
-	// Patch Manager test
-	//
+	return 0;
+}
+
+/*!
+* Subtest 003
+*
+* Testing dump/restore through the patch manager.
+*/
+int subtest_003()
+{
+    int archiveVersion = 1;
 
 	// Dump all the patches
 	log::cout() << "Dumping patch manager..." << std::endl;
@@ -149,12 +169,6 @@ int main(int argc, char *argv[]) {
 	OBinaryArchive binaryWriterPM("cartesian_uniform_patch_PM", archiveVersion, headerPM);
 	patch::manager().dumpAll(binaryWriterPM.getStream());
 	binaryWriterPM.close();
-
-	// Delete old patches
-	log::cout() << "Deleting existing patches..." << std::endl;
-
-	delete patch_2D_restored;
-	delete patch_3D_restored;
 
 	// Restore all the patches
 	log::cout() << "Restoring patches through patch manager..." << std::endl;
@@ -176,8 +190,58 @@ int main(int argc, char *argv[]) {
 	patch_3D_PM_restored->getVTK().setName("cartesian_uniform_patch_3D_restored_PM");
 	patch_3D_PM_restored->write();
 
+	return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	// Initialize the logger
+	log::manager().initialize(log::COMBINED);
+
+	// Run the subtests
+	log::cout() << "Testing dump/restore of Cartesian patches" << std::endl;
+
+	int status;
+	try {
+		VolCartesian *patch_2D = nullptr;
+		VolCartesian *patch_2D_restored = nullptr;
+		VolCartesian *patch_3D = nullptr;
+		VolCartesian *patch_3D_restored = nullptr;
+
+		status = subtest_001(patch_2D, patch_2D_restored);
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002(patch_3D, patch_3D_restored);
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_003();
+		if (status != 0) {
+			return status;
+		}
+
+		delete patch_2D;
+		delete patch_2D_restored;
+		delete patch_3D_restored;
+		delete patch_3D;
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
 #if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
 #endif
-
 }

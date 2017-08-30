@@ -24,26 +24,22 @@
 
 #include <array>
 #if BITPIT_ENABLE_MPI==1
-#include <mpi.h>
+#   include <mpi.h>
 #endif
+#include <vector>
 
 #include "bitpit_common.hpp"
 #include "bitpit_volcartesian.hpp"
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-#if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc,&argv);
-#else
-	BITPIT_UNUSED(argc);
-	BITPIT_UNUSED(argv);
-#endif
-
-	log::manager().initialize(log::COMBINED);
-	log::cout() << "Testing Cartesian patch" << "\n";
-
+/*!
+* Subtest 001
+*
+* Testing point localization on a 2D patch.
+*/
+int subtest_001()
+{
 	std::array<double, 3> origin = {{-10., -10., -10.}};
 	double length = 20;
 	double dh = 0.5;
@@ -108,6 +104,45 @@ int main(int argc, char *argv[]) {
 
 	delete patch_2D;
 
+	return 0;
+}
+
+/*!
+* Subtest 002
+*
+* Testing point localization on a 3D patch.
+*/
+int subtest_002()
+{
+	std::array<double, 3> origin = {{-10., -10., -10.}};
+	double length = 20;
+	double dh = 0.5;
+
+	std::array<double, 3> point;
+	std::vector<std::array<double, 3>> pointList;
+
+	pointList.push_back(origin);
+	for (int i = 0; i < 3; ++i) {
+		point[i] = origin[i] + length / 4;
+		pointList.push_back(point);
+	}
+	for (int i = 0; i < 3; ++i) {
+		point[i] = origin[i] + length / 2;
+		pointList.push_back(point);
+	}
+	for (int i = 0; i < 3; ++i) {
+		point[i] = origin[i] + length / 2 + 0.01;
+		pointList.push_back(point);
+	}
+	for (int i = 0; i < 3; ++i) {
+		point[i] = origin[i] - length / 2;
+		pointList.push_back(point);
+	}
+	for (int i = 0; i < 3; ++i) {
+		point[i] = origin[i] - length / 4;
+		pointList.push_back(point);
+	}
+
 	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
 	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
@@ -143,8 +178,43 @@ int main(int argc, char *argv[]) {
 
 	delete patch_3D;
 
+	return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	// Initialize the logger
+	log::manager().initialize(log::COMBINED);
+
+	// Run the subtests
+	log::cout() << "Testing point localization on Cartesian patches" << std::endl;
+
+	int status;
+	try {
+		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002();
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
 #if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
 #endif
-
 }
