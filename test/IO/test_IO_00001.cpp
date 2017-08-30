@@ -22,16 +22,22 @@
  *
 \*---------------------------------------------------------------------------*/
 
-
 #include <iostream>
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
 
-#include "VTK.hpp"
+#include "bitpit_IO.hpp"
 
 using namespace std;
 
-int main()
+/*!
+* Subtest 001
+*
+* Testing read/write of VTK files.
+*/
+int subtest_001()
 {
-
     vector<array<double,3>>     points ;
     vector<vector<int>>          connectivity ;
 
@@ -170,4 +176,38 @@ int main()
         vtk.write(bitpit::VTKWriteMode::NO_INCREMENT) ;
     }
 
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+    MPI_Init(&argc,&argv);
+#else
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
+#endif
+
+    // Initialize the logger
+    bitpit::log::manager().initialize(bitpit::log::COMBINED);
+
+    // Run the subtests
+    bitpit::log::cout() << "Testing read/write of VTK files" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        bitpit::log::cout() << exception.what();
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
 }

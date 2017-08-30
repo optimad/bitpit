@@ -22,15 +22,20 @@
  *
 \*---------------------------------------------------------------------------*/
 
-
 #include <iostream>
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
 
-#include "GenericIO.hpp"
+#include "bitpit_IO.hpp"
 
-
-int main()
+/*!
+* Subtest 001
+*
+* Testing generic input/output.
+*/
+int subtest_001()
 {
-
     int exitStatus(0) ;
 
     { //write ASCII
@@ -108,4 +113,37 @@ int main()
 
     return exitStatus;
 
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+    MPI_Init(&argc,&argv);
+#else
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
+#endif
+
+    // Initialize the logger
+    bitpit::log::manager().initialize(bitpit::log::COMBINED);
+
+    // Run the subtests
+    bitpit::log::cout() << "Testing generic input/output" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        bitpit::log::cout() << exception.what();
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
 }

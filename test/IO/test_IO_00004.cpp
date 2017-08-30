@@ -22,13 +22,22 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
+
 #include "bitpit_IO.hpp"
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-    std::cout << "Testing configuraton parser" << std::endl;
+/*!
+* Subtest 001
+*
+* Testing basic configuraton parser features.
+*/
+int subtest_001()
+{
+    std::cout << "Testing basic configuraton parser features" << std::endl;
 
     // Reset global parset
     //
@@ -97,4 +106,38 @@ int main(int argc, char *argv[]) {
     std::cout << "Write configuration file..." << std::endl;
     config::write("configuration_updated.xml");
 
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+    MPI_Init(&argc,&argv);
+#else
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
+#endif
+
+    // Initialize the logger
+    log::manager().initialize(log::COMBINED);
+
+    // Run the subtests
+    log::cout() << "Testing configuration parser" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
 }
