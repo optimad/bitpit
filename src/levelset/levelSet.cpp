@@ -575,6 +575,13 @@ void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
 
         visitor.communicate( sendList, recvList, &mapper ) ;
     }
+
+    for( int objectId : m_order){
+        auto &visitor = *(m_objects.at(objectId)) ;
+
+        visitor.exchangeGhosts();
+    }
+
 }
 #endif
 
