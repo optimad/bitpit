@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <mpi.h>
+
 #include "bitpit_IO.hpp"
 #include "bitpit_communications.hpp"
 
@@ -38,21 +40,11 @@ using namespace bitpit;
  * bigger than 2Gb the maximum avialble memory should be increased at least
  * to 2049 Mb.
  *
+ * \param rank is the rank of the process
  */
-int main(int argc, char *argv[]) {
-
+int subtest_001(int rank)
+{
     const double MAX_MEMORY = 10;
-
-    MPI_Init(&argc, &argv);
-
-    int nProcs;
-    int    rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    log::manager().initialize(log::COMBINED, true, nProcs, rank);
-    log::cout().setVisibility(log::GLOBAL);
-    log::cout() << "Testing communications" << std::endl;
 
     DataCommunicator dataCommunicator(MPI_COMM_WORLD);
 
@@ -154,6 +146,38 @@ int main(int argc, char *argv[]) {
     // Wait all sends
     dataCommunicator.startAllSends();
 
-    // Finalize MPI
+    // Done
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+    MPI_Init(&argc,&argv);
+
+    // Initialize the logger
+    int nProcs;
+    int    rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    log::manager().initialize(log::COMBINED, true, nProcs, rank);
+    log::cout().setVisibility(log::GLOBAL);
+
+    // Run the subtests
+    log::cout() << "Testing communications bigger than 2Gb" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001(rank);
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
+
     MPI_Finalize();
 }

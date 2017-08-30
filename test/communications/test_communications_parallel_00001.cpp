@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <mpi.h>
+
 #include "bitpit_IO.hpp"
 #include "bitpit_communications.hpp"
 
@@ -41,20 +43,12 @@ int getSendCount(int dstRank)
  * After setting the sends, the DataCommunicator is used to automatically
  * discorver and set the receives. Finally some data is communicated among
  * the processors.
+ *
+ * \param rank is the rank of the process
+ * \param nProcs is the number of processes
  */
-int main(int argc, char *argv[]) {
-
-	MPI_Init(&argc,&argv);
-
-	int nProcs;
-	int	rank;
-	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	log::manager().initialize(log::COMBINED, true, nProcs, rank);
-	log::cout().setVisibility(log::GLOBAL);
-	log::cout() << "Testing communications" << "\n";
-
+int subtest_001(int rank, int nProcs)
+{
 	DataCommunicator dataCommunicator(MPI_COMM_WORLD);
 
 	// Create data to send
@@ -133,6 +127,38 @@ int main(int argc, char *argv[]) {
 	// Wait all sends
 	dataCommunicator.startAllSends();
 
-	// Finalize MPI
+	// Done
+	return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+	MPI_Init(&argc,&argv);
+
+	// Initialize the logger
+	int nProcs;
+	int	rank;
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	log::manager().initialize(log::COMBINED, true, nProcs, rank);
+	log::cout().setVisibility(log::GLOBAL);
+
+	// Run the subtests
+	log::cout() << "Testing basic parallel communications" << std::endl;
+
+	int status;
+	try {
+		status = subtest_001(rank, nProcs);
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
 	MPI_Finalize();
 }
