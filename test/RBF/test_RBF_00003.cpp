@@ -4,6 +4,9 @@
 #include <array>
 #include <map>
 #include <algorithm>
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
 
 #include "bitpit_operators.hpp"
 #include "bitpit_IO.hpp"
@@ -301,10 +304,13 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
     return;
 };
 
-
-
-int main() {
-
+/*!
+* Subtest 001
+*
+* Testing mesh deformation.
+*/
+int subtest_001()
+{
     // Variables
     std::vector< std::array<double,3> >              points ;
     std::vector< std::vector<int> >       connectivity ;
@@ -432,4 +438,48 @@ int main() {
 	
 	
         return 0;
+}
+
+// ========================================================================== //
+// MAIN                                                                       //
+// ========================================================================== //
+int main(int argc, char *argv[])
+{
+    // ====================================================================== //
+    // INITIALIZE MPI                                                         //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variabels
+    int                             status = 0;
+
+    // ====================================================================== //
+    // RUN SUB-TESTS                                                          //
+    // ====================================================================== //
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return (10 + status);
+        }
+    } catch (const std::exception &exception) {
+        bitpit::log::cout() << exception.what();
+    }
+
+    // ====================================================================== //
+    // FINALIZE MPI                                                           //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
+
+    return status;
 }

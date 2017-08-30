@@ -22,22 +22,74 @@
  *
 \*---------------------------------------------------------------------------*/
 
-
 #include <iostream>
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
 
+#include "bitpit_IO.hpp"
 #include "bitpit_RBF.hpp"
 
 using namespace std;
 
-int main()
+/*!
+* Subtest 001
+*
+* Testing basis evaluation.
+*/
+int subtest_001()
 {
-
-    bitpit::RBF     myRBF ;
+    bitpit::RBF     myRBF;
 
 	bool check;
-	check =  (myRBF.evalBasis(0.9) > 0.0) && (myRBF.evalBasis(1.1) == 0);
+	check = (myRBF.evalBasis(0.9) > 0.0) && (myRBF.evalBasis(1.1) == 0);
 	std::cout<<"value basis RBF in 0.9  "<<myRBF.evalBasis(0.9)<<std::endl;
 	std::cout<<"value basis RBF in 1.1  "<<myRBF.evalBasis(1.1)<<std::endl;	
 	int err = (int)(!check);
+
 	return err;
+}
+
+// ========================================================================== //
+// MAIN                                                                       //
+// ========================================================================== //
+int main(int argc, char *argv[])
+{
+    // ====================================================================== //
+    // INITIALIZE MPI                                                         //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variabels
+    int                             status = 0;
+
+    // ====================================================================== //
+    // RUN SUB-TESTS                                                          //
+    // ====================================================================== //
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return (10 + status);
+        }
+    } catch (const std::exception &exception) {
+        bitpit::log::cout() << exception.what();
+    }
+
+    // ====================================================================== //
+    // FINALIZE MPI                                                           //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
+
+    return status;
 }
