@@ -38,19 +38,60 @@
 // ================================================================================== //
 // INCLUDES                                                                           //
 // ================================================================================== //
-# include "test_operators_00001.hpp"
+#include <array>
+#include <cmath>
+#include <iostream>
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
+#include <vector>
+
+#include <bitpit_operators.hpp>
+
+// ================================================================================== //
+// NAMESPACES                                                                         //
+// ================================================================================== //
+using namespace std;
+
+// ================================================================================== //
+// TYPES DEFINITIONS                                                                  //
+// ================================================================================== //
+
+// boolean vectors
+typedef vector< bool >                 bvector1D;
+typedef vector< bvector1D >            bvector2D;
+typedef vector< bvector2D >            bvector3D;
+typedef vector< bvector3D >            bvector4D;
+
+// characters vectors
+typedef vector< char >                 cvector1D;
+typedef vector< cvector1D >            cvector2D;
+typedef vector< cvector2D >            cvector3D;
+typedef vector< cvector3D >            cvector4D;
+
+// integer vectors
+typedef vector< int >                  ivector1D;
+typedef vector< ivector1D >            ivector2D;
+typedef vector< ivector2D >            ivector3D;
+typedef vector< ivector3D >            ivector4D;
+
+// double vectors
+typedef vector< double >               dvector1D;
+typedef vector< dvector1D >            dvector2D;
+typedef vector< dvector2D >            dvector3D;
+typedef vector< dvector3D >            dvector4D;
 
 // ================================================================================== //
 // IMPLEMENTATIONS                                                                    //
 // ================================================================================== //
 
 // ---------------------------------------------------------------------------------- //
-void vectorOperators_Ex(
+int subtest_001(
     void
 ) {
 
 // ================================================================================== //
-// void vectorOperators_Ex(                                                           //
+// int subtest_001(                                                                   //
 //     void)                                                                          //
 //                                                                                    //
 // Examples of usage of operators for vectors                                         //
@@ -61,7 +102,8 @@ void vectorOperators_Ex(
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - none                                                                             //
+// - err      : int, error flag:                                                      //
+//              err = 0  --> no error(s)                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -593,15 +635,15 @@ void vectorOperators_Ex(
     cout << endl;
 }
 
-return; };
+return 0; };
 
 // ---------------------------------------------------------------------------------- //
-void vectorMathFunct_Ex(
+int subtest_002(
     void
 ) {
 
 // ================================================================================== //
-// void vectorMathFunct_Ex(                                                           //
+// int subtest_002(                                                                   //
 //     void)                                                                          //
 //                                                                                    //
 // Examples of usage of operators for vectors                                         //
@@ -612,7 +654,8 @@ void vectorMathFunct_Ex(
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - none                                                                             //
+// - err      : int, error flag:                                                      //
+//              err = 0  --> no error(s)                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -1090,15 +1133,15 @@ void vectorMathFunct_Ex(
     cout << endl;
 }
 
-return; };
+return 0; };
 
 // ---------------------------------------------------------------------------------- //
-void arrayOperators_Ex(
+int subtest_003(
     void
 ) {
 
 // ================================================================================== //
-// void arrayOperators_Ex(                                                            //
+// int subtest_003(                                                                   //
 //     void)                                                                          //
 //                                                                                    //
 // Examples of usage of operators for arrays                                          //
@@ -1109,7 +1152,8 @@ void arrayOperators_Ex(
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - none                                                                             //
+// - err      : int, error flag:                                                      //
+//              err = 0  --> no error(s)                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -1637,15 +1681,15 @@ void arrayOperators_Ex(
     cout << endl;
 }
 
-return; };
+return 0; };
 
 // ---------------------------------------------------------------------------------- //
-void arrayMathFunct_Ex(
+int subtest_004(
     void
 ) {
 
 // ================================================================================== //
-// void arrayMathFunct_Ex(                                                            //
+// int subtest_004(                                                                   //
 //     void)                                                                          //
 //                                                                                    //
 // Examples of usage of operators for C++ v10.0 arrays.                               //
@@ -1656,7 +1700,8 @@ void arrayMathFunct_Ex(
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - none                                                                             //
+// - err      : int, error flag:                                                      //
+//              err = 0  --> no error(s)                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -2128,19 +2173,53 @@ void arrayMathFunct_Ex(
     cout << endl;
 }
 
-return; };
+return 0; };
 
-// ================================================================================== //
-// MAIN                                                                               //
-// ================================================================================== //
-int main(void) {
-cout << "========== TEST base operators for std::vector ==========" << endl;
-vectorOperators_Ex();
-cout << "========== TEST math functions for std::vector ==========" << endl;
-vectorMathFunct_Ex();
-cout << "========== TEST base operators for std::array ===========" << endl;
-arrayOperators_Ex();
-cout << "========== TEST math functions for std::array ===========" << endl;
-arrayMathFunct_Ex();
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+    MPI_Init(&argc,&argv);
+#else
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
+#endif
 
-return(0); };
+    // Run the subtests
+    cout << "Testing basic features of Cartesian patches" << std::endl;
+
+    int status;
+    try {
+        cout << "========== TEST base operators for std::vector ==========" << endl;
+        status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+
+        cout << "========== TEST math functions for std::vector ==========" << endl;
+        status = subtest_002();
+        if (status != 0) {
+            return status;
+        }
+
+        cout << "========== TEST base operators for std::array ===========" << endl;
+        status = subtest_002();
+        if (status != 0) {
+            return status;
+        }
+
+        cout << "========== TEST math functions for std::array ===========" << endl;
+        status = subtest_004();
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        cout << exception.what();
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
+}
