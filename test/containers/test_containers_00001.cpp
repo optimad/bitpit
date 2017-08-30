@@ -22,10 +22,20 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#if BITPIT_ENABLE_MPI==1
+# include <mpi.h>
+#endif
+
 #include "bitpit_containers.hpp"
 
 using namespace bitpit;
 
+/*!
+* Print the elements of the specified container.
+*
+* \param nElements is the number of elements to put in the container
+* \param container is the container to fille
+*/
 void printElements(PiercedVector<double> &container)
 {
 	std::cout << std::endl << "  List of elements:" << std::endl;
@@ -47,6 +57,12 @@ void printElements(PiercedVector<double> &container)
 	}
 }
 
+/*!
+* Fill the specified container.
+*
+* \param nElements is the number of elements to put in the container
+* \param container is the container to fille
+*/
 void fillContainer(int nElements, PiercedVector<double> &container)
 {
 	for (int i = 0; i < nElements; i++) {
@@ -55,7 +71,12 @@ void fillContainer(int nElements, PiercedVector<double> &container)
 	}
 }
 
-int main()
+/*!
+* Subtest 001
+*
+* Testing basic PiercedVector features.
+*/
+int subtest_001()
 {
 	// Creating an emtpy PiercedVector
 	std::cout << std::endl << "::: Creating an empty PiercedVector :::" << std::endl;
@@ -406,4 +427,38 @@ int main()
 	std::cout << std::endl << "::: Done :::" << std::endl;
 	std::cout << std::endl;
 
+	return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	// Seed the random function
+	std::srand(1);
+
+	// Run the subtests
+	std::cout << "Testing PiercedVector" << std::endl;
+
+	int status;
+	try {
+		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		std::cout << exception.what();
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	MPI_Finalize();
+#endif
 }
