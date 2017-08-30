@@ -31,6 +31,9 @@
 # include <chrono>
 # include <string>
 # include <iostream>
+#if BITPIT_ENABLE_MPI==1
+# include <mpi.h>
+#endif
 
 # include "bitpit_operators.hpp"
 # include "bitpit_CG.hpp"
@@ -1096,205 +1099,474 @@ bool testFaceOfBox(){
     
 }
 
+// ========================================================================== //
+// MAIN                                                                       //
+// ========================================================================== //
+int main(int argc, char *argv[])
+{
+    // ====================================================================== //
+    // INITIALIZE MPI                                                         //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
 
-int main(
-    void
-    ) {
-        bool check(true), local;
-        
-        local = testConvertBarycentricToFlagSegment();
-        std::cout<<"test on convertBarycentricToFlagSegment "<<local<<std::endl;
-        check &= local;
-    
-        local = testConvertBarycentricToFlagTriangle();
-        std::cout<<"test on convertBarycentricToFlagTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testConvertBarycentricToFlagSimplex();
-        std::cout<<"test on convertBarycentricToFlagSimplex "<<local<<std::endl;
-        check &= local;
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
 
-        local = testReconstructPointFromBarycentricSegment();
-        std::cout<<"test on reconstructPointFromBarycentricSegment "<<local<<std::endl;
-        check &= local;
-        
-        local = testReconstructPointFromBarycentricTriangle();
-        std::cout<<"test on reconstructPointFromBarycentricTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testReconstructPointFromBarycentricSimplex();
-        std::cout<<"test on reconstructPointFromBarycentricSimplex "<<local<<std::endl;
-        check &= local;
+    // Local variabels
+    bool                            pass = false;
 
-        local = testProjectPointLine();
-        std::cout<<"test on projectPointLine "<<local<<std::endl;
-        check &= local;
-        
-        local = testProjectPointPlane();
-        std::cout<<"test on projectPointPlane "<<local<<std::endl;
-        check &= local;
-        
-        local = testProjectPointSegment();
-        std::cout<<"test on projectPointSegment "<<local<<std::endl;
-        check &= local;
-        
-        local = testProjectPointTriangle();
-        std::cout<<"test on projectPointTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testRestrictPointTriangle();
-        std::cout<<"test on restrictPointTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testProjectCloudTriangle();
-        std::cout<<"test on projectCloudTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testProjectPointSimplex();
-        std::cout<<"test on projectPointSimplex "<<local<<std::endl;
-        check &= local;
-        
-        local = testProjectPointCone();
-        std::cout<<"test on projectPointCone "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistancePointLine();
-        std::cout<<"test on distancePointLine "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistancePointPlane();
-        std::cout<<"test on distancePointPlane "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistancePointSegment();
-        std::cout<<"test on distancePointSegment "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistancePointTriangle();
-        std::cout<<"test on distancePointTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistancePointCone();
-        std::cout<<"test on distancePointCone "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistanceCloudTriangle();
-        std::cout<<"test on distanceCloudTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistancePointSimplex();
-        std::cout<<"test on distancePointSimplex "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistanceCloudSimplex();
-        std::cout<<"test on distanceCloudSimplex "<<local<<std::endl;
-        check &= local;
-        
-        local = testDistanceLineLine();
-        std::cout<<"test on distanceLineLine "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectLineLine();
-        std::cout<<"test on intersectLineLine "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectSegmentSegment();
-        std::cout<<"test on intersectSegmentSegment "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectLinePlane();
-        std::cout<<"test on intersectLinePlane "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectSegmentPlane();
-        std::cout<<"test on intersectSegmentPlane "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectPlanePlane();
-        std::cout<<"test on intersectPlanePlane "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectPlaneBox();
-        std::cout<<"test on intersectPlaneBox "<<local<<std::endl;
-        check &= local;
+    // ====================================================================== //
+    // RUN SUB-TESTS                                                          //
+    // ====================================================================== //
+    try {
+        std::cout << "Testing convertBarycentricToFlagSegment...";
+        pass = testConvertBarycentricToFlagSegment();
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
 
-        local = testIntersectLineTriangle();
-        std::cout<<"test on intersectLineTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectSegmentTriangle();
-        std::cout<<"test on intersectSegmentTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectLineSimplex();
-        std::cout<<"test on intersectLineSimplex "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectSegmentSimplex();
-        std::cout<<"test on intersectSegmentSimplex "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectBoxBox();
-        std::cout<<"test on intersectBoxBox "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectBoxTriangle();
-        std::cout<<"test on intersectBoxTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectSegmentBox();
-        std::cout<<"test on intersectSegmentBox "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectBoxSimplex();
-        std::cout<<"test on intersectBoxSimplex "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectPointSegment();
-        std::cout<<"test on intersectPointSegment "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectPointTriangle();
-        std::cout<<"test on intersectPointTriangle "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectPointBox();
-        std::cout<<"test on intersectPointBox "<<local<<std::endl;
-        check &= local;
-        
-        local = testComputeAABBSegment();
-        std::cout<<"test on computeAABBSegment "<<local<<std::endl;
-        check &= local;
-        
-        local = testComputeAABBTriangle();
-        std::cout<<"test on computeAABBTriangle "<<local<<std::endl;
-        check &= local;
+        pass = testConvertBarycentricToFlagTriangle();
+        std::cout << "Testing convertBarycentricToFlagTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
 
-        local = testComputeAABBSimplex();
-        std::cout<<"test on computeAABBSimplex "<<local<<std::endl;
-        check &= local;
-        
-        local = testUnionAABB();
-        std::cout<<"test on unionAABB "<<local<<std::endl;
-        check &= local;
-        
-        local = testIntersectionAABB();
-        std::cout<<"test on intersectionAABB "<<local<<std::endl;
-        check &= local;
-        
-        local = testVertexOfBox();
-        std::cout<<"test on vertexOfBox "<<local<<std::endl;
-        check &= local;
+        pass = testConvertBarycentricToFlagSimplex();
+        std::cout << "Testing convertBarycentricToFlagSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
 
-        local = testEdgeOfBox();
-        std::cout<<"test on edgeOfBox "<<local<<std::endl;
-        check &= local;
+        pass = testReconstructPointFromBarycentricSegment();
+        std::cout << "Testing reconstructPointFromBarycentricSegment...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
 
-        local = testFaceOfBox();
-        std::cout<<"test on faceOfBox "<<local<<std::endl;
-        check &= local;
-        
-    return int(!check); 
-};
+        pass = testReconstructPointFromBarycentricTriangle();
+        std::cout << "Testing reconstructPointFromBarycentricTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
 
+        pass = testReconstructPointFromBarycentricSimplex();
+        std::cout << "Testing reconstructPointFromBarycentricSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
 
+        pass = testProjectPointLine();
+        std::cout << "Testing projectPointLine...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testProjectPointPlane();
+        std::cout << "Testing projectPointPlane...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testProjectPointSegment();
+        std::cout << "Testing projectPointSegment...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testProjectPointTriangle();
+        std::cout << "Testing projectPointTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testRestrictPointTriangle();
+        std::cout << "Testing restrictPointTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testProjectCloudTriangle();
+        std::cout << "Testing projectCloudTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testProjectPointSimplex();
+        std::cout << "Testing projectPointSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testProjectPointCone();
+        std::cout << "Testing projectPointCone...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistancePointLine();
+        std::cout << "Testing distancePointLine...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistancePointPlane();
+        std::cout << "Testing distancePointPlane...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistancePointSegment();
+        std::cout << "Testing distancePointSegment...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistancePointTriangle();
+        std::cout << "Testing distancePointTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistancePointCone();
+        std::cout << "Testing distancePointCone...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistanceCloudTriangle();
+        std::cout << "Testing distanceCloudTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistancePointSimplex();
+        std::cout << "Testing distancePointSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistanceCloudSimplex();
+        std::cout << "Testing distanceCloudSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testDistanceLineLine();
+        std::cout << "Testing distanceLineLine...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectLineLine();
+        std::cout << "Testing intersectLineLine...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectSegmentSegment();
+        std::cout << "Testing intersectSegmentSegment...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectLinePlane();
+        std::cout << "Testing intersectLinePlane...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectSegmentPlane();
+        std::cout << "Testing intersectSegmentPlane...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectPlanePlane();
+        std::cout << "Testing intersectPlanePlane...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectPlaneBox();
+        std::cout << "Testing intersectPlaneBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectLineTriangle();
+        std::cout << "Testing intersectLineTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectSegmentTriangle();
+        std::cout << "Testing intersectSegmentTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectLineSimplex();
+        std::cout << "Testing intersectLineSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectSegmentSimplex();
+        std::cout << "Testing intersectSegmentSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectBoxBox();
+        std::cout << "Testing intersectBoxBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectBoxTriangle();
+        std::cout << "Testing intersectBoxTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectSegmentBox();
+        std::cout << "Testing intersectSegmentBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectBoxSimplex();
+        std::cout << "Testing intersectBoxSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectPointSegment();
+        std::cout << "Testing intersectPointSegment...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectPointTriangle();
+        std::cout << "Testing intersectPointTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectPointBox();
+        std::cout << "Testing intersectPointBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testComputeAABBSegment();
+        std::cout << "Testing computeAABBSegment...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testComputeAABBTriangle();
+        std::cout << "Testing computeAABBTriangle...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testComputeAABBSimplex();
+        std::cout << "Testing computeAABBSimplex...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testUnionAABB();
+        std::cout << "Testing unionAABB...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectionAABB();
+        std::cout << "Testing intersectionAABB...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testVertexOfBox();
+        std::cout << "Testing vertexOfBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testEdgeOfBox();
+        std::cout << "Testing edgeOfBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testFaceOfBox();
+        std::cout << "Testing faceOfBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+    } catch (const std::exception &exception) {
+        std::cout << exception.what();
+    }
+
+    // ====================================================================== //
+    // FINALIZE MPI                                                           //
+    // ====================================================================== //
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
+
+    return 0;
+}
