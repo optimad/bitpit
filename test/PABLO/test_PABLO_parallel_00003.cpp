@@ -26,24 +26,19 @@
 
 #include "bitpit_common.hpp"
 #include "bitpit_PABLO.hpp"
+#include "bitpit_IO.hpp"
 
 using namespace bitpit;
 
-int main(int argc, char *argv[]) {
-
-    MPI_Init(&argc,&argv);
-
-    int nproc;
-    int rank;
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Comm_size(comm,&nproc);
-    MPI_Comm_rank(comm,&rank);
-
-    log::manager().initialize(log::SEPARATE, false, nproc, rank);
-    log::cout().setVisibility(log::GLOBAL);
-    log::cout() << fileVerbosity(log::NORMAL);
-    log::cout() << consoleVerbosity(log::NORMAL);
-
+/*!
+* Subtest 001
+*
+* Testing parallel dump/restore of a 2D octree patch.
+*
+* \param rank is the rank of the process
+*/
+int subtest_001(int rank)
+{
     int archiveVersion = 1;
 
     // Instantation of a 3D para_tree object
@@ -139,6 +134,38 @@ int main(int argc, char *argv[]) {
     octreeRestored.computeConnectivity();
     octreeRestored.write("Pablo_parallel_00003_restored");
 
-    // Finalize
+    // Done
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+    MPI_Init(&argc,&argv);
+
+    // Initialize the logger
+    int nProcs;
+    int rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    log::manager().initialize(log::COMBINED, true, nProcs, rank);
+    log::cout().setVisibility(log::GLOBAL);
+
+    // Run the subtests
+    log::cout() << "Testing parallel octree dump and restore." << std::endl;
+
+    int status;
+    try {
+        status = subtest_001(rank);
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
+
     MPI_Finalize();
 }

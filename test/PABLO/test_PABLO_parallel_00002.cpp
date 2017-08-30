@@ -22,30 +22,22 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <mpi.h>
+
 #include "bitpit_common.hpp"
 #include "bitpit_PABLO.hpp"
+#include "bitpit_IO.hpp"
 
 using namespace std;
 using namespace bitpit;
 
-// =================================================================================== //
-void testParallel01() {
-
-    /**<Instantation and setup of a default (named bitpit) logfile.*/
-    int nproc;
-    int    rank;
-#if BITPIT_ENABLE_MPI==1
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Comm_size(comm,&nproc);
-    MPI_Comm_rank(comm,&rank);
-#else
-    nproc = 1;
-    rank = 0;
-#endif
-    log::manager().initialize(log::SEPARATE, false, nproc, rank);
-    log::cout() << fileVerbosity(log::NORMAL);
-    log::cout() << consoleVerbosity(log::QUIET);
-
+/*!
+* Subtest 001
+*
+* Testing parallel refinement of a 2D octree.
+*/
+int subtest_001()
+{
     /**<Instantation of a 2D para_tree object.*/
     ParaTree pablo(2);
 
@@ -62,10 +54,8 @@ void testParallel01() {
     pablo.setMarker(2,1);
     pablo.adapt();
 
-#if BITPIT_ENABLE_MPI==1
     /**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
     pablo.loadBalance();
-#endif
 
 //    if(pablo.getRank()==1 || pablo.getRank()==2){
 //        uint32_t nocts = pablo.getNumOctants();
@@ -83,32 +73,44 @@ void testParallel01() {
 
     pablo.adaptGlobalCoarse();
 
-#if BITPIT_ENABLE_MPI==1
     /**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
     pablo.loadBalance();
-#endif
 
     /**<Compute the connectivity and write the para_tree.*/
     pablo.updateConnectivity();
     pablo.write("PabloParallelEmptyPartitions_parallel");
 
-    return ;
+    return 0;
 }
 
-// =================================================================================== //
-int main( int argc, char *argv[] ) {
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+    MPI_Init(&argc,&argv);
 
-#if BITPIT_ENABLE_MPI==1
-    MPI_Init(&argc, &argv);
-#else
-    BITPIT_UNUSED(argc);
-    BITPIT_UNUSED(argv);
-#endif
+    // Initialize the logger
+    int nProcs;
+    int    rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    /**<Calling Pablo Test routines*/
-    testParallel01() ;
+    log::manager().initialize(log::COMBINED, true, nProcs, rank);
+    log::cout().setVisibility(log::GLOBAL);
 
-#if BITPIT_ENABLE_MPI==1
+    // Run the subtests
+    log::cout() << "Testing parallel octree refinement" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
+
     MPI_Finalize();
-#endif
 }

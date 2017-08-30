@@ -22,34 +22,28 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#if BITPIT_ENABLE_MPI==1
+#   include <mpi.h>
+#endif
+
 #include "bitpit_common.hpp"
-#include "ParaTree.hpp"
+#include "bitpit_PABLO.hpp"
+#include "bitpit_IO.hpp"
 
 using namespace std;
 using namespace bitpit;
 
-// =================================================================================== //
-void test01() {
-
+/*!
+* Subtest 001
+*
+* Testing data smothing.
+*/
+int subtest_001()
+{
     int iter = 0;
     int dim = 3;
 
-	/**<Instantation and setup of a default (named bitpit) logfile.*/
-	int nproc;
-	int	rank;
-#if BITPIT_ENABLE_MPI==1
-	MPI_Comm comm = MPI_COMM_WORLD;
-	MPI_Comm_size(comm,&nproc);
-	MPI_Comm_rank(comm,&rank);
-#else
-	nproc = 1;
-	rank = 0;
-#endif
-	log::manager().initialize(log::SEPARATE, false, nproc, rank);
-	log::cout() << fileVerbosity(log::NORMAL);
-	log::cout() << consoleVerbosity(log::QUIET);
-
-	/**<Instantation of a 3D para_tree object.*/
+    /**<Instantation of a 3D para_tree object.*/
     ParaTree pablo(3);
 
     /**<Refine globally four level and write the para_tree.*/
@@ -131,26 +125,50 @@ void test01() {
         oct_data = oct_data_smooth;
     };
 
-    return ;
-} ;
+    return 0;
+}
 
-// =================================================================================== //
-int main( int argc, char *argv[] ) {
-
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
 #if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc, &argv);
-
-	{
+    MPI_Init(&argc,&argv);
 #else
-	BITPIT_UNUSED(argc);
-	BITPIT_UNUSED(argv);
+    BITPIT_UNUSED(argc);
+    BITPIT_UNUSED(argv);
 #endif
-		/**<Calling Pablo Test routines*/
-        test01() ;
+
+    int nProcs;
+    int rank;
+#if BITPIT_ENABLE_MPI==1
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else
+    nProcs = 1;
+    rank   = 0;
+#endif
+
+    // Initialize the logger
+    log::manager().initialize(log::SEPARATE, false, nProcs, rank);
+    log::cout() << fileVerbosity(log::NORMAL);
+    log::cout() << consoleVerbosity(log::QUIET);
+
+    // Run the subtests
+    log::cout() << "Testing data smoothing" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        log::cout() << exception.what();
+    }
 
 #if BITPIT_ENABLE_MPI==1
-	}
-
-	MPI_Finalize();
+    MPI_Finalize();
 #endif
 }
