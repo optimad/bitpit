@@ -33,6 +33,11 @@
 	<b>To run</b>: ./patchkernel_example_00001 \n
 */
 
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
+
+#include "bitpit_IO.hpp"
 #include "bitpit_patchkernel.hpp"
 
 using namespace bitpit;
@@ -58,7 +63,10 @@ void fillCellList(int nCells, PiercedVector<Cell> &cells)
 	}
 }
 
-int main()
+/**
+ * Run the example.
+ */
+void run()
 {
 	// Creating an emtpy list of cells
 	std::cout << std::endl << "::: Creating an empty PiercedVector :::" << std::endl;
@@ -409,4 +417,43 @@ int main()
 	std::cout << std::endl << "::: Done :::" << std::endl;
 	std::cout << std::endl;
 
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	int nProcs;
+	int rank;
+#if BITPIT_ENABLE_MPI==1
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else
+	nProcs = 1;
+	rank   = 0;
+#endif
+
+	// Initialize the logger
+	log::manager().initialize(log::SEPARATE, false, nProcs, rank);
+	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << consoleVerbosity(log::QUIET);
+
+	// Run the example
+	try {
+		run();
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	MPI_Finalize();
+#endif
 }
