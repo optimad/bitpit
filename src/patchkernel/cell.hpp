@@ -50,7 +50,7 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& 
 
 public:
 	Cell();
-	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED,
+	Cell(const long &id, ElementInfo::Type type,
 	     bool interior = true, bool storeNeighbourhood = true);
 
 	Cell(const Cell &other) = default;
