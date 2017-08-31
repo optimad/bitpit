@@ -1530,11 +1530,15 @@ cout << "1. Math Operators for STL vectors" << endl;
 cout << "2. Basic Operators for STL array" << endl;
 cout << "3. Math Operators for STL array" << endl;
 cin >> selection;
-switch (selection) {
-    case 0: { vectorOperators_Ex(); break; }
-    case 1: { vectorMathFunct_Ex(); break; }
-    case 2: { arrayOperators_Ex(); break; }
-    case 3: { arrayMathFunct_Ex(); break; }
-};
+try {
+    switch (selection) {
+        case 0: { vectorOperators_Ex(); break; }
+        case 1: { vectorMathFunct_Ex(); break; }
+        case 2: { arrayOperators_Ex(); break; }
+        case 3: { arrayMathFunct_Ex(); break; }
+    }
+} catch (const std::exception &exception) {
+    std::cout << exception.what();
+}
 
 return(0); };
