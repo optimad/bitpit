@@ -36,22 +36,14 @@
 using namespace std;
 
 /*!
-    Test for creating a levelset from an existing tree.
+* Subtest 001
+*
+* Testing creation of a levelset from an existing tree.
+*
+* \param rank is the rank of the process
 */
-int main( int argc, char *argv[]){
-
-    MPI_Init(&argc, &argv);
-
-    // MPI information
-    int nProcessors, rank;
-
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    // Initialize logger
-    bitpit::log::manager().initialize(bitpit::log::COMBINED, false, nProcessors, rank);
-    bitpit::log::cout().setVisibility(bitpit::log::GLOBAL);
-
+int subtest_001(int rank)
+{
     // Info
     bitpit::log::cout() << "Testing creating a levelset from an existing tree" << std::endl;
 
@@ -177,6 +169,38 @@ int main( int argc, char *argv[]){
 
     bitpit::log::cout() << " Elapsed time initialization " << elapsed_init << " ms" << endl;
     bitpit::log::cout() << " Elapsed time refinement     " << elapsed_refi << " ms" << endl;
+
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+    MPI_Init(&argc,&argv);
+
+    // Initialize the logger
+    int nProcs;
+    int    rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    bitpit::log::manager().initialize(bitpit::log::COMBINED, true, nProcs, rank);
+    bitpit::log::cout().setVisibility(bitpit::log::GLOBAL);
+
+    // Run the subtests
+    bitpit::log::cout() << "Testing creation of a levelset from an existing tree" << std::endl;
+
+    int status;
+    try {
+        status = subtest_001(rank);
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        bitpit::log::cout() << exception.what();
+    }
 
     MPI_Finalize();
 }

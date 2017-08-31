@@ -62,6 +62,15 @@
 // ========================================================================== //
 using namespace bitpit;
 
+// ========================================================================== //
+// IMPLEMENTATIONS                                                            //
+// ========================================================================== //
+
+/*!
+* Generate a 2D surface mesh.
+*
+* \param[in,out] mesh on output it will contain the generated surface mesh
+*/
 void Generate2DSurfMesh(
     SurfUnstructured                   &mesh
 ) {
@@ -116,12 +125,13 @@ long                                    i;
 
 return; }
 
-int main( int argc, char *argv[]){
-
-
-#if BITPIT_ENABLE_MPI==1
-    MPI_Init(&argc, &argv);
-#endif
+/*!
+* Subtest 001
+*
+* Testing basic features of a 2D levelset.
+*/
+int subtest_001()
+{
     int dimensions(2) ;
 
     // Input geometry
@@ -207,12 +217,38 @@ int main( int argc, char *argv[]){
 
     log::cout() << " - Exported data" << std::endl;
 
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
 #if BITPIT_ENABLE_MPI==1
-    MPI_Finalize();
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
 #endif
 
-    return 0;
+	// Initialize the logger
+	log::manager().initialize(log::COMBINED);
 
-};
+	// Run the subtests
+	log::cout() << "Testing basic levelset features" << std::endl;
 
+	int status;
+	try {
+		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
 
+#if BITPIT_ENABLE_MPI==1
+	MPI_Finalize();
+#endif
+}

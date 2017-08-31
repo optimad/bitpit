@@ -56,23 +56,19 @@
 // ========================================================================== //
 using namespace std;
 
+// ========================================================================== //
+// IMPLEMENTATIONS                                                            //
+// ========================================================================== //
+
 /*!
-    Test for 3D levelset of complex geometries on a Pablo octree mesh.
+* Subtest 001
+*
+* Testing 3D levelset parallel refinement.
+*
+* \param rank is the rank of the process
 */
-int main( int argc, char *argv[]){
-
-    MPI_Init(&argc, &argv);
-
-    // MPI information
-    int nProcessors, rank ;
-
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    // Initialize logger
-    bitpit::log::manager().initialize(bitpit::log::SEPARATE, false, nProcessors, rank) ;
-    bitpit::log::cout().setVisibility( bitpit::log::GLOBAL ) ;
-
+int subtest_001(int rank)
+{
     // Input geometry
     std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(0) );
 
@@ -208,5 +204,37 @@ int main( int argc, char *argv[]){
     cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
     cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;
 
-    MPI_Finalize();
+    return 0;
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+	MPI_Init(&argc,&argv);
+
+	// Initialize the logger
+	int nProcs;
+	int	rank;
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	bitpit::log::manager().initialize(bitpit::log::COMBINED, true, nProcs, rank);
+	bitpit::log::cout().setVisibility(bitpit::log::GLOBAL);
+
+	// Run the subtests
+    bitpit::log::cout() << "Testing levelset parallel refinement." << std::endl;
+
+	int status;
+	try {
+		status = subtest_001(rank);
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		bitpit::log::cout() << exception.what();
+	}
+
+	MPI_Finalize();
 }

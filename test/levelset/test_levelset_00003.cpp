@@ -59,13 +59,17 @@
 // ========================================================================== //
 using namespace std;
 
-/*!Demo for 2D level set of complex geometries on a Pablo octree mesh.
-*/
-int main( int argc, char *argv[]){
+// ========================================================================== //
+// IMPLEMENTATIONS                                                            //
+// ========================================================================== //
 
-#if BITPIT_ENABLE_MPI==1
-    MPI_Init(&argc, &argv);
-#endif
+/*!
+* Subtest 001
+*
+* Testing levelset refinement.
+*/
+int subtest_001()
+{
     // ========================================================================== //
     // VARIABLES DECLARATION                                                      //
     // ========================================================================== //
@@ -317,12 +321,38 @@ int main( int argc, char *argv[]){
     cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
     cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;
 
-#if BITPIT_ENABLE_MPI==1
-    MPI_Finalize();
-#endif
-
     return 0;
-
 };
 
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
 
+	// Initialize the logger
+	bitpit::log::manager().initialize(bitpit::log::COMBINED);
+
+	// Run the subtests
+	bitpit::log::cout() << "Testing levelset refinement" << std::endl;
+
+	int status;
+	try {
+		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+	} catch (const std::exception &exception) {
+		bitpit::log::cout() << exception.what();
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	MPI_Finalize();
+#endif
+}
