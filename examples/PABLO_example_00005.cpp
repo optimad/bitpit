@@ -22,6 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
+
 #include "bitpit_PABLO.hpp"
 
 using namespace std;
@@ -54,131 +58,148 @@ using namespace bitpit;
 */
 // =================================================================================== //
 
-int main(int argc, char *argv[]) {
+/**
+ * Run the example.
+ */
+void run()
+{
+	int iter = 0;
 
-#if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc, &argv);
+	/**<Instantation of a 2D pablo uniform object.*/
+	PabloUniform pablo5(2);
 
-	{
-#endif
-		int iter = 0;
+	/**<Set NO 2:1 balance for the octree.*/
+	uint32_t idx=0;
+	pablo5.setBalance(idx,false);
 
-		/**<Instantation and setup of a default (named bitpit) logfile.*/
-		int nproc;
-		int	rank;
-#if BITPIT_ENABLE_MPI==1
-		MPI_Comm comm = MPI_COMM_WORLD;
-		MPI_Comm_size(comm,&nproc);
-		MPI_Comm_rank(comm,&rank);
-#else
-		nproc = 1;
-		rank = 0;
-#endif
-		log::manager().initialize(log::SEPARATE, false, nproc, rank);
-		log::cout() << fileVerbosity(log::NORMAL);
-		log::cout() << consoleVerbosity(log::QUIET);
+	/**<Compute the connectivity and write the octree.*/
+	pablo5.computeConnectivity();
+	pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
 
-		/**<Instantation of a 2D pablo uniform object.*/
-		PabloUniform pablo5(2);
-
-		/**<Set NO 2:1 balance for the octree.*/
-		uint32_t idx=0;
-		pablo5.setBalance(idx,false);
-
-		/**<Compute the connectivity and write the octree.*/
-		pablo5.computeConnectivity();
+	/**<Refine globally two level and write the octree.*/
+	for (iter=1; iter<3; iter++){
+		pablo5.adaptGlobalRefine();
+		pablo5.updateConnectivity();
 		pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
+	}
 
-		/**<Refine globally two level and write the octree.*/
-		for (iter=1; iter<3; iter++){
-			pablo5.adaptGlobalRefine();
-			pablo5.updateConnectivity();
-			pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
+#if BITPIT_ENABLE_MPI==1
+	/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+	pablo5.loadBalance();
+#endif
+
+	/**<Define a center point and a radius.*/
+	double xc, yc;
+	xc = yc = 0.5;
+	double radius = 0.4;
+
+	/**<Simple adapt() (refine) 6 times the octants with at least one node inside the circle.*/
+	for (iter=3; iter<9; iter++){
+		uint32_t nocts = pablo5.getNumOctants();
+		for (unsigned int i=0; i<nocts; i++){
+			/**<Compute the nodes of the octant.*/
+			vector<array<double,3> > nodes = pablo5.getNodes(i);
+			for (int j=0; j<4; j++){
+				double x = nodes[j][0];
+				double y = nodes[j][1];
+				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
+					pablo5.setMarker(i, 1);
+				}
+			}
 		}
 
+		/**<Adapt octree.*/
+		pablo5.adapt();
+
 #if BITPIT_ENABLE_MPI==1
-		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+		/**<(Load)Balance the octree over the processes.*/
 		pablo5.loadBalance();
 #endif
 
-		/**<Define a center point and a radius.*/
-		double xc, yc;
-		xc = yc = 0.5;
-		double radius = 0.4;
-
-		/**<Simple adapt() (refine) 6 times the octants with at least one node inside the circle.*/
-		for (iter=3; iter<9; iter++){
-			uint32_t nocts = pablo5.getNumOctants();
-			for (unsigned int i=0; i<nocts; i++){
-				/**<Compute the nodes of the octant.*/
-				vector<array<double,3> > nodes = pablo5.getNodes(i);
-				for (int j=0; j<4; j++){
-					double x = nodes[j][0];
-					double y = nodes[j][1];
-					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-						pablo5.setMarker(i, 1);
-					}
-				}
-			}
-
-			/**<Adapt octree.*/
-			pablo5.adapt();
-
-#if BITPIT_ENABLE_MPI==1
-			/**<(Load)Balance the octree over the processes.*/
-			pablo5.loadBalance();
-#endif
-
-			/**<Update the connectivity and write the octree.*/
-			pablo5.updateConnectivity();
-			pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
-		}
-
-		/**<Coarse globally one level and write the octree.*/
-		pablo5.adaptGlobalCoarse();
+		/**<Update the connectivity and write the octree.*/
 		pablo5.updateConnectivity();
 		pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
-
-
-		/**<Define a center point and a radius.*/
-		xc = yc = 0.35;
-		radius = 0.15;
-
-		/**<Simple adapt() 5 times the octants with at least one node inside the circle.*/
-		for (iter=10; iter<15; iter++){
-			uint32_t nocts = pablo5.getNumOctants();
-			for (unsigned int i=0; i<nocts; i++){
-				/**<Compute the nodes of the octant.*/
-				vector<array<double,3> > nodes = pablo5.getNodes(i);
-				for (int j=0; j<4; j++){
-					double x = nodes[j][0];
-					double y = nodes[j][1];
-					/**<Set refinement marker=-1 (coarse it one time) for octants inside a circle.*/
-					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-						pablo5.setMarker(i, -1);
-					}
-				}
-			}
-			/**<Adapt octree.*/
-			pablo5.adapt();
-
-#if BITPIT_ENABLE_MPI==1
-			/**<(Load)Balance the octree over the processes.*/
-			pablo5.loadBalance();
-#endif
-
-			/**<Update the connectivity and write the octree.*/
-			pablo5.updateConnectivity();
-			pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
-		}
-
-		/**<Coarse globally one level and write the octree.*/
-		pablo5.adaptGlobalCoarse();
-		pablo5.updateConnectivity();
-		pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
-
-#if BITPIT_ENABLE_MPI==1
 	}
+
+	/**<Coarse globally one level and write the octree.*/
+	pablo5.adaptGlobalCoarse();
+	pablo5.updateConnectivity();
+	pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
+
+
+	/**<Define a center point and a radius.*/
+	xc = yc = 0.35;
+	radius = 0.15;
+
+	/**<Simple adapt() 5 times the octants with at least one node inside the circle.*/
+	for (iter=10; iter<15; iter++){
+		uint32_t nocts = pablo5.getNumOctants();
+		for (unsigned int i=0; i<nocts; i++){
+			/**<Compute the nodes of the octant.*/
+			vector<array<double,3> > nodes = pablo5.getNodes(i);
+			for (int j=0; j<4; j++){
+				double x = nodes[j][0];
+				double y = nodes[j][1];
+				/**<Set refinement marker=-1 (coarse it one time) for octants inside a circle.*/
+				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
+					pablo5.setMarker(i, -1);
+				}
+			}
+		}
+		/**<Adapt octree.*/
+		pablo5.adapt();
+
+#if BITPIT_ENABLE_MPI==1
+		/**<(Load)Balance the octree over the processes.*/
+		pablo5.loadBalance();
+#endif
+
+		/**<Update the connectivity and write the octree.*/
+		pablo5.updateConnectivity();
+		pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
+	}
+
+	/**<Coarse globally one level and write the octree.*/
+	pablo5.adaptGlobalCoarse();
+	pablo5.updateConnectivity();
+	pablo5.write("pablo00005_iter"+to_string(static_cast<unsigned long long>(iter)));
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	int nProcs;
+	int rank;
+#if BITPIT_ENABLE_MPI==1
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else
+	nProcs = 1;
+	rank   = 0;
+#endif
+
+	// Initialize the logger
+	log::manager().initialize(log::SEPARATE, false, nProcs, rank);
+	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << consoleVerbosity(log::QUIET);
+
+	// Run the example
+	try {
+		run();
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
+#if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
 #endif
 }

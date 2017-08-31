@@ -22,6 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
+
 #include "bitpit_PABLO.hpp"
 
 #if BITPIT_ENABLE_MPI==1
@@ -127,154 +131,169 @@ public:
     }
 };
 
-int main(int argc, char *argv[]) {
+/**
+ * Run the example.
+ */
+void run()
+{
+	int iter = 0;
+	int dim = 2;
+
+	/**<Instantation of a 2D pablo uniform object.*/
+	PabloUniform pablo6(2);
+
+	/**<Refine globally four level and write the octree.*/
+	for (iter=1; iter<5; iter++){
+		pablo6.adaptGlobalRefine();
+	}
 
 #if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc, &argv);
-
-	{
-#endif
-		int iter = 0;
-		int dim = 2;
-
-		/**<Instantation and setup of a default (named bitpit) logfile.*/
-		int nproc;
-		int	rank;
-#if BITPIT_ENABLE_MPI==1
-		MPI_Comm comm = MPI_COMM_WORLD;
-		MPI_Comm_size(comm,&nproc);
-		MPI_Comm_rank(comm,&rank);
-#else
-		nproc = 1;
-		rank = 0;
-#endif
-		log::manager().initialize(log::SEPARATE, false, nproc, rank);
-		log::cout() << fileVerbosity(log::NORMAL);
-		log::cout() << consoleVerbosity(log::QUIET);
-
-		/**<Instantation of a 2D pablo uniform object.*/
-		PabloUniform pablo6(2);
-
-		/**<Refine globally four level and write the octree.*/
-		for (iter=1; iter<5; iter++){
-			pablo6.adaptGlobalRefine();
-		}
-
-#if BITPIT_ENABLE_MPI==1
-		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
-		pablo6.loadBalance();
+	/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+	pablo6.loadBalance();
 #endif
 
-		/**<Define a center point and a radius.*/
-		double xc, yc;
-		xc = yc = 0.5;
-		double radius = 0.25;
+	/**<Define a center point and a radius.*/
+	double xc, yc;
+	xc = yc = 0.5;
+	double radius = 0.25;
 
-		/**<Define vectors of data.*/
-		uint32_t nocts = pablo6.getNumOctants();
-		uint32_t nghosts = pablo6.getNumGhosts();
-		//vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
-		Data octdata(nocts), ghostdata(nghosts);
+	/**<Define vectors of data.*/
+	uint32_t nocts = pablo6.getNumOctants();
+	uint32_t nghosts = pablo6.getNumGhosts();
+	//vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+	Data octdata(nocts), ghostdata(nghosts);
 
 
-		/**<Assign a data to the octants with at least one node inside the circle.*/
-		for (unsigned int i=0; i<nocts; i++){
-			vector<array<double,3> > nodes = pablo6.getNodes(i);
-			for (int j=0; j<4; j++){
-				double x = nodes[j][0];
-				double y = nodes[j][1];
-				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					//oct_data[i] = 1.0;
-				    octdata.doubleData[i] = 1.0;
-				    octdata.floatData[i] = 1.0;
-				}
+	/**<Assign a data to the octants with at least one node inside the circle.*/
+	for (unsigned int i=0; i<nocts; i++){
+		vector<array<double,3> > nodes = pablo6.getNodes(i);
+		for (int j=0; j<4; j++){
+			double x = nodes[j][0];
+			double y = nodes[j][1];
+			if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
+				//oct_data[i] = 1.0;
+				octdata.doubleData[i] = 1.0;
+				octdata.floatData[i] = 1.0;
 			}
 		}
+	}
 
-		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
-		for (unsigned int i=0; i<nghosts; i++){
-			/**<Compute the nodes of the octant (Use pointer for ghost).*/
-			Octant *oct = pablo6.getGhostOctant(i);
-			vector<array<double,3> > nodes = pablo6.getNodes(oct);
-			for (int j=0; j<4; j++){
-				double x = nodes[j][0];
-				double y = nodes[j][1];
-				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					//ghost_data[i] = 1.0;
-				    ghostdata.doubleData[i] = 1.0;
-				    ghostdata.floatData[i] = 1.0;
+	/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
+	for (unsigned int i=0; i<nghosts; i++){
+		/**<Compute the nodes of the octant (Use pointer for ghost).*/
+		Octant *oct = pablo6.getGhostOctant(i);
+		vector<array<double,3> > nodes = pablo6.getNodes(oct);
+		for (int j=0; j<4; j++){
+			double x = nodes[j][0];
+			double y = nodes[j][1];
+			if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
+				//ghost_data[i] = 1.0;
+				ghostdata.doubleData[i] = 1.0;
+				ghostdata.floatData[i] = 1.0;
+			}
+		}
+	}
+
+	/**<Update the connectivity and write the para_tree.*/
+	iter = 0;
+	pablo6.updateConnectivity();
+	pablo6.writeTest("pablo00006_double_iter"+to_string(static_cast<unsigned long long>(iter)), octdata.doubleData);
+
+	/**<Smoothing iterations on initial data*/
+	int start = iter + 1;
+	for (iter=start; iter<start+25; iter++){
+		//vector<double> oct_data_smooth(nocts, 0.0);
+		Data octdatasmooth(nocts);
+		vector<uint32_t> neigh, neigh_t;
+		vector<bool> isghost, isghost_t;
+		uint8_t iface, nfaces, codim;
+		for (unsigned int i=0; i<nocts; i++){
+			neigh.clear();
+			isghost.clear();
+
+			/**<Find neighbours through faces (codim=1) and edges (codim=2) of the octants*/
+			for (codim=1; codim<dim+1; codim++){
+				if (codim == 1){
+					nfaces = 4;
+				}
+				else if (codim == 2){
+					nfaces = 4;
+				}
+				for (iface=0; iface<nfaces; iface++){
+					pablo6.findNeighbours(i,iface,codim,neigh_t,isghost_t);
+					neigh.insert(neigh.end(), neigh_t.begin(), neigh_t.end());
+					isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
+				}
+			}
+
+			/**<Smoothing data with the average over the one ring neighbours of octants*/
+			//oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
+			octdatasmooth.doubleData[i] = octdata.doubleData[i]/(neigh.size()+1);
+			octdatasmooth.floatData[i] = octdata.floatData[i]/(neigh.size()+1);
+			for (unsigned int j=0; j<neigh.size(); j++){
+				if (isghost[j]){
+					//oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
+					octdatasmooth.doubleData[i] += ghostdata.doubleData[neigh[j]]/(neigh.size()+1);
+					octdatasmooth.floatData[i] += ghostdata.floatData[neigh[j]]/(neigh.size()+1);
+				}
+				else{
+					//oct_data_smooth[i] += oct_data[neigh[j]]/(neigh.size()+1);
+					octdatasmooth.doubleData[i] += octdata.doubleData[neigh[j]]/(neigh.size()+1);
+					octdatasmooth.floatData[i] += octdata.floatData[neigh[j]]/(neigh.size()+1);
 				}
 			}
 		}
 
 		/**<Update the connectivity and write the para_tree.*/
-		iter = 0;
 		pablo6.updateConnectivity();
-		pablo6.writeTest("pablo00006_double_iter"+to_string(static_cast<unsigned long long>(iter)), octdata.doubleData);
-
-		/**<Smoothing iterations on initial data*/
-		int start = iter + 1;
-		for (iter=start; iter<start+25; iter++){
-			//vector<double> oct_data_smooth(nocts, 0.0);
-		    Data octdatasmooth(nocts);
-			vector<uint32_t> neigh, neigh_t;
-			vector<bool> isghost, isghost_t;
-			uint8_t iface, nfaces, codim;
-			for (unsigned int i=0; i<nocts; i++){
-				neigh.clear();
-				isghost.clear();
-
-				/**<Find neighbours through faces (codim=1) and edges (codim=2) of the octants*/
-				for (codim=1; codim<dim+1; codim++){
-					if (codim == 1){
-						nfaces = 4;
-					}
-					else if (codim == 2){
-						nfaces = 4;
-					}
-					for (iface=0; iface<nfaces; iface++){
-						pablo6.findNeighbours(i,iface,codim,neigh_t,isghost_t);
-						neigh.insert(neigh.end(), neigh_t.begin(), neigh_t.end());
-						isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
-					}
-				}
-
-				/**<Smoothing data with the average over the one ring neighbours of octants*/
-				//oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
-				octdatasmooth.doubleData[i] = octdata.doubleData[i]/(neigh.size()+1);
-				octdatasmooth.floatData[i] = octdata.floatData[i]/(neigh.size()+1);
-				for (unsigned int j=0; j<neigh.size(); j++){
-					if (isghost[j]){
-						//oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
-						octdatasmooth.doubleData[i] += ghostdata.doubleData[neigh[j]]/(neigh.size()+1);
-						octdatasmooth.floatData[i] += ghostdata.floatData[neigh[j]]/(neigh.size()+1);
-					}
-					else{
-						//oct_data_smooth[i] += oct_data[neigh[j]]/(neigh.size()+1);
-						octdatasmooth.doubleData[i] += octdata.doubleData[neigh[j]]/(neigh.size()+1);
-						octdatasmooth.floatData[i] += octdata.floatData[neigh[j]]/(neigh.size()+1);
-					}
-				}
-			}
-
-			/**<Update the connectivity and write the para_tree.*/
-			pablo6.updateConnectivity();
-			pablo6.writeTest("pablo00006_iter"+to_string(static_cast<unsigned long long>(iter)), octdatasmooth.doubleData);
+		pablo6.writeTest("pablo00006_iter"+to_string(static_cast<unsigned long long>(iter)), octdatasmooth.doubleData);
 
 #if BITPIT_ENABLE_MPI==1
-			/**<Communicate the data of the octants and the ghost octants between the processes.*/
-			UserDataComm<Data> data_comm(octdatasmooth, ghostdata);
-			pablo6.communicate(data_comm);
+		/**<Communicate the data of the octants and the ghost octants between the processes.*/
+		UserDataComm<Data> data_comm(octdatasmooth, ghostdata);
+		pablo6.communicate(data_comm);
 
 #endif
-			octdata.doubleData = octdatasmooth.doubleData;
-			octdata.floatData = octdatasmooth.floatData;
-		}
+		octdata.doubleData = octdatasmooth.doubleData;
+		octdata.floatData = octdatasmooth.floatData;
+	}
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
 #if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	int nProcs;
+	int rank;
+#if BITPIT_ENABLE_MPI==1
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else
+	nProcs = 1;
+	rank   = 0;
+#endif
+
+	// Initialize the logger
+	log::manager().initialize(log::SEPARATE, false, nProcs, rank);
+	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << consoleVerbosity(log::QUIET);
+
+	// Run the example
+	try {
+		run();
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
 	}
 
+#if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
 #endif
 }
-
-

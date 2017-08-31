@@ -22,6 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#if BITPIT_ENABLE_MPI==1
+#include <mpi.h>
+#endif
+
 #include "bitpit_PABLO.hpp"
 
 using namespace std;
@@ -62,119 +66,135 @@ using namespace bitpit;
 */
 // =================================================================================== //
 
-int main(int argc, char *argv[]) {
+/**
+ * Run the example.
+ */
+void run()
+{
+	/**<Instantation of a 2D pablo uniform object.*/
+	PabloUniform pablo1(2);
 
-#if BITPIT_ENABLE_MPI==1
-	MPI_Init(&argc, &argv);
+	/**<Compute the connectivity and write the octree.*/
+	pablo1.computeConnectivity();
+	pablo1.write("pablo00001_iter0");
 
-	{
-#endif
+	/**<Refine globally one level and write the octree.*/
+	pablo1.adaptGlobalRefine();
+	pablo1.updateConnectivity();
+	pablo1.write("pablo00001_iter1");
 
-		/**<Instantation and setup of a default (named bitpit) logfile.*/
-		int nproc;
-		int	rank;
-#if BITPIT_ENABLE_MPI==1
-		MPI_Comm comm = MPI_COMM_WORLD;
-		MPI_Comm_size(comm,&nproc);
-		MPI_Comm_rank(comm,&rank);
-#else
-		nproc = 1;
-		rank = 0;
-#endif
-		log::manager().initialize(log::SEPARATE, false, nproc, rank);
-		log::cout() << fileVerbosity(log::NORMAL);
-		log::cout() << consoleVerbosity(log::QUIET);
+	/**<Define a center point.*/
+	double xc, yc;
+	xc = yc = 0.5;
 
-		/**<Instantation of a 2D pablo uniform object.*/
-		PabloUniform pablo1(2);
+	/**<Set 2:1 balance through faces.*/
+	pablo1.setBalanceCodimension(1);
 
-		/**<Compute the connectivity and write the octree.*/
-		pablo1.computeConnectivity();
-		pablo1.write("pablo00001_iter0");
-
-		/**<Refine globally one level and write the octree.*/
-		pablo1.adaptGlobalRefine();
-		pablo1.updateConnectivity();
-		pablo1.write("pablo00001_iter1");
-
-		/**<Define a center point.*/
-		double xc, yc;
-		xc = yc = 0.5;
-
-		/**<Set 2:1 balance through faces.*/
-		pablo1.setBalanceCodimension(1);
-
-		/**<Set NO 2:1 balance in the right side of domain.*/
-		uint32_t nocts = pablo1.getNumOctants();
-		for (unsigned int i=0; i<nocts; i++){
-			array<double,3> center = pablo1.getCenter(i);
-			double x = center[0];
-			if (x>xc)
-				pablo1.setBalance(i,false);
-		}
-
-		/**<Define a radius.*/
-		double radius = 0.4;
-
-		/**<Simple adapt() nref1 times in lower area of domain.*/
-		int nref1 = 6;
-		for (int iter=0; iter<nref1; iter++){
-			nocts = pablo1.getNumOctants();
-			for (unsigned int i=0; i<nocts; i++){
-				/**<Extract Octant (pointer use).*/
-				Octant *oct = pablo1.getOctant(i);
-				/**<Compute center of the octant.*/
-				array<double,3> center = pablo1.getCenter(oct);
-				double x = center[0];
-				double y = center[1];
-
-				/**<Set refinement marker=1 for octants inside a circle.*/
-				if ((pow((x-xc),2.0)+pow((y-yc),2.0) < pow(radius,2.0)) &&
-						(y<yc)){
-					pablo1.setMarker(oct, 1);
-				}
-			}
-			/**<Adapt octree, update connectivity and write.*/
-			pablo1.adapt();
-			pablo1.updateConnectivity();
-			pablo1.write("pablo00001_iter"+to_string(static_cast<unsigned long long>(iter+2)));
-		}
-
-		/**<While adapt() nref2 times in the upper area of domain.
-		 * (Useful if you work with center of octants) */
-		int nref2 = 5;
-		int iter = 0;
-		bool done = true;
-		while(iter<=nref2){
-			done = true;
-			while(done)
-			{
-				nocts = pablo1.getNumOctants();
-				for (unsigned int i=0; i<nocts; i++){
-					/**<Compute center of the octant (index use).*/
-					array<double,3> center = pablo1.getCenter(i);
-					double x = center[0];
-					double y = center[1];
-					if ((pow((x-xc),2.0)+pow((y-yc),2.0) < pow(radius,2.0)) &&
-							(y>yc) && iter<=nref2 && pablo1.getLevel(i)<=iter+1){
-
-						/**<Set refinement marker=1 for octants inside a circle.*/
-						pablo1.setMarker(i, 1);
-					}
-				}
-				done = pablo1.adapt();
-				pablo1.updateConnectivity();
-				pablo1.write("pablo00001_iter"+to_string(static_cast<unsigned long long>(iter+nref1+2)));
-			}
-			iter++;
-		}
-		/**<Globally refine one level, update the connectivity and write the octree.*/
-		pablo1.adaptGlobalRefine();
-		pablo1.updateConnectivity();
-		pablo1.write("pablo00001_iter"+to_string(static_cast<unsigned long long>(iter+nref1+3)));
-#if BITPIT_ENABLE_MPI==1
+	/**<Set NO 2:1 balance in the right side of domain.*/
+	uint32_t nocts = pablo1.getNumOctants();
+	for (unsigned int i=0; i<nocts; i++){
+		array<double,3> center = pablo1.getCenter(i);
+		double x = center[0];
+		if (x>xc)
+			pablo1.setBalance(i,false);
 	}
 
+	/**<Define a radius.*/
+	double radius = 0.4;
+
+	/**<Simple adapt() nref1 times in lower area of domain.*/
+	int nref1 = 6;
+	for (int iter=0; iter<nref1; iter++){
+		nocts = pablo1.getNumOctants();
+		for (unsigned int i=0; i<nocts; i++){
+			/**<Extract Octant (pointer use).*/
+			Octant *oct = pablo1.getOctant(i);
+			/**<Compute center of the octant.*/
+			array<double,3> center = pablo1.getCenter(oct);
+			double x = center[0];
+			double y = center[1];
+
+			/**<Set refinement marker=1 for octants inside a circle.*/
+			if ((pow((x-xc),2.0)+pow((y-yc),2.0) < pow(radius,2.0)) &&
+					(y<yc)){
+				pablo1.setMarker(oct, 1);
+			}
+		}
+		/**<Adapt octree, update connectivity and write.*/
+		pablo1.adapt();
+		pablo1.updateConnectivity();
+		pablo1.write("pablo00001_iter"+to_string(static_cast<unsigned long long>(iter+2)));
+	}
+
+	/**<While adapt() nref2 times in the upper area of domain.
+		* (Useful if you work with center of octants) */
+	int nref2 = 5;
+	int iter = 0;
+	bool done = true;
+	while(iter<=nref2){
+		done = true;
+		while(done)
+		{
+			nocts = pablo1.getNumOctants();
+			for (unsigned int i=0; i<nocts; i++){
+				/**<Compute center of the octant (index use).*/
+				array<double,3> center = pablo1.getCenter(i);
+				double x = center[0];
+				double y = center[1];
+				if ((pow((x-xc),2.0)+pow((y-yc),2.0) < pow(radius,2.0)) &&
+						(y>yc) && iter<=nref2 && pablo1.getLevel(i)<=iter+1){
+
+					/**<Set refinement marker=1 for octants inside a circle.*/
+					pablo1.setMarker(i, 1);
+				}
+			}
+			done = pablo1.adapt();
+			pablo1.updateConnectivity();
+			pablo1.write("pablo00001_iter"+to_string(static_cast<unsigned long long>(iter+nref1+2)));
+		}
+		iter++;
+	}
+	/**<Globally refine one level, update the connectivity and write the octree.*/
+	pablo1.adaptGlobalRefine();
+	pablo1.updateConnectivity();
+	pablo1.write("pablo00001_iter"+to_string(static_cast<unsigned long long>(iter+nref1+3)));
+}
+
+/*!
+* Main program.
+*/
+int main(int argc, char *argv[])
+{
+#if BITPIT_ENABLE_MPI==1
+	MPI_Init(&argc,&argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
+#endif
+
+	int nProcs;
+	int rank;
+#if BITPIT_ENABLE_MPI==1
+	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else
+	nProcs = 1;
+	rank   = 0;
+#endif
+
+	// Initialize the logger
+	log::manager().initialize(log::SEPARATE, false, nProcs, rank);
+	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << consoleVerbosity(log::QUIET);
+
+	// Run the example
+	try {
+		run();
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
+
+#if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
 #endif
 }
