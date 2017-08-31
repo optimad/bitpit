@@ -54,10 +54,14 @@ int main(int argc, char *argv[]) {
 	double length = 20;
 	double dh = 0.5;
 
-	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
-	patch_2D->getVTK().setName("cartesian_2D_patch");
-	patch_2D->update();
-	patch_2D->write();
+	try {
+		VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
+		patch_2D->getVTK().setName("cartesian_2D_patch");
+		patch_2D->update();
+		patch_2D->write();
+	} catch (const std::exception &exception) {
+		log::cout() << exception.what();
+	}
 
 #if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
