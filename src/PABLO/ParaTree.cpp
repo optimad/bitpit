@@ -26,7 +26,10 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "bitpit_common.hpp"
+#if BITPIT_ENABLE_MPI==1
 #include "bitpit_communications.hpp"
+#endif
+
 #include "ParaTree.hpp"
 #include <sstream>
 #include <iomanip>
