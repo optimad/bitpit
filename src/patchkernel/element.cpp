@@ -1377,8 +1377,7 @@ std::vector<long> Element::getEdgeConnect(int edge) const
 	const std::vector<int> &localEdgeConnect = getEdgeLocalConnect(edge);
 	int nEdgeVertices = localEdgeConnect.size();
 
-	std::vector<long> edgeConnect;
-	edgeConnect.resize(nEdgeVertices);
+	std::vector<long> edgeConnect(nEdgeVertices);
 	for (int k = 0; k < nEdgeVertices; ++k) {
 		int localVertexId = localEdgeConnect[k];
 		long vertexId = getVertex(localVertexId);
