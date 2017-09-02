@@ -1313,8 +1313,7 @@ std::vector<long> Element::getFaceConnect(int face) const
 	const std::vector<int> &localFaceConnect = getFaceLocalConnect(face);
 	int nFaceVertices = localFaceConnect.size();
 
-	std::vector<long> faceConnect;
-	faceConnect.resize(nFaceVertices);
+	std::vector<long> faceConnect(nFaceVertices);
 	for (int k = 0; k < nFaceVertices; ++k) {
 		int localVertexId = localFaceConnect[k];
 		long vertexId = getVertex(localVertexId);
