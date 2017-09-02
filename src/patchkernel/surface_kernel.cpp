@@ -630,8 +630,7 @@ std::array<double, 3> SurfaceKernel::evalVertexNormal(const long &id, const int 
  * Vertex normal is evaluated as a weighted average of the normals of the
  * 1 ring of the vertex. Only the normal whose angle with respect to the
  * considered cell is less that the specified limit are considered. The
- * weights used in the average are the normalized angles of incident
- * facets at vertex.
+ * weights used in the average are the angles of incident facets at vertex.
  *
  * \param[in] id is the cell id
  * \param[in] vertex is the local vertex id
@@ -642,62 +641,44 @@ std::array<double, 3> SurfaceKernel::evalVertexNormal(const long &id, const int 
 */
 std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, const int &vertex, const double &limit) const
 {
-    // Get glocal vertex id
+    // Get vertex id
     const Cell &cell = m_cells[id];
     long vertexId = cell.getVertex(vertex);
 
-    // Reference normal
-    std::array<double, 3> referenceNormal = evalFacetNormal(id);
+    // Cell normal
+    std::array<double, 3> cellNormal = evalFacetNormal(id);
 
-    // Compute 1-ring of vertex
-    std::vector<long> ring = findCellVertexOneRing(id, vertex);
+    // Cell angle at vertex
+    double cellVertexAngle = evalAngleAtVertex(id, cell.findVertex(vertexId));
 
-    // Build the list of facests that will be use to evaluate the normal
-    std::vector<long> facetIds;
-    std::vector<std::array<double, 3>> facetNormals;
-    for (long ringId : ring) {
-        if (ringId == id) {
-            facetIds.push_back(id);
-            facetNormals.push_back(referenceNormal);
-            continue;
-        }
+    // Compute cell vertex neighs
+    std::vector<long> vertexNeighs = findCellVertexNeighs(id, vertex);
 
-        std::array<double, 3> facetNormal = evalFacetNormal(ringId);
-        double misalignment = std::acos(dotProduct(facetNormal, referenceNormal)) ;
+    // Compute non-normalized normal
+    std::array<double, 3> normal = cellVertexAngle * cellNormal;
+    for (long facetId : vertexNeighs) {
+        // Eval facet normal
+        std::array<double, 3> facetNormal = evalFacetNormal(facetId);
+
+        // Discard facets with a misalignment greater than the specified limit
+        double misalignment = std::acos(dotProduct(facetNormal, cellNormal)) ;
         if (misalignment > std::abs(limit)) {
             continue;
         }
 
-        facetIds.push_back(ringId);
-        facetNormals.push_back(std::move(facetNormal));
-    }
-
-    // Compute normalized angles of incident facet at vertex
-    //
-    // These are the weigths used for the averagin.
-    std::vector<double> angles;
-    angles.reserve(facetIds.size());
-    for (long facetId : facetIds) {
+        // Eval facet angle used as normalization weight
         const Cell &facet = m_cells[facetId];
-        angles.push_back(evalAngleAtVertex(facetId, facet.findVertex(vertexId)));
-    }
+        double facetVertexAngle = evalAngleAtVertex(facetId, facet.findVertex(vertexId));
 
-    double disk_angle = 0.0;
-    sum(angles, disk_angle);
-    angles = angles / disk_angle;
-
-    // Compute the vertex normal
-    std::array<double, 3> normal = {{0., 0., 0.}};
-    for (size_t i = 0; i < facetIds.size(); ++i) {
-        normal += angles[i] * facetNormals[i];
+        // Add facet contribution to normal
+        normal += facetVertexAngle * facetNormal;
     }
 
     // Normalization
-    normal = normal/norm2(normal);
+    normal = normal / norm2(normal);
 
-    return(normal);
+    return normal;
 }
-
 
 /*!
  * Adjust the orientation of all facets of the local partition according to the
