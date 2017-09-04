@@ -151,9 +151,8 @@ public:
     __PSI_REFERENCE__ operator*() const;
     __PSI_POINTER__ operator->() const;
 
-    template<typename U = value_t, typename U_no_cv = value_no_cv_t,
-             typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type = 0>
-    operator PiercedStorageIterator<const U_no_cv, id_t>() const;
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
+    operator PiercedStorageIterator<const U, id_t>() const;
 
     /**
     * Two-way comparison.

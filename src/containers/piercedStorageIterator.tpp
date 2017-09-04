@@ -166,13 +166,12 @@ __PSI_POINTER__ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator->
 * Converts the iterator to a const_iterator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-template<typename U, typename U_no_cv,
-         typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type>
-PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator PiercedStorageIterator<const U_no_cv, id_t>() const
+template<typename U, typename std::enable_if<!std::is_const<U>::value, int>::type>
+PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator PiercedStorageIterator<const U, id_t>() const
 {
     std::size_t rawIndex = getRawIndex();
 
-    return PiercedStorageIterator<const U_no_cv, id_t>(m_storage, rawIndex);
+    return PiercedStorageIterator<const U, id_t>(m_storage, rawIndex);
 }
 
 }
