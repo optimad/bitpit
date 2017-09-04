@@ -4678,7 +4678,7 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 	} else if (name == "offsets") {
 		int offset = 0;
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			offset += cell.getInfo().nVertices;
+			offset += cell.getVertexCount();
 			genericIO::flushBINARY(stream, offset);
 		}
 	} else if (name == "types") {
