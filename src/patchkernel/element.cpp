@@ -1481,14 +1481,7 @@ Element::Tesselation Element::generateTesselation(const std::array<double, 3> *c
 		int nFaces = getFaceCount();
 		std::vector<std::vector<int>> faceTesselationIds(nFaces);
 		for (int i = 0; i < nFaces; ++i) {
-			int connectOffset = 0;
-			if (getFaceType(i) == ElementType::POLYGON) {
-				connectOffset++;
-			}
-
-			ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(i);
-			ConstProxyVector<int> localVertexIds(localFaceConnect.data() + connectOffset , localFaceConnect.size() - connectOffset);
-
+			ConstProxyVector<int> localVertexIds = getFaceLocalVertexIds(i);
 			int nFaceVertices = localVertexIds.size();
 			faceTesselationIds[i].resize(nFaceVertices);
 			for (int k = 0; k < nFaceVertices; ++k) {
