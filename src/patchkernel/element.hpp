@@ -121,13 +121,13 @@ public:
 	int getFaceCount() const;
 	ElementType getFaceType(const int &face) const;
 	int getFaceVertexCount(const int &face) const;
-	const std::vector<int> & getFaceLocalConnect(const int &face) const;
-	std::vector<long> getFaceConnect(int face) const;
+	ConstProxyVector<int> getFaceLocalConnect(const int &face) const;
+	ConstProxyVector<long> getFaceConnect(int face) const;
 	ConstProxyVector<long> getFaceVertexIds(int face) const;
 
 	int getEdgeCount() const;
-	const std::vector<int> & getEdgeLocalConnect(const int &edge) const;
-	std::vector<long> getEdgeConnect(int edge) const;
+	ConstProxyVector<int> getEdgeLocalConnect(const int &edge) const;
+	ConstProxyVector<long> getEdgeConnect(int edge) const;
 
 	int getVertexCount() const;
 	void renumberVertices(const std::unordered_map<long, long> &map);

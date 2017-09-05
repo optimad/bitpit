@@ -457,18 +457,24 @@ int Element::getFaceVertexCount(const int &face) const
 	\param face is the face for which the connectivity is reqested
 	\result The local connectivity of the specified face of the element.
 */
-const std::vector<int> & Element::getFaceLocalConnect(const int &face) const
+ConstProxyVector<int> Element::getFaceLocalConnect(const int &face) const
 {
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
 	case (ElementType::POLYHEDRON):
 	case (ElementType::UNDEFINED):
+	{
 		BITPIT_UNREACHABLE("Unsupported element");
 		throw std::runtime_error ("Unsupported element");
+	}
 
 	default:
-		return getInfo().faceConnect[face];
+	{
+		const std::vector<int> &localFaceConnect = getInfo().faceConnect[face];
+
+		return ConstProxyVector<int>(localFaceConnect.data(), localFaceConnect.size());
+	}
 
 	}
 }
@@ -479,20 +485,21 @@ const std::vector<int> & Element::getFaceLocalConnect(const int &face) const
 	\param face is the face for which the connectivity is reqested
 	\result The connectivity of the specified face of the element.
 */
-std::vector<long> Element::getFaceConnect(int face) const
+ConstProxyVector<long> Element::getFaceConnect(int face) const
 {
-	const std::vector<int> &localFaceConnect = getFaceLocalConnect(face);
-	int nFaceVertices = localFaceConnect.size();
+	const long *connectivity = getConnect();
 
-	ConstProxyVector<long> cellVertexIds = getVertexIds();
-	std::vector<long> faceConnect(nFaceVertices);
-	for (int k = 0; k < nFaceVertices; ++k) {
+	ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(face);
+	int faceConnectSize = localFaceConnect.size();
+
+	std::vector<long> faceConnect(faceConnectSize);
+	for (int k = 0; k < faceConnectSize; ++k) {
 		int localVertexId = localFaceConnect[k];
-		long vertexId = cellVertexIds[localVertexId];
+		long vertexId = connectivity[localVertexId];
 		faceConnect[k] = vertexId;
 	}
 
-	return faceConnect;
+	return ConstProxyVector<long>(std::move(faceConnect));
 }
 
 /*!
@@ -522,18 +529,24 @@ int Element::getEdgeCount() const
 	\param edge is the edge for which the connectivity is reqested
 	\result The local connectivity of the specified edge of the element.
 */
-const std::vector<int> & Element::getEdgeLocalConnect(const int &edge) const
+ConstProxyVector<int> Element::getEdgeLocalConnect(const int &edge) const
 {
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
 	case (ElementType::POLYHEDRON):
 	case (ElementType::UNDEFINED):
+	{
 		BITPIT_UNREACHABLE("Unsupported element");
 		throw std::runtime_error ("Unsupported element");
+	}
 
 	default:
-		return getInfo().edgeConnect[edge];
+	{
+		const std::vector<int> &localEdgeConnect = getInfo().edgeConnect[edge];
+
+		return ConstProxyVector<int>(localEdgeConnect.data(), localEdgeConnect.size());
+	}
 
 	}
 }
@@ -544,20 +557,20 @@ const std::vector<int> & Element::getEdgeLocalConnect(const int &edge) const
 	\param edge is the edge for which the connectivity is reqested
 	\result The connectivity of the specified edge of the element.
 */
-std::vector<long> Element::getEdgeConnect(int edge) const
+ConstProxyVector<long> Element::getEdgeConnect(int edge) const
 {
-	const std::vector<int> &localEdgeConnect = getEdgeLocalConnect(edge);
+	const long *connectivity = getConnect();
+
+	ConstProxyVector<int> localEdgeConnect = getEdgeLocalConnect(edge);
 	int nEdgeVertices = localEdgeConnect.size();
 
 	std::vector<long> edgeConnect(nEdgeVertices);
-	ConstProxyVector<long> cellVertexIds = getVertexIds();
 	for (int k = 0; k < nEdgeVertices; ++k) {
 		int localVertexId = localEdgeConnect[k];
-		long vertexId = cellVertexIds[localVertexId];
-		edgeConnect[k] = vertexId;
+		edgeConnect[k] = connectivity[localVertexId];
 	}
 
-	return edgeConnect;
+	return ConstProxyVector<long>(std::move(edgeConnect));
 }
 
 /*!
@@ -685,7 +698,7 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 
 	default:
 	{
-		const std::vector<int> &localFaceVertexIds = getFaceLocalConnect(face);
+		ConstProxyVector<int> localFaceVertexIds = getFaceLocalConnect(face);
 		int nFaceVertices = localFaceVertexIds.size();
 
 		ConstProxyVector<long> cellVertexIds = getVertexIds();

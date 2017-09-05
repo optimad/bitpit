@@ -282,7 +282,6 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
     bool                                        check;
     int                                         n_faces, n_adj;
     long                                        id;
-    vector<long>                                face_connect;
 
     // Counters
     int                                         i, j;
@@ -318,8 +317,20 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
                 check = check && (id > c_->getAdjacency(i, j));
             } //next j
             if (check) {
-                face_connect = c_->getFaceConnect(i);
-                net.addCell(c_->getFaceType(i), true, face_connect);
+                // Get edge type
+                ElementType edgeType = c_->getFaceType(i);
+
+                // Get edge connect
+                ConstProxyVector<long> faceConnect = c_->getFaceConnect(i);
+                int faceConnectSize = faceConnect.size();
+
+                std::unique_ptr<long[]> edgeConnect = std::unique_ptr<long[]>(new long[faceConnectSize]);
+                for (int k = 0; k < faceConnectSize; ++k) {
+                    edgeConnect[k] = faceConnect[k];
+                }
+
+                // Add edge
+                net.addCell(edgeType, true, std::move(edgeConnect));
             }
         } //next i
     } //next c_

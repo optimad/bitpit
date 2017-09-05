@@ -2554,7 +2554,7 @@ void PatchKernel::_findCellEdgeNeighs(const long &id, const int &edge, const std
 	}
 
 	const Cell &cell = getCell(id);
-	std::vector<int> edgeVertices = cell.getEdgeLocalConnect(edge);
+	ConstProxyVector<int> edgeVertices = cell.getEdgeLocalConnect(edge);
 	std::size_t nEdgeVertices = edgeVertices.size();
 	if (nEdgeVertices < 2) {
 		return;
@@ -4008,7 +4008,7 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 	}
 
 	// Connectivity of the interface
-	std::vector<long> faceConnect = intrOwner->getFaceConnect(intrOwnerFace);
+	ConstProxyVector<long> faceConnect = intrOwner->getFaceConnect(intrOwnerFace);
 
 	int nInterfaceVertices = faceConnect.size();
 	std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
@@ -4597,7 +4597,7 @@ void PatchKernel::extractEnvelope(PatchKernel &envelope) const
 
 			// Add face vertices to the envelope and get face
 			// connectivity in the envelope
-			std::vector<long> faceConnect = cell.getFaceConnect(i);
+			ConstProxyVector<long> faceConnect = cell.getFaceConnect(i);
 			int nFaceVertices = faceConnect.size();
 
 			std::unique_ptr<long[]> faceEnvelopeConnect = std::unique_ptr<long[]>(new long[nFaceVertices]);
