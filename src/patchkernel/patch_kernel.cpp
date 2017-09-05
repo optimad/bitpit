@@ -759,10 +759,10 @@ void PatchKernel::write(VTKWriteMode mode)
 
 	long vtkConnectSize = 0;
 	for (const Cell &cell : getVTKCellWriteRange()) {
-		const int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		const int nCellVertices = cellVertexIds.size();
 		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cellConnect[k];
+			long vertexId = cellVertexIds[k];
 			vertexWriteFlag.at(vertexId) = true;
 		}
 		vtkConnectSize += nCellVertices;
@@ -1252,10 +1252,10 @@ long PatchKernel::countOrphanVertices() const
 {
 	std::unordered_set<long> usedVertices;
 	for (const Cell &cell : m_cells) {
-		int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		int nCellVertices = cellVertexIds.size();
 		for (int i = 0; i < nCellVertices; ++i) {
-			usedVertices.insert(cellConnect[i]);
+			usedVertices.insert(cellVertexIds[i]);
 		}
 	}
 
@@ -1279,10 +1279,10 @@ std::vector<long> PatchKernel::findOrphanVertices()
 
 	// Remove used vertices
 	for (const Cell &cell : m_cells) {
-		int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		int nCellVertices = cellVertexIds.size();
 		for (int i = 0; i < nCellVertices; ++i) {
-			vertexSet.erase(cellConnect[i]);
+			vertexSet.erase(cellVertexIds[i]);
 		}
 	}
 
@@ -1350,13 +1350,13 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	// Sort cells
 	std::array<long, 2> binEntry;
 	for (const Cell &cell : m_cells) {
-		int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		int nCellVertices = cellVertexIds.size();
 		for (int j = 0; j < nCellVertices; ++j) {
 			binEntry[0] = cell.getId();
 			binEntry[1] = j;
 
-			long vertexId = cellConnect[j];
+			long vertexId = cellVertexIds[j];
 			long binId = bin_index[vertexId];
 			bins[binId].push_back(binEntry);
 		}
@@ -2196,10 +2196,10 @@ long PatchKernel::countOrphanCells() const
 	// Compute vertex valence
 	std::unordered_map<long, short> vertexValence;
 	for (const Cell &cell : m_cells) {
-		int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		int nCellVertices = cellVertexIds.size();
 		for (int j = 0; j < nCellVertices; j++) {
-			long vertexId = cellConnect[j];
+			long vertexId = cellVertexIds[j];
 			vertexValence[vertexId] += 1;
 		}
 	}
@@ -2208,10 +2208,10 @@ long PatchKernel::countOrphanCells() const
 	long nOrphanCells = 0;
 	for (const Cell &cell : m_cells) {
 		long isIsolated = true;
-		int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		int nCellVertices = cellVertexIds.size();
 		for (int j = 0; j < nCellVertices; j++) {
-			long vertexId = cellConnect[j];
+			long vertexId = cellVertexIds[j];
 			if (vertexValence[vertexId] > 1) {
 				isIsolated = false;
 				break;
@@ -2686,8 +2686,8 @@ void PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, std::v
 void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	const Cell &cell = getCell(id);
-	const long *cellConnect = cell.getConnect();
-	long vertexId = cellConnect[vertex];
+	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+	long vertexId = cellVertexIds[vertex];
 
 	std::vector<long> scanQueue;
 	std::set<long> alreadyProcessed;
@@ -3594,12 +3594,12 @@ std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id) const
 */
 std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element) const
 {
-	const long *elementConnect = element.getConnect();
-	int nElementVertices = element.getVertexCount();
+	ConstProxyVector<long> cellVertexIds = element.getVertexIds();
+	int nElementVertices = cellVertexIds.size();
 
 	std::array<double, 3> centroid = {{0., 0., 0.}};
 	for (int i = 0; i < nElementVertices; ++i) {
-		const Vertex &vertex = getVertex(elementConnect[i]);
+		const Vertex &vertex = getVertex(cellVertexIds[i]);
 		centroid += vertex.getCoords();
 	}
 	centroid /= (double) nElementVertices;
@@ -3660,13 +3660,13 @@ size_t                          k;
 face_loc_connect_A = cell_1_->getFaceLocalConnect(i);
 face_loc_connect_B = cell_2_->getFaceLocalConnect(j);
 if (face_loc_connect_A.size() == face_loc_connect_B.size()) {
-    const long *connectivity_1_ = cell_1_->getConnect();
+    ConstProxyVector<long> cellVertexIds_1_ = cell_1_->getVertexIds();
     for (k = 0; k < face_loc_connect_A.size(); ++k) {
-        face_loc_connect_A[k] = connectivity_1_[face_loc_connect_A[k]];
+        face_loc_connect_A[k] = cellVertexIds_1_[face_loc_connect_A[k]];
     } //next i
-    const long *connectivity_2_ = cell_2_->getConnect();
+    ConstProxyVector<long> cellVertexIds_2_ = cell_2_->getVertexIds();
     for (k = 0; k < face_loc_connect_B.size(); ++k) {
-        face_loc_connect_B[k] = connectivity_2_[face_loc_connect_B[k]];
+        face_loc_connect_B[k] = cellVertexIds_2_[face_loc_connect_B[k]];
     } //next i
     std::sort(face_loc_connect_A.begin(), face_loc_connect_A.end());
     std::sort(face_loc_connect_B.begin(), face_loc_connect_B.end());
@@ -3716,10 +3716,10 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 	for (const Cell &cell : m_cells) {
 		long cellId = cell.getId();
 
-		int nCellVertices = cell.getVertexCount();
-		const long *cellConnect = cell.getConnect();
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		int nCellVertices = cellVertexIds.size();
 		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cellConnect[k];
+			long vertexId = cellVertexIds[k];
 			vertexToCellsMap[vertexId].push_back(cellId);
 		}
 	}
@@ -4746,10 +4746,10 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 		}
 	} else if (name == "connectivity") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			const long *cellConnect = cell.getConnect();
+			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 			const int nCellVertices = cell.getVertexCount();
 			for (int k = 0; k < nCellVertices; ++k) {
-				long vertexId = cellConnect[k];
+				long vertexId = cellVertexIds[k];
 				long vtkVertexId = m_vtkVertexMap.at(vertexId);
 				genericIO::flushBINARY(stream, vtkVertexId);
 			}

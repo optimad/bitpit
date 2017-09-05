@@ -330,12 +330,12 @@ void Interface::display(std::ostream &out, unsigned short int indent) const
 
 	// Connectivity infos --------------------------------------------------- //
 	int nVertices = getVertexCount();
-	const long *cellConnect = getConnect();
+	ConstProxyVector<long> cellVertexIds = getVertexIds();
 	out << t_s << "connectivity: [ ";
 	for (int i = 0; i < nVertices - 1; ++i) {
-		out << cellConnect[i] << ", ";
+		out << cellVertexIds[i] << ", ";
 	} //next i
-	out << cellConnect[nVertices - 1] << " ]" << std::endl;
+	out << cellVertexIds[nVertices - 1] << " ]" << std::endl;
 
 	// Onwer infos ---------------------------------------------------------- //
 	out << t_s << "onwer ID:    " << getOwner() << std::endl;

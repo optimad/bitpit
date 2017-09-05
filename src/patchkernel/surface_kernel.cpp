@@ -182,7 +182,7 @@ double SurfaceKernel::evalCellArea(const long &id) const
 
     // Local variables
     const Cell                   *cell_ = &m_cells[id];
-    const long                   *cellConnect_ = cell_->getConnect();
+    ConstProxyVector<long>       cellVertexIds = cell_->getVertexIds();
 
     // Counters
     // none
@@ -193,13 +193,13 @@ double SurfaceKernel::evalCellArea(const long &id) const
     if ((cell_->getType() == ElementType::UNDEFINED)
      || (cell_->getType() == ElementType::VERTEX)) return 0.0;
     if (cell_->getType() == ElementType::LINE) {
-        return ( norm2(m_vertices[cellConnect_[0]].getCoords()
-                     - m_vertices[cellConnect_[1]].getCoords()) );
+        return ( norm2(m_vertices[cellVertexIds[0]].getCoords()
+                     - m_vertices[cellVertexIds[1]].getCoords()) );
     }
     array<double, 3>            d1, d2;
     if (cell_->getType() == ElementType::TRIANGLE) {
-        d1 = m_vertices[cellConnect_[1]].getCoords() - m_vertices[cellConnect_[0]].getCoords();
-        d2 = m_vertices[cellConnect_[2]].getCoords() - m_vertices[cellConnect_[0]].getCoords();
+        d1 = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
+        d2 = m_vertices[cellVertexIds[2]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
         return (0.5*norm2(crossProduct(d1, d2)));
     }
     else {
@@ -210,8 +210,8 @@ double SurfaceKernel::evalCellArea(const long &id) const
         for (int i = 0; i < nvert; ++i) {
             next = (i + 1) % nvert;
             prev = (nvert + i - 1) % nvert;
-            d1 = m_vertices[cellConnect_[next]].getCoords() - m_vertices[cellConnect_[i]].getCoords();
-            d2 = m_vertices[cellConnect_[prev]].getCoords() - m_vertices[cellConnect_[i]].getCoords();
+            d1 = m_vertices[cellVertexIds[next]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
+            d2 = m_vertices[cellVertexIds[prev]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
             area += coeff*norm2(crossProduct(d1, d2));
         } //next i
         return(area);
@@ -237,7 +237,7 @@ double SurfaceKernel::evalEdgeLength(const long &id, const int &edge_id) const
 
     // Local variables
     const Cell                           *cell_ = &m_cells[id];
-    const long                           *cellConnect_ = cell_->getConnect();
+    ConstProxyVector<long>               cellVertexIds = cell_->getVertexIds();
 
     // Counters
     // none
@@ -252,8 +252,8 @@ double SurfaceKernel::evalEdgeLength(const long &id, const int &edge_id) const
     double edge_length = 0.0;
     vector<int> face_loc_connect(2, Vertex::NULL_ID);
     face_loc_connect = cell_->getFaceLocalConnect(edge_id);
-    face_loc_connect[0] = cellConnect_[face_loc_connect[0]];
-    face_loc_connect[1] = cellConnect_[face_loc_connect[1]];
+    face_loc_connect[0] = cellVertexIds[face_loc_connect[0]];
+    face_loc_connect[1] = cellVertexIds[face_loc_connect[1]];
     edge_length = norm2(m_vertices[face_loc_connect[0]].getCoords() - m_vertices[face_loc_connect[1]].getCoords());
 
     return(edge_length);
@@ -360,7 +360,7 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id) co
 
     // Local variables
     const Cell                   *cell_ = &m_cells[id];
-    const long                   *cellConnect_ = cell_->getConnect();
+    ConstProxyVector<long>       cellVertexIds = cell_->getVertexIds();
 
     // Counters
 
@@ -380,8 +380,8 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id) co
     double                       angle;
     array<double, 3>             d1, d2;
 
-    d1 = m_vertices[cellConnect_[next]].getCoords() - m_vertices[cellConnect_[vertex_id]].getCoords();
-    d2 = m_vertices[cellConnect_[prev]].getCoords() - m_vertices[cellConnect_[vertex_id]].getCoords();
+    d1 = m_vertices[cellVertexIds[next]].getCoords() - m_vertices[cellVertexIds[vertex_id]].getCoords();
+    d2 = m_vertices[cellVertexIds[prev]].getCoords() - m_vertices[cellVertexIds[vertex_id]].getCoords();
     d1 = d1/norm2(d1);
     d2 = d2/norm2(d2);
     angle = acos( min(1.0, max(-1.0, dotProduct(d1, d2) ) ) );
@@ -534,7 +534,7 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
     // Local variables
     array<double, 3>             normal = {{0.0, 0.0, 0.0}};
     const Cell                   *cell_ = &m_cells[id];
-    const long                   *cellConnect_ = cell_->getConnect();
+    ConstProxyVector<long>       cellVertexIds = cell_->getVertexIds();
 
     // Counters
     // none
@@ -548,7 +548,7 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
     if (cell_->getType() == ElementType::LINE) {
         if (m_spaceDim - getDimension() == 1) {
             std::array<double, 3>       z = {{0.0, 0.0, 1.0}};
-            normal = m_vertices[cellConnect_[1]].getCoords() - m_vertices[cellConnect_[0]].getCoords();
+            normal = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
             normal = crossProduct(normal, z);
         }
         else return normal;
@@ -556,8 +556,8 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
 
     if (cell_->getType() == ElementType::TRIANGLE) {
         array<double, 3>                d1, d2;
-        d1 = m_vertices[cellConnect_[1]].getCoords() - m_vertices[cellConnect_[0]].getCoords();
-        d2 = m_vertices[cellConnect_[2]].getCoords() - m_vertices[cellConnect_[0]].getCoords();
+        d1 = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
+        d2 = m_vertices[cellVertexIds[2]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
         normal = crossProduct(d1, d2);
     }
     else {
@@ -567,8 +567,8 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
         for (i = 0; i < nvert; ++i) {
             next = (i+1) % nvert;
             prev = (nvert + i - 1) % nvert;
-            d1 = m_vertices[cellConnect_[next]].getCoords() - m_vertices[cellConnect_[i]].getCoords();
-            d2 = m_vertices[cellConnect_[prev]].getCoords() - m_vertices[cellConnect_[i]].getCoords();
+            d1 = m_vertices[cellVertexIds[next]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
+            d2 = m_vertices[cellVertexIds[prev]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
             normal += coeff*crossProduct(d1, d2);
         } //next i
     }
@@ -647,8 +647,8 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, con
 {
     // Get vertex id
     const Cell &cell = m_cells[id];
-    const long *cellConnect = cell.getConnect();
-    long vertexId = cellConnect[vertex];
+    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+    long vertexId = cellVertexIds[vertex];
 
     // Cell normal
     std::array<double, 3> cellNormal = evalFacetNormal(id);
@@ -911,9 +911,9 @@ bool SurfaceKernel::sameOrientationAtInterface(const long &id)
     const auto &neigh = getCell(neighId);
 
     if (face.getType() == ElementType::VERTEX) {
-        const long* ownerConnect = owner.getConnect();
-        const long* neighConnect = neigh.getConnect();
-        if (ownerConnect[0] == neighConnect[0] || ownerConnect[1] == neighConnect[1]) {
+        ConstProxyVector<long> ownerVertexIds = owner.getVertexIds();
+        ConstProxyVector<long> neighVertexIds = neigh.getVertexIds();
+        if (ownerVertexIds[0] == neighVertexIds[0] || ownerVertexIds[1] == neighVertexIds[1]) {
             return false;
         }
     } else if (face.getType() == ElementType::LINE) {

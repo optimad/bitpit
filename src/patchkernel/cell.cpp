@@ -745,7 +745,7 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 	int                         nv = getVertexCount();
 	int                         nf = getFaceCount();
 
-	const long                  *cellConnect = getConnect();
+	ConstProxyVector<long>      cellVertexIds = getVertexIds();
 
 	// General info ----------------------------------------------------- //
 	out << t_s << "cell type:    " << getType() << std::endl;
@@ -758,11 +758,11 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 	// Connectivity infos --------------------------------------------------- //
 	out << t_s << "connectivity: [ ";
 	for (i = 0; i < nv-1; ++i) {
-            if (cellConnect[i] == Vertex::NULL_ID)   out << "n.a. ";
-            else                                   out << cellConnect[i] << ", ";
+            if (cellVertexIds[i] == Vertex::NULL_ID)   out << "n.a. ";
+            else                                   out << cellVertexIds[i] << ", ";
 	} //next i
-	if (cellConnect[nv-1] == Vertex::NULL_ID)    out << "n.a. ";
-	else                                       out << cellConnect[nv-1] << " ]" << std::endl;
+	if (cellVertexIds[nv-1] == Vertex::NULL_ID)    out << "n.a. ";
+	else                                       out << cellVertexIds[nv-1] << " ]" << std::endl;
 
 	// neighbors infos ------------------------------------------------------ //
         if (m_adjacencies.size() > 0) {

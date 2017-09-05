@@ -1139,10 +1139,10 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     for (const long &cellId : cellsToCommunicate) {
         const Cell &cell = m_cells[cellId];
 
-        int nCellVertices = cell.getVertexCount();
-        const long *cellConnect = cell.getConnect();
+        ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+        int nCellVertices = cellVertexIds.size();
         for (int j = 0; j < nCellVertices; ++j) {
-            long vertexId = cellConnect[j];
+            long vertexId = cellVertexIds[j];
             if (vertexToCommunicate.count(vertexId) > 0) {
                 continue;
             }
@@ -1397,10 +1397,10 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     for (const auto &entry : m_ghostOwners) {
         long ghostId = entry.first;
         const Cell &ghost = m_cells[ghostId];
-        int nGhostVertices = ghost.getVertexCount();
-        const long *ghostConnect = ghost.getConnect();
+        ConstProxyVector<long> ghostVertexIds = ghost.getVertexIds();
+        int nGhostVertices = ghostVertexIds.size();
         for (int k = 0; k < nGhostVertices; ++k) {
-            long vertexId = ghostConnect[k];
+            long vertexId = ghostVertexIds[k];
             if (ghostVertices.count(vertexId) == 0) {
                 ghostVertices.insert({{vertexId, m_vertices[vertexId]}});
                 ghostVerticesTree.insert(&ghostVertices.at(vertexId), vertexId);
@@ -1536,10 +1536,10 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                 }
 
                 bool cellsCoincide = true;
-                int nGhostVertices = ghostCell.getVertexCount();
-                const long *ghostCellConnect = ghostCell.getConnect();
+                ConstProxyVector<long> ghostVertexIds = ghostCell.getVertexIds();
+                int nGhostVertices = ghostVertexIds.size();
                 for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
-                    long ghostVertexId = ghostCellConnect[vertex];
+                    long ghostVertexId = ghostVertexIds[vertex];
                     long recvVertexId  = recvCellConnect[vertex];
                     if (ghostVertexId != recvVertexId) {
                         cellsCoincide = false;

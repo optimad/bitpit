@@ -303,11 +303,10 @@ long * Element::getConnect()
 */
 int Element::findVertex(long vertexId) const
 {
-	int nVertices = getVertexCount();
-	const long *connectivity = getConnect();
+	ConstProxyVector<long> cellVertexIds = getVertexIds();
 
-	int localVertexId = std::find(connectivity, connectivity + nVertices, vertexId) - connectivity;
-	if (localVertexId >= nVertices) {
+	int localVertexId = std::distance(cellVertexIds.begin(), std::find(cellVertexIds.begin(), cellVertexIds.end(), vertexId));
+	if (localVertexId >= (int) cellVertexIds.size()) {
 		return -1;
 	}
 
@@ -417,11 +416,11 @@ std::vector<long> Element::getFaceConnect(int face) const
 	const std::vector<int> &localFaceConnect = getFaceLocalConnect(face);
 	int nFaceVertices = localFaceConnect.size();
 
+	ConstProxyVector<long> cellVertexIds = getVertexIds();
 	std::vector<long> faceConnect(nFaceVertices);
-	const long *cellConnect = getConnect();
 	for (int k = 0; k < nFaceVertices; ++k) {
 		int localVertexId = localFaceConnect[k];
-		long vertexId = cellConnect[localVertexId];
+		long vertexId = cellVertexIds[localVertexId];
 		faceConnect[k] = vertexId;
 	}
 
@@ -483,10 +482,10 @@ std::vector<long> Element::getEdgeConnect(int edge) const
 	int nEdgeVertices = localEdgeConnect.size();
 
 	std::vector<long> edgeConnect(nEdgeVertices);
-	const long *cellConnect = getConnect();
+	ConstProxyVector<long> cellVertexIds = getVertexIds();
 	for (int k = 0; k < nEdgeVertices; ++k) {
 		int localVertexId = localEdgeConnect[k];
-		long vertexId = cellConnect[localVertexId];
+		long vertexId = cellVertexIds[localVertexId];
 		edgeConnect[k] = vertexId;
 	}
 
