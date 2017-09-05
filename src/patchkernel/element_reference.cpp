@@ -197,22 +197,6 @@ void ReferenceElementInfo::initializeFaceEdges(const std::vector<const Reference
 }
 
 /*!
-    \class ReferenceUndefinedInfo
-    \ingroup patchelements
-
-    \brief The ReferenceUndefinedInfo class is used for undefined reference
-    element.
-*/
-
-/*!
-    Default constructor
-*/
-ReferenceUndefinedInfo::ReferenceUndefinedInfo()
-    : ReferenceElementInfo(-1, ElementType::UNDEFINED, 0, 0, 0)
-{
-}
-
-/*!
     \class Reference3DElementInfo
     \ingroup patchelements
 

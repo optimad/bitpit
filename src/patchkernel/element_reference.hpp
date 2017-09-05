@@ -66,18 +66,6 @@ protected:
 
 };
 
-class ReferenceUndefinedInfo : public ReferenceElementInfo {
-
-friend class ReferenceElementInfo;
-
-protected:
-    ReferenceUndefinedInfo();
-
-    ReferenceUndefinedInfo(ReferenceUndefinedInfo const&) = delete;
-    ReferenceUndefinedInfo& operator=(ReferenceUndefinedInfo const&) = delete;
-
-};
-
 class Reference3DElementInfo : public ReferenceElementInfo {
 
 protected:
