@@ -24,6 +24,7 @@
 
 #include <cassert>
 #include <limits>
+#include <set>
 
 #include "bitpit_common.hpp"
 #include "bitpit_operators.hpp"
@@ -1181,6 +1182,55 @@ Element::Tesselation Element::generateTesselation(const std::array<double, 3> *c
 	}
 
 	return tesselation;
+}
+
+/*!
+	Evaluates the connectivity of all edges.
+
+	This function does not use the information of the reference element, so it
+	is slow and should only be used for polyhedral elements.
+
+	\param nRequestedEdges is the number of edges to extract
+	\result The connectivity of all edges.
+*/
+std::vector<ConstProxyVector<long>> Element::evalEdgeConnects(int nRequestedEdges) const
+{
+	if (nRequestedEdges == -1) {
+		nRequestedEdges = getEdgeCount();
+	}
+	assert(nRequestedEdges <= getEdgeCount());
+
+	std::set<std::pair<long, long>> edgeSet;
+	std::vector<ConstProxyVector<long>> edgeConnects(nRequestedEdges);
+
+	int nFaces = getFaceCount();
+	for (int i = 0; i < nFaces; ++i) {
+		ConstProxyVector<long> faceVertexIds = getFaceVertexIds(i);
+		int nFaceVertices = faceVertexIds.size();
+		for (int k = 0; k < nFaceVertices; ++k) {
+			long vertex_A = faceVertexIds[k];
+			long vertex_B = faceVertexIds[(k + 1) % nFaceVertices];
+			if (vertex_A > vertex_B) {
+				std::swap(vertex_A, vertex_B);
+			}
+
+			std::pair<long, long> edgePair = std::pair<long, long>(vertex_A, vertex_B);
+			std::pair<std::set<std::pair<long, long>>::iterator, bool> insertResult = edgeSet.insert(edgePair);
+			if (insertResult.second) {
+				std::vector<long> edgeConnect(2, edgePair.first);
+				edgeConnect[1] = edgePair.second;
+				edgeConnects[edgeSet.size() - 1] = ConstProxyVector<long>(std::move(edgeConnect));
+
+				if (edgeSet.size() == (std::size_t) nRequestedEdges) {
+					return edgeConnects;
+				}
+			}
+		}
+	}
+
+	assert(edgeSet.size() == nRequestedEdges);
+
+	return edgeConnects;
 }
 
 /*!

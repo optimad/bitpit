@@ -183,6 +183,8 @@ private:
 
 	Tesselation generateTesselation(const std::array<double, 3> *coordinates) const;
 
+	std::vector<ConstProxyVector<long>> evalEdgeConnects(int maxEdges = -1) const;
+
 };
 
 extern template class PiercedVector<Element>;
