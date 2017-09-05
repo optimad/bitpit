@@ -63,6 +63,34 @@ Interface::Interface(const long &id, ElementType type)
 	_initialize(NULL_ID, -1, NULL_ID, -1);
 }
 
+/*!
+	Creates a new interface.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
+	\param connectSize is the size of the connectivity, this is only used
+	if the element is not associated to a reference element
+*/
+Interface::Interface(const long &id, ElementType type, int connectSize)
+	: Element(id, type, connectSize)
+{
+	_initialize(NULL_ID, -1, NULL_ID, -1);
+}
+
+/*!
+	Creates a new interface.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+*/
+Interface::Interface(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage)
+	: Element(id, type, std::move(connectStorage))
+{
+	_initialize(NULL_ID, -1, NULL_ID, -1);
+}
+
 /**
 * Exchanges the content of the interface by the content the specified other
 * interface.
@@ -89,6 +117,36 @@ void Interface::swap(Interface &other) noexcept
 void Interface::initialize(long id, ElementType type)
 {
 	Element::initialize(id, type);
+
+	_initialize(NULL_ID, -1, NULL_ID, -1);
+}
+
+/*!
+	Initializes the data structures of the interface.
+
+	\param id is the id of the element
+	\param type is the type of the element
+	\param connectSize is the size of the connectivity, this is only used
+	if the element is not associated to a reference element
+*/
+void Interface::initialize(long id, ElementType type, int connectSize)
+{
+	Element::initialize(id, type, connectSize);
+
+	_initialize(NULL_ID, -1, NULL_ID, -1);
+}
+
+/*!
+	Initializes the data structures of the interface.
+
+	\param id is the id of the element
+	\param type is the type of the element
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+*/
+void Interface::initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage)
+{
+	Element::initialize(id, type, std::move(connectStorage));
 
 	_initialize(NULL_ID, -1, NULL_ID, -1);
 }

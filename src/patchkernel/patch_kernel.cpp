@@ -1747,13 +1747,16 @@ long PatchKernel::generateCellId()
 	Creates a new cell with the specified id.
 
 	\param type is the type of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\param interior is true if the cell is an interior cell, false otherwise
 	\return An iterator pointing to the newly created cell.
 */
-PatchKernel::CellIterator PatchKernel::createCell(ElementType type, bool interior, long id)
+PatchKernel::CellIterator PatchKernel::createCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+												  bool interior, long id)
 {
 	if (id < 0) {
 		id = generateCellId();
@@ -1770,9 +1773,9 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementType type, bool interio
 		// If there are ghosts cells, the internal cell should be inserted
 		// before the first ghost cell.
 		if (m_firstGhostId < 0) {
-			iterator = m_cells.emreclaim(id, id, type, interior, true);
+			iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), interior, true);
 		} else {
-			iterator = m_cells.emreclaimBefore(m_firstGhostId, id, id, type, interior, true);
+			iterator = m_cells.emreclaimBefore(m_firstGhostId, id, id, type, std::move(connectStorage), interior, true);
 		}
 		m_nInternals++;
 
@@ -1788,9 +1791,9 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementType type, bool interio
 		// If there are internal cells, the ghost cell should be inserted
 		// after the last internal cell.
 		if (m_lastInternalId < 0) {
-			iterator = m_cells.emreclaim(id, id, type, interior, true);
+			iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), interior, true);
 		} else {
-			iterator = m_cells.emreclaimAfter(m_lastInternalId, id, id, type, interior, true);
+			iterator = m_cells.emreclaimAfter(m_lastInternalId, id, id, type, std::move(connectStorage), interior, true);
 		}
 		m_nGhosts++;
 
@@ -1820,7 +1823,10 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const long &id)
 		return cellEnd();
 	}
 
-	return createCell(type, true, id);
+	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	return createCell(type, std::move(connectStorage), true, id);
 }
 
 /*!
@@ -1840,7 +1846,10 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior, 
 		return cellEnd();
 	}
 
-	CellIterator iterator = createCell(type, interior, id);
+	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	CellIterator iterator = createCell(type, std::move(connectStorage), interior, id);
 
 	return iterator;
 }
@@ -1851,22 +1860,21 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior, 
 	\param type is the type of the cell
 	\param interior defines if the cell is in the interior of the patch
 	or if it's a ghost cell
-	\param connect is the connectivity of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
-                                   std::unique_ptr<long[]> &&connect, const long &id)
+                                               std::unique_ptr<long[]> &&connectStorage, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
 	}
 
-	CellIterator iterator = addCell(type, interior, id);
-	Cell &cell = (*iterator);
-	cell.setConnect(std::move(connect));
+	CellIterator iterator = createCell(type, std::move(connectStorage), interior, id);
 
 	return iterator;
 }
@@ -1877,29 +1885,24 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
 	\param type is the type of the cell
 	\param interior defines if the cell is in the interior of the patch
 	or if it's a ghost cell
-	\param connect is the connectivity of the cell
+	\param connectivity is the connectivity of the cell
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
-								   const std::vector<long> &connect, const long &id)
+								               const std::vector<long> &connectivity, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
 	}
 
+	int connectSize = connectivity.size();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
 
-	// Add the cell
-	CellIterator iterator = addCell(type, interior, id);
-
-	// Set the connectivity
-	Cell &cell = (*iterator);
-	int nCellVertices = cell.getVertexCount();
-	std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
-	std::copy(connect.data(), connect.data() + nCellVertices, cellConnect.get());
-	cell.setConnect(std::move(cellConnect));
+	CellIterator iterator = createCell(type, std::move(connectStorage), interior, id);
 
 	return iterator;
 }
@@ -1919,7 +1922,10 @@ PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
 		return cellEnd();
 	}
 
-	CellIterator iterator = createCell(source.getType(), source.isInterior(), id);
+	int connectSize = source.getConnectSize();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	CellIterator iterator = createCell(source.getType(), std::move(connectStorage), source.isInterior(), id);
 	Cell &cell = (*iterator);
 	id = cell.getId();
 	cell = source;
@@ -1946,7 +1952,10 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
 		id = source.getId();
 	}
 
-	CellIterator iterator = createCell(source.getType(), source.isInterior(), id);
+	int connectSize = source.getConnectSize();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	CellIterator iterator = createCell(source.getType(), std::move(connectStorage), source.isInterior(), id);
 	Cell &cell = (*iterator);
 	id = cell.getId();
 	cell = std::move(source);
@@ -2980,12 +2989,16 @@ long PatchKernel::generateInterfaceId()
 	Creates a new interface with the specified id.
 
 	\param type is the type of the interface
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
 	\param id is the id that will be assigned to the newly created interface.
 	If a negative id value is specified, a new unique id will be generated
 	for the interface
 	\return An iterator pointing to the newly created interface.
 */
-PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type, long id)
+PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type,
+															std::unique_ptr<long[]> &&connectStorage,
+															long id)
 {
 	if (id < 0) {
 		id = generateInterfaceId();
@@ -2995,7 +3008,7 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type, lo
 		return interfaceEnd();
 	}
 
-	PiercedVector<Interface>::iterator iterator = m_interfaces.emreclaim(id, id, type);
+	PiercedVector<Interface>::iterator iterator = m_interfaces.emreclaim(id, id, type, std::move(connectStorage));
 
 	return iterator;
 }
@@ -3015,7 +3028,59 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type, const
 		return interfaceEnd();
 	}
 
-	InterfaceIterator iterator = createInterface(type, id);
+	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	InterfaceIterator iterator = createInterface(type, std::move(connectStorage), id);
+
+	return iterator;
+}
+
+/*!
+	Adds a new interface with the specified id.
+
+	\param type is the type of the interface
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return An iterator pointing to the added interface.
+*/
+PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
+														 std::unique_ptr<long[]> &&connectStorage,
+														 const long &id)
+{
+	if (!isExpert()) {
+		return interfaceEnd();
+	}
+
+	InterfaceIterator iterator = createInterface(type, std::move(connectStorage), id);
+
+	return iterator;
+}
+
+/*!
+	Adds a new interface with the specified id.
+
+	\param type is the type of the interface
+	\param connectivity is the connectivity of the cell
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return An iterator pointing to the added interface.
+*/
+PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
+														 const std::vector<long> &connectivity,
+														 const long &id)
+{
+	if (!isExpert()) {
+		return interfaceEnd();
+	}
+
+	int connectSize = connectivity.size();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
+
+	InterfaceIterator iterator = createInterface(type, std::move(connectStorage), id);
 
 	return iterator;
 }
@@ -3035,7 +3100,10 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source
 		return interfaceEnd();
 	}
 
-	InterfaceIterator iterator = createInterface(source.getType(), id);
+	int connectSize = source.getConnectSize();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	InterfaceIterator iterator = createInterface(source.getType(), std::move(connectStorage), id);
 	Interface &interface = (*iterator);
 	id = interface.getId();
 	interface = source;
@@ -3063,7 +3131,10 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, lon
 		id = source.getId();
 	}
 
-	InterfaceIterator iterator = createInterface(source.getType(), id);
+	int connectSize = source.getConnectSize();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	InterfaceIterator iterator = createInterface(source.getType(), std::move(connectStorage), id);
 	Interface &interface = (*iterator);
 	id = interface.getId();
 	interface = std::move(source);
@@ -3936,9 +4007,18 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 		intrNeighFace = face_1;
 	}
 
+	// Connectivity of the interface
+	std::vector<long> faceConnect = intrOwner->getFaceConnect(intrOwnerFace);
+
+	int nInterfaceVertices = faceConnect.size();
+	std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
+	for (int k = 0; k < nInterfaceVertices; ++k) {
+		interfaceConnect[k] = faceConnect[k];
+	}
+
 	// Create the interface
 	ElementType interfaceType = intrOwner->getFaceType(intrOwnerFace);
-	InterfaceIterator interfaceIterator = addInterface(interfaceType, interfaceId);
+	InterfaceIterator interfaceIterator = addInterface(interfaceType, std::move(interfaceConnect), interfaceId);
 	Interface &interface = *interfaceIterator;
 	if (interfaceId < 0) {
 		interfaceId = interface.getId();
@@ -3949,16 +4029,6 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 	if (intrNeighId >= 0) {
 		interface.setNeigh(intrNeighId, intrNeighFace);
 	}
-
-	// Set connectivity
-	std::vector<long> faceConnect = intrOwner->getFaceConnect(intrOwnerFace);
-
-	int nInterfaceVertices = faceConnect.size();
-	std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
-	for (int k = 0; k < nInterfaceVertices; ++k) {
-		interfaceConnect[k] = faceConnect[k];
-	}
-	interface.setConnect(std::move(interfaceConnect));
 
 	// Update owner and neighbour cell data
 	//

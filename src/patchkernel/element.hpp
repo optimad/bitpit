@@ -86,7 +86,8 @@ public:
 	static bool isThreeDimensional(ElementType type);
 
 	Element();
-	Element(long id, ElementType type = ElementType::UNDEFINED);
+	Element(long id, ElementType type, int connectSize = 0);
+	Element(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
 	Element(const Element &other);
 	Element(Element&& other) = default;
@@ -95,7 +96,8 @@ public:
 
 	void swap(Element &other) noexcept;
 
-	void initialize(long id, ElementType type);
+	void initialize(long id, ElementType type, int connectSize = 0);
+	void initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
 	bool hasInfo() const;
 	const ReferenceElementInfo & getInfo() const;
@@ -150,7 +152,8 @@ private:
 
 	std::unique_ptr<long[]> m_connect;
 
-	void _initialize(long id, ElementType type);
+	void _initialize(long id, ElementType type = ElementType::UNDEFINED, int connectSize = 0);
+	void _initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
 };
 

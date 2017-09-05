@@ -39,6 +39,8 @@ class Interface : public Element {
 public:
 	Interface();
 	Interface(const long &id, ElementType type = ElementType::UNDEFINED);
+	Interface(const long &id, ElementType type = ElementType::UNDEFINED, int connectSize = 0);
+	Interface(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
 	Interface(const Interface &other) = default;
 	Interface(Interface&& other) = default;
@@ -48,6 +50,8 @@ public:
 	void swap(Interface &other) noexcept;
 
 	void initialize(long id, ElementType type);
+	void initialize(long id, ElementType type, int connectSize);
+	void initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
 	bool isBorder() const;
 

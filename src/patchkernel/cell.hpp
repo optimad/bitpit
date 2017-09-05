@@ -50,7 +50,12 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& 
 
 public:
 	Cell();
-	Cell(const long &id, ElementType type, bool interior = true, bool storeNeighbourhood = true);
+	Cell(const long &id, ElementType type,
+	     bool interior = true, bool storeNeighbourhood = true);
+	Cell(const long &id, ElementType type, int connectSize,
+	     bool interior = true, bool storeNeighbourhood = true);
+	Cell(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage,
+	     bool interior = true, bool storeNeighbourhood = true);
 
 	Cell(const Cell &other) = default;
 	Cell(Cell&& other) = default;
@@ -60,6 +65,8 @@ public:
 	void swap(Cell &other) noexcept;
 
 	void initialize(long id, ElementType type, bool interior, bool storeNeighbourhood = true);
+	void initialize(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood = true);
+	void initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood = true);
 
 	bool isInterior() const;
 

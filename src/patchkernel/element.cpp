@@ -102,10 +102,25 @@ Element::Element()
 
 	\param id is the id that will be assigned to the element
 	\param type is the type of the element
+	\param connectSize is the size of the connectivity, this is only used
+	if the element is not associated to a reference element
 */
-Element::Element(long id, ElementType type)
+Element::Element(long id, ElementType type, int connectSize)
 {
-	_initialize(id, type);
+	_initialize(id, type, connectSize);
+}
+
+/*!
+	Creates a new element.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+*/
+Element::Element(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage)
+{
+	_initialize(id, type, std::move(connectStorage));
 }
 
 /*!
@@ -151,10 +166,24 @@ void Element::swap(Element &other) noexcept
 
 	\param id the id of the element
 	\param type the type of the element
+	\param connectSize is the size of the connectivity, this is only used
+	if the element is not associated to a reference element
 */
-void Element::initialize(long id, ElementType type)
+void Element::initialize(long id, ElementType type, int connectSize)
 {
-	_initialize(id, type);
+	_initialize(id, type, connectSize);
+}
+
+/*!
+	Initializes the data structures of the element.
+
+	\param type the type of the element
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+*/
+void Element::initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage)
+{
+	_initialize(id, type, std::move(connectStorage));
 }
 
 /*!
@@ -162,35 +191,53 @@ void Element::initialize(long id, ElementType type)
 
 	\param id the id of the element
 	\param type the type of the element
+	\param connectSize is the size of the connectivity, this is only used
+	if the element is not associated to a reference element
 */
-void Element::_initialize(long id, ElementType type)
+void Element::_initialize(long id, ElementType type, int connectSize)
+{
+	// Get previous connect size
+	int previousConnectSize = 0;
+	if (m_connect) {
+		if (hasInfo()) {
+			previousConnectSize = getInfo().nVertices;
+		}
+	}
+
+	// Initialize connectivity storage
+	if (ReferenceElementInfo::hasInfo(type)) {
+		connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+	}
+
+	std::unique_ptr<long[]> connectStorage;
+	if (connectSize != previousConnectSize) {
+		connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	} else {
+		connectStorage = std::move(m_connect);
+	}
+
+	// Initialize element
+	_initialize(id, type, std::move(connectStorage));
+}
+
+/*!
+	Internal function to initialize the data structures of the element.
+
+	\param id is the ID of the element
+	\param type is the type of the element
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+*/
+void Element::_initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage)
 {
 	// Set the id
 	setId(id);
 
-	// Get previous connect size
-	int previousConnectSize;
-	if (type != ElementType::UNDEFINED) {
-		if (m_connect) {
-			assert(getType() != ElementType::UNDEFINED);
-			previousConnectSize = getInfo().nVertices;
-		} else {
-			previousConnectSize = 0;
-		}
-	}
-
-	// Set element type
+	// Set type
 	setType(type);
 
-	// Set connectivity
-	if (type != ElementType::UNDEFINED) {
-		int connectSize = getInfo().nVertices;
-		if (connectSize != previousConnectSize) {
-			setConnect(std::unique_ptr<long[]>(new long[connectSize]));
-		}
-	} else {
-		unsetConnect();
-	}
+	// Initialize connectivity
+	setConnect(std::move(connectStorage));
 }
 
 /*!
