@@ -135,6 +135,11 @@ public:
 	void renumberVertices(const std::unordered_map<long, long> &map);
 	ConstProxyVector<long> getVertexIds() const;
 
+	int getFaceStreamSize() const;
+	std::vector<long> getFaceStream() const;
+	static void renumberFaceStream(const PiercedStorage<long, long> &map, std::vector<long> *faceStream);
+	int getFaceStreamPosition(int face) const;
+
 	static const long NULL_ID;
 
 	double evalSize(const std::array<double, 3> *coordinates) const;

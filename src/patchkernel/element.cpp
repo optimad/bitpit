@@ -47,11 +47,17 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 	long id;
 	buffer >> id;
 
-	element._initialize(id, type);
+	int connectSize;
+	if (bitpit::ReferenceElementInfo::hasInfo(type)) {
+		element._initialize(id, type);
+		connectSize = element.getConnectSize();
+	} else {
+		buffer >> connectSize;
+		element._initialize(id, type, connectSize);
+	}
 
-	// Set the connectivity
-	int nVertices = element.getVertexCount();
-	for (int i = 0; i < nVertices; ++i) {
+	// Set connectivity
+	for (int i = 0; i < connectSize; ++i) {
 	    buffer >> element.m_connect[i];
 	}
 
@@ -67,10 +73,15 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 */
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Element &element)
 {
-	int nVertices = element.getVertexCount();
 	buffer << element.getType();
 	buffer << element.getId();
-	for (int i = 0; i < nVertices; ++i) {
+
+	int connectSize = element.getConnectSize();
+	if (!bitpit::ReferenceElementInfo::hasInfo(element.m_type)) {
+		buffer << connectSize;
+	}
+
+	for (int i = 0; i < connectSize; ++i) {
 	    buffer << element.m_connect[i];
 	}
 
@@ -177,16 +188,17 @@ void Element::Tesselation::importPolygon(const std::vector<int> &vertexIds)
 	// centroid.
 	ElementType tileType = ElementType::TRIANGLE;
 	int nTileVertices = ReferenceElementInfo::getInfo(tileType).nVertices;
+	int nSideVertices = ReferenceElementInfo::getInfo(ElementType::LINE).nVertices;
 
 	int nSides = nVertices;
 	m_types.resize(m_nTiles + nSides, tileType);
 	m_connects.resize(m_nTiles + nSides, std::vector<int>(nTileVertices));
 	for (int i = 0; i < nSides; ++i) {
 		m_nTiles++;
-		for (int k = 0; k < nTileVertices; ++k) {
-		m_connects[i][k] = (i + k) % nVertices;
+		for (int k = 0; k < nSideVertices; ++k) {
+			m_connects[m_nTiles - 1][k] = vertexIds[(i + k) % nVertices];
 		}
-		m_connects[i][nTileVertices] = centroidId;
+		m_connects[m_nTiles - 1][nSideVertices] = centroidId;
 	}
 }
 
@@ -202,9 +214,11 @@ void Element::Tesselation::importPolyhedron(const std::vector<int> &vertexIds, c
 	int nVertices = vertexIds.size();
 
 	// Generate the tesselation of the surface
+	int nInitialTiles = m_nTiles;
 	for (int i = 0; i < nFaces; ++i) {
 		importPolygon(faceVertexIds[i]);
 	}
+	int nFinalTiles = m_nTiles;
 
 	// Add the centroid of the element to the tesselation
 	std::array<double, 3> centroid = {{0., 0., 0.}};
@@ -222,7 +236,7 @@ void Element::Tesselation::importPolyhedron(const std::vector<int> &vertexIds, c
 	// already generated the surface tesselation, we can "convert" the
 	// two-dimensional tiles of that tesselation in three-dimensional
 	// tiles to obtain the volume tesselation.
-	for (int i = 0; i < m_nTiles; ++i) {
+	for (int i = nInitialTiles; i < nFinalTiles; ++i) {
 		// Change the tile type
 		ElementType &tileType = m_types[i];
 		if (tileType == ElementType::TRIANGLE) {
@@ -354,6 +368,12 @@ Element & Element::operator=(const Element &other)
 {
 	Element tmp(other);
 	swap(tmp);
+
+	if (other.m_connect) {
+		int connectSize = other.getConnectSize();
+		m_connect = std::unique_ptr<long[]>(new long[connectSize]);
+		std::copy(other.m_connect.get(), other.m_connect.get() + connectSize, m_connect.get());
+	}
 
 	return *this;
 }
@@ -581,7 +601,11 @@ int Element::getConnectSize() const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+		return 1 + getVertexCount();
+
 	case (ElementType::POLYHEDRON):
+		return getFaceStreamSize();
+
 	case (ElementType::UNDEFINED):
 		BITPIT_UNREACHABLE("Unsupported element");
 		throw std::runtime_error ("Unsupported element");
@@ -603,6 +627,8 @@ int Element::getFaceCount() const
 
 	case (ElementType::POLYGON):
 	case (ElementType::POLYHEDRON):
+		return getConnect()[0];
+
 	case (ElementType::UNDEFINED):
 		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
@@ -623,13 +649,36 @@ ElementType Element::getFaceType(const int &face) const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+	{
+		return ElementType::LINE;
+	}
+
 	case (ElementType::POLYHEDRON):
+	{
+		int nFaceVertices = getFaceVertexCount(face);
+		switch (nFaceVertices) {
+
+		case 3:
+			return ElementType::TRIANGLE;
+
+		case 4:
+			return ElementType::QUAD;
+
+		default:
+			return ElementType::POLYGON;
+
+		}
+	}
 	case (ElementType::UNDEFINED):
+	{
 		BITPIT_UNREACHABLE("Unsupported element");
 		return ElementType::UNDEFINED;
+	}
 
 	default:
+	{
 		return getInfo().face_type[face];
+	}
 
 	}
 }
@@ -644,14 +693,21 @@ int Element::getFaceVertexCount(const int &face) const
 {
 	switch (m_type) {
 
-	case (ElementType::POLYGON):
 	case (ElementType::POLYHEDRON):
+	{
+		int facePos = getFaceStreamPosition(face);
+		const long *connectivity = getConnect();
+
+		return connectivity[facePos];
+	}
+
 	case (ElementType::UNDEFINED):
     {
 		BITPIT_UNREACHABLE("Unsupported element");
 		throw std::runtime_error ("Unsupported element");
     }
 
+	case (ElementType::POLYGON):
 	default:
     {
 		ElementType faceType = getFaceType(face);
@@ -673,7 +729,52 @@ ConstProxyVector<int> Element::getFaceLocalConnect(const int &face) const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+	{
+		int connectSize = getConnectSize();
+
+		int faceConnectSize = getFaceVertexCount(face);
+		std::vector<int> localFaceConnect(faceConnectSize);
+		for (int i = 0; i < faceConnectSize; ++i) {
+			int localVertexId = (face + i) % connectSize;
+
+			localFaceConnect[i] = localVertexId;
+		}
+
+		return ConstProxyVector<int>(std::move(localFaceConnect));
+	}
+
 	case (ElementType::POLYHEDRON):
+	{
+		ElementType faceType = getFaceType(face);
+		ConstProxyVector<long> faceVertexIds = getFaceVertexIds(face);
+		int nFaceVertices = faceVertexIds.size();
+		bool faceHasReferenceInfo = ReferenceElementInfo::hasInfo(faceType);
+
+		int faceConnectSize  = nFaceVertices;
+		int localVertexOffset = 0;
+		if (!faceHasReferenceInfo) {
+			++faceConnectSize;
+			++localVertexOffset;
+		}
+
+		std::vector<int> localFaceConnect(faceConnectSize);
+		if (!faceHasReferenceInfo) {
+			localFaceConnect[0] = nFaceVertices;
+		}
+
+		// The list of the vertices in sorted, therfore we can search the
+		// vertices using a binary search.
+		ConstProxyVector<long> vertexIds = getVertexIds();
+		for (int k = 0; k < nFaceVertices; ++k) {
+			int vertexId = faceVertexIds[k];
+			auto localVertexIdItr = std::lower_bound(vertexIds.begin(), vertexIds.end(), vertexId);
+			assert(localVertexIdItr != vertexIds.end() && *localVertexIdItr == vertexId);
+			localFaceConnect[localVertexOffset + k] = std::distance(vertexIds.begin(), localVertexIdItr);
+		}
+
+		return ConstProxyVector<int>(std::move(localFaceConnect));
+	}
+
 	case (ElementType::UNDEFINED):
 	{
 		BITPIT_UNREACHABLE("Unsupported element");
@@ -700,17 +801,68 @@ ConstProxyVector<long> Element::getFaceConnect(int face) const
 {
 	const long *connectivity = getConnect();
 
-	ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(face);
-	int faceConnectSize = localFaceConnect.size();
+	switch (m_type) {
 
-	std::vector<long> faceConnect(faceConnectSize);
-	for (int k = 0; k < faceConnectSize; ++k) {
-		int localVertexId = localFaceConnect[k];
-		long vertexId = connectivity[localVertexId];
-		faceConnect[k] = vertexId;
+	case (ElementType::POLYGON):
+	{
+		int connectSize = getConnectSize();
+
+		int facePos         = 1 + face;
+		int faceConnectSize = getFaceVertexCount(face);
+		if (facePos + faceConnectSize <= connectSize) {
+			return ConstProxyVector<long>(connectivity + facePos, faceConnectSize);
+		} else {
+			std::vector<long> faceConnect(faceConnectSize);
+			for (int i = 0; i < faceConnectSize; ++i) {
+				int position = facePos + i;
+				if (position >= connectSize) {
+					position = position % connectSize + 1;
+				}
+
+				faceConnect[i] = connectivity[position];
+			}
+
+			return ConstProxyVector<long>(std::move(faceConnect));
+		}
 	}
 
-	return ConstProxyVector<long>(std::move(faceConnect));
+	case (ElementType::POLYHEDRON):
+	{
+		ElementType faceType = getFaceType(face);
+
+		int facePos          = getFaceStreamPosition(face);
+		int faceConnectSize  = connectivity[facePos];
+		int faceConnectBegin = facePos + 1;
+		if (!ReferenceElementInfo::hasInfo(faceType)) {
+			faceConnectSize++;
+			faceConnectBegin--;
+		}
+
+		return ConstProxyVector<long>(connectivity + faceConnectBegin, faceConnectSize);
+	}
+
+	case (ElementType::UNDEFINED):
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+	{
+		ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(face);
+		int faceConnectSize = localFaceConnect.size();
+
+		std::vector<long> faceConnect(faceConnectSize);
+		for (int k = 0; k < faceConnectSize; ++k) {
+			int localVertexId = localFaceConnect[k];
+			long vertexId = connectivity[localVertexId];
+			faceConnect[k] = vertexId;
+		}
+
+		return ConstProxyVector<long>(std::move(faceConnect));
+	}
+
+	}
 }
 
 /*!
@@ -723,13 +875,29 @@ int Element::getEdgeCount() const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+	{
+		return getVertexCount();
+	}
+
 	case (ElementType::POLYHEDRON):
+	{
+		int nVertices = getVertexCount();
+		int nFaces    = getFaceCount();
+		int nEdges    = nVertices + nFaces - 2;
+
+		return nEdges;
+	}
+
 	case (ElementType::UNDEFINED):
+	{
 		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
+	}
 
 	default:
+	{
 		return getInfo().nEdges;
+	}
 
 	}
 }
@@ -770,11 +938,36 @@ ConstProxyVector<int> Element::getEdgeLocalConnect(const int &edge) const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+	{
+		int nEdgeVertices = ReferenceElementInfo::getInfo(ElementType::VERTEX).nVertices;
+
+		std::vector<int> localEdgeConnect(nEdgeVertices);
+		for (int k = 0; k < nEdgeVertices; ++k) {
+			localEdgeConnect[k] = k;
+		}
+
+		return ConstProxyVector<int>(std::move(localEdgeConnect));
+	}
+
 	case (ElementType::POLYHEDRON):
 	case (ElementType::UNDEFINED):
 	{
-		BITPIT_UNREACHABLE("Unsupported element");
-		throw std::runtime_error ("Unsupported element");
+		ConstProxyVector<long> edgeVertexIds = getEdgeVertexIds(edge);
+		int nEdgeVertices = edgeVertexIds.size();
+
+		// The list of the vertices in sorted, therfore we can search the
+		// vertices using a binary search.
+		ConstProxyVector<long> vertexIds = getVertexIds();
+
+		std::vector<int> localEdgeConnect(nEdgeVertices);
+		for (int k = 0; k < nEdgeVertices; ++k) {
+			int vertexId = edgeVertexIds[k];
+			auto localVertexIdItr = std::lower_bound(vertexIds.begin(), vertexIds.end(), vertexId);
+			assert(localVertexIdItr != vertexIds.end() && *localVertexIdItr == vertexId);
+			localEdgeConnect[k] = std::distance(vertexIds.begin(), localVertexIdItr);
+		}
+
+		return ConstProxyVector<int>(std::move(localEdgeConnect));
 	}
 
 	default:
@@ -797,16 +990,41 @@ ConstProxyVector<long> Element::getEdgeConnect(int edge) const
 {
 	const long *connectivity = getConnect();
 
-	ConstProxyVector<int> localEdgeConnect = getEdgeLocalConnect(edge);
-	int nEdgeVertices = localEdgeConnect.size();
+	switch (m_type) {
 
-	std::vector<long> edgeConnect(nEdgeVertices);
-	for (int k = 0; k < nEdgeVertices; ++k) {
-		int localVertexId = localEdgeConnect[k];
-		edgeConnect[k] = connectivity[localVertexId];
+	case (ElementType::POLYGON):
+	{
+		return ConstProxyVector<long>(connectivity + 1 + edge, 1);
 	}
 
-	return ConstProxyVector<long>(std::move(edgeConnect));
+	case (ElementType::POLYHEDRON):
+	{
+		std::vector<ConstProxyVector<long>> edgeConnects = evalEdgeConnects(edge + 1);
+
+		return edgeConnects[edge];
+	}
+
+	case (ElementType::UNDEFINED):
+	{
+		BITPIT_UNREACHABLE("Unsupported element");
+		throw std::runtime_error ("Unsupported element");
+	}
+
+	default:
+	{
+		ConstProxyVector<int> localEdgeConnect = getEdgeLocalConnect(edge);
+		int nEdgeVertices = localEdgeConnect.size();
+
+		std::vector<long> edgeConnect(nEdgeVertices);
+		for (int k = 0; k < nEdgeVertices; ++k) {
+			int localVertexId = localEdgeConnect[k];
+			edgeConnect[k] = connectivity[localVertexId];
+		}
+
+		return ConstProxyVector<long>(std::move(edgeConnect));
+	}
+
+	}
 }
 
 /*!
@@ -878,13 +1096,25 @@ int Element::getVertexCount() const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+	{
+		return getConnect()[0];
+	}
+
 	case (ElementType::POLYHEDRON):
+	{
+		return getVertexIds().size();
+	}
+
 	case (ElementType::UNDEFINED):
+	{
 		BITPIT_UNREACHABLE("Unsupported element");
 		return -1;
+	}
 
 	default:
+	{
 		return getInfo().nVertices;
+	}
 
 	}
 }
@@ -899,7 +1129,29 @@ ConstProxyVector<long> Element::getVertexIds() const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+	{
+		return ConstProxyVector<long>(getConnect() + 1, getVertexCount());
+	}
+
 	case (ElementType::POLYHEDRON):
+	{
+		// The list of the vertices has to be sorted, this will make it easy
+		// to extract the connectivity of the face.
+		int nFaces = getFaceCount();
+		const long *connectivity = getConnect();
+
+		std::set<long> vertexIds;
+		for (int i = 0; i < nFaces - 1; ++i) {
+			int facePos = getFaceStreamPosition(i);
+
+			int beginVertexPos = facePos + 1;
+			int endVertexPos   = facePos + 1 + connectivity[facePos];
+			vertexIds.insert(connectivity + beginVertexPos, connectivity + endVertexPos);
+		}
+
+		return ConstProxyVector<long>(std::vector<long>(vertexIds.begin(), vertexIds.end()));
+	}
+
 	case (ElementType::UNDEFINED):
 	{
 		BITPIT_UNREACHABLE("Unsupported element");
@@ -925,7 +1177,18 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+	{
+		return getFaceConnect(face);
+	}
+
 	case (ElementType::POLYHEDRON):
+	{
+		int facePos = getFaceStreamPosition(face);
+		const long *connectivity = getConnect();
+
+		return ConstProxyVector<long>(connectivity + facePos + 1, connectivity[facePos]);
+	}
+
 	case (ElementType::UNDEFINED):
 	{
 		BITPIT_UNREACHABLE("Unsupported element");
@@ -973,7 +1236,34 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 	switch (m_type) {
 
 	case ElementType::POLYGON:
+    {
+		int nVertices = getVertexCount();
+		long *connectivity = getConnect();
+		for (int k = 1; k < nVertices + 1; ++k) {
+			connectivity[k] = map.at(connectivity[k]);
+		}
+
+		break;
+	}
+
 	case ElementType::POLYHEDRON:
+    {
+		int nFaces = getFaceCount();
+		long *connectivity = getConnect();
+
+		for (int i = 0; i < nFaces - 1; ++i) {
+			int facePos = getFaceStreamPosition(i);
+
+			int beginVertexPos = facePos + 1;
+			int endVertexPos   = facePos + 1 + connectivity[facePos];
+			for (int k = beginVertexPos; k < endVertexPos; ++k) {
+				connectivity[k] = map.at(connectivity[k]);
+			}
+		}
+
+		break;
+	}
+
 	case ElementType::UNDEFINED:
 	{
 		BITPIT_UNREACHABLE("Unsupported element");
@@ -1034,8 +1324,24 @@ double Element::evalVolume(const std::array<double, 3> *coordinates) const
 
 	switch (m_type) {
 
-	case ElementType::POLYGON:
 	case ElementType::POLYHEDRON:
+	{
+		Tesselation tesselation = generateTesselation(coordinates);
+		int nTiles = tesselation.getTileCount();
+
+		double volume = 0.;
+		for (int i = 0; i < nTiles; ++i) {
+			const ElementType &tileType = tesselation.getTileType(i);
+			const std::vector<std::array<double, 3>> tileCoordinates = tesselation.getTileVertexCoordinates(i);
+			const Reference3DElementInfo &referenceInfo = static_cast<const Reference3DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
+
+			volume += referenceInfo.evalVolume(tileCoordinates.data());
+		}
+
+		return volume;
+	}
+
+	case ElementType::POLYGON:
 	case ElementType::UNDEFINED:
 	{
 		BITPIT_UNREACHABLE("Unsupported element");
@@ -1067,6 +1373,22 @@ double Element::evalArea(const std::array<double, 3> *coordinates) const
 	switch (m_type) {
 
 	case ElementType::POLYGON:
+	{
+		Tesselation tesselation = generateTesselation(coordinates);
+		int nTiles = tesselation.getTileCount();
+
+		double area = 0.;
+		for (int i = 0; i < nTiles; ++i) {
+			const ElementType &tileType = tesselation.getTileType(i);
+			const std::vector<std::array<double, 3>> tileCoordinates = tesselation.getTileVertexCoordinates(i);
+			const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
+
+			area += referenceInfo.evalArea(tileCoordinates.data());
+		}
+
+		return area;
+	}
+
 	case ElementType::POLYHEDRON:
 	case ElementType::UNDEFINED:
 	{
@@ -1134,6 +1456,39 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 	switch (m_type) {
 
 	case ElementType::POLYGON:
+	{
+		int dimension = getDimension();
+
+		Tesselation tesselation = generateTesselation(coordinates);
+		int nTiles = tesselation.getTileCount();
+
+		double surfaceArea = 0.;
+		std::array<double, 3> normal = {{0., 0., 0.}};
+		for (int i = 0; i < nTiles; ++i) {
+			const ElementType &tileType = tesselation.getTileType(i);
+			const std::vector<std::array<double, 3>> tileCoordinates = tesselation.getTileVertexCoordinates(i);
+			const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
+
+			double tileArea = referenceInfo.evalArea(tileCoordinates.data());
+			std::array<double, 3> tileNormal = {{0., 0., 0.,}};
+			if (dimension == 2) {
+				const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
+				tileNormal = referenceInfo.evalNormal(tileCoordinates.data(), point);
+			} else if (dimension == 1) {
+				const Reference1DElementInfo &referenceInfo = static_cast<const Reference1DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
+				tileNormal = referenceInfo.evalNormal(tileCoordinates.data(), orientation, point);
+			} else if (dimension == 0) {
+				tileNormal = orientation;
+			}
+
+			normal      += tileArea * tileNormal;
+			surfaceArea += tileArea;
+		}
+		normal = (1. / surfaceArea) * normal;
+
+		return normal;
+	}
+
 	case ElementType::POLYHEDRON:
 	case ElementType::UNDEFINED:
 	{
@@ -1190,12 +1545,18 @@ Element::Tesselation Element::generateTesselation(const std::array<double, 3> *c
 		int nFaces = getFaceCount();
 		std::vector<std::vector<int>> faceTesselationIds(nFaces);
 		for (int i = 0; i < nFaces; ++i) {
-			ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(i);
-			int nFaceVertices = getFaceVertexCount(i);
+			int connectOffset = 0;
+			if (getFaceType(i) == ElementType::POLYGON) {
+				connectOffset++;
+			}
 
+			ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(i);
+			ConstProxyVector<int> localVertexIds(localFaceConnect.data() + connectOffset , localFaceConnect.size() - connectOffset);
+
+			int nFaceVertices = localVertexIds.size();
 			faceTesselationIds[i].resize(nFaceVertices);
 			for (int k = 0; k < nFaceVertices; ++k) {
-				faceTesselationIds[i][k] = vertexTesselationIds[localFaceConnect[k]];
+				faceTesselationIds[i][k] = vertexTesselationIds[localVertexIds[k]];
 			}
 		}
 
@@ -1218,6 +1579,86 @@ Element::Tesselation Element::generateTesselation(const std::array<double, 3> *c
 	}
 
 	return tesselation;
+}
+
+/*
+	Gets the size of the face stream that describes the element.
+
+	\result The size of the face stream that describes the element.
+*/
+int Element::getFaceStreamSize() const
+{
+	int nFaces = getFaceCount();
+	int size   = 1 + (getFaceStreamPosition(nFaces) - 1);
+
+	return size;
+}
+
+/*!
+	Gets the face stream that describes the element.
+
+	\result The face stream that describes the element.
+*/
+std::vector<long> Element::getFaceStream() const
+{
+	int nFaces = getFaceCount();
+	int faceStreamSize = getFaceStreamSize();
+	std::vector<long> faceStream(faceStreamSize);
+
+	int pos = 0;
+	faceStream[pos] = nFaces;
+	for (int i = 0; i < nFaces; ++i) {
+		ConstProxyVector<long> faceVertexIds = getFaceVertexIds(i);
+		int nFaceVertices = faceVertexIds.size();
+
+		++pos;
+		faceStream[pos] = getFaceVertexCount(i);
+		for (int k = 0; k < nFaceVertices; ++k) {
+			++pos;
+			faceStream[pos] = faceVertexIds[k];
+		}
+	}
+
+	return faceStream;
+}
+
+/*!
+	Renumber the vertices of the specified face stream according to the
+	given map.
+
+	\param map is the vertex map
+	\param faceStream is the face stream to be renumbered
+*/
+void Element::renumberFaceStream(const PiercedStorage<long, long> &map, std::vector<long> *faceStream)
+{
+	int pos = 0;
+	int nFaces = (*faceStream)[pos];
+	for (int i = 0; i < nFaces; ++i) {
+		++pos;
+		int nFaceVertices = (*faceStream)[pos];
+		for (int k = 0; k < nFaceVertices; ++k) {
+			++pos;
+			(*faceStream)[pos] = map.at((*faceStream)[pos]);
+		}
+	}
+}
+
+/*!
+	Gets the position of the specified face in the face stream.
+
+	\param face is the face
+	\result The position of the specified face in the face stream.
+*/
+int Element::getFaceStreamPosition(int face) const
+{
+	const long *connectivity = getConnect();
+
+	int position = 1;
+	for (int i = 0; i < face; ++i) {
+		position += 1 + connectivity[position];
+	}
+
+	return position;
 }
 
 /*!
@@ -1276,7 +1717,12 @@ std::vector<ConstProxyVector<long>> Element::evalEdgeConnects(int nRequestedEdge
 */
 unsigned int Element::getBinarySize()
 {
-	return (sizeof(ElementType) + (getVertexCount() + 1) * sizeof(long));
+	unsigned int binarySize = sizeof(m_type) + sizeof(m_id) + getConnectSize() * sizeof(long);
+	if (bitpit::ReferenceElementInfo::hasInfo(m_type)) {
+		binarySize += sizeof(int);
+	}
+
+	return binarySize;
 }
 
 // Explicit instantiation of the Element containers

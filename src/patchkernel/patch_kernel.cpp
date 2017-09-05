@@ -267,6 +267,8 @@ void PatchKernel::initialize()
 	m_vtk.setGeomData<int>(VTKUnstructuredField::OFFSETS, this);
 	m_vtk.setGeomData<int>(VTKUnstructuredField::TYPES, this);
 	m_vtk.setGeomData<long>(VTKUnstructuredField::CONNECTIVITY, this);
+	m_vtk.setGeomData<long>(VTKUnstructuredField::FACE_STREAMS, this);
+	m_vtk.setGeomData<int>(VTKUnstructuredField::FACE_OFFSETS, this);
 
 	// Add VTK basic patch data
 	m_vtk.addData<long>("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
@@ -757,7 +759,16 @@ void PatchKernel::write(VTKWriteMode mode)
 	PiercedStorage<long, long> vertexWriteFlag(1, &m_vertices);
 	vertexWriteFlag.fill(false);
 
-	long vtkConnectSize = 0;
+	bool vtkFaceStreamNeeded = false;
+	for (const Cell &cell : m_cells) {
+		if (cell.getDimension() > 2 && !cell.hasInfo()) {
+			vtkFaceStreamNeeded = true;
+			break;
+		}
+	}
+
+	long vtkConnectSize    = 0;
+	long vtkFaceStreamSize = 0;
 	for (const Cell &cell : getVTKCellWriteRange()) {
 		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 		const int nCellVertices = cellVertexIds.size();
@@ -765,7 +776,15 @@ void PatchKernel::write(VTKWriteMode mode)
 			long vertexId = cellVertexIds[k];
 			vertexWriteFlag.at(vertexId) = true;
 		}
+
 		vtkConnectSize += nCellVertices;
+		if (vtkFaceStreamNeeded) {
+			if (cell.getDimension() <= 2 || cell.hasInfo()) {
+				vtkFaceStreamSize += 1;
+			} else {
+				vtkFaceStreamSize += cell.getFaceStreamSize();
+			}
+		}
 	}
 
 	int vtkVertexCount = 0;
@@ -780,7 +799,7 @@ void PatchKernel::write(VTKWriteMode mode)
 		}
 	}
 
-	m_vtk.setDimensions(vtkCellCount, vtkVertexCount, vtkConnectSize);
+	m_vtk.setDimensions(vtkCellCount, vtkVertexCount, vtkConnectSize, vtkFaceStreamSize);
 
 	// Write the mesh
 	m_vtk.write(mode);
@@ -4803,6 +4822,10 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 				VTKType = VTKElementType::QUAD;
 				break;
 
+			case ElementType::POLYGON:
+				VTKType = VTKElementType::POLYGON;
+				break;
+
 			case ElementType::TETRA:
 				VTKType = VTKElementType::TETRA;
 				break;
@@ -4823,6 +4846,10 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 				VTKType = VTKElementType::PYRAMID;
 				break;
 
+			case ElementType::POLYHEDRON:
+				VTKType = VTKElementType::POLYHEDRON;
+				break;
+
 			default:
 				VTKType = VTKElementType::UNDEFINED;
 				break;
@@ -4840,6 +4867,30 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 				long vtkVertexId = m_vtkVertexMap.at(vertexId);
 				genericIO::flushBINARY(stream, vtkVertexId);
 			}
+		}
+	} else if (name == "faces") {
+		for (const Cell &cell : getVTKCellWriteRange()) {
+			if (cell.getDimension() <= 2 || cell.hasInfo()) {
+				genericIO::flushBINARY(stream, (long) 0);
+			} else {
+				std::vector<long> faceStream = cell.getFaceStream();
+				Cell::renumberFaceStream(m_vtkVertexMap, &faceStream);
+				int faceStreamSize = faceStream.size();
+				for (int k = 0; k < faceStreamSize; ++k) {
+					genericIO::flushBINARY(stream, faceStream[k]);
+				}
+			}
+		}
+	} else if (name == "faceoffsets") {
+		int offset = 0;
+		for (const Cell &cell : getVTKCellWriteRange()) {
+			if (cell.getDimension() <= 2 || cell.hasInfo()) {
+				offset += 1;
+			} else {
+				offset += cell.getFaceStreamSize();
+			}
+
+			genericIO::flushBINARY(stream, offset);
 		}
 	} else if (name == "cellIndex") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
