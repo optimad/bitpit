@@ -50,6 +50,7 @@
 #endif
 
 // CC_lin
+# include "bitpit_common.hpp"
 # include "bitpit_LA.hpp"
 
 // ========================================================================== //
