@@ -1253,8 +1253,9 @@ long PatchKernel::countOrphanVertices() const
 	std::unordered_set<long> usedVertices;
 	for (const Cell &cell : m_cells) {
 		int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
 		for (int i = 0; i < nCellVertices; ++i) {
-			usedVertices.insert(cell.getVertex(i));
+			usedVertices.insert(cellConnect[i]);
 		}
 	}
 
@@ -1279,8 +1280,9 @@ std::vector<long> PatchKernel::findOrphanVertices()
 	// Remove used vertices
 	for (const Cell &cell : m_cells) {
 		int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
 		for (int i = 0; i < nCellVertices; ++i) {
-			vertexSet.erase(cell.getVertex(i));
+			vertexSet.erase(cellConnect[i]);
 		}
 	}
 
@@ -1349,11 +1351,12 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	std::array<long, 2> binEntry;
 	for (const Cell &cell : m_cells) {
 		int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
 		for (int j = 0; j < nCellVertices; ++j) {
 			binEntry[0] = cell.getId();
 			binEntry[1] = j;
 
-			long vertexId = cell.getVertex(j);
+			long vertexId = cellConnect[j];
 			long binId = bin_index[vertexId];
 			bins[binId].push_back(binEntry);
 		}
@@ -1380,9 +1383,10 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 			for (int j = 0; j < nBinCells; ++j) {
 				long cellId = bin[list[j]][0];
 				Cell &cell  = m_cells[cellId];
+				long *cellConnect = cell.getConnect();
 
 				long k         = bin[list[j]][1];
-				long vertexId  = cell.getVertex(k);
+				long vertexId  = cellConnect[k];
 				if (uniqueVertices.count(vertexId) != 0) {
 					continue;
 				}
@@ -1391,7 +1395,7 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 
 				long collapsedVertexId;
 				if (kd.exist(&vertex, collapsedVertexId) >= 0) {
-					cell.setVertex(k, collapsedVertexId);
+					cellConnect[k] = collapsedVertexId;
 				} else {
 					kd.insert(&vertex, vertexId);
 					uniqueVertices.insert(vertexId);
@@ -2193,8 +2197,10 @@ long PatchKernel::countOrphanCells() const
 	std::unordered_map<long, short> vertexValence;
 	for (const Cell &cell : m_cells) {
 		int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
 		for (int j = 0; j < nCellVertices; j++) {
-			vertexValence[cell.getVertex(j)] += 1;
+			long vertexId = cellConnect[j];
+			vertexValence[vertexId] += 1;
 		}
 	}
 
@@ -2203,8 +2209,9 @@ long PatchKernel::countOrphanCells() const
 	for (const Cell &cell : m_cells) {
 		long isIsolated = true;
 		int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
 		for (int j = 0; j < nCellVertices; j++) {
-			long vertexId = cell.getVertex(j);
+			long vertexId = cellConnect[j];
 			if (vertexValence[vertexId] > 1) {
 				isIsolated = false;
 				break;
@@ -2679,7 +2686,8 @@ void PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, std::v
 void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	const Cell &cell = getCell(id);
-	long vertexId = cell.getVertex(vertex);
+	const long *cellConnect = cell.getConnect();
+	long vertexId = cellConnect[vertex];
 
 	std::vector<long> scanQueue;
 	std::set<long> alreadyProcessed;
@@ -3652,11 +3660,13 @@ size_t                          k;
 face_loc_connect_A = cell_1_->getFaceLocalConnect(i);
 face_loc_connect_B = cell_2_->getFaceLocalConnect(j);
 if (face_loc_connect_A.size() == face_loc_connect_B.size()) {
+    const long *connectivity_1_ = cell_1_->getConnect();
     for (k = 0; k < face_loc_connect_A.size(); ++k) {
-        face_loc_connect_A[k] = cell_1_->getVertex(face_loc_connect_A[k]);
+        face_loc_connect_A[k] = connectivity_1_[face_loc_connect_A[k]];
     } //next i
+    const long *connectivity_2_ = cell_2_->getConnect();
     for (k = 0; k < face_loc_connect_B.size(); ++k) {
-        face_loc_connect_B[k] = cell_2_->getVertex(face_loc_connect_B[k]);
+        face_loc_connect_B[k] = connectivity_2_[face_loc_connect_B[k]];
     } //next i
     std::sort(face_loc_connect_A.begin(), face_loc_connect_A.end());
     std::sort(face_loc_connect_B.begin(), face_loc_connect_B.end());
@@ -3707,8 +3717,9 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 		long cellId = cell.getId();
 
 		int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
 		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cell.getVertex(k);
+			long vertexId = cellConnect[k];
 			vertexToCellsMap[vertexId].push_back(cellId);
 		}
 	}

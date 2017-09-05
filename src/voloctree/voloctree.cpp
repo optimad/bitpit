@@ -1471,8 +1471,9 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 		// For now, all cell vertices will be listed. Later, the vertex of
 		// the dangling faces will be removed from the list.
 		int nCellVertices = cell.getVertexCount();
+		const long *cellConnect = cell.getConnect();
 		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cell.getVertex(k);
+			long vertexId = cellConnect[k];
 			deadVertices.insert(vertexId);
 		}
 
@@ -1783,12 +1784,13 @@ bool VolOctree::isPointInside(const std::array<double, 3> &point)
 bool VolOctree::isPointInside(const long &id, const std::array<double, 3> &point)
 {
 	const Cell &cell = m_cells[id];
+	const long *cellConnect = cell.getConnect();
 
     int lowerLeftVertex  = 0;
 	int upperRightVertex = pow(2, getDimension()) - 1;
 
-	std::array<double, 3> lowerLeft  = getVertexCoords(cell.getVertex(lowerLeftVertex));
-	std::array<double, 3> upperRight = getVertexCoords(cell.getVertex(upperRightVertex));
+	std::array<double, 3> lowerLeft  = getVertexCoords(cellConnect[lowerLeftVertex]);
+	std::array<double, 3> upperRight = getVertexCoords(cellConnect[upperRightVertex]);
 
 	const double EPS = getTol();
     for (int d = 0; d < 3; ++d){
@@ -2026,8 +2028,9 @@ void VolOctree::setLength(double length)
 		for (const Cell &cell : m_cells) {
 			OctantInfo octantInfo = getCellOctant(cell.getId());
 			Octant *octant = getOctantPointer(octantInfo);
+			const long *cellConnect = cell.getConnect();
 			for (int k = 0; k < m_cellTypeInfo->nVertices; ++k) {
-				long vertexId = cell.getVertex(k);
+				long vertexId = cellConnect[k];
 				if (alreadyEvaluated.count(vertexId) == 0) {
 					Vertex &vertex = m_vertices.at(vertexId);
 					vertex.setCoords(m_tree->getNode(octant, k));

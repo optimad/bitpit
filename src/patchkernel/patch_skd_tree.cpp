@@ -67,17 +67,18 @@ void SkdPatchInfo::buildCache()
         // Cell info
         const Cell &cell = cells.rawAt(rawCellId);
         int nCellVertices = cell.getVertexCount();
+        const long *cellConnect = cell.getConnect();
 
         // Bounding box
         std::array<double, 3> &cellBoxMin   = m_cellBoxes->rawAt(rawCellId, 0);
         std::array<double, 3> &cellBoxMax   = m_cellBoxes->rawAt(rawCellId, 1);
         std::array<double, 3> &cellCentroid = m_cellCentroids->rawAt(rawCellId, 0);
 
-        cellBoxMin   = m_patch->getVertexCoords(cell.getVertex(0));
+        cellBoxMin   = m_patch->getVertexCoords(cellConnect[0]);
         cellBoxMax   = cellBoxMin;
         cellCentroid = cellBoxMin;
         for (int i = 1; i < nCellVertices; ++i) {
-            const std::array<double, 3> &coords = m_patch->getVertexCoords(cell.getVertex(i));
+            const std::array<double, 3> &coords = m_patch->getVertexCoords(cellConnect[i]);
             for (int d = 0; d < 3; ++d) {
                 cellBoxMin[d]    = std::min(coords[d], cellBoxMin[d]);
                 cellBoxMax[d]    = std::max(coords[d], cellBoxMax[d]);
@@ -462,6 +463,7 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
         std::size_t cellRawId = cellRawIds[n];
         const Cell &cell = cells.rawAt(cellRawId);
         long cellId = cell.getId();
+        const long *cellConnect = cell.getConnect();
 
         // Evaluate the distance from the cell
         double cellDistance;
@@ -471,8 +473,8 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
 
         case ElementType::LINE:
         {
-            const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cell.getVertex(0));
-            const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cell.getVertex(1));
+            const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cellConnect[0]);
+            const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cellConnect[1]);
 
             cellDistance = CGElem::distancePointSegment(point, vertexCoords_0, vertexCoords_1);
             break;
@@ -480,9 +482,9 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
 
         case ElementType::TRIANGLE:
         {
-            const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cell.getVertex(0));
-            const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cell.getVertex(1));
-            const std::array<double, 3> &vertexCoords_2 = patch.getVertexCoords(cell.getVertex(2));
+            const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cellConnect[0]);
+            const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cellConnect[1]);
+            const std::array<double, 3> &vertexCoords_2 = patch.getVertexCoords(cellConnect[2]);
 
             cellDistance = CGElem::distancePointTriangle(point, vertexCoords_0, vertexCoords_1, vertexCoords_2);
             break;
@@ -495,7 +497,7 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
             int nVertices = cell.getVertexCount();
             vertexCoords.resize(nVertices);
             for (int i = 0; i < nVertices; ++i) {
-                vertexCoords[i] = patch.getVertexCoords(cell.getVertex(i));
+                vertexCoords[i] = patch.getVertexCoords(cellConnect[i]);
             }
 
             cellDistance = CGElem::distancePointPolygon(point, vertexCoords);

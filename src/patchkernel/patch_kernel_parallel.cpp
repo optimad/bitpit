@@ -1140,8 +1140,9 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         const Cell &cell = m_cells[cellId];
 
         int nCellVertices = cell.getVertexCount();
+        const long *cellConnect = cell.getConnect();
         for (int j = 0; j < nCellVertices; ++j) {
-            long vertexId = cell.getVertex(j);
+            long vertexId = cellConnect[j];
             if (vertexToCommunicate.count(vertexId) > 0) {
                 continue;
             }
@@ -1397,8 +1398,9 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         long ghostId = entry.first;
         const Cell &ghost = m_cells[ghostId];
         int nGhostVertices = ghost.getVertexCount();
+        const long *ghostConnect = ghost.getConnect();
         for (int k = 0; k < nGhostVertices; ++k) {
-            long vertexId = ghost.getVertex(k);
+            long vertexId = ghostConnect[k];
             if (ghostVertices.count(vertexId) == 0) {
                 ghostVertices.insert({{vertexId, m_vertices[vertexId]}});
                 ghostVerticesTree.insert(&ghostVertices.at(vertexId), vertexId);
@@ -1508,6 +1510,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         Cell recvCell;
         cellBuffer >> recvCell;
         long senderCellId = recvCell.getId();
+        long *recvCellConnect = recvCell.getConnect();
 
         // Set cell interior flag
         bool recvIsInterior = (recvCellOwner == m_rank);
@@ -1516,10 +1519,10 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         // Remap connectivity
         int nCellVertices = recvCell.getVertexCount();
         for (int j = 0; j < nCellVertices; ++j) {
-            long senderVertexId = recvCell.getVertex(j);
+            long senderVertexId = recvCellConnect[j];
             long localVertexId  = recvVertexMap.at(senderVertexId);
 
-            recvCell.setVertex(j, localVertexId);
+            recvCellConnect[j] = localVertexId;
         }
 
         // Check if the cells is a duplicate
@@ -1534,9 +1537,10 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 
                 bool cellsCoincide = true;
                 int nGhostVertices = ghostCell.getVertexCount();
+                const long *ghostCellConnect = ghostCell.getConnect();
                 for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
-                    long ghostVertexId = ghostCell.getVertex(vertex);
-                    long recvVertexId  = recvCell.getVertex(vertex);
+                    long ghostVertexId = ghostCellConnect[vertex];
+                    long recvVertexId  = recvCellConnect[vertex];
                     if (ghostVertexId != recvVertexId) {
                         cellsCoincide = false;
                         break;

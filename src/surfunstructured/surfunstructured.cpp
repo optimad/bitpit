@@ -283,6 +283,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
     long                                        id;
     vector<int>                                 face_loc_connect;
     vector<long>                                face_connect;
+    const long                                  *cell_connect;
 
     // Counters
     int                                         i, j;
@@ -310,6 +311,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
     for (c_ = cellBegin(); c_ != ce_; ++c_) {
         id = c_->getId();
         n_faces = c_->getFaceCount();
+        cell_connect = c_->getConnect();
         for (i = 0; i < n_faces; ++i) {
             check = true;
             n_adj = c_->getAdjacencyCount(i);
@@ -322,7 +324,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
                 face_connect.resize(n_vert);
                 j_ = face_connect.begin();
                 for (i_ = face_loc_connect.cbegin(); i_ != face_loc_connect.cend(); ++i_) {
-                    *j_ = c_->getVertex(*i_);
+                    *j_ = cell_connect[*i_];
                     ++j_;
                 } //next i_
                 net.addCell(c_->getFaceType(i), true, face_connect);
@@ -579,6 +581,7 @@ unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const b
     vector<array<int,3>>                        connectivityList;
     unordered_map<long, long>                   vertexMap;
     array<int,3>                                dummyIntArray;
+    const long                                  *cellConnect;
 
     // Counters
     int                                         v_count ,j;
@@ -637,10 +640,12 @@ unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const b
         *i_ = std::move(evalFacetNormal(c_->getId()));
         
         // Build connectivity
+        cellConnect = c_->getConnect();
+
         ke_ = j_->end();
         j = 0;
         for (k_ = j_->begin(); k_ != ke_; ++k_) {
-            *k_ = vertexMap[c_->getVertex(j)];
+            *k_ = vertexMap[cellConnect[j]];
             ++j;
         } //next k_
 
@@ -895,6 +900,7 @@ unsigned short SurfUnstructured::exportDGF(const string &dgf_name)
     std::vector<std::array<double, 3>>                          vertex_list(nV);
     std::vector<std::vector<int>>                               simplex_list(nS);
     std::unordered_map<long, long>                              vertex_map;
+    const long                                                  *cell_connect;
 
     // Counters
     VertexIterator                                              v_, ve_;
@@ -919,9 +925,10 @@ unsigned short SurfUnstructured::exportDGF(const string &dgf_name)
     ccount = 0;
     for (c_ = cellBegin(); c_ != ce_; ++c_) {
         nv = c_->getVertexCount();
+        cell_connect = c_->getConnect();
         simplex_list[ccount].resize(nv);
         for (v = 0; v < nv; ++v) {
-            simplex_list[ccount][v] = vertex_map[c_->getVertex(v)];
+            simplex_list[ccount][v] = vertex_map[cell_connect[v]];
         } //next v
         ++ccount;
     } //next c_

@@ -164,8 +164,9 @@ double LevelSetKernel::computeCellIncircle( long id ) {
     }
 
     int vertexCount = cell.getInterfaceCount();
+    const long *cellConnect = cell.getConnect();
     for (int k = 0; k < vertexCount; ++k) {
-        long vertexId = cell.getVertex(k);
+        long vertexId = cellConnect[k];
         double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
         radius = std::min(radius, r);
     }
@@ -197,8 +198,9 @@ double LevelSetKernel::computeCellCircumcircle( long id ) {
     }
 
     int vertexCount = cell.getInterfaceCount();
+    const long *cellConnect = cell.getConnect();
     for (int k = 0; k < vertexCount; ++k) {
-        long vertexId = cell.getVertex(k);
+        long vertexId = cellConnect[k];
         double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
         radius = std::max(radius, r);
     }
@@ -237,8 +239,9 @@ double LevelSetKernel::isCellInsideBoundingBox( long id, std::array<double, 3> m
     cellMaxPoint.fill( - std::numeric_limits<double>::max() ) ;
 
     int nVertices = cell.getVertexCount();
+    const long *cellConnect = cell.getConnect();
     for (int i = 0; i < nVertices; ++i) {
-        long vertexId = cell.getVertex(i);
+        long vertexId = cellConnect[i];
         std::array<double, 3> vertexCoords = m_mesh->getVertexCoords(vertexId);
         for (int d = 0; d < 3; ++d) {
             cellMinPoint[d] = std::min( vertexCoords[d] - tolerance, cellMinPoint[d]) ;

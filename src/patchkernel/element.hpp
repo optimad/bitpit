@@ -124,9 +124,7 @@ public:
 	const std::vector<int> & getEdgeLocalConnect(const int &edge) const;
 	std::vector<long> getEdgeConnect(int edge) const;
 
-	void setVertex(const int &index, const long &vertex);
 	int getVertexCount() const;
-	long getVertex(const int &vertex) const;
 
 	static const long NULL_ID;
 

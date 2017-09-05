@@ -418,9 +418,10 @@ std::vector<long> Element::getFaceConnect(int face) const
 	int nFaceVertices = localFaceConnect.size();
 
 	std::vector<long> faceConnect(nFaceVertices);
+	const long *cellConnect = getConnect();
 	for (int k = 0; k < nFaceVertices; ++k) {
 		int localVertexId = localFaceConnect[k];
-		long vertexId = getVertex(localVertexId);
+		long vertexId = cellConnect[localVertexId];
 		faceConnect[k] = vertexId;
 	}
 
@@ -482,9 +483,10 @@ std::vector<long> Element::getEdgeConnect(int edge) const
 	int nEdgeVertices = localEdgeConnect.size();
 
 	std::vector<long> edgeConnect(nEdgeVertices);
+	const long *cellConnect = getConnect();
 	for (int k = 0; k < nEdgeVertices; ++k) {
 		int localVertexId = localEdgeConnect[k];
-		long vertexId = getVertex(localVertexId);
+		long vertexId = cellConnect[localVertexId];
 		edgeConnect[k] = vertexId;
 	}
 
@@ -569,28 +571,6 @@ int Element::getVertexCount() const
 		return getInfo().nVertices;
 
 	}
-}
-
-/*!
-	Sets the vertex with the specified local index.
-
-	\param index is the local index of the vertex
-	\param vertex is the id of the vertex.
-*/
-void Element::setVertex(const int &index, const long &vertex)
-{
-	m_connect[index] = vertex;
-}
-
-/*!
-	Gets the vertex with the specified local index.
-
-	\param vertex is the local index of the vertex
-	\result The id of the specified vertex.
-*/
-long Element::getVertex(const int &vertex) const
-{
-	return m_connect[vertex];
 }
 
 /*!

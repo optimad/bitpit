@@ -150,10 +150,11 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
 
     const Cell &segment = m_surface->getCell(id) ;
     int nVertices = segment.getVertexCount() ;
+    const long *segmentConnect = segment.getConnect();
 
     coords->resize(nVertices);
     for (int n = 0; n < nVertices; ++n) {
-        long vertexId = segment.getVertex(n) ;
+        long vertexId = segmentConnect[n] ;
         (*coords)[n] = m_surface->getVertexCoords(vertexId);
     }
 
@@ -183,6 +184,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 
     const Cell &cell = m_surface->getCell(segmentId) ;
     ElementType cellType = cell.getType();
+    const long *cellConnect = cell.getConnect();
 
     std::array<double,3> projectionCoords;
 
@@ -190,7 +192,7 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 
     case ElementType::VERTEX :
     {
-        long id = cell.getVertex(0) ;
+        long id = cellConnect[0] ;
 
         projectionCoords = m_surface->getVertexCoords(id);
 
@@ -202,8 +204,8 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 
     case ElementType::LINE:
     {
-        long id0 = cell.getVertex(0) ;
-        long id1 = cell.getVertex(1) ;
+        long id0 = cellConnect[0] ;
+        long id1 = cellConnect[1] ;
         std::array<double,2> lambda ;
 
         projectionCoords = CGElem::projectPointSegment( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), lambda);
@@ -226,9 +228,9 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 
     case ElementType::TRIANGLE:
     {
-        long id0 = cell.getVertex(0) ;
-        long id1 = cell.getVertex(1) ;
-        long id2 = cell.getVertex(2) ;
+        long id0 = cellConnect[0] ;
+        long id1 = cellConnect[1] ;
+        long id2 = cellConnect[2] ;
 
         std::array<double,3> lambda ;
 

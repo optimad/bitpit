@@ -696,15 +696,17 @@ void VolCartesian::addCells()
 				Cell &cell = *cellIterator;
 
 				// Connettività
-				cell.setVertex(0, getVertexLinearId(i,     j,     k));
-				cell.setVertex(1, getVertexLinearId(i + 1, j,     k));
-				cell.setVertex(2, getVertexLinearId(i,     j + 1, k));
-				cell.setVertex(3, getVertexLinearId(i + 1, j + 1, k));
+				long *cellConnect = cell.getConnect();
+
+				cellConnect[0] = getVertexLinearId(i,     j,     k);
+				cellConnect[1] = getVertexLinearId(i + 1, j,     k);
+				cellConnect[2] = getVertexLinearId(i,     j + 1, k);
+				cellConnect[3] = getVertexLinearId(i + 1, j + 1, k);
 				if (isThreeDimensional()) {
-					cell.setVertex(4, getVertexLinearId(i,     j,     k + 1));
-					cell.setVertex(5, getVertexLinearId(i + 1, j,     k + 1));
-					cell.setVertex(6, getVertexLinearId(i,     j + 1, k + 1));
-					cell.setVertex(7, getVertexLinearId(i + 1, j + 1, k + 1));
+					cellConnect[4] = getVertexLinearId(i,     j,     k + 1);
+					cellConnect[5] = getVertexLinearId(i + 1, j,     k + 1);
+					cellConnect[6] = getVertexLinearId(i,     j + 1, k + 1);
+					cellConnect[7] = getVertexLinearId(i + 1, j + 1, k + 1);
 				}
 			}
 		}

@@ -649,16 +649,20 @@ int                             i;
     // Scope variables
     int                         j;
     int                         n;
+    long                        *cellConnect;
+    long                        *ghostConnect;
 
     // Initialize internal cell
     log::cout() << "** Initializing cell" << endl;
+    cellConnect = cell.getConnect();
     n = cell.getVertexCount();
     for (j = 0; j < n; ++j) {
-        cell.setVertex(j, c_connect[j]);
+        cellConnect[j] = c_connect[j];
     } //next j
+    ghostConnect = ghost.getConnect();
     n = ghost.getVertexCount();
     for (j = 0; j < n; ++j) {
-        ghost.setVertex(j, g_connect[j]);
+        ghostConnect[j] = g_connect[j];
     } //next j
     log::cout() << endl;
 }
