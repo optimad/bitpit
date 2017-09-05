@@ -38,80 +38,28 @@ namespace bitpit {
     \image html common_elements.png
 */
 
-const ReferenceElementInfo ReferenceElementInfo::undefinedInfo  = ReferenceElementInfo(ElementType::UNDEFINED);
-const ReferenceElementInfo ReferenceElementInfo::vertexInfo     = ReferenceElementInfo(ElementType::VERTEX);
-const ReferenceElementInfo ReferenceElementInfo::lineInfo       = ReferenceElementInfo(ElementType::LINE);
-const ReferenceElementInfo ReferenceElementInfo::triangleInfo   = ReferenceElementInfo(ElementType::TRIANGLE);
-const ReferenceElementInfo ReferenceElementInfo::pixelInfo      = ReferenceElementInfo(ElementType::PIXEL);
-const ReferenceElementInfo ReferenceElementInfo::quadInfo       = ReferenceElementInfo(ElementType::QUAD);
-const ReferenceElementInfo ReferenceElementInfo::tetraInfo      = ReferenceElementInfo(ElementType::TETRA);
-const ReferenceElementInfo ReferenceElementInfo::voxelInfo      = ReferenceElementInfo(ElementType::VOXEL);
-const ReferenceElementInfo ReferenceElementInfo::hexahedronInfo = ReferenceElementInfo(ElementType::HEXAHEDRON);
-const ReferenceElementInfo ReferenceElementInfo::pyramidInfo    = ReferenceElementInfo(ElementType::PYRAMID);
-const ReferenceElementInfo ReferenceElementInfo::wedgeInfo      = ReferenceElementInfo(ElementType::WEDGE);
-
 /*!
-    Default constructor
+    Constructor
+
+    \param _dimension is the space dimension of the element
+    \param _type is the type of element
+    \param _nVertices is the number of vertices
+    \param _nFaces is the number of faces
+    \param _nEdges is the number of edges
 */
-ReferenceElementInfo::ReferenceElementInfo()
+ReferenceElementInfo::ReferenceElementInfo(int _dimension, ElementType _type, int _nVertices, int _nFaces, int _nEdges)
+    : dimension(_dimension), type(_type),
+      nVertices(_nVertices),
+      nFaces(_nFaces), face_type(nFaces), faceConnect(nFaces), faceEdges(nFaces),
+      nEdges(_nEdges), edge_type(nEdges), edgeConnect(nEdges)
 {
-    initializeUndefinedInfo();
 }
 
 /*!
-    Creates a new set of element information.
-
-    \param type is the type of element
+    Destructor
 */
-ReferenceElementInfo::ReferenceElementInfo(ElementType type)
+ReferenceElementInfo::~ReferenceElementInfo()
 {
-    switch (type) {
-
-    case (ElementType::VERTEX):
-        initializeVertexInfo();
-        break;
-
-    case (ElementType::LINE):
-        initializeLineInfo();
-        break;
-
-    case (ElementType::TRIANGLE):
-        initializeTriangleInfo();
-        break;
-
-    case (ElementType::PIXEL):
-        initializePixelInfo();
-        break;
-
-    case (ElementType::QUAD):
-        initializeQuadInfo();
-        break;
-
-    case (ElementType::TETRA):
-        initializeTetraInfo();
-        break;
-
-    case (ElementType::VOXEL):
-        initializeVoxelInfo();
-        break;
-
-    case (ElementType::HEXAHEDRON):
-        initializeHexahedronInfo();
-        break;
-
-    case (ElementType::PYRAMID):
-        initializePyramidInfo();
-        break;
-
-    case (ElementType::WEDGE):
-        initializeWedgeInfo();
-        break;
-
-    default:
-        initializeUndefinedInfo();
-        break;
-
-    }
 }
 
 /*!
@@ -122,6 +70,18 @@ ReferenceElementInfo::ReferenceElementInfo(ElementType type)
 */
 const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 {
+    const static ReferenceUndefinedInfo undefinedInfo;
+    const static ReferenceVertexInfo vertexInfo;
+    const static ReferenceLineInfo lineInfo;
+    const static ReferenceTriangleInfo triangleInfo;
+    const static ReferencePixelInfo pixelInfo;
+    const static ReferenceQuadInfo quadInfo;
+    const static ReferenceTetraInfo tetraInfo;
+    const static ReferenceVoxelInfo voxelInfo;
+    const static ReferenceHexahedronInfo hexahedronInfo;
+    const static ReferencePyramidInfo pyramidInfo;
+    const static ReferenceWedgeInfo wedgeInfo;
+
     switch (type) {
 
     case (ElementType::VERTEX):
@@ -162,255 +122,109 @@ const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 }
 
 /*!
-    Initializes the information for the undefined element.
+    Initializes the list of edges associated to the faces
 */
-void ReferenceElementInfo::initializeUndefinedInfo()
+void ReferenceElementInfo::initializeFaceEdges(const std::vector<const ReferenceElementInfo *> &facesInfo)
 {
-    type      = UNDEFINED;
-    dimension = -1;
-
-    nVertices = -1;
-    nEdges    = -1;
-    nFaces    = -1;
-}
-
-/*!
-    Initializes the information for the point element.
-*/
-void ReferenceElementInfo::initializeVertexInfo()
-{
-    type      = ElementType::VERTEX;
-    dimension = 0;
-
-    // Vertices data
-    nVertices = 1;
-
-    // Edge data
-    nEdges = 1;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edge_type[0] = ElementType::VERTEX;
-
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
-    edgeConnect[0] = std::vector<int>(nVertices);
-    edgeConnect[0][0] = 0;
-
-    // Face data
-    nFaces = 1;
-
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    face_type[0] = ElementType::VERTEX;
-
-    facesInfo[0] = this;
-
-    faceConnect = std::vector<std::vector<int>>(nFaces);
-    faceConnect[0] = std::vector<int>(nVertices);
-    faceConnect[0][0] = 0;
-
-    initializeFaceEdges(facesInfo);
-}
-
-/*!
-    Initializes the information for the line element.
-*/
-void ReferenceElementInfo::initializeLineInfo()
-{
-    ReferenceElementInfo vertexInfo(VERTEX);
-
-    type      = LINE;
-    dimension = 1;
-
-    // Vertices data
-    nVertices = 2;
-
-    // Edge data
-    nEdges = 2;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
-    for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
-    }
-
-    // Face data
-    nFaces = 2;
-
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
+    faceEdges = std::vector<std::vector<int>>(nFaces);
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]       = ElementType::VERTEX;
-        facesInfo[k]      = &vertexInfo;
-        faceConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        faceConnect[k][0] = k;
-    }
+        const ReferenceElementInfo &faceInfo = *(facesInfo[k]);
 
-    initializeFaceEdges(facesInfo);
+        int nFaceEdges = faceInfo.nFaces;
+        for (int i = 0; i < nFaceEdges; ++i) {
+            // Number of vertices of the edge associated to the face
+            std::size_t nFaceEdgeVertices = faceInfo.faceConnect[i].size();
+
+            // Connectivity of the edge associated to the face
+            const std::vector<int> &localFaceEdgeConnect = faceInfo.faceConnect[i];
+
+            std::vector<int> faceEdgeConnect(nFaceEdgeVertices);
+            for (std::size_t n = 0; n < nFaceEdgeVertices; ++n) {
+                int localVertexId = localFaceEdgeConnect[n];
+                int vertexId      = faceConnect[k][localVertexId];
+
+                faceEdgeConnect[n] = vertexId;
+            }
+
+            // Search the edge that has the same connectivity of the face edge
+            for (int j = 0; j < nEdges; ++j) {
+                // If face edge and the guess edge have a different number of
+                // vertices, the two edge cannot be the same.
+                std::size_t nGuessEdgeVertices = edgeConnect[j].size();
+                if (nGuessEdgeVertices != nFaceEdgeVertices) {
+                    continue;
+                }
+
+                // If the connecitivity of the face edge and the one of the
+                // guess edge are the same, the two edges coincides.
+                const std::vector<int> commonVertices = utils::intersectionVector(faceEdgeConnect, edgeConnect[j]);
+                if (commonVertices.size() == nFaceEdgeVertices) {
+                    faceEdges[k].push_back(j);
+                }
+            }
+        }
+
+        assert(faceEdges[k].size() == nFaceEdges);
+    }
 }
 
 /*!
-    Initializes the information for the triangle element.
+    \class ReferenceUndefinedInfo
+    \ingroup patchelements
+
+    \brief The ReferenceUndefinedInfo class is used for undefined reference
+    element.
 */
-void ReferenceElementInfo::initializeTriangleInfo()
+
+/*!
+    Default constructor
+*/
+ReferenceUndefinedInfo::ReferenceUndefinedInfo()
+    : ReferenceElementInfo(-1, ElementType::UNDEFINED, 0, 0, 0)
 {
-    ReferenceElementInfo vertexInfo(VERTEX);
-    ReferenceElementInfo lineInfo(LINE);
-
-    type      = TRIANGLE;
-    dimension = 2;
-
-    // Vertices data
-    nVertices = 3;
-
-    // Edge data
-    nEdges = 3;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
-    for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
-    }
-
-    // Face data
-    nFaces = 3;
-
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
-    for (int k = 0; k < nFaces; ++k) {
-        face_type[k]       = LINE;
-        facesInfo[k]      = &lineInfo;
-        faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
-        faceConnect[k][0] = k;
-        faceConnect[k][1] = (k + 1) % nVertices;
-    }
-
-    initializeFaceEdges(facesInfo);
 }
 
 /*!
-    Initializes the information for the quadrangle element.
+    \class Reference3DElementInfo
+    \ingroup patchelements
+
+    \brief The Reference3DElementInfo class allows to define information about
+    reference three-dimensional elements.
+
+    The local numbering scheme of element vertices is shown below.
+
+    \image html common_elements.png
 */
-void ReferenceElementInfo::initializePixelInfo()
+
+/*!
+    Constructor
+
+    \param type is the type of element
+    \param nVertices is the number of vertices
+    \param nFaces is the number of faces
+*/
+Reference3DElementInfo::Reference3DElementInfo(ElementType type, int nVertices, int nFaces)
+    : ReferenceElementInfo(3, type, nVertices, nFaces, nVertices + nFaces - 2)
 {
-    ReferenceElementInfo vertexInfo(VERTEX);
-    ReferenceElementInfo lineInfo(LINE);
-
-    type      = PIXEL;
-    dimension = 2;
-
-    // Vertices data
-    nVertices = 4;
-
-    // Edge data
-    nEdges = 4;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
-    for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
-    }
-
-    // Face data
-    nFaces = 4;
-
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
-    for (int k = 0; k < nFaces; ++k) {
-        face_type[k]    = LINE;
-        facesInfo[k]   = &lineInfo;
-        faceConnect[k] = std::vector<int>(lineInfo.nVertices);
-    }
-
-    faceConnect[0][0] = 2;
-    faceConnect[0][1] = 0;
-
-    faceConnect[1][0] = 1;
-    faceConnect[1][1] = 3;
-
-    faceConnect[2][0] = 0;
-    faceConnect[2][1] = 1;
-
-    faceConnect[3][0] = 3;
-    faceConnect[3][1] = 2;
-
-    initializeFaceEdges(facesInfo);
 }
 
 /*!
-    Initializes the information for the quadrangle element.
+    \ingroup patchelements
+
+    \brief The ReferenceTetraInfo class defines the information about the
+    reference tetrahedron.
 */
-void ReferenceElementInfo::initializeQuadInfo()
-{
-    ReferenceElementInfo vertexInfo(VERTEX);
-    ReferenceElementInfo lineInfo(LINE);
-
-    type      = QUAD;
-    dimension = 2;
-
-    // Vertices data
-    nVertices = 4;
-
-    // Edge data
-    nEdges = 4;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
-    for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
-    }
-
-    // Face data
-    nFaces = 4;
-
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
-    for (int k = 0; k < nFaces; ++k) {
-        face_type[k]       = LINE;
-        facesInfo[k]      = &lineInfo;
-        faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
-        faceConnect[k][0] = k;
-        faceConnect[k][1] = (k + 1) % nVertices;
-    }
-
-    initializeFaceEdges(facesInfo);
-}
 
 /*!
-    Initializes the information for the tetrahedron element.
+    Default constructor
 */
-void ReferenceElementInfo::initializeTetraInfo()
+ReferenceTetraInfo::ReferenceTetraInfo()
+    : Reference3DElementInfo(ElementType::TETRA, 4, 4)
 {
-    ReferenceElementInfo lineInfo(LINE);
-    ReferenceElementInfo triangleInfo(TRIANGLE);
-
-    type      = TETRA;
-    dimension = 3;
-
-    // Vertices data
-    nVertices = 4;
+    const ReferenceLineInfo lineInfo;
+    const ReferenceTriangleInfo triangleInfo;
 
     // Edge data
-    nEdges = 6;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
     for (int k = 0; k < nEdges; ++k) {
         edge_type[k]   = LINE;
         edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
@@ -435,14 +249,10 @@ void ReferenceElementInfo::initializeTetraInfo()
     edgeConnect[5][1] = 2;
 
     // Face data
-    nFaces = 4;
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]    = TRIANGLE;
+        face_type[k]   = TRIANGLE;
         facesInfo[k]   = &triangleInfo;
         faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
     }
@@ -467,24 +277,23 @@ void ReferenceElementInfo::initializeTetraInfo()
 }
 
 /*!
-    Initializes the information for the brick element.
+    \class ReferenceVoxelInfo
+    \ingroup patchelements
+
+    \brief The ReferenceVoxelInfo class defines the information about the
+    reference voxel.
 */
-void ReferenceElementInfo::initializeVoxelInfo()
+
+/*!
+    Default constructor
+*/
+ReferenceVoxelInfo::ReferenceVoxelInfo()
+    : Reference3DElementInfo(ElementType::VOXEL, 8, 6)
 {
-    ReferenceElementInfo lineInfo(LINE);
-    ReferenceElementInfo pixelInfo(PIXEL);
-
-    type      = VOXEL;
-    dimension = 3;
-
-    // Vertices data
-    nVertices = 8;
+    const ReferenceLineInfo lineInfo;
+    const ReferencePixelInfo pixelInfo;
 
     // Edge data
-    nEdges = 12;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
     for (int k = 0; k < nEdges; ++k) {
         edge_type[k]   = LINE;
         edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
@@ -527,14 +336,10 @@ void ReferenceElementInfo::initializeVoxelInfo()
     edgeConnect[11][1] = 7;
 
     // Face data
-    nFaces = 6;
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]    = PIXEL;
+        face_type[k]   = PIXEL;
         facesInfo[k]   = &pixelInfo;
         faceConnect[k] = std::vector<int>(pixelInfo.nVertices);
     }
@@ -573,24 +378,23 @@ void ReferenceElementInfo::initializeVoxelInfo()
 }
 
 /*!
-    Initializes the information for the hexahedron element.
+    \class ReferenceHexahedronInfo
+    \ingroup patchelements
+
+    \brief The ReferenceHexahedronInfo class defines the information about the
+    reference hexahedron.
 */
-void ReferenceElementInfo::initializeHexahedronInfo()
+
+/*!
+    Default constructor
+*/
+ReferenceHexahedronInfo::ReferenceHexahedronInfo()
+    : Reference3DElementInfo(ElementType::HEXAHEDRON, 8, 6)
 {
-    ReferenceElementInfo lineInfo(LINE);
-    ReferenceElementInfo quadInfo(QUAD);
-
-    type      = HEXAHEDRON;
-    dimension = 3;
-
-    // Vertices data
-    nVertices = 8;
+    const ReferenceLineInfo lineInfo;
+    const ReferenceQuadInfo quadInfo;
 
     // Edge data
-    nEdges = 12;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
     for (int k = 0; k < nEdges; ++k) {
         edge_type[k]   = LINE;
         edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
@@ -633,12 +437,8 @@ void ReferenceElementInfo::initializeHexahedronInfo()
     edgeConnect[11][1] = 7;
 
     // Face data
-    nFaces = 6;
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
     for (int k = 0; k < nFaces; ++k) {
         face_type[k]    = QUAD;
         facesInfo[k]   = &quadInfo;
@@ -679,25 +479,24 @@ void ReferenceElementInfo::initializeHexahedronInfo()
 }
 
 /*!
-    Initializes the information for the pyramid element.
+    \class ReferencePyramidInfo
+    \ingroup patchelements
+
+    \brief The ReferencePyramidInfo class defines the information about the
+    reference pyramid.
 */
-void ReferenceElementInfo::initializePyramidInfo()
+
+/*!
+    Default constructor
+*/
+ReferencePyramidInfo::ReferencePyramidInfo()
+    : Reference3DElementInfo(ElementType::PYRAMID, 5, 5)
 {
-    ReferenceElementInfo lineInfo(LINE);
-    ReferenceElementInfo triangleInfo(TRIANGLE);
-    ReferenceElementInfo quadInfo(QUAD);
-
-    type      = PYRAMID;
-    dimension = 3;
-
-    // Vertices data
-    nVertices = 5;
+    const ReferenceLineInfo lineInfo;
+    const ReferenceTriangleInfo triangleInfo;
+    const ReferenceQuadInfo quadInfo;
 
     // Edge data
-    nEdges = 8;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
     for (int k = 0; k < nEdges; ++k) {
         edge_type[k]   = LINE;
         edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
@@ -728,12 +527,8 @@ void ReferenceElementInfo::initializePyramidInfo()
     edgeConnect[7][1] = 3;
 
     // Face data
-    nFaces = 5;
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
     for (int k = 0; k < nFaces; ++k) {
         if (k == 0) {
             face_type[k]   = ElementType::QUAD;
@@ -771,25 +566,24 @@ void ReferenceElementInfo::initializePyramidInfo()
 }
 
 /*!
-    Initializes the information for the wedge (triangular prism) element.
+    \class ReferenceWedgeInfo
+    \ingroup patchelements
+
+    \brief The ReferenceWedgeInfo class defines the information about the
+    reference wedge.
 */
-void ReferenceElementInfo::initializeWedgeInfo()
+
+/*!
+    Default constructor
+*/
+ReferenceWedgeInfo::ReferenceWedgeInfo()
+    : Reference3DElementInfo(ElementType::WEDGE, 6, 5)
 {
-    ReferenceElementInfo lineInfo(LINE);
-    ReferenceElementInfo triangleInfo(TRIANGLE);
-    ReferenceElementInfo quadInfo(QUAD);
-
-    type      = WEDGE;
-    dimension = 3;
-
-    // Vertices data
-    nVertices = 6;
+    const ReferenceLineInfo lineInfo;
+    const ReferenceTriangleInfo triangleInfo;
+    const ReferenceQuadInfo quadInfo;
 
     // Edge data
-    nEdges = 9;
-
-    edge_type = std::vector<ElementType>(nEdges);
-    edgeConnect = std::vector<std::vector<int>>(nEdges);
     for (int k = 0; k < nEdges; ++k) {
         edge_type[k]   = LINE;
         edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
@@ -823,19 +617,15 @@ void ReferenceElementInfo::initializeWedgeInfo()
     edgeConnect[8][1] = 2;
 
     // Face data
-    nFaces = 5;
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
-    std::vector<ReferenceElementInfo *> facesInfo(nFaces);
-
-    face_type = std::vector<ElementType>(nFaces);
-    faceConnect = std::vector<std::vector<int>>(nFaces);
     for (int k = 0; k < nFaces; ++k) {
         if (k == 0 || k == 1) {
-            face_type[k]    = TRIANGLE;
+            face_type[k]   = TRIANGLE;
             facesInfo[k]   = &triangleInfo;
             faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
         } else {
-            face_type[k]    = QUAD;
+            face_type[k]   = QUAD;
             facesInfo[k]   = &quadInfo;
             faceConnect[k] = std::vector<int>(quadInfo.nVertices);
         }
@@ -868,50 +658,264 @@ void ReferenceElementInfo::initializeWedgeInfo()
 }
 
 /*!
-    Initializes the list of edges associated to the faces
+    \class Reference2DElementInfo
+    \ingroup patchelements
+
+    \brief The Reference2DElementInfo class allows to define information about
+    reference two-dimensional elements.
+
+    The local numbering scheme of element vertices is shown below.
+
+    \image html common_elements.png
 */
-void ReferenceElementInfo::initializeFaceEdges(const std::vector<ReferenceElementInfo *> &facesInfo)
+
+/*!
+    Constructor
+
+    \param type is the type of element
+    \param nVertices is the number of vertices
+    \param nFaces is the number of faces
+*/
+Reference2DElementInfo::Reference2DElementInfo(ElementType type, int nVertices)
+    : ReferenceElementInfo(2, type, nVertices, nVertices, nVertices)
 {
-    faceEdges = std::vector<std::vector<int>>(nFaces);
-    for (int k = 0; k < nFaces; ++k) {
-        const ReferenceElementInfo &faceInfo = *(facesInfo[k]);
+}
 
-        int nFaceEdges = faceInfo.nFaces;
-        for (int i = 0; i < nFaceEdges; ++i) {
-            // Number of vertices of the edge associated to the face
-            std::size_t nFaceEdgeVertices = faceInfo.faceConnect[i].size();
+/*!
+    \class ReferenceTriangleInfo
+    \ingroup patchelements
 
-            // Connectivity of the edge associated to the face
-            const std::vector<int> &localFaceEdgeConnect = faceInfo.faceConnect[i];
+    \brief The ReferenceTriangleInfo class defines the information about the
+    reference triangle.
+*/
 
-            std::vector<int> faceEdgeConnect(nFaceEdgeVertices);
-            for (std::size_t n = 0; n < nFaceEdgeVertices; ++n) {
-                int localVertexId = localFaceEdgeConnect[n];
-                int vertexId      = faceConnect[k][localVertexId];
+/*!
+    Default constructor
+*/
+ReferenceTriangleInfo::ReferenceTriangleInfo()
+    : Reference2DElementInfo(ElementType::TRIANGLE, 3)
+{
+    const ReferenceVertexInfo vertexInfo;
+    const ReferenceLineInfo lineInfo;
 
-                faceEdgeConnect[n] = vertexId;
-            }
-
-            // Search the edge that has the same connectivity of the face edge
-            for (int j = 0; j < nEdges; ++j) {
-                // If face edge and the guess edge have a different number of
-                // vertices, the two edge cannot be the same.
-                std::size_t nGuessEdgeVertices = edgeConnect[j].size();
-                if (nGuessEdgeVertices != nFaceEdgeVertices) {
-                    continue;
-                }
-
-                // If the connecitivity of the face edge and the one of the
-                // guess edge are the same, the two edges coincides.
-                const std::vector<int> commonVertices = utils::intersectionVector(faceEdgeConnect, edgeConnect[j]);
-                if (commonVertices.size() == nFaceEdgeVertices) {
-                    faceEdges[k].push_back(j);
-                }
-            }
-        }
-
-        assert(faceEdges[k].size() == nFaceEdges);
+    // Edge data
+    for (int k = 0; k < nEdges; ++k) {
+        edge_type[k]      = ElementType::VERTEX;
+        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+        edgeConnect[k][0] = k;
     }
+
+    // Face data
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
+
+    for (int k = 0; k < nFaces; ++k) {
+        face_type[k]       = LINE;
+        facesInfo[k]      = &lineInfo;
+        faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
+        faceConnect[k][0] = k;
+        faceConnect[k][1] = (k + 1) % nVertices;
+    }
+
+    initializeFaceEdges(facesInfo);
+}
+
+/*!
+    \class ReferencePixelInfo
+    \ingroup patchelements
+
+    \brief The ReferencePixelInfo class defines the information about the
+    reference pixel.
+*/
+
+/*!
+    Default constructor
+*/
+ReferencePixelInfo::ReferencePixelInfo()
+    : Reference2DElementInfo(ElementType::PIXEL, 4)
+{
+    const ReferenceVertexInfo vertexInfo;
+    const ReferenceLineInfo lineInfo;
+
+    // Edge data
+    for (int k = 0; k < nEdges; ++k) {
+        edge_type[k]      = ElementType::VERTEX;
+        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+        edgeConnect[k][0] = k;
+    }
+
+    // Face data
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
+
+    for (int k = 0; k < nFaces; ++k) {
+        face_type[k]    = LINE;
+        facesInfo[k]   = &lineInfo;
+        faceConnect[k] = std::vector<int>(lineInfo.nVertices);
+    }
+
+    faceConnect[0][0] = 2;
+    faceConnect[0][1] = 0;
+
+    faceConnect[1][0] = 1;
+    faceConnect[1][1] = 3;
+
+    faceConnect[2][0] = 0;
+    faceConnect[2][1] = 1;
+
+    faceConnect[3][0] = 3;
+    faceConnect[3][1] = 2;
+
+    initializeFaceEdges(facesInfo);
+}
+
+/*!
+    \class ReferenceQuadInfo
+    \ingroup patchelements
+
+    \brief The ReferenceQuadInfo class defines the information about the
+    reference quadrangle.
+*/
+
+/*!
+    Default constructor
+*/
+ReferenceQuadInfo::ReferenceQuadInfo()
+    : Reference2DElementInfo(ElementType::QUAD, 4)
+{
+    const ReferenceVertexInfo vertexInfo;
+    const ReferenceLineInfo lineInfo;
+
+    // Edge data
+    for (int k = 0; k < nEdges; ++k) {
+        edge_type[k]      = ElementType::VERTEX;
+        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+        edgeConnect[k][0] = k;
+    }
+
+    // Face data
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
+
+    for (int k = 0; k < nFaces; ++k) {
+        face_type[k]       = LINE;
+        facesInfo[k]      = &lineInfo;
+        faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
+        faceConnect[k][0] = k;
+        faceConnect[k][1] = (k + 1) % nVertices;
+    }
+
+    initializeFaceEdges(facesInfo);
+}
+
+/*!
+    \class Reference1DElementInfo
+    \ingroup patchelements
+
+    \brief The Reference1DElementInfo class allows to define information about
+    reference one-dimensional elements.
+
+    The local numbering scheme of element vertices is shown below.
+
+    \image html common_elements.png
+*/
+
+/*!
+    Constructor
+
+    \param type is the type of element
+*/
+Reference1DElementInfo::Reference1DElementInfo(ElementType type)
+    : ReferenceElementInfo(1, type, 2, 2, 2)
+{
+}
+
+/*!
+    \class ReferenceLineInfo
+    \ingroup patchelements
+
+    \brief The ReferenceLineInfo class defines the information about the
+    reference line.
+*/
+
+/*!
+    Default constructor
+*/
+ReferenceLineInfo::ReferenceLineInfo()
+    : Reference1DElementInfo(ElementType::LINE)
+{
+    const ReferenceVertexInfo vertexInfo;
+
+    // Edge data
+    for (int k = 0; k < nEdges; ++k) {
+        edge_type[k]      = ElementType::VERTEX;
+        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+        edgeConnect[k][0] = k;
+    }
+
+    // Face data
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
+
+    for (int k = 0; k < nFaces; ++k) {
+        face_type[k]       = ElementType::VERTEX;
+        facesInfo[k]      = &vertexInfo;
+        faceConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+        faceConnect[k][0] = k;
+    }
+
+    initializeFaceEdges(facesInfo);
+}
+
+/*!
+    \class Reference0DElementInfo
+    \ingroup patchelements
+
+    \brief The Reference0DElementInfo class allows to define information about
+    reference zero-dimensional elements.
+
+    The local numbering scheme of element vertices is shown below.
+
+    \image html common_elements.png
+*/
+
+/*!
+    Constructor
+
+    \param type is the type of element
+*/
+Reference0DElementInfo::Reference0DElementInfo(ElementType type)
+    : ReferenceElementInfo(0, type, 1, 1, 1)
+{
+}
+
+/*!
+    \class ReferenceVertexInfo
+    \ingroup patchelements
+
+    \brief The ReferenceVertexInfo class defines the information about the
+    reference vertex.
+*/
+
+/*!
+    Default constructor
+*/
+ReferenceVertexInfo::ReferenceVertexInfo()
+    : Reference0DElementInfo(ElementType::VERTEX)
+{
+    // Edge data
+    edge_type[0] = ElementType::VERTEX;
+
+    edgeConnect[0] = std::vector<int>(nVertices);
+    edgeConnect[0][0] = 0;
+
+    // Face data
+    std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
+
+    facesInfo[0] = this;
+
+    face_type[0] = ElementType::VERTEX;
+
+    faceConnect[0] = std::vector<int>(nVertices);
+    faceConnect[0][0] = 0;
+
+    initializeFaceEdges(facesInfo);
 }
 
 }
