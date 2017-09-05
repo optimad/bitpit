@@ -46,6 +46,7 @@
 #endif
 #include <vector>
 
+#include "bitpit_common.hpp"
 #include "bitpit_operators.hpp"
 
 // ================================================================================== //
