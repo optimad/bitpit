@@ -1169,6 +1169,17 @@ ConstProxyVector<long> Element::getEdgeVertexIds(int edge) const
 }
 
 /*!
+	Gets the list of local vertex ids for the specified edge of the element.
+
+	\param edge is the edge for which the vertex ids is reqested
+	\result The list of local vertex ids for the specified edge of the element.
+*/
+ConstProxyVector<int> Element::getEdgeLocalVertexIds(int edge) const
+{
+	return getEdgeLocalConnect(edge);
+}
+
+/*!
 	Renumber the vertices of a cell.
 
 	\param map is the map that will be used for the renumbering
