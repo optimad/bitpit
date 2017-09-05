@@ -46,7 +46,7 @@
 #endif
 #include <vector>
 
-#include <bitpit_operators.hpp>
+#include "bitpit_operators.hpp"
 
 // ================================================================================== //
 // NAMESPACES                                                                         //
