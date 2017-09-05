@@ -129,6 +129,7 @@ public:
 	ElementType getEdgeType(const int &edge) const;
 	ConstProxyVector<int> getEdgeLocalConnect(const int &edge) const;
 	ConstProxyVector<long> getEdgeConnect(int edge) const;
+	ConstProxyVector<long> getEdgeVertexIds(int edge) const;
 
 	int getVertexCount() const;
 	void renumberVertices(const std::unordered_map<long, long> &map);
