@@ -2682,46 +2682,55 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 	const Cell &cell = getCell(id);
 	long vertexId = cell.getVertex(vertex);
 
-	std::unordered_set<long> scanQueue;
-	std::unordered_set<long> alreadyScan;
-	scanQueue.insert(cell.getId());
+	std::vector<long> scanQueue;
+	std::set<long> alreadyProcessed;
+	scanQueue.push_back(cell.getId());
 	while (!scanQueue.empty()) {
 		// Pop a cell to process
-		long scanId = *(scanQueue.begin());
+		long scanId = scanQueue.back();
 		const Cell &scanCell = getCell(scanId);
 
-		scanQueue.erase(scanId);
-		alreadyScan.insert(scanId);
+		scanQueue.pop_back();
+		alreadyProcessed.insert(scanId);
 
-		// Find the faces that share the vertex
-		std::vector<long> faceList;
-		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
-			const std::vector<long> faceConnect = scanCell.getFaceConnect(i);
-			for (size_t k = 0; k < faceConnect.size(); ++k) {
-				if (faceConnect[k] == vertexId) {
-					faceList.push_back(i);
-					break;
-				}
+		// Add elements to the neighbour list
+		if (scanId != id) {
+			// Discard elements that don't own the vertex
+			if (scanCell.findVertex(vertexId) < 0) {
+				continue;
+			}
+
+			// Add the element to the list
+			if (utils::findInOrderedVector<long>(scanId, blackList) == blackList.end()) {
+				utils::addToOrderedVector<long>(scanId, *neighs);
 			}
 		}
 
-		// If there are no faces that share the vertices go to the next cell
-		if (faceList.empty()) {
-			continue;
-		}
+		// Add negihbours of faces that owns the vertex to the scan list
+		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
+			const ElementInfo::Type &faceType = scanCell.getFaceType(i);
+			const int nFaceVertices = ElementInfo::getElementInfo(faceType).nVertices;
+			const std::vector<long> faceConnect = scanCell.getFaceConnect(i);
 
-		// Add the current cell to the neighoburs
-		if (scanId != id && utils::findInOrderedVector<long>(scanId, blackList) == blackList.end()) {
-			utils::addToOrderedVector<long>(scanId, *neighs);
-		}
+			// Discard faces that don't own the vertex
+			bool faceOwnsVertex = false;
+			for (int k = 0; k < nFaceVertices; ++k) {
+				if (faceConnect[k] == vertexId) {
+					faceOwnsVertex = true;
+					break;
+				}
+			}
 
-		// Add the neighbours of the faces to the scan list
-		for (const long &face : faceList) {
-			int nFaceNeighs = scanCell.getAdjacencyCount(face);
+			if (!faceOwnsVertex) {
+				continue;
+			}
+
+			// Add face neighbours to the scan queue
+			int nFaceNeighs = scanCell.getAdjacencyCount(i);
 			for (int k = 0; k < nFaceNeighs; ++k) {
-				long neighId = scanCell.getAdjacency(face, k);
-				if (neighId >= 0 && alreadyScan.count(neighId) == 0) {
-					scanQueue.insert(neighId);
+				long neighId = scanCell.getAdjacency(i, k);
+				if (neighId >= 0 && alreadyProcessed.count(neighId) == 0) {
+					scanQueue.push_back(neighId);
 				}
 			}
 		}
