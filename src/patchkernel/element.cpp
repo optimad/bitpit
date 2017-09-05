@@ -1149,6 +1149,25 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 }
 
 /*!
+	Gets the list of local vertex ids for the specified face of the element.
+
+	\param face is the face for which the vertex ids is reqested
+	\result The list of local vertex ids for the specified face of the element.
+*/
+ConstProxyVector<int> Element::getFaceLocalVertexIds(int face) const
+{
+	ConstProxyVector<int> localVertexIds = getFaceLocalConnect(face);
+	if  (m_type == ElementType::POLYHEDRON) {
+		ElementType faceType = getFaceType(face);
+		if (faceType == ElementType::POLYGON) {
+			localVertexIds.set(localVertexIds.data() + 1, localVertexIds.size() - 1);
+		}
+	}
+
+	return localVertexIds;
+}
+
+/*!
 	Gets the list of vertex ids for the specified edge of the element.
 
 	\param edge is the edge for which the vertex ids is reqested
