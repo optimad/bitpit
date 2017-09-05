@@ -171,6 +171,7 @@ public:
 	void unsetConnect();
 	const long * getConnect() const;
 	long * getConnect();
+	int findVertex(long vertexId) const;
 
 	int getFaceCount() const;
 	ElementInfo::Type getFaceType(const int &face) const;
