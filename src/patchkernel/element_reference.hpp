@@ -37,6 +37,7 @@ namespace bitpit {
 class ReferenceElementInfo {
 
 public:
+    static bool hasInfo(ElementType type);
     static const ReferenceElementInfo & getInfo(ElementType type);
 
     int dimension;

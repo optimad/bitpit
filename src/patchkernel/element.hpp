@@ -93,6 +93,7 @@ public:
 
 	void initialize(long id, ElementType type);
 
+	bool hasInfo() const;
 	const ReferenceElementInfo & getInfo() const;
 
 	void setId(const long &id);

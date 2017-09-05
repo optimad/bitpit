@@ -63,6 +63,36 @@ ReferenceElementInfo::~ReferenceElementInfo()
 }
 
 /*!
+    Check if the sepcified element type is associated to a reference element.
+
+    \param type is the type of element
+    \result Return tru if the sepcified element type is associated to a
+    reference element, false otherwis.
+*/
+bool ReferenceElementInfo::hasInfo(ElementType type)
+{
+
+    switch (type) {
+
+    case (ElementType::VERTEX):
+    case (ElementType::LINE):
+    case (ElementType::TRIANGLE):
+    case (ElementType::PIXEL):
+    case (ElementType::QUAD):
+    case (ElementType::TETRA):
+    case (ElementType::VOXEL):
+    case (ElementType::HEXAHEDRON):
+    case (ElementType::PYRAMID):
+    case (ElementType::WEDGE):
+        return true;
+
+    default:
+        return false;
+
+    }
+}
+
+/*!
     Gets the information for the specified element type.
 
     \param type is the type of element
@@ -70,7 +100,6 @@ ReferenceElementInfo::~ReferenceElementInfo()
 */
 const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 {
-    const static ReferenceUndefinedInfo undefinedInfo;
     const static ReferenceVertexInfo vertexInfo;
     const static ReferenceLineInfo lineInfo;
     const static ReferenceTriangleInfo triangleInfo;
@@ -116,7 +145,6 @@ const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 
     default:
         BITPIT_UNREACHABLE("Unsupported element");
-        return undefinedInfo;
 
     }
 }

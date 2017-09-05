@@ -214,6 +214,17 @@ long Element::getId() const
 }
 
 /*!
+	Check if the element is associated to a reference element.
+
+	\result Returns true if the element is associated to a reference element,
+	false otherwise.
+*/
+bool Element::hasInfo() const
+{
+	return ReferenceElementInfo::hasInfo(m_type);
+}
+
+/*!
 	Gets the basic information of the element.
 
 	\result A constant reference to the basic information of the element.
