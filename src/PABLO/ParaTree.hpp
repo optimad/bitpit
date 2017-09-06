@@ -741,7 +741,7 @@ namespace bitpit {
 
                 //Update and build ghosts here
                 updateLoadBalance();
-                setPboundGhosts();
+                computeGhostHalo();
             }
             else
             {
@@ -1122,7 +1122,7 @@ namespace bitpit {
 
                 //Update and ghosts here
                 updateLoadBalance();
-                setPboundGhosts();
+                computeGhostHalo();
                 uint32_t nofGhosts = getNumGhosts();
                 userData.resizeGhost(nofGhosts);
 

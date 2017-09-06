@@ -662,7 +662,7 @@ namespace bitpit {
 
 #if BITPIT_ENABLE_MPI==1
         if (!m_serial) {
-            setPboundGhosts();
+            computeGhostHalo();
         }
 #endif
 
@@ -3532,7 +3532,7 @@ namespace bitpit {
             if (getNumOctants() > nocts0)
                 localDone = true;
             updateAdapt();
-            setPboundGhosts();
+            computeGhostHalo();
             (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
             nocts0 = getNumOctants();
 
@@ -3625,12 +3625,12 @@ namespace bitpit {
             // Coarse
             while(m_octree.globalCoarse(m_mapIdx));
             updateAfterCoarse();
-            setPboundGhosts();
+            computeGhostHalo();
             balance21(false);
             while(m_octree.refine(m_mapIdx));
             updateAdapt();
 
-            setPboundGhosts();
+            computeGhostHalo();
             bool localDone = false;
             if (getNumOctants() < nocts0){
                 localDone = true;
@@ -4287,8 +4287,7 @@ namespace bitpit {
 
                 //Update and ghosts here
                 updateLoadBalance();
-                setPboundGhosts();
-
+                computeGhostHalo();
             }
         else
             {
@@ -4620,7 +4619,7 @@ namespace bitpit {
                 delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
                 //Update and ghosts here
                 updateLoadBalance();
-                setPboundGhosts();
+                computeGhostHalo();
             }
     };
 #endif
@@ -4740,7 +4739,7 @@ namespace bitpit {
             if (getNumOctants() > nocts0)
                 localDone = true;
             updateAdapt();
-            setPboundGhosts();
+            computeGhostHalo();
             (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
             nocts0 = getNumOctants();
 
@@ -4748,7 +4747,7 @@ namespace bitpit {
             // Coarse
             while(m_octree.coarse(m_mapIdx));
             updateAfterCoarse();
-            setPboundGhosts();
+            computeGhostHalo();
             if (getNumOctants() < nocts0){
                 localDone = true;
             }
@@ -5231,8 +5230,8 @@ namespace bitpit {
         delete [] rbuff; rbuff = NULL;
     }
 
-    /*! Build the structure with the information about ghost octants, partition boundary octants
-     *  and parameters for communicate between porcesses.
+    /*! Build the structure with the information about the first layer of ghost octants, partition boundary octants
+     *  and parameters for communicate between processes.
      */
     void
     ParaTree::setPboundGhosts() {
