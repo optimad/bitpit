@@ -1080,15 +1080,16 @@ void VTK::readData( ){
         }
 
         str.close();
-        str.clear();
-
-        //ReOpen in for ascii read
         str.open( m_fh.getPath( ), std::ios::in ) ;
+
     }
 
+    
     //Read ascii data
     for( auto & field : m_data ){
         if( field.isEnabled() &&  field.getCodification() == VTKFormat::ASCII){
+
+            str.clear();
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
@@ -1101,7 +1102,10 @@ void VTK::readData( ){
     //Read ascii geometry
     for( auto & field : m_geometry ){
         if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII){
+
+            str.clear();
             str.seekg( field.getPosition() ) ;
+
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
             if(str.tellg()==field.getPosition()){
@@ -1181,6 +1185,7 @@ void VTK::readDataHeader( std::fstream &str ){
                     ptemp->setDataType( temp.getDataType() ) ;
                     ptemp->setFieldType( temp.getFieldType() ) ;
                     ptemp->setCodification( temp.getCodification() ) ;
+                    ptemp->setPosition( temp.getPosition() ) ;
 
                 }
 
