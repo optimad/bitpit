@@ -47,6 +47,7 @@ unset(TESTS)
 add_custom_command(
     TARGET "test_IO_00001" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/selection.vtu" "${CMAKE_CURRENT_BINARY_DIR}/data/selection.vtu"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/line.vtu" "${CMAKE_CURRENT_BINARY_DIR}/data/line.vtu"
 )
 
 add_custom_command(

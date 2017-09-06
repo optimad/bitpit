@@ -146,8 +146,8 @@ int subtest_001()
     }
 
 
-    { //Read grid and data from Paraview-generated file, rename and rexport
-        cout << "Read grid and data from Paraview-generated file, rename and rexport" << endl;
+    { //Read grid and data from Paraview-generated binary file, rename and rexport
+        cout << "Read grid and data from Paraview-generated binary file, rename and rexport" << endl;
 
         vector< array<float,3>  >    Ipoints ;
         vector< vector<int64_t> >    Iconnectivity ;
@@ -174,6 +174,28 @@ int subtest_001()
         vtk.setName( "otherSelection") ;
         vtk.write(bitpit::VTKWriteMode::NO_SERIES) ;
         vtk.write(bitpit::VTKWriteMode::NO_INCREMENT) ;
+    }
+
+    { // Read grid and data from Paraview-generated ASCII file, rename and rexport
+        cout << "Read grid and data from Paraview-generated ASCII file, rename and rexport" << endl;
+
+        std::vector<array<double,3>>    Ipoints ;
+        vector< vector<int> >    Iconnectivity ;
+        vector<short> pids;
+        bitpit::VTKUnstructuredGrid  vtk("data", "line", bitpit::VTKElementType::LINE);
+        vtk.setGeomData( bitpit::VTKUnstructuredField::POINTS, Ipoints) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, Iconnectivity) ;
+        vtk.addData("PID", pids);
+        vtk.read() ;
+
+        bitpit::VTKUnstructuredGrid  vtk2(".", "line_rewrite", bitpit::VTKElementType::LINE);
+        vtk2.setGeomData( bitpit::VTKUnstructuredField::POINTS, Ipoints) ;
+        vtk2.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, Iconnectivity) ;
+        vtk2.setDimensions(Iconnectivity.size(), Ipoints.size());
+        vtk2.addData("PID", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL,pids);
+        vtk2.setCodex(bitpit::VTKFormat::ASCII);
+        vtk2.write() ;
+
     }
 
     return 0;
