@@ -298,6 +298,7 @@ namespace bitpit {
         uint64_t 	getGhostGlobalIdx(uint32_t idx) const;
         uint32_t    getLocalIdx(uint64_t gidx) const;
         uint32_t    getLocalIdx(uint64_t gidx,int rank) const;
+        void        getLocalIdx(uint64_t gidx,uint32_t & lidx,int & rank) const;
         uint32_t    getGhostLocalIdx(uint64_t gidx) const;
         octantID	getPersistentIdx(uint32_t idx) const;
         int8_t 		getPreMarker(uint32_t idx);
@@ -520,6 +521,7 @@ namespace bitpit {
         void 		computePartition(uint32_t* partition, uint8_t & level_, dvector* weight);
         void 		updateLoadBalance();
         void 		setPboundGhosts();
+        void 		computeGhostHalo();
         void 		commMarker();
 #endif
         void 		updateAfterCoarse();

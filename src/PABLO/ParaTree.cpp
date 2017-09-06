@@ -1569,6 +1569,18 @@ namespace bitpit {
         };
     };
 
+    /*! Get the local index of an octant and the rank owning the octant.
+     * \param[in] gidx Global index of target octant.
+     * \param[out] rank Rank of the process owning the octant as a local one.
+     * \param[out] Local index of octant.
+     */
+    void
+    ParaTree::getLocalIdx(uint64_t gidx, uint32_t & lidx,int & rank) const {
+        rank = getOwnerRank(gidx);
+        lidx = getLocalIdx(gidx,rank);
+    };
+
+
     /*! Get the local index of an octant.
      * \param[in] gidx Global index of target octant.
      * \return Local index of octant.
@@ -2471,8 +2483,15 @@ namespace bitpit {
      */
     void
     ParaTree::setNofGhostLayers(std::size_t nofGhostLayers) {
-        if (m_nofGhostLayers != 1) {
-            throw std::runtime_error ("Only one layer of ghosts can be built!");
+        if (m_nofGhostLayers == 0) {
+            throw std::runtime_error ("It is not possible to disable the ghost halo!");
+        }
+
+        typedef std::result_of<decltype(&Octant::getGhostLayer)(Octant)>::type layer_t;
+        typedef std::make_unsigned<layer_t>::type ulayer_t;
+        ulayer_t maxNofGhostLayers = std::numeric_limits<layer_t>::max() + (ulayer_t) 1;
+        if (nofGhostLayers > maxNofGhostLayers) {
+            throw std::runtime_error ("Halo size exceeds the maximum allowed value.");
         }
 
         m_nofGhostLayers = nofGhostLayers;
@@ -5429,6 +5448,396 @@ namespace bitpit {
         }
 
         ghostCommunicator.waitAllSends();
+    }
+
+    /*! Build the structure with the information about the layers (from the second one) of ghost octants, partition boundary octants
+     *  and parameters for communicate between processes.
+     */
+    void
+    ParaTree::computeGhostHalo(){
+        //build first ghost layer
+        setPboundGhosts();
+
+        //if we need to build only one layer we can exit
+        if(m_nofGhostLayers <= 1){
+            return;
+        }
+
+        //build a global to local map for ghosts
+        std::unordered_map<uint64_t,uint32_t> global2localGhost;
+        uint32_t nofGhosts = getNumGhosts();
+        for(uint32_t g = 0; g < nofGhosts; ++g){
+            uint64_t ghostGlobal = getGhostGlobalIdx(g);
+            global2localGhost[ghostGlobal] = g;
+        }
+
+        //compute adjacencies of halo sources
+        std::array<std::vector<long>, 2> haloSourceLists;
+        haloSourceLists[0].reserve(getNumOctants());
+        haloSourceLists[1].reserve(getNumOctants());
+
+        for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
+            for(uint32_t pborder : p_pborders.second){
+                haloSourceLists[0].push_back(pborder);
+            }
+        }
+
+        std::unordered_map<uint32_t, std::unordered_set<uint64_t>> oneRingGlobalAdjacencies;
+        for (uint32_t currentHaloSourceDepth = 0; currentHaloSourceDepth < m_nofGhostLayers; ++currentHaloSourceDepth) {
+            std::vector<long> &backHaloSourceList = haloSourceLists[(currentHaloSourceDepth + 1) % 2];
+            backHaloSourceList.clear();
+
+            std::vector<long> &frontHaloSourceList = haloSourceLists[currentHaloSourceDepth % 2];
+            std::size_t haloSourceListCursor = frontHaloSourceList.size();
+            while (haloSourceListCursor > 0) {
+                --haloSourceListCursor;
+                long idx = frontHaloSourceList[haloSourceListCursor];
+                if (oneRingGlobalAdjacencies.count(idx) != 0) {
+                    continue;
+                }
+
+                //find the adjacencies of the source
+                std::unordered_set<uint64_t> &sourceGlobalAdjacencies = oneRingGlobalAdjacencies[idx];
+                findAllGlobalNeighbours(idx, sourceGlobalAdjacencies);
+
+                //add the adjacencies of the source to the source list
+                if (currentHaloSourceDepth < m_nofGhostLayers - 1) {
+                    for (uint64_t sourceGlobalAdjacency : sourceGlobalAdjacencies) {
+                        int rank;
+                        uint32_t sourceLocalAdjacency;
+                        getLocalIdx(sourceGlobalAdjacency, sourceLocalAdjacency, rank);
+                        if (rank != m_rank) {
+                            continue;
+                        }
+
+                        if (oneRingGlobalAdjacencies.count(sourceLocalAdjacency) != 0) {
+                            continue;
+                        }
+
+                        backHaloSourceList.push_back(sourceLocalAdjacency);
+                    }
+                }
+            }
+        }
+
+        std::unordered_map<uint32_t, std::unordered_set<uint64_t> > augmentedGlobalAdjacencies = oneRingGlobalAdjacencies;
+
+        //initialize information needed for building ghost layer
+        //
+        //The map with the global ghost ids has the following structure:
+        //  senderGlobalGhostPerLayerPerProc[layer][rank][global]
+        std::vector<std::unordered_map<int,std::unordered_set<uint64_t>>> senderGlobalGhostPerLayerPerProc(m_nofGhostLayers);
+
+        std::pair<std::unordered_set<uint64_t>::iterator,bool> whereAndIfWasInserted;
+
+        std::unordered_map<int,std::unordered_set<uint64_t>> senderGlobalGhostPit;
+        for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
+            senderGlobalGhostPit.insert({p_pborders.first, std::unordered_set<uint64_t>()});
+        }
+
+        //fill first layer with pborders
+        for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
+            for(const uint32_t &pborder : p_pborders.second){
+                uint64_t globalPborder = getGlobalIdx(pborder);
+                whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(globalPborder);
+                if(whereAndIfWasInserted.second)
+                    senderGlobalGhostPerLayerPerProc[0][p_pborders.first].insert(globalPborder);
+            }
+        }
+
+        //fill following layers
+        for(uint32_t layer = 1; layer < m_nofGhostLayers; ++layer){
+            for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
+                for(const uint32_t &pborder : p_pborders.second){
+                    for(const uint64_t & neigh : augmentedGlobalAdjacencies.at(pborder)){
+                        if(getOwnerRank(neigh) != p_pborders.first){
+                            whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(neigh);
+                            if(whereAndIfWasInserted.second)
+                                senderGlobalGhostPerLayerPerProc[layer][p_pborders.first].insert(neigh);
+                        }
+                    }
+                }
+            }
+
+            //enlarge adjacencies
+            if(layer < m_nofGhostLayers - 1){
+                //send adjacencies on ghosts
+                DataCommunicator adjacenciesComm(m_comm);
+                std::map<int, u32vector>::iterator bitend = m_bordersPerProc.end();
+                std::map<int, u32vector>::iterator bitbegin = m_bordersPerProc.begin();
+                for(std::map<int,u32vector >::iterator bit = bitbegin; bit != bitend; ++bit){
+                    const int & key = bit->first;
+                    const u32vector & pborders = bit->second;
+                    std::size_t buffSize = 0;
+                    std::size_t nofPbordersPerProc = pborders.size();
+                    buffSize += nofPbordersPerProc * sizeof(size_t);
+                    for(size_t i = 0; i < nofPbordersPerProc; ++i){
+                        buffSize += augmentedGlobalAdjacencies.at(pborders[i]).size() * sizeof(uint64_t);
+                    }
+                    //enlarge buffer to store number of pborders from this proc
+                    buffSize += sizeof(size_t);
+                    adjacenciesComm.setSend(key,buffSize);
+                    SendBuffer & sendBuffer = adjacenciesComm.getSendBuffer(key);
+                    //store number of pborders from this proc at the begining
+                    sendBuffer << nofPbordersPerProc;
+                    for(uint32_t i = 0; i < nofPbordersPerProc; ++i){
+                        const std::set<uint64_t> adjacencies(augmentedGlobalAdjacencies.at(pborders[i]).cbegin(), augmentedGlobalAdjacencies.at(pborders[i]).cend());
+                        sendBuffer << adjacencies.size();
+                        for(uint64_t a : adjacencies){
+                            sendBuffer << a;
+                        }
+                    }
+                }
+                adjacenciesComm.discoverRecvs();
+                adjacenciesComm.startAllRecvs();
+                adjacenciesComm.startAllSends();
+
+                //receive adjacencies on ghosts
+                std::vector<std::unordered_set<uint64_t>> ghostGlobalAdjacencies(nofGhosts);
+
+                int ghostOffset = 0;
+                std::vector<int> recvRanks = adjacenciesComm.getRecvRanks();
+                std::sort(recvRanks.begin(),recvRanks.end());
+                for(int rank : recvRanks){
+                    adjacenciesComm.waitRecv(rank);
+                    RecvBuffer & recvBuffer = adjacenciesComm.getRecvBuffer(rank);
+                    size_t nofGhostFromThisProc = 0;
+                    recvBuffer >> nofGhostFromThisProc;
+                    for(size_t k = 0; k < nofGhostFromThisProc; ++k){
+                        size_t adjacencySize;
+                        recvBuffer >> adjacencySize;
+                        for(uint32_t a = 0; a < adjacencySize; ++a){
+                            uint64_t neigh;
+                            recvBuffer >> neigh;
+                            ghostGlobalAdjacencies[k+ghostOffset].insert(neigh);
+                        }
+                    }
+                    ghostOffset += nofGhostFromThisProc;
+                }
+                adjacenciesComm.waitAllSends();
+
+                //enlarge source adjacency rings
+                std::unordered_map<uint32_t, std::unordered_set<uint64_t>> previousAugmentedGlobalAdjacencies = std::move(augmentedGlobalAdjacencies);
+
+                augmentedGlobalAdjacencies.clear();
+                for(const std::pair<uint32_t, std::unordered_set<uint64_t>> &oneRingGlobalAdjacenciesEntry : oneRingGlobalAdjacencies){
+                    uint32_t sourceIdx = oneRingGlobalAdjacenciesEntry.first;
+                    uint64_t sourceGlobalIdx = getGlobalIdx(sourceIdx);
+                    std::unordered_set<uint64_t> &sourceAugmentedGlobalAdjacencies = augmentedGlobalAdjacencies[sourceIdx];
+
+                    const std::unordered_set<uint64_t> &sourceOneRingAdjacencies = oneRingGlobalAdjacenciesEntry.second;
+                    sourceAugmentedGlobalAdjacencies.insert(sourceOneRingAdjacencies.begin(),sourceOneRingAdjacencies.end());
+
+                    for(uint64_t globalAdjacencyIdx : sourceOneRingAdjacencies){
+                        if (globalAdjacencyIdx == sourceGlobalIdx) {
+                            continue;
+                        }
+
+                        int adjacencyRank;
+                        uint32_t localAdjacencyIdx;
+                        getLocalIdx(globalAdjacencyIdx, localAdjacencyIdx, adjacencyRank);
+                        if(adjacencyRank == m_rank){
+                            auto previousAugmentedGlobalAdjacencieItr = previousAugmentedGlobalAdjacencies.find(localAdjacencyIdx);
+                            if(previousAugmentedGlobalAdjacencieItr != previousAugmentedGlobalAdjacencies.end()){
+                                sourceAugmentedGlobalAdjacencies.insert(previousAugmentedGlobalAdjacencieItr->second.begin(), previousAugmentedGlobalAdjacencieItr->second.end());
+                            }
+                        }
+                        else{
+                            localAdjacencyIdx = global2localGhost[globalAdjacencyIdx];
+                            sourceAugmentedGlobalAdjacencies.insert(ghostGlobalAdjacencies[localAdjacencyIdx].begin(), ghostGlobalAdjacencies[localAdjacencyIdx].end());
+                        }
+                    }
+                }
+            }
+        }
+
+        //build ghosts
+        //prepare map for each proc
+        std::vector<std::set<uint64_t>> receivedGlobalGhostStorePerLayer(m_nofGhostLayers);
+        {
+            std::unordered_map<int,std::map<uint64_t,uint32_t>> senderGhostPerProcWithLayer;
+            for(uint32_t layer = 0; layer < m_nofGhostLayers; ++layer){
+                for(const std::pair<int,std::unordered_set<uint64_t>> &layerProcGhost : senderGlobalGhostPerLayerPerProc[layer]){
+                    int proc = layerProcGhost.first;
+                    for(uint64_t g : layerProcGhost.second){
+                        if(getOwnerRank(g) != proc)
+                            senderGhostPerProcWithLayer[proc].insert({g, layer});
+                    }
+                }
+            }
+
+            //COMMUNICATE SENDER GHOST GLOBAL
+            DataCommunicator senderGlobalComm(m_comm);
+            for(const std::pair<int,std::map<uint64_t,uint32_t>> &procSenderGhost :senderGhostPerProcWithLayer){
+                size_t procSenderGhostSize = procSenderGhost.second.size();
+                size_t buffSize = 0;
+                buffSize += sizeof(std::size_t);
+                buffSize += procSenderGhostSize * (sizeof(uint64_t) + sizeof(uint32_t));
+                senderGlobalComm.setSend(procSenderGhost.first,buffSize);
+                SendBuffer & sendBuffer = senderGlobalComm.getSendBuffer(procSenderGhost.first);
+                sendBuffer << procSenderGhostSize;
+                for(const std::pair<uint64_t,uint32_t> &g : procSenderGhost.second){
+                    sendBuffer << g.first;
+                    sendBuffer << g.second;
+                }
+            }
+            senderGlobalComm.discoverRecvs();
+            senderGlobalComm.startAllRecvs();
+            senderGlobalComm.startAllSends();
+
+            vector<int> recvRanks = senderGlobalComm.getRecvRanks();
+            for(int rank : recvRanks){
+                senderGlobalComm.waitRecv(rank);
+                RecvBuffer & recvBuffer = senderGlobalComm.getRecvBuffer(rank);
+                size_t procReceivedGhostSize;
+                recvBuffer >> procReceivedGhostSize;
+                for(size_t g = 0; g < procReceivedGhostSize; ++g ){
+                    uint64_t tempGlobal;
+                    recvBuffer >> tempGlobal;
+                    uint32_t tempLayer;
+                    recvBuffer >> tempLayer;
+                    receivedGlobalGhostStorePerLayer[tempLayer].insert(tempGlobal);
+                }
+            }
+            senderGlobalComm.waitAllSends();
+        }
+        //ASK GHOST to owners
+        std::unordered_map<int,std::map<uint64_t,uint32_t>> globalGhostPerProcWithLayer;
+        for(uint32_t layer = 0; layer < m_nofGhostLayers; ++layer){
+            for(uint64_t g : receivedGlobalGhostStorePerLayer[layer]){
+                int rank = getOwnerRank(g);
+                globalGhostPerProcWithLayer[rank].insert({g, layer});
+            }
+        }
+        DataCommunicator askGhostToOwnerComm(m_comm);
+        for(const std::pair<int,std::map<uint64_t,uint32_t>> &rankGhostsLayer : globalGhostPerProcWithLayer){
+            size_t buffSize = 0;
+            size_t nofGhostPerProc = rankGhostsLayer.second.size();
+            buffSize += sizeof(size_t);
+            buffSize += nofGhostPerProc * (sizeof(uint64_t) + sizeof(uint32_t));
+            askGhostToOwnerComm.setSend(rankGhostsLayer.first,buffSize);
+            SendBuffer & sendBuffer = askGhostToOwnerComm.getSendBuffer(rankGhostsLayer.first);
+            sendBuffer << nofGhostPerProc;
+            for(const std::pair<uint64_t,uint32_t> &gl : rankGhostsLayer.second){
+                sendBuffer << gl.first;
+                sendBuffer << gl.second;
+            }
+        }
+        askGhostToOwnerComm.discoverRecvs();
+        askGhostToOwnerComm.startAllRecvs();
+        askGhostToOwnerComm.startAllSends();
+
+        std::unordered_map<int,std::map<uint64_t,uint32_t>> internalsToBeSentAsGhostPerProc;
+        std::vector<int> recvRanks = askGhostToOwnerComm.getRecvRanks();
+        for(int rank : recvRanks){
+            askGhostToOwnerComm.waitRecv(rank);
+            RecvBuffer & recvBuffer = askGhostToOwnerComm.getRecvBuffer(rank);
+            size_t nofReceivedGhostFromProc;
+            recvBuffer >> nofReceivedGhostFromProc;
+            for(std::size_t g = 0; g < nofReceivedGhostFromProc; ++g){
+                uint64_t tempGlobal;
+                uint32_t tempLayer;
+                recvBuffer >> tempGlobal;
+                recvBuffer >> tempLayer;
+                internalsToBeSentAsGhostPerProc[rank].insert({tempGlobal, tempLayer});
+            }
+        }
+        askGhostToOwnerComm.waitAllSends();
+
+        //Send INTERNAL and recv GHOST adn set pbordersPerProc
+        m_bordersPerProc.clear();
+        m_octree.m_ghosts.clear();
+        uint64_t global_index;
+        uint32_t x,y,z;
+        uint8_t l,g;
+        int8_t m;
+        bool info[Octant::INFO_ITEM_COUNT];
+        DataCommunicator sendInternalsForGhostComm(m_comm);
+        for(const std::pair<int,std::map<uint64_t,uint32_t>> &internalsByProc : internalsToBeSentAsGhostPerProc){
+            u32vector localInternals;
+            localInternals.reserve(internalsByProc.second.size());
+            size_t buffSize = 0;
+            size_t nofInternalsByProc = internalsByProc.second.size();
+            buffSize += (std::size_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes) * nofInternalsByProc;
+            sendInternalsForGhostComm.setSend(internalsByProc.first,buffSize);
+            SendBuffer & sendBuffer = sendInternalsForGhostComm.getSendBuffer(internalsByProc.first);
+            for(const std::pair<uint64_t,uint32_t> &procInternals : internalsByProc.second){
+                uint32_t localInternal = getLocalIdx(procInternals.first);
+                localInternals.push_back(localInternal);
+                const Octant *oct = getOctant(localInternal);
+                x = oct->getX();
+                y = oct->getY();
+                z = oct->getZ();
+                l = oct->getLevel();
+                m = oct->getMarker();
+                g = procInternals.second;
+                global_index = procInternals.first;
+                for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i)
+                    info[i] = oct->m_info[i];
+                sendBuffer << x;
+                sendBuffer << y;
+                sendBuffer << z;
+                sendBuffer << l;
+                sendBuffer << m;
+                sendBuffer << g;
+                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
+                    sendBuffer << info[j];
+                }
+                sendBuffer << global_index;
+            }
+            m_bordersPerProc.insert({internalsByProc.first, localInternals});
+        }
+
+        sendInternalsForGhostComm.discoverRecvs();
+        sendInternalsForGhostComm.startAllRecvs();
+
+        int nofBytesOverProc = 0;
+        std::vector<int> recvsRanks = sendInternalsForGhostComm.getRecvRanks();
+        std::sort(recvsRanks.begin(),recvsRanks.end());
+        for(int i : recvsRanks){
+            nofBytesOverProc += sendInternalsForGhostComm.getRecvBuffer(i).getSize();
+        }
+        nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
+        m_octree.m_sizeGhosts = nofGhosts;
+        m_octree.m_ghosts.clear();
+        m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim));
+        m_octree.m_globalIdxGhosts.resize(nofGhosts);
+
+        sendInternalsForGhostComm.startAllSends();
+
+        uint32_t ghostCounter = 0;
+        for(int rank : recvsRanks){
+            sendInternalsForGhostComm.waitRecv(rank);
+
+            RecvBuffer &recvBuffer = sendInternalsForGhostComm.getRecvBuffer(rank);
+            int nofGhostsPerProc = int(recvBuffer.getSize() / (uint32_t) (m_global.m_octantBytes + m_global.m_globalIndexBytes));
+            for(int i = 0; i < nofGhostsPerProc; ++i){
+                recvBuffer >> x;
+                recvBuffer >> y;
+                recvBuffer >> z;
+                recvBuffer >> l;
+
+                m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
+                recvBuffer >> m;
+                m_octree.m_ghosts[ghostCounter].setMarker(m);
+                recvBuffer >> g;
+                m_octree.m_ghosts[ghostCounter].setGhostLayer(g);
+                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
+                    recvBuffer >> info[j];
+                    m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
+                }
+                recvBuffer >> global_index;
+                m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
+
+                // The received ghost layer flag is discarded, for this
+                // processor the octant belongs to the first ghost layer
+                m_octree.m_ghosts[ghostCounter].setGhostLayer(0);
+
+                ++ghostCounter;
+            }
+        }
+
+        sendInternalsForGhostComm.waitAllSends();
     }
 
     /*! Communicate the marker of the octants and the auxiliary info[15].

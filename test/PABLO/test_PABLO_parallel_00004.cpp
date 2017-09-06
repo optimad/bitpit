@@ -55,7 +55,7 @@ void test01() {
 
 #if BITPIT_ENABLE_MPI==1
     /**<Set the number of ghost layers.*/
-    pablo.setNofGhostLayers(1);
+    pablo.setNofGhostLayers(3);
 #endif
 
     /**<Compute the connectivity and write the para_tree.*/
