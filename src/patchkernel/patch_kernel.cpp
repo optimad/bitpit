@@ -3797,21 +3797,18 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 		for (int face = 0; face < nCellFaces; face++) {
 			int nFaceVertices = cell.getFaceVertexCount(face);
 
-			// Get vertex ids of the face
-			ConstProxyVector<long> faceVertexIds = cell.getFaceVertexIds(face);
-
 			// Build list of neighbour candidates
 			//
 			// Consider all the cells that shares the same vertices of the
 			// current face, but discard the cells that are already adjacencies
 			// for this face.
-			long firstVertexId = faceVertexIds[0];
+			long firstVertexId = cell.getFaceVertexId(face, 0);
 			std::vector<long> candidates = vertexToCellsMap[firstVertexId];
 			utils::eraseValue(candidates, cellId);
 
 			int j = 1;
 			while (candidates.size() > 0 && j < nFaceVertices) {
-				long vertexId = faceVertexIds[j];
+				long vertexId = cell.getFaceVertexId(face, j);
 				candidates = utils::intersectionVector(candidates, vertexToCellsMap[vertexId]);
 				j++;
 			}
