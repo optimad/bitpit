@@ -235,15 +235,19 @@ void PiercedStorage<value_t, id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel
 
 /**
 * Unsets the kernel.
+*
+* \param release if it's true the memory hold by the container will
+* be released, otherwise the container will be cleared but its
+* memory will not be released
 */
 template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::unsetKernel()
+void PiercedStorage<value_t, id_t>::unsetKernel(bool release)
 {
     // Detach the kernel
     detachKernel();
 
     // Clear the storage
-    rawClear(true);
+    rawClear(release);
 }
 
 /**

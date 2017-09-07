@@ -266,7 +266,7 @@ public:
 
     void setStaticKernel(const PiercedKernel<id_t> *kernel);
     void setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    void unsetKernel();
+    void unsetKernel(bool release = true);
     const PiercedKernel<id_t> * getKernel() const;
     KernelType getKernelType() const;
     PiercedSyncMaster::SyncMode getSyncMode() const;
