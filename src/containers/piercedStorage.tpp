@@ -177,7 +177,7 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::~PiercedStorage()
 {
-    unsetKernel();
+    detachKernel();
 }
 
 /**
