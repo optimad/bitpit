@@ -2735,7 +2735,7 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 				continue;
 			}
 
-			// Add the element to the list
+			// Add the element to the neighbour list
 			if (utils::findInOrderedVector<long>(scanId, blackList) == blackList.end()) {
 				utils::addToOrderedVector<long>(scanId, *neighs);
 			}
@@ -2744,12 +2744,10 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 		// Add negihbours of faces that owns the vertex to the scan list
 		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
 			// Discard faces that don't own the vertex
-			ConstProxyVector<long> faceVertexIds = scanCell.getFaceVertexIds(i);
-			const int nFaceVertices = faceVertexIds.size();
-
 			bool faceOwnsVertex = false;
-			for (int k = 0; k < nFaceVertices; ++k) {
-				if (faceVertexIds[k] == vertexId) {
+			for (int k = 0; k < scanCell.getFaceVertexCount(i); ++k) {
+				long faceVertexId = scanCell.getFaceVertexId(i, k);
+				if (faceVertexId == vertexId) {
 					faceOwnsVertex = true;
 					break;
 				}
