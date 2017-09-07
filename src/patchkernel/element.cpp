@@ -1137,24 +1137,15 @@ ConstProxyVector<long> Element::getVertexIds() const
 */
 ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 {
-	switch (m_type) {
-
-	case (ElementType::POLYHEDRON):
-	{
-		int facePos = getFaceStreamPosition(face);
-		const long *connectivity = getConnect();
-
-		return ConstProxyVector<long>(connectivity + facePos + 1, connectivity[facePos]);
+	ConstProxyVector<long> vertexIds = getFaceConnect(face);
+	if  (m_type == ElementType::POLYHEDRON) {
+		ElementType faceType = getFaceType(face);
+		if (faceType == ElementType::POLYGON) {
+			vertexIds.set(vertexIds.data() + 1, vertexIds.size() - 1);
+		}
 	}
 
-	default:
-	{
-		assert(m_type != ElementType::UNDEFINED);
-
-		return getFaceConnect(face);
-	}
-
-	}
+	return vertexIds;
 }
 
 /*!
