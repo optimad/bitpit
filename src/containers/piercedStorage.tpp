@@ -696,6 +696,7 @@ void PiercedStorage<value_t, id_t>::swap(PiercedStorage &x) noexcept
     }
 
     PiercedSyncSlave::swap(x);
+    std::swap(x.m_nFields, m_nFields);
     std::swap(x.m_fields, m_fields);
     std::swap(x.m_kernel, m_kernel);
     std::swap(x.m_const_kernel, m_const_kernel);
