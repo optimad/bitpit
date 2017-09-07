@@ -262,8 +262,10 @@ public:
 
     ~PiercedStorage();
 
+    // Methods for accessing container properties
     std::size_t getFieldCount() const;
 
+    // Methods for synchronizing the storage
     void setStaticKernel(const PiercedKernel<id_t> *kernel);
     void setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     void unsetKernel(bool release = true);
