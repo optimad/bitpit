@@ -124,6 +124,7 @@ public:
 	ConstProxyVector<int> getFaceLocalConnect(const int &face) const;
 	ConstProxyVector<long> getFaceConnect(int face) const;
 	ConstProxyVector<long> getFaceVertexIds(int face) const;
+	long getFaceVertexId(int face, int vertex) const;
 	ConstProxyVector<int> getFaceLocalVertexIds(int face) const;
 
 	int getEdgeCount() const;

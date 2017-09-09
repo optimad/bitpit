@@ -1183,6 +1183,38 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 }
 
 /*!
+	Gets the vertex id of the specified local vertex in the given face of
+	the element.
+
+	\param face is the face for which the vertex id is reqested
+	\param vertex is the local index of the vertex
+	\result The vertex id of the specified local vertex in the given face of
+	the element.
+*/
+long Element::getFaceVertexId(int face, int vertex) const
+{
+	switch (m_type) {
+
+	case (ElementType::POLYGON):
+	case (ElementType::POLYHEDRON):
+	{
+		ConstProxyVector<long> faceVertexIds = getFaceVertexIds(face);
+
+		return faceVertexIds[vertex];
+	}
+
+	default:
+	{
+		ConstProxyVector<long> cellVertexIds = getVertexIds();
+		ConstProxyVector<int> faceLocalVertexIds = getFaceLocalVertexIds(face);
+
+		return cellVertexIds[faceLocalVertexIds[vertex]];
+	}
+
+	}
+}
+
+/*!
 	Gets the list of local vertex ids for the specified face of the element.
 
 	\param face is the face for which the vertex ids is reqested
