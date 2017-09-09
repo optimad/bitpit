@@ -251,6 +251,7 @@ double SurfaceKernel::evalEdgeLength(const long &cellId, const int &edgeId) cons
     case ElementType::UNDEFINED:
     {
         edge_length = 0.;
+        break;
     }
 
     default:
@@ -259,6 +260,7 @@ double SurfaceKernel::evalEdgeLength(const long &cellId, const int &edgeId) cons
         const Vertex &vertex_0 = m_vertices[faceVertexIds[0]];
         const Vertex &vertex_1 = m_vertices[faceVertexIds[1]];
         edge_length = norm2(vertex_0.getCoords() - vertex_1.getCoords());
+        break;
     }
 
     }
