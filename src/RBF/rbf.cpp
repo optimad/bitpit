@@ -88,31 +88,37 @@ RBFKernel::RBFKernel()
  */
 RBFKernel::RBFKernel(const RBFKernel & other)
 {
-    *this = other;
-}
-
-/*!
- * Copy Operator
- */
-RBFKernel & RBFKernel::operator=(const RBFKernel & other)
-{
     m_fields = other.m_fields;
-    m_nodes = other.m_nodes;
+    m_mode = other.m_mode;
     m_supportRadius = other.m_supportRadius;
     m_typef = other.m_typef;
     m_fPtr = other.m_fPtr;
-
-    m_mode = other.m_mode;
-
+    m_error = other.m_error;
     m_value = other.m_value;
     m_weight = other.m_weight;
-
     m_activeNodes = other.m_activeNodes;
-    m_error = other.m_error;
-
     m_maxFields = other.m_maxFields;
+    m_nodes = other.m_nodes;
+}
 
-    return(*this);
+/*!
+ * Swap method. Exchange contents of each class member with those 
+ * corresponding in the argument object.
+ * \param[in] x object to be swapped
+ */
+void RBFKernel::swap(RBFKernel &x) noexcept
+{
+   std::swap(m_fields, x.m_fields);
+   std::swap(m_mode, x.m_mode);
+   std::swap(m_supportRadius, x.m_supportRadius);
+   std::swap(m_typef, x.m_typef);
+   std::swap(m_fPtr, x.m_fPtr);
+   std::swap(m_error, x.m_error);
+   std::swap(m_value, x.m_value);
+   std::swap(m_weight, x.m_weight);
+   std::swap(m_activeNodes, x.m_activeNodes);
+   std::swap(m_maxFields, x.m_maxFields);
+   std::swap(m_nodes, x.m_nodes);
 }
 
 /*!
@@ -991,18 +997,29 @@ RBF::RBF( RBFBasisFunction bfunc)
 RBF::RBF(const RBF & other)
     : RBFKernel(other)
 {
-    *this = other;
+    m_node = other.m_node;
 }
 
 /*!
  * Copy Operator
  */
-RBF & RBF::operator=(const RBF & other)
+RBF & RBF::operator=(RBF other)
 {
-    *(static_cast<RBFKernel*>(this)) = *(static_cast<const RBFKernel *>(&other));
-    m_node = other.m_node;
+    swap(other);
 
     return *this;
+}
+
+/*!
+ * Swap method. Exchange contents of each class member with those 
+ * corresponding in the argument object.
+ * \param[in] x object to be swapped
+ */
+void RBF::swap(RBF &x) noexcept
+{
+    RBFKernel::swap(x);
+
+    std::swap(m_node, x.m_node);
 }
 
 /*!

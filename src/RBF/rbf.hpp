@@ -84,7 +84,6 @@ public:
     ~RBFKernel();
     RBFKernel();
     RBFKernel(const RBFKernel & other);
-    RBFKernel & operator=(const RBFKernel & other);
 
     void                    setFunction(const RBFBasisFunction &);
     void                    setFunction(double (&funct)(const double &));
@@ -132,6 +131,7 @@ protected:
     double                  evalError();
     int                     addGreedyPoint();
     int                     solveLSQ();
+    void                    swap(RBFKernel & x) noexcept;
 
 private:
 
@@ -149,7 +149,7 @@ public:
     ~RBF();
     RBF(RBFBasisFunction = RBFBasisFunction::WENDLANDC2);
     RBF(const RBF & other);
-    RBF & operator=(const RBF & other);
+    RBF & operator=(RBF other);
 
     int                     getTotalNodesCount();
 
@@ -158,6 +158,9 @@ public:
     bool                    removeNode(int);
     bool                    removeNode(std::vector<int> &);
     void                    removeAllNodes();
+
+protected:
+    void     swap(RBF & x) noexcept;
 
 private:
     double calcDist(int i, int j);
