@@ -374,7 +374,7 @@ void flushBINARY(std::fstream &str, const PiercedVector<data_T> &data, bool writ
 /*!
  * Reads one line into templated data type.
  * Relies on operator ">>" of the templated data type.
- * In case the information on the line is not sufficient or exceeds the data type and error message is displayed std::cout
+ * In case the information on the line is not sufficient or exceeds the data type an error message is displayed
  * @tparam          data_T  type of POD data
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
@@ -401,9 +401,9 @@ void  lineStream(std::fstream &str, data_T &data)
     }
 
     if (read != expected) {
-        std::cout << " Not expected nr of element in line" << std::endl;
-        std::cout << " Expected number: "<< expected << std::endl;
-        std::cout << " Actual number: "<< read << std::endl;
+        log::cout() << " Not expected nr of element in line" << std::endl;
+        log::cout() << " Expected number: "<< expected << std::endl;
+        log::cout() << " Actual number: "<< read << std::endl;
     } else {
         data=temp[0];
     }
@@ -414,7 +414,7 @@ void  lineStream(std::fstream &str, data_T &data)
  * Relies on operator ">>" of the templated data type.
  * In case data.size() == 0, data will be resized to match all information available on the line.
  * Otherwise the information on the line should fit exactly the size of data.
- * If not an error message is displayed std::cout
+ * If not an error message is displayed log::cout()
  * @tparam          data_T  type of POD data
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
@@ -444,9 +444,9 @@ void  lineStream(std::fstream &str, std::vector<data_T> &data)
         }
 
         if (expected != read) {
-            std::cout << " Not expected nr of element in line" << std::endl;
-            std::cout << " Expected number: "<< expected << std::endl;
-            std::cout << " Actual number: "<< read << std::endl;
+            log::cout() << " Not expected nr of element in line" << std::endl;
+            log::cout() << " Expected number: "<< expected << std::endl;
+            log::cout() << " Actual number: "<< read << std::endl;
         }
     }
 }
@@ -455,7 +455,7 @@ void  lineStream(std::fstream &str, std::vector<data_T> &data)
  * Reads one line into std::array of templated data type and templated size
  * Relies on operator ">>" of the templated data type.
  * The information on the line should fit exactly the size of the array.
- * If not an error message is displayed std::cout
+ * If not an error message is displayed log::cout()
  * @tparam          data_T  type of POD data
  * @tparam          d       size of std::array
  * @param[in]       str     file stream
@@ -485,9 +485,9 @@ void  lineStream(std::fstream &str, std::array<data_T,d> &data)
     if (expected == read) {
         for (i=0; i<read; i++) data[i] = temp[i];
     } else {
-        std::cout << " Not expected nr of element in line" << std::endl;
-        std::cout << " Expected number: "<< expected << std::endl;
-        std::cout << " Actual number: "<< read << std::endl;
+        log::cout() << " Not expected nr of element in line" << std::endl;
+        log::cout() << " Expected number: "<< expected << std::endl;
+        log::cout() << " Actual number: "<< read << std::endl;
     }
 }
 
@@ -495,7 +495,7 @@ void  lineStream(std::fstream &str, std::array<data_T,d> &data)
  * Reads one line into C array of templated data type and given size.
  * Relies on operator ">>" of the templated data type.
  * The information on the line should fit exactly the size .
- * If not an error message is displayed std::cout
+ * If not an error message is displayed log::cout()
  * @tparam          data_T  type of POD data
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
@@ -525,9 +525,9 @@ void  lineStream(std::fstream &str, data_T *data, int nr)
     if (expected == read) {
         for (i=0; i<read; i++) data[i] = temp[i];
     } else {
-        std::cout << " Not expected nr of element in line" << std::endl;
-        std::cout << " Expected number: "<< expected << std::endl;
-        std::cout << " Actual number: "<< read << std::endl;
+        log::cout() << " Not expected nr of element in line" << std::endl;
+        log::cout() << " Expected number: "<< expected << std::endl;
+        log::cout() << " Actual number: "<< read << std::endl;
     }
 }
 
@@ -547,7 +547,7 @@ void absorbASCII(std::fstream &str, data_T &data)
 /*!
  * Reads a std::vector of data type from file stream in ascii.
  * The size of the vector defines the number of elements to be read.
- * If not enough elements are present in the file an error message is displayed on std::cout
+ * If not enough elements are present in the file an error message is displayed on log::cout()
  * Relies on the function lineStream.
  * @tparam  data_T  type of POD data
  * @param[in]   str     file stream
@@ -582,7 +582,7 @@ void absorbASCII(std::fstream &str, std::vector<data_T> &data)
     }
 
     if (itrData != endData) {
-        std::cout << "Not enough elements found to fill vector" << std::endl;
+        log::cout() << "Not enough elements found to fill vector" << std::endl;
     }
 }
 
@@ -613,7 +613,7 @@ void absorbASCII(std::fstream &str, std::vector<std::vector<data_T>> &data)
         ++row;
 
         if(row==dim1){
-            std::cout << "all internal vectors have 0 size in absorbASCII " << std::endl;
+            log::cout() << "all internal vectors have 0 size in absorbASCII " << std::endl;
             return;
         }
 
@@ -643,7 +643,7 @@ void absorbASCII(std::fstream &str, std::vector<std::vector<data_T>> &data)
         }
     }
 
-    std::cout << "Not enough elements found to fill vector" << std::endl;
+    log::cout() << "Not enough elements found to fill vector" << std::endl;
 }
 
 /*!
@@ -672,7 +672,7 @@ void absorbASCII(std::fstream &str, std::vector<std::array<data_T,d> > &data)
 /*!
  * Reads a std::array of data type from file stream in ascii.
  * The size of the array defines the number of elements to be read.
- * If not enough elements are present in the file an error message is displayed on std::cout
+ * If not enough elements are present in the file an error message is displayed on log::cout()
  * Relies on the function lineStream.
  * @tparam      data_T  class stored in std::array
  * @tparam      d       size of std::array
@@ -708,13 +708,13 @@ void absorbASCII(std::fstream &str, std::array<data_T,d> &data)
     }
 
     if (itrData != endData) {
-        std::cout << "Not enough elements found to fill array" << std::endl;
+        log::cout() << "Not enough elements found to fill array" << std::endl;
     }
 }
 
 /*!
  * Reads a C array of data type from file stream in ascii.
- * If not enough elements are present in the file an error message is displayed on std::cout
+ * If not enough elements are present in the file an error message is displayed on log::cout()
  * Relies on the function lineStream.
  * @tparam      data_T  class stored in C array
  * @tparam      d       size of std::array
@@ -751,7 +751,7 @@ void absorbASCII(std::fstream &str, data_T *data, int nr)
     }
 
     if (itrData != endData) {
-        std::cout << "Not enough elements found to fill array" << std::endl;
+        log::cout() << "Not enough elements found to fill array" << std::endl;
     }
 }
 

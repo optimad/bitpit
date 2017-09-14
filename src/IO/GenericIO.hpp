@@ -35,6 +35,8 @@
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 
+#include "logger.hpp"
+
 namespace bitpit {
 
 /*!
