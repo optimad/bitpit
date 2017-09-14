@@ -587,6 +587,89 @@ void absorbASCII(std::fstream &str, std::vector<data_T> &data)
 }
 
 /*!
+ * Reads a std::vector of std::vector of templated POD data type from file stream in ascii format
+ * @tparam data_T type of data
+ * @param[in] str file stream
+ * @param[in] data data to be read
+ */
+template<class data_T>
+void absorbASCII(std::fstream &str, std::vector<std::vector<data_T>> &data)
+{
+
+    size_t dim1= data.size();
+    if(dim1 == 0){
+        return;
+    }
+
+    size_t row(0);
+
+    typename std::vector<data_T>::iterator itrRow = data[row].begin();
+    typename std::vector<data_T>::iterator endRow = data[row].end();
+
+    std::vector<data_T> temp;
+    typename std::vector<data_T>::iterator itrTemp;
+
+    while(itrRow==endRow){
+        ++row;
+
+        if(row==dim1){
+            std::cout << "all internal vectors have 0 size in absorbASCII " << std::endl;
+            return;
+        }
+
+        itrRow = data[row].begin();
+        endRow = data[row].end();
+    }
+
+    while(str.good()) {
+
+        temp.clear();
+        lineStream(str, temp);
+
+        for (itrTemp=temp.begin(); itrTemp!=temp.end(); ++itrTemp) {
+            *itrRow = *itrTemp;
+
+            ++itrRow;
+            while(itrRow==endRow){
+                ++row;
+
+                if(row==dim1){
+                    return;
+                }
+
+                itrRow = data[row].begin();
+                endRow = data[row].end();
+            }
+        }
+    }
+
+    std::cout << "Not enough elements found to fill vector" << std::endl;
+}
+
+/*!
+ * Reads a std::vector of std::array of templated POD data type of templated size from file stream in asci format
+ * @tparam data_T type of data
+ * @tparam d  size of array
+ * @param[in] str file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T, size_t d >
+void absorbASCII(std::fstream &str, std::vector<std::array<data_T,d> > &data)
+{
+    size_t dim1= data.size();
+    if(dim1 == 0){
+        return;
+    }
+
+    size_t dim2= d;
+    if(dim2 == 0){
+        return;
+    }
+
+    absorbASCII(str, &data[0][0], dim1*dim2);
+}
+
+/*!
  * Reads a std::array of data type from file stream in ascii.
  * The size of the array defines the number of elements to be read.
  * If not enough elements are present in the file an error message is displayed on std::cout

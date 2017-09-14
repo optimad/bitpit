@@ -100,6 +100,12 @@ void absorbASCII(std::fstream &str, data_T &data);
 template<class data_T>
 void absorbASCII(std::fstream &str, std::vector<data_T> &data);
 
+template<class data_T>
+void absorbASCII(std::fstream &str, std::vector<std::vector<data_T>> &data);
+
+template<class data_T, size_t d>
+void absorbASCII(std::fstream &str, std::vector<std::array<data_T,d>> &data);
+
 template<class data_T, size_t d>
 void absorbASCII(std::fstream &str, std::array<data_T,d> &data);
 
