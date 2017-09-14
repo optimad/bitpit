@@ -87,18 +87,12 @@ RBFKernel::RBFKernel()
  * Copy Constructor
  */
 RBFKernel::RBFKernel(const RBFKernel & other)
+    : m_fields(other.m_fields), m_mode(other.m_mode),
+      m_supportRadius(other.m_supportRadius), m_typef(other.m_typef),
+      m_fPtr(other.m_fPtr), m_error(other.m_error), m_value(other.m_value),
+      m_weight(other.m_weight), m_activeNodes(other.m_activeNodes),
+      m_maxFields(other.m_maxFields), m_nodes(other.m_nodes)
 {
-    m_fields = other.m_fields;
-    m_mode = other.m_mode;
-    m_supportRadius = other.m_supportRadius;
-    m_typef = other.m_typef;
-    m_fPtr = other.m_fPtr;
-    m_error = other.m_error;
-    m_value = other.m_value;
-    m_weight = other.m_weight;
-    m_activeNodes = other.m_activeNodes;
-    m_maxFields = other.m_maxFields;
-    m_nodes = other.m_nodes;
 }
 
 /*!
@@ -995,9 +989,9 @@ RBF::RBF( RBFBasisFunction bfunc)
  * Copy Constructor
  */
 RBF::RBF(const RBF & other)
-    : RBFKernel(other)
+    : RBFKernel(other),
+      m_node(other.m_node)
 {
-    m_node = other.m_node;
 }
 
 /*!
