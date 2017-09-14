@@ -102,48 +102,37 @@ bool ReferenceElementInfo::hasInfo(ElementType type)
 */
 const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 {
-    const static ReferenceVertexInfo vertexInfo;
-    const static ReferenceLineInfo lineInfo;
-    const static ReferenceTriangleInfo triangleInfo;
-    const static ReferencePixelInfo pixelInfo;
-    const static ReferenceQuadInfo quadInfo;
-    const static ReferenceTetraInfo tetraInfo;
-    const static ReferenceVoxelInfo voxelInfo;
-    const static ReferenceHexahedronInfo hexahedronInfo;
-    const static ReferencePyramidInfo pyramidInfo;
-    const static ReferenceWedgeInfo wedgeInfo;
-
     switch (type) {
 
     case (ElementType::VERTEX):
-        return vertexInfo;
+        return ReferenceVertexInfo::info;
 
     case (ElementType::LINE):
-        return lineInfo;
+        return ReferenceLineInfo::info;
 
     case (ElementType::TRIANGLE):
-        return triangleInfo;
+        return ReferenceTriangleInfo::info;
 
     case (ElementType::PIXEL):
-        return pixelInfo;
+        return ReferencePixelInfo::info;
 
     case (ElementType::QUAD):
-        return quadInfo;
+        return ReferenceQuadInfo::info;
 
     case (ElementType::TETRA):
-        return tetraInfo;
+        return ReferenceTetraInfo::info;
 
     case (ElementType::VOXEL):
-        return voxelInfo;
+        return ReferenceVoxelInfo::info;
 
     case (ElementType::HEXAHEDRON):
-        return hexahedronInfo;
+        return ReferenceHexahedronInfo::info;
 
     case (ElementType::PYRAMID):
-        return pyramidInfo;
+        return ReferencePyramidInfo::info;
 
     case (ElementType::WEDGE):
-        return wedgeInfo;
+        return ReferenceWedgeInfo::info;
 
     default:
         BITPIT_UNREACHABLE("Unsupported element");
@@ -280,6 +269,8 @@ double Reference3DElementInfo::evalEdgePerimeter(const std::array<double, 3> *ve
     reference tetrahedron.
 */
 
+const ReferenceTetraInfo ReferenceTetraInfo::info;
+
 /*!
     Default constructor
 */
@@ -388,6 +379,8 @@ double ReferenceTetraInfo::evalSize(const std::array<double, 3> *vertexCoords) c
     \brief The ReferenceVoxelInfo class defines the information about the
     reference voxel.
 */
+
+const ReferenceVoxelInfo ReferenceVoxelInfo::info;
 
 /*!
     Default constructor
@@ -529,6 +522,8 @@ double ReferenceVoxelInfo::evalSize(const std::array<double, 3> *vertexCoords) c
     \brief The ReferenceHexahedronInfo class defines the information about the
     reference hexahedron.
 */
+
+const ReferenceHexahedronInfo ReferenceHexahedronInfo::info;
 
 /*!
     Default constructor
@@ -690,6 +685,8 @@ double ReferenceHexahedronInfo::evalSize(const std::array<double, 3> *vertexCoor
     reference pyramid.
 */
 
+const ReferencePyramidInfo ReferencePyramidInfo::info;
+
 /*!
     Default constructor
 */
@@ -821,6 +818,8 @@ double ReferencePyramidInfo::evalVolume(const std::array<double, 3> *vertexCoord
     \brief The ReferenceWedgeInfo class defines the information about the
     reference wedge.
 */
+
+const ReferenceWedgeInfo ReferenceWedgeInfo::info;
 
 /*!
     Default constructor
@@ -1039,6 +1038,8 @@ double Reference2DElementInfo::evalPerimeter(const std::array<double, 3> *vertex
     reference triangle.
 */
 
+const ReferenceTriangleInfo ReferenceTriangleInfo::info;
+
 /*!
     Default constructor
 */
@@ -1137,6 +1138,8 @@ std::array<double, 3> ReferenceTriangleInfo::evalNormal(const std::array<double,
     \brief The ReferencePixelInfo class defines the information about the
     reference pixel.
 */
+
+const ReferencePixelInfo ReferencePixelInfo::info;
 
 /*!
     Default constructor
@@ -1246,6 +1249,8 @@ std::array<double, 3> ReferencePixelInfo::evalNormal(const std::array<double, 3>
     \brief The ReferenceQuadInfo class defines the information about the
     reference quadrangle.
 */
+
+const ReferenceQuadInfo ReferenceQuadInfo::info;
 
 /*!
     Default constructor
@@ -1384,6 +1389,8 @@ Reference1DElementInfo::Reference1DElementInfo(ElementType type)
     reference line.
 */
 
+const ReferenceLineInfo ReferenceLineInfo::info;
+
 /*!
     Default constructor
 */
@@ -1493,6 +1500,8 @@ Reference0DElementInfo::Reference0DElementInfo(ElementType type)
     \brief The ReferenceVertexInfo class defines the information about the
     reference vertex.
 */
+
+const ReferenceVertexInfo ReferenceVertexInfo::info;
 
 /*!
     Default constructor

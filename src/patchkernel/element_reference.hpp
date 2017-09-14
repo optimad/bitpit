@@ -93,6 +93,8 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const;
 
+    const static ReferenceTetraInfo info;
+
 protected:
     ReferenceTetraInfo();
 
@@ -109,6 +111,8 @@ public:
     double evalSize(const std::array<double, 3> *vertexCoords) const;
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const;
+
+    const static ReferenceVoxelInfo info;
 
 protected:
     ReferenceVoxelInfo();
@@ -127,6 +131,8 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const;
 
+    const static ReferenceHexahedronInfo info;
+
 protected:
     ReferenceHexahedronInfo();
 
@@ -144,6 +150,8 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const;
 
+    const static ReferencePyramidInfo info;
+
 protected:
     ReferencePyramidInfo();
 
@@ -160,6 +168,8 @@ public:
     double evalSize(const std::array<double, 3> *vertexCoords) const;
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const;
+
+    const static ReferenceWedgeInfo info;
 
 protected:
     ReferenceWedgeInfo();
@@ -196,6 +206,8 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
 
+    const static ReferenceTriangleInfo info;
+
 protected:
     ReferenceTriangleInfo();
 
@@ -215,6 +227,8 @@ public:
     double evalArea(const std::array<double, 3> *vertexCoords) const;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+
+    const static ReferencePixelInfo info;
 
 protected:
     ReferencePixelInfo();
@@ -237,6 +251,8 @@ public:
     double evalArea(const std::array<double, 3> *vertexCoords) const;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+
+    const static ReferenceQuadInfo info;
 
 protected:
     ReferenceQuadInfo();
@@ -277,6 +293,8 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const ;
 
+    const static ReferenceLineInfo info;
+
 protected:
     ReferenceLineInfo();
 
@@ -307,6 +325,8 @@ public:
     double evalSize(const std::array<double, 3> *vertexCoords) const;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{1., 0., 0.}}) const;
+
+    const static ReferenceVertexInfo info;
 
 protected:
     ReferenceVertexInfo();
