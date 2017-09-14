@@ -239,6 +239,19 @@ void PiercedStorage<value_t, id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::unsetKernel()
 {
+    // Detach the kernel
+    detachKernel();
+
+    // Clear the storage
+    rawClear(true);
+}
+
+/**
+* Detach the kernel without clearing the container.
+*/
+template<typename value_t, typename id_t>
+void PiercedStorage<value_t, id_t>::detachKernel()
+{
     if (!m_const_kernel) {
         return;
     }
@@ -248,7 +261,6 @@ void PiercedStorage<value_t, id_t>::unsetKernel()
         m_kernel = nullptr;
     }
 
-    rawClear(true);
     m_const_kernel = nullptr;
 }
 

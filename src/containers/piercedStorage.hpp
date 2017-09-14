@@ -357,6 +357,8 @@ protected:
     // Methods for synchronizing the storage
     void commitSyncAction(const PiercedSyncAction &action);
 
+    void detachKernel();
+
     // Methos for updating the storage
     void rawReserve(std::size_t n);
     void rawShrinkToFit();

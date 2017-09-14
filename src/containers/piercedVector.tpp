@@ -730,9 +730,10 @@ void PiercedVector<value_t, id_t>::swap(PiercedVector &x) noexcept
 {
     // The swap will swap also the slave-master information. This is not what
     // we want, therefore the two pierced storage will be unregistered and the
-    // registered again after the swap.
-    PiercedVectorStorage<value_t, id_t>::unsetKernel();
-    x.PiercedVectorStorage<value_t, id_t>::unsetKernel();
+    // registered again after the swap. When the kernel is unset the storage
+    // can't be clear, otherwise its contents will be lost.
+    PiercedVectorStorage<value_t, id_t>::detachKernel();
+    x.PiercedVectorStorage<value_t, id_t>::detachKernel();
 
     // Swap kernel data
     PiercedVectorKernel<id_t>::swap(x);
