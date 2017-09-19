@@ -285,7 +285,10 @@ void LevelSetCachedObject::propagateSign() {
                 SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
 
                 for (long cellId : sendIds) {
-                    int sign = getSign(cellId);
+                    int sign = 0;
+                    if (signAssigned.at(cellId)) {
+                        sign = getSign(cellId);
+                    }
                     buffer << sign;
                 }
 
