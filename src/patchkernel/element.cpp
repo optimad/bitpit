@@ -1245,6 +1245,22 @@ ConstProxyVector<long> Element::getEdgeVertexIds(int edge) const
 }
 
 /*!
+	Gets the vertex id of the specified local vertex in the given edge of
+	the element.
+
+	\param edge is the edge for which the vertex id is reqested
+	\param vertex is the local index of the vertex
+	\result The vertex id of the specified local vertex in the given edge of
+	the element.
+*/
+long Element::getEdgeVertexId(int edge, int vertex) const
+{
+	ConstProxyVector<long> edgeVertexIds = getEdgeVertexIds(edge);
+
+	return edgeVertexIds[vertex];
+}
+
+/*!
 	Gets the list of local vertex ids for the specified edge of the element.
 
 	\param edge is the edge for which the vertex ids is reqested

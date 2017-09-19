@@ -132,6 +132,7 @@ public:
 	ConstProxyVector<int> getEdgeLocalConnect(const int &edge) const;
 	ConstProxyVector<long> getEdgeConnect(int edge) const;
 	ConstProxyVector<long> getEdgeVertexIds(int edge) const;
+	long getEdgeVertexId(int edge, int vertex) const;
 	ConstProxyVector<int> getEdgeLocalVertexIds(int edge) const;
 
 	int getVertexCount() const;
