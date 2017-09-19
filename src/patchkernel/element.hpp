@@ -136,6 +136,7 @@ public:
 	int getVertexCount() const;
 	void renumberVertices(const std::unordered_map<long, long> &map);
 	ConstProxyVector<long> getVertexIds() const;
+	long getVertexId(int vertex) const;
 
 	int getFaceStreamSize() const;
 	std::vector<long> getFaceStream() const;

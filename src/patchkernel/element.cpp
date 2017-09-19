@@ -1130,6 +1130,40 @@ ConstProxyVector<long> Element::getVertexIds() const
 }
 
 /*!
+	Gets the vertex id of the specified local vertex.
+
+	If more than one vertex is needed, the function getVertexIds may be a
+	better choice. This is specially true for polygons and polyhedra, where
+	the whole list of vertex ids has to be evaluated at each function call.
+
+	\param vertex is the local index of the vertex
+	\result The id of the specified vertex.
+*/
+long Element::getVertexId(int vertex) const
+{
+	switch (m_type) {
+
+	case (ElementType::POLYGON):
+	case (ElementType::POLYHEDRON):
+	{
+		ConstProxyVector<long> vertexIds = getVertexIds();
+
+		return vertexIds[vertex];
+	}
+
+	default:
+	{
+		assert(m_type != ElementType::UNDEFINED);
+
+		const long *connectivity = getConnect();
+
+		return connectivity[vertex];
+	}
+
+	}
+}
+
+/*!
 	Gets the list of vertex ids for the specified face of the element.
 
 	\param face is the face for which the vertex ids is reqested
