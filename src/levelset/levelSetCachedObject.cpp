@@ -167,11 +167,12 @@ void LevelSetCachedObject::__clear( ){
 void LevelSetCachedObject::propagateSign() {
 
     VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
+    const PiercedVector<Cell> &cells = mesh.getCells();
 
     VolumeKernel::CellConstIterator cellBegin = mesh.cellConstBegin();
     VolumeKernel::CellConstIterator cellEnd   = mesh.cellConstEnd();
 
-    PiercedStorage<bool, long> signAssigned(1, &(m_kernelPtr->getMesh()->getCells()));
+    PiercedStorage<bool, long> signAssigned(1, &cells);
     signAssigned.fill(false);
 
     long nUnassigned = mesh.getCellCount();
@@ -309,7 +310,7 @@ void LevelSetCachedObject::propagateSign() {
                 for (long cellId : recvIds) {
                     buffer >> sign;
 
-                    std::size_t cellRawId = mesh.getCells().getRawIndex(cellId);
+                    std::size_t cellRawId = cells.getRawIndex(cellId);
                     if (!signAssigned.rawAt(cellRawId)) {
                         if (sign != 0) {
                             setSign(cellId, sign);
