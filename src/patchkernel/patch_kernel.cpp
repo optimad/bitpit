@@ -753,8 +753,10 @@ void PatchKernel::write(VTKWriteMode mode)
 #endif
 	}
 
-	// Set thedimensinos of the mesh
-	std::unordered_map<long, long>().swap(m_vtkVertexMap);
+	// Set the dimensinos of the mesh
+	m_vtkVertexMap.unsetKernel(true);
+	m_vtkVertexMap.setStaticKernel(&m_vertices);
+	m_vtkVertexMap.fill(Vertex::NULL_ID);
 
 	long vtkVertexCount = 0;
 	long vtkConnectSize = 0;
@@ -764,9 +766,9 @@ void PatchKernel::write(VTKWriteMode mode)
 		for (int k = 0; k < nCellVertices; ++k) {
 			long vertexId = cellConnect[k];
 
-			auto vertexMapItr = m_vtkVertexMap.find(vertexId);
-			if (vertexMapItr == m_vtkVertexMap.end()) {
-				m_vtkVertexMap[vertexId] = vtkVertexCount++;
+			long &vertexVTKId = m_vtkVertexMap.at(vertexId);
+			if (vertexVTKId == Vertex::NULL_ID) {
+				vertexVTKId = vtkVertexCount++;
 			}
 		}
 		vtkConnectSize += nCellVertices;
@@ -4644,9 +4646,12 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 	BITPIT_UNUSED(format);
 
 	if (name == "Points") {
-		std::vector<const Vertex *> vertexList(m_vtkVertexMap.size());
-		for (const auto &entry : m_vtkVertexMap) {
-			vertexList[entry.second] = &m_vertices.at(entry.first);
+		std::vector<const Vertex *> vertexList(m_vertices.size());
+		for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
+			long vertexId    = itr.getId();
+			long vertexVTKId = m_vtkVertexMap.rawAt(itr.getRawIndex());
+
+			vertexList[vertexVTKId] = &m_vertices.at(vertexId);
 		}
 
 		for (const Vertex *vertex : vertexList) {
@@ -4730,9 +4735,12 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 			genericIO::flushBINARY(stream, cell.getPID());
 		}
 	} else if (name == "vertexIndex") {
-		std::vector<long> vertexList(m_vtkVertexMap.size());
-		for (const auto &entry : m_vtkVertexMap) {
-			vertexList[entry.second] = entry.first;
+		std::vector<long> vertexList(m_vertices.size());
+		for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
+			long vertexId    = itr.getId();
+			long vertexVTKId = m_vtkVertexMap.rawAt(itr.getRawIndex());
+
+			vertexList[vertexVTKId] = vertexId;
 		}
 
 		for (long id : vertexList) {

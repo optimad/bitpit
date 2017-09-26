@@ -473,7 +473,7 @@ protected:
 	VTKUnstructuredGrid m_vtk ;
 	WriteTarget m_vtkWriteTarget;
 	CellConstRange m_vtkCellRange;
-	std::unordered_map<long, long> m_vtkVertexMap;
+	PiercedStorage<long, long> m_vtkVertexMap;
 
 	PatchKernel(bool expert);
 	PatchKernel(const int &dimension, bool expert);
