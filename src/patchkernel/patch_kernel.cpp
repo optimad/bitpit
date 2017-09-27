@@ -754,25 +754,32 @@ void PatchKernel::write(VTKWriteMode mode)
 	}
 
 	// Set the dimensinos of the mesh
-	m_vtkVertexMap.unsetKernel(true);
-	m_vtkVertexMap.setStaticKernel(&m_vertices);
-	m_vtkVertexMap.fill(Vertex::NULL_ID);
+	PiercedStorage<long, long> vertexWriteFlag(1, &m_vertices);
+	vertexWriteFlag.fill(false);
 
-	long vtkVertexCount = 0;
 	long vtkConnectSize = 0;
 	for (const Cell &cell : getVTKCellWriteRange()) {
 		const int nCellVertices = cell.getVertexCount();
 		const long *cellConnect = cell.getConnect();
 		for (int k = 0; k < nCellVertices; ++k) {
 			long vertexId = cellConnect[k];
-
-			long &vertexVTKId = m_vtkVertexMap.at(vertexId);
-			if (vertexVTKId == Vertex::NULL_ID) {
-				vertexVTKId = vtkVertexCount++;
-			}
+			vertexWriteFlag.at(vertexId) = true;
 		}
 		vtkConnectSize += nCellVertices;
 	}
+
+	int vtkVertexCount = 0;
+	m_vtkVertexMap.unsetKernel(true);
+	m_vtkVertexMap.setStaticKernel(&m_vertices);
+	for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
+		std::size_t vertexRawId = itr.getRawIndex();
+		if (vertexWriteFlag.rawAt(vertexRawId)) {
+			m_vtkVertexMap.rawAt(vertexRawId) = vtkVertexCount++;
+		} else {
+			m_vtkVertexMap.rawAt(vertexRawId) = Vertex::NULL_ID;
+		}
+	}
+
 	m_vtk.setDimensions(vtkCellCount, vtkVertexCount, vtkConnectSize);
 
 	// Write the mesh
@@ -4646,16 +4653,13 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 	BITPIT_UNUSED(format);
 
 	if (name == "Points") {
-		std::vector<const Vertex *> vertexList(m_vertices.size());
 		for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
-			long vertexId    = itr.getId();
-			long vertexVTKId = m_vtkVertexMap.rawAt(itr.getRawIndex());
-
-			vertexList[vertexVTKId] = &m_vertices.at(vertexId);
-		}
-
-		for (const Vertex *vertex : vertexList) {
-			genericIO::flushBINARY(stream, vertex->getCoords());
+			std::size_t vertexRawId = itr.getRawIndex();
+			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
+			if (vertexVTKId != Vertex::NULL_ID) {
+				const Vertex &vertex = m_vertices.rawAt(vertexRawId);
+				genericIO::flushBINARY(stream, vertex.getCoords());
+			}
 		}
 	} else if (name == "offsets") {
 		int offset = 0;
@@ -4735,16 +4739,12 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 			genericIO::flushBINARY(stream, cell.getPID());
 		}
 	} else if (name == "vertexIndex") {
-		std::vector<long> vertexList(m_vertices.size());
 		for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
-			long vertexId    = itr.getId();
-			long vertexVTKId = m_vtkVertexMap.rawAt(itr.getRawIndex());
-
-			vertexList[vertexVTKId] = vertexId;
-		}
-
-		for (long id : vertexList) {
-			genericIO::flushBINARY(stream, id);
+			std::size_t vertexRawId = itr.getRawIndex();
+			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
+			if (vertexVTKId != Vertex::NULL_ID) {
+				genericIO::flushBINARY(stream, vertexVTKId);
+			}
 		}
 #if BITPIT_ENABLE_MPI==1
 	} else if (name == "cellGlobalIndex") {
