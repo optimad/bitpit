@@ -856,10 +856,9 @@ void PatchSkdTree::createChildren(std::size_t parentId)
 
         // Order the elements
         //
-        // All the elements with a centroid coordinate lower than the
-        // threshold
-        //  the elements contained in the parent with respect to
-        // their centroid along the specified direction.
+        // All the elements with a centroid coordinate less or equal than the
+        // threshold will be assigned to the left child, the others will be
+        // assigned to the right child.
         std::size_t leftBegin  = parent.m_cellRangeBegin;
         std::size_t leftEnd    = parent.m_cellRangeEnd;
         std::size_t rightBegin = parent.m_cellRangeBegin;
