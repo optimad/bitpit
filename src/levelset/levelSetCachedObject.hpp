@@ -47,8 +47,14 @@ class LevelSetObject;
 class LevelSetCachedObject : public LevelSetObject{
 
     private:
+    static const int                            PROPAGATION_STATUS_EXTERNAL = - 1;
+    static const int                            PROPAGATION_STATUS_WAITING  =   0;
+    static const int                            PROPAGATION_STATUS_REACHED  =   1;
+
     void                                        setSign( long id, int sign ) ;
-    void                                        propagateSeedSign( const std::vector<long> &seeds, long *nUnassigned, PiercedStorage<bool, long> *signAssigned ) ;
+    void                                        propagateSeedSign( const std::vector<long> &seeds,
+                                                                   PiercedStorage<int, long> *status,
+                                                                   long *nWaiting, int *externalSign ) ;
 
     protected:
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */

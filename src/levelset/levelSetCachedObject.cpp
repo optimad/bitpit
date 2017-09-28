@@ -172,11 +172,6 @@ void LevelSetCachedObject::propagateSign() {
     VolumeKernel::CellConstIterator cellBegin = mesh.cellConstBegin();
     VolumeKernel::CellConstIterator cellEnd   = mesh.cellConstEnd();
 
-    PiercedStorage<bool, long> signAssigned(1, &cells);
-    signAssigned.fill(false);
-
-    long nUnassigned = mesh.getCellCount();
-
     std::vector<long> seeds;
     seeds.reserve(mesh.getCellCount());
 
@@ -185,7 +180,7 @@ void LevelSetCachedObject::propagateSign() {
     std::array<double,3> boxMax;
     getBoundingBox(boxMin, boxMax);
 
-    // Identify the cells that have a known sign
+    // Set the initial propagation status of the cells
     //
     // We don't need to set the sign of cells associated to a levelset info,
     // if a cell is associated to a levelset info we know its sign (the value
@@ -193,17 +188,28 @@ void LevelSetCachedObject::propagateSign() {
     // the correct one) and the cell can be used as seeds for propagating the
     // sign to other cells.
     //
-    // The sign of external cells will always be positive. An external cell is
-    // a cell outside the bounding box of the object. Alsot the external cells
-    // can be usesd as seeds for sign propagation.
+    // The sign of the cells outise the bounding box of all objects (external
+    // cells) can be either positive or negative depending on the orientation
+    // of the objects. There is no need to propagate the sign into those cells,
+    // once the sign of the external region is know, it can be assigned to all
+    // the cells in the external region. When the propagation reaches the
+    // external region it can be stopped, the sign the sign of the seed from
+    // which the propagation has started that will be the sign of the external
+    // region.
+    PiercedStorage<int, long> propagationStatus(1, &cells);
+    propagationStatus.fill(PROPAGATION_STATUS_WAITING);
+
+    int externalSign = 0;
+    long nExternal   = 0;
+    long nWaiting    = mesh.getCellCount();
     for (auto itr = cellBegin; itr != cellEnd; ++itr) {
         long cellId = itr.getId();
 
         // Process cells associated to a levelset info
         if (m_ls.find(cellId) != m_ls.end()) {
             std::size_t cellRawId = itr.getRawIndex();
-            signAssigned.rawAt(cellRawId) = true;
-            --nUnassigned;
+            propagationStatus.rawAt(cellRawId) = PROPAGATION_STATUS_REACHED;
+            --nWaiting;
 
             seeds.push_back(cellId);
 
@@ -222,30 +228,28 @@ void LevelSetCachedObject::propagateSign() {
         }
 
         if (isExternal) {
-            setSign(cellId, 1);
             std::size_t cellRawId = itr.getRawIndex();
-            signAssigned.rawAt(cellRawId) = true;
-            --nUnassigned;
-
-            seeds.push_back(cellId);
+            propagationStatus.rawAt(cellRawId) = PROPAGATION_STATUS_EXTERNAL;
+            --nWaiting;
+            ++nExternal;
 
             continue;
         }
     }
 
     // Use the seeds to propagate the sign
-    propagateSeedSign(seeds, &nUnassigned, &signAssigned);
+    propagateSeedSign(seeds, &propagationStatus, &nWaiting, &externalSign);
 
 #if BITPIT_ENABLE_MPI
     // If there are cells with an unknown sign, data communication among
     // ghost cells is needed. However it is only possibly to have cells with
     // an unknown sign for partinioned patches.
-    long nGlobalUnassigned = nUnassigned;
+    long nGlobalWaiting = nWaiting;
     if (mesh.isPartitioned()) {
-        MPI_Allreduce(MPI_IN_PLACE, &nGlobalUnassigned, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
+        MPI_Allreduce(MPI_IN_PLACE, &nGlobalWaiting, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
     }
 
-    if (nGlobalUnassigned != 0) {
+    if (nGlobalWaiting != 0) {
         assert(mesh.isPartitioned());
         assert(mesh.getProcessorCount() != 1);
 
@@ -272,7 +276,7 @@ void LevelSetCachedObject::propagateSign() {
         }
 
         // Communicate the sign among the partitions
-        while (nGlobalUnassigned != 0) {
+        while (nGlobalWaiting != 0) {
             // Start the receives
             for (const auto entry : mesh.getGhostExchangeTargets()) {
                 const int rank = entry.first;
@@ -287,7 +291,7 @@ void LevelSetCachedObject::propagateSign() {
 
                 for (long cellId : sendIds) {
                     int sign = 0;
-                    if (signAssigned.at(cellId)) {
+                    if (propagationStatus.at(cellId) == PROPAGATION_STATUS_REACHED) {
                         sign = getSign(cellId);
                     }
                     buffer << sign;
@@ -311,14 +315,15 @@ void LevelSetCachedObject::propagateSign() {
                     buffer >> sign;
 
                     std::size_t cellRawId = cells.getRawIndex(cellId);
-                    if (!signAssigned.rawAt(cellRawId)) {
+                    int &cellPropagationStatus = propagationStatus.rawAt(cellRawId);
+                    if (cellPropagationStatus == PROPAGATION_STATUS_WAITING) {
                         if (sign != 0) {
                             setSign(cellId, sign);
-                            signAssigned.rawAt(cellRawId) = true;
-                            --nUnassigned;
+                            cellPropagationStatus = PROPAGATION_STATUS_REACHED;
+                            --nWaiting;
                             seeds.push_back(cellId);
                         }
-                    } else {
+                    } else if (cellPropagationStatus == PROPAGATION_STATUS_REACHED) {
                         assert(getSign(cellId) == sign);
                     }
                 }
@@ -327,39 +332,82 @@ void LevelSetCachedObject::propagateSign() {
             }
 
             if (seeds.size() > 0) {
-                propagateSeedSign(seeds, &nUnassigned, &signAssigned);
+                propagateSeedSign(seeds, &propagationStatus, &nWaiting, &externalSign);
             }
 
             // Wait to the sends to finish
             dataCommunicator.waitAllSends();
 
             // Update the global counter for cells with an unknow sign
-            nGlobalUnassigned = nUnassigned;
-            MPI_Allreduce(MPI_IN_PLACE, &nGlobalUnassigned, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
+            nGlobalWaiting = nWaiting;
+            MPI_Allreduce(MPI_IN_PLACE, &nGlobalWaiting, 1, MPI_LONG, MPI_SUM, m_kernelPtr->getCommunicator());
+        }
+    }
+
+    // Communicate the sign of the external region
+    //
+    // The sign has to be consistent among all the partitions.
+    if (mesh.isPartitioned()) {
+        int minExternalSign = externalSign;
+        MPI_Allreduce(MPI_IN_PLACE, &minExternalSign, 1, MPI_INT, MPI_MIN, m_kernelPtr->getCommunicator());
+
+        int maxExternalSign = externalSign;
+        MPI_Allreduce(MPI_IN_PLACE, &maxExternalSign, 1, MPI_INT, MPI_MAX, m_kernelPtr->getCommunicator());
+
+        if (minExternalSign == maxExternalSign) {
+            externalSign = minExternalSign;
+        } else if (minExternalSign == 0) {
+            externalSign = maxExternalSign;
+        } else if (maxExternalSign == 0) {
+            externalSign = minExternalSign;
         }
     }
 #else
     // Check that the sign has been propagated into all regions
-    assert(nUnassigned == 0);
+    assert(nWaiting == 0);
 #endif
+
+    // Check that the sign of the external region was correctly identified
+    if (nExternal != 0 && externalSign == 0) {
+        throw std::runtime_error("Sign of external region not properly identified!");
+    }
+
+    // Assign the sign to the external cells
+    for (auto itr = cellBegin; itr != cellEnd; ++itr) {
+        std::size_t cellRawId = itr.getRawIndex();
+        if (propagationStatus.rawAt(cellRawId) != PROPAGATION_STATUS_EXTERNAL) {
+            continue;
+        }
+
+        long cellId = itr.getId();
+        setSign(cellId, externalSign);
+    }
 }
 
 /*!
- * Propagate the sign of the signed distance function from the specified
- * seeds to all reachable cells.
+ * Propagates the sign of the signed distance function from the specified
+ * seeds to all reachable cells whose sign has not yet been assigned.
+ *
+ * The sign will NOT be propagated into cells flagged with the "EXTERNAL"
+ * status (i.e., cells outside the bounding box of all the objects). When
+ * the propagation reaches the external region it can be stopped, the sign
+ * the sign of the seed from which the propagation has startedthat will be
+ * the sign of the external region.
  *
  * \param seeds are the seeds to be used for sign propagation
- * \param[in,out] nUnassigned is the number of cells for which the sign is
- * still unassigned. On output, this number will be updated so it's possible
- * to keep track of the cells whose sign is not yet assigned
- * \param[in,out] signAssigned is a flag that states if the sign of a
- * cell has been assigned. On output, this flag will be updated for
- * all the cells whose sign has been set
- * \result The number of cells for which the sign has been set during this
- * function call.
+ * \param[in,out] statuses is a flag that defines the propagation status of
+ * the cells. On output, this flag will be updated with the new propagation
+ * statuses
+ * \param[in,out] nWaiting is the number of cells that are waiting for the
+ * propagation to reach them. On output, this number will be updated so it's
+ * possible to keep track of the cells whose sign is not yet assigned
+ * \param[in,out] externalSign is the sign of the external region. If the
+ * external sign is not yet defined and the propagation reaches the external
+ * region, the parameter will be updated with the sign of the external region
  */
 void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
-                                             long *nUnassigned, PiercedStorage<bool, long> *signAssigned) {
+                                             PiercedStorage<int, long> *statuses,
+                                             long *nWaiting, int *externalSign) {
 
     VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
 
@@ -371,60 +419,47 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
         --seedCursor;
         long seedId = seeds[seedCursor];
 
-        // Clear process list
-        processList.clear();
-
-        // Start filling the process list with the neighbours of the seed
-        // that have an unknown sign. If the seed is sourrounded only by
-        // cell for which the sign value is know, the seed can't be used
-        // to propagate the sign
-        const Cell &seed = mesh.getCell(seedId);
-        const long *seedNeighs = seed.getAdjacencies() ;
-        int nSeedNeighs = seed.getAdjacencyCount() ;
-        for(int n = 0; n < nSeedNeighs; ++n){
-            long neighId = seedNeighs[n] ;
-            if (neighId < 0) {
-                continue;
-            } else if (signAssigned->at(neighId)) {
-                continue;
-            }
-
-            processList.push_back(neighId);
-        }
-
-        if (processList.empty()) {
-            continue;
-        }
-
         // Get the sign of the seed
         int seedSign = getSign(seedId);
+
+        // Initialize the process list with the seed
+        processList.resize(1);
+        processList[0] = seedId;
 
         // Propagate the sign
         while (!processList.empty()) {
             long cellId = processList.back();
             processList.resize(processList.size() - 1);
 
-            // Consider only cells with an unknown sign
+            // Process non-seed cells
+            bool isSeed = (cellId == seedId);
+            if (!isSeed) {
+                // Consider only cells waiting for the propagation to reach them
+                //
+                // The process list is not unique, it can contain duplicate, so
+                // we need to make sure not to process a cell multiple times.
+                int &cellStatus = statuses->at(cellId);
+                if (cellStatus != PROPAGATION_STATUS_WAITING) {
+                    continue;
+                }
+
+                // Set the sign of the cell
+                setSign(cellId, seedSign);
+                cellStatus = PROPAGATION_STATUS_REACHED;
+                --(*nWaiting);
+
+                // If there are no more waiting cell we can exit
+                if (*nWaiting == 0) {
+                    return;
+                }
+            }
+
+            // Process cell neighbours
             //
-            // The process list is not unique, it can contain duplcates, so
-            // we need to make sure not to process a cell multiple times.
-            // If the sign of the cell is know, this means that it has
-            // already been processed.
-            if (signAssigned->at(cellId)) {
-                continue;
-            }
-
-            // Set the sign of the cell
-            setSign(cellId, seedSign);
-            signAssigned->at(cellId) = true;
-            --(*nUnassigned);
-
-            // If there are no more unassigned cell we can exit
-            if (*nUnassigned == 0) {
-                return;
-            }
-
-            // Add cells with unknow sign to the process list
+            // If a neighbour is waiting for the propagation, add it to the
+            // process list. When the propagation reaches an external cell
+            // the sign of the seed frow which the propagation started will
+            // be the sign of the external region.
             const Cell &cell = mesh.getCell(cellId);
             const long *cellNeighs = cell.getAdjacencies() ;
             int nCellNeighs = cell.getAdjacencyCount() ;
@@ -432,11 +467,21 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
                 long neighId = cellNeighs[n] ;
                 if (neighId < 0) {
                     continue;
-                } else if (signAssigned->at(neighId)) {
-                    continue;
                 }
 
-                processList.push_back(neighId);
+                int neighStatus = statuses->at(neighId);
+                if (neighStatus == PROPAGATION_STATUS_WAITING) {
+                    processList.push_back(neighId);
+                } else if (neighStatus == PROPAGATION_STATUS_EXTERNAL) {
+                    // If the sign of the external region was unknown it can
+                    // be assigned, otherwise check if the current sign is
+                    // consistent with the previously evaluated sign.
+                    if (*externalSign == 0) {
+                        *externalSign = seedSign;
+                    } else if (*externalSign != seedSign) {
+                        throw std::runtime_error("Mismatch in sign of external region!");
+                    }
+                }
             }
         }
     }
