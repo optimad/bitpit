@@ -210,7 +210,9 @@ void VTKRectilinearGrid::readMetaInformation( ){
     for( auto &field : m_geometry ){ //int i=0; i<geometry.size(); ++i){
         str.seekg( position) ;
         if( ! readDataArray( str, field ) ) {
+#if ENABLE_DEBUG
             log::cout() << field.getName() << " DataArray not found" << std::endl ;
+#endif
         }
     }
 
