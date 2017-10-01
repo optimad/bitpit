@@ -644,11 +644,11 @@ void absorbASCII(std::fstream &str, data_T *data, int nr)
 {
     std::vector<data_T>                      temp;
 
-    data_T*                                  itrData, begData, endData;
+    data_T                                   *itrData, *begData, *endData;
     typename std::vector<data_T>::iterator   itrTemp, begTemp, endTemp;
 
     begData = &data[0];
-    endData = &data[nr-1];
+    endData = &data[nr];
 
     itrData = begData;
 
