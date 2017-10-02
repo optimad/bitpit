@@ -513,7 +513,9 @@ void LevelSet::compute(){
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
         visitor.computeLSInNarrowBand(m_signedDF) ;
+#if BITPIT_ENABLE_MPI
         visitor.exchangeGhosts();
+#endif
         if(m_propagateS) visitor.propagateSign() ;
     }
 }
@@ -537,7 +539,9 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         auto &visitor = *(m_objects.at(objectId)) ;
         visitor.clearAfterMeshAdaption(mapper) ;
         visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
+#if BITPIT_ENABLE_MPI
         visitor.exchangeGhosts();
+#endif
         if(m_propagateS) visitor.propagateSign() ;
     }
 }
