@@ -383,8 +383,8 @@ void LevelSetObject::_restore( std::istream &stream ){
  */
 void LevelSetObject::exchangeGhosts(){
 
-    std::unordered_map<int,std::vector<long>> &sendList =  m_kernelPtr->getMesh()->getGhostExchangeSources() ;
-    std::unordered_map<int,std::vector<long>> &recvList =  m_kernelPtr->getMesh()->getGhostExchangeTargets() ;
+    const std::unordered_map<int,std::vector<long>> &sendList =  m_kernelPtr->getMesh()->getGhostExchangeSources() ;
+    const std::unordered_map<int,std::vector<long>> &recvList =  m_kernelPtr->getMesh()->getGhostExchangeTargets() ;
 
     communicate(sendList,recvList);
 }
@@ -396,7 +396,9 @@ void LevelSetObject::exchangeGhosts(){
  * @param[in] recvList list of elements to be received
  * @param[in] mapper mapper containing mesh modifications
  */
-void LevelSetObject::communicate( std::unordered_map<int,std::vector<long>> &sendList, std::unordered_map<int,std::vector<long>> &recvList, std::vector<adaption::Info> const *mapper){
+void LevelSetObject::communicate( const std::unordered_map<int,std::vector<long>> &sendList,
+                                  const std::unordered_map<int,std::vector<long>> &recvList,
+                                  std::vector<adaption::Info> const *mapper){
 
     if (!m_kernelPtr->getMesh()->isPartitioned()) {
         return;

@@ -109,7 +109,9 @@ class LevelSetObject{
 
 # if BITPIT_ENABLE_MPI
     void                                        exchangeGhosts() ;
-    void                                        communicate( std::unordered_map<int,std::vector<long>> &, std::unordered_map<int,std::vector<long>> &, std::vector<adaption::Info> const *mapper=NULL ) ;
+    void                                        communicate( const std::unordered_map<int,std::vector<long>> &,
+                                                             const std::unordered_map<int,std::vector<long>> &,
+                                                             std::vector<adaption::Info> const *mapper=NULL );
 # endif 
 
 };
