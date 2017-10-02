@@ -43,6 +43,10 @@
 
 namespace bitpit {
 
+const int LevelSetCachedObject::PROPAGATION_STATUS_EXTERNAL = - 1;
+const int LevelSetCachedObject::PROPAGATION_STATUS_WAITING  =   0;
+const int LevelSetCachedObject::PROPAGATION_STATUS_REACHED  =   1;
+
 /*!
 	@ingroup levelset
 	@interface LevelSetCachedObject

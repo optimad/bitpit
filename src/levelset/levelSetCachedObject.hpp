@@ -47,9 +47,9 @@ class LevelSetObject;
 class LevelSetCachedObject : public LevelSetObject{
 
     private:
-    static const int                            PROPAGATION_STATUS_EXTERNAL = - 1;
-    static const int                            PROPAGATION_STATUS_WAITING  =   0;
-    static const int                            PROPAGATION_STATUS_REACHED  =   1;
+    static const int                            PROPAGATION_STATUS_EXTERNAL;
+    static const int                            PROPAGATION_STATUS_WAITING;
+    static const int                            PROPAGATION_STATUS_REACHED;
 
     void                                        setSign( long id, int sign ) ;
     void                                        propagateSeedSign( const std::vector<long> &seeds,
