@@ -1699,31 +1699,40 @@ int VolCartesian::linearCellInterpolation(std::array<double,3> &point,
 
 	int dimension = getDimension();
 
-	std::array<int, 3> ijk_next;
-	std::array<int, 3> nS = {{1,1,1}};
+	int nContribs_x = 1;
+	int nContribs_y = 1;
+	int nContribs_z = 1;
+
 	std::array< std::array<int,2>, 3> cStencil;
 	std::array< std::array<double,2>, 3> cWeights;
 	for (int d = 0; d < dimension; ++d) {
 		// Find cell index
-		if (point[d] < m_cellCenters[d][ijk_point[d]]) {
-			ijk_point[d] = ijk_point[d] - 1;
+		int index_point = ijk_point[d];
+		if (point[d] < m_cellCenters[d][index_point]) {
+			index_point = index_point - 1;
 		}
 
-		ijk_next[d] = ijk_point[d] + 1;
+		int index_next = index_point + 1;
 
-		if (ijk_point[d] < 0) {
+		if (index_point < 0) {
 			cStencil[d][0] = 0.;
 			cWeights[d][0] = 1.;
-		} else if (ijk_next[d] > m_nCells1D[d] - 1) {
+		} else if (index_next > m_nCells1D[d] - 1) {
 			cStencil[d][0] = m_nCells1D[d] - 1;
 			cWeights[d][0] = 1.;
 		} else {
-			nS[d] = 2;
+			if (d == 0) {
+				nContribs_x = 2;
+			} else if (d == 1) {
+				nContribs_y = 2;
+			} else {
+				nContribs_z = 2;
+			}
 
-			cStencil[d][0] = ijk_point[d];
-			cStencil[d][1] = ijk_next[d];
+			cStencil[d][0] = index_point;
+			cStencil[d][1] = index_next;
 
-			cWeights[d][1] = (point[d] - m_cellCenters[d][ijk_point[d]]) / m_cellSpacings[d]  ;
+			cWeights[d][1] = (point[d] - m_cellCenters[d][index_point]) / m_cellSpacings[d]  ;
 			cWeights[d][0] = 1.0 - cWeights[d][1];
 		}
 	}
@@ -1733,15 +1742,15 @@ int VolCartesian::linearCellInterpolation(std::array<double,3> &point,
 		cWeights[d][0] = 1.;
 	}
 
-	int stencilSize = nS[0] * nS[1] * nS[2];
+	int stencilSize = nContribs_x * nContribs_y * nContribs_z;
 	stencil.resize(stencilSize);
 	weights.resize(stencilSize);
 
 	std::vector<int>::iterator itrStencil = stencil.begin();
 	std::vector<double>::iterator itrWeights = weights.begin();
-	for (int k = 0; k < nS[2]; ++k) {
-		for (int j = 0; j < nS[1]; ++j) {
-			for (int i = 0; i < nS[0]; ++i) {
+	for (int k = 0; k < nContribs_z; ++k) {
+		for (int j = 0; j < nContribs_y; ++j) {
+			for (int i = 0; i < nContribs_x; ++i) {
 				int &is = cStencil[0][i];
 				int &js = cStencil[1][j];
 				int &ks = cStencil[2][k];
@@ -1788,16 +1797,20 @@ int VolCartesian::linearVertexInterpolation(std::array<double,3> &point,
 
 	int dimension = getDimension();
 
-	std::array<int, 3> ijk_next;
+	int nContribs_x = 2;
+	int nContribs_y = 2;
+	int nContribs_z = dimension - 1;
+
 	std::array< std::array<int,2>, 3> cStencil;
 	std::array< std::array<double,2>, 3> cWeights;
 	for (int d = 0; d < dimension; ++d) {
-		ijk_next[d] = ijk_point[d] +1;
+		int index_point = ijk_point[d];
+		int index_next  = index_point +1;
 
-		cStencil[d][0] = ijk_point[d];
-		cStencil[d][1] = ijk_next[d];
+		cStencil[d][0] = index_point;
+		cStencil[d][1] = index_next;
 
-		cWeights[d][1] = (point[d] - m_vertexCoords[d][ijk_point[d]]) / m_cellSpacings[d];
+		cWeights[d][1] = (point[d] - m_vertexCoords[d][index_point]) / m_cellSpacings[d];
 		cWeights[d][0] = 1.0 - cWeights[d][1];
 	}
 
@@ -1812,9 +1825,9 @@ int VolCartesian::linearVertexInterpolation(std::array<double,3> &point,
 
 	std::vector<int>::iterator itrStencil    = stencil.begin();
 	std::vector<double>::iterator itrWeights = weights.begin();
-	for (int k = 0; k < dimension - 1; ++k) {
-		for (int j = 0; j < 2; ++j) {
-			for (int i = 0; i < 2; ++i) {
+	for (int k = 0; k < nContribs_z; ++k) {
+		for (int j = 0; j < nContribs_y; ++j) {
+			for (int i = 0; i < nContribs_x; ++i) {
 				int &is = cStencil[0][i];
 				int &js = cStencil[1][j];
 				int &ks = cStencil[2][k];
