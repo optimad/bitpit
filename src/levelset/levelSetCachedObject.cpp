@@ -602,8 +602,6 @@ void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &s
     }
 
     __writeCommunicationBuffer( sendList, dataBuffer) ;
-
-    dataBuffer.squeeze( ) ;
 }
 
 /*!
