@@ -664,16 +664,6 @@ std::vector<int> PatchKernel::getNeighbourRanks()
 }
 
 /*!
-	Gets a reference to the ghost targets needed for data exchange.
-
-	\result A reference to the ghost targets needed for data exchange.
-*/
-std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeTargets()
-{
-	return m_ghostExchangeTargets;
-}
-
-/*!
 	Gets a constant reference to the ghost targets needed for data exchange.
 
 	\result A constant reference to the ghost targets needed for data
@@ -682,19 +672,6 @@ std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeTarget
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeTargets() const
 {
 	return m_ghostExchangeTargets;
-}
-
-/*!
-	Gets a reference to the ghost targets needed for data exchange for
-	the specified rank.
-
-	\param rank is the rank for which the information will be retreived
-	\result A reference to the ghost targets needed for data exchange for
-	the specified rank.
-*/
-std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank)
-{
-	return m_ghostExchangeTargets.at(rank);
 }
 
 /*!
@@ -711,16 +688,6 @@ const std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank) const
 }
 
 /*!
-	Gets a reference to the ghost sources needed for data exchange.
-
-	\result A reference to the ghost sources needed for data exchange.
-*/
-std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeSources()
-{
-	return m_ghostExchangeSources;
-}
-
-/*!
 	Gets a constant reference to the ghost sources needed for data exchange.
 
 	\result A constant reference to the ghost sources needed for data
@@ -729,19 +696,6 @@ std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeSource
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeSources() const
 {
 	return m_ghostExchangeSources;
-}
-
-/*!
-	Gets a reference to the ghost sources needed for data exchange for
-	the specified rank.
-
-	\param rank is the rank for which the information will be retreived
-	\result A reference to the ghost sources needed for data exchange for
-	the specified rank.
-*/
-std::vector<long> & PatchKernel::getGhostExchangeSources(int rank)
-{
-	return m_ghostExchangeSources.at(rank);
 }
 
 /*!

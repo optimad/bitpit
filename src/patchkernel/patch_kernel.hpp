@@ -428,14 +428,9 @@ public:
 
 	bool isRankNeighbour(int rank);
 	std::vector<int> getNeighbourRanks();
-	std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets();
 	const std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets() const;
-	std::vector<long> & getGhostExchangeTargets(int rank);
 	const std::vector<long> & getGhostExchangeTargets(int rank) const;
-
-	std::unordered_map<int, std::vector<long>> & getGhostExchangeSources();
 	const std::unordered_map<int, std::vector<long>> & getGhostExchangeSources() const;
-	std::vector<long> & getGhostExchangeSources(int rank);
 	const std::vector<long> & getGhostExchangeSources(int rank) const;
 
 	bool isPartitioned() const;
