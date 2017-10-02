@@ -59,7 +59,7 @@ void printCellIds(PiercedVector<Cell> &cells)
 void fillCellList(int nCells, PiercedVector<Cell> &cells)
 {
 	for (int i = 0; i < nCells; i++) {
-		PiercedVector<Cell>::iterator cell = cells.emplace(i, i, ElementInfo::TRIANGLE);
+		cells.emplace(i, i, ElementInfo::TRIANGLE);
 	}
 }
 
