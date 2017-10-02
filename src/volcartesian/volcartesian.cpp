@@ -1581,7 +1581,7 @@ std::vector<double> VolCartesian::convertToVertexData(const std::vector<double> 
 	std::vector<double> vertexData(getVertexCount());
 	std::fill (vertexData.begin(), vertexData.end(), 0.);
 
-	for (int k = 0; k < m_nCells1D[Vertex::COORD_Z]; ++k) {
+	for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k < 1); k++) {
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; ++j) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; ++i) {
 				// Cell index
@@ -1627,7 +1627,7 @@ std::vector<double> VolCartesian::convertToCellData(const std::vector<double> &v
 	std::vector<double> cellData(getCellCount());
 	std::fill (cellData.begin(), cellData.end(), 0.);
 
-	for (int k = 0; k < m_nCells1D[Vertex::COORD_Z]; ++k) {
+	for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k < 1); k++) {
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; ++j) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; ++i) {
     				// Cell index
