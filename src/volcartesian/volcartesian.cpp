@@ -774,10 +774,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
 				Interface &interface = *interfaceIterator;
 
 				// Owner id
-				std::array<int, 3> ownerIJK;
-				for (int n = 0; n < 3; n++) {
-					ownerIJK[n] = counters[n];
-				}
+				std::array<int, 3> ownerIJK(counters);
 				if (counters[direction] == (interfaceCount1D[direction] - 1)) {
 					ownerIJK[direction] -= 1;
 				}
@@ -787,10 +784,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
 				// Neighbour id
 				long neighId;
 				if (counters[direction] != 0 && counters[direction] != interfaceCount1D[direction] - 1) {
-					std::array<int, 3> neighIJK;
-					for (int n = 0; n < 3; n++) {
-						neighIJK[n] = counters[n];
-					}
+					std::array<int, 3> neighIJK(counters);
 					neighIJK[direction] -= 1;
 
 					neighId = getCellLinearId(neighIJK);
