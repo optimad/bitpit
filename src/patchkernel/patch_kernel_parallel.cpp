@@ -1636,8 +1636,16 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         for (int face = 0; face < nCellFaces; ++face) {
             int nFaceLinkAdjacencies = cellLinkAdjacencies.getItemCount(face);
             for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
+                // We need to updated the adjacencies only if they are cells
+                // that have been send.
                 long senderAdjacencyId = cellLinkAdjacencies.getItem(face, k);
-                long localAdjacencyId  = recvCellMap[senderAdjacencyId];
+                if (recvCellMap.count(senderAdjacencyId) == 0) {
+                    continue;
+                }
+
+                // If the send cell is already in the adjacency list there is
+                // nothing to update.
+                long localAdjacencyId  = recvCellMap.at(senderAdjacencyId);
                 if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
                     continue;
                 }
