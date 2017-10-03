@@ -53,7 +53,7 @@ int subtest_001(VolCartesian *patch_2D, VolCartesian *patch_2D_restored)
 	// Create the patch
 	log::cout() << "Creating 2D patch..." << std::endl;
 
-	patch_2D = new VolCartesian(0, 2, origin, length, dh);
+	patch_2D = new VolCartesian(2, origin, length, dh);
 	patch_2D->getVTK().setName("cartesian_uniform_patch_2D");
 	patch_2D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 
@@ -113,7 +113,7 @@ int subtest_002(VolCartesian *patch_3D, VolCartesian *patch_3D_restored)
 	// Create the patch
 	log::cout() << "Creating 3D patch..." << std::endl;
 
-	patch_3D = new VolCartesian(1, 3, origin, length, dh);
+	patch_3D = new VolCartesian(3, origin, length, dh);
 	patch_3D->getVTK().setName("cartesian_uniform_patch_3D");
 	patch_3D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 

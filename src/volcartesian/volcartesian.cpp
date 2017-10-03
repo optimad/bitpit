@@ -52,6 +52,22 @@ VolCartesian::VolCartesian()
 /*!
 	Creates a new patch.
 
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param lengths are the lengths of the domain
+	\param nCells are the numbers of cells of the patch
+*/
+VolCartesian::VolCartesian(const int &dimension,
+                               const std::array<double, 3> &origin,
+                               const std::array<double, 3> &lengths,
+                               const std::array<int, 3> &nCells)
+	: VolCartesian(PatchManager::AUTOMATIC_ID, dimension, origin, lengths, nCells)
+{
+}
+
+/*!
+	Creates a new patch.
+
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -75,6 +91,21 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 /*!
 	Creates a new patch.
 
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param nCells1D is the number of cells along each direction
+*/
+VolCartesian::VolCartesian(const int &dimension,
+                               const std::array<double, 3> &origin,
+                               double length, int nCells)
+	: VolCartesian(PatchManager::AUTOMATIC_ID, dimension, origin, length, nCells)
+{
+}
+
+/*!
+	Creates a new patch.
+
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -92,6 +123,21 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 	setLengths({{length, length, length}});
 
 	setDiscretization({{nCells, nCells, nCells}});
+}
+
+/*!
+	Creates a new patch.
+
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param dh is the maximum allowed mesh spacing
+*/
+VolCartesian::VolCartesian(const int &dimension,
+                               const std::array<double, 3> &origin,
+                               double length, double dh)
+	: VolCartesian(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh)
+{
 }
 
 /*!

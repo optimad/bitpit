@@ -51,7 +51,7 @@ int subtest_001()
 
 	log::cout() << "  >> 2D Cartesian patch" << "\n";
 
-	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
+	VolCartesian *patch_2D = new VolCartesian(2, origin, length, dh);
 	patch_2D->getVTK().setName("cartesian_uniform_patch_2D");
 	patch_2D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 	patch_2D->write();
@@ -144,7 +144,7 @@ int subtest_002()
 
 	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
-	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
+	VolCartesian *patch_3D = new VolCartesian(3, origin, length, dh);
 	VTKUnstructuredGrid& vtk = patch_3D->getVTK();
 	vtk.setName("cartesian_uniform_patch_3D");
 	patch_3D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
