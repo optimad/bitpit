@@ -137,7 +137,7 @@ void IndexGenerator::setAssigned(long id)
     // recycle it (if the id is not in the trash, this means it was already
     // an assigned id).
     if (id > m_highest) {
-        for (long wasteId = m_highest + 1; wasteId < id; ++wasteId) {
+        for (long wasteId = std::max(0L, m_highest + 1); wasteId < id; ++wasteId) {
             trash(wasteId);
         }
 
