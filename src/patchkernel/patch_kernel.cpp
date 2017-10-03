@@ -2239,7 +2239,10 @@ long PatchKernel::_getCellNativeIndex(long id) const
 */
 std::vector<long> PatchKernel::findCellNeighs(const long &id) const
 {
-	return findCellVertexNeighs(id);
+	std::vector<long> neighs;
+	findCellNeighs(id, &neighs);
+
+	return neighs;
 }
 
 /*!
@@ -2251,6 +2254,10 @@ std::vector<long> PatchKernel::findCellNeighs(const long &id) const
 void PatchKernel::findCellNeighs(const long &id, std::vector<long> *neighs) const
 {
 	findCellVertexNeighs(id, true, neighs);
+	if (isThreeDimensional()) {
+		findCellEdgeNeighs(id, true, neighs);
+	}
+	findCellFaceNeighs(id, true, neighs);
 }
 
 /*!
