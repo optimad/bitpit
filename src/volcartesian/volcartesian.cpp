@@ -1593,7 +1593,7 @@ std::vector<double> VolCartesian::convertToVertexData(const std::vector<double> 
 							// Vertex index
 							int i_v = i + l;
 							int j_v = j + m;
-							int k_v = j + n;
+							int k_v = k + n;
 							long vertexId = getVertexLinearId(i_v, j_v, k_v);
 
 							vertexData[vertexId] += cellData[cellId];
@@ -1639,7 +1639,7 @@ std::vector<double> VolCartesian::convertToCellData(const std::vector<double> &v
 							// Vertex index
 							int i_v = i + l;
 							int j_v = j + m;
-							int k_v = j + n;
+							int k_v = k + n;
 							long vertexId = getVertexLinearId(i_v, j_v, k_v);
 
 							cellData[cellId] += vertexData[vertexId];
