@@ -108,6 +108,9 @@ public:
 	void setType(ElementType type);
 	ElementType getType() const;
 
+	void setPID(int pid);
+	int getPID() const;
+
 	int getDimension() const;
 	bool isThreeDimensional() const;
 	
@@ -187,6 +190,8 @@ private:
 	long m_id;
 
 	ElementType m_type;
+
+	int m_pid;
 
 	std::unique_ptr<long[]> m_connect;
 

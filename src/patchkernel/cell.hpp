@@ -69,9 +69,6 @@ public:
 	void initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood = true);
 
 	bool isInterior() const;
-
-	void setPID(int pid);
-	int getPID() const;
 	
 	void deleteInterfaces();
 	void resetInterfaces(bool storeInterfaces = true);
@@ -116,7 +113,6 @@ protected:
 
 private:
 	bool m_interior;
-	int m_pid;
 
 	bitpit::FlatVector2D<long> m_interfaces;
 	bitpit::FlatVector2D<long> m_adjacencies;

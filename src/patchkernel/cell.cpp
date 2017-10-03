@@ -115,7 +115,7 @@ bitpit::FlatVector2D<long> Cell::createNeighbourhoodStorage(bool storeNeighbourh
 	Default constructor.
 */
 Cell::Cell()
-	: Element(), m_interior(true), m_pid(0),
+	: Element(), m_interior(true),
       m_interfaces(createNeighbourhoodStorage(false)),
       m_adjacencies(createNeighbourhoodStorage(false))
 {
@@ -132,7 +132,7 @@ Cell::Cell()
 	information
 */
 Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
-	: Element(id, type), m_pid(0),
+	: Element(id, type),
       m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
@@ -151,7 +151,7 @@ Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourh
 	information
 */
 Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
-	: Element(id, type, connectSize), m_pid(0),
+	: Element(id, type, connectSize),
       m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
@@ -170,7 +170,7 @@ Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, boo
 	information
 */
 Cell::Cell(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
-	: Element(id, type, std::move(connectStorage)), m_pid(0),
+	: Element(id, type, std::move(connectStorage)),
       m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
@@ -187,7 +187,6 @@ void Cell::swap(Cell &other) noexcept
 	Element::swap(other);
 
 	std::swap(other.m_interior, m_interior);
-	std::swap(other.m_pid, m_pid);
 
 	other.m_interfaces.swap(m_interfaces);
 	other.m_adjacencies.swap(m_adjacencies);
@@ -297,26 +296,6 @@ void Cell::setInterior(bool interior)
 bool Cell::isInterior() const
 {
 	return m_interior;
-}
-
-/*!
-	Sets the PID associated to the cell.
-
-	\param pid is the PID associated to the cell.
-*/
-void Cell::setPID(int pid)
-{
-	m_pid = pid;
-}
-
-/*!
-	Gets the PID associated to the cell.
-
-	\result The PID associated to the cell.
-*/
-int Cell::getPID() const
-{
-	return m_pid;
 }
 
 /*!

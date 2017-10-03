@@ -389,6 +389,7 @@ void Element::swap(Element &other) noexcept
 {
 	std::swap(other.m_id, m_id);
 	std::swap(other.m_type, m_type);
+	std::swap(other.m_pid, m_pid);
 	std::swap(other.m_connect, m_connect);
 }
 
@@ -427,6 +428,9 @@ void Element::initialize(long id, ElementType type, std::unique_ptr<long[]> &&co
 */
 void Element::_initialize(long id, ElementType type, int connectSize)
 {
+	// Initialize PID
+	m_pid = 0;
+
 	// Get previous connect size
 	int previousConnectSize = 0;
 	if (m_connect) {
@@ -530,6 +534,26 @@ void Element::setType(ElementType type)
 ElementType Element::getType() const
 {
 	return m_type;
+}
+
+/*!
+	Sets the PID associated to the element.
+
+	\param pid is the PID associated to the element.
+*/
+void Element::setPID(int pid)
+{
+	m_pid = pid;
+}
+
+/*!
+	Gets the PID associated to the element.
+
+	\result The PID associated to the element.
+*/
+int Element::getPID() const
+{
+	return m_pid;
 }
 
 /*!
