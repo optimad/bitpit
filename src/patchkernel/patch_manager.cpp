@@ -85,6 +85,8 @@ int PatchManager::registerPatch(PatchKernel *patch, int id)
 		if (m_idGenerator.isAssigned(id)) {
 			throw std::runtime_error ("A patch with the same id already exists");
 		}
+
+		m_idGenerator.setAssigned(id);
 	} else {
 		id = m_idGenerator.generate();
 	}
