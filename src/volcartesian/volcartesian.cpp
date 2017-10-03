@@ -1577,6 +1577,10 @@ std::vector<double> VolCartesian::convertToVertexData(const std::vector<double> 
 {
 	int dimension = getDimension();
 
+	int nContribs_x = 2;
+	int nContribs_y = 2;
+	int nContribs_z = dimension - 1;
+
 	std::vector<int> nodeCounter(getVertexCount());
 	std::vector<double> vertexData(getVertexCount());
 	std::fill (vertexData.begin(), vertexData.end(), 0.);
@@ -1584,19 +1588,23 @@ std::vector<double> VolCartesian::convertToVertexData(const std::vector<double> 
 	for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k < 1); k++) {
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; ++j) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; ++i) {
-				// Cell index
+				// Get cell contribution
 				long cellId = getCellLinearId(i, j, k);
+				double cellContrib = cellData[cellId];
 
-				for (int n = 0; n < dimension - 1; ++n) {
-					for (int m = 0; m < 2; ++m) {
-						for (int l = 0; l < 2; ++l) {
-							// Vertex index
+				// Eval vertex data
+				for (int n = 0; n < nContribs_z; n++) {
+					int k_v = k + n;
+					for (int m = 0; m < nContribs_y; ++m) {
+						int j_v = j + m;
+						for (int l = 0; l < nContribs_x; ++l) {
 							int i_v = i + l;
-							int j_v = j + m;
-							int k_v = k + n;
+
+							// Get vertex index
 							long vertexId = getVertexLinearId(i_v, j_v, k_v);
 
-							vertexData[vertexId] += cellData[cellId];
+							// Sum cell contribution
+							vertexData[vertexId] += cellContrib;
 							nodeCounter[vertexId]++;
 						}
 					}
@@ -1624,25 +1632,31 @@ std::vector<double> VolCartesian::convertToCellData(const std::vector<double> &v
 {
 	int dimension = getDimension();
 
+	int nContribs_x = 2;
+	int nContribs_y = 2;
+	int nContribs_z = dimension - 1;
+
 	std::vector<double> cellData(getCellCount());
 	std::fill (cellData.begin(), cellData.end(), 0.);
 
 	for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k < 1); k++) {
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; ++j) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; ++i) {
-    				// Cell index
+				// Eval cell data
 				long cellId = getCellLinearId(i, j, k);
-
-				for (int n = 0; n < dimension - 1; ++n) {
-					for (int m = 0; m < 2; ++m) {
-						for (int l = 0; l < 2; ++l) {
-							// Vertex index
+				for (int n = 0; n < nContribs_z; ++n) {
+					int k_v = k + n;
+					for (int m = 0; m < nContribs_y; ++m) {
+						int j_v = j + m;
+						for (int l = 0; l < nContribs_x; ++l) {
 							int i_v = i + l;
-							int j_v = j + m;
-							int k_v = k + n;
-							long vertexId = getVertexLinearId(i_v, j_v, k_v);
 
-							cellData[cellId] += vertexData[vertexId];
+							// Get vertex contribution
+							long vertexId = getVertexLinearId(i_v, j_v, k_v);
+							double vertexContrib = vertexData[vertexId];
+
+							// Sum vertex contribution
+							cellData[cellId] += vertexContrib;
 						}
 					}
 				}
