@@ -575,30 +575,29 @@ void LevelSetCachedObject::__restore( std::istream &stream ){
  */
 void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
 
-    long nItems(0), counter(0) ;
-
-
-    //determine number of elements to send
+    // Evaluate the size of the buffer
+    long nItems = 0;
     for( const auto &index : sendList){
         if( m_ls.exists(index)){
             nItems++ ;
         }
-
     }
 
+    dataBuffer.setSize(dataBuffer.getSize() + sizeof(long) + nItems* (sizeof(long) +4*sizeof(double)) ) ;
+
+    // Fill the buffer
     dataBuffer << nItems ;
-    dataBuffer.setSize(dataBuffer.getSize() +nItems* (sizeof(long) +4*sizeof(double)) ) ;
 
-
-    for( const auto &index : sendList){
-        auto lsInfoItr = m_ls.find(index) ;
+    long index = 0;
+    for( long id : sendList){
+        auto lsInfoItr = m_ls.find(id) ;
         if( lsInfoItr != m_ls.end() ){
-            dataBuffer << counter ;
+            dataBuffer << index ;
             dataBuffer << lsInfoItr->value ;
             dataBuffer << lsInfoItr->gradient ;
             ++nItems ;
         }
-        ++counter ;
+        ++index ;
     }
 
     __writeCommunicationBuffer( sendList, dataBuffer) ;
@@ -621,15 +620,14 @@ void LevelSetCachedObject::__writeCommunicationBuffer( const std::vector<long> &
  */
 void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
 
-    long    nItems, index, id;
-
+    long nItems ;
     dataBuffer >> nItems ;
 
     for( int i=0; i<nItems; ++i){
-
         // Determine the id of the element
+        long index ;
         dataBuffer >> index ;
-        id = recvList[index] ;
+        long id = recvList[index] ;
 
         // Assign the data of the element
         PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;

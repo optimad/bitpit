@@ -1044,9 +1044,8 @@ void LevelSetSegmentation::__restore( std::istream &stream ){
  */
 void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
 
-    long nItems(0);
-
-    //determine number of elements to send
+    // Evaluate the size of the buffer
+    long nItems = 0;
     for( const auto &index : sendList){
         auto infoItr = m_surfaceInfo.find(index) ;
         if( infoItr != m_surfaceInfo.end() ){
@@ -1054,20 +1053,21 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
         }
     }
 
-    dataBuffer << nItems ;
-    dataBuffer.setSize(dataBuffer.getSize() +nItems* ( 2*sizeof(long) +3*sizeof(double) ));
+    dataBuffer.setSize(dataBuffer.getSize() + sizeof(long) + nItems* ( 2*sizeof(long) +3*sizeof(double) ));
 
-    //determine elements to send
-    long counter= 0 ;
-    for( const auto &index : sendList){
-        auto infoItr = m_surfaceInfo.find(index) ;
+    // Fill the buffer
+    dataBuffer << nItems ;
+
+    long index = 0 ;
+    for( long id : sendList){
+        auto infoItr = m_surfaceInfo.find(id) ;
         if( infoItr != m_surfaceInfo.end() ){
-            dataBuffer << counter ;
+            dataBuffer << index ;
             dataBuffer << infoItr->support;
             dataBuffer << infoItr->normal;
         }
 
-        ++counter;
+        ++index;
     }
 }
 
@@ -1078,30 +1078,22 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
  */
 void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
 
-    long nItems, index, id ;
-    long support;
-    std::array<double,3> normal;
-
+    long nItems ;
     dataBuffer >> nItems ;
 
     for( long i=0; i<nItems; ++i){
-
-        // read buffer
+        // Get the id of the element
+        long index;
         dataBuffer >> index;
-        dataBuffer >> support;
-        dataBuffer >> normal;
-
-        // determine the id of the element
-        id = recvList[index] ;
+        long id = recvList[index] ;
 
         // Assign the data of the element
         auto infoItr = m_surfaceInfo.find(id) ;
         if( infoItr == m_surfaceInfo.end() ){
             infoItr = m_surfaceInfo.emplace(id) ;
         }
-        infoItr->support = support;
-        infoItr->normal = normal;
-
+        dataBuffer >> infoItr->support;
+        dataBuffer >> infoItr->normal;
     }
 }
 # endif
