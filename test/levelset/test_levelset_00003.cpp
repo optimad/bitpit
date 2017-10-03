@@ -95,7 +95,7 @@ int subtest_001()
 
 
     // Second Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (0,1,dimensions) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (1,dimensions) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 
@@ -111,7 +111,7 @@ int subtest_001()
     std::cout << "n. simplex: " << STL1->getCellCount() << std::endl;
 
     // Third Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL2( new bitpit::SurfUnstructured (0,1,dimensions) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL2( new bitpit::SurfUnstructured (1,dimensions) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 

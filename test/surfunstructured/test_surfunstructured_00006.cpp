@@ -51,7 +51,7 @@ int subtest_001(SurfUnstructured *patch_2D, SurfUnstructured *patch_2D_restored)
 
 	const std::string fielname_2D = "./data/cube.stl";
 
-	patch_2D = new SurfUnstructured(0, 2, 2);
+	patch_2D = new SurfUnstructured(2, 2);
 	patch_2D->importSTL(fielname_2D);
 	patch_2D->getVTK().setName("surfunstructured_patch_2D");
 

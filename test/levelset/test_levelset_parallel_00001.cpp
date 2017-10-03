@@ -70,7 +70,7 @@ using namespace std;
 int subtest_001(int rank)
 {
     // Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(0) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(2, 3) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 

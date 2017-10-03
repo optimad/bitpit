@@ -48,7 +48,7 @@ int subtest_001()
     log::cout() << std::endl;
     log::cout() << "Importing STL..." << std::endl;
 
-    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (0, 2, 3));
+    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2, 3));
     surfaceMesh->setExpert(true);
     surfaceMesh->importSTL("./data/buddha.stl");
     surfaceMesh->deleteCoincidentVertices();

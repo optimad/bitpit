@@ -53,6 +53,17 @@ SurfUnstructured::SurfUnstructured()
 /*!
 	Creates a new patch.
 
+	\param patch_dim is the dimension of the patch
+	\param space_dim is the dimension of the space
+*/
+SurfUnstructured::SurfUnstructured(int patch_dim, int space_dim)
+	: SurfaceKernel(PatchManager::AUTOMATIC_ID, patch_dim, space_dim, true)
+{
+}
+
+/*!
+	Creates a new patch.
+
 	\param id is the id of the patch
 	\param patch_dim is the dimension of the patch
 	\param space_dim is the dimension of the space

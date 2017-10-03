@@ -230,7 +230,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                        mesh(0);
+SurfUnstructured                        mesh(2, 3);
 Cell                                    cell_17, cell_5, cell_7;
 vector<long>                            cell_list;
 
@@ -269,7 +269,8 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfUnstructured                    envelope(0);
+	std::cout << " VV " << PatchManager::AUTOMATIC_ID << std::endl;
+    SurfUnstructured                    envelope(2, 3);
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -340,7 +341,7 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfUnstructured                    envelope(0);
+    SurfUnstructured                    envelope(2, 3);
     vector<long>                        ring1, ring1_expected{6,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -419,7 +420,7 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfUnstructured                    envelope(0);
+    SurfUnstructured                    envelope(2, 3);
     vector<long>                        ring1, ring1_expected{7};
     SurfUnstructured::CellIterator      it;
 
@@ -496,7 +497,7 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfUnstructured                    envelope(0);
+    SurfUnstructured                    envelope(2, 3);
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -606,7 +607,7 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                mesh(0);
+SurfUnstructured                mesh(2, 3);
 vector<long>                    c_connect{0, 1, 2};
 vector<long>                    g_connect{3, 4, 5};
 Cell                            cell(0, ElementType::TRIANGLE, true);

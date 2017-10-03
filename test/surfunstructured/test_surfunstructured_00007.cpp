@@ -201,7 +201,7 @@ int subtest_001()
 	long counter;
 
 	// Local variables
-	SurfUnstructured                        mesh(0);
+	SurfUnstructured                        mesh(2, 3);
 	mesh.setExpert(true);
 
 	// Generate a Dummy Triangulation

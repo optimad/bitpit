@@ -59,7 +59,7 @@ int subtest_001(
 ) {
 
     // Create the mesh
-    SurfUnstructured *mesh = new SurfUnstructured(0);
+    SurfUnstructured *mesh = new SurfUnstructured(2, 3);
     mesh->setExpert(true);
 
     std::vector<array<double,3>> verts(5);

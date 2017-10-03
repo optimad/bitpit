@@ -296,7 +296,7 @@ void COM_step(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                     envelope(0);
+SurfUnstructured                     envelope(2, 3);
 
 // Counters
 // none
@@ -350,7 +350,7 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                     mesh(0);
+SurfUnstructured                     mesh(2, 3);
 
 // Counters
 // none
@@ -389,7 +389,7 @@ if (mesh.getRank() == 0) {
 {
     // Scope variables ------------------------------------------------------ //
     stringstream                name;
-    SurfUnstructured                envelope(0);
+    SurfUnstructured                envelope(2, 3);
 
     // Generate dummy triangulation ----------------------------------------- //
     if (mesh.getRank() == 0) {
@@ -502,7 +502,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured            mesh(0);
+SurfUnstructured            mesh(2, 3);
 
 // Counters
 // none
@@ -693,7 +693,7 @@ int subtest_003(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured            mesh(0);
+SurfUnstructured            mesh(2, 3);
 
 // Counters
 // none

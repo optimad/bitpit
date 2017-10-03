@@ -71,7 +71,7 @@ int subtest_001(int rank)
     uint8_t                 dimensions(2);
 
     // First Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL0( new bitpit::SurfUnstructured (0,1,dimensions) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL0( new bitpit::SurfUnstructured (1,dimensions) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 
@@ -90,7 +90,7 @@ int subtest_001(int rank)
 
 
     // Second Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (0,1,dimensions) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (1,dimensions) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 

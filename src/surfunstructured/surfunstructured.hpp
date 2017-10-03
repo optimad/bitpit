@@ -40,7 +40,8 @@ public:
 
         // Constructors
 	SurfUnstructured();
-	SurfUnstructured(const int &id, int patch_dim = 2, int space_dim = 3);
+	SurfUnstructured(int patch_dim, int space_dim);
+	SurfUnstructured(const int &id, int patch_dim, int space_dim);
 	SurfUnstructured(std::istream &stream);
 
         // Clone

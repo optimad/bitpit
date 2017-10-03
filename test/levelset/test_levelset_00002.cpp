@@ -71,7 +71,7 @@ int subtest_001()
     int                    dimensions(3) ;
 
     // Input geometry
-    std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(0) );
+    std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(2, 3) );
 
     std::cout << " - Loading stl geometry" << std::endl;
 

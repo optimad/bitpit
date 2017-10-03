@@ -84,7 +84,7 @@ int subtest_001(
 // Local variables
 string                          in_name_ASCII = "./data/ahmed.stl";
 string                          out_name_VTU = "ahmed";
-SurfUnstructured                mesh(0);
+SurfUnstructured                mesh(2, 3);
 
 // Counters
 // none

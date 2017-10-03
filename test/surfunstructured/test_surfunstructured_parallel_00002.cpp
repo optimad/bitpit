@@ -79,7 +79,7 @@ int subtest_001(
 
 // Local variables
 string                          in_name_bin = "./data/buddha.stl";
-SurfUnstructured                mesh(0);
+SurfUnstructured                mesh(2, 3);
 
 // Counters
 // none
