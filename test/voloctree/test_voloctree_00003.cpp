@@ -71,7 +71,7 @@ int subtest_001()
 
 	log::cout() << "  >> 2D octree patch" << "\n";
 
-	VolOctree *patch_2D = new VolOctree(0, 2, origin, length, dh);
+	VolOctree *patch_2D = new VolOctree(2, origin, length, dh);
 	patch_2D->getVTK().setName("octree_uniform_patch_2D");
 	patch_2D->update();
 
@@ -145,7 +145,7 @@ int subtest_002()
 
 	log::cout() << "  >> 3D octree patch" << "\n";
 
-	VolOctree *patch_3D = new VolOctree(0, 3, origin, length, dh);
+	VolOctree *patch_3D = new VolOctree(3, origin, length, dh);
 	patch_3D->getVTK().setName("octree_uniform_patch_3D");
 	patch_3D->update();
 

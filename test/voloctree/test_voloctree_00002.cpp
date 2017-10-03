@@ -163,7 +163,7 @@ int subtest_001(const std::array<double, 3> &origin, double length, double dh)
 	log::cout() << std::endl;
 	log::cout() << ">> Creating the patch" << std::endl;
 
-	VolOctree *patch = new VolOctree(0, 2, origin, length, dh);
+	VolOctree *patch = new VolOctree(2, origin, length, dh);
 	patch->getVTK().setName("octree_adapted_patch_2D");
 	patch->update();
 	patch->write();
@@ -242,7 +242,7 @@ int subtest_002(const std::array<double, 3> &origin, double length, double dh)
 	log::cout() << std::endl;
 	log::cout() << ">> Creating patch" << std::endl;
 
-	VolOctree *patch = new VolOctree(0, 3, origin, length, dh);
+	VolOctree *patch = new VolOctree(3, origin, length, dh);
 	patch->getVTK().setName("octree_adapted_patch_3D");
 	patch->update();
 	patch->write();

@@ -46,7 +46,7 @@ int subtest_001()
 	log::cout() << "  >> 2D octree patch" << "\n";
 
 	// Create the patch
-	VolOctree *patch_2D_original = new VolOctree(0, 2, origin, length, dh);
+	VolOctree *patch_2D_original = new VolOctree(2, origin, length, dh);
 	patch_2D_original->setCommunicator(MPI_COMM_WORLD);
 	patch_2D_original->getVTK().setName("octree_parallel_uniform_patch_2D");
 	patch_2D_original->update();
@@ -114,7 +114,7 @@ int subtest_002()
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
 	// Create the patch
-	VolOctree *patch_3D_original = new VolOctree(0, 3, origin, length, dh);
+	VolOctree *patch_3D_original = new VolOctree(3, origin, length, dh);
 	patch_3D_original->setCommunicator(MPI_COMM_WORLD);
 	patch_3D_original->getVTK().setName("octree_parallel_uniform_patch_3D");
 	patch_3D_original->update();

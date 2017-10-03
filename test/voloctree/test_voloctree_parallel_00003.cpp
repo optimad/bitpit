@@ -52,7 +52,7 @@ int subtest_001(int rank, VolOctree *patch_2D, VolOctree *patch_2D_restored)
     // Create the patch
     log::cout() << "Creating 2D patch..." << std::endl;
 
-    patch_2D = new VolOctree(0, 2, origin, length, dh);
+    patch_2D = new VolOctree(2, origin, length, dh);
     patch_2D->setCommunicator(MPI_COMM_WORLD);
     patch_2D->getVTK().setName("octree_uniform_patch_2D");
     patch_2D->update();
@@ -176,7 +176,7 @@ int subtest_002(int rank, VolOctree *patch_3D, VolOctree *patch_3D_restored)
 
     log::cout() << "Creating 3D patch..." << std::endl;
 
-    patch_3D = new VolOctree(1, 3, origin, length, dh);
+    patch_3D = new VolOctree(3, origin, length, dh);
     patch_3D->setCommunicator(MPI_COMM_WORLD);
     patch_3D->getVTK().setName("octree_uniform_patch_3D");
     patch_3D->update();

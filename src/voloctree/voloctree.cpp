@@ -67,6 +67,20 @@ VolOctree::VolOctree()
 /*!
 	Creates a new patch.
 
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param dh is the maximum allowed cell size of the initial refinement
+*/
+VolOctree::VolOctree(const int &dimension,
+				     std::array<double, 3> origin, double length, double dh )
+	: VolOctree(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh)
+{
+}
+
+/*!
+	Creates a new patch.
+
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -112,6 +126,17 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
 	m_tree->setMarker((uint32_t) 0, initial_level);
+}
+
+/*!
+	Creates a new patch.
+
+	\param tree is the tree that will be used
+	\param adopter is a pointer to the tree adopter
+*/
+VolOctree::VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
+	: VolOctree(PatchManager::AUTOMATIC_ID, std::move(tree), adopter)
+{
 }
 
 /*!

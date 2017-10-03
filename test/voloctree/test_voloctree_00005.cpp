@@ -119,7 +119,7 @@ int subtest_001()
     //
 
     // Create the original patch
-    VolOctree *patch_2D_original = new VolOctree(0, std::move(treePointer), &treePointer);
+    VolOctree *patch_2D_original = new VolOctree(std::move(treePointer), &treePointer);
     patch_2D_original->getVTK().setName("octree_patch_from_tree_2D_initial");
     patch_2D_original->update();
 
@@ -168,7 +168,7 @@ int subtest_001()
     patch_2D->write();
 
     // The tree has now being adopted and can used again.
-    patch_2D = std::unique_ptr<VolOctree>(new VolOctree(0, std::move(treePointer), &treePointer));
+    patch_2D = std::unique_ptr<VolOctree>(new VolOctree(std::move(treePointer), &treePointer));
     patch_2D->getVTK().setName("octree_patch_from_adopted_tree_2D_initial");
     patch_2D->update();
 
