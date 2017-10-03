@@ -38,7 +38,7 @@ class PatchManager {
 friend class PatchKernel;
 
 public:
-	static int const NULL_PATCH_ID;
+	static int const AUTOMATIC_ID;
 
     static PatchManager & manager();
 
@@ -60,7 +60,7 @@ private:
     PatchManager(PatchManager const&) = delete;
     PatchManager& operator=(PatchManager const&) = delete;
 
-	int registerPatch(PatchKernel *patch, int id = NULL_PATCH_ID);
+	int registerPatch(PatchKernel *patch, int id = AUTOMATIC_ID);
 	void unregisterPatch(PatchKernel *patch);
 
 };

@@ -206,7 +206,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 void PatchKernel::initialize()
 {
 	// Id
-	m_id = PatchManager::NULL_PATCH_ID;
+	m_id = PatchManager::AUTOMATIC_ID;
 
 	// Cell count
 	m_nInternals = 0;
