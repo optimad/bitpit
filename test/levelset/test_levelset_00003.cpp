@@ -153,7 +153,7 @@ int subtest_001()
     };
 
     dh = h / 16. ;
-    bitpit::VolOctree    mesh(1, dimensions, meshMin, h, dh );
+    bitpit::VolOctree    mesh(dimensions, meshMin, h, dh );
     mesh.update() ;
 
 

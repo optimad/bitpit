@@ -94,7 +94,7 @@ int subtest_001(int rank)
     // Create the mesh
     bitpit::log::cout() << " - Creating the mesh" << std::endl;
 
-    bitpit::VolOctree mesh(0, std::move(octree));
+    bitpit::VolOctree mesh(std::move(octree));
     mesh.update();
 
     mesh.getVTK().setCounter();

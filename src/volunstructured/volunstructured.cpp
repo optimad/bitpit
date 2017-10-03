@@ -42,6 +42,17 @@ namespace bitpit {
 /*!
 	Creates a new patch.
 
+	\param dimension is the dimension of the patch
+*/
+VolUnstructured::VolUnstructured(const int &dimension)
+	: VolumeKernel(PatchManager::AUTOMATIC_ID, dimension, true)
+{
+
+}
+
+/*!
+	Creates a new patch.
+
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 */

@@ -38,6 +38,7 @@ public:
 	using VolumeKernel::isPointInside;
 	using PatchKernel::locatePoint;
 
+	VolUnstructured(const int &dimension);
 	VolUnstructured(const int &id, const int &dimension);
 
 	~VolUnstructured();
