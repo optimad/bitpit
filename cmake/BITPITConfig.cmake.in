@@ -88,5 +88,8 @@ endif ()
 # BITPIT Definitions
 set(BITPIT_DEFINITIONS "@BITPIT_DEFINITIONS_PUBLIC@")
 
+# List of currently enabled BITPIT modules
+set(BITPIT_ENABLED_MODULE_LIST "@BITPIT_ENABLED_MODULE_LIST@")
+
 # Let libfind_process initialize the appropriate variables
 libfind_process(BITPIT)

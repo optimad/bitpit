@@ -36,6 +36,14 @@ set(BITPIT_CONFIG_CMAKE_DIR "\${BITPIT_INSTALL_PREFIX}/${BITPIT_INSTALL_CMAKE_DI
 get_target_property(BITPIT_DEBUG_POSTFIX ${BITPIT_LIBRARY} DEBUG_POSTFIX)
 get_target_property(BITPIT_RELEASE_POSTFIX ${BITPIT_LIBRARY} RELEASE_POSTFIX)
 
+set(BITPIT_ENABLED_MODULE_LIST "")
+foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+    isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
+    if(MODULE_ENABLED)
+        list(APPEND BITPIT_ENABLED_MODULE_LIST ${MODULE_NAME})
+    endif()
+endforeach()
+
 configure_file("BITPITConfig.cmake.in"  "${CMAKE_CURRENT_BINARY_DIR}/BITPITConfig.cmake" @ONLY)
 
 #------------------------------------------------------------------------------------#
