@@ -25,25 +25,34 @@
 #ifndef __BITPIT_INDEX_GENERATOR_HPP__
 #define __BITPIT_INDEX_GENERATOR_HPP__
 
+#include <cassert>
 #include <deque>
 #include <iostream>
+#include <limits>
+
+#include "bitpit_common.hpp"
 
 namespace bitpit {
 
+template<typename id_t = long>
 class IndexGenerator {
 
+static_assert(std::is_integral<id_t>::value, "Index has to be an integer!");
+
 public:
-    static const long NULL_ID;
+    typedef id_t id_type;
+
+    static const id_type NULL_ID;
 
     IndexGenerator();
 
-    long generate();
-    bool isAssigned(long id);
-    void setAssigned(long id);
-    void trash(const long &id);
+    id_type generate();
+    bool isAssigned(id_type id);
+    void setAssigned(id_type id);
+    void trash(id_type id);
 
-    long getLatest();
-    long getHighest();
+    id_type getLatest();
+    id_type getHighest();
 
     void reset();
 
@@ -51,14 +60,22 @@ public:
     void restore(std::istream &stream);
 
 private:
-    long m_latest;
-    long m_highest;
-    std::deque<long> m_trash;
+    id_type m_latest;
+    id_type m_highest;
+    std::deque<id_type> m_trash;
 
     int getBinaryArchiveVersion();
 
 };
 
+#ifndef __BITPIT_COMMON_UTILS_SRC__
+extern template class IndexGenerator<int>;
+extern template class IndexGenerator<long>;
+#endif
+
 }
+
+// Include the implementation
+#include "index_generator.tpp"
 
 #endif

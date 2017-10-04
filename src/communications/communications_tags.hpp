@@ -33,7 +33,7 @@
 
 namespace bitpit {
 
-class CommunicationTags : public IndexGenerator {
+class CommunicationTags : public IndexGenerator<int> {
 
 friend class PatchKernel;
 

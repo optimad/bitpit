@@ -53,7 +53,7 @@ public:
 private:
     static std::unique_ptr<PatchManager> m_manager;
 
-	IndexGenerator m_idGenerator;
+	IndexGenerator<int> m_idGenerator;
 	std::vector<PatchKernel *> m_patchOrder;
 	std::unordered_map<PatchKernel *, int> m_patchIds;
 

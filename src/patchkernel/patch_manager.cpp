@@ -34,7 +34,7 @@ namespace bitpit {
 	\brief The PatchManager oversee the handling of the patches.
 */
 
-int const PatchManager::AUTOMATIC_ID = IndexGenerator::NULL_ID;
+const int PatchManager::AUTOMATIC_ID = IndexGenerator<int>::NULL_ID;
 
 /*
     Initialize logger manager instance.

@@ -458,9 +458,9 @@ protected:
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
 
-	IndexGenerator m_vertexIdGenerator;
-	IndexGenerator m_interfaceIdGenerator;
-	IndexGenerator m_cellIdGenerator;
+	IndexGenerator<long> m_vertexIdGenerator;
+	IndexGenerator<long> m_interfaceIdGenerator;
+	IndexGenerator<long> m_cellIdGenerator;
 
 	long m_nInternals;
 	long m_nGhosts;
