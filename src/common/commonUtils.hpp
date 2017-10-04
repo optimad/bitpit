@@ -72,7 +72,7 @@ void eraseValue(std::vector<T> &, const T&);
 template <class T>
 std::vector<T> intersectionVector(const std::vector<T>&, const std::vector<T>&);
 
-#ifndef __BITPIT_UTILS_SRC__
+#ifndef __BITPIT_COMMON_UTILS_SRC__
 extern template bool addToOrderedVector<>(const long&, std::vector<long>&, std::less<long>);
 extern template bool addToOrderedVector<>(const unsigned long&, std::vector<unsigned long>&, std::less<unsigned long>);
 
