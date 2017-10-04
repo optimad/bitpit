@@ -1539,6 +1539,7 @@ try {
     }
 } catch (const std::exception &exception) {
     std::cout << exception.what();
+    exit(1);
 }
 
 return(0); };
