@@ -234,6 +234,7 @@ int main(int argc, char *argv[])
 		}
 	} catch (const std::exception &exception) {
 		bitpit::log::cout() << exception.what();
+		exit(1);
 	}
 
 	MPI_Finalize();

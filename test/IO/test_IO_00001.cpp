@@ -227,6 +227,7 @@ int main(int argc, char *argv[])
         }
     } catch (const std::exception &exception) {
         bitpit::log::cout() << exception.what();
+        exit(1);
     }
 
 #if BITPIT_ENABLE_MPI==1

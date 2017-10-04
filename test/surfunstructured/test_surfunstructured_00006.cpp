@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
         delete patch_2D_restored;
     } catch (const std::exception &exception) {
         log::cout() << exception.what();
+        exit(1);
     }
 
 #if BITPIT_ENABLE_MPI==1

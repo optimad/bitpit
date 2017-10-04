@@ -1559,6 +1559,7 @@ int main(int argc, char *argv[])
 
     } catch (const std::exception &exception) {
         std::cout << exception.what();
+        exit(1);
     }
 
     // ====================================================================== //

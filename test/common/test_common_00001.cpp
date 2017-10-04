@@ -274,6 +274,7 @@ int main(int argc, char *argv[])
         }
     } catch (const std::exception &exception) {
         cout << exception.what();
+        exit(1);
     }
 
     // ====================================================================== //

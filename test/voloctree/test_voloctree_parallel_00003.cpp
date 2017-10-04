@@ -375,6 +375,7 @@ int main(int argc, char *argv[])
         delete patch_3D;
     } catch (const std::exception &exception) {
         log::cout() << exception.what();
+        exit(1);
     }
 
     MPI_Finalize();
