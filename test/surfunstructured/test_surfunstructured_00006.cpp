@@ -108,7 +108,9 @@ int subtest_002()
 	// Restore all the patches
 	log::cout() << "Restoring patches through patch manager..." << std::endl;
 
-	SurfUnstructured *patch_2D_PM_restored = new SurfUnstructured();
+	SurfUnstructured *patch_2D_PM_restored = static_cast<SurfUnstructured *>(patch::manager().get(0));
+	patch_2D_PM_restored->reset();
+
 	IBinaryArchive binaryReaderPM("surfunstructured_patch_PM.dat");
 	patch::manager().restoreAll(binaryReaderPM.getStream());
 	binaryReaderPM.close();
