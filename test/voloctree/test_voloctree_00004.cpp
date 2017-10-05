@@ -304,8 +304,12 @@ int subtest_003()
     // Restore all the patches
     log::cout() << "Restoring patches through patch manager..." << std::endl;
 
-    VolOctree *patch_2D_PM_restored = new VolOctree();
-    VolOctree *patch_3D_PM_restored = new VolOctree();
+    VolOctree *patch_2D_PM_restored = static_cast<VolOctree *>(patch::manager().get(0));
+    patch_2D_PM_restored->reset();
+
+    VolOctree *patch_3D_PM_restored = static_cast<VolOctree *>(patch::manager().get(1));
+    patch_3D_PM_restored->reset();
+
     IBinaryArchive binaryReaderPM("octree_uniform_patch_PM");
     patch::manager().restoreAll(binaryReaderPM.getStream());
     binaryReaderPM.close();
