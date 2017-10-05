@@ -173,8 +173,12 @@ int subtest_003()
 	// Restore all the patches
 	log::cout() << "Restoring patches through patch manager..." << std::endl;
 
-	VolCartesian *patch_2D_PM_restored = new VolCartesian();
-	VolCartesian *patch_3D_PM_restored = new VolCartesian();
+	VolCartesian *patch_2D_PM_restored = static_cast<VolCartesian *>(patch::manager().get(0));
+	patch_2D_PM_restored->reset();
+
+	VolCartesian *patch_3D_PM_restored = static_cast<VolCartesian *>(patch::manager().get(1));
+	patch_3D_PM_restored->reset();
+
 	IBinaryArchive binaryReaderPM("cartesian_uniform_patch_PM");
 	patch::manager().restoreAll(binaryReaderPM.getStream());
 	binaryReaderPM.close();
