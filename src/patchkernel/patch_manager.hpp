@@ -42,6 +42,8 @@ public:
 
     static PatchManager & manager();
 
+	PatchKernel * get(int id);
+
 	void dump(std::ostream &stream);
 	void restore(std::istream &stream);
 

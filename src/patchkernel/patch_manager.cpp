@@ -56,6 +56,23 @@ PatchManager & PatchManager::manager()
 }
 
 /*!
+	Get the patch with the specified id.
+
+	\param id is the id of the patch
+*/
+PatchKernel * PatchManager::get(int id)
+{
+	for (const auto &entry : m_patchIds) {
+		long patchId = entry.second;
+		if (patchId == id) {
+			return entry.first;
+		}
+	}
+
+	return nullptr;
+}
+
+/*!
 	Registers a patch in the manager
 
 	\param patch is a pointer to the patch to be registered
