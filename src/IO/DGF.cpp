@@ -1278,7 +1278,7 @@ unsigned int dgf::readMesh(
 // ========================================================================== //
 
 // Local variables
-unsigned int    err;
+unsigned int    err = 0;
 long int        start_pos;
 string          line, word;
 stringstream    sline;
@@ -1366,7 +1366,7 @@ unsigned int dgf::readMesh(
 // ========================================================================== //
 
 // Local variables
-unsigned int    err;
+unsigned int    err = 0;
 long int        start_pos;
 string          line, word;
 stringstream    sline;
