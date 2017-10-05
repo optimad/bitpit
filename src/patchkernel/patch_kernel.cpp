@@ -626,6 +626,8 @@ void PatchKernel::resetCells()
 	m_cellIdGenerator.reset();
 	m_nInternals = 0;
 	m_nGhosts = 0;
+	m_lastInternalId = Cell::NULL_ID;
+	m_firstGhostId = Cell::NULL_ID;
 
 	for (auto &interface : m_interfaces) {
 		interface.unsetNeigh();
