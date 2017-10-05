@@ -2996,7 +2996,7 @@ PatchKernel::InterfaceConstIterator PatchKernel::interfaceConstEnd() const
 long PatchKernel::generateInterfaceId()
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return Interface::NULL_ID;
 	}
 
 	return m_interfaceIdGenerator.generate();
