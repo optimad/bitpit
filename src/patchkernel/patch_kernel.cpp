@@ -212,8 +212,8 @@ void PatchKernel::initialize()
 	m_nInternals = 0;
 	m_nGhosts    = 0;
 
-	m_lastInternalId = Element::NULL_ID;
-	m_firstGhostId   = Element::NULL_ID;
+	m_lastInternalId = Cell::NULL_ID;
+	m_firstGhostId   = Cell::NULL_ID;
 
 	// Dimension
 	m_dimension = -1;
@@ -1756,7 +1756,7 @@ PatchKernel::CellConstIterator PatchKernel::ghostConstEnd() const
 long PatchKernel::generateCellId()
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return Cell::NULL_ID;
 	}
 
 	return m_cellIdGenerator.generate();
@@ -2040,17 +2040,17 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	if (isInternal) {
 		m_nInternals--;
 		if (m_nInternals == 0) {
-			m_lastInternalId = Element::NULL_ID;
+			m_lastInternalId = Cell::NULL_ID;
 		} else if (id == m_lastInternalId) {
-			m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
+			m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
 		}
 	} else {
 		m_nGhosts--;
 		if (id == m_firstGhostId) {
 			if (m_nGhosts == 0) {
-				m_firstGhostId = Element::NULL_ID;
+				m_firstGhostId = Cell::NULL_ID;
 			} else if (m_nInternals == 0) {
-				m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Element::NULL_ID);
+				m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
 			} else {
 				CellIterator first_ghost_iterator = ++m_cells.find(m_lastInternalId);
 				m_firstGhostId = first_ghost_iterator->getId();
@@ -2139,9 +2139,9 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 	// Update the last internal and first ghost markers
 	m_firstGhostId = id;
 	if (m_nInternals == 0) {
-		m_lastInternalId = Element::NULL_ID;
+		m_lastInternalId = Cell::NULL_ID;
 	} else {
-		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
+		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
 	}
 
 	// Return the iterator to the new position
@@ -2177,7 +2177,7 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 	// Update the last internal and first ghost markers
 	m_lastInternalId = id;
 	if (m_nGhosts == 0) {
-		m_firstGhostId = Element::NULL_ID;
+		m_firstGhostId = Cell::NULL_ID;
 	} else {
 		CellIterator firstGhostIterator = iterator;
 		++firstGhostIterator;
