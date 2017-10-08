@@ -22,22 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- *	\date			10/jul/2014
- *	\authors		Alessandro Alaia
- *	\authors		Haysam Telib
- *	\authors		Edoardo Lombardi
- *	\version		0.1
- *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *
- *	\brief Level Set Class Demos
- */
-
-// ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
-
 //Standard Template Library
 # include <ctime>
 # include <chrono>
@@ -47,19 +31,9 @@
 #endif
 
 // bitpit
-# include "bitpit_IO.hpp"
 # include "bitpit_surfunstructured.hpp"
 # include "bitpit_volcartesian.hpp"
 # include "bitpit_levelset.hpp"
-
-// ========================================================================== //
-// NAMESPACES                                                                 //
-// ========================================================================== //
-using namespace bitpit;
-
-// ========================================================================== //
-// IMPLEMENTATIONS                                                            //
-// ========================================================================== //
 
 /*!
 * Subtest 001
@@ -68,12 +42,12 @@ using namespace bitpit;
 */
 int subtest_001()
 {
-    int                    dimensions(3) ;
+    int dimensions(3) ;
 
     // Input geometry
-    std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(2, 3) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(2, 3) );
 
-    std::cout << " - Loading stl geometry" << std::endl;
+    bitpit::log::cout()<< " - Loading stl geometry" << std::endl;
 
     STL->importSTL("./data/cube.stl", true);
 
@@ -83,15 +57,14 @@ int subtest_001()
     STL->getVTK().setName("geometry_002") ;
     STL->write() ;
 
-    std::cout << "n. vertex: " << STL->getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL->getCellCount() << std::endl;
-
+    bitpit::log::cout()<< "n. vertex: " << STL->getVertexCount() << std::endl;
+    bitpit::log::cout()<< "n. simplex: " << STL->getCellCount() << std::endl;
 
 
     // create cartesian mesh around geometry 
-    std::cout << " - Setting mesh" << std::endl;
-    std::array<double,3>     meshMin, meshMax, delta ;
-    std::array<int,3>        nc = {{64, 64, 64}} ;
+    bitpit::log::cout()<< " - Setting mesh" << std::endl;
+    std::array<double,3> meshMin, meshMax, delta ;
+    std::array<int,3> nc = {{64, 64, 64}} ;
 
     STL->getBoundingBox( meshMin, meshMax ) ;
 
@@ -101,50 +74,31 @@ int subtest_001()
 
     delta = meshMax -meshMin ;
 
-    VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
+    bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
     mesh.update() ;
 
     // Compute level set  in narrow band
-    LevelSet levelset ;
-    int id0;
-
+    bitpit::LevelSet levelset ;
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    int elapsed_seconds;
-
 
     levelset.setMesh(&mesh) ;
-    id0 = levelset.addObject( std::move(STL), M_PI/3. ) ;
+    int id0 = levelset.addObject( std::move(STL), M_PI/3. ) ;
 
     levelset.setPropagateSign(true) ;
     start = std::chrono::system_clock::now();
     levelset.compute( ) ;
     end = std::chrono::system_clock::now();
 
-    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    std::cout << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    bitpit::log::cout()<< "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
-    std::cout << " - Exporting data" << std::endl;
-    std::vector<double> LS(mesh.getCellCount() ) ;
-    std::vector<std::array<double,3>> LG(mesh.getCellCount() ) ;
-    const LevelSetObject &object0 = levelset.getObject(id0);
-
-    std::vector<double>::iterator itLS = LS.begin() ;
-    std::vector<std::array<double,3>>::iterator itLG = LG.begin() ;
-
-    for( auto & cell : mesh.getCells() ){
-        const long &id = cell.getId() ;
-        *itLS = object0.getLS(id) ;
-        *itLG = object0.getGradient(id) ;
-        ++itLS ;
-        ++itLG ;
-    };
-
-    mesh.getVTK().addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
-    mesh.getVTK().addData("lg", VTKFieldType::VECTOR, VTKLocation::CELL, LG) ;
+    bitpit::log::cout()<< " - Exporting data" << std::endl;
     mesh.getVTK().setName("levelset_002") ;
-    mesh.write() ;
+    bitpit::LevelSetObject &object = levelset.getObject(id0);
 
-    std::cout << " - Exported data" << std::endl;
+    object.enableVTKOutput( bitpit::LevelSetWriteField::ALL);
+
+    mesh.write() ;
 
     return 0;
 }
@@ -162,10 +116,10 @@ int main(int argc, char *argv[])
 #endif
 
 	// Initialize the logger
-	log::manager().initialize(log::COMBINED);
+	bitpit::log::manager().initialize(bitpit::log::COMBINED);
 
 	// Run the subtests
-	log::cout() << "Testing basic levelset features" << std::endl;
+	bitpit::log::cout() << "Testing basic levelset features" << std::endl;
 
 	int status;
 	try {
@@ -174,7 +128,7 @@ int main(int argc, char *argv[])
 			return status;
 		}
 	} catch (const std::exception &exception) {
-		log::cout() << exception.what();
+		bitpit::log::cout() << exception.what();
 		exit(1);
 	}
 
