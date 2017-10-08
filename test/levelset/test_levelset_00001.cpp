@@ -22,21 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- *	\date			10/jul/2014
- *	\authors		Alessandro Alaia
- *	\authors		Haysam Telib
- *	\authors		Edoardo Lombardi
- *	\version		0.1
- *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *
- *	\brief Level Set Class Demos
- */
-
-// ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
 
 //Standard Template Library
 # define _USE_MATH_DEFINES
@@ -52,78 +37,51 @@
 #endif
 
 // bitpit
-# include "bitpit_IO.hpp"
 # include "bitpit_levelset.hpp"
 # include "bitpit_surfunstructured.hpp"
 # include "bitpit_volcartesian.hpp"
-
-// ========================================================================== //
-// NAMESPACES                                                                 //
-// ========================================================================== //
-using namespace bitpit;
-
-// ========================================================================== //
-// IMPLEMENTATIONS                                                            //
-// ========================================================================== //
 
 /*!
 * Generate a 2D surface mesh.
 *
 * \param[in,out] mesh on output it will contain the generated surface mesh
 */
-void Generate2DSurfMesh(
-    SurfUnstructured                   &mesh
-) {
-
-// ========================================================================== //
-// VARIABLES DECLARATION                                                      //
-// ========================================================================== //
-
-// Local variables
-const double                            R = 1.0;
-const long                              N = 32;
-double                                  theta;
-double                                  dtheta = 2. * M_PI/((double) N);
-
-// Counters
-long                                    i;
-
-// ========================================================================== //
-// GENERATE MESH                                                              //
-// ========================================================================== //
+void Generate2DSurfMesh( bitpit::SurfUnstructured &mesh )
 {
-    // Local variables ------------------------------------------------------ //
-    std::array<double, 3>                    point;
-    std::vector<long>                        connect(2, Element::NULL_ID);
 
-    // Create vertex list --------------------------------------------------- //
-    //
+    const double R = 1.0;
+    const long N = 32;
+    double theta;
+    double dtheta = 2. * M_PI/((double) N);
+    
+    std::array<double,3> point;
+    std::vector<long> connect(2, bitpit::Element::NULL_ID);
+
+    // Create vertex list
     // Use non-consecutive vertex ids to test if the levelset can handle them.
     const long vertexIdOffset = 101;
     const long vertexIdStride = 2;
 
     point[2] = 0.0;
-    for (i = 0; i < N; ++i) {
+    for (long i = 0; i < N; ++i) {
         theta = ((double) i) * dtheta;
         point[0] = R * cos( theta );
         point[1] = R * sin( theta );
         mesh.addVertex(point, vertexIdOffset + vertexIdStride * i);
-    } //next i
+    }
 
-    // Create simplex list -------------------------------------------------- //
-    //
+    // Create simplex list
     // Use non-consecutive cell ids to test if the levelset can handle them.
     const long cellIdOffset = 202;
     const long cellIdStride = 3;
 
-    for (i = 0; i < N; ++i) {
+    for (long i = 0; i < N; ++i) {
         connect[0] = vertexIdOffset + vertexIdStride * i;
         connect[1] = vertexIdOffset + vertexIdStride * ((i + 1) % N);
-        mesh.addCell(ElementType::LINE, true, connect, cellIdOffset + cellIdStride * i);
-    } //next i
-}
+        mesh.addCell(bitpit::ElementType::LINE, true, connect, cellIdOffset + cellIdStride * i);
+    }
 
-return; }
+}
 
 /*!
 * Subtest 001
@@ -135,22 +93,22 @@ int subtest_001()
     int dimensions(2) ;
 
     // Input geometry
-    std::unique_ptr<SurfUnstructured> STL( new SurfUnstructured(0,1,dimensions) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(0,1,dimensions) );
 
-    log::cout() << " - Loading dgf geometry" << std::endl;
+    bitpit::log::cout() << " - Loading dgf geometry" << std::endl;
 
     Generate2DSurfMesh( *(STL.get()) ) ;
 
     STL->getVTK().setName("geometry_001") ;
     STL->write() ;
 
-    log::cout() << "n. vertex: " << STL->getVertexCount() << std::endl;
-    log::cout() << "n. simplex: " << STL->getCellCount() << std::endl;
+    bitpit::log::cout() << "n. vertex: " << STL->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << STL->getCellCount() << std::endl;
 
     // create cartesian mesh around geometry 
-    log::cout() << " - Setting mesh" << std::endl;
-    std::array<double,3>     meshMin, meshMax, delta ;
-    std::array<int,3>        nc = {{64, 64, 0}} ;
+    bitpit::log::cout() << " - Setting mesh" << std::endl;
+    std::array<double,3> meshMin, meshMax, delta ;
+    std::array<int,3> nc = {{64, 64, 0}} ;
 
     STL->getBoundingBox( meshMin, meshMax ) ;
 
@@ -160,12 +118,11 @@ int subtest_001()
 
     delta = meshMax -meshMin ;
 
-    VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
+    bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
     mesh.update() ;
 
     // mark cells within R=0.5
     std::unordered_set<long> mask;
-
     for( auto & cell : mesh.getCells() ){
         const long &id = cell.getId() ;
         std::array<double,3> center = mesh.evalCellCentroid(id);
@@ -173,49 +130,37 @@ int subtest_001()
         if(r<=0.5){
             mask.insert(id);
         }
-    };
+    }
 
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock> start, end;
     int elapsed_seconds;
 
-    LevelSet levelset ;
+    bitpit::LevelSet levelset ;
 
     levelset.setMesh(&mesh) ;
 
     int id0 = levelset.addObject(std::move(STL),M_PI) ;
     int id1 = levelset.addObject(mask) ;
+    std::vector<int> ids;
+    ids.push_back(id0);
+    ids.push_back(id1);
 
     start = std::chrono::system_clock::now();
     levelset.compute( ) ;
     end = std::chrono::system_clock::now();
 
     elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
-    log::cout() << " - Exporting data" << std::endl;
+    bitpit::log::cout() << " - Exporting data" << std::endl;
 
-    const LevelSetObject &object0 = levelset.getObject(id0);
-    const LevelSetObject &object1 = levelset.getObject(id1);
-
-    std::vector<double> LS0(mesh.getCellCount()) ;
-    std::vector<double> LS1(mesh.getCellCount()) ;
-    std::vector<double>::iterator it0 = LS0.begin() ;
-    std::vector<double>::iterator it1 = LS1.begin() ;
-    for( auto & cell : mesh.getCells() ){
-        const long &cellId = cell.getId() ;
-        *it0 = object0.getLS(cellId) ;
-        *it1 = object1.getLS(cellId) ;
-        ++it0 ;
-        ++it1 ;
-    };
-
-    mesh.getVTK().addData("ls0", VTKFieldType::SCALAR, VTKLocation::CELL, LS0) ;
-    mesh.getVTK().addData("ls1", VTKFieldType::SCALAR, VTKLocation::CELL, LS1) ;
+    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    levelset.getObject(id1).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh.getVTK().setName("levelset_001") ;
     mesh.write() ;
 
-    log::cout() << " - Exported data" << std::endl;
+    bitpit::log::cout() << " - Exported data" << std::endl;
 
     return 0;
 }
@@ -233,10 +178,10 @@ int main(int argc, char *argv[])
 #endif
 
 	// Initialize the logger
-	log::manager().initialize(log::COMBINED);
+	bitpit::log::manager().initialize(bitpit::log::COMBINED);
 
 	// Run the subtests
-	log::cout() << "Testing basic levelset features" << std::endl;
+	bitpit::log::cout() << "Testing basic levelset features" << std::endl;
 
 	int status;
 	try {
@@ -245,7 +190,7 @@ int main(int argc, char *argv[])
 			return status;
 		}
 	} catch (const std::exception &exception) {
-		log::cout() << exception.what();
+		bitpit::log::cout() << exception.what();
 		exit(1);
 	}
 
