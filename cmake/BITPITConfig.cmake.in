@@ -91,5 +91,24 @@ set(BITPIT_DEFINITIONS "@BITPIT_DEFINITIONS_PUBLIC@")
 # List of currently enabled BITPIT modules
 set(BITPIT_ENABLED_MODULE_LIST "@BITPIT_ENABLED_MODULE_LIST@")
 
+# Check if requested modules modules are enabled
+if(BITPIT_FIND_COMPONENTS)
+    foreach(COMPONENT ${BITPIT_FIND_COMPONENTS})
+        list(FIND BITPIT_ENABLED_MODULE_LIST ${COMPONENT} COMPONENT_INDEX)
+        if(${COMPONENT_INDEX} LESS 0)
+            set(BITPIT_${COMPONENT}_FOUND 0)
+
+            set(COMPONENT_NOT_FOUND_MESSAGE "${COMPONENT} module is not enabled in current BITPIT installation")
+            if(BITPIT_FIND_REQUIRED_${COMPONENT})
+               message(FATAL_ERROR "${COMPONENT_NOT_FOUND_MESSAGE}")
+            elseif (NOT BITPIT_FIND_QUIETLY)
+               message(STATUS "${COMPONENT_NOT_FOUND_MESSAGE}")
+            endif ()
+        else()
+            set(BITPIT_${COMPONENT}_FOUND 1)
+        endif()
+    endforeach()
+endif()
+
 # Let libfind_process initialize the appropriate variables
 libfind_process(BITPIT)

@@ -15,6 +15,14 @@
 #
 #  BITPIT_DIR - The directory containing BITPITConfig.cmake.
 #
+# A list of required BITPIT modules may be specified when invoking the
+# find_package command after the COMPONENTS option (or after the REQUIRED
+# option if present). Additional optional components may be listed after
+# OPTIONAL_COMPONENTS. For each of the requested modules, a boolean variable
+# named BITPIT_<MODULE_NAME>_FOUND will be set telling if the corresponding
+# module is enabled in the corresponding BITPIT installation. If a required
+# module is not found a fatal error is generated and the configure step
+# stops executing.
 
 # Assume not found.
 set(BITPIT_FOUND 0)
@@ -22,7 +30,7 @@ set(BITPIT_FOUND 0)
 # Use the Config mode of the find_package() command to find BITPITConfig.
 # If this succeeds (possibly because BITPIT_DIR is already set), the
 # command will have already loaded BITPITConfig.cmake and set BITPIT_FOUND.
-find_package(BITPIT QUIET NO_MODULE)
+find_package(BITPIT QUIET NO_MODULE COMPONENTS ${BITPIT_FIND_COMPONENTS})
 
 # If BITPIT was not found, explain to the user how to specify its location.
 if (NOT BITPIT_FOUND)
@@ -34,3 +42,16 @@ if (NOT BITPIT_FOUND)
         message(STATUS ${BITPIT_DIR_MESSAGE})
     endif ()
 endif ()
+
+# If If a required module is not found a fatal error is generated and the
+# configure step stops executing.
+foreach(COMPONENT ${BITPIT_FIND_COMPONENTS})
+    if(NOT BITPIT_${COMPONENT}_FOUND)
+        set(COMPONENT_NOT_FOUND_MESSAGE "${COMPONENT} module is not enabled in current BITPIT installation")
+        if(BITPIT_FIND_REQUIRED_${COMPONENT})
+           message(FATAL_ERROR "${COMPONENT_NOT_FOUND_MESSAGE}")
+        elseif (NOT BITPIT_FIND_QUIETLY)
+           message(STATUS "${COMPONENT_NOT_FOUND_MESSAGE}")
+        endif ()
+    endif()
+endforeach()
