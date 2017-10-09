@@ -286,7 +286,7 @@ int subtest_001()
         P[2] = 1.0;
         n.fill(0.0);
         n[2] = 1.0;
-        intersect = CGElem::intersectLineSimplex(P, n, V, Q);
+        intersect = CGElem::intersectLinePolygon(P, n, V, Q);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN LINE AND SIMPLEX" << endl;
@@ -320,7 +320,7 @@ int subtest_001()
         P[2] = 1.0;
         n.fill(0.0);
         n[2] = 1.0;
-        intersect = CGElem::intersectLineSimplex(P, n, V, Q);
+        intersect = CGElem::intersectLinePolygon(P, n, V, Q);
 
         // Output message ------------------------------------------------------- //
         cout << "  Test 2 " << endl;
@@ -560,8 +560,7 @@ int subtest_001()
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
-        array<double, 3>            A, B, C, P0, Q;
-        int                         flag ;
+        array<double, 3>            A, B, C, P0, lambda;
         double                      d ;
 
         // Compute intersection (Test 1) ---------------------------------------- //
@@ -575,7 +574,7 @@ int subtest_001()
         P0[0] = P0[1] = 1.;
         P0[2] = -2.0;
 
-        d = CGElem::distancePointTriangle(P0, A, B, C, Q, flag);
+        d = CGElem::distancePointTriangle(P0, A, B, C, lambda);
 
         // Output message ------------------------------------------------------- //
         cout << " - DISTANCE BETWEEN POINT AND TRIANGLE" << endl;
@@ -587,8 +586,7 @@ int subtest_001()
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
         cout << "    distance to point is: " << d << endl;
-        cout << "    projection point is: " << Q << endl;
-        cout << "    projecting on : " << flag << endl;
+        cout << "    barycentric coordinates of projection point are: " << lambda << endl;
         cout << endl;
 
     }
@@ -598,9 +596,8 @@ int subtest_001()
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
-        array<double, 3>            A, B, C, P0, Q, lambda;
+        array<double, 3>            A, B, C, P0, lambda;
         double                      d ;
-        int flag ;
 
         // Compute intersection (Test 1) ---------------------------------------- //
         A.fill(0.0);
@@ -613,7 +610,7 @@ int subtest_001()
         P0[0] = P0[1] = 1.;
         P0[2] = -2.0;
 
-        d = CGElem::distancePointTriangle(P0, A, B, C, Q, lambda, flag);
+        d = CGElem::distancePointTriangle(P0, A, B, C, lambda);
 
         // Output message ------------------------------------------------------- //
         cout << " - DISTANCE BETWEEN POINT AND TRIANGLE" << endl;
@@ -625,7 +622,6 @@ int subtest_001()
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
         cout << "    distance to point is: " << d << endl;
-        cout << "    projection point is: " << Q << endl;
         cout << "    barycentric coordinates are : " << lambda << endl;
         cout << endl;
 
@@ -705,9 +701,8 @@ int subtest_001()
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
-        vector< array<double, 3> >  P(2), Q(2);
+        vector< array<double, 3> >  P(2), lambda(2);
         vector<double>              d(2) ;
-        vector<int>                 flag(2) ;
 
         array<double, 3>            A, B, C;
 
@@ -725,7 +720,7 @@ int subtest_001()
         P[1].fill(-0.5);
         P[1][2] = 1.0;
         
-        d = CGElem::distanceCloudTriangle(P, A, B, C, Q, flag);
+        d = CGElem::distanceCloudTriangle(P, A, B, C, lambda);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 1" << endl;
@@ -739,11 +734,9 @@ int subtest_001()
         cout << "      B: " << B << endl;
         cout << "      C: " << C << endl;
         cout << "    distance to point 0 is: " << d[0] << endl;
-        cout << "    projection point 0 is: " << Q[0] << endl;
-        cout << "    projecting 0 on : " << flag[0] << endl;
+        cout << "    barycentric coordinates of projection point 0 are: " << lambda[0] << endl;
         cout << "    distance to point 1 is: " << d[1] << endl;
-        cout << "    projection point 1 is: " << Q[1] << endl;
-        cout << "    projecting 1 on : " << flag[1] << endl;
+        cout << "    barycentric coordinates of projection point 1 are: " << lambda[1] << endl;
         cout << endl;
 
     }
@@ -782,7 +775,7 @@ int subtest_001()
         
         //d = CGElem::distanceCloudTriangle(P, A, B, C, nullptr, nullptr);
         d = CGElem::distanceCloudTriangle(P, A, B, C, lambda);
-        //d = CGElem::distanceCloudSimplex(P,VS);
+        //d = CGElem::distanceCloudPolygon(P,VS);
 
         // Output message ------------------------------------------------------- //
         cout << " - INTERSECTION BETWEEN POINT CLOUD AND TRIANGLE 2" << endl;

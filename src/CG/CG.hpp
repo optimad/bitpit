@@ -90,7 +90,6 @@ bool validBarycentric( double const * &, int );
 int convertBarycentricToFlagTriangle( std::array<double,3> const &);
 int convertBarycentricToFlagSegment( std::array<double,2> const &);
 int convertBarycentricToFlagPolygon( std::vector<double> const &);
-BITPIT_DEPRECATED(int convertBarycentricToFlagSimplex( std::vector<double> const &));
 
 void computeGeneralizedBarycentric( array3D const &, std::vector<array3D> const &, std::vector<double> &);
 
@@ -99,7 +98,6 @@ array3D reconstructPointFromBarycentricSegment( array3D const &, array3D const &
 array3D reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, std::array<double,3> const & ); 
 array3D reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, double const * ); 
 array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &, std::vector<double> const & ); 
-BITPIT_DEPRECATED(array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &, std::vector<double> const & )); 
 
 array3D projectPointLine( array3D const &, array3D const &, array3D const & );
 array3D projectPointPlane( array3D const &, array3D const &, array3D const & );
@@ -110,8 +108,6 @@ array3D projectPointTriangle( array3D const &, array3D const &, array3D const &,
 array3D projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D & );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const & );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );
-BITPIT_DEPRECATED(array3D projectPointSimplex( array3D const &, std::vector<array3D> const & ));
-BITPIT_DEPRECATED(array3D projectPointSimplex( array3D const &, std::vector<array3D> const &, std::vector<double> & ));
 array3D projectPointCone( array3D const &, array3D const &, array3D const &, double const &);
 std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &);
 
@@ -121,36 +117,24 @@ array3D restrictPointTriangle( array3D const &, array3D const &, array3D const &
 double distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;
 double distancePointPlane( array3D const &, array3D const &, array3D const &, array3D & ) ;
 
-BITPIT_DEPRECATED( double distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, int & ));
-BITPIT_DEPRECATED( double distancePointSegment( array3D const &, array3D const &, array3D const &, array3D &, std::array<double,2> &, int & )) ;
 double distancePointSegment( array3D const &, array3D const &, array3D const & );
 double distancePointSegment( array3D const &, array3D const &, array3D const &, std::array<double,2> & );
 
-BITPIT_DEPRECATED( double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, int & )) ;
-BITPIT_DEPRECATED( double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int & )) ;
 double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &);
 double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &);
 
 double distancePointPolygon( array3D const &, std::vector<array3D> const &, array3D &, int & );
 double distancePointPolygon( array3D const &, std::vector<array3D> const & );
 double distancePointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );
-BITPIT_DEPRECATED( double distancePointSimplex( array3D const &, std::vector<array3D> const &, array3D &, int & )) ;
-BITPIT_DEPRECATED(double distancePointSimplex( array3D const &, std::vector<array3D> const & ));
-BITPIT_DEPRECATED(double distancePointSimplex( array3D const &, std::vector<array3D> const &, std::vector<double> & ));
 
 double distancePointCone( array3D const &, array3D const &, array3D const &, double const &);
 
-BITPIT_DEPRECATED( std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, std::vector<int> & ) );
-BITPIT_DEPRECATED( std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> * const, std::vector<array3D> * const ) );
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &);
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> & );
 
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<array3D> &, std::vector<int> & );
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::vector<array3D> const &);
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<std::vector<double>> &);
-BITPIT_DEPRECATED( std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<array3D> &, std::vector<int> & ) );
-BITPIT_DEPRECATED(std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &));
-BITPIT_DEPRECATED(std::vector<double> distanceCloudSimplex( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<std::vector<double>> &));
 
 double distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &);
 double distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
@@ -164,15 +148,12 @@ bool intersectLineLine( array3D const &, array3D const &, array3D const &, array
 bool intersectLinePlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectLineTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectLinePolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ) ;
-BITPIT_DEPRECATED(bool intersectLineSimplex( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ));
 
 bool intersectSegmentSegment( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectSegmentPlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectSegmentTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectSegmentPolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ) ;
-BITPIT_DEPRECATED(bool intersectSegmentSimplex( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ));
 
-BITPIT_DEPRECATED (bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, int dim=3 ) );
 bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3 ) ;
 bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, int dim=3 );
 bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 );
@@ -185,15 +166,10 @@ bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D
 bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int  dim = 3 ) ;
 
 
-BITPIT_DEPRECATED( bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &));
 bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, int dim=3 ) ;
 bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> &, int dim=3 ) ;
 bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 ) ;
 
-BITPIT_DEPRECATED( bool intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, std::vector<array3D> &, int dim=3) );
-BITPIT_DEPRECATED( bool intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, int dim=3 ) );
-BITPIT_DEPRECATED( bool intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, int dim=3) );
-BITPIT_DEPRECATED( bool intersectBoxSimplex( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3) );
 
 bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, int dim=3 );
 bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, int dim=3);
@@ -203,23 +179,11 @@ bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D>
 void computeAABBSegment( array3D const &, array3D const &, array3D &, array3D & ) ;
 void computeAABBTriangle( array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;
 void computeAABBPolygon( std::vector<array3D> const &, array3D &, array3D & );
-BITPIT_DEPRECATED(void computeAABBSimplex( std::vector<array3D> const &, array3D &, array3D & ) );
 
 void unionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
 void intersectionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
 void subtractionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
 void unionAABB( std::vector<array3D>  const &, std::vector<array3D> const &, array3D &, array3D & );
-//levelset    bool IntersectLineSurface(
-//levelset            array3D  const  &,                                                // (input)  first point on surface
-//levelset            array3D  const  &,                                                // (input)  normal of first point on surface
-//levelset            array3D  const  &,                                                // (input)  second point on surface
-//levelset            array3D  const  &,                                                // (input)  normal of second point on surface
-//levelset            array3D  const  &,                                                // (input)  point on line
-//levelset            array3D  const  &,                                                // (input)  versor of line
-//levelset            array3D         &,                                                // (output)  intersection of line and surface
-//levelset            array3D         &                                                 // (output)  normal at intersection
-//levelset            );
-
 
 array3D rotateVector( array3D const &, array3D const &, double);
 double areaTriangle( array3D const &, array3D const &, array3D const &);

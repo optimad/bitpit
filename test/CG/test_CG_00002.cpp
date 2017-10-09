@@ -71,14 +71,14 @@ bool testConvertBarycentricToFlagTriangle(){
 }
 
 /*!
- * \return true, test convertBarycentricToFlagSimplex passed
+ * \return true, test convertBarycentricToFlagPolygon passed
  */
-bool testConvertBarycentricToFlagSimplex(){
+bool testConvertBarycentricToFlagPolygon(){
     
     bool check(true);
-    check &= (convertBarycentricToFlagSimplex({{0.1,0.2,0.2,0.5}}) == 0);
-    check &= (convertBarycentricToFlagSimplex({{1.0,0.0,0.0,0.0}}) == 1);
-    check &= (convertBarycentricToFlagSimplex({{0.0,0.4,0.6,0.0}}) == -2);
+    check &= (convertBarycentricToFlagPolygon({{0.1,0.2,0.2,0.5}}) == 0);
+    check &= (convertBarycentricToFlagPolygon({{1.0,0.0,0.0,0.0}}) == 1);
+    check &= (convertBarycentricToFlagPolygon({{0.0,0.4,0.6,0.0}}) == -2);
     return check;
 }
 
@@ -115,9 +115,9 @@ bool testReconstructPointFromBarycentricTriangle(){
 }
 
 /*!
- * \return true, test reconstructPointFromBarycentricSimplex passed
+ * \return true, test reconstructPointFromBarycentricPolygon passed
  */
-bool testReconstructPointFromBarycentricSimplex(){
+bool testReconstructPointFromBarycentricPolygon(){
     std::vector<array3D> pp(5,{{0.0,0.0,0.0}});
     pp[0][2] = 1.0;
     pp[1][0] = 1.0; pp[1][2] = 1.0;
@@ -126,7 +126,7 @@ bool testReconstructPointFromBarycentricSimplex(){
     std::vector<double> lambda(5,0.2);
     
     array3D test1 = {{0.3,0.3,0.4}};
-    array3D target1 = reconstructPointFromBarycentricSimplex(pp, lambda);
+    array3D target1 = reconstructPointFromBarycentricPolygon(pp, lambda);
     return (norm2(target1 - test1)< 1.e-12);
 }
 
@@ -233,9 +233,9 @@ bool testProjectCloudTriangle(){
 
 
 /*!
- * \return true, test projectPointSimplex passed
+ * \return true, test projectPointPolygon passed
  */
-bool testProjectPointSimplex(){
+bool testProjectPointPolygon(){
     
     std::vector<array3D>polygon;
     polygon.push_back({{0.0, 0.0, 2.0}});
@@ -246,7 +246,7 @@ bool testProjectPointSimplex(){
     
     array3D point = {{0.5,0.73,0.0}};
     array3D test = {{0.5,0.73,2.0}};
-    array3D target = projectPointSimplex(point, polygon);
+    array3D target = projectPointPolygon(point, polygon);
     
     return (norm2(target - test)< 1.e-12);
 }
@@ -411,9 +411,9 @@ bool testDistanceCloudTriangle(){
 }
 
 /*!
- * \return true, test distancePointSimplex passed
+ * \return true, test distancePointPolygon passed
  */
-bool testDistancePointSimplex(){
+bool testDistancePointPolygon(){
     
     bool check(true);
 
@@ -430,8 +430,8 @@ bool testDistancePointSimplex(){
     double distance = norm2(point - test);
     std::vector<double> lambda;
     
-    auto target0 = distancePointSimplex(point, polygon);
-    auto target1 = distancePointSimplex(point, polygon, lambda);
+    auto target0 = distancePointPolygon(point, polygon);
+    auto target1 = distancePointPolygon(point, polygon, lambda);
     check &= (std::abs(target0 - distance)< 1.e-12);
     check &= (std::abs(target1 - distance)< 1.e-12);
     
@@ -439,9 +439,9 @@ bool testDistancePointSimplex(){
 }
 
 /*!
- * \return true, test distanceCloudSimplex passed
+ * \return true, test distanceCloudPolygon passed
  */
-bool testDistanceCloudSimplex(){
+bool testDistanceCloudPolygon(){
     
     bool check(true);
 
@@ -464,8 +464,8 @@ bool testDistanceCloudSimplex(){
                       
     std::vector<std::vector<double> > lambda; 
     
-    auto target0 = distanceCloudSimplex(cloud, polygon);
-    auto target1 = distanceCloudSimplex(cloud, polygon, lambda);
+    auto target0 = distanceCloudPolygon(cloud, polygon);
+    auto target1 = distanceCloudPolygon(cloud, polygon, lambda);
     for(int j=0; j<2; ++j){
         check &= (std::abs(target0[j] - distances[j])< 1.e-12);
         check &= (std::abs(target1[j] - distances[j])< 1.e-12);
@@ -708,9 +708,9 @@ bool testIntersectSegmentTriangle(){
 }
 
 /*!
- * \return true, test intersectLineSimplex passed
+ * \return true, test intersectLinePolygon passed
  */
-bool testIntersectLineSimplex(){
+bool testIntersectLinePolygon(){
     
     bool check(true);
     double cc = pow(29,0.5);
@@ -728,16 +728,16 @@ bool testIntersectLineSimplex(){
     array3D test = {{2.0,0.0,0.0}};
     array3D xp;
     
-    check &= intersectLineSimplex(p0,d0,polygon,xp);
+    check &= intersectLinePolygon(p0,d0,polygon,xp);
     check &= (norm2(test-xp)<1.E-12);
     
     return check;
 }
 
 /*!
- * \return true, test intersectSegmentSimplex passed
+ * \return true, test intersectSegmentPolygon passed
  */
-bool testIntersectSegmentSimplex(){
+bool testIntersectSegmentPolygon(){
     
     bool check(true);
     double cc = pow(29,0.5);
@@ -756,7 +756,7 @@ bool testIntersectSegmentSimplex(){
     array3D test = {{2.0,0.0,0.0}};
     array3D xp;
     
-    check &= intersectSegmentSimplex(p0,p1,polygon,xp);
+    check &= intersectSegmentPolygon(p0,p1,polygon,xp);
     check &= (norm2(test-xp)<1.E-12);
     
     return check;
@@ -808,7 +808,7 @@ bool testIntersectBoxTriangle(){
 
     std::vector<array3D> insects;
     
-    check &= intersectBoxTriangle(min0,max0,p1,p2,p3,insects);
+    check &= intersectBoxTriangle(min0,max0,p1,p2,p3,false,false,true,insects);
     check &= (insects.size() == 1);
     return check;
 }
@@ -828,16 +828,16 @@ bool testIntersectSegmentBox(){
     std::vector<array3D> insects;
 
     check &= intersectSegmentBox(p1,p2,min0,max0,3);
-    check &= intersectSegmentBox(p1,p2,min0,max0,insects,3);
+    check &= intersectSegmentBox(p1,p2,min0,max0,true,true,insects,3);
     check &= (insects.size() == 2);
     
     return check;
 }
 
 /*!
- * \return true, test intersectBoxSimplex passed
+ * \return true, test intersectBoxPolygon passed
  */
-bool testIntersectBoxSimplex(){
+bool testIntersectBoxPolygon(){
     
     bool check(true);
     
@@ -852,7 +852,7 @@ bool testIntersectBoxSimplex(){
     
     std::vector<array3D> insects;
     
-    check &= intersectBoxSimplex(min0,max0,polygon,true,true,true,insects,3);
+    check &= intersectBoxPolygon(min0,max0,polygon,true,true,true,insects,3);
     check &= (insects.size() == 4);
     
     return check;
@@ -938,9 +938,9 @@ bool testComputeAABBTriangle(){
 }
 
 /*!
- * \return true, test computeAABBSimplex passed
+ * \return true, test computeAABBPolygon passed
  */
-bool testComputeAABBSimplex(){
+bool testComputeAABBPolygon(){
     
     std::vector<array3D> polygon;
     array3D m0, m1, dim, test;
@@ -951,7 +951,7 @@ bool testComputeAABBSimplex(){
     polygon.push_back({{0,1.5,0.5}});
     test = {{3,1.9567,0}};
     
-    computeAABBSimplex(polygon,m0,m1);
+    computeAABBPolygon(polygon,m0,m1);
     dim = m1-m0;
     
     return (norm2(dim-test) < 1.e-12); 
@@ -1143,8 +1143,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testConvertBarycentricToFlagSimplex();
-        std::cout << "Testing convertBarycentricToFlagSimplex...";
+        pass = testConvertBarycentricToFlagPolygon();
+        std::cout << "Testing convertBarycentricToFlagPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1170,8 +1170,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testReconstructPointFromBarycentricSimplex();
-        std::cout << "Testing reconstructPointFromBarycentricSimplex...";
+        pass = testReconstructPointFromBarycentricPolygon();
+        std::cout << "Testing reconstructPointFromBarycentricPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1233,8 +1233,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testProjectPointSimplex();
-        std::cout << "Testing projectPointSimplex...";
+        pass = testProjectPointPolygon();
+        std::cout << "Testing projectPointPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1305,8 +1305,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testDistancePointSimplex();
-        std::cout << "Testing distancePointSimplex...";
+        pass = testDistancePointPolygon();
+        std::cout << "Testing distancePointPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1314,8 +1314,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testDistanceCloudSimplex();
-        std::cout << "Testing distanceCloudSimplex...";
+        pass = testDistanceCloudPolygon();
+        std::cout << "Testing distanceCloudPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1404,8 +1404,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testIntersectLineSimplex();
-        std::cout << "Testing intersectLineSimplex...";
+        pass = testIntersectLinePolygon();
+        std::cout << "Testing intersectLinePolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1413,8 +1413,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testIntersectSegmentSimplex();
-        std::cout << "Testing intersectSegmentSimplex...";
+        pass = testIntersectSegmentPolygon();
+        std::cout << "Testing intersectSegmentPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1449,8 +1449,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testIntersectBoxSimplex();
-        std::cout << "Testing intersectBoxSimplex...";
+        pass = testIntersectBoxPolygon();
+        std::cout << "Testing intersectBoxPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;
@@ -1503,8 +1503,8 @@ int main(int argc, char *argv[])
             std::cout << " Passed" << std::endl;
         }
 
-        pass = testComputeAABBSimplex();
-        std::cout << "Testing computeAABBSimplex...";
+        pass = testComputeAABBPolygon();
+        std::cout << "Testing computeAABBPolygon...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;

@@ -426,42 +426,6 @@ bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, a
 
 /*!
  * \private
- * Computes intersection between an axis aligned bounding box and a simplex
- * \param[in] A0 min point of first box
- * \param[in] A1 max point of first box
- * \param[in] VS simplex vertices coordinates
- * \param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
- * \param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * \param[in] simplexBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
- * \param[out] P intersection points simplex box edges
- * \param[in] dim number of dimension to be checked
- * \return if intersect
- */
-bool _intersectBoxSimplex(array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxHullIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
-{
-
-    array3D B0, B1;
-
-    //check if simplex boundig box and box overlap -> necessary condition
-    computeAABBPolygon( VS, B0, B1);
-    if( !intersectBoxBox( A0, A1, B0, B1, dim) ) { 
-        return false; 
-    }
-    
-    int vertexCount = VS.size();
-    if(vertexCount == 2){ //segment
-        return _intersectSegmentBox( VS[0], VS[1], A0, A1, innerSimplexPoints, simplexEdgeBoxHullIntersection, intrPtr, flagPtr, dim);
-
-    } else if(vertexCount == 3){ //triangle
-        return _intersectBoxTriangle( VS[0], VS[1], VS[2], A0, A1, innerSimplexPoints, simplexEdgeBoxHullIntersection, simplexBoxEdgeIntersection, intrPtr, flagPtr, dim);
-
-    } else{
-        return _intersectBoxPolygon( A0, A1, VS, innerSimplexPoints, simplexEdgeBoxHullIntersection, simplexBoxEdgeIntersection, intrPtr, flagPtr, dim);
-    }
-}
-
-/*!
- * \private
  * Computes intersection between an axis aligned bounding box and a convex polygon
  * \param[in] A0 min point of first box
  * \param[in] A1 max point of first box
@@ -786,29 +750,6 @@ int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
 }
 
 /*!
- * Converts barycentric coordinates of a point on a simplex to a flag that indicates where the point lies.
- * Flag = 0 Point lies within the simplex
- * Flag = i Point coincides with the ith vertex of simplex or lies within the area spanned by the edges incident in the ith vertex
- * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
- * \param[in] lambda barycentric coordinates of point
- * \return flag
- */
-int convertBarycentricToFlagSimplex( std::vector<double> const &lambda)
-{
-    int vertexCount(lambda.size());
-
-    if(vertexCount==2){
-        return convertBarycentricToFlagSegment({{lambda[0], lambda[1]}} );
-
-    } else if(vertexCount==3){
-        return convertBarycentricToFlagTriangle({{lambda[0], lambda[1], lambda[2] }});
-
-    } else {
-        return convertBarycentricToFlagPolygon(lambda);
-    }
-}
-
-/*!
  * Computes Generalized Barycentric Coordinates of a point in convex polygons or polyedra.
  * No check is performed to check convexity.
  * Formula [6] of \ref{igeometry.caltech.edu/pubs/MHBD02.pdf} is implemented.
@@ -925,17 +866,6 @@ array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &V, s
     }
 
     return xP;
-}
-
-/*!
- * Reconstructs a point from barycentric coordinates of a simplex
- * \param[in] V vertices of simplex
- * \param[in] lambda barycentric coordinates
- * \return reconstructed Point
- */
-array3D reconstructPointFromBarycentricSimplex( std::vector<array3D> const &V, std::vector<double> const &lambda)
-{
-    return reconstructPointFromBarycentricPolygon(V,lambda);
 }
 
 /*!
@@ -1201,47 +1131,6 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
 }
 
 /*!
- * Computes projection of point onto a generic simplex
- * \param[in] P point coordinates
- * \param[in] V simplex vertices coordinates
- * \return coordinates of projection point
- */
-array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V)
-{
-    std::vector<double> lambda(V.size());
-    return projectPointSimplex( P, V, lambda);
-}
-
-/*!
- * Computes projection of point onto a generic simplex
- * \param[in] P point coordinates
- * \param[in] V simplex vertices coordinates
- * \param[out] lambda baycentric coordinates of projection point
- * \return coordinates of projection point
- */
-array3D projectPointSimplex( array3D const &P, std::vector<array3D> const &V, std::vector<double> &lambda)
-{
-    array3D xP;
-
-    int vertexCount(V.size());
-    lambda.resize(vertexCount);
-
-    if (vertexCount == 2) { //segment
-        xP =  projectPointSegment(P, V[0], V[1], lambda.data());
-
-    } else if (vertexCount == 3) { //triangle
-        _projectPointsTriangle(1, &P, V[0], V[1], V[2], &xP, &lambda[0] );
-
-    } else { //generic convex polygon
-        xP = projectPointPolygon(P, V, lambda);
-
-    }
-
-    return xP;
-
-}
-
-/*!
  * Computes projection point on semi-infinite cone surface
  * \param[in] point point coordinates
  * \param[in] apex cone apex
@@ -1311,43 +1200,7 @@ double distancePointPlane( array3D const &P, array3D const &Q, array3D const &n,
 }
 
 /*!
- * Computes distance point to segment in 3D using a projection method
- * \param[in] P point coordinates
- * \param[in] Q1 segment starting point
- * \param[in] Q2 segment ending point
- * \param[out] xP closest point on line
- * \param[out] flag point mapping onto segment vertices (flag = 1, 2), or onto segment interior (flag = 0)
- * \return distance
- */
-double distancePointSegment( array3D const &P, array3D const &Q1, array3D const &Q2, array3D &xP, int &flag)
-{
-    std::array<double,2> lambda;
-
-    double distance =  distancePointSegment(P, Q1, Q2, lambda); 
-    xP = reconstructPointFromBarycentricSegment(Q1,Q2,lambda);
-    flag = convertBarycentricToFlagSegment(lambda);
-    return distance;
-}
-
-/*!
- * Computes distance point to segment in 3D using barycentric coordinates
- * \param[in] P point coordinates
- * \param[in] Q1 segment starting point
- * \param[in] Q2 segment ending point
- * \param[out] xP closest point on line
- * \param[out] lambda barycentric coordinates
- * \return distance
- */
-double distancePointSegment( array3D const &P, array3D const &Q1, array3D const &Q2, array3D &xP, std::array<double,2> &lambda, int &flag ) 
-{
-    xP = projectPointSegment( P, Q1, Q2, lambda);
-    flag = convertBarycentricToFlagSegment(lambda);
-
-    return norm2(P-xP); 
-}
-
-/*!
- * Computes distance point to segment in 3D using barycentric coordinates
+ * Computes distance point to segment
  * \param[in] P point coordinates
  * \param[in] Q0 segment starting point
  * \param[in] Q1 segment ending point
@@ -1372,43 +1225,6 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
 {
     array3D xP = projectPointSegment( P, Q0, Q1, lambda);
     return norm2(P-xP); 
-}
-
-/*!
- * Computes distance point to triangle
- * \param[in] P point coordinates
- * \param[in] Q0 first triangle vertex
- * \param[in] Q1 second triangle vertex
- * \param[in] Q2 third triangle vertex
- * \param[out] xP closest point on triangle
- * \param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
- * \return distance
- */
-double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &xP, int &flag)
-{
-    array3D lambda;
-    double distance =  distancePointTriangle( P, Q0, Q1, Q2, lambda);
-    flag = convertBarycentricToFlagTriangle(lambda);
-    xP = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda);
-    return distance;
-}
-
-/*!
- * Computes distance point to triangle
- * \param[in] P point coordinates
- * \param[in] Q0 first triangle vertex
- * \param[in] Q1 second triangle vertex
- * \param[in] Q2 third triangle vertex
- * \param[out] xP closest point on triangle
- * \param[out] lambda barycentric coordinates of projection point
- * \param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
- * \return distance
- */
-double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &xP, array3D &lambda, int &flag) 
-{
-    xP = projectPointTriangle(P, Q0, Q1, Q2, lambda);
-    flag = convertBarycentricToFlagTriangle(lambda);
-    return norm2(P-xP);
 }
 
 /*!
@@ -1456,80 +1272,6 @@ double distancePointCone( array3D const &point, array3D const &apex, array3D con
 
 /*!
  * Computes distances of point cloud to triangle
- * \param[in] P point cloud coordinates
- * \param[in] Q1 first triangle vertex
- * \param[in] Q2 second triangle vertex
- * \param[in] Q3 third triangle vertex
- * \param[out] xP closest points on triangle
- * \param[out] flag point projecting onto triangle's interior (flag = 0), triangle's vertices (flag = 1, 2, 3) or triangle's edges (flag = -1, -2, -3)
- * \return distance
- */
-std::vector<double> distanceCloudTriangle( std::vector<array3D> const &P, array3D const &Q1, array3D const &Q2, array3D const &Q3, std::vector<array3D> &xP, std::vector<int> &flag )
-{
-
-    int N( P.size() );
-    std::vector<array3D> lambda(N);
-    std::vector<double> d = distanceCloudTriangle( P, Q1, Q2, Q3, lambda );
-
-    flag.resize(N);
-    std::vector<int>::iterator flagItr = flag.begin();
-
-    xP.resize(N);
-    std::vector<array3D>::iterator xPItr = xP.begin();
-
-    for( auto const &l : lambda){
-        *xPItr   = reconstructPointFromBarycentricTriangle( Q1, Q2, Q3, l);
-        *flagItr = convertBarycentricToFlagTriangle(l);
-
-        ++xPItr;
-        ++flagItr;
-    }
-
-    return d;
-}
-
-/*!
- * Computes distances of point cloud to triangle
- * \param[in] cloud point cloud coordinates
- * \param[in] Q1 first triangle vertex
- * \param[in] Q2 second triangle vertex
- * \param[in] Q3 third triangle vertex
- * \param[inout] xPExt pointer to std::vector to be filled with the projection point; 
- * \param[inout] lambdas pointer to sd::vector to be filled with barycentric coordinates of projection points
- * \return distances
- */
-std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2, std::vector<array3D>* const xPExt, std::vector<array3D>* const lambdaExt )
-{
-
-    int N(cloud.size());
-
-    std::vector<array3D> xP, lambda;
-
-    std::vector<array3D> *xPPtr = ( xPExt == nullptr) ? &xP : xPExt;
-    std::vector<array3D> *lambdaPtr = ( lambdaExt == nullptr) ? &lambda : lambdaExt;
-    
-    xPPtr->resize(N);
-    lambdaPtr->resize(N);
-
-    _projectPointsTriangle( N, cloud.data(), Q0, Q1, Q2, &(xPPtr->at(0)), &(*lambdaPtr)[0][0] );
-
-    std::vector<array3D>::iterator projection = xPPtr->begin();
-
-    std::vector<double> d(N);
-    std::vector<double>::iterator distance = d.begin();
-
-    for( const auto &point : cloud){
-        *distance = norm2( point - *projection);
-
-        ++projection;
-        ++distance;
-    }
-
-    return d;
-}
-
-/*!
- * Computes distances of point cloud to triangle
  * \param[in] cloud point cloud coordinates
  * \param[in] Q1 first triangle vertex
  * \param[in] Q2 second triangle vertex
@@ -1572,83 +1314,6 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
     }
 
     return d;
-}
-
-/*!
- * Computes distances of point to generic simplex
- * \param[in] P point coordinates
- * \param[in] V simplex vertices coordinates
- * \param[out] xP closest points on simplex
- * \param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
- * \return distance
- */
-double distancePointSimplex( array3D const &P, std::vector<array3D> const &V, array3D &xP, int &flag)
-{
-    int vertexCount(V.size());
-
-    if(vertexCount==2){
-        return distancePointSegment( P, V[0], V[1], xP, flag);
-
-    } else if(vertexCount==3){
-        return distancePointTriangle( P, V[0], V[1], V[2], xP, flag);
-
-    } else {
-        return distancePointPolygon( P, V, xP, flag);
-    }
-}
-
-/*!
- * Computes distances of point to generic simplex
- * \param[in] P point coordinates
- * \param[in] V simplex vertices coordinates
- * \return distance
- */
-double distancePointSimplex( array3D const &P, std::vector<array3D> const &V)
-{
-    int vertexCount(V.size());
-
-    if(vertexCount==2){
-        return distancePointSegment( P, V[0], V[1]);
-
-    } else if(vertexCount==3){
-        return distancePointTriangle( P, V[0], V[1], V[2]);
-
-    } else {
-        return distancePointPolygon( P, V);
-    }
-}
-
-/*!
- * Computes distances of point to generic simplex
- * \param[in] P point coordinates
- * \param[in] V simplex vertices coordinates
- * \param[out] lambda barycentric coordinates
- * \return distance
- */
-double distancePointSimplex( array3D const &P, std::vector<array3D> const &V,std::vector<double> &lambda)
-{
-    int vertexCount(V.size());
-
-    if(vertexCount==2){
-        std::array<double,2> _lambda;
-        double distance =  distancePointSegment( P, V[0], V[1], _lambda);
-        lambda.resize(2);
-        lambda[0] = _lambda[0];
-        lambda[1] = _lambda[1];
-        return distance;
-
-    } else if(vertexCount==3){
-        std::array<double,3> _lambda;
-        double distance = distancePointTriangle( P, V[0], V[1], V[2], _lambda);
-        lambda.resize(3);
-        lambda[0] = _lambda[0];
-        lambda[1] = _lambda[1];
-        lambda[2] = _lambda[2];
-        return distance;
-
-    } else {
-        return distancePointPolygon( P, V);
-    }
 }
 
 /*!
@@ -1784,118 +1449,6 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std
     }
 
     return d; 
-}
-
-/*!
- * Computes distances of point cloud to generic simplex
- * \param[in] P point cloud coordinates
- * \param[in] V simplex vertices coordinates
- * \param[out] xP closest points on simplex
- * \param[out] flag point projecting onto simplex's interior (flag = 0), simplex's vertices (flag = 1, 2, ...) or triangle's edges (flag = -1, -2, -...)
- * \return distance
- */
-std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<array3D> &xP, std::vector<int> &flag)
-{
-    int vertexCount(V.size());
-    int cloudCount(cloud.size());
-    std::vector<double> d(cloudCount);
-
-    if (vertexCount == 2) { //Segment
-
-        xP.resize(cloudCount);
-        flag.resize(cloudCount);
-        for( int i=0; i<cloudCount; ++i ){
-            d[i] = distancePointSegment(cloud[i], V[0], V[1], xP[i], flag[i] );
-        }
-
-
-    } else if (vertexCount == 3) {  // Triangle 
-        d = distanceCloudTriangle(cloud, V[0], V[1], V[2], xP, flag);
-
-    } else { // Generic convex polygon 
-        d =  distanceCloudPolygon(cloud, V);
-
-    }
-
-    return d;
-
-}
-
-/*!
- * Computes distances of point cloud to generic simplex
- * \param[in] P point cloud coordinates
- * \param[in] V simplex vertices coordinates
- * \return distance
- */
-std::vector<double> distanceCloudSimplex( std::vector<array3D> const &P, std::vector<array3D> const &V)
-{
-    int vertexCount(V.size());
-
-    if (vertexCount == 2) { //Segment
-        int cloudCount(P.size());
-        std::vector<double> d(cloudCount);
-
-        for( int i=0; i<cloudCount; ++i ){
-            d[i] = distancePointSegment(P[i], V[0], V[1]);
-        }
-
-        return d;
-
-    } else if (vertexCount == 3) {  // Triangle 
-        return distanceCloudTriangle(P, V[0], V[1], V[2]);
-
-    } else { // Generic convex polygon 
-        return distanceCloudPolygon(P, V);
-
-    }
-
-}
-
-/*!
- * Computes distances of point cloud to generic simplex
- * \param[in] cloud point cloud coordinates
- * \param[in] V simplex vertices coordinates
- * \param[out] lambda barycentric coordinates of projectio points
- * \return distance
- */
-std::vector<double> distanceCloudSimplex( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<std::vector<double>> &lambda)
-{
-    int cloudCount(cloud.size()), vertexCount(V.size());
-
-    lambda.resize(cloudCount, std::vector<double>(vertexCount,0) );
-
-    if (vertexCount == 2) { //Segment
-        std::vector<double> d(cloudCount);
-
-        std::vector<double>::iterator dItr = d.begin();
-        std::vector<std::vector<double>>::iterator lambdaItr = lambda.begin();
-
-        array3D proj;
-
-        for( auto const &point : cloud ){
-            proj = projectPointSegment(point, V[0], V[1], lambdaItr->data());
-            *dItr = norm2( point-proj);
-            ++dItr;
-            ++lambdaItr;
-        }
-
-        return d;
-
-    } else if (vertexCount == 3) {  // Triangle 
-        std::vector<array3D> lambdaTemp(cloudCount);
-        auto lambdaItr = lambda.begin();
-        std::vector<double> d =  distanceCloudTriangle(cloud, V[0], V[1], V[2], lambdaTemp);
-        for(auto const &l : lambdaTemp){
-            std::copy( l.begin(), l.end(), lambdaItr->begin());
-            ++lambdaItr;
-        }
-
-        return d;
-
-    } else { // Generic convex polygon 
-        return distanceCloudPolygon( cloud, V, lambda);
-    }
-
 }
 
 /*!
@@ -2201,19 +1754,6 @@ bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D con
 }
 
 /*!
- * Computes intersection between triangle and a simplex
- * \param[in] P point on line
- * \param[in] n direction of line
- * \param[in] V simplex vertices coordinates
- * \param[out] Q intersection point
- * \return if intersect
- */
-bool intersectLineSimplex( array3D const &P, array3D const &n, std::vector<array3D > const &V, array3D &Q)
-{
-    return intersectLinePolygon(P, n, V, Q);
-}
-
-/*!
  * Computes intersection between triangle and a convex polygon
  * \param[in] P point on line
  * \param[in] n direction of line
@@ -2237,19 +1777,6 @@ bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array
     }
 
     return false; 
-}
-
-/*!
- * Computes intersection between a segment and a generic simplex
- * \param[in] P0 start point of segment
- * \param[in] P1 end point of segment
- * \param[in] V simplex vertices coordinates
- * \param[out] Q intersection point
- * \return if intersect
- */
-bool intersectSegmentSimplex( array3D const &P0, array3D const &P1, std::vector<array3D > const &V, array3D &Q)
-{
-    return intersectSegmentPolygon(P0, P1, V, Q);
 }
 
 /*!
@@ -2349,21 +1876,6 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] V0 first vertex of triangle
  * \param[in] V1 second vertex of triangle
  * \param[in] V2 third vertex of triangle
- * \param[out] P intersection points between triangle and the box edges
- * \return if intersect
- */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, std::vector<array3D> &P)
-{
-    return _intersectBoxTriangle( A0, A1, V0, V1, V2, false, false, true, &P, nullptr);
-}
-
-/*!
- * Checks if an axis aligned bounding box and a triangle intersect
- * \param[in] A0 min point of box
- * \param[in] A1 max point of box
- * \param[in] V0 first vertex of triangle
- * \param[in] V1 second vertex of triangle
- * \param[in] V2 third vertex of triangle
  * \param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
  * \param[in] triangleEdgeBoxFaceIntersections if true, the intersections between the edges of the triangle and the hull of the box will be added to the intersection points P
  * \param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
@@ -2443,80 +1955,6 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
 bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
     return _intersectSegmentBox( V0, V1, A0, A1, interiorSegmentVertice, segmentBoxHullIntersection, &P, &flag, dim);
-}
-
-/*!
- * Computes intersection between an axis aligned bounding box and a segment
- * \param[in] V0 start point of segment
- * \param[in] V1 end point of segment
- * \param[in] A0 min point of box
- * \param[in] A1 max point of box
- * \param[out] P intersection point segment and box faces
- * \param[in] dim number of dimension to be checked
- * \return if intersect
- */
-bool intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, std::vector<array3D> &P, int dim)
-{
-    return _intersectSegmentBox( V0, V1, A0, A1, false, true, &P, nullptr, dim);
-}
-
-/*!
- * Computes intersection between an axis aligned bounding box and a simplex
- * \param[in] A1 min point of first box
- * \param[in] A2 max point of first box
- * \param[in] VS simplex vertices coordinates
- * \param[in] dim number of dimension to be checked
- * \return if intersect
- */
-bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, int dim )
-{
-    return _intersectBoxSimplex( A1, A2, VS, false, false, false, nullptr, nullptr, dim);
-}
-
-/*!
- * Computes intersection between an axis aligned bounding box and a simplex
- * \param[in] A1 min point of first box
- * \param[in] A2 max point of first box
- * \param[in] VS simplex vertices coordinates
- * \param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
- * \param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the simplex and the hull of the box should be added to the intersection list
- * \param[in] simplexBoxEdgeIntersection intersection between the simplex and the edges of the box should be added to the intersection list
- * \param[in] dim number of dimension to be checked
- * \return if intersect
- */
-bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxFaceIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> &P, int dim)
-{
-    return _intersectBoxSimplex(A1, A2, VS, innerSimplexPoints, simplexEdgeBoxFaceIntersection, simplexBoxEdgeIntersection, &P, nullptr, dim);
-}
-
-/*!
- * Computes intersection between an axis aligned bounding box and a simplex
- * \param[in] A1 min point of first box
- * \param[in] A2 max point of first box
- * \param[in] VS simplex vertices coordinates
- * \param[in] innerSimplexPoints simplex vertices within the box should be added to the intersection list
- * \param[in] simplexEdgeBoxFaceIntersection intersection between the edges of the simplex and the hull of the box should be added to the intersection list
- * \param[in] simplexBoxEdgeIntersection intersection between the simplex and the edges of the box should be added to the intersection list
- * \param[in] dim number of dimension to be checked
- * \return if intersect
- */
-bool intersectBoxSimplex( array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, bool innerSimplexPoints, bool simplexEdgeBoxFaceIntersection, bool simplexBoxEdgeIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
-{
-    return _intersectBoxSimplex(A1, A2, VS, innerSimplexPoints, simplexEdgeBoxFaceIntersection, simplexBoxEdgeIntersection, &P, &flag, dim);
-}
-
-/*!
- * Computes intersection between an axis aligned bounding box and a simplex
- * \param[in] A1 min point of first box
- * \param[in] A2 max point of first box
- * \param[in] VS simplex vertices coordinates
- * \param[out] P intersection points simplex box edges
- * \param[in] dim number of dimension to be checked
- * \return if intersect
- */
-bool intersectBoxSimplex(array3D const &A1, array3D const &A2, std::vector<array3D> const &VS, std::vector<array3D> &P, int dim)
-{
-    return _intersectBoxSimplex(A1, A2, VS, false, true, false, &P, nullptr, dim);
 }
 
 /*!
@@ -2762,18 +2200,6 @@ void computeAABBTriangle(array3D const &A, array3D const &B, array3D const &C, a
         P1[i] = std::max( P1[i], C[i] );
     }
 
-    return;
-}
-
-/*!
- * computes axis aligned boundig box of a simplex
- * \param[in] VS simplex vertices coordinates
- * \param[out] P0 min point of bounding box
- * \param[out] P1 max point of bounding box
- */
-void computeAABBSimplex(std::vector<array3D> const &VS, array3D &P0, array3D &P1)
-{
-    computeAABBPolygon( VS, P0, P1);
     return;
 }
 
