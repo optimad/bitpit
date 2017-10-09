@@ -23,22 +23,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- *	\date			10/jul/2014
- *	\authors		Alessandro Alaia
- *	\authors		Haysam Telib
- *	\authors		Edoardo Lombardi
- *	\version		0.1
- *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *
- *	\brief Level Set Class Demos
- */
-
-// ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
-
 //Standard Template Library
 # include <ctime>
 # include <chrono>
@@ -54,11 +38,6 @@
 # include "bitpit_voloctree.hpp"
 # include "bitpit_levelset.hpp"
 
-// ========================================================================== //
-// NAMESPACES                                                                 //
-// ========================================================================== //
-using namespace std;
-
 /*!
 * Subtest 001
 *
@@ -68,12 +47,12 @@ using namespace std;
 */
 int subtest_001(int rank)
 {
-    uint8_t                 dimensions(2);
+    uint8_t dimensions(2);
 
     // First Input geometry
     std::unique_ptr<bitpit::SurfUnstructured> STL0( new bitpit::SurfUnstructured (1,dimensions) );
 
-    std::cout << " - Loading stl geometry" << std::endl;
+    bitpit::log::cout() << " - Loading stl geometry" << std::endl;
 
     STL0->importDGF("./data/naca0012.dgf");
 
@@ -85,14 +64,14 @@ int subtest_001(int rank)
         STL0->write() ;
     }
 
-    std::cout << "n. vertex: " << STL0->getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL0->getCellCount() << std::endl;
+    bitpit::log::cout() << "n. vertex: " << STL0->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << STL0->getCellCount() << std::endl;
 
 
     // Second Input geometry
     std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (1,dimensions) );
 
-    std::cout << " - Loading stl geometry" << std::endl;
+    bitpit::log::cout() << " - Loading stl geometry" << std::endl;
 
     STL1->importDGF("./data/square.dgf");
 
@@ -104,17 +83,15 @@ int subtest_001(int rank)
         STL1->write() ;
     }
 
-    std::cout << "n. vertex: " << STL1->getVertexCount() << std::endl;
-    std::cout << "n. simplex: " << STL1->getCellCount() << std::endl;
+    bitpit::log::cout() << "n. vertex: " << STL1->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << STL1->getCellCount() << std::endl;
 
-    // ========================================================================== //
-    // CREATE MESH                                                                //
-    // ========================================================================== //
-    std::cout << " - Setting mesh" << std::endl;
-    std::array<double,3>    meshMin0, meshMax0;
-    std::array<double,3>    meshMin1, meshMax1;
-    std::array<double,3>    meshMin, meshMax, delta ;
-    double                  h(0), dh ;
+    // Create mesh
+    bitpit::log::cout() << " - Setting mesh" << std::endl;
+    std::array<double,3> meshMin0, meshMax0;
+    std::array<double,3> meshMin1, meshMax1;
+    std::array<double,3> meshMin, meshMax, delta ;
+    double h(0), dh ;
 
     STL0->getBoundingBox( meshMin0, meshMax0 ) ;
     STL1->getBoundingBox( meshMin1, meshMax1 ) ;
@@ -127,7 +104,7 @@ int subtest_001(int rank)
     delta = meshMax -meshMin ;
 
     for( int i=0; i<3; ++i){
-        h = max( h, meshMax[i]-meshMin[i] ) ;
+        h = std::max( h, meshMax[i]-meshMin[i] ) ;
     };
 
     dh = h / 16. ;
@@ -135,67 +112,62 @@ int subtest_001(int rank)
     mesh.update() ;
 
 
-    // COMPUTE LEVEL SET in NARROW BAND
-    std::chrono::time_point<std::chrono::system_clock>    start, end;
-    int                                         elapsed_init, elapsed_refi(0);
+    // Configure levelset
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    int elapsed_init, elapsed_part, elapsed_refi(0);
 
-    bitpit::LevelSet                levelset;
+    bitpit::LevelSet levelset;
 
     std::vector<bitpit::adaption::Info> mapper ;
-    int                             id0, id1, id2 ;
-    std::vector<double>             LS0, LS1, LS2 ;
-    std::vector<double>::iterator   it0, it1, it2 ;
+    int id0, id1, id2 ;
+    std::vector<int> ids;
 
     levelset.setMesh(&mesh) ;
     id0 = levelset.addObject(std::move(STL0),M_PI) ;
     id1 = levelset.addObject(std::move(STL1),M_PI) ;
     id2 = levelset.addObject(bitpit::LevelSetBooleanOperation::INTERSECTION,id0,id1) ;
-    const bitpit::LevelSetObject &object0 = levelset.getObject(id0) ;
-    const bitpit::LevelSetObject &object1 = levelset.getObject(id1) ;
-    const bitpit::LevelSetObject &object2 = levelset.getObject(id2) ;
+    ids.push_back(id0);
+    ids.push_back(id1);
+    ids.push_back(id2);
 
-    mesh.getVTK().addData("ls0", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS0) ;
-    mesh.getVTK().addData("ls1", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS1) ;
-    mesh.getVTK().addData("ls2", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS2) ;
-    mesh.getVTK().setName("levelset_parallel_002") ;
+    bitpit::LevelSetObject &object0 = levelset.getObject(id0) ;
+    bitpit::LevelSetObject &object1 = levelset.getObject(id1) ;
+    bitpit::LevelSetObject &object2 = levelset.getObject(id2) ;
+
+    object0.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object1.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object2.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
 
     levelset.setPropagateSign(true);
 
+    // Compute levelset in narrow band
     start = std::chrono::system_clock::now();
     levelset.compute( );
     end = std::chrono::system_clock::now();
 
-    elapsed_init = chrono::duration_cast<chrono::milliseconds>(end-start).count();
-
-
-    // Export level set ------------------------------------------------------- //
-    std::cout << " - Exporting data" << endl;
-    LS0.resize(mesh.getCellCount() ) ;
-    LS1.resize(mesh.getCellCount() ) ;
-    LS2.resize(mesh.getCellCount() ) ;
-    it0 = LS0.begin() ;
-    it1 = LS1.begin() ;
-    it2 = LS2.begin() ;
-    for( auto & cell : mesh.getCells() ){
-        const long &cellId = cell.getId();
-        *it0 = object0.getLS(cellId);
-        *it1 = object1.getLS(cellId);
-        *it2 = object2.getLS(cellId);
-        ++it0;
-        ++it1;
-        ++it2;
-    };
+    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
     if(rank==0){
+        mesh.getVTK().setName("levelset_parallel_002_serial");
         mesh.write() ;
     }
 
-    //Mesh Partitioning
-    mapper = mesh.partition(MPI_COMM_WORLD, true) ;
-    mesh.getVTK().setCounter() ;
-    levelset.partition(mapper) ;
 
-    //Refinement
+    // Mesh Partitioning
+    mapper = mesh.partition(MPI_COMM_WORLD, true) ;
+
+    start = std::chrono::system_clock::now();
+    levelset.partition(mapper) ;
+    end = std::chrono::system_clock::now();
+
+    elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+
+    mesh.getVTK().setName("levelset_parallel_002_partitioned");
+    mesh.write() ;
+
+    // Refinement
+    mesh.getVTK().setCounter() ;
+    mesh.getVTK().setName("levelset_parallel_002_refinement");
     for( int i=0; i<10; ++i){
 
         for( auto & cell : mesh.getCells() ){
@@ -216,31 +188,14 @@ int subtest_001(int rank)
         levelset.update(mapper) ;
         end = std::chrono::system_clock::now();
 
-        elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
+        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
-        std::cout << "Refinement " << i << " Narrow Band id " << id0 << " " << object0.getSizeNarrowBand() << endl;
-        std::cout << "Refinement " << i << " Narrow Band id " << id1 << " " << object1.getSizeNarrowBand() << endl;
-
-        LS0.resize(mesh.getCellCount());
-        LS1.resize(mesh.getCellCount());
-        LS2.resize(mesh.getCellCount());
-        it0 = LS0.begin() ;
-        it1 = LS1.begin() ;
-        it2 = LS2.begin() ;
-        for( auto & cell : mesh.getCells() ){
-            const long &cellId = cell.getId();
-            *it0 = object0.getLS(cellId);
-            *it1 = object1.getLS(cellId);
-            *it2 = object2.getLS(cellId);
-            ++it0 ;
-            ++it1 ;
-            ++it2 ;
-        };
         mesh.write() ;
     }
 
-    cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
-    cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;
+    bitpit::log::cout() << "elapsed time initialization " << elapsed_init << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi << " ms" << std::endl;
 
     return 0;
 }
