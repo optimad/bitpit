@@ -439,22 +439,6 @@ void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKBaseStre
 
 }
 
-/*!
- * Associates streamer to a geometrical field
- * @param[in] fieldEnum which geometrical field 
- * @param[in] type type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
- * @param[in] streamer VTKBaseStreamer
- */
-void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKDataType type, VTKBaseStreamer *streamer ){
-
-    int      index = static_cast<int>(fieldEnum) ;
-    VTKField& field = m_geometry[index] ;
-
-    field.setDataType( type ) ;
-    field.setStreamer( *streamer ) ;
-
-}
-
 /*!  
  *  sets the global 2D grid information for parallel output.
  *  Needs to be called by all processes

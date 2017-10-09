@@ -265,23 +265,6 @@ void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseSt
 
 }
 
-/*!
- * Associates streamer to a geometrical field
- * @param[in] fieldEnum which geometrical field 
- * @param[in] type type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
- * @param[in] streamer pointer to data streamer
- */
-void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKDataType type, VTKBaseStreamer *streamer ){
-
-    int      index = getFieldGeomId(fieldEnum) ;
-    VTKField& field = m_geometry[index] ;
-
-    field.setDataType( type ) ;
-    field.setStreamer( *streamer ) ;
-
-
-}
-
 /*!  
  *  Reads "type" information of existing grid and calculates the correspondng connectivity size.
  *  @return size of the connectivity information

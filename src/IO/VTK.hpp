@@ -330,8 +330,6 @@ class VTK{
 
         VTKField&               addData( std::string, VTKBaseStreamer* = NULL ) ;
 
-        BITPIT_DEPRECATED( VTKField&  addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
-
         template<class T>
         VTKField&               addData( std::string, VTKFieldType, VTKLocation, VTKBaseStreamer* =NULL ) ;
 
@@ -445,8 +443,6 @@ class VTKUnstructuredGrid : public VTK {
         void                    setGeomData( VTKUnstructuredField, std::vector<T> & ) ;
         void                    setGeomData( VTKUnstructuredField, VTKBaseStreamer* = NULL ) ;
 
-        BITPIT_DEPRECATED( void setGeomData( VTKUnstructuredField, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
-
         template<class T>
         void setGeomData( VTKUnstructuredField, VTKBaseStreamer* =NULL );
 
@@ -499,7 +495,6 @@ class VTKRectilinearGrid : public VTK{
         template<class T>
         void                    setGeomData( VTKRectilinearField, std::vector<T> & ) ;
         void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* = NULL ) ;
-        BITPIT_DEPRECATED( void setGeomData( VTKRectilinearField, VTKDataType, VTKBaseStreamer* =NULL ) ) ;
 
         template<class T>
         void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* =NULL ) ;

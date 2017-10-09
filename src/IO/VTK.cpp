@@ -319,27 +319,6 @@ VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
 }
 
 /*!
- * Add user data for input or output. 
- * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
- * @param[in] name name of field
- * @param[in] comp type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
- * @param[in] loc location of data [VTKLocation::CELL/VTKLocation::POINT]
- * @param[in] type type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
- * @param[in] streamer data streamer
- */
-VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, VTKDataType type, VTKBaseStreamer *streamer ){
-
-    VTKField&   field = addData( name, streamer ) ;
-
-    field.setFieldType(comp) ;
-    field.setLocation(loc) ;
-    field.setDataType(type) ;
-
-    return field ;
-
-}
-
-/*!
  * Removes user data from input or output 
  * @param[in] name name of field to be removed
  */
