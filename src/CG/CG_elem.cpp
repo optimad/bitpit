@@ -2365,15 +2365,15 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] V1 second vertex of triangle
  * \param[in] V2 third vertex of triangle
  * \param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
- * \param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
  * \param[in] triangleEdgeBoxFaceIntersections if true, the intersections between the edges of the triangle and the hull of the box will be added to the intersection points P
+ * \param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
  * \param[out] P calculated intersection points 
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> P, int dim)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> &P, int dim)
 {
-    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertice, triangleBoxEdgeIntersection, triangleEdgeBoxFaceIntersections, &P, nullptr, dim);
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertice, triangleEdgeBoxFaceIntersections, triangleBoxEdgeIntersection, &P, nullptr, dim);
 }
 
 /*!
