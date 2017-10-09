@@ -11,7 +11,7 @@ set(BITPIT_INSTALL_CMAKE_DIR "lib/cmake/${PROJECT_NAME}-${BITPIT_MAJOR_VERSION}.
 #------------------------------------------------------------------------------------#
 # Generate BITPITConfig.cmake
 #------------------------------------------------------------------------------------#
-set(BITPIT_CONFIG_CODE
+set(BITPIT_INSTALL_PREFIX_CODE
 "set(_bitpit_installed_prefix \"${CMAKE_INSTALL_PREFIX}/${BITPIT_INSTALL_CMAKE_DIR}\")
 set(_bitpit_requested_prefix \"\${CMAKE_CURRENT_LIST_DIR}\")
 get_filename_component(_bitpit_installed_prefix_full \"\${_bitpit_installed_prefix}\" REALPATH)
@@ -25,11 +25,11 @@ else ()
 # calls to compute the installation prefix.
 string(REGEX REPLACE "/" ";" _count "${BITPIT_INSTALL_CMAKE_DIR}")
 foreach(p ${_count})
-    set(BITPIT_CONFIG_CODE "${BITPIT_CONFIG_CODE}
+    set(BITPIT_INSTALL_PREFIX_CODE "${BITPIT_INSTALL_PREFIX_CODE}
     get_filename_component(BITPIT_INSTALL_PREFIX \"\${BITPIT_INSTALL_PREFIX}\" PATH)")
 endforeach()
 
-set(BITPIT_CONFIG_CODE "${BITPIT_CONFIG_CODE}
+set(BITPIT_INSTALL_PREFIX_CODE "${BITPIT_INSTALL_PREFIX_CODE}
 endif ()")
 
 set(BITPIT_CONFIG_CMAKE_DIR "\${BITPIT_INSTALL_PREFIX}/${BITPIT_INSTALL_CMAKE_DIR}")

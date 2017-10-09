@@ -5,7 +5,7 @@
 # to load BITPIT's settings for an external project.
 
 # Compute the installation prefix from this BITPITConfig.cmake file location.
-@BITPIT_CONFIG_CODE@
+@BITPIT_INSTALL_PREFIX_CODE@
 
 # The C and C++ flags added by BITPIT to the cmake-configured flags.
 SET(BITPIT_REQUIRED_C_FLAGS "")
