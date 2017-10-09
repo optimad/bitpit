@@ -32,9 +32,7 @@
 #include "bitpit_surfunstructured.hpp"
 #include "bitpit_voloctree.hpp"
 #include "bitpit_levelset.hpp"
-
-using namespace std;
-
+  
 /*!
 * Subtest 001
 *
@@ -44,11 +42,13 @@ using namespace std;
 */
 int subtest_001(int rank)
 {
+    int dimensions = 3;
+
     // Info
     bitpit::log::cout() << "Testing creating a levelset from an existing tree" << std::endl;
 
     // Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(2, 3) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(2, dimensions) );
 
     bitpit::log::cout() << " - Loading stl geometry" << std::endl;
 
@@ -78,10 +78,8 @@ int subtest_001(int rank)
 
     double h = 0.;
     for (int i=0; i<3; ++i) {
-        h = max(h, meshMax[i] - meshMin[i]);
+        h = std::max(h, meshMax[i] - meshMin[i]);
     }
-
-    int dimensions = 3;
 
     std::unique_ptr<bitpit::PabloUniform> octree = std::unique_ptr<bitpit::PabloUniform>(new bitpit::PabloUniform(meshMin[0], meshMin[1], meshMin[2], h, dimensions));
     octree->adaptGlobalRefine();
@@ -97,49 +95,35 @@ int subtest_001(int rank)
     bitpit::VolOctree mesh(std::move(octree));
     mesh.update();
 
-    mesh.getVTK().setCounter();
-    mesh.getVTK().setName("levelset_parallel_003");
-
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock>    start, end;
-    int                                         elapsed_init, elapsed_refi(0);
+    int elapsed_init, elapsed_refi(0);
 
-    bitpit::LevelSet                levelset;
+    bitpit::LevelSet levelset;
 
     std::vector<bitpit::adaption::Info> mapper;
-    std::vector<double>             LS;
-    std::vector<double>::iterator   itLS;
 
     levelset.setMesh(&mesh);
-    int id0 = levelset.addObject(std::move(STL),M_PI);
-    const bitpit::LevelSetObject &object = levelset.getObject(id0);
-
-    mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS);
-
     levelset.setPropagateSign(true);
+    int id0 = levelset.addObject(std::move(STL),M_PI);
+
 
     start = std::chrono::system_clock::now();
     levelset.compute( );
     end = std::chrono::system_clock::now();
 
-    elapsed_init = chrono::duration_cast<chrono::milliseconds>(end-start).count();
+    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
     // Write mesh
-    if (rank == 0) {
-        bitpit::log::cout() << " - Exporting data" << endl;
-    }
+    bitpit::log::cout() << " - Exporting data" << std::endl;
 
-    LS.resize(mesh.getCellCount() );
-    itLS = LS.begin();
-    for (auto & cell : mesh.getCells() ){
-        const long &id = cell.getId();
-        *itLS = object.getLS(id);
-        ++itLS;
-    }
-
+    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    mesh.getVTK().setCounter();
+    mesh.getVTK().setName("levelset_parallel_003");
     mesh.write();
 
     // Refinement
+    const bitpit::LevelSetObject &object = levelset.getObject(id0);
     for (int i=0; i<3; ++i){
 
         for (auto & cell : mesh.getCells() ){
@@ -154,21 +138,12 @@ int subtest_001(int rank)
         levelset.update(mapper);
         end = std::chrono::system_clock::now();
 
-        elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
-
-        LS.resize(mesh.getCellCount() );
-        itLS = LS.begin();
-        for (auto & cell : mesh.getCells() ){
-            const long &id = cell.getId();
-            *itLS = object.getLS(id);
-            ++itLS;
-        }
-
+        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
         mesh.write();
     }
 
-    bitpit::log::cout() << " Elapsed time initialization " << elapsed_init << " ms" << endl;
-    bitpit::log::cout() << " Elapsed time refinement     " << elapsed_refi << " ms" << endl;
+    bitpit::log::cout() << " Elapsed time initialization " << elapsed_init << " ms" << std::endl;
+    bitpit::log::cout() << " Elapsed time refinement     " << elapsed_refi << " ms" << std::endl;
 
     return 0;
 }
