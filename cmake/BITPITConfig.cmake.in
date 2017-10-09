@@ -4,6 +4,13 @@
 # This file is configured by BITPIT and used by the UseBITPIT.cmake module
 # to load BITPIT's settings for an external project.
 
+# If a different UseBITPIT.cmake was previoulsy loaded a reconfiguration
+# is needed
+if(NOT ("@BITPIT_CMAKE_CONFIG_DIR@" STREQUAL BITPIT_CMAKE_CONFIG_PATH_LAST))
+    set(BITPIT_RECONFIGURE 1)
+    set(BITPIT_CMAKE_CONFIG_PATH_LAST CACHE INTERNAL "@BITPIT_CMAKE_CONFIG_DIR@" FORCE)
+endif()
+
 # Compute the installation prefix from this BITPITConfig.cmake file location.
 @BITPIT_INSTALL_PREFIX_CODE@
 
@@ -34,12 +41,21 @@ include(FindPackageHandleStandardArgs)
 #-----------------------------------------------------------------------------
 
 # Headers
+if(BITPIT_RECONFIGURE)
+    unset(BITPIT_INCLUDE_DIR CACHE)
+endif()
+
 find_path(BITPIT_INCLUDE_DIR "@PROJECT_NAME@_version.hpp"
           HINTS "${BITPIT_INSTALL_PREFIX}/include/bitpit")
 
 mark_as_advanced(BITPIT_INCLUDE_DIR)
 
 # Library
+if(BITPIT_RECONFIGURE)
+    unset(BITPIT_LIBRARY_RELEASE CACHE)
+    unset(BITPIT_LIBRARY_DEBUG CACHE)
+endif()
+
 find_library(BITPIT_LIBRARY_RELEASE
              NAMES @PROJECT_NAME@@BITPIT_RELEASE_POSTFIX@ @PROJECT_NAME@
              HINTS "${BITPIT_INSTALL_PREFIX}/lib")
@@ -108,6 +124,11 @@ if(BITPIT_FIND_COMPONENTS)
             set(BITPIT_${COMPONENT}_FOUND 1)
         endif()
     endforeach()
+endif()
+
+# Unset the unneeded variables
+if(BITPIT_RECONFIGURE)
+    unset(BITPIT_RECONFIGURE)
 endif()
 
 # Let libfind_process initialize the appropriate variables

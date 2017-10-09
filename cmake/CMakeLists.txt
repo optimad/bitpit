@@ -11,8 +11,10 @@ set(BITPIT_INSTALL_CMAKE_DIR "lib/cmake/${PROJECT_NAME}-${BITPIT_MAJOR_VERSION}.
 #------------------------------------------------------------------------------------#
 # Generate BITPITConfig.cmake
 #------------------------------------------------------------------------------------#
+set(BITPIT_CMAKE_CONFIG_DIR "${CMAKE_INSTALL_PREFIX}/${BITPIT_INSTALL_CMAKE_DIR}")
+
 set(BITPIT_INSTALL_PREFIX_CODE
-"set(_bitpit_installed_prefix \"${CMAKE_INSTALL_PREFIX}/${BITPIT_INSTALL_CMAKE_DIR}\")
+"set(_bitpit_installed_prefix \"${BITPIT_CMAKE_CONFIG_DIR}\")
 set(_bitpit_requested_prefix \"\${CMAKE_CURRENT_LIST_DIR}\")
 get_filename_component(_bitpit_installed_prefix_full \"\${_bitpit_installed_prefix}\" REALPATH)
 get_filename_component(_bitpit_requested_prefix_full \"\${_bitpit_requested_prefix}\" REALPATH)
