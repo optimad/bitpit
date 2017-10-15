@@ -37,7 +37,7 @@ sections:
                 url: installation.html
             manual:
                 name: Programmer's manual
-                url: manual/1.3.2/index.html
+                url: manual/1.4.0/index.html
 
     downloads:
         name: Downloads
