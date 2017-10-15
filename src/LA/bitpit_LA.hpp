@@ -33,7 +33,7 @@
  * @defgroup lamanipulation Manipulation
  * @defgroup lamultiplication Multiplication
  * @defgroup lainfo Info
- * @defgroup lasolve Solve
+ * @defgroup system_solver_small System Solvers (Small Systems)
  * @}
  */
 

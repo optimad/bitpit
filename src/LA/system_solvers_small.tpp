@@ -25,7 +25,7 @@
 namespace bitpit{
 namespace linearalgebra{
 /*!
- * @ingroup lasolve
+ * @ingroup system_solver_small
  * @{
  */
 
