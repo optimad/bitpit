@@ -352,6 +352,7 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
             temp.clear() ;
             bitpit::utils::string::convertString( line, temp) ;
             nconn += temp.size() ;
+            getline( str, line) ;
         }
 
 
