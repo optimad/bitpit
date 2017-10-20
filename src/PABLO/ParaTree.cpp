@@ -2833,8 +2833,23 @@ namespace bitpit {
                         }
                     }
                 }
-                isghost = true;
-                return idxtry;
+
+                const Octant* octtry = getGhostOctant(idxtry);
+                dvector anchor_idxtry = {{getX(octtry),getY(octtry),getZ(octtry)}};
+                double size_try = getSize(octtry);
+                bool isInIdxtry = true;
+
+                for(int i = 0; i < m_dim; ++i){
+                    isInIdxtry *= (point[i] >= anchor_idxtry[i] && point[i] <= anchor_idxtry[i] + size_try);
+                }
+
+                if( isInIdxtry){
+                    isghost = true;
+                    return idxtry;
+                }
+                else{
+                    return numeric_limits<uint32_t>::max();
+                }
             }
         }///end ghosts search
     };
@@ -3086,8 +3101,23 @@ namespace bitpit {
                         }
                     }
                 }
-                isghost = true;
-                return idxtry;
+
+                const Octant* octtry = getGhostOctant(idxtry);
+                dvector anchor_idxtry = {{getX(octtry),getY(octtry),getZ(octtry)}};
+                double size_try = getSize(octtry);
+                bool isInIdxtry = true;
+
+                for(int i = 0; i < m_dim; ++i){
+                    isInIdxtry *= (point[i] >= anchor_idxtry[i] && point[i] <= anchor_idxtry[i] + size_try);
+                }
+
+                if( isInIdxtry){
+                    isghost = true;
+                    return idxtry;
+                }
+                else{
+                    return numeric_limits<uint32_t>::max();
+                }
             }
         }///end ghosts search
     };
