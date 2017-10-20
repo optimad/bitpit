@@ -3325,7 +3325,7 @@ long PatchKernel::countFreeFaces() const
  *
  *  \param stream is the stream to write to
  */
-void PatchKernel::dumpInterfaces(std::ostream &stream)
+void PatchKernel::dumpInterfaces(std::ostream &stream) const
 {
 	long nInterfaces = getInterfaceCount();
 	utils::binary::write(stream, nInterfaces);
@@ -5047,7 +5047,7 @@ int PatchKernel::getDumpVersion() const
  *
  *  \param stream is the stream to write to
  */
-void PatchKernel::dump(std::ostream &stream)
+void PatchKernel::dump(std::ostream &stream) const
 {
 	// Version
 	utils::binary::write(stream, getDumpVersion());

@@ -911,7 +911,7 @@ int VolCartesian::_getDumpVersion() const
  *
  *  \param stream is the stream to write to
  */
-void VolCartesian::_dump(std::ostream &stream)
+void VolCartesian::_dump(std::ostream &stream) const
 {
 	utils::binary::write(stream, m_minCoords[0]);
 	utils::binary::write(stream, m_minCoords[1]);

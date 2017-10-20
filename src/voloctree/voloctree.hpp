@@ -129,7 +129,7 @@ protected:
 	void _resetTol();
 
 	int _getDumpVersion() const;
-	void _dump(std::ostream &stream);
+	void _dump(std::ostream &stream) const;
 	void _restore(std::istream &stream);
 
 	long _getCellNativeIndex(long id) const;

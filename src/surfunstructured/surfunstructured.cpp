@@ -135,7 +135,7 @@ int SurfUnstructured::_getDumpVersion() const
  *
  *  \param stream is the stream to write to
  */
-void SurfUnstructured::_dump(std::ostream &stream)
+void SurfUnstructured::_dump(std::ostream &stream) const
 {
 #if BITPIT_ENABLE_MPI==1
 	// Dump works only for serial calculations

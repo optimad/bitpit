@@ -162,7 +162,7 @@ int VolUnstructured::_getDumpVersion() const
  *
  *  \param stream is the stream to write to
  */
-void VolUnstructured::_dump(std::ostream &stream)
+void VolUnstructured::_dump(std::ostream &stream) const
 {
     BITPIT_UNUSED(stream);
 

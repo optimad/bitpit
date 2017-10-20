@@ -68,7 +68,7 @@ protected:
 	SurfUnstructured(const SurfUnstructured &other) = default;
 
 	int _getDumpVersion() const;
-	void _dump(std::ostream &stream);
+	void _dump(std::ostream &stream) const;
 	void _restore(std::istream &stream);
 
 	static ElementType getSTLFacetType(int nFacetVertices);

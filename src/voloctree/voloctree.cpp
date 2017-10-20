@@ -1888,7 +1888,7 @@ int VolOctree::_getDumpVersion() const
  *
  *  \param stream is the stream to write to
  */
-void VolOctree::_dump(std::ostream &stream)
+void VolOctree::_dump(std::ostream &stream) const
 {
 	// Dump tree data
 	m_tree->dump(stream);

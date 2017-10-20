@@ -411,7 +411,7 @@ public:
 	void flushData(std::fstream &stream, std::string name, VTKFormat format );
 
 	int getDumpVersion() const;
-	void dump(std::ostream &stream);
+	void dump(std::ostream &stream) const;
 	void restore(std::istream &stream, bool reregister = false);
 
 	void consecutiveRenumberVertices(long offset = 0);
@@ -488,7 +488,7 @@ protected:
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
 
-	void dumpInterfaces(std::ostream &stream);
+	void dumpInterfaces(std::ostream &stream) const;
 	void restoreInterfaces(std::istream &stream);
 
 	void setSpawnStatus(SpawnStatus status);
@@ -506,7 +506,7 @@ protected:
 	virtual void _resetTol();
 
 	virtual int _getDumpVersion() const = 0;
-	virtual void _dump(std::ostream &stream) = 0;
+	virtual void _dump(std::ostream &stream) const = 0;
 	virtual void _restore(std::istream &stream) = 0;
 
 	virtual long _getCellNativeIndex(long id) const;

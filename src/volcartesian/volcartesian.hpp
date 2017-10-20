@@ -139,7 +139,7 @@ protected:
 	std::vector<adaption::Info> _spawn(bool trackSpawn);
 
 	int _getDumpVersion() const;
-	void _dump(std::ostream &stream);
+	void _dump(std::ostream &stream) const;
 	void _restore(std::istream &stream);
 
 	void _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
