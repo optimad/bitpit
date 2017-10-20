@@ -1795,7 +1795,9 @@ bool VolOctree::_enableCellBalancing(const long &id, bool enabled)
  */
 bool VolOctree::isPointInside(const std::array<double, 3> &point)
 {
-	return (m_tree->getPointOwner(point) != nullptr);
+	bool isGhost;
+
+	return (m_tree->getPointOwner(point, isGhost) != nullptr);
 }
 
 /*!
@@ -1838,12 +1840,13 @@ bool VolOctree::isPointInside(const long &id, const std::array<double, 3> &point
 */
 long VolOctree::locatePoint(const std::array<double, 3> &point)
 {
-	Octant *octant = m_tree->getPointOwner(point);
-	if (m_tree->getPointOwner(point) == nullptr) {
+	bool isGhost;
+	uint32_t treeId = m_tree->getPointOwnerIdx(point, isGhost);
+	if (treeId == std::numeric_limits<uint32_t>::max()) {
 		return Element::NULL_ID;
 	}
 
-	OctantInfo octantInfo(m_tree->getIdx(octant), true);
+	OctantInfo octantInfo(treeId, !isGhost);
 	return getOctantId(octantInfo);
 }
 
