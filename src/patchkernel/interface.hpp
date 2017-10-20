@@ -39,7 +39,7 @@ class Interface : public Element {
 public:
 	Interface();
 	Interface(const long &id, ElementType type = ElementType::UNDEFINED);
-	Interface(const long &id, ElementType type = ElementType::UNDEFINED, int connectSize = 0);
+	Interface(const long &id, ElementType type, int connectSize = 0);
 	Interface(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
 	Interface(const Interface &other) = default;
