@@ -56,7 +56,7 @@ public:
 
     void reset();
 
-    void dump(std::ostream &stream);
+    void dump(std::ostream &stream) const;
     void restore(std::istream &stream);
 
 private:
@@ -64,7 +64,7 @@ private:
     id_type m_highest;
     std::deque<id_type> m_trash;
 
-    int getBinaryArchiveVersion();
+    int getBinaryArchiveVersion() const;
 
 };
 

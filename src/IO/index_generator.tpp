@@ -188,7 +188,7 @@ void IndexGenerator<id_t>::reset()
     \result The version of the binary archive.
 */
 template<typename id_t>
-int IndexGenerator<id_t>::getBinaryArchiveVersion()
+int IndexGenerator<id_t>::getBinaryArchiveVersion() const
 {
     return 1;
 }
@@ -199,7 +199,7 @@ int IndexGenerator<id_t>::getBinaryArchiveVersion()
  *  \param stream is the stream to write to
  */
 template<typename id_t>
-void IndexGenerator<id_t>::dump(std::ostream &stream)
+void IndexGenerator<id_t>::dump(std::ostream &stream) const
 {
     utils::binary::write(stream, getBinaryArchiveVersion());
     utils::binary::write(stream, m_latest);
