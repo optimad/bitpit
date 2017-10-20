@@ -173,7 +173,7 @@ public:
     const PiercedVectorKernel<id_t> & getKernel() const;
     const PiercedVectorStorage<value_t, id_t> & getStorage() const;
 
-    void dump();
+    void dump() const;
 
     // Methods that extract the contents of the container
     using PiercedVectorStorage<value_t, id_t>::back;

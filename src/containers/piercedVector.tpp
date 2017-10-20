@@ -772,7 +772,7 @@ const PiercedVectorStorage<value_t, id_t> & PiercedVector<value_t, id_t>::getSto
 * Dumps to screen the internal data.
 */
 template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::dump()
+void PiercedVector<value_t, id_t>::dump() const
 {
     PiercedVectorKernel<id_t>::dump();
 }
