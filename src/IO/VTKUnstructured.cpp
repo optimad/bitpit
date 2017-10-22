@@ -348,20 +348,17 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
 
         getline( str, line) ;
         while( ! bitpit::utils::string::keywordInString(line,"/DataArray") ) {
-
             temp.clear() ;
             bitpit::utils::string::convertString( line, temp) ;
             nconn += temp.size() ;
             getline( str, line) ;
         }
 
-
     }
 
     str.close();
 
     return nconn ;
-
 
 }
 
