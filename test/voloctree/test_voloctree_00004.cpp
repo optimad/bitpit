@@ -128,13 +128,67 @@ int subtest_001(VolOctree *patch_2D, VolOctree *patch_2D_restored)
 
     patch_2D->write();
 
+    // Create data associated to the patch
+    PiercedStorage<bool> booleanStorage(1, &patch_2D->getCells());
+    booleanStorage.fill(true);
+    booleanStorage.rawAt(0) = false;
+    booleanStorage.rawAt(1) = false;
+    booleanStorage.rawAt(3) = false;
+
+    PiercedStorage<double> doubleStorage(5, &patch_2D->getCells());
+    doubleStorage.fill(100);
+    doubleStorage.rawAt(0, 0) = 11;
+    doubleStorage.rawAt(0, 1) = 12;
+    doubleStorage.rawAt(0, 2) = 13;
+    doubleStorage.rawAt(0, 3) = 14;
+    doubleStorage.rawAt(0, 4) = 15;
+    doubleStorage.rawAt(2, 0) = 31;
+    doubleStorage.rawAt(2, 1) = 32;
+    doubleStorage.rawAt(2, 2) = 33;
+    doubleStorage.rawAt(2, 3) = 34;
+    doubleStorage.rawAt(2, 4) = 35;
+
+    PiercedStorage<std::array<double, 3>> arrayDoubleStorage(5, &patch_2D->getCells());
+    arrayDoubleStorage.fill({{1., 2., 3.}});
+    arrayDoubleStorage.rawAt(0, 0) = {{11., 12., 13.}};
+
+    std::string stringValue = "TEST";
+
+    std::vector<std::string> stringVector(3);
+    stringVector[0] = "Test V 0";
+    stringVector[1] = "Test V 1";
+    stringVector[2] = "Test V 2";
+
+    std::array<std::string, 3> stringArray;
+    stringArray[0] = "Test A 0";
+    stringArray[1] = "Test A 1";
+    stringArray[2] = "Test A 2";
+
     // Dump the patch
     log::cout() << "Dumping 2D patch..." << std::endl;
 
     std::string header2D = "2D octree patch";
     OBinaryArchive binaryWriter2D("octree_uniform_patch_2D", archiveVersion, header2D);
     patch_2D->dump(binaryWriter2D.getStream());
+
+    // Dump the data
+    booleanStorage.dump(binaryWriter2D.getStream());
+    doubleStorage.dump(binaryWriter2D.getStream());
+    arrayDoubleStorage.dump(binaryWriter2D.getStream());
+
+    utils::binary::write(binaryWriter2D.getStream(), stringValue);
+    utils::binary::write(binaryWriter2D.getStream(), stringVector);
+    utils::binary::write(binaryWriter2D.getStream(), stringArray);
+
     binaryWriter2D.close();
+
+    // Reset the data
+    booleanStorage.fill(false);
+    doubleStorage.fill(0);
+    arrayDoubleStorage.fill({{0., 0., 0.}});
+    stringValue = "";
+    stringVector.clear();
+    stringArray.fill("");
 
     // Delete the patch
     log::cout() << "Deleting 2D patch..." << std::endl;
@@ -147,10 +201,64 @@ int subtest_001(VolOctree *patch_2D, VolOctree *patch_2D_restored)
     patch_2D_restored = new VolOctree();
     IBinaryArchive binaryReader2D("octree_uniform_patch_2D");
     patch_2D_restored->restore(binaryReader2D.getStream());
-    binaryReader2D.close();
 
     log::cout() << "Restored cell count:   " << patch_2D_restored->getCellCount() << std::endl;
     log::cout() << "Restored vertex count: " << patch_2D_restored->getVertexCount() << std::endl;
+
+    // Restore the data
+    booleanStorage.setStaticKernel(&patch_2D_restored->getCells());
+    doubleStorage.setStaticKernel(&patch_2D_restored->getCells());
+    arrayDoubleStorage.setStaticKernel(&patch_2D_restored->getCells());
+
+    booleanStorage.restore(binaryReader2D.getStream());
+    doubleStorage.restore(binaryReader2D.getStream());
+    arrayDoubleStorage.restore(binaryReader2D.getStream());
+
+    utils::binary::read(binaryReader2D.getStream(), stringValue);
+    utils::binary::read(binaryReader2D.getStream(), stringVector);
+    utils::binary::read(binaryReader2D.getStream(), stringArray);
+
+    binaryReader2D.close();
+
+    std::cout << "booleanStorage[0] = " << booleanStorage.rawAt(0) << std::endl;
+    std::cout << "booleanStorage[1] = " << booleanStorage.rawAt(1) << std::endl;
+    std::cout << "booleanStorage[2] = " << booleanStorage.rawAt(2) << std::endl;
+    std::cout << "booleanStorage[3] = " << booleanStorage.rawAt(3) << std::endl;
+    std::cout << "booleanStorage[4] = " << booleanStorage.rawAt(4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "doubleStorage[0][0] = " << doubleStorage.rawAt(0, 0) << std::endl;
+    std::cout << "doubleStorage[0][1] = " << doubleStorage.rawAt(0, 1) << std::endl;
+    std::cout << "doubleStorage[0][2] = " << doubleStorage.rawAt(0, 2) << std::endl;
+    std::cout << "doubleStorage[0][3] = " << doubleStorage.rawAt(0, 3) << std::endl;
+    std::cout << "doubleStorage[0][4] = " << doubleStorage.rawAt(0, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "doubleStorage[1][0] = " << doubleStorage.rawAt(1, 0) << std::endl;
+    std::cout << "doubleStorage[1][1] = " << doubleStorage.rawAt(1, 1) << std::endl;
+    std::cout << "doubleStorage[1][2] = " << doubleStorage.rawAt(1, 2) << std::endl;
+    std::cout << "doubleStorage[1][3] = " << doubleStorage.rawAt(1, 3) << std::endl;
+    std::cout << "doubleStorage[1][4] = " << doubleStorage.rawAt(1, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "doubleStorage[2][0] = " << doubleStorage.rawAt(2, 0) << std::endl;
+    std::cout << "doubleStorage[2][1] = " << doubleStorage.rawAt(2, 1) << std::endl;
+    std::cout << "doubleStorage[2][2] = " << doubleStorage.rawAt(2, 2) << std::endl;
+    std::cout << "doubleStorage[2][3] = " << doubleStorage.rawAt(2, 3) << std::endl;
+    std::cout << "doubleStorage[2][4] = " << doubleStorage.rawAt(2, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "arrayDoubleStorage[0][0] = " << arrayDoubleStorage.rawAt(0, 0) << std::endl;
+    std::cout << "arrayDoubleStorage[0][1] = " << arrayDoubleStorage.rawAt(0, 1) << std::endl;
+    std::cout << "arrayDoubleStorage[0][2] = " << arrayDoubleStorage.rawAt(0, 2) << std::endl;
+    std::cout << "arrayDoubleStorage[0][3] = " << arrayDoubleStorage.rawAt(0, 3) << std::endl;
+    std::cout << "arrayDoubleStorage[0][4] = " << arrayDoubleStorage.rawAt(0, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "string = " << stringValue << std::endl;
+    std::cout << std::endl;
+    std::cout << "stringVector[0] = " << stringVector[0] << std::endl;
+    std::cout << "stringVector[1] = " << stringVector[1] << std::endl;
+    std::cout << "stringVector[2] = " << stringVector[2] << std::endl;
+    std::cout << std::endl;
+    std::cout << "stringArray[0] = " << stringArray[0] << std::endl;
+    std::cout << "stringArray[1] = " << stringArray[1] << std::endl;
+    std::cout << "stringArray[2] = " << stringArray[2] << std::endl;
 
     patch_2D_restored->getVTK().setName("octree_uniform_patch_2D_restored");
     patch_2D_restored->write();
@@ -254,13 +362,67 @@ int subtest_002(VolOctree *patch_3D, VolOctree *patch_3D_restored)
 
     patch_3D->write();
 
+    // Create data associated to the patch
+    PiercedStorage<bool> booleanStorage(1, &patch_3D->getCells());
+    booleanStorage.fill(true);
+    booleanStorage.rawAt(0) = false;
+    booleanStorage.rawAt(1) = false;
+    booleanStorage.rawAt(3) = false;
+
+    PiercedStorage<double> doubleStorage(5, &patch_3D->getCells());
+    doubleStorage.fill(100);
+    doubleStorage.rawAt(0, 0) = 11;
+    doubleStorage.rawAt(0, 1) = 12;
+    doubleStorage.rawAt(0, 2) = 13;
+    doubleStorage.rawAt(0, 3) = 14;
+    doubleStorage.rawAt(0, 4) = 15;
+    doubleStorage.rawAt(2, 0) = 31;
+    doubleStorage.rawAt(2, 1) = 32;
+    doubleStorage.rawAt(2, 2) = 33;
+    doubleStorage.rawAt(2, 3) = 34;
+    doubleStorage.rawAt(2, 4) = 35;
+
+    PiercedStorage<std::array<double, 3>> arrayDoubleStorage(5, &patch_3D->getCells());
+    arrayDoubleStorage.fill({{1., 2., 3.}});
+    arrayDoubleStorage.rawAt(0, 0) = {{11., 12., 13.}};
+
+    std::string stringValue = "TEST";
+
+    std::vector<std::string> stringVector(3);
+    stringVector[0] = "Test V 0";
+    stringVector[1] = "Test V 1";
+    stringVector[2] = "Test V 2";
+
+    std::array<std::string, 3> stringArray;
+    stringArray[0] = "Test A 0";
+    stringArray[1] = "Test A 1";
+    stringArray[2] = "Test A 2";
+
     // Dump the patch
     log::cout() << "Dumping 3D patch..." << std::endl;
 
     std::string header3D = "3D octree patch";
     OBinaryArchive binaryWriter3D("octree_uniform_patch_3D", archiveVersion, header3D);
     patch_3D->dump(binaryWriter3D.getStream());
+
+    // Dump the data
+    booleanStorage.dump(binaryWriter3D.getStream());
+    doubleStorage.dump(binaryWriter3D.getStream());
+    arrayDoubleStorage.dump(binaryWriter3D.getStream());
+
+    utils::binary::write(binaryWriter3D.getStream(), stringValue);
+    utils::binary::write(binaryWriter3D.getStream(), stringVector);
+    utils::binary::write(binaryWriter3D.getStream(), stringArray);
+
     binaryWriter3D.close();
+
+    // Reset the data
+    booleanStorage.fill(false);
+    doubleStorage.fill(0);
+    arrayDoubleStorage.fill({{0., 0., 0.}});
+    stringValue = "";
+    stringVector.clear();
+    stringArray.fill("");
 
     // Delete the patch
     log::cout() << "Deleting 3D patch..." << std::endl;
@@ -273,10 +435,64 @@ int subtest_002(VolOctree *patch_3D, VolOctree *patch_3D_restored)
     patch_3D_restored = new VolOctree();
     IBinaryArchive binaryReader3D("octree_uniform_patch_3D");
     patch_3D_restored->restore(binaryReader3D.getStream());
-    binaryReader3D.close();
 
     log::cout() << "Restored cell count:   " << patch_3D_restored->getCellCount() << std::endl;
     log::cout() << "Restored vertex count: " << patch_3D_restored->getVertexCount() << std::endl;
+
+    // Restore the data
+    booleanStorage.setStaticKernel(&patch_3D_restored->getCells());
+    doubleStorage.setStaticKernel(&patch_3D_restored->getCells());
+    arrayDoubleStorage.setStaticKernel(&patch_3D_restored->getCells());
+
+    booleanStorage.restore(binaryReader3D.getStream());
+    doubleStorage.restore(binaryReader3D.getStream());
+    arrayDoubleStorage.restore(binaryReader3D.getStream());
+
+    utils::binary::read(binaryReader3D.getStream(), stringValue);
+    utils::binary::read(binaryReader3D.getStream(), stringVector);
+    utils::binary::read(binaryReader3D.getStream(), stringArray);
+
+    binaryReader3D.close();
+
+    std::cout << "booleanStorage[0] = " << booleanStorage.rawAt(0) << std::endl;
+    std::cout << "booleanStorage[1] = " << booleanStorage.rawAt(1) << std::endl;
+    std::cout << "booleanStorage[2] = " << booleanStorage.rawAt(2) << std::endl;
+    std::cout << "booleanStorage[3] = " << booleanStorage.rawAt(3) << std::endl;
+    std::cout << "booleanStorage[4] = " << booleanStorage.rawAt(4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "doubleStorage[0][0] = " << doubleStorage.rawAt(0, 0) << std::endl;
+    std::cout << "doubleStorage[0][1] = " << doubleStorage.rawAt(0, 1) << std::endl;
+    std::cout << "doubleStorage[0][2] = " << doubleStorage.rawAt(0, 2) << std::endl;
+    std::cout << "doubleStorage[0][3] = " << doubleStorage.rawAt(0, 3) << std::endl;
+    std::cout << "doubleStorage[0][4] = " << doubleStorage.rawAt(0, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "doubleStorage[1][0] = " << doubleStorage.rawAt(1, 0) << std::endl;
+    std::cout << "doubleStorage[1][1] = " << doubleStorage.rawAt(1, 1) << std::endl;
+    std::cout << "doubleStorage[1][2] = " << doubleStorage.rawAt(1, 2) << std::endl;
+    std::cout << "doubleStorage[1][3] = " << doubleStorage.rawAt(1, 3) << std::endl;
+    std::cout << "doubleStorage[1][4] = " << doubleStorage.rawAt(1, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "doubleStorage[2][0] = " << doubleStorage.rawAt(2, 0) << std::endl;
+    std::cout << "doubleStorage[2][1] = " << doubleStorage.rawAt(2, 1) << std::endl;
+    std::cout << "doubleStorage[2][2] = " << doubleStorage.rawAt(2, 2) << std::endl;
+    std::cout << "doubleStorage[2][3] = " << doubleStorage.rawAt(2, 3) << std::endl;
+    std::cout << "doubleStorage[2][4] = " << doubleStorage.rawAt(2, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "arrayDoubleStorage[0][0] = " << arrayDoubleStorage.rawAt(0, 0) << std::endl;
+    std::cout << "arrayDoubleStorage[0][1] = " << arrayDoubleStorage.rawAt(0, 1) << std::endl;
+    std::cout << "arrayDoubleStorage[0][2] = " << arrayDoubleStorage.rawAt(0, 2) << std::endl;
+    std::cout << "arrayDoubleStorage[0][3] = " << arrayDoubleStorage.rawAt(0, 3) << std::endl;
+    std::cout << "arrayDoubleStorage[0][4] = " << arrayDoubleStorage.rawAt(0, 4) << std::endl;
+    std::cout << std::endl;
+    std::cout << "string = " << stringValue << std::endl;
+    std::cout << std::endl;
+    std::cout << "stringVector[0] = " << stringVector[0] << std::endl;
+    std::cout << "stringVector[1] = " << stringVector[1] << std::endl;
+    std::cout << "stringVector[2] = " << stringVector[2] << std::endl;
+    std::cout << std::endl;
+    std::cout << "stringArray[0] = " << stringArray[0] << std::endl;
+    std::cout << "stringArray[1] = " << stringArray[1] << std::endl;
+    std::cout << "stringArray[2] = " << stringArray[2] << std::endl;
 
     patch_3D_restored->getVTK().setName("octree_uniform_patch_3D_restored");
     patch_3D_restored->write();
