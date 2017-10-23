@@ -67,7 +67,7 @@ void write(std::ostream &stream, const std::array<T, dim> &container)
     \param stream is the stream to write to
     \param container is the container to write
 */
-template<typename T, typename = typename std::enable_if<utils::is_iterable<T>::value>::type*>
+template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type*>
 void write(std::ostream &stream, const T &value)
 {
     write(stream, value.size());
@@ -152,13 +152,13 @@ void read(std::istream &stream, std::array<T, dim> &container)
     \param stream is the stream to write to
     \param container is the container to write
 */
-template<typename T, typename = typename std::enable_if<utils::is_iterable<T>::value>::type>
+template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type*>
 void read(std::istream &stream, T &value)
 {
     size_t size;
     read(stream, size);
 
-    value.resize();
+    value.resize(size);
     for (auto &item : value) {
         read(stream, item);
     }
