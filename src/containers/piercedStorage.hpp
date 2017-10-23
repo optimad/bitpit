@@ -401,13 +401,13 @@ private:
     template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value>::type * = nullptr>
     void restoreField(std::istream &stream, T &value);
 
-    template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_restore()>::type * = nullptr>
+    template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_restore()>::type * = nullptr>
     void restoreField(std::istream &stream, T &object);
 
     template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value>::type * = nullptr>
     void dumpField(std::ostream &stream, const T &value) const;
 
-    template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump()>::type * = nullptr>
+    template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_dump()>::type * = nullptr>
     void dumpField(std::ostream &stream, const T &object) const;
 
 };
