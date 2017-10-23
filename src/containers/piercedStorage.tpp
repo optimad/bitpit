@@ -1377,6 +1377,20 @@ void PiercedStorage<value_t, id_t>::restore(std::istream &stream)
 * \param value on output will contain the restored value
 */
 template<typename value_t, typename id_t>
+void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, std::vector<bool>::reference value)
+{
+    bool bool_value;
+    utils::binary::read(stream, bool_value);
+    value = bool_value;
+}
+
+/**
+* Restore a field.
+*
+* \param stream is the stream data should be read from
+* \param value on output will contain the restored value
+*/
+template<typename value_t, typename id_t>
 template<typename T, typename std::enable_if<std::is_pod<T>::value>::type *>
 void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, T &value)
 {
@@ -1418,6 +1432,19 @@ void PiercedStorage<value_t, id_t>::dump(std::ostream &stream) const
         dumpField(stream, m_fields[pos]);
         ++pos;
     }
+}
+
+/**
+* Dump a field.
+*
+* \param stream is the stream data should be written to
+* \param value is the value that will be dumped
+*/
+template<typename value_t, typename id_t>
+void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const std::vector<bool>::const_reference &value) const
+{
+    bool bool_value = value;
+    utils::binary::write(stream, bool_value);
 }
 
 /**

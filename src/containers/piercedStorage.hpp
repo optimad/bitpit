@@ -398,11 +398,15 @@ private:
     const PiercedKernel<id_t> *m_const_kernel;
     PiercedKernel<id_t> *m_kernel;
 
+    void restoreField(std::istream &stream, std::vector<bool>::reference value);
+
     template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value>::type * = nullptr>
     void restoreField(std::istream &stream, T &value);
 
     template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_restore()>::type * = nullptr>
     void restoreField(std::istream &stream, T &object);
+
+    void dumpField(std::ostream &stream, const std::vector<bool>::const_reference &value) const;
 
     template<typename T = value_t, typename std::enable_if<std::is_pod<T>::value>::type * = nullptr>
     void dumpField(std::ostream &stream, const T &value) const;
