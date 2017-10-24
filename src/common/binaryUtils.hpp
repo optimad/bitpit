@@ -53,6 +53,9 @@ void write(std::ostream &stream, const std::vector<bool> &value);
 template<typename T, std::size_t dim, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 void write(std::ostream &stream, const std::array<T, dim> &value);
 
+template<typename T, std::size_t dim, typename std::enable_if<!std::is_pod<T>::value>::type* = nullptr>
+void write(std::ostream &stream, const std::array<T, dim> &value);
+
 template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type* = nullptr>
 void write(std::ostream &stream, const T &value);
 
@@ -74,6 +77,9 @@ template<>
 void read(std::istream &stream, std::vector<bool> &value);
 
 template<typename T, std::size_t dim, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
+void read(std::istream &stream, std::array<T, dim> &value);
+
+template<typename T, std::size_t dim, typename std::enable_if<!std::is_pod<T>::value>::type* = nullptr>
 void read(std::istream &stream, std::array<T, dim> &value);
 
 template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type* = nullptr>

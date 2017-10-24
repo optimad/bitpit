@@ -55,10 +55,21 @@ void write(std::ostream &stream, const std::vector<T> &container)
 template<typename T, std::size_t dim, typename std::enable_if<std::is_pod<T>::value>::type*>
 void write(std::ostream &stream, const std::array<T, dim> &container)
 {
-    size_t size = container.size();
-    write(stream, size);
+    write(stream, container.data(), dim * sizeof(T));
+}
 
-    write(stream, container.data(), size * sizeof(T));
+/*!
+    Write the given container to the specified stream in binary format.
+
+    \param stream is the stream to write to
+    \param container is the container to write
+*/
+template<typename T, std::size_t dim, typename std::enable_if<!std::is_pod<T>::value>::type*>
+void write(std::ostream &stream, const std::array<T, dim> &container)
+{
+    for (std::size_t i = 0; i < dim; ++i) {
+        write(stream, container[i]);
+    }
 }
 
 /*!
@@ -140,10 +151,21 @@ void read(std::istream &stream, std::vector<T> &container)
 template<typename T, std::size_t dim, typename std::enable_if<std::is_pod<T>::value>::type*>
 void read(std::istream &stream, std::array<T, dim> &container)
 {
-    size_t size;
-    read(stream, size);
+    read(stream, container.data(), dim * sizeof(T));
+}
 
-    read(stream, container.data(), size * sizeof(T));
+/*!
+    Read the given container to the specified stream in binary format.
+
+    \param stream is the stream to write to
+    \param container is the container to write
+*/
+template<typename T, std::size_t dim, typename std::enable_if<!std::is_pod<T>::value>::type*>
+void read(std::istream &stream, std::array<T, dim> &container)
+{
+    for (std::size_t i = 0; i < dim; ++i) {
+        read(stream, container[i]);
+    }
 }
 
 /*!
