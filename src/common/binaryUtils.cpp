@@ -36,7 +36,6 @@ namespace binary {
     \param stream is the stream to write to
     \param container is the container to write
 */
-template<>
 void write(std::ostream &stream, const std::vector<bool> &container)
 {
     std::copy(container.begin(), container.end(), std::ostream_iterator<bool>(stream));
@@ -61,10 +60,22 @@ void write(std::ostream &stream, const std::string &string)
     \param stream is the stream to write to
     \param container is the container to write
 */
-template<>
 void read(std::istream &stream, std::vector<bool> &container)
 {
     std::copy(std::istream_iterator<bool>(stream), {}, std::back_inserter(container));
+}
+
+/*!
+    Read the given container to the specified stream in binary format.
+
+    \param stream is the stream to write to
+    \param value is the value to write
+*/
+void read(std::istream &stream, std::vector<bool>::reference value)
+{
+    bool bool_value;
+    utils::binary::read(stream, bool_value);
+    value = bool_value;
 }
 
 /*!

@@ -47,9 +47,6 @@ namespace binary {
 template<typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 void write(std::ostream &stream, const std::vector<T> &value);
 
-template<>
-void write(std::ostream &stream, const std::vector<bool> &value);
-
 template<typename T, std::size_t dim, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 void write(std::ostream &stream, const std::array<T, dim> &value);
 
@@ -68,13 +65,12 @@ void write(std::ostream &stream, const T &value, size_t size);
 template<typename T>
 void write(std::ostream &stream, const T *value, size_t size);
 
+void write(std::ostream &stream, const std::vector<bool> &container);
+
 void write(std::ostream &stream, const std::string &string);
 
 template<typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 void read(std::istream &stream, std::vector<T> &value);
-
-template<>
-void read(std::istream &stream, std::vector<bool> &value);
 
 template<typename T, std::size_t dim, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 void read(std::istream &stream, std::array<T, dim> &value);
@@ -93,6 +89,10 @@ void read(std::istream &stream, T &value, size_t size);
 
 template<typename T>
 void read(std::istream &stream, T *value, size_t size);
+
+void read(std::istream &stream, std::vector<bool> &container);
+
+void read(std::istream &stream, std::vector<bool>::reference value);
 
 void read(std::istream &stream, std::string &string);
 
