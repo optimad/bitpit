@@ -218,14 +218,22 @@ std::vector<std::size_t> PiercedKernel<id_t>::sort()
         permutations[i] = squeezePermutations[sortPermutations[i]];
     }
 
-    // Sort the ids
-    //
-    // NOTE: the reored function will destroy the permutation on output
-    utils::reorderVector<id_t>(sortPermutations, m_ids, nElements);
-
-    // Update storage
+    // Create the permutation action
     PiercedSyncAction permutationAction(PiercedSyncAction::TYPE_REORDER);
     permutationAction.importData(sortPermutations);
+
+    // Sort the ids
+    //
+    // NOTE: the reorder function will destroy the permutation vector
+    utils::reorderVector<id_t>(sortPermutations, m_ids, nElements);
+
+    // Update the positions
+    m_pos.clear();
+    for (std::size_t pos = 0; pos < nElements; ++pos) {
+        m_pos[m_ids[pos]] = pos;
+    }
+
+    // Update storage
     processSyncAction(permutationAction);
 
     // Return the permutations
