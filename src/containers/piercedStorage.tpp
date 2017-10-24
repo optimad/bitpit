@@ -1391,7 +1391,7 @@ void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, std::vect
 * \param value on output will contain the restored value
 */
 template<typename value_t, typename id_t>
-template<typename T, typename std::enable_if<std::is_pod<T>::value>::type *>
+template<typename T, typename std::enable_if<!PiercedStorage<T, id_t>::has_restore()>::type *>
 void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, T &value)
 {
     utils::binary::read(stream, value);
@@ -1454,7 +1454,7 @@ void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const std::v
 * \param value is the value that will be dumped
 */
 template<typename value_t, typename id_t>
-template<typename T, typename std::enable_if<std::is_pod<T>::value>::type *>
+template<typename T, typename std::enable_if<!PiercedStorage<T, id_t>::has_dump()>::type *>
 void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const T &value) const
 {
     utils::binary::write(stream, value);
