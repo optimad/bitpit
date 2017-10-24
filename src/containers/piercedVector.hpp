@@ -199,10 +199,10 @@ public:
     using PiercedVectorStorage<value_t, id_t>::rawFind;
 
     // Dump and restore
-    template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type * = nullptr>
+    template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_restore()>::type * = nullptr>
     void restore(std::istream &stream);
 
-    template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type * = nullptr>
+    template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump()>::type * = nullptr>
     void dump(std::ostream &stream) const;
 
 protected:

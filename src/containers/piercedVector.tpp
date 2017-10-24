@@ -783,7 +783,7 @@ void PiercedVector<value_t, id_t>::dump() const
 * \param stream is the stream data should be read from
 */
 template<typename value_t, typename id_t>
-template<typename T, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type *>
+template<typename T, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_restore()>::type *>
 void PiercedVector<value_t, id_t>::restore(std::istream &stream)
 {
     PiercedVectorKernel<id_t>::restore(stream);
@@ -797,7 +797,7 @@ void PiercedVector<value_t, id_t>::restore(std::istream &stream)
 * \param stream is the stream data should be written to
 */
 template<typename value_t, typename id_t>
-template<typename T, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump_restore>::type *>
+template<typename T, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump()>::type *>
 void PiercedVector<value_t, id_t>::dump(std::ostream &stream) const
 {
     PiercedVectorKernel<id_t>::dump(stream);
