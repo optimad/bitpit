@@ -3554,7 +3554,9 @@ bool PatchKernel::sortVertices()
 }
 
 /*!
-	Sorts internal cell storage in ascending id order.
+	Sorts cell storage in ascending id order.
+
+	Internal cells and ghost cells are sordered separately.
 */
 bool PatchKernel::sortCells()
 {
@@ -3562,7 +3564,17 @@ bool PatchKernel::sortCells()
 		return false;
 	}
 
-	m_cells.sort();
+	// Sort internal cells
+	if (m_nInternals > 0) {
+		m_cells.sortBefore(m_lastInternalId, true);
+		updateLastInternalId();
+	}
+
+	// Sort ghost cells
+	if (m_nGhosts > 0) {
+		m_cells.sortAfter(m_firstGhostId, true);
+		updateFirstGhostId();
+	}
 
 	return true;
 }
