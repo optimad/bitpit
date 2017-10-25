@@ -2041,22 +2041,13 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	m_cellIdGenerator.trash(id);
 	if (isInternal) {
 		m_nInternals--;
-		if (m_nInternals == 0) {
-			m_lastInternalId = Cell::NULL_ID;
-		} else if (id == m_lastInternalId) {
-			m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
+		if (id == m_lastInternalId) {
+			updateLastInternalId();
 		}
 	} else {
 		m_nGhosts--;
 		if (id == m_firstGhostId) {
-			if (m_nGhosts == 0) {
-				m_firstGhostId = Cell::NULL_ID;
-			} else if (m_nInternals == 0) {
-				m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
-			} else {
-				CellIterator first_ghost_iterator = ++m_cells.find(m_lastInternalId);
-				m_firstGhostId = first_ghost_iterator->getId();
-			}
+			updateFirstGhostId();
 		}
 	}
 
@@ -3407,6 +3398,33 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 
 			buildCellInterface(&cell, face, otherCell, otherFace, interfaceId);
 		}
+	}
+}
+
+/*!
+	Updates the id of the last internal cell.
+*/
+void PatchKernel::updateLastInternalId()
+{
+	if (m_nInternals == 0) {
+		m_lastInternalId = Cell::NULL_ID;
+	} else {
+		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
+	}
+}
+
+/*!
+	Updates the id of the first ghost cell.
+*/
+void PatchKernel::updateFirstGhostId()
+{
+	if (m_nGhosts == 0) {
+		m_firstGhostId = Cell::NULL_ID;
+	} else if (m_nInternals == 0) {
+		m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
+	} else {
+		CellIterator first_ghost_iterator = ++m_cells.find(m_lastInternalId);
+		m_firstGhostId = first_ghost_iterator->getId();
 	}
 }
 

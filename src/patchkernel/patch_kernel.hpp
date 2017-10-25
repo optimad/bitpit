@@ -491,6 +491,9 @@ protected:
 	void dumpInterfaces(std::ostream &stream) const;
 	void restoreInterfaces(std::istream &stream);
 
+	void updateLastInternalId();
+	void updateFirstGhostId();
+
 	void setSpawnStatus(SpawnStatus status);
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
 
