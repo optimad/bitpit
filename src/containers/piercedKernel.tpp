@@ -290,6 +290,10 @@ std::vector<std::size_t> PiercedKernel<id_t>::squeeze()
             permutations[updatedPos] = pos;
         }
 
+        for (std::size_t pos = m_end_pos; pos < rawSize(); ++pos) {
+            permutations[pos] = pos;
+        }
+
         // Clear the holes
         holesClear();
 
@@ -305,7 +309,7 @@ std::vector<std::size_t> PiercedKernel<id_t>::squeeze()
         // Shrink the kernel
         shrink(size(), true);
     } else {
-        for (std::size_t pos = 0; pos < m_end_pos; ++pos) {
+        for (std::size_t pos = 0; pos < rawSize(); ++pos) {
             permutations[pos] = pos;
         }
     }
