@@ -199,38 +199,83 @@ void PiercedKernel<id_t>::resize(std::size_t n)
 template<typename id_t>
 std::vector<std::size_t> PiercedKernel<id_t>::sort()
 {
+    return rawSort(m_begin_pos, m_end_pos);
+}
+
+/**
+* Sorts the elements of the kernel in ascending id order.
+*
+* \param beginPos is the first position that will be sorted
+* \param endPos is the position past the last element that will be sorted
+*/
+template<typename id_t>
+std::vector<std::size_t> PiercedKernel<id_t>::rawSort(std::size_t beginPos, std::size_t endPos)
+{
+    // Get initial kernel size
+    std::size_t initialKernelRawSize = rawSize();
+
     // Squeeze the kernel
+    //
+    // After the squeeze there will be no holes in the kernel.
     std::vector<std::size_t> squeezePermutations = squeeze();
 
-    // The kernel has been squeezed, there are no holes
-    std::size_t nElements = size();
+    // Get updated kernel size
+    std::size_t updatedKernelRawSize = rawSize();
+
+    // Update the sort range
+    std::size_t updatedBeginPos = initialKernelRawSize;
+    std::size_t updatedEndPos   = initialKernelRawSize;
+    for (std::size_t i = 0; i < initialKernelRawSize; ++i) {
+        std::size_t previousPos = squeezePermutations[i];
+        if (previousPos == beginPos) {
+            updatedBeginPos = i;
+        }
+        if (previousPos == endPos) {
+            updatedEndPos = i;
+        }
+
+        if (updatedBeginPos != initialKernelRawSize && updatedEndPos != initialKernelRawSize) {
+            break;
+        }
+    }
+
+    if (updatedBeginPos != initialKernelRawSize) {
+        beginPos = updatedBeginPos;
+    } else {
+        beginPos = updatedKernelRawSize;
+    }
+
+    if (updatedEndPos != initialKernelRawSize) {
+        endPos = updatedEndPos;
+    } else {
+        endPos = updatedKernelRawSize;
+    }
 
     // Evaluates the sort permutations
-    std::vector<std::size_t> sortPermutations(nElements);
-    for (std::size_t i = 0; i < nElements; ++i) {
+    std::vector<std::size_t> sortPermutations(updatedKernelRawSize);
+    for (std::size_t i = 0; i < updatedKernelRawSize; ++i) {
         sortPermutations[i] = i;
     }
-    std::sort(sortPermutations.begin(), sortPermutations.end(), idLess(m_ids));
 
-    // Combine squeeze and sort permutations
-    std::vector<std::size_t> permutations(nElements);
-    for (std::size_t i = 0; i < nElements; ++i) {
-        permutations[i] = squeezePermutations[sortPermutations[i]];
-    }
+    std::sort(sortPermutations.begin() + beginPos, sortPermutations.begin() + endPos, idLess(m_ids));
 
     // Create the permutation action
     PiercedSyncAction permutationAction(PiercedSyncAction::TYPE_REORDER);
-    permutationAction.importData(sortPermutations);
+    permutationAction.importData(std::vector<std::size_t>(squeezePermutations));
+    std::vector<std::size_t> &permutations = *(permutationAction.data);
+    for (std::size_t i = beginPos; i < endPos; ++i) {
+        permutations[i] = squeezePermutations[sortPermutations[i]];
+    }
 
     // Sort the ids
     //
     // NOTE: the reorder function will destroy the permutation vector
-    utils::reorderVector<id_t>(sortPermutations, m_ids, nElements);
+    utils::reorderVector<id_t>(sortPermutations, m_ids, updatedKernelRawSize);
 
     // Update the positions
     m_pos.clear();
-    for (std::size_t pos = 0; pos < nElements; ++pos) {
-        m_pos[m_ids[pos]] = pos;
+    for (std::size_t i = 0; i < updatedKernelRawSize; ++i) {
+        m_pos[m_ids[i]] = i;
     }
 
     // Update storage

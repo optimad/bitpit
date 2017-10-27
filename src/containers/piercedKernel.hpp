@@ -264,6 +264,8 @@ public:
     void shrinkToFit();
     void swap(PiercedKernel &x) noexcept;
 
+    std::vector<std::size_t> rawSort(std::size_t begin, std::size_t end);
+
     // Methods that extract information about the kernel
     bool contiguous() const;
     void dump() const;
