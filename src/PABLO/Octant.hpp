@@ -94,7 +94,7 @@ private:
 	uint8_t   			m_level;		/**< Refinement level (0=root) */
 	int8_t    			m_marker;		/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
 	std::bitset<17> 	m_info;			/**< -Info[0..6]: true if 0..6 face is a boundary face [bound] \n
-										-Info[6..11]: true if 0..6 face is a process boundary face [pbound] \n
+										-Info[6..11]: true if 6..11 face is a process boundary face [pbound] \n
 										-Info[12/13]: true if octant is new after refinement/coarsening \n
 										-Info[14]   : true if balancing is not required for this octant \n
 										-Info[15]   : Aux
