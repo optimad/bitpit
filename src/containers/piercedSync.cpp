@@ -39,7 +39,7 @@ namespace bitpit {
 * Constructor
 */
 PiercedSyncAction::PiercedSyncAction(ActionType _type)
-    : type(_type)
+    : type(_type), data(nullptr)
 {
 }
 
