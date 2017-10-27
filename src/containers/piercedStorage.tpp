@@ -433,6 +433,11 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
         break;
     }
 
+    case PiercedSyncAction::TYPE_NOOP:
+    {
+        break;
+    }
+
     default:
     {
         throw std::runtime_error("Undefined synchronization action.");

@@ -289,6 +289,9 @@ void PiercedSyncMaster::journalSyncAction(const PiercedSyncAction &action)
         m_syncJournal[0] = action;
         break;
 
+    case PiercedSyncAction::TYPE_NOOP:
+        break;
+
     default:
         m_syncJournal.push_back(action);
         break;

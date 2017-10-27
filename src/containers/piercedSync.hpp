@@ -45,6 +45,7 @@ public:
     */
     enum ActionType {
         TYPE_UNDEFINED = -1,
+        TYPE_NOOP,
         TYPE_CLEAR,
         TYPE_RESERVE,
         TYPE_RESIZE,
