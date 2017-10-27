@@ -602,10 +602,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::clear(bool release)
 {
     // Update the kernel
-    PiercedVectorKernel<id_t>::clear(release);
+    ClearAction clearAction = PiercedVectorKernel<id_t>::clear(release);
 
     // Update the storage
-    PiercedVectorStorage<value_t, id_t>::rawClear(release);
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(clearAction);
 }
 
 /**
@@ -624,10 +624,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::reserve(std::size_t n)
 {
     // Update the kernel
-    PiercedVectorKernel<id_t>::reserve(n);
+    ReserveAction reserveAction = PiercedVectorKernel<id_t>::reserve(n);
 
-    // Update the storgae
-    PiercedVectorStorage<value_t, id_t>::rawReserve(n);
+    // Update the storage
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(reserveAction);
 }
 
 /**
@@ -651,10 +651,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::resize(std::size_t n)
 {
     // Update the kernel
-    PiercedVectorKernel<id_t>::resize(n);
+    ResizeAction resizeAction = PiercedVectorKernel<id_t>::resize(n);
 
     // Update the storage
-    PiercedVectorStorage<value_t, id_t>::rawResize(PiercedVectorKernel<id_t>::rawSize());
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(resizeAction);
 }
 
 /**
@@ -664,10 +664,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::sort()
 {
     // Update the kernel
-    std::vector<std::size_t> permutations = PiercedVectorKernel<id_t>::sort();
+    SortAction sortAction = PiercedVectorKernel<id_t>::sort();
 
     // Update the storage
-    PiercedVectorStorage<value_t, id_t>::rawReorder(permutations);
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(sortAction);
 }
 
 /**
@@ -684,12 +684,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::squeeze()
 {
     // Update the kernel
-    std::vector<std::size_t> permutations = PiercedVectorKernel<id_t>::squeeze();
+    SqueezeAction squeezeAction = PiercedVectorKernel<id_t>::squeeze();
 
     // Update the storage
-    PiercedVectorStorage<value_t, id_t>::rawReorder(permutations);
-    PiercedVectorStorage<value_t, id_t>::rawResize(PiercedVectorKernel<id_t>::rawSize());
-    PiercedVectorStorage<value_t, id_t>::rawShrinkToFit();
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(squeezeAction);
 }
 
 /**
@@ -706,10 +704,10 @@ template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::shrinkToFit()
 {
     // Update the kernel
-    PiercedVectorKernel<id_t>::shrinkToFit();
+    ShrinkToFitAction shrinkToFitAction = PiercedVectorKernel<id_t>::shrinkToFit();
 
     // Update the storage
-    PiercedVectorStorage<value_t, id_t>::rawShrinkToFit();
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(shrinkToFitAction);
 }
 
 /**

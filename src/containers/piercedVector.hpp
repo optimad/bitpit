@@ -206,6 +206,14 @@ public:
     void dump(std::ostream &stream) const;
 
 protected:
+    using PiercedVectorKernel<id_t>::clear;
+    using PiercedVectorKernel<id_t>::reserve;
+    using PiercedVectorKernel<id_t>::resize;
+    using PiercedVectorKernel<id_t>::sort;
+    using PiercedVectorKernel<id_t>::squeeze;
+    using PiercedVectorKernel<id_t>::shrinkToFit;
+    using PiercedVectorKernel<id_t>::swap;
+
     using PiercedVectorStorage<value_t, id_t>::setStaticKernel;
     using PiercedVectorStorage<value_t, id_t>::setDynamicKernel;
     using PiercedVectorStorage<value_t, id_t>::unsetKernel;
@@ -218,6 +226,12 @@ private:
     typedef typename PiercedVectorKernel<id_t>::MoveAction MoveAction;
     typedef typename PiercedVectorKernel<id_t>::SwapAction SwapAction;
     typedef typename PiercedVectorKernel<id_t>::EraseAction EraseAction;
+    typedef typename PiercedVectorKernel<id_t>::ClearAction ClearAction;
+    typedef typename PiercedVectorKernel<id_t>::ReserveAction ReserveAction;
+    typedef typename PiercedVectorKernel<id_t>::ResizeAction ResizeAction;
+    typedef typename PiercedVectorKernel<id_t>::SortAction SortAction;
+    typedef typename PiercedVectorKernel<id_t>::SqueezeAction SqueezeAction;
+    typedef typename PiercedVectorKernel<id_t>::ShrinkToFitAction ShrinkToFitAction;
 
     iterator reclaimValue(const FillAction &action);
     iterator insertValue(const FillAction &action, const value_t &value);

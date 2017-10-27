@@ -366,7 +366,11 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
 
     case PiercedSyncAction::TYPE_REORDER:
     {
-        rawReorder(*action.data);
+        if (action.data && action.data->size() > 0) {
+            rawReorder(*action.data);
+        }
+        rawResize(action.info[PiercedSyncAction::INFO_SIZE]);
+        rawShrinkToFit();
         break;
     }
 

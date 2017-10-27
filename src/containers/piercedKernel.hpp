@@ -250,21 +250,101 @@ public:
         };
     };
 
+    /**
+    * Clear action
+    */
+    class ClearAction : public PiercedSyncAction {
+
+    public:
+        ClearAction()
+            : PiercedSyncAction(PiercedSyncAction::TYPE_CLEAR)
+        {
+        };
+    };
+
+    /**
+    * Reserve action
+    */
+    class ReserveAction : public PiercedSyncAction {
+
+    public:
+        ReserveAction()
+            : PiercedSyncAction(PiercedSyncAction::TYPE_RESERVE)
+        {
+        };
+    };
+
+    /**
+    * Resize action
+    */
+    class ResizeAction : public PiercedSyncAction {
+
+    public:
+        enum ResizeActionType {
+            TYPE_NOOP    = PiercedSyncAction::TYPE_NOOP,
+            TYPE_RESERVE = PiercedSyncAction::TYPE_RESERVE,
+            TYPE_CLEAR   = PiercedSyncAction::TYPE_CLEAR,
+            TYPE_RESIZE  = PiercedSyncAction::TYPE_RESIZE
+        };
+
+
+        ResizeAction(ResizeActionType type)
+            : PiercedSyncAction(static_cast<PiercedSyncAction::ActionType>(type))
+        {
+        };
+    };
+
+    /**
+    * Sort action
+    */
+    class SortAction : public PiercedSyncAction {
+
+    public:
+        SortAction()
+            : PiercedSyncAction(PiercedSyncAction::TYPE_REORDER)
+        {
+        };
+    };
+
+    /**
+    * Squeeze action
+    */
+    class SqueezeAction : public PiercedSyncAction {
+
+    public:
+        SqueezeAction()
+            : PiercedSyncAction(PiercedSyncAction::TYPE_REORDER)
+        {
+        };
+    };
+
+    /**
+    * ShrinkToFit action
+    */
+    class ShrinkToFitAction : public PiercedSyncAction {
+
+    public:
+        ShrinkToFitAction()
+            : PiercedSyncAction(PiercedSyncAction::TYPE_SHRINK_TO_FIT)
+        {
+        };
+    };
+
     // Contructors
     PiercedKernel();
     PiercedKernel(std::size_t n);
 
     // Methods that modify the kernel as a whole
-    void clear(bool release = true);
-    void flush();
-    void reserve(std::size_t n);
-    void resize(std::size_t n);
-    std::vector<std::size_t> sort();
-    std::vector<std::size_t> squeeze();
-    void shrinkToFit();
+    ClearAction clear(bool release = true);
+    ReserveAction reserve(std::size_t n);
+    ResizeAction resize(std::size_t n);
+    SortAction sort();
+    SqueezeAction squeeze();
+    ShrinkToFitAction shrinkToFit();
+
     void swap(PiercedKernel &x) noexcept;
 
-    std::vector<std::size_t> rawSort(std::size_t begin, std::size_t end);
+    void flush();
 
     // Methods that extract information about the kernel
     bool contiguous() const;
@@ -353,6 +433,14 @@ protected:
     std::size_t getPos(id_t id) const;
     std::size_t getFirstUsedPos() const;
     std::size_t getLastUsedPos() const;
+
+    // Methods that modify the kernel as a whole
+    ClearAction _clear(bool release = true);
+    ReserveAction _reserve(std::size_t n);
+    ResizeAction _resize(std::size_t n);
+    SortAction _sort(std::size_t begin, std::size_t end);
+    SqueezeAction _squeeze();
+    ShrinkToFitAction _shrinkToFit();
 
 private:
     /**

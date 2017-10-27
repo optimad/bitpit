@@ -80,7 +80,27 @@ void PiercedKernel<id_t>::updateId(const id_t &currentId, const id_t &updatedId)
 * otherwise the kernel will be cleared but its memory will not be relased
 */
 template<typename id_t>
-void PiercedKernel<id_t>::clear(bool release)
+typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::clear(bool release)
+{
+    ClearAction syncAction = _clear(release);
+
+    // Update the storage
+    processSyncAction(syncAction);
+
+    return syncAction;
+}
+
+
+/**
+* Removes all elements from the kernel.
+*
+* The function will NOT process the sync action.
+*
+* \param release if it's true the memory hold by the kernel will be released,
+* otherwise the kernel will be cleared but its memory will not be relased
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::_clear(bool release)
 {
     // Clear positions
     m_ids.clear();
@@ -100,19 +120,10 @@ void PiercedKernel<id_t>::clear(bool release)
     // There are no dirty positions
     m_dirty_begin_pos = m_end_pos;
 
-    // Update the storage
-    PiercedSyncAction syncAction(PiercedSyncAction::TYPE_CLEAR);
-    processSyncAction(syncAction);
-}
+    // Generate the sync action
+    ClearAction syncAction;
 
-/**
-* Flush all pending changes.
-*/
-template<typename id_t>
-void PiercedKernel<id_t>::flush()
-{
-    // Flush pending holes
-    holesFlush();
+    return syncAction;
 }
 
 /**
@@ -128,10 +139,42 @@ void PiercedKernel<id_t>::flush()
 * \param n the minimum capacity requested for the kernel
 */
 template<typename id_t>
-void PiercedKernel<id_t>::reserve(std::size_t n)
+typename PiercedKernel<id_t>::ReserveAction PiercedKernel<id_t>::reserve(std::size_t n)
 {
+    ReserveAction syncAction = _reserve(n);
+
+    // Update the storage
+    processSyncAction(syncAction);
+
+    return syncAction;
+}
+
+/**
+* Requests that the kernel capacity be at least enough to contain n elements.
+*
+* If n is greater than the current kernel capacity, the function causes the
+* kernel to reallocate its data structured increasing its capacity to n
+* (or greater).
+*
+* In all other cases, the function call does not cause a reallocation and
+* the kernel capacity is not affected.
+*
+* The function will NOT process the sync action.
+*
+* \param n the minimum capacity requested for the kernel
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::ReserveAction PiercedKernel<id_t>::_reserve(std::size_t n)
+{
+    // Update the kernel
     m_ids.reserve(n);
     m_pos.reserve(n);
+
+    // Generate the sync action
+    ReserveAction syncAction;
+    syncAction.info[PiercedSyncAction::INFO_SIZE] = n;
+
+    return syncAction;
 }
 
 /**
@@ -152,25 +195,64 @@ void PiercedKernel<id_t>::reserve(std::size_t n)
 * \param n is the new kernel size, expressed in number of elements.
 */
 template<typename id_t>
-void PiercedKernel<id_t>::resize(std::size_t n)
+typename PiercedKernel<id_t>::ResizeAction PiercedKernel<id_t>::resize(std::size_t n)
+{
+    ResizeAction syncAction = _resize(n);
+
+    // Update the storage
+    processSyncAction(syncAction);
+
+    return syncAction;
+}
+
+/**
+* Resizes the kernel so that it contains n elements.
+*
+* If n is smaller than the current kernel size, the content is reduced to its
+* first n elements, removing those beyond.
+*
+* If n is greater than the current kernel size, space is reserved to allow
+* the kernel to reach the requested size.
+*
+* If n is also greater than the current kernel capacity, an automatic
+* reallocation of the allocated kernel space takes place.
+*
+* Notice that this function changes the actual content of the kernel by
+* erasing elements from it.
+*
+* The function will NOT process the sync action.
+*
+* \param n is the new kernel size, expressed in number of elements.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::ResizeAction PiercedKernel<id_t>::_resize(std::size_t n)
 {
     // If the size of the kernel is already the requested size there is
     // nothing to do.
     if (n == size()) {
-        return;
+        ResizeAction syncAction(ResizeAction::TYPE_NOOP);
+
+        return syncAction;
     }
 
     // A request for a size equal to 0 is equivalent to a clear.
     if (n == 0) {
-        clear();
-        return;
+        _clear();
+
+        ResizeAction syncAction(ResizeAction::TYPE_CLEAR);
+
+        return syncAction;
     }
 
     // If the requested size is greater that the current size we may need to
     // reserve space to allow the kernel to reach the requested size.
     if (n > size()) {
-        reserve(n);
-        return;
+        _reserve(n);
+
+        ResizeAction syncAction(ResizeAction::TYPE_RESERVE);
+        syncAction.info[PiercedSyncAction::INFO_SIZE] = rawSize();
+
+        return syncAction;
     }
 
     // If the requested size is smaller that the current size
@@ -188,28 +270,37 @@ void PiercedKernel<id_t>::resize(std::size_t n)
     // Shrink the kernel
     shrink(last_used_pos + 1);
 
-    // Update the storage
-    PiercedSyncAction syncAction(PiercedSyncAction::TYPE_RESIZE);
+    // Generate the sync action
+    ResizeAction syncAction(ResizeAction::TYPE_RESIZE);
     syncAction.info[PiercedSyncAction::INFO_SIZE] = rawSize();
+
+    return syncAction;
 }
 
 /**
 * Sorts the elements of the kernel in ascending id order.
 */
 template<typename id_t>
-std::vector<std::size_t> PiercedKernel<id_t>::sort()
+typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::sort()
 {
-    return rawSort(m_begin_pos, m_end_pos);
+    SortAction syncAction = _sort(m_begin_pos, m_end_pos);
+
+    // Update the storage
+    processSyncAction(syncAction);
+
+    return syncAction;
 }
 
 /**
 * Sorts the elements of the kernel in ascending id order.
 *
+* The function will NOT process the sync action.
+*
 * \param beginPos is the first position that will be sorted
 * \param endPos is the position past the last element that will be sorted
 */
 template<typename id_t>
-std::vector<std::size_t> PiercedKernel<id_t>::rawSort(std::size_t beginPos, std::size_t endPos)
+typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::_sort(std::size_t beginPos, std::size_t endPos)
 {
     // Get initial kernel size
     std::size_t initialKernelRawSize = rawSize();
@@ -217,38 +308,47 @@ std::vector<std::size_t> PiercedKernel<id_t>::rawSort(std::size_t beginPos, std:
     // Squeeze the kernel
     //
     // After the squeeze there will be no holes in the kernel.
-    std::vector<std::size_t> squeezePermutations = squeeze();
+    SqueezeAction squeezeAction = _squeeze();
+    const std::vector<std::size_t> &squeezePermutations = *(squeezeAction.data);
+    bool squeezed = (squeezeAction.data.get() != nullptr);
 
     // Get updated kernel size
-    std::size_t updatedKernelRawSize = rawSize();
+    std::size_t updatedKernelRawSize;
+    if (squeezed) {
+        updatedKernelRawSize = rawSize();
+    } else {
+        updatedKernelRawSize = initialKernelRawSize;
+    }
 
     // Update the sort range
-    std::size_t updatedBeginPos = initialKernelRawSize;
-    std::size_t updatedEndPos   = initialKernelRawSize;
-    for (std::size_t i = 0; i < initialKernelRawSize; ++i) {
-        std::size_t previousPos = squeezePermutations[i];
-        if (previousPos == beginPos) {
-            updatedBeginPos = i;
-        }
-        if (previousPos == endPos) {
-            updatedEndPos = i;
+    if (squeezed) {
+        std::size_t updatedBeginPos = initialKernelRawSize;
+        std::size_t updatedEndPos   = initialKernelRawSize;
+        for (std::size_t i = 0; i < initialKernelRawSize; ++i) {
+            std::size_t previousPos = squeezePermutations[i];
+            if (previousPos == beginPos) {
+                updatedBeginPos = i;
+            }
+            if (previousPos == endPos) {
+                updatedEndPos = i;
+            }
+
+            if (updatedBeginPos != initialKernelRawSize && updatedEndPos != initialKernelRawSize) {
+                break;
+            }
         }
 
-        if (updatedBeginPos != initialKernelRawSize && updatedEndPos != initialKernelRawSize) {
-            break;
+        if (updatedBeginPos != initialKernelRawSize) {
+            beginPos = updatedBeginPos;
+        } else {
+            beginPos = updatedKernelRawSize;
         }
-    }
 
-    if (updatedBeginPos != initialKernelRawSize) {
-        beginPos = updatedBeginPos;
-    } else {
-        beginPos = updatedKernelRawSize;
-    }
-
-    if (updatedEndPos != initialKernelRawSize) {
-        endPos = updatedEndPos;
-    } else {
-        endPos = updatedKernelRawSize;
+        if (updatedEndPos != initialKernelRawSize) {
+            endPos = updatedEndPos;
+        } else {
+            endPos = updatedKernelRawSize;
+        }
     }
 
     // Evaluates the sort permutations
@@ -259,12 +359,17 @@ std::vector<std::size_t> PiercedKernel<id_t>::rawSort(std::size_t beginPos, std:
 
     std::sort(sortPermutations.begin() + beginPos, sortPermutations.begin() + endPos, idLess(m_ids));
 
-    // Create the permutation action
-    PiercedSyncAction permutationAction(PiercedSyncAction::TYPE_REORDER);
-    permutationAction.importData(std::vector<std::size_t>(squeezePermutations));
-    std::vector<std::size_t> &permutations = *(permutationAction.data);
-    for (std::size_t i = beginPos; i < endPos; ++i) {
-        permutations[i] = squeezePermutations[sortPermutations[i]];
+    // Create the sync action
+    SortAction syncAction;
+    syncAction.info[PiercedSyncAction::INFO_SIZE] = updatedKernelRawSize;
+    if (squeezed) {
+        syncAction.importData(std::vector<std::size_t>(squeezePermutations));
+        std::vector<std::size_t> &permutations = *(syncAction.data);
+        for (std::size_t i = beginPos; i < endPos; ++i) {
+            permutations[i] = squeezePermutations[sortPermutations[i]];
+        }
+    } else {
+        syncAction.importData(std::vector<std::size_t>(sortPermutations));
     }
 
     // Sort the ids
@@ -278,11 +383,8 @@ std::vector<std::size_t> PiercedKernel<id_t>::rawSort(std::size_t beginPos, std:
         m_pos[m_ids[i]] = i;
     }
 
-    // Update storage
-    processSyncAction(permutationAction);
-
     // Return the permutations
-    return permutations;
+    return syncAction;
 }
 
 /**
@@ -296,17 +398,49 @@ std::vector<std::size_t> PiercedKernel<id_t>::rawSort(std::size_t beginPos, std:
 * cannot alter its elements.
 */
 template<typename id_t>
-std::vector<std::size_t> PiercedKernel<id_t>::squeeze()
+typename PiercedKernel<id_t>::SqueezeAction PiercedKernel<id_t>::squeeze()
 {
-    std::vector<std::size_t> permutations;
-    permutations.resize(rawSize());
+    SqueezeAction syncAction = _squeeze();
 
+    // Update the storage
+    processSyncAction(syncAction);
+
+    return syncAction;
+}
+
+/**
+* Requests the kernel to compact the elements and reduce its capacity to
+* fit its size.
+*
+* The request is non-binding, and the function can leave the kernel with a
+* capacity greater than its size.
+*
+* This may cause a reallocation, but has no effect on the kernel size and
+* cannot alter its elements.
+*
+* The function will NOT process the sync action.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::SqueezeAction PiercedKernel<id_t>::_squeeze()
+{
     // Flush changes
     flush();
+
+    // Get kernel size
+    std::size_t kernelSize    = size();
+    std::size_t kernelRawSize = rawSize();
+
+    // Initialize the sync action
+    SqueezeAction syncAction;
+    syncAction.info[PiercedSyncAction::INFO_SIZE] = kernelSize;
 
     // Compact the kernel
     std::size_t nHoles = holesCount();
     if (nHoles != 0) {
+        // Initialize sync data
+        syncAction.importData(std::vector<std::size_t>(kernelRawSize));
+        std::vector<std::size_t> &permutations = *(syncAction.data);
+
         // Move the elements
         std::size_t firstPosToUpdate;
         if (m_begin_pos == 0) {
@@ -346,23 +480,14 @@ std::vector<std::size_t> PiercedKernel<id_t>::squeeze()
         setBeginPos(0);
         setEndPos(size());
 
-        // Update storage
-        PiercedSyncAction permutationAction(PiercedSyncAction::TYPE_REORDER);
-        permutationAction.importData(permutations);
-        processSyncAction(permutationAction);
-
         // Shrink the kernel
         shrink(size(), true);
-    } else {
-        for (std::size_t pos = 0; pos < rawSize(); ++pos) {
-            permutations[pos] = pos;
-        }
     }
 
     // Shrink to fit
-    shrinkToFit();
+    _shrinkToFit();
 
-    return permutations;
+    return syncAction;
 }
 
 /**
@@ -376,13 +501,38 @@ std::vector<std::size_t> PiercedKernel<id_t>::squeeze()
 * cannot alter its elements not the holes.
 */
 template<typename id_t>
-void PiercedKernel<id_t>::shrinkToFit()
+typename PiercedKernel<id_t>::ShrinkToFitAction PiercedKernel<id_t>::shrinkToFit()
 {
-    m_ids.shrink_to_fit();
+    ShrinkToFitAction syncAction = _shrinkToFit();
 
     // Update the storage
-    PiercedSyncAction syncAction(PiercedSyncAction::TYPE_SHRINK_TO_FIT);
     processSyncAction(syncAction);
+
+    return syncAction;
+}
+
+/**
+* Requests the kernel to reduce its capacity to fit its size. This method
+* will NOT compact the elements, leaving the existing holes unaltered.
+*
+* The request is non-binding, and the function can leave the kernel with a
+* capacity greater than its size.
+*
+* This may cause a reallocation, but has no effect on the kernel size and
+* cannot alter its elements not the holes.
+*
+* The function will NOT process the sync action.
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::ShrinkToFitAction PiercedKernel<id_t>::_shrinkToFit()
+{
+    // Update the kernel
+    m_ids.shrink_to_fit();
+
+    // Generate the sync action
+    ShrinkToFitAction syncAction;
+
+    return syncAction;
 }
 
 /**
@@ -414,6 +564,16 @@ void PiercedKernel<id_t>::swap(PiercedKernel &x) noexcept
     std::swap(x.m_holes_pending_begin, m_holes_pending_begin);
     std::swap(x.m_holes_pending_end, m_holes_pending_end);
     std::swap(x.m_holes_pending_sorted, m_holes_pending_sorted);
+}
+
+/**
+* Flush all pending changes.
+*/
+template<typename id_t>
+void PiercedKernel<id_t>::flush()
+{
+    // Flush pending holes
+    holesFlush();
 }
 
 /**
@@ -917,11 +1077,11 @@ std::size_t PiercedKernel<id_t>::getFirstUsedPos() const
 }
 
 /**
-* Gets the position of the first element in the container.
+* Gets the position of the last element in the container.
 *
 * If there is no element with the specified id, an exception is thrown.
 *
-* \result The position of the first element in the container.
+* \result The position of the last element in the container.
 */
 template<typename id_t>
 std::size_t PiercedKernel<id_t>::getLastUsedPos() const
