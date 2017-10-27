@@ -671,6 +671,44 @@ void PiercedVector<value_t, id_t>::sort()
 }
 
 /**
+* Sorts the container after the element with the reference id in ascending
+* id order.
+*
+* \param referenceId is the id of the element after which the container will
+* be sorted
+* \param inclusive if true the reference element will be sorted, otherwise
+* the sorting will stop at the element following the reference
+*/
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::sortAfter(id_t referenceId, bool inclusive)
+{
+    // Update the kernel
+    SortAction sortAction = PiercedVectorKernel<id_t>::sortAfter(referenceId, inclusive);
+
+    // Update the storage
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(sortAction);
+}
+
+/**
+* Sorts the container before the element with the reference id in ascending
+* id order.
+*
+* \param referenceId is the id of the element before which the container will
+* be sorted
+* \param inclusive if true the reference element will be sorted, otherwise
+* the sorting will stop at the element preceding the reference
+*/
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::sortBefore(id_t referenceId, bool inclusive)
+{
+    // Update the kernel
+    SortAction sortAction = PiercedVectorKernel<id_t>::sortBefore(referenceId, inclusive);
+
+    // Update the storage
+    PiercedVectorStorage<value_t, id_t>::commitSyncAction(sortAction);
+}
+
+/**
 * Requests the container to compact the elements and reduce its capacity to
 * fit its size.
 *

@@ -339,6 +339,8 @@ public:
     ReserveAction reserve(std::size_t n);
     ResizeAction resize(std::size_t n);
     SortAction sort();
+    SortAction sortAfter(id_t referenceId, bool inclusive);
+    SortAction sortBefore(id_t referenceId, bool inclusive);
     SqueezeAction squeeze();
     ShrinkToFitAction shrinkToFit();
 

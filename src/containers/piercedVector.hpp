@@ -165,6 +165,8 @@ public:
     void reserve(std::size_t n);
     void resize(std::size_t n);
     void sort();
+    void sortAfter(id_t referenceId, bool inclusive);
+    void sortBefore(id_t referenceId, bool inclusive);
     void squeeze();
     void shrinkToFit();
     void swap(PiercedVector &x) noexcept;
@@ -210,6 +212,8 @@ protected:
     using PiercedVectorKernel<id_t>::reserve;
     using PiercedVectorKernel<id_t>::resize;
     using PiercedVectorKernel<id_t>::sort;
+    using PiercedVectorKernel<id_t>::sortAfter;
+    using PiercedVectorKernel<id_t>::sortBefore;
     using PiercedVectorKernel<id_t>::squeeze;
     using PiercedVectorKernel<id_t>::shrinkToFit;
     using PiercedVectorKernel<id_t>::swap;

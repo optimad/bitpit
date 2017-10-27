@@ -292,6 +292,60 @@ typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::sort()
 }
 
 /**
+* Sorts the kernel after the element with the reference id in ascending
+* id order.
+*
+* \param referenceId is the id of the element after which the kernel will
+* be sorted
+* \param inclusive if true the reference element will be sorted, otherwise
+* the sorting will stop at the element following the reference
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::sortAfter(id_t referenceId, bool inclusive)
+{
+    // Get the reference position
+    std::size_t referencePos = getPos(referenceId);
+    if (!inclusive) {
+        referencePos++;
+    }
+
+    // Sorte the
+    SortAction syncAction = _sort(referencePos, m_end_pos);
+
+    // Update the storage
+    processSyncAction(syncAction);
+
+    return syncAction;
+}
+
+/**
+* Sorts the kernel before the element with the reference id in ascending
+* id order.
+*
+* \param referenceId is the id of the element before which the kernel will
+* be sorted
+* \param inclusive if true the reference element will be sorted, otherwise
+* the sorting will stop at the element preceding the reference
+*/
+template<typename id_t>
+typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::sortBefore(id_t referenceId, bool inclusive)
+{
+    // Get the reference position
+    std::size_t referencePos = getPos(referenceId);
+    if (inclusive) {
+        referencePos++;
+    }
+
+    // Sorte the
+    SortAction syncAction = _sort(m_begin_pos, referencePos);
+
+    // Update the storage
+    processSyncAction(syncAction);
+
+    return syncAction;
+}
+
+/**
 * Sorts the elements of the kernel in ascending id order.
 *
 * The function will NOT process the sync action.
