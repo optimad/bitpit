@@ -50,8 +50,8 @@ PiercedSyncAction::PiercedSyncAction(const PiercedSyncAction &other)
 {
     // Copy the items that need allocation
     std::unique_ptr<std::vector<std::size_t>> new_data;
-    if (data) {
-        new_data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(*data));
+    if (other.data) {
+        new_data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(*(other.data)));
     }
 
     // Assign the new memory to the object
