@@ -83,13 +83,14 @@ public:
 
     void importData(const std::vector<std::size_t> &values);
 
-    ActionType type;
-    std::array<std::size_t, INFO_COUNT> info;
-    std::unique_ptr<std::vector<std::size_t>> data;
-
     // Dump and restore
     void restore(std::istream &stream);
     void dump(std::ostream &stream) const;
+
+    // Data
+    ActionType type;
+    std::array<std::size_t, INFO_COUNT> info;
+    std::unique_ptr<std::vector<std::size_t>> data;
 
 };
 
