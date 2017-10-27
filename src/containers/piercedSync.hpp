@@ -77,6 +77,7 @@ public:
     PiercedSyncAction(const PiercedSyncAction &other);
 
     PiercedSyncAction & operator=(const PiercedSyncAction &other);
+    PiercedSyncAction & operator=(PiercedSyncAction&&) = default;
 
     void swap(PiercedSyncAction &other) noexcept;
 
