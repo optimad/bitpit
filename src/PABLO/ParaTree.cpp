@@ -5197,6 +5197,7 @@ namespace bitpit {
                         if(pBegin != m_rank || pEnd != m_rank){
                             it->setPbound(i,true);
                             pbd = true;
+                            break;
                         }
                         else{
                             it->setPbound(i,false);
