@@ -1014,7 +1014,7 @@ namespace bitpit {
 
             // If the internal neighbours already cover the whole face,
             // we have found all the neighbours and we can exit.
-            uint32_t neighArea  = 0;
+            uint64_t neighArea  = 0;
             std::size_t nNeighs = neighbours.size();
             for (std::size_t i = 0; i < nNeighs; ++i) {
                 neighArea += m_octants[neighbours[i]].getArea();
