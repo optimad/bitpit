@@ -1,0 +1,146 @@
+language:
+  - cpp
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-7
+      - g++-7
+      - gfortran-7
+      - cmake
+      - libblas-dev
+      - liblapack-dev
+      - liblapacke-dev
+      - mpich
+      - libmpich-dev
+
+env:
+  global:
+    - C_COMPILER="gcc-7"
+    - CXX_COMPILER="g++-7"
+    - Fortran_COMPILER="gfortran-7"
+  matrix:
+    - BUILD_TYPE="Release" ENABLE_MPI="True"
+    - BUILD_TYPE="Release" ENABLE_MPI="False"
+    - BUILD_TYPE="Debug" ENABLE_MPI="True"
+    - BUILD_TYPE="Debug" ENABLE_MPI="False"
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+            - gfortran-4.9
+            - cmake
+            - libblas-dev
+            - liblapack-dev
+            - liblapacke-dev
+            - mpich
+            - libmpich-dev
+
+      env:
+        - C_COMPILER="gcc-4.9"
+        - CXX_COMPILER="g++-4.9"
+        - Fortran_COMPILER="gfortran-4.9"
+        - BUILD_TYPE="Release" ENABLE_MPI="True"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - gfortran-6
+            - cmake
+            - libblas-dev
+            - liblapack-dev
+            - liblapacke-dev
+            - mpich
+            - libmpich-dev
+
+      env:
+        - C_COMPILER="gcc-6"
+        - CXX_COMPILER="g++-6"
+        - Fortran_COMPILER="gfortran-6"
+        - BUILD_TYPE="Release" ENABLE_MPI="True"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+            - g++-6
+            - gfortran-6
+            - cmake
+            - libblas-dev
+            - liblapack-dev
+            - liblapacke-dev
+            - mpich
+            - libmpich-dev
+
+      env:
+        - C_COMPILER="clang-3.7"
+        - CXX_COMPILER="clang++-3.7"
+        - Fortran_COMPILER="gfortran-6"
+        - BUILD_TYPE="Release" ENABLE_MPI="True"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+            - g++-7
+            - gfortran-7
+            - cmake
+            - libblas-dev
+            - liblapack-dev
+            - liblapacke-dev
+            - mpich
+            - libmpich-dev
+
+      env:
+        - C_COMPILER="clang-5.0"
+        - CXX_COMPILER="clang++-5.0"
+        - Fortran_COMPILER="gfortran-7"
+        - BUILD_TYPE="Release" ENABLE_MPI="True"
+
+before_install:
+  - test -n $CC && unset CC
+  - test -n $CXX && unset CXX
+  - test -n $FC && unset FC
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake
+    -DCMAKE_C_COMPILER=${C_COMPILER}
+    -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
+    -DCMAKE_Fortran_COMPILER=${Fortran_COMPILER}
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+    -DENABLE_MPI=${ENABLE_MPI}
+    -DVERBOSE_MAKE=True
+    ..
+
+script:
+  - make && ctest -V
+
+notifications:
+  slack:
+    rooms:
+      - romanticdevs:wsYAkDHp0E9NNnsLM0Wo3dpQ#cmake
+    on_success:
+      always
