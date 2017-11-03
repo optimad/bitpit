@@ -104,6 +104,9 @@ public:
     void clear();
     void shrinkToFit();
 
+    const std::size_t * indices() const noexcept;
+    const std::size_t * indices(int i) const noexcept;
+
     T * data() noexcept;
     const T * data() const noexcept;
     const std::vector<T> & vector() const;

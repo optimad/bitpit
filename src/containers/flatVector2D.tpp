@@ -438,6 +438,35 @@ void FlatVector2D<T>::shrinkToFit()
 }
 
 /*!
+    Returns a constant pointer to the first item in the vector used
+    internally by the container to store the indices.
+
+    \result A constant pointer to the first item in the vector used
+    internally by the container to store the indices.
+*/
+template <class T>
+const std::size_t * FlatVector2D<T>::indices() const noexcept
+{
+    return m_index.data();
+}
+
+/*!
+    Returns a constant pointer to the first item in the vector used
+    internally by the container to store the indices of the specified
+    vector.
+
+    \param i is the index of the vector
+    \result A constant pointer to the first item in the vector used
+    internally by the container to store the indices of the specified
+    vector.
+*/
+template <class T>
+const std::size_t * FlatVector2D<T>::indices(int i) const noexcept
+{
+    return (m_index.data() + i);
+}
+
+/*!
     Returns a direct pointer to the memory vector used internally by the
     container to store its items.
 
