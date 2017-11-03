@@ -524,8 +524,21 @@ void FlatVector2D<T>::pushBack(const int &subArraySize, const T &value)
 template <class T>
 void FlatVector2D<T>::pushBack(const std::vector<T> &subArray)
 {
-    int subArraySize = subArray.size();
+    pushBack(subArray.size(), subArray.data());
+}
 
+/*!
+    Adds the specified array at the end.
+
+    Adds the specified array at the end of the vector, after its current
+    last item.
+
+    \param subArraySize is the size of the sub array
+    \param subArray is a pointer to the sub array will be added
+*/
+template <class T>
+void FlatVector2D<T>::pushBack(int subArraySize, const T *subArray)
+{
     std::size_t previousLastIndex = m_index.back();
     m_index.emplace_back();
     std::size_t &lastIndex = m_index.back();

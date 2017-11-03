@@ -111,6 +111,7 @@ public:
     void pushBack();
     void pushBack(const int &subArraySize, const T &value = T());
     void pushBack(const std::vector<T> &subArray);
+    void pushBack(int subArraySize, const T *subArray);
     void pushBackItem(const T& value);
     void pushBackItem(const int &i, const T& value);
 
