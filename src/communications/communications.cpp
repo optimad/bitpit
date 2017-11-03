@@ -71,6 +71,10 @@ DataCommunicator::~DataCommunicator()
             communications::tags().trash(m_discoverTag);
         }
     }
+
+    if (!m_customExchangeTag || !m_customDiscoverTag) {
+        MPI_Barrier(m_communicator);
+    }
 }
 
 /*!
