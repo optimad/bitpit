@@ -22,10 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include <lapacke.h>
-
 #include <cmath>
 #include <set>
+
+#include "bitpit_private_lapacke.hpp"
 
 #include "bitpit_operators.hpp"
 #include "bitpit_IO.hpp"
