@@ -27,7 +27,8 @@
 # include <iostream>
 
 # include <assert.h>
-# include <lapacke.h>
+
+# include "bitpit_private_lapacke.hpp"
 
 # include "bitpit_operators.hpp"
 
