@@ -599,7 +599,6 @@ void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &s
             dataBuffer << index ;
             dataBuffer << lsInfoItr->value ;
             dataBuffer << lsInfoItr->gradient ;
-            ++nItems ;
         }
         ++index ;
     }
