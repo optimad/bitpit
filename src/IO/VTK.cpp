@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <cassert>
+
 #include "VTK.hpp"
 
 #include "logger.hpp"
@@ -256,8 +258,7 @@ void VTK::setGeomData( VTKField &&field ){
     const std::string &name = field.getName();
     int id = _findFieldIndex( name, m_geometry ) ;
     if( id < 0 ){
-        log::cout() << "The field " << name << "is not an admissible geometry field." << std::endl ;
-        return;
+        throw std::runtime_error("Not admissible to add geometry field with same name as user data " + name );
     }
 
     m_geometry[id] = std::move(field);
@@ -274,7 +275,7 @@ VTKField& VTK::addData( VTKField &&field ){
 
     const std::string &name = field.getName();
     if( findGeomData(name) ){
-        log::cout() << "Not admissible to add user data with same name as geometry field " << name << std::endl ;
+        throw std::runtime_error("Not admissible to add user data with same name as geometry field " + name );
     }
 
     int id = _findFieldIndex( name, m_data ) ;
@@ -297,22 +298,18 @@ VTKField& VTK::addData( VTKField &&field ){
  */
 VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
 
-    VTKField *ptr = nullptr ;
-
-    if( ! findGeomData(name) ){
-
-        ptr = _findData( name ) ;
-        if(  ! ptr ) {
-            m_data.push_back( VTKField( name ) ) ;
-            ptr = &(m_data.back()) ;
-        }
-
-        ptr->setCodification(m_dataCodex) ;
-        ptr->setStreamer(*streamer) ;
-
-    } else {
-        log::cout() << "Not admissible to add user data with same name as geometry field " << name << std::endl ;
+    if( findGeomData(name) ){
+        throw std::runtime_error("Not admissible to add user data with same name as geometry field " + name);
     }
+
+    VTKField *ptr = _findData( name ) ;
+    if ( ! ptr ) {
+        m_data.push_back( VTKField( name ) ) ;
+        ptr = &(m_data.back()) ;
+    }
+
+    ptr->setCodification(m_dataCodex) ;
+    ptr->setStreamer(*streamer) ;
 
     return *ptr ;
 
