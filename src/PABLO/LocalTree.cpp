@@ -2764,7 +2764,7 @@ namespace bitpit {
             obegin = m_octants.begin();
             oend = m_octants.end();
             idx = 0;
-            for (it=obegin; it!=oend; it++){
+            for (it=obegin; it!=oend; ++it){
                 if (it->getBalance() && (it->getMarker() != 0 || it->m_info[15]) ){
                     targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
@@ -2880,7 +2880,7 @@ namespace bitpit {
             obegin = m_ghosts.begin();
             oend = m_ghosts.end();
             idx = 0;
-            for (it=obegin; it!=oend; it++){
+            for (it=obegin; it!=oend; ++it){
                 if (!it->getNotBalance() && (it->getMarker() != 0 || it->m_info[15]) ){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
@@ -2948,7 +2948,7 @@ namespace bitpit {
             while(modsize!=0){
                 ibegin = modified.begin();
                 iend = modified.end();
-                for (iit=ibegin; iit!=iend; iit++){
+                for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (!m_octants[idx].getNotBalance()){
                         targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
@@ -3050,7 +3050,7 @@ namespace bitpit {
             obegin = m_ghosts.begin();
             oend = m_ghosts.end();
             idx = 0;
-            for (it=obegin; it!=oend; it++){
+            for (it=obegin; it!=oend; ++it){
                 if (!it->getNotBalance() && it->m_info[15]){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
@@ -3118,7 +3118,7 @@ namespace bitpit {
             while(modsize!=0){
                 ibegin = modified.begin();
                 iend = modified.end();
-                for (iit=ibegin; iit!=iend; iit++){
+                for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (!m_octants[idx].getNotBalance()){
                         targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
@@ -3249,7 +3249,7 @@ namespace bitpit {
             obegin = m_octants.begin();
             oend = m_octants.end();
             idx = 0;
-            for (it=obegin; it!=oend; it++){
+            for (it=obegin; it!=oend; ++it){
                 if ((!it->getNotBalance()) && ((it->m_info[15]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
                     targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
@@ -3366,7 +3366,7 @@ namespace bitpit {
             obegin = m_ghosts.begin();
             oend = m_ghosts.end();
             idx = 0;
-            for (it=obegin; it!=oend; it++){
+            for (it=obegin; it!=oend; ++it){
                 if (!it->getNotBalance() && (it->m_info[15] || (it->getIsNewC() || it->getIsNewR()))){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
@@ -3434,7 +3434,7 @@ namespace bitpit {
             while(modsize!=0){
                 ibegin = modified.begin();
                 iend = modified.end();
-                for (iit=ibegin; iit!=iend; iit++){
+                for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (!m_octants[idx].getNotBalance()){
                         targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
@@ -3536,7 +3536,7 @@ namespace bitpit {
             obegin = m_ghosts.begin();
             oend = m_ghosts.end();
             idx = 0;
-            for (it=obegin; it!=oend; it++){
+            for (it=obegin; it!=oend; ++it){
                 if (!it->getNotBalance() && (it->m_info[15] || (it->getIsNewC() || it->getIsNewR()))){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
@@ -3604,7 +3604,7 @@ namespace bitpit {
             while(modsize!=0){
                 ibegin = modified.begin();
                 iend = modified.end();
-                for (iit=ibegin; iit!=iend; iit++){
+                for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (!m_octants[idx].getNotBalance()){
                         targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
@@ -3729,7 +3729,7 @@ namespace bitpit {
 		// Loop on ghosts
 		obegin = m_ghosts.begin();
 		oend = m_ghosts.end();
-		for (it = obegin; it != oend; it++){
+		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
 				findGhostNeighbours(idx, iface2, neighbours);
@@ -3778,7 +3778,7 @@ namespace bitpit {
 		idx=0;
 		obegin = m_octants.begin();
 		oend = m_octants.end();
-		for (it = obegin; it != oend; it++){
+		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
 				findNeighbours(idx, iface2, neighbours, isghost);

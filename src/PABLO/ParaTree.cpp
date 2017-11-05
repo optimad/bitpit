@@ -2998,7 +2998,7 @@ namespace bitpit {
 
         int count = 0;
         int8_t marker;
-        for (it=itb; it!=ite; it++){
+        for (it=itb; it!=ite; ++it){
             marker = (*it)->getMarker();
             if (marker != 0){
                 idx.push_back(count);
@@ -3176,7 +3176,7 @@ namespace bitpit {
         octvector::iterator itend = m_octree.m_octants.end();
         while(!lcheck && it != itend){
             lcheck = (it->getMarker() != 0);
-            it++;
+            ++it;
         }
         if (m_nproc == 1){
             gcheck = lcheck;
@@ -3218,7 +3218,7 @@ namespace bitpit {
         uint32_t nocts0 = getNumOctants();
         vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
-        for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
+        for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
             iter->m_info[12] = false;
             iter->m_info[13] = false;
             iter->m_info[15] = false;
