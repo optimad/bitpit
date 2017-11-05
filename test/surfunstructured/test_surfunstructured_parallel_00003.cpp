@@ -162,7 +162,7 @@ if (myRank == 0) {
             int side_y = (mesh.evalCellCentroid(cell.getId())[1] > baricenter[1]) ? 0 : 1;
             int side_z = (mesh.evalCellCentroid(cell.getId())[2] > baricenter[2]) ? 0 : 1;
 
-            int rank;
+            int rank = -1;
             if (side_z == 0 && side_y == 0 && side_x == 0) {
                 rank = 0;
             } else if (side_z == 0 && side_y == 0 && side_x == 1) {
