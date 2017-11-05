@@ -2346,15 +2346,6 @@ namespace bitpit {
         return oct->m_info[16];
     };
 
-    /*! Get the nature of an octant.
-     * \param[in] oct Target octant.
-     * \return Is octant ghost?
-     */
-    bool
-    ParaTree::getIsGhost(const Octant oct) const {
-        return oct.m_info[16];
-    };
-
     /*! Get a map of elements sent to the other processes during load balance
      * \return an unordered map associating rank to sent elements given by index extremes of a chunck
      */
