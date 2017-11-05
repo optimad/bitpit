@@ -326,7 +326,7 @@ CellFlatMapping::~CellFlatMapping()
 	\param adaptionData is adaption data that will be used to update
 	the mapping
 */
-void CellFlatMapping::update(const std::vector<adaption::Info> adaptionData)
+void CellFlatMapping::update(const std::vector<adaption::Info> &adaptionData)
 {
 	// Previous number of cells
 	long nPreviousCells = m_numbering.size();

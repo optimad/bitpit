@@ -111,7 +111,7 @@ public:
 
 	virtual ~FlatMapping();
 
-	virtual void update(const std::vector<adaption::Info> adaptionData) = 0;
+	virtual void update(const std::vector<adaption::Info> &adaptionData) = 0;
 
 	const std::vector<long> & getNumbering() const;
 	const std::vector<long> & getMapping() const;
@@ -133,7 +133,7 @@ public:
 
 	~CellFlatMapping();
 
-	void update(const std::vector<adaption::Info> adaptionData);
+	void update(const std::vector<adaption::Info> &adaptionData);
 
 };
 
