@@ -1033,11 +1033,10 @@ void VTK::readData( ){
                 if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
                 if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
-                std::fstream::pos_type position_before = str.tellg();
-
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
 #if ENABLE_DEBUG
+                std::fstream::pos_type position_before = str.tellg();
                 if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
                     log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
                 }
@@ -1054,11 +1053,10 @@ void VTK::readData( ){
                 if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
                 if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
-                std::fstream::pos_type position_before = str.tellg();
-
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
 #if ENABLE_DEBUG
+                std::fstream::pos_type position_before = str.tellg();
                 if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
                     log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
                 }
