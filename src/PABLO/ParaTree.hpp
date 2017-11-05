@@ -119,7 +119,7 @@ namespace bitpit {
             {
             }
 
-            LoadBalanceRanges(bool serial, ExchangeRanges _sendRanges, ExchangeRanges _recvRanges)
+            LoadBalanceRanges(bool serial, const ExchangeRanges &_sendRanges, const ExchangeRanges &_recvRanges)
                 : sendRanges(_sendRanges), recvRanges(_recvRanges)
             {
                 if (serial) {
