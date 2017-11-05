@@ -332,7 +332,7 @@ void VTK::removeData( std::string name ){
             fieldItr = m_data.erase(fieldItr);
             return;
         } else {
-            fieldItr++;
+            ++fieldItr;
         }
     } 
 
