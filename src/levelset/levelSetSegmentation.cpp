@@ -773,7 +773,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
     std::array<double,3> gradient, normal;
     std::array<double,3> centroid, root;
 
-    std::unordered_set<long> intersects, prcoessed;
+    std::unordered_set<long> intersects;
 
     for( const Cell &cell : mesh.getCells() ){
 
