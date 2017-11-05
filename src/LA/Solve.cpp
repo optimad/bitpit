@@ -111,7 +111,9 @@ zeros(U, n, n);
 AA = A;
 
 // Pivoting array
-eye(*P, n, n);
+if (P != NULL) {
+    eye(*P, n, n);
+}
 
 // ========================================================================== //
 // COMPUTE LU FACTORIZATION                                                   //
