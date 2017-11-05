@@ -2337,24 +2337,6 @@ namespace bitpit {
         return NULL;
     };
 
-    /*! Get the local index of an octant.
-     * \param[in] oct Target octant.
-     * \return Local index of octant.
-     */
-    uint32_t
-    ParaTree::getIdx(const Octant oct) const {
-#if BITPIT_ENABLE_MPI==1
-        if (getIsGhost(oct)){
-            return m_octree.findGhostMorton(oct.computeMorton());
-        }
-        else{
-#endif
-            return m_octree.findMorton(oct.computeMorton());
-#if BITPIT_ENABLE_MPI==1
-        };
-#endif
-    };
-
     /*! Get the nature of an octant.
      * \param[in] oct Pointer to target octant.
      * \return Is octant ghost?
