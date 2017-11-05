@@ -405,7 +405,7 @@ bool LevelSet::removeProcessingOrder(int objectId){
 
     std::vector<int>::iterator orderItr;
 
-    for(orderItr=m_order.begin(); orderItr!=m_order.end(); orderItr++){
+    for(orderItr=m_order.begin(); orderItr!=m_order.end(); ++orderItr){
         if(*orderItr==objectId){
             m_order.erase(orderItr);
             return true;
