@@ -1903,7 +1903,7 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> P, std::vector<int> flag, int dim)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
     return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertice, triangleEdgeBoxHullIntersections, triangleBoxEdgeIntersection, &P, &flag, dim);
 }
