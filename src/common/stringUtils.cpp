@@ -60,14 +60,14 @@ bool getAfterKeyword(std::string line, std::string key, char del, std::string &r
     advance(it, key.size());
 
     while ((*it) != del) {
-        it++;
+        ++it;
     }
     std::size_t c1= it- line.begin() + 1;
 
-    it++;
+    ++it;
 
     while ((*it) != del) {
-        it++;
+        ++it;
     }
     std::size_t c2 = it - line.begin() - 1;
 
