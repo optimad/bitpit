@@ -2719,11 +2719,6 @@ namespace bitpit {
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
 
-        if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength)
-            || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
-            return numeric_limits<uint32_t>::max();
-        }
-
         if (x == m_global.m_maxLength) x = x - 1;
         if (y == m_global.m_maxLength) y = y - 1;
         if (z == m_global.m_maxLength) z = z - 1;
@@ -2802,11 +2797,6 @@ namespace bitpit {
         x = m_trans.mapX(std::min(std::max(point[0], 0.0), 1.0));
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
-
-        if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength)
-            || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
-            return numeric_limits<uint32_t>::max();
-        }
 
         if (x == m_global.m_maxLength) x = x - 1;
         if (y == m_global.m_maxLength) y = y - 1;
