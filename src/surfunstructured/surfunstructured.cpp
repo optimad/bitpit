@@ -737,8 +737,8 @@ unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exp
             *itN = std::move(evalFacetNormal(cell.getId()));
 
             // Increment  iterators
-            itC++;
-            itN++;
+            ++itC;
+            ++itN;
         }
 
         // Write the solid associated to the current PID
@@ -767,8 +767,8 @@ unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exp
             *itN = std::move(evalFacetNormal(itr.getId()));
 
             // Increment iterators
-            itC++;
-            itN++;
+            ++itC;
+            ++itN;
         }
 
         // Write the solid associated to the ghosts
