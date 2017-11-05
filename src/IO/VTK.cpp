@@ -898,7 +898,6 @@ void VTK::writeData( ){
  */
 void VTK::writeDataHeader( std::fstream &str, bool parallel ){
 
-    std::string           line ;
     VTKLocation           location ;
     std::stringstream     scalars, vectors ;
 

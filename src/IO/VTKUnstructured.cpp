@@ -351,7 +351,6 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
 void VTKUnstructuredGrid::writeMetaInformation( ){
 
     std::fstream str ;
-    std::string line ; 
 
     str.open( m_fh.getPath( ), std::ios::out ) ;
 
