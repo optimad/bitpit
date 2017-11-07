@@ -102,7 +102,7 @@ const PiercedKernelIterator<id_t> & PiercedStorageIterator<value_t, id_t, value_
 template<typename value_t, typename id_t, typename value_no_cv_t>
 __PSI_REFERENCE__ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::getValue(std::size_t k) const
 {
-    if (*this == m_storage->getKernel.end()) {
+    if (*this == m_storage->getKernel().end()) {
         throw std::out_of_range("Iterator points to an invalid position.");
     }
 
