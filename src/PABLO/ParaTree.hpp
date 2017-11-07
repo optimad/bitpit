@@ -456,10 +456,12 @@ namespace bitpit {
         void 		findAllNodeNeighbours(Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const;
         Octant* 	getPointOwner(dvector point);
         Octant* 	getPointOwner(dvector point, bool & isghost);
-        uint32_t 	getPointOwnerIdx(dvector point) const;
-        uint32_t 	getPointOwnerIdx(dvector point, bool & isghost) const;
         Octant* 	getPointOwner(darray3 point);
         Octant* 	getPointOwner(darray3 point, bool & isghost);
+        uint32_t 	getPointOwnerIdx(double * point) const;
+        uint32_t 	getPointOwnerIdx(double * point, bool & isghost) const;
+        uint32_t 	getPointOwnerIdx(dvector point) const;
+        uint32_t 	getPointOwnerIdx(dvector point, bool & isghost) const;
         uint32_t 	getPointOwnerIdx(darray3 point) const;
         uint32_t 	getPointOwnerIdx(darray3 point, bool & isghost) const;
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const;
