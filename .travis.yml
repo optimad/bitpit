@@ -136,7 +136,7 @@ before_script:
     ..
 
 script:
-  - make && ctest -V
+  - make && ctest
 
 notifications:
   slack:
