@@ -2306,7 +2306,7 @@ void PiercedKernel<id_t>::restore(std::istream &stream)
     utils::binary::read(stream, nIds);
     m_pos.reserve(nIds);
     for (std::size_t n = 0; n < nIds; ++n) {
-        std::size_t id;
+        id_t id;
         utils::binary::read(stream, id);
 
         std::size_t pos;
@@ -2331,7 +2331,7 @@ void PiercedKernel<id_t>::restore(std::istream &stream)
     utils::binary::read(stream, m_dirty_begin_pos);
 
     // Holes data
-    std::size_t nHoles = size();
+    std::size_t nHoles;
     utils::binary::read(stream, nHoles);
     m_holes.resize(nHoles);
     for (std::size_t n = 0; n < nHoles; ++n) {
@@ -2361,7 +2361,7 @@ template<typename id_t>
 void PiercedKernel<id_t>::dump(std::ostream &stream) const
 {
     // Ids data
-    std::size_t nIds = size();
+    std::size_t nIds = m_pos.size();
     utils::binary::write(stream, nIds);
     for (const auto &entry : m_pos) {
         utils::binary::write(stream, entry.first);
@@ -2369,7 +2369,7 @@ void PiercedKernel<id_t>::dump(std::ostream &stream) const
     }
 
     // Postions data
-    std::size_t nPositions = size();
+    std::size_t nPositions = m_ids.size();
     utils::binary::write(stream, nPositions);
     for (std::size_t pos : m_ids) {
         utils::binary::write(stream, pos);
@@ -2380,7 +2380,7 @@ void PiercedKernel<id_t>::dump(std::ostream &stream) const
     utils::binary::write(stream, m_dirty_begin_pos);
 
     // Holes data
-    std::size_t nHoles = size();
+    std::size_t nHoles = m_holes.size();
     utils::binary::write(stream, nHoles);
     for (std::size_t hole : m_holes) {
         utils::binary::write(stream, hole);
