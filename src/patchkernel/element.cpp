@@ -428,8 +428,6 @@ void Element::initialize(long id, ElementType type, std::unique_ptr<long[]> &&co
 */
 void Element::_initialize(long id, ElementType type, int connectSize)
 {
-	// Initialize PID
-	m_pid = 0;
 
 	// Get previous connect size
 	int previousConnectSize = 0;
@@ -470,6 +468,9 @@ void Element::_initialize(long id, ElementType type, std::unique_ptr<long[]> &&c
 
 	// Set type
 	setType(type);
+
+	// Initialize PID
+	setPID(0);
 
 	// Initialize connectivity
 	setConnect(std::move(connectStorage));
