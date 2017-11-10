@@ -86,7 +86,7 @@ void flushASCII(std::fstream &str, int elements_per_line, const std::vector<data
 
         for (j=0; j<this_line; j++) {
             flushASCII(str, data[k]);
-            k++;
+            ++k;
         }
 
         i++;
@@ -142,7 +142,7 @@ void flushASCII(std::fstream &str, int elements_per_line, const std::array<data_
         this_line = std::min(elements_per_line, nr - k);
         for (j=0; j<this_line; j++) {
             flushASCII(str, data[k]);
-            k++;
+            ++k;
         }
 
         i++;
@@ -183,7 +183,7 @@ void flushASCII(std::fstream &str, int elements_per_line, const data_T *data, in
         this_line = std::min(elements_per_line, nr - k);
         for (j = 0; j < this_line; j++) {
             flushASCII(str, data[k]);
-            k++;
+            ++k;
         }
 
         i++;
@@ -234,8 +234,8 @@ void flushASCII(std::fstream &str, int elements_per_line, const PiercedVector<da
                 flushASCII(str, dataItr.getId());
             }
             flushASCII(str, *dataItr);
-            k++;
-            dataItr++;
+            ++k;
+            ++dataItr;
         }
 
         i++;
