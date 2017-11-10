@@ -207,6 +207,10 @@ public:
     template<typename T = value_t, typename std::enable_if<PiercedVectorStorage<T, id_t>::has_dump()>::type * = nullptr>
     void dump(std::ostream &stream) const;
 
+    void restoreKernel(std::istream &stream);
+
+    void dumpKernel(std::ostream &stream) const;
+
 protected:
     using PiercedVectorKernel<id_t>::clear;
     using PiercedVectorKernel<id_t>::reserve;
