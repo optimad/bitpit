@@ -1190,7 +1190,7 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 /**
 * Gets an iterator pointing to the specified position.
 *
-* \param id is the id of the specified iterator.
+* \param pos is the requested position
 * \result An iterator pointing to the specified position.
 */
 template<typename value_t, typename id_t>
@@ -1202,7 +1202,8 @@ typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::
 /**
 * Gets a constant iterator pointing to the specified position.
 *
-* \param id is the id of the specified iterator.
+* \param id is the id of the specified iterator
+* \param pos is the requested position
 * \result A constant iterator pointing to the specified position.
 */
 template<typename value_t, typename id_t>
