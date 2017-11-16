@@ -259,15 +259,19 @@ double LevelSetKernel::isCellInsideBoundingBox( long id, std::array<double, 3> m
 */
 void LevelSetKernel::initializeCommunicator()
 {
-	// Communication can be set just once
-	if (isCommunicatorSet()) {
-		throw std::runtime_error ("Levelset communicator can be set just once");
-	}
-
 	// The communicator has to be valid
 	MPI_Comm communicator = m_mesh->getCommunicator();
 	if (communicator == MPI_COMM_NULL) {
 		throw std::runtime_error ("Levelset communicator is not valid");
+	}
+
+	// Communication can be set just once
+	if (isCommunicatorSet()) {
+		if (communicator != m_communicator) {
+			throw std::runtime_error ("Levelset communicator cannot be modified.");
+		} else {
+			return;
+		}
 	}
 
 	// Create a duplicate of the patch communicator
