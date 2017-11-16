@@ -564,7 +564,9 @@ void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
 
     // Set the communicator
-    m_kernel->initializeCommunicator();
+    if (!m_kernel->isCommunicatorSet()) {
+        m_kernel->initializeCommunicator();
+    }
 
     // Udate the cache of the kernel
     m_kernel->updateGeometryCache( mapper ) ;
