@@ -112,6 +112,10 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
  * @param[in] cartesian cartesian patch
  */
 void LevelSet::setMesh( VolCartesian* cartesian ) {
+    if (m_kernel) {
+        throw std::runtime_error ("Mesh can be set just once.");
+    }
+
     LevelSetKernel *kernel = new LevelSetCartesian( *cartesian) ;
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
@@ -128,6 +132,10 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
  * @param[in] octree octree patch
  */
 void LevelSet::setMesh( VolOctree* octree ) {
+    if (m_kernel) {
+        throw std::runtime_error ("Mesh can be set just once.");
+    }
+
     LevelSetKernel *kernel = new LevelSetOctree( *octree) ;
     m_kernel = unique_ptr<LevelSetKernel>(kernel);
 
