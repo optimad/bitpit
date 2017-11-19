@@ -267,10 +267,12 @@ void LevelSetKernel::initializeCommunicator()
 
 	// Communication can be set just once
 	if (isCommunicatorSet()) {
-		if (communicator != m_communicator) {
-			throw std::runtime_error ("Levelset communicator cannot be modified.");
-		} else {
+		int comparison;
+		MPI_Comm_compare(communicator, m_communicator, &comparison);
+		if (comparison == MPI_IDENT || comparison == MPI_CONGRUENT) {
 			return;
+		} else {
+			throw std::runtime_error ("Levelset communicator cannot be modified.");
 		}
 	}
 
