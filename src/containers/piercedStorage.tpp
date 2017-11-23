@@ -1369,13 +1369,10 @@ void PiercedStorage<value_t, id_t>::restore(std::istream &stream)
     rawResize(nElements);
 
     // Fill the storage
-    auto begin_itr = m_fields.cbegin() + m_const_kernel->m_begin_pos;
-    auto end_itr   = m_fields.cbegin() + m_const_kernel->m_end_pos;
-
-    size_t pos = m_const_kernel->m_begin_pos;
-    for (auto itr = begin_itr; itr != end_itr; ++itr) {
+    auto fieldsBeginPos = m_nFields * m_const_kernel->m_begin_pos;
+    auto fieldsEndPos   = m_nFields * m_const_kernel->m_end_pos;
+    for (std::size_t pos = fieldsBeginPos; pos < fieldsEndPos; ++pos) {
         restoreField(stream, m_fields[pos]);
-        ++pos;
     }
 }
 
@@ -1433,13 +1430,10 @@ void PiercedStorage<value_t, id_t>::dump(std::ostream &stream) const
     utils::binary::write(stream, rawSize());
 
     // Fileds
-    auto begin_itr = m_fields.cbegin() + m_const_kernel->m_begin_pos;
-    auto end_itr   = m_fields.cbegin() + m_const_kernel->m_end_pos;
-
-    size_t pos = m_const_kernel->m_begin_pos;
-    for (auto itr = begin_itr; itr != end_itr; ++itr) {
+    auto fieldsBeginPos = m_nFields * m_const_kernel->m_begin_pos;
+    auto fieldsEndPos   = m_nFields * m_const_kernel->m_end_pos;
+    for (std::size_t pos = fieldsBeginPos; pos < fieldsEndPos; ++pos) {
         dumpField(stream, m_fields[pos]);
-        ++pos;
     }
 }
 
