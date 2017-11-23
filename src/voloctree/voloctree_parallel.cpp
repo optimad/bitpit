@@ -114,7 +114,7 @@ std::vector<adaption::Info> VolOctree::_partitioningAlter(bool trackPartitioning
 	m_tree->loadBalance();
 
 	// Sync the patch
-	std::vector<adaption::Info> partitioningData = sync(true, true, trackPartitioning);
+	std::vector<adaption::Info> partitioningData = sync(trackPartitioning);
 
 	// The bounding box is frozen, it is not updated automatically
 	setBoundingBox();

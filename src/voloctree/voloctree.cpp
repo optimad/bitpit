@@ -179,7 +179,7 @@ VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::u
 #endif
 
 	// Sync the patch with the tree
-	sync(true, true, false);
+	sync(false);
 
 	// Set the bounding
 	setBoundingBox();
@@ -669,7 +669,7 @@ std::vector<adaption::Info> VolOctree::_spawn(bool trackSpawn)
 	ParaTree::Operation lastTreeOperation = m_tree->getLastOperation();
 	if (lastTreeOperation == ParaTree::OP_INIT && emtpyPatch) {
 		m_tree->adapt();
-		updateInfo = sync(true, true, trackSpawn);
+		updateInfo = sync(trackSpawn);
 	}
 
 	return updateInfo;
@@ -780,7 +780,7 @@ std::vector<adaption::Info> VolOctree::_adaptionAlter(bool trackAdaption)
 	log::cout() << " Done" << std::endl;
 
 	// Sync the patch
-	return sync(true, true, trackAdaption);
+	return sync(trackAdaption);
 }
 
 /*!
@@ -794,16 +794,11 @@ void VolOctree::_adaptionCleanup()
 /*!
 	Syncronizes the patch with the underlying octree.
 
-	\param updateOctantMaps if set to true the cell-to-octant maps will
-	be updated, otherwise the function assumes that someone has already
-	updated those maps
-	\param generateInterfaces check if the interfaces of the imported cells
-	will be generated
 	\param trackChanges if set to true the changes to the patch will be
 	tracked
 	\result Returns all the changes applied to the patch.
 */
-std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges)
+std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 {
 	log::cout() << ">> Syncing patch..." << std::endl;
 
@@ -1103,17 +1098,10 @@ std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generate
 	// Enable advanced editing
 	setExpert(true);
 
-	// Reset cell-to-octant and octant-to-cell map
-	if (updateOctantMaps) {
-		log::cout() << ">> Resetting cell-to-octant and octant-to-cell maps...";
+	// Renumber cells
+	renumberCells(renumberedOctants);
 
-		updateCellOctantMaps(deletedOctants, renumberedOctants, addedOctants);
-		std::vector<RenumberInfo>().swap(renumberedOctants);
-
-		log::cout() << " Done" << std::endl;
-	}
-
-	// Remove deleted octants
+	// Remove deleted cells
 	StitchInfo stitchInfo;
 	if (deletedOctants.size() > 0) {
 		log::cout() << ">> Removing non-existing cells...";
@@ -1204,12 +1192,12 @@ std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generate
 
 	std::vector<DeleteInfo>().swap(deletedOctants);
 
-	// Import added octants
+	// Import added cells
 	std::vector<long> createdCells;
 	if (addedOctants.size() > 0) {
 		log::cout() << ">> Importing new octants...";
 
-		createdCells = importCells(addedOctants, stitchInfo, generateInterfaces);
+		createdCells = importCells(addedOctants, stitchInfo);
 
 		log::cout() << " Done" << std::endl;
 		log::cout() << ">> Octants imported: " <<  addedOctants.size() << std::endl;
@@ -1217,7 +1205,7 @@ std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generate
 
 	StitchInfo().swap(stitchInfo);
 
-	// Rebuild the ghost information
+	// Rebuild the ghost exchange data
 #if BITPIT_ENABLE_MPI==1
 	buildGhostExchangeData();
 #endif
@@ -1304,45 +1292,14 @@ std::vector<adaption::Info> VolOctree::sync(bool updateOctantMaps, bool generate
 }
 
 /*!
-	Update the cell-to-octants maps
+	Renumber the specified cells.
 
-	\param deletedOctants contains the information about the deleted octants
 	\param renumberedOctants contains the information about the renumbered
 	octants
-	\param addedOctants contains the information about the added octants
 */
-void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
-                                     std::vector<RenumberInfo> &renumberedOctants,
-                                     std::vector<OctantInfo> &addedOctants)
+void VolOctree::renumberCells(const std::vector<RenumberInfo> &renumberedOctants)
 {
-	// Reset the ghost maps
-	m_cellToGhost.clear();
-	m_ghostToCell.clear();
-
-	// Reserve space for the maps
-	long nOctants = m_tree->getNumOctants();
-	m_cellToOctant.reserve(nOctants);
-	m_octantToCell.reserve(nOctants);
-
-	long nGhostsOctants = m_tree->getNumGhosts();
-	m_cellToGhost.reserve(nGhostsOctants);
-	m_ghostToCell.reserve(nGhostsOctants);
-
-	// Remove cell-to-tree associations for cells that will be deleted
-	for (const DeleteInfo &deleteInfo : deletedOctants) {
-		long cellId = deleteInfo.cellId;
-		if (!m_cells[cellId].isInterior()) {
-			continue;
-		}
-
-		const OctantInfo &octantInfo = getCellOctant(cellId);
-		uint32_t treeId = octantInfo.id;
-
-		m_cellToOctant.erase(cellId);
-		m_octantToCell.erase(treeId);
-	}
-
-	// Remove old cell-to-tree associations for renumbered cells
+	// Remove old patch-to-tree and tree-to-patch associations
 	for (const RenumberInfo &renumberInfo : renumberedOctants) {
 		long cellId = renumberInfo.cellId;
 		if (!m_cells[cellId].isInterior()) {
@@ -1355,7 +1312,7 @@ void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
 		m_octantToCell.erase(previousTreeId);
 	}
 
-	// Create cell-to-tree associations for renumbered cells
+	// Create new patch-to-tree and tree-to-patch associations
 	for (const RenumberInfo &renumberInfo : renumberedOctants) {
 		long cellId = renumberInfo.cellId;
 		if (!m_cells[cellId].isInterior()) {
@@ -1367,19 +1324,6 @@ void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
 		m_cellToOctant[cellId] = treeId;
 		m_octantToCell[treeId] = cellId;
 	}
-
-	// Create cell-to-tree associations for cells that wil be added
-	for (OctantInfo &octantInfo : addedOctants) {
-		long cellId = generateCellId();
-
-		if (octantInfo.internal) {
-			m_cellToOctant.insert({{cellId, octantInfo.id}});
-			m_octantToCell.insert({{octantInfo.id, cellId}});
-		} else {
-			m_cellToGhost.insert({{cellId, octantInfo.id}});
-			m_ghostToCell.insert({{octantInfo.id, cellId}});
-		}
-	}
 }
 
 /*!
@@ -1388,30 +1332,59 @@ void VolOctree::updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
 	\param octantInfoList is the list of octant to import
 	\param stitchInfo is the list of vertices that will be used to stitch the
 	the new octants
-	\param generateInterfaces check if the interfaces of the imprted cells
-	will be generated
+	\param restoreStream is an optional stream from which the information about
+	the restore will be read. If no restore stream is given the the cells will
+	be created from scratch
 */
-std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList,
-										 StitchInfo &stitchInfo, bool generateInterfaces)
+std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantInfoList,
+                                         StitchInfo &stitchInfo, std::istream *restoreStream)
 {
 	// Create the new vertices
 	int nCellVertices = m_cellTypeInfo->nVertices;
-	for (OctantInfo &octantInfo : octantInfoList) {
+	for (const OctantInfo &octantInfo : octantInfoList) {
 		Octant *octant = getOctantPointer(octantInfo);
 		for (int k = 0; k < nCellVertices; ++k) {
 			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
 			if (stitchInfo.count(vertexTreeMorton) == 0) {
+				// Id that will be assigned to the vertex
+				long vertexId;
+				if (!restoreStream) {
+					vertexId = generateVertexId();
+				} else {
+					utils::binary::read(*restoreStream, vertexId);
+				}
+
 				// Vertex coordinates
 				std::array<double, 3> nodeCoords = m_tree->getNode(octant, k);
 
 				// Create the vertex
-				VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
+				if (!restoreStream) {
+					addVertex(std::move(nodeCoords), vertexId);
+				} else {
+					VertexIterator vertexIterator = m_vertices.find(vertexId);
+					if (vertexIterator == m_vertices.end()) {
+						throw std::runtime_error("");
+					}
+
+
+					Vertex &vertex = *vertexIterator;
+					vertex.initialize(vertexId, std::move(nodeCoords));
+				}
 
 				// Add the vertex to the stitching info
-				stitchInfo[vertexTreeMorton] = vertexIterator->getId();
+				stitchInfo[vertexTreeMorton] = vertexId;
 			}
 		}
 	}
+
+	// Reserve space for the maps
+	long nOctants = m_tree->getNumOctants();
+	m_cellToOctant.reserve(nOctants);
+	m_octantToCell.reserve(nOctants);
+
+	long nGhostsOctants = m_tree->getNumGhosts();
+	m_cellToGhost.reserve(nGhostsOctants);
+	m_ghostToCell.reserve(nGhostsOctants);
 
 	// Add the cells
 	size_t octantInfoListSize = octantInfoList.size();
@@ -1419,10 +1392,15 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 
 	std::vector<long> createdCells(octantInfoListSize);
 	for (size_t k = 0; k < octantInfoListSize; ++k) {
-		OctantInfo &octantInfo = octantInfoList[k];
+		const OctantInfo &octantInfo = octantInfoList[k];
 
 		// Id that will be assigned to the cell
-		long cellId = getOctantId(octantInfo);
+		long cellId;
+		if (!restoreStream) {
+			cellId = generateCellId();
+		} else {
+			utils::binary::read(*restoreStream, cellId);
+		}
 
 		// Octant connectivity
 		Octant *octant = getOctantPointer(octantInfo);
@@ -1435,7 +1413,22 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 		}
 
 		// Add cell
-		addCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
+		if (!restoreStream) {
+			addCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
+		} else {
+			auto cellIterator = m_cells.find(cellId);
+			if (cellIterator == m_cells.end()) {
+				throw std::runtime_error("");
+			}
+
+			Cell &cell = *cellIterator;
+			cell.initialize(cellId, m_cellTypeInfo->type, std::move(cellConnect), octantInfo.internal, true);
+			if (octantInfo.internal) {
+				m_nInternals++;
+			} else {
+				m_nGhosts++;
+			}
+		}
 
 		// If the cell is a ghost set its owner
 #if BITPIT_ENABLE_MPI==1
@@ -1447,14 +1440,33 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 		}
 #endif
 
+		// Create patch-tree associations
+		if (octantInfo.internal) {
+			m_cellToOctant.insert({{cellId, octantInfo.id}});
+			m_octantToCell.insert({{octantInfo.id, cellId}});
+		} else {
+			m_cellToGhost.insert({{cellId, octantInfo.id}});
+			m_ghostToCell.insert({{octantInfo.id, cellId}});
+		}
+
 		// Add the cell to the list of created cells
 		createdCells[k] = cellId;
 	}
 
+	// Update first ghost and last internal information
+	if (restoreStream) {
+		updateLastInternalId();
+		updateFirstGhostId();
+	}
+
 	// Build adjacencies
 	updateAdjacencies(createdCells, false);
-	if (generateInterfaces) {
+
+	// Build interfaces
+	if (!restoreStream) {
 		updateInterfaces(createdCells, false);
+	} else {
+		restoreInterfaces(*restoreStream);
 	}
 
 	// Done
@@ -1462,13 +1474,14 @@ std::vector<long> VolOctree::importCells(std::vector<OctantInfo> &octantInfoList
 }
 
 /*!
-	Remove a list of octants from the patch.
+	Delete the specified cells.
 
-	\param deletedOctants contains a list with the information of the deleted
-	octants
-	\result Returns the vertices that will be used to stitch  faces created after deleting the octants.
+	\param deletedOctants contains a list with the information about the
+	deleted octants
+	\result Returns the stitch information that can  the faces created
+	after deleting the octants.
 */
-VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOctants)
+VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &deletedOctants)
 {
 	// Info of the cells
 	int nCellVertices = m_cellTypeInfo->nVertices;
@@ -1562,6 +1575,26 @@ VolOctree::StitchInfo VolOctree::deleteCells(std::vector<DeleteInfo> &deletedOct
 
 			// Add the interface to the list of interfaces to delete
 			deadInterfaces.insert(interfaceId);
+		}
+
+		// Remove patch-tree associations
+		const OctantInfo &octantInfo = getCellOctant(cellId);
+		uint32_t treeId = octantInfo.id;
+
+		if (cell.isInterior()) {
+			m_cellToOctant.erase(cellId);
+
+			auto octantToCellItr = m_octantToCell.find(treeId);
+			if (octantToCellItr->second == cellId) {
+				m_octantToCell.erase(octantToCellItr);
+			}
+		} else {
+			m_cellToGhost.erase(cellId);
+
+			auto ghostToCellItr = m_ghostToCell.find(treeId);
+			if (ghostToCellItr->second == cellId) {
+				m_ghostToCell.erase(ghostToCellItr);
+			}
 		}
 
 		// Delete cell
@@ -1893,17 +1926,58 @@ int VolOctree::_getDumpVersion() const
  */
 void VolOctree::_dump(std::ostream &stream) const
 {
+	// List all octants
+	std::size_t nOctants       = m_tree->getNumOctants();
+	std::size_t nGhostsOctants = m_tree->getNumGhosts();
+
+	std::vector<OctantInfo> octantInfoList;
+	octantInfoList.reserve(nOctants + nGhostsOctants);
+
+	for (std::size_t n = 0; n < nOctants; ++n) {
+		octantInfoList.emplace_back(n, true);
+	}
+
+	for (std::size_t n = 0; n < nGhostsOctants; ++n) {
+		octantInfoList.emplace_back(n, false);
+	}
+
 	// Dump tree data
 	m_tree->dump(stream);
 
-	size_t nOctants = m_octantToCell.size();
-	for (size_t n = 0; n < nOctants; ++n) {
-		utils::binary::write(stream, m_octantToCell.at(n));
+	// Dump kernel of vertex's containers
+	//
+	// We want the kernel state to be kept after the restore.
+	m_vertices.dumpKernel(stream);
+
+	// Dump kernel of cell's containers
+	//
+	// We want the kernel state to be kept after the restore.
+	m_cells.dumpKernel(stream);
+
+	// Dump vertex information
+	//
+	// This indexes will be read when importing the cells to keep the
+	// association between numeration of tree vertices and patch vertices.
+	std::unordered_set<long> dumpedVertices;
+	dumpedVertices.reserve(getVertexCount());
+	for (const OctantInfo &octantInfo : octantInfoList) {
+		const Cell &cell = m_cells.at(getOctantId(octantInfo));
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		for (int k = 0; k < m_cellTypeInfo->nVertices; ++k) {
+			long vertexId = cellVertexIds[k];
+			if (dumpedVertices.count(vertexId) == 0) {
+				utils::binary::write(stream, vertexId);
+				dumpedVertices.insert(vertexId);
+			}
+		}
 	}
 
-	size_t nGhosts = m_ghostToCell.size();
-	for (size_t n = 0; n < nGhosts; ++n) {
-		utils::binary::write(stream, m_ghostToCell.at(n));
+	// Dump cell information
+	//
+	// This indexes will be read when importing the cells to keep the
+	// association between numeration of tree octants and patch cells.
+	for (const OctantInfo &octantInfo : octantInfoList) {
+		utils::binary::write(stream, getOctantId(octantInfo));
 	}
 
 	// Dump interfaces
@@ -1917,49 +1991,44 @@ void VolOctree::_dump(std::ostream &stream) const
  */
 void VolOctree::_restore(std::istream &stream)
 {
-	//
-	// Restore tree data
-	//
+	// Restore tree
 #if ENABLE_MPI==1
 	m_tree->setComm(getCommunicator());
 #endif
 	m_tree->restore(stream);
 
-	// Restore octant to cell map
-	size_t nOctants = m_tree->getNumOctants();
-	m_cellToOctant.reserve(nOctants);
-	m_octantToCell.reserve(nOctants);
-	for (size_t n = 0; n < nOctants; ++n) {
-		long cellId;
-		utils::binary::read(stream, cellId);
+	// Restore kernel of vertex's containers
+	m_vertices.restoreKernel(stream);
 
-		m_cellToOctant.insert({cellId, n});
-		m_octantToCell.insert({n, cellId});
-	}
+	// Restore kernel of cell's containers
+	m_cells.restoreKernel(stream);
 
-	// Restore ghost to cell map
-	size_t nGhosts = m_tree->getNumGhosts();
-
-	m_cellToGhost.reserve(nGhosts);
-	m_ghostToCell.reserve(nGhosts);
-	for (size_t n = 0; n < nGhosts; ++n) {
-		long cellId;
-		utils::binary::read(stream, cellId);
-
-		m_cellToGhost.insert({cellId, n});
-		m_ghostToCell.insert({n, cellId});
-	}
-
-	//
-	// Sync the patch
-	//
-	sync(false, false, false);
-
-	//
-	// Restore the interfaces
-	//
+	// Activate expert mode
 	setExpert(true);
-	restoreInterfaces(stream);
+
+	// Restore cells
+	size_t nOctants       = m_tree->getNumOctants();
+	size_t nGhostsOctants = m_tree->getNumGhosts();
+
+	StitchInfo stitchInfo;
+
+	std::vector<OctantInfo> octantInfoList;
+	octantInfoList.reserve(nOctants + nGhostsOctants);
+	for (std::size_t n = 0; n < nOctants; ++n) {
+		octantInfoList.emplace_back(n, true);
+	}
+	for (std::size_t n = 0; n < nGhostsOctants; ++n) {
+		octantInfoList.emplace_back(n, false);
+	}
+
+	importCells(octantInfoList, stitchInfo, &stream);
+
+	// Rebuild the ghost exchange data
+#if BITPIT_ENABLE_MPI==1
+	buildGhostExchangeData();
+#endif
+
+	// De-activate expert mode
 	setExpert(false);
 
 	//

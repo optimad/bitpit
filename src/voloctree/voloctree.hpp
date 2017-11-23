@@ -233,14 +233,11 @@ private:
 
 	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
-	void updateCellOctantMaps(std::vector<DeleteInfo> &deletedOctants,
-	                          std::vector<RenumberInfo> &renumberedOctants,
-	                          std::vector<OctantInfo> &addOctants);
+	StitchInfo deleteCells(const std::vector<DeleteInfo> &deletedOctants);
+	void renumberCells(const std::vector<RenumberInfo> &renumberedOctants);
+	std::vector<long> importCells(const std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo, std::istream *stream = nullptr);
 
-	std::vector<long> importCells(std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo, bool generateInterfaces);
-	StitchInfo deleteCells(std::vector<DeleteInfo> &deletedOctants);
-
-	std::vector<adaption::Info> sync(bool updateOctantMaps, bool generateInterfaces, bool trackChanges);
+	std::vector<adaption::Info> sync(bool trackChanges);
 
 	void findCellCodimensionNeighs(const long &id, const int &index,
 		const int &codimension, const std::vector<long> &blackList, std::vector<long> *neighs) const;
