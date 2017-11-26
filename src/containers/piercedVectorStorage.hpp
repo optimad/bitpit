@@ -37,12 +37,11 @@
 
 namespace bitpit {
 
-/**
-* \ingroup containers
-*
-* \brief Base class for the pierced vector maps.
-*/
 class BasePiercedVectorStorage {
+
+protected:
+    BasePiercedVectorStorage();
+
 };
 
 /**

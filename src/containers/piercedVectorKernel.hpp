@@ -31,12 +31,11 @@
 
 namespace bitpit {
 
-/**
-* \ingroup containers
-*
-* \brief Base class for the pierced vector kernels.
-*/
 class BasePiercedVectorKernel {
+
+protected:
+    BasePiercedVectorKernel();
+
 };
 
 /**
