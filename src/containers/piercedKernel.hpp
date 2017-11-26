@@ -42,6 +42,9 @@ namespace bitpit {
 
 class BasePiercedKernel : public PiercedSyncMaster {
 
+public:
+    virtual ~BasePiercedKernel() = default;
+
 protected:
     BasePiercedKernel();
 

@@ -41,6 +41,9 @@ namespace bitpit {
 
 class BasePiercedStorage : public PiercedSyncSlave {
 
+public:
+    virtual ~BasePiercedStorage() = default;
+
 protected:
     BasePiercedStorage();
 

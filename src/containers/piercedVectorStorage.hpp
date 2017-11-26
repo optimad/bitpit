@@ -39,6 +39,9 @@ namespace bitpit {
 
 class BasePiercedVectorStorage {
 
+public:
+    virtual ~BasePiercedVectorStorage() = default;
+
 protected:
     BasePiercedVectorStorage();
 

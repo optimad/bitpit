@@ -33,6 +33,9 @@ namespace bitpit {
 
 class BasePiercedVectorKernel {
 
+public:
+    virtual ~BasePiercedVectorKernel() = default;
+
 protected:
     BasePiercedVectorKernel();
 

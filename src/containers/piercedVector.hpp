@@ -39,6 +39,9 @@ namespace bitpit {
 
 class BasePiercedVector {
 
+public:
+    virtual ~BasePiercedVector() = default;
+
 protected:
     BasePiercedVector();
 
