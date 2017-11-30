@@ -429,7 +429,7 @@ bool LevelSet::removeProcessingOrder(int objectId){
  * @param id is the object id
  * @return reference to levelset object
  */
-const LevelSetObject & LevelSet::getObject( int id) const{
+LevelSetObject & LevelSet::getObject( int id) const{
     return getObject<LevelSetObject>(id);
 }
 
@@ -438,7 +438,7 @@ const LevelSetObject & LevelSet::getObject( int id) const{
  * @param id is the object id
  * @return pointer to levelset object
  */
-const LevelSetObject * LevelSet::getObjectPtr( int id) const{
+LevelSetObject * LevelSet::getObjectPtr( int id) const{
     return getObjectPtr<LevelSetObject>(id);
 }
 
@@ -446,7 +446,7 @@ const LevelSetObject * LevelSet::getObjectPtr( int id) const{
  * Get vector of pointers to all object.
  * @return vector of pointers to levelset objects
  */
-std::vector<LevelSetObject const *>  LevelSet::getObjectPtrs( ) const{
+std::vector<LevelSetObject *>  LevelSet::getObjectPtrs( ) const{
     return getObjectPtrs<LevelSetObject>();
 }
 

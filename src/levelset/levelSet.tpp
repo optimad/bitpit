@@ -34,8 +34,8 @@ namespace bitpit{
  * @return reference to levelset object
  */
 template<typename T>
-const T & LevelSet::getObject( int id) const{
-    return dynamic_cast<const T &>(*m_objects.at(id)) ;
+T & LevelSet::getObject( int id) const{
+    return dynamic_cast<T &>(*m_objects.at(id)) ;
 }
 
 /*!
@@ -45,8 +45,8 @@ const T & LevelSet::getObject( int id) const{
  * @return pointer to levelset object
  */
 template<typename T>
-const T * LevelSet::getObjectPtr( int id) const{
-    return dynamic_cast<const T *>(m_objects.at(id).get()) ;
+T * LevelSet::getObjectPtr( int id) const{
+    return dynamic_cast<T *>(m_objects.at(id).get()) ;
 }
 
 /*!
@@ -54,11 +54,11 @@ const T * LevelSet::getObjectPtr( int id) const{
  * @return vector of pointers to levelset objects
  */
 template<typename T>
-std::vector<T const *>  LevelSet::getObjectPtrs( ) const{
-    std::vector<T const *> objects;
+std::vector<T *>  LevelSet::getObjectPtrs( ) const{
+    std::vector<T *> objects;
     objects.reserve(m_objects.size());
-    for( auto const &entry : m_objects){
-        T const *object = getObjectPtr(entry.first) ;
+    for( auto &entry : m_objects){
+        T *object = getObjectPtr(entry.first) ;
         if(object){
             objects.push_back( object ) ;
         }
