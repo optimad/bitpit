@@ -369,6 +369,156 @@ void LevelSetObject::restore( std::istream &stream ){
 }
 
 /*!
+ * Enables or disables the VTK output
+ * @param[in] writeField describes the field(s) that should be written
+ * @param[in] enable true for enabling, false for diabling
+ */
+void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable) {
+
+    std::vector<LevelSetWriteField> fields;
+
+    if( writeField==LevelSetWriteField::ALL){
+        fields.push_back(LevelSetWriteField::VALUE);
+        fields.push_back(LevelSetWriteField::GRADIENT);
+        fields.push_back(LevelSetWriteField::NORMAL);
+        fields.push_back(LevelSetWriteField::PART);
+
+    } else if ( writeField==LevelSetWriteField::DEFAULT){
+        fields.push_back(LevelSetWriteField::VALUE);
+        fields.push_back(LevelSetWriteField::GRADIENT);
+
+    } else {
+        fields.push_back(writeField);
+    }
+
+    for( LevelSetWriteField &field : fields){
+
+        stringstream name;
+        name << "ls_";
+        name << getId();
+        name << "_";
+
+
+        switch(field){
+            case LevelSetWriteField::VALUE:
+                name << "value";
+                if(enable){
+                    m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::SCALAR, VTKLocation::CELL, this);
+                } else {
+                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
+                }
+                break;
+
+            case LevelSetWriteField::GRADIENT:
+                name << "gradient";
+                if(enable){
+                    m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::VECTOR, VTKLocation::CELL, this);
+                } else {
+                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
+                }
+                break;
+
+            case LevelSetWriteField::NORMAL:
+                name << "normal";
+                if(enable){
+                    m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::VECTOR, VTKLocation::CELL, this);
+                } else {
+                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
+                }
+                break;
+
+            case LevelSetWriteField::PART:
+                name << "partId";
+                if(enable){
+                    m_kernelPtr->getMesh()->getVTK().addData<int>( name.str(), VTKFieldType::SCALAR, VTKLocation::CELL, this);
+                } else {
+                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
+                }
+                break;
+
+            default:
+                throw std::runtime_error ("Unsupported value of field in LevelSetObject::addDataToVTK() ");
+                break;
+
+        }
+    }
+
+}
+
+/*!
+ * Reads LevelSetObject from stream in binary format
+ * @param[in] stream output stream
+ */
+void LevelSetObject::flushData( std::fstream &stream, std::string name, VTKFormat format){
+
+
+    if(utils::string::keywordInString(name,"value")){
+
+        void (*writeFunctionPtr)(std::fstream &, const double &) = nullptr;
+
+        if(format==VTKFormat::APPENDED){
+            writeFunctionPtr = genericIO::flushBINARY<double>;
+        } else if(format==VTKFormat::ASCII){
+            writeFunctionPtr = genericIO::flushASCII<double>;
+        }
+
+        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            const double &value = getLS(cellId);
+            (*writeFunctionPtr)(stream,value);
+        }
+
+    } else if( utils::string::keywordInString(name,"gradient")){
+
+        void (*writeFunctionPtr)(std::fstream &, const std::array<double,3> &) = nullptr;
+
+        if(format==VTKFormat::APPENDED){
+            writeFunctionPtr = genericIO::flushBINARY<std::array<double,3>>;
+        } else if(format==VTKFormat::ASCII){
+            writeFunctionPtr = genericIO::flushASCII<std::array<double,3>>;
+        }
+
+        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            const std::array<double,3> &value = getGradient(cellId);
+            (*writeFunctionPtr)(stream,value);
+        }
+
+    } else if( utils::string::keywordInString(name,"normal")){
+
+        void (*writeFunctionPtr)(std::fstream &, const std::array<double,3> &) = nullptr;
+
+        if(format==VTKFormat::APPENDED){
+            writeFunctionPtr = genericIO::flushBINARY<std::array<double,3>>;
+        } else if(format==VTKFormat::ASCII){
+            writeFunctionPtr = genericIO::flushASCII<std::array<double,3>>;
+        }
+
+        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            const std::array<double,3> &value = getNormal(cellId);
+            (*writeFunctionPtr)(stream,value);
+        }
+
+    } else if( utils::string::keywordInString(name,"part")){
+
+        void (*writeFunctionPtr)(std::fstream &, const int &) = nullptr;
+
+        if(format==VTKFormat::APPENDED){
+            writeFunctionPtr = genericIO::flushBINARY<int>;
+        } else if(format==VTKFormat::ASCII){
+            writeFunctionPtr = genericIO::flushASCII<int>;
+        }
+
+        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            const int &value = getPart(cellId);
+            (*writeFunctionPtr)(stream,value);
+        }
+    }
+}
+
+/*!
  * Reads LevelSetObject from stream in binary format
  * @param[in] stream output stream
  */

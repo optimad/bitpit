@@ -88,6 +88,19 @@ enum class LevelSetIntersectionMode{
     ACCURATE=3                      /**< Accurate but more costly checks */
 };
 
+/*!
+ * @ingroup levelsetEnums
+ * Enum class containing the possible fields to be added to the VTK file
+ */
+enum class LevelSetWriteField{
+    VALUE=0,                        /**< adds level set value to VTK*/
+    GRADIENT=1,                     /**< adds level set gradient to VTK*/
+    NORMAL=2,                       /**< adds body normal at projection point to VTK*/
+    PART=3,                         /**< adds part identifier at projection point to VTK*/
+    ALL=4,                          /**< adds level set value, gradient, normal and projection point to VTK*/
+    DEFAULT=5                       /**< adds levelset value and gradient to VTK*/
+};
+
 }
 
 #endif

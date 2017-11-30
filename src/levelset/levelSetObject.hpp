@@ -31,6 +31,7 @@
 # include <vector>
 # include <unordered_map>
 
+# include "bitpit_IO.hpp"
 # include "levelSetCommon.hpp"
 
 namespace bitpit{
@@ -44,7 +45,7 @@ class RecvBuffer;
 class LevelSet;
 class LevelSetKernel;
 
-class LevelSetObject{
+class LevelSetObject : public VTKBaseStreamer{
 
     friend LevelSet;
 
@@ -122,6 +123,8 @@ class LevelSetObject{
     virtual double                              getMinSurfaceFeatureSize() const;
     virtual double                              getMaxSurfaceFeatureSize() const;
 
+    void                                        enableVTKOutput(LevelSetWriteField field, bool enable=true);
+    void                                        flushData(std::fstream &, std::string, VTKFormat);
 
 
 };
