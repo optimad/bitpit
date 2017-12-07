@@ -23,13 +23,12 @@
 \*---------------------------------------------------------------------------*/
 
 /**
- * \example POD_example_00001.cpp
+ * \example POD_example_00003.cpp
  * 
- * \brief POD basis computation using voloctree.
- * This example computes the POD basis starting from a database of simulations
- * defined on the same mesh and evaluate the reconstruction of a snapshot
- * not included in the database.
- * <b>To run</b>: ./voloctree_example_00001 \n
+ * \brief leave-1-out computation using voloctree.
+ * This example computes the leave-1-out cross-validation starting from a 
+ * database of simulations defined on the same mesh and evaluate the error maps
+ * <b>To run</b>: ./POD_example_00003 \n
  */ 
 
 #include <array>
@@ -50,25 +49,26 @@ void run()
     POD pod;
 
     /**<Add snapshots to database.*/   
-    for (int i=0; i<11; i++)
+    for (int i=0; i<10; i++)
         pod.addSnapshot("./data", "test."+to_string(i));
 
     /**<Set POD.*/    
     pod.setMeshType(POD::MeshType::VOLOCTREE);
-    pod.setStaticMesh(true);
-    pod.setErrorMode(POD::ErrorMode::SINGLE);
+    pod.setStaticMesh(true); 
+    pod.setUseMean(false);
     pod.setWriteMode(POD::WriteMode::DEBUG);
     pod.setMemoryMode(POD::MemoryMode::MEMORY_NORMAL);
     pod.setEnergyLevel(99);
-
+    
     pod.setDirectory("pod");
-    pod.setName("pod.test.solver");
+    pod.setName("pod.test.solver");    
+
+    /**<Remove snapshots from the leave-1-out method.*/   
+    for (int i=0; i<5; i++)
+        pod.removeLeave1outSnapshot("./data", "test."+to_string(2*i)); 
     
-    /**<Add snapshot to be reconstructed.*/
-    pod.addReconstructionSnapshot("./data", "test.0");
-    
-    /**<Compute the POD basis.*/ 
-    pod.run();
+    /**<Compute the error map through the leave-1-out method.*/ 
+    pod.leave1out();
 }
 
 /**

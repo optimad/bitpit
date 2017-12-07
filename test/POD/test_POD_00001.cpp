@@ -130,7 +130,7 @@ int subtest_001(int rank, int nProcs)
 
     /**<Compute the POD basis.*/ 
     pod.evalMeanMesh();
-    pod.fillListID(mask);
+    pod.fillListActiveIDs(mask);
     pod.evalCorrelation();
     pod.evalEigen();
     pod.evalModes();

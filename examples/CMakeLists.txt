@@ -67,6 +67,7 @@ if(BUILD_EXAMPLES)
 	list(APPEND EXAMPLE_LIST "volcartesian_example_00001")
 	list(APPEND EXAMPLE_LIST "POD_example_00001")
 	list(APPEND EXAMPLE_LIST "POD_example_00002")
+	list(APPEND EXAMPLE_LIST "POD_example_00003")
 	list(APPEND EXAMPLE_LIST "POD_application_example_00001")
 
 	#Rules to build the examples
@@ -85,7 +86,7 @@ if(BUILD_EXAMPLES)
 
 	# Data files
 	add_custom_command(
-		TARGET "POD_application_example_00001" "POD_example_00001" "POD_example_00002" PRE_BUILD
+		TARGET "POD_application_example_00001" "POD_example_00001" "POD_example_00002" "POD_example_00003" PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "${CMAKE_CURRENT_BINARY_DIR}/data"
 		COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/pod"
 	)

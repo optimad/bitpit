@@ -43,28 +43,34 @@ class POD : public VTKBaseStreamer {
 
 public:
 
-    enum MemoryMode {
+    enum class MemoryMode {
         MEMORY_NORMAL,
         MEMORY_LIGHT
     };
 
-    enum RunMode {
+    enum class RunMode {
         RESTORE,
         COMPUTE
     };
 
-    enum WriteMode {
+    enum class WriteMode {
         DUMP,
         DEBUG,
         NONE
     };
 
-    enum ReconstructionMode {
+    enum class ReconstructionMode {
         PROJECTION,
         MINIMIZATION
     };
 
-    enum MeshType {
+    enum class ErrorMode {
+        COMBINED,
+        SINGLE,
+        NONE
+    }; 
+    
+    enum class MeshType {
         UNDEFINED,
         VOLOCTREE
     };
@@ -89,6 +95,9 @@ public:
     void addSnapshot(const std::string &directory, const std::string &name);
     void addSnapshot(const pod::SnapshotFile &file);
     void setSnapshots(const std::vector<pod::SnapshotFile> &database);
+    void removeLeave1outSnapshot(const std::string &directory, const std::string &name);
+    void removeLeave1outSnapshot(const pod::SnapshotFile &file);    
+    void unsetLeave1outSnapshots();    
     void addReconstructionSnapshot(const std::string &directory, const std::string &name);
     void addReconstructionSnapshot(const pod::SnapshotFile &file);
     void setModeCount(std::size_t nmodes);
@@ -98,6 +107,7 @@ public:
     void setMeshType(MeshType type);
     MeshType getMeshType();
     void setStaticMesh(bool flag);
+    void setUseMean(bool flag);    
 
     void setMemoryMode(MemoryMode mode);
     MemoryMode getMemoryMode();
@@ -107,6 +117,8 @@ public:
     WriteMode getWriteMode();
     void setReconstructionMode(ReconstructionMode mode);
     ReconstructionMode getReconstructionMode();
+    void setErrorMode(ErrorMode mode);
+    ErrorMode getErrorMode();       
 
     void setSensorMask(const PiercedStorage<bool> &mask);
 
@@ -119,15 +131,16 @@ public:
     const pod::PODMode & getMean();
     const std::vector<pod::PODMode> & getModes();
     std::vector<std::vector<double> > getReconstructionCoeffs();
-    const std::vector<long int> & getListID();
+    const std::vector<long int> & getListActiveIDs();
     std::size_t getListIDInternalCount();
 
     void run();
     void dump();
     void restore();
+    void leave1out();    
 
     void evalMeanMesh();
-    void fillListID(const PiercedStorage<bool> &bfield);
+    void fillListActiveIDs(const PiercedStorage<bool> &bfield);
     void evalCorrelation();
     void evalModes();
     void evalEigen();
@@ -148,10 +161,12 @@ protected:
     std::unique_ptr<PODKernel>              m_podkernel;                /**< POD computational kernel */
     MeshType                                m_meshType;                 /**< Type of POD mesh*/
     bool                                    m_staticMesh;               /**< If true the mesh is unique and the same for each snapshot and for POD modes [it is read one time together with the first snapshot].*/
+    bool                                    m_useMean;                  /**< If true the POD is computed by subtracting the mean fields from the snapshots.*/  
     std::string                             m_directory;                /**< Input/output directory.*/
     std::string                             m_name;                     /**< POD session name.*/
     std::vector<pod::SnapshotFile>          m_database;                 /**< Vector of snapshots (directory and file name structure) */
-    std::vector<pod::SnapshotFile>          m_databaseReconstruction;   /**< Vector of snapshots to be reconstructed (directory and file name structure) */
+    std::vector<pod::SnapshotFile>          m_reconstructionDatabase;   /**< Vector of snapshots to be reconstructed (directory and file name structure) */
+    std::vector<pod::SnapshotFile>          m_leave1outOffDatabase;     /**< Vector of snapshots (directory and file name structure) not used in the leave-1-out method*/    
     std::size_t                             m_nSnapshots;               /**< Number of snapshots*/
     std::size_t                             m_nReconstructionSnapshots; /**< Number of snapshots to be reconstructed*/
     std::size_t                             m_nScalarFields;            /**< Number of scalar fields (note. first fields in dumped file)*/
@@ -163,6 +178,7 @@ protected:
     PiercedStorage<bool>                    m_filter;                   /**< Filter field (!=0 fluid cell, ==0 solid cell) used to compute POD modes (no POD on solid cells).*/
     PiercedStorage<bool>                    m_sensorMask;               /**< Sensor mask field (!=0 solve cell, ==0 no-solve cell) used to project (orthogonally and non-orthogonally) on POD modes.*/
     pod::PODMode                            m_mean;                     /**< Mean field of the snapshots database.*/
+    pod::PODField                           m_errorMap;                 /**< Error field.*/  
     std::vector<pod::PODMode>               m_modes;                    /**< POD Modes*/
     std::size_t                             m_nModes;                   /**< Number of retained POD modes*/
     double                                  m_energyLevel;              /**< Level of percentage energy of the retained POD modes*/
@@ -174,6 +190,7 @@ protected:
     std::vector<std::vector<double>>               m_reconstructionCoeffs;  /**< Pod coefficients of last reconstructed snapshot.*/
 
     std::vector<long int>                          m_listActiveIDs;           /**<List of ID of active cells [to be updated when filter/mask change]. */
+    std::vector<std::size_t>                       m_listActiveIDsLeave1out;  /**<List of the active snapshots used in the leave-1-out method*/  
     std::size_t                                    m_sizeInternal;            /**<Number of internal cells in the list of ID of active cells [the internal cells are placed first in the list of active IDs].*/
 
 #if BITPIT_ENABLE_MPI
@@ -187,6 +204,7 @@ protected:
     RunMode             m_runMode;              /**<Restore or compute pod modes, mean field and pod mesh. */
     WriteMode           m_writeMode;            /**<Write mode: dump write pod info, modes, mean field and pod mesh on dump files only, DEBUG write even vtu files and NONE to dump/write nothing. [Default = DUMP] */
     ReconstructionMode  m_reconstructionMode;   /**<Evaluate reconstruction by PROJECTION or by MINIMIZATION. [Default = MINIMIZATION] */
+    ErrorMode           m_errorMode;            /**<Error mode: COMBINED - evaluate the of maximum reconstruction errors, SINGLE - evaluate reconstruction error, NONE - do nothing. [Default = NONE, Default in leave-1-out = COMBINED] */
 
     std::vector<std::size_t>    _m_nr;  /**<Temporary number of modes to track the energy level of retained number of modes for different fields.*/
 
@@ -200,6 +218,8 @@ protected:
     void evalReconstructionCoeffs(pod::PODField &snapi);
     void evalReconstructionCoeffsStaticMesh(pod::PODField &snapi);
     void buildFields(pod::PODField &recon);
+    void initErrorMaps();
+    void buildErrorMaps(pod::PODField &snap, pod::PODField &recon);    
     void evalMinimizationMatrices();
     void initMinimization();
     void solveMinimization(std::vector<std::vector<double>> &rhs);
@@ -212,6 +232,8 @@ protected:
 
     void diff(pod::PODField &a, const pod::PODMode &b);
     void sum(pod::PODField &a, const pod::PODMode &b);
+    std::vector<double> fieldsl2norm(pod::PODField &snap);
+    std::vector<double> fieldsMax(pod::PODField &snap);    
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);
