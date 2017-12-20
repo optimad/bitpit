@@ -921,6 +921,26 @@ namespace bitpit {
         return m_partitionRangeGlobalIdx;
     };
 
+    /*! Get a constant reference to the vector containing the
+     * Morton number of the first octant on each processor.
+     * \return Constant reference to the vector containing the
+     * Morton number of the first octant on each processor.
+     */
+    const std::vector<uint64_t> &
+    ParaTree::getPartitionFirstDesc() const {
+        return m_partitionFirstDesc;
+    };
+
+    /*! Get a constant reference to the vector containing the
+     * Morton number of the last possible octant on each processor.
+     * \return Constant reference to the vector containing the
+     * Morton number of the last possible octant on each processor.
+     */
+    const std::vector<uint64_t> &
+    ParaTree::getPartitionLastDesc() const {
+        return m_partitionLastDesc;
+    };
+
     /*! Get the coordinates of the origin of the octree.
      * \return Coordinates of the origin.
      */

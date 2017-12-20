@@ -227,6 +227,8 @@ namespace bitpit {
         bool		isCommSet() const;
 #endif
         const std::vector<uint64_t> &getPartitionRangeGlobalIdx() const;
+        const std::vector<uint64_t> &getPartitionFirstDesc() const;
+        const std::vector<uint64_t> &getPartitionLastDesc() const;
         darray3		getOrigin() const;
         double		getX0() const;
         double		getY0() const;
