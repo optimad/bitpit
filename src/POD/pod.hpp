@@ -108,6 +108,7 @@ public:
     MeshType getMeshType();
     void setStaticMesh(bool flag);
     void setUseMean(bool flag);    
+//    void setMesh(VolumeKernel* mesh);
 
     void setMemoryMode(MemoryMode mode);
     MemoryMode getMemoryMode();
@@ -133,6 +134,7 @@ public:
     std::vector<std::vector<double> > getReconstructionCoeffs();
     const std::vector<long int> & getListActiveIDs();
     std::size_t getListIDInternalCount();
+    std::unique_ptr<PODKernel> & getKernel();
 
     void run();
     void dump();

@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_POD_VOLOCTREE_HPP__
-#define __BITPIT_POD_VOLOCTREE_HPP__
+#ifndef __BITPIT_MESH_MAPPER_HPP__
+#define __BITPIT_MESH_MAPPER_HPP__
 
 #if BITPIT_ENABLE_MPI
 #    include <mpi.h>
@@ -32,32 +32,53 @@
 #include <vector>
 #include <unordered_map>
 
-#include "pod_kernel.hpp"
 #include "bitpit_voloctree.hpp"
 
 namespace bitpit {
 
-class PODVolOctree: public PODKernel {
+namespace mapping{
+
+    typedef adaption::Info Info;
+
+}
+
+class MeshMapper {
+
+
 
 public:
 # if BITPIT_ENABLE_MPI
-    PODVolOctree(MPI_Comm comm = MPI_COMM_WORLD);
+    MeshMapper(MPI_Comm comm = MPI_COMM_WORLD);
 # else
-    PODVolOctree();
+    MeshMapper();
 # endif
 
-    ~PODVolOctree() override;
+    ~MeshMapper();
+    MeshMapper(MeshMapper&& other) = default;
 
-    PODVolOctree(PODVolOctree&& other) = default;
+    const bitpit::PiercedStorage<bitpit::adaption::Info> & getMapping();
+
+    void mapMeshes(bitpit::VolumeKernel * meshReference, bitpit::VolumeKernel * meshMapped);
 
 protected:
 
-    VolumeKernel* createMesh() override;
+#if BITPIT_ENABLE_MPI
+    MPI_Comm                m_communicator; /**< MPI communicator */
+#endif
+    int                     m_rank;         /**< Local rank of process. */
+    int                     m_nProcs;       /**< Number of processes. */
 
-public:
+    bitpit::PiercedStorage<bitpit::adaption::Info> m_mapper;  /**< Mapping info for each cell of reference mesh. */
 
-    bitpit::PiercedStorage<bitpit::adaption::Info> mapMesh(bitpit::VolOctree * mesh);
-    void mapMeshSamePartition(bitpit::VolOctree * mesh, bitpit::PiercedStorage<bitpit::adaption::Info> & mapper);
+    void _mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped);
+    void _mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped);
+
+#if BITPIT_ENABLE_MPI
+    void initializeCommunicator(MPI_Comm communicator);
+    MPI_Comm getCommunicator() const;
+    bool isCommunicatorSet() const;
+    void freeCommunicator();
+#endif
 
 };
 

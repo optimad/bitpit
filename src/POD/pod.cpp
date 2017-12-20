@@ -336,7 +336,6 @@ double POD::getEnergyLevel()
  */
 void POD::setMeshType(POD::MeshType type)
 {
-
     if (m_meshType != MeshType::UNDEFINED)
         throw std::runtime_error ("POD mesh type already set. Change not allowed.");
 
@@ -416,6 +415,22 @@ void POD::setMemoryMode(POD::MemoryMode mode)
 
     }
 }
+
+//void POD::setMesh(VolumeKernel* mesh)
+//{
+//    if (m_meshType == MeshType::UNDEFINED)
+//        throw std::runtime_error ("POD mesh type not set. Set mesh manually not allowed.");
+//
+//    switch (m_meshType)
+//    {
+//    case POD::MeshType::VOLOCTREE:
+//        m_podkernel->setMesh(static_cast<VolOctree*>(mesh));
+//        break;
+//
+//    default:
+//        break;
+//    }
+//}
 
 /**
  * Get the memory mode of the POD object.
@@ -668,6 +683,11 @@ const std::vector<long> & POD::getListActiveIDs()
 std::size_t POD::getListIDInternalCount()
 {
     return m_sizeInternal;
+}
+
+std::unique_ptr<PODKernel> & POD::getKernel()
+{
+    return m_podkernel;
 }
 
 /**

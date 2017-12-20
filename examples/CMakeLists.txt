@@ -69,6 +69,7 @@ if(BUILD_EXAMPLES)
 	list(APPEND EXAMPLE_LIST "POD_example_00002")
 	list(APPEND EXAMPLE_LIST "POD_example_00003")
 	list(APPEND EXAMPLE_LIST "POD_application_example_00001")
+	list(APPEND EXAMPLE_LIST "meshmapper_example_00001")
 
 	#Rules to build the examples
 	foreach(EXAMPLE_NAME IN LISTS EXAMPLE_LIST)
