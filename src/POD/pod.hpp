@@ -32,6 +32,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "mesh_mapper.hpp"
 #include "pod_kernel.hpp"
 #include "pod_voloctree.hpp"
 
@@ -120,8 +121,9 @@ public:
     ReconstructionMode getReconstructionMode();
     void setErrorMode(ErrorMode mode);
     ErrorMode getErrorMode();       
+    void setExpert(bool mode = true);
 
-    void setSensorMask(const PiercedStorage<bool> &mask);
+    void setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh = nullptr);
 
     std::size_t getSnapshotCount();
     std::vector<std::string> getScalarNames();
@@ -132,7 +134,7 @@ public:
     const pod::PODMode & getMean();
     const std::vector<pod::PODMode> & getModes();
     std::vector<std::vector<double> > getReconstructionCoeffs();
-    const std::vector<long int> & getListActiveIDs();
+    const std::unordered_set<long int> & getListActiveIDs();
     std::size_t getListIDInternalCount();
     std::unique_ptr<PODKernel> & getKernel();
 
@@ -151,10 +153,6 @@ public:
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
     void dumpField(const std::string &name, const pod::PODField &field) const;
 
-    void reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *mesh,
-            const std::map<std::string, std::size_t> &targetScalars,
-            const std::map<std::array<std::string, 3>, std::array<std::size_t, 3>> &targetVector,
-            const std::unordered_set<long> *targetCells);
     void reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *mesh,
             std::map<std::string, std::size_t> targetFields,
             const std::unordered_set<long> *targetCells);
@@ -191,9 +189,11 @@ protected:
     std::vector<std::vector<std::vector<double>>>  m_podCoeffs;             /**< Eigenvectors of correlation matrix (i.e. pod coefficients of database snapshots).*/
     std::vector<std::vector<double>>               m_reconstructionCoeffs;  /**< Pod coefficients of last reconstructed snapshot.*/
 
-    std::vector<long int>                          m_listActiveIDs;           /**<List of ID of active cells [to be updated when filter/mask change]. */
+    std::unordered_set<long int>                   m_listActiveIDs;           /**<List of ID of active cells [to be updated when filter/mask change]. */
     std::vector<std::size_t>                       m_listActiveIDsLeave1out;  /**<List of the active snapshots used in the leave-1-out method*/  
     std::size_t                                    m_sizeInternal;            /**<Number of internal cells in the list of ID of active cells [the internal cells are placed first in the list of active IDs].*/
+
+//    MeshMapper                                     m_meshmap;                /**< Mapping object TO/FROM pod mesh.*/
 
 #if BITPIT_ENABLE_MPI
     MPI_Comm            m_communicator; /**< MPI communicator */
@@ -207,6 +207,9 @@ protected:
     WriteMode           m_writeMode;            /**<Write mode: dump write pod info, modes, mean field and pod mesh on dump files only, DEBUG write even vtu files and NONE to dump/write nothing. [Default = DUMP] */
     ReconstructionMode  m_reconstructionMode;   /**<Evaluate reconstruction by PROJECTION or by MINIMIZATION. [Default = MINIMIZATION] */
     ErrorMode           m_errorMode;            /**<Error mode: COMBINED - evaluate the of maximum reconstruction errors, SINGLE - evaluate reconstruction error, NONE - do nothing. [Default = NONE, Default in leave-1-out = COMBINED] */
+    bool                m_expert;               /**<Expert mode. Main features: 1 - In expert mode (true) the mapper between POD mesh and input mesh
+                                                    during reconstruction of a field has to be updated manually,
+                                                    otherwise is recomputed at each call. */
 
     std::vector<std::size_t>    _m_nr;  /**<Temporary number of modes to track the energy level of retained number of modes for different fields.*/
 
@@ -218,7 +221,7 @@ protected:
     void initCorrelation();
     void evalCorrelationTerm(int i, pod::PODField &snapi, int j, pod::PODField &snapj);
     void evalReconstructionCoeffs(pod::PODField &snapi);
-    void evalReconstructionCoeffsStaticMesh(pod::PODField &snapi);
+    void _evalReconstructionCoeffs(pod::PODField &snapi);
     void buildFields(pod::PODField &recon);
     void initErrorMaps();
     void buildErrorMaps(pod::PODField &snap, pod::PODField &recon);    
@@ -228,7 +231,6 @@ protected:
 
     void dumpMode(std::size_t ir);
 
-    void readSnapshot(pod::SnapshotFile snap, VolumeKernel *mesh, pod::PODField &fieldr);
     void readSnapshot(pod::SnapshotFile snap, pod::PODField &fieldr);
     void readMode(std::size_t ir);
 
@@ -244,16 +246,23 @@ protected:
     void freeCommunicator();
 #endif
 
-    void evalReconstructionCoeffs(PiercedStorage<double> &fields, const VolumeKernel *mesh,
+    void evalReconstructionCoeffs(PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds);
-    void evalReconstructionCoeffsStaticMesh(PiercedStorage<double> &fields,
+    void _evalReconstructionCoeffs(PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds);
     void buildFields(PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
+    void _buildFields(PiercedStorage<double> &fields,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+            const std::unordered_set<long> *targetCells = nullptr);
+
+
+    void computeMapping(const VolumeKernel * mesh);
 
 };
 

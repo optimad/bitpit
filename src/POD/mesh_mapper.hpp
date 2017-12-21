@@ -56,9 +56,14 @@ public:
     ~MeshMapper();
     MeshMapper(MeshMapper&& other) = default;
 
-    const bitpit::PiercedStorage<bitpit::adaption::Info> & getMapping();
+    void clear();
+    void clearMapping();
+    void clearInverseMapping();
 
-    void mapMeshes(bitpit::VolumeKernel * meshReference, bitpit::VolumeKernel * meshMapped);
+    const bitpit::PiercedStorage<bitpit::adaption::Info> & getMapping();
+    const bitpit::PiercedStorage<bitpit::adaption::Info> & getInverseMapping();
+
+    void mapMeshes(const bitpit::VolumeKernel * meshReference, const bitpit::VolumeKernel * meshMapped, bool fillInv = false);
 
 protected:
 
@@ -69,9 +74,10 @@ protected:
     int                     m_nProcs;       /**< Number of processes. */
 
     bitpit::PiercedStorage<bitpit::adaption::Info> m_mapper;  /**< Mapping info for each cell of reference mesh. */
+    bitpit::PiercedStorage<bitpit::adaption::Info> m_invmapper;  /**< Inverse mapping info for each cell of reference mesh. */
 
-    void _mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped);
-    void _mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped);
+    void _mapMeshes(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv);
+    void _mapMeshesSamePartition(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv);
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);

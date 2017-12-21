@@ -33,6 +33,7 @@
 #include <unordered_map>
 
 #include "pod_common.hpp"
+#include "mesh_mapper.hpp"
 #include "bitpit_patchkernel.hpp"
 #include "bitpit_IO.hpp"
 
@@ -62,6 +63,10 @@ protected:
     int                     m_rank;         /**< Local rank of process. */
     int                     m_nProcs;       /**< Number of processes. */
 
+    MeshMapper              m_meshmap;      /**< Mapping object TO/FROM pod mesh.*/
+
+    bool                    m_dirtymap;        /**< True if mapping has to be recomputed/updated [to be set by set method]. */
+
     void clear();
 
     void setMesh(VolumeKernel*);
@@ -70,7 +75,25 @@ protected:
     VolumeKernel* readMesh(const pod::SnapshotFile &snap);
     void restoreMesh(const pod::SnapshotFile &snap);
 
+    void    computeMapping(const VolumeKernel * mesh);
+    MeshMapper & getMeshMapper();
+
+    void setMappingDirty(bool dirty = true);
+    bool isMappingDirty();
+
     virtual VolumeKernel* createMesh() = 0;
+
+    virtual pod::PODField mapPODFieldToPOD(const pod::PODField & field, const std::unordered_set<long> * targetCells) = 0;
+    virtual void mapPODFieldFromPOD(pod::PODField & field, const std::unordered_set<long> * targetCells, const pod::PODField & mappedField) = 0;
+
+    virtual PiercedStorage<double> mapFieldsToPOD(const PiercedStorage<double> & fields, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::array<std::size_t, 3>> &vectorIds) = 0;
+    virtual void mapFieldsFromPOD(PiercedStorage<double> & fields, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells,
+            const PiercedStorage<double> & mappedFields,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::array<std::size_t, 3>> &vectorIds) = 0;
+
+    virtual PiercedStorage<bool> mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells) = 0;
+    virtual void mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField) = 0;
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);

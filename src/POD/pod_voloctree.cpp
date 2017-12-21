@@ -72,4 +72,433 @@ VolumeKernel* PODVolOctree::createMesh()
     return mesh;
 }
 
+pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const std::unordered_set<long> * targetCells)
+{
+
+    //Check target cells
+    std::unordered_set<long> targetCellsStorage;
+    if (!targetCells) {
+        for (const Cell &cell : m_meshPOD->getCells())
+            targetCellsStorage.insert(cell.getId());
+
+        targetCells = &targetCellsStorage;
+    }
+
+    // Map data fields on pod mesh
+    std::size_t nsf = field.scalar->getFieldCount();
+    std::size_t nvf = field.vector->getFieldCount();
+
+    const PiercedStorage<mapping::Info> & m_mapper = m_meshmap.getMapping();
+    const PiercedStorage<mapping::Info> & m_invmapper = m_meshmap.getInverseMapping();
+
+    pod::PODField mappedField(nsf, nvf, m_meshPOD, &m_meshPOD->getCells());
+
+    for (long id : *targetCells){
+        double *datamappedS = mappedField.scalar->data(id);
+        std::array<double,3> *datamappedV = mappedField.vector->data(id);
+
+        if (m_mapper[id].type == adaption::Type::TYPE_RENUMBERING){
+            bool dataB = field.mask->at(m_mapper[id].previous[0]);
+            mappedField.mask->set(id, dataB);
+
+            double *dataS = field.scalar->data(m_mapper[id].previous[0]);
+            for (std::size_t i = 0; i < nsf; i++){
+                double *dataSi = dataS + i;
+                double *datamappedSi = datamappedS + i;
+                (*datamappedSi) = (*dataSi);
+            }
+
+            std::array<double,3> *dataV = field.vector->data(m_mapper[id].previous[0]);
+            for (std::size_t i = 0; i < nvf; i++) {
+                std::array<double,3> *dataVi = dataV + i;
+                std::array<double,3> *datamappedVi = datamappedV + i;
+                (*datamappedVi) = (*dataVi);
+            }
+        }
+        else if (m_mapper[id].type == adaption::Type::TYPE_COARSENING){
+            mappedField.mask->set(id, false);
+
+            for (std::size_t i = 0; i < nsf; i++){
+                double *datamappedSi = datamappedS + i;
+                (*datamappedSi) = 0.0;
+            }
+            for (std::size_t i = 0; i < nvf; i++){
+                std::array<double,3> *datamappedVi = datamappedV + i;
+                (*datamappedVi) = std::array<double,3>{0.0, 0.0, 0.0};
+            }
+
+            bool dataB, dataMappedB = false;
+            double *dataS;
+            std::array<double,3> *dataV;
+            double volmapped = m_meshPOD->evalCellVolume(id);
+            for (long idd : m_mapper[id].previous){
+                dataB = field.mask->at(idd);
+                dataMappedB |= dataB;
+
+                dataS = field.scalar->data(idd);
+                double vol = field.mesh->evalCellVolume(idd);
+                for (std::size_t i = 0; i < nsf; i++){
+                    double *dataSi = dataS + i;
+                    double *datamappedSi = datamappedS + i;
+                    (*datamappedSi) += (*dataSi) * vol / volmapped;
+                }
+                dataV = field.vector->data(idd);
+                for (std::size_t i = 0; i < nvf; i++) {
+                    std::array<double,3> *dataVi = dataV + i;
+                    std::array<double,3> *datamappedVi = datamappedV + i;
+                    (*datamappedVi) += (*dataVi) * vol / volmapped;
+                }
+            }
+            mappedField.mask->set(id, dataMappedB);
+
+        }
+        else if (m_mapper[id].type == adaption::Type::TYPE_REFINEMENT){
+            bool dataB = field.mask->at(m_mapper[id].previous[0]);
+            double *dataS = field.scalar->data(m_mapper[id].previous[0]);
+            std::array<double,3> *dataV = field.vector->data(m_mapper[id].previous[0]);
+
+            mappedField.mask->set(id, dataB);
+
+            for (std::size_t i = 0; i < nsf; i++){
+                double *dataSi = dataS + i;
+                double *datamappedSi = datamappedS + i;
+                (*datamappedSi) = (*dataSi);
+            }
+            for (std::size_t i = 0; i < nvf; i++) {
+                std::array<double,3> *dataVi = dataV + i;
+                std::array<double,3> *datamappedVi = datamappedV + i;
+                (*datamappedVi) = (*dataVi);
+            }
+        }
+    }
+
+    return mappedField;
+
+}
+
+void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordered_set<long> * targetCells,
+        const pod::PODField & mappedField)
+{
+
+    //Check target cells
+    std::unordered_set<long> targetCellsStorage;
+    if (!targetCells) {
+        for (const Cell &cell : field.mesh->getCells())
+            targetCellsStorage.insert(cell.getId());
+
+        targetCells = &targetCellsStorage;
+    }
+
+    // Map data fields from pod mesh
+    std::size_t nsf = field.scalar->getFieldCount();
+    std::size_t nvf = field.vector->getFieldCount();
+
+    const PiercedStorage<mapping::Info> & m_mapper = m_meshmap.getMapping();
+    const PiercedStorage<mapping::Info> & m_invmapper = m_meshmap.getInverseMapping();
+
+    for (long id : *targetCells){
+        double *dataS = field.scalar->data(id);
+        std::array<double,3> *dataV = field.vector->data(id);
+
+        if (m_invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
+            bool datamappedB = mappedField.mask->at(m_invmapper[id].previous[0]);
+            field.mask->set(id, datamappedB);
+            double *datamappedS = mappedField.scalar->data(m_invmapper[id].previous[0]);
+            for (std::size_t i = 0; i < nsf; i++){
+                double *dataSi = dataS + i;
+                double *datamappedSi = datamappedS + i;
+                (*dataSi) = (*datamappedSi);
+            }
+            std::array<double,3>  *datamappedV = mappedField.vector->data(m_invmapper[id].previous[0]);
+            for (std::size_t i = 0; i < nvf; i++) {
+                std::array<double,3> *dataVi = dataV + i;
+                std::array<double,3> *datamappedVi = datamappedV + i;
+                (*dataVi) = (*datamappedVi);
+            }
+        }
+        else if (m_invmapper[id].type == adaption::Type::TYPE_COARSENING){
+            bool dataB = false;
+            for (std::size_t i = 0; i < nsf; i++){
+                double *dataSi = dataS + i;
+                (*dataSi) = 0.0;
+            }
+            for (std::size_t i = 0; i < nvf; i++){
+                std::array<double,3> *dataVi = dataV + i;
+                (*dataVi) = std::array<double,3>{0.0, 0.0, 0.0};
+            }
+            bool datamappedB;
+            double *datamappedS;
+            std::array<double,3> *datamappedV;
+            double vol = field.mesh->evalCellVolume(id);
+            for (long idd : m_invmapper[id].previous){
+                datamappedB = mappedField.mask->at(idd);
+                dataB |= datamappedB;
+                datamappedS = mappedField.scalar->data(idd);
+                double volmapped = m_meshPOD->evalCellVolume(idd);
+                for (std::size_t i = 0; i < nsf; i++){
+                    double *dataSi = dataS + i;
+                    double *datamappedSi = datamappedS + i;
+                    (*dataSi) += (*datamappedSi) * volmapped / vol;
+                }
+                datamappedV = mappedField.vector->data(idd);
+                for (std::size_t i = 0; i < nvf; i++) {
+                    std::array<double,3> *dataVi = dataV + i;
+                    std::array<double,3> *datamappedVi = datamappedV + i;
+                    (*dataVi) += (*datamappedVi) * volmapped / vol;
+                }
+            }
+            field.mask->set(id, dataB);
+        }
+        else if (m_invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
+            bool datamappedB = mappedField.mask->at(m_invmapper[id].previous[0]);
+            field.mask->set(id, datamappedB);
+            double *datamappedS = mappedField.scalar->data(m_invmapper[id].previous[0]);
+            for (std::size_t i = 0; i < nsf; i++){
+                double *dataSi = dataS + i;
+                double *datamappedSi = datamappedS + i;
+                (*dataSi) = (*datamappedSi);
+            }
+            std::array<double,3> *datamappedV = mappedField.vector->data(m_invmapper[id].previous[0]);
+            for (std::size_t i = 0; i < nvf; i++) {
+                std::array<double,3> *dataVi = dataV + i;
+                std::array<double,3> *datamappedVi = datamappedV + i;
+                (*dataVi) = (*datamappedVi);
+            }
+        }
+    }
+}
+
+PiercedStorage<double> PODVolOctree::mapFieldsToPOD(const PiercedStorage<double> & fields, const VolumeKernel * mesh,
+        const std::unordered_set<long> * targetCells,
+        const std::vector<std::size_t> &scalarIds,
+        const std::vector<std::array<std::size_t, 3>> &vectorIds)
+{
+
+    //Check target cells
+    std::unordered_set<long> targetCellsStorage;
+    if (!targetCells) {
+        for (const Cell &cell : m_meshPOD->getCells())
+            targetCellsStorage.insert(cell.getId());
+
+        targetCells = &targetCellsStorage;
+    }
+
+    // Map data fields on pod mesh
+    std::size_t nsf = scalarIds.size();
+    std::size_t nvf = vectorIds.size();
+
+    const PiercedStorage<mapping::Info> & m_mapper = m_meshmap.getMapping();
+    const PiercedStorage<mapping::Info> & m_invmapper = m_meshmap.getInverseMapping();
+
+    PiercedStorage<double> mappedFields(fields.getFieldCount(), &m_meshPOD->getCells());
+
+    for (long id : *targetCells){
+        double *datamapped = mappedFields.data(id);
+        if (m_mapper[id].type == adaption::Type::TYPE_RENUMBERING){
+            const double *data = fields.data(m_mapper[id].previous[0]);
+            for (std::size_t i = 0; i < nsf; i++){
+                const double *datai = data + scalarIds[i];
+                double *datamappedi = datamapped + scalarIds[i];
+                (*datamappedi) = (*datai);
+            }
+            for (std::size_t i = 0; i < nvf; i++) {
+                for (std::size_t j = 0; j < 3; j++) {
+                    const double *datai = data + vectorIds[i][j];
+                    double *datamappedi = datamapped + vectorIds[i][j];
+                    (*datamappedi) = (*datai);
+                }
+            }
+        }
+        else if (m_mapper[id].type == adaption::Type::TYPE_COARSENING){
+            for (std::size_t i = 0; i < nsf; i++){
+                double *datamappedi = datamapped + scalarIds[i];
+                (*datamappedi) = 0.0;
+            }
+            for (std::size_t i = 0; i < nvf; i++){
+                for (std::size_t j = 0; j < 3; j++) {
+                    double *datamappedi = datamapped + vectorIds[i][j];
+                    (*datamappedi) = 0.0;
+                }
+            }
+            double volmapped = m_meshPOD->evalCellVolume(id);
+            for (long idd : m_mapper[id].previous){
+                const double *data = fields.data(idd);
+                double vol = mesh->evalCellVolume(idd);
+
+                for (std::size_t i = 0; i < nsf; i++){
+                    const double *datai = data + scalarIds[i];
+                    double *datamappedi = datamapped + scalarIds[i];
+                    (*datamappedi) += (*datai) * vol / volmapped;
+                }
+                for (std::size_t i = 0; i < nvf; i++) {
+                    for (std::size_t j = 0; j < 3; j++) {
+                        const double *datai = data + vectorIds[i][j];
+                        double *datamappedi = datamapped + vectorIds[i][j];
+                        (*datamappedi) += (*datai) * vol / volmapped;
+                    }
+                }
+            }
+        }
+        else if (m_mapper[id].type == adaption::Type::TYPE_REFINEMENT){
+            const double *data = fields.data(m_mapper[id].previous[0]);
+            for (std::size_t i = 0; i < nsf; i++){
+                const double *datai = data + scalarIds[i];
+                double *datamappedi = datamapped + scalarIds[i];
+                (*datamappedi) = (*datai);
+            }
+            for (std::size_t i = 0; i < nvf; i++) {
+                for (std::size_t j = 0; j < 3; j++) {
+                    const double *datai = data + vectorIds[i][j];
+                    double *datamappedi = datamapped + vectorIds[i][j];
+                    (*datamappedi) = (*datai);
+                }
+            }
+        }
+    }
+
+    return mappedFields;
+
+}
+
+void PODVolOctree::mapFieldsFromPOD(PiercedStorage<double> & fields, const VolumeKernel * mesh,
+        const std::unordered_set<long> * targetCells, const PiercedStorage<double> & mappedFields,
+        const std::vector<std::size_t> &scalarIds, const std::vector<std::array<std::size_t, 3>> &vectorIds)
+{
+
+    //Check target cells
+    std::unordered_set<long> targetCellsStorage;
+    if (!targetCells) {
+        for (const Cell &cell : mesh->getCells())
+            targetCellsStorage.insert(cell.getId());
+
+        targetCells = &targetCellsStorage;
+    }
+
+    // Map data fields from pod mesh
+    std::size_t nsf = scalarIds.size();
+    std::size_t nvf = vectorIds.size();
+
+    const PiercedStorage<mapping::Info> & m_mapper = m_meshmap.getMapping();
+    const PiercedStorage<mapping::Info> & m_invmapper = m_meshmap.getInverseMapping();
+
+    for (long id : *targetCells){
+        double *data = fields.data(id);
+        if (m_invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
+            const double *datamapped = mappedFields.data(m_invmapper[id].previous[0]);
+            for (std::size_t i = 0; i < nsf; i++){
+                double *datai = data + scalarIds[i];
+                const double *datamappedi = datamapped + scalarIds[i];
+                (*datai) = (*datamappedi);
+            }
+            for (std::size_t i = 0; i < nvf; i++) {
+                for (std::size_t j = 0; j < 3; j++) {
+                    double *datai = data + vectorIds[i][j];
+                    const double *datamappedi = datamapped + vectorIds[i][j];
+                    (*datai) = (*datamappedi);
+                }
+            }
+        }
+        else if (m_invmapper[id].type == adaption::Type::TYPE_COARSENING){
+            for (std::size_t i = 0; i < nsf; i++){
+                double *datai = data + scalarIds[i];
+                (*datai) = 0.0;
+            }
+            for (std::size_t i = 0; i < nvf; i++){
+                for (std::size_t j = 0; j < 3; j++) {
+                    double *datai = data + vectorIds[i][j];
+                    (*datai) = 0.0;
+                }
+            }
+            double vol = mesh->evalCellVolume(id);
+            for (long idd : m_invmapper[id].previous){
+                const double * datamapped = mappedFields.data(idd);
+                double volmapped = m_meshPOD->evalCellVolume(idd);
+
+                for (std::size_t i = 0; i < nsf; i++){
+                    double *datai = data + scalarIds[i];
+                    const double *datamappedi = datamapped + scalarIds[i];
+                    (*datai) += (*datamappedi) * volmapped / vol;
+                }
+                for (std::size_t i = 0; i < nvf; i++) {
+                    for (std::size_t j = 0; j < 3; j++) {
+                        double *datai = data + vectorIds[i][j];
+                        const double *datamappedi = datamapped + vectorIds[i][j];
+                        (*datai) += (*datamappedi) * volmapped / vol;
+                    }
+                }
+            }
+        }
+        else if (m_invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
+            const double *datamapped = mappedFields.data(m_invmapper[id].previous[0]);
+            for (std::size_t i = 0; i < nsf; i++){
+                double *datai = data + scalarIds[i];
+                const double *datamappedi = datamapped + scalarIds[i];
+                (*datai) = (*datamappedi);
+            }
+            for (std::size_t i = 0; i < nvf; i++) {
+                for (std::size_t j = 0; j < 3; j++) {
+                    double *datai = data + vectorIds[i][j];
+                    const double *datamappedi = datamapped + vectorIds[i][j];
+                    (*datai) = (*datamappedi);
+                }
+            }
+        }
+    }
+
+}
+
+
+PiercedStorage<bool> PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh,
+        const std::unordered_set<long> * targetCells)
+{
+
+    // Map bool field (number of fields = 1) on pod mesh
+    PiercedStorage<bool> mappedField(1, &m_meshPOD->getCells());
+    mapBoolFieldToPOD(field, mesh, targetCells, mappedField);
+    return mappedField;
+
+}
+
+void PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh,
+        const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField)
+{
+
+    //Check target cells
+    std::unordered_set<long> targetCellsStorage;
+    if (!targetCells) {
+        for (const Cell &cell : m_meshPOD->getCells())
+            targetCellsStorage.insert(cell.getId());
+
+        targetCells = &targetCellsStorage;
+    }
+
+    // Map bool field (number of fields = 1) on pod mesh
+    const PiercedStorage<mapping::Info> & m_mapper = m_meshmap.getMapping();
+    const PiercedStorage<mapping::Info> & m_invmapper = m_meshmap.getInverseMapping();
+
+    mappedField.setStaticKernel(&m_meshPOD->getCells());
+    mappedField.fill(false);
+
+    for (long id : *targetCells){
+        if (m_mapper[id].type == adaption::Type::TYPE_RENUMBERING){
+            bool dataB = field.at(m_mapper[id].previous[0]);
+            mappedField.set(id, dataB);
+        }
+        else if (m_mapper[id].type == adaption::Type::TYPE_COARSENING){
+            mappedField.set(id, false);
+            bool dataB, dataMappedB = false;
+            for (long idd : m_mapper[id].previous){
+                dataB = field.at(idd);
+                dataMappedB |= dataB;
+            }
+            mappedField.set(id, dataMappedB);
+        }
+        else if (m_mapper[id].type == adaption::Type::TYPE_REFINEMENT){
+            bool dataB = field.at(m_mapper[id].previous[0]);
+            mappedField.set(id, dataB);
+        }
+    }
+
+}
+
 }

@@ -149,8 +149,6 @@ void run(int rank, int nProcs)
 
     /**<Test hybrid interface using optimad solver format.*/
     PiercedStorage<double> gfield0(nsf+3*nvf, &meshr->getCells());
-    std::map<std::string, std::size_t> scalarFields;
-    std::map<std::array<std::string, 3>, std::array<std::size_t,3>> vectorFields;
     std::unordered_set<long> targetCells;
 
     std::map<std::string, std::size_t> fields;
@@ -170,23 +168,37 @@ void run(int rank, int nProcs)
     }
 
     for (std::size_t ifield=0; ifield<nsf; ifield++){
-        scalarFields[namesf[ifield]] = ifield;
         fields[namesf[ifield]] = ifield;
     }
     for (std::size_t ifield=0; ifield<nvf; ifield++){
         for (std::size_t j=0; j<3; j++){
-            vectorFields[namevf[ifield]][j] = ifield*3+nsf+j;
             fields[namevf[ifield][j]] = ifield*3+nsf+j;
         }
     }
 
-    pod.reconstructFields(gfield0, meshr, scalarFields, vectorFields, &targetCells);
+    pod.setStaticMesh(false);
+    pod.reconstructFields(gfield0, meshr, fields, &targetCells);
 
     if (rank==0){
         std::cout<< " " << std::endl;
         std::cout<< ">> Reconstruction coeffs hybrid interface:" << std::endl;
         for (std::size_t i = 0; i < nf; ++i)
             std::cout<< pod.getReconstructionCoeffs()[i] << std::endl;
+
+        std::cout<< " " << std::endl;
+        std::cout<< ">> Reconstruction error hybrid interface" << std::endl;
+        double maxerr = 0.0;
+        for (Cell & cell : meshr->getCells()){
+            long id = cell.getId();
+            for (std::size_t i = 0; i < nsf; ++i)
+                maxerr = std::max(maxerr, std::abs(gfield0.at(id, i) - fieldr.scalar->at(id, i)));
+            for (std::size_t i = 0; i < nvf; ++i){
+                for (std::size_t j=0; j<3; j++)
+                    maxerr = std::max(maxerr, std::abs(gfield0.at(id, nsf+3*i+j) - fieldr.vector->at(id, i)[j]));
+            }
+        }
+        std::cout<< ">> Max error :" << maxerr << std::endl;
+
     }
 
 }

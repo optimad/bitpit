@@ -76,6 +76,8 @@ PODKernel::PODKernel()
     m_nProcs = 1;
 #endif
 
+    m_dirtymap = true;
+
 }
 
 /**
@@ -149,6 +151,26 @@ void PODKernel::restoreMesh(const pod::SnapshotFile &snap)
 }
 
 
+void PODKernel::computeMapping(const VolumeKernel * mesh)
+{
+    m_meshmap.mapMeshes(m_meshPOD, mesh, true);
+    setMappingDirty(false);
+}
+
+MeshMapper & PODKernel::getMeshMapper()
+{
+    return m_meshmap;
+}
+
+void PODKernel::setMappingDirty(bool dirty)
+{
+    m_dirtymap = dirty;
+}
+
+bool PODKernel::isMappingDirty()
+{
+    return m_dirtymap;
+}
 
 #if BITPIT_ENABLE_MPI
 /**

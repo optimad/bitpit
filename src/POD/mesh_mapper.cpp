@@ -69,28 +69,52 @@ MeshMapper::~MeshMapper()
 {
 }
 
+void MeshMapper::clear()
+{
+    clearMapping();
+    clearInverseMapping();
+}
+
+void MeshMapper::clearMapping()
+{
+    m_mapper.unsetKernel(true);
+}
+
+void MeshMapper::clearInverseMapping()
+{
+    m_invmapper.unsetKernel(true);
+}
+
 const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getMapping()
 {
     return m_mapper;
 }
 
+const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getInverseMapping()
+{
+    return m_invmapper;
+}
 
-void MeshMapper::mapMeshes(bitpit::VolumeKernel * meshReference, bitpit::VolumeKernel * meshMapped)
+
+void MeshMapper::mapMeshes(const bitpit::VolumeKernel * meshReference, const bitpit::VolumeKernel * meshMapped, bool fillInv)
 {
     {
-        VolOctree* _meshReference = dynamic_cast<VolOctree*>(meshReference);
-        VolOctree* _meshMapped = dynamic_cast<VolOctree*>(meshMapped);
+        const VolOctree* _meshReference = dynamic_cast<const VolOctree*>(meshReference);
+        const VolOctree* _meshMapped = dynamic_cast<const VolOctree*>(meshMapped);
         if (_meshReference && _meshMapped){
-            _mapMeshes(_meshReference, _meshMapped);
+            _mapMeshes(_meshReference, _meshMapped, fillInv);
         }
     }
 }
 
 
-void MeshMapper::_mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped)
+void MeshMapper::_mapMeshes(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv)
 {
 
     m_mapper.setStaticKernel(&meshReference->getCells());
+    if (fillInv)
+        m_invmapper.setStaticKernel(&meshMapped->getCells());
+
 
     bool checkPartition = true;
 
@@ -99,7 +123,7 @@ void MeshMapper::_mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree
     if (!(meshReference->isPartitioned())){
 #endif
 
-        _mapMeshesSamePartition(meshReference, meshMapped);
+        _mapMeshesSamePartition(meshReference, meshMapped, fillInv);
 
 #if BITPIT_ENABLE_MPI==1
     }
@@ -113,10 +137,10 @@ void MeshMapper::_mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree
             checkPartition = checkPartition && (partitionReference[m_rank-1] == partitionMapped[m_rank-1]);
 
         if (checkPartition){
-            _mapMeshesSamePartition(meshReference, meshMapped);
+            _mapMeshesSamePartition(meshReference, meshMapped, fillInv);
         }
         else{
-
+            throw std::runtime_error("Mapping with different partitions not supported.");
         }
 
     }
@@ -125,7 +149,7 @@ void MeshMapper::_mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree
 }
 
 
-void MeshMapper::_mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped)
+void MeshMapper::_mapMeshesSamePartition(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv)
 {
 
     long nRef  = meshReference->getInternalCount();
@@ -142,11 +166,20 @@ void MeshMapper::_mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitp
 
         m_mapper[idRef].entity = bitpit::adaption::Entity::ENTITY_CELL;
         m_mapper[idRef].rank = m_rank;
+        if (fillInv){
+            m_invmapper[idMap].entity = bitpit::adaption::Entity::ENTITY_CELL;
+            m_invmapper[idMap].rank = m_rank;
+        }
 
         if (meshMapped->getCellLevel(idMap) == meshReference->getCellLevel(idRef)){
             m_mapper[idRef].current.push_back(idRef);
             m_mapper[idRef].previous.push_back(idMap);
             m_mapper[idRef].type = bitpit::adaption::Type::TYPE_RENUMBERING;
+            if (fillInv){
+                m_invmapper[idMap].current.push_back(idMap);
+                m_invmapper[idMap].previous.push_back(idRef);
+                m_invmapper[idMap].type = bitpit::adaption::Type::TYPE_RENUMBERING;
+            }
             indRef++;
             indMap++;
         }
@@ -159,6 +192,11 @@ void MeshMapper::_mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitp
 
             while(mortonMap < mortonlastdesc && indMap < nMap){
                 m_mapper[idRef].previous.push_back(idMap);
+                if (fillInv){
+                    m_invmapper[idMap].current.push_back(idMap);
+                    m_invmapper[idMap].type = bitpit::adaption::Type::TYPE_REFINEMENT;
+                    m_invmapper[idMap].previous.push_back(idRef);
+                }
                 indMap++;
                 octinfoMap = VolOctree::OctantInfo(indMap, true);
                 idMap = meshMapped->getOctantId(octinfoMap);
@@ -171,10 +209,18 @@ void MeshMapper::_mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitp
             uint64_t morton= meshReference->getTree().getMorton(indRef);
             uint64_t mortonlastdescmesh = meshMapped->getTree().getLastDescMorton(indMap);
 
+            if (fillInv){
+                m_invmapper[idMap].current.push_back(idMap);
+                m_invmapper[idMap].type = bitpit::adaption::Type::TYPE_COARSENING;
+            }
+
             while (morton <= mortonlastdescmesh && indRef < nRef){
                 m_mapper[idRef].current.push_back(idRef);
                 m_mapper[idRef].type = bitpit::adaption::Type::TYPE_REFINEMENT;
                 m_mapper[idRef].previous.push_back(idMap);
+                if (fillInv){
+                    m_invmapper[idMap].previous.push_back(idRef);
+                }
                 indRef++;
                 morton = meshReference->getTree().getMorton(indRef);
                 octinfoRef = VolOctree::OctantInfo(indRef, true);

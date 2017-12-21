@@ -157,8 +157,6 @@ void run()
     patch_2D_original->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata);
     patch_2D_original->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
     patch_2D_original->write();
-    patch_2D_original->getVTK().setName("mesh_original.1");
-    patch_2D_original->write();
 
     //
     // Create the new tree
@@ -227,11 +225,12 @@ void run()
 
     MeshMapper mapobject;
 
-    mapobject.mapMeshes(patch_2D, patch_2D_original);
-    PiercedStorage<mapping::Info> mapper = mapobject.getMapping();
+    mapobject.mapMeshes(patch_2D, patch_2D_original, true);
 
     // Map data on second mesh and write
     PiercedStorage<double> data2(1, &patch_2D->getCells());
+    {
+    PiercedStorage<mapping::Info> mapper = mapobject.getMapping();
     std::vector<double> vdata2(patch_2D->getInternalCount());
     count = 0;
     for (Cell & cell : patch_2D->getCells()){
@@ -262,6 +261,43 @@ void run()
     patch_2D->write();
     patch_2D->getVTK().setName("mesh_random.1");
     patch_2D->write();
+
+    }
+
+    // Re-Map data on first mesh with inverse mapping and write
+    {
+    PiercedStorage<mapping::Info> invmapper = mapobject.getInverseMapping();
+    PiercedStorage<double> data3(1, &patch_2D_original->getCells());
+    std::vector<double> vdata3(patch_2D_original->getInternalCount());
+    count = 0;
+    for (Cell & cell : patch_2D_original->getCells()){
+        if (cell.isInterior()){
+            long id = cell.getId();
+            if (invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
+                data3[id] = data2[invmapper[id].previous[0]];
+                vdata3[count] = data3[id];
+            }
+            else if (invmapper[id].type == adaption::Type::TYPE_COARSENING){
+                data3[id] = 0.0;
+                int n = invmapper[id].previous.size();
+                for (long idd : invmapper[id].previous){
+                    data3[id] += data2[idd] / n;
+                }
+                vdata3[count] = data3[id];
+            }
+            else if (invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
+                data3[id] = data2[invmapper[id].previous[0]];
+                vdata3[count] = data3[id];
+            }
+            count++;
+        }
+    }
+
+    patch_2D_original->getVTK().setName("mesh_original.1");
+    patch_2D_original->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata3);
+    patch_2D_original->write();
+
+    }
 
 }
 

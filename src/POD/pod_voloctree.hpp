@@ -59,6 +59,18 @@ public:
     bitpit::PiercedStorage<bitpit::adaption::Info> mapMesh(bitpit::VolOctree * mesh);
     void mapMeshSamePartition(bitpit::VolOctree * mesh, bitpit::PiercedStorage<bitpit::adaption::Info> & mapper);
 
+    pod::PODField mapPODFieldToPOD(const pod::PODField & field, const std::unordered_set<long> * targetCells);
+    void mapPODFieldFromPOD(pod::PODField & field, const std::unordered_set<long> * targetCells, const pod::PODField & mappedField);
+
+    PiercedStorage<double> mapFieldsToPOD(const PiercedStorage<double> & fields, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::array<std::size_t, 3>> &vectorIds);
+    void mapFieldsFromPOD(PiercedStorage<double> & fields, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells,
+            const PiercedStorage<double> & mappedFields,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::array<std::size_t, 3>> &vectorIds);
+
+    PiercedStorage<bool> mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells);
+    void mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField);
+
 };
 
 }
