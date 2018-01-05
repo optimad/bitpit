@@ -149,7 +149,7 @@ void ConfigParser::read(const std::string &filename, bool append)
     // check if the root name is the requeste one
     std::string rootName(reinterpret_cast<const char*>(rootElement->name));
     if (rootName != m_root) {
-        throw std::runtime_error("The name of the root element is not \"" + rootName + "\"");
+        throw std::runtime_error("The name of the root element is not \"" + m_root + "\"");
     }
 
     // Check if the version is supported
