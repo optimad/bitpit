@@ -2264,7 +2264,7 @@ std::vector<double> POD::fieldsMax(pod::PODField & snap)
         if (m_nScalarFields){
             double* datas = snap.scalar->data(id);
             for (std::size_t i = 0; i < m_nScalarFields; i++){
-                max[i] = std::max(max[i],*datas);
+                max[i] = std::max(max[i],std::abs(*datas));
                 datas++;
             }
         }
