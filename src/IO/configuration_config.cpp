@@ -51,11 +51,53 @@ Config::Config(bool multiSections)
 }
 
 /*!
+    Copy constructor.
+
+    \param other is the object to be copied
+*/
+Config::Config(const Config &other)
+    : m_multiSections(other.m_multiSections),
+      m_options(std::unique_ptr<Options>(new Options(*(other.m_options)))),
+      m_sections(std::unique_ptr<Sections>(new Sections()))
+{
+    for (const auto &entry : *(other.m_sections)) {
+        std::unique_ptr<Config> config = std::unique_ptr<Config>(new Config(*(entry.second)));
+        m_sections->insert(std::make_pair(entry.first, std::move(config)));
+    }
+}
+
+/*!
+    Copy assigment operator.
+
+    \param other is the object to be copied
+*/
+Config & Config::operator=(Config other)
+{
+    this->swap(other);
+
+    return *this;
+}
+
+/*!
     Destructor.
 */
 Config::~Config()
 {
 }
+
+/*!
+    Swap operator.
+
+    \param other is another config whose content is swapped with that of
+    this config
+*/
+void Config::swap(Config &other)
+{
+    std::swap(m_multiSections, other.m_multiSections);
+    std::swap(m_options, other.m_options);
+    std::swap(m_sections, other.m_sections);
+}
+
 
 /*!
     Returns true if multi-sections are enabled.

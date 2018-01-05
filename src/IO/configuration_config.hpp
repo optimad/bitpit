@@ -42,8 +42,15 @@ public:
     typedef std::multimap<std::string, std::unique_ptr<Config>> Sections;
 
     Config(bool multiSections);
+    Config(const Config &other);
+    Config(Config &&other) = default;
+
+    Config & operator=(Config other);
+    Config & operator=(Config &&other) = default;
 
     virtual ~Config();
+
+    void swap(Config &other);
 
     bool isMultiSectionsEnabled() const;
 
