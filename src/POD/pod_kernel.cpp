@@ -150,23 +150,39 @@ void PODKernel::restoreMesh(const pod::SnapshotFile &snap)
     m_meshPOD = readMesh(snap);
 }
 
-
-void PODKernel::computeMapping(const VolumeKernel * mesh)
+/**
+ * Compute the mapping of an input mesh on the pod mesh.
+ * \param[in] mesh Pointer to input mesh.
+ * \param[in] fillInv If true even the inverse mapping is computed.
+ */
+void PODKernel::computeMapping(const VolumeKernel * mesh, bool fillInv)
 {
-    m_meshmap.mapMeshes(m_meshPOD, mesh, true);
+    m_meshmap.mapMeshes(m_meshPOD, mesh, fillInv);
     setMappingDirty(false);
 }
 
+/**
+ * Get the stored pre-computed mapping.
+ * \return mesh mapper.
+ */
 MeshMapper & PODKernel::getMeshMapper()
 {
     return m_meshmap;
 }
 
+/**
+ * Set if the mapper has to be recomputed.
+ * param[in] Dirty mapping flag
+ */
 void PODKernel::setMappingDirty(bool dirty)
 {
     m_dirtymap = dirty;
 }
 
+/**
+ * Get if the mapper has to be recomputed.
+ * return Is the mapping dirty?
+ */
 bool PODKernel::isMappingDirty()
 {
     return m_dirtymap;

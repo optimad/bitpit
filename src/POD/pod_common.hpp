@@ -61,7 +61,7 @@ struct SnapshotFile
  */
 struct PODField
 {
-    bool                                    meshOwner;  /**<True if the mesh is released during clear. */
+    bool                                    meshOwner;  /**<If true the mesh is released during clear. */
     VolumeKernel*                           mesh;   /**< Mesh of the field.*/
     std::unique_ptr<PiercedStorage<bool>>   mask;   /**< Mask: true where the values of the field are defined.*/
     std::unique_ptr<pod::ScalarStorage>     scalar; /**< Scalar fields.*/
@@ -149,6 +149,10 @@ struct PODField
         meshOwner = owner;
     }
 
+    /**
+     *Clear the pod field.
+     * If the field is set to be mesh owner the mesh is destroyed.
+     */
     void clear()
     {
         if (meshOwner){
@@ -194,6 +198,9 @@ struct PODMode
         vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(nvf, lkernel));
     }
 
+    /**
+     * Clear a pod mode.
+     */
     void clear()
     {
         scalar.reset();

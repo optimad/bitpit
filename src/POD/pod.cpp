@@ -45,12 +45,15 @@ namespace bitpit {
 /**
  * \class POD
  * \ingroup POD
- * \brief The POD class provides an interface for defining POD object.
+ * \brief The POD (Proper Orthogonal Decomposition) class provides an interface for defining POD object.
  *
  * POD is the base class for defining POD object. \n
  * This class provides the interface methods, as the base get/set methods. \n
  * To execute a pod work-flow of a POD object call the
  * method run().
+ *
+ * Note: in this version the only allowed mesh type is VolOctree. All the database fields and the reconstructed ones
+ * have to be defined on the same domain.
  *
  */
 
@@ -369,7 +372,8 @@ POD::MeshType POD::getMeshType()
 /**
  * Set if the mesh, where the fields are defined,
  * is a static mesh, fixed for the whole database, or it is
- * an AMR mesh (differently adapted for each field in the database).
+ * an AMR mesh, i.e. differently adapted for each field in the database
+ * or during reconstruction.
  *
  * \param[in] flag if set to true the mesh is considered static.
  */
@@ -416,22 +420,6 @@ void POD::setMemoryMode(POD::MemoryMode mode)
 
     }
 }
-
-//void POD::setMesh(VolumeKernel* mesh)
-//{
-//    if (m_meshType == MeshType::UNDEFINED)
-//        throw std::runtime_error ("POD mesh type not set. Set mesh manually not allowed.");
-//
-//    switch (m_meshType)
-//    {
-//    case POD::MeshType::VOLOCTREE:
-//        m_podkernel->setMesh(static_cast<VolOctree*>(mesh));
-//        break;
-//
-//    default:
-//        break;
-//    }
-//}
 
 /**
  * Get the memory mode of the POD object.
@@ -576,17 +564,22 @@ void POD::setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh)
     m_sensorMask.setStaticKernel(&(m_podkernel->getMesh()->getCells()));
 
     if (m_staticMesh){
+
         for (auto &cell : m_podkernel->getMesh()->getCells()) {
             long id = cell.getId();
             m_sensorMask[id] = mask[id];
         }
+
     }
     else{
+
         if (mesh == nullptr)
             throw std::runtime_error ("POD: null mesh pointer passed to setSensorMask");
+
         //If mapping dirty or not computed, compute mapping of input mesh on pod mesh
         if (m_podkernel->isMappingDirty())
-            computeMapping(mesh);
+            _computeMapping(mesh);
+
         std::unordered_set<long> trueCells;
         for (Cell & cell : mesh->getCells()){
             long id = cell.getId();
@@ -594,6 +587,7 @@ void POD::setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh)
                 trueCells.insert(id);
             m_podkernel->mapBoolFieldToPOD(mask, mesh, &trueCells, m_sensorMask);
         }
+
     }
 
     fillListActiveIDs(m_sensorMask);
@@ -632,7 +626,8 @@ std::vector<std::array<std::string,3>> POD::getVectorNames()
 }
 
 /**
- * Get the names of the fields involved in the POD in one list (scalar fields and components of vector fields).
+ * Get the names of the fields involved in the POD in one list
+ * (scalar fields and components of vector fields).
  *
  * \return The names of fields.
  */
@@ -708,6 +703,9 @@ std::size_t POD::getListIDInternalCount()
     return m_sizeInternal;
 }
 
+/**
+ * Get the reference to the POD kernel.
+ */
 std::unique_ptr<PODKernel> & POD::getKernel()
 {
     return m_podkernel;
@@ -723,6 +721,7 @@ std::unique_ptr<PODKernel> & POD::getKernel()
 void POD::run()
 {
     if (m_runMode == RunMode::COMPUTE) {
+
         // Evaluate mean field and mesh
         log::cout() << "pod : computing mean field and pod mesh... " << std::endl;
         evalMeanMesh();
@@ -741,9 +740,12 @@ void POD::run()
         // Compute POD modes
         log::cout() << "pod : computing pod modes... " << std::endl;
         evalModes();
+
     } else if (m_runMode == RunMode::RESTORE) {
+
         log::cout() << "pod : restore... " << std::endl;
         restore();
+
     }
 
     // Dump pod
@@ -1048,7 +1050,8 @@ void POD::evalReconstruction()
             snapi.setMeshOwner();
 
             //Compute mapping of snapshot mesh on pod mesh
-            computeMapping(snapi.mesh);
+            if (m_podkernel->isMappingDirty())
+                _computeMapping(snapi.mesh);
 
             // Map snapshot on pod mesh
             pod::PODField mappedSnapi = m_podkernel->mapPODFieldToPOD(snapi, nullptr);
@@ -1092,15 +1095,15 @@ void POD::evalReconstruction()
 void POD::reconstructFields(pod::PODField & field,  pod::PODField & reconi)
 {
 
-        //set the mesh of reconstructed field
-        reconi.mesh = field.mesh;
-        evalReconstructionCoeffs(field);
-        buildFields(reconi);
-        if (m_errorMode != ErrorMode::NONE){
-            if (m_errorMode == ErrorMode::SINGLE)
-                initErrorMaps();
-            buildErrorMaps(field,reconi);
-        }
+    //set the mesh of reconstructed field
+    reconi.mesh = field.mesh;
+    evalReconstructionCoeffs(field);
+    buildFields(reconi);
+    if (m_errorMode != ErrorMode::NONE){
+        if (m_errorMode == ErrorMode::SINGLE)
+            initErrorMaps();
+        buildErrorMaps(field,reconi);
+    }
 
 }
 
@@ -1231,7 +1234,7 @@ void POD::buildFields(pod::PODField & recon)
  * Compute the error map of a field reconstructed through POD. 
  *
  * \param[in] snap Original snapshot field.
- * \param[in] recon Reconstructed snapshot field.
+ * \param[out] recon Reconstructed snapshot field.
  */
 void POD::buildErrorMaps(pod::PODField & snap, pod::PODField & recon)
 {  
@@ -1349,7 +1352,7 @@ void POD::evalMinimizationMatrices()
 /**
  * Solution of the minimization problem.
  *
- * \param[in] rhs right-hand side.
+ * \param[in/out] rhs right-hand side / solution.
  */
 void POD::solveMinimization(std::vector<std::vector<double> > & rhs)
 {
@@ -1456,6 +1459,7 @@ void POD::evalEigen()
  * Check the number of modes with the number of snapshots and level of energy.
  *
  * \param[in] lambda Array of eigenvalues in ascending order.
+ * \param[in] ifield Index of pod field checked.
  */
 void POD::checkModeCount(double *alambda, std::size_t ifield)
 {
@@ -2127,7 +2131,7 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
 /**
  * Perform difference between a POD field and a POD mode.
  *
- * \param[in] a Field as POD object.
+ * \param[in/out] a Field as POD object original / result.
  * \param[in] b Mode as POD object.
  */
 void POD::diff(pod::PODField& a, const pod::PODMode& b)
@@ -2168,7 +2172,7 @@ void POD::diff(pod::PODField& a, const pod::PODMode& b)
 /**
  * Perform sum between a POD field and a POD mode.
  *
- * \param[in] a Field as POD object.
+ * \param[in/out] a Field as POD object original /result.
  * \param[in] b Mode as POD object.
  */
 void POD::sum(pod::PODField& a, const pod::PODMode& b)
@@ -2416,22 +2420,22 @@ void POD::reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *
     }
     else{
 
-    //If mapping not computed, compute mapping of input mesh on pod mesh
-    if (m_podkernel->isMappingDirty())
-        computeMapping(mesh);
+        //If mapping not computed, compute mapping of input mesh on pod mesh
+        if (m_podkernel->isMappingDirty())
+            _computeMapping(mesh);
 
-    // Map data fields on pod mesh
-    PiercedStorage<double> mappedFields = m_podkernel->mapFieldsToPOD(fields, mesh, &m_listActiveIDs, scalarIds, vectorIds);
+        // Map data fields on pod mesh
+        PiercedStorage<double> mappedFields = m_podkernel->mapFieldsToPOD(fields, mesh, &m_listActiveIDs, scalarIds, vectorIds);
 
-    evalReconstructionCoeffs(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds);
+        evalReconstructionCoeffs(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds);
 
-    buildFields(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+        buildFields(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
 
-    m_podkernel->mapFieldsFromPOD(fields, mesh, targetCells, mappedFields, scalarIds, vectorIds);
+        m_podkernel->mapFieldsFromPOD(fields, mesh, targetCells, mappedFields, scalarIds, vectorIds);
 
-    //Clear Mapping
-    //TODO LEAVE TO THE USER TO UPDATE THE MAPPER?
-    m_podkernel->getMeshMapper().clear();
+        //Clear Mapping
+        //TODO LEAVE TO THE USER TO UPDATE THE MAPPER?
+        m_podkernel->getMeshMapper().clear();
 
     }
 
@@ -2443,15 +2447,15 @@ void POD::reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *
  * \param[in] fields Original input field (optimad solver format).
  * \param[in] mesh Pointer to snapshot field.
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
- * \param[in] scalarNames Names of scalar fields in PiercedStorage.
+ * \param[in] podscalarIds Ids of scalar fields in POD modes.
  * \param[in] vectorIds Ids of vector fields in PiercedStorage.
- * \param[in] vectorNames Names of vector fields in PiercedStorage.
+ * \param[in] podvectorIds Ids of vector fields in POD modes.
  */
 void POD::evalReconstructionCoeffs(PiercedStorage<double> &fields,
         const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> & podscalarIds,
         const std::vector<std::array<std::size_t, 3>> & vectorIds, const std::vector<std::size_t> & podvectorIds)
 {
-        _evalReconstructionCoeffs(fields, scalarIds, podscalarIds, vectorIds, podvectorIds);
+    _evalReconstructionCoeffs(fields, scalarIds, podscalarIds, vectorIds, podvectorIds);
 #if BITPIT_ENABLE_MPI
     for (std::size_t i = 0; i < m_nFields; i++)
         MPI_Allreduce(MPI_IN_PLACE, m_reconstructionCoeffs[i].data(), m_nModes, MPI_DOUBLE, MPI_SUM, m_communicator);
@@ -2463,9 +2467,9 @@ void POD::evalReconstructionCoeffs(PiercedStorage<double> &fields,
  *
  * \param[in] fields Original input field (optimad solver format).
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
- * \param[in] scalarNames Names of scalar fields in PiercedStorage.
+ * \param[in] podscalarIds Ids of scalar fields in POD modes.
  * \param[in] vectorIds Ids of vector fields in PiercedStorage.
- * \param[in] vectorNames Names of vector fields in PiercedStorage.
+ * \param[in] podvectorIds Ids of vector fields in POD modes.
  */
 void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
         const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
@@ -2569,8 +2573,8 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
  *
  * \param[in,out] fields Input and resulting reconstructed field.
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
- * \param[in] vectorIds Ids of vector fields in PiercedStorage.
  * \param[in] podscalarIds Ids of scalar fields in POD modes.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
  * \param[in] podvectorIds Ids of vector fields in POD modes.
  * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
  */
@@ -2579,7 +2583,7 @@ void POD::buildFields(PiercedStorage<double> &fields,
         const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
         const std::unordered_set<long> *targetCells)
 {
-        _buildFields(fields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+    _buildFields(fields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
 
 }
 
@@ -2590,8 +2594,8 @@ void POD::buildFields(PiercedStorage<double> &fields,
  *
  * \param[in,out] fields Input and resulting reconstructed field.
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
- * \param[in] vectorIds Ids of vector fields in PiercedStorage.
  * \param[in] podscalarIds Ids of scalar fields in POD modes.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
  * \param[in] podvectorIds Ids of vector fields in POD modes.
  * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
  */
@@ -2679,12 +2683,26 @@ void POD::_buildFields(PiercedStorage<double> &fields,
     }
 }
 
+/**
+ * Compute the mapping of an input mesh to the POD mesh.
+ * Can be called only if expert mode is active.
+ * \param[in] mesh Pointer to input mesh
+ */
 void POD::computeMapping(const VolumeKernel * mesh)
 {
-    m_podkernel->computeMapping(mesh);
     if (!m_expert)
-        m_podkernel->setMappingDirty(true);
+        throw std::runtime_error("POD: compute mapping can be called only in expert mode");
+    _computeMapping(mesh);
+}
 
+/**
+ * Compute the mapping of an input mesh to the POD mesh (internal method).
+ * \param[in] mesh Pointer to input mesh
+ */
+void POD::_computeMapping(const VolumeKernel * mesh)
+{
+    m_podkernel->computeMapping(mesh);
+    m_podkernel->setMappingDirty(m_expert);
 }
 
 }

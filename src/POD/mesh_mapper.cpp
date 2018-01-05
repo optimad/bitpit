@@ -69,33 +69,57 @@ MeshMapper::~MeshMapper()
 {
 }
 
+/**
+ * Clear mapping members
+ */
 void MeshMapper::clear()
 {
     clearMapping();
     clearInverseMapping();
 }
 
+/**
+ * Clear direct mapping
+ */
 void MeshMapper::clearMapping()
 {
     m_mapper.unsetKernel(true);
 }
 
+/**
+ * Clear inverse mapping
+ */
 void MeshMapper::clearInverseMapping()
 {
     m_invmapper.unsetKernel(true);
 }
 
+/**
+ * Get direct mapping
+ */
 const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getMapping()
 {
     return m_mapper;
 }
 
+/**
+ * Get inverse mapping
+ */
 const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getInverseMapping()
 {
     return m_invmapper;
 }
 
-
+/**
+ * Map an input mesh on a reference mesh. The specialization of the meshes are automatically recovered
+ * by the method. VolumeKernel is the Base class from which the two meshes have to be derived.
+ * Allowed mesh classes:
+ * 1. VolOctree.
+ *
+ * \param[in] meshReference Pointer to VolumeKernel reference mesh
+ * \param[in] meshMapped Pointer to VolumeKernel input mesh to map
+ * \param[in] fillInv If true even the inverse mapping (reference mesh to input mesh) is filled.
+ */
 void MeshMapper::mapMeshes(const bitpit::VolumeKernel * meshReference, const bitpit::VolumeKernel * meshMapped, bool fillInv)
 {
     {
@@ -107,9 +131,19 @@ void MeshMapper::mapMeshes(const bitpit::VolumeKernel * meshReference, const bit
     }
 }
 
-
+/**
+ * Map an input VolOctree mesh on a VolOctree reference mesh.
+ * Requirement : the meshes have to be defined on the same identical domain.
+ *
+ * \param[in] meshReference Pointer to reference mesh
+ * \param[in] meshMapped Pointer to input mesh to map
+ * \param[in] fillInv If true even the inverse mapping (reference mesh to input mesh) is filled.
+ */
 void MeshMapper::_mapMeshes(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv)
 {
+
+    if ( (meshReference->getLength() != meshMapped->getLength()) || (meshReference->getOrigin() != meshMapped->getOrigin()) )
+        throw std::runtime_error ("mesh mapper: different domain of VolOctree meshes not allowed.");
 
     m_mapper.setStaticKernel(&meshReference->getCells());
     if (fillInv)
@@ -148,7 +182,15 @@ void MeshMapper::_mapMeshes(const bitpit::VolOctree * meshReference, const bitpi
 
 }
 
-
+/**
+ * Map an input VolOctree mesh on a VolOctree reference mesh.
+ * Requirements : the meshes have to be defined on the same identical domain;
+ *                the meshes must have the same parallel partitioning in terms of last descendant octant.
+ *
+ * \param[in] meshReference Pointer to reference mesh
+ * \param[in] meshMapped Pointer to input mesh to map
+ * \param[in] fillInv If true even the inverse mapping (reference mesh to input mesh) is filled.
+ */
 void MeshMapper::_mapMeshesSamePartition(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv)
 {
 

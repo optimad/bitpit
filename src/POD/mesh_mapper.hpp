@@ -44,8 +44,6 @@ namespace mapping{
 
 class MeshMapper {
 
-
-
 public:
 # if BITPIT_ENABLE_MPI
     MeshMapper(MPI_Comm comm = MPI_COMM_WORLD);

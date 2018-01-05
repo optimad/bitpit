@@ -55,7 +55,7 @@ class PODKernel : public VTKBaseStreamer {
     PODKernel(PODKernel&& other) = default;
 
 protected:
-    VolumeKernel    *m_meshPOD;     /**< Pointer to POD mesh*/
+    VolumeKernel            *m_meshPOD;     /**< Pointer to POD mesh*/
 
 #if BITPIT_ENABLE_MPI
     MPI_Comm                m_communicator; /**< MPI communicator */
@@ -65,7 +65,7 @@ protected:
 
     MeshMapper              m_meshmap;      /**< Mapping object TO/FROM pod mesh.*/
 
-    bool                    m_dirtymap;        /**< True if mapping has to be recomputed/updated [to be set by set method]. */
+    bool                    m_dirtymap;     /**< True if mapping has to be recomputed/updated [to be set by set method]. */
 
     void clear();
 
@@ -75,7 +75,7 @@ protected:
     VolumeKernel* readMesh(const pod::SnapshotFile &snap);
     void restoreMesh(const pod::SnapshotFile &snap);
 
-    void    computeMapping(const VolumeKernel * mesh);
+    void    computeMapping(const VolumeKernel * mesh, bool fillInv = true);
     MeshMapper & getMeshMapper();
 
     void setMappingDirty(bool dirty = true);

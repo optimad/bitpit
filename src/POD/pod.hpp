@@ -109,7 +109,6 @@ public:
     MeshType getMeshType();
     void setStaticMesh(bool flag);
     void setUseMean(bool flag);    
-//    void setMesh(VolumeKernel* mesh);
 
     void setMemoryMode(MemoryMode mode);
     MemoryMode getMemoryMode();
@@ -149,6 +148,7 @@ public:
     void evalModes();
     void evalEigen();
     void evalReconstruction();
+    void computeMapping(const VolumeKernel * mesh);
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
     void dumpField(const std::string &name, const pod::PODField &field) const;
@@ -261,8 +261,7 @@ protected:
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
 
-
-    void computeMapping(const VolumeKernel * mesh);
+    void _computeMapping(const VolumeKernel * mesh);
 
 };
 

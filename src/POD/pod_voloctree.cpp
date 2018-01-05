@@ -59,7 +59,7 @@ PODVolOctree::~PODVolOctree()
 /**
  * Create the mesh for POD.
  *
- * return Pointer to instantiated mesh.
+ * \return Pointer to instantiated mesh.
  */
 VolumeKernel* PODVolOctree::createMesh()
 {
@@ -72,6 +72,13 @@ VolumeKernel* PODVolOctree::createMesh()
     return mesh;
 }
 
+/**
+ * Map a POD Field TO the POD mesh.
+ *
+ * \param[in] field Input POD Field
+ * \param[in] targetCells Pointer to set of target cells of POD mesh (cells with mapped values as result)
+ * \return Mapped POD field on target cells of POD mesh.
+ */
 pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const std::unordered_set<long> * targetCells)
 {
 
@@ -176,6 +183,13 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
 
 }
 
+/**
+ * Map a POD Field FROM the POD mesh.
+ *
+ * \param[out] field Output POD Field
+ * \param[in] targetCells Pointer to set of target cells of output field mesh (cells with mapped values as result)
+ * \param[in] mappedField POD field on target cells of output field mesh.
+ */
 void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordered_set<long> * targetCells,
         const pod::PODField & mappedField)
 {
@@ -268,6 +282,16 @@ void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordere
     }
 }
 
+/**
+ * Map a storage of fields TO the POD mesh.
+ *
+ * \param[in] field Input Fields storage
+ * \param[in] mesh Pointer to input field mesh
+ * \param[in] targetCells Pointer to set of target cells of POD mesh (cells with mapped values as result)
+ * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
+ * \return Fields storage on target cells of POD mesh.
+ */
 PiercedStorage<double> PODVolOctree::mapFieldsToPOD(const PiercedStorage<double> & fields, const VolumeKernel * mesh,
         const std::unordered_set<long> * targetCells,
         const std::vector<std::size_t> &scalarIds,
@@ -360,6 +384,16 @@ PiercedStorage<double> PODVolOctree::mapFieldsToPOD(const PiercedStorage<double>
 
 }
 
+/**
+ * Map a storage of fields FROM the POD mesh.
+ *
+ * \param[out] field Output Fields storage
+ * \param[in] mesh Pointer to input field mesh
+ * \param[in] targetCells Pointer to set of target cells of input field mesh mesh (cells with mapped values as result)
+ * \param[in]mappedFields  Fields storage on POD mesh to be mapped.
+ * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
+ */
 void PODVolOctree::mapFieldsFromPOD(PiercedStorage<double> & fields, const VolumeKernel * mesh,
         const std::unordered_set<long> * targetCells, const PiercedStorage<double> & mappedFields,
         const std::vector<std::size_t> &scalarIds, const std::vector<std::array<std::size_t, 3>> &vectorIds)
@@ -447,7 +481,14 @@ void PODVolOctree::mapFieldsFromPOD(PiercedStorage<double> & fields, const Volum
 
 }
 
-
+/**
+ * Map a storage of boolean field TO the POD mesh.
+ *
+ * \param[in] field Input Fields storage
+ * \param[in] mesh Pointer to input field mesh
+ * \param[in] targetCells Pointer to set of target cells of POD mesh (cells with mapped values as result)
+ * \return Fields storage on target cells of POD mesh.
+ */
 PiercedStorage<bool> PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh,
         const std::unordered_set<long> * targetCells)
 {
@@ -459,6 +500,14 @@ PiercedStorage<bool> PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> 
 
 }
 
+/**
+ * Map a storage of boolean field TO the POD mesh.
+ *
+ * \param[in] field Input Fields storage
+ * \param[in] mesh Pointer to input field mesh
+ * \param[in] targetCells Pointer to set of target cells of POD mesh (cells with mapped values as result)
+ * param[out] Fields storage on target cells of POD mesh.
+ */
 void PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh,
         const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField)
 {
