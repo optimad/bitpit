@@ -41,7 +41,7 @@ public:
     typedef std::map<std::string, std::string> Options;
     typedef std::multimap<std::string, std::unique_ptr<Config>> Sections;
 
-    Config(bool multiSections);
+    Config(bool multiSections = false);
     Config(const Config &other);
     Config(Config &&other) = default;
 
