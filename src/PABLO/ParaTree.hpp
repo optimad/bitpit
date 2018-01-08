@@ -388,7 +388,8 @@ namespace bitpit {
         const Octant* getOctant(uint32_t idx) const;
         Octant*	getGhostOctant(uint32_t idx);
         const Octant* getGhostOctant(uint32_t idx) const;
-        bool 			getIsGhost(const Octant* oct) const;
+        bool getIsGhost(const Octant* oct) const;
+        int getGhostLayer(const Octant* oct) const;
         const LoadBalanceRanges & getLoadBalanceRanges() const;
 
         // =================================================================================== //
@@ -815,6 +816,7 @@ namespace bitpit {
                 uint32_t x,y,z;
                 uint8_t l;
                 int8_t m;
+                int g;
                 bool info[Octant::INFO_ITEM_COUNT];
                 int intBuffer = 0;
                 int contatore = 0;
@@ -900,6 +902,7 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
+                                g = octant.getGhostLayer();
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j)
                                     info[j] = octant.m_info[j];
                                 sendBuffer << x;
@@ -907,6 +910,7 @@ namespace bitpit {
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
+                                sendBuffer << g;
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
@@ -1002,6 +1006,7 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
+                                g = octant.getGhostLayer();
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j)
                                     info[j] = octant.m_info[j];
                                 sendBuffer << x;
@@ -1009,6 +1014,7 @@ namespace bitpit {
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
+                                sendBuffer << g;
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
@@ -1089,6 +1095,8 @@ namespace bitpit {
                         m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                         recvBuffer >> m;
                         m_octree.m_octants[newCounter].setMarker(m);
+                        recvBuffer >> g;
+                        m_octree.m_octants[newCounter].setGhostLayer(g);
                         for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                             recvBuffer >> info[j];
                             m_octree.m_octants[newCounter].m_info[j] = info[j];

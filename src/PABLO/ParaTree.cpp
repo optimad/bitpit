@@ -484,6 +484,7 @@ namespace bitpit {
             utils::binary::write(stream, octant.getX());
             utils::binary::write(stream, octant.getY());
             utils::binary::write(stream, octant.getZ());
+            utils::binary::write(stream, octant.getGhostLayer());
 
             for (size_t k = 0; k < Octant::INFO_ITEM_COUNT; ++k) {
                 utils::binary::write(stream, (bool) octant.m_info[k]);
@@ -603,6 +604,10 @@ namespace bitpit {
             utils::binary::read(stream, z);
 
             Octant octant(false, m_dim, level, x, y, z);
+
+            int ghost;
+            utils::binary::read(stream, ghost);
+            octant.setGhostLayer(ghost);
 
             // Set octant info
             for (size_t k = 0; k < Octant::INFO_ITEM_COUNT; ++k) {
@@ -2429,7 +2434,17 @@ namespace bitpit {
      */
     bool
     ParaTree::getIsGhost(const Octant* oct) const {
-        return oct->m_info[Octant::INFO_GHOST];
+        return oct->getIsGhost();
+    };
+
+    /*! Get the layer number of the ghost halo an octant belong to.
+     * \param[in] oct Pointer to target octant.
+     * \return the layer in the ghost halo. For internal (non-ghost) octants
+     * the function will return -1.
+     */
+    int
+    ParaTree::getGhostLayer(const Octant* oct) const {
+        return oct->getGhostLayer();
     };
 
     /*! Get a map of elements sent to the other processes during load balance
@@ -4244,6 +4259,7 @@ namespace bitpit {
 
                 uint32_t x,y,z;
                 uint8_t l;
+                int g;
                 int8_t m;
                 bool info[Octant::INFO_ITEM_COUNT];
                 int intBuffer = 0;
@@ -4274,6 +4290,7 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
+                                g = octant.getGhostLayer();
                                 for(int ii = 0; ii < Octant::INFO_ITEM_COUNT; ++ii)
                                     info[ii] = octant.m_info[ii];
                                 sendBuffer << x;
@@ -4281,6 +4298,7 @@ namespace bitpit {
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
+                                sendBuffer << g;
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
@@ -4310,6 +4328,7 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
+                                g = octant.getGhostLayer();
                                 for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i)
                                     info[i] = octant.m_info[i];
                                 sendBuffer << x;
@@ -4317,6 +4336,7 @@ namespace bitpit {
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
+                                sendBuffer << g;
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
@@ -4355,6 +4375,7 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
+                                g = octant.getGhostLayer();
                                 for(int ii = 0; ii < Octant::INFO_ITEM_COUNT; ++ii)
                                     info[ii] = octant.m_info[ii];
                                 sendBuffer << x;
@@ -4362,6 +4383,7 @@ namespace bitpit {
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
+                                sendBuffer << g;
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
@@ -4391,6 +4413,7 @@ namespace bitpit {
                                 z = octant.getZ();
                                 l = octant.getLevel();
                                 m = octant.getMarker();
+                                g = octant.getGhostLayer();
                                 for(int ii = 0; ii < Octant::INFO_ITEM_COUNT; ++ii)
                                     info[ii] = octant.m_info[ii];
                                 sendBuffer << x;
@@ -4398,6 +4421,7 @@ namespace bitpit {
                                 sendBuffer << z;
                                 sendBuffer << l;
                                 sendBuffer << m;
+                                sendBuffer << g;
                                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                                     sendBuffer << info[j];
                                 }
@@ -4468,6 +4492,8 @@ namespace bitpit {
                         m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
                         recvBuffer >> m;
                         m_octree.m_octants[newCounter].setMarker(m);
+                        recvBuffer >> g;
+                        m_octree.m_octants[newCounter].setGhostLayer(g);
                         for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                             recvBuffer >> info[j];
                             m_octree.m_octants[newCounter].m_info[j] = info[j];
@@ -5219,6 +5245,7 @@ namespace bitpit {
         uint64_t global_index;
         uint32_t x,y,z;
         uint8_t l;
+        int g;
         int8_t m;
         bool info[Octant::INFO_ITEM_COUNT];
         DataCommunicator ghostCommunicator(m_comm);
@@ -5239,6 +5266,7 @@ namespace bitpit {
                 z = octant.getZ();
                 l = octant.getLevel();
                 m = octant.getMarker();
+                g = octant.getGhostLayer();
                 global_index = getGlobalIdx(value[i]);
                 for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i)
                     info[i] = octant.m_info[i];
@@ -5247,6 +5275,7 @@ namespace bitpit {
                 sendBuffer << z;
                 sendBuffer << l;
                 sendBuffer << m;
+                sendBuffer << g;
                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                     sendBuffer << info[j];
                 }
@@ -5289,11 +5318,13 @@ namespace bitpit {
                 m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
                 recvBuffer >> m;
                 m_octree.m_ghosts[ghostCounter].setMarker(m);
+                recvBuffer >> g;
+                m_octree.m_ghosts[ghostCounter].setGhostLayer(g);
                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
                     recvBuffer >> info[j];
                     m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
                 }
-                m_octree.m_ghosts[ghostCounter].m_info[Octant::INFO_GHOST] = true;
+                m_octree.m_ghosts[ghostCounter].setGhostLayer(0);
                 recvBuffer >> global_index;
                 m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
                 ++ghostCounter;

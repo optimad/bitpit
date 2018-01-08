@@ -291,7 +291,7 @@ Global::initialize(uint8_t dim) {
 	m_nnodes				= uint8_t(1)<<dim;
 	m_nedges 				= (dim-2)*12;
 	m_nnodesPerFace 		= uint8_t(1)<<(dim-1);
-	m_octantBytes 			= uint8_t(sizeof(uint32_t)*3 + sizeof(uint8_t) + sizeof(int8_t) + (Octant::INFO_ITEM_COUNT)*sizeof(bool));
+	m_octantBytes 			= uint8_t(sizeof(uint32_t)*3 + sizeof(uint8_t) + sizeof(int8_t) + sizeof(int) + (Octant::INFO_ITEM_COUNT)*sizeof(bool));// 3 coordinates + level + marker + ghost + info
 	m_globalIndexBytes 		= uint8_t(sizeof(uint64_t));
 	m_markerBytes 			= sizeof(int8_t);
 	m_levelBytes 			= sizeof(uint8_t);

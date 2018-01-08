@@ -121,9 +121,8 @@ class Octant{
         INFO_NEW4COARSENING = 13, /**< Identifier to access the bit storing if the octant is new for coarsening */
         INFO_BALANCED       = 14, /**< Identifier to access the bit storing if the octant has to be kept unbalanced */
         INFO_AUX            = 15, /**< Identifier to access an auxiliary bit */
-        INFO_GHOST          = 16, /**< Identifier to access ghost information about the octant */
 
-        INFO_ITEM_COUNT     = 17  /**< Number of items contained in the enum */
+        INFO_ITEM_COUNT     = 16  /**< Number of items contained in the enum */
     };
 
 private:
@@ -136,9 +135,14 @@ private:
 										-Info[6..11]: true if 0..6 face is a process boundary face [pbound] \n
 										-Info[12/13]: true if octant is new after refinement/coarsening \n
 										-Info[14]   : true if balancing is required for this octant \n
-										-Info[15]   : Aux
-										-Info[16]   : true if octant is a scary ghost */
-	uint8_t				m_dim;			/**< Dimension of octant (2D/3D) */
+										-Info[15]   : Aux */
+	uint8_t                         m_dim;          /**< Dimension of octant (2D/3D) */
+	int                             m_ghost;        /**< Ghost specifier:\n
+	                                                    -1 : internal, \n
+	                                                     0 : ghost in the 0-th layer of the halo, \n
+	                                                     1 : ghost in the 1-st layer of the halo, \n
+	                                                     ... \n
+	                                                     n : ghost in the n-th layer of the halo. */
 
 	//TODO add bitset for edge & node
 
@@ -180,12 +184,14 @@ private:
 	bool		getIsNewR() const;
 	bool		getIsNewC() const;
 	bool		getIsGhost() const;
+	int			getGhostLayer() const;
 	bool		getNotBalance() const;
 	bool		getBalance() const;
 	void		setMarker(int8_t marker);
 	void		setBalance(bool balance);
 	void		setLevel(uint8_t level);
 	void 		setPbound(uint8_t face, bool flag);
+	void		setGhostLayer(int ghostLayer);
 
 	// =================================================================================== //
 	// OTHER GET/SET METHODS

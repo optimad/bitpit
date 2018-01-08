@@ -527,6 +527,7 @@ namespace bitpit {
                             for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                                 father.m_info[iii] = false;
                             }
+                            father.setGhostLayer(-1);
                             for(idx2=0; idx2<m_global.m_nchildren; idx2++){
                                 if (idx2 < m_sizeOctants){
                                     if (markerfather < m_octants[idx+offset+idx2].getMarker()+1){
@@ -668,6 +669,7 @@ namespace bitpit {
                     for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                         father.m_info[iii] = false;
                     }
+                    father.setGhostLayer(-1);
                     markerfather = m_ghosts[idx2_gh].getMarker()+1;
                     nbro = 0;
                     idx = idx2_gh;
@@ -721,6 +723,7 @@ namespace bitpit {
                     }
                     father.m_info[Octant::INFO_NEW4COARSENING] = true;
                     father.m_info[Octant::INFO_AUX] = false;
+                    father.setGhostLayer(-1);
                     //Impossible in this version
                     //                if (markerfather < 0 && mapsize == 0){
                         //                    docoarse = true;

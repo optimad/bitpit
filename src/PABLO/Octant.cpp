@@ -114,6 +114,7 @@ Octant::Octant(const Octant &octant){
 	m_level = octant.m_level;
 	m_marker = octant.m_marker;
 	m_info = octant.m_info;
+	m_ghost = octant.m_ghost;
 };
 
 /*! Check if two octants are equal (no check on info)
@@ -160,6 +161,7 @@ Octant::initialize(uint8_t dim, uint8_t level, bool bound) {
 	// Initialize octant info
 	m_info.reset();
 	m_info[OctantInfo::INFO_BALANCED] = true;
+	m_ghost = -1;
 
 	// If this is the root octant we need to set the boundary condition bound
 	// for faces
@@ -297,7 +299,13 @@ Octant::getIsNewC() const{return m_info[OctantInfo::INFO_NEW4COARSENING];};
  * \return true if the octant is a ghost octant.
  */
 bool
-Octant::getIsGhost() const{return m_info[OctantInfo::INFO_GHOST];};
+Octant::getIsGhost() const{return (m_ghost >= 0);};
+
+/*! Get the layer number of the ghost halo an octant belong to.
+ * \return the layer in the ghost halo. 0 is for internal (non-ghost) octant.
+ */
+int
+Octant::getGhostLayer() const{return m_ghost;};
 
 /*! Get if the octant is a balancing-blocked octant.
  * \return false if the octant has to be balanced.
@@ -347,6 +355,16 @@ void
 Octant::setPbound(uint8_t face, bool flag){
 	m_info[6+face] = flag;
 };
+
+/*! Set the ghost specifier of an octant.
+ * \param[in] ghostLayer Number defining the layer of the ghost halo. 0 is for internal octants, i.e. non-ghost.
+ * ghostLayer > 0 means that the octant is ghost in the ghostLayer layer of the ghost halo.
+ */
+void
+Octant::setGhostLayer(int ghostLayer){
+    m_ghost = ghostLayer;
+};
+
 
 // =================================================================================== //
 // OTHER GET/SET METHODS
