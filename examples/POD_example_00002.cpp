@@ -147,24 +147,33 @@ void run(int rank, int nProcs)
             std::cout<< pod.getReconstructionCoeffs()[i] << std::endl;
     }
 
+
     /**<Test hybrid interface using optimad solver format.*/
-    PiercedStorage<double> gfield0(nsf+3*nvf, &meshr->getCells());
+    PiercedStorage<double> gfield0(nsf+3*nvf+1, &meshr->getCells(), PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
+    PiercedStorage<double> gfieldAdapt(nsf+3*nvf+1, &meshr->getCells(), PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
     std::unordered_set<long> targetCells;
 
     std::map<std::string, std::size_t> fields;
 
     for (Cell & cell : meshr->getCells()){
         long id = cell.getId();
-        for (std::size_t ifield=0; ifield<nsf; ifield++)
+        for (std::size_t ifield=0; ifield<nsf; ifield++){
             gfield0.at(id, ifield) = fieldr.scalar->at(id, ifield);
+            gfieldAdapt.at(id, ifield) = fieldr.scalar->at(id, ifield);
+        }
 
         for (std::size_t ifield=0; ifield<nvf; ifield++){
-            for (std::size_t j=0; j<3; j++)
+            for (std::size_t j=0; j<3; j++){
                 gfield0.at(id, ifield*3+nsf+j) = fieldr.vector->at(id, ifield)[j];
+                gfieldAdapt.at(id, ifield*3+nsf+j) = fieldr.vector->at(id, ifield)[j];
+            }
 
         }
-        if (fieldr.mask->at(id))
+        if (fieldr.mask->at(id)){
             targetCells.insert(id);
+            gfield0.at(id, nsf+3*nvf) = fieldr.mask->at(id);
+            gfieldAdapt.at(id, nsf+3*nvf) = fieldr.mask->at(id);
+        }
     }
 
     for (std::size_t ifield=0; ifield<nsf; ifield++){
@@ -196,6 +205,125 @@ void run(int rank, int nProcs)
                 for (std::size_t j=0; j<3; j++)
                     maxerr = std::max(maxerr, std::abs(gfield0.at(id, nsf+3*i+j) - fieldr.vector->at(id, i)[j]));
             }
+        }
+        std::cout<< ">> Max error :" << maxerr << std::endl;
+
+    }
+
+
+    /**<Test hybrid interface using optimad solver format on an adapted mesh.*/
+    /**<Adapt the patch with random markers.*/
+    long nCells = meshr->getCellCount();
+    log::cout() << std::endl;
+    log::cout() << ">> Marking the cells to adapt... " << std::endl;
+
+    for (int i = 0; i < 100; ++i) {
+        long cellId = rand() % nCells * 2;
+        if (!meshr->getCells().exists(cellId)) {
+            continue;
+        }
+
+        for (auto neighId : meshr->findCellNeighs(cellId)) {
+            meshr->markCellForRefinement(neighId);
+        }
+    }
+
+    for (int i = 0; i < 50; ++i) {
+        long cellId = rand() % nCells * 2;
+        if (!meshr->getCells().exists(cellId)) {
+            continue;
+        }
+
+        if (fieldr.mask->at(cellId)){
+            meshr->markCellForCoarsening(cellId);
+            for (auto neighId : meshr->findCellNeighs(cellId)) {
+                if (fieldr.mask->at(neighId))
+                    meshr->markCellForCoarsening(neighId);
+            }
+        }
+    }
+
+    log::cout() << std::endl;
+    log::cout() << ">> Initial number of cells... " << nCells << std::endl;
+
+    /**<Preadapt and adapt to update data.*/
+    {
+
+        std::vector<adaption::Info> preadaptInfo = meshr->adaptionPrepare(true);
+
+        PiercedVector<std::vector<double>> oldData(meshr->getCellCount());
+        for (adaption::Info & info : preadaptInfo){
+            for (long & id : info.previous){
+                oldData.insert(id, std::vector<double>(nsf+3*nvf+1, 0.0));
+                for (std::size_t i=0; i<nsf+3*nvf+1; i++)
+                    oldData[id][i] = gfield0.at(id,i);
+            }
+        }
+
+        std::vector<adaption::Info> adaptInfo = meshr->adaptionAlter(true);
+
+        nCells = meshr->getCellCount();
+        log::cout() << ">> Final number of cells... " << nCells << std::endl;
+
+        for (adaption::Info & info : adaptInfo){
+            if (info.type == adaption::Type::TYPE_RENUMBERING){
+                for (std::size_t i=0; i<nsf+3*nvf+1; i++){
+                    gfield0.at(info.current[0],i) = oldData[info.previous[0]][i];
+                    gfieldAdapt.at(info.current[0],i) = oldData[info.previous[0]][i];
+                }
+            }
+            if (info.type == adaption::Type::TYPE_REFINEMENT){
+                for (long & id : info.current){
+                    for (std::size_t i=0; i<nsf+3*nvf+1; i++){
+                        gfield0.at(id,i) = oldData[info.previous[0]][i];
+                        gfieldAdapt.at(id,i) = oldData[info.previous[0]][i];
+                    }
+                }
+            }
+            if (info.type == adaption::Type::TYPE_COARSENING){
+                for (std::size_t i=0; i<nsf+3*nvf+1; i++){
+                    gfield0.at(info.current[0], i) = 0.0;
+                    gfieldAdapt.at(info.current[0], i) = 0.0;
+                }
+                for (long & id : info.previous){
+                    for (std::size_t i=0; i<nsf+3*nvf; i++){
+                        gfield0.at(info.current[0],i) += oldData[id][i] / info.previous.size();
+                        gfieldAdapt.at(info.current[0],i) += oldData[id][i] / info.previous.size();
+                    }
+                    gfield0.at(info.current[0], nsf+3*nvf) = std::max(gfield0.at(info.current[0], nsf+3*nvf), oldData[id][nsf+3*nvf]);
+                    gfieldAdapt.at(info.current[0], nsf+3*nvf) = std::max(gfieldAdapt.at(info.current[0], nsf+3*nvf), oldData[id][nsf+3*nvf]);
+                }
+            }
+        }
+
+        meshr->adaptionCleanup();
+
+    }
+
+    /**<Reconstruct fields with pre-computed POD and evaluate maximum error.
+     * The reconstruction overwrite the fields value- > use a gfieldAdapt
+     * with original data to evaluate errors.*/
+    targetCells.clear();
+    for (Cell & cell : meshr->getCells()){
+        long id = cell.getId();
+        if (gfield0.at(id, nsf+3*nvf))
+            targetCells.insert(id);
+    }
+    pod.reconstructFields(gfield0, meshr, fields, &targetCells);
+
+    if (rank==0){
+        std::cout<< " " << std::endl;
+        std::cout<< ">> Reconstruction coeffs hybrid interface:" << std::endl;
+        for (std::size_t i = 0; i < nf; ++i)
+            std::cout<< pod.getReconstructionCoeffs()[i] << std::endl;
+
+        std::cout<< " " << std::endl;
+        std::cout<< ">> Reconstruction error hybrid interface" << std::endl;
+        double maxerr = 0.0;
+        for (Cell & cell : meshr->getCells()){
+            long id = cell.getId();
+            for (std::size_t i = 0; i < nsf+3*nvf; ++i)
+                maxerr = std::max(maxerr, std::abs(gfield0.at(id, i) - gfieldAdapt.at(id, i)));
         }
         std::cout<< ">> Max error :" << maxerr << std::endl;
 

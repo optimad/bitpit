@@ -122,7 +122,7 @@ public:
     ErrorMode getErrorMode();       
     void setExpert(bool mode = true);
 
-    void setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh = nullptr);
+    void setSensorMask(const PiercedStorage<bool> & mask, const VolumeKernel * mesh = nullptr);
 
     std::size_t getSnapshotCount();
     std::vector<std::string> getScalarNames();

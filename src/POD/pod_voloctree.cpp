@@ -535,10 +535,10 @@ void PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const V
         }
         else if (m_mapper[id].type == adaption::Type::TYPE_COARSENING){
             mappedField.set(id, false);
-            bool dataB, dataMappedB = false;
+            bool dataB, dataMappedB = true;
             for (long idd : m_mapper[id].previous){
                 dataB = field.at(idd);
-                dataMappedB |= dataB;
+                dataMappedB &= dataB;
             }
             mappedField.set(id, dataMappedB);
         }

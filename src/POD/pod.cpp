@@ -559,13 +559,13 @@ void POD::setExpert(bool mode)
  * If set to true, the corresponding cell is used during the minimization [or projection],
  * otherwise it is discarded.
  */
-void POD::setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh)
+void POD::setSensorMask(const PiercedStorage<bool> & mask, const VolumeKernel * mesh)
 {
     m_sensorMask.setStaticKernel(&(m_podkernel->getMesh()->getCells()));
 
     if (m_staticMesh){
 
-        for (auto &cell : m_podkernel->getMesh()->getCells()) {
+        for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
             long id = cell.getId();
             m_sensorMask[id] = mask[id];
         }
@@ -581,12 +581,31 @@ void POD::setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh)
             _computeMapping(mesh);
 
         std::unordered_set<long> trueCells;
-        for (Cell & cell : mesh->getCells()){
+        for (const Cell & cell : mesh->getCells()){
             long id = cell.getId();
             if (mask[id])
                 trueCells.insert(id);
-            m_podkernel->mapBoolFieldToPOD(mask, mesh, &trueCells, m_sensorMask);
         }
+
+
+        //Map true cells
+        std::unordered_set<long> mappedCells;
+            const PiercedStorage<mapping::Info> & m_invmapper = m_podkernel->getMeshMapper().getInverseMapping();
+            for (const long & id : trueCells){
+                if (m_invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
+                    mappedCells.insert(m_invmapper[id].previous[0]);
+                }
+                if (m_invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
+                    mappedCells.insert(m_invmapper[id].previous[0]);
+                }
+                if (m_invmapper[id].type == adaption::Type::TYPE_COARSENING){
+                    for (long idd : m_invmapper[id].previous)
+                        mappedCells.insert(idd);
+                }
+
+            }
+
+        m_podkernel->mapBoolFieldToPOD(mask, mesh, &mappedCells, m_sensorMask);
 
     }
 
@@ -2429,13 +2448,30 @@ void POD::reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *
 
         evalReconstructionCoeffs(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds);
 
-        buildFields(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+        //Map target cells
+        std::unordered_set<long> mappedCells;
+        std::unordered_set<long>* ptr_mappedCells = nullptr;
+        if (targetCells){
+            const PiercedStorage<mapping::Info> & m_invmapper = m_podkernel->getMeshMapper().getInverseMapping();
+            for (const long & id : *targetCells){
+                if (m_invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
+                    mappedCells.insert(m_invmapper[id].previous[0]);
+                }
+                if (m_invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
+                    mappedCells.insert(m_invmapper[id].previous[0]);
+                }
+                if (m_invmapper[id].type == adaption::Type::TYPE_COARSENING){
+                    for (long idd : m_invmapper[id].previous)
+                        mappedCells.insert(idd);
+                }
+
+            }
+            ptr_mappedCells = &mappedCells;
+        }
+
+        buildFields(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds, ptr_mappedCells);
 
         m_podkernel->mapFieldsFromPOD(fields, mesh, targetCells, mappedFields, scalarIds, vectorIds);
-
-        //Clear Mapping
-        //TODO LEAVE TO THE USER TO UPDATE THE MAPPER?
-        m_podkernel->getMeshMapper().clear();
 
     }
 
@@ -2702,7 +2738,7 @@ void POD::computeMapping(const VolumeKernel * mesh)
 void POD::_computeMapping(const VolumeKernel * mesh)
 {
     m_podkernel->computeMapping(mesh);
-    m_podkernel->setMappingDirty(m_expert);
+    m_podkernel->setMappingDirty(!m_expert);
 }
 
 }

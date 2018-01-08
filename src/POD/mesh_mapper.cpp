@@ -232,7 +232,7 @@ void MeshMapper::_mapMeshesSamePartition(const bitpit::VolOctree * meshReference
             uint64_t mortonlastdesc = meshReference->getTree().getLastDescMorton(indRef);
             uint64_t mortonMap = meshMapped->getTree().getMorton(indMap);
 
-            while(mortonMap < mortonlastdesc && indMap < nMap){
+            while(mortonMap <= mortonlastdesc && indMap < nMap){
                 m_mapper[idRef].previous.push_back(idMap);
                 if (fillInv){
                     m_invmapper[idMap].current.push_back(idMap);
