@@ -5127,7 +5127,7 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 
 	// Rebuild the ghost information
 #if BITPIT_ENABLE_MPI==1
-	buildGhostExchangeData();
+	buildGhostExchangeInfo();
 #endif
 }	
 

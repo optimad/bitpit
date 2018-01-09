@@ -245,10 +245,10 @@ void SurfUnstructured::_restore(std::istream &stream)
 		cellIterator->setPID(PID);
 	}
 
-	// Build ghost exchange data
+	// Build ghost exchange info
 #if BITPIT_ENABLE_MPI==1
 	if (getProcessorCount()) {
-		buildGhostExchangeData();
+		buildGhostExchangeInfo();
 	}
 #endif
 }

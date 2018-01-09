@@ -541,22 +541,22 @@ protected:
 	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
 	virtual void _partitioningCleanup();
 
-	void setGhostOwner(int id, int rank, bool updateExchangeData = false);
-	void unsetGhostOwner(int id, bool updateExchangeData = false);
-	void clearGhostOwners(bool updateExchangeData = false);
+	void setGhostOwner(int id, int rank, bool updateExchangeInfo = false);
+	void unsetGhostOwner(int id, bool updateExchangeInfo = false);
+	void clearGhostOwners(bool updateExchangeInfo = false);
 
-	void deleteGhostExchangeData();
-	void deleteGhostExchangeData(int rank);
+	void deleteGhostExchangeInfo();
+	void deleteGhostExchangeInfo(int rank);
 
-	void buildGhostExchangeData();
-	void buildGhostExchangeData(int rank);
-	void buildGhostExchangeData(const std::vector<int> &rank);
+	void buildGhostExchangeInfo();
+	void buildGhostExchangeInfo(int rank);
+	void buildGhostExchangeInfo(const std::vector<int> &rank);
 
-	void addGhostsToExchangeData(const std::vector<long> &ghostIds);
-	void addGhostToExchangeData(const long ghostId);
+	void addGhostsToExchangeInfo(const std::vector<long> &ghostIds);
+	void addGhostToExchangeInfo(const long ghostId);
 
-	void removeGhostsFromExchangeData(const std::vector<long> &ghostIds);
-	void removeGhostFromExchangeData(const long ghostId);
+	void removeGhostsFromExchangeInfo(const std::vector<long> &ghostIds);
+	void removeGhostFromExchangeInfo(const long ghostId);
 
 	virtual std::vector<long> _findGhostExchangeSources(int rank);
 #endif

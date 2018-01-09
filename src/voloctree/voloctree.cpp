@@ -1234,9 +1234,9 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	StitchInfo().swap(stitchInfo);
 
-	// Rebuild the ghost exchange data
+	// Rebuild the ghost exchange info
 #if BITPIT_ENABLE_MPI==1
-	buildGhostExchangeData();
+	buildGhostExchangeInfo();
 #endif
 
 	// Disable advanced editing
@@ -2088,9 +2088,9 @@ void VolOctree::_restore(std::istream &stream)
 
 	importCells(octantInfoList, stitchInfo, &stream);
 
-	// Rebuild the ghost exchange data
+	// Rebuild the ghost exchange info
 #if BITPIT_ENABLE_MPI==1
-	buildGhostExchangeData();
+	buildGhostExchangeInfo();
 #endif
 
 	// De-activate expert mode
