@@ -557,6 +557,8 @@ protected:
 
 	void removeGhostsFromExchangeData(const std::vector<long> &ghostIds);
 	void removeGhostFromExchangeData(const long ghostId);
+
+	virtual std::vector<long> _findGhostExchangeSources(int rank);
 #endif
 
 	template<typename item_t, typename id_t = long>
@@ -603,7 +605,8 @@ private:
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeSources;
 
-	void addExchangeSources(const std::vector<long> &ghostIds);
+	void buildGhostExchangeSources(int rank);
+	void buildGhostExchangeSources(const std::vector<int> &ranks);
 
     adaption::Info sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend);
     adaption::Info sendCells_receiver(const int &sendRank);

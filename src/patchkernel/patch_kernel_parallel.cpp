@@ -879,8 +879,10 @@ void PatchKernel::addGhostsToExchangeData(const std::vector<long> &ghostIds)
 		std::sort(rankTargets.begin(), rankTargets.end(), CellPositionLess(*this));
 	}
 
-	// Add the sources
-	addExchangeSources(ghostIds);
+	// Build the sources
+	for (const int rank : ranks) {
+		buildGhostExchangeSources(rank);
+	}
 }
 
 /*!
@@ -915,8 +917,7 @@ void PatchKernel::removeGhostsFromExchangeData(const std::vector<long> &ghostIds
 
 	// Rebuild information of the sources
 	for (const int rank : ranks) {
-		m_ghostExchangeSources[rank].clear();
-		addExchangeSources(m_ghostExchangeTargets[rank]);
+		buildGhostExchangeSources(rank);
 	}
 }
 
@@ -931,22 +932,52 @@ void PatchKernel::removeGhostFromExchangeData(const long ghostId)
 }
 
 /*!
-	Finds the internal cells that will be sources for the neighbour processors
-	that owns the specified ghost cells and add those cells to the sources
-	for that processor.
+	Build the information about the internal cells that will be ghost cells
+	for the processor with the specified rank.
 
-	\param ghostIds are the ids of the ghosts
+	\param rank is the rank for which the information will be built
 */
-void PatchKernel::addExchangeSources(const std::vector<long> &ghostIds)
+void PatchKernel::buildGhostExchangeSources(int rank)
 {
-	// Get the sources
-	std::vector<long> neighIds;
-	std::unordered_map<int, std::unordered_set<long>> ghostSources;
-	for (long ghostId : ghostIds) {
-		// Owner of the ghost
-		int rank = m_ghostOwners[ghostId];
+	buildGhostExchangeSources(std::vector<int>{rank});
+}
 
-		// The internal neighbourss will be sources for the rank
+/*!
+	Build the information about the internal cells that will be ghost cells
+	for the processors with the specified ranks.
+
+	\param ranks are the rank for which the information will be built
+*/
+void PatchKernel::buildGhostExchangeSources(const std::vector<int> &ranks)
+{
+	for (int rank : ranks) {
+		std::vector<long> &rankSources = m_ghostExchangeSources[rank];
+
+		// Clear current sources
+		rankSources.clear();
+
+		// Update the source list
+		rankSources = _findGhostExchangeSources(rank);
+
+		// Sort the sources
+		std::sort(rankSources.begin(), rankSources.end(), CellPositionLess(*this));
+	}
+}
+
+/*!
+	Finds the internal cells that will be ghost cells for the processors
+	with the specified ranks. During data exchange, these cells will be
+	the sources form which data will be read from.
+
+	\param ranks are the rank for which the information will be built
+*/
+std::vector<long> PatchKernel::_findGhostExchangeSources(int rank)
+{
+	// The internal neighbours of the ghosts will be sources for the rank
+	std::vector<long> neighIds;
+	std::unordered_set<long> exchangeSources;
+	exchangeSources.reserve(m_ghostExchangeTargets[rank].size());
+	for (long ghostId : m_ghostExchangeTargets[rank]) {
 		neighIds.clear();
 		findCellNeighs(ghostId, &neighIds);
 		for (long neighId : neighIds) {
@@ -954,22 +985,11 @@ void PatchKernel::addExchangeSources(const std::vector<long> &ghostIds)
 				continue;
 			}
 
-			ghostSources[rank].insert(neighId);
+			exchangeSources.insert(neighId);
 		}
 	}
 
-	// Add the sources
-	for (auto entry : ghostSources) {
-		int rank = entry.first;
-		std::unordered_set<long> &updatedSources = entry.second;
-
-		std::vector<long> &rankSources = m_ghostExchangeSources[rank];
-		for (long rankSourceId : rankSources) {
-			updatedSources.insert(rankSourceId);
-		}
-		rankSources = std::vector<long>(updatedSources.begin(), updatedSources.end());
-		std::sort(rankSources.begin(), rankSources.end(), CellPositionLess(*this));
-	}
+	return std::vector<long>(exchangeSources.begin(), exchangeSources.end());
 }
 
 /*!
