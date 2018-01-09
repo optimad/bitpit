@@ -56,6 +56,7 @@ class PODKernel : public VTKBaseStreamer {
 
 protected:
     VolumeKernel            *m_meshPOD;     /**< Pointer to POD mesh*/
+    PiercedStorage<double>   m_cellsVolume; /**< Cells volume of POD mesh*/
 
 #if BITPIT_ENABLE_MPI
     MPI_Comm                m_communicator; /**< MPI communicator */
@@ -74,6 +75,10 @@ protected:
 
     VolumeKernel* readMesh(const pod::SnapshotFile &snap);
     void restoreMesh(const pod::SnapshotFile &snap);
+
+    void evalCellsVolume();
+    double getCellVolume(long id);
+    double getRawCellVolume(long rawIndex);
 
     void    computeMapping(const VolumeKernel * mesh, bool fillInv = true);
     MeshMapper & getMeshMapper();

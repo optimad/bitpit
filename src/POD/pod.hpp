@@ -234,6 +234,9 @@ protected:
     void readSnapshot(pod::SnapshotFile snap, pod::PODField &fieldr);
     void readMode(std::size_t ir);
 
+    double getCellVolume(long id);
+    double getRawCellVolume(long rawIndex);
+
     void diff(pod::PODField &a, const pod::PODMode &b);
     void sum(pod::PODField &a, const pod::PODMode &b);
     std::vector<double> fieldsl2norm(pod::PODField &snap);

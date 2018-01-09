@@ -872,6 +872,9 @@ void POD::evalMeanMesh()
         throw std::runtime_error("Dynamic mesh is not supported yet.");
     }
 
+    //Compute cells volume
+    m_podkernel->evalCellsVolume();
+
     // Set mesh POD to write only internal cells
 #if BITPIT_ENABLE_MPI
     m_podkernel->getMesh()->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
@@ -1027,7 +1030,7 @@ void POD::evalCorrelationTerm(int i, pod::PODField & snapi, int j, pod::PODField
                 double* datasi = snapi.scalar->rawData(rawIndex);
                 double* datasj = snapj.scalar->rawData(rawIndex);
                 for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
-                    m_correlationMatrices[ifield][i*m_nSnapshots+j] += (*datasi)*(*datasj)*snapi.mesh->evalCellVolume(id);
+                    m_correlationMatrices[ifield][i*m_nSnapshots+j] += (*datasi)*(*datasj)*getRawCellVolume(rawIndex);
                     datasi++;
                     datasj++;
                 }
@@ -1036,7 +1039,7 @@ void POD::evalCorrelationTerm(int i, pod::PODField & snapi, int j, pod::PODField
                 std::array<double,3>* datavi = snapi.vector->rawData(rawIndex);
                 std::array<double,3>* datavj = snapj.vector->rawData(rawIndex);
                 for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
-                    m_correlationMatrices[ifield][i*m_nSnapshots+j] += dotProduct((*datavi),(*datavj))*snapi.mesh->evalCellVolume(id);
+                    m_correlationMatrices[ifield][i*m_nSnapshots+j] += dotProduct((*datavi),(*datavj))*getRawCellVolume(rawIndex);
                     datavi++;
                     datavj++;
                 }
@@ -1171,7 +1174,7 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
                 double* modes = m_modes[ir].scalar->rawData(rawIndex);
                 double* datas = field.scalar->rawData(rawIndex);
                 for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
-                    rhs[ifield][ir] += (*datas)*(*modes)*m_podkernel->getMesh()->evalCellVolume(id);
+                    rhs[ifield][ir] += (*datas)*(*modes)*getRawCellVolume(rawIndex);
                     modes++;
                     datas++;
                 }
@@ -1180,7 +1183,7 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
                 std::array<double,3>* modev = m_modes[ir].vector->rawData(rawIndex);
                 std::array<double,3>* datav = field.vector->rawData(rawIndex);
                 for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
-                    rhs[ifield][ir] += dotProduct((*datav),(*modev))*m_podkernel->getMesh()->evalCellVolume(id);
+                    rhs[ifield][ir] += dotProduct((*datav),(*modev))*getRawCellVolume(rawIndex);
                     modev++;
                     datav++;
                 }
@@ -1329,7 +1332,7 @@ void POD::evalMinimizationMatrices()
                             double* datasi = m_modes[ir].scalar->rawData(rawIndex);
                             double* datasj = m_modes[jr].scalar->rawData(rawIndex);
                             for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
-                                m_minimizationMatrices[ifield][ir*m_nModes+jr] += (*datasi)*(*datasj)*m_podkernel->getMesh()->evalCellVolume(id);
+                                m_minimizationMatrices[ifield][ir*m_nModes+jr] += (*datasi)*(*datasj)*getRawCellVolume(rawIndex);
                                 datasi++;
                                 datasj++;
                             }
@@ -1344,7 +1347,7 @@ void POD::evalMinimizationMatrices()
                             std::array<double,3>* datavi = m_modes[ir].vector->rawData(rawIndex);
                             std::array<double,3>* datavj = m_modes[jr].vector->rawData(rawIndex);
                             for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
-                                m_minimizationMatrices[ifield][ir*m_nModes+jr] += dotProduct((*datavi),(*datavj))*m_podkernel->getMesh()->evalCellVolume(id);
+                                m_minimizationMatrices[ifield][ir*m_nModes+jr] += dotProduct((*datavi),(*datavj))*getRawCellVolume(rawIndex);
                                 datavi++;
                                 datavj++;
                             }
@@ -1777,6 +1780,26 @@ void POD::readMode(std::size_t ir)
         }
         binaryReader.close();
     }
+}
+
+/**
+ * Get the volume of a cell of POD mesh.
+ *
+ * \param[in] id Cell id
+ */
+double POD::getCellVolume(long id)
+{
+    return m_podkernel->getCellVolume(id);
+}
+
+/**
+ * Get the volume of a cell of POD mesh.
+ *
+ * \param[in] rawIndex Cell raw index
+ */
+double POD::getRawCellVolume(long rawIndex)
+{
+    return m_podkernel->getRawCellVolume(rawIndex);
 }
 
 /**
@@ -2556,7 +2579,7 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
                 for (std::size_t ifield = 0; ifield < nsf; ifield++) {
                     double *modesi = modes + podscalarIds[ifield];
                     double *datagi = datag + scalarIds[ifield];
-                    rhs[ifield][ir] += (*datagi)*(*modesi)*m_podkernel->getMesh()->evalCellVolume(id);
+                    rhs[ifield][ir] += (*datagi)*(*modesi)*getRawCellVolume(rawIndex);
                 }
             }
             if (nvf) {
@@ -2565,7 +2588,7 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
                     std::array<double,3>* modevi = modev + podvectorIds[ifield];
                     for (std::size_t j = 0; j < 3; j++) {
                         double *datagi = datag + vectorIds[ifield][j];
-                        rhs[m_nScalarFields+ifield][ir] += ((*datagi)*(*modevi)[j])*m_podkernel->getMesh()->evalCellVolume(id);
+                        rhs[m_nScalarFields+ifield][ir] += ((*datagi)*(*modevi)[j])*getRawCellVolume(rawIndex);
                     }
                 }
             }

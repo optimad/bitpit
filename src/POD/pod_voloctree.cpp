@@ -101,6 +101,8 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
     pod::PODField mappedField(nsf, nvf, m_meshPOD, &m_meshPOD->getCells());
 
     for (long id : *targetCells){
+        std::size_t rawIndex = m_meshPOD->getCells().getRawIndex(id);
+
         double *datamappedS = mappedField.scalar->data(id);
         std::array<double,3> *datamappedV = mappedField.vector->data(id);
 
@@ -137,7 +139,7 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
             bool dataB, dataMappedB = false;
             double *dataS;
             std::array<double,3> *dataV;
-            double volmapped = m_meshPOD->evalCellVolume(id);
+            double volmapped = getRawCellVolume(rawIndex);
             for (long idd : m_mapper[id].previous){
                 dataB = field.mask->at(idd);
                 dataMappedB |= dataB;
@@ -245,10 +247,11 @@ void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordere
             std::array<double,3> *datamappedV;
             double vol = field.mesh->evalCellVolume(id);
             for (long idd : m_invmapper[id].previous){
+                std::size_t rawIndexIdd = m_meshPOD->getCells().getRawIndex(idd);
                 datamappedB = mappedField.mask->at(idd);
                 dataB |= datamappedB;
                 datamappedS = mappedField.scalar->data(idd);
-                double volmapped = m_meshPOD->evalCellVolume(idd);
+                double volmapped = getRawCellVolume(rawIndexIdd);
                 for (std::size_t i = 0; i < nsf; i++){
                     double *dataSi = dataS + i;
                     double *datamappedSi = datamappedS + i;
@@ -317,6 +320,8 @@ PiercedStorage<double> PODVolOctree::mapFieldsToPOD(const PiercedStorage<double>
     PiercedStorage<double> mappedFields(fields.getFieldCount(), &m_meshPOD->getCells());
 
     for (long id : *targetCells){
+        std::size_t rawIndex = m_meshPOD->getCells().getRawIndex(id);
+
         double *datamapped = mappedFields.data(id);
         if (m_mapper[id].type == adaption::Type::TYPE_RENUMBERING){
             const double *data = fields.data(m_mapper[id].previous[0]);
@@ -344,7 +349,7 @@ PiercedStorage<double> PODVolOctree::mapFieldsToPOD(const PiercedStorage<double>
                     (*datamappedi) = 0.0;
                 }
             }
-            double volmapped = m_meshPOD->evalCellVolume(id);
+            double volmapped = getRawCellVolume(rawIndex);
             for (long idd : m_mapper[id].previous){
                 const double *data = fields.data(idd);
                 double vol = mesh->evalCellVolume(idd);
@@ -445,8 +450,9 @@ void PODVolOctree::mapFieldsFromPOD(PiercedStorage<double> & fields, const Volum
             }
             double vol = mesh->evalCellVolume(id);
             for (long idd : m_invmapper[id].previous){
+                std::size_t rawIndexIdd = m_meshPOD->getCells().getRawIndex(idd);
                 const double * datamapped = mappedFields.data(idd);
-                double volmapped = m_meshPOD->evalCellVolume(idd);
+                double volmapped = getRawCellVolume(rawIndexIdd);
 
                 for (std::size_t i = 0; i < nsf; i++){
                     double *datai = data + scalarIds[i];

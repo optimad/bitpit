@@ -59,6 +59,7 @@ PODKernel::PODKernel(MPI_Comm comm)
 # else
 PODKernel::PODKernel()
 # endif
+:m_cellsVolume(1)
 {
 
 #if BITPIT_ENABLE_MPI
@@ -148,6 +149,39 @@ VolumeKernel* PODKernel::readMesh(const pod::SnapshotFile &snap)
 void PODKernel::restoreMesh(const pod::SnapshotFile &snap)
 {
     m_meshPOD = readMesh(snap);
+    evalCellsVolume();
+}
+
+/**
+ * Compute the volume of the cells of the mesh and store them in a member.
+ */
+void PODKernel::evalCellsVolume()
+{
+    m_cellsVolume.setStaticKernel(&m_meshPOD->getCells());
+    for (Cell & cell : m_meshPOD->getCells()){
+        long id = cell.getId();
+        m_cellsVolume[id] = m_meshPOD->evalCellVolume(id);
+    }
+}
+
+/**
+ * Get the volume of a cell of the mesh.
+ *
+ * \param[in] id Cell id
+ */
+double PODKernel::getCellVolume(long id)
+{
+    return m_cellsVolume[id];
+}
+
+/**
+ * Get the volume of a cell of the mesh.
+ *
+ * \param[in] rawIndex Cell raw index
+ */
+double PODKernel::getRawCellVolume(long rawIndex)
+{
+    return m_cellsVolume.rawAt(rawIndex);
 }
 
 /**
