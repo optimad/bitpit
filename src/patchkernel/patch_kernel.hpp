@@ -552,11 +552,11 @@ protected:
 	void buildGhostExchangeData(int rank);
 	void buildGhostExchangeData(const std::vector<int> &rank);
 
-	void addGhostsToExchangeTargets(const std::vector<long> &ghostIds);
-	void addGhostToExchangeTargets(const long ghostId);
+	void addGhostsToExchangeData(const std::vector<long> &ghostIds);
+	void addGhostToExchangeData(const long ghostId);
 
-	void removeGhostsFromExchangeTargets(const std::vector<long> &ghostIds);
-	void removeGhostFromExchangeTargets(const long ghostId);
+	void removeGhostsFromExchangeData(const std::vector<long> &ghostIds);
+	void removeGhostFromExchangeData(const long ghostId);
 #endif
 
 	template<typename item_t, typename id_t = long>

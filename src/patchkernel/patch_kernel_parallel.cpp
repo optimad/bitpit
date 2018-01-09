@@ -723,7 +723,7 @@ void PatchKernel::setGhostOwner(int id, int rank, bool updateExchangeData)
 	// Rebuild the exchange data information of the previous owner
 	if (updateExchangeData) {
 		if (m_ghostOwners.count(id) > 0) {
-			removeGhostFromExchangeTargets(id);
+			removeGhostFromExchangeData(id);
 		}
 	}
 
@@ -732,7 +732,7 @@ void PatchKernel::setGhostOwner(int id, int rank, bool updateExchangeData)
 
 	// Rebuild the exchange data information of the current owner
 	if (updateExchangeData) {
-		addGhostToExchangeTargets(id);
+		addGhostToExchangeData(id);
 	}
 }
 
@@ -750,7 +750,7 @@ void PatchKernel::unsetGhostOwner(int id, bool updateExchangeData)
 
 	// Rebuild the exchange data information of the previous owner
 	if (updateExchangeData) {
-		removeGhostFromExchangeTargets(id);
+		removeGhostFromExchangeData(id);
 	}
 
 	// Remove the owner
@@ -809,7 +809,7 @@ void PatchKernel::buildGhostExchangeData()
 	}
 
 	deleteGhostExchangeData();
-	addGhostsToExchangeTargets(ghosts);
+	addGhostsToExchangeData(ghosts);
 }
 
 /*!
@@ -849,7 +849,7 @@ void PatchKernel::buildGhostExchangeData(const std::vector<int> &ranks)
 	for (const int rank : ranks) {
 		deleteGhostExchangeData(rank);
 	}
-	addGhostsToExchangeTargets(ghosts);
+	addGhostsToExchangeData(ghosts);
 }
 
 /*!
@@ -859,7 +859,7 @@ void PatchKernel::buildGhostExchangeData(const std::vector<int> &ranks)
 
 	\param ghostIds are the ids of the ghosts that will be added
 */
-void PatchKernel::addGhostsToExchangeTargets(const std::vector<long> &ghostIds)
+void PatchKernel::addGhostsToExchangeData(const std::vector<long> &ghostIds)
 {
 	// Add the ghost to the targets
 	std::unordered_set<int> ranks;
@@ -888,9 +888,9 @@ void PatchKernel::addGhostsToExchangeTargets(const std::vector<long> &ghostIds)
 
 	\param ghostId is the id of the ghost that will be added
 */
-void PatchKernel::addGhostToExchangeTargets(const long ghostId)
+void PatchKernel::addGhostToExchangeData(const long ghostId)
 {
-	addGhostsToExchangeTargets(std::vector<long>{ghostId});
+	addGhostsToExchangeData(std::vector<long>{ghostId});
 }
 
 /*!
@@ -898,7 +898,7 @@ void PatchKernel::addGhostToExchangeTargets(const long ghostId)
 
 	\param ghostIds are the ids of the ghosts that will be removed
 */
-void PatchKernel::removeGhostsFromExchangeTargets(const std::vector<long> &ghostIds)
+void PatchKernel::removeGhostsFromExchangeData(const std::vector<long> &ghostIds)
 {
 	// Remove ghost from targets
 	std::unordered_set<int> ranks;
@@ -925,9 +925,9 @@ void PatchKernel::removeGhostsFromExchangeTargets(const std::vector<long> &ghost
 
 	\param ghostId id the id of the ghost that will be removed
 */
-void PatchKernel::removeGhostFromExchangeTargets(const long ghostId)
+void PatchKernel::removeGhostFromExchangeData(const long ghostId)
 {
-	removeGhostsFromExchangeTargets(std::vector<long>{ghostId});
+	removeGhostsFromExchangeData(std::vector<long>{ghostId});
 }
 
 /*!
