@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- xml interface to replicate .cpp example : test_podvoloctree_parallel_00001.cpp -->
+<podXML version="1">
+    <POD>
+            <Modes>9</Modes>
+            <WriteMode>DEBUG</WriteMode>
+            <MemoryMode>NORMAL</MemoryMode>
+            <ReconstructionMode>PROJECTION</ReconstructionMode>
+            <Directory>./pod</Directory>
+            <Name>pod.test.solver</Name>
+            <SteadyMesh>1</SteadyMesh>
+    </POD>
+    <Database>
+        <c0>
+            <Case>test</Case>
+            <Directory>./data</Directory>
+            <NSnapshots>11</NSnapshots>
+        </c0>
+    </Database>
+    <Reconstruction>
+        <c0>
+            <Case>test</Case>
+            <Directory>./data</Directory>
+            <NSnapshots>11</NSnapshots>
+            <Stride>2</Stride>
+            <FirstSnapshot>0</FirstSnapshot>
+        </c0>
+    </Reconstruction>
+</podXML>	

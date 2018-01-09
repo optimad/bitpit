@@ -65,6 +65,9 @@ if(BUILD_EXAMPLES)
 	list(APPEND EXAMPLE_LIST "PABLO_example_00010")
 	list(APPEND EXAMPLE_LIST "patchkernel_example_00001")
 	list(APPEND EXAMPLE_LIST "volcartesian_example_00001")
+	list(APPEND EXAMPLE_LIST "POD_example_00001")
+	list(APPEND EXAMPLE_LIST "POD_example_00002")
+	list(APPEND EXAMPLE_LIST "POD_application_example_00001")
 
 	#Rules to build the examples
 	foreach(EXAMPLE_NAME IN LISTS EXAMPLE_LIST)
@@ -80,5 +83,15 @@ if(BUILD_EXAMPLES)
 	add_custom_target(examples DEPENDS ${EXAMPLE_LIST})
 	add_custom_target(clean-examples COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
+	# Data files
+	add_custom_command(
+		TARGET "POD_application_example_00001" "POD_example_00001" "POD_example_00002" PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "${CMAKE_CURRENT_BINARY_DIR}/data"
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/pod"
+	)
+
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION doc/${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}/examples)
+
+	# List of example sources
 	set (EXAMPLES_SOURCES ${EXAMPLES_SOURCES} PARENT_SCOPE)
 endif()

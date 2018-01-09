@@ -321,6 +321,7 @@ list(APPEND BITPIT_MODULE_LIST "voloctree")
 list(APPEND BITPIT_MODULE_LIST "volunstructured")
 list(APPEND BITPIT_MODULE_LIST "RBF")
 list(APPEND BITPIT_MODULE_LIST "levelset")
+list(APPEND BITPIT_MODULE_LIST "POD")
 
 #------------------------------------------------------------------------------------#
 # Modules dependecies
@@ -340,6 +341,7 @@ set(VOLOCTREE_DEPS "common;PABLO;patchkernel")
 set(VOLUNSTRUCTURED_DEPS "common;patchkernel")
 set(RBF_DEPS "operators;IO;SA")
 set(LEVELSET_DEPS "common;communications;SA;CG;surfunstructured;voloctree;volcartesian")
+set(POD_DEPS "IO;common;containers;voloctree")
 
 #------------------------------------------------------------------------------------#
 # MPI-only modules
@@ -411,7 +413,8 @@ set(BITPIT_EXTERNAL_INCLUDE_DIRECTORIES "")
 
 isModuleEnabled("CG" MODULE_CG_ENABLED)
 isModuleEnabled("RBF" MODULE_RBF_ENABLED)
-if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
+isModuleEnabled("POD" MODULE_POD_ENABLED)
+if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED OR MODULE_POD_ENABLED)
 	enable_language(Fortran)
 	enable_language(C)
 
