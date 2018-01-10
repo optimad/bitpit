@@ -46,6 +46,30 @@ void VolOctree::setCommunicator(MPI_Comm communicator)
 }
 
 /*!
+	Gets the maximum allowed size, expressed in number of layers, of the ghost
+	cells halo.
+
+	\result The maximum allowed size, expressed in number of layers, of the
+	ghost cells halo.
+*/
+std::size_t VolOctree::_getMaxHaloSize()
+{
+	return std::numeric_limits<uint32_t>::max();
+}
+
+/*!
+	Internal function to set the size, expressed in number of layers, of the
+	ghost cells halo.
+
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+void VolOctree::_setHaloSize(std::size_t haloSize)
+{
+	m_tree->setNofGhostLayers(haloSize);
+}
+
+/*!
 	Prepares the patch for performing the partitioning.
 
 	Default implementation is a no-op function.

@@ -142,6 +142,9 @@ protected:
 	void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 
 #if BITPIT_ENABLE_MPI==1
+	std::size_t _getMaxHaloSize() override;
+	void _setHaloSize(std::size_t haloSize) override;
+
 	std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning) override;
 	std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning) override;
 	void _partitioningCleanup() override;
