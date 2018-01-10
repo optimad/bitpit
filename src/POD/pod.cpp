@@ -316,7 +316,7 @@ std::size_t POD::getModeCount()
  * Set the energy percentage level (e%) used to retain a limited number of POD modes
  * during POD evaluation. m_nModes such that sum(lambda[1:m_nModes])/etot >= e% and sum(lambda[1:m_nModes-1])/etot < e%.
  *
- * \param[in] energy is the target energy percentage level
+ * \param[in] energy is the target energy percentage level.
  */
 void POD::setEnergyLevel(double energy)
 {
@@ -331,6 +331,26 @@ void POD::setEnergyLevel(double energy)
 double POD::getEnergyLevel()
 {
     return m_energyLevel;
+}
+
+/**
+ * Set the minimum error threshold used to identify a subregion of the original computational domain.
+ *
+ * \param[in] threshold is the threshold value for the minimum error.
+ */
+void POD::setErrorThreshold(double threshold)
+{
+    m_errorThreshold = threshold;
+}
+
+/**
+ * Get the error threshold used in the subregion evaluation.
+ *
+ * \return The threshold value.
+ */
+double POD::getErrorThreshold()
+{
+    return m_errorThreshold;
 }
 
 /**
@@ -793,7 +813,7 @@ void POD::leave1out()
 
     // Initialize error field  
     initErrorMaps();
-
+    
     // Initialize help variables
     std::vector<std::vector<double>> h_correlationMatrices=m_correlationMatrices;
     std::vector<pod::SnapshotFile> h_database=m_database; 
@@ -843,6 +863,7 @@ void POD::leave1out()
     //dump error
     if (m_writeMode != WriteMode::NONE){    
         std::string ename = m_name + ".error";
+        std::cout<< ename << endl;
         dumpField(ename, m_errorMap);
     }
     m_nSnapshots=h_nSnapshots;
@@ -912,6 +933,16 @@ void POD::evalMeanStaticMesh()
             }
         }
     }
+    else {
+    // filter+mask
+        for (std::size_t i = 0; i < m_nSnapshots; i++) {
+            pod::PODField readf;
+            readSnapshot(m_database[i], readf);
+            for (const Cell &cell : m_podkernel->getMesh()->getCells())
+                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (readf.mask->at(cell.getId())); //N.B. mask == filter          
+        }
+    }
+        
     setSensorMask(m_filter);
 }
 
@@ -1006,6 +1037,11 @@ void POD::initErrorMaps()
     m_errorMap.vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(m_nVectorFields, &m_podkernel->getMesh()->getCells()));
     m_errorMap.scalar->fill(0.0);
     m_errorMap.vector->fill(std::array<double, 3>{{0.0, 0.0, 0.0}});
+    m_errorMap.mask = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(1, &m_podkernel->getMesh()->getCells()));
+    m_errorMap.mask->fill(0);
+    for (long id : m_listActiveIDs)
+        m_errorMap.mask->at(id)=1;
+
 }
 
 /**
@@ -1087,19 +1123,170 @@ void POD::evalReconstruction()
         }
         if (m_errorMode == ErrorMode::SINGLE){
             std::vector<double> enorm = fieldsl2norm(m_errorMap); 
-            std::string ename = m_name + ".error."+std::to_string(i);
+            std::string ename = m_name + ".error."+ m_reconstructionDatabase[i].name;
 
             if (m_writeMode != WriteMode::NONE)
                 dumpField(ename, m_errorMap); 
 
             // one coeff file for each reconstruction, each line is related to a field
-            std::ofstream oute(m_directory + m_name + ".error.norm."+ std::to_string(i) +".dat", std::ofstream::out);
+            std::ofstream oute(m_directory + m_name + ".error.norm."+ m_reconstructionDatabase[i].name +".dat", std::ofstream::out);
             for (std::size_t j = 0; j < m_nFields; j++)
                 oute << enorm[j] << std::endl;
 
             oute.close();                      
         } 
     }
+}
+
+/**
+ * Evaluation of error bounding box according to a certain threshold.
+ */
+void POD::evalErrorBoundingBox(std::map<std::string, std::size_t> targetErrorFields)
+{
+    setWriteMode(WriteMode::NONE);
+    pod::SnapshotFile efile("./pod", m_name+".error");
+    log::cout()<< "Reading error field ..."<< endl;
+    log::cout()<< efile.directory+"/"+efile.name +"..."<< endl;
+    pod::PODField error;
+    readSnapshot(efile, error);
+    
+    fillListActiveIDs(*error.mask);
+
+    std::vector<std::size_t> scalarIds, vectorIds;  
+
+    // Find scalar target fields
+    std::size_t count=0;
+    for (std::string val : m_nameScalarFields) {
+        std::map<std::string, std::size_t>::iterator found = targetErrorFields.find(val);
+        if (found != targetErrorFields.end()) {
+            std::size_t ind = found->second;
+            scalarIds.push_back(count);
+            targetErrorFields.erase(found);
+        }
+        count++;
+    }
+
+    // Find vector target fields
+    for (std::array<std::string,3> valv : m_nameVectorFields) {
+        std::size_t ic = 0;
+        std::array<std::string,3> toerase;
+        for (std::string val : valv) {
+            std::map<std::string, std::size_t>::iterator found = targetErrorFields.find(val);
+            if (found != targetErrorFields.end()) {
+                std::size_t ind = found->second;
+                toerase[ic] = val;
+                ic++;
+            }
+
+            if (ic == 3) {
+                vectorIds.push_back(count);
+                for (std::size_t i = 0; i < 3; i++)
+                    targetErrorFields.erase(toerase[i]);
+            }
+        }
+        count++;
+    }
+
+    if (targetErrorFields.size() != 0) {
+        std::string verror = " ";
+        for (const auto &targetErrorField : targetErrorFields)
+            verror += targetErrorField.first + " ";
+
+        throw std::runtime_error ("POD: fields not found in POD base or incomplete vector: " + verror);
+    }
+    
+    std::size_t nsf = scalarIds.size();
+    std::size_t nvf = vectorIds.size();
+
+    std::vector<std::array<double, 3>> minBoxes, maxBoxes;
+    minBoxes.resize(m_nFields,{0.0, 0.0, 0.0});
+    maxBoxes.resize(m_nFields,{0.0, 0.0, 0.0});
+     
+    std::unordered_set<long>::iterator it;
+    for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.end(); it++) {
+        long id = *it;
+        std::array<double, 3> cellCentroid = error.mesh->evalCellCentroid(id);
+        if (nsf) {
+            double* datas = error.scalar->data(id);
+            for (std::size_t i = 0; i < nsf; i++){
+                double* datasi = datas+scalarIds[i];
+                if (*datasi >= m_errorThreshold){
+                    maxBoxes[scalarIds[i]]= max(cellCentroid,maxBoxes[scalarIds[i]]);
+                    minBoxes[scalarIds[i]]= min(cellCentroid,minBoxes[scalarIds[i]]);
+                }
+            }
+        }
+        if (nvf) {
+            std::array<double,3>* datav = error.vector->data(id);
+            for (std::size_t i = 0; i< nvf; i++) {
+                std::array<double,3>* datavi = datav+vectorIds[i];           
+                if (std::sqrt( dotProduct((*datavi),(*datavi)) ) >= m_errorThreshold){
+                    maxBoxes[vectorIds[i]]= max(cellCentroid,maxBoxes[vectorIds[i]]);
+                    minBoxes[vectorIds[i]]= min(cellCentroid,minBoxes[vectorIds[i]]);
+                }              
+            }
+        }  
+    }
+             
+    /*std::unordered_set<long>::iterator it;
+    for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.end(); ++it){
+        long id = *it;
+        std::array<double, 3> cellCentroid = error.mesh->evalCellCentroid(id);
+        if (m_nScalarFields){
+            double* datas = error.scalar->data(id);
+            for (std::size_t i = 0; i < m_nScalarFields; i++){
+                if (*datas >= m_errorThreshold){
+                    maxBoxes[i]= max(cellCentroid,maxBoxes[i]);
+                    minBoxes[i]= min(cellCentroid,minBoxes[i]);
+                }
+                datas++;
+            }
+        }
+        if (m_nVectorFields){
+            std::array<double,3>* datav = error.vector->data(id);
+            for (std::size_t i = m_nScalarFields; i < m_nFields; i++){ 
+                if (std::sqrt( dotProduct((*datav),(*datav)) ) >= m_errorThreshold){
+                    maxBoxes[i]= max(cellCentroid,maxBoxes[i]);
+                    minBoxes[i]= min(cellCentroid,minBoxes[i]);
+                }
+                datav++;
+            }
+        }
+    }*/
+
+# if BITPIT_ENABLE_MPI
+    MPI_Allreduce(MPI_IN_PLACE, maxBoxes.data(), m_nFields*3, MPI_DOUBLE, MPI_MAX, m_communicator);
+    MPI_Allreduce(MPI_IN_PLACE, minBoxes.data(), m_nFields*3, MPI_DOUBLE, MPI_MIN, m_communicator);    
+# endif  
+  
+    log::cout()<< ">> Fields Bounding boxes " << endl; 
+    log::cout()<< "min: "<< minBoxes << endl;
+    log::cout()<< "max: "<< maxBoxes << endl;
+    
+    std::array<double, 3> minBox={0.0, 0.0, 0.0};
+    std::array<double, 3> maxBox={0.0, 0.0, 0.0};
+    
+    for (std::size_t i =0; i < m_nFields; i++){
+        maxBox=max(maxBoxes[i],maxBox);  
+        minBox=min(minBoxes[i],minBox);      
+    }
+ 
+    log::cout()<< ">> Bounding box " << endl; 
+    log::cout()<< "("<< minBox << ") ("<< maxBox << ")"<< endl;
+    
+    bool runSolver;
+#if BITPIT_ENABLE_MPI
+    runSolver = (m_rank == 0);
+#else
+    runSolver = true;
+#endif 
+    if (runSolver){
+        std::ofstream outBB(m_directory + m_name + ".box.dat", std::ofstream::out);
+        outBB << minBox << std::endl;
+        outBB << maxBox << std::endl;
+        outBB.close();
+    }
+  
 }
 
 /**

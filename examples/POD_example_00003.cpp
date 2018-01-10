@@ -69,6 +69,30 @@ void run()
     
     /**<Compute the error map through the leave-1-out method.*/ 
     pod.leave1out();
+    
+    /**<Set target error fields.*/
+    std::map<std::string, std::size_t> fields;
+    std::vector<std::string> namesf {"p","a"};
+    std::vector<std::array<std::string,3>> namevf {}; //;{{"u_x", "u_y","u_z"}};
+    std::size_t nsf= namesf.size();
+    std::size_t nvf= namevf.size();
+    
+    for (std::size_t ifield=0; ifield<nsf; ifield++){
+        fields[namesf[ifield]] = ifield;
+    }
+   
+    
+    for (std::size_t ifield=0; ifield<nvf; ifield++){
+        for (std::size_t j=0; j<3; j++){
+            fields[namevf[ifield][j]] = ifield*3+nsf+j;
+        }
+    }
+
+    /**<Set error threshold for bounding box computation.*/
+    pod.setErrorThreshold(0.001);
+    
+    /**<Evaluate the error bounding box.*/
+    pod.evalErrorBoundingBox(fields);
 }
 
 /**

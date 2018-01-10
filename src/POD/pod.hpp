@@ -129,6 +129,9 @@ public:
     std::size_t getModeCount();
     void setEnergyLevel(double energy);
     double getEnergyLevel();
+    void setErrorThreshold(double threshold);
+    double getErrorThreshold(); 
+
     void setMeshType(MeshType type);
     MeshType getMeshType();
     void setStaticMesh(bool flag);
@@ -172,6 +175,7 @@ public:
     void evalModes();
     void evalEigen();
     void evalReconstruction();
+    void evalErrorBoundingBox(std::map<std::string, std::size_t> targetErrorFields);
     void computeMapping(const VolumeKernel * mesh);
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
@@ -206,6 +210,7 @@ private:
     std::vector<pod::PODMode>               m_modes;                    /**< POD Modes*/
     std::size_t                             m_nModes;                   /**< Number of retained POD modes*/
     double                                  m_energyLevel;              /**< Level of percentage energy of the retained POD modes*/
+    double                                  m_errorThreshold;           /**< Minimum error threshold for bounding box computation*/
 
     std::vector<std::vector<double>>               m_correlationMatrices;   /**< Correlation matrices (internal use)*/
     std::vector<std::vector<double>>               m_minimizationMatrices;  /**< Least-squares minimization matrices (internal use)*/
