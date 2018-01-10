@@ -28,7 +28,7 @@
  * \brief POD application.
  * This application computes the POD basis using the setup specified through 
  * an xml dictionary.
- * <b>To print the usage</b>: ./application_example_00001 --help \n
+ * <b>To print the usage</b>: ./POD_application_example_00001 --help \n
  */ 
 
 #if BITPIT_ENABLE_MPI
@@ -152,8 +152,9 @@ InfoBitpodPP readArguments(int argc, char*argv[] ){
     keymap[2] = "vconsole=";
 
     std::map<int, std::string> final_map;
-    //visit input list and search for each key string  in key map. If an input string positively match a key, 
-    // clean the entry from key, give her the key map marker and store it in the final map.
+    /*! Visit input list and search for each key string  in key map. If an input string positively match a key,
+     * clean the entry from key, give her the key map marker and store it in the final map.
+     */
 
     for(auto val: input){
         std::size_t pos = std::string::npos;
@@ -173,7 +174,7 @@ InfoBitpodPP readArguments(int argc, char*argv[] ){
     }
 
 
-    //now assign arguments to InfoBitpodPP class
+    /*! now assign arguments to InfoBitpodPP class */
     InfoBitpodPP result;
     result.dictName = final_map[0];
 
@@ -306,7 +307,7 @@ read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
     };
 
 
-    //resume pod modes in logger
+    /*! Resume pod modes in logger */
     {
         std::vector<std::string> emode(2, "restore");
         emode[1] = "compute";
@@ -391,7 +392,7 @@ void read_Dictionary(POD & podInst) {
         log::cout().setPriority(bitpit::log::DEBUG);
     }
 
-    // Snapshots database
+    /*! Snapshots database */
     if(config::root.hasSection("Database")){
 
         bitpit::Config::Section & blockXML = config::root.getSection("Database");
@@ -433,7 +434,7 @@ void read_Dictionary(POD & podInst) {
         log::cout().setPriority(bitpit::log::DEBUG);
     }
 
-    //Reconstruction database
+    /*! Reconstruction database */
     if(config::root.hasSection("Reconstruction")){
 
         bitpit::Config::Section & blockXML = config::root.getSection("Reconstruction");
@@ -479,9 +480,9 @@ void read_Dictionary(POD & podInst) {
 
 // =================================================================================== //
 
-//core of xml handler
+/*! Core of xml handler*/
 void podcore(const InfoBitpodPP & info) {
-    //set the logger and the verbosity of the output messages in execution
+    /*! Set the logger and the verbosity of the output messages in execution*/
     std::string log = "bitpit";
     bitpit::log::cout(log);
     switch(int(info.vconsole)){
@@ -494,7 +495,7 @@ void podcore(const InfoBitpodPP & info) {
     case 0 :
         bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::Verbosity::QUIET);
         break;
-    default: //never been reached
+    default:
         break;
     }
 
@@ -508,12 +509,12 @@ void podcore(const InfoBitpodPP & info) {
     case 0 :
         bitpit::log::setFileVerbosity(log::cout(), bitpit::log::Verbosity::QUIET);
         break;
-    default: //never been reached
+    default:
         break;
 
     }
 
-    //print resume args info.
+    /*! Print resume args info.*/
     log::cout().setPriority(bitpit::log::NORMAL);
     {
         std::vector<std::string> verb(3, "quiet");
@@ -529,17 +530,17 @@ void podcore(const InfoBitpodPP & info) {
     }
     log::cout().setPriority(bitpit::log::DEBUG);
 
-    //get into the mood.
     bitpit::config::reset("podXML", 1);
     bitpit::config::read(info.dictName);
 
     POD podInst;
-    //force mesh type voloctree
+    /*! Force mesh type voloctree */
     podInst.setMeshType(POD::MeshType::VOLOCTREE);
 
+    /*! Read dictionary */
     read_Dictionary(podInst);
 
-    //Execute
+    /*! Execute */
     log::cout().setPriority(bitpit::log::NORMAL);
     log::cout()<<"Execution of pod... ";
     log::cout().setPriority(bitpit::log::DEBUG);
@@ -547,13 +548,11 @@ void podcore(const InfoBitpodPP & info) {
     log::cout().setPriority(bitpit::log::NORMAL);
     log::cout()<<"...execution of pod done"<<std::endl;
 
-    //Done, now exiting;
     log::cout().setPriority(bitpit::log::DEBUG);
 }
 
 //=================================================================================== //
 
-//main program
 int main( int argc, char *argv[] ) {
 
 #if BITPIT_ENABLE_MPI
@@ -562,7 +561,7 @@ int main( int argc, char *argv[] ) {
     {
 #endif
         try{
-            //read the arguments
+            /*! Read the arguments and run*/
             InfoBitpodPP info = readArguments(argc, argv);
             podcore(info);
         }
@@ -579,5 +578,3 @@ int main( int argc, char *argv[] ) {
 
     return 0;
 }
-
-//=================================================================================== //

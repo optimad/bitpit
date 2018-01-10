@@ -43,7 +43,7 @@ class PODKernel : public VTKBaseStreamer {
 
     friend class POD;
 
-    public:
+public:
 # if BITPIT_ENABLE_MPI
     PODKernel(MPI_Comm comm = MPI_COMM_WORLD);
 # else
@@ -53,6 +53,20 @@ class PODKernel : public VTKBaseStreamer {
     virtual ~PODKernel();
 
     PODKernel(PODKernel&& other) = default;
+
+    VolumeKernel* getMesh();
+    void evalCellsVolume();
+    double getCellVolume(long id);
+    double getRawCellVolume(long rawIndex);
+    MeshMapper & getMeshMapper();
+    bool isMappingDirty();
+    void computeMapping(const VolumeKernel * mesh, bool fillInv = true);
+
+#if BITPIT_ENABLE_MPI
+    MPI_Comm getCommunicator() const;
+    bool isCommunicatorSet() const;
+#endif
+
 
 protected:
     VolumeKernel            *m_meshPOD;     /**< Pointer to POD mesh*/
@@ -71,20 +85,11 @@ protected:
     void clear();
 
     void setMesh(VolumeKernel*);
-    VolumeKernel* getMesh();
 
     VolumeKernel* readMesh(const pod::SnapshotFile &snap);
     void restoreMesh(const pod::SnapshotFile &snap);
 
-    void evalCellsVolume();
-    double getCellVolume(long id);
-    double getRawCellVolume(long rawIndex);
-
-    void    computeMapping(const VolumeKernel * mesh, bool fillInv = true);
-    MeshMapper & getMeshMapper();
-
     void setMappingDirty(bool dirty = true);
-    bool isMappingDirty();
 
     virtual VolumeKernel* createMesh() = 0;
 
@@ -100,10 +105,10 @@ protected:
     virtual PiercedStorage<bool> mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells) = 0;
     virtual void mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField) = 0;
 
+    virtual std::unordered_set<long> mapCellsToPOD(const std::unordered_set<long> * cells) = 0;
+
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);
-    MPI_Comm getCommunicator() const;
-    bool isCommunicatorSet() const;
     void freeCommunicator();
 #endif
 

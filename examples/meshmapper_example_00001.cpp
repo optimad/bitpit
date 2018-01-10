@@ -25,8 +25,8 @@
 /**
  * \example meshmapper_example_00001.cpp
  * 
- * \brief Mesh mapping computation using voloctree.
- * <b>To run</b>: ./meshmapper_example_00003 \n
+ * \brief Mesh mapping computing between voloctree meshes.
+ * <b>To run</b>: ./meshmapper_example_00001 \n
  */ 
 
 #include <array>
@@ -49,9 +49,9 @@ void run()
 
     log::cout() << "  >> 2D octree patch" << "\n";
 
-    //
-    // Create the tree
-    //
+    /**
+     * Create the tree
+     */
     double x_0 = 10.;
     double y_0 = 20.;
     double z_0 = 30.;
@@ -63,21 +63,21 @@ void run()
     std::cout << " Origin : ( " << octree.getX0() << ", " << octree.getY0() << ", " << octree.getZ0() << " )" << std::endl;
     std::cout << " Length : " << octree.getL() << std::endl;
 
-    // Refine and write the octree
+    /** Refine and write the octree*/
     octree.adaptGlobalRefine();
     octree.adaptGlobalRefine();
     octree.adaptGlobalRefine();
     octree.adaptGlobalRefine();
 
-    //
-    // Create the patch from the existing tree
-    //
-    // Create the original patch
+    /**
+     * Create the patch from the existing tree
+     */
+    /** Create the original patch */
     VolOctree *patch_2D_original = new VolOctree(std::move(treePointer), &treePointer);
 
     patch_2D_original->update();
 
-    // Partition the patch
+    /** Partition the patch */
     patch_2D_original->partition(true);
 
 
@@ -136,11 +136,11 @@ void run()
     }
     patch_2D_original->update();
 
-    // Show patch info
+    /** Show patch info */
     log::cout() << "Cell count:   " << patch_2D_original->getCellCount() << std::endl;
     log::cout() << "Vertex count: " << patch_2D_original->getVertexCount() << std::endl;
 
-    // Define data on original mesh and write
+    /** Define data on original mesh and write */
     PiercedStorage<double> data(1, &patch_2D_original->getCells());
     std::vector<double> vdata(patch_2D_original->getInternalCount());
     int count = 0;
@@ -158,26 +158,26 @@ void run()
     patch_2D_original->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
     patch_2D_original->write();
 
-    //
-    // Create the new tree
-    //
+    /**
+     * Create the new tree
+     */
     std::unique_ptr<PabloUniform> treePointer2 = std::unique_ptr<PabloUniform>(new PabloUniform(x_0, y_0, z_0, l, 2));
     PabloUniform &octree2 = *treePointer2;
 
-    // Refine and write the octree
+    /** Refine and write the octree */
     octree2.adaptGlobalRefine();
     octree2.adaptGlobalRefine();
     octree2.adaptGlobalRefine();
     octree2.adaptGlobalRefine();
 
-    // Create a new patch
+    /** Create a new patch */
     VolOctree *patch_2D = new VolOctree(std::move(treePointer2), &treePointer2);
     patch_2D->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
 
-    //Partition the patch
+    /** Partition the patch */
     patch_2D->partition(true);
 
-    // Refine the patch
+    /** Refine the patch */
     for (int k = 0; k < 4; ++k) {
         long nCells = patch_2D->getCellCount();
         log::cout() << std::endl;
@@ -215,19 +215,17 @@ void run()
         log::cout() << ">> Final number of cells... " << nCells << std::endl;
     }
 
-    // Show patch info
+    /** Show patch info */
     log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
     log::cout() << "Vertex count: " << patch_2D->getVertexCount() << std::endl;
 
-    // Show patch info
-    log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
-    log::cout() << "Vertex count: " << patch_2D->getVertexCount() << std::endl;
-
+    /** Create mapper object */
     MeshMapper mapobject;
 
+    /** Map the two meshes */
     mapobject.mapMeshes(patch_2D, patch_2D_original, true);
 
-    // Map data on second mesh and write
+    /** Map data on second mesh and write */
     PiercedStorage<double> data2(1, &patch_2D->getCells());
     {
     PiercedStorage<mapping::Info> mapper = mapobject.getMapping();
@@ -264,7 +262,7 @@ void run()
 
     }
 
-    // Re-Map data on first mesh with inverse mapping and write
+    /** Re-Map data on first mesh with inverse mapping and write */
     {
     PiercedStorage<mapping::Info> invmapper = mapobject.getInverseMapping();
     PiercedStorage<double> data3(1, &patch_2D_original->getCells());
@@ -311,7 +309,7 @@ int main(int argc, char *argv[])
     MPI_Init(&argc,&argv);
 #endif    
 
-    // Run the example
+    /** Run the example **/
     try {
         run();
     } catch (const std::exception &exception) {

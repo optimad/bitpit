@@ -44,36 +44,60 @@ class POD : public VTKBaseStreamer {
 
 public:
 
+    /*!
+     *\enum MemoryMode
+     *\brief Memory Mode of the POD object. It defines the use of the memory resources.
+     */
     enum class MemoryMode {
-        MEMORY_NORMAL,
-        MEMORY_LIGHT
+        MEMORY_NORMAL /**<Normal use of the memory. The POD modes are stored in memory till the POD object is destroyed.*/,
+        MEMORY_LIGHT /**<Light use of memory. The POD modes are not stored but they are read from file when needed.*/
     };
 
+    /*!
+     *\enum RunMode
+     *\brief Run Mode of the POD object. It defines if the POD basis has to be computed or restored.
+     */
     enum class RunMode {
-        RESTORE,
-        COMPUTE
+        RESTORE /**<Restore the POD basis from dumped file.*/,
+        COMPUTE /**<Compute the POD basis.*/
     };
 
+    /*!
+     *\enum WriteMode
+     *\brief Output Write Mode of the POD object. It defines the amount of information written by the POD object.
+     */
     enum class WriteMode {
-        DUMP,
-        DEBUG,
-        NONE
+        DUMP /**<Write (dump) only the files needed to restore the POD instance.*/,
+        DEBUG /**<Write files to debug the run (POD dumping files, POD basis in .vtu format, database fields in .vtu format, reconstrucetd fields in .vtu format...) .*/,
+        NONE /**<Write none.*/
     };
 
+    /*!
+     *\enum ReconstructionMode
+     *\brief Mode of Reconstruction of fields by using the POD basis.
+     */
     enum class ReconstructionMode {
-        PROJECTION,
-        MINIMIZATION
+        PROJECTION /**<Orthogonal projection of a field over the POD basis. Note: if the POD modes are not orthogonal on the active domain this is an approximation.*/,
+        MINIMIZATION /**<Non-orthogonal projection of a field over the POD basis.Note: if the POD modes are orthogonal on the active domain the result obtained by using PROJECTION is the same.*/
     };
 
+    /*!
+     *\enum ErrorMode
+     *\brief Mode of Error evaluation of a reconstructed fields by the POD basis.
+     */
     enum class ErrorMode {
-        COMBINED,
-        SINGLE,
-        NONE
+        COMBINED /**<Maximum of reconstruction errors.*/,
+        SINGLE /**<Reconstruction errors one at a time.*/,
+        NONE /**<No error evaluation.*/
     }; 
-    
+
+    /*!
+     *\enum MeshType
+     *\brief Type of the Mesh used to compute the POD basis.
+     */
     enum class MeshType {
-        UNDEFINED,
-        VOLOCTREE
+        UNDEFINED /**<Undefined mesh type. Note: not allowed to run POD computing.*/,
+        VOLOCTREE /**<VolOctree mesh type.*/
     };
 
 public:
@@ -157,7 +181,7 @@ public:
             std::map<std::string, std::size_t> targetFields,
             const std::unordered_set<long> *targetCells);
 
-protected:
+private:
     std::unique_ptr<PODKernel>              m_podkernel;                /**< POD computational kernel */
     MeshType                                m_meshType;                 /**< Type of POD mesh*/
     bool                                    m_staticMesh;               /**< If true the mesh is unique and the same for each snapshot and for POD modes [it is read one time together with the first snapshot].*/
@@ -193,7 +217,7 @@ protected:
     std::vector<std::size_t>                       m_listActiveIDsLeave1out;  /**<List of the active snapshots used in the leave-1-out method*/  
     std::size_t                                    m_sizeInternal;            /**<Number of internal cells in the list of ID of active cells [the internal cells are placed first in the list of active IDs].*/
 
-//    MeshMapper                                     m_meshmap;                /**< Mapping object TO/FROM pod mesh.*/
+    //    MeshMapper                                     m_meshmap;                /**< Mapping object TO/FROM pod mesh.*/
 
 #if BITPIT_ENABLE_MPI
     MPI_Comm            m_communicator; /**< MPI communicator */
@@ -265,6 +289,16 @@ protected:
             const std::unordered_set<long> *targetCells = nullptr);
 
     void _computeMapping(const VolumeKernel * mesh);
+
+    void diff(PiercedStorage<double> &fields, const pod::PODMode &mode,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+            const std::unordered_set<long> *targetCells = nullptr);
+    void sum(PiercedStorage<double> &fields, const pod::PODMode &mode,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+            const std::unordered_set<long> *targetCells = nullptr);
+
 
 };
 

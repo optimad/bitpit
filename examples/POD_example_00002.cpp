@@ -29,7 +29,11 @@
  * This example computes the POD basis starting from a database of simulations
  * defined on the same mesh and evaluate the reconstruction of a snapshot
  * not included in the database testing the hybrid interface.
- * <b>To run</b>: ./voloctree_example_00002 \n
+ * The reconstruction is performed by methods based on POD field structures and
+ * on PiercedStorage containers.
+ * Finally, the reconstruction of a PiercedStorage field
+ * is performed by using an adapted mesh field different from the POD mesh.
+ * <b>To run</b>: ./POD_example_00002 \n
  */ 
 
 #include <array>
@@ -54,7 +58,7 @@ void run(int rank, int nProcs)
     POD pod;
 
     /**<Add snapshots to database.*/   
-    for (int i=0; i<11; i++)
+    for (int i=1; i<11; i++)
         pod.addSnapshot("./data", "test."+std::to_string(i));
 
     /**<Set POD.*/    
@@ -185,7 +189,6 @@ void run(int rank, int nProcs)
         }
     }
 
-    pod.setStaticMesh(false);
     pod.reconstructFields(gfield0, meshr, fields, &targetCells);
 
     if (rank==0){
@@ -309,6 +312,10 @@ void run(int rank, int nProcs)
         if (gfield0.at(id, nsf+3*nvf))
             targetCells.insert(id);
     }
+
+    /**<Test pod reconstruction by using dynamic mesh mode.
+     * The field is now defined on a different mesh of POD basis.*/
+    pod.setStaticMesh(false);
     pod.reconstructFields(gfield0, meshr, fields, &targetCells);
 
     if (rank==0){
@@ -352,7 +359,7 @@ int main(int argc, char *argv[])
     rank   = 0;   
 #endif 
 
-    // Run the example
+    /** Run the example */
     try {
         run(rank, nProcs);
     } catch (const std::exception &exception) {

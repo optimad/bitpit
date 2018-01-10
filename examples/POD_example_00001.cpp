@@ -28,8 +28,8 @@
  * \brief POD basis computation using voloctree.
  * This example computes the POD basis starting from a database of simulations
  * defined on the same mesh and evaluate the reconstruction of a snapshot
- * not included in the database.
- * <b>To run</b>: ./voloctree_example_00001 \n
+ * included in the database.
+ * <b>To run</b>: ./POD_example_00001 \n
  */ 
 
 #include <array>
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     MPI_Init(&argc,&argv);
 #endif    
 
-    // Run the example
+    /** Run the example */
     try {
         run();
     } catch (const std::exception &exception) {

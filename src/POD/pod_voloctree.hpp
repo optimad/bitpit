@@ -39,6 +39,8 @@ namespace bitpit {
 
 class PODVolOctree: public PODKernel {
 
+    friend class POD;
+
 public:
 # if BITPIT_ENABLE_MPI
     PODVolOctree(MPI_Comm comm = MPI_COMM_WORLD);
@@ -50,11 +52,10 @@ public:
 
     PODVolOctree(PODVolOctree&& other) = default;
 
-protected:
+private:
 
     VolumeKernel* createMesh() override;
 
-public:
 
     bitpit::PiercedStorage<bitpit::adaption::Info> mapMesh(bitpit::VolOctree * mesh);
     void mapMeshSamePartition(bitpit::VolOctree * mesh, bitpit::PiercedStorage<bitpit::adaption::Info> & mapper);
@@ -70,6 +71,8 @@ public:
 
     PiercedStorage<bool> mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells);
     void mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField);
+
+    std::unordered_set<long> mapCellsToPOD(const std::unordered_set<long> * targetCells);
 
 };
 

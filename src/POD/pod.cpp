@@ -547,6 +547,13 @@ POD::ErrorMode POD::getErrorMode()
     return m_errorMode;
 }
 
+/**
+ * Set expert mode for the POD object.
+ *
+ * \param[in] mode Expert mode active flag.
+ * If expert mode is active same features have to be manually controlled:
+ * - a pre-computed mapping between a mesh field and the POD mesh is not automatically re-computed when reconstructed (use computeMapping method)
+ */
 void POD::setExpert(bool mode)
 {
     m_expert = mode;
@@ -589,21 +596,7 @@ void POD::setSensorMask(const PiercedStorage<bool> & mask, const VolumeKernel * 
 
 
         //Map true cells
-        std::unordered_set<long> mappedCells;
-            const PiercedStorage<mapping::Info> & m_invmapper = m_podkernel->getMeshMapper().getInverseMapping();
-            for (const long & id : trueCells){
-                if (m_invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
-                    mappedCells.insert(m_invmapper[id].previous[0]);
-                }
-                if (m_invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
-                    mappedCells.insert(m_invmapper[id].previous[0]);
-                }
-                if (m_invmapper[id].type == adaption::Type::TYPE_COARSENING){
-                    for (long idd : m_invmapper[id].previous)
-                        mappedCells.insert(idd);
-                }
-
-            }
+        std::unordered_set<long> mappedCells = m_podkernel->mapCellsToPOD(&trueCells);
 
         m_podkernel->mapBoolFieldToPOD(mask, mesh, &mappedCells, m_sensorMask);
 
@@ -1079,19 +1072,19 @@ void POD::evalReconstruction()
             pod::PODField mappedSnapi = m_podkernel->mapPODFieldToPOD(snapi, nullptr);
             reconstructFields(mappedSnapi, reconi);
         }
-
-        std::string rname = m_name + ".recon." + std::to_string(i);
-
-        if (m_writeMode != WriteMode::NONE)
+        std::string rname = m_name + ".recon." + m_reconstructionDatabase[i].name;
+        
+        if (m_writeMode != WriteMode::NONE && m_errorMode != ErrorMode::COMBINED)
             dumpField(rname, reconi);
 
-        // one coeff file for each reconstruction, each line is related to a field, each term is related to a mode
-        std::ofstream outr(m_directory + m_name + ".recon.coeff."+ std::to_string(i) +".dat", std::ofstream::out);
-        for (std::size_t j = 0; j < m_nFields; j++)
-            outr << m_reconstructionCoeffs[j] << std::endl;
+        if (m_errorMode != ErrorMode::COMBINED){
+            // one coeff file for each reconstruction, each line is related to a field, each term is related to a mode
+            std::ofstream outr(m_directory + m_name + ".recon.coeff."+ m_reconstructionDatabase[i].name +".dat", std::ofstream::out);
+            for (std::size_t j = 0; j < m_nFields; j++)
+                outr << m_reconstructionCoeffs[j] << std::endl;
 
-        outr.close();
-
+            outr.close();
+        }
         if (m_errorMode == ErrorMode::SINGLE){
             std::vector<double> enorm = fieldsl2norm(m_errorMap); 
             std::string ename = m_name + ".error."+std::to_string(i);
@@ -1447,21 +1440,22 @@ void POD::evalEigen()
                     m_podCoeffs[i][p][n] = Marr[N - m_nSnapshots * (p + 1) + n] * std::sqrt(abs(m_lambda[i][p]));
             }
         }
+        if (m_errorMode != ErrorMode::COMBINED){
+            // one coeff file for each mode, each line is related to a field, each term is related to a snapshot
+            for (std::size_t ir=0; ir<m_nModes; ++ir) {
+                std::ofstream out(m_directory + m_name + ".coeff."+std::to_string(ir)+".dat", std::ofstream::out);
+                for (std::size_t i = 0; i < m_nFields; i++)
+                    out << m_podCoeffs[i][ir] << std::endl;
 
-        // one coeff file for each mode, each line is related to a field, each term is related to a snapshot
-        for (std::size_t ir=0; ir<m_nModes; ++ir) {
-            std::ofstream out(m_directory + m_name + ".coeff."+std::to_string(ir)+".dat", std::ofstream::out);
+                out.close();
+            }
+
+            std::ofstream outl(m_directory + m_name + ".lambda.dat", std::ofstream::out);
             for (std::size_t i = 0; i < m_nFields; i++)
-                out << m_podCoeffs[i][ir] << std::endl;
+                outl << m_lambda[i] << std::endl;
 
-            out.close();
+            outl.close();
         }
-
-        std::ofstream outl(m_directory + m_name + ".lambda.dat", std::ofstream::out);
-        for (std::size_t i = 0; i < m_nFields; i++)
-            outl << m_lambda[i] << std::endl;
-
-        outl.close();
     }
 
 #if BITPIT_ENABLE_MPI
@@ -2475,20 +2469,7 @@ void POD::reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *
         std::unordered_set<long> mappedCells;
         std::unordered_set<long>* ptr_mappedCells = nullptr;
         if (targetCells){
-            const PiercedStorage<mapping::Info> & m_invmapper = m_podkernel->getMeshMapper().getInverseMapping();
-            for (const long & id : *targetCells){
-                if (m_invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
-                    mappedCells.insert(m_invmapper[id].previous[0]);
-                }
-                if (m_invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
-                    mappedCells.insert(m_invmapper[id].previous[0]);
-                }
-                if (m_invmapper[id].type == adaption::Type::TYPE_COARSENING){
-                    for (long idd : m_invmapper[id].previous)
-                        mappedCells.insert(idd);
-                }
-
-            }
+            mappedCells = m_podkernel->mapCellsToPOD(targetCells);
             ptr_mappedCells = &mappedCells;
         }
 
@@ -2538,24 +2519,7 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
     std::size_t nvf = vectorIds.size();
 
     // Difference field - m_mean
-    for (long  id : m_listActiveIDs) {
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-        double *datag = fields.rawData(rawIndex);
-        double *datams = m_mean.scalar->rawData(rawIndex);
-        for (std::size_t i = 0; i < nsf; i++) {
-            double *datagi = datag + scalarIds[i];
-            double *datamsi = datams + podscalarIds[i];
-            (*datagi) -= (*datamsi);
-        }
-        std::array<double,3>* datamv = m_mean.vector->rawData(rawIndex);
-        for (std::size_t i = 0; i < nvf; i++) {
-            std::array<double,3>* datamvi = datamv + podvectorIds[i];
-            for (std::size_t j = 0; j < 3; j++) {
-                double *datagi = datag + vectorIds[i][j];
-                (*datagi) -= (*datamvi)[j];
-            }
-        }
-    }
+    diff(fields, m_mean, scalarIds, podscalarIds, vectorIds, podvectorIds, &m_listActiveIDs);
 
     m_reconstructionCoeffs.clear();
     m_reconstructionCoeffs.resize(m_nFields, std::vector<double>(m_nModes, 0.0));
@@ -2604,25 +2568,7 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
     solveMinimization(rhs);
 
     // Sum field and mean
-    for (long id : m_listActiveIDs) {
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-        double *datag = fields.rawData(rawIndex);
-
-        double *datams = m_mean.scalar->rawData(rawIndex);
-        for (std::size_t i = 0; i < nsf; i++) {
-            double *datagi = datag + scalarIds[i];
-            double *datamsi = datams + podscalarIds[i];
-            *datagi = *datagi + *datamsi;
-        }
-        std::array<double,3>* datamv = m_mean.vector->rawData(rawIndex);
-        for (std::size_t i = 0; i < nvf; i++) {
-            std::array<double,3>* datamvi = datamv + podvectorIds[i];
-            for (std::size_t j = 0; j < 3; j++) {
-                double *datagi = datag + vectorIds[i][j];
-                *datagi = *datagi + (*datamvi)[j];
-            }
-        }
-    }
+    sum(fields, m_mean, scalarIds, podscalarIds, vectorIds, podvectorIds, &m_listActiveIDs);
 }
 
 /**
@@ -2721,25 +2667,7 @@ void POD::_buildFields(PiercedStorage<double> &fields,
     }
 
     // Sum field and mean
-    for (const long id : *targetCells) {
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-        double *datag = fields.rawData(rawIndex);
-        double *datams = m_mean.scalar->rawData(rawIndex);
-        for (std::size_t i = 0; i < nsf; i++) {
-            double *datagi = datag + scalarIds[i];
-            double *datamsi = datams + podscalarIds[i];
-            (*datagi) += (*datamsi);
-        }
-
-        std::array<double,3>* datamv = m_mean.vector->rawData(rawIndex);
-        for (std::size_t i = 0; i < nvf; i++) {
-            std::array<double,3>* datamvi = datamv + podvectorIds[i];
-            for (std::size_t j = 0; j < 3; j++) {
-                double *datagi = datag + vectorIds[i][j];
-                (*datagi) += (*datamvi)[j];
-            }
-        }
-    }
+    sum(fields, m_mean, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
 }
 
 /**
@@ -2762,6 +2690,80 @@ void POD::_computeMapping(const VolumeKernel * mesh)
 {
     m_podkernel->computeMapping(mesh);
     m_podkernel->setMappingDirty(!m_expert);
+}
+
+/**
+ * Perform difference between a PiercedStorage fields and a POD mode.
+ *
+ * \param[in/out] fields Fields as PiercedStorage object original / result.
+ * \param[in] mode Mode as POD object.
+ */
+void POD::diff(PiercedStorage<double> &fields, const pod::PODMode &mode,
+        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+        const std::unordered_set<long> *targetCells)
+{
+    if (targetCells){
+
+        std::size_t nsf = scalarIds.size();
+        std::size_t nvf = vectorIds.size();
+
+        for (long  id : *targetCells) {
+            double *datag = fields.data(id);
+            double *datams = mode.scalar->data(id);
+            for (std::size_t i = 0; i < nsf; i++) {
+                double *datagi = datag + scalarIds[i];
+                double *datamsi = datams + podscalarIds[i];
+                (*datagi) -= (*datamsi);
+            }
+            std::array<double,3>* datamv = mode.vector->data(id);
+            for (std::size_t i = 0; i < nvf; i++) {
+                std::array<double,3>* datamvi = datamv + podvectorIds[i];
+                for (std::size_t j = 0; j < 3; j++) {
+                    double *datagi = datag + vectorIds[i][j];
+                    (*datagi) -= (*datamvi)[j];
+                }
+            }
+        }
+
+    }
+}
+
+/**
+ * Perform sum between a PiercedStorage fields and a POD mode.
+ *
+ * \param[in/out] fields Fields as PiercedStorage object original / result.
+ * \param[in] mode Mode as POD object.
+ */
+void POD::sum(PiercedStorage<double> &fields, const pod::PODMode &mode,
+        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+        const std::unordered_set<long> *targetCells)
+{
+    if (targetCells){
+
+        std::size_t nsf = scalarIds.size();
+        std::size_t nvf = vectorIds.size();
+
+        for (long  id : *targetCells) {
+            double *datag = fields.data(id);
+            double *datams = mode.scalar->data(id);
+            for (std::size_t i = 0; i < nsf; i++) {
+                double *datagi = datag + scalarIds[i];
+                double *datamsi = datams + podscalarIds[i];
+                (*datagi) += (*datamsi);
+            }
+            std::array<double,3>* datamv = mode.vector->data(id);
+            for (std::size_t i = 0; i < nvf; i++) {
+                std::array<double,3>* datamvi = datamv + podvectorIds[i];
+                for (std::size_t j = 0; j < 3; j++) {
+                    double *datagi = datag + vectorIds[i][j];
+                    (*datagi) += (*datamvi)[j];
+                }
+            }
+        }
+
+    }
 }
 
 }
