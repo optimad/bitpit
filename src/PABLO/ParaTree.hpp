@@ -396,6 +396,7 @@ namespace bitpit {
         const LoadBalanceRanges & getLoadBalanceRanges() const;
         std::size_t getNofGhostLayers() const;
         void setNofGhostLayers(std::size_t nofGhostLayers);
+        const std::map<int, std::vector<uint32_t>> & getBordersPerProc() const;
 
         // =================================================================================== //
         // PRIVATE GET/SET METHODS															   //

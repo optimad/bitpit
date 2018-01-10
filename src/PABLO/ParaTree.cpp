@@ -2497,6 +2497,12 @@ namespace bitpit {
         m_nofGhostLayers = nofGhostLayers;
     };
 
+    /*! Get a map of border octants per process
+     * \return A map of border octants per process
+     */
+    const std::map<int, u32vector> & ParaTree::getBordersPerProc() const {
+        return m_bordersPerProc;
+    }
 
     // =================================================================================== //
     // PRIVATE GET/SET METHODS
