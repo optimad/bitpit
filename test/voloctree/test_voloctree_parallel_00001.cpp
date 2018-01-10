@@ -77,7 +77,7 @@ int subtest_001(int rank)
 /*!
 * Subtest 002
 *
-* Testing basic features of a parallel 2D patch.
+* Testing basic features of a parallel 3D patch.
 *
 * \param rank is the rank of the process
 */
