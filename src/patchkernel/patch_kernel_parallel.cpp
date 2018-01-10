@@ -137,6 +137,62 @@ int PatchKernel::getProcessorCount() const
 }
 
 /*!
+	Sets the size, expressed in number of layers, of the ghost cells halo.
+
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+void PatchKernel::setHaloSize(std::size_t haloSize)
+{
+	if (isPartitioned()) {
+		throw std::runtime_error ("Halo size can only be set before partitionig the patch.");
+	}
+
+	std::size_t maxHaloSize = _getMaxHaloSize();
+	if (haloSize > maxHaloSize) {
+		throw std::runtime_error ("Halo size exceeds the maximum allowed value.");
+	}
+
+	m_haloSize = haloSize;
+
+	_setHaloSize(haloSize);
+}
+
+/*!
+	Gets the size, expressed in number of layers, of the ghost cells halo.
+
+	\result The size, expressed in number of layers, of the ghost cells halo.
+*/
+std::size_t PatchKernel::getHaloSize()
+{
+	return m_haloSize;
+}
+
+/*!
+	Gets the maximum allowed size, expressed in number of layers, of the ghost
+	cells halo.
+
+	\result The maximum allowed size, expressed in number of layers, of the
+	ghost cells halo.
+*/
+std::size_t PatchKernel::_getMaxHaloSize()
+{
+	return 1;
+}
+
+/*!
+	Internal function to set the size, expressed in number of layers, of the
+	ghost cells halo.
+
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+void PatchKernel::_setHaloSize(std::size_t haloSize)
+{
+	BITPIT_UNUSED(haloSize);
+}
+
+/*!
 	Partitions the patch among the processors. Each cell will be assigned
 	to a specific processor according to the specified input.
 
@@ -146,12 +202,16 @@ int PatchKernel::getProcessorCount() const
 	tracked
 	\param squeezeStorage if set to true the vector that store patch information
 	will be squeezed after the synchronization
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage)
+std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage, std::size_t haloSize)
 {
 	setCommunicator(communicator);
+
+	setHaloSize(haloSize);
 
 	return partition(cellRanks, trackPartitioning, squeezeStorage);
 }
@@ -203,12 +263,16 @@ std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> &cellR
 	tracked
 	\param squeezeStorage if set to true the vector that store patch information
 	will be squeezed after the synchronization
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage)
+std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage, std::size_t haloSize)
 {
 	setCommunicator(communicator);
+
+	setHaloSize(haloSize);
 
 	return partition(trackPartitioning, squeezeStorage);
 }
@@ -258,12 +322,16 @@ std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool 
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning)
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, std::size_t haloSize)
 {
 	setCommunicator(communicator);
+
+	setHaloSize(haloSize);
 
 	return partitioningPrepare(cellRanks, trackPartitioning);
 }
@@ -360,12 +428,16 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::vector<i
 	\param communicator is the communicator that will be used
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicator, bool trackPartitioning)
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicator, bool trackPartitioning, std::size_t haloSize)
 {
 	setCommunicator(communicator);
+
+	setHaloSize(haloSize);
 
 	return partitioningPrepare(trackPartitioning);
 }

@@ -437,6 +437,9 @@ public:
 	int getRank() const;
 	int getProcessorCount() const;
 
+	void setHaloSize(std::size_t haloSize);
+	std::size_t getHaloSize();
+
 	int getCellRank(const long &id) const;
 
 	bool isRankNeighbour(int rank);
@@ -449,13 +452,13 @@ public:
 	bool isPartitioned() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	double evalPartitioningUnbalance();
-	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
-	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partition(bool trackPartitioning, bool squeezeStorage = false);
-	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning);
+	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partitioningPrepare(const std::vector<int> &cellRanks, bool trackPartitioning);
-	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, bool trackPartitioning);
+	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, bool trackPartitioning, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partitioningPrepare(bool trackPartitioning);
 	std::vector<adaption::Info> partitioningAlter(bool trackPartitioning = true, bool squeezeStorage = false);
 	void partitioningCleanup();
@@ -535,6 +538,9 @@ protected:
 	void addPointToBoundingBox(const std::array<double, 3> &point);
 	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 #if BITPIT_ENABLE_MPI==1
+	virtual std::size_t _getMaxHaloSize();
+	virtual void _setHaloSize(std::size_t haloSize);
+
 	void setPartitioned(bool partitioned);
 	void setPartitioningStatus(PartitioningStatus status);
 	virtual std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning);
@@ -597,6 +603,8 @@ private:
 	MPI_Comm m_communicator;
 	bool m_partitioned;
 	PartitioningStatus m_partitioningStatus;
+
+	int m_haloSize;
 
 	std::unordered_map<int, std::vector<long>> m_partitioningSends;
 	std::vector<int> m_partitioningPairs;

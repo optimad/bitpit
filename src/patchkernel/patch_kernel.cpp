@@ -143,6 +143,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       , m_communicator(MPI_COMM_NULL),
       m_partitioned(other.m_partitioned),
       m_partitioningStatus(other.m_partitioningStatus),
+      m_haloSize(0),
       m_ghostOwners(other.m_ghostOwners),
       m_ghostExchangeTargets(other.m_ghostExchangeTargets),
       m_ghostExchangeSources(other.m_ghostExchangeSources)
@@ -239,6 +240,7 @@ void PatchKernel::initialize()
 #if BITPIT_ENABLE_MPI==1
 	m_partitioned  = false;
 	m_communicator = MPI_COMM_NULL;
+	m_haloSize     = 0;
 
 	// Set the partitioning as unsupported
 	//

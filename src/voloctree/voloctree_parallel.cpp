@@ -129,6 +129,27 @@ void VolOctree::_partitioningCleanup()
 {
 }
 
+/*!
+	Finds the internal cells that will be ghost cells for the processors
+	with the specified ranks. During data exchange, these cells will be
+	the sources form which data will be read from.
+
+	\param ranks are the rank for which the information will be built
+*/
+std::vector<long> VolOctree::_findGhostExchangeSources(int rank)
+{
+	const std::vector<uint32_t> &ghostOctantSources = m_tree->getBordersPerProc().at(rank);
+	std::size_t nGhostSources = ghostOctantSources.size();
+
+	std::vector<long> ghostCellSources(nGhostSources);
+	for (std::size_t k = 0; k < nGhostSources; ++k) {
+		OctantInfo octantInfo(ghostOctantSources[k], true);
+		ghostCellSources[k] = getOctantId(octantInfo);
+	}
+
+	return ghostCellSources;
+}
+
 }
 
 #endif
