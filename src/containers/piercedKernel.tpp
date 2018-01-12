@@ -870,7 +870,7 @@ std::size_t PiercedKernel<id_t>::getRawIndex(id_t id) const
 * \result The flat index of the element with the specified id.
 */
 template<typename id_t>
-std::size_t PiercedKernel<id_t>::evalFlatIndex(id_t id)
+std::size_t PiercedKernel<id_t>::evalFlatIndex(id_t id) const
 {
     std::size_t pos  = getPos(id);
 
@@ -879,22 +879,30 @@ std::size_t PiercedKernel<id_t>::evalFlatIndex(id_t id)
 
     // Subtract pending holes before position
     if (holesCountPending() > 0) {
-        holesSortPending();
-        holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
-        holes_iterator pending_end_itr   = m_holes.begin() + m_holes_pending_end;
-        auto holes_itr = std::upper_bound(pending_begin_itr, pending_end_itr, pos, std::greater<std::size_t>());
-        std::size_t nHolesBefore = std::distance(holes_itr, pending_end_itr);
+        holes_const_iterator pending_begin_itr = m_holes.cbegin() + m_holes_pending_begin;
+        holes_const_iterator pending_end_itr   = m_holes.cbegin() + m_holes_pending_end;
+
+        std::size_t nHolesBefore = 0;
+        for (auto itr = pending_begin_itr; itr != pending_end_itr; ++itr) {
+            if (*itr <= pos) {
+                ++nHolesBefore;
+            }
+        }
 
         flat -= nHolesBefore;
     }
 
     // Subtract regular holes before position
     if (holesCountRegular() > 0) {
-        holesSortRegular();
-        holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
-        holes_iterator regular_end_itr   = m_holes.begin() + m_holes_regular_end;
-        auto holes_itr = std::upper_bound(regular_begin_itr, regular_end_itr, pos, std::greater<std::size_t>());
-        std::size_t nHolesBefore = std::distance(holes_itr, regular_end_itr);
+        holes_const_iterator regular_begin_itr = m_holes.cbegin() + m_holes_regular_begin;
+        holes_const_iterator regular_end_itr   = m_holes.cbegin() + m_holes_regular_end;
+
+        std::size_t nHolesBefore = 0;
+        for (auto itr = regular_begin_itr; itr != regular_end_itr; ++itr) {
+            if (*itr <= pos) {
+                ++nHolesBefore;
+            }
+        }
 
         flat -= nHolesBefore;
     }

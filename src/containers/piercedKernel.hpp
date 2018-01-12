@@ -364,7 +364,7 @@ public:
     bool contains(id_t id) const;
     std::size_t count(id_t id) const;
     std::size_t getRawIndex(id_t id) const;
-    std::size_t evalFlatIndex(id_t id);
+    std::size_t evalFlatIndex(id_t id) const;
 
     std::vector<id_t> getIds(bool ordered = true) const;
     id_t getSizeMarker(std::size_t targetSize, const id_t &fallback = -1);
