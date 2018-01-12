@@ -73,6 +73,7 @@ public:
 
     // General methods
     void swap(PiercedKernelRange &other) noexcept;
+    std::size_t evalSize() const;
 
     // Methods to get begin and end
     const_iterator begin() const noexcept;

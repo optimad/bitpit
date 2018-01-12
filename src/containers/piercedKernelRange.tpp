@@ -92,6 +92,30 @@ void PiercedKernelRange<id_t>::swap(PiercedKernelRange &other) noexcept
 }
 
 /*!
+* Evaluates the number of elements contained in the range.
+*
+* \result The number of elements contained in the range.
+*/
+template<typename id_t>
+std::size_t PiercedKernelRange<id_t>::evalSize() const
+{
+    const PiercedKernel<id_t> &kernel = m_cbegin.getKernel();
+
+    std::size_t flatBegin = kernel.evalFlatIndex(m_cbegin.getId());
+
+    std::size_t flatEnd;
+    if (m_cend.getPos() <= kernel.getLastUsedPos()) {
+        flatEnd = kernel.evalFlatIndex(m_cend.getId()) + 1;
+    } else {
+        flatEnd = kernel.size();
+    }
+
+    std::size_t size = (flatEnd - flatBegin);
+
+    return size;
+}
+
+/*!
 * Returns a constant iterator pointing to the first element in the range.
 *
 * \result A constant iterator pointing to the first element in the range.
