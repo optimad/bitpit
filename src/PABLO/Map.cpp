@@ -2,6 +2,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "Global.hpp"
+#include "Operators.hpp"
 #include "Map.hpp"
 #include <cmath>
 
@@ -63,6 +64,11 @@ void Map::initialize(uint8_t dim){
     m_origin[2] = 0.;
 
     m_L = 1.0;
+
+    m_area     = uipow<uint64_t>(m_maxLength,m_dim-1);
+    m_area_1   = 1/double(m_area);
+    m_volume   = uipow<uint64_t>(m_maxLength,m_dim);
+    m_volume_1 = 1/double(m_volume);
 };
 
 /*! Transformation of coordinates X,Y,Z (logical->physical).
@@ -150,7 +156,7 @@ double Map::mapSize(uint32_t const & size) const {
  * \return Area of octant in physical domain.
  */
 double Map::mapArea(uint64_t const & area) const {
-	return ((1/pow(double(m_maxLength),(m_dim-1)))*double(area));
+	return m_area_1*double(area);
 };
 
 /*! Transformation of volume of an octant (logical->physical).
@@ -158,7 +164,7 @@ double Map::mapArea(uint64_t const & area) const {
  * \return Coordinate Volume of octant in physical domain.
  */
 double Map::mapVolume(uint64_t const & volume) const {
-	return ((1/pow(double(m_maxLength),m_dim))*double(volume));
+	return m_volume_1*double(volume);
 };
 
 /*! Transformation of coordinates of center of an octant (logical->physical).
