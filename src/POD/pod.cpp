@@ -786,9 +786,10 @@ void POD::evalCorrelationTerm(int i, pod::PODField & snapi, int j, pod::PODField
         std::vector<long>::iterator it;
         for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.begin()+m_sizeInternal; it++){
             long id = *it;
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
             if (m_nScalarFields){
-                double* datasi = snapi.scalar->data(id);
-                double* datasj = snapj.scalar->data(id);
+                double* datasi = snapi.scalar->rawData(rawIndex);
+                double* datasj = snapj.scalar->rawData(rawIndex);
                 for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
                     m_correlationMatrices[ifield][i*m_nSnapshots+j] += (*datasi)*(*datasj)*snapi.mesh->evalCellVolume(id);
                     datasi++;
@@ -796,8 +797,8 @@ void POD::evalCorrelationTerm(int i, pod::PODField & snapi, int j, pod::PODField
                 }
             }
             if (m_nVectorFields){
-                std::array<double,3>* datavi = snapi.vector->data(id);
-                std::array<double,3>* datavj = snapj.vector->data(id);
+                std::array<double,3>* datavi = snapi.vector->rawData(rawIndex);
+                std::array<double,3>* datavj = snapj.vector->rawData(rawIndex);
                 for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
                     m_correlationMatrices[ifield][i*m_nSnapshots+j] += dotProduct((*datavi),(*datavj))*snapi.mesh->evalCellVolume(id);
                     datavi++;
@@ -943,9 +944,10 @@ void POD::evalReconstructionCoeffsStaticMesh(pod::PODField & field)
         std::vector<long>::iterator it;
         for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.begin()+m_sizeInternal; ++it){
             long id = *it;
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
             if (m_nScalarFields){
-                double* modes = m_modes[ir].scalar->data(id);
-                double* datas = field.scalar->data(id);
+                double* modes = m_modes[ir].scalar->rawData(rawIndex);
+                double* datas = field.scalar->rawData(rawIndex);
                 for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
                     rhs[ifield][ir] += (*datas)*(*modes)*m_podkernel->getMesh()->evalCellVolume(id);
                     modes++;
@@ -953,8 +955,8 @@ void POD::evalReconstructionCoeffsStaticMesh(pod::PODField & field)
                 }
             }
             if (m_nVectorFields){
-                std::array<double,3>* modev = m_modes[ir].vector->data(id);
-                std::array<double,3>* datav = field.vector->data(id);
+                std::array<double,3>* modev = m_modes[ir].vector->rawData(rawIndex);
+                std::array<double,3>* datav = field.vector->rawData(rawIndex);
                 for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
                     rhs[ifield][ir] += dotProduct((*datav),(*modev))*m_podkernel->getMesh()->evalCellVolume(id);
                     modev++;
@@ -993,9 +995,10 @@ void POD::buildFields(pod::PODField & recon)
             readMode(ir);
 
         for (long id : m_listActiveIDs){
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
             if (m_nScalarFields){
-                double* recons = recon.scalar->data(id);
-                double* modes = m_modes[ir].scalar->data(id);
+                double* recons = recon.scalar->rawData(rawIndex);
+                double* modes = m_modes[ir].scalar->rawData(rawIndex);
                 for (std::size_t ifs = 0; ifs < m_nScalarFields; ifs++){
                     *recons  = *recons + *modes*m_reconstructionCoeffs[ifs][ir];
                     recons++;
@@ -1004,8 +1007,8 @@ void POD::buildFields(pod::PODField & recon)
             }
 
             if (m_nVectorFields){
-                std::array<double,3>* reconv = recon.vector->data(id);
-                std::array<double,3>* modev = m_modes[ir].vector->data(id);
+                std::array<double,3>* reconv = recon.vector->rawData(rawIndex);
+                std::array<double,3>* modev = m_modes[ir].vector->rawData(rawIndex);
                 for (std::size_t ifv = 0; ifv < m_nVectorFields; ifv++){
                     *reconv = *reconv + *modev*m_reconstructionCoeffs[m_nScalarFields+ifv][ir];
                     reconv++;
@@ -1059,9 +1062,10 @@ void POD::evalMinimizationMatrices()
                     std::vector<long>::iterator it;
                     for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.begin()+m_sizeInternal; ++it){
                         long id = *it;
+                        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
                         if (m_nScalarFields){
-                            double* datasi = m_modes[ir].scalar->data(id);
-                            double* datasj = m_modes[jr].scalar->data(id);
+                            double* datasi = m_modes[ir].scalar->rawData(rawIndex);
+                            double* datasj = m_modes[jr].scalar->rawData(rawIndex);
                             for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
                                 m_minimizationMatrices[ifield][ir*m_nModes+jr] += (*datasi)*(*datasj)*m_podkernel->getMesh()->evalCellVolume(id);
                                 datasi++;
@@ -1075,8 +1079,8 @@ void POD::evalMinimizationMatrices()
                             }
                         }
                         if (m_nVectorFields){
-                            std::array<double,3>* datavi = m_modes[ir].vector->data(id);
-                            std::array<double,3>* datavj = m_modes[jr].vector->data(id);
+                            std::array<double,3>* datavi = m_modes[ir].vector->rawData(rawIndex);
+                            std::array<double,3>* datavj = m_modes[jr].vector->rawData(rawIndex);
                             for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
                                 m_minimizationMatrices[ifield][ir*m_nModes+jr] += dotProduct((*datavi),(*datavj))*m_podkernel->getMesh()->evalCellVolume(id);
                                 datavi++;
@@ -1270,9 +1274,10 @@ void POD::evalModesStaticMesh()
 
         for (std::size_t ir = 0; ir < m_nModes; ir++){
             for (long id : m_listActiveIDs){
+                std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
                 if (m_nScalarFields){
-                    double* modes = m_modes[ir].scalar->data(id);
-                    double* datas = snapi.scalar->data(id);
+                    double* modes = m_modes[ir].scalar->rawData(rawIndex);
+                    double* datas = snapi.scalar->rawData(rawIndex);
                     for (std::size_t ifs = 0; ifs < m_nScalarFields; ifs++){
                         *modes = *modes + *datas*m_podCoeffs[ifs][ir][is] / m_lambda[ifs][ir];
                         modes++;
@@ -1280,8 +1285,8 @@ void POD::evalModesStaticMesh()
                     }
                 }
                 if (m_nVectorFields){
-                    std::array<double, 3>* modev = m_modes[ir].vector->data(id);
-                    std::array<double, 3>* datav = snapi.vector->data(id);
+                    std::array<double, 3>* modev = m_modes[ir].vector->rawData(rawIndex);
+                    std::array<double, 3>* datav = snapi.vector->rawData(rawIndex);
                     for (std::size_t ifv = 0; ifv < m_nVectorFields; ifv++){
                         *modev = *modev + *datav*m_podCoeffs[m_nScalarFields+ifv][ir][is] / m_lambda[m_nScalarFields+ifv][ir];
                         modev++;
@@ -1894,15 +1899,16 @@ void POD::diff(pod::PODField& a, const pod::PODMode& b)
 
     //WARNING: it works only if nvf and nsf !=0 TODO
     for (long id : a.scalar->getKernel()->getIds()){
-        double* datasa = a.scalar->data(id);
-        double* datasb = b.scalar->data(id);
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        double* datasa = a.scalar->rawData(rawIndex);
+        double* datasb = b.scalar->rawData(rawIndex);
         for (std::size_t i = 0; i < nsf; i++){
             *datasa = *datasa - *datasb;
             datasa++;
             datasb++;
         }
-        std::array<double,3>* datava = a.vector->data(id);
-        std::array<double,3>* datavb = b.vector->data(id);
+        std::array<double,3>* datava = a.vector->rawData(rawIndex);
+        std::array<double,3>* datavb = b.vector->rawData(rawIndex);
         for (std::size_t i = 0; i < nvf; i++)
             *datava = *datava - *datavb;
         datava++;
@@ -1933,15 +1939,16 @@ void POD::sum(pod::PODField& a, const pod::PODMode& b)
     }
 
     for (long id : a.scalar->getKernel()->getIds()){
-        double* datasa = a.scalar->data(id);
-        double* datasb = b.scalar->data(id);
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        double* datasa = a.scalar->rawData(rawIndex);
+        double* datasb = b.scalar->rawData(rawIndex);;
         for (std::size_t i = 0; i < nsf; i++){
             *datasa = *datasa + *datasb;
             datasa++;
             datasb++;
         }
-        std::array<double,3>* datava = a.vector->data(id);
-        std::array<double,3>* datavb = b.vector->data(id);
+        std::array<double,3>* datava = a.vector->rawData(rawIndex);
+        std::array<double,3>* datavb = b.vector->rawData(rawIndex);
         for (std::size_t i = 0; i < nvf; i++)
             *datava = *datava + *datavb;
         datava++;
@@ -2175,14 +2182,15 @@ void POD::evalReconstructionCoeffsStaticMesh(PiercedStorage<double> &fields,
 
     // Difference field - m_mean
     for (long  id : m_listActiveIDs) {
-        double *datag = fields.data(id);
-        double *datams = m_mean.scalar->data(id);
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        double *datag = fields.rawData(rawIndex);
+        double *datams = m_mean.scalar->rawData(rawIndex);
         for (std::size_t i = 0; i < nsf; i++) {
             double *datagi = datag + scalarIds[i];
             double *datamsi = datams + podscalarIds[i];
             (*datagi) -= (*datamsi);
         }
-        std::array<double,3>* datamv = m_mean.vector->data(id);
+        std::array<double,3>* datamv = m_mean.vector->rawData(rawIndex);
         for (std::size_t i = 0; i < nvf; i++) {
             std::array<double,3>* datamvi = datamv + podvectorIds[i];
             for (std::size_t j = 0; j < 3; j++) {
@@ -2207,9 +2215,10 @@ void POD::evalReconstructionCoeffsStaticMesh(PiercedStorage<double> &fields,
         std::vector<long>::iterator it;
         for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.begin()+m_sizeInternal; it++) {
             long id = *it;
-            double *datag = fields.data(id);
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            double *datag = fields.rawData(rawIndex);
             if (nsf) {
-                double *modes = m_modes[ir].scalar->data(id);
+                double *modes = m_modes[ir].scalar->rawData(rawIndex);
                 for (std::size_t ifield = 0; ifield < nsf; ifield++) {
                     double *modesi = modes + podscalarIds[ifield];
                     double *datagi = datag + scalarIds[ifield];
@@ -2217,7 +2226,7 @@ void POD::evalReconstructionCoeffsStaticMesh(PiercedStorage<double> &fields,
                 }
             }
             if (nvf) {
-                std::array<double,3>* modev = m_modes[ir].vector->data(id);
+                std::array<double,3>* modev = m_modes[ir].vector->rawData(rawIndex);
                 for (std::size_t ifield = 0; ifield < nvf; ifield++) {
                     std::array<double,3>* modevi = modev + podvectorIds[ifield];
                     for (std::size_t j = 0; j < 3; j++) {
@@ -2239,14 +2248,16 @@ void POD::evalReconstructionCoeffsStaticMesh(PiercedStorage<double> &fields,
 
     // Sum field and mean
     for (long id : m_listActiveIDs) {
-        double *datag = fields.data(id);
-        double *datams = m_mean.scalar->data(id);
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        double *datag = fields.rawData(rawIndex);
+
+        double *datams = m_mean.scalar->rawData(rawIndex);
         for (std::size_t i = 0; i < nsf; i++) {
             double *datagi = datag + scalarIds[i];
             double *datamsi = datams + podscalarIds[i];
             *datagi = *datagi + *datamsi;
         }
-        std::array<double,3>* datamv = m_mean.vector->data(id);
+        std::array<double,3>* datamv = m_mean.vector->rawData(rawIndex);
         for (std::size_t i = 0; i < nvf; i++) {
             std::array<double,3>* datamvi = datamv + podvectorIds[i];
             for (std::size_t j = 0; j < 3; j++) {
@@ -2308,15 +2319,16 @@ void POD::buildFields(PiercedStorage<double> &fields,
             readMode(ir);
 
         for (const long id : *targetCells) {
-            double *modes = m_modes[ir].scalar->data(id);
-            double *recon = fields.data(id);
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            double *modes = m_modes[ir].scalar->rawData(rawIndex);
+            double *recon = fields.rawData(rawIndex);
             for (std::size_t ifs = 0; ifs < m_nScalarFields; ifs++) {
                 double *modesi = modes + podscalarIds[ifs];
                 double *reconsi = recon + scalarIds[ifs];
                 (*reconsi) += (*modesi) * m_reconstructionCoeffs[ifs][ir];
             }
 
-            std::array<double,3> *modev = m_modes[ir].vector->data(id);
+            std::array<double,3> *modev = m_modes[ir].vector->rawData(rawIndex);
             for (std::size_t ifv = 0; ifv < m_nVectorFields; ifv++) {
                 std::array<double,3>* modevi = modev + podvectorIds[ifv];
                 for (std::size_t j = 0; j < 3; j++) {
@@ -2332,15 +2344,16 @@ void POD::buildFields(PiercedStorage<double> &fields,
 
     // Sum field and mean
     for (const long id : *targetCells) {
-        double *datag = fields.data(id);
-        double *datams = m_mean.scalar->data(id);
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        double *datag = fields.rawData(rawIndex);
+        double *datams = m_mean.scalar->rawData(rawIndex);
         for (std::size_t i = 0; i < nsf; i++) {
             double *datagi = datag + scalarIds[i];
             double *datamsi = datams + podscalarIds[i];
             (*datagi) += (*datamsi);
         }
 
-        std::array<double,3>* datamv = m_mean.vector->data(id);
+        std::array<double,3>* datamv = m_mean.vector->rawData(rawIndex);
         for (std::size_t i = 0; i < nvf; i++) {
             std::array<double,3>* datamvi = datamv + podvectorIds[i];
             for (std::size_t j = 0; j < 3; j++) {
