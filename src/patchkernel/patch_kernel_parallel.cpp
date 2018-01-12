@@ -709,6 +709,22 @@ int PatchKernel::getCellRank(const long &id) const
 }
 
 /*!
+	Gets the halo layer of the specified cell.
+
+	\param id is the id of the requested cell
+	\result The halo layer of the specified cell.
+*/
+int PatchKernel::getCellHaloLayer(const long &id) const
+{
+	const Cell &cell = getCell(id);
+	if (cell.isInterior()) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
+/*!
 	Check if the processors associated to the specified rank is a neighbour.
 
 	\param rank is the rank associated to the processor

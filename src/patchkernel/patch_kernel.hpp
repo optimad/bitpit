@@ -441,6 +441,7 @@ public:
 	std::size_t getHaloSize();
 
 	int getCellRank(const long &id) const;
+	virtual int getCellHaloLayer(const long &id) const;
 
 	bool isRankNeighbour(int rank);
 	std::vector<int> getNeighbourRanks();
