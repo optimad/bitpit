@@ -65,6 +65,17 @@ int subtest_001(int rank)
 	// Repartiion the patch
 	patch_2D->partition(true);
 
+	// Evaluate the ghost layer the cells belongs to
+	const PatchKernel::CellConstRange &cellWriteRange = patch_2D->getVTKCellWriteRange();
+	std::vector<int> cellHaloLayer(cellWriteRange.evalSize());
+
+	std::size_t flatIndex = 0;
+	for (const Cell &cell : cellWriteRange) {
+		cellHaloLayer[flatIndex++] = patch_2D->getCellHaloLayer(cell.getId());
+	}
+
+	patch_2D->getVTK().addData("haloLayer", VTKFieldType::SCALAR, VTKLocation::CELL, cellHaloLayer);
+
 	// Write the patch
 	patch_2D->write();
 
@@ -106,6 +117,17 @@ int subtest_002(int rank)
 
 	// Repartiion the patch
 	patch_3D->partition(true);
+
+	// Evaluate the ghost layer the cells belongs to
+	const PatchKernel::CellConstRange &cellWriteRange = patch_3D->getVTKCellWriteRange();
+	std::vector<int> cellHaloLayer(cellWriteRange.evalSize());
+
+	std::size_t flatIndex = 0;
+	for (const Cell &cell : cellWriteRange) {
+		cellHaloLayer[flatIndex++] = patch_3D->getCellHaloLayer(cell.getId());
+	}
+
+	patch_3D->getVTK().addData("haloLayer", VTKFieldType::SCALAR, VTKLocation::CELL, cellHaloLayer);
 
 	// Write the patch
 	patch_3D->write();

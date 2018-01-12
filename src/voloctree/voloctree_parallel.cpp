@@ -46,6 +46,24 @@ void VolOctree::setCommunicator(MPI_Comm communicator)
 }
 
 /*!
+	Gets the halo layer of the specified cell.
+
+	\param id is the id of the requested cell
+	\result The halo layer of the specified cell.
+*/
+int VolOctree::getCellHaloLayer(const long &id) const
+{
+	OctantInfo octantInfo = getCellOctant(id);
+	if (octantInfo.internal) {
+		return -1;
+	}
+
+	const Octant *octant = getOctantPointer(octantInfo);
+
+	return m_tree->getGhostLayer(octant);
+}
+
+/*!
 	Gets the maximum allowed size, expressed in number of layers, of the ghost
 	cells halo.
 

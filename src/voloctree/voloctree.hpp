@@ -114,6 +114,8 @@ public:
 
 #if BITPIT_ENABLE_MPI==1
 	void setCommunicator(MPI_Comm communicator) override;
+
+	int getCellHaloLayer(const long &id) const override;
 #endif
 
 protected:
