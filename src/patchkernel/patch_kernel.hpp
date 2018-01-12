@@ -414,7 +414,7 @@ public:
 	VTKUnstructuredGrid & getVTK();
 	WriteTarget getVTKWriteTarget() const;
 	void setVTKWriteTarget(WriteTarget targetCells);
-	const PatchKernel::CellConstRange & getVTKCellWriteRange() const;
+	const PatchKernel::CellConstRange getVTKCellWriteRange() const;
 	void write(VTKWriteMode mode = VTKWriteMode::DEFAULT);
 	void write(std::string name, VTKWriteMode mode = VTKWriteMode::DEFAULT);
 
@@ -483,7 +483,6 @@ protected:
 
 	VTKUnstructuredGrid m_vtk ;
 	WriteTarget m_vtkWriteTarget;
-	CellConstRange m_vtkCellRange;
 	PiercedStorage<long, long> m_vtkVertexMap;
 
 	PatchKernel(bool expert);

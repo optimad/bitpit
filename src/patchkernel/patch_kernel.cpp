@@ -787,16 +787,12 @@ void PatchKernel::write(std::string filename, VTKWriteMode mode)
 */
 void PatchKernel::write(VTKWriteMode mode)
 {
-	// Set VTK targets
+	// Get VTK cell count
 	long vtkCellCount = 0;
 	if (m_vtkWriteTarget == WRITE_TARGET_CELLS_ALL) {
-		m_vtkCellRange = CellConstRange(cellConstBegin(), cellConstEnd());
-
 		vtkCellCount = getCellCount();
 #if BITPIT_ENABLE_MPI==1
 	} else if (m_vtkWriteTarget == WRITE_TARGET_CELLS_INTERNAL) {
-		m_vtkCellRange = CellConstRange(internalConstBegin(), internalConstEnd());
-
 		vtkCellCount = getInternalCount();
 #endif
 	}
@@ -4899,9 +4895,17 @@ void PatchKernel::setVTKWriteTarget(WriteTarget writeTarget)
 
 	\result The VTK cell write range.
 */
-const PatchKernel::CellConstRange & PatchKernel::getVTKCellWriteRange() const
+const PatchKernel::CellConstRange PatchKernel::getVTKCellWriteRange() const
 {
-	return m_vtkCellRange;
+	if (m_vtkWriteTarget == WRITE_TARGET_CELLS_ALL) {
+		return CellConstRange(cellConstBegin(), cellConstEnd());
+#if BITPIT_ENABLE_MPI==1
+	} else if (m_vtkWriteTarget == WRITE_TARGET_CELLS_INTERNAL) {
+		return CellConstRange(internalConstBegin(), internalConstEnd());
+#endif
+	} else {
+		return CellConstRange(cellConstEnd(), cellConstEnd());
+	}
 }
 
 /*!
