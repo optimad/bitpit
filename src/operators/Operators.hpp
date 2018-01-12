@@ -359,6 +359,13 @@ T sign(                                                                         
         const  T                                &                                     // (input) input value
       );
 
+// Operator "pow with unsigned integer exponential" -------------------------------- //
+template <class T>
+T uipow(                                                                             // POWER WITH UNSIGNED INTEGER EXPONENTIAL
+        const T &,                                                                   // (input) input argument
+        unsigned int                                                                 // (input) power
+        );
+
 // Operator "pow" ------------------------------------------------------------------- //
 template <class T>
 std::vector< T > pow(                                                                 // RETURNS THE ELEMENTWISE POWER OF VECTOR

@@ -41,5 +41,61 @@ T sign(
     return (T(0) < val) - (val < T(0)) ;
 };
 
+/*!
+    \ingroup MathFunctions
+    Power function with unsigned integer exponent.
+    \param[in] base Input argument
+    \param[in] exponent Power index
 
+    Template parameter can be any type such that *operator is defined.
 
+    \result returns the p-th power of the input argument.
+*/
+template <class T>
+T uipow(const T & base, unsigned int exponent)
+{
+    switch (exponent) {
+
+    case 0:
+    {
+        return 1;
+    }
+
+    case 1:
+    {
+        return base;
+    }
+
+    case 2:
+    {
+        return base * base;
+    }
+
+    case 3:
+    {
+        return base * base * base;
+    }
+
+    default:
+    {
+        // The integer power is evluated using the exponentiating by squaring
+        // algorithm. For an explanation of the algorith see the following
+        // link:
+        //
+        //    https://en.wikipedia.org/wiki/Exponentiation_by_squaring
+        double result = 1.;
+        double base_work = base;
+        while (exponent) {
+            if (exponent % 2) {
+                result *= base_work;
+            }
+
+            exponent /= 2;
+            base_work *= base_work;
+        }
+
+        return result;
+    }
+
+    }
+}

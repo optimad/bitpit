@@ -2037,6 +2037,7 @@ int subtest_004(
 
     // Minval of double ------------------------------------------------------------- //
     cout << "  pow(a,2) = " << pow(a,2.0) << endl;
+    cout << "  uipow(a,2) = " << uipow(a,2) << endl;
 
     // Minval of 1D arrays ---------------------------------------------------------- //
     cout << "  pow(x,2) = " << pow(x,2.0) << endl;
