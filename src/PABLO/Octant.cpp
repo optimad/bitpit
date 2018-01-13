@@ -353,7 +353,7 @@ Octant::setPbound(uint8_t face, bool flag){
  */
 uint32_t
 Octant::getSize() const{
-	uint32_t size = uint32_t(1<<(Global::getMaxLevel()-m_level));
+	uint32_t size = 1 << (Global::getMaxLevel() - m_level);
 	return size;
 };
 
