@@ -513,15 +513,14 @@ std::array<double, 3> VolOctree::evalInterfaceNormal(const long &id) const
 */
 VolOctree::OctantInfo VolOctree::getCellOctant(const long &id) const
 {
-	OctantInfo octantInfo;
-	octantInfo.internal = m_cells[id].isInterior();
-	if (octantInfo.internal) {
-		octantInfo.id = m_cellToOctant.at(id);
-	} else {
-		octantInfo.id = m_cellToGhost.at(id);
+	// Search the cell among the internal octants
+	auto octantItr = m_cellToOctant.find(id);
+	if (octantItr != m_cellToOctant.end()) {
+		return OctantInfo(octantItr->second, true);
 	}
 
-	return octantInfo;
+	// Search the cell among the ghosts
+	return OctantInfo(m_cellToGhost.at(id), false);
 }
 
 /*!
