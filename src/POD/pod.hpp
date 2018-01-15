@@ -154,7 +154,7 @@ public:
     ErrorMode getErrorMode();       
     void setExpert(bool mode = true);
 
-    void setSensorMask(const PiercedStorage<bool> & mask, const VolumeKernel * mesh = nullptr);
+    void setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh = nullptr);
 
     std::size_t getSnapshotCount();
     std::vector<std::string> getScalarNames();
@@ -181,12 +181,14 @@ public:
     void evalEigen();
     void evalReconstruction();
     void evalErrorBoundingBox();
-    void computeMapping(const VolumeKernel * mesh);
+    void computeMapper(VolumeKernel * mesh);
+    void prepareMapper(const std::vector<adaption::Info> & info);
+    void updateMapper(const std::vector<adaption::Info> & info);
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
     void dumpField(const std::string &name, const pod::PODField &field) const;
 
-    void reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *mesh,
+    void reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
             std::map<std::string, std::size_t> targetFields,
             const std::unordered_set<long> *targetCells);
 
@@ -228,8 +230,6 @@ private:
     std::vector<std::size_t>                       m_listActiveIDsLeave1out;  /**<List of the active snapshots used in the leave-1-out method*/  
     std::size_t                                    m_sizeInternal;            /**<Number of internal cells in the list of ID of active cells [the internal cells are placed first in the list of active IDs].*/
 
-    //    MeshMapper                                     m_meshmap;                /**< Mapping object TO/FROM pod mesh.*/
-
 #if BITPIT_ENABLE_MPI
     MPI_Comm            m_communicator; /**< MPI communicator */
 #endif
@@ -252,9 +252,9 @@ private:
 
     const double    m_tol = 1.0e-12;  /**<Tolerance for energy check.*/
 
-    void evalMeanStaticMesh();
+    void _evalMeanMesh();
     void checkModeCount(double *alambda, std::size_t ifield);
-    void evalModesStaticMesh();
+    void _evalModes();
     void initCorrelation();
     void evalCorrelationTerm(int i, pod::PODField &snapi, int j, pod::PODField &snapj);
     void evalReconstructionCoeffs(pod::PODField &snapi);
@@ -274,8 +274,8 @@ private:
     double getCellVolume(long id);
     double getRawCellVolume(long rawIndex);
 
-    void diff(pod::PODField &a, const pod::PODMode &b);
-    void sum(pod::PODField &a, const pod::PODMode &b);
+    void diff(pod::PODField * _a, const pod::PODMode &b);
+    void sum(pod::PODField * _a, const pod::PODMode &b);
     std::vector<double> fieldsl2norm(pod::PODField &snap);
     std::vector<double> fieldsMax(pod::PODField &snap);    
 
@@ -301,7 +301,8 @@ private:
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
 
-    void _computeMapping(const VolumeKernel * mesh);
+    void _computeMapper(VolumeKernel * mesh);
+    void _updateMapper(const std::vector<adaption::Info> & info);
 
     void diff(PiercedStorage<double> &fields, const pod::PODMode &mode,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
@@ -311,7 +312,6 @@ private:
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
-
 
 };
 

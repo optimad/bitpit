@@ -228,7 +228,7 @@ void run()
     /** Map data on second mesh and write */
     PiercedStorage<double> data2(1, &patch_2D->getCells());
     {
-    PiercedStorage<mapping::Info> mapper = mapobject.getMapping();
+    const PiercedStorage<mapping::Info> & mapper = mapobject.getMapping();
     std::vector<double> vdata2(patch_2D->getInternalCount());
     count = 0;
     for (Cell & cell : patch_2D->getCells()){
@@ -264,7 +264,7 @@ void run()
 
     /** Re-Map data on first mesh with inverse mapping and write */
     {
-    PiercedStorage<mapping::Info> invmapper = mapobject.getInverseMapping();
+    const PiercedStorage<mapping::Info> & invmapper = mapobject.getInverseMapping();
     PiercedStorage<double> data3(1, &patch_2D_original->getCells());
     std::vector<double> vdata3(patch_2D_original->getInternalCount());
     count = 0;

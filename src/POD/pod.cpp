@@ -143,6 +143,8 @@ void POD::clear()
     m_nModes = 0;
     m_nReconstructionSnapshots = 0;
 
+    m_podkernel->clearMapper();
+
 # if BITPIT_ENABLE_MPI
     freeCommunicator();
 # endif
@@ -596,7 +598,7 @@ POD::ErrorMode POD::getErrorMode()
  *
  * \param[in] mode Expert mode active flag.
  * If expert mode is active same features have to be manually controlled:
- * - a pre-computed mapping between a mesh field and the POD mesh is not automatically re-computed when reconstructed (use computeMapping method)
+ * - a pre-computed mapping between a mesh field and the POD mesh is not automatically re-computed when reconstructed (use computeMapper method)
  */
 void POD::setExpert(bool mode)
 {
@@ -610,11 +612,11 @@ void POD::setExpert(bool mode)
  * If set to true, the corresponding cell is used during the minimization [or projection],
  * otherwise it is discarded.
  */
-void POD::setSensorMask(const PiercedStorage<bool> & mask, const VolumeKernel * mesh)
+void POD::setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh)
 {
     m_sensorMask.setStaticKernel(&(m_podkernel->getMesh()->getCells()));
 
-    if (m_staticMesh){
+    if (m_staticMesh || mesh == m_podkernel->getMesh()){
 
         for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
             long id = cell.getId();
@@ -628,8 +630,8 @@ void POD::setSensorMask(const PiercedStorage<bool> & mask, const VolumeKernel * 
             throw std::runtime_error ("POD: null mesh pointer passed to setSensorMask");
 
         //If mapping dirty or not computed, compute mapping of input mesh on pod mesh
-        if (m_podkernel->isMappingDirty())
-            _computeMapping(mesh);
+        if (m_podkernel->isMapperDirty())
+            _computeMapper(mesh);
 
         std::unordered_set<long> trueCells;
         for (const Cell & cell : mesh->getCells()){
@@ -837,7 +839,7 @@ void POD::leave1out()
 
     // Initialize error field  
     initErrorMaps();
-    
+
     // Initialize help variables
     std::vector<std::vector<double>> h_correlationMatrices=m_correlationMatrices;
     std::vector<pod::SnapshotFile> h_database=m_database; 
@@ -904,11 +906,7 @@ void POD::evalMeanMesh()
         throw std::runtime_error ("PODVolOctree database empty");
 
     // If the mesh is static do nothing on mesh and compute mean fields directly
-    if (m_staticMesh) {
-        evalMeanStaticMesh();
-    } else{
-        throw std::runtime_error("Dynamic mesh is not supported yet.");
-    }
+    _evalMeanMesh();
 
     //Compute cells volume
     m_podkernel->evalCellsVolume();
@@ -922,20 +920,35 @@ void POD::evalMeanMesh()
 }
 
 /**
- * Evaluation of the mean field on static mesh (used as POD mesh).
+ * Evaluation of the POD mesh and mean field on the mesh (if static mesh active it uses the mesh of the first read snapshot).
  */
-void POD::evalMeanStaticMesh()
+void POD::_evalMeanMesh()
 {
     //Read first mesh and use as meshPOD
     VolumeKernel* meshr = m_podkernel->readMesh(m_database[0]);
     m_podkernel->setMesh(meshr);
 
+    //Dynamic mesh case
+    if (!m_staticMesh){
+        // Compute meshPOD (starting from inital mesh) and fill filter
+        for (std::size_t i = 0; i < m_nSnapshots; i++) {
+            log::cout() << "pod : evaluation POD mesh - use snapshot " << i+1 << "/" << m_nSnapshots << std::endl;
+            pod::PODField readf;
+            readSnapshot(m_database[i], readf);
+            m_podkernel->adaptMeshToMesh(m_podkernel->getMesh(), readf.mesh);
+            m_podkernel->getMeshMapper().clear();
+            m_podkernel->setMapperDirty(true);
+        }
+    }
+    else{
+        // Read first snapshot to set n scalar and vector fields TODO readNsfNvf only from one field
+        pod::PODField readf;
+        readSnapshot(m_database[0], readf);
+    }
+
     m_filter.setStaticKernel(&(m_podkernel->getMesh()->getCells()));
     m_filter.fill(true);
 
-    // Read first snapshot to set n scalar and vector fields TODO readNsfNvf only from one field
-    pod::PODField readf;
-    readSnapshot(m_database[0], readf);
 
     if (m_useMean){
         m_mean.scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(m_nScalarFields, &m_podkernel->getMesh()->getCells()));
@@ -946,28 +959,64 @@ void POD::evalMeanStaticMesh()
         // Compute mean (starting from first snapshot) & filter+mask
         for (std::size_t i = 0; i < m_nSnapshots; i++) {
             log::cout() << "pod : evaluation mean - use snapshot " << i+1 << "/" << m_nSnapshots << std::endl;
+            pod::PODField * _readf;
             pod::PODField readf;
             readSnapshot(m_database[i], readf);
-            for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
-                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (readf.mask->at(cell.getId())); //N.B. mask == filter
-                for (std::size_t j = 0; j < m_nScalarFields; j++)
-                    m_mean.scalar->at(cell.getId(),j) += readf.scalar->at(cell.getId(),j) / double(m_nSnapshots);
-                for (std::size_t j = 0; j < m_nVectorFields; j++)
-                    m_mean.vector->at(cell.getId(),j) += readf.vector->at(cell.getId(),j) / double(m_nSnapshots);
+            if (m_staticMesh){
+                _readf = &readf;
             }
+            else{
+                //Compute mapping of read mesh on pod mesh
+                _computeMapper(readf.mesh);
+                _readf = new pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
+                m_podkernel->getMeshMapper().clear();
+                m_podkernel->setMapperDirty(true);
+            }
+
+            for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (_readf->mask->at(cell.getId())); //N.B. mask == filter
+                if (m_filter[cell.getId()]){
+                    for (std::size_t j = 0; j < m_nScalarFields; j++)
+                        m_mean.scalar->at(cell.getId(),j) += _readf->scalar->at(cell.getId(),j) / double(m_nSnapshots);
+                    for (std::size_t j = 0; j < m_nVectorFields; j++)
+                        m_mean.vector->at(cell.getId(),j) += _readf->vector->at(cell.getId(),j) / double(m_nSnapshots);
+                }
+                else{
+                    for (std::size_t j = 0; j < m_nScalarFields; j++)
+                        m_mean.scalar->at(cell.getId(),j) = 0.0;
+                    for (std::size_t j = 0; j < m_nVectorFields; j++)
+                        m_mean.vector->at(cell.getId(),j) = {0.0, 0.0, 0.0};
+                }
+            }
+            if (!m_staticMesh)
+                delete _readf;
         }
     }
     else {
-    // filter+mask
+        // filter+mask
         for (std::size_t i = 0; i < m_nSnapshots; i++) {
+            pod::PODField * _readf;
             pod::PODField readf;
             readSnapshot(m_database[i], readf);
+            if (m_staticMesh)
+            {
+                _readf = &readf;
+            }else{
+                _computeMapper(readf.mesh);
+                _readf = new pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
+                m_podkernel->getMeshMapper().clear();
+                m_podkernel->setMapperDirty(true);
+            }
+
             for (const Cell &cell : m_podkernel->getMesh()->getCells())
-                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (readf.mask->at(cell.getId())); //N.B. mask == filter          
+                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (_readf->mask->at(cell.getId())); //N.B. mask == filter
+
+            if (!m_staticMesh)
+                delete _readf;
         }
     }
-        
-    setSensorMask(m_filter);
+
+    setSensorMask(m_filter, m_podkernel->getMesh());
 }
 
 /**
@@ -1009,29 +1058,41 @@ void POD::evalCorrelation()
 {
     initCorrelation();
     for (std::size_t i = 0; i < m_nSnapshots; i++){
+        pod::PODField* _snapi;
         pod::PODField snapi;
         readSnapshot(m_database[i], snapi);
+        if (m_staticMesh){
+            _snapi = &snapi;
+        }
+        else{
+            _computeMapper(snapi.mesh);
+            _snapi = new pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
+            m_podkernel->getMeshMapper().clear();
+        }
 
-        //TODO diff if dynamic mesh?...
         if (m_useMean)
-            diff(snapi, m_mean);
+            diff(_snapi, m_mean);
 
         for (std::size_t j = i; j < m_nSnapshots; j++){
             log::cout() << "pod : evaluation " << i << "," << j << " term of correlation matrix " << std::endl;
+            pod::PODField* _snapj;
             pod::PODField snapj;
             readSnapshot(m_database[j], snapj);
+            if (m_staticMesh){
+                _snapj = &snapj;
+            }
+            else{
+                _computeMapper(snapj.mesh);
+                _snapj = new pod::PODField(m_podkernel->mapPODFieldToPOD(snapj, nullptr));
+                m_podkernel->getMeshMapper().clear();
+            }
 
-            //TODO diff if dynamic mesh?...
             if (m_useMean)
-                diff(snapj, m_mean);
+                diff(_snapj, m_mean);
 
-            evalCorrelationTerm(i, snapi, j, snapj);
+            evalCorrelationTerm(i, *_snapi, j, *_snapj);
 
-            if (!m_staticMesh)
-                delete [] snapj.mesh;
         }
-        if (!m_staticMesh)
-            delete [] snapi.mesh;
     }
 
 # if BITPIT_ENABLE_MPI
@@ -1074,34 +1135,31 @@ void POD::initErrorMaps()
 void POD::evalCorrelationTerm(int i, pod::PODField & snapi, int j, pod::PODField & snapj)
 {
 
-    if (m_staticMesh) {
-        std::unordered_set<long>::iterator it;
-        for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.end(); it++){
-            long id = *it;
-            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-            if (m_nScalarFields){
-                double* datasi = snapi.scalar->rawData(rawIndex);
-                double* datasj = snapj.scalar->rawData(rawIndex);
-                for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
-                    m_correlationMatrices[ifield][i*m_nSnapshots+j] += (*datasi)*(*datasj)*getRawCellVolume(rawIndex);
-                    datasi++;
-                    datasj++;
-                }
+    std::unordered_set<long>::iterator it;
+    for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.end(); it++){
+        long id = *it;
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        if (m_nScalarFields){
+            double* datasi = snapi.scalar->rawData(rawIndex);
+            double* datasj = snapj.scalar->rawData(rawIndex);
+            for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
+                m_correlationMatrices[ifield][i*m_nSnapshots+j] += (*datasi)*(*datasj)*getRawCellVolume(rawIndex);
+                datasi++;
+                datasj++;
             }
-            if (m_nVectorFields){
-                std::array<double,3>* datavi = snapi.vector->rawData(rawIndex);
-                std::array<double,3>* datavj = snapj.vector->rawData(rawIndex);
-                for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
-                    m_correlationMatrices[ifield][i*m_nSnapshots+j] += dotProduct((*datavi),(*datavj))*getRawCellVolume(rawIndex);
-                    datavi++;
-                    datavj++;
-                }
+        }
+        if (m_nVectorFields){
+            std::array<double,3>* datavi = snapi.vector->rawData(rawIndex);
+            std::array<double,3>* datavj = snapj.vector->rawData(rawIndex);
+            for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
+                m_correlationMatrices[ifield][i*m_nSnapshots+j] += dotProduct((*datavi),(*datavj))*getRawCellVolume(rawIndex);
+                datavi++;
+                datavj++;
             }
         }
 
-    } else {
-        throw std::runtime_error("Dynamic mesh is not supported yet.");
     }
+
 }
 
 /**
@@ -1121,19 +1179,18 @@ void POD::evalReconstruction()
             reconstructFields(snapi, reconi);
         }
         else{
-            //Set the mesh owned by the field
-            snapi.setMeshOwner();
 
             //Compute mapping of snapshot mesh on pod mesh
-            if (m_podkernel->isMappingDirty())
-                _computeMapping(snapi.mesh);
+            _computeMapper(snapi.mesh);
 
             // Map snapshot on pod mesh
             pod::PODField mappedSnapi = m_podkernel->mapPODFieldToPOD(snapi, nullptr);
+            m_podkernel->getMeshMapper().clear();
+
             reconstructFields(mappedSnapi, reconi);
         }
         std::string rname = m_name + ".recon." + m_reconstructionDatabase[i].name;
-        
+
         if (m_writeMode != WriteMode::NONE && m_errorMode != ErrorMode::COMBINED)
             dumpField(rname, reconi);
 
@@ -1173,7 +1230,7 @@ void POD::evalErrorBoundingBox()
     log::cout()<< efile.directory+"/"+efile.name +"..."<< endl;
     pod::PODField error;
     readSnapshot(efile, error);
-    
+
     fillListActiveIDs(*error.mask);
 
     std::vector<std::size_t> scalarIds, vectorIds;  
@@ -1219,14 +1276,14 @@ void POD::evalErrorBoundingBox()
 
         throw std::runtime_error ("POD: fields not found in POD base or incomplete vector: " + verror);
     }
-    
+
     std::size_t nsf = scalarIds.size();
     std::size_t nvf = vectorIds.size();
 
     std::vector<std::array<double, 3>> minBoxes, maxBoxes;
     minBoxes.resize(m_nFields,{0.0, 0.0, 0.0});
     maxBoxes.resize(m_nFields,{0.0, 0.0, 0.0});
-     
+
     std::unordered_set<long>::iterator it;
     for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.end(); it++) {
         long id = *it;
@@ -1254,27 +1311,27 @@ void POD::evalErrorBoundingBox()
             }
         }  
     }
-             
+
 # if BITPIT_ENABLE_MPI
     MPI_Allreduce(MPI_IN_PLACE, maxBoxes.data(), m_nFields*3, MPI_DOUBLE, MPI_MAX, m_communicator);
     MPI_Allreduce(MPI_IN_PLACE, minBoxes.data(), m_nFields*3, MPI_DOUBLE, MPI_MIN, m_communicator);    
 # endif  
-  
+
     log::cout()<< ">> Fields Bounding boxes " << endl; 
     log::cout()<< "min: "<< minBoxes << endl;
     log::cout()<< "max: "<< maxBoxes << endl;
-    
+
     std::array<double, 3> minBox={0.0, 0.0, 0.0};
     std::array<double, 3> maxBox={0.0, 0.0, 0.0};
-    
+
     for (std::size_t i =0; i < m_nFields; i++){
         maxBox=max(maxBoxes[i],maxBox);  
         minBox=min(minBoxes[i],minBox);      
     }
- 
+
     log::cout()<< ">> Bounding box " << endl; 
     log::cout()<< "("<< minBox << ") ("<< maxBox << ")"<< endl;
-    
+
     bool runSolver;
 #if BITPIT_ENABLE_MPI
     runSolver = (m_rank == 0);
@@ -1287,12 +1344,12 @@ void POD::evalErrorBoundingBox()
         outBB << maxBox << std::endl;
         outBB.close();
     }
-  
+
 }
 
 /**
  * Field reconstruction.
- * \param[in] field Original field.
+ * \param[in] field Original field (Note: it has to be defined on POD mesh).
  * \param[out] reconi Reconstructed field.
  */
 void POD::reconstructFields(pod::PODField & field,  pod::PODField & reconi)
@@ -1300,6 +1357,7 @@ void POD::reconstructFields(pod::PODField & field,  pod::PODField & reconi)
 
     //set the mesh of reconstructed field
     reconi.mesh = field.mesh;
+    reconi.mask = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(*field.mask));
     evalReconstructionCoeffs(field);
     buildFields(reconi);
     if (m_errorMode != ErrorMode::NONE){
@@ -1334,10 +1392,9 @@ void POD::evalReconstructionCoeffs(pod::PODField & field)
 void POD::_evalReconstructionCoeffs(pod::PODField & field)
 {
     if (m_useMean)
-        diff(field, m_mean);
+        diff(&field, m_mean);
     m_reconstructionCoeffs.clear();
     m_reconstructionCoeffs.resize(m_nFields, std::vector<double>(m_nModes, 0.0));
-    std::vector<std::vector<double> > rhs=m_reconstructionCoeffs;
 
     // Evaluate minimization matrices
     evalMinimizationMatrices();
@@ -1355,7 +1412,7 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
                 double* modes = m_modes[ir].scalar->rawData(rawIndex);
                 double* datas = field.scalar->rawData(rawIndex);
                 for (std::size_t ifield = 0; ifield < m_nScalarFields; ifield++){
-                    rhs[ifield][ir] += (*datas)*(*modes)*getRawCellVolume(rawIndex);
+                    m_reconstructionCoeffs[ifield][ir] += (*datas)*(*modes)*getRawCellVolume(rawIndex);
                     modes++;
                     datas++;
                 }
@@ -1364,7 +1421,7 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
                 std::array<double,3>* modev = m_modes[ir].vector->rawData(rawIndex);
                 std::array<double,3>* datav = field.vector->rawData(rawIndex);
                 for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ifield++){
-                    rhs[ifield][ir] += dotProduct((*datav),(*modev))*getRawCellVolume(rawIndex);
+                    m_reconstructionCoeffs[ifield][ir] += dotProduct((*datav),(*modev))*getRawCellVolume(rawIndex);
                     modev++;
                     datav++;
                 }
@@ -1374,15 +1431,15 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
 
 # if BITPIT_ENABLE_MPI
     for (std::size_t i = 0; i < m_nFields; i++)
-        MPI_Allreduce(MPI_IN_PLACE, rhs[i].data(), m_nModes, MPI_DOUBLE, MPI_SUM, m_communicator);
+        MPI_Allreduce(MPI_IN_PLACE, m_reconstructionCoeffs[i].data(), m_nModes, MPI_DOUBLE, MPI_SUM, m_communicator);
 # endif
 
     // Solve minimization
-    solveMinimization(rhs);
+    solveMinimization(m_reconstructionCoeffs);
 
     // Sum field and mean
     if (m_useMean)
-        sum(field, m_mean);
+        sum(&field, m_mean);
 }
 
 /**
@@ -1430,7 +1487,7 @@ void POD::buildFields(pod::PODField & recon)
     }
 
     if (m_useMean)
-        sum(recon, m_mean);
+        sum(&recon, m_mean);
 }
 
 /**
@@ -1580,8 +1637,6 @@ void POD::solveMinimization(std::vector<std::vector<double> > & rhs)
                 log::cout() << "WARNING!    algorithm convergence info " << info << std::endl;
                 throw std::runtime_error("Unable to solve minimization problem.");
             }
-
-            m_reconstructionCoeffs[i] = rhs[i];
         }
     }
     else{
@@ -1708,18 +1763,13 @@ void POD::checkModeCount(double *alambda, std::size_t ifield)
 void POD::evalModes()
 {
     m_modes.resize(m_nModes);
-
-    // If m_staticMesh no need mapping on fields to compute POD modes
-    if (m_staticMesh)
-        evalModesStaticMesh();
-    else
-        throw std::runtime_error("Dynamic mesh is not supported yet.");
+    _evalModes();
 }
 
 /**
- * Evaluation of POD modes for static mesh.
+ * Evaluation of POD modes for static and dynamic mesh.
  */
-void POD::evalModesStaticMesh()
+void POD::_evalModes()
 {
     for (std::size_t ir = 0; ir < m_nModes; ir++){
         m_modes[ir].scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(m_nScalarFields, &m_podkernel->getMesh()->getCells()));
@@ -1729,17 +1779,27 @@ void POD::evalModesStaticMesh()
     }
 
     for (std::size_t is = 0; is < m_nSnapshots; is++){
+        pod::PODField* _snapi;
         pod::PODField snapi;
         readSnapshot(m_database[is], snapi);
+        if (m_staticMesh){
+            _snapi = &snapi;
+        }
+        else{
+            _computeMapper(snapi.mesh);
+            _snapi = new pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
+            m_podkernel->getMeshMapper().clear();
+        }
+
         if (m_useMean)    
-            diff(snapi, m_mean);
+            diff(_snapi, m_mean);
 
         for (std::size_t ir = 0; ir < m_nModes; ir++){
             for (long id : m_listActiveIDs){
                 std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
                 if (m_nScalarFields){
                     double* modes = m_modes[ir].scalar->rawData(rawIndex);
-                    double* datas = snapi.scalar->rawData(rawIndex);
+                    double* datas = _snapi->scalar->rawData(rawIndex);
                     for (std::size_t ifs = 0; ifs < m_nScalarFields; ifs++){
                         *modes = *modes + *datas*m_podCoeffs[ifs][ir][is] / m_lambda[ifs][ir];
                         modes++;
@@ -1748,7 +1808,7 @@ void POD::evalModesStaticMesh()
                 }
                 if (m_nVectorFields){
                     std::array<double, 3>* modev = m_modes[ir].vector->rawData(rawIndex);
-                    std::array<double, 3>* datav = snapi.vector->rawData(rawIndex);
+                    std::array<double, 3>* datav = _snapi->vector->rawData(rawIndex);
                     for (std::size_t ifv = 0; ifv < m_nVectorFields; ifv++){
                         *modev = *modev + *datav*m_podCoeffs[m_nScalarFields+ifv][ir][is] / m_lambda[m_nScalarFields+ifv][ir];
                         modev++;
@@ -2301,9 +2361,10 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
 
     // Dumping mesh
     {
-        std::string header = name + "mesh";
-        OBinaryArchive binaryWriter(m_directory + "/" + name+".mesh", ARCHIVE_VERSION, header, dumpBlock);
-        field.mesh->dump(binaryWriter.getStream());
+        std::string header = name;// + "mesh";
+        OBinaryArchive binaryWriter(m_directory + name + ".mesh", ARCHIVE_VERSION, header, dumpBlock);
+        std::ostream &dataStream = binaryWriter.getStream();
+        field.mesh->dump(dataStream);
         binaryWriter.close();
     }
 
@@ -2361,11 +2422,12 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
 /**
  * Perform difference between a POD field and a POD mode.
  *
- * \param[in/out] a Field as POD object original / result.
+ * \param[in/out] _a Pointer to field as POD object original / result.
  * \param[in] b Mode as POD object.
  */
-void POD::diff(pod::PODField& a, const pod::PODMode& b)
+void POD::diff(pod::PODField* _a, const pod::PODMode& b)
 {
+    pod::PODField& a = *_a;
     std::size_t nsf = 0;
     if (m_nScalarFields){
         nsf = a.scalar->getFieldCount();
@@ -2380,33 +2442,40 @@ void POD::diff(pod::PODField& a, const pod::PODMode& b)
             throw std::runtime_error ("POD: different field count");
     }
 
-    //WARNING: it works only if nvf and nsf !=0 TODO
-    for (long id : a.scalar->getKernel()->getIds()){
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-        double* datasa = a.scalar->rawData(rawIndex);
-        double* datasb = b.scalar->rawData(rawIndex);
-        for (std::size_t i = 0; i < nsf; i++){
-            *datasa = *datasa - *datasb;
-            datasa++;
-            datasb++;
+    if (nsf){
+        for (long id : a.scalar->getKernel()->getIds()){
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            double* datasa = a.scalar->rawData(rawIndex);
+            double* datasb = b.scalar->rawData(rawIndex);
+            for (std::size_t i = 0; i < nsf; i++){
+                *datasa = *datasa - *datasb;
+                datasa++;
+                datasb++;
+            }
         }
-        std::array<double,3>* datava = a.vector->rawData(rawIndex);
-        std::array<double,3>* datavb = b.vector->rawData(rawIndex);
-        for (std::size_t i = 0; i < nvf; i++)
-            *datava = *datava - *datavb;
-        datava++;
-        datavb++;
+    }
+    if (nvf){
+        for (long id : a.scalar->getKernel()->getIds()){
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            std::array<double,3>* datava = a.vector->rawData(rawIndex);
+            std::array<double,3>* datavb = b.vector->rawData(rawIndex);
+            for (std::size_t i = 0; i < nvf; i++)
+                *datava = *datava - *datavb;
+            datava++;
+            datavb++;
+        }
     }
 }
 
 /**
  * Perform sum between a POD field and a POD mode.
  *
- * \param[in/out] a Field as POD object original /result.
+ * \param[in/out] a Pointer to field as POD object original /result.
  * \param[in] b Mode as POD object.
  */
-void POD::sum(pod::PODField& a, const pod::PODMode& b)
+void POD::sum(pod::PODField* _a, const pod::PODMode& b)
 {
+    pod::PODField& a = *_a;
     std::size_t nsf = 0;
     if (m_nScalarFields){
         nsf = a.scalar->getFieldCount();
@@ -2420,22 +2489,29 @@ void POD::sum(pod::PODField& a, const pod::PODMode& b)
         if (nvf != b.vector->getFieldCount())
             throw std::runtime_error ("POD: different field count");
     }
-    //WARNING: it works only if nvf and nsf !=0 TODO
-    for (long id : a.scalar->getKernel()->getIds()){
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-        double* datasa = a.scalar->rawData(rawIndex);
-        double* datasb = b.scalar->rawData(rawIndex);;
-        for (std::size_t i = 0; i < nsf; i++){
-            *datasa = *datasa + *datasb;
-            datasa++;
-            datasb++;
+
+    if (nsf){
+        for (long id : a.scalar->getKernel()->getIds()){
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            double* datasa = a.scalar->rawData(rawIndex);
+            double* datasb = b.scalar->rawData(rawIndex);;
+            for (std::size_t i = 0; i < nsf; i++){
+                *datasa = *datasa + *datasb;
+                datasa++;
+                datasb++;
+            }
         }
-        std::array<double,3>* datava = a.vector->rawData(rawIndex);
-        std::array<double,3>* datavb = b.vector->rawData(rawIndex);
-        for (std::size_t i = 0; i < nvf; i++)
-            *datava = *datava + *datavb;
-        datava++;
-        datavb++;
+    }
+    if (nvf){
+        for (long id : a.scalar->getKernel()->getIds()){
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            std::array<double,3>* datava = a.vector->rawData(rawIndex);
+            std::array<double,3>* datavb = b.vector->rawData(rawIndex);
+            for (std::size_t i = 0; i < nvf; i++)
+                *datava = *datava + *datavb;
+            datava++;
+            datavb++;
+        }
     }
 }
 
@@ -2586,7 +2662,7 @@ void POD::freeCommunicator()
  * \param[in] targetFields Map of names/ids of fields in PiercedStorage to reconstruct
  * \param[in] targetCells Pointer to list of cell to be updated with the reconstructed values (optional, default whole field).
  */
-void POD::reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *mesh,
+void POD::reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
         std::map<std::string, std::size_t> targetFields,
         const std::unordered_set<long> * targetCells)
 {
@@ -2653,8 +2729,8 @@ void POD::reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *
     else{
 
         //If mapping not computed, compute mapping of input mesh on pod mesh
-        if (m_podkernel->isMappingDirty())
-            _computeMapping(mesh);
+        if (m_podkernel->isMapperDirty())
+            _computeMapper(mesh);
 
         // Map data fields on pod mesh
         PiercedStorage<double> mappedFields = m_podkernel->mapFieldsToPOD(fields, mesh, &m_listActiveIDs, scalarIds, vectorIds);
@@ -2719,7 +2795,6 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
 
     m_reconstructionCoeffs.clear();
     m_reconstructionCoeffs.resize(m_nFields, std::vector<double>(m_nModes, 0.0));
-    std::vector<std::vector<double> > rhs = m_reconstructionCoeffs;
 
     // Evaluate minimization matrices
     evalMinimizationMatrices();
@@ -2739,7 +2814,7 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
                 for (std::size_t ifield = 0; ifield < nsf; ifield++) {
                     double *modesi = modes + podscalarIds[ifield];
                     double *datagi = datag + scalarIds[ifield];
-                    rhs[ifield][ir] += (*datagi)*(*modesi)*getRawCellVolume(rawIndex);
+                    m_reconstructionCoeffs[ifield][ir] += (*datagi)*(*modesi)*getRawCellVolume(rawIndex);
                 }
             }
             if (nvf) {
@@ -2748,7 +2823,7 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
                     std::array<double,3>* modevi = modev + podvectorIds[ifield];
                     for (std::size_t j = 0; j < 3; j++) {
                         double *datagi = datag + vectorIds[ifield][j];
-                        rhs[m_nScalarFields+ifield][ir] += ((*datagi)*(*modevi)[j])*getRawCellVolume(rawIndex);
+                        m_reconstructionCoeffs[m_nScalarFields+ifield][ir] += ((*datagi)*(*modevi)[j])*getRawCellVolume(rawIndex);
                     }
                 }
             }
@@ -2757,11 +2832,11 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
 
 #if BITPIT_ENABLE_MPI
     for (std::size_t i = 0; i < m_nFields; i++)
-        MPI_Allreduce(MPI_IN_PLACE, rhs[i].data(), m_nModes, MPI_DOUBLE, MPI_SUM, m_communicator);
+        MPI_Allreduce(MPI_IN_PLACE, m_reconstructionCoeffs[i].data(), m_nModes, MPI_DOUBLE, MPI_SUM, m_communicator);
 #endif
 
     // Solve
-    solveMinimization(rhs);
+    solveMinimization(m_reconstructionCoeffs);
 
     // Sum field and mean
     sum(fields, m_mean, scalarIds, podscalarIds, vectorIds, podvectorIds, &m_listActiveIDs);
@@ -2872,21 +2947,54 @@ void POD::_buildFields(PiercedStorage<double> &fields,
  * Can be called only if expert mode is active.
  * \param[in] mesh Pointer to input mesh
  */
-void POD::computeMapping(const VolumeKernel * mesh)
+void POD::computeMapper(VolumeKernel * mesh)
 {
     if (!m_expert)
-        throw std::runtime_error("POD: compute mapping can be called only in expert mode");
-    _computeMapping(mesh);
+        throw std::runtime_error("POD: compute mapper can be called only in expert mode");
+    _computeMapper(mesh);
+}
+
+/**
+ * Update the mapping pre-computed of an input mesh to the POD mesh by
+ * the info given after an adaptation of the input mesh.
+ * Can be called only if expert mode is active.
+ * \param[in] info Info vector result of adaptation of the input mesh
+ */
+void POD::updateMapper(const std::vector<adaption::Info> & info)
+{
+    if (!m_expert)
+        throw std::runtime_error("POD: update mapper can be called only in expert mode");
+    _updateMapper(info);
 }
 
 /**
  * Compute the mapping of an input mesh to the POD mesh (internal method).
  * \param[in] mesh Pointer to input mesh
  */
-void POD::_computeMapping(const VolumeKernel * mesh)
+void POD::_computeMapper(VolumeKernel * mesh)
 {
-    m_podkernel->computeMapping(mesh);
-    m_podkernel->setMappingDirty(!m_expert);
+    m_podkernel->computeMapper(mesh);
+    m_podkernel->setMapperDirty(!m_expert);
+}
+
+/**
+ * Prepare the pre-computed mapping of an input mesh to the POD mesh by
+ * the info given before an adaptation of the input mesh (internal method).
+ * \param[in] info Info vector result of adaptation prepare of the input mesh
+ */
+void POD::prepareMapper(const std::vector<adaption::Info> & info)
+{
+    m_podkernel->prepareMapper(info);
+}
+
+/**
+ * Update the mapping pre-computed of an input mesh to the POD mesh by
+ * the info given after an adaptation of the input mesh (internal method).
+ * \param[in] info Info vector result of adaptation of the input mesh
+ */
+void POD::_updateMapper(const std::vector<adaption::Info> & info)
+{
+    m_podkernel->updateMapper(info);
 }
 
 /**

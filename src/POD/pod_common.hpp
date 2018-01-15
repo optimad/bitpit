@@ -110,6 +110,7 @@ struct PODField
 
     PODField(int nsf, int nvf, VolumeKernel *lmesh = nullptr, const PiercedKernel<long> *lkernel = nullptr)
     {
+        meshOwner = false;
         mesh   = lmesh;
         mask   = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(1, lkernel));
         scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(nsf, lkernel));
@@ -117,7 +118,7 @@ struct PODField
     }
 
     /**
-     * Set the linked kernel to a pod field.
+     * Set the linked static kernel to a pod field.
      *
      * \param[in] lkernel Linked kernel
      */
@@ -126,6 +127,18 @@ struct PODField
         mask->setStaticKernel(lkernel);
         scalar->setStaticKernel(lkernel);
         vector->setStaticKernel(lkernel);
+    }
+
+    /**
+     * Set the linked dynamic kernel to a pod field.
+     *
+     * \param[in] lkernel Linked kernel
+     */
+    void setDynamicKernel(PiercedKernel<long> *lkernel)
+    {
+        mask->setDynamicKernel(lkernel, PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
+        scalar->setDynamicKernel(lkernel, PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
+        vector->setDynamicKernel(lkernel, PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
     }
 
     /**

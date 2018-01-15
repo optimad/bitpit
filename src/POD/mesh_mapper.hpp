@@ -58,10 +58,13 @@ public:
     void clearMapping();
     void clearInverseMapping();
 
-    const bitpit::PiercedStorage<bitpit::adaption::Info> & getMapping();
-    const bitpit::PiercedStorage<bitpit::adaption::Info> & getInverseMapping();
+    const bitpit::PiercedStorage<mapping::Info> & getMapping();
+    const bitpit::PiercedStorage<mapping::Info> & getInverseMapping();
 
-    void mapMeshes(const bitpit::VolumeKernel * meshReference, const bitpit::VolumeKernel * meshMapped, bool fillInv = false);
+    void mapMeshes(bitpit::VolumeKernel * meshReference, bitpit::VolumeKernel * meshMapped, bool fillInv = false);
+
+    void mappingAdaptionPreparare(const std::vector<adaption::Info> & infoAdapt, bool reference = true);
+    void mappingAdaptionUpdate(const std::vector<adaption::Info> & infoAdapt, bool reference = true, bool fillInv = true);
 
 protected:
 
@@ -71,11 +74,20 @@ protected:
     int                     m_rank;         /**< Local rank of process. */
     int                     m_nProcs;       /**< Number of processes. */
 
-    bitpit::PiercedStorage<bitpit::adaption::Info> m_mapper;  /**< Mapping info for each cell of reference mesh. */
-    bitpit::PiercedStorage<bitpit::adaption::Info> m_invmapper;  /**< Inverse mapping info for each cell of reference mesh. */
+    VolumeKernel* m_referenceMesh;
+    VolumeKernel* m_mappedMesh;
 
-    void _mapMeshes(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv);
-    void _mapMeshesSamePartition(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv);
+    PiercedStorage<adaption::Info> m_mapper;  /**< Mapping info for each cell of reference mesh.
+                                                                  The mapping info is treated as a set of adaption info related to
+                                                                  an adaption of the mapped mesh toward the reference mesh. */
+    PiercedStorage<adaption::Info> m_invmapper;  /**< Inverse mapping info for each cell of mapped mesh. */
+
+
+    std::unordered_map<long, mapping::Info> m_previousmapper;
+
+
+    void _mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped, bool fillInv);
+    void _mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped, bool fillInv);
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);

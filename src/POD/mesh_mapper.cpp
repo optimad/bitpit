@@ -83,7 +83,8 @@ void MeshMapper::clear()
  */
 void MeshMapper::clearMapping()
 {
-    m_mapper.unsetKernel(true);
+    if (m_mapper.getKernel() != nullptr)
+        m_mapper.unsetKernel(true);
 }
 
 /**
@@ -91,13 +92,14 @@ void MeshMapper::clearMapping()
  */
 void MeshMapper::clearInverseMapping()
 {
-    m_invmapper.unsetKernel(true);
+    if (m_invmapper.getKernel() != nullptr)
+        m_invmapper.unsetKernel(false);
 }
 
 /**
  * Get direct mapping
  */
-const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getMapping()
+const bitpit::PiercedStorage<mapping::Info> & MeshMapper::getMapping()
 {
     return m_mapper;
 }
@@ -105,7 +107,7 @@ const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getMapping()
 /**
  * Get inverse mapping
  */
-const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getInverseMapping()
+const bitpit::PiercedStorage<mapping::Info> & MeshMapper::getInverseMapping()
 {
     return m_invmapper;
 }
@@ -120,16 +122,188 @@ const bitpit::PiercedStorage<bitpit::adaption::Info> & MeshMapper::getInverseMap
  * \param[in] meshMapped Pointer to VolumeKernel input mesh to map
  * \param[in] fillInv If true even the inverse mapping (reference mesh to input mesh) is filled.
  */
-void MeshMapper::mapMeshes(const bitpit::VolumeKernel * meshReference, const bitpit::VolumeKernel * meshMapped, bool fillInv)
+void MeshMapper::mapMeshes(bitpit::VolumeKernel * meshReference, bitpit::VolumeKernel * meshMapped, bool fillInv)
 {
+    clear();
+
     {
-        const VolOctree* _meshReference = dynamic_cast<const VolOctree*>(meshReference);
-        const VolOctree* _meshMapped = dynamic_cast<const VolOctree*>(meshMapped);
+        VolOctree* _meshReference = dynamic_cast<VolOctree*>(meshReference);
+        VolOctree* _meshMapped = dynamic_cast<VolOctree*>(meshMapped);
         if (_meshReference && _meshMapped){
+            m_referenceMesh = meshReference;
+            m_mappedMesh = meshMapped;
             _mapMeshes(_meshReference, _meshMapped, fillInv);
         }
     }
 }
+
+
+void MeshMapper::mappingAdaptionPreparare(const std::vector<adaption::Info> & infoAdapt, bool reference)
+{
+    m_previousmapper.clear();
+    PiercedStorage<adaption::Info>* pmapper;
+
+    if (reference)
+        pmapper = &m_mapper;
+    else
+        pmapper = &m_invmapper;
+
+    for (const adaption::Info & info : infoAdapt){
+            for (const long & id : info.previous)
+                m_previousmapper[id] = pmapper->at(id);
+    }
+}
+
+void MeshMapper::mappingAdaptionUpdate(const std::vector<adaption::Info> & infoAdapt, bool reference, bool fillInv)
+{
+
+    VolOctree* meshAdapted;
+    PiercedStorage<adaption::Info>* mapperAdapted;
+    VolOctree* meshMapped;
+    PiercedStorage<adaption::Info>* mapperMapped;
+    if (reference){
+        meshAdapted = dynamic_cast<VolOctree*>(m_referenceMesh);
+        mapperAdapted = &m_mapper;
+        meshMapped = dynamic_cast<VolOctree*>(m_mappedMesh);
+        mapperMapped = &m_invmapper;
+    }
+    else{
+        meshMapped = dynamic_cast<VolOctree*>(m_referenceMesh);
+        mapperAdapted = &m_invmapper;
+        meshAdapted = dynamic_cast<VolOctree*>(m_mappedMesh);
+        mapperMapped = &m_mapper;
+    }
+
+    for (const adaption::Info & info : infoAdapt){
+        if (info.type == adaption::Type::TYPE_RENUMBERING){
+            long id = info.current[0];
+            (*mapperAdapted)[id].current.clear();
+            (*mapperAdapted)[id].previous.clear();
+
+            (*mapperAdapted)[id].current.push_back(id);
+            (*mapperAdapted)[id].type = m_previousmapper[info.previous[0]].type;
+            (*mapperAdapted)[id].entity = adaption::Entity::ENTITY_CELL;
+            (*mapperAdapted)[id].previous = m_previousmapper[info.previous[0]].previous;
+
+            if (fillInv){
+                for (long idp : (*mapperAdapted)[id].previous){
+                    std::vector<long>::iterator it = std::find((*mapperMapped)[idp].previous.begin(), (*mapperMapped)[idp].previous.end(), info.previous[0]);
+                    *it = id;
+                }
+            }
+        }
+        if (info.type == adaption::Type::TYPE_REFINEMENT){
+            std::size_t iprevious = 0;
+            long idprevious = m_previousmapper[info.previous[0]].previous[iprevious];
+            VolOctree::OctantInfo oinfoprev = meshMapped->getCellOctant(idprevious);
+            uint64_t morton = meshMapped->getTree().getMorton(oinfoprev.id);
+            for (const long & id : info.current){
+                (*mapperAdapted)[id].current.clear();
+                (*mapperAdapted)[id].previous.clear();
+                (*mapperAdapted)[id].entity = adaption::Entity::ENTITY_CELL;
+                (*mapperAdapted)[id].current.push_back(id);
+                uint8_t level =  meshAdapted->getCellLevel(id);
+                if (level == meshMapped->getCellLevel(idprevious)){
+                    (*mapperAdapted)[id].type = adaption::Type::TYPE_RENUMBERING;
+                    (*mapperAdapted)[id].previous.push_back(idprevious);
+
+                    if (fillInv){
+                        (*mapperMapped)[idprevious].type = adaption::Type::TYPE_RENUMBERING;
+                        (*mapperMapped)[idprevious].previous.clear();
+                        (*mapperMapped)[idprevious].previous.push_back(id);
+                    }
+                }
+                else if (level > meshMapped->getCellLevel(idprevious)){
+                    (*mapperAdapted)[id].type = adaption::Type::TYPE_REFINEMENT;
+                    (*mapperAdapted)[id].previous.push_back(idprevious);
+
+                    if (fillInv){
+                        std::vector<long>::iterator it = std::find((*mapperMapped)[idprevious].previous. begin(), (*mapperMapped)[idprevious].previous.end(), info.previous[0]);
+                        if (it != (*mapperMapped)[idprevious].previous.end()){
+                            *it = id;
+                        }
+                        else{
+                            (*mapperMapped)[idprevious].previous.push_back(id);
+                        }
+                        (*mapperMapped)[idprevious].type = adaption::Type::TYPE_COARSENING;
+                    }
+                }
+                else if (level < meshMapped->getCellLevel(idprevious)){
+                    (*mapperAdapted)[id].type = adaption::Type::TYPE_COARSENING;
+                    VolOctree::OctantInfo oinfo = meshAdapted->getCellOctant(id);
+                    uint64_t mortonlastdesc = meshAdapted->getTree().getLastDescMorton(oinfo.id);
+                    while (morton <= mortonlastdesc && iprevious < m_previousmapper[info.previous[0]].previous.size()){
+
+                        idprevious = m_previousmapper[info.previous[0]].previous[iprevious];
+                        oinfoprev = meshMapped->getCellOctant(idprevious);
+                        morton = meshMapped->getTree().getMorton(oinfoprev.id);
+                        (*mapperAdapted)[id].previous.push_back(idprevious);
+
+                        if (fillInv){
+                            (*mapperMapped)[idprevious].type = adaption::Type::TYPE_REFINEMENT;
+                            (*mapperMapped)[idprevious].previous[0] = id;
+                        }
+
+                        iprevious++;
+                    }
+                }
+            }
+        }
+        if (info.type == adaption::Type::TYPE_COARSENING){
+            long id = info.current[0];
+            (*mapperAdapted)[id].current.clear();
+            (*mapperAdapted)[id].previous.clear();
+            (*mapperAdapted)[id].entity = adaption::Entity::ENTITY_CELL;
+            (*mapperAdapted)[id].current.push_back(id);
+            uint8_t level =  meshAdapted->getCellLevel(id);
+            std::unordered_set<long> idsprev;
+            for (const long & id_ : info.previous){
+                for (const long & idp : m_previousmapper[id_].previous){
+                    idsprev.insert(idp);
+                }
+            }
+            if (idsprev.size() == 1){
+                long idprevious = *idsprev.begin();
+                if (level == meshMapped->getCellLevel(idprevious)){
+                    (*mapperAdapted)[id].type = adaption::Type::TYPE_RENUMBERING;
+
+                    if (fillInv){
+                        (*mapperMapped)[idprevious].type = adaption::Type::TYPE_RENUMBERING;
+                        (*mapperMapped)[idprevious].previous.clear();
+                        (*mapperMapped)[idprevious].previous.push_back(id);
+                    }
+                }
+                else{
+                    (*mapperAdapted)[id].type = adaption::Type::TYPE_REFINEMENT;
+
+                    if (fillInv){
+                        std::vector<long>::iterator it = std::find((*mapperMapped)[idprevious].previous. begin(), (*mapperMapped)[idprevious].previous.end(), info.previous[0]);
+                        *it = id;
+                        (*mapperMapped)[idprevious].type = adaption::Type::TYPE_COARSENING;
+                    }
+
+                }
+            }
+            else{
+                (*mapperAdapted)[id].type = adaption::Type::TYPE_COARSENING;
+
+                if (fillInv){
+                    for (const long & idprevious : idsprev){
+                        (*mapperMapped)[idprevious].type = adaption::Type::TYPE_REFINEMENT;
+                        (*mapperMapped)[idprevious].previous[0] = id;
+                    }
+                }
+
+            }
+            for (const long & id_ : idsprev){
+                (*mapperAdapted)[id].previous.push_back(id_);
+            }
+        }
+    }
+
+}
+
+
 
 /**
  * Map an input VolOctree mesh on a VolOctree reference mesh.
@@ -139,15 +313,17 @@ void MeshMapper::mapMeshes(const bitpit::VolumeKernel * meshReference, const bit
  * \param[in] meshMapped Pointer to input mesh to map
  * \param[in] fillInv If true even the inverse mapping (reference mesh to input mesh) is filled.
  */
-void MeshMapper::_mapMeshes(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv)
+void MeshMapper::_mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped, bool fillInv)
 {
 
     if ( (meshReference->getLength() != meshMapped->getLength()) || (meshReference->getOrigin() != meshMapped->getOrigin()) )
         throw std::runtime_error ("mesh mapper: different domain of VolOctree meshes not allowed.");
 
-    m_mapper.setStaticKernel(&meshReference->getCells());
+    m_mapper.setDynamicKernel(&meshReference->getCells(), PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
     if (fillInv)
-        m_invmapper.setStaticKernel(&meshMapped->getCells());
+        m_invmapper.setDynamicKernel(&meshMapped->getCells(), PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
+    else
+        clearInverseMapping();
 
 
     bool checkPartition = true;
@@ -191,7 +367,7 @@ void MeshMapper::_mapMeshes(const bitpit::VolOctree * meshReference, const bitpi
  * \param[in] meshMapped Pointer to input mesh to map
  * \param[in] fillInv If true even the inverse mapping (reference mesh to input mesh) is filled.
  */
-void MeshMapper::_mapMeshesSamePartition(const bitpit::VolOctree * meshReference, const bitpit::VolOctree * meshMapped, bool fillInv)
+void MeshMapper::_mapMeshesSamePartition(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped, bool fillInv)
 {
 
     long nRef  = meshReference->getInternalCount();

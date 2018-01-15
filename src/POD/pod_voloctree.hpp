@@ -78,6 +78,8 @@ private:
 
     std::unordered_set<long> mapCellsToPOD(const std::unordered_set<long> * targetCells);
 
+    void adaptMeshToMesh(VolumeKernel* meshToAdapt, VolumeKernel * meshReference);
+
 };
 
 }

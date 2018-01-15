@@ -189,10 +189,33 @@ double PODKernel::getRawCellVolume(long rawIndex)
  * \param[in] mesh Pointer to input mesh.
  * \param[in] fillInv If true even the inverse mapping is computed.
  */
-void PODKernel::computeMapping(const VolumeKernel * mesh, bool fillInv)
+void PODKernel::computeMapper(VolumeKernel * mesh, bool fillInv)
 {
     m_meshmap.mapMeshes(m_meshPOD, mesh, fillInv);
-    setMappingDirty(false);
+    setMapperDirty(false);
+}
+
+/**
+ * Prepare the pre-computed mapping of an input mesh to the POD mesh by
+ * the info given before an adaptation of the input mesh (internal method).
+ * \param[in] info Info vector result of adaptation prepare of the input mesh
+ */
+void PODKernel::prepareMapper(const std::vector<adaption::Info> & info)
+{
+    m_meshmap.mappingAdaptionPreparare(info, false);
+    setMapperDirty(true);
+}
+
+/**
+ * Update the mapping pre-computed of an input mesh to the POD mesh by
+ * the info given after an adaptation of the input mesh (internal method).
+ * \param[in] info Info vector result of adaptation of the input mesh
+ * \param[in] fillInv If true even the inverse mapping is computed.
+ */
+void PODKernel::updateMapper(const std::vector<adaption::Info> & info, bool fillInv)
+{
+    m_meshmap.mappingAdaptionUpdate(info, false, fillInv);
+    setMapperDirty(false);
 }
 
 /**
@@ -205,10 +228,18 @@ MeshMapper & PODKernel::getMeshMapper()
 }
 
 /**
+ * Clear the mapping info.
+ */
+void PODKernel::clearMapper()
+{
+    m_meshmap.clear();
+    m_dirtymap = true;
+}
+/**
  * Set if the mapper has to be recomputed.
  * param[in] Dirty mapping flag
  */
-void PODKernel::setMappingDirty(bool dirty)
+void PODKernel::setMapperDirty(bool dirty)
 {
     m_dirtymap = dirty;
 }
@@ -217,7 +248,7 @@ void PODKernel::setMappingDirty(bool dirty)
  * Get if the mapper has to be recomputed.
  * return Is the mapping dirty?
  */
-bool PODKernel::isMappingDirty()
+bool PODKernel::isMapperDirty()
 {
     return m_dirtymap;
 }

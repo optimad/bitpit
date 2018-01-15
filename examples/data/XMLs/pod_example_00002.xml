@@ -8,7 +8,7 @@
             <ReconstructionMode>PROJECTION</ReconstructionMode>
             <Directory>./pod</Directory>
             <Name>pod.test.solver</Name>
-            <StaticMesh>1</StaticMesh>
+            <SteadyMesh>0</SteadyMesh>
     </POD>
     <Database>
         <c0>
@@ -16,6 +16,16 @@
             <Directory>./data</Directory>
             <NSnapshots>11</NSnapshots>
         </c0>
+         <c1>
+            <Case>testrefine</Case>
+            <Directory>./data</Directory>
+            <NSnapshots>11</NSnapshots>
+        </c1>
+        <c2>
+            <Case>testcoarse</Case>
+            <Directory>./data</Directory>
+            <NSnapshots>11</NSnapshots>
+        </c2>
     </Database>
     <Reconstruction>
         <c0>
@@ -25,5 +35,19 @@
             <Stride>1</Stride>
             <FirstSnapshot>0</FirstSnapshot>
         </c0>
+        <c1>
+            <Case>testrefine</Case>
+            <Directory>./data</Directory>
+            <NSnapshots>11</NSnapshots>
+            <Stride>1</Stride>
+            <FirstSnapshot>0</FirstSnapshot>
+        </c1>
+        <c2>
+            <Case>testcoarse</Case>
+            <Directory>./data</Directory>
+            <NSnapshots>11</NSnapshots>
+            <Stride>1</Stride>
+            <FirstSnapshot>0</FirstSnapshot>
+        </c2>
     </Reconstruction>
 </podXML>	

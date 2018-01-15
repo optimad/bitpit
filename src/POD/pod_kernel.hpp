@@ -63,8 +63,10 @@ public:
     double getCellVolume(long id);
     double getRawCellVolume(long rawIndex);
     MeshMapper & getMeshMapper();
-    bool isMappingDirty();
-    void computeMapping(const VolumeKernel * mesh, bool fillInv = true);
+    bool isMapperDirty();
+    void computeMapper(VolumeKernel * mesh, bool fillInv = true);
+    void prepareMapper(const std::vector<adaption::Info> & info);
+    void updateMapper(const std::vector<adaption::Info> & info, bool fillInv = true);
 
 #if BITPIT_ENABLE_MPI
     MPI_Comm getCommunicator() const;
@@ -93,7 +95,8 @@ protected:
     VolumeKernel* readMesh(const pod::SnapshotFile &snap);
     void restoreMesh(const pod::SnapshotFile &snap);
 
-    void setMappingDirty(bool dirty = true);
+    void clearMapper();
+    void setMapperDirty(bool dirty = true);
 
     virtual VolumeKernel* createMesh() = 0;
 
@@ -110,6 +113,8 @@ protected:
     virtual void mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh, const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField) = 0;
 
     virtual std::unordered_set<long> mapCellsToPOD(const std::unordered_set<long> * cells) = 0;
+
+    virtual void adaptMeshToMesh(VolumeKernel * meshToAdapt, VolumeKernel * meshReference) = 0;
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);

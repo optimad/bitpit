@@ -125,7 +125,7 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
             }
         }
         else if (m_mapper[id].type == adaption::Type::TYPE_COARSENING){
-            mappedField.mask->set(id, false);
+            mappedField.mask->set(id, true);
 
             for (std::size_t i = 0; i < nsf; i++){
                 double *datamappedSi = datamappedS + i;
@@ -142,7 +142,7 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
             double volmapped = getRawCellVolume(rawIndex);
             for (long idd : m_mapper[id].previous){
                 dataB = field.mask->at(idd);
-                dataMappedB |= dataB;
+                dataMappedB &= dataB;
 
                 dataS = field.scalar->data(idd);
                 double vol = field.mesh->evalCellVolume(idd);
@@ -233,7 +233,7 @@ void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordere
             }
         }
         else if (m_invmapper[id].type == adaption::Type::TYPE_COARSENING){
-            bool dataB = false;
+            bool dataB = true;
             for (std::size_t i = 0; i < nsf; i++){
                 double *dataSi = dataS + i;
                 (*dataSi) = 0.0;
@@ -249,7 +249,7 @@ void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordere
             for (long idd : m_invmapper[id].previous){
                 std::size_t rawIndexIdd = m_meshPOD->getCells().getRawIndex(idd);
                 datamappedB = mappedField.mask->at(idd);
-                dataB |= datamappedB;
+                dataB &= datamappedB;
                 datamappedS = mappedField.scalar->data(idd);
                 double volmapped = getRawCellVolume(rawIndexIdd);
                 for (std::size_t i = 0; i < nsf; i++){
@@ -582,5 +582,40 @@ std::unordered_set<long> PODVolOctree::mapCellsToPOD(const std::unordered_set<lo
 
 }
 
+void PODVolOctree::adaptMeshToMesh(VolumeKernel* meshToAdapt, VolumeKernel * meshReference)
+{
+
+    computeMapper(meshReference);
+
+    bool adapt = true;
+
+    while(adapt){
+
+        adapt = false;
+
+        const PiercedStorage<mapping::Info> & m_mapper = getMeshMapper().getMapping();
+        const PiercedStorage<mapping::Info> & m_invmapper = getMeshMapper().getInverseMapping();
+
+        for (Cell & cell : getMesh()->getCells()){
+            long id = cell.getId();
+            if (m_mapper[id].type == adaption::Type::TYPE_COARSENING){
+                getMesh()->markCellForRefinement(id);
+                adapt = true;
+            }
+        }
+
+        std::vector<adaption::Info> infoAdapt = getMesh()->adaptionPrepare(true);
+
+        getMeshMapper().mappingAdaptionPreparare(infoAdapt, true);
+
+        infoAdapt = getMesh()->adaptionAlter(true);
+
+        getMeshMapper().mappingAdaptionUpdate(infoAdapt, true, true);
+
+        getMesh()->adaptionCleanup();
+
+    }
+
+}
 
 }
