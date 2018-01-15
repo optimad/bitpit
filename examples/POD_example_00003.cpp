@@ -25,9 +25,11 @@
 /**
  * \example POD_example_00003.cpp
  * 
- * \brief leave-1-out computation using voloctree.
- * This example computes the leave-1-out cross-validation starting from a 
- * database of simulations defined on the same mesh and evaluate the error maps
+ * \brief POD leave-1-out error map computation using voloctree.
+ * This example uses the leave-1-out cross-validation method to compute the reconstruction
+ * error map starting from a database of simulations defined on the same mesh.
+ * It evaluates also the bounding box containing all those cells whose error is equal or greater
+ * than an assigned threshold.
  * <b>To run</b>: ./POD_example_00003 \n
  */ 
 
@@ -63,36 +65,25 @@ void run()
     pod.setDirectory("pod");
     pod.setName("pod.test.solver");    
 
-    /**<Remove snapshots from the leave-1-out method.*/   
+    /**<Remove snapshots from the leave-1-out method.
+     * These snapshots are always used in the POD bases computation and
+     * the corresponding reconstruction error is never evaluated. */   
     for (int i=0; i<5; i++)
         pod.removeLeave1outSnapshot("./data", "test."+to_string(2*i)); 
     
     /**<Compute the error map through the leave-1-out method.*/ 
     pod.leave1out();
     
-    /**<Set target error fields.*/
-    std::map<std::string, std::size_t> fields;
+    /**<Set target error fields used in the bounding box evaluation.*/
     std::vector<std::string> namesf {"p","a"};
-    std::vector<std::array<std::string,3>> namevf {}; //;{{"u_x", "u_y","u_z"}};
-    std::size_t nsf= namesf.size();
-    std::size_t nvf= namevf.size();
-    
-    for (std::size_t ifield=0; ifield<nsf; ifield++){
-        fields[namesf[ifield]] = ifield;
-    }
-   
-    
-    for (std::size_t ifield=0; ifield<nvf; ifield++){
-        for (std::size_t j=0; j<3; j++){
-            fields[namevf[ifield][j]] = ifield*3+nsf+j;
-        }
-    }
+    std::vector<std::array<std::string,3>> namevf {}; //{{"u_x", "u_y","u_z"}};  
+    pod.setTargetErrorFields(namesf,namevf);
 
-    /**<Set error threshold for bounding box computation.*/
+    /**<Set error threshold for the bounding box evaluation.*/
     pod.setErrorThreshold(0.001);
     
-    /**<Evaluate the error bounding box.*/
-    pod.evalErrorBoundingBox(fields);
+    /**<Evaluate the bounding box of the target error fields.*/
+    pod.evalErrorBoundingBox();
 }
 
 /**
@@ -105,7 +96,7 @@ int main(int argc, char *argv[])
     MPI_Init(&argc,&argv);
 #endif    
 
-    // Run the example
+    /** Run the example */
     try {
         run();
     } catch (const std::exception &exception) {

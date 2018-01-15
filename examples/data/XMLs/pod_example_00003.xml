@@ -1,29 +1,37 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!-- xml interface to replicate .cpp example : POD_example_00001.cpp -->
+<!-- xml interface to replicate .cpp example : POD_example_00003.cpp -->
 <podXML version="1">
     <POD>
-            <Modes>9</Modes>
+            <Energy>99</Energy>
             <WriteMode>DEBUG</WriteMode>
             <MemoryMode>NORMAL</MemoryMode>
             <ReconstructionMode>PROJECTION</ReconstructionMode>
             <Directory>./pod</Directory>
             <Name>pod.test.solver</Name>
             <StaticMesh>1</StaticMesh>
+            <Mean>0</Mean> 
+            <ErrorThreshold>0.001</ErrorThreshold>              
+            <targetErrorScalarFields> p a </targetErrorScalarFields>            
     </POD>
     <Database>
         <c0>
             <Case>test</Case>
             <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
+            <NSnapshots>10</NSnapshots>
         </c0>
     </Database>
-    <Reconstruction>
+    <Leave1out>
         <c0>
             <Case>test</Case>
             <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
+            <NSnapshots>9</NSnapshots>
             <Stride>2</Stride>
             <FirstSnapshot>0</FirstSnapshot>
         </c0>
-    </Reconstruction>
-</podXML>	
+    </Leave1out>   
+    <JobControls>
+            <doPODbasis>0</doPODbasis>
+            <doLeave1out>1</doLeave1out>
+            <doBoundingBox>1</doBoundingBox>
+    </JobControls>
+</podXML>   

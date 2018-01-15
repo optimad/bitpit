@@ -131,6 +131,7 @@ public:
     double getEnergyLevel();
     void setErrorThreshold(double threshold);
     double getErrorThreshold(); 
+    void setTargetErrorFields(std::vector<std::string> &namesf, std::vector<std::array<std::string,3>> &namevf);
 
     void setMeshType(MeshType type);
     MeshType getMeshType();
@@ -175,7 +176,7 @@ public:
     void evalModes();
     void evalEigen();
     void evalReconstruction();
-    void evalErrorBoundingBox(std::map<std::string, std::size_t> targetErrorFields);
+    void evalErrorBoundingBox();
     void computeMapping(const VolumeKernel * mesh);
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
@@ -202,6 +203,7 @@ private:
     std::size_t                             m_nFields;                  /**< Number of total fields*/
     std::vector<std::string>                m_nameScalarFields;         /**< Names of scalar fields. */
     std::vector<std::array<std::string,3>>  m_nameVectorFields;         /**< Names of vector fields. */
+    std::map<std::string, std::size_t>      m_nameTargetErrorFields;    /**< Map of target fields used in error bounding box evaluation. */    
     bool                                    m_toUpdate;                 /**< If true the pod structures need to be updated.*/
     PiercedStorage<bool>                    m_filter;                   /**< Filter field (!=0 fluid cell, ==0 solid cell) used to compute POD modes (no POD on solid cells).*/
     PiercedStorage<bool>                    m_sensorMask;               /**< Sensor mask field (!=0 solve cell, ==0 no-solve cell) used to project (orthogonally and non-orthogonally) on POD modes.*/

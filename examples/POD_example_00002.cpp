@@ -23,7 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 /**
- * \example POD_example_reconstruction_00002.cpp
+ * \example POD_example_00002.cpp
  * 
  * \brief POD basis computation using voloctree.
  * This example computes the POD basis starting from a database of simulations
