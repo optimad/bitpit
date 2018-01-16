@@ -90,7 +90,7 @@ namespace bitpit {
         m_origin[0] = X;
         m_origin[1] = Y;
         m_origin[2] = Z;
-        m_L = L;
+        setL(L);
     };
 
     // =================================================================================== //
@@ -110,7 +110,7 @@ namespace bitpit {
     void
     PabloUniform::__reset(){
         m_origin = {{0,0,0}};
-        m_L = 1.0;
+        setL(1.);
     }
 
     /*! Get the version associated to the binary dumps.
@@ -153,7 +153,10 @@ namespace bitpit {
         utils::binary::read(stream, m_origin[0]);
         utils::binary::read(stream, m_origin[1]);
         utils::binary::read(stream, m_origin[2]);
-        utils::binary::read(stream, m_L);
+
+        double L;
+        utils::binary::read(stream, L);
+        setL(L);
     }
 
     // =================================================================================== //
