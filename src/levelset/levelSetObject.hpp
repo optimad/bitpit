@@ -41,15 +41,43 @@ namespace adaption{
 class SendBuffer;
 class RecvBuffer;
 
+class LevelSet;
 class LevelSetKernel;
 
 class LevelSetObject{
+
+    friend LevelSet;
 
     private:
     int                                         m_id;           /**< identifier of object */
 
     protected:
+    LevelSetObject(int);
     LevelSetObject(const LevelSetObject &other) = default;
+
+    void                                        setKernel(LevelSetKernel *);
+    LevelSetKernel *                            getKernel();
+
+    void                                        clear();
+
+    void                                        setSizeNarrowBand(double) ;
+
+    virtual void                                computeLSInNarrowBand(bool);
+    virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, bool);
+    void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
+
+    virtual void                                propagateSign() ;
+
+    void                                        dump(std::ostream &);
+    void                                        restore(std::istream &);
+
+# if BITPIT_ENABLE_MPI
+    void                                        exchangeGhosts() ;
+    void                                        communicate( const std::unordered_map<int,std::vector<long>> &,
+                                                             const std::unordered_map<int,std::vector<long>> &,
+                                                             std::vector<adaption::Info> const *mapper=NULL );
+# endif
+
 
     LevelSetKernel*                             m_kernelPtr;    /**< pointer to kernel */
     double                                      m_narrowBand;   /**< Size of narrow band */
@@ -68,14 +96,10 @@ class LevelSetObject{
 
     public:
     virtual ~LevelSetObject();
-    LevelSetObject(int);
 
-    void                                        setKernel(LevelSetKernel *);
-    LevelSetKernel *                            getKernel();
     const LevelSetKernel *                      getKernel() const;
 
     virtual LevelSetObject*                     clone() const =0;
-    void                                        clear();
 
     int                                         getId() const ;
     virtual bool                                isPrimary() const ;
@@ -89,30 +113,16 @@ class LevelSetObject{
     virtual std::array<double,3>                getNormal(const long &) const; 
 
     short                                       getSign(const long &) const;
-    virtual void                                propagateSign() ; 
 
     bool                                        isInNarrowBand(const long &) const;
     double                                      getSizeNarrowBand() const;
-    void                                        setSizeNarrowBand(double) ;
 
     LevelSetIntersectionStatus                  intersectSurface(const long &, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
     virtual double                              getSurfaceFeatureSize(const long &) const;
     virtual double                              getMinSurfaceFeatureSize() const;
     virtual double                              getMaxSurfaceFeatureSize() const;
 
-    virtual void                                computeLSInNarrowBand(bool);
-    virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, bool);
-    void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
 
-    void                                        dump(std::ostream &); 
-    void                                        restore(std::istream &); 
-
-# if BITPIT_ENABLE_MPI
-    void                                        exchangeGhosts() ;
-    void                                        communicate( const std::unordered_map<int,std::vector<long>> &,
-                                                             const std::unordered_map<int,std::vector<long>> &,
-                                                             std::vector<adaption::Info> const *mapper=NULL );
-# endif 
 
 };
 
