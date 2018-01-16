@@ -87,9 +87,7 @@ namespace bitpit {
 #endif
         __reset();
 
-        m_origin[0] = X;
-        m_origin[1] = Y;
-        m_origin[2] = Z;
+        setOrigin({X, Y, Z});
         setL(L);
     };
 
@@ -109,7 +107,7 @@ namespace bitpit {
      */
     void
     PabloUniform::__reset(){
-        m_origin = {{0,0,0}};
+        setOrigin({{0,0,0}});
         setL(1.);
     }
 
@@ -150,9 +148,11 @@ namespace bitpit {
     {
         ParaTree::restore(stream);
 
-        utils::binary::read(stream, m_origin[0]);
-        utils::binary::read(stream, m_origin[1]);
-        utils::binary::read(stream, m_origin[2]);
+        std::array<double, 3> origin;
+        utils::binary::read(stream, origin[0]);
+        utils::binary::read(stream, origin[1]);
+        utils::binary::read(stream, origin[2]);
+        setOrigin(origin);
 
         double L;
         utils::binary::read(stream, L);
