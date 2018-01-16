@@ -24,6 +24,8 @@
 
 #include <cassert>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
@@ -162,6 +164,13 @@ const std::string & POD::getName()
  */
 void POD::setDirectory(const std::string &directory)
 {
+    struct stat info;
+    if (stat(directory.c_str(), &info) != 0) {
+        throw std::runtime_error("The directory \"" + directory + "\" does not exists!");
+    } else if (!(info.st_mode & S_IFDIR)) {
+        throw std::runtime_error("The directory \"" + directory + "\" is not valid: a file with the same name was found!");
+    }
+
     m_directory = directory + "/";
 }
 
