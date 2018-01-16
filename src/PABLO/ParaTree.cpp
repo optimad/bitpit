@@ -2296,7 +2296,7 @@ namespace bitpit {
     Octant*
     ParaTree::getOctant(uint32_t idx) {
         if (idx < getNumOctants()){
-            return &m_octree.m_octants[idx] ;
+            return (m_octree.m_octants.data() + idx);
         }
         return NULL;
     };
@@ -2308,7 +2308,7 @@ namespace bitpit {
     const Octant*
     ParaTree::getOctant(uint32_t idx) const {
         if (idx < m_octree.getNumOctants()){
-            return &m_octree.m_octants[idx] ;
+            return (m_octree.m_octants.data() + idx);
         }
         return NULL;
     };
@@ -2320,7 +2320,7 @@ namespace bitpit {
     Octant*
     ParaTree::getGhostOctant(uint32_t idx) {
         if (idx < m_octree.getNumGhosts()){
-            return &m_octree.m_ghosts[idx] ;
+            return (m_octree.m_ghosts.data() + idx);
         }
         return NULL;
     };
@@ -2332,7 +2332,7 @@ namespace bitpit {
     const Octant*
     ParaTree::getGhostOctant(uint32_t idx) const {
         if (idx < m_octree.getNumGhosts()){
-            return &m_octree.m_ghosts[idx] ;
+            return (m_octree.m_ghosts.data() + idx);
         }
         return NULL;
     };
