@@ -25,6 +25,8 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include "bitpit_operators.hpp"
+
 #include "PabloUniform.hpp"
 
 namespace bitpit {
@@ -207,7 +209,9 @@ namespace bitpit {
      */
     void
     PabloUniform::setL(double L){
-        m_L = L;
+        m_L      = L;
+        m_area   = uipow(L, getDim() - 1);
+        m_volume = uipow(L, getDim());
     };
 
     /*! Set the origin of the domain.
@@ -296,11 +300,7 @@ namespace bitpit {
      */
     double
     PabloUniform::getArea(uint32_t idx) const {
-        double area = ParaTree::getArea(idx);
-        for (int i=1; i<ParaTree::getDim(); i++){
-            area *= m_L;
-        }
-        return area;
+        return m_area * ParaTree::getArea(idx);
     };
 
     /*! Get the volume of an octant.
@@ -309,11 +309,7 @@ namespace bitpit {
      */
     double
     PabloUniform::getVolume(uint32_t idx) const {
-        double volume = ParaTree::getVolume(idx);
-        for (int i=0; i<ParaTree::getDim(); i++){
-            volume *= m_L;
-        }
-        return volume;
+        return m_volume * ParaTree::getVolume(idx);
     };
 
     /*! Get the coordinates of the center of an octant.
@@ -514,11 +510,7 @@ namespace bitpit {
      */
     double
     PabloUniform::getArea(const Octant* oct) const {
-        double area = ParaTree::getArea(oct);
-        for (int i=1; i<ParaTree::getDim(); i++){
-            area *= m_L;
-        }
-        return area;
+        return m_area * ParaTree::getArea(oct);
     };
 
     /*! Get the volume of an octant.
@@ -527,11 +519,7 @@ namespace bitpit {
      */
     double
     PabloUniform::getVolume(const Octant* oct) const {
-        double volume = ParaTree::getVolume(oct);
-        for (int i=0; i<ParaTree::getDim(); i++){
-            volume *= m_L;
-        }
-        return volume;
+        return m_volume * ParaTree::getVolume(oct);
     };
 
     /*! Get the coordinates of the center of an octant.
@@ -749,11 +737,7 @@ namespace bitpit {
      */
     double
     PabloUniform::getArea(const Intersection* inter) const {
-        double area =  ParaTree::getArea(inter);
-        for (int i=1; i<ParaTree::getDim(); i++){
-            area *= m_L;
-        }
-        return area;
+        return m_area * ParaTree::getArea(inter);
     };
 
     /*! Get the coordinates of the center of an intersection.

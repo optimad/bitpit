@@ -66,6 +66,8 @@ namespace bitpit {
     private:
         darray3 	m_origin;				/**<Coordinate X,Y,Z of the origin of the octree in the physical domain*/
         double 		m_L;					/**<Side length of octree in the physical domain*/
+        double 		m_area;					/**<Area of octree in the physical domain*/
+        double 		m_volume;				/**<Volume of octree in the physical domain*/
 
         // =================================================================================== //
         // CONSTRUCTORS AND OPERATORS
