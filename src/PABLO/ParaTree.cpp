@@ -2290,51 +2290,43 @@ namespace bitpit {
     // =================================================================================== //
 
     /** Get an octant as pointer to the target octant.
+     * NOTE: no checks will be performed on the octant index.
      * \param[in] idx Local index of target octant.
      * \return Pointer to target octant.
      */
     Octant*
     ParaTree::getOctant(uint32_t idx) {
-        if (idx < getNumOctants()){
-            return (m_octree.m_octants.data() + idx);
-        }
-        return NULL;
+        return (m_octree.m_octants.data() + idx);
     };
 
     /** Get an octant as constant pointer to the target octant.
+     * NOTE: no checks will be performed on the octant index.
      * \param[in] idx Local index of target octant.
      * \return Constant pointer to target octant.
      */
     const Octant*
     ParaTree::getOctant(uint32_t idx) const {
-        if (idx < m_octree.getNumOctants()){
-            return (m_octree.m_octants.data() + idx);
-        }
-        return NULL;
+        return (m_octree.m_octants.data() + idx);
     };
 
     /** Get a ghost octant as pointer to the target octant.
+     * NOTE: no checks will be performed on the ghost octant index.
      * \param[in] idx Local index (in ghosts structure) of target ghost octant.
      * \return Pointer to target ghost octant.
      */
     Octant*
     ParaTree::getGhostOctant(uint32_t idx) {
-        if (idx < m_octree.getNumGhosts()){
-            return (m_octree.m_ghosts.data() + idx);
-        }
-        return NULL;
+        return (m_octree.m_ghosts.data() + idx);
     };
 
     /** Get a ghost octant as constant pointer to the target octant.
+     * NOTE: no checks will be performed on the ghost octant index.
      * \param[in] idx Local index (in ghosts structure) of target ghost octant.
      * \return Constant pointer to target ghost octant.
      */
     const Octant*
     ParaTree::getGhostOctant(uint32_t idx) const {
-        if (idx < m_octree.getNumGhosts()){
-            return (m_octree.m_ghosts.data() + idx);
-        }
-        return NULL;
+        return (m_octree.m_ghosts.data() + idx);
     };
 
     /*! Get the nature of an octant.
