@@ -149,8 +149,8 @@ void MeshMapper::mappingAdaptionPreparare(const std::vector<adaption::Info> & in
         pmapper = &m_invmapper;
 
     for (const adaption::Info & info : infoAdapt){
-            for (const long & id : info.previous)
-                m_previousmapper[id] = pmapper->at(id);
+        for (const long & id : info.previous)
+            m_previousmapper[id] = pmapper->at(id);
     }
 }
 

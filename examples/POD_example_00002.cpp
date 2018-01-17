@@ -146,6 +146,8 @@ void run(int rank, int nProcs)
     pod.reconstructFields(fieldr,reconr);
 
     if (rank==0){
+        std::cout<< ">> N modes:" << pod.getModeCount() << std::endl;
+
         std::cout<< ">> Reconstruction coeffs:" << std::endl;
         for (std::size_t i = 0; i < nf; ++i)
             std::cout<< pod.getReconstructionCoeffs()[i] << std::endl;

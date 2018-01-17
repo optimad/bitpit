@@ -38,7 +38,7 @@ namespace bitpit {
 
 namespace mapping{
 
-    typedef adaption::Info Info;
+typedef adaption::Info Info;
 
 }
 

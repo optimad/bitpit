@@ -2,52 +2,40 @@
 <!-- xml interface to replicate .cpp example : test_podvoloctree_parallel_00001.cpp -->
 <podXML version="1">
     <POD>
-            <Modes>9</Modes>
+            <Modes>6</Modes>
             <WriteMode>DEBUG</WriteMode>
             <MemoryMode>NORMAL</MemoryMode>
             <ReconstructionMode>PROJECTION</ReconstructionMode>
             <Directory>./pod</Directory>
             <Name>pod.test.solver</Name>
-            <SteadyMesh>0</SteadyMesh>
+            <StaticMesh>0</StaticMesh>
     </POD>
     <Database>
         <c0>
             <Case>test</Case>
             <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
+            <NSnapshots>10</NSnapshots>
         </c0>
          <c1>
-            <Case>testrefine</Case>
+             <Case>testcoarse</Case>
             <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
+            <NSnapshots>10</NSnapshots>
         </c1>
-        <c2>
-            <Case>testcoarse</Case>
-            <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
-        </c2>
     </Database>
     <Reconstruction>
         <c0>
             <Case>test</Case>
             <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
+            <NSnapshots>10</NSnapshots>
             <Stride>1</Stride>
             <FirstSnapshot>0</FirstSnapshot>
         </c0>
         <c1>
-            <Case>testrefine</Case>
+            <Case>testcoarse</Case>
             <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
+            <NSnapshots>10</NSnapshots>
             <Stride>1</Stride>
             <FirstSnapshot>0</FirstSnapshot>
         </c1>
-        <c2>
-            <Case>testcoarse</Case>
-            <Directory>./data</Directory>
-            <NSnapshots>11</NSnapshots>
-            <Stride>1</Stride>
-            <FirstSnapshot>0</FirstSnapshot>
-        </c2>
     </Reconstruction>
 </podXML>	
