@@ -740,15 +740,19 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 			}
 		}
 
+#if BITPIT_ENABLE_MPI==1
 		// Ghost cells will be removed
-		std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
-		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-		adaptionInfo.previous.reserve(getGhostCount());
-		for (auto itr = ghostBegin(); itr != ghostEnd(); ++itr) {
-			adaptionInfo.previous.emplace_back();
-			long &deletedGhostId = adaptionInfo.previous.back();
-			deletedGhostId = itr.getId();
+		if (isPartitioned()) {
+			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
+			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+			adaptionInfo.previous.reserve(getGhostCount());
+			for (auto itr = ghostBegin(); itr != ghostEnd(); ++itr) {
+				adaptionInfo.previous.emplace_back();
+				long &deletedGhostId = adaptionInfo.previous.back();
+				deletedGhostId = itr.getId();
+			}
 		}
+#endif
 	}
 
 	return adaptionData.dump();
