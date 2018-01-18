@@ -447,6 +447,8 @@ namespace bitpit {
         uint32_t 	getPointOwnerIdx(const dvector &point, bool & isghost) const;
         uint32_t 	getPointOwnerIdx(const darray3 &point) const;
         uint32_t 	getPointOwnerIdx(const darray3 &point, bool & isghost) const;
+        void 		findAllCodimensionNeighbours(uint32_t idx, u32vector & neighbours, bvector & isghost);
+        void 		findAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost);
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const;
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
         void 		getPreMapping(u32vector & idx, vector<int8_t> & markers, vector<bool> & isghost);

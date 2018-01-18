@@ -2692,6 +2692,55 @@ namespace bitpit {
         findAllNodeNeighbours(oct, inode, neighbours, isghost);
     };
 
+    /** Finds all the neighbours of an internal octant through all its boundaries of any codimension.
+     * Returns a vector with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of current octant
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
+     */
+    void
+    ParaTree::findAllCodimensionNeighbours(uint32_t idx, u32vector & neighbours, bvector & isghost){
+        Octant* oct = getOctant(idx);
+        findAllCodimensionNeighbours(oct,neighbours,isghost);
+    }
+
+    /** Finds all the neighbours of an internal octant through all its boundaries of any codimension.
+     * Returns a vector with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree. Neighbours are not sorted by Morton.
+     * \param[in] oct pointer to the current octant
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
+     */
+    void
+    ParaTree::findAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
+        neighbours.clear();
+        neighbours.reserve(26);
+        isghost.clear();
+        isghost.reserve(26);
+        u32vector singleCodimNeighbours;
+        bvector singleCodimIsGhost;
+        vector<uint8_t> codimensionsIndeces(m_dim+1);
+        codimensionsIndeces[0] = 0;
+        codimensionsIndeces[1] = getNfaces();
+        codimensionsIndeces[m_dim] = getNnodes();
+        if(m_dim == 3){
+            codimensionsIndeces[2] = getNedges();
+        }
+        for(uint8_t codim = 1; codim <= m_dim; ++codim){
+            for(int icodim = 0; icodim < codimensionsIndeces[codim]; ++icodim){
+                findNeighbours(oct,icodim,codim,singleCodimNeighbours,singleCodimIsGhost);
+                for(size_t i = 0; i < singleCodimIsGhost.size(); ++i){
+                    isghost.push_back(singleCodimIsGhost[i]);
+                    neighbours.push_back(singleCodimNeighbours[i]);
+                }
+            }
+        }
+    }
+
+
     /** Get the internal octant owner of an input point.
      * \param[in] point Coordinates of target point.
      * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
