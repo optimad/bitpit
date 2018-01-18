@@ -109,6 +109,10 @@ public:
 
     ~POD();
 
+    /**
+     * Default copy constructor.
+     * \param[in] other Input POD object
+     */
     POD(POD&& other) = default;
 
     void clear();

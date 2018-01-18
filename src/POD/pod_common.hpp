@@ -32,8 +32,8 @@ namespace bitpit {
     \brief The namespace 'pod' contains structures for working with the POD class.
 */
 namespace pod {
-typedef PiercedStorage<double> ScalarStorage;
-typedef PiercedStorage<std::array<double, 3>> VectorStorage;
+typedef PiercedStorage<double> ScalarStorage;                   /**< Scalar Storage type definition. */
+typedef PiercedStorage<std::array<double, 3>> VectorStorage;    /**< Vector Storage type definition. */
 
 /**
  * \ingroup POD

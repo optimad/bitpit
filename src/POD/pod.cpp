@@ -210,7 +210,7 @@ void POD::addSnapshot(const std::string &directory, const std::string &name)
 /**
  * Add a snapshot to the POD database.
  *
- * \param[in] name is the name of the snapshot.
+ * \param[in] file is the file name (complete path) of the snapshot.
  */
 void POD::addSnapshot(const pod::SnapshotFile &file)
 {
@@ -245,7 +245,7 @@ void POD::removeLeave1outSnapshot(const std::string &directory, const std::strin
 /**
  *  Remove a snapshot from the leave-1-out error computation.
  *
- * \param[in] name is the name of the snapshot.
+ * \param[in] file is the file name (complete path) of the snapshot.
  */
 void POD::removeLeave1outSnapshot(const pod::SnapshotFile &file)
 {
@@ -284,7 +284,7 @@ void POD::addReconstructionSnapshot(const std::string &directory, const std::str
 /**
  * Add a snapshot to the reconstruction database.
  *
- * \param[in] name is the name of the snapshot.
+ * \param[in] file is the file name (complete path) of the snapshot.
  */
 void POD::addReconstructionSnapshot(const pod::SnapshotFile &file)
 {
@@ -2267,7 +2267,7 @@ void POD::restore()
  * Write snapshots by dumping.
  *
  * \param[in] name Filename.
- * \param[in] snap Snapshot field.
+ * \param[in] field Snapshot field.
  */
 void POD::dumpField(const std::string &name, const pod::PODField &field) const
 {
@@ -2583,7 +2583,7 @@ void POD::freeCommunicator()
  *
  * \param[in,out] fields Original field used in the reconstruction. Only the values of \p targetCells are updated.
  * \param[in] mesh Pointer to snapshot field
- * \param[in] fields Map of names/ids of fields in PiercedStorage
+ * \param[in] targetFields Map of names/ids of fields in PiercedStorage to reconstruct
  * \param[in] targetCells Pointer to list of cell to be updated with the reconstructed values (optional, default whole field).
  */
 void POD::reconstructFields(PiercedStorage<double> &fields, const VolumeKernel *mesh,

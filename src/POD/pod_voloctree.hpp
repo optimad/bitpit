@@ -50,6 +50,10 @@ public:
 
     ~PODVolOctree() override;
 
+    /**
+     * Default copy constructor.
+     * \param[in] other Input PODVolOctree object
+     */
     PODVolOctree(PODVolOctree&& other) = default;
 
 private:

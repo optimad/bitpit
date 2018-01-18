@@ -52,6 +52,10 @@ public:
 
     virtual ~PODKernel();
 
+    /**
+     * Default copy constructor.
+     * \param[in] other Input PODKernel object
+     */
     PODKernel(PODKernel&& other) = default;
 
     VolumeKernel* getMesh();
