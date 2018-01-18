@@ -353,7 +353,7 @@ Octant::setPbound(uint8_t face, bool flag){
  */
 uint32_t
 Octant::getSize() const{
-	uint32_t size = 1 << (Global::getMaxLevel() - m_level);
+	uint32_t size = uint32_t(1) << (Global::getMaxLevel() - m_level);
 	return size;
 };
 
@@ -362,7 +362,7 @@ Octant::getSize() const{
  */
 uint64_t
 Octant::getArea() const{
-	uint64_t area = 1 << ((m_dim-1) * (Global::getMaxLevel() - m_level));
+	uint64_t area = uint64_t(1) << ((m_dim-1) * (Global::getMaxLevel() - m_level));
 	return area;
 };
 
@@ -371,7 +371,7 @@ Octant::getArea() const{
  */
 uint64_t
 Octant::getVolume() const{
-	uint64_t volume = 1 << (m_dim * (Global::getMaxLevel() - m_level));
+	uint64_t volume = uint64_t(1) << (m_dim * (Global::getMaxLevel() - m_level));
 	return volume;
 };
 
