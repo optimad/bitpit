@@ -436,11 +436,11 @@ namespace bitpit {
         void        findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals = false) const;
     public:
         void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
-        void 		findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const ;
+        void 		findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const ;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         void 		findAllNodeNeighbours(uint32_t idx, uint32_t inode, u32vector & neighbours, bvector & isghost);
-        void 		findAllNodeNeighbours(Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const;
+        void 		findAllNodeNeighbours(const Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const;
         Octant* 	getPointOwner(const dvector &point);
         Octant* 	getPointOwner(const dvector &point, bool & isghost);
         Octant* 	getPointOwner(const darray3 &point);

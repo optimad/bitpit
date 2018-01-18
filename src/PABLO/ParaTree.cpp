@@ -2602,7 +2602,7 @@ namespace bitpit {
      * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
     void
-    ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
+    ParaTree::findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
 
         findNeighbours(oct, false, 0, iface, codim, neighbours, isghost, false);
 
@@ -2649,7 +2649,7 @@ namespace bitpit {
     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
     */
     void
-    ParaTree::findAllNodeNeighbours(Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const {
+    ParaTree::findAllNodeNeighbours(const Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const {
 
         u32vector neigh_edge, neigh_face;
         bvector isghost_edge, isghost_face;
