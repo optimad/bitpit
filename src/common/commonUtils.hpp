@@ -116,6 +116,8 @@ void extractWithoutReplacement(                                               //
     std::vector<int>           &                                              // (input/output) list of extracted value
 );
 
+unsigned long factorial(unsigned long n);
+
 /*!
     Functor to compare two double precision floating point numbers.
 
