@@ -440,7 +440,7 @@ void
 Octant::getNodes(u32arr3vector & nodes) const{
 	uint8_t		i;
 	uint32_t	dh;
-	uint8_t nn = 1<<m_dim;
+	uint8_t nn = uint8_t(1)<<m_dim;
 
 	dh = getSize();
 	nodes.resize(nn);
@@ -459,7 +459,7 @@ u32arr3vector
 Octant::getNodes() const{
 	uint8_t		i;
 	uint32_t	dh;
-	uint8_t nn = 1<<m_dim;
+	uint8_t nn = uint8_t(1)<<m_dim;
 	u32arr3vector nodes;
 
 	dh = getSize();
@@ -545,7 +545,7 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 Octant	Octant::buildLastDesc() const {
 	u32array3 delta = { {0,0,0} };
 	for (int i=0; i<m_dim; i++){
-		delta[i] = (uint32_t)(1 << (Global::getMaxLevel() - m_level)) - 1;
+		delta[i] = (uint32_t(1) << (Global::getMaxLevel() - m_level)) - 1;
 	}
 	Octant last_desc(m_dim, Global::getMaxLevel(), (m_x+delta[0]), (m_y+delta[1]), (m_z+delta[2]));
 	return last_desc;
@@ -564,7 +564,7 @@ Octant	Octant::buildFather() const {
 	xx[2] = m_z;
 	delta[2] = 0;
 	for (int i=0; i<m_dim; i++){
-		delta[i] = xx[i]%(uint32_t(1 << (Global::getMaxLevel() - max(0,(m_level-1)))));
+		delta[i] = xx[i]%(uint32_t(1) << (Global::getMaxLevel() - max(0,(m_level-1))));
 	}
 	Octant father(m_dim, max(0,m_level-1), m_x-delta[0], m_y-delta[1], m_z-delta[2]);
 	return father;
@@ -824,10 +824,10 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 	uint32_t nneigh, nline;
 	uint32_t i,cx,cy,cz;
 
-	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<((m_dim-1)*(maxdepth-m_level))) : 1;
-	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(Global::getMaxLevel() - maxdepth)) : getSize();
+	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<((m_dim-1)*(maxdepth-m_level)) : 1;
+	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
 	dh2 = getSize();
-	nline = uint32_t(1<<(maxdepth-m_level));
+	nline = uint32_t(1)<<(maxdepth-m_level);
 
 	if (m_info[iface]){
 		sizem = 0;
@@ -1094,8 +1094,8 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 	uint8_t iface1, iface2;
 
 
-	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(maxdepth-m_level)) : 1;
-	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(Global::getMaxLevel() - maxdepth)) : getSize();
+	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(maxdepth-m_level) : 1;
+	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
 	dh2 = getSize();
 	iface1 = edgeface[iedge][0];
 	iface2 = edgeface[iedge][1];
@@ -1281,7 +1281,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 	}
 
 	nneigh = 1;
-	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1<<(Global::getMaxLevel() - maxdepth)) : getSize();
+	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
 	dh2 = getSize();
 
 	uint64_t Morton = this->computeMorton();
@@ -1380,7 +1380,7 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
 	uint64_t Morton = this->computeMorton();
 	uint32_t dh;
 	dh = getSize();
-	uint32_t maxLength = uint32_t(1<<Global::getMaxLevel());
+	uint32_t maxLength = uint32_t(1)<<Global::getMaxLevel();
 
 	if (!m_info[iface]){
 		return Morton;
@@ -1428,7 +1428,7 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
  */
 Octant Octant::computePeriodicOctant(uint8_t iface) const {
 	Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z);
-	uint32_t maxLength = uint32_t(1<<Global::getMaxLevel());
+	uint32_t maxLength = uint32_t(1)<<Global::getMaxLevel();
 	uint32_t dh = this->getSize();
 
 	if (!m_info[iface]){

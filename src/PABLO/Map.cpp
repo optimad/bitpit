@@ -52,8 +52,8 @@ void Map::initialize(){
 void Map::initialize(uint8_t dim){
     m_dim = dim;
     if (m_dim > 0) {
-        m_nnodes        = 1<<m_dim;
-        m_nnodesPerFace = 1<<(m_dim-1);
+        m_nnodes        = uint8_t(1)<<m_dim;
+        m_nnodesPerFace = uint8_t(1)<<(m_dim-1);
 
         m_maxLength   = Global::getMaxLength();
         m_maxLength_1 = 1/double(m_maxLength);

@@ -1979,7 +1979,7 @@ namespace bitpit {
      */
     double
     ParaTree::getLocalMinSize() const {
-        uint32_t size = uint32_t(1<<(m_global.m_maxLevel-m_octree.getLocalMaxDepth()));
+        uint32_t size = uint32_t(1)<<(m_global.m_maxLevel-m_octree.getLocalMaxDepth());
         return m_trans.mapSize(size);
     };
 
@@ -4350,7 +4350,7 @@ namespace bitpit {
      */
     double
     ParaTree::levelToSize(uint8_t & level) {
-        uint32_t size = uint32_t(1<<(m_global.m_maxLevel-level));
+        uint32_t size = uint32_t(1)<<(m_global.m_maxLevel-level);
         return m_trans.mapSize(size);
     }
 

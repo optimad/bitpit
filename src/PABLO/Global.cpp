@@ -285,11 +285,11 @@ Global::initialize(uint8_t dim) {
 	if (dim>3) dim = 3;
 	if (dim<2) dim = 2;
 
-	m_nchildren 			= 1<<dim;
+	m_nchildren 			= uint8_t(1)<<dim;
 	m_nfaces 				= 2*dim;
-	m_nnodes				= 1<<dim;
+	m_nnodes				= uint8_t(1)<<dim;
 	m_nedges 				= (dim-2)*12;
-	m_nnodesPerFace 		= 1<<(dim-1);
+	m_nnodesPerFace 		= uint8_t(1)<<(dim-1);
 	m_octantBytes 			= uint8_t(sizeof(uint32_t)*3 + sizeof(uint8_t) + sizeof(int8_t) + (17)*sizeof(bool));
 	m_globalIndexBytes 		= uint8_t(sizeof(uint64_t));
 	m_markerBytes 			= sizeof(int8_t);
