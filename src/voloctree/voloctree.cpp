@@ -708,7 +708,6 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 		// Track internal octants that will be coarsend/refined
 		long nOctants = m_tree->getNumOctants();
 
-
 		uint32_t treeId = 0;
 		while (treeId < (uint32_t) nOctants) {
 			int8_t marker = m_tree->getPreMarker(treeId);
@@ -1244,8 +1243,8 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 #endif
 		}
 
-		// Track created ghosts cells
 #if BITPIT_ENABLE_MPI==1
+		// Track created ghosts cells
 		if (nGhostsOctants > 0) {
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
