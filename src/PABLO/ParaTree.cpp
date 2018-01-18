@@ -2692,6 +2692,26 @@ namespace bitpit {
         findAllNodeNeighbours(oct, inode, neighbours, isghost);
     };
 
+    /** Compute neighbours adjacencies for every internal octant, storing them in a structure provided by the user
+     * \param[in] idx Index of the octant
+     * \param[out] globalNeighs Vector of global neighbours indices
+     */
+    void
+    ParaTree::findAllGlobalNeighbours(uint32_t idx, std::unordered_set<uint64_t> &globalNeighs){
+        globalNeighs.clear();
+
+        u32vector neighs;
+        bvector isghost;
+        findAllCodimensionNeighbours(idx,neighs,isghost);
+        size_t nofNeighs = neighs.size();
+        for(size_t n = 0; n < nofNeighs; ++n){
+            if(isghost[n])
+                globalNeighs.insert(getGhostGlobalIdx(neighs[n]));
+            else
+                globalNeighs.insert(getGlobalIdx(neighs[n]));
+        }
+    }
+
     /** Finds all the neighbours of an internal octant through all its boundaries of any codimension.
      * Returns a vector with the index of neighbours
      * in their structure (octants or ghosts) and sets isghost[i] = true if the

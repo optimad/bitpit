@@ -41,6 +41,7 @@
 #include "bitpit_IO.hpp"
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <bitset>
 #include <algorithm>
@@ -429,6 +430,7 @@ namespace bitpit {
         // OTHER OCTANT BASED METHODS												    	   //
         // =================================================================================== //
 
+        void        findAllGlobalNeighbours(uint32_t idx, std::unordered_set<uint64_t> &globalNeighs);
         void        findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals = false) const;
     public:
         void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
