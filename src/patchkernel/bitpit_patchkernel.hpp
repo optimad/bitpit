@@ -44,6 +44,7 @@
 #include "surface_skd_tree.hpp"
 #include "volume_kernel.hpp"
 #include "volume_skd_tree.hpp"
+#include "volume_mapper.hpp"
 #include "adaption.hpp"
 
 #endif
