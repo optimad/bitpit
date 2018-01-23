@@ -354,7 +354,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
 //TODO: import a specified solid (ascii format only)
 /*!
  * Import surface tasselation from S.T.L. file. STL facet are added at to the
- * present mesh, i.e. current mesh content is not discarded. Howver no checks
+ * present mesh, i.e. current mesh content is not discarded. However no checks
  * are performed to ensure that no duplicated vertices or cells are created.
  *
  * If the input file is a multi-solid ASCII file, all solids will be loaded
@@ -381,7 +381,7 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name,
 
 /*!
  * Import surface tasselation from S.T.L. file. STL facet are added at to the
- * present mesh, i.e. current mesh content is not discarded. Howver no checks
+ * present mesh, i.e. current mesh content is not discarded. However no checks
  * are performed to ensure that no duplicated vertices or cells are created.
  *
  * If the input file is a multi-solid ASCII file, all solids will be loaded
@@ -409,7 +409,7 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
 
 /*!
  * Import surface tasselation from S.T.L. file. STL facet are added at to the
- * present mesh, i.e. current mesh content is not discarded. Howver no checks
+ * present mesh, i.e. current mesh content is not discarded. However no checks
  * are performed to ensure that no duplicated vertices or cells are created.
  *
  * If the input file is a multi-solid ASCII file, all solids will be loaded
@@ -418,7 +418,7 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
  * \param[in] STL is the STL object to import
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
- * the file or if the same PID will be assigned to all cells
+ * the file (false) or if the same PID will be assigned to all cells (true).
  *
  * \result on output returns an error flag for I/O error
 */
@@ -551,7 +551,6 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
  * If true, isBinary flag will be ignored.
  * \param[in] exportInternalsOnly flag for exporting only internal cells (true), or
  * internal+ghost cells (false).
- *
  * \result on output returns an error flag for I/O error.
  */
 unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary, const bool &isMulti, bool exportInternalsOnly)
@@ -682,9 +681,8 @@ unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const b
  * ill-formed stl triangulation. If available, ghost cells will be written in a stand-alone solid.
  *
  * \param[in] stl_name name of the stl file
- * \param[in] exportInternalsOnly flag for exporting only internal cells (true),
- * or internal+ghost cells (false).
- *
+ * \param[in] exportInternalsOnly OPTIONAL flag for exporting only internal cells (true),
+ * or internal+ghost cells (false). Default is true.
  * \result on output returns an error flag for I/O error 0-done, >0 errors.
  */
 unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exportInternalsOnly)
