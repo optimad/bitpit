@@ -392,17 +392,20 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name,
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file or if the same PID will be assigned to all cells
+ * \param[in,out] PIDNames are the names of the PIDs, on output the names
+ * of the newly imported PIDs will be added to the list
  *
  * \result on output returns an error flag for I/O error
 */
 unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &isBinary,
-                                           int PIDOffset, bool PIDSquash)
+                                           int PIDOffset, bool PIDSquash,
+                                           std::unordered_map<int, std::string> *PIDNames)
 {
     // Create STL object
     STLObj STL(stl_name, isBinary);
 
     // Import stl object
-    importSTL(STL, PIDOffset, PIDSquash);
+    importSTL(STL, PIDOffset, PIDSquash, PIDNames);
 
     return 0;
 }
@@ -419,10 +422,13 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file (false) or if the same PID will be assigned to all cells (true).
+ * \param[in,out] PIDNames are the names of the PIDs, on output the names
+ * of the newly imported PIDs will be added to the list
  *
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash)
+unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash,
+                                           std::unordered_map<int, std::string> *PIDNames)
 {
     // ====================================================================== //
     // OPEN STL FILE                                                          //
@@ -449,17 +455,21 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         std::vector<std::array<double, 3>> vertexList;
         std::vector<std::array<double, 3>> normalList;
         std::vector<std::array<int, 3>> connectivityList;
+        std::string name = "";
 
-        STL.loadSolid(nVertex, nSimplex, vertexList, normalList, connectivityList);
+        STL.loadSolid(nVertex, nSimplex, vertexList, normalList, connectivityList, name);
         if (nVertex == 0) {
             break;
         }
 
         // ====================================================================== //
-        // PID OF THE SOLID                                                       //
+        // PID AND NAME OF THE SOLID                                              //
         // ====================================================================== //
         if (!PIDSquash) {
             ++pid;
+            if (PIDNames && !name.empty()) {
+                PIDNames->insert({{pid, name}});
+            }
         }
 
         // ====================================================================== //
@@ -551,13 +561,17 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
  * If true, isBinary flag will be ignored.
  * \param[in] exportInternalsOnly flag for exporting only internal cells (true), or
  * internal+ghost cells (false).
+ * \param[in,out] PIDNames are the names of the PIDs, if a PIDs has no name
+ * its number will be used
  * \result on output returns an error flag for I/O error.
  */
-unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary, const bool &isMulti, bool exportInternalsOnly)
+unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary,
+                                           const bool &isMulti, bool exportInternalsOnly,
+                                           std::unordered_map<int, std::string> *PIDNames)
 {
     unsigned short flag = 0;
     if (isMulti) {
-        flag = exportSTLMulti(stl_name, exportInternalsOnly);
+        flag = exportSTLMulti(stl_name, exportInternalsOnly, PIDNames);
     } else {
         flag = exportSTLSingle(stl_name, isBinary, exportInternalsOnly);
     }
@@ -683,9 +697,12 @@ unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const b
  * \param[in] stl_name name of the stl file
  * \param[in] exportInternalsOnly OPTIONAL flag for exporting only internal cells (true),
  * or internal+ghost cells (false). Default is true.
+  * \param[in,out] PIDNames are the names of the PIDs, if a PIDs has no name
+  * its number will be used
  * \result on output returns an error flag for I/O error 0-done, >0 errors.
  */
-unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exportInternalsOnly)
+unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exportInternalsOnly,
+                                                std::unordered_map<int, std::string> *PIDNames)
 {
     int                                         nTotVertex;
     vector<array<double, 3>>                    totVertexList;
@@ -740,7 +757,14 @@ unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exp
         }
 
         // Write the solid associated to the current PID
-        STL.saveSolid(std::to_string(pid), nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+        std::string name;
+        if (PIDNames && PIDNames->count(pid) > 0) {
+            name = PIDNames->at(pid);
+        } else {
+            name = std::to_string(pid);
+        }
+
+        STL.saveSolid(name, nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
     }
 
     // Export ghost cells
