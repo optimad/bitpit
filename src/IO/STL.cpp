@@ -40,6 +40,7 @@
 // ========================================================================== //
 # include "bitpit_common.hpp"
 # include "STL.hpp"
+# include "logger.hpp"
 
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
@@ -666,13 +667,17 @@ return; };
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
     connectivity entries for the facets acquired from the stl file. New connectivity entries
     are appended at the end of T.
+    \param[in,out] name name of the stl solid that will to be read, if the name is
+    empty, the first solid found will be read. On output il will contain the name
+    of the solid that has been actually read
 */
 void STLObj::loadSolid(
     int                                 &nV,
     int                                 &nT,
     vector<vector<double> >             &V,
     vector<vector<double> >             &N,
-    vector<vector<int> >                &T
+    vector<vector<int> >                &T,
+    std::string                         &name
 ) {
 
 // ========================================================================== //
@@ -686,10 +691,17 @@ void STLObj::loadSolid(
 // none
 
 // ========================================================================== //
+// CHECK INUPUT DATA                                                          //
+// ========================================================================== //
+if (stl_type && !utils::string::trim(name).empty()) {
+    log::cout() << "WARNING: loading solids with a specific name is only supported for ASCII files" << std::endl;
+}
+
+// ========================================================================== //
 // READ STL DATA                                                              //
 // ========================================================================== //
 if (stl_type)   { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else            { stl::readSolidASCII(ifile_handle, false, nV, nT, V, N, T); }
+else            { stl::readSolidASCII(ifile_handle, false, nV, nT, V, N, T, name); }
 
 return; };
 
@@ -715,13 +727,17 @@ return; };
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
     connectivity entries for the facets acquired from the stl file. New connectivity entries
     are appended at the end of T.
+    \param[in,out] name name of the stl solid that will to be read, if the name is
+    empty, the first solid found will be read. On output il will contain the name
+    of the solid that has been actually read
 */
 void STLObj::loadSolid(
     int                                 &nV,
     int                                 &nT,
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
-    vector<array<int,3> >               &T
+    vector<array<int,3> >               &T,
+    std::string                         &name
 ) {
 
 // ========================================================================== //
@@ -735,10 +751,17 @@ void STLObj::loadSolid(
 // none
 
 // ========================================================================== //
+// CHECK INUPUT DATA                                                          //
+// ========================================================================== //
+if (stl_type && !utils::string::trim(name).empty()) {
+    log::cout() << "WARNING: loading solids with a specific name is only supported for ASCII files" << std::endl;
+}
+
+// ========================================================================== //
 // READ STL DATA                                                              //
 // ========================================================================== //
 if (stl_type)   { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else            { stl::readSolidASCII(ifile_handle, false, nV, nT, V, N, T); }
+else            { stl::readSolidASCII(ifile_handle, false, nV, nT, V, N, T, name); }
 
 return; };
 
@@ -1744,7 +1767,9 @@ return(0); }
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
     of T.
-    \param[in,out] solid_name name of the stl solid (if available) read from the stl file
+    \param[in,out] name name of the stl solid that will to be read, if the name is
+    empty, the first solid found will be read. On output il will contain the name
+    of the solid that has been actually read
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -1759,16 +1784,20 @@ unsigned int stl::readSolidASCII(
     vector<vector<double> >             &V,
     vector<vector<double> >             &N,
     vector<vector<int> >                &T,
-    string                              solid_name
+    string                              &name
 ) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
+// Constants
+const std::string SOLID_KEY = "solid";
+
 // Local variables
 bool                check = false;
 long int            start_pos = file_handle.tellg(), current_pos;
+string              name_key;
 string              line, word;
 stringstream        sline;
 
@@ -1785,11 +1814,13 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 
 // Parameters --------------------------------------------------------------- //
-sline << "solid " << solid_name;
-line = sline.str();
-solid_name = utils::string::trim(line);
+name = utils::string::trim(name);
 
-
+name_key = SOLID_KEY;
+if (!name.empty()) {
+    name_key += " " + name;
+    name_key = utils::string::trim(name_key);
+}
 
 // Scan file until stl solid is found --------------------------------------- //
 current_pos = start_pos+1;
@@ -1814,16 +1845,13 @@ while (!check && (start_pos != current_pos)) {
     current_pos = file_handle.tellg();
 
     // Look for keyword "solid"
-    if ((sline >> word) && (word.compare("solid") == 0)) {
-        if (solid_name.compare("solid") == 0) {
+    if ((sline >> word) && (word.compare(SOLID_KEY) == 0)) {
+        if (name.empty() || line.compare(name_key) == 0) {
+            name = line.erase(0, SOLID_KEY.size());
+            name = utils::string::trim(name);
+
             start_pos = current_pos;
             check = true;
-        }
-        else {
-            if (line.compare(solid_name) == 0) {
-                start_pos = current_pos;
-                check = true;
-            }
         }
     }
 
@@ -1899,7 +1927,9 @@ return(0); }
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
     of T.
-    \param[in,out] solid_name name of the stl solid (if available) read from the stl file
+    \param[in,out] name name of the stl solid that will to be read, if the name is
+    empty, the first solid found will be read. On output il will contain the name
+    of the solid that has been actually read
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -1914,16 +1944,21 @@ unsigned int stl::readSolidASCII(
     vector<array<double,3> >            &V,
     vector<array<double,3> >            &N,
     vector<array<int,3> >               &T,
-    string                               solid_name
+    string                              &name
+
 ) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
+// Constants
+const std::string SOLID_KEY = "solid";
+
 // Local variables
 bool                check = false;
 long int            start_pos = file_handle.tellg(), current_pos;
+string              name_key;
 string              line, word;
 stringstream        sline;
 
@@ -1940,9 +1975,13 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 
 // Parameters --------------------------------------------------------------- //
-sline << "solid " << solid_name;
-line = sline.str();
-solid_name = utils::string::trim(line);
+name = utils::string::trim(name);
+
+name_key = SOLID_KEY;
+if (!name.empty()) {
+    name_key += " " + name;
+    name_key = utils::string::trim(name_key);
+}
 
 // Scan file until stl solid is found --------------------------------------- //
 current_pos = start_pos+1;
@@ -1967,16 +2006,13 @@ while (!check && (start_pos != current_pos)) {
     current_pos = file_handle.tellg();
 
     // Look for keyword "solid"
-    if ((sline >> word) && (word.compare("solid") == 0)) {
-        if (solid_name.compare("solid") == 0) {
+    if ((sline >> word) && (word.compare(SOLID_KEY) == 0)) {
+        if (name.empty() || line.compare(name_key) == 0) {
+            name = line.erase(0, SOLID_KEY.size());
+            name = utils::string::trim(name);
+
             start_pos = current_pos;
             check = true;
-        }
-        else {
-            if (line.compare(solid_name) == 0) {
-                start_pos = current_pos;
-                check = true;
-            }
         }
     }
 
@@ -2076,6 +2112,7 @@ unsigned int stl::readASCII(
 long int        start_pos, current_pos;
 stringstream    sline;
 string          line, word;
+string          name = "";
 
 // Counters
 // none
@@ -2105,7 +2142,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         file_handle.clear();
         file_handle.seekg(current_pos);
-        readSolidASCII(file_handle, true, nV, nT, V, N, T, "");
+        readSolidASCII(file_handle, true, nV, nT, V, N, T, name);
     }
     current_pos = file_handle.tellg();
 }
@@ -2163,6 +2200,7 @@ unsigned int stl::readASCII(
 long int        start_pos, current_pos;
 stringstream    sline;
 string          line, word;
+string          name = "";
 
 // Counters
 // none
@@ -2192,7 +2230,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         file_handle.clear();
         file_handle.seekg(current_pos);
-        stl::readSolidASCII(file_handle, true, nV, nT, V, N, T, "");
+        readSolidASCII(file_handle, true, nV, nT, V, N, T, name);
     }
     current_pos = file_handle.tellg();
 }
