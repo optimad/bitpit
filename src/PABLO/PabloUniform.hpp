@@ -91,11 +91,11 @@ namespace bitpit {
         // =================================================================================== //
         // METHODS
         // =================================================================================== //
-        void	reset();
+        void	reset() override;
 
-        int		getDumpVersion() const;
-        void	dump(std::ostream &stream, bool full = true);
-        void	restore(std::istream &stream);
+        int		getDumpVersion() const override;
+        void	dump(std::ostream &stream, bool full = true) override;
+        void	restore(std::istream &stream) override;
 
         // =================================================================================== //
         // BASIC GET/SET METHODS															   //
