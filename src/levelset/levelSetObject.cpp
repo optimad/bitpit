@@ -207,6 +207,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, Level
 
     switch(mode){
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
+        {
             incircle = m_kernelPtr->computeCellIncircle(i) ;
             if(std::abs(getLS(i)) <= incircle){
                 return LevelSetIntersectionStatus::TRUE;
@@ -215,8 +216,10 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, Level
             }
 
             break;
+        }
 
         case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
+        {
             circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
             if(std::abs(getLS(i)) > circumcircle){
                 return LevelSetIntersectionStatus::FALSE;
@@ -225,8 +228,10 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, Level
             }
 
             break;
+        }
 
         case LevelSetIntersectionMode::FAST_FUZZY:
+        {
             circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
             if(std::abs(getLS(i)) > circumcircle){
                 return LevelSetIntersectionStatus::FALSE;
@@ -240,8 +245,10 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, Level
             return LevelSetIntersectionStatus::CLOSE;
 
             break;
+        }
 
         case LevelSetIntersectionMode::ACCURATE:
+        {
             circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
             if(std::abs(getLS(i)) > circumcircle){
                 return LevelSetIntersectionStatus::FALSE;
@@ -261,6 +268,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, Level
             }
 
             break;
+        }
     }
 
     BITPIT_UNREACHABLE("cannot reach");
