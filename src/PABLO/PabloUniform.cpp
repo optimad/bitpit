@@ -89,7 +89,7 @@ namespace bitpit {
 #endif
         __reset();
 
-        setOrigin({X, Y, Z});
+        setOrigin({{X, Y, Z}});
         setL(L);
     };
 
