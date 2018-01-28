@@ -40,24 +40,20 @@
  * @param str is the error message that will be displayed it the unreachable
  * code is reached
  */
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#ifdef HAVE___BUILTIN_UNREACHABLE
 #define BITPIT_UNREACHABLE(str)    \
-do {                         \
-    assert(!str);            \
-    __builtin_unreachable(); \
+do {                        \
+   assert(!str);            \
+   __builtin_unreachable(); \
 } while (0)
-#elif (defined(__clang__) && defined(__has_builtin))
-# if __has_builtin(__builtin_unreachable)
-#  define BITPIT_UNREACHABLE(str)  \
-do {                         \
-    assert(!str);            \
-    __builtin_unreachable(); \
+#elif defined (_MSC_VER)
+#define BITPIT_UNREACHABLE(str)    \
+do {                        \
+   assert(!str);            \
+   __assume(0);             \
 } while (0)
-# endif
-#endif
-
-#ifndef BITPIT_UNREACHABLE
-#define BITPIT_UNREACHABLE(str)
+#else
+#define BITPIT_UNREACHABLE(str) assert(!str)
 #endif
 
 /*!

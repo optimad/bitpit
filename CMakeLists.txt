@@ -219,6 +219,14 @@ scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
 	set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
 endif ()
 
+# Check the features supported by the compiler
+include(CheckCXXSourceCompiles)
+
+CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN_UNREACHABLE)
+if(HAVE___BUILTIN_UNREACHABLE)
+    list (APPEND BITPIT_DEFINITIONS_PRIVATE "HAVE___BUILTIN_UNREACHABLE")
+endif()
+
 # Add the definitions
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PRIVATE})
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PUBLIC})
