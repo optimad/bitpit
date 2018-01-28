@@ -43,26 +43,26 @@ public:
 
 	~VolUnstructured();
 
-	std::unique_ptr<PatchKernel> clone() const;
+	std::unique_ptr<PatchKernel> clone() const override;
 
 	void setExpert(bool expert);
 
-	double evalCellVolume(const long &id) const;
-	double evalCellSize(const long &id) const;
+	double evalCellVolume(const long &id) const override;
+	double evalCellSize(const long &id) const override;
 
-	double evalInterfaceArea(const long &id) const;
-	std::array<double, 3> evalInterfaceNormal(const long &id) const;
+	double evalInterfaceArea(const long &id) const override;
+	std::array<double, 3> evalInterfaceNormal(const long &id) const override;
 
-	bool isPointInside(const std::array<double, 3> &point);
-	bool isPointInside(const long &id, const std::array<double, 3> &point);
-	long locatePoint(const std::array<double, 3> &point);
+	bool isPointInside(const std::array<double, 3> &point) override;
+	bool isPointInside(const long &id, const std::array<double, 3> &point) override;
+	long locatePoint(const std::array<double, 3> &point) override;
 
 protected:
 	VolUnstructured(const VolUnstructured &other) = default;
 
-	int _getDumpVersion() const;
-	void _dump(std::ostream &stream) const;
-	void _restore(std::istream &stream);
+	int _getDumpVersion() const override;
+	void _dump(std::ostream &stream) const override;
+	void _restore(std::istream &stream) override;
 
 private:
 
