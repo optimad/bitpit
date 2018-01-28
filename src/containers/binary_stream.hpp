@@ -128,7 +128,7 @@ public:
 
     void open(std::size_t size);
 
-    void setSize(std::size_t size);
+    void setSize(std::size_t size) override;
     void squeeze();
 
 private:

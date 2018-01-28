@@ -360,7 +360,7 @@ protected:
     std::size_t rawSize() const;
 
     // Methods for synchronizing the storage
-    void commitSyncAction(const PiercedSyncAction &action);
+    void commitSyncAction(const PiercedSyncAction &action) override;
 
     void detachKernel();
 
