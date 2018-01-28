@@ -40,7 +40,7 @@ using namespace bitpit;
 */
 int subtest_001(int rank)
 {
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 20;
 	double dh = 1.0;
 
@@ -83,7 +83,7 @@ int subtest_001(int rank)
 */
 int subtest_002(int rank)
 {
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 20;
 	double dh = 1.0;
 

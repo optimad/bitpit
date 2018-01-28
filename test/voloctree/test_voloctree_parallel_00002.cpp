@@ -39,7 +39,7 @@ using namespace bitpit;
 */
 int subtest_001()
 {
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 20;
 	double dh = 2;
 
@@ -107,7 +107,7 @@ int subtest_001()
 */
 int subtest_002()
 {
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 20;
 	double dh = 2;
 
