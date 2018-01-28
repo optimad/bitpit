@@ -42,9 +42,9 @@ class LevelSetCartesian : public LevelSetKernel{
 
     VolCartesian *                              getCartesianMesh() const;
 
-    double                                      computeCellIncircle(long);
-    double                                      computeCellCircumcircle(long);
-    bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &);
+    double                                      computeCellIncircle(long) override;
+    double                                      computeCellCircumcircle(long) override;
+    bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &) override;
 
 };
 

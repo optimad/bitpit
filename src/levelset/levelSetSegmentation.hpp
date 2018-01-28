@@ -116,18 +116,18 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     protected:
 
-    void                                        __clear() ;
-    void                                        __dump( std::ostream &) ;
-    void                                        __restore( std::istream &) ;
+    void                                        __clear() override ;
+    void                                        __dump( std::ostream &) override ;
+    void                                        __restore( std::istream &) override ;
 
-    void                                        __clearAfterMeshAdaption(const std::vector<adaption::Info> &);
+    void                                        __clearAfterMeshAdaption(const std::vector<adaption::Info> &) override ;
 
 # if BITPIT_ENABLE_MPI
-    void                                        __writeCommunicationBuffer(const std::vector<long> &, SendBuffer &);
-    void                                        __readCommunicationBuffer(const std::vector<long> &, RecvBuffer &);
+    void                                        __writeCommunicationBuffer(const std::vector<long> &, SendBuffer &) override ;
+    void                                        __readCommunicationBuffer(const std::vector<long> &, RecvBuffer &)  override ;
 # endif
 
-    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const;
+    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, double, std::vector<long> &);
 
     void                                        computeLSInNarrowBand( LevelSetCartesian *, bool);
@@ -140,22 +140,22 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     LevelSetSegmentation(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * M_PI);
     LevelSetSegmentation(int, const SurfUnstructured*, double featureAngle = 2. * M_PI);
 
-    LevelSetSegmentation*                       clone() const ;
+    LevelSetSegmentation*                       clone() const override ;
 
     void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&patch, double featureAngle = 2. * M_PI) ;
     void                                        setSegmentation(const SurfUnstructured *patch, double featureAngle = 2. * M_PI) ;
     const SegmentationKernel &                  getSegmentation() const ;
 
-    virtual int                                 getPart(const long &) const ;
-    virtual std::array<double,3>                getNormal(const long &) const ;
+    virtual int                                 getPart(const long &) const override;
+    virtual std::array<double,3>                getNormal(const long &) const override;
     long                                        getSupport(const long &i) const;
 
-    double                                      getSurfaceFeatureSize(const long &) const;
-    double                                      getMinSurfaceFeatureSize() const;
-    double                                      getMaxSurfaceFeatureSize() const;
+    double                                      getSurfaceFeatureSize(const long &) const override;
+    double                                      getMinSurfaceFeatureSize() const override;
+    double                                      getMaxSurfaceFeatureSize() const override;
 
-    void                                        computeLSInNarrowBand(bool);
-    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool);
+    void                                        computeLSInNarrowBand(bool) override;
+    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool) override;
 };
 
 }

@@ -60,22 +60,22 @@ class LevelSetCachedObject : public LevelSetObject{
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
 
-    void                                        _clear( ) ;
+    void                                        _clear( ) override ;
     virtual void                                __clear() ;
 
 
-    void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
+    void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) override ;
     virtual void                                __clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
 
-    void                                        _dump( std::ostream &) ; 
+    void                                        _dump( std::ostream &) override ;
     virtual void                                __dump(std::ostream &) ; 
-    void                                        _restore( std::istream &) ; 
+    void                                        _restore( std::istream &) override ;
     virtual void                                __restore(std::istream &) ; 
 
 # if BITPIT_ENABLE_MPI
-    void                                        _writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ; 
+    void                                        _writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) override ;
     virtual void                                __writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ; 
-    void                                        _readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ; 
+    void                                        _readCommunicationBuffer( const std::vector<long> &, RecvBuffer & )  override;
     virtual void                                __readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ; 
 # endif 
 
@@ -83,11 +83,11 @@ class LevelSetCachedObject : public LevelSetObject{
     virtual ~LevelSetCachedObject();
     LevelSetCachedObject(int);
 
-    LevelSetInfo                                getLevelSetInfo(const long &) const ;
-    double                                      getLS(const long &) const;
-    std::array<double,3>                        getGradient(const long &) const ;
+    LevelSetInfo                                getLevelSetInfo(const long &) const override ;
+    double                                      getLS(const long &) const override ;
+    std::array<double,3>                        getGradient(const long &) const override ;
 
-    void                                        propagateSign();
+    void                                        propagateSign() override ;
 
 };
 
