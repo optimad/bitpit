@@ -663,7 +663,7 @@ unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const b
     for (c_ = cb_; c_ != ce_; ++c_) {
 
         // Build normals
-        *i_ = std::move(evalFacetNormal(c_->getId()));
+        *i_ = evalFacetNormal(c_->getId());
         
         // Build connectivity
         ConstProxyVector<long> cellVertexIds = c_->getVertexIds();
@@ -749,7 +749,7 @@ unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exp
             }
 
             // Fill normal
-            *itN = std::move(evalFacetNormal(cell.getId()));
+            *itN = evalFacetNormal(cell.getId());
 
             // Increment  iterators
             ++itC;
@@ -786,7 +786,7 @@ unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exp
             }
 
             // Fill normal
-            *itN = std::move(evalFacetNormal(itr.getId()));
+            *itN = evalFacetNormal(itr.getId());
 
             // Increment iterators
             ++itC;
