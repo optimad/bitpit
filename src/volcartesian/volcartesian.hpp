@@ -62,28 +62,28 @@ public:
 			   double length, double dh);
 	VolCartesian(std::istream &stream);
 
-	std::unique_ptr<PatchKernel> clone() const;
+	std::unique_ptr<PatchKernel> clone() const override;
 
-	void reset();
+	void reset() override;
 
 	void setDiscretization(const std::array<int, 3> &nCells);
 
-	long getVertexCount() const;
+	long getVertexCount() const override;
 
-	long getCellCount() const;
+	long getCellCount() const override;
 	ElementType getCellType() const;
-	ElementType getCellType(const long &id) const;
+	ElementType getCellType(const long &id) const override;
 
-	long getInterfaceCount() const;
+	long getInterfaceCount() const override;
 	ElementType getInterfaceType() const;
-	ElementType getInterfaceType(const long &id) const;
+	ElementType getInterfaceType(const long &id) const override;
 
-	double evalCellVolume(const long &id) const;
-	double evalCellSize(const long &id) const;
-	std::array<double, 3> evalCellCentroid(const long &id) const;
+	double evalCellVolume(const long &id) const override;
+	double evalCellSize(const long &id) const override;
+	std::array<double, 3> evalCellCentroid(const long &id) const override;
 
-	double evalInterfaceArea(const long &id) const;
-	std::array<double, 3> evalInterfaceNormal(const long &id) const;
+	double evalInterfaceArea(const long &id) const override;
+	std::array<double, 3> evalInterfaceNormal(const long &id) const override;
 
 	std::array<double, 3> getSpacing() const;
 	double getSpacing(const int &direction) const;
@@ -91,9 +91,9 @@ public:
 	void switchMemoryMode(MemoryMode mode);
 	MemoryMode getMemoryMode();
 
-	bool isPointInside(const std::array<double, 3> &point);
-	bool isPointInside(const long &id, const std::array<double, 3> &point);
-	long locatePoint(const std::array<double, 3> &point);
+	bool isPointInside(const std::array<double, 3> &point) override;
+	bool isPointInside(const long &id, const std::array<double, 3> &point) override;
+	long locatePoint(const std::array<double, 3> &point) override;
 	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
 	long locateClosestVertex(std::array<double,3> const &point) const;
 	std::array<int, 3> locateClosestVertexCartesian(std::array<double,3> const &point) const;
@@ -109,10 +109,10 @@ public:
 
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);
-	void translate(std::array<double, 3> translation);
+	void translate(std::array<double, 3> translation) override;
 	std::array<double, 3> getLengths() const;
 	void setLengths(const std::array<double, 3> &lengths);
-	void scale(std::array<double, 3> scaling);
+	void scale(std::array<double, 3> scaling) override;
 
 	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
 	std::vector<double> convertToCellData(const std::vector<double> &nodeData) const;
@@ -136,11 +136,11 @@ public:
 protected:
 	VolCartesian(const VolCartesian &other) = default;
 
-	std::vector<adaption::Info> _spawn(bool trackSpawn);
+	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
 
-	int _getDumpVersion() const;
-	void _dump(std::ostream &stream) const;
-	void _restore(std::istream &stream);
+	int _getDumpVersion() const override;
+	void _dump(std::ostream &stream) const override;
+	void _restore(std::istream &stream) override;
 
 	void _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 	void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
