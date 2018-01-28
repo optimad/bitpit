@@ -197,10 +197,10 @@ class VTKVectorContainer : public VTKBaseContainer{
         VTKVectorContainer( const VTKVectorContainer &);
         ~VTKVectorContainer( ) ;
 
-        VTKVectorContainer*     clone() const ;
+        VTKVectorContainer*     clone() const override ;
 
-        void                    flushData( std::fstream &, VTKFormat) ;
-        void                    absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) ;
+        void                    flushData( std::fstream &, VTKFormat) override ;
+        void                    absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) override ;
         void                    resize( std::true_type, uint64_t , uint8_t) ;
         void                    resize( std::false_type, uint64_t , uint8_t) ;
 };
@@ -227,8 +227,8 @@ class VTKNativeStreamer : public VTKBaseStreamer {
         template<class T>
         void                    addData( std::string, std::vector<T> & ) ;
         void                    removeData( std::string ) ;
-        void                    flushData( std::fstream &, std::string, VTKFormat) ;
-        void                    absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t) ;
+        void                    flushData( std::fstream &, std::string, VTKFormat) override ;
+        void                    absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t) override ;
 };
 
 class VTKField{
@@ -406,7 +406,7 @@ class VTKUnstructuredGrid : public VTK {
                 VTKElementType          m_type ;                    /**< the type of cells */
                 long                    m_nCells ;                  /**< numer of cells */
 
-                void                    flushData( std::fstream &, std::string, VTKFormat) ;
+                void                    flushData( std::fstream &, std::string, VTKFormat) override ;
 
             public:
                 void                    setElementType( VTKElementType) ;
@@ -425,7 +425,7 @@ class VTKUnstructuredGrid : public VTK {
     VTKUnstructuredGrid( std::string , std::string , VTKElementType elementType = VTKElementType::UNDEFINED ) ;
 
     protected:
-        void                    writeCollection() ;  
+        void                    writeCollection() override ;
 
         uint64_t                readConnectivityEntries( ) ;
 
@@ -434,8 +434,8 @@ class VTKUnstructuredGrid : public VTK {
     public:
         using                   VTK::setGeomData;
 
-        void                    readMetaInformation() ;
-        void                    writeMetaInformation() ;
+        void                    readMetaInformation() override ;
+        void                    writeMetaInformation() override ;
 
         void                    setDimensions( uint64_t , uint64_t , uint64_t nconn = 0 , uint64_t nfacestream = 0 ) ;
 
@@ -447,9 +447,9 @@ class VTKUnstructuredGrid : public VTK {
         void setGeomData( VTKUnstructuredField, VTKBaseStreamer* =NULL );
 
         uint64_t                calcConnectivityEntries( ) ;
-        uint64_t                calcFieldSize( const VTKField &) ;
-        uint64_t                calcFieldEntries( const VTKField &) ;
-        uint8_t                 calcFieldComponents( const VTKField &) ;
+        uint64_t                calcFieldSize( const VTKField &) override ;
+        uint64_t                calcFieldEntries( const VTKField &) override ;
+        uint8_t                 calcFieldComponents( const VTKField &) override ;
 
     private:
         int                     getFieldGeomId( VTKUnstructuredField field ) ;
@@ -476,13 +476,13 @@ class VTKRectilinearGrid : public VTK{
         VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int );
         ~VTKRectilinearGrid();
 
-        void                    writeCollection() ;  
+        void                    writeCollection() override ;
 
     public:
         using                   VTK::setGeomData;
 
-        void                    readMetaInformation() ;
-        void                    writeMetaInformation() ;
+        void                    readMetaInformation() override ;
+        void                    writeMetaInformation() override ;
 
         void                    setDimensions( int, int, int, int, int, int ) ;
         void                    setDimensions( int, int, int ) ;
@@ -502,9 +502,9 @@ class VTKRectilinearGrid : public VTK{
         void                    setGlobalIndex( std::vector<extension3D_t> ) ;
         void                    setGlobalIndex( std::vector<extension2D_t> ) ;
 
-        uint64_t                calcFieldSize( const VTKField &) ;
-        uint64_t                calcFieldEntries( const VTKField &) ;
-        uint8_t                 calcFieldComponents( const VTKField &) ;
+        uint64_t                calcFieldSize( const VTKField &) override ;
+        uint64_t                calcFieldEntries( const VTKField &) override ;
+        uint8_t                 calcFieldComponents( const VTKField &) override ;
 };
 
 /*!

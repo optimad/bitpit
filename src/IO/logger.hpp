@@ -104,8 +104,8 @@ private:
 
     const std::string getTimestamp() const;
 
-    int_type overflow(int_type ch);
-    int sync();
+    int_type overflow(int_type ch) override;
+    int sync() override;
 
 };
 
