@@ -74,17 +74,17 @@ public:
 
 	~VolOctree();
 
-	std::unique_ptr<PatchKernel> clone() const;
+	std::unique_ptr<PatchKernel> clone() const override;
 
-	void reset();
-	void setDimension(int dimension);
+	void reset() override;
+	void setDimension(int dimension) override;
 
-	double evalCellVolume(const long &id) const;
-	double evalCellSize(const long &id) const;
-	std::array<double, 3> evalCellCentroid(const long &id) const;
+	double evalCellVolume(const long &id) const override;
+	double evalCellSize(const long &id) const override;
+	std::array<double, 3> evalCellCentroid(const long &id) const override;
 
-	double evalInterfaceArea(const long &id) const;
-	std::array<double, 3> evalInterfaceNormal(const long &id) const;
+	double evalInterfaceArea(const long &id) const override;
+	std::array<double, 3> evalInterfaceNormal(const long &id) const override;
 
 	OctantInfo getCellOctant(const long &id) const;
 	int getCellLevel(const long &id) const;
@@ -97,45 +97,45 @@ public:
 	const PabloUniform & getTree() const;
 	void setTreeAdopter(std::unique_ptr<PabloUniform> *entruster);
 
-	bool isPointInside(const std::array<double, 3> &point);
-	bool isPointInside(const long &id, const std::array<double, 3> &point);
-	long locatePoint(const std::array<double, 3> &point);
+	bool isPointInside(const std::array<double, 3> &point) override;
+	bool isPointInside(const long &id, const std::array<double, 3> &point) override;
+	long locatePoint(const std::array<double, 3> &point) override;
 
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);
-	void translate(std::array<double, 3> translation);
+	void translate(std::array<double, 3> translation) override;
 	double getLength() const;
 	void setLength(double length);
-	void scale(std::array<double, 3> scaling);
+	void scale(std::array<double, 3> scaling) override;
 
-	void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
+	void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true) override;
 
 #if BITPIT_ENABLE_MPI==1
-	void setCommunicator(MPI_Comm communicator);
+	void setCommunicator(MPI_Comm communicator) override;
 #endif
 
 protected:
 	VolOctree(const VolOctree &other);
 
-	std::vector<adaption::Info> _spawn(bool trackSpawn);
+	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
 
-	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption);
-	std::vector<adaption::Info> _adaptionAlter(bool trackAdaption);
-	void _adaptionCleanup();
-	bool _markCellForRefinement(const long &id);
-	bool _markCellForCoarsening(const long &id);
-	bool _enableCellBalancing(const long &id, bool enabled);
-	void _setTol(double tolerance);
-	void _resetTol();
+	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption) override;
+	std::vector<adaption::Info> _adaptionAlter(bool trackAdaption) override;
+	void _adaptionCleanup() override;
+	bool _markCellForRefinement(const long &id) override;
+	bool _markCellForCoarsening(const long &id) override;
+	bool _enableCellBalancing(const long &id, bool enabled) override;
+	void _setTol(double tolerance) override;
+	void _resetTol() override;
 
-	int _getDumpVersion() const;
-	void _dump(std::ostream &stream) const;
-	void _restore(std::istream &stream);
+	int _getDumpVersion() const override;
+	void _dump(std::ostream &stream) const override;
+	void _restore(std::istream &stream) override;
 
-	long _getCellNativeIndex(long id) const;
+	long _getCellNativeIndex(long id) const override;
 
-	void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const;
-	void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const;
+	void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 
 #if BITPIT_ENABLE_MPI==1
 	std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning) override;
