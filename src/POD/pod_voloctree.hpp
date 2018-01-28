@@ -52,7 +52,7 @@ public:
 
 protected:
 
-    VolumeKernel* createMesh();
+    VolumeKernel* createMesh() override;
 
 };
 
