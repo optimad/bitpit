@@ -1199,8 +1199,8 @@ void POD::evalEigen()
         outl.close();
     }
 
-    long bufferSize = m_nModes;
 #if BITPIT_ENABLE_MPI
+    long bufferSize = m_nModes;
     MPI_Bcast(&bufferSize, 1, MPI_LONG, 0, m_communicator);
     m_nModes = bufferSize;
     for (std::size_t i = 0; i < m_nFields; i++) {
