@@ -45,13 +45,13 @@ public:
 	SurfUnstructured(std::istream &stream);
 
         // Clone
-        std::unique_ptr<PatchKernel> clone() const;
+        std::unique_ptr<PatchKernel> clone() const override;
 
         // Setters
 	void setExpert(bool expert);
 
         // Search algorithms
-        long locatePoint(const std::array<double, 3> &point);
+        long locatePoint(const std::array<double, 3> &point) override;
 
         // Evaluations
         void extractEdgeNetwork(SurfUnstructured &);
@@ -67,9 +67,9 @@ public:
 protected:
 	SurfUnstructured(const SurfUnstructured &other) = default;
 
-	int _getDumpVersion() const;
-	void _dump(std::ostream &stream) const;
-	void _restore(std::istream &stream);
+	int _getDumpVersion() const override;
+	void _dump(std::ostream &stream) const override;
+	void _restore(std::istream &stream) override;
 
 	static ElementType getSTLFacetType(int nFacetVertices);
 	static ElementType getDGFFacetType(int nFacetVertices);
