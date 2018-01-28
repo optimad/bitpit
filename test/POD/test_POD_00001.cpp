@@ -76,10 +76,10 @@ int subtest_001(int rank, int nProcs)
             long id = cell.getId();
             if (k%2){
                 fields.at(id) = std::cos((k)*mesh->evalCellCentroid(id)[0]);
-                fieldv.at(id) = {1.,0.,0.};
+                fieldv.at(id) = {{1.,0.,0.}};
             }else{
                 fields.at(id) = std::sin((k+1)*mesh->evalCellCentroid(id)[1]);
-                fieldv.at(id) = {0.,1.,0.};
+                fieldv.at(id) = {{0.,1.,0.}};
             }
         }
         /**<Dump the snapshots.*/
@@ -93,7 +93,7 @@ int subtest_001(int rank, int nProcs)
             utils::binary::write(dataStream,std::size_t(1));
             utils::binary::write(dataStream,std::string("scalar"));
             fields.dump(dataStream);
-            std::array<std::string,3> namevf={"vector_x","vector_y","vector_z"};
+            std::array<std::string,3> namevf = {{"vector_x","vector_y","vector_z"}};
             utils::binary::write(dataStream,std::size_t(1));
             utils::binary::write(dataStream,namevf);
             fieldv.dump(dataStream);
