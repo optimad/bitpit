@@ -57,7 +57,7 @@ public:
         std::array<double, 3> evalEdgeNormal(const long&, const int&) const;
         std::array<double, 3> evalVertexNormal(const long&, const int&) const;
         virtual std::array<double, 3> evalLimitedVertexNormal(const long&, const int&, const double&) const;
-        double evalCellSize(const long &id) const;
+        double evalCellSize(const long &id) const override;
 
         bool adjustCellOrientation();
         bool adjustCellOrientation(const long &id, const bool &flip = false);

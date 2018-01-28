@@ -89,9 +89,9 @@ class ReferenceTetraInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+    double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceTetraInfo info;
 
@@ -108,9 +108,9 @@ class ReferenceVoxelInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+    double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceVoxelInfo info;
 
@@ -127,9 +127,9 @@ class ReferenceHexahedronInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+    double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceHexahedronInfo info;
 
@@ -146,9 +146,9 @@ class ReferencePyramidInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+    double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferencePyramidInfo info;
 
@@ -165,9 +165,9 @@ class ReferenceWedgeInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalVolume(const std::array<double, 3> *vertexCoords) const;
+    double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceWedgeInfo info;
 
@@ -200,11 +200,11 @@ friend class ReferencePyramidInfo;
 friend class ReferenceWedgeInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalArea(const std::array<double, 3> *vertexCoords) const;
+    double evalArea(const std::array<double, 3> *vertexCoords) const override;
 
-    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
     const static ReferenceTriangleInfo info;
 
@@ -222,11 +222,11 @@ friend class ReferenceElementInfo;
 friend class ReferenceVoxelInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalArea(const std::array<double, 3> *vertexCoords) const;
+    double evalArea(const std::array<double, 3> *vertexCoords) const override;
 
-    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
     const static ReferencePixelInfo info;
 
@@ -246,11 +246,11 @@ friend class ReferencePyramidInfo;
 friend class ReferenceWedgeInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalArea(const std::array<double, 3> *vertexCoords) const;
+    double evalArea(const std::array<double, 3> *vertexCoords) const override;
 
-    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
     const static ReferenceQuadInfo info;
 
@@ -287,11 +287,11 @@ friend class ReferencePyramidInfo;
 friend class ReferenceWedgeInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    double evalLength(const std::array<double, 3> *vertexCoords) const;
+    double evalLength(const std::array<double, 3> *vertexCoords) const override;
 
-    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const ;
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
     const static ReferenceLineInfo info;
 
@@ -322,9 +322,9 @@ friend class ReferencePixelInfo;
 friend class ReferenceQuadInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const;
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
-    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{1., 0., 0.}}) const;
+    std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{1., 0., 0.}}) const override;
 
     const static ReferenceVertexInfo info;
 

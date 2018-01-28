@@ -78,9 +78,9 @@ public:
 #endif
 
 protected:
-	void _init();
-	void _reset();
-	void _extract();
+	void _init() override;
+	void _reset() override;
+	void _extract() override;
 
 private:
 	std::unordered_map<long, long> m_cellLocalToConsecutiveMap;

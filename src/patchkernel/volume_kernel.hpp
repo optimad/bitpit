@@ -40,7 +40,6 @@ public:
 	virtual bool isPointInside(const long &id, const std::array<double, 3> &point) = 0;
 
 	virtual double evalCellVolume(const long &id)const = 0;
-	virtual double evalCellSize(const long &id)const = 0;
 
 	virtual double evalInterfaceArea(const long &id)const = 0;
         virtual std::array<double,3> evalInterfaceNormal(const long &id)const = 0;

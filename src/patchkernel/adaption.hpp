@@ -133,7 +133,7 @@ public:
 
 	~CellFlatMapping();
 
-	void update(const std::vector<adaption::Info> &adaptionData);
+	void update(const std::vector<adaption::Info> &adaptionData) override;
 
 };
 
