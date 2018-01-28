@@ -59,8 +59,8 @@ VTKRectilinearGrid::VTKRectilinearGrid( ) :VTK() {
     }
 
     for (int k = 0; k < 3; ++k) {
-        m_localIndex[k]  = { -1, -1 } ;
-        m_globalIndex[k] = { -1, -1 } ;
+        m_localIndex[k]  = {{ -1, -1 }} ;
+        m_globalIndex[k] = {{ -1, -1 }} ;
     }
 
     m_dimensions = -1 ;
