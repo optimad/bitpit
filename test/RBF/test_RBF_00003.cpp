@@ -266,6 +266,8 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
         int     d ;
         bool    found;
         std::array<int,3>    index, body_beg, body_end ;
+        body_beg.fill(0);
+        body_end.fill(0);
 
         type.resize( np[0]*np[1]*np[2] ) ;
 
