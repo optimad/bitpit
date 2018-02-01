@@ -114,6 +114,150 @@ return; };
  */
 
 /*!
+ * @ingroup laauxiliary
+ * @{
+ */
+
+// -------------------------------------------------------------------------- //
+/*!
+    Given an input matrix A, compute the complement of the element A[i][j].
+
+    \param[in] i row index of element
+    \param[in] j column index of element
+    \param[in] A input matrix
+    \param[in,out] B complement of alement A[i][j].
+*/
+template <class T>
+void complement(
+    int                                          i,
+    int                                          j,
+    std::vector< std::vector< T > >             &A,
+    std::vector< std::vector< T > >             &B
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+int            m, n;
+
+// Counters
+int            l, k;
+
+// ========================================================================== //
+// CHECK INPUT                                                                //
+// ========================================================================== //
+m = A.size();
+if (m == 0) { return; }
+n = A[0].size();
+if (n == 0) { return; }
+i--; j--;
+if ((i >= m) || (i < 0)) {
+    return;
+}
+if ((j >= n) || (j < 0)) {
+    return;
+}
+
+// ========================================================================== //
+// EXTRACT COMPLEMENT                                                         //
+// ========================================================================== //
+
+// Resize output variables
+B.resize(m-1);
+for (i = 0; i < m-1; ++i) {
+    B[i].resize(n-1, 0.0);
+} //next i
+
+// Extract complement
+for (l = 0; l < i; l++) {
+    for (k = 0; k < j; k++) {
+        B[l][k] = A[l][k];
+    } //next k
+    for (k = j+1; k < n; k++) {
+        B[l][k-1] = A[l][k];
+    } //next k
+} //next l
+for (l = i+1; l < m; l++) {
+    for (k = 0; k < j; k++) {
+        B[l-1][k] = A[l][k];
+    } //next k
+    for (k = j+1; k < n; k++) {
+        B[l-1][k-1] = A[l][k];
+    } //next k
+} //next l
+
+return; };
+
+// -------------------------------------------------------------------------- //
+/*!
+    Given an input matrix A, compute the complement of the element A[i][j].
+    Overloading of complement() function for container array.
+
+    \param[in] i row index of element
+    \param[in] j column index of element
+    \param[in] A input matrix
+    \param[in,out] B complement of alement A[i][j].
+*/
+template <class T, size_t m, size_t n>
+void complement(
+    int                                          i,
+    int                                          j,
+    std::array< std::array< T, n >, m >         &A,
+    std::array< std::array<T, n-1>, m-1>        &B
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+int            l, k;
+
+// ========================================================================== //
+// CHECK INPUT                                                                //
+// ========================================================================== //
+if (m == 0) { return; }
+if (n == 0) { return; }
+i--; j--;
+if ((i >= (long) m) || (i < 0)) {
+    return;
+}
+if ((j >= (long) n) || (j < 0)) {
+    return;
+}
+
+// ========================================================================== //
+// EXTRACT COMPLEMENT                                                         //
+// ========================================================================== //
+for (l = 0; l < i; l++) {
+    for (k = 0; k < j; k++) {
+        B[l][k] = A[l][k];
+    } //next k
+    for (k = j+1; k < (long) n; k++) {
+        B[l][k-1] = A[l][k];
+    } //next k
+} //next l
+for (l = i+1; l < (long) m; l++) {
+    for (k = 0; k < j; k++) {
+        B[l-1][k] = A[l][k];
+    } //next k
+    for (k = j+1; k < (long) n; k++) {
+        B[l-1][k-1] = A[l][k];
+    } //next k
+} //next l
+
+return; };
+
+/*!
+ * @}
+ */
+
+/*!
  * @ingroup laspecialmatrix
  * @{
  */

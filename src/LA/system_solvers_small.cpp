@@ -39,7 +39,9 @@
 // ========================================================================== //
 // INCLUDES                                                                   //
 // ========================================================================== //
-# include "LinearAlgebra.hpp"
+# include "matrix_utilities.hpp"
+# include "multiplication.hpp"
+# include "system_solvers_small.hpp"
 
 namespace bitpit{
 

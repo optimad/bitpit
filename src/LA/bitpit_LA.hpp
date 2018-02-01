@@ -28,17 +28,21 @@
 /*!
  * @defgroup LinearAlgebra Linear algebra (LA)
  * @{
- * @defgroup laspecialmatrix SpecialMatrix
+ * @defgroup laspecialmatrix Special Matrices
  * @defgroup ladisplay Display
  * @defgroup lamanipulation Manipulation
  * @defgroup lamultiplication Multiplication
  * @defgroup lainfo Info
+ * @defgroup laauxiliary Auxiliary Utilities
  * @defgroup system_solver_small System Solvers (Small Systems)
  * @}
  */
 
 #include "bitpit_version.hpp"
 
-#include "LinearAlgebra.hpp"
+#include "manipulation.hpp"
+#include "matrix_utilities.hpp"
+#include "multiplication.hpp"
+#include "system_solvers_small.hpp"
 
 #endif
