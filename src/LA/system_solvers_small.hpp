@@ -48,7 +48,7 @@
 # include <array>
 # include <iostream>
 
-# include "Operators.hpp"
+# include "bitpit_operators.hpp"
 
 namespace bitpit{
 
