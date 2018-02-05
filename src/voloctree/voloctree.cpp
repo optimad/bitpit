@@ -705,37 +705,39 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 		currentRank = getRank();
 #endif
 
-		// Track internal octants that will be coarsend/refined
-		long nOctants = m_tree->getNumOctants();
+		// Track internal and ghosts octants that will be coarsend/refined
+		std::vector<uint32_t> treeIds;
+		std::vector<int8_t> treeMarkers;
+		std::vector<bool> treeGhosts;
+		m_tree->getPreMapping(treeIds, treeMarkers, treeGhosts);
 
-		uint32_t treeId = 0;
-		while (treeId < (uint32_t) nOctants) {
-			int8_t marker = m_tree->getPreMarker(treeId);
-			if (marker == 0) {
-				treeId++;
-				continue;
-			}
-
-			int nUpdatedOctants;
+		std::size_t n = 0;
+		std::size_t nUpdatedOctants = treeIds.size();
+		while (n < nUpdatedOctants){
+			int8_t marker = treeMarkers[n];
+			int nAdaptionOctants;
 			adaption::Type adaptionType;
 			if (marker > 0) {
-				nUpdatedOctants = 1;
-				adaptionType    = adaption::TYPE_REFINEMENT;
+				nAdaptionOctants = 1;
+				adaptionType     = adaption::TYPE_REFINEMENT;
 			} else {
-				nUpdatedOctants = pow(2, getDimension());
-				adaptionType    = adaption::TYPE_COARSENING;
+				nAdaptionOctants = pow(2, getDimension());
+				adaptionType     = adaption::TYPE_COARSENING;
 			}
 
 			std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-			adaptionInfo.previous.reserve(nUpdatedOctants);
-			for (int k = 0; k < nUpdatedOctants; ++k) {
-				OctantInfo octantInfo(treeId, true);
+			adaptionInfo.previous.reserve(nAdaptionOctants);
+			for (int k = 0; k < nAdaptionOctants; ++k) {
+				uint32_t treeId = treeIds[n];
+				bool isghost    = treeGhosts[n];
+				OctantInfo octantInfo(treeId, !isghost);
 
 				adaptionInfo.previous.emplace_back();
 				long &cellId = adaptionInfo.previous.back();
 				cellId = getOctantId(octantInfo);
-				treeId++;
+
+				n++;
 			}
 		}
 
