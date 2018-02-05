@@ -2970,33 +2970,62 @@ namespace bitpit {
         }
     };
 
-    /** Get octants with marker different from zero and the related markers.
+    /** Get octants with marker different from zero and the related markers and ghostness info.
         * The methods has to be called after a apredapt, otherwise it calls preadapt method.
-        * \param[out] idx Vector of local indices of octants with marler different from zero.
+        * \param[out] idx Vector of local indices of octants with marker different from zero.
         * \param[out] markers Vector with markers related to octants in the idx list.
+        * \param[out] isghost Info on ghostness of octants.
         */
     void
-    ParaTree::getPreMapping(u32vector & idx, vector<int8_t> & mapper)
+    ParaTree::getPreMapping(u32vector & idx, vector<int8_t> & markers, vector<bool> & isghost)
     {
         if (m_lastOp != OP_PRE_ADAPT) {
             throw std::runtime_error("Last operation different from preadapt, unable to call getPreMarker function");
         }
 
         idx.clear();
-        mapper.clear();
-        idx.reserve(getNumOctants());
-        mapper.reserve(getNumOctants());
-        octantIterator it, itb = getInternalOctantsBegin(), ite = getInternalOctantsEnd();
+        markers.clear();
+        isghost.clear();
 
-        int count = 0;
-        int8_t marker;
-        for (it=itb; it!=ite; ++it){
-            marker = (*it)->getMarker();
-            if (marker != 0){
-                idx.push_back(count);
-                mapper.push_back(marker);
+        std::size_t firstGsize = m_octree.m_firstGhostBros.size();
+        std::size_t lastGsize = m_octree.m_lastGhostBros.size();
+
+        idx.reserve(getNumOctants() + firstGsize + lastGsize);
+        markers.reserve(getNumOctants() + firstGsize + lastGsize);
+        isghost.reserve(getNumOctants() + firstGsize + lastGsize);
+
+        //insert first ghost brothers if present
+        {
+            int8_t marker;
+            for (uint32_t id : m_octree.m_firstGhostBros){
+                marker = m_octree.m_ghosts[id].getMarker();
+                idx.push_back(id);
+                markers.push_back(marker);
+                isghost.push_back(true);
             }
-            count++;
+        }
+
+        {
+            int8_t marker;
+            for (uint32_t count = 0; count < m_octree.getNumOctants(); count++){
+                marker = m_octree.m_octants[count].getMarker();
+                if (marker != 0){
+                    idx.push_back(count);
+                    markers.push_back(marker);
+                    isghost.push_back(false);
+                }
+            }
+        }
+
+        //insert last ghost brothers if present
+        {
+            int8_t marker;
+            for (uint32_t id : m_octree.m_lastGhostBros){
+                marker = m_octree.m_ghosts[id].getMarker();
+                idx.push_back(id);
+                markers.push_back(marker);
+                isghost.push_back(true);
+            }
         }
     };
 
