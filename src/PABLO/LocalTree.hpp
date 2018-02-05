@@ -126,7 +126,8 @@ private:
 	uint8_t 				m_balanceCodim;			/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through faces (default);
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 2 = 2:1 balance through edges and faces;
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 3 = 2:1 balance through nodes, edges and faces)*/
-	u32vector 				m_lastGhostBros;		/**<Index of ghost brothers in case of broken family coarsened*/
+	u32vector 				m_lastGhostBros;		/**<Index of ghost brothers in case of broken family coarsened (tail of local octants)*/
+	u32vector 				m_firstGhostBros;		/**<Index of ghost brothers in case of broken family coarsened (head of local octants)*/
 	u32vector2D				m_connectivity;			/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 The nodes are stored as index of vector nodes*/
 	u32vector2D				m_ghostsConnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.

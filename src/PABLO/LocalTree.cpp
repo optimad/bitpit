@@ -292,6 +292,7 @@ namespace bitpit {
         m_globalIdxGhosts.clear();
 
         m_lastGhostBros.clear();
+        m_firstGhostBros.clear();
 
         m_localMaxDepth = 0;
 
@@ -2413,6 +2414,7 @@ namespace bitpit {
 
         //Clean index of ghost brothers in case of coarsening a broken family
         m_lastGhostBros.clear();
+        m_firstGhostBros.clear();
 
         // Set index for start and end check for ghosts
         bool checkend = true;
@@ -2441,6 +2443,10 @@ namespace bitpit {
                     idx = idx1_gh;
                     marker = m_ghosts[idx].getMarker();
                     while(marker < 0 && m_ghosts[idx].buildFather() == father){
+
+                        //Add ghost index to structure for mapper in case of coarsening a broken family
+                        m_firstGhostBros.push_back(idx);
+
                         nbro++;
                         if (idx==0)
                             break;
@@ -2462,6 +2468,8 @@ namespace bitpit {
                                 m_octants[ii].m_info[15]=true;
                             }
                         }
+                        //Clean ghost index to structure for mapper in case of coarsening a broken family
+                        m_firstGhostBros.clear();
                     }
                 }
             }
@@ -2589,6 +2597,7 @@ namespace bitpit {
 
         //Clean index of ghost brothers in case of coarsening a broken family
         m_lastGhostBros.clear();
+        m_firstGhostBros.clear();
 
         // Set index for start and end check for ghosts
         bool checkend = true;
@@ -2620,7 +2629,7 @@ namespace bitpit {
                     while(marker < 0 && m_ghosts[idx].buildFather() == father){
 
                         //Add ghost index to structure for mapper in case of coarsening a broken family
-                        m_lastGhostBros.push_back(idx);
+                        m_firstGhostBros.push_back(idx);
 
                         nbro++;
                         if (idx==0)
@@ -2645,7 +2654,7 @@ namespace bitpit {
                             }
                         }
                         //Clean index of ghost brothers in case of coarsening a broken family
-                        m_lastGhostBros.clear();
+                        m_firstGhostBros.clear();
                     }
                 }
             }
@@ -2661,6 +2670,10 @@ namespace bitpit {
                     idx = idx2_gh;
                     marker = m_ghosts[idx].getMarker();
                     while(marker < 0 && m_ghosts[idx].buildFather() == father){
+
+                        //Add ghost index to structure for mapper in case of coarsening a broken family
+                        m_lastGhostBros.push_back(idx);
+
                         nbro++;
                         idx++;
                         if(idx == m_sizeGhosts){
@@ -2687,6 +2700,8 @@ namespace bitpit {
                                 newmodified.push_back(ii);
                             }
                         }
+                        //Clean index of ghost brothers in case of coarsening a broken family
+                        m_lastGhostBros.clear();
                     }
                 }
             }
