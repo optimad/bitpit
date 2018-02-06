@@ -557,7 +557,7 @@ void podcore(const InfoBitpodPP & info) {
 int main( int argc, char *argv[] ) {
 
 #if BITPIT_ENABLE_MPI
-    MPI::Init(argc, argv);
+    MPI_Init(&argc, &argv);
 
     {
 #endif
@@ -574,7 +574,7 @@ int main( int argc, char *argv[] ) {
 #if BITPIT_ENABLE_MPI
     }
 
-    MPI::Finalize();
+    MPI_Finalize();
 #endif
 
     return 0;
