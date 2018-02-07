@@ -253,7 +253,7 @@ bool
 Octant::getBound() const{
 	return m_info[OctantInfo::INFO_BOUNDFACE0]||m_info[OctantInfo::INFO_BOUNDFACE1]||
 	        m_info[OctantInfo::INFO_BOUNDFACE2]||m_info[OctantInfo::INFO_BOUNDFACE3]||
-	        ((m_dim-2)*(m_info[OctantInfo::INFO_BOUNDFACE4]||m_info[OctantInfo::INFO_BOUNDFACE5]));
+	        ((m_dim-2)&&(m_info[OctantInfo::INFO_BOUNDFACE4]||m_info[OctantInfo::INFO_BOUNDFACE5]));
 };
 
 /*! Set the boundary flag to true on an octant face.
