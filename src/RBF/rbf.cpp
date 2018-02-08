@@ -645,8 +645,8 @@ int RBFKernel::solve()
 
     std::vector<int> activeSet( getActiveSet() );
 
-    double *a = new double [lda * nS];
-    double *b = new double [ldb * nrhs];
+    std::vector<double> A(lda * nS);
+    std::vector<double> b(ldb * nrhs);
 
     k=0;
     for( j=0; j<nrhs; ++j) {
@@ -661,12 +661,12 @@ int RBFKernel::solve()
         for( const auto &j : activeSet ){
 
             dist = calcDist(j,i) / m_supportRadius;
-            a[k] = evalBasis( dist );
+            A[k] = evalBasis( dist );
             k++;
         }
     }
 
-    info = LAPACKE_dgesv( LAPACK_COL_MAJOR, nS, nrhs, a, lda, ipiv, b, ldb );
+    info = LAPACKE_dgesv( LAPACK_COL_MAJOR, nS, nrhs, A.data(), lda, ipiv, b.data(), ldb );
 
     if( info > 0 ) {
         printf( "The diagonal element of the triangular factor of a,\n" );
@@ -686,9 +686,6 @@ int RBFKernel::solve()
             ++k;
         }
     }
-
-    delete[] a;
-    delete[] b;
 
     return 0;
 }
@@ -902,9 +899,9 @@ int RBFKernel::solveLSQ()
     lda = m;
     ldb = std::max(n,m);
 
-    double  *a = new double [lda * n];
-    double  *b = new double [ldb * nrhs];
-    double  *s = new double [m];
+    std::vector<double> A(lda * n);
+    std::vector<double> b(ldb * nrhs);
+    std::vector<double> s(m);
 
     for( j=0; j<nrhs; ++j) {
         for( i=0; i<nP; ++i) {
@@ -917,12 +914,12 @@ int RBFKernel::solveLSQ()
     for( const auto &j : activeSet ) {
         for( i=0; i<nP; ++i) {
             dist = calcDist(j,i) / m_supportRadius;
-            a[k] = evalBasis( dist );
+            A[k] = evalBasis( dist );
             k++;
         }
     }
 
-    info = LAPACKE_dgelsd( LAPACK_COL_MAJOR, nP, nR, nrhs, a, lda, b, ldb, s, rcond, &rank );
+    info = LAPACKE_dgelsd( LAPACK_COL_MAJOR, nP, nR, nrhs, A.data(), lda, b.data(), ldb, s.data(), rcond, &rank );
 
     if( info > 0 ) {
         return 1;
@@ -940,10 +937,6 @@ int RBFKernel::solveLSQ()
             ++k;
         }
     }
-
-    delete[] a;
-    delete[] b;
-    delete[] s;
 
     return(0);
 }
