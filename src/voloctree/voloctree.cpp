@@ -957,9 +957,8 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// Cells that will be removed
 		//
 		// Mark the cells associated to previous local octants for deletion.
-		int nPreviousTreeIds;
 		if (!importFromScratch) {
-			nPreviousTreeIds = mapper_octantMap.size();
+			int nPreviousTreeIds = mapper_octantMap.size();
 			for (int k = 0; k < nPreviousTreeIds; ++k) {
 #if BITPIT_ENABLE_MPI==1
 				// Only local cells can be deleted
@@ -976,8 +975,6 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 				unmappedOctants[previousTreeId] = false;
 			}
-		} else {
-			nPreviousTreeIds = 0;
 		}
 
 		// Adaption tracking
