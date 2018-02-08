@@ -222,7 +222,6 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
     {
 
         std::array<double,3>    temp ;
-        k=0;
         for(j=0; j<np[1];  j++){
             for( i=0; i<np[0]; i++){
                 temp[0] = xpoints[i] ;
