@@ -99,7 +99,10 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	patch::manager().registerPatch(this, id);
 
 	// Set the dimension
-	setDimension(dimension);
+	//
+	// Here we can only call the base function, if needed, every derived patch
+	// has to call its derived function.
+	PatchKernel::setDimension(dimension);
 }
 
 /*!
