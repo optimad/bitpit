@@ -824,7 +824,6 @@ int DataCommunicator::waitAnyRecv(const std::vector<int> &blackList)
     Waits for the receive associate to the sepcified rank to complete.
 
     \param rank is the rank associated to the receive to wait for
-    \param
 */
 void DataCommunicator::waitRecv(int rank)
 {
