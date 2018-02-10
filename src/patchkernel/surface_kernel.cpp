@@ -1145,7 +1145,7 @@ void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding) cons
 
 /*!
  * Compute the histogram showing the distribution of aspect ratio among elements
- * 
+ *
  * \param[in] funct_ pointer to member function to be used to compute stats
  * \param[in,out] bins bins used to construct histogram. If an empty vector is passed
  * as input, uniform bins will be generated in the interval [1.0, 5.0)
@@ -1154,10 +1154,10 @@ void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding) cons
  * SelectionMask::SELECT_TRIANGLE, only quad and tria element will be considered and count
  * will returns the number of such elements.
  * \param[in] n_intervals (default = 8), number of intervals to be used for histogram construction.
- * If bins is a non-empty vector, the number of intervals will be set equal to 
+ * If bins is a non-empty vector, the number of intervals will be set equal to
  * bins.size()-1
  * \param[in] mask (default = SelectionMask::ALL) selection mask for element type
- * 
+ *
  * \result on output returns a vector of dimensions n_internvals+2, storing the
  * histogram for the distribution of aspect ratio among cells.
  * hist[0] stores the % of element having aspect ratio below bins[0]
@@ -1167,7 +1167,7 @@ void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding) cons
  * hist[n_internvals+1] stores the % of element having aspect ratio above
  * bins[n_intervals].
 */
-std::vector<double> SurfaceKernel::computeHistogram(eval_f_ funct_, vector<double> &bins, long &count, int n_intervals, unsigned short mask) const
+std::vector<double> SurfaceKernel::computeHistogram(eval_f_ funct_, std::vector<double> &bins, long &count, int n_intervals, unsigned short mask) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //

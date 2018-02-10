@@ -29,6 +29,12 @@
 
 namespace bitpit {
 
+/*!
+	Creates a clone of the specified pach.
+
+	\param original is the patch that will be cloned
+	\result A clone of the pach.
+*/
 template<typename patch_t>
 std::unique_ptr<patch_t> PatchKernel::clone(const patch_t *original)
 {

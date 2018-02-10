@@ -84,7 +84,9 @@ public:
 	};
 
 	/*!
-		Functional for compare the position of two cells
+		Functional for comparing the position of two cells.
+
+		The comparison is made with respect to the cell centroid.
 	*/
 	struct CellPositionLess
 	{
@@ -126,7 +128,9 @@ public:
 	};
 
 	/*!
-		Functional for compare the position of two cells
+		Functional for comparing the position of two cells.
+
+		The comparison is made with respect to the cell centroid.
 	*/
 	struct CellPositionGreater
 	{

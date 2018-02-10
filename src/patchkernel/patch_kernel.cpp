@@ -2276,7 +2276,9 @@ std::vector<long> PatchKernel::findCellNeighs(const long &id) const
 	Extracts all the neighbours of the specified cell
 
 	\param id is the id of the cell
-	\result All the neighbours of the specified cell.
+	\param[in,out] neighs is the vector were the neighbours will be stored.
+	The vector is not cleared before adding the neighbours, it is extended
+	by appending all the neighbours found by this function
 */
 void PatchKernel::findCellNeighs(const long &id, std::vector<long> *neighs) const
 {
@@ -3528,7 +3530,8 @@ bool PatchKernel::_markCellForCoarsening(const long &id)
 
 	Default implementation is a no-op function.
 
-	\param id the cell to be refined
+	\param id is the id of the cell
+	\param enabled defines if enable the balancing for the specified cell
 	\result Returns true if the falg was properly set, false otherwise.
 */
 bool PatchKernel::_enableCellBalancing(const long &id, bool enabled)
@@ -3749,8 +3752,8 @@ long PatchKernel::locatePoint(const double &x, const double &y, const double &z)
  * 
  * \param[in] cellId_A is the index of the first cell
  * \param[in] face_A is the face on the first cell
- * \param[in] cellId_A is the index of the second cell
- * \param[in] face_A is the face on the second cell
+ * \param[in] cellId_B is the index of the second cell
+ * \param[in] face_B is the face on the second cell
  * \result Returns true if the two faces are the same.
 */
 bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_B)
@@ -4798,11 +4801,11 @@ const PatchKernel::CellConstRange & PatchKernel::getVTKCellWriteRange() const
  *  Interface for writing data to stream.
  *
  *  @param[in] stream is the stream to write to
+ *  @param[in] name is the name of the data to be written. Either user
+ *  data or patch data
  *  @param[in] format is the format which must be used. Supported options
  *  are "ascii" or "appended". For "appended" type an unformatted binary
  *  stream must be used
- *  @param[in] name is the name of the data to be written. Either user
- *  data or patch data
  */
 void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat format)
 {
@@ -5182,7 +5185,7 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
  *  Merge the specified adaption info.
  *
  *  \param[in] source is the source adaption info
- *  \param[in,out] desintation is the destination adaption info
+ *  \param[in,out] destination is the destination adaption info
  */
 void PatchKernel::mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination)
 {

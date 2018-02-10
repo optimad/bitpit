@@ -384,8 +384,8 @@ std::size_t SkdNode::getChildId(ChildLocation child) const
 * cells contained the node.
 *
 * \param point is the point
-* \param[out] distance on output it will contain the minimum distance
-* among the specified point and the cells contained the node.
+* \result The minimum distance among the specified point and the cells
+* contained the node.
 */
 double SkdNode::evalPointMinDistance(const std::array<double, 3> &point) const
 {
@@ -403,9 +403,8 @@ double SkdNode::evalPointMinDistance(const std::array<double, 3> &point) const
 * cells contained in the bounding box associated to the node.
 *
 * \param point is the point
-* \param[out] distance on output it will contain the maximum distance
-* among the specified point and the cells contained in the bounding
-* box associated to the node.
+* \result The maximum distance among the specified point and the cells
+* contained in the bounding box associated to the node.
 */
 double SkdNode::evalPointMaxDistance(const std::array<double, 3> &point) const
 {

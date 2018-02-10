@@ -42,7 +42,6 @@ namespace bitpit {
 	Default constructor
 
 	\param patch is patch from which the informations will be extracted
-	\param init is the function that will be call to initialize the patch
 */
 PatchInfo::PatchInfo(PatchKernel const *patch)
 	: m_patch(nullptr)
@@ -115,8 +114,6 @@ void PatchInfo::extract()
 
 /*!
 	Updates the information.
-
-	\param patch is patch from which the informations will be extracted
 */
 void PatchInfo::update()
 {
@@ -284,8 +281,7 @@ const std::unordered_map<long, long> & PatchNumberingInfo::getCellConsecutiveMap
 /*!
 	Gets the global number of cells.
 
-	\param id is the local id of the cell
-	\return The rank of the specified cell.
+	\return The global number of cells.
 */
 long PatchNumberingInfo::getCellGlobalCount() const
 {

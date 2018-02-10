@@ -999,7 +999,6 @@ double ReferenceWedgeInfo::evalVolume(const std::array<double, 3> *vertexCoords)
 
     \param type is the type of element
     \param nVertices is the number of vertices
-    \param nFaces is the number of faces
 */
 Reference2DElementInfo::Reference2DElementInfo(ElementType type, int nVertices)
     : ReferenceElementInfo(2, type, nVertices, nVertices, nVertices)

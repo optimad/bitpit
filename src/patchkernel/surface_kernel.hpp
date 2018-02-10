@@ -64,7 +64,7 @@ public:
         void flipCellOrientation(const long &id);
 
         void displayQualityStats(ostream&, unsigned int padding = 0) const;
-        std::vector<double> computeHistogram(eval_f_, std::vector<double>&, long&, int n_int = 8, unsigned short mask = SELECT_ALL) const;
+        std::vector<double> computeHistogram(eval_f_ funct_, std::vector<double> &bins, long &count, int n_intervals = 8, unsigned short mask = SELECT_ALL) const;
 
 private:
         void initialize();

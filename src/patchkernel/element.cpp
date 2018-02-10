@@ -350,6 +350,8 @@ Element::Element(long id, ElementType type, std::unique_ptr<long[]> &&connectSto
 
 /*!
 	Copy constructor
+
+	\param other is another element whose content is copied in this element
 */
 Element::Element(const Element &other)
 {
@@ -363,6 +365,8 @@ Element::Element(const Element &other)
 
 /*!
 	Copy-assignament operator.
+
+	\param other is another element whose content is copied in this element
 */
 Element & Element::operator=(const Element &other)
 {
@@ -409,6 +413,7 @@ void Element::initialize(long id, ElementType type, int connectSize)
 /*!
 	Initializes the data structures of the element.
 
+	\param id the id of the element
 	\param type the type of the element
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
@@ -1617,7 +1622,7 @@ Element::Tesselation Element::generateTesselation(const std::array<double, 3> *c
 	return tesselation;
 }
 
-/*
+/*!
 	Gets the size of the face stream that describes the element.
 
 	\result The size of the face stream that describes the element.
