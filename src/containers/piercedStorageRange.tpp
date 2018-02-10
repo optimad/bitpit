@@ -39,6 +39,8 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange()
 
 /*!
 * Constructor.
+*
+* \param storage is the storage that will be associated to the range
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t *storage)
@@ -50,6 +52,7 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t
 /*!
 * Constructor.
 *
+* \param storage is the storage that will be associated to the range
 * \param first is the id of the first element in the range
 * \param last is the id of the last element in the range
 */

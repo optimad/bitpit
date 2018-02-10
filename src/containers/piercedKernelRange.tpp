@@ -39,6 +39,8 @@ PiercedKernelRange<id_t>::PiercedKernelRange()
 
 /*!
 * Constructor.
+*
+* \param kernel is the kernel that will be associated to the range
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel)
@@ -50,6 +52,7 @@ PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel)
 /*!
 * Constructor.
 *
+* \param kernel is the kernel that will be associated to the range
 * \param first is the id of the first element in the range
 * \param last is the id of the last element in the range
 */

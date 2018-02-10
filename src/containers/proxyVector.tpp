@@ -189,8 +189,7 @@ ProxyVector<T>::ProxyVector(T *data, std::size_t size)
 /*!
     Constructor
 
-    \param size is the number elements contained in the data
-    \param data a pointer to the data
+    \param storage is the storage that contains the data
 */
 template<typename T>
 template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
@@ -239,8 +238,8 @@ ProxyVector<T> & ProxyVector<T>::operator=(const ProxyVector &other)
 /*!
     Sets the content of the container.
 
-    \param size is the number elements contained in the data
     \param data a pointer to the data
+    \param size is the number elements contained in the data
 */
 template<typename T>
 void ProxyVector<T>::set(T *data, std::size_t size)
@@ -252,8 +251,7 @@ void ProxyVector<T>::set(T *data, std::size_t size)
 /*!
     Sets the content of the container.
 
-    \param size is the number elements contained in the data
-    \param data a pointer to the data
+    \param storage is the storage that contains the data
 */
 template<typename T>
 template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>

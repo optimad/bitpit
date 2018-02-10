@@ -77,7 +77,7 @@ void PiercedKernel<id_t>::updateId(const id_t &currentId, const id_t &updatedId)
 * Removes all elements from the kernel.
 *
 * \param release if it's true the memory hold by the kernel will be released,
-* otherwise the kernel will be cleared but its memory will not be relased
+* otherwise the kernel will be cleared but its memory will not be released
 */
 template<typename id_t>
 typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::clear(bool release)
@@ -97,7 +97,7 @@ typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::clear(bool releas
 * The function will NOT process the sync action.
 *
 * \param release if it's true the memory hold by the kernel will be released,
-* otherwise the kernel will be cleared but its memory will not be relased
+* otherwise the kernel will be cleared but its memory will not be released
 */
 template<typename id_t>
 typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::_clear(bool release)
@@ -687,8 +687,6 @@ void PiercedKernel<id_t>::dump() const
 
 /**
 * Check the integrity of the kernel.
-*
-* \param stream is the stream data should be written to
 */
 template<typename id_t>
 void PiercedKernel<id_t>::checkIntegrity() const
@@ -1347,7 +1345,7 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillAppend(id_t id
 /**
 * Fills the specified hole with the given id.
 *
-* \param pos is the position to fill
+* \param hole is the position of the hole to fill
 * \param id is the id that will be associated to the position
 * \result The synchronization action associated with the fill.
 */
@@ -1793,7 +1791,7 @@ void PiercedKernel<id_t>::pierce(std::size_t pos, bool flush)
 /**
 * Clear the list of available holes.
 *
-* \param relase if set to true the memory previously hold by holes'
+* \param release if set to true the memory previously hold by holes'
 * kernel will be released
 */
 template<typename id_t>
@@ -1810,7 +1808,7 @@ void PiercedKernel<id_t>::holesClear(bool release)
 /**
 * Clear regular holes.
 *
-* \param relase if set to true the memory previously hold by holes'
+* \param release if set to true the memory previously hold by holes'
 * kernel will be released
 */
 template<typename id_t>
@@ -1832,7 +1830,7 @@ void PiercedKernel<id_t>::holesClearRegular(bool release)
 /**
 * Clear pending holes
 *
-* \param relase if set to true the memory previously hold by holes'
+* \param release if set to true the memory previously hold by holes'
 * kernel will be released
 */
 template<typename id_t>
@@ -1854,7 +1852,7 @@ void PiercedKernel<id_t>::holesClearPending(bool release)
 * begin of the hole's kernel
 * \param nRegulars is the number of regulars holes
 * \param nPendings  the number of pending holes
-* \param relase if set to true the memory previously hold by holes'
+* \param release if set to true the memory previously hold by holes'
 * kernel will be released
 */
 template<typename id_t>
@@ -2225,6 +2223,8 @@ void PiercedKernel<id_t>::setEndPos(std::size_t pos)
 * Shrink the kernel so that it contains n raw positions.
 *
 * \param n is the new kernel size, expressed in number of raw positions.
+* \param force constrols if the shrink will be performed also if the container
+* already have the requested size
 */
 template<typename id_t>
 void PiercedKernel<id_t>::shrink(std::size_t n, bool force)

@@ -447,9 +447,11 @@ OBinaryStream::OBinaryStream()
 /*!
 * Constructor.
 *
-* Initialize a binary stream with the specified size.
+* Initialize a binary stream with the specified size. If the specified size
+* if different from zero, the buffer capacity will be set equal to its size
+* and the automatic expansion of the buffer wil be disabled.
 *
-* \param[in] capacity is the size of the stream
+* \param[in] size is the size of the stream
 */
 OBinaryStream::OBinaryStream(std::size_t size)
     : BinaryStream(size), m_expandable(size == 0)
@@ -459,14 +461,18 @@ OBinaryStream::OBinaryStream(std::size_t size)
 /*!
 * Open a binary stream with the specified size.
 *
-* \param[in] capacity is the buffer size
+* If the specified size if different from zero, the buffer capacity will be
+* set equal to its size and the automatic expansion of the buffer wil be
+* disabled.
+*
+* \param[in] size is the buffer size
 */
 void OBinaryStream::open(std::size_t size)
 {
-    // Set the stream expandable to allow changing its capacity
+    // Set the stream expandable to allow changing its size
     m_expandable = true;
 
-    // Open a stream with the desidered capacity
+    // Open a stream with the desidered size
     BinaryStream::open(size);
 
     // Set the definitive expandable flag

@@ -40,8 +40,6 @@ PiercedStorage<value_t, id_t>::PiercedStorage()
 * Constructor.
 *
 * \param nFields is the number of fields in the storage
-* \param kernel is the kernel that will be set
-* \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields)
@@ -552,7 +550,7 @@ void PiercedStorage<value_t, id_t>::rawReorder(const std::vector<std::size_t> &p
 /**
 * Resizes the container so that it contains n elements.
 *
-* \param size is the new container size, expressed in number of elements
+* \param n is the new container size, expressed in number of elements
 * \param value is the value to be copied (or moved) to the newly created
 * elements
 */
@@ -956,7 +954,6 @@ __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::operator[](id_t id) const
 *
 * \param id is the id of the item
 * \param values is a pointer to the destination
-* \param offset is the offset used for setting the fields
 */
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::copy(id_t id, value_t *values) const
@@ -1016,7 +1013,6 @@ void PiercedStorage<value_t, id_t>::set(id_t id, std::size_t k, const value_t &v
 *
 * \param id is the id of the item
 * \param values is a pointer to the values that will be set
-* \param offset is the offset used for setting the fields
 */
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::set(id_t id, const value_t *values)
@@ -1075,9 +1071,8 @@ __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::rawAt(std::size_t pos, std
 /**
 * Copy all the fields of the specified item.
 *
-* \param id is the id of the item
+* \param pos is the raw position of the item
 * \param values is a pointer to the destination
-* \param offset is the offset used for setting the fields
 */
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::rawCopy(std::size_t pos, value_t *values) const
@@ -1088,7 +1083,7 @@ void PiercedStorage<value_t, id_t>::rawCopy(std::size_t pos, value_t *values) co
 /**
 * Set the requested fields of the specified item.
 *
-* \param id is the id of the item
+* \param pos is the raw position of the item
 * \param nFields is the number of fields that will be copied
 * \param offset is the offset used for setting the fields
 * \param values is a pointer to the destination
@@ -1134,7 +1129,6 @@ void PiercedStorage<value_t, id_t>::rawSet(std::size_t pos, std::size_t k, const
 *
 * \param pos is the raw position of the item
 * \param values is a pointer to the values that will be set
-* \param offset is the offset used for setting the fields
 */
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::rawSet(std::size_t pos, const value_t *values)
@@ -1202,7 +1196,6 @@ typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::
 /**
 * Gets a constant iterator pointing to the specified position.
 *
-* \param id is the id of the specified iterator
 * \param pos is the requested position
 * \result A constant iterator pointing to the specified position.
 */
