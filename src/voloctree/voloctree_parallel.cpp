@@ -50,7 +50,7 @@ void VolOctree::setCommunicator(MPI_Comm communicator)
 
 	Default implementation is a no-op function.
 
-	\param trackPartitioninging if set to true the function will return the
+	\param trackPartitioning if set to true the function will return the
 	changes that will be performed in the alter step
 	\result If the partitioning is tracked, returns a vector of adaption::Info
 	that can be used to discover what changes will be performed in the alter

@@ -72,7 +72,7 @@ VolCartesian::VolCartesian(const int &dimension,
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
 	\param lengths are the lengths of the domain
-	\param nCells are the numbers of cells of the patch
+	\param nCells are the number of cells along each direction
 */
 VolCartesian::VolCartesian(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
@@ -94,7 +94,7 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
 	\param length is the length of the domain
-	\param nCells1D is the number of cells along each direction
+	\param nCells is the number of cells along each direction
 */
 VolCartesian::VolCartesian(const int &dimension,
                                const std::array<double, 3> &origin,
@@ -110,7 +110,7 @@ VolCartesian::VolCartesian(const int &dimension,
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
 	\param length is the length of the domain
-	\param nCells1D is the number of cells along each direction
+	\param nCells is the number of cells along each direction
 */
 VolCartesian::VolCartesian(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
@@ -1301,7 +1301,9 @@ bool VolCartesian::isVertexCartesianIdValid(const std::array<int, 3> &ijk) const
 	\param face is a face of the cell
 	\param blackList is a list of cells that are excluded from the search.
 	The blacklist has to be a unique list of ordered cell ids.
-	\result The neighbours of the specified cell for the given face.
+	\param[in,out] neighs is the vector were the neighbours will be stored.
+	The vector is not cleared before adding the neighbours, it is extended
+	by appending all the neighbours found by this function
 */
 void VolCartesian::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {

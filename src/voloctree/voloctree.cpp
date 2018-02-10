@@ -41,6 +41,21 @@ namespace bitpit {
 */
 
 /*!
+	\struct VolOctree::OctantInfo
+	\ingroup volumepatches
+
+	OctantInfo allows to uniquely identify an octant of the underlying
+	octree.
+*/
+
+/*!
+	\struct VolOctree::OctantInfoHasher
+	\ingroup volumepatches
+
+	OctantInfoHasher allows to generate a hash for the OctantInfo structure.
+*/
+
+/*!
 	Creates an uninitialized patch.
 */
 VolOctree::VolOctree()
@@ -203,7 +218,7 @@ VolOctree::VolOctree(std::istream &stream)
 /*!
 	Copy constructor.
 
-	\param stream is the stream to read from
+	\param other is another patch whose content is copied in this element
 */
 VolOctree::VolOctree(const VolOctree &other)
 	: VolumeKernel(other)
@@ -1812,6 +1827,7 @@ bool VolOctree::set_marker(const long &id, const int8_t &value)
 
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
+	\result Returns true if the falg was properly set, false otherwise.
 */
 bool VolOctree::_enableCellBalancing(const long &id, bool enabled)
 {
@@ -2307,7 +2323,9 @@ void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const s
 	\param index is the local index of the entity (vertex, edge or face)
 	\param blackList is a list of cells that are excluded from the search.
 	The blacklist has to be a unique list of ordered cell ids.
-	\result The neighbours for the given codimension of the specified cell.
+	\param[in,out] neighs is the vector were the neighbours will be stored.
+	The vector is not cleared before adding the neighbours, it is extended
+	by appending all the neighbours found by this function
 */
 void VolOctree::findCellCodimensionNeighs(const long &id, const int &index,
                                           const int &codimension, const std::vector<long> &blackList,
