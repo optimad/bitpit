@@ -87,18 +87,18 @@ LevelSetMask::LevelSetMask(int id, const std::unordered_set<long> &mask, const V
  * Constructor
  * @param[in] id identifier of object
  * @param[in] list the list of interfaces
- * @param[in] refId id of reference interface
+ * @param[in] interfaceId id of reference interface
  * @param[in] invert if orientation should be inverted with respect to the reference interface
  * @param[in] mesh the mesh hosting the cells
  */
-LevelSetMask::LevelSetMask(int id, const std::vector<long> &list, const long &intrIndex, const bool &invert, const VolumeKernel &mesh ) :LevelSetSegmentation(id) {
+LevelSetMask::LevelSetMask(int id, const std::vector<long> &list, const long &interfaceId, const bool &invert, const VolumeKernel &mesh ) :LevelSetSegmentation(id) {
 
     std::unordered_map<long,long> meshToEnvelope ;
 
     std::unique_ptr<SurfUnstructured> segmentation = extractFaceEnvelope(list,mesh,meshToEnvelope) ;
 
-    long enveIndex = meshToEnvelope.at(intrIndex);
-    bool sameOrientation = sameInterfaceEnvelopeOrientation(mesh, intrIndex, *segmentation, enveIndex);
+    long enveIndex = meshToEnvelope.at(interfaceId);
+    bool sameOrientation = sameInterfaceEnvelopeOrientation(mesh, interfaceId, *segmentation, enveIndex);
 
     bool flip = (sameOrientation == invert);
 

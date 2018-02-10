@@ -456,6 +456,11 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
 /*!
  * Reads LevelSetObject from stream in binary format
  * @param[in] stream output stream
+ * @param[in] name is the name of the data to be written. Either user
+ * data or patch data
+ * @param[in] format is the format which must be used. Supported options
+ * are "ascii" or "appended". For "appended" type an unformatted binary
+ * stream must be used
  */
 void LevelSetObject::flushData( std::fstream &stream, std::string name, VTKFormat format){
 

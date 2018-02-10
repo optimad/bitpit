@@ -54,6 +54,9 @@ SegmentationKernel::SegmentationKernel( ) : m_surface(nullptr), m_featureAngle(0
 
 /*!
  * Constructor
+ *
+ * @param[in,out] surface pointer to surface
+ * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 SegmentationKernel::SegmentationKernel( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle ) {
 
@@ -64,6 +67,9 @@ SegmentationKernel::SegmentationKernel( std::unique_ptr<const SurfUnstructured> 
 
 /*!
  * Constructor
+ *
+ * @param[in] surface pointer to surface
+ * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 SegmentationKernel::SegmentationKernel( const SurfUnstructured *surface, double featureAngle ) {
 
@@ -104,7 +110,8 @@ const SurfUnstructured & SegmentationKernel::getSurface() const {
 
 /*!
  * Set the surface
- * @param[in] patch pointer to surface
+ * @param[in] surface pointer to surface
+ * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 void SegmentationKernel::setSurface( const SurfUnstructured *surface, double featureAngle){
 
@@ -334,7 +341,7 @@ LevelSetSegmentation::LevelSetSegmentation(int id) : LevelSetCachedObject(id), m
  * Constructor
  * @param[in] id identifier of object
  * @param[in] STL unique pointer to surface mesh
- * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
+ * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentation(id) {
     setSegmentation( std::move(STL), featureAngle );
@@ -360,7 +367,8 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
 
 /*!
  * Set the segmentation
- * @param[in] patch pointer to surface
+ * @param[in] surface pointer to surface
+ * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 void LevelSetSegmentation::setSegmentation( const SurfUnstructured *surface, double featureAngle){
 
@@ -369,7 +377,8 @@ void LevelSetSegmentation::setSegmentation( const SurfUnstructured *surface, dou
 
 /*!
  * Set the segmentation
- * @param[in] patch pointer to surface
+ * @param[in,out] surface pointer to surface
+ * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 void LevelSetSegmentation::setSegmentation( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle){
 
@@ -519,6 +528,7 @@ double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
  * Finds seed points in narrow band within a cartesian mesh for one simplex
  * @param[in] visitee cartesian mesh 
  * @param[in] VS Simplex
+ * @param[in] searchRadius search radius
  * @param[out] I indices of seed points
  */
 bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vector<std::array<double,3>> &VS, double searchRadius, std::vector<long> &I){
@@ -616,6 +626,16 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
 }
 
 /*!
+ * Computes the levelset within the narrow band on an
+ * cartesian grid.
+ * If the size of the narrow band has been set, the
+ * method will compute the levelset values only of those
+ * cells within the threshold. 
+ * In case the size of the narrow band has not been set,
+ * the method will calculate the levelset within a band
+ * containing one cell on each side of the surface.
+ * @param[in] visitee the octree LevelSetKernel
+ * @param[in] signd whether signed distance should be calculated
  */
 void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bool signd){
 
@@ -759,6 +779,16 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
 }
 
 /*!
+ * Computes the levelset within the narrow band on an
+ * octree grid.
+ * If the size of the narrow band has been set, the
+ * method will compute the levelset values only of those
+ * cells within the threshold. 
+ * In case the size of the narrow band has not been set,
+ * the method will calculate the levelset within the cells
+ * that intersect the surface and within their first neighbours,
+ * \param[in] visitee the octree LevelSetKernel
+ * \param[in] signd whether signed distance should be calculated
  */
 void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool signd){
 
@@ -862,6 +892,17 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 }
 
 /*!
+ * Updates the levelset within the narrow band on an
+ * octree grid after an grid adaption.
+ * If the size of the narrow band has been set, the
+ * method will compute the levelset values only of those
+ * cells within the threshold. 
+ * In case the size of the narrow band has not been set,
+ * the method will calculate the levelset within the cells
+ * that intersect the surface and within their first neighbours,
+ * @param[in] visitee the octree LevelSetKernel
+ * @param[in] mapper the adaption mapper
+ * @param[in] signd whether signed distance should be calculated
  */
 void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, bool signd){
 

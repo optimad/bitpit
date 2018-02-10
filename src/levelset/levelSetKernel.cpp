@@ -212,7 +212,7 @@ double LevelSetKernel::computeCellCircumcircle( long id ) {
 /*!
  * Check if a point lies within the cell
  * @param[in] id is the cell index
- * @param[in] pointCrords are the point coordinates
+ * @param[in] pointCoords are the point coordinates
  * @return true if point is inside, false otherwise
  */
 bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoords){

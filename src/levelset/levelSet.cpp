@@ -297,6 +297,8 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
  * Adds a LevelSetMask object composed of a list of interfaces
  * The function setMesh() must have been called prior.
  * @param[in] list list of indices of interfaces
+ * @param[in] refInterface id of reference interface
+ * @param[in] invert if orientation should be inverted with respect to the reference interface
  * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
  * @return identifier of new object
  */
