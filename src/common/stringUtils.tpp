@@ -32,6 +32,8 @@ namespace utils {
 namespace string {
 
 /*!
+* \ingroup common_strings
+*
 * Left-trim operator for std::string.
 *
 * Remove left trailing spaces from string. For instance, if the input string is
@@ -48,6 +50,8 @@ inline std::string & ltrim(std::string &s)
 }
 
 /*!
+* \ingroup common_strings
+*
 * Right-trim operator for std::string.
 * Remove right blank spaces from string. For instance, if the input string is
 * "  test_string  ", on output this function returns "  test_string"
@@ -63,6 +67,8 @@ inline std::string &rtrim(std::string &s)
 }
 
 /*!
+* \ingroup common_strings
+*
 * Trim operator for std::string.
 * Remove left/right blank spaces from string. For instance, if the input string is
 * "  test_string  ", on output this function returns "test_string"
@@ -76,6 +82,8 @@ inline std::string &trim(std::string &s)
 }
 
 /*!
+* \ingroup common_strings
+*
 * String left-filler. Create a string composed of the input string left-filled
 * with a specified character. E.g.
 * given the input string s = "test", lfill(10, s, '_') will return
@@ -94,6 +102,8 @@ inline std::string lfill(const int &nchars, std::string &s, char c)
 }
 
 /*!
+* \ingroup common_strings
+*
 * String right-filler. Create a string composed of the input string right-filled
 * with a specified character. E.g.
 * given the input string s = "test", rfill(10, s, '_') will return
@@ -112,6 +122,8 @@ inline std::string rfill(const int &nchars, std::string &s, char c)
 }
 
 /*!
+* \ingroup common_strings
+*
 * Given an integer, returns a string of length nchars, composed of the input number
 * and nchars - ndigits '0' characters (where ndigits is the number of digits of the input integer)
 * in the following format "000xxx".
@@ -133,6 +145,8 @@ inline std::string zeroPadNumber(int nchars, int num)
 }
 
 /*!
+* \ingroup common_strings
+*
 * Check whether a string contains the kwyword or not.
 *
 * \param[in] line is the input string
@@ -145,6 +159,8 @@ inline bool keywordInString(std::string line, std::string key)
 }
 
 /*!
+* \ingroup common_strings
+*
 * Convertes a string into fundamental data type.
 *
 * If no data of type T can be extracted from the input string a 0 value,
@@ -187,6 +203,8 @@ void convertString(std::string input, T &output)
 }
 
 /*!
+* \ingroup common_strings
+*
 * Convertes a string into a vector of fundamental data type.
 *
 * If no data of type T can be extracted from the input string a void vector is returned.
@@ -220,6 +238,8 @@ void convertString(std::string input, std::vector<T> &output)
 }
 
 /*!
+* \ingroup common_strings
+*
 * Convertes a string into a arrayof fundamental data type.
 *
 * If no data of type T can be extracted from the input string a void array with null

@@ -35,7 +35,7 @@ namespace bitpit {
 namespace utils {
 
 /*!
-	\ingroup common::utils::hashing
+	\ingroup common_hashing
 
 	\brief Functions for generating the hash of data types.
 */

@@ -22,22 +22,17 @@
  *
  \*---------------------------------------------------------------------------*/
 
-
-
 /*!
  * @defgroup common Common
  * @{
- * @defgroup common::utils Utils
- *     @{
- *     @defgroup common::utils::string String utils
- *     @defgroup common::utils::binary Binary utils
-  *     @defgroup common::utils::hashing Hashing utils
- *     @}
- * @defgroup macro Macros
+ * @defgroup common_strings String manipulation
+ * @defgroup common_binary Binary streams
+ * @defgroup common_hashing Hashing
+ * @defgroup common_misc Miscellaneous
+ * @defgroup common_macro Macros
  * @}
  *
  */
-
 
 #ifndef __BITPIT_MODULE_COMMON_HPP__
 #define __BITPIT_MODULE_COMMON_HPP__

@@ -32,6 +32,8 @@ namespace bitpit {
 namespace utils {
 
 /*!
+* \ingroup common_misc
+*
 * Adds an id to an ordered list of unique ids.
 *
 * \tparam T is the type of elements contained in the list
@@ -66,6 +68,8 @@ bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator compara
 };
 
 /*!
+* \ingroup common_misc
+*
 * Search a value in an ordered list of unique ids.
 *
 * \tparam T is the type of elements contained in the list
@@ -94,6 +98,8 @@ typename std::vector<T>::const_iterator findInOrderedVector(const T &value, cons
 };
 
 /*!
+* \ingroup common_misc
+*
 * Order a vector according to a reordering vector.
 *
 * \tparam order_t is the type of data that needs to be reordered
@@ -119,6 +125,8 @@ void reorderVector(std::vector<size_t>& order, std::vector<T>& v, const size_t &
 }
 
 /*!
+* \ingroup common_misc
+*
 * Remove a element with specified value from input std::vector.
 *
 * \param[in,out] vec is the inptut vector set. On output stores the input
@@ -135,6 +143,8 @@ void eraseValue(std::vector<T> &vec, const T &value)
 }
 
 /*!
+* \ingroup common_misc
+*
 * Compute intersection between two std::vectors.
 *
 * \param[in] vec_1 is the 1st argument for intersection.
@@ -162,6 +172,8 @@ std::vector<T> intersectionVector(const std::vector<T> &vec_1, const std::vector
 }
 
 /*!
+* \ingroup common_misc
+*
 * Check if a type is iterable
 */
 template <typename T>

@@ -32,6 +32,8 @@ namespace utils {
 namespace binary {
 
 /*!
+    \ingroup common_binary
+
     Write the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -47,6 +49,8 @@ void write(std::ostream &stream, const std::vector<T> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Write the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -59,6 +63,8 @@ void write(std::ostream &stream, const std::array<T, dim> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Write the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -73,10 +79,11 @@ void write(std::ostream &stream, const std::array<T, dim> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Write the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
-    \param container is the container to write
 */
 template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type*>
 void write(std::ostream &stream, const T &value)
@@ -89,6 +96,8 @@ void write(std::ostream &stream, const T &value)
 }
 
 /*!
+    \ingroup common_binary
+
     Write the given data to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -101,6 +110,8 @@ void write(std::ostream &stream, const T &value)
 }
 
 /*!
+    \ingroup common_binary
+
     Write the given data to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -114,6 +125,8 @@ void write(std::ostream &stream, const T &value, size_t size)
 }
 
 /*!
+    \ingroup common_binary
+
     Write the given data to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -127,6 +140,8 @@ void write(std::ostream &stream, const T *value, size_t size)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -143,6 +158,8 @@ void read(std::istream &stream, std::vector<T> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -155,6 +172,8 @@ void read(std::istream &stream, std::array<T, dim> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -169,10 +188,11 @@ void read(std::istream &stream, std::array<T, dim> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
-    \param container is the container to write
 */
 template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type*>
 void read(std::istream &stream, T &value)
@@ -187,6 +207,8 @@ void read(std::istream &stream, T &value)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given data to the specified stream in binary format.
 
     \param stream is the stream to read from
@@ -199,6 +221,8 @@ void read(std::istream &stream, T &value)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given data to the specified stream in binary format.
 
     \param stream is the stream to read from
@@ -212,6 +236,8 @@ void read(std::istream &stream, T &value, size_t size)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given data to the specified stream in binary format.
 
     \param stream is the stream to read from

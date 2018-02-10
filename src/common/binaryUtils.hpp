@@ -38,7 +38,7 @@ namespace bitpit {
 namespace utils {
 
 /*!
-    \ingroup utils::binary
+    \ingroup utils_binary
     \brief The namespace 'binary' contains routines for handling binary
     archives.
 */

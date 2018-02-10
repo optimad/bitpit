@@ -40,6 +40,8 @@ template std::vector<long>::const_iterator findInOrderedVector<>(const long&, co
 template std::vector<unsigned long>::const_iterator findInOrderedVector<>(const unsigned long&, const std::vector<unsigned long>&, std::less<unsigned long>);
 
 /*!
+* \ingroup common_misc
+*
 * Extract n integers in the interval [0,m] without replacement.
 * if n = m+1, returns a random permutation of {0, 1, 2, ..., m}
 *

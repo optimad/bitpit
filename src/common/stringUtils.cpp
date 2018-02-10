@@ -33,6 +33,8 @@ namespace utils {
 namespace string {
 
 /*!
+* \ingroup common_strings
+*
 * Given an input string containing several fields separated by a delimiter,
 * returns the field after the specified search key.
 * For instance, if the input string is str = "field_1 ; field_2 ; field_3"

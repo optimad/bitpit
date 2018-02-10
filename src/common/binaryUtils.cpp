@@ -31,6 +31,8 @@ namespace utils {
 namespace binary {
 
 /*!
+    \ingroup common_binary
+
     Write the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -42,6 +44,8 @@ void write(std::ostream &stream, const std::vector<bool> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Write the given string to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -55,6 +59,8 @@ void write(std::ostream &stream, const std::string &string)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -66,6 +72,8 @@ void read(std::istream &stream, std::vector<bool> &container)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
@@ -79,6 +87,8 @@ void read(std::istream &stream, std::vector<bool>::reference value)
 }
 
 /*!
+    \ingroup common_binary
+
     Read the given string to the specified stream in binary format.
 
     \param stream is the stream to read from

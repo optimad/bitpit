@@ -35,7 +35,7 @@
 namespace bitpit {
 
 /*!
-    \ingroup common::utils
+    \ingroup common_misc
 
     \brief Namespace for generic utility functions
 */

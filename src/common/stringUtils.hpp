@@ -40,7 +40,7 @@ namespace bitpit {
 namespace utils {
 
 /*!
-    \ingroup common::utils::string
+    \ingroup common_strings
 
     \brief Namespace for string utility functions
 */

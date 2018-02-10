@@ -27,17 +27,14 @@
 
 /*! \file */
 
-/*!
- * @ingroup macro
- * @{
- */
-
 /**
+ * \ingroup common_macro
+ *
  * Unreachable macro.
  *
  * Useful for suppressing "control reaches end of non-void function" warnings.
  *
- * @param str is the error message that will be displayed it the unreachable
+ * \param str is the error message that will be displayed it the unreachable
  * code is reached
  */
 #ifdef HAVE___BUILTIN_UNREACHABLE
@@ -57,9 +54,11 @@ do {                        \
 #endif
 
 /*!
+ * \ingroup common_macro
+ *
  * Unused macro.
  *
- * @param variable is the name of variable to be marked as unused
+ * \param variable is the name of variable to be marked as unused
  */
 #define BITPIT_UNUSED(variable)     \
 do {                  \
@@ -68,9 +67,11 @@ do {                  \
 
 
 /*!
+ * \ingroup common_macro
+ *
  * Deprecated macro.
  *
- * @param func id the function/method to be marked as deprecated
+ * \param func id the function/method to be marked as deprecated
  */
 #if defined __GNUC__
 #   define BITPIT_DEPRECATED(func) func __attribute__ ((deprecated))
@@ -82,9 +83,5 @@ do {                  \
 #   pragma message("WARNING: You need to implement DEPRECATED for this compiler")
 #   define BITPIT_DEPRECATED(func) func
 #endif
-
-/*!
- * @}
- */
 
 #endif
