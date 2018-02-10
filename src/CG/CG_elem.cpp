@@ -60,7 +60,7 @@ namespace CGElem{
  * \param[out] lambda pointer to barycentric coordinates of projection points
  * \return distances
  */
-void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
+void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
 {
 
     assert( validTriangle(Q0,Q1,Q2) );
@@ -72,10 +72,10 @@ void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q
     double *B = new double [2*nPoints];
 
     for( int i=0; i<nPoints; ++i){
-        array3D rP = *point -Q0;
+        array3D rP = *points -Q0;
         B[2*i]   = dotProduct(s0,rP); 
         B[2*i+1] = dotProduct(s1,rP); 
-        ++point;
+        ++points;
     }
 
     int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 );
@@ -111,7 +111,7 @@ void _projectPointsTriangle( int nPoints, array3D const *point, array3D const &Q
  * \param[out] lambda pointer to barycentric coordinates of projection points
  * \return distances
  */
-void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
+void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
 {
 
     assert( validTriangle(Q0,Q1,Q2) );
@@ -123,10 +123,10 @@ void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, 
     double *B = new double [2*nPoints];
 
     for( int i=0; i<nPoints; ++i){
-        array3D rP = *point -Q0;
+        array3D rP = *points -Q0;
         B[2*i]   = dotProduct(s0,rP); 
         B[2*i+1] = dotProduct(s1,rP); 
-        ++point;
+        ++points;
     }
 
     int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 );
@@ -152,21 +152,25 @@ void _projectPointsPlane( int nPoints, array3D const *point, array3D const &Q0, 
 /*!
  * \private
  * Computes intersection between an axis aligned bounding box and a triangle
- * \param[in] A1 min point of first box
- * \param[in] A2 max point of first box
- * \param[in] V1 first vertex of triangle
- * \param[in] V2 second vertex of triangle
- * \param[in] V3 third vertex of triangle
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] V0 first vertex of triangle
+ * \param[in] V1 second vertex of triangle
+ * \param[in] V2 third vertex of triangle
+ * \param[in] interiorTriangleVertices if true, all triangle vertices within the box will be added to the intersection points P
+ * \param[in] triangleEdgeBoxHullIntersections if true, the intersections between the edges of the triangle and the outer hull of the box will be added to the intersection points P
+ * \param[in] triangleBoxEdgeIntersections if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
  * \param[out] intrPtr pointed vector will hold intersection points between triangle edges and box faces
- * \param[out] flagPtr pointed vector will have the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
+ * \param[out] flagPtr pointed vector will have the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertices. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
+bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
 
     bool intersect(false);
     bool addFlag( flagPtr!=nullptr);
-    bool computeIntersection(interiorTriangleVertice||triangleBoxEdgeIntersection||triangleEdgeBoxHullIntersections);
+    bool computeIntersection(interiorTriangleVertices||triangleBoxEdgeIntersections||triangleEdgeBoxHullIntersections);
 
     assert( ! (computeIntersection && (intrPtr==nullptr) ) );
 
@@ -191,7 +195,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
         vertexOfTriangle(i, V0, V1, V2, B0);
         if( intersectPointBox(B0, A0, A1, dim) ){
             intersect = true;
-            if(!interiorTriangleVertice) break;
+            if(!interiorTriangleVertices) break;
 
             intrPtr->push_back(B0);
             if(addFlag) flagPtr->push_back(0);
@@ -242,7 +246,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
     }
 
     //check if triangle and box edges (dim=3) or box vertices (dim=2) intersect
-    if( !intersect || triangleBoxEdgeIntersection ) {
+    if( !intersect || triangleBoxEdgeIntersections ) {
 
         array3D p;
 
@@ -251,7 +255,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
                 vertexOfBox( i, A0, A1, B0);
                 if( intersectPointTriangle(B0,V0,V1,V2)) {
                     intersect = true;
-                    if(!triangleBoxEdgeIntersection) break;
+                    if(!triangleBoxEdgeIntersections) break;
 
                     intrPtr->push_back(B0);
                     if(addFlag) flagPtr->push_back(2);
@@ -263,7 +267,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
                 edgeOfBox( i, A0, A1, B0, B1);
                 if( intersectSegmentTriangle(B0,B1,V0,V1,V2,p)) {
                     intersect = true;
-                    if(!triangleBoxEdgeIntersection) break;
+                    if(!triangleBoxEdgeIntersections) break;
 
                     intrPtr->push_back(p);
                     if(addFlag) flagPtr->push_back(2);
@@ -286,7 +290,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
  * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
  * \param[in,out] intrPtr pointer to the list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
  * \param[in,out] flagPtr if (!=nullptr), for each intersection point a flag will be inserted indicatingif it belongs to interiorSegmentVertice (flag=0) or segmentBoxHullIntersection (flag=1)
- * \param[in] dim number of dimension to be checked
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
 bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
@@ -432,18 +436,19 @@ bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, a
  * \param[in] A1 max point of first box
  * \param[in] VS polygon vertices coordinates
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
- * \param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * \param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
- * \param[out] P intersection points 
- * \param[in] dim number of dimension to be checked
+ * \param[in] polygonEdgeBoxHullIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[out] intrPtr pointed vector will hold intersection points between polygon edges and box faces
+ * \param[out] flagPtr pointed vector will have the same size of intrPtr. If the i-th flag=0, the intersection is due to interiorPolygonVertice. If the i-th flag=1, the intersection is due to polygonEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to polygonBoxEdgeIntersections.
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxHullIntersection, bool polygonBoxEdgeIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
+bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxHullIntersection, bool polygonBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
 
     bool intersect(false);
     bool addFlag(flagPtr!=nullptr);
-    bool computeIntersection(innerPolygonPoints || polygonEdgeBoxHullIntersection || polygonBoxEdgeIntersection);
+    bool computeIntersection(innerPolygonPoints || polygonEdgeBoxHullIntersection || polygonBoxEdgeIntersections);
 
     assert( ! (computeIntersection && (intrPtr==nullptr) ) );
 
@@ -468,12 +473,12 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<arra
 
     // check if triangle vertices lie within box
     // or if triangles intersect edges of box
-    computeIntersection = innerPolygonPoints || polygonBoxEdgeIntersection;
+    computeIntersection = innerPolygonPoints || polygonBoxEdgeIntersections;
     int trianglesCount = polygonSubtriangleCount(VS);
     for (int triangle=0; triangle<trianglesCount; ++triangle) {
         subtriangleOfPolygon(triangle, VS, V0, V1, V2);
 
-        if( _intersectBoxTriangle( A0, A1, V0, V1, V2, innerPolygonPoints, false, polygonBoxEdgeIntersection, &partialIntr, &partialFlag, dim ) ){
+        if( _intersectBoxTriangle( A0, A1, V0, V1, V2, innerPolygonPoints, false, polygonBoxEdgeIntersections, &partialIntr, &partialFlag, dim ) ){
 
             intersect = true;
             if(!computeIntersection) break;
@@ -753,11 +758,11 @@ int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
 /*!
  * Computes Generalized Barycentric Coordinates of a point in convex polygons or polyedra.
  * No check is performed to check convexity.
- * Formula [6] of \ref{igeometry.caltech.edu/pubs/MHBD02.pdf} is implemented.
+ * Formula [6] of <a href="igeometry.caltech.edu/pubs/MHBD02.pdf">this</a> paper is implemented.
  * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
  * \param[in] p point
  * \param[in] vertex vertex coordinates of polygon
- * \parm[out] lambda generalized barycentric coordinates of p
+ * \param[out] lambda generalized barycentric coordinates of p
  */
 void computeGeneralizedBarycentric( array3D const &p, std::vector<array3D> const &vertex, std::vector<double> &lambda)
 {
@@ -797,7 +802,7 @@ void computeGeneralizedBarycentric( array3D const &p, std::vector<array3D> const
  * \param[in] Q0 first vertex of segment
  * \param[in] Q1 second vertex of segment
  * \param[in] lambda barycentric coordinates
- * \param[out] reconstructed point
+ * \result The reconstructed point
  */
 array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, std::array<double,2> const &lambda)
 {
@@ -811,7 +816,7 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
  * \param[in] Q0 first vertex of segment
  * \param[in] Q1 second vertex of segment
  * \param[in] lambda barycentric coordinates
- * \param[out] reconstructed point
+ * \result The reconstructed point
  */
 array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const &Q1, double const *lambda)
 {
@@ -826,7 +831,7 @@ array3D reconstructPointFromBarycentricSegment(array3D const &Q0, array3D const 
  * \param[in] Q1 second vertex of triangle
  * \param[in] Q2 third vertex of triangle
  * \param[in] lambda barycentric coordinates
- * \param[out] reconstructed point
+ * \result The reconstructed point
  */
 array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D const &lambda)
 {
@@ -841,7 +846,7 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
  * \param[in] Q1 second vertex of triangle
  * \param[in] Q2 third vertex of triangle
  * \param[in] lambda barycentric coordinates
- * \param[out] reconstructed point
+ * \result The reconstructed point
  */
 array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const &Q1, array3D const &Q2, double const *lambda)
 {
@@ -898,8 +903,8 @@ array3D projectPointPlane( array3D const &P, array3D const &Q, array3D const &n 
 /*!
  * Computes projection of point on line in 3D
  * \param[in] P point coordinates
- * \param[in] Q point on plane
- * \param[in] n plane normal
+ * \param[in] Q0 first line vertex
+ * \param[in] Q1 second line vertex
  * \return projection point
  */
 array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const &Q1)
@@ -912,8 +917,8 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
 /*!
  * Computes projection of point on line in 3D
  * \param[in] P point coordinates
- * \param[in] Q point on plane
- * \param[in] n plane normal
+ * \param[in] Q0 first line vertex
+ * \param[in] Q1 second line vertex
  * \param[out] lambda barycentric coordinates of projection point 
  * \return projection point
  */
@@ -925,8 +930,8 @@ array3D projectPointSegment( array3D const &P, array3D const &Q0, array3D const 
 /*!
  * Computes projection of point on line in 3D
  * \param[in] P point coordinates
- * \param[in] Q point on plane
- * \param[in] n plane normal
+ * \param[in] Q0 first line vertex
+ * \param[in] Q1 second line vertex
  * \param[out] lambda barycentric coordinates of projection point 
  * \return projection point
  */
@@ -1050,9 +1055,9 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
  * Projects a point cloud onto a triangle. 
  * Projection points are the closest points to the original points within the triangle.
  * \param[in] cloud point cloud coordinates
- * \param[in] Q1 first triangle vertex
- * \param[in] Q2 second triangle vertex
- * \param[in] Q3 third triangle vertex
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
  * \param[inout] lambda barycentric coordinates of projection points
  * \return distances
  */
@@ -1216,9 +1221,8 @@ double distancePointSegment( array3D const &P, array3D const &Q0, array3D const 
 /*!
  * Computes distance point to segment in 3D using barycentric coordinates
  * \param[in] P point coordinates
- * \param[in] Q1 segment starting point
- * \param[in] Q2 segment ending point
- * \param[out] xP closest point on line
+ * \param[in] Q0 segment starting point
+ * \param[in] Q1 segment ending point
  * \param[out] lambda barycentric coordinates
  * \return distance
  */
@@ -1274,9 +1278,9 @@ double distancePointCone( array3D const &point, array3D const &apex, array3D con
 /*!
  * Computes distances of point cloud to triangle
  * \param[in] cloud point cloud coordinates
- * \param[in] Q1 first triangle vertex
- * \param[in] Q2 second triangle vertex
- * \param[in] Q3 third triangle vertex
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
  * \return distances
  */
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, array3D const &Q0, array3D const &Q1, array3D const &Q2)
@@ -1288,9 +1292,9 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
 /*!
  * Computes distances of point cloud to triangle
  * \param[in] cloud point cloud coordinates
- * \param[in] Q1 first triangle vertex
- * \param[in] Q2 second triangle vertex
- * \param[in] Q3 third triangle vertex
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
  * \param[out] lambda barycentric coordinates of projection points
  * \return distances
  */
@@ -1362,7 +1366,7 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V,std
 
 /*!
  * Computes distances of point cloud to a convex polygon
- * \param[in] P point cloud coordinates
+ * \param[in] cloud point cloud coordinates
  * \param[in] V polygon vertices coordinates
  * \param[out] xP closest points on simplex
  * \param[out] flag point projecting onto polygon's interior (flag = 0), polygon's vertices (flag = 1, 2, ...) or polygon's edges (flag = -1, -2, -...)
@@ -1812,7 +1816,7 @@ bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::vector<
  * \param[in] A2 max point of first box
  * \param[in] B1 min point of second box
  * \param[in] B2 max point of second box
- * \param[in] dim number of dimension to be checked
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
 bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, int dim)
@@ -1834,7 +1838,7 @@ bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, ar
  * \param[in] B2 max point of second box
  * \param[out] I1 min point of intersection box
  * \param[out] I2 max point of intersection box
- * \param[in] dim number of dimension to be checked
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
 bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, array3D &I1, array3D &I2, int dim )
@@ -1877,16 +1881,16 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] V0 first vertex of triangle
  * \param[in] V1 second vertex of triangle
  * \param[in] V2 third vertex of triangle
- * \param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
+ * \param[in] interiorTriangleVertices if true, all triangle vertices within the box will be added to the intersection points P
  * \param[in] triangleEdgeBoxFaceIntersections if true, the intersections between the edges of the triangle and the hull of the box will be added to the intersection points P
- * \param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * \param[in] triangleBoxEdgeIntersections if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
  * \param[out] P calculated intersection points 
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> &P, int dim)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> &P, int dim)
 {
-    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertice, triangleEdgeBoxFaceIntersections, triangleBoxEdgeIntersection, &P, nullptr, dim);
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertices, triangleEdgeBoxFaceIntersections, triangleBoxEdgeIntersections, &P, nullptr, dim);
 }
 
 /*!
@@ -1896,17 +1900,17 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] V0 first vertex of triangle
  * \param[in] V1 second vertex of triangle
  * \param[in] V2 third vertex of triangle
- * \param[in] interiorTriangleVertice if true, all triangle vertices within the box will be added to the intersection points P
+ * \param[in] interiorTriangleVertices if true, all triangle vertices within the box will be added to the intersection points P
  * \param[in] triangleEdgeBoxHullIntersections if true, the intersections between the edges of the triangle and the outer hull of the box will be added to the intersection points P
- * \param[in] triangleBoxEdgeIntersection if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * \param[in] triangleBoxEdgeIntersections if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
  * \param[out] P calculated intersection points 
- * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertice. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
+ * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertices. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertice, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
-    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertice, triangleEdgeBoxHullIntersections, triangleBoxEdgeIntersection, &P, &flag, dim);
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertices, triangleEdgeBoxHullIntersections, triangleBoxEdgeIntersections, &P, &flag, dim);
 }
 
 /*!
@@ -1915,7 +1919,7 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] V1 end point of segment
  * \param[in] A0 min point of box
  * \param[in] A1 max point of box
- * \param[in] dim number of dimension to be checked
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
 bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, int dim)
@@ -1932,7 +1936,7 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
  * \param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
  * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
  * \param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
- * \param[in] dim number of dimension to be checked
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
 bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, int dim)
@@ -1950,7 +1954,7 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
  * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
  * \param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
  * \param[out] flag indicates for each intersection if it belongs to interiorSegmentVertice (flag=0) or segmentHullIntersection (flag=1)
- * \param[in] dim number of dimension to be checked
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
 bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
@@ -1963,7 +1967,7 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
  * \param[in] A0 min point of first box
  * \param[in] A1 max point of first box
  * \param[in] VS simplex vertices coordinates
- * \param[in] dim number of dimension to be checked
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
 bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, int dim )
@@ -1975,16 +1979,17 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
  * Computes intersection between an axis aligned bounding box and a convex polygon
  * \param[in] A0 min point of first box
  * \param[in] A1 max point of first box
- * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
- * \param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * \param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
  * \param[in] VS polygon vertices coordinates
- * \param[in] dim number of dimension to be checked
+ * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[out] P calculated intersection points
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersection, bool polygonBoxEdgeIntersection, std::vector<array3D> &P, int dim)
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, int dim)
 {
-    return _intersectBoxPolygon(A0, A1, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersection, polygonBoxEdgeIntersection, &P, nullptr, dim);
+    return _intersectBoxPolygon(A0, A1, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, nullptr, dim);
 }
 
 /*!
@@ -1993,14 +1998,16 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
  * \param[in] A1 max point of first box
  * \param[in] VS simplex vertices coordinates
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
- * \param[in] polygonEdgeBoxFaceIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
- * \param[in] polygonBoxEdgeIntersection intersection between the polygon and the edges of the box should be added to the intersection list
- * \param[in] dim number of dimension to be checked
+ * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[out] P calculated intersection points
+ * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to innerPolygonPoints. If the ith flag=1, the intersection is due to polygonEdgeBoxFaceIntersections. If the ith flag=2, the intersection is due to polygonBoxEdgeIntersections.
+ * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersection, bool polygonBoxEdgeIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
-    return _intersectBoxPolygon(A0, A1, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersection, polygonBoxEdgeIntersection, &P, &flag, dim);
+    return _intersectBoxPolygon(A0, A1, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, &flag, dim);
 }
 
 
