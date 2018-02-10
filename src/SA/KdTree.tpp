@@ -689,7 +689,7 @@ return; };
     Given two input vertices, P1 and P2, evaluate the distance between the
     two vertices.
     \param[in] P1 is a constant reference to the first vertex
-    \param[in] P1 is a constant reference to the second vertex
+    \param[in] P2 is a constant reference to the second vertex
     \result The distance between the two vertices.
 */
 template<int d, class T, class T1 >
