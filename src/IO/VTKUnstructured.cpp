@@ -121,7 +121,9 @@ VTKUnstructuredGrid::~VTKUnstructuredGrid( ) {
 
 /*!  
  *  Default constructor.
- *  Allocates four geometry fields called "Points"(Float64), "offsets"(Int32), "types"(Int32) and "connectivity"(Int32).
+ *  Allocates four geometry fields called "Points"(Float64), "offsets"(Int32),
+ *  "types"(Int32) and "connectivity"(Int32).
+ *  @param[in] elementType Type of elements in the grid
  */
 VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
 
@@ -164,6 +166,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
  *  sets input parameters and calls default constructor
  *  @param[in] dir  Directory of vtk file with final "/"
  *  @param[in] name Name of vtk file without suffix
+ *  @param[in] elementType Type of elements in the grid
  */
 VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name, VTKElementType elementType ):VTKUnstructuredGrid( elementType ){
 
@@ -174,11 +177,11 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name, VTK
 /*!  
  *  Tell VTKUnstructuredGrid that grid is made homogeously of one element type; 
  *  Consequently type and offset information are handled directly in class and need not to be provided via interface
- *  @param[in] type Type of element in grid
+ *  @param[in] elementType Type of elements in the grid
  */
-void VTKUnstructuredGrid::setElementType( VTKElementType type ){
+void VTKUnstructuredGrid::setElementType( VTKElementType elementType ){
 
-    m_elementType = type ;
+    m_elementType = elementType ;
     if ( m_elementType == VTKElementType::UNDEFINED ) {
         return;
     }
@@ -206,6 +209,7 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type ){
  *  @param[in] ncells number of cells
  *  @param[in] npoints number of points
  *  @param[in] nconn size of the connectivity information;
+ *  @param[in] nfacestream size of the face stream information;
  */
 void VTKUnstructuredGrid::setDimensions( uint64_t ncells, uint64_t npoints, uint64_t nconn, uint64_t nfacestream ){
 

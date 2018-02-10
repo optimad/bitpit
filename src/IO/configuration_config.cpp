@@ -395,7 +395,7 @@ Config::Section & Config::operator[](const std::string &key)
 /*!
     Write the specified configuration to screen.
 
-    \param configuration is the configuration to dump
+    \param out is the stream where the configuration will be written
     \param indentLevel is the indentation level
 */
 void Config::dump(std::ostream &out, int indentLevel) const

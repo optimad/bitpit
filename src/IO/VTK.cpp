@@ -267,9 +267,9 @@ void VTK::setGeomData( VTKField &&field ){
 
 /*!
  * Add user data for input or output.
- * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
- * @param[in] name name of field
- * @param[in] streamer data streamer
+ * Codification will be set according to default value [appended] or to value
+ * set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
+ * @param[in] field is the field that will be added
  */
 VTKField& VTK::addData( VTKField &&field ){
 
@@ -292,7 +292,8 @@ VTKField& VTK::addData( VTKField &&field ){
 
 /*!
  * Add user data for input or output. 
- * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
+ * Codification will be set according to default value [appended] or to value
+ * set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in] name name of field
  * @param[in] streamer data streamer
  */
@@ -316,7 +317,7 @@ VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
 }
 
 /*!
- * Removes user data from input or output 
+ * Removes user data from input or output
  * @param[in] name name of field to be removed
  */
 void VTK::removeData( std::string name ){
@@ -507,7 +508,7 @@ VTKField * VTK::_findGeomData( const std::string &name ) {
 
 /*!
  * Gets a constant pointer to the data field with the specified index.
- * @param[in] index index of the field
+ * @param[in] id index of the field
  * \return A constant pointer to the field with the specified index.
  */
 const VTKField * VTK::getData( std::size_t id ) const {
@@ -519,7 +520,7 @@ const VTKField * VTK::getData( std::size_t id ) const {
 
 /*!
  * Gets a pointer to the data field with the specified index.
- * @param[in] index index of the field
+ * @param[in] id index of the field
  * \return A pointer to the field with the specified index.
  */
 VTKField * VTK::getData( std::size_t id ) {
@@ -531,7 +532,7 @@ VTKField * VTK::getData( std::size_t id ) {
 
 /*!
  * Gets a constant pointer to the geometry field with the specified index.
- * @param[in] index index of the field
+ * @param[in] id index of the field
  * \return A constant pointer to the field with the specified index.
  */
 const VTKField * VTK::getGeomData( std::size_t id ) const {
@@ -543,7 +544,7 @@ const VTKField * VTK::getGeomData( std::size_t id ) const {
 
 /*!
  * Gets a pointer to the geometry field with the specified index.
- * @param[in] index index of the field
+ * @param[in] id index of the field
  * \return A pointer to the field with the specified index.
  */
 VTKField * VTK::getGeomData( std::size_t id ) {

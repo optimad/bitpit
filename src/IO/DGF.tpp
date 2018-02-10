@@ -230,6 +230,8 @@ return; }
 
 // Input routines =========================================================== //
 
+namespace dgf {
+
 // -------------------------------------------------------------------------- //
 /*!
     Read data block from dgf file.
@@ -241,9 +243,9 @@ return; }
     \result error flag tor I/O errors
         err = 0: no error(s) encountered
         err = 1: failed to load data from dgf file
-*/ 
+*/
 template< typename T >
-unsigned int dgf::readData(
+unsigned int readData(
     std::ifstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data
@@ -336,7 +338,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */ 
 template <typename T>
-unsigned int dgf::readVertexData(
+unsigned int readVertexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
@@ -431,7 +433,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */
 template <typename T>
-unsigned int dgf::readSimplexData(
+unsigned int readSimplexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
@@ -524,7 +526,7 @@ return(0); }
         err = 1: failed to write data to dgf file
 */ 
 template < typename T >
-unsigned int dgf::writeData(
+unsigned int writeData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data
@@ -569,7 +571,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */ 
 template < typename T >
-unsigned int dgf::writeVertexData(
+unsigned int writeVertexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
@@ -623,7 +625,7 @@ return(err); };
         err = 1: failed to load data from dgf file
 */ 
 template < typename T >
-unsigned int dgf::writeSimplexData(
+unsigned int writeSimplexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
@@ -663,4 +665,4 @@ err = dgf::writeData(file_handle, N, Data);
 
 return(err); };
 
-
+}

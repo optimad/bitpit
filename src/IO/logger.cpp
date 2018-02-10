@@ -1194,7 +1194,7 @@ void LoggerManager::setFileVerbosity(log::Verbosity verbosity)
 /*!
     Gets the defualt logger name.
 
-    \param The defualt logger name.
+    \result The defualt logger name.
 */
 std::string LoggerManager::getDefaultName() const
 {
@@ -1204,7 +1204,7 @@ std::string LoggerManager::getDefaultName() const
 /*!
     Gets the defualt logger directory.
 
-    \param The defualt logger directory.
+    \result The defualt logger directory.
 */
 std::string LoggerManager::getDefaultDirectory() const
 {

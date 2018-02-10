@@ -107,7 +107,7 @@ std::string BinaryArchive::getHeader() const
 }
 
 /*!
-    \ingroup binary
+    \ingroup Binary
     \class IBinaryArchive
     \brief Input binary archive.
 
@@ -200,7 +200,7 @@ bool IBinaryArchive::checkVersion(int version)
 }
 
 /*!
-    \ingroup binary
+    \ingroup Binary
     \class OBinaryArchive
     \brief Output binary archive.
 
@@ -225,7 +225,6 @@ OBinaryArchive::OBinaryArchive(const std::string &name, int version, int block)
     Creates a new output archive.
 
     \param name is the name of the file
-    \param extension is the extension of the file
     \param version is the version of the archive
     \param header is the header of the archive, the length of the header is
     limited to HEADER_SIZE characters.
@@ -276,7 +275,6 @@ OBinaryArchive::OBinaryArchive(const std::string &name, const std::string &exten
     input/output operations are performed on its content.
 
     \param name is the name of the file
-    \param extension is the extension of the file
     \param version is the version of the archive
     \param block is the parallel block thefile belongs to, a negative value
     mean that the file is serial
@@ -291,7 +289,6 @@ void OBinaryArchive::open(const std::string &name, int version, int block)
     input/output operations are performed on its content.
 
     \param name is the name of the file
-    \param extension is the extension of the file
     \param version is the version of the archive
     \param header is the header of the archive, the length of the header is
     limited to HEADER_SIZE characters.

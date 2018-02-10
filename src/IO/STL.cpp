@@ -106,7 +106,7 @@ return; };
     \param[in] filetype boolean flag for ascii (false) or binary (true) stl file
 */
 STLObj::STLObj(
-    string                              filename,
+    std::string                         filename,
     bool                                filetype
 ) {
 
@@ -144,7 +144,7 @@ return; };
     \param[in] filename stl file name
 */
 STLObj::STLObj(
-    string                              filename
+    std::string                         filename
 ) {
 
 // ========================================================================== //
@@ -215,7 +215,7 @@ return; };
     \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
 */
 void STLObj::open(
-    string                              mode
+    std::string                              mode
 ) {
 
 // ========================================================================== //
@@ -555,9 +555,9 @@ return; };
 void STLObj::load(
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T
 ) {
 
 // ========================================================================== //
@@ -613,9 +613,9 @@ return; };
 void STLObj::load(
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int, 3> >              &T
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int, 3> >    &T
 ) {
 
 // ========================================================================== //
@@ -674,9 +674,9 @@ return; };
 void STLObj::loadSolid(
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T,
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T,
     std::string                         &name
 ) {
 
@@ -734,9 +734,9 @@ return; };
 void STLObj::loadSolid(
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int,3> >               &T,
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int,3> >     &T,
     std::string                         &name
 ) {
 
@@ -890,9 +890,9 @@ return; };
         err = 1: failed to scan stl file.
 */
 unsigned int stl::scanASCII(
-    ifstream                            &file_handle,
-    vector<string>                      &solid_names,
-    vector<int>                         &solid_facets
+    std::ifstream                       &file_handle,
+    std::vector<std::string>            &solid_names,
+    std::vector<int>                    &solid_facets
 ) {
 
 // ========================================================================== //
@@ -988,9 +988,9 @@ return(0); };
         err = 1: failed to scan stl file.
 */
 unsigned int stl::scanBINARY(
-    ifstream                            &file_handle,
-    vector<string>                      &solid_names,
-    vector<int>                         &solid_facets
+    std::ifstream                       &file_handle,
+    std::vector<std::string>            &solid_names,
+    std::vector<int>                    &solid_facets
 ) {
 
 // ========================================================================== //
@@ -1053,7 +1053,7 @@ return(0); };
         err = 1: failed to scan stl file.
 */
 unsigned int stl::scanSolidASCII(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     int                                 &nT
 ) {
 
@@ -1140,8 +1140,8 @@ return(0); };
         err = 1: failed to scan/check stl file
 */
 unsigned int stl::checkASCII(
-    ifstream                            &file_handle,
-    vector<vector<bool> >               &err_map
+    std::ifstream                       &file_handle,
+    std::vector<std::vector<bool> >     &err_map
 ) {
 
 // ========================================================================== //
@@ -1215,8 +1215,8 @@ return(0); }
         err = 1: failed to scan/check stl file
 */
 unsigned int stl::checkSolidASCII(
-    ifstream                            &file_handle,
-    vector<bool>                        &err_map
+    std::ifstream                       &file_handle,
+    std::vector<bool>                   &err_map
 ) {
 
 // ========================================================================== //
@@ -1299,8 +1299,8 @@ return(0); };
         err = 1: failed to scan/check stl file
 */
 unsigned int stl::checkFacetASCII(
-    ifstream                            &file_handle,
-    vector<bool>                        &err_map
+    std::ifstream                       &file_handle,
+    std::vector<bool>                   &err_map
 ) {
 
 // ========================================================================== //
@@ -1413,8 +1413,8 @@ return(0); }
         err = 1: failed to scan/check stl file
 */
 unsigned int stl::checkBINARY(
-    ifstream                            &file_handle,
-    vector<vector<bool> >               &err_map
+    std::ifstream                       &file_handle,
+    std::vector<std::vector<bool> >     &err_map
 ) {
 
 // ========================================================================== //
@@ -1551,12 +1551,12 @@ return(0); }
         err = 2: one facet has more than 3 vertices
 */  
 unsigned int stl::readFacetASCII(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T
 ) {
 
 // ========================================================================== //
@@ -1661,12 +1661,12 @@ return(0); }
         err = 2: one facet has more than 3 vertices
 */  
 unsigned int stl::readFacetASCII(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int, 3> >              &T
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int, 3> >    &T
 ) {
 
 // ========================================================================== //
@@ -1777,14 +1777,14 @@ return(0); }
         err = 2: failed to read a facet
 */
 unsigned int stl::readSolidASCII(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     bool                                wrapAround,
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T,
-    string                              &name
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T,
+    std::string                         &name
 ) {
 
 // ========================================================================== //
@@ -1937,14 +1937,14 @@ return(0); }
         err = 2: failed to read a facet
 */
 unsigned int stl::readSolidASCII(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     bool                                wrapAround,
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int,3> >               &T,
-    string                              &name
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int,3> >     &T,
+    std::string                         &name
 
 ) {
 
@@ -2096,12 +2096,12 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int stl::readASCII(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T
 ) {
 
 // ========================================================================== //
@@ -2184,12 +2184,12 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int stl::readASCII(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int,3> >               &T
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int,3> >     &T
 ) {
 
 // ========================================================================== //
@@ -2270,12 +2270,12 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int stl::readBINARY(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T
 ) {
 
 // ========================================================================== //
@@ -2402,12 +2402,12 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int stl::readBINARY(
-    ifstream                            &file_handle,
+    std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int, 3> >              &T
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int, 3> >    &T
 ) {
 
 // ========================================================================== //
@@ -2533,13 +2533,13 @@ return(0); }
         err = 1: failed to write data to output stream
 */
 unsigned int stl::writeSolidASCII(
-    ofstream                            &file_handle,
+    std::ofstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T,
-    string                              solid_name
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T,
+    std::string                         solid_name
 ) {
 
 // ========================================================================== //
@@ -2646,13 +2646,13 @@ return(err); };
         err = 1: failed to write data to output stream
 */
 unsigned int stl::writeSolidASCII(
-    ofstream                            &file_handle,
+    std::ofstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int,3> >               &T,
-    string                               solid_name
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int,3> >     &T,
+    std::string                         solid_name
 ) {
 
 // ========================================================================== //
@@ -2758,13 +2758,13 @@ return(err); };
         err = 1: failed to write data to output stream
 */
 unsigned int stl::writeSolidBINARY(
-    ofstream                            &file_handle,
+    std::ofstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<vector<double> >             &V,
-    vector<vector<double> >             &N,
-    vector<vector<int> >                &T,
-    string                               solid_name
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<double> >   &N,
+    std::vector<std::vector<int> >      &T,
+    std::string                         solid_name
 ) {
 
 // ========================================================================== //
@@ -2857,13 +2857,13 @@ return(0); };
         err = 1: failed to write data to output stream
 */
 unsigned int stl::writeSolidBINARY(
-    ofstream                            &file_handle,
+    std::ofstream                       &file_handle,
     int                                 &nV,
     int                                 &nT,
-    vector<array<double,3> >            &V,
-    vector<array<double,3> >            &N,
-    vector<array<int,3> >               &T,
-    string                               solid_name
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::array<double,3> >  &N,
+    std::vector<std::array<int,3> >     &T,
+    std::string                         solid_name
 ) {
 
 // ========================================================================== //

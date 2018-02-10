@@ -935,17 +935,17 @@ void absorbBINARY(std::fstream &str, PiercedVector<data_T> &data)
  * @tparam          data_T  type data
  * @param[in]       str     file stream
  * @param[in]       data    data to be written
- * @param[in]       readIndex if indices should be written
+ * @param[in]       nElements the number of elements that should be read
  */
 template<class data_T>
-void absorbBINARY(std::fstream &str, PiercedVector<data_T> &data, long N)
+void absorbBINARY(std::fstream &str, PiercedVector<data_T> &data, long nElements)
 {
     long n, index;
     data_T value;
 
-    data.reserve(N);
+    data.reserve(nElements);
 
-    for (n=0; n<N; ++n) {
+    for (n=0; n<nElements; ++n) {
         absorbBINARY(str,index);
         absorbBINARY(str,value);
 

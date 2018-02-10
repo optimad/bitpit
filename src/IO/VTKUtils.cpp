@@ -29,10 +29,10 @@ namespace bitpit{
 /*!
  *  Returns number of vertices for a given element type.
  *  Codification of element type according to http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
- *  @param[in] t element type
+ *  @param[in] type element type
  *  @return number of vertices of element type
  */
-uint8_t vtk::getElementNodeCount( const VTKElementType & type){
+uint8_t vtk::getElementNodeCount( const VTKElementType &type){
 
     switch (type){
 
