@@ -59,8 +59,8 @@ public:
         // I/O routines
         unsigned short importSTL(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
         unsigned short importSTL(const std::string &, const bool &, int PIDOffset = 0, bool PIDSquash = false, std::unordered_map<int, std::string> *PIDNames = nullptr);
-        unsigned short exportSTL(const std::string &, const bool &, bool flag = true);
-        unsigned short exportSTL(const std::string &, const bool &, const bool &, bool flag, std::unordered_map<int, std::string> *PIDNames = nullptr);
+        unsigned short exportSTL(const std::string &, const bool &, bool exportInternalsOnly = true);
+        unsigned short exportSTL(const std::string &, const bool &, const bool &, bool exportInternalsOnly, std::unordered_map<int, std::string> *PIDNames = nullptr);
         unsigned short importDGF(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
         unsigned short exportDGF(const std::string &);
 
@@ -76,8 +76,8 @@ protected:
 
 	unsigned short importSTL(STLObj &STL, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
-	unsigned short exportSTLSingle(const std::string &, const bool &, bool flag = true);
-	unsigned short exportSTLMulti(const std::string &, bool flag = true, std::unordered_map<int, std::string> *PIDNames = nullptr);
+	unsigned short exportSTLSingle(const std::string &, const bool &, bool exportInternalsOnly = true);
+	unsigned short exportSTLMulti(const std::string &, bool exportInternalsOnly = true, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
 private:
 

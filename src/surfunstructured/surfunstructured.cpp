@@ -360,18 +360,18 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
  * If the input file is a multi-solid ASCII file, all solids will be loaded
  * and a different PID will be assigned to the PID of the different solids.
  * 
- * \param[in] stl_name name of stl file
+ * \param[in] name name of stl file
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file or if the same PID will be assigned to all cells
  * 
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(const string &stl_name,
+unsigned short SurfUnstructured::importSTL(const std::string &name,
                                            int PIDOffset, bool PIDSquash)
 {
     // Create STL object
-    STLObj STL(stl_name);
+    STLObj STL(name);
 
     // Import stl object
     importSTL(STL, PIDOffset, PIDSquash);
@@ -387,7 +387,7 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name,
  * If the input file is a multi-solid ASCII file, all solids will be loaded
  * and a different PID will be assigned to the PID of the different solids.
  *
- * \param[in] stl_name name of stl file
+ * \param[in] name name of stl file
  * \param[in] isBinary flag for binary (true), of ASCII (false) stl file
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
@@ -397,12 +397,12 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name,
  *
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &isBinary,
+unsigned short SurfUnstructured::importSTL(const std::string &name, const bool &isBinary,
                                            int PIDOffset, bool PIDSquash,
                                            std::unordered_map<int, std::string> *PIDNames)
 {
     // Create STL object
-    STLObj STL(stl_name, isBinary);
+    STLObj STL(name, isBinary);
 
     // Import stl object
     importSTL(STL, PIDOffset, PIDSquash, PIDNames);
@@ -538,16 +538,16 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
  * therefore tasselation containing vertex, line or quad elements will produce
  * ill-formed stl triangulation.
  *
- * \param[in] stl_name name of the stl file
+ * \param[in] name name of the stl file
  * \param[in] isBinary flag for binary (true) or ASCII (false) file
  * \param[in] exportInternalsOnly flag for exporting only internal cells (true), or
  * internal and ghost cells (false).
  *
  * \result on output returns an error flag for I/O error.
  */
-unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary, bool exportInternalsOnly)
+unsigned short SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
 {
-    return exportSTLSingle(stl_name, isBinary, exportInternalsOnly);
+    return exportSTLSingle(name, isBinary, exportInternalsOnly);
 }
 
 /*!
@@ -555,7 +555,7 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
  * therefore tasselation containing vertex, line or quad elements will produce
  * ill-formed stl triangulation. Overloading supporting the the ascii multi-solid mode export.
  *
- * \param[in] stl_name name of the stl file
+ * \param[in] name name of the stl file
  * \param[in] isBinary flag for binary (true) or ASCII (false) file
  * \param[in] isMulti flag to write in ASCII multi-solid mode (true) or not (false).
  * If true, isBinary flag will be ignored.
@@ -565,15 +565,15 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
  * its number will be used
  * \result on output returns an error flag for I/O error.
  */
-unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &isBinary,
+unsigned short SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary,
                                            const bool &isMulti, bool exportInternalsOnly,
                                            std::unordered_map<int, std::string> *PIDNames)
 {
     unsigned short flag = 0;
     if (isMulti) {
-        flag = exportSTLMulti(stl_name, exportInternalsOnly, PIDNames);
+        flag = exportSTLMulti(name, exportInternalsOnly, PIDNames);
     } else {
-        flag = exportSTLSingle(stl_name, isBinary, exportInternalsOnly);
+        flag = exportSTLSingle(name, isBinary, exportInternalsOnly);
     }
 
     return flag;
@@ -587,14 +587,14 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
  * therefore tasselation containing vertex, line or quad elements will produce
  * ill-formed stl triangulation.
  * 
- * \param[in] stl_name name of the stl file
+ * \param[in] name name of the stl file
  * \param[in] isBinary flag for binary (true) or ASCII (false) file
  * \param[in] exportInternalsOnly flag for exporting only internal cells (true),
  * or internal+ghost cells (false).
  * 
  * \result on output returns an error flag for I/O error.
 */
-unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const bool &isBinary, bool exportInternalsOnly)
+unsigned short SurfUnstructured::exportSTLSingle(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -683,7 +683,7 @@ unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const b
     // ====================================================================== //
     // EXPORT STL DATA                                                        //
     // ====================================================================== //
-    STLObj                                      STL(stl_name, isBinary);
+    STLObj                                      STL(name, isBinary);
     STL.save("", nVertex, nSimplex, vertexList, normalList, connectivityList);
 
     return 0;
@@ -694,14 +694,14 @@ unsigned short SurfUnstructured::exportSTLSingle(const string &stl_name, const b
  * No check is perfomed on element type therefore tasselation containing vertex, line or quad elements will produce
  * ill-formed stl triangulation. If available, ghost cells will be written in a stand-alone solid.
  *
- * \param[in] stl_name name of the stl file
+ * \param[in] name name of the stl file
  * \param[in] exportInternalsOnly OPTIONAL flag for exporting only internal cells (true),
  * or internal+ghost cells (false). Default is true.
   * \param[in,out] PIDNames are the names of the PIDs, if a PIDs has no name
   * its number will be used
  * \result on output returns an error flag for I/O error 0-done, >0 errors.
  */
-unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exportInternalsOnly,
+unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool exportInternalsOnly,
                                                 std::unordered_map<int, std::string> *PIDNames)
 {
     int                                         nTotVertex;
@@ -712,7 +712,7 @@ unsigned short SurfUnstructured::exportSTLMulti(const string &stl_name, bool exp
     vector<array<double, 3>>                    normalLocList;
     vector<array<int,3>>                        connectivityLocList;
 
-    STLObj STL(stl_name, false);
+    STLObj STL(name, false);
 
     STL.open("out");
     if (STL.err != 0) {
@@ -841,7 +841,7 @@ ElementType SurfUnstructured::getSTLFacetType(int nFacetVertices)
  * 
  * \result on output returns an error flag for I/O error.
 */
-unsigned short SurfUnstructured::importDGF(const string &dgf_name, int PIDOffset, bool PIDSquash)
+unsigned short SurfUnstructured::importDGF(const std::string &dgf_name, int PIDOffset, bool PIDSquash)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -921,7 +921,7 @@ unsigned short SurfUnstructured::importDGF(const string &dgf_name, int PIDOffset
  * 
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::exportDGF(const string &dgf_name)
+unsigned short SurfUnstructured::exportDGF(const std::string &dgf_name)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
