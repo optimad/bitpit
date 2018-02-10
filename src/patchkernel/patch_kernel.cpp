@@ -2773,10 +2773,26 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 */
 std::vector<long> PatchKernel::findCellVertexOneRing(const long &id, const int &vertex) const
 {
-	std::vector<long> oneRing = findCellVertexNeighs(id, vertex);
-	utils::addToOrderedVector<long>(id, oneRing);
+	std::vector<long> ring;
+	findCellVertexOneRing(id, vertex, &ring);
 
-	return oneRing;
+	return ring;
+}
+
+/*!
+	Finds the one-ring of the specified vertex of the cell.
+
+	\param id is the id of the cell
+	\param vertex is a vertex of the cell
+	\param[in,out] ring is the vector were the one-ring of the specified vertex
+	of the cell will be stored. The vector is not cleared before adding the
+	neighbours, it is extended by appending all the neighbours found by this
+	function
+*/
+void PatchKernel::findCellVertexOneRing(const long &id, const int &vertex, std::vector<long> *ring) const
+{
+	findCellVertexNeighs(id, vertex, ring);
+	utils::addToOrderedVector<long>(id, *ring);
 }
 
 /*!
