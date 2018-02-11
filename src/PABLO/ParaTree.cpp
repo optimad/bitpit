@@ -44,6 +44,36 @@ namespace bitpit {
     using namespace std;
 
     // =================================================================================== //
+    // AUXILIARY IMPLEMENTATIONS                                                           //
+    // =================================================================================== //
+
+    ParaTree::LoadBalanceRanges::LoadBalanceRanges()
+        : sendAction(ACTION_UNDEFINED), recvAction(ACTION_UNDEFINED)
+    {
+    }
+
+    ParaTree::LoadBalanceRanges::LoadBalanceRanges(bool serial, const ExchangeRanges &_sendRanges, const ExchangeRanges &_recvRanges)
+        : sendRanges(_sendRanges), recvRanges(_recvRanges)
+    {
+        if (serial) {
+            sendAction = ACTION_DELETE;
+            recvAction = ACTION_NONE;
+        } else {
+            sendAction = ACTION_SEND;
+            recvAction = ACTION_RECEIVE;
+        }
+    }
+
+    void ParaTree::LoadBalanceRanges::clear()
+    {
+        sendAction = ACTION_UNDEFINED;
+        sendRanges.clear();
+
+        recvAction = ACTION_UNDEFINED;
+        recvRanges.clear();
+    }
+
+    // =================================================================================== //
     // CLASS IMPLEMENTATION                                                                //
     // =================================================================================== //
 

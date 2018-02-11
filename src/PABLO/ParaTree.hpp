@@ -114,31 +114,10 @@ namespace bitpit {
             ExchangeAction recvAction;
             ExchangeRanges recvRanges;
 
-            LoadBalanceRanges()
-                : sendAction(ACTION_UNDEFINED), recvAction(ACTION_UNDEFINED)
-            {
-            }
+            LoadBalanceRanges();
+            LoadBalanceRanges(bool serial, const ExchangeRanges &_sendRanges, const ExchangeRanges &_recvRanges);
 
-            LoadBalanceRanges(bool serial, const ExchangeRanges &_sendRanges, const ExchangeRanges &_recvRanges)
-                : sendRanges(_sendRanges), recvRanges(_recvRanges)
-            {
-                if (serial) {
-                    sendAction = ACTION_DELETE;
-                    recvAction = ACTION_NONE;
-                } else {
-                    sendAction = ACTION_SEND;
-                    recvAction = ACTION_RECEIVE;
-                }
-            }
-
-            void clear()
-            {
-                sendAction = ACTION_UNDEFINED;
-                sendRanges.clear();
-
-                recvAction = ACTION_UNDEFINED;
-                recvRanges.clear();
-            }
+            void clear();
         };
 
     private:
