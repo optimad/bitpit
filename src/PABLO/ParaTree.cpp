@@ -47,11 +47,52 @@ namespace bitpit {
     // AUXILIARY IMPLEMENTATIONS                                                           //
     // =================================================================================== //
 
+    /*!
+        \typedef ParaTree::ExchangeRanges
+        \ingroup PABLO
+
+        Defines a set of local octants' ranges that will be exchanged with
+        other processes.
+
+        A range is defined as a pair: the first entry is the local index
+        referring to the first octant the will be exchanged and the second
+        entry is the local index referring to the "past-the-last" octant
+        that will be exchanged.
+
+        There is a range for each each process for which an exchange will take
+        place.
+    */
+
+    /*!
+        \struct ParaTree::LoadBalanceRanges
+        \ingroup PABLO
+
+        Defines the range of local octants that will be exchanged during a load
+        balance.
+    */
+
+    /*!
+        \enum ParaTree::LoadBalanceRanges::ExchangeAction
+        \ingroup PABLO
+
+        The type of exchange action that will be performed on the octants in
+        a range.
+    */
+
+    /*! Default constructor
+    */
     ParaTree::LoadBalanceRanges::LoadBalanceRanges()
         : sendAction(ACTION_UNDEFINED), recvAction(ACTION_UNDEFINED)
     {
     }
 
+    /*! Constructor
+     * \param serial controls is the tree is currently serial or parallel
+     * \param _sendRanges are the range of local octants that will be sent to
+     * other processes
+     * \param _recvRanges are the range of local octants that will be received
+     * from other processes
+     */
     ParaTree::LoadBalanceRanges::LoadBalanceRanges(bool serial, const ExchangeRanges &_sendRanges, const ExchangeRanges &_recvRanges)
         : sendRanges(_sendRanges), recvRanges(_recvRanges)
     {
@@ -64,6 +105,8 @@ namespace bitpit {
         }
     }
 
+    /*! Clear the ranges
+     */
     void ParaTree::LoadBalanceRanges::clear()
     {
         sendAction = ACTION_UNDEFINED;
@@ -84,6 +127,7 @@ namespace bitpit {
     // =================================================================================== //
 
     /*! Default empty constructor of ParaTree.
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
 #if BITPIT_ENABLE_MPI==1
     /*!
@@ -130,10 +174,10 @@ namespace bitpit {
     // =============================================================================== //
 
     /*!
-        Creates a new octree restoring the octree saved in the specified stream.
-
-        \param stream is the stream to read from
-    */
+     * Creates a new octree restoring the octree saved in the specified stream.
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     * \param stream is the stream to read from
+     */
 #if BITPIT_ENABLE_MPI==1
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
@@ -2456,7 +2500,7 @@ namespace bitpit {
      * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
     void
-    ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost) const {
+    ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
 
         const Octant* oct = &m_octree.m_octants[idx];
 
@@ -2474,7 +2518,7 @@ namespace bitpit {
      * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
     void
-    ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost) const {
+    ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
 
         findNeighbours(oct, false, 0, iface, codim, neighbours, isghost, false);
 
@@ -2922,7 +2966,7 @@ namespace bitpit {
      * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
      */
     void
-    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost) const {
+    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const {
 
         if (idx >= m_mapIdx.size()){
             throw std::runtime_error ("Invalid value for input index in getMapping");

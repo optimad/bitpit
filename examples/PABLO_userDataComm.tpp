@@ -31,7 +31,8 @@
 
 // #include "bitpit_common.hpp"
 
-/* \cond
+/*!
+ * \cond
  */
 template<class Data>
 UserDataComm<Data>::UserDataComm(Data & data_, Data & ghostData_) : data(data_), ghostData(ghostData_){};
@@ -64,5 +65,6 @@ inline void UserDataComm<Data>::scatter(Buffer& buff,	const uint32_t e) {
 	buff >> ghostData.floatData[e];
 };
 
-/* endcond
+/*!
+ * \endcond
  */

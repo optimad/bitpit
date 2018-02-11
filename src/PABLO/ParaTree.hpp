@@ -689,7 +689,15 @@ namespace bitpit {
 
         }
 
-
+        /**
+        * Distribute Load-Balancing octants and user data of the whole
+        * tree over the processes of the job following a given partition
+        * distribution. Until loadBalance is not called for the first time
+        * the mesh is serial.
+        * \param[in] userData User data that will be distributed among the
+        * processes.
+        * \param[in] partition Target distribution of octants over processes.
+        */
         template<class Impl>
         void
         privateLoadBalance(DataLBInterface<Impl> & userData,uint32_t* partition){

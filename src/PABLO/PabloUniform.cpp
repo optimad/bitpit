@@ -44,7 +44,8 @@ namespace bitpit {
     // CONSTRUCTORS AND OPERATORS
     // =================================================================================== //
     /*! Default empty constructor of PabloUniform.
-	 */
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
 #if BITPIT_ENABLE_MPI==1
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
@@ -74,7 +75,9 @@ namespace bitpit {
 
     /*! Custom constructor of PabloUniform.
      * It sets the Origin in (X,Y,Z) and side of length L.
-     * \param[in] X,Y,Z Coordinates of the origin in physical domain,
+     * \param[in] X x-coordinate of the origin in physical domain,
+     * \param[in] Y y-coordinate of the origin in physical domain,
+     * \param[in] Z z-coordinate of the origin in physical domain,
      * \param[in] L Length of the side in physical domain.
      * \param[in] dim The space dimension of the octree.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
