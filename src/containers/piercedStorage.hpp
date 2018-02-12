@@ -78,7 +78,7 @@ private:
 
     private:
         template<typename class_t>
-        static std::true_type test_restore(decltype(std::declval<class_t>().restore(std::declval<std::ostream &>())) *);
+        static std::true_type test_restore(decltype(std::declval<class_t>().restore(std::declval<std::istream &>())) *);
 
         template<typename class_t>
         static std::false_type test_restore(...);
@@ -103,7 +103,7 @@ private:
 
     private:
         template<typename class_t>
-        static std::true_type test_dump(decltype(std::declval<class_t>().dump(std::declval<std::istream &>())) *);
+        static std::true_type test_dump(decltype(std::declval<class_t>().dump(std::declval<std::ostream &>())) *);
 
         template<typename class_t>
         static std::false_type test_dump(...);
