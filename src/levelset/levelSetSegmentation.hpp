@@ -59,8 +59,6 @@ public:
     const SurfUnstructured & getSurface() const;
     double getFeatureAngle() const;
 
-    const SurfUnstructured & getSurface();
-
     void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
     void getSegmentInfo( const std::array<double,3> &p, const long &i, const bool &signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
 
