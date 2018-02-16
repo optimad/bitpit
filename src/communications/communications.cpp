@@ -56,7 +56,7 @@ DataCommunicator::DataCommunicator(MPI_Comm communicator)
 }
 
 /*!
-    Creates a new communicator for data exchange.
+    Destructor.
 */
 DataCommunicator::~DataCommunicator()
 {
