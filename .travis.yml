@@ -215,6 +215,7 @@ script:
 notifications:
   slack:
     rooms:
-      - romanticdevs:wsYAkDHp0E9NNnsLM0Wo3dpQ#cmake
+      # Channel cmake on romanticdevs
+      - secure: "fl5eXHRN4EnO5aizGBTfsK2ZwNMO+0ZocXvDvs5yoIVrE+uUlKPEayUtSLC5X0EO7JOxzCMfey51cr+Wk0O6ME1cj2WPZHMaziXkLshPltFbx6m+O0XGZJCOO5l6gFuAEZWXkfFzz2fQz80tUpQHQCaZjFq1OsRq4FiWPpAFjsxqYgz524EHwxFWxIFcZnl6gnFwlmtQbmPBVCEMDoqRmDPiWIEQ0Paom9DUPdEm7K6JTP0TSIWOcGLvYWtJqNsJ0kauvQtCZQc1XnrSu5vRrHY+uBWXew+JXq7aJ2kM2NlaeOqMBQsxDicjYa9vFGSo5Qmdck9ZXE79rc1BA05UVRb5G/9dyhxLlm2YbncmsaH4Lyua0qQ4TA1FepB7DOF4E2rs4ywqMwR+WKoZeTuk1yqkvurH2WfLmOsDw8ybwgqLiITYuL7pMpvakluYI2hT6bL2EiF3g0oA/10vyi2PmLx9ScRKrs7CosApHaPjo06ViqSHUFlcCqvUQDKdUp7n7AvuCE2gRBCXXgpI3d5oRVWX3KoHNChTir/vUhZfGRqpzfA1CCsGht2kciD7IEAAjMxZ9adgfFJWJe00IQaCx7KBOXlZF3SjvWOfAuLfta7sDXl1NOE9x55RVolSs2L9lZExLR0PajLdCbfVdgV6359wYsmAJV+jJHS6Ma0zB4U="
     on_success: change
     on_failure: change
