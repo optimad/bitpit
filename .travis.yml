@@ -24,23 +24,28 @@ env:
 
 jobs:
   include:
-    - os: linux
+    - if: branch != coverity
+      os: linux
       env:
         - BUILD_TYPE="Release" ENABLE_MPI="True"
 
-    - os: linux
+    - if: branch != coverity
+      os: linux
       env:
         - BUILD_TYPE="Release" ENABLE_MPI="False"
 
-    - os: linux
+    - if: branch != coverity
+      os: linux
       env:
         - BUILD_TYPE="Debug" ENABLE_MPI="True"
 
-    - os: linux
+    - if: branch != coverity
+      os: linux
       env:
         - BUILD_TYPE="Debug" ENABLE_MPI="False"
 
-    - os: linux
+    - if: branch != coverity
+      os: linux
       addons:
         apt:
           sources:
@@ -61,7 +66,8 @@ jobs:
         - Fortran_COMPILER="gfortran-4.9"
         - BUILD_TYPE="Release" ENABLE_MPI="True"
 
-    - os: linux
+    - if: branch != coverity
+      os: linux
       addons:
         apt:
           sources:
@@ -83,7 +89,8 @@ jobs:
         - Fortran_COMPILER="gfortran-6"
         - BUILD_TYPE="Release" ENABLE_MPI="True"
 
-    - os: linux
+    - if: branch != coverity
+      os: linux
       addons:
         apt:
           sources:
@@ -106,7 +113,8 @@ jobs:
         - Fortran_COMPILER="gfortran-6"
         - BUILD_TYPE="Release" ENABLE_MPI="True"
 
-    - os: linux
+    - if: branch != coverity
+      os: linux
       addons:
         apt:
           sources:
@@ -129,25 +137,80 @@ jobs:
         - Fortran_COMPILER="gfortran-7"
         - BUILD_TYPE="Release" ENABLE_MPI="True"
 
+    - if: branch = coverity
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gfortran
+            - cmake
+            - libblas-dev
+            - liblapack-dev
+            - liblapacke-dev
+            - mpich
+            - libmpich-dev
+        coverity_scan:
+          project:
+            name: optimad/bitpit
+            description: "bitpit :: Open source library for scientific High Performance Computing"
+          notification_email: coverity@optimad.it
+          build_command_prepend: >
+            mkdir build;
+            cd build;
+            cmake -DCMAKE_C_COMPILER=${C_COMPILER} \
+              -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
+              -DCMAKE_Fortran_COMPILER=${Fortran_COMPILER} \
+              -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              -DENABLE_MPI=${ENABLE_MPI} \
+              -DVERBOSE_MAKE=True \
+              ..;
+          build_command: >
+            make -j2
+          branch_pattern: coverity
+
+      env:
+        - C_COMPILER="gcc"
+        - CXX_COMPILER="g++"
+        - Fortran_COMPILER="gfortran"
+        - BUILD_TYPE="Debug" ENABLE_MPI="True"
+
+        # Encrypted COVERITY_SCAN_TOKEN
+        - secure: "q4Pdqc6eiar7cxgr+iqmED+/vDRq+yE7kzY0GM/gFUpuYMVEh7Rox4TWcPDadLAWsFXIQhDkomoWVC6ButyCqtqa41WDG7aeo73bRG10MV4n5uMzPasLE9KS1KQBmKHN/nofuX6S0IR8EsTOymdtXV4Wsc8T0uEOn/FDsVa+i4o2UHQDmyzPJ4yXnYh/98Q3umVC5nqrTfn43oqHUIedYqPv8LQLZTQBYhY2I4q1J/kTntyele79Zt1KmCdsQYZlMLZ5kT2/aVZpQ4nlvpC61BMCmKBvdEEEP13W5FpBF7KmZqOZqRZLbIxkP1UMOrsjbPXOD1c9INYmII+ouSh5DLiBpHFNTFp854s21Oa7A93igtYM5BLIGsKCTCyXdWi59WGKGY4jtSMKM0XnRzQ/Wpd9fEFyaokebJx8YuWs/JUPSDovoifmbjo9hwNQNeomSKMEieqFXRAqX8qEQ1MPxxP+Pdku8/CwJ15yZmNSA/gh/rbrFykC5btu2FHeFxaXe1HYF8EOEi8nWlseOC3obdBdzIUM8zoOCQroyuom+QWEuOu1AGwSdwMS2K7xKDfrYQSbjb8KkfSb+s6xAcQZHKiBLgX4eeYWabUbFlCJl4hGyQXjGZpCiaY8q7GMdgslgPE4e6ALl6BnmLCupBsdMDvSP9YB5PUPaPeK6B33SrM="
+
 before_install:
+  - echo "Building branch ${TRAVIS_BRANCH}..."
+  - if [ ${TRAVIS_BRANCH} != "coverity" ]; then
+      echo "Coverity build... No";
+    else
+      echo "Coverity build... Yes";
+    fi
   - test -n $CC && unset CC
   - test -n $CXX && unset CXX
   - test -n $FC && unset FC
+  - if [ ${TRAVIS_BRANCH} == "coverity" ]; then
+      echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
+    fi
 
 before_script:
-  - mkdir build
-  - cd build
-  - cmake
-    -DCMAKE_C_COMPILER=${C_COMPILER}
-    -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
-    -DCMAKE_Fortran_COMPILER=${Fortran_COMPILER}
-    -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-    -DENABLE_MPI=${ENABLE_MPI}
-    -DVERBOSE_MAKE=True
-    ..
+  - if [ ${TRAVIS_BRANCH} != "coverity" ]; then
+      mkdir build;
+      cd build;
+      cmake
+        -DCMAKE_C_COMPILER=${C_COMPILER}
+        -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
+        -DCMAKE_Fortran_COMPILER=${Fortran_COMPILER}
+        -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+        -DENABLE_MPI=${ENABLE_MPI}
+        -DVERBOSE_MAKE=True
+        ..;
+    fi
 
 script:
-  - make -j2 && ctest
+  - if [ ${TRAVIS_BRANCH} != "coverity" ]; then
+      make -j2 && ctest;
+    fi
 
 notifications:
   slack:
