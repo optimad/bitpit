@@ -27,7 +27,7 @@ env:
     - BUILD_TYPE="Debug" ENABLE_MPI="True"
     - BUILD_TYPE="Debug" ENABLE_MPI="False"
 
-matrix:
+jobs:
   include:
     - os: linux
       addons:
