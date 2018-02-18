@@ -21,14 +21,25 @@ env:
     - C_COMPILER="gcc-7"
     - CXX_COMPILER="g++-7"
     - Fortran_COMPILER="gfortran-7"
-  matrix:
-    - BUILD_TYPE="Release" ENABLE_MPI="True"
-    - BUILD_TYPE="Release" ENABLE_MPI="False"
-    - BUILD_TYPE="Debug" ENABLE_MPI="True"
-    - BUILD_TYPE="Debug" ENABLE_MPI="False"
 
 jobs:
   include:
+    - os: linux
+      env:
+        - BUILD_TYPE="Release" ENABLE_MPI="True"
+
+    - os: linux
+      env:
+        - BUILD_TYPE="Release" ENABLE_MPI="False"
+
+    - os: linux
+      env:
+        - BUILD_TYPE="Debug" ENABLE_MPI="True"
+
+    - os: linux
+      env:
+        - BUILD_TYPE="Debug" ENABLE_MPI="False"
+
     - os: linux
       addons:
         apt:
