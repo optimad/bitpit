@@ -216,5 +216,5 @@ notifications:
   slack:
     rooms:
       - romanticdevs:wsYAkDHp0E9NNnsLM0Wo3dpQ#cmake
-    on_success:
-      always
+    on_success: change
+    on_failure: change
