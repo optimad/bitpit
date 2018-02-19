@@ -126,6 +126,7 @@ protected:
 	void _adaptionCleanup() override;
 	bool _markCellForRefinement(const long &id) override;
 	bool _markCellForCoarsening(const long &id) override;
+	adaption::Marker _getCellAdaptionMarker(const long &id) override;
 	bool _enableCellBalancing(const long &id, bool enabled) override;
 	void _setTol(double tolerance) override;
 	void _resetTol() override;

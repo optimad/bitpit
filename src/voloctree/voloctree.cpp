@@ -1815,6 +1815,29 @@ bool VolOctree::_markCellForCoarsening(const long &id)
 }
 
 /*!
+	Returns the adaption marker of the specified cell.
+
+	\param id is the id of the cell
+	\return The adaption marker of the cell.
+*/
+adaption::Marker VolOctree::_getCellAdaptionMarker(const long &id)
+{
+	OctantInfo octantInfo = getCellOctant(id);
+	if (!octantInfo.internal) {
+		return adaption::MARKER_UNDEFINED;
+	}
+
+	int8_t treeMarker = m_tree->getMarker(octantInfo.id);
+	if (treeMarker > 0) {
+		return adaption::MARKER_REFINE;
+	} else if (treeMarker < 0) {
+		return adaption::MARKER_COARSEN;
+	} else {
+		return adaption::MARKER_NONE;
+	}
+}
+
+/*!
 	Set the marker on a cell.
 
 	\param id is the id of the cell
