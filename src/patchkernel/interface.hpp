@@ -55,9 +55,7 @@ public:
 
 	bool isBorder() const;
 
-	std::array<std::array<double, 3>, 3> evalRotationFromCartesian();
 	static std::array<std::array<double, 3>, 3> evalRotationFromCartesian(std::array<double, 3> &versor);
-	std::array<std::array<double, 3>, 3> evalRotationToCartesian();
 	static std::array<std::array<double, 3>, 3> evalRotationToCartesian(std::array<double, 3> &versor);
 	static std::array<std::array<double, 3>, 3> evalRotationTranspose(const std::array<std::array<double, 3>, 3> &R);
 
