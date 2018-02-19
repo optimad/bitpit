@@ -49,7 +49,7 @@ class PODKernel : public VTKBaseStreamer {
     PODKernel();
 # endif
 
-    ~PODKernel();
+    virtual ~PODKernel();
 
     PODKernel(PODKernel&& other) = default;
 

@@ -46,7 +46,7 @@ public:
     PODVolOctree();
 # endif
 
-    ~PODVolOctree();
+    ~PODVolOctree() override;
 
     PODVolOctree(PODVolOctree&& other) = default;
 
