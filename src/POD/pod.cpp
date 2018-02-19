@@ -79,9 +79,11 @@ POD::POD()
     m_nSnapshots = 0;
     m_nModes = std::numeric_limits<std::size_t>::max();
     m_energyLevel = 100;
+    m_nFields = 0;
     m_nScalarFields = 0;
     m_nVectorFields = 0;
     m_nReconstructionSnapshots = 0;
+    m_sizeInternal = 0;
 
 # if BITPIT_ENABLE_MPI
     initializeCommunicator(comm);
