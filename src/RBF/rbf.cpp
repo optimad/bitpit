@@ -669,8 +669,8 @@ int RBFKernel::solve()
     info = LAPACKE_dgesv( LAPACK_COL_MAJOR, nS, nrhs, A.data(), lda, ipiv, b.data(), ldb );
 
     if( info > 0 ) {
-        printf( "The diagonal element of the triangular factor of a,\n" );
-        printf( "U(%i,%i) is zero, so that a is singular;\n", info, info );
+        printf( "The diagonal element of the triangular factor of the linear system matrix \n" );
+        printf( "U(%i,%i) is zero, so that matrix is singular;\n", info, info );
         printf( "the solution could not be computed.\n" );
         return 1;
     }
