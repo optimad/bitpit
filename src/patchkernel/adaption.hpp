@@ -33,6 +33,13 @@ namespace bitpit {
 
 namespace adaption
 {
+	enum Marker {
+		MARKER_REFINE,
+		MARKER_NONE,
+		MARKER_COARSEN,
+		MARKER_UNDEFINED
+	};
+
 	enum Type {
 		TYPE_UNKNOWN  = -2,
 		TYPE_NONE     = -1,

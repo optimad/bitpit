@@ -38,6 +38,13 @@ namespace adaption
 {
 
 /*!
+	\enum adaption::Marker
+
+	\brief The Marker enum defines the type of adaption that has been
+	requested.
+*/
+
+/*!
 	\enum adaption::Type
 
 	\brief The Type enum defines the type of adaption that has been

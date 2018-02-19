@@ -232,6 +232,7 @@ public:
 
 	void markCellForRefinement(const long &id);
 	void markCellForCoarsening(const long &id);
+    adaption::Marker getCellAdaptionMarker(const long &id);
 	void enableCellBalancing(const long &id, bool enabled);
 
 	bool isDirty(bool global = false) const;
@@ -509,6 +510,7 @@ protected:
 	virtual void _adaptionCleanup();
 	virtual bool _markCellForRefinement(const long &id);
 	virtual bool _markCellForCoarsening(const long &id);
+	virtual adaption::Marker _getCellAdaptionMarker(const long &id);
 	virtual bool _enableCellBalancing(const long &id, bool enabled);
 
 	virtual void _setTol(double tolerance);

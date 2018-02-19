@@ -590,6 +590,22 @@ void PatchKernel::markCellForCoarsening(const long &id)
 }
 
 /*!
+	Returns the adaption marker of the specified cell.
+
+	The marker only defines the type of adaption requested for the cell, it
+	is not guaranteed that the adaption will effectively perfrom the requestd
+	action (i.e., the requested marker may not be consistent with the internal
+	criteria defined by the patch).
+
+	\param id is the id of the cell
+	\return The adaption marker of the cell.
+*/
+adaption::Marker PatchKernel::getCellAdaptionMarker(const long &id)
+{
+	return _getCellAdaptionMarker(id);
+}
+
+/*!
 	Enables cell balancing.
 
 	\param id is the id of the cell
@@ -3551,6 +3567,21 @@ bool PatchKernel::_markCellForCoarsening(const long &id)
 	BITPIT_UNUSED(id);
 
 	return false;
+}
+
+/*!
+	Returns the adaption marker of the specified cell.
+
+	Default implementation always return an undefined marker.
+
+	\param id is the id of the cell
+	\return The adaption marker of the cell.
+*/
+adaption::Marker PatchKernel::_getCellAdaptionMarker(const long &id)
+{
+	BITPIT_UNUSED(id);
+
+	return adaption::MARKER_UNDEFINED;
 }
 
 /*!
