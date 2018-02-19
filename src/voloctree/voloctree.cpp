@@ -1815,6 +1815,17 @@ bool VolOctree::_markCellForCoarsening(const long &id)
 }
 
 /*!
+	Resets the adaption marker of the specified cell.
+
+	\param id the cell to be refined
+	\result Returns true if the marker was properly reset, false otherwise.
+*/
+bool VolOctree::_resetCellAdaptionMarker(const long &id)
+{
+	return set_marker(id, 0);
+}
+
+/*!
 	Returns the adaption marker of the specified cell.
 
 	\param id is the id of the cell
