@@ -3258,6 +3258,26 @@ namespace bitpit {
     // =================================================================================== //
 
 
+    /** Rearrange the octree markers with user setup for markers and 2:1 balancing conditions.
+     *
+     *  This function is analogous to pre-adapt method, but no function is mandatory after
+     *  a settleMarkers call.
+     *
+     *  Note: the last operation tag is not changed after a settleMarkers call.
+     */
+    void
+    ParaTree::settleMarkers(){
+
+        (*m_log) << "---------------------------------------------" << endl;
+        (*m_log) << " SETTLE MARKERS " << endl;
+
+        balance21(true);
+
+        (*m_log) << " " << endl;
+        (*m_log) << "---------------------------------------------" << endl;
+
+    };
+
     /** Pre-adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
      *
      *  The user can call pre-adapt and then adapt or only adapt, however after the

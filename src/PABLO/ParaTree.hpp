@@ -456,6 +456,7 @@ namespace bitpit {
         uint8_t		getMaxDepth() const;
         int 		findOwner(const uint64_t & morton) const;
         int 		getOwnerRank(const uint64_t & globalIdx) const;
+        void        settleMarkers();
         void        preadapt();
         bool        checkToAdapt();
         bool        adapt(bool mapper_flag = false);
