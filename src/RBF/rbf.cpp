@@ -938,7 +938,7 @@ int RBFKernel::solveLSQ()
         }
     }
 
-    return(0);
+    return 0;
 }
 
 // RBF derived class implementation
