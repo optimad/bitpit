@@ -5111,6 +5111,12 @@ void PatchKernel::dump(std::ostream &stream) const
 	utils::binary::write(stream, false);
 #endif
 
+	// Spawn status
+	utils::binary::write(stream, m_spawnStatus);
+
+	// Adaption status
+	utils::binary::write(stream, m_adaptionStatus);
+
 	// VTK data
 	utils::binary::write(stream, m_vtkWriteTarget);
 
@@ -5173,6 +5179,12 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	bool dummyPartitioned;
 	utils::binary::read(stream, dummyPartitioned);
 #endif
+
+	// Spawn status
+	utils::binary::read(stream, m_spawnStatus);
+
+	// Adaption status
+	utils::binary::read(stream, m_adaptionStatus);
 
 	// VTK data
 	utils::binary::read(stream, m_vtkWriteTarget);
