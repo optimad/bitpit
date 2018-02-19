@@ -67,7 +67,7 @@ void SkdPatchInfo::buildCache()
         // Cell info
         const Cell &cell = cells.rawAt(rawCellId);
         int nCellVertices = cell.getVertexCount();
-        const long *cellConnect = cell.getConnect();
+        ConstProxyVector<long> cellConnect = cell.getVertexIds();
 
         // Bounding box
         std::array<double, 3> &cellBoxMin   = m_cellBoxes->rawAt(rawCellId, 0);
@@ -457,61 +457,29 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
     const PatchKernel &patch = m_patchInfo->getPatch();
     const PiercedVector<Cell> &cells = patch.getCells();
     const std::vector<std::size_t> &cellRawIds = m_patchInfo->getCellRawIds();
+    std::vector<std::array<double, 3>> cellVertexCoordinates(ReferenceElementInfo::MAX_ELEM_VERTICES);
 
     for (std::size_t n = m_cellRangeBegin; n < m_cellRangeEnd; n++) {
         std::size_t cellRawId = cellRawIds[n];
         const Cell &cell = cells.rawAt(cellRawId);
-        long cellId = cell.getId();
-        const long *cellConnect = cell.getConnect();
+
+        // Get the vertices ids
+        ConstProxyVector<long> elementVertexIds = cell.getVertexIds();
+        const int nElementVertices = elementVertexIds.size();
+
+        // Get vertex coordinates
+        cellVertexCoordinates.resize(nElementVertices);
+        for (int i = 0; i < nElementVertices; ++i) {
+            cellVertexCoordinates[i] = patch.getVertex(elementVertexIds[i]).getCoords();
+        }
 
         // Evaluate the distance from the cell
-        double cellDistance;
-
-        ElementType cellType = cell.getType();
-        switch (cellType) {
-
-        case ElementType::LINE:
-        {
-            const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cellConnect[0]);
-            const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cellConnect[1]);
-
-            cellDistance = CGElem::distancePointSegment(point, vertexCoords_0, vertexCoords_1);
-            break;
-        }
-
-        case ElementType::TRIANGLE:
-        {
-            const std::array<double, 3> &vertexCoords_0 = patch.getVertexCoords(cellConnect[0]);
-            const std::array<double, 3> &vertexCoords_1 = patch.getVertexCoords(cellConnect[1]);
-            const std::array<double, 3> &vertexCoords_2 = patch.getVertexCoords(cellConnect[2]);
-
-            cellDistance = CGElem::distancePointTriangle(point, vertexCoords_0, vertexCoords_1, vertexCoords_2);
-            break;
-        }
-
-        case ElementType::PIXEL:
-        case ElementType::QUAD:
-        {
-            std::vector<std::array<double, 3>> vertexCoords;
-            int nVertices = cell.getVertexCount();
-            vertexCoords.resize(nVertices);
-            for (int i = 0; i < nVertices; ++i) {
-                vertexCoords[i] = patch.getVertexCoords(cellConnect[i]);
-            }
-
-            cellDistance = CGElem::distancePointPolygon(point, vertexCoords);
-            break;
-        }
-
-        default:
-            throw std::runtime_error ("Type of cell not supported.");
-
-        }
+        double cellDistance = cell.evalPointDistance(point, cellVertexCoordinates.data());
 
         // Update the distance
         if (cellDistance < *distance) {
             *distance = cellDistance;
-            *id       = cellId;
+            *id       = cell.getId();
         }
     }
 }
