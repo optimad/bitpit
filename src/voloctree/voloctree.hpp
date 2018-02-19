@@ -79,6 +79,8 @@ public:
 	void reset() override;
 	void setDimension(int dimension) override;
 
+	void settleAdaptionMarkers() override;
+
 	double evalCellVolume(const long &id) const override;
 	double evalCellSize(const long &id) const override;
 	std::array<double, 3> evalCellCentroid(const long &id) const override;

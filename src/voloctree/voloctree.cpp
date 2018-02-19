@@ -811,6 +811,19 @@ void VolOctree::_adaptionCleanup()
 }
 
 /*!
+	Make the adaption markers set by the user consistent with the internal
+	criteria defined by the patch.
+
+	The patch will enforce the 2:1 balancing on the cells that have it enabled
+	and will verify the feasability of coarsening. Adaption markers will be
+	updated consequently.
+*/
+void VolOctree::settleAdaptionMarkers()
+{
+	m_tree->settleMarkers();
+}
+
+/*!
 	Syncronizes the patch with the underlying octree.
 
 	\param trackChanges if set to true the changes to the patch will be
