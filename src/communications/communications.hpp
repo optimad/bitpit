@@ -74,10 +74,7 @@ public:
     bool areRecvsContinuous();
 
     void discoverSends();
-    void discoverSends(int discoverTag);
-
     void discoverRecvs();
-    void discoverRecvs(int discoverTag);
 
     int getSendCount();
     int getRecvCount();
