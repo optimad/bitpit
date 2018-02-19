@@ -304,13 +304,11 @@ public:
     __PS_CONST_REFERENCE__ operator[](id_t id) const;
 
     void copy(id_t id, value_t *values) const;
-    void copy(id_t id, std::size_t nFields, value_t *values) const;
     void copy(id_t id, std::size_t nFields, std::size_t offset, value_t *values) const;
 
     void set(id_t id, const value_t &value);
     void set(id_t id, std::size_t k, const value_t &value);
     void set(id_t id, const value_t *values);
-    void set(id_t id, std::size_t nFields, const value_t *values);
     void set(id_t id, std::size_t nFields, std::size_t offset, const value_t *values);
 
     // Methods for editing the items using their position
@@ -318,13 +316,11 @@ public:
     __PS_CONST_REFERENCE__ rawAt(std::size_t pos, std::size_t offset = 0) const;
 
     void rawCopy(std::size_t pos, value_t *values) const;
-    void rawCopy(std::size_t pos, std::size_t nFields, value_t *values) const;
     void rawCopy(std::size_t pos, std::size_t nFields, std::size_t offset, value_t *values) const;
 
     void rawSet(std::size_t pos, const value_t &value);
     void rawSet(std::size_t pos, std::size_t k, const value_t &value);
     void rawSet(std::size_t pos, const value_t *values);
-    void rawSet(std::size_t pos, std::size_t nFields, const value_t *values);
     void rawSet(std::size_t pos, std::size_t nFields, std::size_t offset, const value_t *values);
 
     // Iterators
