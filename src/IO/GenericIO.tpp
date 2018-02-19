@@ -656,17 +656,16 @@ void absorbASCII(std::fstream &str, std::vector<std::vector<data_T>> &data)
 template< class data_T, size_t d >
 void absorbASCII(std::fstream &str, std::vector<std::array<data_T,d> > &data)
 {
-    size_t dim1= data.size();
-    if(dim1 == 0){
+    if(d == 0){
         return;
     }
 
-    size_t dim2= d;
-    if(dim2 == 0){
+    size_t nArrays = data.size();
+    if(nArrays == 0){
         return;
     }
 
-    absorbASCII(str, &data[0][0], dim1*dim2);
+    absorbASCII(str, &data[0][0], nArrays * d);
 }
 
 /*!
