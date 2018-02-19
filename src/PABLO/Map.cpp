@@ -63,20 +63,20 @@ void Map::initialize(uint8_t dim){
         m_nnodesPerFace = uint8_t(1)<<(m_dim-1);
 
         m_maxLength = Global::getMaxLength();
-        m_area      = uipow<uint64_t>(m_maxLength, m_dim - 1);
-        m_volume    = uipow<uint64_t>(m_maxLength, m_dim);
+        m_maxArea   = uipow<uint64_t>(m_maxLength, m_dim - 1);
+        m_maxVolume = uipow<uint64_t>(m_maxLength, m_dim);
     } else {
         m_nnodes        = 0;
         m_nnodesPerFace = 0;
 
         m_maxLength = 0;
-        m_area      = 0;
-        m_volume    = 0;
+        m_maxArea   = 0;
+        m_maxVolume = 0;
     }
 
     m_maxLength_1 = 1. / double(m_maxLength);
-    m_area_1      = 1. / double(m_area);
-    m_volume_1    = 1. / double(m_volume);
+    m_maxArea_1   = 1. / double(m_maxArea);
+    m_maxVolume_1 = 1. / double(m_maxVolume);
 };
 
 /*! Transformation of coordinates X,Y,Z (logical->physical).
@@ -164,7 +164,7 @@ double Map::mapSize(uint32_t const & size) const {
  * \return Area of octant in physical domain.
  */
 double Map::mapArea(uint64_t const & area) const {
-	return m_area_1*double(area);
+	return m_maxArea_1*double(area);
 };
 
 /*! Transformation of volume of an octant (logical->physical).
@@ -172,7 +172,7 @@ double Map::mapArea(uint64_t const & area) const {
  * \return Coordinate Volume of octant in physical domain.
  */
 double Map::mapVolume(uint64_t const & volume) const {
-	return m_volume_1*double(volume);
+	return m_maxVolume_1*double(volume);
 };
 
 /*! Transformation of coordinates of center of an octant (logical->physical).

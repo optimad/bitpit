@@ -86,10 +86,10 @@ private:
 	uint8_t		m_nnodesPerFace;		/**<Number of nodes for each face*/
 	uint32_t	m_maxLength;			/**< Length of the logical domain */
 	double		m_maxLength_1;          /**< 1/Length of the logical domain */
-	uint64_t	m_area;                 /**< Area of the logical domain */
-	double		m_area_1;               /**< 1/Area of the logical domain */
-	uint64_t	m_volume;               /**< Volume of the logical domain */
-	double		m_volume_1;             /**< 1/Volume of the logical domain */
+	uint64_t	m_maxArea;              /**< Area of the logical domain */
+	double		m_maxArea_1;            /**< 1/Area of the logical domain */
+	uint64_t	m_maxVolume;            /**< Volume of the logical domain */
+	double		m_maxVolume_1;          /**< 1/Volume of the logical domain */
 
 
 	// =================================================================================== //
