@@ -228,6 +228,8 @@ public:
 	std::vector<adaption::Info> adaptionAlter(bool trackAdaption = true, bool squeezeStorage = false);
 	void adaptionCleanup();
 
+	virtual void settleAdaptionMarkers();
+
 	void markCellForRefinement(const long &id);
 	void markCellForCoarsening(const long &id);
 	void enableCellBalancing(const long &id, bool enabled);

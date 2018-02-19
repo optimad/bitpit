@@ -518,6 +518,15 @@ void PatchKernel::adaptionCleanup()
 }
 
 /*!
+	Make the adaption markers set by the user consistent with the internal
+	criteria defined by the patch.
+*/
+void PatchKernel::settleAdaptionMarkers()
+{
+	// Nothing to do
+}
+
+/*!
 	Begin patch alteration.
 */
 void PatchKernel::beginAlteration()
