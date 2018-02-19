@@ -51,13 +51,6 @@ void Map::initialize(){
  */
 void Map::initialize(uint8_t dim){
     m_dim = dim;
-    if (m_dim > 0) {
-        m_nnodes        = uint8_t(1)<<m_dim;
-        m_nnodesPerFace = uint8_t(1)<<(m_dim-1);
-
-        m_maxLength   = Global::getMaxLength();
-        m_maxLength_1 = 1/double(m_maxLength);
-    }
 
     m_origin[0] = 0.;
     m_origin[1] = 0.;
@@ -65,10 +58,25 @@ void Map::initialize(uint8_t dim){
 
     m_L = 1.0;
 
-    m_area     = uipow<uint64_t>(m_maxLength,m_dim-1);
-    m_area_1   = 1/double(m_area);
-    m_volume   = uipow<uint64_t>(m_maxLength,m_dim);
-    m_volume_1 = 1/double(m_volume);
+    if (m_dim > 0) {
+        m_nnodes        = uint8_t(1)<<m_dim;
+        m_nnodesPerFace = uint8_t(1)<<(m_dim-1);
+
+        m_maxLength = Global::getMaxLength();
+        m_area      = uipow<uint64_t>(m_maxLength, m_dim - 1);
+        m_volume    = uipow<uint64_t>(m_maxLength, m_dim);
+    } else {
+        m_nnodes        = 0;
+        m_nnodesPerFace = 0;
+
+        m_maxLength = 0;
+        m_area      = 0;
+        m_volume    = 0;
+    }
+
+    m_maxLength_1 = 1. / double(m_maxLength);
+    m_area_1      = 1. / double(m_area);
+    m_volume_1    = 1. / double(m_volume);
 };
 
 /*! Transformation of coordinates X,Y,Z (logical->physical).
