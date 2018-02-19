@@ -590,6 +590,20 @@ void PatchKernel::markCellForCoarsening(const long &id)
 }
 
 /*!
+	Resets the adaption marker of the specified cell.
+
+	\param id is the id of the cell
+*/
+void PatchKernel::resetCellAdaptionMarker(const long &id)
+{
+	bool updated = _resetCellAdaptionMarker(id);
+
+	if (updated) {
+		setAdaptionStatus(ADAPTION_DIRTY);
+	}
+}
+
+/*!
 	Returns the adaption marker of the specified cell.
 
 	The marker only defines the type of adaption requested for the cell, it
@@ -3563,6 +3577,21 @@ bool PatchKernel::_markCellForRefinement(const long &id)
 	\result Returns true if the marker was properly set, false otherwise.
 */
 bool PatchKernel::_markCellForCoarsening(const long &id)
+{
+	BITPIT_UNUSED(id);
+
+	return false;
+}
+
+/*!
+	Resets the adaption marker of the specified cell.
+
+	Default implementation is a no-op function.
+
+	\param id the cell to be refined
+	\result Returns true if the marker was properly reset, false otherwise.
+*/
+bool PatchKernel::_resetCellAdaptionMarker(const long &id)
 {
 	BITPIT_UNUSED(id);
 
