@@ -225,7 +225,7 @@ void DataCommunicator::setRecvsContinuous(bool enabled)
         return;
     }
 
-    cancelAllRecvs();
+    cancelAllRecvs(true);
 
     int nRecvBuffers = m_recvBuffers.size();
     for (int k = 0; k < nRecvBuffers; ++k) {
