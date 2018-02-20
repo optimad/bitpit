@@ -48,7 +48,7 @@ public:
 
     const MPI_Comm & getCommunicator() const;
 
-    void finalize();
+    void finalize(bool synchronous = false);
 
     void setTag(int exchangeTag);
     void setTags(int exchangeTag, int discoverTag);
@@ -58,8 +58,8 @@ public:
     int getExchangeTag() const;
     int getDiscoverTag() const;
 
-    void clearAllSends();
-    void clearAllRecvs();
+    void clearAllSends(bool synchronous = false);
+    void clearAllRecvs(bool synchronous = false);
 
     void clearSend(int rank);
     void clearRecv(int rank);
@@ -104,6 +104,9 @@ public:
 
     void cancelSend(int rank);
     void cancelRecv(int rank);
+
+    void cancelAllSends(bool synchronous);
+    void cancelAllRecvs(bool synchronous);
 
     void cancelAllSends();
     void cancelAllRecvs();

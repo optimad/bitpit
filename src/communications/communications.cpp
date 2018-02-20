@@ -89,14 +89,21 @@ const MPI_Comm & DataCommunicator::getCommunicator() const
 
 /*!
     Finalizes the communicator
+
+    \param synchronous if this parameter is set to true, the function will
+    cancel all requests of the current rank and than will wait until all
+    remote processes that exchange data with the current rank cancel their
+    requests as well. This guarantees that, at the end of the function,
+    both the current rank and the remote processes involved in a data
+    exchange with the current rank have canceled their requests.
 */
-void DataCommunicator::finalize()
+void DataCommunicator::finalize(bool synchronous)
 {
     // Cancels all sends
-    cancelAllSends();
+    cancelAllSends(synchronous);
 
     // Cancels all receives
-    cancelAllRecvs();
+    cancelAllRecvs(synchronous);
 }
 
 /*!
@@ -418,11 +425,18 @@ void DataCommunicator::clearRecv(int rank)
 
 /*!
     Clear all the sends.
+
+    \param synchronous if this parameter is set to true, the function will
+    cancel the send requests of the current rank and than will wait until
+    all remote processes that sends data to the current rank cancel their
+    send requests as well. This guarantees that, at the end of the function,
+    both the current rank and the remote processes involved in a data exchange
+    with the current rank have canceled their send requests.
 */
-void DataCommunicator::clearAllSends()
+void DataCommunicator::clearAllSends(bool synchronous)
 {
     // Cancel waiting sends
-    cancelAllSends();
+    cancelAllSends(synchronous);
 
     // Clear the sends
     m_sendRanks.clear();
@@ -433,11 +447,18 @@ void DataCommunicator::clearAllSends()
 
 /*!
     Clear all the receives.
+
+    \param synchronous if this parameter is set to true, the function will
+    cancel the receive requests of the current rank and than will wait until
+    all remote processes that receives data from the current rank cancel their
+    receive requests as well. This guarantees that, at the end of the function,
+    both the current rank and all remote processes involved in a data exchange
+    with it have canceled their receive requests.
 */
-void DataCommunicator::clearAllRecvs()
+void DataCommunicator::clearAllRecvs(bool synchronous)
 {
     // Cancel waiting receives
-    cancelAllRecvs();
+    cancelAllRecvs(synchronous);
 
     // Clear data associated to the recevies
     m_recvRanks.clear();
@@ -943,6 +964,159 @@ void DataCommunicator::cancelRecv(int rank)
 
     MPI_Cancel(&m_recvRequests[id]);
     MPI_Request_free(&m_recvRequests[id]);
+}
+
+/*!
+    Cancels all the sends.
+
+    \param synchronous if this parameter is set to true, the function will
+    cancel the send requests of the current rank and than will wait until
+    all remote processes that sends data to the current rank cancel their
+    send requests. This guarantees that, at the end of the function, both
+    the current rank and all remote processes involved in a data exchange
+    with it have canceled their send requests.
+*/
+void DataCommunicator::cancelAllSends(bool synchronous)
+{
+    // If no synchronization is needed just call the standard overload
+    if (!synchronous) {
+        cancelAllSends();
+        return;
+    }
+
+    // Start auxiliary receives for handling synchronization
+    //
+    // We will receive a notification from all the processes for which a
+    // receive has been set. The notification will contain the status of
+    // the send request on that processor that matches the receive of this
+    // rank. A status equal to zero means that the send has been successfully
+    // canceled.
+    int nRecvs = getRecvCount();
+    std::vector<MPI_Request> recvNotificationRequests(nRecvs);
+
+    std::vector<int> remoteSendStatus(nRecvs, 1);
+    for (int i = 0; i < nRecvs; ++i) {
+        int rank = m_recvRanks[i];
+        MPI_Irecv(remoteSendStatus.data() + i, 1, MPI_INT, rank, m_discoverTag, m_communicator, &recvNotificationRequests[i]);
+    }
+
+    // Cancel all the sends
+    //
+    // We will send a notification to all processes for wich a send has been
+    // set. The notification will contain the status of the send request. A
+    // status equal to zero means that the send request has been successfully
+    // canceled.
+    int nSends = getSendCount();
+    std::vector<MPI_Request> sendNotificationRequests(nSends);
+    for (int i = 0; i < nSends; ++i) {
+        int rank = m_sendRanks[i];
+
+        // Cancel the send
+        cancelSend(rank);
+
+        // Notify the other process that the send has been canceled
+        int sendStatus = 0;
+        MPI_Isend(&sendStatus, 1, MPI_INT, rank, m_discoverTag, m_communicator, &sendNotificationRequests[i]);
+    }
+
+    // Synchronize with other processes
+    //
+    // Wait until all processes involved in data exchanging cancel their
+    // send requests.
+    std::size_t nMissingNotifications = recvNotificationRequests.size();
+    while (nMissingNotifications > 0) {
+        int i;
+        MPI_Status status;
+        MPI_Waitany(recvNotificationRequests.size(), recvNotificationRequests.data(), &i, &status);
+        if (remoteSendStatus[i] == 1) {
+            log::cout() << "Unable to properly cancel the sends.";
+            MPI_Abort(m_communicator, 1);
+        }
+
+        int size;
+        MPI_Get_count(&status, MPI_INT, &size);
+        log::cout() << " NOTIFICATOIN SIZE " << size << std::endl;
+        log::cout() << "    missing " << nMissingNotifications << std::endl;
+
+
+        --nMissingNotifications;
+    }
+
+    // Wait until the notifications have been sent
+    MPI_Waitall(sendNotificationRequests.size(), sendNotificationRequests.data(), MPI_STATUS_IGNORE);
+}
+
+/*!
+    Cancels all the receives.
+
+    \param synchronous if this parameter is set to true, the function will
+    cancel the receive requests of the current rank and than will wait until
+    all remote processes that receives data from the current rank cancel their
+    receive requests. This guarantees that, at the end of the function, both
+    the current rank and all remote processes involved in a data exchange with
+    it have canceled their receive requests.
+*/
+void DataCommunicator::cancelAllRecvs(bool synchronous)
+{
+    // If no synchronization is needed just call the standard overload
+    if (!synchronous) {
+        cancelAllRecvs();
+        return;
+    }
+
+    // Start auxiliary receives for handling synchronization
+    //
+    // We will receive a notification from all the processes for which a
+    // send has been set. The notification will contain the status of the
+    // receive request on that processor that matches the send of this rank.
+    // A status equal to zero means that the receive has been successfully
+    // canceled.
+    int nSends = getSendCount();
+    std::vector<MPI_Request> recvNotificationRequests(nSends);
+
+    std::vector<int> remoteReceiveStatus(nSends, 1);
+    for (int i = 0; i < nSends; ++i) {
+        int rank = m_sendRanks[i];
+        MPI_Irecv(remoteReceiveStatus.data() + i, 1, MPI_INT, rank, m_discoverTag, m_communicator, &recvNotificationRequests[i]);
+    }
+
+    // Cancel all the receives
+    //
+    // We will send a notification to all processes for wich a receive has been
+    // set. The notification will contain the status of the receive request. A
+    // status equal to zero means that the receive request has been successfully
+    // canceled.
+    int nRecvs = getRecvCount();
+    std::vector<MPI_Request> sendNotificationRequests(nRecvs);
+    for (int i = 0; i < nRecvs; ++i) {
+        int rank = m_recvRanks[i];
+
+        // Cancel the send
+        cancelRecv(rank);
+
+        // Notify other process that the received has been canceled
+        int receiveStatus = 0;
+        MPI_Isend(&receiveStatus, 1, MPI_INT, rank, m_discoverTag, m_communicator, &sendNotificationRequests[i]);
+    }
+
+    // Synchronize with other processes
+    //
+    // Wait until all processes involved in data exchanging cancel their
+    // receive requests.
+    std::size_t nMissingNotifications = recvNotificationRequests.size();
+    while (nMissingNotifications > 0) {
+        int i;
+        MPI_Waitany(recvNotificationRequests.size(), recvNotificationRequests.data(), &i, MPI_STATUS_IGNORE);
+        if (remoteReceiveStatus[i] == 1) {
+            log::cout() << "Unable to properly cancel the receives.";
+            MPI_Abort(m_communicator, 1);
+        }
+
+        --nMissingNotifications;
+    }
+
+    // Wait until the notifications have been sent
+    MPI_Waitall(sendNotificationRequests.size(), sendNotificationRequests.data(), MPI_STATUS_IGNORE);
 }
 
 /*!
