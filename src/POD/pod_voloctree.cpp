@@ -600,6 +600,10 @@ void PODVolOctree::adaptMeshToMesh(VolumeKernel* meshToAdapt, VolumeKernel * mes
             }
         }
 
+#if BITPIT_ENABLE_MPI==1
+        MPI_Allreduce(MPI_IN_PLACE, &adapt, 1, MPI_C_BOOL, MPI_LOR, m_communicator);
+#endif
+
         std::vector<adaption::Info> infoAdapt = getMesh()->adaptionPrepare(true);
 
         getMeshMapper().mappingAdaptionPreparare(infoAdapt, true);
