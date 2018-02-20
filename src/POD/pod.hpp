@@ -138,6 +138,9 @@ public:
     void setTargetErrorFields(std::vector<std::string> &namesf, std::vector<std::array<std::string,3>> &namevf);
 
     void setMeshType(MeshType type);
+    void setMesh(const std::string &directory, const std::string &name);
+    void setMesh(const pod::SnapshotFile &file);
+    void setMesh(VolumeKernel* mesh);
     MeshType getMeshType();
     void setStaticMesh(bool flag);
     void setUseMean(bool flag);    

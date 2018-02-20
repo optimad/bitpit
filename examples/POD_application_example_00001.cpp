@@ -206,7 +206,10 @@ InfoBitpodPP readArguments(int argc, char*argv[] ){
  * ## <B>WriteMode</B>: write mode of the pod object
  * ## <B>ReconstructionMode</B>: reconstruction mode of the pod object
  * ## <B>ErrorMode</B>: error mode of the pod object
+ * ## <B>MeshType</B>: mesh type of the pod object<B>/MeshType</B>
  * ## <B>StaticMesh</B>: condition to set if the mesh of the database snapshots is the same or not
+ * ## <B>MeshDirectory</B>: path of the snapshot file used to read the pod mesh<B>/MeshDirectory</B>
+ * ## <B>MeshName</B>: name of the snapshot file used to read the pod mesh<B>/MeshName</B>
  * ## <B>Modes</B>: target number of retained modes (minimum between desired n modes and energy level)
  * ## <B>Energy</B>: target energy level to set the number of retained modes (minimum between desired n modes and energy level)
  * ## <B>Mean</B>: condition to unset if the mean is not computed
@@ -277,7 +280,7 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
         else
             podInst.setReconstructionMode(POD::ReconstructionMode::PROJECTION);
     }
-    
+
     if(slotXML.hasOption("ErrorMode")){
         std::string input = slotXML.get("ErrorMode");
         input = bitpit::utils::string::trim(input);
@@ -299,7 +302,34 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
         }
         podInst.setStaticMesh(value);
     }
-    
+
+    if(slotXML.hasOption("MeshType")){
+        std::string input = slotXML.get("MeshType");
+        input = bitpit::utils::string::trim(input);
+        if(input =="VOLOCTREE")
+            podInst.setMeshType(POD::MeshType::VOLOCTREE);
+        else
+            podInst.setMeshType(POD::MeshType::UNDEFINED);
+    }
+    else{
+        /*! Force mesh type voloctree */
+        podInst.setMeshType(POD::MeshType::VOLOCTREE);
+    }
+
+    if(slotXML.hasOption("MeshDirectory")){
+        std::string meshDir = slotXML.get("MeshDirectory");
+        meshDir = bitpit::utils::string::trim(meshDir);
+        if(!meshDir.empty()){
+            if(slotXML.hasOption("MeshName")){
+                std::string meshName = slotXML.get("MeshName");
+                meshName = bitpit::utils::string::trim(meshName);
+                if(!meshName.empty()){
+                    podInst.setMesh(meshDir, meshName);
+                }
+            }
+        }
+    }
+
     if(slotXML.hasOption("Mean")){
         std::string input = slotXML.get("Mean");
         input = bitpit::utils::string::trim(input);
@@ -332,8 +362,8 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
         }
         podInst.setEnergyLevel(temp);
     }
-    
-   /*! Error bounding box */     
+
+    /*! Error bounding box */
     if(slotXML.hasOption("ErrorThreshold")){
         std::string input = slotXML.get("ErrorThreshold");
         input = bitpit::utils::string::trim(input);
@@ -347,7 +377,7 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
 
     std::vector<std::string> tempsf;
     std::vector<std::array<std::string,3>> tempvf;    
-    
+
     if(slotXML.hasOption("targetErrorScalarFields")){
         std::string input = slotXML.get("targetErrorScalarFields");
         input = bitpit::utils::string::trim(input);
@@ -373,7 +403,7 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
     log::cout().setPriority(bitpit::log::NORMAL);
     log::cout()<< "Finished reading XML dictionary"<<std::endl;
     log::cout().setPriority(bitpit::log::DEBUG);      
-  
+
     /*! Resume pod modes in logger */
     {
         std::vector<std::string> emode(2, "restore");
@@ -388,7 +418,7 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
 
         std::vector<std::string> rmode(2, "projection");
         wmode[1] = "minimization";
-        
+
         std::vector<std::string> errmode(3, "combined");
         wmode[1] = "single";
         wmode[2] = "none";        
@@ -427,7 +457,7 @@ std::vector<bool> read_jobControlsXML(const bitpit::Config::Section & slotXML, P
 
     std::vector<bool> controls;
     controls.resize(3,false);
-    
+
     if(slotXML.hasOption("doPODbasis")){
         std::string input = slotXML.get("doPODbasis");
         input = bitpit::utils::string::trim(input);
@@ -440,7 +470,7 @@ std::vector<bool> read_jobControlsXML(const bitpit::Config::Section & slotXML, P
     }
     else 
         controls[0]=true;
-    
+
     if(slotXML.hasOption("doLeave1out")){
         std::string input = slotXML.get("doLeave1out");
         input = bitpit::utils::string::trim(input);
@@ -451,7 +481,7 @@ std::vector<bool> read_jobControlsXML(const bitpit::Config::Section & slotXML, P
         }
         controls[1]=temp;
     }
-    
+
     if(slotXML.hasOption("doBoundingBox")){
         std::string input = slotXML.get("doBoundingBox");
         input = bitpit::utils::string::trim(input);
@@ -489,7 +519,10 @@ std::vector<bool> read_jobControlsXML(const bitpit::Config::Section & slotXML, P
  * ## <B>WriteMode</B>: write mode of the pod object
  * ## <B>ReconstructionMode</B>: reconstruction mode of the pod object
  * ## <B>ErrorMode</B>: error mode of the pod object
+ * ## <B>MeshType</B>: mesh type of the pod object<B>/MeshType</B>
  * ## <B>StaticMesh</B>: condition to set if the mesh of the database snapshots is the same or not
+ * ## <B>MeshDirectory</B>: path of the snapshot file used to read the pod mesh<B>/MeshDirectory</B>
+ * ## <B>MeshName</B>: name of the snapshot file used to read the pod mesh<B>/MeshName</B>
  * ## <B>Modes</B>: target number of retained modes (minimum between desired n modes and energy level)
  * ## <B>Energy</B>: target energy level to set the number of retained modes (minimum between desired n modes and energy level)
  * ## <B>Mean</B>: condition to unset if the mean is not computed
@@ -530,7 +563,7 @@ std::vector<bool> read_Dictionary(POD & podInst) {
 
     std::vector<bool> exeFlags;
     exeFlags.resize(3,false);
-    
+
     log::cout().setPriority(bitpit::log::NORMAL);
     log::cout()<< "Currently reading XML dictionary"<<std::endl;
     log::cout().setPriority(bitpit::log::DEBUG);
@@ -643,7 +676,7 @@ std::vector<bool> read_Dictionary(POD & podInst) {
             std::string nss = sect.second->get("NSnapshots");
             std::stringstream ss(nss);
             ss >> ns;
-            
+
             if(sect.second->hasOption("Stride")){
                 std::string sstride = sect.second->get("Stride");
                 std::stringstream ssstride(sstride);
@@ -669,11 +702,11 @@ std::vector<bool> read_Dictionary(POD & podInst) {
         exeFlags=read_jobControlsXML(jobXML, podInst);
     }else      
         exeFlags[0]=true;  
-    
+
     log::cout().setPriority(bitpit::log::NORMAL);
     log::cout()<< "Finished reading XML dictionary"<<std::endl;
     log::cout().setPriority(bitpit::log::DEBUG);
-    
+
     return exeFlags;
 
 }
@@ -735,8 +768,6 @@ void podcore(const InfoBitpodPP & info) {
     bitpit::config::read(info.dictName);
 
     POD podInst;
-    /*! Force mesh type voloctree */
-    podInst.setMeshType(POD::MeshType::VOLOCTREE);
 
     /*! Read dictionary */
     std::vector<bool> exes;
@@ -746,14 +777,14 @@ void podcore(const InfoBitpodPP & info) {
     log::cout().setPriority(bitpit::log::NORMAL);
     log::cout()<<"Execution of pod... ";
     log::cout().setPriority(bitpit::log::DEBUG);
-    
+
     /*! Execute*/
     if (exes[1])
         podInst.leave1out();
-    
+
     if (exes[2])
         podInst.evalErrorBoundingBox();
-    
+
     if (exes[0])
         podInst.run();
 

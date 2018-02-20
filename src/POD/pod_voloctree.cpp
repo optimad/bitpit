@@ -115,7 +115,6 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
                 double *datamappedSi = datamappedS + i;
                 (*datamappedSi) = (*dataSi);
             }
-
             std::array<double,3> *dataV = field.vector->data(m_mapper[id].previous[0]);
             for (std::size_t i = 0; i < nvf; i++) {
                 std::array<double,3> *dataVi = dataV + i;

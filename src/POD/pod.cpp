@@ -381,6 +381,7 @@ void POD::setTargetErrorFields(std::vector<std::string> &namesf, std::vector<std
 
 /**
  * Set the type of the POD mesh, where the fields and modes are defined.
+ * Note: even if the mesh is directly set by setMesh methods, the type MUST be set before call setMesh.
  *
  * \param[in] type Type of the POD mesh.
  */
@@ -396,13 +397,67 @@ void POD::setMeshType(POD::MeshType type)
     case POD::MeshType::VOLOCTREE:
 #if BITPIT_ENABLE_MPI
         m_podkernel = std::unique_ptr<PODKernel>(new PODVolOctree(m_communicator));
-#endif
+#else
         m_podkernel = std::unique_ptr<PODKernel>(new PODVolOctree());
+#endif
         break;
 
     default:
+        throw std::runtime_error ("POD mesh type not allowed.");
         break;
     }
+}
+
+/**
+ * Set the POD mesh, where the fields and modes are defined.
+ * The POD mesh is not computed during POD run.
+ *
+ * \param[in] mesh Pointer to POD mesh.
+ */
+void POD::setMesh(VolumeKernel* mesh)
+{
+    if (m_meshType == MeshType::UNDEFINED)
+        throw std::runtime_error ("POD mesh type not set.");
+
+    const VolOctree* _mesh = dynamic_cast<const VolOctree*>(mesh);
+    if (_mesh){
+        if (m_meshType != MeshType::VOLOCTREE)
+            throw std::runtime_error ("POD mesh type not set to VolOctree.");
+        m_podkernel->setMesh(mesh);
+    }
+    else{
+        throw std::runtime_error ("POD mesh type not allowed.");
+    }
+}
+
+/**
+ * Set the POD mesh by reading it from file, where the fields and modes are defined.
+ * The POD mesh is not computed during POD run.
+ * The file has to be a snapshot file format (data file + mesh file).
+ *
+ * \param[in] directory is the directory that contains the snapshot.
+ * \param[in] name is the name of the snapshot.
+ */
+void POD::setMesh(const std::string &directory, const std::string &name)
+{
+    pod::SnapshotFile file(directory, name);
+    setMesh(file);
+}
+
+/**
+ * Set the POD mesh by reading it from file, where the fields and modes are defined.
+ * The POD mesh is not computed during POD run.
+ * The file has to be a snapshot file format (data file + mesh file).
+ *
+ * \param[in] file is the file name of the snapshot (complete path directory+name).
+ */
+void POD::setMesh(const pod::SnapshotFile &file)
+{
+    if (m_meshType == MeshType::UNDEFINED)
+        throw std::runtime_error ("POD mesh type not set.");
+
+    VolumeKernel* mesh = m_podkernel->readMesh(file);
+    setMesh(mesh);
 }
 
 /**
@@ -908,9 +963,6 @@ void POD::evalMeanMesh()
     // If the mesh is static do nothing on mesh and compute mean fields directly
     _evalMeanMesh();
 
-    //Compute cells volume
-    m_podkernel->evalCellsVolume();
-
     // Set mesh POD to write only internal cells
 #if BITPIT_ENABLE_MPI
     m_podkernel->getMesh()->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
@@ -924,27 +976,33 @@ void POD::evalMeanMesh()
  */
 void POD::_evalMeanMesh()
 {
-    //Read first mesh and use as meshPOD
-    VolumeKernel* meshr = m_podkernel->readMesh(m_database[0]);
-    m_podkernel->setMesh(meshr);
 
-    //Dynamic mesh case
-    if (!m_staticMesh){
-        // Compute meshPOD (starting from inital mesh) and fill filter
-        for (std::size_t i = 0; i < m_nSnapshots; i++) {
-            log::cout() << "pod : evaluation POD mesh - use snapshot " << i+1 << "/" << m_nSnapshots << std::endl;
-            pod::PODField readf;
-            readSnapshot(m_database[i], readf);
-            m_podkernel->adaptMeshToMesh(m_podkernel->getMesh(), readf.mesh);
-            m_podkernel->getMeshMapper().clear();
-            m_podkernel->setMapperDirty(true);
+    if (m_podkernel->getMesh() == nullptr){
+
+        //Read first mesh and use as meshPOD
+        VolumeKernel* meshr = m_podkernel->readMesh(m_database[0]);
+        m_podkernel->setMesh(meshr);
+
+        //Dynamic mesh case
+        if (!m_staticMesh){
+            // Compute meshPOD (starting from inital mesh) and fill filter
+            for (std::size_t i = 1; i < m_nSnapshots; i++) {
+                log::cout() << "pod : evaluation POD mesh - use snapshot " << i+1 << "/" << m_nSnapshots << std::endl;
+                VolumeKernel* readmesh = m_podkernel->readMesh(m_database[i]);
+                m_podkernel->adaptMeshToMesh(m_podkernel->getMesh(), readmesh);
+                m_podkernel->clearMapper();
+            }
         }
     }
-    else{
-        // Read first snapshot to set n scalar and vector fields TODO readNsfNvf only from one field
+
+    {
+        // Read first snapshot to set n scalar and vector fields
         pod::PODField readf;
         readSnapshot(m_database[0], readf);
     }
+
+    //Compute cells volume
+    m_podkernel->evalCellsVolume();
 
     m_filter.setStaticKernel(&(m_podkernel->getMesh()->getCells()));
     m_filter.fill(true);
