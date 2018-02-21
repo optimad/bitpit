@@ -27,6 +27,7 @@
 #include <set>
 
 #include "bitpit_common.hpp"
+#include "bitpit_CG.hpp"
 #include "bitpit_operators.hpp"
 
 #include "element.hpp"
@@ -1558,6 +1559,61 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 		} else {
 			return orientation;
 		}
+	}
+
+	}
+}
+
+/*!
+	Evaluates the distance between the element and the specified point.
+
+	\param[in] point is the point
+	\param coordinates are the coordinate of the vertices
+	\result The distance between the element and the specified point.
+*/
+double Element::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *coordinates) const
+{
+	switch (m_type) {
+
+	case ElementType::POLYGON:
+	{
+		return CGElem::distancePointPolygon(point, getVertexCount(), coordinates);
+	}
+
+	case ElementType::POLYHEDRON:
+	{
+		double distance = std::numeric_limits<double>::max();
+
+		int nFaces = getFaceCount();
+		std::vector<std::array<double, 3>> faceCoordinates;
+		for (int i = 0; i < nFaces; ++i) {
+			ElementType faceType = getFaceType(i);
+			ConstProxyVector<int> faceVertexIds = getFaceLocalVertexIds(i);
+			int nFaceVertices = faceVertexIds.size();
+			faceCoordinates.resize(nFaceVertices);
+			for (int k = 0; k < nFaceVertices; ++k) {
+				faceCoordinates[k] = coordinates[faceVertexIds[k]];
+			}
+
+			double faceDistance;
+			bool faceHasReferenceInfo = ReferenceElementInfo::hasInfo(faceType);
+			if (faceHasReferenceInfo) {
+				faceDistance = ReferenceElementInfo::getInfo(faceType).evalPointDistance(point, faceCoordinates.data());
+			} else {
+				faceDistance = CGElem::distancePointPolygon(point, nFaceVertices, faceCoordinates.data());
+			}
+
+			distance = std::min(faceDistance, distance);
+		}
+
+		return distance;
+	}
+
+	default:
+	{
+		assert(ReferenceElementInfo::hasInfo(m_type));
+
+		return getInfo().evalPointDistance(point, coordinates);
 	}
 
 	}

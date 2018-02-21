@@ -158,6 +158,8 @@ public:
 
 	std::array<double, 3> evalNormal(const std::array<double, 3> *coordinates, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const;
 
+	double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *coordinates) const;
+
 	unsigned int getBinarySize();
 
 private:

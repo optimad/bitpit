@@ -62,6 +62,8 @@ public:
 
     virtual double evalSize(const std::array<double, 3> *vertexCoords) const = 0;
 
+    virtual double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const = 0;
+
 protected:
     ReferenceElementInfo(int _dimension, ElementType _type, int _nVertices, int _nFaces, int _nEdges);
 
@@ -78,6 +80,8 @@ public:
     virtual double evalVolume(const std::array<double, 3> *vertexCoords) const = 0;
     double evalSurfaceArea(const std::array<double, 3> *vertexCoords) const;
     double evalEdgePerimeter(const std::array<double, 3> *vertexCoords) const;
+
+    double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
 protected:
     Reference3DElementInfo(ElementType type, int nVertices, int nFaces);
@@ -187,6 +191,8 @@ public:
 
     virtual std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const = 0;
 
+    double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
+
 protected:
     Reference2DElementInfo(ElementType type, int nVertices);
 
@@ -205,6 +211,8 @@ public:
     double evalArea(const std::array<double, 3> *vertexCoords) const override;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
+
+    double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceTriangleInfo info;
 
@@ -293,6 +301,8 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
+    double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
+
     const static ReferenceLineInfo info;
 
 protected:
@@ -325,6 +335,8 @@ public:
     double evalSize(const std::array<double, 3> *vertexCoords) const override;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{1., 0., 0.}}) const override;
+
+    double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceVertexInfo info;
 

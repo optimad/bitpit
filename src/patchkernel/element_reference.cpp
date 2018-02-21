@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include "bitpit_CG.hpp"
+#include "bitpit_containers.hpp"
 #include "bitpit_operators.hpp"
 
 #include "element_reference.hpp"
@@ -259,6 +261,30 @@ double Reference3DElementInfo::evalEdgePerimeter(const std::array<double, 3> *ve
     }
 
     return perimeter;
+}
+
+/*!
+    Evaluates the distance between the element and the specified point.
+
+    \param[in] point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \result The distance between the element and the specified point.
+*/
+double Reference3DElementInfo::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const
+{
+    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> faceVertexCoords;
+
+    double distance = std::numeric_limits<double>::max();
+    for (int i = 0; i < nFaces; ++i) {
+        ElementType faceType = face_type[i];
+        for (int n = 0; n < nFaces; ++n) {
+            faceVertexCoords[i] = vertexCoords[faceConnect[i][n]];
+        }
+
+        distance = std::min(ReferenceElementInfo::getInfo(faceType).evalPointDistance(point, faceVertexCoords.data()), distance);
+    }
+
+    return distance;
 }
 
 /*!
@@ -1030,6 +1056,18 @@ double Reference2DElementInfo::evalPerimeter(const std::array<double, 3> *vertex
 }
 
 /*!
+    Evaluates the distance between the element and the specified point.
+
+    \param[in] point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \result The distance between the element and the specified point.
+*/
+double Reference2DElementInfo::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const
+{
+    return CGElem::distancePointPolygon(point, nVertices, vertexCoords);
+}
+
+/*!
     \class ReferenceTriangleInfo
     \ingroup patchelements
 
@@ -1128,6 +1166,18 @@ std::array<double, 3> ReferenceTriangleInfo::evalNormal(const std::array<double,
     normal = normal / norm2(normal);
 
     return normal;
+}
+
+/*!
+    Evaluates the distance between the element and the specified point.
+
+    \param[in] point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \result The distance between the element and the specified point.
+*/
+double ReferenceTriangleInfo::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const
+{
+    return CGElem::distancePointTriangle(point, vertexCoords[0], vertexCoords[1], vertexCoords[2]);
 }
 
 /*!
@@ -1471,6 +1521,18 @@ std::array<double, 3> ReferenceLineInfo::evalNormal(const std::array<double, 3> 
 }
 
 /*!
+    Evaluates the distance between the element and the specified point.
+
+    \param[in] point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \result The distance between the element and the specified point.
+*/
+double ReferenceLineInfo::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const
+{
+    return CGElem::distancePointSegment(point, vertexCoords[0], vertexCoords[1]);
+}
+
+/*!
     \class Reference0DElementInfo
     \ingroup patchelements
 
@@ -1560,6 +1622,18 @@ std::array<double, 3> ReferenceVertexInfo::evalNormal(const std::array<double, 3
     normal = normal / norm2(normal);
 
     return normal;
+}
+
+/*!
+    Evaluates the distance between the element and the specified point.
+
+    \param[in] point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \result The distance between the element and the specified point.
+*/
+double ReferenceVertexInfo::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const
+{
+    return norm2(point - vertexCoords[0]);
 }
 
 }
