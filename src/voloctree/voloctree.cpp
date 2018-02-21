@@ -774,7 +774,7 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 
 #if BITPIT_ENABLE_MPI==1
 		// Ghost cells will be removed
-		if (isPartitioned()) {
+		if (isPartitioned() && getGhostCount() > 0) {
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			adaptionInfo.previous.reserve(getGhostCount());
