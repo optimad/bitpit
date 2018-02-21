@@ -434,6 +434,7 @@ bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, a
  * Computes intersection between an axis aligned bounding box and a convex polygon
  * \param[in] A0 min point of first box
  * \param[in] A1 max point of first box
+ * \param[in] nVS number of polygon vertices
  * \param[in] VS polygon vertices coordinates
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
  * \param[in] polygonEdgeBoxHullIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
@@ -443,7 +444,7 @@ bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, a
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxHullIntersection, bool polygonBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
+bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxHullIntersection, bool polygonBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
 {
 
     bool intersect(false);
@@ -463,7 +464,7 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<arra
     array3D V0, V1, V2;
 
     //check if simplex boundig box and box overlap -> necessary condition
-    computeAABBPolygon( VS, V0, V1);
+    computeAABBPolygon( nVS, VS, V0, V1);
     if( !intersectBoxBox( A0, A1, V0, V1, dim) ) { 
         return false; 
     }
@@ -474,9 +475,9 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<arra
     // check if triangle vertices lie within box
     // or if triangles intersect edges of box
     computeIntersection = innerPolygonPoints || polygonBoxEdgeIntersections;
-    int trianglesCount = polygonSubtriangleCount(VS);
+    int trianglesCount = polygonSubtriangleCount(nVS, VS);
     for (int triangle=0; triangle<trianglesCount; ++triangle) {
-        subtriangleOfPolygon(triangle, VS, V0, V1, V2);
+        subtriangleOfPolygon(triangle, nVS, VS, V0, V1, V2);
 
         if( _intersectBoxTriangle( A0, A1, V0, V1, V2, innerPolygonPoints, false, polygonBoxEdgeIntersections, &partialIntr, &partialFlag, dim ) ){
 
@@ -516,10 +517,10 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::vector<arra
 
     // check if edges of polygon intersect box face
     computeIntersection = polygonEdgeBoxHullIntersection;
-    int edgesCount = polygonEdgesCount(VS);
+    int edgesCount = polygonEdgesCount(nVS, VS);
     if(!intersect || polygonEdgeBoxHullIntersection){
         for (int edge=0; edge<edgesCount; ++edge) {
-            edgeOfPolygon(edge, VS, V0, V1);
+            edgeOfPolygon(edge, nVS, VS, V0, V1);
 
             if( _intersectSegmentBox( V0, V1, A0, A1, false, polygonEdgeBoxHullIntersection, &partialIntr, &partialFlag, dim) ){
 
@@ -728,14 +729,27 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
  */
 int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
 {
+    return convertBarycentricToFlagPolygon( lambda.size(), lambda.data());
+}
 
-    int N(lambda.size());
+/*!
+ * Converts barycentric coordinates of a point on a convex polygon to a flag that indicates where the point lies.
+ * Flag = 0 Point lies within the simplex
+ * Flag = i Point coincides with the ith vertex of simplex or lies within the area spanned by the edges incident in the ith vertex
+ * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
+ * \param[in] nLambda number of barycentric coordinates of point
+ * \param[in] lambda barycentric coordinates of point
+ * \return flag
+ */
+int convertBarycentricToFlagPolygon( std::size_t nLambda, double const *lambda)
+{
+
     int count(0);
-    int firstPositive(N);
+    std::size_t firstPositive(nLambda);
 
-    assert( validBarycentric(&lambda[0],N) );
+    assert( validBarycentric(&lambda[0],nLambda) );
 
-    for( int i=0; i<N; ++i){
+    for( std::size_t i=0; i<nLambda; ++i){
         if ( lambda[i] > 0.) {
             firstPositive = std::min( firstPositive, i);
             ++count;
@@ -766,24 +780,37 @@ int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
  */
 void computeGeneralizedBarycentric( array3D const &p, std::vector<array3D> const &vertex, std::vector<double> &lambda)
 {
-    int vertexCount=vertex.size();
+    computeGeneralizedBarycentric( p, vertex.size(), vertex.data(), lambda);
+}
 
-    lambda.resize(vertexCount);
+/*!
+ * Computes Generalized Barycentric Coordinates of a point in convex polygons or polyedra.
+ * No check is performed to check convexity.
+ * Formula [6] of <a href="igeometry.caltech.edu/pubs/MHBD02.pdf">this</a> paper is implemented.
+ * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
+ * \param[in] p point
+ * \param[in] nVertices number of polygon vertices
+ * \param[in] vertex vertex coordinates of polygon
+ * \param[out] lambda generalized barycentric coordinates of p
+ */
+void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, array3D const *vertex, std::vector<double> &lambda)
+{
+    lambda.resize(nVertices);
 
-    std::vector<double> area(vertexCount);
-    for( int i=0; i<vertexCount; ++i){
-        int next = (i +1) %vertexCount;
+    std::vector<double> area(nVertices);
+    for( std::size_t i=0; i<nVertices; ++i){
+        int next = (i +1) %nVertices;
         area[i] = areaTriangle( vertex[i], vertex[next], p);
     }
 
     double sumWeight(0);
 
-    for( int i=0; i<vertexCount; ++i){
-        int prev = (i +vertexCount -1) %vertexCount;
-        int next = (i +1) %vertexCount;
+    for( std::size_t i=0; i<nVertices; ++i){
+        std::size_t prev = (i +nVertices -1) %nVertices;
+        std::size_t next = (i +1) %nVertices;
         lambda[i]  = areaTriangle(vertex[prev], vertex[i], vertex[next]);
 
-        for( int j=0; j<vertexCount; ++j){
+        for( std::size_t j=0; j<nVertices; ++j){
             if( j==prev || j==i){
                 continue;
             }
@@ -863,11 +890,22 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
  */
 array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &V, std::vector<double> const &lambda)
 {
-    int N(V.size());
-    assert( validBarycentric(&lambda[0],N) );
+    return reconstructPointFromBarycentricPolygon( V.size(), V.data(), lambda);
+}
+
+/*!
+ * Reconstructs a point from barycentric coordinates of a polygon
+ * \param[in] nV number of polygon vertices
+ * \param[in] V vertices of simplex
+ * \param[in] lambda barycentric coordinates
+ * \return reconstructed Point
+ */
+array3D reconstructPointFromBarycentricPolygon( std::size_t nV, array3D const *V, std::vector<double> const &lambda)
+{
+    assert( validBarycentric(&lambda[0],nV) );
 
     array3D xP = {{0.,0.,0.}};
-    for(int i=0; i<N; ++i){
+    for(std::size_t i=0; i<nV; ++i){
         xP += lambda[i]*V[i];
     }
 
@@ -1084,8 +1122,20 @@ std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &cloud, ar
  */
 array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V)
 {
-    std::vector<double> lambda(V.size());
-    return projectPointPolygon( P, V, lambda);
+    return projectPointPolygon( P, V.size(), V.data());
+}
+
+/*!
+ * Computes projection of point onto a convex polygon
+ * \param[in] P point coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \return coordinates of projection point
+ */
+array3D projectPointPolygon( array3D const &P, std::size_t nV, array3D const *V)
+{
+    std::vector<double> lambda(nV);
+    return projectPointPolygon( P, nV, V, lambda);
 }
 
 /*!
@@ -1097,10 +1147,22 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V)
  */
 array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, std::vector<double> &lambda)
 {
+    return projectPointPolygon( P, V.size(), V.data(), lambda);
+}
+
+/*!
+ * Computes projection of point onto a convex polygon
+ * \param[in] P point coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda baycentric coordinates of projection point
+ * \return coordinates of projection point
+ */
+array3D projectPointPolygon( array3D const &P, std::size_t nV, array3D const *V, std::vector<double> &lambda)
+{
     array3D xP;
 
-    int vertexCount(V.size());
-    lambda.resize(vertexCount);
+    lambda.resize(nV);
 
     double distance, minDistance(std::numeric_limits<double>::max());
     int minTriangle = -1;
@@ -1108,11 +1170,11 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
     array3D localLambda, minLambda;
 
     // Compute the distance from each triangle in the simplex
-    int triangleCount = polygonSubtriangleCount(V);
+    int triangleCount = polygonSubtriangleCount(nV, V);
 
     for (int triangle=0; triangle < triangleCount; ++triangle) {
 
-        subtriangleOfPolygon( triangle, V, V0, V1, V2);
+        subtriangleOfPolygon( triangle, nV, V, V0, V1, V2);
 
         distance = distancePointTriangle(P, V0, V1, V2, localLambda);
 
@@ -1127,10 +1189,10 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
     } //next triangle
 
     assert(minTriangle >= 0);
-    subtriangleOfPolygon( minTriangle, V, V0, V1, V2);
+    subtriangleOfPolygon( minTriangle, nV, V, V0, V1, V2);
     xP = reconstructPointFromBarycentricTriangle( V0, V1, V2, minLambda);
 
-    computeGeneralizedBarycentric( xP, V, lambda);
+    computeGeneralizedBarycentric( xP, nV, V, lambda);
 
     return xP;
 
@@ -1331,9 +1393,23 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &cloud, ar
  */
 double distancePointPolygon( array3D const &P, std::vector<array3D> const &V, array3D &xP, int &flag)
 {
-    std::vector<double> lambda(V.size());
-    double distance = distancePointPolygon( P, V, lambda);
-    xP = reconstructPointFromBarycentricPolygon( V, lambda );
+    return distancePointPolygon( P, V.size(), V.data(), xP, flag);
+}
+
+/*!
+ * Computes distances of point to a convex polygon
+ * \param[in] P point coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] xP closest points on polygon
+ * \param[out] flag point projecting onto polygon's interior (flag = 0), polygon's vertices (flag = 1, 2, ...) or polygon's edges (flag = -1, -2, -...)
+ * \return distance
+ */
+double distancePointPolygon( array3D const &P, std::size_t nV, array3D const *V, array3D &xP, int &flag)
+{
+    std::vector<double> lambda(nV);
+    double distance = distancePointPolygon( P, nV, V, lambda);
+    xP = reconstructPointFromBarycentricPolygon( nV, V, lambda );
     flag = convertBarycentricToFlagPolygon( lambda );
 
     return distance; 
@@ -1347,8 +1423,20 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V, ar
  */
 double distancePointPolygon( array3D const &P, std::vector<array3D> const &V)
 {
-    std::vector<double> lambda(V.size());
-    return distancePointPolygon( P, V, lambda);
+    return distancePointPolygon( P, V.size(), V.data());
+}
+
+/*!
+ * Computes distances of point to a convex polygon
+ * \param[in] P point coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V simplex vertices coordinates
+ * \return distance
+ */
+double distancePointPolygon( array3D const &P, std::size_t nV, array3D const *V)
+{
+    std::vector<double> lambda(nV);
+    return distancePointPolygon( P, nV, V, lambda);
 }
 
 /*!
@@ -1360,8 +1448,21 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V)
  */
 double distancePointPolygon( array3D const &P, std::vector<array3D> const &V,std::vector<double> &lambda)
 {
-    array3D xP = projectPointPolygon( P, V, lambda);
-    return norm2(P-xP); 
+    return distancePointPolygon(P, V.size(), V.data(), lambda);
+}
+
+/*!
+ * Computes distances of point to a convex polygon
+ * \param[in] P point coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda barycentric coordinates
+ * \return distance
+ */
+double distancePointPolygon( array3D const &P, std::size_t nV, array3D const *V,std::vector<double> &lambda)
+{
+    array3D xP = projectPointPolygon( P, nV, V, lambda);
+    return norm2(P-xP);
 }
 
 /*!
@@ -1374,11 +1475,24 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V,std
  */
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<array3D> &xP, std::vector<int> &flag)
 {
-    int cloudCount( cloud.size() );
-    int vertexCount( V.size() );
+    return distanceCloudPolygon( cloud, V.size(), V.data(), xP, flag);
+}
 
-    std::vector<std::vector<double>> lambda( cloudCount, std::vector<double> (vertexCount));
-    std::vector<double> d = distanceCloudPolygon( cloud, V, lambda);
+/*!
+ * Computes distances of point cloud to a convex polygon
+ * \param[in] cloud point cloud coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] xP closest points on simplex
+ * \param[out] flag point projecting onto polygon's interior (flag = 0), polygon's vertices (flag = 1, 2, ...) or polygon's edges (flag = -1, -2, -...)
+ * \return distance
+ */
+std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std::size_t nV, array3D const *V, std::vector<array3D> &xP, std::vector<int> &flag)
+{
+    int cloudCount( cloud.size() );
+
+    std::vector<std::vector<double>> lambda( cloudCount, std::vector<double> (nV));
+    std::vector<double> d = distanceCloudPolygon( cloud, nV, V, lambda);
 
     xP.resize(cloudCount);
     std::vector<array3D>::iterator xPItr = xP.begin();
@@ -1388,7 +1502,7 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std
 
     for( const auto &l : lambda){
         *flagItr = convertBarycentricToFlagPolygon( l );
-        *xPItr = reconstructPointFromBarycentricPolygon( V, l ); 
+        *xPItr = reconstructPointFromBarycentricPolygon( nV, V, l );
 
         ++xPItr;
         ++flagItr;
@@ -1405,15 +1519,27 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std
  */
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &P, std::vector<array3D> const &V)
 {
+    return distanceCloudPolygon( P, V.size(), V.data());
+}
+
+/*!
+ * Computes distances of point cloud to a convex polygon
+ * \param[in] P point cloud coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \return distance
+ */
+std::vector<double> distanceCloudPolygon( std::vector<array3D> const &P, std::size_t nV, array3D const *V)
+{
     int cloudCount(P.size());
 
     std::vector<double> d(cloudCount,std::numeric_limits<double>::max());
 
-    int triangleCount = polygonSubtriangleCount(V);
+    int triangleCount = polygonSubtriangleCount(nV, V);
     array3D V0, V1, V2;
 
     for (int triangle=0; triangle < triangleCount; ++triangle) { // foreach triangle
-        subtriangleOfPolygon( triangle, V, V0, V1, V2);
+        subtriangleOfPolygon( triangle, nV, V, V0, V1, V2);
         std::vector<double> dT = distanceCloudTriangle(P, V0, V1, V2);
 
         d = min(d,dT);
@@ -1431,18 +1557,31 @@ std::vector<double> distanceCloudPolygon( std::vector<array3D> const &P, std::ve
  */
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std::vector<array3D> const &V, std::vector<std::vector<double>> &lambda)
 {
-    int cloudCount(cloud.size()), vertexCount(V.size());
+    return distanceCloudPolygon( cloud, V.size(), V.data(), lambda);
+}
+
+/*!
+ * Computes distances of point cloud to a convex polygon
+ * \param[in] cloud point cloud coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda barycentric coordinates of the projection points
+ * \return distance
+ */
+std::vector<double> distanceCloudPolygon( std::vector<array3D> const &cloud, std::size_t nV, array3D const *V, std::vector<std::vector<double>> &lambda)
+{
+    int cloudCount(cloud.size()), vertexCount(nV);
 
     std::vector<double> d(cloudCount,std::numeric_limits<double>::max());
     lambda.resize(cloudCount, std::vector<double>(vertexCount,0) );
 
     std::vector<double> dTemp(cloudCount);
     std::vector<array3D> lambdaTemp(cloudCount);
-    int triangleCount = polygonSubtriangleCount(V);
+    int triangleCount = polygonSubtriangleCount(nV, V);
     array3D V0, V1, V2;
 
     for (int triangle=0; triangle < triangleCount; ++triangle) { // foreach triangle
-        subtriangleOfPolygon( triangle, V, V0, V1, V2);
+        subtriangleOfPolygon( triangle, nV, V, V0, V1, V2);
         dTemp = distanceCloudTriangle(cloud, V0, V1, V2, lambdaTemp);
 
         for(int i=0; i< cloudCount; ++i){
@@ -1768,13 +1907,27 @@ bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D con
  */
 bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array3D > const &V, array3D &Q)
 {
+    return intersectLinePolygon( P, n, V.size(), V.data(), Q);
+}
+
+/*!
+ * Computes intersection between triangle and a convex polygon
+ * \param[in] P point on line
+ * \param[in] n direction of line
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] Q intersection point
+ * \return if intersect
+ */
+bool intersectLinePolygon( array3D const &P, array3D const &n, std::size_t nV, array3D const *V, array3D &Q)
+{
     assert( validLine(P,n) );
 
-    int nTriangles = polygonSubtriangleCount(V);
+    int nTriangles = polygonSubtriangleCount(nV, V);
     array3D V0, V1, V2;
 
     for( int i=0; i< nTriangles; ++i){
-        subtriangleOfPolygon(i, V, V0, V1, V2);
+        subtriangleOfPolygon(i, nV, V, V0, V1, V2);
 
         if( intersectLineTriangle(P, n, V0, V1, V2, Q) ) { 
             return true; 
@@ -1794,13 +1947,27 @@ bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array
  */
 bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::vector<array3D > const &V, array3D &Q)
 {
+    return intersectSegmentPolygon( P0, P1, V.size(), V.data(), Q);
+}
+
+/*!
+ * Computes intersection between a segment and a polygon
+ * \param[in] P0 start point of segment
+ * \param[in] P1 end point of segment
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] Q intersection point
+ * \return if intersect
+ */
+bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::size_t nV, array3D const *V, array3D &Q)
+{
     assert( validSegment(P0,P1) );
 
-    int nTriangles = polygonSubtriangleCount(V);
+    int nTriangles = polygonSubtriangleCount(nV, V);
     array3D V0, V1, V2;
 
     for( int i=0; i< nTriangles; ++i){
-        subtriangleOfPolygon(i, V, V0, V1, V2);
+        subtriangleOfPolygon(i, nV, V, V0, V1, V2);
 
         if( intersectSegmentTriangle(P0, P1, V0, V1, V2, Q) ) { 
             return true; 
@@ -1972,7 +2139,20 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
  */
 bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, int dim )
 {
-    return _intersectBoxPolygon(A0, A1, VS, false, false, false, nullptr, nullptr, dim);
+    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), dim );
+}
+/*!
+ * Computes intersection between an axis aligned bounding box and a simplex
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] nVS number of polygon vertices
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] dim number of dimensions to be checked
+ * \return if intersect
+ */
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, int dim )
+{
+    return _intersectBoxPolygon(A0, A1, nVS, VS, false, false, false, nullptr, nullptr, dim);
 }
 
 /*!
@@ -1989,7 +2169,26 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
  */
 bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, int dim)
 {
-    return _intersectBoxPolygon(A0, A1, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, nullptr, dim);
+    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, P, dim);
+}
+
+
+/*!
+ * Computes intersection between an axis aligned bounding box and a convex polygon
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] nVS number of polygon vertices
+ * \param[in] VS polygon vertices coordinates
+ * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[out] P calculated intersection points
+ * \param[in] dim number of dimensions to be checked
+ * \return if intersect
+ */
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, int dim)
+{
+    return _intersectBoxPolygon(A0, A1, nVS, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, nullptr, dim);
 }
 
 /*!
@@ -2007,7 +2206,26 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
  */
 bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim)
 {
-    return _intersectBoxPolygon(A0, A1, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, &flag, dim);
+    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, P, flag, dim);
+}
+
+/*!
+ * Computes intersection between an axis aligned bounding box and a simplex
+ * \param[in] A0 min point of first box
+ * \param[in] A1 max point of first box
+ * \param[in] nVS number of polygon vertices
+ * \param[in] VS simplex vertices coordinates
+ * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
+ * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
+ * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[out] P calculated intersection points
+ * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to innerPolygonPoints. If the ith flag=1, the intersection is due to polygonEdgeBoxFaceIntersections. If the ith flag=2, the intersection is due to polygonBoxEdgeIntersections.
+ * \param[in] dim number of dimensions to be checked
+ * \return if intersect
+ */
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+{
+    return _intersectBoxPolygon(A0, A1, nVS, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, &flag, dim);
 }
 
 
@@ -2219,12 +2437,22 @@ void computeAABBTriangle(array3D const &A, array3D const &B, array3D const &C, a
  */
 void computeAABBPolygon(std::vector<array3D> const &VS, array3D &P0, array3D &P1)
 {
-    int  vertexCount(VS.size());
+    computeAABBPolygon(VS.size(), VS.data(), P0, P1);
+}
 
+/*!
+ * computes axis aligned boundig box of a polygon
+ * \param[in] nVS number of polygon vertices
+ * \param[in] VS polygon vertices coordinates
+ * \param[out] P0 min point of bounding box
+ * \param[out] P1 max point of bounding box
+ */
+void computeAABBPolygon(std::size_t nVS, array3D const *VS, array3D &P0, array3D &P1)
+{
     P0 = VS[0];
     P1 = VS[0];
 
-    for( int j=1; j<vertexCount; ++j){
+    for( std::size_t j=1; j<nVS; ++j){
         for( int i=0; i<3; ++i){
             P0[i] = std::min( P0[i], VS[j][i] );
             P1[i] = std::max( P1[i], VS[j][i] );
@@ -2574,7 +2802,20 @@ double areaTriangle( array3D const &a, array3D const &b, array3D const &c)
  */
 int polygonEdgesCount( std::vector<array3D> const &V)
 {
-    return V.size();
+    return polygonEdgesCount( V.size(), V.data());
+}
+
+/*
+ * Gets the number of edges of a polygon
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \return number of edges
+ */
+int polygonEdgesCount( std::size_t nV, array3D const *V)
+{
+    BITPIT_UNUSED(V);
+
+    return nV;
 }
 
 /*
@@ -2583,7 +2824,20 @@ int polygonEdgesCount( std::vector<array3D> const &V)
  */
 int polygonSubtriangleCount( std::vector<array3D> const &V)
 {
-    return V.size()-2;
+    return polygonSubtriangleCount( V.size(), V.data());
+}
+
+/*
+ * Gets the number of subtriangles of a polygon
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \return number of subtriangles
+ */
+int polygonSubtriangleCount( std::size_t nV, array3D const *V)
+{
+    BITPIT_UNUSED(V);
+
+    return (nV - 2);
 }
 
 /*
@@ -2595,10 +2849,23 @@ int polygonSubtriangleCount( std::vector<array3D> const &V)
  */
 void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0, array3D &V1)
 {
-    assert(edge<polygonEdgesCount(V));
+    edgeOfPolygon( edge, V.size(), V.data(), V0, V1);
+}
+
+/*
+ * Gets the edge coordinates of a convex polygon
+ * \param[in] edge index
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polgon vertices
+ * \param[in] V0 first vertice coordinates of edge
+ * \param[in] V1 second vertice coordinates of edge
+ */
+void edgeOfPolygon( int const &edge, std::size_t nV, array3D const *V, array3D &V0, array3D &V1)
+{
+    assert(edge<polygonEdgesCount(nV, V));
 
     V0 = V[edge];
-    V1 = V[(edge+1) %V.size()];
+    V1 = V[(edge+1) % nV];
     return;
 }
 
@@ -2612,7 +2879,22 @@ void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0,
  */
 void subtriangleOfPolygon( int const &triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
 {
-    assert(triangle<polygonSubtriangleCount(V));
+    subtriangleOfPolygon( triangle, V.size(), V.data(), V0, V1, V2);
+}
+
+/*
+ * Gets the subtriangle vertices' coordinates of a convex polygon
+ * \param[in] triangle index of triangle
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polgon vertices
+ * \param[in] V0 first vertice coordinates of triangle
+ * \param[in] V1 second vertice coordinates of triangle
+ * \param[in] V2 third vertice coordinates of triangle
+ */
+void subtriangleOfPolygon( int const &triangle, std::size_t nV, array3D const *V, array3D &V0, array3D &V1, array3D &V2)
+{
+    BITPIT_UNUSED(nV);
+    assert(triangle<polygonSubtriangleCount(nV, V));
 
     V0 = V[0];
     V1 = V[triangle+1];

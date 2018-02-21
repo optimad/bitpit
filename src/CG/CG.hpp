@@ -90,14 +90,17 @@ bool validBarycentric( double const * &, int );
 int convertBarycentricToFlagTriangle( std::array<double,3> const &);
 int convertBarycentricToFlagSegment( std::array<double,2> const &);
 int convertBarycentricToFlagPolygon( std::vector<double> const &);
+int convertBarycentricToFlagPolygon( std::size_t, double const *);
 
 void computeGeneralizedBarycentric( array3D const &, std::vector<array3D> const &, std::vector<double> &);
+void computeGeneralizedBarycentric( array3D const &, std::size_t, array3D const *, std::vector<double> &);
 
 array3D reconstructPointFromBarycentricSegment( array3D const &, array3D const &, std::array<double,2> const & ); 
 array3D reconstructPointFromBarycentricSegment( array3D const &, array3D const &, double const * ); 
 array3D reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, std::array<double,3> const & ); 
 array3D reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, double const * ); 
 array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &, std::vector<double> const & ); 
+array3D reconstructPointFromBarycentricPolygon( std::size_t, array3D const *, std::vector<double> const & );
 
 array3D projectPointLine( array3D const &, array3D const &, array3D const & );
 array3D projectPointPlane( array3D const &, array3D const &, array3D const & );
@@ -107,7 +110,9 @@ array3D projectPointSegment( array3D const &, array3D const &, array3D const &, 
 array3D projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const & );
 array3D projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D & );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const & );
+array3D projectPointPolygon( array3D const &, std::size_t, array3D const * );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );
+array3D projectPointPolygon( array3D const &, std::size_t, array3D const *, std::vector<double> & );
 array3D projectPointCone( array3D const &, array3D const &, array3D const &, double const &);
 std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &);
 
@@ -124,8 +129,11 @@ double distancePointTriangle( array3D const &, array3D const &, array3D const &,
 double distancePointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D &);
 
 double distancePointPolygon( array3D const &, std::vector<array3D> const &, array3D &, int & );
+double distancePointPolygon( array3D const &, std::size_t, array3D const *, array3D &, int & );
 double distancePointPolygon( array3D const &, std::vector<array3D> const & );
+double distancePointPolygon( array3D const &, std::size_t, array3D const * );
 double distancePointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );
+double distancePointPolygon( array3D const &, std::size_t, array3D const *, std::vector<double> & );
 
 double distancePointCone( array3D const &, array3D const &, array3D const &, double const &);
 
@@ -133,8 +141,11 @@ std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> & );
 
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<array3D> &, std::vector<int> & );
+std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::size_t, array3D const *, std::vector<array3D> &, std::vector<int> & );
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::vector<array3D> const &);
+std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::size_t, array3D const *);
 std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::vector<array3D> const &, std::vector<std::vector<double>> &);
+std::vector<double> distanceCloudPolygon( std::vector<array3D> const &, std::size_t, array3D const *, std::vector<std::vector<double>> &);
 
 double distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &);
 double distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
@@ -148,11 +159,13 @@ bool intersectLineLine( array3D const &, array3D const &, array3D const &, array
 bool intersectLinePlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectLineTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectLinePolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ) ;
+bool intersectLinePolygon( array3D const &, array3D const &, std::size_t, array3D const *, array3D & ) ;
 
 bool intersectSegmentSegment( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectSegmentPlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectSegmentTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
 bool intersectSegmentPolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ) ;
+bool intersectSegmentPolygon( array3D const &, array3D const &, std::size_t, array3D const *, array3D & ) ;
 
 bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3 ) ;
 bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, int dim=3 );
@@ -172,13 +185,17 @@ bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, ar
 
 
 bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, int dim=3 );
+bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, int dim=3 );
 bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, int dim=3);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, bool, bool, bool, std::vector<array3D> &, int dim=3);
 bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3);
 
 
 void computeAABBSegment( array3D const &, array3D const &, array3D &, array3D & ) ;
 void computeAABBTriangle( array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;
 void computeAABBPolygon( std::vector<array3D> const &, array3D &, array3D & );
+void computeAABBPolygon( std::size_t, array3D const *, array3D &, array3D & );
 
 void unionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
 void intersectionAABB( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & );
@@ -198,9 +215,13 @@ void edgeOfBox( int const &, array3D const &, array3D const &, array3D &, array3
 void faceOfBox( int const &, array3D const &, array3D const &, array3D &, array3D &, array3D &, array3D & );
 
 int polygonEdgesCount(std::vector<array3D> const &);
+int polygonEdgesCount(std::size_t, array3D const *);
 int polygonSubtriangleCount(std::vector<array3D> const &);
+int polygonSubtriangleCount(std::size_t, array3D const *);
 void edgeOfPolygon( int const &, std::vector<array3D> const &, array3D &, array3D &);
+void edgeOfPolygon( int const &, std::size_t, array3D const *, array3D &, array3D &);
 void subtriangleOfPolygon( int const &, std::vector<array3D> const &, array3D &, array3D &, array3D &);
+void subtriangleOfPolygon( int const &, std::size_t, array3D const *, array3D &, array3D &, array3D &);
 
 }
 
