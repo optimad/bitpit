@@ -423,6 +423,8 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
  */
 std::vector<bool> read_jobControlsXML(const bitpit::Config::Section & slotXML, POD & podInst){
 
+    BITPIT_UNUSED(podInst);
+
     std::vector<bool> controls;
     controls.resize(3,false);
     
