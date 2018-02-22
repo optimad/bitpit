@@ -513,6 +513,7 @@ PiercedStorage<bool> PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> 
 void PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh,
         const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField)
 {
+    BITPIT_UNUSED(mesh);
 
     //Check target cells
     std::unordered_set<long> targetCellsStorage;
@@ -579,6 +580,7 @@ std::unordered_set<long> PODVolOctree::mapCellsToPOD(const std::unordered_set<lo
 
 void PODVolOctree::adaptMeshToMesh(VolumeKernel* meshToAdapt, VolumeKernel * meshReference)
 {
+    BITPIT_UNUSED(meshToAdapt);
 
     computeMapper(meshReference);
 
