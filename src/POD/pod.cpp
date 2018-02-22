@@ -1241,7 +1241,6 @@ void POD::evalErrorBoundingBox()
     for (std::string val : m_nameScalarFields) {
         std::map<std::string, std::size_t>::iterator found = targetErrorFields.find(val);
         if (found != targetErrorFields.end()) {
-            std::size_t ind = found->second;
             scalarIds.push_back(count);
             targetErrorFields.erase(found);
         }
@@ -1255,7 +1254,6 @@ void POD::evalErrorBoundingBox()
         for (std::string val : valv) {
             std::map<std::string, std::size_t>::iterator found = targetErrorFields.find(val);
             if (found != targetErrorFields.end()) {
-                std::size_t ind = found->second;
                 toerase[ic] = val;
                 ic++;
             }
