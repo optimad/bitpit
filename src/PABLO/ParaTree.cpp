@@ -911,10 +911,10 @@ namespace bitpit {
     };
 #endif
 
-    /*! Get the partition information of the octree over the processes
-     * by using the global index of the octants.
-     * \return Pointer to m_partitionRangeGlobalIdx (global array containing global
-     * index of the last existing octant in each processor).
+    /*! Get a constant reference to the vector containing the
+     * global index of the last existing octant in each processor.
+     * \return A constant reference to the vector containing the
+     * global index of the last existing octant in each processor.
      */
     const std::vector<uint64_t> &
     ParaTree::getPartitionRangeGlobalIdx() const {
