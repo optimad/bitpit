@@ -135,7 +135,7 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
                 (*datamappedVi) = std::array<double,3>{0.0, 0.0, 0.0};
             }
 
-            bool dataB, dataMappedB = false;
+            bool dataB, dataMappedB = true;
             double *dataS;
             std::array<double,3> *dataV;
             double volmapped = getRawCellVolume(rawIndex);
