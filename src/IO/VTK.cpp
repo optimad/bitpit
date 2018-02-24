@@ -622,7 +622,7 @@ void VTK::checkAllFields(){
     for( auto & field : m_data ){
         if( field.isEnabled() && !field.hasAllMetaData() ) {
             field.disable() ;
-#if ENABLE_DEBUG
+#if BITPIT_ENABLE_DEBUG
             log::cout() << "Data field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
 #endif
         }
@@ -631,7 +631,7 @@ void VTK::checkAllFields(){
     for( auto & field : m_geometry ){
         if( field.isEnabled() && !field.hasAllMetaData() ) {
             field.disable() ;
-#if ENABLE_DEBUG
+#if BITPIT_ENABLE_DEBUG
             log::cout() << "Geometry field " << field.getName() << " has not all metadata and has been disabled from reading/writing in VTK" << std::endl ;
 #endif
         }
@@ -1032,7 +1032,7 @@ void VTK::readData( ){
 
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
-#if ENABLE_DEBUG
+#if BITPIT_ENABLE_DEBUG
                 std::fstream::pos_type position_before = str.tellg();
                 if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
                     log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
@@ -1052,7 +1052,7 @@ void VTK::readData( ){
 
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
-#if ENABLE_DEBUG
+#if BITPIT_ENABLE_DEBUG
                 std::fstream::pos_type position_before = str.tellg();
                 if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
                     log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
@@ -1075,7 +1075,7 @@ void VTK::readData( ){
             str.seekg( field.getPosition() ) ;
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
-#if ENABLE_DEBUG
+#if BITPIT_ENABLE_DEBUG
             if(str.tellg()==field.getPosition()){
                 log::cout() << "Warning VTK: No data have been read for field " << field.getName() << std::endl;
             }
@@ -1092,7 +1092,7 @@ void VTK::readData( ){
 
             field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
-#if ENABLE_DEBUG
+#if BITPIT_ENABLE_DEBUG
             if(str.tellg()==field.getPosition()){
                 log::cout() << "Warning VTK: No data have been read for field " << field.getName() << std::endl;
             }
