@@ -1033,12 +1033,6 @@ void DataCommunicator::cancelAllSends(bool synchronous)
             MPI_Abort(m_communicator, 1);
         }
 
-        int size;
-        MPI_Get_count(&status, MPI_INT, &size);
-        log::cout() << " NOTIFICATOIN SIZE " << size << std::endl;
-        log::cout() << "    missing " << nMissingNotifications << std::endl;
-
-
         --nMissingNotifications;
     }
 
