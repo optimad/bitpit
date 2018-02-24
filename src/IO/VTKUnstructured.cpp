@@ -489,7 +489,7 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     for( auto &field : m_geometry ){ 
         str.seekg( position) ;
         if( ! readDataArray( str, field ) ) {
-#if ENAABLE_DEBUG
+#if ENABLE_DEBUG
             log::cout() << field.getName() << " DataArray not found" << std::endl ;
 #endif
         }
