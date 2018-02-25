@@ -1039,6 +1039,11 @@ void DataCommunicator::cancelAllSends(bool synchronous)
 
     // Wait until the notifications have been sent
     MPI_Waitall(sendNotificationRequests.size(), sendNotificationRequests.data(), MPI_STATUS_IGNORE);
+
+#if BITPIT_ENABLE_DEBUG
+    // Wait until all processes cancel the sends
+    MPI_Barrier(m_communicator);
+#endif
 }
 
 /*!
@@ -1113,6 +1118,11 @@ void DataCommunicator::cancelAllRecvs(bool synchronous)
 
     // Wait until the notifications have been sent
     MPI_Waitall(sendNotificationRequests.size(), sendNotificationRequests.data(), MPI_STATUS_IGNORE);
+
+#if BITPIT_ENABLE_DEBUG
+    // Wait until all processes cancel the receives
+    MPI_Barrier(m_communicator);
+#endif
 }
 
 /*!
