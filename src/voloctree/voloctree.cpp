@@ -1801,7 +1801,7 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 */
 bool VolOctree::_markCellForRefinement(const long &id)
 {
-	return set_marker(id, 1);
+	return setMarker(id, 1);
 }
 
 /*!
@@ -1811,7 +1811,7 @@ bool VolOctree::_markCellForRefinement(const long &id)
 */
 bool VolOctree::_markCellForCoarsening(const long &id)
 {
-	return set_marker(id, -1);
+	return setMarker(id, -1);
 }
 
 /*!
@@ -1822,7 +1822,7 @@ bool VolOctree::_markCellForCoarsening(const long &id)
 */
 bool VolOctree::_resetCellAdaptionMarker(const long &id)
 {
-	return set_marker(id, 0);
+	return setMarker(id, 0);
 }
 
 /*!
@@ -1854,7 +1854,7 @@ adaption::Marker VolOctree::_getCellAdaptionMarker(const long &id)
 	\param id is the id of the cell
 	\param value is the value of the marker
 */
-bool VolOctree::set_marker(const long &id, const int8_t &value)
+bool VolOctree::setMarker(const long &id, const int8_t &value)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {

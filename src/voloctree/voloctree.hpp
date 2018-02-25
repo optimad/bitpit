@@ -233,7 +233,7 @@ private:
 	void __reset(bool resetTree);
 	void __setDimension(int dimension);
 
-	bool set_marker(const long &id, const int8_t &value);
+	bool setMarker(const long &id, const int8_t &value);
 
 	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
