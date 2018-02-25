@@ -974,7 +974,8 @@ void DataCommunicator::cancelRecv(int rank)
     all remote processes that sends data to the current rank cancel their
     send requests. This guarantees that, at the end of the function, both
     the current rank and all remote processes involved in a data exchange
-    with it have canceled their send requests.
+    with it have canceled their send requests. When synchronous mode is
+    enabled send and receive requests have to match among all the processes.
 */
 void DataCommunicator::cancelAllSends(bool synchronous)
 {
@@ -1048,7 +1049,8 @@ void DataCommunicator::cancelAllSends(bool synchronous)
     all remote processes that receives data from the current rank cancel their
     receive requests. This guarantees that, at the end of the function, both
     the current rank and all remote processes involved in a data exchange with
-    it have canceled their receive requests.
+    it have canceled their receive requests. When synchronous mode is enabled
+    send and receive requests have to match among all the processes.
 */
 void DataCommunicator::cancelAllRecvs(bool synchronous)
 {
