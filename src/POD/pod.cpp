@@ -1043,7 +1043,7 @@ void POD::_evalMeanMesh()
                     for (std::size_t j = 0; j < m_nScalarFields; j++)
                         m_mean.scalar->at(cell.getId(),j) = 0.0;
                     for (std::size_t j = 0; j < m_nVectorFields; j++)
-                        m_mean.vector->at(cell.getId(),j) = {0.0, 0.0, 0.0};
+                        m_mean.vector->at(cell.getId(),j) = {{0.0, 0.0, 0.0}};
                 }
             }
             if (!m_staticMesh)
@@ -1337,8 +1337,8 @@ void POD::evalErrorBoundingBox()
     std::size_t nvf = vectorIds.size();
 
     std::vector<std::array<double, 3>> minBoxes, maxBoxes;
-    minBoxes.resize(m_nFields,{0.0, 0.0, 0.0});
-    maxBoxes.resize(m_nFields,{0.0, 0.0, 0.0});
+    minBoxes.resize(m_nFields, {{0.0, 0.0, 0.0}});
+    maxBoxes.resize(m_nFields, {{0.0, 0.0, 0.0}});
 
     std::unordered_set<long>::iterator it;
     for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.end(); it++) {
@@ -1377,8 +1377,8 @@ void POD::evalErrorBoundingBox()
     log::cout()<< "min: "<< minBoxes << endl;
     log::cout()<< "max: "<< maxBoxes << endl;
 
-    std::array<double, 3> minBox={0.0, 0.0, 0.0};
-    std::array<double, 3> maxBox={0.0, 0.0, 0.0};
+    std::array<double, 3> minBox = {{0.0, 0.0, 0.0}};
+    std::array<double, 3> maxBox = {{0.0, 0.0, 0.0}};
 
     for (std::size_t i =0; i < m_nFields; i++){
         maxBox=max(maxBoxes[i],maxBox);  

@@ -131,7 +131,7 @@ pod::PODField PODVolOctree::mapPODFieldToPOD(const pod::PODField & field, const 
             }
             for (std::size_t i = 0; i < nvf; i++){
                 std::array<double,3> *datamappedVi = datamappedV + i;
-                (*datamappedVi) = std::array<double,3>{0.0, 0.0, 0.0};
+                (*datamappedVi) = std::array<double,3>{{0.0, 0.0, 0.0}};
             }
 
             bool dataB, dataMappedB = true;
@@ -237,7 +237,7 @@ void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordere
             }
             for (std::size_t i = 0; i < nvf; i++){
                 std::array<double,3> *dataVi = dataV + i;
-                (*dataVi) = std::array<double,3>{0.0, 0.0, 0.0};
+                (*dataVi) = std::array<double,3>{{0.0, 0.0, 0.0}};
             }
             bool datamappedB;
             double *datamappedS;
