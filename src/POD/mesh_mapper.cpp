@@ -325,9 +325,6 @@ void MeshMapper::_mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree
     else
         clearInverseMapping();
 
-
-    bool checkPartition = true;
-
 #if BITPIT_ENABLE_MPI==1
 
     if (!(meshReference->isPartitioned())){
@@ -342,7 +339,7 @@ void MeshMapper::_mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree
         std::vector<uint64_t> partitionReference = meshReference->getTree().getPartitionLastDesc();
         std::vector<uint64_t> partitionMapped = meshMapped->getTree().getPartitionLastDesc();
 
-        checkPartition = (partitionReference[m_rank] == partitionMapped[m_rank]);
+        bool checkPartition = (partitionReference[m_rank] == partitionMapped[m_rank]);
         if (m_rank != 0)
             checkPartition = checkPartition && (partitionReference[m_rank-1] == partitionMapped[m_rank-1]);
 
