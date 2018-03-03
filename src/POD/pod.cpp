@@ -1369,8 +1369,8 @@ void POD::evalErrorBoundingBox()
     }
 
 # if BITPIT_ENABLE_MPI
-    MPI_Allreduce(MPI_IN_PLACE, maxBoxes.data(), m_nFields*3, MPI_DOUBLE, MPI_MAX, m_communicator);
-    MPI_Allreduce(MPI_IN_PLACE, minBoxes.data(), m_nFields*3, MPI_DOUBLE, MPI_MIN, m_communicator);    
+    MPI_Allreduce(MPI_IN_PLACE, reinterpret_cast<double *>(maxBoxes.data()), m_nFields*3, MPI_DOUBLE, MPI_MAX, m_communicator);
+    MPI_Allreduce(MPI_IN_PLACE, reinterpret_cast<double *>(minBoxes.data()), m_nFields*3, MPI_DOUBLE, MPI_MIN, m_communicator);
 # endif  
 
     log::cout()<< ">> Fields Bounding boxes " << endl; 
