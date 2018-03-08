@@ -35,6 +35,7 @@ list(APPEND TESTS "test_IO_00002")
 list(APPEND TESTS "test_IO_00003")
 list(APPEND TESTS "test_IO_00004")
 list(APPEND TESTS "test_IO_00005")
+list(APPEND TESTS "test_IO_00006")
 
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
@@ -53,4 +54,11 @@ add_custom_command(
 add_custom_command(
     TARGET "test_IO_00004" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/configuration.xml" "${CMAKE_CURRENT_BINARY_DIR}/data/configuration.xml"
+)
+
+add_custom_command(
+    TARGET "test_IO_00006" PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cubeAscii.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cubeAscii.stl"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cubeBinary.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cubeBinary.stl"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cubeAscii_MultiSolid.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cubeAscii_MultiSolid.stl"
 )
