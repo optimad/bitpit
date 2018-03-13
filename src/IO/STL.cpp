@@ -174,39 +174,173 @@ data.n_solids = -1;
 // DETECT FILE TYPE (ASCII OR BINARY)                                         //
 // ========================================================================== //
 
-// Open file
-ifile_handle.open(stl_name, ifstream::in);
-
-// Check if the file start with the work "SOLID"
-char keyword[] = "solid";
-int keywordSize = sizeof(keyword) / sizeof(keyword[0]) - 1;
-
-char c;
-int nMatches = 0;
-while (ifile_handle.get(c)) {
-    if (isblank(c)) {
-        continue;
-    }
-
-    c = tolower(c);
-    if (c == keyword[nMatches]) {
-        ++nMatches;
-        if (nMatches == keywordSize) {
-            break;
-        }
-    } else {
-        break;
-    }
+FileFormat fileFormat = detectFileFormat(stl_name);
+if (fileFormat == FormatInvalid) {
+    throw std::runtime_error("Invalid STL.");
 }
 
-stl_type = (nMatches != keywordSize);
-
-// Close file
-ifile_handle.close();
+stl_type = (fileFormat == FormatBinary);
 
 return; };
 
 // Public methods ----------------------------------------------------------- //
+
+// -------------------------------------------------------------------------- //
+/*!
+    Detects if the specified STL file is in binary format.
+
+    \param[in] filename stl file name
+*/
+STLObj::FileFormat STLObj::detectFileFormat(
+    std::string                         filename
+) {
+
+const std::size_t BINARY_HEADER_SIZE = 80;
+const std::size_t BINARY_FLOAT_SIZE  = 4;
+const std::size_t BINARY_SHORT_SIZE  = 2;
+const std::size_t BINARY_LONG_SIZE   = 4;
+
+const std::size_t MINIMUM_ASCII_SIZE  = 14;
+const std::size_t MINIMUM_BINARY_SIZE = BINARY_HEADER_SIZE + BINARY_LONG_SIZE;
+
+const std::string ASCII_BEGIN = "solid ";
+const std::string ASCII_END   = "endsolid";
+
+std::ifstream fileStream;
+
+// Get the file size
+fileStream.open(filename, std::ifstream::ate | std::ifstream::binary);
+if (!fileStream.good()) {
+    fileStream.close();
+    throw std::runtime_error("Invalid STL.");
+}
+
+std::size_t fileSize = fileStream.tellg();
+fileStream.close();
+fileStream.clear();
+
+//
+// ASCII check
+//
+
+// Check if the size is compatible with an ASCCI STL file.
+//
+// An ASCII contains at least the "solid " and "endsolid" markers, therefore
+// the minimum size of an empty ASCII file is 14 bytes.
+if (fileSize < MINIMUM_ASCII_SIZE) {
+    return FormatInvalid;
+}
+
+// If a files starts with "solid" and ends with "endsolid" is an ASCII file.
+//
+// Binary files should never start with "solid ", but that's not mandatory.
+// We need to check both the beginning and the and of the file to be sure
+// of the file format.
+char c;
+std::size_t bufferPos;
+
+bufferPos = 0;
+std::string beginString(ASCII_BEGIN.size(), ' ');
+fileStream.open(filename, std::ifstream::binary);
+while (fileStream.get(c)) {
+    if (bufferPos == 0 && (std::isblank(c) || std::isspace(c))) {
+        continue;
+    }
+
+    beginString.at(bufferPos) = tolower(c);
+    ++bufferPos;
+    if (bufferPos == ASCII_BEGIN.size()) {
+        break;
+    }
+}
+fileStream.close();
+fileStream.clear();
+
+bool maybeASCII = (beginString.compare(ASCII_BEGIN) == 0);
+if (maybeASCII) {
+    // Open the file
+    fileStream.open(filename, std::ifstream::ate | std::ifstream::binary);
+
+    // Move the cursor at the beginning of the last non-empty line
+    bool empty = true;
+    fileStream.seekg(-1, ios_base::cur);
+    while (fileStream.get(c)) {
+        if (c == '\n') {
+            if (!empty) {
+                break;
+            }
+        }
+
+        if (empty) {
+            empty = (!std::isblank(c) && !std::isspace(c));
+        }
+
+        fileStream.seekg(-2, ios_base::cur);
+    }
+
+    // Search the end-line keyword
+    bufferPos = 0;
+    std::string endString(ASCII_END.size(), ' ');
+    while (fileStream.get(c)) {
+        if (bufferPos == 0 && (std::isblank(c) || std::isspace(c))) {
+            continue;
+        }
+
+        endString.at(bufferPos) = tolower(c);
+        ++bufferPos;
+        if (bufferPos == ASCII_END.size()) {
+            break;
+        }
+    }
+
+    // Close the file
+    fileStream.close();
+    fileStream.clear();
+
+    // Check if the end-solid keyword was found
+    bool isASCII = (endString.compare(ASCII_END) == 0);
+    if (isASCII) {
+        return FormatASCII;
+    }
+}
+
+//
+// Binary check
+//
+
+// Check if the size is compatible with a binary STL file.
+//
+// An empty binary file contains the header and the number of triangles,
+// therefore the minimum size of an empty binary file is 84 bytes.
+if (fileSize < MINIMUM_BINARY_SIZE) {
+    return FormatInvalid;
+}
+
+// Read the number of triangles
+std::uint32_t nTriangles;
+
+fileStream.open(filename, std::ifstream::binary);
+fileStream.seekg(BINARY_HEADER_SIZE);
+fileStream.read(reinterpret_cast<char*>(&nTriangles), BINARY_FLOAT_SIZE);
+fileStream.close();
+fileStream.clear();
+
+// Check that the size of the file is compatiblewith the number of triangles
+//
+// Each triangle has three facet and each facet contains:
+//  - Normal: 3 float_32
+//  - Vertices' coordinates: 3x float_32
+//  - Attribute byte count: 1 unit_16
+const std::size_t BINARY_FACET_SIZE = 3 * BINARY_FLOAT_SIZE +
+                                      3 * 3 * BINARY_FLOAT_SIZE +
+                                      BINARY_SHORT_SIZE;
+
+std::size_t expectedFileSize = BINARY_HEADER_SIZE + BINARY_LONG_SIZE + (nTriangles * BINARY_FACET_SIZE);
+if (fileSize == expectedFileSize) {
+    return FormatBinary;
+}
+
+return FormatInvalid; };
 
 // -------------------------------------------------------------------------- //
 /*!

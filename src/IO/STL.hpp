@@ -65,6 +65,15 @@ struct STLData {
 
 class STLObj {
 
+    // Public enumerations ================================================== //
+    public:
+
+    enum FileFormat {
+        FormatInvalid = -1,
+        FormatASCII,
+        FormatBinary
+    };
+
     // Public members ======================================================= //
     public:
 
@@ -102,6 +111,9 @@ class STLObj {
 
     // Public methods ======================================================= //
     public:
+    FileFormat detectFileFormat(                                              // detect file format
+        std::string                                                           // (input) stream mode (input/output/append)
+    );
     void open(                                                                // open stream to stl file
         std::string                                                           // (input) stream mode (input/output/append)
     );
