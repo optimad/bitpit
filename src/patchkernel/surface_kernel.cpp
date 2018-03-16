@@ -675,7 +675,13 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, con
         std::array<double, 3> facetNormal = evalFacetNormal(facetId);
 
         // Discard facets with a misalignment greater than the specified limit
-        double misalignment = std::acos(dotProduct(facetNormal, cellNormal)) ;
+        //
+        // The argument of the acos function has to be in the range [-1, 1].
+        // Rounding errors may lead to a dot product slightly outside this
+        // range. Since the arguments of the dot product are unit vectors,
+        // we can safetly clamp the dot product result to be between -1 and
+        // 1.
+        double misalignment = std::acos(std::min(1.0, std::max(-1.0, dotProduct(facetNormal, cellNormal))));
         if (misalignment > std::abs(limit)) {
             continue;
         }
