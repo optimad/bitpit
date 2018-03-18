@@ -416,13 +416,24 @@ bool FlatVector2D<T>::empty() const
 
     Removes all items from the container (which are destroyed), leaving
     the container with a size of 0.
+
+    \param release if it's true the memory hold by the container will be
+    released, otherwise the container will be cleared but its memory will
+    not be relased
 */
 template <class T>
-void FlatVector2D<T>::clear()
+void FlatVector2D<T>::clear(bool release)
 {
-    std::vector<T>(0).swap(m_v);
+    if (release) {
+        std::vector<T>(0).swap(m_v);
 
-    std::vector<size_t>(1, 0L).swap(m_index);
+        std::vector<size_t>(1, 0L).swap(m_index);
+    } else {
+        m_v.clear();
+
+        m_index.resize(1);
+        m_index[0];
+    }
 }
 
 /*!

@@ -101,7 +101,7 @@ public:
     void fill(T &value);
     bool empty() const;
 
-    void clear();
+    void clear(bool release = true);
     void shrinkToFit();
 
     const std::size_t * indices() const noexcept;
