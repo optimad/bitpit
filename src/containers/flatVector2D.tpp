@@ -183,6 +183,7 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
         m_index.resize(nVectors + 1);
     }
 
+    m_index[0] = 0;
     for (int i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + sizes[i];
     }
@@ -233,6 +234,7 @@ void FlatVector2D<T>::initialize(const int &nVectors, const int &size, const T &
         m_index.resize(nVectors + 1);
     }
 
+    m_index[0] = 0;
     for (int i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + size;
     }
@@ -286,6 +288,7 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
         m_index.resize(nVectors + 1);
     }
 
+    m_index[0] = 0;
     for (int i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + vector2D[i].size();
     }
