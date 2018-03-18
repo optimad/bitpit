@@ -181,7 +181,6 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
     // Initialize the indexes
     if (reallocateIndex) {
         m_index.resize(nVectors + 1);
-        m_index.shrink_to_fit();
     }
 
     for (int i = 0; i < nVectors; ++i) {
@@ -191,7 +190,6 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
     // Initialize the storage
     if (reallocateValues) {
         m_v.assign(m_index[nVectors], value);
-        m_v.shrink_to_fit();
     } else {
         for (int k = 0; k < nItems; ++k) {
             m_v[k] = value;
@@ -233,7 +231,6 @@ void FlatVector2D<T>::initialize(const int &nVectors, const int &size, const T &
     // Initialize the indexes
     if (reallocateIndex) {
         m_index.resize(nVectors + 1);
-        m_index.shrink_to_fit();
     }
 
     for (int i = 0; i < nVectors; ++i) {
@@ -243,7 +240,6 @@ void FlatVector2D<T>::initialize(const int &nVectors, const int &size, const T &
     // Initialize the storage
     if (reallocateValues) {
         m_v.assign(m_index[nVectors], value);
-        m_v.shrink_to_fit();
     } else {
         for (int k = 0; k < nItems; ++k) {
             m_v[k] = value;
@@ -288,7 +284,6 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
     // Initialize the indexes
     if (reallocateIndex) {
         m_index.resize(nVectors + 1);
-        m_index.shrink_to_fit();
     }
 
     for (int i = 0; i < nVectors; ++i) {
@@ -298,7 +293,6 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
     // Initialize the storage
     if (reallocateValues) {
         m_v.resize(m_index[nVectors]);
-        m_v.shrink_to_fit();
     }
 
     int k = 0;
