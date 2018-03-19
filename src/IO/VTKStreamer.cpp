@@ -73,14 +73,16 @@ void VTKBaseStreamer::flushData( std::fstream &str, std::string name, VTKFormat 
  * @param[in] format ASCII or BINARY format
  * @param[in] entries total number of entries to be read
  * @param[in] components size of grouping (e.g. =3 for vectors)
+ * @param[in] datatype type of data of your current field
  */
-void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
+void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components, VTKDataType datatype){
 
     BITPIT_UNUSED(str) ;
     BITPIT_UNUSED(name) ;
     BITPIT_UNUSED(format) ;
     BITPIT_UNUSED(entries) ;
     BITPIT_UNUSED(components) ;
+    BITPIT_UNUSED(datatype) ;
 
 }
 
@@ -154,8 +156,11 @@ void VTKNativeStreamer::flushData( std::fstream &str, std::string name, VTKForma
  * @param[in] format ASCII or BINARY format
  * @param[in] entries total number of entries to be read
  * @param[in] components size of groups
+ * @param[in] datatype type of data of your current field
  */
-void VTKNativeStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
+void VTKNativeStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components, VTKDataType datatype){
+
+    BITPIT_UNUSED(datatype);
 
     auto fieldItr = m_field.find(name) ;
 

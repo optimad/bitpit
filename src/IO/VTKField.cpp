@@ -279,7 +279,7 @@ void  VTKField::write( std::fstream &str) const{
  */
 void VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
     if(m_streamer){
-        m_streamer->absorbData( str, m_name, m_codification, entries, components) ;
+        m_streamer->absorbData( str, m_name, m_codification, entries, components, m_dataType) ;
     }
 }
 

@@ -211,7 +211,7 @@ class VTKBaseStreamer{
 
     public:
         virtual void            flushData( std::fstream &, std::string, VTKFormat)  ;
-        virtual void            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t )  ;
+        virtual void            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t, VTKDataType)  ;
 };
 
 class VTKNativeStreamer : public VTKBaseStreamer {
@@ -228,7 +228,7 @@ class VTKNativeStreamer : public VTKBaseStreamer {
         void                    addData( std::string, std::vector<T> & ) ;
         void                    removeData( std::string ) ;
         void                    flushData( std::fstream &, std::string, VTKFormat) override ;
-        void                    absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t) override ;
+        void                    absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t, VTKDataType) override ;
 };
 
 class VTKField{
