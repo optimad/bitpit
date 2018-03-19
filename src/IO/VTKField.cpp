@@ -266,7 +266,9 @@ bool VTKField::hasAllMetaData() const{
  * @param[in] str file stream
  */
 void  VTKField::write( std::fstream &str) const{ 
-    m_streamer->flushData( str, m_name, m_codification) ;
+    if(m_streamer){
+        m_streamer->flushData( str, m_name, m_codification) ;
+    }
 }
 
 /*!
@@ -276,7 +278,9 @@ void  VTKField::write( std::fstream &str) const{
  * @param[in] components size of subgroup
  */
 void VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
-    m_streamer->absorbData( str, m_name, m_codification, entries, components) ;
+    if(m_streamer){
+        m_streamer->absorbData( str, m_name, m_codification, entries, components) ;
+    }
 }
 
 }
