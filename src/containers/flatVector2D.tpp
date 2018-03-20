@@ -434,6 +434,31 @@ void FlatVector2D<T>::clear(bool release)
 }
 
 /*!
+    Clears the items.
+
+    Removes all items stored in the vectors (which are destroyed), leaving
+    each vector with a size of 0.
+
+    \param release if it's true the memory hold by the container will be
+    released, otherwise the container will be cleared but its memory will
+    not be relased
+*/
+template <class T>
+void FlatVector2D<T>::clearItems(bool release)
+{
+    std::size_t nVectors = size();
+    if (release) {
+        std::vector<T>(0).swap(m_v);
+
+        std::vector<size_t>(nVectors + 1, 0L).swap(m_index);
+    } else {
+        m_v.clear();
+
+        m_index.assign(nVectors + 1, 0L);
+    }
+}
+
+/*!
     Shrinks to fit
 
     Requests the container to reduce its capacity to fit its size.

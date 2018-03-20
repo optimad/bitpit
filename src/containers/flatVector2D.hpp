@@ -102,6 +102,7 @@ public:
     bool empty() const;
 
     void clear(bool release = true);
+    void clearItems(bool release = true);
     void shrinkToFit();
 
     const std::size_t * indices() const noexcept;
