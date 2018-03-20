@@ -428,6 +428,7 @@ class VTKUnstructuredGrid : public VTK {
         void                    writeCollection() override ;
 
         uint64_t                readConnectivityEntries( ) ;
+        uint64_t                readFaceStreamEntries( ) ;
 
         void                    setElementType( VTKElementType ) ;
 

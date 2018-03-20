@@ -349,6 +349,78 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
 
 }
 
+/*!
+ * Reading the total number of entries in the face stream of the vtu file
+ * \return total number of faces entries
+ */
+uint64_t VTKUnstructuredGrid::readFaceStreamEntries( ){
+    uint64_t                 nface(0) ;
+    std::fstream             str  ;
+    std::fstream::pos_type   position_appended;
+    std::string              line;
+    char                     c_ ;
+    uint32_t                 nbytes32 ;
+    uint64_t                 nbytes64 ;
+
+    // Geometry id of the facestream
+    int facestream_gid = getFieldGeomId(VTKUnstructuredField::FACE_STREAMS);
+    if(facestream_gid < 0 ) return nface;
+    if(!m_geometry[facestream_gid].hasAllMetaData()) return nface;
+
+    if( m_geometry[facestream_gid].getCodification() == VTKFormat::APPENDED ){
+        str.open( m_fh.getPath( ), std::ios::in ) ;
+        //Go to the initial position of the appended section
+        while( getline(str, line) && (! bitpit::utils::string::keywordInString( line, "<AppendedData")) ){}
+        str >> c_;
+        while( c_ != '_') str >> c_;
+        position_appended = str.tellg();
+        str.close();
+    }
+
+    //Open in binary for read
+    if( m_geometry[facestream_gid].getCodification() == VTKFormat::APPENDED ){
+        str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
+        str.seekg( position_appended) ;
+        str.seekg( m_geometry[facestream_gid].getOffset(), std::ios::cur) ;
+
+        int dataSize = VTKTypes::sizeOfType( m_geometry[facestream_gid].getDataType() ) ;
+        assert(dataSize > 0) ;
+
+        if( m_headerType== "UInt32") {
+            genericIO::absorbBINARY( str, nbytes32 ) ;
+            nface = nbytes32 / dataSize ;
+        }
+
+        if( m_headerType== "UInt64") {
+            genericIO::absorbBINARY( str, nbytes64 ) ;
+            nface = nbytes64 / dataSize ;
+        }
+    }
+
+    //Open in ASCII for read
+    if(  m_geometry[facestream_gid].getCodification() == VTKFormat::ASCII ){
+        str.open( m_fh.getPath( ), std::ios::in );
+        str.seekg( m_geometry[facestream_gid].getPosition() ) ;
+
+        std::string              line ;
+        std::vector<uint64_t>    temp;
+
+        nface = 0 ;
+
+        getline( str, line) ;
+        while( ! bitpit::utils::string::keywordInString(line,"/DataArray") ) {
+            temp.clear() ;
+            bitpit::utils::string::convertString( line, temp) ;
+            nface += temp.size() ;
+            getline( str, line) ;
+        }
+
+        str.close();
+    }
+
+    return nface ;
+}
+
 /*!  
  *  Writes entire VTU but the data.
  */
@@ -499,7 +571,7 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     str.close() ;
 
     if( m_elementType == VTKElementType::UNDEFINED) {
-        setDimensions( m_cells, m_points, readConnectivityEntries() ) ;
+        setDimensions( m_cells, m_points, readConnectivityEntries(), readFaceStreamEntries() ) ;
     } else {
         // Metadata information read form file may not match the information
         // set in our own streamer. If the grid is homogeneous, we need to
