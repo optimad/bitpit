@@ -5023,7 +5023,8 @@ void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat fo
 			std::size_t vertexRawId = itr.getRawIndex();
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
-				genericIO::flushBINARY(stream, vertexVTKId);
+				std::size_t vertexId = itr.getId();
+				genericIO::flushBINARY(stream, vertexId);
 			}
 		}
 #if BITPIT_ENABLE_MPI==1
