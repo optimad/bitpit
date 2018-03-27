@@ -788,7 +788,7 @@ std::vector<adaption::Info> VolOctree::_adaptionAlter(bool trackAdaption)
 	// Updating the tree
 	log::cout() << ">> Adapting tree...";
 
-	bool emtpyPatch   = (getCellCount() == 0);
+	bool emtpyPatch = empty();
 	bool buildMapping = !emtpyPatch;
 	bool updated = m_tree->adapt(buildMapping);
 
@@ -839,7 +839,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	// In import-from-scratch mode we start form an empty patch and we need
 	// to import all the octants of the tree. If we are importing the tree
 	// from scratch there are no cells to delete/renumber.
-	bool importFromScratch = (getCellCount() == 0);
+	bool importFromScratch = empty();
 
 	// Last operation on the tree
 	ParaTree::Operation lastTreeOperation = m_tree->getLastOperation();
