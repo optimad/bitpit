@@ -269,6 +269,8 @@ public:
 	VertexConstIterator vertexConstBegin() const;
 	VertexConstIterator vertexConstEnd() const;
 
+	bool empty() const;
+
 	virtual long getCellCount() const;
 	long getInternalCount() const;
 	long getGhostCount() const;

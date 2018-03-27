@@ -1514,6 +1514,23 @@ const std::array<double, 3> & PatchKernel::getVertexCoords(const long &id) const
 }
 
 /*!
+	Return true if the patch is emtpy.
+
+	\return Return true if the patch is emtpy.
+*/
+bool PatchKernel::empty() const
+{
+	bool isEmpty = (getCellCount() == 0);
+#if BITPIT_ENABLE_MPI==1
+	if (isPartitioned()) {
+		MPI_Allreduce(MPI_IN_PLACE, &isEmpty, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+	}
+#endif
+
+	return isEmpty;
+}
+
+/*!
 	Gets the number of cells in the patch.
 
 	\return The number of cells in the patch
