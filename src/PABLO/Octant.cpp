@@ -602,7 +602,7 @@ void		Octant::getNormal(uint8_t iface, i8array3 & normal, const int8_t (&normals
  */
 uint64_t	Octant::computeMorton() const{
 	uint64_t morton = 0;
-	morton = mortonEncode_magicbits(this->m_x,this->m_y,this->m_z);
+	morton = PABLO::computeMorton(this->m_x,this->m_y,this->m_z);
 	return morton;
 };
 
@@ -613,7 +613,7 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 
 	u32array3 node = getNode(inode);
 
-	return keyXYZ(node[0], node[1], node[2], Global::getMaxLevel());
+	return PABLO::computeXYZKey(node[0], node[1], node[2], Global::getMaxLevel());
 };
 
 /** Get the size of the buffer required to communicate the octant.
@@ -851,7 +851,7 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
 			for (i=0; i<nneigh; i++){
 				cy = (i==1)||(i==3);
 				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = mortonEncode_magicbits(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -860,7 +860,7 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
 			for (i=0; i<nneigh; i++){
 				cy = (i==1)||(i==3);
 				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -869,7 +869,7 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
 			for (i=0; i<nneigh; i++){
 				cx = (i==1)||(i==3);
 				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -878,7 +878,7 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
 			for (i=0; i<nneigh; i++){
 				cx = (i==1)||(i==3);
 				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -887,7 +887,7 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
 			for (i=0; i<nneigh; i++){
 				cx = (i==1)||(i==3);
 				cy = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
 			}
 		}
 		break;
@@ -896,7 +896,7 @@ vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf)
 			for (i=0; i<nneigh; i++){
 				cx = (i==1)||(i==3);
 				cy = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
 			}
 		}
 		break;
@@ -939,7 +939,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 			for (i=0; i<nneigh; i++){
 				cz = (m_dim-2)*(i%nline);
 				cy = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = mortonEncode_magicbits(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -948,7 +948,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 			for (i=0; i<nneigh; i++){
 				cz = (m_dim-2)*(i%nline);
 				cy = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -957,7 +957,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 			for (i=0; i<nneigh; i++){
 				cz = (m_dim-2)*(i%nline);
 				cx = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -966,7 +966,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 			for (i=0; i<nneigh; i++){
 				cz = (m_dim-2)*(i%nline);
 				cx = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -975,7 +975,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 			for (i=0; i<nneigh; i++){
 				cx = (i/nline);
 				cy = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
 			}
 		}
 		break;
@@ -984,7 +984,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
 			for (i=0; i<nneigh; i++){
 				cx = (i/nline);
 				cy = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
 			}
 		}
 		break;
@@ -1052,7 +1052,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = -1;
 				cy = (i==1);
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1062,7 +1062,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = 1;
 				cy = (i==1);
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1072,7 +1072,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = (i==1);
 				cy = -1;
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1082,7 +1082,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = (i==1);
 				cy = 1;
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1092,7 +1092,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = -1;
 				cy = -1;
 				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1102,7 +1102,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = 1;
 				cy = -1;
 				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1112,7 +1112,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = -1;
 				cy = 1;
 				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1122,7 +1122,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = 1;
 				cy = 1;
 				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1132,7 +1132,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = -1;
 				cy = (i==1);
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1142,7 +1142,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = 1;
 				cy = (i==1);
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1152,7 +1152,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = (i==1);
 				cy = -1;
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1162,7 +1162,7 @@ vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & siz
 				cx = (i==1);
 				cy = 1;
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1211,7 +1211,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = -1;
 				cy = i;
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1221,7 +1221,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = 1;
 				cy = i;
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1231,7 +1231,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = i;
 				cy = -1;
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1241,7 +1241,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = i;
 				cy = 1;
 				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1251,7 +1251,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = -1;
 				cy = -1;
 				cz = i;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1261,7 +1261,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = 1;
 				cy = -1;
 				cz = i;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1271,7 +1271,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = -1;
 				cy = 1;
 				cz = i;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1281,7 +1281,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = 1;
 				cy = 1;
 				cz = i;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 			}
 		}
 		break;
@@ -1291,7 +1291,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = -1;
 				cy = i;
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1301,7 +1301,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = 1;
 				cy = i;
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1311,7 +1311,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = i;
 				cy = -1;
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1321,7 +1321,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
 				cx = i;
 				cy = 1;
 				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
 			}
 		}
 		break;
@@ -1388,7 +1388,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = -1;
 		cy = -1;
 		cz = -1*(m_dim-2);
-		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 1 :
@@ -1396,7 +1396,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = 1;
 		cy = -1;
 		cz = -1*(m_dim-2);
-		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 2 :
@@ -1404,7 +1404,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = -1;
 		cy = 1;
 		cz = -1*(m_dim-2);
-		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 3 :
@@ -1412,7 +1412,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = 1;
 		cy = 1;
 		cz = -1*(m_dim-2);
-		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 4 :
@@ -1420,7 +1420,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = -1;
 		cy = -1;
 		cz = 1;
-		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 	}
 	break;
 	case 5 :
@@ -1428,7 +1428,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = 1;
 		cy = -1;
 		cz = 1;
-		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 	}
 	break;
 	case 6 :
@@ -1436,7 +1436,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = -1;
 		cy = 1;
 		cz = 1;
-		Morton = mortonEncode_magicbits(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
 	}
 	break;
 	case 7 :
@@ -1444,7 +1444,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		cx = 1;
 		cy = 1;
 		cz = 1;
-		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
 	}
 	break;
 	default:
@@ -1488,32 +1488,32 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
 		switch (iface) {
 		case 0 :
 		{
-			Morton = mortonEncode_magicbits(maxLength-dh,this->m_y,this->m_z);
+			Morton = PABLO::computeMorton(maxLength-dh,this->m_y,this->m_z);
 		}
 		break;
 		case 1 :
 		{
-			Morton = mortonEncode_magicbits(0,this->m_y,this->m_z);
+			Morton = PABLO::computeMorton(0,this->m_y,this->m_z);
 		}
 		break;
 		case 2 :
 		{
-			Morton = mortonEncode_magicbits(this->m_x,maxLength-dh,this->m_z);
+			Morton = PABLO::computeMorton(this->m_x,maxLength-dh,this->m_z);
 		}
 		break;
 		case 3 :
 		{
-			Morton = mortonEncode_magicbits(this->m_x,0,this->m_z);
+			Morton = PABLO::computeMorton(this->m_x,0,this->m_z);
 		}
 		break;
 		case 4 :
 		{
-			Morton = mortonEncode_magicbits(this->m_x,this->m_y,maxLength-dh);
+			Morton = PABLO::computeMorton(this->m_x,this->m_y,maxLength-dh);
 		}
 		break;
 		case 5 :
 		{
-			Morton = mortonEncode_magicbits(this->m_x,this->m_y,0);
+			Morton = PABLO::computeMorton(this->m_x,this->m_y,0);
 		}
 		break;
 		default:

@@ -3611,7 +3611,7 @@ namespace bitpit {
             }
 
             for (auto &node : octnodes){
-                uint64_t morton = keyXYZ(node[0], node[1], node[2], m_global.m_maxLevel);
+                uint64_t morton = PABLO::computeXYZKey(node[0], node[1], node[2], m_global.m_maxLevel);
                 if (nodeCoords.count(morton) == 0) {
                     mortonList.push_back(morton);
                     nodeCoords.insert({{morton, std::move(node)}});

@@ -26,7 +26,8 @@
 #define __BITPIT_PABLO_OCTANT_HPP__
 
 // INCLUDES                                                                            //
-#include "inlinedFunct.hpp"
+#include "morton.hpp"
+
 #include <vector>
 #include <bitset>
 #include <array>

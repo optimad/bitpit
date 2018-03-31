@@ -2936,7 +2936,7 @@ namespace bitpit {
         if (x == m_global.m_maxLength) x = x - 1;
         if (y == m_global.m_maxLength) y = y - 1;
         if (z == m_global.m_maxLength) z = z - 1;
-        morton = mortonEncode_magicbits(x,y,z);
+        morton = PABLO::computeMorton(x,y,z);
 
 
         powner = 0;
@@ -3015,7 +3015,7 @@ namespace bitpit {
         if (x == m_global.m_maxLength) x = x - 1;
         if (y == m_global.m_maxLength) y = y - 1;
         if (z == m_global.m_maxLength) z = z - 1;
-        morton = mortonEncode_magicbits(x,y,z);
+        morton = PABLO::computeMorton(x,y,z);
 
 
         powner = 0;
