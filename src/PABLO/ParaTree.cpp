@@ -31,6 +31,7 @@
 #endif
 
 #include "ParaTree.hpp"
+#include <climits>
 #include <sstream>
 #include <iomanip>
 #include <fstream>
