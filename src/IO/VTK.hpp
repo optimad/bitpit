@@ -328,10 +328,10 @@ class VTK{
 
         VTKField&               addData( VTKField &&field ) ;
 
-        VTKField&               addData( std::string, VTKBaseStreamer* = NULL ) ;
+        VTKField&               addData( std::string, VTKBaseStreamer* = nullptr ) ;
 
         template<class T>
-        VTKField&               addData( std::string, VTKFieldType, VTKLocation, VTKBaseStreamer* =NULL ) ;
+        VTKField&               addData( std::string, VTKFieldType, VTKLocation, VTKBaseStreamer* = nullptr ) ;
 
         template<class T>
         VTKField&               addData( std::string, std::vector<T> & ) ;
@@ -441,10 +441,10 @@ class VTKUnstructuredGrid : public VTK {
 
         template<class T>
         void                    setGeomData( VTKUnstructuredField, std::vector<T> & ) ;
-        void                    setGeomData( VTKUnstructuredField, VTKBaseStreamer* = NULL ) ;
+        void                    setGeomData( VTKUnstructuredField, VTKBaseStreamer* = nullptr ) ;
 
         template<class T>
-        void setGeomData( VTKUnstructuredField, VTKBaseStreamer* =NULL );
+        void setGeomData( VTKUnstructuredField, VTKBaseStreamer* = nullptr );
 
         uint64_t                calcConnectivityEntries( ) ;
         uint64_t                calcFieldSize( const VTKField &) override ;
@@ -494,10 +494,10 @@ class VTKRectilinearGrid : public VTK{
 
         template<class T>
         void                    setGeomData( VTKRectilinearField, std::vector<T> & ) ;
-        void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* = NULL ) ;
+        void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* = nullptr ) ;
 
         template<class T>
-        void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* =NULL ) ;
+        void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* = nullptr ) ;
 
         void                    setGlobalIndex( std::vector<extension3D_t> ) ;
         void                    setGlobalIndex( std::vector<extension2D_t> ) ;

@@ -52,7 +52,7 @@ VTKField::VTKField(){
     m_offset          = 0 ;
     m_fieldType       = VTKFieldType::UNDEFINED ;
     m_position        = 0 ;
-    m_streamer        = NULL ;
+    m_streamer        = nullptr ;
     m_enabled         = true ;
 
 }
@@ -255,7 +255,7 @@ bool VTKField::hasAllMetaData() const{
     allData = allData && m_location != VTKLocation::UNDEFINED ;
     allData = allData && m_codification != VTKFormat::UNDEFINED ;
     allData = allData && m_fieldType != VTKFieldType::UNDEFINED ; 
-    allData = allData && m_streamer != NULL   ;
+    allData = allData && m_streamer != nullptr ;
 
     return allData;
 

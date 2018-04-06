@@ -35,7 +35,7 @@ namespace bitpit{
  */
 template<class T>
 VTKVectorContainer<T>::~VTKVectorContainer( ){
-    m_ptr = NULL;
+    m_ptr = nullptr;
 }
 
 /*!
