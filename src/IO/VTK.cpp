@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <cassert>
+#include <unordered_set>
 
 #include "VTK.hpp"
 
@@ -1111,6 +1112,7 @@ void VTK::readData( ){
 /*!
  * Reads data headers from stream.
  * All field information available in file are stored.
+ * All pre-existent fields not found in the header will be disabled.
  * @param[in] str output stream
  */
 void VTK::readDataHeader( std::fstream &str ){
@@ -1129,6 +1131,13 @@ void VTK::readDataHeader( std::fstream &str ){
     VTKField*               ptemp ;
 
 
+    // Mark all fields as unused
+    std::unordered_set<VTKField *> unusedFields;
+    for (VTKField &field : m_data) {
+        unusedFields.insert(&field);
+    }
+
+    // Read header
     for( int i=0; i<2; i++){
 
         ss.str("") ;
@@ -1177,6 +1186,10 @@ void VTK::readDataHeader( std::fstream &str ){
                     ptemp->setCodification( temp.getCodification() ) ;
                     ptemp->setPosition( temp.getPosition() ) ;
 
+                    // The field should not be marked as unused
+                    if( unusedFields.count(ptemp) > 0 ){
+                        unusedFields.erase(ptemp);
+                    }
                 }
 
             }
@@ -1187,6 +1200,10 @@ void VTK::readDataHeader( std::fstream &str ){
 
     }
 
+    // Disable all unused fields
+    for (VTKField *field : unusedFields) {
+        field->disable();
+    }
 }
 
 /*!
