@@ -284,28 +284,27 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
     uint32_t                 nbytes32 ;
     uint64_t                 nbytes64 ;
 
-    str.open( m_fh.getPath( ), std::ios::in ) ;
-
     // Geometry id of the connectivity
     int connectivity_gid = getFieldGeomId(VTKUnstructuredField::CONNECTIVITY);
+    if(connectivity_gid < 0)    return nconn;
 
-    //Read appended data
-    //Go to the initial position of the appended section
-    while( getline(str, line) && (! bitpit::utils::string::keywordInString( line, "<AppendedData")) ){}
-
-    str >> c_;
-    while( c_ != '_') str >> c_;
-
-    position_appended = str.tellg();
-
-
-    str.close();
-    str.clear();
-
-    //Open in binary for read
-    str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
+    if(!m_geometry[connectivity_gid].hasAllMetaData()){
+        throw std::runtime_error("VTKUnstructuredGrid::readConnectivityEntries. Connectivity is missing meta information");
+    }
 
     if( m_geometry[connectivity_gid].getCodification() == VTKFormat::APPENDED ){
+        str.open( m_fh.getPath( ), std::ios::in ) ;
+        //Go to the initial position of the appended section
+        while( getline(str, line) && (! bitpit::utils::string::keywordInString( line, "<AppendedData")) ){}
+        str >> c_;
+        while( c_ != '_') str >> c_;
+        position_appended = str.tellg();
+        str.close();
+    }
+
+    //Open in binary for read
+    if( m_geometry[connectivity_gid].getCodification() == VTKFormat::APPENDED ){
+        str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
         str.seekg( position_appended) ;
         str.seekg( m_geometry[connectivity_gid].getOffset(), std::ios::cur) ;
 
@@ -321,11 +320,14 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
             genericIO::absorbBINARY( str, nbytes64 ) ;
             nconn = nbytes64 / dataSize ;
         }
+        str.close();
     }
 
 
-    //Read geometry
+
+    //Open in ascii for read
     if(  m_geometry[connectivity_gid].getCodification() == VTKFormat::ASCII ){
+        str.open( m_fh.getPath( ), std::ios::in);
         str.seekg( m_geometry[connectivity_gid].getPosition() ) ;
 
         std::string              line ;
@@ -341,9 +343,8 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
             getline( str, line) ;
         }
 
+        str.close();
     }
-
-    str.close();
 
     return nconn ;
 
