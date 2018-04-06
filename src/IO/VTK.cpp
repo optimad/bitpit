@@ -1025,17 +1025,19 @@ void VTK::readData( ){
         //Read appended data
         for( auto & field : m_data){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
+                str.clear();
                 str.seekg( position_appended) ;
                 str.seekg( field.getOffset(), std::ios::cur) ;
                 if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
                 if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
+                std::fstream::pos_type position_before = str.tellg();
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
 #if BITPIT_ENABLE_DEBUG
-                std::fstream::pos_type position_before = str.tellg();
-                if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
+                if( uint64_t(str.tellg()-position_before) != calcFieldSize(field) ){
                     log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
+                    log::cout() << "Found data chunk dimension of : "<<  uint64_t(str.tellg()-position_before)<<" different from estimated field size : " <<calcFieldSize(field)<<std::endl;
                 }
 #endif
 
@@ -1045,17 +1047,19 @@ void VTK::readData( ){
         //Read appended m_geometry
         for( auto & field : m_geometry ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED){
+                str.clear();
                 str.seekg( position_appended) ;
                 str.seekg( field.getOffset(), std::ios::cur) ;
                 if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
                 if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
+                std::fstream::pos_type position_before = str.tellg();
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
 #if BITPIT_ENABLE_DEBUG
-                std::fstream::pos_type position_before = str.tellg();
-                if( (uint64_t) str.tellg()-position_before != calcFieldSize(field) ){
+                if( uint64_t(str.tellg()-position_before) != calcFieldSize(field) ){
                     log::cout() << "Warning VTK: Size of data read does not corrispond to size of field " << field.getName() << std::endl;
+                    log::cout() << "Found data chunk dimension of : "<< uint64_t(str.tellg()-position_before)<<" different from estimated field size : " <<calcFieldSize(field)<<std::endl;
                 }
 #endif
             }
