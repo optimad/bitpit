@@ -250,12 +250,12 @@ bool VTKField::hasAllMetaData() const{
 
     bool allData(true);
 
-    allData = allData && m_name != "undefined" ;  
-    allData = allData && m_dataType != VTKDataType::UNDEFINED ;
-    allData = allData && m_location != VTKLocation::UNDEFINED ;
-    allData = allData && m_codification != VTKFormat::UNDEFINED ;
-    allData = allData && m_fieldType != VTKFieldType::UNDEFINED ; 
-    allData = allData && m_streamer != nullptr ;
+    allData &= m_name != "undefined" ;
+    allData &= m_dataType != VTKDataType::UNDEFINED ;
+    allData &= m_location != VTKLocation::UNDEFINED ;
+    allData &= m_codification != VTKFormat::UNDEFINED ;
+    allData &= m_fieldType != VTKFieldType::UNDEFINED ;
+    allData &= m_streamer != nullptr ;
 
     return allData;
 
