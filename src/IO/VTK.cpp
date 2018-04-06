@@ -1109,7 +1109,7 @@ void VTK::readData( ){
 }
 
 /*!
- * Reads data headers from strean.
+ * Reads data headers from stream.
  * All field information available in file are stored.
  * @param[in] str output stream
  */
@@ -1190,7 +1190,7 @@ void VTK::readDataHeader( std::fstream &str ){
 }
 
 /*!
- * Reads data array from stream and stores in field information
+ * Reads data array information from stream and stores in field.
  * @param[in]  str output stream
  * @param[out] field field information
  */
