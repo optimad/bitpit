@@ -558,13 +558,14 @@ void VTKUnstructuredGrid::readMetaInformation( ){
     position = str.tellg() ;
     readDataHeader( str ) ;
 
-
+    // Read metadata information
     for( auto &field : m_geometry ){ 
         str.seekg( position) ;
         if( ! readDataArray( str, field ) ) {
 #if BITPIT_ENABLE_DEBUG
-            log::cout() << field.getName() << " DataArray not found" << std::endl ;
+            log::cout() <<"Geometry field " << field.getName() << " not found, it will be disabled" << std::endl ;
 #endif
+            field.disable();
         }
     }
 
