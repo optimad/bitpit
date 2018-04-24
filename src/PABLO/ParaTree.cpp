@@ -5504,10 +5504,8 @@ namespace bitpit {
             nextLayerHaloSources.clear();
 
             std::vector<long> &currentLayerHaloSources = haloLayerSources[currentHaloSourceDepth % 2];
-            std::size_t haloSourceListCursor = currentLayerHaloSources.size();
-            while (haloSourceListCursor > 0) {
-                --haloSourceListCursor;
-                long idx = currentLayerHaloSources[haloSourceListCursor];
+            for (auto itr = currentLayerHaloSources.rbegin(); itr != currentLayerHaloSources.rend(); ++itr) {
+                long idx = *itr;
                 if (oneRingGlobalAdjacencies.count(idx) != 0) {
                     continue;
                 }
