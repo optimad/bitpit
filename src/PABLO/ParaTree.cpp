@@ -5553,7 +5553,7 @@ namespace bitpit {
 
         //fill first layer with pborders
         for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
-            for(const uint32_t &pborder : p_pborders.second){
+            for(uint32_t pborder : p_pborders.second){
                 uint64_t globalPborder = getGlobalIdx(pborder);
                 whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(globalPborder);
                 if(whereAndIfWasInserted.second)
@@ -5564,8 +5564,8 @@ namespace bitpit {
         //fill following layers
         for(uint32_t layer = 1; layer < m_nofGhostLayers; ++layer){
             for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
-                for(const uint32_t &pborder : p_pborders.second){
-                    for(const uint64_t & neigh : augmentedGlobalAdjacencies.at(pborder)){
+                for(uint32_t pborder : p_pborders.second){
+                    for(uint64_t neigh : augmentedGlobalAdjacencies.at(pborder)){
                         if(getOwnerRank(neigh) != p_pborders.first){
                             whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(neigh);
                             if(whereAndIfWasInserted.second)
