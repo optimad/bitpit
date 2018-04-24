@@ -5701,7 +5701,7 @@ namespace bitpit {
             senderGlobalComm.startAllRecvs();
             senderGlobalComm.startAllSends();
 
-            vector<int> recvRanks = senderGlobalComm.getRecvRanks();
+            const std::vector<int> &recvRanks = senderGlobalComm.getRecvRanks();
             for(int rank : recvRanks){
                 senderGlobalComm.waitRecv(rank);
                 RecvBuffer & recvBuffer = senderGlobalComm.getRecvBuffer(rank);
@@ -5744,7 +5744,7 @@ namespace bitpit {
         askGhostToOwnerComm.startAllSends();
 
         std::unordered_map<int,std::map<uint64_t,uint32_t>> internalsToBeSentAsGhostPerProc;
-        std::vector<int> recvRanks = askGhostToOwnerComm.getRecvRanks();
+        const std::vector<int> &recvRanks = askGhostToOwnerComm.getRecvRanks();
         for(int rank : recvRanks){
             askGhostToOwnerComm.waitRecv(rank);
             RecvBuffer & recvBuffer = askGhostToOwnerComm.getRecvBuffer(rank);
