@@ -5488,26 +5488,26 @@ namespace bitpit {
         // Layer sources are stored inside vectors because it is cheaper to
         // add duplicates and discard them later instead of trying to avoid
         // adding the duplicates (e.g., storing the sources using a set).
-        std::array<std::vector<long>, 2> haloSourceLists;
-        haloSourceLists[0].reserve(getNumOctants());
-        haloSourceLists[1].reserve(getNumOctants());
+        std::array<std::vector<long>, 2> haloLayerSources;
+        haloLayerSources[0].reserve(getNumOctants());
+        haloLayerSources[1].reserve(getNumOctants());
 
         for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
             for(uint32_t pborder : p_pborders.second){
-                haloSourceLists[0].push_back(pborder);
+                haloLayerSources[0].push_back(pborder);
             }
         }
 
         std::unordered_map<uint32_t, std::unordered_set<uint64_t>> oneRingGlobalAdjacencies;
         for (uint32_t currentHaloSourceDepth = 0; currentHaloSourceDepth < m_nofGhostLayers; ++currentHaloSourceDepth) {
-            std::vector<long> &backHaloSourceList = haloSourceLists[(currentHaloSourceDepth + 1) % 2];
-            backHaloSourceList.clear();
+            std::vector<long> &nextLayerHaloSources = haloLayerSources[(currentHaloSourceDepth + 1) % 2];
+            nextLayerHaloSources.clear();
 
-            std::vector<long> &frontHaloSourceList = haloSourceLists[currentHaloSourceDepth % 2];
-            std::size_t haloSourceListCursor = frontHaloSourceList.size();
+            std::vector<long> &currentLayerHaloSources = haloLayerSources[currentHaloSourceDepth % 2];
+            std::size_t haloSourceListCursor = currentLayerHaloSources.size();
             while (haloSourceListCursor > 0) {
                 --haloSourceListCursor;
-                long idx = frontHaloSourceList[haloSourceListCursor];
+                long idx = currentLayerHaloSources[haloSourceListCursor];
                 if (oneRingGlobalAdjacencies.count(idx) != 0) {
                     continue;
                 }
@@ -5532,7 +5532,7 @@ namespace bitpit {
                             continue;
                         }
 
-                        backHaloSourceList.push_back(sourceLocalAdjacency);
+                        nextLayerHaloSources.push_back(sourceLocalAdjacency);
                     }
                 }
             }
