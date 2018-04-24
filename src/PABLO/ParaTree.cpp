@@ -5476,7 +5476,18 @@ namespace bitpit {
             global2localGhost[ghostGlobal] = g;
         }
 
-        //compute adjacencies of halo sources
+        // Halo sources and their adjacencies
+        //
+        // The sources are found in using a marching algorithm. We start from
+        // the sources of the first layer (which are known, because the first
+        // ghost of layers is fully built). The adjacencies of those sources
+        // are found and stored. The adjacencies that are not among the known
+        // sources are the sources of the next layer. These new sources are
+        // processed as the one of the previous layer and so on so forth.
+        //
+        // Layer sources are stored inside vectors because it is cheaper to
+        // add duplicates and discard them later instead of trying to avoid
+        // adding the duplicates (e.g., storing the sources using a set).
         std::array<std::vector<long>, 2> haloSourceLists;
         haloSourceLists[0].reserve(getNumOctants());
         haloSourceLists[1].reserve(getNumOctants());
@@ -5501,11 +5512,13 @@ namespace bitpit {
                     continue;
                 }
 
-                //find the adjacencies of the source
+                // Find the neighbours of the current source
                 std::unordered_set<uint64_t> &sourceGlobalAdjacencies = oneRingGlobalAdjacencies[idx];
                 findAllGlobalNeighbours(idx, sourceGlobalAdjacencies);
 
-                //add the adjacencies of the source to the source list
+                // Add the internal neighbours that are not among the known
+                // sources to the sources of next layer. We don't need to
+                // build the sources past the last layer.
                 if (currentHaloSourceDepth < m_nofGhostLayers - 1) {
                     for (uint64_t sourceGlobalAdjacency : sourceGlobalAdjacencies) {
                         int rank;
@@ -5527,10 +5540,10 @@ namespace bitpit {
 
         std::unordered_map<uint32_t, std::unordered_set<uint64_t> > augmentedGlobalAdjacencies = oneRingGlobalAdjacencies;
 
-        //initialize information needed for building ghost layer
+        // Initialize information needed for building ghost layer
         //
-        //The map with the global ghost ids has the following structure:
-        //  senderGlobalGhostPerLayerPerProc[layer][rank][global]
+        // The map with the global ghost ids has the following structure:
+        //    senderGlobalGhostPerLayerPerProc[layer][rank][global]
         std::vector<std::unordered_map<int,std::unordered_set<uint64_t>>> senderGlobalGhostPerLayerPerProc(m_nofGhostLayers);
 
         std::pair<std::unordered_set<uint64_t>::iterator,bool> whereAndIfWasInserted;
