@@ -5248,6 +5248,9 @@ namespace bitpit {
         //this map contains the local octants as ghosts for neighbor processes
 
         // NO PBORDERS !
+        //
+        // TODO: provide an estimate of the border octants in order to reserve
+        // the vectors that will contain them.
         LocalTree::octvector::iterator end = m_octree.m_octants.end();
         LocalTree::octvector::iterator begin = m_octree.m_octants.begin();
         m_bordersPerProc.clear();
@@ -5333,11 +5336,7 @@ namespace bitpit {
             for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
                 int p = *pit;
                 if(p != m_rank){
-                    //TODO better reserve to avoid if
                     m_bordersPerProc[p].push_back(distance(begin,it));
-                    vector<uint32_t> & bordersSingleProc = m_bordersPerProc[p];
-                    if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
-                        bordersSingleProc.reserve(2*bordersSingleProc.size());
                 }
             }
 
