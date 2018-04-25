@@ -5679,7 +5679,7 @@ namespace bitpit {
         {
             //COMMUNICATE SENDER GHOST GLOBAL
             DataCommunicator senderGlobalComm(m_comm);
-            for(const std::pair<int,std::map<uint64_t,uint32_t>> &procSenderGhost :senderGhostPerProcWithLayer){
+            for(const auto &procSenderGhost :senderGhostPerProcWithLayer){
                 size_t procSenderGhostSize = procSenderGhost.second.size();
                 size_t buffSize = 0;
                 buffSize += sizeof(std::size_t);
@@ -5687,7 +5687,7 @@ namespace bitpit {
                 senderGlobalComm.setSend(procSenderGhost.first,buffSize);
                 SendBuffer & sendBuffer = senderGlobalComm.getSendBuffer(procSenderGhost.first);
                 sendBuffer << procSenderGhostSize;
-                for(const std::pair<uint64_t,uint32_t> &g : procSenderGhost.second){
+                for(const auto &g : procSenderGhost.second){
                     sendBuffer << g.first;
                     sendBuffer << g.second;
                 }
@@ -5717,7 +5717,7 @@ namespace bitpit {
         }
         //ASK GHOST to owners
         DataCommunicator askGhostToOwnerComm(m_comm);
-        for(const std::pair<int,std::map<uint64_t,uint32_t>> &rankGhostsLayer : ghostReqestList){
+        for(const auto &rankGhostsLayer : ghostReqestList){
             size_t buffSize = 0;
             size_t nofGhostPerProc = rankGhostsLayer.second.size();
             buffSize += sizeof(size_t);
@@ -5725,7 +5725,7 @@ namespace bitpit {
             askGhostToOwnerComm.setSend(rankGhostsLayer.first,buffSize);
             SendBuffer & sendBuffer = askGhostToOwnerComm.getSendBuffer(rankGhostsLayer.first);
             sendBuffer << nofGhostPerProc;
-            for(const std::pair<uint64_t,uint32_t> &gl : rankGhostsLayer.second){
+            for(const auto &gl : rankGhostsLayer.second){
                 sendBuffer << gl.first;
                 sendBuffer << gl.second;
             }
@@ -5760,7 +5760,7 @@ namespace bitpit {
         int8_t m;
         bool info[Octant::INFO_ITEM_COUNT];
         DataCommunicator sendInternalsForGhostComm(m_comm);
-        for(const std::pair<int,std::map<uint64_t,uint32_t>> &internalsByProc : internalsToBeSentAsGhostPerProc){
+        for(const auto &internalsByProc : internalsToBeSentAsGhostPerProc){
             u32vector localInternals;
             localInternals.reserve(internalsByProc.second.size());
             size_t buffSize = 0;
@@ -5768,7 +5768,7 @@ namespace bitpit {
             buffSize += (std::size_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes) * nofInternalsByProc;
             sendInternalsForGhostComm.setSend(internalsByProc.first,buffSize);
             SendBuffer & sendBuffer = sendInternalsForGhostComm.getSendBuffer(internalsByProc.first);
-            for(const std::pair<uint64_t,uint32_t> &procInternals : internalsByProc.second){
+            for(const auto &procInternals : internalsByProc.second){
                 uint32_t localInternal = getLocalIdx(procInternals.first);
                 localInternals.push_back(localInternal);
                 const Octant *oct = getOctant(localInternal);
