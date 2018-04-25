@@ -5540,8 +5540,8 @@ namespace bitpit {
         // Initialize information needed for building ghost layer
         //
         // The map with the global ghost ids has the following structure:
-        //    senderGlobalGhostPerLayerPerProc[layer][rank][global]
-        std::vector<std::unordered_map<int,std::unordered_set<uint64_t>>> senderGlobalGhostPerLayerPerProc(m_nofGhostLayers);
+        //    senderGhostPerProcWithLayer[layer][pair(global, rank)]
+        std::unordered_map<int, std::map<uint64_t,uint32_t>> senderGhostPerProcWithLayer;
 
         std::pair<std::unordered_set<uint64_t>::iterator,bool> whereAndIfWasInserted;
 
@@ -5555,8 +5555,11 @@ namespace bitpit {
             for(uint32_t pborder : p_pborders.second){
                 uint64_t globalPborder = getGlobalIdx(pborder);
                 whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(globalPborder);
-                if(whereAndIfWasInserted.second)
-                    senderGlobalGhostPerLayerPerProc[0][p_pborders.first].insert(globalPborder);
+                if(whereAndIfWasInserted.second) {
+                    if(getOwnerRank(globalPborder) != p_pborders.first) {
+                        senderGhostPerProcWithLayer[p_pborders.first].insert({globalPborder, 0});
+                    }
+                }
             }
         }
 
@@ -5568,8 +5571,11 @@ namespace bitpit {
                     for(uint64_t neigh : augmentedGlobalAdjacencies.at(pborder)){
                         if(getOwnerRank(neigh) != p_pborders.first){
                             whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(neigh);
-                            if(whereAndIfWasInserted.second)
-                                senderGlobalGhostPerLayerPerProc[layer][p_pborders.first].insert(neigh);
+                            if(whereAndIfWasInserted.second) {
+                                if(getOwnerRank(neigh) != p_pborders.first) {
+                                    senderGhostPerProcWithLayer[p_pborders.first].insert({neigh, layer});
+                                }
+                            }
                         }
                     }
                 }
@@ -5671,17 +5677,6 @@ namespace bitpit {
         //prepare map for each proc
         std::vector<std::set<uint64_t>> receivedGlobalGhostStorePerLayer(m_nofGhostLayers);
         {
-            std::unordered_map<int,std::map<uint64_t,uint32_t>> senderGhostPerProcWithLayer;
-            for(uint32_t layer = 0; layer < m_nofGhostLayers; ++layer){
-                for(const std::pair<int,std::unordered_set<uint64_t>> &layerProcGhost : senderGlobalGhostPerLayerPerProc[layer]){
-                    int proc = layerProcGhost.first;
-                    for(uint64_t g : layerProcGhost.second){
-                        if(getOwnerRank(g) != proc)
-                            senderGhostPerProcWithLayer[proc].insert({g, layer});
-                    }
-                }
-            }
-
             //COMMUNICATE SENDER GHOST GLOBAL
             DataCommunicator senderGlobalComm(m_comm);
             for(const std::pair<int,std::map<uint64_t,uint32_t>> &procSenderGhost :senderGhostPerProcWithLayer){
