@@ -5561,6 +5561,7 @@ namespace bitpit {
         }
 
         //fill following layers
+        std::vector<std::unordered_set<uint64_t>> ghostGlobalAdjacencies;
         for(uint32_t layer = 1; layer < m_nofGhostLayers; ++layer){
             for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
                 for(uint32_t pborder : p_pborders.second){
@@ -5608,7 +5609,7 @@ namespace bitpit {
                 adjacenciesComm.startAllSends();
 
                 //receive adjacencies on ghosts
-                std::vector<std::unordered_set<uint64_t>> ghostGlobalAdjacencies(nofGhosts);
+                ghostGlobalAdjacencies.resize(nofGhosts);
 
                 int ghostOffset = 0;
                 std::vector<int> recvRanks = adjacenciesComm.getRecvRanks();
