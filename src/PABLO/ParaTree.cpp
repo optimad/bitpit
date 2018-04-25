@@ -5487,7 +5487,7 @@ namespace bitpit {
         // Layer sources are stored inside vectors because it is cheaper to
         // add duplicates and discard them later instead of trying to avoid
         // adding the duplicates (e.g., storing the sources using a set).
-        std::array<std::vector<long>, 2> haloLayerSources;
+        std::array<std::vector<uint32_t>, 2> haloLayerSources;
         haloLayerSources[0].reserve(getNumOctants());
         haloLayerSources[1].reserve(getNumOctants());
 
@@ -5499,12 +5499,12 @@ namespace bitpit {
 
         std::unordered_map<uint32_t, std::unordered_set<uint64_t>> oneRingGlobalAdjacencies;
         for (uint32_t currentHaloSourceDepth = 0; currentHaloSourceDepth < m_nofGhostLayers; ++currentHaloSourceDepth) {
-            std::vector<long> &nextLayerHaloSources = haloLayerSources[(currentHaloSourceDepth + 1) % 2];
+            std::vector<uint32_t> &nextLayerHaloSources = haloLayerSources[(currentHaloSourceDepth + 1) % 2];
             nextLayerHaloSources.clear();
 
-            std::vector<long> &currentLayerHaloSources = haloLayerSources[currentHaloSourceDepth % 2];
+            std::vector<uint32_t> &currentLayerHaloSources = haloLayerSources[currentHaloSourceDepth % 2];
             for (auto itr = currentLayerHaloSources.rbegin(); itr != currentLayerHaloSources.rend(); ++itr) {
-                long idx = *itr;
+                uint32_t idx = *itr;
                 if (oneRingGlobalAdjacencies.count(idx) != 0) {
                     continue;
                 }
