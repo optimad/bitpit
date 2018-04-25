@@ -5675,7 +5675,7 @@ namespace bitpit {
 
         //build ghosts
         //prepare map for each proc
-        std::vector<std::set<uint64_t>> receivedGlobalGhostStorePerLayer(m_nofGhostLayers);
+        std::unordered_map<int, std::map<uint64_t,uint32_t>> ghostReqestList;
         {
             //COMMUNICATE SENDER GHOST GLOBAL
             DataCommunicator senderGlobalComm(m_comm);
@@ -5703,25 +5703,21 @@ namespace bitpit {
                 size_t procReceivedGhostSize;
                 recvBuffer >> procReceivedGhostSize;
                 for(size_t g = 0; g < procReceivedGhostSize; ++g ){
-                    uint64_t tempGlobal;
-                    recvBuffer >> tempGlobal;
-                    uint32_t tempLayer;
-                    recvBuffer >> tempLayer;
-                    receivedGlobalGhostStorePerLayer[tempLayer].insert(tempGlobal);
+                    uint64_t ghostGlobalIdx;
+                    recvBuffer >> ghostGlobalIdx;
+                    uint32_t ghostLayer;
+                    recvBuffer >> ghostLayer;
+
+                    int ghostRank = getOwnerRank(ghostGlobalIdx);
+
+                    ghostReqestList[ghostRank].insert({ghostGlobalIdx, ghostLayer});
                 }
             }
             senderGlobalComm.waitAllSends();
         }
         //ASK GHOST to owners
-        std::unordered_map<int,std::map<uint64_t,uint32_t>> globalGhostPerProcWithLayer;
-        for(uint32_t layer = 0; layer < m_nofGhostLayers; ++layer){
-            for(uint64_t g : receivedGlobalGhostStorePerLayer[layer]){
-                int rank = getOwnerRank(g);
-                globalGhostPerProcWithLayer[rank].insert({g, layer});
-            }
-        }
         DataCommunicator askGhostToOwnerComm(m_comm);
-        for(const std::pair<int,std::map<uint64_t,uint32_t>> &rankGhostsLayer : globalGhostPerProcWithLayer){
+        for(const std::pair<int,std::map<uint64_t,uint32_t>> &rankGhostsLayer : ghostReqestList){
             size_t buffSize = 0;
             size_t nofGhostPerProc = rankGhostsLayer.second.size();
             buffSize += sizeof(size_t);
