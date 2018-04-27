@@ -27,6 +27,7 @@
 // =================================================================================== //
 #include "Global.hpp"
 #include "Octant.hpp"
+#include "bitpit_common.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -1306,7 +1307,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
 	dh2 = getSize();
 
-	uint64_t Morton = this->computeMorton();
+	uint64_t Morton;
 	switch (inode) {
 	case 0 :
 	{
@@ -1372,6 +1373,8 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		Morton = mortonEncode_magicbits(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
 	}
 	break;
+	default:
+		BITPIT_UNREACHABLE("The maximum number of nodes is 8.");
 	}
 	sizem = nneigh;
 	return Morton;
@@ -1399,13 +1402,13 @@ uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxde
  * \return Periodic neighbour morton number.
  */
 uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
-	uint64_t Morton = this->computeMorton();
+	uint64_t Morton;
 	uint32_t dh;
 	dh = getSize();
 	uint32_t maxLength = uint32_t(1)<<Global::getMaxLevel();
 
 	if (!m_info[iface]){
-		return Morton;
+		return this->computeMorton();
 	}
 	else{
 		switch (iface) {
@@ -1439,6 +1442,8 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
 			Morton = mortonEncode_magicbits(this->m_x,this->m_y,0);
 		}
 		break;
+		default:
+			BITPIT_UNREACHABLE("The maximum number of faces is 6.");
 		}
 		return Morton;
 	}
