@@ -5836,10 +5836,6 @@ namespace bitpit {
                 recvBuffer >> global_index;
                 m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
 
-                // The received ghost layer flag is discarded, for this
-                // processor the octant belongs to the first ghost layer
-                m_octree.m_ghosts[ghostCounter].setGhostLayer(0);
-
                 ++ghostCounter;
             }
         }
