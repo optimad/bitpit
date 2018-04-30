@@ -2741,18 +2741,19 @@ namespace bitpit {
      * \param[out] globalNeighs Vector of global neighbours indices
      */
     void
-    ParaTree::findAllGlobalNeighbours(uint32_t idx, std::unordered_set<uint64_t> &globalNeighs){
-        globalNeighs.clear();
+    ParaTree::findAllGlobalNeighbours(uint32_t idx, std::vector<uint64_t> &globalNeighs){
 
         u32vector neighs;
         bvector isghost;
         findAllCodimensionNeighbours(idx,neighs,isghost);
         size_t nofNeighs = neighs.size();
+
+        globalNeighs.resize(nofNeighs);
         for(size_t n = 0; n < nofNeighs; ++n){
             if(isghost[n])
-                globalNeighs.insert(getGhostGlobalIdx(neighs[n]));
+                globalNeighs[n] = getGhostGlobalIdx(neighs[n]);
             else
-                globalNeighs.insert(getGlobalIdx(neighs[n]));
+                globalNeighs[n] = getGlobalIdx(neighs[n]);
         }
     }
 
@@ -5486,209 +5487,421 @@ namespace bitpit {
             return;
         }
 
-        //build a global to local map for ghosts
-        std::unordered_map<uint64_t,uint32_t> global2localGhost;
-        uint32_t nofGhosts = getNumGhosts();
-        for(uint32_t g = 0; g < nofGhosts; ++g){
-            uint64_t ghostGlobal = getGhostGlobalIdx(g);
-            global2localGhost[ghostGlobal] = g;
-        }
-
-        // Halo sources and their adjacencies
+        // Initialize the 1-rings of the internal octants
         //
-        // The sources are found in using a marching algorithm. We start from
-        // the sources of the first layer (which are known, because the first
-        // ghost of layers is fully built). The adjacencies of those sources
-        // are found and stored. The adjacencies that are not among the known
-        // sources are the sources of the next layer. These new sources are
-        // processed as the one of the previous layer and so on so forth.
-        //
-        // Layer sources are stored inside vectors because it is cheaper to
-        // add duplicates and discard them later instead of trying to avoid
-        // adding the duplicates (e.g., storing the sources using a set).
-        std::array<std::vector<uint32_t>, 2> haloLayerSources;
-        haloLayerSources[0].reserve(getNumOctants());
-        haloLayerSources[1].reserve(getNumOctants());
+        // Every time a 1-ring of an internal octant is evaluated, the result
+        // is cached.
+        std::unordered_map<uint32_t, std::vector<uint64_t>> cachedOneRings;
+        cachedOneRings.reserve(getNumOctants());
 
-        for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
-            for(uint32_t pborder : p_pborders.second){
-                haloLayerSources[0].push_back(pborder);
+        // Initialize the accretions
+        int firstLayer = 0;
+
+        std::vector<AccretionData> accretions;
+        accretions.reserve(m_bordersPerProc.size());
+        for(const auto &bordersPerProcEntry : m_bordersPerProc){
+            accretions.emplace_back();
+            AccretionData &accretion = accretions.back();
+
+            // The accretion is owned by this rank
+            //
+            // Sources will be extracted only from accretions owned by the
+            // current rank.
+            int ownerRank = m_rank;
+            accretion.ownerRank = ownerRank;
+
+            // Rank for which the accretion will gather sources
+            int targetRank = bordersPerProcEntry.first;
+            accretion.targetRank = targetRank;
+
+            // Initialize the first layer
+            //
+            // The population and the seeds of the first layer are the octants
+            // on processors borders.
+            const std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc.at(targetRank);
+            const std::size_t nRankBordersPerProc = rankBordersPerProc.size();
+
+            accretion.population.reserve(m_nofGhostLayers * nRankBordersPerProc);
+            accretion.seeds.reserve(nRankBordersPerProc);
+            for(uint32_t pborderLocalIdx : rankBordersPerProc){
+                uint64_t pborderGlobalIdx = getGlobalIdx(pborderLocalIdx);
+                accretion.population.insert({pborderGlobalIdx, firstLayer});
+                accretion.seeds.insert({pborderGlobalIdx, firstLayer});
             }
         }
 
-        std::unordered_map<uint32_t, std::unordered_set<uint64_t>> oneRingGlobalAdjacencies;
-        for (uint32_t currentHaloSourceDepth = 0; currentHaloSourceDepth < m_nofGhostLayers; ++currentHaloSourceDepth) {
-            std::vector<uint32_t> &nextLayerHaloSources = haloLayerSources[(currentHaloSourceDepth + 1) % 2];
-            nextLayerHaloSources.clear();
+        // Add layers to the accretions
+        DataCommunicator accretionDataCommunicator(m_comm);
+        DataCommunicator foreignAccretionDataCommunicator(m_comm);
+        for(std::size_t layer = 1; layer < m_nofGhostLayers; ++layer){
+            //
+            // Exchange foreing accretions
+            //
+            // When a ghost is incorporated in the population, the accretion
+            // needs to continue on the processor that owns the ghost.
 
-            std::vector<uint32_t> &currentLayerHaloSources = haloLayerSources[currentHaloSourceDepth % 2];
-            for (auto itr = currentLayerHaloSources.rbegin(); itr != currentLayerHaloSources.rend(); ++itr) {
-                uint32_t idx = *itr;
-                if (oneRingGlobalAdjacencies.count(idx) != 0) {
+            // Generate the foreign accretions
+            //
+            // When the accretion reaches a foreign process (i.e., a ghost is
+            // added to the seeds), the ranks that owns the ghost seed have to
+            // continue the propagation of those seeds (which will be local
+            // seeds for that foreign rank) locally. Therefore we need to
+            // communicate to the ranks that own ghosts seeds the information
+            // about the accretion and the list of seeds.
+            std::unordered_map<int, std::vector<AccretionData>> foreignAccretions;
+            for(const AccretionData &accretion : accretions){
+                for(const auto &seedEntry : accretion.seeds){
+                    int seedRank = getOwnerRank(seedEntry.first);
+                    if (seedRank == m_rank) {
+                        continue;
+                    }
+
+                    // Find the foreign accretion the ghost seed belogns to
+                    std::vector<AccretionData> &foreignRankAccretions = foreignAccretions[seedRank];
+
+                    auto foreignRankAccretionsItr = foreignRankAccretions.begin();
+                    for (; foreignRankAccretionsItr != foreignRankAccretions.end(); ++foreignRankAccretionsItr) {
+                        if (foreignRankAccretionsItr->ownerRank != accretion.ownerRank) {
+                            continue;
+                        } else if (foreignRankAccretionsItr->targetRank!= accretion.targetRank) {
+                            continue;
+                        }
+
+                        break;
+                    }
+
+                    if (foreignRankAccretionsItr == foreignRankAccretions.end()) {
+                        foreignRankAccretions.emplace_back();
+                        foreignRankAccretionsItr = foreignRankAccretions.begin() + foreignRankAccretions.size() - 1;
+                        foreignRankAccretionsItr->ownerRank = accretion.ownerRank;
+                        foreignRankAccretionsItr->targetRank = accretion.targetRank;
+                    }
+
+                    AccretionData &foreignAccretion = *foreignRankAccretionsItr;
+
+                    // Add the seeds
+                    foreignAccretion.seeds.insert(seedEntry);
+                }
+            }
+
+            // Execute the communications
+            bool foreignAccrationExchangeNeeded = (foreignAccretions.size() > 0);
+            MPI_Allreduce(MPI_IN_PLACE, &foreignAccrationExchangeNeeded, 1, MPI_C_BOOL, MPI_LOR, m_comm);
+            if (foreignAccrationExchangeNeeded) {
+                // Clear previous communications
+                foreignAccretionDataCommunicator.clearAllSends();
+                foreignAccretionDataCommunicator.clearAllRecvs();
+
+                // Send the foreign accretions
+                for(const auto &foreignAccretionEntry : foreignAccretions){
+                    int receiverRank = foreignAccretionEntry.first;
+
+                    // Evaluate buffer size
+                    std::size_t buffSize = 0;
+                    buffSize += sizeof(std::size_t);
+                    for(const auto &foreignAccretion: foreignAccretionEntry.second){
+                        std::size_t nForeignSeeds = foreignAccretion.seeds.size();
+
+                        buffSize += sizeof(int);
+                        buffSize += sizeof(int);
+                        buffSize += sizeof(std::size_t);
+                        buffSize += nForeignSeeds * (sizeof(uint64_t) + sizeof(int));
+                    }
+
+                    foreignAccretionDataCommunicator.setSend(receiverRank, buffSize);
+
+                    // Fill buffer
+                    SendBuffer &sendBuffer = foreignAccretionDataCommunicator.getSendBuffer(receiverRank);
+
+                    const std::vector<AccretionData> &foreignRankAccretions = foreignAccretionEntry.second;
+
+                    sendBuffer << foreignRankAccretions.size();
+                    for(const auto &foreignAccretion: foreignRankAccretions){
+                        sendBuffer << foreignAccretion.ownerRank;
+                        sendBuffer << foreignAccretion.targetRank;
+                        sendBuffer << foreignAccretion.seeds.size();
+                        for(const auto &seedEntry : foreignAccretion.seeds){
+                            sendBuffer << seedEntry.first;
+                            sendBuffer << seedEntry.second;
+                        }
+                    }
+                }
+
+                // Start communications
+                foreignAccretionDataCommunicator.discoverRecvs();
+                foreignAccretionDataCommunicator.startAllRecvs();
+                foreignAccretionDataCommunicator.startAllSends();
+
+                // Receive the accretiation to execute on behalf of neighbour
+                // processes
+                int nCompletedRecvs = 0;
+                while (nCompletedRecvs < foreignAccretionDataCommunicator.getRecvCount()) {
+                    int senderRank = foreignAccretionDataCommunicator.waitAnyRecv();
+                    RecvBuffer &recvBuffer = foreignAccretionDataCommunicator.getRecvBuffer(senderRank);
+
+                    std::size_t nForeignAccretions;
+                    recvBuffer >> nForeignAccretions;
+
+                    for (std::size_t k = 0; k < nForeignAccretions; ++k) {
+                        // Owner rank
+                        int ownerRank;
+                        recvBuffer >> ownerRank;
+
+                        // Target rank
+                        int targetRank;
+                        recvBuffer >> targetRank;
+
+                        // Get the accretion to update
+                        //
+                        // If an accretions with the requeste owner and target
+                        // ranks doesn't exist create a new one.
+                        auto accretionsItr = accretions.begin();
+                        for(; accretionsItr != accretions.end(); ++accretionsItr){
+                            if (accretionsItr->ownerRank != ownerRank) {
+                                continue;
+                            } else if (accretionsItr->targetRank!= targetRank) {
+                                continue;
+                            }
+
+                            break;
+                        }
+
+                        if (accretionsItr == accretions.end()) {
+                            accretions.emplace_back();
+                            accretionsItr = accretions.begin() + accretions.size() - 1;
+                            accretionsItr->ownerRank = ownerRank;
+                            accretionsItr->targetRank = targetRank;
+                        }
+
+                        AccretionData &accretion = *accretionsItr;
+
+                        // Initialize accretion seeds
+                        std::size_t nSeeds;
+                        recvBuffer >> nSeeds;
+
+                        for(std::size_t n = 0; n < nSeeds; ++n){
+                            uint64_t globalIdx;
+                            recvBuffer >> globalIdx;
+
+                            int layer;
+                            recvBuffer >> layer;
+
+                            accretion.population.insert({globalIdx, layer});
+                            accretion.seeds.insert({globalIdx, layer});
+                        }
+                    }
+
+                    ++nCompletedRecvs;
+                }
+
+                // Wait until all exchanges are completed
+                foreignAccretionDataCommunicator.waitAllSends();
+            }
+
+            //
+            // Add a new layer to the population
+            //
+            for(AccretionData &accretion : accretions){
+                // If the accretion doesn't have seeds we can skip it
+                std::size_t nSeeds = accretion.seeds.size();
+                if (nSeeds == 0) {
                     continue;
                 }
 
-                // Find the neighbours of the current source
-                std::unordered_set<uint64_t> &sourceGlobalAdjacencies = oneRingGlobalAdjacencies[idx];
-                findAllGlobalNeighbours(idx, sourceGlobalAdjacencies);
+                // Rank for which accretion is gathering data
+                const int targetRank = accretion.targetRank;
 
-                // Add the internal neighbours that are not among the known
-                // sources to the sources of next layer. We don't need to
-                // build the sources past the last layer.
-                if (currentHaloSourceDepth < m_nofGhostLayers - 1) {
-                    for (uint64_t sourceGlobalAdjacency : sourceGlobalAdjacencies) {
-                        int rank;
-                        uint32_t sourceLocalAdjacency;
-                        getLocalIdx(sourceGlobalAdjacency, sourceLocalAdjacency, rank);
-                        if (rank != m_rank) {
+                // Seeds
+                //
+                // We make a copy of the seeds and then we clear the original
+                // list in order to generate the seeds for the next layer.
+                std::vector<uint64_t> currentSeedsIndexes(nSeeds);
+                std::vector<int> currentSeedsLayer(nSeeds);
+
+                std::size_t n = 0;
+                for(auto const &seedEntry : accretion.seeds){
+                    currentSeedsIndexes[n] = seedEntry.first;
+                    currentSeedsLayer[n]   = seedEntry.second;
+                    n++;
+                }
+
+                accretion.seeds = std::unordered_map<uint64_t, int>();
+
+                // The next layer is obtained adding the 1-ring neighbours of
+                // the internal octants of the previous layer.
+                for(std::size_t n = 0; n < nSeeds; ++n){
+                    // Consider only internal octants
+                    uint64_t seedGlobalIdx = currentSeedsIndexes[n];
+                    if (!isInternal(seedGlobalIdx)) {
+                        continue;
+                    }
+
+                    // Get seed layer
+                    int seedLayer = currentSeedsLayer[n];
+
+                    // Find the 1-ring of the source
+                    uint32_t seedLocalIdx = getLocalIdx(seedGlobalIdx);
+                    auto cachedOneRingsItr = cachedOneRings.find(seedLocalIdx);
+                    if (cachedOneRingsItr == cachedOneRings.end()) {
+                        cachedOneRingsItr = cachedOneRings.insert({seedLocalIdx, std::vector<uint64_t>()}).first;
+                        findAllGlobalNeighbours(seedLocalIdx, cachedOneRingsItr->second);
+                        cachedOneRingsItr->second.push_back(getGlobalIdx(seedLocalIdx));
+                    }
+                    const std::vector<uint64_t> &seedOneRing = cachedOneRingsItr->second;
+
+                    // Add the 1-ring of the octant to the sources
+                    for(uint64_t neighGlobalIdx : seedOneRing){
+                        // Discard octants already in the population
+                        if (accretion.population.count(neighGlobalIdx) > 0) {
                             continue;
                         }
 
-                        if (oneRingGlobalAdjacencies.count(sourceLocalAdjacency) != 0) {
-                            continue;
+                        // Avoid adding ghosts owned by the target rank.
+                        if (!isInternal(neighGlobalIdx)) {
+                            int neighRank = getOwnerRank(neighGlobalIdx);
+                            if (neighRank == targetRank) {
+                                continue;
+                            }
                         }
 
-                        nextLayerHaloSources.push_back(sourceLocalAdjacency);
+                        // Add the octant to the population and to the seeds
+                        accretion.population.insert({neighGlobalIdx, seedLayer + 1});
+                        if (layer < (m_nofGhostLayers - 1)) {
+                            accretion.seeds.insert({neighGlobalIdx, seedLayer + 1});
+                        }
                     }
                 }
             }
-        }
 
-        std::unordered_map<uint32_t, std::unordered_set<uint64_t> > augmentedGlobalAdjacencies = oneRingGlobalAdjacencies;
+            //
+            // Exchange the accretion data among the processors
+            //
 
-        // Initialize information needed for building ghost layer
-        //
-        // The map with the global ghost ids has the following structure:
-        //    senderGhostPerProcWithLayer[layer][pair(global, rank)]
-        std::unordered_map<int, std::map<uint64_t, int>> senderGhostPerProcWithLayer;
+            // Detect the accretions to send
+            //
+            // We need to send the population of the last layer (i.e., we need
+            // to send the seeds) of the accretions not owned by this process.
+            std::unordered_map<int, std::vector<const AccretionData *>> sendAccretionList;
+            for(const AccretionData &accretion : accretions){
+                // Do not send data for accretions onwed by this process
+                if (accretion.ownerRank == m_rank) {
+                    continue;
+                }
 
-        std::pair<std::unordered_set<uint64_t>::iterator,bool> whereAndIfWasInserted;
+                // Do not send data if there is nothing to send
+                std::size_t nSeeds = accretion.seeds.size();
+                if (nSeeds == 0) {
+                    continue;
+                }
 
-        std::unordered_map<int,std::unordered_set<uint64_t>> senderGlobalGhostPit;
-        for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
-            senderGlobalGhostPit.insert({p_pborders.first, std::unordered_set<uint64_t>()});
-        }
+                // This accretion will be send
+                const int receiverRank = accretion.ownerRank;
+                sendAccretionList[receiverRank].push_back(&accretion);
+            }
 
-        //fill first layer with pborders
-        for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
-            for(uint32_t pborder : p_pborders.second){
-                uint64_t globalPborder = getGlobalIdx(pborder);
-                whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(globalPborder);
-                if(whereAndIfWasInserted.second) {
-                    if(getOwnerRank(globalPborder) != p_pborders.first) {
-                        senderGhostPerProcWithLayer[p_pborders.first].insert({globalPborder, 0});
+            // Execute communications
+            bool accretionExchangeNeeded = (sendAccretionList.size() > 0);
+            MPI_Allreduce(MPI_IN_PLACE, &accretionExchangeNeeded, 1, MPI_C_BOOL, MPI_LOR, m_comm);
+            if (accretionExchangeNeeded) {
+                // Clear previous communications
+                accretionDataCommunicator.clearAllSends();
+                accretionDataCommunicator.clearAllRecvs();
+
+                // Send the seeds
+                //
+                // The seeds are the population of the last layer.
+                for (const auto &sendAccretionListEntry : sendAccretionList) {
+                    // Rank of the receiver
+                    const int receiverRank = sendAccretionListEntry.first;
+
+                    // Accretions to send
+                    const std::vector<const AccretionData *> rankAccretions = sendAccretionListEntry.second;
+
+                    // Evaluate buffer size
+                    std::size_t buffSize = 0;
+
+                    buffSize += sizeof(std::size_t);
+                    for(const AccretionData *accretion : rankAccretions){
+                        buffSize += sizeof(int);
+                        buffSize += sizeof(std::size_t);
+                        buffSize += accretion->seeds.size() * (sizeof(uint64_t) + sizeof(int));
+                    }
+
+                    accretionDataCommunicator.setSend(receiverRank, buffSize);
+
+                    // Fill buffer
+                    SendBuffer &sendBuffer = accretionDataCommunicator.getSendBuffer(receiverRank);
+
+                    sendBuffer << rankAccretions.size();
+                    for(const AccretionData *accretion : rankAccretions){
+                        sendBuffer << accretion->targetRank;
+                        sendBuffer << accretion->seeds.size();
+                        for(const auto &entry : accretion->seeds){
+                            sendBuffer << entry.first;
+                            sendBuffer << entry.second;
+                        }
                     }
                 }
-            }
-        }
 
-        //fill following layers
-        std::vector<std::unordered_set<uint64_t>> ghostGlobalAdjacencies;
-        for(uint32_t layer = 1; layer < m_nofGhostLayers; ++layer){
-            for(const std::pair<const int,u32vector> &p_pborders : m_bordersPerProc){
-                for(uint32_t pborder : p_pborders.second){
-                    for(uint64_t neigh : augmentedGlobalAdjacencies.at(pborder)){
-                        if(getOwnerRank(neigh) != p_pborders.first){
-                            whereAndIfWasInserted = senderGlobalGhostPit.at(p_pborders.first).insert(neigh);
-                            if(whereAndIfWasInserted.second) {
-                                if(getOwnerRank(neigh) != p_pborders.first) {
-                                    senderGhostPerProcWithLayer[p_pborders.first].insert({neigh, layer});
+                // Start communications
+                accretionDataCommunicator.discoverRecvs();
+                accretionDataCommunicator.startAllRecvs();
+                accretionDataCommunicator.startAllSends();
+
+                // Receive the population of the last layer
+                //
+                // The seeds are the population of the last layer.
+                int nCompletedRecvs = 0;
+                while (nCompletedRecvs < accretionDataCommunicator.getRecvCount()) {
+                    int senderRank = accretionDataCommunicator.waitAnyRecv();
+                    RecvBuffer &recvBuffer = accretionDataCommunicator.getRecvBuffer(senderRank);
+
+                    std::size_t nRecvAccretions;
+                    recvBuffer >> nRecvAccretions;
+
+                    for (std::size_t k = 0; k < nRecvAccretions; ++k) {
+                        // Target rank
+                        int targetRank;
+                        recvBuffer >> targetRank;
+
+                        // Get the accretion to update
+                        auto accretionsItr = accretions.begin();
+                        for(; accretionsItr != accretions.end(); ++accretionsItr){
+                            if (accretionsItr->ownerRank != m_rank) {
+                                continue;
+                            } else if (accretionsItr->targetRank != targetRank) {
+                                continue;
+                            }
+
+                            break;
+                        }
+                        AccretionData &accretion = *accretionsItr;
+
+                        std::size_t nSeeds;
+                        recvBuffer >> nSeeds;
+
+                        for(std::size_t n = 0; n < nSeeds; ++n){
+                            uint64_t seedGlobalIdx;
+                            recvBuffer >> seedGlobalIdx;
+
+                            int seedLayer;
+                            recvBuffer >> seedLayer;
+
+                            auto iterator = accretion.population.find(seedGlobalIdx);
+                            if (iterator == accretion.population.end()) {
+                                accretion.population.insert({seedGlobalIdx, seedLayer});
+                                if (layer < (m_nofGhostLayers - 1)) {
+                                    accretion.seeds.insert({seedGlobalIdx, seedLayer});
                                 }
                             }
                         }
                     }
+
+                    ++nCompletedRecvs;
                 }
-            }
 
-            //enlarge adjacencies
-            if(layer < m_nofGhostLayers - 1){
-                //send adjacencies on ghosts
-                DataCommunicator adjacenciesComm(m_comm);
-                std::map<int, u32vector>::iterator bitend = m_bordersPerProc.end();
-                std::map<int, u32vector>::iterator bitbegin = m_bordersPerProc.begin();
-                for(std::map<int,u32vector >::iterator bit = bitbegin; bit != bitend; ++bit){
-                    const int & key = bit->first;
-                    const u32vector & pborders = bit->second;
-                    std::size_t buffSize = 0;
-                    std::size_t nofPbordersPerProc = pborders.size();
-                    buffSize += nofPbordersPerProc * sizeof(size_t);
-                    for(size_t i = 0; i < nofPbordersPerProc; ++i){
-                        buffSize += augmentedGlobalAdjacencies.at(pborders[i]).size() * sizeof(uint64_t);
-                    }
-                    //enlarge buffer to store number of pborders from this proc
-                    buffSize += sizeof(size_t);
-                    adjacenciesComm.setSend(key,buffSize);
-                    SendBuffer & sendBuffer = adjacenciesComm.getSendBuffer(key);
-                    //store number of pborders from this proc at the begining
-                    sendBuffer << nofPbordersPerProc;
-                    for(uint32_t i = 0; i < nofPbordersPerProc; ++i){
-                        const std::set<uint64_t> adjacencies(augmentedGlobalAdjacencies.at(pborders[i]).cbegin(), augmentedGlobalAdjacencies.at(pborders[i]).cend());
-                        sendBuffer << adjacencies.size();
-                        for(uint64_t a : adjacencies){
-                            sendBuffer << a;
-                        }
-                    }
-                }
-                adjacenciesComm.discoverRecvs();
-                adjacenciesComm.startAllRecvs();
-                adjacenciesComm.startAllSends();
-
-                //receive adjacencies on ghosts
-                ghostGlobalAdjacencies.resize(nofGhosts);
-
-                int ghostOffset = 0;
-                std::vector<int> recvRanks = adjacenciesComm.getRecvRanks();
-                std::sort(recvRanks.begin(),recvRanks.end());
-                for(int rank : recvRanks){
-                    adjacenciesComm.waitRecv(rank);
-                    RecvBuffer & recvBuffer = adjacenciesComm.getRecvBuffer(rank);
-                    size_t nofGhostFromThisProc = 0;
-                    recvBuffer >> nofGhostFromThisProc;
-                    for(size_t k = 0; k < nofGhostFromThisProc; ++k){
-                        size_t adjacencySize;
-                        recvBuffer >> adjacencySize;
-                        for(uint32_t a = 0; a < adjacencySize; ++a){
-                            uint64_t neigh;
-                            recvBuffer >> neigh;
-                            ghostGlobalAdjacencies[k+ghostOffset].insert(neigh);
-                        }
-                    }
-                    ghostOffset += nofGhostFromThisProc;
-                }
-                adjacenciesComm.waitAllSends();
-
-                //enlarge source adjacency rings
-                std::unordered_map<uint32_t, std::unordered_set<uint64_t>> previousAugmentedGlobalAdjacencies = std::move(augmentedGlobalAdjacencies);
-
-                augmentedGlobalAdjacencies.clear();
-                for(const std::pair<uint32_t, std::unordered_set<uint64_t>> &oneRingGlobalAdjacenciesEntry : oneRingGlobalAdjacencies){
-                    uint32_t sourceIdx = oneRingGlobalAdjacenciesEntry.first;
-                    uint64_t sourceGlobalIdx = getGlobalIdx(sourceIdx);
-                    std::unordered_set<uint64_t> &sourceAugmentedGlobalAdjacencies = augmentedGlobalAdjacencies[sourceIdx];
-
-                    const std::unordered_set<uint64_t> &sourceOneRingAdjacencies = oneRingGlobalAdjacenciesEntry.second;
-                    sourceAugmentedGlobalAdjacencies.insert(sourceOneRingAdjacencies.begin(),sourceOneRingAdjacencies.end());
-
-                    for(uint64_t globalAdjacencyIdx : sourceOneRingAdjacencies){
-                        if (globalAdjacencyIdx == sourceGlobalIdx) {
-                            continue;
-                        }
-
-                        int adjacencyRank;
-                        uint32_t localAdjacencyIdx;
-                        getLocalIdx(globalAdjacencyIdx, localAdjacencyIdx, adjacencyRank);
-                        if(adjacencyRank == m_rank){
-                            auto previousAugmentedGlobalAdjacencieItr = previousAugmentedGlobalAdjacencies.find(localAdjacencyIdx);
-                            if(previousAugmentedGlobalAdjacencieItr != previousAugmentedGlobalAdjacencies.end()){
-                                sourceAugmentedGlobalAdjacencies.insert(previousAugmentedGlobalAdjacencieItr->second.begin(), previousAugmentedGlobalAdjacencieItr->second.end());
-                            }
-                        }
-                        else{
-                            localAdjacencyIdx = global2localGhost[globalAdjacencyIdx];
-                            sourceAugmentedGlobalAdjacencies.insert(ghostGlobalAdjacencies[localAdjacencyIdx].begin(), ghostGlobalAdjacencies[localAdjacencyIdx].end());
-                        }
-                    }
-                }
+                // Wait until all exchanges are completed
+                accretionDataCommunicator.waitAllSends();
             }
         }
 
@@ -5697,18 +5910,46 @@ namespace bitpit {
         std::unordered_map<int, std::map<uint64_t, int>> ghostReqestList;
         {
             //COMMUNICATE SENDER GHOST GLOBAL
+            //
+            // Sources are extracted from accretions owned by the current rank
             DataCommunicator senderGlobalComm(m_comm);
-            for(const auto &procSenderGhost :senderGhostPerProcWithLayer){
-                size_t procSenderGhostSize = procSenderGhost.second.size();
+            std::size_t nRankSources;
+            std::vector<uint32_t> rankSourcesStorage;
+            const AccretionData *rankAccretion;
+            for(const auto &bordersPerProcEntry : m_bordersPerProc){
+                int rank = bordersPerProcEntry.first;
+
+                nRankSources = 0;
+                for(const AccretionData &accretion : accretions){
+                    if (accretion.ownerRank != m_rank) {
+                        continue;
+                    } else if (accretion.targetRank != rank) {
+                        continue;
+                    }
+
+                    rankAccretion = &accretion;
+                    rankSourcesStorage.resize(rankAccretion->population.size());
+                    for(const auto &populationEntry : rankAccretion->population){
+                        rankSourcesStorage[nRankSources] = populationEntry.first;
+                        ++nRankSources;
+                    }
+                    break;
+                }
+
+                std::sort(rankSourcesStorage.begin(), rankSourcesStorage.end());
+
                 size_t buffSize = 0;
                 buffSize += sizeof(std::size_t);
-                buffSize += procSenderGhostSize * (sizeof(uint64_t) + sizeof(int));
-                senderGlobalComm.setSend(procSenderGhost.first,buffSize);
-                SendBuffer & sendBuffer = senderGlobalComm.getSendBuffer(procSenderGhost.first);
-                sendBuffer << procSenderGhostSize;
-                for(const auto &g : procSenderGhost.second){
-                    sendBuffer << g.first;
-                    sendBuffer << g.second;
+                buffSize += nRankSources * (sizeof(uint64_t) + sizeof(int));
+                senderGlobalComm.setSend(rank, buffSize);
+                SendBuffer & sendBuffer = senderGlobalComm.getSendBuffer(rank);
+                sendBuffer << nRankSources;
+                for(std::size_t k = 0; k < nRankSources; ++k){
+                    uint64_t globalIdx = rankSourcesStorage[k];
+                    int layer = rankAccretion->population.at(globalIdx);
+
+                    sendBuffer << globalIdx;
+                    sendBuffer << layer;
                 }
             }
             senderGlobalComm.discoverRecvs();
@@ -5728,8 +5969,16 @@ namespace bitpit {
                     recvBuffer >> ghostLayer;
 
                     int ghostRank = getOwnerRank(ghostGlobalIdx);
+                    std::map<uint64_t, int> &ghostRankReqestList = ghostReqestList[ghostRank];
 
-                    ghostReqestList[ghostRank].insert({ghostGlobalIdx, ghostLayer});
+                    auto ghostReqestListItr = ghostRankReqestList.find(ghostGlobalIdx);
+                    if (ghostReqestListItr == ghostRankReqestList.end()) {
+                        ghostRankReqestList.insert({ghostGlobalIdx, ghostLayer});
+                    } else {
+                        if (ghostLayer < ghostReqestListItr->second) {
+                            ghostReqestListItr->second = ghostLayer;
+                        }
+                    }
                 }
             }
             senderGlobalComm.waitAllSends();
@@ -5824,7 +6073,7 @@ namespace bitpit {
         for(int i : recvsRanks){
             nofBytesOverProc += sendInternalsForGhostComm.getRecvBuffer(i).getSize();
         }
-        nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
+        uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
         m_octree.m_sizeGhosts = nofGhosts;
         m_octree.m_ghosts.clear();
         m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim));

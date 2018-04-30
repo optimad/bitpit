@@ -124,6 +124,13 @@ namespace bitpit {
     private:
         typedef std::unordered_map<int, std::array<uint64_t, 2>> PartitionIntersections;
 
+        struct AccretionData {
+            int ownerRank;
+            int targetRank;
+            std::unordered_map<uint64_t, int> seeds;
+            std::unordered_map<uint64_t, int> population;
+        };
+
         //undistributed members
         std::vector<uint64_t>	m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each processor*/
         std::vector<uint64_t>	m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each processor*/
@@ -432,7 +439,7 @@ namespace bitpit {
         // OTHER OCTANT BASED METHODS												    	   //
         // =================================================================================== //
 
-        void        findAllGlobalNeighbours(uint32_t idx, std::unordered_set<uint64_t> &globalNeighs);
+        void        findAllGlobalNeighbours(uint32_t idx, std::vector<uint64_t> &globalNeighs);
         void        findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals = false) const;
     public:
         void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
