@@ -5541,7 +5541,7 @@ namespace bitpit {
         //
         // The map with the global ghost ids has the following structure:
         //    senderGhostPerProcWithLayer[layer][pair(global, rank)]
-        std::unordered_map<int, std::map<uint64_t,uint32_t>> senderGhostPerProcWithLayer;
+        std::unordered_map<int, std::map<uint64_t, int>> senderGhostPerProcWithLayer;
 
         std::pair<std::unordered_set<uint64_t>::iterator,bool> whereAndIfWasInserted;
 
@@ -5675,7 +5675,7 @@ namespace bitpit {
 
         //build ghosts
         //prepare map for each proc
-        std::unordered_map<int, std::map<uint64_t,uint32_t>> ghostReqestList;
+        std::unordered_map<int, std::map<uint64_t, int>> ghostReqestList;
         {
             //COMMUNICATE SENDER GHOST GLOBAL
             DataCommunicator senderGlobalComm(m_comm);
@@ -5683,7 +5683,7 @@ namespace bitpit {
                 size_t procSenderGhostSize = procSenderGhost.second.size();
                 size_t buffSize = 0;
                 buffSize += sizeof(std::size_t);
-                buffSize += procSenderGhostSize * (sizeof(uint64_t) + sizeof(uint32_t));
+                buffSize += procSenderGhostSize * (sizeof(uint64_t) + sizeof(int));
                 senderGlobalComm.setSend(procSenderGhost.first,buffSize);
                 SendBuffer & sendBuffer = senderGlobalComm.getSendBuffer(procSenderGhost.first);
                 sendBuffer << procSenderGhostSize;
@@ -5705,7 +5705,7 @@ namespace bitpit {
                 for(size_t g = 0; g < procReceivedGhostSize; ++g ){
                     uint64_t ghostGlobalIdx;
                     recvBuffer >> ghostGlobalIdx;
-                    uint32_t ghostLayer;
+                    int ghostLayer;
                     recvBuffer >> ghostLayer;
 
                     int ghostRank = getOwnerRank(ghostGlobalIdx);
@@ -5721,7 +5721,7 @@ namespace bitpit {
             size_t buffSize = 0;
             size_t nofGhostPerProc = rankGhostsLayer.second.size();
             buffSize += sizeof(size_t);
-            buffSize += nofGhostPerProc * (sizeof(uint64_t) + sizeof(uint32_t));
+            buffSize += nofGhostPerProc * (sizeof(uint64_t) + sizeof(int));
             askGhostToOwnerComm.setSend(rankGhostsLayer.first,buffSize);
             SendBuffer & sendBuffer = askGhostToOwnerComm.getSendBuffer(rankGhostsLayer.first);
             sendBuffer << nofGhostPerProc;
@@ -5734,7 +5734,7 @@ namespace bitpit {
         askGhostToOwnerComm.startAllRecvs();
         askGhostToOwnerComm.startAllSends();
 
-        std::unordered_map<int,std::map<uint64_t,uint32_t>> internalsToBeSentAsGhostPerProc;
+        std::unordered_map<int,std::map<uint64_t,int>> internalsToBeSentAsGhostPerProc;
         const std::vector<int> &recvRanks = askGhostToOwnerComm.getRecvRanks();
         for(int rank : recvRanks){
             askGhostToOwnerComm.waitRecv(rank);
@@ -5743,7 +5743,7 @@ namespace bitpit {
             recvBuffer >> nofReceivedGhostFromProc;
             for(std::size_t g = 0; g < nofReceivedGhostFromProc; ++g){
                 uint64_t tempGlobal;
-                uint32_t tempLayer;
+                int tempLayer;
                 recvBuffer >> tempGlobal;
                 recvBuffer >> tempLayer;
                 internalsToBeSentAsGhostPerProc[rank].insert({tempGlobal, tempLayer});
@@ -5756,7 +5756,8 @@ namespace bitpit {
         m_octree.m_ghosts.clear();
         uint64_t global_index;
         uint32_t x,y,z;
-        uint8_t l,g;
+        uint8_t l;
+        int g;
         int8_t m;
         bool info[Octant::INFO_ITEM_COUNT];
         DataCommunicator sendInternalsForGhostComm(m_comm);
