@@ -529,6 +529,8 @@ namespace bitpit {
         void 		balance21(bool const first);
         void		createPartitionInfo();
 
+        bool		isInternal(uint64_t gidx) const;
+
         // =================================================================================== //
         // TESTING OUTPUT METHODS												    			   //
         // =================================================================================== //

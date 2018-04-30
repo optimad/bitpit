@@ -1627,6 +1627,25 @@ namespace bitpit {
         return uint64_t(m_octree.m_sizeGhosts);
     };
 
+    /*! Returns true if the specified global index belongs to the current
+     *  process
+     * \param[in] gidx Global index of target octant.
+     * \return Returns true if the specified global index belongs to the
+     * current process.
+     */
+    bool
+    ParaTree::isInternal(uint64_t gidx) const {
+        if (gidx > m_partitionRangeGlobalIdx[m_rank]){
+            return false;
+        }
+
+        if (m_rank != 0 && gidx <= m_partitionRangeGlobalIdx[m_rank - 1]){
+            return false;
+        }
+
+        return true;
+    };
+
     /*! Get the persistent index of an octant.
      * \param[in] idx Local index of target octant.
      * \return Persistent index of octant,
