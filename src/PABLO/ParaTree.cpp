@@ -5905,11 +5905,10 @@ namespace bitpit {
             }
         }
 
-        //build ghosts
-        //prepare map for each proc
+        // Exchange list of sources/ghosts to exchange
         std::unordered_map<int, std::map<uint64_t, int>> ghostReqestList;
         {
-            //COMMUNICATE SENDER GHOST GLOBAL
+            // Send list of sources
             //
             // Sources are extracted from accretions owned by the current rank
             DataCommunicator senderGlobalComm(m_comm);
@@ -5956,6 +5955,7 @@ namespace bitpit {
             senderGlobalComm.startAllRecvs();
             senderGlobalComm.startAllSends();
 
+            // Receive the list of ghosts to request
             const std::vector<int> &recvRanks = senderGlobalComm.getRecvRanks();
             for(int rank : recvRanks){
                 senderGlobalComm.waitRecv(rank);
@@ -5983,7 +5983,8 @@ namespace bitpit {
             }
             senderGlobalComm.waitAllSends();
         }
-        //ASK GHOST to owners
+
+        // Request ghosts to owners
         DataCommunicator askGhostToOwnerComm(m_comm);
         for(const auto &rankGhostsLayer : ghostReqestList){
             size_t buffSize = 0;
@@ -6019,7 +6020,16 @@ namespace bitpit {
         }
         askGhostToOwnerComm.waitAllSends();
 
-        //Send INTERNAL and recv GHOST adn set pbordersPerProc
+        //
+        // Build ghosts
+        //
+
+        DataCommunicator sendInternalsForGhostComm(m_comm);
+
+        // Fill the buffer with source octants
+        //
+        // A source octant is an internal octants that is ghosts on other
+        // process.
         m_bordersPerProc.clear();
         m_octree.m_ghosts.clear();
         uint64_t global_index;
@@ -6028,7 +6038,6 @@ namespace bitpit {
         int g;
         int8_t m;
         bool info[Octant::INFO_ITEM_COUNT];
-        DataCommunicator sendInternalsForGhostComm(m_comm);
         for(const auto &internalsByProc : internalsToBeSentAsGhostPerProc){
             u32vector localInternals;
             localInternals.reserve(internalsByProc.second.size());
@@ -6064,9 +6073,11 @@ namespace bitpit {
             m_bordersPerProc.insert({internalsByProc.first, localInternals});
         }
 
+        // Start the receives
         sendInternalsForGhostComm.discoverRecvs();
         sendInternalsForGhostComm.startAllRecvs();
 
+        // Prepare ghost dta structures
         int nofBytesOverProc = 0;
         std::vector<int> recvsRanks = sendInternalsForGhostComm.getRecvRanks();
         std::sort(recvsRanks.begin(),recvsRanks.end());
@@ -6079,6 +6090,7 @@ namespace bitpit {
         m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim));
         m_octree.m_globalIdxGhosts.resize(nofGhosts);
 
+        // Receive the ghosts
         sendInternalsForGhostComm.startAllSends();
 
         uint32_t ghostCounter = 0;
@@ -6109,6 +6121,7 @@ namespace bitpit {
             }
         }
 
+        // Wait for the communications to complete
         sendInternalsForGhostComm.waitAllSends();
     }
 
