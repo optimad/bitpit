@@ -40,9 +40,16 @@ using namespace bitpit;
 */
 int subtest_001(int rank)
 {
+	BITPIT_UNUSED(rank);
+
+	// Patch data
+	//
+	// The number of ghosts layers in the halo should high enough for every
+	// partition to contain all the global octants.
 	std::array<double, 3> origin = {0., 0., 0.};
-	double length = 20;
+	double length = 8;
 	double dh = 1.0;
+	int nGhostLayers = 16;
 
 	log::cout() << "  >> 2D octree patch" << "\n";
 
@@ -52,11 +59,15 @@ int subtest_001(int rank)
 	patch_2D->update();
 
 	// Partition the patch
-	patch_2D->partition(MPI_COMM_WORLD, true, true, 3);
+	patch_2D->partition(MPI_COMM_WORLD, true, true, nGhostLayers);
 
-	// Refine one processor
-	if(rank==0){
-		for(const auto& cell:patch_2D->getCells()){
+	// Get information on patch numbering
+	PatchNumberingInfo patchNumberingInfo(patch_2D);
+
+	// Refine the mesh to obtain a non-uniform mesh
+	for(const Cell &cell : patch_2D->getCells()){
+		long globalId = patchNumberingInfo.getCellGlobalId(cell.getId());
+		if (((globalId + 2) % 4) == 0) {
 			patch_2D->markCellForRefinement(cell.getId());
 		}
 	}
@@ -79,9 +90,30 @@ int subtest_001(int rank)
 	// Write the patch
 	patch_2D->write();
 
+	// Check if the ghost layer has been performed correctly
+	//
+	// Every partition contains all the global octant, this means that the
+	// volume of the partition is equal to the volume of the whole patch.
+	double partitionVolume = 0;
+	for(const Cell &cell : patch_2D->getCells()){
+		partitionVolume += patch_2D->evalCellVolume(cell.getId());
+	}
+
+	double globalVolume = length * length;
+
+	log::cout() << "  Checking halo layers" << "\n";
+	log::cout() << "\n";
+	log::cout() << "    >> Partition volume = " << partitionVolume << "\n";
+	log::cout() << "    >> Global volume = " << globalVolume << "\n";
+
+	int errorFlag = 0;
+	if (!utils::DoubleFloatingEqual()(partitionVolume, globalVolume)) {
+		errorFlag = 1;
+	}
+
 	delete patch_2D;
 
-	return 0;
+	return errorFlag;
 }
 
 /*!
@@ -93,9 +125,12 @@ int subtest_001(int rank)
 */
 int subtest_002(int rank)
 {
+	BITPIT_UNUSED(rank);
+
 	std::array<double, 3> origin = {0., 0., 0.};
-	double length = 20;
+	double length = 8;
 	double dh = 1.0;
+	int nGhostLayers = 16;
 
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
@@ -105,11 +140,15 @@ int subtest_002(int rank)
 	patch_3D->update();
 
 	// Partition the patch
-	patch_3D->partition(MPI_COMM_WORLD, true, true, 3);
+	patch_3D->partition(MPI_COMM_WORLD, true, true, nGhostLayers);
 
-	// Refine one processor
-	if(rank==0){
-		for(const auto& cell:patch_3D->getCells()){
+	// Get information on patch numbering
+	PatchNumberingInfo patchNumberingInfo(patch_3D);
+
+	// Refine the mesh to obtain a non-uniform mesh
+	for(const Cell &cell : patch_3D->getCells()){
+		long globalId = patchNumberingInfo.getCellGlobalId(cell.getId());
+		if (((globalId + 2) % 8) == 0) {
 			patch_3D->markCellForRefinement(cell.getId());
 		}
 	}
@@ -132,9 +171,30 @@ int subtest_002(int rank)
 	// Write the patch
 	patch_3D->write();
 
+	// Check if the ghost layer has been performed correctly
+	//
+	// Every partition contains all the global octant, this means that the
+	// volume of the partition is equal to the volume of the whole patch.
+	double partitionVolume = 0;
+	for(const Cell &cell : patch_3D->getCells()){
+		partitionVolume += patch_3D->evalCellVolume(cell.getId());
+	}
+
+	double globalVolume = length * length * length;
+
+	log::cout() << "  Checking halo layers" << "\n";
+	log::cout() << "\n";
+	log::cout() << "    >> Partition volume = " << partitionVolume << "\n";
+	log::cout() << "    >> Global volume = " << globalVolume << "\n";
+
+	int errorFlag = 0;
+	if (!utils::DoubleFloatingEqual()(partitionVolume, globalVolume)) {
+		errorFlag = 1;
+	}
+
 	delete patch_3D;
 
-	return 0;
+	return errorFlag;
 }
 
 /*!
