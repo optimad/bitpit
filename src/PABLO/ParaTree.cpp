@@ -5905,224 +5905,167 @@ namespace bitpit {
             }
         }
 
-        // Exchange list of sources/ghosts to exchange
-        std::unordered_map<int, std::map<uint64_t, int>> ghostReqestList;
-        {
-            // Send list of sources
-            //
-            // Sources are extracted from accretions owned by the current rank
-            DataCommunicator senderGlobalComm(m_comm);
-            std::size_t nRankSources;
-            std::vector<uint32_t> rankSourcesStorage;
-            const AccretionData *rankAccretion;
-            for(const auto &bordersPerProcEntry : m_bordersPerProc){
-                int rank = bordersPerProcEntry.first;
-
-                nRankSources = 0;
-                for(const AccretionData &accretion : accretions){
-                    if (accretion.ownerRank != m_rank) {
-                        continue;
-                    } else if (accretion.targetRank != rank) {
-                        continue;
-                    }
-
-                    rankAccretion = &accretion;
-                    rankSourcesStorage.resize(rankAccretion->population.size());
-                    for(const auto &populationEntry : rankAccretion->population){
-                        rankSourcesStorage[nRankSources] = populationEntry.first;
-                        ++nRankSources;
-                    }
-                    break;
-                }
-
-                std::sort(rankSourcesStorage.begin(), rankSourcesStorage.end());
-
-                size_t buffSize = 0;
-                buffSize += sizeof(std::size_t);
-                buffSize += nRankSources * (sizeof(uint64_t) + sizeof(int));
-                senderGlobalComm.setSend(rank, buffSize);
-                SendBuffer & sendBuffer = senderGlobalComm.getSendBuffer(rank);
-                sendBuffer << nRankSources;
-                for(std::size_t k = 0; k < nRankSources; ++k){
-                    uint64_t globalIdx = rankSourcesStorage[k];
-                    int layer = rankAccretion->population.at(globalIdx);
-
-                    sendBuffer << globalIdx;
-                    sendBuffer << layer;
-                }
-            }
-            senderGlobalComm.discoverRecvs();
-            senderGlobalComm.startAllRecvs();
-            senderGlobalComm.startAllSends();
-
-            // Receive the list of ghosts to request
-            const std::vector<int> &recvRanks = senderGlobalComm.getRecvRanks();
-            for(int rank : recvRanks){
-                senderGlobalComm.waitRecv(rank);
-                RecvBuffer & recvBuffer = senderGlobalComm.getRecvBuffer(rank);
-                size_t procReceivedGhostSize;
-                recvBuffer >> procReceivedGhostSize;
-                for(size_t g = 0; g < procReceivedGhostSize; ++g ){
-                    uint64_t ghostGlobalIdx;
-                    recvBuffer >> ghostGlobalIdx;
-                    int ghostLayer;
-                    recvBuffer >> ghostLayer;
-
-                    int ghostRank = getOwnerRank(ghostGlobalIdx);
-                    std::map<uint64_t, int> &ghostRankReqestList = ghostReqestList[ghostRank];
-
-                    auto ghostReqestListItr = ghostRankReqestList.find(ghostGlobalIdx);
-                    if (ghostReqestListItr == ghostRankReqestList.end()) {
-                        ghostRankReqestList.insert({ghostGlobalIdx, ghostLayer});
-                    } else {
-                        if (ghostLayer < ghostReqestListItr->second) {
-                            ghostReqestListItr->second = ghostLayer;
-                        }
-                    }
-                }
-            }
-            senderGlobalComm.waitAllSends();
+        //
+        // Build the list of sources
+        //
+        // Sources are internal octants that are ghosts for other processors,
+        // i.e., internal octants on processors borders (pborder octants).
+        // Internal octants of the accretions are the sources for the target
+        // rank of the accretion.
+        for (auto &bordersPerProcEntry : m_bordersPerProc) {
+            std::vector<uint32_t> &rankBordersPerProc = bordersPerProcEntry.second;
+            rankBordersPerProc.clear();
         }
 
-        // Request ghosts to owners
-        DataCommunicator askGhostToOwnerComm(m_comm);
-        for(const auto &rankGhostsLayer : ghostReqestList){
-            size_t buffSize = 0;
-            size_t nofGhostPerProc = rankGhostsLayer.second.size();
-            buffSize += sizeof(size_t);
-            buffSize += nofGhostPerProc * (sizeof(uint64_t) + sizeof(int));
-            askGhostToOwnerComm.setSend(rankGhostsLayer.first,buffSize);
-            SendBuffer & sendBuffer = askGhostToOwnerComm.getSendBuffer(rankGhostsLayer.first);
-            sendBuffer << nofGhostPerProc;
-            for(const auto &gl : rankGhostsLayer.second){
-                sendBuffer << gl.first;
-                sendBuffer << gl.second;
-            }
-        }
-        askGhostToOwnerComm.discoverRecvs();
-        askGhostToOwnerComm.startAllRecvs();
-        askGhostToOwnerComm.startAllSends();
+        std::vector<uint32_t> internalPopulationStorage(getNumOctants());
+        for(const AccretionData &accretion : accretions){
+            // Get internal octants
+            std::size_t internalPopulationSize = 0;
+            for (const auto &populationEntry : accretion.population) {
+                uint64_t globalIdx = populationEntry.first;
+                if (!isInternal(globalIdx)) {
+                    continue;
+                }
 
-        std::unordered_map<int,std::map<uint64_t,int>> internalsToBeSentAsGhostPerProc;
-        const std::vector<int> &recvRanks = askGhostToOwnerComm.getRecvRanks();
-        for(int rank : recvRanks){
-            askGhostToOwnerComm.waitRecv(rank);
-            RecvBuffer & recvBuffer = askGhostToOwnerComm.getRecvBuffer(rank);
-            size_t nofReceivedGhostFromProc;
-            recvBuffer >> nofReceivedGhostFromProc;
-            for(std::size_t g = 0; g < nofReceivedGhostFromProc; ++g){
-                uint64_t tempGlobal;
-                int tempLayer;
-                recvBuffer >> tempGlobal;
-                recvBuffer >> tempLayer;
-                internalsToBeSentAsGhostPerProc[rank].insert({tempGlobal, tempLayer});
+                uint32_t localIdx = getLocalIdx(globalIdx);
+                internalPopulationStorage[internalPopulationSize] = localIdx;
+                ++internalPopulationSize;
             }
+
+            // Update the
+            int targetRank = accretion.targetRank;
+            std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc[targetRank];
+            rankBordersPerProc.assign(internalPopulationStorage.begin(), internalPopulationStorage.begin() + internalPopulationSize);
+            std::sort(rankBordersPerProc.begin(), rankBordersPerProc.end());
         }
-        askGhostToOwnerComm.waitAllSends();
 
         //
-        // Build ghosts
+        // Build the ghosts
         //
+        DataCommunicator ghostDataCommunicator(m_comm);
 
-        DataCommunicator sendInternalsForGhostComm(m_comm);
+        // Binary size of a ghost entry in the communication buffer
+        const std::size_t GHOST_ENTRY_BINARY_SIZE = sizeof(uint64_t) + m_global.m_octantBytes + sizeof(int);
 
-        // Fill the buffer with source octants
+        // Fill the send buffers with source octants
         //
         // A source octant is an internal octants that is ghosts on other
         // process.
-        m_bordersPerProc.clear();
-        m_octree.m_ghosts.clear();
-        uint64_t global_index;
-        uint32_t x,y,z;
-        uint8_t l;
-        int g;
-        int8_t m;
-        bool info[Octant::INFO_ITEM_COUNT];
-        for(const auto &internalsByProc : internalsToBeSentAsGhostPerProc){
-            u32vector localInternals;
-            localInternals.reserve(internalsByProc.second.size());
-            size_t buffSize = 0;
-            size_t nofInternalsByProc = internalsByProc.second.size();
-            buffSize += (std::size_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes) * nofInternalsByProc;
-            sendInternalsForGhostComm.setSend(internalsByProc.first,buffSize);
-            SendBuffer & sendBuffer = sendInternalsForGhostComm.getSendBuffer(internalsByProc.first);
-            for(const auto &procInternals : internalsByProc.second){
-                uint32_t localInternal = getLocalIdx(procInternals.first);
-                localInternals.push_back(localInternal);
-                const Octant *oct = getOctant(localInternal);
-                x = oct->getX();
-                y = oct->getY();
-                z = oct->getZ();
-                l = oct->getLevel();
-                m = oct->getMarker();
-                g = procInternals.second;
-                global_index = procInternals.first;
-                for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i)
-                    info[i] = oct->m_info[i];
-                sendBuffer << x;
-                sendBuffer << y;
-                sendBuffer << z;
-                sendBuffer << l;
-                sendBuffer << m;
-                sendBuffer << g;
-                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
-                    sendBuffer << info[j];
+        for(const auto &bordersPerProcEntry : m_bordersPerProc){
+            int rank = bordersPerProcEntry.first;
+            const std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc.at(rank);
+            std::size_t nRankBordersPerProc = rankBordersPerProc.size();
+
+            // Get the accretion associated with this rank
+            auto accretionsItr = accretions.begin();
+            for (; accretionsItr != accretions.end(); ++accretionsItr) {
+                if (accretionsItr->targetRank == rank) {
+                    break;
                 }
-                sendBuffer << global_index;
             }
-            m_bordersPerProc.insert({internalsByProc.first, localInternals});
+
+            const AccretionData &accretion = *accretionsItr;
+
+            // Initialize the send
+            std::size_t buffSize = GHOST_ENTRY_BINARY_SIZE * nRankBordersPerProc;
+            ghostDataCommunicator.setSend(rank, buffSize);
+
+            // Fill the buffer
+            SendBuffer &sendBuffer = ghostDataCommunicator.getSendBuffer(rank);
+            for(uint32_t sourceLocalIdx : rankBordersPerProc){
+                uint64_t sourceGlobalIdx = getGlobalIdx(sourceLocalIdx);
+                sendBuffer << sourceGlobalIdx;
+
+                const Octant *sourceOctant = getOctant(sourceLocalIdx);
+                sendBuffer << sourceOctant->getX();
+                sendBuffer << sourceOctant->getY();
+                sendBuffer << sourceOctant->getZ();
+                sendBuffer << sourceOctant->getLevel();
+                sendBuffer << sourceOctant->getMarker();
+                sendBuffer << sourceOctant->getGhostLayer();
+                for(int k = 0; k < Octant::INFO_ITEM_COUNT; ++k){
+                    bool info = sourceOctant->m_info[k];
+                    sendBuffer << info;
+                }
+
+                sendBuffer << accretion.population.at(sourceGlobalIdx);
+            }
         }
 
-        // Start the receives
-        sendInternalsForGhostComm.discoverRecvs();
-        sendInternalsForGhostComm.startAllRecvs();
+        // Discover the receives
+        ghostDataCommunicator.discoverRecvs();
+        ghostDataCommunicator.startAllRecvs();
+        ghostDataCommunicator.startAllSends();
 
-        // Prepare ghost dta structures
-        int nofBytesOverProc = 0;
-        std::vector<int> recvsRanks = sendInternalsForGhostComm.getRecvRanks();
-        std::sort(recvsRanks.begin(),recvsRanks.end());
-        for(int i : recvsRanks){
-            nofBytesOverProc += sendInternalsForGhostComm.getRecvBuffer(i).getSize();
+        // Get the ranks from which ghosts will be received
+        std::vector<int> ghostCommunicatorRecvsRanks = ghostDataCommunicator.getRecvRanks();
+        std::sort(ghostCommunicatorRecvsRanks.begin(), ghostCommunicatorRecvsRanks.end());
+
+        // Prepare ghost data structures
+        m_octree.m_sizeGhosts = 0;
+        for (int rank : ghostCommunicatorRecvsRanks) {
+            RecvBuffer &recvBuffer = ghostDataCommunicator.getRecvBuffer(rank);
+            std::size_t nRankGhosts = recvBuffer.getSize() / GHOST_ENTRY_BINARY_SIZE;
+            m_octree.m_sizeGhosts += nRankGhosts;
         }
-        uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
-        m_octree.m_sizeGhosts = nofGhosts;
-        m_octree.m_ghosts.clear();
-        m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim));
-        m_octree.m_globalIdxGhosts.resize(nofGhosts);
+
+        m_octree.m_ghosts.resize(m_octree.m_sizeGhosts);
+        m_octree.m_globalIdxGhosts.resize(m_octree.m_sizeGhosts);
 
         // Receive the ghosts
-        sendInternalsForGhostComm.startAllSends();
+        //
+        // Ghosts have to be received following the rank order.
+        uint32_t ghostLocalIdx = 0;
+        for (int rank : ghostCommunicatorRecvsRanks) {
+            ghostDataCommunicator.waitRecv(rank);
+            RecvBuffer &recvBuffer = ghostDataCommunicator.getRecvBuffer(rank);
 
-        uint32_t ghostCounter = 0;
-        for(int rank : recvsRanks){
-            sendInternalsForGhostComm.waitRecv(rank);
+            std::size_t nRankGhosts = recvBuffer.getSize() / GHOST_ENTRY_BINARY_SIZE;
+            for(std::size_t n = 0; n < nRankGhosts; ++n){
+                // Assign the global index
+                uint64_t ghostGlobalIdx;
+                recvBuffer >> ghostGlobalIdx;
+                m_octree.m_globalIdxGhosts[ghostLocalIdx] = ghostGlobalIdx;
 
-            RecvBuffer &recvBuffer = sendInternalsForGhostComm.getRecvBuffer(rank);
-            int nofGhostsPerProc = int(recvBuffer.getSize() / (uint32_t) (m_global.m_octantBytes + m_global.m_globalIndexBytes));
-            for(int i = 0; i < nofGhostsPerProc; ++i){
+                // Build the ghosts
+                //
+                // The layer of the received octant will be overwritten with
+                // the actual ghost layer.
+                uint32_t x, y, z;
+                uint8_t level;
                 recvBuffer >> x;
                 recvBuffer >> y;
                 recvBuffer >> z;
-                recvBuffer >> l;
+                recvBuffer >> level;
+                Octant &ghostOctant = m_octree.m_ghosts[ghostLocalIdx];
+                ghostOctant = Octant(m_dim, level, x , y, z);
 
-                m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
-                recvBuffer >> m;
-                m_octree.m_ghosts[ghostCounter].setMarker(m);
-                recvBuffer >> g;
-                m_octree.m_ghosts[ghostCounter].setGhostLayer(g);
+                int8_t marker;
+                recvBuffer >> marker;
+                ghostOctant.setMarker(marker);
+
+                int dummyGhostLayer;
+                recvBuffer >> dummyGhostLayer;
+                ghostOctant.setGhostLayer(dummyGhostLayer);
+
                 for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
-                    recvBuffer >> info[j];
-                    m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
+                    bool info;
+                    recvBuffer >> info;
+                    ghostOctant.m_info[j] = info;
                 }
-                recvBuffer >> global_index;
-                m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
 
-                ++ghostCounter;
+                // Set the layer of the ghost
+                int ghostLayer;
+                recvBuffer >> ghostLayer;
+                ghostOctant.setGhostLayer(ghostLayer);
+
+                // Increase the ghost index
+                ++ghostLocalIdx;
             }
         }
 
         // Wait for the communications to complete
-        sendInternalsForGhostComm.waitAllSends();
+        ghostDataCommunicator.waitAllSends();
     }
 
     /*! Communicate the marker of the octants and the auxiliary info[15].
