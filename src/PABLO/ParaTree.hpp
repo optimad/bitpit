@@ -528,6 +528,8 @@ namespace bitpit {
         void 		computePartition(uint32_t* partition, uint8_t & level_, dvector* weight);
         void 		updateLoadBalance();
         void 		setPboundGhosts();
+        void 		buildGhostOctants(const std::map<int, u32vector> &bordersPerProc, const std::vector<AccretionData> &accretions);
+
         void 		computeGhostHalo();
         void 		commMarker();
 #endif

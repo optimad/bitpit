@@ -5374,104 +5374,8 @@ namespace bitpit {
 
         MPI_Barrier(m_comm);
 
-        //WRITE BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (buffSize) TO BE SENT TO THE RIGHT PROCESS (key)
-        //it visits every element in m_bordersPerProc (one for every neighbor proc)
-        //for every element it visits the border octants it contains and write them in the bitpit communication structure, DataCommunicator
-        //this structure has a buffer for every proc containing the octants to be sent to that proc written in a char* buffer
-        uint64_t global_index;
-        uint32_t x,y,z;
-        uint8_t l;
-        int g;
-        int8_t m;
-        bool info[Octant::INFO_ITEM_COUNT];
-        DataCommunicator ghostCommunicator(m_comm);
-        map<int,vector<uint32_t> >::iterator bitend = m_bordersPerProc.end();
-        uint32_t pbordersOversize = 0;
-        for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
-            pbordersOversize += bit->second.size();
-            std::size_t buffSize = bit->second.size() * (std::size_t)ceil((double)(m_global.m_octantBytes + m_global.m_globalIndexBytes) / (double)(CHAR_BIT/8));
-            int key = bit->first;
-            const vector<uint32_t> & value = bit->second;
-            ghostCommunicator.setSend(key,buffSize);
-            SendBuffer &sendBuffer = ghostCommunicator.getSendBuffer(key);
-            int nofBorders = value.size();
-            for(int i = 0; i < nofBorders; ++i){
-                const Octant & octant = m_octree.m_octants[value[i]];
-                x = octant.getX();
-                y = octant.getY();
-                z = octant.getZ();
-                l = octant.getLevel();
-                m = octant.getMarker();
-                g = octant.getGhostLayer();
-                global_index = getGlobalIdx(value[i]);
-                for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i)
-                    info[i] = octant.m_info[i];
-                sendBuffer << x;
-                sendBuffer << y;
-                sendBuffer << z;
-                sendBuffer << l;
-                sendBuffer << m;
-                sendBuffer << g;
-                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
-                    sendBuffer << info[j];
-                }
-                sendBuffer << global_index;
-            }
-        }
-
-        ghostCommunicator.discoverRecvs();
-        ghostCommunicator.startAllRecvs();
-
-        int nofBytesOverProc = 0;
-        std::vector<int> recvsRanks = ghostCommunicator.getRecvRanks();
-        std::sort(recvsRanks.begin(),recvsRanks.end());
-        for(int i : recvsRanks){
-            nofBytesOverProc += ghostCommunicator.getRecvBuffer(i).getSize();
-        }
-        uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
-        m_octree.m_sizeGhosts = nofGhosts;
-        m_octree.m_ghosts.clear();
-        m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim));
-        m_octree.m_globalIdxGhosts.resize(nofGhosts);
-
-        ghostCommunicator.startAllSends();
-
-        //READ BUFFERS AND BUILD GHOSTS CONTAINER OF LOCALTREE
-        //every receive buffer is visited,and read octant by octant.
-        //every ghost octant is built and put in the ghost vector
-        uint32_t ghostCounter = 0;
-        for(int rank : recvsRanks){
-            ghostCommunicator.waitRecv(rank);
-
-            RecvBuffer &recvBuffer = ghostCommunicator.getRecvBuffer(rank);
-            int nofGhostsPerProc = int(recvBuffer.getSize() / (uint32_t) (m_global.m_octantBytes + m_global.m_globalIndexBytes));
-            for(int i = 0; i < nofGhostsPerProc; ++i){
-                recvBuffer >> x;
-                recvBuffer >> y;
-                recvBuffer >> z;
-                recvBuffer >> l;
-
-                m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
-                recvBuffer >> m;
-                m_octree.m_ghosts[ghostCounter].setMarker(m);
-                recvBuffer >> g;
-                m_octree.m_ghosts[ghostCounter].setGhostLayer(g);
-                for(int j = 0; j < Octant::INFO_ITEM_COUNT; ++j){
-                    recvBuffer >> info[j];
-                    m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
-                }
-                recvBuffer >> global_index;
-                m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
-
-                // The received ghost layer flag is discarded, for this
-                // processor the octant belongs to the first ghost layer
-                m_octree.m_ghosts[ghostCounter].setGhostLayer(0);
-
-                ++ghostCounter;
-            }
-        }
-
-        ghostCommunicator.waitAllSends();
+        // Build ghosts
+        buildGhostOctants(m_bordersPerProc, std::vector<AccretionData>());
     }
 
     /*! Build the structure with the information about the layers (from the second one) of ghost octants, partition boundary octants
@@ -5791,6 +5695,18 @@ namespace bitpit {
         //
         // Build the ghosts
         //
+        buildGhostOctants(m_bordersPerProc, accretions);
+    }
+
+    /*! Build ghost octants.
+     *
+     *  \param[in] bordersPerProc Information on partition boundary octants.
+     *  \param[in] accretions Accretions used to growth the sources.
+     */
+    void
+    ParaTree::buildGhostOctants(const std::map<int, u32vector> &bordersPerProc,
+                                const std::vector<AccretionData> &accretions){
+
         DataCommunicator ghostDataCommunicator(m_comm);
 
         // Binary size of a ghost entry in the communication buffer
@@ -5800,20 +5716,30 @@ namespace bitpit {
         //
         // A source octant is an internal octants that is ghosts on other
         // process.
-        for(const auto &bordersPerProcEntry : m_bordersPerProc){
+        for(const auto &bordersPerProcEntry : bordersPerProc){
             int rank = bordersPerProcEntry.first;
-            const std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc.at(rank);
+            const std::vector<uint32_t> &rankBordersPerProc = bordersPerProcEntry.second;
             std::size_t nRankBordersPerProc = rankBordersPerProc.size();
 
             // Get the accretion associated with this rank
-            auto accretionsItr = accretions.begin();
-            for (; accretionsItr != accretions.end(); ++accretionsItr) {
-                if (accretionsItr->targetRank == rank) {
-                    break;
+            //
+            // If there are no accretions it means we are building only the
+            // first layer of ghosts.
+            std::vector<AccretionData>::const_iterator accretionsItr;
+            if (accretions.size() > 0) {
+                bool accretionFound = false;
+                BITPIT_UNUSED(accretionFound);
+                accretionsItr = accretions.begin();
+                for (; accretionsItr != accretions.end(); ++accretionsItr) {
+                    if (accretionsItr->targetRank == rank) {
+                        accretionFound = true;
+                        break;
+                    }
                 }
+                assert(accretionFound);
+            } else {
+                accretionsItr = accretions.end();
             }
-
-            const AccretionData &accretion = *accretionsItr;
 
             // Initialize the send
             std::size_t buffSize = GHOST_ENTRY_BINARY_SIZE * nRankBordersPerProc;
@@ -5822,9 +5748,11 @@ namespace bitpit {
             // Fill the buffer
             SendBuffer &sendBuffer = ghostDataCommunicator.getSendBuffer(rank);
             for(uint32_t sourceLocalIdx : rankBordersPerProc){
+                // Global index
                 uint64_t sourceGlobalIdx = getGlobalIdx(sourceLocalIdx);
                 sendBuffer << sourceGlobalIdx;
 
+                // Source data
                 const Octant *sourceOctant = getOctant(sourceLocalIdx);
                 sendBuffer << sourceOctant->getX();
                 sendBuffer << sourceOctant->getY();
@@ -5837,7 +5765,18 @@ namespace bitpit {
                     sendBuffer << info;
                 }
 
-                sendBuffer << accretion.population.at(sourceGlobalIdx);
+                // Layer information
+                //
+                // If not accretions are received we are building only the
+                // first layer of ghosts.
+                int layer;
+                if (accretions.size() > 0) {
+                    layer = accretionsItr->population.at(sourceGlobalIdx);
+                } else {
+                    layer = 0;
+                }
+
+                sendBuffer << layer;
             }
         }
 
