@@ -5503,10 +5503,6 @@ namespace bitpit {
             accretions.emplace_back();
             AccretionData &accretion = accretions.back();
 
-            // The accretion is owned by this rank
-            int ownerRank = m_rank;
-            accretion.ownerRank = ownerRank;
-
             // Rank for which the accretion will gather sources
             int targetRank = bordersPerProcEntry.first;
             accretion.targetRank = targetRank;
@@ -5557,9 +5553,7 @@ namespace bitpit {
 
                     auto foreignRankAccretionsItr = foreignRankAccretions.begin();
                     for (; foreignRankAccretionsItr != foreignRankAccretions.end(); ++foreignRankAccretionsItr) {
-                        if (foreignRankAccretionsItr->ownerRank != accretion.ownerRank) {
-                            continue;
-                        } else if (foreignRankAccretionsItr->targetRank!= accretion.targetRank) {
+                        if (foreignRankAccretionsItr->targetRank!= accretion.targetRank) {
                             continue;
                         }
 
@@ -5569,7 +5563,6 @@ namespace bitpit {
                     if (foreignRankAccretionsItr == foreignRankAccretions.end()) {
                         foreignRankAccretions.emplace_back();
                         foreignRankAccretionsItr = foreignRankAccretions.begin() + foreignRankAccretions.size() - 1;
-                        foreignRankAccretionsItr->ownerRank = accretion.ownerRank;
                         foreignRankAccretionsItr->targetRank = accretion.targetRank;
                     }
 
@@ -5599,7 +5592,6 @@ namespace bitpit {
                         std::size_t nForeignSeeds = foreignAccretion.seeds.size();
 
                         buffSize += sizeof(int);
-                        buffSize += sizeof(int);
                         buffSize += sizeof(std::size_t);
                         buffSize += nForeignSeeds * (sizeof(uint64_t) + sizeof(int));
                     }
@@ -5613,7 +5605,6 @@ namespace bitpit {
 
                     sendBuffer << foreignRankAccretions.size();
                     for(const auto &foreignAccretion: foreignRankAccretions){
-                        sendBuffer << foreignAccretion.ownerRank;
                         sendBuffer << foreignAccretion.targetRank;
                         sendBuffer << foreignAccretion.seeds.size();
                         for(const auto &seedEntry : foreignAccretion.seeds){
@@ -5639,10 +5630,6 @@ namespace bitpit {
                     recvBuffer >> nForeignAccretions;
 
                     for (std::size_t k = 0; k < nForeignAccretions; ++k) {
-                        // Owner rank
-                        int ownerRank;
-                        recvBuffer >> ownerRank;
-
                         // Target rank
                         int targetRank;
                         recvBuffer >> targetRank;
@@ -5653,9 +5640,7 @@ namespace bitpit {
                         // ranks doesn't exist create a new one.
                         auto accretionsItr = accretions.begin();
                         for(; accretionsItr != accretions.end(); ++accretionsItr){
-                            if (accretionsItr->ownerRank != ownerRank) {
-                                continue;
-                            } else if (accretionsItr->targetRank!= targetRank) {
+                            if (accretionsItr->targetRank!= targetRank) {
                                 continue;
                             }
 
@@ -5665,7 +5650,6 @@ namespace bitpit {
                         if (accretionsItr == accretions.end()) {
                             accretions.emplace_back();
                             accretionsItr = accretions.begin() + accretions.size() - 1;
-                            accretionsItr->ownerRank = ownerRank;
                             accretionsItr->targetRank = targetRank;
                         }
 

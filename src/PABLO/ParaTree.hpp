@@ -125,7 +125,6 @@ namespace bitpit {
         typedef std::unordered_map<int, std::array<uint64_t, 2>> PartitionIntersections;
 
         struct AccretionData {
-            int ownerRank;
             int targetRank;
             std::unordered_map<uint64_t, int> seeds;
             std::unordered_map<uint64_t, int> population;
