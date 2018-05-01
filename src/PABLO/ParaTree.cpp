@@ -5504,9 +5504,6 @@ namespace bitpit {
             AccretionData &accretion = accretions.back();
 
             // The accretion is owned by this rank
-            //
-            // Sources will be extracted only from accretions owned by the
-            // current rank.
             int ownerRank = m_rank;
             accretion.ownerRank = ownerRank;
 
@@ -5531,7 +5528,6 @@ namespace bitpit {
         }
 
         // Add layers to the accretions
-        DataCommunicator accretionDataCommunicator(m_comm);
         DataCommunicator foreignAccretionDataCommunicator(m_comm);
         for(std::size_t layer = 1; layer < m_nofGhostLayers; ++layer){
             //
@@ -5771,137 +5767,6 @@ namespace bitpit {
                         }
                     }
                 }
-            }
-
-            //
-            // Exchange the accretion data among the processors
-            //
-
-            // Detect the accretions to send
-            //
-            // We need to send the population of the last layer (i.e., we need
-            // to send the seeds) of the accretions not owned by this process.
-            std::unordered_map<int, std::vector<const AccretionData *>> sendAccretionList;
-            for(const AccretionData &accretion : accretions){
-                // Do not send data for accretions onwed by this process
-                if (accretion.ownerRank == m_rank) {
-                    continue;
-                }
-
-                // Do not send data if there is nothing to send
-                std::size_t nSeeds = accretion.seeds.size();
-                if (nSeeds == 0) {
-                    continue;
-                }
-
-                // This accretion will be send
-                const int receiverRank = accretion.ownerRank;
-                sendAccretionList[receiverRank].push_back(&accretion);
-            }
-
-            // Execute communications
-            bool accretionExchangeNeeded = (sendAccretionList.size() > 0);
-            MPI_Allreduce(MPI_IN_PLACE, &accretionExchangeNeeded, 1, MPI_C_BOOL, MPI_LOR, m_comm);
-            if (accretionExchangeNeeded) {
-                // Clear previous communications
-                accretionDataCommunicator.clearAllSends();
-                accretionDataCommunicator.clearAllRecvs();
-
-                // Send the seeds
-                //
-                // The seeds are the population of the last layer.
-                for (const auto &sendAccretionListEntry : sendAccretionList) {
-                    // Rank of the receiver
-                    const int receiverRank = sendAccretionListEntry.first;
-
-                    // Accretions to send
-                    const std::vector<const AccretionData *> rankAccretions = sendAccretionListEntry.second;
-
-                    // Evaluate buffer size
-                    std::size_t buffSize = 0;
-
-                    buffSize += sizeof(std::size_t);
-                    for(const AccretionData *accretion : rankAccretions){
-                        buffSize += sizeof(int);
-                        buffSize += sizeof(std::size_t);
-                        buffSize += accretion->seeds.size() * (sizeof(uint64_t) + sizeof(int));
-                    }
-
-                    accretionDataCommunicator.setSend(receiverRank, buffSize);
-
-                    // Fill buffer
-                    SendBuffer &sendBuffer = accretionDataCommunicator.getSendBuffer(receiverRank);
-
-                    sendBuffer << rankAccretions.size();
-                    for(const AccretionData *accretion : rankAccretions){
-                        sendBuffer << accretion->targetRank;
-                        sendBuffer << accretion->seeds.size();
-                        for(const auto &entry : accretion->seeds){
-                            sendBuffer << entry.first;
-                            sendBuffer << entry.second;
-                        }
-                    }
-                }
-
-                // Start communications
-                accretionDataCommunicator.discoverRecvs();
-                accretionDataCommunicator.startAllRecvs();
-                accretionDataCommunicator.startAllSends();
-
-                // Receive the population of the last layer
-                //
-                // The seeds are the population of the last layer.
-                int nCompletedRecvs = 0;
-                while (nCompletedRecvs < accretionDataCommunicator.getRecvCount()) {
-                    int senderRank = accretionDataCommunicator.waitAnyRecv();
-                    RecvBuffer &recvBuffer = accretionDataCommunicator.getRecvBuffer(senderRank);
-
-                    std::size_t nRecvAccretions;
-                    recvBuffer >> nRecvAccretions;
-
-                    for (std::size_t k = 0; k < nRecvAccretions; ++k) {
-                        // Target rank
-                        int targetRank;
-                        recvBuffer >> targetRank;
-
-                        // Get the accretion to update
-                        auto accretionsItr = accretions.begin();
-                        for(; accretionsItr != accretions.end(); ++accretionsItr){
-                            if (accretionsItr->ownerRank != m_rank) {
-                                continue;
-                            } else if (accretionsItr->targetRank != targetRank) {
-                                continue;
-                            }
-
-                            break;
-                        }
-                        AccretionData &accretion = *accretionsItr;
-
-                        std::size_t nSeeds;
-                        recvBuffer >> nSeeds;
-
-                        for(std::size_t n = 0; n < nSeeds; ++n){
-                            uint64_t seedGlobalIdx;
-                            recvBuffer >> seedGlobalIdx;
-
-                            int seedLayer;
-                            recvBuffer >> seedLayer;
-
-                            auto iterator = accretion.population.find(seedGlobalIdx);
-                            if (iterator == accretion.population.end()) {
-                                accretion.population.insert({seedGlobalIdx, seedLayer});
-                                if (layer < (m_nofGhostLayers - 1)) {
-                                    accretion.seeds.insert({seedGlobalIdx, seedLayer});
-                                }
-                            }
-                        }
-                    }
-
-                    ++nCompletedRecvs;
-                }
-
-                // Wait until all exchanges are completed
-                accretionDataCommunicator.waitAllSends();
             }
         }
 
