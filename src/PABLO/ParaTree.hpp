@@ -534,7 +534,7 @@ namespace bitpit {
         void 		commMarker();
 #endif
         void 		updateAfterCoarse();
-        void 		balance21(bool const first);
+        void 		balance21(bool verbose, bool balanceNewOctants);
         void		createPartitionInfo();
 
         bool		isInternal(uint64_t gidx) const;

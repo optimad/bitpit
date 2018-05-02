@@ -3424,7 +3424,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " SETTLE MARKERS " << endl;
 
-        balance21(true);
+        balance21(true, false);
 
         (*m_log) << " " << endl;
         (*m_log) << "---------------------------------------------" << endl;
@@ -3440,7 +3440,7 @@ namespace bitpit {
     void
     ParaTree::preadapt(){
 
-        balance21(true);
+        balance21(true, false);
 
         m_lastOp = OP_PRE_ADAPT;
 
@@ -3615,7 +3615,7 @@ namespace bitpit {
             (*m_log) << " " << endl;
 
             // 2:1 Balance
-            balance21(true);
+            balance21(true, false);
 
             (*m_log) << " " << endl;
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
@@ -3623,7 +3623,7 @@ namespace bitpit {
             // Coarse
             while(m_octree.globalCoarse(m_mapIdx));
             updateAfterCoarse();
-            balance21(false);
+            balance21(false, true);
             while(m_octree.refine(m_mapIdx));
             updateAdapt();
 
@@ -3643,7 +3643,7 @@ namespace bitpit {
             (*m_log) << " " << endl;
 
             // 2:1 Balance
-            balance21(true);
+            balance21(true, false);
 
             (*m_log) << " " << endl;
             (*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
@@ -3652,7 +3652,7 @@ namespace bitpit {
             while(m_octree.globalCoarse(m_mapIdx));
             updateAfterCoarse();
             computeGhostHalo();
-            balance21(false);
+            balance21(false, true);
             while(m_octree.refine(m_mapIdx));
             updateAdapt();
 
@@ -4718,7 +4718,7 @@ namespace bitpit {
 
             // 2:1 Balance
             if (m_lastOp != OP_PRE_ADAPT) {
-                balance21(true);
+                balance21(true, false);
             }
 
             (*m_log) << " " << endl;
@@ -4752,7 +4752,7 @@ namespace bitpit {
 
             // 2:1 Balance
             if (m_lastOp != OP_PRE_ADAPT) {
-                balance21(true);
+                balance21(true, false);
             }
 
             (*m_log) << " " << endl;
@@ -5974,131 +5974,76 @@ namespace bitpit {
     }
 
     /*!Balance 2:1 the octree.
-     * \param[in] first Is the first call of the 2:1 balance method?
+     * \param[in] verbose If set to true output messages will be printed on
+     * the logger
+     * \param[in] balanceNewOctants If set to true also new octants will be
+     * balanced
      */
     void
-    ParaTree::balance21(bool const first){
+    ParaTree::balance21(bool verbose, bool balanceNewOctants){
+
+        // Print header
+        if (verbose){
+            (*m_log) << "---------------------------------------------" << endl;
+            (*m_log) << " 2:1 BALANCE (balancing Marker before Adapt)" << endl;
+            (*m_log) << " " << endl;
+            (*m_log) << " Iterative procedure	" << endl;
+            (*m_log) << " " << endl;
+        }
+
+        // 2:1 balancing
+        int iteration = 0;
+        bool markersModified = true;
+        while (markersModified) {
+            if (verbose){
+                (*m_log) << " Iteration	:	" + to_string(iteration) << endl;
+            }
+
+            // Only first iteration will process internl octants
+            bool processInternals = (iteration == 0);
+
 #if BITPIT_ENABLE_MPI==1
-        bool globalDone = true, localDone = false;
-        int  iteration  = 0;
+            // Communicate markers
+            commMarker();
+#endif
 
+            // Pre-processing for 2:1 balancing
+            m_octree.preBalance21(processInternals);
+
+#if BITPIT_ENABLE_MPI==1
+            // Communicate markers
+            commMarker();
+#endif
+
+            // Execute local loadbalance
+            markersModified = m_octree.localBalance(balanceNewOctants, processInternals);
+#if BITPIT_ENABLE_MPI==1
+            if (!m_serial) {
+                MPI_Allreduce(MPI_IN_PLACE, &markersModified, 1, MPI_C_BOOL, MPI_LOR, m_comm);
+            }
+#endif
+
+            // Increase iteration counter
+            iteration++;
+        }
+
+        // Post-processing for 2:1 balancing
+        //
+        // The post-process is done calling the pre-process function on the
+        // ghost octants.
+        m_octree.preBalance21(false);
+
+#if BITPIT_ENABLE_MPI==1
+        // Communicate markers
         commMarker();
-        m_octree.preBalance21(true);
+#endif
 
-        if (first){
-            (*m_log) << "---------------------------------------------" << endl;
-            (*m_log) << " 2:1 BALANCE (balancing Marker before Adapt)" << endl;
-            (*m_log) << " " << endl;
-            (*m_log) << " Iterative procedure	" << endl;
-            (*m_log) << " " << endl;
-            (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
-
-            commMarker();
-            localDone = m_octree.localBalance(false, true);
-            commMarker();
-            m_octree.preBalance21(false);
-            if (m_serial) {
-                globalDone = localDone;
-            } else {
-                m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
-            }
-
-            while(globalDone){
-                iteration++;
-                (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
-                commMarker();
-                localDone = m_octree.localBalance(false, false);
-                commMarker();
-                m_octree.preBalance21(false);
-                if (m_serial) {
-                    globalDone = localDone;
-                } else {
-                    m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
-                }
-            }
-
-            commMarker();
-            (*m_log) << " Iteration	:	Finalizing " << endl;
-            (*m_log) << " " << endl;
-
+        // Print footer
+        if (verbose){
             (*m_log) << " 2:1 Balancing reached " << endl;
             (*m_log) << " " << endl;
             (*m_log) << "---------------------------------------------" << endl;
-
         }
-        else{
-
-            commMarker();
-            localDone = m_octree.localBalance(true, true);
-            commMarker();
-            m_octree.preBalance21(false);
-            if (m_serial) {
-                globalDone = localDone;
-            } else {
-                m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
-            }
-
-            while(globalDone){
-                iteration++;
-                commMarker();
-                localDone = m_octree.localBalance(true, false);
-                commMarker();
-                m_octree.preBalance21(false);
-                if (m_serial) {
-                    globalDone = localDone;
-                } else {
-                    m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
-                }
-            }
-
-            commMarker();
-
-        }
-#else
-        bool localDone = false;
-        int  iteration  = 0;
-
-        m_octree.preBalance21(true);
-
-        if (first){
-            (*m_log) << "---------------------------------------------" << endl;
-            (*m_log) << " 2:1 BALANCE (balancing Marker before Adapt)" << endl;
-            (*m_log) << " " << endl;
-            (*m_log) << " Iterative procedure	" << endl;
-            (*m_log) << " " << endl;
-            (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
-
-            localDone = m_octree.localBalance(false, true);
-            m_octree.preBalance21(false);
-
-            while(localDone){
-                iteration++;
-                (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
-                localDone = m_octree.localBalance(false, false);
-                m_octree.preBalance21(false);
-            }
-
-            (*m_log) << " Iteration	:	Finalizing " << endl;
-            (*m_log) << " " << endl;
-
-            (*m_log) << " 2:1 Balancing reached " << endl;
-            (*m_log) << " " << endl;
-            (*m_log) << "---------------------------------------------" << endl;
-
-        }
-        else{
-
-            localDone = m_octree.localBalance(true, true);
-            m_octree.preBalance21(false);
-
-            while(localDone){
-                iteration++;
-                localDone = m_octree.localBalance(true, false);
-                m_octree.preBalance21(false);
-            }
-        }
-
-#endif /* NOMPI */
     };
 
     // =================================================================================== //
