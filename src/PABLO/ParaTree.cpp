@@ -6399,7 +6399,9 @@ namespace bitpit {
 
         }
 #if BITPIT_ENABLE_MPI==1
-        MPI_Barrier(m_comm);
+        if (isCommSet()) {
+            MPI_Barrier(m_comm);
+        }
 #endif
 
     }
