@@ -6030,7 +6030,6 @@ namespace bitpit {
         else{
 
             commMarker();
-            MPI_Barrier(m_comm);
             localDone = m_octree.localBalanceAll(true);
             commMarker();
             m_octree.preBalance21(false);
