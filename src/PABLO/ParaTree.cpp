@@ -5372,8 +5372,6 @@ namespace bitpit {
         m_pborders.resize(countpbd);
         m_internals.resize(countint);
 
-        MPI_Barrier(m_comm);
-
         // Build ghosts
         buildGhostOctants(m_bordersPerProc, std::vector<AccretionData>());
     }
