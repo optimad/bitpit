@@ -4392,7 +4392,6 @@ namespace bitpit {
                 else if(m_rank == 0){
                     firstSuccessor = 1;
                 }
-                MPI_Barrier(m_comm); //da spostare prima della prima comunicazione
 
                 uint32_t x,y,z;
                 uint8_t l;
