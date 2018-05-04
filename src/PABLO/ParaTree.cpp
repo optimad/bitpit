@@ -5863,7 +5863,7 @@ namespace bitpit {
         }
 
         // Binary size of a marker entry in the communication buffer
-        const std::size_t MARKER_ENTRY_BINARY_SIZE = m_global.m_markerBytes + m_global.m_boolBytes;
+        const std::size_t MARKER_ENTRY_BINARY_SIZE = sizeof(int8_t) + sizeof(bool);
 
         //WRITE LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (buffSize) TO BE SENT TO THE RIGHT PROCESS (key)
         //it visits every element in m_bordersPerProc (one for every neighbor proc)
