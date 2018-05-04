@@ -70,11 +70,6 @@ private:
 	uint8_t  m_nedges;				/**< Number of edges of an octant */
 	uint8_t  m_nnodes;				/**< Number of nodes of an octant */
 	uint8_t  m_nnodesPerFace;		/**< Number of nodes per face of an octant */
-	uint8_t  m_octantBytes;			/**< Bytes occupation of an octant */
-	uint8_t  m_globalIndexBytes;	/**< Bytes occupation of the index of an octant */
-	uint8_t  m_markerBytes;			/**< Bytes occupation of the refinement marker of an octant */
-	uint8_t  m_levelBytes;			/**< Bytes occupation of the level of an octant */
-	uint8_t  m_boolBytes;			/**< Bytes occupation of a boolean */
 	uint8_t  m_oppFace[6];			/**< oppface[i] = Index of the face of an octant neighbour through the i-th face of the current octant */
 	uint8_t  m_nodeFace[8][3];		/**< nodeface[i][0:1] = local indices of faces sharing the i-th node of an octant */
 	uint8_t  m_nodeEdge[8][3];		/**< nodeedge[i][0:1] = local indices of edges sharing the i-th node of an octant */
@@ -96,16 +91,12 @@ private:
 	static int8_t 		getMaxLevel();
 	static uint32_t 	getMaxLength();
 
-	uint8_t 	getBoolBytes() const;
 	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]) const;
 	void 		getEdgeface(uint8_t edgeface[12][2]) const;
 	void 		getEdgenode(uint8_t edgeNode[12][2]) const;
 	void 		getEdgenode(uint8_t edge, uint8_t edgeNode[2]) const;
 	void 		getFacenode(uint8_t facenode[6][4]) const;
 	void 		getNodeedge(uint8_t nodeegde_[8][3]) const;
-	uint8_t 	getGlobalIndexBytes() const;
-	uint8_t 	getLevelBytes() const;
-	uint8_t 	getMarkerBytes() const;
 	uint8_t 	getNchildren() const;
 	uint8_t 	getNedges() const;
 	uint8_t 	getNfaces() const;

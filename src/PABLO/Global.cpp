@@ -34,15 +34,6 @@ namespace bitpit {
 const int8_t Global::m_maxLevel = 20;
 const uint32_t Global::m_maxLength = uint32_t(1 << Global::m_maxLevel);
 
-
-/*!Get the bytes occupation of a boolean.
- * \return Bytes occupation of a boolean.
- */
-uint8_t
-Global::getBoolBytes() const {
-	return m_boolBytes;
-}
-
 /*! Get the components of the "normals" per edge (bisector of edge)
  * \return Components (x,y,z) of the "normals" per edge.
  */
@@ -117,30 +108,6 @@ Global::getNodeedge(uint8_t nodeedge_[8][3]) const {
             nodeedge_[i][j] = m_nodeEdge[i][j];
         }
     }
-}
-
-/*!Get the bytes occupation of the global index of an octant.
- * \return Bytes occupation of a global index.
- */
-uint8_t
-Global::getGlobalIndexBytes() const {
-	return m_globalIndexBytes;
-}
-
-/*!Get the bytes occupation of the level of an octant.
- * \return Bytes occupation of level.
- */
-uint8_t
-Global::getLevelBytes() const {
-	return m_levelBytes;
-}
-
-/*!Get the bytes occupation of the marker of an octant.
- * \return Bytes occupation of marker.
- */
-uint8_t
-Global::getMarkerBytes() const {
-	return m_markerBytes;
 }
 
 /*!Get the length of the logical domain.
@@ -236,13 +203,6 @@ Global::getNormals(int8_t normals_[6][3]) const {
 	}
 }
 
-/*!Get the bytes occupation of an octant.
- * \return Bytes occupation of an octant.
- */
-uint8_t
-Global::getOctantBytes() const {
-	return m_octantBytes;
-}
 /*! Get the index of the opposite face of each face.
 * \return oppface[i] = index of the face of an octant neighbour
 * through the i-th face of the current octant.
@@ -291,11 +251,6 @@ Global::initialize(uint8_t dim) {
 	m_nnodes				= uint8_t(1)<<dim;
 	m_nedges 				= (dim-2)*12;
 	m_nnodesPerFace 		= uint8_t(1)<<(dim-1);
-	m_octantBytes 			= uint8_t(sizeof(uint32_t)*3 + sizeof(uint8_t) + sizeof(int8_t) + sizeof(int) + (Octant::INFO_ITEM_COUNT)*sizeof(bool));// 3 coordinates + level + marker + ghost + info
-	m_globalIndexBytes 		= uint8_t(sizeof(uint64_t));
-	m_markerBytes 			= sizeof(int8_t);
-	m_levelBytes 			= sizeof(uint8_t);
-	m_boolBytes 			= sizeof(bool);
 
 	m_oppFace[0] = 1;
 	m_oppFace[1] = 0;
