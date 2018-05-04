@@ -5862,6 +5862,9 @@ namespace bitpit {
             return;
         }
 
+        // Binary size of a marker entry in the communication buffer
+        const std::size_t MARKER_ENTRY_BINARY_SIZE = m_global.m_markerBytes + m_global.m_boolBytes;
+
         //WRITE LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (buffSize) TO BE SENT TO THE RIGHT PROCESS (key)
         //it visits every element in m_bordersPerProc (one for every neighbor proc)
         //for every element it visits the border octants it contains and write them in the bitpit communication structure, DataCommunicator
@@ -5873,7 +5876,7 @@ namespace bitpit {
         uint32_t pbordersOversize = 0;
         for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
             pbordersOversize += bit->second.size();
-            std::size_t buffSize = bit->second.size() * (std::size_t)ceil((double)(m_global.m_markerBytes + m_global.m_boolBytes) / (double)(CHAR_BIT/8));
+            std::size_t buffSize = bit->second.size() * (std::size_t)ceil((double)(MARKER_ENTRY_BINARY_SIZE) / (double)(CHAR_BIT/8));
             int key = bit->first;
             const vector<uint32_t> & value = bit->second;
             markerCommunicator.setSend(key,buffSize);
@@ -5901,7 +5904,7 @@ namespace bitpit {
         for(int rank : recvRanks){
             markerCommunicator.waitRecv(rank);
             RecvBuffer & recvBuffer = markerCommunicator.getRecvBuffer(rank);
-            int nofGhostsPerProc = int(recvBuffer.getSize() / ((uint32_t) (m_global.m_markerBytes + m_global.m_boolBytes)));
+            int nofGhostsPerProc = recvBuffer.getSize() / MARKER_ENTRY_BINARY_SIZE;
             for(int i = 0; i < nofGhostsPerProc; ++i){
                 recvBuffer >> marker;
                 m_octree.m_ghosts[ghostCounter].setMarker(marker);
