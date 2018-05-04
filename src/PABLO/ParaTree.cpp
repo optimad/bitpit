@@ -5865,56 +5865,60 @@ namespace bitpit {
         // Binary size of a marker entry in the communication buffer
         const std::size_t MARKER_ENTRY_BINARY_SIZE = sizeof(int8_t) + sizeof(bool);
 
-        //WRITE LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (buffSize) TO BE SENT TO THE RIGHT PROCESS (key)
-        //it visits every element in m_bordersPerProc (one for every neighbor proc)
-        //for every element it visits the border octants it contains and write them in the bitpit communication structure, DataCommunicator
-        //this structure has a buffer for every proc containing the octants to be sent to that proc written in a char* buffer
-        int8_t marker;
-        bool mod;
+        // Fill communication buffer with level and marker
+        //
+        // It visits every element in m_bordersPerProc (one for every neighbor proc)
+        // for every element it visits the border octants it contains and write them in the bitpit communication structure, DataCommunicator
+        // this structure has a buffer for every proc containing the octants to be sent to that proc written in a char* buffer
         DataCommunicator markerCommunicator(m_comm);
-        map<int,vector<uint32_t> >::iterator bitend = m_bordersPerProc.end();
-        uint32_t pbordersOversize = 0;
-        for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
-            pbordersOversize += bit->second.size();
-            std::size_t buffSize = bit->second.size() * MARKER_ENTRY_BINARY_SIZE;
-            int key = bit->first;
-            const vector<uint32_t> & value = bit->second;
-            markerCommunicator.setSend(key,buffSize);
-            SendBuffer sendBuffer = markerCommunicator.getSendBuffer(key);
-            int nofBorders = value.size();
-            for(int i = 0; i < nofBorders; ++i){
-                const Octant & octant = m_octree.m_octants[value[i]];
-                marker = octant.getMarker();
-                mod	= octant.m_info[Octant::INFO_AUX];
-                sendBuffer << marker;
-                sendBuffer << mod;
+
+        for(const auto &bordersPerProcEntry : m_bordersPerProc){
+            int rank = bordersPerProcEntry.first;
+            const std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc.at(rank);
+            const std::size_t nRankBorders = rankBordersPerProc.size();
+
+            std::size_t buffSize = nRankBorders * MARKER_ENTRY_BINARY_SIZE;
+            markerCommunicator.setSend(rank, buffSize);
+
+            SendBuffer sendBuffer = markerCommunicator.getSendBuffer(rank);
+            for(std::size_t i = 0; i < nRankBorders; ++i){
+                const Octant &octant = m_octree.m_octants[rankBordersPerProc[i]];
+                sendBuffer << octant.getMarker();
+                sendBuffer << octant.m_info[Octant::INFO_AUX];
             }
         }
 
         markerCommunicator.discoverRecvs();
         markerCommunicator.startAllRecvs();
-		markerCommunicator.startAllSends();
+        markerCommunicator.startAllSends();
 
-        //READ BUFFERS AND BUILD GHOSTS CONTAINER OF LOCALTREE
-        //every receive buffer is visited, and read octant by octant.
-        //every ghost octant level and marker are updated
-        uint32_t ghostCounter = 0;
-        vector<int> recvRanks = markerCommunicator.getRecvRanks();
-        std::sort(recvRanks.begin(),recvRanks.end());
+        // Read level and marker from communication buffer
+        //
+        // every receive buffer is visited, and read octant by octant.
+        // every ghost octant level and marker are updated
+        std::vector<int> recvRanks = markerCommunicator.getRecvRanks();
+        std::sort(recvRanks.begin(), recvRanks.end());
+
+        uint32_t ghostIdx = 0;
         for(int rank : recvRanks){
             markerCommunicator.waitRecv(rank);
-            RecvBuffer & recvBuffer = markerCommunicator.getRecvBuffer(rank);
-            int nofGhostsPerProc = recvBuffer.getSize() / MARKER_ENTRY_BINARY_SIZE;
-            for(int i = 0; i < nofGhostsPerProc; ++i){
+            RecvBuffer &recvBuffer = markerCommunicator.getRecvBuffer(rank);
+
+            const std::size_t nRankGhosts = recvBuffer.getSize() / MARKER_ENTRY_BINARY_SIZE;
+            for(std::size_t i = 0; i < nRankGhosts; ++i){
+                int8_t marker;
                 recvBuffer >> marker;
-                m_octree.m_ghosts[ghostCounter].setMarker(marker);
-                recvBuffer >> mod;
-                m_octree.m_ghosts[ghostCounter].m_info[Octant::INFO_AUX] = mod;
-                ++ghostCounter;
+                m_octree.m_ghosts[ghostIdx].setMarker(marker);
+
+                bool aux;
+                recvBuffer >> aux;
+                m_octree.m_ghosts[ghostIdx].m_info[Octant::INFO_AUX] = aux;
+
+                ++ghostIdx;
             }
         }
-        markerCommunicator.waitAllSends();
 
+        markerCommunicator.waitAllSends();
     }
 #endif
 
