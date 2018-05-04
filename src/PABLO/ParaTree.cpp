@@ -5876,7 +5876,7 @@ namespace bitpit {
         uint32_t pbordersOversize = 0;
         for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
             pbordersOversize += bit->second.size();
-            std::size_t buffSize = bit->second.size() * (std::size_t)ceil((double)(MARKER_ENTRY_BINARY_SIZE) / (double)(CHAR_BIT/8));
+            std::size_t buffSize = bit->second.size() * MARKER_ENTRY_BINARY_SIZE;
             int key = bit->first;
             const vector<uint32_t> & value = bit->second;
             markerCommunicator.setSend(key,buffSize);
