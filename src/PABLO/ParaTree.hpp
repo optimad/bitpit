@@ -851,7 +851,7 @@ namespace bitpit {
                             if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
                                 nofElementsFromSuccessiveToPrevious  = headSize;
 
-                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)m_global.m_octantBytes;
+                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)Octant::getBinarySize();
                             //compute size of data in buffers
                             if(userData.fixedSize()){
                                 buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
@@ -897,7 +897,7 @@ namespace bitpit {
                         }
                         else{
                             nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)m_global.m_octantBytes;
+                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)Octant::getBinarySize();
                             //compute size of data in buffers
                             if(userData.fixedSize()){
                                 buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
@@ -955,7 +955,7 @@ namespace bitpit {
                             if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
                                 nofElementsFromPreviousToSuccessive = tailSize;
 
-                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)m_global.m_octantBytes;
+                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)Octant::getBinarySize();
                             //compute size of data in buffers
                             if(userData.fixedSize()){
                                 buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
@@ -1001,7 +1001,7 @@ namespace bitpit {
                         else{
                             nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
                             uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
-                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)m_global.m_octantBytes;
+                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)Octant::getBinarySize();
                             //compute size of data in buffers
                             if(userData.fixedSize()){
                                 buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
