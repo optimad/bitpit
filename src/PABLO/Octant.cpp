@@ -552,6 +552,21 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 	return keyXYZ(node[0], node[1], node[2], Global::getMaxLevel());
 };
 
+/** Get the size of the buffer required to communicate the octant.
+ * \return Returns the buffer size (in bytes).
+ */
+unsigned int Octant::getBinarySize()
+{
+    unsigned int binarySize = 0;
+    binarySize += 3 * sizeof(uint32_t); // 3 coordinates
+    binarySize += sizeof(uint8_t); // level
+    binarySize += sizeof(int8_t); // marker
+    binarySize += sizeof(int); // ghost layer
+    binarySize += INFO_ITEM_COUNT * sizeof(bool); // info
+
+    return binarySize;
+}
+
 // =================================================================================== //
 // OTHER METHODS
 // =================================================================================== //
