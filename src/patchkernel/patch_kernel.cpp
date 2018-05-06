@@ -3796,6 +3796,20 @@ std::array<double, 3> PatchKernel::evalCellCentroid(const long &id) const
 }
 
 /*!
+	Evaluates the bounding box of the specified cell.
+
+	\param id is the id of the cell
+	\param[out] minPoint is the minimum point of the bounding box
+	\param[out] maxPoint is the maximum point of the bounding box
+*/
+void PatchKernel::evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const
+{
+	const Cell &cell = getCell(id);
+
+	return evalElementBoundingBox(cell, minPoint, maxPoint);
+}
+
+/*!
 	Evaluates the centroid of the specified interface.
 
 	\param id is the id of the interface
@@ -3806,6 +3820,20 @@ std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id) const
 	const Interface &interface = getInterface(id);
 
 	return evalElementCentroid(interface);
+}
+
+/*!
+	Evaluates the bounding box of the specified interface.
+
+	\param id is the id of the interface
+	\param[out] minPoint is the minimum point of the bounding box
+	\param[out] maxPoint is the maximum point of the bounding box
+*/
+void PatchKernel::evalInterfaceBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const
+{
+	const Interface &interface = getInterface(id);
+
+	return evalElementBoundingBox(interface, minPoint, maxPoint);
 }
 
 /*!
@@ -3830,6 +3858,29 @@ std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element) c
 	centroid /= (double) nElementVertices;
 
 	return centroid;
+}
+
+/*!
+	Evaluates the bounding box of the specified element.
+
+	\param element is the element
+	\param[out] minPoint is the minimum point of the bounding box
+	\param[out] maxPoint is the maximum point of the bounding box
+*/
+void PatchKernel::evalElementBoundingBox(const Element &element, std::array<double,3> *minCoord, std::array<double,3> *maxCoord) const
+{
+	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
+	const int nElementVertices = elementVertexIds.size();
+
+	*minCoord = getVertexCoords(elementVertexIds[0]);
+	*maxCoord = *minCoord;
+	for (int i = 1; i < nElementVertices; ++i) {
+		const std::array<double, 3> &vertexCoord = getVertexCoords(elementVertexIds[i]);
+		for (int d = 0; d < 3; ++d) {
+			(*minCoord)[d] = std::min(vertexCoord[d], (*minCoord)[d]);
+			(*maxCoord)[d] = std::max(vertexCoord[d], (*maxCoord)[d]);
+		}
+	}
 }
 
 /*!

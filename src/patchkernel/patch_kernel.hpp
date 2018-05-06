@@ -299,6 +299,7 @@ public:
 	long countFreeCells() const;
 	long countOrphanCells() const;
 	virtual std::array<double, 3> evalCellCentroid(const long &id) const;
+	virtual void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 	std::vector<long> findCellNeighs(const long &id) const;
 	void findCellNeighs(const long &id, std::vector<long> *neighs) const;
 	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
@@ -354,6 +355,7 @@ public:
 	long countFreeInterfaces() const;
 	long countOrphanInterfaces() const;
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id) const;
+	virtual void evalInterfaceBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 
 	InterfaceIterator getInterfaceIterator(const long &id);
 	InterfaceIterator interfaceBegin();
@@ -637,6 +639,7 @@ private:
 	void setId(int id);
 
 	std::array<double, 3> evalElementCentroid(const Element &element) const;
+	void evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 
 	void mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination);
 };
