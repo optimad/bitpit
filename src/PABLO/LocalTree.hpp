@@ -231,8 +231,7 @@ private:
 
 	void 		preBalance21(bool internal);
 	void 		preBalance21(u32vector& newmodified);
-	bool 		localBalance(bool doInterior);
-	bool 		localBalanceAll(bool doInterior);
+	bool 		localBalance(bool doNew, bool doInterior);
 
 	void 		computeIntersections();
 

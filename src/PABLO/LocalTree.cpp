@@ -2755,12 +2755,15 @@ namespace bitpit {
 
     // =================================================================================== //
 
-    /*! 2:1 balancing on level a local tree already adapted (balance only the octants with info[15] = false) (refinement wins!)
+    /*! 2:1 balancing on level a local tree (refinement wins!)
+     * The balance is enforced on octants with the AUX bit set and, if
+     * requested, also on new octants.
+     * \param[in] doNew Set to true the balance is enforced also on new octants.
      * \param[in] doInterior Set to false if the interior octants are already balanced.
      * \return True if balanced done with some markers modification.
      */
     bool
-    LocalTree::localBalance(bool doInterior){
+    LocalTree::localBalance(bool doNew, bool doInterior){
 
         uint32_t			sizeneigh, modsize;
         u32vector		 	neigh;
@@ -2783,7 +2786,16 @@ namespace bitpit {
             oend = m_octants.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (it->getBalance() && (it->getMarker() != 0 || it->m_info[Octant::INFO_AUX]) ){
+                bool balanceOctant = it->getBalance();
+                if (balanceOctant) {
+                    if (doNew) {
+                        balanceOctant = (it->m_info[Octant::INFO_AUX] || (it->getMarker() != 0) || it->getIsNewC() || it->getIsNewR());
+                    } else {
+                        balanceOctant = (it->m_info[Octant::INFO_AUX] || (it->getMarker() != 0));
+                    }
+                }
+
+                if (balanceOctant){
                     targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
                     //Balance through faces
@@ -2899,7 +2911,16 @@ namespace bitpit {
             oend = m_ghosts.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && (it->getMarker() != 0 || it->m_info[Octant::INFO_AUX]) ){
+                bool balanceOctant = it->getBalance();
+                if (balanceOctant) {
+                    if (doNew) {
+                        balanceOctant = (it->m_info[Octant::INFO_AUX] || it->getIsNewC() || it->getIsNewR());
+                    } else {
+                        balanceOctant = (it->m_info[Octant::INFO_AUX] || (it->getMarker() != 0));
+                    }
+                }
+
+                if (balanceOctant){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
@@ -3069,493 +3090,16 @@ namespace bitpit {
             oend = m_ghosts.end();
             idx = 0;
             for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && it->m_info[Octant::INFO_AUX]){
-                    targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-
-                    //Balance through faces
-                    for (iface=0; iface<m_global.m_nfaces; iface++){
-                        if(it->getPbound(iface) == true){
-                            neigh.clear();
-                            findGhostNeighbours(idx, iface, neigh);
-                            sizeneigh = neigh.size();
-                            for(i=0; i<sizeneigh; i++){
-                                if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                    m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                    modified.push_back(neigh[i]);
-                                    Bdone = true;
-                                }
-                            }
-                        }
-                        targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                    }
-
-                    if (Bedge){
-                        //Balance through edges
-                        for (iedge=0; iedge<m_global.m_nedges; iedge++){
-							neigh.clear();
-							findGhostEdgeNeighbours(idx, iedge, neigh);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                    if (Bnode){
-                        //Balance through nodes
-                        for (inode=0; inode<m_global.m_nnodes; inode++){
-							neigh.clear();
-							findGhostNodeNeighbours(idx, inode, neigh);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                }
-                idx++;
-            }
-
-            // While loop for iterative balancing
-            u32vector().swap(newmodified);
-            modsize = modified.size();
-            while(modsize!=0){
-                ibegin = modified.begin();
-                iend = modified.end();
-                for (iit=ibegin; iit!=iend; ++iit){
-                    idx = *iit;
-                    if (!m_octants[idx].getNotBalance()){
-                        targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-
-                        //Balance through faces
-                        for (iface=0; iface<m_global.m_nfaces; iface++){
-                            if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(idx, iface, neigh, isghost);
-                                sizeneigh = neigh.size();
-                                for(i=0; i<sizeneigh; i++){
-                                    if (!isghost[i]){
-                                        {
-                                            if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-                                                m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(idx);
-                                                Bdone = true;
-                                            }
-                                            else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                                m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(neigh[i]);
-                                                Bdone = true;
-                                            }
-                                        };
-                                    }
-                                }
-                            }
-                            targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                        }
-
-                        if (Bedge){
-                            //Balance through edges
-                            for (iedge=0; iedge<m_global.m_nedges; iedge++){
-								findEdgeNeighbours(idx, iedge, neigh, isghost);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
-
-                        if (Bnode){
-                            //Balance through nodes
-                            for (inode=0; inode<m_global.m_nnodes; inode++){
-								findNodeNeighbours(idx, inode, neigh, isghost);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
-
+                bool balanceOctant = it->getBalance();
+                if (balanceOctant) {
+                    if (doNew) {
+                        balanceOctant = (it->m_info[Octant::INFO_AUX] || it->getIsNewC() || it->getIsNewR());
+                    } else {
+                        balanceOctant = it->m_info[Octant::INFO_AUX];
                     }
                 }
-                preBalance21(newmodified);
-                u32vector().swap(modified);
-                swap(modified,newmodified);
-                modsize = modified.size();
-                u32vector().swap(newmodified);
-            }// end while
-            obegin = oend = m_octants.end();
-            ibegin = iend = modified.end();
-        }
-        return Bdone;
-        // Pay attention : info[15] may be true after local balance for some octants
-    };
 
-    // =================================================================================== //
-
-    /*! 2:1 balancing on level a local tree already adapted (balance all the local octants and new or modified ghost octants) (refinement wins!)
-     * \param[in] doInterior Set to false if the interior octants are already balanced.
-     * \return True if balanced done with some markers modification.
-     */
-    bool
-    LocalTree::localBalanceAll(bool doInterior){
-        // Local variables
-        uint32_t			sizeneigh, modsize;
-        u32vector		 	neigh;
-        u32vector		 	modified, newmodified;
-        uint32_t 			i, idx;
-        uint8_t				iface, iedge, inode;
-        int8_t				targetmarker;
-        vector<bool> 		isghost;
-        bool				Bdone = false;
-        bool				Bedge = ((m_balanceCodim>1) && (m_dim==3));
-        bool				Bnode = (m_balanceCodim==m_dim);
-
-        octvector::iterator 	obegin, oend, it;
-        u32vector::iterator 	ibegin, iend, iit;
-
-
-        //If interior octants have to be balanced
-        if(doInterior){
-            // First loop on the octants
-            obegin = m_octants.begin();
-            oend = m_octants.end();
-            idx = 0;
-            for (it=obegin; it!=oend; ++it){
-                if ((!it->getNotBalance()) && ((it->m_info[Octant::INFO_AUX]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
-                    targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-
-                    //Balance through faces
-                    for (iface=0; iface<m_global.m_nfaces; iface++){
-						findNeighbours(idx, iface, neigh, isghost);
-						sizeneigh = neigh.size();
-						for(i=0; i<sizeneigh; i++){
-							if (!isghost[i]){
-								{
-									if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-									else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-										m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-										m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(neigh[i]);
-										Bdone = true;
-									}
-								};
-							}
-							else{
-								{
-									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-								};
-
-							}
-						}
-						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-                    }
-
-                    if (Bedge){
-                        //Balance through edges
-                        for (iedge=0; iedge<m_global.m_nedges; iedge++){
-							findEdgeNeighbours(idx, iedge, neigh, isghost);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if (!isghost[i]){
-									{
-										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
-											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(idx);
-											Bdone = true;
-										}
-										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(neigh[i]);
-											Bdone = true;
-										}
-									};
-								}
-								else{
-									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-								}
-							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-                        }
-                    }
-
-                    if (Bnode){
-                        //Balance through nodes
-                        for (inode=0; inode<m_global.m_nnodes; inode++){
-							findNodeNeighbours(idx, inode, neigh, isghost);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if (!isghost[i]){
-									{
-										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
-											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(idx);
-											Bdone = true;
-										}
-										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(neigh[i]);
-											Bdone = true;
-										}
-									};
-								}
-								else{
-									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-								}
-							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-                        }
-                    }
-
-                }
-                idx++;
-            }
-            // Loop on ghost octants (influence over interior borders)
-            obegin = m_ghosts.begin();
-            oend = m_ghosts.end();
-            idx = 0;
-            for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && (it->m_info[Octant::INFO_AUX] || (it->getIsNewC() || it->getIsNewR()))){
-                    targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-
-                    //Balance through faces
-                    for (iface=0; iface<m_global.m_nfaces; iface++){
-                        if(it->getPbound(iface) == true){
-                            neigh.clear();
-                            findGhostNeighbours(idx, iface, neigh);
-                            sizeneigh = neigh.size();
-                            for(i=0; i<sizeneigh; i++){
-                                if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                    m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                    modified.push_back(neigh[i]);
-                                    Bdone = true;
-                                }
-                            }
-                        }
-                        targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                    }
-
-                    if (Bedge){
-                        //Balance through edges
-                        for (iedge=0; iedge<m_global.m_nedges; iedge++){
-							neigh.clear();
-							findGhostEdgeNeighbours(idx, iedge, neigh);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                    if (Bnode){
-                        //Balance through nodes
-                        for (inode=0; inode<m_global.m_nnodes; inode++){
-							neigh.clear();
-							findGhostNodeNeighbours(idx, inode, neigh);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                }
-                idx++;
-            }
-
-            // While loop for iterative balancing
-            u32vector().swap(newmodified);
-            modsize = modified.size();
-            while(modsize!=0){
-                ibegin = modified.begin();
-                iend = modified.end();
-                for (iit=ibegin; iit!=iend; ++iit){
-                    idx = *iit;
-                    if (!m_octants[idx].getNotBalance()){
-                        targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-
-                        //Balance through faces
-                        for (iface=0; iface<m_global.m_nfaces; iface++){
-                            if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(idx, iface, neigh, isghost);
-                                sizeneigh = neigh.size();
-                                for(i=0; i<sizeneigh; i++){
-                                    if (!isghost[i]){
-                                        {
-                                            if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-                                                m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(idx);
-                                                Bdone = true;
-                                            }
-                                            else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                                m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(neigh[i]);
-                                                Bdone = true;
-                                            }
-                                        };
-                                    }
-                                }
-                            }
-                            targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                        }
-
-                        if (Bedge){
-                            //Balance through edges
-                            for (iedge=0; iedge<m_global.m_nedges; iedge++){
-								findEdgeNeighbours(idx, iedge, neigh, isghost);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
-
-                        if (Bnode){
-                            //Balance through nodes
-                            for (inode=0; inode<m_global.m_nnodes; inode++){
-								findNodeNeighbours(idx, inode, neigh, isghost);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
-
-                    }
-                }
-                preBalance21(newmodified);
-                u32vector().swap(modified);
-                swap(modified,newmodified);
-                modsize = modified.size();
-                u32vector().swap(newmodified);
-            }// end while
-
-        }
-        else{
-
-            // Loop on ghost octants (influence over interior borders)
-            obegin = m_ghosts.begin();
-            oend = m_ghosts.end();
-            idx = 0;
-            for (it=obegin; it!=oend; ++it){
-                if (!it->getNotBalance() && (it->m_info[Octant::INFO_AUX] || (it->getIsNewC() || it->getIsNewR()))){
+                if (balanceOctant){
                     targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces

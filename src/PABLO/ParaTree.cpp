@@ -5994,7 +5994,7 @@ namespace bitpit {
             (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
 
             commMarker();
-            localDone = m_octree.localBalance(true);
+            localDone = m_octree.localBalance(false, true);
             commMarker();
             m_octree.preBalance21(false);
             if (m_serial) {
@@ -6007,7 +6007,7 @@ namespace bitpit {
                 iteration++;
                 (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
                 commMarker();
-                localDone = m_octree.localBalance(false);
+                localDone = m_octree.localBalance(false, false);
                 commMarker();
                 m_octree.preBalance21(false);
                 if (m_serial) {
@@ -6029,7 +6029,7 @@ namespace bitpit {
         else{
 
             commMarker();
-            localDone = m_octree.localBalanceAll(true);
+            localDone = m_octree.localBalance(true, true);
             commMarker();
             m_octree.preBalance21(false);
             if (m_serial) {
@@ -6041,7 +6041,7 @@ namespace bitpit {
             while(globalDone){
                 iteration++;
                 commMarker();
-                localDone = m_octree.localBalanceAll(false);
+                localDone = m_octree.localBalance(true, false);
                 commMarker();
                 m_octree.preBalance21(false);
                 if (m_serial) {
@@ -6068,13 +6068,13 @@ namespace bitpit {
             (*m_log) << " " << endl;
             (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
 
-            localDone = m_octree.localBalance(true);
+            localDone = m_octree.localBalance(false, true);
             m_octree.preBalance21(false);
 
             while(localDone){
                 iteration++;
                 (*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
-                localDone = m_octree.localBalance(false);
+                localDone = m_octree.localBalance(false, false);
                 m_octree.preBalance21(false);
             }
 
@@ -6088,12 +6088,12 @@ namespace bitpit {
         }
         else{
 
-            localDone = m_octree.localBalanceAll(true);
+            localDone = m_octree.localBalance(true, true);
             m_octree.preBalance21(false);
 
             while(localDone){
                 iteration++;
-                localDone = m_octree.localBalanceAll(false);
+                localDone = m_octree.localBalance(true, false);
                 m_octree.preBalance21(false);
             }
         }
