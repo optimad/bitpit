@@ -308,12 +308,6 @@ Octant::getIsGhost() const{return (m_ghost >= 0);};
 int
 Octant::getGhostLayer() const{return m_ghost;};
 
-/*! Get if the octant is a balancing-blocked octant.
- * \return false if the octant has to be balanced.
- */
-bool
-Octant::getNotBalance() const{return !m_info[OctantInfo::INFO_BALANCED];};
-
 /*! Get if the octant has to be balanced.
  * \return true if the octant has to be balanced.
  */
@@ -932,7 +926,7 @@ vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & max
  */
 vector<uint64_t> Octant::computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizeneigh) const {
 	vector<uint64_t> Morton;
-	if (getNotBalance()){
+	if (!getBalance()){
 		return computeMinSizeMorton(iface,
 				maxdepth,
 				sizeneigh);
@@ -1270,7 +1264,7 @@ vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t
  */
 vector<uint64_t>		Octant::computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t balance_codim, uint8_t (&edgeface)[12][2]) const {
 
-	if(!getNotBalance() && balance_codim > 1){
+	if(getBalance() && balance_codim > 1){
 		return computeEdgeHalfSizeMorton(iedge,
 				sizeneigh, edgeface);
 	}

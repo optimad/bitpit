@@ -2989,7 +2989,7 @@ namespace bitpit {
                 iend = modified.end();
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
-                    if (!m_octants[idx].getNotBalance()){
+                    if (m_octants[idx].getBalance()){
                         targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces
@@ -3168,7 +3168,7 @@ namespace bitpit {
                 iend = modified.end();
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
-                    if (!m_octants[idx].getNotBalance()){
+                    if (m_octants[idx].getBalance()){
                         targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces

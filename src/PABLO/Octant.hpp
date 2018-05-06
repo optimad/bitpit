@@ -185,7 +185,6 @@ private:
 	bool		getIsNewC() const;
 	bool		getIsGhost() const;
 	int			getGhostLayer() const;
-	bool		getNotBalance() const;
 	bool		getBalance() const;
 	void		setMarker(int8_t marker);
 	void		setBalance(bool balance);
