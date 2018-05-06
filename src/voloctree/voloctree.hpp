@@ -84,6 +84,7 @@ public:
 	double evalCellVolume(const long &id) const override;
 	double evalCellSize(const long &id) const override;
 	std::array<double, 3> evalCellCentroid(const long &id) const override;
+	void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const override;
 
 	double evalInterfaceArea(const long &id) const override;
 	std::array<double, 3> evalInterfaceNormal(const long &id) const override;

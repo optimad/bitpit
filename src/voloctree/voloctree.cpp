@@ -472,6 +472,22 @@ std::array<double, 3> VolOctree::evalCellCentroid(const long &id) const
 }
 
 /*!
+	Evaluates the bounding box of the specified cell.
+
+	\param id is the id of the cell
+	\param[out] minPoint is the minimum point of the bounding box
+	\param[out] maxPoint is the maximum point of the bounding box
+*/
+void VolOctree::evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const
+{
+	OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
+
+	*minPoint = m_tree->getNode(octant, 0);
+	*maxPoint = m_tree->getNode(octant, m_cellTypeInfo->nVertices - 1);
+}
+
+/*!
 	Evaluates the characteristic size of the specified cell.
 
 	\param id is the id of the cell
