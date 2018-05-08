@@ -4531,13 +4531,14 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 	Get the coordinates of the specified element
 
 	\param element is the element
-	\param staticStorage is a pointer to the static storage where the
-	coordinaets of element with a can be stored
+	\param[in,out] externalStorage is an optional external storage that can
+	be used to store vertex coordinates of standard elements (i.e., elements
+	associated to a reference element)
 	\result The coordinates of the element.
 */
-ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates(const Element &element, std::array<double, 3> *staticStorage) const
+ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates(const Element &element, std::array<double, 3> *externalStorage) const
 {
-	std::unique_ptr<std::vector<std::array<double, 3>>> dynamicStorage;
+	std::unique_ptr<std::vector<std::array<double, 3>>> localStorage;
 	std::array<double, 3> *storage;
 
 	// Get the vertices ids
@@ -4545,12 +4546,12 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates
 	const int nElementVertices = elementVertexIds.size();
 
 	// Store coordinates in storage
-	bool useStaticPool = (staticStorage != nullptr) && element.hasInfo();
-	if (useStaticPool) {
-		storage = staticStorage;
+	bool useExternalStorage = (externalStorage != nullptr) && element.hasInfo();
+	if (useExternalStorage) {
+		storage = externalStorage;
 	} else {
-		dynamicStorage = std::unique_ptr<std::vector<std::array<double, 3>>>(new std::vector<std::array<double, 3>>(nElementVertices));
-		storage = dynamicStorage->data();
+		localStorage = std::unique_ptr<std::vector<std::array<double, 3>>>(new std::vector<std::array<double, 3>>(nElementVertices));
+		storage = localStorage->data();
 	}
 
 	for (int i = 0; i < nElementVertices; ++i) {
@@ -4559,11 +4560,11 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates
 
 	// Build the proxy vector with the coordinates
 	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
-	if (useStaticPool) {
-		vertexCoordinates.set(staticStorage, nElementVertices);
+	if (useExternalStorage) {
+		vertexCoordinates.set(externalStorage, nElementVertices);
 	} else {
-		vertexCoordinates.set(std::move(*dynamicStorage));
-		dynamicStorage.release();
+		vertexCoordinates.set(std::move(*localStorage));
+		localStorage.release();
 	}
 
 	return vertexCoordinates;

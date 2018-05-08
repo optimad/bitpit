@@ -575,7 +575,7 @@ protected:
 	template<typename item_t, typename id_t = long>
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 
-	ConstProxyVector<std::array<double, 3>> getElementVertexCoordinates(const Element &element, std::array<double, 3> *staticStorage = nullptr) const;
+	ConstProxyVector<std::array<double, 3>> getElementVertexCoordinates(const Element &element, std::array<double, 3> *externalStorage = nullptr) const;
 
 private:
 	double DEFAULT_TOLERANCE = 1e-14;
