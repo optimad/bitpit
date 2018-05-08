@@ -3852,6 +3852,23 @@ void PatchKernel::evalInterfaceBoundingBox(long id, std::array<double,3> *minPoi
 	return evalElementBoundingBox(interface, minPoint, maxPoint);
 }
 
+
+/*!
+	Get vertex coordinates of the specified interface.
+
+	\param id is the id of the interface
+	\param[in,out] externalStorage is an optional external storage that can
+	be used to store vertex coordinates of standard elements (i.e., elements
+	associated to a reference element)
+	\result Vertex coordinates of the interface.
+*/
+ConstProxyVector<std::array<double, 3>> PatchKernel::getInterfaceVertexCoordinates(long id, std::array<double, 3> *externalStorage) const
+{
+	const Interface &interface = getInterface(id);
+
+	return getElementVertexCoordinates(interface, externalStorage);
+}
+
 /*!
 	Evaluates the centroid of the specified element.
 

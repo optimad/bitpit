@@ -357,6 +357,7 @@ public:
 	long countOrphanInterfaces() const;
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id) const;
 	virtual void evalInterfaceBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
+	ConstProxyVector<std::array<double, 3>> getInterfaceVertexCoordinates(long id, std::array<double, 3> *staticStorage = nullptr) const;
 
 	InterfaceIterator getInterfaceIterator(const long &id);
 	InterfaceIterator interfaceBegin();
