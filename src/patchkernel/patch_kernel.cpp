@@ -3810,6 +3810,22 @@ void PatchKernel::evalCellBoundingBox(long id, std::array<double,3> *minPoint, s
 }
 
 /*!
+	Get vertex coordinates of the specified cell.
+
+	\param id is the id of the cell
+	\param[in,out] externalStorage is an optional external storage that can
+	be used to store vertex coordinates of standard elements (i.e., elements
+	associated to a reference element)
+	\result Vertex coordinates of the cell.
+*/
+ConstProxyVector<std::array<double, 3>> PatchKernel::getCellVertexCoordinates(long id, std::array<double, 3> *externalStorage) const
+{
+	const Cell &cell = getCell(id);
+
+	return getElementVertexCoordinates(cell, externalStorage);
+}
+
+/*!
 	Evaluates the centroid of the specified interface.
 
 	\param id is the id of the interface

@@ -300,6 +300,7 @@ public:
 	long countOrphanCells() const;
 	virtual std::array<double, 3> evalCellCentroid(const long &id) const;
 	virtual void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
+	ConstProxyVector<std::array<double, 3>> getCellVertexCoordinates(long id, std::array<double, 3> *staticStorage = nullptr) const;
 	std::vector<long> findCellNeighs(const long &id) const;
 	void findCellNeighs(const long &id, std::vector<long> *neighs) const;
 	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
