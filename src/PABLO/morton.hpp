@@ -37,7 +37,7 @@ namespace PABLO {
 * \param a is an integer position
 * \result Separated bits.
 */
-inline uint64_t splitBy3(unsigned int a)
+inline uint64_t splitBy3(uint32_t a)
 {
     uint64_t x = a & 0x1fffff; // we only look at the first 21 bits
     x = (x | x << 32) & 0x1f00000000ffff;  // shift left 32 bits, OR with self, and 00011111000000000000000000000000000000001111111111111111
@@ -57,7 +57,7 @@ inline uint64_t splitBy3(unsigned int a)
 * \param a is an integer position
 * \result Separated bits.
 */
-inline uint64_t splitBy2(unsigned int a)
+inline uint64_t splitBy2(uint32_t a)
 {
     uint64_t x = a;
     x = (x | x << 16) & 0xFFFF0000FFFF;  // shift left 16 bits, OR with self, and 0000000000000000111111111111111100000000000000001111111111111111
@@ -80,7 +80,7 @@ inline uint64_t splitBy2(unsigned int a)
 * \param z is the integer z position
 * \result The Morton number.
 */
-inline uint64_t computeMorton(unsigned int x, unsigned int y, unsigned int z)
+inline uint64_t computeMorton(uint32_t x, uint32_t y, uint32_t z)
 {
     uint64_t morton = splitBy3(x) | splitBy3(y) << 1 | splitBy3(z) << 2;
 
@@ -97,7 +97,7 @@ inline uint64_t computeMorton(unsigned int x, unsigned int y, unsigned int z)
 * \param y is the integer y position
 * \result The Morton number.
 */
-inline uint64_t computeMorton(unsigned int x, unsigned int y)
+inline uint64_t computeMorton(uint32_t x, uint32_t y)
 {
     uint64_t morton = splitBy2(x) | splitBy2(y) << 1;
 
