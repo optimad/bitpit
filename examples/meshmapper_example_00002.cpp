@@ -95,7 +95,9 @@ void run()
 
     /** Create a new patch */
     VolOctree *patch_2D = new VolOctree(std::move(treePointer2), &treePointer2);
+#if BITPIT_ENABLE_MPI
     patch_2D->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
+#endif
 
 //    /** Partition the patch */
 //    patch_2D->partition(true);
@@ -201,10 +203,16 @@ void run()
     refineList.push_back(229);
     refineList.push_back(230);
 
+    int rank;
+#if BITPIT_ENABLE_MPI
+    rank = patch_2D_original->getRank();
+#else
+    rank = 0;
+#endif
 
     for (uint64_t ind : refineList) {
         int owner = patch_2D_original->getTree().getOwnerRank(ind);
-        if (patch_2D_original->getRank() == owner){
+        if (rank == owner){
             uint32_t lind = patch_2D_original->getTree().getLocalIdx(ind, owner);
             VolOctree::OctantInfo octinfo(lind, true);
             long id = patch_2D_original->getOctantId(octinfo);
@@ -251,7 +259,9 @@ void run()
 
     patch_2D_original->getVTK().setName("mesh_original.0");
     patch_2D_original->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata);
+#if BITPIT_ENABLE_MPI
     patch_2D_original->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
+#endif
     patch_2D_original->write();
 
 
