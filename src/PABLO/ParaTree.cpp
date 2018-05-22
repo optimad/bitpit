@@ -222,6 +222,7 @@ namespace bitpit {
           m_nproc(other.m_nproc),
           m_maxDepth(other.m_maxDepth),
           m_global(other.m_global),
+          m_nofGhostLayers(other.m_nofGhostLayers),
           m_rank(other.m_rank),
           m_octree(other.m_octree),
           m_bordersPerProc(other.m_bordersPerProc),
