@@ -64,6 +64,8 @@ endforeach()
 # Library
 #------------------------------------------------------------------------------------#
 
+# NOTE: to get lib files, enable both BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags.
+
 set(BITPIT_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
 
 add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
@@ -81,7 +83,19 @@ set_target_properties(${BITPIT_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE ${P
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_VERSION}"
                                                  SOVERSION  "${BITPIT_MAJOR_VERSION}")
 
-install(TARGETS ${BITPIT_LIBRARY} DESTINATION lib)
+# Windows shared libraries have to be linked against their dependencies.
+if (MINGW AND BUILD_SHARED_LIBS)
+	target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
+endif()
+
+# Install target
+#
+# On Windows, shared libraries have to be installed in the binary directory.
+if (WIN32)
+	install(TARGETS ${BITPIT_LIBRARY} ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
+else()
+	install(TARGETS ${BITPIT_LIBRARY} DESTINATION lib)
+endif()
 
 # Definitions
 set(BITPIT_DEFINITIONS ${MODULE_DEFINITIONS} CACHE INTERNAL "Pre-processor definitions needed by the Base Library" FORCE)
