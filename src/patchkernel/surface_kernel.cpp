@@ -379,7 +379,7 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id) co
     if ((cell_->getType() == ElementType::UNDEFINED)
      || (cell_->getType() == ElementType::VERTEX)) return 0.0;
     if (cell_->getType() == ElementType::LINE) {
-        if (m_spaceDim - getDimension() == 1)   return M_PI;
+        if (m_spaceDim - getDimension() == 1)   return BITPIT_PI;
         else                                    return 0.0;
     }
 
