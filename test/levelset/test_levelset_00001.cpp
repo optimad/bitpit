@@ -52,7 +52,7 @@ void Generate2DSurfMesh( bitpit::SurfUnstructured &mesh )
     const double R = 1.0;
     const long N = 32;
     double theta;
-    double dtheta = 2. * M_PI/((double) N);
+    double dtheta = 2. * BITPIT_PI/((double) N);
     
     std::array<double,3> point;
     std::vector<long> connect(2, bitpit::Element::NULL_ID);
@@ -140,7 +140,7 @@ int subtest_001()
 
     levelset.setMesh(&mesh) ;
 
-    int id0 = levelset.addObject(std::move(STL),M_PI) ;
+    int id0 = levelset.addObject(std::move(STL),BITPIT_PI) ;
     int id1 = levelset.addObject(mask) ;
     std::vector<int> ids;
     ids.push_back(id0);

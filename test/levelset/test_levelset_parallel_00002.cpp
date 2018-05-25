@@ -123,8 +123,8 @@ int subtest_001(int rank)
     std::vector<int> ids;
 
     levelset.setMesh(&mesh) ;
-    id0 = levelset.addObject(std::move(STL0),M_PI) ;
-    id1 = levelset.addObject(std::move(STL1),M_PI) ;
+    id0 = levelset.addObject(std::move(STL0),BITPIT_PI) ;
+    id1 = levelset.addObject(std::move(STL1),BITPIT_PI) ;
     id2 = levelset.addObject(bitpit::LevelSetBooleanOperation::INTERSECTION,id0,id1) ;
     ids.push_back(id0);
     ids.push_back(id1);

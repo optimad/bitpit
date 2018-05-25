@@ -135,9 +135,9 @@ int subtest_001()
     int id0, id1, id2, id3, id4, id5;
 
     levelset.setMesh(&mesh) ;
-    id0 = levelset.addObject(std::move(STL0),M_PI) ;
-    id1 = levelset.addObject(std::move(STL1),M_PI) ;
-    id2 = levelset.addObject(std::move(STL2),M_PI/10.) ;
+    id0 = levelset.addObject(std::move(STL0),BITPIT_PI) ;
+    id1 = levelset.addObject(std::move(STL1),BITPIT_PI) ;
+    id2 = levelset.addObject(std::move(STL2),BITPIT_PI/10.) ;
 
     id3 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,id0,id1) ;
     id4 = levelset.addObject(bitpit::LevelSetBooleanOperation::SUBTRACTION,id3,id2) ;

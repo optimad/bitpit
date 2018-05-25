@@ -82,7 +82,7 @@ int subtest_001()
     std::chrono::time_point<std::chrono::system_clock> start, end;
 
     levelset.setMesh(&mesh) ;
-    int id0 = levelset.addObject( std::move(STL), M_PI/3. ) ;
+    int id0 = levelset.addObject( std::move(STL), BITPIT_PI/3. ) ;
 
     levelset.setPropagateSign(true) ;
     start = std::chrono::system_clock::now();

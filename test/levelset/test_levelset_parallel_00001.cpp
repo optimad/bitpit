@@ -98,7 +98,7 @@ int subtest_001(int rank)
     levelset.setMesh(&mesh) ;
     levelset.setPropagateSign(true);
 
-    id0 = levelset.addObject(std::move(STL),M_PI) ;
+    id0 = levelset.addObject(std::move(STL),BITPIT_PI) ;
     levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
 
     // Compute levelset in narrowband in serial

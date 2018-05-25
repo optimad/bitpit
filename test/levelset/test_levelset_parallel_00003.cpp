@@ -105,7 +105,7 @@ int subtest_001(int rank)
 
     levelset.setMesh(&mesh);
     levelset.setPropagateSign(true);
-    int id0 = levelset.addObject(std::move(STL),M_PI);
+    int id0 = levelset.addObject(std::move(STL),BITPIT_PI);
 
 
     start = std::chrono::system_clock::now();
