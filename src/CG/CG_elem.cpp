@@ -1210,13 +1210,13 @@ array3D projectPointCone( array3D const &point, array3D const &apex, array3D con
 {
 
 
-    if( alpha <= M_PI/2. ) { //accute cone angle
+    if( alpha <= BITPIT_PI_2 ) { //accute cone angle
 
         array3D versor = point-apex;
         versor /= norm2(versor);
 
         double cosPointAxis = dotProduct(versor,axis);
-        double cosCriticalAngle = cos(alpha+M_PI/2.);
+        double cosCriticalAngle = cos(alpha+BITPIT_PI_2);
 
         if( cosPointAxis <= cosCriticalAngle ){ //point projects on cone apex
             return apex;
@@ -1233,7 +1233,7 @@ array3D projectPointCone( array3D const &point, array3D const &apex, array3D con
         } 
 
     } else { // abtuse cone angle -> project on complement
-        return projectPointCone( point, apex, -1.*axis, M_PI-alpha);
+        return projectPointCone( point, apex, -1.*axis, BITPIT_PI-alpha);
 
     }
 
