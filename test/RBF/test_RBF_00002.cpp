@@ -47,9 +47,9 @@ std::array<double,3> modulation( std::array<double,3> P, std::array<double,3> am
 
     std::array<double,3>    d;
 
-    d[0] = amp[0]*sin( wave[0] *M_PI *P[0] ) ;
-    d[1] = amp[1]*sin( wave[1] *M_PI *P[0] ) ;
-    d[2] = amp[2]*sin( wave[2] *M_PI *P[0] ) ;
+    d[0] = amp[0]*sin( wave[0] *BITPIT_PI *P[0] ) ;
+    d[1] = amp[1]*sin( wave[1] *BITPIT_PI *P[0] ) ;
+    d[2] = amp[2]*sin( wave[2] *BITPIT_PI *P[0] ) ;
 
     return d;
 
@@ -409,7 +409,7 @@ int subtest_001()
 
         vrot[0] = 0.0 ;
         vrot[1] = 0.0 ;
-        vrot[2] = 0.0 ; //M_PI/4. ;
+        vrot[2] = 0.0 ; //BITPIT_PI/4. ;
 
 
         for( i=0; i<nP; ++i){
