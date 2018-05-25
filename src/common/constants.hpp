@@ -22,26 +22,26 @@
  *
  \*---------------------------------------------------------------------------*/
 
+#ifndef __BITPIT_CONSTANTS_HPP__
+#define __BITPIT_CONSTANTS_HPP__
+
 /*!
- * @defgroup common Common
- * @{
- * @defgroup common_strings String manipulation
- * @defgroup common_binary Binary streams
- * @defgroup common_hashing Hashing
- * @defgroup common_misc Miscellaneous
- * @defgroup common_macro Macros
- * @defgroup common_constants Constants
- * @}
- *
+ * \file
+ * \ingroup common_constants
+ * \addtogroup common_constants
+ * \{
  */
 
-#ifndef __BITPIT_MODULE_COMMON_HPP__
-#define __BITPIT_MODULE_COMMON_HPP__
+#define BITPIT_PI           3.14159265358979323846
+#define BITPIT_PI_2         1.57079632679489661923
+#define BITPIT_PI_4         0.78539816339744830962
 
-#include "bitpit_version.hpp"
+#define BITPIT_PIl          3.141592653589793238462643383279502884L
+#define BITPIT_PI_2l        1.570796326794896619231321691639751442L
+#define BITPIT_PI_4l        0.785398163397448309615660845819875721L
 
-#include "compiler.hpp"
-#include "constants.hpp"
-#include "utils.hpp"
+/*!
+ * \}
+ */
 
 #endif
