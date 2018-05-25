@@ -191,8 +191,6 @@ typechecking that the compiler would otherwise do for you and if used in
 headers, introduce names into the global rather than <B>%bitpit</B> namespace.
 
 Don't define constants that are already provided by standard libraries.
-For example, use \c M_PI as defined in \c math.h rather than defining
-your own constant.
 
 \subsection typedefs Typedefs
 
