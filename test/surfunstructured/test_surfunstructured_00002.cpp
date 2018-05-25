@@ -228,8 +228,8 @@ SurfUnstructured                mesh(2, 3);
     log::cout() << "** Testing routines for angle calculations" << endl;
 
     // Ref. value to check against ------------------------------------------ //
-    expected[0] = vector<double>{0.5*M_PI, 0.25*M_PI, 0.25*M_PI};
-    expected[1].resize(4, 0.5*M_PI);
+    expected[0] = vector<double>{BITPIT_PI_2, BITPIT_PI_4, BITPIT_PI_4};
+    expected[1].resize(4, BITPIT_PI_2);
 
     // Check edge length ---------------------------------------------------- //
     SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
