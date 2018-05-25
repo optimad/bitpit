@@ -135,13 +135,13 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     public:
     virtual ~LevelSetSegmentation();
     LevelSetSegmentation(int);
-    LevelSetSegmentation(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * M_PI);
-    LevelSetSegmentation(int, const SurfUnstructured*, double featureAngle = 2. * M_PI);
+    LevelSetSegmentation(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentation(int, const SurfUnstructured*, double featureAngle = 2. * BITPIT_PI);
 
     LevelSetSegmentation*                       clone() const override ;
 
-    void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&patch, double featureAngle = 2. * M_PI) ;
-    void                                        setSegmentation(const SurfUnstructured *patch, double featureAngle = 2. * M_PI) ;
+    void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&patch, double featureAngle = 2. * BITPIT_PI) ;
+    void                                        setSegmentation(const SurfUnstructured *patch, double featureAngle = 2. * BITPIT_PI) ;
     const SegmentationKernel &                  getSegmentation() const ;
 
     virtual int                                 getPart(const long &) const override;
