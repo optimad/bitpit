@@ -46,7 +46,7 @@ int subtest_001(int rank, int nProcs)
 
     /**<Set coordinates of the origin and size of the 2D octree patch.*/
     std::array<double, 3> origin = {{0., 0., 0.}};
-    double length = 2*M_PI;
+    double length = 2*BITPIT_PI;
     double dh = length/100;
 
     /**<Create the patch.*/ 
