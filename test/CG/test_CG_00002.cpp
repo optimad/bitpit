@@ -256,7 +256,7 @@ bool testProjectPointPolygon(){
  */
 bool testProjectPointCone(){
     
-    double theta = M_PI/6.0;
+    double theta = BITPIT_PI/6.0;
     array3D apex = {{0.0,0.0,2.0}};
     array3D axis = {{-1.0,0.0,0.0}};
     array3D dir1 = {{-1.0*cos(theta), sin(theta), 0.0}};
@@ -364,7 +364,7 @@ bool testDistancePointTriangle(){
  * \return true, test distancePointCone passed
  */
 bool testDistancePointCone(){
-    double theta = M_PI/6.0;
+    double theta = BITPIT_PI/6.0;
     array3D apex = {{0.0,0.0,2.0}};
     array3D axis = {{-1.0,0.0,0.0}};
     array3D dir1 = {{-1.0*cos(theta), sin(theta), 0.0}};
@@ -611,7 +611,7 @@ bool testIntersectPlanePlane(){
     array3D p0 = {{0,0,0}};
     array3D n0 = {{0,1,0}};
     
-    array3D p1 = {{0.0,cos(M_PI/3.0),sin(M_PI/3.0)}};
+    array3D p1 = {{0.0,cos(BITPIT_PI/3.0),sin(BITPIT_PI/3.0)}};
     array3D n1 = {{1,0,0}};
     
     array3D testdir = {{1.0,0.0,0.0}};

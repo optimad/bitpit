@@ -640,7 +640,7 @@ int subtest_001()
         apex  = {{ 0., 0., 0. }};
         axis  = {{ 1., 0., 0. }};
        
-        alpha = 15. /180. *M_PI; 
+        alpha = 15. /180. *BITPIT_PI;
 
         distance = CGElem::distancePointCone( point, apex, axis, alpha);
 
@@ -660,7 +660,7 @@ int subtest_001()
         apex  = {{ 0., 0., 0. }};
         axis  = {{ 1., 0., 0. }};
        
-        alpha = 22.5 /180. *M_PI; 
+        alpha = 22.5 /180. *BITPIT_PI;
 
         distance = CGElem::distancePointCone( point, apex, axis, alpha);
 
@@ -680,7 +680,7 @@ int subtest_001()
         apex  = {{ 0., 0., 0. }};
         axis  = {{ 1., 0., 0. }};
        
-        alpha = 22.5/180. *M_PI; 
+        alpha = 22.5/180. *BITPIT_PI;
 
         distance = CGElem::distancePointCone( point, apex, axis, alpha);
 
