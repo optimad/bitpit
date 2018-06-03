@@ -607,6 +607,7 @@ uint64_t	Octant::computeMorton() const{
 };
 
 /** Compute the Morton index of the given node (without level).
+ * \param[in] inode Local index of the node
  * \return morton Morton index of the node.
  */
 uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
