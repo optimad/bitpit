@@ -33,6 +33,70 @@
 #include <cmath>
 #include <iostream>
 
+
+/*!
+ * Input stream operator for class Octant. Stream cell data from memory
+ * input stream to container.
+ *
+ * \param[in] buffer is the input stream from memory
+ * \param[in] octant is the octant object
+ * \result Returns the same input stream received in input.
+ */
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Octant &octant)
+{
+    uint8_t dimensions;
+    buffer >> dimensions;
+
+    uint8_t level;
+    buffer >> level;
+
+    octant.initialize(dimensions, level, true);
+
+    buffer >> octant.m_x;
+    buffer >> octant.m_y;
+    buffer >> octant.m_z;
+
+    buffer >> octant.m_marker;
+
+    buffer >> octant.m_ghost;
+
+    for(int i = 0; i < bitpit::Octant::INFO_ITEM_COUNT; ++i){
+        bool value;
+        buffer >> value;
+        octant.m_info[i] = value;
+    }
+
+    return buffer;
+}
+
+/*!
+ * Output stream operator for class Cell. Stream octant data from container
+ * to output stream.
+ *
+ * \param[in] buffer is the output stream from memory
+ * \param[in] octant is the octant object
+ * \result Returns the same output stream received in input.
+ */
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Octant &octant)
+{
+    buffer << octant.m_dim;
+    buffer << octant.m_level;
+
+    buffer << octant.m_x;
+    buffer << octant.m_y;
+    buffer << octant.m_z;
+
+    buffer << octant.m_marker;
+
+    buffer << octant.m_ghost;
+
+    for(int i = 0; i < bitpit::Octant::INFO_ITEM_COUNT; ++i){
+        buffer << (bool) octant.m_info[i];
+    }
+
+    return buffer;
+}
+
 namespace bitpit {
 
 // =================================================================================== //
@@ -558,8 +622,9 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 unsigned int Octant::getBinarySize()
 {
     unsigned int binarySize = 0;
-    binarySize += 3 * sizeof(uint32_t); // 3 coordinates
+    binarySize += sizeof(uint8_t); // dimensions
     binarySize += sizeof(uint8_t); // level
+    binarySize += 3 * sizeof(uint32_t); // 3 coordinates
     binarySize += sizeof(int8_t); // marker
     binarySize += sizeof(int); // ghost layer
     binarySize += INFO_ITEM_COUNT * sizeof(bool); // info

@@ -31,6 +31,15 @@
 #include <bitset>
 #include <array>
 
+#include "bitpit_containers.hpp"
+
+namespace bitpit {
+    class Octant;
+}
+
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Octant& octant);
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::Octant& octant);
+
 namespace bitpit {
 
 // =================================================================================== //
@@ -84,6 +93,10 @@ class Octant{
 	friend class LocalTree;
 	friend class ParaTree;
     friend class Global;
+
+	friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Octant& octant);
+	friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Octant& octant);
+
 
     // =================================================================================== //
     // STATIC MEMBERS
