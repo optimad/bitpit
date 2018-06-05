@@ -3602,16 +3602,18 @@ namespace bitpit {
         nodeOctants.reserve(noctants);
 
         for (uint64_t n = 0; n < (noctants + nghosts); n++){
+            const Octant *octant;
             if (n < noctants) {
                 uint32_t octantId = n;
-                m_octants[octantId].getNodes(octnodes);
+                octant = &(m_octants[octantId]);
             } else {
                 uint32_t octantId = n - noctants;
-                m_ghosts[octantId].getNodes(octnodes);
+                octant = &(m_ghosts[octantId]);
             }
 
+            octant->getNodes(octnodes);
             for (auto &node : octnodes){
-                uint64_t morton = PABLO::computeXYZKey(node[0], node[1], node[2], m_global.m_maxLevel);
+                uint64_t morton = octant->computeNodeMorton(node);
                 if (nodeCoords.count(morton) == 0) {
                     mortonList.push_back(morton);
                     nodeCoords.insert({{morton, std::move(node)}});
