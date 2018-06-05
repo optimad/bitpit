@@ -990,6 +990,7 @@ namespace bitpit {
                 //READ number of octants per sender
                 vector<int> recvRanks = lbCommunicator.getRecvRanks();
                 std::sort(recvRanks.begin(),recvRanks.end());
+                vector<uint32_t> nofNewOverProcs(recvRanks.size());
                 for(int rank : recvRanks){
                     lbCommunicator.waitRecv(rank);
                     RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
