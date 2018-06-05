@@ -3585,7 +3585,6 @@ namespace bitpit {
      */
     void
     LocalTree::computeConnectivity(){
-        u32arr3vector                                octnodes;
         vector<uint64_t>                             mortonList;
         unordered_map<uint64_t, array<uint32_t, 3> > nodeCoords;
         unordered_map<uint64_t, vector<uint64_t> >   nodeOctants;
@@ -3595,8 +3594,6 @@ namespace bitpit {
 
 
         // Gather node information
-        octnodes.reserve(m_global.m_nnodes);
-
         mortonList.reserve(noctants);
         nodeCoords.reserve(noctants);
         nodeOctants.reserve(noctants);
@@ -3611,8 +3608,10 @@ namespace bitpit {
                 octant = &(m_ghosts[octantId]);
             }
 
-            octant->getNodes(octnodes);
-            for (auto &node : octnodes){
+            for (uint8_t i = 0; i < m_global.m_nnodes; ++i){
+                u32array3 node;
+                octant->getNode(node, i);
+
                 uint64_t morton = octant->computeNodeMorton(node);
                 if (nodeCoords.count(morton) == 0) {
                     mortonList.push_back(morton);
