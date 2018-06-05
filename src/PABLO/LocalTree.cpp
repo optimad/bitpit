@@ -3630,9 +3630,9 @@ namespace bitpit {
         m_ghostsConnectivity.resize(nghosts);
 
         uint32_t nodeId = 0;
-        for (auto &morton : mortonList) {
+        for (uint64_t morton : mortonList) {
             m_nodes.emplace_back(std::move(nodeCoords.at(morton)));
-            for (const auto &n : nodeOctants.at(morton)) {
+            for (uint64_t n : nodeOctants.at(morton)) {
                 std::vector<uint32_t> *octantConnect;
                 if (n < noctants) {
                     uint32_t octantId = n;
