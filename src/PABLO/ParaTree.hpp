@@ -988,10 +988,10 @@ namespace bitpit {
                 uint32_t nofNewTail = 0;
 
                 //READ number of octants per sender
-                std::map<int,uint32_t> nofNewOverProcs;
-                int nCompletedRecvs = 0;
-                while(nCompletedRecvs < lbCommunicator.getRecvCount()){
-                    int rank = lbCommunicator.waitAnyRecv();
+                vector<int> recvRanks = lbCommunicator.getRecvRanks();
+                std::sort(recvRanks.begin(),recvRanks.end());
+                for(int rank : recvRanks){
+                    lbCommunicator.waitRecv(rank);
                     RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
                     uint32_t nofNewPerProc;
                     recvBuffer >> nofNewPerProc;
@@ -1000,10 +1000,7 @@ namespace bitpit {
                         nofNewHead += nofNewPerProc;
                     else if(rank > m_rank)
                         nofNewTail += nofNewPerProc;
-                    ++nCompletedRecvs;
                 }
-
-                lbCommunicator.waitAllSends();
 
                 //MOVE RESIDENT TO BEGIN IN OCTANTS
                 m_octree.m_sizeOctants = m_octree.m_octants.size();
@@ -1028,9 +1025,6 @@ namespace bitpit {
                 //READ BUFFERS AND BUILD NEW OCTANTS
                 newCounter = 0;
                 bool jumpResident = false;
-
-                vector<int> recvRanks = lbCommunicator.getRecvRanks();
-                std::sort(recvRanks.begin(),recvRanks.end());
                 for(int rank : recvRanks){
                     RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
                     uint32_t nofNewPerProc = nofNewOverProcs[rank];
@@ -1044,6 +1038,7 @@ namespace bitpit {
                         ++newCounter;
                     }
                 }
+                lbCommunicator.waitAllSends();
                 octvector(m_octree.m_octants).swap(m_octree.m_octants);
 
                 userData.shrink();
