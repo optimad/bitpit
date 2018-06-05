@@ -3616,7 +3616,7 @@ namespace bitpit {
                 if (nodeCoords.count(morton) == 0) {
                     mortonList.push_back(morton);
                     nodeCoords.insert({{morton, std::move(node)}});
-                    nodeOctants[morton].reserve(8);
+                    nodeOctants[morton].reserve(m_global.m_nnodes);
                 }
 
                 nodeOctants[morton].push_back(n);
