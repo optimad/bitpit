@@ -71,13 +71,17 @@ public:
     LoggerBuffer(std::size_t bufferSize = 256);
     ~LoggerBuffer();
 
+    bool isConsoleTimestampEnabled() const;
     void setConsoleEnabled(bool enabled);
+    void setConsoleTimestampEnabled(bool enabled);
     void setConsoleStream(std::ostream *console);
     std::ostream & getConsoleStream();
     void setConsolePrefix(const std::string &prefix);
     std::string getConsolePrefix()	const;
 
+    bool isFileTimestampEnabled() const;
     void setFileEnabled(bool enabled);
+    void setFileTimestampEnabled(bool enabled);
     void setFileStream(std::ofstream *file);
     std::ofstream & getFileStream();
     void setFilePrefix(const std::string &prefix);
@@ -95,10 +99,12 @@ private:
     std::string m_padding;
 
     bool m_consoleEnabled;
+    bool m_consoleTimestampEnabled;
     std::ostream *m_console;
     std::string m_consolePrefix;
 
     bool m_fileEnabled;
+    bool m_fileTimestampEnabled;
     std::ofstream *m_file;
     std::string m_filePrefix;
 
@@ -134,13 +140,18 @@ public:
     log::Visibility getVisibility();
 
     void setVerbosities(log::Verbosity verbosity);
+    void setTimestampEnabled(bool enabled);
 
+    bool isConsoleTimestampEnabled() const;
+    void setConsoleTimestampEnabled(bool enabled);
     void setConsoleStream(std::ostream *console);
     std::ostream & getConsoleStream();
     std::string getConsolePrefix();
     void setConsoleVerbosity(log::Verbosity verbosity);
     log::Verbosity getConsoleVerbosity();
 
+    bool isFileTimestampEnabled() const;
+    void setFileTimestampEnabled(bool enabled);
     void setFileStream(std::ofstream *file);
     std::ofstream & getFileStream();
     std::string getFilePrefix();

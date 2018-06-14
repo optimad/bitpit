@@ -49,8 +49,8 @@ namespace bitpit{
 */
 LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
     : m_buffer(bufferSize + 1), m_context(""), m_padding(""),
-    m_consoleEnabled(false), m_console(&std::cout), m_consolePrefix(""),
-    m_fileEnabled(false), m_file(nullptr), m_filePrefix("")
+    m_consoleEnabled(false), m_consoleTimestampEnabled(false), m_console(&std::cout), m_consolePrefix(""),
+    m_fileEnabled(false), m_fileTimestampEnabled(true), m_file(nullptr), m_filePrefix("")
 {
     // Set the buffer
     char *bufferBegin = &m_buffer.front();
@@ -151,6 +151,10 @@ int LoggerBuffer::flush(bool terminate)
 
         // Write to the console
         if (m_console && m_consoleEnabled) {
+            if (m_consoleTimestampEnabled) {
+                *m_console << "[" + getTimestamp() + "] ";
+            }
+
             if (!m_consolePrefix.empty()) {
                 *m_console << m_consolePrefix << " :: ";
             }
@@ -175,7 +179,9 @@ int LoggerBuffer::flush(bool terminate)
 
         // Write to file
         if (m_file && m_fileEnabled && m_file->is_open()) {
-            *m_file << "[" + getTimestamp() + "] ";
+            if (m_fileTimestampEnabled) {
+                *m_file << "[" + getTimestamp() + "] ";
+            }
 
             if (!m_filePrefix.empty()) {
                 *m_file << m_filePrefix << " :: ";
@@ -213,6 +219,27 @@ void LoggerBuffer::setConsoleEnabled(bool enabled)
     flush(true);
 
     m_consoleEnabled = enabled;
+}
+
+/*!
+    Returns true if the timestamp is enabled on the console, false otherwise.
+
+    \result Returns true if the timestamp is enabled on the console, false
+    otherwise.
+*/
+bool LoggerBuffer::isConsoleTimestampEnabled() const
+{
+    return m_consoleTimestampEnabled;
+}
+
+/*!
+    Enables the timestamp on the console.
+
+    \param enabled if set to true enables the timestamp on the console.
+*/
+void LoggerBuffer::setConsoleTimestampEnabled(bool enabled)
+{
+    m_consoleTimestampEnabled = enabled;
 }
 
 /*!
@@ -274,6 +301,27 @@ void LoggerBuffer::setFileEnabled(bool enabled)
     flush(true);
 
     m_fileEnabled = enabled;
+}
+
+/*!
+    Returns true if the timestamp is enabled on the log file, false otherwise.
+
+    \result Returns true if the timestamp is enabled on the log file, false
+    otherwise.
+*/
+bool LoggerBuffer::isFileTimestampEnabled() const
+{
+    return m_fileTimestampEnabled;
+}
+
+/*!
+    Enables the timestamp on the log file.
+
+    \param enabled if set to true enables the timestamp on the log file
+*/
+void LoggerBuffer::setFileTimestampEnabled(bool enabled)
+{
+    m_fileTimestampEnabled = enabled;
 }
 
 /*!
@@ -516,6 +564,39 @@ void Logger::setVerbosities(log::Verbosity verbosity)
 }
 
 /*!
+    Enables the timestamp both on the console and on the log file.
+
+    \param enabled if set to true enables the timestamp both on the console
+    and on the log file.
+*/
+void Logger::setTimestampEnabled(bool enabled)
+{
+    setConsoleTimestampEnabled(enabled);
+    setFileTimestampEnabled(enabled);
+}
+
+/*!
+    Returns true if the timestamp is enabled on the console, false otherwise.
+
+    \result Returns true if the timestamp is enabled on the console, false
+    otherwise.
+*/
+bool Logger::isConsoleTimestampEnabled() const
+{
+    return m_buffer.isConsoleTimestampEnabled();
+}
+
+/*!
+    Enables the timestamp on the console.
+
+    \param enabled if set to true enables the timestamp on the console.
+*/
+void Logger::setConsoleTimestampEnabled(bool enabled)
+{
+    m_buffer.setConsoleTimestampEnabled(enabled);
+}
+
+/*!
     Sets the verbosity for the messages printed on the console.
 
     \param verbosity is the verbosity for the messages printed on the console
@@ -550,6 +631,27 @@ log::Verbosity Logger::getConsoleVerbosity()
 std::string Logger::getConsolePrefix()
 {
     return m_buffer.getConsolePrefix();
+}
+
+/*!
+    Returns true if the timestamp is enabled on the log file, false otherwise.
+
+    \result Returns true if the timestamp is enabled on the log file, false
+    otherwise.
+*/
+bool Logger::isFileTimestampEnabled() const
+{
+    return m_buffer.isFileTimestampEnabled();
+}
+
+/*!
+    Enables the timestamp on the log file.
+
+    \param enabled if set to true enables the timestamp on the log file
+*/
+void Logger::setFileTimestampEnabled(bool enabled)
+{
+    m_buffer.setFileTimestampEnabled(enabled);
 }
 
 /*!
@@ -1148,7 +1250,9 @@ void LoggerManager::_create(const std::string &name, Logger &master)
 
     // Import logger settings
     Logger &logger = *(m_loggers.at(name));
+    logger.setConsoleTimestampEnabled(master.isConsoleTimestampEnabled());
     logger.setConsoleVerbosity(master.getConsoleVerbosity());
+    logger.setFileTimestampEnabled(master.isFileTimestampEnabled());
     logger.setFileVerbosity(master.getFileVerbosity());
     logger.setVisibility(master.getVisibility());
     logger.setPriority(master.getPriority());
