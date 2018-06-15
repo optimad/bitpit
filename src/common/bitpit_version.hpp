@@ -1,1 +1,1 @@
-#define BITPIT_VERSION "1.5.0-devel"
+#define BITPIT_VERSION "1.6.0-devel"
