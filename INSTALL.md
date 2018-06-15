@@ -6,7 +6,19 @@ bitpit runs on Linux and Mac OSX platforms.
 bitpit depends on
 * c++ compiler supporting `-std=c++11`. It has been tested with g++ >= 4.7.3
 * cmake >= 2.8
-* (optionally) MPI implementation. It has been tested with OpenMPI >= 1.6.5. 
+* (optionally) MPI implementation. It has been tested with OpenMPI >= 1.6.5.
+
+Some additional dependencies are required for building specific modules
+* libxml2 and its development headers are needed when compiling the 'IO'
+  module (please note that the 'IO' module is a dependecies for many other
+  bitpit modules, the only modules that do not depend on 'IO' are the low
+  level modules like 'operators', 'containers', 'LA', and 'SA');
+* blas, lapack, and lapacke are needed when compiling 'CG', 'RBF', and 'POD'
+  modules.
+
+When compiling bitpit, both shared library files and header library files are
+required. Therefore, in addition to the library packages, also the corresponding
+'*-devel' packages ('*-dev' in Debian-based distributions) are required.
 
 ## Confguring BITPIT
 bitpit uses ccmake as building tool.
