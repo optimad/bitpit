@@ -100,6 +100,20 @@ struct PODField
     }
 
     /**
+     * Assignement operator using copy and swap
+     *
+     * \param[in] other another pod field whose content is copied in this
+     * pod field
+     * \return the assigneed field
+     */
+    PODField & operator=(PODField other)
+    {
+        this->swap(other);
+
+        return *this;
+    }
+
+    /**
      * Exchanges the content of the pod field by the content of other pod
      * field received in input.
      *
