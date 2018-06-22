@@ -5288,8 +5288,10 @@ void PatchKernel::dump(std::ostream &stream) const
 	utils::binary::write(stream, m_vtk.getName());
 #if BITPIT_ENABLE_MPI==1
 	utils::binary::write(stream, m_partitioned);
+	utils::binary::write(stream, m_haloSize);
 #else
 	utils::binary::write(stream, false);
+	utils::binary::write(stream, 0);
 #endif
 
 	// Spawn status
@@ -5359,6 +5361,14 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 #else
 	bool dummyPartitioned;
 	utils::binary::read(stream, dummyPartitioned);
+#endif
+
+	// Halo size
+#if BITPIT_ENABLE_MPI==1
+	utils::binary::read(stream, m_haloSize);
+#else
+	int dummyHaloSize;
+	utils::binary::read(stream, dummyHaloSize);
 #endif
 
 	// Spawn status
