@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <cassert>
+
 #include "mesh_mapper.hpp"
 
 namespace bitpit {
@@ -173,6 +175,9 @@ void MeshMapper::mappingAdaptionUpdate(const std::vector<adaption::Info> & infoA
         meshAdapted = dynamic_cast<VolOctree*>(m_mappedMesh);
         mapperMapped = &m_mapper;
     }
+
+    assert(meshAdapted != nullptr);
+    assert(meshMapped != nullptr);
 
     for (const adaption::Info & info : infoAdapt){
         if (info.type == adaption::Type::TYPE_RENUMBERING){
