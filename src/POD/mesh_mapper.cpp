@@ -49,7 +49,7 @@ MeshMapper::MeshMapper(MPI_Comm comm)
 # else
 MeshMapper::MeshMapper()
 # endif
-: m_mapper(1)
+: m_referenceMesh(nullptr), m_mappedMesh(nullptr), m_mapper(1)
 {
 
 #if BITPIT_ENABLE_MPI
