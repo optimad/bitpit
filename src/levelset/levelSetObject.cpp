@@ -473,6 +473,8 @@ void LevelSetObject::flushData( std::fstream &stream, std::string name, VTKForma
             writeFunctionPtr = genericIO::flushBINARY<double>;
         } else if(format==VTKFormat::ASCII){
             writeFunctionPtr = genericIO::flushASCII<double>;
+        } else {
+            BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
         for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
@@ -489,6 +491,8 @@ void LevelSetObject::flushData( std::fstream &stream, std::string name, VTKForma
             writeFunctionPtr = genericIO::flushBINARY<std::array<double,3>>;
         } else if(format==VTKFormat::ASCII){
             writeFunctionPtr = genericIO::flushASCII<std::array<double,3>>;
+        } else {
+            BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
         for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
@@ -505,6 +509,8 @@ void LevelSetObject::flushData( std::fstream &stream, std::string name, VTKForma
             writeFunctionPtr = genericIO::flushBINARY<std::array<double,3>>;
         } else if(format==VTKFormat::ASCII){
             writeFunctionPtr = genericIO::flushASCII<std::array<double,3>>;
+        } else {
+            BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
         for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
@@ -521,6 +527,8 @@ void LevelSetObject::flushData( std::fstream &stream, std::string name, VTKForma
             writeFunctionPtr = genericIO::flushBINARY<int>;
         } else if(format==VTKFormat::ASCII){
             writeFunctionPtr = genericIO::flushASCII<int>;
+        } else {
+            BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
         for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
