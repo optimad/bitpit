@@ -467,6 +467,7 @@ namespace bitpit {
         utils::binary::write(stream, getDim());
 
         utils::binary::write(stream, getSerial());
+        utils::binary::write(stream, getNofGhostLayers());
         utils::binary::write(stream, getMaxDepth());
         utils::binary::write(stream, getStatus());
         utils::binary::write(stream, getBalanceCodimension());
@@ -568,6 +569,7 @@ namespace bitpit {
 
         // Set tree properties
         utils::binary::read(stream, m_serial);
+        utils::binary::read(stream, m_nofGhostLayers);
         utils::binary::read(stream, m_maxDepth);
         utils::binary::read(stream, m_status);
 
