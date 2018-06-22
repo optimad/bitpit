@@ -193,6 +193,7 @@ void MeshMapper::mappingAdaptionUpdate(const std::vector<adaption::Info> & infoA
             if (fillInv){
                 for (long idp : (*mapperAdapted)[id].previous){
                     std::vector<long>::iterator it = std::find((*mapperMapped)[idp].previous.begin(), (*mapperMapped)[idp].previous.end(), info.previous[0]);
+                    assert(it != (*mapperMapped)[idp].previous.end());
                     *it = id;
                 }
             }
@@ -283,6 +284,7 @@ void MeshMapper::mappingAdaptionUpdate(const std::vector<adaption::Info> & infoA
 
                     if (fillInv){
                         std::vector<long>::iterator it = std::find((*mapperMapped)[idprevious].previous. begin(), (*mapperMapped)[idprevious].previous.end(), info.previous[0]);
+                        assert(it != (*mapperMapped)[idprevious].previous.end());
                         *it = id;
                         (*mapperMapped)[idprevious].type = adaption::Type::TYPE_COARSENING;
                     }
