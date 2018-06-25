@@ -1017,27 +1017,23 @@ void POD::_evalMeanMesh()
         // Compute mean (starting from first snapshot) & filter+mask
         for (std::size_t i = 0; i < m_nSnapshots; i++) {
             log::cout() << "pod : evaluation mean - use snapshot " << i+1 << "/" << m_nSnapshots << std::endl;
-            pod::PODField * _readf;
             pod::PODField readf;
             readSnapshot(m_database[i], readf);
-            if (m_staticMesh){
-                _readf = &readf;
-            }
-            else{
+            if (!m_staticMesh){
                 //Compute mapping of read mesh on pod mesh
                 _computeMapper(readf.mesh);
-                _readf = new pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
+                readf = pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
                 m_podkernel->getMeshMapper().clear();
                 m_podkernel->setMapperDirty(true);
             }
 
             for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
-                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (_readf->mask->at(cell.getId())); //N.B. mask == filter
+                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (readf.mask->at(cell.getId())); //N.B. mask == filter
                 if (m_filter[cell.getId()]){
                     for (std::size_t j = 0; j < m_nScalarFields; j++)
-                        m_mean.scalar->at(cell.getId(),j) += _readf->scalar->at(cell.getId(),j) / double(m_nSnapshots);
+                        m_mean.scalar->at(cell.getId(),j) += readf.scalar->at(cell.getId(),j) / double(m_nSnapshots);
                     for (std::size_t j = 0; j < m_nVectorFields; j++)
-                        m_mean.vector->at(cell.getId(),j) += _readf->vector->at(cell.getId(),j) / double(m_nSnapshots);
+                        m_mean.vector->at(cell.getId(),j) += readf.vector->at(cell.getId(),j) / double(m_nSnapshots);
                 }
                 else{
                     for (std::size_t j = 0; j < m_nScalarFields; j++)
@@ -1046,31 +1042,24 @@ void POD::_evalMeanMesh()
                         m_mean.vector->at(cell.getId(),j) = {{0.0, 0.0, 0.0}};
                 }
             }
-            if (!m_staticMesh)
-                delete _readf;
         }
     }
     else {
         // filter+mask
         for (std::size_t i = 0; i < m_nSnapshots; i++) {
-            pod::PODField * _readf;
             pod::PODField readf;
             readSnapshot(m_database[i], readf);
-            if (m_staticMesh)
+            if (!m_staticMesh)
             {
-                _readf = &readf;
-            }else{
                 _computeMapper(readf.mesh);
-                _readf = new pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
+                readf = pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
                 m_podkernel->getMeshMapper().clear();
                 m_podkernel->setMapperDirty(true);
             }
 
             for (const Cell &cell : m_podkernel->getMesh()->getCells())
-                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (_readf->mask->at(cell.getId())); //N.B. mask == filter
+                m_filter[cell.getId()] = (m_filter[cell.getId()]) && (readf.mask->at(cell.getId())); //N.B. mask == filter
 
-            if (!m_staticMesh)
-                delete _readf;
         }
     }
 
@@ -1116,39 +1105,31 @@ void POD::evalCorrelation()
 {
     initCorrelation();
     for (std::size_t i = 0; i < m_nSnapshots; i++){
-        pod::PODField* _snapi;
         pod::PODField snapi;
         readSnapshot(m_database[i], snapi);
-        if (m_staticMesh){
-            _snapi = &snapi;
-        }
-        else{
+        if (!m_staticMesh){
             _computeMapper(snapi.mesh);
-            _snapi = new pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
+            snapi = pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
             m_podkernel->getMeshMapper().clear();
         }
 
         if (m_useMean)
-            diff(_snapi, m_mean);
+            diff(&snapi, m_mean);
 
         for (std::size_t j = i; j < m_nSnapshots; j++){
             log::cout() << "pod : evaluation " << i << "," << j << " term of correlation matrix " << std::endl;
-            pod::PODField* _snapj;
             pod::PODField snapj;
             readSnapshot(m_database[j], snapj);
-            if (m_staticMesh){
-                _snapj = &snapj;
-            }
-            else{
+            if (!m_staticMesh){
                 _computeMapper(snapj.mesh);
-                _snapj = new pod::PODField(m_podkernel->mapPODFieldToPOD(snapj, nullptr));
+                snapj = pod::PODField(m_podkernel->mapPODFieldToPOD(snapj, nullptr));
                 m_podkernel->getMeshMapper().clear();
             }
 
             if (m_useMean)
-                diff(_snapj, m_mean);
+                diff(&snapj, m_mean);
 
-            evalCorrelationTerm(i, *_snapi, j, *_snapj);
+            evalCorrelationTerm(i, snapi, j, snapj);
 
         }
     }
@@ -1233,20 +1214,18 @@ void POD::evalReconstruction()
         pod::PODField snapi, reconi, erri;
         readSnapshot(m_reconstructionDatabase[i], snapi);
 
-        if (m_staticMesh){
-            reconstructFields(snapi, reconi);
-        }
-        else{
+        if (!m_staticMesh){
 
             //Compute mapping of snapshot mesh on pod mesh
             _computeMapper(snapi.mesh);
 
             // Map snapshot on pod mesh
-            pod::PODField mappedSnapi = m_podkernel->mapPODFieldToPOD(snapi, nullptr);
+            snapi = pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
             m_podkernel->getMeshMapper().clear();
 
-            reconstructFields(mappedSnapi, reconi);
         }
+
+        reconstructFields(snapi, reconi);
         std::string rname = m_name + ".recon." + m_reconstructionDatabase[i].name;
 
         if (m_writeMode != WriteMode::NONE && m_errorMode != ErrorMode::COMBINED)
@@ -1835,27 +1814,23 @@ void POD::_evalModes()
     }
 
     for (std::size_t is = 0; is < m_nSnapshots; is++){
-        pod::PODField* _snapi;
         pod::PODField snapi;
         readSnapshot(m_database[is], snapi);
-        if (m_staticMesh){
-            _snapi = &snapi;
-        }
-        else{
+        if (!m_staticMesh){
             _computeMapper(snapi.mesh);
-            _snapi = new pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
+            snapi = pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
             m_podkernel->getMeshMapper().clear();
         }
 
         if (m_useMean)    
-            diff(_snapi, m_mean);
+            diff(&snapi, m_mean);
 
         for (std::size_t ir = 0; ir < m_nModes; ir++){
             for (long id : m_listActiveIDs){
                 std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
                 if (m_nScalarFields){
                     double* modes = m_modes[ir].scalar->rawData(rawIndex);
-                    double* datas = _snapi->scalar->rawData(rawIndex);
+                    double* datas = snapi.scalar->rawData(rawIndex);
                     for (std::size_t ifs = 0; ifs < m_nScalarFields; ifs++){
                         *modes = *modes + *datas*m_podCoeffs[ifs][ir][is] / m_lambda[ifs][ir];
                         modes++;
@@ -1864,7 +1839,7 @@ void POD::_evalModes()
                 }
                 if (m_nVectorFields){
                     std::array<double, 3>* modev = m_modes[ir].vector->rawData(rawIndex);
-                    std::array<double, 3>* datav = _snapi->vector->rawData(rawIndex);
+                    std::array<double, 3>* datav = snapi.vector->rawData(rawIndex);
                     for (std::size_t ifv = 0; ifv < m_nVectorFields; ifv++){
                         *modev = *modev + *datav*m_podCoeffs[m_nScalarFields+ifv][ir][is] / m_lambda[m_nScalarFields+ifv][ir];
                         modev++;
