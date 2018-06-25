@@ -1151,7 +1151,7 @@ namespace bitpit {
      * face of an octant neighbour through the i-th face of the current octant).
      */
     uint8_t
-        (*ParaTree::getOppface()){
+        *ParaTree::getOppface(){
         return m_global.m_oppFace;
     }
 

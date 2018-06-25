@@ -257,7 +257,7 @@ namespace bitpit {
         void 		getNodecoeffs(int8_t nodecoeffs[8][3]) const;
         void 		getEdgecoeffs(int8_t edgecoeffs[12][3]) const;
         int8_t		(*getNormals())[3];
-        uint8_t		(*getOppface());
+        uint8_t		*getOppface();
         uint8_t 	(*getFacenode())[4];
         uint8_t 	(*getNodeface())[3];
         uint8_t 	(*getEdgeface())[2];
