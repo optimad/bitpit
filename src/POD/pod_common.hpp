@@ -100,6 +100,22 @@ struct PODField
     }
 
     /**
+     * Exchanges the content of the pod field by the content of other pod
+     * field received in input.
+     *
+     * \param[in] field another pod field whose content is swapped with that of
+     * this pod field.
+     */
+    void swap(PODField &other)
+    {
+        std::swap(meshOwner, other.meshOwner);
+        std::swap(mesh, other.mesh);
+        std::swap(mask, other.mask);
+        std::swap(scalar, other.scalar);
+        std::swap(vector, other.vector);
+    }
+
+    /**
      * Creates a new empty pod field with fixed number of scalar and vector fields and optional linked kernel.
      *
      * \param[in] nsf is the number of scalar fields.
