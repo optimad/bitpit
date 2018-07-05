@@ -4137,8 +4137,7 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 			//
 			// Interface and adjacencies are aligned:
 			for (int k = updateBegin; k < updateEnd; ++k) {
-				// Do not create the interfaces between two ghost cells or
-				// on ghost border faces.
+				// Do not create the interfaces on ghost border faces.
 				long neighId = cell.getAdjacency(face, k);
 				if (neighId < 0 && !cell.isInterior()) {
 					continue;
@@ -4147,11 +4146,7 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 				Cell *neigh   = nullptr;
 				int neighFace = -1;
 				if (neighId >= 0) {
-					neigh = &m_cells[neighId];
-					if (!neigh->isInterior()) {
-						continue;
-					}
-
+					neigh     = &m_cells[neighId];
 					neighFace = findAdjoinNeighFace(cellId, neighId);
 				}
 
