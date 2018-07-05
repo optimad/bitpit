@@ -163,7 +163,7 @@ void PatchKernel::setHaloSize(std::size_t haloSize)
 
 	\result The size, expressed in number of layers, of the ghost cells halo.
 */
-std::size_t PatchKernel::getHaloSize()
+std::size_t PatchKernel::getHaloSize() const
 {
 	return m_haloSize;
 }
