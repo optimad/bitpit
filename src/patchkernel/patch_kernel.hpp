@@ -442,7 +442,7 @@ public:
 	int getProcessorCount() const;
 
 	void setHaloSize(std::size_t haloSize);
-	std::size_t getHaloSize();
+	std::size_t getHaloSize() const;
 
 	int getCellRank(const long &id) const;
 	virtual int getCellHaloLayer(const long &id) const;
