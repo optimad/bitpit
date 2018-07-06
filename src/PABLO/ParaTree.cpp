@@ -5261,15 +5261,13 @@ namespace bitpit {
 
             // Virtual Corner Neighbors
             for(uint8_t c = 0; c < m_global.m_nnodes; ++c){
-                if(!octant.getBound(m_global.m_nodeFace[c][0]) && !octant.getBound(m_global.m_nodeFace[c][1])){
-                    bool hasVirtualNeighbour;
-                    uint64_t virtualNeighbor;
-                    octant.computeNodeVirtualMorton(c, m_maxDepth,m_global.m_nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
-                    if(hasVirtualNeighbour){
-                        int neighProc = findOwner(virtualNeighbor);
-                        if (neighProc != m_rank) {
-                            neighProcs.insert(neighProc);
-                        }
+                bool hasVirtualNeighbour;
+                uint64_t virtualNeighbor;
+                octant.computeNodeVirtualMorton(c, m_maxDepth,m_global.m_nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
+                if(hasVirtualNeighbour){
+                    int neighProc = findOwner(virtualNeighbor);
+                    if (neighProc != m_rank) {
+                        neighProcs.insert(neighProc);
                     }
                 }
             }
