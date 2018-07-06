@@ -1352,66 +1352,74 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 	switch (inode) {
 	case 0 :
 	{
-		int cx = -1;
-		int cy = -1;
-		int cz = -1*(m_dim-2);
-		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		uint32_t x = m_x - dh;
+		uint32_t y = m_y - dh;
+		uint32_t z = m_z - (m_dim - 2) * dh;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	case 1 :
 	{
-		int cx = 1;
-		int cy = -1;
-		int cz = -1*(m_dim-2);
-		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		uint32_t x = m_x + dh2;
+		uint32_t y = m_y - dh;
+		uint32_t z = m_z - (m_dim - 2) * dh;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	case 2 :
 	{
-		int cx = -1;
-		int cy = 1;
-		int cz = -1*(m_dim-2);
-		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		uint32_t x = m_x - dh;
+		uint32_t y = m_y + dh2;
+		uint32_t z = m_z - (m_dim - 2) * dh;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	case 3 :
 	{
-		int cx = 1;
-		int cy = 1;
-		int cz = -1*(m_dim-2);
-		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		uint32_t x = m_x + dh2;
+		uint32_t y = m_y + dh2;
+		uint32_t z = m_z - (m_dim - 2) * dh;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	case 4 :
 	{
-		int cx = -1;
-		int cy = -1;
-		int cz = 1;
-		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		uint32_t x = m_x - dh;
+		uint32_t y = m_y - dh;
+		uint32_t z = m_z + dh2;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	case 5 :
 	{
-		int cx = 1;
-		int cy = -1;
-		int cz = 1;
-		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		uint32_t x = m_x + dh2;
+		uint32_t y = m_y - dh;
+		uint32_t z = m_z + dh2;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	case 6 :
 	{
-		int cx = -1;
-		int cy = 1;
-		int cz = 1;
-		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		uint32_t x = m_x - dh;
+		uint32_t y = m_y + dh2;
+		uint32_t z = m_z + dh2;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	case 7 :
 	{
-		int cx = 1;
-		int cy = 1;
-		int cz = 1;
-		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		uint32_t x = m_x + dh2;
+		uint32_t y = m_y + dh2;
+		uint32_t z = m_z + dh2;
+
+		*morton = PABLO::computeMorton(x, y, z);
 	}
 	break;
 	default:
