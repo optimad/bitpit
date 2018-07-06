@@ -5189,19 +5189,20 @@ namespace bitpit {
         //
         // TODO: provide an estimate of the border octants in order to reserve
         // the vectors that will contain them.
-        std::set<int> neighProcs;
-        uint32_t nVirtualNeighbors;
-        std::vector<uint64_t> virtualNeighbors;
         m_bordersPerProc.clear();
         m_internals.resize(getNumOctants());
         m_pborders.resize(getNumOctants());
+
         int countpbd = 0;
         int countint = 0;
+        std::set<int> neighProcs;
+        uint32_t nVirtualNeighbors;
+        std::vector<uint64_t> virtualNeighbors;
         for (uint32_t idx = 0; idx < m_octree.getNumOctants(); ++idx) {
             neighProcs.clear();
             Octant &octant = m_octree.m_octants[idx];
 
-            //Virtual Face Neighbors
+            // Virtual Face Neighbors
             for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
                 bool isFacePbound = false;
                 if(octant.getBound(i) == false){
@@ -5235,7 +5236,8 @@ namespace bitpit {
 
                 octant.setPbound(i, isFacePbound);
             }
-            //Virtual Edge Neighbors
+
+            // Virtual Edge Neighbors
             for(uint8_t e = 0; e < m_global.m_nedges; ++e){
                 octant.computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_global.m_edgeFace, &nVirtualNeighbors, &virtualNeighbors);
                 if(nVirtualNeighbors > 0){
@@ -5256,7 +5258,8 @@ namespace bitpit {
                     }
                 }
             }
-            //Virtual Corner Neighbors
+
+            // Virtual Corner Neighbors
             for(uint8_t c = 0; c < m_global.m_nnodes; ++c){
                 if(!octant.getBound(m_global.m_nodeFace[c][0]) && !octant.getBound(m_global.m_nodeFace[c][1])){
                     bool hasVirtualNeighbour;
@@ -5271,6 +5274,7 @@ namespace bitpit {
                 }
             }
 
+            // Build list of internal and processor borders octants
             if (neighProcs.empty()){
                 m_internals[countint] = &octant;
                 countint++;
