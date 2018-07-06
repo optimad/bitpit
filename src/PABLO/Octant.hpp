@@ -239,7 +239,7 @@ private:
 	std::vector< Octant >	buildChildren() const;
 	void computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
 	void computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
-	void computeVirtualMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
+	void computeFaceVirtualMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
 	void computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
 	void computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
 	void computeEdgeVirtualMortons(uint8_t iedge, uint8_t maxdepth, uint8_t balance_codim, uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const;

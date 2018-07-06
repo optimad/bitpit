@@ -1000,7 +1000,7 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
  * \param[out] nMortons number of morton numbers.
  * \param[out] mortons are the requestd morton numbers.
  */
-void Octant::computeVirtualMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
+void Octant::computeFaceVirtualMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
 	if (!getBalance()){
 		computeMinSizeMortons(iface, maxdepth, nMortons, mortons);
 	} else{

@@ -5206,7 +5206,7 @@ namespace bitpit {
             for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
                 bool isFacePbound = false;
                 if(octant.getBound(i) == false){
-                    octant.computeVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
+                    octant.computeFaceVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
                     uint32_t maxDelta = nVirtualNeighbors/2;
                     for(uint32_t j = 0; j <= maxDelta; ++j){
                         int neighProcFirst = findOwner(virtualNeighbors[j]);
