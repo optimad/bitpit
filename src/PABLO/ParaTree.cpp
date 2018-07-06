@@ -5196,11 +5196,10 @@ namespace bitpit {
         m_bordersPerProc.clear();
         m_internals.resize(getNumOctants());
         m_pborders.resize(getNumOctants());
-        bool pbd = false;
         int countpbd = 0;
         int countint = 0;
         for(LocalTree::octvector::iterator it = begin; it != end; ++it){
-            pbd = false;
+            bool pbd = false;
             set<int> procs;
             //Virtual Face Neighbors
             for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
@@ -5240,8 +5239,8 @@ namespace bitpit {
             //Virtual Edge Neighbors
             for(uint8_t e = 0; e < m_global.m_nedges; ++e){
                 it->computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_global.m_edgeFace, &nVirtualNeighbors, &virtualNeighbors);
-                uint32_t maxDelta = nVirtualNeighbors/2;
                 if(nVirtualNeighbors > 0){
+                    uint32_t maxDelta = nVirtualNeighbors/2;
                     for(uint32_t ee = 0; ee <= maxDelta; ++ee){
                         int pBegin = findOwner(virtualNeighbors[ee]);
                         int pEnd = findOwner(virtualNeighbors[nVirtualNeighbors - 1- ee]);
