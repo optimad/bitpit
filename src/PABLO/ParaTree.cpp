@@ -5191,20 +5191,20 @@ namespace bitpit {
         // the vectors that will contain them.
         uint32_t nVirtualNeighbors;
         std::vector<uint64_t> virtualNeighbors;
-        LocalTree::octvector::iterator end = m_octree.m_octants.end();
-        LocalTree::octvector::iterator begin = m_octree.m_octants.begin();
         m_bordersPerProc.clear();
         m_internals.resize(getNumOctants());
         m_pborders.resize(getNumOctants());
         int countpbd = 0;
         int countint = 0;
-        for(LocalTree::octvector::iterator it = begin; it != end; ++it){
+        for (uint32_t idx = 0; idx < m_octree.getNumOctants(); ++idx) {
             bool pbd = false;
             set<int> procs;
+            Octant &octant = m_octree.m_octants[idx];
+
             //Virtual Face Neighbors
             for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
-                if(it->getBound(i) == false){
-                    it->computeVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
+                if(octant.getBound(i) == false){
+                    octant.computeVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
                     uint32_t maxDelta = nVirtualNeighbors/2;
                     for(uint32_t j = 0; j <= maxDelta; ++j){
                         int pBegin = findOwner(virtualNeighbors[j]);
@@ -5212,33 +5212,33 @@ namespace bitpit {
                         procs.insert(pBegin);
                         procs.insert(pEnd);
                         if(pBegin != m_rank || pEnd != m_rank){
-                            it->setPbound(i,true);
+                            octant.setPbound(i,true);
                             pbd = true;
                             break;
                         }
                         else{
-                            it->setPbound(i,false);
+                            octant.setPbound(i,false);
                         }
                         //					//TODO debug
                         //					if (abs(pBegin-pEnd) <= 1) j = maxDelta + 1;
                     }
                 }
                 else if(m_periodic[i]){
-                    uint64_t virtualNeighbor = it->computePeriodicMorton(i);
+                    uint64_t virtualNeighbor = octant.computePeriodicMorton(i);
                     int pOwner = findOwner(virtualNeighbor);
                     procs.insert(pOwner);
                     if(pOwner != m_rank){
-                        it->setPbound(i,true);
+                        octant.setPbound(i,true);
                         pbd = true;
                     }
                     else{
-                        it->setPbound(i,false);
+                        octant.setPbound(i,false);
                     }
                 }
             }
             //Virtual Edge Neighbors
             for(uint8_t e = 0; e < m_global.m_nedges; ++e){
-                it->computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_global.m_edgeFace, &nVirtualNeighbors, &virtualNeighbors);
+                octant.computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_global.m_edgeFace, &nVirtualNeighbors, &virtualNeighbors);
                 if(nVirtualNeighbors > 0){
                     uint32_t maxDelta = nVirtualNeighbors/2;
                     for(uint32_t ee = 0; ee <= maxDelta; ++ee){
@@ -5256,10 +5256,10 @@ namespace bitpit {
             }
             //Virtual Corner Neighbors
             for(uint8_t c = 0; c < m_global.m_nnodes; ++c){
-                if(!it->getBound(m_global.m_nodeFace[c][0]) && !it->getBound(m_global.m_nodeFace[c][1])){
+                if(!octant.getBound(m_global.m_nodeFace[c][0]) && !octant.getBound(m_global.m_nodeFace[c][1])){
                     bool hasVirtualNeighbour;
                     uint64_t virtualNeighbor;
-                    it ->computeNodeVirtualMorton(c, m_maxDepth,m_global.m_nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
+                    octant.computeNodeVirtualMorton(c, m_maxDepth,m_global.m_nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
                     if(hasVirtualNeighbour){
                         int proc = findOwner(virtualNeighbor);
                         procs.insert(proc);
@@ -5274,16 +5274,16 @@ namespace bitpit {
             for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
                 int p = *pit;
                 if(p != m_rank){
-                    m_bordersPerProc[p].push_back(distance(begin,it));
+                    m_bordersPerProc[p].push_back(idx);
                 }
             }
 
             if (pbd){
-                m_pborders[countpbd] = &(*it);
+                m_pborders[countpbd] = &octant;
                 countpbd++;
             }
             else{
-                m_internals[countint] = &(*it);
+                m_internals[countint] = &octant;
                 countint++;
             }
         }
