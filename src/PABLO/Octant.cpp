@@ -855,55 +855,67 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 	switch (iface) {
 	case 0 :
 	{
+		uint32_t x = m_x - dh;
 		for (uint32_t i = 0; i < *nMortons; ++i) {
-			uint32_t cy = (i==1)||(i==3);
-			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
-			(*mortons)[i] = PABLO::computeMorton(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
+			uint32_t y = m_y + ((i == 1) || (i == 3)) * dh;
+			uint32_t z = m_z + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
+
+			(*mortons)[i] = PABLO::computeMorton(x, y, z);
 		}
 	}
 	break;
 	case 1 :
 	{
+		uint32_t x = m_x + dh2;
 		for (uint32_t i = 0; i < *nMortons; ++i) {
-			uint32_t cy = (i==1)||(i==3);
-			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
-			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
+			uint32_t y = m_y + ((i == 1) || (i == 3)) * dh;
+			uint32_t z = m_z + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
+
+			(*mortons)[i] = PABLO::computeMorton(x, y, z);
 		}
 	}
 	break;
 	case 2 :
 	{
+		uint32_t y = m_y - dh;
 		for (uint32_t i = 0; i < *nMortons; ++i) {
-			uint32_t cx = (i==1)||(i==3);
-			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
-			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
+			uint32_t x = m_x + ((i == 1) || (i == 3)) * dh;
+			uint32_t z = m_z + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
+
+			(*mortons)[i] = PABLO::computeMorton(x, y, z);
 		}
 	}
 	break;
 	case 3 :
 	{
+		uint32_t y = m_y + dh2;
 		for (uint32_t i = 0; i < *nMortons; ++i) {
-			uint32_t cx = (i==1)||(i==3);
-			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
-			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
+			uint32_t x = m_x + ((i == 1) || (i == 3)) * dh;
+			uint32_t z = m_z + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
+
+			(*mortons)[i] = PABLO::computeMorton(x, y, z);
 		}
 	}
 	break;
 	case 4 :
 	{
+		uint32_t z = m_z - dh;
 		for (uint32_t i = 0; i < *nMortons; ++i) {
-			uint32_t cx = (i==1)||(i==3);
-			uint32_t cy = (i==2)||(i==3);
-			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
+			uint32_t x = m_x + ((i == 1) || (i == 3)) * dh;
+			uint32_t y = m_y + ((i == 2) || (i == 3)) * dh;
+
+			(*mortons)[i] = PABLO::computeMorton(x, y, z);
 		}
 	}
 	break;
 	case 5 :
 	{
+		uint32_t z = m_z + dh2;
 		for (uint32_t i = 0; i < *nMortons; ++i) {
-			uint32_t cx = (i==1)||(i==3);
-			uint32_t cy = (i==2)||(i==3);
-			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
+			uint32_t x = m_x + ((i == 1) || (i == 3)) * dh;
+			uint32_t y = m_y + ((i == 2) || (i == 3)) * dh;
+
+			(*mortons)[i] = PABLO::computeMorton(x, y, z);
 		}
 	}
 	break;
