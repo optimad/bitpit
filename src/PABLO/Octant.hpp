@@ -237,20 +237,14 @@ private:
 	Octant					buildLastDesc() const;
 	Octant					buildFather() const;
 	std::vector< Octant >	buildChildren() const;
-	std::vector<uint64_t> 		computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf) const;
-	std::vector<uint64_t>		computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth,
-			uint32_t & sizem) const;
-	std::vector<uint64_t> 		computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth,
-			uint32_t & sizeneigh) const;
-	std::vector<uint64_t> 		computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf, uint8_t (&edgeface)[12][2]) const;
-	std::vector<uint64_t> 		computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth,
-			uint32_t & sizem, uint8_t (&edgeface)[12][2]) const;
-	std::vector<uint64_t>		computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth,
-			uint32_t & sizeneigh, uint8_t balance_codim, uint8_t (&edgeface)[12][2]) const;
-	uint64_t 		computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxdepth,
-			uint32_t & sizehf, uint8_t (&nodeface)[8][3]) const;
-	uint64_t 		computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth,
-			uint32_t & sizeneigh, uint8_t (&nodeface)[8][3]) const;
+	void computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
+	void computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
+	void computeVirtualMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
+	void computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
+	void computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
+	void computeEdgeVirtualMortons(uint8_t iedge, uint8_t maxdepth, uint8_t balance_codim, uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
+	void computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uint8_t (&nodeface)[8][3], bool *hasMorton, uint64_t *morton) const;
+	void computeNodeVirtualMorton(uint8_t inode, uint8_t maxdepth, const uint8_t (&nodeface)[8][3], bool *hasMorton, uint64_t *morton) const;
 	uint64_t computePeriodicMorton(uint8_t iface) const;
 	Octant computePeriodicOctant(uint8_t iface) const;
 	std::array<int64_t,3> getPeriodicCoord(uint8_t iface) const;

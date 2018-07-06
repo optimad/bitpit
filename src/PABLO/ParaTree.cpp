@@ -5189,6 +5189,8 @@ namespace bitpit {
         //
         // TODO: provide an estimate of the border octants in order to reserve
         // the vectors that will contain them.
+        uint32_t nVirtualNeighbors;
+        std::vector<uint64_t> virtualNeighbors;
         LocalTree::octvector::iterator end = m_octree.m_octants.end();
         LocalTree::octvector::iterator begin = m_octree.m_octants.begin();
         m_bordersPerProc.clear();
@@ -5203,12 +5205,11 @@ namespace bitpit {
             //Virtual Face Neighbors
             for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
                 if(it->getBound(i) == false){
-                    uint32_t virtualNeighborsSize = 0;
-                    vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,m_maxDepth,virtualNeighborsSize);
-                    uint32_t maxDelta = virtualNeighborsSize/2;
+                    it->computeVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
+                    uint32_t maxDelta = nVirtualNeighbors/2;
                     for(uint32_t j = 0; j <= maxDelta; ++j){
                         int pBegin = findOwner(virtualNeighbors[j]);
-                        int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
+                        int pEnd = findOwner(virtualNeighbors[nVirtualNeighbors - 1 - j]);
                         procs.insert(pBegin);
                         procs.insert(pEnd);
                         if(pBegin != m_rank || pEnd != m_rank){
@@ -5238,13 +5239,12 @@ namespace bitpit {
             }
             //Virtual Edge Neighbors
             for(uint8_t e = 0; e < m_global.m_nedges; ++e){
-                uint32_t virtualEdgeNeighborSize = 0;
-                vector<uint64_t> virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,m_maxDepth,virtualEdgeNeighborSize,m_octree.m_balanceCodim, m_global.m_edgeFace);
-                uint32_t maxDelta = virtualEdgeNeighborSize/2;
-                if(virtualEdgeNeighborSize){
+                it->computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_global.m_edgeFace, &nVirtualNeighbors, &virtualNeighbors);
+                uint32_t maxDelta = nVirtualNeighbors/2;
+                if(nVirtualNeighbors > 0){
                     for(uint32_t ee = 0; ee <= maxDelta; ++ee){
-                        int pBegin = findOwner(virtualEdgeNeighbors[ee]);
-                        int pEnd = findOwner(virtualEdgeNeighbors[virtualEdgeNeighborSize - 1- ee]);
+                        int pBegin = findOwner(virtualNeighbors[ee]);
+                        int pEnd = findOwner(virtualNeighbors[nVirtualNeighbors - 1- ee]);
                         procs.insert(pBegin);
                         procs.insert(pEnd);
                         if(pBegin != m_rank || pEnd != m_rank){
@@ -5258,10 +5258,11 @@ namespace bitpit {
             //Virtual Corner Neighbors
             for(uint8_t c = 0; c < m_global.m_nnodes; ++c){
                 if(!it->getBound(m_global.m_nodeFace[c][0]) && !it->getBound(m_global.m_nodeFace[c][1])){
-                    uint32_t virtualCornerNeighborSize = 0;
-                    uint64_t virtualCornerNeighbor = it ->computeNodeVirtualMorton(c,m_maxDepth,virtualCornerNeighborSize, m_global.m_nodeFace);
-                    if(virtualCornerNeighborSize){
-                        int proc = findOwner(virtualCornerNeighbor);
+                    bool hasVirtualNeighbour;
+                    uint64_t virtualNeighbor;
+                    it ->computeNodeVirtualMorton(c, m_maxDepth,m_global.m_nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
+                    if(hasVirtualNeighbour){
+                        int proc = findOwner(virtualNeighbor);
                         procs.insert(proc);
                         if(proc != m_rank ){
                             pbd = true;

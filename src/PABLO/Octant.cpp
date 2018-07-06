@@ -835,650 +835,603 @@ vector< Octant >	Octant::buildChildren() const {
  * (or same size if level=maxlevel) possible neighbours of octant
  * throught face iface (sizehf=0 if boundary octant).
  * \param[in] iface Local index of the face target.
- * \param[out] sizehf Number of possible neighbours.
- * \return Vector of neighbours morton numbers.
+ * \param[out] nMortons number of morton numbers.
+ * \param[out] mortons are the requestd morton numbers.
  */
-vector<uint64_t> Octant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf) const {
-	uint32_t dh,dh2;
-	uint32_t nneigh;
-	uint32_t i,cx,cy,cz;
+void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
+
+	if (m_info[iface]) {
+		*nMortons = 0;
+		mortons->clear();
+		return;
+	}
+
 	int nchildren = 1<<m_dim;
+	*nMortons = (m_level < Global::getMaxLevel()) ? nchildren/2 : 1;
+	mortons->resize(*nMortons);
 
-	nneigh = (m_level < Global::getMaxLevel()) ? nchildren/2 : 1;
-	dh = (m_level < Global::getMaxLevel()) ? getSize()/2 : getSize();
-	dh2 = getSize();
-
-	if (m_info[iface]){
-		sizehf = 0;
-		vector<uint64_t> Morton(0);
-		return Morton;
+	uint32_t dh  = (m_level < Global::getMaxLevel()) ? getSize()/2 : getSize();
+	uint32_t dh2 = getSize();
+	switch (iface) {
+	case 0 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cy = (i==1)||(i==3);
+			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
+			(*mortons)[i] = PABLO::computeMorton(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
 	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iface) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cy = (i==1)||(i==3);
-				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = PABLO::computeMorton(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
+	break;
+	case 1 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cy = (i==1)||(i==3);
+			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
 		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cy = (i==1)||(i==3);
-				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cz = (m_dim == 3) && ((i==2)||(i==3));
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cy = (i==2)||(i==3);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
-			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cy = (i==2)||(i==3);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
-			}
-		}
-		break;
-		}
-		sizehf = nneigh;
-		return Morton;
 	}
-
-
-};
+	break;
+	case 2 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cx = (i==1)||(i==3);
+			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 3 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cx = (i==1)||(i==3);
+			uint32_t cz = (m_dim == 3) && ((i==2)||(i==3));
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 4 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cx = (i==1)||(i==3);
+			uint32_t cy = (i==2)||(i==3);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
+		}
+	}
+	break;
+	case 5 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cx = (i==1)||(i==3);
+			uint32_t cy = (i==2)||(i==3);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
+		}
+	}
+	break;
+	}
+}
 
 /*! Computes Morton index (without level) of "n=sizem" min-size
  * (or same size if level=maxlevel) possible neighbours of octant
  * throught face iface (sizem=0 if boundary octant).
  * \param[in] iface Local index of the face target.
  * \param[in] maxdepth Maximum refinement level currently reached in the octree.
- * \param[out] sizem Number of possible neighbours.
- * \return Vector of neighbours morton numbers.
+ * \param[out] nMortons number of morton numbers.
+ * \param[out] mortons are the requestd morton numbers.
  */
-vector<uint64_t> Octant::computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizem) const {
-	uint32_t dh,dh2;
-	uint32_t nneigh, nline;
-	uint32_t i,cx,cy,cz;
+void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
 
-	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<((m_dim-1)*(maxdepth-m_level)) : 1;
-	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
-	dh2 = getSize();
-	nline = uint32_t(1)<<(maxdepth-m_level);
-
-	if (m_info[iface]){
-		sizem = 0;
-		vector<uint64_t> Morton(0);
-		return Morton;
-	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iface) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cz = (m_dim-2)*(i%nline);
-				cy = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = PABLO::computeMorton(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cz = (m_dim-2)*(i%nline);
-				cy = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cz = (m_dim-2)*(i%nline);
-				cx = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cz = (m_dim-2)*(i%nline);
-				cx = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = (i%nline);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
-			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = (i%nline);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
-			}
-		}
-		break;
-		}
-		sizem = nneigh;
-		sort(Morton.begin(), Morton.end());
-		return Morton;
+	if (m_info[iface]) {
+		*nMortons = 0;
+		mortons->clear();
+		return;
 	}
 
-};
+	*nMortons = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<((m_dim-1)*(maxdepth-m_level)) : 1;
+	mortons->resize(*nMortons);
+
+	uint32_t dh    = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
+	uint32_t dh2   = getSize();
+	uint32_t nline = uint32_t(1)<<(maxdepth-m_level);
+	switch (iface) {
+	case 0 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cz = (m_dim-2)*(i%nline);
+			uint32_t cy = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x-dh,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 1 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cz = (m_dim-2)*(i%nline);
+			uint32_t cy = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 2 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cz = (m_dim-2)*(i%nline);
+			uint32_t cx = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y-dh,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 3 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cz = (m_dim-2)*(i%nline);
+			uint32_t cx = (m_dim==2)*(i%nline) + (m_dim-2)*(i/nline);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 4 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cx = (i/nline);
+			uint32_t cy = (i%nline);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z-dh);
+		}
+	}
+	break;
+	case 5 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			uint32_t cx = (i/nline);
+			uint32_t cy = (i%nline);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2);
+		}
+	}
+	break;
+	}
+
+	std::sort(mortons->begin(), mortons->end());
+}
 
 /*! Computes Morton index (without level) of possible (virtual) neighbours of octant
  * throught iface. Checks if balanced or not and uses half-size or min-size method
  * (sizeneigh=0 if boundary octant).
  * \param[in] iface Local index of the face target.
  * \param[in] maxdepth Maximum refinement level currently reached in the octree.
- * \param[out] sizeneigh Number of possible neighbours.
- * \return Vector of neighbours morton numbers.
+ * \param[out] nMortons number of morton numbers.
+ * \param[out] mortons are the requestd morton numbers.
  */
-vector<uint64_t> Octant::computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizeneigh) const {
-	vector<uint64_t> Morton;
+void Octant::computeVirtualMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
 	if (!getBalance()){
-		return computeMinSizeMorton(iface,
-				maxdepth,
-				sizeneigh);
+		computeMinSizeMortons(iface, maxdepth, nMortons, mortons);
+	} else{
+		computeHalfSizeMortons(iface, nMortons, mortons);
 	}
-	else{
-		return computeHalfSizeMorton(iface,
-				sizeneigh);
-	}
-};
+}
 
 /*! Computes Morton index (without level) of "n=sizehf" half-size
  * (or same size if level=maxlevel) possible neighbours of octant throught
  * edge iedge (sizehf=0 if boundary octant)
  * \param[in] iedge Local index of the edge target.
- * \param[out] sizehf Number of possible neighbours.
  * \param[in] edgeface Local edge-face connectivity.
- * \return Vector of neighbours morton numbers.
+ * \param[out] nMortons number of morton numbers.
+ * \param[out] mortons are the requestd morton numbers.
  */
-vector<uint64_t> Octant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf, uint8_t (&edgeface)[12][2]) const {
-	uint32_t dh,dh2;
-	uint32_t nneigh;
-	uint32_t i;
-	int32_t cx,cy,cz;
-	uint8_t iface1, iface2;
+void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
 
-	nneigh = (m_level < Global::getMaxLevel()) ? 2 : 1;
-	dh = (m_level < Global::getMaxLevel()) ? getSize()/2 : getSize();
-	dh2 = getSize();
-	iface1 = edgeface[iedge][0];
-	iface2 = edgeface[iedge][1];
-
-	if (m_info[iface1] || m_info[iface2]){
-		sizehf = 0;
-		vector<uint64_t> Morton(0);
-		return Morton;
-	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iedge) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = (i==1);
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = (i==1);
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = -1;
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = 1;
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = -1;
-				cz = (i==1);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = -1;
-				cz = (i==1);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 6 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = 1;
-				cz = (i==1);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 7 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = 1;
-				cz = (i==1);
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 8 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = (i==1);
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		case 9 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = (i==1);
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		case 10 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = -1;
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		case 11 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = 1;
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		}
-		sizehf = nneigh;
-		return Morton;
+	uint32_t iface1 = edgeface[iedge][0];
+	uint32_t iface2 = edgeface[iedge][1];
+	if (m_info[iface1] || m_info[iface2]) {
+		*nMortons = 0;
+		mortons->clear();
+		return;
 	}
 
+	*nMortons = (m_level < Global::getMaxLevel()) ? 2 : 1;
+	mortons->resize(*nMortons);
 
-};
+	uint32_t dh = (m_level < Global::getMaxLevel()) ? getSize()/2 : getSize();
+	uint32_t dh2 = getSize();
+
+	switch (iedge) {
+	case 0 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = (i==1);
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 1 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = (i==1);
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 2 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = (i==1);
+			int32_t cy = -1;
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 3 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = (i==1);
+			int32_t cy = 1;
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 4 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = -1;
+			int32_t cz = (i==1);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 5 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = -1;
+			int32_t cz = (i==1);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 6 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = 1;
+			int32_t cz = (i==1);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 7 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = 1;
+			int32_t cz = (i==1);
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 8 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = (i==1);
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	case 9 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = (i==1);
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	case 10 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = (i==1);
+			int32_t cy = -1;
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	case 11 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = (i==1);
+			int32_t cy = 1;
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	}
+}
 
 /*! Computes Morton index (without level) of "n=sizem" min-size
  * (or same size if level=maxlevel) possible neighbours of octant throught
  * edge iedge (sizem=0 if boundary octant)
  * \param[in] iedge Local index of the edge target.
  * \param[in] maxdepth Maximum refinement level currently reached in the octree.
- * \param[out] sizem Number of possible neighbours.
  * \param[in] edgeface Local edge-face connectivity.
- * \return Vector of neighbours morton numbers.
+ * \param[out] nMortons number of morton numbers.
+ * \param[out] mortons are the requestd morton numbers.
  */
-vector<uint64_t> 		Octant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizem, uint8_t (&edgeface)[12][2]) const {
-	uint32_t dh,dh2;
-	uint32_t nneigh;
-	uint32_t i;
-	int32_t cx,cy,cz;
-	uint8_t iface1, iface2;
+void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
 
-
-	nneigh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(maxdepth-m_level) : 1;
-	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
-	dh2 = getSize();
-	iface1 = edgeface[iedge][0];
-	iface2 = edgeface[iedge][1];
-
-	if (m_info[iface1] || m_info[iface2]){
-		sizem = 0;
-		vector<uint64_t> Morton(0);
-		return Morton;
+	uint8_t iface1 = edgeface[iedge][0];
+	uint8_t iface2 = edgeface[iedge][1];
+	if (m_info[iface1] || m_info[iface2]) {
+		*nMortons = 0;
+		mortons->clear();
+		return;
 	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iedge) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = i;
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
+
+	*nMortons = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(maxdepth-m_level) : 1;
+	mortons->resize(*nMortons);
+
+	uint32_t dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
+	uint32_t dh2 = getSize();
+	switch (iedge) {
+	case 0 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = i;
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = i;
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = i;
-				cy = -1;
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = i;
-				cy = 1;
-				cz = -1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = -1;
-				cz = i;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = -1;
-				cz = i;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 6 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = 1;
-				cz = i;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 7 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = 1;
-				cz = i;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
-			}
-		}
-		break;
-		case 8 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = i;
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		case 9 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = i;
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		case 10 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = i;
-				cy = -1;
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		case 11 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = i;
-				cy = 1;
-				cz = 1;
-				Morton[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
-			}
-		}
-		break;
-		}
-		sizem = nneigh;
-		sort(Morton.begin(),Morton.end());
-		return Morton;
 	}
-};
+	break;
+	case 1 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = i;
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 2 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = i;
+			int32_t cy = -1;
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 3 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = i;
+			int32_t cy = 1;
+			int32_t cz = -1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 4 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = -1;
+			int32_t cz = i;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 5 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = -1;
+			int32_t cz = i;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 6 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = 1;
+			int32_t cz = i;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 7 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = 1;
+			int32_t cz = i;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		}
+	}
+	break;
+	case 8 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = -1;
+			int32_t cy = i;
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	case 9 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = 1;
+			int32_t cy = i;
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	case 10 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = i;
+			int32_t cy = -1;
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	case 11 :
+	{
+		for (uint32_t i = 0; i < *nMortons; ++i) {
+			int32_t cx = i;
+			int32_t cy = 1;
+			int32_t cz = 1;
+			(*mortons)[i] = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		}
+	}
+	break;
+	}
+
+	std::sort(mortons->begin(), mortons->end());
+}
 
 /*! Computes Morton index (without level) of possible (virtual) neighbours of octant
  * throught iedge. Checks if balanced or not and uses half-size or min-size method
  * (sizeneigh=0 if boundary octant).
  * \param[in] iedge Local index of the edge target.
  * \param[in] maxdepth Maximum refinement level currently reached in the octree.
- * \param[out] sizeneigh Number of possible neighbours.
  * \param[in] balance_codim Maximum codimension of the entity for 2:1 balancing.
  * \param[in] edgeface Local edge-face connectivity.
- * \return Vector of neighbours morton numbers.
+ * \param[out] nMortons number of morton numbers.
+ * \param[out] mortons are the requestd morton numbers.
  */
-vector<uint64_t>		Octant::computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t balance_codim, uint8_t (&edgeface)[12][2]) const {
+void Octant::computeEdgeVirtualMortons(uint8_t iedge, uint8_t maxdepth, const uint8_t balance_codim, uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
 
-	if(getBalance() && balance_codim > 1){
-		return computeEdgeHalfSizeMorton(iedge,
-				sizeneigh, edgeface);
+	if (getBalance() && balance_codim > 1) {
+		computeEdgeHalfSizeMortons(iedge, edgeface, nMortons, mortons);
+	} else{
+		computeEdgeMinSizeMortons(iedge, maxdepth, edgeface, nMortons, mortons);
 	}
-	else{
-		return computeEdgeMinSizeMorton(iedge,
-				maxdepth, sizeneigh, edgeface);
-	}
-};
+}
 
 /*! Computes Morton index (without level) of "n=sizem" min-size
  * (or same size if level=maxlevel) possible neighbours of octant throught
  * node inode (sizem=0 if boundary octant)
  * \param[in] inode Local index of the node target.
  * \param[in] maxdepth Maximum refinement level currently reached in the octree.
- * \param[out] sizem Number of possible neighbours (1 or 0).
  * \param[in] nodeface Local node-face connectivity.
- * \return Vector of neighbours morton numbers.
+ * \param[out] hasMorton true if the request morton exists
+ * \param[out] morton the requested morton number.
  */
-uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxdepth,uint32_t & sizem, uint8_t (&nodeface)[8][3]) const {
+void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uint8_t (&nodeface)[8][3], bool *hasMorton, uint64_t *morton) const {
 
-	uint32_t dh,dh2;
-	uint32_t nneigh;
-	int8_t cx,cy,cz;
-
-	for (int i=0; i<m_dim; i++){
+	for (int i=0; i<m_dim; i++) {
 		uint8_t iface = nodeface[inode][i];
 		if (m_info[iface]) {
-			sizem = 0;
-			return this->computeMorton();
+			*hasMorton = false;
+			*morton = this->computeMorton();
+			return;
 		}
 	}
 
-	nneigh = 1;
-	dh = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
-	dh2 = getSize();
+	*hasMorton = true;
 
-	uint64_t Morton;
+	uint32_t dh  = (m_level < Global::getMaxLevel()) ? uint32_t(1)<<(Global::getMaxLevel() - maxdepth) : getSize();
+	uint32_t dh2 = getSize();
 	switch (inode) {
 	case 0 :
 	{
-		cx = -1;
-		cy = -1;
-		cz = -1*(m_dim-2);
-		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		int cx = -1;
+		int cy = -1;
+		int cz = -1*(m_dim-2);
+		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 1 :
 	{
-		cx = 1;
-		cy = -1;
-		cz = -1*(m_dim-2);
-		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
+		int cx = 1;
+		int cy = -1;
+		int cz = -1*(m_dim-2);
+		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 2 :
 	{
-		cx = -1;
-		cy = 1;
-		cz = -1*(m_dim-2);
-		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		int cx = -1;
+		int cy = 1;
+		int cz = -1*(m_dim-2);
+		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 3 :
 	{
-		cx = 1;
-		cy = 1;
-		cz = -1*(m_dim-2);
-		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
+		int cx = 1;
+		int cy = 1;
+		int cz = -1*(m_dim-2);
+		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh*cz);
 	}
 	break;
 	case 4 :
 	{
-		cx = -1;
-		cy = -1;
-		cz = 1;
-		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		int cx = -1;
+		int cy = -1;
+		int cz = 1;
+		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 	}
 	break;
 	case 5 :
 	{
-		cx = 1;
-		cy = -1;
-		cz = 1;
-		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
+		int cx = 1;
+		int cy = -1;
+		int cz = 1;
+		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh*cy,this->m_z+dh2*cz);
 	}
 	break;
 	case 6 :
 	{
-		cx = -1;
-		cy = 1;
-		cz = 1;
-		Morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		int cx = -1;
+		int cy = 1;
+		int cz = 1;
+		*morton = PABLO::computeMorton(this->m_x+dh*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
 	}
 	break;
 	case 7 :
 	{
-		cx = 1;
-		cy = 1;
-		cz = 1;
-		Morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
+		int cx = 1;
+		int cy = 1;
+		int cz = 1;
+		*morton = PABLO::computeMorton(this->m_x+dh2*cx,this->m_y+dh2*cy,this->m_z+dh2*cz);
 	}
 	break;
 	default:
 		BITPIT_UNREACHABLE("The maximum number of nodes is 8.");
 	}
-	sizem = nneigh;
-	return Morton;
-
-};
+}
 
 /*! Computes Morton index (without level) of possible (virtual) neighbours of octant
  * throught inode. Uses min-size method (sizeneigh=0 if boundary octant).
  * \param[in] inode Local index of the node target.
  * \param[in] maxdepth Maximum refinement level currently reached in the octree.
- * \param[out] sizeneigh Number of possible neighbours (1).
  * \param[in] nodeface Local node-face connectivity.
- * \return Vector of neighbours morton numbers.
+ * \param[out] hasMorton true if the request morton exists
+ * \param[out] morton the requested morton number.
  */
-uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t (&nodeface)[8][3]) const {
+void Octant::computeNodeVirtualMorton(uint8_t inode, uint8_t maxdepth, const uint8_t (&nodeface)[8][3], bool *hasMorton, uint64_t *morton) const {
 
-	return computeNodeMinSizeMorton(inode, maxdepth,
-			sizeneigh, nodeface);
+	computeNodeMinSizeMorton(inode, maxdepth, nodeface, hasMorton, morton);
 
- };
+}
 
 /*! Computes Morton index (without level) of same size
  * periodic neighbour of octant throught face iface.
