@@ -5287,8 +5287,8 @@ namespace bitpit {
                 countint++;
             }
         }
-        m_pborders.resize(countpbd);
-        m_internals.resize(countint);
+        m_pborders.shrink_to_fit();
+        m_internals.shrink_to_fit();
 
         // Build ghosts
         buildGhostOctants(m_bordersPerProc, std::vector<AccretionData>());
