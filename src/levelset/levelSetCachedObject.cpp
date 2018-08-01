@@ -407,7 +407,10 @@ void LevelSetCachedObject::propagateSign() {
 
         long cellId = itr.getId();
         setSign(cellId, externalSign);
+        --nExternal;
     }
+
+    assert(nExternal == 0);
 }
 
 /*!
