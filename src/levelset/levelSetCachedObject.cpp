@@ -47,6 +47,9 @@ const int LevelSetCachedObject::PROPAGATION_STATUS_EXTERNAL = - 1;
 const int LevelSetCachedObject::PROPAGATION_STATUS_WAITING  =   0;
 const int LevelSetCachedObject::PROPAGATION_STATUS_REACHED  =   1;
 
+const int LevelSetCachedObject::PROPAGATION_SIGN_DUMMY     = -2;
+const int LevelSetCachedObject::PROPAGATION_SIGN_UNDEFINED =  0;
+
 /*!
 	@ingroup levelset
 	@interface LevelSetCachedObject
@@ -203,9 +206,8 @@ void LevelSetCachedObject::propagateSign() {
     PiercedStorage<int, long> propagationStatus(1, &cells);
     propagationStatus.fill(PROPAGATION_STATUS_WAITING);
 
-    int externalSign = 0;
-    long nExternal   = 0;
-    long nWaiting    = mesh.getCellCount();
+    long nExternal = 0;
+    long nWaiting  = mesh.getCellCount();
     for (auto itr = cellBegin; itr != cellEnd; ++itr) {
         long cellId = itr.getId();
 
@@ -239,6 +241,16 @@ void LevelSetCachedObject::propagateSign() {
 
             continue;
         }
+    }
+
+    // If there are no external cells, set the sign of the external region
+    // to a dummy values. In this way the routine that propagates the sign
+    // will not try to detect the sign of the external region.
+    int externalSign;
+    if (nExternal == 0) {
+        externalSign = PROPAGATION_SIGN_DUMMY;
+    } else {
+        externalSign = PROPAGATION_SIGN_UNDEFINED;
     }
 
     // Use the seeds to propagate the sign
@@ -372,7 +384,7 @@ void LevelSetCachedObject::propagateSign() {
 #endif
 
     // Check that the sign of the external region was correctly identified
-    if (nExternal != 0 && externalSign == 0) {
+    if (nExternal != 0 && externalSign == PROPAGATION_SIGN_UNDEFINED) {
         throw std::runtime_error("Sign of external region not properly identified!");
     }
 
@@ -452,8 +464,9 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
                 cellStatus = PROPAGATION_STATUS_REACHED;
                 --(*nWaiting);
 
-                // If there are no more waiting cell we can exit
-                if (*nWaiting == 0) {
+                // If there are no more waiting cells and we have detected the
+                // sign of the external region we can exit
+                if (*nWaiting == 0 && *externalSign != PROPAGATION_SIGN_UNDEFINED) {
                     return;
                 }
             }
@@ -480,7 +493,7 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
                     // If the sign of the external region was unknown it can
                     // be assigned, otherwise check if the current sign is
                     // consistent with the previously evaluated sign.
-                    if (*externalSign == 0) {
+                    if (*externalSign == PROPAGATION_SIGN_UNDEFINED) {
                         *externalSign = seedSign;
                     } else if (*externalSign != seedSign) {
                         throw std::runtime_error("Mismatch in sign of external region!");

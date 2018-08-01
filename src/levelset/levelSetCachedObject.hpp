@@ -51,6 +51,9 @@ class LevelSetCachedObject : public LevelSetObject{
     static const int                            PROPAGATION_STATUS_WAITING;
     static const int                            PROPAGATION_STATUS_REACHED;
 
+    static const int                            PROPAGATION_SIGN_UNDEFINED;
+    static const int                            PROPAGATION_SIGN_DUMMY;
+
     void                                        setSign( long id, int sign ) ;
     void                                        propagateSeedSign( const std::vector<long> &seeds,
                                                                    PiercedStorage<int, long> *status,
