@@ -200,9 +200,8 @@ void LevelSetCachedObject::propagateSign() {
     // of the objects. There is no need to propagate the sign into those cells,
     // once the sign of the external region is know, it can be assigned to all
     // the cells in the external region. When the propagation reaches the
-    // external region it can be stopped, the sign the sign of the seed from
-    // which the propagation has started that will be the sign of the external
-    // region.
+    // external region it can be stopped, the sign of the seed from which the
+    // propagation has started will be the sign of the external region.
     PiercedStorage<int, long> propagationStatus(1, &cells);
     propagationStatus.fill(PROPAGATION_STATUS_WAITING);
 
@@ -411,9 +410,9 @@ void LevelSetCachedObject::propagateSign() {
  * the sign of the external region.
  *
  * \param seeds are the seeds to be used for sign propagation
- * \param[in,out] statuses is a flag that defines the propagation status of
- * the cells. On output, this flag will be updated with the new propagation
- * statuses
+ * \param[in,out] statuses contains the flags that defines the propagation
+ * status of the cells. On output, this flag will be updated with the new
+ * propagation statuses
  * \param[in,out] nWaiting is the number of cells that are waiting for the
  * propagation to reach them. On output, this number will be updated so it's
  * possible to keep track of the cells whose sign is not yet assigned
@@ -490,7 +489,7 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
                 if (neighStatus == PROPAGATION_STATUS_WAITING) {
                     processList.push_back(neighId);
                 } else if (neighStatus == PROPAGATION_STATUS_EXTERNAL) {
-                    // If the sign of the external region was unknown it can
+                    // If the sign of the external region is unknown it can
                     // be assigned, otherwise check if the current sign is
                     // consistent with the previously evaluated sign.
                     if (*externalSign == PROPAGATION_SIGN_UNDEFINED) {
