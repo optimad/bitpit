@@ -135,6 +135,8 @@ private:
 class PatchSkdTree {
 
 public:
+    virtual ~PatchSkdTree() = default;
+
     void build(int leafCapacity = 1);
     void clear(bool release = false);
 
