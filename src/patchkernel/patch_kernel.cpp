@@ -3516,7 +3516,7 @@ std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
 {
 	BITPIT_UNUSED(trackSpawn);
 
-	assert(true && "The patch needs to implement _spawn");
+	assert(false && "The patch needs to implement _spawn");
 
 	return std::vector<adaption::Info>();
 }
