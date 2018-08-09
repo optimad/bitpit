@@ -778,8 +778,17 @@ void PiercedVector<value_t, id_t>::swap(PiercedVector &x) noexcept
     PiercedVectorStorage<value_t, id_t>::swap(x);
 
     // Re-register the storages
-    PiercedVectorStorage<value_t, id_t>::setDynamicKernel(this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
-    x.PiercedVectorStorage<value_t, id_t>::setDynamicKernel(&x, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
+    //
+    // The function that sets a dynamic kernel may throw an exception if the
+    // kernel is already set or if we are trying to set a null kernel. Here
+    // neither of the two cases can happen, because the kernel has been
+    // previously cleared and the kernel we are trying to set is not null.
+    try {
+        PiercedVectorStorage<value_t, id_t>::setDynamicKernel(this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
+        x.PiercedVectorStorage<value_t, id_t>::setDynamicKernel(&x, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
+    } catch (const std::runtime_error &exception) {
+        assert(false && "Error while swapping the PiercedVector!");
+    }
 }
 
 /**
