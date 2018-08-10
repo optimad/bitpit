@@ -1,8 +1,14 @@
 /* The standard CSS for doxygen 1.8.9.1 */
 
+html, body, table, div, p, dl {
+    font-family: Lato,"Helvetica Neue",Helvetica,sans-serif;
+}
+
 #manual {
     position: relative;
     margin: 10px 0 250px 0;
+
+    font: 400 14px/22px Roboto,sans-serif;
 }
 
 #side-nav {
@@ -12,10 +18,6 @@
 
 #main-menu {
     z-index: 50;
-}
-
-body, table, div, p, dl {
-    font: 400 14px/22px Roboto,sans-serif;
 }
 
 /* @group Heading Levels */
