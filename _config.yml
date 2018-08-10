@@ -2,6 +2,7 @@ name: bitpit
 markdown: redcarpet
 highlighter: rouge
 baseurl: /bitpit
+timezone: Europe/Rome
 
 exclude: [_manual]
 
