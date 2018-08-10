@@ -1032,7 +1032,10 @@ void VTK::readData( ){
                 if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
                 if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
+#if BITPIT_ENABLE_DEBUG
                 std::fstream::pos_type position_before = str.tellg();
+#endif
+
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
 #if BITPIT_ENABLE_DEBUG
@@ -1054,7 +1057,10 @@ void VTK::readData( ){
                 if( m_headerType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
                 if( m_headerType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
 
+#if BITPIT_ENABLE_DEBUG
                 std::fstream::pos_type position_before = str.tellg();
+#endif
+
                 field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
 
 #if BITPIT_ENABLE_DEBUG
