@@ -1,0 +1,14 @@
+<map id="bitpit::BasePiercedVectorStorage" name="bitpit::BasePiercedVectorStorage">
+<area shape="rect" id="node2" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector. " alt="" coords="229,181,420,223"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Cell, long \&gt;" alt="" coords="604,8,795,49"/>
+<area shape="rect" id="node10" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; SurfaceInfo, long \&gt;" alt="" coords="604,344,795,385"/>
+<area shape="rect" id="node11" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Vertex, long \&gt;" alt="" coords="604,145,795,187"/>
+<area shape="rect" id="node12" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::LevelSetInfo, long \&gt;" alt="" coords="604,409,795,451"/>
+<area shape="rect" id="node13" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Interface, long \&gt;" alt="" coords="604,73,795,115"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector. " alt="" coords="628,225,771,267"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Cell \&gt;" alt="" coords="986,28,1129,69"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Vertex \&gt;" alt="" coords="986,219,1129,260"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Interface \&gt;" alt="" coords="986,113,1129,155"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::LevelSetInfo \&gt;" alt="" coords="980,377,1135,419"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; SurfaceInfo \&gt;" alt="" coords="986,293,1129,335"/>
+</map>

@@ -1,0 +1,25 @@
+<map id="bitpit::PiercedStorage&lt; value_t, id_t &gt;" name="bitpit::PiercedStorage&lt; value_t, id_t &gt;">
+<area shape="rect" id="node4" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector. " alt="" coords="789,211,980,252"/>
+<area shape="rect" id="node16" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; long, long \&gt;" alt="" coords="809,423,960,464"/>
+<area shape="rect" id="node17" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; double \&gt;" alt="" coords="809,488,960,529"/>
+<area shape="rect" id="node18" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::Cell, long \&gt;" alt="" coords="809,5,960,47"/>
+<area shape="rect" id="node19" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; SurfaceInfo, long \&gt;" alt="" coords="809,276,960,317"/>
+<area shape="rect" id="node20" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::adaption::Info \&gt;" alt="" coords="804,553,965,595"/>
+<area shape="rect" id="node21" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::Vertex, long \&gt;" alt="" coords="808,144,961,185"/>
+<area shape="rect" id="node22" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::LevelSetInfo,\l long \&gt;" alt="" coords="809,342,960,398"/>
+<area shape="rect" id="node23" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::Interface, long \&gt;" alt="" coords="802,73,967,115"/>
+<area shape="rect" id="node24" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bool \&gt;" alt="" coords="809,619,960,660"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1BasePiercedStorage.html" title="Base class for the pierced storages. " alt="" coords="223,325,405,351"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization. " alt="" coords="5,325,173,351"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector. " alt="" coords="1188,255,1331,296"/>
+<area shape="rect" id="node11" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Cell, long \&gt;" alt="" coords="1164,37,1355,79"/>
+<area shape="rect" id="node12" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; SurfaceInfo, long \&gt;" alt="" coords="1164,360,1355,401"/>
+<area shape="rect" id="node13" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Vertex, long \&gt;" alt="" coords="1164,175,1355,216"/>
+<area shape="rect" id="node14" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::LevelSetInfo, long \&gt;" alt="" coords="1164,425,1355,467"/>
+<area shape="rect" id="node15" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Interface, long \&gt;" alt="" coords="1164,103,1355,144"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Cell \&gt;" alt="" coords="1546,57,1689,99"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Vertex \&gt;" alt="" coords="1546,248,1689,289"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Interface \&gt;" alt="" coords="1546,143,1689,184"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::LevelSetInfo \&gt;" alt="" coords="1540,407,1695,448"/>
+<area shape="rect" id="node10" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; SurfaceInfo \&gt;" alt="" coords="1546,323,1689,364"/>
+</map>

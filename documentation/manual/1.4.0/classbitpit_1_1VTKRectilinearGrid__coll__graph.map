@@ -1,6 +1,0 @@
-<map id="bitpit::VTKRectilinearGrid" name="bitpit::VTKRectilinearGrid">
-<area shape="rect" id="node2" href="$classbitpit_1_1VTK.html" title="A base class for VTK input output. " alt="" coords="86,173,172,200"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1FileHandler.html" title="Creates file names and checks status. " alt="" coords="5,83,133,109"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1VTKNativeStreamer.html" title="In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored. Right now only std::vector is supported. " alt="" coords="158,83,337,109"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form. " alt="" coords="161,5,335,32"/>
-</map>

@@ -1,4 +1,0 @@
-<map id="bitpit::LevelSetKernel" name="bitpit::LevelSetKernel">
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetCartesian.html" title="Implements LevelSetKernel for cartesian meshes. " alt="" coords="5,80,176,107"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetOctree.html" title="Implements LevelSetKernel for octree meshes. " alt="" coords="200,80,352,107"/>
-</map>

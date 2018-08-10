@@ -1,4 +1,0 @@
-<map id="bitpit::LevelSetMetaObject" name="bitpit::LevelSetMetaObject">
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetBoolean.html" title="Class which deals with boolean operation between two LevelSetObjects. " alt="" coords="15,155,177,181"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed..." alt="" coords="21,5,171,32"/>
-</map>

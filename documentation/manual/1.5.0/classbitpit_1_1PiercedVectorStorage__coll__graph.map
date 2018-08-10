@@ -1,0 +1,6 @@
+<map id="bitpit::PiercedVectorStorage&lt; value_t, id_t &gt;" name="bitpit::PiercedVectorStorage&lt; value_t, id_t &gt;">
+<area shape="rect" id="node2" href="$classbitpit_1_1BasePiercedVectorStorage.html" title="Base class for pierced vector kernels. " alt="" coords="5,155,180,196"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PiercedStorage.html" title="Metafunction for generating a pierced storage. " alt="" coords="204,155,355,196"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1BasePiercedStorage.html" title="Base class for the pierced storages. " alt="" coords="188,80,371,107"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization. " alt="" coords="195,5,363,32"/>
+</map>

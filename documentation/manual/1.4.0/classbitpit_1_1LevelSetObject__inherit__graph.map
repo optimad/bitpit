@@ -1,7 +1,0 @@
-<map id="bitpit::LevelSetObject" name="bitpit::LevelSetObject">
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetCachedObject.html" title="Interface class for all objects which need to store the discrete values of levelset function..." alt="" coords="5,80,203,107"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetMetaObject.html" title="Interface class for all objects, which depend on other LevelSetObjects. " alt="" coords="228,80,409,107"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetSegmentation.html" title="Implements visitor pattern fo segmentated geometries. " alt="" coords="6,155,201,181"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetMask.html" title="Implements the levelset around a set of cells or interfaces of the kernel. " alt="" coords="32,229,176,256"/>
-<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetBoolean.html" title="Class which deals with boolean operation between two LevelSetObjects. " alt="" coords="237,155,400,181"/>
-</map>

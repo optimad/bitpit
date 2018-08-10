@@ -1,4 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classbitpit_1_1VTKBaseContainer.html" title="An interface class to all containers that are batively supported by VTK. " alt="" coords="5,5,184,32"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1VTKVectorContainer.html" title="Implementation of VTKBaseContainer in order to support natively std::vector in VTK. " alt="" coords="232,5,451,32"/>
-</map>

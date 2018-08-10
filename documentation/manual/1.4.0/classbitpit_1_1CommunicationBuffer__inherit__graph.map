@@ -1,6 +1,0 @@
-<map id="bitpit::CommunicationBuffer&lt; RawBufferType &gt;" name="bitpit::CommunicationBuffer&lt; RawBufferType &gt;">
-<area shape="rect" id="node2" href="$classbitpit_1_1CommunicationBuffer.html" title="bitpit::CommunicationBuffer\l\&lt; RawRecvBuffer \&gt;" alt="" coords="368,5,557,46"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1CommunicationBuffer.html" title="bitpit::CommunicationBuffer\l\&lt; RawSendBuffer \&gt;" alt="" coords="368,70,557,111"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1RecvBuffer.html" title="Buffer to be used for receive communications. " alt="" coords="610,12,734,39"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1SendBuffer.html" title="Buffer to be used for send communications. " alt="" coords="609,77,735,104"/>
-</map>

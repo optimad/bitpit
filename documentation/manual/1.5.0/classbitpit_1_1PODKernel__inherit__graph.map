@@ -1,0 +1,4 @@
+<map id="bitpit::PODKernel" name="bitpit::PODKernel">
+<area shape="rect" id="node3" href="$classbitpit_1_1PODVolOctree.html" title="The PODVolOctree is the specialized class of PODKernel for VolOctree meshes. " alt="" coords="18,155,163,181"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form. " alt="" coords="5,5,176,32"/>
+</map>

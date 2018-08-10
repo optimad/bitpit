@@ -1,0 +1,5 @@
+<map id="bitpit::LevelSetBoolean" name="bitpit::LevelSetBoolean">
+<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetMetaObject.html" title="Interface class for all objects, which depend on other LevelSetObjects. " alt="" coords="5,155,183,181"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed..." alt="" coords="21,80,167,107"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form. " alt="" coords="9,5,179,32"/>
+</map>

@@ -1,8 +1,0 @@
-<map id="bitpit::Reference3DElementInfo" name="bitpit::Reference3DElementInfo">
-<area shape="rect" id="node3" href="$classbitpit_1_1ReferenceHexahedronInfo.html" title="The ReferenceHexahedronInfo class defines the information about the reference hexahedron. " alt="" coords="507,5,725,32"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1ReferencePyramidInfo.html" title="The ReferencePyramidInfo class defines the information about the reference pyramid. " alt="" coords="519,56,713,83"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1ReferenceTetraInfo.html" title="The ReferenceTetraInfo class defines the information about the reference tetrahedron. " alt="" coords="527,107,705,133"/>
-<area shape="rect" id="node6" href="$classbitpit_1_1ReferenceVoxelInfo.html" title="The ReferenceVoxelInfo class defines the information about the reference voxel. " alt="" coords="527,157,705,184"/>
-<area shape="rect" id="node7" href="$classbitpit_1_1ReferenceWedgeInfo.html" title="The ReferenceWedgeInfo class defines the information about the reference wedge. " alt="" coords="521,208,711,235"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1ReferenceElementInfo.html" title="The ReferenceElementInfo class allows to define information about reference elements. " alt="" coords="6,107,199,133"/>
-</map>

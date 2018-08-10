@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classbitpit_1_1PatchSkdTree.html" title="PatchSkdTree is the class that implements a spatial kd&#45;tree (skd&#45;tree) a bitpit patch. " alt="" coords="5,31,149,57"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1SurfaceSkdTree.html" title="The SurfaceSkdTree implements a Bounding Volume Hierarchy tree for surface patches. " alt="" coords="197,5,353,32"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1VolumeSkdTree.html" title="The VolumeSkdTree implements a Bounding Volume Hierarchy tree for volume patches. ..." alt="" coords="197,56,353,83"/>
+</map>

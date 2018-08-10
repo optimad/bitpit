@@ -1,0 +1,5 @@
+<map id="bitpit::SurfaceKernel" name="bitpit::SurfaceKernel">
+<area shape="rect" id="node4" href="$classbitpit_1_1SurfUnstructured.html" title="The SurfUnstructured class defines an unstructured surface triangulation. " alt="" coords="14,229,167,256"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches. " alt="" coords="26,80,155,107"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form. " alt="" coords="5,5,176,32"/>
+</map>

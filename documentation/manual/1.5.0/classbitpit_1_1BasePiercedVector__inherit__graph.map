@@ -1,0 +1,8 @@
+<map id="bitpit::BasePiercedVector" name="bitpit::BasePiercedVector">
+<area shape="rect" id="node2" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector. " alt="" coords="229,172,372,213"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Cell \&gt;" alt="" coords="563,103,706,144"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Vertex \&gt;" alt="" coords="563,5,706,47"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Interface \&gt;" alt="" coords="563,259,706,300"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::LevelSetInfo \&gt;" alt="" coords="557,357,712,399"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; SurfaceInfo \&gt;" alt="" coords="563,176,706,217"/>
+</map>

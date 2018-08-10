@@ -1,0 +1,21 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form. " alt="" coords="5,183,176,209"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed..." alt="" coords="248,56,395,83"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches. " alt="" coords="257,107,386,133"/>
+<area shape="rect" id="node15" href="$classbitpit_1_1POD.html" title="The POD (Proper Orthogonal Decomposition) class provides an interface for defining POD object..." alt="" coords="279,157,364,184"/>
+<area shape="rect" id="node16" href="$classbitpit_1_1PODKernel.html" title="The PODKernel class provides an interface to manage the mesh dependent members and functions of a POD..." alt="" coords="259,208,383,235"/>
+<area shape="rect" id="node18" href="$classbitpit_1_1VTKNativeStreamer.html" title="In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored. Right now only std::vector is supported. " alt="" coords="233,259,410,285"/>
+<area shape="rect" id="node19" href="$classbitpit_1_1VTKUnstructuredGrid_1_1HomogeneousInfoStreamer.html" title="bitpit::VTKUnstructuredGrid\l::HomogeneousInfoStreamer" alt="" coords="224,310,419,351"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetCachedObject.html" title="Interface class for all objects which need to store the discrete values of levelset function..." alt="" coords="467,5,661,32"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetMetaObject.html" title="Interface class for all objects, which depend on other LevelSetObjects. " alt="" coords="475,56,653,83"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetSegmentation.html" title="Implements visitor pattern fo segmentated geometries. " alt="" coords="709,5,901,32"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetMask.html" title="Implements the levelset around a set of cells or interfaces of the kernel &#160;&#160;" alt="" coords="949,5,1092,32"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1LevelSetBoolean.html" title="Class which deals with boolean operation between two LevelSetObjects. " alt="" coords="725,56,885,83"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1SurfaceKernel.html" title="The SurfaceKernel class provides an interface for defining surface patches. " alt="" coords="493,107,635,133"/>
+<area shape="rect" id="node11" href="$classbitpit_1_1VolumeKernel.html" title="The VolumeKernel class provides an interface for defining volume patches. " alt="" coords="493,157,635,184"/>
+<area shape="rect" id="node10" href="$classbitpit_1_1SurfUnstructured.html" title="The SurfUnstructured class defines an unstructured surface triangulation. " alt="" coords="729,107,882,133"/>
+<area shape="rect" id="node12" href="$classbitpit_1_1VolCartesian.html" title="The VolCartesian defines a Cartesian patch. " alt="" coords="738,157,873,184"/>
+<area shape="rect" id="node13" href="$classbitpit_1_1VolOctree.html" title="The VolOctree defines a Octree patch. " alt="" coords="747,208,863,235"/>
+<area shape="rect" id="node14" href="$classbitpit_1_1VolUnstructured.html" title="The VolUnstructured class defines a dummy unstructured volume patch. " alt="" coords="730,259,881,285"/>
+<area shape="rect" id="node17" href="$classbitpit_1_1PODVolOctree.html" title="The PODVolOctree is the specialized class of PODKernel for VolOctree meshes. " alt="" coords="491,208,637,235"/>
+</map>

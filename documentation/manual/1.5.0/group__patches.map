@@ -1,0 +1,6 @@
+<map id="Patches" name="Patches">
+<area shape="rect" id="node1" href="$group__patchkernel.html" title="Kernel" alt="" coords="153,5,214,32"/>
+<area shape="rect" id="node2" href="$group__surfacepatches.html" title="Surface patches" alt="" coords="124,56,243,83"/>
+<area shape="rect" id="node3" href="$group__volumepatches.html" title="Volume patches" alt="" coords="124,107,243,133"/>
+<area shape="rect" id="node4" href="$group__patchelements.html" title="Elements" alt="" coords="145,157,222,184"/>
+</map>

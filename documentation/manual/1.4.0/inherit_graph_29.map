@@ -1,8 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed..." alt="" coords="6,31,157,57"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetCachedObject.html" title="Interface class for all objects which need to store the discrete values of levelset function..." alt="" coords="206,5,405,32"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetMetaObject.html" title="Interface class for all objects, which depend on other LevelSetObjects. " alt="" coords="215,56,396,83"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetSegmentation.html" title="Implements visitor pattern fo segmentated geometries. " alt="" coords="454,5,650,32"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetMask.html" title="Implements the levelset around a set of cells or interfaces of the kernel. " alt="" coords="699,5,843,32"/>
-<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetBoolean.html" title="Class which deals with boolean operation between two LevelSetObjects. " alt="" coords="471,56,633,83"/>
-</map>

@@ -1,5 +1,0 @@
-<map id="bitpit::LevelSetMask" name="bitpit::LevelSetMask">
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetSegmentation.html" title="Implements visitor pattern fo segmentated geometries. " alt="" coords="6,155,201,181"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetCachedObject.html" title="Interface class for all objects which need to store the discrete values of levelset function..." alt="" coords="5,80,203,107"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed..." alt="" coords="29,5,179,32"/>
-</map>

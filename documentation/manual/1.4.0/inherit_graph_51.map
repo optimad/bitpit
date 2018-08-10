@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classbitpit_1_1PiercedSyncAction.html" title="Action for pierced synchronization. " alt="" coords="6,111,181,137"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1PiercedKernel_1_1EraseAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::EraseAction" alt="" coords="230,5,378,46"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1PiercedKernel_1_1FillAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::FillAction" alt="" coords="231,70,377,111"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1PiercedKernel_1_1MoveAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::MoveAction" alt="" coords="231,135,377,177"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1PiercedKernel_1_1SwapAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::SwapAction" alt="" coords="230,201,378,242"/>
-</map>

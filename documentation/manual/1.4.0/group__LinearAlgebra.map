@@ -1,8 +1,0 @@
-<map id="Linear algebra (LA)" name="Linear algebra (LA)">
-<area shape="rect" id="node1" href="$group__ladisplay.html" title="Display" alt="" coords="210,5,278,32"/>
-<area shape="rect" id="node2" href="$group__laspecialmatrix.html" title="SpecialMatrix" alt="" coords="192,56,296,83"/>
-<area shape="rect" id="node3" href="$group__lainfo.html" title="Info" alt="" coords="221,107,267,133"/>
-<area shape="rect" id="node5" href="$group__lamultiplication.html" title="Multiplication" alt="" coords="193,157,295,184"/>
-<area shape="rect" id="node6" href="$group__lamanipulation.html" title="Manipulation" alt="" coords="193,208,295,235"/>
-<area shape="rect" id="node7" href="$group__lasolve.html" title="Solve" alt="" coords="215,259,273,285"/>
-</map>

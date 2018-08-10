@@ -1,0 +1,6 @@
+<map id="bitpit::Reference2DElementInfo" name="bitpit::Reference2DElementInfo">
+<area shape="rect" id="node3" href="$classbitpit_1_1ReferencePixelInfo.html" title="The ReferencePixelInfo class defines the information about the reference pixel. " alt="" coords="5,155,175,181"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1ReferenceQuadInfo.html" title="The ReferenceQuadInfo class defines the information about the reference quadrangle. " alt="" coords="199,155,371,181"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1ReferenceTriangleInfo.html" title="The ReferenceTriangleInfo class defines the information about the reference triangle. " alt="" coords="395,155,585,181"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1ReferenceElementInfo.html" title="The ReferenceElementInfo class allows to define information about reference elements. " alt="" coords="191,5,378,32"/>
+</map>

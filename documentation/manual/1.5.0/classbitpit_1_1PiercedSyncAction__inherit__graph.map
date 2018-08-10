@@ -1,0 +1,12 @@
+<map id="bitpit::PiercedSyncAction" name="bitpit::PiercedSyncAction">
+<area shape="rect" id="node2" href="$classbitpit_1_1PiercedKernel_1_1ClearAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::ClearAction" alt="" coords="242,5,387,47"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PiercedKernel_1_1EraseAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::EraseAction" alt="" coords="241,71,388,112"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1PiercedKernel_1_1FillAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::FillAction" alt="" coords="243,136,386,177"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedKernel_1_1MoveAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::MoveAction" alt="" coords="241,201,388,243"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1PiercedKernel_1_1ReserveAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::ReserveAction" alt="" coords="233,267,396,308"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1PiercedKernel_1_1ResizeAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::ResizeAction" alt="" coords="237,332,392,373"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1PiercedKernel_1_1ShrinkToFitAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::ShrinkToFitAction" alt="" coords="224,397,405,439"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1PiercedKernel_1_1SortAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::SortAction" alt="" coords="243,463,386,504"/>
+<area shape="rect" id="node10" href="$classbitpit_1_1PiercedKernel_1_1SqueezeAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::SqueezeAction" alt="" coords="231,528,398,569"/>
+<area shape="rect" id="node11" href="$classbitpit_1_1PiercedKernel_1_1SwapAction.html" title="bitpit::PiercedKernel\l\&lt; id_t \&gt;::SwapAction" alt="" coords="241,593,388,635"/>
+</map>

@@ -1,0 +1,34 @@
+<map id="bitpit::PatchKernel" name="bitpit::PatchKernel">
+<area shape="rect" id="node2" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form. " alt="" coords="463,43,634,70"/>
+<area shape="rect" id="node25" href="$classbitpit_1_1VTKNativeStreamer.html" title="In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored. Right now only std::vector is supported. " alt="" coords="827,145,1004,171"/>
+<area shape="rect" id="node26" href="$classbitpit_1_1VTKUnstructuredGrid_1_1HomogeneousInfoStreamer.html" title="bitpit::VTKUnstructuredGrid\l::HomogeneousInfoStreamer" alt="" coords="1035,40,1229,81"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Vertex \&gt;" alt="" coords="1626,503,1769,544"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1BasePiercedVector.html" title="Base class for pierced vectors. " alt="" coords="828,418,1003,445"/>
+<area shape="rect" id="node19" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector. " alt="" coords="1277,448,1420,489"/>
+<area shape="rect" id="node27" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Interface \&gt;" alt="" coords="1626,300,1769,341"/>
+<area shape="rect" id="node30" href="$classbitpit_1_1PiercedVector.html" title="bitpit::PiercedVector\l\&lt; bitpit::Cell \&gt;" alt="" coords="1626,389,1769,431"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedVectorKernel.html" title="bitpit::PiercedVectorKernel\l\&lt; long \&gt;" alt="" coords="1258,268,1439,309"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1BasePiercedVectorKernel.html" title="Base class for pierced vector kernels. " alt="" coords="461,228,636,269"/>
+<area shape="rect" id="node11" href="$classbitpit_1_1PiercedVectorKernel.html" title="Kernel of the pierced vector. " alt="" coords="825,196,1006,237"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1PiercedKernel.html" title="bitpit::PiercedKernel\l\&lt; long \&gt;" alt="" coords="844,261,987,303"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel. " alt="" coords="233,255,408,282"/>
+<area shape="rect" id="node10" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel. " alt="" coords="477,163,620,204"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization. " alt="" coords="5,255,180,282"/>
+<area shape="rect" id="node12" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Vertex, long \&gt;" alt="" coords="1253,777,1444,819"/>
+<area shape="rect" id="node13" href="$classbitpit_1_1BasePiercedVectorStorage.html" title="Base class for pierced vector kernels. " alt="" coords="461,663,636,704"/>
+<area shape="rect" id="node18" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector. " alt="" coords="820,701,1011,743"/>
+<area shape="rect" id="node28" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Interface, long \&gt;" alt="" coords="1253,565,1444,607"/>
+<area shape="rect" id="node31" href="$classbitpit_1_1PiercedVectorStorage.html" title="bitpit::PiercedVectorStorage\l\&lt; bitpit::Cell, long \&gt;" alt="" coords="1253,700,1444,741"/>
+<area shape="rect" id="node14" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::Vertex, long \&gt;" alt="" coords="839,899,992,940"/>
+<area shape="rect" id="node15" href="$classbitpit_1_1BasePiercedStorage.html" title="Base class for the pierced storages. " alt="" coords="229,966,412,993"/>
+<area shape="rect" id="node17" href="$classbitpit_1_1PiercedStorage.html" title="Metafunction for generating a pierced storage. " alt="" coords="473,855,624,896"/>
+<area shape="rect" id="node29" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::Interface, long \&gt;" alt="" coords="833,580,998,621"/>
+<area shape="rect" id="node32" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; bitpit::Cell, long \&gt;" alt="" coords="840,833,991,875"/>
+<area shape="rect" id="node33" href="$classbitpit_1_1PiercedStorage.html" title="bitpit::PiercedStorage\l\&lt; long, long \&gt;" alt="" coords="840,964,991,1005"/>
+<area shape="rect" id="node16" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization. " alt="" coords="9,966,177,993"/>
+<area shape="rect" id="node20" href="$classbitpit_1_1IndexGenerator.html" title="bitpit::IndexGenerator\l\&lt; long \&gt;" alt="" coords="1622,47,1773,88"/>
+<area shape="rect" id="node21" href="$classbitpit_1_1IndexGenerator.html" title="The IndexGenerator class allows to generate unique ids. " alt="" coords="1273,44,1424,85"/>
+<area shape="rect" id="node22" href="$classbitpit_1_1VTKUnstructuredGrid.html" title="VTK input output for Unstructured Meshes. " alt="" coords="1605,173,1789,199"/>
+<area shape="rect" id="node23" href="$classbitpit_1_1VTK.html" title="A base class for VTK input output. " alt="" coords="1307,173,1391,199"/>
+<area shape="rect" id="node24" href="$classbitpit_1_1FileHandler.html" title="Creates file names and checks status. " alt="" coords="853,94,978,121"/>
+</map>
