@@ -46,7 +46,7 @@ int subtest_001(int rank)
 	//
 	// The number of ghosts layers in the halo should high enough for every
 	// partition to contain all the global octants.
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 8;
 	double dh = 1.0;
 	int nGhostLayers = 16;
@@ -127,7 +127,7 @@ int subtest_002(int rank)
 {
 	BITPIT_UNUSED(rank);
 
-	std::array<double, 3> origin = {0., 0., 0.};
+	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 8;
 	double dh = 1.0;
 	int nGhostLayers = 16;
