@@ -25,14 +25,12 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "tree_constants.hpp"
 #include "Octant.hpp"
 #include "bitpit_common.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
-
 
 /*!
  * Input stream operator for class Octant. Stream cell data from memory

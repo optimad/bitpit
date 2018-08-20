@@ -31,6 +31,40 @@ namespace bitpit {
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
+/*! Get an instance of global variables.
+ * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
+ */
+const TreeConstants &
+TreeConstants::instance(uint8_t dim) {
+	assert(dim == 2 || dim == 3);
+	return instances()[dim];
+}
+
+/*! Get the instances of global variables.
+ */
+const TreeConstants::Instances &
+TreeConstants::instances() {
+	static TreeConstants::Instances instances = {{
+		TreeConstants(0),
+		TreeConstants(0),
+		TreeConstants(2),
+		TreeConstants(3)
+	}};
+
+	return instances;
+}
+
+/*! Default constructor.
+ */
+TreeConstants::TreeConstants() : TreeConstants(0) {
+}
+
+/*! Constructor.
+ * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
+ */
+TreeConstants::TreeConstants(uint8_t dim) {
+	initialize(dim);
+}
 
 /*! Get the components of the "normals" per edge (bisector of edge)
  * \return Components (x,y,z) of the "normals" per edge.

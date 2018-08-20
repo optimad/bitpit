@@ -138,7 +138,7 @@ namespace bitpit {
         uint64_t 				m_globalNumOctants;   			/**<Global number of octants in the parallel octree*/
         int 					m_nproc;						/**<Number of processes of the job*/
         uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
-        TreeConstants			m_global;						/**<Global variables*/
+        const TreeConstants	   *m_global;						/**<Global variables*/
         std::size_t 			m_nofGhostLayers;				/**<Global number of ghost layers from the process boundary expressing the depth of the ghost halo*/
 
         //distributed members

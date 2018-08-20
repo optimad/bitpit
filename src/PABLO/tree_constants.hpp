@@ -30,6 +30,8 @@
 // =================================================================================== //
 #include <stdint.h>
 
+#include <array>
+
 namespace bitpit {
 
 /*!
@@ -58,6 +60,18 @@ class TreeConstants {
 	friend class Map;
 	friend class Octant;
 
+public:
+	// =================================================================================== //
+	// TYPEDEFS
+	// =================================================================================== //
+	typedef std::array<TreeConstants, 4> Instances;
+
+	// =================================================================================== //
+	// STATIC MEMBERS
+	// =================================================================================== //
+	static const TreeConstants & instance(uint8_t dim);
+	static const Instances & instances();
+
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //
@@ -84,6 +98,8 @@ private:
 	// =================================================================================== //
 	// METHODS
 	// =================================================================================== //
+	TreeConstants();
+	TreeConstants(uint8_t dim);
 
 	// =================================================================================== //
 	// BASIC GET/SET METHODS
@@ -109,6 +125,10 @@ private:
 	void 		getOppface(uint8_t oppface[6]) const;
 	void 		getParallelEdges(uint8_t parallelEdges[12][3]) const;
 	void 		getParallelEdges(uint8_t edge, uint8_t parallelEdges[]) const;
+
+	uint32_t    getLength(uint8_t level) const;
+	uint64_t    getArea(uint8_t level) const;
+	uint64_t    getVolume(uint8_t level) const;
 
 	void 		initialize(uint8_t dim);
 

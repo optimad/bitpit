@@ -27,6 +27,7 @@
 
 // INCLUDES                                                                            //
 #include "morton.hpp"
+#include "tree_constants.hpp"
 
 #include <vector>
 #include <bitset>

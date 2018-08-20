@@ -236,11 +236,11 @@ namespace bitpit {
         if(m_sizeOctants){
             octvector::const_iterator lastOctant = m_octants.end() - 1;
             uint32_t x,y,z,delta;
-            delta = (uint32_t)(1<<((uint8_t)m_global.m_maxLevel - lastOctant->m_level)) - 1;
+            delta = (uint32_t)(1<<((uint8_t)m_global->m_maxLevel - lastOctant->m_level)) - 1;
             x = lastOctant->m_x + delta;
             y = lastOctant->m_y + delta;
             z = lastOctant->m_z + (m_dim-2)*delta;
-            Octant lastDesc = Octant(m_dim, m_global.m_maxLevel,x,y,z);
+            Octant lastDesc = Octant(m_dim, m_global->m_maxLevel,x,y,z);
             m_lastDescMorton = lastDesc.computeMorton();
         }
     };
@@ -278,7 +278,7 @@ namespace bitpit {
         m_balanceCodim = 1;
 
         if (m_dim > 0) {
-            m_global.initialize(m_dim);
+            m_global = &(TreeConstants::instance(m_dim));
             m_periodic.resize(m_dim*2);
         }
     }
@@ -304,13 +304,13 @@ namespace bitpit {
         if (createRoot) {
             m_octants.push_back(Octant(m_dim));
 
-            Octant firstDesc(m_global.m_maxLevel,0,0,0);
+            Octant firstDesc(m_global->m_maxLevel,0,0,0);
             m_firstDescMorton = firstDesc.computeMorton();
 
-            Octant lastDesc(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
+            Octant lastDesc(m_dim,m_global->m_maxLevel,m_global->m_maxLength-1,m_global->m_maxLength-1,(m_dim-2)*(m_global->m_maxLength-1));
             m_lastDescMorton = lastDesc.computeMorton();
         } else {
-            Octant octDesc(m_dim,m_global.m_maxLevel,pow(2,m_global.m_maxLevel),pow(2,m_global.m_maxLevel),(m_dim > 2 ? pow(2,m_global.m_maxLevel) : 0));
+            Octant octDesc(m_dim,m_global->m_maxLevel,pow(2,m_global->m_maxLevel),pow(2,m_global->m_maxLevel),(m_dim > 2 ? pow(2,m_global->m_maxLevel) : 0));
             m_lastDescMorton  = octDesc.computeMorton();
             m_firstDescMorton = std::numeric_limits<uint64_t>::max();
         }
@@ -369,12 +369,12 @@ namespace bitpit {
         uint32_t 		idx, ilastch;
         uint32_t 		offset = 0, blockidx;
         uint32_t		mapsize = mapidx.size();
-        uint8_t 		nchm1 = m_global.m_nchildren-1, ich;
+        uint8_t 		nchm1 = m_global->m_nchildren-1, ich;
         bool 			dorefine = false;
 
         m_sizeOctants = m_octants.size();
         for (idx=0; idx<m_sizeOctants; idx++){
-            if(m_octants[idx].getMarker() > 0 && m_octants[idx].getLevel() < m_global.m_maxLevel){
+            if(m_octants[idx].getMarker() > 0 && m_octants[idx].getLevel() < m_global->m_maxLevel){
                 last_child_index.push_back(idx+nchm1+offset);
                 offset += nchm1;
             }
@@ -401,7 +401,7 @@ namespace bitpit {
                 if(idx == last_child_index[ilastch]){
                     m_octants[idx-offset].m_info[Octant::INFO_AUX] = false;
                     children = m_octants[idx-offset].buildChildren();
-                    for (ich=0; ich<m_global.m_nchildren; ich++){
+                    for (ich=0; ich<m_global->m_nchildren; ich++){
                         m_octants[idx-ich] = (children[nchm1-ich]);
                         if(mapsize>0) mapidx[idx-ich]  = mapidx[idx-offset];
                     }
@@ -452,7 +452,7 @@ namespace bitpit {
         uint32_t		mapsize = mapidx.size();
         int8_t 			markerfather, marker;
         uint8_t 		nbro, nend, nstart;
-        uint8_t 		nchm1 = m_global.m_nchildren-1;
+        uint8_t 		nchm1 = m_global->m_nchildren-1;
         bool 			docoarse = false;
         bool 			wstop = false;
 
@@ -499,14 +499,14 @@ namespace bitpit {
                 nbro = 0;
                 father = m_octants[idx].buildFather();
                 // Check if family is to be refined
-                for (idx2=idx; idx2<idx+m_global.m_nchildren; idx2++){
+                for (idx2=idx; idx2<idx+m_global->m_nchildren; idx2++){
                     if (idx2<m_sizeOctants){
                         if(m_octants[idx2].getMarker() < 0 && m_octants[idx2].buildFather() == father){
                             nbro++;
                         }
                     }
                 }
-                if (nbro == m_global.m_nchildren){
+                if (nbro == m_global->m_nchildren){
                     nidx++;
                     first_child_index.push_back(idx);
                     idx = idx2-1;
@@ -522,13 +522,13 @@ namespace bitpit {
                 if (idx+offset < m_sizeOctants){
                     if (nidx < nfchild){
                         if (idx+offset == first_child_index[nidx]){
-                            markerfather = -m_global.m_maxLevel;
+                            markerfather = -m_global->m_maxLevel;
                             father = m_octants[idx+offset].buildFather();
                             for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                                 father.m_info[iii] = false;
                             }
                             father.setGhostLayer(-1);
-                            for(idx2=0; idx2<m_global.m_nchildren; idx2++){
+                            for(idx2=0; idx2<m_global->m_nchildren; idx2++){
                                 if (idx2 < m_sizeOctants){
                                     if (markerfather < m_octants[idx+offset+idx2].getMarker()+1){
                                         markerfather = m_octants[idx+offset+idx2].getMarker()+1;
@@ -606,7 +606,7 @@ namespace bitpit {
                         }
                         marker = m_octants[idx].getMarker();
                     }
-                    if (nbro == m_global.m_nchildren){
+                    if (nbro == m_global->m_nchildren){
                         offset = nstart;
                     }
                     else{
@@ -648,7 +648,7 @@ namespace bitpit {
                             marker = m_ghosts[idx22_gh].getMarker();
                         }
 
-                        if (nbro == m_global.m_nchildren){
+                        if (nbro == m_global->m_nchildren){
                             m_octants.clear();
                             m_sizeOctants = 0;
                             if(mapsize > 0){
@@ -679,7 +679,7 @@ namespace bitpit {
                         if (markerfather < m_ghosts[idx].getMarker()+1){
                             markerfather = m_ghosts[idx].getMarker()+1;
                         }
-                        for (uint32_t iii=0; iii<m_global.m_nfaces; iii++){
+                        for (uint32_t iii=0; iii<m_global->m_nfaces; iii++){
                             father.m_info[iii] = father.m_info[iii] || m_ghosts[idx].m_info[iii];
                         }
                         father.m_info[Octant::INFO_BALANCED] = father.m_info[Octant::INFO_BALANCED] || m_ghosts[idx].m_info[Octant::INFO_BALANCED];
@@ -708,7 +708,7 @@ namespace bitpit {
                         }
                         marker = m_octants[idx].getMarker();
                     }
-                    if (nbro == m_global.m_nchildren){
+                    if (nbro == m_global->m_nchildren){
                         offset = nend;
                     }
                     else{
@@ -888,14 +888,14 @@ namespace bitpit {
 
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
-            cxyz[idim] = m_global.m_normals[iface][idim];
+            cxyz[idim] = m_global->m_normals[iface][idim];
         }
 
         isghost.clear();
         neighbours.clear();
 
         // Default if iface is nface<iface<0
-        if (iface > m_global.m_nfaces){
+        if (iface > m_global->m_nfaces){
             return;
         }
 
@@ -1174,21 +1174,21 @@ namespace bitpit {
         bool amIghost = oct->getIsGhost();
 
         //Alternative to switch case
-        int8_t cx = m_global.m_edgeCoeffs[iedge][0];
-        int8_t cy = m_global.m_edgeCoeffs[iedge][1];
-        int8_t cz = m_global.m_edgeCoeffs[iedge][2];
+        int8_t cx = m_global->m_edgeCoeffs[iedge][0];
+        int8_t cy = m_global->m_edgeCoeffs[iedge][1];
+        int8_t cz = m_global->m_edgeCoeffs[iedge][2];
 
         isghost.clear();
         neighbours.clear();
 
         // Default if iedge is nface<iedge<0
-        if (iedge > m_global.m_nfaces*2){
+        if (iedge > m_global->m_nfaces*2){
             return;
         }
 
         // Check if octants edge is a process boundary
-        iface1 = m_global.m_edgeFace[iedge][0];
-        iface2 = m_global.m_edgeFace[iedge][1];
+        iface1 = m_global->m_edgeFace[iedge][0];
+        iface2 = m_global->m_edgeFace[iedge][1];
 
         // Check if octants edge is a boundary
         if (oct->m_info[iface1] == false && oct->m_info[iface2] == false){
@@ -1441,21 +1441,21 @@ namespace bitpit {
 
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
-            cxyz[idim] = m_global.m_nodeCoeffs[inode][idim];
+            cxyz[idim] = m_global->m_nodeCoeffs[inode][idim];
         }
 
         isghost.clear();
         neighbours.clear();
 
         // Default if inode is nnodes<inode<0
-        if (inode > m_global.m_nnodes){
+        if (inode > m_global->m_nnodes){
             return;
         }
 
         // Check if octants node is a boundary
-        iface1 = m_global.m_nodeFace[inode][0];
-        iface2 = m_global.m_nodeFace[inode][1];
-        iface3 = m_global.m_nodeFace[inode][m_dim-1];
+        iface1 = m_global->m_nodeFace[inode][0];
+        iface2 = m_global->m_nodeFace[inode][1];
+        iface3 = m_global->m_nodeFace[inode][m_dim-1];
 
         // Check if octants node is a boundary
         if (oct->m_info[iface1] == false && oct->m_info[iface2] == false && oct->m_info[iface3] == false){
@@ -1937,14 +1937,14 @@ namespace bitpit {
 
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
-            cxyz[idim] = m_global.m_normals[iface][idim];
+            cxyz[idim] = m_global->m_normals[iface][idim];
         }
 
         isghost.clear();
         neighbours.clear();
 
         // Default if iface is nface<iface<0
-        if (iface > m_global.m_nfaces){
+        if (iface > m_global->m_nfaces){
             return;
         }
 
@@ -2279,13 +2279,13 @@ namespace bitpit {
 
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
-            cxyz[idim] = m_global.m_normals[iface][idim];
+            cxyz[idim] = m_global->m_normals[iface][idim];
         }
 
         neighbours.clear();
 
         // Default if iface is nface<iface<0
-        if (iface > m_global.m_nfaces){
+        if (iface > m_global->m_nfaces){
             return;
         }
 
@@ -2464,7 +2464,7 @@ namespace bitpit {
                         if(idx==nocts)
                             break;
                     }
-                    if (nbro != m_global.m_nchildren && idx!=nocts){
+                    if (nbro != m_global->m_nchildren && idx!=nocts){
                         for(uint32_t ii=0; ii<idx; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
@@ -2510,7 +2510,7 @@ namespace bitpit {
                         }
                     }
                     last_idx=idx;
-                    if (nbro != m_global.m_nchildren && idx!=nocts-1){
+                    if (nbro != m_global->m_nchildren && idx!=nocts-1){
                         for(uint32_t ii=idx+1; ii<nocts; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
@@ -2531,7 +2531,7 @@ namespace bitpit {
                 lastdesc = father.buildLastDesc();
                 mortonld = lastdesc.computeMorton();
                 nbro = 0;
-                for (idx=0; idx<m_global.m_nchildren; idx++){
+                for (idx=0; idx<m_global->m_nchildren; idx++){
                     if (idx<nocts){
                         // Check if family is complete or to be checked in the internal loop (some brother refined)
                         if (m_octants[idx].computeMorton() <= mortonld){
@@ -2539,7 +2539,7 @@ namespace bitpit {
                         }
                     }
                 }
-                if (nbro != m_global.m_nchildren)
+                if (nbro != m_global->m_nchildren)
                     idx0 = nbro;
 
                 // Check and coarse internal octants
@@ -2548,14 +2548,14 @@ namespace bitpit {
                         nbro = 0;
                         father = m_octants[idx].buildFather();
                         // Check if family is to be coarsened
-                        for (idx2=idx; idx2<idx+m_global.m_nchildren; idx2++){
+                        for (idx2=idx; idx2<idx+m_global->m_nchildren; idx2++){
                             if (idx2<nocts){
                                 if(m_octants[idx2].getMarker() < 0 && m_octants[idx2].buildFather() == father){
                                     nbro++;
                                 }
                             }
                         }
-                        if (nbro == m_global.m_nchildren){
+                        if (nbro == m_global->m_nchildren){
                             idx = idx2-1;
                         }
                         else{
@@ -2648,7 +2648,7 @@ namespace bitpit {
                         if(idx==nocts)
                             break;
                     }
-                    if (nbro != m_global.m_nchildren && idx!=nocts){
+                    if (nbro != m_global->m_nchildren && idx!=nocts){
                         for(uint32_t ii=0; ii<idx; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
@@ -2695,7 +2695,7 @@ namespace bitpit {
                         }
                     }
                     last_idx=idx;
-                    if (nbro != m_global.m_nchildren && idx!=nocts-1){
+                    if (nbro != m_global->m_nchildren && idx!=nocts-1){
                         for(uint32_t ii=idx+1; ii<nocts; ii++){
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
@@ -2715,7 +2715,7 @@ namespace bitpit {
         lastdesc = father.buildLastDesc();
         mortonld = lastdesc.computeMorton();
         nbro = 0;
-        for (idx=0; idx<m_global.m_nchildren; idx++){
+        for (idx=0; idx<m_global->m_nchildren; idx++){
             // Check if family is complete or to be checked in the internal loop (some brother refined)
             if (idx<nocts){
                 if (m_octants[idx].computeMorton() <= mortonld){
@@ -2723,7 +2723,7 @@ namespace bitpit {
                 }
             }
         }
-        if (nbro != m_global.m_nchildren)
+        if (nbro != m_global->m_nchildren)
             idx0 = nbro;
 
         // Check and coarse internal octants
@@ -2732,14 +2732,14 @@ namespace bitpit {
                 nbro = 0;
                 father = m_octants[idx].buildFather();
                 // Check if family is to be coarsened
-                for (idx2=idx; idx2<idx+m_global.m_nchildren; idx2++){
+                for (idx2=idx; idx2<idx+m_global->m_nchildren; idx2++){
                     if (idx2<nocts){
                         if(m_octants[idx2].getMarker() < 0 && m_octants[idx2].buildFather() == father){
                             nbro++;
                         }
                     }
                 }
-                if (nbro == m_global.m_nchildren){
+                if (nbro == m_global->m_nchildren){
                     idx = idx2-1;
                 }
                 else{
@@ -2796,10 +2796,10 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+                    targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
                     //Balance through faces
-                    for (iface=0; iface<m_global.m_nfaces; iface++){
+                    for (iface=0; iface<m_global->m_nfaces; iface++){
 						findNeighbours(idx, iface, neigh, isghost);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
@@ -2830,12 +2830,12 @@ namespace bitpit {
 								};
 							}
 						}
-						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+						targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
-                        for (iedge=0; iedge<m_global.m_nedges; iedge++){
+                        for (iedge=0; iedge<m_global->m_nedges; iedge++){
 							findEdgeNeighbours(idx, iedge, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2864,13 +2864,13 @@ namespace bitpit {
 									}
 								}
 							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+							targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
 
                     if (Bnode){
                         //Balance through nodes
-                        for (inode=0; inode<m_global.m_nnodes; inode++){
+                        for (inode=0; inode<m_global->m_nnodes; inode++){
 							findNodeNeighbours(idx, inode, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2899,7 +2899,7 @@ namespace bitpit {
 									}
 								}
 							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+							targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
 
@@ -2921,10 +2921,10 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+                    targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
-                    for (iface=0; iface<m_global.m_nfaces; iface++){
+                    for (iface=0; iface<m_global->m_nfaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
                             findGhostNeighbours(idx, iface, neigh);
@@ -2938,12 +2938,12 @@ namespace bitpit {
                                 }
                             }
                         }
-                        targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+                        targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
-                        for (iedge=0; iedge<m_global.m_nedges; iedge++){
+                        for (iedge=0; iedge<m_global->m_nedges; iedge++){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -2955,13 +2955,13 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
                     if (Bnode){
                         //Balance through nodes
-                        for (inode=0; inode<m_global.m_nnodes; inode++){
+                        for (inode=0; inode<m_global->m_nnodes; inode++){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -2973,7 +2973,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2990,10 +2990,10 @@ namespace bitpit {
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (m_octants[idx].getBalance()){
-                        targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                        targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces
-                        for (iface=0; iface<m_global.m_nfaces; iface++){
+                        for (iface=0; iface<m_global->m_nfaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
                                 findNeighbours(idx, iface, neigh, isghost);
                                 sizeneigh = neigh.size();
@@ -3016,12 +3016,12 @@ namespace bitpit {
                                     }
                                 }
                             }
-                            targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                            targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                         }
 
                         if (Bedge){
                             //Balance through edges
-                            for (iedge=0; iedge<m_global.m_nedges; iedge++){
+                            for (iedge=0; iedge<m_global->m_nedges; iedge++){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3042,13 +3042,13 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
                         if (Bnode){
                             //Balance through nodes
-                            for (inode=0; inode<m_global.m_nnodes; inode++){
+                            for (inode=0; inode<m_global->m_nnodes; inode++){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3069,7 +3069,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
@@ -3100,10 +3100,10 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+                    targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
-                    for (iface=0; iface<m_global.m_nfaces; iface++){
+                    for (iface=0; iface<m_global->m_nfaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
                             findGhostNeighbours(idx, iface, neigh);
@@ -3117,12 +3117,12 @@ namespace bitpit {
                                 }
                             }
                         }
-                        targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+                        targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
-                        for (iedge=0; iedge<m_global.m_nedges; iedge++){
+                        for (iedge=0; iedge<m_global->m_nedges; iedge++){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -3134,13 +3134,13 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
                     if (Bnode){
                         //Balance through nodes
-                        for (inode=0; inode<m_global.m_nnodes; inode++){
+                        for (inode=0; inode<m_global->m_nnodes; inode++){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -3152,7 +3152,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_global->m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -3169,10 +3169,10 @@ namespace bitpit {
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (m_octants[idx].getBalance()){
-                        targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                        targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces
-                        for (iface=0; iface<m_global.m_nfaces; iface++){
+                        for (iface=0; iface<m_global->m_nfaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
                                 findNeighbours(idx, iface, neigh, isghost);
                                 sizeneigh = neigh.size();
@@ -3195,12 +3195,12 @@ namespace bitpit {
                                     }
                                 }
                             }
-                            targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                            targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                         }
 
                         if (Bedge){
                             //Balance through edges
-                            for (iedge=0; iedge<m_global.m_nedges; iedge++){
+                            for (iedge=0; iedge<m_global->m_nedges; iedge++){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3221,13 +3221,13 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
                         if (Bnode){
                             //Balance through nodes
-                            for (inode=0; inode<m_global.m_nnodes; inode++){
+                            for (inode=0; inode<m_global->m_nnodes; inode++){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -3248,7 +3248,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_global->m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
@@ -3305,7 +3305,7 @@ namespace bitpit {
 						intersection.m_outisghost = intersection.m_finer;
 						intersection.m_owners[0]  = neighbours[i];
 						intersection.m_owners[1] = idx;
-						intersection.m_iface = m_global.m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
+						intersection.m_iface = m_global->m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
 						intersection.m_isnew = false;
 						intersection.m_isghost = true;
 						intersection.m_bound = false;
@@ -3323,7 +3323,7 @@ namespace bitpit {
 						intersection.m_outisghost = intersection.m_finer;
 						intersection.m_owners[0]  = neighbours[i];
 						intersection.m_owners[1] = idx;
-						intersection.m_iface = m_global.m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
+						intersection.m_iface = m_global->m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
 						intersection.m_isnew = false;
 						intersection.m_isghost = true;
 						intersection.m_bound = true;
@@ -3608,7 +3608,7 @@ namespace bitpit {
                 octant = &(m_ghosts[octantId]);
             }
 
-            for (uint8_t i = 0; i < m_global.m_nnodes; ++i){
+            for (uint8_t i = 0; i < m_global->m_nnodes; ++i){
                 u32array3 node;
                 octant->getNode(node, i);
 
@@ -3616,7 +3616,7 @@ namespace bitpit {
                 if (nodeCoords.count(morton) == 0) {
                     mortonList.push_back(morton);
                     nodeCoords.insert({{morton, std::move(node)}});
-                    nodeOctants[morton].reserve(m_global.m_nnodes);
+                    nodeOctants[morton].reserve(m_global->m_nnodes);
                 }
 
                 nodeOctants[morton].push_back(n);
@@ -3643,7 +3643,7 @@ namespace bitpit {
                 }
 
                 if (octantConnect->size() == 0) {
-                    octantConnect->reserve(m_global.m_nnodes);
+                    octantConnect->reserve(m_global->m_nnodes);
                 }
                 octantConnect->push_back(nodeId);
             }
