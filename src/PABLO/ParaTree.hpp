@@ -34,7 +34,7 @@
 #include "DataCommInterface.hpp"
 #include "communications.hpp"
 #endif
-#include "Global.hpp"
+#include "tree_constants.hpp"
 #include "Octant.hpp"
 #include "LocalTree.hpp"
 #include "Map.hpp"
@@ -138,7 +138,7 @@ namespace bitpit {
         uint64_t 				m_globalNumOctants;   			/**<Global number of octants in the parallel octree*/
         int 					m_nproc;						/**<Number of processes of the job*/
         uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
-        Global					m_global;						/**<Global variables*/
+        TreeConstants			m_global;						/**<Global variables*/
         std::size_t 			m_nofGhostLayers;				/**<Global number of ghost layers from the process boundary expressing the depth of the ghost halo*/
 
         //distributed members

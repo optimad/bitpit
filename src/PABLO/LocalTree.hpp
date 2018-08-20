@@ -28,7 +28,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "Global.hpp"
+#include "tree_constants.hpp"
 #include "Octant.hpp"
 #include "Intersection.hpp"
 
@@ -135,7 +135,7 @@ private:
 	u32arr3vector			m_nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
 
 	uint8_t					m_dim;					/**<Space dimension. Only 2D or 3D space accepted*/
-	Global					m_global;				/**<Global variables*/
+	TreeConstants			m_global;				/**<Global variables*/
 	bvector 				m_periodic;				/**<Boolvector: i-th element is true if the i-th boundary face is a periodic interface.*/
 
 

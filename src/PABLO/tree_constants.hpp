@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PABLO_GLOBAL_HPP__
-#define __BITPIT_PABLO_GLOBAL_HPP__
+#ifndef __BITPIT_PABLO_TREE_CONSTANTS_HPP__
+#define __BITPIT_PABLO_TREE_CONSTANTS_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -44,11 +44,11 @@ namespace bitpit {
  *	Global variables are used in PABLO everywhere and they are public, i.e. each
  *	global variable can be used asant by external codes.
  *
- *	Class Global is a class with static members initialized during the construction
- *	of a paratree object.
+ *	Class TreeConstants is a class with static members initialized during the
+ *	construction of a paratree object.
  *
  */
-class Global{
+class TreeConstants {
 
 	// =================================================================================== //
 	// FRIENDSHIPS
@@ -63,7 +63,7 @@ class Global{
 	// =================================================================================== //
 private:
 	static const int8_t m_maxLevel    = 20;                                 /**< Maximum allowed refinement level of octree */
-	static const uint32_t m_maxLength = uint32_t(1 << Global::m_maxLevel);  /**< Length of the logical domain */
+	static const uint32_t m_maxLength = uint32_t(1 << TreeConstants::m_maxLevel);  /**< Length of the logical domain */
 
 	uint8_t  m_nchildren;			/**< Number of children of an octant */
 	uint8_t  m_nfaces;				/**< Number of faces of an octant */
@@ -116,4 +116,4 @@ private:
 
 }
 
-#endif /* __BITPIT_PABLO_GLOBAL_HPP__ */
+#endif /* __BITPIT_PABLO_TREE_CONSTANTS_HPP__ */

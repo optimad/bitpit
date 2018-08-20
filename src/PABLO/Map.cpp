@@ -1,7 +1,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "Global.hpp"
+#include "tree_constants.hpp"
 #include "Operators.hpp"
 #include "Map.hpp"
 #include <cmath>
@@ -62,7 +62,7 @@ void Map::initialize(uint8_t dim){
         m_nnodes        = uint8_t(1)<<m_dim;
         m_nnodesPerFace = uint8_t(1)<<(m_dim-1);
 
-        m_maxLength = Global::getMaxLength();
+        m_maxLength = TreeConstants::getMaxLength();
         m_maxArea   = uipow<uint64_t>(m_maxLength, m_dim - 1);
         m_maxVolume = uipow<uint64_t>(m_maxLength, m_dim);
 
