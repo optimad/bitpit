@@ -69,6 +69,9 @@ public:
 	// =================================================================================== //
 	// STATIC MEMBERS
 	// =================================================================================== //
+	static const int8_t   MAX_LEVEL  = 20;                        /**< Maximum allowed refinement level of octree */
+	static const uint32_t MAX_LENGTH = uint32_t(1) << MAX_LEVEL;  /**< Length of the logical domain */
+
 	static const TreeConstants & instance(uint8_t dim);
 	static const Instances & instances();
 
@@ -76,9 +79,6 @@ public:
 	// MEMBERS
 	// =================================================================================== //
 private:
-	static const int8_t   MAX_LEVEL  = 20;                        /**< Maximum allowed refinement level of octree */
-	static const uint32_t MAX_LENGTH = uint32_t(1) << MAX_LEVEL;  /**< Length of the logical domain */
-
 	uint8_t  m_nchildren;			/**< Number of children of an octant */
 	uint8_t  m_nfaces;				/**< Number of faces of an octant */
 	uint8_t  m_nedges;				/**< Number of edges of an octant */
