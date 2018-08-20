@@ -41,13 +41,10 @@ namespace bitpit {
  *	\authors		Marco Cisternino
  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
  *
- *	\brief Global variables used in PABLO
+ *	\brief Global constants associated to a PABLO tree
  *
- *	Global variables are used in PABLO everywhere and they are public, i.e. each
- *	global variable can be used asant by external codes.
- *
- *	Class TreeConstants is a class with static members initialized during the
- *	construction of a paratree object.
+ *	Global constants are used in PABLO everywhere and they are public, i.e.
+ *	each global variable can be used by any external code.
  *
  */
 struct TreeConstants {
