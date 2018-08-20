@@ -54,11 +54,6 @@ TreeConstants::instances() {
 	return instances;
 }
 
-/*! Default constructor.
- */
-TreeConstants::TreeConstants() : TreeConstants(0) {
-}
-
 /*! Constructor.
  * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
  */
