@@ -1363,7 +1363,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
  * \param[out] nMortons number of morton numbers.
  * \param[out] mortons are the requestd morton numbers.
  */
-void Octant::computeEdgeVirtualMortons(uint8_t iedge, uint8_t maxdepth, const uint8_t balance_codim, uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
+void Octant::computeEdgeVirtualMortons(uint8_t iedge, uint8_t maxdepth, const uint8_t balance_codim, const uint8_t (&edgeface)[12][2], uint32_t *nMortons, std::vector<uint64_t> *mortons) const {
 
 	if (getBalance() && balance_codim > 1) {
 		computeEdgeHalfSizeMortons(iedge, edgeface, nMortons, mortons);
