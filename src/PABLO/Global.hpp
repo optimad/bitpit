@@ -62,8 +62,8 @@ class Global{
 	// MEMBERS
 	// =================================================================================== //
 private:
-	static const int8_t   m_maxLevel;		/**< Maximum allowed refinement level of octree */
-	static const uint32_t m_maxLength;		/**< Length of the logical domain */
+	static const int8_t m_maxLevel    = 20;                                 /**< Maximum allowed refinement level of octree */
+	static const uint32_t m_maxLength = uint32_t(1 << Global::m_maxLevel);  /**< Length of the logical domain */
 
 	uint8_t  m_nchildren;			/**< Number of children of an octant */
 	uint8_t  m_nfaces;				/**< Number of faces of an octant */

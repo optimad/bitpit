@@ -31,8 +31,6 @@ namespace bitpit {
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
-const int8_t Global::m_maxLevel = 20;
-const uint32_t Global::m_maxLength = uint32_t(1 << Global::m_maxLevel);
 
 /*! Get the components of the "normals" per edge (bisector of edge)
  * \return Components (x,y,z) of the "normals" per edge.
