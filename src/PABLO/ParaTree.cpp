@@ -3335,10 +3335,9 @@ namespace bitpit {
         assert(dim == 3);
 
         // Get the coordinates of the edge
-        uint8_t edgeNodes[2];
-        m_global->getEdgenode(edgeIndex, edgeNodes);
-        std::array<uint32_t, 3> minEdgeCoords = edgeOctant->getNode(edgeNodes[0]);
-        std::array<uint32_t, 3> maxEdgeCoords = edgeOctant->getNode(edgeNodes[1]);
+        const uint8_t (*edgeNodes)[2] = &m_global->m_edgeNode[edgeIndex];
+        std::array<uint32_t, 3> minEdgeCoords = edgeOctant->getNode((*edgeNodes)[0]);
+        std::array<uint32_t, 3> maxEdgeCoords = edgeOctant->getNode((*edgeNodes)[1]);
 
         // Get minimum/maximum coordinates of the contant
         std::array<uint32_t, 3> minOctantCoords = octant->getNode(0);
@@ -3380,10 +3379,9 @@ namespace bitpit {
         int dim = octant->getDim();
 
         // Get minimum/maximum coordinates of the face
-        uint8_t faceNodes[6][4];
-        m_global->getFacenode(faceNodes);
-        std::array<uint32_t, 3> minFaceCoords = faceOctant->getNode(faceNodes[faceIndex][0]);
-        std::array<uint32_t, 3> maxFaceCoords = faceOctant->getNode(faceNodes[faceIndex][2 * dim - 1]);
+        const uint8_t (*faceNodes)[6][4] = &m_global->m_faceNode;
+        std::array<uint32_t, 3> minFaceCoords = faceOctant->getNode((*faceNodes)[faceIndex][0]);
+        std::array<uint32_t, 3> maxFaceCoords = faceOctant->getNode((*faceNodes)[faceIndex][2 * dim - 1]);
 
         // Get minimum/maximum coordinates of the contant
         std::array<uint32_t, 3> minOctantCoords = octant->getNode(0);
