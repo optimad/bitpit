@@ -76,8 +76,8 @@ public:
 	// MEMBERS
 	// =================================================================================== //
 private:
-	static const int8_t m_maxLevel    = 20;                                 /**< Maximum allowed refinement level of octree */
-	static const uint32_t m_maxLength = uint32_t(1 << TreeConstants::m_maxLevel);  /**< Length of the logical domain */
+	static const int8_t   MAX_LEVEL  = 20;                        /**< Maximum allowed refinement level of octree */
+	static const uint32_t MAX_LENGTH = uint32_t(1 << MAX_LEVEL);  /**< Length of the logical domain */
 
 	uint8_t  m_nchildren;			/**< Number of children of an octant */
 	uint8_t  m_nfaces;				/**< Number of faces of an octant */
@@ -95,9 +95,9 @@ private:
 	int8_t   m_nodeCoeffs[8][3];	/**< Components (x,y,z) of the "normals" per node */
 	uint8_t  m_parallelEdges[12][3];/**< Parallel edges per edge */
 
-	std::array<uint32_t, m_maxLevel> m_lengths;   /**< Lengths associated to the levels */
-	std::array<uint64_t, m_maxLevel> m_areas;     /**< Areas associated to the levels */
-	std::array<uint64_t, m_maxLevel> m_volumes;   /**< Volumes associated to the levels */
+	std::array<uint32_t, MAX_LEVEL> m_lengths;   /**< Lengths associated to the levels */
+	std::array<uint64_t, MAX_LEVEL> m_areas;     /**< Areas associated to the levels */
+	std::array<uint64_t, MAX_LEVEL> m_volumes;   /**< Volumes associated to the levels */
 
 	// =================================================================================== //
 	// METHODS
@@ -108,9 +108,6 @@ private:
 	// =================================================================================== //
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
-	static int8_t 		getMaxLevel();
-	static uint32_t 	getMaxLength();
-
 	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]) const;
 	void 		getEdgeface(uint8_t edgeface[12][2]) const;
 	void 		getEdgenode(uint8_t edgeNode[12][2]) const;

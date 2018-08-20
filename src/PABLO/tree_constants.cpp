@@ -142,22 +142,6 @@ TreeConstants::getNodeedge(uint8_t nodeedge_[8][3]) const {
     }
 }
 
-/*!Get the length of the logical domain.
- * \return Length of the logical domain.
- */
-uint32_t
-TreeConstants::getMaxLength()  {
-	return m_maxLength;
-}
-
-/*!Get the maximum allowed refinement level of octree.
- * \return Maximum allowed refinement level of octree.
- */
-int8_t
-TreeConstants::getMaxLevel()  {
-	return m_maxLevel;
-}
-
 /*!Get the number of children of an octant.
  * \return Number of children of an octant.
  */
@@ -563,11 +547,10 @@ TreeConstants::initialize(uint8_t dim) {
 	m_parallelEdges[11][1] = 3;
 	m_parallelEdges[11][2] = 10;
 
-	int maxLevel = getMaxLevel();
-	for (int level = 0; level < maxLevel; ++level) {
-		m_lengths[level] = uint32_t(1) << (maxLevel - level);
-		m_areas[level]   = uint64_t(1) << ((dim - 1) * (maxLevel - level));
-		m_volumes[level] = uint64_t(1) << (dim * (maxLevel - level));
+	for (int level = 0; level < MAX_LEVEL; ++level) {
+		m_lengths[level] = uint32_t(1) << (MAX_LEVEL - level);
+		m_areas[level]   = uint64_t(1) << ((dim - 1) * (MAX_LEVEL - level));
+		m_volumes[level] = uint64_t(1) << (dim * (MAX_LEVEL - level));
 	}
 
 }

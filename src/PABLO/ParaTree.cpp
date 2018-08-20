@@ -721,7 +721,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
         (*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
-        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global->m_maxLevel)) << endl;
+        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(TreeConstants::MAX_LEVEL)) << endl;
         (*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " " << endl;
@@ -998,7 +998,7 @@ namespace bitpit {
      */
     int
     ParaTree::getMaxLevel() const {
-        return m_global->m_maxLevel;
+        return TreeConstants::MAX_LEVEL;
     };
 
     /*! Get the length of the domain in logical domain.
@@ -1006,7 +1006,7 @@ namespace bitpit {
      */
     uint32_t
     ParaTree::getMaxLength() const {
-        return m_global->m_maxLength;
+        return TreeConstants::MAX_LENGTH;
     }
 
     /*! Get the number of nodes for each octant (4 for 2D case, 8 for 3D case)
@@ -2116,7 +2116,7 @@ namespace bitpit {
      */
     double
     ParaTree::getLocalMinSize() const {
-        uint32_t size = uint32_t(1)<<(m_global->m_maxLevel-m_octree.getLocalMaxDepth());
+        uint32_t size = uint32_t(1)<<(TreeConstants::MAX_LEVEL-m_octree.getLocalMaxDepth());
         return m_trans.mapSize(size);
     };
 
@@ -2935,9 +2935,9 @@ namespace bitpit {
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
 
-        if (x == m_global->m_maxLength) x = x - 1;
-        if (y == m_global->m_maxLength) y = y - 1;
-        if (z == m_global->m_maxLength) z = z - 1;
+        if (x == TreeConstants::MAX_LENGTH) x = x - 1;
+        if (y == TreeConstants::MAX_LENGTH) y = y - 1;
+        if (z == TreeConstants::MAX_LENGTH) z = z - 1;
         morton = PABLO::computeMorton(x,y,z);
 
 
@@ -3014,9 +3014,9 @@ namespace bitpit {
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
 
-        if (x == m_global->m_maxLength) x = x - 1;
-        if (y == m_global->m_maxLength) y = y - 1;
-        if (z == m_global->m_maxLength) z = z - 1;
+        if (x == TreeConstants::MAX_LENGTH) x = x - 1;
+        if (y == TreeConstants::MAX_LENGTH) y = y - 1;
+        if (z == TreeConstants::MAX_LENGTH) z = z - 1;
         morton = PABLO::computeMorton(x,y,z);
 
 
@@ -4574,7 +4574,7 @@ namespace bitpit {
      */
     double
     ParaTree::levelToSize(uint8_t & level) {
-        uint32_t size = uint32_t(1)<<(m_global->m_maxLevel-level);
+        uint32_t size = uint32_t(1)<<(TreeConstants::MAX_LEVEL-level);
         return m_trans.mapSize(size);
     }
 
@@ -5033,14 +5033,14 @@ namespace bitpit {
     void
     ParaTree::computePartition(uint32_t* partition, uint8_t & level_, dvector* weight) {
 
-        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(m_global->m_maxLevel)));
+        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
         uint32_t* partition_temp = new uint32_t[m_nproc];
         uint8_t* boundary_proc = new uint8_t[m_nproc-1];
         uint8_t dimcomm, indcomm;
         uint8_t* glbdimcomm = new uint8_t[m_nproc];
         uint8_t* glbindcomm = new uint8_t[m_nproc];
 
-        uint32_t Dh = uint32_t(pow(double(2),double(m_global->m_maxLevel-level)));
+        uint32_t Dh = uint32_t(pow(double(2),double(TreeConstants::MAX_LEVEL-level)));
         uint32_t istart, nocts, rest, forw, backw;
         uint32_t i = 0, iproc, j;
         uint64_t sum;
@@ -5155,7 +5155,7 @@ namespace bitpit {
         }
         //update first last descendant
         if(getNumOctants()==0){
-            Octant octDesc(m_dim,m_global->m_maxLevel,pow(2,m_global->m_maxLevel),pow(2,m_global->m_maxLevel),(m_dim > 2 ? pow(2,m_global->m_maxLevel) : 0));
+            Octant octDesc(m_dim,TreeConstants::MAX_LEVEL,pow(2,TreeConstants::MAX_LEVEL),pow(2,TreeConstants::MAX_LEVEL),(m_dim > 2 ? pow(2,TreeConstants::MAX_LEVEL) : 0));
             m_octree.m_lastDescMorton = octDesc.computeMorton();
             m_octree.m_firstDescMorton = std::numeric_limits<uint64_t>::max();
         }

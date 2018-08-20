@@ -620,7 +620,7 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
  */
 uint64_t	Octant::computeNodeMorton(const u32array3 &node) const{
 
-	return PABLO::computeXYZKey(node[0], node[1], node[2], TreeConstants::getMaxLevel());
+	return PABLO::computeXYZKey(node[0], node[1], node[2], TreeConstants::MAX_LEVEL);
 };
 
 /** Get the size of the buffer required to communicate the octant.
@@ -649,9 +649,9 @@ unsigned int Octant::getBinarySize()
 Octant	Octant::buildLastDesc() const {
 	u32array3 delta = { {0,0,0} };
 	for (int i=0; i<m_dim; i++){
-		delta[i] = (uint32_t(1) << (TreeConstants::getMaxLevel() - m_level)) - 1;
+		delta[i] = (uint32_t(1) << (TreeConstants::MAX_LEVEL - m_level)) - 1;
 	}
-	Octant last_desc(m_dim, TreeConstants::getMaxLevel(), (m_x+delta[0]), (m_y+delta[1]), (m_z+delta[2]));
+	Octant last_desc(m_dim, TreeConstants::MAX_LEVEL, (m_x+delta[0]), (m_y+delta[1]), (m_z+delta[2]));
 	return last_desc;
 };
 
@@ -668,7 +668,7 @@ Octant	Octant::buildFather() const {
 	xx[2] = m_z;
 	delta[2] = 0;
 	for (int i=0; i<m_dim; i++){
-		delta[i] = xx[i]%(uint32_t(1) << (TreeConstants::getMaxLevel() - max(0,(m_level-1))));
+		delta[i] = xx[i]%(uint32_t(1) << (TreeConstants::MAX_LEVEL - max(0,(m_level-1))));
 	}
 	Octant father(m_dim, max(0,m_level-1), m_x-delta[0], m_y-delta[1], m_z-delta[2]);
 	return father;
@@ -683,7 +683,7 @@ vector< Octant >	Octant::buildChildren() const {
 	uint8_t xf,yf,zf;
 	int nchildren = 1<<m_dim;
 
-	if (this->m_level < TreeConstants::getMaxLevel()){
+	if (this->m_level < TreeConstants::MAX_LEVEL){
 		vector< Octant > children(nchildren, Octant(m_dim));
 		for (int i=0; i<nchildren; i++){
 			switch (i) {
@@ -844,10 +844,10 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 	}
 
 	int nchildren = 1<<m_dim;
-	*nMortons = (m_level < TreeConstants::getMaxLevel()) ? nchildren/2 : 1;
+	*nMortons = (m_level < TreeConstants::MAX_LEVEL) ? nchildren/2 : 1;
 	mortons->resize(*nMortons);
 
-	uint32_t dh  = (m_level < TreeConstants::getMaxLevel()) ? getSize()/2 : getSize();
+	uint32_t dh  = (m_level < TreeConstants::MAX_LEVEL) ? getSize()/2 : getSize();
 	uint32_t dh2 = getSize();
 	switch (iface) {
 	case 0 :
@@ -935,10 +935,10 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
 		return;
 	}
 
-	*nMortons = (m_level < TreeConstants::getMaxLevel()) ? uint32_t(1)<<((m_dim-1)*(maxdepth-m_level)) : 1;
+	*nMortons = (m_level < TreeConstants::MAX_LEVEL) ? uint32_t(1)<<((m_dim-1)*(maxdepth-m_level)) : 1;
 	mortons->resize(*nMortons);
 
-	uint32_t dh    = (m_level < TreeConstants::getMaxLevel()) ? uint32_t(1)<<(TreeConstants::getMaxLevel() - maxdepth) : getSize();
+	uint32_t dh    = (m_level < TreeConstants::MAX_LEVEL) ? uint32_t(1)<<(TreeConstants::MAX_LEVEL - maxdepth) : getSize();
 	uint32_t dh2   = getSize();
 	uint32_t nline = uint32_t(1)<<(maxdepth-m_level);
 	switch (iface) {
@@ -1047,10 +1047,10 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		return;
 	}
 
-	*nMortons = (m_level < TreeConstants::getMaxLevel()) ? 2 : 1;
+	*nMortons = (m_level < TreeConstants::MAX_LEVEL) ? 2 : 1;
 	mortons->resize(*nMortons);
 
-	uint32_t dh = (m_level < TreeConstants::getMaxLevel()) ? getSize()/2 : getSize();
+	uint32_t dh = (m_level < TreeConstants::MAX_LEVEL) ? getSize()/2 : getSize();
 	uint32_t dh2 = getSize();
 
 	switch (iedge) {
@@ -1208,10 +1208,10 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		return;
 	}
 
-	*nMortons = (m_level < TreeConstants::getMaxLevel()) ? uint32_t(1)<<(maxdepth-m_level) : 1;
+	*nMortons = (m_level < TreeConstants::MAX_LEVEL) ? uint32_t(1)<<(maxdepth-m_level) : 1;
 	mortons->resize(*nMortons);
 
-	uint32_t dh = (m_level < TreeConstants::getMaxLevel()) ? uint32_t(1)<<(TreeConstants::getMaxLevel() - maxdepth) : getSize();
+	uint32_t dh = (m_level < TreeConstants::MAX_LEVEL) ? uint32_t(1)<<(TreeConstants::MAX_LEVEL - maxdepth) : getSize();
 	uint32_t dh2 = getSize();
 	switch (iedge) {
 	case 0 :
@@ -1391,7 +1391,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 
 	*hasMorton = true;
 
-	uint32_t dh  = (m_level < TreeConstants::getMaxLevel()) ? uint32_t(1)<<(TreeConstants::getMaxLevel() - maxdepth) : getSize();
+	uint32_t dh  = (m_level < TreeConstants::MAX_LEVEL) ? uint32_t(1)<<(TreeConstants::MAX_LEVEL - maxdepth) : getSize();
 	uint32_t dh2 = getSize();
 	switch (inode) {
 	case 0 :
@@ -1494,7 +1494,7 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
 	uint64_t Morton;
 	uint32_t dh;
 	dh = getSize();
-	uint32_t maxLength = uint32_t(1)<<TreeConstants::getMaxLevel();
+	uint32_t maxLength = uint32_t(1)<<TreeConstants::MAX_LEVEL;
 
 	if (!m_info[iface]){
 		return this->computeMorton();
@@ -1544,7 +1544,7 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
  */
 Octant Octant::computePeriodicOctant(uint8_t iface) const {
 	Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z);
-	uint32_t maxLength = uint32_t(1)<<TreeConstants::getMaxLevel();
+	uint32_t maxLength = uint32_t(1)<<TreeConstants::MAX_LEVEL;
 	uint32_t dh = this->getSize();
 
 	if (!m_info[iface]){
@@ -1603,7 +1603,7 @@ array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
 	coord[1] = this->m_y;
 	coord[2] = this->m_z;
 	int64_t dh = this->getSize();
-	int64_t maxLength = int64_t(1)<<TreeConstants::getMaxLevel();
+	int64_t maxLength = int64_t(1)<<TreeConstants::MAX_LEVEL;
 
 	switch (iface) {
 	case 0 :
