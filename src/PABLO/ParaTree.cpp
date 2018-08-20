@@ -1140,8 +1140,8 @@ namespace bitpit {
     /*! Get the components (in logical domain) of the 6 normals to the faces of an octant (for the 2D case consider only the first 4)
      * \return Pointer to normals array[6][3] to the faces of an octant.
      */
-    int8_t
-        (*ParaTree::getNormals())[3]{
+    const int8_t
+        (*ParaTree::getNormals() const) [3] {
         return m_global.m_normals;
     }
 
@@ -1150,8 +1150,8 @@ namespace bitpit {
      * \return Pointer to opposed faces array[6] to the faces of an octant (oppface[i] = Index of the
      * face of an octant neighbour through the i-th face of the current octant).
      */
-    uint8_t
-        *ParaTree::getOppface(){
+    const uint8_t
+        *ParaTree::getOppface() const {
         return m_global.m_oppFace;
     }
 
@@ -1159,8 +1159,8 @@ namespace bitpit {
      * \return Pointer to connectivity face-node. facenode[i][0:1] = local indices of nodes
      * of the i-th face of an octant.
      */
-    uint8_t
-        (*ParaTree::getFacenode())[4]{
+    const uint8_t
+        (*ParaTree::getFacenode() const)[4] {
         return m_global.m_faceNode;
     }
 
@@ -1168,8 +1168,8 @@ namespace bitpit {
      * \return Pointer to connectivity node-face. nodeface[i][0:1] = local indices of faces
      * sharing the i-th node of an octant.
      */
-    uint8_t
-        (*ParaTree::getNodeface())[3]{
+    const uint8_t
+        (*ParaTree::getNodeface() const)[3] {
         return m_global.m_nodeFace;
     }
 
@@ -1177,24 +1177,24 @@ namespace bitpit {
      * \return Pointer to connectivity edge-face. edgeface[i][0:1] = local indices of
      * faces sharing the i-th edge of an octant.
      */
-    uint8_t
-        (*ParaTree::getEdgeface())[2]{
+    const uint8_t
+        (*ParaTree::getEdgeface() const)[2] {
         return m_global.m_edgeFace;
     }
 
     /*!Get the normals of the nodes (in 2D case consider only the first 4).
      * \return Pointer to components (x,y,z) of the "normals" of the nodes.
      */
-    int8_t
-        (*ParaTree::getNodecoeffs())[3]{
+    const int8_t
+        (*ParaTree::getNodecoeffs() const)[3] {
         return m_global.m_nodeCoeffs;
     };
 
     /*!Get the normals per edge (in 2D case not to be considered at all).
      * \return Pointer to components (x,y,z) of the "normals" per edge.
      */
-    int8_t
-        (*ParaTree::getEdgecoeffs())[3]{
+    const int8_t
+        (*ParaTree::getEdgecoeffs() const)[3] {
         return m_global.m_edgeCoeffs;
     };
 
