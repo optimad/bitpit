@@ -116,6 +116,8 @@ class Octant{
                                                         {0,2,1},{2,2,1},{0,1,2},
                                                         {2,1,2},{1,0,2},{1,2,2}};  /**< Static member for internal use. */
 
+    static const TreeConstants::Instances sm_treeConstants; /**< Static member for internal use. */
+
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //

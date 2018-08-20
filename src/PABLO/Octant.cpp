@@ -114,6 +114,8 @@ constexpr int Octant::sm_CoeffNode[8][3];
 constexpr int Octant::sm_CoeffFaceCenter[6][3];
 constexpr int Octant::sm_CoeffEdgeCenter[12][3];
 
+const TreeConstants::Instances Octant::sm_treeConstants = TreeConstants::instances();
+
 // =================================================================================== //
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
@@ -432,8 +434,7 @@ Octant::setGhostLayer(int ghostLayer){
  */
 uint32_t
 Octant::getSize() const{
-	uint32_t size = uint32_t(1) << (TreeConstants::getMaxLevel() - m_level);
-	return size;
+	return sm_treeConstants[m_dim].getLength(m_level);
 };
 
 /*! Get the area of an octant in logical domain .
@@ -441,8 +442,7 @@ Octant::getSize() const{
  */
 uint64_t
 Octant::getArea() const{
-	uint64_t area = uint64_t(1) << ((m_dim-1) * (TreeConstants::getMaxLevel() - m_level));
-	return area;
+	return sm_treeConstants[m_dim].getArea(m_level);
 };
 
 /*! Get the volume of an octant in logical domain.
@@ -450,8 +450,7 @@ Octant::getArea() const{
  */
 uint64_t
 Octant::getVolume() const{
-	uint64_t volume = uint64_t(1) << (m_dim * (TreeConstants::getMaxLevel() - m_level));
-	return volume;
+	return sm_treeConstants[m_dim].getVolume(m_level);
 };
 
 // =================================================================================== //
