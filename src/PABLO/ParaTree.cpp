@@ -472,7 +472,7 @@ namespace bitpit {
         utils::binary::write(stream, getStatus());
         utils::binary::write(stream, getBalanceCodimension());
 
-        for (int i = 0; i < m_global->m_nfaces; i++) {
+        for (int i = 0; i < m_global->nFaces; i++) {
             utils::binary::write(stream, getPeriodic(i));
         }
 
@@ -577,7 +577,7 @@ namespace bitpit {
         utils::binary::read(stream, balanceCodimension);
         setBalanceCodimension(balanceCodimension);
 
-        for (int i = 0; i < m_global->m_nfaces; i++) {
+        for (int i = 0; i < m_global->nFaces; i++) {
             bool periodicBorder;
             utils::binary::read(stream, periodicBorder);
             if (periodicBorder){
@@ -1014,7 +1014,7 @@ namespace bitpit {
      */
     uint8_t
     ParaTree::getNnodes() const {
-        return m_global->m_nnodes;
+        return m_global->nNodes;
     }
 
     /*! Get the number of faces for each octant (4 for 2D case, 6 for 3D case)
@@ -1022,7 +1022,7 @@ namespace bitpit {
      */
     uint8_t
     ParaTree::getNfaces() const {
-        return m_global->m_nfaces;
+        return m_global->nFaces;
     }
 
     /*! Get the number of edges for each octant (0 for 2D case, 12 for 3D case)
@@ -1030,7 +1030,7 @@ namespace bitpit {
      */
     uint8_t
     ParaTree::getNedges() const {
-        return m_global->m_nedges;
+        return m_global->nEdges;
     }
 
     /*! Get the number of possible children for each octant (4 for 2D case, 8 for 3D case)
@@ -1038,7 +1038,7 @@ namespace bitpit {
      */
     uint8_t
     ParaTree::getNchildren() const {
-        return m_global->m_nchildren;
+        return m_global->nChildren;
     }
 
     /*! Get the number of nodes for each face of an octant (2 for 2D case, 4 for 3D case)
@@ -1046,7 +1046,7 @@ namespace bitpit {
      */
     uint8_t
     ParaTree::getNnodesperface() const {
-        return m_global->m_nnodesPerFace;
+        return m_global->nNodesPerFace;
     }
 
     /*! Get the components (in logical domain) of the 6 normals to the faces of an octant (for the 2D case consider only the first 4)
@@ -1056,7 +1056,7 @@ namespace bitpit {
     ParaTree::getNormals(int8_t normals[6][3]) const {
         for (int i=0; i<6; i++){
             for (int j=0; j<3; j++){
-                normals[i][j] = m_global->m_normals[i][j];
+                normals[i][j] = m_global->normals[i][j];
             }
         }
     }
@@ -1069,7 +1069,7 @@ namespace bitpit {
     void
     ParaTree::getOppface(uint8_t oppface[6]) const {
         for (int j=0; j<6; j++){
-            oppface[j] = m_global->m_oppFace[j];
+            oppface[j] = m_global->oppositeFace[j];
         }
     }
 
@@ -1081,7 +1081,7 @@ namespace bitpit {
     ParaTree::getFacenode(uint8_t facenode[6][4]) const {
         for (int i=0; i<6; i++){
             for (int j=0; j<4; j++){
-                facenode[i][j] = m_global->m_faceNode[i][j];
+                facenode[i][j] = m_global->faceNode[i][j];
             }
         }
     }
@@ -1094,7 +1094,7 @@ namespace bitpit {
     ParaTree::getNodeface(uint8_t nodeface[8][3]) const {
         for (int i=0; i<8; i++){
             for (int j=0; j<3; j++){
-                nodeface[i][j] = m_global->m_nodeFace[i][j];
+                nodeface[i][j] = m_global->nodeFace[i][j];
             }
         }
     }
@@ -1107,7 +1107,7 @@ namespace bitpit {
     ParaTree::getEdgeface(uint8_t edgeface[12][2]) const {
         for (int i=0; i<12; i++){
             for (int j=0; j<2; j++){
-                edgeface[i][j] = m_global->m_edgeFace[i][j];
+                edgeface[i][j] = m_global->edgeFace[i][j];
             }
         }
     }
@@ -1120,7 +1120,7 @@ namespace bitpit {
         for (int i=0; i<8; i++){
             nodecoeffs[i][2] = 0;
             for (int j=0; j<m_dim; j++){
-                nodecoeffs[i][j] = m_global->m_nodeCoeffs[i][j];
+                nodecoeffs[i][j] = m_global->nodeCoeffs[i][j];
             }
         }
     }
@@ -1132,7 +1132,7 @@ namespace bitpit {
     ParaTree::getEdgecoeffs(int8_t edgecoeffs[12][3]) const {
         for (int i=0; i<12; i++){
             for (int j=0; j<3; j++){
-                edgecoeffs[i][j] = m_global->m_edgeCoeffs[i][j];
+                edgecoeffs[i][j] = m_global->edgeCoeffs[i][j];
             }
         }
     }
@@ -1142,7 +1142,7 @@ namespace bitpit {
      */
     const int8_t
         (*ParaTree::getNormals() const) [3] {
-        return m_global->m_normals;
+        return m_global->normals;
     }
 
     /*! Get the indices of the faces of virtual octants opposed to the 6 faces of an octant
@@ -1152,7 +1152,7 @@ namespace bitpit {
      */
     const uint8_t
         *ParaTree::getOppface() const {
-        return m_global->m_oppFace;
+        return m_global->oppositeFace;
     }
 
     /*! Get the face-node connectivity for 6 faces (in 2D case consider only the first 4 terms).
@@ -1161,7 +1161,7 @@ namespace bitpit {
      */
     const uint8_t
         (*ParaTree::getFacenode() const)[4] {
-        return m_global->m_faceNode;
+        return m_global->faceNode;
     }
 
     /*! Get the node-face connectivity for 8 nodes (in 2D case consider only the first 4 terms).
@@ -1170,7 +1170,7 @@ namespace bitpit {
      */
     const uint8_t
         (*ParaTree::getNodeface() const)[3] {
-        return m_global->m_nodeFace;
+        return m_global->nodeFace;
     }
 
     /*! Get the edge-face connectivity for 12 edge (in 2D case not to be considered at all).
@@ -1179,7 +1179,7 @@ namespace bitpit {
      */
     const uint8_t
         (*ParaTree::getEdgeface() const)[2] {
-        return m_global->m_edgeFace;
+        return m_global->edgeFace;
     }
 
     /*!Get the normals of the nodes (in 2D case consider only the first 4).
@@ -1187,7 +1187,7 @@ namespace bitpit {
      */
     const int8_t
         (*ParaTree::getNodecoeffs() const)[3] {
-        return m_global->m_nodeCoeffs;
+        return m_global->nodeCoeffs;
     };
 
     /*!Get the normals per edge (in 2D case not to be considered at all).
@@ -1195,7 +1195,7 @@ namespace bitpit {
      */
     const int8_t
         (*ParaTree::getEdgecoeffs() const)[3] {
-        return m_global->m_edgeCoeffs;
+        return m_global->edgeCoeffs;
     };
 
     /*! Get the periodic condition of the boundaries.
@@ -1228,7 +1228,7 @@ namespace bitpit {
     void
     ParaTree::setPeriodic(uint8_t i){
         m_periodic[i] = true;
-        m_periodic[m_global->m_oppFace[i]] = true;
+        m_periodic[m_global->oppositeFace[i]] = true;
         m_octree.setPeriodic(m_periodic);
     };
 
@@ -1409,7 +1409,7 @@ namespace bitpit {
     void
     ParaTree::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const {
         i8array3 normal_;
-        m_octree.m_octants[idx].getNormal(iface, normal_, m_global->m_normals);
+        m_octree.m_octants[idx].getNormal(iface, normal_, m_global->normals);
         m_trans.mapNormals(normal_, normal);
     }
 
@@ -1422,7 +1422,7 @@ namespace bitpit {
     ParaTree::getNormal(uint32_t idx, uint8_t iface) const {
         darray3 normal;
         i8array3 normal_;
-        m_octree.m_octants[idx].getNormal(iface, normal_, m_global->m_normals);
+        m_octree.m_octants[idx].getNormal(iface, normal_, m_global->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
     }
@@ -1859,7 +1859,7 @@ namespace bitpit {
     void
     ParaTree::getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const {
         i8array3 normal_;
-        oct->getNormal(iface, normal_, m_global->m_normals);
+        oct->getNormal(iface, normal_, m_global->normals);
         m_trans.mapNormals(normal_, normal);
     }
 
@@ -1872,7 +1872,7 @@ namespace bitpit {
     ParaTree::getNormal(const Octant* oct, uint8_t iface) const {
         darray3 normal;
         i8array3 normal_;
-        oct->getNormal(iface, normal_, m_global->m_normals);
+        oct->getNormal(iface, normal_, m_global->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
     }
@@ -2393,10 +2393,10 @@ namespace bitpit {
         uint8_t iface = inter->m_iface;
         u32arr3vector nodes_all;
         oct.getNodes(nodes_all);
-        u32arr3vector nodes_(m_global->m_nnodesPerFace);
-        for (int i=0; i<m_global->m_nnodesPerFace; i++){
+        u32arr3vector nodes_(m_global->nNodesPerFace);
+        for (int i=0; i<m_global->nNodesPerFace; i++){
             for (int j=0; j<3; j++){
-                nodes_[i][j] = nodes_all[m_global->m_faceNode[iface][i]][j];
+                nodes_[i][j] = nodes_all[m_global->faceNode[iface][i]][j];
             }
         }
         m_trans.mapNodesIntersection(nodes_, nodes);
@@ -2417,7 +2417,7 @@ namespace bitpit {
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
         uint8_t iface = inter->m_iface;
         i8array3 normal_;
-        oct.getNormal(iface, normal_, m_global->m_normals);
+        oct.getNormal(iface, normal_, m_global->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
     }
@@ -2537,7 +2537,7 @@ namespace bitpit {
     ParaTree::setDim(uint8_t dim){
         m_dim = dim;
         m_global = &(TreeConstants::instance(m_dim));
-        m_periodic.resize(m_global->m_nfaces, false);
+        m_periodic.resize(m_global->nFaces, false);
     }
 
     /*! Set the first finer descendant of the local tree.
@@ -2683,7 +2683,7 @@ namespace bitpit {
 
         int octantLevel = getLevel(oct);
         if (dim == 3) {
-            for (int edge : m_global->m_nodeEdge[inode]) {
+            for (int edge : m_global->nodeEdge[inode]) {
                 findNeighbours(oct, edge, 2, neigh_edge, isghost_edge);
                 for (std::size_t i = 0; i < neigh_edge.size(); ++i) {
                     const Octant* neighOctant;
@@ -2705,7 +2705,7 @@ namespace bitpit {
             }
         }
         for (int j = 0; j < dim; ++j) {
-            int face = m_global->m_nodeFace[inode][j];
+            int face = m_global->nodeFace[inode][j];
             findNeighbours(oct, face, 1, neigh_face, isghost_face);
             for (std::size_t i = 0; i < neigh_face.size(); ++i) {
                 const Octant* neighOctant;
@@ -3153,7 +3153,7 @@ namespace bitpit {
         // return the value stored in the mapper.
         if (getIsNewC(idx)){
             // Count the children
-            int nChildren = m_global->m_nchildren;
+            int nChildren = m_global->nChildren;
 
             int nInternalChildren = nChildren;
             if (idx == (getNumOctants() - 1)) {
@@ -3335,7 +3335,7 @@ namespace bitpit {
         assert(dim == 3);
 
         // Get the coordinates of the edge
-        const uint8_t (*edgeNodes)[2] = &m_global->m_edgeNode[edgeIndex];
+        const uint8_t (*edgeNodes)[2] = &m_global->edgeNode[edgeIndex];
         std::array<uint32_t, 3> minEdgeCoords = edgeOctant->getNode((*edgeNodes)[0]);
         std::array<uint32_t, 3> maxEdgeCoords = edgeOctant->getNode((*edgeNodes)[1]);
 
@@ -3379,7 +3379,7 @@ namespace bitpit {
         int dim = octant->getDim();
 
         // Get minimum/maximum coordinates of the face
-        const uint8_t (*faceNodes)[6][4] = &m_global->m_faceNode;
+        const uint8_t (*faceNodes)[6][4] = &m_global->faceNode;
         std::array<uint32_t, 3> minFaceCoords = faceOctant->getNode((*faceNodes)[faceIndex][0]);
         std::array<uint32_t, 3> maxFaceCoords = faceOctant->getNode((*faceNodes)[faceIndex][2 * dim - 1]);
 
@@ -5201,7 +5201,7 @@ namespace bitpit {
             Octant &octant = m_octree.m_octants[idx];
 
             // Virtual Face Neighbors
-            for(uint8_t i = 0; i < m_global->m_nfaces; ++i){
+            for(uint8_t i = 0; i < m_global->nFaces; ++i){
                 bool isFacePbound = false;
                 if(octant.getBound(i) == false){
                     octant.computeFaceVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
@@ -5236,8 +5236,8 @@ namespace bitpit {
             }
 
             // Virtual Edge Neighbors
-            for(uint8_t e = 0; e < m_global->m_nedges; ++e){
-                octant.computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_global->m_edgeFace, &nVirtualNeighbors, &virtualNeighbors);
+            for(uint8_t e = 0; e < m_global->nEdges; ++e){
+                octant.computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_global->edgeFace, &nVirtualNeighbors, &virtualNeighbors);
                 if(nVirtualNeighbors > 0){
                     uint32_t maxDelta = nVirtualNeighbors/2;
                     for(uint32_t ee = 0; ee <= maxDelta; ++ee){
@@ -5258,10 +5258,10 @@ namespace bitpit {
             }
 
             // Virtual Corner Neighbors
-            for(uint8_t c = 0; c < m_global->m_nnodes; ++c){
+            for(uint8_t c = 0; c < m_global->nNodes; ++c){
                 bool hasVirtualNeighbour;
                 uint64_t virtualNeighbor;
-                octant.computeNodeVirtualMorton(c, m_maxDepth,m_global->m_nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
+                octant.computeNodeVirtualMorton(c, m_maxDepth,m_global->nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
                 if(hasVirtualNeighbour){
                     int neighProc = findOwner(virtualNeighbor);
                     if (neighProc != m_rank) {
@@ -5993,7 +5993,7 @@ namespace bitpit {
             << "          ";
         for(int i = 0; i < nofOctants; i++)
             {
-                for(int j = 0; j < m_global->m_nnodes; j++)
+                for(int j = 0; j < m_global->nNodes; j++)
                     {
                         int jj = j;
                         if (m_dim==2){
@@ -6014,7 +6014,7 @@ namespace bitpit {
             }
         for(int i = 0; i < nofGhosts; i++)
             {
-                for(int j = 0; j < m_global->m_nnodes; j++)
+                for(int j = 0; j < m_global->nNodes; j++)
                     {
                         int jj = j;
                         if (m_dim==2){
@@ -6038,7 +6038,7 @@ namespace bitpit {
             << "          ";
         for(int i = 0; i < nofAll; i++)
             {
-                out << (i+1)*m_global->m_nnodes << " ";
+                out << (i+1)*m_global->nNodes << " ";
                 if((i+1)%12==0 && i!=nofAll-1)
                     out << endl << "          ";
             }
@@ -6159,7 +6159,7 @@ namespace bitpit {
             << "          ";
         for(int i = 0; i < nofOctants; i++)
             {
-                for(int j = 0; j < m_global->m_nnodes; j++)
+                for(int j = 0; j < m_global->nNodes; j++)
                     {
                         int jj = j;
                         if (m_dim==2){
@@ -6183,7 +6183,7 @@ namespace bitpit {
             << "          ";
         for(int i = 0; i < nofAll; i++)
             {
-                out << (i+1)*m_global->m_nnodes << " ";
+                out << (i+1)*m_global->nNodes << " ";
                 if((i+1)%12==0 && i!=nofAll-1)
                     out << endl << "          ";
             }

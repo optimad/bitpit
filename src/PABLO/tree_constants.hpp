@@ -50,15 +50,7 @@ namespace bitpit {
  *	construction of a paratree object.
  *
  */
-class TreeConstants {
-
-	// =================================================================================== //
-	// FRIENDSHIPS
-	// =================================================================================== //
-	friend class ParaTree;
-	friend class LocalTree;
-	friend class Map;
-	friend class Octant;
+struct TreeConstants {
 
 public:
 	// =================================================================================== //
@@ -78,60 +70,35 @@ public:
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //
+	uint8_t  nChildren;             /**< Number of children of an octant */
+	uint8_t  nFaces;                /**< Number of faces of an octant */
+	uint8_t  nEdges;                /**< Number of edges of an octant */
+	uint8_t  nNodes;                /**< Number of nodes of an octant */
+	uint8_t  nNodesPerFace;         /**< Number of nodes per face of an octant */
+
+	uint8_t  oppositeFace[6];       /**< oppositeFace[i]  = Index of the face of an octant neighbour through the i-th face of the current octant */
+	uint8_t  nodeFace[8][3];        /**< nodeface[i][0:1] = Local indices of faces sharing the i-th node of an octant */
+	uint8_t  nodeEdge[8][3];        /**< nodeedge[i][0:1] = Local indices of edges sharing the i-th node of an octant */
+	uint8_t  faceNode[6][4];        /**< facenode[i][0:1] = Local indices of nodes of the i-th face of an octant */
+	uint8_t  edgeFace[12][2];       /**< edgeface[i][0:1] = Local indices of faces sharing the i-th edge of an octant */
+	uint8_t  edgeNode[12][2];       /**< edgeNode[i][0:1] = Local indices of nodes of the i-th edge of an octant */
+	int8_t   normals[6][3];         /**< Components (x,y,z) of the normals per face (z=0 in 2D) */
+	int8_t   edgeCoeffs[12][3];     /**< Components (x,y,z) of the "normals" per edge */
+	int8_t   nodeCoeffs[8][3];      /**< Components (x,y,z) of the "normals" per node */
+	uint8_t  parallelEdges[12][3];  /**< Parallel edges per edge */
+
+	std::array<uint32_t, MAX_LEVEL> lengths;   /**< Lengths associated to the levels */
+	std::array<uint64_t, MAX_LEVEL> areas;     /**< Areas associated to the levels */
+	std::array<uint64_t, MAX_LEVEL> volumes;   /**< Volumes associated to the levels */
+
 private:
-	uint8_t  m_nchildren;			/**< Number of children of an octant */
-	uint8_t  m_nfaces;				/**< Number of faces of an octant */
-	uint8_t  m_nedges;				/**< Number of edges of an octant */
-	uint8_t  m_nnodes;				/**< Number of nodes of an octant */
-	uint8_t  m_nnodesPerFace;		/**< Number of nodes per face of an octant */
-	uint8_t  m_oppFace[6];			/**< oppface[i] = Index of the face of an octant neighbour through the i-th face of the current octant */
-	uint8_t  m_nodeFace[8][3];		/**< nodeface[i][0:1] = local indices of faces sharing the i-th node of an octant */
-	uint8_t  m_nodeEdge[8][3];		/**< nodeedge[i][0:1] = local indices of edges sharing the i-th node of an octant */
-	uint8_t  m_faceNode[6][4];		/**< facenode[i][0:1] = local indices of nodes of the i-th face of an octant */
-	uint8_t  m_edgeFace[12][2];		/**< edgeface[i][0:1] = local indices of faces sharing the i-th edge of an octant */
-	uint8_t  m_edgeNode[12][2];		/**< edgeNode[i][0:1] = local indices of nodes of the i-th edge of an octant */
-	int8_t   m_normals[6][3];		/**< Components (x,y,z) of the normals per face (z=0 in 2D) */
-	int8_t   m_edgeCoeffs[12][3];	/**< Components (x,y,z) of the "normals" per edge */
-	int8_t   m_nodeCoeffs[8][3];	/**< Components (x,y,z) of the "normals" per node */
-	uint8_t  m_parallelEdges[12][3];/**< Parallel edges per edge */
-
-	std::array<uint32_t, MAX_LEVEL> m_lengths;   /**< Lengths associated to the levels */
-	std::array<uint64_t, MAX_LEVEL> m_areas;     /**< Areas associated to the levels */
-	std::array<uint64_t, MAX_LEVEL> m_volumes;   /**< Volumes associated to the levels */
-
 	// =================================================================================== //
 	// METHODS
 	// =================================================================================== //
 	TreeConstants();
 	TreeConstants(uint8_t dim);
 
-	// =================================================================================== //
-	// BASIC GET/SET METHODS
-	// =================================================================================== //
-	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]) const;
-	void 		getEdgeface(uint8_t edgeface[12][2]) const;
-	void 		getEdgenode(uint8_t edgeNode[12][2]) const;
-	void 		getEdgenode(uint8_t edge, uint8_t edgeNode[2]) const;
-	void 		getFacenode(uint8_t facenode[6][4]) const;
-	void 		getNodeedge(uint8_t nodeegde_[8][3]) const;
-	uint8_t 	getNchildren() const;
-	uint8_t 	getNedges() const;
-	uint8_t 	getNfaces() const;
-	uint8_t 	getNnodes() const;
-	uint8_t 	getNnodesperface() const;
-	void 		getNodecoeffs(int8_t nodecoeffs[8][3]) const;
-	void 		getNodeface(uint8_t nodeface[8][3]) const;
-	void 		getNormals(int8_t normals[6][3]) const;
-	uint8_t 	getOctantBytes() const;
-	void 		getOppface(uint8_t oppface[6]) const;
-	void 		getParallelEdges(uint8_t parallelEdges[12][3]) const;
-	void 		getParallelEdges(uint8_t edge, uint8_t parallelEdges[]) const;
-
-	uint32_t    getLength(uint8_t level) const;
-	uint64_t    getArea(uint8_t level) const;
-	uint64_t    getVolume(uint8_t level) const;
-
-	void 		initialize(uint8_t dim);
+	void initialize(uint8_t dim);
 
 };
 

@@ -434,7 +434,7 @@ Octant::setGhostLayer(int ghostLayer){
  */
 uint32_t
 Octant::getSize() const{
-	return sm_treeConstants[m_dim].getLength(m_level);
+	return sm_treeConstants[m_dim].lengths[m_level];
 };
 
 /*! Get the area of an octant in logical domain .
@@ -442,7 +442,7 @@ Octant::getSize() const{
  */
 uint64_t
 Octant::getArea() const{
-	return sm_treeConstants[m_dim].getArea(m_level);
+	return sm_treeConstants[m_dim].areas[m_level];
 };
 
 /*! Get the volume of an octant in logical domain.
@@ -450,7 +450,7 @@ Octant::getArea() const{
  */
 uint64_t
 Octant::getVolume() const{
-	return sm_treeConstants[m_dim].getVolume(m_level);
+	return sm_treeConstants[m_dim].volumes[m_level];
 };
 
 // =================================================================================== //
