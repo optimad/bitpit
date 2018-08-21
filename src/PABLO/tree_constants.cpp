@@ -67,9 +67,6 @@ TreeConstants::TreeConstants(uint8_t dim) {
 void
 TreeConstants::initialize(uint8_t dim) {
 
-	if (dim>3) dim = 3;
-	if (dim<2) dim = 2;
-
 	nChildren 			= uint8_t(1)<<dim;
 	nFaces 				= 2*dim;
 	nNodes				= uint8_t(1)<<dim;
