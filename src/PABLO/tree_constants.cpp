@@ -269,6 +269,35 @@ TreeConstants::getParallelEdges(uint8_t edge, uint8_t parallelEdges[]) const {
     }
 }
 
+/*! Get the length associated with the specified level
+* \param[in] level is the level
+* \return The length associated with the specified level.
+*/
+uint32_t
+TreeConstants::getLength(uint8_t level) const {
+    return m_lengths[level];
+}
+
+
+/*! Get the length associated with the specified level
+* \param[in] level is the level
+* \return The length associated with the specified level.
+*/
+uint64_t
+TreeConstants::getArea(uint8_t level) const {
+    return m_areas[level];
+}
+
+
+/*! Get the length associated with the specified level
+* \param[in] level is the level
+* \return The length associated with the specified level.
+*/
+uint64_t
+TreeConstants::getVolume(uint8_t level) const {
+    return m_volumes[level];
+}
+
 /*! Initialization of static global variables.
  * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
  */
@@ -533,6 +562,13 @@ TreeConstants::initialize(uint8_t dim) {
 	m_parallelEdges[11][0] = 2;
 	m_parallelEdges[11][1] = 3;
 	m_parallelEdges[11][2] = 10;
+
+	int maxLevel = getMaxLevel();
+	for (int level = 0; level < maxLevel; ++level) {
+		m_lengths[level] = uint32_t(1) << (maxLevel - level);
+		m_areas[level]   = uint64_t(1) << ((dim - 1) * (maxLevel - level));
+		m_volumes[level] = uint64_t(1) << (dim * (maxLevel - level));
+	}
 
 }
 

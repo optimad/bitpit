@@ -95,6 +95,10 @@ private:
 	int8_t   m_nodeCoeffs[8][3];	/**< Components (x,y,z) of the "normals" per node */
 	uint8_t  m_parallelEdges[12][3];/**< Parallel edges per edge */
 
+	std::array<uint32_t, m_maxLevel> m_lengths;   /**< Lengths associated to the levels */
+	std::array<uint64_t, m_maxLevel> m_areas;     /**< Areas associated to the levels */
+	std::array<uint64_t, m_maxLevel> m_volumes;   /**< Volumes associated to the levels */
+
 	// =================================================================================== //
 	// METHODS
 	// =================================================================================== //
