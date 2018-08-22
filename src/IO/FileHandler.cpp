@@ -38,16 +38,10 @@ namespace bitpit{
  * Refers to a serial file in the current directory called "file.dat"
  * Default values of counters and blocks are set to 0.
  */
-FileHandler::FileHandler(){
-   
-    directory  = "./" ; 
-    name       = "file" ;
-    appendix   = "dat" ;
-    series     = false ;
-    parallel   = false ;
-    counter    = 0 ;
-    block      = 0 ;
-    
+FileHandler::FileHandler()
+    : directory("./"), name("file"), appendix("dat"),
+      series(false), parallel(false),
+      counter(0), block(0) {
 } ;
 
 /*!
@@ -58,12 +52,10 @@ FileHandler::FileHandler(){
  * @param[in]   name_   name of the file
  * @param[in]   app_    appendix of the file
  */
-FileHandler::FileHandler( std::string dir_, std::string name_, std::string app_):
-    directory(dir_), name(name_), appendix(app_){
-    series     = false ;
-    parallel   = false ;
-    counter    = 0 ;
-    block      = 0 ;
+FileHandler::FileHandler(const std::string &dir_, const std::string &name_, const std::string &app_)
+    : directory(dir_), name(name_), appendix(app_),
+      series(false), parallel(false),
+      counter(0), block(0) {
 };
 
 /*!
