@@ -188,13 +188,13 @@ namespace bitpit {
         // =================================================================================== //
     public:
 #if BITPIT_ENABLE_MPI==1
-        ParaTree(std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
-        ParaTree(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
-        ParaTree(std::istream &stream, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        ParaTree(const std::string &logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        ParaTree(uint8_t dim, const std::string &logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        ParaTree(std::istream &stream, const std::string &logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
 #else
-        ParaTree(std::string logfile = DEFAULT_LOG_FILE);
-        ParaTree(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE);
-        ParaTree(std::istream &stream, std::string logfile = DEFAULT_LOG_FILE);
+        ParaTree(const std::string &logfile = DEFAULT_LOG_FILE);
+        ParaTree(uint8_t dim, const std::string &logfile = DEFAULT_LOG_FILE);
+        ParaTree(std::istream &stream, const std::string &logfile = DEFAULT_LOG_FILE);
 #endif
         ~ParaTree();
 
@@ -543,8 +543,8 @@ namespace bitpit {
         // TESTING OUTPUT METHODS												    			   //
         // =================================================================================== //
     public:
-        void 		write(std::string filename);
-        void 		writeTest(std::string filename, dvector data);
+        void 		write(const std::string &filename);
+        void 		writeTest(const std::string &filename, dvector data);
 
         // =================================================================================== //
         // TEMPLATE METHODS												    			       //

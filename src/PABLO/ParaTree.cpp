@@ -134,9 +134,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(std::string logfile, MPI_Comm comm )
+    ParaTree::ParaTree(const std::string &logfile, MPI_Comm comm )
 #else
-    ParaTree::ParaTree(std::string logfile )
+    ParaTree::ParaTree(const std::string &logfile )
 #endif
     {
 #if BITPIT_ENABLE_MPI==1
@@ -156,9 +156,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(uint8_t dim, std::string logfile, MPI_Comm comm )
+    ParaTree::ParaTree(uint8_t dim, const std::string &logfile, MPI_Comm comm )
 #else
-    ParaTree::ParaTree(uint8_t dim, std::string logfile )
+    ParaTree::ParaTree(uint8_t dim, const std::string &logfile )
 #endif
         : m_octree(dim), m_trans(dim)
     {
@@ -183,9 +183,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    ParaTree::ParaTree(std::istream &stream, std::string logfile, MPI_Comm comm)
+    ParaTree::ParaTree(std::istream &stream, const std::string &logfile, MPI_Comm comm)
 #else
-    ParaTree::ParaTree(std::istream &stream, std::string logfile)
+    ParaTree::ParaTree(std::istream &stream, const std::string &logfile)
 #endif
     {
 #if BITPIT_ENABLE_MPI==1
@@ -5951,7 +5951,7 @@ namespace bitpit {
      * \param[in] filename Name of output file (PABLO will add the total number of processes p000# and the current rank s000#).
      */
     void
-    ParaTree::write(string filename) {
+    ParaTree::write(const std::string &filename) {
 
         if (m_octree.m_connectivity.size() == 0) {
             m_octree.computeConnectivity();
@@ -6106,7 +6106,7 @@ namespace bitpit {
      * \param[in] data Vector of double with user data.
      */
     void
-    ParaTree::writeTest(string filename, vector<double> data) {
+    ParaTree::writeTest(const std::string &filename, vector<double> data) {
 
         if (m_octree.m_connectivity.size() == 0) {
             m_octree.computeConnectivity();
