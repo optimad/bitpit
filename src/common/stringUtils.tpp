@@ -93,7 +93,7 @@ inline std::string &trim(std::string &s)
 * \param[in] s is the input string
 * \param[in] c is the char used as filler
 */
-inline std::string lfill(const int &nchars, std::string &s, char c)
+inline std::string lfill(const int &nchars, const std::string &s, char c)
 {
     std::stringstream ss;
     ss << std::string(nchars - s.length(), c) << s;
@@ -113,7 +113,7 @@ inline std::string lfill(const int &nchars, std::string &s, char c)
 * \param[in] s is the input string
 * \param[in] c is the char used as filler
 */
-inline std::string rfill(const int &nchars, std::string &s, char c)
+inline std::string rfill(const int &nchars, const std::string &s, char c)
 {
     std::stringstream ss;
     ss << s << std::string(nchars - s.length(), c);
@@ -153,7 +153,7 @@ inline std::string zeroPadNumber(int nchars, int num)
 * \param[in] key is the search key
 * \result Return true if the keyword has been found, false otherwise.
 */
-inline bool keywordInString(std::string line, std::string key)
+inline bool keywordInString(const std::string &line, const std::string &key)
 {
     return (line.find(key) != std::string::npos);
 }

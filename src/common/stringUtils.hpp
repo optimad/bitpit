@@ -52,13 +52,13 @@ inline std::string &rtrim(std::string &s);
 inline std::string &trim(std::string &s);
 
 // Padding operators
-inline std::string lfill(const int &nchars, std::string &s, char c);
-inline std::string rfill(const int &nchars, std::string &s, char c);
+inline std::string lfill(const int &nchars, const std::string &s, char c);
+inline std::string rfill(const int &nchars, const std::string &s, char c);
 inline std::string zeroPadNumber(int nchars, int num);
 
 // Keyword search
-bool getAfterKeyword(std::string line, std::string key, char del, std::string &result);
-inline bool keywordInString(std::string line, std::string key);
+bool getAfterKeyword(const std::string &line, const std::string &key, char del, std::string &result);
+inline bool keywordInString(const std::string &line, const std::string &key);
 
 // Conversion
 template <class T>

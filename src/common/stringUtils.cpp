@@ -48,7 +48,7 @@ namespace string {
 *
 * \result boolean flag, (true) if search key has been found, (false) otherwise
 */
-bool getAfterKeyword(std::string line, std::string key, char del, std::string &result)
+bool getAfterKeyword(const std::string &line, const std::string &key, char del, std::string &result)
 {
     result.clear();
 
@@ -57,7 +57,7 @@ bool getAfterKeyword(std::string line, std::string key, char del, std::string &r
         return false;
     }
 
-    std::string::iterator it = line.begin();
+    std::string::const_iterator it = line.begin();
     advance(it, pos);
     advance(it, key.size());
 
