@@ -73,7 +73,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( ) :VTK() {
  *  @param[in] dir directory of VTK file with final "/"
  *  @param[in] name name of VTK without suffix
  */
-VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name ) :VTKRectilinearGrid( ) {
+VTKRectilinearGrid::VTKRectilinearGrid( const std::string &dir, const std::string &name ) :VTKRectilinearGrid( ) {
 
     setNames( dir, name ) ;
 
@@ -92,7 +92,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name ) :VTK
  *  @param[in] l1 min node index in third direction 
  *  @param[in] l2 max node index in third direction 
  */
-VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFormat codex, int n1, int n2, int m1, int m2, int l1, int l2 ) :VTKRectilinearGrid( ) {
+VTKRectilinearGrid::VTKRectilinearGrid( const std::string &dir, const std::string &name, VTKFormat codex, int n1, int n2, int m1, int m2, int l1, int l2 ) :VTKRectilinearGrid( ) {
 
     setNames( dir, name ) ;
 
@@ -112,7 +112,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
  *  @param[in] m number of nodes in second direction 
  *  @param[in] l number of nodes in third direction 
  */
-VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFormat codex, int n, int m, int l ) : VTKRectilinearGrid( ) {
+VTKRectilinearGrid::VTKRectilinearGrid( const std::string &dir, const std::string &name, VTKFormat codex, int n, int m, int l ) : VTKRectilinearGrid( ) {
 
     setNames( dir, name ) ;
 
@@ -132,7 +132,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
  *  @param[in] m1 min node index in second direction 
  *  @param[in] m2 max node index in second direction 
  */
-VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFormat codex, int n1, int n2, int m1, int m2 ) :VTKRectilinearGrid( ) {
+VTKRectilinearGrid::VTKRectilinearGrid( const std::string &dir, const std::string &name, VTKFormat codex, int n1, int n2, int m1, int m2 ) :VTKRectilinearGrid( ) {
 
     setNames( dir, name ) ;
 
@@ -150,7 +150,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFo
  *  @param[in] n number of nodes in first direction 
  *  @param[in] m number of nodes in second direction 
  */
-VTKRectilinearGrid::VTKRectilinearGrid( std::string dir, std::string name, VTKFormat codex, int n, int m ) : VTKRectilinearGrid( ) {
+VTKRectilinearGrid::VTKRectilinearGrid( const std::string &dir, const std::string &name, VTKFormat codex, int n, int m ) : VTKRectilinearGrid( ) {
 
     setNames( dir, name ) ;
 

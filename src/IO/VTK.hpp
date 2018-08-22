@@ -210,8 +210,8 @@ class VTKBaseStreamer{
     private:
 
     public:
-        virtual void            flushData( std::fstream &, std::string, VTKFormat)  ;
-        virtual void            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t, VTKDataType)  ;
+        virtual void            flushData( std::fstream &, const std::string &, VTKFormat)  ;
+        virtual void            absorbData( std::fstream &, const std::string &, VTKFormat, uint64_t, uint8_t, VTKDataType)  ;
 };
 
 class VTKNativeStreamer : public VTKBaseStreamer {
@@ -225,10 +225,10 @@ class VTKNativeStreamer : public VTKBaseStreamer {
         ~VTKNativeStreamer();
 
         template<class T>
-        void                    addData( std::string, std::vector<T> & ) ;
-        void                    removeData( std::string ) ;
-        void                    flushData( std::fstream &, std::string, VTKFormat) override ;
-        void                    absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t, VTKDataType) override ;
+        void                    addData( const std::string &, std::vector<T> & ) ;
+        void                    removeData( const std::string & ) ;
+        void                    flushData( std::fstream &, const std::string &, VTKFormat) override ;
+        void                    absorbData( std::fstream &, const std::string &, VTKFormat, uint64_t, uint8_t, VTKDataType) override ;
 };
 
 class VTKField{
@@ -252,7 +252,7 @@ class VTKField{
 
         VTKField();
         VTKField( const VTKField &);
-        VTKField( std::string );
+        VTKField( const std::string & );
 
         VTKField& operator=( const VTKField & );
                                 
@@ -267,7 +267,7 @@ class VTKField{
         bool                    isEnabled() const ;
         bool                    hasAllMetaData() const ;
 
-        void                    setName( std::string ) ;
+        void                    setName( const std::string & ) ;
         void                    setDataType( VTKDataType ) ;
         void                    setFieldType( VTKFieldType ) ;
         void                    setLocation( VTKLocation ) ;
@@ -303,19 +303,19 @@ class VTK{
 
     public:
         VTK( );
-        VTK( std::string, std::string );
+        VTK( const std::string &, const std::string & );
         virtual ~VTK( );
 
-        void                    setHeaderType( std::string );
+        void                    setHeaderType( const std::string & );
         std::string             getHeaderType(  ) const;
 
         std::string             getName(  ) const;
         std::string             getDirectory(  ) const;
         int                     getCounter(  ) const;
 
-        void                    setNames( std::string , std::string ) ;
-        void                    setName( std::string ) ;
-        void                    setDirectory( std::string ) ;
+        void                    setNames( const std::string & , const std::string & ) ;
+        void                    setName( const std::string & ) ;
+        void                    setDirectory( const std::string & ) ;
         void                    setCounter( int c_=0 ) ;
         int                     unsetCounter( ) ;
         void                    setParallel( uint16_t , uint16_t ) ;
@@ -328,20 +328,20 @@ class VTK{
 
         VTKField&               addData( VTKField &&field ) ;
 
-        VTKField&               addData( std::string, VTKBaseStreamer* = nullptr ) ;
+        VTKField&               addData( const std::string &, VTKBaseStreamer* = nullptr ) ;
 
         template<class T>
-        VTKField&               addData( std::string, VTKFieldType, VTKLocation, VTKBaseStreamer* = nullptr ) ;
+        VTKField&               addData( const std::string &, VTKFieldType, VTKLocation, VTKBaseStreamer* = nullptr ) ;
 
         template<class T>
-        VTKField&               addData( std::string, std::vector<T> & ) ;
+        VTKField&               addData( const std::string &, std::vector<T> & ) ;
 
         template<class T>
-        VTKField&               addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
+        VTKField&               addData( const std::string &, VTKFieldType, VTKLocation, std::vector<T> & ) ;
 
-        void                    removeData( std::string ) ;
-        void                    enableData( std::string ) ;
-        void                    disableData( std::string ) ;
+        void                    removeData( const std::string & ) ;
+        void                    enableData( const std::string & ) ;
+        void                    disableData( const std::string & ) ;
 
         std::vector<VTKField>::const_iterator    getDataBegin( ) const ;
         std::vector<VTKField>::const_iterator    getDataEnd( ) const ;
@@ -360,7 +360,7 @@ class VTK{
         void                    readData() ;
 
         void                    write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
-        void                    write( std::string, VTKWriteMode writeMode=VTKWriteMode::NO_INCREMENT )  ;
+        void                    write( const std::string &, VTKWriteMode writeMode=VTKWriteMode::NO_INCREMENT )  ;
 
         virtual void            writeMetaInformation() = 0 ;
         void                    writeData() ;
@@ -406,7 +406,7 @@ class VTKUnstructuredGrid : public VTK {
                 VTKElementType          m_type ;                    /**< the type of cells */
                 long                    m_nCells ;                  /**< numer of cells */
 
-                void                    flushData( std::fstream &, std::string, VTKFormat) override ;
+                void                    flushData( std::fstream &, const std::string &, VTKFormat) override ;
 
             public:
                 void                    setElementType( VTKElementType) ;
@@ -422,7 +422,7 @@ class VTKUnstructuredGrid : public VTK {
     ~VTKUnstructuredGrid();
 
     VTKUnstructuredGrid( VTKElementType elementType = VTKElementType::UNDEFINED );
-    VTKUnstructuredGrid( std::string , std::string , VTKElementType elementType = VTKElementType::UNDEFINED ) ;
+    VTKUnstructuredGrid( const std::string &, const std::string &, VTKElementType elementType = VTKElementType::UNDEFINED ) ;
 
     protected:
         void                    writeCollection() override ;
@@ -470,11 +470,11 @@ class VTKRectilinearGrid : public VTK{
 
     protected:
         VTKRectilinearGrid();
-        VTKRectilinearGrid( std::string , std::string  );
-        VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int, int, int, int, int );
-        VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int, int );
-        VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int, int, int );
-        VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int );
+        VTKRectilinearGrid( const std::string & , const std::string &  );
+        VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int, int, int, int );
+        VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int );
+        VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int, int );
+        VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int );
         ~VTKRectilinearGrid();
 
         void                    writeCollection() override ;

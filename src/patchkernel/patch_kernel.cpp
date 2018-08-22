@@ -771,7 +771,7 @@ bool PatchKernel::reserveInterfaces(size_t nInterfaces)
 	\param filename the filename where the patch will be written to
     \param mode is the VTK file mode that will be used for writing the patch
 */
-void PatchKernel::write(std::string filename, VTKWriteMode mode)
+void PatchKernel::write(const std::string &filename, VTKWriteMode mode)
 {
 	std::string oldFilename = m_vtk.getName();
 
@@ -4998,7 +4998,7 @@ const PatchKernel::CellConstRange PatchKernel::getVTKCellWriteRange() const
  *  are "ascii" or "appended". For "appended" type an unformatted binary
  *  stream must be used
  */
-void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat format)
+void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFormat format)
 {
 	assert(format == VTKFormat::APPENDED);
 	BITPIT_UNUSED(format);

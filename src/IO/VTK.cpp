@@ -67,7 +67,7 @@ VTK::VTK(){
  * @param[in]  dir    directory of file with final "/"
  * @param[in]  name   file name without suffix
  */
-VTK::VTK( std::string dir,  std::string name ):
+VTK::VTK(const std::string &dir, const std::string &name ):
      VTK(){
 
     setNames(dir, name) ;
@@ -88,7 +88,7 @@ VTK::~VTK(){
  * set header type for appended binary output
  * @param[in] st header type ["UInt32"/"UInt64"]
  */
-void  VTK::setHeaderType( std::string st){ 
+void  VTK::setHeaderType(const std::string &st){
 
     if( st == "UInt32" || st == "UInt64"){
         m_headerType = st ;
@@ -113,7 +113,7 @@ std::string  VTK::getHeaderType( ) const{
  * @param[in] dir directory of file with final "/"
  * @param[in] name file name without suffix
  */
-void  VTK::setNames( std::string dir, std::string name ){
+void  VTK::setNames( const std::string &dir, const std::string &name ){
 
   setDirectory(dir);
   setName(name);
@@ -124,7 +124,7 @@ void  VTK::setNames( std::string dir, std::string name ){
  * set name for VTK file
  * @param[in] name file name without suffix
  */
-void  VTK::setName( std::string name ){
+void  VTK::setName( const std::string &name ){
 
   m_fh.setName(name);
 
@@ -134,7 +134,7 @@ void  VTK::setName( std::string name ){
  * set directory for VTK file
  * @param[in] dir directory of file with final "/"
  */
-void  VTK::setDirectory( std::string dir ){
+void  VTK::setDirectory( const std::string &dir ){
 
   m_fh.setDirectory(dir);
 
@@ -298,7 +298,7 @@ VTKField& VTK::addData( VTKField &&field ){
  * @param[in] name name of field
  * @param[in] streamer data streamer
  */
-VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
+VTKField& VTK::addData( const std::string &name, VTKBaseStreamer* streamer ){
 
     if( findGeomData(name) ){
         throw std::runtime_error("Not admissible to add user data with same name as geometry field " + name);
@@ -321,7 +321,7 @@ VTKField& VTK::addData( std::string name, VTKBaseStreamer* streamer ){
  * Removes user data from input or output
  * @param[in] name name of field to be removed
  */
-void VTK::removeData( std::string name ){
+void VTK::removeData( const std::string &name ){
 
     std::vector<VTKField>::iterator  fieldItr = m_data.begin();
 
@@ -343,7 +343,7 @@ void VTK::removeData( std::string name ){
  * Enables field for reading and writing
  * @param[in] name name of field to be enabled
  */
-void VTK::enableData( std::string name ){
+void VTK::enableData( const std::string &name ){
 
     VTKField *field = _findData(name);
 
@@ -361,7 +361,7 @@ void VTK::enableData( std::string name ){
  * Disables field for reading and writing
  * @param[in] name name of field to be disabled
  */
-void VTK::disableData( std::string name ){
+void VTK::disableData( const std::string &name ){
 
     VTKField *field = _findData(name);
 
@@ -684,7 +684,7 @@ void VTK::write( VTKWriteMode writeMode ){
  * if writeMode == VTKWriteMode::NO_SERIES no time stamp will be added and the counter will not be increased;
  * if writeMode == VTKWriteMode::NO_INCREMENT the output file will have the same time stamp like the previous one ;
  */
-void VTK::write( std::string name, VTKWriteMode writeMode ){
+void VTK::write( const std::string &name, VTKWriteMode writeMode ){
 
     std::string oldName = getName() ;
 

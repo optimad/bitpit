@@ -147,7 +147,7 @@ void VTKVectorContainer<T>::resize( std::false_type, uint64_t entries, uint8_t c
  * @param[in] data std::vector containing the data
  */
 template<class T>
-void VTKNativeStreamer::addData( std::string name, std::vector<T> &data ){
+void VTKNativeStreamer::addData( const std::string &name, std::vector<T> &data ){
 
     auto fieldItr = m_field.find(name) ;
 

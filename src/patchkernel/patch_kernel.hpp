@@ -420,9 +420,9 @@ public:
 	void setVTKWriteTarget(WriteTarget targetCells);
 	const PatchKernel::CellConstRange getVTKCellWriteRange() const;
 	void write(VTKWriteMode mode = VTKWriteMode::DEFAULT);
-	void write(std::string name, VTKWriteMode mode = VTKWriteMode::DEFAULT);
+	void write(const std::string &name, VTKWriteMode mode = VTKWriteMode::DEFAULT);
 
-	void flushData(std::fstream &stream, std::string name, VTKFormat format) override;
+	void flushData(std::fstream &stream, const std::string &name, VTKFormat format) override;
 
 	int getDumpVersion() const;
 	void dump(std::ostream &stream) const;

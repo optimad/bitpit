@@ -462,7 +462,7 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
  * are "ascii" or "appended". For "appended" type an unformatted binary
  * stream must be used
  */
-void LevelSetObject::flushData( std::fstream &stream, std::string name, VTKFormat format){
+void LevelSetObject::flushData( std::fstream &stream, const std::string &name, VTKFormat format){
 
 
     if(utils::string::keywordInString(name,"value")){

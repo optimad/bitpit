@@ -31,7 +31,7 @@ namespace bitpit{
  * @param[in] data std::vector containing the data
  */
 template<class T>
-VTKField& VTK::addData( std::string name, std::vector<T> &data ){
+VTKField& VTK::addData( const std::string &name, std::vector<T> &data ){
 
     VTKField& field= addData( name, &m_nativeStreamer) ;
     field.setDataType( VTKTypes::whichType<T>()) ;
@@ -52,7 +52,7 @@ VTKField& VTK::addData( std::string name, std::vector<T> &data ){
  * @param[in] data data
  */
 template<class T>
-VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, std::vector<T> &data ){
+VTKField& VTK::addData(const std::string &name, VTKFieldType comp,  VTKLocation loc, std::vector<T> &data ){
 
     VTKField&   field = addData( name, data ) ;
 
@@ -73,7 +73,7 @@ VTKField& VTK::addData( std::string name, VTKFieldType comp,  VTKLocation loc, s
  * @param[in] streamer data streamer
  */
 template<class T>
-VTKField& VTK::addData( std::string name, VTKFieldType comp, VTKLocation loc, VTKBaseStreamer *streamer ){
+VTKField& VTK::addData( const std::string &name, VTKFieldType comp, VTKLocation loc, VTKBaseStreamer *streamer ){
 
     VTKField&   field = addData( name, streamer ) ;
 

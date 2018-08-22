@@ -60,7 +60,7 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::setCellCount( long n){
  * @param[in] name name of field
  * @param[in] format ASCII or BINARY format
  */
-void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str, std::string name, VTKFormat format){
+void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str, const std::string &name, VTKFormat format){
 
     assert( m_type != VTKElementType::UNDEFINED ) ;
 
@@ -168,7 +168,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
  *  @param[in] name Name of vtk file without suffix
  *  @param[in] elementType Type of elements in the grid
  */
-VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir, std::string name, VTKElementType elementType ):VTKUnstructuredGrid( elementType ){
+VTKUnstructuredGrid::VTKUnstructuredGrid( const std::string &dir, const std::string &name, VTKElementType elementType ):VTKUnstructuredGrid( elementType ){
 
     setNames( dir, name ) ; 
 

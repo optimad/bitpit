@@ -69,7 +69,7 @@ VTKField::VTKField( const VTKField &other){
  * Constructor
  * @param[in] name name of data field
  */
-VTKField::VTKField( std::string name ): VTKField() {
+VTKField::VTKField( const std::string &name ): VTKField() {
     setName(name) ;
 }
 
@@ -95,7 +95,7 @@ VTKField& VTKField::operator=( const VTKField & other){
  * set name of data field
  * @param[in] name name of data field
  */
-void VTKField::setName( std::string  name){ 
+void VTKField::setName( const std::string &name){
     m_name= name; 
 }
 
