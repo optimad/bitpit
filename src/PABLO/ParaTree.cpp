@@ -3593,7 +3593,7 @@ namespace bitpit {
         uint32_t nocts0 = getNumOctants();
         vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
-        for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
+        for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
             iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
             iter->m_info[Octant::INFO_NEW4COARSENING] = false;
             iter->m_info[Octant::INFO_AUX] = false;
@@ -4613,7 +4613,7 @@ namespace bitpit {
         uint32_t nocts0 = getNumOctants();
         vector<Octant >::iterator iter, iterend = m_octree.m_octants.end();
 
-        for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
+        for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
             iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
             iter->m_info[Octant::INFO_NEW4COARSENING] = false;
         }
