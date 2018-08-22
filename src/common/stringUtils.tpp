@@ -39,7 +39,8 @@ namespace string {
 * Remove left trailing spaces from string. For instance, if the input string is
 * "  test_string  ", on output this function returns "test_string  "
 *
-* \param[in] s is the input string
+* \param[in,out] s on input contains the input string, on output contains the
+* trimmed string
 * \result A reference to the input string.
 */
 inline std::string & ltrim(std::string &s)
@@ -56,7 +57,8 @@ inline std::string & ltrim(std::string &s)
 * Remove right blank spaces from string. For instance, if the input string is
 * "  test_string  ", on output this function returns "  test_string"
 *
-* \param[in] s is the input string
+* \param[in,out] s on input contains the input string, on output contains the
+* trimmed string
 * \result A reference to the input string.
 */
 inline std::string &rtrim(std::string &s)
@@ -73,7 +75,8 @@ inline std::string &rtrim(std::string &s)
 * Remove left/right blank spaces from string. For instance, if the input string is
 * "  test_string  ", on output this function returns "test_string"
 *
-* \param[in] s is the input string
+* \param[in,out] s on input contains the input string, on output contains the
+* trimmed string
 * \result A reference to the input string.
 */
 inline std::string &trim(std::string &s)
