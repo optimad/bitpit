@@ -83,8 +83,6 @@ void readNode(xmlNodePtr root, Config *config)
 */
 void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string &encoding)
 {
-    int status;
-
     // Write the options
     for (auto &entry : config->getOptions()) {
         std::string key   = entry.first;
@@ -92,7 +90,7 @@ void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string 
 
         xmlChar *elementName = encodeString(key, encoding);
         xmlChar *elementText = encodeString(value, encoding);
-        status = xmlTextWriterWriteFormatElement(writer, BAD_CAST elementName, "%s", elementText);
+        int status = xmlTextWriterWriteFormatElement(writer, BAD_CAST elementName, "%s", elementText);
         if (status < 0) {
             throw std::runtime_error("Error at xmlTextWriterWriteFormatElement");
         }
