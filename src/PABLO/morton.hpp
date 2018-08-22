@@ -25,6 +25,8 @@
 #ifndef __BITPIT_PABLO_MORTON_HPP__
 #define __BITPIT_PABLO_MORTON_HPP__
 
+#include <cstdint>
+
 namespace bitpit {
 
 namespace PABLO {
