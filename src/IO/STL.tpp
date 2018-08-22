@@ -198,7 +198,7 @@ return; }
 */
 template <typename ... T2>
 void STLObj::save(
-    std::string                                  sname,
+    const std::string                           &sname,
     int                                         &nV,
     int                                         &nT,
     std::vector<std::vector<double> >           &V,
@@ -251,7 +251,7 @@ return; }
 */
 template <typename ... T2>
 void STLObj::save(
-    std::string                                  sname,
+    const std::string                           &sname,
     int                                         &nV,
     int                                         &nT,
     std::vector<std::array<double,3> >          &V,
@@ -304,7 +304,7 @@ return; }
 */
 template <typename ... T2>
 void STLObj::append(
-    std::string                                 sname,
+    const std::string                           &sname,
     int                                         &nV,
     int                                         &nT,
     std::vector<std::vector<double> >           &V,
@@ -357,7 +357,7 @@ return; }
 */
 template <typename ... T2>
 void STLObj::append(
-    std::string                                  sname,
+    const std::string                           &sname,
     int                                         &nV,
     int                                         &nT,
     std::vector<std::array<double,3> >          &V,

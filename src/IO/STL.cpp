@@ -192,7 +192,7 @@ return; };
     \param[in] filename stl file name
 */
 STLObj::FileFormat STLObj::detectFileFormat(
-    std::string                         filename
+    const std::string                  &filename
 ) {
 
 const std::size_t BINARY_HEADER_SIZE = 80;
@@ -349,7 +349,7 @@ return FormatInvalid; };
     \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
 */
 void STLObj::open(
-    std::string                              mode
+    const std::string                       &mode
 ) {
 
 // ========================================================================== //
@@ -430,7 +430,7 @@ return; };
     "app": append)
 */
 void STLObj::close(
-    string                              mode
+    const string                        &mode
 ) {
 
 // ========================================================================== //
@@ -912,7 +912,7 @@ return; };
     \param[in]  T facet->vertex connectivity.
  */
 void STLObj::saveSolid(
-    std::string                                 sname,
+    const std::string                           &sname,
     int                                         &nV,
     int                                         &nT,
     std::vector<std::vector<double> >           &V,
@@ -940,7 +940,7 @@ void STLObj::saveSolid(
 *    \param[in]  T facet->vertex connectivity.
 */
 void STLObj::saveSolid(
-    std::string                                 sname,
+    const std::string                           &sname,
     int                                         &nV,
     int                                         &nT,
     std::vector<std::array<double,3> >          &V,
@@ -2673,7 +2673,7 @@ unsigned int stl::writeSolidASCII(
     std::vector<std::vector<double> >   &V,
     std::vector<std::vector<double> >   &N,
     std::vector<std::vector<int> >      &T,
-    std::string                         solid_name
+    const std::string                   &solid_name
 ) {
 
 // ========================================================================== //
@@ -2786,7 +2786,7 @@ unsigned int stl::writeSolidASCII(
     std::vector<std::array<double,3> >  &V,
     std::vector<std::array<double,3> >  &N,
     std::vector<std::array<int,3> >     &T,
-    std::string                         solid_name
+    const std::string                   &solid_name
 ) {
 
 // ========================================================================== //
@@ -2898,7 +2898,7 @@ unsigned int stl::writeSolidBINARY(
     std::vector<std::vector<double> >   &V,
     std::vector<std::vector<double> >   &N,
     std::vector<std::vector<int> >      &T,
-    std::string                         solid_name
+    const std::string                   &solid_name
 ) {
 
 // ========================================================================== //
@@ -2997,7 +2997,7 @@ unsigned int stl::writeSolidBINARY(
     std::vector<std::array<double,3> >  &V,
     std::vector<std::array<double,3> >  &N,
     std::vector<std::array<int,3> >     &T,
-    std::string                         solid_name
+    const std::string                   &solid_name
 ) {
 
 // ========================================================================== //

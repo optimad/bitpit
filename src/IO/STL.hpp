@@ -112,13 +112,13 @@ class STLObj {
     // Public methods ======================================================= //
     public:
     FileFormat detectFileFormat(                                              // detect file format
-        std::string                                                           // (input) stream mode (input/output/append)
+        const std::string                       &                             // (input) stream mode (input/output/append)
     );
     void open(                                                                // open stream to stl file
-        std::string                                                           // (input) stream mode (input/output/append)
+        const std::string                       &                             // (input) stream mode (input/output/append)
     );
     void close(                                                               // close stream to from file
-        std::string                             mode = ""                     // (input) stream to be closed (input/output/append)
+        const std::string                       &mode = ""                    // (input) stream to be closed (input/output/append)
     );
     void display(                                                             // Display info about stl file
         std::ostream                            &                             // (input/output) output stream
@@ -184,7 +184,7 @@ class STLObj {
         T2                                      & ...                         // (input/optional) other stl solids
     );
     void saveSolid(                                                           // Export next stl solid to stl file (appending)
-        std::string                              ,                            // (input) solid name
+        const std::string                       &,                            // (input) solid name
         int                                     &,                            // (input/output) number of stl vertices
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::vector<double> >       &,                            // (input) vertex coordinate list
@@ -192,7 +192,7 @@ class STLObj {
         std::vector<std::vector<int> >          &                             // (input) triangle-vertex connectivity
     );
     void saveSolid(                                                           // Export next stl solid to stl file (appending)
-        std::string                              ,                            // (input) solid name
+        const std::string                       &,                            // (input) solid name
         int                                     &,                            // (input/output) number of stl vertices
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input) vertex coordinate list
@@ -201,7 +201,7 @@ class STLObj {
     );
     template <typename ... T2>
     void save(                                                                // Export stl solid to stl file
-        std::string                              ,                            // (input) solid name
+        const std::string                       &,                            // (input) solid name
         int                                     &,                            // (input/output) number of stl vertices
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::vector<double> >       &,                            // (input) vertex coordinate list
@@ -211,7 +211,7 @@ class STLObj {
     );
     template <typename ... T2>
     void save(                                                                // Export stl solid to stl file
-        std::string                              ,                            // (input) solid name
+        const std::string                       &,                            // (input) solid name
         int                                     &,                            // (input/output) number of stl vertices
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input) vertex coordinate list
@@ -221,7 +221,7 @@ class STLObj {
     );
     template <typename ... T2>
     void append(                                                              // Append stl solid to stl file
-        std::string                              ,                            // (input) solid name
+        const std::string                       &,                            // (input) solid name
         int                                     &,                            // (input/output) number of stl vertices
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::vector<double> >       &,                            // (input) vertex coordinate list
@@ -231,7 +231,7 @@ class STLObj {
     );
     template <typename ... T2>
     void append(                                                              // Append stl solid to stl file
-        std::string                              ,                            // (input) solid name
+        const std::string                       &,                            // (input) solid name
         int                                     &,                            // (input/output) number of stl vertices
         int                                     &,                            // (input/output) number of stl facets
         std::vector<std::array<double,3> >      &,                            // (input) vertex coordinate list
@@ -369,7 +369,7 @@ unsigned int writeSolidASCII(                                            // Writ
     std::vector<std::vector<double> >           &,                            // (input) vertex coordinate list
     std::vector<std::vector<double> >           &,                            // (input) triangles' unit normals
     std::vector<std::vector<int> >              &,                            // (input) triangle-vertex connectivity
-    std::string                                  solid_name = ""              // (input/optional) stl solid name
+    const std::string                           &solid_name = ""              // (input/optional) stl solid name
 );
 unsigned int writeSolidASCII(                                            // Write stl triangulation in a ASCII stl file
     std::ofstream                               &,                            // (input) output stream
@@ -378,7 +378,7 @@ unsigned int writeSolidASCII(                                            // Writ
     std::vector<std::array<double,3> >          &,                            // (input) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input) triangles' unit normals
     std::vector<std::array<int,3> >             &,                            // (input) triangle-vertex connectivity
-    std::string                                  solid_name = ""              // (input/optional) stl solid name
+    const std::string                           &solid_name = ""              // (input/optional) stl solid name
 );
 unsigned int writeSolidBINARY(                                              // Write stl triangulation in a binary stl file
     std::ofstream                               &,                            // (input) output stream
@@ -387,7 +387,7 @@ unsigned int writeSolidBINARY(                                              // W
     std::vector<std::vector<double> >           &,                            // (input) vertex coordinate list
     std::vector<std::vector<double> >           &,                            // (input) triangles' unit normals
     std::vector<std::vector<int> >              &,                            // (input) triangle-vertex connectivity
-    std::string                                  solid_name = ""              // (input/optional) stl solid name
+    const std::string                           &solid_name = ""              // (input/optional) stl solid name
 );
 unsigned int writeSolidBINARY(                                              // Write stl triangulation in a binary stl file
     std::ofstream                               &,                            // (input) output stream
@@ -396,7 +396,7 @@ unsigned int writeSolidBINARY(                                              // W
     std::vector<std::array<double,3> >          &,                            // (input) vertex coordinate list
     std::vector<std::array<double,3> >          &,                            // (input) triangles' unit normals
     std::vector<std::array<int,3> >             &,                            // (input) triangle-vertex connectivity
-    std::string                                 solid_name = ""               // (input/optional) stl solid name
+    const std::string                           &solid_name = ""               // (input/optional) stl solid name
 );
 
 }
