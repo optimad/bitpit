@@ -37,8 +37,8 @@ namespace bitpit{
  *
  * Permits to create easily filenames for parallel output and for writing time series.
  * Typical filenames are *directory/name.bxxxx.yyyy.appendix* and can be retirieved via GetName().
- * - *directory* set via SetDirectory( std::string)
- * - *name* set via SetName(std::string)
+ * - *directory* set via SetDirectory( const std::string &)
+ * - *name* set via SetName(const std::string &)
  * - *bxxxx* is added if SetParallel(true) and SetBlock(xxxx) have been called
  * - *yyyy* is added if SetSeries(true) and SetCounter(yyyy) have been called. yyyy is incremented by one if IncrementCounter() is called.
  */
@@ -56,16 +56,16 @@ class FileHandler{
 
     public:
         FileHandler() ;
-        FileHandler( std::string dir_, std::string name_, std::string app_) ;
+        FileHandler( const std::string & dir_, const std::string & name_, const std::string & app_) ;
         FileHandler(  const FileHandler& other ) ;
 
         ~FileHandler() ;
 
         FileHandler& operator=( const FileHandler& other) ;
 
-        void                setDirectory( std::string d_) ;
-        void                setName( std::string n_) ;
-        void                setAppendix( std::string a_) ;
+        void                setDirectory( const std::string & d_) ;
+        void                setName( const std::string & n_) ;
+        void                setAppendix( const std::string & a_) ;
         void                setSeries( bool s_) ;
         void                setParallel( bool p_) ;
         void                setCounter(int c_);

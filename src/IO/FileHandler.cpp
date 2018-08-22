@@ -96,7 +96,7 @@ FileHandler&    FileHandler::operator=(const FileHandler& other){
  * sets the directory
  * @param[in]   d_      name of directory
  */
-void    FileHandler::setDirectory( std::string d_){ 
+void    FileHandler::setDirectory(const std::string &d_){
     directory=d_; 
     return;
 } ;
@@ -105,7 +105,7 @@ void    FileHandler::setDirectory( std::string d_){
  * sets the name
  * @param[in]   n_      name of file
  */
-void    FileHandler::setName( std::string n_){ 
+void    FileHandler::setName(const std::string &n_){
     name=n_; 
     return;
 } ;
@@ -114,7 +114,7 @@ void    FileHandler::setName( std::string n_){
  * sets the appendix
  * @param[in]   a_      appendix of file
  */
-void    FileHandler::setAppendix( std::string a_){ 
+void    FileHandler::setAppendix(const std::string &a_){
     appendix=a_; 
     return;
 } ;
