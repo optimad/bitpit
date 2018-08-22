@@ -700,7 +700,7 @@ void VTK::write( const std::string &name, VTKWriteMode writeMode ){
 void VTK::writeData( ){
 
     std::fstream             str ;
-    std::fstream::pos_type   position_insert, position_eof ;
+    std::fstream::pos_type   position_insert ;
 
     int                 length;
     char*               buffer ;
@@ -791,7 +791,6 @@ void VTK::writeData( ){
 
         char                    c_;
         std::string             line ;
-        std::fstream::pos_type  position_appended ;
         std::fstream::pos_type  position_before_write ;
 
         //Go to the initial position of the appended section
