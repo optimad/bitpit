@@ -210,6 +210,8 @@ class VTKBaseStreamer{
     private:
 
     public:
+        virtual ~VTKBaseStreamer() = default;
+
         virtual void            flushData( std::fstream &, const std::string &, VTKFormat)  ;
         virtual void            absorbData( std::fstream &, const std::string &, VTKFormat, uint64_t, uint8_t, VTKDataType)  ;
 };
