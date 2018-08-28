@@ -66,8 +66,10 @@ void readNode(xmlNodePtr root, Config *config)
             }
             readNode(node->children, section);
         } else {
-            std::string value(reinterpret_cast<const char*>(xmlNodeGetContent(node)));
+            xmlChar *nodeContent = xmlNodeGetContent(node);
+            std::string value(reinterpret_cast<const char*>(nodeContent));
             config->set(key, value);
+            xmlFree(nodeContent);
         }
     }
 }
