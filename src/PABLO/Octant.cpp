@@ -110,10 +110,6 @@ using namespace std;
 // STATIC AND CONSTANT
 // =================================================================================== //
 
-constexpr int Octant::sm_CoeffNode[8][3];
-constexpr int Octant::sm_CoeffFaceCenter[6][3];
-constexpr int Octant::sm_CoeffEdgeCenter[12][3];
-
 const TreeConstants::Instances Octant::sm_treeConstants = TreeConstants::instances();
 
 // =================================================================================== //
@@ -484,9 +480,9 @@ Octant::getFaceCenter(uint8_t iface) const{
 	assert(iface < m_dim*2);
 
 	dh_2 = double(getSize())*0.5;
-	center[0] = (double)m_x + (double)sm_CoeffFaceCenter[iface][0] * dh_2;
-	center[1] = (double)m_y + (double)sm_CoeffFaceCenter[iface][1] * dh_2;
-	center[2] = (double)m_z + double(m_dim-2) * (double)sm_CoeffFaceCenter[iface][2] * dh_2;
+	center[0] = (double)m_x + (double)sm_treeConstants[m_dim].faceDisplacements[iface][0] * dh_2;
+	center[1] = (double)m_y + (double)sm_treeConstants[m_dim].faceDisplacements[iface][1] * dh_2;
+	center[2] = (double)m_z + double(m_dim-2) * (double)sm_treeConstants[m_dim].faceDisplacements[iface][2] * dh_2;
 
 	return center;
 };
@@ -503,9 +499,9 @@ Octant::getEdgeCenter(uint8_t iedge) const{
 	darray3 center;
 
 	dh_2 = double(getSize())*0.5;
-	center[0] = (double)m_x + (double)sm_CoeffEdgeCenter[iedge][0] * dh_2;
-	center[1] = (double)m_y + (double)sm_CoeffEdgeCenter[iedge][1] * dh_2;
-	center[2] = (double)m_z + double(m_dim-2) * (double)sm_CoeffEdgeCenter[iedge][2] * dh_2;
+	center[0] = (double)m_x + (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][0] * dh_2;
+	center[1] = (double)m_y + (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][1] * dh_2;
+	center[2] = (double)m_z + double(m_dim-2) * (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][2] * dh_2;
 	return center;
 };
 
@@ -524,9 +520,9 @@ Octant::getNodes(u32arr3vector & nodes) const{
 	nodes.resize(nn);
 
 	for (i = 0; i < nn; i++){
-		nodes[i][0] = m_x + uint32_t(sm_CoeffNode[i][0])*dh;
-		nodes[i][1] = m_y + uint32_t(sm_CoeffNode[i][1])*dh;
-		nodes[i][2] = m_z + uint32_t(sm_CoeffNode[i][2])*dh;
+		nodes[i][0] = m_x + uint32_t(sm_treeConstants[m_dim].nodeCoordinates[i][0])*dh;
+		nodes[i][1] = m_y + uint32_t(sm_treeConstants[m_dim].nodeCoordinates[i][1])*dh;
+		nodes[i][2] = m_z + uint32_t(sm_treeConstants[m_dim].nodeCoordinates[i][2])*dh;
 	}
 };
 
@@ -544,9 +540,9 @@ Octant::getNodes() const{
 	nodes.resize(nn);
 
 	for (i = 0; i < nn; i++){
-		nodes[i][0] = m_x + sm_CoeffNode[i][0]*dh;
-		nodes[i][1] = m_y + sm_CoeffNode[i][1]*dh;
-		nodes[i][2] = m_z + sm_CoeffNode[i][2]*dh;
+		nodes[i][0] = m_x + sm_treeConstants[m_dim].nodeCoordinates[i][0]*dh;
+		nodes[i][1] = m_y + sm_treeConstants[m_dim].nodeCoordinates[i][1]*dh;
+		nodes[i][2] = m_z + sm_treeConstants[m_dim].nodeCoordinates[i][2]*dh;
 	}
 
 	return nodes;
@@ -560,9 +556,9 @@ void		Octant::getNode(u32array3 & node, uint8_t inode) const{
 	uint32_t	dh;
 
 	dh = getSize();
-	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
-	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
-	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
+	node[0] = m_x + sm_treeConstants[m_dim].nodeCoordinates[inode][0]*dh;
+	node[1] = m_y + sm_treeConstants[m_dim].nodeCoordinates[inode][1]*dh;
+	node[2] = m_z + sm_treeConstants[m_dim].nodeCoordinates[inode][2]*dh;
 
 };
 
@@ -575,9 +571,9 @@ u32array3		Octant::getNode(uint8_t inode) const{
 	uint32_t	dh;
 
 	dh = getSize();
-	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
-	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
-	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
+	node[0] = m_x + sm_treeConstants[m_dim].nodeCoordinates[inode][0]*dh;
+	node[1] = m_y + sm_treeConstants[m_dim].nodeCoordinates[inode][1]*dh;
+	node[2] = m_z + sm_treeConstants[m_dim].nodeCoordinates[inode][2]*dh;
 	return node;
 };
 

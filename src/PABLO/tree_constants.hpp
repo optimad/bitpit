@@ -84,6 +84,10 @@ public:
 	int8_t   nodeCoeffs[8][3];      /**< Components (x,y,z) of the "normals" per node */
 	uint8_t  parallelEdges[12][3];  /**< Parallel edges per edge */
 
+	uint8_t  nodeCoordinates[8][3];    /**< nodeCoordinates[i][0:2] = Local coordinates of the i-th node */
+	uint8_t  edgeDisplacements[12][3]; /**< edgeDisplacements[i][0:2] = Twice the local displacement of the i-th edge centroid */
+	uint8_t  faceDisplacements[6][3];  /**< faceDisplacements[i][0:2] = Twice the local displacement of the i-th face centroid */
+
 	std::array<uint32_t, MAX_LEVEL> lengths;   /**< Lengths associated to the levels */
 	std::array<uint64_t, MAX_LEVEL> areas;     /**< Areas associated to the levels */
 	std::array<uint64_t, MAX_LEVEL> volumes;   /**< Volumes associated to the levels */
