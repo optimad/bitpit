@@ -2536,8 +2536,10 @@ namespace bitpit {
     void
     ParaTree::setDim(uint8_t dim){
         m_dim = dim;
-        m_treeConstants = &(TreeConstants::instance(m_dim));
-        m_periodic.resize(m_treeConstants->nFaces, false);
+        if (m_dim != 0) {
+            m_treeConstants = &(TreeConstants::instance(m_dim));
+            m_periodic.resize(m_treeConstants->nFaces, false);
+        }
     }
 
     /*! Set the first finer descendant of the local tree.
