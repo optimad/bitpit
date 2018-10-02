@@ -305,7 +305,7 @@ void LevelSetCachedObject::propagateSign() {
                 SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
 
                 for (long cellId : sendIds) {
-                    int sign = 0;
+                    int sign = PROPAGATION_SIGN_UNDEFINED;
                     if (propagationStatus.at(cellId) == PROPAGATION_STATUS_REACHED) {
                         sign = getSign(cellId);
                     }
@@ -328,16 +328,17 @@ void LevelSetCachedObject::propagateSign() {
                 // Receive data and detect new seeds
                 for (long cellId : recvIds) {
                     buffer >> sign;
+                    if (sign == PROPAGATION_SIGN_UNDEFINED) {
+                        continue;
+                    }
 
                     std::size_t cellRawId = cells.getRawIndex(cellId);
                     int &cellPropagationStatus = propagationStatus.rawAt(cellRawId);
                     if (cellPropagationStatus == PROPAGATION_STATUS_WAITING) {
-                        if (sign != 0) {
-                            setSign(cellId, sign);
-                            cellPropagationStatus = PROPAGATION_STATUS_REACHED;
-                            --nWaiting;
-                            seeds.push_back(cellId);
-                        }
+                        setSign(cellId, sign);
+                        cellPropagationStatus = PROPAGATION_STATUS_REACHED;
+                        --nWaiting;
+                        seeds.push_back(cellId);
                     } else if (cellPropagationStatus == PROPAGATION_STATUS_REACHED) {
                         assert(getSign(cellId) == sign);
                     }
