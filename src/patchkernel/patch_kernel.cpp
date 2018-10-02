@@ -3393,44 +3393,21 @@ long PatchKernel::countFreeFaces() const
  */
 void PatchKernel::dumpInterfaces(std::ostream &stream) const
 {
-	long nInterfaces = getInterfaceCount();
-	utils::binary::write(stream, nInterfaces);
+	// Dump kernel
+	m_interfaces.dumpKernel(stream);
 
-	std::unordered_set<long> dumpedInterfaces(nInterfaces);
-	for (const Cell &cell : getCells()) {
-		long cellId = cell.getId();
-		utils::binary::write(stream, cellId);
+	// Dump interfaces
+	for (const Interface &interface : getInterfaces()) {
+		utils::binary::write(stream, interface.getId());
 
-		int nCellInterfaces = cell.getInterfaceCount();
-		const long *interfaces = cell.getInterfaces();
-		for (int i = 0; i < nCellInterfaces; ++i) {
-			long interfaceId = interfaces[i];
-			if (interfaceId < 0 || dumpedInterfaces.count(interfaceId) > 0) {
-				continue;
-			}
+		utils::binary::write(stream, interface.getOwner());
+		utils::binary::write(stream, interface.getOwnerFace());
 
-			const Interface &interface = m_interfaces.at(interfaceId);
-			const long interfaceOwnerId = interface.getOwner();
-			const long interfaceNeighId = interface.getNeigh();
-
-			utils::binary::write(stream, interfaceId);
-			if (cellId == interfaceOwnerId) {
-				utils::binary::write(stream, interface.getOwnerFace());
-				utils::binary::write(stream, interfaceNeighId);
-				if (interfaceNeighId >= 0) {
-					utils::binary::write(stream, interface.getNeighFace());
-				}
-			} else {
-				utils::binary::write(stream, interface.getNeighFace());
-				utils::binary::write(stream, interfaceOwnerId);
-				utils::binary::write(stream, interface.getOwnerFace());
-			}
-
-			dumpedInterfaces.insert(interfaceId);
+		long neighId = interface.getNeigh();
+		utils::binary::write(stream, interface.getNeigh());
+		if (neighId >= 0) {
+			utils::binary::write(stream, interface.getNeighFace());
 		}
-
-		// There are no more interfaces for this cell
-		utils::binary::write(stream, Interface::NULL_ID);
 	}
 }
 
@@ -3441,38 +3418,33 @@ void PatchKernel::dumpInterfaces(std::ostream &stream) const
  */
 void PatchKernel::restoreInterfaces(std::istream &stream)
 {
-	long nInterfaces;
-	utils::binary::read(stream, nInterfaces);
-	m_interfaces.reserve(nInterfaces);
+	// Restore kernel
+	m_interfaces.restoreKernel(stream);
 
-	long nCells = getCellCount();
-	for (long n = 0; n < nCells; ++n) {
-		long cellId;
-		utils::binary::read(stream, cellId);
-		Cell &cell = m_cells.at(cellId);
+	// Restore interfaces
+	long nInterfaces = m_interfaces.size();
+	for (long n = 0; n < nInterfaces; ++n) {
+		long interfaceId;
+		utils::binary::read(stream, interfaceId);
 
-		while (true) {
-			long interfaceId;
-			utils::binary::read(stream, interfaceId);
-			if (interfaceId < 0) {
-				break;
-			}
+		long ownerId;
+		int ownerFace;
+		utils::binary::read(stream, ownerId);
+		utils::binary::read(stream, ownerFace);
+		Cell *owner = &(m_cells.at(ownerId));
 
-			int face;
-			utils::binary::read(stream, face);
-
-			long otherCellId;
-			utils::binary::read(stream, otherCellId);
-
-			Cell *otherCell = nullptr;
-			int otherFace = -1;
-			if (otherCellId >= 0) {
-				otherCell = &m_cells.at(otherCellId);
-				utils::binary::read(stream, otherFace);
-			}
-
-			buildCellInterface(&cell, face, otherCell, otherFace, interfaceId);
+		long neighId;
+		int neighFace;
+		utils::binary::read(stream, neighId);
+		Cell *neigh;
+		if (neighId >= 0) {
+			utils::binary::read(stream, neighFace);
+			neigh = &(m_cells.at(neighId));
+		} else {
+			neigh = nullptr;
 		}
+
+		buildCellInterface(owner, ownerFace, neigh, neighFace, interfaceId);
 	}
 }
 
@@ -4166,9 +4138,9 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 	\param face_1 is the face of the first cell
 	\param cell_2 is the second cell
 	\param face_2 is the face of the second cell
-	\param interfaceId is the id that will be assigned to the newly created interface.
-	If a negative id value is specified, a new unique id will be generated
-	for the interface
+	\param interfaceId is the id of the interface that will be built. If a
+	negative id value is specified, a new interface will be created, otherwise
+	the existing interface will be overwritten with the new data.
  */
 void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId)
 {
@@ -4248,17 +4220,27 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 	}
 
 	// Create the interface
+	Interface *interface;
+
 	ElementType interfaceType = intrOwner->getFaceType(intrOwnerFace);
-	InterfaceIterator interfaceIterator = addInterface(interfaceType, std::move(interfaceConnect), interfaceId);
-	Interface &interface = *interfaceIterator;
 	if (interfaceId < 0) {
-		interfaceId = interface.getId();
+		InterfaceIterator interfaceIterator = addInterface(interfaceType, std::move(interfaceConnect), interfaceId);
+		interface = &(*interfaceIterator);
+		interfaceId = interface->getId();
+	} else {
+		InterfaceIterator interfaceIterator = m_interfaces.find(interfaceId);
+		if (interfaceIterator == m_interfaces.end()) {
+			throw std::runtime_error("Error initializing the interface.");
+		}
+
+		interface = &(*interfaceIterator);
+		interface->initialize(interfaceId, interfaceType, std::move(interfaceConnect));
 	}
 
 	// Set owner and neighbour
-	interface.setOwner(intrOwnerId, intrOwnerFace);
+	interface->setOwner(intrOwnerId, intrOwnerFace);
 	if (intrNeighId >= 0) {
-		interface.setNeigh(intrNeighId, intrNeighFace);
+		interface->setNeigh(intrNeighId, intrNeighFace);
 	}
 
 	// Update owner and neighbour cell data
@@ -5262,7 +5244,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 1;
+	const int KERNEL_DUMP_VERSION = 2;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
