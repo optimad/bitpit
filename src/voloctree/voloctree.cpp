@@ -1715,6 +1715,15 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 		updateFirstGhostId();
 	}
 
+	// Update cell PIDs
+	if (restoreStream) {
+		for (Cell &cell : getCells()) {
+			int PID;
+			utils::binary::read(*restoreStream, PID);
+			cell.setPID(PID);
+		}
+	}
+
 	// Build adjacencies
 	updateAdjacencies(createdCells, false);
 
@@ -1995,7 +2004,7 @@ void VolOctree::_resetTol()
  */
 int VolOctree::_getDumpVersion() const
 {
-	const int DUMP_VERSION = 2;
+	const int DUMP_VERSION = 3;
 
 	return DUMP_VERSION;
 }
@@ -2059,6 +2068,10 @@ void VolOctree::_dump(std::ostream &stream) const
 	// association between numeration of tree octants and patch cells.
 	for (const OctantInfo &octantInfo : octantInfoList) {
 		utils::binary::write(stream, getOctantId(octantInfo));
+	}
+
+	for (const Cell &cell : getCells()) {
+		utils::binary::write(stream, cell.getPID());
 	}
 
 	// Dump interfaces
