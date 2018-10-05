@@ -3408,6 +3408,8 @@ void PatchKernel::dumpInterfaces(std::ostream &stream) const
 		if (neighId >= 0) {
 			utils::binary::write(stream, interface.getNeighFace());
 		}
+
+		utils::binary::write(stream, interface.getPID());
 	}
 }
 
@@ -3444,7 +3446,11 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 			neigh = nullptr;
 		}
 
-		buildCellInterface(owner, ownerFace, neigh, neighFace, interfaceId);
+		int pid;
+		utils::binary::read(stream, pid);
+
+		InterfaceIterator interfaceIterator = buildCellInterface(owner, ownerFace, neigh, neighFace, interfaceId);
+		interfaceIterator->setPID(pid);
 	}
 }
 
@@ -4142,7 +4148,7 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 	negative id value is specified, a new interface will be created, otherwise
 	the existing interface will be overwritten with the new data.
  */
-void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId)
+PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId)
 {
 	// Validate the input
 	assert(cell_1);
@@ -4221,14 +4227,15 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 
 	// Create the interface
 	Interface *interface;
+	InterfaceIterator interfaceIterator;
 
 	ElementType interfaceType = intrOwner->getFaceType(intrOwnerFace);
 	if (interfaceId < 0) {
-		InterfaceIterator interfaceIterator = addInterface(interfaceType, std::move(interfaceConnect), interfaceId);
+		interfaceIterator = addInterface(interfaceType, std::move(interfaceConnect), interfaceId);
 		interface = &(*interfaceIterator);
 		interfaceId = interface->getId();
 	} else {
-		InterfaceIterator interfaceIterator = m_interfaces.find(interfaceId);
+		interfaceIterator = m_interfaces.find(interfaceId);
 		if (interfaceIterator == m_interfaces.end()) {
 			throw std::runtime_error("Error initializing the interface.");
 		}
@@ -4280,6 +4287,8 @@ void PatchKernel::buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int
 			intrNeigh->setAdjacency(intrNeighFace, neighPairedAdjacencyIndex, neighPairedAdjacency);
 		}
 	}
+
+	return interfaceIterator;
 }
 
 /*!
@@ -5244,7 +5253,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 2;
+	const int KERNEL_DUMP_VERSION = 3;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
