@@ -901,7 +901,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
  */
 int VolCartesian::_getDumpVersion() const
 {
-	const int DUMP_VERSION = 1;
+	const int DUMP_VERSION = 2;
 
 	return DUMP_VERSION;
 }
@@ -926,6 +926,18 @@ void VolCartesian::_dump(std::ostream &stream) const
 	utils::binary::write(stream, m_nCells1D[2]);
 
 	utils::binary::write(stream, m_memoryMode);
+
+	if (m_memoryMode == MEMORY_NORMAL) {
+		for (const Cell &cell : getCells()) {
+			utils::binary::write(stream, cell.getPID());
+		}
+	}
+
+	if (m_memoryMode == MEMORY_NORMAL) {
+		for (const Interface &interface : getInterfaces()) {
+			utils::binary::write(stream, interface.getPID());
+		}
+	}
 }
 
 /*!
@@ -966,6 +978,24 @@ void VolCartesian::_restore(std::istream &stream)
 	MemoryMode memoryMode;
 	utils::binary::read(stream, memoryMode);
 	switchMemoryMode(memoryMode);
+
+	// Cell data
+	if (m_memoryMode == MEMORY_NORMAL) {
+		for (Cell &cell : getCells()) {
+			int PID;
+			utils::binary::read(stream, PID);
+			cell.setPID(PID);
+		}
+	}
+
+	// Interface data
+	if (m_memoryMode == MEMORY_NORMAL) {
+		for (Interface &interface : getInterfaces()) {
+			int PID;
+			utils::binary::read(stream, PID);
+			interface.setPID(PID);
+		}
+	}
 }
 
 /*!
