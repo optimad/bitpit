@@ -278,11 +278,12 @@ double Reference3DElementInfo::evalPointDistance(const std::array<double, 3> &po
     double distance = std::numeric_limits<double>::max();
     for (int i = 0; i < nFaces; ++i) {
         ElementType faceType = face_type[i];
-        for (int n = 0; n < nFaces; ++n) {
-            faceVertexCoords[i] = vertexCoords[faceConnect[i][n]];
+        const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(faceType));
+        for (int n = 0; n < faceInfo.nVertices; ++n) {
+            faceVertexCoords[n] = vertexCoords[faceConnect[i][n]];
         }
 
-        distance = std::min(ReferenceElementInfo::getInfo(faceType).evalPointDistance(point, faceVertexCoords.data()), distance);
+        distance = std::min(faceInfo.evalPointDistance(point, faceVertexCoords.data()), distance);
     }
 
     return distance;
