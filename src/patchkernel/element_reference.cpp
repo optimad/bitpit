@@ -228,11 +228,12 @@ double Reference3DElementInfo::evalSurfaceArea(const std::array<double, 3> *vert
 
     double area = 0;
     for (int i = 0; i < nFaces; ++i) {
-        for (int n = 0; n < nFaces; ++n) {
-            faceVertexCoords[i] = vertexCoords[faceConnect[i][n]];
+        ElementType faceType = face_type[i];
+        const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(faceType));
+        for (int n = 0; n < faceInfo.nVertices; ++n) {
+            faceVertexCoords[n] = vertexCoords[faceConnect[i][n]];
         }
 
-        const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(face_type[i]));
         area += faceInfo.evalArea(faceVertexCoords.data());
     }
 
