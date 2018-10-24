@@ -460,6 +460,24 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
 {
     *id       = Cell::NULL_ID;
     *distance = std::numeric_limits<double>::max();
+
+    updatePointClosestCell(point, id, distance);
+}
+
+/*!
+* Given the specified point find if, among the cells contained in the
+* bounding box associated to the node, there is a cell closer to the
+* one received in input.
+*
+* \param point is the point
+* \param[in,out] id is the id of the current closest cell, on output it will
+* be updated if a closer cell is found
+* \param[in,out] closestDistance is the distance of the current closest cell,
+* on output it will be updated if a closer cell is found
+*/
+void SkdNode::updatePointClosestCell(const std::array<double, 3> &point,
+                                     long *id, double *distance) const
+{
     if (getCellCount() == 0) {
         return;
     }

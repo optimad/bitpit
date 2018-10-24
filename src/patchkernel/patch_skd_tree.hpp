@@ -101,6 +101,7 @@ public:
     double evalPointDistance(const std::array<double, 3> &point) const;
 
     void findPointClosestCell(const std::array<double, 3> &point, long *id, double *distance) const;
+    void updatePointClosestCell(const std::array<double, 3> &point, long *id, double *distance) const;
 
 protected:
     struct Allocator : std::allocator<SkdNode>
