@@ -469,6 +469,10 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
 * bounding box associated to the node, there is a cell closer to the
 * one received in input.
 *
+* If two cells have the same distance, the closest cell will be chosen using
+* the normal of the cells: the cell more "aligned" with the line that connect
+* the specified point and its projection onto the cell will be chosen.
+*
 * \param point is the point
 * \param[in,out] id is the id of the current closest cell, on output it will
 * be updated if a closer cell is found
@@ -504,11 +508,128 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point,
         // Evaluate the distance from the cell
         double cellDistance = cell.evalPointDistance(point, cellVertexCoordinates.data());
 
-        // Update the distance
-        if (cellDistance < *distance) {
-            *distance = cellDistance;
-            *id       = cell.getId();
+        // Update closest distance
+        updateClosestCellInfo(point, cell.getId(), cellDistance, id, distance);
+    }
+}
+
+/*!
+* Give the specified point, cell, and cell distance update the information
+* of the closest cell.
+*
+* If two cells have the same distance, the closest cell will be chosen using
+* the normal of the cells: the cell more "aligned" with the line that connect
+* the specified point and its projection onto the cell will be chosen.
+*
+* \param point is the point
+* \param cellId is the cell id
+* \param cellDistance is the cell distance
+* \param[in,out] closestId is the index of the closest cell, on output it will
+* be updated if the specified cell is closer than the current closest cell
+* \param[in,out] closestDistance is the distance of the closest cell, on output
+* it will be updated if the specified cell is closer than the current closest
+* cell
+*/
+void SkdNode::updateClosestCellInfo(const std::array<double, 3> &point,
+                                    long cellId, double cellDistance,
+                                    long *closestId, double *closestDistance) const
+{
+    // If there is no current closest cell just update the information
+    if (*closestId == Cell::NULL_ID) {
+        *closestId       = cellId;
+        *closestDistance = cellDistance;
+
+        return;
+    }
+
+    // Detect if the specified cell is closer than the current closest cell
+    const int DISTANCE_CLOSER  = - 1;
+    const int DISTANCE_EQUAL   =   0;
+    const int DISTANCE_FARTHER =   1;
+
+    int distanceFlag = DISTANCE_FARTHER;
+    if (utils::DoubleFloatingEqual()(cellDistance, *closestDistance)) {
+        distanceFlag = DISTANCE_EQUAL;
+    } else if (cellDistance < *closestDistance) {
+        distanceFlag = DISTANCE_CLOSER;
+    }
+
+    // Update closest cell information accordingly to the distance flag:
+    //  - if the specified cell is closer the specified cell will become the
+    //    closest cell
+    //  - if the two cells have the same distance, the closest cell will be
+    //    chosen using the normal of the cells.
+    //  - if the specified cell is farther there is nothing to do;
+    switch (distanceFlag) {
+
+    case DISTANCE_CLOSER:
+    {
+        *closestId       = cellId;
+        *closestDistance = cellDistance;
+
+        break;
+    }
+
+    case DISTANCE_EQUAL:
+    {
+        const PatchKernel &patch = m_patchInfo->getPatch();
+
+        // Project point ont the specified cell
+        const Cell &cell = patch.getCell(cellId);
+
+        ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+        const int nCellVertices = cellVertexIds.size();
+
+        std::vector<std::array<double, 3>> cellVertexCoordinates(nCellVertices);
+        for (int i = 0; i < nCellVertices; ++i) {
+            cellVertexCoordinates[i] = patch.getVertex(cellVertexIds[i]).getCoords();
         }
+
+        double cellProjectionDistance;
+        std::array<double, 3> cellProjection;
+        cell.evalPointProjection(point, cellVertexCoordinates.data(), &cellProjection, &cellProjectionDistance);
+
+        // Project point ont the closest cell
+        const Cell &closest = patch.getCell(*closestId);
+
+        ConstProxyVector<long> closestVertexIds = closest.getVertexIds();
+        const int nClosestVertices = closestVertexIds.size();
+
+        std::vector<std::array<double, 3>> closestVertexCoordinates(nClosestVertices);
+        for (int i = 0; i < nClosestVertices; ++i) {
+            closestVertexCoordinates[i] = patch.getVertex(closestVertexIds[i]).getCoords();
+        }
+
+        double closestProjectionDistance;
+        std::array<double, 3> closestProjection;
+        closest.evalPointProjection(point, closestVertexCoordinates.data(), &closestProjection, &closestProjectionDistance);
+
+        // Find normal of the cells at the centroids
+        //
+        // To be more precise, the normals should beevaluated on projection
+        // points.
+        std::array<double, 3> cellNormal    = cell.evalNormal(cellVertexCoordinates.data());
+        std::array<double, 3> closestNormal = closest.evalNormal(closestVertexCoordinates.data());
+
+        // Find cell more aligned with tespect to the normal
+        double cellAligement    = std::abs(dotProduct(cellNormal, point - cellProjection));
+        double closestAligement = std::abs(dotProduct(closestNormal, point - closestProjection));
+
+        // If the specified cell is more aligned than the closest cell, update
+        // the closest info.
+        if (cellAligement > closestAligement) {
+            *closestId       = cellId;
+            *closestDistance = cellDistance;
+        }
+
+        break;
+    }
+
+    default:
+    {
+        // Nothing to do
+    }
+
     }
 }
 

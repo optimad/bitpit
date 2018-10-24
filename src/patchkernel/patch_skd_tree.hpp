@@ -132,6 +132,10 @@ private:
 
     void initializeBoundingBox();
 
+    void updateClosestCellInfo(const std::array<double, 3> &point,
+                               long cellId, double cellDistance,
+                               long *closestId, double *closestDistance) const;
+
 };
 
 class PatchSkdTree {
