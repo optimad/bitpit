@@ -276,23 +276,23 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
 
     // the sign is computed by determining the side of point p
     // with respect to the normal plane 
-    double s = sign( dotProduct(gradient, outwards) );
+    int s = sign( dotProduct(gradient, outwards) );
 
     // if p lies on the normal plane (s=0), but the distance is finite the sign must be evaluated
     // considering the curvature of the surface. Anyhow this situation is not crucial because
     // there should exists another element with smaller distance. The signed is put aribtrarly
     // to positive
-    if(utils::DoubleFloatingEqual()(s,0.) && distance>0){
-        s = 1.;
+    if(s==0 && distance>0){
+        s = 1;
     } 
 
     // If signed distance are computed, the distance value and gradient
     // need to be changed accordingly. If unsigned distance are computed
     // the orientation of the suraface normal is discarded and in order
     // to agnostic with repect the two sides of the surface
-    distance *= ( signd *s  + (!signd) *1.);
-    gradient *= ( signd *s  + (!signd) *1.);
-    normal   *= ( signd *1. + (!signd) *s );
+    distance *= (double) ( signd *s + (!signd) *1);
+    gradient *= (double) ( signd *s + (!signd) *1);
+    normal   *= (double) ( signd *1 + (!signd) *s);
 
     return;
 
