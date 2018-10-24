@@ -208,14 +208,8 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
         std::size_t nodeId = m_candidateIds[k];
         const SkdNode &node = m_nodes[nodeId];
 
-        long cellId;
-        double cellDistance;
-        node.findPointClosestCell(point, &cellId, &cellDistance);
+        node.updatePointClosestCell(point, id, distance);
         ++nDistanceEvaluations;
-        if (cellDistance < *distance) {
-            *id       = cellId;
-            *distance = cellDistance;
-        }
     }
 
     // If no closest cell was found set the distance to the maximum
