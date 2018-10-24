@@ -293,9 +293,6 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
     distance *= (double) ( signd *s + (!signd) *1);
     gradient *= (double) ( signd *s + (!signd) *1);
     normal   *= (double) ( signd *1 + (!signd) *s);
-
-    return;
-
 }
 
 /*!
@@ -774,8 +771,6 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
 
         } //end while
     }
-
-    return;
 }
 
 /*!
