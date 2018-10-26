@@ -60,7 +60,7 @@ public:
     double getFeatureAngle() const;
 
     void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
-    void getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
+    int getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
 
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;

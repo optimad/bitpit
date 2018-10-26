@@ -180,8 +180,7 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
  * @param[out] gradient levelset gradient
  * @param[out] normal normal at closest point
  */
-void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const {
-
+int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const {
 
     std::array<double,3> outwards;
 
@@ -278,13 +277,16 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
     // with respect to the normal plane 
     int s = sign( dotProduct(gradient, outwards) );
 
-    // if p lies on the normal plane (s=0), but the distance is finite the sign must be evaluated
-    // considering the curvature of the surface. Anyhow this situation is not crucial because
-    // there should exists another element with smaller distance. The signed is put aribtrarly
-    // to positive
+    // If the point lies on the normal plane (s = 0), but its distance is
+    // finite the sign must be evaluated considering the curvature of the
+    // surface. This is not implemented yet.
     if(s==0 && distance>0){
-        s = 1;
-    } 
+        distance = levelSetDefaults::VALUE;
+        gradient = levelSetDefaults::GRADIENT;
+        normal   = levelSetDefaults::GRADIENT;
+
+        return 1;
+    }
 
     // If signed distance are computed, the distance value and gradient
     // need to be changed accordingly. If unsigned distance are computed
@@ -293,6 +295,8 @@ void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords
     distance *= (double) ( signd *s + (!signd) *1);
     gradient *= (double) ( signd *s + (!signd) *1);
     normal   *= (double) ( signd *1 + (!signd) *s);
+
+    return 0;
 }
 
 /*!
@@ -736,17 +740,22 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
                     if( cellDistance < std::abs(lsInfoItr->value) ){
 
                         // compute all necessary information and store them
-                        m_segmentation->getSegmentInfo(cloud[k], segmentId, signd, distance, gradient, normal);
+                        //
+                        // If an error occures, there should exists another
+                        // segment from which the levelset information can
+                        // be extracted from.
+                        int error = m_segmentation->getSegmentInfo(cloud[k], segmentId, signd, distance, gradient, normal);
+                        if (!error) {
+                            lsInfoItr->value    = distance;
+                            lsInfoItr->gradient = gradient;
 
-                        lsInfoItr->value    = distance;
-                        lsInfoItr->gradient = gradient;
-                
-                        auto infoItr = m_surfaceInfo.find(cellId) ;
-                        if( infoItr == m_surfaceInfo.end() ){
-                            infoItr = m_surfaceInfo.emplace(cellId) ;
+                            auto infoItr = m_surfaceInfo.find(cellId) ;
+                            if( infoItr == m_surfaceInfo.end() ){
+                                infoItr = m_surfaceInfo.emplace(cellId) ;
+                            }
+                            infoItr->support = segmentId;
+                            infoItr->normal = normal;
                         }
-                        infoItr->support = segmentId;
-                        infoItr->normal = normal;
                     }
 
 
@@ -815,7 +824,10 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
         if(segmentId>=0){
 
-            m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+            int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+            if (error) {
+                throw std::runtime_error ("Unable to extract the levelset information from segment.");
+            }
 
             PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId);
             lsInfoItr = m_ls.emplace(cellId) ;
@@ -863,7 +875,10 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
             if(segmentId>=0){
 
-                m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+                int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+                if (error) {
+                    throw std::runtime_error ("Unable to extract the levelset information from segment.");
+                }
 
                 PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(neighId) ;
                 lsInfoItr->value    = distance;
@@ -929,7 +944,10 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
             if(segmentId>=0){
 
-                m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+                int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+                if (error) {
+                    throw std::runtime_error ("Unable to extract the levelset information from segment.");
+                }
 
                 PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
                 lsInfoItr->value    = distance;
@@ -974,7 +992,10 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
                 if(segmentId>=0){
 
-                    m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+                        int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+                        if (error) {
+                            throw std::runtime_error ("Unable to extract the levelset information from segment.");
+                        }
 
                     PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
                     lsInfoItr->value    = distance;
