@@ -426,6 +426,9 @@ if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED OR MODULE_POD_ENABLED)
 	enable_language(Fortran)
 	enable_language(C)
 
+	set(BLAS_VENDOR "All" CACHE STRING "If set, checks only the specified vendor. If not set, checks all the possibilities")
+	mark_as_advanced(BLAS_VENDOR)
+	set(BLA_VENDOR "${BLAS_VENDOR}")
 	set(LAPACKE_STATIC 0 CACHE BOOL "Require LAPACKE static libraries")
 	mark_as_advanced(LAPACKE_STATIC)
 
