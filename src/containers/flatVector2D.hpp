@@ -93,6 +93,7 @@ public:
     void initialize(const std::vector<int> &sizes, const T &value = T());
     void initialize(const int &nVectors, const int &size, const T &value = T());
     void initialize(const std::vector<std::vector<T> > &vector2D);
+    void initialize(const FlatVector2D<T> &other);
 
     void destroy();
     void reserve(int nVectors, int nItems = 0);

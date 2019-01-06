@@ -308,6 +308,19 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
 }
 
 /*!
+    Initializes the container.
+
+    \param other is antoher container of the same type, whose contents will
+    be used to initialize the current container
+*/
+template <class T>
+void FlatVector2D<T>::initialize(const FlatVector2D<T> &other)
+{
+    m_v.assign(other.m_v.begin(), other.m_v.end());
+    m_index.assign(other.m_index.begin(), other.m_index.end());
+}
+
+/*!
     Destroy the container.
 
     After calling this function the container will be non-functional
