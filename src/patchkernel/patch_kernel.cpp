@@ -3443,6 +3443,7 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 			utils::binary::read(stream, neighFace);
 			neigh = &(m_cells.at(neighId));
 		} else {
+			neighFace = -1;
 			neigh = nullptr;
 		}
 
