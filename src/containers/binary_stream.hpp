@@ -59,6 +59,8 @@ namespace bitpit{
 class BinaryStream {
 
 public:
+    virtual ~BinaryStream() = default;
+
     bool eof() const;
 
     std::streampos tellg() const;
