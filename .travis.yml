@@ -240,6 +240,13 @@ script:
       make -j2 && ctest;
     fi
 
+after_script:
+  # When using secret variables, the output gets filtered through a helper
+  # process by default. This may leed to truncated ouptut after failures.
+  # Waiting some seconds after the script should workaround the issue (see
+  # https://github.com/travis-ci/travis-ci/issues/6018).
+  - sleep 10
+
 notifications:
   slack:
     rooms:
