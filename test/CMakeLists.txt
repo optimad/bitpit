@@ -45,7 +45,7 @@ function(isTestParallel TEST_ENTRY PARALLEL_FLAG)
 endfunction()
 
 # Get the number of processors a test has to run on
-function(getTestNumProcs TEST_ENTRY DEFAULT_N_PROCS N_PROCS)
+function(getTestNumProcs TEST_ENTRY N_PROCS)
 	isTestParallel("${TEST_ENTRY}" IS_TEST_PARALLEL)
 	if (NOT IS_TEST_PARALLEL)
 		set(${N_PROCS} "1" PARENT_SCOPE)
@@ -54,7 +54,9 @@ function(getTestNumProcs TEST_ENTRY DEFAULT_N_PROCS N_PROCS)
 
 	string(REGEX MATCH "[^:]*$" TEST_ENTRY_MATCH ${TEST_ENTRY})
 	if ("${TEST_ENTRY_MATCH}" STREQUAL "${TEST_ENTRY}")
-		set(${N_PROCS} "${DEFAULT_N_PROCS}" PARENT_SCOPE)
+		set(TEST_DEFAULT_NUMPROCS 2 CACHE STRING "Is the default number of precesses the test will run on")
+		mark_as_advanced(TEST_DEFAULT_NUMPROCS)
+		set(${N_PROCS} "${TEST_DEFAULT_NUMPROCS}" PARENT_SCOPE)
 		return()
 	endif ()
 
@@ -80,7 +82,7 @@ function(addModuleTests MODULE_NAME TEST_ENTRIES TEST_LIBRARIES)
         list(APPEND TARGETS "${TEST_NAME}")
 
         if (${IS_TEST_PARALLEL})
-            getTestNumProcs("${TEST_ENTRY}" "${MPIEXEC_MAX_NUMPROCS}" N_PROCS)
+            getTestNumProcs("${TEST_ENTRY}" N_PROCS)
             addModuleParallelTest("${TEST_NAME}" "${TEST_LIBRARIES}" ${N_PROCS})
         else ()
             addModuleSerialTest("${TEST_NAME}" "${TEST_LIBRARIES}")
