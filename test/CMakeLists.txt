@@ -121,18 +121,10 @@ function(addModuleSerialTest TEST_NAME TEST_LIBRARIES)
 endfunction()
 
 # Add a parallel test
-function(addModuleParallelTest TEST_NAME TEST_LIBRARIES)
+function(addModuleParallelTest TEST_NAME TEST_LIBRARIES N_PROCS)
     # Parallel tests are enable only in MPI builds
     if (NOT ENABLE_MPI)
         return()
-    endif ()
-
-    # Get the number of processors to run the test on
-    list(LENGTH ARGN ARGN_LENGTH)
-    if (${ARGN_LENGTH} GREATER 0)
-        list(GET ARGN 0 N_PROCS)
-    else ()
-        set(N_PROCS "${MPIEXEC_MAX_NUMPROCS}")
     endif ()
 
     # Add the test
