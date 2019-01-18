@@ -663,7 +663,7 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, con
     std::array<double, 3> cellNormal = evalFacetNormal(id);
 
     // Cell angle at vertex
-    double cellVertexAngle = evalAngleAtVertex(id, cell.findVertex(vertexId));
+    double cellVertexAngle = evalAngleAtVertex(id, vertex);
 
     // Compute cell vertex neighs
     std::vector<long> vertexNeighs = findCellVertexNeighs(id, vertex);
