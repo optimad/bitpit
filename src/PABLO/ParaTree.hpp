@@ -196,7 +196,7 @@ namespace bitpit {
         ParaTree(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE);
         ParaTree(std::istream &stream, std::string logfile = DEFAULT_LOG_FILE);
 #endif
-        ~ParaTree();
+        virtual ~ParaTree();
 
         ParaTree(const ParaTree & other);
 
