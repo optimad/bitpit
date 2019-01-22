@@ -193,7 +193,8 @@ void LevelSetCachedObject::propagateSign() {
     // if a cell is associated to a levelset info we know its sign (the value
     // contained in the levelset info may be a dummy value, but the sign is
     // the correct one) and the cell can be used as seeds for propagating the
-    // sign to other cells.
+    // sign to other cells. External sign should not be added to the seeds
+    // because we don't need to propagate the sign in the external region.
     //
     // The sign of the cells outise the bounding box of all objects (external
     // cells) can be either positive or negative depending on the orientation
@@ -203,53 +204,25 @@ void LevelSetCachedObject::propagateSign() {
     // external region it can be stopped, the sign of the seed from which the
     // propagation has started will be the sign of the external region.
     PiercedStorage<int, long> propagationStatus(1, &cells);
-    propagationStatus.fill(PROPAGATION_STATUS_WAITING);
 
-    long nExternal = 0;
-    long nWaiting  = mesh.getCellCount();
+    int externalSign = PROPAGATION_SIGN_UNDEFINED;
+    long nExternal   = 0;
+    long nWaiting    = mesh.getCellCount();
     for (auto itr = cellBegin; itr != cellEnd; ++itr) {
         long cellId = itr.getId();
+        long cellRawId = itr.getRawIndex();
+        int &cellPropagationStatus = propagationStatus.rawAt(cellRawId);
 
-        // Process cells associated to a levelset info
-        if (m_ls.find(cellId) != m_ls.end()) {
-            std::size_t cellRawId = itr.getRawIndex();
-            propagationStatus.rawAt(cellRawId) = PROPAGATION_STATUS_REACHED;
-            --nWaiting;
-
-            seeds.push_back(cellId);
-
-            continue;
-        }
-
-        // Process external cells
-        std::array<double, 3> centroid = mesh.evalCellCentroid(cellId);
-
-        bool isExternal = false;
-        for (int i = 0; i < 3; ++i) {
-            if (centroid[i] < boxMin[i] || centroid[i] > boxMax[i]) {
-                isExternal = true;
-                break;
-            }
-        }
-
-        if (isExternal) {
-            std::size_t cellRawId = itr.getRawIndex();
-            propagationStatus.rawAt(cellRawId) = PROPAGATION_STATUS_EXTERNAL;
-            --nWaiting;
-            ++nExternal;
-
-            continue;
-        }
+        initializeCellSignPropagation(cellId, boxMin, boxMax,
+                                      &cellPropagationStatus, &seeds,
+                                      &nWaiting, &nExternal, &externalSign);
     }
 
     // If there are no external cells, set the sign of the external region
     // to a dummy values. In this way the routine that propagates the sign
     // will not try to detect the sign of the external region.
-    int externalSign;
     if (nExternal == 0) {
         externalSign = PROPAGATION_SIGN_DUMMY;
-    } else {
-        externalSign = PROPAGATION_SIGN_UNDEFINED;
     }
 
     // Use the seeds to propagate the sign
@@ -335,10 +308,13 @@ void LevelSetCachedObject::propagateSign() {
                     std::size_t cellRawId = cells.getRawIndex(cellId);
                     int &cellPropagationStatus = propagationStatus.rawAt(cellRawId);
                     if (cellPropagationStatus == PROPAGATION_STATUS_WAITING) {
+                        // Set the sign
                         setSign(cellId, sign);
-                        cellPropagationStatus = PROPAGATION_STATUS_REACHED;
-                        --nWaiting;
-                        seeds.push_back(cellId);
+
+                        // Initialize sign propagation
+                        initializeCellSignPropagation(cellId, boxMin, boxMax,
+                                                        &cellPropagationStatus, &seeds,
+                                                        &nWaiting, &nExternal, &externalSign);
                     } else if (cellPropagationStatus == PROPAGATION_STATUS_REACHED) {
                         assert(getSign(cellId) == sign);
                     }
@@ -411,6 +387,73 @@ void LevelSetCachedObject::propagateSign() {
     }
 
     assert(nExternal == 0);
+}
+
+/*!
+ * Initialize propagation information for the specified cell.
+ *
+ * External cells for which the levelset sign is know can be used to define the
+ * sign of the external region. Non-external cells for which the sign is known
+ * will be used as seeds.
+ *
+ * \param cellId is the index of the cell
+ * \param boxMin is the lower-left corenr of the object bounding box
+ * \param boxMax is the upper-right corenr of the object bounding box
+ * \param[out] cellStatus on output will contain the propagation status
+ * associated to the cell
+ * \param[in,out] seeds are the seeds to be used for sign propagation
+ * status of the cells
+ * \param[in,out] nWaiting is the number of cells that are waiting for the
+ * propagation to reach them.
+ * \param[in,out] nExternal is the number of cells in the external region
+ * \param[in,out] externalSign is the sign of the external region
+ */
+void LevelSetCachedObject::initializeCellSignPropagation(long cellId,
+                                                         const std::array<double, 3> &boxMin,
+                                                         const std::array<double, 3> &boxMax,
+                                                         int *cellStatus, std::vector<long> *seeds,
+                                                         long *nWaiting, long *nExternal,
+                                                         int *externalSign) {
+
+    // Detect if the cell is external
+    const VolumeKernel &mesh = *(m_kernelPtr->getMesh());
+    std::array<double, 3> centroid = mesh.evalCellCentroid(cellId);
+
+    bool isExternal = false;
+    for (int i = 0; i < 3; ++i) {
+        if (centroid[i] < boxMin[i] || centroid[i] > boxMax[i]) {
+            isExternal = true;
+            break;
+        }
+    }
+
+    // Detect if the sign is defined for the cell
+    bool hasSign = (m_ls.find(cellId) != m_ls.end());
+
+    // Initialize cell sign propagation
+    if (hasSign) {
+        *cellStatus = PROPAGATION_STATUS_REACHED;
+        --(*nWaiting);
+
+        if (!isExternal) {
+            seeds->push_back(cellId);
+        } else {
+            int sign = getSign(cellId);
+            if (*externalSign == 0) {
+                *externalSign = sign;
+            } else if (*externalSign != sign) {
+                throw std::runtime_error("Mismatch in sign of external region!");
+            }
+        }
+    } else {
+        if (!isExternal) {
+            *cellStatus = PROPAGATION_STATUS_WAITING;
+        } else {
+            *cellStatus = PROPAGATION_STATUS_EXTERNAL;
+            ++(*nExternal);
+            --(*nWaiting);
+        }
+    }
 }
 
 /*!
