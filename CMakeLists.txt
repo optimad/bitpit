@@ -463,6 +463,9 @@ endif()
 # Main library
 add_subdirectory(src)
 
+# Docs
+add_subdirectory(doc)
+
 # CMake
 add_subdirectory(cmake)
 
@@ -472,6 +475,3 @@ add_subdirectory(examples)
 # Tests
 enable_testing()
 add_subdirectory(test)
-
-# Docs
-add_subdirectory(doc)
