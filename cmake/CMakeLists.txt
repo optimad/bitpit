@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 #------------------------------------------------------------------------------------#
 
 # Directory where the CMake configuration file will be installed
-set(BITPIT_INSTALL_CMAKE_DIR "lib/cmake/${PROJECT_NAME}-${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}")
+set(BITPIT_INSTALL_CMAKE_DIR "lib/cmake/${PROJECT_NAME}-${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}" CACHE INTERNAL "Directory in which cmake modules will be installed")
 
 #------------------------------------------------------------------------------------#
 # Generate BITPITConfig.cmake

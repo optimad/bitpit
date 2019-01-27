@@ -147,3 +147,18 @@ endif()
 
 # Let libfind_process initialize the appropriate variables
 libfind_process(BITPIT)
+
+#-----------------------------------------------------------------------------
+# Find bitpit external dependencies
+#-----------------------------------------------------------------------------
+
+# Find external packages
+foreach(_DEPENDENCY @BITPIT_EXTERNAL_DEPENDENCIES@)
+    find_package("${_DEPENDENCY}" REQUIRED)
+endforeach()
+
+# Add external libraries
+list(APPEND BITPIT_LIBRARIES @BITPIT_EXTERNAL_LIBRARIES@)
+
+# Add external inclued paths
+list(APPEND BITPIT_INCLUDE_DIRS @BITPIT_EXTERNAL_INCLUDE_DIRS@)
