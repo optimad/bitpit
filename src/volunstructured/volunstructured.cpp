@@ -45,7 +45,7 @@ namespace bitpit {
 	\param dimension is the dimension of the patch
 */
 VolUnstructured::VolUnstructured(const int &dimension)
-	: VolumeKernel(PatchManager::AUTOMATIC_ID, dimension, true)
+	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension)
 {
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning
