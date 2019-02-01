@@ -40,6 +40,14 @@ namespace bitpit {
 */
 
 /*!
+	Creates an uninitialized patch.
+*/
+VolUnstructured::VolUnstructured()
+	: VolumeKernel(true)
+{
+}
+
+/*!
 	Creates a new patch.
 
 	\param dimension is the dimension of the patch
