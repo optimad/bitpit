@@ -129,7 +129,7 @@ void SurfUnstructured::setExpert(bool expert)
  */
 int SurfUnstructured::_getDumpVersion() const
 {
-	const int DUMP_VERSION = 1;
+	const int DUMP_VERSION = 3;
 
 	return DUMP_VERSION;
 }
@@ -152,34 +152,13 @@ void SurfUnstructured::_dump(std::ostream &stream) const
 	utils::binary::write(stream, getSpaceDimension());
 
 	// Save the vertices
-	utils::binary::write(stream, getVertexCount());
-
-	for (const Vertex &vertex : m_vertices) {
-		utils::binary::write(stream, vertex.getId());
-
-		std::array<double, 3> coords = vertex.getCoords();
-		utils::binary::write(stream, coords[0]);
-		utils::binary::write(stream, coords[1]);
-		utils::binary::write(stream, coords[2]);
-	}
+	dumpVertices(stream);
 
 	// Save the cells
-	utils::binary::write(stream, getInternalCount());
-	utils::binary::write(stream, getGhostCount());
+	dumpCells(stream);
 
-	for (const Cell &cell: m_cells) {
-		const ReferenceElementInfo &cellInfo = cell.getInfo();
-
-		utils::binary::write(stream, cell.getId());
-		utils::binary::write(stream, cell.getPID());
-		utils::binary::write(stream, cellInfo.type);
-
-		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-		int nCellVertices = cellVertexIds.size();
-		for (int i = 0; i < nCellVertices; ++i) {
-			utils::binary::write(stream, cellVertexIds[i]);
-		}
-	}
+	// Save the interfaces
+	dumpInterfaces(stream);
 }
 
 /*!
@@ -202,59 +181,13 @@ void SurfUnstructured::_restore(std::istream &stream)
 	setSpaceDimension(spaceDimension);
 
 	// Restore the vertices
-	long nVertices;
-	utils::binary::read(stream, nVertices);
-
-	reserveVertices(nVertices);
-	for (long i = 0; i < nVertices; ++i) {
-		long id;
-		utils::binary::read(stream, id);
-
-		std::array<double, 3> coords;
-		utils::binary::read(stream, coords[0]);
-		utils::binary::read(stream, coords[1]);
-		utils::binary::read(stream, coords[2]);
-
-		addVertex(coords, id);
-	}
+	restoreVertices(stream);
 
 	// Restore the cells
-	long nInternals;
-	utils::binary::read(stream, nInternals);
+	restoreCells(stream);
 
-	long nGhosts;
-	utils::binary::read(stream, nGhosts);
-
-	long nCells = nInternals + nGhosts;
-
-	reserveCells(nCells);
-	for (long i = 0; i < nCells; ++i) {
-		long id;
-		utils::binary::read(stream, id);
-
-		int PID;
-		utils::binary::read(stream, PID);
-
-		ElementType type;
-		utils::binary::read(stream, type);
-		const ReferenceElementInfo &cellInfo = ReferenceElementInfo::getInfo(type);
-
-		int nCellVertices = cellInfo.nVertices;
-		std::vector<long> connect(nCellVertices, Vertex::NULL_ID);
-		for (int k = 0; k < nCellVertices; ++k) {
-			utils::binary::read(stream, connect[k]);
-		}
-
-		CellIterator cellIterator = addCell(type, true, connect, id);
-		cellIterator->setPID(PID);
-	}
-
-	// Build ghost exchange info
-#if BITPIT_ENABLE_MPI==1
-	if (getProcessorCount()) {
-		buildGhostExchangeInfo();
-	}
-#endif
+	// Restore the interfaces
+	restoreInterfaces(stream);
 }
 
 /*!
