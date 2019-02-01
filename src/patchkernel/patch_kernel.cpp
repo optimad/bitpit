@@ -3430,6 +3430,83 @@ void PatchKernel::restoreVertices(std::istream &stream)
 }
 
 /*!
+ *  Write the cells to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void PatchKernel::dumpCells(std::ostream &stream) const
+{
+	utils::binary::write(stream, getInternalCount());
+	utils::binary::write(stream, getGhostCount());
+
+	for (const Cell &cell: m_cells) {
+		utils::binary::write(stream, cell.getId());
+		utils::binary::write(stream, cell.getPID());
+		utils::binary::write(stream, cell.getType());
+
+		int cellConnectSize = cell.getConnectSize();
+		utils::binary::write(stream, cellConnectSize);
+
+		const long *cellConnect = cell.getConnect();
+		for (int i = 0; i < cellConnectSize; ++i) {
+			utils::binary::write(stream, cellConnect[i]);
+		}
+	}
+}
+
+/*!
+ *  Restore the cells from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void PatchKernel::restoreCells(std::istream &stream)
+{
+	// Restore the cells
+	long nInternals;
+	utils::binary::read(stream, nInternals);
+
+	long nGhosts;
+	utils::binary::read(stream, nGhosts);
+
+	long nCells = nInternals + nGhosts;
+
+	reserveCells(nCells);
+
+	std::vector<long> cellConnect;
+	for (long i = 0; i < nCells; ++i) {
+		long id;
+		utils::binary::read(stream, id);
+
+		int PID;
+		utils::binary::read(stream, PID);
+
+		ElementType type;
+		utils::binary::read(stream, type);
+
+		int cellConnectSize;
+		utils::binary::read(stream, cellConnectSize);
+
+		cellConnect.resize(cellConnectSize);
+		for (int k = 0; k < cellConnectSize; ++k) {
+			utils::binary::read(stream, cellConnect[k]);
+		}
+
+		CellIterator cellIterator = addCell(type, true, cellConnect, id);
+		cellIterator->setPID(PID);
+	}
+
+	// Restore adjacencies
+	buildAdjacencies();
+
+	// Build ghost exchange info
+#if BITPIT_ENABLE_MPI==1
+	if (getProcessorCount() > 1) {
+		buildGhostExchangeInfo();
+	}
+#endif
+}
+
+/*!
  *  Write the interfaces to the specified stream.
  *
  *  \param stream is the stream to write to

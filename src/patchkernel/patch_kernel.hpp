@@ -507,6 +507,10 @@ protected:
 
 	void dumpVertices(std::ostream &stream) const;
 	void restoreVertices(std::istream &stream);
+
+	void dumpCells(std::ostream &stream) const;
+	void restoreCells(std::istream &stream);
+
 	void dumpInterfaces(std::ostream &stream) const;
 	void restoreInterfaces(std::istream &stream);
 
