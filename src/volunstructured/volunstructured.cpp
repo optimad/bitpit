@@ -213,9 +213,21 @@ int VolUnstructured::_getDumpVersion() const
  */
 void VolUnstructured::_dump(std::ostream &stream) const
 {
-	BITPIT_UNUSED(stream);
+#if BITPIT_ENABLE_MPI==1
+	// Dump works only for serial calculations
+	if (getProcessorCount() != 1) {
+		throw std::runtime_error ("Dump of volunstructured is implemented only for serial calculations.");
+	}
+#endif
 
-	throw std::runtime_error ("Dump of volunstructured is not implemented yet.");
+	// Dump certices
+	dumpVertices(stream);
+
+	// Dump cells
+	dumpCells(stream);
+
+	// Dump cells
+	dumpInterfaces(stream);
 }
 
 /*!
@@ -225,9 +237,21 @@ void VolUnstructured::_dump(std::ostream &stream) const
  */
 void VolUnstructured::_restore(std::istream &stream)
 {
-	BITPIT_UNUSED(stream);
+#if BITPIT_ENABLE_MPI==1
+	// Restore works only for serial calculations
+	if (getProcessorCount() != 1) {
+		throw std::runtime_error ("Restore of volunstructured is implemented only for serial calculations.");
+	}
+#endif
 
-	throw std::runtime_error ("Restore of volunstructured is not implemented yet.");
+	// Restore certices
+	restoreVertices(stream);
+
+	// Restore cells
+	restoreCells(stream);
+
+	// Restore cells
+	restoreInterfaces(stream);
 }
 
 /*!

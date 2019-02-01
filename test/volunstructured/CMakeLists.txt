@@ -31,6 +31,7 @@ get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 # List of tests
 set(TESTS "")
 list(APPEND TESTS "test_volunstructured_00001")
+list(APPEND TESTS "test_volunstructured_00002")
 
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
