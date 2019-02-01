@@ -3387,6 +3387,49 @@ long PatchKernel::countFreeFaces() const
 }
 
 /*!
+ *  Write the vertices to the specified stream.
+ *
+ *  \param stream is the stream to write to
+ */
+void PatchKernel::dumpVertices(std::ostream &stream) const
+{
+	utils::binary::write(stream, getVertexCount());
+
+	for (const Vertex &vertex : m_vertices) {
+		utils::binary::write(stream, vertex.getId());
+
+		std::array<double, 3> coords = vertex.getCoords();
+		utils::binary::write(stream, coords[0]);
+		utils::binary::write(stream, coords[1]);
+		utils::binary::write(stream, coords[2]);
+	}
+}
+
+/*!
+ *  Restore the vertices from the specified stream.
+ *
+ *  \param stream is the stream to read from
+ */
+void PatchKernel::restoreVertices(std::istream &stream)
+{
+	long nVertices;
+	utils::binary::read(stream, nVertices);
+
+	reserveVertices(nVertices);
+	for (long i = 0; i < nVertices; ++i) {
+		long id;
+		utils::binary::read(stream, id);
+
+		std::array<double, 3> coords;
+		utils::binary::read(stream, coords[0]);
+		utils::binary::read(stream, coords[1]);
+		utils::binary::read(stream, coords[2]);
+
+		addVertex(coords, id);
+	}
+}
+
+/*!
  *  Write the interfaces to the specified stream.
  *
  *  \param stream is the stream to write to

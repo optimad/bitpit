@@ -505,6 +505,8 @@ protected:
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
 
+	void dumpVertices(std::ostream &stream) const;
+	void restoreVertices(std::istream &stream);
 	void dumpInterfaces(std::ostream &stream) const;
 	void restoreInterfaces(std::istream &stream);
 
