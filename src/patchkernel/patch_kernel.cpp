@@ -3973,76 +3973,121 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 		}
 	}
 
-    //
-    // Build vertex->cell connectivity
-    //
-	std::unordered_map<long, std::vector<long>> vertexToCellsMap;
-	for (const Cell &cell : m_cells) {
-		long cellId = cell.getId();
+	//
+	// Update the adjacencies
+	//
 
-		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-		int nCellVertices = cellVertexIds.size();
-		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cellVertexIds[k];
-			vertexToCellsMap[vertexId].push_back(cellId);
+	// The adjacencies are found looking for matching half-faces.
+	//
+	// On a three-dimensional patch each internal face is shared between two,
+	// and only two, half-faces. On lower dimension patches one internal face
+	// may be shared among multiple half-faces (this happend with non-manifold
+	// patches).
+	//
+	// If faces can be shared only between two half-faces, there is a one-to-one
+	// correspondence between the half-faces. Give one half-faces, its matching
+	// can be found looking for an half-faces with the same vertices but with
+	// reverse vertex winding order.
+	//
+	// If faces can be shared among more than two half-faces, it's not anymore
+	// possible to define a unique winding order for the vertices of the faces.
+	// There is no more a one-to-one correspondence between pairs of half-face.
+	// In this case, when looking for half-face correspondence, it is necessary
+	// to look for half-faces with reverse vertex winding order and also for
+	// half-faces with the same vertex winding order.
+	//
+	// If we are updating the adjacencies of only part of the cells, we need
+	// to populate the half-face list with the faces of the cells that will
+	// not be updated (among those faces may find matches for the faces of
+	// the updated cells). If faces can be shared only between two half-faces
+	// we need to insert only the border faces of the non-updated cells,
+	// otherwise we need to add all the faces of the non-updated cells.
+
+	// Define matching windings
+	bool multipleMatchesAllowed = (getDimension() < 3);
+
+	std::vector<CellHalfFace::Winding> matchingWindings;
+	matchingWindings.push_back(CellHalfFace::WINDING_REVERSE);
+	if (multipleMatchesAllowed) {
+		matchingWindings.push_back(CellHalfFace::WINDING_NATURAL);
+	}
+
+	// Initialize half-faces list
+	std::unordered_multiset<CellHalfFace, CellHalfFace::Hasher> halfFaces;
+	if (multipleMatchesAllowed) {
+		halfFaces.reserve(4 * getCellCount());
+	} else {
+		halfFaces.reserve(2 * cellIds.size());
+	}
+
+	// Populate list with faces of non-updated cells
+	if ((long) cellIds.size() != getCellCount()) {
+		std::unordered_set<long> updateCellSet(cellIds.begin(), cellIds.end());
+
+		for (Cell &cell : m_cells) {
+			if (updateCellSet.count(cell.getId()) > 0) {
+				continue;
+			}
+
+			int nCellFaces = cell.getFaceCount();
+			for (int face = 0; face < nCellFaces; face++) {
+				if (multipleMatchesAllowed || cell.isFaceBorder(face)) {
+					std::cout << ": " << cell.getId() << " : " << face << std::endl;
+					halfFaces.emplace(cell, face, CellHalfFace::WINDING_NATURAL);
+				}
+			}
 		}
 	}
 
-    //
-    // Update adjacencies
-    //
+	// Update the adjacencies
 	for (long cellId : cellIds) {
 		Cell &cell = m_cells[cellId];
 
 		const int nCellFaces = cell.getFaceCount();
 		for (int face = 0; face < nCellFaces; face++) {
-			int nFaceVertices = cell.getFaceVertexCount(face);
+			// Generate the half-face
+			CellHalfFace halfFace(cell, face);
 
-			// Build list of neighbour candidates
+			// Find matching half-faces
+			int nAdjacencies = 0;
+			for (CellHalfFace::Winding winding : matchingWindings) {
+				// Set winding order
+				halfFace.setWinding(winding);
+
+				// Search for matching half-faces
+				//
+				// Each match is adjacent to the current half-face.
+				auto matchRange = halfFaces.equal_range(halfFace);
+				for (auto matchItr = matchRange.first; matchItr != matchRange.second; ++matchItr) {
+					const CellHalfFace &neighHalfFace = *matchItr;
+
+					// Generate the adjacency
+					Cell &neigh    = neighHalfFace.getCell();
+					long neighId   = neigh.getId();
+					long neighFace = neighHalfFace.getFace();
+
+					cell.pushAdjacency(face, neighId);
+					neigh.pushAdjacency(neighFace, cellId);
+
+					++nAdjacencies;
+				}
+
+				// Remove the matching half-faces from the list
+				//
+				// It is not possible to remove the matching half-faces
+				// if multiple matches are allowed.
+				if (!multipleMatchesAllowed) {
+					halfFaces.erase(matchRange.first, matchRange.second);
+				}
+			}
+
+			// Add the current half-face to the list.
 			//
-			// Consider all the cells that shares the same vertices of the
-			// current face, but discard the cells that are already adjacencies
-			// for this face.
-			long firstVertexId = cell.getFaceVertexId(face, 0);
-			std::vector<long> candidates = vertexToCellsMap[firstVertexId];
-			utils::eraseValue(candidates, cellId);
-
-			int j = 1;
-			while (candidates.size() > 0 && j < nFaceVertices) {
-				long vertexId = cell.getFaceVertexId(face, j);
-				candidates = utils::intersectionVector(candidates, vertexToCellsMap[vertexId]);
-				j++;
-			}
-
-			int nFaceAdjacencies = cell.getAdjacencyCount(face);
-			for (int k = 0; k < nFaceAdjacencies; ++k) {
-				long adjacencyId = cell.getAdjacency(face, k);
-				if (adjacencyId >= 0) {
-					utils::eraseValue(candidates, adjacencyId);
-				}
-			}
-
-			// Find the real neighoburs and update the adjacencies
-			for (long candidateId : candidates) {
-				Cell &candidate = m_cells[candidateId];
-				int nCandidateFaces = candidate.getFaceCount();
-
-				// Consider only real neighbours
-				int candidateFace = -1;
-				for (int k = 0; k < nCandidateFaces; ++k) {
-					if (isSameFace(cellId, face, candidateId, k)) {
-						candidateFace = k;
-						break;
-					}
-				}
-
-				if (candidateFace < 0) {
-					continue;
-				}
-
-				// If the candidate is a real neighbout update the adjacencies
-				cell.pushAdjacency(face, candidateId);
-				candidate.pushAdjacency(candidateFace, cellId);
+			// If no multiple matches are allowed, we need to add the current
+			// half-face to the list only if no matchings were found.
+			if (multipleMatchesAllowed || nAdjacencies == 0) {
+				halfFace.setWinding(CellHalfFace::WINDING_NATURAL);
+				halfFaces.insert(std::move(halfFace));
 			}
 		}
 	}
