@@ -204,18 +204,19 @@ ProxyVector<T>::ProxyVector(std::vector<T_no_cv> &&storage)
 */
 template<typename T>
 ProxyVector<T>::ProxyVector(const ProxyVector &other)
+    : m_size(other.m_size)
 {
-    // Copy the elements
-    std::vector<T_no_cv> new_storage(*(other.m_storage));
-
-    // Assign the new memory to the object
-    m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(std::move(new_storage)));
-    if (other.m_data == other.m_storage->data()) {
-        m_data = m_storage->data();
+    if (other.m_storage) {
+        m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(*(other.m_storage)));
+        if (other.m_data == other.m_storage->data()) {
+            m_data = m_storage->data();
+        } else {
+            m_data = other.m_data;
+        }
     } else {
+        m_storage.reset();
         m_data = other.m_data;
     }
-    m_size = other.m_size;
 }
 
 /*!
