@@ -868,7 +868,10 @@ ConstProxyVector<long> Element::getFaceConnect(int face) const
 	{
 		assert(m_type != ElementType::UNDEFINED);
 
-		ConstProxyVector<int> localFaceConnect = getFaceLocalConnect(face);
+		// If we are here, the element has a reference element, therefore we
+		// can retrieve the local face connectivity directly form the info
+		// associated the to referenc element.
+		const std::vector<int> &localFaceConnect = getInfo().faceConnect[face];
 		int faceConnectSize = localFaceConnect.size();
 
 		std::vector<long> faceConnect(faceConnectSize);
