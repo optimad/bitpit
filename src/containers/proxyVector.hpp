@@ -187,6 +187,7 @@ public:
     ProxyVector(std::vector<T_no_cv> &&data);
 
     ProxyVector(const ProxyVector &other);
+    ProxyVector(ProxyVector &&other) = default;
 
     /*!
         Move assignment operator.
