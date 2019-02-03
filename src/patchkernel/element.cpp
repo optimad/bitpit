@@ -1833,6 +1833,174 @@ unsigned int Element::getBinarySize()
 	return binarySize;
 }
 
+/*!
+	\class ElementHalfFace
+	\ingroup patchelements
+
+	\brief The ElementHalfFace class defines element half-faces.
+
+	ElementHalfFace is the class that defines element half-faces. Each face
+	can be seen as two half-faces: one belonging to an element and the other
+	belonging to the neighbouring element. A half-face is identify by its
+	vertices and by the winding order of the vertices.
+*/
+
+/*!
+	Constructor.
+
+	\param element is a reference to the element the owns the face
+	\param face if the local face of the element
+	\param winding is the winding order of the vertices
+*/
+ElementHalfFace::ElementHalfFace(Element &element, int face, Winding winding)
+    : m_element(element), m_face(face),
+      m_connect(m_element.getFaceConnect(m_face)),
+      m_winding(winding)
+{
+	// Find the vertex with the lowest id, this will be used as first vertex
+	// when iterating over the connectivity.
+	std::size_t connectSize = m_connect.size();
+
+	m_connectBegin = 0;
+	if (connectSize > 0) {
+		long smallestVertexId = m_connect[m_connectBegin];
+		for (std::size_t i = 1; i < connectSize; ++i) {
+			long vertexId = m_connect[i];
+			if (vertexId < smallestVertexId) {
+				m_connectBegin = i;
+				smallestVertexId = vertexId;
+			}
+		}
+	}
+}
+
+/*!
+	Get the element the face belongs to.
+
+	\result Returns the element the face belongs to.
+*/
+Element & ElementHalfFace::getElement() const
+{
+    return m_element;
+}
+
+/*!
+	Get the local face index.
+
+	\result Returns the local face index.
+*/
+int ElementHalfFace::getFace() const
+{
+    return m_face;
+}
+
+/*!
+	Get the connectivity of the face
+
+	\result Returns the connectivity of the face.
+*/
+const ConstProxyVector<long> & ElementHalfFace::getConnect() const
+{
+    return m_connect;
+}
+
+/*!
+	Get vertex winding order.
+
+	\result Vertex winding order.
+*/
+ElementHalfFace::Winding ElementHalfFace::getWinding() const
+{
+	return m_winding;
+}
+
+/*!
+	Set vertex winding order.
+
+	\param winding is the vertex winding order
+*/
+void ElementHalfFace::setWinding(Winding winding)
+{
+	m_winding = winding;
+}
+
+/*!
+	Comparison operator for the ElementHalfFace class.
+
+	\param other is the object to be compared with
+	\result Returns true if the two half-faces define the same half-face,
+	false otherwise.
+*/
+bool ElementHalfFace::operator==(const bitpit::ElementHalfFace &other) const
+{
+	const bitpit::ConstProxyVector<long> &connect1 = m_connect;
+	const bitpit::ConstProxyVector<long> &connect2 = other.m_connect;
+
+	std::size_t connectSize = connect1.size();
+	if (connectSize != connect2.size()) {
+		return false;
+	}
+
+	int winding = m_winding * other.m_winding;
+	std::size_t offset = other.m_connectBegin - winding * m_connectBegin + 2 * connectSize;
+	for (std::size_t i = 0; i < connectSize; ++i) {
+		std::size_t k1 = i;
+		std::size_t k2 = (offset + winding * i) % connectSize;
+		if (connect1[k1] != connect2[k2]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/*!
+	Comparison operator for the ElementHalfFace class.
+
+	\param other is the object to be compared with
+	\result Returns true if the two half-faces define different half-faces,
+	false otherwise.
+*/
+bool ElementHalfFace::operator!=(const bitpit::ElementHalfFace &other) const
+{
+	return !((*this) == other);
+}
+
+/*!
+	\class ElementHalfFace::Hasher
+	\ingroup patchelements
+
+	\brief The ElementHalfFace::Hasher class allows to create hashes for the
+	face items.
+*/
+
+/*!
+	Generete the hash for the specified face item.
+
+	\param item is the face item
+	\result The hash of the specified face item.
+*/
+std::size_t ElementHalfFace::Hasher::operator()(const ElementHalfFace &item) const
+{
+	const ConstProxyVector<long> &connectivity = item.m_connect;
+	std::size_t connectivitySize = connectivity.size();
+
+	std::size_t hash = connectivitySize;
+	if (item.m_winding == ElementHalfFace::WINDING_NATURAL) {
+		for (std::size_t i = 0; i < connectivitySize; ++i) {
+			std::size_t k = (item.m_connectBegin + i) % connectivitySize;
+			utils::hashing::hash_combine(hash, connectivity[k]);
+		}
+	} else {
+		for (std::size_t i = connectivitySize; i > 0; --i) {
+			std::size_t k = (item.m_connectBegin + i) % connectivitySize;
+			utils::hashing::hash_combine(hash, connectivity[k]);
+		}
+	}
+
+	return hash;
+}
+
 // Explicit instantiation of the Element containers
 template class PiercedVector<Element>;
 

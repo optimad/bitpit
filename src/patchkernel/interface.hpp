@@ -86,6 +86,18 @@ private:
 
 };
 
+class InterfaceHalfEdge : public ElementHalfFace {
+
+public:
+	InterfaceHalfEdge(Interface &interface, int edge, Winding winding = WINDING_NATURAL);
+
+	Interface & getInterface() const;
+
+protected:
+	using ElementHalfFace::getElement;
+
+};
+
 extern template class PiercedVector<Interface>;
 
 }

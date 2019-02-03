@@ -905,6 +905,40 @@ unsigned int Cell::getBinarySize()
     return (Element::getBinarySize() + m_interfaces.getBinarySize() + m_adjacencies.getBinarySize());
 }
 
+/*!
+	\class CellHalfFace
+	\ingroup patchelements
+
+	\brief The CellHalfFace class defines cell half-faces.
+
+	CellHalfFace is the class that defines cell half-faces. Each face can be
+	seen as two half-faces: one belonging to a cell and the other belonging
+	to the neighbouring cell. A half-face is identify by its vertices and by
+	the winding order of the vertices.
+*/
+
+/*!
+	Constructor.
+
+	\param cell is a reference to the cell the owns the face
+	\param face if the local face of the cell
+	\param winding is the winding order of the vertices
+*/
+CellHalfFace::CellHalfFace(Cell &cell, int face, Winding winding)
+    : ElementHalfFace(cell, face, winding)
+{
+}
+
+/*!
+	Get the cell the face belongs to.
+
+	\result Returns the cell the face belongs to.
+*/
+Cell & CellHalfFace::getCell() const
+{
+    return static_cast<Cell &>(getElement());
+}
+
 // Explicit instantiation of the Cell containers
 template class PiercedVector<Cell>;
 

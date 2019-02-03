@@ -206,6 +206,42 @@ private:
 
 };
 
+class ElementHalfFace {
+
+public:
+	enum Winding {
+		WINDING_NATURAL =  1,
+		WINDING_REVERSE = -1
+	};
+
+	struct Hasher {
+		std::size_t operator()(const ElementHalfFace &ElementHalfFace) const;
+	};
+
+	Element & getElement() const;
+	int getFace() const;
+	const ConstProxyVector<long> & getConnect() const;
+
+	Winding getWinding() const;
+	void setWinding(Winding winding);
+
+	bool operator==(const ElementHalfFace &other) const;
+	bool operator!=(const ElementHalfFace &other) const;
+
+protected:
+	ElementHalfFace(Element &element, int face, Winding winding = WINDING_NATURAL);
+
+private:
+	Element &m_element;
+	int m_face;
+
+	ConstProxyVector<long> m_connect;
+	std::size_t m_connectBegin;
+
+	Winding m_winding;
+
+};
+
 extern template class PiercedVector<Element>;
 
 }

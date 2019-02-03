@@ -409,6 +409,40 @@ void Interface::display(std::ostream &out, unsigned short int indent) const
 	}
 }
 
+/*!
+	\class InterfaceHalfEdge
+	\ingroup patchelements
+
+	\brief The InterfaceHalfEdge class defines interface half-edges.
+
+	InterfaceHalfEdge is the class that defines interface half-edges. Each
+	edge can be seen as two half-edges: one belonging to an interface and
+	the other belonging to the neighbouring interface. A half-edge is
+	identify by its vertices and by the winding order of the vertices.
+*/
+
+/*!
+	Constructor.
+
+	\param interface is a reference to the interface the owns the edge
+	\param edge if the local edge of the interface
+	\param winding is the winding order of the vertices
+*/
+InterfaceHalfEdge::InterfaceHalfEdge(Interface &interface, int edge, Winding winding)
+    : ElementHalfFace(interface, edge, winding)
+{
+}
+
+/*!
+	Get the interface the edge belongs to.
+
+	\result Returns the interface the edge belongs to.
+*/
+Interface & InterfaceHalfEdge::getInterface() const
+{
+	return static_cast<Interface &>(getElement());
+}
+
 // Explicit instantiation of the Interface containers
 template class PiercedVector<Interface>;
 

@@ -123,6 +123,18 @@ private:
 
 };
 
+class CellHalfFace : public ElementHalfFace {
+
+public:
+	CellHalfFace(Cell &cell, int face, Winding winding = WINDING_NATURAL);
+
+	Cell & getCell() const;
+
+protected:
+	using ElementHalfFace::getElement;
+
+};
+
 extern template class PiercedVector<Cell>;
 
 }
