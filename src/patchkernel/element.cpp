@@ -364,10 +364,16 @@ Element::Element(long id, ElementType type, std::unique_ptr<long[]> &&connectSto
 */
 Element::Element(const Element &other)
 {
-	_initialize(other.m_id, other.m_type);
+	int connectSize;
+	if (other.m_connect) {
+		connectSize = other.getConnectSize();
+	} else {
+		connectSize = 0;
+	}
+
+	_initialize(other.m_id, other.m_type, connectSize);
 
 	if (other.m_connect) {
-		int connectSize = getInfo().nVertices;
 		std::copy(other.m_connect.get(), other.m_connect.get() + connectSize, m_connect.get());
 	}
 }
