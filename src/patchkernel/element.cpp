@@ -373,6 +373,8 @@ Element::Element(const Element &other)
 
 	_initialize(other.m_id, other.m_type, connectSize);
 
+	m_pid = other.m_pid;
+
 	if (other.m_connect) {
 		std::copy(other.m_connect.get(), other.m_connect.get() + connectSize, m_connect.get());
 	}
