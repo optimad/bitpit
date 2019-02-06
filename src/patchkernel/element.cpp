@@ -388,12 +388,6 @@ Element & Element::operator=(const Element &other)
 	Element tmp(other);
 	swap(tmp);
 
-	if (other.m_connect) {
-		int connectSize = other.getConnectSize();
-		m_connect = std::unique_ptr<long[]>(new long[connectSize]);
-		std::copy(other.m_connect.get(), other.m_connect.get() + connectSize, m_connect.get());
-	}
-
 	return *this;
 }
 
