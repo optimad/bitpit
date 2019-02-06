@@ -444,7 +444,6 @@ void Element::initialize(long id, ElementType type, std::unique_ptr<long[]> &&co
 */
 void Element::_initialize(long id, ElementType type, int connectSize)
 {
-
 	// Get previous connect size
 	int previousConnectSize = 0;
 	if (m_connect) {
