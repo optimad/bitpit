@@ -363,19 +363,29 @@ void LevelSetCachedObject::propagateSign() {
     // Communicate the sign of the external region
     //
     // The sign has to be consistent among all the partitions.
+    bool exchangeExternalSign;
     if (mesh.isPartitioned()) {
-        int minExternalSign = externalSign;
-        MPI_Allreduce(MPI_IN_PLACE, &minExternalSign, 1, MPI_INT, MPI_MIN, m_kernelPtr->getCommunicator());
+        exchangeExternalSign = (nExternal != 0);
+        MPI_Allreduce(MPI_IN_PLACE, &exchangeExternalSign, 1, MPI_C_BOOL, MPI_LOR, m_kernelPtr->getCommunicator());
+    } else {
+        exchangeExternalSign = false;
+    }
 
-        int maxExternalSign = externalSign;
-        MPI_Allreduce(MPI_IN_PLACE, &maxExternalSign, 1, MPI_INT, MPI_MAX, m_kernelPtr->getCommunicator());
+    if (exchangeExternalSign) {
+        bool positiveExternalSign = (externalSign == 1);
+        MPI_Allreduce(MPI_IN_PLACE, &positiveExternalSign, 1, MPI_C_BOOL, MPI_LOR, m_kernelPtr->getCommunicator());
 
-        if (minExternalSign == maxExternalSign) {
-            externalSign = minExternalSign;
-        } else if (minExternalSign == 0) {
-            externalSign = maxExternalSign;
-        } else if (maxExternalSign == 0) {
-            externalSign = minExternalSign;
+        bool negativeExternalSign = (externalSign == -1);
+        MPI_Allreduce(MPI_IN_PLACE, &negativeExternalSign, 1, MPI_C_BOOL, MPI_LOR, m_kernelPtr->getCommunicator());
+
+        if (positiveExternalSign && negativeExternalSign) {
+            externalSign = PROPAGATION_SIGN_UNDEFINED;
+        } else if (positiveExternalSign) {
+            externalSign = 1;
+        } else if (negativeExternalSign) {
+            externalSign = -1;
+        } else {
+            externalSign = PROPAGATION_SIGN_UNDEFINED;
         }
     }
 #else
