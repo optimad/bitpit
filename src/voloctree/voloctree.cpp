@@ -1722,12 +1722,12 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 		}
 	}
 
-	// Build adjacencies
+	// Update adjacencies
 	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
 		updateAdjacencies(createdCells);
 	}
 
-	// Build interfaces
+	// Update interfaces
 	if (!restoreStream) {
 		if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
 			updateInterfaces(createdCells);
