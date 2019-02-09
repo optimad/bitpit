@@ -107,11 +107,8 @@ public:
     void cancelSend(int rank);
     void cancelRecv(int rank);
 
-    void cancelAllSends(bool synchronous);
-    void cancelAllRecvs(bool synchronous);
-
-    void cancelAllSends();
-    void cancelAllRecvs();
+    void cancelAllSends(bool synchronous = false);
+    void cancelAllRecvs(bool synchronous = false);
 
 private:
     MPI_Comm m_communicator;
