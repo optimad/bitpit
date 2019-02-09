@@ -52,7 +52,7 @@ DataCommunicator::DataCommunicator(MPI_Comm communicator)
     MPI_Comm_rank(m_communicator, &m_rank);
 
     // Set a tag
-    setTags(TAG_AUTO, TAG_AUTO);
+    setTags(TAG_AUTO, TAG_AUTO, TAG_AUTO);
 }
 
 /*!
@@ -72,7 +72,13 @@ DataCommunicator::~DataCommunicator()
         }
     }
 
-    if (!m_customExchangeTag || !m_customDiscoverTag) {
+    if (!m_customNotificationTag) {
+        if (m_rank == 0) {
+            communications::tags().trash(m_notificationTag);
+        }
+    }
+
+    if (!m_customExchangeTag || !m_customDiscoverTag || !m_customNotificationTag) {
         MPI_Barrier(m_communicator);
     }
 }
@@ -127,11 +133,13 @@ void DataCommunicator::setTag(int exchangeTag)
 
     \param exchangeTag is the custom tag to be used for data exchange
     \param discoverTag is the custom tag to be used for data size discover
+    \param notificationTag is the custom tag to be used for notifications
 */
-void DataCommunicator::setTags(int exchangeTag, int discoverTag)
+void DataCommunicator::setTags(int exchangeTag, int discoverTag, int notificationTag)
 {
     setExchangeTag(exchangeTag);
     setDiscoverTag(discoverTag);
+    setNotificationTag(notificationTag);
 }
 
 /*!
@@ -179,6 +187,28 @@ void DataCommunicator::setDiscoverTag(int tag)
 }
 
 /*!
+    Sets the tag to be used for notifications
+
+    By default, a unique tag is generated in the constructor. However, using
+    this function, it is possible to assign a custom tag.
+
+    \param tag is the custom tag to be used for notifications
+*/
+void DataCommunicator::setNotificationTag(int tag)
+{
+    m_customNotificationTag = (tag != TAG_AUTO);
+    if (m_customNotificationTag) {
+        m_notificationTag = tag;
+    } else {
+        if (m_rank == 0) {
+            m_notificationTag = communications::tags().generate();
+        }
+
+        MPI_Bcast(&m_notificationTag, 1, MPI_INT, 0, m_communicator);
+    }
+}
+
+/*!
     Gets the tag to be used for data exchange communications
 
     \result The tag to be used for data exchange communications.
@@ -206,6 +236,16 @@ int DataCommunicator::getExchangeTag() const
 int DataCommunicator::getDiscoverTag() const
 {
     return m_discoverTag;
+}
+
+/*!
+    Gets the tag to be used for notifications
+
+    \result The tag to be used for notifications.
+*/
+int DataCommunicator::getNotificationTag() const
+{
+    return m_notificationTag;
 }
 
 /*!
@@ -306,6 +346,19 @@ void DataCommunicator::discoverSends()
             }
         }
     }
+
+    // At this point we are sure that all the processes have sent the data
+    // sizes and the data sizes have reached the destination, however it is
+    // not guaranteed that the data sizes have already been received (the
+    // message is on the destination process, but we don't know if it has
+    // been processed and received). Consequently, we can't be sure that all
+    // sends have been set.
+    //
+    // For the above reason it is not possible to call this function multiple
+    // times without receiving the messages or changes the exchanges between
+    // one call an another. Nor it is possible to call a discover recives
+    // followed by a discover sends (or viceversa) without receviing the
+    // messages or canceling them in between the two calls.
 }
 
 /*!
@@ -365,6 +418,19 @@ void DataCommunicator::discoverRecvs()
             }
         }
     }
+
+    // At this point we are sure that all the processes have sent the data
+    // sizes and the data sizes have reached the destination, however it is
+    // not guaranteed that the data sizes have already been received (the
+    // message is on the destination process, but we don't know if it has
+    // been processed and received). Consequently, we can't be sure that all
+    // receives have been set.
+    //
+    // For the above reason it is not possible to call this function multiple
+    // times without receiving the messages or changes the exchanges between
+    // one call an another. Nor it is possible to call a discover recives
+    // followed by a discover sends (or viceversa) without receviing the
+    // messages or canceling them in between the two calls.
 }
 
 /*!
@@ -985,6 +1051,40 @@ void DataCommunicator::cancelAllSends(bool synchronous)
         return;
     }
 
+    // Notify that the sends have been canceled
+    //
+    // The tag of the notifications has to be different from the tag used for
+    // data size discovery. We may have a scenario like the following:
+    //
+    //    discoverRecvs(); # <-- This call is using the discover tag
+    //
+    //    startAllRecvs();
+    //
+    //    <User fill send buffers>
+    //
+    //    startAllSends();
+    //
+    //    waitAllRecvs();
+    //
+    //    waitAllSends();
+    //
+    //    cancelAllSends(true); # <-- This call is using the notification tag
+    //
+    //    cancelAllrecvs(true); # <-- This call is using the notification tag
+    //
+    // If a process completes all its exchanges, it may reach the function
+    // that cancels the sends while other processes are still discovering
+    // the receives. Thats's because data size discovery is a non-blocking
+    // operation. At the end of data size discovery we know that the data
+    // sizes for the recevies has reached the destination processes, but it
+    // not guaranteed that the messages have been processed. What can happend
+    // is that a process can exit from the function while other processes are
+    // still receving/processing the recevied messages (so they are still
+    // setting the receives). The notification issued when canceling the
+    // sends may than be catched by the processes that are still discovering
+    // the receives. To avoid this discover tags and notification tags have
+    // to be different.
+
     // Start auxiliary receives for handling synchronization
     //
     // We will receive a notification from all the processes for which a
@@ -998,7 +1098,7 @@ void DataCommunicator::cancelAllSends(bool synchronous)
     std::vector<int> remoteSendStatus(nRecvs, 1);
     for (int i = 0; i < nRecvs; ++i) {
         int rank = m_recvRanks[i];
-        MPI_Irecv(remoteSendStatus.data() + i, 1, MPI_INT, rank, m_discoverTag, m_communicator, &recvNotificationRequests[i]);
+        MPI_Irecv(remoteSendStatus.data() + i, 1, MPI_INT, rank, m_notificationTag, m_communicator, &recvNotificationRequests[i]);
     }
 
     // Cancel all the sends
@@ -1017,7 +1117,7 @@ void DataCommunicator::cancelAllSends(bool synchronous)
 
         // Notify the other process that the send has been canceled
         int sendStatus = 0;
-        MPI_Isend(&sendStatus, 1, MPI_INT, rank, m_discoverTag, m_communicator, &sendNotificationRequests[i]);
+        MPI_Isend(&sendStatus, 1, MPI_INT, rank, m_notificationTag, m_communicator, &sendNotificationRequests[i]);
     }
 
     // Synchronize with other processes
@@ -1065,6 +1165,12 @@ void DataCommunicator::cancelAllRecvs(bool synchronous)
         return;
     }
 
+    // Notify that the sends have been canceled
+    //
+    // The tag of the notifications has to be different from the tag used for
+    // data size discovery. See comment in 'cancelAllSends' function for an
+    // explanation.
+
     // Start auxiliary receives for handling synchronization
     //
     // We will receive a notification from all the processes for which a
@@ -1078,7 +1184,7 @@ void DataCommunicator::cancelAllRecvs(bool synchronous)
     std::vector<int> remoteReceiveStatus(nSends, 1);
     for (int i = 0; i < nSends; ++i) {
         int rank = m_sendRanks[i];
-        MPI_Irecv(remoteReceiveStatus.data() + i, 1, MPI_INT, rank, m_discoverTag, m_communicator, &recvNotificationRequests[i]);
+        MPI_Irecv(remoteReceiveStatus.data() + i, 1, MPI_INT, rank, m_notificationTag, m_communicator, &recvNotificationRequests[i]);
     }
 
     // Cancel all the receives
@@ -1097,7 +1203,7 @@ void DataCommunicator::cancelAllRecvs(bool synchronous)
 
         // Notify other process that the received has been canceled
         int receiveStatus = 0;
-        MPI_Isend(&receiveStatus, 1, MPI_INT, rank, m_discoverTag, m_communicator, &sendNotificationRequests[i]);
+        MPI_Isend(&receiveStatus, 1, MPI_INT, rank, m_notificationTag, m_communicator, &sendNotificationRequests[i]);
     }
 
     // Synchronize with other processes

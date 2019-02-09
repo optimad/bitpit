@@ -51,12 +51,14 @@ public:
     void finalize(bool synchronous = false);
 
     void setTag(int exchangeTag);
-    void setTags(int exchangeTag, int discoverTag);
+    void setTags(int exchangeTag, int discoverTag, int notificationTag);
     void setExchangeTag(int tag);
     void setDiscoverTag(int tag);
+    void setNotificationTag(int tag);
     int getTag() const;
     int getExchangeTag() const;
     int getDiscoverTag() const;
+    int getNotificationTag() const;
 
     void clearAllSends(bool synchronous = false);
     void clearAllRecvs(bool synchronous = false);
@@ -116,8 +118,10 @@ private:
     int m_rank;
     int m_exchangeTag;
     int m_discoverTag;
+    int m_notificationTag;
     bool m_customExchangeTag;
     bool m_customDiscoverTag;
+    bool m_customNotificationTag;
     bool m_recvsContinuous;
 
     std::vector<int> m_recvRanks;
