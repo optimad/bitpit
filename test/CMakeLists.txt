@@ -54,9 +54,9 @@ function(getTestNumProcs TEST_ENTRY N_PROCS)
 
 	string(REGEX MATCH "[^:]*$" TEST_ENTRY_MATCH ${TEST_ENTRY})
 	if ("${TEST_ENTRY_MATCH}" STREQUAL "${TEST_ENTRY}")
-		set(TEST_DEFAULT_NUMPROCS 2 CACHE STRING "Is the default number of precesses the test will run on")
-		mark_as_advanced(TEST_DEFAULT_NUMPROCS)
-		set(${N_PROCS} "${TEST_DEFAULT_NUMPROCS}" PARENT_SCOPE)
+		set(BITPIT_TEST_DEFAULT_NUMPROCS 2 CACHE STRING "Is the default number of precesses the test will run on")
+		mark_as_advanced(BITPIT_TEST_DEFAULT_NUMPROCS)
+		set(${N_PROCS} "${BITPIT_TEST_DEFAULT_NUMPROCS}" PARENT_SCOPE)
 		return()
 	endif ()
 
