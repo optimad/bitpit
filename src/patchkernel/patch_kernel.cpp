@@ -4337,18 +4337,20 @@ PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int
 
 	// Owner and neighbour of the interface
 	//
-	// The interface is owned by the cell that has only one
-	// adjacency, i.e., by the cell that owns the smallest of
-	// the two faces. If the faces of both cells have the same
-	// size, the interface is owned by the cell with the "lower
-	// positioning".
+	// The interface is owned by the cell that has only one adjacency, i.e.,
+	// by the cell that owns the smallest of the two faces. If the faces
+	// of both cells have the same size, the interface is owned by the cell
+	// with the "lower fuzzy positioning". It is not necessary to have a
+	// precise comparison, it's only necassary to define a repetible order
+	// between the two cells. It is therefore possible to use the "fuzzy"
+	// cell comparison.
 	bool cellOwnsInterface = true;
 	if (cell_2) {
 		if (cell_1->getAdjacencyCount(face_1) > 1) {
 			cellOwnsInterface = false;
 		} else if (cell_2->getAdjacencyCount(face_2) == 1) {
 			assert(cell_1->getAdjacencyCount(face_1) == 1);
-			cellOwnsInterface = CellPositionLess(*this)(id_1, id_2);
+			cellOwnsInterface = CellFuzzyPositionLess(*this)(id_1, id_2);
 		}
 	}
 

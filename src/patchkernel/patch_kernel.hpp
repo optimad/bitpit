@@ -200,6 +200,12 @@ public:
 					return vertexCoords_1[k] < vertexCoords_2[k];
 				}
 			}
+
+			// If we are here it was not possible to find a vertex on the
+			// second cell for the comparison.
+			std::ostringstream stream;
+			stream << "Unable to fuzzy order cells " << id_1 << " and " << id_2 << ". ";
+			throw std::runtime_error (stream.str());
 		}
 
 		PatchKernel &m_patch;
