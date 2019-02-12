@@ -468,8 +468,9 @@ public:
 	virtual void updateAdjacencies(const std::vector<long> &cellIds);
 
 	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
-	virtual void buildInterfaces(bool resetInterfaces = true);
-	virtual void updateInterfaces(const std::vector<long> &cellIds, bool resetInterfaces = true);
+	void clearInterfaces();
+	virtual void buildInterfaces();
+	virtual void updateInterfaces(const std::vector<long> &cellIds);
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
 	bool isBoundingBoxDirty(bool global = false) const;

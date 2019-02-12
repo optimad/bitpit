@@ -692,6 +692,11 @@ void PatchKernel::resetCells()
 */
 void PatchKernel::resetInterfaces()
 {
+	// Early return if no adjacencies have been built
+	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+		return;
+	}
+
 	// Clear interfaces
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
@@ -4297,15 +4302,17 @@ void PatchKernel::setInterfacesBuildStrategy(InterfacesBuildStrategy status)
 }
 
 /*!
-	Update the interfaces of the specified list of cells and of their
-	neighbours.
-
-	\param resetInterfaces if set to true, the interfaces of the cells will be
-	reset before builiding the new ones.
+	Build interfaces among the cells.
 */
-void PatchKernel::buildInterfaces(bool resetInterfaces)
+void PatchKernel::buildInterfaces()
 {
-	updateInterfaces(m_cells.getIds(false), resetInterfaces);
+	// Reset interfaces
+	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+		clearInterfaces();
+	}
+
+	// Update interfaces
+	updateInterfaces(m_cells.getIds(false));
 }
 
 /*!
@@ -4313,22 +4320,9 @@ void PatchKernel::buildInterfaces(bool resetInterfaces)
 	neighbours.
 
 	\param[in] cellIds is the list of cell ids
-	\param resetInterfaces if set to true, the interfaces of the cells will be
-	reset before builiding the new ones.
 */
-void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetInterfaces)
+void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 {
-    //
-    // Reset existing interfaces
-    //
-	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
-		if (resetInterfaces) {
-			for (long cellId : cellIds) {
-				m_cells[cellId].resetInterfaces();
-			}
-		}
-	}
-
 	//
 	// Update interfaces
 	//
@@ -4386,6 +4380,18 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 
 	// Set interfaces build strategy
 	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
+}
+
+/*!
+	Clear the interfaces of the patch.
+
+	This function just calls 'resetInterfaces', its only purpose is to make
+	the API for handling the interfaces as much as possible similar to the
+	API for handling the adjacencied.
+*/
+void PatchKernel::clearInterfaces()
+{
+	resetInterfaces();
 }
 
 /*!
