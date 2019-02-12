@@ -463,8 +463,9 @@ public:
 	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B);
 
 	AdjacenciesBuildStrategy getAdjacenciesBuildStrategy() const;
-	virtual void buildAdjacencies(bool resetAdjacencies = true);
-	virtual void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
+	void clearAdjacencies();
+	virtual void buildAdjacencies();
+	virtual void updateAdjacencies(const std::vector<long> &cellIds);
 
 	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
 	virtual void buildInterfaces(bool resetInterfaces = true);

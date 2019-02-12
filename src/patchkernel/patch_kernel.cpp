@@ -4116,13 +4116,16 @@ void PatchKernel::setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status)
 
 /*!
 	Fill adjacencies info for each cell.
-
-	\param resetAdjacencies if set to true, the adjacencies of the cells will be
-	reset before builiding the new ones.
 */
-void PatchKernel::buildAdjacencies(bool resetAdjacencies)
+void PatchKernel::buildAdjacencies()
 {
-	updateAdjacencies(m_cells.getIds(false), resetAdjacencies);
+	// Reset adjacencies
+	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+		clearAdjacencies();
+	}
+
+	// Update the adjacencies
+	updateAdjacencies(m_cells.getIds(false));
 }
 
 /*!
@@ -4132,26 +4135,9 @@ void PatchKernel::buildAdjacencies(bool resetAdjacencies)
 	This implementation can NOT handle hanging nodes.
 
 	\param[in] cellIds is the list of cell ids
-	\param resetAdjacencies if set to true, the adjacencies of the cells will be
-	reset before builiding the new ones.
 */
-void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies)
+void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
 {
-    //
-    // Reset adjacency info
-    //
-	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
-		if (resetAdjacencies) {
-			for (long cellId : cellIds) {
-				m_cells[cellId].resetAdjacencies();
-			}
-		}
-	}
-
-	//
-	// Update the adjacencies
-	//
-
 	// The adjacencies are found looking for matching half-faces.
 	//
 	// On a three-dimensional patch each internal face is shared between two,
@@ -4269,6 +4255,25 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 
 	// Set adjacencies build strategy
 	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
+}
+
+/*!
+	Clear the adjacencies.
+*/
+void PatchKernel::clearAdjacencies()
+{
+	// Early return if no adjacencies have been built
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
+		return;
+	}
+
+	// Reset adjacencies
+	for (Cell &cell : m_cells) {
+		cell.resetAdjacencies();
+	}
+
+	// Set adjacencies status
+	setAdjacenciesBuildStrategy(ADJACENCIES_NONE);
 }
 
 /*!

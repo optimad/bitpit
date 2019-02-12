@@ -111,7 +111,7 @@ public:
 	void setLength(double length);
 	void scale(std::array<double, 3> scaling) override;
 
-	void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true) override;
+	void updateAdjacencies(const std::vector<long> &cellIds) override;
 
 #if BITPIT_ENABLE_MPI==1
 	void setCommunicator(MPI_Comm communicator) override;

@@ -1731,7 +1731,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 	}
 
 	// Build adjacencies
-	updateAdjacencies(createdCells, false);
+	updateAdjacencies(createdCells);
 
 	// Build interfaces
 	if (!restoreStream) {
@@ -1747,19 +1747,12 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 /*!
 	Build the adjacencies the cells.
 */
-void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies)
+void VolOctree::updateAdjacencies(const std::vector<long> &cellIds)
 {
 	// Face information
 	int nCellFaces = 2 * getDimension();
 	uint8_t oppositeFace[nCellFaces];
 	m_tree->getOppface(oppositeFace);
-
-	// Reset the adjacencies
-	if (resetAdjacencies) {
-		for (long cellId : cellIds) {
-			m_cells[cellId].resetAdjacencies();
-		}
-	}
 
 	// Sort the cells beased on their tree level
 	int maxLevel = m_tree->getMaxDepth();
