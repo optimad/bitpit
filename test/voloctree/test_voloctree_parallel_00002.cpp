@@ -49,6 +49,7 @@ int subtest_001()
 	VolOctree *patch_2D_original = new VolOctree(2, origin, length, dh);
 	patch_2D_original->setCommunicator(MPI_COMM_WORLD);
 	patch_2D_original->getVTK().setName("octree_parallel_uniform_patch_2D");
+	patch_2D_original->buildAdjacencies();
 	patch_2D_original->buildInterfaces();
 	patch_2D_original->update();
 	patch_2D_original->getVTK().setCounter(0);
@@ -118,6 +119,7 @@ int subtest_002()
 	VolOctree *patch_3D_original = new VolOctree(3, origin, length, dh);
 	patch_3D_original->setCommunicator(MPI_COMM_WORLD);
 	patch_3D_original->getVTK().setName("octree_parallel_uniform_patch_3D");
+	patch_3D_original->buildAdjacencies();
 	patch_3D_original->buildInterfaces();
 	patch_3D_original->update();
 	patch_3D_original->getVTK().setCounter(0);

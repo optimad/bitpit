@@ -314,9 +314,6 @@ void VolOctree::initialize()
 	// This patch supports adaption
 	setAdaptionStatus(ADAPTION_CLEAN);
 
-	// Set adjacencies build strategy
-	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
-
 	// Set interfaces build strategy
 	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
 
@@ -1726,7 +1723,9 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 	}
 
 	// Build adjacencies
-	updateAdjacencies(createdCells);
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
+		updateAdjacencies(createdCells);
+	}
 
 	// Build interfaces
 	if (!restoreStream) {
