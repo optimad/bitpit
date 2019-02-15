@@ -1429,8 +1429,9 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	// ====================================================================== //
 	// COLLAPSE DOUBLE VERTICES                                               //
 	// ====================================================================== //
-	std::unordered_set<long> uniqueVertices;
-	uniqueVertices.reserve(getVertexCount());
+	std::size_t nCollapsedVertices = 0;
+	std::unordered_map<long, long> vertexMap;
+	vertexMap.reserve(getVertexCount());
 
 	for (auto &bin : bins) {
 		int nBinCells = bin.size();
@@ -1444,38 +1445,46 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 			for (int j = 0; j < nBinCells; ++j) {
 				long cellId = bin[list[j]][0];
 				Cell &cell  = m_cells[cellId];
-				long *cellConnect = cell.getConnect();
+				ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 
-				long k         = bin[list[j]][1];
-				long vertexId  = cellConnect[k];
-				if (uniqueVertices.count(vertexId) != 0) {
+				long k        = bin[list[j]][1];
+				long vertexId = cellVertexIds[k];
+				if (vertexMap.count(vertexId) > 0) {
 					continue;
 				}
 
 				Vertex &vertex = m_vertices[vertexId];
 
 				long collapsedVertexId;
-				if (kd.exist(&vertex, collapsedVertexId) >= 0) {
-					cellConnect[k] = collapsedVertexId;
-				} else {
+				if (kd.exist(&vertex, collapsedVertexId) < 0) {
+					collapsedVertexId = vertexId;
 					kd.insert(&vertex, vertexId);
-					uniqueVertices.insert(vertexId);
+				} else {
+					++nCollapsedVertices;
 				}
+
+				vertexMap.insert({vertexId, collapsedVertexId});
 			}
 		}
 	}
 
+	for (Cell &cell : m_cells) {
+		cell.renumberVertices(vertexMap);
+	}
+
 	// Create the list of collapsed vertices
-	size_t nCollapsedVertices = getVertexCount() - uniqueVertices.size();
 	collapsedVertices.resize(nCollapsedVertices);
 
 	size_t k = 0;
 	for (auto vertexItr = m_vertices.begin(); vertexItr != m_vertices.end(); ++vertexItr) {
+		// Skip orphan vertices or unique vertices
 		long vertexId = vertexItr.getId();
-		if (uniqueVertices.count(vertexId) != 0) {
+		auto vertexMapItr = vertexMap.find(vertexId);
+		if (vertexMapItr == vertexMap.end() || vertexMap.at(vertexId) == vertexId) {
 			continue;
 		}
 
+		// Add vertex id to the list of collpased vertices
 		collapsedVertices[k++] = vertexId;
 	}
 
