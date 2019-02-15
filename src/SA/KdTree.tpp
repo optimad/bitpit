@@ -235,7 +235,7 @@ return; }
 */
 template<int d, class T, class T1>
 int KdTree<d, T, T1>::exist(
-    T      *P_
+    const T      *P_
 ) {
 
 // ========================================================================== //
@@ -295,7 +295,7 @@ return(index); };
 */
 template<int d, class T, class T1>
 int KdTree<d, T, T1>::exist(
-    T               *P_,
+    const T         *P_,
     T1              &label
 ) {
 
@@ -361,7 +361,7 @@ return(index); };
 template<int d, class T, class T1 >
 template< class T2>
 int KdTree<d, T, T1>::hNeighbor(
-    T               *P_,
+    const T         *P_,
     T2               h,
     bool             debug,
     int              next_,
@@ -432,7 +432,7 @@ return(std::max(index_l, index_r)); };
 template<int d, class T, class T1 >
 template< class T2>
 int KdTree<d, T, T1>::hNeighbor(
-    T               *P_,
+    const T         *P_,
     T1              &label,
     T2               h,
     int              next_,
@@ -733,7 +733,7 @@ return norm2(delta);
 template<int d, class T, class T1 >
 template< class T2>
 void KdTree<d, T, T1>::hNeighbors(
-    T               *P_,
+    const T         *P_,
     T2               h,
     std::vector<T1> *L_,
     std::vector<T1> *EX_,
