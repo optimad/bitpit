@@ -234,6 +234,14 @@ public:
 	};
 
 	/*!
+		Adjacencies build strategy
+	*/
+	enum AdjacenciesBuildStrategy {
+		ADJACENCIES_NONE = -1,
+		ADJACENCIES_AUTOMATIC
+	};
+
+	/*!
 		Spawn status
 	*/
 	enum SpawnStatus {
@@ -446,6 +454,7 @@ public:
 	virtual long locatePoint(const std::array<double, 3> &point) = 0;
 	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B);
 
+	AdjacenciesBuildStrategy getAdjacenciesBuildStrategy() const;
 	virtual void buildAdjacencies(bool resetAdjacencies = true);
 	virtual void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
 
@@ -579,6 +588,8 @@ protected:
 	void updateLastInternalId();
 	void updateFirstGhostId();
 
+	void setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status);
+
 	void setSpawnStatus(SpawnStatus status);
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
 
@@ -656,6 +667,8 @@ private:
 	std::array<double, 3> m_boxMaxPoint;
 	std::array<int, 3> m_boxMinCounter;
 	std::array<int, 3> m_boxMaxCounter;
+
+	AdjacenciesBuildStrategy m_adjacenciesBuildStrategy;
 
 	SpawnStatus m_spawnStatus;
 

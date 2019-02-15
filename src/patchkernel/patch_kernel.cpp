@@ -131,6 +131,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_boxMaxPoint(other.m_boxMaxPoint),
       m_boxMinCounter(other.m_boxMinCounter),
       m_boxMaxCounter(other.m_boxMaxCounter),
+      m_adjacenciesBuildStrategy(other.m_adjacenciesBuildStrategy),
       m_spawnStatus(other.m_spawnStatus),
       m_adaptionStatus(other.m_adaptionStatus),
       m_expert(other.m_expert),
@@ -221,6 +222,9 @@ void PatchKernel::initialize()
 
 	// Dimension
 	m_dimension = -1;
+
+	// Set adjacencies build strategy
+	setAdjacenciesBuildStrategy(ADJACENCIES_NONE);
 
 	// Set the spawn as unneeded
 	//
@@ -3505,7 +3509,9 @@ void PatchKernel::restoreCells(std::istream &stream)
 	}
 
 	// Restore adjacencies
-	buildAdjacencies();
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
+		buildAdjacencies();
+	}
 
 	// Build ghost exchange info
 #if BITPIT_ENABLE_MPI==1
@@ -4071,6 +4077,26 @@ bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_
 }
 
 /*!
+	Returns the current adjacencies build strategy.
+
+	\return The current adjacencies build strategy.
+*/
+PatchKernel::AdjacenciesBuildStrategy PatchKernel::getAdjacenciesBuildStrategy() const
+{
+	return m_adjacenciesBuildStrategy;
+}
+
+/*!
+	Set the current adjacencies build strategy.
+
+	\param status is the adjacencies build strategy that will be set
+*/
+void PatchKernel::setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status)
+{
+	m_adjacenciesBuildStrategy = status;
+}
+
+/*!
 	Fill adjacencies info for each cell.
 
 	\param resetAdjacencies if set to true, the adjacencies of the cells will be
@@ -4096,9 +4122,11 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
     //
     // Reset adjacency info
     //
-	if (resetAdjacencies) {
-		for (long cellId : cellIds) {
-			m_cells[cellId].resetAdjacencies();
+	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+		if (resetAdjacencies) {
+			for (long cellId : cellIds) {
+				m_cells[cellId].resetAdjacencies();
+			}
 		}
 	}
 
@@ -4220,6 +4248,9 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 			}
 		}
 	}
+
+	// Set adjacencies build strategy
+	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
 }
 
 /*!
@@ -5430,7 +5461,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 3;
+	const int KERNEL_DUMP_VERSION = 4;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
@@ -5462,6 +5493,9 @@ void PatchKernel::dump(std::ostream &stream) const
 
 	// Adaption status
 	utils::binary::write(stream, m_adaptionStatus);
+
+	// Adjacencies build strategy
+	utils::binary::write(stream, m_adjacenciesBuildStrategy);
 
 	// VTK data
 	utils::binary::write(stream, m_vtkWriteTarget);
@@ -5539,6 +5573,9 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 
 	// Adaption status
 	utils::binary::read(stream, m_adaptionStatus);
+
+	// Adjacencies build strategy
+	utils::binary::read(stream, m_adjacenciesBuildStrategy);
 
 	// VTK data
 	utils::binary::read(stream, m_vtkWriteTarget);

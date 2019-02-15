@@ -274,6 +274,9 @@ void VolCartesian::initialize()
 	// This patch need to be spawn
 	setSpawnStatus(SPAWN_NEEDED);
 
+	// Set adjacencies build strategy
+	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
+
 	// Set the light memory mode
 	setMemoryMode(MemoryMode::MEMORY_LIGHT);
 

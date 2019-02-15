@@ -314,6 +314,9 @@ void VolOctree::initialize()
 	// This patch supports adaption
 	setAdaptionStatus(ADAPTION_CLEAN);
 
+	// Set adjacencies build strategy
+	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
+
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning
 	setPartitioningStatus(PARTITIONING_CLEAN);
@@ -1817,6 +1820,9 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 			}
 		}
 	}
+
+	// Set adjacencies build strategy
+	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
 }
 
 /*!
