@@ -84,6 +84,7 @@ int subtest_001(int rank)
 
     dh = h / 16. ;
     bitpit::VolOctree mesh(dimensions, meshMin, h, dh );
+    mesh.buildInterfaces();
     mesh.update() ;
 
     // Configure levelset

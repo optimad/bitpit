@@ -121,6 +121,7 @@ int subtest_001()
     // Create the original patch
     VolOctree *patch_2D_original = new VolOctree(std::move(treePointer), &treePointer);
     patch_2D_original->getVTK().setName("octree_patch_from_tree_2D_initial");
+    patch_2D_original->buildInterfaces();
     patch_2D_original->update();
 
     // Clone the patch

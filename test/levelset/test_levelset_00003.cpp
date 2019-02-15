@@ -122,8 +122,8 @@ int subtest_001()
 
     dh = h / 16. ;
     bitpit::VolOctree mesh(dimensions, meshMin, h, dh );
+    mesh.buildInterfaces();
     mesh.update() ;
-
 
     // Set levelset configuration
     std::chrono::time_point<std::chrono::system_clock> start, end;

@@ -56,6 +56,7 @@ int subtest_001(int rank)
 	// Create the patch
 	VolOctree *patch_2D = new VolOctree(2, origin, length, dh);
 	patch_2D->getVTK().setName("octree_parallel_uniform_patch_2D");
+	patch_2D->buildInterfaces();
 	patch_2D->update();
 
 	// Partition the patch
@@ -137,6 +138,7 @@ int subtest_002(int rank)
 	// Create the patch
 	VolOctree *patch_3D = new VolOctree(3, origin, length, dh);
 	patch_3D->getVTK().setName("octree_parallel_uniform_patch_3D");
+	patch_3D->buildInterfaces();
 	patch_3D->update();
 
 	// Partition the patch

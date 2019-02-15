@@ -1730,7 +1730,9 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 
 	// Build interfaces
 	if (!restoreStream) {
-		updateInterfaces(createdCells);
+		if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+			updateInterfaces(createdCells);
+		}
 	} else {
 		restoreInterfaces(*restoreStream);
 	}
