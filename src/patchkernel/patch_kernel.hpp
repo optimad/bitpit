@@ -242,6 +242,14 @@ public:
 	};
 
 	/*!
+		Interfaces build strategy
+	*/
+	enum InterfacesBuildStrategy {
+		INTERFACES_NONE = -1,
+		INTERFACES_AUTOMATIC
+	};
+
+	/*!
 		Spawn status
 	*/
 	enum SpawnStatus {
@@ -458,6 +466,7 @@ public:
 	virtual void buildAdjacencies(bool resetAdjacencies = true);
 	virtual void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
 
+	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
 	virtual void buildInterfaces(bool resetInterfaces = true);
 	virtual void updateInterfaces(const std::vector<long> &cellIds, bool resetInterfaces = true);
 
@@ -590,6 +599,8 @@ protected:
 
 	void setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status);
 
+	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
+
 	void setSpawnStatus(SpawnStatus status);
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
 
@@ -669,6 +680,8 @@ private:
 	std::array<int, 3> m_boxMaxCounter;
 
 	AdjacenciesBuildStrategy m_adjacenciesBuildStrategy;
+
+	InterfacesBuildStrategy m_interfacesBuildStrategy;
 
 	SpawnStatus m_spawnStatus;
 

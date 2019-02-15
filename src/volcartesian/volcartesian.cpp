@@ -277,6 +277,9 @@ void VolCartesian::initialize()
 	// Set adjacencies build strategy
 	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
 
+	// Set interfaces build strategy
+	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
+
 	// Set the light memory mode
 	setMemoryMode(MemoryMode::MEMORY_LIGHT);
 

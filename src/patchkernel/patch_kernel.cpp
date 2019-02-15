@@ -132,6 +132,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_boxMinCounter(other.m_boxMinCounter),
       m_boxMaxCounter(other.m_boxMaxCounter),
       m_adjacenciesBuildStrategy(other.m_adjacenciesBuildStrategy),
+      m_interfacesBuildStrategy(other.m_interfacesBuildStrategy),
       m_spawnStatus(other.m_spawnStatus),
       m_adaptionStatus(other.m_adaptionStatus),
       m_expert(other.m_expert),
@@ -225,6 +226,9 @@ void PatchKernel::initialize()
 
 	// Set adjacencies build strategy
 	setAdjacenciesBuildStrategy(ADJACENCIES_NONE);
+
+	// Set interfaces build strategy
+	setInterfacesBuildStrategy(INTERFACES_NONE);
 
 	// Set the spawn as unneeded
 	//
@@ -688,6 +692,7 @@ void PatchKernel::resetCells()
 */
 void PatchKernel::resetInterfaces()
 {
+	// Clear interfaces
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
 	m_interfaceIdGenerator.reset();
@@ -695,6 +700,9 @@ void PatchKernel::resetInterfaces()
 	for (auto &cell : m_cells) {
 		cell.resetInterfaces();
 	}
+
+	// Set interface build strategy
+	setInterfacesBuildStrategy(INTERFACES_NONE);
 }
 
 /*!
@@ -3528,6 +3536,11 @@ void PatchKernel::restoreCells(std::istream &stream)
  */
 void PatchKernel::dumpInterfaces(std::ostream &stream) const
 {
+	// Early return if the interfaces are not build
+	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+		return;
+	}
+
 	// Dump kernel
 	m_interfaces.dumpKernel(stream);
 
@@ -3555,6 +3568,11 @@ void PatchKernel::dumpInterfaces(std::ostream &stream) const
  */
 void PatchKernel::restoreInterfaces(std::istream &stream)
 {
+	// Early return if the interfaces are not build
+	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+		return;
+	}
+
 	// Restore kernel
 	m_interfaces.restoreKernel(stream);
 
@@ -4254,6 +4272,26 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 }
 
 /*!
+	Returns the current interfaces build strategy.
+
+	\return The current interfaces build strategy.
+*/
+PatchKernel::InterfacesBuildStrategy PatchKernel::getInterfacesBuildStrategy() const
+{
+	return m_interfacesBuildStrategy;
+}
+
+/*!
+	Set the current interfaces build strategy.
+
+	\param status is the interfaces build strategy that will be set
+*/
+void PatchKernel::setInterfacesBuildStrategy(InterfacesBuildStrategy status)
+{
+	m_interfacesBuildStrategy = status;
+}
+
+/*!
 	Update the interfaces of the specified list of cells and of their
 	neighbours.
 
@@ -4278,9 +4316,11 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
     //
     // Reset existing interfaces
     //
-	if (resetInterfaces) {
-		for (long cellId : cellIds) {
-			m_cells[cellId].resetInterfaces();
+	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+		if (resetInterfaces) {
+			for (long cellId : cellIds) {
+				m_cells[cellId].resetInterfaces();
+			}
 		}
 	}
 
@@ -4338,6 +4378,9 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetI
 			}
 		}
 	}
+
+	// Set interfaces build strategy
+	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
 }
 
 /*!
@@ -5497,6 +5540,9 @@ void PatchKernel::dump(std::ostream &stream) const
 	// Adjacencies build strategy
 	utils::binary::write(stream, m_adjacenciesBuildStrategy);
 
+	// Dump interfaces build strategy
+	utils::binary::write(stream, m_interfacesBuildStrategy);
+
 	// VTK data
 	utils::binary::write(stream, m_vtkWriteTarget);
 
@@ -5576,6 +5622,9 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 
 	// Adjacencies build strategy
 	utils::binary::read(stream, m_adjacenciesBuildStrategy);
+
+	// Interfaces status
+	utils::binary::read(stream, m_interfacesBuildStrategy);
 
 	// VTK data
 	utils::binary::read(stream, m_vtkWriteTarget);
