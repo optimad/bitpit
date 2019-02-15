@@ -148,7 +148,7 @@ void Vertex::_initialize(long id, const std::array<double, 3> &coords)
 	\result Returns the boolean result of comparison of the values of the
 	arguments, which are not modified.
 */
-bool Vertex::operator==(const Vertex &other)
+bool Vertex::operator==(const Vertex &other) const
 {
 	for (int i = 0; i < 3; ++i) {
 		if (!utils::DoubleFloatingEqual()(m_coords[i], other.m_coords[i])) {

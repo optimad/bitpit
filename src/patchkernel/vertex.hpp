@@ -64,7 +64,7 @@ public:
 
 	void initialize(long id, const std::array<double, 3> &coords);
 
-	bool operator==(const Vertex &other);
+	bool operator==(const Vertex &other) const;
 
 	double & operator[](int coord_id);
 	const double & operator[](int coord_id) const;
