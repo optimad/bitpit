@@ -77,7 +77,7 @@ namespace bitpit {
 */
 SparseMatrix::SparseMatrix(MPI_Comm communicator)
     : m_communicator(communicator),
-      m_maxRowNZ(0), m_lastRow(-1),
+      m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
       m_global_nRows(0), m_global_nCols(0), m_global_nNZ(0),
       m_global_maxRowNZ(0), m_global_rowOffset(0), m_global_colOffset(0)
 {
@@ -94,7 +94,7 @@ SparseMatrix::SparseMatrix(MPI_Comm communicator)
 * Default constructor
 */
 SparseMatrix::SparseMatrix()
-    : m_maxRowNZ(0), m_lastRow(-1)
+    : m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1)
 {
 }
 #endif
