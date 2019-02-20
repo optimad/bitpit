@@ -277,9 +277,12 @@ namespace bitpit {
         m_dim          = dim;
         m_balanceCodim = 1;
 
+        m_periodic.resize(m_dim*2);
+
         if (m_dim > 0) {
             m_treeConstants = &(TreeConstants::instance(m_dim));
-            m_periodic.resize(m_dim*2);
+        } else {
+            m_treeConstants = nullptr;
         }
     }
 
