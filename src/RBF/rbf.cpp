@@ -533,10 +533,13 @@ bool RBFKernel::removeData(std::vector<int> & list)
         if(id>=0 && id <m_fields){;
             m_fields--;
             int index = id-extracted;
+            assert(index >= 0);
             if (m_mode == RBFMode::INTERP) {
+                assert((std::size_t) index < m_value.size());
                 auto valueItr = m_value.begin() + index;
                 m_value.erase(valueItr);
             } else {
+                assert((std::size_t) index < m_weight.size());
                 auto weightItr = m_weight.begin() + index;
                 m_weight.erase(weightItr);
             }
@@ -1094,8 +1097,11 @@ bool RBF::removeNode(std::vector<int> & list)
         if(id>=0 && id <m_nodes){;
             m_nodes--;
             int index = id-extracted;
+            assert(index >= 0);
+            assert((std::size_t) index < m_node.size());
             auto nodeItr = m_node.begin() + index;
             m_node.erase(nodeItr);
+            assert((std::size_t) index < m_activeNodes.size());
             auto activeNodeItr = m_activeNodes.begin() + index;
             m_activeNodes.erase(activeNodeItr);
             extracted++;
