@@ -198,14 +198,14 @@ jobs:
           build_command_prepend: >
             mkdir build;
             cd build;
-            cmake -DCMAKE_C_COMPILER=${C_COMPILER}
-              -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
-              -DCMAKE_Fortran_COMPILER=${Fortran_COMPILER}
-              -DPETSC_DIR=/usr/lib/petscdir/3.6.2/x86_64-linux-gnu
-              -DPETSC_ARCH=
-              -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-              -DENABLE_MPI=${ENABLE_MPI}
-              -DVERBOSE_MAKE=True
+            cmake -DCMAKE_C_COMPILER=${C_COMPILER} \
+              -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
+              -DCMAKE_Fortran_COMPILER=${Fortran_COMPILER} \
+              -DPETSC_DIR=/usr/lib/petscdir/3.6.2/x86_64-linux-gnu-real \
+              -DPETSC_ARCH= \
+              -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              -DENABLE_MPI=${ENABLE_MPI} \
+              -DVERBOSE_MAKE=True \
               ..;
           build_command: >
             make -j2
