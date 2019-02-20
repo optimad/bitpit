@@ -1000,6 +1000,7 @@ void PatchKernel::removeGhostsFromExchangeInfo(const std::vector<long> &ghostIds
 		// Remove targets
 		std::vector<long> &ghostTargets = m_ghostExchangeTargets[rank];
 		auto iterator = std::lower_bound(ghostTargets.begin(), ghostTargets.end(), rank, CellPositionLess(*this));
+		assert(iterator != ghostTargets.end());
 		ghostTargets.erase(iterator);
 	}
 
