@@ -69,7 +69,10 @@ SystemSolver::SystemSolver(MPI_Comm communicator, bool debug)
 #else
 SystemSolver::SystemSolver(bool debug)
 #endif
-    : m_initialized(false), m_pivotType(PIVOT_NONE)
+    : m_initialized(false), m_pivotType(PIVOT_NONE),
+      m_rowGlobalOffset(0), m_colGlobalOffset(0),
+      m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
+      m_rpivot(nullptr), m_cpivot(nullptr), m_KSP(nullptr)
 {
     // Add debug options
     if (debug) {
