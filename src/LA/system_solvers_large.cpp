@@ -482,6 +482,8 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
         PetscInt *nRowCols = nullptr;
         const PetscInt **rowGlobalCols = nullptr;
         MatGetRow(m_A, globalRow, nRowCols, rowGlobalCols, NULL);
+        assert(nRowCols != nullptr);
+        assert(rowGlobalCols != nullptr);
 
         // Get elements indices
         rowGlobalColsMap.clear();
