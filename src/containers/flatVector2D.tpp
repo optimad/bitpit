@@ -442,7 +442,7 @@ void FlatVector2D<T>::clear(bool release)
         m_v.clear();
 
         m_index.resize(1);
-        m_index[0];
+        m_index[0] = 0;
     }
 }
 
