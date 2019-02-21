@@ -5408,8 +5408,14 @@ namespace bitpit {
             exchangeGhostHaloAccretions(&accretionDataCommunicator, &accretions);
 
             // Grow accretions
-            growGhostHaloAccretions(layer, &oneRingsCache, &accretions);
+            growGhostHaloAccretions(&oneRingsCache, &accretions);
         }
+
+        // To correctly identify the population of the last layer of sources,
+        // we need to exchange the accretions one more time. This allows to
+        // communicate the foreign seeds found during the last growth to the
+        // processors that own them.
+        exchangeGhostHaloAccretions(&accretionDataCommunicator, &accretions);
 
         //
         // Extract list of sources
@@ -5491,13 +5497,11 @@ namespace bitpit {
      * halo. An explanation of how ghost halo is generated can be found in the
      * function that builds the ghost layers.
      *
-     * \param layer is the latest layer reached in accretion growth
      * \param[in,out] oneRingsCache cache for one ring evaluation
      * \param[in,out] accretions list of accretions
      */
     void
-    ParaTree::growGhostHaloAccretions(std::size_t layer,
-                                      std::unordered_map<uint32_t, std::vector<uint64_t>> *oneRingsCache,
+    ParaTree::growGhostHaloAccretions(std::unordered_map<uint32_t, std::vector<uint64_t>> *oneRingsCache,
                                       std::vector<AccretionData> *accretions) {
 
         // The neighbour of the internal seeds are the next layer of sources.
@@ -5566,12 +5570,10 @@ namespace bitpit {
                     // seeds containt ghost octants that are not owned by the
                     // target rank (if an octant is owned by the target rank,
                     // by definition it will not be a source for that rank).
-                    if (layer < (m_nofGhostLayers - 1)) {
-                        if (isNeighInternal) {
-                            accretion.internalSeeds.insert({neighGlobalIdx, seedLayer + 1});
-                        } else if (neighRank != targetRank) {
-                            accretion.foreignSeeds.insert({neighGlobalIdx, seedLayer + 1});
-                        }
+                    if (isNeighInternal) {
+                        accretion.internalSeeds.insert({neighGlobalIdx, seedLayer + 1});
+                    } else if (neighRank != targetRank) {
+                        accretion.foreignSeeds.insert({neighGlobalIdx, seedLayer + 1});
                     }
                 }
             }
