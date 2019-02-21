@@ -5467,7 +5467,7 @@ namespace bitpit {
             //
             // The population and the seeds of the first layer are the octants
             // on processors borders.
-            const std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc.at(targetRank);
+            const std::vector<uint32_t> &rankBordersPerProc = bordersPerProcEntry.second;
             const std::size_t nRankBordersPerProc = rankBordersPerProc.size();
 
             accretion.population.reserve(m_nofGhostLayers * nRankBordersPerProc);
