@@ -530,6 +530,9 @@ namespace bitpit {
         void 		updateLoadBalance();
         void 		setPboundGhosts();
         void 		buildGhostOctants(const std::map<int, u32vector> &bordersPerProc, const std::vector<AccretionData> &accretions);
+        void 		initializeGhostHaloAccretions(std::vector<AccretionData> *accretions);
+        void 		growGhostHaloAccretions(std::size_t layer, std::unordered_map<uint32_t, std::vector<uint64_t>> *cachedOneRings, std::vector<AccretionData> *accretions);
+        void 		exchangeGhostHaloAccretions(DataCommunicator *dataCommunicator, std::vector<AccretionData> *accretions);
 
         void 		computeGhostHalo();
         void 		commMarker();

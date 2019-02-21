@@ -5346,283 +5346,73 @@ namespace bitpit {
      */
     void
     ParaTree::computeGhostHalo(){
-        //build first ghost layer
+        // Build first layer of ghosts
         setPboundGhosts();
 
-        //if we need to build only one layer we can exit
+        // Early return if we need to build only one layer
         if(m_nofGhostLayers <= 1){
             return;
         }
 
-        // Initialize the 1-rings of the internal octants
         //
-        // Every time a 1-ring of an internal octant is evaluated, the result
-        // is cached.
-        std::unordered_map<uint32_t, std::vector<uint64_t>> cachedOneRings;
-        cachedOneRings.reserve(getNumOctants());
+        // Accrete sources
+        //
+        // We don't build ghost layers directly, instead we identify the
+        // internal cells that are ghosts for the neighboring process and
+        // we use this list to create the ghosts. We use the term "sources"
+        // to identify internal cells that are ghosts for the neighboring
+        // process. For each layer of ghosts, a corresponding layer of
+        // sources exists.
+        //
+        // Sources are identified one layer at a time. The first layer is
+        // already known: the processor-border octants. The neighbors of
+        // processor-border octants are the second layer of sources; the
+        // neighbors of the second layer of sources are the third layer,
+        // and so on an so forth.
+        //
+        // To identify the sources, an auxiliary data structure is used. This
+        // data structure is called accretion and contains the list of sources
+        // currently identified (population), a list of octants to be used for
+        // building the next layer of sources (seeds) and the rank on which
+        // the sources gathered by the accretion will be ghosts.
+        //
+        // The identification of the sources starts creating one accretions for
+        // each of the neighboring processors. The accretions are initialized
+        // using the processor-border octants already build: those octants are
+        // the first layer of sources and the seeds for the generation of the
+        // second layer. Adding the neighbors of the seeds to the population,
+        // accretions are grown one layer at a time. When an accretion reaches
+        // a neighboring processors (i.e., when a first-layer ghost enters in
+        // the list of seeds), we communicate to the owner of the ghost to
+        // create a new accretion and continue the search for the sources.
+        // At the end of the procedure, the population of the accretions on
+        // each processor will contain the desired sources.
 
-        // Initialize the accretions
-        int firstLayer = 0;
+        // Initialize cache for 1-rings of the internal octants
+        std::unordered_map<uint32_t, std::vector<uint64_t>> oneRingsCache;
+        oneRingsCache.reserve(getNumOctants());
 
+        // Initialize data communicator
+        DataCommunicator accretionDataCommunicator(m_comm);
+
+        // Initialize accretions
         std::vector<AccretionData> accretions;
-        accretions.reserve(m_bordersPerProc.size());
-        for(const auto &bordersPerProcEntry : m_bordersPerProc){
-            accretions.emplace_back();
-            AccretionData &accretion = accretions.back();
+        initializeGhostHaloAccretions(&accretions);
 
-            // Rank for which the accretion will gather sources
-            int targetRank = bordersPerProcEntry.first;
-            accretion.targetRank = targetRank;
-
-            // Initialize the first layer
-            //
-            // The population and the seeds of the first layer are the octants
-            // on processors borders.
-            const std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc.at(targetRank);
-            const std::size_t nRankBordersPerProc = rankBordersPerProc.size();
-
-            accretion.population.reserve(m_nofGhostLayers * nRankBordersPerProc);
-            accretion.seeds.reserve(nRankBordersPerProc);
-            for(uint32_t pborderLocalIdx : rankBordersPerProc){
-                uint64_t pborderGlobalIdx = getGlobalIdx(pborderLocalIdx);
-                accretion.population.insert({pborderGlobalIdx, firstLayer});
-                accretion.seeds.insert({pborderGlobalIdx, firstLayer});
-            }
-        }
-
-        // Add layers to the accretions
-        DataCommunicator foreignAccretionDataCommunicator(m_comm);
+        // Grow the accretions
         for(std::size_t layer = 1; layer < m_nofGhostLayers; ++layer){
+            // Exchange accretions
             //
-            // Exchange foreing accretions
-            //
-            // When a ghost is incorporated in the population, the accretion
+            // When a ghost is incorporated in the seeds, the accretion
             // needs to continue on the processor that owns the ghost.
+            exchangeGhostHaloAccretions(&accretionDataCommunicator, &accretions);
 
-            // Generate the foreign accretions
-            //
-            // When the accretion reaches a foreign process (i.e., a ghost is
-            // added to the seeds), the ranks that owns the ghost seed have to
-            // continue the propagation of those seeds (which will be local
-            // seeds for that foreign rank) locally. Therefore we need to
-            // communicate to the ranks that own ghosts seeds the information
-            // about the accretion and the list of seeds.
-            std::unordered_map<int, std::vector<AccretionData>> foreignAccretions;
-            for(const AccretionData &accretion : accretions){
-                for(const auto &seedEntry : accretion.seeds){
-                    int seedRank = getOwnerRank(seedEntry.first);
-                    if (seedRank == m_rank) {
-                        continue;
-                    }
-
-                    // Find the foreign accretion the ghost seed belogns to
-                    std::vector<AccretionData> &foreignRankAccretions = foreignAccretions[seedRank];
-
-                    auto foreignRankAccretionsItr = foreignRankAccretions.begin();
-                    for (; foreignRankAccretionsItr != foreignRankAccretions.end(); ++foreignRankAccretionsItr) {
-                        if (foreignRankAccretionsItr->targetRank!= accretion.targetRank) {
-                            continue;
-                        }
-
-                        break;
-                    }
-
-                    if (foreignRankAccretionsItr == foreignRankAccretions.end()) {
-                        foreignRankAccretions.emplace_back();
-                        foreignRankAccretionsItr = foreignRankAccretions.begin() + foreignRankAccretions.size() - 1;
-                        foreignRankAccretionsItr->targetRank = accretion.targetRank;
-                    }
-
-                    AccretionData &foreignAccretion = *foreignRankAccretionsItr;
-
-                    // Add the seeds
-                    foreignAccretion.seeds.insert(seedEntry);
-                }
-            }
-
-            // Execute the communications
-            bool foreignAccrationExchangeNeeded = (foreignAccretions.size() > 0);
-            MPI_Allreduce(MPI_IN_PLACE, &foreignAccrationExchangeNeeded, 1, MPI_C_BOOL, MPI_LOR, m_comm);
-            if (foreignAccrationExchangeNeeded) {
-                // Clear previous communications
-                foreignAccretionDataCommunicator.clearAllSends();
-                foreignAccretionDataCommunicator.clearAllRecvs();
-
-                // Send the foreign accretions
-                for(const auto &foreignAccretionEntry : foreignAccretions){
-                    int receiverRank = foreignAccretionEntry.first;
-
-                    // Evaluate buffer size
-                    std::size_t buffSize = 0;
-                    buffSize += sizeof(std::size_t);
-                    for(const auto &foreignAccretion: foreignAccretionEntry.second){
-                        std::size_t nForeignSeeds = foreignAccretion.seeds.size();
-
-                        buffSize += sizeof(int);
-                        buffSize += sizeof(std::size_t);
-                        buffSize += nForeignSeeds * (sizeof(uint64_t) + sizeof(int));
-                    }
-
-                    foreignAccretionDataCommunicator.setSend(receiverRank, buffSize);
-
-                    // Fill buffer
-                    SendBuffer &sendBuffer = foreignAccretionDataCommunicator.getSendBuffer(receiverRank);
-
-                    const std::vector<AccretionData> &foreignRankAccretions = foreignAccretionEntry.second;
-
-                    sendBuffer << foreignRankAccretions.size();
-                    for(const auto &foreignAccretion: foreignRankAccretions){
-                        sendBuffer << foreignAccretion.targetRank;
-                        sendBuffer << foreignAccretion.seeds.size();
-                        for(const auto &seedEntry : foreignAccretion.seeds){
-                            sendBuffer << seedEntry.first;
-                            sendBuffer << seedEntry.second;
-                        }
-                    }
-                }
-
-                // Start communications
-                foreignAccretionDataCommunicator.discoverRecvs();
-                foreignAccretionDataCommunicator.startAllRecvs();
-                foreignAccretionDataCommunicator.startAllSends();
-
-                // Receive the accretiation to execute on behalf of neighbour
-                // processes
-                int nCompletedRecvs = 0;
-                while (nCompletedRecvs < foreignAccretionDataCommunicator.getRecvCount()) {
-                    int senderRank = foreignAccretionDataCommunicator.waitAnyRecv();
-                    RecvBuffer &recvBuffer = foreignAccretionDataCommunicator.getRecvBuffer(senderRank);
-
-                    std::size_t nForeignAccretions;
-                    recvBuffer >> nForeignAccretions;
-
-                    for (std::size_t k = 0; k < nForeignAccretions; ++k) {
-                        // Target rank
-                        int targetRank;
-                        recvBuffer >> targetRank;
-
-                        // Get the accretion to update
-                        //
-                        // If an accretions with the requeste owner and target
-                        // ranks doesn't exist create a new one.
-                        auto accretionsItr = accretions.begin();
-                        for(; accretionsItr != accretions.end(); ++accretionsItr){
-                            if (accretionsItr->targetRank!= targetRank) {
-                                continue;
-                            }
-
-                            break;
-                        }
-
-                        if (accretionsItr == accretions.end()) {
-                            accretions.emplace_back();
-                            accretionsItr = accretions.begin() + accretions.size() - 1;
-                            accretionsItr->targetRank = targetRank;
-                        }
-
-                        AccretionData &accretion = *accretionsItr;
-
-                        // Initialize accretion seeds
-                        std::size_t nSeeds;
-                        recvBuffer >> nSeeds;
-
-                        for(std::size_t n = 0; n < nSeeds; ++n){
-                            uint64_t globalIdx;
-                            recvBuffer >> globalIdx;
-
-                            int layer;
-                            recvBuffer >> layer;
-
-                            accretion.population.insert({globalIdx, layer});
-                            accretion.seeds.insert({globalIdx, layer});
-                        }
-                    }
-
-                    ++nCompletedRecvs;
-                }
-
-                // Wait until all exchanges are completed
-                foreignAccretionDataCommunicator.waitAllSends();
-            }
-
-            //
-            // Add a new layer to the population
-            //
-            for(AccretionData &accretion : accretions){
-                // If the accretion doesn't have seeds we can skip it
-                std::size_t nSeeds = accretion.seeds.size();
-                if (nSeeds == 0) {
-                    continue;
-                }
-
-                // Rank for which accretion is gathering data
-                const int targetRank = accretion.targetRank;
-
-                // Seeds
-                //
-                // We make a copy of the seeds and then we clear the original
-                // list in order to generate the seeds for the next layer.
-                std::vector<uint64_t> currentSeedsIndexes(nSeeds);
-                std::vector<int> currentSeedsLayer(nSeeds);
-
-                std::size_t n = 0;
-                for(auto const &seedEntry : accretion.seeds){
-                    currentSeedsIndexes[n] = seedEntry.first;
-                    currentSeedsLayer[n]   = seedEntry.second;
-                    n++;
-                }
-
-                accretion.seeds = std::unordered_map<uint64_t, int>();
-
-                // The next layer is obtained adding the 1-ring neighbours of
-                // the internal octants of the previous layer.
-                for(std::size_t n = 0; n < nSeeds; ++n){
-                    // Consider only internal octants
-                    uint64_t seedGlobalIdx = currentSeedsIndexes[n];
-                    if (!isInternal(seedGlobalIdx)) {
-                        continue;
-                    }
-
-                    // Get seed layer
-                    int seedLayer = currentSeedsLayer[n];
-
-                    // Find the 1-ring of the source
-                    uint32_t seedLocalIdx = getLocalIdx(seedGlobalIdx);
-                    auto cachedOneRingsItr = cachedOneRings.find(seedLocalIdx);
-                    if (cachedOneRingsItr == cachedOneRings.end()) {
-                        cachedOneRingsItr = cachedOneRings.insert({seedLocalIdx, std::vector<uint64_t>()}).first;
-                        findAllGlobalNeighbours(seedLocalIdx, cachedOneRingsItr->second);
-                        cachedOneRingsItr->second.push_back(getGlobalIdx(seedLocalIdx));
-                    }
-                    const std::vector<uint64_t> &seedOneRing = cachedOneRingsItr->second;
-
-                    // Add the 1-ring of the octant to the sources
-                    for(uint64_t neighGlobalIdx : seedOneRing){
-                        // Discard octants already in the population
-                        if (accretion.population.count(neighGlobalIdx) > 0) {
-                            continue;
-                        }
-
-                        // Avoid adding ghosts owned by the target rank.
-                        if (!isInternal(neighGlobalIdx)) {
-                            int neighRank = getOwnerRank(neighGlobalIdx);
-                            if (neighRank == targetRank) {
-                                continue;
-                            }
-                        }
-
-                        // Add the octant to the population and to the seeds
-                        accretion.population.insert({neighGlobalIdx, seedLayer + 1});
-                        if (layer < (m_nofGhostLayers - 1)) {
-                            accretion.seeds.insert({neighGlobalIdx, seedLayer + 1});
-                        }
-                    }
-                }
-            }
+            // Grow accretions
+            growGhostHaloAccretions(layer, &oneRingsCache, &accretions);
         }
 
         //
-        // Build the list of sources
+        // Extract list of sources
         //
         // Sources are internal octants that are ghosts for other processors,
         // i.e., internal octants on processors borders (pborder octants).
@@ -5648,7 +5438,7 @@ namespace bitpit {
                 ++internalPopulationSize;
             }
 
-            // Update the
+            // Update the processor-border octants
             int targetRank = accretion.targetRank;
             std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc[targetRank];
             rankBordersPerProc.assign(internalPopulationStorage.begin(), internalPopulationStorage.begin() + internalPopulationSize);
@@ -5659,6 +5449,295 @@ namespace bitpit {
         // Build the ghosts
         //
         buildGhostOctants(m_bordersPerProc, accretions);
+    }
+
+    /*! Initialize the accretions.
+     *
+     * Accretions are auxiliary data structures needed for generation of ghost
+     * halo. An explanation of how ghost halo is generated can be found in the
+     * function that builds the ghost layers.
+     *
+     * \param[in,out] accretions list of accretions
+     */
+    void
+    ParaTree::initializeGhostHaloAccretions(std::vector<AccretionData> *accretions) {
+
+        const std::size_t FIRST_LAYER = 0;
+
+        accretions->reserve(m_bordersPerProc.size());
+        for(const auto &bordersPerProcEntry : m_bordersPerProc){
+            accretions->emplace_back();
+            AccretionData &accretion = accretions->back();
+
+            // Rank for which the accretion will gather sources
+            int targetRank = bordersPerProcEntry.first;
+            accretion.targetRank = targetRank;
+
+            // Initialize the first layer
+            //
+            // The population and the seeds of the first layer are the octants
+            // on processors borders.
+            const std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc.at(targetRank);
+            const std::size_t nRankBordersPerProc = rankBordersPerProc.size();
+
+            accretion.population.reserve(m_nofGhostLayers * nRankBordersPerProc);
+            accretion.seeds.reserve(nRankBordersPerProc);
+            for(uint32_t pborderLocalIdx : rankBordersPerProc){
+                uint64_t pborderGlobalIdx = getGlobalIdx(pborderLocalIdx);
+                accretion.population.insert({pborderGlobalIdx, FIRST_LAYER});
+                accretion.seeds.insert({pborderGlobalIdx, FIRST_LAYER});
+            }
+        }
+    }
+
+    /*! Grow the accretions adding a new layer of seeds.
+     *
+     * Accretions are auxiliary data structures needed for generation of ghost
+     * halo. An explanation of how ghost halo is generated can be found in the
+     * function that builds the ghost layers.
+     *
+     * \param layer is the latest layer reached in accretion growth
+     * \param[in,out] oneRingsCache cache for one ring evaluation
+     * \param[in,out] accretions list of accretions
+     */
+    void
+    ParaTree::growGhostHaloAccretions(std::size_t layer,
+                                      std::unordered_map<uint32_t, std::vector<uint64_t>> *oneRingsCache,
+                                      std::vector<AccretionData> *accretions) {
+
+        for(AccretionData &accretion : *accretions){
+            // If the accretion doesn't have seeds we can skip it
+            std::size_t nSeeds = accretion.seeds.size();
+            if (nSeeds == 0) {
+                continue;
+            }
+
+            // Rank for which accretion is gathering data
+            const int targetRank = accretion.targetRank;
+
+            // Seeds
+            //
+            // We make a copy of the seeds and then we clear the original
+            // list in order to generate the seeds for the next layer.
+            std::vector<uint64_t> currentSeedsIndexes(nSeeds);
+            std::vector<int> currentSeedsLayer(nSeeds);
+
+            std::size_t n = 0;
+            for(auto const &seedEntry : accretion.seeds){
+                currentSeedsIndexes[n] = seedEntry.first;
+                currentSeedsLayer[n]   = seedEntry.second;
+                n++;
+            }
+
+            accretion.seeds = std::unordered_map<uint64_t, int>();
+
+            // The next layer is obtained adding the 1-ring neighbours of
+            // the internal octants of the previous layer.
+            for(std::size_t n = 0; n < nSeeds; ++n){
+                // Consider only internal octants
+                uint64_t seedGlobalIdx = currentSeedsIndexes[n];
+                if (!isInternal(seedGlobalIdx)) {
+                    continue;
+                }
+
+                // Get seed layer
+                int seedLayer = currentSeedsLayer[n];
+
+                // Find the 1-ring of the source
+                uint32_t seedLocalIdx = getLocalIdx(seedGlobalIdx);
+                auto oneRingsCacheItr = oneRingsCache->find(seedLocalIdx);
+                if (oneRingsCacheItr == oneRingsCache->end()) {
+                    oneRingsCacheItr = oneRingsCache->insert({seedLocalIdx, std::vector<uint64_t>()}).first;
+                    findAllGlobalNeighbours(seedLocalIdx, oneRingsCacheItr->second);
+                    oneRingsCacheItr->second.push_back(getGlobalIdx(seedLocalIdx));
+                }
+                const std::vector<uint64_t> &seedOneRing = oneRingsCacheItr->second;
+
+                // Add the 1-ring of the octant to the sources
+                for(uint64_t neighGlobalIdx : seedOneRing){
+                    // Discard octants already in the population
+                    if (accretion.population.count(neighGlobalIdx) > 0) {
+                        continue;
+                    }
+
+                    // Avoid adding ghosts owned by the target rank.
+                    if (!isInternal(neighGlobalIdx)) {
+                        int neighRank = getOwnerRank(neighGlobalIdx);
+                        if (neighRank == targetRank) {
+                            continue;
+                        }
+                    }
+
+                    // Add the octant to the population and to the seeds
+                    accretion.population.insert({neighGlobalIdx, seedLayer + 1});
+                    if (layer < (m_nofGhostLayers - 1)) {
+                        accretion.seeds.insert({neighGlobalIdx, seedLayer + 1});
+                    }
+                }
+            }
+        }
+    }
+
+    /*! Exchange the accretions among neighbouring processors.
+     *
+     * Accretions are auxiliary data structures needed for generation of ghost
+     * halo. An explanation of how ghost halo is generated can be found in the
+     * function that builds the ghost layers.
+     *
+     * \param[in,out] dataCommunicator is the data communicator that will
+     * handle data exchagne
+     * \param[in,out] accretions list of accretions
+     */
+    void
+    ParaTree::exchangeGhostHaloAccretions(DataCommunicator *dataCommunicator,
+                                          std::vector<AccretionData> *accretions) {
+
+        // Generate accretions that has to be sent to other processors
+        //
+        // When the accretion reaches a foreign process (i.e., a ghost is
+        // added to the seeds), the ranks that owns the ghost seed have to
+        // continue the propagation of those seeds (which will be local
+        // seeds for that foreign rank) locally. Therefore we need to
+        // communicate to the ranks that own ghosts seeds the information
+        // about the accretion and the list of seeds.
+        std::unordered_map<int, std::vector<AccretionData>> foreignAccretions;
+        for(const AccretionData &accretion : *accretions){
+            for(const auto &seedEntry : accretion.seeds){
+                int seedRank = getOwnerRank(seedEntry.first);
+                if (seedRank == m_rank) {
+                    continue;
+                }
+
+                // Find the foreign accretion the ghost seed belogns to
+                std::vector<AccretionData> &foreignRankAccretions = foreignAccretions[seedRank];
+
+                auto foreignRankAccretionsItr = foreignRankAccretions.begin();
+                for (; foreignRankAccretionsItr != foreignRankAccretions.end(); ++foreignRankAccretionsItr) {
+                    if (foreignRankAccretionsItr->targetRank!= accretion.targetRank) {
+                        continue;
+                    }
+
+                    break;
+                }
+
+                if (foreignRankAccretionsItr == foreignRankAccretions.end()) {
+                    foreignRankAccretions.emplace_back();
+                    foreignRankAccretionsItr = foreignRankAccretions.begin() + foreignRankAccretions.size() - 1;
+                    foreignRankAccretionsItr->targetRank = accretion.targetRank;
+                }
+
+                AccretionData &foreignAccretion = *foreignRankAccretionsItr;
+
+                // Add the seeds
+                foreignAccretion.seeds.insert(seedEntry);
+            }
+        }
+
+        // Early return if no communications are needed
+        bool foreignAccrationExchangeNeeded = (foreignAccretions.size() > 0);
+        MPI_Allreduce(MPI_IN_PLACE, &foreignAccrationExchangeNeeded, 1, MPI_C_BOOL, MPI_LOR, m_comm);
+        if (!foreignAccrationExchangeNeeded) {
+            return;
+        }
+
+        // Clear previous communications
+        dataCommunicator->clearAllSends();
+        dataCommunicator->clearAllRecvs();
+
+        // Fill send buffers with accretions data
+        for(const auto &foreignAccretionEntry : foreignAccretions){
+            int receiverRank = foreignAccretionEntry.first;
+
+            // Evaluate buffer size
+            std::size_t buffSize = 0;
+            buffSize += sizeof(std::size_t);
+            for(const auto &foreignAccretion: foreignAccretionEntry.second){
+                std::size_t nForeignSeeds = foreignAccretion.seeds.size();
+
+                buffSize += sizeof(int);
+                buffSize += sizeof(std::size_t);
+                buffSize += nForeignSeeds * (sizeof(uint64_t) + sizeof(int));
+            }
+
+            dataCommunicator->setSend(receiverRank, buffSize);
+
+            // Fill buffer
+            SendBuffer &sendBuffer = dataCommunicator->getSendBuffer(receiverRank);
+
+            const std::vector<AccretionData> &foreignRankAccretions = foreignAccretionEntry.second;
+
+            sendBuffer << foreignRankAccretions.size();
+            for(const auto &foreignAccretion: foreignRankAccretions){
+                sendBuffer << foreignAccretion.targetRank;
+                sendBuffer << foreignAccretion.seeds.size();
+                for(const auto &seedEntry : foreignAccretion.seeds){
+                    sendBuffer << seedEntry.first;
+                    sendBuffer << seedEntry.second;
+                }
+            }
+        }
+
+        // Start communications
+        dataCommunicator->discoverRecvs();
+        dataCommunicator->startAllRecvs();
+        dataCommunicator->startAllSends();
+
+        // Receive the accretiation to grow on behalf of neighbour processes
+        int nCompletedRecvs = 0;
+        while (nCompletedRecvs < dataCommunicator->getRecvCount()) {
+            int senderRank = dataCommunicator->waitAnyRecv();
+            RecvBuffer &recvBuffer = dataCommunicator->getRecvBuffer(senderRank);
+
+            std::size_t nForeignAccretions;
+            recvBuffer >> nForeignAccretions;
+
+            for (std::size_t k = 0; k < nForeignAccretions; ++k) {
+                // Target rank
+                int targetRank;
+                recvBuffer >> targetRank;
+
+                // Get the accretion to update
+                //
+                // If an accretions with the requeste owner and target
+                // ranks doesn't exist create a new one.
+                auto accretionsItr = accretions->begin();
+                for(; accretionsItr != accretions->end(); ++accretionsItr){
+                    if (accretionsItr->targetRank!= targetRank) {
+                        continue;
+                    }
+
+                    break;
+                }
+
+                if (accretionsItr == accretions->end()) {
+                    accretions->emplace_back();
+                    accretionsItr = accretions->begin() + accretions->size() - 1;
+                    accretionsItr->targetRank = targetRank;
+                }
+
+                AccretionData &accretion = *accretionsItr;
+
+                // Initialize accretion seeds and population
+                std::size_t nSeeds;
+                recvBuffer >> nSeeds;
+
+                for(std::size_t n = 0; n < nSeeds; ++n){
+                    uint64_t globalIdx;
+                    recvBuffer >> globalIdx;
+
+                    int layer;
+                    recvBuffer >> layer;
+
+                    accretion.population.insert({globalIdx, layer});
+                    accretion.seeds.insert({globalIdx, layer});
+                }
+            }
+
+            ++nCompletedRecvs;
+        }
+
+        // Wait until all exchanges are completed
+        dataCommunicator->waitAllSends();
     }
 
     /*! Build ghost octants.
