@@ -5519,29 +5519,21 @@ namespace bitpit {
             //
             // We make a copy of the seeds and then we clear the original
             // list in order to generate the seeds for the next layer.
-            std::vector<uint64_t> currentSeedsIndexes(nSeeds);
-            std::vector<int> currentSeedsLayer(nSeeds);
-
-            std::size_t n = 0;
-            for(auto const &seedEntry : accretion.seeds){
-                currentSeedsIndexes[n] = seedEntry.first;
-                currentSeedsLayer[n]   = seedEntry.second;
-                n++;
-            }
-
-            accretion.seeds = std::unordered_map<uint64_t, int>();
+            std::unordered_map<uint64_t, int> currentSeeds;
+            currentSeeds.reserve(accretion.seeds.size());
+            accretion.seeds.swap(currentSeeds);
 
             // The next layer is obtained adding the 1-ring neighbours of
             // the internal octants of the previous layer.
-            for(std::size_t n = 0; n < nSeeds; ++n){
+            for(const auto &seedEntry : currentSeeds){
                 // Consider only internal octants
-                uint64_t seedGlobalIdx = currentSeedsIndexes[n];
+                uint64_t seedGlobalIdx = seedEntry.first;
                 if (!isInternal(seedGlobalIdx)) {
                     continue;
                 }
 
                 // Get seed layer
-                int seedLayer = currentSeedsLayer[n];
+                int seedLayer = seedEntry.second;
 
                 // Find the 1-ring of the source
                 uint32_t seedLocalIdx = getLocalIdx(seedGlobalIdx);
