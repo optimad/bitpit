@@ -5416,32 +5416,22 @@ namespace bitpit {
         //
         // Sources are internal octants that are ghosts for other processors,
         // i.e., internal octants on processors borders (pborder octants).
-        // Internal octants of the accretions are the sources for the target
-        // rank of the accretion.
-        for (auto &bordersPerProcEntry : m_bordersPerProc) {
-            std::vector<uint32_t> &rankBordersPerProc = bordersPerProcEntry.second;
-            rankBordersPerProc.clear();
-        }
-
-        std::vector<uint32_t> internalPopulationStorage(getNumOctants());
+        // The population of the accretions is exaclty made of the sources
+        // for the target rank of the accretion.
         for(const AccretionData &accretion : accretions){
-            // Get internal octants
-            std::size_t internalPopulationSize = 0;
+            int targetRank = accretion.targetRank;
+
+            std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc[targetRank];
+            rankBordersPerProc.resize(accretion.population.size());
+
+            std::size_t index = 0;
             for (const auto &populationEntry : accretion.population) {
                 uint64_t globalIdx = populationEntry.first;
-                if (!isInternal(globalIdx)) {
-                    continue;
-                }
-
                 uint32_t localIdx = getLocalIdx(globalIdx);
-                internalPopulationStorage[internalPopulationSize] = localIdx;
-                ++internalPopulationSize;
+                rankBordersPerProc[index] = localIdx;
+                ++index;
             }
 
-            // Update the processor-border octants
-            int targetRank = accretion.targetRank;
-            std::vector<uint32_t> &rankBordersPerProc = m_bordersPerProc[targetRank];
-            rankBordersPerProc.assign(internalPopulationStorage.begin(), internalPopulationStorage.begin() + internalPopulationSize);
             std::sort(rankBordersPerProc.begin(), rankBordersPerProc.end());
         }
 
@@ -5484,7 +5474,9 @@ namespace bitpit {
             accretion.seeds.reserve(nRankBordersPerProc);
             for(uint32_t pborderLocalIdx : rankBordersPerProc){
                 uint64_t pborderGlobalIdx = getGlobalIdx(pborderLocalIdx);
-                accretion.population.insert({pborderGlobalIdx, FIRST_LAYER});
+                if (isInternal(pborderGlobalIdx)) {
+                    accretion.population.insert({pborderGlobalIdx, FIRST_LAYER});
+                }
                 accretion.seeds.insert({pborderGlobalIdx, FIRST_LAYER});
             }
         }
@@ -5552,18 +5544,31 @@ namespace bitpit {
                         continue;
                     }
 
-                    // Avoid adding ghosts owned by the target rank.
-                    if (!isInternal(neighGlobalIdx)) {
-                        int neighRank = getOwnerRank(neighGlobalIdx);
-                        if (neighRank == targetRank) {
-                            continue;
-                        }
+                    // Get neighbour information
+                    bool isNeighInternal = isInternal(neighGlobalIdx);
+
+                    int neighRank;
+                    if (isNeighInternal) {
+                        neighRank = getRank();
+                    } else {
+                        neighRank = getOwnerRank(neighGlobalIdx);
                     }
 
-                    // Add the octant to the population and to the seeds
-                    accretion.population.insert({neighGlobalIdx, seedLayer + 1});
-                    if (layer < (m_nofGhostLayers - 1)) {
-                        accretion.seeds.insert({neighGlobalIdx, seedLayer + 1});
+                    // Add the neighbour to the population
+                    //
+                    // Population should only contain internal octants.
+                    if (isNeighInternal) {
+                        accretion.population.insert({neighGlobalIdx, seedLayer + 1});
+                    }
+
+                    // Add the neighbour to the seeds
+                    //
+                    // Seeds contains both internal and ghost octants, but not
+                    // ghosts owned by the target rank.
+                    if (neighRank != targetRank) {
+                        if (layer < (m_nofGhostLayers - 1)) {
+                            accretion.seeds.insert({neighGlobalIdx, seedLayer + 1});
+                        }
                     }
                 }
             }
@@ -5710,6 +5715,10 @@ namespace bitpit {
                 AccretionData &accretion = *accretionsItr;
 
                 // Initialize accretion seeds and population
+                //
+                // We are receiving only internal octants, there is no need
+                // to explicitly check if and octant is internal before add
+                // it to the population.
                 std::size_t nSeeds;
                 recvBuffer >> nSeeds;
 
@@ -5720,6 +5729,7 @@ namespace bitpit {
                     int layer;
                     recvBuffer >> layer;
 
+                    assert(isInternal(neighGlobalIdx));
                     accretion.population.insert({globalIdx, layer});
                     accretion.seeds.insert({globalIdx, layer});
                 }
