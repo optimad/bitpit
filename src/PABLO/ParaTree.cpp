@@ -5380,13 +5380,13 @@ namespace bitpit {
         // each of the neighboring processors. The accretions are initialized
         // using the processor-border octants already build: those octants are
         // the first layer of sources and the seeds for the generation of the
-        // second layer. Adding the neighbors of the seeds to the population,
-        // accretions are grown one layer at a time. When an accretion reaches
-        // a neighboring processors (i.e., when a first-layer ghost enters in
-        // the list of seeds), we communicate to the owner of the ghost to
-        // create a new accretion and continue the search for the sources.
-        // At the end of the procedure, the population of the accretions on
-        // each processor will contain the desired sources.
+        // second layer. Adding the internal neighbors of the internal seeds to
+        // the population, accretions are grown one layer at a time. When an
+        // accretion reaches a neighboring processors (i.e., when a first-layer
+        // ghost enters in the list of foreign seeds), we communicate to the
+        // owner of the ghost to create a new accretion and continue the search
+        // for the sources. At the end of the procedure, the population of the
+        // accretions on each processor will contain the desired sources.
 
         // Initialize cache for 1-rings of the internal octants
         std::unordered_map<uint32_t, std::vector<uint64_t>> oneRingsCache;
@@ -5471,13 +5471,16 @@ namespace bitpit {
             const std::size_t nRankBordersPerProc = rankBordersPerProc.size();
 
             accretion.population.reserve(m_nofGhostLayers * nRankBordersPerProc);
-            accretion.seeds.reserve(nRankBordersPerProc);
+            accretion.internalSeeds.reserve(nRankBordersPerProc);
+            accretion.foreignSeeds.reserve(nRankBordersPerProc);
             for(uint32_t pborderLocalIdx : rankBordersPerProc){
                 uint64_t pborderGlobalIdx = getGlobalIdx(pborderLocalIdx);
                 if (isInternal(pborderGlobalIdx)) {
                     accretion.population.insert({pborderGlobalIdx, FIRST_LAYER});
+                    accretion.internalSeeds.insert({pborderGlobalIdx, FIRST_LAYER});
+                } else {
+                    accretion.foreignSeeds.insert({pborderGlobalIdx, FIRST_LAYER});
                 }
-                accretion.seeds.insert({pborderGlobalIdx, FIRST_LAYER});
             }
         }
     }
@@ -5497,9 +5500,10 @@ namespace bitpit {
                                       std::unordered_map<uint32_t, std::vector<uint64_t>> *oneRingsCache,
                                       std::vector<AccretionData> *accretions) {
 
+        // The neighbour of the internal seeds are the next layer of sources.
         for(AccretionData &accretion : *accretions){
-            // If the accretion doesn't have seeds we can skip it
-            std::size_t nSeeds = accretion.seeds.size();
+            // If the accretion doesn't have internal seeds we can skip it
+            std::size_t nSeeds = accretion.internalSeeds.size();
             if (nSeeds == 0) {
                 continue;
             }
@@ -5511,24 +5515,19 @@ namespace bitpit {
             //
             // We make a copy of the seeds and then we clear the original
             // list in order to generate the seeds for the next layer.
-            std::unordered_map<uint64_t, int> currentSeeds;
-            currentSeeds.reserve(accretion.seeds.size());
-            accretion.seeds.swap(currentSeeds);
+            std::unordered_map<uint64_t, int> currentInternalSeeds;
+            currentInternalSeeds.reserve(accretion.internalSeeds.size());
+            accretion.internalSeeds.swap(currentInternalSeeds);
 
             // The next layer is obtained adding the 1-ring neighbours of
             // the internal octants of the previous layer.
-            for(const auto &seedEntry : currentSeeds){
-                // Consider only internal octants
-                uint64_t seedGlobalIdx = seedEntry.first;
-                if (!isInternal(seedGlobalIdx)) {
-                    continue;
-                }
-
-                // Get seed layer
+            for(const auto &seedEntry : currentInternalSeeds){
+                // Get seed information
                 int seedLayer = seedEntry.second;
+                uint64_t seedGlobalIdx = seedEntry.first;
+                uint32_t seedLocalIdx = getLocalIdx(seedGlobalIdx);
 
                 // Find the 1-ring of the source
-                uint32_t seedLocalIdx = getLocalIdx(seedGlobalIdx);
                 auto oneRingsCacheItr = oneRingsCache->find(seedLocalIdx);
                 if (oneRingsCacheItr == oneRingsCache->end()) {
                     oneRingsCacheItr = oneRingsCache->insert({seedLocalIdx, std::vector<uint64_t>()}).first;
@@ -5563,11 +5562,15 @@ namespace bitpit {
 
                     // Add the neighbour to the seeds
                     //
-                    // Seeds contains both internal and ghost octants, but not
-                    // ghosts owned by the target rank.
-                    if (neighRank != targetRank) {
-                        if (layer < (m_nofGhostLayers - 1)) {
-                            accretion.seeds.insert({neighGlobalIdx, seedLayer + 1});
+                    // Internal seeds contains only internal octants, foreign
+                    // seeds containt ghost octants that are not owned by the
+                    // target rank (if an octant is owned by the target rank,
+                    // by definition it will not be a source for that rank).
+                    if (layer < (m_nofGhostLayers - 1)) {
+                        if (isNeighInternal) {
+                            accretion.internalSeeds.insert({neighGlobalIdx, seedLayer + 1});
+                        } else if (neighRank != targetRank) {
+                            accretion.foreignSeeds.insert({neighGlobalIdx, seedLayer + 1});
                         }
                     }
                 }
@@ -5599,13 +5602,9 @@ namespace bitpit {
         // about the accretion and the list of seeds.
         std::unordered_map<int, std::vector<AccretionData>> foreignAccretions;
         for(const AccretionData &accretion : *accretions){
-            for(const auto &seedEntry : accretion.seeds){
-                int seedRank = getOwnerRank(seedEntry.first);
-                if (seedRank == m_rank) {
-                    continue;
-                }
-
+            for(const auto &seedEntry : accretion.foreignSeeds){
                 // Find the foreign accretion the ghost seed belogns to
+                int seedRank = getOwnerRank(seedEntry.first);
                 std::vector<AccretionData> &foreignRankAccretions = foreignAccretions[seedRank];
 
                 auto foreignRankAccretionsItr = foreignRankAccretions.begin();
@@ -5625,8 +5624,8 @@ namespace bitpit {
 
                 AccretionData &foreignAccretion = *foreignRankAccretionsItr;
 
-                // Add the seeds
-                foreignAccretion.seeds.insert(seedEntry);
+                // Add the seed
+                foreignAccretion.internalSeeds.insert(seedEntry);
             }
         }
 
@@ -5649,11 +5648,11 @@ namespace bitpit {
             std::size_t buffSize = 0;
             buffSize += sizeof(std::size_t);
             for(const auto &foreignAccretion: foreignAccretionEntry.second){
-                std::size_t nForeignSeeds = foreignAccretion.seeds.size();
+                std::size_t nSeeds = foreignAccretion.internalSeeds.size();
 
                 buffSize += sizeof(int);
                 buffSize += sizeof(std::size_t);
-                buffSize += nForeignSeeds * (sizeof(uint64_t) + sizeof(int));
+                buffSize += nSeeds * (sizeof(uint64_t) + sizeof(int));
             }
 
             dataCommunicator->setSend(receiverRank, buffSize);
@@ -5666,8 +5665,8 @@ namespace bitpit {
             sendBuffer << foreignRankAccretions.size();
             for(const auto &foreignAccretion: foreignRankAccretions){
                 sendBuffer << foreignAccretion.targetRank;
-                sendBuffer << foreignAccretion.seeds.size();
-                for(const auto &seedEntry : foreignAccretion.seeds){
+                sendBuffer << foreignAccretion.internalSeeds.size();
+                for(const auto &seedEntry : foreignAccretion.internalSeeds){
                     sendBuffer << seedEntry.first;
                     sendBuffer << seedEntry.second;
                 }
@@ -5718,7 +5717,7 @@ namespace bitpit {
                 //
                 // We are receiving only internal octants, there is no need
                 // to explicitly check if and octant is internal before add
-                // it to the population.
+                // it to the population and to the internal seeds.
                 std::size_t nSeeds;
                 recvBuffer >> nSeeds;
 
@@ -5731,7 +5730,7 @@ namespace bitpit {
 
                     assert(isInternal(neighGlobalIdx));
                     accretion.population.insert({globalIdx, layer});
-                    accretion.seeds.insert({globalIdx, layer});
+                    accretion.internalSeeds.insert({globalIdx, layer});
                 }
             }
 

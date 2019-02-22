@@ -126,7 +126,8 @@ namespace bitpit {
 
         struct AccretionData {
             int targetRank;
-            std::unordered_map<uint64_t, int> seeds;
+            std::unordered_map<uint64_t, int> internalSeeds;
+            std::unordered_map<uint64_t, int> foreignSeeds;
             std::unordered_map<uint64_t, int> population;
         };
 
