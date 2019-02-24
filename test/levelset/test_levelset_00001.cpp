@@ -120,6 +120,7 @@ int subtest_001()
 
     bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
     mesh.update() ;
+    mesh.buildAdjacencies() ;
     mesh.buildInterfaces() ;
 
     // mark cells within R=0.5
