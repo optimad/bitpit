@@ -287,9 +287,9 @@ public:
 	virtual std::unique_ptr<PatchKernel> clone() const = 0;
 
 	virtual void reset();
-	void resetVertices();
-	void resetCells();
-	void resetInterfaces();
+	virtual void resetVertices();
+	virtual void resetCells();
+	virtual void resetInterfaces();
 
 	bool reserveVertices(size_t nVertices);
 	bool reserveCells(size_t nCells);
