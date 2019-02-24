@@ -66,6 +66,10 @@ public:
 
 	void reset() override;
 
+	void resetInterfaces() override;
+	void buildInterfaces() override;
+	void updateInterfaces(const std::vector<long> &cellIds) override;
+
 	void setDiscretization(const std::array<int, 3> &nCells);
 
 	long getVertexCount() const override;

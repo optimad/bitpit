@@ -76,6 +76,7 @@ int subtest_001()
 
     bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
     mesh.update() ;
+    mesh.buildInterfaces() ;
 
     // Compute level set  in narrow band
     bitpit::LevelSet levelset ;
