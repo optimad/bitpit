@@ -3581,6 +3581,10 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 	// Restore kernel
 	m_interfaces.restoreKernel(stream);
 
+	// Enable advanced editing
+	bool originalExpertStatus = isExpert();
+	setExpert(true);
+
 	// Restore interfaces
 	long nInterfaces = m_interfaces.size();
 	for (long n = 0; n < nInterfaces; ++n) {
@@ -3611,6 +3615,9 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 		InterfaceIterator interfaceIterator = buildCellInterface(owner, ownerFace, neigh, neighFace, interfaceId);
 		interfaceIterator->setPID(pid);
 	}
+
+	// Set original advanced editing status
+	setExpert(originalExpertStatus);
 }
 
 /*!
@@ -4323,6 +4330,10 @@ void PatchKernel::buildInterfaces()
 */
 void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 {
+	// Enable advanced editing
+	bool originalExpertStatus = isExpert();
+	setExpert(true);
+
 	//
 	// Update interfaces
 	//
@@ -4380,6 +4391,9 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 
 	// Set interfaces build strategy
 	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
+
+	// Set original advanced editing status
+	setExpert(originalExpertStatus);
 }
 
 /*!
