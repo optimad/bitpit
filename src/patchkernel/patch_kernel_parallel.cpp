@@ -1077,7 +1077,7 @@ void PatchKernel::buildGhostExchangeSources(const std::vector<int> &ranks)
 	with the specified ranks. During data exchange, these cells will be
 	the sources form which data will be read from.
 
-	\param ranks are the rank for which the information will be built
+	\param rank is the rank for which the information will be built
 */
 std::vector<long> PatchKernel::_findGhostExchangeSources(int rank)
 {
