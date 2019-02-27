@@ -279,7 +279,11 @@ int main(int argc,char *argv[]) {
   return 0;
 }
 ")
-    multipass_source_runs ("${includes}" "${libraries}" "${_PETSC_TEST_SOURCE}" ${runs} "${PETSC_LANGUAGE_BINDINGS}")
+
+    get_property(includes_external DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+    set (includes_all ${includes} ${includes_external})
+
+    multipass_source_runs ("${includes_all}" "${libraries}" "${_PETSC_TEST_SOURCE}" ${runs} "${PETSC_LANGUAGE_BINDINGS}")
     if (${${runs}})
       set (PETSC_EXECUTABLE_RUNS "YES" CACHE BOOL
         "Can the system successfully run a PETSc executable?  This variable can be manually set to \"YES\" to force CMake to accept a given PETSc configuration, but this will almost always result in a broken build.  If you change PETSC_DIR, PETSC_ARCH, or PETSC_CURRENT you would have to reset this variable." FORCE)
