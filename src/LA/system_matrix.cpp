@@ -72,6 +72,14 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
 /**
 * Default constructor
+*/
+SparseMatrix::SparseMatrix()
+    : SparseMatrix(MPI_COMM_SELF)
+{
+}
+
+/**
+* Constructor
 *
 * \param communicator is the MPI communicator
 */
@@ -99,39 +107,62 @@ SparseMatrix::SparseMatrix()
 }
 #endif
 
+#if BITPIT_ENABLE_MPI==1
 /**
 * Constructor
 *
-*/
-#if BITPIT_ENABLE_MPI==1
-/*!
-* \param communicator is the MPI communicator
 * \param nRows is the number of local rows of the matrix
 * \param nCols is the number of local columns of the matrix
-*/
-#else
-/*!
 * \param nRows is the number of rows of the matrix
 * \param nCols is the number of columns of the matrix
-*/
-#endif
-/*!
 * \param nNZ is the number of non-zero elements that the matrix will contain.
 * This is just an optional hint. If the actual number of non-zero elements
 * turns out to be greater than the provided value, the initialization of the
 * matrix pattern will be slower because reallocation of internal data may be
 * needed
 */
-#if BITPIT_ENABLE_MPI==1
+SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
+    : SparseMatrix(MPI_COMM_SELF, nRows, nCols, nNZ)
+{
+}
+
+/**
+* Constructor
+*
+* \param communicator is the MPI communicator
+* \param nRows is the number of local rows of the matrix
+* \param nCols is the number of local columns of the matrix
+* \param nRows is the number of rows of the matrix
+* \param nCols is the number of columns of the matrix
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* This is just an optional hint. If the actual number of non-zero elements
+* turns out to be greater than the provided value, the initialization of the
+* matrix pattern will be slower because reallocation of internal data may be
+* needed
+*/
 SparseMatrix::SparseMatrix(MPI_Comm communicator, long nRows, long nCols, long nNZ)
     : SparseMatrix(communicator)
-#else
-SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
-    : SparseMatrix()
-#endif
 {
     _initialize(nRows, nCols, nNZ);
 }
+#else
+/**
+* Constructor
+*
+* \param nRows is the number of rows of the matrix
+* \param nCols is the number of columns of the matrix
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* This is just an optional hint. If the actual number of non-zero elements
+* turns out to be greater than the provided value, the initialization of the
+* matrix pattern will be slower because reallocation of internal data may be
+* needed
+*/
+SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
+    : SparseMatrix()
+{
+    _initialize(nRows, nCols, nNZ);
+}
+#endif
 
 /*!
  * Destructor

@@ -38,12 +38,11 @@ namespace bitpit {
 class SparseMatrix {
 
 public:
+    SparseMatrix();
+    SparseMatrix(long nRows, long nCols, long nNZ = 0);
 #if BITPIT_ENABLE_MPI==1
     SparseMatrix(MPI_Comm communicator);
     SparseMatrix(MPI_Comm communicator, long nRows, long nCols, long nNZ = 0);
-#else
-    SparseMatrix();
-    SparseMatrix(long nRows, long nCols, long nNZ = 0);
 #endif
 
     ~SparseMatrix();
