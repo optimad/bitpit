@@ -79,11 +79,11 @@ public:
     static void addInitOption(const std::string &option);
     static void addInitOptions(const std::vector<std::string> &options);
 
+    SystemSolver(bool debug = false);
 #if BITPIT_ENABLE_MPI==1
     SystemSolver(MPI_Comm communicator, bool debug = false);
-#else
-    SystemSolver(bool debug = false);
 #endif
+
     ~SystemSolver();
 
     void clear();

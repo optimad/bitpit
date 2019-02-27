@@ -61,12 +61,30 @@ void SystemSolver::addInitOptions(const std::vector<std::string> &options)
     }
 }
 
+#if BITPIT_ENABLE_MPI==1
 /*!
  * Default constuctor
+ *
+ * \param debug if set to true, debug information will be printed
  */
-#if BITPIT_ENABLE_MPI==1
+SystemSolver::SystemSolver(bool debug)
+    : SystemSolver(MPI_COMM_SELF, debug)
+{
+}
+
+/*!
+ * Constuctor
+ *
+ * \param communicator is the MPI communicator
+ * \param debug if set to true, debug information will be printed
+ */
 SystemSolver::SystemSolver(MPI_Comm communicator, bool debug)
 #else
+/*!
+ * Defualt constuctor
+ *
+ * \param debug if set to true, debug information will be printed
+ */
 SystemSolver::SystemSolver(bool debug)
 #endif
     : m_initialized(false), m_pivotType(PIVOT_NONE),
@@ -101,7 +119,7 @@ SystemSolver::SystemSolver(bool debug)
 
 #if BITPIT_ENABLE_MPI==1
     // Detect if the system is partitioned
-    m_partitioned = (communicator != MPI_COMM_NULL);
+    m_partitioned = (communicator != MPI_COMM_NULL) && (communicator != MPI_COMM_SELF);
 
     // Set the communicator
     if (m_partitioned) {
