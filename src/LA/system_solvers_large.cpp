@@ -125,7 +125,7 @@ SystemSolver::SystemSolver(bool debug)
     if (m_partitioned) {
         MPI_Comm_dup(communicator, &m_communicator);
     } else {
-        m_communicator = PETSC_COMM_SELF;
+        m_communicator = MPI_COMM_SELF;
     }
 #endif
 }
