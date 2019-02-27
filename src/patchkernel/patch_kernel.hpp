@@ -90,7 +90,7 @@ public:
 	*/
 	struct CellPositionLess
 	{
-		CellPositionLess(PatchKernel &patch, bool native = true)
+		CellPositionLess(const PatchKernel &patch, bool native = true)
 			: m_patch(patch), m_native(native)
 		{
 		}
@@ -125,7 +125,7 @@ public:
 			throw std::runtime_error (stream.str());
 		}
 
-		PatchKernel &m_patch;
+		const PatchKernel &m_patch;
 		bool m_native;
 	};
 
@@ -136,7 +136,7 @@ public:
 	*/
 	struct CellPositionGreater : private CellPositionLess
 	{
-		CellPositionGreater(PatchKernel &patch, bool native = true)
+		CellPositionGreater(const PatchKernel &patch, bool native = true)
 			: CellPositionLess(patch, native)
 		{
 		}
