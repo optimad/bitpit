@@ -5730,7 +5730,7 @@ namespace bitpit {
                     int layer;
                     recvBuffer >> layer;
 
-                    assert(isInternal(neighGlobalIdx));
+                    assert(isInternal(globalIdx));
                     accretion.population.insert({globalIdx, layer});
                     accretion.internalSeeds.insert({globalIdx, layer});
                 }
