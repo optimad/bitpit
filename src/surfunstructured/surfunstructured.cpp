@@ -59,6 +59,10 @@ SurfUnstructured::SurfUnstructured()
 SurfUnstructured::SurfUnstructured(int patch_dim, int space_dim)
 	: SurfaceKernel(PatchManager::AUTOMATIC_ID, patch_dim, space_dim, true)
 {
+#if BITPIT_ENABLE_MPI==1
+	// This patch supports partitioning
+	setPartitioningStatus(PARTITIONING_CLEAN);
+#endif
 }
 
 /*!
