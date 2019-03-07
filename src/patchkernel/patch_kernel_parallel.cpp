@@ -506,7 +506,7 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 	beginAlteration();
 
 	// Alter patch
-	if (m_partitioningSends.empty()) {
+	if (m_partitioningPairs.empty()) {
 		partitioningData = _partitioningAlter(trackPartitioning);
 	} else {
 		std::vector<long> emptyCellList;
@@ -560,7 +560,7 @@ void PatchKernel::partitioningCleanup()
 	// Clean-up the partitioning
 	_partitioningCleanup();
 
-	if (m_partitioningSends.empty()) {
+	if (!m_partitioningPairs.empty()) {
 		std::unordered_map<int, std::vector<long>>().swap(m_partitioningSends);
 		std::vector<int>().swap(m_partitioningPairs);
 	}
