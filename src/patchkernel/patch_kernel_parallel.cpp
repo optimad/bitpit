@@ -372,40 +372,48 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::vector<i
 			continue;
 		}
 
-		m_partitioningSends[rank].push_back(cellItr->getId());
+		m_partitioningLocalSendList[rank].push_back(cellItr->getId());
 
 		cellItr++;
 	}
 
-	// Local sender-receiver pairs
-	std::vector<int> localPairs;
-	localPairs.reserve(2 * m_partitioningSends.size());
-	for (const auto &entry : m_partitioningSends) {
-		localPairs.push_back(getRank());
-		localPairs.push_back(entry.first);
+	// Local senders and receivers
+	int nLocalExchanges = m_partitioningLocalSendList.size();
+
+	std::vector<int> localSenders;
+	std::vector<int> localReceivers;
+	localSenders.reserve(nLocalExchanges);
+	localReceivers.reserve(nLocalExchanges);
+	for (const auto &entry : m_partitioningLocalSendList) {
+		localSenders.push_back(getRank());
+		localReceivers.push_back(entry.first);
 	}
 
 	// Prepare the communication for exchanging the sender/receiver pairs
-	int globalPairsSize = localPairs.size();
-	std::vector<int> globalPairsSizes(getProcessorCount());
-	MPI_Allgather(&globalPairsSize, 1, MPI_INT, globalPairsSizes.data(), 1, MPI_INT, getCommunicator());
+	std::vector<int> globalExchangeSizes(getProcessorCount());
+	MPI_Allgather(&nLocalExchanges, 1, MPI_INT, globalExchangeSizes.data(), 1, MPI_INT, getCommunicator());
 
-	std::vector<int> globalPairsOffsets(getProcessorCount());
-	globalPairsOffsets[0] = 0;
+	std::vector<int> globalExchangeOffsets(getProcessorCount());
+	globalExchangeOffsets[0] = 0;
 	for (int i = 1; i < getProcessorCount(); ++i) {
-		globalPairsOffsets[i] = globalPairsOffsets[i-1] + globalPairsSizes[i-1];
+		globalExchangeOffsets[i] = globalExchangeOffsets[i-1] + globalExchangeSizes[i-1];
 	}
 
-	// Global sender-receiver pairs
-	m_partitioningPairs.resize(globalPairsOffsets.back() + globalPairsSizes.back());
+	// Gather global information
+	m_nPartitioningGlobalExchanges = globalExchangeOffsets.back() + globalExchangeSizes.back();
 
-	MPI_Allgatherv(localPairs.data(), localPairs.size(), MPI_INT, m_partitioningPairs.data(),
-				globalPairsSizes.data(), globalPairsOffsets.data(), MPI_INT,
-				getCommunicator());
+	m_partitioningGlobalSenders.resize(m_nPartitioningGlobalExchanges);
+	m_partitioningGlobalReceivers.resize(m_nPartitioningGlobalExchanges);
+
+	MPI_Allgatherv(localSenders.data(), localSenders.size(), MPI_INT, m_partitioningGlobalSenders.data(),
+				   globalExchangeSizes.data(), globalExchangeOffsets.data(), MPI_INT, getCommunicator());
+
+	MPI_Allgatherv(localReceivers.data(), localReceivers.size(), MPI_INT, m_partitioningGlobalReceivers.data(),
+				   globalExchangeSizes.data(), globalExchangeOffsets.data(), MPI_INT, getCommunicator());
 
 	// Build the information on the cells that will be sent
 	if (trackPartitioning) {
-		for (const auto &entry : m_partitioningSends) {
+		for (const auto &entry : m_partitioningLocalSendList) {
 			int receiver = entry.first;
 			const std::vector<long> &ids = entry.second;
 
@@ -466,6 +474,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartition
 		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
+	// Reset partitioning information
+	m_nPartitioningGlobalExchanges = 0;
+
 	// Execute the partitioning preparation
 	partitioningData = _partitioningPrepare(trackPartitioning);
 
@@ -506,17 +517,17 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 	beginAlteration();
 
 	// Alter patch
-	if (m_partitioningPairs.empty()) {
+	if (m_nPartitioningGlobalExchanges == 0) {
 		partitioningData = _partitioningAlter(trackPartitioning);
 	} else {
 		std::vector<long> emptyCellList;
-		for (size_t i = 0; i < m_partitioningPairs.size(); i += 2) {
-			int sender   = m_partitioningPairs[i];
-			int receiver = m_partitioningPairs[i+1];
+		for (int i = 0; i < m_nPartitioningGlobalExchanges; ++i) {
+			int sender   = m_partitioningGlobalSenders[i];
+			int receiver = m_partitioningGlobalReceivers[i];
 
 			std::vector<long> *ids;
 			if (sender == getRank()) {
-				ids = &(m_partitioningSends[receiver]);
+				ids = &(m_partitioningLocalSendList[receiver]);
 			} else {
 				ids = &emptyCellList;
 			}
@@ -560,9 +571,11 @@ void PatchKernel::partitioningCleanup()
 	// Clean-up the partitioning
 	_partitioningCleanup();
 
-	if (!m_partitioningPairs.empty()) {
-		std::unordered_map<int, std::vector<long>>().swap(m_partitioningSends);
-		std::vector<int>().swap(m_partitioningPairs);
+	if (m_nPartitioningGlobalExchanges != 0) {
+		m_nPartitioningGlobalExchanges = 0;
+		std::unordered_map<int, std::vector<long>>().swap(m_partitioningLocalSendList);
+		std::vector<int>().swap(m_partitioningGlobalSenders);
+		std::vector<int>().swap(m_partitioningGlobalReceivers);
 	}
 
 	// Update the status

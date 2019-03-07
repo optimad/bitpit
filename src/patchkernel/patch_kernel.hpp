@@ -610,8 +610,10 @@ private:
 
 	int m_haloSize;
 
-	std::unordered_map<int, std::vector<long>> m_partitioningSends;
-	std::vector<int> m_partitioningPairs;
+	int m_nPartitioningGlobalExchanges;
+	std::vector<int> m_partitioningGlobalSenders;
+	std::vector<int> m_partitioningGlobalReceivers;
+	std::unordered_map<int, std::vector<long>> m_partitioningLocalSendList;
 
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
