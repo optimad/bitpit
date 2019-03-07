@@ -418,6 +418,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::vector<i
 		}
 	}
 
+	// Update the status
+	setPartitioningStatus(PARTITIONING_PREPARED);
+
 	return partitioningData;
 }
 
