@@ -120,7 +120,19 @@ if (myRank == 0) {
     log::cout() << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
     if (mesh.importSTL(in_name_bin, true) > 0) return 1;
     mesh.collapseCoincidentVertices();
+}
+
+{
+    // Scope variables ------------------------------------------------------ //
+    // None
+
+    //  Build adjacencies --------------------------------------------------- //
     mesh.buildAdjacencies();
+}
+
+if (myRank == 0) {
+    // Scope variables ------------------------------------------------------ //
+    // None
 
     // Mess-up the orientation ---------------------------------------------- //
     for (const auto &cell : mesh.getCells()) {

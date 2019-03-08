@@ -538,15 +538,16 @@ if (mesh.getRank() == 0) {
 // ========================================================================== //
 if (mesh.getRank() == 0) {
 
-    // Scope variables ------------------------------------------------------ //
-    high_resolution_clock::time_point   t0, t1;
-    duration<double>                    time_span;
-    stringstream                        out_msg;
-
     // Load stl geometry ---------------------------------------------------- //
     log::cout() << "** Rank#0, initializing mesh" << endl;
     log::cout() << "   generating simple quad mesh" << endl;
     generateTestQuadMesh(8, 8, mesh);
+}
+
+{
+    // Scope variables ------------------------------------------------------ //
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
 
     // Build adjacency ------------------------------------------------------ //
     log::cout() << "   building adjacencies" << endl;
@@ -555,6 +556,11 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
+}
+
+if (mesh.getRank() == 0) {
+    // Scope variables ------------------------------------------------------ //
+    stringstream                        out_msg;
 
     // Display Stats -------------------------------------------------------- //
     mesh.displayTopologyStats(out_msg, 3);
@@ -729,15 +735,16 @@ if (mesh.getRank() == 0) {
 // ========================================================================== //
 if (mesh.getRank() == 0) {
 
-    // Scope variables ------------------------------------------------------ //
-    high_resolution_clock::time_point   t0, t1;
-    duration<double>                    time_span;
-    stringstream                        out_msg;
-
     // Load stl geometry ---------------------------------------------------- //
     log::cout() << "** Rank#0, initializing mesh" << endl;
     log::cout() << "   generating simple quad mesh" << endl;
     generateTestQuadMesh(9, 9, mesh);
+}
+
+{
+    // Scope variables ------------------------------------------------------ //
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
 
     // Build adjacency ------------------------------------------------------ //
     log::cout() << "   building adjacencies" << endl;
@@ -746,6 +753,11 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
+}
+
+if (mesh.getRank() == 0) {
+    // Scope variables ------------------------------------------------------ //
+    stringstream                        out_msg;
 
     // Display Stats -------------------------------------------------------- //
     mesh.displayTopologyStats(out_msg, 3);
