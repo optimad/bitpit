@@ -550,7 +550,7 @@ public:
 	std::vector<adaption::Info> partitioningAlter(bool trackPartitioning = true, bool squeezeStorage = false);
 	void partitioningCleanup();
 
-	adaption::Info sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
+	adaption::Info sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend, bool squeezeStorage = false);
 #endif
 
 protected:
@@ -718,6 +718,7 @@ private:
 	void buildGhostExchangeSources(int rank);
 	void buildGhostExchangeSources(const std::vector<int> &ranks);
 
+    adaption::Info sendCells_any(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
     adaption::Info sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend);
     adaption::Info sendCells_receiver(const int &sendRank);
     adaption::Info sendCells_notified(const int &sendRank, const int &recvRank);

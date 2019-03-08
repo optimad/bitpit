@@ -532,7 +532,7 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 				ids = &emptyCellList;
 			}
 
-			adaption::Info partitioningInfo = sendCells(sender, receiver, *ids);
+			adaption::Info partitioningInfo = sendCells_any(sender, receiver, *ids);
 			if (trackPartitioning && partitioningInfo.type != adaption::TYPE_NONE) {
 				partitioningData.push_back(std::move(partitioningInfo));
 			}
@@ -1109,8 +1109,57 @@ std::vector<long> PatchKernel::_findGhostExchangeSources(int rank)
     \param[in] sendRank sender rank
     \param[in] recvRank receiver rank
     \param[in] cellsToSend list of cells to be moved
+    \param[in] squeezeStorage if set to true the vector that store patch information
+    will be squeezed after the synchronization
  */
-adaption::Info PatchKernel::sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend)
+adaption::Info PatchKernel::sendCells(const int &sendRank, const int &recvRank,
+                                      const std::vector<long> &cellsToSend,
+                                      bool squeezeStorage)
+{
+	//
+	// Pereare partitioning alteration
+	//
+	partitioningPrepare(false);
+
+	//
+	// Alter partitioning
+	//
+
+	// Begin patch alteration
+	beginAlteration();
+
+	// Send cells
+	adaption::Info adaptionInfo = sendCells_any(sendRank, recvRank, cellsToSend);
+
+	// End patch alteration
+	endAlteration(squeezeStorage);
+
+	// The patch is now partitioned
+	setPartitioned(true);
+
+	// Update the status
+	setPartitioningStatus(PARTITIONING_ALTERED);
+
+	//
+	// Cleanup partitioning alteration
+	//
+	partitioningCleanup();
+
+	return adaptionInfo;
+}
+
+/*!
+    Sends the specified list of cells from process with rank sendRank (sender)
+    to process with rank recvRank (receiver). If the rank the process currently
+    hosting the mesh is neither the sender or the receiver, a notification is
+    received in case ghost cells has changed owner.
+
+    \param[in] sendRank sender rank
+    \param[in] recvRank receiver rank
+    \param[in] cellsToSend list of cells to be moved
+ */
+adaption::Info PatchKernel::sendCells_any(const int &sendRank, const int &recvRank,
+                                          const std::vector<long> &cellsToSend)
 {
 	adaption::Info adaptionInfo;
 	if (m_rank == sendRank) {
