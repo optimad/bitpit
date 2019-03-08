@@ -935,6 +935,9 @@ void PatchKernel::buildGhostExchangeInfo(int rank)
 */
 void PatchKernel::buildGhostExchangeInfo(const std::vector<int> &ranks)
 {
+	// Check if all structures needed are ready
+	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
 	// List of ghost to add
 	std::unordered_set<int> buildRanks(ranks.begin(), ranks.end());
 
