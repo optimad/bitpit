@@ -1294,21 +1294,6 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         }
     }
 
-    // The cells that are exchange sources for the receiver are already on
-    // the receiver (these cells are ghost owned by this processor). Mark
-    // is as such to help the receiver to remove duplicate cells.
-    std::unordered_map<long, long> senderGhostsToPromote;
-    if (getGhostExchangeSources().count(recvRank) > 0) {
-        const auto &exchangeSources = getGhostExchangeSources(recvRank);
-        long nExchangeSources = exchangeSources.size();
-        for (long k = 0; k < nExchangeSources; ++k) {
-            long cellId = exchangeSources[k];
-            if (cellRankOnReceiver.count(cellId) > 0) {
-                senderGhostsToPromote.insert({{cellId, k}});
-            }
-        }
-    }
-
     //
     // Create the list of vertices to send
     //
@@ -1360,38 +1345,32 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     OBinaryStream cellBuffer;
     long cellBufferSize = 0;
 
-	// Fill the buffer with information on the cells that will be send to the
-	// receiver, but are already there because they are ghosts owned by the
-	// sender. These cells will be promoted by the receiver to internal cells.
-    cellBufferSize += sizeof(long) + 2 * senderGhostsToPromote.size() * sizeof(long);
-    cellBuffer.setSize(cellBufferSize);
-
-    cellBuffer << (long) senderGhostsToPromote.size();
-    for (const auto &entry : senderGhostsToPromote) {
-        // Index of the cell in the exchange info structure
-		long index = entry.second;
-		cellBuffer << index;
-
-		// Id of the cell on this processor
-		long cellId = entry.first;
-		cellBuffer << cellId;
-	}
-
     // Fill the buffer with cell data
     cellBufferSize += sizeof(long);
     for (const long &cellId : cellsToCommunicate) {
-        cellBufferSize += sizeof(int) + m_cells[cellId].getBinarySize();
+        cellBufferSize += sizeof(int) + sizeof(int) + m_cells[cellId].getBinarySize();
     }
     cellBuffer.setSize(cellBufferSize);
 
     cellBuffer << (long) cellsToCommunicate.size();
     for (const long &cellId : cellsToCommunicate) {
+        const Cell &cell = m_cells[cellId];
+
         // Owner of the cell
-        int cellOwner = cellRankOnReceiver[cellId];
+        int cellOwner;
+        if (cell.isInterior()) {
+            cellOwner = m_rank;
+        } else {
+            cellOwner = m_ghostOwners.at(cellId);
+        }
         cellBuffer << cellOwner;
 
+        // Future owner of the cell
+        int cellFutureOwner = cellRankOnReceiver[cellId];
+        cellBuffer << cellFutureOwner;
+
         // Cell data
-        cellBuffer << m_cells[cellId];
+        cellBuffer << cell;
     }
 
     if (cellBufferSize != (long) cellBuffer.getSize()) {
@@ -1621,51 +1600,13 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     IBinaryStream cellBuffer(cellBufferSize);
     MPI_Recv(cellBuffer.data(), cellBuffer.getSize(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
 
-    // Ghost owned by the receiver that will be promoted as internal cell
-    //
-    // Among all the received cells, some cells may be already here because
-    // they are ghost cells owned by the sending processor. To identify those
-    // cells, the sender is sending us the position in the ghost exchange info
-    // structures of the duplicate cells owned by this processor. These cells
-    // will be promoted to internal cells and the data received by the sender
-    // will allow to properly set the adjacencies.
-    //
-    // Other cells may be already here, i.e. ghost cells owned by a processor
-    // that is not the sender. However the sender doens't have the necessary
-    // information to tell us which ghost cells are already here. The data we
-    // receive now is only related to the ghost cells owned by the sender.
-    // Cells owned by other processors need to be check when they are received.
-    long nSenderGhostsToPromote;
-    cellBuffer >> nSenderGhostsToPromote;
-
-	unordered_map<long, long> senderGhostsToPromote;
-	senderGhostsToPromote.reserve(nSenderGhostsToPromote);
-
-	if (nSenderGhostsToPromote > 0) {
-		const auto &sendExchangeTargets = getGhostExchangeTargets(sendRank);
-		for (int n = 0; n < nSenderGhostsToPromote; ++n) {
-			long index;
-			cellBuffer >> index;
-			long cellId = sendExchangeTargets[index];
-
-			long senderCellId;
-			cellBuffer >> senderCellId;
-
-			senderGhostsToPromote.insert({{senderCellId, cellId}});
-		}
-	}
-
     // Receive cells
     //
     // The sender is sending also an halo surroudning the cells explicitly
     // marked for sending. This halo will be used for connecting the received
     // cells to the existing ones and to build the ghosts.
     //
-    // Some cells on the halo can be duplicate. For some of these cells we
-    // already know the apping between sender cell ids and local ids. For
-    // all the other cells we need to check if they are duplicate. All halo
-    // are inserted in the cell list, if they are duplicates they will be
-    // deleted later.
+    // Some of the recieved cells may already be among of the ghosts.
     long nReceivedCells;
     cellBuffer >> nReceivedCells;
 
@@ -1681,13 +1622,16 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     m_cells.reserve(nReceivedCells);
     for (long i = 0; i < nReceivedCells; ++i) {
         // Cell data
+        int cellOriginalOwner;
+        cellBuffer >> cellOriginalOwner;
+
         int cellOwner;
         cellBuffer >> cellOwner;
 
         Cell cell;
         cellBuffer >> cell;
+
         long cellOriginalId = cell.getId();
-        ConstProxyVector<long> vertexIds = cell.getVertexIds();
 
         // Set cell interior flag
         bool isInterior = (cellOwner == m_rank);
@@ -1697,34 +1641,39 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         cell.renumberVertices(vertexMap);
 
         // Check if the cells is a duplicate
+        //
+        // The received cell may be one of the current ghosts.
+        ConstProxyVector<long> vertexIds = cell.getVertexIds();
+
         long cellId = Cell::NULL_ID;
-        if (cellOwner != m_rank && getGhostExchangeTargets().count(cellOwner) > 0) {
-            const auto &rankExchangeTargets = getGhostExchangeTargets(cellOwner);
-            for (long ghostId : rankExchangeTargets) {
-                const Cell &ghostCell = m_cells[ghostId];
-                if (ghostCell.getType() != cell.getType()) {
-                    continue;
-                }
+        for (const auto &ghostEntry : m_ghostOwners) {
+            int ghostOwner = ghostEntry.second;
+            if (ghostOwner != cellOriginalOwner) {
+                continue;
+            }
 
-                bool cellsCoincide = true;
-                ConstProxyVector<long> ghostVertexIds = ghostCell.getVertexIds();
-                int nGhostVertices = ghostVertexIds.size();
-                for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
-                    long ghostVertexId = ghostVertexIds[vertex];
-                    long vertexId  = vertexIds[vertex];
-                    if (ghostVertexId != vertexId) {
-                        cellsCoincide = false;
-                        break;
-                    }
-                }
+            long ghostId = ghostEntry.first;
+            const Cell &ghostCell = m_cells[ghostId];
+            if (ghostCell.getType() != cell.getType()) {
+                continue;
+            }
 
-                if (cellsCoincide) {
-                    cellId = ghostId;
+            ConstProxyVector<long> ghostVertexIds = ghostCell.getVertexIds();
+            int nGhostVertices = ghostVertexIds.size();
+            bool isDuplicate = true;
+            for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
+                long ghostVertexId = ghostVertexIds[vertex];
+                long vertexId  = vertexIds[vertex];
+                if (ghostVertexId != vertexId) {
+                    isDuplicate = false;
                     break;
                 }
             }
-        } else if (senderGhostsToPromote.count(cellOriginalId) > 0) {
-            cellId = senderGhostsToPromote[cellOriginalId];
+
+            if (isDuplicate) {
+                cellId = ghostId;
+                break;
+            }
         }
 
         // If the cell is not a duplicate add it in the cell data structure,
