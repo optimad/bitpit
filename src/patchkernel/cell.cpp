@@ -900,7 +900,7 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 
 	\result Returns the buffer size (in bytes).
 */
-unsigned int Cell::getBinarySize()
+unsigned int Cell::getBinarySize() const
 {
     return (Element::getBinarySize() + m_interfaces.getBinarySize() + m_adjacencies.getBinarySize());
 }

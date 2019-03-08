@@ -1824,7 +1824,7 @@ std::vector<ConstProxyVector<long>> Element::evalEdgeConnects(int nRequestedEdge
 
         \result buffer size (in bytes)
 */
-unsigned int Element::getBinarySize()
+unsigned int Element::getBinarySize() const
 {
 	unsigned int binarySize = sizeof(m_type) + sizeof(m_id) + getConnectSize() * sizeof(long) + sizeof(m_pid);
 	if (bitpit::ReferenceElementInfo::hasInfo(m_type)) {

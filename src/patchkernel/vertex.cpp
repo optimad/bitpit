@@ -322,7 +322,7 @@ void Vertex::display(std::ostream &out, unsigned short int indent) const
 
         \result buffer size (in bytes)
 */
-unsigned int Vertex::getBinarySize()
+unsigned int Vertex::getBinarySize() const
 {
     return (sizeof(m_id) + m_coords.size() * sizeof(double));
 }

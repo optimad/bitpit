@@ -84,7 +84,7 @@ public:
 
 	static const long NULL_ID;
 
-    unsigned int getBinarySize();
+    unsigned int getBinarySize() const;
 
 	void display(std::ostream &out, unsigned short int indent) const;
 

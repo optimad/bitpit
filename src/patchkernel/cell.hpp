@@ -106,7 +106,7 @@ public:
 
 	void display(std::ostream &out, unsigned short int indent) const;
 
-	unsigned int getBinarySize( );
+	unsigned int getBinarySize() const;
 
 protected:
 	void setInterior(bool interior);

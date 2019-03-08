@@ -160,7 +160,7 @@ public:
 
 	double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *coordinates) const;
 
-	unsigned int getBinarySize();
+	unsigned int getBinarySize() const;
 
 private:
 	class Tesselation {
