@@ -1122,7 +1122,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 		// Previous ghosts cells need to be removed
 		if (nPreviousGhosts > 0) {
-			clearGhostOwners(true);
+			clearGhostOwners();
 
 			for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
 				OctantInfo ghostOctantInfo(ghostTreeId, false);
@@ -1255,11 +1255,6 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	}
 
 	StitchInfo().swap(stitchInfo);
-
-	// Rebuild the ghost exchange info
-#if BITPIT_ENABLE_MPI==1
-	buildGhostExchangeInfo();
-#endif
 
 	// Disable advanced editing
 	setExpert(false);
@@ -1698,7 +1693,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 			uint64_t globalTreeId = m_tree->getGhostGlobalIdx(octantInfo.id);
 			int rank = m_tree->getOwnerRank(globalTreeId);
 
-			setGhostOwner(cellId, rank, false);
+			setGhostOwner(cellId, rank);
 		}
 #endif
 
@@ -2118,11 +2113,6 @@ void VolOctree::_restore(std::istream &stream)
 	}
 
 	importCells(octantInfoList, stitchInfo, &stream);
-
-	// Rebuild the ghost exchange info
-#if BITPIT_ENABLE_MPI==1
-	buildGhostExchangeInfo();
-#endif
 
 	// De-activate expert mode
 	setExpert(false);

@@ -820,23 +820,14 @@ const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 
 	\param id is the id of the ghost cell
 	\param rank is the rank of the processors that owns the ghost cell
-	\param updateExchangeInfo if set to true exchange info will be updated
 */
-void PatchKernel::setGhostOwner(int id, int rank, bool updateExchangeInfo)
+void PatchKernel::setGhostOwner(int id, int rank)
 {
-	// Rebuild the exchange info information of the previous owner
-	if (updateExchangeInfo) {
-		if (m_ghostOwners.count(id) > 0) {
-			removeGhostFromExchangeInfo(id);
-		}
-	}
-
-	// Assign the owner to the cell
-	m_ghostOwners[id] = rank;
-
-	// Rebuild the exchange info information of the current owner
-	if (updateExchangeInfo) {
-		addGhostToExchangeInfo(id);
+	auto ghostOwnerItr = m_ghostOwners.find(id);
+	if (ghostOwnerItr != m_ghostOwners.end()) {
+		ghostOwnerItr->second = rank;
+	} else {
+		m_ghostOwners.insert({id, rank});
 	}
 }
 
@@ -844,21 +835,15 @@ void PatchKernel::setGhostOwner(int id, int rank, bool updateExchangeInfo)
 	Unsets the owner of the specified ghost.
 
 	\param id is the id of the ghost cell
-	\param updateExchangeInfo if set to true exchange info will be updated
 */
-void PatchKernel::unsetGhostOwner(int id, bool updateExchangeInfo)
+void PatchKernel::unsetGhostOwner(int id)
 {
-	if (m_ghostOwners.count(id) <= 0) {
+	auto ghostOwnerItr = m_ghostOwners.find(id);
+	if (ghostOwnerItr == m_ghostOwners.end()) {
 		return;
 	}
 
-	// Rebuild the exchange info information of the previous owner
-	if (updateExchangeInfo) {
-		removeGhostFromExchangeInfo(id);
-	}
-
-	// Remove the owner
-	m_ghostOwners.erase(id);
+	m_ghostOwners.erase(ghostOwnerItr);
 }
 
 /*!
@@ -866,209 +851,54 @@ void PatchKernel::unsetGhostOwner(int id, bool updateExchangeInfo)
 
 	\param updateExchangeInfo if set to true exchange info will be updated
 */
-void PatchKernel::clearGhostOwners(bool updateExchangeInfo)
+void PatchKernel::clearGhostOwners()
 {
-	// Clear the owners
 	m_ghostOwners.clear();
-
-	// Clear exchange info
-	if (updateExchangeInfo) {
-		deleteGhostExchangeInfo();
-	}
 }
 
 /*!
-	Reset the ghost information needed for data exchange.
+	Update the information needed for ghost data exchange.
 */
-void PatchKernel::deleteGhostExchangeInfo()
-{
-	m_ghostExchangeTargets.clear();
-	m_ghostExchangeSources.clear();
-}
-
-/*!
-	Reset the ghost information needed for data exchange for the specified rank.
-
-	\param rank is the rank for which the information will be reset
-*/
-void PatchKernel::deleteGhostExchangeInfo(int rank)
-{
-	if (!isRankNeighbour(rank)) {
-		return;
-	}
-
-	m_ghostExchangeTargets.erase(rank);
-	m_ghostExchangeSources.erase(rank);
-}
-
-/*!
-	Builds the ghost information needed for data exchange.
-*/
-void PatchKernel::buildGhostExchangeInfo()
-{
-	std::vector<long> ghosts;
-	for (const auto &entry : m_ghostOwners) {
-		long ghostId = entry.first;
-		ghosts.push_back(ghostId);
-	}
-
-	deleteGhostExchangeInfo();
-	addGhostsToExchangeInfo(ghosts);
-}
-
-/*!
-	Builds the ghost information needed for data exchange for the specified
-	rank.
-
-	\param rank is the rank for which the information will be built
-*/
-void PatchKernel::buildGhostExchangeInfo(int rank)
-{
-	buildGhostExchangeInfo(std::vector<int>{rank});
-}
-
-/*!
-	Builds the ghost information needed for data exchange for the specified
-	list of ranks.
-
-	\param ranks are the rank for which the information will be built
-*/
-void PatchKernel::buildGhostExchangeInfo(const std::vector<int> &ranks)
+void PatchKernel::updateGhostExchangeInfo()
 {
 	// Check if all structures needed are ready
 	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
 
-	// List of ghost to add
-	std::unordered_set<int> buildRanks(ranks.begin(), ranks.end());
+	// Clear targets
+	m_ghostExchangeTargets.clear();
 
-	std::vector<long> ghosts;
+	// Update targets
 	for (const auto &entry : m_ghostOwners) {
 		int ghostRank = entry.second;
-		if (buildRanks.count(ghostRank) == 0) {
-			continue;
-		}
-
 		long ghostId = entry.first;
-		ghosts.push_back(ghostId);
-	}
-
-	// Build exchange info
-	for (const int rank : ranks) {
-		deleteGhostExchangeInfo(rank);
-	}
-	addGhostsToExchangeInfo(ghosts);
-}
-
-/*!
-	Adds the specified ghosts to the exchange targets.
-
-	No check will be perfomed to ensure that
-
-	\param ghostIds are the ids of the ghosts that will be added
-*/
-void PatchKernel::addGhostsToExchangeInfo(const std::vector<long> &ghostIds)
-{
-	// Add the ghost to the targets
-	std::unordered_set<int> ranks;
-	for (const long ghostId : ghostIds) {
-		// Rank of the ghost
-		int rank = m_ghostOwners[ghostId];
-		ranks.insert(rank);
-
-		// Add the ghost to the targets
-		m_ghostExchangeTargets[rank].push_back(ghostId);
+		m_ghostExchangeTargets[ghostRank].push_back(ghostId);
 	}
 
 	// Sort the targets
-	for (const int rank : ranks) {
-		std::vector<long> &rankTargets = m_ghostExchangeTargets[rank];
-		rankTargets.erase(std::unique(rankTargets.begin(), rankTargets.end()), rankTargets.end());
+	for (auto &entry : m_ghostExchangeTargets) {
+		std::vector<long> &rankTargets = entry.second;
 		std::sort(rankTargets.begin(), rankTargets.end(), CellPositionLess(*this));
 	}
 
+	// Clear the sources
+	m_ghostExchangeSources.clear();
+
 	// Build the sources
-	for (const int rank : ranks) {
-		buildGhostExchangeSources(rank);
-	}
-}
+	for (auto &entry : m_ghostExchangeTargets) {
+		int rank = entry.first;
 
-/*!
-	Adds the specified ghost to the exchange list.
-
-	\param ghostId is the id of the ghost that will be added
-*/
-void PatchKernel::addGhostToExchangeInfo(const long ghostId)
-{
-	addGhostsToExchangeInfo(std::vector<long>{ghostId});
-}
-
-/*!
-	Removes the specified ghosts from the exchange list.
-
-	\param ghostIds are the ids of the ghosts that will be removed
-*/
-void PatchKernel::removeGhostsFromExchangeInfo(const std::vector<long> &ghostIds)
-{
-	// Remove ghost from targets
-	std::unordered_set<int> ranks;
-	for (const long ghostId : ghostIds) {
-		// Rank of the ghost
-		int rank = m_ghostOwners[ghostId];
-		ranks.insert(rank);
-
-		// Remove targets
-		std::vector<long> &ghostTargets = m_ghostExchangeTargets[rank];
-		auto iterator = std::lower_bound(ghostTargets.begin(), ghostTargets.end(), rank, CellPositionLess(*this));
-		assert(iterator != ghostTargets.end());
-		ghostTargets.erase(iterator);
-	}
-
-	// Rebuild information of the sources
-	for (const int rank : ranks) {
-		buildGhostExchangeSources(rank);
-	}
-}
-
-/*!
-	Removes the specified ghost from the exchange list.
-
-	\param ghostId id the id of the ghost that will be removed
-*/
-void PatchKernel::removeGhostFromExchangeInfo(const long ghostId)
-{
-	removeGhostsFromExchangeInfo(std::vector<long>{ghostId});
-}
-
-/*!
-	Build the information about the internal cells that will be ghost cells
-	for the processor with the specified rank.
-
-	\param rank is the rank for which the information will be built
-*/
-void PatchKernel::buildGhostExchangeSources(int rank)
-{
-	buildGhostExchangeSources(std::vector<int>{rank});
-}
-
-/*!
-	Build the information about the internal cells that will be ghost cells
-	for the processors with the specified ranks.
-
-	\param ranks are the rank for which the information will be built
-*/
-void PatchKernel::buildGhostExchangeSources(const std::vector<int> &ranks)
-{
-	for (int rank : ranks) {
-		std::vector<long> &rankSources = m_ghostExchangeSources[rank];
-
-		// Clear current sources
-		rankSources.clear();
-
-		// Update the source list
-		rankSources = _findGhostExchangeSources(rank);
+		// Generate the source list
+		std::vector<long> rankSources = _findGhostExchangeSources(rank);
+		if (rankSources.empty()) {
+			m_ghostExchangeSources.erase(rank);
+			continue;
+		}
 
 		// Sort the sources
 		std::sort(rankSources.begin(), rankSources.end(), CellPositionLess(*this));
+
+		// Store list
+		m_ghostExchangeSources[rank] = std::move(rankSources);
 	}
 }
 
@@ -1081,11 +911,21 @@ void PatchKernel::buildGhostExchangeSources(const std::vector<int> &ranks)
 */
 std::vector<long> PatchKernel::_findGhostExchangeSources(int rank)
 {
+	// Get targets for the specified rank
+	//
+	// If there are no targets, there will be no soruces either.
+	auto ghostExchangeTargetsItr = m_ghostExchangeTargets.find(rank);
+	if (ghostExchangeTargetsItr == m_ghostExchangeTargets.end()) {
+		return std::vector<long>();
+	}
+
+	std::vector<long> &rankTargets = ghostExchangeTargetsItr->second;
+
 	// The internal neighbours of the ghosts will be sources for the rank
 	std::vector<long> neighIds;
 	std::unordered_set<long> exchangeSources;
-	exchangeSources.reserve(m_ghostExchangeTargets[rank].size());
-	for (long ghostId : m_ghostExchangeTargets[rank]) {
+	exchangeSources.reserve(rankTargets.size());
+	for (long ghostId : rankTargets) {
 		neighIds.clear();
 		findCellNeighs(ghostId, &neighIds);
 		for (long neighId : neighIds) {
@@ -1463,10 +1303,8 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 
         // Delete the cell or mark is as a ghost owned by the receiver.
         if (moveToGhosts) {
-            moveInternal2Ghost(cellId);
-            setGhostOwner(cellId, recvRank, false);
+            moveInternal2Ghost(cellId, recvRank);
         } else {
-			unsetGhostOwner(cellId, false);
             deleteCell(cellId, true, true);
         }
     }
@@ -1475,12 +1313,6 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     //
     // Loop over all the ghosts and keep only the cells that have at least
     // one internal neighbour.
-    std::unordered_set<int> involvedRanks;
-    involvedRanks.insert(recvRank);
-    for (int rank : notifiedRanks) {
-        involvedRanks.insert(rank);
-    }
-
     auto itr = m_ghostOwners.cbegin();
     while (itr != m_ghostOwners.cend()) {
         long ghostId = itr->first;
@@ -1498,10 +1330,6 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         auto nextItr = itr;
         nextItr++;
         if (!keep) {
-            long ghostOwner = itr->second;
-            involvedRanks.insert(ghostOwner);
-
-            unsetGhostOwner(ghostId, false);
             deleteCell(ghostId, true, true);
         }
         itr = nextItr;
@@ -1511,10 +1339,6 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 
 	// Delete orphan vertices
 	deleteOrphanVertices();
-
-	// Rebuild ghost information
-	std::vector<int> involvedRankList(involvedRanks.begin(), involvedRanks.end());
-	buildGhostExchangeInfo(involvedRankList);
 
 	// Return adaption info
     return adaptionInfo;
@@ -1633,9 +1457,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     long nReceivedCells;
     cellBuffer >> nReceivedCells;
 
-    std::unordered_set<int> involvedRanks;
-	involvedRanks.insert(sendRank);
-
     std::unordered_map<long, long> cellMap;
     std::unordered_set<long> receivedCells;
 	receivedCells.reserve(nReceivedCells);
@@ -1692,7 +1513,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
             cellId = generateCellId();
             addCell(std::move(cell), cellId);
             if (!isInterior) {
-                setGhostOwner(cellId, cellOwner, false);
+                setGhostOwner(cellId, cellOwner);
             }
 
             receivedCells.insert(cellId);
@@ -1703,7 +1524,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
             // Check if the existing cells needs to become an internal cell
             Cell &localCell = m_cells[cellId];
             if (isInterior && !localCell.isInterior()) {
-                unsetGhostOwner(cellId, false);
                 moveGhost2Internal(cellId);
             }
 
@@ -1724,11 +1544,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 
                 cellAdjacencies.pushBack(faceAdjacencies);
             }
-        }
-
-        // Ranks involved in the communication
-        if (cellOwner != m_rank) {
-            involvedRanks.insert(cellOwner);
         }
 
         // Add the cell to the cell map
@@ -1795,10 +1610,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     // (they already know the list of cells for which data is needed and
     // the order in which these data will be sent).
     std::sort(adaptionInfo.current.begin(), adaptionInfo.current.end(), CellPositionLess(*this));
-
-    // Rebuild ghost information
-    std::vector<int> involvedRankList(involvedRanks.begin(), involvedRanks.end());
-    buildGhostExchangeInfo(involvedRankList);
 
     // Return adaption info
     return adaptionInfo;
@@ -1871,12 +1682,9 @@ adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &r
         recvBuffer >> ghostSentToReceiver;
 
         if (ghostSentToReceiver) {
-            setGhostOwner(ghostId, recvRank, false);
+            setGhostOwner(ghostId, recvRank);
         }
     }
-
-    // Rebuild ghost exchagne data
-    buildGhostExchangeInfo(std::vector<int>{sendRank, recvRank});
 
 	// Return adaption info
     return adaptionInfo;

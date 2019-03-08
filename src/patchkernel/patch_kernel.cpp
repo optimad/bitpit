@@ -565,6 +565,18 @@ void PatchKernel::endAlteration(bool squeezeStorage)
 	// Update geometric information
 	updateBoundingBox();
 
+#if BITPIT_ENABLE_MPI==1
+	// Update information for ghost data exchange
+	//
+	// If we are partitioning the patch, the partition flag is not set yet (it
+	// will be set after the call to this function). We call the update of
+	// information for ghost data exchange unconditionally, if there are no
+	// ghosts the function will exit without doing anything.
+	if (getProcessorCount() > 1 && getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+		updateGhostExchangeInfo();
+	}
+#endif
+
 	// Synchronize storage
 	m_cells.sync();
 	m_interfaces.sync();
@@ -2082,10 +2094,13 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		return false;
 	}
 
+	// Get cell information
+	const Cell &cell = m_cells[id];
+	bool isInternal = cell.isInterior();
+
 	// Update neighbours
 	if (updateNeighs) {
-		const Cell &cell = m_cells[id];
-		int nCellFaces = m_cells[id].getFaceCount();
+		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
 			// Update adjacency of the neighbours
 			int nFaceAdjacencies = cell.getAdjacencyCount(i);
@@ -2118,8 +2133,14 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		}
 	}
 
+#if BITPIT_ENABLE_MPI==1
+	// Unset ghost owner
+	if (!isInternal) {
+		unsetGhostOwner(id);
+	}
+#endif
+
 	// Delete cell
-	bool isInternal = m_cells.at(id).isInterior();
 	m_cells.erase(id, delayed);
 	m_cellIdGenerator.trash(id);
 	if (isInternal) {
@@ -2168,8 +2189,9 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 
 	\param[in] id is the index of the cell
 	\param[in] isInternal is the internal flag that will be set
+	\param[in] ownerRank if the cell becomes a ghost, this is the owner of the cell
 */
-bool PatchKernel::setCellInternal(const long &id, bool isInternal)
+bool PatchKernel::setCellInternal(const long &id, bool isInternal, int ownerRank)
 {
 	if (!isExpert()) {
 		return false;
@@ -2180,7 +2202,8 @@ bool PatchKernel::setCellInternal(const long &id, bool isInternal)
 	} else if (isInternal) {
 		moveGhost2Internal(id);
 	} else {
-		moveInternal2Ghost(id);
+		assert(ownerRank >= 0);
+		moveInternal2Ghost(id, ownerRank);
 	}
 
 	return true;
@@ -2190,8 +2213,9 @@ bool PatchKernel::setCellInternal(const long &id, bool isInternal)
 	Converts an internal cell to a ghost cell.
 
 	\param[in] id is the index of the cell
+	\param[in] ownerRank is the owner of the cell
 */
-PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
+PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id, int ownerRank)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -2219,6 +2243,14 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 	} else {
 		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
 	}
+
+#if BITPIT_ENABLE_MPI==1
+	// Set ghost owner
+	setGhostOwner(id, ownerRank);
+#else
+	// Mark variable as unused
+	BITPIT_UNUSED(ownerRank);
+#endif
 
 	// Return the iterator to the new position
 	return iterator;
@@ -2259,6 +2291,11 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 		++firstGhostIterator;
 		m_firstGhostId = firstGhostIterator->getId();
 	}
+
+#if BITPIT_ENABLE_MPI==1
+	// Unset ghost owner
+	unsetGhostOwner(id);
+#endif
 
 	// Return the iterator to the new position
 	return iterator;
@@ -3525,13 +3562,6 @@ void PatchKernel::restoreCells(std::istream &stream)
 	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
 		buildAdjacencies();
 	}
-
-	// Build ghost exchange info
-#if BITPIT_ENABLE_MPI==1
-	if (getProcessorCount() > 1) {
-		buildGhostExchangeInfo();
-	}
-#endif
 }
 
 /*!
@@ -5478,9 +5508,11 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 		m_firstGhostId = map.at(m_firstGhostId);
 	}
 
-	// Rebuild the ghost information
 #if BITPIT_ENABLE_MPI==1
-	buildGhostExchangeInfo();
+	// Update information for ghost data exchange
+	if (isPartitioned()) {
+		updateGhostExchangeInfo();
+	}
 #endif
 }	
 
@@ -5656,6 +5688,13 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 
 	// Specific restore
 	_restore(stream);
+
+#if BITPIT_ENABLE_MPI==1
+	// Update information for ghost data exchange
+	if (isPartitioned()) {
+		updateGhostExchangeInfo();
+	}
+#endif
 
 	// Geometric tolerance
 	int hasCustomTolerance;

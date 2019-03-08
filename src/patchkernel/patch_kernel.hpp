@@ -370,9 +370,9 @@ public:
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
-	bool setCellInternal(const long &id, bool isInternal);
+	bool setCellInternal(const long &id, bool isInternal, int ownerRank);
 	CellIterator moveGhost2Internal(const long &id);
-	CellIterator moveInternal2Ghost(const long &id);
+	CellIterator moveInternal2Ghost(const long &id, int ownerRank);
 	virtual double evalCellSize(const long &id) const = 0;
 	long countFreeCells() const;
 	long countOrphanCells() const;
@@ -643,22 +643,9 @@ protected:
 	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
 	virtual void _partitioningCleanup();
 
-	void setGhostOwner(int id, int rank, bool updateExchangeInfo = false);
-	void unsetGhostOwner(int id, bool updateExchangeInfo = false);
-	void clearGhostOwners(bool updateExchangeInfo = false);
-
-	void deleteGhostExchangeInfo();
-	void deleteGhostExchangeInfo(int rank);
-
-	void buildGhostExchangeInfo();
-	void buildGhostExchangeInfo(int rank);
-	void buildGhostExchangeInfo(const std::vector<int> &rank);
-
-	void addGhostsToExchangeInfo(const std::vector<long> &ghostIds);
-	void addGhostToExchangeInfo(const long ghostId);
-
-	void removeGhostsFromExchangeInfo(const std::vector<long> &ghostIds);
-	void removeGhostFromExchangeInfo(const long ghostId);
+	void setGhostOwner(int id, int rank);
+	void unsetGhostOwner(int id);
+	void clearGhostOwners();
 
 	virtual std::vector<long> _findGhostExchangeSources(int rank);
 #endif
@@ -715,13 +702,12 @@ private:
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeSources;
 
-	void buildGhostExchangeSources(int rank);
-	void buildGhostExchangeSources(const std::vector<int> &ranks);
-
     adaption::Info sendCells_any(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
     adaption::Info sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend);
     adaption::Info sendCells_receiver(const int &sendRank);
     adaption::Info sendCells_notified(const int &sendRank, const int &recvRank);
+
+	void updateGhostExchangeInfo();
 #endif
 
 	void initialize();
