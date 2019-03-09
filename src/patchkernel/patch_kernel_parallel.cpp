@@ -1592,12 +1592,12 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     long nRecvVertices;
     vertexBuffer >> nRecvVertices;
 
-    std::unordered_map<long, long> recvVertexMap;
-    recvVertexMap.reserve(nRecvVertices);
+    std::unordered_map<long, long> vertexMap;
+    vertexMap.reserve(nRecvVertices);
     for (long i = 0; i < nRecvVertices; ++i) {
         Vertex vertex;
         vertexBuffer >> vertex;
-        long recvVertexId = vertex.getId();
+        long vertexId = vertex.getId();
 
         long localVertexId;
         if (ghostVerticesTree.exist(&vertex, localVertexId) < 0) {
@@ -1605,7 +1605,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
             addVertex(std::move(vertex), localVertexId);
         }
 
-        recvVertexMap.insert({{recvVertexId, localVertexId}});
+        vertexMap.insert({{vertexId, localVertexId}});
     }
 
     std::unordered_map<long, Vertex>().swap(ghostVertices);
@@ -1646,12 +1646,12 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 		for (int n = 0; n < nSenderGhostsToPromote; ++n) {
 			long index;
 			cellBuffer >> index;
-			long localCellId = sendExchangeTargets[index];
+			long cellId = sendExchangeTargets[index];
 
 			long senderCellId;
 			cellBuffer >> senderCellId;
 
-			senderGhostsToPromote.insert({{senderCellId, localCellId}});
+			senderGhostsToPromote.insert({{senderCellId, cellId}});
 		}
 	}
 
@@ -1666,43 +1666,43 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     // all the other cells we need to check if they are duplicate. All halo
     // are inserted in the cell list, if they are duplicates they will be
     // deleted later.
-    long nRecvCells;
-    cellBuffer >> nRecvCells;
+    long nReceivedCells;
+    cellBuffer >> nReceivedCells;
 
     std::unordered_set<int> involvedRanks;
 	involvedRanks.insert(sendRank);
 
-    std::unordered_map<long, long> recvCellMap;
-    std::unordered_set<long> recvCells;
-	recvCells.reserve(nRecvCells);
+    std::unordered_map<long, long> cellMap;
+    std::unordered_set<long> receivedCells;
+	receivedCells.reserve(nReceivedCells);
 
     std::unordered_map<long, FlatVector2D<long>> linkAdjacencies;
 
-    m_cells.reserve(nRecvCells);
-    for (long i = 0; i < nRecvCells; ++i) {
+    m_cells.reserve(nReceivedCells);
+    for (long i = 0; i < nReceivedCells; ++i) {
         // Cell data
-        int recvCellOwner;
-        cellBuffer >> recvCellOwner;
+        int cellOwner;
+        cellBuffer >> cellOwner;
 
-        Cell recvCell;
-        cellBuffer >> recvCell;
-        long recvCellId = recvCell.getId();
-        ConstProxyVector<long> recvVertexIds = recvCell.getVertexIds();
+        Cell cell;
+        cellBuffer >> cell;
+        long cellOriginalId = cell.getId();
+        ConstProxyVector<long> vertexIds = cell.getVertexIds();
 
         // Set cell interior flag
-        bool recvIsInterior = (recvCellOwner == m_rank);
-        recvCell.setInterior(recvIsInterior);
+        bool isInterior = (cellOwner == m_rank);
+        cell.setInterior(isInterior);
 
         // Remap connectivity
-        recvCell.renumberVertices(recvVertexMap);
+        cell.renumberVertices(vertexMap);
 
         // Check if the cells is a duplicate
-        long localCellId = Cell::NULL_ID;
-        if (recvCellOwner != m_rank && getGhostExchangeTargets().count(recvCellOwner) > 0) {
-            const auto &rankExchangeTargets = getGhostExchangeTargets(recvCellOwner);
+        long cellId = Cell::NULL_ID;
+        if (cellOwner != m_rank && getGhostExchangeTargets().count(cellOwner) > 0) {
+            const auto &rankExchangeTargets = getGhostExchangeTargets(cellOwner);
             for (long ghostId : rankExchangeTargets) {
                 const Cell &ghostCell = m_cells[ghostId];
-                if (ghostCell.getType() != recvCell.getType()) {
+                if (ghostCell.getType() != cell.getType()) {
                     continue;
                 }
 
@@ -1711,76 +1711,76 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                 int nGhostVertices = ghostVertexIds.size();
                 for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
                     long ghostVertexId = ghostVertexIds[vertex];
-                    long recvVertexId  = recvVertexIds[vertex];
-                    if (ghostVertexId != recvVertexId) {
+                    long vertexId  = vertexIds[vertex];
+                    if (ghostVertexId != vertexId) {
                         cellsCoincide = false;
                         break;
                     }
                 }
 
                 if (cellsCoincide) {
-                    localCellId = ghostId;
+                    cellId = ghostId;
                     break;
                 }
             }
-        } else if (senderGhostsToPromote.count(recvCellId) > 0) {
-            localCellId = senderGhostsToPromote[recvCellId];
+        } else if (senderGhostsToPromote.count(cellOriginalId) > 0) {
+            cellId = senderGhostsToPromote[cellOriginalId];
         }
 
         // If the cell is not a duplicate add it in the cell data structure,
         // otherwise merge the connectivity of the duplicate cell to the
         // existing cell. This ensure that the received cell will be
         // properly connected to the received cells
-        if (localCellId < 0) {
+        if (cellId < 0) {
             // Add cell
-            localCellId = generateCellId();
-            addCell(std::move(recvCell), localCellId);
-            if (!recvIsInterior) {
-                setGhostOwner(localCellId, recvCellOwner, false);
+            cellId = generateCellId();
+            addCell(std::move(cell), cellId);
+            if (!isInterior) {
+                setGhostOwner(cellId, cellOwner, false);
             }
 
-            recvCells.insert(localCellId);
+            receivedCells.insert(cellId);
 
             // Update adaption info
-            adaptionInfo.current.push_back(localCellId);
+            adaptionInfo.current.push_back(cellId);
         } else {
             // Check if the existing cells needs to become an internal cell
-            Cell &localCell = m_cells[localCellId];
-            if (recvIsInterior && !localCell.isInterior()) {
-                unsetGhostOwner(localCellId, false);
-                moveGhost2Internal(localCellId);
+            Cell &localCell = m_cells[cellId];
+            if (isInterior && !localCell.isInterior()) {
+                unsetGhostOwner(cellId, false);
+                moveGhost2Internal(cellId);
             }
 
             // Save the adjacencies of the received cell, this adjacencies
             // will link together the recevied cell to the existing ones.
-            FlatVector2D<long> &recvAdjacencies = linkAdjacencies[localCellId];
+            FlatVector2D<long> &cellAdjacencies = linkAdjacencies[cellId];
 
-            int nCellFaces = recvCell.getFaceCount();
-            recvAdjacencies.reserve(nCellFaces);
+            int nCellFaces = cell.getFaceCount();
+            cellAdjacencies.reserve(nCellFaces);
             for (int face = 0; face < nCellFaces; ++face) {
-                int nFaceAdjacencies = recvCell.getAdjacencyCount(face);
+                int nFaceAdjacencies = cell.getAdjacencyCount(face);
 
                 std::vector<long> faceAdjacencies;
                 faceAdjacencies.reserve(nFaceAdjacencies);
                 for (int k = 0; k < nFaceAdjacencies; ++k) {
-                    faceAdjacencies.push_back(recvCell.getAdjacency(face, k));
+                    faceAdjacencies.push_back(cell.getAdjacency(face, k));
                 }
 
-                recvAdjacencies.pushBack(faceAdjacencies);
+                cellAdjacencies.pushBack(faceAdjacencies);
             }
         }
 
         // Ranks involved in the communication
-        if (recvCellOwner != m_rank) {
-            involvedRanks.insert(recvCellOwner);
+        if (cellOwner != m_rank) {
+            involvedRanks.insert(cellOwner);
         }
 
         // Add the cell to the cell map
-        recvCellMap.insert({{recvCellId, localCellId}});
+        cellMap.insert({{cellOriginalId, cellId}});
     }
 
     // Remap adjacencies
-    for (auto cellId : recvCells) {
+    for (auto cellId : receivedCells) {
         Cell &cell = m_cells[cellId];
 
         int nCellFaces = cell.getFaceCount();
@@ -1790,11 +1790,11 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                 long senderAdjacencyId = cell.getAdjacency(face, k);
                 if (senderAdjacencyId < 0) {
                     continue;
-                } else if (recvCellMap.count(senderAdjacencyId) == 0) {
+                } else if (cellMap.count(senderAdjacencyId) == 0) {
 					cell.deleteAdjacency(face, k);
                     continue;
                 } else {
-					long localAdjacencyId = recvCellMap.at(senderAdjacencyId);
+					long localAdjacencyId = cellMap.at(senderAdjacencyId);
 					cell.setAdjacency(face, k, localAdjacencyId);
 				}
             }
@@ -1814,13 +1814,13 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                 // We need to updated the adjacencies only if they are cells
                 // that have been send.
                 long senderAdjacencyId = cellLinkAdjacencies.getItem(face, k);
-                if (recvCellMap.count(senderAdjacencyId) == 0) {
+                if (cellMap.count(senderAdjacencyId) == 0) {
                     continue;
                 }
 
                 // If the send cell is already in the adjacency list there is
                 // nothing to update.
-                long localAdjacencyId  = recvCellMap.at(senderAdjacencyId);
+                long localAdjacencyId  = cellMap.at(senderAdjacencyId);
                 if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
                     continue;
                 }
