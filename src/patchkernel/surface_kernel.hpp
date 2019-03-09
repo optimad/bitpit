@@ -44,6 +44,11 @@ public:
     void setSpaceDimension(int dimension);
     int getSpaceDimension(void) const;
 
+    int getVolumeCodimension() const override;
+    int getSurfaceCodimension() const override;
+    int getLineCodimension() const override;
+    int getPointCodimension() const override;
+
     virtual double evalCellArea(long) const;
     virtual double evalEdgeLength(long, int) const;
     virtual double evalMinEdgeLength(long, int &) const;

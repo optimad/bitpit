@@ -161,6 +161,46 @@ void SurfaceKernel::initialize()
 }
 
 /*!
+	Get the codimension of the patch in the volume space.
+
+	\result The codimension of the patch in the volume space.
+*/
+int SurfaceKernel::getVolumeCodimension() const
+{
+	return 1;
+}
+
+/*!
+	Get the codimension of the patch in the surface space.
+
+	\result The codimension of the patch in the surface space.
+*/
+int SurfaceKernel::getSurfaceCodimension() const
+{
+	return 0;
+}
+
+/*!
+	Get the codimension of the patch in the line space.
+
+	\result The codimension of the patch in the line space.
+*/
+int SurfaceKernel::getLineCodimension() const
+{
+	return -1;
+}
+
+/*!
+	Get the codimension of the patch in the point space.
+
+	\result The codimension of the patch in the point space.
+*/
+int SurfaceKernel::getPointCodimension() const
+{
+	return -2;
+}
+
+/*!
         Evaluates the characteristic size of the specified cell.
 
         \param id is the id of the cell
