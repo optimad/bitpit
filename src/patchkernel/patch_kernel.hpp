@@ -410,6 +410,11 @@ public:
 	virtual void setDimension(int dimension);
 	bool isThreeDimensional() const;
 
+	virtual int getVolumeCodimension() const = 0;
+	virtual int getSurfaceCodimension() const = 0;
+	virtual int getLineCodimension() const = 0;
+	virtual int getPointCodimension() const = 0;
+
 	bool empty(bool global = true) const;
 
 	bool isVertexAutoIndexingEnabled() const;

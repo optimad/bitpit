@@ -32,6 +32,11 @@ namespace bitpit {
 class LineKernel : public PatchKernel {
 
 public:
+    int getVolumeCodimension() const override;
+    int getSurfaceCodimension() const override;
+    int getLineCodimension() const override;
+    int getPointCodimension() const override;
+
     virtual double evalCellLength(long id) const;
     double evalCellSize(long id) const override;
     virtual std::array<double, 3> evalCellNormal(long id, const std::array<double, 3> &orientation = {{0., 0., 1.}}) const;

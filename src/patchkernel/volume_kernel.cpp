@@ -130,6 +130,46 @@ VolumeKernel::VolumeKernel(int id, int dimension, bool expert)
 }
 
 /*!
+	Get the codimension of the patch in the volume space.
+
+	\result The codimension of the patch in the volume space.
+*/
+int VolumeKernel::getVolumeCodimension() const
+{
+	return 0;
+}
+
+/*!
+	Get the codimension of the patch in the surface space.
+
+	\result The codimension of the patch in the surface space.
+*/
+int VolumeKernel::getSurfaceCodimension() const
+{
+	return -1;
+}
+
+/*!
+	Get the codimension of the patch in the line space.
+
+	\result The codimension of the patch in the line space.
+*/
+int VolumeKernel::getLineCodimension() const
+{
+	return -2;
+}
+
+/*!
+	Get the codimension of the patch in the point space.
+
+	\result The codimension of the patch in the point space.
+*/
+int VolumeKernel::getPointCodimension() const
+{
+	return -3;
+}
+
+/*!
 	Checks if the specified point is inside the patch.
 
 	\param[in] x is the x coordinate of the point

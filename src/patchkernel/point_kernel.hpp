@@ -32,6 +32,11 @@ namespace bitpit {
 class PointKernel : public PatchKernel {
 
 public:
+    int getVolumeCodimension() const override;
+    int getSurfaceCodimension() const override;
+    int getLineCodimension() const override;
+    int getPointCodimension() const override;
+
     double evalCellSize(long id) const override;
     virtual double evalPointsDistance(long id1, long id2) const;
     virtual std::array<double, 3> evalPointsDirection(long id1, long id2) const;
