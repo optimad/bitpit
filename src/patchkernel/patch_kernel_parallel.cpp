@@ -1578,7 +1578,8 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     }
 
     KdTree<3, Vertex, long> ghostVerticesTree(nGhostsMaxVertices);
-    std::unordered_map<long, Vertex> ghostVertices(nGhostsMaxVertices);
+    std::unordered_map<long, Vertex> ghostVertices;
+    ghostVertices.reserve(nGhostsMaxVertices);
     for (const auto &entry : m_ghostOwners) {
         long ghostId = entry.first;
         const Cell &ghost = m_cells[ghostId];
