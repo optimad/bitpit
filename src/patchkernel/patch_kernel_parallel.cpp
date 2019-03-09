@@ -153,9 +153,17 @@ void PatchKernel::setHaloSize(std::size_t haloSize)
 		throw std::runtime_error ("Halo size exceeds the maximum allowed value.");
 	}
 
+	if (m_haloSize == haloSize) {
+        return;
+    }
+
 	m_haloSize = haloSize;
 
 	_setHaloSize(haloSize);
+
+	if (isPartitioned()) {
+		updateGhostExchangeInfo();
+	}
 }
 
 /*!
