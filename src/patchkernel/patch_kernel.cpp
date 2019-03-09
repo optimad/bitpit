@@ -353,6 +353,13 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 		updateBoundingBox();
 	}
 
+#if BITPIT_ENABLE_MPI==1
+	// Update ghost exchange info
+	if (areGhostExchangeInfoDirty()) {
+		updateGhostExchangeInfo();
+	}
+#endif
+
 	return updateInfo;
 }
 
