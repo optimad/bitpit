@@ -1335,8 +1335,6 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         itr = nextItr;
     }
 
-    m_cells.flush();
-
 	// Delete orphan vertices
 	deleteOrphanVertices();
 
