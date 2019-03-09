@@ -541,7 +541,10 @@ void PatchKernel::settleAdaptionMarkers()
 */
 void PatchKernel::beginAlteration()
 {
-	// Nothing to do
+#if BITPIT_ENABLE_MPI==1
+	// Mark ghost exchange information as dirty
+	m_areGhostExchangeInfoDirty = true;
+#endif
 }
 
 /*!
