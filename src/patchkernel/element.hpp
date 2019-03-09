@@ -119,7 +119,6 @@ public:
 	int getConnectSize() const;
 	const long * getConnect() const;
 	long * getConnect();
-	int findVertex(long vertexId) const;
 
 	int getFaceCount() const;
 	ElementType getFaceType(const int &face) const;
@@ -142,6 +141,7 @@ public:
 	void renumberVertices(const std::unordered_map<long, long> &map);
 	ConstProxyVector<long> getVertexIds() const;
 	long getVertexId(int vertex) const;
+	int findVertex(long vertexId) const;
 
 	int getFaceStreamSize() const;
 	std::vector<long> getFaceStream() const;

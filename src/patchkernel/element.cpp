@@ -611,27 +611,6 @@ long * Element::getConnect()
 }
 
 /*!
-	Given the id of a vertex, evaluates thhe local index of that vertex within
-	the element. If the specified vertex does not exist in the element
-	connectivity list, a negative number is returned.
-
-	\param vertexId is the vertex id
-	\result The local index of the vertex if the element contains the vertex,
-	a negative number otherwise.
-*/
-int Element::findVertex(long vertexId) const
-{
-	ConstProxyVector<long> cellVertexIds = getVertexIds();
-
-	int localVertexId = std::distance(cellVertexIds.begin(), std::find(cellVertexIds.begin(), cellVertexIds.end(), vertexId));
-	if (localVertexId >= (int) cellVertexIds.size()) {
-		return -1;
-	}
-
-	return localVertexId;
-}
-
-/*!
 	Gets the size of the connectivity of the element.
 
 	\result The size of the connectivity of the element.
@@ -1204,6 +1183,27 @@ long Element::getVertexId(int vertex) const
 	}
 
 	}
+}
+
+/*!
+	Given the id of a vertex, evaluates thhe local index of that vertex within
+	the element. If the specified vertex does not exist in the element
+	connectivity list, a negative number is returned.
+
+	\param vertexId is the vertex id
+	\result The local index of the vertex if the element contains the vertex,
+	a negative number otherwise.
+*/
+int Element::findVertex(long vertexId) const
+{
+	ConstProxyVector<long> cellVertexIds = getVertexIds();
+
+	int localVertexId = std::distance(cellVertexIds.begin(), std::find(cellVertexIds.begin(), cellVertexIds.end(), vertexId));
+	if (localVertexId >= (int) cellVertexIds.size()) {
+		return -1;
+	}
+
+	return localVertexId;
 }
 
 /*!
