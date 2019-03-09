@@ -1643,8 +1643,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         // Check if the cells is a duplicate
         //
         // The received cell may be one of the current ghosts.
-        ConstProxyVector<long> vertexIds = cell.getVertexIds();
-
         long cellId = Cell::NULL_ID;
         for (const auto &ghostEntry : m_ghostOwners) {
             int ghostOwner = ghostEntry.second;
@@ -1652,28 +1650,14 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                 continue;
             }
 
-            long ghostId = ghostEntry.first;
+            const long ghostId = ghostEntry.first;
             const Cell &ghostCell = m_cells[ghostId];
-            if (ghostCell.getType() != cell.getType()) {
+            if (!cell.hasSameConnect(ghostCell)) {
                 continue;
             }
 
-            ConstProxyVector<long> ghostVertexIds = ghostCell.getVertexIds();
-            int nGhostVertices = ghostVertexIds.size();
-            bool isDuplicate = true;
-            for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
-                long ghostVertexId = ghostVertexIds[vertex];
-                long vertexId  = vertexIds[vertex];
-                if (ghostVertexId != vertexId) {
-                    isDuplicate = false;
-                    break;
-                }
-            }
-
-            if (isDuplicate) {
-                cellId = ghostId;
-                break;
-            }
+            cellId = ghostId;
+            break;
         }
 
         // If the cell is not a duplicate add it in the cell data structure,
