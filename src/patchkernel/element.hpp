@@ -119,6 +119,7 @@ public:
 	int getConnectSize() const;
 	const long * getConnect() const;
 	long * getConnect();
+	bool hasSameConnect(const Element &other) const;
 
 	int getFaceCount() const;
 	ElementType getFaceType(const int &face) const;

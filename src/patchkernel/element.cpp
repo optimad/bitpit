@@ -634,6 +634,32 @@ int Element::getConnectSize() const
 }
 
 /*!
+	Checks if the connectivity of this element and the connectivity of the
+	other element are the same.
+
+	\param other is the other element
+	\result True if the connectivity of this element and the connectivity of
+	the other element are the same, false otherwise.
+*/
+bool Element::hasSameConnect(const Element &other) const
+{
+    int cellConnectSize = getConnectSize();
+    if (other.getConnectSize() != cellConnectSize) {
+        return false;
+    }
+
+    const long *cellConnect  = getConnect();
+    const long *otherConnect = other.getConnect();
+    for (int k = 0; k < cellConnectSize; ++k) {
+        if (cellConnect[k] != otherConnect[k]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*!
 	Gets the number of faces of the element.
 
 	\result The number of vertices of the element
