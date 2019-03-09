@@ -1192,12 +1192,12 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     adaptionInfo.rank   = recvRank;
 
     //
-    // Create a set with the cells to communicate
+    // Initialize the list of cells that will be communicated
     //
-    // For now the set will contain the cells explicitly marked for sending.
+    // For now the list will contain the cells explicitly marked for sending.
     // Later, a layer of surrounding cells will be added.
     //
-    // Only internal cells can sent.
+    // Only internal cells can be sent.
     std::vector<long> cellsToCommunicate;
     std::unordered_map<long, int> cellRankOnReceiver;
 
