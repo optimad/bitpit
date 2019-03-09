@@ -1213,37 +1213,6 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         cellRankOnReceiver.insert({{cellId, recvRank}});
     }
 
-    //
-    // Create the notifications of ownership change
-    //
-    // Processors that have, among their ghost, cells that will be sent to
-    // the receiver need to be notified about the ownership change. We will
-    // communicate to the neighbours only the index in the exchange info
-    // structure of the cells that have change ownership.
-    //
-    // We need to create the notification now that the set with the cells
-    // to communicate contains only the cells explicitly marked for sending.
-    std::unordered_map<int, std::vector<long>> ownershipNotifications;
-    for (const auto &rankExchangeInfo : getGhostExchangeSources()) {
-        int neighRank = rankExchangeInfo.first;
-		if (neighRank == recvRank) {
-			continue;
-		}
-
-        std::vector<long> &notificationList = ownershipNotifications[neighRank];
-
-        auto &rankExchangeSources = rankExchangeInfo.second;
-        int nRankExchangeSources = rankExchangeSources.size();
-        for (long k = 0; k < nRankExchangeSources; ++k) {
-            long cellId = rankExchangeSources[k];
-			if (cellRankOnReceiver.count(cellId) == 0) {
-                continue;
-            }
-
-            notificationList.push_back(k);
-        }
-	}
-
     // Find the frame of the cells explicitly marked for sending. These cells
     // are the cells marked for sending that have at least one neighbour that
     // will not be sent.
@@ -1382,30 +1351,75 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     MPI_Send(cellBuffer.data(), cellBuffer.getSize(), MPI_CHAR, recvRank, 21, m_communicator);
 
     //
-    // Send ownership notifications
+    // Send notifications
     //
-    for (const auto &ownershipNotification : ownershipNotifications) {
-        int neighRank = ownershipNotification.first;
-		const auto &notificationList = ownershipNotification.second;
+    // Some of the cells that have been send may be ghosts on other processors.
+    // Those processors need to be informed of the ownership change of their
+    // ghostd.
+    //
+    // Each processor will send a list of cells that, before the send operation,
+    // were owned by the current processor. We need to check which cells have
+    // been sent to the sender, i.e., which cells have changed ownership, and
+    // notify the ownership change.
 
-        // Communicate the size of the notification
-        long notificationBufferSize = 0;
-        if (notificationList.size() > 0) {
-            notificationBufferSize += sizeof(long) + notificationList.size() * sizeof(long);
+    // Build a kd-tree with the centroids of the send cells
+    //
+    // We need to consider only the cells explicitly marked for sending.
+    KdTree<3, Vertex, long> sendCellsCentroidsTree(cellsToSend.size());
+    std::vector<Vertex> sendCellsCentroid;
+    sendCellsCentroid.reserve(cellsToSend.size());
+    for (long cellId : cellsToSend) {
+        sendCellsCentroid.emplace_back(Vertex::NULL_ID, evalCellCentroid(cellId));
+        sendCellsCentroidsTree.insert(&(sendCellsCentroid.back()), cellId);
+    }
+
+    // Receive the number of ownership checks that each processor will request
+    int nRanks = getProcessorCount();
+
+    long nOwnershipChecks = 0;
+    std::vector<long> nOwnershipChecksPerRank(nRanks);
+    MPI_Gather(&nOwnershipChecks, 1, MPI_LONG, nOwnershipChecksPerRank.data(), 1, MPI_LONG, m_rank, m_communicator);
+
+    // Perform ownership checks
+    std::vector<int> notifiedRanks;
+    for (int rank = 0; rank < nRanks; ++rank) {
+        int nRankOwnershipChecks = nOwnershipChecksPerRank[rank];
+        if (nRankOwnershipChecks == 0) {
+            continue;
         }
-        MPI_Send(&notificationBufferSize, 1, MPI_LONG, neighRank, 30, m_communicator);
 
-        // Fill the buffer and send the notification
-        if (notificationBufferSize > 0) {
-            OBinaryStream notificationBuffer(notificationBufferSize);
+        // Receive the centroids that belong to the cells for which the remote
+        // rank is requesting an ownership check.
+        long recvBufferSize;
+        MPI_Recv(&recvBufferSize, 1, MPI_LONG, rank, 30, m_communicator, MPI_STATUS_IGNORE);
 
-			notificationBuffer << (long) notificationList.size();
-            for (long index : notificationList) {
-                notificationBuffer << index;
-            }
+        IBinaryStream recvBuffer(recvBufferSize);
+        MPI_Recv(recvBuffer.data(), recvBuffer.getSize(), MPI_CHAR, rank, 31, m_communicator, MPI_STATUS_IGNORE);
 
-            MPI_Send(notificationBuffer.data(), notificationBuffer.getSize(), MPI_CHAR, neighRank, 31, m_communicator);
+        // Notify which cells have changed ownership
+        //
+        // We have received the centroids of cells that, before the send, were
+        // owned by this processor. We need to check which ones of these cells
+        // have been sent to the receiver.
+        long sendBufferSize = nRankOwnershipChecks * sizeof(bool);
+        MPI_Send(&sendBufferSize, 1, MPI_LONG, rank, 30, m_communicator);
+
+        OBinaryStream sendBuffer(sendBufferSize);
+        for (int k = 0; k < nRankOwnershipChecks; ++k) {
+            // Receive remote cell
+            Vertex remoteCellCentroid;
+            recvBuffer >> remoteCellCentroid;
+
+            // Check if cell has been sent to receiver
+            bool cellSentToReceiver = (sendCellsCentroidsTree.exist(&remoteCellCentroid) >= 0);
+
+            // Fill the buffer
+            sendBuffer << cellSentToReceiver;
         }
+        MPI_Send(sendBuffer.data(), sendBuffer.getSize(), MPI_CHAR, rank, 31, m_communicator);
+
+        // The rank has been notified
+        notifiedRanks.push_back(rank);
     }
 
     //
@@ -1463,8 +1477,8 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     // one internal neighbour.
     std::unordered_set<int> involvedRanks;
     involvedRanks.insert(recvRank);
-    for (const auto &entry : ownershipNotifications) {
-        involvedRanks.insert(entry.first);
+    for (int rank : notifiedRanks) {
+        involvedRanks.insert(rank);
     }
 
     auto itr = m_ghostOwners.cbegin();
@@ -1514,6 +1528,28 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 {
     //
+    // Perfom data exchange
+    //
+
+    // Vertex data
+    long vertexBufferSize;
+    MPI_Recv(&vertexBufferSize, 1, MPI_LONG, sendRank, 10, m_communicator, MPI_STATUS_IGNORE);
+
+    IBinaryStream vertexBuffer(vertexBufferSize);
+    MPI_Recv(vertexBuffer.data(), vertexBuffer.getSize(), MPI_CHAR, sendRank, 11, m_communicator, MPI_STATUS_IGNORE);
+
+    // Cell data
+    long cellBufferSize;
+    MPI_Recv(&cellBufferSize, 1, MPI_LONG, sendRank, 20, m_communicator, MPI_STATUS_IGNORE);
+
+    IBinaryStream cellBuffer(cellBufferSize);
+    MPI_Recv(cellBuffer.data(), cellBuffer.getSize(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
+
+    // Notification data
+    long nOwnershipChecks = 0;
+    MPI_Gather(&nOwnershipChecks, 1, MPI_LONG, nullptr, 1, MPI_LONG, sendRank, m_communicator);
+
+    //
     // Initialize adaption info
     //
     adaption::Info adaptionInfo;
@@ -1524,13 +1560,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     //
     // Add vertices
     //
-
-    // Receive data
-    long vertexBufferSize;
-    MPI_Recv(&vertexBufferSize, 1, MPI_LONG, sendRank, 10, m_communicator, MPI_STATUS_IGNORE);
-
-    IBinaryStream vertexBuffer(vertexBufferSize);
-    MPI_Recv(vertexBuffer.data(), vertexBuffer.getSize(), MPI_CHAR, sendRank, 11, m_communicator, MPI_STATUS_IGNORE);
 
     // Build a kd-tree with the vertices on the ghosts cells
     //
@@ -1592,13 +1621,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     //
     // Add cells
     //
-
-    // Receive data
-    long cellBufferSize;
-    MPI_Recv(&cellBufferSize, 1, MPI_LONG, sendRank, 20, m_communicator, MPI_STATUS_IGNORE);
-
-    IBinaryStream cellBuffer(cellBufferSize);
-    MPI_Recv(cellBuffer.data(), cellBuffer.getSize(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
 
     // Receive cells
     //
@@ -1792,23 +1814,50 @@ adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &r
 {
     adaption::Info adaptionInfo;
 
-    // This processor will receive a notification only if it has ghosts owned
-    // by the sender
-    if (getGhostExchangeTargets().count(sendRank) == 0) {
+    // Check if, among the ghosts, there are cells owned by the sender. Those
+    // are the cells that may have changed owner.
+    std::size_t nGhosts = getGhostCount();
+
+    std::vector<long> ghostsOnSenderRank;
+    std::vector<Vertex> ghostCentroidsOnSenderRank;
+    ghostsOnSenderRank.reserve(nGhosts);
+    ghostCentroidsOnSenderRank.reserve(nGhosts);
+    for (const auto &ghostEntry : m_ghostOwners) {
+        int ghostOwner = ghostEntry.second;
+        if (ghostOwner == sendRank) {
+            long ghostId = ghostEntry.first;
+            ghostsOnSenderRank.emplace_back(ghostId);
+            ghostCentroidsOnSenderRank.emplace_back(Vertex::NULL_ID, evalCellCentroid(ghostEntry.first));
+        }
+    }
+
+    long nOwnershipChecks = ghostsOnSenderRank.size();
+    MPI_Gather(&nOwnershipChecks, 1, MPI_LONG, nullptr, 1, MPI_LONG, sendRank, m_communicator);
+
+    if (nOwnershipChecks == 0) {
         adaptionInfo.type = adaption::TYPE_NONE;
         return adaptionInfo;
     }
 
-    // Receive ownership changes
-    long bufferSize;
-    MPI_Recv(&bufferSize, 1, MPI_LONG, sendRank, 30, m_communicator, MPI_STATUS_IGNORE);
-    if (bufferSize == 0) {
-        adaptionInfo.type = adaption::TYPE_NONE;
-        return adaptionInfo;
+    // Send the centroids of the ghosts owned by sender rank
+    long sendBufferSize = 0;
+    for (const Vertex &centroid : ghostCentroidsOnSenderRank) {
+        sendBufferSize += centroid.getBinarySize();
     }
+    MPI_Send(&sendBufferSize, 1, MPI_LONG, sendRank, 30, m_communicator);
 
-    IBinaryStream buffer(bufferSize);
-    MPI_Recv(buffer.data(), buffer.getSize(), MPI_CHAR, sendRank, 31, m_communicator, MPI_STATUS_IGNORE);
+    OBinaryStream sendBuffer(sendBufferSize);
+    for (const Vertex &centroid : ghostCentroidsOnSenderRank) {
+        sendBuffer << centroid;
+    }
+    MPI_Send(sendBuffer.data(), sendBuffer.getSize(), MPI_CHAR, sendRank, 31, m_communicator);
+
+    // Receive ownership change information
+    long recvBufferSize;
+    MPI_Recv(&recvBufferSize, 1, MPI_LONG, sendRank, 30, m_communicator, MPI_STATUS_IGNORE);
+
+    IBinaryStream recvBuffer(recvBufferSize);
+    MPI_Recv(recvBuffer.data(), recvBuffer.getSize(), MPI_CHAR, sendRank, 31, m_communicator, MPI_STATUS_IGNORE);
 
     // Initialize adaption info
     adaptionInfo.entity = adaption::ENTITY_CELL;
@@ -1816,16 +1865,13 @@ adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &r
     adaptionInfo.rank   = sendRank;
 
     // Apply ownership changes
-    long nChanges;
-    buffer >> nChanges;
+    for (long ghostId : ghostsOnSenderRank) {
+        bool ghostSentToReceiver;
+        recvBuffer >> ghostSentToReceiver;
 
-    const auto exchangeTargets = getGhostExchangeTargets(sendRank);
-    for (long k = 0; k < nChanges; ++k) {
-        long index;
-        buffer >> index;
-
-        long cellId = exchangeTargets[index];
-        setGhostOwner(cellId, recvRank, false);
+        if (ghostSentToReceiver) {
+            setGhostOwner(ghostId, recvRank, false);
+        }
     }
 
     // Rebuild ghost exchagne data
