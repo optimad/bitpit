@@ -243,7 +243,7 @@ long SurfUnstructured::locatePoint(const std::array<double, 3> &point) const
  * 
  * \param[in,out] net on output stores the network of edges
 */
-void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
+void SurfUnstructured::extractEdgeNetwork(LineUnstructured &net)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //

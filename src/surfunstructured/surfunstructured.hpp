@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "bitpit_patchkernel.hpp"
+#include "bitpit_lineunstructured.hpp"
 
 namespace bitpit {
 
@@ -60,7 +61,7 @@ public:
     long locatePoint(const std::array<double, 3> &point) const override;
 
     // Evaluations
-    void extractEdgeNetwork(SurfUnstructured &net);
+    void extractEdgeNetwork(LineUnstructured &net);
 
     // I/O routines
     int importSTL(const std::string &filename, int PIDOffset = 0, bool PIDSquash = false);
