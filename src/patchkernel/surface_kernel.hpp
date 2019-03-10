@@ -36,7 +36,6 @@ public:
     static const unsigned short SELECT_TRIANGLE;
     static const unsigned short SELECT_QUAD;
     static const unsigned short SELECT_ALL;
-    static const std::map<ElementType, unsigned short> m_selectionTypes;
 
     // Types definitions
     typedef double (SurfaceKernel::*eval_f_)(long, int &) const;
@@ -75,6 +74,8 @@ public:
     std::vector<double> computeHistogram(eval_f_ funct_, std::vector<double> &bins, long &count, int n_intervals = 8, unsigned short mask = SELECT_ALL) const;
 
 private:
+    static const std::map<ElementType, unsigned short> m_selectionTypes;
+
     void initialize();
 
     bool compareSelectedTypes(unsigned short, ElementType) const;
