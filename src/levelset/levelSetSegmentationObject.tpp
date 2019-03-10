@@ -243,10 +243,10 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getSegmentSize( long id 
 
     const SurfUnstructured &m_surface = m_segmentation->getSurface();
 
-    int spaceDimension = m_surface.getSpaceDimension();
-    if (spaceDimension == 2) {
+    int surfaceDimension = m_surface.getDimension();
+    if (surfaceDimension == 1) {
         return m_surface.evalCellArea(id); //TODO check
-    } else if (spaceDimension == 3) {
+    } else if (surfaceDimension == 2) {
         int dummy;
         return m_surface.evalMinEdgeLength(id, dummy);
     }
