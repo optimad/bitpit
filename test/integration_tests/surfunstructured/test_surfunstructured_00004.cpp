@@ -83,9 +83,9 @@ int subtest_001(
 
 // Local variables
 #if BITPIT_ENABLE_MPI
-SurfUnstructured                mesh(2, MPI_COMM_NULL), edges(2, MPI_COMM_NULL);
+SurfUnstructured                mesh(2, MPI_COMM_NULL), edges(1, MPI_COMM_NULL);
 #else
-SurfUnstructured                mesh(2), edges(2);
+SurfUnstructured                mesh(2), edges(1);
 #endif
 
 // Counters
@@ -246,9 +246,9 @@ int                             nV, nE;
 return 0; } 
 
 // ========================================================================== //
-// SUBTEST #002 Test edge network extraction for 2D curve                     //
+// SUBTEST #002 Test edge network extraction for 1D surface mesh              //
 // ========================================================================== //
-void Generate2DSurfMesh(
+void Generate1DSurfMesh(
     SurfUnstructured                    &mesh
 ) {
 
@@ -321,9 +321,9 @@ int subtest_002(
 
 // Local variables
 #if BITPIT_ENABLE_MPI
-SurfUnstructured                mesh(2, MPI_COMM_NULL);
+SurfUnstructured                mesh(1, MPI_COMM_NULL);
 #else
-SurfUnstructured                mesh(2);
+SurfUnstructured                mesh(1);
 #endif
 
 // Counters
@@ -363,7 +363,7 @@ int                             nV, nS, nE;
 
     // Generate test surface mesh ------------------------------------------- //
     log::cout() << "** Generating surface mesh" << endl;
-    Generate2DSurfMesh(mesh);
+    Generate1DSurfMesh(mesh);
     log::cout() << "** Building adjacencies" << endl;
     mesh.initializeAdjacencies();
 

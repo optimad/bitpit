@@ -224,9 +224,9 @@ string                          in_name = "./data/NACA0012.dgf";
 string                          out_name = "./NACA0012_copy.dgf";
 string                          out_name_vtu = "./NACA0012_copy";
 #if BITPIT_ENABLE_MPI
-SurfUnstructured                mesh(2, MPI_COMM_NULL);
+SurfUnstructured                mesh(1, MPI_COMM_NULL);
 #else
-SurfUnstructured                mesh(2);
+SurfUnstructured                mesh(1);
 #endif
 
 // Counters
@@ -293,9 +293,9 @@ SurfUnstructured                mesh(2);
 {
     // Scope variables ------------------------------------------------------ //
 #if BITPIT_ENABLE_MPI
-    SurfUnstructured                    mesh_copy(2, MPI_COMM_NULL);
+    SurfUnstructured                    mesh_copy(1, MPI_COMM_NULL);
 #else
-    SurfUnstructured                    mesh_copy(2);
+    SurfUnstructured                    mesh_copy(1);
 #endif
     
     // Import mesh from stl format ------------------------------------------ //
