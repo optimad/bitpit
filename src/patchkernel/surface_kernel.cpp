@@ -591,10 +591,14 @@ double SurfaceKernel::evalAspectRatio(long id, int &edge_id) const
  * If cell is of type ElementType::VERTEX or ElementType::LINE, returns 0.0
  * 
  * \param[in] id cell ID
- * 
+ * \param orientation is a vector carring the additional information needed
+ * to un-ambigously define a normal to the element (e.g., when evaluating
+ * the normal of a one-dimensional element, this versor is perpendicular to
+ * the plane where the normal should lie)
+ *
  * \result facet normal
 */
-std::array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
+std::array<double, 3> SurfaceKernel::evalFacetNormal(long id, const std::array<double, 3> &orientation) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -615,12 +619,8 @@ std::array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
      || (cell_->getType() == ElementType::VERTEX)) return normal;
     
     if (cell_->getType() == ElementType::LINE) {
-        if (m_spaceDim - getDimension() == 1) {
-            std::array<double, 3>       z = {{0.0, 0.0, 1.0}};
-            normal = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
-            normal = crossProduct(normal, z);
-        }
-        else return normal;
+        normal = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
+        normal = crossProduct(normal, orientation);
     }
 
     if (cell_->getType() == ElementType::TRIANGLE) {
