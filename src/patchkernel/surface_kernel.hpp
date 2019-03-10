@@ -52,7 +52,7 @@ public:
     virtual double evalMinAngleAtVertex(long, int &) const;
     virtual double evalMaxAngleAtVertex(long, int &) const;
     virtual double evalAspectRatio(long, int &) const;
-    virtual std::array<double, 3> evalFacetNormal(long) const;
+    virtual std::array<double, 3> evalFacetNormal(long, const std::array<double, 3> &orientation = {{0., 0., 1.}}) const;
     std::array<double, 3> evalEdgeNormal(long, int) const;
     std::array<double, 3> evalVertexNormal(long, int) const;
     std::array<double, 3> evalVertexNormal(long, int, std::size_t, const long *) const;
