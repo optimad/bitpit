@@ -60,6 +60,104 @@ CommunicationTags::CommunicationTags()
 {
 }
 
+/*!
+    Generates a unique tag.
+
+    If the trash is empty a new tag is generated, otherwise a tag taken
+    from the trash is recycled.
+
+    The tag is shared among the processes that belong to the specified
+    communicator.
+
+    \param communicator is the MPI communicator
+    \return A new unique tag.
+*/
+
+int CommunicationTags::generate(MPI_Comm communicator)
+{
+    // Early return if the communicator is not valid
+    if (communicator == MPI_COMM_NULL) {
+        return IndexGenerator<int>::generate();
+    }
+
+    // The master generates a unique tag
+    int tag;
+
+    int rank;
+    MPI_Comm_rank(communicator, &rank);
+    if (rank == 0) {
+        tag = IndexGenerator<int>::generate();
+    }
+
+    // Share the tag among the processes
+    MPI_Bcast(&tag, 1, MPI_INT, 0, communicator);
+
+    return tag;
+}
+
+/*!
+    Checks if an tag is currently assigned.
+
+    \param communicator is the MPI communicator
+    \return True if the tag has already been assigned, false otherwise.
+*/
+bool CommunicationTags::isAssigned(int tag, MPI_Comm communicator)
+{
+    // The master checks if the tag is assigned
+    bool assigned;
+
+    int rank;
+    MPI_Comm_rank(communicator, &rank);
+    if (rank == 0) {
+        assigned = IndexGenerator<int>::isAssigned(tag);
+    }
+
+    // Share the result among the processes
+    MPI_Bcast(&assigned, 1, MPI_C_BOOL, 0, communicator);
+
+    return assigned;
+}
+
+/*!
+    Marks the specified tag as currently assigned.
+
+    \param tag is the tag to be marked as assigned
+    \param communicator is the MPI communicator
+*/
+void CommunicationTags::setAssigned(int tag, MPI_Comm communicator)
+{
+    // Only the master needs to set the tag as assigned
+    int rank;
+    MPI_Comm_rank(communicator, &rank);
+    if (rank == 0) {
+        IndexGenerator<int>::setAssigned(tag);
+    }
+}
+
+/*!
+    Trashes a tag.
+
+    A trashed tag is a tag no more used that can be recycled.
+
+    \param tag is the tag that will be trashed
+    \param communicator is the MPI communicator
+*/
+void CommunicationTags::trash(int tag, MPI_Comm communicator)
+{
+    // Wait all the processes
+    //
+    // We need to avoid that a tag is trashed while some processes are still
+    // using it.
+    MPI_Barrier(communicator);
+
+    // Only the master needs to trash the tag
+    int rank;
+    MPI_Comm_rank(communicator, &rank);
+    if (rank == 0) {
+        IndexGenerator<int>::trash(tag);
+    }
+}
+
 // Communication manager global functions
 namespace communications {
 

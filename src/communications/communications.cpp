@@ -61,21 +61,15 @@ DataCommunicator::DataCommunicator(MPI_Comm communicator)
 DataCommunicator::~DataCommunicator()
 {
     if (!m_customExchangeTag) {
-        if (m_rank == 0) {
-            communications::tags().trash(m_exchangeTag);
-        }
+        communications::tags().trash(m_exchangeTag, m_communicator);
     }
 
     if (!m_customDiscoverTag) {
-        if (m_rank == 0) {
-            communications::tags().trash(m_discoverTag);
-        }
+        communications::tags().trash(m_discoverTag, m_communicator);
     }
 
     if (!m_customNotificationTag) {
-        if (m_rank == 0) {
-            communications::tags().trash(m_notificationTag);
-        }
+        communications::tags().trash(m_notificationTag, m_communicator);
     }
 
     if (!m_customExchangeTag || !m_customDiscoverTag || !m_customNotificationTag) {
@@ -156,11 +150,7 @@ void DataCommunicator::setExchangeTag(int tag)
     if (m_customExchangeTag) {
         m_exchangeTag = tag;
     } else {
-        if (m_rank == 0) {
-            m_exchangeTag = communications::tags().generate();
-        }
-
-        MPI_Bcast(&m_exchangeTag, 1, MPI_INT, 0, m_communicator);
+        m_exchangeTag = communications::tags().generate(m_communicator);
     }
 }
 
@@ -178,11 +168,7 @@ void DataCommunicator::setDiscoverTag(int tag)
     if (m_customDiscoverTag) {
         m_discoverTag = tag;
     } else {
-        if (m_rank == 0) {
-            m_discoverTag = communications::tags().generate();
-        }
-
-        MPI_Bcast(&m_discoverTag, 1, MPI_INT, 0, m_communicator);
+        m_discoverTag = communications::tags().generate(m_communicator);
     }
 }
 
@@ -200,11 +186,7 @@ void DataCommunicator::setNotificationTag(int tag)
     if (m_customNotificationTag) {
         m_notificationTag = tag;
     } else {
-        if (m_rank == 0) {
-            m_notificationTag = communications::tags().generate();
-        }
-
-        MPI_Bcast(&m_notificationTag, 1, MPI_INT, 0, m_communicator);
+        m_notificationTag = communications::tags().generate(m_communicator);
     }
 }
 

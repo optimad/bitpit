@@ -26,6 +26,7 @@
 #define __BITPIT_COMMUNICATIONS_TAGS_HPP__
 
 #include <memory>
+#include <mpi.h>
 #include <iostream>
 #include <unordered_map>
 
@@ -39,6 +40,16 @@ friend class PatchKernel;
 
 public:
     static CommunicationTags & instance();
+
+    int generate(MPI_Comm communicator);
+    bool isAssigned(id_type id, MPI_Comm communicator);
+    void setAssigned(int id, MPI_Comm communicator);
+    void trash(int id, MPI_Comm communicator);
+
+    id_type getLatest() = delete;
+    id_type getHighest() = delete;
+
+    void reset() = delete;
 
 private:
     static std::unique_ptr<CommunicationTags> m_instance;
