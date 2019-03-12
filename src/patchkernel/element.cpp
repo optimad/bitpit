@@ -62,6 +62,12 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 	    buffer >> element.m_connect[i];
 	}
 
+	// Set PID
+	int pid;
+	buffer >> pid;
+
+	element.setPID(pid);
+
 	return buffer;
 }
 
@@ -85,6 +91,8 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 	for (int i = 0; i < connectSize; ++i) {
 	    buffer << element.m_connect[i];
 	}
+
+	buffer << element.getPID();
 
 	return buffer;
 }
@@ -1814,7 +1822,7 @@ std::vector<ConstProxyVector<long>> Element::evalEdgeConnects(int nRequestedEdge
 */
 unsigned int Element::getBinarySize()
 {
-	unsigned int binarySize = sizeof(m_type) + sizeof(m_id) + getConnectSize() * sizeof(long);
+	unsigned int binarySize = sizeof(m_type) + sizeof(m_id) + getConnectSize() * sizeof(long) + sizeof(m_pid);
 	if (bitpit::ReferenceElementInfo::hasInfo(m_type)) {
 		binarySize += sizeof(int);
 	}
