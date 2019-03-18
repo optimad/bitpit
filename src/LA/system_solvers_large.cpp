@@ -24,6 +24,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 #include <bitpit_IO.hpp>
 
@@ -481,16 +482,14 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
  */
 void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatrix &elements)
 {
-    const long maxRowElements = elements.getMaxRowNZCount();
-    std::vector<std::size_t> elementsColsIndexes(maxRowElements);
+    const long maxRowElements = std::max(elements.getMaxRowNZCount(), 0L);
 
-    std::map<PetscInt, std::size_t> rowGlobalColsMap;
-
-    std::vector<PetscScalar> rowValues(maxRowElements);
+    // Check if element columns are already in the pattern
+    std::unordered_set<PetscInt> currentRowPattern;
 
     for (std::size_t n = 0; n < rows.size(); ++n) {
-        ConstProxyVector<double> elementsValues = elements.getRowValues(n);
-        const int nRowElements = elementsValues.size();
+        ConstProxyVector<long> rowPattern = elements.getRowPattern(n);
+        const int nRowElements = rowPattern.size();
         if (nRowElements == 0) {
             continue;
         }
@@ -499,48 +498,59 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
         long row = rows[n];
         const PetscInt globalRow = m_rowGlobalOffset + row;
 
-        // Get current row elements
-        PetscInt *nRowCols = nullptr;
-        const PetscInt **rowGlobalCols = nullptr;
-        MatGetRow(m_A, globalRow, nRowCols, rowGlobalCols, NULL);
-        assert(nRowCols != nullptr);
-        assert(rowGlobalCols != nullptr);
+        // Get current row pattern
+        PetscInt nCurrentRowElements = 0;
+        const PetscInt *rawCurrentRowPattern = nullptr;
+        MatGetRow(m_A, globalRow, &nCurrentRowElements, &rawCurrentRowPattern, NULL);
+        assert(nCurrentRowElements != 0);
+        assert(rawCurrentRowPattern != nullptr);
 
-        // Get elements indices
-        rowGlobalColsMap.clear();
-        for (PetscInt k = 0; k < *nRowCols; ++k) {
-            PetscInt globalCol = (*rowGlobalCols)[n];
-            rowGlobalColsMap[globalCol] = k;
+        currentRowPattern.clear();
+        for (PetscInt k = 0; k < nCurrentRowElements; ++k) {
+            currentRowPattern.insert(rawCurrentRowPattern[k]);
         }
 
-        ConstProxyVector<long> elementsGlobalCols = elements.getRowPattern(row);
+        // Check if element columns are already in the pattern
         for (int k = 0; k < nRowElements; ++k) {
-            long elementGlobalCol = elementsGlobalCols[k];
-
-            auto rowGlobalColsMapItr = rowGlobalColsMap.find(elementGlobalCol);
-            if (rowGlobalColsMapItr == rowGlobalColsMap.end()) {
+            if (currentRowPattern.count(rowPattern[k]) == 0) {
                 throw std::runtime_error("The element is not in the matrix.");
             }
-
-            elementsColsIndexes[k] = rowGlobalColsMapItr->second;
-        }
-
-        // Update values
-        for (int k = 0; k < *nRowCols; ++k) {
-            rowValues[k] = 0.;
-        }
-
-        for (int k = 0; k < nRowElements; ++k) {
-            long elementColsIndex = elementsColsIndexes[k];
-            rowValues[elementColsIndex] += elementsValues[k];
         }
 
         // Restore row
-        MatRestoreRow(m_A, globalRow, nRowCols, rowGlobalCols, NULL);
-
-        // update values
-        MatSetValuesRow(m_A, globalRow, rowValues.data());
+        MatRestoreRow(m_A, globalRow, &nCurrentRowElements, &rawCurrentRowPattern, NULL);
     }
+
+    // Update element values
+    std::vector<PetscInt> rawRowPattern(maxRowElements);
+    std::vector<PetscScalar> rawRowValues(maxRowElements);
+
+    for (std::size_t n = 0; n < rows.size(); ++n) {
+        ConstProxyVector<double> rowValues = elements.getRowValues(n);
+        const int nRowElements = rowValues.size();
+        if (nRowElements == 0) {
+            continue;
+        }
+
+        // Get global row
+        long row = rows[n];
+        const PetscInt globalRow = m_rowGlobalOffset + row;
+
+        // Get pattern
+        ConstProxyVector<long> rowPattern = elements.getRowPattern(n);
+
+        // Update values
+        for (int k = 0; k < nRowElements; ++k) {
+            rawRowPattern[k] = rowPattern[k];;
+            rawRowValues[k]  = rowValues[k];
+        }
+
+        MatSetValues(m_A, 1, &globalRow, nRowElements, rawRowPattern.data(), rawRowValues.data(), INSERT_VALUES);
+    }
+
+    // Let petsc assembly the matrix after the update
+    MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
 }
 
 /*!
