@@ -372,6 +372,24 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 }
 
 /*!
+	Simulate the adaption of the specified cell.
+
+	\param id is the id of the cell
+	\param marker is the adaption marker of the simulated update
+	\param[out] virtualCells are the virtual cells that would be outcome of the
+	update
+*/
+void PatchKernel::simulateCellUpdate(const long id, adaption::Marker marker, std::vector<Cell> *virtualCells, PiercedVector<Vertex, long> *virtualVertices) const
+{
+	BITPIT_UNUSED(id);
+	BITPIT_UNUSED(marker);
+	BITPIT_UNUSED(virtualCells);
+	BITPIT_UNUSED(virtualVertices);
+
+	throw std::runtime_error ("This function has not been implemented for the specified patch.");
+}
+
+/*!
 	Generates the patch.
 
 	\param trackSpawn if set to true the changes to the patch will be tracked

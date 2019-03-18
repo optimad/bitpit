@@ -297,6 +297,8 @@ public:
 
 	std::vector<adaption::Info> update(bool trackAdaption = true, bool squeezeStorage = false);
 
+	virtual void simulateCellUpdate(const long id, adaption::Marker marker, std::vector<Cell> *virtualCells, PiercedVector<Vertex, long> *virtualVertices) const;
+
 	SpawnStatus getSpawnStatus() const;
 	std::vector<adaption::Info> spawn(bool trackSpawn);
 

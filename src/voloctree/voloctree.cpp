@@ -447,6 +447,73 @@ void VolOctree::setBoundingBox()
 }
 
 /*!
+	Simulate the adaption of the specified cell.
+
+	\param id is the id of the cell
+	\param marker is the adaption marker of the simulated update
+	\param[out] virtualCells are the virtual cells that would be outcome of the
+	update
+	\param[out] virtualVertices are the vertices of the virtual cells that
+	would be outcome of the update
+*/
+void VolOctree::simulateCellUpdate(long id, adaption::Marker marker, std::vector<Cell> *virtualCells, PiercedVector<Vertex, long> *virtualVertices) const
+{
+	// Get virtual post-update octants
+	OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
+
+	int8_t markerValue;
+	switch (marker) {
+
+	case adaption::MARKER_COARSEN:
+		markerValue = -1;
+		break;
+
+	case adaption::MARKER_REFINE:
+		markerValue = 1;
+		break;
+
+	default:
+		markerValue = 0;
+
+	}
+
+	int nMaxVirtualOctants;
+	if (getDimension() == 3) {
+		nMaxVirtualOctants = 8;
+	} else {
+		nMaxVirtualOctants = 4;
+	}
+
+	std::vector<Octant> virtualOctants;
+	virtualOctants.reserve(nMaxVirtualOctants);
+	m_tree->expectedOctantAdapt(octant, markerValue, &virtualOctants);
+	std::size_t nVirtualOctants = virtualOctants.size();
+
+	// Create virtual post-update cells
+	int nCellVertices = m_cellTypeInfo->nVertices;
+
+	virtualVertices->clear();
+	virtualVertices->reserve(nCellVertices * nVirtualOctants);
+
+	virtualCells->clear();
+	virtualCells->resize(nVirtualOctants);
+
+	for (std::size_t k = 0; k < nVirtualOctants; ++k) {
+		const Octant *virtualOctant = &(virtualOctants[k]);
+
+		std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[nCellVertices]);
+		for (int i = 0; i < nCellVertices; ++i) {
+			long vertexId = k * nCellVertices + i;
+			connectStorage[i] = vertexId;
+			virtualVertices->emplaceBack(vertexId, vertexId, m_tree->getNode(virtualOctant, i));
+		}
+
+		virtualCells->emplace_back(id, m_cellTypeInfo->type, std::move(connectStorage), true, false);
+	}
+}
+
+/*!
 	Evaluates the volume of the specified cell.
 
 	\param id is the id of the cell

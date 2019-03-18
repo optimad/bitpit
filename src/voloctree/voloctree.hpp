@@ -84,6 +84,9 @@ public:
 	double evalCellVolume(long id) const override;
 	double evalCellSize(long id) const override;
 	std::array<double, 3> evalCellCentroid(long id) const override;
+
+	void simulateCellUpdate(long id, adaption::Marker marker, std::vector<Cell> *virtualCells, PiercedVector<Vertex, long> *virtualVertices) const override;
+
 	void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const override;
 
 	double evalInterfaceArea(long id) const override;
