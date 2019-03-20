@@ -570,7 +570,7 @@ void SparseMatrix::addRow(const std::vector<long> &rowPattern, const std::vector
 */
 void SparseMatrix::addRow(long nRowNZ, const long *rowPattern, const double *rowValues)
 {
-    if (isFinalized()) {
+    if (countMissingRows() == 0) {
         throw std::runtime_error("Unable to add another row: all rows have already been defined.");
     }
 
