@@ -54,8 +54,6 @@ public:
     void assembly();
     bool isAssembled() const;
 
-    bool isFinalized() const;
-
     long countMissingRows() const;
     long countAddedRows() const;
 

@@ -363,17 +363,6 @@ bool SparseMatrix::isAssembled() const
 }
 
 /**
-* Check if all the rows of the pattern are defined. If this is the case, the
-* pattern is considered frozen and no more rows can be added.
-
-* \result Returns true if the pattern is finalized, false otherwise.
-*/
-bool SparseMatrix::isFinalized() const
-{
-    return (m_lastRow >= (m_nRows - 1));
-}
-
-/**
 * Count the number of rows that needs to be added to fill the matrix.
 *
 * \result The number of rows that needs to be added to fill the matrix.
