@@ -60,6 +60,7 @@ int subtest_001()
 
         matrix.addRow(rowPattern, rowValues);
     }
+    matrix.assembly();
 
     // Build system
     log::cout() << "Building system..." << std::endl;

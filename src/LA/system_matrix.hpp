@@ -51,6 +51,9 @@ public:
     void clear(bool release = false);
     void squeeze();
 
+    void assembly();
+    bool isAssembled() const;
+
     bool isInitialized() const;
     bool isFinalized() const;
 
@@ -99,6 +102,8 @@ protected:
     long m_maxRowNZ;
 
     long m_lastRow;
+
+    bool m_assembled;
 
 #if BITPIT_ENABLE_MPI==1
     long m_global_nRows;

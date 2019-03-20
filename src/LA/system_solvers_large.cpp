@@ -187,9 +187,9 @@ void SystemSolver::clear()
  */
 void SystemSolver::initialize(const SparseMatrix &matrix, PivotType pivotType)
 {
-    // Check if the matrix is finalized
-    if (!matrix.isFinalized()) {
-        throw std::runtime_error("Unable to initialize the system. The matrix is not yet finalized.");
+    // Check if the matrix is assembled
+    if (!matrix.isAssembled()) {
+        throw std::runtime_error("Unable to initialize the system. The matrix is not yet assembled.");
     }
 
     // Clear the system
@@ -230,9 +230,10 @@ void SystemSolver::initialize(const SparseMatrix &matrix, PivotType pivotType)
  */
 void SystemSolver::update(const std::vector<long> &rows, const SparseMatrix &elements)
 {
-    // Check if the element storage is finalized
-    if (!elements.isFinalized()) {
-        throw std::runtime_error("Unable to update the system. The element storage is not yet finalized.");
+    // Check if the element storage is assembled
+    // Check if the matrix is assembled
+    if (!elements.isAssembled()) {
+        throw std::runtime_error("Unable to update the system. The element storage is not yet assembled.");
     }
 
     // Check if the system is initialized

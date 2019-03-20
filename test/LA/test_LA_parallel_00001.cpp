@@ -57,6 +57,7 @@ int subtest_001(int rank)
 
         matrix.addRow(rowPattern, rowValues);
     }
+    matrix.assembly();
 
     // Build system
     log::cout() << "Building system..." << std::endl;

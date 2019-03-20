@@ -86,6 +86,7 @@ SparseMatrix::SparseMatrix()
 SparseMatrix::SparseMatrix(MPI_Comm communicator)
     : m_communicator(communicator),
       m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
+      m_assembled(false),
       m_global_nRows(0), m_global_nCols(0), m_global_nNZ(0),
       m_global_maxRowNZ(0), m_global_rowOffset(0), m_global_colOffset(0)
 {
@@ -102,7 +103,8 @@ SparseMatrix::SparseMatrix(MPI_Comm communicator)
 * Default constructor
 */
 SparseMatrix::SparseMatrix()
-    : m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1)
+    : m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
+      m_assembled(false)
 {
 }
 #endif
@@ -301,6 +303,8 @@ void SparseMatrix::clear(bool release)
     m_global_rowOffset = 0;
     m_global_colOffset = 0;
 #endif
+
+    m_assembled = false;
 }
 
 /*!
@@ -312,6 +316,50 @@ void SparseMatrix::squeeze()
 {
     m_pattern.shrinkToFit();
     m_values.shrink_to_fit();
+}
+
+/*!
+* Assembly the matrix.
+*
+* This function should be called after adding all the rows of the matrix.
+* Its purpose is to prepare the matrix for the usage.
+#if BITPIT_ENABLE_MPI==1
+*
+* It's a collective operation, hence it has to be called by all processors.
+#endif
+*/
+void SparseMatrix::assembly()
+{
+    // Early return if the matrix is already assembled.
+    if (isAssembled()) {
+        return;
+    }
+
+    // Assembly can be called only after adding all the rows
+    if (countMissingRows() != 0) {
+        throw std::runtime_error("Assembly can be called only after adding all the rows.");
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    // Updathe global information of the non-zero elements
+    if (m_partitioned) {
+        MPI_Allreduce(&m_maxRowNZ, &m_global_maxRowNZ, 1, MPI_LONG, MPI_MAX, m_communicator);
+        MPI_Allreduce(&m_nNZ, &m_global_nNZ, 1, MPI_LONG, MPI_SUM, m_communicator);
+    }
+#endif
+
+    // The function is now assembled
+    m_assembled = true;
+}
+
+/**
+* Check if the matrix is assembled and ready for use.
+
+* \result Returns true if the matrix is assembled and ready for use.
+*/
+bool SparseMatrix::isAssembled() const
+{
+    return m_assembled;
 }
 
 /**
@@ -585,18 +633,7 @@ void SparseMatrix::addRow(long nRowNZ, const long *rowPattern, const double *row
     m_nNZ += nRowNZ;
 
     // Update the index of the last row
-    //
-    // When inserting the last row the matrix can be finalized.
     m_lastRow++;
-    if (isFinalized()) {
-#if BITPIT_ENABLE_MPI==1
-        // Updathe global information of the non-zero elements
-        if (m_partitioned) {
-            MPI_Allreduce(&m_maxRowNZ, &m_global_maxRowNZ, 1, MPI_LONG, MPI_MAX, m_communicator);
-            MPI_Allreduce(&m_nNZ, &m_global_nNZ, 1, MPI_LONG, MPI_SUM, m_communicator);
-        }
-#endif
-    }
 }
 
 /**
