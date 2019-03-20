@@ -337,6 +337,29 @@ bool SparseMatrix::isFinalized() const
 }
 
 /**
+* Count the number of rows that needs to be added to fill the matrix.
+*
+* \result The number of rows that needs to be added to fill the matrix.
+*/
+long SparseMatrix::countMissingRows() const
+{
+    long nRows      = getRowCount();
+    long nAddedRows = countAddedRows();
+
+    return (nRows - nAddedRows);
+}
+
+/**
+* Count the number of rows that have been added to the matrix.
+*
+* \result The number of rows that have been added to the matrix.
+*/
+long SparseMatrix::countAddedRows() const
+{
+    return (m_lastRow + 1);
+}
+
+/**
 * Get the number of rows of the matrix.
 *
 * \result The number of rows of the matrix.

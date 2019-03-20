@@ -54,6 +54,9 @@ public:
     bool isInitialized() const;
     bool isFinalized() const;
 
+    long countMissingRows() const;
+    long countAddedRows() const;
+
     long getRowCount() const;
     long getColCount() const;
 
