@@ -470,6 +470,7 @@ namespace bitpit {
         bool 		isEdgeOnOctant(const Octant* edgeOctant, uint8_t edgeIndex, const Octant* octant) const;
         bool 		isFaceOnOctant(const Octant* faceOctant, uint8_t faceIndex, const Octant* octant) const;
         int 		getPointOwnerRank(darray3 point);
+        uint8_t		getFamilySplittingNode(const Octant*) const;
 
         // =================================================================================== //
         // OTHER PARATREE BASED METHODS												    	   //

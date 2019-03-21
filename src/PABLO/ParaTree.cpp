@@ -3252,6 +3252,16 @@ namespace bitpit {
         return -1;
     };
 
+    /** Get the local index of the node of a target octant, corresponding to the splitting node of its family; i.e. the index of the local node
+     * coincident with the center point of its father.
+     * \param[in] oct Pointer to target octant
+     * \return Local index of octant node corresponding to the splitting family node.
+     */
+    uint8_t
+    ParaTree::getFamilySplittingNode(const Octant* oct) const {
+        return oct->getFamilySplittingNode();
+    };
+
     /** Get mapping info of an octant after an adapting with tracking changes.
      * \param[in] idx Index of new octant.
      * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;

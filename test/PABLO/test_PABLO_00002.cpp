@@ -52,6 +52,15 @@ int subtest_001()
     pablo.updateConnectivity();
     pablo.write("Pablo002_iter1");
 
+    /**< Ask for splitting nodes of each octant.*/
+    uint32_t nocts = pablo.getNumOctants();
+    log::cout() << " List Octants splitting node " << std::endl;
+    for (unsigned int i=0; i<nocts; i++){
+        /**<Extract Octant (pointer use).*/
+        Octant *oct = pablo.getOctant(i);
+        log::cout() << " Octant index " << i << " : splitting node " << int(pablo.getFamilySplittingNode(oct)) << std::endl;
+    }
+
     /**<Define a center point.*/
     double xc, yc;
     xc = yc = 0.5;
@@ -60,7 +69,6 @@ int subtest_001()
     pablo.setBalanceCodimension(1);
 
     /**<Set NO 2:1 balance in the right side of domain.*/
-    uint32_t nocts = pablo.getNumOctants();
     for (unsigned int i=0; i<nocts; i++){
         array<double,3> center = pablo.getCenter(i);
         double x = center[0];

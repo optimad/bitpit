@@ -1624,6 +1624,25 @@ array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
 
 };
 
+/** Get the local index of the node corresponding to the splitting node of the octant family; i.e. the index of the local node
+ * coincident with the center point of the father.
+ * \return Local index of octant node corresponding to the splitting family node.
+ */
+uint8_t Octant::getFamilySplittingNode() const {
+
+	bool delta[3];
+	uint32_t xx[3];
+	xx[0] = m_x;
+	xx[1] = m_y;
+	xx[2] = m_z;
+	delta[2] = 0;
+	//Delta to build father (use the boolean negation to identify the splitting node)
+	for (int i=0; i<m_dim; i++){
+		delta[i] = ((xx[i]%(uint32_t(1) << (TreeConstants::MAX_LEVEL - max(0,(m_level-1))))) == 0);
+	}
+	return sm_treeConstants[m_dim].nodeFromCoordinates[delta[0]][delta[1]][delta[2]];
+};
+
 
 
 }

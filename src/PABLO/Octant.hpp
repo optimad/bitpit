@@ -238,6 +238,7 @@ private:
 	uint64_t computePeriodicMorton(uint8_t iface) const;
 	Octant computePeriodicOctant(uint8_t iface) const;
 	std::array<int64_t,3> getPeriodicCoord(uint8_t iface) const;
+	uint8_t getFamilySplittingNode() const;
 };
 
 }

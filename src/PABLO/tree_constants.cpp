@@ -414,6 +414,15 @@ TreeConstants::initialize(uint8_t dim) {
 	faceDisplacements[5][1] = 1;
 	faceDisplacements[5][2] = 2;
 
+	nodeFromCoordinates[0][0][0] = 0;
+	nodeFromCoordinates[1][0][0] = 1;
+	nodeFromCoordinates[0][1][0] = 2;
+	nodeFromCoordinates[1][1][0] = 3;
+	nodeFromCoordinates[0][0][1] = 4;
+	nodeFromCoordinates[1][0][1] = 5;
+	nodeFromCoordinates[0][1][1] = 6;
+	nodeFromCoordinates[1][1][1] = 7;
+
 	for (int level = 0; level < MAX_LEVEL; ++level) {
 		lengths[level] = uint32_t(1) << (MAX_LEVEL - level);
 		areas[level]   = uint64_t(1) << ((dim - 1) * (MAX_LEVEL - level));
