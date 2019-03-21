@@ -3262,6 +3262,30 @@ namespace bitpit {
         return oct->getFamilySplittingNode();
     };
 
+    /** Given an input testing marker, it gets the expected resulting octants of an adaption of a target octant.
+     * \param[in] oct Pointer to target octant
+     * \param[in] marker Testing adaptation marker
+     * \param[out] result pointer to vector of expcted octants resulting from adaptation [marker<0 : one-coarsening octant father; marker=0, copy of the current input octant itself; marker>0 one-refinement octant children]
+     */
+    void
+    ParaTree::expectedOctantAdapt(const Octant* oct, int8_t marker, octvector* result) const {
+
+        if (oct == nullptr || result == nullptr){
+            return;
+        }
+
+        result->clear();
+        if (marker > 0){
+            octvector children = oct->buildChildren();
+            result->swap(children);
+        }
+        else if (marker < 0){
+            result->push_back(oct->buildFather());
+        }
+
+        result->push_back(*oct);
+    };
+
     /** Get mapping info of an octant after an adapting with tracking changes.
      * \param[in] idx Index of new octant.
      * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
