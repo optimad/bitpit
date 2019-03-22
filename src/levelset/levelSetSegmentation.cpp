@@ -88,8 +88,8 @@ double SegmentationKernel::getFeatureAngle() const {
  * Get segmentation vertex normals
  * @return segmentation vertex normals;
  */
-const std::unordered_map<long, std::vector< std::array<double,3>>> & SegmentationKernel::getVertexNormals() const {
-    return m_vertexNormals;
+const std::unordered_map<long, std::vector< std::array<double,3>>> & SegmentationKernel::getLimitedVertexNormals() const {
+    return m_limitedVertexNormals;
 }
 
 /*!
@@ -115,7 +115,7 @@ const SurfUnstructured & SegmentationKernel::getSurface() const {
  */
 void SegmentationKernel::setSurface( const SurfUnstructured *surface, double featureAngle){
 
-    std::vector<std::array<double,3>> vertexNormal ;
+    std::vector<std::array<double,3>> limitedVertexNormal ;
     std::vector<std::array<double,3>> vertexGradient ;
 
     m_surface      = surface;
@@ -126,20 +126,20 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
         long segmentId = segment.getId() ;
         int nVertices  = segment.getVertexCount() ;
 
-        vertexNormal.resize(nVertices) ;
+        limitedVertexNormal.resize(nVertices) ;
         vertexGradient.resize(nVertices) ;
 
         double misalignment = 0. ;
         for( int i = 0; i < nVertices; ++i ){
             vertexGradient[i] = m_surface->evalVertexNormal(segmentId, i) ;
-            vertexNormal[i]   = m_surface->evalLimitedVertexNormal(segmentId, i, m_featureAngle) ;
+            limitedVertexNormal[i]   = m_surface->evalLimitedVertexNormal(segmentId, i, m_featureAngle) ;
 
-            misalignment += norm2(vertexGradient[i] - vertexNormal[i]) ;
+            misalignment += norm2(vertexGradient[i] - limitedVertexNormal[i]) ;
         }
 
         m_vertexGradients.insert({{segmentId, vertexGradient}}) ;
         if( misalignment >= tol ){
-            m_vertexNormals.insert({{segmentId, vertexNormal}}) ;
+            m_limitedVertexNormals.insert({{segmentId, limitedVertexNormal}}) ;
         }
     }
 
@@ -184,7 +184,7 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     std::array<double,3> outwards;
 
-    auto itrNormal = getVertexNormals().find(segmentId) ;
+    auto itrLimitedNormal = getLimitedVertexNormals().find(segmentId) ;
     auto itrGradient = getVertexGradients().find(segmentId) ;
     assert( itrGradient != getVertexGradients().end() ) ;
 
@@ -219,9 +219,9 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
         outwards += lambda[1] *itrGradient->second[1] ;
         outwards /= norm2(outwards) ;
 
-        if( itrNormal != getVertexNormals().end() ){
-            normal  = lambda[0] *itrNormal->second[0] ;
-            normal += lambda[1] *itrNormal->second[1] ;
+        if( itrLimitedNormal != getLimitedVertexNormals().end() ){
+            normal  = lambda[0] *itrLimitedNormal->second[0] ;
+            normal += lambda[1] *itrLimitedNormal->second[1] ;
             normal /= norm2(normal) ;
 
         } else {
@@ -247,10 +247,10 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
         outwards /= norm2(outwards);
 
 
-        if( itrNormal != getVertexNormals().end() ){
-            normal  = lambda[0] *itrNormal->second[0] ;
-            normal += lambda[1] *itrNormal->second[1] ;
-            normal += lambda[2] *itrNormal->second[2] ;
+        if( itrLimitedNormal != getLimitedVertexNormals().end() ){
+            normal  = lambda[0] *itrLimitedNormal->second[0] ;
+            normal += lambda[1] *itrLimitedNormal->second[1] ;
+            normal += lambda[2] *itrLimitedNormal->second[2] ;
             normal /= norm2(normal) ;
 
         } else {
