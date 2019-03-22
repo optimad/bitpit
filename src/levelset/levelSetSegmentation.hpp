@@ -63,7 +63,7 @@ public:
     int getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
 
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getLimitedVertexNormals() const;
-    const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;
+    const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
 
     std::unique_ptr<SurfaceSkdTree> m_searchTreeUPtr;
 
@@ -73,7 +73,7 @@ private:
     double m_featureAngle;
 
     std::unordered_map<long, std::vector< std::array<double,3>>> m_limitedVertexNormals;
-    std::unordered_map<long, std::vector< std::array<double,3>>> m_vertexGradients;
+    std::unordered_map<long, std::vector< std::array<double,3>>> m_vertexNormals;
 
     void setSurface( const SurfUnstructured *surface, double featureAngle);
 
