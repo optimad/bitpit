@@ -244,7 +244,7 @@ void SparseMatrix::_initialize(bool partitioned, long nRows, long nCols, long nN
     m_global_rowOffset = 0;
     m_global_colOffset = 0;
     if (m_partitioned) {
-        int nProcessors = 1;
+        int nProcessors;
         MPI_Comm_size(m_communicator, &nProcessors);
 
         std::vector<long> nGlobalRows(nProcessors);
