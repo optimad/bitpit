@@ -119,15 +119,11 @@ SystemSolver::SystemSolver(bool debug)
     ++m_nInstances;
 
 #if BITPIT_ENABLE_MPI==1
-    // Detect if the system is partitioned
-    m_partitioned = (communicator != MPI_COMM_NULL) && (communicator != MPI_COMM_SELF);
-
     // Set the communicator
-    if (m_partitioned) {
-        MPI_Comm_dup(communicator, &m_communicator);
-    } else {
-        m_communicator = MPI_COMM_SELF;
-    }
+    setCommunicator(communicator);
+
+    // Detect if the system is partitioned
+    m_partitioned = (m_communicator != MPI_COMM_SELF);
 #endif
 }
 
@@ -136,19 +132,11 @@ SystemSolver::SystemSolver(bool debug)
  */
 SystemSolver::~SystemSolver()
 {
+    // Clear the patch
+    clear();
+
     // Decrease the number of instances
     --m_nInstances;
-
-#if BITPIT_ENABLE_MPI==1
-    // Free the MPI communicator
-    if (m_partitioned) {
-        int finalizedCalled;
-        MPI_Finalized(&finalizedCalled);
-        if (!finalizedCalled) {
-            MPI_Comm_free(&m_communicator);
-        }
-    }
-#endif
 
     // Finalize petsc
     if (m_nInstances == 0) {
@@ -175,6 +163,10 @@ void SystemSolver::clear()
         ISDestroy(&m_rpivot);
         ISDestroy(&m_cpivot);
     }
+
+#if BITPIT_ENABLE_MPI==1
+    freeCommunicator();
+#endif
 
     m_initialized = false;
 }
@@ -983,5 +975,46 @@ const KSPStatus & SystemSolver::getKSPStatus() const
 {
     return m_KSPStatus;
 }
+
+#if BITPIT_ENABLE_MPI==1
+/*!
+	Gets the MPI communicator associated to the system.
+
+	\return The MPI communicator associated to the system.
+*/
+const MPI_Comm & SystemSolver::getCommunicator() const
+{
+	return m_communicator;
+}
+
+/*!
+	Sets the MPI communicator to be used for parallel communications.
+
+	\param communicator is the communicator to be used for parallel
+	communications.
+*/
+void SystemSolver::setCommunicator(MPI_Comm communicator)
+{
+    if ((communicator != MPI_COMM_NULL) && (communicator != MPI_COMM_SELF)) {
+        MPI_Comm_dup(communicator, &m_communicator);
+    } else {
+        m_communicator = MPI_COMM_SELF;
+    }
+}
+
+/*!
+	Frees the MPI communicator associated to the matrix.
+*/
+void SystemSolver::freeCommunicator()
+{
+    if (m_communicator != MPI_COMM_SELF) {
+        int finalizedCalled;
+        MPI_Finalized(&finalizedCalled);
+        if (!finalizedCalled) {
+            MPI_Comm_free(&m_communicator);
+        }
+    }
+}
+#endif
 
 }

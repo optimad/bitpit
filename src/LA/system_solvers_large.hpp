@@ -140,6 +140,10 @@ protected:
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
     void vectorsExport(std::vector<double> *solution);
 
+#if BITPIT_ENABLE_MPI==1
+    const MPI_Comm & getCommunicator() const;
+#endif
+
 private:
     static int m_nInstances;
     static std::vector<std::string> m_options;
@@ -169,6 +173,11 @@ private:
     void pivotInit(PivotType pivotType);
 
     void KSPInit();
+
+#if BITPIT_ENABLE_MPI==1
+    void setCommunicator(MPI_Comm communicator);
+    void freeCommunicator();
+#endif
 
 };
 
