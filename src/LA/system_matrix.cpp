@@ -436,6 +436,16 @@ long SparseMatrix::getMaxRowNZCount() const
 }
 
 #if BITPIT_ENABLE_MPI==1
+/*!
+	Checks if the matrix is partitioned.
+
+	\result Returns true if the patch is partitioned, false otherwise.
+*/
+bool SparseMatrix::isPartitioned() const
+{
+	return m_partitioned;
+}
+
 /**
 * Get the number of global rows
 *

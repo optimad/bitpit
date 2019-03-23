@@ -65,6 +65,8 @@ public:
     long getMaxRowNZCount() const;
 
 #if BITPIT_ENABLE_MPI==1
+    bool isPartitioned() const;
+
     long getRowGlobalCount() const;
     long getRowGlobalOffset() const;
 
