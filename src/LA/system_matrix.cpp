@@ -168,7 +168,7 @@ SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
  */
 SparseMatrix::~SparseMatrix()
 {
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
     // Free the MPI communicator
     freeCommunicator();
 #endif
