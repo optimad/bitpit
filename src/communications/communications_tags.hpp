@@ -42,9 +42,9 @@ public:
     static CommunicationTags & instance();
 
     int generate(MPI_Comm communicator);
-    bool isAssigned(id_type id, MPI_Comm communicator);
-    void setAssigned(int id, MPI_Comm communicator);
-    void trash(int id, MPI_Comm communicator);
+    bool isAssigned(id_type tag, MPI_Comm communicator);
+    void setAssigned(int tag, MPI_Comm communicator);
+    void trash(int tag, MPI_Comm communicator);
 
     id_type getLatest() = delete;
     id_type getHighest() = delete;
