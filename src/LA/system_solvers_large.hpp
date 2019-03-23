@@ -84,7 +84,7 @@ public:
     SystemSolver(MPI_Comm communicator, bool debug = false);
 #endif
 
-    ~SystemSolver();
+    virtual ~SystemSolver();
 
     void clear();
     void initialize(const SparseMatrix &matrix, PivotType pivotType = PIVOT_NONE);
