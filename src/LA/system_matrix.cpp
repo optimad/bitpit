@@ -32,9 +32,6 @@ namespace bitpit {
 *
 * \brief Sparse matrix.
 *
-* m,n,M,N parameters specify the size of the matrix, and its partitioning across processors, while
-* d_nz,d_nnz,o_nz,o_nnz parameters specify the approximate storage requirements for this matrix.
-*
 */
 #if BITPIT_ENABLE_MPI==1
 /**
@@ -108,8 +105,6 @@ SparseMatrix::SparseMatrix()
 /**
 * Constructor
 *
-* \param nRows is the number of local rows of the matrix
-* \param nCols is the number of local columns of the matrix
 * \param nRows is the number of rows of the matrix
 * \param nCols is the number of columns of the matrix
 * \param nNZ is the number of non-zero elements that the matrix will contain.
@@ -127,10 +122,11 @@ SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
 * Constructor
 *
 * \param communicator is the MPI communicator
-* \param nRows is the number of local rows of the matrix
-* \param nCols is the number of local columns of the matrix
-* \param nRows is the number of rows of the matrix
-* \param nCols is the number of columns of the matrix
+* \param partitioned controls if the matrix is partitioned
+* \param nRows is the number rows of the matrix, if the matrix is partitioned
+* this is the number of local rows
+* \param nCols is the number columns of the matrix, if the matrix is partitioned
+* this is the number of local columns
 * \param nNZ is the number of non-zero elements that the matrix will contain.
 * This is just an optional hint. If the actual number of non-zero elements
 * turns out to be greater than the provided value, the initialization of the
