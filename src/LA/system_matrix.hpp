@@ -92,11 +92,6 @@ public:
     ConstProxyVector<long> getRowPattern(long row) const;
 
 protected:
-#if BITPIT_ENABLE_MPI==1
-    bool m_partitioned;
-    MPI_Comm m_communicator;
-#endif
-
     long m_nRows;
     long m_nCols;
     long m_nNZ;
@@ -107,6 +102,9 @@ protected:
     bool m_assembled;
 
 #if BITPIT_ENABLE_MPI==1
+    bool m_partitioned;
+    MPI_Comm m_communicator;
+
     long m_global_nRows;
     long m_global_nCols;
     long m_global_nNZ;
