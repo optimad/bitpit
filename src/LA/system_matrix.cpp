@@ -84,8 +84,7 @@ SparseMatrix::SparseMatrix()
 * \param communicator is the MPI communicator
 */
 SparseMatrix::SparseMatrix(MPI_Comm communicator)
-    : m_communicator(communicator),
-      m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
+    : m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
       m_assembled(false),
       m_global_nRows(0), m_global_nCols(0), m_global_nNZ(0),
       m_global_maxRowNZ(0), m_global_rowOffset(0), m_global_colOffset(0)
@@ -94,9 +93,7 @@ SparseMatrix::SparseMatrix(MPI_Comm communicator)
     m_partitioned = (communicator != MPI_COMM_NULL);
 
     // Set the communicator
-    if (m_partitioned) {
-        MPI_Comm_dup(communicator, &m_communicator);
-    }
+    setCommunicator(communicator);
 }
 #else
 /**
@@ -173,13 +170,7 @@ SparseMatrix::~SparseMatrix()
 {
 #if ENABLE_MPI==1
     // Free the MPI communicator
-    if (m_partitioned) {
-        int finalizedCalled;
-        MPI_Finalized(&finalizedCalled);
-        if (!finalizedCalled) {
-            MPI_Comm_free(&m_communicator);
-        }
-    }
+    freeCommunicator();
 #endif
 }
 
@@ -444,6 +435,45 @@ long SparseMatrix::getMaxRowNZCount() const
 bool SparseMatrix::isPartitioned() const
 {
 	return m_partitioned;
+}
+
+/*!
+	Gets the MPI communicator associated to the matrix.
+
+	\return The MPI communicator associated to the matrix.
+*/
+const MPI_Comm & SparseMatrix::getCommunicator() const
+{
+	return m_communicator;
+}
+
+/*!
+	Sets the MPI communicator to be used for parallel communications.
+
+	\param communicator is the communicator to be used for parallel
+	communications.
+*/
+void SparseMatrix::setCommunicator(MPI_Comm communicator)
+{
+    if ((communicator != MPI_COMM_NULL) && (communicator != MPI_COMM_SELF)) {
+        MPI_Comm_dup(communicator, &m_communicator);
+    } else {
+        m_communicator = MPI_COMM_SELF;
+    }
+}
+
+/*!
+	Frees the MPI communicator associated to the matrix.
+*/
+void SparseMatrix::freeCommunicator()
+{
+    if (m_communicator != MPI_COMM_SELF) {
+        int finalizedCalled;
+        MPI_Finalized(&finalizedCalled);
+        if (!finalizedCalled) {
+            MPI_Comm_free(&m_communicator);
+        }
+    }
 }
 
 /**

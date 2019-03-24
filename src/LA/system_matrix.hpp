@@ -67,6 +67,8 @@ public:
 #if BITPIT_ENABLE_MPI==1
     bool isPartitioned() const;
 
+    const MPI_Comm & getCommunicator() const;
+
     long getRowGlobalCount() const;
     long getRowGlobalOffset() const;
 
@@ -118,6 +120,11 @@ protected:
 
 private:
     void _initialize(long nRows, long nCols, long nNZ = 0);
+
+#if BITPIT_ENABLE_MPI==1
+    void setCommunicator(MPI_Comm communicator);
+    void freeCommunicator();
+#endif
 
 };
 
