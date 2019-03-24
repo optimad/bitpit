@@ -161,7 +161,7 @@ SystemSolver::~SystemSolver()
  */
 void SystemSolver::clear()
 {
-    if (!m_initialized) {
+    if (!isInitialized()) {
         return;
     }
 
@@ -237,7 +237,7 @@ void SystemSolver::update(const std::vector<long> &rows, const SparseMatrix &ele
     }
 
     // Check if the system is initialized
-    if (!m_initialized) {
+    if (!isInitialized()) {
         throw std::runtime_error("Unable to update the system. The system is not yet initialized.");
     }
 
