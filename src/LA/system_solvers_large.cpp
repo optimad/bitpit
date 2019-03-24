@@ -330,6 +330,11 @@ bool SystemSolver::isInitialized() const
  */
 void SystemSolver::solve()
 {
+    // Check if the system is initialized
+    if (!isInitialized()) {
+        throw std::runtime_error("Unable to solve the system. The system is not yet initialized.");
+    }
+
     // Reorder the vectors
     if (getPivotType() != PIVOT_NONE) {
         vectorsReorder(PETSC_FALSE);
