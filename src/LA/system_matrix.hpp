@@ -42,12 +42,15 @@ public:
     SparseMatrix(long nRows, long nCols, long nNZ = 0);
 #if BITPIT_ENABLE_MPI==1
     SparseMatrix(MPI_Comm communicator);
-    SparseMatrix(MPI_Comm communicator, long nRows, long nCols, long nNZ = 0);
+    SparseMatrix(MPI_Comm communicator, bool partitioned, long nRows, long nCols, long nNZ = 0);
 #endif
 
     ~SparseMatrix();
 
     void initialize(long nRows, long nCols, long nNZ = 0);
+#if BITPIT_ENABLE_MPI==1
+    void initialize(bool partitioned, long nRows, long nCols, long nNZ = 0);
+#endif
     void clear(bool release = false);
     void squeeze();
 
@@ -118,6 +121,9 @@ protected:
 
 private:
     void _initialize(long nRows, long nCols, long nNZ = 0);
+#if BITPIT_ENABLE_MPI==1
+    void _initialize(bool partitioned, long nRows, long nCols, long nNZ = 0);
+#endif
 
 #if BITPIT_ENABLE_MPI==1
     void setCommunicator(MPI_Comm communicator);

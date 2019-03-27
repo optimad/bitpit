@@ -86,12 +86,10 @@ SparseMatrix::SparseMatrix()
 SparseMatrix::SparseMatrix(MPI_Comm communicator)
     : m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
       m_assembled(false),
+      m_partitioned(false),
       m_global_nRows(0), m_global_nCols(0), m_global_nNZ(0),
       m_global_maxRowNZ(0), m_global_rowOffset(0), m_global_colOffset(0)
 {
-    // Detect if the matrix is partitioned
-    m_partitioned = (communicator != MPI_COMM_NULL);
-
     // Set the communicator
     setCommunicator(communicator);
 }
@@ -121,7 +119,7 @@ SparseMatrix::SparseMatrix()
 * needed
 */
 SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
-    : SparseMatrix(MPI_COMM_SELF, nRows, nCols, nNZ)
+    : SparseMatrix(MPI_COMM_SELF, false, nRows, nCols, nNZ)
 {
 }
 
@@ -139,10 +137,10 @@ SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
 * matrix pattern will be slower because reallocation of internal data may be
 * needed
 */
-SparseMatrix::SparseMatrix(MPI_Comm communicator, long nRows, long nCols, long nNZ)
+SparseMatrix::SparseMatrix(MPI_Comm communicator, bool partitioned, long nRows, long nCols, long nNZ)
     : SparseMatrix(communicator)
 {
-    _initialize(nRows, nCols, nNZ);
+    _initialize(partitioned, nRows, nCols, nNZ);
 }
 #else
 /**
@@ -174,22 +172,32 @@ SparseMatrix::~SparseMatrix()
 #endif
 }
 
+#if BITPIT_ENABLE_MPI==1
 /**
 * Initialize the pattern.
 *
+* \param partitioned controls if the matrix is partitioned
+* \param nRows is the number rows of the matrix, if the matrix is partitioned
+* this is the number of local rows
+* \param nCols is the number columns of the matrix, if the matrix is partitioned
+* this is the number of local columns
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* This is just an optional hint. If the actual number of non-zero elements
+* turns out to be greater than the provided value, the initialization of the
+* matrix pattern will be slower because reallocation of internal data may be
+* needed
 */
-#if BITPIT_ENABLE_MPI==1
-/*!
-* \param nRows is the number of local rows of the matrix
-* \param nCols is the number of local columns of the matrix
-*/
-#else
-/*!
+void SparseMatrix::initialize(bool partitioned, long nRows, long nCols, long nNZ)
+{
+    _initialize(partitioned, nRows, nCols, nNZ);
+}
+#endif
+
+/**
+* Initialize the pattern.
+*
 * \param nRows is the number of rows of the matrix
 * \param nCols is the number of columns of the matrix
-*/
-#endif
-/*!
 * \param nNZ is the number of non-zero elements that the matrix will contain.
 * This is just an optional hint. If the actual number of non-zero elements
 * turns out to be greater than the provided value, the initialization of the
@@ -198,45 +206,36 @@ SparseMatrix::~SparseMatrix()
 */
 void SparseMatrix::initialize(long nRows, long nCols, long nNZ)
 {
+#if BITPIT_ENABLE_MPI==1
+    _initialize(false, nRows, nCols, nNZ);
+#else
     _initialize(nRows, nCols, nNZ);
+#endif
 }
 
+#if BITPIT_ENABLE_MPI==1
 /**
 * Internal function to initialize the pattern.
 *
-*/
-#if BITPIT_ENABLE_MPI==1
-/*!
-* \param nRows is the number of local rows of the matrix
-* \param nCols is the number of local columns of the matrix
-*/
-#else
-/*!
-* \param nRows is the number of rows of the matrix
-* \param nCols is the number of columns of the matrix
-*/
-#endif
-/*!
+* \param partitioned controls if the matrix is partitioned
+* \param nRows is the number rows of the matrix, if the matrix is partitioned
+* this is the number of local rows
+* \param nCols is the number columns of the matrix, if the matrix is partitioned
+* this is the number of local columns
 * \param nNZ is the number of non-zero elements that the matrix will contain.
 * This is just an optional hint. If the actual number of non-zero elements
 * turns out to be greater than the provided value, the initialization of the
 * matrix pattern will be slower because reallocation of internal data may be
 * needed
 */
-void SparseMatrix::_initialize(long nRows, long nCols, long nNZ)
+void SparseMatrix::_initialize(bool partitioned, long nRows, long nCols, long nNZ)
 {
-    assert(nRows >= 0);
-    assert(nCols >= 0);
-    assert(nNZ >= 0);
+    // Serial initialization
+    _initialize(nRows, nCols, nNZ);
 
-    clear();
+    // Parallel initialization
+    m_partitioned = partitioned;
 
-    m_pattern.reserve(nRows, nNZ);
-    m_values.reserve(nNZ);
-
-    m_nRows = nRows;
-    m_nCols = nCols;
-#if BITPIT_ENABLE_MPI == 1
     if (m_partitioned) {
         MPI_Allreduce(&m_nRows, &m_global_nRows, 1, MPI_LONG, MPI_SUM, m_communicator);
         MPI_Allreduce(&m_nCols, &m_global_nCols, 1, MPI_LONG, MPI_SUM, m_communicator);
@@ -261,9 +260,34 @@ void SparseMatrix::_initialize(long nRows, long nCols, long nNZ)
             m_global_colOffset += nGlobalCols[i];
         }
     }
-#endif
 }
+#endif
 
+/**
+* Internal function to initialize the pattern.
+*
+* \param nRows is the number of rows of the matrix
+* \param nCols is the number of columns of the matrix
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* This is just an optional hint. If the actual number of non-zero elements
+* turns out to be greater than the provided value, the initialization of the
+* matrix pattern will be slower because reallocation of internal data may be
+* needed
+*/
+void SparseMatrix::_initialize(long nRows, long nCols, long nNZ)
+{
+    assert(nRows >= 0);
+    assert(nCols >= 0);
+    assert(nNZ >= 0);
+
+    clear();
+
+    m_pattern.reserve(nRows, nNZ);
+    m_values.reserve(nNZ);
+
+    m_nRows = nRows;
+    m_nCols = nCols;
+}
 
 /**
 * Clear the pattern.
@@ -287,6 +311,8 @@ void SparseMatrix::clear(bool release)
     m_lastRow  = -1;
 
 #if BITPIT_ENABLE_MPI==1
+    m_partitioned = false;
+
     m_global_nRows     = 0;
     m_global_nCols     = 0;
     m_global_nNZ       = 0;
