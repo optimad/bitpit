@@ -182,7 +182,7 @@ void DiscreteStencil<weight_t>::initialize(const DiscreteStencil<weight_t> &othe
     m_zero = other.m_zero;
     m_pattern.initialize(other.m_pattern);
     m_weights.initialize(other.m_weights);
-    m_constant = other.m_zero;
+    m_constant = other.m_constant;
 }
 
 /*!
