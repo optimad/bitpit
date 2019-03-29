@@ -57,15 +57,25 @@ SkdPatchInfo::SkdPatchInfo(const PatchKernel *patch, const std::vector<std::size
 */
 void SkdPatchInfo::buildCache()
 {
-    const PiercedVector<Cell> &cells = m_patch->getCells();
+    PatchKernel::CellConstRange cellRange(m_patch->internalConstBegin(), m_patch->internalConstEnd());
 
+    buildCache(cellRange);
+}
+
+/*!
+* Build the cache.
+*
+* \param cellRange is the range of cells fow which the cache has to be built
+*/
+void SkdPatchInfo::buildCache(const PatchKernel::CellConstRange &cellRange)
+{
     m_cellBoxes     = std::unique_ptr<BoxCache>(new BoxCache(2, &(m_patch->getCells())));
     m_cellCentroids = std::unique_ptr<BoxCache>(new CentroidCache(1, &(m_patch->getCells())));
-    for (auto itr = m_patch->internalConstBegin(); itr != m_patch->internalConstEnd(); ++itr) {
+    for (auto itr = cellRange.cbegin(); itr != cellRange.cend(); ++itr) {
         std::size_t rawCellId = itr.getRawIndex();
 
         // Cell info
-        const Cell &cell = cells.rawAt(rawCellId);
+        const Cell &cell = *itr;
         int nCellVertices = cell.getVertexCount();
         ConstProxyVector<long> cellConnect = cell.getVertexIds();
 
@@ -588,11 +598,15 @@ bool SkdNode::boxIntersectsSphere(const std::array<double, 3> &center, double ra
 * Constructor.
 *
 * \param patch is the patch that will be use to build the tree
+* \param includeGhosts if set to true the ghost cells are included in the tree
 */
-PatchSkdTree::PatchSkdTree(const PatchKernel *patch)
-    : m_patchInfo(patch, &m_cellRawIds), m_cellRawIds(patch->getInternalCount()),
-      m_leafCapacity(0), m_nLeafs(0)
+PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool includeGhosts)
+    : m_patchInfo(patch, &m_cellRawIds),
+      m_cellRawIds(includeGhosts ? patch->getCellCount() : patch->getInternalCount()),
+      m_leafCapacity(0), m_nLeafs(0),
+      m_includeGhosts(includeGhosts)
 {
+
 }
 
 /*!
@@ -637,18 +651,27 @@ void PatchSkdTree::build(int leafCapacity)
     setLeafCapacity(leafCapacity);
 
     // Initialize list of cell raw ids
-    std::size_t nCells = patch.getInternalCount();
+    std::size_t nCells;
+    PatchKernel::CellConstRange cellRange;
+    if (m_includeGhosts) {
+        nCells = patch.getCellCount();
+        cellRange.initialize(patch.cellConstBegin(), patch.cellConstEnd());
+    } else {
+        nCells = patch.getInternalCount();
+        cellRange.initialize(patch.internalConstBegin(), patch.internalConstEnd());
+    }
+
     if (m_cellRawIds.size() != nCells) {
         m_cellRawIds.resize(nCells);
     }
 
     std::size_t k = 0;
-    for (auto itr = patch.internalConstBegin(); itr != patch.internalConstEnd(); ++itr) {
+    for (auto itr = cellRange.begin(); itr != cellRange.end(); ++itr) {
         m_cellRawIds[k++] = itr.getRawIndex();
     }
 
     // Build patch cache
-    m_patchInfo.buildCache();
+    m_patchInfo.buildCache(cellRange);
 
     // Initialize node list
     m_nodes.reserve(1.5 * nCells / getLeafCapacity());

@@ -37,6 +37,7 @@ friend class PatchSkdTree;
 
 public:
     void buildCache();
+    void buildCache(const PatchKernel::CellConstRange &cellRange);
     void destroyCache();
 
     const PatchKernel & getPatch() const;
@@ -160,7 +161,9 @@ protected:
     std::size_t m_nLeafs;
     std::vector<SkdNode, SkdNode::Allocator> m_nodes;
 
-    PatchSkdTree(const PatchKernel *patch);
+    bool m_includeGhosts;
+
+    PatchSkdTree(const PatchKernel *patch, bool includeGhosts = false);
 
     SkdNode & _getNode(std::size_t nodeId);
 
