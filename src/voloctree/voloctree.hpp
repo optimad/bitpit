@@ -91,6 +91,7 @@ public:
 
 	OctantInfo getCellOctant(long id) const;
 	int getCellLevel(long id) const;
+	int getCellFamilySplitLocalVertex(long id) const;
 
 	long getOctantId(const OctantInfo &octantInfo) const;
 	Octant * getOctantPointer(const OctantInfo &octantInfo);

@@ -687,6 +687,20 @@ int VolOctree::getCellLevel(long id) const
 }
 
 /*!
+	Get the local index of the family-splitting node for the specified cell.
+
+	\param id is the id of the cell
+	\result The local index of the family-splitting node for the specified cell.
+*/
+int VolOctree::getCellFamilySplitLocalVertex(long id) const
+{
+	OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
+
+	return m_tree->getFamilySplittingNode(octant);
+}
+
+/*!
 	Generates the patch.
 
 	\param trackSpawn if set to true the changes to the patch will be tracked
