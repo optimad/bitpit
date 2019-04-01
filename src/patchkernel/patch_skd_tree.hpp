@@ -163,7 +163,7 @@ protected:
 
     bool m_includeGhosts;
 
-    PatchSkdTree(const PatchKernel *patch, bool includeGhosts = false);
+    PatchSkdTree(const PatchKernel *patch, bool includeGhosts = true);
 
     SkdNode & _getNode(std::size_t nodeId);
 
