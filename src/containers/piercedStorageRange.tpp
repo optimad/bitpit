@@ -44,9 +44,8 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange()
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t *storage)
-    : PiercedKernelRange<id_t>(&(storage->getKernel())),
-      m_begin(storage->begin()), m_end(storage->end())
 {
+    initialize(storage);
 }
 
 /*!
@@ -58,9 +57,8 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t *storage, id_t first, id_t last)
-    : PiercedKernelRange<id_t>(&(storage->getKernel()), first, last),
-      m_begin(storage->find(first)), m_end(++(storage->find(last)))
 {
+    initialize(storage, first, last);
 }
 
 /*!
@@ -71,12 +69,57 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(storage_t
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(const iterator &begin, const iterator &end)
-    : PiercedKernelRange<id_t>(begin.getKernelIterator(), end.getKernelIterator()),
-      m_begin(begin), m_end(end)
+{
+    initialize(begin, end);
+}
+
+/*!
+* Initialize the range.
+*
+* \param kernel is the kernel that will be associated to the range
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+void PiercedStorageRange<value_t, id_t, value_no_cv_t>::initialize(const storage_t *storage)
+{
+    PiercedKernelRange<id_t>::initialize(&(storage->getKernel()));
+
+    m_begin = storage->begin();
+    m_end   = storage->end();
+}
+
+/*!
+* Initialize the range.
+*
+* \param kernel is the kernel that will be associated to the range
+* \param first is the id of the first element in the range
+* \param last is the id of the last element in the range
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+void PiercedStorageRange<value_t, id_t, value_no_cv_t>::initialize(const storage_t *storage, id_t first, id_t last)
+{
+    PiercedKernelRange<id_t>::initialize(&(storage->getKernel()), first, last);
+
+    m_begin = storage->find(first);
+    m_end   = ++(storage->find(last));
+}
+
+/*!
+* Initialize the range.
+*
+* \param begin is the begin of the range
+* \param end is the end of the range
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+void PiercedStorageRange<value_t, id_t, value_no_cv_t>::initialize(const iterator &begin, const iterator &end)
 {
     if (&(begin.getStorage()) != &(end.getStorage())) {
         throw std::runtime_error("The two iterators belong to different storages");
     }
+
+    PiercedKernelRange<id_t>::initialize(begin.getKernelIterator(), end.getKernelIterator());
+
+    m_begin = begin;
+    m_end   = end;
 }
 
 /*!

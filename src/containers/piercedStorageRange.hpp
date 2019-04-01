@@ -118,6 +118,10 @@ public:
     PiercedStorageRange(const iterator &begin, const iterator &end);
 
     // General methods
+    void initialize(const storage_t *storage);
+    void initialize(const storage_t *storage, id_t first, id_t last);
+    void initialize(const iterator &begin, const iterator &end);
+
     using PiercedKernelRange<id_t>::evalSize;
 
     void swap(PiercedStorageRange &other) noexcept;

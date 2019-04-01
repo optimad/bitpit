@@ -72,6 +72,10 @@ public:
     PiercedKernelRange(const const_iterator &begin, const const_iterator &end);
 
     // General methods
+    void initialize(const kernel_t *kernel);
+    void initialize(const kernel_t *kernel, id_t first, id_t last);
+    void initialize(const const_iterator &begin, const const_iterator &end);
+
     void swap(PiercedKernelRange &other) noexcept;
     std::size_t evalSize() const;
 

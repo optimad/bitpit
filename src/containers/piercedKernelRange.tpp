@@ -44,9 +44,8 @@ PiercedKernelRange<id_t>::PiercedKernelRange()
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel)
-    : m_cbegin(kernel->cbegin()),
-      m_cend(kernel->cend())
 {
+    initialize(kernel);
 }
 
 /*!
@@ -58,9 +57,8 @@ PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel)
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel, id_t first, id_t last)
-    : m_cbegin(kernel->find(first)),
-      m_cend(++(kernel->find(last)))
 {
+    initialize(kernel, first, last);
 }
 
 /*!
@@ -71,12 +69,51 @@ PiercedKernelRange<id_t>::PiercedKernelRange(const kernel_t *kernel, id_t first,
 */
 template<typename id_t>
 PiercedKernelRange<id_t>::PiercedKernelRange(const const_iterator &begin, const const_iterator &end)
-    : m_cbegin(begin),
-      m_cend(end)
+{
+    initialize(begin, end);
+}
+
+/*!
+* Initialize the range.
+*
+* \param kernel is the kernel that will be associated to the range
+*/
+template<typename id_t>
+void PiercedKernelRange<id_t>::initialize(const kernel_t *kernel)
+{
+    m_cbegin = kernel->cbegin();
+    m_cend   = kernel->cend();
+}
+
+/*!
+* Initialize the range.
+*
+* \param kernel is the kernel that will be associated to the range
+* \param first is the id of the first element in the range
+* \param last is the id of the last element in the range
+*/
+template<typename id_t>
+void PiercedKernelRange<id_t>::initialize(const kernel_t *kernel, id_t first, id_t last)
+{
+    m_cbegin = kernel->find(first);
+    m_cend   = ++(kernel->find(last));
+}
+
+/*!
+* Initialize the range.
+*
+* \param begin is the begin of the range
+* \param end is the end of the range
+*/
+template<typename id_t>
+void PiercedKernelRange<id_t>::initialize(const const_iterator &begin, const const_iterator &end)
 {
     if (&(begin.getKernel()) != &(end.getKernel())) {
         throw std::runtime_error("The two iterators belong to different kernels");
     }
+
+    m_cbegin = begin;
+    m_cend   = end;
 }
 
 /*!
