@@ -2446,10 +2446,6 @@ void PatchKernel::_findCellFaceNeighs(const long &id, const int &face, const std
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getAdjacencyCount(face); ++i) {
 		long neighId = cell.getAdjacency(face, i);
-		if (neighId < 0) {
-			continue;
-		}
-
 		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
 			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
@@ -5454,10 +5450,6 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 		int nCellAdjacencies = cell.getAdjacencyCount();
 		for (int i = 0; i < nCellAdjacencies; ++i) {
 			long &neighId = adjacencies[i];
-			if (neighId < 0) {
-				continue;
-			}
-
 			neighId = map[neighId];
 		}
 	}

@@ -804,9 +804,6 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
 
             for (int i = 0; i < nInterfaces; ++i) {
                 const long neighId = adjacencyIds[i];
-                if (neighId < 0) {
-                    continue;
-                }
 
 #if BITPIT_ENABLE_MPI==1
                 if (ghostExchangeNeeded) {

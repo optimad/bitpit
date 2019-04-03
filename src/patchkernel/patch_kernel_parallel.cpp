@@ -2052,9 +2052,7 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
             int nFaceAdjacencies = cell.getAdjacencyCount(face);
             for (int k = 0; k < nFaceAdjacencies; ++k) {
                 long senderAdjacencyId = cell.getAdjacency(face, k);
-                if (senderAdjacencyId < 0) {
-                    continue;
-                } else if (cellMap.count(senderAdjacencyId) == 0) {
+                if (cellMap.count(senderAdjacencyId) == 0) {
 					cell.deleteAdjacency(face, k);
                     continue;
                 } else {
