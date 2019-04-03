@@ -538,10 +538,6 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
             int nCellNeighs = cell.getAdjacencyCount() ;
             for(int n = 0; n < nCellNeighs; ++n){
                 long neighId = cellNeighs[n] ;
-                if (neighId < 0) {
-                    continue;
-                }
-
                 int neighStatus = statuses->at(neighId);
                 if (neighStatus == PROPAGATION_STATUS_WAITING) {
                     processList.push_back(neighId);

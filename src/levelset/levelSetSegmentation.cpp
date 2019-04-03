@@ -855,10 +855,6 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
         for (int n = 0; n < nNeighbours; ++n) {
             long neighId = neighbours[n];
 
-            if (neighId < 0) {
-                continue;
-            }
-
             // skip if neigh cell has already been processed
             // either because it is intersected by surface or
             // because it is a neigh to a previous intersect
@@ -973,33 +969,31 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
             long neighId = neighbours[n];
 
-            if(neighId>=0){
-                if( intersectSurface(neighId,LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE){
+            if( intersectSurface(neighId,LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE){
 
-                    centroid = visitee->computeCellCentroid(cellId);
-                    root = computeProjectionPoint(neighId);
+                centroid = visitee->computeCellCentroid(cellId);
+                root = computeProjectionPoint(neighId);
 
-                    searchRadius =  1.05 *norm2(centroid-root);
-                    m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+                searchRadius =  1.05 *norm2(centroid-root);
+                m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
 
-                    if(segmentId>=0){
+                if(segmentId>=0){
 
-                        m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+                    m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
 
-                        PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
-                        lsInfoItr->value    = distance;
-                        lsInfoItr->gradient = gradient;
+                    PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
+                    lsInfoItr->value    = distance;
+                    lsInfoItr->gradient = gradient;
 
 
-                        PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
-                        infoItr->support = segmentId;
-                        infoItr->normal = normal;
+                    PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
+                    infoItr->support = segmentId;
+                    infoItr->normal = normal;
 
-                    } else {
-                        assert(false && "Should not pass here");
-                    }
-                    iterate = false;
+                } else {
+                    assert(false && "Should not pass here");
                 }
+                iterate = false;
             }
 
             ++n;
