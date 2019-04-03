@@ -145,7 +145,7 @@ bitpit::FlatVector2D<long> Cell::createEmptyNeighbourhoodStorage(bool storeNeigh
 */
 Cell::Cell()
 	: Element(), m_interior(true),
-      m_interfaces(createNeighbourhoodStorage(false)),
+      m_interfaces(createEmptyNeighbourhoodStorage(false)),
       m_adjacencies(createNeighbourhoodStorage(false))
 {
 
@@ -162,7 +162,7 @@ Cell::Cell()
 */
 Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type),
-      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
+      m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
@@ -181,7 +181,7 @@ Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourh
 */
 Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
 	: Element(id, type, connectSize),
-      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
+      m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
@@ -200,7 +200,7 @@ Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, boo
 */
 Cell::Cell(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
 	: Element(id, type, std::move(connectStorage)),
-      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
+      m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
@@ -353,7 +353,7 @@ void Cell::deleteInterfaces()
 */
 void Cell::resetInterfaces(bool storeInterfaces)
 {
-	m_interfaces = createNeighbourhoodStorage(storeInterfaces);
+	m_interfaces = createEmptyNeighbourhoodStorage(storeInterfaces);
 }
 
 /*!
@@ -406,17 +406,7 @@ void Cell::pushInterface(const int &face, const long &interface)
 		return;
 	}
 
-	// If there is only one interface stored for the specified face and
-	// that interface is negative, we need to overwrite the value and
-	// not add another interface.
-	if (m_interfaces.getItemCount(face) == 1) {
-		if (m_interfaces.getItem(face, 0) < 0) {
-			m_interfaces.setItem(face, 0, interface);
-			return;
-		}
-	}
-
-	// There are multiple adjacency, we need to add the interface.
+	// Add the interface.
 	m_interfaces.pushBackItem(face, interface);
 }
 
@@ -429,14 +419,6 @@ void Cell::pushInterface(const int &face, const long &interface)
 */
 void Cell::deleteInterface(const int &face, const int &i)
 {
-	// If there is only one interface stored for the specified face, we
-	// need to overwrite the value and not delete the interface.
-	if (m_interfaces.getItemCount(face) == 1) {
-		m_interfaces.setItem(face, 0, NULL_ID);
-		return;
-	}
-
-	// There are multiple interfaces, we need to delete the interface.
 	m_interfaces.eraseItem(face, i);
 }
 
@@ -933,25 +915,27 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
         // interface infos ------------------------------------------------------ //
         if (m_interfaces.size() > 0) {
             out << t_s << "interfaces:   [ ";
-            for (i = 0; i < nf-1; ++i) {
+            for (i = 0; i < nf; ++i) {
                 nn = getInterfaceCount(i);
                 out << "[ ";
-                for (j = 0; j < nn-1; ++j) {
-                    if (getInterface(i,j) == Element::NULL_ID)  out << "n.a. ";
-                    else                                        out << getInterface(i, j) << ", ";
-                } //next j
-                if (getInterface(i, nn-1) == Element::NULL_ID)  out << "n.a. ], ";
-                else                                            out << getInterface(i, nn-1) << " ], ";
-            } //next i
-            nn = getInterfaceCount(nf-1);
-            out << "[ ";
-            for (j = 0; j < nn-1; ++j) {
-                if (getInterface(nf-1, j) == Element::NULL_ID)  out << "n.a. ";
-                else                                            out << getInterface(nf-1, j) << ", ";
-            } //next j
-            if (getInterface(nf-1, nn-1) == Element::NULL_ID)   out << "n.a. ]";
-            else                                                out << getInterface(nf-1, nn-1) << " ]";
-            out << " ]" << std::endl;
+                if (nn == 0) {
+                    out << "n.a. ";
+                } else {
+                    for (j = 0; j < nn; ++j) {
+                        out << getInterface(i, j);
+                        if (j != (nn - 1)) {
+                            out << ",";
+                        }
+                        out << " ";
+                    }
+                }
+                out << "]";
+                if (i != (nf - 1)) {
+                    out << ",";
+                }
+                out << " ";
+            }
+            out << "]" << std::endl;
         }
 
 }

@@ -2121,13 +2121,11 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 			int nFaceInterfaces = cell.getInterfaceCount(i);
 			for (int k = 0; k < nFaceInterfaces; ++k) {
 				long interfaceId = cell.getInterface(i,k);
-				if (interfaceId >= 0) {
-					Interface &interface = m_interfaces[interfaceId];
-					if (interface.getOwner() == id) {
-							interface.unsetOwner();
-					} else {
-							interface.unsetNeigh();
-					}
+				Interface &interface = m_interfaces[interfaceId];
+				if (interface.getOwner() == id) {
+						interface.unsetOwner();
+				} else {
+						interface.unsetNeigh();
 				}
 			} //next k
 		}
@@ -4378,19 +4376,8 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 			int nFaceAdjacencies = cell.getAdjacencyCount(face);
 
 			// Find the range of adjacencies that need an interface
-			//
-			// Each face has always an interface, but this interface might be
-			// just a placholder. If this is the case, the update has to
-			// begin from the first adjacency.
 			int updateEnd   = nFaceAdjacencies;
 			int updateBegin = cell.getInterfaceCount(face);
-			if (updateBegin == 1) {
-				long interfaceId = cell.getInterface(face, 0);
-				if (interfaceId < 0) {
-					updateBegin = 0;
-				}
-			}
-
 			if (updateBegin == updateEnd) {
 				continue;
 			}
@@ -5527,9 +5514,7 @@ void PatchKernel::consecutiveRenumberInterfaces(long offset)
 		int nCellInterfaces = cell.getInterfaceCount();
 		for (int i = 0; i < nCellInterfaces; ++i) {
 			long &interfaceId = interfaces[i];
-			if (interfaceId >= 0) {
-				interfaceId = map.at(interfaceId);
-			}
+			interfaceId = map.at(interfaceId);
 		}
 	}
 }

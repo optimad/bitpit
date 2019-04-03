@@ -993,20 +993,27 @@ void SurfaceKernel::flipCellOrientation(const long &id)
     // Copy original ordering in newAdjacency and newInterface
     //
     for (int f = 0; f < faceCount; ++f) {
-        std::vector<long> &locAdj = newAdjacency[f];
-        std::vector<long> &locInt = newInterface[f];
+        // Adjacencies
+        std::vector<long> &faceAdjacencies = newAdjacency[f];
 
         int nCellAdjacencies = cell.getAdjacencyCount(f);
-        const long *adjacency = cell.getAdjacencies(f);
-        const long *interface = cell.getInterfaces(f);
+        const long *cellAdjacencies = cell.getAdjacencies(f);
 
-        locAdj.resize(nCellAdjacencies);
-        locInt.resize(nCellAdjacencies);
+        faceAdjacencies.resize(nCellAdjacencies);
         for (int j = 0; j < nCellAdjacencies; ++j) {
-            locAdj[j] = adjacency[j];
-            locInt[j] = interface[j];
+            faceAdjacencies[j] = cellAdjacencies[j];
         }
 
+        // Interfaces
+        std::vector<long> &faceInterfaces = newInterface[f];
+
+        int nCellInterfaces = cell.getInterfaceCount(f);
+        const long *cellInterfaces = cell.getInterfaces(f);
+
+        faceInterfaces.resize(nCellInterfaces);
+        for (int j = 0; j < nCellInterfaces; ++j) {
+            faceInterfaces[j] = cellInterfaces[j];
+        }
     }
 
     //
@@ -1025,15 +1032,26 @@ void SurfaceKernel::flipCellOrientation(const long &id)
     // Invert all enties within one face
     //
     for (int f = 0; f < faceCount; ++f) {
-        std::vector<long> &locAdj =newAdjacency[f];
-        std::vector<long> &locInt =newInterface[f];
-        int nFaceAdjacencies = locAdj.size();
+        // Adjacencies
+        std::vector<long> &faceAdjacencies =newAdjacency[f];
+        int nFaceAdjacencies = faceAdjacencies.size();
 
         top = 0;
         end = nFaceAdjacencies - 1;
         for (int j = 0; j<(int) std::floor(nFaceAdjacencies / 2); ++j) {
-            std::swap(locAdj[top], locAdj[end]);
-            std::swap(locInt[top], locInt[end]);
+            std::swap(faceAdjacencies[top], faceAdjacencies[end]);
+            ++top;
+            --end;
+        }
+
+        // Interfaces
+        std::vector<long> &faceInterfaces =newInterface[f];
+        int nFaceInterfaces = faceInterfaces.size();
+
+        top = 0;
+        end = nFaceInterfaces - 1;
+        for (int j = 0; j<(int) std::floor(nFaceInterfaces / 2); ++j) {
+            std::swap(faceInterfaces[top], faceInterfaces[end]);
             ++top;
             --end;
         }
