@@ -116,6 +116,31 @@ bitpit::FlatVector2D<long> Cell::createNeighbourhoodStorage(bool storeNeighbourh
 }
 
 /*!
+	Create an empty storage for interfaces or adjacencies.
+
+	This function is called in the initializer list of the constructor, care
+	must be taken to ensure that all members needed by the function are
+	already initialized at the time the function is called.
+
+	\param storeNeighbourhood defines is the cell should store neighbourhood
+	information
+*/
+bitpit::FlatVector2D<long> Cell::createEmptyNeighbourhoodStorage(bool storeNeighbourhood)
+{
+	ElementType type = getType();
+	if (!storeNeighbourhood || type == ElementType::UNDEFINED) {
+		return bitpit::FlatVector2D<long>(false);
+	}
+
+	int nFaces = getFaceCount();
+	if (nFaces <= 0) {
+		return bitpit::FlatVector2D<long>(false);
+	}
+
+	return bitpit::FlatVector2D<long>(nFaces, 0);
+}
+
+/*!
 	Default constructor.
 */
 Cell::Cell()
