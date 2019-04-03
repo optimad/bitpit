@@ -5349,7 +5349,7 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 		int nCellAdjacencies = cell.getAdjacencyCount();
 		for (int i = 0; i < nCellAdjacencies; ++i) {
 			long &neighId = adjacencies[i];
-			if (neighId == -1) {
+			if (neighId < 0) {
 				continue;
 			}
 
