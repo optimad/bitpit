@@ -96,7 +96,7 @@ namespace bitpit {
 	\param storeNeighbourhood defines is the cell should store neighbourhood
 	information
 */
-bitpit::FlatVector2D<long> Cell::createEmptyNeighbourhoodStorage(bool storeNeighbourhood)
+bitpit::FlatVector2D<long> Cell::createNeighbourhoodStorage(bool storeNeighbourhood)
 {
 	ElementType type = getType();
 	if (!storeNeighbourhood || type == ElementType::UNDEFINED) {
@@ -116,8 +116,8 @@ bitpit::FlatVector2D<long> Cell::createEmptyNeighbourhoodStorage(bool storeNeigh
 */
 Cell::Cell()
 	: Element(), m_interior(true),
-      m_interfaces(createEmptyNeighbourhoodStorage(false)),
-      m_adjacencies(createEmptyNeighbourhoodStorage(false))
+      m_interfaces(createNeighbourhoodStorage(false)),
+      m_adjacencies(createNeighbourhoodStorage(false))
 {
 
 }
@@ -133,8 +133,8 @@ Cell::Cell()
 */
 Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type),
-      m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createEmptyNeighbourhoodStorage(storeNeighbourhood))
+      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
+      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
 }
@@ -152,8 +152,8 @@ Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourh
 */
 Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
 	: Element(id, type, connectSize),
-      m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createEmptyNeighbourhoodStorage(storeNeighbourhood))
+      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
+      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
 }
@@ -171,8 +171,8 @@ Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, boo
 */
 Cell::Cell(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
 	: Element(id, type, std::move(connectStorage)),
-      m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createEmptyNeighbourhoodStorage(storeNeighbourhood))
+      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
+      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
 }
@@ -324,7 +324,7 @@ void Cell::deleteInterfaces()
 */
 void Cell::resetInterfaces(bool storeInterfaces)
 {
-	m_interfaces = createEmptyNeighbourhoodStorage(storeInterfaces);
+	m_interfaces = createNeighbourhoodStorage(storeInterfaces);
 }
 
 /*!
@@ -552,7 +552,7 @@ void Cell::deleteAdjacencies()
 */
 void Cell::resetAdjacencies(bool storeAdjacencies)
 {
-	m_adjacencies = createEmptyNeighbourhoodStorage(storeAdjacencies);
+	m_adjacencies = createNeighbourhoodStorage(storeAdjacencies);
 }
 
 /*!

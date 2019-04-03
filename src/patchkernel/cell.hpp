@@ -117,7 +117,7 @@ private:
 	bitpit::FlatVector2D<long> m_interfaces;
 	bitpit::FlatVector2D<long> m_adjacencies;
 
-	bitpit::FlatVector2D<long> createEmptyNeighbourhoodStorage(bool storeNeighbourhood);
+	bitpit::FlatVector2D<long> createNeighbourhoodStorage(bool storeNeighbourhood);
 
 	void _initialize(bool interior, bool initializeNeighbourhood, bool storeNeighbourhood);
 
