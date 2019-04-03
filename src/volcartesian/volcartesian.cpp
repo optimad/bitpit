@@ -910,7 +910,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
 
 				interface.setOwner(owner.getId(), ownerFace);
 				owner.pushInterface(ownerFace, interface.getId());
-				owner.setAdjacency(ownerFace, 0, neighId);
+				owner.pushAdjacency(ownerFace, neighId);
 
 				// Neighbour data
 				if (counters[direction] != 0 && counters[direction] != interfaceCount1D[direction] - 1) {
@@ -920,7 +920,7 @@ void VolCartesian::addInterfacesDirection(const int &direction)
 
 					interface.setNeigh(neigh.getId(), neighFace);
 					neigh.pushInterface(neighFace, interface.getId());
-					neigh.setAdjacency(neighFace, 0, ownerId);
+					neigh.pushAdjacency(neighFace, ownerId);
 				} else {
 					interface.unsetNeigh();
 				}

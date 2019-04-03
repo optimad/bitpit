@@ -2107,13 +2107,12 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 			int nFaceAdjacencies = cell.getAdjacencyCount(i);
 			for (int k = 0; k < nFaceAdjacencies; ++k) {
 				long neighId = cell.getAdjacency(i,k);
-				if (neighId >= 0) {
-					int neighFace, adjacencyId;
-					findFaceNeighCell(neighId, id, neighFace, adjacencyId);
-					if (neighFace >= 0) {
-						Cell &neigh = m_cells[neighId];
-						neigh.deleteAdjacency(neighFace, adjacencyId);
-					}
+
+				int neighFace, adjacencyId;
+				findFaceNeighCell(neighId, id, neighFace, adjacencyId);
+				if (neighFace >= 0) {
+					Cell &neigh = m_cells[neighId];
+					neigh.deleteAdjacency(neighFace, adjacencyId);
 				}
 			} //next k
 
@@ -2765,7 +2764,7 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 			int nFaceNeighs = scanCell.getAdjacencyCount(i);
 			for (int k = 0; k < nFaceNeighs; ++k) {
 				long neighId = scanCell.getAdjacency(i, k);
-				if (neighId >= 0 && alreadyProcessed.count(neighId) == 0) {
+				if (alreadyProcessed.count(neighId) == 0) {
 					scanQueue.push_back(neighId);
 				}
 			}
@@ -4369,37 +4368,34 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 	// This meas that, to update the interfaces, we can count the interfaces
 	// already associated to a face and loop only on the adjacencies which
 	// have an index past the one of the last interface.
+	//
+	// On border faces of internal cells we need to build an interface, also
+	// if there are no adjacencies.
 	for (long cellId : cellIds) {
 		Cell &cell = m_cells[cellId];
 		const int nCellFaces = cell.getFaceCount();
 		for (int face = 0; face < nCellFaces; face++) {
-			int nFaceAdjacencies = cell.getAdjacencyCount(face);
-
-			// Find the range of adjacencies that need an interface
-			int updateEnd   = nFaceAdjacencies;
-			int updateBegin = cell.getInterfaceCount(face);
-			if (updateBegin == updateEnd) {
-				continue;
-			}
-
-			// Build an interface for every adjacency
-			//
-			// Interface and adjacencies are aligned:
-			for (int k = updateBegin; k < updateEnd; ++k) {
-				// Do not create the interfaces on ghost border faces.
-				long neighId = cell.getAdjacency(face, k);
-				if (neighId < 0 && !cell.isInterior()) {
+			bool isFaceBorder = cell.isFaceBorder(face);
+			if (!isFaceBorder) {
+				// Find the range of adjacencies that need an interface
+				int updateEnd   = cell.getAdjacencyCount(face);
+				int updateBegin = cell.getInterfaceCount(face);
+				if (updateBegin == updateEnd) {
 					continue;
 				}
 
-				Cell *neigh   = nullptr;
-				int neighFace = -1;
-				if (neighId >= 0) {
-					neigh     = &m_cells[neighId];
-					neighFace = findAdjoinNeighFace(cellId, neighId);
-				}
+				// Build an interface for every adjacency
+				for (int k = updateBegin; k < updateEnd; ++k) {
+					long neighId = cell.getAdjacency(face, k);
+					Cell *neigh  = &m_cells[neighId];
 
-				buildCellInterface(&cell, face, neigh, neighFace);
+					int neighFace = findAdjoinNeighFace(cellId, neighId);
+
+					buildCellInterface(&cell, face, neigh, neighFace);
+				}
+			} else if (cell.isInterior()) {
+				// Internal borderes need an interface
+				buildCellInterface(&cell, face, nullptr, -1);
 			}
 		}
 	}

@@ -146,7 +146,7 @@ bitpit::FlatVector2D<long> Cell::createEmptyNeighbourhoodStorage(bool storeNeigh
 Cell::Cell()
 	: Element(), m_interior(true),
       m_interfaces(createEmptyNeighbourhoodStorage(false)),
-      m_adjacencies(createNeighbourhoodStorage(false))
+      m_adjacencies(createEmptyNeighbourhoodStorage(false))
 {
 
 }
@@ -163,7 +163,7 @@ Cell::Cell()
 Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type),
       m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
+      m_adjacencies(createEmptyNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
 }
@@ -182,7 +182,7 @@ Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourh
 Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
 	: Element(id, type, connectSize),
       m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
+      m_adjacencies(createEmptyNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
 }
@@ -201,7 +201,7 @@ Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, boo
 Cell::Cell(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
 	: Element(id, type, std::move(connectStorage)),
       m_interfaces(createEmptyNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
+      m_adjacencies(createEmptyNeighbourhoodStorage(storeNeighbourhood))
 {
 	_initialize(interior, false, false);
 }
@@ -367,18 +367,8 @@ void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 	    return;
 	}
 
-	// Initialize the interfaces
 	assert(m_interfaces.size() == getFaceCount());
 	m_interfaces.initialize(interfaces);
-
-	// Check that there is at least one interfaces for each face. If the face
-	// is not associated to an interface, a dummy interface is added.
-	int nFaces = getFaceCount();
-	for (int i = 0; i < nFaces; ++i) {
-		if (m_interfaces.getItemCount(i) == 0) {
-			m_interfaces.pushBackItem(i, NULL_ID);
-		}
-	}
 }
 
 /*!
@@ -406,7 +396,7 @@ void Cell::pushInterface(const int &face, const long &interface)
 		return;
 	}
 
-	// Add the interface.
+	// Add the interface
 	m_interfaces.pushBackItem(face, interface);
 }
 
@@ -591,7 +581,7 @@ void Cell::deleteAdjacencies()
 */
 void Cell::resetAdjacencies(bool storeAdjacencies)
 {
-	m_adjacencies = createNeighbourhoodStorage(storeAdjacencies);
+	m_adjacencies = createEmptyNeighbourhoodStorage(storeAdjacencies);
 }
 
 /*!
@@ -605,18 +595,8 @@ void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 	    return;
 	}
 
-	// Initialize the adjacencies
 	assert(m_interfaces.size() == getFaceCount());
 	m_adjacencies.initialize(adjacencies);
-
-	// Check that there is at least one adjacency for each face. If the face
-	// is not associated to an adjacency, a dummy adjacency is added.
-	int nFaces = getFaceCount();
-	for (int i = 0; i < nFaces; ++i) {
-		if (m_adjacencies.getItemCount(i) == 0) {
-			m_adjacencies.pushBackItem(i, NULL_ID);
-		}
-	}
 }
 
 /*!
@@ -644,17 +624,7 @@ void Cell::pushAdjacency(const int &face, const long &adjacency)
 		return;
 	}
 
-	// If there is only one adjacency stored for the specified face and
-	// that adjacency is negative, we need to overwrite the value and
-	// not add another adjacency.
-	if (m_adjacencies.getItemCount(face) == 1) {
-		if (m_adjacencies.getItem(face, 0) < 0) {
-			m_adjacencies.setItem(face, 0, adjacency);
-			return;
-		}
-	}
-
-	// There are multiple adjacency, we need to add the adjacency.
+	// Add the adjacency
 	m_adjacencies.pushBackItem(face, adjacency);
 }
 
@@ -667,14 +637,6 @@ void Cell::pushAdjacency(const int &face, const long &adjacency)
 */
 void Cell::deleteAdjacency(const int &face, const int &i)
 {
-	// If there is only one adjacency stored for the specified face, we
-	// need to overwrite that value and not delete the adjacency.
-	if (m_adjacencies.getItemCount(face) == 1) {
-		m_adjacencies.setItem(face, 0, NULL_ID);
-		return;
-	}
-
-	// There are multiple adjacencies, we need to delete the adjacency.
 	m_adjacencies.eraseItem(face, i);
 }
 
@@ -828,13 +790,7 @@ int Cell::findAdjacency(const int &adjacency)
 */
 bool Cell::isFaceBorder(int face) const
 {
-	assert(m_adjacencies.size() > 0);
-
-	if (m_adjacencies.size() == 0) {
-		return true;
-	} else {
-		return (getAdjacency(face, 0) < 0);
-	}
+	return (m_adjacencies.getItemCount(face) == 0);
 }
 
 /*!
@@ -891,25 +847,27 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 	// neighbors infos ------------------------------------------------------ //
         if (m_adjacencies.size() > 0) {
             out << t_s << "neighbors:    [ ";
-            for (i = 0; i < nf-1; ++i) {
+            for (i = 0; i < nf; ++i) {
                 nn = getAdjacencyCount(i);
                 out << "[ ";
-                for (j = 0; j < nn-1; ++j) {
-                    if (getAdjacency(i,j) == Element::NULL_ID)  out << "n.a. ";
-                    else                                        out << getAdjacency(i, j) << ", ";
-                } //next j
-                if (getAdjacency(i, nn-1) == Element::NULL_ID)  out << "n.a. ], ";
-                else                                            out << getAdjacency(i, nn-1) << " ], ";
-            } //next i
-            nn = getAdjacencyCount(nf-1);
-            out << "[ ";
-            for (j = 0; j < nn-1; ++j) {
-                if (getAdjacency(nf-1, j) == Element::NULL_ID)  out << "n.a. ";
-                else                                            out << getAdjacency(nf-1, j) << ", ";
-            } //next j
-            if (getAdjacency(nf-1, nn-1) == Element::NULL_ID)   out << "n.a. ]";
-            else                                                out << getAdjacency(nf-1, nn-1) << " ]";
-            out << " ]" << std::endl;
+                if (nn == 0) {
+                    out << "n.a. ";
+                } else {
+                    for (j = 0; j < nn; ++j) {
+                        out << getAdjacency(i, j);
+                        if (j != (nn - 1)) {
+                            out << ",";
+                        }
+                        out << " ";
+                    }
+                }
+                out << "]";
+                if (i != (nf - 1)) {
+                    out << ",";
+                }
+                out << " ";
+            }
+            out << "]" << std::endl;
         }
 
         // interface infos ------------------------------------------------------ //
