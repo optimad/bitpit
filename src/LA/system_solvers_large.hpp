@@ -80,9 +80,6 @@ public:
     static void addInitOptions(const std::vector<std::string> &options);
 
     SystemSolver(bool debug = false);
-#if BITPIT_ENABLE_MPI==1
-    SystemSolver(MPI_Comm communicator, bool debug = false);
-#endif
 
     virtual ~SystemSolver();
 
@@ -97,6 +94,8 @@ public:
 #if BITPIT_ENABLE_MPI==1
     long getRowGlobalCount() const;
     long getColGlobalCount() const;
+
+    bool isPartitioned() const;
 #endif
 
     void solve();
@@ -151,13 +150,14 @@ private:
     bool m_initialized;
     PivotType m_pivotType;
 
+#if BITPIT_ENABLE_MPI==1
+    MPI_Comm m_communicator;
+
+    bool m_partitioned;
+#endif
+
     long m_rowGlobalOffset;
     long m_colGlobalOffset;
-
-#if BITPIT_ENABLE_MPI==1
-    bool m_partitioned;
-    MPI_Comm m_communicator;
-#endif
 
     Mat m_A;
     Vec m_rhs;

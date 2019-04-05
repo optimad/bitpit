@@ -62,33 +62,16 @@ void SystemSolver::addInitOptions(const std::vector<std::string> &options)
     }
 }
 
-#if BITPIT_ENABLE_MPI==1
-/*!
- * Default constuctor
- *
- * \param debug if set to true, debug information will be printed
- */
-SystemSolver::SystemSolver(bool debug)
-    : SystemSolver(MPI_COMM_SELF, debug)
-{
-}
-
 /*!
  * Constuctor
  *
- * \param communicator is the MPI communicator
- * \param debug if set to true, debug information will be printed
- */
-SystemSolver::SystemSolver(MPI_Comm communicator, bool debug)
-#else
-/*!
- * Defualt constuctor
- *
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(bool debug)
-#endif
     : m_initialized(false), m_pivotType(PIVOT_NONE),
+#if BITPIT_ENABLE_MPI==1
+      m_communicator(MPI_COMM_SELF), m_partitioned(false),
+#endif
       m_rowGlobalOffset(0), m_colGlobalOffset(0),
       m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
       m_rpivot(nullptr), m_cpivot(nullptr), m_KSP(nullptr)
@@ -117,14 +100,6 @@ SystemSolver::SystemSolver(bool debug)
 
     // Increase the number of instances
     ++m_nInstances;
-
-#if BITPIT_ENABLE_MPI==1
-    // Set the communicator
-    setCommunicator(communicator);
-
-    // Detect if the system is partitioned
-    m_partitioned = (m_communicator != MPI_COMM_SELF);
-#endif
 }
 
 /*!
@@ -186,6 +161,14 @@ void SystemSolver::initialize(const SparseMatrix &matrix, PivotType pivotType)
 
     // Clear the system
     clear();
+
+#if BITPIT_ENABLE_MPI == 1
+    // Set the communicator
+    setCommunicator(matrix.getCommunicator());
+
+    // Detect if the system is partitioned
+    m_partitioned = matrix.isPartitioned();
+#endif
 
     // Initialize matrix
     matrixInit(matrix);
@@ -304,6 +287,16 @@ long SystemSolver::getColGlobalCount() const
     MatGetSize(m_A, NULL, &nCols);
 
     return nCols;
+}
+
+/*!
+    Checks if the matrix is partitioned.
+
+    \result Returns true if the patch is partitioned, false otherwise.
+*/
+bool SystemSolver::isPartitioned() const
+{
+    return m_partitioned;
 }
 #endif
 
@@ -903,7 +896,7 @@ void SystemSolver::KSPInit()
 
     PCType preconditionerType;
 #if BITPIT_ENABLE_MPI == 1
-    if (m_partitioned) {
+    if (isPartitioned()) {
         preconditionerType = PCASM;
     } else {
         preconditionerType = PCILU;
