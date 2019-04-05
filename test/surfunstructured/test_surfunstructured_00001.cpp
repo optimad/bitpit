@@ -610,7 +610,9 @@ SurfUnstructured                mesh(2, 3);
 vector<long>                    c_connect{0, 1, 2};
 vector<long>                    g_connect{3, 4, 5};
 Cell                            cell(0, ElementType::TRIANGLE, true);
+#if BITPIT_ENABLE_MPI
 Cell                            ghost(0, ElementType::TRIANGLE, false);
+#endif
 vector<long>                    expected;
 vector<bool>                    internal;
 
@@ -650,20 +652,29 @@ int                             i;
     int                         j;
     int                         n;
     long                        *cellConnect;
+#if BITPIT_ENABLE_MPI
     long                        *ghostConnect;
+#endif
 
     // Initialize internal cell
-    log::cout() << "** Initializing cell" << endl;
+    log::cout() << "** Initializing internal cell" << endl;
     cellConnect = cell.getConnect();
     n = cell.getVertexCount();
     for (j = 0; j < n; ++j) {
         cellConnect[j] = c_connect[j];
     } //next j
+
+#if BITPIT_ENABLE_MPI
+    // Initialize ghost cell
+    log::cout() << "** Initializing ghost cell" << endl;
+
     ghostConnect = ghost.getConnect();
     n = ghost.getVertexCount();
     for (j = 0; j < n; ++j) {
         ghostConnect[j] = g_connect[j];
     } //next j
+#endif
+
     log::cout() << endl;
 }
 
@@ -709,6 +720,7 @@ int                             i;
     } //next it
     log::cout() << endl;
 
+#if BITPIT_ENABLE_MPI
     // Insert ghost cells (IDX 5-9) ----------------------------------------- //
     // cells:  {0,1,2,3,4}
     // ghosts: {5,6,7,8,9}
@@ -742,6 +754,7 @@ int                             i;
         it->display(log::cout(), 4);
     } //next it
     log::cout() << endl;
+#endif
 
 }
 
@@ -752,20 +765,45 @@ int                             i;
     // Scope variables
     SurfUnstructured::CellIterator              it, et;
 
-    // Remove internal cells
-    //bucket: {4,2,5,6}
-    //cells:  {0,1,-1,3,-1}
-    //ghosts: {-1,-1,7,8,9}
-    mesh.deleteCell(4);
-    mesh.deleteCell(2);
+#if BITPIT_ENABLE_MPI
+    // Remove ghost cells
+    //bucket: {5,6}
+    //cells:  {0,1,2,3,4}
+    //ghosts: {7,8,9}
     mesh.deleteCell(5);
     mesh.deleteCell(6);
     expected.erase(expected.begin() + 6);
     expected.erase(expected.begin() + 5);
-    expected.erase(expected.begin() + 4);
-    expected.erase(expected.begin() + 2);
     internal.erase(internal.begin() + 6);
     internal.erase(internal.begin() + 5);
+
+    // Check element order
+    i = 0;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        if (it->getId() != expected[i])        return 2;
+        if (it->isInterior() != internal[i])    return 2;
+        ++i;
+    } //next it
+
+    // Display mesh
+    log::cout() << "** After removing ghost cells" << endl;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        log::cout() << "   cell: " << endl;
+        it->display(log::cout(), 4);
+    } //next it
+    log::cout() << endl;
+#endif
+
+    // Remove internal cells
+    //bucket: {4,2,5,6}
+    //cells:  {0,1,3,}
+    //ghosts: {7,8,9}
+    mesh.deleteCell(4);
+    mesh.deleteCell(2);
+    expected.erase(expected.begin() + 4);
+    expected.erase(expected.begin() + 2);
     internal.erase(internal.begin() + 4);
     internal.erase(internal.begin() + 2);
 
@@ -779,7 +817,7 @@ int                             i;
     } //next it
 
     // Display mesh
-    log::cout() << "** After removing internal/ghost cells" << endl;
+    log::cout() << "** After removing internal cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
         log::cout() << "   cell: " << endl;
@@ -787,18 +825,19 @@ int                             i;
     } //next it
     log::cout() << endl;
 
-    // Remove ghost cells
+#if BITPIT_ENABLE_MPI
+    // Add cells
     //bucket = {}
-    //cells:  {0,1,5,3,6}
-    //ghosts: {2,4,7,8,9}
+    //cells:  {0,1,4,3,2}
+    //ghosts: {6,5,7,8,9}
     mesh.addCell(ElementType::TRIANGLE, false, g_connect);
     mesh.addCell(ghost);
     mesh.addCell(cell);
     mesh.addCell(ElementType::TRIANGLE, true, c_connect);
-    expected.insert(expected.begin() + 3, 4);
-    expected.insert(expected.begin() + 3, 2);
-    expected.insert(expected.begin() + 2, 5);
-    expected.insert(expected.begin() + 4, 6);
+    expected.insert(expected.begin() + 3, 5);
+    expected.insert(expected.begin() + 3, 6);
+    expected.insert(expected.begin() + 2, 4);
+    expected.insert(expected.begin() + 4, 2);
     internal.insert(internal.begin() + 3, false);
     internal.insert(internal.begin() + 3, false);
     internal.insert(internal.begin() + 2, true);
@@ -822,12 +861,12 @@ int                             i;
     log::cout() << endl;
 
     // Remove all internal cells and add 2 ghost cells
-    //bucket: {5,0,3}
+    //bucket: {0,3,4}
     //cells:  {}
-    //ghosts: {6,1,2,4,7,8,9}
-    mesh.deleteCell(6);
+    //ghosts: {2,1,6,5,7,8,9}
+    mesh.deleteCell(2);
     mesh.deleteCell(1);
-    mesh.deleteCell(5);
+    mesh.deleteCell(4);
     mesh.deleteCell(0);
     mesh.deleteCell(3);
     mesh.addCell(ghost);
@@ -838,7 +877,7 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.insert(expected.begin(), 1);
-    expected.insert(expected.begin(), 6);
+    expected.insert(expected.begin(), 2);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());
@@ -865,10 +904,10 @@ int                             i;
     log::cout() << endl;
 
     // Remove all ghosts add 2 internal cells
-    //bucket: {3,4,2,1,6,9,7,8}
-    //cells:  {5,1}
+    //bucket: {2,1,6,5,7,8,9}
+    //cells:  {4,0}
     //ghosts: {}
-    mesh.deleteCell(4);
+    mesh.deleteCell(5);
     mesh.deleteCell(2);
     mesh.deleteCell(1);
     mesh.deleteCell(6);
@@ -885,7 +924,7 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.insert(expected.begin(),0);
-    expected.insert(expected.begin(),5);
+    expected.insert(expected.begin(),4);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());
@@ -912,6 +951,7 @@ int                             i;
         it->display(log::cout(), 4);
     } //next it
     log::cout() << endl;
+#endif
 
 }
 
