@@ -2195,31 +2195,6 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 }
 
 /*!
-	Sets the internal flag of a cell.
-
-	\param[in] id is the index of the cell
-	\param[in] isInternal is the internal flag that will be set
-	\param[in] ownerRank if the cell becomes a ghost, this is the owner of the cell
-*/
-bool PatchKernel::setCellInternal(const long &id, bool isInternal, int ownerRank)
-{
-	if (!isExpert()) {
-		return false;
-	}
-
-	if (m_cells[id].isInterior() == isInternal) {
-		return true;
-	} else if (isInternal) {
-		moveGhost2Internal(id);
-	} else {
-		assert(ownerRank >= 0);
-		moveInternal2Ghost(id, ownerRank);
-	}
-
-	return true;
-}
-
-/*!
 	Converts an internal cell to a ghost cell.
 
 	\param[in] id is the index of the cell

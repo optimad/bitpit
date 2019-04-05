@@ -370,7 +370,6 @@ public:
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
-	bool setCellInternal(const long &id, bool isInternal, int ownerRank);
 	CellIterator moveGhost2Internal(const long &id);
 	CellIterator moveInternal2Ghost(const long &id, int ownerRank);
 	virtual double evalCellSize(const long &id) const = 0;
