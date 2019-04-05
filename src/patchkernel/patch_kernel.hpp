@@ -690,7 +690,7 @@ private:
 	bool m_partitioned;
 	PartitioningStatus m_partitioningStatus;
 
-	int m_haloSize;
+	std::size_t m_haloSize;
 
 	int m_nPartitioningGlobalExchanges;
 	std::vector<int> m_partitioningGlobalSenders;

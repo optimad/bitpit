@@ -5546,7 +5546,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 4;
+	const int KERNEL_DUMP_VERSION = 5;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
