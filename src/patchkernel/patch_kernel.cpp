@@ -1884,6 +1884,10 @@ long PatchKernel::generateCellId()
 PatchKernel::CellIterator PatchKernel::createCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												  bool interior, long id)
 {
+#if not BITPIT_ENABLE_MPI==1
+	BITPIT_UNUSED(interior);
+#endif
+
 	if (id < 0) {
 		id = generateCellId();
 	}
@@ -1893,42 +1897,60 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementType type, std::unique_
 	}
 
 	PiercedVector<Cell>::iterator iterator;
+#if BITPIT_ENABLE_MPI==1
 	if (interior) {
-		// Create an internal cell
-		//
-		// If there are ghosts cells, the internal cell should be inserted
-		// before the first ghost cell.
-		if (m_firstGhostId < 0) {
-			iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), interior, true);
-		} else {
-			iterator = m_cells.emreclaimBefore(m_firstGhostId, id, id, type, std::move(connectStorage), interior, true);
-		}
-		m_nInternals++;
-
-		// Update the id of the last internal cell
-		if (m_lastInternalId < 0) {
-			m_lastInternalId = id;
-		} else if (m_cells.rawIndex(m_lastInternalId) < m_cells.rawIndex(id)) {
-			m_lastInternalId = id;
-		}
+		iterator = _createInternal(type, std::move(connectStorage), id);
 	} else {
-		// Create a ghost cell
-		//
-		// If there are internal cells, the ghost cell should be inserted
-		// after the last internal cell.
-		if (m_lastInternalId < 0) {
-			iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), interior, true);
-		} else {
-			iterator = m_cells.emreclaimAfter(m_lastInternalId, id, id, type, std::move(connectStorage), interior, true);
-		}
-		m_nGhosts++;
+		iterator = _createGhost(type, std::move(connectStorage), id);
+	}
+#else
+	iterator = _createInternal(type, std::move(connectStorage), id);
+#endif
 
-		// Update the id of the first ghost cell
-		if (m_firstGhostId < 0) {
-			m_firstGhostId = id;
-		} else if (m_cells.rawIndex(m_firstGhostId) > m_cells.rawIndex(id)) {
-			m_firstGhostId = id;
-		}
+	return iterator;
+}
+
+/*!
+	Internal function to create an internal cell.
+
+	\param type is the type of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the newly created cell.
+*/
+PatchKernel::CellIterator PatchKernel::_createInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+													   long id)
+{
+	// Get the id of the cell before which the new cell should be inserted
+#if BITPIT_ENABLE_MPI==1
+	//
+	// If there are ghosts cells, the internal cell should be inserted
+	// before the first ghost cell.
+#endif
+	long referenceId;
+#if BITPIT_ENABLE_MPI==1
+	referenceId = m_firstGhostId;
+#else
+	referenceId = Cell::NULL_ID;
+#endif
+
+	// Create the cell
+	PiercedVector<Cell>::iterator iterator;
+	if (referenceId == Cell::NULL_ID) {
+		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), true, true);
+	} else {
+		iterator = m_cells.emreclaimBefore(referenceId, id, id, type, std::move(connectStorage), true, true);
+	}
+	m_nInternals++;
+
+	// Update the id of the last internal cell
+	if (m_lastInternalId < 0) {
+		m_lastInternalId = id;
+	} else if (m_cells.rawIndex(m_lastInternalId) < m_cells.rawIndex(id)) {
+		m_lastInternalId = id;
 	}
 
 	return iterator;

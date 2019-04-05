@@ -730,6 +730,11 @@ private:
 	void evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 
 	void mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination);
+
+	CellIterator _createInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+#if BITPIT_ENABLE_MPI==1
+	CellIterator _createGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+#endif
 };
 
 }

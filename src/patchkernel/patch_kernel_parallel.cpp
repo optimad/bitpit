@@ -201,6 +201,42 @@ void PatchKernel::_setHaloSize(std::size_t haloSize)
 }
 
 /*!
+	Internal function to create a ghost cell.
+
+	\param type is the type of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the newly created cell.
+*/
+PatchKernel::CellIterator PatchKernel::_createGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+                                                    long id)
+{
+	// Create the cell
+	//
+	// If there are internal cells, the ghost cell should be inserted
+	// after the last internal cell.
+	PiercedVector<Cell>::iterator iterator;
+	if (m_lastInternalId < 0) {
+		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), false, true);
+	} else {
+		iterator = m_cells.emreclaimAfter(m_lastInternalId, id, id, type, std::move(connectStorage), false, true);
+	}
+	m_nGhosts++;
+
+	// Update the id of the first ghost cell
+	if (m_firstGhostId < 0) {
+		m_firstGhostId = id;
+	} else if (m_cells.rawIndex(m_firstGhostId) > m_cells.rawIndex(id)) {
+		m_firstGhostId = id;
+	}
+
+	return iterator;
+}
+
+/*!
 	Partitions the patch among the processors. Each cell will be assigned
 	to a specific processor according to the specified input.
 
