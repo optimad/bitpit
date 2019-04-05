@@ -269,7 +269,6 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-	std::cout << " VV " << PatchManager::AUTOMATIC_ID << std::endl;
     SurfUnstructured                    envelope(2, 3);
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
