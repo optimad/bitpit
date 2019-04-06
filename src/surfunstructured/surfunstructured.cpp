@@ -413,7 +413,7 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         // PREPARE MESH FOR DATA IMPORT                                           //
         // ====================================================================== //
         reserveVertices(getVertexCount() + nVertex);
-        reserveCells(m_nInternals + m_nGhosts + nSimplex);
+        reserveCells(getCellCount() + nSimplex);
 
         // ====================================================================== //
         // ADD VERTICES TO MESH                                                   //
@@ -559,8 +559,13 @@ unsigned short SurfUnstructured::exportSTLSingle(const std::string &name, const 
     // ====================================================================== //
     dummyIntArray.fill(0) ;
 
-    nSimplex = m_nInternals;
-    if (!exportInternalsOnly) nSimplex += m_nGhosts;
+    nSimplex = getInternalCount();
+#if BITPIT_ENABLE_MPI==1
+    if (!exportInternalsOnly) {
+        nSimplex += getGhostCount();
+    }
+#endif
+
     vertexList.resize(getVertexCount());
     normalList.resize(nSimplex);
     connectivityList.resize(nSimplex, dummyIntArray);
