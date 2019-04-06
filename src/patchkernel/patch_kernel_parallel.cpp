@@ -316,7 +316,7 @@ const Cell & PatchKernel::getFirstGhost() const
 }
 
 /*!
-	Internal function to create a ghost cell.
+	Internal function to add a ghost cell.
 
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
@@ -326,8 +326,8 @@ const Cell & PatchKernel::getFirstGhost() const
 	for the cell
 	\return An iterator pointing to the newly created cell.
 */
-PatchKernel::CellIterator PatchKernel::_createGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-                                                    long id)
+PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+												long id)
 {
 	// Create the cell
 	//

@@ -366,12 +366,12 @@ public:
 	const Cell &getFirstGhost() const;
 #endif
 	long generateCellId();
-	CellIterator addCell(ElementType type, const long &id = Element::NULL_ID);
-	CellIterator addCell(ElementType type, bool interior, const long &id = Element::NULL_ID);
-	CellIterator addCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, const long &id = Element::NULL_ID);
-	CellIterator addCell(ElementType type, bool interior, const std::vector<long> &connectivity, const long &id = Element::NULL_ID);
 	CellIterator addCell(const Cell &source, long id = Element::NULL_ID);
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, bool interior, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, bool interior, const std::vector<long> &connectivity, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 #if BITPIT_ENABLE_MPI==1
@@ -742,7 +742,6 @@ private:
 
 	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
 	InterfaceIterator createInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
-	CellIterator createCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, long id = Element::NULL_ID);
 
 	int findAdjoinNeighFace(const long &cellId, const long &neighId) const;
 
@@ -753,9 +752,9 @@ private:
 
 	void mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination);
 
-	CellIterator _createInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+	CellIterator _addInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #if BITPIT_ENABLE_MPI==1
-	CellIterator _createGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+	CellIterator _addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #endif
 
 	void _restoreInternal(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);

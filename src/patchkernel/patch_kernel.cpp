@@ -1831,23 +1831,133 @@ long PatchKernel::generateCellId()
 }
 
 /*!
-	Creates a new cell with the specified id.
+	Adds the specified cell to the patch.
+
+	\param source is the cell that will be added
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
+{
+	if (id < 0) {
+		id = generateCellId();
+	}
+
+	Cell cell = source;
+
+	return addCell(std::move(cell), id);
+}
+
+/*!
+	Adds the specified cell to the patch.
+
+	\param source is the cell that will be added
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, the id of the source will be used
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
+{
+	if (id < 0) {
+		id = source.getId();
+	}
+
+	int connectSize = source.getConnectSize();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	CellIterator iterator = addCell(source.getType(), source.isInterior(), std::move(connectStorage), id);
+
+	Cell &cell = (*iterator);
+	id = cell.getId();
+	cell = std::move(source);
+	cell.setId(id);
+
+	return iterator;
+}
+
+/*!
+	Adds a new cell with the specified id.
 
 	\param type is the type of the cell
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, long id)
+{
+	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	return addCell(type, true, std::move(connectStorage), id);
+}
+
+/*!
+	Adds a new cell with the specified id and type.
+
+	\param type is the type of the cell
+	\param interior is true if the cell is the interior of the patch,
+	false otherwise
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior, long id)
+{
+	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	return addCell(type, interior, std::move(connectStorage), id);
+}
+
+/*!
+	Adds a new cell with the specified id, type, and connectivity.
+
+	\param type is the type of the cell
+	\param interior defines if the cell is in the interior of the patch
+	or if it's a ghost cell
+	\param connectivity is the connectivity of the cell
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
+								               const std::vector<long> &connectivity, long id)
+{
+	int connectSize = connectivity.size();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
+
+	return addCell(type, interior, std::move(connectStorage), id);
+}
+
+/*!
+	Adds a new cell with the specified id, type, and connectivity.
+
+	\param type is the type of the cell
+	\param interior defines if the cell is in the interior of the patch
+	or if it's a ghost cell
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
-	\param interior is true if the cell is an interior cell, false otherwise
-	\return An iterator pointing to the newly created cell.
+	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::createCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-												  bool interior, long id)
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
+                                               std::unique_ptr<long[]> &&connectStorage, long id)
 {
 #if not BITPIT_ENABLE_MPI==1
 	BITPIT_UNUSED(interior);
 #endif
+
+	if (!isExpert()) {
+		return cellEnd();
+	}
 
 	if (id < 0) {
 		id = generateCellId();
@@ -1860,19 +1970,19 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementType type, std::unique_
 	PiercedVector<Cell>::iterator iterator;
 #if BITPIT_ENABLE_MPI==1
 	if (interior) {
-		iterator = _createInternal(type, std::move(connectStorage), id);
+		iterator = _addInternal(type, std::move(connectStorage), id);
 	} else {
-		iterator = _createGhost(type, std::move(connectStorage), id);
+		iterator = _addGhost(type, std::move(connectStorage), id);
 	}
 #else
-	iterator = _createInternal(type, std::move(connectStorage), id);
+	iterator = _addInternal(type, std::move(connectStorage), id);
 #endif
 
 	return iterator;
 }
 
 /*!
-	Internal function to create an internal cell.
+	Internal function to add an internal cell.
 
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
@@ -1882,8 +1992,8 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementType type, std::unique_
 	for the cell
 	\return An iterator pointing to the newly created cell.
 */
-PatchKernel::CellIterator PatchKernel::_createInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-													   long id)
+PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+													long id)
 {
 	// Get the id of the cell before which the new cell should be inserted
 #if BITPIT_ENABLE_MPI==1
@@ -1913,162 +2023,6 @@ PatchKernel::CellIterator PatchKernel::_createInternal(ElementType type, std::un
 	} else if (m_cells.rawIndex(m_lastInternalId) < m_cells.rawIndex(id)) {
 		m_lastInternalId = id;
 	}
-
-	return iterator;
-}
-
-/*!
-	Adds a new cell with the specified id.
-
-	\param type is the type of the cell
-	\param id is the id that will be assigned to the newly created cell.
-	If a negative id value is specified, a new unique id will be generated
-	for the cell
-	\return An iterator pointing to the added cell.
-*/
-PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const long &id)
-{
-	if (!isExpert()) {
-		return cellEnd();
-	}
-
-	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-
-	return createCell(type, std::move(connectStorage), true, id);
-}
-
-/*!
-	Adds a new cell with the specified id and type.
-
-	\param type is the type of the cell
-	\param interior is true if the cell is the interior of the patch,
-	false otherwise
-	\param id is the id that will be assigned to the newly created cell.
-	If a negative id value is specified, a new unique id will be generated
-	for the cell
-	\return An iterator pointing to the added cell.
-*/
-PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior, const long &id)
-{
-	if (!isExpert()) {
-		return cellEnd();
-	}
-
-	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-
-	CellIterator iterator = createCell(type, std::move(connectStorage), interior, id);
-
-	return iterator;
-}
-
-/*!
-	Adds a new cell with the specified id, type, and connectivity.
-
-	\param type is the type of the cell
-	\param interior defines if the cell is in the interior of the patch
-	or if it's a ghost cell
-	\param connectStorage is the storage the contains or will contain
-	the connectivity of the element
-	\param id is the id that will be assigned to the newly created cell.
-	If a negative id value is specified, a new unique id will be generated
-	for the cell
-	\return An iterator pointing to the added cell.
-*/
-PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
-                                               std::unique_ptr<long[]> &&connectStorage, const long &id)
-{
-	if (!isExpert()) {
-		return cellEnd();
-	}
-
-	CellIterator iterator = createCell(type, std::move(connectStorage), interior, id);
-
-	return iterator;
-}
-
-/*!
-	Adds a new cell with the specified id, type, and connectivity.
-
-	\param type is the type of the cell
-	\param interior defines if the cell is in the interior of the patch
-	or if it's a ghost cell
-	\param connectivity is the connectivity of the cell
-	\param id is the id that will be assigned to the newly created cell.
-	If a negative id value is specified, a new unique id will be generated
-	for the cell
-	\return An iterator pointing to the added cell.
-*/
-PatchKernel::CellIterator PatchKernel::addCell(ElementType type, bool interior,
-								               const std::vector<long> &connectivity, const long &id)
-{
-	if (!isExpert()) {
-		return cellEnd();
-	}
-
-	int connectSize = connectivity.size();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
-
-	CellIterator iterator = createCell(type, std::move(connectStorage), interior, id);
-
-	return iterator;
-}
-
-/*!
-	Adds the specified cell to the patch.
-
-	\param source is the cell that will be added
-	\param id is the id that will be assigned to the newly created cell.
-	If a negative id value is specified, a new unique id will be generated
-	for the cell
-	\return An iterator pointing to the added cell.
-*/
-PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
-{
-	if (!isExpert()) {
-		return cellEnd();
-	}
-
-	int connectSize = source.getConnectSize();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-
-	CellIterator iterator = createCell(source.getType(), std::move(connectStorage), source.isInterior(), id);
-	Cell &cell = (*iterator);
-	id = cell.getId();
-	cell = source;
-	cell.setId(id);
-
-	return iterator;
-}
-
-/*!
-	Adds the specified cell to the patch.
-
-	\param source is the cell that will be added
-	\param id is the id that will be assigned to the newly created cell.
-	If a negative id value is specified, the id of the source will be used
-	\return An iterator pointing to the added cell.
-*/
-PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
-{
-	if (!isExpert()) {
-		return cellEnd();
-	}
-
-	if (id < 0) {
-		id = source.getId();
-	}
-
-	int connectSize = source.getConnectSize();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-
-	CellIterator iterator = createCell(source.getType(), std::move(connectStorage), source.isInterior(), id);
-	Cell &cell = (*iterator);
-	id = cell.getId();
-	cell = std::move(source);
-	cell.setId(id);
 
 	return iterator;
 }
