@@ -3312,8 +3312,10 @@ long PatchKernel::countFreeFaces() const
  */
 void PatchKernel::dumpVertices(std::ostream &stream) const
 {
-	utils::binary::write(stream, getVertexCount());
+	// Dump kernel
+	m_vertices.dumpKernel(stream);
 
+	// Dump vertices
 	for (const Vertex &vertex : m_vertices) {
 		utils::binary::write(stream, vertex.getId());
 
@@ -3331,10 +3333,15 @@ void PatchKernel::dumpVertices(std::ostream &stream) const
  */
 void PatchKernel::restoreVertices(std::istream &stream)
 {
-	long nVertices;
-	utils::binary::read(stream, nVertices);
+	// Restore kernel
+	m_vertices.restoreKernel(stream);
 
-	reserveVertices(nVertices);
+	// Enable advanced editing
+	bool originalExpertStatus = isExpert();
+	setExpert(true);
+
+	// Restore vertices
+	long nVertices = m_vertices.size();
 	for (long i = 0; i < nVertices; ++i) {
 		long id;
 		utils::binary::read(stream, id);
@@ -3344,8 +3351,17 @@ void PatchKernel::restoreVertices(std::istream &stream)
 		utils::binary::read(stream, coords[1]);
 		utils::binary::read(stream, coords[2]);
 
-		addVertex(coords, id);
+		VertexIterator vertexIterator = m_vertices.find(id);
+		if (vertexIterator == m_vertices.end()) {
+			throw std::runtime_error("Unable to restore the vertices. Kernel doesn't match dumped vertices.");
+		}
+
+		Vertex &vertex = *vertexIterator;
+		vertex.initialize(id, std::move(coords));
 	}
+
+	// Set original advanced editing status
+	setExpert(originalExpertStatus);
 }
 
 /*!
@@ -5414,7 +5430,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 5;
+	const int KERNEL_DUMP_VERSION = 6;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
