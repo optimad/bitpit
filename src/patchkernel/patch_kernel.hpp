@@ -599,6 +599,8 @@ protected:
 
 	CellIterator restoreCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, const long &id);
 
+	InterfaceIterator restoreInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, const long &id);
+
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
 

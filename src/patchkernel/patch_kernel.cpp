@@ -3206,6 +3206,40 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, lon
 }
 
 /*!
+	Resore the interface with the specified id.
+
+	The kernel should already contain the interface, only the contents of the
+	interface will be updated.
+
+	\param type is the type of the interface
+	\param connectivity is the connectivity of the interface
+	\param id is the id of the interface to restore
+	\return An iterator pointing to the restored interface.
+*/
+PatchKernel::InterfaceIterator PatchKernel::restoreInterface(ElementType type,
+															 std::unique_ptr<long[]> &&connectStorage,
+															 const long &id)
+{
+	if (!isExpert()) {
+		return interfaceEnd();
+	}
+
+	if (Interface::getDimension(type) > (getDimension() - 1)) {
+		return interfaceEnd();
+	}
+
+	InterfaceIterator iterator = m_interfaces.find(id);
+	if (iterator == m_interfaces.end()) {
+		throw std::runtime_error("Unable to restore the specified interface: the kernel doesn't contain an entry for that interface.");
+	}
+
+	Interface &interface = *iterator;
+	interface.initialize(id, type, std::move(connectStorage));
+
+	return iterator;
+}
+
+/*!
 	Deletes an interface.
 
 	\param id is the id of the interface
@@ -4459,13 +4493,8 @@ PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int
 		interface = &(*interfaceIterator);
 		interfaceId = interface->getId();
 	} else {
-		interfaceIterator = m_interfaces.find(interfaceId);
-		if (interfaceIterator == m_interfaces.end()) {
-			throw std::runtime_error("Error initializing the interface.");
-		}
-
+		interfaceIterator = restoreInterface(interfaceType, std::move(interfaceConnect), interfaceId);
 		interface = &(*interfaceIterator);
-		interface->initialize(interfaceId, interfaceType, std::move(interfaceConnect));
 	}
 
 	// Set owner and neighbour
