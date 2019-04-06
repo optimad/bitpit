@@ -735,6 +735,11 @@ private:
 #if BITPIT_ENABLE_MPI==1
 	CellIterator _createGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #endif
+
+	void _deleteInternal(long id, bool delayed);
+#if BITPIT_ENABLE_MPI==1
+	void _deleteGhost(long id, bool delayed);
+#endif
 };
 
 }

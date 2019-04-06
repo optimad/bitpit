@@ -2128,7 +2128,6 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 
 	// Get cell information
 	const Cell &cell = m_cells[id];
-	bool isInternal = cell.isInterior();
 
 	// Update neighbours
 	if (updateNeighs) {
@@ -2165,27 +2164,20 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		}
 	}
 
+	// Delete cell
 #if BITPIT_ENABLE_MPI==1
-	// Unset ghost owner
-	if (!isInternal) {
-		unsetGhostOwner(id);
+	bool isInternal = cell.isInterior();
+	if (isInternal) {
+		_deleteInternal(id, delayed);
+	} else {
+		_deleteGhost(id, delayed);
 	}
+#else
+	_deleteInternal(id, delayed);
 #endif
 
-	// Delete cell
-	m_cells.erase(id, delayed);
+	// Cell id is no longer used
 	m_cellIdGenerator.trash(id);
-	if (isInternal) {
-		m_nInternals--;
-		if (id == m_lastInternalId) {
-			updateLastInternalId();
-		}
-	} else {
-		m_nGhosts--;
-		if (id == m_firstGhostId) {
-			updateFirstGhostId();
-		}
-	}
 
 	return true;
 }
@@ -2214,6 +2206,21 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 	}
 
 	return true;
+}
+
+/*!
+	Internal function to delete an internal cell.
+
+	\param id is the id of the cell
+	\param delayed is true a delayed delete will be performed
+*/
+void PatchKernel::_deleteInternal(long id, bool delayed)
+{
+	m_cells.erase(id, delayed);
+	m_nInternals--;
+	if (id == m_lastInternalId) {
+		updateLastInternalId();
+	}
 }
 
 /*!

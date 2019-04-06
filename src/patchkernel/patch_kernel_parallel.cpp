@@ -237,6 +237,25 @@ PatchKernel::CellIterator PatchKernel::_createGhost(ElementType type, std::uniqu
 }
 
 /*!
+	Internal function to delete a ghost cell.
+
+	\param id is the id of the cell
+	\param delayed is true a delayed delete will be performed
+*/
+void PatchKernel::_deleteGhost(long id, bool delayed)
+{
+	// Unset ghost owner
+	unsetGhostOwner(id);
+
+	// Delete cell
+	m_cells.erase(id, delayed);
+	m_nGhosts--;
+	if (id == m_firstGhostId) {
+		updateFirstGhostId();
+	}
+}
+
+/*!
 	Partitions the patch among the processors. Each cell will be assigned
 	to a specific processor according to the specified input.
 
