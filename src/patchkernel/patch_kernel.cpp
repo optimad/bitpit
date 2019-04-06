@@ -3371,17 +3371,10 @@ void PatchKernel::restoreVertices(std::istream &stream)
  */
 void PatchKernel::dumpCells(std::ostream &stream) const
 {
-	long nInternals = getInternalCount();
-	utils::binary::write(stream, nInternals);
+	// Dump kernel
+	m_cells.dumpKernel(stream);
 
-	long nGhosts;
-#if BITPIT_ENABLE_MPI==1
-	nGhosts = getGhostCount();
-#else
-	nGhosts = 0;
-#endif
-	utils::binary::write(stream, nGhosts);
-
+	// Dump cells
 	for (const Cell &cell: m_cells) {
 		utils::binary::write(stream, cell.getId());
 		utils::binary::write(stream, cell.getPID());
@@ -3404,18 +3397,15 @@ void PatchKernel::dumpCells(std::ostream &stream) const
  */
 void PatchKernel::restoreCells(std::istream &stream)
 {
-	// Restore the cells
-	long nInternals;
-	utils::binary::read(stream, nInternals);
+	// Restore kernel
+	m_cells.restoreKernel(stream);
 
-	long nGhosts;
-	utils::binary::read(stream, nGhosts);
+	// Enable advanced editing
+	bool originalExpertStatus = isExpert();
+	setExpert(true);
 
-	long nCells = nInternals + nGhosts;
-
-	reserveCells(nCells);
-
-	std::vector<long> cellConnect;
+	// Restore cells
+	long nCells = m_cells.size();
 	for (long i = 0; i < nCells; ++i) {
 		long id;
 		utils::binary::read(stream, id);
@@ -3429,19 +3419,29 @@ void PatchKernel::restoreCells(std::istream &stream)
 		int cellConnectSize;
 		utils::binary::read(stream, cellConnectSize);
 
-		cellConnect.resize(cellConnectSize);
+		std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[cellConnectSize]);
 		for (int k = 0; k < cellConnectSize; ++k) {
 			utils::binary::read(stream, cellConnect[k]);
 		}
 
-		CellIterator cellIterator = addCell(type, true, cellConnect, id);
+		auto cellIterator = m_cells.find(id);
+		if (cellIterator == m_cells.end()) {
+			throw std::runtime_error("Unable to restore the vertices. Kernel doesn't match dumped vertices.");
+		}
+
+		Cell &cell = *cellIterator;
+		cell.initialize(id, type, std::move(cellConnect), true, true);
 		cellIterator->setPID(PID);
+		m_nInternals++;
 	}
 
 	// Restore adjacencies
 	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
 		buildAdjacencies();
 	}
+
+	// Set original advanced editing status
+	setExpert(originalExpertStatus);
 }
 
 /*!
@@ -5430,7 +5430,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 6;
+	const int KERNEL_DUMP_VERSION = 7;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
