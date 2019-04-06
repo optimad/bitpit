@@ -1672,20 +1672,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 		if (!restoreStream) {
 			addCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
 		} else {
-			auto cellIterator = m_cells.find(cellId);
-			if (cellIterator == m_cells.end()) {
-				throw std::runtime_error("");
-			}
-
-			Cell &cell = *cellIterator;
-			cell.initialize(cellId, m_cellTypeInfo->type, std::move(cellConnect), octantInfo.internal, true);
-			if (octantInfo.internal) {
-				m_nInternals++;
-			} else {
-#if BITPIT_ENABLE_MPI==1
-				m_nGhosts++;
-#endif
-			}
+			restoreCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
 		}
 
 		// If the cell is a ghost set its owner

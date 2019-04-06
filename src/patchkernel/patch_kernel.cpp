@@ -2047,6 +2047,64 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
 }
 
 /*!
+	Resore the cell with the specified id.
+
+	The kernel should already contain the cell, only the contents of the
+	cell will be updated.
+
+	\param type is the type of the cell
+	\param interior defines if the cell is in the interior of the patch
+	or if it's a ghost cell
+	\param connectivity is the connectivity of the cell
+	\param id is the id of the cell that will be restored
+	\return An iterator pointing to the restored cell.
+*/
+PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, bool interior,
+												   std::unique_ptr<long[]> &&connectStorage, const long &id)
+{
+#if not BITPIT_ENABLE_MPI==1
+	BITPIT_UNUSED(interior);
+#endif
+
+	if (Cell::getDimension(type) > getDimension()) {
+		return cellEnd();
+	}
+
+	PiercedVector<Cell>::iterator iterator = m_cells.find(id);
+	if (iterator == m_cells.end()) {
+		throw std::runtime_error("Unable to restore the specified cell: the kernel doesn't contain an entry for that cell.");
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	if (interior) {
+		_restoreInternal(iterator, type, std::move(connectStorage));
+	} else {
+		_restoreGhost(iterator, type, std::move(connectStorage));
+	}
+#else
+	_restoreInternal(iterator, type, std::move(connectStorage));
+#endif
+
+	return iterator;
+}
+
+/*!
+	Internal function to restore an internal cell.
+
+	\param iterator is an iterator pointing to the cell to restore
+	\param type is the type of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+*/
+void PatchKernel::_restoreInternal(CellIterator iterator, ElementType type,
+								   std::unique_ptr<long[]> &&connectStorage)
+{
+	Cell &cell = *iterator;
+	cell.initialize(iterator.getId(), type, std::move(connectStorage), true, true);
+	m_nInternals++;
+}
+
+/*!
 	Deletes a cell.
 
 	\param id is the id of the cell
@@ -3424,15 +3482,8 @@ void PatchKernel::restoreCells(std::istream &stream)
 			utils::binary::read(stream, cellConnect[k]);
 		}
 
-		auto cellIterator = m_cells.find(id);
-		if (cellIterator == m_cells.end()) {
-			throw std::runtime_error("Unable to restore the vertices. Kernel doesn't match dumped vertices.");
-		}
-
-		Cell &cell = *cellIterator;
-		cell.initialize(id, type, std::move(cellConnect), true, true);
-		cellIterator->setPID(PID);
-		m_nInternals++;
+		CellIterator iterator = restoreCell(type, true, std::move(cellConnect), id);
+		iterator->setPID(PID);
 	}
 
 	// Restore adjacencies

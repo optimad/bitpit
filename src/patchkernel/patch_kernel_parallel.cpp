@@ -352,6 +352,25 @@ PatchKernel::CellIterator PatchKernel::_createGhost(ElementType type, std::uniqu
 }
 
 /*!
+	Internal function to restore a ghost cell.
+
+	The kernel should already contain the cell, only the contents of the
+	cell will be updated.
+
+	\param iterator is an iterator pointing to the cell to restore
+	\param type is the type of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+*/
+void PatchKernel::_restoreGhost(CellIterator iterator, ElementType type,
+								std::unique_ptr<long[]> &&connectStorage)
+{
+	Cell &cell = *iterator;
+	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, true);
+	m_nGhosts++;
+}
+
+/*!
 	Internal function to delete a ghost cell.
 
 	\param id is the id of the cell

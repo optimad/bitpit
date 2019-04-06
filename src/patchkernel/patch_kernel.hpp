@@ -597,6 +597,8 @@ protected:
 	void setBoundingBoxDirty(bool dirty);
 	void setBoundingBox(const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint);
 
+	CellIterator restoreCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, const long &id);
+
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
 
@@ -750,6 +752,11 @@ private:
 	CellIterator _createInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #if BITPIT_ENABLE_MPI==1
 	CellIterator _createGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+#endif
+
+	void _restoreInternal(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
+#if BITPIT_ENABLE_MPI==1
+	void _restoreGhost(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 #endif
 
 	void _deleteInternal(long id, bool delayed);
