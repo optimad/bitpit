@@ -1282,6 +1282,33 @@ PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 }
 
 /*!
+	Resore the vertex with the specified id.
+
+	The kernel should already contain the vertex, only the contents of the
+	vertex will be updated.
+
+	\param coords are the coordinates of the vertex
+	\param id is the id of the vertex to restore
+	\return An iterator pointing to the restored vertex.
+*/
+PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &&coords, const long &id)
+{
+	if (!isExpert()) {
+		return vertexEnd();
+	}
+
+	VertexIterator iterator = m_vertices.find(id);
+	if (iterator == m_vertices.end()) {
+		throw std::runtime_error("Unable to restore the specified vertex: the kernel doesn't contain an entry for that vertex.");
+	}
+
+	Vertex &vertex = *iterator;
+	vertex.initialize(id, std::move(coords));
+
+	return iterator;
+}
+
+/*!
 	Deletes a vertex.
 
 	\param id is the id of the vertex
@@ -3443,13 +3470,7 @@ void PatchKernel::restoreVertices(std::istream &stream)
 		utils::binary::read(stream, coords[1]);
 		utils::binary::read(stream, coords[2]);
 
-		VertexIterator vertexIterator = m_vertices.find(id);
-		if (vertexIterator == m_vertices.end()) {
-			throw std::runtime_error("Unable to restore the vertices. Kernel doesn't match dumped vertices.");
-		}
-
-		Vertex &vertex = *vertexIterator;
-		vertex.initialize(id, std::move(coords));
+		restoreVertex(std::move(coords), id);
 	}
 
 	// Set original advanced editing status
