@@ -567,24 +567,6 @@ protected:
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
 
-	IndexGenerator<long> m_vertexIdGenerator;
-	IndexGenerator<long> m_interfaceIdGenerator;
-	IndexGenerator<long> m_cellIdGenerator;
-
-	long m_nInternals;
-#if BITPIT_ENABLE_MPI==1
-	long m_nGhosts;
-#endif
-
-	long m_lastInternalId;
-#if BITPIT_ENABLE_MPI==1
-	long m_firstGhostId;
-#endif
-
-	VTKUnstructuredGrid m_vtk ;
-	WriteTarget m_vtkWriteTarget;
-	PiercedStorage<long, long> m_vtkVertexMap;
-
 	PatchKernel(bool expert);
 	PatchKernel(const int &dimension, bool expert);
 	PatchKernel(const int &id, const int &dimension, bool expert);
@@ -681,6 +663,24 @@ protected:
 
 private:
 	double DEFAULT_TOLERANCE = 1e-14;
+
+	IndexGenerator<long> m_vertexIdGenerator;
+	IndexGenerator<long> m_interfaceIdGenerator;
+	IndexGenerator<long> m_cellIdGenerator;
+
+	long m_nInternals;
+#if BITPIT_ENABLE_MPI==1
+	long m_nGhosts;
+#endif
+
+	long m_lastInternalId;
+#if BITPIT_ENABLE_MPI==1
+	long m_firstGhostId;
+#endif
+
+	VTKUnstructuredGrid m_vtk ;
+	WriteTarget m_vtkWriteTarget;
+	PiercedStorage<long, long> m_vtkVertexMap;
 
 	bool m_boxFrozen;
 	bool m_boxDirty;
