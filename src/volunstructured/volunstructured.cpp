@@ -201,7 +201,7 @@ std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
  */
 int VolUnstructured::_getDumpVersion() const
 {
-	const int DUMP_VERSION = 1;
+	const int DUMP_VERSION = 2;
 
 	return DUMP_VERSION;
 }
@@ -213,13 +213,6 @@ int VolUnstructured::_getDumpVersion() const
  */
 void VolUnstructured::_dump(std::ostream &stream) const
 {
-#if BITPIT_ENABLE_MPI==1
-	// Dump works only for serial calculations
-	if (getProcessorCount() != 1) {
-		throw std::runtime_error ("Dump of volunstructured is implemented only for serial calculations.");
-	}
-#endif
-
 	// Dump certices
 	dumpVertices(stream);
 
@@ -237,13 +230,6 @@ void VolUnstructured::_dump(std::ostream &stream) const
  */
 void VolUnstructured::_restore(std::istream &stream)
 {
-#if BITPIT_ENABLE_MPI==1
-	// Restore works only for serial calculations
-	if (getProcessorCount() != 1) {
-		throw std::runtime_error ("Restore of volunstructured is implemented only for serial calculations.");
-	}
-#endif
-
 	// Restore certices
 	restoreVertices(stream);
 
