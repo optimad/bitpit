@@ -3398,6 +3398,12 @@ void PatchKernel::dumpCells(std::ostream &stream) const
 		utils::binary::write(stream, cell.getId());
 		utils::binary::write(stream, cell.getPID());
 		utils::binary::write(stream, cell.getType());
+#if BITPIT_ENABLE_MPI==1
+		utils::binary::write(stream, getCellRank(cell.getId()));
+#else
+		int dummyRank = 0;
+		utils::binary::write(stream, dummyRank);
+#endif
 
 		int cellConnectSize = cell.getConnectSize();
 		utils::binary::write(stream, cellConnectSize);
@@ -3407,6 +3413,15 @@ void PatchKernel::dumpCells(std::ostream &stream) const
 			utils::binary::write(stream, cellConnect[i]);
 		}
 	}
+
+	// Dump ghost/internal subdivision
+#if BITPIT_ENABLE_MPI==1
+	utils::binary::write(stream, m_firstGhostId);
+	utils::binary::write(stream, m_lastInternalId);
+#else
+	utils::binary::write(stream, Cell::NULL_ID);
+	utils::binary::write(stream, Cell::NULL_ID);
+#endif
 }
 
 /*!
@@ -3435,6 +3450,14 @@ void PatchKernel::restoreCells(std::istream &stream)
 		ElementType type;
 		utils::binary::read(stream, type);
 
+#if BITPIT_ENABLE_MPI==1
+		int rank;
+		utils::binary::read(stream, rank);
+#else
+		int dummyRank;
+		utils::binary::read(stream, dummyRank);
+#endif
+
 		int cellConnectSize;
 		utils::binary::read(stream, cellConnectSize);
 
@@ -3443,14 +3466,37 @@ void PatchKernel::restoreCells(std::istream &stream)
 			utils::binary::read(stream, cellConnect[k]);
 		}
 
-		CellIterator iterator = restoreCell(type, std::move(cellConnect), id);
+		CellIterator iterator;
+#if BITPIT_ENABLE_MPI==1
+		iterator = restoreCell(type, std::move(cellConnect), rank, id);
+#else
+		iterator = restoreCell(type, std::move(cellConnect), id);
+#endif
 		iterator->setPID(PID);
 	}
+
+	// Restore ghost/internal subdivision
+#if BITPIT_ENABLE_MPI==1
+	utils::binary::read(stream, m_firstGhostId);
+	utils::binary::read(stream, m_lastInternalId);
+#else
+	long dummyFirstGhostId;
+	long dummyLastInternalId;
+	utils::binary::read(stream, dummyFirstGhostId);
+	utils::binary::read(stream, dummyLastInternalId);
+#endif
 
 	// Restore adjacencies
 	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
 		buildAdjacencies();
 	}
+
+#if BITPIT_ENABLE_MPI==1
+	// Update information for ghost data exchange
+	if (isPartitioned()) {
+		updateGhostExchangeInfo();
+	}
+#endif
 
 	// Set original advanced editing status
 	setExpert(originalExpertStatus);
@@ -5437,7 +5483,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 7;
+	const int KERNEL_DUMP_VERSION = 9;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
@@ -5469,6 +5515,13 @@ void PatchKernel::dump(std::ostream &stream) const
 
 	// Adaption status
 	utils::binary::write(stream, m_adaptionStatus);
+
+	// Partition status
+#if BITPIT_ENABLE_MPI==1
+	utils::binary::write(stream, m_partitioningStatus);
+#else
+	utils::binary::write(stream, PARTITIONING_UNSUPPORTED);
+#endif
 
 	// Adjacencies build strategy
 	utils::binary::write(stream, m_adjacenciesBuildStrategy);
@@ -5552,6 +5605,14 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 
 	// Adaption status
 	utils::binary::read(stream, m_adaptionStatus);
+
+	// Partition status
+#if BITPIT_ENABLE_MPI==1
+	utils::binary::read(stream, m_partitioningStatus);
+#else
+	PartitioningStatus dummyPartitioningStatus;
+	utils::binary::read(stream, dummyPartitioningStatus);
+#endif
 
 	// Adjacencies build strategy
 	utils::binary::read(stream, m_adjacenciesBuildStrategy);
