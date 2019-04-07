@@ -2042,19 +2042,13 @@ PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::uniqu
 	cell will be updated.
 
 	\param type is the type of the cell
-	\param interior defines if the cell is in the interior of the patch
-	or if it's a ghost cell
 	\param connectivity is the connectivity of the cell
 	\param id is the id of the cell that will be restored
 	\return An iterator pointing to the restored cell.
 */
-PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, bool interior,
-												   std::unique_ptr<long[]> &&connectStorage, const long &id)
+PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+												   const long &id)
 {
-#if not BITPIT_ENABLE_MPI==1
-	BITPIT_UNUSED(interior);
-#endif
-
 	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
 	}
@@ -2064,15 +2058,7 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, bool interi
 		throw std::runtime_error("Unable to restore the specified cell: the kernel doesn't contain an entry for that cell.");
 	}
 
-#if BITPIT_ENABLE_MPI==1
-	if (interior) {
-		_restoreInternal(iterator, type, std::move(connectStorage));
-	} else {
-		_restoreGhost(iterator, type, std::move(connectStorage));
-	}
-#else
 	_restoreInternal(iterator, type, std::move(connectStorage));
-#endif
 
 	return iterator;
 }
@@ -3457,7 +3443,7 @@ void PatchKernel::restoreCells(std::istream &stream)
 			utils::binary::read(stream, cellConnect[k]);
 		}
 
-		CellIterator iterator = restoreCell(type, true, std::move(cellConnect), id);
+		CellIterator iterator = restoreCell(type, std::move(cellConnect), id);
 		iterator->setPID(PID);
 	}
 

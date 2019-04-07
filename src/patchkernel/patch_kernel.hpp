@@ -588,7 +588,10 @@ protected:
 	void setBoundingBoxDirty(bool dirty);
 	void setBoundingBox(const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint);
 
-	CellIterator restoreCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, const long &id);
+	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, const long &id);
+#if BITPIT_ENABLE_MPI==1
+	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, const long &id);
+#endif
 
 	InterfaceIterator restoreInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, const long &id);
 
@@ -765,7 +768,7 @@ private:
 
 	void _restoreInternal(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 #if BITPIT_ENABLE_MPI==1
-	void _restoreGhost(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
+	void _restoreGhost(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank);
 #endif
 
 	void _deleteInternal(long id, bool delayed);

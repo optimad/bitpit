@@ -1684,13 +1684,13 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 		if (!restoreStream) {
 			addCell(m_cellTypeInfo->type, std::move(cellConnect), rank, cellId);
 		} else {
-			restoreCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
+			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), rank, cellId);
 		}
 #else
 		if (!restoreStream) {
 			addCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
 		} else {
-			restoreCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
+			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
 		}
 #endif
 

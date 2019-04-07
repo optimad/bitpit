@@ -480,6 +480,39 @@ PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_p
 }
 
 /*!
+	Resore the cell with the specified id.
+
+	The kernel should already contain the cell, only the contents of the
+	cell will be updated.
+
+	\param type is the type of the cell
+	\param connectivity is the connectivity of the cell
+	\param rank is the rank that owns the cell that will be restored
+	\param id is the id of the cell that will be restored
+	\return An iterator pointing to the restored cell.
+*/
+PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+												   int rank, const long &id)
+{
+	if (Cell::getDimension(type) > getDimension()) {
+		return cellEnd();
+	}
+
+	PiercedVector<Cell>::iterator iterator = m_cells.find(id);
+	if (iterator == m_cells.end()) {
+		throw std::runtime_error("Unable to restore the specified cell: the kernel doesn't contain an entry for that cell.");
+	}
+
+	if (rank == getRank()) {
+		_restoreInternal(iterator, type, std::move(connectStorage));
+	} else {
+		_restoreGhost(iterator, type, std::move(connectStorage), rank);
+	}
+
+	return iterator;
+}
+
+/*!
 	Internal function to restore a ghost cell.
 
 	The kernel should already contain the cell, only the contents of the
@@ -489,10 +522,13 @@ PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_p
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
+	\param rank is the rank that owns the cell that will be restored
 */
 void PatchKernel::_restoreGhost(CellIterator iterator, ElementType type,
-								std::unique_ptr<long[]> &&connectStorage)
+								std::unique_ptr<long[]> &&connectStorage, int rank)
 {
+	BITPIT_UNUSED(rank);
+
 	Cell &cell = *iterator;
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, true);
 	m_nGhosts++;
