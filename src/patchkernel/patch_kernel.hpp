@@ -329,9 +329,9 @@ public:
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
 	long generateVertexId();
-	VertexIterator addVertex(const std::array<double, 3> &coords, const long &id = Vertex::NULL_ID);
 	VertexIterator addVertex(const Vertex &source, long id = Vertex::NULL_ID);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
+	VertexIterator addVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
 	long countFreeVertices() const;
 	long countOrphanVertices() const;
 	std::vector<long> findOrphanVertices();
@@ -739,8 +739,6 @@ private:
 	void endAlteration(bool squeezeStorage = false);
 
 	InterfaceIterator buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
-
-	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
 
 	int findAdjoinNeighFace(const long &cellId, const long &neighId) const;
 

@@ -1189,25 +1189,45 @@ long PatchKernel::generateVertexId()
 }
 
 /*!
-	Creates a new vertex with the specified id.
+	Adds the specified vertex to the patch.
 
-	\param coords are the coordinates of the vertex
+	\param source is the vertex that will be added
 	\param id is the id that will be assigned to the newly created vertex.
 	If a negative id value is specified, a new unique id will be generated
 	for the vertex
-	\return An iterator pointing to the newly created vertex.
+	\return An iterator pointing to the added vertex.
 */
-PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3> &coords, long id)
+PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id)
 {
 	if (id < 0) {
 		id = generateVertexId();
 	}
 
-	// Add the vertex
-	PiercedVector<Vertex>::iterator iterator = m_vertices.emreclaim(id, id, coords);
+	Vertex vertex = source;
 
-	// Update the bounding box
-	addPointToBoundingBox(iterator->getCoords());
+	return addVertex(std::move(vertex), id);
+}
+
+/*!
+	Adds the specified vertex to the patch.
+
+	\param source is the vertex that will be added
+	\param id is the id that will be assigned to the newly created vertex.
+	If a negative id value is specified, the id of the source will be used
+	\return An iterator pointing to the added vertex.
+*/
+PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
+{
+	if (id < 0) {
+		id = source.getId();
+	}
+
+	VertexIterator iterator = addVertex(source.getCoords(), id);
+
+	Vertex &vertex = (*iterator);
+	id = vertex.getId();
+	vertex = std::move(source);
+	vertex.setId(id);
 
 	return iterator;
 }
@@ -1221,62 +1241,21 @@ PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3
 	for the vertex
 	\return An iterator pointing to the added vertex.
 */
-PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &coords, const long &id)
-{
-	if (!isExpert()) {
-		return vertexEnd();
-	}
-
-	return createVertex(coords, id);
-}
-
-/*!
-	Adds the specified vertex to the patch.
-
-	\param source is the vertex that will be added
-	\param id is the id that will be assigned to the newly created vertex.
-	If a negative id value is specified, a new unique id will be generated
-	for the vertex
-	\return An iterator pointing to the added vertex.
-*/
-PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id)
-{
-	if (!isExpert()) {
-		return vertexEnd();
-	}
-
-	VertexIterator iterator = createVertex(source.getCoords(), id);
-	Vertex &vertex = (*iterator);
-	id = vertex.getId();
-	vertex = source;
-	vertex.setId(id);
-
-	return iterator;
-}
-
-/*!
-	Adds the specified vertex to the patch.
-
-	\param source is the vertex that will be added
-	\param id is the id that will be assigned to the newly created vertex.
-	If a negative id value is specified, the id of the source will be used
-	\return An iterator pointing to the added vertex.
-*/
-PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
+PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &coords, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
 	}
 
 	if (id < 0) {
-		id = source.getId();
+		id = generateVertexId();
 	}
 
-	VertexIterator iterator = createVertex(source.getCoords(), id);
-	Vertex &vertex = (*iterator);
-	id = vertex.getId();
-	vertex = std::move(source);
-	vertex.setId(id);
+	// Add the vertex
+	PiercedVector<Vertex>::iterator iterator = m_vertices.emreclaim(id, id, coords);
+
+	// Update the bounding box
+	addPointToBoundingBox(iterator->getCoords());
 
 	return iterator;
 }
