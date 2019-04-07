@@ -3029,29 +3029,49 @@ long PatchKernel::generateInterfaceId()
 }
 
 /*!
-	Creates a new interface with the specified id.
+	Adds the specified interface to the patch.
 
-	\param type is the type of the interface
-	\param connectStorage is the storage the contains or will contain
-	the connectivity of the element
+	\param source is the interface that will be added
 	\param id is the id that will be assigned to the newly created interface.
 	If a negative id value is specified, a new unique id will be generated
 	for the interface
-	\return An iterator pointing to the newly created interface.
+	\return An iterator pointing to the added interface.
 */
-PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type,
-															std::unique_ptr<long[]> &&connectStorage,
-															long id)
+PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source, long id)
 {
 	if (id < 0) {
 		id = generateInterfaceId();
 	}
 
-	if (Interface::getDimension(type) > (getDimension() - 1)) {
-		return interfaceEnd();
+	Interface interface = source;
+
+	return addInterface(std::move(interface), id);
+}
+
+/*!
+	Adds the specified interface to the patch.
+
+	\param source is the interface that will be added
+	\param id is the id that will be assigned to the newly created interface.
+	If a negative id value is specified, the id of the source will be used
+	\return An iterator pointing to the added interface.
+
+*/
+PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, long id)
+{
+	if (id < 0) {
+		id = source.getId();
 	}
 
-	PiercedVector<Interface>::iterator iterator = m_interfaces.emreclaim(id, id, type, std::move(connectStorage));
+	int connectSize = source.getConnectSize();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+
+	InterfaceIterator iterator = addInterface(source.getType(), std::move(connectStorage), id);
+
+	Interface &interface = (*iterator);
+	id = interface.getId();
+	interface = std::move(source);
+	interface.setId(id);
 
 	return iterator;
 }
@@ -3065,18 +3085,32 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementType type,
 	for the interface
 	\return An iterator pointing to the added interface.
 */
-PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type, const long &id)
+PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type, long id)
 {
-	if (!isExpert()) {
-		return interfaceEnd();
-	}
-
 	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
 	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
 
-	InterfaceIterator iterator = createInterface(type, std::move(connectStorage), id);
+	return addInterface(type, std::move(connectStorage), id);
+}
 
-	return iterator;
+/*!
+	Adds a new interface with the specified id.
+
+	\param type is the type of the interface
+	\param connectivity is the connectivity of the interface
+	\param id is the id of the new interface. If a negative id value is
+	specified, ad new unique id will be generated
+	\return An iterator pointing to the added interface.
+*/
+PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
+														 const std::vector<long> &connectivity,
+														 long id)
+{
+	int connectSize = connectivity.size();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
+
+	return addInterface(type, std::move(connectStorage), id);
 }
 
 /*!
@@ -3091,97 +3125,21 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type, const
 */
 PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 														 std::unique_ptr<long[]> &&connectStorage,
-														 const long &id)
-{
-	if (!isExpert()) {
-		return interfaceEnd();
-	}
-
-	InterfaceIterator iterator = createInterface(type, std::move(connectStorage), id);
-
-	return iterator;
-}
-
-/*!
-	Adds a new interface with the specified id.
-
-	\param type is the type of the interface
-	\param connectivity is the connectivity of the cell
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
-	\return An iterator pointing to the added interface.
-*/
-PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
-														 const std::vector<long> &connectivity,
-														 const long &id)
-{
-	if (!isExpert()) {
-		return interfaceEnd();
-	}
-
-	int connectSize = connectivity.size();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
-
-	InterfaceIterator iterator = createInterface(type, std::move(connectStorage), id);
-
-	return iterator;
-}
-
-/*!
-	Adds the specified interface to the patch.
-
-	\param source is the interface that will be added
-	\param id is the id that will be assigned to the newly created interface.
-	If a negative id value is specified, a new unique id will be generated
-	for the interface
-	\return An iterator pointing to the added interface.
-*/
-PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source, long id)
-{
-	if (!isExpert()) {
-		return interfaceEnd();
-	}
-
-	int connectSize = source.getConnectSize();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-
-	InterfaceIterator iterator = createInterface(source.getType(), std::move(connectStorage), id);
-	Interface &interface = (*iterator);
-	id = interface.getId();
-	interface = source;
-	interface.setId(id);
-
-	return iterator;
-}
-
-/*!
-	Adds the specified interface to the patch.
-
-	\param source is the interface that will be added
-	\param id is the id that will be assigned to the newly created interface.
-	If a negative id value is specified, the id of the source will be used
-	\return An iterator pointing to the added interface.
-
-*/
-PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, long id)
+														 long id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
 	}
 
 	if (id < 0) {
-		id = source.getId();
+		id = generateInterfaceId();
 	}
 
-	int connectSize = source.getConnectSize();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	if (Interface::getDimension(type) > (getDimension() - 1)) {
+		return interfaceEnd();
+	}
 
-	InterfaceIterator iterator = createInterface(source.getType(), std::move(connectStorage), id);
-	Interface &interface = (*iterator);
-	id = interface.getId();
-	interface = std::move(source);
-	interface.setId(id);
+	PiercedVector<Interface>::iterator iterator = m_interfaces.emreclaim(id, id, type, std::move(connectStorage));
 
 	return iterator;
 }

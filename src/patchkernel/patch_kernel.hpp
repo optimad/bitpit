@@ -433,11 +433,11 @@ public:
 	const Interface &getInterface(const long &id) const;
 	virtual ElementType getInterfaceType(const long &id) const;
 	long generateInterfaceId();
-	InterfaceIterator addInterface(ElementType type, const long &id = Element::NULL_ID);
-	InterfaceIterator addInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, const long &id = Element::NULL_ID);
-	InterfaceIterator addInterface(ElementType type, const std::vector<long> &connectivity, const long &id = Element::NULL_ID);
 	InterfaceIterator addInterface(const Interface &source, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(Interface &&source, long id = Element::NULL_ID);
+	InterfaceIterator addInterface(ElementType type, long id = Element::NULL_ID);
+	InterfaceIterator addInterface(ElementType type, const std::vector<long> &connectivity, long id = Element::NULL_ID);
+	InterfaceIterator addInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
 	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	long countFreeInterfaces() const;
@@ -741,7 +741,6 @@ private:
 	InterfaceIterator buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
 
 	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
-	InterfaceIterator createInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
 
 	int findAdjoinNeighFace(const long &cellId, const long &neighId) const;
 
