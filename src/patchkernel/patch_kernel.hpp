@@ -658,10 +658,6 @@ protected:
 	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
 	virtual void _partitioningCleanup();
 
-	void setGhostOwner(int id, int rank);
-	void unsetGhostOwner(int id);
-	void clearGhostOwners();
-
 	virtual std::vector<long> _findGhostExchangeSources(int rank);
 #endif
 
@@ -735,6 +731,10 @@ private:
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeSources;
+
+	void setGhostOwner(int id, int rank);
+	void unsetGhostOwner(int id);
+	void clearGhostOwners();
 
     adaption::Info sendCells_any(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
     adaption::Info sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend);

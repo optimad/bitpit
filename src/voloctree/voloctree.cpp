@@ -1121,8 +1121,6 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 		// Previous ghosts cells need to be removed
 		if (nPreviousGhosts > 0) {
-			clearGhostOwners();
-
 			for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
 				OctantInfo ghostOctantInfo(ghostTreeId, false);
 				long ghostId = getOctantId(ghostOctantInfo);
@@ -1691,13 +1689,6 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 			addCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
 		} else {
 			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
-		}
-#endif
-
-#if BITPIT_ENABLE_MPI==1
-		// If the cell is a ghost set its owner
-		if (!octantInfo.internal) {
-			setGhostOwner(cellId, rank);
 		}
 #endif
 

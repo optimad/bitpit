@@ -455,8 +455,6 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												 int rank, long id)
 {
-	BITPIT_UNUSED(rank);
-
 	// Create the cell
 	//
 	// If there are internal cells, the ghost cell should be inserted
@@ -475,6 +473,9 @@ PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_p
 	} else if (m_cells.rawIndex(m_firstGhostId) > m_cells.rawIndex(id)) {
 		m_firstGhostId = id;
 	}
+
+	// Set owner
+	setGhostOwner(id, rank);
 
 	return iterator;
 }
@@ -527,11 +528,13 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 void PatchKernel::_restoreGhost(CellIterator iterator, ElementType type,
 								std::unique_ptr<long[]> &&connectStorage, int rank)
 {
-	BITPIT_UNUSED(rank);
-
+	// Restore cell
 	Cell &cell = *iterator;
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, true);
 	m_nGhosts++;
+
+	// Set owner
+	setGhostOwner(cell.getId(), rank);
 }
 
 /*!
@@ -1948,9 +1951,6 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
             // Add cell
             cellId = generateCellId();
             addCell(std::move(cell), cellOwner, cellId);
-            if (!isInterior) {
-                setGhostOwner(cellId, cellOwner);
-            }
 
             receivedCells.insert(cellId);
 
