@@ -1365,7 +1365,7 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 		int nFaces = getFaceCount();
 		long *connectivity = getConnect();
 
-		for (int i = 0; i < nFaces - 1; ++i) {
+		for (int i = 0; i < nFaces; ++i) {
 			int facePos = getFaceStreamPosition(i);
 
 			int beginVertexPos = facePos + 1;
