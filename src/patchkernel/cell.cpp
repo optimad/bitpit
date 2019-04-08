@@ -457,6 +457,10 @@ long Cell::getInterface(const int &face, const int &index) const
 */
 const long * Cell::getInterfaces() const
 {
+	if (m_interfaces.empty()) {
+		return nullptr;
+	}
+
 	return m_interfaces.get(0);
 }
 
@@ -468,6 +472,10 @@ const long * Cell::getInterfaces() const
 */
 const long * Cell::getInterfaces(const int &face) const
 {
+	if (m_interfaces.empty()) {
+		return nullptr;
+	}
+
 	return m_interfaces.get(face);
 }
 
@@ -478,6 +486,10 @@ const long * Cell::getInterfaces(const int &face) const
 */
 long * Cell::getInterfaces()
 {
+	if (m_interfaces.empty()) {
+		return nullptr;
+	}
+
 	return m_interfaces.get(0);
 }
 
@@ -489,6 +501,10 @@ long * Cell::getInterfaces()
 */
 long * Cell::getInterfaces(const int &face)
 {
+	if (m_interfaces.empty()) {
+		return nullptr;
+	}
+
 	return m_interfaces.get(face);
 }
 
