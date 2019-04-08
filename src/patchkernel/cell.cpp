@@ -103,6 +103,10 @@ bitpit::FlatVector2D<long> Cell::createNeighbourhoodStorage(bool storeNeighbourh
 		return bitpit::FlatVector2D<long>(false);
 	}
 
+	if (!hasInfo() && !getConnect()) {
+		return bitpit::FlatVector2D<long>(false);
+	}
+
 	int nFaces = getFaceCount();
 	if (nFaces <= 0) {
 		return bitpit::FlatVector2D<long>(false);

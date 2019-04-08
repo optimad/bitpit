@@ -353,6 +353,9 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int rank, long id)
 
 	int connectSize = source.getConnectSize();
 	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	if (!source.hasInfo()){
+		std::copy(source.getConnect(), source.getConnect() + connectSize, connectStorage.get());
+	}
 
 	CellIterator iterator = addCell(source.getType(), std::move(connectStorage), rank, id);
 
@@ -376,8 +379,13 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int rank, long id)
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int rank, long id)
 {
-	int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	std::unique_ptr<long[]> connectStorage;
+	if (ReferenceElementInfo::hasInfo(type)) {
+		int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+		connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	} else {
+		connectStorage = std::unique_ptr<long[]>(nullptr);
+	}
 
 	return addCell(type, std::move(connectStorage), rank, id);
 }
