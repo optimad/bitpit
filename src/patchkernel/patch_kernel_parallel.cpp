@@ -1897,8 +1897,9 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     cellBuffer >> nReceivedCells;
 
     std::unordered_map<long, long> cellMap;
-    std::vector<long> receivedCells;
-	receivedCells.reserve(nReceivedCells);
+
+    std::vector<long> addedCells;
+    addedCells.reserve(nReceivedCells);
 
     std::unordered_map<long, FlatVector2D<long>> linkAdjacencies;
 
@@ -1951,8 +1952,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
             // Add cell
             cellId = generateCellId();
             addCell(std::move(cell), cellOwner, cellId);
-
-            receivedCells.insert(cellId);
+            addedCells.push_back(cellId);
 
             // Update adaption info
             adaptionInfo.current.push_back(cellId);
@@ -1987,7 +1987,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     }
 
     // Remap adjacencies
-    for (auto cellId : receivedCells) {
+    for (auto cellId : addedCells) {
         Cell &cell = m_cells[cellId];
 
         int nCellFaces = cell.getFaceCount();
