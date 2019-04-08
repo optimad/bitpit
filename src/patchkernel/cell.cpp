@@ -713,6 +713,10 @@ long Cell::getAdjacency(const int &face, const int &index) const
 */
 const long * Cell::getAdjacencies() const
 {
+	if (m_adjacencies.empty()) {
+		return nullptr;
+	}
+
 	return m_adjacencies.get(0);
 }
 
@@ -724,6 +728,10 @@ const long * Cell::getAdjacencies() const
 */
 const long * Cell::getAdjacencies(const int &face) const
 {
+	if (m_adjacencies.empty()) {
+		return nullptr;
+	}
+
 	return m_adjacencies.get(face);
 }
 
@@ -734,6 +742,10 @@ const long * Cell::getAdjacencies(const int &face) const
 */
 long * Cell::getAdjacencies()
 {
+	if (m_adjacencies.empty()) {
+		return nullptr;
+	}
+
 	return m_adjacencies.get(0);
 }
 
@@ -745,6 +757,10 @@ long * Cell::getAdjacencies()
 */
 long * Cell::getAdjacencies(const int &face)
 {
+	if (m_adjacencies.empty()) {
+		return nullptr;
+	}
+
 	return m_adjacencies.get(face);
 }
 
