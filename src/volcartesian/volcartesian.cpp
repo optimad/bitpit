@@ -796,7 +796,7 @@ void VolCartesian::addCells()
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
 				long id_cell = getCellLinearId(i, j, k);
-				CellIterator cellIterator = VolumeKernel::addCell(cellType, true, id_cell);
+				CellIterator cellIterator = VolumeKernel::addCell(cellType, id_cell);
 				Cell &cell = *cellIterator;
 
 				// Connettività

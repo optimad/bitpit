@@ -369,9 +369,18 @@ public:
 	CellIterator addCell(const Cell &source, long id = Element::NULL_ID);
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, long id = Element::NULL_ID);
-	CellIterator addCell(ElementType type, bool interior, long id = Element::NULL_ID);
-	CellIterator addCell(ElementType type, bool interior, const std::vector<long> &connectivity, long id = Element::NULL_ID);
-	CellIterator addCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, const std::vector<long> &connectivity, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
+#if BITPIT_ENABLE_MPI==1
+	CellIterator addCell(const Cell &source, int rank, long id = Element::NULL_ID);
+	CellIterator addCell(Cell &&source, int rank, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, int rank, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, const std::vector<long> &connectivity, int rank, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id = Element::NULL_ID);
+#endif
+	BITPIT_DEPRECATED(CellIterator addCell(ElementType type, bool interior, long id = Element::NULL_ID));
+	BITPIT_DEPRECATED(CellIterator addCell(ElementType type, bool interior, const std::vector<long> &connectivity, long id = Element::NULL_ID));
+	BITPIT_DEPRECATED(CellIterator addCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID));
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 #if BITPIT_ENABLE_MPI==1
@@ -751,7 +760,7 @@ private:
 
 	CellIterator _addInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #if BITPIT_ENABLE_MPI==1
-	CellIterator _addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+	CellIterator _addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id);
 #endif
 
 	void _restoreInternal(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);

@@ -278,7 +278,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
                 }
 
                 // Add edge
-                net.addCell(edgeType, true, std::move(edgeConnect));
+                net.addCell(edgeType, std::move(edgeConnect));
             }
         } //next i
     } //next c_
@@ -450,7 +450,7 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
             } //next w_
 
             // Add cell
-            CellIterator cellIterator = addCell(getSTLFacetType(n_v), true, connect);
+            CellIterator cellIterator = addCell(getSTLFacetType(n_v), connect);
             cellIterator->setPID(pid);
         } //next c_
 
@@ -848,7 +848,7 @@ unsigned short SurfUnstructured::importDGF(const std::string &dgf_name, int PIDO
             *j_ = *i_;
             ++i_;
         } //next j_
-        CellIterator cellIterator = addCell(getDGFFacetType(c_->size()), true, connect);
+        CellIterator cellIterator = addCell(getDGFFacetType(c_->size()), connect);
 
         // Set cell PID
         int cellPID = PIDOffset;

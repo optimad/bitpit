@@ -283,7 +283,7 @@ long                                    i;
     for (i = 0; i < N; ++i) {
         connect[0] = i;
         connect[1] = (i+1) % N;
-        mesh.addCell(ElementType::LINE, true, connect);
+        mesh.addCell(ElementType::LINE, connect);
     } //next i
 }
 

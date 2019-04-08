@@ -140,14 +140,14 @@ SurfUnstructured                mesh(2, 3);
     q_connect[3] = vit->getId();
     vit = mesh.addVertex(array<double, 3>{{0.0, 1.0, 0.0}});
     t_connect[2] = vit->getId();
-    cit = mesh.addCell(ElementType::TRIANGLE, true, t_connect);
+    cit = mesh.addCell(ElementType::TRIANGLE, t_connect);
 
     // Place a quad
     vit = mesh.addVertex(array<double, 3>{{0.0, -1.0, 0.0}});
     q_connect[1] = vit->getId();
     vit = mesh.addVertex(array<double, 3>{{1.0, -1.0, 0.0}});
     q_connect[2] = vit->getId();
-    cit = mesh.addCell(ElementType::QUAD, true, q_connect);
+    cit = mesh.addCell(ElementType::QUAD, q_connect);
     
 
     // Display mesh data ---------------------------------------------------- //

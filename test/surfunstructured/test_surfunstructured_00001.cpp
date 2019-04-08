@@ -152,16 +152,16 @@ int                     i;
         connectivity[0] = i;
         connectivity[1] = i + 1 + off;
         connectivity[2] = i + off;
-        mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+        mesh.addCell(ElementType::TRIANGLE, connectivity);
         connectivity[0] = i;
         connectivity[1] = i + 1;
         connectivity[2] = i + 1 + off;
-        mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+        mesh.addCell(ElementType::TRIANGLE, connectivity);
     } //next i
     connectivity[0] = i;
     connectivity[1] = i + 1 + off;
     connectivity[2] = i + off;
-    mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+    mesh.addCell(ElementType::TRIANGLE, connectivity);
 
     // 1-row ---------------------------------------------------------------- //
     off = 9;
@@ -169,30 +169,30 @@ int                     i;
         connectivity[0] = i;
         connectivity[1] = i + 1;
         connectivity[2] = i + off;
-        mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+        mesh.addCell(ElementType::TRIANGLE, connectivity);
         connectivity[0] = i + 1;
         connectivity[1] = i + 1 + off;
         connectivity[2] = i + off;
-        mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+        mesh.addCell(ElementType::TRIANGLE, connectivity);
     } //next i
     connectivity[0] = i;
     connectivity[1] = i + 1;
     connectivity[2] = i + off;
-    mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+    mesh.addCell(ElementType::TRIANGLE, connectivity);
 
     // Orthogonal element --------------------------------------------------- //
     connectivity[0] = 3;
     connectivity[1] = 12;
     connectivity[2] = 25;
-    mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+    mesh.addCell(ElementType::TRIANGLE, connectivity);
     connectivity[0] = 12;
     connectivity[1] = 26;
     connectivity[2] = 25;
-    mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+    mesh.addCell(ElementType::TRIANGLE, connectivity);
     connectivity[0] = 12;
     connectivity[1] = 21;
     connectivity[2] = 26;
-    mesh.addCell(ElementType::TRIANGLE, true, connectivity);
+    mesh.addCell(ElementType::TRIANGLE, connectivity);
     
 }
 
@@ -685,6 +685,9 @@ int                             i;
     // Scope variables ------------------------------------------------------ //
     const int                                   N = 5;
     SurfUnstructured::CellIterator              it, et;
+#if BITPIT_ENABLE_MPI
+    int                                         dummyNeighRank = 1;
+#endif
 
     // Insert internal cells (IDX 0-4) -------------------------------------- //
     // cells:  {0,1,2,3,4}
@@ -696,7 +699,7 @@ int                             i;
         internal.push_back(true);
     } //next i
     for (i = N/2; i < N; ++i) {
-        mesh.addCell(ElementType::TRIANGLE, true, c_connect);
+        mesh.addCell(ElementType::TRIANGLE, c_connect);
         expected.push_back(long(i));
         internal.push_back(true);
     } //next i
@@ -726,12 +729,12 @@ int                             i;
     // ghosts: {5,6,7,8,9}
     log::cout() << "** Inserting ghost cells" << endl;
     for (i = 0; i < N/2; ++i) {
-        mesh.addCell(ghost);
+        mesh.addCell(ghost, dummyNeighRank);
         expected.push_back(long(N + i));
         internal.push_back(false);
     } //next i
     for (i = N/2; i < N; ++i) {
-        mesh.addCell(ElementType::TRIANGLE, false, g_connect);
+        mesh.addCell(ElementType::TRIANGLE, g_connect, dummyNeighRank);
         expected.push_back(long(N + i));
         internal.push_back(false);
     } //next i
@@ -764,6 +767,9 @@ int                             i;
 {
     // Scope variables
     SurfUnstructured::CellIterator              it, et;
+#if BITPIT_ENABLE_MPI
+    int                                         dummyNeighRank = 1;
+#endif
 
 #if BITPIT_ENABLE_MPI
     // Remove ghost cells
@@ -830,10 +836,10 @@ int                             i;
     //bucket = {}
     //cells:  {0,1,4,3,2}
     //ghosts: {6,5,7,8,9}
-    mesh.addCell(ElementType::TRIANGLE, false, g_connect);
-    mesh.addCell(ghost);
+    mesh.addCell(ElementType::TRIANGLE, g_connect, dummyNeighRank);
+    mesh.addCell(ghost, dummyNeighRank);
     mesh.addCell(cell);
-    mesh.addCell(ElementType::TRIANGLE, true, c_connect);
+    mesh.addCell(ElementType::TRIANGLE, c_connect);
     expected.insert(expected.begin() + 3, 5);
     expected.insert(expected.begin() + 3, 6);
     expected.insert(expected.begin() + 2, 4);
@@ -869,8 +875,8 @@ int                             i;
     mesh.deleteCell(4);
     mesh.deleteCell(0);
     mesh.deleteCell(3);
-    mesh.addCell(ghost);
-    mesh.addCell(ElementType::TRIANGLE, false, g_connect);
+    mesh.addCell(ghost, dummyNeighRank);
+    mesh.addCell(ElementType::TRIANGLE, g_connect, dummyNeighRank);
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
@@ -915,7 +921,7 @@ int                             i;
     mesh.deleteCell(7);
     mesh.deleteCell(8);
     mesh.addCell(cell);
-    mesh.addCell(ElementType::TRIANGLE, true, c_connect);
+    mesh.addCell(ElementType::TRIANGLE, c_connect);
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());

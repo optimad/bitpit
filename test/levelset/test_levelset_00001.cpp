@@ -78,7 +78,7 @@ void Generate2DSurfMesh( bitpit::SurfUnstructured &mesh )
     for (long i = 0; i < N; ++i) {
         connect[0] = vertexIdOffset + vertexIdStride * i;
         connect[1] = vertexIdOffset + vertexIdStride * ((i + 1) % N);
-        mesh.addCell(bitpit::ElementType::LINE, true, connect, cellIdOffset + cellIdStride * i);
+        mesh.addCell(bitpit::ElementType::LINE, connect, cellIdOffset + cellIdStride * i);
     }
 
 }

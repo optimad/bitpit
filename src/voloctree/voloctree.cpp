@@ -1668,19 +1668,35 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 			cellConnect[k] = stitchInfo.at(vertexTreeMorton);
 		}
 
+#if BITPIT_ENABLE_MPI==1
+		// Cell owner
+		int rank;
+		if (octantInfo.internal) {
+			rank = getRank();
+		} else {
+			uint64_t globalTreeId = m_tree->getGhostGlobalIdx(octantInfo.id);
+			rank = m_tree->getOwnerRank(globalTreeId);
+		}
+#endif
+
 		// Add cell
+#if BITPIT_ENABLE_MPI==1
 		if (!restoreStream) {
-			addCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
+			addCell(m_cellTypeInfo->type, std::move(cellConnect), rank, cellId);
 		} else {
 			restoreCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
 		}
+#else
+		if (!restoreStream) {
+			addCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
+		} else {
+			restoreCell(m_cellTypeInfo->type, octantInfo.internal, std::move(cellConnect), cellId);
+		}
+#endif
 
-		// If the cell is a ghost set its owner
 #if BITPIT_ENABLE_MPI==1
+		// If the cell is a ghost set its owner
 		if (!octantInfo.internal) {
-			uint64_t globalTreeId = m_tree->getGhostGlobalIdx(octantInfo.id);
-			int rank = m_tree->getOwnerRank(globalTreeId);
-
 			setGhostOwner(cellId, rank);
 		}
 #endif
