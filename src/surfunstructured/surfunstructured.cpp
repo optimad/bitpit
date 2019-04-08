@@ -129,7 +129,7 @@ void SurfUnstructured::setExpert(bool expert)
  */
 int SurfUnstructured::_getDumpVersion() const
 {
-	const int DUMP_VERSION = 3;
+	const int DUMP_VERSION = 4;
 
 	return DUMP_VERSION;
 }
@@ -141,13 +141,6 @@ int SurfUnstructured::_getDumpVersion() const
  */
 void SurfUnstructured::_dump(std::ostream &stream) const
 {
-#if BITPIT_ENABLE_MPI==1
-	// Dump works only for serial calculations
-	if (getProcessorCount() != 1) {
-		throw std::runtime_error ("Dump of surfunstructured is implemented only for serial calculations.");
-	}
-#endif
-
 	// Space dimension
 	utils::binary::write(stream, getSpaceDimension());
 
@@ -168,13 +161,6 @@ void SurfUnstructured::_dump(std::ostream &stream) const
  */
 void SurfUnstructured::_restore(std::istream &stream)
 {
-#if BITPIT_ENABLE_MPI==1
-	// Restore works only for serial calculations
-	if (getProcessorCount() != 1) {
-		throw std::runtime_error ("Restore of surfunstructured is implemented only for serial calculations.");
-	}
-#endif
-
 	// Space dimension
 	int spaceDimension;
 	utils::binary::read(stream, spaceDimension);
