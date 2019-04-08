@@ -1897,7 +1897,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     cellBuffer >> nReceivedCells;
 
     std::unordered_map<long, long> cellMap;
-    std::unordered_set<long> receivedCells;
+    std::vector<long> receivedCells;
 	receivedCells.reserve(nReceivedCells);
 
     std::unordered_map<long, FlatVector2D<long>> linkAdjacencies;
