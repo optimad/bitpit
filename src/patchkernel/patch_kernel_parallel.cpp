@@ -1776,6 +1776,9 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         itr = nextItr;
     }
 
+    // Delete orphan interfaces
+    deleteOrphanInterfaces();
+
 	// Delete orphan vertices
 	deleteOrphanVertices();
 
@@ -1901,6 +1904,11 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     std::vector<long> addedCells;
     addedCells.reserve(nReceivedCells);
 
+    std::vector<long> updateInterfacesCells;
+    if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+        updateInterfacesCells.reserve(nReceivedCells);
+    }
+
     std::unordered_map<long, FlatVector2D<long>> linkAdjacencies;
 
     m_cells.reserve(nReceivedCells);
@@ -1949,8 +1957,16 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         // existing cell. This ensure that the received cell will be
         // properly connected to the received cells
         if (cellId < 0) {
-            // Add cell
+            // Generate the id of the cell
             cellId = generateCellId();
+
+            // Reset the interfaces of the cell, they will be recreated later
+            if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+                cell.resetInterfaces();
+                updateInterfacesCells.push_back(cellId);
+            }
+
+            // Add cell
             addCell(std::move(cell), cellOwner, cellId);
             addedCells.push_back(cellId);
 
@@ -1979,6 +1995,22 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
                 }
 
                 cellAdjacencies.pushBack(faceAdjacencies);
+            }
+
+            // Delete the interfaces of the cell, they will be recreated later
+            if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+                int nLocalCellInterfaces = localCell.getInterfaceCount();
+                const long *localCellInterfaces = localCell.getInterfaces();
+                for (int k = 0; k < nLocalCellInterfaces; ++k) {
+                    const long interfaceId = localCellInterfaces[k];
+                    if (interfaceId < 0) {
+                        continue;
+                    }
+
+                    deleteInterface(interfaceId, true, true);
+                }
+
+                updateInterfacesCells.push_back(cellId);
             }
         }
 
@@ -2036,6 +2068,14 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
             }
         }
     }
+
+    // Update interfaces
+    if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+        m_interfaces.flush();
+
+        updateInterfaces(updateInterfacesCells);
+    }
+
 
     // Sort the ids in the adaption info
     //
