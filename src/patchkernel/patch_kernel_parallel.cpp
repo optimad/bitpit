@@ -201,6 +201,121 @@ void PatchKernel::_setHaloSize(std::size_t haloSize)
 }
 
 /*!
+	Converts an internal cell to a ghost cell.
+
+	\param[in] id is the index of the cell
+	\param[in] ownerRank is the owner of the cell
+*/
+PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id, int ownerRank)
+{
+	if (!isExpert()) {
+		return m_cells.end();
+	}
+
+	// Swap the element with the last internal cell
+	if (id != m_lastInternalId) {
+		m_cells.swap(id, m_lastInternalId);
+	}
+
+	// Get the iterator pointing to the updated position of the element
+	CellIterator iterator = m_cells.find(id);
+
+	// Update the interior flag
+	iterator->setInterior(false);
+
+	// Update cell counters
+	--m_nInternals;
+	++m_nGhosts;
+
+	// Update the last internal and first ghost markers
+	m_firstGhostId = id;
+	if (m_nInternals == 0) {
+		m_lastInternalId = Cell::NULL_ID;
+	} else {
+		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
+	}
+
+	// Set ghost owner
+	setGhostOwner(id, ownerRank);
+
+	// Return the iterator to the new position
+	return iterator;
+}
+
+/*!
+	Converts a ghost cell to an internal cell.
+
+	\param[in] id is the index of the cell
+*/
+PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
+{
+	if (!isExpert()) {
+		return m_cells.end();
+	}
+
+	// Swap the cell with the first ghost
+	if (id != m_firstGhostId) {
+		m_cells.swap(id, m_firstGhostId);
+	}
+
+	// Get the iterator pointing to the updated position of the element
+	CellIterator iterator = m_cells.find(id);
+
+	// Update the interior flag
+	iterator->setInterior(true);
+
+	// Update cell counters
+	++m_nInternals;
+	--m_nGhosts;
+
+	// Update the last internal and first ghost markers
+	m_lastInternalId = id;
+	if (m_nGhosts == 0) {
+		m_firstGhostId = Cell::NULL_ID;
+	} else {
+		CellIterator firstGhostIterator = iterator;
+		++firstGhostIterator;
+		m_firstGhostId = firstGhostIterator->getId();
+	}
+
+	// Unset ghost owner
+	unsetGhostOwner(id);
+
+	// Return the iterator to the new position
+	return iterator;
+}
+
+/*!
+	Gets the number of ghost cells in the patch.
+
+	\return The number of ghost cells in the patch
+*/
+long PatchKernel::getGhostCount() const
+{
+	return m_nGhosts;
+}
+
+/*!
+	Gets a reference to the first ghost cell.
+
+	\return A reference to the first ghost cell.
+*/
+Cell & PatchKernel::getFirstGhost()
+{
+	return m_cells[m_firstGhostId];
+}
+
+/*!
+	Gets a constant reference to the first ghost cell.
+
+	\return A constant reference to the first ghost cell.
+*/
+const Cell & PatchKernel::getFirstGhost() const
+{
+	return m_cells[m_firstGhostId];
+}
+
+/*!
 	Internal function to create a ghost cell.
 
 	\param type is the type of the cell
@@ -252,6 +367,69 @@ void PatchKernel::_deleteGhost(long id, bool delayed)
 	m_nGhosts--;
 	if (id == m_firstGhostId) {
 		updateFirstGhostId();
+	}
+}
+
+/*!
+    Returns iterator to the first ghost cells within the cell list.
+
+    \result An iterator to the first ghost cell.
+*/
+PatchKernel::CellIterator PatchKernel::ghostBegin()
+{
+	if (m_nGhosts > 0) {
+		return m_cells.find(m_firstGhostId);
+	} else {
+		return m_cells.end();
+	}
+}
+
+/*!
+	Returns iterator to the end of the list of ghost cells.
+
+	\result An iterator to the end of the list of ghost cell.
+*/
+PatchKernel::CellIterator PatchKernel::ghostEnd()
+{
+	return m_cells.end();
+}
+
+/*!
+    Returns a constant iterator to the first ghost cells within the cell list.
+
+    \result A constant iterator to the first ghost cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::ghostConstBegin() const
+{
+	if (m_nGhosts > 0) {
+		return m_cells.find(m_firstGhostId);
+	} else {
+		return m_cells.cend();
+	}
+}
+
+/*!
+	Returns a constant iterator to the end of the list of ghost cells.
+
+	\result A constant iterator to the end of the list of ghost cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::ghostConstEnd() const
+{
+	return m_cells.cend();
+}
+
+/*!
+	Updates the id of the first ghost cell.
+*/
+void PatchKernel::updateFirstGhostId()
+{
+	if (m_nGhosts == 0) {
+		m_firstGhostId = Cell::NULL_ID;
+	} else if (m_nInternals == 0) {
+		m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
+	} else {
+		CellIterator first_ghost_iterator = ++m_cells.find(m_lastInternalId);
+		m_firstGhostId = first_ghost_iterator->getId();
 	}
 }
 

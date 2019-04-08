@@ -119,9 +119,13 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_interfaceIdGenerator(other.m_interfaceIdGenerator),
       m_cellIdGenerator(other.m_cellIdGenerator),
       m_nInternals(other.m_nInternals),
+#if BITPIT_ENABLE_MPI==1
       m_nGhosts(other.m_nGhosts),
+#endif
       m_lastInternalId(other.m_lastInternalId),
+#if BITPIT_ENABLE_MPI==1
       m_firstGhostId(other.m_firstGhostId),
+#endif
       m_vtk(other.m_vtk),
       m_vtkWriteTarget(other.m_vtkWriteTarget),
       m_vtkVertexMap(other.m_vtkVertexMap),
@@ -216,10 +220,14 @@ void PatchKernel::initialize()
 
 	// Cell count
 	m_nInternals = 0;
+#if BITPIT_ENABLE_MPI==1
 	m_nGhosts    = 0;
+#endif
 
 	m_lastInternalId = Cell::NULL_ID;
+#if BITPIT_ENABLE_MPI==1
 	m_firstGhostId   = Cell::NULL_ID;
+#endif
 
 	// Dimension
 	m_dimension = -1;
@@ -699,9 +707,13 @@ void PatchKernel::resetCells()
 	PiercedVector<Cell>().swap(m_cells);
 	m_cellIdGenerator.reset();
 	m_nInternals = 0;
+#if BITPIT_ENABLE_MPI==1
 	m_nGhosts = 0;
+#endif
 	m_lastInternalId = Cell::NULL_ID;
+#if BITPIT_ENABLE_MPI==1
 	m_firstGhostId = Cell::NULL_ID;
+#endif
 
 	for (auto &interface : m_interfaces) {
 		interface.unsetNeigh();
@@ -1597,16 +1609,6 @@ long PatchKernel::getInternalCount() const
 }
 
 /*!
-	Gets the number of ghost cells in the patch.
-
-	\return The number of ghost cells in the patch
-*/
-long PatchKernel::getGhostCount() const
-{
-	return m_nGhosts;
-}
-
-/*!
 	Gets the cells owned by the patch.
 
 	\return The cells owned by the patch.
@@ -1680,26 +1682,6 @@ const Cell & PatchKernel::getLastInternal() const
 }
 
 /*!
-	Gets a reference to the first ghost cell.
-
-	\return A reference to the first ghost cell.
-*/
-Cell & PatchKernel::getFirstGhost()
-{
-	return m_cells[m_firstGhostId];
-}
-
-/*!
-	Gets a constant reference to the first ghost cell.
-
-	\return A constant reference to the first ghost cell.
-*/
-const Cell & PatchKernel::getFirstGhost() const
-{
-	return m_cells[m_firstGhostId];
-}
-
-/*!
 	Returns an iterator pointing to the specified cell.
 
 	\result An iterator to the specified cell.
@@ -1754,30 +1736,6 @@ PatchKernel::CellIterator PatchKernel::internalEnd()
 }
 
 /*!
-    Returns iterator to the first ghost cells within the cell list.
-
-    \result An iterator to the first ghost cell.
-*/
-PatchKernel::CellIterator PatchKernel::ghostBegin()
-{
-	if (m_nGhosts > 0) {
-		return m_cells.find(m_firstGhostId);
-	} else {
-		return m_cells.end();
-	}
-}
-
-/*!
-	Returns iterator to the end of the list of ghost cells.
-
-	\result An iterator to the end of the list of ghost cell.
-*/
-PatchKernel::CellIterator PatchKernel::ghostEnd()
-{
-	return m_cells.end();
-}
-
-/*!
 	Returns a constant iterator pointing to the specified cell.
 
 	\result A constant iterator to the specified cell.
@@ -1829,30 +1787,6 @@ PatchKernel::CellConstIterator PatchKernel::internalConstEnd() const
 	} else {
 		return m_cells.cend();
 	}
-}
-
-/*!
-    Returns a constant iterator to the first ghost cells within the cell list.
-
-    \result A constant iterator to the first ghost cell.
-*/
-PatchKernel::CellConstIterator PatchKernel::ghostConstBegin() const
-{
-	if (m_nGhosts > 0) {
-		return m_cells.find(m_firstGhostId);
-	} else {
-		return m_cells.cend();
-	}
-}
-
-/*!
-	Returns a constant iterator to the end of the list of ghost cells.
-
-	\result A constant iterator to the end of the list of ghost cell.
-*/
-PatchKernel::CellConstIterator PatchKernel::ghostConstEnd() const
-{
-	return m_cells.cend();
 }
 
 /*!
@@ -2221,98 +2155,6 @@ void PatchKernel::_deleteInternal(long id, bool delayed)
 	if (id == m_lastInternalId) {
 		updateLastInternalId();
 	}
-}
-
-/*!
-	Converts an internal cell to a ghost cell.
-
-	\param[in] id is the index of the cell
-	\param[in] ownerRank is the owner of the cell
-*/
-PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id, int ownerRank)
-{
-	if (!isExpert()) {
-		return m_cells.end();
-	}
-
-	// Swap the element with the last internal cell
-	if (id != m_lastInternalId) {
-		m_cells.swap(id, m_lastInternalId);
-	}
-
-	// Get the iterator pointing to the updated position of the element
-	CellIterator iterator = m_cells.find(id);
-
-	// Update the interior flag
-	iterator->setInterior(false);
-
-	// Update cell counters
-	--m_nInternals;
-	++m_nGhosts;
-
-	// Update the last internal and first ghost markers
-	m_firstGhostId = id;
-	if (m_nInternals == 0) {
-		m_lastInternalId = Cell::NULL_ID;
-	} else {
-		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
-	}
-
-#if BITPIT_ENABLE_MPI==1
-	// Set ghost owner
-	setGhostOwner(id, ownerRank);
-#else
-	// Mark variable as unused
-	BITPIT_UNUSED(ownerRank);
-#endif
-
-	// Return the iterator to the new position
-	return iterator;
-}
-
-/*!
-	Converts a ghost cell to an internal cell.
-
-	\param[in] id is the index of the cell
-*/
-PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
-{
-	if (!isExpert()) {
-		return m_cells.end();
-	}
-
-	// Swap the cell with the first ghost
-	if (id != m_firstGhostId) {
-		m_cells.swap(id, m_firstGhostId);
-	}
-
-	// Get the iterator pointing to the updated position of the element
-	CellIterator iterator = m_cells.find(id);
-
-	// Update the interior flag
-	iterator->setInterior(true);
-
-	// Update cell counters
-	++m_nInternals;
-	--m_nGhosts;
-
-	// Update the last internal and first ghost markers
-	m_lastInternalId = id;
-	if (m_nGhosts == 0) {
-		m_firstGhostId = Cell::NULL_ID;
-	} else {
-		CellIterator firstGhostIterator = iterator;
-		++firstGhostIterator;
-		m_firstGhostId = firstGhostIterator->getId();
-	}
-
-#if BITPIT_ENABLE_MPI==1
-	// Unset ghost owner
-	unsetGhostOwner(id);
-#endif
-
-	// Return the iterator to the new position
-	return iterator;
 }
 
 /*!
@@ -3513,8 +3355,16 @@ void PatchKernel::restoreVertices(std::istream &stream)
  */
 void PatchKernel::dumpCells(std::ostream &stream) const
 {
-	utils::binary::write(stream, getInternalCount());
-	utils::binary::write(stream, getGhostCount());
+	long nInternals = getInternalCount();
+	utils::binary::write(stream, nInternals);
+
+	long nGhosts;
+#if BITPIT_ENABLE_MPI==1
+	nGhosts = getGhostCount();
+#else
+	nGhosts = 0;
+#endif
+	utils::binary::write(stream, nGhosts);
 
 	for (const Cell &cell: m_cells) {
 		utils::binary::write(stream, cell.getId());
@@ -3673,21 +3523,6 @@ void PatchKernel::updateLastInternalId()
 		m_lastInternalId = Cell::NULL_ID;
 	} else {
 		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
-	}
-}
-
-/*!
-	Updates the id of the first ghost cell.
-*/
-void PatchKernel::updateFirstGhostId()
-{
-	if (m_nGhosts == 0) {
-		m_firstGhostId = Cell::NULL_ID;
-	} else if (m_nInternals == 0) {
-		m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
-	} else {
-		CellIterator first_ghost_iterator = ++m_cells.find(m_lastInternalId);
-		m_firstGhostId = first_ghost_iterator->getId();
 	}
 }
 
@@ -3864,11 +3699,13 @@ bool PatchKernel::sortCells()
 		updateLastInternalId();
 	}
 
+#if BITPIT_ENABLE_MPI==1
 	// Sort ghost cells
 	if (m_nGhosts > 0) {
 		m_cells.sortAfter(m_firstGhostId, true);
 		updateFirstGhostId();
 	}
+#endif
 
 	return true;
 }
@@ -5518,9 +5355,11 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 		m_lastInternalId = map.at(m_lastInternalId);
 	}
 
+#if BITPIT_ENABLE_MPI==1
 	if (m_firstGhostId >= 0) {
 		m_firstGhostId = map.at(m_firstGhostId);
 	}
+#endif
 
 #if BITPIT_ENABLE_MPI==1
 	// Update information for ghost data exchange

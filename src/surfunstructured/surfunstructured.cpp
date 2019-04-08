@@ -646,6 +646,10 @@ unsigned short SurfUnstructured::exportSTLSingle(const std::string &name, const 
 unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool exportInternalsOnly,
                                                 std::unordered_map<int, std::string> *PIDNames)
 {
+#if not BITPIT_ENABLE_MPI==1
+    BITPIT_UNUSED(exportInternalsOnly);
+#endif
+
     int                                         nTotVertex;
     vector<array<double, 3>>                    totVertexList;
     unordered_map<long, long>                   vertexMap;
@@ -709,6 +713,7 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
         STL.saveSolid(name, nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
     }
 
+#if BITPIT_ENABLE_MPI==1
     // Export ghost cells
     long nGhosts = getGhostCount();
     if (!exportInternalsOnly && nGhosts > 0) {
@@ -738,6 +743,7 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
         // Write the solid associated to the ghosts
         STL.saveSolid("ghosts", nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
     }
+#endif
 
     STL.close("out");
 

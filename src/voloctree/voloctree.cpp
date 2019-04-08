@@ -428,6 +428,7 @@ void VolOctree::setBoundingBox()
 	// Get the bounding box from the tree
 	m_tree->getBoundingBox(minPoint, maxPoint);
 
+#if BITPIT_ENABLE_MPI==1
 	// The tree is only evaluating the bounding box of the internal octants,
 	// we need to consider also ghosts cells.
 	for (auto ghostItr = ghostBegin(); ghostItr != ghostEnd(); ++ghostItr) {
@@ -441,6 +442,7 @@ void VolOctree::setBoundingBox()
 			}
 		}
 	}
+#endif
 
 	// Set the bounding box
 	setBoundingBox(minPoint, maxPoint);
@@ -1680,7 +1682,9 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 			if (octantInfo.internal) {
 				m_nInternals++;
 			} else {
+#if BITPIT_ENABLE_MPI==1
 				m_nGhosts++;
+#endif
 			}
 		}
 
@@ -1710,7 +1714,9 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 	// Update first ghost and last internal information
 	if (restoreStream) {
 		updateLastInternalId();
+#if BITPIT_ENABLE_MPI==1
 		updateFirstGhostId();
+#endif
 	}
 
 	// Update cell PIDs

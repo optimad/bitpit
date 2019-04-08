@@ -351,7 +351,9 @@ public:
 
 	virtual long getCellCount() const;
 	long getInternalCount() const;
+#if BITPIT_ENABLE_MPI==1
 	long getGhostCount() const;
+#endif
 	PiercedVector<Cell> &getCells();
 	const PiercedVector<Cell> &getCells() const;
 	Cell &getCell(const long &id);
@@ -359,8 +361,10 @@ public:
 	virtual ElementType getCellType(const long &id) const;
 	Cell &getLastInternal();
 	const Cell &getLastInternal() const;
+#if BITPIT_ENABLE_MPI==1
 	Cell &getFirstGhost();
 	const Cell &getFirstGhost() const;
+#endif
 	long generateCellId();
 	CellIterator addCell(ElementType type, const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, bool interior, const long &id = Element::NULL_ID);
@@ -370,8 +374,10 @@ public:
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
+#if BITPIT_ENABLE_MPI==1
 	CellIterator moveGhost2Internal(const long &id);
 	CellIterator moveInternal2Ghost(const long &id, int ownerRank);
+#endif
 	virtual double evalCellSize(const long &id) const = 0;
 	long countFreeCells() const;
 	long countOrphanCells() const;
@@ -405,16 +411,20 @@ public:
 	CellIterator cellEnd();
 	CellIterator internalBegin();
 	CellIterator internalEnd();
+#if BITPIT_ENABLE_MPI==1
 	CellIterator ghostBegin();
 	CellIterator ghostEnd();
+#endif
 
 	CellConstIterator getCellConstIterator(const long &id) const;
 	CellConstIterator cellConstBegin() const;
 	CellConstIterator cellConstEnd() const;
 	CellConstIterator internalConstBegin() const;
 	CellConstIterator internalConstEnd() const;
+#if BITPIT_ENABLE_MPI==1
 	CellConstIterator ghostConstBegin() const;
 	CellConstIterator ghostConstEnd() const;
+#endif
 
 	virtual long getInterfaceCount() const;
 	PiercedVector<Interface> &getInterfaces();
@@ -562,10 +572,14 @@ protected:
 	IndexGenerator<long> m_cellIdGenerator;
 
 	long m_nInternals;
+#if BITPIT_ENABLE_MPI==1
 	long m_nGhosts;
+#endif
 
 	long m_lastInternalId;
+#if BITPIT_ENABLE_MPI==1
 	long m_firstGhostId;
+#endif
 
 	VTKUnstructuredGrid m_vtk ;
 	WriteTarget m_vtkWriteTarget;
@@ -596,7 +610,9 @@ protected:
 	void restoreInterfaces(std::istream &stream);
 
 	void updateLastInternalId();
+#if BITPIT_ENABLE_MPI==1
 	void updateFirstGhostId();
+#endif
 
 	void setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status);
 
