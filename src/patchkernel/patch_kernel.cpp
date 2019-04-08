@@ -3191,15 +3191,19 @@ bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delaye
 		Interface &interface = m_interfaces[id];
 
 		// Update owner
+		//
+		// If the owner has been deleted before the interface, it may be null.
 		long ownerId = interface.getOwner();
-		Cell &owner = m_cells[ownerId];
-		int ownerFace = interface.getOwnerFace();
+		if (ownerId >= 0) {
+			Cell &owner = m_cells[ownerId];
+			int ownerFace = interface.getOwnerFace();
 
-		int ownerInterfaceId = 0;
-		while (owner.getInterface(ownerFace, ownerInterfaceId) != id) {
-			++ownerInterfaceId;
+			int ownerInterfaceId = 0;
+			while (owner.getInterface(ownerFace, ownerInterfaceId) != id) {
+				++ownerInterfaceId;
+			}
+			owner.deleteInterface(ownerFace, ownerInterfaceId);
 		}
-		owner.deleteInterface(ownerFace, ownerInterfaceId);
 
 		// Update neighbour
 		long neighId = interface.getNeigh();
