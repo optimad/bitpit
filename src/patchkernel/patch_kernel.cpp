@@ -3242,7 +3242,7 @@ bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeig
 	}
 
 	if (!delayed) {
-		m_cells.flush();
+		m_interfaces.flush();
 	}
 
 	return true;
