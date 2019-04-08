@@ -3274,20 +3274,88 @@ long PatchKernel::countFreeInterfaces() const
 /*!
 	Counts orphan interfaces within the patch.
 
-	An interface is orphan if not linked to any cell in the patch.
+	An interface is considered orphan if it has no owner nor neighbour or
+	if it's on a border face of a ghost cell.
 
 	\return The number of orphan interfaces.
 */
 long PatchKernel::countOrphanInterfaces() const
 {
 	long nOrphanInterfaces = 0;
-	for (const Interface &interface : m_interfaces) {
-		if (interface.getOwner() < 0 && interface.getNeigh() < 0) {
+	for (InterfaceConstIterator itr = interfaceConstBegin(); itr != interfaceConstEnd(); ++itr) {
+		const long interfaceId = itr.getId();
+		if (isInterfaceOrphan(interfaceId)) {
 			++nOrphanInterfaces;
 		}
-        }
+	}
 
 	return nOrphanInterfaces;
+}
+
+/*!
+	Find orphan interfaces in the patch.
+
+	An interface is considered orphan if it has no owner nor neighbour or
+	if it's on a border face of a ghost cell.
+
+	\result The list of orphan interfaces.
+*/
+std::vector<long> PatchKernel::findOrphanInterfaces() const
+{
+	std::vector<long> orphanInterfaces;
+	for (InterfaceConstIterator itr = interfaceConstBegin(); itr != interfaceConstEnd(); ++itr) {
+		const long interfaceId = itr.getId();
+		if (isInterfaceOrphan(interfaceId)) {
+			orphanInterfaces.push_back(interfaceId);
+		}
+	}
+
+	return orphanInterfaces;
+}
+
+/*!
+	Remove orphan interfaces
+*/
+bool PatchKernel::deleteOrphanInterfaces()
+{
+	if (!isExpert()) {
+		return false;
+	}
+
+	std::vector<long> list = findOrphanInterfaces();
+	deleteInterfaces(list);
+
+	return true;
+}
+
+/*!
+	Check if the interfaces is orphan.
+
+	An interface is considered orphan if it has no owner nor neighbour or
+	if it's on a border face of a ghost cell.
+
+	\result Returns true if the interfaces is orphan, false otherwise.
+*/
+bool PatchKernel::isInterfaceOrphan(long id) const
+{
+	const Interface &interface = getInterface(id);
+
+	// Interface is not orphan if it has an owner or a neighbour
+	long ownerId = interface.getOwner();
+	long neighId = interface.getNeigh();
+	if (ownerId >= 0 && neighId >= 0) {
+		return false;
+	}
+
+	// Interface is not orphan if it's on a border face of an internal cell
+	if (ownerId >= 0 && neighId < 0) {
+		const Cell &owner = getCell(ownerId);
+		if (owner.isInterior()) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /*!

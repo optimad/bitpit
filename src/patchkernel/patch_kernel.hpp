@@ -451,6 +451,9 @@ public:
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	long countFreeInterfaces() const;
 	long countOrphanInterfaces() const;
+	std::vector<long> findOrphanInterfaces() const;
+	bool deleteOrphanInterfaces();
+	bool isInterfaceOrphan(long id) const;
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id) const;
 	virtual void evalInterfaceBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 	ConstProxyVector<std::array<double, 3>> getInterfaceVertexCoordinates(long id, std::array<double, 3> *staticStorage = nullptr) const;
