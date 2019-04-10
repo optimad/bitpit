@@ -1502,33 +1502,35 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         cellRankOnReceiver.insert({{cellId, recvRank}});
     }
 
-    // Find the frame of the cells explicitly marked for sending. These cells
-    // are the cells marked for sending that have at least one neighbour that
-    // will not be sent.
-    std::unordered_set<long> cellsToSendFrame;
-	for (long cellId : cellsToSend) {
-		neighIds.clear();
-		findCellNeighs(cellId, &neighIds);
-		for (long neighId : neighIds) {
-			if (cellRankOnReceiver.count(neighId) == 0) {
-				cellsToSendFrame.insert(cellId);
-				break;
-			}
-		}
-	}
+    // Identify cells-to-send halo and cells-to-send frame
+    //
+    // Along with the cells explicitly marked for sending, we need to send an
+    // halo of surrounfing cells. Those cells will be used by the receiver to
+    // connect the cells it receives to the existing cells, plus some of them
+    // will become ghost cells. To identify the cells of the halo, first we
+    // find the cells to be send that have at least one face neighbour that
+    // remains on this rank and then we find the neighbours of these sends.
+    //
+    // Cells-to-send frame is made of cells explicitly marked for sending
+    // that have at least one neighbour (face, edge, vertex) that will not
+    // be sent.
 
-    // Along with the cells explicitly marked for sending, we need to send
-    // also an halo of surrounfing cells. Those cells will be used by the
-    // receiver to connect the cells it receives to the existing cells,
-    // plus some of them will become ghost cells.
-    //
-    // Some cells on the halo may be already on the receiver (becuase they
-    // are already ghosts owned by another processor). However we don't have
-    // enough information to identify those duplicate cells. The receiver
-    // needs to permorm a check to avoid inserting duplicate cells.
-    //
-    // Cells owned by receiver are already on the receiver, so there is no
-    // need to send them.
+    // Initialize cell frame with cells explicitly marked for sending that
+    // have at least one face neighbour that will not be sent
+    std::unordered_set<long> cellsToSendFrame;
+    for (long cellId : cellsToSend) {
+        neighIds.clear();
+        findCellFaceNeighs(cellId, &neighIds);
+        for (long neighId : neighIds) {
+            if (cellRankOnReceiver.count(neighId) == 0) {
+                cellsToSendFrame.insert(cellId);
+                break;
+            }
+        }
+    }
+
+    // Build cell halo
+    std::unordered_set<long> cellsToSendHalo;
     for (long cellId : cellsToSendFrame) {
         neighIds.clear();
         findCellNeighs(cellId, &neighIds);
@@ -1537,18 +1539,46 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
                 continue;
             }
 
-            int ownerRank;
-            if (m_ghostOwners.count(neighId) == 0) {
-                ownerRank = m_rank;
-            } else {
-                ownerRank = m_ghostOwners[neighId];
-                if (ownerRank == recvRank) {
-                    continue;
-                }
-            }
+            cellsToSendHalo.insert(neighId);
+        }
+    }
 
-			cellsToCommunicate.push_back(neighId);
-            cellRankOnReceiver.insert({{neighId, ownerRank}});
+    // At this point, the frame of the cells explicitly marked for sending
+    // contains only cells that have one face negihbour that will not be
+    // sent. We need to extend the frame to the cells marked for sending
+    // that have at least one neighbour (face, edge, vertex) that will not
+    // be sent. To find these cells we search among the neighbours of the
+    // halo: neighbours that will not be send will be part of the frame.
+    for (long cellId : cellsToSendHalo) {
+        neighIds.clear();
+        findCellNeighs(cellId, &neighIds);
+        for (long neighId : neighIds) {
+            if (cellRankOnReceiver.count(neighId) > 0) {
+                cellsToSendFrame.insert(neighId);
+            }
+        }
+    }
+
+    // Add halo cells to the cells that will be send
+    //
+    // Cells owned by receiver are already on the receiver, so there is no
+    // need to send them.
+    //
+    // Some cells on the halo may be already on the receiver (becuase they
+    // are already ghosts owned by another processor). However we don't have
+    // enough information to identify those duplicate cells. The receiver
+    // needs to permorm a check to avoid inserting duplicate cells.
+    for (long cellId : cellsToSendHalo) {
+        int ownerRank;
+        if (m_ghostOwners.count(cellId) == 0) {
+            ownerRank = m_rank;
+        } else {
+            ownerRank = m_ghostOwners[cellId];
+        }
+
+        if (ownerRank != recvRank) {
+            cellsToCommunicate.push_back(cellId);
+            cellRankOnReceiver.insert({{cellId, ownerRank}});
         }
     }
 
