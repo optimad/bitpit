@@ -102,7 +102,6 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
     case KERNEL_DYNAMIC:
     {
         throw std::runtime_error("Unable to set a dynamic kernel. The kernel received in input can be only used to set a static kernel");
-        break;
     }
 
     default:
@@ -443,7 +442,6 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
     default:
     {
         throw std::runtime_error("Undefined synchronization action.");
-        break;
     }
 
     }
