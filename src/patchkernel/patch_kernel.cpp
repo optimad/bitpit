@@ -715,6 +715,10 @@ void PatchKernel::resetCells()
 	m_firstGhostId = Cell::NULL_ID;
 #endif
 
+#if BITPIT_ENABLE_MPI==1
+	clearGhostOwners();
+#endif
+
 	for (auto &interface : m_interfaces) {
 		interface.unsetNeigh();
 		interface.unsetOwner();
