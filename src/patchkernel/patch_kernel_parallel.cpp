@@ -801,7 +801,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::vector<i
 	// Build the list of ids to be sent
 	auto cellItr = cellBegin();
 	for (int k = 0; k < getInternalCount(); ++k) {
-		const int &rank = cellRanks[k];
+		const int rank = cellRanks[k];
 		if (rank == getRank()) {
 			cellItr++;
 			continue;
@@ -1401,7 +1401,7 @@ std::vector<long> PatchKernel::_findGhostExchangeSources(int rank)
     \param[in] squeezeStorage if set to true the vector that store patch information
     will be squeezed after the synchronization
  */
-adaption::Info PatchKernel::sendCells(const int &sendRank, const int &recvRank,
+adaption::Info PatchKernel::sendCells(int sendRank, int recvRank,
                                       const std::vector<long> &cellsToSend,
                                       bool squeezeStorage)
 {
@@ -1447,7 +1447,7 @@ adaption::Info PatchKernel::sendCells(const int &sendRank, const int &recvRank,
     \param[in] recvRank receiver rank
     \param[in] cellsToSend list of cells to be moved
  */
-adaption::Info PatchKernel::sendCells_any(const int &sendRank, const int &recvRank,
+adaption::Info PatchKernel::sendCells_any(int sendRank, int recvRank,
                                           const std::vector<long> &cellsToSend)
 {
 	adaption::Info adaptionInfo;
@@ -1468,7 +1468,7 @@ adaption::Info PatchKernel::sendCells_any(const int &sendRank, const int &recvRa
     \param[in] recvRank is the receiver rank
     \param[in] cellsToSend is the list of cells to be sent
  */
-adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend)
+adaption::Info PatchKernel::sendCells_sender(int recvRank, const std::vector<long> &cellsToSend)
 {
     std::vector<long> neighIds;
 
@@ -1581,7 +1581,7 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     // Create the list of vertices to send
     //
     std::unordered_set<long> vertexToCommunicate;
-    for (const long &cellId : cellsToCommunicate) {
+    for (const long cellId : cellsToCommunicate) {
         const Cell &cell = m_cells[cellId];
 
         ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
@@ -1630,13 +1630,13 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 
     // Fill the buffer with cell data
     cellBufferSize += sizeof(long);
-    for (const long &cellId : cellsToCommunicate) {
+    for (const long cellId : cellsToCommunicate) {
         cellBufferSize += sizeof(int) + sizeof(int) + m_cells[cellId].getBinarySize();
     }
     cellBuffer.setSize(cellBufferSize);
 
     cellBuffer << (long) cellsToCommunicate.size();
-    for (const long &cellId : cellsToCommunicate) {
+    for (const long cellId : cellsToCommunicate) {
         const Cell &cell = m_cells[cellId];
 
         // Cells in the cell frame or in the cell halo may already be on
@@ -1831,7 +1831,7 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 
     \param[in] sendRank is the rank of the processors sending the cells
  */
-adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
+adaption::Info PatchKernel::sendCells_receiver(int sendRank)
 {
     //
     // Perfom data exchange
@@ -2135,7 +2135,7 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     \param[in] sendRank is the rank of the processor sending the cells
     \param[in] recvRank is the rank of the processor receiving the cells
  */
-adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &recvRank)
+adaption::Info PatchKernel::sendCells_notified(int sendRank, int recvRank)
 {
     adaption::Info adaptionInfo;
 

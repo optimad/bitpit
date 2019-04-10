@@ -571,7 +571,7 @@ public:
 	std::vector<adaption::Info> partitioningAlter(bool trackPartitioning = true, bool squeezeStorage = false);
 	void partitioningCleanup();
 
-	adaption::Info sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend, bool squeezeStorage = false);
+	adaption::Info sendCells(int sendRank, int recvRank, const std::vector<long> &cellsToSend, bool squeezeStorage = false);
 #endif
 
 protected:
@@ -739,10 +739,10 @@ private:
 	void unsetGhostOwner(int id);
 	void clearGhostOwners();
 
-    adaption::Info sendCells_any(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
-    adaption::Info sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend);
-    adaption::Info sendCells_receiver(const int &sendRank);
-    adaption::Info sendCells_notified(const int &sendRank, const int &recvRank);
+	adaption::Info sendCells_any(int sendRank, int recvRank, const std::vector<long> &cellsToSend);
+	adaption::Info sendCells_sender(int recvRank, const std::vector<long> &cellsToSend);
+	adaption::Info sendCells_receiver(int sendRank);
+	adaption::Info sendCells_notified(int sendRank, int recvRank);
 
 	bool areGhostExchangeInfoDirty() const;
 	void updateGhostExchangeInfo();
