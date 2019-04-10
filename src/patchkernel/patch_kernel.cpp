@@ -4244,7 +4244,6 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
 			int nCellFaces = cell.getFaceCount();
 			for (int face = 0; face < nCellFaces; face++) {
 				if (multipleMatchesAllowed || cell.isFaceBorder(face)) {
-					std::cout << ": " << cell.getId() << " : " << face << std::endl;
 					halfFaces.emplace(cell, face, CellHalfFace::WINDING_NATURAL);
 				}
 			}
