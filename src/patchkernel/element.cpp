@@ -1564,11 +1564,10 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 			double tileArea = referenceInfo.evalArea(tileCoordinates.data());
 			std::array<double, 3> tileNormal = {{0., 0., 0.,}};
 			if (dimension == 2) {
-				const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
 				tileNormal = referenceInfo.evalNormal(tileCoordinates.data(), point);
 			} else if (dimension == 1) {
-				const Reference1DElementInfo &referenceInfo = static_cast<const Reference1DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
-				tileNormal = referenceInfo.evalNormal(tileCoordinates.data(), orientation, point);
+				const Reference1DElementInfo &referenceInfo1D = static_cast<const Reference1DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
+				tileNormal = referenceInfo1D.evalNormal(tileCoordinates.data(), orientation, point);
 			} else if (dimension == 0) {
 				tileNormal = orientation;
 			}
