@@ -1729,66 +1729,70 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 
     std::sort(adaptionInfo.previous.begin(), adaptionInfo.previous.end(), CellPositionLess(*this));
 
-    // Delete sent cells or mark them as ghosts owned by the receiver.
-    for (long cellId : cellsToSend) {
-		// Check if a cell has to be delete or is a ghost owned by the receiver
-		//
-		// A cell will become a ghost if at least one of his neighbours is
-		// an internal cell. If the processors is sending all its cells
-		// there will be no ghosts cell.
-		bool moveToGhosts = false;
-		if (cellsToSendFrame.count(cellId) == 0) {
-			moveToGhosts = false;
-		} else {
-			neighIds.clear();
-			findCellNeighs(cellId, &neighIds);
-			for (long neighId : neighIds) {
-				if (m_ghostOwners.count(neighId) == 0) {
-					moveToGhosts = true;
-					break;
-				}
-			}
-		}
-
-        // Delete the cell or mark is as a ghost owned by the receiver.
-        if (moveToGhosts) {
-            moveInternal2Ghost(cellId, recvRank);
-        } else {
-            deleteCell(cellId, true, true);
-        }
-    }
-
-    // Delete stale ghosts
+    // Delete stale cells/interfaces/vertices
     //
-    // Loop over all the ghosts and keep only the cells that have at least
-    // one internal neighbour.
-    auto itr = m_ghostOwners.cbegin();
-    while (itr != m_ghostOwners.cend()) {
-        long ghostId = itr->first;
+    // If the process is senting all its cells we can just clear the patch.
+    if (cellsToSend.size() < (std::size_t) getInternalCount()) {
+        // Delete sent cells or mark them as ghosts owned by the receiver.
+        for (long cellId : cellsToSend) {
+            // Check if a cell has to be delete or is a ghost owned by the
+            // receiver. A cell will become a ghost if at least one of his
+            // neighbours is an internal cell.
+            bool moveToGhosts = false;
+            if (cellsToSendFrame.count(cellId) > 0) {
+                neighIds.clear();
+                findCellNeighs(cellId, &neighIds);
+                for (long neighId : neighIds) {
+                    if (m_ghostOwners.count(neighId) == 0) {
+                        moveToGhosts = true;
+                        break;
+                    }
+                }
+            }
 
-        neighIds.clear();
-        findCellNeighs(ghostId, &neighIds);
-        bool keep = false;
-        for (long neighId : neighIds) {
-			if (m_ghostOwners.count(neighId) == 0) {
-                keep = true;
-                break;
+            // Delete the cell or mark is as a ghost owned by the receiver.
+            if (moveToGhosts) {
+                moveInternal2Ghost(cellId, recvRank);
+            } else {
+                deleteCell(cellId, true, true);
             }
         }
 
-        auto nextItr = itr;
-        nextItr++;
-        if (!keep) {
-            deleteCell(ghostId, true, true);
+        // Delete stale ghosts
+        //
+        // Loop over all the ghosts and keep only the cells that have at least
+        // one internal neighbour.
+        auto itr = m_ghostOwners.cbegin();
+        while (itr != m_ghostOwners.cend()) {
+            long ghostId = itr->first;
+
+            neighIds.clear();
+            findCellNeighs(ghostId, &neighIds);
+            bool keep = false;
+            for (long neighId : neighIds) {
+                if (m_ghostOwners.count(neighId) == 0) {
+                    keep = true;
+                    break;
+                }
+            }
+
+            auto nextItr = itr;
+            nextItr++;
+            if (!keep) {
+                deleteCell(ghostId, true, true);
+            }
+            itr = nextItr;
         }
-        itr = nextItr;
+
+        // Delete orphan interfaces
+        deleteOrphanInterfaces();
+
+        // Delete orphan vertices
+        deleteOrphanVertices();
+    } else {
+        // The processor has sent all its cells, the patch is now empty
+        reset();
     }
-
-    // Delete orphan interfaces
-    deleteOrphanInterfaces();
-
-	// Delete orphan vertices
-	deleteOrphanVertices();
 
 	// Return adaption info
     return adaptionInfo;
