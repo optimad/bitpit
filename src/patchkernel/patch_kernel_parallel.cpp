@@ -1563,11 +1563,6 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     //
     // Cells owned by receiver are already on the receiver, so there is no
     // need to send them.
-    //
-    // Some cells on the halo may be already on the receiver (becuase they
-    // are already ghosts owned by another processor). However we don't have
-    // enough information to identify those duplicate cells. The receiver
-    // needs to permorm a check to avoid inserting duplicate cells.
     for (long cellId : cellsToSendHalo) {
         int ownerRank;
         if (m_ghostOwners.count(cellId) == 0) {
@@ -1644,16 +1639,19 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     for (const long &cellId : cellsToCommunicate) {
         const Cell &cell = m_cells[cellId];
 
-        // Owner of the cell
-        int cellOwner;
-        if (cell.isInterior()) {
-            cellOwner = m_rank;
-        } else {
-            cellOwner = m_ghostOwners.at(cellId);
+        // Cells in the cell frame or in the cell halo may already be on
+        // receiver. However we don't have enough information to identify
+        // those duplicate cells. The receiver needs to perform a check
+        // to avoid inserting duplicate cells.
+        bool duplicateCheckNeeded = false;
+        if (cellsToSendFrame.count(cellId) > 0) {
+            duplicateCheckNeeded = true;
+        } else if (cellsToSendHalo.count(cellId) > 0) {
+            duplicateCheckNeeded = true;
         }
-        cellBuffer << cellOwner;
+        cellBuffer << duplicateCheckNeeded;
 
-        // Future owner of the cell
+        // Cell owner on receiver
         int cellFutureOwner = cellRankOnReceiver[cellId];
         cellBuffer << cellFutureOwner;
 
@@ -1956,8 +1954,8 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     m_cells.reserve(nReceivedCells);
     for (long i = 0; i < nReceivedCells; ++i) {
         // Cell data
-        int cellOriginalOwner;
-        cellBuffer >> cellOriginalOwner;
+        bool duplicateCheckNeeded;
+        cellBuffer >> duplicateCheckNeeded;
 
         int cellOwner;
         cellBuffer >> cellOwner;
@@ -1978,20 +1976,17 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
         //
         // The received cell may be one of the current ghosts.
         long cellId = Cell::NULL_ID;
-        for (const auto &ghostEntry : m_ghostOwners) {
-            int ghostOwner = ghostEntry.second;
-            if (ghostOwner != cellOriginalOwner) {
-                continue;
-            }
+        if (duplicateCheckNeeded) {
+            for (const auto &ghostEntry : m_ghostOwners) {
+                const long ghostId = ghostEntry.first;
+                const Cell &ghostCell = m_cells[ghostId];
+                if (!cell.hasSameConnect(ghostCell)) {
+                    continue;
+                }
 
-            const long ghostId = ghostEntry.first;
-            const Cell &ghostCell = m_cells[ghostId];
-            if (!cell.hasSameConnect(ghostCell)) {
-                continue;
+                cellId = ghostId;
+                break;
             }
-
-            cellId = ghostId;
-            break;
         }
 
         // If the cell is not a duplicate add it in the cell data structure,
