@@ -65,11 +65,11 @@ void StencilScalarSolver::clear(bool release)
 
 #if BITPIT_ENABLE_MPI==1
 /*!
-* Initialize the stencil solver.
+* Assembly the stencil solver.
 *
 * \param stencils are the stencils
 */
-void StencilScalarSolver::initialize(const std::vector<StencilScalar> &stencils)
+void StencilScalarSolver::assembly(const std::vector<StencilScalar> &stencils)
 {
     assembly(MPI_COMM_SELF, false, stencils);
 }
@@ -80,14 +80,14 @@ void StencilScalarSolver::initialize(const std::vector<StencilScalar> &stencils)
 * \param communicator is the MPI communicator
 * \param stencils are the stencils
 */
-void StencilScalarSolver::initialize(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> &stencils)
+void StencilScalarSolver::assembly(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> &stencils)
 #else
 /*!
 * Initialize the stencil solver.
 *
 * \param stencils are the stencils
 */
-void StencilScalarSolver::initialize(const std::vector<StencilScalar> &stencils)
+void StencilScalarSolver::assembly(const std::vector<StencilScalar> &stencils)
 #endif
 {
     long nDOFs = stencils.size();

@@ -42,9 +42,9 @@ public:
     StencilScalarSolver(bool debug = false);
 
     void clear(bool release = false);
-    void initialize(const std::vector<StencilScalar> &stencils);
+    void assembly(const std::vector<StencilScalar> &stencils);
 #if BITPIT_ENABLE_MPI==1
-    void initialize(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> &stencils);
+    void assembly(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> &stencils);
 #endif
     void update(const std::vector<long> &rows, const std::vector<StencilScalar> &stencils);
 
