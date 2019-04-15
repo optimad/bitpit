@@ -71,7 +71,7 @@ void StencilScalarSolver::clear(bool release)
 */
 void StencilScalarSolver::initialize(const std::vector<StencilScalar> &stencils)
 {
-    initialize(MPI_COMM_SELF, false, stencils);
+    assembly(MPI_COMM_SELF, false, stencils);
 }
 /*!
 * Initialize the stencil solver.
@@ -113,7 +113,7 @@ void StencilScalarSolver::initialize(const std::vector<StencilScalar> &stencils)
 
     matrix.assembly();
 
-    SystemSolver::initialize(matrix);
+    SystemSolver::assembly(matrix);
 }
 
 /*!
@@ -158,9 +158,9 @@ void StencilScalarSolver::update(const std::vector<long> &rows, const std::vecto
 */
 void StencilScalarSolver::solve()
 {
-    // Check if the stencil solver is initialized
-    if (!isInitialized()) {
-        throw std::runtime_error("Unable to solve the system. The stencil solver is not yet initialized.");
+    // Check if the stencil solver is assembled
+    if (!isAssembled()) {
+        throw std::runtime_error("Unable to solve the system. The stencil solver is not yet assembled.");
     }
 
     // Subtract constant terms to the RHS

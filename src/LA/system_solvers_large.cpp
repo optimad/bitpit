@@ -68,7 +68,7 @@ void SystemSolver::addInitOptions(const std::vector<std::string> &options)
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(bool debug)
-    : m_initialized(false), m_pivotType(PIVOT_NONE),
+    : m_assembled(false), m_pivotType(PIVOT_NONE),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
@@ -125,7 +125,7 @@ SystemSolver::~SystemSolver()
  */
 void SystemSolver::clear()
 {
-    if (!isInitialized()) {
+    if (!isAssembled()) {
         return;
     }
 
@@ -144,20 +144,20 @@ void SystemSolver::clear()
     freeCommunicator();
 #endif
 
-    m_initialized = false;
+    m_assembled = false;
 }
 
 /*!
- * Initialize the system.
+ * Assembly the system.
  *
  * \param matrix is the matrix
  * \param pivotType is the type of pivoting that will be used
  */
-void SystemSolver::initialize(const SparseMatrix &matrix, PivotType pivotType)
+void SystemSolver::assembly(const SparseMatrix &matrix, PivotType pivotType)
 {
     // Check if the matrix is assembled
     if (!matrix.isAssembled()) {
-        throw std::runtime_error("Unable to initialize the system. The matrix is not yet assembled.");
+        throw std::runtime_error("Unable to assembly the system. The matrix is not yet assembled.");
     }
 
     // Clear the system
@@ -191,15 +191,15 @@ void SystemSolver::initialize(const SparseMatrix &matrix, PivotType pivotType)
     // Initialize Krylov solver
     KSPInit();
 
-    // The system is now initialized
-    m_initialized = true;
+    // The system is now assembled
+    m_assembled = true;
 }
 
 /*!
  * Update the system.
  *
  * Only the values of the system matrix can be updated, once the system is
- * initialized its pattern cannot be modified.
+ * assembled its pattern cannot be modified.
  *
  * \param rows are the global indices of the rows that will be updated
  * \param elements are the elements that will be used to update the rows
@@ -212,9 +212,9 @@ void SystemSolver::update(const std::vector<long> &rows, const SparseMatrix &ele
         throw std::runtime_error("Unable to update the system. The element storage is not yet assembled.");
     }
 
-    // Check if the system is initialized
-    if (!isInitialized()) {
-        throw std::runtime_error("Unable to update the system. The system is not yet initialized.");
+    // Check if the system is assembled
+    if (!isAssembled()) {
+        throw std::runtime_error("Unable to update the system. The system is not yet assembled.");
     }
 
     // Update matrix
@@ -228,7 +228,7 @@ void SystemSolver::update(const std::vector<long> &rows, const SparseMatrix &ele
 */
 long SystemSolver::getRowCount() const
 {
-    if (!isInitialized()) {
+    if (!isAssembled()) {
         return 0;
     }
 
@@ -245,7 +245,7 @@ long SystemSolver::getRowCount() const
 */
 long SystemSolver::getColCount() const
 {
-    if (!isInitialized()) {
+    if (!isAssembled()) {
         return 0;
     }
 
@@ -263,7 +263,7 @@ long SystemSolver::getColCount() const
 */
 long SystemSolver::getRowGlobalCount() const
 {
-    if (!isInitialized()) {
+    if (!isAssembled()) {
         return 0;
     }
 
@@ -280,7 +280,7 @@ long SystemSolver::getRowGlobalCount() const
 */
 long SystemSolver::getColGlobalCount() const
 {
-    if (!isInitialized()) {
+    if (!isAssembled()) {
         return 0;
     }
 
@@ -302,13 +302,13 @@ bool SystemSolver::isPartitioned() const
 #endif
 
 /*!
- * Check if the system is initialized.
+ * Check if the system is assembled.
  *
- * \return Returns true if the system is initialized, false otherwise.
+ * \return Returns true if the system is assembled, false otherwise.
  */
-bool SystemSolver::isInitialized() const
+bool SystemSolver::isAssembled() const
 {
-    return m_initialized;
+    return m_assembled;
 }
 
 /*!
@@ -316,9 +316,9 @@ bool SystemSolver::isInitialized() const
  */
 void SystemSolver::solve()
 {
-    // Check if the system is initialized
-    if (!isInitialized()) {
-        throw std::runtime_error("Unable to solve the system. The system is not yet initialized.");
+    // Check if the system is assembled
+    if (!isAssembled()) {
+        throw std::runtime_error("Unable to solve the system. The system is not yet assembled.");
     }
 
     // Reorder the vectors

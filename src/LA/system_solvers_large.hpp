@@ -84,8 +84,8 @@ public:
     virtual ~SystemSolver();
 
     void clear();
-    void initialize(const SparseMatrix &matrix, PivotType pivotType = PIVOT_NONE);
-    bool isInitialized() const;
+    void assembly(const SparseMatrix &matrix, PivotType pivotType = PIVOT_NONE);
+    bool isAssembled() const;
 
     void update(const std::vector<long> &rows, const SparseMatrix &elements);
 
@@ -147,7 +147,7 @@ private:
     static int m_nInstances;
     static std::vector<std::string> m_options;
 
-    bool m_initialized;
+    bool m_assembled;
     PivotType m_pivotType;
 
 #if BITPIT_ENABLE_MPI==1

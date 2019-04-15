@@ -78,7 +78,7 @@ int subtest_001(int rank, int nProcs)
     log::cout() << "Building system..." << std::endl;
 
     SystemSolver system;
-    system.initialize(matrix);
+    system.assembly(matrix);
 
     double *rhs = system.getRHSRawPtr();
     for (int i = 0; i < nCols; ++i) {
