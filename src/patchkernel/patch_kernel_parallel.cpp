@@ -2007,17 +2007,12 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
             FlatVector2D<long> &cellAdjacencies = linkAdjacencies[cellId];
 
             int nCellFaces = cell.getFaceCount();
-            cellAdjacencies.reserve(nCellFaces);
+            int nCellAdjacencies = cell.getAdjacencyCount();
+            cellAdjacencies.reserve(nCellFaces, nCellAdjacencies);
             for (int face = 0; face < nCellFaces; ++face) {
                 int nFaceAdjacencies = cell.getAdjacencyCount(face);
-
-                std::vector<long> faceAdjacencies;
-                faceAdjacencies.reserve(nFaceAdjacencies);
-                for (int k = 0; k < nFaceAdjacencies; ++k) {
-                    faceAdjacencies.push_back(cell.getAdjacency(face, k));
-                }
-
-                cellAdjacencies.pushBack(faceAdjacencies);
+                const long *faceAdjacencies = cell.getAdjacencies(face);
+                cellAdjacencies.pushBack(nFaceAdjacencies, faceAdjacencies);
             }
 
             // Delete the interfaces of the cell, they will be recreated later
@@ -2048,8 +2043,9 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
         int nCellFaces = cell.getFaceCount();
         for (int face = 0; face < nCellFaces; ++face) {
             int nFaceAdjacencies = cell.getAdjacencyCount(face);
+            const long *faceAdjacencies = cell.getAdjacencies(face);
             for (int k = 0; k < nFaceAdjacencies; ++k) {
-                long senderAdjacencyId = cell.getAdjacency(face, k);
+                long senderAdjacencyId = faceAdjacencies[k];
                 if (cellMap.count(senderAdjacencyId) == 0) {
 					cell.deleteAdjacency(face, k);
                     continue;
