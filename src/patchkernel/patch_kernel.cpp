@@ -2121,8 +2121,9 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 
 			// Update interface
 			int nFaceInterfaces = cell.getInterfaceCount(i);
+			const long *faceInterfaces = cell.getInterfaces(i);
 			for (int k = 0; k < nFaceInterfaces; ++k) {
-				long interfaceId = cell.getInterface(i,k);
+				long interfaceId = faceInterfaces[k];
 				Interface &interface = m_interfaces[interfaceId];
 				if (interface.getOwner() == id) {
 						interface.unsetOwner();
