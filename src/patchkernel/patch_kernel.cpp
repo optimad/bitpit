@@ -2108,8 +2108,9 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		for (int i = 0; i < nCellFaces; ++i) {
 			// Update adjacency of the neighbours
 			int nFaceAdjacencies = cell.getAdjacencyCount(i);
+			const long *faceAdjacencies = cell.getAdjacencies(i);
 			for (int k = 0; k < nFaceAdjacencies; ++k) {
-				long neighId = cell.getAdjacency(i,k);
+				long neighId = faceAdjacencies[k];
 
 				int neighFace, adjacencyId;
 				findFaceNeighCell(neighId, id, neighFace, adjacencyId);
