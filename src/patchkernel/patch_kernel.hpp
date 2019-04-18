@@ -411,7 +411,7 @@ public:
 	void findCellVertexNeighs(const long &id, const int &vertex, std::vector<long> *neighs) const;
 	std::vector<long> findCellVertexOneRing(const long &id, const int &vertex) const;
 	void findCellVertexOneRing(const long &id, const int &vertex, std::vector<long> *neighs) const;
-    void findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx);
+	bool findFaceNeighCell(long cellId, long neighId, int *cellFace, int *cellAdjacencyId) const;
 	std::set<int> getInternalPIDs();
 	std::vector<long> getInternalsByPID(int pid);
 

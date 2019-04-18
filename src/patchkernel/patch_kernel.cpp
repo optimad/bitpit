@@ -2113,7 +2113,7 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 				long neighId = faceAdjacencies[k];
 
 				int neighFace, adjacencyId;
-				findFaceNeighCell(neighId, id, neighFace, adjacencyId);
+				findFaceNeighCell(neighId, id, &neighFace, &adjacencyId);
 				if (neighFace >= 0) {
 					Cell &neigh = m_cells[neighId];
 					neigh.deleteAdjacency(neighFace, adjacencyId);
@@ -2812,49 +2812,45 @@ void PatchKernel::findCellVertexOneRing(const long &id, const int &vertex, std::
 }
 
 /*!
-        Stores the local index of the face shared by cell_idx and neigh_idx
-        into face_loc_idx.
-        If cell cell_idx and neigh_idx do not share any face, -1 is stored in
-        face_loc_idx.
+        Find the face and the adjacency that are shared by the specified cells.
 
-        \param[in] cell_idx cell index
-        \param[in] neigh_idx neighbour index
-        \param[in,out] face_loc_idx on output stores the local index (on cell
-        cell_idx) shared by cell_idx and neigh_idx. If cells cell_idx and neigh_idx
-        do not share any face, -1 is stored in face_loc_idx.
-        \param[in,out] intf_loc_idx on output stores the index of the adjacency (on face
-        face_loc_idx of cell cell_idx). If cells cell_idx and neigh_idx do not share
-        any face, -1 is stored into intf_loc_idx.
+        If the two cells don't share a face, the output arguments are set to
+        a negative value.
+
+        \param[in] cellId is the id of the cell
+        \param[in] neighId is the id of the neighbour
+        \param[out] cellFace is the face of the cell that is shared with the
+        neighbour. If the cell doesn't share any face with the neighbour, the
+        argument is set to a negative number
+        \param[out] cellAdjacencyId is the adjacency of the cell that is shared
+        with the neighbour. If the cell doesn't share any adjacency with the
+        neighbour, the argument is set to a negative number
+        \return Return true if the two cells share a face, false otherwise.
 */
-void PatchKernel::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx)
+bool PatchKernel::findFaceNeighCell(long cellId, long neighId, int *cellFace, int *cellAdjacencyId) const
 {
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
-    bool                        loop_continue = true;
-    int                         n_faces, n_adj;
-    int                         j, k;
-    Cell                       &cell_ = m_cells[cell_idx];
+    const Cell &cell = getCell(cellId);
 
-    // ====================================================================== //
-    // LOOP OVER ADJACENCIES                                                  //
-    // ====================================================================== //
-    n_faces = cell_.getFaceCount();
-    j = 0;
-    while ( loop_continue && (j < n_faces) ) {
-        n_adj = cell_.getAdjacencyCount(j);
-        k = 0;
-        while ( loop_continue && (k < n_adj) ) {
-            loop_continue = ( cell_.getAdjacency( j, k ) != neigh_idx );
-            ++k;
-        } //next k
-        ++j;
-    } //next j
+    int nFaces = cell.getFaceCount();
+    for (int i = 0; i < nFaces; ++i) {
+        int nFaceAdjacencies = cell.getAdjacencyCount(i);
+        const long *faceAdjacencies = cell.getAdjacencies(i);
+        for (int k = 0; k < nFaceAdjacencies; ++k) {
+            long faceNeighId = faceAdjacencies[k];
+            if (faceNeighId < 0) {
+                continue;
+            } else if (faceNeighId == neighId) {
+                *cellFace        = i;
+                *cellAdjacencyId = k;
+                return true;
+            }
+        }
+    }
 
-    if ( loop_continue) { face_loc_idx = intf_loc_idx = -1; }
-    else                { face_loc_idx = --j; intf_loc_idx = --k; }
+    *cellFace        = -1;
+    *cellAdjacencyId = -1;
 
-    return;
+    return false;
 }
 
 /*!
