@@ -605,16 +605,15 @@ array<double, 3> SurfaceKernel::evalEdgeNormal(const long &id, const int &edge_i
     // Local variables
     array<double, 3>                    normal = evalFacetNormal(id);
     const Cell                          *cell_ = &m_cells[id];
-
-    // Counters
     int                                 n_adj = cell_->getAdjacencyCount(edge_id);
-    
+    const long                          *adjacencies = cell_->getAdjacencies(edge_id);
+
     // ====================================================================== //
     // COMPUTE EDGE NORMAL                                                    //
     // ====================================================================== //
-    if (cell_->getAdjacency(edge_id, 0) != Element::NULL_ID) {
+    if (adjacencies[0] != Element::NULL_ID) {
         for (int i = 0; i < n_adj; ++i) {
-            normal += evalFacetNormal(cell_->getAdjacency(edge_id, i));
+            normal += evalFacetNormal(adjacencies[i]);
         } //next i
         normal = normal/norm2(normal);
     }
