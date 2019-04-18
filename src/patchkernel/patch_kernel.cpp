@@ -3199,9 +3199,10 @@ bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delaye
 		if (ownerId >= 0) {
 			Cell &owner = m_cells[ownerId];
 			int ownerFace = interface.getOwnerFace();
+			const long *ownerFaceInterfaces = owner.getInterfaces(ownerFace);
 
 			int ownerInterfaceId = 0;
-			while (owner.getInterface(ownerFace, ownerInterfaceId) != id) {
+			while (ownerFaceInterfaces[ownerInterfaceId] != id) {
 				++ownerInterfaceId;
 			}
 			owner.deleteInterface(ownerFace, ownerInterfaceId);
@@ -3212,9 +3213,10 @@ bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delaye
 		if (neighId >= 0) {
 			Cell &neigh = m_cells[neighId];
 			int neighFace = interface.getNeighFace();
+			const long *neighFaceInterfaces = neigh.getInterfaces(neighFace);
 
 			int neighInterfaceId = 0;
-			while (neigh.getInterface(neighFace, neighInterfaceId) != id) {
+			while (neighFaceInterfaces[neighInterfaceId] != id) {
 				++neighInterfaceId;
 			}
 			neigh.deleteInterface(neighFace, neighInterfaceId);
