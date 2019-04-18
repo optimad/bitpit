@@ -4395,8 +4395,9 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 				}
 
 				// Build an interface for every adjacency
+				const long *faceAdjacencies = cell.getAdjacencies(face);
 				for (int k = updateBegin; k < updateEnd; ++k) {
-					long neighId = cell.getAdjacency(face, k);
+					long neighId = faceAdjacencies[k];
 					Cell *neigh  = &m_cells[neighId];
 
 					int neighFace = findAdjoinNeighFace(cellId, neighId);
