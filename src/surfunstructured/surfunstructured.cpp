@@ -216,6 +216,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
     bool                                        check;
     int                                         n_faces, n_adj;
     long                                        id;
+    const long                                  *adjacencies;
 
     // Counters
     int                                         i, j;
@@ -247,8 +248,9 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
         for (i = 0; i < n_faces; ++i) {
             check = true;
             n_adj = c_->getAdjacencyCount(i);
+            adjacencies = c_->getAdjacencies(i);
             for (j = 0; j < n_adj; ++j) {
-                check = check && (id > c_->getAdjacency(i, j));
+                check = check && (id > adjacencies[j]);
             } //next j
             if (check) {
                 // Get edge type
