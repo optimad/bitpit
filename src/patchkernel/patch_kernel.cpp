@@ -2447,8 +2447,11 @@ void PatchKernel::findCellFaceNeighs(const long &id, const int &face, std::vecto
 void PatchKernel::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	const Cell &cell = getCell(id);
-	for (int i = 0; i < cell.getAdjacencyCount(face); ++i) {
-		long neighId = cell.getAdjacency(face, i);
+
+	int nFaceAdjacencies = cell.getAdjacencyCount(face);
+	const long *faceAdjacencies = cell.getAdjacencies(face);
+	for (int k = 0; k < nFaceAdjacencies; ++k) {
+		long neighId = faceAdjacencies[k];
 		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
 			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
