@@ -76,9 +76,9 @@ public:
 
 private:
 	long m_owner;
-	int m_ownerFace;
-
 	long m_neigh;
+
+	int m_ownerFace;
 	int m_neighFace;
 
 	void _initialize(long owner, long ownerFace, long neigh, long neighFace);
