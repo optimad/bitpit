@@ -4117,15 +4117,19 @@ bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_
 		return false;
 	}
 
-	ConstProxyVector<long> faceVertexIds_A = cell_A.getFaceVertexIds(face_A);
-	std::vector<long> sortedFaceVertexIds_A(faceVertexIds_A.begin(), faceVertexIds_A.end());
-	std::sort(sortedFaceVertexIds_A.begin(), sortedFaceVertexIds_A.end());
+	int nFaceVertices = cell_A.getFaceVertexCount(face_A);
 
-	ConstProxyVector<long> faceVertexIds_B = cell_B.getFaceVertexIds(face_B);
-	std::vector<long> sortedFaceVertexIds_B(faceVertexIds_B.begin(), faceVertexIds_B.end());
-	std::sort(sortedFaceVertexIds_B.begin(), sortedFaceVertexIds_B.end());
+	std::vector<long> faceVertexIds_A(nFaceVertices);
+	std::vector<long> faceVertexIds_B(nFaceVertices);
+	for (int k = 0; k < nFaceVertices; ++k) {
+		faceVertexIds_A[k] = cell_A.getFaceVertexId(face_A, k);
+		faceVertexIds_B[k] = cell_B.getFaceVertexId(face_B, k);
+	}
 
-	return (sortedFaceVertexIds_A == sortedFaceVertexIds_B);
+	std::sort(faceVertexIds_A.begin(), faceVertexIds_A.end());
+	std::sort(faceVertexIds_B.begin(), faceVertexIds_B.end());
+
+	return (faceVertexIds_A == faceVertexIds_B);
 }
 
 /*!
