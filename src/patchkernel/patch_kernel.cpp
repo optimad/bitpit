@@ -2713,6 +2713,8 @@ void PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, std::v
 	For example, A1 and B1 are not neighbours (although they share the
 	vertex V), whereas A2 and B2 are neighbours.
 
+	This implementation can NOT handle hanging nodes.
+
 	\param id is the id of the cell
 	\param vertex is a local vertex of the cell
 	\param blackList is a list of cells that are excluded from the search.
@@ -2725,42 +2727,69 @@ void PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, std::v
 void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	const Cell &cell = getCell(id);
-	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-	long vertexId = cellVertexIds[vertex];
+	long vertexId = cell.getVertexId(vertex);
+
+	// Since we are processing a small number of cells it's more efficient to
+	// store the list of already processed cells in a vector instead of using
+	// a set or an unordered_set. To speed-up the lookup, the vector is kept
+	// sorted.
+	const int GUESS_NEIGHS_COUNT = 8;
+
+	std::vector<long> alreadyProcessed;
+	alreadyProcessed.reserve(GUESS_NEIGHS_COUNT);
 
 	std::vector<long> scanQueue;
-	std::set<long> alreadyProcessed;
-	scanQueue.push_back(cell.getId());
+	scanQueue.reserve(GUESS_NEIGHS_COUNT);
+	scanQueue.push_back(id);
+
+	ConstProxyVector<long> scanCellVertexIds;
 	while (!scanQueue.empty()) {
 		// Pop a cell to process
-		long scanId = scanQueue.back();
-		const Cell &scanCell = getCell(scanId);
-
+		long scanCellId = scanQueue.back();
+		const Cell &scanCell = getCell(scanCellId);
 		scanQueue.pop_back();
-		alreadyProcessed.insert(scanId);
+		utils::addToOrderedVector<long>(scanCell.getId(), alreadyProcessed);
 
-		// Add elements to the neighbour list
-		if (scanId != id) {
-			// Discard elements that don't own the vertex
-			if (scanCell.findVertex(vertexId) < 0) {
+		// Get vertex list
+		if (scanCell.hasInfo()) {
+			scanCellVertexIds = scanCell.getVertexIds();
+		}
+
+		// Use face adjacencies to find vertex negihbours
+		int nFaces = scanCell.getFaceCount();
+		for (int i = 0; i < nFaces; ++i) {
+			// Discard faces with no neighbours
+            if (scanCell.isFaceBorder(i)) {
 				continue;
 			}
 
-			// Add the element to the neighbour list
-			if (utils::findInOrderedVector<long>(scanId, blackList) == blackList.end()) {
-				utils::addToOrderedVector<long>(scanId, *neighs);
-			}
-		}
-
-		// Add negihbours of faces that owns the vertex to the scan list
-		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
 			// Discard faces that don't own the vertex
+			//
+			// We use differents algorithm depending on whether the cell has a
+			// reference element or not. If the cell has a reference element,
+			// accessing the local connectivity of the face is cheap. If the
+			// cell has no reference element, it is better to avoid using the
+			// local connectivity of the face.
 			bool faceOwnsVertex = false;
-			for (int k = 0; k < scanCell.getFaceVertexCount(i); ++k) {
-				long faceVertexId = scanCell.getFaceVertexId(i, k);
-				if (faceVertexId == vertexId) {
-					faceOwnsVertex = true;
-					break;
+			if (scanCell.hasInfo()) {
+				ConstProxyVector<int> faceLocalVertexIds = scanCell.getFaceLocalVertexIds(i);
+				int nFaceVertices = faceLocalVertexIds.size();
+				for (int k = 0; k < nFaceVertices; ++k) {
+					long faceVertexId = scanCellVertexIds[faceLocalVertexIds[k]];
+					if (faceVertexId == vertexId) {
+						faceOwnsVertex = true;
+						break;
+					}
+				}
+			} else {
+				ConstProxyVector<long> faceVertexIds = scanCell.getFaceVertexIds(i);
+				int nFaceVertices = faceVertexIds.size();
+				for (int k = 0; k < nFaceVertices; ++k) {
+					long faceVertexId = faceVertexIds[k];
+					if (faceVertexId == vertexId) {
+						faceOwnsVertex = true;
+						break;
+					}
 				}
 			}
 
@@ -2768,13 +2797,26 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 				continue;
 			}
 
-			// Add face neighbours to the scan queue
-			int nFaceNeighs = scanCell.getAdjacencyCount(i);
-			for (int k = 0; k < nFaceNeighs; ++k) {
-				long neighId = scanCell.getAdjacency(i, k);
-				if (alreadyProcessed.count(neighId) == 0) {
-					scanQueue.push_back(neighId);
+			// Loop through the adjacencies
+			//
+			// Non-manifold patches may have faces with multiple adjacencies.
+			int nFaceAdjacencies = scanCell.getAdjacencyCount(i);
+			const long *faceAdjacencies = scanCell.getAdjacencies(i);
+			for (int k = 0; k < nFaceAdjacencies; ++k) {
+				long faceNeighId = faceAdjacencies[k];
+
+				// Discard neighbours that have already been processed
+				if (utils::findInOrderedVector<long>(faceNeighId, alreadyProcessed) != alreadyProcessed.end()) {
+					continue;
 				}
+
+				// Update list of vertex neighbours
+				if (utils::findInOrderedVector<long>(faceNeighId, blackList) == blackList.end()) {
+					utils::addToOrderedVector<long>(faceNeighId, *neighs);
+				}
+
+				// Update scan list
+				scanQueue.push_back(faceNeighId);
 			}
 		}
 	}
