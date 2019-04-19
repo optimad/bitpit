@@ -1347,7 +1347,6 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 {
 	// Info of the cells
 	int nCellVertices = m_cellTypeInfo->nVertices;
-	const std::vector<std::vector<int>> &cellLocalFaceConnect = m_cellTypeInfo->faceConnect;
 
 	// Info on the faces
 	const int &nInterfaceVertices = m_interfaceTypeInfo->nVertices;
@@ -1524,7 +1523,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 			OctantInfo ownerOctantInfo = getCellOctant(ownerId);
 			Octant *ownerOctant = getOctantPointer(ownerOctantInfo);
 
-			const std::vector<int> &localFaceConnect = cellLocalFaceConnect[ownerFace];
+			const int *localFaceConnect = m_cellTypeInfo->faceConnectStorage[ownerFace].data();
 			for (int k = 0; k < nInterfaceVertices; ++k) {
 				long vertexId = ownerCellVertexIds[localFaceConnect[k]];
 				uint64_t vertexTreeMorton = m_tree->getNodeMorton(ownerOctant, localFaceConnect[k]);

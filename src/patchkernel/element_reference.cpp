@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <set>
+
 #include "bitpit_CG.hpp"
 #include "bitpit_containers.hpp"
 #include "bitpit_operators.hpp"
@@ -53,10 +55,18 @@ namespace bitpit {
 */
 ReferenceElementInfo::ReferenceElementInfo(int _dimension, ElementType _type, int _nVertices, int _nFaces, int _nEdges)
     : dimension(_dimension), type(_type),
-      nVertices(_nVertices),
-      nFaces(_nFaces), face_type(nFaces), faceConnect(nFaces), faceEdges(nFaces),
-      nEdges(_nEdges), edge_type(nEdges), edgeConnect(nEdges)
+      nVertices(_nVertices), nFaces(_nFaces), nEdges(_nEdges)
 {
+    faceTypeStorage.fill(ElementType::UNDEFINED);
+    for (int i = 0; i < MAX_ELEM_FACES; ++i) {
+        faceConnectStorage[i].fill(-1);
+        faceEdgeStorage[i].fill(-1);
+    }
+
+    edgeTypeStorage.fill(ElementType::UNDEFINED);
+    for (int i = 0; i < MAX_ELEM_FACES; ++i) {
+        edgeConnectStorage[i].fill(-1);
+    }
 }
 
 /*!
@@ -146,47 +156,49 @@ const ReferenceElementInfo & ReferenceElementInfo::getInfo(ElementType type)
 /*!
     Initializes the list of edges associated to the faces
 */
-void ReferenceElementInfo::initializeFaceEdges(const std::vector<const ReferenceElementInfo *> &facesInfo)
+void ReferenceElementInfo::initializeFaceEdges(const std::vector<const ReferenceElementInfo *> &facesInfo,
+                                               const std::vector<const ReferenceElementInfo *> &edgesInfo)
 {
-    faceEdges = std::vector<std::vector<int>>(nFaces);
     for (int k = 0; k < nFaces; ++k) {
         const ReferenceElementInfo &faceInfo = *(facesInfo[k]);
 
         int nFaceEdges = faceInfo.nFaces;
+        int faceEdgeCounter = 0;
         for (int i = 0; i < nFaceEdges; ++i) {
-            // Number of vertices of the edge associated to the face
-            std::size_t nFaceEdgeVertices = faceInfo.faceConnect[i].size();
+            const ReferenceElementInfo &faceEdgeInfo = *(edgesInfo[i]);
 
             // Connectivity of the edge associated to the face
-            const std::vector<int> &localFaceEdgeConnect = faceInfo.faceConnect[i];
+            const int *localFaceEdgeConnect = faceInfo.faceConnectStorage[i].data();
 
-            std::vector<int> faceEdgeConnect(nFaceEdgeVertices);
-            for (std::size_t n = 0; n < nFaceEdgeVertices; ++n) {
+            std::set<int> faceEdgeConnect;
+            for (int n = 0; n < faceEdgeInfo.nVertices; ++n) {
                 int localVertexId = localFaceEdgeConnect[n];
-                int vertexId      = faceConnect[k][localVertexId];
+                int vertexId      = faceConnectStorage[k][localVertexId];
 
-                faceEdgeConnect[n] = vertexId;
+                faceEdgeConnect.insert(vertexId);
             }
 
             // Search the edge that has the same connectivity of the face edge
             for (int j = 0; j < nEdges; ++j) {
-                // If face edge and the guess edge have a different number of
-                // vertices, the two edge cannot be the same.
-                std::size_t nGuessEdgeVertices = edgeConnect[j].size();
-                if (nGuessEdgeVertices != nFaceEdgeVertices) {
+                const ReferenceElementInfo &guessEdgeInfo = *(edgesInfo[j]);
+
+                // If face edge and the guess edge have a different type, the
+                // two edge cannot be the same.
+                if (guessEdgeInfo.type != faceEdgeInfo.type) {
                     continue;
                 }
 
                 // If the connecitivity of the face edge and the one of the
                 // guess edge are the same, the two edges coincides.
-                const std::vector<int> commonVertices = utils::intersectionVector(faceEdgeConnect, edgeConnect[j]);
-                if (commonVertices.size() == nFaceEdgeVertices) {
-                    faceEdges[k].push_back(j);
+                const std::set<int> guessEdgeConnect = std::set<int>(edgeConnectStorage[j].begin(), edgeConnectStorage[j].begin() + guessEdgeInfo.nVertices);
+                if (faceEdgeConnect == guessEdgeConnect) {
+                    faceEdgeStorage[k][faceEdgeCounter] = j;
+                    ++faceEdgeCounter;
                 }
             }
         }
 
-        assert((int) faceEdges[k].size() == nFaceEdges);
+        assert(faceEdgeCounter == nFaceEdges);
     }
 }
 
@@ -228,10 +240,10 @@ double Reference3DElementInfo::evalSurfaceArea(const std::array<double, 3> *vert
 
     double area = 0;
     for (int i = 0; i < nFaces; ++i) {
-        ElementType faceType = face_type[i];
+        ElementType faceType = faceTypeStorage[i];
         const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(faceType));
         for (int n = 0; n < faceInfo.nVertices; ++n) {
-            faceVertexCoords[n] = vertexCoords[faceConnect[i][n]];
+            faceVertexCoords[n] = vertexCoords[faceConnectStorage[i][n]];
         }
 
         area += faceInfo.evalArea(faceVertexCoords.data());
@@ -255,7 +267,7 @@ double Reference3DElementInfo::evalEdgePerimeter(const std::array<double, 3> *ve
     double perimeter = 0;
     for (int i = 0; i < nEdges; ++i) {
         for (int n = 0; n < edgeInfo.nVertices; ++n) {
-            edgeVertexCoords[n] = vertexCoords[edgeConnect[i][n]];
+            edgeVertexCoords[n] = vertexCoords[edgeConnectStorage[i][n]];
         }
 
         perimeter += edgeInfo.evalLength(edgeVertexCoords.data());
@@ -277,10 +289,10 @@ double Reference3DElementInfo::evalPointDistance(const std::array<double, 3> &po
 
     double distance = std::numeric_limits<double>::max();
     for (int i = 0; i < nFaces; ++i) {
-        ElementType faceType = face_type[i];
+        ElementType faceType = faceTypeStorage[i];
         const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(faceType));
         for (int n = 0; n < faceInfo.nVertices; ++n) {
-            faceVertexCoords[n] = vertexCoords[faceConnect[i][n]];
+            faceVertexCoords[n] = vertexCoords[faceConnectStorage[i][n]];
         }
 
         distance = std::min(faceInfo.evalPointDistance(point, faceVertexCoords.data()), distance);
@@ -309,55 +321,58 @@ ReferenceTetraInfo::ReferenceTetraInfo()
     const ReferenceTriangleInfo triangleInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]   = LINE;
-        edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
+        edgesInfo[k] = &lineInfo;
+
+        edgeTypeStorage[k] = LINE;
     }
 
-    edgeConnect[0][0] = 0;
-    edgeConnect[0][1] = 1;
+    edgeConnectStorage[0][0] = 0;
+    edgeConnectStorage[0][1] = 1;
 
-    edgeConnect[1][0] = 1;
-    edgeConnect[1][1] = 2;
+    edgeConnectStorage[1][0] = 1;
+    edgeConnectStorage[1][1] = 2;
 
-    edgeConnect[2][0] = 2;
-    edgeConnect[2][1] = 0;
+    edgeConnectStorage[2][0] = 2;
+    edgeConnectStorage[2][1] = 0;
 
-    edgeConnect[3][0] = 3;
-    edgeConnect[3][1] = 0;
+    edgeConnectStorage[3][0] = 3;
+    edgeConnectStorage[3][1] = 0;
 
-    edgeConnect[4][0] = 3;
-    edgeConnect[4][1] = 1;
+    edgeConnectStorage[4][0] = 3;
+    edgeConnectStorage[4][1] = 1;
 
-    edgeConnect[5][0] = 3;
-    edgeConnect[5][1] = 2;
+    edgeConnectStorage[5][0] = 3;
+    edgeConnectStorage[5][1] = 2;
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]   = TRIANGLE;
-        facesInfo[k]   = &triangleInfo;
-        faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
+        facesInfo[k] = &triangleInfo;
+
+        faceTypeStorage[k] = TRIANGLE;
     }
 
-    faceConnect[0][0] = 1;
-    faceConnect[0][1] = 0;
-    faceConnect[0][2] = 2;
+    faceConnectStorage[0][0] = 1;
+    faceConnectStorage[0][1] = 0;
+    faceConnectStorage[0][2] = 2;
 
-    faceConnect[1][0] = 0;
-    faceConnect[1][1] = 3;
-    faceConnect[1][2] = 2;
+    faceConnectStorage[1][0] = 0;
+    faceConnectStorage[1][1] = 3;
+    faceConnectStorage[1][2] = 2;
 
-    faceConnect[2][0] = 3;
-    faceConnect[2][1] = 1;
-    faceConnect[2][2] = 2;
+    faceConnectStorage[2][0] = 3;
+    faceConnectStorage[2][1] = 1;
+    faceConnectStorage[2][2] = 2;
 
-    faceConnect[3][0] = 0;
-    faceConnect[3][1] = 1;
-    faceConnect[3][2] = 3;
+    faceConnectStorage[3][0] = 0;
+    faceConnectStorage[3][1] = 1;
+    faceConnectStorage[3][2] = 3;
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -420,87 +435,90 @@ ReferenceVoxelInfo::ReferenceVoxelInfo()
     const ReferencePixelInfo pixelInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]   = LINE;
-        edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
+        edgesInfo[k] = &lineInfo;
+
+        edgeTypeStorage[k] = LINE;
     }
 
-    edgeConnect[0][0] = 0;
-    edgeConnect[0][1] = 2;
+    edgeConnectStorage[0][0] = 0;
+    edgeConnectStorage[0][1] = 2;
 
-    edgeConnect[1][0] = 1;
-    edgeConnect[1][1] = 3;
+    edgeConnectStorage[1][0] = 1;
+    edgeConnectStorage[1][1] = 3;
 
-    edgeConnect[2][0] = 0;
-    edgeConnect[2][1] = 1;
+    edgeConnectStorage[2][0] = 0;
+    edgeConnectStorage[2][1] = 1;
 
-    edgeConnect[3][0] = 2;
-    edgeConnect[3][1] = 3;
+    edgeConnectStorage[3][0] = 2;
+    edgeConnectStorage[3][1] = 3;
 
-    edgeConnect[4][0] = 0;
-    edgeConnect[4][1] = 4;
+    edgeConnectStorage[4][0] = 0;
+    edgeConnectStorage[4][1] = 4;
 
-    edgeConnect[5][0] = 1;
-    edgeConnect[5][1] = 5;
+    edgeConnectStorage[5][0] = 1;
+    edgeConnectStorage[5][1] = 5;
 
-    edgeConnect[6][0] = 2;
-    edgeConnect[6][1] = 6;
+    edgeConnectStorage[6][0] = 2;
+    edgeConnectStorage[6][1] = 6;
 
-    edgeConnect[7][0] = 3;
-    edgeConnect[7][1] = 7;
+    edgeConnectStorage[7][0] = 3;
+    edgeConnectStorage[7][1] = 7;
 
-    edgeConnect[8][0] = 4;
-    edgeConnect[8][1] = 6;
+    edgeConnectStorage[8][0] = 4;
+    edgeConnectStorage[8][1] = 6;
 
-    edgeConnect[9][0] = 5;
-    edgeConnect[9][1] = 7;
+    edgeConnectStorage[9][0] = 5;
+    edgeConnectStorage[9][1] = 7;
 
-    edgeConnect[10][0] = 4;
-    edgeConnect[10][1] = 5;
+    edgeConnectStorage[10][0] = 4;
+    edgeConnectStorage[10][1] = 5;
 
-    edgeConnect[11][0] = 6;
-    edgeConnect[11][1] = 7;
+    edgeConnectStorage[11][0] = 6;
+    edgeConnectStorage[11][1] = 7;
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]   = PIXEL;
-        facesInfo[k]   = &pixelInfo;
-        faceConnect[k] = std::vector<int>(pixelInfo.nVertices);
+        facesInfo[k] = &pixelInfo;
+
+        faceTypeStorage[k] = PIXEL;
     }
 
-    faceConnect[0][0] = 2;
-    faceConnect[0][1] = 0;
-    faceConnect[0][2] = 6;
-    faceConnect[0][3] = 4;
+    faceConnectStorage[0][0] = 2;
+    faceConnectStorage[0][1] = 0;
+    faceConnectStorage[0][2] = 6;
+    faceConnectStorage[0][3] = 4;
 
-    faceConnect[1][0] = 1;
-    faceConnect[1][1] = 3;
-    faceConnect[1][2] = 5;
-    faceConnect[1][3] = 7;
+    faceConnectStorage[1][0] = 1;
+    faceConnectStorage[1][1] = 3;
+    faceConnectStorage[1][2] = 5;
+    faceConnectStorage[1][3] = 7;
 
-    faceConnect[2][0] = 0;
-    faceConnect[2][1] = 1;
-    faceConnect[2][2] = 4;
-    faceConnect[2][3] = 5;
+    faceConnectStorage[2][0] = 0;
+    faceConnectStorage[2][1] = 1;
+    faceConnectStorage[2][2] = 4;
+    faceConnectStorage[2][3] = 5;
 
-    faceConnect[3][0] = 3;
-    faceConnect[3][1] = 2;
-    faceConnect[3][2] = 7;
-    faceConnect[3][3] = 6;
+    faceConnectStorage[3][0] = 3;
+    faceConnectStorage[3][1] = 2;
+    faceConnectStorage[3][2] = 7;
+    faceConnectStorage[3][3] = 6;
 
-    faceConnect[4][0] = 2;
-    faceConnect[4][1] = 3;
-    faceConnect[4][2] = 0;
-    faceConnect[4][3] = 1;
+    faceConnectStorage[4][0] = 2;
+    faceConnectStorage[4][1] = 3;
+    faceConnectStorage[4][2] = 0;
+    faceConnectStorage[4][3] = 1;
 
-    faceConnect[5][0] = 4;
-    faceConnect[5][1] = 5;
-    faceConnect[5][2] = 6;
-    faceConnect[5][3] = 7;
+    faceConnectStorage[5][0] = 4;
+    faceConnectStorage[5][1] = 5;
+    faceConnectStorage[5][2] = 6;
+    faceConnectStorage[5][3] = 7;
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -563,87 +581,90 @@ ReferenceHexahedronInfo::ReferenceHexahedronInfo()
     const ReferenceQuadInfo quadInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]   = LINE;
-        edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
+        edgesInfo[k] = &lineInfo;
+
+        edgeTypeStorage[k] = LINE;
     }
 
-    edgeConnect[0][0] = 1;
-    edgeConnect[0][1] = 0;
+    edgeConnectStorage[0][0] = 1;
+    edgeConnectStorage[0][1] = 0;
 
-    edgeConnect[1][0] = 1;
-    edgeConnect[1][1] = 2;
+    edgeConnectStorage[1][0] = 1;
+    edgeConnectStorage[1][1] = 2;
 
-    edgeConnect[2][0] = 2;
-    edgeConnect[2][1] = 3;
+    edgeConnectStorage[2][0] = 2;
+    edgeConnectStorage[2][1] = 3;
 
-    edgeConnect[3][0] = 3;
-    edgeConnect[3][1] = 0;
+    edgeConnectStorage[3][0] = 3;
+    edgeConnectStorage[3][1] = 0;
 
-    edgeConnect[4][0] = 4;
-    edgeConnect[4][1] = 5;
+    edgeConnectStorage[4][0] = 4;
+    edgeConnectStorage[4][1] = 5;
 
-    edgeConnect[5][0] = 5;
-    edgeConnect[5][1] = 6;
+    edgeConnectStorage[5][0] = 5;
+    edgeConnectStorage[5][1] = 6;
 
-    edgeConnect[6][0] = 6;
-    edgeConnect[6][1] = 7;
+    edgeConnectStorage[6][0] = 6;
+    edgeConnectStorage[6][1] = 7;
 
-    edgeConnect[7][0] = 7;
-    edgeConnect[7][1] = 4;
+    edgeConnectStorage[7][0] = 7;
+    edgeConnectStorage[7][1] = 4;
 
-    edgeConnect[8][0] = 0;
-    edgeConnect[8][1] = 4;
+    edgeConnectStorage[8][0] = 0;
+    edgeConnectStorage[8][1] = 4;
 
-    edgeConnect[9][0] = 1;
-    edgeConnect[9][1] = 5;
+    edgeConnectStorage[9][0] = 1;
+    edgeConnectStorage[9][1] = 5;
 
-    edgeConnect[10][0] = 2;
-    edgeConnect[10][1] = 6;
+    edgeConnectStorage[10][0] = 2;
+    edgeConnectStorage[10][1] = 6;
 
-    edgeConnect[11][0] = 3;
-    edgeConnect[11][1] = 7;
+    edgeConnectStorage[11][0] = 3;
+    edgeConnectStorage[11][1] = 7;
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]    = QUAD;
-        facesInfo[k]   = &quadInfo;
-        faceConnect[k] = std::vector<int>(quadInfo.nVertices);
+        facesInfo[k] = &quadInfo;
+
+        faceTypeStorage[k] = QUAD;
     }
 
-    faceConnect[0][0] = 1;
-    faceConnect[0][1] = 0;
-    faceConnect[0][2] = 3;
-    faceConnect[0][3] = 2;
+    faceConnectStorage[0][0] = 1;
+    faceConnectStorage[0][1] = 0;
+    faceConnectStorage[0][2] = 3;
+    faceConnectStorage[0][3] = 2;
 
-    faceConnect[1][0] = 4;
-    faceConnect[1][1] = 5;
-    faceConnect[1][2] = 6;
-    faceConnect[1][3] = 7;
+    faceConnectStorage[1][0] = 4;
+    faceConnectStorage[1][1] = 5;
+    faceConnectStorage[1][2] = 6;
+    faceConnectStorage[1][3] = 7;
 
-    faceConnect[2][0] = 7;
-    faceConnect[2][1] = 3;
-    faceConnect[2][2] = 0;
-    faceConnect[2][3] = 4;
+    faceConnectStorage[2][0] = 7;
+    faceConnectStorage[2][1] = 3;
+    faceConnectStorage[2][2] = 0;
+    faceConnectStorage[2][3] = 4;
 
-    faceConnect[3][0] = 5;
-    faceConnect[3][1] = 1;
-    faceConnect[3][2] = 2;
-    faceConnect[3][3] = 6;
+    faceConnectStorage[3][0] = 5;
+    faceConnectStorage[3][1] = 1;
+    faceConnectStorage[3][2] = 2;
+    faceConnectStorage[3][3] = 6;
 
-    faceConnect[4][0] = 4;
-    faceConnect[4][1] = 0;
-    faceConnect[4][2] = 1;
-    faceConnect[4][3] = 5;
+    faceConnectStorage[4][0] = 4;
+    faceConnectStorage[4][1] = 0;
+    faceConnectStorage[4][2] = 1;
+    faceConnectStorage[4][3] = 5;
 
-    faceConnect[5][0] = 6;
-    faceConnect[5][1] = 2;
-    faceConnect[5][2] = 3;
-    faceConnect[5][3] = 7;
+    faceConnectStorage[5][0] = 6;
+    faceConnectStorage[5][1] = 2;
+    faceConnectStorage[5][2] = 3;
+    faceConnectStorage[5][3] = 7;
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -674,7 +695,7 @@ double ReferenceHexahedronInfo::evalVolume(const std::array<double, 3> *vertexCo
     double volume = 0.;
     for (int i = 0; i < nFaces; ++i) {
         for (int n = 0; n < quadInfo.nVertices; ++n) {
-            pyramidVertexCoords[quadInfo.nVertices - n - 1] = vertexCoords[faceConnect[i][n]];
+            pyramidVertexCoords[quadInfo.nVertices - n - 1] = vertexCoords[faceConnectStorage[i][n]];
         }
 
         volume += pyramidInfo.evalVolume(pyramidVertexCoords.data());
@@ -726,72 +747,75 @@ ReferencePyramidInfo::ReferencePyramidInfo()
     const ReferenceQuadInfo quadInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]   = LINE;
-        edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
+        edgesInfo[k] = &lineInfo;
+
+        edgeTypeStorage[k] = LINE;
     }
 
-    edgeConnect[0][0] = 0;
-    edgeConnect[0][1] = 1;
+    edgeConnectStorage[0][0] = 0;
+    edgeConnectStorage[0][1] = 1;
 
-    edgeConnect[1][0] = 1;
-    edgeConnect[1][1] = 2;
+    edgeConnectStorage[1][0] = 1;
+    edgeConnectStorage[1][1] = 2;
 
-    edgeConnect[2][0] = 2;
-    edgeConnect[2][1] = 3;
+    edgeConnectStorage[2][0] = 2;
+    edgeConnectStorage[2][1] = 3;
 
-    edgeConnect[3][0] = 3;
-    edgeConnect[3][1] = 0;
+    edgeConnectStorage[3][0] = 3;
+    edgeConnectStorage[3][1] = 0;
 
-    edgeConnect[4][0] = 4;
-    edgeConnect[4][1] = 0;
+    edgeConnectStorage[4][0] = 4;
+    edgeConnectStorage[4][1] = 0;
 
-    edgeConnect[5][0] = 4;
-    edgeConnect[5][1] = 1;
+    edgeConnectStorage[5][0] = 4;
+    edgeConnectStorage[5][1] = 1;
 
-    edgeConnect[6][0] = 4;
-    edgeConnect[6][1] = 2;
+    edgeConnectStorage[6][0] = 4;
+    edgeConnectStorage[6][1] = 2;
 
-    edgeConnect[7][0] = 4;
-    edgeConnect[7][1] = 3;
+    edgeConnectStorage[7][0] = 4;
+    edgeConnectStorage[7][1] = 3;
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
         if (k == 0) {
-            face_type[k]   = ElementType::QUAD;
-            facesInfo[k]   = &quadInfo;
-            faceConnect[k] = std::vector<int>(quadInfo.nVertices);
+            facesInfo[k] = &quadInfo;
+
+            faceTypeStorage[k] = ElementType::QUAD;
         } else {
-            face_type[k]   = ElementType::TRIANGLE;
-            facesInfo[k]   = &triangleInfo;
-            faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
+            facesInfo[k] = &triangleInfo;
+
+            faceTypeStorage[k] = ElementType::TRIANGLE;
         }
     }
 
-    faceConnect[0][0] = 0;
-    faceConnect[0][1] = 3;
-    faceConnect[0][2] = 2;
-    faceConnect[0][3] = 1;
+    faceConnectStorage[0][0] = 0;
+    faceConnectStorage[0][1] = 3;
+    faceConnectStorage[0][2] = 2;
+    faceConnectStorage[0][3] = 1;
 
-    faceConnect[1][0] = 3;
-    faceConnect[1][1] = 0;
-    faceConnect[1][2] = 4;
+    faceConnectStorage[1][0] = 3;
+    faceConnectStorage[1][1] = 0;
+    faceConnectStorage[1][2] = 4;
 
-    faceConnect[2][0] = 0;
-    faceConnect[2][1] = 1;
-    faceConnect[2][2] = 4;
+    faceConnectStorage[2][0] = 0;
+    faceConnectStorage[2][1] = 1;
+    faceConnectStorage[2][2] = 4;
 
-    faceConnect[3][0] = 1;
-    faceConnect[3][1] = 2;
-    faceConnect[3][2] = 4;
+    faceConnectStorage[3][0] = 1;
+    faceConnectStorage[3][1] = 2;
+    faceConnectStorage[3][2] = 4;
 
-    faceConnect[4][0] = 2;
-    faceConnect[4][1] = 3;
-    faceConnect[4][2] = 4;
+    faceConnectStorage[4][0] = 2;
+    faceConnectStorage[4][1] = 3;
+    faceConnectStorage[4][2] = 4;
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -860,77 +884,79 @@ ReferenceWedgeInfo::ReferenceWedgeInfo()
     const ReferenceQuadInfo quadInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]   = LINE;
-        edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
+        edgeTypeStorage[k]   = LINE;
+        edgesInfo[k]   = &lineInfo;
     }
 
-    edgeConnect[0][0] = 1;
-    edgeConnect[0][1] = 0;
+    edgeConnectStorage[0][0] = 1;
+    edgeConnectStorage[0][1] = 0;
 
-    edgeConnect[1][0] = 1;
-    edgeConnect[1][1] = 2;
+    edgeConnectStorage[1][0] = 1;
+    edgeConnectStorage[1][1] = 2;
 
-    edgeConnect[2][0] = 2;
-    edgeConnect[2][1] = 0;
+    edgeConnectStorage[2][0] = 2;
+    edgeConnectStorage[2][1] = 0;
 
-    edgeConnect[3][0] = 3;
-    edgeConnect[3][1] = 4;
+    edgeConnectStorage[3][0] = 3;
+    edgeConnectStorage[3][1] = 4;
 
-    edgeConnect[4][0] = 4;
-    edgeConnect[4][1] = 5;
+    edgeConnectStorage[4][0] = 4;
+    edgeConnectStorage[4][1] = 5;
 
-    edgeConnect[5][0] = 5;
-    edgeConnect[5][1] = 3;
+    edgeConnectStorage[5][0] = 5;
+    edgeConnectStorage[5][1] = 3;
 
-    edgeConnect[6][0] = 3;
-    edgeConnect[6][1] = 0;
+    edgeConnectStorage[6][0] = 3;
+    edgeConnectStorage[6][1] = 0;
 
-    edgeConnect[7][0] = 4;
-    edgeConnect[7][1] = 1;
+    edgeConnectStorage[7][0] = 4;
+    edgeConnectStorage[7][1] = 1;
 
-    edgeConnect[8][0] = 5;
-    edgeConnect[8][1] = 2;
+    edgeConnectStorage[8][0] = 5;
+    edgeConnectStorage[8][1] = 2;
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
         if (k == 0 || k == 1) {
-            face_type[k]   = TRIANGLE;
-            facesInfo[k]   = &triangleInfo;
-            faceConnect[k] = std::vector<int>(triangleInfo.nVertices);
+            facesInfo[k] = &triangleInfo;
+
+            faceTypeStorage[k] = TRIANGLE;
         } else {
-            face_type[k]   = QUAD;
-            facesInfo[k]   = &quadInfo;
-            faceConnect[k] = std::vector<int>(quadInfo.nVertices);
+            facesInfo[k] = &quadInfo;
+
+            faceTypeStorage[k] = QUAD;
         }
     }
 
-    faceConnect[0][0] = 0;
-    faceConnect[0][1] = 1;
-    faceConnect[0][2] = 2;
+    faceConnectStorage[0][0] = 0;
+    faceConnectStorage[0][1] = 1;
+    faceConnectStorage[0][2] = 2;
 
-    faceConnect[1][0] = 4;
-    faceConnect[1][1] = 3;
-    faceConnect[1][2] = 5;
+    faceConnectStorage[1][0] = 4;
+    faceConnectStorage[1][1] = 3;
+    faceConnectStorage[1][2] = 5;
 
-    faceConnect[2][0] = 4;
-    faceConnect[2][1] = 1;
-    faceConnect[2][2] = 0;
-    faceConnect[2][3] = 3;
+    faceConnectStorage[2][0] = 4;
+    faceConnectStorage[2][1] = 1;
+    faceConnectStorage[2][2] = 0;
+    faceConnectStorage[2][3] = 3;
 
-    faceConnect[3][0] = 1;
-    faceConnect[3][1] = 4;
-    faceConnect[3][2] = 5;
-    faceConnect[3][3] = 2;
+    faceConnectStorage[3][0] = 1;
+    faceConnectStorage[3][1] = 4;
+    faceConnectStorage[3][2] = 5;
+    faceConnectStorage[3][3] = 2;
 
-    faceConnect[4][0] = 3;
-    faceConnect[4][1] = 0;
-    faceConnect[4][2] = 2;
-    faceConnect[4][3] = 5;
+    faceConnectStorage[4][0] = 3;
+    faceConnectStorage[4][1] = 0;
+    faceConnectStorage[4][2] = 2;
+    faceConnectStorage[4][3] = 5;
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -993,7 +1019,7 @@ double ReferenceWedgeInfo::evalVolume(const std::array<double, 3> *vertexCoords)
     double volume = 0.;
     for (int i : triaFaces) {
         for (int n = 0; n < triaInfo.nVertices; ++n) {
-            tetraVertexCoords[triaInfo.nVertices - n - 1] = vertexCoords[faceConnect[i][n]];
+            tetraVertexCoords[triaInfo.nVertices - n - 1] = vertexCoords[faceConnectStorage[i][n]];
         }
 
         volume += tetraInfo.evalVolume(tetraVertexCoords.data());
@@ -1001,7 +1027,7 @@ double ReferenceWedgeInfo::evalVolume(const std::array<double, 3> *vertexCoords)
 
     for (int i : quadFaces) {
         for (int n = 0; n < quadInfo.nVertices; ++n) {
-            pyramidVertexCoords[quadInfo.nVertices - n - 1] = vertexCoords[faceConnect[i][n]];
+            pyramidVertexCoords[quadInfo.nVertices - n - 1] = vertexCoords[faceConnectStorage[i][n]];
         }
 
         volume += pyramidInfo.evalVolume(pyramidVertexCoords.data());
@@ -1048,7 +1074,7 @@ double Reference2DElementInfo::evalPerimeter(const std::array<double, 3> *vertex
     double perimeter = 0;
     for (int i = 0; i < nFaces; ++i) {
         for (int n = 0; n < sideInfo.nVertices; ++n) {
-            sideVertexCoords[n] = vertexCoords[faceConnect[i][n]];
+            sideVertexCoords[n] = vertexCoords[faceConnectStorage[i][n]];
         }
 
         perimeter += sideInfo.evalLength(sideVertexCoords.data());
@@ -1089,24 +1115,27 @@ ReferenceTriangleInfo::ReferenceTriangleInfo()
     const ReferenceLineInfo lineInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
+        edgesInfo[k] = &vertexInfo;
+
+        edgeTypeStorage[k]       = ElementType::VERTEX;
+        edgeConnectStorage[k][0] = k;
     }
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]       = LINE;
-        facesInfo[k]      = &lineInfo;
-        faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
-        faceConnect[k][0] = k;
-        faceConnect[k][1] = (k + 1) % nVertices;
+        facesInfo[k] = &lineInfo;
+
+        faceTypeStorage[k]       = LINE;
+        faceConnectStorage[k][0] = k;
+        faceConnectStorage[k][1] = (k + 1) % nVertices;
     }
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -1202,34 +1231,37 @@ ReferencePixelInfo::ReferencePixelInfo()
     const ReferenceLineInfo lineInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
+        edgesInfo[k] = &vertexInfo;
+
+        edgeTypeStorage[k]       = ElementType::VERTEX;
+        edgeConnectStorage[k][0] = k;
     }
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]    = LINE;
-        facesInfo[k]   = &lineInfo;
-        faceConnect[k] = std::vector<int>(lineInfo.nVertices);
+        facesInfo[k] = &lineInfo;
+
+        faceTypeStorage[k] = LINE;
     }
 
-    faceConnect[0][0] = 2;
-    faceConnect[0][1] = 0;
+    faceConnectStorage[0][0] = 2;
+    faceConnectStorage[0][1] = 0;
 
-    faceConnect[1][0] = 1;
-    faceConnect[1][1] = 3;
+    faceConnectStorage[1][0] = 1;
+    faceConnectStorage[1][1] = 3;
 
-    faceConnect[2][0] = 0;
-    faceConnect[2][1] = 1;
+    faceConnectStorage[2][0] = 0;
+    faceConnectStorage[2][1] = 1;
 
-    faceConnect[3][0] = 3;
-    faceConnect[3][1] = 2;
+    faceConnectStorage[3][0] = 3;
+    faceConnectStorage[3][1] = 2;
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -1313,24 +1345,27 @@ ReferenceQuadInfo::ReferenceQuadInfo()
     const ReferenceLineInfo lineInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
+        edgesInfo[k] = &vertexInfo;
+
+        edgeTypeStorage[k]       = ElementType::VERTEX;
+        edgeConnectStorage[k][0] = k;
     }
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]       = LINE;
-        facesInfo[k]      = &lineInfo;
-        faceConnect[k]    = std::vector<int>(lineInfo.nVertices);
-        faceConnect[k][0] = k;
-        faceConnect[k][1] = (k + 1) % nVertices;
+        facesInfo[k] = &lineInfo;
+
+        faceTypeStorage[k]       = LINE;
+        faceConnectStorage[k][0] = k;
+        faceConnectStorage[k][1] = (k + 1) % nVertices;
     }
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -1451,23 +1486,26 @@ ReferenceLineInfo::ReferenceLineInfo()
     const ReferenceVertexInfo vertexInfo;
 
     // Edge data
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
+
     for (int k = 0; k < nEdges; ++k) {
-        edge_type[k]      = ElementType::VERTEX;
-        edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        edgeConnect[k][0] = k;
+        edgesInfo[k] = &vertexInfo;
+
+        edgeTypeStorage[k]       = ElementType::VERTEX;
+        edgeConnectStorage[k][0] = k;
     }
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     for (int k = 0; k < nFaces; ++k) {
-        face_type[k]       = ElementType::VERTEX;
-        facesInfo[k]      = &vertexInfo;
-        faceConnect[k]    = std::vector<int>(vertexInfo.nVertices);
-        faceConnect[k][0] = k;
+        facesInfo[k] = &vertexInfo;
+
+        faceTypeStorage[k]       = ElementType::VERTEX;
+        faceConnectStorage[k][0] = k;
     }
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!
@@ -1573,22 +1611,24 @@ ReferenceVertexInfo::ReferenceVertexInfo()
     : Reference0DElementInfo(ElementType::VERTEX)
 {
     // Edge data
-    edge_type[0] = ElementType::VERTEX;
+    std::vector<const ReferenceElementInfo *> edgesInfo(nEdges);
 
-    edgeConnect[0] = std::vector<int>(nVertices);
-    edgeConnect[0][0] = 0;
+    edgesInfo[0] = this;
+
+    edgeTypeStorage[0] = ElementType::VERTEX;
+
+    edgeConnectStorage[0][0] = 0;
 
     // Face data
     std::vector<const ReferenceElementInfo *> facesInfo(nFaces);
 
     facesInfo[0] = this;
 
-    face_type[0] = ElementType::VERTEX;
+    faceTypeStorage[0] = ElementType::VERTEX;
 
-    faceConnect[0] = std::vector<int>(nVertices);
-    faceConnect[0][0] = 0;
+    faceConnectStorage[0][0] = 0;
 
-    initializeFaceEdges(facesInfo);
+    initializeFaceEdges(facesInfo, edgesInfo);
 }
 
 /*!

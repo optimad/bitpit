@@ -48,15 +48,15 @@ public:
     ElementType type;
 
     int nVertices;
-
     int nFaces;
-    std::vector<ElementType> face_type;
-    std::vector<std::vector<int>> faceConnect;
-    std::vector<std::vector<int>> faceEdges;
-
     int nEdges;
-    std::vector<ElementType> edge_type;
-    std::vector<std::vector<int>> edgeConnect;
+
+    std::array<ElementType, MAX_ELEM_FACES> faceTypeStorage;
+    std::array<std::array<int, MAX_ELEM_VERTICES>, MAX_ELEM_FACES> faceConnectStorage;
+    std::array<std::array<int, MAX_ELEM_FACES>, MAX_ELEM_FACES> faceEdgeStorage;
+
+    std::array<ElementType, MAX_ELEM_EDGES> edgeTypeStorage;
+    std::array<std::array<int, MAX_ELEM_VERTICES>, MAX_ELEM_EDGES> edgeConnectStorage;
 
     virtual ~ReferenceElementInfo();
 
@@ -70,7 +70,7 @@ protected:
     ReferenceElementInfo(ReferenceElementInfo const &) = delete;
     ReferenceElementInfo & operator=(ReferenceElementInfo const &) = delete;
 
-    void initializeFaceEdges(const std::vector<const ReferenceElementInfo *> &facesInfo);
+    void initializeFaceEdges(const std::vector<const ReferenceElementInfo *> &facesInfo, const std::vector<const ReferenceElementInfo *> &edgesInfo);
 
 };
 
