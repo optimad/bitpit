@@ -2804,19 +2804,20 @@ namespace bitpit {
      */
     void
     ParaTree::findAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
+        std::array<uint8_t, 4> codimensionsIndeces;
+        codimensionsIndeces[0] = 0;
+        codimensionsIndeces[1] = getNfaces();
+        if(m_dim == 3){
+            codimensionsIndeces[2] = getNedges();
+        }
+        codimensionsIndeces[m_dim] = getNnodes();
+
         neighbours.clear();
         neighbours.reserve(26);
         isghost.clear();
         isghost.reserve(26);
         u32vector singleCodimNeighbours;
         bvector singleCodimIsGhost;
-        vector<uint8_t> codimensionsIndeces(m_dim+1);
-        codimensionsIndeces[0] = 0;
-        codimensionsIndeces[1] = getNfaces();
-        codimensionsIndeces[m_dim] = getNnodes();
-        if(m_dim == 3){
-            codimensionsIndeces[2] = getNedges();
-        }
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
             for(int icodim = 0; icodim < codimensionsIndeces[codim]; ++icodim){
                 findNeighbours(oct,icodim,codim,singleCodimNeighbours,singleCodimIsGhost);
@@ -2852,19 +2853,20 @@ namespace bitpit {
      */
     void
     ParaTree::findGhostAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
+        std::array<uint8_t, 4> codimensionsIndeces;
+        codimensionsIndeces[0] = 0;
+        codimensionsIndeces[1] = getNfaces();
+        if(m_dim == 3){
+            codimensionsIndeces[2] = getNedges();
+        }
+        codimensionsIndeces[m_dim] = getNnodes();
+
         neighbours.clear();
         neighbours.reserve(26);
         isghost.clear();
         isghost.reserve(26);
         u32vector singleCodimNeighbours;
         bvector singleCodimIsGhost;
-        vector<uint8_t> codimensionsIndeces(m_dim+1);
-        codimensionsIndeces[0] = 0;
-        codimensionsIndeces[1] = getNfaces();
-        codimensionsIndeces[m_dim] = getNnodes();
-        if(m_dim == 3){
-            codimensionsIndeces[2] = getNedges();
-        }
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
             for(int icodim = 0; icodim < codimensionsIndeces[codim]; ++icodim){
                 findGhostNeighbours(oct,icodim,codim,singleCodimNeighbours,singleCodimIsGhost);
