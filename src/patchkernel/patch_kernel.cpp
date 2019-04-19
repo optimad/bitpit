@@ -1346,8 +1346,11 @@ long PatchKernel::countFreeVertices() const
 				continue;
 			}
 
-			ConstProxyVector<long> faceVertexIds = cell.getFaceVertexIds(i);
-			freeVertices.insert(faceVertexIds.begin(), faceVertexIds.end());
+			int nFaceVertices = cell.getFaceVertexCount(i);
+			for (int k = 0; k < nFaceVertices; ++k) {
+				long faceVertexId = cell.getFaceVertexId(i, k);
+				freeVertices.insert(faceVertexId);
+			}
 		}
 	}
 
