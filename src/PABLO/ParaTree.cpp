@@ -2667,6 +2667,23 @@ namespace bitpit {
 
     };
 
+    /** Finds all the neighbours of ghost octant through iface face/edge/node.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure ( only local octants ).
+     * \param[in] oct Pointer to current ghost octant
+     * \param[in] iface Index of face/edge/node passed through for neighbours finding
+     * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
+     */
+    void
+    ParaTree::findGhostNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
+
+        uint32_t idx = getIdx(oct);
+        findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, false);
+
+    };
+
     /** Finds all the neighbours of a node
     * \param[in] oct Pointer to current octant
     * \param[in] inode Index of node passed through for neighbours finding
