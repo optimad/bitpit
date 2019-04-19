@@ -952,6 +952,19 @@ ElementType Element::getEdgeType(const int &edge) const
 }
 
 /*!
+	Gets the number of vertices of the specified edge.
+
+	\param edge is the edge for which the number of vertices is requested
+	\result The number of vertices of the specified edge.
+*/
+int Element::getEdgeVertexCount(const int &edge) const
+{
+	ElementType edgeType = getEdgeType(edge);
+
+	return ReferenceElementInfo::getInfo(edgeType).nVertices;
+}
+
+/*!
 	Gets the local connectivity of the specified edge of the element.
 
 	\param edge is the edge for which the connectivity is reqested
