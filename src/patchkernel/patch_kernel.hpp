@@ -643,6 +643,7 @@ protected:
 
 	virtual long _getCellNativeIndex(long id) const;
 
+	virtual void _findCellNeighs(const long &id, const std::vector<long> &blackList, std::vector<long> *neighs) const;
 	virtual void _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const;
 	virtual void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const;
 	virtual void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const;

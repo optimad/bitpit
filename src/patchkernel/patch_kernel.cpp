@@ -2295,11 +2295,8 @@ std::vector<long> PatchKernel::findCellNeighs(const long &id) const
 */
 void PatchKernel::findCellNeighs(const long &id, std::vector<long> *neighs) const
 {
-	findCellVertexNeighs(id, true, neighs);
-	if (isThreeDimensional()) {
-		findCellEdgeNeighs(id, true, neighs);
-	}
-	findCellFaceNeighs(id, true, neighs);
+	std::vector<long> blackList;
+	_findCellNeighs(id, blackList, neighs);
 }
 
 /*!
@@ -2372,6 +2369,39 @@ std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
 	findCellFaceNeighs(id, &neighs);
 
 	return neighs;
+}
+
+/*!
+	Extracts all the neighbours of the specified cell
+
+	This implementation can NOT handle hanging nodes.
+
+	\param id is the id of the cell
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
+	\param[in,out] neighs is the vector were the neighbours of the specified
+	cell for the given vertex will be stored. The vector is not cleared before
+	adding the neighbours, it is extended by appending all the neighbours
+	found by this function
+*/
+void PatchKernel::_findCellNeighs(const long &id, const std::vector<long> &blackList, std::vector<long> *neighs) const
+{
+	// Some patches can work (at least partially) without initializing the
+	// cell list. To handle those patches, if there are no cells the vertex
+	// count is evaluated using the ReferenceElementInfo associated to the cell.
+	int nCellVertices;
+	if (m_cells.size() == 0) {
+		ElementType cellType = getCellType(id);
+		const ReferenceElementInfo &cellTypeInfo = ReferenceElementInfo::getInfo(cellType);
+		nCellVertices = cellTypeInfo.nVertices;
+	} else {
+		const Cell &cell = getCell(id);
+		nCellVertices = cell.getVertexCount();
+	}
+
+	for (int i = 0; i < nCellVertices; ++i) {
+		_findCellVertexNeighs(id, i, blackList, neighs);
+	}
 }
 
 /*!

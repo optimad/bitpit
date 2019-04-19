@@ -2251,6 +2251,42 @@ void VolOctree::scale(std::array<double, 3> scaling)
 }
 
 /*!
+	Extracts all the neighbours of the specified cell
+
+	This implementation can NOT handle hanging nodes.
+
+	\param id is the id of the cell
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a unique list of ordered cell ids.
+	\param[in,out] neighs is the vector were the neighbours of the specified
+	cell for the given vertex will be stored. The vector is not cleared before
+	adding the neighbours, it is extended by appending all the neighbours
+	found by this function
+*/
+void VolOctree::_findCellNeighs(const long &id, const std::vector<long> &blackList, std::vector<long> *neighs) const
+{
+	OctantInfo octantInfo = getCellOctant(id);
+
+	std::vector<uint32_t> neighTreeIds;
+	std::vector<bool> neighGhostFlags;
+	if (octantInfo.internal) {
+		m_tree->findAllCodimensionNeighbours(octantInfo.id, neighTreeIds, neighGhostFlags);
+	} else {
+		m_tree->findGhostAllCodimensionNeighbours(octantInfo.id, neighTreeIds, neighGhostFlags);
+	}
+
+	int nNeighs = neighTreeIds.size();
+	for (int i = 0; i < nNeighs; ++i) {
+		OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
+		long neighId = getOctantId(neighOctantInfo);
+
+		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
+			utils::addToOrderedVector<long>(neighId, *neighs);
+		}
+	}
+}
+
+/*!
 	Extracts the neighbours of the specified cell for the given edge.
 
 	This function can be only used with three-dimensional cells.

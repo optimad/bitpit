@@ -141,6 +141,7 @@ protected:
 
 	long _getCellNativeIndex(long id) const override;
 
+	void _findCellNeighs(const long &id, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 	void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 	void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 
