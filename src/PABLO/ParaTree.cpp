@@ -2014,13 +2014,12 @@ namespace bitpit {
      */
     uint64_t
     ParaTree::getGlobalIdx(const Octant* oct) const {
+        uint32_t idx = getIdx(oct);
 #if BITPIT_ENABLE_MPI==1
         if (getIsGhost(oct)){
-            uint32_t idx = m_octree.findGhostMorton(oct->computeMorton());
             return m_octree.m_globalIdxGhosts[idx];
         }
 #endif
-        uint32_t idx = m_octree.findMorton(oct->computeMorton());
         if (m_rank){
             return m_partitionRangeGlobalIdx[m_rank-1] + uint64_t(idx + 1);
         }
