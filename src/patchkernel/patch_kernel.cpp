@@ -2587,10 +2587,14 @@ void PatchKernel::_findCellEdgeNeighs(const long &id, const int &edge, const std
 	}
 
 	// The neighbours of the edge are the cells that share all the edge vertices
-	std::vector<long> firstVertexNeighs;
-	std::vector<long> secondVertexNeighs;
+	const int GUESS_NEIGHS_COUNT = 3;
 
+	std::vector<long> firstVertexNeighs;
+	firstVertexNeighs.reserve(GUESS_NEIGHS_COUNT);
 	_findCellVertexNeighs(id, edgeVertices[0], blackList, &firstVertexNeighs);
+
+	std::vector<long> secondVertexNeighs;
+	secondVertexNeighs.reserve(GUESS_NEIGHS_COUNT);
 	for (std::size_t k = 1; k < nEdgeVertices; ++k) {
 		secondVertexNeighs.clear();
 		_findCellVertexNeighs(id, edgeVertices[k], blackList, &secondVertexNeighs);
