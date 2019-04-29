@@ -1431,6 +1431,34 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 }
 
 /*!
+	Evaluates the centroid of the element.
+
+	\param coordinates are the coordinate of the vertices
+	\result The centroid of the element.
+*/
+std::array<double, 3> Element::evalCentroid(const std::array<double, 3> *coordinates) const
+{
+	int nVertices = getVertexCount();
+	if (nVertices == 0) {
+		return {{0., 0., 0.}};
+	}
+
+	std::array<double, 3> centroid = coordinates[0];
+	for (int i = 1; i < nVertices; ++i) {
+		const std::array<double, 3> &vertexCoordinates = coordinates[i];
+		for (int k = 0; k < 3; ++k) {
+			centroid[k] += vertexCoordinates[k];
+		}
+	}
+
+	for (int k = 0; k < 3; ++k) {
+		centroid[k] /= nVertices;
+	}
+
+	return centroid;
+}
+
+/*!
 	Evaluates the characteristics size of the element.
 
 	\param coordinates are the coordinate of the vertices

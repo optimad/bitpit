@@ -155,6 +155,8 @@ public:
 
 	static const long NULL_ID;
 
+	std::array<double, 3> evalCentroid(const std::array<double, 3> *coordinates) const;
+
 	double evalSize(const std::array<double, 3> *coordinates) const;
 
 	double evalVolume(const std::array<double, 3> *coordinates) const;

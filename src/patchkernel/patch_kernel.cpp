@@ -4280,17 +4280,10 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getInterfaceVertexCoordinat
 */
 std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element) const
 {
-	ConstProxyVector<long> cellVertexIds = element.getVertexIds();
-	int nElementVertices = cellVertexIds.size();
+	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> referenceCoordinatesCache;
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(element, referenceCoordinatesCache.data());
 
-	std::array<double, 3> centroid = {{0., 0., 0.}};
-	for (int i = 0; i < nElementVertices; ++i) {
-		const Vertex &vertex = getVertex(cellVertexIds[i]);
-		centroid += vertex.getCoords();
-	}
-	centroid /= (double) nElementVertices;
-
-	return centroid;
+	return element.evalCentroid(vertexCoordinates.data());
 }
 
 /*!
