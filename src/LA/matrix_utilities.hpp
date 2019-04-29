@@ -44,6 +44,7 @@
 
 // Standard template library
 # include <vector>
+# include <cassert>
 # include <cmath>
 # include <array>
 # include <iostream>
@@ -85,6 +86,37 @@ void complement(                                                              //
     int                                          ,                            // (input) complement 2nd index
     std::array< std::array< T, n >, m >         &,                            // (input) input matrix
     std::array< std::array<T, n-1>, m-1>        &                             // (input/output) (i,j) complement
+);
+
+int linearIndexColMajor(
+    int                                         row,                          // (input) row
+    int                                         col,                          // (input) column
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols                         // (input) number of columns
+);
+
+int linearIndexRowMajor(
+    int                                         row,                          // (input) row
+    int                                         col,                          // (input) column
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols                         // (input) number of columns
+);
+
+int linearIndexColMajorSymmetric(
+    int                                         row,                          // (input) row
+    int                                         col,                          // (input) column
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols,                        // (input) number of columns
+    char                                        uplo                          // (input) upper or lower portion of the matrix
+
+);
+
+int linearIndexRowMajorSymmetric(
+    int                                         row,                          // (input) row
+    int                                         col,                          // (input) column
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols,                        // (input) number of columns
+    char                                        uplo                          // (input) upper or lower portion of the matrix
 );
 
 // Matrix Basic templates --------------------------------------------------- //
