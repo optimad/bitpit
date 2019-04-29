@@ -1370,22 +1370,23 @@ ReferencePixelInfo::ReferencePixelInfo()
     Evaluates the characteristics size of an element with the specified vertex
     coordinates.
 
-    The characteristics size of the pixel is evaluated as the area divied by
-    the mean side length.
+    The characteristics size of the pixel is evaluated as the mean side length.
 
     \param vertexCoords are the coordinate of the vertices
     \result The length of the line.
 */
 double ReferencePixelInfo::evalSize(const std::array<double, 3> *vertexCoords) const
 {
-    double area      = evalArea(vertexCoords);
-    double perimeter = evalPerimeter(vertexCoords);
+    const std::array<double, 3> &V_A = vertexCoords[0];
+    const std::array<double, 3> &V_B = vertexCoords[1];
+    const std::array<double, 3> &V_C = vertexCoords[2];
 
-    double meanSideLength = perimeter / nFaces;
+    double sideLength_x = norm2(V_B - V_A);
+    double sideLength_y = norm2(V_C - V_A);
 
-    double length = area / meanSideLength;
+    double size = (sideLength_x + sideLength_y) / 2.;
 
-    return length;
+    return size;
 }
 
 /*!
