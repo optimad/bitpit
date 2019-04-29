@@ -156,7 +156,6 @@ private:
 	// =================================================================================== //
 public:
 	Octant();
-	Octant(const Octant &octant);
 private:
 	Octant(uint8_t dim);
 	Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);

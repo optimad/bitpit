@@ -165,19 +165,6 @@ Octant::Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int
 	m_z = (m_dim-2) * z;
 };
 
-/*! Copy constructor of an octant.
- */
-Octant::Octant(const Octant &octant){
-	m_dim = octant.m_dim;
-	m_x = octant.m_x;
-	m_y = octant.m_y;
-	m_z = octant.m_z;
-	m_level = octant.m_level;
-	m_marker = octant.m_marker;
-	m_info = octant.m_info;
-	m_ghost = octant.m_ghost;
-};
-
 /*! Check if two octants are equal (no check on info)
  */
 bool Octant::operator ==(const Octant & oct2){
