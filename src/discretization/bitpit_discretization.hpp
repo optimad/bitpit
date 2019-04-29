@@ -31,6 +31,7 @@
 
 #include "bitpit_version.hpp"
 
+#include "reconstruction.hpp"
 #include "stencil.hpp"
 #include "stencil_solver.hpp"
 
