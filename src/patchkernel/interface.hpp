@@ -73,8 +73,6 @@ public:
 
 	void display(std::ostream &out, unsigned short int indent) const;
 
-protected:
-
 private:
 	long m_owner;
 	int m_ownerFace;
