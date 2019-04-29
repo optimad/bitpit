@@ -246,6 +246,20 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationToCartesian(std::arr
 }
 
 /*!
+	Evaluates the inverse of the specified rotation matrix.
+
+	Rotation matrices are orthogonal matrices, hence the inverse of a rotation
+	matrix is equal to its transpose.
+
+	\param R the rotation matrix to transpose
+	\result The inverse of the rotation matrix.
+*/
+std::array<std::array<double, 3>, 3> Interface::evalRotationInverse(const std::array<std::array<double, 3>, 3> &R)
+{
+	return evalRotationTranspose(R);
+}
+
+/*!
 	Evaluates the transpose of the specified rotation matrix.
 
 	\param R the rotation matrix to transpose

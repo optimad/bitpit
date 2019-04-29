@@ -57,6 +57,7 @@ public:
 
 	static std::array<std::array<double, 3>, 3> evalRotationFromCartesian(std::array<double, 3> &versor);
 	static std::array<std::array<double, 3>, 3> evalRotationToCartesian(std::array<double, 3> &versor);
+	static std::array<std::array<double, 3>, 3> evalRotationInverse(const std::array<std::array<double, 3>, 3> &R);
 	static std::array<std::array<double, 3>, 3> evalRotationTranspose(const std::array<std::array<double, 3>, 3> &R);
 
 	void setOwner(const long &owner, const int &onwerFace);
