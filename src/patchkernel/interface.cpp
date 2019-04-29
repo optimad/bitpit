@@ -230,7 +230,7 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationFromCartesian(std::a
 	Evaluates the rotation matrix that needs to be applied to the
 	coordinates system defined starting from the specified versor
 	to make it coincide with the Cartesian coordinates system.
-	This matrix can be evaluated as the transpose of the rotation
+	This matrix can be evaluated as the inverse of the rotation
 	matrix from the Cartesian coordinate system to the versor
 	coordinate system.
 
@@ -242,7 +242,7 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationFromCartesian(std::a
 */
 std::array<std::array<double, 3>, 3> Interface::evalRotationToCartesian(std::array<double, 3> &versor)
 {
-	return evalRotationTranspose(evalRotationFromCartesian(versor));
+	return evalRotationInverse(evalRotationFromCartesian(versor));
 }
 
 /*!
