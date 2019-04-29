@@ -576,22 +576,25 @@ double ReferenceVoxelInfo::evalVolume(const std::array<double, 3> *vertexCoords)
     Evaluates the characteristics size of an element with the specified vertex
     coordinates.
 
-    The characteristics size of the voxel is evaluated as the volume divied by
-    the mean side area.
+    The characteristics size of the voxel is evaluated as the mean side length.
 
     \param vertexCoords are the coordinate of the vertices
     \result The length of the line.
 */
 double ReferenceVoxelInfo::evalSize(const std::array<double, 3> *vertexCoords) const
 {
-    double volume = evalVolume(vertexCoords);
-    double area   = evalSurfaceArea(vertexCoords);
+    const std::array<double, 3> &V_A = vertexCoords[0];
+    const std::array<double, 3> &V_B = vertexCoords[1];
+    const std::array<double, 3> &V_C = vertexCoords[2];
+    const std::array<double, 3> &V_D = vertexCoords[4];
 
-    double meanFaceArea = area / nFaces;
+    double sideLength_x = norm2(V_B - V_A);
+    double sideLength_y = norm2(V_C - V_A);
+    double sideLength_z = norm2(V_D - V_A);
 
-    double length = volume / meanFaceArea;
+    double size = (sideLength_x + sideLength_y + sideLength_z) / 3.;
 
-    return length;
+    return size;
 }
 
 /*!
