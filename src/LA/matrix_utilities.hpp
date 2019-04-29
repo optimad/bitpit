@@ -71,6 +71,40 @@ void display(                                                          // Displa
     std::array< std::array< T, n >, m >         &                             // (input) matrix to be displayed
 );
 
+template <class T>
+void displayColMajor(                                                         // Display matrix in nicely formatted output
+    std::ostream                                &out,                         // (input/output) handle to output stream
+    T                                           *A,                           // (input) matrix to be displayed
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols                         // (input) number of columns
+);
+
+template <class T>
+void displayRowMajor(                                                         // Display matrix in nicely formatted output
+    std::ostream                                &out,                         // (input/output) handle to output stream
+    T                                           *A,                           // (input) matrix to be displayed
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols                         // (input) number of columns
+);
+
+template <class T>
+void displayColMajorSymmetric(                                                // Display matrix in nicely formatted output
+    std::ostream                                &out,                         // (input/output) handle to output stream
+    T                                           *A,                           // (input) matrix to be displayed
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols,                        // (input) number of columns
+    char                                        uplo                          // (input) upper or lower portion of the matrix
+);
+
+template <class T>
+void displayRowMajorSymmetric(                                                // Display matrix in nicely formatted output
+    std::ostream                                &out,                         // (input/output) handle to output stream
+    T                                           *A,                           // (input) matrix to be displayed
+    int                                         nRows,                        // (input) number of rows
+    int                                         nCols,                        // (input) number of columns
+    char                                        uplo                          // (input) upper or lower portion of the matrix
+);
+
 // Auxiliary routines --------------------------------------------------------- //
 template <class T>
 void complement(                                                              // Complement extraction

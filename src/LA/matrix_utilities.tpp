@@ -109,6 +109,111 @@ for (i = 0; i < m; ++i) {
 
 return; };
 
+// -------------------------------------------------------------------------- //
+/*!
+    Display matrix stored in column major ordering to output stream in a nicely
+    formatted form.
+
+    \param[in,out] out is the output stream
+    \param[in] A is the matrix to be displayed
+    \param[in] nRows is the number of rows
+    \param[in] nCols is the number of columns
+*/
+template<class T>
+void displayColMajor(
+    std::ostream &out,
+    T *A,
+    int nRows,
+    int nCols
+) {
+    for (int i = 0; i < nRows; ++i) {
+        for (int j = 0; j < nCols; ++j) {
+            out << A[linearIndexColMajor(i, j, nRows, nCols)] << "  ";
+        }
+        out << std::endl;
+    }
+}
+
+// -------------------------------------------------------------------------- //
+/*!
+    Display matrix stored in row major ordering to output stream in a nicely
+    formatted form.
+
+    \param[in,out] out is the output stream
+    \param[in] A is the matrix to be displayed
+    \param[in] nRows is the number of rows
+    \param[in] nCols is the number of columns
+*/
+template<class T>
+void displayRowMajor(
+    std::ostream &out,
+    T *A,
+    int nRows,
+    int nCols
+) {
+    for (int i = 0; i < nRows; ++i) {
+        for (int j = 0; j < nCols; ++j) {
+            out << A[linearIndexRowMajor(i, j, nRows, nCols)] << "  ";
+        }
+        out << std::endl;
+    }
+}
+
+// -------------------------------------------------------------------------- //
+/*!
+    Display matrix stored in column major ordering to output stream in a nicely
+    formatted form.
+
+    \param[in,out] out is the output stream
+    \param[in] A is the matrix to be displayed
+    \param[in] nRows is the number of rows
+    \param[in] nCols is the number of columns
+*/
+template<class T>
+void displayColMajorSymmetric(
+    std::ostream &out, T *A,
+    int nRows,
+    int nCols,
+    char uplo
+) {
+    assert(uplo=='L' || uplo=='U');
+
+    for (int i = 0; i < nRows; ++i) {
+        for (int j = 0; j < nCols; ++j) {
+            out << A[linearIndexColMajorSymmetric(i, j, nRows, nCols, uplo)] << "  ";
+        }
+        out << std::endl;
+    }
+}
+
+// -------------------------------------------------------------------------- //
+/*!
+    Display symmteric matrix stored in row major ordering to output stream in a
+    nicely formatted form.
+
+    \param[in,out] out is the output stream
+    \param[in] A is the matrix to be displayed
+    \param[in] nRows is the number of rows
+    \param[in] nCols is the number of columns
+*/
+template<class T>
+void displayRowMajorSymmetric(
+    std::ostream &out,
+    T *A,
+    int nRows,
+    int nCols,
+    char uplo
+) {
+    assert(uplo=='L' || uplo=='U');
+
+    for (int i = 0; i < nRows; ++i) {
+        for (int j = 0; j < nCols; ++j) {
+            out << A[linearIndexRowMajorSymmetric(i, j, nRows, nCols, uplo)] << "  ";
+        }
+        out << std::endl;
+    }
+}
+
 /*!
  * @}
  */
