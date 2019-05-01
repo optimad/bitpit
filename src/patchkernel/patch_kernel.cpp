@@ -250,13 +250,15 @@ void PatchKernel::initialize()
 	// initialization.
 	setAdaptionStatus(ADAPTION_UNSUPPORTED);
 
-	// Parallel
+	// Parallel information
 	m_rank        = 0;
 	m_nProcessors = 1;
 #if BITPIT_ENABLE_MPI==1
-	m_partitioned  = false;
+
+	// Patch is not partitioned
 	m_communicator = MPI_COMM_NULL;
-	m_haloSize     = 0;
+	m_haloSize = 0;
+	setPartitioned(false);
 
 	// Set the partitioning as unsupported
 	//
@@ -5574,7 +5576,7 @@ void PatchKernel::dump(std::ostream &stream) const
 	utils::binary::write(stream, m_dimension);
 	utils::binary::write(stream, m_vtk.getName());
 #if BITPIT_ENABLE_MPI==1
-	utils::binary::write(stream, m_partitioned);
+	utils::binary::write(stream, isPartitioned());
 	utils::binary::write(stream, m_haloSize);
 #else
 	utils::binary::write(stream, false);
@@ -5656,11 +5658,10 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	m_vtk.setName(name);
 
 	// Partioned flag
+	bool partitioned;
+	utils::binary::read(stream, partitioned);
 #if BITPIT_ENABLE_MPI==1
-	utils::binary::read(stream, m_partitioned);
-#else
-	bool dummyPartitioned;
-	utils::binary::read(stream, dummyPartitioned);
+	setPartitioned(partitioned);
 #endif
 
 	// Halo size
