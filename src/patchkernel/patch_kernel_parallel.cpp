@@ -2029,9 +2029,7 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
                 const long *localCellInterfaces = localCell.getInterfaces();
                 while (nLocalCellInterfaces > 0) {
                     const long interfaceId = localCellInterfaces[nLocalCellInterfaces - 1];
-                    if (interfaceId >= 0) {
-                        deleteInterface(interfaceId, true, true);
-                    }
+                    deleteInterface(interfaceId, true, true);
                     --nLocalCellInterfaces;
                 }
 
