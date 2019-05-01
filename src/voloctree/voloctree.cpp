@@ -2307,9 +2307,12 @@ void VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::
 		return;
 	}
 
+	// Get octant info
+	const OctantInfo octantInfo = getCellOctant(id);
+
 	// Get edge neighbours
 	int codimension = getDimension() - 1;
-	findCellCodimensionNeighs(id, edge, codimension, blackList, neighs);
+	findOctantCodimensionNeighs(octantInfo, edge, codimension, blackList, neighs);
 
 	// Add face neighbours
 	//
@@ -2323,7 +2326,6 @@ void VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::
 	//     edge.
 	//
 	std::vector<long> faceNeighs;
-	const OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
 	int octantLevel = m_tree->getLevel(octant);
 	for (int face : m_octantLocalFacesOnEdge[edge]) {
@@ -2356,9 +2358,12 @@ void VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::
 */
 void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
+	// Get octant info
+	const OctantInfo octantInfo = getCellOctant(id);
+
 	// Get vertex neighbours
 	int codimension = getDimension();
-	findCellCodimensionNeighs(id, vertex, codimension, blackList, neighs);
+	findOctantCodimensionNeighs(octantInfo, vertex, codimension, blackList, neighs);
 
 	// Add edge and face neighbours
 	//
@@ -2375,7 +2380,6 @@ void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const s
 	//
 	// NOTE: in three dimension the function "_findCellEdgeNeighs" will return
 	// both edge and face neighbours.
-	const OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
 	int octantLevel = m_tree->getLevel(octant);
 	if (isThreeDimensional()) {
@@ -2414,12 +2418,12 @@ void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const s
 }
 
 /*!
-	Finds the neighbours for the given co-dimension of the specified cell.
+	Finds the neighbours for the given co-dimension of the specified octant.
 
 	Only the neighbours for the specified co-dimension are found, neighbours
 	of higher co-dimensions are not inserted in the returned list.
 
-	\param id is the id of the cell
+	\param octantInfo the data of the octant
 	\param codimension is the co-dimension
 	\param index is the local index of the entity (vertex, edge or face)
 	\param blackList is a list of cells that are excluded from the search.
@@ -2428,16 +2432,13 @@ void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const s
 	The vector is not cleared before adding the neighbours, it is extended
 	by appending all the neighbours found by this function
 */
-void VolOctree::findCellCodimensionNeighs(const long &id, const int &index,
-                                          const int &codimension, const std::vector<long> &blackList,
-                                          std::vector<long> *neighs) const
+void VolOctree::findOctantCodimensionNeighs(const OctantInfo &octantInfo, int index, int codimension,
+                                            const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	int dimension = getDimension();
 	if (codimension > dimension || codimension <= 0) {
 		return;
 	}
-
-	OctantInfo octantInfo = getCellOctant(id);
 
 	std::vector<uint32_t> neighTreeIds;
 	std::vector<bool> neighGhostFlags;

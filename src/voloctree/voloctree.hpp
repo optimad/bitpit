@@ -252,8 +252,8 @@ private:
 
 	std::vector<adaption::Info> sync(bool trackChanges);
 
-	void findCellCodimensionNeighs(const long &id, const int &index,
-		const int &codimension, const std::vector<long> &blackList, std::vector<long> *neighs) const;
+	void findOctantCodimensionNeighs(const OctantInfo &octantInfo, int index, int codimension,
+									 const std::vector<long> &blackList, std::vector<long> *neighs) const;
 };
 
 }
