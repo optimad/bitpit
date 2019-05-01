@@ -3504,40 +3504,7 @@ namespace bitpit {
      */
     uint32_t
     LocalTree::findMorton(uint64_t Morton) const {
-
-        uint32_t 		nocts = m_octants.size();
-        uint32_t 		idx = nocts/2;
-        uint64_t 		Mortontry = m_octants[idx].computeMorton();
-        int32_t 		jump = nocts/2;
-
-        while(abs(jump)>0){
-            if (Mortontry == Morton){
-                return idx;
-            }
-            jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
-            idx += jump;
-            if (idx > nocts){
-                return nocts-1;
-            }
-            Mortontry = m_octants[idx].computeMorton();
-        }
-        if (Mortontry<Morton){
-            for (uint32_t idx2=idx; idx2<nocts; idx2++){
-                Mortontry = m_octants[idx2].computeMorton();
-                if (Mortontry == Morton){
-                    return idx2;
-                }
-            }
-        }
-        else{
-            for(uint32_t idx2=0; idx2<idx+1; idx2++){
-                Mortontry = m_octants[idx2].computeMorton();
-                if (Mortontry == Morton){
-                    return idx2;
-                }
-            }
-        }
-        return nocts;
+        return _findMorton(Morton, m_octants);
     };
 
     // =================================================================================== //
@@ -3547,38 +3514,35 @@ namespace bitpit {
      */
     uint32_t
     LocalTree::findGhostMorton(uint64_t Morton) const {
-        uint32_t 		nocts = m_ghosts.size();
-        uint32_t 		idx = nocts/2;
-        uint64_t 		Mortontry = m_ghosts[idx].computeMorton();
-        int32_t 		jump = nocts/2;
+        return _findMorton(Morton, m_ghosts);
+    };
 
-        while(abs(jump)>0){
-            if (Mortontry == Morton){
-                return idx;
-            }
-            jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
-            idx += jump;
-            if (idx > nocts){
-                return nocts;
-            }
-            Mortontry = m_ghosts[idx].computeMorton();
-        }
-        if (Mortontry<Morton){
-            for (uint32_t idx2=idx; idx2<nocts; idx2++){
-                Mortontry = m_ghosts[idx2].computeMorton();
-                if (Mortontry == Morton){
-                    return idx2;
-                }
-            }
-        }
-        else{
-            for(uint32_t idx2=0; idx2<idx; idx2++){
-                Mortontry = m_ghosts[idx2].computeMorton();
-                if (Mortontry == Morton){
-                    return idx2;
-                }
+    // =================================================================================== //
+    /*! Find the index of the octant with the specified Morton in the given
+     *  sorted list of octants.
+     * \param[in] Morton Morton index to be found.
+     * \param[in] octants list of octants
+     * \return Local index of the target octant (=nocts if target Morton not found).
+     */
+    uint32_t
+    LocalTree::_findMorton(uint64_t Morton, const octvector &octants) const {
+
+        uint32_t nocts = octants.size();
+
+        uint32_t low  = 0;
+        uint32_t high = nocts - 1;
+        while (low <= high) {
+            uint32_t mid = low + ((high - low) / 2);
+            uint64_t mid_morton = octants[mid].computeMorton();
+            if (mid_morton > Morton) {
+                high = mid - 1;
+            } else if (mid_morton < Morton) {
+                low = mid + 1;
+            } else {
+                return mid;
             }
         }
+
         return nocts;
     };
 

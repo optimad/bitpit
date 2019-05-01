@@ -237,6 +237,7 @@ private:
 
 	uint32_t 	findMorton(uint64_t Morton) const;
 	uint32_t 	findGhostMorton(uint64_t Morton) const;
+	uint32_t 	_findMorton(uint64_t Morton, const octvector &octants) const;
 
 	void 		computeConnectivity();
 	void 		clearConnectivity();
