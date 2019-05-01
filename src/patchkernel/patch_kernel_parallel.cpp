@@ -2022,15 +2022,17 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
 
             // Delete the interfaces of the cell, they will be recreated later
             if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+                // When deleting an interface, the list of cell interfaces is
+                // update as well. Therefore, we need to delete the interfaces
+                // from the back of the list using a while loop.
                 int nLocalCellInterfaces = localCell.getInterfaceCount();
                 const long *localCellInterfaces = localCell.getInterfaces();
-                for (int k = 0; k < nLocalCellInterfaces; ++k) {
-                    const long interfaceId = localCellInterfaces[k];
-                    if (interfaceId < 0) {
-                        continue;
+                while (nLocalCellInterfaces > 0) {
+                    const long interfaceId = localCellInterfaces[nLocalCellInterfaces - 1];
+                    if (interfaceId >= 0) {
+                        deleteInterface(interfaceId, true, true);
                     }
-
-                    deleteInterface(interfaceId, true, true);
+                    --nLocalCellInterfaces;
                 }
 
                 updateInterfacesCells.push_back(cellId);
