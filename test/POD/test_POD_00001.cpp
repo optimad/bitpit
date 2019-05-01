@@ -54,6 +54,8 @@ int subtest_001(int rank, int nProcs)
 #if BITPIT_ENABLE_MPI    
     mesh->setCommunicator(MPI_COMM_WORLD);
 #endif
+    mesh->buildAdjacencies();
+    mesh->buildInterfaces();
     mesh->update();
 
 #if BITPIT_ENABLE_MPI
