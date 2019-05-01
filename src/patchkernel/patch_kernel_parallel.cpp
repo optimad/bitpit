@@ -1292,17 +1292,6 @@ void PatchKernel::clearGhostOwners()
 }
 
 /*!
-	Checks if the ghost exchange information are dirty.
-
-	\result Returns true if the ghost exchange information are dirty, false
-	otherwise.
-*/
-bool PatchKernel::areGhostExchangeInfoDirty() const
-{
-	return m_areGhostExchangeInfoDirty;
-}
-
-/*!
 	Update the information needed for ghost data exchange.
 */
 void PatchKernel::updateGhostExchangeInfo()
@@ -1346,9 +1335,6 @@ void PatchKernel::updateGhostExchangeInfo()
 		// Store list
 		m_ghostExchangeSources[rank] = std::move(rankSources);
 	}
-
-	// Exchange info are now updated
-	m_areGhostExchangeInfoDirty = false;
 }
 
 /*!

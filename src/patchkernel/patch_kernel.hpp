@@ -730,7 +730,6 @@ private:
 	std::vector<int> m_partitioningGlobalReceivers;
 	std::unordered_map<int, std::vector<long>> m_partitioningLocalSendList;
 
-	bool m_areGhostExchangeInfoDirty;
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeSources;
@@ -744,7 +743,6 @@ private:
 	adaption::Info sendCells_receiver(int sendRank);
 	adaption::Info sendCells_notified(int sendRank, int recvRank);
 
-	bool areGhostExchangeInfoDirty() const;
 	void updateGhostExchangeInfo();
 #endif
 
