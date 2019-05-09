@@ -2,7 +2,7 @@
  *
  *  bitpit
  *
- *  Copyright (C) 2015-2017 OPTIMAD engineering Srl
+ *  Copyright (C) 2015-2019 OPTIMAD engineering Srl
  *
  *  -------------------------------------------------------------------------
  *  License
@@ -51,7 +51,7 @@ typedef std::vector<Intersection>	 	intervector;
  *	\date		15/dec/2015
  *	\authors	Edoardo Lombardi
  *	\authors	Marco Cisternino
- *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.
+ *	\copyright		Copyright (C) 2015-2019 OPTIMAD engineering srl. All rights reserved.
  *
  *	\brief Local octree portion for each process
  *

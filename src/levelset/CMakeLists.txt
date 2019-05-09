@@ -2,7 +2,7 @@
 #
 #  bitpit
 #
-#  Copyright (C) 2015-2017 OPTIMAD engineering Srl
+#  Copyright (C) 2015-2019 OPTIMAD engineering Srl
 #
 #  -------------------------------------------------------------------------
 #  License

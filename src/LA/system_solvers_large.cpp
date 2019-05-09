@@ -2,7 +2,7 @@
  *
  *  bitpit
  *
- *  Copyright (C) 2015-2017 OPTIMAD engineering Srl
+ *  Copyright (C) 2015-2019 OPTIMAD engineering Srl
  *
  *  -------------------------------------------------------------------------
  *  License
@@ -81,6 +81,7 @@ SystemSolver::SystemSolver(bool debug)
         addInitOption("-log_view");
         addInitOption("-ksp_monitor_true_residual");
         addInitOption("-ksp_converged_reason");
+        addInitOption("-ksp_monitor_singular_value");
     }
 
     // Initialize Petsc

@@ -2,7 +2,7 @@
  *
  *  bitpit
  *
- *  Copyright (C) 2015-2017 OPTIMAD engineering Srl
+ *  Copyright (C) 2015-2019 OPTIMAD engineering Srl
  *
  *  -------------------------------------------------------------------------
  *  License
@@ -44,7 +44,7 @@ namespace bitpit {
  *	\date			16/dec/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
- *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\copyright		Copyright (C) 2014-2019 OPTIMAD engineering srl. All rights reserved.
  *
  *	\brief Intersection class definition
  *

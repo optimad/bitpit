@@ -2,7 +2,7 @@
  *
  *  bitpit
  *
- *  Copyright (C) 2015-2017 OPTIMAD engineering Srl
+ *  Copyright (C) 2015-2019 OPTIMAD engineering Srl
  *
  *  -------------------------------------------------------------------------
  *  License
@@ -66,7 +66,7 @@ typedef std::vector<u32array3>				u32arr3vector;
  *	\date			10/dec/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
- *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.
+ *	\copyright		Copyright (C) 2015-2019 OPTIMAD engineering srl. All rights reserved.
  *
  *	\brief Octant class definition
  *
