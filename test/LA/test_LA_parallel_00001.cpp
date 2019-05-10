@@ -50,7 +50,7 @@ int subtest_001(int rank)
     std::vector<long> rowPattern(1);
     std::vector<double> rowValues(1);
 
-    SparseMatrix matrix(MPI_COMM_WORLD, nRows, nCols, nNZ);
+    SparseMatrix matrix(MPI_COMM_WORLD, true, nRows, nCols, nNZ);
     for (int i = 0; i < nRows; ++i) {
         rowPattern[0] = nRows * rank + i;
         rowValues[0]  = 1. / (double) (matrix.getRowGlobalOffset() + i + 1);

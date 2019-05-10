@@ -50,7 +50,7 @@ int subtest_001()
     std::vector<double> rowValues(1);
 
 #if BITPIT_ENABLE_MPI==1
-    SparseMatrix matrix(MPI_COMM_WORLD, nRows, nCols, nNZ);
+    SparseMatrix matrix(MPI_COMM_WORLD, false, nRows, nCols, nNZ);
 #else
     SparseMatrix matrix(nRows, nCols, nNZ);
 #endif
