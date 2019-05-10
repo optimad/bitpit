@@ -62,7 +62,7 @@ int subtest_001(int rank)
     // Build system
     log::cout() << "Building system..." << std::endl;
 
-    SystemSolver system(MPI_COMM_WORLD);
+    SystemSolver system;
     system.initialize(matrix);
 
     double *rhs = system.getRHSRawPtr();

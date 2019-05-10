@@ -65,11 +65,7 @@ int subtest_001()
     // Build system
     log::cout() << "Building system..." << std::endl;
 
-#if BITPIT_ENABLE_MPI==1
-    SystemSolver system(MPI_COMM_WORLD);
-#else
     SystemSolver system;
-#endif
     system.initialize(matrix);
 
     double *rhs = system.getRHSRawPtr();
