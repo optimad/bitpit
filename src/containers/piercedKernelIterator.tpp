@@ -122,23 +122,26 @@ std::size_t PiercedKernelIterator<id_t>::getPos() const noexcept
 template<typename id_t>
 PiercedKernelIterator<id_t> & PiercedKernelIterator<id_t>::operator++()
 {
-    std::size_t delta = 1;
-    while (true) {
-        m_pos += delta;
-        if (m_pos >= m_kernel->m_end_pos) {
-            m_pos = m_kernel->m_end_pos;
-            return *this;
-        }
-
-        id_t id = m_kernel->m_ids[m_pos];
-        if (id >= 0) {
-            return *this;
-        } else {
-            delta = - id;
-        }
+    if (m_pos >= m_kernel->m_end_pos) {
+        return *this;
     }
 
-    assert(false);
+    auto basePosItr    = m_kernel->m_ids.begin();
+    auto endPosItr     = basePosItr + m_kernel->m_end_pos;
+    auto currentPosItr = basePosItr + m_pos + 1;
+
+    while (currentPosItr < endPosItr) {
+        id_t id = *currentPosItr;
+        if (id >= 0) {
+            break;
+        }
+
+        currentPosItr -= id;
+    }
+
+    m_pos = currentPosItr - basePosItr;
+
+    return *this;
 }
 
 /**
