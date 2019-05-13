@@ -1921,6 +1921,8 @@ std::size_t PiercedKernel<id_t>::holesCountRegular() const
 *
 * All the pending hole are converted to regular holes and new
 * space is reserved for future pending holes.
+*
+* This function will not sort the regular holes.
 */
 template<typename id_t>
 void PiercedKernel<id_t>::holesFlush()
