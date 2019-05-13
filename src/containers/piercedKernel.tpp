@@ -480,6 +480,11 @@ typename PiercedKernel<id_t>::SqueezeAction PiercedKernel<id_t>::_squeeze()
     // Flush changes
     flush();
 
+    // Sort the holes
+    //
+    // After being flushed, the container will contain only regular holes.
+    holesSortRegular();
+
     // Get kernel size
     std::size_t kernelSize    = size();
     std::size_t kernelRawSize = rawSize();
