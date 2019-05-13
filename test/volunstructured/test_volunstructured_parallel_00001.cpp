@@ -142,7 +142,7 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
         }
     }
 
-    patch_2D->partition(cellRanks, true);
+    patch_2D->partition(cellRanks, true, true);
 
     // Show patch info
     log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
@@ -291,7 +291,7 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
     // Serialize the patch
     cellRanks.clear();
     cellRanks.resize(patch_2D_restored->getInternalCount(), 0);
-    patch_2D_restored->partition(cellRanks, true);
+    patch_2D_restored->partition(cellRanks, true, true);
 
     log::cout() << "Restored serialized cell count:   " << patch_2D_restored->getCellCount() << std::endl;
     log::cout() << "Restored serialized vertex count: " << patch_2D_restored->getVertexCount() << std::endl;
@@ -516,7 +516,7 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
         }
     }
 
-    patch_3D->partition(cellRanks, true);
+    patch_3D->partition(cellRanks, true, true);
 
     // Show patch info
     log::cout() << "Cell count:   " << patch_3D->getCellCount() << std::endl;
@@ -663,7 +663,7 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
     // Serialize the patch
     cellRanks.clear();
     cellRanks.resize(patch_3D_restored->getInternalCount(), 0);
-    patch_3D_restored->partition(cellRanks, true);
+    patch_3D_restored->partition(cellRanks, true, true);
 
     log::cout() << "Restored serialized cell count:   " << patch_3D_restored->getCellCount() << std::endl;
     log::cout() << "Restored serialized vertex count: " << patch_3D_restored->getVertexCount() << std::endl;
