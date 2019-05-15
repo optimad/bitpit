@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(VOLCARTESIAN_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of volcartesi
 unset(HEADER_FILES)
 
 if (NOT "${VOLCARTESIAN_SOURCES}" STREQUAL "")
-    add_library(VOLCARTESIAN_TARGET_OBJECT OBJECT ${VOLCARTESIAN_SOURCES})
+    set(VOLCARTESIAN_TARGET_OBJECT "VOLCARTESIAN_TARGET_OBJECT")
+    add_library(${VOLCARTESIAN_TARGET_OBJECT} OBJECT ${VOLCARTESIAN_SOURCES})
+    set_lto_property(${VOLCARTESIAN_TARGET_OBJECT})
 endif ()
 
 install(FILES ${VOLCARTESIAN_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

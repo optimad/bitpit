@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(POD_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of POD module" FORCE)
 unset(HEADER_FILES)
 
 if (NOT "${POD_SOURCES}" STREQUAL "")
-    add_library(POD_TARGET_OBJECT OBJECT ${POD_SOURCES})
+    set(POD_TARGET_OBJECT "POD_TARGET_OBJECT")
+    add_library(${POD_TARGET_OBJECT} OBJECT ${POD_SOURCES})
+    set_lto_property(${POD_TARGET_OBJECT})
 endif ()
 
 install(FILES ${POD_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

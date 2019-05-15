@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(SA_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of SA Library" FORCE)
 unset(HEADER_FILES)
 
 if (NOT "${SA_SOURCES}" STREQUAL "")
-    add_library(SA_TARGET_OBJECT OBJECT ${SA_SOURCES})
+    set(SA_TARGET_OBJECT "SA_TARGET_OBJECT")
+    add_library(${SA_TARGET_OBJECT} OBJECT ${SA_SOURCES})
+    set_lto_property(${SA_TARGET_OBJECT})
 endif ()
 
 install(FILES ${SA_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

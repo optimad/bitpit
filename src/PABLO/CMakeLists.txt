@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(PABLO_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of PABLO module" FOR
 unset(HEADER_FILES)
 
 if (NOT "${PABLO_SOURCES}" STREQUAL "")
-    add_library(PABLO_TARGET_OBJECT OBJECT ${PABLO_SOURCES})
+    set(PABLO_TARGET_OBJECT "PABLO_TARGET_OBJECT")
+    add_library(${PABLO_TARGET_OBJECT} OBJECT ${PABLO_SOURCES})
+    set_lto_property(${PABLO_TARGET_OBJECT})
 endif ()
 
 install(FILES ${PABLO_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(VOLOCTREE_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of voloctree mod
 unset(HEADER_FILES)
 
 if (NOT "${VOLOCTREE_SOURCES}" STREQUAL "")
-    add_library(VOLOCTREE_TARGET_OBJECT OBJECT ${VOLOCTREE_SOURCES})
+    set(VOLOCTREE_TARGET_OBJECT "VOLOCTREE_TARGET_OBJECT")
+    add_library(${VOLOCTREE_TARGET_OBJECT} OBJECT ${VOLOCTREE_SOURCES})
+    set_lto_property(${VOLOCTREE_TARGET_OBJECT})
 endif ()
 
 install(FILES ${VOLOCTREE_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

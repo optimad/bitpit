@@ -23,6 +23,12 @@
 #----------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------#
+# CMake settings
+#------------------------------------------------------------------------------------#
+cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
+
+#------------------------------------------------------------------------------------#
 # Library properties
 #------------------------------------------------------------------------------------#
 
@@ -69,6 +75,8 @@ endforeach()
 set(BITPIT_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
 
 add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
+
+set_lto_property(${BITPIT_LIBRARY})
 
 if (ENABLE_MPI)
 	set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")

@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(CG_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of CG module" FORCE)
 unset(HEADER_FILES)
 
 if (NOT "${CG_SOURCES}" STREQUAL "")
-    add_library(CG_TARGET_OBJECT OBJECT ${CG_SOURCES})
+    set(CG_TARGET_OBJECT "CG_TARGET_OBJECT")
+    add_library(${CG_TARGET_OBJECT} OBJECT ${CG_SOURCES})
+    set_lto_property(${CG_TARGET_OBJECT})
 endif ()
 
 install(FILES ${CG_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

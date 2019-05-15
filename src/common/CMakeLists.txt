@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -62,7 +63,9 @@ unset(HEADER_FILES)
 set(COMMON_HEADERS "${HEADERS}" CACHE INTERNAL "Common headers" FORCE)
 
 if (NOT "${COMMON_SOURCES}" STREQUAL "")
-	add_library(COMMON_TARGET_OBJECT OBJECT ${COMMON_SOURCES})
+    set(COMMON_TARGET_OBJECT "COMMON_TARGET_OBJECT")
+    add_library(${COMMON_TARGET_OBJECT} OBJECT ${COMMON_SOURCES})
+    set_lto_property(${COMMON_TARGET_OBJECT})
 endif ()
 
 install(FILES ${COMMON_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

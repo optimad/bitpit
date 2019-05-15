@@ -36,6 +36,11 @@ set(ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 set(BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
 
+if(${CMAKE_VERSION} VERSION_EQUAL "3.9.0" OR ${CMAKE_VERSION} VERSION_GREATER "3.9.0")
+    set(LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build) Enabled Disabled.")
+    set_property(CACHE LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
+endif()
+
 #------------------------------------------------------------------------------------#
 # Functions
 #------------------------------------------------------------------------------------#
@@ -230,6 +235,57 @@ endif()
 # Add the definitions
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PRIVATE})
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PUBLIC})
+
+#------------------------------------------------------------------------------------#
+# Link Time Optimization (LTO)
+#------------------------------------------------------------------------------------#
+
+# Detect if LTO can be enabled
+if(DEFINED LTO_STRATEGY)
+    if (NOT "${LTO_STRATEGY}" STREQUAL "Disabled")
+        cmake_policy(SET CMP0069 NEW)
+        include(CheckIPOSupported)
+
+        if ("${LTO_STRATEGY}" STREQUAL "Enabled")
+            if (NOT BUILD_SHARED_LIBS)
+                message(FATAL_ERROR "LTO can be enabled only when building a shared library." )
+            endif()
+            check_ipo_supported()
+            set(ENABLE_LTO TRUE)
+        elseif ("${LTO_STRATEGY}" STREQUAL "Auto")
+            if (BUILD_SHARED_LIBS)
+                check_ipo_supported(RESULT LTO_SUPPORTED)
+                if (${LTO_SUPPORTED} AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+                    set(ENABLE_LTO TRUE)
+                else()
+                    set(ENABLE_LTO FALSE)
+                endif()
+            else()
+                set(ENABLE_LTO FALSE)
+            endif()
+        else()
+            set(ENABLE_LTO FALSE)
+        endif()
+    else()
+        set(ENABLE_LTO FALSE)
+    endif()
+else()
+    set(ENABLE_LTO FALSE)
+endif()
+
+# Initialize LTO property
+function(initialize_lto_property)
+    if (${ENABLE_LTO})
+        cmake_policy(SET CMP0069 NEW)
+    endif()
+endfunction()
+
+# Set LTO property for the specified target
+function(set_lto_property TARGET_NAME)
+    if (${ENABLE_LTO})
+        set_target_properties(${TARGET_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
+endfunction()
 
 #------------------------------------------------------------------------------------#
 # Customized build types

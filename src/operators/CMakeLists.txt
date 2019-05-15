@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(OPERATORS_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of the operators
 unset(OPERATORS_HEADERS)
 
 if (NOT "${OPERATORS_SOURCES}" STREQUAL "")
-    add_library(OPERATORS_TARGET_OBJECT OBJECT ${OPERATORS_SOURCES})
+    set(OPERATORS_TARGET_OBJECT "OPERATORS_TARGET_OBJECT")
+    add_library(${OPERATORS_TARGET_OBJECT} OBJECT ${OPERATORS_SOURCES})
+    set_lto_property(${OPERATORS_TARGET_OBJECT})
 endif ()
 
 install(FILES ${OPERATORS_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

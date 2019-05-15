@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(PATCHKERNEL_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of patch modul
 unset(HEADER_FILES)
 
 if (NOT "${PATCHKERNEL_SOURCES}" STREQUAL "")
-    add_library(PATCHKERNEL_TARGET_OBJECT OBJECT ${PATCHKERNEL_SOURCES})
+    set(PATCHKERNEL_TARGET_OBJECT "PATCHKERNEL_TARGET_OBJECT")
+    add_library(${PATCHKERNEL_TARGET_OBJECT} OBJECT ${PATCHKERNEL_SOURCES})
+    set_lto_property(${PATCHKERNEL_TARGET_OBJECT})
 endif ()
 
 install(FILES ${PATCHKERNEL_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

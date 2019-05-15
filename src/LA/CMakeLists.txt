@@ -24,6 +24,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
+initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
@@ -40,7 +41,9 @@ set(LA_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of LA Library" FORCE)
 unset(HEADER_FILES)
 
 if (NOT "${LA_SOURCES}" STREQUAL "")
-    add_library(LA_TARGET_OBJECT OBJECT ${LA_SOURCES})
+    set(LA_TARGET_OBJECT "LA_TARGET_OBJECT")
+    add_library(${LA_TARGET_OBJECT} OBJECT ${LA_SOURCES})
+    set_lto_property(${LA_TARGET_OBJECT})
 endif ()
 
 install(FILES ${LA_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
