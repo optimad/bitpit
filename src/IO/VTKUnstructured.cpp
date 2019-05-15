@@ -288,8 +288,8 @@ uint64_t VTKUnstructuredGrid::readConnectivityEntries( ){
     int connectivity_gid = getFieldGeomId(VTKUnstructuredField::CONNECTIVITY);
     if(connectivity_gid < 0)    return nconn;
 
-    if(!m_geometry[connectivity_gid].hasAllMetaData()){
-        throw std::runtime_error("VTKUnstructuredGrid::readConnectivityEntries. Connectivity is missing meta information");
+    if(!m_geometry[connectivity_gid].hasAllMetaData() || !m_geometry[connectivity_gid].isEnabled()){
+        throw std::runtime_error("VTKUnstructuredGrid::readConnectivityEntries. Connectivity field is missing meta information or disabled");
     }
 
     if( m_geometry[connectivity_gid].getCodification() == VTKFormat::APPENDED ){
