@@ -258,6 +258,7 @@ void PatchKernel::initialize()
 	// Patch is not partitioned
 	m_communicator = MPI_COMM_NULL;
 	m_haloSize = 0;
+	m_nPartitioningGlobalExchanges = 0;
 	setPartitioned(false);
 
 	// Set the partitioning as unsupported
