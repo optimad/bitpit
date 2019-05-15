@@ -2538,6 +2538,9 @@ namespace bitpit {
         if (m_dim != 0) {
             m_treeConstants = &(TreeConstants::instance(m_dim));
             m_periodic.resize(m_treeConstants->nFaces, false);
+        } else {
+            m_treeConstants = nullptr;
+            m_periodic.clear();
         }
     }
 
