@@ -366,7 +366,7 @@ uint64_t VTKUnstructuredGrid::readFaceStreamEntries( ){
     // Geometry id of the facestream
     int facestream_gid = getFieldGeomId(VTKUnstructuredField::FACE_STREAMS);
     if(facestream_gid < 0 ) return nface;
-    if(!m_geometry[facestream_gid].hasAllMetaData()) return nface;
+    if(!m_geometry[facestream_gid].hasAllMetaData() || !m_geometry[facestream_gid].isEnabled()) return nface;
 
     if( m_geometry[facestream_gid].getCodification() == VTKFormat::APPENDED ){
         str.open( m_fh.getPath( ), std::ios::in ) ;
