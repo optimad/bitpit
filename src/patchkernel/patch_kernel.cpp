@@ -150,6 +150,10 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_partitioned(other.m_partitioned),
       m_partitioningStatus(other.m_partitioningStatus),
       m_haloSize(other.m_haloSize),
+      m_nPartitioningGlobalExchanges(other.m_nPartitioningGlobalExchanges),
+      m_partitioningGlobalSenders(other.m_partitioningGlobalSenders),
+      m_partitioningGlobalReceivers(other.m_partitioningGlobalReceivers),
+      m_partitioningLocalSendList(other.m_partitioningLocalSendList),
       m_ghostOwners(other.m_ghostOwners),
       m_ghostExchangeTargets(other.m_ghostExchangeTargets),
       m_ghostExchangeSources(other.m_ghostExchangeSources)
