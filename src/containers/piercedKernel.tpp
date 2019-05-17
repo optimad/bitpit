@@ -76,8 +76,8 @@ void PiercedKernel<id_t>::updateId(const id_t &currentId, const id_t &updatedId)
 /**
 * Removes all elements from the kernel.
 *
-* \param release if it's true the memory hold by the kernel will be released,
-* otherwise the kernel will be cleared but its memory will not be released
+* \param release if set to true, the containers that hold kernel data are
+* requested to release all unneeded memory (it is a non-binding request)
 */
 template<typename id_t>
 typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::clear(bool release)
@@ -96,8 +96,8 @@ typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::clear(bool releas
 *
 * The function will NOT process the sync action.
 *
-* \param release if it's true the memory hold by the kernel will be released,
-* otherwise the kernel will be cleared but its memory will not be released
+* \param release if set to true, the containers that hold holes data are
+* requested to release all unneeded memory (it is a non-binding request)
 */
 template<typename id_t>
 typename PiercedKernel<id_t>::ClearAction PiercedKernel<id_t>::_clear(bool release)
@@ -1804,8 +1804,8 @@ void PiercedKernel<id_t>::pierce(std::size_t pos, bool flush)
 /**
 * Clear the list of available holes.
 *
-* \param release if set to true the memory previously hold by holes'
-* kernel will be released
+* \param release if set to true, the containers that hold holes data are
+* requested to release all unneeded memory (it is a non-binding request)
 */
 template<typename id_t>
 void PiercedKernel<id_t>::holesClear(bool release)
@@ -1821,8 +1821,8 @@ void PiercedKernel<id_t>::holesClear(bool release)
 /**
 * Clear regular holes.
 *
-* \param release if set to true the memory previously hold by holes'
-* kernel will be released
+* \param release if set to true, the containers that hold holes data are
+* requested to release all unneeded memory (it is a non-binding request)
 */
 template<typename id_t>
 void PiercedKernel<id_t>::holesClearRegular(bool release)
@@ -1843,8 +1843,8 @@ void PiercedKernel<id_t>::holesClearRegular(bool release)
 /**
 * Clear pending holes
 *
-* \param release if set to true the memory previously hold by holes'
-* kernel will be released
+* \param release if set to true, the containers that hold holes data are
+* requested to release all unneeded memory (it is a non-binding request)
 */
 template<typename id_t>
 void PiercedKernel<id_t>::holesClearPending(bool release)
@@ -1865,8 +1865,8 @@ void PiercedKernel<id_t>::holesClearPending(bool release)
 * begin of the hole's kernel
 * \param nRegulars is the number of regulars holes
 * \param nPendings  the number of pending holes
-* \param release if set to true the memory previously hold by holes'
-* kernel will be released
+* \param release if set to true, the containers that hold holes data are
+* requested to release all unneeded memory (it is a non-binding request)
 */
 template<typename id_t>
 void PiercedKernel<id_t>::holesResize(std::size_t offset, std::size_t nRegulars, std::size_t nPendings, bool release)
