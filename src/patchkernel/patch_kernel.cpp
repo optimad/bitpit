@@ -4976,39 +4976,18 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
 */
 std::unordered_map<long, long> PatchKernel::binSortVertex(const PiercedVector<Vertex> &vertices, int nBins)
 {
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
+	std::unordered_map<long, std::vector<long>> bins = binGroupVertices(vertices, nBins);
 
-    // Local variables
-    double                              dx, dy, dz;
+	std::unordered_map<long, long> bin_index;
+	bin_index.reserve(vertices.size());
+	for (const auto &binEntry : bins) {
+		long binId = binEntry.first;
+		for (const long vertexId : binEntry.second) {
+			bin_index[vertexId] = binId;
+		}
+	}
 
-    // Counters
-    long                                i, j, k;
-
-    // ====================================================================== //
-    // ASSOCIATE EACH VERTEX WITH A BIN                                       //
-    // ====================================================================== //
-
-    // Update bounding box
-    updateBoundingBox();
-
-    // Bin's spacing
-    dx = max(1.0e-12, m_boxMaxPoint[0] - m_boxMinPoint[0]) / ((double) nBins);
-    dy = max(1.0e-12, m_boxMaxPoint[1] - m_boxMinPoint[1]) / ((double) nBins);
-    dz = max(1.0e-12, m_boxMaxPoint[2] - m_boxMinPoint[2]) / ((double) nBins);
-
-    // Loop over vertices
-    std::unordered_map<long, long> bin_index;
-    PiercedVector<Vertex>::const_iterator E = vertices.cend();
-    for (PiercedVector<Vertex>::const_iterator V = vertices.cbegin(); V != E; ++V) {
-        i = std::min(nBins - 1L, long((V->getCoords()[0] - m_boxMinPoint[0]) / dx));
-        j = std::min(nBins - 1L, long((V->getCoords()[1] - m_boxMinPoint[1]) / dy));
-        k = std::min(nBins - 1L, long((V->getCoords()[2] - m_boxMinPoint[2]) / dz));
-        bin_index[V->getId()] = nBins * nBins * k + nBins * j + i;
-    }
-
-    return bin_index;
+	return bin_index;
 }
 
 /*!
