@@ -223,6 +223,35 @@ return; }
 
 // -------------------------------------------------------------------------- //
 /*!
+    Clear current content without freeing memory.
+*/
+template<int d, class T, class T1>
+void KdTree<d, T, T1>::clear(
+        void
+        ) {
+
+    // ========================================================================== //
+    // VARIABLES DECLARATION                                                      //
+    // ========================================================================== //
+
+    // Local variables
+    // none
+
+    // Counters
+    // none
+
+    // ========================================================================== //
+    // CLEAR CONTENT                                                              //
+    // ========================================================================== //
+    n_nodes = 0;
+    nodes.clear();
+    nodes.resize(MAXSTK);
+
+    return;
+}
+
+// -------------------------------------------------------------------------- //
+/*!
     Check whether a given vertex already exist in the kd-tree.
     Check is performed via lexicographical comparison of vertex coordinates.
 

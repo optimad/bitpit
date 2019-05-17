@@ -102,6 +102,9 @@ class KdTree {
 
     // Methods ============================================================== //
     public:
+    void clear(                                                               // Clear kd-tree content
+        void                                                                  // (input) none
+    );
     int exist(                                                                // Check if element exist in the kd-tree
         const T     *                                                         // (input) pointer to element to be tested
     );
