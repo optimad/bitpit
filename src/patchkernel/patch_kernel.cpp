@@ -4943,40 +4943,6 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates
 }
 
 /*!
-	Sort patch vertices on regular bins.
-
-	\param[in] nBins is the number of bins (on each space direction)
-	\result Returns the bin index associated to each vertex.
-*/
-std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
-{
-	return PatchKernel::binSortVertex(m_vertices, nBins);
-}
-
-/*!
-    Sort specified vertices on regular bins.
-
-    \param[in] vertices are the vertices to be sorted
-    \param[in] nBins is the number of bins (on each space direction)
-    \result Returns the bin index associated to each vertex.
-*/
-std::unordered_map<long, long> PatchKernel::binSortVertex(const PiercedVector<Vertex> &vertices, int nBins)
-{
-	std::unordered_map<long, std::vector<long>> bins = binGroupVertices(vertices, nBins);
-
-	std::unordered_map<long, long> bin_index;
-	bin_index.reserve(vertices.size());
-	for (const auto &binEntry : bins) {
-		long binId = binEntry.first;
-		for (const long vertexId : binEntry.second) {
-			bin_index[vertexId] = binId;
-		}
-	}
-
-	return bin_index;
-}
-
-/*!
     Group vertices on regular bins.
 
     \param[in] vertices are the vertices to be sorted
