@@ -533,7 +533,7 @@ typename PiercedKernel<id_t>::SqueezeAction PiercedKernel<id_t>::_squeeze()
         }
 
         // Clear the holes
-        holesClear();
+        holesClear(true);
 
         // Reset begin and end
         setBeginPos(0);
