@@ -1442,12 +1442,6 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 		return collapsedVertices;
 	}
 
-	std::vector<std::vector<std::array<long, 2> > > bins;
-
-	// ====================================================================== //
-	// INITIALIZE LOCAL VARIABLES                                             //
-	// ====================================================================== //
-
 	// Random number generator
 	srand(1223145611);
 
@@ -1469,76 +1463,57 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 		nBins = 128;
 	}
 
-	// Resize variables
-	bins.resize(nBins * nBins * nBins);
+	// Group vertices into bins
+	std::unordered_map<long, std::vector<long>> bins = binGroupVertices(nBins);
 
-	// ====================================================================== //
-	// SORT VERTICES ON BINS                                                  //
-	// ====================================================================== //
+	//
+	// Collapse double vertices
+	//
 
-	// Sort vertices
-	std::unordered_map<long, long> bin_index = binSortVertex(nBins);
-
-	// Sort cells
-	std::array<long, 2> binEntry;
-	for (const Cell &cell : m_cells) {
-		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-		int nCellVertices = cellVertexIds.size();
-		for (int j = 0; j < nCellVertices; ++j) {
-			binEntry[0] = cell.getId();
-			binEntry[1] = j;
-
-			long vertexId = cellVertexIds[j];
-			long binId = bin_index[vertexId];
-			bins[binId].push_back(binEntry);
-		}
+	// Evaluate vertex map
+	std::size_t nMaxBinVertices = 0;
+	for (const auto &binEntry : bins) {
+		nMaxBinVertices = std::max(binEntry.second.size(), nMaxBinVertices);
 	}
 
-	// Free memory
-	std::unordered_map<long, long>().swap(bin_index);
+	std::vector<int> randomExtraction;
+	randomExtraction.reserve(nMaxBinVertices);
+	KdTree<3, Vertex, long> kd(nMaxBinVertices);
 
-	// ====================================================================== //
-	// COLLAPSE DOUBLE VERTICES                                               //
-	// ====================================================================== //
 	std::size_t nCollapsedVertices = 0;
 	std::unordered_map<long, long> vertexMap;
 	vertexMap.reserve(getVertexCount());
+	for (const auto &binEntry : bins) {
+		const std::vector<long> &binVertices = binEntry.second;
+		int nBinVertices = binVertices.size();
 
-	for (auto &bin : bins) {
-		int nBinCells = bin.size();
-		if (nBinCells > 0) {
-			// Randomize vertex insertion
-			std::vector<int> list;
-			utils::extractWithoutReplacement(nBinCells, nBinCells - 1, list);
+		// Randomize vertex insertion
+		randomExtraction.clear();
+		utils::extractWithoutReplacement(nBinVertices, nBinVertices - 1, randomExtraction);
 
-			// Vertex insertion
-			KdTree<3, Vertex, long> kd(nBinCells);
-			for (int j = 0; j < nBinCells; ++j) {
-				long cellId = bin[list[j]][0];
-				Cell &cell  = m_cells[cellId];
-				ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-
-				long k        = bin[list[j]][1];
-				long vertexId = cellVertexIds[k];
-				if (vertexMap.count(vertexId) > 0) {
-					continue;
-				}
-
-				Vertex &vertex = m_vertices[vertexId];
-
-				long collapsedVertexId;
-				if (kd.exist(&vertex, collapsedVertexId) < 0) {
-					collapsedVertexId = vertexId;
-					kd.insert(&vertex, vertexId);
-				} else {
-					++nCollapsedVertices;
-				}
-
-				vertexMap.insert({vertexId, collapsedVertexId});
+		// Vertex insertion
+		kd.clear();
+		for (int j = 0; j < nBinVertices; ++j) {
+			long vertexId = binVertices[randomExtraction[j]];
+			if (vertexMap.count(vertexId) > 0) {
+				continue;
 			}
+
+			Vertex &vertex = m_vertices.at(vertexId);
+
+			long collapsedVertexId;
+			if (kd.exist(&vertex, collapsedVertexId) < 0) {
+				collapsedVertexId = vertexId;
+				kd.insert(&vertex, vertexId);
+			} else {
+				++nCollapsedVertices;
+			}
+
+			vertexMap.insert({vertexId, collapsedVertexId});
 		}
 	}
 
+	// Renumber cell vertices
 	for (Cell &cell : m_cells) {
 		cell.renumberVertices(vertexMap);
 	}
