@@ -1433,11 +1433,9 @@ bool PatchKernel::deleteOrphanVertices()
 	Find and collapse coincident vertices. Cell connectivity is
 	automatically updated.
 
-	\param[in] nBins (default = 128) is the number of bins used by
-	bin-sorting algorithm to sort tasselation vertices
 	\result The list of the of the collapsed vertices.
 */
-std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
+std::vector<long> PatchKernel::collapseCoincidentVertices()
 {
 	std::vector<long> collapsedVertices;
 	if (!isExpert()) {
@@ -1452,6 +1450,24 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 
 	// Random number generator
 	srand(1223145611);
+
+	// Update bounding box
+	updateBoundingBox();
+
+	// Define a sensible values for the number of bins
+	int nBoxDimensions = 3;
+	for (int k = 0; k < 3; ++k) {
+		if (utils::DoubleFloatingEqual()(m_boxMaxPoint[k], m_boxMinPoint[k], getTol())) {
+			--nBoxDimensions;
+		}
+	}
+
+	int nBins = std::ceil(std::pow(getVertexCount(), 1. / (double) nBoxDimensions));
+	if (nBins < 16) {
+		nBins = 16;
+	} else if (nBins > 128) {
+		nBins = 128;
+	}
 
 	// Resize variables
 	bins.resize(nBins * nBins * nBins);
@@ -1548,17 +1564,14 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 
 /*!
 	Remove coincident vertices from the patch.
-
-	\param[in] nBins (default = 128) is the number of bins used by bin
-	sorting algotrithm to sort patch vertices.
 */
-bool PatchKernel::deleteCoincidentVertices(int nBins)
+bool PatchKernel::deleteCoincidentVertices()
 {
 	if (!isExpert()) {
 		return false;
 	}
 
-	std::vector<long> verticesToDelete = collapseCoincidentVertices(nBins);
+	std::vector<long> verticesToDelete = collapseCoincidentVertices();
 	deleteVertices(verticesToDelete);
 
 	return true;
@@ -4957,8 +4970,7 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates
 /*!
 	Sort patch vertices on regular bins.
 
-	\param[in] nBins (default = 128) is the number of bins (on each space
-	direction)
+	\param[in] nBins is the number of bins (on each space direction)
 	\result Returns the bin index associated to each vertex.
 */
 std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
@@ -4970,8 +4982,7 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
     Sort specified vertices on regular bins.
 
     \param[in] vertices are the vertices to be sorted
-    \param[in] nBins (default = 128) is the number of bins (on each space
-    direction)
+    \param[in] nBins is the number of bins (on each space direction)
     \result Returns the bin index associated to each vertex.
 */
 std::unordered_map<long, long> PatchKernel::binSortVertex(const PiercedVector<Vertex> &vertices, int nBins)

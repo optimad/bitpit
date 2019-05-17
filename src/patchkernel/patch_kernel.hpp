@@ -336,8 +336,8 @@ public:
 	long countOrphanVertices() const;
 	std::vector<long> findOrphanVertices();
 	bool deleteOrphanVertices();
-	std::vector<long> collapseCoincidentVertices(int nBins = 128);
-	bool deleteCoincidentVertices(int nBins = 128);
+	std::vector<long> collapseCoincidentVertices();
+	bool deleteCoincidentVertices();
 
 	VertexIterator getVertexIterator(const long &id);
 	VertexIterator vertexBegin();
@@ -497,8 +497,8 @@ public:
 	bool isBoundingBoxDirty(bool global = false) const;
 	void updateBoundingBox(bool forcedUpdated = false);
 
-	std::unordered_map<long, long> binSortVertex(const PiercedVector<Vertex> &vertices, int nBins = 128);
-    std::unordered_map<long, long> binSortVertex(int nBins = 128);
+	std::unordered_map<long, long> binSortVertex(const PiercedVector<Vertex> &vertices, int nBins);
+	std::unordered_map<long, long> binSortVertex(int nBins);
 
 	virtual void translate(std::array<double, 3> translation);
 	void translate(double sx, double sy, double sz);
