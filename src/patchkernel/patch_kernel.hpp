@@ -617,6 +617,9 @@ protected:
 	void updateFirstGhostId();
 #endif
 
+	std::unordered_map<long, std::vector<long>> binGroupVertices(const PiercedVector<Vertex> &vertices, int nBins);
+	std::unordered_map<long, std::vector<long>> binGroupVertices(int nBins);
+
 	void setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status);
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);

@@ -5012,6 +5012,50 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(const PiercedVector<Ve
 }
 
 /*!
+    Group vertices on regular bins.
+
+    \param[in] vertices are the vertices to be sorted
+    \param[in] nBins is the number of bins (on each space direction)
+    \result Returns the vertices grouped into bins.
+*/
+std::unordered_map<long, std::vector<long>> PatchKernel::binGroupVertices(int nBins)
+{
+	return PatchKernel::binGroupVertices(m_vertices, nBins);
+}
+
+/*!
+    Group specified vertices on regular bins.
+
+    \param[in] vertices are the vertices to be sorted
+    \param[in] nBins is the number of bins (on each space direction)
+    \result Returns the vertices grouped into bins.
+*/
+std::unordered_map<long, std::vector<long>> PatchKernel::binGroupVertices(const PiercedVector<Vertex> &vertices, int nBins)
+{
+    // Update bounding box
+    updateBoundingBox();
+
+    // Bin's spacing
+    double dx = max(1.0e-12, m_boxMaxPoint[0] - m_boxMinPoint[0]) / ((double) nBins);
+    double dy = max(1.0e-12, m_boxMaxPoint[1] - m_boxMinPoint[1]) / ((double) nBins);
+    double dz = max(1.0e-12, m_boxMaxPoint[2] - m_boxMinPoint[2]) / ((double) nBins);
+
+    // Identify bins of vertices
+    std::unordered_map<long, std::vector<long>> bins;
+    PiercedVector<Vertex>::const_iterator E = vertices.cend();
+    for (PiercedVector<Vertex>::const_iterator V = vertices.cbegin(); V != E; ++V) {
+        int i = std::min(nBins - 1L, long((V->getCoords()[0] - m_boxMinPoint[0]) / dx));
+        int j = std::min(nBins - 1L, long((V->getCoords()[1] - m_boxMinPoint[1]) / dy));
+        int k = std::min(nBins - 1L, long((V->getCoords()[2] - m_boxMinPoint[2]) / dz));
+
+        long binId = nBins * nBins * k + nBins * j + i;
+        bins[binId].emplace_back(V->getId());
+    }
+
+    return bins;
+}
+
+/*!
 	Translates the patch.
 
 	\param[in] translation is the translation vector
