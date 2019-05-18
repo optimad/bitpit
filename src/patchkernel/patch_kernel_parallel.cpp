@@ -665,6 +665,9 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const 
 std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage)
 {
 	std::vector<adaption::Info> partitioningData;
+	if (!isPartitioningSupported()) {
+		return partitioningData;
+	}
 
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
@@ -673,9 +676,7 @@ std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> &cellR
 
 	// Check partitioning status
 	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
-	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
-		return partitioningData;
-	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+	if (partitioningStatus != PARTITIONING_CLEAN) {
 		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
@@ -725,6 +726,9 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool t
 std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool squeezeStorage)
 {
 	std::vector<adaption::Info> partitioningData;
+	if (!isPartitioningSupported()) {
+		return partitioningData;
+	}
 
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
@@ -733,9 +737,7 @@ std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool 
 
 	// Check partitioning status
 	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
-	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
-		return partitioningData;
-	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+	if (partitioningStatus != PARTITIONING_CLEAN) {
 		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
@@ -783,6 +785,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::vector<int> &cellRanks, bool trackPartitioning)
 {
 	std::vector<adaption::Info> partitioningData;
+	if (!isPartitioningSupported()) {
+		return partitioningData;
+	}
 
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
@@ -791,9 +796,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::vector<i
 
 	// Check partitioning status
 	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
-	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
-		return partitioningData;
-	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+	if (partitioningStatus != PARTITIONING_CLEAN) {
 		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
@@ -899,12 +902,13 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartitioning)
 {
 	std::vector<adaption::Info> partitioningData;
+	if (!isPartitioningSupported()) {
+		return partitioningData;
+	}
 
 	// Check partitioning status
 	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
-	if (partitioningStatus == PARTITIONING_UNSUPPORTED) {
-		return partitioningData;
-	} else if (partitioningStatus != PARTITIONING_CLEAN) {
+	if (partitioningStatus != PARTITIONING_CLEAN) {
 		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
@@ -938,10 +942,13 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartition
 std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
 {
 	std::vector<adaption::Info> partitioningData;
+	if (!isPartitioningSupported()) {
+		return partitioningData;
+	}
 
 	// Check partitioning status
 	PartitioningStatus partitioningStatus = getPartitioningStatus();
-	if (partitioningStatus == PARTITIONING_UNSUPPORTED || partitioningStatus == PARTITIONING_CLEAN) {
+	if (partitioningStatus == PARTITIONING_CLEAN) {
 		return partitioningData;
 	} else if (partitioningStatus != PARTITIONING_PREPARED) {
 		throw std::runtime_error ("The prepare function has no been called.");
@@ -993,8 +1000,12 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 */
 void PatchKernel::partitioningCleanup()
 {
+	if (!isPartitioningSupported()) {
+		return;
+	}
+
 	PartitioningStatus partitioningStatus = getPartitioningStatus();
-	if (partitioningStatus == PARTITIONING_UNSUPPORTED || partitioningStatus == PARTITIONING_CLEAN) {
+	if (partitioningStatus == PARTITIONING_CLEAN) {
 		return;
 	} else if (partitioningStatus == PARTITIONING_PREPARED) {
 		throw std::runtime_error ("It is not yet possible to abort a partitioning.");
@@ -1034,6 +1045,16 @@ bool PatchKernel::isPartitioned() const
 void PatchKernel::setPartitioned(bool partitioned)
 {
 	m_partitioned = partitioned;
+}
+
+/*!
+	Checks if the patch supports partitioning.
+
+	\return Returns true if the patch supports partitioning, false otherwise.
+*/
+bool PatchKernel::isPartitioningSupported() const
+{
+    return (getPartitioningStatus() != PARTITIONING_UNSUPPORTED);
 }
 
 /*!

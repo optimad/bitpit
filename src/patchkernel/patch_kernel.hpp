@@ -559,6 +559,7 @@ public:
 	const std::vector<long> & getGhostExchangeSources(int rank) const;
 
 	bool isPartitioned() const;
+	bool isPartitioningSupported() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	double evalPartitioningUnbalance();
 	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
