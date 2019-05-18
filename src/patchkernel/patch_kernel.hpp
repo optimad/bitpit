@@ -302,6 +302,7 @@ public:
 	SpawnStatus getSpawnStatus() const;
 	std::vector<adaption::Info> spawn(bool trackSpawn);
 
+	bool isAdaptionSupported() const;
 	AdaptionStatus getAdaptionStatus(bool global = false) const;
 	std::vector<adaption::Info> adaption(bool trackAdaption = true, bool squeezeStorage = false);
 	std::vector<adaption::Info> adaptionPrepare(bool trackAdaption = true);

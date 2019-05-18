@@ -939,6 +939,17 @@ void PatchKernel::setSpawnStatus(SpawnStatus status)
 	m_spawnStatus = status;
 }
 
+
+/*!
+	Checks if the patch supports adaption.
+
+	\return Returns true if the patch supports adaption, false otherwise.
+*/
+bool PatchKernel::isAdaptionSupported() const
+{
+    return (getAdaptionStatus() != ADAPTION_UNSUPPORTED);
+}
+
 /*!
 	Returns the current adaption status.
 
