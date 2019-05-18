@@ -611,7 +611,7 @@ array<double, 3> SurfaceKernel::evalEdgeNormal(const long &id, const int &edge_i
     // ====================================================================== //
     // COMPUTE EDGE NORMAL                                                    //
     // ====================================================================== //
-    if (adjacencies[0] != Element::NULL_ID) {
+    if (n_adj > 0) {
         for (int i = 0; i < n_adj; ++i) {
             normal += evalFacetNormal(adjacencies[i]);
         } //next i
