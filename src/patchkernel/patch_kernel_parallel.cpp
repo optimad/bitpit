@@ -669,12 +669,6 @@ std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> &cellR
 		return partitioningData;
 	}
 
-	// Check partitioning status
-	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
-	if (partitioningStatus != PARTITIONING_CLEAN) {
-		throw std::runtime_error ("A partitioning is already in progress.");
-	}
-
 	partitioningPrepare(cellRanks, false);
 
 	partitioningData = partitioningAlter(trackPartitioning, squeezeStorage);
@@ -723,12 +717,6 @@ std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool 
 	std::vector<adaption::Info> partitioningData;
 	if (!isPartitioningSupported()) {
 		return partitioningData;
-	}
-
-	// Check partitioning status
-	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
-	if (partitioningStatus != PARTITIONING_CLEAN) {
-		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
 	partitioningPrepare(false);
