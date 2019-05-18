@@ -669,11 +669,6 @@ std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> &cellR
 		return partitioningData;
 	}
 
-	// Communicator has to be set
-	if (!isCommunicatorSet()) {
-		throw std::runtime_error ("There is no communicator set for the patch.");
-	}
-
 	// Check partitioning status
 	PartitioningStatus partitioningStatus = getPartitioningStatus(true);
 	if (partitioningStatus != PARTITIONING_CLEAN) {
@@ -728,11 +723,6 @@ std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool 
 	std::vector<adaption::Info> partitioningData;
 	if (!isPartitioningSupported()) {
 		return partitioningData;
-	}
-
-	// Communicator has to be set
-	if (!isCommunicatorSet()) {
-		throw std::runtime_error ("There is no communicator set for the patch.");
 	}
 
 	// Check partitioning status
