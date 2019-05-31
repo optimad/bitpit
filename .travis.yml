@@ -79,6 +79,31 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
+            - gfortran-8
+            - cmake
+            - libblas-dev
+            - liblapack-dev
+            - liblapacke-dev
+            - openmpi-bin
+            - libopenmpi-dev
+            - libpetsc3.6
+            - libpetsc3.6.2-dev
+
+      env:
+        - C_COMPILER="gcc-8"
+        - CXX_COMPILER="g++-8"
+        - Fortran_COMPILER="gfortran-8"
+        - BUILD_TYPE="Release" ENABLE_MPI="True"
+
+    - if: branch != coverity
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.9
           packages:
             - clang-3.9
