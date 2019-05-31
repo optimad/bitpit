@@ -167,6 +167,8 @@ jobs:
             - liblapacke-dev
             - openmpi-bin
             - libopenmpi-dev
+            - libpetsc3.6
+            - libpetsc3.6.2-dev
 
       env:
         - C_COMPILER="clang"
