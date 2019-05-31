@@ -34,7 +34,7 @@
 #   include <mpi.h>
 #endif
 
-#include <lapacke.h>
+#include "bitpit_private_lapacke.hpp"
 #include "bitpit_voloctree.hpp"
 
 #include "pod.hpp"
