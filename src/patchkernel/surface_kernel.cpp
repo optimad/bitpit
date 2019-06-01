@@ -32,7 +32,7 @@
 #endif
 
 #if BITPIT_ENABLE_MPI==1
-#include <bitpit_communications.hpp>
+#include "bitpit_communications.hpp"
 #endif
 
 #include "surface_kernel.hpp"

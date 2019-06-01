@@ -29,7 +29,7 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <bitpit_IO.hpp>
+#include "bitpit_IO.hpp"
 
 namespace bitpit {
 
