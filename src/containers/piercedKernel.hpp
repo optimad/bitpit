@@ -32,7 +32,7 @@
 #include <type_traits>
 #include <vector>
 
-#include <bitpit_common.hpp>
+#include "bitpit_common.hpp"
 
 #include "piercedSync.hpp"
 #include "piercedKernelIterator.hpp"
