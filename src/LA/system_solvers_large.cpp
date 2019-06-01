@@ -26,7 +26,7 @@
 #include <string>
 #include <unordered_set>
 
-#include <bitpit_IO.hpp>
+#include "bitpit_IO.hpp"
 
 #include "system_solvers_large.hpp"
 
