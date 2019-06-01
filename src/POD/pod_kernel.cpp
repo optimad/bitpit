@@ -33,7 +33,7 @@
 #endif
 
 #include "bitpit_private_lapacke.hpp"
-#include <bitpit_voloctree.hpp>
+#include "bitpit_voloctree.hpp"
 
 #include "pod_kernel.hpp"
 
