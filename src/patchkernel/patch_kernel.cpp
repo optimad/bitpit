@@ -1213,11 +1213,8 @@ void PatchKernel::setVertexIdAssigned(long id)
 */
 PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id)
 {
-	if (id < 0) {
-		id = generateVertexId();
-	}
-
 	Vertex vertex = source;
+	vertex.setId(id);
 
 	return addVertex(std::move(vertex), id);
 }
@@ -1263,6 +1260,8 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 
 	if (id < 0) {
 		id = generateVertexId();
+	} else {
+		setVertexIdAssigned(id);
 	}
 
 	// Add the vertex
