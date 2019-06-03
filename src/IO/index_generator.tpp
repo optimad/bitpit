@@ -135,6 +135,11 @@ bool IndexGenerator<id_t>::isAssigned(id_type id)
 template<typename id_t>
 void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id)
 {
+    // Check if the id has already been assigned
+    if (isAssigned(id)) {
+        throw std::runtime_error("Requested id has already been assigned.");
+    }
+
     // If the id is past the highest assigned id we need to trash all the ids
     // from the highest assigned to this one (the generator only handles
     // contiguous ids), otherwise look for the id in the trash and, if found,
