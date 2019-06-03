@@ -3106,6 +3106,20 @@ long PatchKernel::generateInterfaceId()
 }
 
 /*!
+	Mark the specified interface id as assigned.
+
+	\param id is the id
+*/
+void PatchKernel::setInterfaceIdAssigned(long id)
+{
+	if (!isExpert()) {
+		return;
+	}
+
+	m_interfaceIdGenerator.setAssigned(id);
+}
+
+/*!
 	Adds the specified interface to the patch.
 
 	\param source is the interface that will be added
