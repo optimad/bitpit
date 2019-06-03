@@ -1802,6 +1802,20 @@ long PatchKernel::generateCellId()
 }
 
 /*!
+	Mark the specified cell id as assigned.
+
+	\param id is the id
+*/
+void PatchKernel::setCellIdAssigned(long id)
+{
+	if (!isExpert()) {
+		return;
+	}
+
+	m_cellIdGenerator.setAssigned(id);
+}
+
+/*!
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added

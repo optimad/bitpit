@@ -367,6 +367,7 @@ public:
 	const Cell &getFirstGhost() const;
 #endif
 	long generateCellId();
+	void setCellIdAssigned(long id);
 	CellIterator addCell(const Cell &source, long id = Element::NULL_ID);
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, long id = Element::NULL_ID);
