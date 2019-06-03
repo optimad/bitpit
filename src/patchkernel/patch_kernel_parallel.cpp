@@ -327,11 +327,8 @@ const Cell & PatchKernel::getFirstGhost() const
 */
 PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int rank, long id)
 {
-	if (id < 0) {
-		id = generateCellId();
-	}
-
 	Cell cell = source;
+	cell.setId(id);
 
 	return addCell(std::move(cell), rank, id);
 }
@@ -432,6 +429,8 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 
 	if (id < 0) {
 		id = generateCellId();
+	} else {
+		setCellIdAssigned(id);
 	}
 
 	if (Cell::getDimension(type) > getDimension()) {
