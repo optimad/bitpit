@@ -3128,11 +3128,8 @@ void PatchKernel::setInterfaceIdAssigned(long id)
 */
 PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source, long id)
 {
-	if (id < 0) {
-		id = generateInterfaceId();
-	}
-
 	Interface interface = source;
+	interface.setId(id);
 
 	return addInterface(std::move(interface), id);
 }
@@ -3222,6 +3219,8 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 
 	if (id < 0) {
 		id = generateInterfaceId();
+	} else {
+		setInterfaceIdAssigned(id);
 	}
 
 	if (Interface::getDimension(type) > (getDimension() - 1)) {
