@@ -1189,6 +1189,20 @@ long PatchKernel::generateVertexId()
 }
 
 /*!
+	Mark the specified vertex id as assigned.
+
+	\param id is the id
+*/
+void PatchKernel::setVertexIdAssigned(long id)
+{
+	if (!isExpert()) {
+		return;
+	}
+
+	m_vertexIdGenerator.setAssigned(id);
+}
+
+/*!
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
