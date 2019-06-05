@@ -1902,8 +1902,9 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
 
         long localVertexId;
         if (ghostVerticesTree.exist(&vertex, localVertexId) < 0) {
-            localVertexId = generateVertexId();
-            addVertex(std::move(vertex), localVertexId);
+            vertex.setId(Vertex::NULL_ID);
+            VertexIterator vertexIterator = addVertex(std::move(vertex));
+            localVertexId = vertexIterator.getId();
         }
 
         vertexMap.insert({{vertexId, localVertexId}});
