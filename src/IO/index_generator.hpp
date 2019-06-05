@@ -29,8 +29,10 @@
 #include <deque>
 #include <iostream>
 #include <limits>
+#include <unordered_set>
 
 #include "bitpit_common.hpp"
+#include "bitpit_containers.hpp"
 
 namespace bitpit {
 
@@ -38,6 +40,7 @@ template<typename id_t = long>
 class IndexGenerator {
 
 static_assert(std::is_integral<id_t>::value, "Index has to be an integer!");
+static_assert(std::numeric_limits<id_t>::is_signed, "Index has to be signed!");
 
 public:
     typedef id_t id_type;
@@ -63,7 +66,10 @@ private:
     id_type m_latest;
     id_type m_lowest;
     id_type m_highest;
-    std::deque<id_type> m_trash;
+    PiercedKernel<id_type> m_trash;
+
+    void eraseFromTrash(id_type id);
+    void pushToTrash(id_type id);
 
     int getBinaryArchiveVersion() const;
 

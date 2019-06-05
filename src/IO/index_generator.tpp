@@ -67,8 +67,8 @@ typename IndexGenerator<id_t>::id_type IndexGenerator<id_t>::generate()
             m_latest = m_highest;
         }
     } else {
-        m_latest = m_trash.front();
-        m_trash.pop_front();
+        m_latest = *(m_trash.begin());
+        eraseFromTrash(m_latest);
     }
 
     return m_latest;
@@ -120,10 +120,8 @@ bool IndexGenerator<id_t>::isAssigned(id_type id)
     }
 
     // The id is assigned only if is not in the trash
-    for (id_type trashedId : m_trash) {
-        if (trashedId == id) {
-            return false;
-        }
+    if (m_trash.contains(id)) {
+        return false;
     }
 
     return true;
@@ -142,32 +140,24 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
     // contiguous ids), otherwise look for the id in the trash and, if found,
     // recycle it (if the id is not in the trash, this means it was already
     // an assigned id).
-    if (id > m_highest) {
-        for (id_type wasteId = std::max(static_cast<id_t>(0), m_highest + 1); wasteId < id; ++wasteId) {
+    if (m_highest == NULL_ID && m_lowest == NULL_ID) {
+        m_lowest  = id;
+        m_highest = id;
+    } else if (id > m_highest) {
+        for (id_type wasteId = m_highest + 1; wasteId < id; ++wasteId) {
             trash(wasteId);
         }
 
         m_highest = id;
-        if (m_lowest == NULL_ID) {
-            m_lowest = m_highest;
-        }
-    } if (id < m_lowest) {
-        for (id_type wasteId = id + 1; wasteId < std::max(static_cast<id_t>(0), m_lowest); ++wasteId) {
+    } else if (id < m_lowest) {
+        for (id_type wasteId = id + 1; wasteId < m_lowest; ++wasteId) {
             trash(wasteId);
         }
 
         m_lowest = id;
-        if (m_highest == NULL_ID) {
-            m_highest = m_lowest;
-        }
     } else {
-        for (auto trashItr = m_trash.begin(); trashItr != m_trash.end(); ++trashItr) {
-            id_type trashedId = *trashItr;
-            if (trashedId == id) {
-                m_trash.erase(trashItr);
-                break;
-            }
-        }
+        assert(m_trash.contains(id));
+        eraseFromTrash(id);
     }
 
     // This is the latest assigned id
@@ -184,7 +174,7 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
 template<typename id_t>
 void IndexGenerator<id_t>::trash(typename IndexGenerator<id_t>::id_type id)
 {
-    m_trash.push_back(id);
+    m_trash.fillAppend(id);
 
     // We only keep track of the latest assigned id, if we trash that id we
     // have no information of the previous assigned id.
@@ -202,7 +192,40 @@ void IndexGenerator<id_t>::reset()
     m_latest  = NULL_ID;
     m_lowest  = NULL_ID;
     m_highest = NULL_ID;
+
     m_trash.clear();
+}
+
+/*!
+    Add the specified index to the trash.
+
+    \param id is the id to be added
+*/
+template<typename id_t>
+void IndexGenerator<id_t>::pushToTrash(id_type id)
+{
+    m_trash.fillAppend(id);
+}
+
+/*!
+    Squeeze the trash to keep the unused size in the trash limited.
+
+    \param id is the id to be erased
+*/
+template<typename id_t>
+void IndexGenerator<id_t>::eraseFromTrash(id_type id)
+{
+    // Erase the index
+    m_trash.erase(id);
+
+    // Squeeze the trash to keep the unused size in the trash limited.
+    std::size_t trashCapacity = m_trash.capacity();
+    if (trashCapacity > 1024) {
+        std::size_t trashSize = m_trash.size();
+        if (trashCapacity > 1.75 * trashSize) {
+            m_trash.squeeze();
+        }
+    }
 }
 
 /*!
@@ -258,9 +281,13 @@ void IndexGenerator<id_t>::restore(std::istream &stream)
     size_t nTrashedIds;
     utils::binary::read(stream, nTrashedIds);
 
-    m_trash.resize(nTrashedIds);
+    PiercedKernel<id_type>().swap(m_trash);
+    m_trash.reserve(nTrashedIds);
+
     for (size_t i = 0; i < nTrashedIds; ++i) {
-        utils::binary::read(stream, m_trash[i]);
+        id_type id;
+        utils::binary::read(stream, id);
+        m_trash.fillAppend(id);
     }
 }
 
