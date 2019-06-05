@@ -61,6 +61,7 @@ public:
 
 private:
     id_type m_latest;
+    id_type m_lowest;
     id_type m_highest;
     std::deque<id_type> m_trash;
 

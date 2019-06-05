@@ -35,7 +35,7 @@ const typename IndexGenerator<id_t>::id_type IndexGenerator<id_t>::NULL_ID = std
 */
 template<typename id_t>
 IndexGenerator<id_t>::IndexGenerator()
-    : m_latest(NULL_ID), m_highest(NULL_ID)
+    : m_latest(NULL_ID), m_lowest(NULL_ID), m_highest(NULL_ID)
 {
 
 }
@@ -54,13 +54,18 @@ typename IndexGenerator<id_t>::id_type IndexGenerator<id_t>::generate()
     // If the trash is empty generate a new id otherwise recycle the first id
     // in the trash.
     if (m_trash.empty()) {
-        if (m_highest == NULL_ID) {
+        if (m_lowest == NULL_ID) {
+            m_lowest  = 0;
             m_highest = 0;
+            m_latest = m_lowest;
+        } else if (m_lowest > 0) {
+            --m_lowest;
+            m_latest = m_lowest;
         } else {
             assert(m_highest < std::numeric_limits<id_type>::max());
             ++m_highest;
+            m_latest = m_highest;
         }
-        m_latest = m_highest;
     } else {
         m_latest = m_trash.front();
         m_trash.pop_front();
@@ -109,6 +114,11 @@ bool IndexGenerator<id_t>::isAssigned(id_type id)
         return false;
     }
 
+    // Ids before the lowest one are not assigned
+    if (id < m_lowest) {
+        return false;
+    }
+
     // The id is assigned only if is not in the trash
     for (id_type trashedId : m_trash) {
         if (trashedId == id) {
@@ -138,6 +148,18 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
         }
 
         m_highest = id;
+        if (m_lowest == NULL_ID) {
+            m_lowest = m_highest;
+        }
+    } if (id < m_lowest) {
+        for (id_type wasteId = id + 1; wasteId < std::max(static_cast<id_t>(0), m_lowest); ++wasteId) {
+            trash(wasteId);
+        }
+
+        m_lowest = id;
+        if (m_highest == NULL_ID) {
+            m_highest = m_lowest;
+        }
     } else {
         for (auto trashItr = m_trash.begin(); trashItr != m_trash.end(); ++trashItr) {
             id_type trashedId = *trashItr;
@@ -178,6 +200,7 @@ template<typename id_t>
 void IndexGenerator<id_t>::reset()
 {
     m_latest  = NULL_ID;
+    m_lowest  = NULL_ID;
     m_highest = NULL_ID;
     m_trash.clear();
 }
@@ -203,6 +226,7 @@ void IndexGenerator<id_t>::dump(std::ostream &stream) const
 {
     utils::binary::write(stream, getBinaryArchiveVersion());
     utils::binary::write(stream, m_latest);
+    utils::binary::write(stream, m_lowest);
     utils::binary::write(stream, m_highest);
 
     utils::binary::write(stream, m_trash.size());
@@ -228,6 +252,7 @@ void IndexGenerator<id_t>::restore(std::istream &stream)
 
     // Generator data
     utils::binary::read(stream, m_latest);
+    utils::binary::read(stream, m_lowest);
     utils::binary::read(stream, m_highest);
 
     size_t nTrashedIds;
