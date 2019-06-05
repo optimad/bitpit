@@ -428,9 +428,9 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	}
 
 	if (id < 0) {
-		id = generateCellId();
+		id = m_cellIdGenerator.generate();
 	} else {
-		setCellIdAssigned(id);
+		m_cellIdGenerator.setAssigned(id);
 	}
 
 	if (Cell::getDimension(type) > getDimension()) {

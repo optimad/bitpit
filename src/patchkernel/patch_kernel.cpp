@@ -1759,34 +1759,6 @@ PatchKernel::CellConstIterator PatchKernel::internalConstEnd() const
 }
 
 /*!
-	Generates a new unique id for the cells.
-
-	\result A new unique id for the cells.
-*/
-long PatchKernel::generateCellId()
-{
-	if (!isExpert()) {
-		return Cell::NULL_ID;
-	}
-
-	return m_cellIdGenerator.generate();
-}
-
-/*!
-	Mark the specified cell id as assigned.
-
-	\param id is the id
-*/
-void PatchKernel::setCellIdAssigned(long id)
-{
-	if (!isExpert()) {
-		return;
-	}
-
-	m_cellIdGenerator.setAssigned(id);
-}
-
-/*!
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added
@@ -1894,9 +1866,9 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	}
 
 	if (id < 0) {
-		id = generateCellId();
+		id = m_cellIdGenerator.generate();
 	} else {
-		setCellIdAssigned(id);
+		m_cellIdGenerator.setAssigned(id);
 	}
 
 	if (Cell::getDimension(type) > getDimension()) {
