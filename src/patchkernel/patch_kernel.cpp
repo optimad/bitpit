@@ -3034,34 +3034,6 @@ PatchKernel::InterfaceConstIterator PatchKernel::interfaceConstEnd() const
 }
 
 /*!
- * Generates a new unique id for the interfaces.
- *
- * \result A new unique id for the interfaces.
- */
-long PatchKernel::generateInterfaceId()
-{
-	if (!isExpert()) {
-		return Interface::NULL_ID;
-	}
-
-	return m_interfaceIdGenerator.generate();
-}
-
-/*!
-	Mark the specified interface id as assigned.
-
-	\param id is the id
-*/
-void PatchKernel::setInterfaceIdAssigned(long id)
-{
-	if (!isExpert()) {
-		return;
-	}
-
-	m_interfaceIdGenerator.setAssigned(id);
-}
-
-/*!
 	Adds the specified interface to the patch.
 
 	\param source is the interface that will be added
@@ -3162,9 +3134,9 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 	}
 
 	if (id < 0) {
-		id = generateInterfaceId();
+		id = m_interfaceIdGenerator.generate();
 	} else {
-		setInterfaceIdAssigned(id);
+		m_interfaceIdGenerator.setAssigned(id);
 	}
 
 	if (Interface::getDimension(type) > (getDimension() - 1)) {

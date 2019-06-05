@@ -439,8 +439,6 @@ public:
 	Interface &getInterface(long id);
 	const Interface &getInterface(long id) const;
 	virtual ElementType getInterfaceType(long id) const;
-	long generateInterfaceId();
-	void setInterfaceIdAssigned(long id);
 	InterfaceIterator addInterface(const Interface &source, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(Interface &&source, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(ElementType type, long id = Element::NULL_ID);
