@@ -1901,7 +1901,15 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
 
         long localVertexId;
         if (ghostVerticesTree.exist(&vertex, localVertexId) < 0) {
-            vertex.setId(Vertex::NULL_ID);
+            // Add the vertex
+            //
+            // If the id of the received vertex is already assigned, let the
+            // patch generate a new id. Otherwise, keep the id of the received
+            // vertex.
+            if (m_vertexIdGenerator.isAssigned(vertexId)) {
+                vertex.setId(Vertex::NULL_ID);
+            }
+
             VertexIterator vertexIterator = addVertex(std::move(vertex));
             localVertexId = vertexIterator.getId();
         }
@@ -1981,7 +1989,14 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
         // properly connected to the received cells
         if (cellId < 0) {
             // Add cell
-            cell.setId(Cell::NULL_ID);
+            //
+            // If the id of the received cell is already assigned, let the
+            // patch generate a new id. Otherwise, keep the id of the received
+            // cell.
+            if (m_cellIdGenerator.isAssigned(cellOriginalId)){
+                cell.setId(Cell::NULL_ID);
+            }
+
             CellIterator cellIterator = addCell(std::move(cell), cellOwner);
             cellId = cellIterator.getId();
             addedCells.push_back(cellId);

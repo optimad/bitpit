@@ -430,28 +430,28 @@ if (mesh.getRank() == 0) {
 }
 
 // ========================================================================== //
-// RANK#2 SENDING CELLS {0,1} TO RANK #1                                      //
+// RANK#2 SENDING CELLS {30,31} TO RANK #1                                      //
 // ========================================================================== //
 {
-    vector<long>                        cell_list{0,1};
+    vector<long>                        cell_list{30,31};
     COM_step(mesh, 2, 1, cell_list, 3);
     log::cout() << endl;
 }
 
 // ========================================================================== //
-// RANK#1 SENDING CELLS {3,4,5} TO RANK #2                                    //
+// RANK#1 SENDING CELLS {22,23,24} TO RANK #2                                    //
 // ========================================================================== //
 {
-    vector<long>                        cell_list{3,4,5};
+    vector<long>                        cell_list{22,23,24};
     COM_step(mesh, 1, 2, cell_list, 4);
     log::cout() << endl;
 }
 
 // ========================================================================== //
-// RANK#1 SENDING CELLS {0,1,2} TO RANK #0                                    //
+// RANK#1 SENDING CELLS {7,8,9} TO RANK #0                                    //
 // ========================================================================== //
 {
-    vector<long>                        cell_list{0,1,2};
+    vector<long>                        cell_list{7,8,9};
     COM_step(mesh, 1, 0, cell_list, 5);
     log::cout() << endl;
 }
