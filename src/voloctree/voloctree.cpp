@@ -1597,26 +1597,21 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 		for (int k = 0; k < nCellVertices; ++k) {
 			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
 			if (stitchInfo.count(vertexTreeMorton) == 0) {
-				// Id that will be assigned to the vertex
-				long vertexId;
-				if (!restoreStream) {
-					vertexId = generateVertexId();
-				} else {
-					utils::binary::read(*restoreStream, vertexId);
-				}
-
 				// Vertex coordinates
 				std::array<double, 3> nodeCoords = m_tree->getNode(octant, k);
 
 				// Create the vertex
+				long vertexId;
 				if (!restoreStream) {
-					addVertex(std::move(nodeCoords), vertexId);
+					VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
+					vertexId = vertexIterator.getId();
 				} else {
+					utils::binary::read(*restoreStream, vertexId);
+
 					VertexIterator vertexIterator = m_vertices.find(vertexId);
 					if (vertexIterator == m_vertices.end()) {
 						throw std::runtime_error("");
 					}
-
 
 					Vertex &vertex = *vertexIterator;
 					vertex.initialize(vertexId, std::move(nodeCoords));
