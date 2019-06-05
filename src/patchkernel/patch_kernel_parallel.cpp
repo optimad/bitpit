@@ -1981,18 +1981,17 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
         // existing cell. This ensure that the received cell will be
         // properly connected to the received cells
         if (cellId < 0) {
-            // Generate the id of the cell
-            cellId = generateCellId();
+            // Add cell
+            cell.setId(Cell::NULL_ID);
+            CellIterator cellIterator = addCell(std::move(cell), cellOwner);
+            cellId = cellIterator.getId();
+            addedCells.push_back(cellId);
 
             // Reset the interfaces of the cell, they will be recreated later
             if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-                cell.resetInterfaces();
+                cellIterator->resetInterfaces();
                 updateInterfacesCells.push_back(cellId);
             }
-
-            // Add cell
-            addCell(std::move(cell), cellOwner, cellId);
-            addedCells.push_back(cellId);
 
             // Update adaption info
             adaptionInfo.current.push_back(cellId);
