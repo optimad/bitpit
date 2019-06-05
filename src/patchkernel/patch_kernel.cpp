@@ -1175,34 +1175,6 @@ PatchKernel::VertexConstIterator PatchKernel::vertexConstEnd() const
 }
 
 /*!
-	Generates a new unique id for the vertices.
-
-	\result A new unique id for the vertices.
-*/
-long PatchKernel::generateVertexId()
-{
-	if (!isExpert()) {
-		return Vertex::NULL_ID;
-	}
-
-	return m_vertexIdGenerator.generate();
-}
-
-/*!
-	Mark the specified vertex id as assigned.
-
-	\param id is the id
-*/
-void PatchKernel::setVertexIdAssigned(long id)
-{
-	if (!isExpert()) {
-		return;
-	}
-
-	m_vertexIdGenerator.setAssigned(id);
-}
-
-/*!
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
@@ -1259,9 +1231,9 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 	}
 
 	if (id < 0) {
-		id = generateVertexId();
+		id = m_vertexIdGenerator.generate();
 	} else {
-		setVertexIdAssigned(id);
+		m_vertexIdGenerator.setAssigned(id);
 	}
 
 	// Add the vertex

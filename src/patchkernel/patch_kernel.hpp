@@ -328,8 +328,6 @@ public:
 	Vertex &getVertex(long id);
 	const Vertex & getVertex(long id) const;
 	const std::array<double, 3> & getVertexCoords(long id) const;
-	long generateVertexId();
-	void setVertexIdAssigned(long id);
 	VertexIterator addVertex(const Vertex &source, long id = Vertex::NULL_ID);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
 	VertexIterator addVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
