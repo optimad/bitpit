@@ -1996,7 +1996,7 @@ adaption::Info PatchKernel::sendCells_receiver(int sendRank)
             adaptionInfo.current.push_back(cellId);
         } else {
             // Check if the existing cells needs to become an internal cell
-            Cell &localCell = m_cells[cellId];
+            const Cell &localCell = m_cells[cellId];
             if (isInterior && !localCell.isInterior()) {
                 moveGhost2Internal(cellId);
             }
