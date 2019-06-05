@@ -1640,14 +1640,6 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 	for (size_t k = 0; k < octantInfoListSize; ++k) {
 		const OctantInfo &octantInfo = octantInfoList[k];
 
-		// Id that will be assigned to the cell
-		long cellId;
-		if (!restoreStream) {
-			cellId = generateCellId();
-		} else {
-			utils::binary::read(*restoreStream, cellId);
-		}
-
 		// Octant connectivity
 		Octant *octant = getOctantPointer(octantInfo);
 
@@ -1670,19 +1662,23 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 #endif
 
 		// Add cell
+		long cellId;
+		if (!restoreStream) {
 #if BITPIT_ENABLE_MPI==1
-		if (!restoreStream) {
-			addCell(m_cellTypeInfo->type, std::move(cellConnect), rank, cellId);
-		} else {
-			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), rank, cellId);
-		}
+			CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect), rank);
 #else
-		if (!restoreStream) {
-			addCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
-		} else {
-			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
-		}
+			CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect));
 #endif
+			cellId = cellIterator.getId();
+		} else {
+			utils::binary::read(*restoreStream, cellId);
+
+#if BITPIT_ENABLE_MPI==1
+			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), rank, cellId);
+#else
+			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
+#endif
+		}
 
 		// Create patch-tree associations
 		if (octantInfo.internal) {
