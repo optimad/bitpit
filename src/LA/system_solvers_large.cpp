@@ -801,6 +801,22 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix)
     PetscViewerFileSetName(rhsViewer, filePathStream.str().c_str());
     VecView(m_rhs, rhsViewer);
     PetscViewerDestroy(&rhsViewer);
+
+    // Solution
+    PetscViewer solutionViewer;
+#if BITPIT_ENABLE_MPI==1
+    PetscViewerCreate(m_communicator, &solutionViewer);
+#else
+    PetscViewerCreate(PETSC_COMM_SELF, &solutionViewer);
+#endif
+    PetscViewerSetType(solutionViewer, PETSCVIEWERASCII);
+    PetscViewerPushFormat(solutionViewer, PETSC_VIEWER_DEFAULT);
+
+    filePathStream.str(std::string());
+    filePathStream << directory << "/" << prefix << "solution.txt";
+    PetscViewerFileSetName(solutionViewer, filePathStream.str().c_str());
+    VecView(m_solution, solutionViewer);
+    PetscViewerDestroy(&solutionViewer);
 }
 
 /*!
