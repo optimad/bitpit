@@ -33,5 +33,6 @@
 
 #include "communications.hpp"
 #include "communications_buffers.hpp"
+#include "communications_tags.hpp"
 
 #endif
