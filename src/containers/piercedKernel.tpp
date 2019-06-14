@@ -336,7 +336,7 @@ typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::sortBefore(id_t re
         referencePos++;
     }
 
-    // Sorte the
+    // Sort the container
     SortAction syncAction = _sort(m_begin_pos, referencePos);
 
     // Update the storage
