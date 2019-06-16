@@ -89,7 +89,7 @@ public:
     /*!
     * Iterator category
     */
-    typedef std::forward_iterator_tag iterator_category;
+    typedef std::bidirectional_iterator_tag iterator_category;
 
     /*!
     * Value type
@@ -147,6 +147,9 @@ public:
     // Operators
     PiercedStorageIterator& operator++();
     PiercedStorageIterator operator++(int);
+
+    PiercedStorageIterator& operator--();
+    PiercedStorageIterator operator--(int);
 
     __PSI_REFERENCE__ operator*() const;
     __PSI_POINTER__ operator->() const;

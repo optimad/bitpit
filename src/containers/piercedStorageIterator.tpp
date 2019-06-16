@@ -113,6 +113,10 @@ __PSI_REFERENCE__ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::getValue
 
 /**
 * Pre-increment operator.
+*
+* Increment operator does not check whether it crosses the end() of the
+* container. Thus, calling this function if the iterator is already at
+* the end of the container results in undefined behavior.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageIterator<value_t, id_t, value_no_cv_t> & PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator++()
@@ -124,6 +128,10 @@ PiercedStorageIterator<value_t, id_t, value_no_cv_t> & PiercedStorageIterator<va
 
 /**
 * Post-increment operator.
+*
+* Increment operator does not check whether it crosses the end() of the
+* container. Thus, calling this function if the iterator is already at
+* the end of the container results in undefined behavior.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 PiercedStorageIterator<value_t, id_t, value_no_cv_t> PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator++(int)
@@ -132,6 +140,39 @@ PiercedStorageIterator<value_t, id_t, value_no_cv_t> PiercedStorageIterator<valu
     PiercedStorageIterator tmp(m_storage, rawIndex);
 
     ++(*this);
+
+    return tmp;
+}
+
+/**
+* Pre-decrement operator.
+*
+* Decrement operator does not check whether it crosses the begin() of the
+* container. Thus, calling this function if the iterator is already at
+* the begin of the container results in undefined behavior.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+PiercedStorageIterator<value_t, id_t, value_no_cv_t> & PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator--()
+{
+    PiercedKernelIterator<id_t>::operator--();
+
+    return *this;
+}
+
+/**
+* Post-decrement operator.
+*
+* Decrement operator does not check whether it crosses the begin() of the
+* container. Thus, calling this function if the iterator is already at
+* the begin of the container results in undefined behavior.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+PiercedStorageIterator<value_t, id_t, value_no_cv_t> PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator--(int)
+{
+    std::size_t rawIndex = getRawIndex();
+    PiercedStorageIterator tmp(m_storage, rawIndex);
+
+    --(*this);
 
     return tmp;
 }
