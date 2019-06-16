@@ -654,7 +654,7 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const 
 	Partitions the patch among the processors. Each cell will be assigned
 	to a specific processor according to the specified input.
 
-	\param cellRanks are the ranks of the cells after the partitioning.
+	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
 	\param squeezeStorage if set to true the vector that store patch information
