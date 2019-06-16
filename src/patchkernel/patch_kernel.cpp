@@ -867,7 +867,7 @@ void PatchKernel::write(VTKWriteMode mode)
 	}
 
 	// Set the dimensinos of the mesh
-	PiercedStorage<long, long> vertexWriteFlag(1, &m_vertices);
+	PiercedStorage<bool, long> vertexWriteFlag(1, &m_vertices);
 	vertexWriteFlag.fill(false);
 
 	bool vtkFaceStreamNeeded = false;
