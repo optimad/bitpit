@@ -1406,31 +1406,40 @@ long PatchKernel::countOrphanVertices() const
 */
 std::vector<long> PatchKernel::findOrphanVertices()
 {
-	// Add all the vertices to the list
-	std::unordered_set<long> vertexSet;
-	for (const Vertex &vertex : m_vertices) {
-		vertexSet.insert(vertex.getId());
-	}
-
-	// Remove used vertices
+	// Detect used vertices
+	PiercedStorage<bool, long> vertexUsedFlag(1, &m_vertices);
+	vertexUsedFlag.fill(false);
 	for (const Cell &cell : m_cells) {
 		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 		int nCellVertices = cellVertexIds.size();
-		for (int i = 0; i < nCellVertices; ++i) {
-			vertexSet.erase(cellVertexIds[i]);
+		for (int j = 0; j < nCellVertices; ++j) {
+			long vertexId = cellVertexIds[j];
+			vertexUsedFlag[vertexId] = true;
 		}
 	}
 
-	// Build a list
-	std::vector<long> vertexList;
-	vertexList.reserve(vertexSet.size());
-	for (long id : vertexSet) {
-		vertexList.emplace_back();
-		long &lastId = vertexList.back();
-		lastId = id;
+	// Count the orphan vertices
+	std::size_t nOrhpanVertices = 0;
+	for (auto itr = m_vertices.begin(); itr != m_vertices.end(); ++itr) {
+		std::size_t vertexRawIndex = itr.getRawIndex();
+		if (!vertexUsedFlag.rawAt(vertexRawIndex)) {
+			++nOrhpanVertices;
+		}
 	}
 
-	return vertexList;
+	// Build a list of unused vertices
+	std::vector<long> orhpanVertices(nOrhpanVertices);
+
+	std::size_t orphanVertexIndex = 0;
+	for (auto itr = m_vertices.begin(); itr != m_vertices.end(); ++itr) {
+		std::size_t vertexRawIndex = itr.getRawIndex();
+		if (!vertexUsedFlag.rawAt(vertexRawIndex)) {
+			orhpanVertices[orphanVertexIndex] = itr.getId();
+			++orphanVertexIndex;
+		}
+	}
+
+	return orhpanVertices;
 }
 
 /*!
