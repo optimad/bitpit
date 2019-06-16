@@ -2155,9 +2155,35 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 		return false;
 	}
 
+	// Deleteing the last internal cell requires some additional work. If the
+	// ids of cells to be deleted contains the last internal cell, we delete
+	// that cell ater deleting all other cells. In this way we make sure to
+	// deleting the last internal cells just once (after deleting the last
+	// internal, another cells becomes the last one and  that cells may be
+	// on the deletion list, and on and so forth). The same applies for the
+	// first ghost.
+	bool deleteLastInternal = false;
+	bool deleteFirstGhost   = false;
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		deleteCell(*i, updateNeighs, true);
+		long cellId = *i;
+		if (cellId == m_lastInternalId) {
+			deleteLastInternal = true;
+			continue;
+		} else if (cellId == m_firstGhostId) {
+			deleteFirstGhost = true;
+			continue;
+		}
+
+		deleteCell(cellId, updateNeighs, true);
+	}
+
+	if (deleteLastInternal) {
+		deleteCell(m_lastInternalId, updateNeighs, true);
+	}
+
+	if (deleteFirstGhost) {
+		deleteCell(m_firstGhostId, updateNeighs, true);
 	}
 
 	if (!delayed) {
