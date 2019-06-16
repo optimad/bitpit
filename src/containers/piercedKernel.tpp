@@ -1942,7 +1942,7 @@ void PiercedKernel<id_t>::holesFlush()
     // updated.
     holesSortPending();
 
-    auto hole = m_holes_pending_begin;
+    std::size_t hole = m_holes_pending_begin;
     std::size_t pos = m_end_pos;
     do {
         if (m_holes[hole] >= pos) {
