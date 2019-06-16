@@ -72,7 +72,7 @@ public:
     /*!
     * Iterator category
     */
-    typedef std::forward_iterator_tag iterator_category;
+    typedef std::bidirectional_iterator_tag iterator_category;
 
     /*!
     * Value type
@@ -120,6 +120,9 @@ public:
     // Operators
     PiercedKernelIterator& operator++();
     PiercedKernelIterator operator++(int);
+
+    PiercedKernelIterator& operator--();
+    PiercedKernelIterator operator--(int);
 
     const id_t & operator*() const;
     const id_t * operator->() const;
