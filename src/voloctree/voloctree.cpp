@@ -1582,8 +1582,8 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 		// Vertices of all other interfaces left of the cell
 		int nCellInterfaces = cell.getInterfaceCount();
 		const long *interfaces = cell.getInterfaces();
-		for (int k = 0; k < nCellInterfaces; ++k) {
-			long interfaceId = interfaces[k];
+		for (int i = 0; i < nCellInterfaces; ++i) {
+			long interfaceId = interfaces[i];
 			if (interfaceId < 0) {
 				continue;
 			}
@@ -1718,8 +1718,8 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 	m_cells.reserve(m_cells.size() + octantInfoListSize);
 
 	std::vector<long> createdCells(octantInfoListSize);
-	for (size_t k = 0; k < octantInfoListSize; ++k) {
-		const OctantInfo &octantInfo = octantInfoList[k];
+	for (size_t i = 0; i < octantInfoListSize; ++i) {
+		const OctantInfo &octantInfo = octantInfoList[i];
 
 		// Octant connectivity
 		Octant *octant = getOctantPointer(octantInfo);
@@ -1771,7 +1771,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 		}
 
 		// Add the cell to the list of created cells
-		createdCells[k] = cellId;
+		createdCells[i] = cellId;
 	}
 
 	// Update first ghost and last internal information
