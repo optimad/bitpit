@@ -60,7 +60,7 @@ int subtest_001(int rank, SurfUnstructured *patch_2D, SurfUnstructured *patch_2D
     }
 
     // Partition the patch
-    std::vector<int> cellRanks;
+    std::unordered_map<long, int> cellRanks;
     if (rank == 0) {
         // Evaluate the baricenter of the patch
         long nCells = patch_2D->getCellCount();
@@ -100,7 +100,7 @@ int subtest_001(int rank, SurfUnstructured *patch_2D, SurfUnstructured *patch_2D
             }
             rank = rank % nProcs;
 
-            cellRanks.push_back(rank);
+            cellRanks[cell.getId()] = rank;
         }
     }
 

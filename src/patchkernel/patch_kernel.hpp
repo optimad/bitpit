@@ -563,18 +563,16 @@ public:
 	bool isPartitioningSupported() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	double evalPartitioningUnbalance();
-	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
-	std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
+	std::vector<adaption::Info> partition(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partition(bool trackPartitioning, bool squeezeStorage = false);
-	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackPartitioning, std::size_t haloSize = 1);
-	std::vector<adaption::Info> partitioningPrepare(const std::vector<int> &cellRanks, bool trackPartitioning);
+	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, std::size_t haloSize = 1);
+	std::vector<adaption::Info> partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning);
 	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, bool trackPartitioning, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partitioningPrepare(bool trackPartitioning);
 	std::vector<adaption::Info> partitioningAlter(bool trackPartitioning = true, bool squeezeStorage = false);
 	void partitioningCleanup();
-
-	adaption::Info sendCells(int sendRank, int recvRank, const std::vector<long> &cellsToSend, bool squeezeStorage = false);
 #endif
 
 protected:
@@ -732,10 +730,9 @@ private:
 
 	std::size_t m_haloSize;
 
-	int m_nPartitioningGlobalExchanges;
-	std::vector<int> m_partitioningGlobalSenders;
-	std::vector<int> m_partitioningGlobalReceivers;
-	std::unordered_map<int, std::vector<long>> m_partitioningLocalSendList;
+	int m_partitioningTag;
+	std::unordered_map<long, int> m_partitioningOutgoings;
+	std::unordered_set<int> m_partitioningGlobalSendRanks;
 
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
@@ -745,10 +742,11 @@ private:
 	void unsetGhostOwner(int id);
 	void clearGhostOwners();
 
-	adaption::Info sendCells_any(int sendRank, int recvRank, const std::vector<long> &cellsToSend);
-	adaption::Info sendCells_sender(int recvRank, const std::vector<long> &cellsToSend);
-	adaption::Info sendCells_receiver(int sendRank);
-	adaption::Info sendCells_notified(int sendRank, int recvRank);
+	std::unordered_map<long, int> _partitioningAlter_getFinalGhostOwners();
+
+	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning);
+	std::vector<adaption::Info> _partitioningAlter_receiveCells(int sendRank, bool trackPartitioning);
+	std::vector<adaption::Info> _partitioningAlter_updateCells(int sendRank, const std::unordered_map<long, int> &finalGhostOwners, bool trackPartitioning);
 
 	void updateGhostExchangeInfo();
 #endif

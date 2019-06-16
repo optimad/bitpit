@@ -297,6 +297,7 @@ void COM_step(
 
 // Local variables
 SurfUnstructured                     envelope(2, 3);
+std::unordered_map<long, int>        cellRanks;
 
 // Counters
 // none
@@ -308,7 +309,13 @@ SurfUnstructured                     envelope(2, 3);
     // Scope variables ------------------------------------------------------ //
     // none
     log::cout() << "rank#" << snd << " send {" << id_list << "} to rank#" << rcv << endl;
-    mesh.sendCells(snd, rcv, id_list);
+    cellRanks.clear();
+    if (mesh.getRank() == snd) {
+        for (long id : id_list) {
+            cellRanks[id] = rcv;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
 
     // Extracting mesh boundaries ------------------------------------------- //
     log::cout() << "(rank #" << mesh.getRank() << ") extracting external envelope" << endl;
@@ -596,6 +603,7 @@ if (mesh.getRank() == 0) {
                                                    44,45,46,47,
                                                    52,53,54,55,
                                                    60,61,62,63};
+    std::unordered_map<long, int>       cellRanks;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
@@ -604,14 +612,26 @@ if (mesh.getRank() == 0) {
 
     log::cout() << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
     t0 = high_resolution_clock::now();
-    mesh.sendCells(0, 1, cell_list1);
+    cellRanks.clear();
+    if (mesh.getRank() == 0) {
+        for (long id : cell_list1) {
+            cellRanks[id] = 1;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     log::cout() << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
-    mesh.sendCells(0, 2, cell_list2);
+    cellRanks.clear();
+    if (mesh.getRank() == 0) {
+        for (long id : cell_list2) {
+            cellRanks[id] = 2;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
@@ -633,6 +653,7 @@ if (mesh.getRank() == 0) {
     // Scope variables ------------------------------------------------------ //
     vector<long>                        cell_list{18,19,20,21,22,23,
                                                   26,27,28,29,30,31};
+    std::unordered_map<long, int>       cellRanks;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
@@ -641,7 +662,13 @@ if (mesh.getRank() == 0) {
 
     log::cout() << "   sending cell: " << cell_list << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
-    mesh.sendCells(0, 2, cell_list);
+    cellRanks.clear();
+    if (mesh.getRank() == 0) {
+        for (long id : cell_list) {
+            cellRanks[id] = 2;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
@@ -794,6 +821,7 @@ if (mesh.getRank() == 0) {
     vector<long>                        cell_list3{60,61,62,
                                                    69,70,71,
                                                    78,79,80};
+    std::unordered_map<long, int>       cellRanks;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
@@ -802,21 +830,39 @@ if (mesh.getRank() == 0) {
 
     log::cout() << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
     t0 = high_resolution_clock::now();
-    mesh.sendCells(0, 1, cell_list1);
+    cellRanks.clear();
+    if (mesh.getRank() == 0) {
+        for (long id : cell_list1) {
+            cellRanks[id] = 1;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     log::cout() << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
-    mesh.sendCells(0, 2, cell_list2);
+    cellRanks.clear();
+    if (mesh.getRank() == 0) {
+        for (long id : cell_list2) {
+            cellRanks[id] = 2;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     log::cout() << "   sending cell: " << cell_list3 << " from 0 to 3" << endl;
     t0 = high_resolution_clock::now();
-    mesh.sendCells(0, 3, cell_list3);
+    cellRanks.clear();
+    if (mesh.getRank() == 0) {
+        for (long id : cell_list3) {
+            cellRanks[id] = 3;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
@@ -839,6 +885,7 @@ if (mesh.getRank() == 0) {
     vector<long>                        cell_list{28,29,30,31,32,33,34,35,
                                                   37,38,39,40,41,42,43,44,
                                                   46,47,48,49,50,51,52,53};
+    std::unordered_map<long, int>       cellRanks;
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
@@ -847,7 +894,13 @@ if (mesh.getRank() == 0) {
 
     log::cout() << "   sending cell: " << cell_list << " from 0 to 3" << endl;
     t0 = high_resolution_clock::now();
-    mesh.sendCells(0, 3, cell_list);
+    cellRanks.clear();
+    if (mesh.getRank() == 0) {
+        for (long id : cell_list) {
+            cellRanks[id] = 3;
+        }
+    }
+    mesh.partition(cellRanks, true, true);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;

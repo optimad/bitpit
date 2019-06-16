@@ -137,7 +137,7 @@ int subtest_001(int rank)
     // Evaluate cell ranks
     log::cout() << "Evaluating cell ranks..." << std::endl;
 
-    std::vector<int> cellRanks;
+    std::unordered_map<long, int> cellRanks;
 
     std::unordered_set<int> rrr;
 
@@ -151,7 +151,7 @@ int subtest_001(int rank)
             int rank = std::floor((double) index / nMaxCellsPerProc);
             ++index;
 
-            cellRanks.push_back(rank);
+            cellRanks[itr.getId()] = rank;
         }
     }
 

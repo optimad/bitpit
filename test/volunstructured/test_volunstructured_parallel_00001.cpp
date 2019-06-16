@@ -98,7 +98,7 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
     patch_2D->buildInterfaces();
 
     // Partition the patch
-    std::vector<int> cellRanks;
+    std::unordered_map<long, int> cellRanks;
     if (rank == 0) {
         // Evaluate the baricenter of the patch
         long nCells = patch_2D->getCellCount();
@@ -138,7 +138,7 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
             }
             rank = rank % nProcs;
 
-            cellRanks.push_back(rank);
+            cellRanks[cell.getId()] = rank;
         }
     }
 
@@ -290,7 +290,10 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
 
     // Serialize the patch
     cellRanks.clear();
-    cellRanks.resize(patch_2D_restored->getInternalCount(), 0);
+    for (const Cell &cell : patch_2D_restored->getCells()) {
+        cellRanks[cell.getId()] = 0;
+    }
+
     patch_2D_restored->partition(cellRanks, true, true);
 
     log::cout() << "Restored serialized cell count:   " << patch_2D_restored->getCellCount() << std::endl;
@@ -472,7 +475,7 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
     patch_3D->buildInterfaces();
 
     // Partition the patch
-    std::vector<int> cellRanks;
+    std::unordered_map<long, int> cellRanks;
     if (rank == 0) {
         // Evaluate the baricenter of the patch
         long nCells = patch_3D->getCellCount();
@@ -512,7 +515,7 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
             }
             rank = rank % nProcs;
 
-            cellRanks.push_back(rank);
+            cellRanks[cell.getId()] = rank;
         }
     }
 
@@ -662,7 +665,10 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
 
     // Serialize the patch
     cellRanks.clear();
-    cellRanks.resize(patch_3D_restored->getInternalCount(), 0);
+    for (const Cell &cell : patch_3D_restored->getCells()) {
+        cellRanks[cell.getId()] = 0;
+    }
+
     patch_3D_restored->partition(cellRanks, true, true);
 
     log::cout() << "Restored serialized cell count:   " << patch_3D_restored->getCellCount() << std::endl;

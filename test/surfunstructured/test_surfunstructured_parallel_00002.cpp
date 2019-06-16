@@ -151,11 +151,12 @@ if (myRank == 0) {
 	// Partitioning ----------------------------------------------------------//
 	log::cout() << "** Mesh partitioning" << endl;
 
-	std::vector<int> cellRanks;
+	std::unordered_map<long, int> cellRanks;
 	if (myRank == 0) {
 		for (const auto &cell : mesh.getCells()) {
+			long cellId = cell.getId();
 			int rank = (mesh.evalCellCentroid(cell.getId())[0] > baricenter[0]) ? 0 : 1;
-			cellRanks.push_back(rank);
+			cellRanks.insert({cellId, rank});
 		}
 	}
 
