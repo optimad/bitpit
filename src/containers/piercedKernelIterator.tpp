@@ -118,6 +118,10 @@ std::size_t PiercedKernelIterator<id_t>::getPos() const noexcept
 
 /**
 * Pre-increment operator.
+*
+* Increment operator does not check whether it crosses the end() of the
+* container. Thus, calling this function if the iterator is already at
+* the end of the container results in undefined behavior.
 */
 template<typename id_t>
 PiercedKernelIterator<id_t> & PiercedKernelIterator<id_t>::operator++()
@@ -146,6 +150,10 @@ PiercedKernelIterator<id_t> & PiercedKernelIterator<id_t>::operator++()
 
 /**
 * Post-increment operator.
+*
+* Increment operator does not check whether it crosses the end() of the
+* container. Thus, calling this function if the iterator is already at
+* the end of the container results in undefined behavior.
 */
 template<typename id_t>
 PiercedKernelIterator<id_t> PiercedKernelIterator<id_t>::operator++(int)
