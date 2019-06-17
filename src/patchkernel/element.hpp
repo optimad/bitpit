@@ -217,6 +217,42 @@ private:
 
 };
 
+class ElementHalfEdge {
+
+public:
+	enum Winding {
+		WINDING_NATURAL =  1,
+		WINDING_REVERSE = -1
+	};
+
+	struct Hasher {
+		std::size_t operator()(const ElementHalfEdge &item) const;
+	};
+
+	Element & getElement() const;
+	int getEdge() const;
+	const ConstProxyVector<long> & getConnect() const;
+
+	Winding getWinding() const;
+	void setWinding(Winding winding);
+
+	bool operator==(const ElementHalfEdge &other) const;
+	bool operator!=(const ElementHalfEdge &other) const;
+
+protected:
+	ElementHalfEdge(Element &element, int edge, Winding winding = WINDING_NATURAL);
+
+private:
+	Element &m_element;
+	int m_edge;
+
+	ConstProxyVector<long> m_connect;
+	std::size_t m_connectBegin;
+
+	Winding m_winding;
+
+};
+
 class ElementHalfFace {
 
 public:
@@ -226,7 +262,7 @@ public:
 	};
 
 	struct Hasher {
-		std::size_t operator()(const ElementHalfFace &ElementHalfFace) const;
+		std::size_t operator()(const ElementHalfFace &item) const;
 	};
 
 	Element & getElement() const;

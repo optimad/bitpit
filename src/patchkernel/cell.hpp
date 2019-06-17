@@ -123,6 +123,18 @@ private:
 
 };
 
+class CellHalfEdge : public ElementHalfEdge {
+
+public:
+	CellHalfEdge(Cell &cell, int edge, Winding winding);
+
+	Cell & getCell() const;
+
+protected:
+	using ElementHalfEdge::getElement;
+
+};
+
 class CellHalfFace : public ElementHalfFace {
 
 public:

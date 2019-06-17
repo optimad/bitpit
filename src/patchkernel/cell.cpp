@@ -880,6 +880,37 @@ unsigned int Cell::getBinarySize() const
 }
 
 /*!
+	\class CellHalfEdge
+	\ingroup patchelements
+
+	\brief The CellHalfEdge class defines cell half-edges.
+
+	CellHalfEdge is the class that defines cell half-edges.
+*/
+
+/*!
+	Constructor.
+
+	\param cell is a reference to the cell the owns the edge
+	\param edge if the local edge of the cell
+	\param winding is the winding order of the vertices
+*/
+CellHalfEdge::CellHalfEdge(Cell &cell, int edge, Winding winding)
+    : ElementHalfEdge(cell, edge, winding)
+{
+}
+
+/*!
+	Get the cell the edge belongs to.
+
+	\result Returns the cell the edge belongs to.
+*/
+Cell & CellHalfEdge::getCell() const
+{
+    return static_cast<Cell &>(getElement());
+}
+
+/*!
 	\class CellHalfFace
 	\ingroup patchelements
 
