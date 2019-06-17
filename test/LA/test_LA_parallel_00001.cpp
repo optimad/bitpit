@@ -34,7 +34,7 @@ using namespace bitpit;
 /*!
 * Subtest 001
 *
-* Testing basic features of a parallel 2D patch.
+* Testing basic features of a system solver.
 *
 * \param rank is the rank of the process
 * \param nProcs is the number of processes
