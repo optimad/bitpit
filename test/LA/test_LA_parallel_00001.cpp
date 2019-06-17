@@ -37,12 +37,22 @@ using namespace bitpit;
 * Testing basic features of a parallel 2D patch.
 *
 * \param rank is the rank of the process
+* \param nProcs is the number of processes
 */
-int subtest_001(int rank)
+int subtest_001(int rank, int nProcs)
 {
-    int nRows = 10;
-    int nCols = 10;
-    int nNZ   = 10;
+    int nRows;
+    int nCols;
+    int nNZ;
+    if (nProcs > 1 && rank == 0) {
+        nRows = 0;
+        nCols = 0;
+        nNZ   = 0;
+    } else {
+        nRows = 10;
+        nCols = 10;
+        nNZ   = 10;
+    }
 
     // Build matrix
     log::cout() << "Building matrix..." << std::endl;
@@ -89,18 +99,22 @@ int subtest_001(int rank)
 
     log::cout() << std::setprecision(16) << std::scientific;
 
-    const double *solution = system.getSolutionRawReadPtr();
-    for (int i = 0; i < nRows; ++i) {
-        log::cout() << "  Solution[" << i << "] = " << solution[i] << std::endl;
+    if (nRows > 0) {
+        const double *solution = system.getSolutionRawReadPtr();
+        for (int i = 0; i < nRows; ++i) {
+            log::cout() << "  Solution[" << i << "] = " << solution[i] << std::endl;
 
-        double expectedSolution = matrix.getRowGlobalOffset() + i + 1;
-        if (!utils::DoubleFloatingEqual()(solution[i], expectedSolution, 10)) {
-            log::cout() << "  Expected solution[" << i << "] = " << expectedSolution << std::endl;
-            log::cout() << "  Error[" << i << "] = " << (expectedSolution - solution[i]) << std::endl;
-            throw std::runtime_error("  The solution of the system doesn't match the expected one.");
+            double expectedSolution = matrix.getRowGlobalOffset() + i + 1;
+            if (!utils::DoubleFloatingEqual()(solution[i], expectedSolution, 10)) {
+                log::cout() << "  Expected solution[" << i << "] = " << expectedSolution << std::endl;
+                log::cout() << "  Error[" << i << "] = " << (expectedSolution - solution[i]) << std::endl;
+                throw std::runtime_error("  The solution of the system doesn't match the expected one.");
+            }
         }
+        system.restoreSolutionRawReadPtr(solution);
+    } else {
+        log::cout() << "  System matrix is empty on this process" << std::endl;
     }
-    system.restoreSolutionRawReadPtr(solution);
 
     return 0;
 }
@@ -126,7 +140,7 @@ int main(int argc, char *argv[])
 
 	int status;
 	try {
-		status = subtest_001(rank);
+		status = subtest_001(rank, nProcs);
 		if (status != 0) {
 			return status;
 		}

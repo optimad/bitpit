@@ -441,21 +441,23 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
     const long maxRowNZ = matrix.getMaxRowNZCount();
 
     // Create the matrix
-    std::vector<PetscInt> rowNZGlobalIds(maxRowNZ);
-    std::vector<PetscScalar> rowNZValues(maxRowNZ);
+    if (maxRowNZ > 0) {
+        std::vector<PetscInt> rowNZGlobalIds(maxRowNZ);
+        std::vector<PetscScalar> rowNZValues(maxRowNZ);
 
-    for (long row = 0; row < nRows; ++row) {
-        ConstProxyVector<long> rowPattern = matrix.getRowPattern(row);
-        ConstProxyVector<double> rowValues = matrix.getRowValues(row);
+        for (long row = 0; row < nRows; ++row) {
+            ConstProxyVector<long> rowPattern = matrix.getRowPattern(row);
+            ConstProxyVector<double> rowValues = matrix.getRowValues(row);
 
-        const int nRowNZ = rowPattern.size();
-        const PetscInt globalRow = m_rowGlobalOffset + row;
-        for (int k = 0; k < nRowNZ; ++k) {
-            rowNZGlobalIds[k] = rowPattern[k];
-            rowNZValues[k] = rowValues[k];
+            const int nRowNZ = rowPattern.size();
+            const PetscInt globalRow = m_rowGlobalOffset + row;
+            for (int k = 0; k < nRowNZ; ++k) {
+                rowNZGlobalIds[k] = rowPattern[k];
+                rowNZValues[k] = rowValues[k];
+            }
+
+            MatSetValues(m_A, 1, &globalRow, nRowNZ, rowNZGlobalIds.data(), rowNZValues.data(), INSERT_VALUES);
         }
-
-        MatSetValues(m_A, 1, &globalRow, nRowNZ, rowNZGlobalIds.data(), rowNZValues.data(), INSERT_VALUES);
     }
 
     // Let petsc build the matrix

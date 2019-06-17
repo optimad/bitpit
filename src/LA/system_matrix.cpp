@@ -626,11 +626,13 @@ std::vector<long> SparseMatrix::extractGhostGlobalCols() const
     const long *globalCols = m_pattern.data();
 
     std::vector<long> ghostGlobalCols;
-    ghostGlobalCols.reserve(m_nNZ);
-    for (long k = 0; k < m_nNZ; ++k) {
-        long globalCol = globalCols[k];
-        if (globalCol >= firstGlobalCol || globalCol < lastGlobalCol) {
-            utils::addToOrderedVector<long>(globalCol, ghostGlobalCols);
+    if (m_nNZ > 0) {
+        ghostGlobalCols.reserve(m_nNZ);
+        for (long k = 0; k < m_nNZ; ++k) {
+            long globalCol = globalCols[k];
+            if (globalCol >= firstGlobalCol || globalCol < lastGlobalCol) {
+                utils::addToOrderedVector<long>(globalCol, ghostGlobalCols);
+            }
         }
     }
 
