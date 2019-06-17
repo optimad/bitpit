@@ -733,8 +733,8 @@ int Element::getFaceVertexCount(int face) const
 
 	case (ElementType::POLYHEDRON):
 	{
-		int facePos = getFaceStreamPosition(face);
 		const long *connectivity = getConnect();
+		int facePos = getFaceStreamPosition(connectivity, face);
 
 		return connectivity[facePos];
 	}
@@ -860,7 +860,7 @@ ConstProxyVector<long> Element::getFaceConnect(int face) const
 	{
 		ElementType faceType = getFaceType(face);
 
-		int facePos          = getFaceStreamPosition(face);
+		int facePos          = getFaceStreamPosition(connectivity, face);
 		int faceConnectSize  = connectivity[facePos];
 		int faceConnectBegin = facePos + 1;
 		if (!ReferenceElementInfo::hasInfo(faceType)) {
@@ -1387,7 +1387,7 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 		long *connectivity = getConnect();
 
 		for (int i = 0; i < nFaces; ++i) {
-			int facePos = getFaceStreamPosition(i);
+			int facePos = getFaceStreamPosition(connectivity, i);
 
 			int beginVertexPos = facePos + 1;
 			int endVertexPos   = facePos + 1 + connectivity[facePos];
@@ -1844,8 +1844,18 @@ void Element::renumberFaceStream(const PiercedStorage<long, long> &map, std::vec
 */
 int Element::getFaceStreamPosition(int face) const
 {
-	const long *connectivity = getConnect();
+	return getFaceStreamPosition(getConnect(), face);
+}
 
+/*!
+	Gets the position of the specified face in the face stream.
+
+	\param connectivity is the the connectivity
+	\param face is the face
+	\result The position of the specified face in the face stream.
+*/
+int Element::getFaceStreamPosition(const long *connectivity,  int face)
+{
 	int position = 1;
 	for (int i = 0; i < face; ++i) {
 		position += 1 + connectivity[position];
