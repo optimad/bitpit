@@ -300,10 +300,10 @@ void SparseMatrix::clear(bool release)
         std::vector<double>().swap(m_values);
     }
 
-    m_nRows    = -1;
-    m_nCols    = -1;
-    m_nNZ      = -1;
-    m_maxRowNZ = -1;
+    m_nRows    =  0;
+    m_nCols    =  0;
+    m_nNZ      =  0;
+    m_maxRowNZ =  0;
     m_lastRow  = -1;
 
 #if BITPIT_ENABLE_MPI==1
