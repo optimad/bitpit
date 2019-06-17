@@ -86,6 +86,8 @@ public:
 	static bool isThreeDimensional(ElementType type);
 
 	static int getFaceStreamPosition(const long *connectivity, int face);
+	static ConstProxyVector<long> getVertexIds(ElementType type, const long *connectivity);
+
 	Element();
 	Element(long id, ElementType type, int connectSize = 0);
 	Element(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);

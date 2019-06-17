@@ -1158,23 +1158,33 @@ int Element::getVertexCount() const
 */
 ConstProxyVector<long> Element::getVertexIds() const
 {
-	switch (m_type) {
+	return getVertexIds(m_type, getConnect());
+}
+
+/*!
+	Gets the list of the vertex ids.
+
+	\param connectivity is the the connectivity,
+	\result The list of the vertex ids.
+*/
+ConstProxyVector<long> Element::getVertexIds(ElementType type, const long *connectivity)
+{
+	switch (type) {
 
 	case (ElementType::POLYGON):
 	{
-		return ConstProxyVector<long>(getConnect() + 1, getVertexCount());
+		return ConstProxyVector<long>(connectivity + 1, countPolygonVertices(connectivity));
 	}
 
 	case (ElementType::POLYHEDRON):
 	{
+		int nFaces = countPolyhedronFaces(connectivity);
+
 		// The list of the vertices has to be sorted, this will make it easy
 		// to extract the connectivity of the face.
-		int nFaces = getFaceCount();
-		const long *connectivity = getConnect();
-
 		std::set<long> vertexIds;
 		for (int i = 0; i < nFaces - 1; ++i) {
-			int facePos = getFaceStreamPosition(i);
+			int facePos = getFaceStreamPosition(connectivity, i);
 
 			int beginVertexPos = facePos + 1;
 			int endVertexPos   = facePos + 1 + connectivity[facePos];
@@ -1188,7 +1198,7 @@ ConstProxyVector<long> Element::getVertexIds() const
 	{
 		assert(m_type != ElementType::UNDEFINED);
 
-		return ConstProxyVector<long>(getConnect(), getVertexCount());
+		return ConstProxyVector<long>(connectivity, ReferenceElementInfo::getInfo(type).nVertices);
 	}
 
 	}
