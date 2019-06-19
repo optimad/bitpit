@@ -104,7 +104,7 @@ bool LevelSetObject::isPrimary( ) const {
  * @param[in] i cell index
  * @return the projection point
  */
-std::array<double,3> LevelSetObject::computeProjectionPoint(const long &i) const{
+std::array<double,3> LevelSetObject::computeProjectionPoint(long i) const{
     double value = getLS(i);
     if(utils::DoubleFloatingEqual()(value,levelSetDefaults::VALUE)){
         return levelSetDefaults::POINT;
@@ -118,7 +118,7 @@ std::array<double,3> LevelSetObject::computeProjectionPoint(const long &i) const
  * @param[in] i cell index
  * @return part id 
  */
-int LevelSetObject::getPart(const long &i) const {
+int LevelSetObject::getPart(long i) const {
     BITPIT_UNUSED(i) ;
     return levelSetDefaults::PART ;
 }
@@ -129,7 +129,7 @@ int LevelSetObject::getPart(const long &i) const {
  * @param[in] i cell index
  * @return surface normal
  */
-std::array<double,3> LevelSetObject::getNormal(const long &i) const {
+std::array<double,3> LevelSetObject::getNormal(long i) const {
     return getGradient(i);
 }
 
@@ -138,7 +138,7 @@ std::array<double,3> LevelSetObject::getNormal(const long &i) const {
  * @param[in] i cell index
  * @return sign of levelset
  */
-short LevelSetObject::getSign(const long &i)const{
+short LevelSetObject::getSign(long i)const{
     return ( static_cast<short>(sign(getLS(i) )) );
 }
 
@@ -153,7 +153,7 @@ void LevelSetObject::propagateSign(){
  * @param[in] i cell index
  * @return true/false if the centroid is in narrow band
  */
-bool LevelSetObject::isInNarrowBand(const long &i)const{
+bool LevelSetObject::isInNarrowBand(long i)const{
     assert( m_narrowBand > 0 && "Need to set size of narrow >0 before calling isInNarrowBand");
     return ( std::abs(getLS(i)) <= m_narrowBand );
 }
@@ -201,7 +201,7 @@ void LevelSetObject::setSizeNarrowBand(double r){
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, LevelSetIntersectionMode mode) const{
+LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetIntersectionMode mode) const{
 
     double incircle, circumcircle;
 
@@ -280,7 +280,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(const long &i, Level
  * @param[in] i cell index
  * @return feature size
  */
-double LevelSetObject::getSurfaceFeatureSize(const long &i) const{
+double LevelSetObject::getSurfaceFeatureSize(long i) const{
     BITPIT_UNUSED(i);
     return (- levelSetDefaults::SIZE);
 }
@@ -479,7 +479,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
 
         for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
-            const double &value = getLS(cellId);
+            double value = getLS(cellId);
             (*writeFunctionPtr)(stream,value);
         }
 
@@ -533,7 +533,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
 
         for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
-            const int &value = getPart(cellId);
+            int value = getPart(cellId);
             (*writeFunctionPtr)(stream,value);
         }
     }

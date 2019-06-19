@@ -183,7 +183,7 @@ int subtest_001()
     for( int i=0; i<10; ++i){
 
         for( auto & cell : mesh.getCells() ){
-            const long &cellId = cell.getId() ;
+            long cellId = cell.getId() ;
             if( std::abs(object0.getLS(cellId)) < mesh.evalCellSize(cellId)  ){
                 mesh.markCellForRefinement(cellId) ;
             }

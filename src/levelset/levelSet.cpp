@@ -243,7 +243,7 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
  * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
  * @return identifier of new object
  */
-int LevelSet::addObject( const LevelSetBooleanOperation &operation, const int &id1, const int &id2, int id ) {
+int LevelSet::addObject( const LevelSetBooleanOperation &operation, int id1, int id2, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_objects.size();
@@ -269,7 +269,7 @@ int LevelSet::addObject( const LevelSetBooleanOperation &operation, const std::v
     }
 
     std::vector<LevelSetObject*> ptr;
-    for( const int &id : ids){
+    for( int id : ids){
         ptr.push_back( m_objects.at(id).get() );
     }
 
@@ -302,7 +302,7 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
  * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
  * @return identifier of new object
  */
-int LevelSet::addObject( const std::vector<long> &list, const long &refInterface, const bool &invert, int id ) {
+int LevelSet::addObject( const std::vector<long> &list, long refInterface, bool invert, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_objects.size();

@@ -78,10 +78,10 @@ class LevelSet{
     int                     addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
-    int                     addObject( const LevelSetBooleanOperation &, const int &, const int &, int id=levelSetDefaults::OBJECT ) ;
+    int                     addObject( const LevelSetBooleanOperation &, int, int, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( const LevelSetBooleanOperation &, const std::vector<int> &, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
-    int                     addObject( const std::vector<long> &, const long &, const bool &, int id=levelSetDefaults::OBJECT ) ;
+    int                     addObject( const std::vector<long> &, long, bool, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( std::unique_ptr<LevelSetObject> && ) ;
 
     void                    removeObjects();

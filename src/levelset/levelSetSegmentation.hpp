@@ -60,7 +60,7 @@ public:
     double getFeatureAngle() const;
 
     void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
-    void getSegmentInfo( const std::array<double,3> &p, const long &i, const bool &signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
+    void getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
 
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexNormals() const;
     const std::unordered_map<long, std::vector< std::array<double,3>>> & getVertexGradients() const;
@@ -144,11 +144,11 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        setSegmentation(const SurfUnstructured *patch, double featureAngle = 2. * BITPIT_PI) ;
     const SegmentationKernel &                  getSegmentation() const ;
 
-    virtual int                                 getPart(const long &) const override;
-    virtual std::array<double,3>                getNormal(const long &) const override;
-    long                                        getSupport(const long &i) const;
+    virtual int                                 getPart(long ) const override;
+    virtual std::array<double,3>                getNormal(long ) const override;
+    long                                        getSupport(long i) const;
 
-    double                                      getSurfaceFeatureSize(const long &) const override;
+    double                                      getSurfaceFeatureSize(long ) const override;
     double                                      getMinSurfaceFeatureSize() const override;
     double                                      getMaxSurfaceFeatureSize() const override;
 

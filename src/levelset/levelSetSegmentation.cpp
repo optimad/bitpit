@@ -180,7 +180,7 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
  * @param[out] gradient levelset gradient
  * @param[out] normal normal at closest point
  */
-void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords, const long &segmentId, const bool &signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const {
+void SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const {
 
 
     std::array<double,3> outwards;
@@ -398,7 +398,7 @@ const SegmentationKernel & LevelSetSegmentation::getSegmentation() const {
  * @param[in] id index of cell
  * @return closest segment in narrow band
  */
-int LevelSetSegmentation::getPart( const long &id ) const{
+int LevelSetSegmentation::getPart( long id ) const{
 
     long supportId = getSupport(id);
 
@@ -416,7 +416,7 @@ int LevelSetSegmentation::getPart( const long &id ) const{
  * @param[in] id index of cell
  * @return surface normal
  */
-std::array<double,3> LevelSetSegmentation::getNormal( const long &id ) const{
+std::array<double,3> LevelSetSegmentation::getNormal( long id ) const{
 
     auto itr = m_surfaceInfo.find(id) ;
     if( itr != m_surfaceInfo.end() ){
@@ -433,7 +433,7 @@ std::array<double,3> LevelSetSegmentation::getNormal( const long &id ) const{
  * @param[in] id index of cell
  * @return closest segment in narrow band
  */
-long LevelSetSegmentation::getSupport( const long &id ) const{
+long LevelSetSegmentation::getSupport( long id ) const{
 
     auto itr = m_surfaceInfo.find(id) ;
     if( itr != m_surfaceInfo.end() ){
@@ -449,7 +449,7 @@ long LevelSetSegmentation::getSupport( const long &id ) const{
  * @param[in] i cell index
  * @return charcteristic size of support triangle
  */
-double LevelSetSegmentation::getSurfaceFeatureSize( const long &i ) const {
+double LevelSetSegmentation::getSurfaceFeatureSize( long i ) const {
 
     long support = getSupport(i);
     if (support == levelSetDefaults::SUPPORT) {
@@ -843,7 +843,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
         return;
     }
     
-    for( const long &cellId : intersects){
+    for( long cellId : intersects){
 
         Cell const &cell = mesh.getCell(cellId);
         
@@ -922,7 +922,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
             continue;
         }
 
-        for( const long &cellId : event.current ){
+        for( long cellId : event.current ){
             centroid = visitee->computeCellCentroid(cellId);
 
             if(adaptiveSearch){
@@ -955,7 +955,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
         return;
     }
 
-    for( const long &cellId : unprocessed){
+    for( long cellId : unprocessed){
 
         const Cell &cell = mesh.getCell(cellId);
 
@@ -1021,7 +1021,7 @@ void LevelSetSegmentation::__clearAfterMeshAdaption( const std::vector<adaption:
         }
 
         // Remove info of previous cells
-        for ( const long & parent : info.previous ) {
+        for ( long  parent : info.previous ) {
             if ( m_surfaceInfo.find( parent ) != m_surfaceInfo.end() ) {
                 m_surfaceInfo.erase( parent, true ) ;
             }

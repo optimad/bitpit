@@ -50,7 +50,7 @@ LevelSetInfo::LevelSetInfo() :value(levelSetDefaults::VALUE), gradient(levelSetD
  * @param[in] v value of levelset function
  * @param[in] g gradient of levelset function
  */
-LevelSetInfo::LevelSetInfo(const double &v, const std::array<double,3> &g) :value(v), gradient(g) {
+LevelSetInfo::LevelSetInfo(double v, const std::array<double,3> &g) :value(v), gradient(g) {
 }
 
 }

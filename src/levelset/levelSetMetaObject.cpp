@@ -61,7 +61,7 @@ bool LevelSetMetaObject::isPrimary() const{
  * @param[in] id cell index
  * @return index of object
 */
-int LevelSetMetaObject::getPrimaryObjectId( const long &id) const{
+int LevelSetMetaObject::getPrimaryObjectId( long id) const{
     BITPIT_UNUSED(id);
     return levelSetDefaults::OBJECT;
 } 

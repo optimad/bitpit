@@ -94,9 +94,9 @@ class LevelSetCachedObject : public LevelSetObject{
     virtual ~LevelSetCachedObject();
     LevelSetCachedObject(int);
 
-    LevelSetInfo                                getLevelSetInfo(const long &) const override ;
-    double                                      getLS(const long &) const override ;
-    std::array<double,3>                        getGradient(const long &) const override ;
+    LevelSetInfo                                getLevelSetInfo(long ) const override ;
+    double                                      getLS(long ) const override ;
+    std::array<double,3>                        getGradient(long ) const override ;
 
     void                                        propagateSign() override ;
 

@@ -126,7 +126,7 @@ int subtest_001()
     // mark cells within R=0.5
     std::unordered_set<long> mask;
     for( auto & cell : mesh.getCells() ){
-        const long &id = cell.getId() ;
+        long id = cell.getId() ;
         std::array<double,3> center = mesh.evalCellCentroid(id);
         double r = norm2(center);
         if(r<=0.5){

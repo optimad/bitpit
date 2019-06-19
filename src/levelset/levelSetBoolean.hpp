@@ -46,9 +46,9 @@ class LevelSetBoolean: public LevelSetMetaObject {
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
     std::vector<LevelSetObject*>                m_objPtr;               /**< pointers to objects */
 
-    LevelSetInfo                                booleanOperation(const long &) const ;
+    LevelSetInfo                                booleanOperation(long ) const ;
     LevelSetBooleanOperation                    getBooleanOperation() const;
-    LevelSetObject*                             getCompetentObject(const long &, double *factorPtr=nullptr) const ;
+    LevelSetObject*                             getCompetentObject(long, double *factorPtr=nullptr) const ;
 
     protected:
     void                                        _dump( std::ostream &) override;
@@ -62,20 +62,20 @@ class LevelSetBoolean: public LevelSetMetaObject {
 
     LevelSetBoolean*                            clone() const override;
 
-    LevelSetInfo                                getLevelSetInfo(const long &) const override;
-    double                                      getLS(const long &) const override;
-    std::array<double,3>                        getGradient(const long &) const override;
+    LevelSetInfo                                getLevelSetInfo(long ) const override;
+    double                                      getLS(long ) const override;
+    std::array<double,3>                        getGradient(long ) const override;
 
-    std::array<double,3>                        getNormal(const long &) const override;
-    int                                         getPart(const long &) const override;
-    double                                      getSurfaceFeatureSize(const long &) const override;
+    std::array<double,3>                        getNormal(long ) const override;
+    int                                         getPart(long ) const override;
+    double                                      getSurfaceFeatureSize(long ) const override;
     double                                      getMinSurfaceFeatureSize() const override;
     double                                      getMaxSurfaceFeatureSize() const override;
 
     void                                        computeLSInNarrowBand(bool) override;
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool) override;
 
-    int                                         getPrimaryObjectId(const long &) const override;
+    int                                         getPrimaryObjectId(long ) const override;
 
 };
 

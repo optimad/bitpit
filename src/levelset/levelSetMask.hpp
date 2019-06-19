@@ -40,13 +40,13 @@ class LevelSetMask : public LevelSetSegmentation {
     private:
     std::unique_ptr<SurfUnstructured> extractCellEnvelope(const std::unordered_set<long> &, const VolumeKernel &, std::unordered_map<long,long> &);
     std::unique_ptr<SurfUnstructured> extractFaceEnvelope(const std::vector<long> &, const VolumeKernel &, std::unordered_map<long,long> &);
-    bool sameInterfaceEnvelopeOrientation(const VolumeKernel &, const long &, SurfUnstructured &, const long &);
+    bool sameInterfaceEnvelopeOrientation(const VolumeKernel &, long, SurfUnstructured &, long );
 
 
     public:
     ~LevelSetMask();
     LevelSetMask(int, const std::unordered_set<long> &, const VolumeKernel &);
-    LevelSetMask(int, const std::vector<long> &, const long &, const bool &, const VolumeKernel &);
+    LevelSetMask(int, const std::vector<long> &, long, bool, const VolumeKernel &);
 };
 
 }

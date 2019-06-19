@@ -105,21 +105,21 @@ class LevelSetObject : public VTKBaseStreamer{
     int                                         getId() const ;
     virtual bool                                isPrimary() const ;
 
-    virtual LevelSetInfo                        getLevelSetInfo(const long &) const =0;
-    virtual double                              getLS(const long &) const =0; 
-    virtual std::array<double,3>                getGradient(const long &) const =0 ; 
-    std::array<double,3>                        computeProjectionPoint(const long &) const;
+    virtual LevelSetInfo                        getLevelSetInfo(long ) const =0;
+    virtual double                              getLS(long ) const =0;
+    virtual std::array<double,3>                getGradient(long ) const =0 ;
+    std::array<double,3>                        computeProjectionPoint(long ) const;
 
-    virtual int                                 getPart(const long &) const ;
-    virtual std::array<double,3>                getNormal(const long &) const; 
+    virtual int                                 getPart(long ) const ;
+    virtual std::array<double,3>                getNormal(long ) const;
 
-    short                                       getSign(const long &) const;
+    short                                       getSign(long ) const;
 
-    bool                                        isInNarrowBand(const long &) const;
+    bool                                        isInNarrowBand(long ) const;
     double                                      getSizeNarrowBand() const;
 
-    LevelSetIntersectionStatus                  intersectSurface(const long &, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
-    virtual double                              getSurfaceFeatureSize(const long &) const;
+    LevelSetIntersectionStatus                  intersectSurface(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
+    virtual double                              getSurfaceFeatureSize(long ) const;
     virtual double                              getMinSurfaceFeatureSize() const;
     virtual double                              getMaxSurfaceFeatureSize() const;
 

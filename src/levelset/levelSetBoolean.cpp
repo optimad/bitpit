@@ -89,7 +89,7 @@ LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObj
  * @param[in] i cell index
  * @return LevelSetInfo
 */
-LevelSetInfo LevelSetBoolean::getLevelSetInfo( const long &i)const{
+LevelSetInfo LevelSetBoolean::getLevelSetInfo( long i)const{
     return booleanOperation(i) ;
 } 
 
@@ -98,7 +98,7 @@ LevelSetInfo LevelSetBoolean::getLevelSetInfo( const long &i)const{
  * @param[in] i cell index
  * @return levelset value in cell
  */
-double LevelSetBoolean::getLS( const long &i)const {
+double LevelSetBoolean::getLS( long i)const {
     return booleanOperation(i).value ;
 }
 
@@ -107,7 +107,7 @@ double LevelSetBoolean::getLS( const long &i)const {
  * @param[in] i cell index
  * @return levelset gradient in cell 
  */
-std::array<double,3> LevelSetBoolean::getGradient(const long &i) const {
+std::array<double,3> LevelSetBoolean::getGradient(long i) const {
     return booleanOperation(i).gradient ;
 }
 
@@ -140,7 +140,7 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
  * @param[in] id cell index
  * @return closest part
  */
-std::array<double,3> LevelSetBoolean::getNormal( const long &id ) const{
+std::array<double,3> LevelSetBoolean::getNormal( long id ) const{
 
     double factor;
     LevelSetObject *objPtr = getCompetentObject(id,&factor) ;
@@ -157,7 +157,7 @@ std::array<double,3> LevelSetBoolean::getNormal( const long &id ) const{
  * @param[in] id cell index
  * @return closest part
  */
-int LevelSetBoolean::getPart( const long &id ) const{
+int LevelSetBoolean::getPart( long id ) const{
     LevelSetObject *objPtr = getCompetentObject(id) ;
 
     if( objPtr == nullptr){
@@ -200,7 +200,7 @@ LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
  * @param[in] id cell index
  * @return charcteristic size
  */
-double LevelSetBoolean::getSurfaceFeatureSize( const long &id ) const {
+double LevelSetBoolean::getSurfaceFeatureSize( long id ) const {
 
     LevelSetObject *objectPtr = getCompetentObject(id);
     if (!objectPtr) {
@@ -260,7 +260,7 @@ double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
  * -1.0*levelset_primary_object.
  * @return pointer to competent LevelSetObject
  */
-LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id, double *factor) const{
+LevelSetObject* LevelSetBoolean::getCompetentObject( long id, double *factor) const{
 
     if(m_objPtr.size()==0){ 
         return nullptr;
@@ -309,7 +309,7 @@ LevelSetObject* LevelSetBoolean::getCompetentObject( const long &id, double *fac
  * @param[in] id cell index
  * @return resulting levelset value and gradient in LevelSetInfo
  */
-LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
+LevelSetInfo LevelSetBoolean::booleanOperation(long id) const{
 
     if(m_objPtr.empty()){
         return LevelSetInfo();
@@ -346,7 +346,7 @@ LevelSetInfo LevelSetBoolean::booleanOperation(const long &id) const{
  * @param[in] cellId cell index
  * @return primary object
  */
-int LevelSetBoolean::getPrimaryObjectId(const long &cellId) const{
+int LevelSetBoolean::getPrimaryObjectId(long cellId) const{
 
     LevelSetObject *obj = getCompetentObject(cellId);
 

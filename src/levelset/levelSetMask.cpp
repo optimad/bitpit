@@ -91,7 +91,7 @@ LevelSetMask::LevelSetMask(int id, const std::unordered_set<long> &mask, const V
  * @param[in] invert if orientation should be inverted with respect to the reference interface
  * @param[in] mesh the mesh hosting the cells
  */
-LevelSetMask::LevelSetMask(int id, const std::vector<long> &list, const long &interfaceId, const bool &invert, const VolumeKernel &mesh ) :LevelSetSegmentation(id) {
+LevelSetMask::LevelSetMask(int id, const std::vector<long> &list, long interfaceId, bool invert, const VolumeKernel &mesh ) :LevelSetSegmentation(id) {
 
     std::unordered_map<long,long> meshToEnvelope ;
 
@@ -123,7 +123,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractCellEnvelope(const std::u
 
     std::vector<long> list;
 
-    for( const long &cellIndex : mask){
+    for( long cellIndex : mask){
         const auto &cell = mesh.getCell(cellIndex);
         const long *adjacencies = cell.getAdjacencies();
         const long *interfaceIndex = cell.getInterfaces();
@@ -131,7 +131,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractCellEnvelope(const std::u
         int interfaceCount= cell.getInterfaceCount() ;
 
         for(int i=0; i<interfaceCount; i++){
-            const long &neigh = adjacencies[i];
+            long neigh = adjacencies[i];
 
             if(mask.count(neigh)==0){
                 list.push_back(interfaceIndex[i]);
@@ -160,7 +160,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::v
     long nVertices(0);
     long nCells(list.size());
 
-    for( const long &faceIndex : list){
+    for( long faceIndex : list){
         auto const &interface = mesh.getInterface(faceIndex);
         nVertices += interface.getVertexCount() ;
     }
@@ -173,7 +173,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::v
 	// ====================================================================== //
 	std::unordered_map<long,long> vertexMap;
 
-    for( const long &faceIndex : list){
+    for( long faceIndex : list){
         auto const &interface = mesh.getInterface(faceIndex);
         ConstProxyVector<long> faceVertexIds = interface.getVertexIds();
         int nFaceVertices = faceVertexIds.size();
@@ -221,7 +221,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::v
  * @param[in] enveIndex index of the envelope cell
  * @return true if interface and cell have the same orientation
 */
-bool LevelSetMask::sameInterfaceEnvelopeOrientation(const VolumeKernel &mesh, const long &faceIndex, SurfUnstructured &envelope, const long &enveIndex){
+bool LevelSetMask::sameInterfaceEnvelopeOrientation(const VolumeKernel &mesh, long faceIndex, SurfUnstructured &envelope, long enveIndex){
 
     std::array<double,3> facetNormal = envelope.evalFacetNormal(enveIndex);
     std::array<double,3> interfaceNormal = mesh.evalInterfaceNormal(faceIndex);
