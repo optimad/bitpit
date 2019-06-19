@@ -64,7 +64,7 @@ template <typename T, typename Comparator = std::less<T> >
 typename std::vector<T>::const_iterator findInOrderedVector(const T &value, const std::vector<T> &list, Comparator comparator = Comparator());
 
 template<typename T>
-void reorderVector(std::vector<size_t>& order, std::vector<T>& v, const size_t &size);
+void reorderVector(std::vector<size_t>& order, std::vector<T>& v, std::size_t size);
 
 template <class T>
 void eraseValue(std::vector<T> &, const T&);
@@ -103,7 +103,7 @@ struct DoubleFloatingEqual
         errors creeping in as a result of x and y computation
         \result Returns true if the numbers match, false otherwise.
     */
-    bool operator()(const double &x, const double &y, double errorFactor = 1.0) const
+    bool operator()(double x, double y, double errorFactor = 1.0) const
     {
         const double ABS_MAX_DIFF = 1e-15;
         const double REL_MAX_DIFF = std::numeric_limits<double>::epsilon();

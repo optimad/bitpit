@@ -108,7 +108,7 @@ typename std::vector<T>::const_iterator findInOrderedVector(const T &value, cons
 * \param size is the size of the vector that will be reordered
 */
 template<typename T>
-void reorderVector(std::vector<size_t>& order, std::vector<T>& v, const size_t &size)
+void reorderVector(std::vector<size_t>& order, std::vector<T>& v, std::size_t size)
 {
     for (size_t i = 0; i < size; i++) {
         size_t j;

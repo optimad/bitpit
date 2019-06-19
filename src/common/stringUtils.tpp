@@ -96,7 +96,7 @@ inline std::string &trim(std::string &s)
 * \param[in] s is the input string
 * \param[in] c is the char used as filler
 */
-inline std::string lfill(const int &nchars, const std::string &s, char c)
+inline std::string lfill(int nchars, const std::string &s, char c)
 {
     std::stringstream ss;
     ss << std::string(nchars - s.length(), c) << s;
@@ -116,7 +116,7 @@ inline std::string lfill(const int &nchars, const std::string &s, char c)
 * \param[in] s is the input string
 * \param[in] c is the char used as filler
 */
-inline std::string rfill(const int &nchars, const std::string &s, char c)
+inline std::string rfill(int nchars, const std::string &s, char c)
 {
     std::stringstream ss;
     ss << s << std::string(nchars - s.length(), c);

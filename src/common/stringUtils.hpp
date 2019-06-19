@@ -52,8 +52,8 @@ inline std::string &rtrim(std::string &s);
 inline std::string &trim(std::string &s);
 
 // Padding operators
-inline std::string lfill(const int &nchars, const std::string &s, char c);
-inline std::string rfill(const int &nchars, const std::string &s, char c);
+inline std::string lfill(int nchars, const std::string &s, char c);
+inline std::string rfill(int nchars, const std::string &s, char c);
 inline std::string zeroPadNumber(int nchars, int num);
 
 // Keyword search
