@@ -2053,8 +2053,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
 
     reserveVertices(getVertexCount() + nRecvVertices);
 
-    std::unordered_map<long, long> vertexMap;
-    vertexMap.reserve(nRecvVertices);
+    std::unordered_map<long, long> verticesMap;
     for (long i = 0; i < nRecvVertices; ++i) {
         Vertex vertex;
         verticesBuffer >> vertex;
@@ -2075,7 +2074,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
             vertexId = vertexIterator.getId();
         }
 
-        vertexMap.insert({{originalVertexId, vertexId}});
+        if (originalVertexId != vertexId) {
+            verticesMap.insert({{originalVertexId, vertexId}});
+        }
     }
 
     std::unordered_map<long, Vertex>().swap(duplicateVerticesCandidates);
@@ -2146,7 +2147,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
         cell.setInterior(isInterior);
 
         // Remap connectivity
-        cell.renumberVertices(vertexMap);
+        if (!verticesMap.empty()) {
+            cell.renumberVertices(verticesMap);
+        }
 
         // Check if the cells is a duplicate
         //
