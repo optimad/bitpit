@@ -2115,10 +2115,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
 
     std::unordered_set<long> interfacesDeleteList;
 
-    std::unordered_map<long, FlatVector2D<long>> linkAdjacencies;
+    std::unordered_set<long> validReceivedAdjacencies;
+    validReceivedAdjacencies.reserve(nReceivedCells);
 
-    std::unordered_map<long, long> cellMap;
-    cellMap.reserve(nReceivedCells);
+    std::unordered_map<long, FlatVector2D<long>> duplicateCellsReceivedAdjacencies;
+
+    std::unordered_map<long, long> cellsMap;
 
     int patchRank = getRank();
 
@@ -2197,7 +2199,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
 
             // Save the adjacencies of the received cell, this adjacencies
             // will link together the recevied cell to the existing ones.
-            FlatVector2D<long> &cellAdjacencies = linkAdjacencies[cellId];
+            FlatVector2D<long> &cellAdjacencies = duplicateCellsReceivedAdjacencies[cellId];
 
             int nCellFaces = cell.getFaceCount();
             int nCellAdjacencies = cell.getAdjacencyCount();
@@ -2223,7 +2225,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
         }
 
         // Add the cell to the cell map
-        cellMap.insert({{cellOriginalId, cellId}});
+        if (cellOriginalId != cellId) {
+            cellsMap.insert({{cellOriginalId, cellId}});
+        }
+
+        // Add original cell id to the list of valid received adjacencies
+        validReceivedAdjacencies.insert(cellOriginalId);
 
         // Update tracking information
         if (trackPartitioning && isInterior) {
@@ -2231,7 +2238,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
         }
     }
 
-    // Remap adjacencies
+    // Remove stale adjacencies
     for (long cellId : addedCells) {
         Cell &cell = m_cells.at(cellId);
 
@@ -2239,15 +2246,32 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
         for (int face = 0; face < nCellFaces; ++face) {
             int nFaceAdjacencies = cell.getAdjacencyCount(face);
             const long *faceAdjacencies = cell.getAdjacencies(face);
-            for (int k = 0; k < nFaceAdjacencies; ++k) {
-                long senderAdjacencyId = faceAdjacencies[k];
-                auto localAdjacencyItr = cellMap.find(senderAdjacencyId);
-                if (localAdjacencyItr == cellMap.end()) {
+
+            int k = 0;
+            while (k < nFaceAdjacencies) {
+                long receivedAdjacencyId = faceAdjacencies[k];
+                if (validReceivedAdjacencies.count(receivedAdjacencyId) == 0) {
                     cell.deleteAdjacency(face, k);
-                    continue;
+                    --nFaceAdjacencies;
                 } else {
-                    long localAdjacencyId = localAdjacencyItr->second;
-                    cell.setAdjacency(face, k, localAdjacencyId);
+                    ++k;
+                }
+            }
+        }
+    }
+
+    // Remap adjacencies
+    if (!cellsMap.empty()) {
+        for (long cellId : addedCells) {
+            Cell &cell = m_cells.at(cellId);
+
+            int nCellAdjacencies = cell.getAdjacencyCount();
+            long *cellAdjacencies = cell.getAdjacencies();
+            for (int k = 0; k < nCellAdjacencies; ++k) {
+                long &cellAdjacencyId = cellAdjacencies[k];
+                auto cellsMapItr = cellsMap.find(cellAdjacencyId);
+                if (cellsMapItr != cellsMap.end()) {
+                    cellAdjacencyId = cellsMapItr->second;
                 }
             }
         }
@@ -2264,25 +2288,32 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
     // also if this may not be needed, but this is still the faster way to
     // link the received cells.
     if (!m_partitioningSerialization) {
-        for (auto &entry : linkAdjacencies) {
+        for (auto &entry : duplicateCellsReceivedAdjacencies) {
             long cellId = entry.first;
             Cell &cell = m_cells.at(cellId);
 
             int nCellFaces = cell.getFaceCount();
-            FlatVector2D<long> &cellLinkAdjacencies = entry.second;
+            FlatVector2D<long> &cellReceivedAdjacencies = entry.second;
             for (int face = 0; face < nCellFaces; ++face) {
-                int nFaceLinkAdjacencies = cellLinkAdjacencies.getItemCount(face);
+                int nFaceLinkAdjacencies = cellReceivedAdjacencies.getItemCount(face);
                 for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
                     // We need to updated the adjacencies only if they are cells
                     // that have been send.
-                    long senderAdjacencyId = cellLinkAdjacencies.getItem(face, k);
-                    if (cellMap.count(senderAdjacencyId) == 0) {
+                    long receivedAdjacencyId = cellReceivedAdjacencies.getItem(face, k);
+                    if (validReceivedAdjacencies.count(receivedAdjacencyId) == 0) {
                         continue;
                     }
 
                     // If the send cell is already in the adjacency list there is
                     // nothing to update.
-                    long localAdjacencyId = cellMap.at(senderAdjacencyId);
+                    long localAdjacencyId;
+                    auto ajacenciyCellMapItr = cellsMap.find(receivedAdjacencyId);
+                    if (ajacenciyCellMapItr != cellsMap.end()) {
+                        localAdjacencyId = ajacenciyCellMapItr->second;
+                    } else {
+                        localAdjacencyId = receivedAdjacencyId;
+                    }
+
                     if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
                         continue;
                     }
