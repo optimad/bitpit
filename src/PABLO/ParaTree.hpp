@@ -570,7 +570,7 @@ namespace bitpit {
             std::map<int,u32vector >::iterator bitend = m_bordersPerProc.end();
             std::map<int,u32vector >::iterator bitbegin = m_bordersPerProc.begin();
             for(std::map<int,u32vector >::iterator bit = bitbegin; bit != bitend; ++bit){
-                const int & key = bit->first;
+                int  key = bit->first;
                 const u32vector & pborders = bit->second;
                 size_t buffSize = 0;
                 size_t nofPbordersPerProc = pborders.size();
