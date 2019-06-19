@@ -56,7 +56,7 @@ Interface::Interface()
 	\param id is the id that will be assigned to the element
 	\param type is the type of the element
 */
-Interface::Interface(const long &id, ElementType type)
+Interface::Interface(long id, ElementType type)
 	: Element(id, type)
 {
 	_initialize(NULL_ID, -1, NULL_ID, -1);
@@ -70,7 +70,7 @@ Interface::Interface(const long &id, ElementType type)
 	\param connectSize is the size of the connectivity, this is only used
 	if the element is not associated to a reference element
 */
-Interface::Interface(const long &id, ElementType type, int connectSize)
+Interface::Interface(long id, ElementType type, int connectSize)
 	: Element(id, type, connectSize)
 {
 	_initialize(NULL_ID, -1, NULL_ID, -1);
@@ -84,7 +84,7 @@ Interface::Interface(const long &id, ElementType type, int connectSize)
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 */
-Interface::Interface(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage)
+Interface::Interface(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage)
 	: Element(id, type, std::move(connectStorage))
 {
 	_initialize(NULL_ID, -1, NULL_ID, -1);
@@ -293,7 +293,7 @@ bool Interface::isBorder() const
 	\param owner the owner of the interface
 	\param onwerFace the owner's face adjacent to the interface
 */
-void Interface::setOwner(const long &owner, const int &onwerFace)
+void Interface::setOwner(long owner, int onwerFace)
 {
 	m_owner     = owner;
 	m_ownerFace = onwerFace;
@@ -334,7 +334,7 @@ int Interface::getOwnerFace() const
 	\param neigh the neighbour of the interface
 	\param neighFace the neighbour's face adjacent to the interface
 */
-void Interface::setNeigh(const long &neigh, const int &neighFace)
+void Interface::setNeigh(long neigh, int neighFace)
 {
 	m_neigh     = neigh;
 	m_neighFace = neighFace;

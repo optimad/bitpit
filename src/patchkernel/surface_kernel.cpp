@@ -75,7 +75,7 @@ SurfaceKernel::SurfaceKernel(bool expert)
 	\param space_dim is the dimension of the space
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(const int &patch_dim, const int& space_dim, bool expert)
+SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
 	: PatchKernel(patch_dim, expert)
 {
     initialize();
@@ -92,7 +92,7 @@ SurfaceKernel::SurfaceKernel(const int &patch_dim, const int& space_dim, bool ex
 	\param space_dim is the dimension of the space
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(const int &id, const int &patch_dim, const int& space_dim, bool expert)
+SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, bool expert)
 	: PatchKernel(id, patch_dim, expert)
 {
     m_spaceDim = space_dim;
@@ -147,7 +147,7 @@ int SurfaceKernel::getSpaceDimension(void) const
         \param id is the id of the cell
         \result The characteristic size of the specified cell.
 */
-double SurfaceKernel::evalCellSize(const long &id) const
+double SurfaceKernel::evalCellSize(long id) const
 {
 
     // ====================================================================== //
@@ -174,7 +174,7 @@ double SurfaceKernel::evalCellSize(const long &id) const
  * 
  * \result facet area
 */
-double SurfaceKernel::evalCellArea(const long &id) const
+double SurfaceKernel::evalCellArea(long id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -228,7 +228,7 @@ double SurfaceKernel::evalCellArea(const long &id) const
  *  \param[in] edgeId is the edge local index
  *  \result The edge length.
 */
-double SurfaceKernel::evalEdgeLength(const long &cellId, const int &edgeId) const
+double SurfaceKernel::evalEdgeLength(long cellId, int edgeId) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -278,7 +278,7 @@ double SurfaceKernel::evalEdgeLength(const long &cellId, const int &edgeId) cons
  * 
  *  \result minimal edge length
 */
-double SurfaceKernel::evalMinEdgeLength(const long &id, int &edge_id) const
+double SurfaceKernel::evalMinEdgeLength(long id, int &edge_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -321,7 +321,7 @@ double SurfaceKernel::evalMinEdgeLength(const long &id, int &edge_id) const
  * 
  *  \result maximal edge length
 */
-double SurfaceKernel::evalMaxEdgeLength(const long &id, int &edge_id) const
+double SurfaceKernel::evalMaxEdgeLength(long id, int &edge_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -361,7 +361,7 @@ double SurfaceKernel::evalMaxEdgeLength(const long &id, int &edge_id) const
  * \param[in] id cell global ID
  * \param[in] vertex_id vertex local ID
 */
-double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id) const
+double SurfaceKernel::evalAngleAtVertex(long id, int vertex_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -407,7 +407,7 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id) co
  * 
  * \result minimal angle at vertex
 */
-double SurfaceKernel::evalMinAngleAtVertex(const long&id, int &vertex_id) const
+double SurfaceKernel::evalMinAngleAtVertex(long id, int &vertex_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -448,7 +448,7 @@ double SurfaceKernel::evalMinAngleAtVertex(const long&id, int &vertex_id) const
  * 
  * \result maximal angle at vertex
 */
-double SurfaceKernel::evalMaxAngleAtVertex(const long&id, int &vertex_id) const
+double SurfaceKernel::evalMaxAngleAtVertex(long id, int &vertex_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -490,7 +490,7 @@ double SurfaceKernel::evalMaxAngleAtVertex(const long&id, int &vertex_id) const
  * 
  * \result cell aspect ratio
 */
-double SurfaceKernel::evalAspectRatio(const long &id, int &edge_id) const
+double SurfaceKernel::evalAspectRatio(long id, int &edge_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -534,7 +534,7 @@ double SurfaceKernel::evalAspectRatio(const long &id, int &edge_id) const
  * 
  * \result facet normal
 */
-array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
+array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -596,7 +596,7 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id) const
  * \param[in] id cell global ID
  * \param[in] edge_id edge local ID on the specified cell
 */
-array<double, 3> SurfaceKernel::evalEdgeNormal(const long &id, const int &edge_id) const
+array<double, 3> SurfaceKernel::evalEdgeNormal(long id, int edge_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -631,7 +631,7 @@ array<double, 3> SurfaceKernel::evalEdgeNormal(const long &id, const int &edge_i
  * \param[in] vertex is the local vertex id
  * \result The normal unit vector of the specified local vertex.
 */
-std::array<double, 3> SurfaceKernel::evalVertexNormal(const long &id, const int &vertex) const
+std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex) const
 {
     return evalLimitedVertexNormal(id, vertex, std::numeric_limits<double>::max());
 }
@@ -651,7 +651,7 @@ std::array<double, 3> SurfaceKernel::evalVertexNormal(const long &id, const int 
  * vertex normal
  * \result The normal unit vector of the specified local vertex.
 */
-std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(const long &id, const int &vertex, const double &limit) const
+std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex, double limit) const
 {
     // Get vertex id
     const Cell &cell = m_cells[id];
@@ -742,7 +742,7 @@ bool SurfaceKernel::adjustCellOrientation()
  * seed of should be inverted with respect to the seed
  * \return Returns true if the surface is orientable, false otherwise.
  */
-bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
+bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
 {
 #if BITPIT_ENABLE_MPI==1
     // Check if the communications are needed
@@ -908,7 +908,7 @@ bool SurfaceKernel::adjustCellOrientation(const long &seed, const bool &invert)
  * \return Returns true if the cells sharing an interface have the same
  * orientation.
  */
-bool SurfaceKernel::sameOrientationAtInterface(const long &id)
+bool SurfaceKernel::sameOrientationAtInterface(long id)
 {
     const auto &face = getInterface(id);
     if (face.isBorder()) {
@@ -949,7 +949,7 @@ bool SurfaceKernel::sameOrientationAtInterface(const long &id)
  *
  * \param[in] id is the id of cell that will be flipped
  */
-void SurfaceKernel::flipCellOrientation(const long &id)
+void SurfaceKernel::flipCellOrientation(long id)
 {
     int top, end;
     auto &cell = getCell(id);
@@ -1259,7 +1259,7 @@ std::vector<double> SurfaceKernel::computeHistogram(eval_f_ funct_, std::vector<
  * \param[in] padding (default = 0) number of trailing spaces
 */
 void SurfaceKernel::displayHistogram(
-    const long                  &count,
+    long                         count,
     const vector<double>        &bins,
     const vector<double>        &hist,
     const string                &stats_name,
@@ -1335,7 +1335,7 @@ void SurfaceKernel::displayHistogram(
  * \param[in] mask_ selection mask_
  * \param[in] type_ element type
 */
-bool SurfaceKernel::compareSelectedTypes(const unsigned short &mask_, const ElementType &type_) const
+bool SurfaceKernel::compareSelectedTypes(unsigned short mask_, ElementType type_) const
 {
     unsigned short       masked = m_selectionTypes.at(type_);
     return ( (mask_ & masked) == masked );

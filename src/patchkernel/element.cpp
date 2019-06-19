@@ -496,7 +496,7 @@ void Element::_initialize(long id, ElementType type, std::unique_ptr<long[]> &&c
 
 	\param id the ID of the element
 */
-void Element::setId(const long &id)
+void Element::setId(long id)
 {
 	m_id = id;
 }
@@ -685,7 +685,7 @@ int Element::getFaceCount() const
 
 	\result The face type of specified face of the element
 */
-ElementType Element::getFaceType(const int &face) const
+ElementType Element::getFaceType(int face) const
 {
 	switch (m_type) {
 
@@ -727,7 +727,7 @@ ElementType Element::getFaceType(const int &face) const
 	\param face is the face for which the number of vertices is requested
 	\result The number of vertices of the specified face.
 */
-int Element::getFaceVertexCount(const int &face) const
+int Element::getFaceVertexCount(int face) const
 {
 	switch (m_type) {
 
@@ -757,7 +757,7 @@ int Element::getFaceVertexCount(const int &face) const
 	\param face is the face for which the connectivity is reqested
 	\result The local connectivity of the specified face of the element.
 */
-ConstProxyVector<int> Element::getFaceLocalConnect(const int &face) const
+ConstProxyVector<int> Element::getFaceLocalConnect(int face) const
 {
 	switch (m_type) {
 
@@ -932,7 +932,7 @@ int Element::getEdgeCount() const
 
 	\result The type of specified edge of the element
 */
-ElementType Element::getEdgeType(const int &edge) const
+ElementType Element::getEdgeType(int edge) const
 {
 	BITPIT_UNUSED(edge);
 
@@ -958,7 +958,7 @@ ElementType Element::getEdgeType(const int &edge) const
 	\param edge is the edge for which the number of vertices is requested
 	\result The number of vertices of the specified edge.
 */
-int Element::getEdgeVertexCount(const int &edge) const
+int Element::getEdgeVertexCount(int edge) const
 {
 	ElementType edgeType = getEdgeType(edge);
 
@@ -971,7 +971,7 @@ int Element::getEdgeVertexCount(const int &edge) const
 	\param edge is the edge for which the connectivity is reqested
 	\result The local connectivity of the specified edge of the element.
 */
-ConstProxyVector<int> Element::getEdgeLocalConnect(const int &edge) const
+ConstProxyVector<int> Element::getEdgeLocalConnect(int edge) const
 {
 	switch (m_type) {
 
@@ -1454,7 +1454,7 @@ double Element::evalVolume(const std::array<double, 3> *coordinates) const
 
 		double volume = 0.;
 		for (int i = 0; i < nTiles; ++i) {
-			const ElementType &tileType = tesselation.getTileType(i);
+			ElementType tileType = tesselation.getTileType(i);
 			const std::vector<std::array<double, 3>> tileCoordinates = tesselation.getTileVertexCoordinates(i);
 			const Reference3DElementInfo &referenceInfo = static_cast<const Reference3DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
 
@@ -1493,7 +1493,7 @@ double Element::evalArea(const std::array<double, 3> *coordinates) const
 
 		double area = 0.;
 		for (int i = 0; i < nTiles; ++i) {
-			const ElementType &tileType = tesselation.getTileType(i);
+			ElementType tileType = tesselation.getTileType(i);
 			const std::vector<std::array<double, 3>> tileCoordinates = tesselation.getTileVertexCoordinates(i);
 			const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
 
@@ -1572,7 +1572,7 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 		double surfaceArea = 0.;
 		std::array<double, 3> normal = {{0., 0., 0.}};
 		for (int i = 0; i < nTiles; ++i) {
-			const ElementType &tileType = tesselation.getTileType(i);
+			ElementType tileType = tesselation.getTileType(i);
 			const std::vector<std::array<double, 3>> tileCoordinates = tesselation.getTileVertexCoordinates(i);
 			const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
 

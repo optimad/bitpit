@@ -38,9 +38,9 @@ class Interface : public Element {
 
 public:
 	Interface();
-	Interface(const long &id, ElementType type = ElementType::UNDEFINED);
-	Interface(const long &id, ElementType type, int connectSize = 0);
-	Interface(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
+	Interface(long id, ElementType type = ElementType::UNDEFINED);
+	Interface(long id, ElementType type, int connectSize = 0);
+	Interface(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
 	Interface(const Interface &other) = default;
 	Interface(Interface&& other) = default;
@@ -60,12 +60,12 @@ public:
 	static std::array<std::array<double, 3>, 3> evalRotationInverse(const std::array<std::array<double, 3>, 3> &R);
 	static std::array<std::array<double, 3>, 3> evalRotationTranspose(const std::array<std::array<double, 3>, 3> &R);
 
-	void setOwner(const long &owner, const int &onwerFace);
+	void setOwner(long owner, int onwerFace);
 	void unsetOwner();
 	long getOwner() const;
 	int getOwnerFace() const;
 
-	void setNeigh(const long &neigh, const int &neighFace);
+	void setNeigh(long neigh, int neighFace);
 	void unsetNeigh();
 	long getNeigh() const;
 	int getNeighFace() const;

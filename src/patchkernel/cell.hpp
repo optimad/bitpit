@@ -50,11 +50,11 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& 
 
 public:
 	Cell();
-	Cell(const long &id, ElementType type,
+	Cell(long id, ElementType type,
 	     bool interior = true, bool storeNeighbourhood = true);
-	Cell(const long &id, ElementType type, int connectSize,
+	Cell(long id, ElementType type, int connectSize,
 	     bool interior = true, bool storeNeighbourhood = true);
-	Cell(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage,
+	Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage,
 	     bool interior = true, bool storeNeighbourhood = true);
 
 	Cell(const Cell &other) = default;
@@ -73,34 +73,34 @@ public:
 	void deleteInterfaces();
 	void resetInterfaces(bool storeInterfaces = true);
 	void setInterfaces(std::vector<std::vector<long>> &interfaces);
-	void setInterface(const int &face, const int &index, const long &interface);
-	void pushInterface(const int &face, const long &interface);
-	void deleteInterface(const int &face, const int &i);
+	void setInterface(int face, int index, long interface);
+	void pushInterface(int face, long interface);
+	void deleteInterface(int face, int i);
 	int getInterfaceCount() const;
-	int getInterfaceCount(const int &face) const;
-	long getInterface(const int &face, const int &index = 0) const;
+	int getInterfaceCount(int face) const;
+	long getInterface(int face, int index = 0) const;
 	const long * getInterfaces() const;
 	long * getInterfaces();
-	const long * getInterfaces(const int &face) const;
-	long * getInterfaces(const int &face);
-	int findInterface(const int &face, const int &interface);
-	int findInterface(const int &interface);
+	const long * getInterfaces(int face) const;
+	long * getInterfaces(int face);
+	int findInterface(int face, int interface);
+	int findInterface(int interface);
 
 	void deleteAdjacencies();
 	void resetAdjacencies(bool storeAdjacencies = true);
 	void setAdjacencies(std::vector<std::vector<long>> &adjacencies);
-	void setAdjacency(const int &face, const int &index, const long &adjacencies);
-	void pushAdjacency(const int &face, const long &adjacency);
-	void deleteAdjacency(const int &face, const int &i);
+	void setAdjacency(int face, int index, long adjacencies);
+	void pushAdjacency(int face, long adjacency);
+	void deleteAdjacency(int face, int i);
 	int getAdjacencyCount() const;
-	int getAdjacencyCount(const int &face) const;
-	long getAdjacency(const int &face, const int &index = 0) const;
+	int getAdjacencyCount(int face) const;
+	long getAdjacency(int face, int index = 0) const;
 	const long * getAdjacencies() const;
 	long * getAdjacencies();
-	const long * getAdjacencies(const int &face) const;
-	long * getAdjacencies(const int &face);
-	int findAdjacency(const int &face, const int &adjacency);
-	int findAdjacency(const int &adjacency);
+	const long * getAdjacencies(int face) const;
+	long * getAdjacencies(int face);
+	int findAdjacency(int face, int adjacency);
+	int findAdjacency(int adjacency);
 
 	bool isFaceBorder(int face) const;
 

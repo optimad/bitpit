@@ -34,20 +34,20 @@ class VolumeKernel : public PatchKernel {
 public:
 	virtual ~VolumeKernel();
 
-	bool isPointInside(const double &x, const double &y, const double &z);
+	bool isPointInside(double x, double y, double z);
 	virtual bool isPointInside(const std::array<double, 3> &point) = 0;
-	bool isPointInside(const long &id, const double &x, const double &y, const double &z);
-	virtual bool isPointInside(const long &id, const std::array<double, 3> &point) = 0;
+	bool isPointInside(long id, double x, double y, double z);
+	virtual bool isPointInside(long id, const std::array<double, 3> &point) = 0;
 
-	virtual double evalCellVolume(const long &id)const = 0;
+	virtual double evalCellVolume(long id)const = 0;
 
-	virtual double evalInterfaceArea(const long &id)const = 0;
-        virtual std::array<double,3> evalInterfaceNormal(const long &id)const = 0;
+	virtual double evalInterfaceArea(long id)const = 0;
+        virtual std::array<double,3> evalInterfaceNormal(long id)const = 0;
 
 protected:
 	VolumeKernel(bool epxert);
-	VolumeKernel(const int &dimension, bool epxert);
-	VolumeKernel(const int &id, const int &dimension, bool epxert);
+	VolumeKernel(int dimension, bool epxert);
+	VolumeKernel(int id, int dimension, bool epxert);
 
 };
 

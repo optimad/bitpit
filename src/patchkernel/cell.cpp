@@ -131,7 +131,7 @@ Cell::Cell()
 	\param storeNeighbourhood defines is the cell should store neighbourhood
 	information
 */
-Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourhood)
+Cell::Cell(long id, ElementType type, bool interior, bool storeNeighbourhood)
 	: Element(id, type),
       m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
@@ -150,7 +150,7 @@ Cell::Cell(const long &id, ElementType type, bool interior, bool storeNeighbourh
 	\param storeNeighbourhood defines is the cell should store neighbourhood
 	information
 */
-Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
+Cell::Cell(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
 	: Element(id, type, connectSize),
       m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
@@ -169,7 +169,7 @@ Cell::Cell(const long &id, ElementType type, int connectSize, bool interior, boo
 	\param storeNeighbourhood defines is the cell should store neighbourhood
 	information
 */
-Cell::Cell(const long &id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
+Cell::Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
 	: Element(id, type, std::move(connectStorage)),
       m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
       m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
@@ -349,7 +349,7 @@ void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 	\param index the index of the interface
 	\param interface is the index of the interface 
 */
-void Cell::setInterface(const int &face, const int &index, const long &interface)
+void Cell::setInterface(int face, int index, long interface)
 {
 	m_interfaces.setItem(face, index, interface);
 }
@@ -360,7 +360,7 @@ void Cell::setInterface(const int &face, const int &index, const long &interface
 	\param face is the face of the cell
 	\param interface is the index of the interface that will be added
 */
-void Cell::pushInterface(const int &face, const long &interface)
+void Cell::pushInterface(int face, long interface)
 {
 	// Do not push an existing interface
 	if (findInterface(face, interface) >= 0) {
@@ -378,7 +378,7 @@ void Cell::pushInterface(const int &face, const long &interface)
 	\param face the face of the cell
 	\param i is the index of the interface to delete
 */
-void Cell::deleteInterface(const int &face, const int &i)
+void Cell::deleteInterface(int face, int i)
 {
 	m_interfaces.eraseItem(face, i);
 }
@@ -405,7 +405,7 @@ int Cell::getInterfaceCount() const
 	\param face the face of the cell
 	\result The number of interfaces of the specified face of the cell.
 */
-int Cell::getInterfaceCount(const int &face) const
+int Cell::getInterfaceCount(int face) const
 {
 	return m_interfaces.getItemCount(face);
 }
@@ -417,7 +417,7 @@ int Cell::getInterfaceCount(const int &face) const
 	\param index the index of the interface to retreive
 	\result The requested interface.
 */
-long Cell::getInterface(const int &face, const int &index) const
+long Cell::getInterface(int face, int index) const
 {
 	return m_interfaces.getItem(face, index);
 }
@@ -442,7 +442,7 @@ const long * Cell::getInterfaces() const
 	\param face the face of the cell
 	\result The requested interfaces
 */
-const long * Cell::getInterfaces(const int &face) const
+const long * Cell::getInterfaces(int face) const
 {
 	if (m_interfaces.empty()) {
 		return nullptr;
@@ -471,7 +471,7 @@ long * Cell::getInterfaces()
 	\param face the face of the cell
 	\result A pointer to the interfaces of the given face of the cell.
 */
-long * Cell::getInterfaces(const int &face)
+long * Cell::getInterfaces(int face)
 {
 	if (m_interfaces.empty()) {
 		return nullptr;
@@ -491,7 +491,7 @@ long * Cell::getInterfaces(const int &face)
 	\param interface is the interface to look for
 	\result The position in the interface face list of the specfied interface.
 */
-int Cell::findInterface(const int &face, const int &interface)
+int Cell::findInterface(int face, int interface)
 {
 	int nFaceInterfaces = getInterfaceCount(face);
 	for (int i = 0; i < nFaceInterfaces; i++) {
@@ -513,7 +513,7 @@ int Cell::findInterface(const int &face, const int &interface)
 	\param interface is the interface to look for
 	\result The position in the interface cell list of the specfied interface.
 */
-int Cell::findInterface(const int &interface)
+int Cell::findInterface(int interface)
 {
 	int nCellInterfaces = getInterfaceCount();
 	const long *interfaces = getInterfaces();
@@ -577,7 +577,7 @@ void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 	\param index the index of the adjacency
 	\param adjacency is the index of the adjacency
 */
-void Cell::setAdjacency(const int &face, const int &index, const long &adjacency)
+void Cell::setAdjacency(int face, int index, long adjacency)
 {
 	m_adjacencies.setItem(face, index, adjacency);
 }
@@ -588,7 +588,7 @@ void Cell::setAdjacency(const int &face, const int &index, const long &adjacency
 	\param face is the face of the cell
 	\param adjacency is the index of the adjacency that will be added
 */
-void Cell::pushAdjacency(const int &face, const long &adjacency)
+void Cell::pushAdjacency(int face, long adjacency)
 {
 	// Do not push an existing adjacency
 	if (findAdjacency(face, adjacency) >= 0) {
@@ -606,7 +606,7 @@ void Cell::pushAdjacency(const int &face, const long &adjacency)
 	\param face the face of the cell
 	\param i is the index of the adjacency to delete
 */
-void Cell::deleteAdjacency(const int &face, const int &i)
+void Cell::deleteAdjacency(int face, int i)
 {
 	m_adjacencies.eraseItem(face, i);
 }
@@ -633,7 +633,7 @@ int Cell::getAdjacencyCount() const
 	\param face the face of the cell
 	\result The number of adjacencies of the specified face of the cell.
 */
-int Cell::getAdjacencyCount(const int &face) const
+int Cell::getAdjacencyCount(int face) const
 {
 	return m_adjacencies.getItemCount(face);
 }
@@ -645,7 +645,7 @@ int Cell::getAdjacencyCount(const int &face) const
 	\param index the index of the adjacency to retreive
 	\result The requested adjacency.
 */
-long Cell::getAdjacency(const int &face, const int &index) const
+long Cell::getAdjacency(int face, int index) const
 {
 	return m_adjacencies.getItem(face, index);
 }
@@ -670,7 +670,7 @@ const long * Cell::getAdjacencies() const
 	\param face the face of the cell
 	\result The requested adjacencies
 */
-const long * Cell::getAdjacencies(const int &face) const
+const long * Cell::getAdjacencies(int face) const
 {
 	if (m_adjacencies.empty()) {
 		return nullptr;
@@ -699,7 +699,7 @@ long * Cell::getAdjacencies()
 	\param face the face of the cell
 	\result A pointer to the adjacencies of the given face of the cell.
 */
-long * Cell::getAdjacencies(const int &face)
+long * Cell::getAdjacencies(int face)
 {
 	if (m_adjacencies.empty()) {
 		return nullptr;
@@ -719,7 +719,7 @@ long * Cell::getAdjacencies(const int &face)
 	\param adjacency is the adjacency to look for
 	\result The position in the adjacency face list of the specfied adjacency.
 */
-int Cell::findAdjacency(const int &face, const int &adjacency)
+int Cell::findAdjacency(int face, int adjacency)
 {
 	int nFaceAdjacencies = getAdjacencyCount(face);
 	for (int i = 0; i < nFaceAdjacencies; i++) {
@@ -741,7 +741,7 @@ int Cell::findAdjacency(const int &face, const int &adjacency)
 	\param adjacency is the adjacency to look for
 	\result The position in the adjacency cell list of the specfied adjacency.
 */
-int Cell::findAdjacency(const int &adjacency)
+int Cell::findAdjacency(int adjacency)
 {
 	int nCellAdjacencies = getAdjacencyCount();
 	const long *adjacencies = getAdjacencies();

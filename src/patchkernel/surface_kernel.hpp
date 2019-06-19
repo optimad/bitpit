@@ -39,29 +39,29 @@ public:
         static const std::map<ElementType, unsigned short>     m_selectionTypes;
 
         // Types definitions
-        typedef double (SurfaceKernel::*eval_f_)(const long&, int&) const;
+        typedef double (SurfaceKernel::*eval_f_)(long, int &) const;
 
         void setSpaceDimension(int dimension);
         int getSpaceDimension(void) const;
 
 	virtual ~SurfaceKernel();
-        virtual double evalCellArea(const long &) const;
-        virtual double evalEdgeLength(const long&, const int&) const;
-        virtual double evalMinEdgeLength(const long &, int &) const;
-        virtual double evalMaxEdgeLength(const long &, int &) const;
-        virtual double evalAngleAtVertex(const long&, const int&) const;
-        virtual double evalMinAngleAtVertex(const long&, int &) const;
-        virtual double evalMaxAngleAtVertex(const long&, int &) const;
-        virtual double evalAspectRatio(const long&, int&) const;
-        virtual std::array<double, 3> evalFacetNormal(const long&) const;
-        std::array<double, 3> evalEdgeNormal(const long&, const int&) const;
-        std::array<double, 3> evalVertexNormal(const long&, const int&) const;
-        virtual std::array<double, 3> evalLimitedVertexNormal(const long&, const int&, const double&) const;
-        double evalCellSize(const long &id) const override;
+        virtual double evalCellArea(long) const;
+        virtual double evalEdgeLength(long, int) const;
+        virtual double evalMinEdgeLength(long, int &) const;
+        virtual double evalMaxEdgeLength(long, int &) const;
+        virtual double evalAngleAtVertex(long, int) const;
+        virtual double evalMinAngleAtVertex(long, int &) const;
+        virtual double evalMaxAngleAtVertex(long, int &) const;
+        virtual double evalAspectRatio(long, int &) const;
+        virtual std::array<double, 3> evalFacetNormal(long) const;
+        std::array<double, 3> evalEdgeNormal(long, int) const;
+        std::array<double, 3> evalVertexNormal(long, int) const;
+        virtual std::array<double, 3> evalLimitedVertexNormal(long, int, double ) const;
+        double evalCellSize(long id) const override;
 
         bool adjustCellOrientation();
-        bool adjustCellOrientation(const long &id, const bool &flip = false);
-        void flipCellOrientation(const long &id);
+        bool adjustCellOrientation(long id, bool invert = false);
+        void flipCellOrientation(long id);
 
         void displayQualityStats(ostream&, unsigned int padding = 0) const;
         std::vector<double> computeHistogram(eval_f_ funct_, std::vector<double> &bins, long &count, int n_intervals = 8, unsigned short mask = SELECT_ALL) const;
@@ -69,17 +69,17 @@ public:
 private:
         void initialize();
 
-        bool compareSelectedTypes(const unsigned short &, const ElementType &) const;
-        void displayHistogram(const long&, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0) const;
+        bool compareSelectedTypes(unsigned short, ElementType) const;
+        void displayHistogram(long, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0) const;
 
-        bool sameOrientationAtInterface(const long &id);
+        bool sameOrientationAtInterface(long id);
 
 protected:
         int                     m_spaceDim;
 
 	SurfaceKernel(bool expert);
-	SurfaceKernel(const int &patch_dim, const int &space_dim, bool expert);
-	SurfaceKernel(const int &id, const int &patch_dim, const int &space_dim, bool expert);
+	SurfaceKernel(int patch_dim, int space_dim, bool expert);
+	SurfaceKernel(int id, int patch_dim, int space_dim, bool expert);
         
 };
 

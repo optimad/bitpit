@@ -469,7 +469,7 @@ long VolCartesian::getCellCount() const
 	\param id is the id of the requested cell
 	\return The element type for the cell with the specified id.
 */
-ElementType VolCartesian::getCellType(const long &id) const
+ElementType VolCartesian::getCellType(long id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -506,7 +506,7 @@ long VolCartesian::getInterfaceCount() const
 	\param id is the id of the requested interface
 	\return The element type for the interface with the specified id.
 */
-ElementType VolCartesian::getInterfaceType(const long &id) const
+ElementType VolCartesian::getInterfaceType(long id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -533,7 +533,7 @@ ElementType VolCartesian::getInterfaceType() const
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double VolCartesian::evalCellVolume(const long &id) const
+double VolCartesian::evalCellVolume(long id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -546,7 +546,7 @@ double VolCartesian::evalCellVolume(const long &id) const
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double VolCartesian::evalCellSize(const long &id) const
+double VolCartesian::evalCellSize(long id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -559,7 +559,7 @@ double VolCartesian::evalCellSize(const long &id) const
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double VolCartesian::evalInterfaceArea(const long &id) const
+double VolCartesian::evalInterfaceArea(long id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -574,7 +574,7 @@ double VolCartesian::evalInterfaceArea(const long &id) const
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> VolCartesian::evalInterfaceNormal(const long &id) const
+std::array<double, 3> VolCartesian::evalInterfaceNormal(long id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -1067,7 +1067,7 @@ void VolCartesian::_restore(std::istream &stream)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolCartesian::isPointInside(const long &id, const std::array<double, 3> &point)
+bool VolCartesian::isPointInside(long id, const std::array<double, 3> &point)
 {
 	std::array<int, 3> cellIjk = getCellCartesianId(id);
 
@@ -1397,7 +1397,7 @@ bool VolCartesian::isVertexCartesianIdValid(const std::array<int, 3> &ijk) const
 	The vector is not cleared before adding the neighbours, it is extended
 	by appending all the neighbours found by this function
 */
-void VolCartesian::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolCartesian::_findCellFaceNeighs(long id, int face, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	int neighSide      = face % 2;
 	int neighDirection = std::floor(face / 2);
@@ -1431,7 +1431,7 @@ void VolCartesian::_findCellFaceNeighs(const long &id, const int &face, const st
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolCartesian::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolCartesian::_findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -1465,7 +1465,7 @@ void VolCartesian::_findCellEdgeNeighs(const long &id, const int &edge, const st
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolCartesian::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolCartesian::_findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	std::array<int, 3> cellIjk   = getCellCartesianId(id);
 	std::array<int, 3> vertexIjk = getVertexCartesianId(cellIjk, vertex);
@@ -1994,7 +1994,7 @@ int VolCartesian::linearVertexInterpolation(std::array<double,3> &point,
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> VolCartesian::evalCellCentroid(const long &id) const
+std::array<double, 3> VolCartesian::evalCellCentroid(long id) const
 {
 	std::array<int, 3> ijk = getCellCartesianId(id);
 

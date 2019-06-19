@@ -52,7 +52,7 @@ VolumeKernel::VolumeKernel(bool expert)
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-VolumeKernel::VolumeKernel(const int &dimension, bool expert)
+VolumeKernel::VolumeKernel(int dimension, bool expert)
 	: PatchKernel(dimension, expert)
 {
 }
@@ -64,7 +64,7 @@ VolumeKernel::VolumeKernel(const int &dimension, bool expert)
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-VolumeKernel::VolumeKernel(const int &id, const int &dimension, bool expert)
+VolumeKernel::VolumeKernel(int id, int dimension, bool expert)
 	: PatchKernel(id, dimension, expert)
 {
 }
@@ -85,7 +85,7 @@ VolumeKernel::~VolumeKernel()
 	\param[in] z is the z coordinate of the point
 	\result Returns true if the point is inside the patch, false otherwise.
  */
-bool VolumeKernel::isPointInside(const double &x, const double &y, const double &z)
+bool VolumeKernel::isPointInside(double x, double y, double z)
 {
 	return isPointInside({{x, y, z}});
 }
@@ -99,7 +99,7 @@ bool VolumeKernel::isPointInside(const double &x, const double &y, const double 
 	\param[in] z is the z coordinate of the point
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolumeKernel::isPointInside(const long &id, const double &x, const double &y, const double &z)
+bool VolumeKernel::isPointInside(long id, double x, double y, double z)
 {
 	return isPointInside(id, {{x, y, z}});
 }

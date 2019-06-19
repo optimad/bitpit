@@ -69,7 +69,7 @@ PatchKernel::PatchKernel(bool expert)
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-PatchKernel::PatchKernel(const int &dimension, bool expert)
+PatchKernel::PatchKernel(int dimension, bool expert)
 	: m_expert(expert)
 {
 	// Initialize the patch
@@ -89,7 +89,7 @@ PatchKernel::PatchKernel(const int &dimension, bool expert)
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
+PatchKernel::PatchKernel(int id, int dimension, bool expert)
 	: m_expert(expert)
 {
 	// Initialize the patch
@@ -602,7 +602,7 @@ void PatchKernel::endAlteration(bool squeezeStorage)
 
 	\param id is the id of the cell that needs to be refined
 */
-void PatchKernel::markCellForRefinement(const long &id)
+void PatchKernel::markCellForRefinement(long id)
 {
 	bool updated = _markCellForRefinement(id);
 
@@ -616,7 +616,7 @@ void PatchKernel::markCellForRefinement(const long &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-void PatchKernel::markCellForCoarsening(const long &id)
+void PatchKernel::markCellForCoarsening(long id)
 {
 	bool updated = _markCellForCoarsening(id);
 
@@ -630,7 +630,7 @@ void PatchKernel::markCellForCoarsening(const long &id)
 
 	\param id is the id of the cell
 */
-void PatchKernel::resetCellAdaptionMarker(const long &id)
+void PatchKernel::resetCellAdaptionMarker(long id)
 {
 	bool updated = _resetCellAdaptionMarker(id);
 
@@ -650,7 +650,7 @@ void PatchKernel::resetCellAdaptionMarker(const long &id)
 	\param id is the id of the cell
 	\return The adaption marker of the cell.
 */
-adaption::Marker PatchKernel::getCellAdaptionMarker(const long &id)
+adaption::Marker PatchKernel::getCellAdaptionMarker(long id)
 {
 	return _getCellAdaptionMarker(id);
 }
@@ -661,7 +661,7 @@ adaption::Marker PatchKernel::getCellAdaptionMarker(const long &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-void PatchKernel::enableCellBalancing(const long &id, bool enabled)
+void PatchKernel::enableCellBalancing(long id, bool enabled)
 {
 	bool updated = _enableCellBalancing(id, enabled);
 
@@ -1098,7 +1098,7 @@ const PiercedVector<Vertex> & PatchKernel::getVertices() const
 	\param id is the id of the requested vertex
 	\return A reference to the vertex with the specified id.
 */
-Vertex & PatchKernel::getVertex(const long &id)
+Vertex & PatchKernel::getVertex(long id)
 {
 	return m_vertices[id];
 }
@@ -1109,7 +1109,7 @@ Vertex & PatchKernel::getVertex(const long &id)
 	\param id is the id of the requested vertex
 	\return A constant reference to the vertex with the specified id.
 */
-const Vertex & PatchKernel::getVertex(const long &id) const
+const Vertex & PatchKernel::getVertex(long id) const
 {
 	return m_vertices[id];
 }
@@ -1119,7 +1119,7 @@ const Vertex & PatchKernel::getVertex(const long &id) const
 
 	\result An iterator to the specified vertex.
 */
-PatchKernel::VertexIterator PatchKernel::getVertexIterator(const long &id)
+PatchKernel::VertexIterator PatchKernel::getVertexIterator(long id)
 {
 	return m_vertices.find(id);
 }
@@ -1149,7 +1149,7 @@ PatchKernel::VertexIterator PatchKernel::vertexEnd()
 
 	\result A constant iterator to the specified vertex.
 */
-PatchKernel::VertexConstIterator PatchKernel::getVertexConstIterator(const long &id) const
+PatchKernel::VertexConstIterator PatchKernel::getVertexConstIterator(long id) const
 {
 	return m_vertices.find(id);
 }
@@ -1270,7 +1270,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 	\param id is the id of the vertex to restore
 	\return An iterator pointing to the restored vertex.
 */
-PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &&coords, const long &id)
+PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &&coords, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -1293,7 +1293,7 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 	\param id is the id of the vertex
 	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteVertex(const long &id, bool delayed)
+bool PatchKernel::deleteVertex(long id, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -1410,7 +1410,7 @@ std::vector<long> PatchKernel::findOrphanVertices()
 	// Build a list
 	std::vector<long> vertexList;
 	vertexList.reserve(vertexSet.size());
-	for (const long &id : vertexSet) {
+	for (long id : vertexSet) {
 		vertexList.emplace_back();
 		long &lastId = vertexList.back();
 		lastId = id;
@@ -1563,7 +1563,7 @@ bool PatchKernel::deleteCoincidentVertices()
 	\param id is the id of the vertex
 	\result The coordinates of the specified vertex.
 */
-const std::array<double, 3> & PatchKernel::getVertexCoords(const long &id) const
+const std::array<double, 3> & PatchKernel::getVertexCoords(long id) const
 {
 	return getVertex(id).getCoords();
 }
@@ -1631,7 +1631,7 @@ const PiercedVector<Cell> & PatchKernel::getCells() const
 	\param id is the id of the requested cell
 	\return A reference to the cell with the specified id.
 */
-Cell & PatchKernel::getCell(const long &id)
+Cell & PatchKernel::getCell(long id)
 {
 	return m_cells[id];
 }
@@ -1642,7 +1642,7 @@ Cell & PatchKernel::getCell(const long &id)
 	\param id is the id of the requested cell
 	\return A constant reference to the cell with the specified id.
 */
-const Cell & PatchKernel::getCell(const long &id) const
+const Cell & PatchKernel::getCell(long id) const
 {
 	return m_cells[id];
 }
@@ -1653,7 +1653,7 @@ const Cell & PatchKernel::getCell(const long &id) const
 	\param id is the id of the requested cell
 	\return The element type for the cell with the specified id.
 */
-ElementType PatchKernel::getCellType(const long &id) const
+ElementType PatchKernel::getCellType(long id) const
 {
 	return m_cells[id].getType();
 }
@@ -1683,7 +1683,7 @@ const Cell & PatchKernel::getLastInternal() const
 
 	\result An iterator to the specified cell.
 */
-PatchKernel::CellIterator PatchKernel::getCellIterator(const long &id)
+PatchKernel::CellIterator PatchKernel::getCellIterator(long id)
 {
 	return m_cells.find(id);
 }
@@ -1737,7 +1737,7 @@ PatchKernel::CellIterator PatchKernel::internalEnd()
 
 	\result A constant iterator to the specified cell.
 */
-PatchKernel::CellConstIterator PatchKernel::getCellConstIterator(const long &id) const
+PatchKernel::CellConstIterator PatchKernel::getCellConstIterator(long id) const
 {
 	return m_cells.find(id);
 }
@@ -2046,7 +2046,7 @@ PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::uniqu
 	\return An iterator pointing to the restored cell.
 */
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-												   const long &id)
+												   long id)
 {
 	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
@@ -2086,7 +2086,7 @@ void PatchKernel::_restoreInternal(CellIterator iterator, ElementType type,
 	removing the cell
 	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteCell(long id, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -2270,7 +2270,7 @@ long PatchKernel::_getCellNativeIndex(long id) const
 	\param id is the id of the cell
 	\result All the neighbours of the specified cell.
 */
-std::vector<long> PatchKernel::findCellNeighs(const long &id) const
+std::vector<long> PatchKernel::findCellNeighs(long id) const
 {
 	std::vector<long> neighs;
 	findCellNeighs(id, &neighs);
@@ -2286,7 +2286,7 @@ std::vector<long> PatchKernel::findCellNeighs(const long &id) const
 	The vector is not cleared before adding the neighbours, it is extended
 	by appending all the neighbours found by this function
 */
-void PatchKernel::findCellNeighs(const long &id, std::vector<long> *neighs) const
+void PatchKernel::findCellNeighs(long id, std::vector<long> *neighs) const
 {
 	std::vector<long> blackList;
 	_findCellNeighs(id, blackList, neighs);
@@ -2309,7 +2309,7 @@ void PatchKernel::findCellNeighs(const long &id, std::vector<long> *neighs) cons
 	also the neighbours for lower codimensions.
 	\result The neighbours for the specified codimension.
 */
-std::vector<long> PatchKernel::findCellNeighs(const long &id, int codimension, bool complete) const
+std::vector<long> PatchKernel::findCellNeighs(long id, int codimension, bool complete) const
 {
 	std::vector<long> neighs;
 	findCellNeighs(id, codimension, complete, &neighs);
@@ -2337,7 +2337,7 @@ std::vector<long> PatchKernel::findCellNeighs(const long &id, int codimension, b
 	the neighbours, it is extended by appending all the neighbours found by
 	this function
 */
-void PatchKernel::findCellNeighs(const long &id, int codimension, bool complete, std::vector<long> *neighs) const
+void PatchKernel::findCellNeighs(long id, int codimension, bool complete, std::vector<long> *neighs) const
 {
 	assert(codimension >= 1 && codimension <= getDimension());
 
@@ -2356,7 +2356,7 @@ void PatchKernel::findCellNeighs(const long &id, int codimension, bool complete,
 	\param id is the id of the cell
 	\result The neighbours of all the faces of the specified cell.
 */
-std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
+std::vector<long> PatchKernel::findCellFaceNeighs(long id) const
 {
 	std::vector<long> neighs;
 	findCellFaceNeighs(id, &neighs);
@@ -2377,7 +2377,7 @@ std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::_findCellNeighs(const long &id, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void PatchKernel::_findCellNeighs(long id, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	// Some patches can work (at least partially) without initializing the
 	// cell list. To handle those patches, if there are no cells the vertex
@@ -2406,7 +2406,7 @@ void PatchKernel::_findCellNeighs(const long &id, const std::vector<long> &black
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::findCellFaceNeighs(const long &id, std::vector<long> *neighs) const
+void PatchKernel::findCellFaceNeighs(long id, std::vector<long> *neighs) const
 {
 	// Some patches can work (at least partially) without initializing the
 	// cell list. To handle those patches, if there are no cells the face
@@ -2434,7 +2434,7 @@ void PatchKernel::findCellFaceNeighs(const long &id, std::vector<long> *neighs) 
 	\param face is a face of the cell
 	\result The neighbours of the specified cell for the given face.
 */
-std::vector<long> PatchKernel::findCellFaceNeighs(const long &id, const int &face) const
+std::vector<long> PatchKernel::findCellFaceNeighs(long id, int face) const
 {
 	std::vector<long> neighs;
 	_findCellFaceNeighs(id, face, std::vector<long>(), &neighs);
@@ -2452,7 +2452,7 @@ std::vector<long> PatchKernel::findCellFaceNeighs(const long &id, const int &fac
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::findCellFaceNeighs(const long &id, const int &face, std::vector<long> *neighs) const
+void PatchKernel::findCellFaceNeighs(long id, int face, std::vector<long> *neighs) const
 {
 	_findCellFaceNeighs(id, face, std::vector<long>(), neighs);
 }
@@ -2469,7 +2469,7 @@ void PatchKernel::findCellFaceNeighs(const long &id, const int &face, std::vecto
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void PatchKernel::_findCellFaceNeighs(long id, int face, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	const Cell &cell = getCell(id);
 
@@ -2494,7 +2494,7 @@ void PatchKernel::_findCellFaceNeighs(const long &id, const int &face, const std
 	contain also neighbours that share an entire face
 	\result The neighbours of all the edges of the specified cell.
 */
-std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, bool complete) const
+std::vector<long> PatchKernel::findCellEdgeNeighs(long id, bool complete) const
 {
 	std::vector<long> neighs;
 	findCellEdgeNeighs(id, complete, &neighs);
@@ -2516,7 +2516,7 @@ std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, bool complete)
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::findCellEdgeNeighs(const long &id, bool complete, std::vector<long> *neighs) const
+void PatchKernel::findCellEdgeNeighs(long id, bool complete, std::vector<long> *neighs) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -2556,7 +2556,7 @@ void PatchKernel::findCellEdgeNeighs(const long &id, bool complete, std::vector<
 	\param edge is an edge of the cell
 	\result The neighbours of the specified cell for the given edge.
 */
-std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, const int &edge) const
+std::vector<long> PatchKernel::findCellEdgeNeighs(long id, int edge) const
 {
 	std::vector<long> neighs;
 	findCellEdgeNeighs(id, edge, &neighs);
@@ -2576,7 +2576,7 @@ std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, const int &edg
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::findCellEdgeNeighs(const long &id, const int &edge, std::vector<long> *neighs) const
+void PatchKernel::findCellEdgeNeighs(long id, int edge, std::vector<long> *neighs) const
 {
 	_findCellEdgeNeighs(id, edge, std::vector<long>(), neighs);
 }
@@ -2595,7 +2595,7 @@ void PatchKernel::findCellEdgeNeighs(const long &id, const int &edge, std::vecto
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void PatchKernel::_findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -2639,7 +2639,7 @@ void PatchKernel::_findCellEdgeNeighs(const long &id, const int &edge, const std
 	contain also neighbours that share an entire face or an entire edge
 	\result The neighbours of all the vertices of the specified cell.
 */
-std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complete) const
+std::vector<long> PatchKernel::findCellVertexNeighs(long id, bool complete) const
 {
 	std::vector<long> neighs;
 	findCellVertexNeighs(id, complete, &neighs);
@@ -2659,7 +2659,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complet
 	cleared before adding the neighbours, it is extended by appending all
 	the neighbours found by this function
 */
-void PatchKernel::findCellVertexNeighs(const long &id, bool complete, std::vector<long> *neighs) const
+void PatchKernel::findCellVertexNeighs(long id, bool complete, std::vector<long> *neighs) const
 {
 	// Some patches can work (at least partially) without initializing the
 	// cell list. To handle those patches, if there are no cells the vertex
@@ -2696,7 +2696,7 @@ void PatchKernel::findCellVertexNeighs(const long &id, bool complete, std::vecto
 	\param vertex is a vertex of the cell
 	\result The neighbours of the specified cell for the given vertex.
 */
-std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const int &vertex) const
+std::vector<long> PatchKernel::findCellVertexNeighs(long id, int vertex) const
 {
 	std::vector<long> neighs;
 	findCellVertexNeighs(id, vertex, &neighs);
@@ -2714,7 +2714,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const int &v
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, std::vector<long> *neighs) const
+void PatchKernel::findCellVertexNeighs(long id, int vertex, std::vector<long> *neighs) const
 {
 	_findCellVertexNeighs(id, vertex, std::vector<long>(), neighs);
 }
@@ -2747,7 +2747,7 @@ void PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, std::v
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void PatchKernel::_findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	const Cell &cell = getCell(id);
 	long vertexId = cell.getVertexId(vertex);
@@ -2852,7 +2852,7 @@ void PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const
 	\param vertex is a vertex of the cell
 	\result The one-ring of the specified vertex of the cell.
 */
-std::vector<long> PatchKernel::findCellVertexOneRing(const long &id, const int &vertex) const
+std::vector<long> PatchKernel::findCellVertexOneRing(long id, int vertex) const
 {
 	std::vector<long> ring;
 	findCellVertexOneRing(id, vertex, &ring);
@@ -2870,7 +2870,7 @@ std::vector<long> PatchKernel::findCellVertexOneRing(const long &id, const int &
 	neighbours, it is extended by appending all the neighbours found by this
 	function
 */
-void PatchKernel::findCellVertexOneRing(const long &id, const int &vertex, std::vector<long> *ring) const
+void PatchKernel::findCellVertexOneRing(long id, int vertex, std::vector<long> *ring) const
 {
 	findCellVertexNeighs(id, vertex, ring);
 	utils::addToOrderedVector<long>(id, *ring);
@@ -2989,7 +2989,7 @@ const PiercedVector<Interface> & PatchKernel::getInterfaces() const
 	\param id is the id of the requested interface
 	\return A reference to the interface with the specified id.
 */
-Interface & PatchKernel::getInterface(const long &id)
+Interface & PatchKernel::getInterface(long id)
 {
 	return m_interfaces[id];
 }
@@ -3000,7 +3000,7 @@ Interface & PatchKernel::getInterface(const long &id)
 	\param id is the id of the requested interface
 	\return A constant reference to the interface with the specified id.
 */
-const Interface & PatchKernel::getInterface(const long &id) const
+const Interface & PatchKernel::getInterface(long id) const
 {
 	return m_interfaces[id];
 }
@@ -3011,7 +3011,7 @@ const Interface & PatchKernel::getInterface(const long &id) const
 	\param id is the id of the requested interface
 	\return The element type for the interface with the specified id.
 */
-ElementType PatchKernel::getInterfaceType(const long &id) const
+ElementType PatchKernel::getInterfaceType(long id) const
 {
 	return m_interfaces[id].getType();
 }
@@ -3021,7 +3021,7 @@ ElementType PatchKernel::getInterfaceType(const long &id) const
 
 	\result An iterator to the specified interface.
 */
-PatchKernel::InterfaceIterator PatchKernel::getInterfaceIterator(const long &id)
+PatchKernel::InterfaceIterator PatchKernel::getInterfaceIterator(long id)
 {
 	return m_interfaces.find(id);
 }
@@ -3051,7 +3051,7 @@ PatchKernel::InterfaceIterator PatchKernel::interfaceEnd()
 
 	\result A constant iterator to the specified interface.
 */
-PatchKernel::InterfaceConstIterator PatchKernel::getInterfaceConstIterator(const long &id) const
+PatchKernel::InterfaceConstIterator PatchKernel::getInterfaceConstIterator(long id) const
 {
 	return m_interfaces.find(id);
 }
@@ -3219,7 +3219,7 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 */
 PatchKernel::InterfaceIterator PatchKernel::restoreInterface(ElementType type,
 															 std::unique_ptr<long[]> &&connectStorage,
-															 const long &id)
+															 long id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -3248,7 +3248,7 @@ PatchKernel::InterfaceIterator PatchKernel::restoreInterface(ElementType type,
 	removing the interface
 	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteInterface(long id, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -3815,7 +3815,7 @@ void PatchKernel::_adaptionCleanup()
 	\param id the cell to be refined
 	\result Returns true if the marker was properly set, false otherwise.
 */
-bool PatchKernel::_markCellForRefinement(const long &id)
+bool PatchKernel::_markCellForRefinement(long id)
 {
 	BITPIT_UNUSED(id);
 
@@ -3830,7 +3830,7 @@ bool PatchKernel::_markCellForRefinement(const long &id)
 	\param id the cell to be refined
 	\result Returns true if the marker was properly set, false otherwise.
 */
-bool PatchKernel::_markCellForCoarsening(const long &id)
+bool PatchKernel::_markCellForCoarsening(long id)
 {
 	BITPIT_UNUSED(id);
 
@@ -3845,7 +3845,7 @@ bool PatchKernel::_markCellForCoarsening(const long &id)
 	\param id the cell to be refined
 	\result Returns true if the marker was properly reset, false otherwise.
 */
-bool PatchKernel::_resetCellAdaptionMarker(const long &id)
+bool PatchKernel::_resetCellAdaptionMarker(long id)
 {
 	BITPIT_UNUSED(id);
 
@@ -3860,7 +3860,7 @@ bool PatchKernel::_resetCellAdaptionMarker(const long &id)
 	\param id is the id of the cell
 	\return The adaption marker of the cell.
 */
-adaption::Marker PatchKernel::_getCellAdaptionMarker(const long &id)
+adaption::Marker PatchKernel::_getCellAdaptionMarker(long id)
 {
 	BITPIT_UNUSED(id);
 
@@ -3876,7 +3876,7 @@ adaption::Marker PatchKernel::_getCellAdaptionMarker(const long &id)
 	\param enabled defines if enable the balancing for the specified cell
 	\result Returns true if the falg was properly set, false otherwise.
 */
-bool PatchKernel::_enableCellBalancing(const long &id, bool enabled)
+bool PatchKernel::_enableCellBalancing(long id, bool enabled)
 {
 	BITPIT_UNUSED(id);
 	BITPIT_UNUSED(enabled);
@@ -4029,7 +4029,7 @@ bool PatchKernel::squeeze()
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> PatchKernel::evalCellCentroid(const long &id) const
+std::array<double, 3> PatchKernel::evalCellCentroid(long id) const
 {
 	const Cell &cell = getCell(id);
 
@@ -4072,7 +4072,7 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getCellVertexCoordinates(lo
 	\param id is the id of the interface
 	\result The centroid of the specified interface.
 */
-std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id) const
+std::array<double, 3> PatchKernel::evalInterfaceCentroid(long id) const
 {
 	const Interface &interface = getInterface(id);
 
@@ -4169,7 +4169,7 @@ void PatchKernel::evalElementBoundingBox(const Element &element, std::array<doub
 	\result Returns the id of the cell the contains the point. If the point
 	is not inside the patch, the function returns the id of the null element.
 */
-long PatchKernel::locatePoint(const double &x, const double &y, const double &z)
+long PatchKernel::locatePoint(double x, double y, double z)
 {
 	return locatePoint({{x, y, z}});
 }
@@ -4659,7 +4659,7 @@ PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int
 	\param neighId is the id of a neighbour of the cell
 	\result The face of the neighbour which adjoin the specified cell
  */
-int PatchKernel::findAdjoinNeighFace(const long &cellId, const long &neighId) const
+int PatchKernel::findAdjoinNeighFace(long cellId, long neighId) const
 {
 	const Cell &neigh = m_cells[neighId];
 	const int nNeighFaces = neigh.getFaceCount();

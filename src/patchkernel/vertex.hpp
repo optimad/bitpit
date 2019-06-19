@@ -52,8 +52,8 @@ public:
 	};
 
 	Vertex();
-	Vertex(const long &id);
-	Vertex(const long &id, const std::array<double, 3> &coords);
+	Vertex(long id);
+	Vertex(long id, const std::array<double, 3> &coords);
 
 	Vertex(const Vertex &other) = default;
 	Vertex(Vertex &&other) = default;
@@ -67,19 +67,19 @@ public:
 	bool operator==(const Vertex &other) const;
 
 	double & operator[](int coord_id);
-	const double & operator[](int coord_id) const;
+	double  operator[](int coord_id) const;
 
-	void setId(const long &id);
+	void setId(long id);
 	long getId() const;
 
 	void setCoords(const std::array<double, 3> &coords);
 	const std::array<double, 3> & getCoords() const;
 
 	void translate(const std::array<double, 3> &translation);
-	void translate(const double &sx, const double &sy, const double &sz);
+	void translate(double sx, double sy, double sz);
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center);
-	void scale(const double &sx, const double &sy, const double &sz,
-	           const double &cx, const double &cy, const double &cz);
+	void scale(double sx, double sy, double sz,
+	           double cx, double cy, double cz);
         void display(std::ostream &, unsigned int padding = 0);
 
 	static const long NULL_ID;

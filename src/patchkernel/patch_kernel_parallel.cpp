@@ -206,7 +206,7 @@ void PatchKernel::_setHaloSize(std::size_t haloSize)
 	\param[in] id is the index of the cell
 	\param[in] ownerRank is the owner of the cell
 */
-PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id, int ownerRank)
+PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(long id, int ownerRank)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -247,7 +247,7 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id, int ow
 
 	\param[in] id is the index of the cell
 */
-PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
+PatchKernel::CellIterator PatchKernel::moveGhost2Internal(long id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -501,7 +501,7 @@ PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_p
 	\return An iterator pointing to the restored cell.
 */
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-												   int rank, const long &id)
+												   int rank, long id)
 {
 	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
@@ -1149,7 +1149,7 @@ void PatchKernel::_partitioningCleanup()
 	\param id is the id of the requested cell
 	\result The rank that owns the specified cell.
 */
-int PatchKernel::getCellRank(const long &id) const
+int PatchKernel::getCellRank(long id) const
 {
 	const Cell &cell = getCell(id);
 	if (cell.isInterior()) {
@@ -1165,7 +1165,7 @@ int PatchKernel::getCellRank(const long &id) const
 	\param id is the id of the requested cell
 	\result The halo layer of the specified cell.
 */
-int PatchKernel::getCellHaloLayer(const long &id) const
+int PatchKernel::getCellHaloLayer(long id) const
 {
 	const Cell &cell = getCell(id);
 	if (cell.isInterior()) {

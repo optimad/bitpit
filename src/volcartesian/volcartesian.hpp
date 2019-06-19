@@ -76,18 +76,18 @@ public:
 
 	long getCellCount() const override;
 	ElementType getCellType() const;
-	ElementType getCellType(const long &id) const override;
+	ElementType getCellType(long id) const override;
 
 	long getInterfaceCount() const override;
 	ElementType getInterfaceType() const;
-	ElementType getInterfaceType(const long &id) const override;
+	ElementType getInterfaceType(long id) const override;
 
-	double evalCellVolume(const long &id) const override;
-	double evalCellSize(const long &id) const override;
-	std::array<double, 3> evalCellCentroid(const long &id) const override;
+	double evalCellVolume(long id) const override;
+	double evalCellSize(long id) const override;
+	std::array<double, 3> evalCellCentroid(long id) const override;
 
-	double evalInterfaceArea(const long &id) const override;
-	std::array<double, 3> evalInterfaceNormal(const long &id) const override;
+	double evalInterfaceArea(long id) const override;
+	std::array<double, 3> evalInterfaceNormal(long id) const override;
 
 	std::array<double, 3> getSpacing() const;
 	double getSpacing(const int &direction) const;
@@ -96,7 +96,7 @@ public:
 	MemoryMode getMemoryMode();
 
 	bool isPointInside(const std::array<double, 3> &point) override;
-	bool isPointInside(const long &id, const std::array<double, 3> &point) override;
+	bool isPointInside(long id, const std::array<double, 3> &point) override;
 	long locatePoint(const std::array<double, 3> &point) override;
 	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
 	long locateClosestVertex(std::array<double,3> const &point) const;
@@ -146,9 +146,9 @@ protected:
 	void _dump(std::ostream &stream) const override;
 	void _restore(std::istream &stream) override;
 
-	void _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellFaceNeighs(long id, int face, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 
 private:
 	MemoryMode m_memoryMode;

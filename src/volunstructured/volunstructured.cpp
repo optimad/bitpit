@@ -113,7 +113,7 @@ void VolUnstructured::setExpert(bool expert)
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double VolUnstructured::evalCellVolume(const long &id) const
+double VolUnstructured::evalCellVolume(long id) const
 {
 	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
 
@@ -133,7 +133,7 @@ double VolUnstructured::evalCellVolume(const long &id) const
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double VolUnstructured::evalCellSize(const long &id) const
+double VolUnstructured::evalCellSize(long id) const
 {
 	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
 
@@ -149,7 +149,7 @@ double VolUnstructured::evalCellSize(const long &id) const
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double VolUnstructured::evalInterfaceArea(const long &id) const
+double VolUnstructured::evalInterfaceArea(long id) const
 {
 	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
 
@@ -169,7 +169,7 @@ double VolUnstructured::evalInterfaceArea(const long &id) const
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id) const
+std::array<double, 3> VolUnstructured::evalInterfaceNormal(long id) const
 {
 	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
 
@@ -260,7 +260,7 @@ bool VolUnstructured::isPointInside(const std::array<double, 3> &point)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolUnstructured::isPointInside(const long &id, const std::array<double, 3> &point)
+bool VolUnstructured::isPointInside(long id, const std::array<double, 3> &point)
 {
 	BITPIT_UNUSED(id);
 	BITPIT_UNUSED(point);

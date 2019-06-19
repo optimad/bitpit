@@ -81,13 +81,13 @@ public:
 
 	void settleAdaptionMarkers() override;
 
-	double evalCellVolume(const long &id) const override;
-	double evalCellSize(const long &id) const override;
-	std::array<double, 3> evalCellCentroid(const long &id) const override;
+	double evalCellVolume(long id) const override;
+	double evalCellSize(long id) const override;
+	std::array<double, 3> evalCellCentroid(long id) const override;
 	void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const override;
 
-	double evalInterfaceArea(const long &id) const override;
-	std::array<double, 3> evalInterfaceNormal(const long &id) const override;
+	double evalInterfaceArea(long id) const override;
+	std::array<double, 3> evalInterfaceNormal(long id) const override;
 
 	OctantInfo getCellOctant(const long &id) const;
 	int getCellLevel(const long &id) const;
@@ -101,7 +101,7 @@ public:
 	void setTreeAdopter(std::unique_ptr<PabloUniform> *entruster);
 
 	bool isPointInside(const std::array<double, 3> &point) override;
-	bool isPointInside(const long &id, const std::array<double, 3> &point) override;
+	bool isPointInside(long id, const std::array<double, 3> &point) override;
 	long locatePoint(const std::array<double, 3> &point) override;
 
 	std::array<double, 3> getOrigin() const;
@@ -116,7 +116,7 @@ public:
 #if BITPIT_ENABLE_MPI==1
 	void setCommunicator(MPI_Comm communicator) override;
 
-	int getCellHaloLayer(const long &id) const override;
+	int getCellHaloLayer(long id) const override;
 #endif
 
 protected:
@@ -127,11 +127,11 @@ protected:
 	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption) override;
 	std::vector<adaption::Info> _adaptionAlter(bool trackAdaption) override;
 	void _adaptionCleanup() override;
-	bool _markCellForRefinement(const long &id) override;
-	bool _markCellForCoarsening(const long &id) override;
-	bool _resetCellAdaptionMarker(const long &id) override;
-	adaption::Marker _getCellAdaptionMarker(const long &id) override;
-	bool _enableCellBalancing(const long &id, bool enabled) override;
+	bool _markCellForRefinement(long id) override;
+	bool _markCellForCoarsening(long id) override;
+	bool _resetCellAdaptionMarker(long id) override;
+	adaption::Marker _getCellAdaptionMarker(long id) override;
+	bool _enableCellBalancing(long id, bool enabled) override;
 	void _setTol(double tolerance) override;
 	void _resetTol() override;
 
@@ -141,9 +141,9 @@ protected:
 
 	long _getCellNativeIndex(long id) const override;
 
-	void _findCellNeighs(const long &id, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellNeighs(long id, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
 
 #if BITPIT_ENABLE_MPI==1
 	std::size_t _getMaxHaloSize() override;

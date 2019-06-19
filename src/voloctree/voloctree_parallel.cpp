@@ -51,7 +51,7 @@ void VolOctree::setCommunicator(MPI_Comm communicator)
 	\param id is the id of the requested cell
 	\result The halo layer of the specified cell.
 */
-int VolOctree::getCellHaloLayer(const long &id) const
+int VolOctree::getCellHaloLayer(long id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	if (octantInfo.internal) {

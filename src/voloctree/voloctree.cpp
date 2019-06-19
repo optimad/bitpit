@@ -454,7 +454,7 @@ void VolOctree::setBoundingBox()
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double VolOctree::evalCellVolume(const long &id) const
+double VolOctree::evalCellVolume(long id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
@@ -468,7 +468,7 @@ double VolOctree::evalCellVolume(const long &id) const
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> VolOctree::evalCellCentroid(const long &id) const
+std::array<double, 3> VolOctree::evalCellCentroid(long id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
@@ -498,7 +498,7 @@ void VolOctree::evalCellBoundingBox(long id, std::array<double,3> *minPoint, std
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double VolOctree::evalCellSize(const long &id) const
+double VolOctree::evalCellSize(long id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
@@ -512,7 +512,7 @@ double VolOctree::evalCellSize(const long &id) const
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double VolOctree::evalInterfaceArea(const long &id) const
+double VolOctree::evalInterfaceArea(long id) const
 {
 	const Interface &interface = getInterface(id);
 	long owner = interface.getOwner();
@@ -529,7 +529,7 @@ double VolOctree::evalInterfaceArea(const long &id) const
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> VolOctree::evalInterfaceNormal(const long &id) const
+std::array<double, 3> VolOctree::evalInterfaceNormal(long id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -1821,7 +1821,7 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds)
 
 	\param id is the id of the cell that needs to be refined
 */
-bool VolOctree::_markCellForRefinement(const long &id)
+bool VolOctree::_markCellForRefinement(long id)
 {
 	return setMarker(id, 1);
 }
@@ -1831,7 +1831,7 @@ bool VolOctree::_markCellForRefinement(const long &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-bool VolOctree::_markCellForCoarsening(const long &id)
+bool VolOctree::_markCellForCoarsening(long id)
 {
 	return setMarker(id, -1);
 }
@@ -1842,7 +1842,7 @@ bool VolOctree::_markCellForCoarsening(const long &id)
 	\param id the cell to be refined
 	\result Returns true if the marker was properly reset, false otherwise.
 */
-bool VolOctree::_resetCellAdaptionMarker(const long &id)
+bool VolOctree::_resetCellAdaptionMarker(long id)
 {
 	return setMarker(id, 0);
 }
@@ -1853,7 +1853,7 @@ bool VolOctree::_resetCellAdaptionMarker(const long &id)
 	\param id is the id of the cell
 	\return The adaption marker of the cell.
 */
-adaption::Marker VolOctree::_getCellAdaptionMarker(const long &id)
+adaption::Marker VolOctree::_getCellAdaptionMarker(long id)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {
@@ -1895,7 +1895,7 @@ bool VolOctree::setMarker(const long &id, const int8_t &value)
 	\param enabled defines if enable the balancing for the specified cell
 	\result Returns true if the falg was properly set, false otherwise.
 */
-bool VolOctree::_enableCellBalancing(const long &id, bool enabled)
+bool VolOctree::_enableCellBalancing(long id, bool enabled)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {
@@ -1927,7 +1927,7 @@ bool VolOctree::isPointInside(const std::array<double, 3> &point)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolOctree::isPointInside(const long &id, const std::array<double, 3> &point)
+bool VolOctree::isPointInside(long id, const std::array<double, 3> &point)
 {
 	const Cell &cell = m_cells[id];
 	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
@@ -2263,7 +2263,7 @@ void VolOctree::scale(std::array<double, 3> scaling)
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolOctree::_findCellNeighs(const long &id, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolOctree::_findCellNeighs(long id, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
@@ -2300,7 +2300,7 @@ void VolOctree::_findCellNeighs(const long &id, const std::vector<long> &blackLi
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolOctree::_findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -2356,7 +2356,7 @@ void VolOctree::_findCellEdgeNeighs(const long &id, const int &edge, const std::
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolOctree::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
 {
 	// Get octant info
 	const OctantInfo octantInfo = getCellOctant(id);

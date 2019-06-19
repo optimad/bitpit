@@ -102,7 +102,7 @@ public:
 	bool hasInfo() const;
 	const ReferenceElementInfo & getInfo() const;
 
-	void setId(const long &id);
+	void setId(long id);
 	long getId() const;
 	
 	void setType(ElementType type);
@@ -122,18 +122,18 @@ public:
 	bool hasSameConnect(const Element &other) const;
 
 	int getFaceCount() const;
-	ElementType getFaceType(const int &face) const;
-	int getFaceVertexCount(const int &face) const;
-	ConstProxyVector<int> getFaceLocalConnect(const int &face) const;
+	ElementType getFaceType(int face) const;
+	int getFaceVertexCount(int face) const;
+	ConstProxyVector<int> getFaceLocalConnect(int face) const;
 	ConstProxyVector<long> getFaceConnect(int face) const;
 	ConstProxyVector<long> getFaceVertexIds(int face) const;
 	long getFaceVertexId(int face, int vertex) const;
 	ConstProxyVector<int> getFaceLocalVertexIds(int face) const;
 
 	int getEdgeCount() const;
-	ElementType getEdgeType(const int &edge) const;
-	int getEdgeVertexCount(const int &edge) const;
-	ConstProxyVector<int> getEdgeLocalConnect(const int &edge) const;
+	ElementType getEdgeType(int edge) const;
+	int getEdgeVertexCount(int edge) const;
+	ConstProxyVector<int> getEdgeLocalConnect(int edge) const;
 	ConstProxyVector<long> getEdgeConnect(int edge) const;
 	ConstProxyVector<long> getEdgeVertexIds(int edge) const;
 	long getEdgeVertexId(int edge, int vertex) const;

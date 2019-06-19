@@ -89,7 +89,7 @@ Vertex::Vertex()
 /*!
 	Creates a new element.
 */
-Vertex::Vertex(const long &id)
+Vertex::Vertex(long id)
 {
 	_initialize(id, {{0., 0., 0.}});
 }
@@ -100,7 +100,7 @@ Vertex::Vertex(const long &id)
 	\param[in] id is the id of the vertex
 	\param[in] coords are the vertex coordinates
 */
-Vertex::Vertex(const long &id, const std::array<double, 3> &coords)
+Vertex::Vertex(long id, const std::array<double, 3> &coords)
 {
 	_initialize(id, coords);
 }
@@ -176,7 +176,7 @@ double & Vertex::operator[](int coord_id)
 	\param coord_id is the index of the requested coordinate
 	\result Returns a constant reference to requested coordinate
 */
-const double & Vertex::operator[](int coord_id) const
+double  Vertex::operator[](int coord_id) const
 {
 	return m_coords[coord_id];
 }
@@ -186,7 +186,7 @@ const double & Vertex::operator[](int coord_id) const
 
 	\param id the ID of the vertex
 */
-void Vertex::setId(const long &id)
+void Vertex::setId(long id)
 {
 	m_id = id;
 }
@@ -240,7 +240,7 @@ void Vertex::translate(const std::array<double, 3> &translation)
 	\param[in] sy translation along y direction
 	\param[in] sz translation along z direction
  */
-void Vertex::translate(const double &sx, const double &sy, const double &sz)
+void Vertex::translate(double sx, double sy, double sz)
 {
 	translate({{sx, sy, sz}});
 }
@@ -268,8 +268,8 @@ void Vertex::scale(const std::array<double, 3> &scaling, const std::array<double
 	\param[in] cy is the y coordinate scaling center
 	\param[in] cz is the z coordinate scaling center
  */
-void Vertex::scale(const double &sx, const double &sy, const double &sz,
-                   const double &cx, const double &cy, const double &cz)
+void Vertex::scale(double sx, double sy, double sz,
+                   double cx, double cy, double cz)
 {
 	scale({{sx, sy, sz}}, {{cx, cy, cz}});
 }
