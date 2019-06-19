@@ -431,7 +431,7 @@ const std::string LoggerBuffer::getTimestamp() const
 */
 Logger::Logger(const std::string &name,
                std::ostream *consoleStream, std::ofstream *fileStream,
-               const int &nProcessors, const int &rank)
+               int nProcessors, int rank)
     : std::ios(0), std::ostream(&m_buffer),
     m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
     m_indentation(0), m_context(""), m_priority(log::NORMAL), m_visibility(log::MASTER),
@@ -721,7 +721,7 @@ std::string Logger::getContext()
 
     \param delta is the relative indentation level
 */
-void Logger::setIndentation(const int &delta)
+void Logger::setIndentation(int delta)
 {
     m_indentation = std::max(m_indentation + delta, 0);
 
@@ -983,7 +983,7 @@ Logger & LoggerManager::cout(const std::string &name)
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset,
-                            const int &nProcessors, const int &rank)
+                            int nProcessors, int rank)
 {
     initialize(mode, m_defaultName, reset, m_defaultDirectory, nProcessors, rank);
 }
@@ -998,7 +998,7 @@ void LoggerManager::initialize(log::Mode mode, bool reset,
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &directory,
-                            const int &nProcessors, const int &rank)
+                            int nProcessors, int rank)
 {
     initialize(mode, m_defaultName, reset, directory, nProcessors, rank);
 }
@@ -1015,7 +1015,7 @@ void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &di
 */
 void LoggerManager::initialize(log::Mode mode, const std::string &name, bool reset,
                             const std::string &directory,
-                            const int &nProcessors, const int &rank)
+                            int nProcessors, int rank)
 {
     if (isInitialized()) {
         log::cout().println("Logger initialization has to be called before creating the loggers.");
@@ -1042,7 +1042,7 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
-                        const int &nProcessors, const int &rank)
+                        int nProcessors, int rank)
 {
     create(name, reset, m_defaultDirectory, nProcessors, rank);
 }
@@ -1058,7 +1058,7 @@ void LoggerManager::create(const std::string &name, bool reset,
 */
 void LoggerManager::create(const std::string &name, bool reset,
                         const std::string &directory,
-                        const int &nProcessors, const int &rank)
+                        int nProcessors, int rank)
 {
     // Its not possible to create a log with the default name nor a log
     // with the same name of an existent logger nor a log with an empty
@@ -1195,7 +1195,7 @@ log::Mode LoggerManager::getMode() const
 */
 void LoggerManager::_create(const std::string &name, bool reset,
                             const std::string &directory,
-                            const int &nProcessors, const int &rank)
+                            int nProcessors, int rank)
 {
     // Get the file path
     FileHandler fileHandler;
@@ -1565,7 +1565,7 @@ namespace log {
         \result A logger manipulator that allows to set the indentation level
         of the messages.
     */
-    LoggerManipulator<int> indent(const int &delta)
+    LoggerManipulator<int> indent(int delta)
     {
         return LoggerManipulator<int>(setIndentation, delta);
     }

@@ -122,7 +122,7 @@ class Logger : public std::ostream
 public:
     Logger(const std::string &name,
            std::ostream *consoleStream, std::ofstream *fileStream,
-           const int &nProcessors = 1, const int &rank = 0);
+           int nProcessors = 1, int rank = 0);
 
     int getProcessorCount();
     int getRank();
@@ -130,7 +130,7 @@ public:
     void setContext(const std::string &context);
     std::string getContext();
 
-    void setIndentation(const int &delta);
+    void setIndentation(int delta);
     int getIndentation();
 
     void setPriority(log::Priority priority);
@@ -205,21 +205,21 @@ public:
     Logger & cout(const std::string &name);
 
     void initialize(log::Mode mode, bool reset,
-                    const int &nProcessors, const int &rank);
+                    int nProcessors, int rank);
 
     void initialize(log::Mode mode, bool reset = false,
                     const std::string &directory = BITPIT_LOG_DIRECTORY,
-                    const int &nProcessors = 1, const int &rank = 0);
+                    int nProcessors = 1, int rank = 0);
 
     void initialize(log::Mode mode, const std::string &name,
                     bool reset = false, const std::string &directory = BITPIT_LOG_DIRECTORY,
-                    const int &nProcessors = 1, const int &rank = 0);
+                    int nProcessors = 1, int rank = 0);
 
     void create(const std::string &name, bool reset = false,
-                const int &nProcessors = 1, const int &rank = 0);
+                int nProcessors = 1, int rank = 0);
 
     void create(const std::string &name, bool reset, const std::string &directory,
-                const int &nProcessors = 1, const int &rank = 0);
+                int nProcessors = 1, int rank = 0);
 
     bool destroy(const std::string &name, bool force = false);
 
@@ -254,7 +254,7 @@ private:
     LoggerManager& operator=(LoggerManager const&) = delete;
 
     void _create(const std::string &name, bool reset, const std::string &directory,
-                const int &nProcessors, const int &rank);
+                int nProcessors, int rank);
     void _create(const std::string &name, Logger &master);
 
 };
@@ -319,7 +319,7 @@ namespace log {
     LoggerManipulator<log::Priority> fileVerbosity(const log::Verbosity &verbosity);
 
     Logger& setIndentation(Logger& logger, const int &delta);
-    LoggerManipulator<int> indent(const int &delta);
+    LoggerManipulator<int> indent(int delta);
 
 }
 

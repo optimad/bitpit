@@ -38,8 +38,8 @@ class ConfigParser : public Config
 public:
     ConfigParser(const std::string &root);
     ConfigParser(const std::string &root, bool multiSections);
-    ConfigParser(const std::string &root, const int &version);
-    ConfigParser(const std::string &root, const int &version, bool multiSections);
+    ConfigParser(const std::string &root, int version);
+    ConfigParser(const std::string &root, int version, bool multiSections);
 
     void reset(const std::string &root);
     void reset(const std::string &root, int version);

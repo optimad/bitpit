@@ -75,7 +75,7 @@ ConfigParser::ConfigParser(const std::string &root, bool multiSections)
     \param root is the name of the root element
     \param version is the required version
 */
-ConfigParser::ConfigParser(const std::string &root, const int &version)
+ConfigParser::ConfigParser(const std::string &root, int version)
     : Config(false)
 {
     reset(root, version);
@@ -89,7 +89,7 @@ ConfigParser::ConfigParser(const std::string &root, const int &version)
     \param multiSections if set to true the configuration parser will allow
     multiple sections with the same name
 */
-ConfigParser::ConfigParser(const std::string &root, const int &version, bool multiSections)
+ConfigParser::ConfigParser(const std::string &root, int version, bool multiSections)
     : Config(multiSections)
 {
     reset(root, version);
