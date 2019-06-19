@@ -154,7 +154,7 @@ private:
     std::size_t m_pos;
 
     // Constructors
-    explicit PiercedKernelIterator(const kernel_t *kernel, const std::size_t &pos);
+    explicit PiercedKernelIterator(const kernel_t *kernel, std::size_t pos);
 
 };
 

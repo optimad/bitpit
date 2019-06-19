@@ -181,7 +181,7 @@ private:
     storage_t *m_storage;
 
     // Constructors
-    explicit PiercedStorageIterator(storage_t *storage, const std::size_t &pos);
+    explicit PiercedStorageIterator(storage_t *storage, std::size_t pos);
     explicit PiercedStorageIterator(storage_t *storage, const bitpit::PiercedKernelIterator<id_t> &iterator);
 
 };

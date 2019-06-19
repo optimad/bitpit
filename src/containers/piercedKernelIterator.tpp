@@ -41,7 +41,7 @@ PiercedKernelIterator<id_t>::PiercedKernelIterator()
 * base iterator recevied in input.
 */
 template<typename id_t>
-PiercedKernelIterator<id_t>::PiercedKernelIterator(const kernel_t *kernel, const std::size_t &pos)
+PiercedKernelIterator<id_t>::PiercedKernelIterator(const kernel_t *kernel, std::size_t pos)
     : m_kernel(kernel), m_pos(pos)
 {
 }

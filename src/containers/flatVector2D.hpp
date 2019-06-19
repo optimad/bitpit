@@ -69,7 +69,7 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream &buffer, Fla
 public:
     FlatVector2D(bool initialize = true);
     FlatVector2D(const std::vector<int> &sizes, const T &value = T());
-    FlatVector2D(const int &nVectors, const int &size, const T &value = T());
+    FlatVector2D(int nVectors, int size, const T &value = T());
     FlatVector2D(const std::vector<std::vector<T> > &vector2D);
     FlatVector2D(const FlatVector2D &other) = default;
     FlatVector2D(FlatVector2D &&other) = default;
@@ -91,7 +91,7 @@ public:
     FlatVector2D & operator=(FlatVector2D &&other) = default;
 
     void initialize(const std::vector<int> &sizes, const T &value = T());
-    void initialize(const int &nVectors, const int &size, const T &value = T());
+    void initialize(int nVectors, int size, const T &value = T());
     void initialize(const std::vector<std::vector<T> > &vector2D);
     void initialize(const FlatVector2D<T> &other);
 
@@ -114,28 +114,28 @@ public:
     const std::vector<T> & vector() const;
 
     void pushBack();
-    void pushBack(const int &subArraySize, const T &value = T());
+    void pushBack(int subArraySize, const T &value = T());
     void pushBack(const std::vector<T> &subArray);
     void pushBack(int subArraySize, const T *subArray);
     void pushBackItem(const T& value);
-    void pushBackItem(const int &i, const T& value);
+    void pushBackItem(int i, const T& value);
 
     void popBack();
     void popBackItem();
-    void popBackItem(const int &i);
+    void popBackItem(int i);
 
-    void erase(const int &i);
-    void eraseItem(const int &i, const int &j);
+    void erase(int i);
+    void eraseItem(int i, int j);
 
-    void setItem(const int &i, const int &j, const T &value);
-    T & getItem(const int &i, const int &j);
-    const T & getItem(const int &i, const int &j) const;
-    const T * get(const int &i) const;
-    T * get(const int &i);
+    void setItem(int i, int j, const T &value);
+    T & getItem(int i, int j);
+    const T & getItem(int i, int j) const;
+    const T * get(int i) const;
+    T * get(int i);
 
-    void rawSetItem(const int &k, const T &value);
-    T & rawGetItem(const int &k);
-    const T & rawGetItem(const int &k) const;
+    void rawSetItem(int k, const T &value);
+    T & rawGetItem(int k);
+    const T & rawGetItem(int k) const;
 
     T * back();
     T * first();
@@ -155,10 +155,10 @@ private:
     std::vector<T> m_v;
     std::vector<std::size_t> m_index;
 
-    const T* operator[](const int &i) const;
-    T* operator[](const int &i);
-    bool isIndexValid(const int &i) const;
-    bool isIndexValid(const int &i, const int &j) const;
+    const T* operator[](int i) const;
+    T* operator[](int i);
+    bool isIndexValid(int i) const;
+    bool isIndexValid(int i, int j) const;
 
     void destroy(bool destroyIndex, bool destroyValues);
 
