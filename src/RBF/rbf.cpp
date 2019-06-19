@@ -199,7 +199,7 @@ void RBFKernel::setFunction( const RBFBasisFunction &bfunc )
  * Sets the rbf function to a user specified function. Supported in both modes.
  * @param[in] bfunc basis function to be used
  */
-void RBFKernel::setFunction( double (&bfunc)(const double &) )
+void RBFKernel::setFunction( double (&bfunc)(double ) )
 {
     m_fPtr = bfunc;
     m_typef = RBFBasisFunction::CUSTOM;
@@ -264,7 +264,7 @@ std::vector<int> RBFKernel::getActiveSet(  )
  * @param[in] n index of node to be checked
  * @return true if active
  */
-bool RBFKernel::isActive( const int &n )
+bool RBFKernel::isActive( int n )
 {
     if(n<0 || n >= int(m_activeNodes.size())) {
         return false;
@@ -278,7 +278,7 @@ bool RBFKernel::isActive( const int &n )
  * @param[in] n index of node to be activated
  * @return    boolean, true if node is activated successfully, false if not
  */
-bool RBFKernel::activateNode(const int & n)
+bool RBFKernel::activateNode(int  n)
 {
     bool check = false;
     if(n>=0 && n<m_nodes) {
@@ -321,7 +321,7 @@ void RBFKernel::activateAllNodes()
  * @param[in] n index of node to be dactivated
  * @return    boolean, true if node is activated successfully, false if not
  */
-bool RBFKernel::deactivateNode(const int & n )
+bool RBFKernel::deactivateNode(int  n )
 {
     bool check = false;
     if(n>=0 && n<m_nodes) {
@@ -363,7 +363,7 @@ void RBFKernel::deactivateAllNodes()
  * Set the support radius of all RBFKernel kernel functions. Supported in both modes.
  * @param[in] radius support radius
  */
-void RBFKernel::setSupportRadius( const double & radius )
+void RBFKernel::setSupportRadius( double  radius )
 {
     m_supportRadius = radius;
     return;
@@ -404,7 +404,7 @@ void RBFKernel::setMode(RBFMode mode)
  * @param[in] id id of node
  * @param[in] value  data values to be set as RBFKernel parameters for the given node
  */
-void RBFKernel::setDataToNode( const int &id, const std::vector<double> &value )
+void RBFKernel::setDataToNode( int id, const std::vector<double> &value )
 {
     if(id<0 || id >= m_fields) {
         return;
@@ -436,7 +436,7 @@ void RBFKernel::setDataToNode( const int &id, const std::vector<double> &value )
  * @param[in] id id of data
  * @param[in] value  data values
  */
-void RBFKernel::setDataToAllNodes( const int &id, const std::vector<double> &value )
+void RBFKernel::setDataToAllNodes( int id, const std::vector<double> &value )
 {
     if(id<0 || id >= m_fields) {
         return;
@@ -700,7 +700,7 @@ int RBFKernel::solve()
  * @param[in] tolerance error tolerance for adding nodes
  * @return integer error flag . If 0-successfull computation and tolerance met, if 1-errors occurred, not enough nodes, if -1 dummy method call
  */
-int RBFKernel::greedy( const double &tolerance)
+int RBFKernel::greedy( double tolerance)
 {
     if(m_mode == RBFMode::PARAM)    return -1;
 
@@ -791,7 +791,7 @@ void RBFKernel::fitDataToNodes(int id)
  * @param[in] dist distance
  * @return value of basis function
  */
-double RBFKernel::evalBasis( const double &dist )
+double RBFKernel::evalBasis( double dist )
 {
     return (*m_fPtr)(dist);
 }
@@ -1148,7 +1148,7 @@ double RBF::calcDist(const std::array<double,3>& point, int j)
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::wendlandc2( const double &dist )
+double rbf::wendlandc2( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1162,7 +1162,7 @@ double rbf::wendlandc2( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::linear( const double &dist )
+double rbf::linear( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1176,7 +1176,7 @@ double rbf::linear( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::gauss90( const double &dist )
+double rbf::gauss90( double dist )
 {
     double eps = std::pow(-1.0*std::log(0.1),0.5);
 
@@ -1188,7 +1188,7 @@ double rbf::gauss90( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::gauss95( const double &dist )
+double rbf::gauss95( double dist )
 {
     double eps = std::pow(-1.0*std::log(0.05),0.5);
 
@@ -1200,7 +1200,7 @@ double rbf::gauss95( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::gauss99( const double &dist )
+double rbf::gauss99( double dist )
 {
     double eps = std::pow(-1.0*std::log(0.01),0.5);
 
@@ -1213,7 +1213,7 @@ double rbf::gauss99( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c1c0( const double &dist )
+double rbf::c1c0( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1228,7 +1228,7 @@ double rbf::c1c0( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c2c0( const double &dist )
+double rbf::c2c0( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1243,7 +1243,7 @@ double rbf::c2c0( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c0c1( const double &dist )
+double rbf::c0c1( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1258,7 +1258,7 @@ double rbf::c0c1( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c1c1( const double &dist )
+double rbf::c1c1( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1273,7 +1273,7 @@ double rbf::c1c1( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c2c1( const double &dist )
+double rbf::c2c1( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1288,7 +1288,7 @@ double rbf::c2c1( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c0c2( const double &dist )
+double rbf::c0c2( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1303,7 +1303,7 @@ double rbf::c0c2( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c1c2( const double &dist )
+double rbf::c1c2( double dist )
 {
     if( dist > 1) {
         return 0.;
@@ -1318,7 +1318,7 @@ double rbf::c1c2( const double &dist )
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
-double rbf::c2c2( const double &dist )
+double rbf::c2c2( double dist )
 {
     if( dist > 1) {
         return 0.;

@@ -69,7 +69,7 @@ private:
     RBFMode m_mode;                                 /**<Behaviour of RBF class (interpolation or parametrization).*/
     double  m_supportRadius;                        /**<Support radius of function used as Radiabl Basis Function.*/
     RBFBasisFunction m_typef;                       /**<Recognize type of RBF shape function actually in the class. */
-    double  (*m_fPtr)(const double &);
+    double  (*m_fPtr)(double);
 
     std::vector<double>                 m_error;    /**<Interpolation error of a field evaluated on each RBF node (auxiliary memeber used in Greedy algorithm).*/
 
@@ -86,30 +86,30 @@ public:
     RBFKernel(const RBFKernel & other);
 
     void                    setFunction(const RBFBasisFunction &);
-    void                    setFunction(double (&funct)(const double &));
+    void                    setFunction(double (&funct)(double ));
 
     RBFBasisFunction        getFunctionType();
     int                     getDataCount();
     int                     getActiveCount();
     std::vector<int>        getActiveSet();
 
-    bool                    isActive(const int &);
+    bool                    isActive(int );
 
-    bool                    activateNode(const int &);
+    bool                    activateNode(int );
     bool                    activateNode(const std::vector<int> &);
     void                    activateAllNodes();
-    bool                    deactivateNode(const int &);
+    bool                    deactivateNode(int );
     bool                    deactivateNode(const std::vector<int> &);
     void                    deactivateAllNodes();
 
-    void                    setSupportRadius(const double &);
+    void                    setSupportRadius(double);
     double                  getSupportRadius();
 
     void                    setMode(RBFMode mode);
     RBFMode                 getMode();
 
-    void                    setDataToNode (const int &, const std::vector<double> &);
-    void                    setDataToAllNodes(const int &, const std::vector<double> &);
+    void                    setDataToNode (int , const std::vector<double> &);
+    void                    setDataToAllNodes(int , const std::vector<double> &);
 
     int                     addData();
     int                     addData(const std::vector<double> &);
@@ -122,10 +122,10 @@ public:
 
     std::vector<double>     evalRBF(const std::array<double,3> &);
     std::vector<double>     evalRBF(int jnode);
-    double                  evalBasis(const double &);
+    double                  evalBasis(double);
 
     int                     solve();
-    int                     greedy(const double &);
+    int                     greedy(double);
 
 protected:
     double                  evalError();
@@ -173,19 +173,19 @@ private:
  */
 namespace rbf
 {
-    double                  wendlandc2(const double &);
-    double                  linear(const double &);
-    double                  gauss90(const double &);
-    double                  gauss95(const double &);
-    double                  gauss99(const double &);
-    double                  c1c0(const double &);
-    double                  c2c0(const double &);
-    double                  c0c1(const double &);
-    double                  c1c1(const double &);
-    double                  c2c1(const double &);
-    double                  c0c2(const double &);
-    double                  c1c2(const double &);
-    double                  c2c2(const double &);
+    double                  wendlandc2(double);
+    double                  linear(double);
+    double                  gauss90(double);
+    double                  gauss95(double);
+    double                  gauss99(double);
+    double                  c1c0(double);
+    double                  c2c0(double);
+    double                  c0c1(double);
+    double                  c1c1(double);
+    double                  c2c1(double);
+    double                  c0c2(double);
+    double                  c1c2(double);
+    double                  c2c2(double);
 }
 
 }
