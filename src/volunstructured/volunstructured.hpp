@@ -39,8 +39,8 @@ public:
 	using PatchKernel::locatePoint;
 
 	VolUnstructured();
-	VolUnstructured(const int &dimension);
-	VolUnstructured(const int &id, const int &dimension);
+	VolUnstructured(int dimension);
+	VolUnstructured(int id, int dimension);
 
 	~VolUnstructured();
 

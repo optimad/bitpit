@@ -52,7 +52,7 @@ VolUnstructured::VolUnstructured()
 
 	\param dimension is the dimension of the patch
 */
-VolUnstructured::VolUnstructured(const int &dimension)
+VolUnstructured::VolUnstructured(int dimension)
 	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension)
 {
 #if BITPIT_ENABLE_MPI==1
@@ -67,7 +67,7 @@ VolUnstructured::VolUnstructured(const int &dimension)
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 */
-VolUnstructured::VolUnstructured(const int &id, const int &dimension)
+VolUnstructured::VolUnstructured(int id, int dimension)
 	: VolumeKernel(id, dimension, true)
 {
 #if BITPIT_ENABLE_MPI==1
