@@ -87,8 +87,7 @@ VolOctree::VolOctree()
 	\param length is the length of the domain
 	\param dh is the maximum allowed cell size of the initial refinement
 */
-VolOctree::VolOctree(const int &dimension,
-				     std::array<double, 3> origin, double length, double dh )
+VolOctree::VolOctree(int dimension, std::array<double, 3> origin, double length, double dh)
 	: VolOctree(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh)
 {
 }
@@ -102,8 +101,7 @@ VolOctree::VolOctree(const int &dimension,
 	\param length is the length of the domain
 	\param dh is the maximum allowed cell size of the initial refinement
 */
-VolOctree::VolOctree(const int &id, const int &dimension,
-				 std::array<double, 3> origin, double length, double dh )
+VolOctree::VolOctree(int id, int dimension, std::array<double, 3> origin, double length, double dh)
 	: VolumeKernel(id, dimension, false)
 {
 	// Create the tree
@@ -161,7 +159,7 @@ VolOctree::VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<Pablo
 	\param tree is the tree that will be used
 	\param adopter is a pointer to the tree adopter
 */
-VolOctree::VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
+VolOctree::VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
 	: VolumeKernel(id, tree->getDim(), false)
 {
 	// Associate the tree
@@ -547,7 +545,7 @@ std::array<double, 3> VolOctree::evalInterfaceNormal(long id) const
 	\param id the id of the cell
 	\result The octant info of the specified cell
 */
-VolOctree::OctantInfo VolOctree::getCellOctant(const long &id) const
+VolOctree::OctantInfo VolOctree::getCellOctant(long id) const
 {
 	// Search the cell among the internal octants
 	auto octantItr = m_cellToOctant.find(id);
@@ -675,7 +673,7 @@ VolOctree::OctantHash VolOctree::evaluateOctantHash(const OctantInfo &octantInfo
 	\param id is the id of the cell
 	\result The refinement level of the specified cell.
 */
-int VolOctree::getCellLevel(const long &id) const
+int VolOctree::getCellLevel(long id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
@@ -1224,7 +1222,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			adaptionInfo.previous.reserve(removedInterfaces.size());
-			for (const long &interfaceId : removedInterfaces) {
+			for (long interfaceId : removedInterfaces) {
 				adaptionInfo.previous.emplace_back();
 				long &deletedInterfaceId = adaptionInfo.previous.back();
 				deletedInterfaceId = interfaceId;
@@ -1322,7 +1320,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			std::size_t infoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[infoId];
 			adaptionInfo.current.reserve(createdInterfaces.size());
-			for (const long &interfaceId : createdInterfaces) {
+			for (long interfaceId : createdInterfaces) {
 				adaptionInfo.current.emplace_back();
 				long &createdInterfaceId = adaptionInfo.current.back();
 				createdInterfaceId = interfaceId;
@@ -1349,7 +1347,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 	int nCellVertices = m_cellTypeInfo->nVertices;
 
 	// Info on the faces
-	const int &nInterfaceVertices = m_interfaceTypeInfo->nVertices;
+	int nInterfaceVertices = m_interfaceTypeInfo->nVertices;
 
 	// List of cells ot delete
 	std::unordered_set<long> deadCells;
@@ -1876,7 +1874,7 @@ adaption::Marker VolOctree::_getCellAdaptionMarker(long id)
 	\param id is the id of the cell
 	\param value is the value of the marker
 */
-bool VolOctree::setMarker(const long &id, const int8_t &value)
+bool VolOctree::setMarker(long id, int8_t value)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {

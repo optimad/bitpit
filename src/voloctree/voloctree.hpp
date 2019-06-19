@@ -66,10 +66,10 @@ public:
 	};
 
 	VolOctree();
-	VolOctree(const int &dimension, std::array<double, 3> origin, double length, double dh);
-	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin, double length, double dh);
+	VolOctree(int dimension, std::array<double, 3> origin, double length, double dh);
+	VolOctree(int id, int dimension, std::array<double, 3> origin, double length, double dh);
 	VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
-	VolOctree(const int &id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
+	VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
 	VolOctree(std::istream &stream);
 
 	~VolOctree();
@@ -89,8 +89,8 @@ public:
 	double evalInterfaceArea(long id) const override;
 	std::array<double, 3> evalInterfaceNormal(long id) const override;
 
-	OctantInfo getCellOctant(const long &id) const;
-	int getCellLevel(const long &id) const;
+	OctantInfo getCellOctant(long id) const;
+	int getCellLevel(long id) const;
 
 	long getOctantId(const OctantInfo &octantInfo) const;
 	Octant * getOctantPointer(const OctantInfo &octantInfo);
@@ -242,7 +242,7 @@ private:
 	void __reset(bool resetTree);
 	void __setDimension(int dimension);
 
-	bool setMarker(const long &id, const int8_t &value);
+	bool setMarker(long id, int8_t value);
 
 	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
