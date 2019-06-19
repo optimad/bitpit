@@ -1358,6 +1358,9 @@ ConstProxyVector<int> Element::getEdgeLocalVertexIds(int edge) const
 /*!
 	Renumber the vertices of a cell.
 
+	If the provided map doesn't contain the id of a vertex, its id will
+	remain unchanged.
+
 	\param map is the map that will be used for the renumbering
 */
 void Element::renumberVertices(const std::unordered_map<long, long> &map)
@@ -1369,7 +1372,10 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 		int nVertices = getVertexCount();
 		long *connectivity = getConnect();
 		for (int k = 1; k < nVertices + 1; ++k) {
-			connectivity[k] = map.at(connectivity[k]);
+			auto mapItr = map.find(connectivity[k]);
+			if (mapItr != map.end()) {
+				connectivity[k] = mapItr->second;
+			}
 		}
 
 		break;
@@ -1386,7 +1392,10 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 			int beginVertexPos = facePos + 1;
 			int endVertexPos   = facePos + 1 + connectivity[facePos];
 			for (int k = beginVertexPos; k < endVertexPos; ++k) {
-				connectivity[k] = map.at(connectivity[k]);
+				auto mapItr = map.find(connectivity[k]);
+				if (mapItr != map.end()) {
+					connectivity[k] = mapItr->second;
+				}
 			}
 		}
 
@@ -1400,7 +1409,10 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 		int nVertices = getVertexCount();
 		long *connectivity = getConnect();
 		for (int k = 0; k < nVertices; ++k) {
-			connectivity[k] = map.at(connectivity[k]);
+			auto mapItr = map.find(connectivity[k]);
+			if (mapItr != map.end()) {
+				connectivity[k] = mapItr->second;
+			}
 		}
 
 		break;
@@ -1787,7 +1799,10 @@ void Element::renumberFaceStream(const PiercedStorage<long, long> &map, std::vec
 		int nFaceVertices = (*faceStream)[pos];
 		for (int k = 0; k < nFaceVertices; ++k) {
 			++pos;
-			(*faceStream)[pos] = map.at((*faceStream)[pos]);
+			auto mapItr = map.find((*faceStream)[pos]);
+			if (mapItr != map.end()) {
+				(*faceStream)[pos] = *mapItr;
+			}
 		}
 	}
 }
