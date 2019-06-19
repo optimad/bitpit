@@ -57,7 +57,7 @@ VolCartesian::VolCartesian()
 	\param lengths are the lengths of the domain
 	\param nCells are the numbers of cells of the patch
 */
-VolCartesian::VolCartesian(const int &dimension,
+VolCartesian::VolCartesian(int dimension,
                                const std::array<double, 3> &origin,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
@@ -74,7 +74,7 @@ VolCartesian::VolCartesian(const int &dimension,
 	\param lengths are the lengths of the domain
 	\param nCells are the number of cells along each direction
 */
-VolCartesian::VolCartesian(const int &id, const int &dimension,
+VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
@@ -96,7 +96,7 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 	\param length is the length of the domain
 	\param nCells is the number of cells along each direction
 */
-VolCartesian::VolCartesian(const int &dimension,
+VolCartesian::VolCartesian(int dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells)
 	: VolCartesian(PatchManager::AUTOMATIC_ID, dimension, origin, length, nCells)
@@ -112,7 +112,7 @@ VolCartesian::VolCartesian(const int &dimension,
 	\param length is the length of the domain
 	\param nCells is the number of cells along each direction
 */
-VolCartesian::VolCartesian(const int &id, const int &dimension,
+VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells)
 	: VolumeKernel(id, dimension, false)
@@ -133,7 +133,7 @@ VolCartesian::VolCartesian(const int &id, const int &dimension,
 	\param length is the length of the domain
 	\param dh is the maximum allowed mesh spacing
 */
-VolCartesian::VolCartesian(const int &dimension,
+VolCartesian::VolCartesian(int dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
 	: VolCartesian(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh)
@@ -149,7 +149,7 @@ VolCartesian::VolCartesian(const int &dimension,
 	\param length is the length of the domain
 	\param dh is the maximum allowed mesh spacing
 */
-VolCartesian::VolCartesian(const int &id, const int &dimension,
+VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
 	: VolumeKernel(id, dimension, false)
@@ -662,7 +662,7 @@ VolCartesian::MemoryMode VolCartesian::getMemoryMode()
 	requested
 	\result The cell spacing along the specificed direction.
 */
-double VolCartesian::getSpacing(const int &direction) const
+double VolCartesian::getSpacing(int direction) const
 {
 	return m_cellSpacings[direction];
 }
@@ -762,7 +762,7 @@ void VolCartesian::addVertices()
 	\param id is the id of the vertex
 	\result The coordinate of the specified vertex.
 */
-std::array<double, 3> VolCartesian::evalVertexCoords(const long &id)
+std::array<double, 3> VolCartesian::evalVertexCoords(long id)
 {
 	std::array<int, 3> ijk = getVertexCartesianId(id);
 
@@ -843,7 +843,7 @@ void VolCartesian::addInterfaces()
 	                 direction
 	\result The interface count for the given direction.
 */
-std::array<int, 3> VolCartesian::getInterfaceCountDirection(const int &direction)
+std::array<int, 3> VolCartesian::getInterfaceCountDirection(int direction)
 {
 	std::array<int, 3> interfaceDirectionCount = m_nCells1D;
 	interfaceDirectionCount[direction]++;
@@ -857,7 +857,7 @@ std::array<int, 3> VolCartesian::getInterfaceCountDirection(const int &direction
 	\param direction the method will creat the interfaces normal to this
 	                 direction
 */
-void VolCartesian::addInterfacesDirection(const int &direction)
+void VolCartesian::addInterfacesDirection(int direction)
 {
 	log::cout() << "  >> Creating interfaces normal to direction " << direction << "\n";
 
@@ -1229,7 +1229,7 @@ std::array<int, 3> VolCartesian::locateClosestCellCartesian(const std::array<dou
 /*!
 	Converts the cell cartesian notation to a linear notation
 */
-long VolCartesian::getCellLinearId(const int &i, const int &j, const int &k) const
+long VolCartesian::getCellLinearId(int i, int j, int k) const
 {
 	long id = i;
 	id += m_nCells1D[Vertex::COORD_X] * j;
@@ -1292,7 +1292,7 @@ bool VolCartesian::isCellCartesianIdValid(const std::array<int, 3> &ijk) const
 /*!
 	Converts the vertex cartesian notation to a linear notation
 */
-long VolCartesian::getVertexLinearId(const int &i, const int &j, const int &k) const
+long VolCartesian::getVertexLinearId(int i, int j, int k) const
 {
 	long id = i;
 	id += m_nVertices1D[Vertex::COORD_X] * j;

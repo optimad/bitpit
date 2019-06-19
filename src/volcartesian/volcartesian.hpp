@@ -48,17 +48,17 @@ public:
 	};
 
 	VolCartesian();
-	VolCartesian(const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(int dimension, const std::array<double, 3> &origin,
 			   const std::array<double, 3> &lengths, const std::array<int, 3> &nCells);
-	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(int id, int dimension, const std::array<double, 3> &origin,
 			   const std::array<double, 3> &lengths, const std::array<int, 3> &nCells);
-	VolCartesian(const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(int dimension, const std::array<double, 3> &origin,
 			   double length, int nCells1D);
-	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(int id, int dimension, const std::array<double, 3> &origin,
 			   double length, int nCells1D);
-	VolCartesian(const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(int dimension, const std::array<double, 3> &origin,
 			   double length, double dh);
-	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(int id, int dimension, const std::array<double, 3> &origin,
 			   double length, double dh);
 	VolCartesian(std::istream &stream);
 
@@ -90,7 +90,7 @@ public:
 	std::array<double, 3> evalInterfaceNormal(long id) const override;
 
 	std::array<double, 3> getSpacing() const;
-	double getSpacing(const int &direction) const;
+	double getSpacing(int direction) const;
 
 	void switchMemoryMode(MemoryMode mode);
 	MemoryMode getMemoryMode();
@@ -126,11 +126,11 @@ public:
 	int linearVertexInterpolation(std::array<double,3> &point,
 		std::vector<int> &stencil, std::vector<double> &weights);
 
-	long getCellLinearId(const int &i, const int &j, const int &k) const;
+	long getCellLinearId(int i, int j, int k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;
 	std::array<int, 3> getCellCartesianId(long const &idx) const;
 	bool isCellCartesianIdValid(const std::array<int, 3> &ijk) const;
-	long getVertexLinearId(const int &i, const int &j, const int &k) const;
+	long getVertexLinearId(int i, int j, int k) const;
 	long getVertexLinearId(const std::array<int, 3> &ijk) const;
 	std::array<int, 3> getVertexCartesianId(long const &idx) const;
 	std::array<int, 3> getVertexCartesianId(long const &cellIdx, int const &vertex) const;
@@ -182,13 +182,13 @@ private:
 	void setMemoryMode(MemoryMode mode);
 
 	void addVertices();
-	std::array<double, 3> evalVertexCoords(const long &id);
+	std::array<double, 3> evalVertexCoords(long id);
 
 	void addCells();
 
 	void addInterfaces();
-	std::array<int, 3> getInterfaceCountDirection(const int &direction);
-	void addInterfacesDirection(const int &direction);
+	std::array<int, 3> getInterfaceCountDirection(int direction);
+	void addInterfacesDirection(int direction);
 
 };
 
