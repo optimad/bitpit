@@ -560,7 +560,7 @@ std::unordered_set<long> PODVolOctree::mapCellsToPOD(const std::unordered_set<lo
 {
     std::unordered_set<long> mappedCells;
     const PiercedStorage<mapping::Info> & m_invmapper = getMeshMapper().getInverseMapping();
-    for (const long & id : *targetCells){
+    for (long id : *targetCells){
         if (m_invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
             mappedCells.insert(m_invmapper[id].previous[0]);
         }

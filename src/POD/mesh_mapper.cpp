@@ -151,7 +151,7 @@ void MeshMapper::mappingAdaptionPreparare(const std::vector<adaption::Info> & in
         pmapper = &m_invmapper;
 
     for (const adaption::Info & info : infoAdapt){
-        for (const long & id : info.previous)
+        for (long id : info.previous)
             m_previousmapper[id] = pmapper->at(id);
     }
 }
@@ -203,7 +203,7 @@ void MeshMapper::mappingAdaptionUpdate(const std::vector<adaption::Info> & infoA
             long idprevious = m_previousmapper[info.previous[0]].previous[iprevious];
             VolOctree::OctantInfo oinfoprev = meshMapped->getCellOctant(idprevious);
             uint64_t morton = meshMapped->getTree().getMorton(oinfoprev.id);
-            for (const long & id : info.current){
+            for (long id : info.current){
                 (*mapperAdapted)[id].current.clear();
                 (*mapperAdapted)[id].previous.clear();
                 (*mapperAdapted)[id].entity = adaption::Entity::ENTITY_CELL;
@@ -263,8 +263,8 @@ void MeshMapper::mappingAdaptionUpdate(const std::vector<adaption::Info> & infoA
             (*mapperAdapted)[id].current.push_back(id);
             uint8_t level =  meshAdapted->getCellLevel(id);
             std::unordered_set<long> idsprev;
-            for (const long & id_ : info.previous){
-                for (const long & idp : m_previousmapper[id_].previous){
+            for (long id_ : info.previous){
+                for (long idp : m_previousmapper[id_].previous){
                     idsprev.insert(idp);
                 }
             }
@@ -295,14 +295,14 @@ void MeshMapper::mappingAdaptionUpdate(const std::vector<adaption::Info> & infoA
                 (*mapperAdapted)[id].type = adaption::Type::TYPE_COARSENING;
 
                 if (fillInv){
-                    for (const long & idprevious : idsprev){
+                    for (long idprevious : idsprev){
                         (*mapperMapped)[idprevious].type = adaption::Type::TYPE_REFINEMENT;
                         (*mapperMapped)[idprevious].previous[0] = id;
                     }
                 }
 
             }
-            for (const long & id_ : idsprev){
+            for (long id_ : idsprev){
                 (*mapperAdapted)[id].previous.push_back(id_);
             }
         }
