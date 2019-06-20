@@ -4978,14 +4978,15 @@ std::unordered_map<long, std::vector<long>> PatchKernel::binGroupVertices(const 
 
     // Identify bins of vertices
     std::unordered_map<long, std::vector<long>> bins;
-    PiercedVector<Vertex>::const_iterator E = vertices.cend();
-    for (PiercedVector<Vertex>::const_iterator V = vertices.cbegin(); V != E; ++V) {
-        int i = std::min(nBins - 1L, long((V->getCoords()[0] - m_boxMinPoint[0]) / dx));
-        int j = std::min(nBins - 1L, long((V->getCoords()[1] - m_boxMinPoint[1]) / dy));
-        int k = std::min(nBins - 1L, long((V->getCoords()[2] - m_boxMinPoint[2]) / dz));
+    for (const Vertex &vertex : vertices) {
+        const std::array<double, 3> &coordinates = vertex.getCoords();
+
+        int i = std::min(nBins - 1L, (long) ((coordinates[0] - m_boxMinPoint[0]) / dx));
+        int j = std::min(nBins - 1L, (long) ((coordinates[1] - m_boxMinPoint[1]) / dy));
+        int k = std::min(nBins - 1L, (long) ((coordinates[2] - m_boxMinPoint[2]) / dz));
 
         long binId = nBins * nBins * k + nBins * j + i;
-        bins[binId].emplace_back(V->getId());
+        bins[binId].emplace_back(vertex.getId());
     }
 
     return bins;
