@@ -1498,10 +1498,6 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 		kd.clear();
 		for (int j = 0; j < nBinVertices; ++j) {
 			long vertexId = binVertices[randomExtraction[j]];
-			if (vertexMap.count(vertexId) > 0) {
-				continue;
-			}
-
 			Vertex &vertex = m_vertices.at(vertexId);
 
 			long collapsedVertexId;
