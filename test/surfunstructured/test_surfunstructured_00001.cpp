@@ -867,9 +867,9 @@ int                             i;
     log::cout() << endl;
 
     // Remove all internal cells and add 2 ghost cells
-    //bucket: {0,3,4}
+    //bucket: {0,1,2}
     //cells:  {}
-    //ghosts: {2,1,6,5,7,8,9}
+    //ghosts: {4,3,6,5,7,8,9}
     mesh.deleteCell(2);
     mesh.deleteCell(1);
     mesh.deleteCell(4);
@@ -882,8 +882,8 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
-    expected.insert(expected.begin(), 1);
-    expected.insert(expected.begin(), 2);
+    expected.insert(expected.begin(), 3);
+    expected.insert(expected.begin(), 4);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());
@@ -910,12 +910,12 @@ int                             i;
     log::cout() << endl;
 
     // Remove all ghosts add 2 internal cells
-    //bucket: {2,1,6,5,7,8,9}
-    //cells:  {4,0}
+    //bucket: {2,3,4,6,5,7,8,9}
+    //cells:  {0,1}
     //ghosts: {}
     mesh.deleteCell(5);
-    mesh.deleteCell(2);
-    mesh.deleteCell(1);
+    mesh.deleteCell(4);
+    mesh.deleteCell(3);
     mesh.deleteCell(6);
     mesh.deleteCell(9);
     mesh.deleteCell(7);
@@ -929,8 +929,8 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
+    expected.insert(expected.begin(),1);
     expected.insert(expected.begin(),0);
-    expected.insert(expected.begin(),4);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());

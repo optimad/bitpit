@@ -174,7 +174,33 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
 template<typename id_t>
 void IndexGenerator<id_t>::trash(typename IndexGenerator<id_t>::id_type id)
 {
-    m_trash.fillAppend(id);
+    assert(!m_trash.contains(id));
+
+    // If we are trashing the highest or the lowest id we can update the
+    // limits of the generator, otherwise we add the id to the trash.
+    if (id == m_highest && id == m_lowest) {
+        // If highest and lowest values are equal it means that we have
+        // generated only one id. Since we are now trashing the only id
+        // that has been generated, the trash must be emtpy.
+        assert(m_trash.empty());
+
+        m_lowest  = NULL_ID;
+        m_highest = NULL_ID;
+    } else if (id == m_highest) {
+        --m_highest;
+        while (m_trash.contains(m_highest)) {
+            eraseFromTrash(m_highest);
+            --m_highest;
+        }
+    } else if (id == m_lowest) {
+        ++m_lowest;
+        while (m_trash.contains(m_lowest)) {
+            eraseFromTrash(m_lowest);
+            ++m_lowest;
+        }
+    } else {
+        m_trash.fillAppend(id);
+    }
 
     // We only keep track of the latest assigned id, if we trash that id we
     // have no information of the previous assigned id.
