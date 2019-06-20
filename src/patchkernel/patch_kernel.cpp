@@ -1485,9 +1485,7 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 	randomExtraction.reserve(nMaxBinVertices);
 	KdTree<3, Vertex, long> kd(nMaxBinVertices);
 
-	std::size_t nCollapsedVertices = 0;
 	std::unordered_map<long, long> vertexMap;
-	vertexMap.reserve(getVertexCount());
 	for (const auto &binEntry : bins) {
 		const std::vector<long> &binVertices = binEntry.second;
 		int nBinVertices = binVertices.size();
@@ -1511,32 +1509,25 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 				collapsedVertexId = vertexId;
 				kd.insert(&vertex, vertexId);
 			} else {
-				++nCollapsedVertices;
+				vertexMap.insert({vertexId, collapsedVertexId});
 			}
-
-			vertexMap.insert({vertexId, collapsedVertexId});
 		}
 	}
 
-	// Renumber cell vertices
-	for (Cell &cell : m_cells) {
-		cell.renumberVertices(vertexMap);
-	}
-
-	// Create the list of collapsed vertices
-	collapsedVertices.resize(nCollapsedVertices);
-
-	size_t k = 0;
-	for (auto vertexItr = m_vertices.begin(); vertexItr != m_vertices.end(); ++vertexItr) {
-		// Skip orphan vertices or unique vertices
-		long vertexId = vertexItr.getId();
-		auto vertexMapItr = vertexMap.find(vertexId);
-		if (vertexMapItr == vertexMap.end() || vertexMap.at(vertexId) == vertexId) {
-			continue;
+	// Collapse vertices
+	if (!vertexMap.empty()) {
+		// Renumber cell vertices
+		for (Cell &cell : m_cells) {
+			cell.renumberVertices(vertexMap);
 		}
 
-		// Add vertex id to the list of collpased vertices
-		collapsedVertices[k++] = vertexId;
+		// Create the list of collapsed vertices
+		collapsedVertices.resize(vertexMap.size());
+
+		std::size_t k = 0;
+		for (const auto &entry : vertexMap) {
+			collapsedVertices[k++] = entry.first;
+		}
 	}
 
 	return collapsedVertices;
