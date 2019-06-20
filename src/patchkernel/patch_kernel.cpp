@@ -1292,6 +1292,8 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 		throw std::runtime_error("Unable to restore the specified vertex: the kernel doesn't contain an entry for that vertex.");
 	}
 
+	// There is not need to set the id of the vertex as assigned, because
+	// also the index generator will be restored.
 	Vertex &vertex = *iterator;
 	vertex.initialize(id, std::move(coords));
 
@@ -2049,6 +2051,8 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 		throw std::runtime_error("Unable to restore the specified cell: the kernel doesn't contain an entry for that cell.");
 	}
 
+	// There is not need to set the id of the cell as assigned, because
+	// also the index generator will be restored.
 	_restoreInternal(iterator, type, std::move(connectStorage));
 
 	return iterator;
@@ -3284,8 +3288,11 @@ PatchKernel::InterfaceIterator PatchKernel::restoreInterface(ElementType type,
 		throw std::runtime_error("Unable to restore the specified interface: the kernel doesn't contain an entry for that interface.");
 	}
 
+	// There is not need to set the id of the interfaces as assigned, because
+	// also the index generator will be restored.
 	Interface &interface = *iterator;
 	interface.initialize(id, type, std::move(connectStorage));
+
 
 	return iterator;
 }
