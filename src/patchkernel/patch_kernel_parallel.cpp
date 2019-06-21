@@ -1247,6 +1247,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     //
     // Send data to the receivers
     //
+    const double ACTIVATE_MEMORY_LIMIT_THRESHOLD = 0.15;
+
     int patchDimension = getDimension();
 
     MPI_Request verticesSizeRequest = MPI_REQUEST_NULL;
@@ -1270,10 +1272,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     std::vector<long> cellSendList;
     std::unordered_set<long> vertexSendList;
 
-    std::size_t nOutgoingsOverall = m_partitioningOutgoings.size();
-    std::size_t outgoingIndexOverall = 0;
-    std::vector<long> outgoingsOverall(nOutgoingsOverall);
-    std::vector<bool> outgoingsFrameFlagOverall(nOutgoingsOverall);
+    std::vector<long> frameCellsOverall;
+    std::size_t frameCellIndexOverall = 0;
 
     for (int recvRank : recvRanks) {
         //
@@ -1467,15 +1467,17 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         std::size_t nHaloCells     = haloCells.size();
 
         cellSendList.resize(nOutgoingCells + nHaloCells);
+        frameCellsOverall.resize(frameCellsOverall.size() + frameCells.size());
 
         std::size_t outgoingIndex = 0;
         for (long cellId : outgoingCells) {
             cellSendList[outgoingIndex] = cellId;
             ++outgoingIndex;
 
-            outgoingsOverall[outgoingIndexOverall] = cellId;
-            outgoingsFrameFlagOverall[outgoingIndexOverall] = (frameCells.count(cellId) > 0);
-            ++outgoingIndexOverall;
+            if (frameCells.count(cellId) > 0) {
+                frameCellsOverall[frameCellIndexOverall] = cellId;
+                ++frameCellIndexOverall;
+            }
         }
 
         std::size_t haloIndex = outgoingIndex;
@@ -1637,32 +1639,44 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
                 partitioningInfo.previous[i] = cellId;
             }
         }
-    }
 
-    //
-    // Update cells that no longer belong to this processor
-    //
-
-    // If the process is sending all its cells we can just clear the patch.
-    if (nOutgoingsOverall != (std::size_t) getInternalCount()) {
+        // Delete outgoing cells not in the frame
         std::vector<long> deleteList;
-        std::vector<long> neighIds;
-
-        // Delete outgoing not in the frame
         deleteList.clear();
-        for (std::size_t i = 0; i < nOutgoingsOverall; ++i) {
-            // Discard frame cells
-            const bool isFrame = outgoingsFrameFlagOverall[i];
-            if (isFrame) {
-                continue;
+        for (std::size_t i = 0; i < nOutgoingCells; ++i) {
+            long cellId = cellSendList[i];
+            if (frameCells.count(cellId) == 0) {
+                deleteList.push_back(cellId);
             }
-
-            // Mark cell for deletion
-            const long cellId = outgoingsOverall[i];
-            deleteList.push_back(cellId);
         }
 
         deleteCells(deleteList, true, true);
+
+        // If we are sending many cells try to reduced the used memory
+        bool keepMemoryLimited = (nOutgoingCells > ACTIVATE_MEMORY_LIMIT_THRESHOLD * getInternalCount());
+        if (keepMemoryLimited) {
+            // Squeeze cells
+            squeezeCells();
+
+            // Delete orphan interfaces
+            deleteOrphanInterfaces();
+            squeezeInterfaces();
+
+            // Delete orphan vertices
+            deleteOrphanVertices();
+            squeezeVertices();
+        }
+    }
+
+    //
+    // Update ghost and frame cells
+    //
+
+    // If the process is sending all its cells we can just clear the patch.
+    std::size_t nOutgoingsOverall = m_partitioningOutgoings.size();
+    if (nOutgoingsOverall != (std::size_t) getInternalCount()) {
+        std::vector<long> deleteList;
+        std::vector<long> neighIds;
 
         // Delete stale ghosts
         //
@@ -1719,14 +1733,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         // A cell will become a ghost if at least one of his neighbours is
         // still on this process.
         deleteList.clear();
-        for (std::size_t i = 0; i < nOutgoingsOverall; ++i) {
-            // Consider only cells in the frame
-            const bool isFrame = outgoingsFrameFlagOverall[i];
-            if (!isFrame) {
-                continue;
-            }
-
-            const long cellId = outgoingsOverall[i];
+        for (long cellId : frameCellsOverall) {
+            // Initially assume the cell will be deleted.
             bool moveToGhosts = false;
 
             // First do a cheap search among the face neighbours.
