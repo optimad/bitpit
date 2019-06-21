@@ -72,12 +72,6 @@ class KdNode {
         void                                                              // (input) none
     );
 
-    // Destructor ======================================================= //
-    public:
-    ~KdNode(                                                              // default destructor for KdNode variables
-        void                                                              // (input) none
-    );
-
     // Methods ============================================================== //
     public:
     void reset(                                                               // Reset the node
@@ -98,12 +92,6 @@ class KdTree {
     public:
     KdTree(                                                                   // Default constructor for KdTree
         int                 stack_size = 10                                   // (input/optional stack size)
-    );
-
-    // Destructors ========================================================== //
-    public:
-    ~KdTree(                                                                  // default destructor for KdTree variables
-        void                                                                  // (input) none
     );
 
     // Methods ============================================================== //
