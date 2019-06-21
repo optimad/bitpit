@@ -1353,6 +1353,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     std::unordered_set<long> frameCells;
     std::unordered_set<long> haloCells;
 
+    std::unordered_set<long> frameVertices;
+    std::unordered_set<long> haloVertices;
+
     std::vector<long> cellSendList;
     std::unordered_set<long> vertexSendList;
 
@@ -1594,6 +1597,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         //
         // Create the list of vertices to send
         //
+        // On serialization there are no frame nor halo cells, however the
+        // vertices on border faces are considered frame vertices, becuase
+        // they will be used to link the cells on the recevier (they will
+        // be duplicate vertices on the receiver).
+        //
+        frameVertices.clear();
+        haloVertices.clear();
         vertexSendList.clear();
         for (const long cellId : cellSendList) {
             const Cell &cell = m_cells.at(cellId);
@@ -1602,11 +1612,35 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
             int nCellVertices = cellVertexIds.size();
             for (int j = 0; j < nCellVertices; ++j) {
                 long vertexId = cellVertexIds[j];
-                if (vertexSendList.count(vertexId) > 0) {
-                    continue;
+
+                if (frameCells.count(cellId) > 0) {
+                    frameVertices.insert(vertexId);
+                } else if (haloCells.count(cellId) > 0) {
+                    haloVertices.insert(vertexId);
                 }
 
-                vertexSendList.insert(vertexId);
+                if (vertexSendList.count(vertexId) == 0) {
+                    vertexSendList.insert(vertexId);
+                }
+            }
+        }
+
+        if (m_partitioningSerialization) {
+            for (const long cellId : cellSendList) {
+                const Cell &cell = m_cells.at(cellId);
+
+                int nCellFaces = cell.getFaceCount();
+                for (int face = 0; face < nCellFaces; ++face) {
+                    if (!cell.isFaceBorder(face)) {
+                        continue;
+                    }
+
+                    int nFaceVertices = cell.getFaceVertexCount(face);
+                    for (int k = 0; k < nFaceVertices; ++k) {
+                        long vertexId = cell.getFaceVertexId(face, k);
+                        frameVertices.insert(vertexId);
+                    }
+                }
             }
         }
 
@@ -1620,7 +1654,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         }
 
         // Start the communication
-        long verticesBufferSize = sizeof(long);
+        long verticesBufferSize = sizeof(long) + 2 * vertexSendList.size() * sizeof(bool);
         for (long vertexId : vertexSendList) {
             verticesBufferSize += m_vertices[vertexId].getBinarySize();
         }
@@ -1642,6 +1676,14 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
 
         verticesBuffer << (long) vertexSendList.size();
         for (long vertexId : vertexSendList) {
+            // Cell information
+            bool isFrame = (frameVertices.count(vertexId) > 0);
+            bool isHalo  = (haloVertices.count(vertexId) > 0);
+
+            verticesBuffer << isFrame;
+            verticesBuffer << isHalo;
+
+            // Certex data
             verticesBuffer << m_vertices[vertexId];
         }
 
@@ -2057,17 +2099,36 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
 
     std::unordered_map<long, long> verticesMap;
     for (long i = 0; i < nRecvVertices; ++i) {
+        // Cell data
+        bool isFrame;
+        verticesBuffer >> isFrame;
+
+        bool isHalo;
+        verticesBuffer >> isHalo;
+
         Vertex vertex;
         verticesBuffer >> vertex;
         long originalVertexId = vertex.getId();
 
-        long vertexId;
-        if (duplicateVerticesCandidatesTree.exist(&vertex, vertexId) < 0) {
-            // Add the vertex
-            //
-            // If the id of the received vertex is already assigned, let the
-            // patch generate a new id. Otherwise, keep the id of the received
-            // vertex.
+        // Check if the vertex is a duplicate
+        //
+        // Only frame and halo vertices may be a duplicate.
+        //
+        // If the vertex is a duplicate the function that check its existance
+        // will return the current id of the vertex.
+        long vertexId = Vertex::NULL_ID;
+
+        bool isDuplicate = (isHalo || isFrame);
+        if (isDuplicate) {
+            isDuplicate = (duplicateVerticesCandidatesTree.exist(&vertex, vertexId) >= 0);
+        }
+
+        // Add the vertex
+        //
+        // If the id of the received vertex is already assigned, let the
+        // patch generate a new id. Otherwise, keep the id of the received
+        // vertex.
+        if (!isDuplicate) {
             if (m_vertexIdGenerator.isAssigned(originalVertexId)) {
                 vertex.setId(Vertex::NULL_ID);
             }
