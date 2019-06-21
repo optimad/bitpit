@@ -2275,31 +2275,29 @@ void PiercedKernel<id_t>::shrink(std::size_t n, bool force)
     // Update the last position
     setEndPos(n);
 
-    // If we don't need to update the holes we can exit now
-    if (holesCount() == 0) {
-        return;
-    }
+    // Update the holes
+    if (holesCount() != 0) {
+        // Remove regular holes beyond the updated last position
+        holesSortRegular();
+        holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
+        holes_iterator regular_end_itr   = m_holes.begin() + m_holes_regular_end;
+        regular_begin_itr = std::lower_bound(regular_begin_itr, regular_end_itr, m_end_pos - 1, std::greater<std::size_t>());
+        m_holes_regular_begin = std::distance(m_holes.begin(), regular_begin_itr);
+        if (m_holes_regular_begin == m_holes_regular_end) {
+            m_holes_regular_begin = 0;
+            m_holes_regular_end   = m_holes_regular_begin;
+        }
 
-    // Remove regular holes beyond the updated last position
-    holesSortRegular();
-    holes_iterator regular_begin_itr = m_holes.begin() + m_holes_regular_begin;
-    holes_iterator regular_end_itr   = m_holes.begin() + m_holes_regular_end;
-    regular_begin_itr = std::lower_bound(regular_begin_itr, regular_end_itr, m_end_pos - 1, std::greater<std::size_t>());
-    m_holes_regular_begin = std::distance(m_holes.begin(), regular_begin_itr);
-    if (m_holes_regular_begin == m_holes_regular_end) {
-        m_holes_regular_begin = 0;
-        m_holes_regular_end   = m_holes_regular_begin;
-    }
-
-    // Remove pending holes beyond the updated last position
-    holesSortPending();
-    holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
-    holes_iterator pending_end_itr   = m_holes.begin() + m_holes_pending_end;
-    pending_begin_itr = std::lower_bound(pending_begin_itr, pending_end_itr, m_end_pos - 1, std::greater<std::size_t>());
-    m_holes_pending_begin = std::distance(m_holes.begin(), pending_begin_itr);
-    if (m_holes_pending_begin == m_holes_pending_end) {
-        m_holes_pending_begin = m_holes_regular_end;
-        m_holes_pending_end   = m_holes_pending_begin;
+        // Remove pending holes beyond the updated last position
+        holesSortPending();
+        holes_iterator pending_begin_itr = m_holes.begin() + m_holes_pending_begin;
+        holes_iterator pending_end_itr   = m_holes.begin() + m_holes_pending_end;
+        pending_begin_itr = std::lower_bound(pending_begin_itr, pending_end_itr, m_end_pos - 1, std::greater<std::size_t>());
+        m_holes_pending_begin = std::distance(m_holes.begin(), pending_begin_itr);
+        if (m_holes_pending_begin == m_holes_pending_end) {
+            m_holes_pending_begin = m_holes_regular_end;
+            m_holes_pending_end   = m_holes_pending_begin;
+        }
     }
 
     // Update the storage
