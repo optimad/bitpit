@@ -77,6 +77,12 @@ class KdNode {
     ~KdNode(                                                              // default destructor for KdNode variables
         void                                                              // (input) none
     );
+
+    // Methods ============================================================== //
+    public:
+    void reset(                                                               // Reset the node
+        void                                                                  // (input) none
+    );
 };
 
 template <int d, class T, class T1 = int>
