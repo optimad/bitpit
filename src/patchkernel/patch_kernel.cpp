@@ -2631,23 +2631,34 @@ void PatchKernel::_findCellEdgeNeighs(long id, int edge, const std::vector<long>
 		return;
 	}
 
-	// The neighbours of the edge are the cells that share all the edge vertices
+	// Find candidates neighbours
+	//
+	// These are the negihbours of the first vertex of the edge.
 	const int GUESS_NEIGHS_COUNT = 3;
 
-	std::vector<long> firstVertexNeighs;
-	firstVertexNeighs.reserve(GUESS_NEIGHS_COUNT);
-	_findCellVertexNeighs(id, edgeVertices[0], blackList, &firstVertexNeighs);
+	std::vector<long> candidateIds;
+	candidateIds.reserve(GUESS_NEIGHS_COUNT);
+	_findCellVertexNeighs(id, edgeVertices[0], blackList, &candidateIds);
 
-	std::vector<long> secondVertexNeighs;
-	secondVertexNeighs.reserve(GUESS_NEIGHS_COUNT);
-	for (std::size_t k = 1; k < nEdgeVertices; ++k) {
-		secondVertexNeighs.clear();
-		_findCellVertexNeighs(id, edgeVertices[k], blackList, &secondVertexNeighs);
+	// Discard candidates that doesn't contain the last vertex of the edge
+	long lastEdgeVertexId = cell.getEdgeVertexId(edge, nEdgeVertices - 1);
 
-		for (long neighId : secondVertexNeighs) {
-			if (utils::findInOrderedVector<long>(neighId, firstVertexNeighs) != firstVertexNeighs.end()) {
-				utils::addToOrderedVector<long>(neighId, *neighs);
+	ConstProxyVector<long> candidateVertexIds;
+	for (long candidateId : candidateIds) {
+		const Cell &candidateNeigh = m_cells.at(candidateId);
+		candidateVertexIds = candidateNeigh.getVertexIds();
+		std::size_t nCandidateVertices = candidateVertexIds.size();
+
+		bool isEdgeNeighbour = false;
+		for (std::size_t k = 0; k < nCandidateVertices; ++k) {
+			if (candidateVertexIds[k] == lastEdgeVertexId) {
+				isEdgeNeighbour = true;
+				break;
 			}
+		}
+
+		if (isEdgeNeighbour) {
+			utils::addToOrderedVector<long>(candidateId, *neighs);
 		}
 	}
 }
