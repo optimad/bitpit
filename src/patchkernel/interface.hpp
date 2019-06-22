@@ -85,20 +85,30 @@ private:
 
 };
 
-class InterfaceHalfEdge : public ElementHalfFace {
+template<typename QualifiedInterface>
+class QualifiedInterfaceHalfEdge : public ElementHalfFace<QualifiedInterface> {
 
 public:
-	InterfaceHalfEdge(Interface &interface, int edge, Winding winding = WINDING_NATURAL);
+	typedef typename ElementHalfFace<QualifiedInterface>::Winding Winding;
 
-	Interface & getInterface() const;
+	QualifiedInterfaceHalfEdge(QualifiedInterface &interface, int edge, Winding winding = Winding::WINDING_NATURAL);
 
-protected:
-	using ElementHalfFace::getElement;
+	QualifiedInterface & getInterface() const;
 
 };
 
 extern template class PiercedVector<Interface>;
 
+extern template class QualifiedInterfaceHalfEdge<Interface>;
+extern template class QualifiedInterfaceHalfEdge<const Interface>;
+
+typedef QualifiedInterfaceHalfEdge<Interface> InterfaceHalfEdge;
+typedef QualifiedInterfaceHalfEdge<const Interface> InterfaceConstHalfEdge;
+
+
 }
+
+// Include template implementations
+#include "interface.tpp"
 
 #endif

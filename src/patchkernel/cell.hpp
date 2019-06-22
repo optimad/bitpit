@@ -123,32 +123,47 @@ private:
 
 };
 
-class CellHalfEdge : public ElementHalfEdge {
+template<typename QualifiedCell>
+class QualifiedCellHalfEdge : public ElementHalfEdge<QualifiedCell> {
 
 public:
-	CellHalfEdge(Cell &cell, int edge, Winding winding);
+	typedef typename ElementHalfEdge<QualifiedCell>::Winding Winding;
 
-	Cell & getCell() const;
+	QualifiedCellHalfEdge(QualifiedCell &cell, int edge, Winding winding = Winding::WINDING_NATURAL);
 
-protected:
-	using ElementHalfEdge::getElement;
+	QualifiedCell & getCell() const;
 
 };
 
-class CellHalfFace : public ElementHalfFace {
+template<typename QualifiedCell>
+class QualifiedCellHalfFace : public ElementHalfFace<QualifiedCell> {
 
 public:
-	CellHalfFace(Cell &cell, int face, Winding winding = WINDING_NATURAL);
+	typedef typename ElementHalfFace<QualifiedCell>::Winding Winding;
 
-	Cell & getCell() const;
+	QualifiedCellHalfFace(QualifiedCell &cell, int face, Winding winding = Winding::WINDING_NATURAL);
 
-protected:
-	using ElementHalfFace::getElement;
+	QualifiedCell & getCell() const;
 
 };
 
 extern template class PiercedVector<Cell>;
 
+extern template class QualifiedCellHalfEdge<Cell>;
+extern template class QualifiedCellHalfEdge<const Cell>;
+
+extern template class QualifiedCellHalfFace<Cell>;
+extern template class QualifiedCellHalfFace<const Cell>;
+
+typedef QualifiedCellHalfEdge<Cell> CellHalfEdge;
+typedef QualifiedCellHalfEdge<const Cell> ConstCellHalfEdge;
+
+typedef QualifiedCellHalfFace<Cell> CellHalfFace;
+typedef QualifiedCellHalfFace<const Cell> ConstCellHalfFace;
+
 }
+
+// Include template implementations
+#include "cell.tpp"
 
 #endif

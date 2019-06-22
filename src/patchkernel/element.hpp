@@ -217,7 +217,8 @@ private:
 
 };
 
-class ElementHalfEdge {
+template<class DerivedElement>
+class ElementHalfItem {
 
 public:
 	enum Winding {
@@ -226,71 +227,66 @@ public:
 	};
 
 	struct Hasher {
-		std::size_t operator()(const ElementHalfEdge &item) const;
+		std::size_t operator()(const ElementHalfItem &item) const;
 	};
 
-	Element & getElement() const;
-	int getEdge() const;
 	const ConstProxyVector<long> & getConnect() const;
 
 	Winding getWinding() const;
 	void setWinding(Winding winding);
 
-	bool operator==(const ElementHalfEdge &other) const;
-	bool operator!=(const ElementHalfEdge &other) const;
+	bool operator==(const ElementHalfItem &other) const;
+	bool operator!=(const ElementHalfItem &other) const;
 
 protected:
-	ElementHalfEdge(Element &element, int edge, Winding winding = WINDING_NATURAL);
-
-private:
-	Element &m_element;
-	int m_edge;
+	DerivedElement &m_element;
 
 	ConstProxyVector<long> m_connect;
 	std::size_t m_connectBegin;
 
 	Winding m_winding;
+
+	ElementHalfItem(DerivedElement &element, ConstProxyVector<long> &&connectivity, ElementHalfItem<DerivedElement>::Winding winding);
+
+	DerivedElement & getElement() const;
 
 };
 
-class ElementHalfFace {
+template<class DerivedElement>
+class ElementHalfEdge : public ElementHalfItem<DerivedElement> {
 
 public:
-	enum Winding {
-		WINDING_NATURAL =  1,
-		WINDING_REVERSE = -1
-	};
+	typedef typename ElementHalfItem<DerivedElement>::Winding Winding;
 
-	struct Hasher {
-		std::size_t operator()(const ElementHalfFace &item) const;
-	};
-
-	Element & getElement() const;
-	int getFace() const;
-	const ConstProxyVector<long> & getConnect() const;
-
-	Winding getWinding() const;
-	void setWinding(Winding winding);
-
-	bool operator==(const ElementHalfFace &other) const;
-	bool operator!=(const ElementHalfFace &other) const;
+	int getEdge() const;
 
 protected:
-	ElementHalfFace(Element &element, int face, Winding winding = WINDING_NATURAL);
+	int m_edge;
 
-private:
-	Element &m_element;
+	ElementHalfEdge(DerivedElement &element, int edge, Winding winding);
+
+};
+
+template<class DerivedElement>
+class ElementHalfFace : public ElementHalfItem<DerivedElement> {
+
+public:
+	typedef typename ElementHalfItem<DerivedElement>::Winding Winding;
+
+	int getFace() const;
+
+protected:
 	int m_face;
 
-	ConstProxyVector<long> m_connect;
-	std::size_t m_connectBegin;
-
-	Winding m_winding;
+	ElementHalfFace(DerivedElement &element, int face, Winding winding);
 
 };
 
 extern template class PiercedVector<Element>;
 
 }
+
+// Include template implementations
+#include "element.tpp"
 
 #endif
