@@ -176,6 +176,37 @@ int subtest_001(int rank)
 
     patch->write("partitioned_mesh");
 
+    //
+    // Re-serialize the patch
+    //
+
+    // Evaluate cell ranks
+    cellRanks.clear();
+    for (auto itr = patch->internalBegin(); itr != patch->internalEnd(); ++itr) {
+        cellRanks[itr.getId()] = 0;
+    }
+
+    // Re-serialize
+    log::cout() << "Re-serializing the patch..." << std::endl;
+
+    std::clock_t serializationStartTime = clock();
+
+    patch->partition(cellRanks, true, true);
+
+    std::clock_t serializationEndTime = clock();
+
+    double serializationElapsed = double(serializationEndTime - serializationStartTime) / CLOCKS_PER_SEC;
+
+    log::cout() << "    Serialization completed in " << serializationElapsed << " seconds" << std::endl;
+
+    // Show patch info
+    log::cout() << "Cell count:   " << patch->getCellCount() << std::endl;
+    log::cout() << "Internal count:   " << patch->getInternalCount() << std::endl;
+    log::cout() << "Ghost count:   " << patch->getGhostCount() << std::endl;
+    log::cout() << "Vertex count: " << patch->getVertexCount() << std::endl;
+
+    patch->write("reserialized_mesh");
+
     return 0;
 }
 
