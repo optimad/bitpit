@@ -207,7 +207,12 @@ ProxyVector<T>::ProxyVector(const ProxyVector &other)
     : m_size(other.m_size)
 {
     if (other.m_storage) {
-        m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(*(other.m_storage)));
+        if (m_storage) {
+            m_storage->assign(other.m_storage->begin(), other.m_storage->end());
+        } else {
+            m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(*(other.m_storage)));
+        }
+
         if (other.m_data == other.m_storage->data()) {
             m_data = m_storage->data();
         } else {
@@ -215,6 +220,7 @@ ProxyVector<T>::ProxyVector(const ProxyVector &other)
         }
     } else {
         m_storage.reset();
+
         m_data = other.m_data;
     }
 }
