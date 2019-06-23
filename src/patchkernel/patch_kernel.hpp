@@ -730,7 +730,8 @@ private:
 
 	std::size_t m_haloSize;
 
-	int m_partitioningTag;
+	int m_partitioningCellsTag;
+	int m_partitioningVerticesTag;
 	bool m_partitioningSerialization;
 	std::unordered_map<long, int> m_partitioningOutgoings;
 	std::unordered_set<int> m_partitioningGlobalSendRanks;

@@ -1138,7 +1138,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
     int nRanks = getProcessorCount();
     int patchRank = getRank();
 
-    m_partitioningTag = communications::tags().generate(m_communicator);
+    m_partitioningCellsTag = communications::tags().generate(m_communicator);
+    m_partitioningVerticesTag = communications::tags().generate(m_communicator);
 
     std::vector<adaption::Info> partitioningData;
     std::vector<adaption::Info> rankPartitioningData;
@@ -1183,7 +1184,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
         }
     }
 
-    communications::tags().trash(m_partitioningTag, m_communicator);
+    communications::tags().trash(m_partitioningCellsTag, m_communicator);
+    communications::tags().trash(m_partitioningVerticesTag, m_communicator);
 
     return partitioningData;
 }
@@ -1592,7 +1594,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
             cellsBufferSize += m_cells.at(cellId).getBinarySize();
         }
 
-        MPI_Isend(&cellsBufferSize, 1, MPI_LONG, recvRank, m_partitioningTag, m_communicator, &cellsSizeRequest);
+        MPI_Isend(&cellsBufferSize, 1, MPI_LONG, recvRank, m_partitioningCellsTag, m_communicator, &cellsSizeRequest);
 
         //
         // Create the list of vertices to send
@@ -1659,7 +1661,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
             verticesBufferSize += m_vertices[vertexId].getBinarySize();
         }
 
-        MPI_Isend(&verticesBufferSize, 1, MPI_LONG, recvRank, m_partitioningTag, m_communicator, &verticesSizeRequest);
+        MPI_Isend(&verticesBufferSize, 1, MPI_LONG, recvRank, m_partitioningVerticesTag, m_communicator, &verticesSizeRequest);
 
         //
         // Send vertex data
@@ -1691,7 +1693,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
             throw std::runtime_error ("Cell buffer size does not match calculated size");
         }
 
-        MPI_Isend(verticesBuffer.data(), verticesBuffer.getSize(), MPI_CHAR, recvRank, m_partitioningTag, m_communicator, &verticesRequest);
+        MPI_Isend(verticesBuffer.data(), verticesBuffer.getSize(), MPI_CHAR, recvRank, m_partitioningVerticesTag, m_communicator, &verticesRequest);
 
         //
         // Send cell data
@@ -1743,7 +1745,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
             throw std::runtime_error ("Cell buffer size does not match calculated size");
         }
 
-        MPI_Isend(cellsBuffer.data(), cellsBuffer.getSize(), MPI_CHAR, recvRank, m_partitioningTag, m_communicator, &cellsRequest);
+        MPI_Isend(cellsBuffer.data(), cellsBuffer.getSize(), MPI_CHAR, recvRank, m_partitioningCellsTag, m_communicator, &cellsRequest);
 
         //
         // Update adaption info
@@ -1953,12 +1955,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
     // Cell buffer size
     long cellsBufferSize;
     MPI_Request cellsSizeRequest;
-    MPI_Irecv(&cellsBufferSize, 1, MPI_LONG, sendRank, m_partitioningTag, m_communicator, &cellsSizeRequest);
+    MPI_Irecv(&cellsBufferSize, 1, MPI_LONG, sendRank, m_partitioningCellsTag, m_communicator, &cellsSizeRequest);
 
     // Vertex buffer size
     long verticesBufferSize;
     MPI_Request verticesSizeRequest;
-    MPI_Irecv(&verticesBufferSize, 1, MPI_LONG, sendRank, m_partitioningTag, m_communicator, &verticesSizeRequest);
+    MPI_Irecv(&verticesBufferSize, 1, MPI_LONG, sendRank, m_partitioningVerticesTag, m_communicator, &verticesSizeRequest);
 
     //
     // Duplicate cell and vertex candidates
@@ -2049,14 +2051,14 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
 
     MPI_Request verticesRequest;
     IBinaryStream verticesBuffer(verticesBufferSize);
-    MPI_Irecv(verticesBuffer.data(), verticesBuffer.getSize(), MPI_CHAR, sendRank, m_partitioningTag, m_communicator, &verticesRequest);
+    MPI_Irecv(verticesBuffer.data(), verticesBuffer.getSize(), MPI_CHAR, sendRank, m_partitioningVerticesTag, m_communicator, &verticesRequest);
 
     // Start receiving cells
     MPI_Wait(&cellsSizeRequest, MPI_STATUS_IGNORE);
 
     MPI_Request cellsRequest;
     IBinaryStream cellsBuffer(cellsBufferSize);
-    MPI_Irecv(cellsBuffer.data(), cellsBuffer.getSize(), MPI_CHAR, sendRank, m_partitioningTag, m_communicator, &cellsRequest);
+    MPI_Irecv(cellsBuffer.data(), cellsBuffer.getSize(), MPI_CHAR, sendRank, m_partitioningCellsTag, m_communicator, &cellsRequest);
 
     // Fill partitioning info
     //
