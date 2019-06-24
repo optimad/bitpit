@@ -734,7 +734,7 @@ private:
 	int m_partitioningVerticesTag;
 	bool m_partitioningSerialization;
 	std::unordered_map<long, int> m_partitioningOutgoings;
-	std::unordered_set<int> m_partitioningGlobalSendRanks;
+	std::vector<std::pair<int, int>> m_partitioningGlobalExchanges;
 
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
@@ -748,8 +748,8 @@ private:
 	void _partitioningAlter_deleteGhosts();
 
 	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning);
-	std::vector<adaption::Info> _partitioningAlter_receiveCells(int sendRank, bool trackPartitioning);
-	std::vector<adaption::Info> _partitioningAlter_updateCells(int sendRank, const std::unordered_map<long, int> &finalGhostOwners, bool trackPartitioning);
+	std::vector<adaption::Info> _partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning);
+	std::vector<adaption::Info> _partitioningAlter_updateCells(const std::unordered_set<int> &sendRanks, const std::unordered_map<long, int> &finalGhostOwners, bool trackPartitioning);
 
 	void updateGhostExchangeInfo();
 #endif

@@ -774,10 +774,11 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	// Fill partitioning ranks
 	int patchRank = getRank();
 
+	std::set<int> recvRanks;
 	m_partitioningOutgoings.clear();
 	for (auto &entry : cellRanks) {
-		int cellRank = entry.second;
-		if (cellRank == patchRank) {
+		int recvRank = entry.second;
+		if (recvRank == patchRank) {
 			continue;
 		}
 
@@ -787,34 +788,51 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 		}
 
 		m_partitioningOutgoings.insert(entry);
+		recvRanks.insert(recvRank);
 	}
 
-	// Identify processors that will send cells
+	// Identify exchange entries
 	int nRanks = getProcessorCount();
 
-	int sendCellCount = m_partitioningOutgoings.size();
-	std::vector<int> globalSendCellCount(nRanks);
-	MPI_Allgather(&sendCellCount, 1, MPI_INT, globalSendCellCount.data(), 1, MPI_INT, getCommunicator());
-
-	m_partitioningGlobalSendRanks.clear();
-	for (int rank = 0; rank < nRanks; ++rank) {
-		if (globalSendCellCount[rank] <= 0) {
-			continue;
-		}
-
-		m_partitioningGlobalSendRanks.insert(rank);
+	int nExchanges = recvRanks.size();
+	std::vector<std::pair<int, int>> exchanges;
+	exchanges.reserve(nExchanges);
+	for (int racvRank : recvRanks) {
+		exchanges.emplace_back(patchRank, racvRank);
 	}
 
-	int nSendRanks = m_partitioningGlobalSendRanks.size();
+	int exchangesGatherCount = 2 * nExchanges;
+	std::vector<int> exchangeGatherCount(nRanks);
+	MPI_Allgather(&exchangesGatherCount, 1, MPI_INT, exchangeGatherCount.data(), 1, MPI_INT, m_communicator);
+
+	std::vector<int> exchangesGatherDispls(nRanks, 0);
+	for (int i = 1; i < nRanks; ++i) {
+		exchangesGatherDispls[i] = exchangesGatherDispls[i - 1] + exchangeGatherCount[i - 1];
+	}
+
+	int nGlobalExchanges = nExchanges;
+	MPI_Allreduce(MPI_IN_PLACE, &nGlobalExchanges, 1, MPI_INT, MPI_SUM, m_communicator);
+
+	m_partitioningGlobalExchanges.resize(nGlobalExchanges);
+	MPI_Allgatherv(exchanges.data(), exchangesGatherCount, MPI_INT, m_partitioningGlobalExchanges.data(),
+	               exchangeGatherCount.data(), exchangesGatherDispls.data(), MPI_INT, m_communicator);
+
+	std::sort(m_partitioningGlobalExchanges.begin(), m_partitioningGlobalExchanges.end(), greater<std::pair<int,int>>());
+
+	// Get global list of ranks that will send data
+	std::unordered_set<int> globalSendRanks;
+	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+		globalSendRanks.insert(entry.first);
+	}
 
 	// Identify if this is a serialization or a normal partitioning
-	m_partitioningSerialization = (nSendRanks > 0) && (nSendRanks == (nRanks - 1));
+	m_partitioningSerialization = (nGlobalExchanges == (nRanks - 1));
 	if (m_partitioningSerialization) {
 		// The rank that is not sending any cells is the rank that should
 		// receive all the cells.
 		int receiverRank = -1;
 		for (int rank = 0; rank < nRanks; ++rank) {
-			if (m_partitioningGlobalSendRanks.count(rank) == 0) {
+			if (globalSendRanks.count(rank) == 0) {
 				receiverRank = rank;
 				break;
 			}
@@ -843,7 +861,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	// Build the information on the cells that will be sent
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
-		for (int recvRank : m_partitioningGlobalSendRanks) {
+		for (int recvRank : globalSendRanks) {
 			partitioningData.emplace_back();
 			adaption::Info &partitioningInfo = partitioningData.back();
 			partitioningInfo.entity = adaption::ENTITY_CELL;
@@ -1135,45 +1153,52 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
     }
 
     // Communicate patch data structures
-    int nRanks = getProcessorCount();
     int patchRank = getRank();
 
     m_partitioningCellsTag = communications::tags().generate(m_communicator);
     m_partitioningVerticesTag = communications::tags().generate(m_communicator);
 
+    std::unordered_set<int> batchSendRanks;
+    std::unordered_set<int> batchRecvRanks;
+
     std::vector<adaption::Info> partitioningData;
     std::vector<adaption::Info> rankPartitioningData;
-    for (int sendRank : m_partitioningGlobalSendRanks) {
-        // Detect if the current rank will send cells
-        bool isSender = (patchRank == sendRank);
+    while (!m_partitioningGlobalExchanges.empty()) {
+        // Add exchanges to the batch
+        //
+        // Inside a batch we can mix send and receives, but a process can be
+        // either a sender or a receiver, it cannot be both.
+        batchSendRanks.clear();
+        batchRecvRanks.clear();
+        while (!m_partitioningGlobalExchanges.empty()) {
+            const std::pair<int, int> &entry = m_partitioningGlobalExchanges.back();
 
-        // Detect if the current rank will receive cells
-        std::unordered_set<int> recvRanks;
-        if (isSender) {
-            for (const auto &rankEntry : m_partitioningOutgoings) {
-                int recvRank = rankEntry.second;
-                recvRanks.insert(recvRank);
+            int entrySendRank = entry.first;
+            if (batchRecvRanks.count(entrySendRank)) {
+                break;
             }
+
+            int entryRecvRank = entry.second;
+            if (batchSendRanks.count(entryRecvRank)) {
+                break;
+            }
+
+            batchSendRanks.insert(entrySendRank);
+            batchRecvRanks.insert(entryRecvRank);
+            m_partitioningGlobalExchanges.pop_back();
         }
 
-        std::vector<int> isReceiverGlobal(nRanks, 0);
-        if (isSender) {
-            isReceiverGlobal.resize(nRanks, 0);
-            for (int recvRank : recvRanks) {
-                isReceiverGlobal[recvRank] = 1;
-            }
-        }
-
-        int isReceiver;
-        MPI_Scatter(isReceiverGlobal.data(), 1, MPI_INT, &isReceiver, 1, MPI_INT, sendRank, m_communicator);
+        // Detect the role of the current process
+        bool isSender   = (batchSendRanks.count(patchRank) > 0);
+        bool isReceiver = (batchRecvRanks.count(patchRank) > 0);
 
         // Perform sends/receives/updates
         if (isSender) {
-            rankPartitioningData = _partitioningAlter_sendCells(recvRanks, trackPartitioning);
+            rankPartitioningData = _partitioningAlter_sendCells(batchRecvRanks, trackPartitioning);
         } else if (isReceiver) {
-            rankPartitioningData = _partitioningAlter_receiveCells(sendRank, trackPartitioning);
+            rankPartitioningData = _partitioningAlter_receiveCells(batchSendRanks, trackPartitioning);
         } else {
-            rankPartitioningData = _partitioningAlter_updateCells(sendRank, finalGhostOwners, trackPartitioning);
+            rankPartitioningData = _partitioningAlter_updateCells(batchSendRanks, finalGhostOwners, trackPartitioning);
         }
 
         // Update tracking information
@@ -1298,15 +1323,15 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
     deleteCells(cellsDeleteList, true, true);
 
     // Delete interfaces no longer used
-    std::vector<long> interfacesDeleteList;
-    interfacesDeleteList.reserve(involvedInterfaces.size());
+    std::vector<long> interfacesDeleteOverall;
+    interfacesDeleteOverall.reserve(involvedInterfaces.size());
     for (long interfaceId : involvedInterfaces) {
         if (isInterfaceOrphan(interfaceId)) {
-            interfacesDeleteList.emplace_back(interfaceId);
+            interfacesDeleteOverall.emplace_back(interfaceId);
         }
     }
 
-    deleteInterfaces(interfacesDeleteList, true, true);
+    deleteInterfaces(interfacesDeleteOverall, true, true);
 
     // Delete vertices no longer used
     deleteOrphanVertices();
@@ -1939,477 +1964,574 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
 /*!
     Recevies a list of cells from the specified processor.
 
-    \param sendRank is the rank of the processors sending the cells
+    \param sendRanks are the rank of the processors sending the cells
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
     \result If the partitioning is tracked, returns a vector of adaption::Info
     with all the changes done to the patch during the partitioning, otherwise
     an empty vector will be returned.
 */
-std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sendRank, bool trackPartitioning)
+std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning)
 {
     //
     // Start receiving buffer sizes
     //
+    int nSendRanks = sendRanks.size();
 
-    // Cell buffer size
-    long cellsBufferSize;
-    MPI_Request cellsSizeRequest;
-    MPI_Irecv(&cellsBufferSize, 1, MPI_LONG, sendRank, m_partitioningCellsTag, m_communicator, &cellsSizeRequest);
+    std::vector<MPI_Request> cellsSizeRequests(nSendRanks, MPI_REQUEST_NULL);
+    std::vector<MPI_Request> verticesSizeRequests(nSendRanks, MPI_REQUEST_NULL);
 
-    // Vertex buffer size
-    long verticesBufferSize;
-    MPI_Request verticesSizeRequest;
-    MPI_Irecv(&verticesBufferSize, 1, MPI_LONG, sendRank, m_partitioningVerticesTag, m_communicator, &verticesSizeRequest);
+    std::vector<long> cellsBufferSizes(nSendRanks);
+    std::vector<long> verticesBufferSizes(nSendRanks);
 
-    //
-    // Duplicate cell and vertex candidates
-    //
+    std::unordered_map<int, int> sendRankIndexes;
+    sendRankIndexes.reserve(nSendRanks);
 
-    // Duplicate cell candidates
-    //
-    // The sender is sending a halo of cells surroudning the cells explicitly
-    // marked for sending. This halo will be used for connecting the received
-    // cells to the existing ones and to build the ghosts.
-    //
-    // We may receive duplicate cells for ghost targets and ghost sources. The
-    // data structures that contains the list of these cells may not be updated
-    // so we need to build the list on the fly. THe list will contain ghost
-    // cells (target) and their neighbours (sources).
+    for (int sendRank : sendRanks) {
+        int sendRankIndex = sendRankIndexes.size();
+        sendRankIndexes[sendRank] = sendRankIndex;
+
+        // Cell buffer size
+        long &cellsBufferSize = cellsBufferSizes[sendRankIndex];
+        MPI_Request &cellsSizeRequest = cellsSizeRequests[sendRankIndex];
+        MPI_Irecv(&cellsBufferSize, 1, MPI_LONG, sendRank, m_partitioningCellsTag, m_communicator, &cellsSizeRequest);
+
+        // Vertex buffer size
+        long &verticesBufferSize = verticesBufferSizes[sendRankIndex];
+        MPI_Request &verticesSizeRequest = verticesSizeRequests[sendRankIndex];
+        MPI_Irecv(&verticesBufferSize, 1, MPI_LONG, sendRank, m_partitioningVerticesTag, m_communicator, &verticesSizeRequest);
+    }
+
+    // Initialize data structured for data exchange
+    std::vector<MPI_Request> cellsRequests(nSendRanks, MPI_REQUEST_NULL);
+    std::vector<MPI_Request> verticesRequests(nSendRanks, MPI_REQUEST_NULL);
+
+    std::vector<std::unique_ptr<IBinaryStream>> cellsBuffers(nSendRanks);
+    std::vector<std::unique_ptr<IBinaryStream>> verticesBuffers(nSendRanks);
+
+    // Fill partitioning info
+    std::vector<adaption::Info> partitioningData;
+    if (trackPartitioning) {
+        partitioningData.resize(nSendRanks);
+        for (int sendRank : sendRanks) {
+            int sendRankIndex = sendRankIndexes.at(sendRank);
+
+            adaption::Info &partitioningInfo = partitioningData[sendRankIndex];
+            partitioningInfo.entity = adaption::ENTITY_CELL;
+            partitioningInfo.type   = adaption::TYPE_PARTITION_RECV;
+            partitioningInfo.rank   = sendRank;
+        }
+    }
+
+    // Receive data
+    int patchRank = getRank();
+
+    int nSendCompleted = 0;
+    std::vector<int> sendCompletedIndexes(nSendRanks);
+    std::vector<MPI_Status> sendCompletedStatuses(nSendRanks);
+
     std::vector<long> neighIds;
 
     std::unordered_set<long> duplicateCellsCandidates;
-    for (auto &entry : m_ghostOwners) {
-        long ghostId = entry.first;
+    KdTree<3, Vertex, long> duplicateVerticesCandidatesTree;
 
-        duplicateCellsCandidates.insert(ghostId);
+    std::unordered_map<long, long> verticesMap;
 
-        findCellNeighs(ghostId, &neighIds);
-        for (long neighId : neighIds) {
-            duplicateCellsCandidates.insert(neighId);
-        }
-    }
+    std::unordered_set<long> validReceivedAdjacencies;
+    std::vector<long> addedCells;
+    std::unordered_map<long, FlatVector2D<long>> duplicateCellsReceivedAdjacencies;
+    std::unordered_map<long, long> cellsMap;
 
-    // Duplicate vertex candidates
-    //
-    // During normal partitioning, vertices of the duplicate cells candidates
-    // are candidates for duplicate vertices.
-    //
-    // During mesh serialization, we will not receive duplicate cells, but in
-    // order to link the recevied cells with the current one we still need to
-    // properly identify duplicate vertices. Since we have delete all ghost
-    // information, all the vertices of border faces need to be added to the
-    // duplicate vertex candidates.
-    //
-    // Duplicate vertex candidates are stored in a kd-tree. The kd-tree stores
-    // a pointer to the vertices. If we try to store in the kd-tree a pointers
-    // to the vertices of the patch, the first resize of the vertex container
-    // would invalidate the pointer. Create a copy of the vertices and store
-    // the pointer to that copy.
-    std::unordered_map<long, Vertex> duplicateVerticesCandidates;
-    if (!m_partitioningSerialization) {
-        for (long cellId : duplicateCellsCandidates) {
-            const Cell &cell = m_cells.at(cellId);
-            ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-            int nCellVertices = cellVertexIds.size();
-            for (int k = 0; k < nCellVertices; ++k) {
-                long vertexId = cellVertexIds[k];
-                duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
+    std::unordered_set<long> borderCellsSet;
+
+    std::unordered_set<long> cellsUpdateAdjacenciesOverall;
+    std::vector<long> cellsUpdateInterfacesOverall;
+    std::unordered_set<long> interfacesDeleteOverall;
+
+    std::unordered_set<int> awaitingSendRanks = sendRanks;
+    while (!awaitingSendRanks.empty()) {
+        //
+        // Duplicate cell and vertex candidates
+        //
+
+        // Duplicate cell candidates
+        //
+        // The sender is sending a halo of cells surroudning the cells explicitly
+        // marked for sending. This halo will be used for connecting the received
+        // cells to the existing ones and to build the ghosts.
+        //
+        // We may receive duplicate cells for ghost targets and ghost sources. The
+        // data structures that contains the list of these cells may not be updated
+        // so we need to build the list on the fly. THe list will contain ghost
+        // cells (target) and their neighbours (sources).
+        duplicateCellsCandidates.clear();
+        for (auto &entry : m_ghostOwners) {
+            long ghostId = entry.first;
+            if (duplicateCellsCandidates.count(ghostId) > 0) {
+                continue;
+            }
+
+            duplicateCellsCandidates.insert(ghostId);
+
+            findCellNeighs(ghostId, &neighIds);
+            for (long neighId : neighIds) {
+                duplicateCellsCandidates.insert(neighId);
             }
         }
-    } else {
-        for (const Cell &cell : m_cells) {
-            int nCellFaces = cell.getFaceCount();
-            for (int face = 0; face < nCellFaces; ++face) {
-                if (!cell.isFaceBorder(face)) {
-                    continue;
-                }
 
-                int nFaceVertices = cell.getFaceVertexCount(face);
-                for (int k = 0; k < nFaceVertices; ++k) {
-                    long vertexId = cell.getFaceVertexId(face, k);
+        // Duplicate vertex candidates
+        //
+        // During normal partitioning, vertices of the duplicate cells candidates
+        // are candidates for duplicate vertices.
+        //
+        // During mesh serialization, we will not receive duplicate cells, but in
+        // order to link the recevied cells with the current one we still need to
+        // properly identify duplicate vertices. Since we have delete all ghost
+        // information, all the vertices of border faces need to be added to the
+        // duplicate vertex candidates.
+        //
+        // Duplicate vertex candidates are stored in a kd-tree. The kd-tree stores
+        // a pointer to the vertices. If we try to store in the kd-tree a pointers
+        // to the vertices of the patch, the first resize of the vertex container
+        // would invalidate the pointer. Create a copy of the vertices and store
+        // the pointer to that copy.
+        std::unordered_map<long, Vertex> duplicateVerticesCandidates;
+        if (!m_partitioningSerialization) {
+            for (long cellId : duplicateCellsCandidates) {
+                const Cell &cell = m_cells.at(cellId);
+                ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+                int nCellVertices = cellVertexIds.size();
+                for (int k = 0; k < nCellVertices; ++k) {
+                    long vertexId = cellVertexIds[k];
                     duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
                 }
             }
-        }
-    }
-
-    KdTree<3, Vertex, long> duplicateVerticesCandidatesTree(duplicateVerticesCandidates.size());
-    for (auto &entry : duplicateVerticesCandidates) {
-        long vertexId = entry.first;
-        Vertex &vertex = entry.second;
-
-        duplicateVerticesCandidatesTree.insert(&vertex, vertexId);
-    }
-
-    //
-    // Start receiving data
-    //
-
-    // Start receiving vertices
-    MPI_Wait(&verticesSizeRequest, MPI_STATUS_IGNORE);
-
-    MPI_Request verticesRequest;
-    IBinaryStream verticesBuffer(verticesBufferSize);
-    MPI_Irecv(verticesBuffer.data(), verticesBuffer.getSize(), MPI_CHAR, sendRank, m_partitioningVerticesTag, m_communicator, &verticesRequest);
-
-    // Start receiving cells
-    MPI_Wait(&cellsSizeRequest, MPI_STATUS_IGNORE);
-
-    MPI_Request cellsRequest;
-    IBinaryStream cellsBuffer(cellsBufferSize);
-    MPI_Irecv(cellsBuffer.data(), cellsBuffer.getSize(), MPI_CHAR, sendRank, m_partitioningCellsTag, m_communicator, &cellsRequest);
-
-    // Fill partitioning info
-    //
-    // Only internal cells are tracked.
-    //
-    // The ids of the cells send will be stored accordingly to the receive
-    // order, this is the same order that will be used on the processor that
-    // has sent the cell. Since the order is the same, the two processors are
-    // able to exchange cell data without additional communications (they
-    // already know the list of cells for which data is needed and the order
-    // in which these data will be sent).
-    std::vector<adaption::Info> partitioningData;
-    adaption::Info *partitioningInfo = nullptr;
-    if (trackPartitioning) {
-        // Generate partition info
-        partitioningData.emplace_back();
-        partitioningInfo = &(partitioningData.back());
-
-        // Fill partitioning info
-        //
-        // List of internal received cells will be filled when cells are
-        // actually received.
-        partitioningInfo->entity = adaption::ENTITY_CELL;
-        partitioningInfo->type   = adaption::TYPE_PARTITION_RECV;
-        partitioningInfo->rank   = sendRank;
-    }
-
-    //
-    // Process vertices
-    //
-
-    // Wait until vertex communication is completed
-    MPI_Wait(&verticesRequest, MPI_STATUS_IGNORE);
-
-    // Add vertices
-    long nRecvVertices;
-    verticesBuffer >> nRecvVertices;
-
-    reserveVertices(getVertexCount() + nRecvVertices);
-
-    std::unordered_map<long, long> verticesMap;
-    for (long i = 0; i < nRecvVertices; ++i) {
-        // Cell data
-        bool isFrame;
-        verticesBuffer >> isFrame;
-
-        bool isHalo;
-        verticesBuffer >> isHalo;
-
-        Vertex vertex;
-        verticesBuffer >> vertex;
-        long originalVertexId = vertex.getId();
-
-        // Check if the vertex is a duplicate
-        //
-        // Only frame and halo vertices may be a duplicate.
-        //
-        // If the vertex is a duplicate the function that check its existance
-        // will return the current id of the vertex.
-        long vertexId = Vertex::NULL_ID;
-
-        bool isDuplicate = (isHalo || isFrame);
-        if (isDuplicate) {
-            isDuplicate = (duplicateVerticesCandidatesTree.exist(&vertex, vertexId) >= 0);
-        }
-
-        // Add the vertex
-        //
-        // If the id of the received vertex is already assigned, let the
-        // patch generate a new id. Otherwise, keep the id of the received
-        // vertex.
-        if (!isDuplicate) {
-            if (m_vertexIdGenerator.isAssigned(originalVertexId)) {
-                vertex.setId(Vertex::NULL_ID);
-            }
-
-            VertexIterator vertexIterator = addVertex(std::move(vertex));
-            vertexId = vertexIterator.getId();
-        }
-
-        if (originalVertexId != vertexId) {
-            verticesMap.insert({{originalVertexId, vertexId}});
-        }
-    }
-
-    std::unordered_map<long, Vertex>().swap(duplicateVerticesCandidates);
-
-    //
-    // Process cells
-    //
-
-    // Wait until vertex communication is completed
-    MPI_Wait(&cellsRequest, MPI_STATUS_IGNORE);
-
-    // Receive cell data
-    //
-    // Internal cells will be sent first.
-    long nReceivedInternals;
-    cellsBuffer >> nReceivedInternals;
-
-    long nReceivedHalo;
-    cellsBuffer >> nReceivedHalo;
-
-    long nReceivedCells = nReceivedInternals + nReceivedHalo;
-
-    reserveCells(getCellCount() + nReceivedCells);
-
-    if (trackPartitioning) {
-        partitioningInfo->current.reserve(nReceivedInternals);
-    }
-
-    std::vector<long> addedCells;
-    addedCells.reserve(nReceivedCells);
-
-    std::vector<long> cellsUpdateInterfacesList;
-    if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-        cellsUpdateInterfacesList.reserve(nReceivedCells);
-    }
-
-    std::unordered_set<long> interfacesDeleteList;
-
-    std::unordered_set<long> validReceivedAdjacencies;
-    validReceivedAdjacencies.reserve(nReceivedCells);
-
-    std::unordered_map<long, FlatVector2D<long>> duplicateCellsReceivedAdjacencies;
-
-    std::unordered_map<long, long> cellsMap;
-
-    int patchRank = getRank();
-
-    for (long i = 0; i < nReceivedCells; ++i) {
-        // Cell data
-        bool isFrame;
-        cellsBuffer >> isFrame;
-
-        bool isHalo;
-        cellsBuffer >> isHalo;
-
-        int cellOwner;
-        if (isHalo) {
-            cellsBuffer >> cellOwner;
         } else {
-            cellOwner = patchRank;
-        }
+            for (const Cell &cell : m_cells) {
+                int nCellFaces = cell.getFaceCount();
+                for (int face = 0; face < nCellFaces; ++face) {
+                    if (!cell.isFaceBorder(face)) {
+                        continue;
+                    }
 
-        Cell cell;
-        cellsBuffer >> cell;
-
-        long cellOriginalId = cell.getId();
-
-        // Set cell interior flag
-        bool isInterior = (cellOwner == patchRank);
-        cell.setInterior(isInterior);
-
-        // Remap connectivity
-        if (!verticesMap.empty()) {
-            cell.renumberVertices(verticesMap);
-        }
-
-        // Check if the cells is a duplicate
-        //
-        // The received cell may be one of the current ghosts.
-        long cellId = Cell::NULL_ID;
-        if (isHalo || isFrame) {
-            for (long candidateId : duplicateCellsCandidates) {
-                const Cell &candidateCell = m_cells.at(candidateId);
-                if (cell.hasSameConnect(candidateCell)) {
-                    cellId = candidateId;
-                    break;
+                    int nFaceVertices = cell.getFaceVertexCount(face);
+                    for (int k = 0; k < nFaceVertices; ++k) {
+                        long vertexId = cell.getFaceVertexId(face, k);
+                        duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
+                    }
                 }
             }
         }
 
-        // If the cell is not a duplicate add it in the cell data structure,
-        // otherwise merge the connectivity of the duplicate cell to the
-        // existing cell. This ensure that the received cell will be
-        // properly connected to the received cells
-        if (cellId < 0) {
-            // Add cell
+        duplicateVerticesCandidatesTree.clear();
+        for (auto &entry : duplicateVerticesCandidates) {
+            long vertexId = entry.first;
+            Vertex &vertex = entry.second;
+
+            duplicateVerticesCandidatesTree.insert(&vertex, vertexId);
+        }
+
+        //
+        // Identify rank that is sending data
+        //
+        // We need to start the receives and identify a rank for which both
+        // cell and vertex recevies are active.
+        int sendRank = -1;
+        while (sendRank < 0) {
+            // Start receiving vertices
+            MPI_Waitsome(nSendRanks, verticesSizeRequests.data(), &nSendCompleted, sendCompletedIndexes.data(), sendCompletedStatuses.data());
+            for (int i = 0; i < nSendCompleted; ++i) {
+                int sourceIndex = sendCompletedIndexes[i];
+                int sourceRank = sendCompletedStatuses[i].MPI_SOURCE;
+
+                std::size_t bufferSize = verticesBufferSizes[sourceIndex];
+                std::unique_ptr<IBinaryStream> buffer = std::unique_ptr<IBinaryStream>(new IBinaryStream(bufferSize));
+                MPI_Request *request = verticesRequests.data() + sourceIndex;
+                MPI_Irecv(buffer->data(), buffer->getSize(), MPI_CHAR, sourceRank, m_partitioningVerticesTag, m_communicator, request);
+                verticesBuffers[sourceIndex] = std::move(buffer);
+            }
+
+            // Start receiving cells
+            MPI_Waitsome(nSendRanks, cellsSizeRequests.data(), &nSendCompleted, sendCompletedIndexes.data(), sendCompletedStatuses.data());
+            for (int i = 0; i < nSendCompleted; ++i) {
+                int sourceIndex = sendCompletedIndexes[i];
+                int sourceRank  = sendCompletedStatuses[i].MPI_SOURCE;
+
+                std::size_t bufferSize = cellsBufferSizes[sourceIndex];
+                std::unique_ptr<IBinaryStream> buffer = std::unique_ptr<IBinaryStream>(new IBinaryStream(bufferSize));
+                MPI_Request *request = cellsRequests.data() + sourceIndex;
+                MPI_Irecv(buffer->data(), buffer->getSize(), MPI_CHAR, sourceRank, m_partitioningCellsTag, m_communicator, request);
+                cellsBuffers[sourceIndex] = std::move(buffer);
+            }
+
+            // Search for a rank that started sending both vertices and cells.
+            // If there aren't any, wait for other request to complete.
+            for (int awaitingSendRank : awaitingSendRanks) {
+                int sourceIndex = sendRankIndexes.at(awaitingSendRank);
+                if (verticesRequests[sourceIndex] == MPI_REQUEST_NULL) {
+                    continue;
+                } else if (cellsRequests[sourceIndex] == MPI_REQUEST_NULL) {
+                    continue;
+                }
+
+                sendRank = awaitingSendRank;
+                break;
+            }
+        }
+
+        int sendRankIndex = sendRankIndexes.at(sendRank);
+
+        //
+        // Process vertices
+        //
+
+        // Wait until vertex communication is completed
+        MPI_Request *verticesRequest = verticesRequests.data() + sendRankIndex;
+        MPI_Wait(verticesRequest, MPI_STATUS_IGNORE);
+
+        // Add vertices
+        IBinaryStream &verticesBuffer = *(verticesBuffers[sendRankIndex]);
+
+        long nRecvVertices;
+        verticesBuffer >> nRecvVertices;
+
+        reserveVertices(getVertexCount() + nRecvVertices);
+
+        verticesMap.clear();
+        for (long i = 0; i < nRecvVertices; ++i) {
+            // Cell data
+            bool isFrame;
+            verticesBuffer >> isFrame;
+
+            bool isHalo;
+            verticesBuffer >> isHalo;
+
+            Vertex vertex;
+            verticesBuffer >> vertex;
+            long originalVertexId = vertex.getId();
+
+            // Check if the vertex is a duplicate
             //
-            // If the id of the received cell is already assigned, let the
+            // Only frame and halo vertices may be a duplicate.
+            //
+            // If the vertex is a duplicate the function that check its existance
+            // will return the current id of the vertex.
+            long vertexId;
+
+            bool isDuplicate = (isFrame || isHalo);
+            if (isDuplicate) {
+                isDuplicate = (duplicateVerticesCandidatesTree.exist(&vertex, vertexId) >= 0);
+            }
+
+            // Add the vertex
+            //
+            // If the id of the received vertex is already assigned, let the
             // patch generate a new id. Otherwise, keep the id of the received
-            // cell.
-            if (m_cellIdGenerator.isAssigned(cellOriginalId)){
-                cell.setId(Cell::NULL_ID);
-            }
-
-            CellIterator cellIterator = addCell(std::move(cell), cellOwner);
-            cellId = cellIterator.getId();
-            addedCells.push_back(cellId);
-
-            // Reset the interfaces of the cell, they will be recreated later
-            if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-                cellIterator->resetInterfaces();
-                cellsUpdateInterfacesList.emplace_back(cellId);
-            }
-        } else {
-            // Check if the existing cells needs to become an internal cell
-            Cell &localCell = m_cells[cellId];
-            if (isInterior && !localCell.isInterior()) {
-                moveGhost2Internal(cellId);
-            }
-
-            // Save the adjacencies of the received cell, this adjacencies
-            // will link together the recevied cell to the existing ones.
-            FlatVector2D<long> &cellAdjacencies = duplicateCellsReceivedAdjacencies[cellId];
-
-            int nCellFaces = cell.getFaceCount();
-            int nCellAdjacencies = cell.getAdjacencyCount();
-            cellAdjacencies.reserve(nCellFaces, nCellAdjacencies);
-            for (int face = 0; face < nCellFaces; ++face) {
-                int nFaceAdjacencies = cell.getAdjacencyCount(face);
-                const long *faceAdjacencies = cell.getAdjacencies(face);
-                cellAdjacencies.pushBack(nFaceAdjacencies, faceAdjacencies);
-            }
-
-            // Mark the interfaces of the cell for deletion, they will be
-            // recreated later
-            if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-                int nLocalCellInterfaces = localCell.getInterfaceCount();
-                const long *localCellInterfaces = localCell.getInterfaces();
-                for (int k = 0; k < nLocalCellInterfaces; ++k) {
-                    long interfaceId = localCellInterfaces[k];
-                    interfacesDeleteList.insert(interfaceId);
+            // vertex.
+            if (!isDuplicate) {
+                if (m_vertexIdGenerator.isAssigned(originalVertexId)) {
+                    vertex.setId(Vertex::NULL_ID);
                 }
 
-                cellsUpdateInterfacesList.emplace_back(cellId);
+                VertexIterator vertexIterator = addVertex(std::move(vertex));
+                vertexId = vertexIterator.getId();
+            }
+
+            if (originalVertexId != vertexId) {
+                verticesMap.insert({{originalVertexId, vertexId}});
             }
         }
 
-        // Add the cell to the cell map
-        if (cellOriginalId != cellId) {
-            cellsMap.insert({{cellOriginalId, cellId}});
+        // Cleanup
+        verticesBuffers[sendRankIndex].reset();
+        std::unordered_map<long, Vertex>().swap(duplicateVerticesCandidates);
+
+        //
+        // Process cells
+        //
+
+        // Wait until vertex communication is completed
+        MPI_Request *cellsRequest = cellsRequests.data() + sendRankIndex;
+        MPI_Wait(cellsRequest, MPI_STATUS_IGNORE);
+
+        // Receive cell data
+        //
+        // Internal cells will be sent first.
+        IBinaryStream &cellsBuffer = *(cellsBuffers[sendRankIndex]);
+
+        long nReceivedInternals;
+        cellsBuffer >> nReceivedInternals;
+
+        long nReceivedHalo;
+        cellsBuffer >> nReceivedHalo;
+
+        long nReceivedCells = nReceivedInternals + nReceivedHalo;
+
+        reserveCells(getCellCount() + nReceivedCells);
+
+        if (trackPartitioning) {
+            // Only internal cells are tracked.
+            partitioningData[sendRankIndex].current.reserve(nReceivedInternals);
         }
 
-        // Add original cell id to the list of valid received adjacencies
-        validReceivedAdjacencies.insert(cellOriginalId);
+        validReceivedAdjacencies.clear();
+        validReceivedAdjacencies.reserve(nReceivedCells);
 
-        // Update tracking information
-        if (trackPartitioning && isInterior) {
-            partitioningInfo->current.emplace_back(cellId);
+        addedCells.clear();
+        addedCells.reserve(nReceivedCells);
+
+        if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+            cellsUpdateInterfacesOverall.reserve(cellsUpdateInterfacesOverall.size() + nReceivedCells);
         }
-    }
 
-    // Remove stale adjacencies
-    for (long cellId : addedCells) {
-        Cell &cell = m_cells.at(cellId);
+        duplicateCellsReceivedAdjacencies.clear();
 
-        int nCellFaces = cell.getFaceCount();
-        for (int face = 0; face < nCellFaces; ++face) {
-            int nFaceAdjacencies = cell.getAdjacencyCount(face);
-            const long *faceAdjacencies = cell.getAdjacencies(face);
+        cellsMap.clear();
 
-            int k = 0;
-            while (k < nFaceAdjacencies) {
-                long receivedAdjacencyId = faceAdjacencies[k];
-                if (validReceivedAdjacencies.count(receivedAdjacencyId) == 0) {
-                    cell.deleteAdjacency(face, k);
-                    --nFaceAdjacencies;
-                } else {
-                    ++k;
+        for (long i = 0; i < nReceivedCells; ++i) {
+            // Cell data
+            bool isFrame;
+            cellsBuffer >> isFrame;
+
+            bool isHalo;
+            cellsBuffer >> isHalo;
+
+            int cellOwner;
+            if (isHalo) {
+                cellsBuffer >> cellOwner;
+            } else {
+                cellOwner = patchRank;
+            }
+
+            Cell cell;
+            cellsBuffer >> cell;
+
+            long cellOriginalId = cell.getId();
+
+            // Set cell interior flag
+            bool isInterior = (cellOwner == patchRank);
+            cell.setInterior(isInterior);
+
+            // Remap connectivity
+            if (!verticesMap.empty()) {
+                cell.renumberVertices(verticesMap);
+            }
+
+            // Check if the cells is a duplicate
+            //
+            // The received cell may be one of the current ghosts.
+            long cellId = Cell::NULL_ID;
+            if (isHalo || isFrame) {
+                for (long candidateId : duplicateCellsCandidates) {
+                    const Cell &candidateCell = m_cells.at(candidateId);
+                    if (cell.hasSameConnect(candidateCell)) {
+                        cellId = candidateId;
+                        break;
+                    }
                 }
             }
-        }
-    }
 
-    // Remap adjacencies
-    if (!cellsMap.empty()) {
+            // If the cell is not a duplicate add it in the cell data structure,
+            // otherwise merge the connectivity of the duplicate cell to the
+            // existing cell. This ensure that the received cell will be
+            // properly connected to the received cells
+            if (cellId < 0) {
+                // Add cell
+                //
+                // If the id of the received cell is already assigned, let the
+                // patch generate a new id. Otherwise, keep the id of the received
+                // cell.
+                if (m_cellIdGenerator.isAssigned(cellOriginalId)){
+                    cell.setId(Cell::NULL_ID);
+                }
+
+                CellIterator cellIterator = addCell(std::move(cell), cellOwner);
+                cellId = cellIterator.getId();
+                addedCells.push_back(cellId);
+
+                // Reset the interfaces of the cell, they will be recreated later
+                if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+                    cellIterator->resetInterfaces();
+                    cellsUpdateInterfacesOverall.push_back(cellId);
+                }
+            } else {
+                // Check if the existing cells needs to become an internal cell
+                const Cell &localCell = m_cells[cellId];
+                if (isInterior && !localCell.isInterior()) {
+                    moveGhost2Internal(cellId);
+                }
+
+                // Save the adjacencies of the received cell, this adjacencies
+                // will link together the recevied cell to the existing ones.
+                FlatVector2D<long> &cellAdjacencies = duplicateCellsReceivedAdjacencies[cellId];
+
+                int nCellFaces = cell.getFaceCount();
+                int nCellAdjacencies = cell.getAdjacencyCount();
+                cellAdjacencies.reserve(nCellFaces, nCellAdjacencies);
+                for (int face = 0; face < nCellFaces; ++face) {
+                    int nFaceAdjacencies = cell.getAdjacencyCount(face);
+                    const long *faceAdjacencies = cell.getAdjacencies(face);
+                    cellAdjacencies.pushBack(nFaceAdjacencies, faceAdjacencies);
+                }
+
+                // Mark the interfaces of the cell for deletion, they will be
+                // recreated later
+                if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+                    int nLocalCellInterfaces = localCell.getInterfaceCount();
+                    const long *localCellInterfaces = localCell.getInterfaces();
+                    for (int k = 0; k < nLocalCellInterfaces; ++k) {
+                        long interfaceId = localCellInterfaces[k];
+                        interfacesDeleteOverall.insert(interfaceId);
+                    }
+
+                    cellsUpdateInterfacesOverall.emplace_back(cellId);
+                }
+            }
+
+            // Add the cell to the cell map
+            if (cellOriginalId != cellId) {
+                cellsMap.insert({{cellOriginalId, cellId}});
+            }
+
+            // Add original cell id to the list of valid received adjacencies
+            validReceivedAdjacencies.insert(cellOriginalId);
+
+            // Update tracking information
+            //
+            // Only internal cells are tracked.
+            //
+            // The ids of the cells send will be stored accordingly to the
+            // receive order, this is the same order that will be used on the
+            // processor that has sent the cell. Since the order is the same,
+            // the two processors are able to exchange cell data without
+            // additional communications (they already know the list of cells
+            // for which data is needed and the order in which these data will
+            // be sent).
+            if (trackPartitioning && isInterior) {
+                partitioningData[sendRankIndex].current.emplace_back(cellId);
+            }
+        }
+
+        // Cleanup
+        cellsBuffers[sendRankIndex].reset();
+
+        // Remove stale adjacencies
         for (long cellId : addedCells) {
             Cell &cell = m_cells.at(cellId);
 
-            int nCellAdjacencies = cell.getAdjacencyCount();
-            long *cellAdjacencies = cell.getAdjacencies();
-            for (int k = 0; k < nCellAdjacencies; ++k) {
-                long &cellAdjacencyId = cellAdjacencies[k];
-                auto cellsMapItr = cellsMap.find(cellAdjacencyId);
-                if (cellsMapItr != cellsMap.end()) {
-                    cellAdjacencyId = cellsMapItr->second;
+            int nCellFaces = cell.getFaceCount();
+            for (int face = 0; face < nCellFaces; ++face) {
+                int nFaceAdjacencies = cell.getAdjacencyCount(face);
+                const long *faceAdjacencies = cell.getAdjacencies(face);
+
+                int k = 0;
+                while (k < nFaceAdjacencies) {
+                    long senderAdjacencyId = faceAdjacencies[k];
+                    if (validReceivedAdjacencies.count(senderAdjacencyId) == 0) {
+                        cell.deleteAdjacency(face, k);
+                        --nFaceAdjacencies;
+                    } else {
+                        ++k;
+                    }
                 }
             }
         }
+
+        // Remap adjacencies
+        if (!cellsMap.empty()) {
+            for (long cellId : addedCells) {
+                Cell &cell = m_cells.at(cellId);
+
+                int nCellAdjacencies = cell.getAdjacencyCount();
+                long *cellAdjacencies = cell.getAdjacencies();
+                for (int k = 0; k < nCellAdjacencies; ++k) {
+                    long &cellAdjacencyId = cellAdjacencies[k];
+                    auto cellsMapItr = cellsMap.find(cellAdjacencyId);
+                    if (cellsMapItr != cellsMap.end()) {
+                        cellAdjacencyId = cellsMapItr->second;
+                    }
+                }
+            }
+        }
+
+        // Link received cells with the initial cells
+        //
+        // If we are serializing the patch, we don't have enough information to
+        // link the recevied cells with the initial cells (ghost cells have been
+        // deleted before receiving the cells). Cells that need to be linked will
+        // have some faces without any adjacency, therefore to link those cells
+        // we rebuild the adjacencies of all the cells that havefaces with no
+        // adjacencis. Authentic border cells will have their adjacencies rebuilt
+        // also if this may not be needed, but this is still the faster way to
+        // link the received cells.
+        if (!m_partitioningSerialization) {
+            for (auto &entry : duplicateCellsReceivedAdjacencies) {
+                long cellId = entry.first;
+                Cell &cell = m_cells.at(cellId);
+
+                int nCellFaces = cell.getFaceCount();
+                FlatVector2D<long> &cellReceivedAdjacencies = entry.second;
+                for (int face = 0; face < nCellFaces; ++face) {
+                    int nFaceLinkAdjacencies = cellReceivedAdjacencies.getItemCount(face);
+                    for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
+                        // We need to updated the adjacencies only if they are cells
+                        // that have been send.
+                        long receivedAdjacencyId = cellReceivedAdjacencies.getItem(face, k);
+                        if (validReceivedAdjacencies.count(receivedAdjacencyId) == 0) {
+                            continue;
+                        }
+
+                        // If the send cell is already in the adjacency list there is
+                        // nothing to update.
+                        long localAdjacencyId;
+                        auto ajacenciyCellMapItr = cellsMap.find(receivedAdjacencyId);
+                        if (ajacenciyCellMapItr != cellsMap.end()) {
+                            localAdjacencyId = ajacenciyCellMapItr->second;
+                        } else {
+                            localAdjacencyId = receivedAdjacencyId;
+                        }
+
+                        if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
+                            continue;
+                        }
+
+                        cell.pushAdjacency(face, localAdjacencyId);
+                    }
+                }
+            }
+        } else {
+            borderCellsSet.clear();
+            for (const Cell &cell : m_cells) {
+                int nCellFaces = cell.getFaceCount();
+                for (int face = 0; face < nCellFaces; ++face) {
+                    if (cell.isFaceBorder(face)) {
+                        borderCellsSet.insert(cell.getId());
+                        break;
+                    }
+                }
+            }
+
+            for (long cellId : borderCellsSet) {
+                cellsUpdateAdjacenciesOverall.insert(cellId);
+            }
+        }
+
+        // Receive is now complete
+        awaitingSendRanks.erase(sendRank);
     }
 
-    // Link received cells with the initial cells
-    //
-    // If we are serializing the patch, we don't have enough information to
-    // link the recevied cells with the initial cells (ghost cells have been
-    // deleted before receiving the cells). Cells that need to be linked will
-    // have some faces without any adjacency, therefore to link those cells
-    // we rebuild the adjacencies of all the cells that havefaces with no
-    // adjacencis. Authentic border cells will have their adjacencies rebuilt
-    // also if this may not be needed, but this is still the faster way to
-    // link the received cells.
-    if (!m_partitioningSerialization) {
-        for (auto &entry : duplicateCellsReceivedAdjacencies) {
-            long cellId = entry.first;
-            Cell &cell = m_cells.at(cellId);
-
-            int nCellFaces = cell.getFaceCount();
-            FlatVector2D<long> &cellReceivedAdjacencies = entry.second;
-            for (int face = 0; face < nCellFaces; ++face) {
-                int nFaceLinkAdjacencies = cellReceivedAdjacencies.getItemCount(face);
-                for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
-                    // We need to updated the adjacencies only if they are cells
-                    // that have been send.
-                    long receivedAdjacencyId = cellReceivedAdjacencies.getItem(face, k);
-                    if (validReceivedAdjacencies.count(receivedAdjacencyId) == 0) {
-                        continue;
-                    }
-
-                    // If the send cell is already in the adjacency list there is
-                    // nothing to update.
-                    long localAdjacencyId;
-                    auto ajacenciyCellMapItr = cellsMap.find(receivedAdjacencyId);
-                    if (ajacenciyCellMapItr != cellsMap.end()) {
-                        localAdjacencyId = ajacenciyCellMapItr->second;
-                    } else {
-                        localAdjacencyId = receivedAdjacencyId;
-                    }
-
-                    if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
-                        continue;
-                    }
-
-                    cell.pushAdjacency(face, localAdjacencyId);
-                }
-            }
-        }
-    } else {
-        std::unordered_set<long> borderCellsSet;
-        for (const Cell &cell : m_cells) {
-            int nCellFaces = cell.getFaceCount();
-            for (int face = 0; face < nCellFaces; ++face) {
-                if (cell.isFaceBorder(face)) {
-                    borderCellsSet.insert(cell.getId());
-                    break;
-                }
-            }
-        }
-
-        std::vector<long> borderCells(borderCellsSet.begin(), borderCellsSet.end());
-
-        updateAdjacencies(borderCells);
+    // Update adjacencies
+    if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
+        std::vector<long> updateList(cellsUpdateAdjacenciesOverall.begin(), cellsUpdateAdjacenciesOverall.end());
+        updateAdjacencies(updateList);
     }
 
     // Update interfaces
     if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-        std::vector<long> deleteList(interfacesDeleteList.begin(), interfacesDeleteList.end());
+        std::vector<long> deleteList(interfacesDeleteOverall.begin(), interfacesDeleteOverall.end());
         deleteInterfaces(deleteList, true, false);
 
-        std::vector<long> updateList(cellsUpdateInterfacesList.begin(), cellsUpdateInterfacesList.end());
+        std::vector<long> updateList(cellsUpdateInterfacesOverall.begin(), cellsUpdateInterfacesOverall.end());
         updateInterfaces(updateList);
     }
 
@@ -2420,7 +2542,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
 /*!
     Apply changes in ghost ownership.
 
-    \param sendRank is the rank of the processors sending the cells
+    \param sendRanks are the rank of the processors sending the cells
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
     \param finalGhostOwners are the owners of the ghost cells after the
@@ -2429,39 +2551,43 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
     with all the changes done to the patch during the partitioning, otherwise
     an empty vector will be returned.
 */
-std::vector<adaption::Info> PatchKernel::_partitioningAlter_updateCells(int sendRank,
+std::vector<adaption::Info> PatchKernel::_partitioningAlter_updateCells(const std::unordered_set<int> &sendRanks,
                                                                         const std::unordered_map<long, int> &finalGhostOwners,
                                                                         bool trackPartitioning)
 {
     // Update ghosts ownership
-    std::vector<long> updatedGhosts;
+    std::unordered_map<int, std::vector<long>> updatedGhosts;
     for (const auto &entry : m_ghostOwners) {
-        long ghostId = entry.first;
-
         int ghostOwner = entry.second;
-        if (ghostOwner != sendRank) {
+        if (sendRanks.count(ghostOwner) == 0) {
             continue;
         }
 
+        long ghostId = entry.first;
         int finalGhostOwner = finalGhostOwners.at(ghostId);
         if (finalGhostOwner == ghostOwner) {
             continue;
         }
 
         setGhostOwner(ghostId, finalGhostOwner);
-        updatedGhosts.push_back(ghostId);
+        updatedGhosts[ghostOwner].push_back(ghostId);
     }
 
     // Fill partitioning info
     std::vector<adaption::Info> partitioningData;
     if (trackPartitioning) {
-        adaption::Info partitioningInfo;
-        partitioningInfo.entity   = adaption::ENTITY_CELL;
-        partitioningInfo.type     = adaption::TYPE_PARTITION_RECV;
-        partitioningInfo.rank     = sendRank;
-        partitioningInfo.previous = std::move(updatedGhosts);
+        partitioningData.resize(updatedGhosts.size());
 
-        partitioningData.emplace_back(std::move(partitioningInfo));
+        int partitioningInfoIndex = 0;
+        for (auto &entry : updatedGhosts) {
+            adaption::Info &partitioningInfo = partitioningData[partitioningInfoIndex];
+            ++partitioningInfoIndex;
+
+            partitioningInfo.entity   = adaption::ENTITY_CELL;
+            partitioningInfo.type     = adaption::TYPE_PARTITION_RECV;
+            partitioningInfo.rank     = entry.first;
+            partitioningInfo.previous = std::move(entry.second);
+        }
     }
 
     return partitioningData;
