@@ -4972,9 +4972,9 @@ std::unordered_map<long, std::vector<long>> PatchKernel::binGroupVertices(const 
     updateBoundingBox();
 
     // Bin's spacing
-    double dx = max(1.0e-12, m_boxMaxPoint[0] - m_boxMinPoint[0]) / ((double) nBins);
-    double dy = max(1.0e-12, m_boxMaxPoint[1] - m_boxMinPoint[1]) / ((double) nBins);
-    double dz = max(1.0e-12, m_boxMaxPoint[2] - m_boxMinPoint[2]) / ((double) nBins);
+    double dx = std::max(1.0e-12, m_boxMaxPoint[0] - m_boxMinPoint[0]) / ((double) nBins);
+    double dy = std::max(1.0e-12, m_boxMaxPoint[1] - m_boxMinPoint[1]) / ((double) nBins);
+    double dz = std::max(1.0e-12, m_boxMaxPoint[2] - m_boxMinPoint[2]) / ((double) nBins);
 
     // Identify bins of vertices
     std::unordered_map<long, std::vector<long>> bins;
