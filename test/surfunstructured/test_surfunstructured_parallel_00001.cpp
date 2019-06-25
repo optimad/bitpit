@@ -868,7 +868,7 @@ if (mesh.getRank() == 0) {
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Export mesh ---------------------------------------------------------- //
-    log::cout() << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
+    log::cout() << "   exporting mesh to \"test00001_subtest003_step0.vtu\"" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest003_step0");
     t1 = high_resolution_clock::now();
@@ -906,7 +906,7 @@ if (mesh.getRank() == 0) {
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
 
     // Export mesh ---------------------------------------------------------- //
-    log::cout() << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
+    log::cout() << "   exporting mesh to \"test00001_subtest003_step1.vtu\"" << endl;
     t0 = high_resolution_clock::now();
     mesh.write("test00001_subtest003_step1");
     t1 = high_resolution_clock::now();
