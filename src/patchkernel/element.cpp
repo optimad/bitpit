@@ -1131,7 +1131,7 @@ int Element::getVertexCount() const
 
 	case (ElementType::POLYGON):
 	{
-		return getConnect()[0];
+		return countPolygonVertices(getConnect());
 	}
 
 	case (ElementType::POLYHEDRON):
@@ -1862,6 +1862,17 @@ int Element::getFaceStreamPosition(const long *connectivity,  int face)
 	}
 
 	return position;
+}
+
+/*!
+	Evaluates the number of vertices of a polygon.
+
+	\param connectivity is the the connectivity
+	\result The number of vertices.
+*/
+int Element::countPolygonVertices(const long *connectivity)
+{
+	return connectivity[0];
 }
 
 /*!

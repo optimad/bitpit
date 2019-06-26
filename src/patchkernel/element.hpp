@@ -193,6 +193,8 @@ private:
 		std::vector<std::array<double, 3>> m_coordinates;
 	};
 
+	static int countPolygonVertices(const long *connectivity);
+
 	long m_id;
 
 	ElementType m_type;
