@@ -3683,12 +3683,6 @@ void PatchKernel::restoreCells(std::istream &stream)
 		buildAdjacencies();
 	}
 
-#if BITPIT_ENABLE_MPI==1
-	// Update information for ghost data exchange
-	if (isPartitioned()) {
-		updateGhostExchangeInfo();
-	}
-#endif
 
 	// Set original advanced editing status
 	setExpert(originalExpertStatus);
