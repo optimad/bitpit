@@ -803,6 +803,41 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 		m_partitioningGlobalSendRanks.insert(rank);
 	}
 
+	int nSendRanks = m_partitioningGlobalSendRanks.size();
+
+	// Identify if this is a serialization or a normal partitioning
+	m_partitioningSerialization = (nSendRanks > 0) && (nSendRanks == (nRanks - 1));
+	if (m_partitioningSerialization) {
+		// The rank that is not sending any cells is the rank that should
+		// receive all the cells.
+		int receiverRank = -1;
+		for (int rank = 0; rank < nRanks; ++rank) {
+			if (m_partitioningGlobalSendRanks.count(rank) == 0) {
+				receiverRank = rank;
+				break;
+			}
+		}
+
+		// We are serializing the patch if all the processes are sending all
+		// their cells to the same rank.
+		if (patchRank == receiverRank) {
+			m_partitioningSerialization = true;
+		} else if (m_partitioningOutgoings.size() != (std::size_t) getInternalCount()) {
+			m_partitioningSerialization = false;
+		} else {
+			m_partitioningSerialization = true;
+			for (auto &entry : m_partitioningOutgoings) {
+				int cellRank = entry.second;
+				if (cellRank != receiverRank) {
+					m_partitioningSerialization = false;
+					break;
+				}
+			}
+		}
+
+		MPI_Allreduce(MPI_IN_PLACE, &m_partitioningSerialization, 1, MPI_C_BOOL, MPI_LAND, m_communicator);
+	}
+
 	// Build the information on the cells that will be sent
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
@@ -1083,12 +1118,18 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 {
     // Ghost final ghost owners
     //
-    // Some of the cells that will be send during partitioning may be ghosts on
-    // other processors. We need to identify the owners of the ghosts after the
-    // partitioning.
+    // If we are serializing the patch, we need to delete all the ghosts cells.
+    //
+    // If we are not serializing the patch, some of the cells that will be send
+    // during partitioning may be ghosts on other processors. Therefore, we
+    // need to identify the owners of the ghosts after the partitioning.
     std::unordered_map<long, int> finalGhostOwners;
-    if (isPartitioned()) {
-        finalGhostOwners = _partitioningAlter_getFinalGhostOwners();
+    if (!m_partitioningSerialization) {
+        if (isPartitioned()) {
+            finalGhostOwners = _partitioningAlter_getFinalGhostOwners();
+        }
+    } else {
+        _partitioningAlter_deleteGhosts();
     }
 
     // Communicate patch data structures
@@ -1227,6 +1268,47 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_getFinalGhostOwner
 }
 
 /*!
+    Delete ghosts.
+*/
+void PatchKernel::_partitioningAlter_deleteGhosts()
+{
+    // Delete ghost cells
+    std::unordered_set<long> involvedInterfaces;
+
+    std::vector<long> cellsDeleteList;
+    cellsDeleteList.reserve(m_ghostOwners.size());
+    for (const auto &entry : m_ghostOwners) {
+        long cellId = entry.first;
+        const Cell &cell = getCell(cellId);
+
+        const long *interfaces = cell.getInterfaces();
+        const int nCellInterfaces = cell.getInterfaceCount();
+        for (int i = 0; i < nCellInterfaces; ++i) {
+            long interfaceId = interfaces[i];
+            involvedInterfaces.insert(interfaceId);
+        }
+
+        cellsDeleteList.emplace_back(cellId);
+    }
+
+    deleteCells(cellsDeleteList, true, true);
+
+    // Delete interfaces no longer used
+    std::vector<long> interfacesDeleteList;
+    interfacesDeleteList.reserve(involvedInterfaces.size());
+    for (long interfaceId : involvedInterfaces) {
+        if (isInterfaceOrphan(interfaceId)) {
+            interfacesDeleteList.emplace_back(interfaceId);
+        }
+    }
+
+    deleteInterfaces(interfacesDeleteList, true, true);
+
+    // Delete vertices no longer used
+    deleteOrphanVertices();
+}
+
+/*!
     Sends the given list of cells to the process with the specified rank.
 
     \param recvRanks are the receiver ranks
@@ -1309,6 +1391,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         // Frame is made up by cells not explicitly marked for sending that
         // have a face, an edge or a vertex on a frontier face.
         //
+        // There are no halo nor frame cells if we are serializing a patch.
+        //
         // NOTE: for three-dimensional unstructured non-conformal meshes we
         // need to explicitly search cells that have an edge on the frontier,
         // searching for cells that have a vertex on the frontier is not
@@ -1318,65 +1402,134 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         frameCells.clear();
 
         // Add face and vertex frontier neighbours
-        frontierCells.clear();
-        frontierVertices.clear();
-        for (long cellId : outgoingCells) {
-            Cell &cell = m_cells.at(cellId);
+        if (!m_partitioningSerialization) {
+            frontierCells.clear();
+            frontierVertices.clear();
+            for (long cellId : outgoingCells) {
+                Cell &cell = m_cells.at(cellId);
 
-            const int nFaces = cell.getFaceCount();
-            for (int face = 0; face < nFaces; ++face) {
-                int nFaceAdjacencies = cell.getAdjacencyCount(face);
-                if (nFaceAdjacencies == 0) {
-                    continue;
-                }
-
-                const long *faceAdjacencies = cell.getAdjacencies(face);
-                for (int i = 0; i < nFaceAdjacencies; ++i) {
-                    // Check if the we are on the frontier
-                    long neighId = faceAdjacencies[i];
-                    if (outgoingCells.count(neighId) > 0) {
+                const int nFaces = cell.getFaceCount();
+                for (int face = 0; face < nFaces; ++face) {
+                    int nFaceAdjacencies = cell.getAdjacencyCount(face);
+                    if (nFaceAdjacencies == 0) {
                         continue;
                     }
 
-                    // Select the cell with only one adjacency
-                    long frontierCellId;
-                    long frontierFace;
-                    Cell *frontierCell;
-                    if (nFaceAdjacencies == 1) {
-                        frontierCellId = cellId;
-                        frontierFace = face;
-                        frontierCell = &cell;
-                    } else {
-                        frontierCellId = neighId;
-                        frontierFace = findAdjoinNeighFace(cellId, neighId);
-                        frontierCell = &(m_cells.at(neighId));
-                    }
-
-                    frontierCells.emplace_back(frontierCellId);
-
-                    // Add frontier face neighbours
-                    frontierNeighs.resize(2);
-                    frontierNeighs[0] = cellId;
-                    frontierNeighs[1] = neighId;
-
-                    // Add frontier vertex neighbours
-                    ConstProxyVector<int> frontierFaceLocalVerticesIds = frontierCell->getFaceLocalVertexIds(frontierFace);
-                    int nFrontierFaceVertices = frontierFaceLocalVerticesIds.size();
-
-                    for (int k = 0; k < nFrontierFaceVertices; ++k) {
-                        // Avoid adding duplicate vertices
-                        long vertexId = frontierCell->getFaceVertexId(frontierFace, k);
-                        auto frontierVertexItr = frontierVertices.find(vertexId);
-                        if (frontierVertexItr != frontierVertices.end()) {
+                    const long *faceAdjacencies = cell.getAdjacencies(face);
+                    for (int i = 0; i < nFaceAdjacencies; ++i) {
+                        // Check if the we are on the frontier
+                        long neighId = faceAdjacencies[i];
+                        if (outgoingCells.count(neighId) > 0) {
                             continue;
                         }
 
-                        // Add vertex to the list of frontier vertices
-                        frontierVertices.insert(vertexId);
+                        // Select the cell with only one adjacency
+                        long frontierCellId;
+                        long frontierFace;
+                        Cell *frontierCell;
+                        if (nFaceAdjacencies == 1) {
+                            frontierCellId = cellId;
+                            frontierFace = face;
+                            frontierCell = &cell;
+                        } else {
+                            frontierCellId = neighId;
+                            frontierFace = findAdjoinNeighFace(cellId, neighId);
+                            frontierCell = &(m_cells.at(neighId));
+                        }
 
-                        // Find vertex neighbours
-                        int vertex = frontierFaceLocalVerticesIds[k];
-                        findCellVertexNeighs(cellId, vertex, &frontierNeighs);
+                        frontierCells.emplace_back(frontierCellId);
+
+                        // Add frontier face neighbours
+                        frontierNeighs.resize(2);
+                        frontierNeighs[0] = cellId;
+                        frontierNeighs[1] = neighId;
+
+                        // Add frontier vertex neighbours
+                        ConstProxyVector<int> frontierFaceLocalVerticesIds = frontierCell->getFaceLocalVertexIds(frontierFace);
+                        int nFrontierFaceVertices = frontierFaceLocalVerticesIds.size();
+
+                        for (int k = 0; k < nFrontierFaceVertices; ++k) {
+                            // Avoid adding duplicate vertices
+                            long vertexId = frontierCell->getFaceVertexId(frontierFace, k);
+                            auto frontierVertexItr = frontierVertices.find(vertexId);
+                            if (frontierVertexItr != frontierVertices.end()) {
+                                continue;
+                            }
+
+                            // Add vertex to the list of frontier vertices
+                            frontierVertices.insert(vertexId);
+
+                            // Find vertex neighbours
+                            int vertex = frontierFaceLocalVerticesIds[k];
+                            findCellVertexNeighs(cellId, vertex, &frontierNeighs);
+                        }
+
+                        // Update frame and halo
+                        for (long frontierNeighId : frontierNeighs) {
+                            if (outgoingCells.count(frontierNeighId) > 0) {
+                                frameCells.insert(frontierNeighId);
+                            } else {
+                                haloCells.insert(frontierNeighId);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add edge frontier neighbours
+            //
+            // We need to find edge neighbours after find all frontier vertices.
+            frontierEdges.clear();
+            if (patchDimension == 3) {
+                for (long frontierCellId : frontierCells) {
+                    Cell &frontierCell = m_cells.at(frontierCellId);
+
+                    // Clear frontier neighbours
+                    frontierNeighs.clear();
+
+                    // Add frontier edge neighbours
+                    int nFrontierCellEdges = frontierCell.getEdgeCount();
+                    for (int edge = 0; edge < nFrontierCellEdges; ++edge) {
+                        // Edge information
+                        ElementType edgeType = frontierCell.getEdgeType(edge);
+                        int nEdgeVertices = frontierCell.getEdgeVertexCount(edge);
+
+                        CellHalfEdge frontierEdge = CellHalfEdge(frontierCell, edge, CellHalfEdge::WINDING_NATURAL);
+
+                        // Discard edges that do not belong to the frontier
+                        ConstProxyVector<long> edgeVertexIds = Cell::getVertexIds(edgeType, frontierEdge.getConnect().data());
+
+                        bool isFrontierEdge = true;
+                        for (int k = 0; k < nEdgeVertices; ++k) {
+                            long edgeVertexId = edgeVertexIds[k];
+                            if (frontierVertices.count(edgeVertexId) == 0) {
+                                isFrontierEdge = false;
+                                break;
+                            }
+                        }
+
+                        if (isFrontierEdge) {
+                            continue;
+                        }
+
+                        // Avoid adding duplicate edges
+                        frontierEdge.setWinding(CellHalfEdge::WINDING_REVERSE);
+                        auto frontierEdgeItr = frontierEdges.find(frontierEdge);
+                        if (frontierEdgeItr != frontierEdges.end()) {
+                            continue;
+                        } else {
+                            frontierEdge.setWinding(CellHalfEdge::WINDING_NATURAL);
+	                        frontierEdgeItr = frontierEdges.find(frontierEdge);
+                            if (frontierEdgeItr != frontierEdges.end()) {
+                                continue;
+                            }
+                        }
+
+                        // Add edge to the list of frontier edges
+                        frontierEdges.insert(std::move(frontierEdge));
+
+                        // Find edge neighbours
+                        findCellEdgeNeighs(frontierCellId, edge, &frontierNeighs);
                     }
 
                     // Update frame and halo
@@ -1386,73 +1539,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
                         } else {
                             haloCells.insert(frontierNeighId);
                         }
-                    }
-                }
-            }
-        }
-
-        // Add edge frontier neighbours
-        //
-        // We need to find edge neighbours after find all frontier vertices.
-        frontierEdges.clear();
-        if (patchDimension == 3) {
-            for (long frontierCellId : frontierCells) {
-                Cell &frontierCell = m_cells.at(frontierCellId);
-
-                // Clear frontier neighbours
-                frontierNeighs.clear();
-
-                // Add frontier edge neighbours
-                int nFrontierCellEdges = frontierCell.getEdgeCount();
-                for (int edge = 0; edge < nFrontierCellEdges; ++edge) {
-                    // Edge information
-                    ElementType edgeType = frontierCell.getEdgeType(edge);
-                    int nEdgeVertices = frontierCell.getEdgeVertexCount(edge);
-
-                    CellHalfEdge frontierEdge = CellHalfEdge(frontierCell, edge, CellHalfEdge::WINDING_NATURAL);
-
-                    // Discard edges that do not belong to the frontier
-                    ConstProxyVector<long> edgeVertexIds = Cell::getVertexIds(edgeType, frontierEdge.getConnect().data());
-
-                    bool isFrontierEdge = true;
-                    for (int k = 0; k < nEdgeVertices; ++k) {
-                        long edgeVertexId = edgeVertexIds[k];
-                        if (frontierVertices.count(edgeVertexId) == 0) {
-                            isFrontierEdge = false;
-                            break;
-                        }
-                    }
-
-                    if (isFrontierEdge) {
-                        continue;
-                    }
-
-                    // Avoid adding duplicate edges
-                    frontierEdge.setWinding(CellHalfEdge::WINDING_REVERSE);
-                    auto frontierEdgeItr = frontierEdges.find(frontierEdge);
-                    if (frontierEdgeItr != frontierEdges.end()) {
-                        continue;
-                    } else {
-                        frontierEdge.setWinding(CellHalfEdge::WINDING_NATURAL);
-                        frontierEdgeItr = frontierEdges.find(frontierEdge);
-                        if (frontierEdgeItr != frontierEdges.end()) {
-                            continue;
-                        }
-                    }
-
-                    // Add edge to the list of frontier edges
-                    frontierEdges.insert(std::move(frontierEdge));
-
-                    // Find edge neighbours
-                    findCellEdgeNeighs(frontierCellId, edge, &frontierNeighs);
-                }
-
-                // Update frame and halo
-                for (long frontierNeighId : frontierNeighs) {
-                    if (outgoingCells.count(frontierNeighId) > 0) {
-                        frameCells.insert(frontierNeighId);
-                    } else {
-                        haloCells.insert(frontierNeighId);
                     }
                 }
             }
@@ -1860,8 +1946,14 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
 
     // Duplicate vertex candidates
     //
-    // Vertices of the duplicate cells candidates are candidates for duplicate
-    // vertices. These vertices are stored in a kd-tree.
+    // During normal partitioning, vertices of the duplicate cells candidates
+    // are candidates for duplicate vertices.
+    //
+    // During mesh serialization, we will not receive duplicate cells, but in
+    // order to link the recevied cells with the current one we still need to
+    // properly identify duplicate vertices. Since we have delete all ghost
+    // information, all the vertices of border faces need to be added to the
+    // duplicate vertex candidates.
     //
     // Duplicate vertex candidates are stored in a kd-tree. The kd-tree stores
     // a pointer to the vertices. If we try to store in the kd-tree a pointers
@@ -1869,13 +1961,30 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
     // would invalidate the pointer. Create a copy of the vertices and store
     // the pointer to that copy.
     std::unordered_map<long, Vertex> duplicateVerticesCandidates;
-    for (long cellId : duplicateCellsCandidates) {
-        const Cell &cell = m_cells.at(cellId);
-        ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-        int nCellVertices = cellVertexIds.size();
-        for (int k = 0; k < nCellVertices; ++k) {
-            long vertexId = cellVertexIds[k];
-            duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
+    if (!m_partitioningSerialization) {
+        for (long cellId : duplicateCellsCandidates) {
+            const Cell &cell = m_cells.at(cellId);
+            ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+            int nCellVertices = cellVertexIds.size();
+            for (int k = 0; k < nCellVertices; ++k) {
+                long vertexId = cellVertexIds[k];
+                duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
+            }
+        }
+    } else {
+        for (const Cell &cell : m_cells) {
+            int nCellFaces = cell.getFaceCount();
+            for (int face = 0; face < nCellFaces; ++face) {
+                if (!cell.isFaceBorder(face)) {
+                    continue;
+                }
+
+                int nFaceVertices = cell.getFaceVertexCount(face);
+                for (int k = 0; k < nFaceVertices; ++k) {
+                    long vertexId = cell.getFaceVertexId(face, k);
+                    duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
+                }
+            }
         }
     }
 
@@ -2142,32 +2251,58 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(int sen
     }
 
     // Link received cells with the initial cells
-    for (const auto &entry : linkAdjacencies) {
-        long cellId = entry.first;
-        Cell &cell = m_cells.at(cellId);
+    //
+    // If we are serializing the patch, we don't have enough information to
+    // link the recevied cells with the initial cells (ghost cells have been
+    // deleted before receiving the cells). Cells that need to be linked will
+    // have some faces without any adjacency, therefore to link those cells
+    // we rebuild the adjacencies of all the cells that havefaces with no
+    // adjacencis. Authentic border cells will have their adjacencies rebuilt
+    // also if this may not be needed, but this is still the faster way to
+    // link the received cells.
+    if (!m_partitioningSerialization) {
+        for (auto &entry : linkAdjacencies) {
+            long cellId = entry.first;
+            Cell &cell = m_cells.at(cellId);
 
-        int nCellFaces = cell.getFaceCount();
-        const FlatVector2D<long> &cellLinkAdjacencies = entry.second;
-        for (int face = 0; face < nCellFaces; ++face) {
-            int nFaceLinkAdjacencies = cellLinkAdjacencies.getItemCount(face);
-            for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
-                // We need to updated the adjacencies only if they are cells
-                // that have been send.
-                long senderAdjacencyId = cellLinkAdjacencies.getItem(face, k);
-                if (cellMap.count(senderAdjacencyId) == 0) {
-                    continue;
+            int nCellFaces = cell.getFaceCount();
+            FlatVector2D<long> &cellLinkAdjacencies = entry.second;
+            for (int face = 0; face < nCellFaces; ++face) {
+                int nFaceLinkAdjacencies = cellLinkAdjacencies.getItemCount(face);
+                for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
+                    // We need to updated the adjacencies only if they are cells
+                    // that have been send.
+                    long senderAdjacencyId = cellLinkAdjacencies.getItem(face, k);
+                    if (cellMap.count(senderAdjacencyId) == 0) {
+                        continue;
+                    }
+
+                    // If the send cell is already in the adjacency list there is
+                    // nothing to update.
+                    long localAdjacencyId = cellMap.at(senderAdjacencyId);
+                    if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
+                        continue;
+                    }
+
+                    cell.pushAdjacency(face, localAdjacencyId);
                 }
-
-                // If the send cell is already in the adjacency list there is
-                // nothing to update.
-                long localAdjacencyId  = cellMap.at(senderAdjacencyId);
-                if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
-                    continue;
-                }
-
-                cell.pushAdjacency(face, localAdjacencyId);
             }
         }
+    } else {
+        std::unordered_set<long> borderCellsSet;
+        for (const Cell &cell : m_cells) {
+            int nCellFaces = cell.getFaceCount();
+            for (int face = 0; face < nCellFaces; ++face) {
+                if (cell.isFaceBorder(face)) {
+                    borderCellsSet.insert(cell.getId());
+                    break;
+                }
+            }
+        }
+
+        std::vector<long> borderCells(borderCellsSet.begin(), borderCellsSet.end());
+
+        updateAdjacencies(borderCells);
     }
 
     // Update interfaces

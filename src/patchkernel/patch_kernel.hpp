@@ -731,6 +731,7 @@ private:
 	std::size_t m_haloSize;
 
 	int m_partitioningTag;
+	bool m_partitioningSerialization;
 	std::unordered_map<long, int> m_partitioningOutgoings;
 	std::unordered_set<int> m_partitioningGlobalSendRanks;
 
@@ -743,6 +744,7 @@ private:
 	void clearGhostOwners();
 
 	std::unordered_map<long, int> _partitioningAlter_getFinalGhostOwners();
+	void _partitioningAlter_deleteGhosts();
 
 	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning);
 	std::vector<adaption::Info> _partitioningAlter_receiveCells(int sendRank, bool trackPartitioning);
