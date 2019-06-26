@@ -669,8 +669,10 @@ int Element::getFaceCount() const
 	switch (m_type) {
 
 	case (ElementType::POLYGON):
+		return countPolygonFaces(getConnect());
+
 	case (ElementType::POLYHEDRON):
-		return getConnect()[0];
+		return countPolyhedronFaces(getConnect());
 
 	default:
 		assert(m_type != ElementType::UNDEFINED);
@@ -1871,6 +1873,28 @@ int Element::getFaceStreamPosition(const long *connectivity,  int face)
 	\result The number of vertices.
 */
 int Element::countPolygonVertices(const long *connectivity)
+{
+	return connectivity[0];
+}
+
+/*!
+	Evaluates the number of faces of a polygon.
+
+	\param connectivity is the the connectivity
+	\result The number of faces.
+*/
+int Element::countPolygonFaces(const long *connectivity)
+{
+	return countPolygonVertices(connectivity);
+}
+
+/*!
+	Evaluates the number of faces of a polyhedron.
+
+	\param connectivity is the the connectivity
+	\result The number of faces.
+*/
+int Element::countPolyhedronFaces(const long *connectivity)
 {
 	return connectivity[0];
 }

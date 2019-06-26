@@ -195,6 +195,9 @@ private:
 
 	static int countPolygonVertices(const long *connectivity);
 
+	static int countPolygonFaces(const long *connectivity);
+	static int countPolyhedronFaces(const long *connectivity);
+
 	long m_id;
 
 	ElementType m_type;
