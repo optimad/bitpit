@@ -619,10 +619,10 @@ void PatchKernel::updateFirstGhostId()
 	if (m_nGhosts == 0) {
 		m_firstGhostId = Cell::NULL_ID;
 	} else if (m_nInternals == 0) {
-		m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
+		CellIterator firstGhostItr = cellBegin();
+		m_firstGhostId = firstGhostItr->getId();
 	} else {
-		CellIterator first_ghost_iterator = ++m_cells.find(m_lastInternalId);
-		m_firstGhostId = first_ghost_iterator->getId();
+		m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
 	}
 }
 
