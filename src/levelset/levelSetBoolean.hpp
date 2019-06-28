@@ -47,6 +47,7 @@ class LevelSetBoolean: public LevelSetMetaObject {
     std::vector<LevelSetObject*>                m_objPtr;               /**< pointers to objects */
 
     LevelSetInfo                                booleanOperation(long ) const ;
+    LevelSetInfo                                booleanOperation(const std::array<double,3> &) const ;
     LevelSetBooleanOperation                    getBooleanOperation() const;
     LevelSetObject*                             getCompetentObject(long, double *factorPtr=nullptr) const ;
 
@@ -69,6 +70,9 @@ class LevelSetBoolean: public LevelSetMetaObject {
     std::array<double,3>                        getNormal(long ) const override;
     int                                         getPart(long ) const override;
     double                                      getSurfaceFeatureSize(long ) const override;
+
+    LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
+
     double                                      getMinSurfaceFeatureSize() const override;
     double                                      getMaxSurfaceFeatureSize() const override;
 

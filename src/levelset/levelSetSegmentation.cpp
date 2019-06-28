@@ -1151,4 +1151,27 @@ void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &r
 }
 # endif
 
+/*!
+ * Computes the LevelSetInfo of a point
+ * \param[in] coords coordinates of the point
+ * \return the LevelSetInfo
+ */
+LevelSetInfo LevelSetSegmentation::computeLevelSetInfo(const std::array<double,3> &coords) const {
+
+    long segmentId;
+    double distance;
+    std::array<double,3> gradient;
+    std::array<double,3> normal;
+
+    m_segmentation->m_searchTreeUPtr->findPointClosestCell(coords, &segmentId, &distance);
+
+    int error = m_segmentation->getSegmentInfo(coords, segmentId, false, distance, gradient, normal);
+    if (error) {
+        throw std::runtime_error ("Unable to extract the levelset information from segment.");
+    }
+
+    return LevelSetInfo(distance,gradient);
+
+}
+
 }

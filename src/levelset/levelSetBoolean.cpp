@@ -112,6 +112,16 @@ std::array<double,3> LevelSetBoolean::getGradient(long i) const {
 }
 
 /*!
+ * Computes the LevelSetInfo in a point
+ * @param[in] coords point coordinates
+ * @return LevelSetInfo
+*/
+LevelSetInfo LevelSetBoolean::computeLevelSetInfo( const std::array<double,3> &coords) const{
+    return booleanOperation(coords) ;
+
+}
+
+/*!
  * Writes LevelSetBoolean to stream in binary format
  * @param[in] stream output stream
  */
@@ -332,6 +342,45 @@ LevelSetInfo LevelSetBoolean::booleanOperation(long id) const{
         } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
             if(result.value<-value) {
                 result = m_objPtr[n]->getLevelSetInfo(id);
+                result.value *= -1.;
+                result.gradient *= -1.;
+            }
+        }
+    }
+
+    return result;
+}
+
+/*!
+ * Performs the bolean operation
+ * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
+ * @param[in] coords point coordinates
+ * @return resulting levelset value and gradient in LevelSetInfo
+ */
+LevelSetInfo LevelSetBoolean::booleanOperation(const std::array<double,3> &coords) const{
+
+    if(m_objPtr.empty()){
+        return LevelSetInfo();
+    }
+
+    LevelSetInfo result = m_objPtr[0]->computeLevelSetInfo(coords);
+    for( size_t n=1; n<m_objPtr.size(); ++n){
+        LevelSetInfo second = m_objPtr[n]->computeLevelSetInfo(coords);
+        double value = second.value;
+
+        if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
+            if(result.value>value) {
+                result = second;
+            }
+
+        } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
+            if(result.value<value) {
+                result = second;
+            }
+
+        } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
+            if(result.value<-value) {
+                result = second;
                 result.value *= -1.;
                 result.gradient *= -1.;
             }

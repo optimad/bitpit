@@ -154,6 +154,9 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     void                                        computeLSInNarrowBand(bool) override;
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool) override;
+
+    LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
+
 };
 
 }
