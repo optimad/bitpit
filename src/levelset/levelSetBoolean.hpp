@@ -80,6 +80,7 @@ class LevelSetBoolean: public LevelSetMetaObject {
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool) override;
 
     int                                         getPrimaryObjectId(long ) const override;
+    std::vector<const LevelSetObject*>          getPrimaryObjects() const;
 
 };
 

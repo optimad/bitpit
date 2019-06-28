@@ -314,6 +314,27 @@ LevelSetObject* LevelSetBoolean::getCompetentObject( long id, double *factor) co
 }
 
 /*!
+ * Get all primary objects that compose the boolean object
+ * \return pointers to all primary objects involved the definition of the boolean object
+ */
+std::vector<const LevelSetObject*> LevelSetBoolean::getPrimaryObjects() const{
+
+    std::vector<const LevelSetObject*> objects;
+
+    for( LevelSetObject* object : m_objPtr){
+        if( LevelSetMetaObject *meta = dynamic_cast<LevelSetMetaObject*>(object) ){
+            std::vector<const LevelSetObject*> subObjects = meta->getPrimaryObjects();
+            objects.insert(objects.end(), subObjects.begin(), subObjects.end());
+        } else {
+            objects.push_back(object);
+        }
+    }
+
+    return objects;
+
+}
+
+/*!
  * Performs the bolean operation
  * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
  * @param[in] id cell index

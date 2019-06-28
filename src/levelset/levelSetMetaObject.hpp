@@ -36,6 +36,7 @@ class LevelSetMetaObject : public LevelSetObject{
 
     bool            isPrimary() const override;
     virtual int     getPrimaryObjectId( long ) const =0;
+    virtual std::vector<const LevelSetObject *> getPrimaryObjects() const =0;
 
 };
 
