@@ -114,6 +114,17 @@ std::array<double,3> LevelSetObject::computeProjectionPoint(long i) const{
 }
 
 /*!
+ * Projects a vertex on the zero levelset
+ * @param[in] vertexId index of the vertex
+ * @return the projected point
+ */
+std::array<double,3> LevelSetObject::computeProjectionPoint(const std::array<double,3> &coords) const{
+
+    LevelSetInfo info = computeLevelSetInfo(coords);
+    return coords +info.value *info.gradient;
+}
+
+/*!
  * Get the part id of projection point
  * @param[in] i cell index
  * @return part id 

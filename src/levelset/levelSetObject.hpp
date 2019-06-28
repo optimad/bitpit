@@ -113,6 +113,7 @@ class LevelSetObject : public VTKBaseStreamer{
     virtual int                                 getPart(long ) const ;
     virtual std::array<double,3>                getNormal(long ) const;
     virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
+    std::array<double,3>                        computeProjectionPoint(const std::array<double,3> &) const;
 
     short                                       getSign(long ) const;
 
