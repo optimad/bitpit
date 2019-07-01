@@ -62,6 +62,7 @@ public:
 
     virtual double evalSize(const std::array<double, 3> *vertexCoords) const = 0;
 
+    virtual void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const = 0;
     virtual double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const = 0;
 
 protected:
@@ -81,6 +82,7 @@ public:
     double evalSurfaceArea(const std::array<double, 3> *vertexCoords) const;
     double evalEdgePerimeter(const std::array<double, 3> *vertexCoords) const;
 
+    void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
 protected:
@@ -191,6 +193,7 @@ public:
 
     virtual std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const = 0;
 
+    void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
 protected:
@@ -212,6 +215,7 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
+    void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceTriangleInfo info;
@@ -301,6 +305,7 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{0., 0., 1.}}, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
+    void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceLineInfo info;
@@ -336,6 +341,7 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &orientation = {{1., 0., 0.}}) const override;
 
+    void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceVertexInfo info;

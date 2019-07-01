@@ -1637,16 +1637,36 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 */
 double Element::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *coordinates) const
 {
+	double distance;
+	std::array<double, 3> projection;
+	evalPointProjection(point, coordinates, &projection, &distance);
+
+	return distance;
+}
+
+/*!
+    Evaluates the projection of the point on the element.
+
+    \param point is the point
+    \param coordinates are the coordinate of the vertices
+    \param[out] projection on output contains the projection point
+    \param[out] distance on output contains the distance between the point
+    and the projection
+*/
+void Element::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *coordinates,
+                                  std::array<double, 3> *projection, double *distance) const
+{
 	switch (m_type) {
 
 	case ElementType::POLYGON:
 	{
-		return CGElem::distancePointPolygon(point, getVertexCount(), coordinates);
+		int projectionFlag;
+		*distance = CGElem::distancePointPolygon(point, getVertexCount(), coordinates, *projection, projectionFlag);
 	}
 
 	case ElementType::POLYHEDRON:
 	{
-		double distance = std::numeric_limits<double>::max();
+		*distance = std::numeric_limits<double>::max();
 
 		int nFaces = getFaceCount();
 		std::vector<std::array<double, 3>> faceCoordinates;
@@ -1660,24 +1680,27 @@ double Element::evalPointDistance(const std::array<double, 3> &point, const std:
 			}
 
 			double faceDistance;
+			std::array<double, 3> faceProjection;
 			bool faceHasReferenceInfo = ReferenceElementInfo::hasInfo(faceType);
 			if (faceHasReferenceInfo) {
-				faceDistance = ReferenceElementInfo::getInfo(faceType).evalPointDistance(point, faceCoordinates.data());
+				ReferenceElementInfo::getInfo(faceType).evalPointProjection(point, faceCoordinates.data(), &faceProjection, &faceDistance);
 			} else {
-				faceDistance = CGElem::distancePointPolygon(point, nFaceVertices, faceCoordinates.data());
+				int faceProjectionFlag;
+				faceDistance = CGElem::distancePointPolygon(point, nFaceVertices, faceCoordinates.data(), faceProjection, faceProjectionFlag);
 			}
 
-			distance = std::min(faceDistance, distance);
+			if (faceDistance < *distance) {
+				*distance   = faceDistance;
+				*projection = faceProjection;
+			}
 		}
-
-		return distance;
 	}
 
 	default:
 	{
 		assert(ReferenceElementInfo::hasInfo(m_type));
 
-		return getInfo().evalPointDistance(point, coordinates);
+		getInfo().evalPointProjection(point, coordinates, projection, distance);
 	}
 
 	}

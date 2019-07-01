@@ -277,6 +277,39 @@ double Reference3DElementInfo::evalEdgePerimeter(const std::array<double, 3> *ve
 }
 
 /*!
+    Evaluates the projection of the point on the element.
+
+    \param point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \param[out] projection on output contains the projection point
+    \param[out] distance on output contains the distance between the point
+    and the projection
+*/
+void Reference3DElementInfo::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords,
+                                                 std::array<double, 3> *projection, double *distance) const
+{
+    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> faceVertexCoords;
+
+    *distance = std::numeric_limits<double>::max();
+    for (int i = 0; i < nFaces; ++i) {
+        ElementType faceType = faceTypeStorage[i];
+        const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(faceType));
+        for (int n = 0; n < faceInfo.nVertices; ++n) {
+            faceVertexCoords[n] = vertexCoords[faceConnectStorage[i][n]];
+        }
+
+        double faceDistance;
+        std::array<double, 3> faceProjection;
+        faceInfo.evalPointProjection(point, faceVertexCoords.data(), &faceProjection, &faceDistance);
+
+        if (faceDistance < *distance) {
+            *distance   = faceDistance;
+            *projection = faceProjection;
+        }
+    }
+}
+
+/*!
     Evaluates the distance between the element and the specified point.
 
     \param[in] point is the point
@@ -1084,6 +1117,22 @@ double Reference2DElementInfo::evalPerimeter(const std::array<double, 3> *vertex
 }
 
 /*!
+    Evaluates the projection of the point on the element.
+
+    \param point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \param[out] projection on output contains the projection point
+    \param[out] distance on output contains the distance between the point
+    and the projection
+*/
+void Reference2DElementInfo::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords,
+                                                 std::array<double, 3> *projection, double *distance) const
+{
+    int projectionFlag;
+    *distance = CGElem::distancePointPolygon(point, nVertices, vertexCoords, *projection, projectionFlag);
+}
+
+/*!
     Evaluates the distance between the element and the specified point.
 
     \param[in] point is the point
@@ -1197,6 +1246,24 @@ std::array<double, 3> ReferenceTriangleInfo::evalNormal(const std::array<double,
     normal = normal / norm2(normal);
 
     return normal;
+}
+
+/*!
+    Evaluates the projection of the point on the element.
+
+    \param point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \param[out] projection on output contains the projection point
+    \param[out] distance on output contains the distance between the point
+    and the projection
+*/
+void ReferenceTriangleInfo::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords,
+                                                std::array<double, 3> *projection, double *distance) const
+{
+    std::array<double, 3> lambda;
+    *distance = CGElem::distancePointTriangle(point, vertexCoords[0], vertexCoords[1], vertexCoords[2], lambda);
+
+    *projection = CGElem::reconstructPointFromBarycentricTriangle(vertexCoords[0], vertexCoords[1], vertexCoords[2], lambda);
 }
 
 /*!
@@ -1561,6 +1628,24 @@ std::array<double, 3> ReferenceLineInfo::evalNormal(const std::array<double, 3> 
 }
 
 /*!
+    Evaluates the projection of the point on the element.
+
+    \param point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \param[out] projection on output contains the projection point
+    \param[out] distance on output contains the distance between the point
+    and the projection
+*/
+void ReferenceLineInfo::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords,
+                                            std::array<double, 3> *projection, double *distance) const
+{
+    std::array<double, 2> lambda;
+    *distance = CGElem::distancePointSegment(point, vertexCoords[0], vertexCoords[1], lambda);
+
+    *projection = CGElem::reconstructPointFromBarycentricSegment(vertexCoords[0], vertexCoords[1], lambda);
+}
+
+/*!
     Evaluates the distance between the element and the specified point.
 
     \param[in] point is the point
@@ -1664,6 +1749,22 @@ std::array<double, 3> ReferenceVertexInfo::evalNormal(const std::array<double, 3
     normal = normal / norm2(normal);
 
     return normal;
+}
+
+/*!
+    Evaluates the projection of the point on the element.
+
+    \param point is the point
+    \param vertexCoords are the coordinate of the vertices
+    \param[out] projection on output contains the projection point
+    \param[out] distance on output contains the distance between the point
+    and the projection
+*/
+void ReferenceVertexInfo::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords,
+                                              std::array<double, 3> *projection, double *distance) const
+{
+    *distance   = evalPointDistance(point, vertexCoords);
+    *projection = vertexCoords[0];
 }
 
 /*!
