@@ -1196,7 +1196,7 @@ ConstProxyVector<long> Element::getVertexIds(ElementType type, const long *conne
 
 	default:
 	{
-		assert(m_type != ElementType::UNDEFINED);
+		assert(type != ElementType::UNDEFINED);
 
 		return ConstProxyVector<long>(connectivity, ReferenceElementInfo::getInfo(type).nVertices);
 	}
