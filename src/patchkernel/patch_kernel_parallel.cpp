@@ -1420,7 +1420,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         // Frame is made up by cells explicitly marked for sending that have
         // a face, an edge or a vertex on a frontier face.
         //
-        // Frame is made up by cells not explicitly marked for sending that
+        // Halo is made up by cells not explicitly marked for sending that
         // have a face, an edge or a vertex on a frontier face.
         //
         // There are no halo nor frame cells if we are serializing a patch.
