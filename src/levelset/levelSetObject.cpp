@@ -260,7 +260,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
             }
 
             std::array<double,3> root = computeProjectionPoint(i);
-            std::array<double,3> normal = getNormal(i);
+            std::array<double,3> normal = getGradient(i);
             if( m_kernelPtr->intersectCellPlane(i,root,normal) ){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
