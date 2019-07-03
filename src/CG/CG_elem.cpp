@@ -1077,11 +1077,41 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 
     } else {
         int vertex0 = 3 -negatives[0] -negatives[1];
-        lambda[0] = 0.;
-        lambda[1] = 0.;
-        lambda[2] = 0.;
-        lambda[vertex0] = 1.;
-        return *r[vertex0];
+
+        int vertex1 = (vertex0 +1) %3;
+        int vertex2 = (vertex1 +1) %3;
+
+        array3D s01 = *r[vertex1] - *r[vertex0];
+        array3D s02 = *r[vertex2] - *r[vertex0];
+
+        if(dotProduct(s01,s02) >= 0 ){
+            lambda[0] = 0.;
+            lambda[1] = 0.;
+            lambda[2] = 0.;
+            lambda[vertex0] = 1.;
+            return *r[vertex0];
+
+        } else {
+            std::array<double,2> lambdaLocal01, lambdaLocal02;
+            array3D P = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda );
+
+            array3D xP01 = projectPointSegment(P, *r[vertex0], *r[vertex1], lambdaLocal01);
+            array3D xP02 = projectPointSegment(P, *r[vertex0], *r[vertex2], lambdaLocal02);
+
+            if( norm2(P-xP01) <= norm2(P-xP02) ){
+                lambda[vertex0] = lambdaLocal01[0];
+                lambda[vertex1] = lambdaLocal01[1];
+                lambda[vertex2] = 0.;
+                return xP01;
+
+            } else {
+                lambda[vertex0] = lambdaLocal02[0];
+                lambda[vertex1] = 0;
+                lambda[vertex2] = lambdaLocal02[1];
+                return xP02;
+            }
+
+        }
 
     }
 
