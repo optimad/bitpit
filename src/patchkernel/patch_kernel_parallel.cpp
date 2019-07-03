@@ -1375,9 +1375,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     OBinaryStream verticesBuffer;
     OBinaryStream cellsBuffer;
 
-    std::vector<long> frontierNeighs;
-    std::vector<long> frontierCells;
+    std::vector<long> neighsList;
+    std::unordered_set<long> frontierNeighs;
     std::unordered_set<long> frontierVertices;
+    std::unordered_set<long> frontierFaceVertices;
     std::unordered_set<CellHalfEdge, CellHalfEdge::Hasher> frontierEdges;
 
     std::unordered_set<long> outgoingCells;
@@ -1390,6 +1391,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     std::vector<long> cellSendList;
     std::unordered_set<long> vertexSendList;
 
+    std::unordered_set<long> ghostCellsOverall;
     std::vector<long> frameCellsOverall;
     std::size_t frameCellIndexOverall = 0;
 
@@ -1427,6 +1429,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         // Halo is made up by cells not explicitly marked for sending that
         // have a face, an edge or a vertex on a frontier face.
         //
+        // We also identify cells that, at the end of the partitionig, will
+        // be ghosts for the current rank. These are all non-outgonig cells
+        // that have a face/edge/vertex on the inner frontier. A face/edge/
+        // vertex is on the inner frontier if its on the frontier and one of
+        // the cells that contain that item is not an outgoing cell.
+        //
         // There are no halo nor frame cells if we are serializing a patch.
         //
         // NOTE: for three-dimensional unstructured non-conformal meshes we
@@ -1434,13 +1442,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         // searching for cells that have a vertex on the frontier is not
         // enough (for unstructured meshes we may have a cell that touches the
         // frontier only through an edge).
-        haloCells.clear();
-        frameCells.clear();
-
-        // Add face and vertex frontier neighbours
         if (!m_partitioningSerialization) {
-            frontierCells.clear();
+            haloCells.clear();
+            frameCells.clear();
+
             frontierVertices.clear();
+            frontierEdges.clear();
             for (long cellId : outgoingCells) {
                 Cell &cell = m_cells.at(cellId);
 
@@ -1473,20 +1480,47 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
                             frontierCell = &(m_cells.at(neighId));
                         }
 
-                        frontierCells.emplace_back(frontierCellId);
+                        // Clear neighbour list
+                        frontierNeighs.clear();
 
+                        //
                         // Add frontier face neighbours
-                        frontierNeighs.resize(2);
-                        frontierNeighs[0] = cellId;
-                        frontierNeighs[1] = neighId;
+                        //
 
+                        // Check if the face is on the inner frontier
+                        bool innerFrontierFace = false;
+                        if (m_partitioningOutgoings.count(cellId) == 0) {
+                            innerFrontierFace = true;
+                        } else if (m_partitioningOutgoings.count(neighId) == 0) {
+                            innerFrontierFace = true;
+                        }
+
+                        // Add the neighbours to the list
+                        frontierNeighs.insert(cellId);
+                        frontierNeighs.insert(neighId);
+
+                        if (innerFrontierFace) {
+                            if (m_partitioningOutgoings.count(cellId) > 0) {
+                                ghostCellsOverall.insert(cellId);
+                            }
+
+                            if (m_partitioningOutgoings.count(neighId) > 0) {
+                                ghostCellsOverall.insert(neighId);
+                            }
+                        }
+
+                        //
                         // Add frontier vertex neighbours
+                        //
                         ConstProxyVector<int> frontierFaceLocalVerticesIds = frontierCell->getFaceLocalVertexIds(frontierFace);
                         int nFrontierFaceVertices = frontierFaceLocalVerticesIds.size();
 
+                        frontierFaceVertices.clear();
                         for (int k = 0; k < nFrontierFaceVertices; ++k) {
-                            // Avoid adding duplicate vertices
                             long vertexId = frontierCell->getFaceVertexId(frontierFace, k);
+                            frontierFaceVertices.insert(vertexId);
+
+                            // Avoid adding duplicate vertices
                             auto frontierVertexItr = frontierVertices.find(vertexId);
                             if (frontierVertexItr != frontierVertices.end()) {
                                 continue;
@@ -1496,84 +1530,112 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
                             frontierVertices.insert(vertexId);
 
                             // Find vertex neighbours
+                            neighsList.clear();
                             int vertex = frontierFaceLocalVerticesIds[k];
-                            findCellVertexNeighs(cellId, vertex, &frontierNeighs);
+                            findCellVertexNeighs(cellId, vertex, &neighsList);
+
+                            // Check if the vertex is on the inner frontier
+                            bool innerFrontierVertex = (m_partitioningOutgoings.count(cellId) == 0);
+                            if (!innerFrontierVertex) {
+                                for (long frontierNeighId : neighsList) {
+                                    if (m_partitioningOutgoings.count(frontierNeighId) == 0) {
+                                        innerFrontierVertex = true;
+                                    }
+                                }
+                            }
+
+                            // Add neighbours to the list
+                            for (long frontierNeighId : neighsList) {
+                                frontierNeighs.insert(frontierNeighId);
+                                if (innerFrontierVertex) {
+                                    if (m_partitioningOutgoings.count(frontierNeighId) > 0) {
+                                        ghostCellsOverall.insert(frontierNeighId);
+                                    }
+                                }
+                            }
                         }
 
-                        // Update frame and halo
+                        //
+                        // Add frontier edge neighbours
+                        //
+                        if (patchDimension == 3) {
+                            int nFrontierCellEdges = frontierCell->getEdgeCount();
+                            for (int edge = 0; edge < nFrontierCellEdges; ++edge) {
+                                // Edge information
+                                ElementType edgeType = frontierCell->getEdgeType(edge);
+                                int nEdgeVertices = frontierCell->getEdgeVertexCount(edge);
+
+                                CellHalfEdge frontierEdge = CellHalfEdge(*frontierCell, edge, CellHalfEdge::WINDING_NATURAL);
+
+                                // Discard edges that do not belong to the
+                                // current frontier face
+                                ConstProxyVector<long> edgeVertexIds = Cell::getVertexIds(edgeType, frontierEdge.getConnect().data());
+
+                                bool isFrontierFaceEdge = true;
+                                for (int k = 0; k < nEdgeVertices; ++k) {
+                                    long edgeVertexId = edgeVertexIds[k];
+                                    if (frontierFaceVertices.count(edgeVertexId) == 0) {
+                                        isFrontierFaceEdge = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!isFrontierFaceEdge) {
+                                    continue;
+                                }
+
+                                // Avoid adding duplicate edges
+                                frontierEdge.setWinding(CellHalfEdge::WINDING_REVERSE);
+                                auto frontierEdgeItr = frontierEdges.find(frontierEdge);
+                                if (frontierEdgeItr != frontierEdges.end()) {
+                                    continue;
+                                } else {
+                                    frontierEdge.setWinding(CellHalfEdge::WINDING_NATURAL);
+                                    frontierEdgeItr = frontierEdges.find(frontierEdge);
+                                    if (frontierEdgeItr != frontierEdges.end()) {
+                                        continue;
+                                    }
+                                }
+
+                                // Add edge to the list of frontier edges
+                                frontierEdges.insert(std::move(frontierEdge));
+
+                                // Find edge neighbours
+                                neighsList.clear();
+                                findCellEdgeNeighs(frontierCellId, edge, &neighsList);
+
+                                // Check if the vertex is on the inner frontier
+                                bool innerFrontierEdge = (m_partitioningOutgoings.count(cellId) == 0);
+                                if (!innerFrontierEdge) {
+                                    for (long frontierNeighId : neighsList) {
+                                        if (m_partitioningOutgoings.count(frontierNeighId) == 0) {
+                                            innerFrontierEdge = true;
+                                        }
+                                    }
+                                }
+
+                                // Add neighbours to the list
+                                for (long frontierNeighId : neighsList) {
+                                    frontierNeighs.insert(frontierNeighId);
+                                    if (innerFrontierEdge) {
+                                        if (m_partitioningOutgoings.count(frontierNeighId) > 0) {
+                                            ghostCellsOverall.insert(frontierNeighId);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tell apart frame and halo cells
+                        //
+                        // Frame cells on inner frontier will be ghost cells
+                        // for the current rank.
                         for (long frontierNeighId : frontierNeighs) {
                             if (outgoingCells.count(frontierNeighId) > 0) {
                                 frameCells.insert(frontierNeighId);
                             } else {
                                 haloCells.insert(frontierNeighId);
                             }
-                        }
-                    }
-                }
-            }
-
-            // Add edge frontier neighbours
-            //
-            // We need to find edge neighbours after find all frontier vertices.
-            frontierEdges.clear();
-            if (patchDimension == 3) {
-                for (long frontierCellId : frontierCells) {
-                    Cell &frontierCell = m_cells.at(frontierCellId);
-
-                    // Clear frontier neighbours
-                    frontierNeighs.clear();
-
-                    // Add frontier edge neighbours
-                    int nFrontierCellEdges = frontierCell.getEdgeCount();
-                    for (int edge = 0; edge < nFrontierCellEdges; ++edge) {
-                        // Edge information
-                        ElementType edgeType = frontierCell.getEdgeType(edge);
-                        int nEdgeVertices = frontierCell.getEdgeVertexCount(edge);
-
-                        CellHalfEdge frontierEdge = CellHalfEdge(frontierCell, edge, CellHalfEdge::WINDING_NATURAL);
-
-                        // Discard edges that do not belong to the frontier
-                        ConstProxyVector<long> edgeVertexIds = Cell::getVertexIds(edgeType, frontierEdge.getConnect().data());
-
-                        bool isFrontierEdge = true;
-                        for (int k = 0; k < nEdgeVertices; ++k) {
-                            long edgeVertexId = edgeVertexIds[k];
-                            if (frontierVertices.count(edgeVertexId) == 0) {
-                                isFrontierEdge = false;
-                                break;
-                            }
-                        }
-
-                        if (isFrontierEdge) {
-                            continue;
-                        }
-
-                        // Avoid adding duplicate edges
-                        frontierEdge.setWinding(CellHalfEdge::WINDING_REVERSE);
-                        auto frontierEdgeItr = frontierEdges.find(frontierEdge);
-                        if (frontierEdgeItr != frontierEdges.end()) {
-                            continue;
-                        } else {
-                            frontierEdge.setWinding(CellHalfEdge::WINDING_NATURAL);
-	                        frontierEdgeItr = frontierEdges.find(frontierEdge);
-                            if (frontierEdgeItr != frontierEdges.end()) {
-                                continue;
-                            }
-                        }
-
-                        // Add edge to the list of frontier edges
-                        frontierEdges.insert(std::move(frontierEdge));
-
-                        // Find edge neighbours
-                        findCellEdgeNeighs(frontierCellId, edge, &frontierNeighs);
-                    }
-
-                    // Update frame and halo
-                    for (long frontierNeighId : frontierNeighs) {
-                        if (outgoingCells.count(frontierNeighId) > 0) {
-                            frameCells.insert(frontierNeighId);
-                        } else {
-                            haloCells.insert(frontierNeighId);
                         }
                     }
                 }
@@ -1889,40 +1951,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         deleteCells(deleteList, true, true);
 
         // Delete frame cells or move them into the ghosts
-        //
-        // A cell will become a ghost if at least one of his neighbours is
-        // still on this process.
         deleteList.clear();
         for (long cellId : frameCellsOverall) {
-            // Initially assume the cell will be deleted.
-            bool moveToGhosts = false;
-
-            // First do a cheap search among the face neighbours.
-            const Cell &cell = m_cells.at(cellId);
-            const long *adjacencies = cell.getAdjacencies();
-            int nCellAdjacencies = cell.getAdjacencyCount();
-            for (int i = 0; i < nCellAdjacencies; ++i) {
-                long neighId = adjacencies[i];
-                if (m_partitioningOutgoings.count(neighId) == 0) {
-                    moveToGhosts = true;
-                    break;
-                }
-            }
-
-            // If we haven't find a neighbour that is still on this
-            // process, do a search among all the neighbours.
-            if (!moveToGhosts) {
-                neighIds.clear();
-                findCellNeighs(cellId, &neighIds);
-                for (long neighId : neighIds) {
-                    if (m_partitioningOutgoings.count(neighId) == 0) {
-                        moveToGhosts = true;
-                        break;
-                    }
-                }
-            }
-
-            // Mark cell for deletion or move it into the ghosts
+            bool moveToGhosts = (ghostCellsOverall.count(cellId) > 0);
             if (moveToGhosts) {
                 int cellOwner = m_partitioningOutgoings.at(cellId);
                 moveInternal2Ghost(cellId, cellOwner);
