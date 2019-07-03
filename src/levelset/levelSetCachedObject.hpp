@@ -56,7 +56,7 @@ class LevelSetCachedObject : public LevelSetObject{
 
     void                                        setSign( long id, int sign ) ;
 
-    void                                        initializeCellSignPropagation( long cellId,
+    void                                        initializeCellSignPropagation( long cellId, int cellSign,
                                                                                const std::array<double, 3> &boxMin,
                                                                                const std::array<double, 3> &boxMax,
                                                                                int *cellStatus, std::vector<long> *seeds,

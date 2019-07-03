@@ -213,7 +213,14 @@ void LevelSetCachedObject::propagateSign() {
         long cellRawId = itr.getRawIndex();
         int &cellPropagationStatus = propagationStatus.rawAt(cellRawId);
 
-        initializeCellSignPropagation(cellId, boxMin, boxMax,
+        int cellSign;
+        if (m_ls.find(cellId) != m_ls.end()) {
+            cellSign = getSign(cellId);
+        } else {
+            cellSign = PROPAGATION_SIGN_UNDEFINED;
+        }
+
+        initializeCellSignPropagation(cellId, cellSign, boxMin, boxMax,
                                       &cellPropagationStatus, &seeds,
                                       &nWaiting, &nExternal, &externalSign);
     }
@@ -312,9 +319,9 @@ void LevelSetCachedObject::propagateSign() {
                         setSign(cellId, sign);
 
                         // Initialize sign propagation
-                        initializeCellSignPropagation(cellId, boxMin, boxMax,
-                                                        &cellPropagationStatus, &seeds,
-                                                        &nWaiting, &nExternal, &externalSign);
+                        initializeCellSignPropagation(cellId, sign, boxMin, boxMax,
+                                                      &cellPropagationStatus, &seeds,
+                                                      &nWaiting, &nExternal, &externalSign);
                     } else if (cellPropagationStatus == PROPAGATION_STATUS_REACHED) {
                         assert(getSign(cellId) == sign);
                     }
@@ -408,7 +415,7 @@ void LevelSetCachedObject::propagateSign() {
  * \param[in,out] nExternal is the number of cells in the external region
  * \param[in,out] externalSign is the sign of the external region
  */
-void LevelSetCachedObject::initializeCellSignPropagation(long cellId,
+void LevelSetCachedObject::initializeCellSignPropagation(long cellId, int cellSign,
                                                          const std::array<double, 3> &boxMin,
                                                          const std::array<double, 3> &boxMax,
                                                          int *cellStatus, std::vector<long> *seeds,
@@ -416,6 +423,8 @@ void LevelSetCachedObject::initializeCellSignPropagation(long cellId,
                                                          int *externalSign) {
 
     // Detect if the cell is external
+    //
+    // A cell is external if is outside the object bounding box.
     const VolumeKernel &mesh = *(m_kernelPtr->getMesh());
     std::array<double, 3> centroid = mesh.evalCellCentroid(cellId);
 
@@ -427,21 +436,30 @@ void LevelSetCachedObject::initializeCellSignPropagation(long cellId,
         }
     }
 
-    // Detect if the sign is defined for the cell
-    bool hasSign = (m_ls.find(cellId) != m_ls.end());
-
-    // Initialize cell sign propagation
-    if (hasSign) {
+    // Detect the status of the cell
+    //
+    // We can have three different cases:
+    //  - the sign of the cell has been defined, in this case the propgation
+    //    status is set as "REACHED";
+    //  - there is no sign for the cell and the cell is external, in this case
+    //    the propgation status is set as "EXTERNAL";
+    //  - there is no sign for the cell and the cell is not external, in this
+    //    case the propgation status is set as "WAITING".
+    //
+    // When the propgation reaches a cell it's possible to update the list of
+    // seeds or the external sign.
+    if (cellSign != PROPAGATION_SIGN_UNDEFINED) {
         *cellStatus = PROPAGATION_STATUS_REACHED;
         --(*nWaiting);
 
+        // Non-external cells are added to the list of seeds, for external
+        // cells the external sign is updated.
         if (!isExternal) {
             seeds->push_back(cellId);
-        } else {
-            int sign = getSign(cellId);
-            if (*externalSign == 0) {
-                *externalSign = sign;
-            } else if (*externalSign != sign) {
+        } else if (*externalSign != PROPAGATION_SIGN_DUMMY) {
+            if (*externalSign == PROPAGATION_SIGN_UNDEFINED) {
+                *externalSign = cellSign;
+            } else if (*externalSign != cellSign) {
                 throw std::runtime_error("Mismatch in sign of external region!");
             }
         }
