@@ -1355,6 +1355,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         partitioningData.reserve(recvRanks.size());
     }
 
+    // Detect if the rank is sending all its cells
+    std::size_t nOutgoingsOverall = m_partitioningOutgoings.size();
+    bool sendingAllCells = (nOutgoingsOverall == (std::size_t) getInternalCount());
+
     //
     // Send data to the receivers
     //
@@ -1830,8 +1834,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     //
 
     // If the process is sending all its cells we can just clear the patch.
-    std::size_t nOutgoingsOverall = m_partitioningOutgoings.size();
-    if (nOutgoingsOverall != (std::size_t) getInternalCount()) {
+    if (!sendingAllCells) {
         std::vector<long> deleteList;
         std::vector<long> neighIds;
 
