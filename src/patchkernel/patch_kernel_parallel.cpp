@@ -1651,14 +1651,16 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         std::size_t nHaloCells     = haloCells.size();
 
         cellSendList.resize(nOutgoingCells + nHaloCells);
-        frameCellsOverall.resize(frameCellsOverall.size() + frameCells.size());
+        if (!sendingAllCells) {
+            frameCellsOverall.resize(frameCellsOverall.size() + frameCells.size());
+        }
 
         std::size_t outgoingIndex = 0;
         for (long cellId : outgoingCells) {
             cellSendList[outgoingIndex] = cellId;
             ++outgoingIndex;
 
-            if (frameCells.count(cellId) > 0) {
+            if (!sendingAllCells && frameCells.count(cellId) > 0) {
                 frameCellsOverall[frameCellIndexOverall] = cellId;
                 ++frameCellIndexOverall;
             }
