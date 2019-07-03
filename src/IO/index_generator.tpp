@@ -120,7 +120,7 @@ bool IndexGenerator<id_t>::isAssigned(id_type id)
     }
 
     // The id is assigned only if is not in the trash
-    if (m_trash.contains(id)) {
+    if (m_trash.count(id) > 0) {
         return false;
     }
 
@@ -161,7 +161,7 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
 
         m_lowest = id;
     } else {
-        assert(m_trash.contains(id));
+        assert(m_trash.count(id) > 0);
         eraseFromTrash(id);
     }
 
@@ -179,7 +179,7 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
 template<typename id_t>
 void IndexGenerator<id_t>::trash(typename IndexGenerator<id_t>::id_type id)
 {
-    assert(!m_trash.contains(id));
+    assert(m_trash.count(id) == 0);
 
     // If we are trashing the highest or the lowest id we can update the
     // limits of the generator, otherwise we add the id to the trash.
@@ -193,18 +193,18 @@ void IndexGenerator<id_t>::trash(typename IndexGenerator<id_t>::id_type id)
         m_highest = NULL_ID;
     } else if (id == m_highest) {
         --m_highest;
-        while (m_trash.contains(m_highest)) {
+        while (m_trash.count(m_highest) > 0) {
             eraseFromTrash(m_highest);
             --m_highest;
         }
     } else if (id == m_lowest) {
         ++m_lowest;
-        while (m_trash.contains(m_lowest)) {
+        while (m_trash.count(m_lowest) > 0) {
             eraseFromTrash(m_lowest);
             ++m_lowest;
         }
     } else {
-        m_trash.fillAppend(id);
+        pushToTrash(id);
     }
 
     // We only keep track of the latest assigned id, if we trash that id we
@@ -235,7 +235,7 @@ void IndexGenerator<id_t>::reset()
 template<typename id_t>
 void IndexGenerator<id_t>::pushToTrash(id_type id)
 {
-    m_trash.fillAppend(id);
+    m_trash.insert(id);
 }
 
 /*!
@@ -248,15 +248,6 @@ void IndexGenerator<id_t>::eraseFromTrash(id_type id)
 {
     // Erase the index
     m_trash.erase(id);
-
-    // Squeeze the trash to keep the unused size in the trash limited.
-    std::size_t trashCapacity = m_trash.capacity();
-    if (trashCapacity > 1024) {
-        std::size_t trashSize = m_trash.size();
-        if (trashCapacity > 1.75 * trashSize) {
-            m_trash.squeeze();
-        }
-    }
 }
 
 /*!
@@ -312,13 +303,12 @@ void IndexGenerator<id_t>::restore(std::istream &stream)
     size_t nTrashedIds;
     utils::binary::read(stream, nTrashedIds);
 
-    PiercedKernel<id_type>().swap(m_trash);
-    m_trash.reserve(nTrashedIds);
+    std::set<id_type>().swap(m_trash);
 
     for (size_t i = 0; i < nTrashedIds; ++i) {
         id_type id;
         utils::binary::read(stream, id);
-        m_trash.fillAppend(id);
+        pushToTrash(id);
     }
 }
 

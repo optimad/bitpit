@@ -29,7 +29,7 @@
 #include <deque>
 #include <iostream>
 #include <limits>
-#include <unordered_set>
+#include <set>
 
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
@@ -66,7 +66,7 @@ private:
     id_type m_latest;
     id_type m_lowest;
     id_type m_highest;
-    PiercedKernel<id_type> m_trash;
+    std::set<id_type> m_trash;
 
     void eraseFromTrash(id_type id);
     void pushToTrash(id_type id);

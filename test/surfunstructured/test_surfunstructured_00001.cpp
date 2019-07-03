@@ -456,7 +456,7 @@ vector<long>                            cell_list;
     if (mesh.getCellCount() != 33)              return 3;
     if (mesh.countFreeCells() != 26)            return 3;
 
-    // Compute 1-ring of vertex 12 ------------------------------------------ //
+    // Compute 1-ring of vertex 11 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
     log::cout() << "   1-ring of vertex (7, 2): " << ring1 << endl;
@@ -497,7 +497,7 @@ vector<long>                            cell_list;
 {
     // Scope variables ------------------------------------------------------ //
     SurfUnstructured                    envelope(2, 3);
-    vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
+    vector<long>                        ring1, ring1_expected{6,8,17,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
     envelope.setExpert(true);
@@ -525,9 +525,9 @@ vector<long>                            cell_list;
     if (mesh.countFreeCells() != 21)            return 4;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
-    ring1 = mesh.findCellVertexOneRing(7, 2);
+    ring1 = mesh.findCellVertexOneRing(6, 1);
     sort(ring1.begin(), ring1.end());
-    log::cout() << "   1-ring of vertex (7, 2): " << ring1 << endl;
+    log::cout() << "   1-ring of vertex (6, 1): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
     if (ring1 != ring1_expected)                return 4;
@@ -803,7 +803,7 @@ int                             i;
 #endif
 
     // Remove internal cells
-    //bucket: {4,2,5,6}
+    //bucket: {2,4,5,6}
     //cells:  {0,1,3,}
     //ghosts: {7,8,9}
     mesh.deleteCell(4);
@@ -834,20 +834,20 @@ int                             i;
 #if BITPIT_ENABLE_MPI
     // Add cells
     //bucket = {}
-    //cells:  {0,1,4,3,2}
-    //ghosts: {6,5,7,8,9}
+    //cells:  {0,1,5,3,6}
+    //ghosts: {4,2,7,8,9}
     mesh.addCell(ElementType::TRIANGLE, g_connect, dummyNeighRank);
     mesh.addCell(ghost, dummyNeighRank);
     mesh.addCell(cell);
     mesh.addCell(ElementType::TRIANGLE, c_connect);
-    expected.insert(expected.begin() + 3, 5);
-    expected.insert(expected.begin() + 3, 6);
-    expected.insert(expected.begin() + 2, 4);
-    expected.insert(expected.begin() + 4, 2);
-    internal.insert(internal.begin() + 3, false);
-    internal.insert(internal.begin() + 3, false);
+    expected.insert(expected.begin() + 2, 5);
+    expected.insert(expected.begin() + 4, 6);
+    expected.insert(expected.begin() + 5, 2);
+    expected.insert(expected.begin() + 5, 4);
     internal.insert(internal.begin() + 2, true);
     internal.insert(internal.begin() + 4, true);
+    internal.insert(internal.begin() + 5, false);
+    internal.insert(internal.begin() + 5, false);
 
     // Check element order
     i = 0;
@@ -867,14 +867,14 @@ int                             i;
     log::cout() << endl;
 
     // Remove all internal cells and add 2 ghost cells
-    //bucket: {0,1,2}
+    //bucket: {0,1,6}
     //cells:  {}
-    //ghosts: {4,3,6,5,7,8,9}
-    mesh.deleteCell(2);
-    mesh.deleteCell(1);
-    mesh.deleteCell(4);
+    //ghosts: {3,5,4,2,7,8,9}
     mesh.deleteCell(0);
+    mesh.deleteCell(1);
+    mesh.deleteCell(5);
     mesh.deleteCell(3);
+    mesh.deleteCell(6);
     mesh.addCell(ghost, dummyNeighRank);
     mesh.addCell(ElementType::TRIANGLE, g_connect, dummyNeighRank);
     expected.erase(expected.begin());
@@ -882,8 +882,8 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
+    expected.insert(expected.begin(), 5);
     expected.insert(expected.begin(), 3);
-    expected.insert(expected.begin(), 4);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());
@@ -913,13 +913,13 @@ int                             i;
     //bucket: {2,3,4,6,5,7,8,9}
     //cells:  {0,1}
     //ghosts: {}
+    mesh.deleteCell(3);
     mesh.deleteCell(5);
     mesh.deleteCell(4);
-    mesh.deleteCell(3);
-    mesh.deleteCell(6);
-    mesh.deleteCell(9);
+    mesh.deleteCell(2);
     mesh.deleteCell(7);
     mesh.deleteCell(8);
+    mesh.deleteCell(9);
     mesh.addCell(cell);
     mesh.addCell(ElementType::TRIANGLE, c_connect);
     expected.erase(expected.begin());
