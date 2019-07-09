@@ -1562,7 +1562,7 @@ Octant Octant::computePeriodicOctant(uint8_t iface) const {
 		break;
 		case 5 :
 		{
-			degOct.m_y = 0;
+			degOct.m_z = 0;
 		}
 		break;
 		}
