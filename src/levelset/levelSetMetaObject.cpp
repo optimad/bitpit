@@ -56,14 +56,4 @@ bool LevelSetMetaObject::isPrimary() const{
     return false;
 } 
 
-/*!
- * Returns the index of the object, which is responsabile for determining the levellset value of the cell
- * @param[in] id cell index
- * @return index of object
-*/
-int LevelSetMetaObject::getPrimaryObjectId( long id) const{
-    BITPIT_UNUSED(id);
-    return levelSetDefaults::OBJECT;
-} 
-
 }
