@@ -534,14 +534,6 @@ void SkdNode::updateClosestCellInfo(const std::array<double, 3> &point,
                                     long cellId, double cellDistance,
                                     long *closestId, double *closestDistance) const
 {
-    // If there is no current closest cell just update the information
-    if (*closestId == Cell::NULL_ID) {
-        *closestId       = cellId;
-        *closestDistance = cellDistance;
-
-        return;
-    }
-
     // Detect if the specified cell is closer than the current closest cell
     const int DISTANCE_CLOSER  = - 1;
     const int DISTANCE_EQUAL   =   0;
@@ -552,6 +544,21 @@ void SkdNode::updateClosestCellInfo(const std::array<double, 3> &point,
         distanceFlag = DISTANCE_EQUAL;
     } else if (cellDistance < *closestDistance) {
         distanceFlag = DISTANCE_CLOSER;
+    }
+
+    // Consider the case where no closest cell is defined
+    //
+    // Even if the id of the closest cell is null, we may have an
+    // estimated of the closest cell distance. We need to update
+    // the closest cell information only if the current cells is
+    // closer than the estimate.
+    if (*closestId == Cell::NULL_ID) {
+        if (distanceFlag != DISTANCE_FARTHER) {
+            *closestId       = cellId;
+            *closestDistance = cellDistance;
+        }
+
+        return;
     }
 
     // Update closest cell information accordingly to the distance flag:
