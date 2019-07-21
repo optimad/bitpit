@@ -1662,6 +1662,8 @@ void Element::evalPointProjection(const std::array<double, 3> &point, const std:
 	{
 		int projectionFlag;
 		*distance = CGElem::distancePointPolygon(point, getVertexCount(), coordinates, *projection, projectionFlag);
+
+		break;
 	}
 
 	case ElementType::POLYHEDRON:
@@ -1694,6 +1696,8 @@ void Element::evalPointProjection(const std::array<double, 3> &point, const std:
 				*projection = faceProjection;
 			}
 		}
+
+		break;
 	}
 
 	default:
@@ -1701,6 +1705,8 @@ void Element::evalPointProjection(const std::array<double, 3> &point, const std:
 		assert(ReferenceElementInfo::hasInfo(m_type));
 
 		getInfo().evalPointProjection(point, coordinates, projection, distance);
+
+		break;
 	}
 
 	}
