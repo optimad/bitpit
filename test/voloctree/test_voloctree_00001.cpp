@@ -98,6 +98,31 @@ int subtest_001()
 	}
 
 	log::cout() << std::endl;
+	log::cout() << "\n  >> 2D ring test" << "\n";
+
+	std::vector<long> ring_2D;
+
+	cellId_2D = 7;
+	long localVertexId_2D = 0;
+	long vertexId_2D = 10;
+	log::cout() << std::endl;
+	log::cout() << "Cell id: " << cellId_2D << std::endl;
+	log::cout() << "Local vertex id: " << localVertexId_2D << std::endl;
+	log::cout() << "Vertex id: " << vertexId_2D << std::endl << std::endl;
+
+	log::cout() << "Cell vertex one ring: " << std::endl;
+	ring_2D = patch_2D->findCellVertexOneRing(cellId_2D, localVertexId_2D);
+	for (unsigned int i = 0; i < ring_2D.size(); ++i) {
+		log::cout() << " - " << ring_2D[i] << std::endl;
+	}
+
+	log::cout() << "Vertex one ring: " << std::endl;
+	ring_2D = patch_2D->findVertexOneRing(vertexId_2D);
+	for (unsigned int i = 0; i < ring_2D.size(); ++i) {
+		log::cout() << " - " << ring_2D[i] << std::endl;
+	}
+
+	log::cout() << std::endl;
 
 	delete patch_2D;
 
@@ -178,6 +203,31 @@ int subtest_002()
 	neighs_3D = patch_3D->findCellVertexNeighs(cellId_3D, false);
 	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		log::cout() << " - " << neighs_3D[i] << std::endl;
+	}
+
+	log::cout() << std::endl;
+	log::cout() << "\n  >> 3D ring test" << "\n";
+
+	std::vector<long> ring_3D;
+
+	cellId_3D = 13;
+	long localVertexId_3D = 0;
+	long vertexId_3D = 29;
+	log::cout() << std::endl;
+	log::cout() << "Cell id: " << cellId_3D << std::endl;
+	log::cout() << "Local vertex id: " << localVertexId_3D << std::endl;
+	log::cout() << "Vertex id: " << vertexId_3D << std::endl << std::endl;
+
+	log::cout() << "Cell vertex one ring: " << std::endl;
+	ring_3D = patch_3D->findCellVertexOneRing(cellId_3D, localVertexId_3D);
+	for (unsigned int i = 0; i < ring_3D.size(); ++i) {
+		log::cout() << " - " << ring_3D[i] << std::endl;
+	}
+
+	log::cout() << "Vertex one ring: " << std::endl;
+	ring_3D = patch_3D->findVertexOneRing(vertexId_3D);
+	for (unsigned int i = 0; i < ring_3D.size(); ++i) {
+		log::cout() << " - " << ring_3D[i] << std::endl;
 	}
 
 	log::cout() << std::endl;
