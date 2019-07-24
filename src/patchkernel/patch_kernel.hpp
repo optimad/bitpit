@@ -479,9 +479,10 @@ public:
 	bool squeezeCells();
 	bool squeezeInterfaces();
 
-	long locatePoint(double x, double y, double z);
-	virtual long locatePoint(const std::array<double, 3> &point) = 0;
-	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B);
+	long locatePoint(double x, double y, double z) const;
+	virtual long locatePoint(const std::array<double, 3> &point) const = 0;
+
+	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B) const;
 
 	AdjacenciesBuildStrategy getAdjacenciesBuildStrategy() const;
 	void clearAdjacencies();

@@ -1983,7 +1983,7 @@ bool VolOctree::_enableCellBalancing(long id, bool enabled)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the patch, false otherwise.
  */
-bool VolOctree::isPointInside(const std::array<double, 3> &point)
+bool VolOctree::isPointInside(const std::array<double, 3> &point) const
 {
 	bool isGhost;
 
@@ -1997,7 +1997,7 @@ bool VolOctree::isPointInside(const std::array<double, 3> &point)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolOctree::isPointInside(long id, const std::array<double, 3> &point)
+bool VolOctree::isPointInside(long id, const std::array<double, 3> &point) const
 {
 	const Cell &cell = m_cells[id];
 	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
@@ -2028,7 +2028,7 @@ bool VolOctree::isPointInside(long id, const std::array<double, 3> &point)
 	\result Returns the id of the cell the contains the point. If the point
 	is not inside the patch, the function returns the id of the null element.
 */
-long VolOctree::locatePoint(const std::array<double, 3> &point)
+long VolOctree::locatePoint(const std::array<double, 3> &point) const
 {
 	bool isGhost;
 	uint32_t treeId = m_tree->getPointOwnerIdx(point, isGhost);

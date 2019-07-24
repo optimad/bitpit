@@ -1067,7 +1067,7 @@ void VolCartesian::_restore(std::istream &stream)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolCartesian::isPointInside(long id, const std::array<double, 3> &point)
+bool VolCartesian::isPointInside(long id, const std::array<double, 3> &point) const
 {
 	std::array<int, 3> cellIjk = getCellCartesianId(id);
 
@@ -1093,7 +1093,7 @@ bool VolCartesian::isPointInside(long id, const std::array<double, 3> &point)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the patch, false otherwise.
  */
-bool VolCartesian::isPointInside(const std::array<double, 3> &point)
+bool VolCartesian::isPointInside(const std::array<double, 3> &point) const
 {
 	const double EPS = getTol();
 
@@ -1117,7 +1117,7 @@ bool VolCartesian::isPointInside(const std::array<double, 3> &point)
 	point is not inside the patch, the function returns the id of the null
 	element.
 */
-long VolCartesian::locatePoint(const std::array<double, 3> &point)
+long VolCartesian::locatePoint(const std::array<double, 3> &point) const
 {
 	std::array<int, 3> pointIjk = locatePointCartesian(point);
 	if (isCellCartesianIdValid(pointIjk)) {
@@ -1137,7 +1137,7 @@ long VolCartesian::locatePoint(const std::array<double, 3> &point)
 	\result Returns the set of cartesian id of the cell the contains the point.
 	If the point is not inside the patch, the function returns negative ids.
 */
-std::array<int, 3> VolCartesian::locatePointCartesian(const std::array<double, 3> &point)
+std::array<int, 3> VolCartesian::locatePointCartesian(const std::array<double, 3> &point) const
 {
 	std::array<int, 3> ijk;
 	if (!isPointInside(point)) {
@@ -1213,7 +1213,7 @@ long VolCartesian::locateClosestCell(const std::array<double, 3> &point)
 	\param[in] point is the point to be checked
 	\result Returns the cartesian id of the closest cell to the point.
 */
-std::array<int, 3> VolCartesian::locateClosestCellCartesian(const std::array<double, 3> &point)
+std::array<int, 3> VolCartesian::locateClosestCellCartesian(const std::array<double, 3> &point) const
 {
 	std::array<int,3> ijk({{0,0,0}});
 

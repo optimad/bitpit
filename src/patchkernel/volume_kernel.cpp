@@ -85,7 +85,7 @@ VolumeKernel::~VolumeKernel()
 	\param[in] z is the z coordinate of the point
 	\result Returns true if the point is inside the patch, false otherwise.
  */
-bool VolumeKernel::isPointInside(double x, double y, double z)
+bool VolumeKernel::isPointInside(double x, double y, double z) const
 {
 	return isPointInside({{x, y, z}});
 }
@@ -99,7 +99,7 @@ bool VolumeKernel::isPointInside(double x, double y, double z)
 	\param[in] z is the z coordinate of the point
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolumeKernel::isPointInside(long id, double x, double y, double z)
+bool VolumeKernel::isPointInside(long id, double x, double y, double z) const
 {
 	return isPointInside(id, {{x, y, z}});
 }

@@ -54,9 +54,9 @@ public:
 	double evalInterfaceArea(long id) const override;
 	std::array<double, 3> evalInterfaceNormal(long id) const override;
 
-	bool isPointInside(const std::array<double, 3> &point) override;
-	bool isPointInside(long id, const std::array<double, 3> &point) override;
-	long locatePoint(const std::array<double, 3> &point) override;
+	bool isPointInside(const std::array<double, 3> &point) const override;
+	bool isPointInside(long id, const std::array<double, 3> &point) const override;
+	long locatePoint(const std::array<double, 3> &point) const override;
 
 protected:
 	VolUnstructured(const VolUnstructured &other) = default;

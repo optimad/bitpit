@@ -51,7 +51,7 @@ public:
 	void setExpert(bool expert);
 
         // Search algorithms
-        long locatePoint(const std::array<double, 3> &point) override;
+        long locatePoint(const std::array<double, 3> &point) const override;
 
         // Evaluations
         void extractEdgeNetwork(SurfUnstructured &);

@@ -246,7 +246,7 @@ void VolUnstructured::_restore(std::istream &stream)
  * \param[in] point is the point to be checked
  * \result Returns true if the point is inside the patch, false otherwise.
  */
-bool VolUnstructured::isPointInside(const std::array<double, 3> &point)
+bool VolUnstructured::isPointInside(const std::array<double, 3> &point) const
 {
 	BITPIT_UNUSED(point);
 
@@ -260,7 +260,7 @@ bool VolUnstructured::isPointInside(const std::array<double, 3> &point)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the cell, false otherwise.
  */
-bool VolUnstructured::isPointInside(long id, const std::array<double, 3> &point)
+bool VolUnstructured::isPointInside(long id, const std::array<double, 3> &point) const
 {
 	BITPIT_UNUSED(id);
 	BITPIT_UNUSED(point);
@@ -279,7 +279,7 @@ bool VolUnstructured::isPointInside(long id, const std::array<double, 3> &point)
  * point is not inside the patch, the function returns the id of the null
  * element.
  */
-long VolUnstructured::locatePoint(const std::array<double, 3> &point)
+long VolUnstructured::locatePoint(const std::array<double, 3> &point) const
 {
 	BITPIT_UNUSED(point);
 

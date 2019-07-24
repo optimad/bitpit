@@ -104,9 +104,9 @@ public:
 	const PabloUniform & getTree() const;
 	void setTreeAdopter(std::unique_ptr<PabloUniform> *entruster);
 
-	bool isPointInside(const std::array<double, 3> &point) override;
-	bool isPointInside(long id, const std::array<double, 3> &point) override;
-	long locatePoint(const std::array<double, 3> &point) override;
+	bool isPointInside(const std::array<double, 3> &point) const override;
+	bool isPointInside(long id, const std::array<double, 3> &point) const override;
+	long locatePoint(const std::array<double, 3> &point) const override;
 
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);

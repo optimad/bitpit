@@ -189,7 +189,7 @@ void SurfUnstructured::_restore(std::istream &stream)
  * point is not inside the patch, the function returns the id of the null
  * element.
  */
-long SurfUnstructured::locatePoint(const std::array<double, 3> &point)
+long SurfUnstructured::locatePoint(const std::array<double, 3> &point) const
 {
 	BITPIT_UNUSED(point);
 

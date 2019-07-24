@@ -4129,7 +4129,7 @@ void PatchKernel::evalElementBoundingBox(const Element &element, std::array<doub
 	\result Returns the id of the cell the contains the point. If the point
 	is not inside the patch, the function returns the id of the null element.
 */
-long PatchKernel::locatePoint(double x, double y, double z)
+long PatchKernel::locatePoint(double x, double y, double z) const
 {
 	return locatePoint({{x, y, z}});
 }
@@ -4144,7 +4144,7 @@ long PatchKernel::locatePoint(double x, double y, double z)
  * \param[in] face_B is the face on the second cell
  * \result Returns true if the two faces are the same.
 */
-bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_B)
+bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_B) const
 {
 	const Cell &cell_A = m_cells[cellId_A];
 	const Cell &cell_B = m_cells[cellId_B];

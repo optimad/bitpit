@@ -95,14 +95,14 @@ public:
 	void switchMemoryMode(MemoryMode mode);
 	MemoryMode getMemoryMode();
 
-	bool isPointInside(const std::array<double, 3> &point) override;
-	bool isPointInside(long id, const std::array<double, 3> &point) override;
-	long locatePoint(const std::array<double, 3> &point) override;
-	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
+	bool isPointInside(const std::array<double, 3> &point) const override;
+	bool isPointInside(long id, const std::array<double, 3> &point) const override;
+	long locatePoint(const std::array<double, 3> &point) const override;
+	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point) const;
 	long locateClosestVertex(std::array<double,3> const &point) const;
 	std::array<int, 3> locateClosestVertexCartesian(std::array<double,3> const &point) const;
 	long locateClosestCell(std::array<double,3> const &point);
-	std::array<int, 3> locateClosestCellCartesian(std::array<double,3> const &point);
+	std::array<int, 3> locateClosestCellCartesian(std::array<double,3> const &point) const;
 
 	std::vector<long> extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax);
 	std::vector<long> extractCellSubSet(int const &idxMin, int const &idxMax);
