@@ -44,6 +44,11 @@ using namespace chrono;
 namespace bitpit {
 
 /*!
+	Default cell weight used for patch partitioning
+*/
+const int PatchKernel::DEFAULT_PARTITIONING_WEIGTH = 1.;
+
+/*!
 	Sets the MPI communicator to be used for parallel communications.
 
 	\param communicator is the communicator to be used for parallel
@@ -696,7 +701,9 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool t
 
 	setHaloSize(haloSize);
 
-	return partition(trackPartitioning, squeezeStorage);
+	std::unordered_map<long, double> dummyCellWeights;
+
+	return partition(dummyCellWeights, trackPartitioning, squeezeStorage);
 }
 
 /*!
@@ -712,7 +719,60 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool t
 */
 std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool squeezeStorage)
 {
-	partitioningPrepare(false);
+	std::unordered_map<long, double> dummyCellWeights;
+
+	partitioningPrepare(dummyCellWeights, false);
+
+	std::vector<adaption::Info> partitioningData = partitioningAlter(trackPartitioning, squeezeStorage);
+
+	partitioningCleanup();
+
+	return partitioningData;
+}
+
+/*!
+	Partitions the patch among the processors. Each cell will be assigned
+	to a specific processor according to the specified input.
+
+	\param communicator is the communicator that will be used
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, a weight equal to one is used
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\param squeezeStorage if set to true the vector that store patch information
+	will be squeezed after the synchronization
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, bool squeezeStorage, std::size_t haloSize)
+{
+	setCommunicator(communicator);
+
+	setHaloSize(haloSize);
+
+	return partition(cellWeights, trackPartitioning, squeezeStorage);
+}
+
+/*!
+	Partitions the patch among the processors. Each cell will be assigned
+	to a specific processor according to the specified input.
+
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, a weight equal to one is used
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\param squeezeStorage if set to true the vector that store patch information
+	will be squeezed after the synchronization
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partition(const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, bool squeezeStorage)
+{
+	partitioningPrepare(cellWeights, false);
 
 	std::vector<adaption::Info> partitioningData = partitioningAlter(trackPartitioning, squeezeStorage);
 
@@ -893,7 +953,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 
 	setHaloSize(haloSize);
 
-	return partitioningPrepare(trackPartitioning);
+	std::unordered_map<long, double> dummyCellWeights;
+
+	return partitioningPrepare(dummyCellWeights, trackPartitioning);
 }
 
 /*!
@@ -907,6 +969,49 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 */
 std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartitioning)
 {
+	std::unordered_map<long, double> dummyCellWeights;
+
+	return partitioningPrepare(dummyCellWeights, trackPartitioning);
+}
+
+/*!
+	Partitions the patch among the processors. The partitioning is done using
+	a criteria that tries to balance the load among the processors.
+
+	\param communicator is the communicator that will be used
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, a weight equal to one is used
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, std::size_t haloSize)
+{
+	setCommunicator(communicator);
+
+	setHaloSize(haloSize);
+
+	return partitioningPrepare(cellWeights, trackPartitioning);
+}
+
+/*!
+	Partitions the patch among the processors. The partitioning is done using
+	a criteria that tries to balance the load among the processors.
+
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, a weight equal to one is used
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordered_map<long, double> &cellWeights, bool trackPartitioning)
+{
 	// Patch needs to support partitioning
 	if (!isPartitioningSupported()) {
 		throw std::runtime_error ("The patch does not support partitioning!");
@@ -919,7 +1024,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartition
 	}
 
 	// Execute the partitioning preparation
-	std::vector<adaption::Info> partitioningData = _partitioningPrepare(trackPartitioning);
+	std::vector<adaption::Info> partitioningData = _partitioningPrepare(cellWeights, DEFAULT_PARTITIONING_WEIGTH, trackPartitioning);
 
 	// Update the status
 	setPartitioningStatus(PARTITIONING_PREPARED);
@@ -1081,26 +1186,59 @@ void PatchKernel::setPartitioningStatus(PartitioningStatus status)
 
 	\result Partitioning load unbalance index.
 */
-double PatchKernel::evalPartitioningUnbalance()
+double PatchKernel::evalPartitioningUnbalance() const
+{
+	std::unordered_map<long, double> dummyCellWeights;
+
+	return evalPartitioningUnbalance(dummyCellWeights);
+}
+
+/*!
+	Evaluate partitioning load unbalance index.
+
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, a weight equal to one is used.
+	\result Partitioning load unbalance index.
+*/
+double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, double> &cellWeights) const
 {
 	if (!isPartitioned()) {
 		return 0.;
 	}
 
 	// Evaluate partition weight
-	double localWeight = getInternalCount();
+	double partitionWeight;
+	if (!cellWeights.empty()) {
+		partitionWeight = 0.;
+		for (auto cellItr = internalConstBegin(); cellItr != internalConstEnd(); ++cellItr) {
+			long cellId = cellItr.getId();
+
+			double cellWeight;
+			auto weightItr = cellWeights.find(cellId);
+			if (weightItr != cellWeights.end()) {
+				cellWeight = weightItr->second;
+			} else {
+				cellWeight = DEFAULT_PARTITIONING_WEIGTH;
+			}
+
+			partitionWeight += cellWeight;
+		}
+	} else {
+		partitionWeight = DEFAULT_PARTITIONING_WEIGTH * getInternalCount();
+	}
 
 	// Evalaute global weights
-	double totalWeight;
-	MPI_Allreduce(&localWeight, &totalWeight, 1, MPI_DOUBLE, MPI_SUM, getCommunicator());
+	double totalPartitionWeight;
+	MPI_Allreduce(&partitionWeight, &totalPartitionWeight, 1, MPI_DOUBLE, MPI_SUM, getCommunicator());
 
-	double maximumWeight;
-	MPI_Allreduce(&localWeight, &maximumWeight, 1, MPI_DOUBLE, MPI_MAX, getCommunicator());
+	double maximumPartitionWeight;
+	MPI_Allreduce(&partitionWeight, &maximumPartitionWeight, 1, MPI_DOUBLE, MPI_MAX, getCommunicator());
 
-	double meanWeight = totalWeight / getProcessorCount();
+	double meanPartitionWeight = totalPartitionWeight / getProcessorCount();
 
 	// Evaluate the unbalance
-	double unbalance = (maximumWeight / meanWeight - 1.);
+	double unbalance = (maximumPartitionWeight / meanPartitionWeight - 1.);
 
 	return unbalance;
 }
@@ -1110,14 +1248,21 @@ double PatchKernel::evalPartitioningUnbalance()
 
 	Default implementation is a no-op function.
 
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, the default weight will be used
+	\param defaultWeight is the default weight that will assigned to the cells
+	for which an explicit weight has not been defined
 	\param trackPartitioning if set to true the function will return the
 	changes that will be performed in the alter step
 	\result If the partitioning is tracked, returns a vector of adaption::Info
 	that can be used to discover what changes will be performed in the alter
 	step, otherwise an empty vector will be returned.
 */
-std::vector<adaption::Info> PatchKernel::_partitioningPrepare(bool trackPartitioning)
+std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning)
 {
+	BITPIT_UNUSED(cellWeights);
+	BITPIT_UNUSED(defaultWeight);
 	BITPIT_UNUSED(trackPartitioning);
 
 	return std::vector<adaption::Info>();

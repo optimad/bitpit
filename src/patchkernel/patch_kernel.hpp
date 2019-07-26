@@ -562,13 +562,18 @@ public:
 	bool isPartitioned() const;
 	bool isPartitioningSupported() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
-	double evalPartitioningUnbalance();
+	double evalPartitioningUnbalance() const;
+	double evalPartitioningUnbalance(const std::unordered_map<long, double> &cellWeights) const;
 	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partition(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
+	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
+	std::vector<adaption::Info> partition(const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partition(bool trackPartitioning, bool squeezeStorage = false);
 	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning);
+	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, std::size_t haloSize = 1);
+	std::vector<adaption::Info> partitioningPrepare(const std::unordered_map<long, double> &cellWeights, bool trackPartitioning);
 	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, bool trackPartitioning, std::size_t haloSize = 1);
 	std::vector<adaption::Info> partitioningPrepare(bool trackPartitioning);
 	std::vector<adaption::Info> partitioningAlter(bool trackPartitioning = true, bool squeezeStorage = false);
@@ -576,6 +581,10 @@ public:
 #endif
 
 protected:
+#if BITPIT_ENABLE_MPI==1
+	const static int DEFAULT_PARTITIONING_WEIGTH;
+#endif
+
 	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
@@ -662,7 +671,7 @@ protected:
 
 	void setPartitioned(bool partitioned);
 	void setPartitioningStatus(PartitioningStatus status);
-	virtual std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning);
+	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning);
 	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
 	virtual void _partitioningCleanup();
 

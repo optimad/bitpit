@@ -153,7 +153,7 @@ protected:
 	std::size_t _getMaxHaloSize() override;
 	void _setHaloSize(std::size_t haloSize) override;
 
-	std::vector<adaption::Info> _partitioningPrepare(bool trackPartitioning) override;
+	std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning) override;
 	std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning) override;
 	void _partitioningCleanup() override;
 

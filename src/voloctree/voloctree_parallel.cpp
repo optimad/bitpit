@@ -90,16 +90,21 @@ void VolOctree::_setHaloSize(std::size_t haloSize)
 /*!
 	Prepares the patch for performing the partitioning.
 
-	Default implementation is a no-op function.
-
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, the default weight will be used
+	\param defaultWeight is the default weight that will assigned to the cells
+	for which an explicit weight has not been defined
 	\param trackPartitioning if set to true the function will return the
 	changes that will be performed in the alter step
 	\result If the partitioning is tracked, returns a vector of adaption::Info
 	that can be used to discover what changes will be performed in the alter
 	step, otherwise an empty vector will be returned.
 */
-std::vector<adaption::Info> VolOctree::_partitioningPrepare(bool trackPartitioning)
+std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning)
 {
+	BITPIT_UNUSED(cellWeights);
+
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
 		int currentRank = getRank();
