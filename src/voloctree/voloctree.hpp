@@ -239,6 +239,8 @@ private:
 	std::unique_ptr<PabloUniform> m_tree;
 	std::unique_ptr<PabloUniform> *m_treeAdopter;
 
+	std::unique_ptr<std::vector<double>> m_partitioningOctantWeights;
+
 	void initialize();
 
 	void setBoundingBox();
@@ -258,6 +260,9 @@ private:
 
 	void findOctantCodimensionNeighs(const OctantInfo &octantInfo, int index, int codimension,
 									 const std::vector<long> &blackList, std::vector<long> *neighs) const;
+
+	void computePartitioningOctantWeights(const std::unordered_map<long, double> &cellWeights, double defaultWeight);
+	void clearPartitioningOctantWeights();
 };
 
 }

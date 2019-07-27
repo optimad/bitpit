@@ -103,12 +103,14 @@ void VolOctree::_setHaloSize(std::size_t haloSize)
 */
 std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning)
 {
-	BITPIT_UNUSED(cellWeights);
+	// Eval partitioning weights
+	computePartitioningOctantWeights(cellWeights, defaultWeight);
 
+	// Generate partitioning information
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
 		int currentRank = getRank();
-		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->evalLoadBalanceRanges((std::vector<double> *) nullptr);
+		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->evalLoadBalanceRanges(m_partitioningOctantWeights.get());
 		for (const auto &entry : loadBalanceRanges.sendRanges) {
 			int receiver = entry.first;
 			if (receiver == currentRank) {
@@ -158,7 +160,7 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered
 std::vector<adaption::Info> VolOctree::_partitioningAlter(bool trackPartitioning)
 {
 	// Updating the tree
-	m_tree->loadBalance();
+	m_tree->loadBalance(m_partitioningOctantWeights.get());
 
 	// Sync the patch
 	std::vector<adaption::Info> partitioningData = sync(trackPartitioning);
@@ -174,6 +176,8 @@ std::vector<adaption::Info> VolOctree::_partitioningAlter(bool trackPartitioning
 */
 void VolOctree::_partitioningCleanup()
 {
+	// Clear partitioning weights
+	clearPartitioningOctantWeights();
 }
 
 /*!
@@ -195,6 +199,45 @@ std::vector<long> VolOctree::_findGhostExchangeSources(int rank)
 	}
 
 	return ghostCellSources;
+}
+
+/*!
+	Compute partitioning weights for the octants.
+
+	\param cellWeights are the weights of the cells, the weight represents the
+	relative computational cost associated to a specified cell. If no weight
+	is specified for a cell, a default weight will be used
+	\param defaultWeight is the default weight that will assigned to the cells
+	for which an explicit weight has not been defined
+*/
+void VolOctree::computePartitioningOctantWeights(const std::unordered_map<long, double> &cellWeights, double defaultWeight)
+{
+	bool useWeights = !cellWeights.empty();
+	MPI_Allreduce(MPI_IN_PLACE, &useWeights, 1, MPI_C_BOOL, MPI_LOR, getCommunicator());
+	if (!useWeights) {
+		clearPartitioningOctantWeights();
+		return;
+	}
+
+	std::size_t nOctants = m_tree->getNumOctants();
+	m_partitioningOctantWeights = std::unique_ptr<std::vector<double>>(new std::vector<double>(nOctants, defaultWeight));
+	for (auto cellItr = internalConstBegin(); cellItr != internalConstEnd(); ++cellItr) {
+		long cellId = cellItr.getId();
+		auto weightItr = cellWeights.find(cellId);
+		if (weightItr != cellWeights.end()) {
+			OctantInfo octantInfo = getCellOctant(cellId);
+			uint32_t treeId = octantInfo.id;
+			(*m_partitioningOctantWeights)[treeId] = weightItr->second;
+		}
+	}
+}
+
+/*!
+	Compute partitioning weights for the octants.
+*/
+void VolOctree::clearPartitioningOctantWeights()
+{
+	m_partitioningOctantWeights.reset();
 }
 
 }

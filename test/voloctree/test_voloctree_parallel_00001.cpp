@@ -24,6 +24,7 @@
 
 #include <array>
 #include <mpi.h>
+#include <unordered_map>
 
 #include "bitpit_common.hpp"
 #include "bitpit_IO.hpp"
@@ -65,8 +66,30 @@ int subtest_001(int rank)
 	}
 	patch_2D->update(true);
 
-	// Repartiion the patch
-	patch_2D->partition(true);
+	// Define partitioning weights
+	std::unordered_map<long, double> partitioningWeights;
+	if (rank == 0) {
+		std::size_t counter = 0;
+		for(const Cell &cell : patch_2D->getCells()){
+			partitioningWeights.insert({cell.getId(), 0});
+
+			++counter;
+			if (counter == 0.25 * patch_2D->getInternalCount()) {
+				break;
+			}
+		}
+	} else if (rank == 1) {
+		std::size_t counter = 0;
+		for(const Cell &cell : patch_2D->getCells()){
+			++counter;
+			if (counter > 0.5 * patch_2D->getInternalCount()) {
+				partitioningWeights.insert({cell.getId(), 5});
+			}
+		}
+	}
+
+	// Re-partition the patch
+	patch_2D->partition(partitioningWeights, true);
 
 	// Write the patch
 	patch_2D->write();
@@ -110,8 +133,30 @@ int subtest_002(int rank)
 	}
 	patch_3D->update(true);
 
-	// Repartiion the patch
-	patch_3D->partition(true);
+	// Define partitioning weights
+	std::unordered_map<long, double> partitioningWeights;
+	if (rank == 0) {
+		std::size_t counter = 0;
+		for(const Cell &cell : patch_3D->getCells()){
+			partitioningWeights.insert({cell.getId(), 0});
+
+			++counter;
+			if (counter == 0.25 * patch_3D->getInternalCount()) {
+				break;
+			}
+		}
+	} else if (rank == 1) {
+		std::size_t counter = 0;
+		for(const Cell &cell : patch_3D->getCells()){
+			++counter;
+			if (counter > 0.5 * patch_3D->getInternalCount()) {
+				partitioningWeights.insert({cell.getId(), 5});
+			}
+		}
+	}
+
+	// Re-partition the patch
+	patch_3D->partition(partitioningWeights, true);
 
 	// Write the patch
 	patch_3D->write();
