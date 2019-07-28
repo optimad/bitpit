@@ -426,11 +426,12 @@ void LevelSetCachedObject::initializeCellSignPropagation(long cellId, int cellSi
     //
     // A cell is external if is outside the object bounding box.
     const VolumeKernel &mesh = *(m_kernelPtr->getMesh());
+    double geometricTolerance = mesh.getTol();
     std::array<double, 3> centroid = mesh.evalCellCentroid(cellId);
 
     bool isExternal = false;
     for (int i = 0; i < 3; ++i) {
-        if (centroid[i] < boxMin[i] || centroid[i] > boxMax[i]) {
+        if (centroid[i] < boxMin[i] - geometricTolerance || centroid[i] > boxMax[i] + geometricTolerance) {
             isExternal = true;
             break;
         }
