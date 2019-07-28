@@ -457,10 +457,12 @@ void LevelSetCachedObject::initializeCellSignPropagation(long cellId, int cellSi
         if (!isExternal) {
             seeds->push_back(cellId);
         } else if (*externalSign != PROPAGATION_SIGN_DUMMY) {
-            if (*externalSign == PROPAGATION_SIGN_UNDEFINED) {
-                *externalSign = cellSign;
-            } else if (*externalSign != cellSign) {
-                throw std::runtime_error("Mismatch in sign of external region!");
+            if (cellSign != PROPAGATION_SIGN_UNDEFINED) {
+                if (*externalSign == PROPAGATION_SIGN_UNDEFINED) {
+                    *externalSign = cellSign;
+                } else if (*externalSign != cellSign) {
+                    throw std::runtime_error("Mismatch in sign of external region!");
+                }
             }
         }
     } else {
@@ -511,6 +513,9 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
 
         // Get the sign of the seed
         int seedSign = getSign(seedId);
+        if (seedSign == PROPAGATION_SIGN_UNDEFINED) {
+            continue;
+        }
 
         // Initialize the process list with the seed
         processList.resize(1);
