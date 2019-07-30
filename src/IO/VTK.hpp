@@ -178,7 +178,6 @@ class VTKBaseContainer{
 
     public:
         VTKBaseContainer( ) ;
-        VTKBaseContainer( const VTKBaseContainer &) = default;
         virtual ~VTKBaseContainer( ) ;
 
         virtual VTKBaseContainer *  clone() const = 0 ;
@@ -194,7 +193,6 @@ class VTKVectorContainer : public VTKBaseContainer{
 
     public:
         VTKVectorContainer( std::vector<T> &) ;
-        VTKVectorContainer( const VTKVectorContainer &);
         ~VTKVectorContainer( ) ;
 
         VTKVectorContainer*     clone() const override ;
@@ -253,7 +251,6 @@ class VTKField{
         virtual ~VTKField();
 
         VTKField();
-        VTKField( const VTKField &);
         VTKField( const std::string & );
 
         VTKField& operator=( const VTKField & );

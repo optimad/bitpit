@@ -58,14 +58,6 @@ VTKField::VTKField(){
 }
 
 /*!
- * Copy constructor
- * @param[in] other object to be copied
- */
-VTKField::VTKField( const VTKField &other){
-    *this = other ;
-}
-
-/*!
  * Constructor
  * @param[in] name name of data field
  */

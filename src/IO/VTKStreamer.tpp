@@ -39,15 +39,6 @@ VTKVectorContainer<T>::~VTKVectorContainer( ){
 }
 
 /*!
- * Copy constructor
- */
-template<class T>
-VTKVectorContainer<T>::VTKVectorContainer( const VTKVectorContainer &other)
-    : VTKBaseContainer(other) {
-    m_ptr = other.m_ptr;
-}
-
-/*!
  * Clones the object
  * @return pointer to cloned object
  */
