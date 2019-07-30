@@ -2929,6 +2929,53 @@ std::vector<long> PatchKernel::getInternalsByPID(int pid)
 }
 
 /*!
+ * Find the cells that share the specified vertex.
+ *
+ * This function doesn't support coincident vertices with different ids.
+ *
+ * \param vertexId is the index of the vertex
+ * \result The cells that share the vertex.
+ */
+std::vector<long> PatchKernel::findVertexOneRing(long vertexId) const
+{
+    std::vector<long> ring;
+    findVertexOneRing(vertexId, &ring);
+
+    return ring;
+}
+
+/*!
+ * Find the cells that share the specified vertex.
+ *
+ * This function doesn't support coincident vertices with different ids.
+ *
+ * \param vertexId is the index of the vertex
+ * \param[in,out] ring is the vector were the one-ring of the specified vertex
+ * will be stored. The vector is not cleared before adding the neighbours, it
+ * is extended by appending all the neighbours found by this function.
+ */
+void PatchKernel::findVertexOneRing(long vertexId, std::vector<long> *ring) const
+{
+    // Find local id of the vertex
+    //
+    // Coincident vertices with different ids are not supported, this case is
+    // special because a cell may contain a point with the vertex coordinates,
+    // but may not contain the requested vertex (because it contains one of
+    // the other coincident vertices).
+    const std::array<double, 3> &coords = getVertexCoords(vertexId);
+    long cellId = locatePoint(coords);
+    if (cellId == bitpit::Element::NULL_ID) {
+        return;
+    }
+
+    int vertexLocalId = getCell(cellId).findVertex(vertexId);
+    assert(vertexLocalId >= 0);
+
+    // Find vertex one-ring
+    findCellVertexOneRing(cellId, vertexLocalId, ring);
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch

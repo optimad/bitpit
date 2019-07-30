@@ -416,6 +416,9 @@ public:
 	std::set<int> getInternalPIDs();
 	std::vector<long> getInternalsByPID(int pid);
 
+	std::vector<long> findVertexOneRing(long vertexId) const;
+	void findVertexOneRing(long vertexId, std::vector<long> *ring) const;
+
 	CellIterator getCellIterator(long id);
 	CellIterator cellBegin();
 	CellIterator cellEnd();
