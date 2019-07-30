@@ -253,8 +253,6 @@ class VTKField{
         VTKField();
         VTKField( const std::string & );
 
-        VTKField& operator=( const VTKField & );
-                                
         std::string             getName() const;
         VTKDataType             getDataType() const;
         VTKFieldType            getFieldType() const;

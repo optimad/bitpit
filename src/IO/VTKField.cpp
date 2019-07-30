@@ -66,24 +66,6 @@ VTKField::VTKField( const std::string &name ): VTKField() {
 }
 
 /*!
- * Assignment operator
- */
-VTKField& VTKField::operator=( const VTKField & other){
-
-    m_name  = other.m_name;
-    m_fieldType = other.m_fieldType ;
-    m_dataType = other.m_dataType ;
-    m_codification = other.m_codification;
-    m_location = other.m_location ;
-    m_offset = other.m_offset ;
-    m_position = other.m_position ;
-    m_streamer = other.m_streamer ;
-    m_enabled = other.m_enabled ;
-
-    return *this;
-}
-
-/*!
  * set name of data field
  * @param[in] name name of data field
  */
