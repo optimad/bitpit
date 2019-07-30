@@ -1469,6 +1469,11 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 		return collapsedVertices;
 	}
 
+	long nVertices = getVertexCount();
+	if (nVertices == 0) {
+		return collapsedVertices;
+	}
+
 	// Random number generator
 	srand(1223145611);
 
