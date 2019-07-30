@@ -712,17 +712,35 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex
  */
 bool SurfaceKernel::adjustCellOrientation()
 {
-    long id = Element::NULL_ID;
+    // Early return if the patch is empty.
+    if (empty()) {
+        return false;
+    }
+
+    // Get the first facet
+    long firstFacetId = Cell::NULL_ID;
+    if (getCellCount() > 0) {
+        firstFacetId = getCells().begin()->getId();
+    }
 
 #if BITPIT_ENABLE_MPI==1
-    if (getRank() == 0) {
-        id = getCells().begin()->getId();
+    if (isPartitioned()) {
+        int patchRank = getRank();
+
+        int firstFacetRank = std::numeric_limits<int>::max();
+        if (firstFacetId >= 0) {
+            firstFacetRank = patchRank;
+        }
+
+        MPI_Allreduce(MPI_IN_PLACE, &firstFacetRank, 1, MPI_INT, MPI_MIN, getCommunicator());
+        if (patchRank != firstFacetRank) {
+            firstFacetId = Cell::NULL_ID;
+        }
     }
-#else
-    id = getCells().begin()->getId();
 #endif
 
-    return adjustCellOrientation(id);
+    // Adjust cell orientation according to the orientation of the first facet
+    return adjustCellOrientation(firstFacetId);
 }
 
 
