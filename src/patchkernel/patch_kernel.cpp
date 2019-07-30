@@ -1483,11 +1483,16 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 		}
 	}
 
-	int nBins = std::ceil(std::pow(getVertexCount(), 1. / (double) nBoxDimensions));
-	if (nBins < 16) {
-		nBins = 16;
-	} else if (nBins > 128) {
-		nBins = 128;
+	int nBins;
+	if (nBoxDimensions != 0) {
+		nBins = std::ceil(std::pow(nVertices, 1. / (double) nBoxDimensions));
+		if (nBins < 16) {
+			nBins = 16;
+		} else if (nBins > 128) {
+			nBins = 128;
+		}
+	} else {
+		nBins = 1;
 	}
 
 	// Group vertices into bins
