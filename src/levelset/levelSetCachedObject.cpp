@@ -48,7 +48,7 @@ const int LevelSetCachedObject::PROPAGATION_STATUS_WAITING  =   0;
 const int LevelSetCachedObject::PROPAGATION_STATUS_REACHED  =   1;
 
 const int LevelSetCachedObject::PROPAGATION_SIGN_DUMMY     = -2;
-const int LevelSetCachedObject::PROPAGATION_SIGN_UNDEFINED =  0;
+const int LevelSetCachedObject::PROPAGATION_SIGN_UNDEFINED = -3;
 
 /*!
 	@ingroup levelset
