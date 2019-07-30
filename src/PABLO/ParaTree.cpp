@@ -5870,8 +5870,8 @@ namespace bitpit {
 
             // Get the accretion associated with this rank
             //
-            // If there are no accretions it means we are building only the
-            // first layer of ghosts.
+            // If there are no accretions it means we are building the first
+            // layer of ghosts.
             std::vector<AccretionData>::const_iterator accretionsItr;
             if (accretions.size() > 0) {
                 bool accretionFound = false;
@@ -5904,7 +5904,7 @@ namespace bitpit {
 
                 // Layer information
                 //
-                // If not accretions are received we are building only the
+                // If there are no accretions it means we are building the
                 // first layer of ghosts.
                 int layer;
                 if (accretionsItr != accretions.end()) {
