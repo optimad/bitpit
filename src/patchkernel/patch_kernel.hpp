@@ -727,7 +727,7 @@ private:
 	int m_id;
 	int m_dimension;
 
-	bool m_hasCustomTolerance;
+	bool m_toleranceCustom;
 	double m_tolerance;
 
 	int m_rank;

@@ -141,7 +141,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_adaptionStatus(other.m_adaptionStatus),
       m_expert(other.m_expert),
       m_dimension(other.m_dimension),
-      m_hasCustomTolerance(other.m_hasCustomTolerance),
+      m_toleranceCustom(other.m_toleranceCustom),
       m_tolerance(other.m_tolerance),
       m_rank(other.m_rank),
       m_nProcessors(other.m_nProcessors)
@@ -277,7 +277,7 @@ void PatchKernel::initialize()
 #endif
 
 	// Initialize the geometrical tolerance to a default value
-	m_hasCustomTolerance = false;
+	m_toleranceCustom = false;
 	_setTol(DEFAULT_TOLERANCE);
 
 	// Initializes the bounding box
@@ -5172,7 +5172,7 @@ void PatchKernel::setTol(double tolerance)
 {
 	_setTol(tolerance);
 
-	m_hasCustomTolerance = true;
+	m_toleranceCustom = true;
 }
 
 /*!
@@ -5203,7 +5203,7 @@ void PatchKernel::resetTol()
 {
 	_resetTol();
 
-	m_hasCustomTolerance = false;
+	m_toleranceCustom = false;
 }
 
 /*!
@@ -5226,7 +5226,7 @@ void PatchKernel::_resetTol()
 */
 bool PatchKernel::isTolCustomized() const
 {
-	return m_hasCustomTolerance;
+	return m_toleranceCustom;
 }
 
 /*!
@@ -5743,8 +5743,8 @@ void PatchKernel::dump(std::ostream &stream) const
 	_dump(stream);
 
 	// Geometric tolerance
-	utils::binary::write(stream, (int) m_hasCustomTolerance);
-	if (m_hasCustomTolerance) {
+	utils::binary::write(stream, (int) m_toleranceCustom);
+	if (m_toleranceCustom) {
 		utils::binary::write(stream, m_tolerance);
 	}
 
