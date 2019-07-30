@@ -5907,7 +5907,7 @@ namespace bitpit {
                 // If not accretions are received we are building only the
                 // first layer of ghosts.
                 int layer;
-                if (accretions.size() > 0) {
+                if (accretionsItr != accretions.end()) {
                     layer = accretionsItr->population.at(sourceGlobalIdx);
                 } else {
                     layer = 0;
