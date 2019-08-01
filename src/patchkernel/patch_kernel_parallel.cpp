@@ -825,33 +825,22 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 		globalSendRanks.insert(entry.first);
 	}
 
-	// Identify if this is a serialization or a normal partitioning
-	m_partitioningSerialization = (nGlobalExchanges == (nRanks - 1));
-	if (m_partitioningSerialization) {
-		// The rank that is not sending any cells is the rank that should
-		// receive all the cells.
-		int receiverRank = -1;
-		for (int rank = 0; rank < nRanks; ++rank) {
-			if (globalSendRanks.count(rank) == 0) {
-				receiverRank = rank;
-				break;
-			}
-		}
+	// Get global list of ranks that will receive data
+	std::unordered_set<int> globalRecvRanks;
+	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+		globalRecvRanks.insert(entry.second);
+	}
 
-		// We are serializing the patch if all the processes are sending all
-		// their cells to the same rank.
-		if (patchRank == receiverRank) {
-			m_partitioningSerialization = true;
-		} else if (m_partitioningOutgoings.size() != (std::size_t) getInternalCount()) {
-			m_partitioningSerialization = false;
-		} else {
-			m_partitioningSerialization = true;
-			for (auto &entry : m_partitioningOutgoings) {
-				int cellRank = entry.second;
-				if (cellRank != receiverRank) {
-					m_partitioningSerialization = false;
-					break;
-				}
+	// Identify if this is a serialization or a normal partitioning
+	//
+	// We are serializing the patch if all the processes are sending all
+	// their cells to the same rank.
+	m_partitioningSerialization = (globalRecvRanks.size() == 1);
+	if (m_partitioningSerialization) {
+		int receiverRank = *(globalRecvRanks.begin());
+		if (patchRank != receiverRank) {
+			if (m_partitioningOutgoings.size() != (std::size_t) getInternalCount()) {
+				m_partitioningSerialization = false;
 			}
 		}
 
