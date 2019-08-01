@@ -797,8 +797,8 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	int nExchanges = recvRanks.size();
 	std::vector<std::pair<int, int>> exchanges;
 	exchanges.reserve(nExchanges);
-	for (int racvRank : recvRanks) {
-		exchanges.emplace_back(patchRank, racvRank);
+	for (int recvRank : recvRanks) {
+		exchanges.emplace_back(patchRank, recvRank);
 	}
 
 	int exchangesGatherCount = 2 * nExchanges;
