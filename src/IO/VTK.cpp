@@ -74,16 +74,6 @@ VTK::VTK(const std::string &dir, const std::string &name ):
 
 }
 
-/*!
- * Destructor
- */
-VTK::~VTK(){
-
-    m_data.clear();
-    m_geometry.clear();
-
-}
-
 /*! 
  * set header type for appended binary output
  * @param[in] st header type ["UInt32"/"UInt64"]

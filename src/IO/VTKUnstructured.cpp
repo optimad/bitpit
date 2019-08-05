@@ -113,13 +113,6 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str,
  */
 
 /*!  
- *  Destructor.
- */
-VTKUnstructuredGrid::~VTKUnstructuredGrid( ) {
-
-}
-
-/*!  
  *  Default constructor.
  *  Allocates four geometry fields called "Points"(Float64), "offsets"(Int32),
  *  "types"(Int32) and "connectivity"(Int32).

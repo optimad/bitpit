@@ -178,7 +178,7 @@ class VTKBaseContainer{
 
     public:
         VTKBaseContainer( ) ;
-        virtual ~VTKBaseContainer( ) ;
+        virtual ~VTKBaseContainer( ) = default;
 
         virtual VTKBaseContainer *  clone() const = 0 ;
 
@@ -193,7 +193,6 @@ class VTKVectorContainer : public VTKBaseContainer{
 
     public:
         VTKVectorContainer( std::vector<T> &) ;
-        ~VTKVectorContainer( ) ;
 
         VTKVectorContainer*     clone() const override ;
 
@@ -222,7 +221,6 @@ class VTKNativeStreamer : public VTKBaseStreamer {
     public:
         VTKNativeStreamer();
         VTKNativeStreamer( const VTKNativeStreamer & );
-        ~VTKNativeStreamer();
 
         template<class T>
         void                    addData( const std::string &, std::vector<T> & ) ;
@@ -248,7 +246,7 @@ class VTKField{
 
         //methods
     public:
-        virtual ~VTKField();
+        virtual ~VTKField() = default;
 
         VTKField();
         VTKField( const std::string & );
@@ -301,7 +299,7 @@ class VTK{
     public:
         VTK( );
         VTK( const std::string &, const std::string & );
-        virtual ~VTK( );
+        virtual ~VTK( ) = default;
 
         void                    setHeaderType( const std::string & );
         std::string             getHeaderType(  ) const;
@@ -416,8 +414,6 @@ class VTKUnstructuredGrid : public VTK {
         HomogeneousInfoStreamer m_homogeneousInfoStreamer;          /**< streamer if unstructured grid is of homogenous type */
 
     public:
-    ~VTKUnstructuredGrid();
-
     VTKUnstructuredGrid( VTKElementType elementType = VTKElementType::UNDEFINED );
     VTKUnstructuredGrid( const std::string &, const std::string &, VTKElementType elementType = VTKElementType::UNDEFINED ) ;
 
@@ -472,7 +468,6 @@ class VTKRectilinearGrid : public VTK{
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int );
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int, int );
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int );
-        ~VTKRectilinearGrid();
 
         void                    writeCollection() override ;
 

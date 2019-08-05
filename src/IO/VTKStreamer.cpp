@@ -40,13 +40,6 @@ VTKBaseContainer::VTKBaseContainer( ){
 }
 
 /*!
- * Destructor
- */
-VTKBaseContainer::~VTKBaseContainer( ){
-
-}
-
-/*!
  * @ingroup VisualizationToolKit
  * @interface VTKBaseStreamer
  * @brief The base class to be used to derive VTK streamers form
@@ -92,14 +85,6 @@ void VTKBaseStreamer::absorbData( std::fstream &str, const std::string &name, VT
  * @brief In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored. 
  * Right now only std::vector is supported.
  */
-
-/*!
- * Destructor
- */
-VTKNativeStreamer::~VTKNativeStreamer(){
-
-    m_field.clear() ;
-}
 
 /*!
  * Constructor

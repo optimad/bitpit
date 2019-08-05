@@ -160,12 +160,6 @@ VTKRectilinearGrid::VTKRectilinearGrid( const std::string &dir, const std::strin
 }
 
 /*!  
- *  Destructor 
- */
-VTKRectilinearGrid::~VTKRectilinearGrid( ){
-}
-
-/*!  
  *  Reads meta data of VTR file (grid size, data fields, codex, position of data within file).
  *  Calls setDimension.
  */

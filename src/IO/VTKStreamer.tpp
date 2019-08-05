@@ -31,14 +31,6 @@ namespace bitpit{
  */
 
 /*!
- * Destructor
- */
-template<class T>
-VTKVectorContainer<T>::~VTKVectorContainer( ){
-    m_ptr = nullptr;
-}
-
-/*!
  * Clones the object
  * @return pointer to cloned object
  */

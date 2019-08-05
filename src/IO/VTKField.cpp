@@ -34,13 +34,6 @@ namespace bitpit{
  */
 
 /*!
- * Destructor
- */
-VTKField::~VTKField(){
-}
-
-
-/*!
  * Default constructor
  */
 VTKField::VTKField(){
