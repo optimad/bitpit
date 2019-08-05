@@ -1069,6 +1069,16 @@ void PatchKernel::setPartitioningStatus(PartitioningStatus status)
 /*!
 	Evaluate partitioning load unbalance index.
 
+	This index measures the performance lost to imbalanced load or, conversely,
+	the performance that could be reclaimed by balancing the load.
+
+	Unbalance index is evaluate almost as in Equation 1 of paper "Quantifying
+	the Effectiveness of Load Balance Algorithms", Olga Pearce, Todd Gamblin†,
+	Bronis R. de Supinski†, Martin Schulz†, Nancy M. Amato, Department of
+	Computer Science and Engineering, Texas A&M University, College Station,
+	TX, USA. The difference is that the imbalance factor evaluate by this
+	function is not a percentage, i.e., it is not multiplied by 100.
+
 	\result Partitioning load unbalance index.
 */
 double PatchKernel::evalPartitioningUnbalance()
@@ -1084,14 +1094,13 @@ double PatchKernel::evalPartitioningUnbalance()
 	double totalWeight;
 	MPI_Allreduce(&localWeight, &totalWeight, 1, MPI_DOUBLE, MPI_SUM, getCommunicator());
 
-	double minimumWeight;
-	MPI_Allreduce(&localWeight, &minimumWeight, 1, MPI_DOUBLE, MPI_MIN, getCommunicator());
-
 	double maximumWeight;
 	MPI_Allreduce(&localWeight, &maximumWeight, 1, MPI_DOUBLE, MPI_MAX, getCommunicator());
 
+	double meanWeight = totalWeight / getProcessorCount();
+
 	// Evaluate the unbalance
-	double unbalance = (maximumWeight - minimumWeight) / totalWeight;
+	double unbalance = (maximumWeight / meanWeight - 1.);
 
 	return unbalance;
 }
