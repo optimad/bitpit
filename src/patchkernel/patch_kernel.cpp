@@ -2181,10 +2181,13 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 		if (cellId == m_lastInternalId) {
 			deleteLastInternal = true;
 			continue;
-		} else if (cellId == m_firstGhostId) {
+		}
+#if BITPIT_ENABLE_MPI==1
+		else if (cellId == m_firstGhostId) {
 			deleteFirstGhost = true;
 			continue;
 		}
+#endif
 
 		deleteCell(cellId, updateNeighs, true);
 	}
@@ -2193,9 +2196,11 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 		deleteCell(m_lastInternalId, updateNeighs, true);
 	}
 
+#if BITPIT_ENABLE_MPI==1
 	if (deleteFirstGhost) {
 		deleteCell(m_firstGhostId, updateNeighs, true);
 	}
+#endif
 
 	if (!delayed) {
 		m_cells.flush();
@@ -3812,9 +3817,10 @@ void PatchKernel::updateLastInternalId()
 		return;
 	}
 
+	CellIterator lastInternalItr;
 #if BITPIT_ENABLE_MPI==1
 	if (m_nGhosts == 0) {
-		CellIterator lastInternalItr = --m_cells.end();
+		lastInternalItr = --m_cells.end();
 		m_lastInternalId = lastInternalItr->getId();
 	} else {
 		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
