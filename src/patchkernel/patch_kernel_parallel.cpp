@@ -1473,6 +1473,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
                             frontierCellId = neighId;
                             frontierFace = findAdjoinNeighFace(cellId, neighId);
                             frontierCell = &(m_cells.at(neighId));
+
+                            assert(frontierFace >= 0);
                         }
 
                         // Clear neighbour list
