@@ -1322,15 +1322,10 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
 
     deleteCells(cellsDeleteList, true, true);
 
-    // Delete interfaces no longer used
-    std::vector<long> interfacesDeleteOverall;
-    interfacesDeleteOverall.reserve(involvedInterfaces.size());
-    for (long interfaceId : involvedInterfaces) {
-        if (isInterfaceOrphan(interfaceId)) {
-            interfacesDeleteOverall.emplace_back(interfaceId);
-        }
-    }
-
+    // Delete all involved interfaces
+    //
+    // Interfaces will be re-created after the partitioning.
+    std::vector<long> interfacesDeleteOverall(involvedInterfaces.begin(), involvedInterfaces.end());
     deleteInterfaces(interfacesDeleteOverall, true, true);
 
     // Delete vertices no longer used
