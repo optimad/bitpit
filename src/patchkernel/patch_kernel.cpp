@@ -152,6 +152,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_haloSize(other.m_haloSize),
       m_partitioningCellsTag(other.m_partitioningCellsTag),
       m_partitioningVerticesTag(other.m_partitioningVerticesTag),
+      m_partitioningSerialization(other.m_partitioningSerialization),
       m_partitioningOutgoings(other.m_partitioningOutgoings),
       m_partitioningGlobalExchanges(other.m_partitioningGlobalExchanges),
       m_ghostOwners(other.m_ghostOwners),
