@@ -357,13 +357,7 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 	}
 
 	// Update bounding box
-	//
-	// Previous updates may already have updated the bounding box, before
-	// doing the update re-check if it is still dirty.
-	boundingBoxDirty = isBoundingBoxDirty();
-	if (boundingBoxDirty) {
-		updateBoundingBox();
-	}
+	updateBoundingBox();
 
 	return updateInfo;
 }
