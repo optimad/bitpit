@@ -1297,6 +1297,9 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 	Vertex &vertex = *iterator;
 	vertex.initialize(id, std::move(coords));
 
+	// Update the bounding box
+	addPointToBoundingBox(iterator->getCoords());
+
 	return iterator;
 }
 
