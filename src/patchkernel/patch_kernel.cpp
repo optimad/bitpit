@@ -150,6 +150,8 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_partitioned(other.m_partitioned),
       m_partitioningStatus(other.m_partitioningStatus),
       m_haloSize(other.m_haloSize),
+      m_partitioningCellsTag(other.m_partitioningCellsTag),
+      m_partitioningVerticesTag(other.m_partitioningVerticesTag),
       m_partitioningOutgoings(other.m_partitioningOutgoings),
       m_partitioningGlobalExchanges(other.m_partitioningGlobalExchanges),
       m_ghostOwners(other.m_ghostOwners),
@@ -267,6 +269,10 @@ void PatchKernel::initialize()
 	// Specific implementation will set the appropriate status during their
 	// initialization.
 	setPartitioningStatus(PARTITIONING_UNSUPPORTED);
+
+	// Initialize partitioning tags
+	m_partitioningCellsTag    = -1;
+	m_partitioningVerticesTag = -1;
 #endif
 
 	// Initialize the geometrical tolerance to a default value
