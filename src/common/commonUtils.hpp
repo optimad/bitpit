@@ -53,6 +53,36 @@
 #define BITPIT_SELECT_OVERLOAD(NAME, NUM) BITPIT_CAT(NAME ## _, NUM)
 #define BITPIT_OVERLOAD_CALL(NAME, ...) BITPIT_SELECT_OVERLOAD(NAME, BITPIT_ARGS_SIZE(__VA_ARGS__))(__VA_ARGS__)
 
+/**
+ * \ingroup common_macro
+ *
+ * Create a workspace with the specified size.
+ *
+ * If the size is less than the specified stack size, the workspace will
+ * make use of an array created on the stack, otherwise a container with
+ * the specified size will be created on the heap and that container will
+ * be used for the workspace.
+ *
+ * NOTE: this macro will always create an array on the stack, whether it
+ * will be used as workspace or not depend on the requested workspace size.
+ *
+ * \param workspace is the name of the workspace
+ * \param item_type is the type of items the workspace will contain
+ * \param size is the size of the workspace
+ * \param stack_size is the maximum size the workspace can have to be
+ * allocated on the stack
+ */
+#define BITPIT_CREATE_WORKSPACE(workspace, item_type, size, stack_size) \
+item_type *workspace;                                            \
+std::array<item_type, stack_size> workspace##_stack;             \
+std::unique_ptr<std::vector<item_type>> workspace##_heap;        \
+if (size <= stack_size) {                                        \
+    workspace = workspace##_stack.data();                        \
+} else {                                                         \
+    workspace##_heap = std::unique_ptr<std::vector<item_type>>(new std::vector<item_type>(size)); \
+    workspace = workspace##_heap->data();                        \
+}
+
 namespace bitpit {
 
 namespace utils {
