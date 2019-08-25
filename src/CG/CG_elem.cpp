@@ -797,6 +797,21 @@ void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, arr
 {
     lambda.resize(nVertices);
 
+    return computeGeneralizedBarycentric( p, nVertices, vertex, lambda.data());
+}
+
+/*!
+ * Computes Generalized Barycentric Coordinates of a point in convex polygons or polyedra.
+ * No check is performed to check convexity.
+ * Formula [6] of <a href="igeometry.caltech.edu/pubs/MHBD02.pdf">this</a> paper is implemented.
+ * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
+ * \param[in] p point
+ * \param[in] nVertices number of polygon vertices
+ * \param[in] vertex vertex coordinates of polygon
+ * \param[out] lambda generalized barycentric coordinates of p
+ */
+void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, array3D const *vertex, double *lambda)
+{
     std::vector<double> area(nVertices);
     for( std::size_t i=0; i<nVertices; ++i){
         int next = (i +1) %nVertices;
@@ -821,7 +836,9 @@ void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, arr
         sumWeight += lambda[i];
     }
 
-    lambda /= sumWeight;
+    for( std::size_t i=0; i<nVertices; ++i){
+        lambda[i] /= sumWeight;
+    }
 }
 
 /*!
@@ -902,7 +919,19 @@ array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &V, s
  */
 array3D reconstructPointFromBarycentricPolygon( std::size_t nV, array3D const *V, std::vector<double> const &lambda)
 {
-    assert( validBarycentric(&lambda[0],nV) );
+    return reconstructPointFromBarycentricPolygon(nV, V, lambda.data());
+}
+
+/*!
+ * Reconstructs a point from barycentric coordinates of a polygon
+ * \param[in] nV number of polygon vertices
+ * \param[in] V vertices of simplex
+ * \param[in] lambda barycentric coordinates
+ * \return reconstructed Point
+ */
+array3D reconstructPointFromBarycentricPolygon( std::size_t nV, array3D const *V, double const *lambda)
+{
+    assert( validBarycentric(lambda, nV) );
 
     array3D xP = {{0.,0.,0.}};
     for(std::size_t i=0; i<nV; ++i){
@@ -1190,9 +1219,22 @@ array3D projectPointPolygon( array3D const &P, std::vector<array3D> const &V, st
  */
 array3D projectPointPolygon( array3D const &P, std::size_t nV, array3D const *V, std::vector<double> &lambda)
 {
-    array3D xP;
-
     lambda.resize(nV);
+
+    return projectPointPolygon(P, nV, V, lambda.data());
+}
+
+/*!
+ * Computes projection of point onto a convex polygon
+ * \param[in] P point coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda baycentric coordinates of projection point
+ * \return coordinates of projection point
+ */
+array3D projectPointPolygon( array3D const &P, std::size_t nV, array3D const *V, double *lambda)
+{
+    array3D xP;
 
     double distance, minDistance(std::numeric_limits<double>::max());
     int minTriangle = -1;
@@ -1490,6 +1532,21 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V,std
  * \return distance
  */
 double distancePointPolygon( array3D const &P, std::size_t nV, array3D const *V,std::vector<double> &lambda)
+{
+    lambda.resize(nV);
+
+    return distancePointPolygon(P, nV, V, lambda.data());
+}
+
+/*!
+ * Computes distances of point to a convex polygon
+ * \param[in] P point coordinates
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] lambda barycentric coordinates
+ * \return distance
+ */
+double distancePointPolygon( array3D const &P, std::size_t nV, array3D const *V, double *lambda)
 {
     array3D xP = projectPointPolygon( P, nV, V, lambda);
     return norm2(P-xP);

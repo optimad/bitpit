@@ -94,6 +94,7 @@ int convertBarycentricToFlagPolygon( std::size_t, double const *);
 
 void computeGeneralizedBarycentric( array3D const &, std::vector<array3D> const &, std::vector<double> &);
 void computeGeneralizedBarycentric( array3D const &, std::size_t, array3D const *, std::vector<double> &);
+void computeGeneralizedBarycentric( array3D const &, std::size_t, array3D const *, double *);
 
 array3D reconstructPointFromBarycentricSegment( array3D const &, array3D const &, std::array<double,2> const & ); 
 array3D reconstructPointFromBarycentricSegment( array3D const &, array3D const &, double const * ); 
@@ -101,6 +102,7 @@ array3D reconstructPointFromBarycentricTriangle( array3D const &, array3D const 
 array3D reconstructPointFromBarycentricTriangle( array3D const &, array3D const &, array3D const &, double const * ); 
 array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &, std::vector<double> const & ); 
 array3D reconstructPointFromBarycentricPolygon( std::size_t, array3D const *, std::vector<double> const & );
+array3D reconstructPointFromBarycentricPolygon( std::size_t, array3D const *, double const * );
 
 array3D projectPointLine( array3D const &, array3D const &, array3D const & );
 array3D projectPointPlane( array3D const &, array3D const &, array3D const & );
@@ -113,6 +115,7 @@ array3D projectPointPolygon( array3D const &, std::vector<array3D> const & );
 array3D projectPointPolygon( array3D const &, std::size_t, array3D const * );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );
 array3D projectPointPolygon( array3D const &, std::size_t, array3D const *, std::vector<double> & );
+array3D projectPointPolygon( array3D const &, std::size_t, array3D const *, double * );
 array3D projectPointCone( array3D const &, array3D const &, array3D const &, double const &);
 std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &);
 
@@ -134,6 +137,7 @@ double distancePointPolygon( array3D const &, std::vector<array3D> const & );
 double distancePointPolygon( array3D const &, std::size_t, array3D const * );
 double distancePointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );
 double distancePointPolygon( array3D const &, std::size_t, array3D const *, std::vector<double> & );
+double distancePointPolygon( array3D const &, std::size_t, array3D const *, double * );
 
 double distancePointCone( array3D const &, array3D const &, array3D const &, double const &);
 
