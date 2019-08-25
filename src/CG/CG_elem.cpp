@@ -228,12 +228,12 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
 
             } else if(dim==3){
                 array3D p;
-                std::vector<array3D> V(4);
+                std::array<array3D, 4> V;
 
                 for( int face=0; face<6; ++face){
                     faceOfBox( face, A0, A1, V[0], V[1], V[2], V[3] );
 
-                    if( intersectSegmentPolygon( B0, B1, V, p ) ) {
+                    if( intersectSegmentPolygon( B0, B1, V.size(), V.data(), p ) ) {
                         intersect=true;
                         if(!triangleEdgeBoxHullIntersections) break;
 
@@ -351,12 +351,12 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
 
         } else if( dim==3 ) { //3D check if box face and segment intersect
 
-            std::vector< array3D > E(4);
+            std::array<array3D, 4> E;
 
             for( int i=0; i<6; ++i){
                 faceOfBox( i, A0, A1, E[0], E[1], E[2], E[3]);
 
-                if( intersectSegmentPolygon(V0,V1,E,p) ) {
+                if( intersectSegmentPolygon(V0,V1,E.size(),E.data(),p) ) {
                     intersect = true;
                     if(!segmentBoxHullIntersection) break;
 
