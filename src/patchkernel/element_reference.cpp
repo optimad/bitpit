@@ -1128,8 +1128,14 @@ double Reference2DElementInfo::evalPerimeter(const std::array<double, 3> *vertex
 void Reference2DElementInfo::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords,
                                                  std::array<double, 3> *projection, double *distance) const
 {
+    // Get vertices ordered counter-clockwise
+    const std::array<double, 3> *ccwVertexCoords;
+    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> ccwVertexCoordsStorage;
+    getCCWVertexCoords(vertexCoords, &ccwVertexCoords, ccwVertexCoordsStorage.data());
+
+    // Evaluate projection
     int projectionFlag;
-    *distance = CGElem::distancePointPolygon(point, nVertices, vertexCoords, *projection, projectionFlag);
+    *distance = CGElem::distancePointPolygon(point, nVertices, ccwVertexCoords, *projection, projectionFlag);
 }
 
 /*!
