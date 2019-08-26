@@ -68,7 +68,7 @@ void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &
     array3D s0 = Q1-Q0;
     array3D s1 = Q2-Q0;
 
-    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }  ; 
+    std::array<double, 4> A = {{ dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }};
 
     const int MAX_STACK_POINTS = 8;
     BITPIT_CREATE_WORKSPACE(B, double, 2 * nPoints, 2 * MAX_STACK_POINTS);
@@ -80,7 +80,7 @@ void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &
         ++points;
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 );
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
     assert( info == 0 );
     BITPIT_UNUSED( info );
 
@@ -119,7 +119,7 @@ void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0,
     array3D s0 = Q1-Q0;
     array3D s1 = Q2-Q0;
 
-    double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }  ; 
+    std::array<double, 4> A = {{ dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }};
 
     const int MAX_STACK_POINTS = 8;
     BITPIT_CREATE_WORKSPACE(B, double, 2 * nPoints, 2 * MAX_STACK_POINTS);
@@ -131,7 +131,7 @@ void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0,
         ++points;
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A, 2, B, 2 );
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
     assert( info == 0 );
     BITPIT_UNUSED( info );
 
