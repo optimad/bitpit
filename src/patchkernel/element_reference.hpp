@@ -199,6 +199,8 @@ public:
 protected:
     Reference2DElementInfo(ElementType type, int nVertices);
 
+    virtual void getCCWVertexCoords(const std::array<double, 3> *vertexCoords, const std::array<double, 3> **ccwVertexCoords, std::array<double, 3> *ccwVertexCoordsStorage) const;
+
 };
 
 class ReferenceTriangleInfo : public Reference2DElementInfo {
@@ -247,6 +249,8 @@ protected:
 
     ReferencePixelInfo(ReferencePixelInfo const &) = delete;
     ReferencePixelInfo & operator=(ReferencePixelInfo const &) = delete;
+
+    void getCCWVertexCoords(const std::array<double, 3> *vertexCoords, const std::array<double, 3> **ccwVertexCoords, std::array<double, 3> *ccwVertexCoordsStorage) const override;
 
 };
 

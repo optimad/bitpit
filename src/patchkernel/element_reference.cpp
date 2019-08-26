@@ -1145,6 +1145,29 @@ double Reference2DElementInfo::evalPointDistance(const std::array<double, 3> &po
 }
 
 /*!
+    Gets the vertex coordinates ordered counter-clockwise.
+
+    If the input vertex coordintaes are already ordered, the function will
+    only make the output vertex coordinates point the input ones, otherwise
+    a full reoredr will be perfromed (the re-ordered coordinates will be
+    stored in the storage provided by the user).
+
+    \param vertexCoords are the coordinates of the vertices
+    \param[out] ccwVertexCoords on output will contain the coordinates of the
+    vertices ordered counter-clockwise
+    \param[out] ccwVertexCoordsStorage if a re-ordered is needed, this is the
+    storage that will contain the ordered coordinates
+*/
+void Reference2DElementInfo::getCCWVertexCoords(const std::array<double, 3> *vertexCoords,
+                                                const std::array<double, 3> **ccwVertexCoords,
+                                                std::array<double, 3> *ccwVertexCoordsStorage) const
+{
+    BITPIT_UNUSED(ccwVertexCoordsStorage);
+
+    *ccwVertexCoords = vertexCoords;
+}
+
+/*!
     \class ReferenceTriangleInfo
     \ingroup patchelements
 
@@ -1390,6 +1413,32 @@ std::array<double, 3> ReferencePixelInfo::evalNormal(const std::array<double, 3>
     normal = normal / norm2(normal);
 
     return normal;
+}
+
+/*!
+    Gets the vertex coordinates ordered counter-clockwise.
+
+    If the input vertex coordintaes are already ordered, the function will
+    only make the output vertex coordinates point the input ones, otherwise
+    a full reoredr will be perfromed (the re-ordered coordinates will be
+    stored in the storage provided by the user).
+
+    \param vertexCoords are the coordinates of the vertices
+    \param[out] ccwVertexCoords on output will contain the coordinates of the
+    vertices ordered counter-clockwise
+    \param[out] ccwVertexCoordsStorage if a re-ordered is needed, this is the
+    storage that will contain the ordered coordinates
+*/
+void ReferencePixelInfo::getCCWVertexCoords(const std::array<double, 3> *vertexCoords,
+                                            const std::array<double, 3> **ccwVertexCoords,
+                                            std::array<double, 3> *ccwVertexCoordsStorage) const
+{
+    ccwVertexCoordsStorage[0] = vertexCoords[0];
+    ccwVertexCoordsStorage[1] = vertexCoords[1];
+    ccwVertexCoordsStorage[2] = vertexCoords[3];
+    ccwVertexCoordsStorage[3] = vertexCoords[2];
+
+    *ccwVertexCoords = ccwVertexCoordsStorage;
 }
 
 /*!
