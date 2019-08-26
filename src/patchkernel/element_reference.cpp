@@ -1147,7 +1147,13 @@ void Reference2DElementInfo::evalPointProjection(const std::array<double, 3> &po
 */
 double Reference2DElementInfo::evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const
 {
-    return CGElem::distancePointPolygon(point, nVertices, vertexCoords);
+    // Get vertices ordered counter-clockwise
+    const std::array<double, 3> *ccwVertexCoords;
+    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> ccwVertexCoordsStorage;
+    getCCWVertexCoords(vertexCoords, &ccwVertexCoords, ccwVertexCoordsStorage.data());
+
+    // Evaluate distance
+    return CGElem::distancePointPolygon(point, nVertices, ccwVertexCoords);
 }
 
 /*!
