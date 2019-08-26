@@ -69,7 +69,9 @@ void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &
     array3D s1 = Q2-Q0;
 
     double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }  ; 
-    double *B = new double [2*nPoints];
+
+    const int MAX_STACK_POINTS = 8;
+    BITPIT_CREATE_WORKSPACE(B, double, 2 * nPoints, 2 * MAX_STACK_POINTS);
 
     for( int i=0; i<nPoints; ++i){
         array3D rP = *points -Q0;
@@ -94,8 +96,6 @@ void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &
         lambda +=3;
         proj += 1;
     }
-
-    delete [] B;
 }
 
 /*!
@@ -120,7 +120,9 @@ void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0,
     array3D s1 = Q2-Q0;
 
     double A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }  ; 
-    double *B = new double [2*nPoints];
+
+    const int MAX_STACK_POINTS = 8;
+    BITPIT_CREATE_WORKSPACE(B, double, 2 * nPoints, 2 * MAX_STACK_POINTS);
 
     for( int i=0; i<nPoints; ++i){
         array3D rP = *points -Q0;
@@ -145,8 +147,6 @@ void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0,
         lambda +=3;
         proj += 1;
     }
-
-    delete [] B;
 }
 
 /*!
@@ -812,7 +812,9 @@ void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, arr
  */
 void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, array3D const *vertex, double *lambda)
 {
-    std::vector<double> area(nVertices);
+    const int MAX_ELEM_VERTICES = 8;
+    BITPIT_CREATE_WORKSPACE(area, double, nVertices, MAX_ELEM_VERTICES);
+
     for( std::size_t i=0; i<nVertices; ++i){
         int next = (i +1) %nVertices;
         area[i] = areaTriangle( vertex[i], vertex[next], p);
@@ -1479,10 +1481,12 @@ double distancePointPolygon( array3D const &P, std::vector<array3D> const &V, ar
  */
 double distancePointPolygon( array3D const &P, std::size_t nV, array3D const *V, array3D &xP, int &flag)
 {
-    std::vector<double> lambda(nV);
+    const int MAX_ELEM_VERTICES = 8;
+    BITPIT_CREATE_WORKSPACE(lambda, double, nV, MAX_ELEM_VERTICES);
+
     double distance = distancePointPolygon( P, nV, V, lambda);
     xP = reconstructPointFromBarycentricPolygon( nV, V, lambda );
-    flag = convertBarycentricToFlagPolygon( lambda );
+    flag = convertBarycentricToFlagPolygon( nV, lambda );
 
     return distance; 
 }
