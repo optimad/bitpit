@@ -67,7 +67,7 @@ void run()
 	int iter = 0;
 
 	/**<Instantation of a 3D para_tree object.*/
-	PabloUniform pabloBB(3);
+	PabloNonUniform pabloBB(3);
 
 	/**<Set 2:1 balance for the octree.*/
 	pabloBB.setBalanceCodimension(1);

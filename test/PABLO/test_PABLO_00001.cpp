@@ -59,7 +59,7 @@ int subtest_001(int rank, int nProcs)
     int dim;
     dim = 2;
     /**<Instantation of a 2D para_tree object with custom constructor.*/
-    PabloUniform ptreecustom(X,Y,Z,L,dim,"custom");
+    PabloNonUniform ptreecustom(X,Y,Z,L,dim,"custom");
     /**<Write the para_tree in physical domain.*/
     ptreecustom.write("Pablo001_custom");
 

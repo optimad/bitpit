@@ -48,7 +48,7 @@ int subtest_001()
     double z_0 = 30.;
     double l   = 1.5;
 
-    PabloUniform octree(x_0, y_0, z_0, l, 2);
+    PabloNonUniform octree(x_0, y_0, z_0, l, 2);
 
     std::cout << " Origin : ( " << octree.getX0() << ", " << octree.getY0() << ", " << octree.getZ0() << " )" << std::endl;
     std::cout << " Length : " << octree.getL() << std::endl;
@@ -118,7 +118,7 @@ int subtest_001()
     binaryWriter2D.close();
 
     // Create an empty octree
-    PabloUniform octreeRestored;
+    PabloNonUniform octreeRestored;
 
     // Restore the tree
     IBinaryArchive binaryReader2D("Pablo_00006_dump");

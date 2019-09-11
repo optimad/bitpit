@@ -31,6 +31,6 @@
 
 #include "bitpit_version.hpp"
 
-#include "PabloUniform.hpp"
+#include "PabloNonUniform.hpp"
 
 #endif

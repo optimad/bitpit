@@ -72,7 +72,7 @@ using namespace bitpit;
 void run()
 {
 	/**<Instantation of a 2D pablo uniform object.*/
-	PabloUniform pablo1(2);
+	PabloNonUniform pablo1(2);
 
 	/**<Compute the connectivity and write the octree.*/
 	pablo1.computeConnectivity();

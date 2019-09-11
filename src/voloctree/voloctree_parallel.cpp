@@ -103,7 +103,7 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(bool trackPartitioni
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
 		int currentRank = getRank();
-		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->evalLoadBalanceRanges((std::vector<double> *) nullptr);
+		PabloNonUniform::LoadBalanceRanges loadBalanceRanges = m_tree->evalLoadBalanceRanges((std::vector<double> *) nullptr);
 		for (const auto &entry : loadBalanceRanges.sendRanges) {
 			int receiver = entry.first;
 			if (receiver == currentRank) {
@@ -111,7 +111,7 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(bool trackPartitioni
 			}
 
 			adaption::Type adaptionType;
-			if (loadBalanceRanges.sendAction == PabloUniform::LoadBalanceRanges::ACTION_DELETE) {
+			if (loadBalanceRanges.sendAction == PabloNonUniform::LoadBalanceRanges::ACTION_DELETE) {
 				adaptionType = adaption::TYPE_DELETION;
 			} else {
 				adaptionType = adaption::TYPE_PARTITION_SEND;

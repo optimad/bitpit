@@ -67,9 +67,11 @@ public:
 
 	VolOctree();
 	VolOctree(int dimension, std::array<double, 3> origin, double length, double dh);
+	VolOctree(int dimension, std::array<double, 3> origin, std::array<double, 3> length, double dh);
 	VolOctree(int id, int dimension, std::array<double, 3> origin, double length, double dh);
-	VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
-	VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
+	VolOctree(int id, int dimension, std::array<double, 3> origin, std::array<double,3> length, double dh);
+	VolOctree(std::unique_ptr<PabloNonUniform> &&tree, std::unique_ptr<PabloNonUniform> *adopter = nullptr);
+	VolOctree(int id, std::unique_ptr<PabloNonUniform> &&tree, std::unique_ptr<PabloNonUniform> *adopter = nullptr);
 	VolOctree(std::istream &stream);
 
 	~VolOctree();
@@ -100,9 +102,9 @@ public:
 	Octant * getOctantPointer(const OctantInfo &octantInfo);
 	const Octant * getOctantPointer(const OctantInfo &octantInfo) const;
 
-	PabloUniform & getTree();
-	const PabloUniform & getTree() const;
-	void setTreeAdopter(std::unique_ptr<PabloUniform> *entruster);
+	PabloNonUniform & getTree();
+	const PabloNonUniform & getTree() const;
+	void setTreeAdopter(std::unique_ptr<PabloNonUniform> *entruster);
 
 	bool isPointInside(const std::array<double, 3> &point) override;
 	bool isPointInside(long id, const std::array<double, 3> &point) override;
@@ -111,8 +113,8 @@ public:
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);
 	void translate(std::array<double, 3> translation) override;
-	double getLength() const;
-	void setLength(double length);
+	darray3 getLength() const;
+	void setLength(darray3 length);
 	void scale(std::array<double, 3> scaling) override;
 
 	void updateAdjacencies(const std::vector<long> &cellIds) override;
@@ -236,8 +238,8 @@ private:
 	std::unordered_map<uint32_t, long> m_octantToCell;
 	std::unordered_map<uint32_t, long> m_ghostToCell;
 
-	std::unique_ptr<PabloUniform> m_tree;
-	std::unique_ptr<PabloUniform> *m_treeAdopter;
+	std::unique_ptr<PabloNonUniform> m_tree;
+	std::unique_ptr<PabloNonUniform> *m_treeAdopter;
 
 	void initialize();
 

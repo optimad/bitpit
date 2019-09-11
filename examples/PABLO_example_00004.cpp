@@ -69,7 +69,7 @@ void run()
 	int iter = 0;
 
 	/**<Instantation of a 2D pablo uniform object.*/
-	PabloUniform pablo4(2);
+	PabloNonUniform pablo4(2);
 
 	/**<Set NO 2:1 balance for the octree (ancestor octant).*/
 	int idx = 0;

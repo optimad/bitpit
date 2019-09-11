@@ -66,7 +66,7 @@ void run()
 	int iter = 0;
 
 	/**<Instantation of a 2D pablo uniform object.*/
-	PabloUniform pablo5(2);
+	PabloNonUniform pablo5(2);
 
 	/**<Set NO 2:1 balance for the octree.*/
 	uint32_t idx=0;

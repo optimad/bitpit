@@ -27,7 +27,7 @@
 // =================================================================================== //
 #include "bitpit_operators.hpp"
 
-#include "PabloUniform.hpp"
+#include "PabloNonUniform.hpp"
 
 namespace bitpit {
 
@@ -37,27 +37,27 @@ namespace bitpit {
     using namespace std;
 
     // =================================================================================== //
-    // CLASS IMPLEMENTATION                                                                    //
+    // CLASS IMPLEMENTATION                                                                //
     // =================================================================================== //
 
     // =================================================================================== //
-    // CONSTRUCTORS AND OPERATORS
+    // CONSTRUCTORS AND OPERATORS                                                          //
     // =================================================================================== //
-    /*! Default empty constructor of PabloUniform.
+    /*! Default empty constructor of PabloNonUniform.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
 #if BITPIT_ENABLE_MPI==1
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    PabloUniform::PabloUniform(std::string logfile, MPI_Comm comm):ParaTree(logfile,comm){
+    PabloNonUniform::PabloNonUniform(std::string logfile, MPI_Comm comm):ParaTree(logfile,comm){
 #else
-    PabloUniform::PabloUniform(std::string logfile):ParaTree(logfile){
+    PabloNonUniform::PabloNonUniform(std::string logfile):ParaTree(logfile){
 #endif
         __reset();
     }
 
-    /*! Default constructor of PabloUniform.
+    /*! Default constructor of PabloNonUniform.
      * It sets the Origin in (0,0,0) and side of length 1.
      * \param[in] dim The space dimension of the octree.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
@@ -66,19 +66,19 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    PabloUniform::PabloUniform(uint8_t dim, std::string logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
+    PabloNonUniform::PabloNonUniform(uint8_t dim, std::string logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
 #else
-    PabloUniform::PabloUniform(uint8_t dim, std::string logfile):ParaTree(dim,logfile){
+    PabloNonUniform::PabloNonUniform(uint8_t dim, std::string logfile):ParaTree(dim,logfile){
 #endif
         __reset();
     };
 
-    /*! Custom constructor of PabloUniform.
+    /*! Custom constructor of PabloNonUniform. Equivalent to PabloUniform
      * It sets the Origin in (X,Y,Z) and side of length L.
      * \param[in] X x-coordinate of the origin in physical domain,
      * \param[in] Y y-coordinate of the origin in physical domain,
      * \param[in] Z z-coordinate of the origin in physical domain,
-     * \param[in] L Length of the side in physical domain.
+     * \param[in] L Length of the sides in physical domain.
      * \param[in] dim The space dimension of the octree.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
@@ -86,24 +86,54 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, std::string logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
+    PabloNonUniform::PabloNonUniform(double X, double Y, double Z, double L, uint8_t dim, std::string logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
 #else
-    PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, std::string logfile):ParaTree(dim,logfile){
+    PabloNonUniform::PabloNonUniform(double X, double Y, double Z, double L, uint8_t dim, std::string logfile):ParaTree(dim,logfile){
 #endif
         __reset();
 
         setOrigin({{X, Y, Z}});
-        setL(L);
+        if(dim == 2)
+          setL({{L, L, 0.}});
+        else if(dim == 3)
+          setL({{L, L, L}});
+    };
+
+    /*! Custom constructor of PabloNonUniform.
+     * It sets the Origin in (X,Y,Z) and sides of length (LX, LY, LZ).
+     * \param[in] X x-coordinate of the origin in physical domain,
+     * \param[in] Y y-coordinate of the origin in physical domain,
+     * \param[in] Z z-coordinate of the origin in physical domain,
+     * \param[in] LX Length of the sides in physical domain along x direction.
+     * \param[in] LY Length of the sides in physical domain along y direction.
+     * \param[in] LZ Length of the sides in physical domain along z direction.
+     * \param[in] dim The space dimension of the octree.
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+     */
+
+#if BITPIT_ENABLE_MPI==1
+    /*!
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     */
+    PabloNonUniform::PabloNonUniform(double X, double Y, double Z, double LX, double LY, double LZ, uint8_t dim, std::string logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
+#else
+    PabloNonUniform::PabloNonUniform(double X, double Y, double Z, double LX, double LY, double LZ, uint8_t dim, std::string logfile):ParaTree(dim,logfile){
+#endif
+        __reset();
+
+        setOrigin({{X, Y, Z}});
+        setL({{LX, LY, LZ}});
+     
     };
 
     // =================================================================================== //
-    // METHODS
+    // METHODS                                                                             //
     // =================================================================================== //
 
     /*! Reset the octree
      */
     void
-    PabloUniform::reset(){
+    PabloNonUniform::reset(){
         ParaTree::reset();
         __reset();
     }
@@ -111,9 +141,9 @@ namespace bitpit {
     /*! Internal function to reset the octree
      */
     void
-    PabloUniform::__reset(){
+    PabloNonUniform::__reset(){
         setOrigin({{0,0,0}});
-        setL(1.);
+        setL({{1., 1., 0.}});
     }
 
     /*! Get the version associated to the binary dumps.
@@ -121,7 +151,7 @@ namespace bitpit {
      *  \result The version associated to the binary dumps.
      */
     int
-    PabloUniform::getDumpVersion() const
+    PabloNonUniform::getDumpVersion() const
     {
         const int DUMP_VERSION = 1;
 
@@ -134,14 +164,16 @@ namespace bitpit {
     *  \param full is the flag for a complete dump with mapping structureof last operation of the tree
     */
     void
-    PabloUniform::dump(std::ostream &stream, bool full)
+    PabloNonUniform::dump(std::ostream &stream, bool full)
     {
         ParaTree::dump(stream, full);
 
         utils::binary::write(stream, m_origin[0]);
         utils::binary::write(stream, m_origin[1]);
         utils::binary::write(stream, m_origin[2]);
-        utils::binary::write(stream, m_L);
+        utils::binary::write(stream, m_L[0]);
+        utils::binary::write(stream, m_L[1]);
+        utils::binary::write(stream, m_L[2]);
     }
 
     /*! Restore the octree from the specified stream.
@@ -149,29 +181,31 @@ namespace bitpit {
     *  \param stream is the stream to read from
     */
     void
-    PabloUniform::restore(std::istream &stream)
+    PabloNonUniform::restore(std::istream &stream)
     {
         ParaTree::restore(stream);
 
-        std::array<double, 3> origin;
+        darray3 origin;
         utils::binary::read(stream, origin[0]);
         utils::binary::read(stream, origin[1]);
         utils::binary::read(stream, origin[2]);
         setOrigin(origin);
-
-        double L;
-        utils::binary::read(stream, L);
+        
+        darray3 L;
+        utils::binary::read(stream, L[0]);
+        utils::binary::read(stream, L[1]);
+        utils::binary::read(stream, L[2]);
         setL(L);
     }
 
     // =================================================================================== //
-    // BASIC GET/SET METHODS															   //
+    // BASIC GET/SET METHODS								   //
     // =================================================================================== //
     /*! Get the coordinates of the origin of the octree.
      * \return Coordinates of the origin.
      */
     darray3
-    PabloUniform::getOrigin() const {
+    PabloNonUniform::getOrigin() const {
         return m_origin;
     };
 
@@ -179,7 +213,7 @@ namespace bitpit {
      * \return Coordinate X of the origin.
      */
     double
-    PabloUniform::getX0() const {
+    PabloNonUniform::getX0() const {
         return m_origin[0];
     };
 
@@ -187,7 +221,7 @@ namespace bitpit {
      * \return Coordinate Y of the origin.
      */
     double
-    PabloUniform::getY0() const {
+    PabloNonUniform::getY0() const {
         return m_origin[1];
     };
 
@@ -195,15 +229,15 @@ namespace bitpit {
      * \return Coordinate Z of the origin.
      */
     double
-    PabloUniform::getZ0() const {
+    PabloNonUniform::getZ0() const {
         return m_origin[2];
     };
 
     /*! Get the length of the domain.
      * \return Length of the octree.
      */
-    double
-    PabloUniform::getL() const {
+    darray3
+    PabloNonUniform::getL() const {
         return m_L;
     };
 
@@ -211,17 +245,38 @@ namespace bitpit {
      * \param[in] L Length of the octree.
      */
     void
-    PabloUniform::setL(double L){
-        m_L      = L;
-        m_area   = uipow(L, getDim() - 1);
-        m_volume = uipow(L, getDim());
+    PabloNonUniform::setL(darray3 L){
+        m_L[0] = L[0];
+        m_L[1] = L[1];
+        m_L[2] = L[2];
+        
+        if (getDim() == 2)
+        {
+          m_area.resize(4);
+          m_area[0] = L[1];
+          m_area[1] = L[1];
+          m_area[2] = L[0];
+          m_area[3] = L[0];
+          m_volume = L[0] * L[1];
+        }
+        if (getDim() == 3)
+        {
+          m_area.resize(6);
+          m_area[0] = L[1] * L[2];
+          m_area[1] = L[1] * L[2];
+          m_area[2] = L[0] * L[2];
+          m_area[3] = L[0] * L[2];
+          m_area[4] = L[0] * L[1];
+          m_area[5] = L[0] * L[1];
+          m_volume = L[0] * L[1] * L[2];
+        }
     };
 
     /*! Set the origin of the domain.
      * \param[in] origin Origin of the octree.
      */
     void
-    PabloUniform::setOrigin(darray3 origin){
+    PabloNonUniform::setOrigin(darray3 origin){
         m_origin = origin;
     };
 
@@ -230,24 +285,24 @@ namespace bitpit {
      * \return Size of an octant of input level.
      */
     double
-    PabloUniform::levelToSize(uint8_t & level) {
+    PabloNonUniform::levelToSize(uint8_t & level, uint8_t dir) {
         double size = ParaTree::levelToSize(level);
-        return m_L *size;
+        return m_L[dir] *size;
     }
 
     // =================================================================================== //
-    // INDEX BASED METHODS																   //
+    // INDEX BASED METHODS								   //
     // =================================================================================== //
     /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
      * \param[in] idx Local index of target octant.
      * \return Coordinates X,Y,Z of node 0.
      */
     darray3
-    PabloUniform::getCoordinates(uint32_t idx) const {
+    PabloNonUniform::getCoordinates(uint32_t idx) const {
         darray3 coords, coords_;
         coords_ = ParaTree::getCoordinates(idx);
         for (int i=0; i<3; i++){
-            coords[i] = m_origin[i] + m_L * coords_[i];
+            coords[i] = m_origin[i] + m_L[i] * coords_[i];
         }
         return coords;
     };
@@ -257,10 +312,10 @@ namespace bitpit {
      * \return Coordinate X of node 0.
      */
     double
-    PabloUniform::getX(uint32_t idx) const {
+    PabloNonUniform::getX(uint32_t idx) const {
         double X, X_;
         X_ = ParaTree::getX(idx);
-        X = m_origin[0] + m_L * X_;
+        X = m_origin[0] + m_L[0] * X_;
         return X;
     };
 
@@ -269,10 +324,10 @@ namespace bitpit {
      * \return Coordinate Y of node 0.
      */
     double
-    PabloUniform::getY(uint32_t idx) const {
+    PabloNonUniform::getY(uint32_t idx) const {
         double Y, Y_;
         Y_ = ParaTree::getY(idx);
-        Y = m_origin[1] + m_L * Y_;
+        Y = m_origin[1] + m_L[1] * Y_;
         return Y;
     };
 
@@ -281,10 +336,10 @@ namespace bitpit {
      * \return Coordinate Z of node 0.
      */
     double
-    PabloUniform::getZ(uint32_t idx) const {
+    PabloNonUniform::getZ(uint32_t idx) const {
         double Z, Z_;
         Z_ = ParaTree::getZ(idx);
-        Z = m_origin[2] + m_L * Z_;
+        Z = m_origin[2] + m_L[2] * Z_;
         return Z;
     };
 
@@ -293,8 +348,8 @@ namespace bitpit {
      * \return Size of octant.
      */
     double
-    PabloUniform::getSize(uint32_t idx) const {
-        return m_L * ParaTree::getSize(idx);
+    PabloNonUniform::getSize(uint32_t idx, uint8_t dir) const {
+        return m_L[dir] * ParaTree::getSize(idx);
     };
 
     /*! Get the area of an octant (for 2D case the same value of getSize).
@@ -302,8 +357,8 @@ namespace bitpit {
      * \return Area of octant.
      */
     double
-    PabloUniform::getArea(uint32_t idx) const {
-        return m_area * ParaTree::getArea(idx);
+    PabloNonUniform::getArea(uint32_t idx, uint8_t iface) const {
+        return m_area[iface] * ParaTree::getArea(idx);
     };
 
     /*! Get the volume of an octant.
@@ -311,7 +366,7 @@ namespace bitpit {
      * \return Volume of octant.
      */
     double
-    PabloUniform::getVolume(uint32_t idx) const {
+    PabloNonUniform::getVolume(uint32_t idx) const {
         return m_volume * ParaTree::getVolume(idx);
     };
 
@@ -320,10 +375,10 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of octant.
      */
     void
-    PabloUniform::getCenter(uint32_t idx, darray3& center) const {
+    PabloNonUniform::getCenter(uint32_t idx, darray3& center) const {
         darray3 center_ = ParaTree::getCenter(idx);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
     };
 
@@ -332,10 +387,10 @@ namespace bitpit {
      * \return center Coordinates of the center of octant.
      */
     darray3
-    PabloUniform::getCenter(uint32_t idx) const {
+    PabloNonUniform::getCenter(uint32_t idx) const {
         darray3 center, center_ = ParaTree::getCenter(idx);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
         return center;
     };
@@ -346,10 +401,10 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of the iface-th face of octant.
      */
     void
-    PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const {
+    PabloNonUniform::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const {
         darray3 center_ = ParaTree::getFaceCenter(idx, iface);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
     };
 
@@ -359,10 +414,10 @@ namespace bitpit {
      * \return center Coordinates of the center of the iface-th face of octant.
      */
     darray3
-    PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface) const {
+    PabloNonUniform::getFaceCenter(uint32_t idx, uint8_t iface) const {
         darray3 center, center_ = ParaTree::getFaceCenter(idx, iface);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
         return center;
     };
@@ -373,10 +428,10 @@ namespace bitpit {
      * \return Coordinates of of the inode-th node of octant.
      */
     darray3
-    PabloUniform::getNode(uint32_t idx, uint8_t inode) const {
+    PabloNonUniform::getNode(uint32_t idx, uint8_t inode) const {
         darray3 node, node_ = ParaTree::getNode(idx, inode);
         for (int i=0; i<3; i++){
-            node[i] = m_origin[i] + m_L * node_[i];
+            node[i] = m_origin[i] + m_L[i] * node_[i];
         }
         return node;
     };
@@ -387,10 +442,10 @@ namespace bitpit {
      * \param[out] node Coordinates of of the inode-th node of octant.
      */
     void
-    PabloUniform::getNode(uint32_t idx, uint8_t inode, darray3& node) const {
+    PabloNonUniform::getNode(uint32_t idx, uint8_t inode, darray3& node) const {
         darray3 node_ = ParaTree::getNode(idx, inode);
         for (int i=0; i<3; i++){
-            node[i] = m_origin[i] + m_L * node_[i];
+            node[i] = m_origin[i] + m_L[i] * node_[i];
         }
     };
 
@@ -399,12 +454,12 @@ namespace bitpit {
      * \param[out] nodes Coordinates of the nodes of octant.
      */
     void
-    PabloUniform::getNodes(uint32_t idx, darr3vector & nodes) const {
+    PabloNonUniform::getNodes(uint32_t idx, darr3vector & nodes) const {
         darray3vector nodes_ = ParaTree::getNodes(idx);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
             for (int i=0; i<3; i++){
-                nodes[j][i] = m_origin[i] + m_L * nodes_[j][i];
+                nodes[j][i] = m_origin[i] + m_L[i] * nodes_[j][i];
             }
         }
     };
@@ -414,12 +469,12 @@ namespace bitpit {
      * \return nodes Coordinates of the nodes of octant.
      */
     darr3vector
-    PabloUniform::getNodes(uint32_t idx) const {
+    PabloNonUniform::getNodes(uint32_t idx) const {
         darray3vector nodes, nodes_ = ParaTree::getNodes(idx);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
             for (int i=0; i<3; i++){
-                nodes[j][i] = m_origin[i] + m_L * nodes_[j][i];
+                nodes[j][i] = m_origin[i] + m_L[i] * nodes_[j][i];
             }
         }
         return nodes;
@@ -431,7 +486,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    PabloUniform::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const {
+    PabloNonUniform::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const {
         ParaTree::getNormal(idx, iface, normal);
     }
 
@@ -441,23 +496,23 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    PabloUniform::getNormal(uint32_t idx, uint8_t iface) const {
+    PabloNonUniform::getNormal(uint32_t idx, uint8_t iface) const {
         return ParaTree::getNormal(idx, iface);
     }
 
     // =================================================================================== //
-    // POINTER BASED METHODS															   //
+    // POINTER BASED METHODS     							   //
     // =================================================================================== //
     /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
      * \param[in] oct Pointer to the target octant
      * \return Coordinates of node 0.
      */
     darray3
-    PabloUniform::getCoordinates(const Octant* oct) const {
+    PabloNonUniform::getCoordinates(const Octant* oct) const {
         darray3 coords, coords_;
         coords_ = ParaTree::getCoordinates(oct);
         for (int i=0; i<3; i++){
-            coords[i] = m_origin[i] + m_L * coords_[i];
+            coords[i] = m_origin[i] + m_L[i] * coords_[i];
         }
         return coords;
     };
@@ -467,10 +522,10 @@ namespace bitpit {
      * \return Coordinate X of node 0.
      */
     double
-    PabloUniform::getX(const Octant* oct) const {
+    PabloNonUniform::getX(const Octant* oct) const {
         double X, X_;
         X_ = ParaTree::getX(oct);
-        X = m_origin[0] + m_L * X_;
+        X = m_origin[0] + m_L[0] * X_;
         return X;
     };
 
@@ -479,10 +534,10 @@ namespace bitpit {
      * \return Coordinate Y of node 0.
      */
     double
-    PabloUniform::getY(const Octant* oct) const {
+    PabloNonUniform::getY(const Octant* oct) const {
         double Y, Y_;
         Y_ = ParaTree::getY(oct);
-        Y = m_origin[1] + m_L * Y_;
+        Y = m_origin[1] + m_L[1] * Y_;
         return Y;
     };
 
@@ -491,10 +546,10 @@ namespace bitpit {
      * \return Coordinate Z of node 0.
      */
     double
-    PabloUniform::getZ(const Octant* oct) const {
+    PabloNonUniform::getZ(const Octant* oct) const {
         double Z, Z_;
         Z_ = ParaTree::getZ(oct);
-        Z = m_origin[2] + m_L * Z_;
+        Z = m_origin[2] + m_L[2] * Z_;
         return Z;
     };
 
@@ -503,8 +558,8 @@ namespace bitpit {
      * \return Size of octant.
      */
     double
-    PabloUniform::getSize(const Octant* oct) const {
-        return m_L * ParaTree::getSize(oct);
+    PabloNonUniform::getSize(const Octant* oct, uint8_t dir) const {
+        return m_L[dir] * ParaTree::getSize(oct);
     };
 
     /*! Get the area of an octant (for 2D case the same value of getSize).
@@ -512,8 +567,8 @@ namespace bitpit {
      * \return Area of octant.
      */
     double
-    PabloUniform::getArea(const Octant* oct) const {
-        return m_area * ParaTree::getArea(oct);
+    PabloNonUniform::getArea(const Octant* oct, uint8_t iface) const {
+        return m_area[iface] * ParaTree::getArea(oct);
     };
 
     /*! Get the volume of an octant.
@@ -521,7 +576,7 @@ namespace bitpit {
      * \return Volume of octant.
      */
     double
-    PabloUniform::getVolume(const Octant* oct) const {
+    PabloNonUniform::getVolume(const Octant* oct) const {
         return m_volume * ParaTree::getVolume(oct);
     };
 
@@ -530,10 +585,10 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of octant.
      */
     void
-    PabloUniform::getCenter(const Octant* oct, darray3& center) const {
+    PabloNonUniform::getCenter(const Octant* oct, darray3& center) const {
         darray3 center_ = ParaTree::getCenter(oct);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
     };
 
@@ -542,10 +597,10 @@ namespace bitpit {
      * \return center Coordinates of the center of octant.
      */
     darray3
-    PabloUniform::getCenter(const Octant* oct) const {
+    PabloNonUniform::getCenter(const Octant* oct) const {
         darray3 center, center_ = ParaTree::getCenter(oct);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
         return center;
     };
@@ -556,10 +611,10 @@ namespace bitpit {
      * \param[out] center Coordinates of the center of the iface-th face af octant.
      */
     void
-    PabloUniform::getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const {
+    PabloNonUniform::getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const {
         darray3 center_ = ParaTree::getFaceCenter(oct, iface);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
     };
 
@@ -569,10 +624,10 @@ namespace bitpit {
      * \return center Coordinates of the center of the iface-th face af octant.
      */
     darray3
-    PabloUniform::getFaceCenter(const Octant* oct, uint8_t iface) const {
+    PabloNonUniform::getFaceCenter(const Octant* oct, uint8_t iface) const {
         darray3 center, center_ = ParaTree::getFaceCenter(oct, iface);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center_[i];
+            center[i] = m_origin[i] + m_L[i] * center_[i];
         }
         return center;
     };
@@ -583,10 +638,10 @@ namespace bitpit {
      * \return Coordinates of the center of the inode-th of octant.
      */
     darray3
-    PabloUniform::getNode(const Octant* oct, uint8_t inode) const {
+    PabloNonUniform::getNode(const Octant* oct, uint8_t inode) const {
         darray3 node, node_ = ParaTree::getNode(oct, inode);
         for (int i=0; i<3; i++){
-            node[i] = m_origin[i] + m_L * node_[i];
+            node[i] = m_origin[i] + m_L[i] * node_[i];
         }
         return node;
     };
@@ -597,10 +652,10 @@ namespace bitpit {
      * \param[out] node Coordinates of the center of the inode-th of octant.
      */
     void
-    PabloUniform::getNode(const Octant* oct, uint8_t inode, darray3& node) const {
+    PabloNonUniform::getNode(const Octant* oct, uint8_t inode, darray3& node) const {
         darray3 node_ = ParaTree::getNode(oct, inode);
         for (int i=0; i<3; i++){
-            node[i] = m_origin[i] + m_L * node_[i];
+            node[i] = m_origin[i] + m_L[i] * node_[i];
         }
     };
 
@@ -609,12 +664,12 @@ namespace bitpit {
      * \param[out] nodes Coordinates of the nodes of octant.
      */
     void
-    PabloUniform::getNodes(const Octant* oct, darr3vector & nodes) const {
+    PabloNonUniform::getNodes(const Octant* oct, darr3vector & nodes) const {
         darray3vector nodes_ = ParaTree::getNodes(oct);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
             for (int i=0; i<3; i++){
-                nodes[j][i] = m_origin[i] + m_L * nodes_[j][i];
+                nodes[j][i] = m_origin[i] + m_L[i] * nodes_[j][i];
             }
         }
     };
@@ -624,12 +679,12 @@ namespace bitpit {
      * \return nodes Coordinates of the nodes of octant.
      */
     darr3vector
-    PabloUniform::getNodes(const Octant* oct) const {
+    PabloNonUniform::getNodes(const Octant* oct) const {
         darray3vector nodes, nodes_ = ParaTree::getNodes(oct);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
             for (int i=0; i<3; i++){
-                nodes[j][i] = m_origin[i] + m_L * nodes_[j][i];
+                nodes[j][i] = m_origin[i] + m_L[i] * nodes_[j][i];
             }
         }
         return nodes;
@@ -641,7 +696,7 @@ namespace bitpit {
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    PabloUniform::getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const {
+    PabloNonUniform::getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const {
         ParaTree::getNormal(oct, iface, normal);
     }
 
@@ -651,27 +706,33 @@ namespace bitpit {
      * \return normal Coordinates of the normal of face.
      */
     darray3
-    PabloUniform::getNormal(const Octant* oct, uint8_t iface) const {
+    PabloNonUniform::getNormal(const Octant* oct, uint8_t iface) const {
         return ParaTree::getNormal(oct, iface);
     }
 
     // =================================================================================== //
-    // LOCAL TREE GET/SET METHODS														   //
+    // LOCAL TREE GET/SET METHODS							   //
     // =================================================================================== //
     /*! Get the local current maximum size of the octree.
      * \return Local current maximum size of the local partition of the octree.
      */
     double
-    PabloUniform::getLocalMaxSize() const {
-        return m_L * ParaTree::getLocalMaxSize();
+    PabloNonUniform::getLocalMaxSize() const {
+        return *std::max_element(m_L.begin(), m_L.end()) * ParaTree::getLocalMaxSize();
     };
 
     /*! Get the local current minimum size of the octree.
      * \return Local current minimum size of the local partition of the octree.
      */
     double
-    PabloUniform::getLocalMinSize() const {
-        return m_L * ParaTree::getLocalMinSize();
+    PabloNonUniform::getLocalMinSize() const {
+        double minL = m_L[0];
+        if (getDim() == 2)
+          minL = std::min(m_L[0], m_L[1]);
+        else if (getDim() == 3)
+         minL = *std::min_element(m_L.begin(), m_L.end()); 
+
+        return minL * ParaTree::getLocalMinSize();
     };
 
 
@@ -680,7 +741,7 @@ namespace bitpit {
      *  \param[out] P1 Array with coordinates of the last point (highest coordinates).
      */
     void
-    PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1) const {
+    PabloNonUniform::getBoundingBox(darray3 & P0, darray3 & P1) const {
         // If there are no octants the bounding box is empty
         uint32_t nocts = ParaTree::getNumOctants();
         if (nocts == 0) {
@@ -695,8 +756,9 @@ namespace bitpit {
         if (getSerial()) {
             P0 = getOrigin();
             P1 = P0;
+            darray3 L = getL();
             for (int i=0; i<ParaTree::getDim(); i++){
-                P1[i] += getL();
+                P1[i] += L[i];
             }
 
             return;
@@ -723,15 +785,15 @@ namespace bitpit {
 
 
     // =================================================================================== //
-    // INTERSECTION GET/SET METHODS														   //
+    // INTERSECTION GET/SET METHODS							   //
     // =================================================================================== //
     /*! Get the size of an intersection.
      * \param[in] inter Pointer to target intersection.
      * \return Size of intersection.
      */
     double
-    PabloUniform::getSize(const Intersection* inter) const {
-        return m_L * ParaTree::getSize(inter);
+    PabloNonUniform::getSize(const Intersection* inter, uint8_t dir) const {
+        return m_L[dir] * ParaTree::getSize(inter);
     };
 
     /*! Get the area of an intersection (for 2D case the same value of getSize).
@@ -739,8 +801,8 @@ namespace bitpit {
      * \return Area of intersection.
      */
     double
-    PabloUniform::getArea(const Intersection* inter) const {
-        return m_area * ParaTree::getArea(inter);
+    PabloNonUniform::getArea(const Intersection* inter, uint8_t iface) const {
+        return m_area[iface] * ParaTree::getArea(inter);
     };
 
     /*! Get the coordinates of the center of an intersection.
@@ -748,10 +810,10 @@ namespace bitpit {
      * \return Coordinates of the center of intersection.
      */
     darray3
-    PabloUniform::getCenter(const Intersection* inter) const {
+    PabloNonUniform::getCenter(const Intersection* inter) const {
         darray3 center = ParaTree::getCenter(inter);
         for (int i=0; i<3; i++){
-            center[i] = m_origin[i] + m_L * center[i];
+            center[i] = m_origin[i] + m_L[i] * center[i];
         }
         return center;
     }
@@ -761,12 +823,12 @@ namespace bitpit {
      * \return Coordinates of the nodes of intersection.
      */
     darr3vector
-    PabloUniform::getNodes(const Intersection* inter) const {
+    PabloNonUniform::getNodes(const Intersection* inter) const {
         darr3vector nodes, nodes_ = ParaTree::getNodes(inter);
         nodes.resize(ParaTree::getNnodesperface());
         for (int j=0; j<ParaTree::getNnodesperface(); j++){
             for (int i=0; i<3; i++){
-                nodes[j][i] = m_origin[i] + m_L * nodes_[j][i];
+                nodes[j][i] = m_origin[i] + m_L[i] * nodes_[j][i];
             }
         }
         return nodes;
@@ -777,21 +839,21 @@ namespace bitpit {
      * \return Coordinates of the normal of intersection.
      */
     darray3
-    PabloUniform::getNormal(const Intersection* inter) const {
+    PabloNonUniform::getNormal(const Intersection* inter) const {
         return ParaTree::getNormal(inter);
     }
 
     // =================================================================================== //
-    // OTHER OCTANT BASED METHODS												    	   //
+    // OTHER OCTANT BASED METHODS						    	   //
     // =================================================================================== //
     /** Get the octant owner of an input point.
      * \param[in] point Coordinates of target point.
      * \return Pointer to octant owner of target point
      * (=NULL if point is outside of the domain).
      */
-    Octant* PabloUniform::getPointOwner(darray3 point){
+    Octant* PabloNonUniform::getPointOwner(darray3 point){
         for (int i=0; i<3; i++){
-            point[i] = (point[i] - m_origin[i])/m_L;
+            point[i] = (point[i] - m_origin[i])/m_L[i];
         }
         return ParaTree::getPointOwner(point);
     };
@@ -801,9 +863,9 @@ namespace bitpit {
      * \param[out] isghost Boolean flag, true if the octant found is ghost
      * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
      */
-    Octant* PabloUniform::getPointOwner(darray3 point, bool & isghost){
+    Octant* PabloNonUniform::getPointOwner(darray3 point, bool & isghost){
         for (int i=0; i<3; i++){
-            point[i] = (point[i] - m_origin[i])/m_L;
+            point[i] = (point[i] - m_origin[i])/m_L[i];
         }
         return ParaTree::getPointOwner(point,isghost);
     };
@@ -815,9 +877,9 @@ namespace bitpit {
      * (max uint32_t representable if point outside of the domain).
      */
     uint32_t
-    PabloUniform::getPointOwnerIdx(darray3 point) const {
+    PabloNonUniform::getPointOwnerIdx(darray3 point) const {
         for (int i=0; i<3; i++){
-            point[i] = (point[i] - m_origin[i])/m_L;
+            point[i] = (point[i] - m_origin[i])/m_L[i];
         }
         return ParaTree::getPointOwnerIdx(point);
     };
@@ -828,9 +890,9 @@ namespace bitpit {
      * \return Index of octant owner of target point (max uint32_t representable if point outside of the ghosted domain).
      */
     uint32_t
-    PabloUniform::getPointOwnerIdx(darray3 point, bool & isghost) const {
+    PabloNonUniform::getPointOwnerIdx(darray3 point, bool & isghost) const {
         for (int i=0; i<3; i++){
-            point[i] = (point[i] - m_origin[i])/m_L;
+            point[i] = (point[i] - m_origin[i])/m_L[i];
         }
         return ParaTree::getPointOwnerIdx(point,isghost);
     };
@@ -839,31 +901,31 @@ namespace bitpit {
      * \param[in] point Coordinates of target point.
      * \return Owner rank of target point (negative if out of global domain).
      */
-    int PabloUniform::getPointOwnerRank(darray3 point){
+    int PabloNonUniform::getPointOwnerRank(darray3 point){
         for (int i=0; i<3; i++){
-            point[i] = (point[i] - m_origin[i])/m_L;
+            point[i] = (point[i] - m_origin[i])/m_L[i];
         }
         return ParaTree::getPointOwnerRank(point);
     };
     
     // =================================================================================== //
-    // OTHER PARATREE BASED METHODS												    	   //
+    // OTHER PARATREE BASED METHODS       					    	   //
     // =================================================================================== //
     /** Get the physical coordinates of a node
      * \param[in] inode Local index of node
      * \return Vector with the coordinates of the node.
      */
     darray3
-    PabloUniform::getNodeCoordinates(uint32_t inode) const {
+    PabloNonUniform::getNodeCoordinates(uint32_t inode) const {
         darray3 node = ParaTree::getNodeCoordinates(inode);
         for (int i=0; i<3; i++){
-            node[i] = m_origin[i] + m_L * node[i];
+            node[i] = m_origin[i] + m_L[i] * node[i];
         }
         return node;
     }
 
     // =================================================================================== //
-    // TESTING OUTPUT METHODS													    	   //
+    // TESTING OUTPUT METHODS		         				    	   //
     // =================================================================================== //
     /** Write the physical octree mesh in .vtu format in a user-defined file.
      * If the connectivity is not stored, the method temporary computes it.
@@ -871,7 +933,7 @@ namespace bitpit {
      * \param[in] filename Name of output file (PABLO will add the total number of processes p000# and the current rank s000#).
      */
     void
-    PabloUniform::write(string filename) {
+    PabloNonUniform::write(string filename) {
 
         if (getConnectivity().size() == 0) {
             computeConnectivity();
@@ -1025,7 +1087,7 @@ namespace bitpit {
      * \param[in] data Vector of double with user data.
      */
     void
-    PabloUniform::writeTest(string filename, vector<double> data) {
+    PabloNonUniform::writeTest(string filename, vector<double> data) {
 
         if (getConnectivity().size() == 0) {
             computeConnectivity();
@@ -1067,9 +1129,9 @@ namespace bitpit {
             {
             const std::array<double,3> & nodeCoordinates = getNodeCoordinates(i);
             for(int j = 0; j < 3; ++j){
-                if (j==0) out << std::setprecision(6) << m_origin[0] + m_L*nodeCoordinates[j] << " ";
-                if (j==1) out << std::setprecision(6) << m_origin[1] + m_L*nodeCoordinates[j] << " ";
-                if (j==2) out << std::setprecision(6) << m_origin[2] + m_L*nodeCoordinates[j] << " ";
+                if (j==0) out << std::setprecision(6) << m_origin[0] + m_L[0] * nodeCoordinates[j] << " ";
+                if (j==1) out << std::setprecision(6) << m_origin[1] + m_L[1] * nodeCoordinates[j] << " ";
+                if (j==2) out << std::setprecision(6) << m_origin[2] + m_L[2] * nodeCoordinates[j] << " ";
             }
                 if((i+1)%4==0 && i!=nofNodes-1)
                     out << endl << "          ";

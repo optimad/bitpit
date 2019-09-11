@@ -63,9 +63,9 @@ VolOctree::VolOctree()
 {
 	// Create the tree
 #if BITPIT_ENABLE_MPI==1
-	m_tree = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
+	m_tree = std::unique_ptr<PabloNonUniform>(new PabloNonUniform(PabloNonUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
 #else
-	m_tree = std::unique_ptr<PabloUniform>(new PabloUniform(PabloUniform::DEFAULT_LOG_FILE));
+	m_tree = std::unique_ptr<PabloNonUniform>(new PabloNonUniform(PabloNonUniform::DEFAULT_LOG_FILE));
 #endif
 
 	// Initialize
@@ -92,6 +92,10 @@ VolOctree::VolOctree(int dimension, std::array<double, 3> origin, double length,
 {
 }
 
+VolOctree::VolOctree(int dimension, std::array<double, 3> origin, std::array<double, 3> length, double dh)
+	: VolOctree(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh)
+{
+}
 /*!
 	Creates a new patch.
 
@@ -106,13 +110,13 @@ VolOctree::VolOctree(int id, int dimension, std::array<double, 3> origin, double
 {
 	// Create the tree
 #if BITPIT_ENABLE_MPI==1
-	m_tree = std::unique_ptr<PabloUniform>(
-	    new PabloUniform(origin[0], origin[1], origin[2], length, dimension,
-	                     PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
+	m_tree = std::unique_ptr<PabloNonUniform>(
+	    new PabloNonUniform(origin[0], origin[1], origin[2], length, dimension,
+	                     PabloNonUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
 #else
-	m_tree = std::unique_ptr<PabloUniform>(
-	    new PabloUniform(origin[0], origin[1], origin[2], length, dimension,
-	                     PabloUniform::DEFAULT_LOG_FILE));
+	m_tree = std::unique_ptr<PabloNonUniform>(
+	    new PabloNonUniform(origin[0], origin[1], origin[2], length, dimension,
+	                     PabloNonUniform::DEFAULT_LOG_FILE));
 #endif
 
 	// Initialize
@@ -141,13 +145,53 @@ VolOctree::VolOctree(int id, int dimension, std::array<double, 3> origin, double
 	m_tree->setMarker((uint32_t) 0, initial_level);
 }
 
+VolOctree::VolOctree(int id, int dimension, std::array<double, 3> origin, std::array<double, 3> length, double dh)
+	: VolumeKernel(id, dimension, false)
+{
+	// Create the tree
+#if BITPIT_ENABLE_MPI==1
+	m_tree = std::unique_ptr<PabloNonUniform>(
+	    new PabloNonUniform(origin[0], origin[1], origin[2], length[0], length[1], length[2], dimension,
+	                     PabloNonUniform::DEFAULT_LOG_FILE, MPI_COMM_NULL));
+#else
+	m_tree = std::unique_ptr<PabloNonUniform>(
+	    new PabloNonUniform(origin[0], origin[1], origin[2], length[0], length[1], length[2], dimension,
+	                     PabloNonUniform::DEFAULT_LOG_FILE));
+#endif
+
+	// Initialize
+	initialize();
+
+	// Reset
+	//
+	// The function that resets the patch is virtual, but since is called
+	// from the constructor of the patch kernel only the base function is
+	// called.
+	__reset(false);
+
+	// Set the dimension
+	//
+	// The function that sets the dimension is virtual, but since is called
+	// from the constructor of the patch kernel only the base function is
+	// called.
+	__setDimension(dimension);
+
+	// Set the bounding
+	setBoundingBox();
+
+	// Inizializzazione dell'octree
+	double initial_level = ceil(log2(std::max(1., length[0] / dh)));
+
+	m_tree->setMarker((uint32_t) 0, initial_level);
+}
+
 /*!
 	Creates a new patch.
 
 	\param tree is the tree that will be used
 	\param adopter is a pointer to the tree adopter
 */
-VolOctree::VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
+VolOctree::VolOctree(std::unique_ptr<PabloNonUniform> &&tree, std::unique_ptr<PabloNonUniform> *adopter)
 	: VolOctree(PatchManager::AUTOMATIC_ID, std::move(tree), adopter)
 {
 }
@@ -159,7 +203,7 @@ VolOctree::VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<Pablo
 	\param tree is the tree that will be used
 	\param adopter is a pointer to the tree adopter
 */
-VolOctree::VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
+VolOctree::VolOctree(int id, std::unique_ptr<PabloNonUniform> &&tree, std::unique_ptr<PabloNonUniform> *adopter)
 	: VolumeKernel(id, tree->getDim(), false)
 {
 	// Associate the tree
@@ -234,7 +278,7 @@ VolOctree::VolOctree(const VolOctree &other)
 	m_ghostToCell  = other.m_ghostToCell;
 
 	if (other.m_tree) {
-		m_tree = std::unique_ptr<PabloUniform>(new PabloUniform(*(other.m_tree)));
+		m_tree = std::unique_ptr<PabloNonUniform>(new PabloNonUniform(*(other.m_tree)));
 	}
 
 	m_treeAdopter = other.m_treeAdopter;
@@ -281,7 +325,7 @@ void VolOctree::__reset(bool resetTree)
 	if (resetTree) {
 		m_tree->reset();
 		m_tree->setOrigin(std::array<double, 3>{{0., 0., 0.}});
-		m_tree->setL(1.);
+		m_tree->setL(std::array<double, 3>{{1., 1., 0.}});
 	}
 
 	// Reset cell-to-octants maps
@@ -629,7 +673,7 @@ VolOctree::OctantInfo VolOctree::getCellOctant(long id) const
 
 	\result A reference to the octree associated to the patch.
 */
-PabloUniform & VolOctree::getTree()
+PabloNonUniform & VolOctree::getTree()
 {
 	return *m_tree;
 }
@@ -639,7 +683,7 @@ PabloUniform & VolOctree::getTree()
 
 	\result A constant reference to the octree associated to the patch.
 */
-const PabloUniform & VolOctree::getTree() const
+const PabloNonUniform & VolOctree::getTree() const
 {
 	return *m_tree;
 }
@@ -650,7 +694,7 @@ const PabloUniform & VolOctree::getTree() const
 
 	\param adopter is a pointer to the tree adopter
 */
-void VolOctree::setTreeAdopter(std::unique_ptr<PabloUniform> *adopter)
+void VolOctree::setTreeAdopter(std::unique_ptr<PabloNonUniform> *adopter)
 {
 	m_treeAdopter = adopter;
 }
@@ -1174,7 +1218,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	if (!importFromScratch) {
 #if BITPIT_ENABLE_MPI==1
 		// Cells that have been send to other processors need to be removed
-		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->getLoadBalanceRanges();
+		PabloNonUniform::LoadBalanceRanges loadBalanceRanges = m_tree->getLoadBalanceRanges();
 		for (const auto &rankEntry : loadBalanceRanges.sendRanges) {
 			int rank = rankEntry.first;
 			if (rank == currentRank) {
@@ -1182,7 +1226,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			}
 
 			adaption::Type deletionType;
-			if (loadBalanceRanges.sendAction == PabloUniform::LoadBalanceRanges::ACTION_DELETE) {
+			if (loadBalanceRanges.sendAction == PabloNonUniform::LoadBalanceRanges::ACTION_DELETE) {
 				deletionType = adaption::TYPE_DELETION;
 			} else {
 				deletionType = adaption::TYPE_PARTITION_SEND;
@@ -2252,7 +2296,7 @@ void VolOctree::translate(std::array<double, 3> translation)
 
 	\return The the reference length of the patch domain.
 */
-double VolOctree::getLength() const
+darray3 VolOctree::getLength() const
 {
 	return m_tree->getL();
 }
@@ -2262,7 +2306,7 @@ double VolOctree::getLength() const
 
 	\param length is the reference length of the patch domain
 */
-void VolOctree::setLength(double length)
+void VolOctree::setLength(darray3 length)
 {
 	// Set the length
 	m_tree->setL(length);

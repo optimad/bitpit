@@ -68,7 +68,7 @@ void run()
 	int iter = 0;
 
 	/**<Instantation of a 2D para_tree object and its default (bitpit) logfile.*/
-	PabloUniform pabloBB(2);
+	PabloNonUniform pabloBB(2);
 
 	/**<Set 2:1 balance for the octree.*/
 	pabloBB.setBalanceCodimension(1);

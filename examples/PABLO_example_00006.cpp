@@ -140,7 +140,7 @@ void run()
 	int dim = 2;
 
 	/**<Instantation of a 2D pablo uniform object.*/
-	PabloUniform pablo6(2);
+	PabloNonUniform pablo6(2);
 
 	/**<Refine globally four level and write the octree.*/
 	for (iter=1; iter<5; iter++){

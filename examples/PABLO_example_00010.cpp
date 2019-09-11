@@ -60,7 +60,7 @@ void run()
 	int iter = 0;
 
 	/**<Instantation of a 3D para_tree object.*/
-	PabloUniform pablo10(3);
+	PabloNonUniform pablo10(3);
 
 	/**<Set NO 2:1 balance for the octree.*/
 	int idx = 0;

@@ -200,7 +200,7 @@ void run()
 	int iter = 0;
 
 	/**<Instantation of a 2D pablo uniform object.*/
-	PabloUniform pablo7(2);
+	PabloNonUniform pablo7(2);
 
 	/**<Set NO 2:1 balance for the octree.*/
 	int idx = 0;

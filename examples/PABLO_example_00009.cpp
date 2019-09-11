@@ -60,7 +60,7 @@ void run()
 	int iter = 0;
 
 	/**<Instantation of a 3D pablo uniform object.*/
-	PabloUniform pablo9(0,0,0,1,3);
+	PabloNonUniform pablo9(0,0,0,1,3);
 
 	/**<Set NO 2:1 balance for the octree.*/
 	int idx = 0;

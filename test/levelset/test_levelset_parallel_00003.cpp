@@ -81,7 +81,7 @@ int subtest_001(int rank)
         h = std::max(h, meshMax[i] - meshMin[i]);
     }
 
-    std::unique_ptr<bitpit::PabloUniform> octree = std::unique_ptr<bitpit::PabloUniform>(new bitpit::PabloUniform(meshMin[0], meshMin[1], meshMin[2], h, dimensions));
+    std::unique_ptr<bitpit::PabloNonUniform> octree = std::unique_ptr<bitpit::PabloNonUniform>(new bitpit::PabloNonUniform(meshMin[0], meshMin[1], meshMin[2], h, dimensions));
     octree->adaptGlobalRefine();
     octree->adaptGlobalRefine();
     octree->adaptGlobalRefine();
