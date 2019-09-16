@@ -261,12 +261,12 @@ void Cell::_initialize(bool interior, bool initializeNeighbourhood, bool storeNe
 	if (initializeNeighbourhood) {
 		// To reduce memory fragmentation, destroy both interfaces/adjacencies
 		// before resetting the interfaces/adjacencies
-		int reallocateInterfaces = (m_interfaces.getItemCount() != getFaceCount());
+		int reallocateInterfaces = (static_cast<int>(m_interfaces.getItemCount()) != getFaceCount());
 		if (reallocateInterfaces) {
 			m_interfaces.destroy();
 		}
 
-		int reallocateAdjacencies = (m_adjacencies.getItemCount() != getFaceCount());
+		int reallocateAdjacencies = (static_cast<int>(m_adjacencies.getItemCount()) != getFaceCount());
 		if (reallocateAdjacencies) {
 			m_adjacencies.destroy();
 		}

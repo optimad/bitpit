@@ -80,12 +80,12 @@ public:
     DiscreteStencil(const weight_t &zero = weight_t());
     DiscreteStencil(int nBuckets, const weight_t &zero = weight_t());
     DiscreteStencil(int nBuckets, int nBucketItems, const weight_t &zero = weight_t());
-    DiscreteStencil(const std::vector<int> &bucketSizes, const weight_t &zero = weight_t());
+    DiscreteStencil(const std::vector<std::size_t> &bucketSizes, const weight_t &zero = weight_t());
 
     void initialize(const weight_t &zero = weight_t());
     void initialize(int nBuckets, const weight_t &zero = weight_t());
     void initialize(int nBuckets, int nBucketItems, const weight_t &zero = weight_t());
-    void initialize(const std::vector<int> &bucketSizes, const weight_t &zero = weight_t());
+    void initialize(const std::vector<std::size_t> &bucketSizes, const weight_t &zero = weight_t());
     void initialize(const DiscreteStencil<weight_t> &other);
 
     void clear(bool release = false);

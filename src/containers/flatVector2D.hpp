@@ -68,8 +68,8 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream &buffer, Fla
 
 public:
     FlatVector2D(bool initialize = true);
-    FlatVector2D(const std::vector<int> &sizes, const T &value = T());
-    FlatVector2D(int nVectors, int size, const T &value = T());
+    FlatVector2D(const std::vector<std::size_t> &sizes, const T &value = T());
+    FlatVector2D(std::size_t nVectors, std::size_t size, const T &value = T());
     FlatVector2D(const std::vector<std::vector<T> > &vector2D);
     FlatVector2D(const FlatVector2D &other) = default;
     FlatVector2D(FlatVector2D &&other) = default;
@@ -91,12 +91,13 @@ public:
     FlatVector2D & operator=(FlatVector2D &&other) = default;
 
     void initialize(const std::vector<int> &sizes, const T &value = T());
-    void initialize(int nVectors, int size, const T &value = T());
+    void initialize(const std::vector<std::size_t> &sizes, const T &value = T());
+    void initialize(std::size_t nVectors, std::size_t size, const T &value = T());
     void initialize(const std::vector<std::vector<T> > &vector2D);
     void initialize(const FlatVector2D<T> &other);
 
     void destroy();
-    void reserve(int nVectors, int nItems = 0);
+    void reserve(std::size_t nVectors, std::size_t nItems = 0);
     void swap(FlatVector2D &other) noexcept;
     bool operator==(const FlatVector2D& rhs) const;
     void fill(T &value);
@@ -107,58 +108,58 @@ public:
     void shrinkToFit();
 
     const std::size_t * indices() const noexcept;
-    const std::size_t * indices(int i) const noexcept;
+    const std::size_t * indices(std::size_t i) const noexcept;
 
     T * data() noexcept;
     const T * data() const noexcept;
     const std::vector<T> & vector() const;
 
     void pushBack();
-    void pushBack(int subArraySize, const T &value = T());
+    void pushBack(std::size_t subArraySize, const T &value = T());
     void pushBack(const std::vector<T> &subArray);
-    void pushBack(int subArraySize, const T *subArray);
+    void pushBack(std::size_t subArraySize, const T *subArray);
     void pushBackItem(const T& value);
-    void pushBackItem(int i, const T& value);
+    void pushBackItem(std::size_t i, const T& value);
 
     void popBack();
     void popBackItem();
-    void popBackItem(int i);
+    void popBackItem(std::size_t i);
 
-    void erase(int i);
-    void eraseItem(int i, int j);
+    void erase(std::size_t i);
+    void eraseItem(std::size_t i, std::size_t j);
 
-    void setItem(int i, int j, const T &value);
-    T & getItem(int i, int j);
-    const T & getItem(int i, int j) const;
-    const T * get(int i) const;
-    T * get(int i);
+    void setItem(std::size_t i, std::size_t j, const T &value);
+    T & getItem(std::size_t i, std::size_t j);
+    const T & getItem(std::size_t i, std::size_t j) const;
+    const T * get(std::size_t i) const;
+    T * get(std::size_t i);
 
-    void rawSetItem(int k, const T &value);
-    T & rawGetItem(int k);
-    const T & rawGetItem(int k) const;
+    void rawSetItem(std::size_t k, const T &value);
+    T & rawGetItem(std::size_t k);
+    const T & rawGetItem(std::size_t k) const;
 
     T * back();
     T * first();
 
-    int size() const;
-    int capacity() const;
+    std::size_t size() const;
+    std::size_t capacity() const;
 
     void merge();
 
-    int getItemCount() const;
-    int getItemCount(int i) const;
-    int getItemCapacity() const;
+    std::size_t getItemCount() const;
+    std::size_t getItemCount(std::size_t i) const;
+    std::size_t getItemCapacity() const;
 
-    size_t getBinarySize() const;
+    std::size_t getBinarySize() const;
 
 private:
     std::vector<T> m_v;
     std::vector<std::size_t> m_index;
 
-    const T* operator[](int i) const;
-    T* operator[](int i);
-    bool isIndexValid(int i) const;
-    bool isIndexValid(int i, int j) const;
+    const T* operator[](std::size_t i) const;
+    T* operator[](std::size_t i);
+    bool isIndexValid(std::size_t i) const;
+    bool isIndexValid(std::size_t i, std::size_t j) const;
 
     void destroy(bool destroyIndex, bool destroyValues);
 

@@ -60,7 +60,7 @@ bitpit::StencilVector operator*(const bitpit::StencilScalar &stencil, const std:
 bitpit::StencilVector operator*(const std::array<double, 3> &vector, const bitpit::StencilScalar &stencil)
 {
     int nBuckets = stencil.getBucketCount();
-    std::vector<int> sizes(nBuckets);
+    std::vector<std::size_t> sizes(nBuckets);
     for (int k = 0; k < nBuckets; ++k) {
         sizes[k] = stencil.size(k);
     }
@@ -100,7 +100,7 @@ bitpit::StencilScalar dotProduct(const bitpit::StencilVector &stencil, const bit
 void dotProduct(const bitpit::StencilVector &stencil, const bitpit::StencilVector::weight_type &vector, bitpit::StencilScalar *stencil_dotProduct)
 {
     int nBuckets = stencil.getBucketCount();
-    std::vector<int> sizes(nBuckets);
+    std::vector<std::size_t> sizes(nBuckets);
     for (int k = 0; k < nBuckets; ++k) {
         sizes[k] = stencil.size(k);
     }

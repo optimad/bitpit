@@ -112,7 +112,7 @@ FlatVector2D<T>::FlatVector2D(bool initialize)
     the vectors
 */
 template <class T>
-FlatVector2D<T>::FlatVector2D(const std::vector<int> &sizes, const T &value)
+FlatVector2D<T>::FlatVector2D(const std::vector<std::size_t> &sizes, const T &value)
 {
     initialize(sizes, value);
 }
@@ -126,7 +126,7 @@ FlatVector2D<T>::FlatVector2D(const std::vector<int> &sizes, const T &value)
     items of the vectors
 */
 template <class T>
-FlatVector2D<T>::FlatVector2D(int nVectors, int size, const T &value)
+FlatVector2D<T>::FlatVector2D(std::size_t nVectors, std::size_t size, const T &value)
 {
     initialize(nVectors, size, value);
 }
@@ -151,12 +151,12 @@ FlatVector2D<T>::FlatVector2D(const std::vector<std::vector<T> > &vector2D)
     the vectors
 */
 template <class T>
-void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
+void FlatVector2D<T>::initialize(const std::vector<std::size_t> &sizes, const T &value)
 {
-    int nVectors = sizes.size();
+    std::size_t nVectors = sizes.size();
 
-    int nItems = 0;
-    for (int i = 0; i < nVectors; ++i) {
+    std::size_t nItems = 0;
+    for (std::size_t i = 0; i < nVectors; ++i) {
         nItems += sizes[i];
     }
 
@@ -184,7 +184,7 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
     }
 
     m_index[0] = 0;
-    for (int i = 0; i < nVectors; ++i) {
+    for (std::size_t i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + sizes[i];
     }
 
@@ -192,7 +192,7 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
     if (reallocateValues) {
         m_v.assign(m_index[nVectors], value);
     } else {
-        for (int k = 0; k < nItems; ++k) {
+        for (std::size_t k = 0; k < nItems; ++k) {
             m_v[k] = value;
         }
     }
@@ -207,9 +207,9 @@ void FlatVector2D<T>::initialize(const std::vector<int> &sizes, const T &value)
     the vectors
 */
 template <class T>
-void FlatVector2D<T>::initialize(int nVectors, int size, const T &value)
+void FlatVector2D<T>::initialize(std::size_t nVectors, std::size_t size, const T &value)
 {
-    int nItems = nVectors * size;
+    std::size_t nItems = nVectors * size;
 
     // Check if the container need reallocation
     //
@@ -235,7 +235,7 @@ void FlatVector2D<T>::initialize(int nVectors, int size, const T &value)
     }
 
     m_index[0] = 0;
-    for (int i = 0; i < nVectors; ++i) {
+    for (std::size_t i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + size;
     }
 
@@ -243,7 +243,7 @@ void FlatVector2D<T>::initialize(int nVectors, int size, const T &value)
     if (reallocateValues) {
         m_v.assign(m_index[nVectors], value);
     } else {
-        for (int k = 0; k < nItems; ++k) {
+        for (std::size_t k = 0; k < nItems; ++k) {
             m_v[k] = value;
         }
     }
@@ -258,10 +258,10 @@ void FlatVector2D<T>::initialize(int nVectors, int size, const T &value)
 template <class T>
 void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
 {
-    int nVectors = vector2D.size();
+    std::size_t nVectors = vector2D.size();
 
-    int nItems = 0;
-    for (int i = 0; i < nVectors; ++i) {
+    std::size_t nItems = 0;
+    for (std::size_t i = 0; i < nVectors; ++i) {
         nItems += vector2D[i].size();
     }
 
@@ -289,7 +289,7 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
     }
 
     m_index[0] = 0;
-    for (int i = 0; i < nVectors; ++i) {
+    for (std::size_t i = 0; i < nVectors; ++i) {
         m_index[i+1] = m_index[i] + vector2D[i].size();
     }
 
@@ -298,10 +298,10 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
         m_v.resize(m_index[nVectors]);
     }
 
-    int k = 0;
-    for (int i = 0; i < nVectors; ++i) {
-        int subArraySize = vector2D[i].size();
-        for (int j = 0; j < subArraySize; ++j) {
+    std::size_t k = 0;
+    for (std::size_t i = 0; i < nVectors; ++i) {
+        std::size_t subArraySize = vector2D[i].size();
+        for (std::size_t j = 0; j < subArraySize; ++j) {
             m_v[k++] = vector2D[i][j];
         }
     }
@@ -367,7 +367,7 @@ void FlatVector2D<T>::destroy(bool destroyIndex, bool destroyValues)
     be able to contain
 */
 template <class T>
-void FlatVector2D<T>::reserve(int nVectors, int nItems)
+void FlatVector2D<T>::reserve(std::size_t nVectors, std::size_t nItems)
 {
     m_index.reserve(nVectors + 1);
     if (nItems > 0) {
@@ -507,7 +507,7 @@ const std::size_t * FlatVector2D<T>::indices() const noexcept
     vector.
 */
 template <class T>
-const std::size_t * FlatVector2D<T>::indices(int i) const noexcept
+const std::size_t * FlatVector2D<T>::indices(std::size_t i) const noexcept
 {
     return (m_index.data() + i);
 }
@@ -578,7 +578,7 @@ void FlatVector2D<T>::pushBack()
     item
 */
 template <class T>
-void FlatVector2D<T>::pushBack(int subArraySize, const T &value)
+void FlatVector2D<T>::pushBack(std::size_t subArraySize, const T &value)
 {
     std::size_t previousLastIndex = m_index.back();
     m_index.emplace_back();
@@ -612,7 +612,7 @@ void FlatVector2D<T>::pushBack(const std::vector<T> &subArray)
     \param subArray is a pointer to the sub array will be added
 */
 template <class T>
-void FlatVector2D<T>::pushBack(int subArraySize, const T *subArray)
+void FlatVector2D<T>::pushBack(std::size_t subArraySize, const T *subArray)
 {
     std::size_t previousLastIndex = m_index.back();
     m_index.emplace_back();
@@ -620,7 +620,7 @@ void FlatVector2D<T>::pushBack(int subArraySize, const T *subArray)
     lastIndex = previousLastIndex + subArraySize;
 
     m_v.reserve(m_v.size() + subArraySize);
-    for (int j = 0; j < subArraySize; j++) {
+    for (std::size_t j = 0; j < subArraySize; j++) {
         m_v.emplace_back();
         T &storedValue = m_v.back();
         storedValue = subArray[j];
@@ -653,14 +653,14 @@ void FlatVector2D<T>::pushBackItem(const T& value)
     \param value is the value that will be added
 */
 template <class T>
-void FlatVector2D<T>::pushBackItem(int i, const T& value)
+void FlatVector2D<T>::pushBackItem(std::size_t i, const T &value)
 {
     assert(isIndexValid(i));
 
     m_v.insert(m_v.begin() + m_index[i+1], value);
 
-    int nIndexes = m_index.size();
-    for (int k = i + 1; k < nIndexes; ++k) {
+    std::size_t nIndexes = m_index.size();
+    for (std::size_t k = i + 1; k < nIndexes; ++k) {
         m_index[k]++;
     }
 }
@@ -706,7 +706,7 @@ void FlatVector2D<T>::popBackItem()
     \param i is the index of the vector
 */
 template <class T>
-void FlatVector2D<T>::popBackItem(int i)
+void FlatVector2D<T>::popBackItem(std::size_t i)
 {
     assert(isIndexValid(i));
 
@@ -716,8 +716,8 @@ void FlatVector2D<T>::popBackItem(int i)
 
     m_v.erase(m_v.begin() + m_index[i+1] - 1);
 
-    int nIndexes = m_index.size();
-    for (int k = i + 1; k < nIndexes; ++k) {
+    std::size_t nIndexes = m_index.size();
+    for (std::size_t k = i + 1; k < nIndexes; ++k) {
         m_index[k]--;
     }
 }
@@ -731,7 +731,7 @@ void FlatVector2D<T>::popBackItem(int i)
     \param i is the index of the vector
 */
 template <class T>
-void FlatVector2D<T>::erase(int i)
+void FlatVector2D<T>::erase(std::size_t i)
 {
     assert(isIndexValid(i));
 
@@ -746,14 +746,14 @@ void FlatVector2D<T>::erase(int i)
     \param j is the index of the item that will be removed
 */
 template <class T>
-void FlatVector2D<T>::eraseItem(int i, int j)
+void FlatVector2D<T>::eraseItem(std::size_t i, std::size_t j)
 {
     assert(isIndexValid(i, j));
 
     m_v.erase(m_v.begin() + m_index[i] + j);
 
-    int nIndexes = m_index.size();
-    for (int k = i + 1; k < nIndexes; ++k) {
+    std::size_t nIndexes = m_index.size();
+    for (std::size_t k = i + 1; k < nIndexes; ++k) {
         m_index[k]--;
     }
 }
@@ -766,7 +766,7 @@ void FlatVector2D<T>::eraseItem(int i, int j)
     \param value is the value that will be set
 */
 template <class T>
-void FlatVector2D<T>::setItem(int i, int j, const T &value)
+void FlatVector2D<T>::setItem(std::size_t i, std::size_t j, const T &value)
 {
     assert(isIndexValid(i, j));
     (*this)[i][j] = value;
@@ -780,7 +780,7 @@ void FlatVector2D<T>::setItem(int i, int j, const T &value)
     \result A reference to the requested value.
 */
 template <class T>
-T & FlatVector2D<T>::getItem(int i, int j)
+T & FlatVector2D<T>::getItem(std::size_t i, std::size_t j)
 {
     assert(isIndexValid(i, j));
     return (*this)[i][j];
@@ -794,7 +794,7 @@ T & FlatVector2D<T>::getItem(int i, int j)
     \result A constant reference to the requested value.
 */
 template <class T>
-const T & FlatVector2D<T>::getItem(int i, int j) const
+const T & FlatVector2D<T>::getItem(std::size_t i, std::size_t j) const
 {
     assert(isIndexValid(i, j));
     return (*this)[i][j];
@@ -807,7 +807,7 @@ const T & FlatVector2D<T>::getItem(int i, int j) const
     \result A constant pointer to the first item of the specified vector.
 */
 template <class T>
-const T * FlatVector2D<T>::get(int i) const
+const T * FlatVector2D<T>::get(std::size_t i) const
 {
     assert(!empty());
     assert(isIndexValid(i));
@@ -821,7 +821,7 @@ const T * FlatVector2D<T>::get(int i) const
     \result A pointer to the first item of the specified vector.
 */
 template <class T>
-T * FlatVector2D<T>::get(int i)
+T * FlatVector2D<T>::get(std::size_t i)
 {
     assert(!empty());
     assert(isIndexValid(i));
@@ -835,7 +835,7 @@ T * FlatVector2D<T>::get(int i)
     \param value is the value that will be set
 */
 template <class T>
-void FlatVector2D<T>::rawSetItem(int k, const T &value)
+void FlatVector2D<T>::rawSetItem(std::size_t k, const T &value)
 {
     m_v[k] = value;
 }
@@ -847,7 +847,7 @@ void FlatVector2D<T>::rawSetItem(int k, const T &value)
     \result A reference to the requested value.
 */
 template <class T>
-T & FlatVector2D<T>::rawGetItem(int k)
+T & FlatVector2D<T>::rawGetItem(std::size_t k)
 {
     return m_v[k];
 }
@@ -859,7 +859,7 @@ T & FlatVector2D<T>::rawGetItem(int k)
     \result A constant reference to the requested value.
 */
 template <class T>
-const T & FlatVector2D<T>::rawGetItem(int k) const
+const T & FlatVector2D<T>::rawGetItem(std::size_t k) const
 {
     return m_v[k];
 }
@@ -892,7 +892,7 @@ T * FlatVector2D<T>::first()
     \result The number of vectors in the container.
 */
 template <class T>
-int FlatVector2D<T>::size() const
+std::size_t FlatVector2D<T>::size() const
 {
     return (m_index.size() - 1);
 }
@@ -905,7 +905,7 @@ int FlatVector2D<T>::size() const
     storing vectors, expressed in terms of items.
 */
 template <class T>
-int FlatVector2D<T>::capacity() const
+std::size_t FlatVector2D<T>::capacity() const
 {
     return m_index.capacity() - 1;
 }
@@ -930,7 +930,7 @@ void FlatVector2D<T>::merge()
     \result The total size of all the vectors.
 */
 template <class T>
-int FlatVector2D<T>::getItemCount() const
+std::size_t FlatVector2D<T>::getItemCount() const
 {
     return m_v.size();
 }
@@ -942,7 +942,7 @@ int FlatVector2D<T>::getItemCount() const
     \result The size of the vector.
 */
 template <class T>
-int FlatVector2D<T>::getItemCount(int i) const
+std::size_t FlatVector2D<T>::getItemCount(std::size_t i) const
 {
     return m_index[i + 1] - m_index[i];
 }
@@ -955,7 +955,7 @@ int FlatVector2D<T>::getItemCount(int i) const
     storing vectors items, expressed in terms of items.
 */
 template <class T>
-int FlatVector2D<T>::getItemCapacity() const
+std::size_t FlatVector2D<T>::getItemCapacity() const
 {
     return m_v.capacity();
 }
@@ -978,11 +978,11 @@ size_t FlatVector2D<T>::getBinarySize() const
     \result A constant pointer to the first item of the specified vector.
 */
 template <class T>
-const T* FlatVector2D<T>::operator[](int i) const
+const T* FlatVector2D<T>::operator[](std::size_t i) const
 {
     assert(isIndexValid(i));
 
-    int index = m_index[i];
+    std::size_t index = m_index[i];
     return &m_v[index];
 }
 
@@ -993,11 +993,11 @@ const T* FlatVector2D<T>::operator[](int i) const
     \result A pointer to the first item of the specified vector.
 */
 template <class T>
-T* FlatVector2D<T>::operator[](int i)
+T* FlatVector2D<T>::operator[](std::size_t i)
 {
     assert(isIndexValid(i));
 
-    int index = m_index[i];
+    std::size_t index = m_index[i];
     return &m_v[index];
 }
 
@@ -1008,7 +1008,7 @@ T* FlatVector2D<T>::operator[](int i)
     \result true if the index is vaid, false otherwise.
 */
 template <class T>
-bool FlatVector2D<T>::isIndexValid(int i) const
+bool FlatVector2D<T>::isIndexValid(std::size_t i) const
 {
     return (i >= 0 && i < size());
 }
@@ -1021,13 +1021,13 @@ bool FlatVector2D<T>::isIndexValid(int i) const
     \result true if the indexes are vaid, false otherwise.
 */
 template <class T>
-bool FlatVector2D<T>::isIndexValid(int i, int j) const
+bool FlatVector2D<T>::isIndexValid(std::size_t i, std::size_t j) const
 {
     if (!isIndexValid(i)) {
         return false;
     }
 
-    return (j >= 0 && j < (int) (m_index[i+1] - m_index[i]));
+    return (j >= 0 && j < (m_index[i+1] - m_index[i]));
 }
 
 }
