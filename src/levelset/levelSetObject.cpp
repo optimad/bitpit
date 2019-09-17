@@ -121,7 +121,7 @@ std::array<double,3> LevelSetObject::computeProjectionPoint(long i) const{
 std::array<double,3> LevelSetObject::computeProjectionPoint(const std::array<double,3> &coords) const{
 
     LevelSetInfo info = computeLevelSetInfo(coords);
-    return coords +info.value *info.gradient;
+    return coords -info.value *info.gradient;
 }
 
 /*!
