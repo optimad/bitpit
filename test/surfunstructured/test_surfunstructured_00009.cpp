@@ -40,9 +40,9 @@ int subtest_001()
     std::chrono::time_point<std::chrono::system_clock> start;
     std::chrono::time_point<std::chrono::system_clock> end;
 
-    log::cout() << "** ================================================================= **" << endl;
-    log::cout() << "** Subtest #001 - Evaluation of the closest cell of a surface patch  **" << endl;
-    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** ================================================================= **" << std::endl;
+    log::cout() << "** Subtest #001 - Evaluation of the closest cell of a surface patch  **" << std::endl;
+    log::cout() << "** ================================================================= **" << std::endl;
 
     // Importing STL
     log::cout() << std::endl;
@@ -70,7 +70,7 @@ int subtest_001()
     searchTree.build();
 
     end = std::chrono::system_clock::now();
-    elapsed_initalization = chrono::duration_cast<chrono::milliseconds>(end-start).count();
+    elapsed_initalization = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
     long treeDepth = searchTree.evalMaxDepth();
     log::cout() << "    Maximum tree depth................. " << treeDepth << std::endl;
@@ -138,7 +138,7 @@ int subtest_001()
     }
 
     end = std::chrono::system_clock::now();
-    elapsed_distance_evaluation = chrono::duration_cast<chrono::milliseconds>(end-start).count();
+    elapsed_distance_evaluation = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
     log::cout() << std::endl;
     log::cout() << "    Elapsed time for distance evaluation " << elapsed_distance_evaluation << " ms" << std::endl;
 
