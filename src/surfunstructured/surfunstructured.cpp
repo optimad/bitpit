@@ -220,8 +220,8 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
 
     // Counters
     int                                         i, j;
-    vector<int>::const_iterator                 i_;
-    vector<long>::iterator                      j_;
+    std::vector<int>::const_iterator            i_;
+    std::vector<long>::iterator                 j_;
     VertexIterator                              v_, ve_ = vertexEnd();
     CellIterator                                c_, ce_ = cellEnd();
 
@@ -406,7 +406,7 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         // ====================================================================== //
         // ADD VERTICES TO MESH                                                   //
         // ====================================================================== //
-        vector<array<double, 3>>::const_iterator v_, ve_;
+        std::vector<std::array<double, 3>>::const_iterator v_, ve_;
 
         std::vector<long> vertexMap;
         vertexMap.reserve(nVertex);
@@ -422,8 +422,8 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         // ====================================================================== //
         // ADD CELLS TO MESH                                                      //
         // ====================================================================== //
-        vector<array<int,3>>::const_iterator c_, ce_;
-        array<int,3>::const_iterator w_, we_;
+        std::vector<std::array<int,3>>::const_iterator c_, ce_;
+        std::array<int,3>::const_iterator w_, we_;
 
         ce_ = connectivityList.cend();
         for (c_ = connectivityList.cbegin(); c_ != ce_; ++c_) {
@@ -528,19 +528,19 @@ unsigned short SurfUnstructured::exportSTLSingle(const std::string &name, const 
     // Local variables
     int                                         nVertex;
     int                                         nSimplex;
-    vector<array<double, 3>>                    vertexList;
-    vector<array<double, 3>>                    normalList;
-    vector<array<int,3>>                        connectivityList;
-    unordered_map<long, long>                   vertexMap;
-    array<int,3>                                dummyIntArray;
+    std::vector<std::array<double, 3>>          vertexList;
+    std::vector<std::array<double, 3>>          normalList;
+    std::vector<std::array<int,3>>              connectivityList;
+    std::unordered_map<long, long>              vertexMap;
+    std::array<int,3>                           dummyIntArray;
 
     // Counters
-    int                                         v_count ,j;
-    vector<array<double, 3>>::iterator          i_;
-    vector<array<int,3>>::iterator              j_;
-    array<int,3>::iterator                      k_, ke_;
-    VertexIterator                              v_, ve_;
-    CellIterator                                c_, cb_, ce_;
+    int                                          v_count ,j;
+    std::vector<std::array<double, 3>>::iterator i_;
+    std::vector<std::array<int,3>>::iterator     j_;
+    std::array<int,3>::iterator                  k_, ke_;
+    VertexIterator                               v_, ve_;
+    CellIterator                                 c_, cb_, ce_;
 
     // ====================================================================== //
     // INITIALIZE DATA STRUCTURE                                              //
@@ -639,12 +639,12 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
 #endif
 
     int                                         nTotVertex;
-    vector<array<double, 3>>                    totVertexList;
-    unordered_map<long, long>                   vertexMap;
+    std::vector<std::array<double, 3>>          totVertexList;
+    std::unordered_map<long, long>              vertexMap;
 
     int                                         nLocSimplex;
-    vector<array<double, 3>>                    normalLocList;
-    vector<array<int,3>>                        connectivityLocList;
+    std::vector<std::array<double, 3>>          normalLocList;
+    std::vector<std::array<int,3>>              connectivityLocList;
 
     STLObj STL(name, false);
 
@@ -671,8 +671,8 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
         connectivityLocList.resize(nLocSimplex);
         normalLocList.resize(nLocSimplex);
 
-        vector<array<int,3>>::iterator itC = connectivityLocList.begin();
-        vector<array<double, 3>>::iterator itN = normalLocList.begin();
+        std::vector<std::array<int,3>>::iterator itC = connectivityLocList.begin();
+        std::vector<std::array<double, 3>>::iterator itN = normalLocList.begin();
 
         // Fill local connectivity and normals structures
         for (auto id : cells) {
@@ -709,8 +709,8 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
         connectivityLocList.resize(nLocSimplex);
         normalLocList.resize(nLocSimplex);
 
-        vector<array<int,3>>::iterator itC = connectivityLocList.begin();
-        vector<array<double, 3>>::iterator itN = normalLocList.begin();
+        std::vector<std::array<int,3>>::iterator itC = connectivityLocList.begin();
+        std::vector<std::array<double, 3>>::iterator itN = normalLocList.begin();
 
         // Fill local connectivity and normals structures
 		CellConstIterator endItr = ghostConstEnd();
