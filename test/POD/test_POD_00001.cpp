@@ -152,12 +152,12 @@ int subtest_001(int rank, int nProcs)
 
     if (rank==0){ 
         std::cout<< ">> Reconstruction coeffs:" << std::endl;
-        std::cout<< rcoeffs0 << endl;
-        std::cout<< rcoeffs1 << endl;
+        std::cout<< rcoeffs0 << std::endl;
+        std::cout<< rcoeffs1 << std::endl;
     }
 
     for (int i=0; i<2; i++)
-        if (bitpit::abs(*sum[i].data()) > 1e-8 ){
+        if (std::abs(*sum[i].data()) > 1e-8 ){
             if (rank==0)
                 std::cout<< "\ntest failed" << std::endl;
             return 1;
