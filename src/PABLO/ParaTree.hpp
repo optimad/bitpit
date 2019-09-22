@@ -465,7 +465,7 @@ namespace bitpit {
         void 		findGhostAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost);
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const;
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
-        void 		getPreMapping(u32vector & idx, vector<int8_t> & markers, vector<bool> & isghost);
+        void 		getPreMapping(u32vector & idx, std::vector<int8_t> & markers, std::vector<bool> & isghost);
         bool 		isNodeOnOctant(const Octant* nodeOctant, uint8_t nodeIndex, const Octant* octant) const;
         bool 		isEdgeOnOctant(const Octant* edgeOctant, uint8_t edgeIndex, const Octant* octant) const;
         bool 		isFaceOnOctant(const Octant* faceOctant, uint8_t faceIndex, const Octant* octant) const;
@@ -605,7 +605,7 @@ namespace bitpit {
 
             //READ RECEIVE BUFFERS
             int ghostOffset = 0;
-            vector<int> recvRanks = communicator.getRecvRanks();
+            std::vector<int> recvRanks = communicator.getRecvRanks();
             std::sort(recvRanks.begin(),recvRanks.end());
             for(int rank : recvRanks){
                 communicator.waitRecv(rank);
@@ -631,8 +631,8 @@ namespace bitpit {
         void
         loadBalance(DataLBInterface<Impl> & userData, dvector* weight = NULL){
             //Write info on log
-            (*m_log) << "---------------------------------------------" << endl;
-            (*m_log) << " LOAD BALANCE " << endl;
+            (*m_log) << "---------------------------------------------" << std::endl;
+            (*m_log) << " LOAD BALANCE " << std::endl;
 
             m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
@@ -651,24 +651,24 @@ namespace bitpit {
                 partition = NULL;
 
                 //Write info of final partition on log
-                (*m_log) << " " << endl;
-                (*m_log) << " Final Parallel partition : " << endl;
-                (*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << " Final Parallel partition : " << std::endl;
+                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << std::endl;
                 for(int ii=1; ii<m_nproc; ii++){
-                    (*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
+                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << std::endl;
                 }
-                (*m_log) << " " << endl;
-                (*m_log) << "---------------------------------------------" << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << "---------------------------------------------" << std::endl;
 
             }
             else{
                 m_loadBalanceRanges.clear();
 
-                (*m_log) << " " << endl;
-                (*m_log) << " Serial partition : " << endl;
-                (*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
-                (*m_log) << " " << endl;
-                (*m_log) << "---------------------------------------------" << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << " Serial partition : " << std::endl;
+                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << std::endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << "---------------------------------------------" << std::endl;
             }
 
         }
@@ -686,8 +686,8 @@ namespace bitpit {
         loadBalance(DataLBInterface<Impl> & userData, uint8_t & level, dvector* weight = NULL){
 
             //Write info on log
-            (*m_log) << "---------------------------------------------" << endl;
-            (*m_log) << " LOAD BALANCE " << endl;
+            (*m_log) << "---------------------------------------------" << std::endl;
+            (*m_log) << " LOAD BALANCE " << std::endl;
 
             m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
@@ -701,24 +701,24 @@ namespace bitpit {
                 partition = NULL;
 
                 //Write info of final partition on log
-                (*m_log) << " " << endl;
-                (*m_log) << " Final Parallel partition : " << endl;
-                (*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << " Final Parallel partition : " << std::endl;
+                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << std::endl;
                 for(int ii=1; ii<m_nproc; ii++){
-                    (*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
+                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << std::endl;
                 }
-                (*m_log) << " " << endl;
-                (*m_log) << "---------------------------------------------" << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << "---------------------------------------------" << std::endl;
 
             }
             else{
                 m_loadBalanceRanges.clear();
 
-                (*m_log) << " " << endl;
-                (*m_log) << " Serial partition : " << endl;
-                (*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
-                (*m_log) << " " << endl;
-                (*m_log) << "---------------------------------------------" << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << " Serial partition : " << std::endl;
+                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << std::endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << "---------------------------------------------" << std::endl;
             }
 
         }
@@ -739,10 +739,10 @@ namespace bitpit {
             if(m_serial)
             {
                 m_lastOp = OP_LOADBALANCE_FIRST;
-                (*m_log) << " " << endl;
-                (*m_log) << " Initial Serial distribution : " << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << " Initial Serial distribution : " << std::endl;
                 for(int ii=0; ii<m_nproc; ii++){
-                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << endl;
+                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << std::endl;
                 }
 
                 uint32_t stride = 0;
@@ -766,11 +766,11 @@ namespace bitpit {
             }
             else
             {
-                (*m_log) << " " << endl;
-                (*m_log) << " Initial Parallel partition : " << endl;
-                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
+                (*m_log) << " " << std::endl;
+                (*m_log) << " Initial Parallel partition : " << std::endl;
+                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << std::endl;
                 for(int ii=1; ii<m_nproc; ii++){
-                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
+                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << std::endl;
                 }
 
                 //empty ghosts
@@ -998,9 +998,9 @@ namespace bitpit {
                 uint32_t nofNewTail = 0;
 
                 //READ number of octants per sender
-                vector<int> recvRanks = lbCommunicator.getRecvRanks();
+                std::vector<int> recvRanks = lbCommunicator.getRecvRanks();
                 std::sort(recvRanks.begin(),recvRanks.end());
-                vector<uint32_t> nofNewOverProcs(recvRanks.size());
+                std::vector<uint32_t> nofNewOverProcs(recvRanks.size());
                 for(int rank : recvRanks){
                     lbCommunicator.waitRecv(rank);
                     RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
