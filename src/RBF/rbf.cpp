@@ -723,7 +723,7 @@ int RBFKernel::greedy( double tolerance)
 
     }
 
-    ios::fmtflags streamFlags(log::cout().flags());
+    std::ios::fmtflags streamFlags(log::cout().flags());
 
     int errorFlag = 0;
     while( error > tolerance) {
