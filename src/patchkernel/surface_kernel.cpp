@@ -196,7 +196,7 @@ double SurfaceKernel::evalCellArea(long id) const
         return ( norm2(m_vertices[cellVertexIds[0]].getCoords()
                      - m_vertices[cellVertexIds[1]].getCoords()) );
     }
-    array<double, 3>            d1, d2;
+    std::array<double, 3>       d1, d2;
     if (cell_->getType() == ElementType::TRIANGLE) {
         d1 = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
         d2 = m_vertices[cellVertexIds[2]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
@@ -387,13 +387,13 @@ double SurfaceKernel::evalAngleAtVertex(long id, int vertex_id) const
     int                          prev = (n_vert + vertex_id - 1) % n_vert;
     int                          next = (vertex_id + 1) % n_vert;
     double                       angle;
-    array<double, 3>             d1, d2;
+    std::array<double, 3>        d1, d2;
 
     d1 = m_vertices[cellVertexIds[next]].getCoords() - m_vertices[cellVertexIds[vertex_id]].getCoords();
     d2 = m_vertices[cellVertexIds[prev]].getCoords() - m_vertices[cellVertexIds[vertex_id]].getCoords();
     d1 = d1/norm2(d1);
     d2 = d2/norm2(d2);
-    angle = acos( min(1.0, max(-1.0, dotProduct(d1, d2) ) ) );
+    angle = acos( std::min(1.0, std::max(-1.0, dotProduct(d1, d2) ) ) );
 
     return(angle);
 }
@@ -519,7 +519,7 @@ double SurfaceKernel::evalAspectRatio(long id, int &edge_id) const
             m_edge = l_edge;
             edge_id = i;
         }
-        M_edge = max(M_edge, l_edge);
+        M_edge = std::max(M_edge, l_edge);
     } //next i
 
     return (M_edge/m_edge);
@@ -534,14 +534,14 @@ double SurfaceKernel::evalAspectRatio(long id, int &edge_id) const
  * 
  * \result facet normal
 */
-array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
+std::array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
     // ====================================================================== //
 
     // Local variables
-    array<double, 3>             normal = {{0.0, 0.0, 0.0}};
+    std::array<double, 3>        normal = {{0.0, 0.0, 0.0}};
     const Cell                   *cell_ = &m_cells[id];
     ConstProxyVector<long>       cellVertexIds = cell_->getVertexIds();
 
@@ -564,13 +564,13 @@ array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
     }
 
     if (cell_->getType() == ElementType::TRIANGLE) {
-        array<double, 3>                d1, d2;
+        std::array<double, 3>           d1, d2;
         d1 = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
         d2 = m_vertices[cellVertexIds[2]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
         normal = crossProduct(d1, d2);
     }
     else {
-        array<double, 3>                d1, d2;
+        std::array<double, 3>           d1, d2;
         int                             next, prev, i, nvert = cell_->getVertexCount();
         double                          coeff = 1.0/double(nvert);
         for (i = 0; i < nvert; ++i) {
@@ -596,14 +596,14 @@ array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
  * \param[in] id cell global ID
  * \param[in] edge_id edge local ID on the specified cell
 */
-array<double, 3> SurfaceKernel::evalEdgeNormal(long id, int edge_id) const
+std::array<double, 3> SurfaceKernel::evalEdgeNormal(long id, int edge_id) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
     // ====================================================================== //
 
     // Local variables
-    array<double, 3>                    normal = evalFacetNormal(id);
+    std::array<double, 3>               normal = evalFacetNormal(id);
     const Cell                          *cell_ = &m_cells[id];
     int                                 n_adj = cell_->getAdjacencyCount(edge_id);
     const long                          *adjacencies = cell_->getAdjacencies(edge_id);
@@ -1117,14 +1117,14 @@ void SurfaceKernel::flipCellOrientation(long id)
  * \param[in,out] out output stream where stats will be printed out
  * \param[in] padding (default = 0) number of trailing spaces
 */
-void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding) const
+void SurfaceKernel::displayQualityStats(std::ostream& out, unsigned int padding) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
     // ====================================================================== //
 
     // Local variables
-    string              indent(padding, ' ');
+    std::string         indent(padding, ' ');
 
     // Counters
     // none
@@ -1134,11 +1134,11 @@ void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding) cons
     // ====================================================================== //
 
     // Distribution for aspect ratio ---------------------------------------- //
-    out << indent << "Aspect ratio distribution ---------------" << endl;
+    out << indent << "Aspect ratio distribution ---------------" << std::endl;
     {
         // Scope variables
         long                            count;
-        vector<double>                  bins, hist;
+        std::vector<double>             bins, hist;
 
         // Compute histogram
         hist = computeHistogram(&SurfaceKernel::evalAspectRatio, bins, count, 8,
@@ -1149,11 +1149,11 @@ void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding) cons
     }
 
     // Distribution of min. angle ------------------------------------------- //
-    out << indent << "Min. angle distribution -----------------" << endl;
+    out << indent << "Min. angle distribution -----------------" << std::endl;
     {
         // Scope variables
         long                            count;
-        vector<double>                  bins, hist;
+        std::vector<double>             bins, hist;
 
         // Compute histogram
         hist = computeHistogram(&SurfaceKernel::evalMinAngleAtVertex, bins, count, 8,
@@ -1164,11 +1164,11 @@ void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding) cons
     }
 
     // Distribution of min. angle ------------------------------------------- //
-    out << indent << "Max. angle distribution -----------------" << endl;
+    out << indent << "Max. angle distribution -----------------" << std::endl;
     {
         // Scope variables
         long                            count;
-        vector<double>                  bins, hist;
+        std::vector<double>             bins, hist;
 
         // Compute histogram
         hist = computeHistogram(&SurfaceKernel::evalMaxAngleAtVertex, bins, count, 8,
@@ -1213,7 +1213,7 @@ std::vector<double> SurfaceKernel::computeHistogram(eval_f_ funct_, std::vector<
 
     // Local variables
     double                      m_, M_;
-    vector<double>              hist;
+    std::vector<double>         hist;
 
     // ====================================================================== //
     // BUILD BINS FOR HISTOGRAM                                               //
@@ -1278,10 +1278,10 @@ std::vector<double> SurfaceKernel::computeHistogram(eval_f_ funct_, std::vector<
 */
 void SurfaceKernel::displayHistogram(
     long                         count,
-    const vector<double>        &bins,
-    const vector<double>        &hist,
-    const string                &stats_name,
-    ostream                     &out,
+    const std::vector<double>   &bins,
+    const std::vector<double>   &hist,
+    const std::string           &stats_name,
+    std::ostream                &out,
     unsigned int                 padding
 ) const {
     // ====================================================================== //
@@ -1291,8 +1291,8 @@ void SurfaceKernel::displayHistogram(
     // Local variables
     int                 nbins = bins.size();
     size_t              n_fill;
-    string              indent(padding, ' ');
-    stringstream        ss;
+    std::string         indent(padding, ' ');
+    std::stringstream   ss;
 
     // Counters
     int                 i;
@@ -1302,45 +1302,45 @@ void SurfaceKernel::displayHistogram(
     // ====================================================================== //
 
     // Set stream properties
-    ss << setprecision(3);
+    ss << std::setprecision(3);
 
     // Display histograms
-    out << indent << "poll size: " << count << endl;
+    out << indent << "poll size: " << count << std::endl;
     out << indent;
     ss << hist[0];
     n_fill = ss.str().length();
-    ss << string(max(size_t(0), 6 - n_fill), ' ');
+    ss << std::string(std::max(size_t(0), 6 - n_fill), ' ');
     out << ss.str() << "%, with          " << stats_name << " < ";
     ss.str("");
     ss << bins[0];
-    out << ss.str() << endl;
+    out << ss.str() << std::endl;
     ss.str("");
     for (i = 0; i < nbins-1; ++i) {
         out << indent;
         ss << hist[i+1];
         n_fill = ss.str().length();
-        ss << string(max(size_t(0),  6 - n_fill), ' ');
+        ss << std::string(std::max(size_t(0),  6 - n_fill), ' ');
         out << ss.str() << "%, with ";
         ss.str("");
         ss << bins[i];
         n_fill = ss.str().length();
-        ss << string(max(size_t(0), 6 - n_fill), ' ');
+        ss << std::string(std::max(size_t(0), 6 - n_fill), ' ');
         out << ss.str() << " < " << stats_name << " < ";
         ss.str("");
         ss << bins[i+1];
-        out << ss.str() << endl;
+        out << ss.str() << std::endl;
         ss.str("");
     } //next i
     out << indent;
     ss << hist[i+1];
     n_fill = ss.str().length();
-    ss << string(max(size_t(0), 6 - n_fill), ' ');
+    ss << std::string(std::max(size_t(0), 6 - n_fill), ' ');
     out << ss.str() << "%, with ";
     ss.str("");
     ss << bins[i];
     n_fill = ss.str().length();
-    ss << string(max(size_t(0), 6 - n_fill), ' ');
-    out << ss.str() << " < " << stats_name << endl;
+    ss << std::string(std::max(size_t(0), 6 - n_fill), ' ');
+    out << ss.str() << " < " << stats_name << std::endl;
     ss.str("");
 
     return;

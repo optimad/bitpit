@@ -63,7 +63,7 @@ public:
         bool adjustCellOrientation(long id, bool invert = false);
         void flipCellOrientation(long id);
 
-        void displayQualityStats(ostream&, unsigned int padding = 0) const;
+        void displayQualityStats(std::ostream&, unsigned int padding = 0) const;
         std::vector<double> computeHistogram(eval_f_ funct_, std::vector<double> &bins, long &count, int n_intervals = 8, unsigned short mask = SELECT_ALL) const;
 
 private:

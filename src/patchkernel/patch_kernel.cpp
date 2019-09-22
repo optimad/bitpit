@@ -325,7 +325,7 @@ PatchKernel::~PatchKernel()
 		patch::manager().unregisterPatch(this);
 	} catch (const std::runtime_error &e) {
 		log::cout() << "Unable to unregister the patch" << std::endl;
-		log::cout() << " Error message: " << e.what() << endl;
+		log::cout() << " Error message: " << e.what() << std::endl;
 	}
 }
 
@@ -5322,27 +5322,27 @@ void PatchKernel::displayTopologyStats(std::ostream &out, unsigned int padding) 
 	// ====================================================================== //
 	// VERTEX STATS                                                           //
 	// ====================================================================== //
-	out << indent<< "Vertices --------------------------------"     << endl;
-	out << indent<< "  # vertices        " << getVertexCount()      << endl;
-	out << indent<< "  # orphan vertices " << countOrphanVertices() << endl;
-	out << indent<< "  # free vertices   " << countFreeVertices()   << endl;
-        //out << indent<< "  # free vertices   " << countDoubleVertices()   << endl;
+	out << indent<< "Vertices --------------------------------"     << std::endl;
+	out << indent<< "  # vertices        " << getVertexCount()      << std::endl;
+	out << indent<< "  # orphan vertices " << countOrphanVertices() << std::endl;
+	out << indent<< "  # free vertices   " << countFreeVertices()   << std::endl;
+        //out << indent<< "  # free vertices   " << countDoubleVertices()   << std::endl;
 
 	// ====================================================================== //
 	// FACE STATS                                                             //
 	// ====================================================================== //
-	out << indent<< "Faces -----------------------------------"     << endl;
-	out << indent<< "  # faces           " << countFaces()          << endl;
-	out << indent<< "  # free faces      " << countFreeFaces()      << endl;
+	out << indent<< "Faces -----------------------------------"     << std::endl;
+	out << indent<< "  # faces           " << countFaces()          << std::endl;
+	out << indent<< "  # free faces      " << countFreeFaces()      << std::endl;
 
 	// ====================================================================== //
 	// CELLS STATS                                                            //
 	// ====================================================================== //
-	out << indent<< "Cells -----------------------------------"     << endl;
-	out << indent<< "  # cells           " << getCellCount()        << endl;
-	out << indent<< "  # orphan cells    " << countOrphanCells()    << endl;
-	out << indent<< "  # free cells      " << countFreeCells()      << endl;
-        //out << indent<< "  # free vertices   " << countDoubleCells()   << endl;
+	out << indent<< "Cells -----------------------------------"     << std::endl;
+	out << indent<< "  # cells           " << getCellCount()        << std::endl;
+	out << indent<< "  # orphan cells    " << countOrphanCells()    << std::endl;
+	out << indent<< "  # free cells      " << countFreeCells()      << std::endl;
+        //out << indent<< "  # free vertices   " << countDoubleCells()   << std::endl;
 }
 
 /*!
