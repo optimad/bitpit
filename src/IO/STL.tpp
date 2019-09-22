@@ -58,9 +58,9 @@ void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::vector<do
 
     // Load solid
     if (stl_type) {
-        stl::readBINARY(m_ifile_handle, nV, nT, V, N, T);
+        readBINARY(m_ifile_handle, nV, nT, V, N, T);
     } else {
-        stl::readSolidASCII(m_ifile_handle, true, nV, nT, V, N, T, name);
+        readSolidASCII(m_ifile_handle, true, nV, nT, V, N, T, name);
     }
 
     // Recursively read other solids
@@ -104,9 +104,9 @@ void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::array<dou
 
     // Load solid
     if (stl_type) {
-        stl::readBINARY(m_ifile_handle, nV, nT, V, N, T);
+        readBINARY(m_ifile_handle, nV, nT, V, N, T);
     } else {
-        stl::readSolidASCII(m_ifile_handle, true, nV, nT, V, N, T, name);
+        readSolidASCII(m_ifile_handle, true, nV, nT, V, N, T, name);
     }
 
     // Recursively read other solids
@@ -137,9 +137,9 @@ void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::ve
 
     // Export solid
     if (stl_type) {
-        stl::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
     } else {
-        stl::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
 
     // Recursively save other solids
@@ -171,9 +171,9 @@ void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::ar
 
     // Export solid
     if (stl_type) {
-        stl::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
     } else {
-        stl::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
 
     // Recursively save other solids
@@ -205,9 +205,9 @@ void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::
 
     // Append solid
     if (stl_type) {
-        stl::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
     } else {
-        stl::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
 
     // Recursively append other solids
@@ -239,9 +239,9 @@ void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::
 
     // Append solid
     if (stl_type) {
-        stl::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
     } else {
-        stl::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
+        writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
 
     // Recursively append other solids

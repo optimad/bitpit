@@ -135,14 +135,6 @@ private:
     void save();
     void load();
 
-};
-
-/*!
- * @ingroup  STereoLithography
- * @brief Utility fuctions for STL IO
- */
-namespace stl {
-
     unsigned int scanASCII(std::ifstream &file_handle, std::vector<std::string> &solid_names,
                            std::vector<int> &solid_facets);
 
@@ -197,7 +189,7 @@ namespace stl {
     unsigned int writeSolidBINARY(std::ofstream &file_handle, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
                                   std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T, const std::string &solid_name = "");
 
-}
+};
 
 // Template implementation
 #include "STL.tpp"

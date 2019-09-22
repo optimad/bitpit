@@ -442,10 +442,10 @@ void STLObj::scan()
 
     // Scan file
     if (stl_type) {
-        err = stl::scanBINARY(m_ifile_handle, data.solid_names, data.solid_facets);
+        err = STLObj::scanBINARY(m_ifile_handle, data.solid_names, data.solid_facets);
         data.n_solids = data.solid_names.size();
     } else {
-        err = stl::scanASCII(m_ifile_handle, data.solid_names, data.solid_facets);
+        err = STLObj::scanASCII(m_ifile_handle, data.solid_names, data.solid_facets);
         data.n_solids = data.solid_names.size();
     }
 
@@ -466,9 +466,9 @@ void STLObj::check()
 
     // Check file
     if (stl_type) {
-        stl::checkBINARY(m_ifile_handle, stl_errors);
+        STLObj::checkBINARY(m_ifile_handle, stl_errors);
     } else {
-        stl::checkASCII(m_ifile_handle, stl_errors);
+        STLObj::checkASCII(m_ifile_handle, stl_errors);
     }
 
     // Close input stream
@@ -505,9 +505,9 @@ void STLObj::load(int &nV, int &nT, std::vector<std::vector<double>> &V,
 
     // Read STL data
     if (stl_type) {
-        stl::readBINARY(m_ifile_handle, nV, nT, V, N, T);
+        STLObj::readBINARY(m_ifile_handle, nV, nT, V, N, T);
     } else {
-        stl::readASCII(m_ifile_handle, nV, nT, V, N, T);
+        STLObj::readASCII(m_ifile_handle, nV, nT, V, N, T);
     }
 
     // Close stream
@@ -547,9 +547,9 @@ void STLObj::load(int &nV, int &nT,
 
     // Read STL data
     if (stl_type) {
-        stl::readBINARY(m_ifile_handle, nV, nT, V, N, T);
+        STLObj::readBINARY(m_ifile_handle, nV, nT, V, N, T);
     } else {
-        stl::readASCII(m_ifile_handle, nV, nT, V, N, T);
+        STLObj::readASCII(m_ifile_handle, nV, nT, V, N, T);
     }
 
     // Close stream
@@ -590,9 +590,9 @@ void STLObj::loadSolid(int &nV, int &nT, std::vector<std::vector<double>> &V,
 
     // Read STL data
     if (stl_type) {
-        stl::readBINARY(m_ifile_handle, nV, nT, V, N, T);
+        STLObj::readBINARY(m_ifile_handle, nV, nT, V, N, T);
     } else {
-        stl::readSolidASCII(m_ifile_handle, false, nV, nT, V, N, T, name);
+        STLObj::readSolidASCII(m_ifile_handle, false, nV, nT, V, N, T, name);
     }
 }
 
@@ -632,9 +632,9 @@ void STLObj::loadSolid(int &nV, int &nT, std::vector<std::array<double, 3>> &V,
 
     // Read STL data
     if (stl_type) {
-        stl::readBINARY(m_ifile_handle, nV, nT, V, N, T);
+        STLObj::readBINARY(m_ifile_handle, nV, nT, V, N, T);
     } else {
-        stl::readSolidASCII(m_ifile_handle, false, nV, nT, V, N, T, name);
+        STLObj::readSolidASCII(m_ifile_handle, false, nV, nT, V, N, T, name);
     }
 }
 
@@ -653,9 +653,9 @@ void STLObj::saveSolid(const std::string &name, int &nV, int &nT,  std::vector<s
                        std::vector<std::vector<double>> &N,  std::vector<std::vector<int>> &T)
 {
     if (stl_type) {
-        stl::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        STLObj::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
     } else {
-        stl::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
+        STLObj::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
 }
 
@@ -675,9 +675,9 @@ void STLObj::saveSolid(const std::string &name, int &nV, int &nT, std::vector<st
                        std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
 {
     if (stl_type) {
-        stl::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        STLObj::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
     } else {
-        stl::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
+        STLObj::writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
 }
 
@@ -711,8 +711,8 @@ void STLObj::load()
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int stl::scanASCII(std::ifstream &file_handle, std::vector<std::string> &solid_names,
-                            std::vector<int> &solid_facets)
+unsigned int STLObj::scanASCII(std::ifstream &file_handle, std::vector<std::string> &solid_names,
+                               std::vector<int> &solid_facets)
 {
     // Initialize output variables
     solid_names.resize(0);
@@ -754,7 +754,7 @@ unsigned int stl::scanASCII(std::ifstream &file_handle, std::vector<std::string>
 
                 // Get solid info
                 int nF = 0;
-                stl::scanSolidASCII(file_handle, nF);
+                scanSolidASCII(file_handle, nF);
                 solid_facets.push_back(nF);
 
             }
@@ -780,8 +780,8 @@ unsigned int stl::scanASCII(std::ifstream &file_handle, std::vector<std::string>
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int stl::scanBINARY(std::ifstream &file_handle, std::vector<std::string> &solid_names,
-                             std::vector<int> &solid_facets)
+unsigned int STLObj::scanBINARY(std::ifstream &file_handle, std::vector<std::string> &solid_names,
+                                std::vector<int> &solid_facets)
 {
     // Resize output variables
     solid_names.resize(0);
@@ -831,7 +831,7 @@ unsigned int stl::scanBINARY(std::ifstream &file_handle, std::vector<std::string
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int stl::scanSolidASCII(std::ifstream &file_handle, int &nT)
+unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, int &nT)
 {
     // Resize output variables
     nT = 0;
@@ -902,7 +902,7 @@ unsigned int stl::scanSolidASCII(std::ifstream &file_handle, int &nT)
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int stl::checkASCII(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map)
+unsigned int STLObj::checkASCII(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map)
 {
     // Resize output variables
     err_map.resize(0);
@@ -929,7 +929,7 @@ unsigned int stl::checkASCII(std::ifstream &file_handle, std::vector<std::vector
 
         if ((sline >> word) && (word.compare("solid") == 0)) {
             std::vector<bool> _map(6, false);
-            stl::checkSolidASCII(file_handle, _map);
+            checkSolidASCII(file_handle, _map);
             err_map.push_back(_map);
         }
 
@@ -958,7 +958,7 @@ unsigned int stl::checkASCII(std::ifstream &file_handle, std::vector<std::vector
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int stl::checkSolidASCII(std::ifstream &file_handle, std::vector<bool> &err_map)
+unsigned int STLObj::checkSolidASCII(std::ifstream &file_handle, std::vector<bool> &err_map)
 {
     // Resize output variables
     err_map.resize(6, false);
@@ -997,7 +997,7 @@ unsigned int stl::checkSolidASCII(std::ifstream &file_handle, std::vector<bool> 
         // Look for keyword "facet"
         if (word.compare("facet") == 0) {
             file_handle.seekg(last_valid_pos);
-            stl::checkFacetASCII(file_handle, err_map);
+            checkFacetASCII(file_handle, err_map);
         }
     }
 
@@ -1026,7 +1026,7 @@ unsigned int stl::checkSolidASCII(std::ifstream &file_handle, std::vector<bool> 
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int stl::checkFacetASCII(std::ifstream &file_handle, std::vector<bool> &err_map)
+unsigned int STLObj::checkFacetASCII(std::ifstream &file_handle, std::vector<bool> &err_map)
 {
     // Initialize output variables
     err_map.resize(6, false);
@@ -1134,7 +1134,7 @@ unsigned int stl::checkFacetASCII(std::ifstream &file_handle, std::vector<bool> 
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int stl::checkBINARY(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map)
+unsigned int STLObj::checkBINARY(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map)
 {
     // Resize output variables
     err_map.resize(1, std::vector<bool>(6, false));
@@ -1234,10 +1234,10 @@ unsigned int stl::checkBINARY(std::ifstream &file_handle, std::vector<std::vecto
         err = 1: failed to read from input stream
         err = 2: failed to read a facet
 */
-unsigned int stl::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
-                                 int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                 std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
-                                 std::string &name)
+unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
+                                    int &nV, int &nT, std::vector<std::vector<double>> &V,
+                                    std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+                                    std::string &name)
 {
     // Constants
     const std::string SOLID_KEY = "solid";
@@ -1305,7 +1305,7 @@ unsigned int stl::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
 
     file_handle.clear();
     file_handle.seekg(start_pos);
-    stl::scanSolidASCII(file_handle, nt);
+    scanSolidASCII(file_handle, nt);
 
     // Read solid data
     V.resize(nV+3*nt, std::vector<double>(3, 0.0));
@@ -1329,7 +1329,7 @@ unsigned int stl::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         // Look for keyword "facet"
         if ((sline >> word) && (word.compare("facet") == 0)) {
             file_handle.seekg(current_pos);
-            int readFacetError = stl::readFacetASCII(file_handle, nV, nT, V, N, T);
+            int readFacetError = readFacetASCII(file_handle, nV, nT, V, N, T);
             if (readFacetError != 0) {
                 return 2;
             }
@@ -1376,10 +1376,10 @@ unsigned int stl::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         err = 1: failed to read from input stream
         err = 2: failed to read a facet
 */
-unsigned int stl::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
-                                 int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                 std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
-                                 std::string &name)
+unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
+                                    int &nV, int &nT, std::vector<std::array<double, 3>> &V,
+                                    std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+                                    std::string &name)
 {
     // Constants
     const std::string SOLID_KEY = "solid";
@@ -1447,7 +1447,7 @@ unsigned int stl::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
 
     file_handle.clear();
     file_handle.seekg(start_pos);
-    stl::scanSolidASCII(file_handle, nt);
+    scanSolidASCII(file_handle, nt);
 
     // Read solid data
     std::array<double, 3> dummyDoubleArray;
@@ -1516,9 +1516,9 @@ unsigned int stl::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int stl::readASCII(std::ifstream &file_handle,
-                            int &nV, int &nT, std::vector<std::vector<double>> &V,
-                            std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
+unsigned int STLObj::readASCII(std::ifstream &file_handle,
+                               int &nV, int &nT, std::vector<std::vector<double>> &V,
+                               std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -1580,9 +1580,9 @@ unsigned int stl::readASCII(std::ifstream &file_handle,
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int stl::readASCII(std::ifstream &file_handle,
-                            int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                            std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
+unsigned int STLObj::readASCII(std::ifstream &file_handle,
+                               int &nV, int &nT, std::vector<std::array<double, 3>> &V,
+                               std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -1644,9 +1644,9 @@ unsigned int stl::readASCII(std::ifstream &file_handle,
         err = 1: failed to read from input stream
         err = 2: one facet has more than 3 vertices
 */
-unsigned int stl::readFacetASCII(std::ifstream &file_handle,
-                                int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
+unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
+                                    int &nV, int &nT, std::vector<std::vector<double>> &V,
+                                    std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
 {
     // Read facet data
     std::string line;
@@ -1739,9 +1739,9 @@ unsigned int stl::readFacetASCII(std::ifstream &file_handle,
         err = 1: failed to read from input stream
         err = 2: one facet has more than 3 vertices
 */
-unsigned int stl::readFacetASCII(std::ifstream &file_handle,
-                                 int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                 std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
+unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
+                                    int &nV, int &nT, std::vector<std::array<double, 3>> &V,
+                                    std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
 {
     // Read facet data
     std::string line;
@@ -1833,9 +1833,9 @@ unsigned int stl::readFacetASCII(std::ifstream &file_handle,
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int stl::readBINARY(std::ifstream &file_handle,
-                             int &nV, int &nT, std::vector<std::vector<double>> &V,
-                             std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
+unsigned int STLObj::readBINARY(std::ifstream &file_handle,
+                                int &nV, int &nT, std::vector<std::vector<double>> &V,
+                                std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -1931,9 +1931,9 @@ unsigned int stl::readBINARY(std::ifstream &file_handle,
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int stl::readBINARY(std::ifstream &file_handle,
-                             int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                             std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
+unsigned int STLObj::readBINARY(std::ifstream &file_handle,
+                                int &nV, int &nT, std::vector<std::array<double, 3>> &V,
+                                std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -2024,10 +2024,10 @@ unsigned int stl::readBINARY(std::ifstream &file_handle,
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int stl::writeSolidASCII(std::ofstream &file_handle,
-                                  int &nV, int &nT,  std::vector<std::vector<double>> &V,
-                                  std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
-                                  const std::string &solid_name)
+unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
+                                     int &nV, int &nT,  std::vector<std::vector<double>> &V,
+                                     std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+                                     const std::string &solid_name)
 {
     // Check input variable
     if (V.size() < static_cast<unsigned int>(nV)) {
@@ -2129,10 +2129,10 @@ unsigned int stl::writeSolidASCII(std::ofstream &file_handle,
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int stl::writeSolidASCII(std::ofstream &file_handle,
-                                  int &nV, int &nT,  std::vector<std::array<double, 3>> &V,
-                                  std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
-                                  const std::string &solid_name)
+unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
+                                     int &nV, int &nT,  std::vector<std::array<double, 3>> &V,
+                                     std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+                                     const std::string &solid_name)
 {
     // Check input variable
     if (V.size() < static_cast<unsigned int>(nV)) {
@@ -2233,10 +2233,10 @@ unsigned int stl::writeSolidASCII(std::ofstream &file_handle,
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int stl::writeSolidBINARY(std::ofstream &file_handle,
-                                   int &nV, int &nT,  std::vector<std::vector<double>> &V,
-                                   std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
-                                   const std::string &solid_name)
+unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
+                                      int &nV, int &nT,  std::vector<std::vector<double>> &V,
+                                      std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+                                      const std::string &solid_name)
 {
     BITPIT_UNUSED(solid_name);
 
@@ -2324,10 +2324,10 @@ unsigned int stl::writeSolidBINARY(std::ofstream &file_handle,
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int stl::writeSolidBINARY(std::ofstream &file_handle,
-                                   int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                   std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
-                                   const std::string &solid_name)
+unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
+                                      int &nV, int &nT, std::vector<std::array<double, 3>> &V,
+                                      std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+                                      const std::string &solid_name)
 {
     BITPIT_UNUSED(solid_name);
 
