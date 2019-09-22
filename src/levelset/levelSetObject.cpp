@@ -423,7 +423,7 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
 
     for( LevelSetWriteField &field : fields){
 
-        stringstream name;
+        std::stringstream name;
         name << "ls_";
         name << getId();
         name << "_";
