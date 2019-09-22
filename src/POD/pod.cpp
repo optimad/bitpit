@@ -944,7 +944,7 @@ void POD::leave1out()
     //dump error
     if (m_writeMode != WriteMode::NONE){    
         std::string ename = m_name + ".error";
-        std::cout<< ename << endl;
+        std::cout<< ename << std::endl;
         dumpField(ename, m_errorMap);
     }
     m_nSnapshots=h_nSnapshots;
@@ -1263,8 +1263,8 @@ void POD::evalErrorBoundingBox()
 {
     setWriteMode(WriteMode::NONE);
     pod::SnapshotFile efile("./pod", m_name+".error");
-    log::cout()<< "Reading error field ..."<< endl;
-    log::cout()<< efile.directory+"/"+efile.name +"..."<< endl;
+    log::cout()<< "Reading error field ..."<< std::endl;
+    log::cout()<< efile.directory+"/"+efile.name +"..."<< std::endl;
     pod::PODField error;
     readSnapshot(efile, error);
 
@@ -1352,9 +1352,9 @@ void POD::evalErrorBoundingBox()
     MPI_Allreduce(MPI_IN_PLACE, reinterpret_cast<double *>(minBoxes.data()), m_nFields*3, MPI_DOUBLE, MPI_MIN, m_communicator);
 # endif  
 
-    log::cout()<< ">> Fields Bounding boxes " << endl; 
-    log::cout()<< "min: "<< minBoxes << endl;
-    log::cout()<< "max: "<< maxBoxes << endl;
+    log::cout()<< ">> Fields Bounding boxes " << std::endl;
+    log::cout()<< "min: "<< minBoxes << std::endl;
+    log::cout()<< "max: "<< maxBoxes << std::endl;
 
     std::array<double, 3> minBox = {{0.0, 0.0, 0.0}};
     std::array<double, 3> maxBox = {{0.0, 0.0, 0.0}};
@@ -1364,8 +1364,8 @@ void POD::evalErrorBoundingBox()
         minBox=min(minBoxes[i],minBox);      
     }
 
-    log::cout()<< ">> Bounding box " << endl; 
-    log::cout()<< "("<< minBox << ") ("<< maxBox << ")"<< endl;
+    log::cout()<< ">> Bounding box " << std::endl;
+    log::cout()<< "("<< minBox << ") ("<< maxBox << ")"<< std::endl;
 
     bool runSolver;
 #if BITPIT_ENABLE_MPI
