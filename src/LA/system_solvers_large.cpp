@@ -86,16 +86,24 @@ SystemSolver::SystemSolver(bool debug)
 
     // Initialize Petsc
     if (m_nInstances == 0) {
+        // Generate command line arguments
+        //
+        // The first argument is the executable name and it is set to a
+        // dummy value.
         const char help[] = "None";
 
-        int argc = m_options.size();
+        int nOptions = m_options.size();
+        int argc = nOptions + 1;
         char **argv = new char*[argc];
-        for (int i = 0; i < argc; ++i) {
-            argv[i] = (char*) m_options[i].c_str();
+        argv[0] = (char*) std::string("bitpit_system_solver").c_str();
+        for (int i = 0; i < nOptions; ++i) {
+            argv[i + 1] = (char *) m_options[i].c_str();
         }
 
+        // Call initialization
         PetscInitialize(&argc, &argv, 0, help);
 
+        // Clean-up
         delete[] argv;
     }
 
