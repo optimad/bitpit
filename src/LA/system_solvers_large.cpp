@@ -36,7 +36,9 @@ int SystemSolver::m_nInstances = 0;
 std::vector<std::string> SystemSolver::m_options = std::vector<std::string>(1, "bitpit");
 
 /*!
- * Set initialization option
+ * Add an initialization option
+ *
+ * \param option is the option that will be added
  */
 void SystemSolver::addInitOption(const std::string &option)
 {
@@ -48,7 +50,9 @@ void SystemSolver::addInitOption(const std::string &option)
 }
 
 /*!
- * Set initialization options
+ * Add initialization options
+ *
+ * \param options are the options that will be added
  */
 void SystemSolver::addInitOptions(const std::vector<std::string> &options)
 {
@@ -605,6 +609,8 @@ void SystemSolver::vectorsInit()
 
 /*!
  * Reorders rhs and solution vectors.
+ *
+ * \param inv is a flag for inverting the permutation
  */
 void SystemSolver::vectorsReorder(PetscBool inv)
 {
@@ -614,6 +620,9 @@ void SystemSolver::vectorsReorder(PetscBool inv)
 
 /*!
  * Fills rhs and solution vectors.
+ *
+ * \param rhs is the right-hand-side of the system
+ * \param solution is the solution of the linear system
  */
 void SystemSolver::vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution)
 {
@@ -642,6 +651,8 @@ void SystemSolver::vectorsFill(const std::vector<double> &rhs, std::vector<doubl
 
 /*!
  * Export the solution vector.
+ *
+ * \param solution on output it will contain the solution of the linear system
  */
 void SystemSolver::vectorsExport(std::vector<double> *solution)
 {
@@ -695,7 +706,7 @@ const double * SystemSolver::getRHSRawReadPtr() const
 /*!
  * Restores the solution vector after getRHSRawPtr() has been called.
  *
- * \param raw_solution is the location of pointer to array obtained from
+ * \param raw_rhs is the location of pointer to array obtained from
  * getRHSRawPtr()
  */
 void SystemSolver::restoreRHSRawPtr(double *raw_rhs)
@@ -706,7 +717,7 @@ void SystemSolver::restoreRHSRawPtr(double *raw_rhs)
 /*!
  * Restores the solution vector after getRHSRawReadPtr() has been called.
  *
- * \param raw_solution is the location of pointer to array obtained from
+ * \param raw_rhs is the location of pointer to array obtained from
  * getRHSRawReadPtr()
  */
 void SystemSolver::restoreRHSRawReadPtr(const double *raw_rhs) const
@@ -774,6 +785,9 @@ void SystemSolver::restoreSolutionRawReadPtr(const double *raw_solution) const
 
 /*!
  * Dump the system to file
+ *
+ * \param directory is the directory where the files will be saved
+ * \param prefix is the prefix that will be added to the files
  */
 void SystemSolver::dump(const std::string &directory, const std::string &prefix) const
 {
