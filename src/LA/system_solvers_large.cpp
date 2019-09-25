@@ -52,6 +52,31 @@ void SystemSolver::addInitOption(const std::string &option)
 /*!
  * Add initialization options
  *
+ * \param argc is a non-negative value representing the number of arguments
+ * passed to the program from the environment in which the program is run
+ * \param argv is a pointer to the first element of an array of argc + 1
+ * pointers, of which the last one is null and the previous ones, if any,
+ * point to null-terminated multibyte strings that represent the arguments
+ * passed to the program from the execution environment. If argv[0] is not
+ * a null pointer (or, equivalently, if argc > 0), it points to a string
+ * that represents the name used to invoke the program, or to an empty string.
+ * The value of argv[0] is not propagated to the system solver, the solver
+ * will see a dummy name.
+ */
+void SystemSolver::addInitOptions(int argc, char **argv)
+{
+    if (m_nInstances != 0) {
+        throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
+    }
+
+    for (int i = 1; i < argc; ++i) {
+        m_options.push_back(argv[i]);
+    }
+}
+
+/*!
+ * Add initialization options
+ *
  * \param options are the options that will be added
  */
 void SystemSolver::addInitOptions(const std::vector<std::string> &options)
