@@ -82,6 +82,7 @@ public:
     static void clearInitOptions();
 
     SystemSolver(bool debug = false);
+    SystemSolver(const std::string &prefix, bool debug = false);
 
     virtual ~SystemSolver();
 
@@ -148,6 +149,8 @@ protected:
 private:
     static int m_nInstances;
     static std::vector<std::string> m_options;
+
+    std::string m_prefix;
 
     bool m_assembled;
     PivotType m_pivotType;

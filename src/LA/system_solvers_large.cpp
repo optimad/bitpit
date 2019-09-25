@@ -104,7 +104,18 @@ void SystemSolver::clearInitOptions()
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(bool debug)
-    : m_assembled(false), m_pivotType(PIVOT_NONE),
+    : SystemSolver("", debug)
+{
+}
+
+/*!
+ * Constuctor
+ *
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param debug if set to true, debug information will be printed
+ */
+SystemSolver::SystemSolver(const std::string &prefix, bool debug)
+    : m_prefix(prefix), m_assembled(false), m_pivotType(PIVOT_NONE),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
@@ -961,8 +972,14 @@ void SystemSolver::KSPInit()
 #else
     KSPCreate(PETSC_COMM_SELF, &m_KSP);
 #endif
+
     KSPSetOperators(m_KSP, m_A, m_A);
 
+    if (!m_prefix.empty()) {
+        KSPSetOptionsPrefix(m_KSP, m_prefix.c_str());
+    }
+
+    // Set defualt linear solver
     KSPSetType(m_KSP, KSPFGMRES);
     if (m_KSPOptions.restart != PETSC_DEFAULT) {
         KSPGMRESSetRestart(m_KSP, m_KSPOptions.restart);
@@ -972,6 +989,7 @@ void SystemSolver::KSPInit()
     }
     KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
 
+    // Set default preconditioner
     PCType preconditionerType;
 #if BITPIT_ENABLE_MPI == 1
     if (isPartitioned()) {
@@ -995,7 +1013,11 @@ void SystemSolver::KSPInit()
             PCFactorSetLevels(preconditioner, m_KSPOptions.levels);
         }
     }
+
+    // Set options
     KSPSetFromOptions(m_KSP);
+
+    // Setup
     KSPSetUp(m_KSP);
 
     // Set ASM sub block preconditioners
