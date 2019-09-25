@@ -91,6 +91,14 @@ void SystemSolver::addInitOptions(const std::vector<std::string> &options)
 }
 
 /*!
+ * Clear initialization options
+ */
+void SystemSolver::clearInitOptions()
+{
+    m_options.clear();
+}
+
+/*!
  * Constuctor
  *
  * \param debug if set to true, debug information will be printed

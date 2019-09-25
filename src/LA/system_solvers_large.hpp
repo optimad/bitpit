@@ -79,6 +79,7 @@ public:
     static void addInitOption(const std::string &option);
     static void addInitOptions(int argc, char **args);
     static void addInitOptions(const std::vector<std::string> &options);
+    static void clearInitOptions();
 
     SystemSolver(bool debug = false);
 
