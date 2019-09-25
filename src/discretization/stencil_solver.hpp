@@ -40,6 +40,7 @@ class StencilScalarSolver : public SystemSolver {
 
 public:
     StencilScalarSolver(bool debug = false);
+    StencilScalarSolver(const std::string &prefix, bool debug = false);
 
     void clear(bool release = false);
     void assembly(const std::vector<StencilScalar> &stencils);
