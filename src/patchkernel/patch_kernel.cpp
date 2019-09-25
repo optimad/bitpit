@@ -4817,8 +4817,31 @@ void PatchKernel::setBoundingBox(const std::array<double, 3> &minPoint, const st
 */
 void PatchKernel::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const
 {
+	getBoundingBox(false, minPoint, maxPoint);
+}
+
+/*!
+	Gets the previously stored patch bounding box.
+
+	\param global if set to true, the bounding box will be evaluated globally
+	across all the partitions
+	\param[out] minPoint on output stores the minimum point of the patch
+	\param[out] maxPoint on output stores the maximum point of the patch
+*/
+void PatchKernel::getBoundingBox(bool global, std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const
+{
 	minPoint = m_boxMinPoint;
 	maxPoint = m_boxMaxPoint;
+
+#if BITPIT_ENABLE_MPI==1
+	if (global && isPartitioned()) {
+		MPI_Comm communicator = getCommunicator();
+		MPI_Allreduce(MPI_IN_PLACE, minPoint.data(), 3, MPI_DOUBLE, MPI_MIN, communicator);
+		MPI_Allreduce(MPI_IN_PLACE, maxPoint.data(), 3, MPI_DOUBLE, MPI_MAX, communicator);
+	}
+#else
+	BITPIT_UNUSED(global);
+#endif
 }
 
 /*!

@@ -499,6 +499,7 @@ public:
 	virtual void updateInterfaces(const std::vector<long> &cellIds);
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
+	void getBoundingBox(bool global, std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
 	bool isBoundingBoxDirty(bool global = false) const;
 	void updateBoundingBox(bool forcedUpdated = false);
 
