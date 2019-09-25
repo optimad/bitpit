@@ -205,7 +205,7 @@ void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::
 
     // Append solid
     if (stl_type) {
-        writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        throw std::runtime_error("Appending data to an existing file is only supported for ASCII files.");
     } else {
         writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
@@ -239,7 +239,7 @@ void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::
 
     // Append solid
     if (stl_type) {
-        writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
+        throw std::runtime_error("Appending data to an existing file is only supported for ASCII files.");
     } else {
         writeSolidASCII(m_ofile_handle, nV, nT, V, N, T, name);
     }
