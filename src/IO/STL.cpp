@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include "bitpit_common.hpp"
+#include "bitpit_operators.hpp"
 
 #include "STL.hpp"
 #include "logger.hpp"

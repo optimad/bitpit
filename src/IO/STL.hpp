@@ -32,8 +32,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "Operators.hpp"
-
 namespace bitpit {
 
 /*!
