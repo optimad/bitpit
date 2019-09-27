@@ -1721,7 +1721,7 @@ void POD::evalEigen()
 
             for (std::size_t n = 0; n < m_nSnapshots; ++n) {
                 for (std::size_t p = 0; p < m_nSnapshots; ++p)
-                    m_podCoeffs[i][p][n] = Marr[N - m_nSnapshots * (p + 1) + n] * std::sqrt(abs(m_lambda[i][p]));
+                    m_podCoeffs[i][p][n] = Marr[N - m_nSnapshots * (p + 1) + n] * std::sqrt(std::abs(m_lambda[i][p]));
             }
         }
         if (m_errorMode != ErrorMode::COMBINED){
