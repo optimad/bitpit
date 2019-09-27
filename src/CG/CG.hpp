@@ -85,7 +85,7 @@ bool validSegment( array3D const &, array3D const & );
 bool validLine( array3D const &, array3D const & );
 bool validPlane( array3D const &, array3D const & );
 bool validTriangle( array3D const &, array3D const &, array3D const & );
-bool validBarycentric( double const * &, int );
+bool validBarycentric( double const * , int );
 
 int convertBarycentricToFlagTriangle( std::array<double,3> const &);
 int convertBarycentricToFlagSegment( std::array<double,2> const &);
