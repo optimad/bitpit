@@ -126,20 +126,25 @@ SystemSolver::SystemSolver(bool debug)
         //
         // The first argument is the executable name and it is set to a
         // dummy value.
-        const char help[] = "None";
+        std::string help        = "None";
+        std::string programName = "bitpit_system_solver";
 
-        int nOptions = m_options.size();
-        int argc = nOptions + 1;
-        char **argv = new char*[argc];
-        argv[0] = (char*) std::string("bitpit_system_solver").c_str();
-        for (int i = 0; i < nOptions; ++i) {
-            argv[i + 1] = (char *) m_options[i].c_str();
+        int argc = 1 + m_options.size();
+        char **argv = new char*[argc + 1];
+        argv[0] = strdup(programName.data());
+        for (int i = 0; i < m_options.size(); i++) {
+            argv[1 + i] = strdup(m_options[i].data());
         }
+        argv[argc] = nullptr;
 
         // Call initialization
-        PetscInitialize(&argc, &argv, 0, help);
+        PetscInitialize(&argc, &argv, 0, help.data());
 
         // Clean-up
+        for (int i = 0; i < argc; ++i) {
+            free(argv[i]);
+        }
+
         delete[] argv;
     }
 
