@@ -52,7 +52,7 @@ void run()
 
     /**<Add snapshots to database.*/   
     for (int i=0; i<10; i++)
-        pod.addSnapshot("./data", "test."+to_string(i));
+        pod.addSnapshot("./data", "test."+std::to_string(i));
 
     /**<Set POD.*/    
     pod.setMeshType(POD::MeshType::VOLOCTREE);
@@ -69,7 +69,7 @@ void run()
      * These snapshots are always used in the POD bases computation and
      * the corresponding reconstruction error is never evaluated. */   
     for (int i=0; i<5; i++)
-        pod.removeLeave1outSnapshot("./data", "test."+to_string(2*i)); 
+        pod.removeLeave1outSnapshot("./data", "test."+std::to_string(2*i));
     
     /**<Compute the error map through the leave-1-out method.*/ 
     pod.leave1out();

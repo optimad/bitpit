@@ -51,7 +51,7 @@ void run()
 
     /**<Add snapshots to database.*/   
     for (int i=0; i<11; i++)
-        pod.addSnapshot("./data", "test."+to_string(i));
+        pod.addSnapshot("./data", "test."+std::to_string(i));
 
     /**<Set POD.*/    
     pod.setMeshType(POD::MeshType::VOLOCTREE);
