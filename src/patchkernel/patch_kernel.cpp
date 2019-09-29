@@ -374,8 +374,10 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 
 	\param id is the id of the cell
 	\param marker is the adaption marker of the simulated update
-	\param[out] virtualCells are the virtual cells that would be outcome of the
-	update
+	\param[out] virtualCells are the virtual cells that would be the outcome
+	of the update
+	\param[out] virtualVertices are the virtual vertices that would be the
+	outcome of the update
 */
 void PatchKernel::simulateCellUpdate(const long id, adaption::Marker marker, std::vector<Cell> *virtualCells, PiercedVector<Vertex, long> *virtualVertices) const
 {
@@ -2049,7 +2051,8 @@ PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::uniqu
 	cell will be updated.
 
 	\param type is the type of the cell
-	\param connectivity is the connectivity of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
 	\param id is the id of the cell that will be restored
 	\return An iterator pointing to the restored cell.
 */
@@ -3297,7 +3300,8 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 	interface will be updated.
 
 	\param type is the type of the interface
-	\param connectivity is the connectivity of the interface
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
 	\param id is the id of the interface to restore
 	\return An iterator pointing to the restored interface.
 */
@@ -4234,18 +4238,18 @@ std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element) c
 	\param[out] minPoint is the minimum point of the bounding box
 	\param[out] maxPoint is the maximum point of the bounding box
 */
-void PatchKernel::evalElementBoundingBox(const Element &element, std::array<double,3> *minCoord, std::array<double,3> *maxCoord) const
+void PatchKernel::evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const
 {
 	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
 	const int nElementVertices = elementVertexIds.size();
 
-	*minCoord = getVertexCoords(elementVertexIds[0]);
-	*maxCoord = *minCoord;
+	*minPoint = getVertexCoords(elementVertexIds[0]);
+	*maxPoint = *minPoint;
 	for (int i = 1; i < nElementVertices; ++i) {
 		const std::array<double, 3> &vertexCoord = getVertexCoords(elementVertexIds[i]);
 		for (int d = 0; d < 3; ++d) {
-			(*minCoord)[d] = std::min(vertexCoord[d], (*minCoord)[d]);
-			(*maxCoord)[d] = std::max(vertexCoord[d], (*maxCoord)[d]);
+			(*minPoint)[d] = std::min(vertexCoord[d], (*minPoint)[d]);
+			(*maxPoint)[d] = std::max(vertexCoord[d], (*maxPoint)[d]);
 		}
 	}
 }
