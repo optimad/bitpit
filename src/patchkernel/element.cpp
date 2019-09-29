@@ -1164,7 +1164,8 @@ ConstProxyVector<long> Element::getVertexIds() const
 /*!
 	Gets the list of the vertex ids.
 
-	\param connectivity is the the connectivity,
+	\param type is the type of the element
+	\param connectivity is the the connectivity of the element
 	\result The list of the vertex ids.
 */
 ConstProxyVector<long> Element::getVertexIds(ElementType type, const long *connectivity)

@@ -500,7 +500,8 @@ PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_p
 	cell will be updated.
 
 	\param type is the type of the cell
-	\param connectivity is the connectivity of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
 	\param rank is the rank that owns the cell that will be restored
 	\param id is the id of the cell that will be restored
 	\return An iterator pointing to the restored cell.
