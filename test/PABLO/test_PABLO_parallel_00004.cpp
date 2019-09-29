@@ -39,6 +39,8 @@ using namespace bitpit;
 */
 int subtest_001(int rank)
 {
+    BITPIT_UNUSED(rank);
+
     // Instantation of a 2D para_tree object
     ParaTree pablo(2);
 
