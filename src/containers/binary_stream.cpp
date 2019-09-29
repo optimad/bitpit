@@ -271,7 +271,7 @@ void BinaryStream::setCapacity(std::size_t capacity)
 {
     m_chunkSize = 1;
     std::size_t nChunks = capacity;
-    while (nChunks > std::numeric_limits<int>::max()) {
+    while (nChunks > (std::size_t) std::numeric_limits<int>::max()) {
         m_chunkSize = 2 * m_chunkSize;
         nChunks     = (1 + ((capacity - 1) / m_chunkSize));
     }
