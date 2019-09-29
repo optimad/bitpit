@@ -234,7 +234,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 
     fileStream.open(filename, std::ifstream::binary);
     fileStream.seekg(BINARY_HEADER_SIZE);
-    fileStream.read(reinterpret_cast<char*>(&nTriangles), BINARY_FLOAT_SIZE);
+    fileStream.read(reinterpret_cast<char*>(&nTriangles), BINARY_LONG_SIZE);
     fileStream.close();
     fileStream.clear();
 
