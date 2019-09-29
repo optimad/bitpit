@@ -360,7 +360,7 @@ double POD::getErrorThreshold()
  * Set the target error fields used in the error bounding box evaluation.
  *
  * \param[in] namesf is the vector of scalar fields names.
- * \param[in] namsvf is the vector of vector fields names, arranged in vector components.
+ * \param[in] namevf is the vector of vector fields names, arranged in vector components.
  */
 void POD::setTargetErrorFields(std::vector<std::string> &namesf, std::vector<std::array<std::string,3>> &namevf)
 {
@@ -1406,7 +1406,7 @@ void POD::reconstructFields(pod::PODField & field,  pod::PODField & reconi)
 /**
  * Evaluation of POD reconstruction coefficients.
  *
- * \param[in] snapi Original snapshot field.
+ * \param[in] field Original field to be projected.
  */
 void POD::evalReconstructionCoeffs(pod::PODField & field)
 {
@@ -1480,7 +1480,7 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
 /**
  * Reconstruct a field through POD. Use the m_reconstructionCoeffs already set.
  *
- * \param[out] reconi Resulting snapshot field.
+ * \param[out] recon Resulting snapshot field.
  */
 void POD::buildFields(pod::PODField & recon)
 {
@@ -1648,7 +1648,7 @@ void POD::evalMinimizationMatrices()
 /**
  * Solution of the minimization problem.
  *
- * \param[in/out] rhs right-hand side / solution.
+ * \param[in,out] rhs right-hand side / solution.
  */
 void POD::solveMinimization(std::vector<std::vector<double> > & rhs)
 {
@@ -1758,7 +1758,7 @@ void POD::evalEigen()
 /**
  * Check the number of modes with the number of snapshots and level of energy.
  *
- * \param[in] lambda Array of eigenvalues in ascending order.
+ * \param[in] alambda Array of eigenvalues in ascending order.
  * \param[in] ifield Index of pod field checked.
  */
 void POD::checkModeCount(double *alambda, std::size_t ifield)
@@ -2453,7 +2453,7 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
 /**
  * Perform difference between a POD field and a POD mode.
  *
- * \param[in/out] _a Pointer to field as POD object original / result.
+ * \param[in,out] _a Pointer to field as POD object original / result.
  * \param[in] b Mode as POD object.
  */
 void POD::diff(pod::PODField* _a, const pod::PODMode& b)
@@ -2501,7 +2501,7 @@ void POD::diff(pod::PODField* _a, const pod::PODMode& b)
 /**
  * Perform sum between a POD field and a POD mode.
  *
- * \param[in/out] a Pointer to field as POD object original /result.
+ * \param[in,out] _a Pointer to field as POD object original /result.
  * \param[in] b Mode as POD object.
  */
 void POD::sum(pod::PODField* _a, const pod::PODMode& b)
@@ -2788,7 +2788,6 @@ void POD::reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
  * Evaluation of POD reconstruction coefficients.
  *
  * \param[in] fields Original input field (optimad solver format).
- * \param[in] mesh Pointer to snapshot field.
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
  * \param[in] podscalarIds Ids of scalar fields in POD modes.
  * \param[in] vectorIds Ids of vector fields in PiercedStorage.
@@ -3031,7 +3030,7 @@ void POD::_updateMapper(const std::vector<adaption::Info> & info)
 /**
  * Perform difference between a PiercedStorage fields and a POD mode.
  *
- * \param[in/out] fields Fields as PiercedStorage object original / result.
+ * \param[in,out] fields Fields as PiercedStorage object original / result.
  * \param[in] mode Mode as POD object.
  */
 void POD::diff(PiercedStorage<double> &fields, const pod::PODMode &mode,
@@ -3069,7 +3068,7 @@ void POD::diff(PiercedStorage<double> &fields, const pod::PODMode &mode,
 /**
  * Perform sum between a PiercedStorage fields and a POD mode.
  *
- * \param[in/out] fields Fields as PiercedStorage object original / result.
+ * \param[in,out] fields Fields as PiercedStorage object original / result.
  * \param[in] mode Mode as POD object.
  */
 void POD::sum(PiercedStorage<double> &fields, const pod::PODMode &mode,

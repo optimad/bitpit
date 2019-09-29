@@ -117,7 +117,7 @@ struct PODField
      * Exchanges the content of the pod field by the content of other pod
      * field received in input.
      *
-     * \param[in] field another pod field whose content is swapped with that of
+     * \param[in] other another pod field whose content is swapped with that of
      * this pod field.
      */
     void swap(PODField &other)
