@@ -76,7 +76,7 @@ PiercedStorageRange<value_t, id_t, value_no_cv_t>::PiercedStorageRange(const ite
 /*!
 * Initialize the range.
 *
-* \param kernel is the kernel that will be associated to the range
+* \param storage is the storage that will be associated to the range
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
 void PiercedStorageRange<value_t, id_t, value_no_cv_t>::initialize(const storage_t *storage)
@@ -90,7 +90,7 @@ void PiercedStorageRange<value_t, id_t, value_no_cv_t>::initialize(const storage
 /*!
 * Initialize the range.
 *
-* \param kernel is the kernel that will be associated to the range
+* \param storage is the storage that will be associated to the range
 * \param first is the id of the first element in the range
 * \param last is the id of the last element in the range
 */
