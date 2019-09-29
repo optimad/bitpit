@@ -285,7 +285,7 @@ void PODVolOctree::mapPODFieldFromPOD(pod::PODField & field, const std::unordere
 /**
  * Map a storage of fields TO the POD mesh.
  *
- * \param[in] field Input Fields storage
+ * \param[in] fields Input Fields storage
  * \param[in] mesh Pointer to input field mesh
  * \param[in] targetCells Pointer to set of target cells of POD mesh (cells with mapped values as result)
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
@@ -507,7 +507,7 @@ PiercedStorage<bool> PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> 
  * \param[in] field Input Fields storage
  * \param[in] mesh Pointer to input field mesh
  * \param[in] targetCells Pointer to set of target cells of POD mesh (cells with mapped values as result)
- * \param[out] Fields storage on target cells of POD mesh.
+ * \param[out] mappedField Fields storage on target cells of POD mesh.
  */
 void PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const VolumeKernel * mesh,
         const std::unordered_set<long> * targetCells, PiercedStorage<bool> & mappedField)
