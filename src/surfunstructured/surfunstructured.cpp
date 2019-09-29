@@ -220,8 +220,6 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
 
     // Counters
     int                                         i, j;
-    std::vector<int>::const_iterator            i_;
-    std::vector<long>::iterator                 j_;
     VertexIterator                              v_, ve_ = vertexEnd();
     CellIterator                                c_, ce_ = cellEnd();
 
