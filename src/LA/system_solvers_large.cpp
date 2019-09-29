@@ -132,7 +132,7 @@ SystemSolver::SystemSolver(bool debug)
         int argc = 1 + m_options.size();
         char **argv = new char*[argc + 1];
         argv[0] = strdup(programName.data());
-        for (int i = 0; i < m_options.size(); i++) {
+        for (std::size_t i = 0; i < m_options.size(); i++) {
             argv[1 + i] = strdup(m_options[i].data());
         }
         argv[argc] = nullptr;
