@@ -98,6 +98,7 @@ int CommunicationTags::generate(MPI_Comm communicator)
 /*!
     Checks if an tag is currently assigned.
 
+    \param tag is the tag to be checked
     \param communicator is the MPI communicator
     \return True if the tag has already been assigned, false otherwise.
 */
