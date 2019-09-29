@@ -404,6 +404,7 @@ void LevelSetCachedObject::propagateSign() {
  * will be used as seeds.
  *
  * \param cellId is the index of the cell
+ * \param cellSign is the sign of the cell
  * \param boxMin is the lower-left corenr of the object bounding box
  * \param boxMax is the upper-right corenr of the object bounding box
  * \param[out] cellStatus on output will contain the propagation status

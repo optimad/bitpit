@@ -115,7 +115,7 @@ std::array<double,3> LevelSetObject::computeProjectionPoint(long i) const{
 
 /*!
  * Projects a vertex on the zero levelset
- * @param[in] vertexId index of the vertex
+ * @param[in] coords point coordinates
  * @return the projected point
  */
 std::array<double,3> LevelSetObject::computeProjectionPoint(const std::array<double,3> &coords) const{
