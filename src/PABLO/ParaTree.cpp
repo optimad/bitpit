@@ -311,6 +311,7 @@ namespace bitpit {
     }
 
     /*! Internal function to initialize a dummy octree
+     * \param[in] dim The space dimension of the octree.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
     void
@@ -329,6 +330,8 @@ namespace bitpit {
     }
 
     /*! Initialize a dummy octree
+     *
+     * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
 #if BITPIT_ENABLE_MPI==1
     /*!
@@ -356,6 +359,11 @@ namespace bitpit {
      * \param[in] dim The space dimension of the octree.
      * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
      */
+#if BITPIT_ENABLE_MPI==1
+    /*!
+     * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+     */
+#endif
     void
 #if BITPIT_ENABLE_MPI==1
     ParaTree::initialize(uint8_t dim, const std::string &logfile, MPI_Comm comm) {
@@ -1575,8 +1583,8 @@ namespace bitpit {
 
     /*! Get the local index of an octant and the rank owning the octant.
      * \param[in] gidx Global index of target octant.
+     * \param[out] lidx Index of the octant.
      * \param[out] rank Rank of the process owning the octant as a local one.
-     * \param[out] Local index of octant.
      */
     void
     ParaTree::getLocalIdx(uint64_t gidx, uint32_t & lidx,int & rank) const {
@@ -4242,7 +4250,7 @@ namespace bitpit {
      * Evaluate the elements of the current partition that will be exchanged
      * with other processors during the load balance.
      *
-     * \param[in] updatePartition is the pointer to the updated pattition
+     * \param[in] updatedPartition is the pointer to the updated pattition
      * \return The ranges of local ids that will be exchanged with other
      * processors.
      */
@@ -4268,7 +4276,7 @@ namespace bitpit {
      * Evaluate the elements of the current partition that will be sent to
      * other processors after the load balance.
      *
-     * \param[in] updatePartition is the pointer to the updated pattition
+     * \param[in] updatedPartition is the pointer to the updated pattition
      * \return The range of local ids that will be sent to other processors.
      */
     ParaTree::ExchangeRanges
@@ -4317,7 +4325,7 @@ namespace bitpit {
      * Evaluate the elements of the current partition that will be received
      * from other processors after the load balance.
      *
-     * \param[in] updatePartition is the pointer to the updated pattition
+     * \param[in] updatedPartition is the pointer to the updated pattition
      * \return The range of local ids that will be received from other
      * processors.
      */
