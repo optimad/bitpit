@@ -171,6 +171,19 @@ int LineKernel::getPointCodimension() const
 }
 
 /*!
+    Extracts the external envelope and appends it to the given patch.
+
+    The external envelope is composed by all the free faces of the patch.
+
+    \param[in,out] envelope is the patch to which the external envelope
+    will be appended
+*/
+void LineKernel::extractEnvelope(PointKernel &envelope) const
+{
+    PatchKernel::extractEnvelope(envelope);
+}
+
+/*!
  * Evaluates the characteristic size of the specified cell.
  *
  * \param id is the id of the cell

@@ -43,6 +43,7 @@
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
 # include "bitpit_operators.hpp"                                              // STL containers operators
 # include "bitpit_patchkernel.hpp"                                            // BitPit base patch
+# include "bitpit_lineunstructured.hpp"                                           // BitPit surftri patch
 # include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
 
 // ========================================================================== //
@@ -274,9 +275,9 @@ vector<long>                            cell_list;
 {
     // Scope variables ------------------------------------------------------ //
 #if BITPIT_ENABLE_MPI
-    SurfUnstructured                    envelope(1, MPI_COMM_NULL);
+    LineUnstructured                    envelope(1, MPI_COMM_NULL);
 #else
-    SurfUnstructured                    envelope(1);
+    LineUnstructured                    envelope(1);
 #endif
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
@@ -349,9 +350,9 @@ vector<long>                            cell_list;
 {
     // Scope variables ------------------------------------------------------ //
 #if BITPIT_ENABLE_MPI
-    SurfUnstructured                    envelope(1, MPI_COMM_NULL);
+    LineUnstructured                    envelope(1, MPI_COMM_NULL);
 #else
-    SurfUnstructured                    envelope(1);
+    LineUnstructured                    envelope(1);
 #endif
     vector<long>                        ring1, ring1_expected{6,8,21,22,23,30,31,32};
 
@@ -433,9 +434,9 @@ vector<long>                            cell_list;
 {
     // Scope variables ------------------------------------------------------ //
 #if BITPIT_ENABLE_MPI
-    SurfUnstructured                    envelope(1, MPI_COMM_NULL);
+    LineUnstructured                    envelope(1, MPI_COMM_NULL);
 #else
-    SurfUnstructured                    envelope(1);
+    LineUnstructured                    envelope(1);
 #endif
     vector<long>                        ring1, ring1_expected{4,6,7,19,20,21};
     SurfUnstructured::CellIterator      it;

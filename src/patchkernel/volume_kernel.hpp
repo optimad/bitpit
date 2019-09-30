@@ -26,6 +26,7 @@
 #define __BITPIT_VOLUME_KERNEL_HPP__
 
 #include "patch_kernel.hpp"
+#include "surface_kernel.hpp"
 
 namespace bitpit {
 
@@ -36,6 +37,8 @@ public:
 	int getSurfaceCodimension() const override;
 	int getLineCodimension() const override;
 	int getPointCodimension() const override;
+
+	void extractEnvelope(SurfaceKernel &envelope) const;
 
 	bool isPointInside(double x, double y, double z) const;
 	virtual bool isPointInside(const std::array<double, 3> &point) const = 0;

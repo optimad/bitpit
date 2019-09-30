@@ -26,6 +26,7 @@
 #define __BITPIT_SURFACE_KERNEL_HPP__
 
 #include "patch_kernel.hpp"
+#include "line_kernel.hpp"
 
 namespace bitpit {
 
@@ -47,6 +48,8 @@ public:
     int getSurfaceCodimension() const override;
     int getLineCodimension() const override;
     int getPointCodimension() const override;
+
+    void extractEnvelope(LineKernel &envelope) const;
 
     virtual double evalCellArea(long) const;
     virtual double evalEdgeLength(long, int) const;
