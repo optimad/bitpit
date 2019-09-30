@@ -5224,6 +5224,12 @@ void PatchKernel::resetTol()
 
 /*!
 	Internal function to reset the tolerance for the geometrical checks.
+
+	If a derived patch re-implements this function, it's up to the derived
+	patch to initialize the tolerance of the newly created patches. Since the
+	tolerance is initialized in the constructor, PatchKernel can only reset
+	the tolerance using its base method. Derived classes need to explicitly
+	initialize the tolerance calling the method they have re-implemented.
 */
 void PatchKernel::_resetTol()
 {
