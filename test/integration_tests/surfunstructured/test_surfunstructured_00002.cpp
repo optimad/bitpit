@@ -89,9 +89,9 @@ int subtest_001(
 // Local variables
 long                            id;
 #if BITPIT_ENABLE_MPI
-SurfUnstructured                mesh(2, 3, MPI_COMM_NULL);
+SurfUnstructured                mesh(2, MPI_COMM_NULL);
 #else
-SurfUnstructured                mesh(2, 3);
+SurfUnstructured                mesh(2);
 #endif
 
 // Counters

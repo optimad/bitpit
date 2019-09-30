@@ -95,8 +95,7 @@ SurfaceKernel::SurfaceKernel(bool expert)
 	means that each processor will be unaware of the existence of the other
 	processes.
 
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
@@ -104,24 +103,20 @@ SurfaceKernel::SurfaceKernel(bool expert)
 	cells halo
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(patch_dim, communicator, haloSize, expert)
+SurfaceKernel::SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+	: PatchKernel(dimension, communicator, haloSize, expert)
 #else
 /*!
 	Creates a patch.
 
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
-	: PatchKernel(patch_dim, expert)
+SurfaceKernel::SurfaceKernel(int dimension, bool expert)
+	: PatchKernel(dimension, expert)
 #endif
 {
     initialize();
-
-    // Set the sapce dimension
-    setSpaceDimension(space_dim);
 }
 
 #if BITPIT_ENABLE_MPI==1
@@ -133,8 +128,7 @@ SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
 	processes.
 
 	\param id is the id that will be assigned to the patch
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
@@ -142,22 +136,20 @@ SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
 	cells halo
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(id, patch_dim, communicator, haloSize, expert)
+SurfaceKernel::SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+	: PatchKernel(id, dimension, communicator, haloSize, expert)
 #else
 /*!
 	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, bool expert)
-	: PatchKernel(id, patch_dim, expert)
+SurfaceKernel::SurfaceKernel(int id, int dimension, bool expert)
+	: PatchKernel(id, dimension, expert)
 #endif
 {
-    m_spaceDim = space_dim;
 }
 
 /*!
@@ -165,34 +157,7 @@ SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, bool expert)
 */
 void SurfaceKernel::initialize()
 {
-    // Space dimension
-    m_spaceDim = -1;
-}
-
-/*!
-	Sets the dimension of the working space.
-
-	\param dimension the dimension of the working patch
-*/
-void SurfaceKernel::setSpaceDimension(int dimension)
-{
-    // If the dimension was already assigned, reset the patch
-    if (m_spaceDim > 0 && m_spaceDim != dimension) {
-        reset();
-    }
-
-    // Set the dimension
-    m_spaceDim = dimension;
-}
-
-/*!
- * Returns the number of dimensions of the working space (set at patch construction)
- *
- * \result The number of dimensions.
- */
-int SurfaceKernel::getSpaceDimension(void) const
-{
-    return(m_spaceDim);
+    // Nothing to do
 }
 
 /*!
@@ -433,8 +398,7 @@ double SurfaceKernel::evalAngleAtVertex(long id, int vertex) const
     } else if (cellType == ElementType::VERTEX) {
         return 0.;
     } else if (cellType == ElementType::LINE) {
-        if (m_spaceDim - getDimension() == 1)   return BITPIT_PI;
-        else                                    return 0.;
+        return BITPIT_PI;
     }
 
     ConstProxyVector<long> cellVertexIds = cell.getVertexIds();

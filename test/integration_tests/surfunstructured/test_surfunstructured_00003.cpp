@@ -88,9 +88,9 @@ string                          in_name_ASCII = "./data/cube.stl";
 string                          out_name_bin = "./buddha_copy.stl";
 string                          out_name_ASCII = "./buddha_cube_copy.stl";
 #if BITPIT_ENABLE_MPI
-SurfUnstructured                mesh(2, 3, MPI_COMM_NULL);
+SurfUnstructured                mesh(2, MPI_COMM_NULL);
 #else
-SurfUnstructured                mesh(2, 3);
+SurfUnstructured                mesh(2);
 #endif
 
 // Counters
@@ -224,10 +224,11 @@ string                          in_name = "./data/NACA0012.dgf";
 string                          out_name = "./NACA0012_copy.dgf";
 string                          out_name_vtu = "./NACA0012_copy";
 #if BITPIT_ENABLE_MPI
-SurfUnstructured                mesh(2, 3, MPI_COMM_NULL);
+SurfUnstructured                mesh(2, MPI_COMM_NULL);
 #else
-SurfUnstructured                mesh(2, 3);
+SurfUnstructured                mesh(2);
 #endif
+
 // Counters
 // none
 
@@ -292,9 +293,9 @@ SurfUnstructured                mesh(2, 3);
 {
     // Scope variables ------------------------------------------------------ //
 #if BITPIT_ENABLE_MPI
-    SurfUnstructured                    mesh_copy(2, 3, MPI_COMM_NULL);
+    SurfUnstructured                    mesh_copy(2, MPI_COMM_NULL);
 #else
-    SurfUnstructured                    mesh_copy(2, 3);
+    SurfUnstructured                    mesh_copy(2);
 #endif
     
     // Import mesh from stl format ------------------------------------------ //

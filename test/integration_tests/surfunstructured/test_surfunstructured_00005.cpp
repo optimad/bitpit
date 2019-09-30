@@ -85,9 +85,9 @@ int subtest_001(
 string                          in_name_ASCII = "./data/ahmed.stl";
 string                          out_name_VTU = "ahmed";
 #if BITPIT_ENABLE_MPI
-SurfUnstructured                mesh(2, 3, MPI_COMM_NULL);
+SurfUnstructured                mesh(2, MPI_COMM_NULL);
 #else
-SurfUnstructured                mesh(2, 3);
+SurfUnstructured                mesh(2);
 #endif
 
 // Counters

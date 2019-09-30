@@ -75,7 +75,7 @@ int subtest_001(
 
 // Local variables
 string                          in_name_bin = "./data/buddha.stl";
-SurfUnstructured                mesh(2, 3, MPI_COMM_WORLD);
+SurfUnstructured                mesh(2, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -270,7 +270,7 @@ int subtest_002(
 
 // Local variables
 string                          in_name_bin = "./data/disc.stl";
-SurfUnstructured                mesh(2, 3, MPI_COMM_WORLD);
+SurfUnstructured                mesh(2, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -465,7 +465,7 @@ int subtest_003(
 
 // Local variables
 string                          in_name_bin = "./data/circle.dgf";
-SurfUnstructured                mesh(1, 2, MPI_COMM_WORLD);
+SurfUnstructured                mesh(1, MPI_COMM_WORLD);
 
 // Counters
 // none

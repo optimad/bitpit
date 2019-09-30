@@ -139,11 +139,10 @@ std::unique_ptr<SurfUnstructured> LevelSetMaskObject<storage_manager_t>::extract
 
     std::unique_ptr<SurfUnstructured> envelope;
 #if BITPIT_ENABLE_MPI==1
-    envelope = std::unique_ptr<SurfUnstructured>(new SurfUnstructured(mesh.getDimension()-1,mesh.getDimension(),mesh.getCommunicator()));
+    envelope = std::unique_ptr<SurfUnstructured>(new SurfUnstructured(mesh.getDimension()-1,mesh.getCommunicator()));
 #else
-    envelope = std::unique_ptr<SurfUnstructured>(new SurfUnstructured(mesh.getDimension()-1,mesh.getDimension()));
+    envelope = std::unique_ptr<SurfUnstructured>(new SurfUnstructured(mesh.getDimension()-1));
 #endif
-
 
     // ====================================================================== //
     // RESIZE DATA STRUCTURES                                                 //

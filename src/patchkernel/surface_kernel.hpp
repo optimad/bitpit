@@ -82,12 +82,12 @@ protected:
 
 #if BITPIT_ENABLE_MPI==1
     SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
-    SurfaceKernel(int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert);
-    SurfaceKernel(int id, int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert);
+    SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+    SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
 #else
     SurfaceKernel(bool expert);
-    SurfaceKernel(int patch_dim, int space_dim, bool expert);
-    SurfaceKernel(int id, int patch_dim, int space_dim, bool expert);
+    SurfaceKernel(int dimension, bool expert);
+    SurfaceKernel(int id, int dimension, bool expert);
 #endif
 
     int getOrderedLocalVertexIds(const Cell &cell, long n) const;
