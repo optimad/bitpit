@@ -276,9 +276,8 @@ void PatchKernel::initialize()
 	m_partitioningVerticesTag = -1;
 #endif
 
-	// Initialize the geometrical tolerance to a default value
-	m_toleranceCustom = false;
-	_setTol(DEFAULT_TOLERANCE);
+	// Initialize the geometrical tolerance
+	resetTol();
 
 	// Initializes the bounding box
 	setBoundingBoxFrozen(false);
@@ -5228,6 +5227,8 @@ void PatchKernel::resetTol()
 */
 void PatchKernel::_resetTol()
 {
+	const double DEFAULT_TOLERANCE = 1e-14;
+
 	m_tolerance = DEFAULT_TOLERANCE;
 }
 

@@ -688,8 +688,6 @@ protected:
 	ConstProxyVector<std::array<double, 3>> getElementVertexCoordinates(const Element &element, std::array<double, 3> *externalStorage = nullptr) const;
 
 private:
-	double DEFAULT_TOLERANCE = 1e-14;
-
 	IndexGenerator<long> m_vertexIdGenerator;
 	IndexGenerator<long> m_interfaceIdGenerator;
 	IndexGenerator<long> m_cellIdGenerator;
