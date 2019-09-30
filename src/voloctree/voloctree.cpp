@@ -320,6 +320,12 @@ void VolOctree::initialize()
 	setPartitioningStatus(PARTITIONING_CLEAN);
 #endif
 
+	// Initialize the tolerance
+	//
+	// Since the patch re-implements the function to reset the tolerance,
+	// it has to explicitly initialize the tolerance.
+	resetTol();
+
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
 }
