@@ -4806,11 +4806,6 @@ void PatchKernel::setBoundingBox(const std::array<double, 3> &minPoint, const st
 	m_boxMaxPoint = maxPoint;
 
 	setBoundingBoxDirty(false);
-
-	// Update geometrical tolerance
-	if (!isTolCustomized()) {
-		resetTol();
-	}
 }
 
 /*!
@@ -4966,11 +4961,6 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 
 			boxUpdated = true;
 		}
-	}
-
-	// Update geometrical tolerance
-	if (boxUpdated && !isTolCustomized()) {
-		resetTol();
 	}
 }
 
@@ -5238,11 +5228,7 @@ void PatchKernel::resetTol()
 */
 void PatchKernel::_resetTol()
 {
-	m_tolerance = 1;
-	for (int k = 0; k < 3; ++k) {
-		m_tolerance = std::max(m_boxMaxPoint[k] - m_boxMinPoint[k], m_tolerance);
-	}
-	m_tolerance *= DEFAULT_TOLERANCE;
+	m_tolerance = DEFAULT_TOLERANCE;
 }
 
 /*!
