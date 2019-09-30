@@ -60,9 +60,9 @@ int subtest_001(
 
     // Create the mesh
 #if BITPIT_ENABLE_MPI
-    SurfUnstructured *mesh = new SurfUnstructured(2, 3, MPI_COMM_NULL);
+    SurfUnstructured *mesh = new SurfUnstructured(2, MPI_COMM_NULL);
 #else
-    SurfUnstructured *mesh = new SurfUnstructured(2, 3);
+    SurfUnstructured *mesh = new SurfUnstructured(2);
 #endif
     mesh->setExpert(true);
 

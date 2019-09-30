@@ -48,7 +48,7 @@ int subtest_001(int rank)
     bitpit::log::cout() << "Testing creating a levelset from an existing tree" << std::endl;
 
     // Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(2, dimensions, MPI_COMM_NULL) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(dimensions - 1, MPI_COMM_NULL) );
 
     bitpit::log::cout() << " - Loading stl geometry" << std::endl;
 

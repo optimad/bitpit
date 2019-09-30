@@ -296,7 +296,7 @@ void COM_step(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                     envelope(2, 3, MPI_COMM_WORLD);
+SurfUnstructured                     envelope(2, MPI_COMM_WORLD);
 std::unordered_map<long, int>        cellRanks;
 
 // Counters
@@ -357,7 +357,7 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                     mesh(2, 3, MPI_COMM_WORLD);
+SurfUnstructured                     mesh(2, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -384,7 +384,7 @@ if (mesh.getRank() == 0) {
 {
     // Scope variables ------------------------------------------------------ //
     stringstream                name;
-    SurfUnstructured                envelope(2, 3, MPI_COMM_WORLD);
+    SurfUnstructured                envelope(2, MPI_COMM_WORLD);
 
     // Generate dummy triangulation ----------------------------------------- //
     if (mesh.getRank() == 0) {
@@ -497,7 +497,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured            mesh(2, 3, MPI_COMM_WORLD);
+SurfUnstructured            mesh(2, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -701,7 +701,7 @@ int subtest_003(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured            mesh(2, 3, MPI_COMM_WORLD);
+SurfUnstructured            mesh(2, MPI_COMM_WORLD);
 
 // Counters
 // none

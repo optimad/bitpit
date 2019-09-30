@@ -48,7 +48,7 @@ int subtest_001(int rank, SurfUnstructured *patch_2D, SurfUnstructured *patch_2D
     // Create the patch
     log::cout() << "Creating 2D patch..." << std::endl;
 
-    patch_2D = new SurfUnstructured(2, 2, MPI_COMM_WORLD);
+    patch_2D = new SurfUnstructured(2, MPI_COMM_WORLD);
     patch_2D->initializeAdjacencies();
     patch_2D->getVTK().setName("surfunstructured_patch_2D");
 

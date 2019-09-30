@@ -44,7 +44,7 @@ int subtest_001(int nProcs, int myRank)
     //
 
     // Create the patch
-    SurfUnstructured mesh(2, 3, MPI_COMM_WORLD);
+    SurfUnstructured mesh(2, MPI_COMM_WORLD);
 
     // Read the file
     log::cout() << "Reading STL file..." << std::endl;
