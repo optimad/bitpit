@@ -22,34 +22,36 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#define __BITPIT_MODULE_PATCH_KERNEL_HPP__
-#include "moduleBegin.hpp"
+#ifndef __BITPIT_POINT_KERNEL_HPP__
+#define __BITPIT_POINT_KERNEL_HPP__
 
-/*!
- * @defgroup patches Patches
- * @{
- * @defgroup patchelements Elements
- * @defgroup patchkernel Kernel
- * @defgroup pointpatches Point patches
- * @defgroup linepatches Line patches
- * @defgroup surfacepatches Surface patches
- * @defgroup volumepatches Volume patches
- * @}
- */
-
-
-#include "line_kernel.hpp"
-#include "patch_info.hpp"
 #include "patch_kernel.hpp"
-#include "patch_manager.hpp"
-#include "point_kernel.hpp"
-#include "surface_kernel.hpp"
-#include "surface_skd_tree.hpp"
-#include "volume_kernel.hpp"
-#include "volume_skd_tree.hpp"
-#include "volume_mapper.hpp"
-#include "adaption.hpp"
 
-#include "moduleEnd.hpp"
+namespace bitpit {
+
+class PointKernel : public PatchKernel {
+
+public:
+    double evalCellSize(long id) const override;
+    virtual double evalPointsDistance(long id1, long id2) const;
+    virtual std::array<double, 3> evalPointsDirection(long id1, long id2) const;
+
+protected:
+#if BITPIT_ENABLE_MPI==1
+    PointKernel(MPI_Comm communicator, bool expert);
+    PointKernel(int dimension, MPI_Comm communicator, bool expert);
+    PointKernel(int id, int dimension, MPI_Comm communicator, bool expert);
+#else
+    PointKernel(bool expert);
+    PointKernel(int dimension, bool expert);
+    PointKernel(int id, int dimension, bool expert);
+#endif
+
+private:
+    void initialize();
+
+};
+
+}
+
 #endif
