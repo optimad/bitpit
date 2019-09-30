@@ -170,6 +170,19 @@ int VolumeKernel::getPointCodimension() const
 }
 
 /*!
+	Extracts the external envelope and appends it to the given patch.
+
+	The external envelope is composed by all the free faces of the patch.
+
+	\param[in,out] envelope is the patch to which the external envelope
+	will be appended
+*/
+void VolumeKernel::extractEnvelope(SurfaceKernel &envelope) const
+{
+	PatchKernel::extractEnvelope(envelope);
+}
+
+/*!
 	Checks if the specified point is inside the patch.
 
 	\param[in] x is the x coordinate of the point

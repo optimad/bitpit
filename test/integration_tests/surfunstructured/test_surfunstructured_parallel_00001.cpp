@@ -44,6 +44,7 @@
 # include "bitpit_IO.hpp"                                                     // Input/output
 # include "bitpit_operators.hpp"                                              // STL containers operators
 # include "bitpit_patchkernel.hpp"                                                  // BitPit base patch
+# include "bitpit_lineunstructured.hpp"                                           // BitPit surftri patch
 # include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
 
 // ========================================================================== //
@@ -284,7 +285,7 @@ return;
 // SUBTEST #001 Communications among 3 processes                              //
 // ========================================================================== //
 void COM_step(
-    PatchKernel                 &mesh,
+    SurfaceKernel               &mesh,
     short                        snd,
     short                        rcv,
     vector<long>                &id_list,
@@ -296,7 +297,7 @@ void COM_step(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                     envelope(1, MPI_COMM_WORLD);
+LineUnstructured                     envelope(1, MPI_COMM_WORLD);
 std::unordered_map<long, int>        cellRanks;
 
 // Counters
@@ -384,7 +385,7 @@ if (mesh.getRank() == 0) {
 {
     // Scope variables ------------------------------------------------------ //
     stringstream                name;
-    SurfUnstructured                envelope(1, MPI_COMM_WORLD);
+    LineUnstructured                envelope(1, MPI_COMM_WORLD);
 
     // Generate dummy triangulation ----------------------------------------- //
     if (mesh.getRank() == 0) {

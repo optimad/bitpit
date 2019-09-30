@@ -655,8 +655,6 @@ public:
 	void resetTol();
 	bool isTolCustomized() const;
 
-	void extractEnvelope(PatchKernel &envelope) const;
-
 	void displayTopologyStats(std::ostream &out, unsigned int padding = 0) const;
 	void displayVertices(std::ostream &out, unsigned int padding = 0) const;
 	void displayCells(std::ostream &out, unsigned int padding = 0) const;
@@ -886,6 +884,8 @@ protected:
 	virtual void _findCellVertexNeighs(long id, int vertex, const std::vector<long> *blackList, std::vector<long> *neighs) const;
 
 	void setExpert(bool expert);
+
+	void extractEnvelope(PatchKernel &envelope) const;
 
 	void addPointToBoundingBox(const std::array<double, 3> &point);
 	void removePointFromBoundingBox(const std::array<double, 3> &point);
