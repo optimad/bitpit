@@ -51,7 +51,7 @@ const std::size_t STLObj::ASCII_MINIMUM_SIZE = STLObj::ASCII_FILE_BEGIN.length()
 /*!
     Default constructor for class STLObj.
 
-    Initialize an empty interface to stl file.
+    Initialize an empty interface to STL file.
 */
 STLObj::STLObj()
 {
@@ -68,10 +68,10 @@ STLObj::STLObj()
 
 /*!
     Constructor #1 for class STLObj.
-    Initialize an interface to stl file with name specified in filename.
+    Initialize an interface to STL file with name specified in filename.
 
-    \param[in] filename stl file name
-    \param[in] filetype boolean flag for ascii (false) or binary (true) stl file
+    \param[in] filename STL file name
+    \param[in] filetype boolean flag for ASCII (false) or binary (true) STL file
 */
 STLObj::STLObj(std::string filename, bool filetype)
 {
@@ -88,9 +88,9 @@ STLObj::STLObj(std::string filename, bool filetype)
 
 /*!
     Constructor #1 for class STLObj.
-    Initialize an interface to stl file with name specified in filename.
+    Initialize an interface to STL file with name specified in filename.
 
-    \param[in] filename stl file name
+    \param[in] filename STL file name
 */
 STLObj::STLObj(std::string filename)
 {
@@ -115,7 +115,7 @@ STLObj::STLObj(std::string filename)
 /*!
     Detects if the specified STL file is in binary format.
 
-    \param[in] filename stl file name
+    \param[in] filename STL file name
 */
 STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 {
@@ -136,7 +136,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
     // ASCII check
     //
 
-    // Check if the size is compatible with an ASCCI STL file.
+    // Check if the size is compatible with an ASCII STL file.
     //
     // An ASCII contains at least the "solid " and "endsolid" markers, therefore
     // the minimum size of an empty ASCII file is 14 bytes.
@@ -322,7 +322,7 @@ void STLObj::open(const std::string &mode)
 }
 
 /*!
-    Close the current stream to stl file.
+    Close the current stream to STL file.
 
     \param[in] mode opening mode used to open stream ("in": input, "out": output,
     "app": append)
@@ -343,7 +343,7 @@ void STLObj::close(const std::string &mode)
 }
 
 /*!
-    Clear info and error flags gathered on the stl file associated
+    Clear info and error flags gathered on the STL file associated
     to the interface.
 */
 void STLObj::clear(void)
@@ -362,7 +362,7 @@ void STLObj::clear(void)
 }
 
 /*!
-    Display info gathered on the stl file associated to the interface.
+    Display info gathered on the STL file associated to the interface.
 
     \param[in,out] out output stream
 */
@@ -389,7 +389,7 @@ void STLObj::display(std::ostream &out)
 
     // Error flags
     if (err == 1) {
-        out << "**ERROR** stl file is missing!" << std::endl;
+        out << "**ERROR** STL file is missing!" << std::endl;
         return;
     }
 
@@ -430,7 +430,7 @@ void STLObj::display(std::ostream &out)
 }
 
 /*!
-    Scan and gather info from the stl file associated to the interface
+    Scan and gather info from the STL file associated to the interface
 */
 void STLObj::scan()
 {
@@ -454,7 +454,7 @@ void STLObj::scan()
 }
 
 /*!
-    Scan and check for format errors in the stl file associated to the interface
+    Scan and check for format errors in the STL file associated to the interface
 */
 void STLObj::check()
 {
@@ -476,22 +476,22 @@ void STLObj::check()
 }
 
 /*!
-    Load solid data from the stl file associated to the interface.
+    Load solid data from the STL file associated to the interface.
 
     \param[in,out] nV on input stores the current number of vertices hosted in V.
     On output stores the input values incremented by the number
-    of vertices acquired from the stl file.
+    of vertices acquired from the STL file.
     \param[in,out] nT on input stores the number of facet->vertex connectivity
     entries stores in T. On output stores the input value incremented by the
-    number of facets acquired from the stl file.
+    number of facets acquired from the STL file.
     \param[in,out] V vertex coordinates list. On output stores the coordinates of
-    vertices vertices acquired from the stl file. New vertices are appended
+    vertices vertices acquired from the STL file. New vertices are appended
     at the end of V.
     \param[in,out] N facet normals. On output stores the normal unit std::vector to
-    each facet acquired from the stl file. New normals are appended
+    each facet acquired from the STL file. New normals are appended
     at the end of N.
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
-    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
 */
 void STLObj::load(int &nV, int &nT, std::vector<std::vector<double>> &V,
@@ -515,23 +515,23 @@ void STLObj::load(int &nV, int &nT, std::vector<std::vector<double>> &V,
 }
 
 /*!
-    Load solid data from the stl file associated to the interface. Overloading of
+    Load solid data from the STL file associated to the interface. Overloading of
     member function STLObj::load() for container std::vector<array<double, 3>>
 
     \param[in,out] nV on input stores the current number of vertices hosted in V.
     On output stores the input values incremented by the number
-    of vertices acquired from the stl file.
+    of vertices acquired from the STL file.
     \param[in,out] nT on input stores the number of facet->vertex connectivity
     entries stores in T. On output stores the input value incremented by the
-    number of facets acquired from the stl file.
+    number of facets acquired from the STL file.
     \param[in,out] V vertex coordinates list. On output stores the coordinates of
-    vertices vertices acquired from the stl file. New vertices are appended
+    vertices vertices acquired from the STL file. New vertices are appended
     at the end of V.
     \param[in,out] N facet normals. On output stores the normal unit std::vector to
-    each facet acquired from the stl file. New normals are appended
+    each facet acquired from the STL file. New normals are appended
     at the end of N.
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
-    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
 */
 void STLObj::load(int &nV, int &nT,
@@ -557,25 +557,25 @@ void STLObj::load(int &nV, int &nT,
 }
 
 /*!
-    Load single solid data from the stl file associated to the interface.
+    Load single solid data from the STL file associated to the interface.
     This routine assumes that the input stream is already open.
 
     \param[in,out] nV on input stores the current number of vertices hosted in V.
     On output stores the input values incremented by the number
-    of vertices acquired from the stl file.
+    of vertices acquired from the STL file.
     \param[in,out] nT on input stores the number of facet->vertex connectivity
     entries stores in T. On output stores the input value incremented by the
-    number of facets acquired from the stl file.
+    number of facets acquired from the STL file.
     \param[in,out] V vertex coordinates list. On output stores the coordinates of
-    vertices vertices acquired from the stl file. New vertices are appended
+    vertices vertices acquired from the STL file. New vertices are appended
     at the end of V.
     \param[in,out] N facet normals. On output stores the normal unit std::vector to
-    each facet acquired from the stl file. New normals are appended
+    each facet acquired from the STL file. New normals are appended
     at the end of N.
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
-    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
-    \param[in,out] name name of the stl solid that will to be read, if the name is
+    \param[in,out] name name of the solid that will to be read, if the name is
     empty, the first solid found will be read. On output il will contain the name
     of the solid that has been actually read
 */
@@ -597,27 +597,27 @@ void STLObj::loadSolid(int &nV, int &nT, std::vector<std::vector<double>> &V,
 }
 
 /*!
-    Load single solid solid data from the stl file associated to the interface.
+    Load single solid solid data from the STL file associated to the interface.
     This routine assumes that the input stream is already open.
     Overloading of member function STLObj::load() for container
     std::vector<array<double, 3>>
 
     \param[in,out] nV on input stores the current number of vertices hosted in V.
     On output stores the input values incremented by the number
-    of vertices acquired from the stl file.
+    of vertices acquired from the STL file.
     \param[in,out] nT on input stores the number of facet->vertex connectivity
     entries stores in T. On output stores the input value incremented by the
-    number of facets acquired from the stl file.
+    number of facets acquired from the STL file.
     \param[in,out] V vertex coordinates list. On output stores the coordinates of
-    vertices vertices acquired from the stl file. New vertices are appended
+    vertices vertices acquired from the STL file. New vertices are appended
     at the end of V.
     \param[in,out] N facet normals. On output stores the normal unit std::vector to
-    each facet acquired from the stl file. New normals are appended
+    each facet acquired from the STL file. New normals are appended
     at the end of N.
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
-    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
-    \param[in,out] name name of the stl solid that will to be read, if the name is
+    \param[in,out] name name of the solid that will to be read, if the name is
     empty, the first solid found will be read. On output il will contain the name
     of the solid that has been actually read
 */
@@ -639,7 +639,7 @@ void STLObj::loadSolid(int &nV, int &nT, std::vector<std::array<double, 3>> &V,
 }
 
 /*!
-    Save single solid data appending to the the stl file associated to the interface.
+    Save single solid data appending to the the STL file associated to the interface.
     This routine assumes that the output stream is already open, in append mode.
 
     \param[in]  name name associated to the solid.
@@ -660,7 +660,7 @@ void STLObj::saveSolid(const std::string &name, int &nV, int &nT,  std::vector<s
 }
 
 /*!
-*   Save single solid data appending to the the stl file associated to the interface.
+*   Save single solid data appending to the the STL file associated to the interface.
 *   Overloading for vertices and facet normals passed as std::vector< std::array< double, 3>>.
 *   This routine assumes that the output stream is already open, in append mode.
 *
@@ -700,16 +700,16 @@ void STLObj::load()
 }
 
 /*!
-    Scan ascii stl file and retrieve infos about content.
+    Scan ASCII STL file and retrieve infos about content.
 
-    \param[in,out] file_handle input stream from stl file
-    \param[out] solid_names list of solid names stored in the stl file
-    \param[out] solid_facets number of facets for each stl solid found in the
-    stl file (same ordering of solid_names).
+    \param[in,out] file_handle input stream from STL file
+    \param[out] solid_names list of solid names stored in the STL file
+    \param[out] solid_facets number of facets for each solid found in the
+    STL file (same ordering of solid_names).
 
     \result returns an error flag for I/O errors
         err = 0: no error(s) encountered
-        err = 1: failed to scan stl file.
+        err = 1: failed to sca STL file.
 */
 unsigned int STLObj::scanASCII(std::ifstream &file_handle, std::vector<std::string> &solid_names,
                                std::vector<int> &solid_facets)
@@ -769,16 +769,16 @@ unsigned int STLObj::scanASCII(std::ifstream &file_handle, std::vector<std::stri
 }
 
 /*!
-    Scan binary stl file and retrieve infos about content.
+    Scan binary STL file and retrieve infos about content.
 
-    \param[in,out] file_handle input stream from stl file
-    \param[out] solid_names list of solid names stored in the stl file
-    \param[out] solid_facets number of facets for each stl solid found in the
-    stl file (same ordering of solid_names).
+    \param[in,out] file_handle input stream from STL file
+    \param[out] solid_names list of solid names stored in the STL file
+    \param[out] solid_facets number of facets for each solid found in the
+    STL file (same ordering of solid_names).
 
     \result returns an error flag for I/O errors
         err = 0: no error(s) encountered
-        err = 1: failed to scan stl file.
+        err = 1: failed to sca STL file.
 */
 unsigned int STLObj::scanBINARY(std::ifstream &file_handle, std::vector<std::string> &solid_names,
                                 std::vector<int> &solid_facets)
@@ -822,14 +822,14 @@ unsigned int STLObj::scanBINARY(std::ifstream &file_handle, std::vector<std::str
 }
 
 /*!
-    Scan solid data from ascii stl file and retrieve infos.
+    Scan solid data from ASCII STL file and retrieve infos.
 
-    \param[in,out] file_handle input stream from stl file
+    \param[in,out] file_handle input stream from STL file
     \param[in,out] nT number of facets found in the solid data section
 
     \result returns an error flag for I/O errors
         err = 0: no error(s) encountered
-        err = 1: failed to scan stl file.
+        err = 1: failed to sca STL file.
 */
 unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, int &nT)
 {
@@ -885,10 +885,10 @@ unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, int &nT)
 }
 
 /*!
-    Scan ascii stl file and perform check on format error.
+    Scan ASCII STL file and perform check on format error.
 
-    \param[in] file_handle input stream from stl file.
-    \param[out] err_map for each solid found in the stl file, store a bitmask
+    \param[in] file_handle input stream from STL file.
+    \param[out] err_map for each solid found in the STL file, store a bitmask
     for format errors encountered in the solid data section.
     error code:
         0 -> unterminated solid block
@@ -900,7 +900,7 @@ unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, int &nT)
 
     \result returns and error flag for I/O errors:
         err = 0: no error(s) encountered
-        err = 1: failed to scan/check stl file
+        err = 1: failed to scan/check STL file
 */
 unsigned int STLObj::checkASCII(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map)
 {
@@ -943,9 +943,9 @@ unsigned int STLObj::checkASCII(std::ifstream &file_handle, std::vector<std::vec
 }
 
 /*!
-    Scan solid data section in ascii stl file and perform check on format error.
+    Scan solid data section in ASCII STL file and perform check on format error.
 
-    \param[in] file_handle input stream from stl file.
+    \param[in] file_handle input stream from STL file.
     \param[out] err_map bitmask for format errors encountered in the solid data section.
         0 -> unterminated solid block
         1 -> undeterminated facet block
@@ -956,7 +956,7 @@ unsigned int STLObj::checkASCII(std::ifstream &file_handle, std::vector<std::vec
 
     \result returns and error flag for I/O errors:
         err = 0: no error(s) encountered
-        err = 1: failed to scan/check stl file
+        err = 1: failed to scan/check STL file
 */
 unsigned int STLObj::checkSolidASCII(std::ifstream &file_handle, std::vector<bool> &err_map)
 {
@@ -1012,9 +1012,9 @@ unsigned int STLObj::checkSolidASCII(std::ifstream &file_handle, std::vector<boo
 }
 
 /*!
-    Scan facet data section in ascii stl file and perform check on format error.
+    Scan facet data section in ASCII STL file and perform check on format error.
 
-    \param[in] file_handle input stream from stl file.
+    \param[in] file_handle input stream from STL file.
     \param[out] err_map bitmask for format errors encountered in the facet data section.
         1 -> undeterminated facet block
         2 -> normal data are missing
@@ -1024,7 +1024,7 @@ unsigned int STLObj::checkSolidASCII(std::ifstream &file_handle, std::vector<boo
 
     \result returns and error flag for I/O errors:
         err = 0: no error(s) encountered
-        err = 1: failed to scan/check stl file
+        err = 1: failed to scan/check STL file
 */
 unsigned int STLObj::checkFacetASCII(std::ifstream &file_handle, std::vector<bool> &err_map)
 {
@@ -1117,10 +1117,10 @@ unsigned int STLObj::checkFacetASCII(std::ifstream &file_handle, std::vector<boo
 }
 
 /*!
-    Scan binary stl file and perform check on format error.
+    Scan binary STL file and perform check on format error.
 
-    \param[in] file_handle input stream from stl file.
-    \param[out] err_map for each solid found in the stl file, store a bitmask
+    \param[in] file_handle input stream from STL file.
+    \param[out] err_map for each solid found in the STL file, store a bitmask
     for format errors encountered in the solid data section.
     error code:
         0 -> unterminated solid block
@@ -1132,7 +1132,7 @@ unsigned int STLObj::checkFacetASCII(std::ifstream &file_handle, std::vector<boo
 
     \result returns and error flag for I/O errors:
         err = 0: no error(s) encountered
-        err = 1: failed to scan/check stl file
+        err = 1: failed to scan/check STL file
 */
 unsigned int STLObj::checkBINARY(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map)
 {
@@ -1204,9 +1204,9 @@ unsigned int STLObj::checkBINARY(std::ifstream &file_handle, std::vector<std::ve
 }
 
 /*!
-    Read solid data from ascii stl file.
+    Read solid data from ASCII STL file.
 
-    \param[in,out] file_handle stream from stl file
+    \param[in,out] file_handle stream from STL file
     \param[in] wrapAround controls if, when the end of file is reached, the
     search for the solid to read will begin again from the beginning of the
     file.
@@ -1225,7 +1225,7 @@ unsigned int STLObj::checkBINARY(std::ifstream &file_handle, std::vector<std::ve
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
     of T.
-    \param[in,out] name name of the stl solid that will to be read, if the name is
+    \param[in,out] name name of the solid that will to be read, if the name is
     empty, the first solid found will be read. On output il will contain the name
     of the solid that has been actually read
 
@@ -1342,10 +1342,10 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
 }
 
 /*!
-    Read solid data from ascii stl file. Overloading of readSolidASCII()
+    Read solid data from ASCII STL file. Overloading of readSolidASCII()
     for std::vector<array<double, 3>> container.
 
-    \param[in,out] file_handle stream from stl file
+    \param[in,out] file_handle stream from STL file
     \param[in] wrapAround controls if, when the end of file is reached, the
     search for the solid to read will begin again from the beginning of the
     file.
@@ -1364,7 +1364,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
     of T.
-    \param[in,out] name name of the stl solid that will to be read, if the name is
+    \param[in,out] name name of the solid that will to be read, if the name is
     empty, the first solid found will be read. On output il will contain the name
     of the solid that has been actually read
 
@@ -1392,7 +1392,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         name_key = utils::string::trim(name_key);
     }
 
-    // Scan file until stl solid is found
+    // Scan file until solid is found
     std::string line;
     std::string word;
     std::stringstream sline;
@@ -1487,24 +1487,24 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
 }
 
 /*!
-    Read data from ascii stl file.
+    Read data from ASCII STL file.
 
-    \param[in,out] file_handle stream from stl file
+    \param[in,out] file_handle stream from STL file
     \param[in,out] nV on input stores the number of vertices currently stored in V.
     On output stores the input value increased by the number of vertices acquired
-    from the stl file.
+    from the STL file.
     \param[in,out] nT on input stores the number of facets->vertex connectivity
     entries currently stored in T. On output stores the input value increased
-    by the number of facet acquired from the stl file.
+    by the number of facet acquired from the STL file.
     \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
-    acquired from the stl file. Vertices acquired from the stl file are appended at the end
-    of V (no distinction is made if multiple solids are stored in the same stl file).
+    acquired from the STL file. Vertices acquired from the STL file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] N facet's normals. On output stores the normal unit std::vector
-    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
-    of N (no distinction is made if multiple solids are stored in the same stl file).
+    to each facet acquired from the STL file. Normals acquired from the STL file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
-    of T (no distinction is made if multiple solids are stored in the same stl file).
+    of T (no distinction is made if multiple solids are stored in the same STL file).
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -1550,25 +1550,25 @@ unsigned int STLObj::readASCII(std::ifstream &file_handle,
 }
 
 /*!
-    Read data from ascii stl file. Overloading of readASCII()
+    Read data from ASCII STL file. Overloading of readASCII()
     for container std::vector<array<double, 3>>
 
-    \param[in,out] file_handle stream from stl file
+    \param[in,out] file_handle stream from STL file
     \param[in,out] nV on input stores the number of vertices currently stored in V.
     On output stores the input value increased by the number of vertices acquired
-    from the stl file.
+    from the STL file.
     \param[in,out] nT on input stores the number of facets->vertex connectivity
     entries currently stored in T. On output stores the input value increased
-    by the number of facet acquired from the stl file.
+    by the number of facet acquired from the STL file.
     \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
-    acquired from the stl file. Vertices acquired from the stl file are appended at the end
-    of V (no distinction is made if multiple solids are stored in the same stl file).
+    acquired from the STL file. Vertices acquired from the STL file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] N facet's normals. On output stores the normal unit std::vector
-    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
-    of N (no distinction is made if multiple solids are stored in the same stl file).
+    to each facet acquired from the STL file. Normals acquired from the STL file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
-    of T (no distinction is made if multiple solids are stored in the same stl file).
+    of T (no distinction is made if multiple solids are stored in the same STL file).
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -1615,23 +1615,23 @@ unsigned int STLObj::readASCII(std::ifstream &file_handle,
 
 
 /*!
-    Read STL facet data from ascii stl file.
+    Read STL facet data from ASCII STL file.
 
-    \param[in,out] file_handle input stream from stl file
+    \param[in,out] file_handle input stream from STL file
     \param[in,out] nV on input stores the number of vertices previously acquired from
-    the stl file, on output stores the input value incremented by the number
+    the STL file, on output stores the input value incremented by the number
     of vertices read from the facet section.
     \param[in,out] nT on input stores the number of facets previously aquired from
-    the stl file, on output stores the input value incremented by 1.
+    the STL file, on output stores the input value incremented by 1.
     \param[in,out] V vertex coordinate list. Vertices read from facet section
     are stored in the location V[nV], V[nV+1], etc. nV is the number of vertices
-    previously acquired from the stl file and passed as input to this function.
+    previously acquired from the STL file and passed as input to this function.
     \param[in,out] N normal list. Normal read from facet section is stored at
     position N[nT], where nT is the number of facet previously acquired from the
-    stl file and passed as input to this function.
+    STL file and passed as input to this function.
     \param[in,out] T vertex->facet connectivity. A new connectivity entry for the facet
     begin read is created at position T[nT], where nT is the number of facet previously
-    acquired from the stl file and passed as input to this function.
+    acquired from the STL file and passed as input to this function.
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -1709,24 +1709,24 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
 }
 
 /*!
-    Read STL facet data from ascii stl file.
+    Read STL facet data from ASCII STL file.
     Overloading of readFacetASCII() for std::vector<array<double, 3>> container.
 
-    \param[in,out] file_handle input stream from stl file
+    \param[in,out] file_handle input stream from STL file
     \param[in,out] nV on input stores the number of vertices previously acquired from
-    the stl file, on output stores the input value incremented by the number
+    the STL file, on output stores the input value incremented by the number
     of vertices read from the facet section.
     \param[in,out] nT on input stores the number of facets previously aquired from
-    the stl file, on output stores the input value incremented by 1.
+    the STL file, on output stores the input value incremented by 1.
     \param[in,out] V vertex coordinate list. Vertices read from facet section
     are stored in the location V[nV], V[nV+1], etc. nV is the number of vertices
-    previously acquired from the stl file and passed as input to this function.
+    previously acquired from the STL file and passed as input to this function.
     \param[in,out] N normal list. Normal read from facet section is stored at
     position N[nT], where nT is the number of facet previously acquired from the
-    stl file and passed as input to this function.
+    STL file and passed as input to this function.
     \param[in,out] T vertex->facet connectivity. A new connectivity entry for the facet
     begin read is created at position T[nT], where nT is the number of facet previously
-    acquired from the stl file and passed as input to this function.
+    acquired from the STL file and passed as input to this function.
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -1804,24 +1804,24 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
 }
 
 /*!
-    Read data from binary  stl file.
+    Read data from binary  STL file.
 
-    \param[in,out] file_handle stream from stl file
+    \param[in,out] file_handle stream from STL file
     \param[in,out] nV on input stores the number of vertices currently stored in V.
     On output stores the input value increased by the number of vertices acquired
-    from the stl file.
+    from the STL file.
     \param[in,out] nT on input stores the number of facets->vertex connectivity
     entries currently stored in T. On output stores the input value increased
-    by the number of facet acquired from the stl file.
+    by the number of facet acquired from the STL file.
     \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
-    acquired from the stl file. Vertices acquired from the stl file are appended at the end
-    of V (no distinction is made if multiple solids are stored in the same stl file).
+    acquired from the STL file. Vertices acquired from the STL file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] N facet's normals. On output stores the normal unit std::vector
-    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
-    of N (no distinction is made if multiple solids are stored in the same stl file).
+    to each facet acquired from the STL file. Normals acquired from the STL file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
-    of T (no distinction is made if multiple solids are stored in the same stl file).
+    of T (no distinction is made if multiple solids are stored in the same STL file).
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -1901,25 +1901,25 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
 }
 
 /*!
-    Read data from binary stl file. Overloading of readBINARY() for container
+    Read data from binary STL file. Overloading of readBINARY() for container
     std::vector<array<double, 3>>
 
-    \param[in,out] file_handle stream from stl file
+    \param[in,out] file_handle stream from STL file
     \param[in,out] nV on input stores the number of vertices currently stored in V.
     On output stores the input value increased by the number of vertices acquired
-    from the stl file.
+    from the STL file.
     \param[in,out] nT on input stores the number of facets->vertex connectivity
     entries currently stored in T. On output stores the input value increased
-    by the number of facet acquired from the stl file.
+    by the number of facet acquired from the STL file.
     \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
-    acquired from the stl file. Vertices acquired from the stl file are appended at the end
-    of V (no distinction is made if multiple solids are stored in the same stl file).
+    acquired from the STL file. Vertices acquired from the STL file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] N facet's normals. On output stores the normal unit std::vector
-    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
-    of N (no distinction is made if multiple solids are stored in the same stl file).
+    to each facet acquired from the STL file. Normals acquired from the STL file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same STL file).
     \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
     for each facet acquired from the solid. New connectivity entries are appended at the end
-    of T (no distinction is made if multiple solids are stored in the same stl file).
+    of T (no distinction is made if multiple solids are stored in the same STL file).
 
     \result returns an error flag for I/O errors:
         err = 0: no error(s) encountered
@@ -2004,11 +2004,11 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
 }
 
 /*!
-    Write solid data to ascii stl file.
+    Write solid data to ASCII STL file.
 
-    \param[in,out] file_handle stream to stl file
-    \param[in,out] nV number of vertices to be written to stl file.
-    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] file_handle stream to STL file
+    \param[in,out] nV number of vertices to be written to STL file.
+    \param[in,out] nT number of facet to be written to STL file.
     \param[in,out] V vertex coordinate list
     \param[in,out] N facet's normals
     \param[in,out] T facet->vertex connectivity
@@ -2108,12 +2108,12 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
 }
 
 /*!
-    Write solid data to ascii stl file. Overloading of writeSolidASCII() for
+    Write solid data to ASCII STL file. Overloading of writeSolidASCII() for
     container std::vector<array<double, 3>>.
 
-    \param[in,out] file_handle stream to stl file
-    \param[in,out] nV number of vertices to be written to stl file.
-    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] file_handle stream to STL file
+    \param[in,out] nV number of vertices to be written to STL file.
+    \param[in,out] nT number of facet to be written to STL file.
     \param[in,out] V vertex coordinate list
     \param[in,out] N facet's normals
     \param[in,out] T facet->vertex connectivity
@@ -2213,11 +2213,11 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
 }
 
 /*!
-    Write solid data to binary stl file.
+    Write solid data to binary STL file.
 
-    \param[in,out] file_handle stream to stl file
-    \param[in,out] nV number of vertices to be written to stl file.
-    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] file_handle stream to STL file
+    \param[in,out] nV number of vertices to be written to STL file.
+    \param[in,out] nT number of facet to be written to STL file.
     \param[in,out] V vertex coordinate list
     \param[in,out] N facet's normals
     \param[in,out] T facet->vertex connectivity
@@ -2303,12 +2303,12 @@ unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
 }
 
 /*!
-    Write solid data to binary stl file. Overloading of writeSolidBINARY()
+    Write solid data to binary STL file. Overloading of writeSolidBINARY()
     for container std::vector<array<double, 3>>
 
-    \param[in,out] file_handle stream to stl file
-    \param[in,out] nV number of vertices to be written to stl file.
-    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] file_handle stream to STL file
+    \param[in,out] nV number of vertices to be written to STL file.
+    \param[in,out] nT number of facet to be written to STL file.
     \param[in,out] V vertex coordinate list
     \param[in,out] N facet's normals
     \param[in,out] T facet->vertex connectivity

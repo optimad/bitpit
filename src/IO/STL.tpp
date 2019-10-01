@@ -23,25 +23,25 @@
 \*---------------------------------------------------------------------------*/
 
 /*!
-    Load data for solid with specified label from stl ascii file.
+    Load data for solid with specified label from ASCII STL file.
     
     \param[in] name label associated to the solid. If empty label is specified
-    (i.e. name = ""), data of the first solid encountered in the stl file is returned.
-    If no solid is found with the specified label, no data are loaded from the stl file.
+    (i.e. name = ""), data of the first solid encountered in the STL file is returned.
+    If no solid is found with the specified label, no data are loaded from the STL file.
     \param[in,out] nV on input stores the current number of vertices hosted in V.
     On output stores the input values incremented by the number
-    of vertices acquired from the stl file.
+    of vertices acquired from the STL file.
     \param[in,out] nT on input stores the number of facet->vertex connectivity
     entries stores in T. On output stores the input value incremented by the
-    number of facets acquired from the stl file.
+    number of facets acquired from the STL file.
     \param[in,out] V vertex coordinates list. On output stores the coordinates of
-    vertices vertices acquired from the stl file. New vertices are appended
+    vertices vertices acquired from the STL file. New vertices are appended
     at the end of V.
     \param[in,out] N facet normals. On output stores the normal unit vector to
-    each facet acquired from the stl file. New normals are appended
+    each facet acquired from the STL file. New normals are appended
     at the end of N.
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
-    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
     \param[in] others parameter packs
 */
@@ -68,26 +68,26 @@ void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::vector<do
 }
 
 /*!
-    Load data for solid with specified label from stl ascii file. Overloading of
+    Load data for solid with specified label from an ASCII STL file. Overloading of
     member function STLObj::load() for container vector<array<double, 3>>
     
     \param[in] name label associated to the solid. If empty label is specified
-    (i.e. name = ""), data of the first solid encountered in the stl file is returned.
-    If no solid is found with the specified label, no data are loaded from the stl file.
+    (i.e. name = ""), data of the first solid encountered in the STL file is returned.
+    If no solid is found with the specified label, no data are loaded from the STL file.
     \param[in,out] nV on input stores the current number of vertices hosted in V.
     On output stores the input values incremented by the number
-    of vertices acquired from the stl file.
+    of vertices acquired from the STL file.
     \param[in,out] nT on input stores the number of facet->vertex connectivity
     entries stores in T. On output stores the input value incremented by the
-    number of facets acquired from the stl file.
+    number of facets acquired from the STL file.
     \param[in,out] V vertex coordinates list. On output stores the coordinates of
-    vertices vertices acquired from the stl file. New vertices are appended
+    vertices vertices acquired from the STL file. New vertices are appended
     at the end of V.
     \param[in,out] N facet normals. On output stores the normal unit vector to
-    each facet acquired from the stl file. New normals are appended
+    each facet acquired from the STL file. New normals are appended
     at the end of N.
     \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
-    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
     \param[in] others parameter packs
 */
@@ -114,7 +114,7 @@ void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::array<dou
 }
 
 /*!
-    Save solid data to stl ascii file.
+    Save solid data to ASCII STL file.
     
     \param[in] name label associated to the solid.
     \param[in,out] nV number of solid vertices.
@@ -147,7 +147,7 @@ void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::ve
 }
 
 /*!
-    Save solid data to stl ascii file. Overloading of member function STLObj::save()
+    Save solid data to ASCII STL file. Overloading of member function STLObj::save()
     for container vector<array<double, 3>>
     
     \param[in] name label associated to the solid.
@@ -181,7 +181,7 @@ void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::ar
 }
 
 /*!
-    Append solid data at the end of an existing stl ascii file.
+    Append solid data at the end of an existing ASCII STL file.
    
     \tparam T2 vriadic template 
     \param[in] name label associated to the solid.
@@ -215,7 +215,7 @@ void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::
 }
 
 /*!
-    Append solid data at the end of an existing stl ascii file. Overloading of
+    Append solid data at the end of an existing ASCII STL file. Overloading of
     member function STLObj::append() for container vector<array<double, 3>>.
     
     \param[in] name label associated to the solid.
