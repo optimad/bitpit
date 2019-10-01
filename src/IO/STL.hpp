@@ -128,6 +128,23 @@ public:
                 std::vector<std::array<double,3>> &N, std::vector<std::array<int,3>> &T,
                 T2 & ... others);
 
+protected:
+    typedef uint8_t  BINARY_UINT8;
+    typedef uint16_t BINARY_UINT16;
+    typedef uint32_t BINARY_UINT32;
+    typedef float    BINARY_REAL32;
+
+    static const std::size_t BINARY_HEADER_SIZE;
+    static const std::size_t BINARY_MINIMUM_SIZE;
+
+    static const std::string ASCII_SOLID_BEGIN;
+    static const std::string ASCII_SOLID_END;
+    static const std::string ASCII_FACET_BEGIN;
+    static const std::string ASCII_FACET_END;
+    static const std::string ASCII_FILE_BEGIN;
+    static const std::string ASCII_FILE_END;
+    static const std::size_t ASCII_MINIMUM_SIZE;
+
 private:
     std::ifstream m_ifile_handle;      /**< input stream to stl file */
     std::ofstream m_ofile_handle;      /**< output stream to stl file */

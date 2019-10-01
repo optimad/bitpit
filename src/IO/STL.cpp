@@ -37,6 +37,17 @@ namespace bitpit {
     and STL I/O functions.
 */
 
+const std::size_t STLObj::BINARY_HEADER_SIZE  = 80 * sizeof(STLObj::BINARY_UINT8);
+const std::size_t STLObj::BINARY_MINIMUM_SIZE = STLObj::BINARY_HEADER_SIZE + sizeof(STLObj::BINARY_UINT32);
+
+const std::string STLObj::ASCII_SOLID_BEGIN  = "solid";
+const std::string STLObj::ASCII_SOLID_END    = "endsolid";
+const std::string STLObj::ASCII_FACET_BEGIN  = "facet";
+const std::string STLObj::ASCII_FACET_END    = "endfacet";
+const std::string STLObj::ASCII_FILE_BEGIN   = STLObj::ASCII_SOLID_BEGIN + " ";
+const std::string STLObj::ASCII_FILE_END     = STLObj::ASCII_SOLID_END;
+const std::size_t STLObj::ASCII_MINIMUM_SIZE = STLObj::ASCII_FILE_BEGIN.length() + STLObj::ASCII_FILE_END.length();
+
 /*!
     Default constructor for class STLObj.
 
@@ -108,17 +119,6 @@ STLObj::STLObj(std::string filename)
 */
 STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 {
-    const std::size_t BINARY_HEADER_SIZE = 80;
-    const std::size_t BINARY_FLOAT_SIZE  = 4;
-    const std::size_t BINARY_SHORT_SIZE  = 2;
-    const std::size_t BINARY_LONG_SIZE   = 4;
-
-    const std::size_t MINIMUM_ASCII_SIZE  = 14;
-    const std::size_t MINIMUM_BINARY_SIZE = BINARY_HEADER_SIZE + BINARY_LONG_SIZE;
-
-    const std::string ASCII_BEGIN = "solid ";
-    const std::string ASCII_END   = "endsolid";
-
     std::ifstream fileStream;
 
     // Get the file size
@@ -140,7 +140,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
     //
     // An ASCII contains at least the "solid " and "endsolid" markers, therefore
     // the minimum size of an empty ASCII file is 14 bytes.
-    if (fileSize < MINIMUM_ASCII_SIZE) {
+    if (fileSize < ASCII_MINIMUM_SIZE) {
         return FormatInvalid;
     }
 
@@ -153,7 +153,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
     std::size_t bufferPos;
 
     bufferPos = 0;
-    std::string beginString(ASCII_BEGIN.size(), ' ');
+    std::string beginString(ASCII_FILE_BEGIN.size(), ' ');
     fileStream.open(filename, std::ifstream::binary);
     while (fileStream.get(c)) {
         if (bufferPos == 0 && (std::isblank(c) || std::isspace(c))) {
@@ -162,14 +162,14 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 
         beginString.at(bufferPos) = tolower(c);
         ++bufferPos;
-        if (bufferPos == ASCII_BEGIN.size()) {
+        if (bufferPos == ASCII_FILE_BEGIN.size()) {
             break;
         }
     }
     fileStream.close();
     fileStream.clear();
 
-    bool maybeASCII = (beginString.compare(ASCII_BEGIN) == 0);
+    bool maybeASCII = (beginString.compare(ASCII_FILE_BEGIN) == 0);
     if (maybeASCII) {
         // Open the file
         fileStream.open(filename, std::ifstream::ate | std::ifstream::binary);
@@ -193,7 +193,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 
         // Search the end-line keyword
         bufferPos = 0;
-        std::string endString(ASCII_END.size(), ' ');
+        std::string endString(ASCII_SOLID_END.size(), ' ');
         while (fileStream.get(c)) {
             if (bufferPos == 0 && (std::isblank(c) || std::isspace(c))) {
                 continue;
@@ -201,7 +201,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 
             endString.at(bufferPos) = tolower(c);
             ++bufferPos;
-            if (bufferPos == ASCII_END.size()) {
+            if (bufferPos == ASCII_SOLID_END.size()) {
                 break;
             }
         }
@@ -211,7 +211,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
         fileStream.clear();
 
         // Check if the end-solid keyword was found
-        bool isASCII = (endString.compare(ASCII_END) == 0);
+        bool isASCII = (endString.compare(ASCII_SOLID_END) == 0);
         if (isASCII) {
             return FormatASCII;
         }
@@ -225,7 +225,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
     //
     // An empty binary file contains the header and the number of facets,
     // therefore the minimum size of an empty binary file is 84 bytes.
-    if (fileSize < MINIMUM_BINARY_SIZE) {
+    if (fileSize < BINARY_MINIMUM_SIZE) {
         return FormatInvalid;
     }
 
@@ -234,7 +234,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 
     fileStream.open(filename, std::ifstream::binary);
     fileStream.seekg(BINARY_HEADER_SIZE);
-    fileStream.read(reinterpret_cast<char*>(&nFacets), BINARY_LONG_SIZE);
+    fileStream.read(reinterpret_cast<char*>(&nFacets), sizeof(BINARY_UINT32));
     fileStream.close();
     fileStream.clear();
 
@@ -244,11 +244,11 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
     //  - normal: 3 float_32;
     //  - vertices' coordinates: 3 float_32;
     //  - attribute byte count: 1 unit_16.
-    const std::size_t BINARY_FACET_SIZE = 3 * BINARY_FLOAT_SIZE +
-                                        3 * 3 * BINARY_FLOAT_SIZE +
-                                        BINARY_SHORT_SIZE;
+    const std::size_t BINARY_FACET_SIZE = 3 * sizeof(BINARY_REAL32) +
+                                          3 * 3 * sizeof(BINARY_REAL32) +
+                                          sizeof(BINARY_UINT16);
 
-    std::size_t expectedFileSize = BINARY_HEADER_SIZE + BINARY_LONG_SIZE + (nFacets * BINARY_FACET_SIZE);
+    std::size_t expectedFileSize = BINARY_HEADER_SIZE + sizeof(BINARY_UINT32) + (nFacets * BINARY_FACET_SIZE);
     if (fileSize == expectedFileSize) {
         return FormatBinary;
     }
@@ -743,7 +743,7 @@ unsigned int STLObj::scanASCII(std::ifstream &file_handle, std::vector<std::stri
 
         // Get keyword
         if (sline >> word) {
-            if (word.compare("solid") == 0) {
+            if (word.compare(ASCII_SOLID_BEGIN) == 0) {
                 // Get solid name
                 sword.str("");
                 while (sline >> word) {
@@ -857,11 +857,11 @@ unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, int &nT)
     }
 
     while ((!file_handle.eof())
-        && ((word.compare("endsolid") != 0)
-        &&  (word.compare("solid") != 0))) {
+        && ((word.compare(ASCII_SOLID_END)   != 0)
+        &&  (word.compare(ASCII_SOLID_BEGIN) != 0))) {
 
         // Look for keyword "facet"
-        if (word.compare("facet") == 0) {
+        if (word.compare(ASCII_FACET_BEGIN) == 0) {
             nT++;
         }
 
@@ -876,7 +876,7 @@ unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, int &nT)
         }
     }
 
-    if (word.compare("endsolid") != 0) {
+    if (word.compare(ASCII_SOLID_END) != 0) {
         file_handle.clear();
         file_handle.seekg(last_valid_pos);
     }
@@ -927,7 +927,7 @@ unsigned int STLObj::checkASCII(std::ifstream &file_handle, std::vector<std::vec
         sline.clear(),
         sline.str(line);
 
-        if ((sline >> word) && (word.compare("solid") == 0)) {
+        if ((sline >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
             std::vector<bool> _map(6, false);
             checkSolidASCII(file_handle, _map);
             err_map.push_back(_map);
@@ -988,21 +988,21 @@ unsigned int STLObj::checkSolidASCII(std::ifstream &file_handle, std::vector<boo
         // Exit conditions
         if (file_handle.eof()) {
             break;
-        } else if (word.compare("endsolid") == 0) {
+        } else if (word.compare(ASCII_SOLID_END) == 0) {
             break;
-        } else if (word.compare("solid") != 0) {
+        } else if (word.compare(ASCII_SOLID_BEGIN) != 0) {
             break;
         }
 
         // Look for keyword "facet"
-        if (word.compare("facet") == 0) {
+        if (word.compare(ASCII_FACET_BEGIN) == 0) {
             file_handle.seekg(last_valid_pos);
             checkFacetASCII(file_handle, err_map);
         }
     }
 
     // Check block temination
-    if (word.compare("endsolid") != 0) {
+    if (word.compare(ASCII_SOLID_END) != 0) {
         err_map[0] = true;
         file_handle.clear();
         file_handle.seekg(last_valid_pos);
@@ -1047,17 +1047,17 @@ unsigned int STLObj::checkFacetASCII(std::ifstream &file_handle, std::vector<boo
     line = utils::string::trim(line);
     sline.clear(),
     sline.str(line);
-    if ((!(sline >> word)) || (word.compare("facet") == 0)) {
+    if ((!(sline >> word)) || (word.compare(ASCII_FACET_BEGIN) == 0)) {
         word = "begin";
     }
 
     int nV = 0;
     bool normal_found = false;
     while ((!file_handle.eof())
-           && ((word.compare("endfacet") != 0)
-           &&  (word.compare("facet")    != 0)
-           &&  (word.compare("endsolid") != 0)
-           &&  (word.compare("solid")    != 0))) {
+           && ((word.compare(ASCII_FACET_END)   != 0)
+           &&  (word.compare(ASCII_FACET_BEGIN) != 0)
+           &&  (word.compare(ASCII_SOLID_END)   != 0)
+           &&  (word.compare(ASCII_SOLID_BEGIN) != 0))) {
 
         // Check facet normal or facet vertices
         if (word.compare("begin") == 0) {
@@ -1097,7 +1097,7 @@ unsigned int STLObj::checkFacetASCII(std::ifstream &file_handle, std::vector<boo
     }
 
     // Check if facket section is properly closed
-    if (word.compare("endfacet") != 0) {
+    if (word.compare(ASCII_FACET_END) != 0) {
         err_map[1] = true;
         file_handle.clear(),
         file_handle.seekg(last_valid_pos);
@@ -1239,9 +1239,6 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
                                     std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
                                     std::string &name)
 {
-    // Constants
-    const std::string SOLID_KEY = "solid";
-
     // Check stream status
     if (!file_handle.good()) {
         return 1;
@@ -1250,7 +1247,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     // Get solid key
     name = utils::string::trim(name);
 
-    std::string name_key = SOLID_KEY;
+    std::string name_key = ASCII_SOLID_BEGIN;
     if (!name.empty()) {
         name_key += " " + name;
         name_key = utils::string::trim(name_key);
@@ -1285,9 +1282,9 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         current_pos = file_handle.tellg();
 
         // Look for keyword "solid"
-        if ((sline >> word) && (word.compare(SOLID_KEY) == 0)) {
+        if ((sline >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
             if (name.empty() || line.compare(name_key) == 0) {
-                name = line.erase(0, SOLID_KEY.size());
+                name = line.erase(0, ASCII_SOLID_BEGIN.size());
                 name = utils::string::trim(name);
 
                 start_pos = current_pos;
@@ -1316,8 +1313,8 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     file_handle.seekg(start_pos);
     word = "begin";
     while ((!file_handle.eof())
-        && (word.compare("endsolid") != 0)
-        && (word.compare("solid") != 0)) {
+        && (word.compare(ASCII_SOLID_END)   != 0)
+        && (word.compare(ASCII_SOLID_BEGIN) != 0)) {
 
         // Get current line
         current_pos = file_handle.tellg();
@@ -1327,7 +1324,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         sline.str(line);
 
         // Look for keyword "facet"
-        if ((sline >> word) && (word.compare("facet") == 0)) {
+        if ((sline >> word) && (word.compare(ASCII_FACET_BEGIN) == 0)) {
             file_handle.seekg(current_pos);
             int readFacetError = readFacetASCII(file_handle, nV, nT, V, N, T);
             if (readFacetError != 0) {
@@ -1336,7 +1333,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         }
     }
 
-    if (word.compare("endsolid") != 0) {
+    if (word.compare(ASCII_SOLID_END) != 0) {
         file_handle.clear();
         file_handle.seekg(current_pos);
     }
@@ -1381,9 +1378,6 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
                                     std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
                                     std::string &name)
 {
-    // Constants
-    const std::string SOLID_KEY = "solid";
-
     // Check stream status
     if (!file_handle.good()) {
         return 1;
@@ -1392,7 +1386,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     // Get solid key
     name = utils::string::trim(name);
 
-    std::string name_key = SOLID_KEY;
+    std::string name_key = ASCII_SOLID_BEGIN;
     if (!name.empty()) {
         name_key += " " + name;
         name_key = utils::string::trim(name_key);
@@ -1427,9 +1421,9 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         current_pos = file_handle.tellg();
 
         // Look for keyword "solid"
-        if ((sline >> word) && (word.compare(SOLID_KEY) == 0)) {
+        if ((sline >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
             if (name.empty() || line.compare(name_key) == 0) {
-                name = line.erase(0, SOLID_KEY.size());
+                name = line.erase(0, ASCII_SOLID_BEGIN.size());
                 name = utils::string::trim(name);
 
                 start_pos = current_pos;
@@ -1464,8 +1458,8 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     file_handle.seekg(start_pos);
     word = "begin";
     while ((!file_handle.eof())
-        && (word.compare("endsolid") != 0)
-        && (word.compare("solid") != 0)) {
+        && (word.compare(ASCII_SOLID_END)   != 0)
+        && (word.compare(ASCII_SOLID_BEGIN) != 0)) {
 
         // Get current line
         current_pos = file_handle.tellg();
@@ -1475,7 +1469,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         sline.str(line);
 
         // Look for keyword "facet"
-        if ((sline >> word) && (word.compare("facet") == 0)) {
+        if ((sline >> word) && (word.compare(ASCII_FACET_BEGIN) == 0)) {
             file_handle.seekg(current_pos);
             int readFacetError = readFacetASCII(file_handle, nV, nT, V, N, T);
             if (readFacetError != 0) {
@@ -1484,7 +1478,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         }
     }
 
-    if (word.compare("endsolid") != 0) {
+    if (word.compare(ASCII_SOLID_END) != 0) {
         file_handle.clear();
         file_handle.seekg(current_pos);
     }
@@ -1540,7 +1534,7 @@ unsigned int STLObj::readASCII(std::ifstream &file_handle,
     while (getline(file_handle, line)) {
         sline.clear();
         sline.str(line);
-        if ((sline >> word) && (word.compare("solid") == 0)) {
+        if ((sline >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
             file_handle.clear();
             file_handle.seekg(current_pos);
             readSolidASCII(file_handle, true, nV, nT, V, N, T, name);
@@ -1604,7 +1598,7 @@ unsigned int STLObj::readASCII(std::ifstream &file_handle,
     while (getline(file_handle, line)) {
         sline.clear();
         sline.str(line);
-        if ((sline >> word) && (word.compare("solid") == 0)) {
+        if ((sline >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
             file_handle.clear();
             file_handle.seekg(current_pos);
             readSolidASCII(file_handle, true, nV, nT, V, N, T, name);
@@ -1659,16 +1653,16 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
     line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
-    if ((!(sline >> word)) || (word.compare("facet") == 0)) {
+    if ((!(sline >> word)) || (word.compare(ASCII_FACET_BEGIN) == 0)) {
         word = "begin";
     }
 
     int nv = 0;
     while ((!file_handle.eof())
-           && ((word.compare("endfacet") != 0)
-           &&  (word.compare("facet")    != 0)
-           &&  (word.compare("solid")    != 0)
-           &&  (word.compare("endsolid") != 0))) {
+           && ((word.compare(ASCII_FACET_END)   != 0)
+           &&  (word.compare(ASCII_FACET_BEGIN) != 0)
+           &&  (word.compare(ASCII_SOLID_BEGIN) != 0)
+           &&  (word.compare(ASCII_SOLID_END)   != 0))) {
 
         // Read facet normal or facet vertices
         if (word.compare("begin") == 0) {
@@ -1697,12 +1691,12 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
     }
 
     // Restor cursor position
-    if (word.compare("endfacet") != 0) {
+    if (word.compare(ASCII_FACET_END) != 0) {
         file_handle.clear();
         file_handle.seekg(last_valid_pos);
     }
 
-    // Update facet-vertex connectivity
+    // Update triangle-vertex connectivity
     for (int i = 0; i < nv; ++i) {
         T[nT][i] = nV + i;
     }
@@ -1754,16 +1748,16 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
     line = utils::string::trim(line);
     sline.clear();
     sline.str(line);
-    if ((!(sline >> word)) || (word.compare("facet") == 0)) {
+    if ((!(sline >> word)) || (word.compare(ASCII_FACET_BEGIN) == 0)) {
         word = "begin";
     }
 
     int nv = 0;
     while ((!file_handle.eof())
-           && ((word.compare("endfacet") != 0)
-           &&  (word.compare("facet")    != 0)
-           &&  (word.compare("solid")    != 0)
-           &&  (word.compare("endsolid") != 0))) {
+           && ((word.compare(ASCII_FACET_END)   != 0)
+           &&  (word.compare(ASCII_FACET_BEGIN) != 0)
+           &&  (word.compare(ASCII_SOLID_BEGIN) != 0)
+           &&  (word.compare(ASCII_SOLID_END)   != 0))) {
 
         // Read facet normal or facet vertices
         if (word.compare("begin") == 0) {
@@ -1792,12 +1786,12 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
     }
 
     // Restor cursor position
-    if (word.compare("endfacet") != 0) {
+    if (word.compare(ASCII_FACET_END) != 0) {
         file_handle.clear();
         file_handle.seekg(last_valid_pos);
     }
 
-    // Update facet-vertex connectivity
+    // Update triangle-vertex connectivity
     for (int i = 0; i < nv; ++i) {
         T[nT][i] = nV + i;
     }
@@ -1862,7 +1856,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
         file_handle.read(reinterpret_cast<char*>(float4byte_ptr), 4);
     }
 
-    // Read number of facets
+    // Read number of elements
     file_handle.read(reinterpret_cast<char*>(longint4byte_ptr), 4);
     nT = (int)*longint4byte_ptr;
     nV = 3*nT;
@@ -1890,7 +1884,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
             nV++;
         }
 
-        // Facet-vertex connectivity
+        // Triangle-vertex connectivity
         T[i][0] = nV - 3;
         T[i][1] = nV - 2;
         T[i][2] = nV - 1;
@@ -1960,7 +1954,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
         file_handle.read(reinterpret_cast<char*>(float4byte_ptr), 4);
     }
 
-    // Read number of facets
+    // Read number of elements
     file_handle.read(reinterpret_cast<char*>(longint4byte_ptr), 4);
     nT = (int)*longint4byte_ptr;
     nV = 3*nT;
@@ -1993,7 +1987,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
             nV++;
         }
 
-        // Facet-vertex connectivity
+        // Triangle-vertex connectivity
         T[i][0] = nV - 3;
         T[i][1] = nV - 2;
         T[i][2] = nV - 1;
@@ -2052,7 +2046,7 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
 
     // Write header
     std::stringstream sheader;
-    sheader << "solid " << solid_name;
+    sheader << ASCII_SOLID_BEGIN << " " << solid_name;
 
     std::string header = sheader.str();
     header = utils::string::trim(header);
@@ -2063,7 +2057,7 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
     // Write solid
     for (int i = 0; i < nT; ++i) {
         // Facet header
-        file_handle << "  facet";
+        file_handle << "  " << ASCII_FACET_BEGIN;
 
         // Facet normal
         int n_size = N[i].size();
@@ -2093,12 +2087,12 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
         file_handle << "    endloop"    << std::endl;
 
         // Facet footer
-        file_handle << "  endfacet" << std::endl;
+        file_handle << "  " << ASCII_FACET_END << std::endl;
     }
 
     // Solid footer
     std::stringstream sfooter;
-    sfooter << "endsolid " << solid_name;
+    sfooter << ASCII_SOLID_END << " " << solid_name;
 
     std::string footer;
     footer = sfooter.str();
@@ -2157,7 +2151,7 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
 
     // Write header
     std::stringstream sheader;
-    sheader << "solid " << solid_name;
+    sheader << ASCII_SOLID_BEGIN << " " << solid_name;
 
     std::string header = sheader.str();
     header = utils::string::trim(header);
@@ -2168,7 +2162,7 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
     // Write solid
     for (int i = 0; i < nT; ++i) {
         // Facet header
-        file_handle << "  facet";
+        file_handle << "  " << ASCII_FACET_BEGIN;
 
         // Facet normal
         int n_size = N[i].size();
@@ -2198,12 +2192,12 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
         file_handle << "    endloop"    << std::endl;
 
         // Facet footer
-        file_handle << "  endfacet" << std::endl;
+        file_handle << "  " << ASCII_FACET_END << std::endl;
     }
 
     // Solid footer
     std::stringstream sfooter;
-    sfooter << "endsolid " << solid_name;
+    sfooter << ASCII_SOLID_END << " " << solid_name;
 
     std::string footer;
     footer = sfooter.str();
