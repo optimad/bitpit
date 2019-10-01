@@ -223,32 +223,32 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
 
     // Check if the size is compatible with a binary STL file.
     //
-    // An empty binary file contains the header and the number of triangles,
+    // An empty binary file contains the header and the number of facets,
     // therefore the minimum size of an empty binary file is 84 bytes.
     if (fileSize < MINIMUM_BINARY_SIZE) {
         return FormatInvalid;
     }
 
-    // Read the number of triangles
-    std::uint32_t nTriangles;
+    // Read the number of facets
+    std::uint32_t nFacets;
 
     fileStream.open(filename, std::ifstream::binary);
     fileStream.seekg(BINARY_HEADER_SIZE);
-    fileStream.read(reinterpret_cast<char*>(&nTriangles), BINARY_LONG_SIZE);
+    fileStream.read(reinterpret_cast<char*>(&nFacets), BINARY_LONG_SIZE);
     fileStream.close();
     fileStream.clear();
 
-    // Check that the size of the file is compatiblewith the number of triangles
+    // Check that the size of the file is compatiblewith the number of facets
     //
-    // Each triangle has three facet and each facet contains:
-    //  - Normal: 3 float_32
-    //  - Vertices' coordinates: 3x float_32
-    //  - Attribute byte count: 1 unit_16
+    // Each facet contains the following information:
+    //  - normal: 3 float_32;
+    //  - vertices' coordinates: 3 float_32;
+    //  - attribute byte count: 1 unit_16.
     const std::size_t BINARY_FACET_SIZE = 3 * BINARY_FLOAT_SIZE +
                                         3 * 3 * BINARY_FLOAT_SIZE +
                                         BINARY_SHORT_SIZE;
 
-    std::size_t expectedFileSize = BINARY_HEADER_SIZE + BINARY_LONG_SIZE + (nTriangles * BINARY_FACET_SIZE);
+    std::size_t expectedFileSize = BINARY_HEADER_SIZE + BINARY_LONG_SIZE + (nFacets * BINARY_FACET_SIZE);
     if (fileSize == expectedFileSize) {
         return FormatBinary;
     }
@@ -1702,7 +1702,7 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
         file_handle.seekg(last_valid_pos);
     }
 
-    // Update triangle-vertex connectivity
+    // Update facet-vertex connectivity
     for (int i = 0; i < nv; ++i) {
         T[nT][i] = nV + i;
     }
@@ -1797,7 +1797,7 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
         file_handle.seekg(last_valid_pos);
     }
 
-    // Update triangle-vertex connectivity
+    // Update facet-vertex connectivity
     for (int i = 0; i < nv; ++i) {
         T[nT][i] = nV + i;
     }
@@ -1862,7 +1862,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
         file_handle.read(reinterpret_cast<char*>(float4byte_ptr), 4);
     }
 
-    // Read number of elements
+    // Read number of facets
     file_handle.read(reinterpret_cast<char*>(longint4byte_ptr), 4);
     nT = (int)*longint4byte_ptr;
     nV = 3*nT;
@@ -1890,7 +1890,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
             nV++;
         }
 
-        // Triangle-vertex connectivity
+        // Facet-vertex connectivity
         T[i][0] = nV - 3;
         T[i][1] = nV - 2;
         T[i][2] = nV - 1;
@@ -1960,7 +1960,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
         file_handle.read(reinterpret_cast<char*>(float4byte_ptr), 4);
     }
 
-    // Read number of elements
+    // Read number of facets
     file_handle.read(reinterpret_cast<char*>(longint4byte_ptr), 4);
     nT = (int)*longint4byte_ptr;
     nV = 3*nT;
@@ -1993,7 +1993,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
             nV++;
         }
 
-        // Triangle-vertex connectivity
+        // Facet-vertex connectivity
         T[i][0] = nV - 3;
         T[i][1] = nV - 2;
         T[i][2] = nV - 1;
