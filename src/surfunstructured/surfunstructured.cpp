@@ -320,7 +320,7 @@ int SurfUnstructured::importSTL(const std::string &name,
  *
  * \result on output returns an error flag for I/O error
 */
-int SurfUnstructured::importSTL(const std::string &name, const bool &isBinary,
+int SurfUnstructured::importSTL(const std::string &name, bool isBinary,
                                 int PIDOffset, bool PIDSquash,
                                 std::unordered_map<int, std::string> *PIDNames)
 {
@@ -468,7 +468,7 @@ int SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash,
  *
  * \result on output returns an error flag for I/O error.
  */
-int SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
+int SurfUnstructured::exportSTL(const std::string &name, bool isBinary, bool exportInternalsOnly)
 {
     return exportSTLSingle(name, isBinary, exportInternalsOnly);
 }
@@ -488,8 +488,8 @@ int SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary, b
  * its number will be used
  * \result on output returns an error flag for I/O error.
  */
-int SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary,
-                                const bool &isMulti, bool exportInternalsOnly,
+int SurfUnstructured::exportSTL(const std::string &name, bool isBinary,
+                                bool isMulti, bool exportInternalsOnly,
                                 std::unordered_map<int, std::string> *PIDNames)
 {
     int flag = 0;
@@ -517,7 +517,7 @@ int SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary,
  * 
  * \result on output returns an error flag for I/O error.
 */
-int SurfUnstructured::exportSTLSingle(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
+int SurfUnstructured::exportSTLSingle(const std::string &name, bool isBinary, bool exportInternalsOnly)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //

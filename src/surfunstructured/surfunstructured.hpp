@@ -58,9 +58,9 @@ public:
 
     // I/O routines
     int importSTL(const std::string &name, int PIDOffset = 0, bool PIDSquash = false);
-    int importSTL(const std::string &name, const bool &isBinary, int PIDOffset = 0, bool PIDSquash = false, std::unordered_map<int, std::string> *PIDNames = nullptr);
-    int exportSTL(const std::string &name, const bool &isBinary, bool exportInternalsOnly = true);
-    int exportSTL(const std::string &name, const bool &isBinary, const bool &isMulti, bool exportInternalsOnly, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    int importSTL(const std::string &name, bool isBinary, int PIDOffset = 0, bool PIDSquash = false, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    int exportSTL(const std::string &name, bool isBinary, bool exportInternalsOnly = true);
+    int exportSTL(const std::string &name, bool isBinary, bool isMulti, bool exportInternalsOnly, std::unordered_map<int, std::string> *PIDNames = nullptr);
     int importDGF(const std::string &name, int PIDOffset = 0, bool PIDSquash = false);
     int exportDGF(const std::string &name);
 
@@ -76,7 +76,7 @@ protected:
 
     int importSTL(STLObj &STL, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
-    int exportSTLSingle(const std::string &name, const bool &isBinary, bool exportInternalsOnly = true);
+    int exportSTLSingle(const std::string &name, bool isBinary, bool exportInternalsOnly = true);
     int exportSTLMulti(const std::string &name, bool exportInternalsOnly = true, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
 };
