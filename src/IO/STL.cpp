@@ -105,8 +105,8 @@ STLObj::STLObj(std::string filename)
     data.n_solids = -1;
 
     // Detect file format (ASCII or BINARY)
-    FileFormat fileFormat = detectFileFormat(stl_name);
-    if (fileFormat == FormatInvalid) {
+    Format fileFormat = detectFormat(stl_name);
+    if (fileFormat == FormatUnknown) {
         throw std::runtime_error("Invalid STL.");
     }
 
@@ -118,7 +118,7 @@ STLObj::STLObj(std::string filename)
 
     \param[in] filename STL file name
 */
-STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
+STLObj::Format STLObj::detectFormat(const std::string &filename)
 {
     std::ifstream fileStream;
 
@@ -142,7 +142,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
     // An ASCII contains at least the "solid " and "endsolid" markers, therefore
     // the minimum size of an empty ASCII file is 14 bytes.
     if (fileSize < ASCII_MINIMUM_SIZE) {
-        return FormatInvalid;
+        return FormatUnknown;
     }
 
     // If a files starts with "solid" and ends with "endsolid" is an ASCII file.
@@ -227,7 +227,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
     // An empty binary file contains the header and the number of facets,
     // therefore the minimum size of an empty binary file is 84 bytes.
     if (fileSize < BINARY_MINIMUM_SIZE) {
-        return FormatInvalid;
+        return FormatUnknown;
     }
 
     // Read the number of facets
@@ -254,7 +254,7 @@ STLObj::FileFormat STLObj::detectFileFormat(const std::string &filename)
         return FormatBinary;
     }
 
-    return FormatInvalid;
+    return FormatUnknown;
 }
 
 /*!

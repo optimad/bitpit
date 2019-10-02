@@ -42,17 +42,17 @@ int subtest_001()
     std::cout << "Reading single-solid ASCII STL" << std::endl;
 
     STLObj reader;
-    STLObj::FileFormat format = reader.detectFileFormat("./data/cubeAscii.stl");
+    STLObj::Format format = reader.detectFormat("./data/cubeAscii.stl");
 
-    if (format == STLObj::FileFormat::FormatASCII) {
+    if (format == STLObj::Format::FormatASCII) {
         std::cout << " Test passed (ASCII format detected)" << std::endl;
-    } else if (format == STLObj::FileFormat::FormatBinary) {
+    } else if (format == STLObj::Format::FormatBinary) {
         std::cout << " Test failed (binary format detected)" << std::endl;
-    } else if (format == STLObj::FileFormat::FormatInvalid) {
+    } else if (format == STLObj::Format::FormatUnknown) {
         std::cout << " Test failed (invalid file detected)" << std::endl;
     }
 
-    return (int) (format != STLObj::FileFormat::FormatASCII);
+    return (int) (format != STLObj::Format::FormatASCII);
 }
 
 /*!
@@ -65,17 +65,17 @@ int subtest_002()
     std::cout << "Reading single-solid binary STL" << std::endl;
 
     STLObj reader;
-    STLObj::FileFormat format = reader.detectFileFormat("./data/cubeBinary.stl");
+    STLObj::Format format = reader.detectFormat("./data/cubeBinary.stl");
 
-    if (format == STLObj::FileFormat::FormatASCII) {
+    if (format == STLObj::Format::FormatASCII) {
         std::cout << " Test failed (ASCII format detected)" << std::endl;
-    } else if (format == STLObj::FileFormat::FormatBinary) {
+    } else if (format == STLObj::Format::FormatBinary) {
         std::cout << " Test passed (binary format detected)" << std::endl;
-    } else if (format == STLObj::FileFormat::FormatInvalid) {
+    } else if (format == STLObj::Format::FormatUnknown) {
         std::cout << " Test failed (invalid file detected)" << std::endl;
     }
 
-    return (int) (format != STLObj::FileFormat::FormatBinary);
+    return (int) (format != STLObj::Format::FormatBinary);
 }
 
 /*!
@@ -88,17 +88,17 @@ int subtest_003()
     std::cout << "Reading multi-solid binary STL" << std::endl;
 
     STLObj reader;
-    STLObj::FileFormat format = reader.detectFileFormat("./data/cubeAscii_MultiSolid.stl");
+    STLObj::Format format = reader.detectFormat("./data/cubeAscii_MultiSolid.stl");
 
-    if (format == STLObj::FileFormat::FormatASCII) {
+    if (format == STLObj::Format::FormatASCII) {
         std::cout << " Test passed (ASCII format detected)" << std::endl;
-    } else if (format == STLObj::FileFormat::FormatBinary) {
+    } else if (format == STLObj::Format::FormatBinary) {
         std::cout << " Test failed (binary format detected)" << std::endl;
-    } else if (format == STLObj::FileFormat::FormatInvalid) {
+    } else if (format == STLObj::Format::FormatUnknown) {
         std::cout << " Test failed (invalid file detected)" << std::endl;
     }
 
-    return (int) (format != STLObj::FileFormat::FormatASCII);
+    return (int) (format != STLObj::Format::FormatASCII);
 }
 
 /*!

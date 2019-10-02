@@ -48,8 +48,8 @@ struct STLData {
 class STLObj {
 
 public:
-    enum FileFormat {
-        FormatInvalid = -1,
+    enum Format {
+        FormatUnknown = -1,
         FormatASCII,
         FormatBinary
     };
@@ -65,7 +65,7 @@ public:
     STLObj(std::string filename, bool filetype);
     STLObj(std::string filename);
 
-    FileFormat detectFileFormat(const std::string &filename);
+    Format detectFormat(const std::string &filename);
 
     void open(const std::string &mode);
     void close(const std::string &mode = "");
