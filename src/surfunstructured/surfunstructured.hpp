@@ -36,50 +36,48 @@ namespace bitpit {
 class SurfUnstructured : public SurfaceKernel {
 
 public:
-	using PatchKernel::locatePoint;
+    using PatchKernel::locatePoint;
 
-        // Constructors
-	SurfUnstructured();
-	SurfUnstructured(int patch_dim, int space_dim);
-	SurfUnstructured(int id, int patch_dim, int space_dim);
-	SurfUnstructured(std::istream &stream);
+    // Constructors
+    SurfUnstructured();
+    SurfUnstructured(int patch_dim, int space_dim);
+    SurfUnstructured(int id, int patch_dim, int space_dim);
+    SurfUnstructured(std::istream &stream);
 
-        // Clone
-        std::unique_ptr<PatchKernel> clone() const override;
+    // Clone
+    std::unique_ptr<PatchKernel> clone() const override;
 
-        // Setters
-	void setExpert(bool expert);
+    // Setters
+    void setExpert(bool expert);
 
-        // Search algorithms
-        long locatePoint(const std::array<double, 3> &point) const override;
+    // Search algorithms
+    long locatePoint(const std::array<double, 3> &point) const override;
 
-        // Evaluations
-        void extractEdgeNetwork(SurfUnstructured &);
+    // Evaluations
+    void extractEdgeNetwork(SurfUnstructured &);
 
-        // I/O routines
-        unsigned short importSTL(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
-        unsigned short importSTL(const std::string &, const bool &, int PIDOffset = 0, bool PIDSquash = false, std::unordered_map<int, std::string> *PIDNames = nullptr);
-        unsigned short exportSTL(const std::string &, const bool &, bool exportInternalsOnly = true);
-        unsigned short exportSTL(const std::string &, const bool &, const bool &, bool exportInternalsOnly, std::unordered_map<int, std::string> *PIDNames = nullptr);
-        unsigned short importDGF(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
-        unsigned short exportDGF(const std::string &);
+    // I/O routines
+    unsigned short importSTL(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
+    unsigned short importSTL(const std::string &, const bool &, int PIDOffset = 0, bool PIDSquash = false, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    unsigned short exportSTL(const std::string &, const bool &, bool exportInternalsOnly = true);
+    unsigned short exportSTL(const std::string &, const bool &, const bool &, bool exportInternalsOnly, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    unsigned short importDGF(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
+    unsigned short exportDGF(const std::string &);
 
 protected:
-	SurfUnstructured(const SurfUnstructured &other) = default;
+    SurfUnstructured(const SurfUnstructured &other) = default;
 
-	int _getDumpVersion() const override;
-	void _dump(std::ostream &stream) const override;
-	void _restore(std::istream &stream) override;
+    int _getDumpVersion() const override;
+    void _dump(std::ostream &stream) const override;
+    void _restore(std::istream &stream) override;
 
-	static ElementType getSTLFacetType(int nFacetVertices);
-	static ElementType getDGFFacetType(int nFacetVertices);
+    static ElementType getSTLFacetType(int nFacetVertices);
+    static ElementType getDGFFacetType(int nFacetVertices);
 
-	unsigned short importSTL(STLObj &STL, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    unsigned short importSTL(STLObj &STL, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
-	unsigned short exportSTLSingle(const std::string &, const bool &, bool exportInternalsOnly = true);
-	unsigned short exportSTLMulti(const std::string &, bool exportInternalsOnly = true, std::unordered_map<int, std::string> *PIDNames = nullptr);
-
-private:
+    unsigned short exportSTLSingle(const std::string &, const bool &, bool exportInternalsOnly = true);
+    unsigned short exportSTLMulti(const std::string &, bool exportInternalsOnly = true, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
 };
 
