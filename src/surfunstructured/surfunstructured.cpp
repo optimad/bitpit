@@ -373,11 +373,11 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         // ====================================================================== //
         // LOAD SOLID FROM THE STL FILE                                           //
         // ====================================================================== //
-        int nVertex = 0;
-        int nSimplex = 0;
+        std::size_t nVertex = 0;
+        std::size_t nSimplex = 0;
         std::vector<std::array<double, 3>> vertexList;
         std::vector<std::array<double, 3>> normalList;
-        std::vector<std::array<int, 3>> connectivityList;
+        std::vector<std::array<std::size_t, 3>> connectivityList;
         std::string name = "";
 
         STL.loadSolid(nVertex, nSimplex, vertexList, normalList, connectivityList, name);
@@ -420,16 +420,16 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
         // ====================================================================== //
         // ADD CELLS TO MESH                                                      //
         // ====================================================================== //
-        std::vector<std::array<int,3>>::const_iterator c_, ce_;
-        std::array<int,3>::const_iterator w_, we_;
+        std::vector<std::array<std::size_t, 3>>::const_iterator c_, ce_;
+        std::array<std::size_t, 3>::const_iterator w_, we_;
 
         ce_ = connectivityList.cend();
         for (c_ = connectivityList.cbegin(); c_ != ce_; ++c_) {
             // Remap STL connectivity
-            int n_v = c_->size();
+            std::size_t n_v = c_->size();
             std::vector<long> connect(n_v, Vertex::NULL_ID);
             we_ = c_->cend();
-            int i = 0;
+            std::size_t i = 0;
             for (w_ = c_->cbegin(); w_ < we_; ++w_) {
                 connect[i] = vertexMap[*w_];
                 ++i;
@@ -524,21 +524,22 @@ unsigned short SurfUnstructured::exportSTLSingle(const std::string &name, const 
     // ====================================================================== //
 
     // Local variables
-    int                                         nVertex;
-    int                                         nSimplex;
+    std::size_t                                 nVertex;
+    std::size_t                                 nSimplex;
     std::vector<std::array<double, 3>>          vertexList;
     std::vector<std::array<double, 3>>          normalList;
-    std::vector<std::array<int,3>>              connectivityList;
+    std::vector<std::array<std::size_t, 3>>     connectivityList;
     std::unordered_map<long, long>              vertexMap;
-    std::array<int,3>                           dummyIntArray;
+    std::array<std::size_t, 3>                  dummyIntArray;
 
     // Counters
-    int                                          v_count ,j;
-    std::vector<std::array<double, 3>>::iterator i_;
-    std::vector<std::array<int,3>>::iterator     j_;
-    std::array<int,3>::iterator                  k_, ke_;
-    VertexIterator                               v_, ve_;
-    CellIterator                                 c_, cb_, ce_;
+    int                                                 j;
+    std::size_t                                         v_count;
+    std::vector<std::array<double, 3>>::iterator        i_;
+    std::vector<std::array<std::size_t, 3>>::iterator   j_;
+    std::array<std::size_t, 3>::iterator                k_, ke_;
+    VertexIterator                                      v_, ve_;
+    CellIterator                                        c_, cb_, ce_;
 
     // ====================================================================== //
     // INITIALIZE DATA STRUCTURE                                              //
@@ -636,13 +637,13 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
     BITPIT_UNUSED(exportInternalsOnly);
 #endif
 
-    int                                         nTotVertex;
+    std::size_t                                 nTotVertex;
     std::vector<std::array<double, 3>>          totVertexList;
     std::unordered_map<long, long>              vertexMap;
 
-    int                                         nLocSimplex;
+    std::size_t                                 nLocSimplex;
     std::vector<std::array<double, 3>>          normalLocList;
-    std::vector<std::array<int,3>>              connectivityLocList;
+    std::vector<std::array<std::size_t, 3>>     connectivityLocList;
 
     STLObj STL(name, false);
 
@@ -665,11 +666,11 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
     for(int pid : getInternalPIDs()){
         std::vector<long> cells = getInternalsByPID(pid);
 
-        nLocSimplex = (int) cells.size();
+        nLocSimplex = (std::size_t) cells.size();
         connectivityLocList.resize(nLocSimplex);
         normalLocList.resize(nLocSimplex);
 
-        std::vector<std::array<int,3>>::iterator itC = connectivityLocList.begin();
+        std::vector<std::array<std::size_t, 3>>::iterator itC = connectivityLocList.begin();
         std::vector<std::array<double, 3>>::iterator itN = normalLocList.begin();
 
         // Fill local connectivity and normals structures
@@ -707,7 +708,7 @@ unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool ex
         connectivityLocList.resize(nLocSimplex);
         normalLocList.resize(nLocSimplex);
 
-        std::vector<std::array<int,3>>::iterator itC = connectivityLocList.begin();
+        std::vector<std::array<std::size_t, 3>>::iterator itC = connectivityLocList.begin();
         std::vector<std::array<double, 3>>::iterator itN = normalLocList.begin();
 
         // Fill local connectivity and normals structures

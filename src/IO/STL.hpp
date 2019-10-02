@@ -42,7 +42,7 @@ namespace bitpit {
 struct STLData {
     int n_solids;                             /**< number of stl solids */
     std::vector<std::string> solid_names;     /**< solids names */
-    std::vector<int> solid_facets;            /**< number of facet for each stl solid */
+    std::vector<std::size_t> solid_facets;    /**< number of facet for each stl solid */
 };
 
 class STLObj {
@@ -76,54 +76,54 @@ public:
     void scan();
     void check();
 
-    void load(int &nV, int &nT, std::vector<std::vector<double>> &V,
-              std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T);
+    void load(std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+              std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T);
 
-    void load(int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-              std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T);
+    void load(std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+              std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T);
 
-    void loadSolid(int &nV, int &nT, std::vector<std::vector<double>> &V,
-                   std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+    void loadSolid(std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                   std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                    std::string &name);
 
-    void loadSolid(int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                   std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+    void loadSolid(std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                   std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T,
                    std::string &name);
 
     template <typename ... T2>
-    void load(std::string name, int &nV, int &nT, std::vector<std::vector<double>> &V,
-              std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+    void load(std::string name, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+              std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
               T2 & ... others);
 
     template <typename ... T2>
-    void load(std::string name, int &nV, int &nT, std::vector<std::array<double,3>> &V,
-              std::vector<std::array<double,3>> &N, std::vector<std::array<int,3>> &T,
+    void load(std::string name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double,3>> &V,
+              std::vector<std::array<double,3>> &N, std::vector<std::array<std::size_t,3>> &T,
               T2 & ... others);
 
-    void saveSolid(const std::string &name, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                   std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T);
+    void saveSolid(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                   std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T);
 
-    void saveSolid(const std::string &name, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                   std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T);
-
-    template <typename ... T2>
-    void save(const std::string &name, int &nV, int &nT, std::vector<std::vector<double>> &V,
-              std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
-              T2 & ... others);
+    void saveSolid(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                   std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T);
 
     template <typename ... T2>
-    void save(const std::string &name, int &nV, int &nT, std::vector<std::array<double,3>> &V,
-              std::vector<std::array<double,3>> &N, std::vector<std::array<int,3>> &T,
+    void save(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+              std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
               T2 & ... others);
 
     template <typename ... T2>
-    void append(const std::string &name, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+    void save(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double,3>> &V,
+              std::vector<std::array<double,3>> &N, std::vector<std::array<std::size_t,3>> &T,
+              T2 & ... others);
+
+    template <typename ... T2>
+    void append(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                 T2 & ... others);
 
     template <typename ... T2>
-    void append(const std::string &name, int &nV, int &nT, std::vector<std::array<double,3>> &V,
-                std::vector<std::array<double,3>> &N, std::vector<std::array<int,3>> &T,
+    void append(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double,3>> &V,
+                std::vector<std::array<double,3>> &N, std::vector<std::array<std::size_t,3>> &T,
                 T2 & ... others);
 
 protected:
@@ -151,12 +151,12 @@ private:
     void load();
 
     unsigned int scanASCII(std::ifstream &file_handle, std::vector<std::string> &solid_names,
-                           std::vector<int> &solid_facets);
+                           std::vector<std::size_t> &solid_facets);
 
     unsigned int scanBINARY(std::ifstream &file_handle, std::vector<std::string> &solid_names,
-                            std::vector<int> &solid_facets);
+                            std::vector<std::size_t> &solid_facets);
 
-    unsigned int scanSolidASCII(std::ifstream &file_handle, int &nT);
+    unsigned int scanSolidASCII(std::ifstream &file_handle, std::size_t &nT);
 
     unsigned int checkASCII(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map);
 
@@ -166,43 +166,43 @@ private:
 
     unsigned int checkBINARY(std::ifstream &file_handle, std::vector<std::vector<bool>> &err_map);
 
-    unsigned int readSolidASCII(std::ifstream &file_handle, bool wrapAround, int &nV, int &nT,
+    unsigned int readSolidASCII(std::ifstream &file_handle, bool wrapAround, std::size_t &nV, std::size_t &nT,
                                 std::vector<std::vector<double>> &V, std::vector<std::vector<double>> &N,
-                                std::vector<std::vector<int>> &T, std::string &name);
+                                std::vector<std::vector<std::size_t>> &T, std::string &name);
 
-    unsigned int readSolidASCII(std::ifstream &file_handle, bool wrapAround, int &nV, int &nT,
+    unsigned int readSolidASCII(std::ifstream &file_handle, bool wrapAround, std::size_t &nV, std::size_t &nT,
                                 std::vector<std::array<double, 3>> &V, std::vector<std::array<double, 3>> &N,
-                                std::vector<std::array<int, 3>> &T, std::string &name);
+                                std::vector<std::array<std::size_t, 3>> &T, std::string &name);
 
-    unsigned int readASCII(std::ifstream &file_handle, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                           std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T);
+    unsigned int readASCII(std::ifstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                           std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T);
 
-    unsigned int readASCII(std::ifstream &file_handle, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                           std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T);
+    unsigned int readASCII(std::ifstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                           std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T);
 
-    unsigned int readFacetASCII(std::ifstream &file_handle,  int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T);
+    unsigned int readFacetASCII(std::ifstream &file_handle,  std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                                std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T);
 
-    unsigned int readFacetASCII(std::ifstream &file_handle, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T);
+    unsigned int readFacetASCII(std::ifstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                                std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T);
 
-    unsigned int readBINARY(std::ifstream &file_handle, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                            std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T);
+    unsigned int readBINARY(std::ifstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                            std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T);
 
-    unsigned int readBINARY(std::ifstream &file_handle, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                            std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T);
+    unsigned int readBINARY(std::ifstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                            std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T);
 
-    unsigned int writeSolidASCII(std::ofstream &file_handle, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                 std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T, const std::string &solid_name = "");
+    unsigned int writeSolidASCII(std::ofstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                                 std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T, const std::string &solid_name = "");
 
-    unsigned int writeSolidASCII(std::ofstream &file_handle, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                 std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T, const std::string &solid_name = "");
+    unsigned int writeSolidASCII(std::ofstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                                 std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T, const std::string &solid_name = "");
 
-    unsigned int writeSolidBINARY(std::ofstream &file_handle, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                  std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T, const std::string &solid_name = "");
+    unsigned int writeSolidBINARY(std::ofstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                                  std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T, const std::string &solid_name = "");
 
-    unsigned int writeSolidBINARY(std::ofstream &file_handle, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                  std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T, const std::string &solid_name = "");
+    unsigned int writeSolidBINARY(std::ofstream &file_handle, std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                                  std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T, const std::string &solid_name = "");
 
 };
 

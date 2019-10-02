@@ -46,8 +46,8 @@
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                  std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+void STLObj::load(std::string name, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                  std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                   T2 & ... others)
 {
     // Open stream
@@ -92,8 +92,8 @@ void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::vector<do
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::array<double,3>> &V,
-                  std::vector<std::array<double,3>> &N, std::vector<std::array<int,3>> &T,
+void STLObj::load(std::string name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double,3>> &V,
+                  std::vector<std::array<double,3>> &N, std::vector<std::array<std::size_t,3>> &T,
                   T2 & ... others)
 {
     // Open stream
@@ -125,8 +125,8 @@ void STLObj::load(std::string name, int &nV, int &nT, std::vector<std::array<dou
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                  std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+void STLObj::save(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                  std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                   T2 & ... others)
 {
     // Open stream
@@ -159,8 +159,8 @@ void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::ve
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::array<double,3>> &V,
-                  std::vector<std::array<double,3>> &N, std::vector<std::array<int,3>> &T,
+void STLObj::save(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double,3>> &V,
+                  std::vector<std::array<double,3>> &N, std::vector<std::array<std::size_t,3>> &T,
                   T2 & ... others)
 {
     // Open stream
@@ -193,8 +193,8 @@ void STLObj::save(const std::string &name, int &nV, int &nT, std::vector<std::ar
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::vector<double>> &V,
-                    std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+void STLObj::append(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                    std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                     T2 & ... others)
 {
     // Open stream
@@ -227,8 +227,8 @@ void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STLObj::append(const std::string &name, int &nV, int &nT, std::vector<std::array<double,3>> &V,
-                    std::vector<std::array<double,3>> &N, std::vector<std::array<int,3>> &T,
+void STLObj::append(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double,3>> &V,
+                    std::vector<std::array<double,3>> &N, std::vector<std::array<std::size_t,3>> &T,
                     T2 & ... others)
 {
     // Open stream

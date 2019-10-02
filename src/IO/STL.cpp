@@ -495,8 +495,8 @@ void STLObj::check()
     connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
 */
-void STLObj::load(int &nV, int &nT, std::vector<std::vector<double>> &V,
-                  std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
+void STLObj::load(std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                  std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T)
 {
     // Open stream
     open("in");
@@ -535,10 +535,10 @@ void STLObj::load(int &nV, int &nT, std::vector<std::vector<double>> &V,
     connectivity entries for the facets acquired from the STL file. New connectivity entries
     are appended at the end of T.
 */
-void STLObj::load(int &nV, int &nT,
+void STLObj::load(std::size_t &nV, std::size_t &nT,
                   std::vector<std::array<double, 3>> &V,
                   std::vector<std::array<double, 3>> &N,
-                  std::vector<std::array<int, 3>> &T)
+                  std::vector<std::array<std::size_t, 3>> &T)
 {
     // Open stream
     open("in");
@@ -580,8 +580,8 @@ void STLObj::load(int &nV, int &nT,
     empty, the first solid found will be read. On output il will contain the name
     of the solid that has been actually read
 */
-void STLObj::loadSolid(int &nV, int &nT, std::vector<std::vector<double>> &V,
-                       std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+void STLObj::loadSolid(std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                       std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                        std::string &name)
 {
     // Check input data
@@ -622,8 +622,8 @@ void STLObj::loadSolid(int &nV, int &nT, std::vector<std::vector<double>> &V,
     empty, the first solid found will be read. On output il will contain the name
     of the solid that has been actually read
 */
-void STLObj::loadSolid(int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                       std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+void STLObj::loadSolid(std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                       std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T,
                        std::string &name)
 {
     // Check inupt data
@@ -650,8 +650,8 @@ void STLObj::loadSolid(int &nV, int &nT, std::vector<std::array<double, 3>> &V,
     \param[in]  N facet normals.
     \param[in]  T facet->vertex connectivity.
  */
-void STLObj::saveSolid(const std::string &name, int &nV, int &nT,  std::vector<std::vector<double>> &V,
-                       std::vector<std::vector<double>> &N,  std::vector<std::vector<int>> &T)
+void STLObj::saveSolid(const std::string &name, std::size_t &nV, std::size_t &nT,  std::vector<std::vector<double>> &V,
+                       std::vector<std::vector<double>> &N,  std::vector<std::vector<std::size_t>> &T)
 {
     if (stl_type) {
         STLObj::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
@@ -672,8 +672,8 @@ void STLObj::saveSolid(const std::string &name, int &nV, int &nT,  std::vector<s
 *    \param[in]  N facet normals.
 *    \param[in]  T facet->vertex connectivity.
 */
-void STLObj::saveSolid(const std::string &name, int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                       std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
+void STLObj::saveSolid(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                       std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T)
 {
     if (stl_type) {
         STLObj::writeSolidBINARY(m_ofile_handle, nV, nT, V, N, T, name);
@@ -713,7 +713,7 @@ void STLObj::load()
         err = 1: failed to sca STL file.
 */
 unsigned int STLObj::scanASCII(std::ifstream &file_handle, std::vector<std::string> &solid_names,
-                               std::vector<int> &solid_facets)
+                               std::vector<std::size_t> &solid_facets)
 {
     // Initialize output variables
     solid_names.resize(0);
@@ -754,7 +754,7 @@ unsigned int STLObj::scanASCII(std::ifstream &file_handle, std::vector<std::stri
                 solid_names.push_back(utils::string::trim(word));
 
                 // Get solid info
-                int nF = 0;
+                std::size_t nF = 0;
                 scanSolidASCII(file_handle, nF);
                 solid_facets.push_back(nF);
 
@@ -782,7 +782,7 @@ unsigned int STLObj::scanASCII(std::ifstream &file_handle, std::vector<std::stri
         err = 1: failed to sca STL file.
 */
 unsigned int STLObj::scanBINARY(std::ifstream &file_handle, std::vector<std::string> &solid_names,
-                                std::vector<int> &solid_facets)
+                                std::vector<std::size_t> &solid_facets)
 {
     // Resize output variables
     solid_names.resize(0);
@@ -832,7 +832,7 @@ unsigned int STLObj::scanBINARY(std::ifstream &file_handle, std::vector<std::str
         err = 0: no error(s) encountered
         err = 1: failed to sca STL file.
 */
-unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, int &nT)
+unsigned int STLObj::scanSolidASCII(std::ifstream &file_handle, std::size_t &nT)
 {
     // Resize output variables
     nT = 0;
@@ -1167,7 +1167,7 @@ unsigned int STLObj::checkBINARY(std::ifstream &file_handle, std::vector<std::ve
 
     // Check number of facets
     file_handle.read(reinterpret_cast<char*>(longint4byte_ptr), 4);
-    int nT = (int) *longint4byte_ptr;
+    std::size_t nT = (int) *longint4byte_ptr;
 
     if (file_handle.eof()) {
         err_map[0][0] = true;
@@ -1175,7 +1175,7 @@ unsigned int STLObj::checkBINARY(std::ifstream &file_handle, std::vector<std::ve
     }
 
     // Check facet data
-    int n = 0;
+    std::size_t n = 0;
     while ((!file_handle.eof()) && (n < nT)) {
         // Read normal
         for (int j = 0; j < 3; ++j) {
@@ -1236,8 +1236,8 @@ unsigned int STLObj::checkBINARY(std::ifstream &file_handle, std::vector<std::ve
         err = 2: failed to read a facet
 */
 unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
-                                    int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                    std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+                                    std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                                    std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                                     std::string &name)
 {
     // Check stream status
@@ -1299,7 +1299,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     }
 
     // Read number of facets
-    int nt;
+    std::size_t nt;
 
     file_handle.clear();
     file_handle.seekg(start_pos);
@@ -1308,7 +1308,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     // Read solid data
     V.resize(nV+3*nt, std::vector<double>(3, 0.0));
     N.resize(nT+nt, std::vector<double>(3, 0.0));
-    T.resize(nT+nt, std::vector<int>(3, -1));
+    T.resize(nT+nt, std::vector<std::size_t>(3, -1));
 
     file_handle.clear();
     file_handle.seekg(start_pos);
@@ -1375,8 +1375,8 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         err = 2: failed to read a facet
 */
 unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
-                                    int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                    std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+                                    std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                                    std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T,
                                     std::string &name)
 {
     // Check stream status
@@ -1438,7 +1438,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     }
 
     // Read number of facets
-    int nt;
+    std::size_t nt;
 
     file_handle.clear();
     file_handle.seekg(start_pos);
@@ -1448,7 +1448,7 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
     std::array<double, 3> dummyDoubleArray;
     dummyDoubleArray.fill(0.);
 
-    std::array<int, 3> dummyIntArray;
+    std::array<std::size_t, 3> dummyIntArray;
     dummyIntArray.fill(-1);
 
     V.resize(nV+3*nt, dummyDoubleArray);
@@ -1512,8 +1512,8 @@ unsigned int STLObj::readSolidASCII(std::ifstream &file_handle, bool wrapAround,
         err = 1: failed to read from input stream
 */
 unsigned int STLObj::readASCII(std::ifstream &file_handle,
-                               int &nV, int &nT, std::vector<std::vector<double>> &V,
-                               std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
+                               std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                               std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -1576,8 +1576,8 @@ unsigned int STLObj::readASCII(std::ifstream &file_handle,
         err = 1: failed to read from input stream
 */
 unsigned int STLObj::readASCII(std::ifstream &file_handle,
-                               int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                               std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
+                               std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                               std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -1640,8 +1640,8 @@ unsigned int STLObj::readASCII(std::ifstream &file_handle,
         err = 2: one facet has more than 3 vertices
 */
 unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
-                                    int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                    std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
+                                    std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                                    std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T)
 {
     // Read facet data
     std::string line;
@@ -1735,8 +1735,8 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
         err = 2: one facet has more than 3 vertices
 */
 unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
-                                    int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                    std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
+                                    std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                                    std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T)
 {
     // Read facet data
     std::string line;
@@ -1829,8 +1829,8 @@ unsigned int STLObj::readFacetASCII(std::ifstream &file_handle,
         err = 1: failed to read from input stream
 */
 unsigned int STLObj::readBINARY(std::ifstream &file_handle,
-                                int &nV, int &nT, std::vector<std::vector<double>> &V,
-                                std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T)
+                                std::size_t &nV, std::size_t &nT, std::vector<std::vector<double>> &V,
+                                std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -1859,16 +1859,16 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
 
     // Read number of elements
     file_handle.read(reinterpret_cast<char*>(longint4byte_ptr), 4);
-    nT = (int)*longint4byte_ptr;
+    nT = (std::size_t)*longint4byte_ptr;
     nV = 3*nT;
 
     // Read data
     V.resize(nV, std::vector<double>(3, 0.0));
     N.resize(nT, std::vector<double>(3, 0.0));
-    T.resize(nT, std::vector<int>(3, -1));
+    T.resize(nT, std::vector<std::size_t>(3, -1));
 
     nV = 0;
-    for (int i = 0; i < nT; ++i) {
+    for (std::size_t i = 0; i < nT; ++i) {
         // Read normal
         for (int j = 0; j < 3; ++j) {
             file_handle.read(reinterpret_cast<char*>(float4byte_ptr), 4);
@@ -1927,8 +1927,8 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
         err = 1: failed to read from input stream
 */
 unsigned int STLObj::readBINARY(std::ifstream &file_handle,
-                                int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T)
+                                std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                                std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T)
 {
     // Check stream status
     if (!file_handle.good()) {
@@ -1957,14 +1957,14 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
 
     // Read number of elements
     file_handle.read(reinterpret_cast<char*>(longint4byte_ptr), 4);
-    nT = (int)*longint4byte_ptr;
+    nT = (std::size_t)*longint4byte_ptr;
     nV = 3*nT;
 
     // Read data
     std::array<double, 3> dummyDoubleArray;
     dummyDoubleArray.fill(0.);
 
-    std::array<int, 3> dummyIntArray;
+    std::array<std::size_t, 3> dummyIntArray;
     dummyIntArray.fill(-1);
 
     V.resize(nV, dummyDoubleArray);
@@ -1972,7 +1972,7 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
     T.resize(nT, dummyIntArray);
 
     nV = 0;
-    for (int i = 0; i < nT; ++i) {
+    for (std::size_t i = 0; i < nT; ++i) {
         // Read normal
         for (int j = 0; j < 3; ++j) {
             file_handle.read(reinterpret_cast<char*>(float4byte_ptr), 4);
@@ -2020,20 +2020,20 @@ unsigned int STLObj::readBINARY(std::ifstream &file_handle,
         err = 1: failed to write data to output stream
 */
 unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
-                                     int &nV, int &nT,  std::vector<std::vector<double>> &V,
-                                     std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+                                     std::size_t &nV, std::size_t &nT,  std::vector<std::vector<double>> &V,
+                                     std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                                      const std::string &solid_name)
 {
     // Check input variable
-    if (V.size() < static_cast<unsigned int>(nV)) {
+    if (V.size() < static_cast<std::size_t>(nV)) {
         return 2;
     }
 
-    if (T.size() < static_cast<unsigned int>(nT)) {
+    if (T.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
-    if (N.size() < static_cast<unsigned int>(nT)) {
+    if (N.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
@@ -2056,15 +2056,15 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
     sheader.str("");
 
     // Write solid
-    for (int i = 0; i < nT; ++i) {
+    for (std::size_t i = 0; i < nT; ++i) {
         // Facet header
         file_handle << "  " << ASCII_FACET_BEGIN;
 
         // Facet normal
-        int n_size = N[i].size();
+        std::size_t n_size = N[i].size();
         if (n_size > 0) {
             file_handle << " normal ";
-            for (int j = 0; j < n_size-1; ++j) {
+            for (std::size_t j = 0; j < n_size-1; ++j) {
                 file_handle << std::scientific << N[i][j] << " ";
             }
             file_handle << std::scientific << N[i][n_size-1];;
@@ -2073,12 +2073,12 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
 
         // Facet vertices
         file_handle << "    outer loop" << std::endl;
-        int t_size = T[i].size();
-        for (int j = 0; j < t_size; ++j) {
-            int v_size = V[T[i][j]].size();
+        std::size_t t_size = T[i].size();
+        for (std::size_t j = 0; j < t_size; ++j) {
+            std::size_t v_size = V[T[i][j]].size();
             file_handle << "      vertex ";
             if (v_size > 0) {
-                for (int k = 0; k < v_size-1; ++k) {
+                for (std::size_t k = 0; k < v_size-1; ++k) {
                     file_handle << std::scientific << V[T[i][j]][k] << " ";
                 }
                 file_handle << std::scientific << V[T[i][j]][v_size-1];
@@ -2125,20 +2125,20 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
         err = 1: failed to write data to output stream
 */
 unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
-                                     int &nV, int &nT,  std::vector<std::array<double, 3>> &V,
-                                     std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+                                     std::size_t &nV, std::size_t &nT,  std::vector<std::array<double, 3>> &V,
+                                     std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T,
                                      const std::string &solid_name)
 {
     // Check input variable
-    if (V.size() < static_cast<unsigned int>(nV)) {
+    if (V.size() < static_cast<std::size_t>(nV)) {
         return 2;
     }
 
-    if (T.size() < static_cast<unsigned int>(nT)) {
+    if (T.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
-    if (N.size() < static_cast<unsigned int>(nT)) {
+    if (N.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
@@ -2161,15 +2161,15 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
     sheader.str("");
 
     // Write solid
-    for (int i = 0; i < nT; ++i) {
+    for (std::size_t i = 0; i < nT; ++i) {
         // Facet header
         file_handle << "  " << ASCII_FACET_BEGIN;
 
         // Facet normal
-        int n_size = N[i].size();
+        std::size_t n_size = N[i].size();
         if (n_size > 0) {
             file_handle << " normal ";
-            for (int j = 0; j < n_size-1; ++j) {
+            for (std::size_t j = 0; j < n_size-1; ++j) {
                 file_handle << std::scientific << N[i][j] << " ";
             }
             file_handle << std::scientific << N[i][n_size-1];;
@@ -2178,12 +2178,12 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
 
         // Facet vertices
         file_handle << "    outer loop" << std::endl;
-        int t_size = T[i].size();
-        for (int j = 0; j < t_size; ++j) {
-            int v_size = V[T[i][j]].size();
+        std::size_t t_size = T[i].size();
+        for (std::size_t j = 0; j < t_size; ++j) {
+            std::size_t v_size = V[T[i][j]].size();
             file_handle << "      vertex ";
             if (v_size > 0) {
-                for (int k = 0; k < v_size-1; ++k) {
+                for (std::size_t k = 0; k < v_size-1; ++k) {
                     file_handle << std::scientific << V[T[i][j]][k] << " ";
                 }
                 file_handle << std::scientific << V[T[i][j]][v_size-1];
@@ -2229,22 +2229,22 @@ unsigned int STLObj::writeSolidASCII(std::ofstream &file_handle,
         err = 1: failed to write data to output stream
 */
 unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
-                                      int &nV, int &nT,  std::vector<std::vector<double>> &V,
-                                      std::vector<std::vector<double>> &N, std::vector<std::vector<int>> &T,
+                                      std::size_t &nV, std::size_t &nT,  std::vector<std::vector<double>> &V,
+                                      std::vector<std::vector<double>> &N, std::vector<std::vector<std::size_t>> &T,
                                       const std::string &solid_name)
 {
     BITPIT_UNUSED(solid_name);
 
     // Check input variable
-    if (V.size() < static_cast<unsigned int>(nV)) {
+    if (V.size() < static_cast<std::size_t>(nV)) {
         return 2;
     }
 
-    if (T.size() < static_cast<unsigned int>(nT)) {
+    if (T.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
-    if (N.size() < static_cast<unsigned int>(nT)) {
+    if (N.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
@@ -2274,19 +2274,19 @@ unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
     file_handle.write(reinterpret_cast<char*>(longint4byte_ptr), 4);
 
     // Write facets
-    for (int i = 0; i < nT; ++i) {
+    for (std::size_t i = 0; i < nT; ++i) {
         // Normals
-        int n_size = N[i].size();
-        for (int j = 0; j < n_size; ++j) {
+        std::size_t n_size = N[i].size();
+        for (std::size_t j = 0; j < n_size; ++j) {
             float4byte = (float) N[i][j];
             file_handle.write(reinterpret_cast<char*>(float4byte_ptr), 4);
         }
 
         // Vertex
-        int t_size = T[i].size();
-        for (int j = 0; j < t_size; ++j) {
-            int v_size = V[T[i][j]].size();
-            for (int k = 0; k < v_size; ++k) {
+        std::size_t t_size = T[i].size();
+        for (std::size_t j = 0; j < t_size; ++j) {
+            std::size_t v_size = V[T[i][j]].size();
+            for (std::size_t k = 0; k < v_size; ++k) {
                 float4byte = (float) V[T[i][j]][k];
                 file_handle.write(reinterpret_cast<char*>(float4byte_ptr), 4);
             }
@@ -2320,22 +2320,22 @@ unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
         err = 1: failed to write data to output stream
 */
 unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
-                                      int &nV, int &nT, std::vector<std::array<double, 3>> &V,
-                                      std::vector<std::array<double, 3>> &N, std::vector<std::array<int, 3>> &T,
+                                      std::size_t &nV, std::size_t &nT, std::vector<std::array<double, 3>> &V,
+                                      std::vector<std::array<double, 3>> &N, std::vector<std::array<std::size_t, 3>> &T,
                                       const std::string &solid_name)
 {
     BITPIT_UNUSED(solid_name);
 
     // Check input variable
-    if (V.size() < static_cast<unsigned int>(nV)) {
+    if (V.size() < static_cast<std::size_t>(nV)) {
         return 2;
     }
 
-    if (T.size() < static_cast<unsigned int>(nT)) {
+    if (T.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
-    if (N.size() < static_cast<unsigned int>(nT)) {
+    if (N.size() < static_cast<std::size_t>(nT)) {
         return 2;
     }
 
@@ -2365,19 +2365,19 @@ unsigned int STLObj::writeSolidBINARY(std::ofstream &file_handle,
     file_handle.write(reinterpret_cast<char*>(longint4byte_ptr), 4);
 
     // Write facets
-    for (int i = 0; i < nT; ++i) {
+    for (std::size_t i = 0; i < nT; ++i) {
         // Normals
-        int n_size = N[i].size();
-        for (int j = 0; j < n_size; ++j) {
+        std::size_t n_size = N[i].size();
+        for (std::size_t j = 0; j < n_size; ++j) {
             float4byte = (float) N[i][j];
             file_handle.write(reinterpret_cast<char*>(float4byte_ptr), 4);
         }
 
         // Vertex
-        int t_size = T[i].size();
-        for (int j = 0; j < t_size; ++j) {
-            int v_size = V[T[i][j]].size();
-            for (int k = 0; k < v_size; ++k) {
+        std::size_t t_size = T[i].size();
+        for (std::size_t j = 0; j < t_size; ++j) {
+            std::size_t v_size = V[T[i][j]].size();
+            for (std::size_t k = 0; k < v_size; ++k) {
                 float4byte = (float) V[T[i][j]][k];
                 file_handle.write(reinterpret_cast<char*>(float4byte_ptr), 4);
             }
