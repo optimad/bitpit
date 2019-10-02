@@ -627,8 +627,36 @@ int SurfUnstructured::exportSTLSingle(const std::string &name, bool isBinary, bo
     // ====================================================================== //
     // EXPORT STL DATA                                                        //
     // ====================================================================== //
-    STLObj                                      STL(name, isBinary);
-    STL.save("", nVertex, nSimplex, vertexList, normalList, connectivityList);
+
+    // Initialize writer
+    int writerError;
+
+    STLReader::Format format;
+    if (isBinary) {
+        format = STLReader::FormatBinary;
+    } else {
+        format = STLReader::FormatASCII;
+    }
+
+    STLWriter writer(name, format);
+
+    // Begin writing
+    writerError = writer.writeBegin(STLWriter::WriteOverwrite);
+    if (writerError != 0) {
+        return writerError;
+    }
+
+    // Write solid
+    writerError = writer.writeSolid("", nVertex, nSimplex, vertexList, normalList, connectivityList);
+    if (writerError != 0) {
+        return writerError;
+    }
+
+    // End writing
+    writerError = writer.writeEnd();
+    if (writerError != 0) {
+        return writerError;
+    }
 
     return 0;
 }
@@ -660,11 +688,15 @@ int SurfUnstructured::exportSTLMulti(const std::string &name, bool exportInterna
     std::vector<std::array<double, 3>>          normalLocList;
     std::vector<std::array<std::size_t, 3>>     connectivityLocList;
 
-    STLObj STL(name, false);
+    // Initialize writer
+    int writerError;
 
-    STL.open("out");
-    if (STL.err != 0) {
-        return STL.err;
+    STLWriter writer(name, STLReader::FormatASCII);
+
+    // Begin writing
+    writerError = writer.writeBegin(STLWriter::WriteOverwrite);
+    if (writerError != 0) {
+        return writerError;
     }
 
     // Create the vertex map
@@ -712,7 +744,10 @@ int SurfUnstructured::exportSTLMulti(const std::string &name, bool exportInterna
             name = std::to_string(pid);
         }
 
-        STL.saveSolid(name, nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+        writer.writeSolid(name, nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+        if (writerError != 0) {
+            return writerError;
+        }
     }
 
 #if BITPIT_ENABLE_MPI==1
@@ -743,11 +778,18 @@ int SurfUnstructured::exportSTLMulti(const std::string &name, bool exportInterna
         }
 
         // Write the solid associated to the ghosts
-        STL.saveSolid("ghosts", nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+        writer.writeSolid("ghosts", nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+        if (writerError != 0) {
+            return writerError;
+        }
     }
 #endif
 
-    STL.close("out");
+    // End writing
+    writerError = writer.writeEnd();
+    if (writerError != 0) {
+        return writerError;
+    }
 
     return 0;
 }
