@@ -45,7 +45,7 @@ struct STLData {
     std::vector<std::size_t> solid_facets;    /**< number of facet for each stl solid */
 };
 
-class STLObj {
+class STLBase {
 
 public:
     enum Format {
@@ -54,6 +54,43 @@ public:
         FormatBinary
     };
 
+    virtual ~STLBase() = default;
+
+    const std::string & getFilename() const;
+    Format getFormat() const;
+
+protected:
+    typedef uint8_t  BINARY_UINT8;
+    typedef uint16_t BINARY_UINT16;
+    typedef uint32_t BINARY_UINT32;
+    typedef float    BINARY_REAL32;
+
+    static const std::size_t BINARY_HEADER_SIZE;
+    static const std::size_t BINARY_MINIMUM_SIZE;
+
+    static const std::string ASCII_SOLID_BEGIN;
+    static const std::string ASCII_SOLID_END;
+    static const std::string ASCII_FACET_BEGIN;
+    static const std::string ASCII_FACET_END;
+    static const std::string ASCII_FILE_BEGIN;
+    static const std::string ASCII_FILE_END;
+    static const std::size_t ASCII_MINIMUM_SIZE;
+
+    STLBase(const std::string &filename);
+    STLBase(const std::string &filename, Format format);
+
+    void setFilename(const std::string &filename);
+    void setFormat(Format format);
+
+private:
+    std::string m_filename;
+    Format m_format;
+
+};
+
+class STLObj : public STLBase {
+
+public:
     std::string stl_name;                         /** stl file name */
     bool stl_type;                                /** flag for binary/ASCII stl file */
     unsigned int err;                             /** general error */
@@ -125,23 +162,6 @@ public:
     void append(const std::string &name, std::size_t &nV, std::size_t &nT, std::vector<std::array<double,3>> &V,
                 std::vector<std::array<double,3>> &N, std::vector<std::array<std::size_t,3>> &T,
                 T2 & ... others);
-
-protected:
-    typedef uint8_t  BINARY_UINT8;
-    typedef uint16_t BINARY_UINT16;
-    typedef uint32_t BINARY_UINT32;
-    typedef float    BINARY_REAL32;
-
-    static const std::size_t BINARY_HEADER_SIZE;
-    static const std::size_t BINARY_MINIMUM_SIZE;
-
-    static const std::string ASCII_SOLID_BEGIN;
-    static const std::string ASCII_SOLID_END;
-    static const std::string ASCII_FACET_BEGIN;
-    static const std::string ASCII_FACET_END;
-    static const std::string ASCII_FILE_BEGIN;
-    static const std::string ASCII_FILE_END;
-    static const std::size_t ASCII_MINIMUM_SIZE;
 
 private:
     std::ifstream m_ifile_handle;      /**< input stream to stl file */

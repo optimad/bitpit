@@ -31,6 +31,85 @@
 namespace bitpit {
 
 /*!
+    \class STLBase
+    \brief Base class for the STL objects.
+*/
+
+const std::size_t STLBase::BINARY_HEADER_SIZE  = 80 * sizeof(STLBase::BINARY_UINT8);
+const std::size_t STLBase::BINARY_MINIMUM_SIZE = STLBase::BINARY_HEADER_SIZE + sizeof(STLBase::BINARY_UINT32);
+
+const std::string STLBase::ASCII_SOLID_BEGIN  = "solid";
+const std::string STLBase::ASCII_SOLID_END    = "endsolid";
+const std::string STLBase::ASCII_FACET_BEGIN  = "facet";
+const std::string STLBase::ASCII_FACET_END    = "endfacet";
+const std::string STLBase::ASCII_FILE_BEGIN   = STLBase::ASCII_SOLID_BEGIN + " ";
+const std::string STLBase::ASCII_FILE_END     = STLBase::ASCII_SOLID_END;
+const std::size_t STLBase::ASCII_MINIMUM_SIZE = STLBase::ASCII_FILE_BEGIN.length() + STLBase::ASCII_FILE_END.length();
+
+/*!
+    Constructor.
+
+    \param filename is the name of the STL file
+*/
+STLBase::STLBase(const std::string &filename)
+{
+    setFilename(filename);
+    setFormat(FormatUnknown);
+}
+
+/*!
+    Constructor.
+
+    \param filename is the name of the STL file
+    \param format is the format of the STL file
+*/
+STLBase::STLBase(const std::string &filename, Format format)
+{
+    setFilename(filename);
+    setFormat(format);
+}
+
+/*!
+    Get name of the STL file.
+
+    \result The name of the STL file.
+*/
+const std::string & STLBase::getFilename() const
+{
+    return m_filename;
+}
+
+/*!
+    Set the name of the STL file.
+
+    \param filename is the name that will be set
+*/
+void STLBase::setFilename(const std::string &filename)
+{
+    m_filename = filename;
+}
+
+/*!
+    Get format of the STL file.
+
+    \result The format of the STL file.
+*/
+STLBase::Format STLBase::getFormat() const
+{
+    return m_format;
+}
+
+/*!
+    Set the format of the STL file.
+
+    \param format is the format that will be set
+*/
+void STLBase::setFormat(STLBase::Format format)
+{
+    m_format = format;
+}
+
+/*!
     \class STLObj
     \brief Interface to STL I/O function
 
@@ -38,27 +117,20 @@ namespace bitpit {
     and STL I/O functions.
 */
 
-const std::size_t STLObj::BINARY_HEADER_SIZE  = 80 * sizeof(STLObj::BINARY_UINT8);
-const std::size_t STLObj::BINARY_MINIMUM_SIZE = STLObj::BINARY_HEADER_SIZE + sizeof(STLObj::BINARY_UINT32);
-
-const std::string STLObj::ASCII_SOLID_BEGIN  = "solid";
-const std::string STLObj::ASCII_SOLID_END    = "endsolid";
-const std::string STLObj::ASCII_FACET_BEGIN  = "facet";
-const std::string STLObj::ASCII_FACET_END    = "endfacet";
-const std::string STLObj::ASCII_FILE_BEGIN   = STLObj::ASCII_SOLID_BEGIN + " ";
-const std::string STLObj::ASCII_FILE_END     = STLObj::ASCII_SOLID_END;
-const std::size_t STLObj::ASCII_MINIMUM_SIZE = STLObj::ASCII_FILE_BEGIN.length() + STLObj::ASCII_FILE_END.length();
-
 /*!
     Default constructor for class STLObj.
 
     Initialize an empty interface to STL file.
 */
 STLObj::STLObj()
+    : STLBase("", FormatUnknown)
 {
     // General info
     stl_name = "";
+    setFilename(stl_name);
+
     stl_type = false;
+    setFormat(FormatASCII);
 
     // Error flags
     err = 0;
@@ -75,10 +147,18 @@ STLObj::STLObj()
     \param[in] filetype boolean flag for ASCII (false) or binary (true) STL file
 */
 STLObj::STLObj(std::string filename, bool filetype)
+    : STLBase("", FormatUnknown)
 {
     // General info
     stl_name = utils::string::trim(filename);
+    setFilename(stl_name);
+
     stl_type = filetype;
+    if (filetype) {
+        setFormat(FormatBinary);
+    } else {
+        setFormat(FormatASCII);
+    }
 
     // Error flags
     err = 0;
@@ -94,9 +174,11 @@ STLObj::STLObj(std::string filename, bool filetype)
     \param[in] filename STL file name
 */
 STLObj::STLObj(std::string filename)
+    : STLBase("", FormatUnknown)
 {
     // General info
     stl_name = utils::string::trim(filename);
+    setFilename(stl_name);
 
     // Error flags
     err = 0;
@@ -111,6 +193,7 @@ STLObj::STLObj(std::string filename)
     }
 
     stl_type = (fileFormat == FormatBinary);
+    setFormat(fileFormat);
 }
 
 /*!
