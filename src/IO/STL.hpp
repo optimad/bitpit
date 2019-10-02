@@ -88,6 +88,126 @@ private:
 
 };
 
+class STLReader : public STLBase {
+
+public:
+    /*!
+        @struct InspectionInfo
+        @ingroup STereoLithography
+        @brief Structure holding inspection information
+    */
+    struct InspectionInfo {
+        int nSolids;                                      /**< Number of solids */
+
+        std::vector<bool> solidValid;                     /**< Errors associated with the solids */
+        std::vector<std::array<bool, 6>> solidErrors;     /**< Errors associated with the solids */
+
+        std::vector<std::string> solidNames;              /**< Name of the solids */
+        std::vector<std::size_t> solidFacetCount;         /**< Number of facets of each solid */
+        std::vector<std::size_t> solidVertexCount;        /**< Number of vertices of each solid */
+    };
+
+    static Format detectFormat(const std::string &filename);
+
+    STLReader(const std::string &filename, Format format = FormatUnknown);
+
+    int inspect(InspectionInfo *info);
+    void displayInspectionInfo(const InspectionInfo &info, std::ostream &out) const;
+
+    int readBegin();
+    int readEnd();
+
+    int readSolid(std::string *name, std::size_t *nV, std::size_t *nT,
+                  std::vector<std::vector<double>> *V, std::vector<std::vector<double>> *N,
+                  std::vector<std::vector<std::size_t>> *T);
+
+    int readSolid(std::string *name, std::size_t *nV, std::size_t *nT,
+                  std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
+                  std::vector<std::array<std::size_t, 3>> *T);
+
+    int readSolid(const std::string &solid, std::string *name, std::size_t *nV, std::size_t *nT,
+                  std::vector<std::vector<double>> *V, std::vector<std::vector<double>> *N,
+                  std::vector<std::vector<std::size_t>> *T);
+
+    int readSolid(const std::string &solid, std::string *name, std::size_t *nV, std::size_t *nT,
+                  std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
+                  std::vector<std::array<std::size_t, 3>> *T);
+
+private:
+    std::ifstream m_fileHandle;      /**< File handle */
+
+    int inspectASCII(InspectionInfo *info);
+    int inspectSolidASCII(std::size_t *nFactes, std::array<bool, 6> *errors);
+    int inspectFacetASCII(std::array<bool, 6> *errors);
+
+    int inspectBinary(InspectionInfo *info);
+
+    int readSolidASCII(const std::string &solid, bool wrapAround, std::string *name,
+                       std::size_t *nV, std::size_t *nT, std::vector<std::vector<double>> *V,
+                       std::vector<std::vector<double>> *N, std::vector<std::vector<std::size_t>> *T);
+
+    int readSolidASCII(const std::string &solid, bool wrapAround, std::string *name,
+                       std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
+                       std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T);
+
+    int readFacetASCII(std::size_t *nV, std::size_t *nT, std::vector<std::vector<double>> *V,
+                       std::vector<std::vector<double>> *N, std::vector<std::vector<std::size_t>> *T);
+
+    int readFacetASCII(std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
+                       std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T);
+
+    int readSolidBinary(std::string *name, std::size_t *nV, std::size_t *nT,
+                        std::vector<std::vector<double>> *V, std::vector<std::vector<double>> *N,
+                        std::vector<std::vector<std::size_t>> *T);
+
+    int readSolidBinary(std::string *name, std::size_t *nV, std::size_t *nT,
+                        std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
+                        std::vector<std::array<std::size_t, 3>> *T);
+
+};
+
+class STLWriter : public STLBase {
+
+public:
+    enum WriteMode {
+        WriteOverwrite,
+        WriteAppend
+    };
+
+    STLWriter(const std::string &filename, Format format);
+
+    int writeBegin(WriteMode writeMode);
+    int writeEnd();
+
+    int writeSolid(const std::string &name, std::size_t nV, std::size_t nT,
+                   const std::vector<std::vector<double>> &V, const std::vector<std::vector<double>> &N,
+                   const std::vector<std::vector<std::size_t>> &T);
+
+    int writeSolid(const std::string &name, std::size_t nV, std::size_t nT,
+                   const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
+                   const std::vector<std::array<std::size_t, 3>> &T);
+
+private:
+    std::ofstream m_fileHandle;      /**< File handle */
+
+    int writeSolidASCII(const std::string &name, std::size_t nV, std::size_t nT,
+                        const std::vector<std::vector<double>> &V, const std::vector<std::vector<double>> &N,
+                        const std::vector<std::vector<std::size_t>> &T);
+
+    int writeSolidASCII(const std::string &name, std::size_t nV, std::size_t nT,
+                        const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
+                        const std::vector<std::array<std::size_t, 3>> &T);
+
+    int writeSolidBinary(const std::string &name, std::size_t nV, std::size_t nT,
+                         const std::vector<std::vector<double>> &V, const std::vector<std::vector<double>> &N,
+                         const std::vector<std::vector<std::size_t>> &T);
+
+    int writeSolidBinary(const std::string &name, std::size_t nV, std::size_t nT,
+                         const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
+                         const std::vector<std::array<std::size_t, 3>> &T);
+
+};
+
 class STLObj : public STLBase {
 
 public:
