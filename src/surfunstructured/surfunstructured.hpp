@@ -74,7 +74,7 @@ protected:
     static ElementType getSTLFacetType(int nFacetVertices);
     static ElementType getDGFFacetType(int nFacetVertices);
 
-    int importSTL(STLObj &STL, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    int importSTL(const std::string &name, STLReader::Format format, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
     int exportSTLSingle(const std::string &name, bool isBinary, bool exportInternalsOnly = true);
     int exportSTLMulti(const std::string &name, bool exportInternalsOnly = true, std::unordered_map<int, std::string> *PIDNames = nullptr);

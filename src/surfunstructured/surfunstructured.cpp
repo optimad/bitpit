@@ -293,13 +293,7 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
 int SurfUnstructured::importSTL(const std::string &name,
                                 int PIDOffset, bool PIDSquash)
 {
-    // Create STL object
-    STLObj STL(name);
-
-    // Import stl object
-    importSTL(STL, PIDOffset, PIDSquash);
-
-    return 0;
+    return importSTL(name, STLReader::FormatUnknown, PIDOffset, PIDSquash);
 }
 
 /*!
@@ -324,13 +318,14 @@ int SurfUnstructured::importSTL(const std::string &name, bool isBinary,
                                 int PIDOffset, bool PIDSquash,
                                 std::unordered_map<int, std::string> *PIDNames)
 {
-    // Create STL object
-    STLObj STL(name, isBinary);
+    STLReader::Format format;
+    if (isBinary) {
+        format = STLReader::FormatBinary;
+    } else {
+        format = STLReader::FormatASCII;
+    }
 
-    // Import stl object
-    importSTL(STL, PIDOffset, PIDSquash, PIDNames);
-
-    return 0;
+    return importSTL(name, format, PIDOffset, PIDSquash, PIDNames);
 }
 
 /*!
@@ -341,7 +336,8 @@ int SurfUnstructured::importSTL(const std::string &name, bool isBinary,
  * If the input file is a multi-solid ASCII file, all solids will be loaded
  * and a different PID will be assigned to the PID of the different solids.
  *
- * \param[in] STL is the STL object to import
+ * \param[in] name name of stl file
+ * \param[in] format is the format of stl file
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file (false) or if the same PID will be assigned to all cells (true).
@@ -350,15 +346,26 @@ int SurfUnstructured::importSTL(const std::string &name, bool isBinary,
  *
  * \result on output returns an error flag for I/O error
 */
-int SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash,
+int SurfUnstructured::importSTL(const std::string &name, STLReader::Format format,
+                                int PIDOffset, bool PIDSquash,
                                 std::unordered_map<int, std::string> *PIDNames)
 {
+    int readerError;
+
     // ====================================================================== //
-    // OPEN STL FILE                                                          //
+    // INITIALIZE READER                                                      //
     // ====================================================================== //
-    STL.open("in");
-    if (STL.err != 0) {
-        return STL.err;
+    STLReader reader(name, format);
+    if (format == STLReader::FormatUnknown) {
+        format = reader.getFormat();
+    }
+
+    // ====================================================================== //
+    // BEGIN REDING STL FILE                                                  //
+    // ====================================================================== //
+    readerError = reader.readBegin();
+    if (readerError != 0) {
+        return readerError;
     }
 
     // ====================================================================== //
@@ -380,8 +387,13 @@ int SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash,
         std::vector<std::array<std::size_t, 3>> connectivityList;
         std::string name = "";
 
-        STL.loadSolid(nVertex, nSimplex, vertexList, normalList, connectivityList, name);
-        if (nVertex == 0) {
+        readerError = reader.readSolid(&name, &nVertex, &nSimplex, &vertexList, &normalList, &connectivityList);
+
+        std::cout << "readerError " << readerError << " ::" << nVertex << std::endl;
+
+        if (readerError != 0) {
+            return readerError;
+        } else if (nVertex == 0) {
             break;
         }
 
@@ -443,15 +455,18 @@ int SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash,
         // ====================================================================== //
         // Multi-body STL files are supported only in ASCII mode                        //
         // ====================================================================== //
-        if (STL.stl_type) {
+        if (format == STLReader::FormatBinary) {
             break;
         }
     }
 
     // ====================================================================== //
-    // CLOSE STL FILE                                                         //
+    // END READING STL FILE                                                   //
     // ====================================================================== //
-    STL.close("in");
+    readerError = reader.readEnd();
+    if (readerError != 0) {
+        return readerError;
+    }
 
     return 0;
 }
