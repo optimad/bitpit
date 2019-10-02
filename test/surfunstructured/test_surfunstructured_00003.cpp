@@ -126,7 +126,7 @@ SurfUnstructured                mesh(2, 3);
     
     // Import mesh from stl format ------------------------------------------ //
     log::cout() << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
-    if (mesh.importSTL(in_name_bin, true) > 0) return 1;
+    if (mesh.importSTL(in_name_bin, true) != 0) return 1;
     if (mesh.getVertexCount() != 3*nExpected) return 1;
     if (mesh.getInternalCount() != nExpected) return 1;
 
@@ -141,7 +141,7 @@ SurfUnstructured                mesh(2, 3);
 
     // Output message ------------------------------------------------------- //
     log::cout() << "** Exporting mesh to (binary): \"" << out_name_bin << "\"" << endl;
-    if (mesh.exportSTL(out_name_bin, true) > 0) return 2;
+    if (mesh.exportSTL(out_name_bin, true) != 0) return 2;
 
 }
 
@@ -154,7 +154,7 @@ SurfUnstructured                mesh(2, 3);
     
     // Import mesh from stl format ------------------------------------------ //
     log::cout() << "** Appending mesh from (ASCII): \"" << in_name_ASCII << "\"" << endl;
-    if (mesh.importSTL(in_name_ASCII, false) > 0) return 3;
+    if (mesh.importSTL(in_name_ASCII, false) != 0) return 3;
     if (mesh.getVertexCount() != 3*nExpected) return 3;
     if (mesh.getInternalCount() != nExpected) return 3;
 
@@ -169,7 +169,7 @@ SurfUnstructured                mesh(2, 3);
 
     // Output message ------------------------------------------------------- //
     log::cout() << "** Exporting mesh to (ASCII): \"" << out_name_ASCII << "\"" << endl;
-    if (mesh.exportSTL(out_name_ASCII, false) > 0) return 4;
+    if (mesh.exportSTL(out_name_ASCII, false) != 0) return 4;
 
 }
 

@@ -122,7 +122,7 @@ if (myRank == 0) {
 
     // Import mesh from stl format ------------------------------------------ //
     log::cout() << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
-    if (mesh.importSTL(in_name_bin, true) > 0) return 1;
+    if (mesh.importSTL(in_name_bin, true) != 0) return 1;
     mesh.collapseCoincidentVertices();
 
     if (mesh.getVertexCount() != 3*nExpected) return 1;
