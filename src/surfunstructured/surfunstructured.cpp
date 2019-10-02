@@ -290,8 +290,8 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
  * 
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(const std::string &name,
-                                           int PIDOffset, bool PIDSquash)
+int SurfUnstructured::importSTL(const std::string &name,
+                                int PIDOffset, bool PIDSquash)
 {
     // Create STL object
     STLObj STL(name);
@@ -320,9 +320,9 @@ unsigned short SurfUnstructured::importSTL(const std::string &name,
  *
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(const std::string &name, const bool &isBinary,
-                                           int PIDOffset, bool PIDSquash,
-                                           std::unordered_map<int, std::string> *PIDNames)
+int SurfUnstructured::importSTL(const std::string &name, const bool &isBinary,
+                                int PIDOffset, bool PIDSquash,
+                                std::unordered_map<int, std::string> *PIDNames)
 {
     // Create STL object
     STLObj STL(name, isBinary);
@@ -350,8 +350,8 @@ unsigned short SurfUnstructured::importSTL(const std::string &name, const bool &
  *
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash,
-                                           std::unordered_map<int, std::string> *PIDNames)
+int SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDSquash,
+                                std::unordered_map<int, std::string> *PIDNames)
 {
     // ====================================================================== //
     // OPEN STL FILE                                                          //
@@ -468,7 +468,7 @@ unsigned short SurfUnstructured::importSTL(STLObj &STL, int PIDOffset, bool PIDS
  *
  * \result on output returns an error flag for I/O error.
  */
-unsigned short SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
+int SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
 {
     return exportSTLSingle(name, isBinary, exportInternalsOnly);
 }
@@ -488,11 +488,11 @@ unsigned short SurfUnstructured::exportSTL(const std::string &name, const bool &
  * its number will be used
  * \result on output returns an error flag for I/O error.
  */
-unsigned short SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary,
-                                           const bool &isMulti, bool exportInternalsOnly,
-                                           std::unordered_map<int, std::string> *PIDNames)
+int SurfUnstructured::exportSTL(const std::string &name, const bool &isBinary,
+                                const bool &isMulti, bool exportInternalsOnly,
+                                std::unordered_map<int, std::string> *PIDNames)
 {
-    unsigned short flag = 0;
+    int flag = 0;
     if (isMulti) {
         flag = exportSTLMulti(name, exportInternalsOnly, PIDNames);
     } else {
@@ -517,7 +517,7 @@ unsigned short SurfUnstructured::exportSTL(const std::string &name, const bool &
  * 
  * \result on output returns an error flag for I/O error.
 */
-unsigned short SurfUnstructured::exportSTLSingle(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
+int SurfUnstructured::exportSTLSingle(const std::string &name, const bool &isBinary, bool exportInternalsOnly)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -630,8 +630,8 @@ unsigned short SurfUnstructured::exportSTLSingle(const std::string &name, const 
   * its number will be used
  * \result on output returns an error flag for I/O error 0-done, >0 errors.
  */
-unsigned short SurfUnstructured::exportSTLMulti(const std::string &name, bool exportInternalsOnly,
-                                                std::unordered_map<int, std::string> *PIDNames)
+int SurfUnstructured::exportSTLMulti(const std::string &name, bool exportInternalsOnly,
+                                     std::unordered_map<int, std::string> *PIDNames)
 {
 #if not BITPIT_ENABLE_MPI==1
     BITPIT_UNUSED(exportInternalsOnly);
@@ -776,7 +776,7 @@ ElementType SurfUnstructured::getSTLFacetType(int nFacetVertices)
  * 
  * \result on output returns an error flag for I/O error.
 */
-unsigned short SurfUnstructured::importDGF(const std::string &dgf_name, int PIDOffset, bool PIDSquash)
+int SurfUnstructured::importDGF(const std::string &dgf_name, int PIDOffset, bool PIDSquash)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -856,7 +856,7 @@ unsigned short SurfUnstructured::importDGF(const std::string &dgf_name, int PIDO
  * 
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::exportDGF(const std::string &dgf_name)
+int SurfUnstructured::exportDGF(const std::string &dgf_name)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //

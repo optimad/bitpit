@@ -57,12 +57,12 @@ public:
     void extractEdgeNetwork(SurfUnstructured &);
 
     // I/O routines
-    unsigned short importSTL(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
-    unsigned short importSTL(const std::string &, const bool &, int PIDOffset = 0, bool PIDSquash = false, std::unordered_map<int, std::string> *PIDNames = nullptr);
-    unsigned short exportSTL(const std::string &, const bool &, bool exportInternalsOnly = true);
-    unsigned short exportSTL(const std::string &, const bool &, const bool &, bool exportInternalsOnly, std::unordered_map<int, std::string> *PIDNames = nullptr);
-    unsigned short importDGF(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
-    unsigned short exportDGF(const std::string &);
+    int importSTL(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
+    int importSTL(const std::string &, const bool &, int PIDOffset = 0, bool PIDSquash = false, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    int exportSTL(const std::string &, const bool &, bool exportInternalsOnly = true);
+    int exportSTL(const std::string &, const bool &, const bool &, bool exportInternalsOnly, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    int importDGF(const std::string &, int PIDOffset = 0, bool PIDSquash = false);
+    int exportDGF(const std::string &);
 
 protected:
     SurfUnstructured(const SurfUnstructured &other) = default;
@@ -74,10 +74,10 @@ protected:
     static ElementType getSTLFacetType(int nFacetVertices);
     static ElementType getDGFFacetType(int nFacetVertices);
 
-    unsigned short importSTL(STLObj &STL, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    int importSTL(STLObj &STL, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
-    unsigned short exportSTLSingle(const std::string &, const bool &, bool exportInternalsOnly = true);
-    unsigned short exportSTLMulti(const std::string &, bool exportInternalsOnly = true, std::unordered_map<int, std::string> *PIDNames = nullptr);
+    int exportSTLSingle(const std::string &, const bool &, bool exportInternalsOnly = true);
+    int exportSTLMulti(const std::string &, bool exportInternalsOnly = true, std::unordered_map<int, std::string> *PIDNames = nullptr);
 
 };
 
