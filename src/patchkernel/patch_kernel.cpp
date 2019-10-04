@@ -4948,23 +4948,23 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 		double value = point[k];
 
 		// Update maximum value
-		if (value > (m_boxMaxPoint[k] + getTol())) {
+		if (utils::DoubleFloatingEqual()(value, m_boxMaxPoint[k], getTol())) {
+			++m_boxMaxCounter[k];
+		} else if (value > m_boxMaxPoint[k]) {
 			m_boxMaxPoint[k]   = value;
 			m_boxMaxCounter[k] = 1;
 
 			boxUpdated = true;
-		} else if (std::abs(value - m_boxMaxPoint[k]) <= getTol()) {
-			++m_boxMaxCounter[k];
 		}
 
 		// Update minimum value
-		if (value < (m_boxMinPoint[k] - getTol())) {
+		if (utils::DoubleFloatingEqual()(value, m_boxMinPoint[k], getTol())) {
+			++m_boxMinCounter[k];
+		} else if (value < m_boxMinPoint[k]) {
 			m_boxMinPoint[k]   = value;
 			m_boxMinCounter[k] = 1;
 
 			boxUpdated = true;
-		} else if (std::abs(value - m_boxMinPoint[k]) <= getTol()) {
-			++m_boxMinCounter[k];
 		}
 	}
 
@@ -4996,25 +4996,25 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 		double value = point[k];
 
 		// Check if maximum value is still valid
-		assert(value <= (m_boxMaxPoint[k] + getTol()));
-		if (value > (m_boxMaxPoint[k] - getTol())) {
-			setBoundingBoxDirty(true);
-		} else if (std::abs(value - m_boxMaxPoint[k]) <= getTol()) {
+		if (utils::DoubleFloatingEqual()(value, m_boxMaxPoint[k], getTol())) {
 			--m_boxMaxCounter[k];
 			if (m_boxMaxCounter[k] == 0) {
 				setBoundingBoxDirty(true);
 			}
+		} else if (value > m_boxMaxPoint[k]) {
+			assert(false && "Bounding box is in inconsistent state.");
+			setBoundingBoxDirty(true);
 		}
 
 		// Update minimum value
-		assert(value >= (m_boxMinPoint[k] - getTol()));
-		if (value < (m_boxMinPoint[k] + getTol())) {
-			setBoundingBoxDirty(true);
-		} else if (std::abs(value - m_boxMinPoint[k]) <= getTol()) {
+		if (utils::DoubleFloatingEqual()(value, m_boxMinPoint[k], getTol())) {
 			--m_boxMinCounter[k];
 			if (m_boxMinCounter[k] == 0) {
 				setBoundingBoxDirty(true);
 			}
+		} else if (value < m_boxMinPoint[k]) {
+			assert(false && "Bounding box is in inconsistent state.");
+			setBoundingBoxDirty(true);
 		}
 	}
 
