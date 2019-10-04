@@ -1312,28 +1312,19 @@ int STLWriter::writeSolidASCII(const std::string &name, std::size_t nV, std::siz
         m_fileHandle << "  " << ASCII_FACET_BEGIN;
 
         // Facet normal
-        std::size_t N_size = N[i].size();
-        if (N_size > 0) {
-            m_fileHandle << " normal ";
-            for (std::size_t j = 0; j < N_size-1; ++j) {
-                m_fileHandle << std::scientific << N[i][j] << " ";
-            }
-            m_fileHandle << std::scientific << N[i][N_size-1];;
-        }
+        m_fileHandle << " normal ";
+        m_fileHandle << std::scientific << N[i][0] << " ";
+        m_fileHandle << std::scientific << N[i][1] << " ";
+        m_fileHandle << std::scientific << N[i][2];;
         m_fileHandle << std::endl;
 
         // Facet vertices
         m_fileHandle << "    outer loop" << std::endl;
-        std::size_t T_size = T[i].size();
-        for (std::size_t j = 0; j < T_size; ++j) {
-            std::size_t V_size = V[T[i][j]].size();
+        for (std::size_t j = 0; j < 3; ++j) {
             m_fileHandle << "      vertex ";
-            if (V_size > 0) {
-                for (std::size_t k = 0; k < V_size-1; ++k) {
-                    m_fileHandle << std::scientific << V[T[i][j]][k] << " ";
-                }
-                m_fileHandle << std::scientific << V[T[i][j]][V_size-1];
-            }
+            m_fileHandle << std::scientific << V[T[i][j]][0] << " ";
+            m_fileHandle << std::scientific << V[T[i][j]][1] << " ";
+            m_fileHandle << std::scientific << V[T[i][j]][2];
             m_fileHandle << std::endl;
         }
         m_fileHandle << "    endloop"    << std::endl;
@@ -1412,8 +1403,7 @@ int STLWriter::writeSolidBinary(const std::string &name, std::size_t nV, std::si
     // Write facets
     for (std::size_t i = 0; i < nT; ++i) {
         // Normals
-        std::size_t N_size = N[i].size();
-        for (std::size_t j = 0; j < N_size; ++j) {
+        for (std::size_t j = 0; j < 3; ++j) {
             BINARY_REAL32 N_ij = (BINARY_REAL32) N[i][j];
             m_fileHandle.write(reinterpret_cast<char *>(&N_ij), sizeof(BINARY_REAL32));
         }
@@ -1421,8 +1411,7 @@ int STLWriter::writeSolidBinary(const std::string &name, std::size_t nV, std::si
         // Vertex
         std::size_t T_size = T[i].size();
         for (std::size_t j = 0; j < T_size; ++j) {
-            std::size_t V_size = V[T[i][j]].size();
-            for (std::size_t k = 0; k < V_size; ++k) {
+            for (std::size_t k = 0; k < 3; ++k) {
                 BINARY_REAL32 V_ijk = (BINARY_REAL32) V[T[i][j]][k];
                 m_fileHandle.write(reinterpret_cast<char *>(&V_ijk), sizeof(BINARY_REAL32));
             }
