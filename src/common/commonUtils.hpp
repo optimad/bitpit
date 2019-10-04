@@ -129,14 +129,15 @@ struct DoubleFloatingEqual
 
         \param x if the first value to compare
         \param y if the second value to compare
+        \param tolerance is the relative tolerance that will be used to
+        perform the comparison
         \param errorFactor is a factor proportional to the floating point
         errors creeping in as a result of x and y computation
         \result Returns true if the numbers match, false otherwise.
     */
-    bool operator()(double x, double y, double errorFactor = 1.0) const
+    bool operator()(double x, double y, double tolerance = std::numeric_limits<double>::epsilon(), double errorFactor = 1.0) const
     {
         const double ABS_MAX_DIFF = 1e-15;
-        const double REL_MAX_DIFF = std::numeric_limits<double>::epsilon();
 
         // Check if the numbers are really close (needed when comparing
         // numbers near zero).
@@ -155,7 +156,7 @@ struct DoubleFloatingEqual
         double abs_y   = std::abs(y);
         double largest = (abs_y > abs_x) ? abs_y : abs_x;
 
-        return (diff <= errorFactor * largest * REL_MAX_DIFF);
+        return (diff <= errorFactor * largest * tolerance);
     }
 };
 

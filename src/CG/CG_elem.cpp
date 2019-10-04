@@ -657,8 +657,8 @@ bool validBarycentric(double const *lambdaPtr, int n )
 
     }
 
-    double accuracyFactor = std::max( 1., std::abs(maxValue) );
-    return utils::DoubleFloatingEqual()( sum, maxValue, accuracyFactor);
+    double tolerance = std::max(1., std::abs(maxValue)) * std::numeric_limits<double>::epsilon();
+    return utils::DoubleFloatingEqual()(sum, maxValue, tolerance);
 }
 
 /*!
