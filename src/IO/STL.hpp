@@ -157,16 +157,29 @@ public:
                    const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
                    const std::vector<std::array<std::size_t, 3>> &T);
 
+    int writeHeader(const std::string &name, std::size_t nT);
+
+    int writeFooter(const std::string &name);
+
+    int writeFacet(const std::array<double, 3> &V0, const std::array<double, 3> &V1,
+                   const std::array<double, 3> &V2, const std::array<double, 3> &N);
+
 private:
     std::ofstream m_fileHandle;      /**< File handle */
 
-    int writeSolidASCII(const std::string &name, std::size_t nV, std::size_t nT,
-                        const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
-                        const std::vector<std::array<std::size_t, 3>> &T);
+    int writeHeaderASCII(const std::string &name, std::size_t nT);
 
-    int writeSolidBinary(const std::string &name, std::size_t nV, std::size_t nT,
-                         const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
-                         const std::vector<std::array<std::size_t, 3>> &T);
+    int writeFooterASCII(const std::string &name);
+
+    int writeFacetASCII(const std::array<double, 3> &V0, const std::array<double, 3> &V1,
+                        const std::array<double, 3> &V2, const std::array<double, 3> &N);
+
+    int writeHeaderBinary(const std::string &name, std::size_t nT);
+
+    int writeFooterBinary(const std::string &name);
+
+    int writeFacetBinary(const std::array<double, 3> &V0, const std::array<double, 3> &V1,
+                         const std::array<double, 3> &V2, const std::array<double, 3> &N);
 
 };
 

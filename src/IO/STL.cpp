@@ -1197,16 +1197,15 @@ int STLWriter::writeBegin(WriteMode writeMode)
             throw std::runtime_error("Specified write mode is not supported for binary files.");
         }
 
-        openMode = std::ifstream::in | std::ifstream::binary;
+        openMode = std::ofstream::out | std::ofstream::binary;
     } else {
         if (writeMode == WriteOverwrite) {
-            openMode = std::ifstream::in;
+            openMode = std::ofstream::out;
         } else if (writeMode == WriteAppend) {
-            openMode = std::ifstream::app;
+            openMode = std::ofstream::app;
         } else {
             throw std::runtime_error("Specified write mode is not supported for ASCII files.");
         }
-
     }
 
     m_fileHandle.open(getFilename(), openMode);
@@ -1247,35 +1246,7 @@ int STLWriter::writeSolid(const std::string &name, std::size_t nV, std::size_t n
                           const std::vector<std::array<double,3>> &V, const std::vector<std::array<double,3>> &N,
                           const std::vector<std::array<std::size_t,3>> &T)
 {
-    Format format = getFormat();
-    if (format == FormatASCII) {
-        return writeSolidASCII(name, nV, nT, V, N, T);
-    } else {
-        return writeSolidBinary(name, nV, nT, V, N, T);
-    }
-}
-
-/*!
-    Write the specified solid data to an ASCII STL file.
-
-    This routine assumes that the file stream is already open.
-
-    \param name is the name of the solid
-    \param nV are the number of vertices of the solid
-    \param nT are the number of facets of the solid
-    \param V is the list of vertex coordinates
-    \param N is the list of facet normals
-    \param T is the facet->vertex connectivity
-    \result Returns a negative number if an error occured, zero otherwise.
-    The meaning of the error codes is the following:
-        - error = -1: failed to write data to output stream
-        - error = -2: input variable are not self-consistent
-*/
-int STLWriter::writeSolidASCII(const std::string &name, std::size_t nV, std::size_t nT,
-                               const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
-                               const std::vector<std::array<std::size_t, 3>> &T)
-{
-    // Check input variable
+    // Check input variables
     if (V.size() < nV) {
         return -2;
     }
@@ -1288,61 +1259,36 @@ int STLWriter::writeSolidASCII(const std::string &name, std::size_t nV, std::siz
         return -2;
     }
 
-    // Check stream status
-    if (!m_fileHandle.good()) {
-        return -1;
-    }
-
     // Save stream flags
     std::ios::fmtflags streamFlags(m_fileHandle.flags());
 
     // Write header
-    std::stringstream sheader;
-    sheader << ASCII_SOLID_BEGIN << " " << name;
-
-    std::string header = sheader.str();
-    header = utils::string::trim(header);
-    m_fileHandle << header << std::endl;
-
-    sheader.str("");
-
-    // Write solid
-    for (std::size_t i = 0; i < nT; ++i) {
-        // Facet header
-        m_fileHandle << "  " << ASCII_FACET_BEGIN;
-
-        // Facet normal
-        m_fileHandle << " normal ";
-        m_fileHandle << std::scientific << N[i][0] << " ";
-        m_fileHandle << std::scientific << N[i][1] << " ";
-        m_fileHandle << std::scientific << N[i][2];;
-        m_fileHandle << std::endl;
-
-        // Facet vertices
-        m_fileHandle << "    outer loop" << std::endl;
-        for (std::size_t j = 0; j < 3; ++j) {
-            m_fileHandle << "      vertex ";
-            m_fileHandle << std::scientific << V[T[i][j]][0] << " ";
-            m_fileHandle << std::scientific << V[T[i][j]][1] << " ";
-            m_fileHandle << std::scientific << V[T[i][j]][2];
-            m_fileHandle << std::endl;
-        }
-        m_fileHandle << "    endloop"    << std::endl;
-
-        // Facet footer
-        m_fileHandle << "  " << ASCII_FACET_END << std::endl;
+    int headerError = writeHeader(name, nT);
+    if (headerError != 0) {
+        return headerError;
     }
 
-    // Solid footer
-    std::stringstream sfooter;
-    sfooter << ASCII_SOLID_END << " " << name;
+    // Write facet data
+    for (std::size_t i = 0; i < nT; ++i) {
+        // Check connectivity
+        for (int k = 0; k < 3; ++k) {
+            if (T[i][k] >= nV) {
+                return -2;
+            }
+        }
 
-    std::string footer;
-    footer = sfooter.str();
-    footer = utils::string::trim(footer);
-    m_fileHandle << footer << std::endl;
+        // Write data
+        int facetError = writeFacet(V[T[i][0]], V[T[i][1]], V[T[i][2]], N[i]);
+        if (facetError != 0) {
+            return facetError;
+        }
+    }
 
-    sfooter.str("");
+    // Write footer
+    int footerError = writeFooter(name);
+    if (footerError != 0) {
+        return footerError;
+    }
 
     // Restore stream flags
     m_fileHandle.flags(streamFlags);
@@ -1351,39 +1297,219 @@ int STLWriter::writeSolidASCII(const std::string &name, std::size_t nV, std::siz
 }
 
 /*!
-    Write the specified solid data to a binary STL file.
+    Write the header to the STL file.
 
     This routine assumes that the file stream is already open.
 
     \param name is the name of the solid
-    \param nV are the number of vertices of the solid
     \param nT are the number of facets of the solid
-    \param V is the list of vertex coordinates
-    \param N is the list of facet normals
-    \param T is the facet->vertex connectivity
     \result Returns a negative number if an error occured, zero otherwise.
     The meaning of the error codes is the following:
         - error = -1: failed to write data to output stream
-        - error = -2: input variable are not self-consistent
 */
-int STLWriter::writeSolidBinary(const std::string &name, std::size_t nV, std::size_t nT,
-                                const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
-                                const std::vector<std::array<std::size_t, 3>> &T)
+int STLWriter::writeHeader(const std::string &name, std::size_t nT)
+{
+    Format format = getFormat();
+
+    int error;
+    if (format == FormatASCII) {
+        error = writeHeaderASCII(name, nT);
+    } else {
+        error = writeHeaderBinary(name, nT);
+    }
+
+    return error;
+}
+
+/*!
+    Write the footer to the STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param name is the name of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeFooter(const std::string &name)
+{
+    Format format = getFormat();
+
+    int error;
+    if (format == FormatASCII) {
+        error = writeFooterASCII(name);
+    } else {
+        error = writeFooterBinary(name);
+    }
+
+    return error;
+}
+
+/*!
+    Write the specified facet data to the STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param V0 are the coordinates of the first vertex
+    \param V1 are the coordinates of the second vertex
+    \param V2 are the coordinates of the third vertex
+    \param N is the normal
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeFacet(const std::array<double, 3> &V0, const std::array<double, 3> &V1,
+                          const std::array<double, 3> &V2, const std::array<double, 3> &N)
+{
+    Format format = getFormat();
+
+    int error;
+    if (format == FormatASCII) {
+        error = writeFacetASCII(V0, V1, V2, N);
+    } else {
+        error = writeFacetBinary(V0, V1, V2, N);
+    }
+
+    return error;
+}
+
+/*!
+    Write the header of a binary STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param name is the name of the solid
+    \param nT are the number of facets of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeHeaderASCII(const std::string &name, std::size_t nT)
+{
+    BITPIT_UNUSED(nT);
+
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
+    }
+
+    // Write header
+    std::stringstream sheader;
+    sheader << ASCII_SOLID_BEGIN << " " << name;
+
+    // Write number of facets
+    std::string header = sheader.str();
+    header = utils::string::trim(header);
+    m_fileHandle << header << std::endl;
+
+    return 0;
+}
+
+/*!
+    Write the footer of a binary STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param name is the name of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeFooterASCII(const std::string &name)
 {
     BITPIT_UNUSED(name);
 
-    // Check input variable
-    if (V.size() < nV) {
-        return -2;
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
     }
 
-    if (T.size() < nT) {
-        return -2;
+    // Write footer
+    std::stringstream sfooter;
+    sfooter << ASCII_SOLID_END << " " << name;
+
+    std::string footer;
+    footer = sfooter.str();
+    footer = utils::string::trim(footer);
+    m_fileHandle << footer << std::endl;
+
+    return 0;
+}
+
+/*!
+    Write the specified facet data to a binary STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param V0 are the coordinates of the first vertex
+    \param V1 are the coordinates of the second vertex
+    \param V2 are the coordinates of the third vertex
+    \param N is the normal
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeFacetASCII(const std::array<double, 3> &V0, const std::array<double, 3> &V1,
+                               const std::array<double, 3> &V2, const std::array<double, 3> &N)
+{
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
     }
 
-    if (N.size() < nT) {
-        return -2;
-    }
+    // Facet header
+    m_fileHandle << "  " << ASCII_FACET_BEGIN;
+
+    // Facet normal
+    m_fileHandle << " normal ";
+    m_fileHandle << std::scientific << N[0] << " ";
+    m_fileHandle << std::scientific << N[1] << " ";
+    m_fileHandle << std::scientific << N[2];
+    m_fileHandle << std::endl;
+
+    // Facet vertices
+    m_fileHandle << "    outer loop" << std::endl;
+
+    m_fileHandle << "      vertex ";
+    m_fileHandle << std::scientific << V0[0] << " ";
+    m_fileHandle << std::scientific << V0[1] << " ";
+    m_fileHandle << std::scientific << V0[2];
+    m_fileHandle << std::endl;
+
+    m_fileHandle << "      vertex ";
+    m_fileHandle << std::scientific << V1[0] << " ";
+    m_fileHandle << std::scientific << V1[1] << " ";
+    m_fileHandle << std::scientific << V1[2];
+    m_fileHandle << std::endl;
+
+    m_fileHandle << "      vertex ";
+    m_fileHandle << std::scientific << V2[0] << " ";
+    m_fileHandle << std::scientific << V2[1] << " ";
+    m_fileHandle << std::scientific << V2[2];
+    m_fileHandle << std::endl;
+
+    m_fileHandle << "    endloop"    << std::endl;
+
+    // Facet footer
+    m_fileHandle << "  " << ASCII_FACET_END << std::endl;
+
+    return 0;
+}
+
+/*!
+    Write the header of a binary STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param name is the name of the solid
+    \param nT are the number of facets of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeHeaderBinary(const std::string &name, std::size_t nT)
+{
+    BITPIT_UNUSED(name);
 
     // Check stream status
     if (!m_fileHandle.good()) {
@@ -1400,31 +1526,82 @@ int STLWriter::writeSolidBinary(const std::string &name, std::size_t nV, std::si
     BINARY_UINT32 nFacets = (BINARY_UINT32) nT;
     m_fileHandle.write(reinterpret_cast<char *>(&nFacets), sizeof(BINARY_UINT32));
 
-    // Write facets
-    for (std::size_t i = 0; i < nT; ++i) {
-        // Normals
-        for (std::size_t j = 0; j < 3; ++j) {
-            BINARY_REAL32 N_ij = (BINARY_REAL32) N[i][j];
-            m_fileHandle.write(reinterpret_cast<char *>(&N_ij), sizeof(BINARY_REAL32));
-        }
+    return 0;
+}
 
-        // Vertex
-        std::size_t T_size = T[i].size();
-        for (std::size_t j = 0; j < T_size; ++j) {
-            for (std::size_t k = 0; k < 3; ++k) {
-                BINARY_REAL32 V_ijk = (BINARY_REAL32) V[T[i][j]][k];
-                m_fileHandle.write(reinterpret_cast<char *>(&V_ijk), sizeof(BINARY_REAL32));
-            }
-        }
+/*!
+    Write the footer of a binary STL file.
 
-        // Attribute byte count
-        //
-        // In the standard format, this should be zero because most software
-        // does not understand anything else.
-        // Attribute byte count
-        BINARY_UINT16 attributeByteCount = 0;
-        m_fileHandle.write(reinterpret_cast<char *>(&attributeByteCount), sizeof(BINARY_UINT16));
+    This routine assumes that the file stream is already open.
+
+    \param name is the name of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeFooterBinary(const std::string &name)
+{
+    BITPIT_UNUSED(name);
+
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
     }
+
+    // Nothing to do
+    return 0;
+}
+
+/*!
+    Write the specified facet data to a binary STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param V0 are the coordinates of the first vertex
+    \param V1 are the coordinates of the second vertex
+    \param V2 are the coordinates of the third vertex
+    \param N is the normal
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to write data to output stream
+*/
+int STLWriter::writeFacetBinary(const std::array<double, 3> &V0, const std::array<double, 3> &V1,
+                                const std::array<double, 3> &V2, const std::array<double, 3> &N)
+{
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
+    }
+
+    // Normals
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 N_k = (BINARY_REAL32) N[k];
+        m_fileHandle.write(reinterpret_cast<char *>(&N_k), sizeof(BINARY_REAL32));
+    }
+
+    // Vertices
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 V_k = (BINARY_REAL32) V0[k];
+        m_fileHandle.write(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
+    }
+
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 V_k = (BINARY_REAL32) V1[k];
+        m_fileHandle.write(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
+    }
+
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 V_k = (BINARY_REAL32) V2[k];
+        m_fileHandle.write(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
+    }
+
+    // Attribute byte count
+    //
+    // In the standard format, this should be zero because most software
+    // does not understand anything else.
+    // Attribute byte count
+    BINARY_UINT16 attributeByteCount = 0;
+    m_fileHandle.write(reinterpret_cast<char *>(&attributeByteCount), sizeof(BINARY_UINT16));
 
     return 0;
 }
