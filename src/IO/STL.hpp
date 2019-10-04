@@ -107,16 +107,8 @@ public:
     int readEnd();
 
     int readSolid(std::string *name, std::size_t *nV, std::size_t *nT,
-                  std::vector<std::vector<double>> *V, std::vector<std::vector<double>> *N,
-                  std::vector<std::vector<std::size_t>> *T);
-
-    int readSolid(std::string *name, std::size_t *nV, std::size_t *nT,
                   std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
                   std::vector<std::array<std::size_t, 3>> *T);
-
-    int readSolid(const std::string &solid, std::string *name, std::size_t *nV, std::size_t *nT,
-                  std::vector<std::vector<double>> *V, std::vector<std::vector<double>> *N,
-                  std::vector<std::vector<std::size_t>> *T);
 
     int readSolid(const std::string &solid, std::string *name, std::size_t *nV, std::size_t *nT,
                   std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
@@ -132,22 +124,11 @@ private:
     int inspectBinary(InspectionInfo *info);
 
     int readSolidASCII(const std::string &solid, bool wrapAround, std::string *name,
-                       std::size_t *nV, std::size_t *nT, std::vector<std::vector<double>> *V,
-                       std::vector<std::vector<double>> *N, std::vector<std::vector<std::size_t>> *T);
-
-    int readSolidASCII(const std::string &solid, bool wrapAround, std::string *name,
                        std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
                        std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T);
 
-    int readFacetASCII(std::size_t *nV, std::size_t *nT, std::vector<std::vector<double>> *V,
-                       std::vector<std::vector<double>> *N, std::vector<std::vector<std::size_t>> *T);
-
     int readFacetASCII(std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
                        std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T);
-
-    int readSolidBinary(std::string *name, std::size_t *nV, std::size_t *nT,
-                        std::vector<std::vector<double>> *V, std::vector<std::vector<double>> *N,
-                        std::vector<std::vector<std::size_t>> *T);
 
     int readSolidBinary(std::string *name, std::size_t *nV, std::size_t *nT,
                         std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
@@ -180,16 +161,8 @@ private:
     std::ofstream m_fileHandle;      /**< File handle */
 
     int writeSolidASCII(const std::string &name, std::size_t nV, std::size_t nT,
-                        const std::vector<std::vector<double>> &V, const std::vector<std::vector<double>> &N,
-                        const std::vector<std::vector<std::size_t>> &T);
-
-    int writeSolidASCII(const std::string &name, std::size_t nV, std::size_t nT,
                         const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
                         const std::vector<std::array<std::size_t, 3>> &T);
-
-    int writeSolidBinary(const std::string &name, std::size_t nV, std::size_t nT,
-                         const std::vector<std::vector<double>> &V, const std::vector<std::vector<double>> &N,
-                         const std::vector<std::vector<std::size_t>> &T);
 
     int writeSolidBinary(const std::string &name, std::size_t nV, std::size_t nT,
                          const std::vector<std::array<double, 3>> &V, const std::vector<std::array<double, 3>> &N,
