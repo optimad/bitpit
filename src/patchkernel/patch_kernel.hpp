@@ -110,7 +110,7 @@ public:
 			}
 
 			for (int k = 0; k < 3; ++k) {
-				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
+				if (utils::DoubleFloatingEqual()(centroid_1[k], centroid_2[k], m_patch.getTol())) {
 					continue;
 				}
 
