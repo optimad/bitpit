@@ -534,103 +534,9 @@ int SurfUnstructured::exportSTL(const std::string &filename, bool isBinary,
 */
 int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary, bool exportInternalsOnly)
 {
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
-
-    // Local variables
-    std::size_t                                 nVertex;
-    std::size_t                                 nSimplex;
-    std::vector<std::array<double, 3>>          vertexList;
-    std::vector<std::array<double, 3>>          normalList;
-    std::vector<std::array<std::size_t, 3>>     connectivityList;
-    std::unordered_map<long, long>              vertexMap;
-    std::array<std::size_t, 3>                  dummyIntArray;
-
-    // Counters
-    int                                                 j;
-    std::size_t                                         v_count;
-    std::vector<std::array<double, 3>>::iterator        i_;
-    std::vector<std::array<std::size_t, 3>>::iterator   j_;
-    std::array<std::size_t, 3>::iterator                k_, ke_;
-    VertexIterator                                      v_, ve_;
-    CellIterator                                        c_, cb_, ce_;
-
-    // ====================================================================== //
-    // INITIALIZE DATA STRUCTURE                                              //
-    // ====================================================================== //
-    dummyIntArray.fill(0) ;
-
-    nSimplex = getInternalCount();
-#if BITPIT_ENABLE_MPI==1
-    if (!exportInternalsOnly) {
-        nSimplex += getGhostCount();
-    }
-#endif
-
-    vertexList.resize(getVertexCount());
-    normalList.resize(nSimplex);
-    connectivityList.resize(nSimplex, dummyIntArray);
-
-    // ====================================================================== //
-    // CREATE VERTEX LIST                                                     //
-    // ====================================================================== //
-    i_ = vertexList.begin();
-    ve_ = vertexEnd();
-    v_count = 0;
-    for (v_ = vertexBegin(); v_ != ve_; ++v_) {
-
-        // Store vertex coordinates
-        *i_ = v_->getCoords();
-        vertexMap[v_->getId()] = v_count;
-
-        // Update counters
-        ++v_count;
-        ++i_;
-
-    } //next v_
-    nVertex = getVertexCount();
-
-    // ====================================================================== //
-    // CREATE CONNECTIVITY                                                    //
-    // ====================================================================== //
-    if (exportInternalsOnly) {
-        cb_ = internalBegin();
-        ce_ = internalEnd();
-    }
-    else {
-        cb_ = cellBegin();
-        ce_ = cellEnd();
-    }
-    i_ = normalList.begin();
-    j_ = connectivityList.begin();
-    for (c_ = cb_; c_ != ce_; ++c_) {
-
-        // Build normals
-        *i_ = evalFacetNormal(c_->getId());
-        
-        // Build connectivity
-        ConstProxyVector<long> cellVertexIds = c_->getVertexIds();
-
-        ke_ = j_->end();
-        j = 0;
-        for (k_ = j_->begin(); k_ != ke_; ++k_) {
-            *k_ = vertexMap[cellVertexIds[j]];
-            ++j;
-        } //next k_
-
-        // Update counters
-        ++j_;
-        ++i_;
-    } //next c_
-
-    // ====================================================================== //
-    // EXPORT STL DATA                                                        //
-    // ====================================================================== //
-
-    // Initialize writer
     int writerError;
 
+    // Initialize writer
     STLReader::Format format;
     if (isBinary) {
         format = STLReader::FormatBinary;
@@ -640,15 +546,74 @@ int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary
 
     STLWriter writer(filename, format);
 
+    // Solid name
+    //
+    // An ampty solid name will be used.
+    const std::string name = "";
+
     // Begin writing
     writerError = writer.writeBegin(STLWriter::WriteOverwrite);
     if (writerError != 0) {
+        writer.writeEnd();
+
         return writerError;
     }
 
-    // Write solid
-    writerError = writer.writeSolid("", nVertex, nSimplex, vertexList, normalList, connectivityList);
+    // Write header
+    std::size_t nFacets = getInternalCount();
+#if BITPIT_ENABLE_MPI==1
+    if (!exportInternalsOnly) {
+        nFacets += getGhostCount();
+    }
+#endif
+
+    writerError = writer.writeHeader(name, nFacets);
     if (writerError != 0) {
+        writer.writeEnd();
+
+        return writerError;
+    }
+
+    // Write facet data
+    CellConstIterator cellBegin;
+    CellConstIterator cellEnd;
+    if (exportInternalsOnly) {
+        cellBegin = internalConstBegin();
+        cellEnd   = internalConstEnd();
+    } else {
+        cellBegin = cellConstBegin();
+        cellEnd   = cellConstEnd();
+    }
+
+    for (CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
+        // Get cell
+        const Cell &cell = *cellItr;
+
+        // Get vertex coordinates
+        ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+        assert(cellVertexIds.size() == 3);
+
+        const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
+        const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
+        const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
+
+        // Evaluate normal
+        const std::array<double, 3> normal = evalFacetNormal(cell.getId());
+
+        // Write data
+        writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+        if (writerError != 0) {
+            writer.writeEnd();
+
+            return writerError;
+        }
+    }
+
+    // Write footer
+    writerError = writer.writeFooter(name);
+    if (writerError != 0) {
+        writer.writeEnd();
+
         return writerError;
     }
 
@@ -680,17 +645,9 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, bool exportInt
     BITPIT_UNUSED(exportInternalsOnly);
 #endif
 
-    std::size_t                                 nTotVertex;
-    std::vector<std::array<double, 3>>          totVertexList;
-    std::unordered_map<long, long>              vertexMap;
-
-    std::size_t                                 nLocSimplex;
-    std::vector<std::array<double, 3>>          normalLocList;
-    std::vector<std::array<std::size_t, 3>>     connectivityLocList;
-
-    // Initialize writer
     int writerError;
 
+    // Initialize writer
     STLWriter writer(filename, STLReader::FormatASCII);
 
     // Begin writing
@@ -699,44 +656,12 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, bool exportInt
         return writerError;
     }
 
-    // Create the vertex map
-    nTotVertex = getVertexCount();
-    totVertexList.resize(nTotVertex);
-    unsigned int count_v = 0;
-    for(const Vertex &v: getVertices()){
-        totVertexList[count_v] = v.getCoords();
-        vertexMap[v.getId()] = count_v;
-        ++count_v;
-    }
-
     // Export the internal cells
-    for(int pid : getInternalPIDs()){
+    for (int pid : getInternalPIDs()) {
+        // Cells associated to the PID
         std::vector<long> cells = getInternalsByPID(pid);
 
-        nLocSimplex = (std::size_t) cells.size();
-        connectivityLocList.resize(nLocSimplex);
-        normalLocList.resize(nLocSimplex);
-
-        std::vector<std::array<std::size_t, 3>>::iterator itC = connectivityLocList.begin();
-        std::vector<std::array<double, 3>>::iterator itN = normalLocList.begin();
-
-        // Fill local connectivity and normals structures
-        for (auto id : cells) {
-            // Fill connectivity
-            const Cell &cell = getCell(id);
-            for (int iloc = 0; iloc<3; ++iloc) {
-                (*itC)[iloc] = vertexMap[cell.getConnect()[iloc]];
-            }
-
-            // Fill normal
-            *itN = evalFacetNormal(cell.getId());
-
-            // Increment  iterators
-            ++itC;
-            ++itN;
-        }
-
-        // Write the solid associated to the current PID
+        // Write header
         std::string name;
         if (PIDNames && PIDNames->count(pid) > 0) {
             name = PIDNames->at(pid);
@@ -744,8 +669,45 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, bool exportInt
             name = std::to_string(pid);
         }
 
-        writer.writeSolid(name, nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+        std::size_t nFacets = cells.size();
+
+        writerError = writer.writeHeader(name, nFacets);
         if (writerError != 0) {
+            writer.writeEnd();
+
+            return writerError;
+        }
+
+        // Write facet data
+        for (long cellId : cells) {
+            // Get cell
+            const Cell &cell = getCell(cellId);
+
+            // Get vertex coordinates
+            ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+            assert(cellVertexIds.size() == 3);
+
+            const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
+            const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
+            const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
+
+            // Evaluate normal
+            const std::array<double, 3> normal = evalFacetNormal(cellId);
+
+            // Write data
+            writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+            if (writerError != 0) {
+                writer.writeEnd();
+
+                return writerError;
+            }
+        }
+
+        // Write footer
+        writerError = writer.writeFooter(name);
+        if (writerError != 0) {
+            writer.writeEnd();
+
             return writerError;
         }
     }
@@ -754,32 +716,50 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, bool exportInt
     // Export ghost cells
     long nGhosts = getGhostCount();
     if (!exportInternalsOnly && nGhosts > 0) {
-        nLocSimplex = nGhosts;
-        connectivityLocList.resize(nLocSimplex);
-        normalLocList.resize(nLocSimplex);
+        // Write header
+        std::string name = "ghosts";
 
-        std::vector<std::array<std::size_t, 3>>::iterator itC = connectivityLocList.begin();
-        std::vector<std::array<double, 3>>::iterator itN = normalLocList.begin();
+        std::size_t nFacets = nGhosts;
 
-        // Fill local connectivity and normals structures
-		CellConstIterator endItr = ghostConstEnd();
-        for (CellConstIterator itr = ghostConstBegin(); itr != endItr; ++itr) {
-            // Fill connectivity
-            for (int iloc = 0; iloc<3; ++iloc) {
-                (*itC)[iloc] = vertexMap[itr->getConnect()[iloc]];
-            }
+        writerError = writer.writeHeader(name, nFacets);
+        if (writerError != 0) {
+            writer.writeEnd();
 
-            // Fill normal
-            *itN = evalFacetNormal(itr.getId());
-
-            // Increment iterators
-            ++itC;
-            ++itN;
+            return writerError;
         }
 
-        // Write the solid associated to the ghosts
-        writer.writeSolid("ghosts", nTotVertex, nLocSimplex, totVertexList, normalLocList, connectivityLocList);
+        // Write facet data
+        CellConstIterator cellBegin = internalConstBegin();
+        CellConstIterator cellEnd   = internalConstEnd();
+        for (CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
+            // Get cell
+            const Cell &cell = *cellItr;
+
+            // Get vertex coordinates
+            ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+            assert(cellVertexIds.size() == 3);
+
+            const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
+            const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
+            const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
+
+            // Evaluate normal
+            const std::array<double, 3> normal = evalFacetNormal(cell.getId());
+
+            // Write data
+            writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+            if (writerError != 0) {
+                writer.writeEnd();
+
+                return writerError;
+            }
+        }
+
+        // Write footer
+        writerError = writer.writeFooter(name);
         if (writerError != 0) {
+            writer.writeEnd();
+
             return writerError;
         }
     }
