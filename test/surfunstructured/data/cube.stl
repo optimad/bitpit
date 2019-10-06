@@ -83,4 +83,4 @@ solid cube
       vertex    0.0    1.0    1.0
     endloop
   endfacet
-endsolid
+endsolid cube
