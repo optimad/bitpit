@@ -1413,6 +1413,9 @@ int STLWriter::writeBegin(WriteMode writeMode)
         return -1;
     }
 
+    // Set stream properties
+    m_fileHandle << std::scientific;
+
     return 0;
 }
 
@@ -1662,30 +1665,30 @@ int STLWriter::writeFacetASCII(const std::array<double, 3> &V0, const std::array
 
     // Facet normal
     m_fileHandle << " normal ";
-    m_fileHandle << std::scientific << N[0] << " ";
-    m_fileHandle << std::scientific << N[1] << " ";
-    m_fileHandle << std::scientific << N[2];
+    m_fileHandle << N[0] << " ";
+    m_fileHandle << N[1] << " ";
+    m_fileHandle << N[2];
     m_fileHandle << "\n";
 
     // Facet vertices
     m_fileHandle << "    outer loop" << "\n";
 
     m_fileHandle << "      vertex ";
-    m_fileHandle << std::scientific << V0[0] << " ";
-    m_fileHandle << std::scientific << V0[1] << " ";
-    m_fileHandle << std::scientific << V0[2];
+    m_fileHandle << V0[0] << " ";
+    m_fileHandle << V0[1] << " ";
+    m_fileHandle << V0[2];
     m_fileHandle << "\n";
 
     m_fileHandle << "      vertex ";
-    m_fileHandle << std::scientific << V1[0] << " ";
-    m_fileHandle << std::scientific << V1[1] << " ";
-    m_fileHandle << std::scientific << V1[2];
+    m_fileHandle << V1[0] << " ";
+    m_fileHandle << V1[1] << " ";
+    m_fileHandle << V1[2];
     m_fileHandle << "\n";
 
     m_fileHandle << "      vertex ";
-    m_fileHandle << std::scientific << V2[0] << " ";
-    m_fileHandle << std::scientific << V2[1] << " ";
-    m_fileHandle << std::scientific << V2[2];
+    m_fileHandle << V2[0] << " ";
+    m_fileHandle << V2[1] << " ";
+    m_fileHandle << V2[2];
     m_fileHandle << "\n";
 
     m_fileHandle << "    endloop"    << "\n";
