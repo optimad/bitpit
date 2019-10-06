@@ -677,50 +677,52 @@ int STLReader::inspectBinary(InspectionInfo *info)
 */
 void STLReader::displayInspectionInfo(const InspectionInfo &info, std::ostream &out) const
 {
-    out << "Inspection info" << std::endl;
+    out << "Inspection info" << "\n";
 
-    out << "  Filename : " << getFilename() << std::endl;
+    out << "  Filename : " << getFilename() << "\n";
 
     Format format = getFormat();
     if (format == FormatBinary) {
-        out << "  Format   : binary" << std::endl;
+        out << "  Format   : binary" << "\n";
     } else {
-        out << "  Format   : ASCII" << std::endl;
+        out << "  Format   : ASCII" << "\n";
     }
 
-    out << std::endl;
+    out << "\n";
     if (info.nSolids > 0) {
-        out << "  Solid count    : " << info.nSolids << std::endl;
+        out << "  Solid count    : " << info.nSolids << "\n";
 
         for (int i = 0; i < info.nSolids; ++i) {
-            out << std::endl;
-            out << "  Solid index    : " << i << std::endl;
-            out << "  Solid name     : " << info.solidNames[i] << std::endl;
-            out << "  Solid facets   : " << info.solidFacetCount[i] << std::endl;
-            out << "  Solid vertices : " << info.solidVertexCount[i] << std::endl;
+            out << "\n";
+            out << "  Solid index    : " << i << "\n";
+            out << "  Solid name     : " << info.solidNames[i] << "\n";
+            out << "  Solid facets   : " << info.solidFacetCount[i] << "\n";
+            out << "  Solid vertices : " << info.solidVertexCount[i] << "\n";
 
             if (info.solidErrors[i][0]) {
-                out << "    **ERROR** Unterminated solid block." << std::endl;
+                out << "    **ERROR** Unterminated solid block." << "\n";
             }
             if (info.solidErrors[i][1]) {
-                out << "    **ERROR** Unterminated facet block." << std::endl;
+                out << "    **ERROR** Unterminated facet block." << "\n";
             }
             if (info.solidErrors[i][2]) {
-                out << "    **ERROR** Normal data are missing." << std::endl;
+                out << "    **ERROR** Normal data are missing." << "\n";
             }
             if (info.solidErrors[i][3]) {
-                out << "    **ERROR** Wrong number of components for normal data." << std::endl;
+                out << "    **ERROR** Wrong number of components for normal data." << "\n";
             }
             if (info.solidErrors[i][4]) {
-                out << "    **ERROR** Wrong number of vertices in facet block." << std::endl;
+                out << "    **ERROR** Wrong number of vertices in facet block." << "\n";
             }
             if (info.solidErrors[i][5]) {
-                out << "    **ERROR** Wrong number of coordinates for vertice." << std::endl;
+                out << "    **ERROR** Wrong number of coordinates for vertice." << "\n";
             }
         }
     } else {
-        out << "  STL file contains no solids." << std::endl;
+        out << "  STL file contains no solids." << "\n";
     }
+
+    out.flush();
 }
 
 /*!
@@ -1598,7 +1600,7 @@ int STLWriter::writeHeaderASCII(const std::string &name, std::size_t nT)
     // Write number of facets
     std::string header = sheader.str();
     header = utils::string::trim(header);
-    m_fileHandle << header << std::endl;
+    m_fileHandle << header << "\n";
 
     return 0;
 }
@@ -1629,7 +1631,7 @@ int STLWriter::writeFooterASCII(const std::string &name)
     std::string footer;
     footer = sfooter.str();
     footer = utils::string::trim(footer);
-    m_fileHandle << footer << std::endl;
+    m_fileHandle << footer << "\n";
 
     return 0;
 }
@@ -1663,33 +1665,33 @@ int STLWriter::writeFacetASCII(const std::array<double, 3> &V0, const std::array
     m_fileHandle << std::scientific << N[0] << " ";
     m_fileHandle << std::scientific << N[1] << " ";
     m_fileHandle << std::scientific << N[2];
-    m_fileHandle << std::endl;
+    m_fileHandle << "\n";
 
     // Facet vertices
-    m_fileHandle << "    outer loop" << std::endl;
+    m_fileHandle << "    outer loop" << "\n";
 
     m_fileHandle << "      vertex ";
     m_fileHandle << std::scientific << V0[0] << " ";
     m_fileHandle << std::scientific << V0[1] << " ";
     m_fileHandle << std::scientific << V0[2];
-    m_fileHandle << std::endl;
+    m_fileHandle << "\n";
 
     m_fileHandle << "      vertex ";
     m_fileHandle << std::scientific << V1[0] << " ";
     m_fileHandle << std::scientific << V1[1] << " ";
     m_fileHandle << std::scientific << V1[2];
-    m_fileHandle << std::endl;
+    m_fileHandle << "\n";
 
     m_fileHandle << "      vertex ";
     m_fileHandle << std::scientific << V2[0] << " ";
     m_fileHandle << std::scientific << V2[1] << " ";
     m_fileHandle << std::scientific << V2[2];
-    m_fileHandle << std::endl;
+    m_fileHandle << "\n";
 
-    m_fileHandle << "    endloop"    << std::endl;
+    m_fileHandle << "    endloop"    << "\n";
 
     // Facet footer
-    m_fileHandle << "  " << ASCII_FACET_END << std::endl;
+    m_fileHandle << "  " << ASCII_FACET_END << "\n";
 
     return 0;
 }
