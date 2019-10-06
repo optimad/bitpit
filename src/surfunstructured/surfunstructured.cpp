@@ -352,54 +352,78 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
 {
     int readerError;
 
-    // ====================================================================== //
-    // INITIALIZE READER                                                      //
-    // ====================================================================== //
+    // Initialize reader
     STLReader reader(filename, format);
     if (format == STLReader::FormatUnknown) {
         format = reader.getFormat();
     }
 
-    // ====================================================================== //
-    // BEGIN REDING STL FILE                                                  //
-    // ====================================================================== //
+    // Begin reding the STL file
     readerError = reader.readBegin();
     if (readerError != 0) {
         return readerError;
     }
 
-    // ====================================================================== //
-    // LOAD ALL SOLID FROM THE STL FILE                                       //
-    // ====================================================================== //
+    // Read all the solids in the STL file
     int pid = PIDOffset;
     if (!PIDSquash) {
         --pid;
     }
 
+    ElementType facetType = ElementType::TRIANGLE;
+    int nFacetVertices = ReferenceElementInfo::getInfo(ElementType::TRIANGLE).nVertices;
+
     while (true) {
-        // ====================================================================== //
-        // LOAD SOLID FROM THE STL FILE                                           //
-        // ====================================================================== //
-        std::size_t nVertex = 0;
-        std::size_t nSimplex = 0;
-        std::vector<std::array<double, 3>> vertexList;
-        std::vector<std::array<double, 3>> normalList;
-        std::vector<std::array<std::size_t, 3>> connectivityList;
-        std::string name = "";
-
-        readerError = reader.readSolid(&name, &nVertex, &nSimplex, &vertexList, &normalList, &connectivityList);
-
-        std::cout << "readerError " << readerError << " ::" << nVertex << std::endl;
-
+        // Read header
+        std::size_t nFacets;
+        std::string name;
+        readerError = reader.readHeader(&name, &nFacets);
         if (readerError != 0) {
-            return readerError;
-        } else if (nVertex == 0) {
-            break;
+            if (readerError == -2) {
+                break;
+            } else {
+                return readerError;
+            }
         }
 
-        // ====================================================================== //
-        // PID AND NAME OF THE SOLID                                              //
-        // ====================================================================== //
+        // Generate patch cells from STL facets
+        reserveVertices(getVertexCount() + nFacetVertices * nFacets);
+        reserveCells(getCellCount() + nFacets);
+
+        for (std::size_t n = 0; n < nFacets; ++n) {
+            // Read facet data
+            std::array<double, 3> coords_0;
+            std::array<double, 3> coords_1;
+            std::array<double, 3> coords_2;
+            std::array<double, 3> normal;
+
+            readerError = reader.readFacet(&coords_0, &coords_1, &coords_2, &normal);
+            if (readerError != 0) {
+                return readerError;
+            }
+
+            // Add vertices
+            VertexIterator vertexItr_0 = addVertex(coords_0);
+            VertexIterator vertexItr_1 = addVertex(coords_1);
+            VertexIterator vertexItr_2 = addVertex(coords_2);
+
+            // Add cell
+            std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[nFacetVertices]);
+            connectStorage[0] = vertexItr_0.getId();
+            connectStorage[1] = vertexItr_1.getId();
+            connectStorage[2] = vertexItr_2.getId();
+
+            CellIterator cellIterator = addCell(facetType, std::move(connectStorage));
+            cellIterator->setPID(pid);
+        }
+
+        // Read footer
+        readerError = reader.readFooter(name);
+        if (readerError != 0) {
+            return readerError;
+        }
+
+        // Assign PID name
         if (!PIDSquash) {
             ++pid;
             if (PIDNames && !name.empty()) {
@@ -407,62 +431,13 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
             }
         }
 
-        // ====================================================================== //
-        // PREPARE MESH FOR DATA IMPORT                                           //
-        // ====================================================================== //
-        reserveVertices(getVertexCount() + nVertex);
-        reserveCells(getCellCount() + nSimplex);
-
-        // ====================================================================== //
-        // ADD VERTICES TO MESH                                                   //
-        // ====================================================================== //
-        std::vector<std::array<double, 3>>::const_iterator v_, ve_;
-
-        std::vector<long> vertexMap;
-        vertexMap.reserve(nVertex);
-
-        long v_counter = 0;
-        ve_ = vertexList.cend();
-        for (v_ = vertexList.cbegin(); v_ != ve_; ++v_) {
-            VertexIterator i_ = addVertex(*v_);
-            vertexMap[v_counter] = i_->getId();
-            ++v_counter;
-        } //next v_
-
-        // ====================================================================== //
-        // ADD CELLS TO MESH                                                      //
-        // ====================================================================== //
-        std::vector<std::array<std::size_t, 3>>::const_iterator c_, ce_;
-        std::array<std::size_t, 3>::const_iterator w_, we_;
-
-        ce_ = connectivityList.cend();
-        for (c_ = connectivityList.cbegin(); c_ != ce_; ++c_) {
-            // Remap STL connectivity
-            std::size_t n_v = c_->size();
-            std::vector<long> connect(n_v, Vertex::NULL_ID);
-            we_ = c_->cend();
-            std::size_t i = 0;
-            for (w_ = c_->cbegin(); w_ < we_; ++w_) {
-                connect[i] = vertexMap[*w_];
-                ++i;
-            } //next w_
-
-            // Add cell
-            CellIterator cellIterator = addCell(getSTLFacetType(n_v), connect);
-            cellIterator->setPID(pid);
-        } //next c_
-
-        // ====================================================================== //
-        // Multi-body STL files are supported only in ASCII mode                        //
-        // ====================================================================== //
+        // Multi-body STL files are supported only in ASCII mode
         if (format == STLReader::FormatBinary) {
             break;
         }
     }
 
-    // ====================================================================== //
-    // END READING STL FILE                                                   //
-    // ====================================================================== //
+    // End reading
     readerError = reader.readEnd();
     if (readerError != 0) {
         return readerError;
