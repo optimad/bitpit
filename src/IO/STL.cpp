@@ -760,32 +760,27 @@ int STLReader::readEnd()
 
     This routine assumes that the file stream is already open.
 
-    \param[in,out] nV on input stores the current number of vertices hosted in V.
-    On output stores the input values incremented by the number
-    of vertices acquired from the STL file.
+    \param[out] name on output will contain the name of the solid that has
+    been actually read. Solid names are only supported for ASCII files
+    \param[in,out] nV on input stores the current number of vertices hosted
+    in V, on output stores the input values incremented by the number of
+    vertices read from the STL file.
     \param[in,out] nT on input stores the number of facet->vertex connectivity
-    entries stores in T. On output stores the input value incremented by the
-    number of facets acquired from the STL file.
-    \param[in,out] V vertex coordinates list. On output stores the coordinates of
-    vertices vertices acquired from the STL file. New vertices are appended
-    at the end of V.
-    \param[in,out] N facet normals. On output stores the normal unit std::vector to
-    each facet acquired from the STL file. New normals are appended
-    at the end of N.
-    \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
-    connectivity entries for the facets acquired from the STL file. New connectivity entries
-    are appended at the end of T.
+    entries stores in T, on output stores the input value incremented by the
+    number of facets read from the STL file.
+    \param[in,out] V is the list of vertex coordinates, vertices read from the
+    STL file are appended at the end of V
+    \param[in,out] N is the list of facet normals, normals read from the STL
+    file are appended at the end of V
+    \param[in,out] T is the facet->vertex connectivity, entries read from the
+    STL file are appended at the end of T
+    \result Returns a negative number if an error occured, zero otherwise.
 */
 int STLReader::readSolid(std::string *name, std::size_t *nV, std::size_t *nT,
                          std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
                          std::vector<std::array<std::size_t, 3>> *T)
 {
-    Format format = getFormat();
-    if (format == FormatASCII) {
-        return readSolidASCII("", false, name, nV, nT, V, N, T);
-    } else {
-        return readSolidBinary(name, nV, nT, V, N, T);
-    }
+    return readSolid("", name, nV, nT, V, N, T);
 }
 
 /*!
@@ -816,9 +811,84 @@ int STLReader::readSolid(const std::string &solid, std::string *name, std::size_
                          std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
                          std::vector<std::array<std::size_t, 3>> *T)
 {
+    // Read header
+    std::size_t nSolidFacets;
+    int headerError = readHeader(solid, name, &nSolidFacets);
+    if (headerError != 0) {
+        return headerError;
+    }
+
+    // Read facet data
+    V->resize(*nV + 3 * nSolidFacets, {{0., 0., 0.}});
+    N->resize(*nT + nSolidFacets, {{0., 0., 0.}});
+    T->resize(*nT + nSolidFacets, {{0, 0, 0}});
+
+    for (std::size_t i = 0; i < *nT; ++i) {
+        // Read facet data
+        std::array<double, 3> *V0 = V->data() + *nV + 3 * i;
+        std::array<double, 3> *V1 = V0 + 1;
+        std::array<double, 3> *V2 = V1 + 1;
+
+        int facetError = readFacet(V0, V1, V2, N->data() + i);
+        if (facetError != 0) {
+            return facetError;
+        }
+
+        // Update facet->vertex connectivity
+        (*T)[i][0] = *nV + 3 * i;
+        (*T)[i][1] = (*T)[i][0] + 1;
+        (*T)[i][2] = (*T)[i][1] + 1;
+    }
+
+    // Read footer
+    int footerError = readFooter(solid);
+    if (footerError != 0) {
+        return footerError;
+    }
+
+    return 0;
+}
+
+/*!
+    Read the header of the STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param[out] name on output will contain the name of the solid that has
+    been actually read
+    \param[out] nT on input will contain the number of factes of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read data from output stream
+        - error = -2: header was not found
+*/
+int STLReader::readHeader(std::string *name, std::size_t *nT)
+{
+    return readHeader("", name, nT);
+}
+
+/*!
+    Read the header of the STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param[in] solid is the name of the solid, if the name is empty, the
+    first header will be read
+    \param[out] name on output will contain the name of the solid that has
+    been actually read
+    \param[out] nT on input will contain the number of factes of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read data from output stream
+        - error = -2: header was not found
+*/
+int STLReader::readHeader(const std::string &solid, std::string *name, std::size_t *nT)
+{
     Format format = getFormat();
+
+    int error;
     if (format == FormatASCII) {
-        return readSolidASCII(solid, true, name, nV, nT, V, N, T);
+        error = readHeaderASCII(solid, name, nT);
     } else {
         std::string trimmedSolid = solid;
         utils::string::trim(trimmedSolid);
@@ -827,43 +897,99 @@ int STLReader::readSolid(const std::string &solid, std::string *name, std::size_
             log::cout() << "         The reader will read the next solid." << std::endl;
         }
 
-        return readSolidBinary(name, nV, nT, V, N, T);
+        error = readHeaderBinary(name, nT);
     }
+
+    return error;
 }
 
 /*!
-    Read solid data from an ASCII STL file.
+    Read the footer of an ASCII STL file.
 
     This routine assumes that the file stream is already open.
 
-    \param[in] solid is the name of the solid that will to be read, if the
-    name is empty, the first solid found will be read. Loading solids with
-    a specific name is only supported for ASCII files
-    \param[in] wrapAround controls if, when the end of file is reached, the
-    search for the solid to read will begin again from the beginning of the
-    file
-    \param[out] name on output will contain the name of the solid that has
-    been actually read. Solid names are only supported for ASCII files
-    \param[in,out] nV on input stores the current number of vertices hosted
-    in V, on output stores the input values incremented by the number of
-    vertices read from the STL file.
-    \param[in,out] nT on input stores the number of facet->vertex connectivity
-    entries stores in T, on output stores the input value incremented by the
-    number of facets read from the STL file.
-    \param[in,out] V is the list of vertex coordinates, vertices read from the
-    STL file are appended at the end of V
-    \param[in,out] N is the list of facet normals, normals read from the STL
-    file are appended at the end of V
-    \param[in,out] T is the facet->vertex connectivity, entries read from the
-    STL file are appended at the end of T
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read data from output stream
+        - error = -2: footer was not found
+*/
+int STLReader::readFooter()
+{
+    return readFooter("");
+}
+
+/*!
+    Read the footer of an ASCII STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param solid is the name of the solid, if the name is empty, the first
+    footer will be read
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read data from output stream
+        - error = -2: footer was not found
+*/
+int STLReader::readFooter(const std::string &solid)
+{
+    Format format = getFormat();
+
+    int error;
+    if (format == FormatASCII) {
+        error = readFooterASCII(solid);
+    } else {
+        error = readFooterBinary();
+    }
+
+    return error;
+}
+
+/*!
+    Read facet data from an ASCII STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param[out] V0 on output will contain the coordinates of the first vertex
+    \param[out] V1 on output will contain the coordinates of the second vertex
+    \param[out] V2 on output will contain the coordinates of the third vertex
+    \param[out] N on output will contain the normal
     \result Returns a negative number if an error occured, zero otherwise.
     The meaning of the error codes is the following:
         - error = -1: failed to read from input stream
-        - error = -2: failed to read a facet
+        - error = -2: facet data section is malformed
+        - error = -3: the facet has more than 3 vertices
 */
-int STLReader::readSolidASCII(const std::string &solid, bool wrapAround, std::string *name,
-                              std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
-                              std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T)
+int STLReader::readFacet(std::array<double, 3> *V0, std::array<double, 3> *V1,
+                         std::array<double, 3> *V2, std::array<double, 3> *N)
+{
+    Format format = getFormat();
+
+    int error;
+    if (format == FormatASCII) {
+        error = readFacetASCII(V0, V1, V2, N);
+    } else {
+        error = readFacetBinary(V0, V1, V2, N);
+    }
+
+    return error;
+}
+
+/*!
+    Read the header of an ASCII STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param[in] solid is the name of the solid, if the name is empty, the
+    first header will be read
+    \param[out] name on output will contain the name of the solid that has
+    been actually read
+    \param[out] nT on input will contain the number of factes of the solid
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read data from output stream
+        - error = -2: header was not found
+*/
+int STLReader::readHeaderASCII(const std::string &solid, std::string *name, std::size_t *nT)
 {
     // Check stream status
     if (!m_fileHandle.good()) {
@@ -884,8 +1010,9 @@ int STLReader::readSolidASCII(const std::string &solid, bool wrapAround, std::st
     long start_pos   = m_fileHandle.tellg();
     long current_pos = start_pos + 1;
 
-    bool check = false;
-    while (!check && (start_pos != current_pos)) {
+    bool solidFound = false;
+    bool wrapAround = solidKey.compare(ASCII_SOLID_BEGIN) != 0;
+    while (!solidFound && (start_pos != current_pos)) {
         // Get current line
         getline(m_fileHandle, line);
         line = utils::string::trim(line);
@@ -897,8 +1024,9 @@ int STLReader::readSolidASCII(const std::string &solid, bool wrapAround, std::st
             if (wrapAround) {
                 m_fileHandle.clear();
                 m_fileHandle.seekg(0);
+                wrapAround = false;
             } else {
-                check = false;
+                solidFound = false;
                 break;
             }
         }
@@ -911,90 +1039,105 @@ int STLReader::readSolidASCII(const std::string &solid, bool wrapAround, std::st
                 *name = utils::string::trim(*name);
 
                 start_pos = current_pos;
-                check = true;
+
+                solidFound = true;
             }
         }
     }
 
-    if (!check) {
-        return 0;
+    if (!solidFound) {
+        return -2;
     }
 
     // Read number of facets
     m_fileHandle.clear();
     m_fileHandle.seekg(start_pos);
 
-    std::size_t nSolidFacets;
     std::array<bool, 6> solidErrors;
-    inspectSolidASCII(&nSolidFacets, &solidErrors);
-
-    // Read solid data
-    std::array<double, 3> dummyDoubleArray;
-    dummyDoubleArray.fill(0.);
-
-    std::array<std::size_t, 3> dummyIntArray;
-    dummyIntArray.fill(-1);
-
-    V->resize(*nV + 3 * nSolidFacets, dummyDoubleArray);
-    N->resize(*nT + nSolidFacets, dummyDoubleArray);
-    T->resize(*nT + nSolidFacets, dummyIntArray);
+    inspectSolidASCII(nT, &solidErrors);
 
     m_fileHandle.clear();
     m_fileHandle.seekg(start_pos);
-    word = "begin";
-    while ((!m_fileHandle.eof())
-        && (word.compare(ASCII_SOLID_END) != 0)
-        && (word.compare(ASCII_SOLID_BEGIN) != 0)) {
 
-        // Get current line
-        current_pos = m_fileHandle.tellg();
+    return 0;
+}
+
+/*!
+    Read the footer of an ASCII STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param solid is the name of the solid, if the name is empty, the first
+    footer will be read
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read data from output stream
+        - error = -2: footer was not found
+*/
+int STLReader::readFooterASCII(const std::string &solid)
+{
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
+    }
+
+    // Get solid key
+    std::string solidKey = solid;
+    utils::string::trim(solidKey);
+    solidKey = ASCII_SOLID_END + " " + solidKey;
+    utils::string::trim(solidKey);
+
+    // Look for the end of solid section
+    std::string line;
+    std::string word;
+    std::stringstream sline;
+
+    while (true) {
+        // Get next line
         getline(m_fileHandle, line);
+
+        // Get next word
         line = utils::string::trim(line);
         sline.clear();
         sline.str(line);
+        if (!(sline >> word)) {
+            word = "";
+        }
 
-        // Look for keyword "facet"
-        if ((sline >> word) && (word.compare(ASCII_FACET_BEGIN) == 0)) {
-            m_fileHandle.seekg(current_pos);
-            int readFacetError = readFacetASCII(nV, nT, V, N, T);
-            if (readFacetError != 0) {
+        // Handle the word
+        if (word.compare(ASCII_SOLID_END) == 0) {
+            if (line.compare(solidKey) == 0) {
+                break;
+            } else {
                 return -2;
             }
+        } else if (word.compare(ASCII_SOLID_BEGIN) == 0) {
+            return -2;
+        } else if (m_fileHandle.eof()) {
+            return -2;
         }
-    }
-
-    if (word.compare(ASCII_SOLID_END) != 0) {
-        m_fileHandle.clear();
-        m_fileHandle.seekg(current_pos);
     }
 
     return 0;
 }
 
 /*!
-    Read facet data from ASCII STL file.
+    Read facet data from an ASCII STL file.
 
     This routine assumes that the file stream is already open.
 
-    \param[in,out] nV on input stores the current number of vertices hosted
-    in V, on output stores the input values incremented by the number of
-    vertices read from the STL file.
-    \param[in,out] nT on input stores the number of facet->vertex connectivity
-    entries stores in T, on output stores the input value incremented by the
-    number of facets read from the STL file.
-    \param[in,out] V is the list of vertex coordinates, vertices read from the
-    STL file are appended at the end of V
-    \param[in,out] N is the list of facet normals, normals read from the STL
-    file are appended at the end of V
-    \param[in,out] T is the facet->vertex connectivity, entries read from the
-    STL file are appended at the end of T
+    \param[out] V0 on output will contain the coordinates of the first vertex
+    \param[out] V1 on output will contain the coordinates of the second vertex
+    \param[out] V2 on output will contain the coordinates of the third vertex
+    \param[out] N on output will contain the normal
     \result Returns a negative number if an error occured, zero otherwise.
     The meaning of the error codes is the following:
         - error = -1: failed to read from input stream
-        - error = -2: one facet has more than 3 vertices
+        - error = -2: facet data section is malformed
+        - error = -3: the facet has more than 3 vertices
 */
-int STLReader::readFacetASCII(std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
-                              std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T)
+int STLReader::readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *V1,
+                              std::array<double, 3> *V2, std::array<double, 3> *N)
 {
     // Read facet data
     std::string line;
@@ -1002,104 +1145,117 @@ int STLReader::readFacetASCII(std::size_t *nV, std::size_t *nT, std::vector<std:
     std::stringstream sline;
     long last_valid_pos;
 
-    last_valid_pos = m_fileHandle.tellg();
-    getline(m_fileHandle, line);
-    line = utils::string::trim(line);
-    sline.clear();
-    sline.str(line);
-    if ((!(sline >> word)) || (word.compare(ASCII_FACET_BEGIN) == 0)) {
-        word = "begin";
-    }
-
+    int error = 0;
     int nFacetVertices = 0;
-    while ((!m_fileHandle.eof())
-           && ((word.compare(ASCII_FACET_END) != 0)
-           &&  (word.compare(ASCII_FACET_BEGIN)    != 0)
-           &&  (word.compare(ASCII_SOLID_BEGIN)    != 0)
-           &&  (word.compare(ASCII_SOLID_END) != 0))) {
-
-        // Read facet normal or facet vertices
-        if (word.compare("begin") == 0) {
-            if ((sline >> word) && (word.compare("normal") == 0)) {
-                sline >> (*N)[*nT];
-            }
-        }
-        else if (word.compare("vertex") == 0) {
-            if (nFacetVertices >= 3) {
-                return 2;
-            }
-
-            sline >> (*V)[*nV + nFacetVertices];
-            nFacetVertices++;
-        }
-
+    std::string target = "facet";
+    while (true) {
         // Get next line
         last_valid_pos = m_fileHandle.tellg();
         getline(m_fileHandle, line);
+
+        // Get next word
         line = utils::string::trim(line);
         sline.clear();
         sline.str(line);
         if (!(sline >> word)) {
-            word = "";
+            continue;
+        }
+
+        // Handle the word
+        //
+        // Beginning of faacet section and normal are on the same line, after
+        // finding the beginning of the facet section we have to extract the
+        // next word without getting a new line.
+        if (word.compare(ASCII_FACET_BEGIN) == 0) {
+            if (word.compare(target) == 0) {
+                target = "normal";
+
+                if (!(sline >> word)) {
+                    continue;
+                }
+            } else {
+                error = -2;
+                break;
+            }
+        }
+
+        if (word.compare(ASCII_FACET_END) == 0) {
+            if (word.compare(target) == 0) {
+                break;
+            } else {
+                error = -2;
+                break;
+            }
+        } else if (word.compare("normal") == 0) {
+            if (word.compare(target) == 0) {
+                sline >> (*N);
+                target = "vertex";
+            } else {
+                error = -2;
+                break;
+            }
+        } else if (word.compare("vertex") == 0) {
+            if (word.compare(target) == 0) {
+                if (nFacetVertices == 0) {
+                    sline >> *V0;
+                } else if (nFacetVertices == 1) {
+                    sline >> *V1;
+                } else if (nFacetVertices == 2) {
+                    sline >> *V2;
+                    target = ASCII_FACET_END;
+                } else {
+                    error = -3;
+                    break;
+                }
+
+                nFacetVertices++;
+            } else {
+                error = -2;
+                break;
+            }
+        } else if (word.compare(ASCII_SOLID_BEGIN) == 0) {
+            error = -2;
+            break;
+        } else if (word.compare(ASCII_SOLID_END) == 0) {
+            error = -2;
+            break;
+        } else if (m_fileHandle.eof()) {
+            error = -2;
+            break;
         }
     }
 
     // Restor cursor position
-    if (word.compare(ASCII_FACET_END) != 0) {
+    if (error != 0) {
         m_fileHandle.clear();
         m_fileHandle.seekg(last_valid_pos);
     }
 
-    // Update facet-vertex connectivity
-    for (int i = 0; i < nFacetVertices; ++i) {
-        (*T)[*nT][i] = *nV + i;
-    }
-
-    // Update facet/vertex counters
-    *nV += nFacetVertices;
-    (*nT)++;
-
-    return 0;
+    return error;
 }
 
 /*!
-    Read solid data from a binary STL file.
+    Read the header of a binary STL file.
 
     This routine assumes that the file stream is already open.
 
     \param[out] name since binary files have no information about solid names,
     on output it will contain an empty string
-    \param[in,out] nV on input stores the current number of vertices hosted
-    in V, on output stores the input values incremented by the number of
-    vertices read from the STL file.
-    \param[in,out] nT on input stores the number of facet->vertex connectivity
-    entries stores in T, on output stores the input value incremented by the
-    number of facets read from the STL file.
-    \param[in,out] V is the list of vertex coordinates, vertices read from the
-    STL file are appended at the end of V
-    \param[in,out] N is the list of facet normals, normals read from the STL
-    file are appended at the end of V
-    \param[in,out] T is the facet->vertex connectivity, entries read from the
-    STL file are appended at the end of T
+    \param[out] nT on input will contain the number of factes of the solid
     \result Returns a negative number if an error occured, zero otherwise.
     The meaning of the error codes is the following:
-        - error = -1: failed to read from input stream
+        - error = -1: failed to read data from output stream
+        - error = -2: unable to read the header
 */
-int STLReader::readSolidBinary(std::string *name, std::size_t *nV, std::size_t *nT,
-                               std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
-                               std::vector<std::array<std::size_t, 3>> *T)
+int STLReader::readHeaderBinary(std::string *name, std::size_t *nT)
 {
-    BITPIT_UNUSED(name);
-
     // Check stream status
     if (!m_fileHandle.good()) {
         return -1;
     }
 
-    // Set cursor at file begin
-    m_fileHandle.clear();
-    long start_pos = m_fileHandle.tellg();
-    m_fileHandle.seekg(0);
+    // Binary data has not information about solid names
+    (*name) = "";
 
     // Skip header
     for (std::size_t i = 0; i < BINARY_HEADER_SIZE / sizeof(BINARY_UINT8); ++i) {
@@ -1110,50 +1266,92 @@ int STLReader::readSolidBinary(std::string *name, std::size_t *nV, std::size_t *
     // Read number of facets
     BINARY_UINT32 nSolidFacets;
     m_fileHandle.read(reinterpret_cast<char *>(&nSolidFacets), sizeof(BINARY_UINT32));
+    *nT = nSolidFacets;
 
-    // Read data
-    std::array<double, 3> dummyDoubleArray;
-    dummyDoubleArray.fill(0.);
-
-    std::array<std::size_t, 3> dummyIntArray;
-    dummyIntArray.fill(-1);
-
-    V->resize(*nV + 3 * nSolidFacets, dummyDoubleArray);
-    N->resize(*nT + nSolidFacets, dummyDoubleArray);
-    T->resize(*nT + nSolidFacets, dummyIntArray);
-
-    for (std::size_t i = 0; i < nSolidFacets; ++i) {
-        // Read normal
-        for (int j = 0; j < 3; ++j) {
-            BINARY_REAL32 N_ij;
-            m_fileHandle.read(reinterpret_cast<char *>(&N_ij), sizeof(BINARY_REAL32));
-            (*N)[i][j] = (double) N_ij;
-        }
-
-        // Read vertex coordinates
-        for (int j = 0; j < 3; ++j) {
-            for (int k = 0; k < 3; ++k) {
-                BINARY_REAL32 V_ijk;
-                m_fileHandle.read(reinterpret_cast<char *>(&V_ijk), sizeof(BINARY_REAL32));
-                (*V)[*nV][k] = (double) V_ijk;
-            }
-
-            (*nV)++;
-        }
-
-        // Facet-vertex connectivity
-        (*T)[i][0] = *nV - 3;
-        (*T)[i][1] = *nV - 2;
-        (*T)[i][2] = *nV - 1;
-
-        // Attribute byte count
-        BINARY_UINT16 attributeByteCount;
-        m_fileHandle.read(reinterpret_cast<char *>(&attributeByteCount), sizeof(BINARY_UINT16));
+    // Check if the end of file has been reached
+    if (m_fileHandle.eof()) {
+        return -2;
     }
 
-    // Restore cursor position
-    m_fileHandle.clear();
-    m_fileHandle.seekg(start_pos);
+    return 0;
+}
+
+/*!
+    Read the footer of a binary STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read data from output stream
+*/
+int STLReader::readFooterBinary()
+{
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
+    }
+
+    // Nothing to do
+    return 0;
+}
+
+/*!
+    Read facet data from a binary STL file.
+
+    This routine assumes that the file stream is already open.
+
+    \param[out] V0 on output will contain the coordinates of the first vertex
+    \param[out] V1 on output will contain the coordinates of the second vertex
+    \param[out] V2 on output will contain the coordinates of the third vertex
+    \param[out] N on output will contain the normal
+    \result Returns a negative number if an error occured, zero otherwise.
+    The meaning of the error codes is the following:
+        - error = -1: failed to read from input stream
+        - error = -2: unable to read facet data
+*/
+int STLReader::readFacetBinary(std::array<double, 3> *V0, std::array<double, 3> *V1,
+                               std::array<double, 3> *V2, std::array<double, 3> *N)
+{
+    // Check stream status
+    if (!m_fileHandle.good()) {
+        return -1;
+    }
+
+    // Read normal
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 N_k;
+        m_fileHandle.read(reinterpret_cast<char *>(&N_k), sizeof(BINARY_REAL32));
+        (*N)[k] = (double) N_k;
+    }
+
+    // Read vertex coordinates
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 V_k;
+        m_fileHandle.read(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
+        (*V0)[k] = (double) V_k;
+    }
+
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 V_k;
+        m_fileHandle.read(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
+        (*V1)[k] = (double) V_k;
+    }
+
+    for (int k = 0; k < 3; ++k) {
+        BINARY_REAL32 V_k;
+        m_fileHandle.read(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
+        (*V2)[k] = (double) V_k;
+    }
+
+    // Attribute byte count
+    BINARY_UINT16 attributeByteCount;
+    m_fileHandle.read(reinterpret_cast<char *>(&attributeByteCount), sizeof(BINARY_UINT16));
+
+    // Check if the end of file has been reached
+    if (m_fileHandle.eof()) {
+        return -2;
+    }
 
     return 0;
 }

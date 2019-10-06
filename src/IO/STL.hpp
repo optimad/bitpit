@@ -114,6 +114,15 @@ public:
                   std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
                   std::vector<std::array<std::size_t, 3>> *T);
 
+    int readHeader(std::string *name, std::size_t *nT);
+    int readHeader(const std::string &solid, std::string *name, std::size_t *nT);
+
+    int readFooter();
+    int readFooter(const std::string &solid);
+
+    int readFacet(std::array<double, 3> *V0, std::array<double, 3> *V1,
+                  std::array<double, 3> *V2, std::array<double, 3> *N);
+
 private:
     std::ifstream m_fileHandle;      /**< File handle */
 
@@ -123,16 +132,19 @@ private:
 
     int inspectBinary(InspectionInfo *info);
 
-    int readSolidASCII(const std::string &solid, bool wrapAround, std::string *name,
-                       std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
-                       std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T);
+    int readHeaderASCII(const std::string &solid, std::string *name, std::size_t *nT);
 
-    int readFacetASCII(std::size_t *nV, std::size_t *nT, std::vector<std::array<double, 3>> *V,
-                       std::vector<std::array<double, 3>> *N, std::vector<std::array<std::size_t, 3>> *T);
+    int readFooterASCII(const std::string &solid);
 
-    int readSolidBinary(std::string *name, std::size_t *nV, std::size_t *nT,
-                        std::vector<std::array<double, 3>> *V, std::vector<std::array<double, 3>> *N,
-                        std::vector<std::array<std::size_t, 3>> *T);
+    int readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *V1,
+                       std::array<double, 3> *V2, std::array<double, 3> *N);
+
+    int readHeaderBinary(std::string *name, std::size_t *nT);
+
+    int readFooterBinary();
+
+    int readFacetBinary(std::array<double, 3> *V0, std::array<double, 3> *V1,
+                        std::array<double, 3> *V2, std::array<double, 3> *N);
 
 };
 
