@@ -750,35 +750,6 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, bool exportInt
 }
 
 /*!
-* Get the element type of a facet with the specified number of vertices.
-*
-* \param[in] nFacetVertices is the number of the vertices of the facet
-*
-* \result The element type of a facet with the specified number of vertices.
-*/
-ElementType SurfUnstructured::getSTLFacetType(int nFacetVertices)
-{
-    switch(nFacetVertices) {
-
-    case 1:
-        return ElementType::VERTEX;
-
-    case 2:
-        return ElementType::LINE;
-
-    case 3:
-        return ElementType::TRIANGLE;
-
-    case 4:
-        return ElementType::QUAD;
-
-    default:
-        return ElementType::UNDEFINED;
-
-    }
-}
-
-/*!
  * Import surface tasselation from DGF file.
  * 
  * \param[in] filename name of dgf file

@@ -71,7 +71,6 @@ protected:
     void _dump(std::ostream &stream) const override;
     void _restore(std::istream &stream) override;
 
-    static ElementType getSTLFacetType(int nFacetVertices);
     static ElementType getDGFFacetType(int nFacetVertices);
 
     int importSTL(const std::string &name, STLReader::Format format, int PIDOffset, bool PIDSquash, std::unordered_map<int, std::string> *PIDNames = nullptr);
