@@ -58,7 +58,7 @@ class LevelSetBoolean: public LevelSetMetaObject {
     public:
     ~LevelSetBoolean();
     LevelSetBoolean(int, LevelSetBooleanOperation, LevelSetObject*, LevelSetObject*);
-    LevelSetBoolean(int, LevelSetBooleanOperation, std::vector<LevelSetObject*>);
+    LevelSetBoolean(int, LevelSetBooleanOperation, const std::vector<LevelSetObject*> &);
     LevelSetBoolean(const LevelSetBoolean &);
 
     LevelSetBoolean*                            clone() const override;

@@ -69,7 +69,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetO
  * @param[in] op type of boolean operation
  * @param[in] objPtr vector of pointers to objects
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, std::vector<LevelSetObject*> objPtr ) :LevelSetMetaObject(id) {
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std::vector<LevelSetObject*> &objPtr ) :LevelSetMetaObject(id) {
     m_operation = op;
     m_objPtr = objPtr;
 }
