@@ -336,7 +336,7 @@ return(item); };
 */
 template <class T>
 void LIFOStack<T>::push(
-    T item
+    const T &item
 ) {
 
 // ========================================================================== //
@@ -375,7 +375,7 @@ return; };
 */
 template <class T>
 void LIFOStack<T>::push(
-    std::vector<T> &items
+    const std::vector<T> &items
 ) {
 
 // ========================================================================== //

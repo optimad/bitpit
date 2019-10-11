@@ -360,10 +360,10 @@ class LIFOStack {
         void                                                                  // (input) none
     );
     void push(                                                                // Pusk item into the stack
-        T                                                                     // (input) item to be pushed into the stack list
+        const T &                                                             // (input) item to be pushed into the stack list
     );
     void push(                                                                // Pusk items into the stack
-        std::vector<T>  &                                                     // (input) items to be pushed into the stack list
+        const std::vector<T>  &                                               // (input) items to be pushed into the stack list
     );
     void display(                                                             // Display LIFO stack infos
         std::ostream    &                                                     // (input) output stream
