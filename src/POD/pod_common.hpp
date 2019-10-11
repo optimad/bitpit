@@ -50,7 +50,7 @@ struct SnapshotFile
     /**
      * Creates a new object.#
      */
-    SnapshotFile(const std::string _directory = std::string(), const std::string _name = std::string())
+    SnapshotFile(const std::string &_directory = std::string(), const std::string &_name = std::string())
     : directory(_directory), name(_name)
     {
     }
