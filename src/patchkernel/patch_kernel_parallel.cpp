@@ -1910,9 +1910,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                     haloVertices.insert(vertexId);
                 }
 
-                if (vertexSendList.count(vertexId) == 0) {
-                    vertexSendList.insert(vertexId);
-                }
+                vertexSendList.insert(vertexId);
             }
         }
 
