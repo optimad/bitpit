@@ -22,6 +22,9 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#ifndef __BITPIT_POD_COMMON_HPP__
+#define __BITPIT_POD_COMMON_HPP__
+
 #include "bitpit_containers.hpp"
 #include "bitpit_patchkernel.hpp"
 
@@ -255,3 +258,5 @@ struct PODMode
 }
 
 }
+
+#endif
