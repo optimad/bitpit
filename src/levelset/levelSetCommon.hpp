@@ -44,7 +44,6 @@ namespace levelSetDefaults{
     const int                               OBJECT = -1 ;               /**< Default value for closest object  */
     const int                               PART  = -1 ;                /**< Default value for closest patch  */
     const long                              SUPPORT = -1 ;              /**< Default value for closest support element */
-    const std::vector<long>                 LIST;                       /**< Default value for list of elements in narrow band */
 };
 
 struct LevelSetInfo{
