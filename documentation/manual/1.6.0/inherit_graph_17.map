@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="5,39,161,80"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1ElementHalfEdge.html" title="The ElementHalfEdge class defines element half&#45;edge items." alt="" coords="209,5,369,47"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="210,71,369,112"/>
+</map>

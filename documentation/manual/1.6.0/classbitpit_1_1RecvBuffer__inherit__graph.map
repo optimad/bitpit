@@ -1,0 +1,5 @@
+<map id="bitpit::RecvBuffer" name="bitpit::RecvBuffer">
+<area shape="rect" id="node1" title="Buffer to be used for receive communications." alt="" coords="35,200,159,227"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1CommunicationBuffer.html" title=" " alt="" coords="5,109,189,151"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1CommunicationBuffer.html" title="Buffer to be used for data communications." alt="" coords="5,5,189,47"/>
+</map>

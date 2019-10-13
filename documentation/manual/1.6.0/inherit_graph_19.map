@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classbitpit_1_1ElementHalfItem.html" title=" " alt="" coords="5,39,161,80"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1ElementHalfEdge.html" title=" " alt="" coords="209,5,369,47"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="210,71,369,112"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1QualifiedCellHalfEdge.html" title=" " alt="" coords="417,5,573,47"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1QualifiedCellHalfFace.html" title="The QualifiedCellHalfFace class defines cell half&#45;faces." alt="" coords="417,71,573,112"/>
+</map>

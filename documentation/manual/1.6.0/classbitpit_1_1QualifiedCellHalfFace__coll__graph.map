@@ -1,0 +1,10 @@
+<map id="bitpit::QualifiedCellHalfFace&lt; QualifiedCell &gt;" name="bitpit::QualifiedCellHalfFace&lt; QualifiedCell &gt;">
+<area shape="rect" id="node1" title="The QualifiedCellHalfFace class defines cell half&#45;faces." alt="" coords="1341,42,1497,83"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="1133,42,1292,83"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1ElementHalfItem.html" title=" " alt="" coords="825,74,981,115"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1ProxyVector.html" title=" " alt="" coords="269,71,400,113"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="517,18,673,59"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1ProxyVector.html" title="Metafunction for generating a list of elements that can be either stored in an external vectror or,..." alt="" coords="5,79,168,105"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="824,9,983,50"/>
+<area shape="rect" id="node7" title=" " alt="" coords="277,5,392,32"/>
+</map>
