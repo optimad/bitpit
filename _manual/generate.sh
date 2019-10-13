@@ -44,7 +44,7 @@ JEKYLL_CONFIG_LIST="${JEKYLL_CONFIG_LIST},${JEKYLL_CONFIG_MANUAL}"
 # Generate templates needed by doxygen
 cd ${JEKYLL_ROOT_DIR}
 
-jekyll build \
+bundle exec jekyll build \
     --config "${JEKYLL_CONFIG_LIST}" \
     --source ${MANUAL_BUILD_DIR} \
     --destination ${MANUAL_BUILD_DIR}/templates
