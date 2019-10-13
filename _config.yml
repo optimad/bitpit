@@ -1,4 +1,4 @@
-name: bitpit
+title: bitpit
 markdown: redcarpet
 highlighter: rouge
 baseurl: /bitpit
@@ -50,6 +50,6 @@ sections:
 # the programmer's manual we open some divs in a header.html file and close
 # them in a separate footer.html file. For being able to generate the
 # programmer's manual these gems cannot be used.
-gems:
+plugins:
    - jekyll-coffeescript
    - jekyll-paginate
