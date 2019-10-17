@@ -48,16 +48,8 @@ namespace bitpit{
 template<class T>
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::FlatVector2D<T> &vector)
 {
-    typename std::vector<T>::const_iterator           it;
-    typename std::vector<size_t>::const_iterator      jt;
-
-    buffer << vector.m_index.size() << vector.m_v.size();
-    for (jt = vector.m_index.begin(); jt != vector.m_index.end(); ++jt) {
-        buffer << *(jt);
-    }
-    for (it = vector.m_v.begin(); it != vector.m_v.end(); ++it) {
-        buffer << *(it);
-    }
+    buffer << vector.m_index;
+    buffer << vector.m_v;
 
     return buffer;
 }
@@ -73,22 +65,8 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::F
 template<class T>
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::FlatVector2D<T> &vector)
 {
-    size_t                      size_m_v, size_m_index;
-    size_t                      i;
-
-    buffer >> size_m_index;
-    buffer >> size_m_v;
-
-    vector.m_index.resize(size_m_index, 0);
-    vector.m_v.resize(size_m_v);
-
-    for (i = 0; i < size_m_index; ++i) {
-        buffer >> vector.m_index[i];
-    }
-
-    for (i = 0; i < size_m_v; ++i) {
-        buffer >> vector.m_v[i];
-    }
+    buffer >> vector.m_index;
+    buffer >> vector.m_v;
 
     return buffer;
 }
