@@ -529,10 +529,8 @@ void OBinaryStream::write(const char *data, std::size_t size)
         setSize(bufferSize);
     }
 
-    for (std::size_t i = 0;  i < size; ++i) {
-        m_buffer[m_pos] = data[i];
-        ++m_pos;
-    }
+    std::memcpy(m_buffer.data() + m_pos, data, size);
+    m_pos += size;
 }
 
 }
