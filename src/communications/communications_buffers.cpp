@@ -53,6 +53,18 @@ void SendBuffer::squeeze()
 }
 
 /*!
+* Write data into the buffer.
+*
+* \param[in] data is the memory that contain the data
+* \param[in] size is the size (in bytes) of the data to be written into
+* the stream
+*/
+void SendBuffer::write(const char *data, std::size_t size)
+{
+    getFront().write(data, size);
+}
+
+/*!
     \class RecvBuffer
     \ingroup communications
 
@@ -65,6 +77,18 @@ void SendBuffer::squeeze()
 RecvBuffer::RecvBuffer(size_t size, bool doubleBuffer)
     : CommunicationBuffer(size, doubleBuffer)
 {
+}
+
+/*!
+* Read data from the buffer.
+*
+* \param[out] data is the memory location that will contain the data
+* \param[in] size is the size (in bytes) of the data to be read from the
+* stream
+*/
+void RecvBuffer::read(char *data, std::size_t size)
+{
+    getFront().read(data, size);
 }
 
 }

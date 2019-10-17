@@ -99,6 +99,8 @@ public:
 
     void squeeze();
 
+    void write(const char *data, std::size_t size);
+
 };
 
 class RecvBuffer : public CommunicationBuffer<RawRecvBuffer>
@@ -110,6 +112,8 @@ class RecvBuffer : public CommunicationBuffer<RawRecvBuffer>
 
 public:
     RecvBuffer(size_t size = 0, bool doubleBuffer = false);
+
+    void read(char *data, std::size_t size);
 
 };
 
