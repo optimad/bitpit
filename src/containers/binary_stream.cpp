@@ -423,7 +423,7 @@ void IBinaryStream::read(char *data, std::size_t size)
         throw std::runtime_error("Bad memory access!");
     }
 
-    std::memcpy(reinterpret_cast<void*>(data), m_buffer.data() + m_pos, size);
+    std::memcpy(data, m_buffer.data() + m_pos, size);
     m_pos += size;
 }
 
