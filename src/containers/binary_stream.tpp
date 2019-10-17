@@ -23,7 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 /*!
-* Write the specified value into the stream.
+* Read the specified value from the stream.
 *
 * \param[in] stream is the input stream
 * \param[in] value is the value to be streamed
