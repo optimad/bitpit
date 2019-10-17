@@ -58,9 +58,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 	}
 
 	// Set connectivity
-	for (int i = 0; i < connectSize; ++i) {
-	    buffer >> element.m_connect[i];
-	}
+	buffer.read(reinterpret_cast<char *>(element.m_connect.get()), connectSize * sizeof(long));
 
 	// Set PID
 	int pid;
@@ -88,9 +86,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 		buffer << connectSize;
 	}
 
-	for (int i = 0; i < connectSize; ++i) {
-	    buffer << element.m_connect[i];
-	}
+	buffer.write(reinterpret_cast<const char *>(element.m_connect.get()), connectSize * sizeof(long));
 
 	buffer << element.getPID();
 
