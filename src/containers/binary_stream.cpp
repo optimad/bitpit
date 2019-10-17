@@ -38,11 +38,11 @@ template<>
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::string &value)
 {
     int size = 0;
-    stream.read(size);
+    stream.read(reinterpret_cast<char *>(&size), sizeof(size));
 
     if (size > 0) {
         std::vector<char> buffer(size);
-        stream.read(buffer);
+        stream.read(buffer.data(), size);
         value.assign(buffer.data(), size);
     }
 
@@ -59,7 +59,7 @@ template<>
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::string &value)
 {
     int size = value.size();
-    stream.write(size);
+    stream.write(reinterpret_cast<const char *>(&size), sizeof(size));
 
     if (size > 0) {
         stream.write(value.c_str(), size);
@@ -67,7 +67,6 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::stri
 
     return stream;
 }
-
 
 namespace bitpit {
 

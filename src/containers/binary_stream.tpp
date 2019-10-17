@@ -32,7 +32,7 @@
 template<typename T>
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, T &value)
 {
-    stream.read(value);
+    stream.read(reinterpret_cast<char *>(&value), sizeof(T));
 
     return stream;
 }
@@ -47,33 +47,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, T &value)
 template<typename T>
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const T &value)
 {
-    stream.write(value);
+    stream.write(reinterpret_cast<const char *>(&value), sizeof(T));
 
     return stream;
-}
-
-namespace bitpit {
-
-/*!
-* Read the specified value from the stream.
-*
-* \param[in] value is the value that will be read
-*/
-template<typename T>
-void IBinaryStream::read(T &value)
-{
-    read(reinterpret_cast<char *>(&value), sizeof(T));
-}
-
-/*!
-* Write the specified value into the stream.
-*
-* \param[in] value is the value that will be written
-*/
-template<typename T>
-void OBinaryStream::write(const T &value)
-{
-    write(reinterpret_cast<const char *>(&value), sizeof(T));
-}
-
 }

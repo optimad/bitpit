@@ -113,8 +113,6 @@ public:
     void open(std::size_t size);
 
 private:
-    template<typename T>
-    void read(T &value);
     void read(char *data, std::size_t size);
 
 };
@@ -136,8 +134,6 @@ public:
 private:
     bool m_expandable;
 
-    template<typename T>
-    void write(const T &value);
     void write(const char *data, std::size_t size);
 };
 
