@@ -118,7 +118,6 @@ public:
     void open(const char *buffer, std::size_t size);
     void open(std::size_t size);
 
-private:
     void read(char *data, std::size_t size);
 
 };
@@ -137,10 +136,11 @@ public:
     void setSize(std::size_t size) override;
     void squeeze();
 
+    void write(const char *data, std::size_t size);
+
 private:
     bool m_expandable;
 
-    void write(const char *data, std::size_t size);
 };
 
 }
