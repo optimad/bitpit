@@ -143,12 +143,13 @@ class PatchSkdTree {
 public:
     virtual ~PatchSkdTree() = default;
 
-    void build(int leafCapacity = 1, bool squeezeStorage = false);
+    void build(std::size_t leaftThreshold = 1, bool squeezeStorage = false);
     void clear(bool release = false);
 
     const PatchKernel & getPatch() const;
 
-    int getLeafCapacity() const;
+    std::size_t getLeafMinCellCount() const;
+    std::size_t getLeafMaxCellCount() const;
 
     std::size_t getNodeCount() const;
     std::size_t getLeafCount() const;
@@ -161,9 +162,10 @@ protected:
     SkdPatchInfo m_patchInfo;
     std::vector<std::size_t> m_cellRawIds;
 
-    std::size_t m_leafCapacity;
-
     std::size_t m_nLeafs;
+    std::size_t m_nMinLeafCells;
+    std::size_t m_nMaxLeafCells;
+
     std::vector<SkdNode, SkdNode::Allocator> m_nodes;
 
     bool m_includeGhosts;
@@ -173,9 +175,7 @@ protected:
     SkdNode & _getNode(std::size_t nodeId);
 
 private:
-    void setLeafCapacity(int capacity);
-
-    void createChildren(std::size_t parentId);
+    void createChildren(std::size_t parentId, std::size_t leaftThreshold);
 
 };
 

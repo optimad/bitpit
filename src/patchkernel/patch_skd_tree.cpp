@@ -751,57 +751,46 @@ bool SkdNode::boxIntersectsSphere(const std::array<double, 3> &center, double ra
 PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool includeGhosts)
     : m_patchInfo(patch, &m_cellRawIds),
       m_cellRawIds(includeGhosts ? patch->getCellCount() : patch->getInternalCount()),
-      m_leafCapacity(0), m_nLeafs(0),
+      m_nLeafs(0), m_nMinLeafCells(0), m_nMaxLeafCells(0),
       m_includeGhosts(includeGhosts)
 {
 
 }
 
 /*!
-* Gets the maximum number of elements that can be contained in the leafs of
-* the tree.
+* Gets the minimum number of elements contained in a leaf.
 *
-* \result The maximum number of elements that can be contained in the leafs
-* of the tree.
+* \result Get the minimum number of elements contained in a leaf.
 */
-int PatchSkdTree::getLeafCapacity() const
+std::size_t PatchSkdTree::getLeafMinCellCount() const
 {
-    return m_leafCapacity;
+    return m_nMinLeafCells;
 }
 
 /*!
-* Sets the maximum number of elements that can be contained in the leafs of
-* the tree.
+* Gets the maximum number of elements contained in a leaf.
 *
-* \param capacity is the maximum number of elements that can be contained in
-* the leafs of the tree
+* \result Get the maximum number of elements contained in a leaf.
 */
-void PatchSkdTree::setLeafCapacity(int capacity)
+std::size_t PatchSkdTree::getLeafMaxCellCount() const
 {
-    if (capacity <= 0) {
-        throw std::runtime_error("Leaf capacity should be greater than zero.");
-    }
-
-    m_leafCapacity = capacity;
+    return m_nMaxLeafCells;
 }
 
 /*!
 * Build the tree.
 *
-* \param[in] leafCapacity is the  maximum number of elements that can be
-* contained in the leafs of the tree
+* \param leafThreshold is the minimum number of cells a node should contain
+* to be considered a leaf
 * \param[in] squeezeStorage if set to true tree data structures will be
 * squeezed after the build
 */
-void PatchSkdTree::build(int leafCapacity, bool squeezeStorage)
+void PatchSkdTree::build(std::size_t leafThreshold, bool squeezeStorage)
 {
     const PatchKernel &patch = m_patchInfo.getPatch();
 
     // Clear existing tree
     clear();
-
-    // Set leaf size
-    setLeafCapacity(leafCapacity);
 
     // Initialize list of cell raw ids
     std::size_t nCells;
@@ -827,7 +816,7 @@ void PatchSkdTree::build(int leafCapacity, bool squeezeStorage)
     m_patchInfo.buildCache(cellRange);
 
     // Initialize node list
-    m_nodes.reserve(std::ceil(2. * nCells / getLeafCapacity() - 1.));
+    m_nodes.reserve(std::ceil(2. * nCells / leafThreshold - 1.));
 
     // Create the root
     m_nodes.emplace_back(&m_patchInfo, 0, nCells);
@@ -844,7 +833,7 @@ void PatchSkdTree::build(int leafCapacity, bool squeezeStorage)
         // This function may add new nodes to the tree, this may invalidate
         // any reference or pointer to the nodes. To avoid potential problems
         // we pass to the function a node id.
-        createChildren(nodeId);
+        createChildren(nodeId, leafThreshold);
 
         // Add the newly created childrend to the stack
         const SkdNode &node = getNode(nodeId);
@@ -873,8 +862,9 @@ void PatchSkdTree::build(int leafCapacity, bool squeezeStorage)
 */
 void PatchSkdTree::clear(bool release)
 {
-    m_nLeafs       = 0;
-    m_leafCapacity = 0;
+    m_nLeafs        = 0;
+    m_nMinLeafCells = 0;
+    m_nMaxLeafCells = 0;
 
     if (release) {
         std::vector<SkdNode, SkdNode::Allocator>().swap(m_nodes);
@@ -965,14 +955,19 @@ std::size_t PatchSkdTree::evalMaxDepth(std::size_t rootId) const
 * Create the children of the specified node.
 *
 * \param parentId is the index of the parent node
+* \param leafThreshold is the minimum number of cells a node should contain
+* to be considered a leaf
 */
-void PatchSkdTree::createChildren(std::size_t parentId)
+void PatchSkdTree::createChildren(std::size_t parentId, std::size_t leafThreshold)
 {
     const SkdNode &parent = getNode(parentId);
 
-    // Check if the parent is a leaf.
-    if (parent.getCellCount() <= m_leafCapacity) {
+    // Check if the parent is a leaf
+    std::size_t parentCellCount = parent.getCellCount();
+    if (parentCellCount <= leafThreshold) {
         ++m_nLeafs;
+        m_nMinLeafCells = std::min(parentCellCount, m_nMinLeafCells);
+        m_nMaxLeafCells = std::max(parentCellCount, m_nMaxLeafCells);
         return;
     }
 
