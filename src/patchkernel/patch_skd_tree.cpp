@@ -825,7 +825,7 @@ void PatchSkdTree::build(int leafCapacity, bool squeezeStorage)
     m_patchInfo.buildCache(cellRange);
 
     // Initialize node list
-    m_nodes.reserve(1.5 * nCells / getLeafCapacity());
+    m_nodes.reserve(std::ceil(2. * nCells / getLeafCapacity() - 1.));
 
     // Create the root
     m_nodes.emplace_back(&m_patchInfo, 0, nCells);
