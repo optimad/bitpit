@@ -143,7 +143,7 @@ class PatchSkdTree {
 public:
     virtual ~PatchSkdTree() = default;
 
-    void build(int leafCapacity = 1);
+    void build(int leafCapacity = 1, bool squeezeStorage = false);
     void clear(bool release = false);
 
     const PatchKernel & getPatch() const;

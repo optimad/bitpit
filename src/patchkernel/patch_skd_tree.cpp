@@ -785,8 +785,13 @@ void PatchSkdTree::setLeafCapacity(int capacity)
 
 /*!
 * Build the tree.
+*
+* \param[in] leafCapacity is the  maximum number of elements that can be
+* contained in the leafs of the tree
+* \param[in] squeezeStorage if set to true tree data structures will be
+* squeezed after the build
 */
-void PatchSkdTree::build(int leafCapacity)
+void PatchSkdTree::build(int leafCapacity, bool squeezeStorage)
 {
     const PatchKernel &patch = m_patchInfo.getPatch();
 
@@ -843,6 +848,11 @@ void PatchSkdTree::build(int leafCapacity)
                 nodeStack.push(childId);
             }
         }
+    }
+
+    // Squeeze storage
+    if (squeezeStorage) {
+        m_nodes.shrink_to_fit();
     }
 
     // Patch cache is no longer needed
