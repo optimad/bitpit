@@ -176,6 +176,7 @@ protected:
 
 private:
     void createChildren(std::size_t parentId, std::size_t leaftThreshold);
+    void createLeaf(std::size_t nodeId);
 
 };
 
