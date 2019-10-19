@@ -708,12 +708,14 @@ bool SkdNode::boxIntersectsSphere(const std::array<double, 3> &center, double ra
 * examples.
 *
 * Each node of a skd-tree structure contains a bounding volume for
-* some subset of the boundary geometry. The nodes are generally
+* some subset of the initial geometry. The nodes are generally
 * arranged in an oriented tree, where child nodes bound non-empty
-* subsets of their parents’ geometry. The bounding volumes are
-* selected to minimize the cost of query operations (e.g. proximity,
-* intersection, or containment) while providing a close fit to the
-* underlying geometry.
+* subsets of their parents’ geometry. Nodes with no children are
+* called leaves.
+*
+* The bounding volumes are selected to minimize the cost of query
+* operations (e.g. proximity, intersection, or containment) while
+* providing a close fit to the underlying geometry.
 *
 * Analyzing the asymptotic behavior of skd-trees is difficult. In
 * the best case, skd-tree queries can be answered in constant time.
