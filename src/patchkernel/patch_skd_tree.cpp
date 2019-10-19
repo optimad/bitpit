@@ -840,6 +840,10 @@ void PatchSkdTree::build(int leafCapacity, bool squeezeStorage)
         nodeStack.pop();
 
         // Create the children of the node
+        //
+        // This function may add new nodes to the tree, this may invalidate
+        // any reference or pointer to the nodes. To avoid potential problems
+        // we pass to the function a node id.
         createChildren(nodeId);
 
         // Add the newly created childrend to the stack
@@ -1040,11 +1044,17 @@ void PatchSkdTree::createChildren(std::size_t parentId)
         }
 
         // Create the left child
+        //
+        // Adding new nodes may invalidate any pointer and reference to the
+        // nodes, we cannot store a reference to the parent node.
         long leftId = m_nodes.size();
         m_nodes.emplace_back(&m_patchInfo, leftBegin, leftEnd);
         _getNode(parentId).m_children[static_cast<std::size_t>(SkdNode::CHILD_LEFT)] = leftId;
 
         // Create the right child
+        //
+        // Adding new nodes may invalidate any pointer and reference to the
+        // nodes, we cannot store a reference to the parent node.
         long rightId = m_nodes.size();
         m_nodes.emplace_back(&m_patchInfo, rightBegin, rightEnd);
         _getNode(parentId).m_children[static_cast<std::size_t>(SkdNode::CHILD_RIGHT)] = rightId;
