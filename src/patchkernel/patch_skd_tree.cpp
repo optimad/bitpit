@@ -964,7 +964,7 @@ std::size_t PatchSkdTree::evalMaxDepth(std::size_t rootId) const
 */
 void PatchSkdTree::createChildren(std::size_t parentId)
 {
-    SkdNode &parent = _getNode(parentId);
+    const SkdNode &parent = getNode(parentId);
 
     // Check if the parent is a leaf.
     if (parent.getCellCount() <= m_leafCapacity) {
@@ -1042,12 +1042,12 @@ void PatchSkdTree::createChildren(std::size_t parentId)
         // Create the left child
         long leftId = m_nodes.size();
         m_nodes.emplace_back(&m_patchInfo, leftBegin, leftEnd);
-        m_nodes[parentId].m_children[static_cast<std::size_t>(SkdNode::CHILD_LEFT)] = leftId;
+        _getNode(parentId).m_children[static_cast<std::size_t>(SkdNode::CHILD_LEFT)] = leftId;
 
         // Create the right child
         long rightId = m_nodes.size();
         m_nodes.emplace_back(&m_patchInfo, rightBegin, rightEnd);
-        m_nodes[parentId].m_children[static_cast<std::size_t>(SkdNode::CHILD_RIGHT)] = rightId;
+        _getNode(parentId).m_children[static_cast<std::size_t>(SkdNode::CHILD_RIGHT)] = rightId;
 
         // Done
         return;
