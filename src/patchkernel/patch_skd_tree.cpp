@@ -780,10 +780,25 @@ std::size_t PatchSkdTree::getLeafMaxCellCount() const
 /*!
 * Build the tree.
 *
-* \param leafThreshold is the minimum number of cells a node should contain
-* to be considered a leaf
-* \param[in] squeezeStorage if set to true tree data structures will be
+* Leaf nodes will contain a number of "characteristic positions" that is less
+* or equal than the specified threshold. Given a parent node, new children are
+* generated divinding the cells of the parent node in two subset. For each
+* cell, a characteristic position is evaluated (i.e., the centrooid of the
+* bounding box) and this characteristic position is used to sort the cells.
+* The weighted average of the characteristics positions of all the cells of
+* the parent will be used as a split threshold. Different cells may have the
+* same characteristics position and all the cells with the same characteristic
+* position will be clustered in the same leaf node. The threshold below which
+* a node is considered a leaf, is compared with the number of characterisic
+* positions containd in the node, not with the number of cell it contains.
+* When there are cells with the same characteristic position, a node may
+* contain a number of cells that is greater than the leaf threshold.
+*
+* \param leafThreshold is the maximum number of "characteristic positions"
+* a node can contain to be considered a leaf
+* * \param[in] squeezeStorage if set to true tree data structures will be
 * squeezed after the build
+*
 */
 void PatchSkdTree::build(std::size_t leafThreshold, bool squeezeStorage)
 {
@@ -955,8 +970,8 @@ std::size_t PatchSkdTree::evalMaxDepth(std::size_t rootId) const
 * Create the children of the specified node.
 *
 * \param parentId is the index of the parent node
-* \param leafThreshold is the minimum number of cells a node should contain
-* to be considered a leaf
+* \param leafThreshold is the maximum number of "characteristic positions"
+* a node can contain to be considered a leaf
 */
 void PatchSkdTree::createChildren(std::size_t parentId, std::size_t leafThreshold)
 {
@@ -965,9 +980,7 @@ void PatchSkdTree::createChildren(std::size_t parentId, std::size_t leafThreshol
     // Check if the parent is a leaf
     std::size_t parentCellCount = parent.getCellCount();
     if (parentCellCount <= leafThreshold) {
-        ++m_nLeafs;
-        m_nMinLeafCells = std::min(parentCellCount, m_nMinLeafCells);
-        m_nMaxLeafCells = std::max(parentCellCount, m_nMaxLeafCells);
+        createLeaf(parentId);
         return;
     }
 
@@ -1058,7 +1071,25 @@ void PatchSkdTree::createChildren(std::size_t parentId, std::size_t leafThreshol
         return;
     }
 
-    throw std::runtime_error("Unable to create the children.");
+    // It was not possible to split the elements. They have all the same
+    // characteristic position and therefore they will be clustered together
+    // in a leaf node.
+    createLeaf(parentId);
+}
+
+/*!
+* Create a leaf node.
+*
+* \param nodeId is the index of the node that will become a leaf
+*/
+void PatchSkdTree::createLeaf(std::size_t nodeId)
+{
+    const SkdNode &node = getNode(nodeId);
+    std::size_t nodeCellCount = node.getCellCount();
+
+    ++m_nLeafs;
+    m_nMinLeafCells = std::min(nodeCellCount, m_nMinLeafCells);
+    m_nMaxLeafCells = std::max(nodeCellCount, m_nMaxLeafCells);
 }
 
 }
