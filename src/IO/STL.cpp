@@ -1108,11 +1108,13 @@ int STLReader::readFooterASCII(const std::string &solid)
 
         // Handle the word
         if (word.compare(ASCII_SOLID_END) == 0) {
-            if (line.compare(solidKey) == 0) {
-                break;
-            } else {
-                return -2;
+            if (line.compare(solidKey) != 0) {
+                log::cout() << "WARNING: end-solid key does not match the solid name." << std::endl;
+                log::cout() << "         Expected end-solid key : " << solidKey << std::endl;
+                log::cout() << "         Current end-solid key  : " << line << std::endl;
             }
+
+            break;
         } else if (word.compare(ASCII_SOLID_BEGIN) == 0) {
             return -2;
         } else if (m_fileHandle.eof()) {
