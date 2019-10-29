@@ -423,6 +423,9 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
     std::fstream str ;
 
     str.open( m_fh.getPath( ), std::ios::out ) ;
+    if (!str.is_open()) {
+        throw std::runtime_error("Cannot create file \"" + m_fh.getName() + "\"" + " inside the directory \"" + m_fh.getDirectory() + "\"");
+    }
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
@@ -484,6 +487,9 @@ void VTKUnstructuredGrid::writeCollection( ){
     fho.setDirectory(".") ;
 
     str.open( fhp.getPath( ), std::ios::out ) ;
+    if (!str.is_open()) {
+        throw std::runtime_error("Cannot create file \"" + fhp.getName() + "\"" + " inside the directory \"" + fhp.getDirectory() + "\"");
+    }
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;

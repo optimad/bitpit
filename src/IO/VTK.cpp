@@ -696,6 +696,9 @@ void VTK::writeData( ){
     char*               buffer ;
 
     str.open( m_fh.getPath( ), std::ios::in | std::ios::out ) ;
+    if (!str.is_open()) {
+        throw std::runtime_error("Cannot create file \"" + m_fh.getName() + "\"" + " inside the directory \"" + m_fh.getDirectory() + "\"");
+    }
 
     { // Write Ascii
 
@@ -798,6 +801,10 @@ void VTK::writeData( ){
 
         //Reopening in binary mode
         str.open( m_fh.getPath( ), std::ios::out | std::ios::in | std::ios::binary);
+        if (!str.is_open()) {
+            throw std::runtime_error("Cannot open file \"" + m_fh.getName() + "\"" + " inside the directory \"" + m_fh.getDirectory() + "\"");
+        }
+
         str.seekg( position_insert) ;
 
         //str.open( "data.dat", std::ios::out | std::ios::binary);
