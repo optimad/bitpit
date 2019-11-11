@@ -157,6 +157,7 @@ protected:
 
 private:
     static int m_nInstances;
+    static bool m_optionsEditable;
     static std::vector<std::string> m_options;
 
     std::string m_prefix;

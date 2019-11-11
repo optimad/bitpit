@@ -33,6 +33,7 @@
 namespace bitpit {
 
 int SystemSolver::m_nInstances = 0;
+bool SystemSolver::m_optionsEditable = true;
 std::vector<std::string> SystemSolver::m_options = std::vector<std::string>(1, "bitpit");
 
 /*!
@@ -42,7 +43,7 @@ std::vector<std::string> SystemSolver::m_options = std::vector<std::string>(1, "
  */
 void SystemSolver::addInitOption(const std::string &option)
 {
-    if (m_nInstances != 0) {
+    if (!m_optionsEditable) {
         throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
     }
 
@@ -65,7 +66,7 @@ void SystemSolver::addInitOption(const std::string &option)
  */
 void SystemSolver::addInitOptions(int argc, char **argv)
 {
-    if (m_nInstances != 0) {
+    if (!m_optionsEditable) {
         throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
     }
 
@@ -81,7 +82,7 @@ void SystemSolver::addInitOptions(int argc, char **argv)
  */
 void SystemSolver::addInitOptions(const std::vector<std::string> &options)
 {
-    if (m_nInstances != 0) {
+    if (!m_optionsEditable) {
         throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
     }
 
@@ -200,6 +201,10 @@ void SystemSolver::clear()
 #endif
 
     m_assembled = false;
+
+    if (m_nInstances == 0) {
+        m_optionsEditable = true;
+    }
 }
 
 /*!
@@ -963,6 +968,7 @@ void SystemSolver::KSPInit()
     preKSPSetupActions();
 
     // Setup Krylov space
+    m_optionsEditable = false;
     KSPSetFromOptions(m_KSP);
     KSPSetUp(m_KSP);
 
