@@ -145,6 +145,9 @@ protected:
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
     void vectorsExport(std::vector<double> *solution);
 
+    virtual void preKSPSetupActions();
+    virtual void postKSPSetupActions();
+
 #if BITPIT_ENABLE_MPI==1
     const MPI_Comm & getCommunicator() const;
 #endif
