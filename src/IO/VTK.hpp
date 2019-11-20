@@ -461,7 +461,7 @@ class VTKRectilinearGrid : public VTK{
         extension3D_t           m_globalIndex ;             /**< min and max indices of global grid */
         std::vector<extension3D_t>      m_procIndex ;       /**< global indices of each processors */
 
-    protected:
+    public:
         VTKRectilinearGrid();
         VTKRectilinearGrid( const std::string & , const std::string &  );
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int, int, int, int );
@@ -469,6 +469,7 @@ class VTKRectilinearGrid : public VTK{
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int, int );
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int );
 
+    protected:
         void                    writeCollection() override ;
 
     public:
