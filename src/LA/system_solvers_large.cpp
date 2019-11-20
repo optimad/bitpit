@@ -168,7 +168,7 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
  */
 SystemSolver::~SystemSolver()
 {
-    // Clear the patch
+    // Clear the solver
     clear();
 
     // Decrease the number of instances
@@ -267,7 +267,6 @@ void SystemSolver::assembly(const SparseMatrix &matrix, PivotType pivotType)
 void SystemSolver::update(const std::vector<long> &rows, const SparseMatrix &elements)
 {
     // Check if the element storage is assembled
-    // Check if the matrix is assembled
     if (!elements.isAssembled()) {
         throw std::runtime_error("Unable to update the system. The element storage is not yet assembled.");
     }
