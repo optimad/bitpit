@@ -68,14 +68,6 @@ struct KSPStatus {
 class SystemSolver {
 
 public:
-    enum PivotType {
-        PIVOT_NONE,  // Natural
-        PIVOT_ND,    // Nested Dissection
-        PIVOT_1WD,   // One-way Dissection
-        PIVOT_RCM,   // Reverse Cuthill-McKee
-        PIVOT_MD     // Quotient Minimum Degree
-    };
-
     enum DumpFormat {
         DUMP_BINARY,
         DUMP_ASCII
@@ -92,7 +84,7 @@ public:
     virtual ~SystemSolver();
 
     void clear();
-    void assembly(const SparseMatrix &matrix, PivotType pivotType = PIVOT_NONE);
+    void assembly(const SparseMatrix &matrix);
     bool isAssembled() const;
 
     void update(const std::vector<long> &rows, const SparseMatrix &elements);
@@ -112,8 +104,6 @@ public:
     void dump(const std::string &directory, const std::string &prefix = "",
               DumpFormat matrixFormat = DUMP_BINARY, DumpFormat rhsFormat = DUMP_BINARY,
               DumpFormat solutionFormat = DUMP_BINARY) const;
-
-    PivotType getPivotType();
 
     void setNullSpace();
     void unsetNullSpace();
@@ -138,14 +128,12 @@ protected:
     void matrixInit(const SparseMatrix &matrix);
     void matrixFill(const SparseMatrix &matrix);
     void matrixUpdate(const std::vector<long> &rows, const SparseMatrix &elements);
-    void matrixReorder();
 
 #if BITPIT_ENABLE_MPI == 1
     void vectorsInit(const std::vector<long> &ghosts);
 #else
     void vectorsInit();
 #endif
-    void vectorsReorder(PetscBool inv);
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
     void vectorsExport(std::vector<double> *solution);
 
@@ -160,7 +148,6 @@ private:
     std::string m_prefix;
 
     bool m_assembled;
-    PivotType m_pivotType;
 
 #if BITPIT_ENABLE_MPI==1
     MPI_Comm m_communicator;
@@ -175,14 +162,9 @@ private:
     Vec m_rhs;
     Vec m_solution;
 
-    IS m_rpivot;
-    IS m_cpivot;
-
     KSP m_KSP;
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
-
-    void pivotInit(PivotType pivotType);
 
     void KSPInit();
 
