@@ -44,11 +44,17 @@ class OBinaryStream;
 template<typename T>
 bitpit::IBinaryStream & operator>>(bitpit::IBinaryStream &stream, T &value);
 
+template<typename T>
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::vector<T> &vector);
+
 template<>
 bitpit::IBinaryStream & operator>>(bitpit::IBinaryStream &stream, std::string &value);
 
 template<typename T>
 bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &stream, const T &value);
+
+template<typename T>
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::vector<T> &vector);
 
 template<>
 bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &stream, const std::string &value);

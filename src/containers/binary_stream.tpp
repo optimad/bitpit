@@ -38,6 +38,28 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, T &value)
 }
 
 /*!
+* Read the specified vector from the stream.
+*
+* Input vector will be resized to match the size of the vector stored in the
+* stream.
+*
+* \param[in] stream is the input stream
+* \param[in] vector is the vector to be streamed
+* \result Returns the updated input stream.
+*/
+template<typename T>
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::vector<T> &vector)
+{
+    std::size_t size;
+    stream.read(reinterpret_cast<char *>(&size), sizeof(size));
+    vector.resize(size);
+
+    stream.read(reinterpret_cast<char *>(vector.data()), size * sizeof(T));
+
+    return stream;
+}
+
+/*!
 * Write the specified value into the stream.
 *
 * \param[in] stream is the output stream
@@ -48,6 +70,26 @@ template<typename T>
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const T &value)
 {
     stream.write(reinterpret_cast<const char *>(&value), sizeof(T));
+
+    return stream;
+}
+
+/*!
+* Write the specified vector into the stream.
+*
+* Along with vector data, also the size of the vector is stored into the
+* stream.
+*
+* \param[in] vector is the vector to be streamed
+* \result Returns the updated output stream.
+*/
+template<typename T>
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::vector<T> &vector)
+{
+    std::size_t size = vector.size();
+    stream.write(reinterpret_cast<const char *>(&size), sizeof(size));
+
+    stream.write(reinterpret_cast<const char *>(vector.data()), size * sizeof(T));
 
     return stream;
 }
