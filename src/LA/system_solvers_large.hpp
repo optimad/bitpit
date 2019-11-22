@@ -84,6 +84,9 @@ public:
     virtual ~SystemSolver();
 
     void clear();
+
+    void setPermutations(long nRows, const long *rowRanks, long nCols, const long *colRanks);
+
     void assembly(const SparseMatrix &matrix);
     bool isAssembled() const;
 
@@ -145,6 +148,7 @@ protected:
 #else
     void vectorsInit();
 #endif
+    void vectorsPermute(bool invert);
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
     void vectorsExport(std::vector<double> *solution);
 
@@ -177,10 +181,15 @@ private:
     long m_colGlobalOffset;
 #endif
 
+    IS m_rowPermutation;
+    IS m_colPermutation;
+
 #if BITPIT_ENABLE_MPI==1
     void setCommunicator(MPI_Comm communicator);
     void freeCommunicator();
 #endif
+
+    void resetPermutations();
 
 };
 

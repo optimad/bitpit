@@ -118,11 +118,12 @@ SystemSolver::SystemSolver(bool debug)
 SystemSolver::SystemSolver(const std::string &prefix, bool debug)
     : m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
       m_KSP(nullptr),
-      m_prefix(prefix), m_assembled(false), m_setUp(false)
+      m_prefix(prefix), m_assembled(false), m_setUp(false),
 #if BITPIT_ENABLE_MPI==1
-      , m_communicator(MPI_COMM_SELF), m_partitioned(false),
-      m_rowGlobalOffset(0), m_colGlobalOffset(0)
+      m_communicator(MPI_COMM_SELF), m_partitioned(false),
+      m_rowGlobalOffset(0), m_colGlobalOffset(0),
 #endif
+      m_rowPermutation(nullptr), m_colPermutation(nullptr)
 {
     // Add debug options
     if (debug) {
@@ -172,6 +173,9 @@ SystemSolver::~SystemSolver()
     // Clear the solver
     clear();
 
+    // Reset the permutations
+    resetPermutations();
+
     // Decrease the number of instances
     --m_nInstances;
 
@@ -207,6 +211,68 @@ void SystemSolver::clear()
 
     if (m_nInstances == 0) {
         m_optionsEditable = true;
+    }
+}
+
+/*!
+ * Set the permutations that will use internally by the solver.
+ *
+ * Only local permutations are suppoerted.
+ *
+ * \param nRows are the rows of the matrix
+ * \param rowRanks are the rank of the rows
+ * \param nRows are the columns of the matrix
+ * \param colRanks are the rank of the columns
+ */
+void SystemSolver::setPermutations(long nRows, const long *rowRanks, long nCols, const long *colRanks)
+{
+    // Permutation has to be set before assembling the system
+    if (isAssembled()) {
+        throw std::runtime_error("Unable to set the permutations. The system is already assembled.");
+    }
+
+    // Reset existing permutations
+    resetPermutations();
+
+    // Create new permutations
+    PetscInt *rowPermutationsStorage;
+    PetscMalloc(nRows * sizeof(PetscInt), &rowPermutationsStorage);
+    for (long i = 0; i < nRows; ++i) {
+        rowPermutationsStorage[i] = rowRanks[i];
+    }
+
+#if BITPIT_ENABLE_MPI == 1
+    ISCreateGeneral(m_communicator, nRows, rowPermutationsStorage, PETSC_OWN_POINTER, &m_rowPermutation);
+#else
+    ISCreateGeneral(PETSC_COMM_SELF, nRows, rowPermutationsStorage, PETSC_OWN_POINTER, &m_rowPermutation);
+#endif
+    ISSetPermutation(m_rowPermutation);
+
+    PetscInt *colPermutationsStorage;
+    PetscMalloc(nCols * sizeof(PetscInt), &colPermutationsStorage);
+    for (long j = 0; j < nCols; ++j) {
+        colPermutationsStorage[j] = colRanks[j];
+    }
+
+#if BITPIT_ENABLE_MPI == 1
+    ISCreateGeneral(m_communicator, nCols, colPermutationsStorage, PETSC_OWN_POINTER, &m_colPermutation);
+#else
+    ISCreateGeneral(PETSC_COMM_SELF, nCols, colPermutationsStorage, PETSC_OWN_POINTER, &m_colPermutation);
+#endif
+    ISSetPermutation(m_colPermutation);
+}
+
+/*!
+ * Reset the permutations
+ */
+void SystemSolver::resetPermutations()
+{
+    if (m_rowPermutation) {
+        ISDestroy(&m_rowPermutation);
+    }
+
+    if (m_colPermutation) {
+        ISDestroy(&m_colPermutation);
     }
 }
 
@@ -431,6 +497,8 @@ void SystemSolver::solve(const std::vector<double> &rhs, std::vector<double> *so
  */
 void SystemSolver::preKSPSolveActions()
 {
+    // Apply permutations
+    vectorsPermute(false);
 }
 
 /*!
@@ -438,6 +506,8 @@ void SystemSolver::preKSPSolveActions()
  */
 void SystemSolver::postKSPSolveActions()
 {
+    // Invert permutations
+    vectorsPermute(true);
 }
 
 /*!
@@ -449,6 +519,11 @@ void SystemSolver::matrixInit(const SparseMatrix &matrix)
 {
     long nRows = matrix.getRowCount();
     long nCols = matrix.getColCount();
+
+    const PetscInt *rowRanks = nullptr;
+    if (m_rowPermutation) {
+        ISGetIndices(m_rowPermutation, &rowRanks);
+    }
 
     // Set row and column global offset
 #if BITPIT_ENABLE_MPI == 1
@@ -470,7 +545,12 @@ void SystemSolver::matrixInit(const SparseMatrix &matrix)
     std::vector<int> o_nnz(nRows, 0);
     if (nOffDiagonalCols > 0) {
         for (long row = 0; row < nRows; ++row) {
-            ConstProxyVector<long> rowPattern = matrix.getRowPattern(row);
+            long matrixRow = row;
+            if (m_rowPermutation) {
+                matrixRow = rowRanks[matrixRow];
+            }
+
+            ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
             int nRowNZ = rowPattern.size();
             for (int k = 0; k < nRowNZ; ++k) {
                 long columnGlobalId = rowPattern[k];
@@ -483,7 +563,12 @@ void SystemSolver::matrixInit(const SparseMatrix &matrix)
         }
     } else {
         for (long row = 0; row < nRows; ++row) {
-            ConstProxyVector<long> rowPattern = matrix.getRowPattern(row);
+            long matrixRow = row;
+            if (m_rowPermutation) {
+                matrixRow = rowRanks[matrixRow];
+            }
+
+            ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
             d_nnz[row] = rowPattern.size();
         }
     }
@@ -495,13 +580,23 @@ void SystemSolver::matrixInit(const SparseMatrix &matrix)
     std::vector<int> d_nnz(nCols);
 
     for (long row = 0; row < nRows; ++row) {
-        ConstProxyVector<long> rowPattern = matrix.getRowPattern(row);
+        long matrixRow = row;
+        if (m_rowPermutation) {
+            matrixRow = rowRanks[matrixRow];
+        }
+
+        ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
         d_nnz[row] = rowPattern.size();
     }
 
     // Create the matrix
     MatCreateSeqAIJ(PETSC_COMM_SELF, nRows, nCols, 0, d_nnz.data(), &m_A);
 #endif
+
+    // Cleanup
+    if (m_rowPermutation) {
+        ISRestoreIndices(m_rowPermutation, &rowRanks);
+    }
 }
 
 /*!
@@ -512,7 +607,20 @@ void SystemSolver::matrixInit(const SparseMatrix &matrix)
 void SystemSolver::matrixFill(const SparseMatrix &matrix)
 {
     const long nRows = matrix.getRowCount();
+    const long nCols = matrix.getColCount();
     const long maxRowNZ = matrix.getMaxRowNZCount();
+
+    const PetscInt *rowRanks = nullptr;
+    if (m_rowPermutation) {
+        ISGetIndices(m_rowPermutation, &rowRanks);
+    }
+
+    IS invColPermutation;
+    const PetscInt *colInvRanks = nullptr;
+    if (m_colPermutation) {
+        ISInvertPermutation(m_colPermutation, nCols, &invColPermutation);
+        ISGetIndices(invColPermutation, &colInvRanks);
+    }
 
     // Create the matrix
     if (maxRowNZ > 0) {
@@ -526,15 +634,34 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
         rowGlobalOffset = 0;
 #endif
 
+        long firstGlobalCol = rowGlobalOffset;
+        long lastGlobalCol  = firstGlobalCol + nCols - 1;
+
         for (long row = 0; row < nRows; ++row) {
-            ConstProxyVector<long> rowPattern = matrix.getRowPattern(row);
-            ConstProxyVector<double> rowValues = matrix.getRowValues(row);
+            long matrixRow = row;
+            if (m_rowPermutation) {
+                matrixRow = rowRanks[matrixRow];
+            }
+
+            ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
+            ConstProxyVector<double> rowValues = matrix.getRowValues(matrixRow);
 
             const int nRowNZ = rowPattern.size();
             const PetscInt globalRow = rowGlobalOffset + row;
             for (int k = 0; k < nRowNZ; ++k) {
-                rowNZGlobalIds[k] = rowPattern[k];
-                rowNZValues[k] = rowValues[k];
+                long matrixGlobalCol = rowPattern[k];
+
+                long globalCol = matrixGlobalCol;
+                if (m_colPermutation) {
+                    if (globalCol >= firstGlobalCol && globalCol <= lastGlobalCol) {
+                        long col = globalCol - firstGlobalCol;
+                        col = colInvRanks[col];
+                        globalCol = firstGlobalCol + col;
+                    }
+                }
+
+                rowNZGlobalIds[k] = globalCol;
+                rowNZValues[k]    = rowValues[k];
             }
 
             MatSetValues(m_A, 1, &globalRow, nRowNZ, rowNZGlobalIds.data(), rowNZValues.data(), INSERT_VALUES);
@@ -544,6 +671,15 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
     // Let petsc build the matrix
     MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
+
+    // Cleanup
+    if (m_rowPermutation) {
+        ISRestoreIndices(m_rowPermutation, &rowRanks);
+    }
+
+    if (m_colPermutation) {
+        ISDestroy(&invColPermutation);
+    }
 }
 
 /*!
@@ -670,6 +806,29 @@ void SystemSolver::vectorsInit()
     VecCreateSeq(PETSC_COMM_SELF, nColumns, &m_solution);
     VecCreateSeq(PETSC_COMM_SELF, nRows, &m_rhs);
 #endif
+}
+
+/*!
+ * Apply permutations to RHS and solution vectors.
+ *
+ * \param invert is a flag for inverting the permutation
+ */
+void SystemSolver::vectorsPermute(bool invert)
+{
+    PetscBool petscInvert;
+    if (invert) {
+        petscInvert = PETSC_TRUE;
+    } else {
+        petscInvert = PETSC_FALSE;
+    }
+
+    if (m_colPermutation) {
+        VecPermute(m_solution, m_colPermutation, petscInvert);
+    }
+
+    if (m_rowPermutation) {
+        VecPermute(m_rhs, m_rowPermutation, petscInvert);
+    }
 }
 
 /*!
