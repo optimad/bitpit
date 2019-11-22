@@ -115,13 +115,13 @@ SystemSolver::SystemSolver(bool debug)
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(const std::string &prefix, bool debug)
-    : m_prefix(prefix), m_assembled(false),
+    : m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
+      m_KSP(nullptr),
+      m_prefix(prefix), m_assembled(false)
 #if BITPIT_ENABLE_MPI==1
-      m_communicator(MPI_COMM_SELF), m_partitioned(false),
-      m_rowGlobalOffset(0), m_colGlobalOffset(0),
+      , m_communicator(MPI_COMM_SELF), m_partitioned(false),
+      m_rowGlobalOffset(0), m_colGlobalOffset(0)
 #endif
-      m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
-      m_KSP(nullptr)
 {
     // Add debug options
     if (debug) {

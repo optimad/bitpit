@@ -125,6 +125,14 @@ public:
     void restoreSolutionRawReadPtr(const double *raw_solution) const;
 
 protected:
+    Mat m_A;
+    Vec m_rhs;
+    Vec m_solution;
+
+    KSP m_KSP;
+    KSPOptions m_KSPOptions;
+    KSPStatus m_KSPStatus;
+
     void matrixInit(const SparseMatrix &matrix);
     void matrixFill(const SparseMatrix &matrix);
     void matrixUpdate(const std::vector<long> &rows, const SparseMatrix &elements);
@@ -157,14 +165,6 @@ private:
     long m_rowGlobalOffset;
     long m_colGlobalOffset;
 #endif
-
-    Mat m_A;
-    Vec m_rhs;
-    Vec m_solution;
-
-    KSP m_KSP;
-    KSPOptions m_KSPOptions;
-    KSPStatus m_KSPStatus;
 
     void KSPInit();
 
