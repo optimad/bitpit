@@ -1006,16 +1006,6 @@ void SystemSolver::setUp()
  */
 void SystemSolver::preKSPSetupActions()
 {
-    // Solver configuration
-    KSPSetType(m_KSP, KSPFGMRES);
-    if (m_KSPOptions.restart != PETSC_DEFAULT) {
-        KSPGMRESSetRestart(m_KSP, m_KSPOptions.restart);
-    }
-    if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
-        KSPSetTolerances(m_KSP, m_KSPOptions.rtol, PETSC_DEFAULT, PETSC_DEFAULT, m_KSPOptions.maxits);
-    }
-    KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
-
     // Preconditioner configuration
     PCType preconditionerType;
 #if BITPIT_ENABLE_MPI == 1
@@ -1040,6 +1030,16 @@ void SystemSolver::preKSPSetupActions()
             PCFactorSetLevels(preconditioner, m_KSPOptions.levels);
         }
     }
+
+    // Solver configuration
+    KSPSetType(m_KSP, KSPFGMRES);
+    if (m_KSPOptions.restart != PETSC_DEFAULT) {
+        KSPGMRESSetRestart(m_KSP, m_KSPOptions.restart);
+    }
+    if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
+        KSPSetTolerances(m_KSP, m_KSPOptions.rtol, PETSC_DEFAULT, PETSC_DEFAULT, m_KSPOptions.maxits);
+    }
+    KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
 }
 
 /*!
