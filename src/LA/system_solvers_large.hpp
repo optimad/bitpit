@@ -148,6 +148,9 @@ protected:
     virtual void preKSPSetupActions();
     virtual void postKSPSetupActions();
 
+    virtual void preKSPSolveActions();
+    virtual void postKSPSolveActions();
+
 #if BITPIT_ENABLE_MPI==1
     const MPI_Comm & getCommunicator() const;
 #endif
