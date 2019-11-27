@@ -754,12 +754,13 @@ private:
 	void unsetGhostOwner(int id);
 	void clearGhostOwners();
 
-	std::unordered_map<long, int> _partitioningAlter_getFinalGhostOwners();
+	std::unordered_map<long, int> _partitioningAlter_evalGhostOwnershipChanges();
+	void _partitioningAlter_applyGhostOwnershipChanges(int sendRank, std::unordered_map<long, int> *ghostOwnershipChanges);
+
 	void _partitioningAlter_deleteGhosts();
 
-	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning);
-	std::vector<adaption::Info> _partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning);
-	std::vector<adaption::Info> _partitioningAlter_updateCells(const std::unordered_set<int> &sendRanks, const std::unordered_map<long, int> &finalGhostOwners, bool trackPartitioning);
+	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostOwnershipChanges);
+	std::vector<adaption::Info> _partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostOwnershipChanges);
 
 	void updateGhostExchangeInfo();
 #endif

@@ -1287,10 +1287,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
     // If we are not serializing the patch, some of the cells that will be send
     // during partitioning may be ghosts on other processors. Therefore, we
     // need to identify the owners of the ghosts after the partitioning.
-    std::unordered_map<long, int> finalGhostOwners;
+    std::unordered_map<long, int> ghostOwnershipChanges;
     if (!m_partitioningSerialization) {
         if (isPartitioned()) {
-            finalGhostOwners = _partitioningAlter_getFinalGhostOwners();
+            ghostOwnershipChanges = _partitioningAlter_evalGhostOwnershipChanges();
         }
     } else {
         _partitioningAlter_deleteGhosts();
@@ -1336,22 +1336,26 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
         bool isSender   = (batchSendRanks.count(patchRank) > 0);
         bool isReceiver = (batchRecvRanks.count(patchRank) > 0);
 
-        // Perform sends/receives/updates
+        // Perform sends/receives
         if (isSender) {
-            rankPartitioningData = _partitioningAlter_sendCells(batchRecvRanks, trackPartitioning);
+            rankPartitioningData = _partitioningAlter_sendCells(batchRecvRanks, trackPartitioning, &ghostOwnershipChanges);
         } else if (isReceiver) {
-            rankPartitioningData = _partitioningAlter_receiveCells(batchSendRanks, trackPartitioning);
-        } else {
-            rankPartitioningData = _partitioningAlter_updateCells(batchSendRanks, finalGhostOwners, trackPartitioning);
+            rankPartitioningData = _partitioningAlter_receiveCells(batchSendRanks, trackPartitioning, &ghostOwnershipChanges);
         }
 
-        // Update tracking information
         if (trackPartitioning) {
             for (adaption::Info &rankPartitioningInfo : rankPartitioningData) {
                 partitioningData.emplace_back(std::move(rankPartitioningInfo));
             }
         }
+
+        // Update ghost ownership
+        for (int sendRank : batchSendRanks) {
+            _partitioningAlter_applyGhostOwnershipChanges(sendRank, &ghostOwnershipChanges);
+        }
     }
+
+    assert(ghostOwnershipChanges.size() == 0);
 
     communications::tags().trash(m_partitioningCellsTag, m_communicator);
     communications::tags().trash(m_partitioningVerticesTag, m_communicator);
@@ -1360,7 +1364,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 }
 
 /*!
-    Get the owners of the ghosts after the partitioning.
+    Get the ghost that will change ownership after partitioning.
 
     Some of the cells that are send during a partitioning may be ghosts on
     other processors. We need to find out the final ghost owners after the
@@ -1368,9 +1372,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 
     This function uses the ghost exchange information.
 
-    \result The owners of the ghosts after the partitioning.
+    \result The ghosts that will change ownership after the partitioning.
 */
-std::unordered_map<long, int> PatchKernel::_partitioningAlter_getFinalGhostOwners()
+std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnershipChanges()
 {
     int patchRank = getRank();
 
@@ -1416,7 +1420,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_getFinalGhostOwner
     //
     // Data buffer contains the ranks that will own ghost cells after the
     // partitioning.
-    std::unordered_map<long, int> finalGhostOwners;
+    std::unordered_map<long, int> ghostOwnershipChanges;
 
     int nCompletedRecvs = 0;
     while (nCompletedRecvs < notificationCommunicator.getRecvCount()) {
@@ -1428,7 +1432,9 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_getFinalGhostOwner
             int finalOwner;
             buffer >> finalOwner;
 
-            finalGhostOwners[id] = finalOwner;
+            if (finalOwner != m_ghostOwners.at(id)) {
+                ghostOwnershipChanges[id] = finalOwner;
+            }
         }
 
         ++nCompletedRecvs;
@@ -1437,7 +1443,37 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_getFinalGhostOwner
     // Wait for the sends to finish
     notificationCommunicator.waitAllSends();
 
-    return finalGhostOwners;
+    return ghostOwnershipChanges;
+}
+
+/*!
+    Apply changes of ghost ownership for ghosts previously owned by the
+    specified sender process.
+
+    \param sendRank is the rank of the processor sending the cells
+    \param[in,out] ghostOwnershipChanges are the ghosts that will change
+    ownership after the partitioning, on output the list will be updated
+    removing the ghosts that are no longer on the partition (i.e., ghosts
+    deleted or promoted to internal cell) and the ghosts whose ownership
+    have been updated
+*/
+void PatchKernel::_partitioningAlter_applyGhostOwnershipChanges(int sendRank,
+                                                                std::unordered_map<long, int> *ghostOwnershipChanges)
+{
+    for (auto itr = ghostOwnershipChanges->begin(); itr != ghostOwnershipChanges->end();) {
+        // Consider only ghosts previously owned by the sender
+        long ghostId = itr->first;
+        int previousGhostOwner = m_ghostOwners.at(ghostId);
+        if (previousGhostOwner != sendRank) {
+            ++itr;
+            continue;
+        }
+
+        // Update ghost owner
+        int finalGhostOwner = itr->second;
+        setGhostOwner(ghostId, finalGhostOwner);
+        itr = ghostOwnershipChanges->erase(itr);
+    }
 }
 
 /*!
@@ -1482,11 +1518,17 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
     \param recvRanks are the receiver ranks
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
+    \param[in,out] ghostOwnershipChanges are the ghosts that will change
+    ownership after the partitioning, on output the list will be updated
+    removing the ghosts that are no longer on the partition (i.e., ghosts
+    deleted or promoted to internal cell) and the ghosts whose ownership
+    have been updated
     \result If the partitioning is tracked, returns a vector of adaption::Info
     with all the changes done to the patch during the partitioning, otherwise
     an empty vector will be returned.
 */
-std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unordered_set<int> &recvRanks, bool trackPartitioning)
+std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning,
+                                                                      std::unordered_map<long, int> *ghostOwnershipChanges)
 {
     // Initialize adaption data
     std::vector<adaption::Info> partitioningData;
@@ -1957,16 +1999,25 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
             // This is only needed if the cell is on the halo, in the other
             // case the owner is always the receiver itself.
             if (isHalo) {
-                int cellFutureOwner;
+                int cellOwnerOnReceiver;
                 if (m_partitioningOutgoings.count(cellId) > 0) {
-                    cellFutureOwner = m_partitioningOutgoings.at(cellId);
+                    cellOwnerOnReceiver = m_partitioningOutgoings.at(cellId);
                 } else if (m_ghostOwners.count(cellId) > 0) {
-                    cellFutureOwner = m_ghostOwners.at(cellId);
+                    cellOwnerOnReceiver = m_ghostOwners.at(cellId);
                 } else {
-                    cellFutureOwner = m_rank;
+                    cellOwnerOnReceiver = m_rank;
                 }
 
-                cellsBuffer << cellFutureOwner;
+                cellsBuffer << cellOwnerOnReceiver;
+
+                int ghostOwnershipChange;
+                if (ghostOwnershipChanges->count(cellId) > 0) {
+                    ghostOwnershipChange = ghostOwnershipChanges->at(cellId);
+                } else {
+                    ghostOwnershipChange = -1;
+                }
+
+                cellsBuffer << ghostOwnershipChange;
             }
 
             // Cell data
@@ -2052,6 +2103,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
                 moveInternal2Ghost(cellId, cellOwner);
             } else {
                 deleteList.push_back(cellId);
+                ghostOwnershipChanges->erase(cellId);
             }
         }
 
@@ -2106,6 +2158,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
             // Add the cell to the delete list
             if (!keep) {
                 deleteList.push_back(cellId);
+                ghostOwnershipChanges->erase(cellId);
             }
         }
 
@@ -2119,6 +2172,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     } else {
         // The processor has sent all its cells, the patch is now empty
         reset();
+        ghostOwnershipChanges->clear();
     }
 
     // Wait for previous communications to finish
@@ -2148,11 +2202,17 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
     \param sendRanks are the rank of the processors sending the cells
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
+    \param[in,out] ghostOwnershipChanges are the ghosts that will change
+    ownership after the partitioning, on output the list will be updated
+    removing the ghosts that are no longer on the partition (i.e., ghosts
+    deleted or promoted to internal cell) and the ghosts whose ownership
+    have been updated
     \result If the partitioning is tracked, returns a vector of adaption::Info
     with all the changes done to the patch during the partitioning, otherwise
     an empty vector will be returned.
 */
-std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning)
+std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning,
+                                                                         std::unordered_map<long, int> *ghostOwnershipChanges)
 {
     //
     // Start receiving buffer sizes
@@ -2475,10 +2535,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             cellsBuffer >> isHalo;
 
             int cellOwner;
+            int ghostOwnershipChange;
             if (isHalo) {
                 cellsBuffer >> cellOwner;
+                cellsBuffer >> ghostOwnershipChange;
             } else {
                 cellOwner = patchRank;
+                ghostOwnershipChange = -1;
             }
 
             Cell cell;
@@ -2527,6 +2590,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                 cellId = cellIterator.getId();
                 addedCells.push_back(cellId);
 
+                // Setup ghost ownership changes
+                if (!cellIterator->isInterior()) {
+                    if (ghostOwnershipChange >= 0) {
+                        ghostOwnershipChanges->insert({cellId, ghostOwnershipChange});
+                    }
+                }
+
                 // Reset the interfaces of the cell, they will be recreated later
                 if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
                     cellIterator->resetInterfaces();
@@ -2537,6 +2607,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                 const Cell &localCell = m_cells[cellId];
                 if (isInterior && !localCell.isInterior()) {
                     moveGhost2Internal(cellId);
+                    ghostOwnershipChanges->erase(cellId);
                 }
 
                 // Save the adjacencies of the received cell, this adjacencies
@@ -2714,47 +2785,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
     }
 
     // Return adaption data
-    return partitioningData;
-}
-
-/*!
-    Apply changes in ghost ownership.
-
-    \param sendRanks are the rank of the processors sending the cells
-    \param trackPartitioning if set to true the function will return the changes
-    done to the patch during the partitioning
-    \param finalGhostOwners are the owners of the ghost cells after the
-    partitioning
-    \result If the partitioning is tracked, returns a vector of adaption::Info
-    with all the changes done to the patch during the partitioning, otherwise
-    an empty vector will be returned.
-*/
-std::vector<adaption::Info> PatchKernel::_partitioningAlter_updateCells(const std::unordered_set<int> &sendRanks,
-                                                                        const std::unordered_map<long, int> &finalGhostOwners,
-                                                                        bool trackPartitioning)
-{
-    BITPIT_UNUSED(trackPartitioning);
-
-    // Update ghosts ownership
-    for (const auto &entry : m_ghostOwners) {
-        int ghostOwner = entry.second;
-        if (sendRanks.count(ghostOwner) == 0) {
-            continue;
-        }
-
-        long ghostId = entry.first;
-        int finalGhostOwner = finalGhostOwners.at(ghostId);
-        if (finalGhostOwner == ghostOwner) {
-            continue;
-        }
-
-        setGhostOwner(ghostId, finalGhostOwner);
-    }
-
-    // Partitioning information are always empty because ghosts are not
-    // tracked.
-    std::vector<adaption::Info> partitioningData;
-
     return partitioningData;
 }
 
