@@ -2244,9 +2244,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         duplicateCellsCandidates.clear();
         for (auto &entry : m_ghostOwners) {
             long ghostId = entry.first;
-            if (duplicateCellsCandidates.count(ghostId) > 0) {
-                continue;
-            }
 
             duplicateCellsCandidates.insert(ghostId);
 
