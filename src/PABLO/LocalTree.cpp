@@ -902,6 +902,17 @@ namespace bitpit {
             return;
         }
 
+        // Exit if is the root octant
+        uint8_t level = oct->getLevel();
+        if (level == 0){
+            // if periodic face return itself
+            if (m_periodic[iface]){
+            	neighbours.push_back(0);
+            	isghost.push_back(false);
+            }
+            return;
+        }
+
         // If a face is a boundary, it can have neighbours only if periodic
         if (oct->m_info[iface]){
             // Use the proper function for searching periodic neighbours
@@ -1189,6 +1200,12 @@ namespace bitpit {
             return;
         }
 
+        // Exit if is the root octant
+        uint8_t level = oct->getLevel();
+        if (level == 0){
+        	return;
+        }
+
         // Check if octants edge is a process boundary
         iface1 = m_treeConstants->edgeFace[iedge][0];
         iface2 = m_treeConstants->edgeFace[iedge][1];
@@ -1453,6 +1470,12 @@ namespace bitpit {
         // Default if inode is nnodes<inode<0
         if (inode > m_treeConstants->nNodes){
             return;
+        }
+
+        // Exit if is the root octant
+        uint8_t level = oct->getLevel();
+        if (level == 0){
+        	return;
         }
 
         // Check if octants node is a boundary
@@ -2290,6 +2313,12 @@ namespace bitpit {
         // Default if iface is nface<iface<0
         if (iface > m_treeConstants->nFaces){
             return;
+        }
+
+        // Exit if is the root octant
+        uint8_t level = oct->getLevel();
+        if (level == 0){
+        	return;
         }
 
         // Check if octants face is a process boundary
