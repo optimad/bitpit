@@ -44,6 +44,7 @@ if (ENABLE_MPI)
 	list(APPEND TESTS "test_surfunstructured_parallel_00002:2")
 	list(APPEND TESTS "test_surfunstructured_parallel_00003:4")
 	list(APPEND TESTS "test_surfunstructured_parallel_00004:4")
+	list(APPEND TESTS "test_surfunstructured_parallel_00005:3")
 endif ()
 
 # Test extra libraries
@@ -85,5 +86,10 @@ if (ENABLE_MPI)
 	add_custom_command(
 		TARGET "test_surfunstructured_parallel_00003" PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
+	)
+
+	add_custom_command(
+		TARGET "test_surfunstructured_parallel_00005" PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/sphere.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/sphere.stl"
 	)
 endif ()
