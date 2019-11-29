@@ -2729,8 +2729,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_updateCells(const st
                                                                         const std::unordered_map<long, int> &finalGhostOwners,
                                                                         bool trackPartitioning)
 {
+    BITPIT_UNUSED(trackPartitioning);
+
     // Update ghosts ownership
-    std::unordered_map<int, std::vector<long>> updatedGhosts;
     for (const auto &entry : m_ghostOwners) {
         int ghostOwner = entry.second;
         if (sendRanks.count(ghostOwner) == 0) {
@@ -2744,25 +2745,11 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_updateCells(const st
         }
 
         setGhostOwner(ghostId, finalGhostOwner);
-        updatedGhosts[ghostOwner].push_back(ghostId);
     }
 
-    // Fill partitioning info
+    // Partitioning information are always empty because ghosts are not
+    // tracked.
     std::vector<adaption::Info> partitioningData;
-    if (trackPartitioning) {
-        partitioningData.resize(updatedGhosts.size());
-
-        int partitioningInfoIndex = 0;
-        for (auto &entry : updatedGhosts) {
-            adaption::Info &partitioningInfo = partitioningData[partitioningInfoIndex];
-            ++partitioningInfoIndex;
-
-            partitioningInfo.entity   = adaption::ENTITY_CELL;
-            partitioningInfo.type     = adaption::TYPE_PARTITION_RECV;
-            partitioningInfo.rank     = entry.first;
-            partitioningInfo.previous = std::move(entry.second);
-        }
-    }
 
     return partitioningData;
 }
