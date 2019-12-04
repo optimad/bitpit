@@ -2043,10 +2043,28 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
         std::vector<long> deleteList;
         std::vector<long> neighIds;
 
+        // Delete frame cells or move them into the ghosts
+        deleteList.clear();
+        for (long cellId : frameCellsOverall) {
+            bool moveToGhosts = (ghostCellsOverall.count(cellId) > 0);
+            if (moveToGhosts) {
+                int cellOwner = m_partitioningOutgoings.at(cellId);
+                moveInternal2Ghost(cellId, cellOwner);
+            } else {
+                deleteList.push_back(cellId);
+            }
+        }
+
+        deleteCells(deleteList, true, true);
+
         // Delete stale ghosts
         //
         // Loop over all the ghosts and keep only the cells that have at least
         // one internal neighbour that is still on this process.
+        //
+        // Stale ghosts have to be deleted after processing frame cells,
+        // because some of the frame cells moved into ghosts may be stale
+        // ghosts.
         deleteList.clear();
         for (const auto &entry : m_ghostOwners) {
             long cellId = entry.first;
@@ -2087,20 +2105,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const unor
 
             // Add the cell to the delete list
             if (!keep) {
-                deleteList.push_back(cellId);
-            }
-        }
-
-        deleteCells(deleteList, true, true);
-
-        // Delete frame cells or move them into the ghosts
-        deleteList.clear();
-        for (long cellId : frameCellsOverall) {
-            bool moveToGhosts = (ghostCellsOverall.count(cellId) > 0);
-            if (moveToGhosts) {
-                int cellOwner = m_partitioningOutgoings.at(cellId);
-                moveInternal2Ghost(cellId, cellOwner);
-            } else {
                 deleteList.push_back(cellId);
             }
         }
