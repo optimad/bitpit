@@ -6008,7 +6008,7 @@ namespace bitpit {
             std::size_t buffSize = nRankBorders * MARKER_ENTRY_BINARY_SIZE;
             markerCommunicator.setSend(rank, buffSize);
 
-            SendBuffer sendBuffer = markerCommunicator.getSendBuffer(rank);
+            SendBuffer &sendBuffer = markerCommunicator.getSendBuffer(rank);
             for(std::size_t i = 0; i < nRankBorders; ++i){
                 const Octant &octant = m_octree.m_octants[rankBordersPerProc[i]];
                 sendBuffer << octant.getMarker();
