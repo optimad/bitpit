@@ -909,23 +909,36 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	}
 
 	// Build the information on the cells that will be sent
+	//
+	// Only internal cells are tracked.
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
-		for (int recvRank : globalSendRanks) {
-			partitioningData.emplace_back();
-			adaption::Info &partitioningInfo = partitioningData.back();
-			partitioningInfo.entity = adaption::ENTITY_CELL;
-			partitioningInfo.type   = adaption::TYPE_PARTITION_SEND;
-			partitioningInfo.rank   = recvRank;
+		for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+			int sendRank = entry.first;
+			if (sendRank != patchRank) {
+				continue;
+			}
 
+			int recvRank = entry.second;
+
+			std::vector<long> previous;
 			for (const auto &entry : m_partitioningOutgoings) {
 				int cellRank = entry.second;
-				if (cellRank == recvRank) {
+				if (cellRank != recvRank) {
 					continue;
 				}
 
 				long cellId = entry.first;
-				partitioningInfo.previous.push_back(cellId);
+				previous.push_back(cellId);
+			}
+
+			if (!previous.empty()) {
+				partitioningData.emplace_back();
+				adaption::Info &partitioningInfo = partitioningData.back();
+				partitioningInfo.entity   = adaption::ENTITY_CELL;
+				partitioningInfo.type     = adaption::TYPE_PARTITION_SEND;
+				partitioningInfo.rank     = recvRank;
+				partitioningInfo.previous = std::move(previous);
 			}
 		}
 	}
