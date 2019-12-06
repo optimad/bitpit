@@ -2589,6 +2589,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             // otherwise merge the connectivity of the duplicate cell to the
             // existing cell. This ensure that the received cell will be
             // properly connected to the received cells
+            bool isTracked = false;
             if (cellId < 0) {
                 // Add cell
                 //
@@ -2610,6 +2611,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     }
                 }
 
+                // Interior cells are tacked
+                isTracked = (trackPartitioning && isInterior);
+
                 // Reset the interfaces of the cell, they will be recreated later
                 if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
                     cellIterator->resetInterfaces();
@@ -2621,6 +2625,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                 if (isInterior && !localCell.isInterior()) {
                     moveGhost2Internal(cellId);
                     ghostOwnershipChanges->erase(cellId);
+                    isTracked = trackPartitioning;
                 }
 
                 // Save the adjacencies of the received cell, this adjacencies
@@ -2660,7 +2665,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
             // Update tracking information
             //
-            // Only internal cells are tracked.
+            // Only new internal cells and internal cells that were
+            // previously ghosts are tracked.
             //
             // The ids of the cells send will be stored accordingly to the
             // receive order, this is the same order that will be used on the
@@ -2669,7 +2675,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             // additional communications (they already know the list of cells
             // for which data is needed and the order in which these data will
             // be sent).
-            if (trackPartitioning && isInterior) {
+            if (isTracked) {
                 partitioningData[sendRankIndex].current.emplace_back(cellId);
             }
         }
