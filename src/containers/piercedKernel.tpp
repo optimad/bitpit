@@ -356,9 +356,6 @@ typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::sortBefore(id_t re
 template<typename id_t>
 typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::_sort(std::size_t beginPos, std::size_t endPos)
 {
-    // Get initial kernel size
-    std::size_t initialKernelRawSize = rawSize();
-
     // Squeeze the kernel
     //
     // After the squeeze there will be no holes in the kernel.
@@ -367,41 +364,21 @@ typename PiercedKernel<id_t>::SortAction PiercedKernel<id_t>::_sort(std::size_t 
     bool squeezed = (squeezeAction.data.get() != nullptr);
 
     // Get updated kernel size
-    std::size_t updatedKernelRawSize;
-    if (squeezed) {
-        updatedKernelRawSize = rawSize();
-    } else {
-        updatedKernelRawSize = initialKernelRawSize;
-    }
+    std::size_t updatedKernelRawSize = rawSize();
 
     // Update the sort range
     if (squeezed) {
-        std::size_t updatedBeginPos = initialKernelRawSize;
-        std::size_t updatedEndPos   = initialKernelRawSize;
-        for (std::size_t i = 0; i < initialKernelRawSize; ++i) {
+        std::size_t previousBeginPos = beginPos;
+        std::size_t previousEndPos   = endPos;
+        for (std::size_t i = m_begin_pos; i < m_end_pos; ++i) {
             std::size_t previousPos = squeezePermutations[i];
-            if (previousPos == beginPos) {
-                updatedBeginPos = i;
+            if (previousPos == previousBeginPos) {
+                beginPos = i;
             }
-            if (previousPos == endPos) {
-                updatedEndPos = i;
-            }
-
-            if (updatedBeginPos != initialKernelRawSize && updatedEndPos != initialKernelRawSize) {
+            if ((previousPos + 1) == previousEndPos) {
+                endPos = i + 1;
                 break;
             }
-        }
-
-        if (updatedBeginPos != initialKernelRawSize) {
-            beginPos = updatedBeginPos;
-        } else {
-            beginPos = updatedKernelRawSize;
-        }
-
-        if (updatedEndPos != initialKernelRawSize) {
-            endPos = updatedEndPos;
-        } else {
-            endPos = updatedKernelRawSize;
         }
     }
 
