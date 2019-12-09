@@ -4071,6 +4071,8 @@ bool PatchKernel::squeezeVertices()
 
 	m_vertices.squeeze();
 
+	m_vertices.sync();
+
 	return true;
 }
 
@@ -4089,6 +4091,8 @@ bool PatchKernel::squeezeCells()
 
 	m_cells.squeeze();
 
+	m_cells.sync();
+
 	return true;
 }
 
@@ -4106,6 +4110,8 @@ bool PatchKernel::squeezeInterfaces()
 	}
 
 	m_interfaces.squeeze();
+
+	m_interfaces.sync();
 
 	return true;
 }
