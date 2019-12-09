@@ -3991,6 +3991,8 @@ bool PatchKernel::sortVertices()
 
 	m_vertices.sort();
 
+	m_vertices.sync();
+
 	return true;
 }
 
@@ -4019,6 +4021,9 @@ bool PatchKernel::sortCells()
 	}
 #endif
 
+	// Synchronize storage
+	m_cells.sync();
+
 	return true;
 }
 
@@ -4032,6 +4037,8 @@ bool PatchKernel::sortInterfaces()
 	}
 
 	m_interfaces.sort();
+
+	m_interfaces.sync();
 
 	return true;
 }
