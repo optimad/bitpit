@@ -268,7 +268,7 @@ typename PiercedKernel<id_t>::ResizeAction PiercedKernel<id_t>::_resize(std::siz
     std::size_t last_used_pos = getPos(last_stored_id);
 
     // Shrink the kernel
-    shrink(last_used_pos + 1);
+    rawShrink(last_used_pos + 1);
 
     // Generate the sync action
     ResizeAction syncAction(ResizeAction::TYPE_RESIZE);
@@ -512,12 +512,11 @@ typename PiercedKernel<id_t>::SqueezeAction PiercedKernel<id_t>::_squeeze()
         // Clear the holes
         holesClear(true);
 
-        // Reset begin and end
+        // Reset begin position
         setBeginPos(0);
-        setEndPos(size());
 
         // Shrink the kernel
-        shrink(size(), true);
+        rawShrink(kernelSize);
     }
 
     // Shrink to fit
@@ -1698,11 +1697,15 @@ typename PiercedKernel<id_t>::EraseAction PiercedKernel<id_t>::popBack()
     // Erase the last element
     if (empty()) {
         throw std::out_of_range("Vector is empty");
-    } else if (size() == 1) {
-        clear();
     } else {
-        std::size_t last_used_pos = findPrevUsedPos(m_end_pos - 1);
-        shrink(last_used_pos + 1);
+        std::size_t updatedRawSize;
+        if (size() == 1) {
+            updatedRawSize = 0;
+        } else {
+            updatedRawSize = findPrevUsedPos(m_end_pos - 1) + 1;
+        }
+
+        rawShrink(updatedRawSize);
     }
 
     // Return the erase action
@@ -1731,12 +1734,15 @@ void PiercedKernel<id_t>::pierce(std::size_t pos, bool flush)
     // position to the holes, it's enough to update the last position
     // counter or clear the kernel if this was the last hole.
     if (pos + 1 == m_end_pos) {
+        std::size_t updatedRawSize;
         if (size() == 1) {
-            clear();
+            updatedRawSize = 0;
         } else {
-            std::size_t last_used_pos = findPrevUsedPos(m_end_pos - 1);
-            shrink(last_used_pos + 1);
+            updatedRawSize = findPrevUsedPos(m_end_pos - 1) + 1;
         }
+
+        rawShrink(updatedRawSize);
+
         return;
     }
 
@@ -2215,11 +2221,9 @@ void PiercedKernel<id_t>::setEndPos(std::size_t pos)
 * Shrink the kernel so that it contains n raw positions.
 *
 * \param n is the new kernel size, expressed in number of raw positions.
-* \param force constrols if the shrink will be performed also if the container
-* already have the requested size
 */
 template<typename id_t>
-void PiercedKernel<id_t>::shrink(std::size_t n, bool force)
+void PiercedKernel<id_t>::rawShrink(std::size_t n)
 {
     // We can only shrink the kernel
     if (n > m_end_pos) {
@@ -2227,14 +2231,14 @@ void PiercedKernel<id_t>::shrink(std::size_t n, bool force)
     }
 
     // Check if we actually need to shrink the kernel
-    if (n == m_end_pos && !force) {
+    if (n == m_end_pos) {
         return;
     }
 
     // When the new last position is before the first one this is equivalent
     // to a clear
     if (n < (m_begin_pos + 1)) {
-        clear();
+        _clear();
         return;
     }
 
@@ -2276,11 +2280,6 @@ void PiercedKernel<id_t>::shrink(std::size_t n, bool force)
             m_holes_pending_end   = m_holes_pending_begin;
         }
     }
-
-    // Update the storage
-    PiercedSyncAction syncAction(PiercedSyncAction::TYPE_RESIZE);
-    syncAction.info[PiercedSyncAction::INFO_SIZE] = n;
-    processSyncAction(syncAction);
 }
 
 /**

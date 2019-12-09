@@ -607,7 +607,7 @@ private:
     void setPosEmptyId(std::size_t pos, std::size_t nextUsedPos);
     void swapPosIds(std::size_t pos_1, id_t id_1, std::size_t pos_2, id_t id_2);
 
-    void shrink(std::size_t n, bool force = false);
+    void rawShrink(std::size_t n);
 
 };
 
