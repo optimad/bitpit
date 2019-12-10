@@ -4742,6 +4742,7 @@ PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int
 		long ownerPairedAdjacency = intrOwner->getAdjacency(intrOwnerFace, ownerInterfaceIndex);
 		if (ownerPairedAdjacency != intrNeighId) {
 			int ownerPairedAdjacencyIndex = intrOwner->findAdjacency(intrOwnerFace, intrNeighId);
+			assert(ownerPairedAdjacencyIndex >= 0);
 			intrOwner->setAdjacency(intrOwnerFace, ownerInterfaceIndex, intrNeighId);
 			intrOwner->setAdjacency(intrOwnerFace, ownerPairedAdjacencyIndex, ownerPairedAdjacency);
 		}
