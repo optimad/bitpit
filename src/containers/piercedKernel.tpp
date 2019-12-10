@@ -1694,19 +1694,20 @@ typename PiercedKernel<id_t>::EraseAction PiercedKernel<id_t>::erase(id_t id, bo
 template<typename id_t>
 typename PiercedKernel<id_t>::EraseAction PiercedKernel<id_t>::popBack()
 {
-    // Erase the last element
+    // The kernel cannt be empty
     if (empty()) {
         throw std::out_of_range("Vector is empty");
-    } else {
-        std::size_t updatedRawSize;
-        if (size() == 1) {
-            updatedRawSize = 0;
-        } else {
-            updatedRawSize = findPrevUsedPos(m_end_pos - 1) + 1;
-        }
-
-        rawShrink(updatedRawSize);
     }
+
+    // Erase the last element
+    std::size_t updatedRawSize;
+    if (size() == 1) {
+        updatedRawSize = 0;
+    } else {
+        updatedRawSize = findPrevUsedPos(m_end_pos - 1) + 1;
+    }
+
+    rawShrink(updatedRawSize);
 
     // Return the erase action
     EraseAction eraseAction(EraseAction::TYPE_SHRINK);
