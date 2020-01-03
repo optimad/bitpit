@@ -159,6 +159,11 @@ function(addTest TEST_NAME TEST_SOURCES TEST_LIBRARIES WORKING_DIRECTORY N_PROCS
     # Add test
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_EXEC} ${TEST_ARGS} WORKING_DIRECTORY "${WORKING_DIRECTORY}")
 
+    # Set test variables
+    if (${N_PROCS} GREATER 1)
+        set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT OMPI_MCA_rmaps_base_oversubscribe=1)
+    endif()
+
 endfunction()
 
 #------------------------------------------------------------------------------------#
