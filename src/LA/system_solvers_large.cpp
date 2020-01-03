@@ -118,8 +118,8 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
     : m_prefix(prefix), m_assembled(false), m_pivotType(PIVOT_NONE),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
-#endif
       m_rowGlobalOffset(0), m_colGlobalOffset(0),
+#endif
       m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
       m_rpivot(nullptr), m_cpivot(nullptr), m_KSP(nullptr)
 {
@@ -437,9 +437,6 @@ void SystemSolver::matrixInit(const SparseMatrix &matrix)
 #if BITPIT_ENABLE_MPI == 1
     m_rowGlobalOffset = matrix.getRowGlobalOffset();
     m_colGlobalOffset = matrix.getColGlobalOffset();
-#else
-    m_rowGlobalOffset = 0;
-    m_colGlobalOffset = 0;
 #endif
 
 #if BITPIT_ENABLE_MPI == 1
@@ -505,12 +502,19 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
         std::vector<PetscInt> rowNZGlobalIds(maxRowNZ);
         std::vector<PetscScalar> rowNZValues(maxRowNZ);
 
+        long rowGlobalOffset;
+#if BITPIT_ENABLE_MPI == 1
+        rowGlobalOffset = m_rowGlobalOffset;
+#else
+        rowGlobalOffset = 0;
+#endif
+
         for (long row = 0; row < nRows; ++row) {
             ConstProxyVector<long> rowPattern = matrix.getRowPattern(row);
             ConstProxyVector<double> rowValues = matrix.getRowValues(row);
 
             const int nRowNZ = rowPattern.size();
-            const PetscInt globalRow = m_rowGlobalOffset + row;
+            const PetscInt globalRow = rowGlobalOffset + row;
             for (int k = 0; k < nRowNZ; ++k) {
                 rowNZGlobalIds[k] = rowPattern[k];
                 rowNZValues[k] = rowValues[k];
@@ -541,6 +545,13 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
     // Check if element columns are already in the pattern
     std::unordered_set<PetscInt> currentRowPattern;
 
+    long rowGlobalOffset;
+#if BITPIT_ENABLE_MPI == 1
+    rowGlobalOffset = m_rowGlobalOffset;
+#else
+    rowGlobalOffset = 0;
+#endif
+
     for (std::size_t n = 0; n < rows.size(); ++n) {
         ConstProxyVector<long> rowPattern = elements.getRowPattern(n);
         const int nRowElements = rowPattern.size();
@@ -550,7 +561,7 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
 
         // Get global row
         long row = rows[n];
-        const PetscInt globalRow = m_rowGlobalOffset + row;
+        const PetscInt globalRow = rowGlobalOffset + row;
 
         // Get current row pattern
         PetscInt nCurrentRowElements = 0;
@@ -588,7 +599,7 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
 
         // Get global row
         long row = rows[n];
-        const PetscInt globalRow = m_rowGlobalOffset + row;
+        const PetscInt globalRow = rowGlobalOffset + row;
 
         // Get pattern
         ConstProxyVector<long> rowPattern = elements.getRowPattern(n);

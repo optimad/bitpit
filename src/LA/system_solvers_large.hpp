@@ -166,10 +166,10 @@ private:
     MPI_Comm m_communicator;
 
     bool m_partitioned;
-#endif
 
     long m_rowGlobalOffset;
     long m_colGlobalOffset;
+#endif
 
     Mat m_A;
     Vec m_rhs;
