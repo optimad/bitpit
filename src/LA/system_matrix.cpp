@@ -232,9 +232,11 @@ void SparseMatrix::_initialize(bool partitioned, long nRows, long nCols, long nN
     // Parallel initialization
     m_partitioned = partitioned;
 
+    m_global_nRows = m_nRows;
+    m_global_nCols = m_nCols;
     if (m_partitioned) {
-        MPI_Allreduce(&m_nRows, &m_global_nRows, 1, MPI_LONG, MPI_SUM, m_communicator);
-        MPI_Allreduce(&m_nCols, &m_global_nCols, 1, MPI_LONG, MPI_SUM, m_communicator);
+        MPI_Allreduce(MPI_IN_PLACE, &m_global_nRows, 1, MPI_LONG, MPI_SUM, m_communicator);
+        MPI_Allreduce(MPI_IN_PLACE, &m_global_nCols, 1, MPI_LONG, MPI_SUM, m_communicator);
     }
 
     m_global_rowOffset = 0;
