@@ -275,7 +275,7 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     // the sign is computed by determining the side of point p
     // with respect to the normal plane 
-    int s = sign( dotProduct(gradient, outwards) );
+    int s = sign( dotProduct(gradient, normal) );
 
     // If the point lies on the normal plane (s = 0), but its distance is
     // finite the sign must be evaluated considering the curvature of the
