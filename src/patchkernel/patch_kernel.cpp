@@ -4951,7 +4951,6 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 		return;
 	}
 
-	bool boxUpdated = false;
 	for (size_t k = 0; k < point.size(); ++k) {
 		double value = point[k];
 
@@ -4961,8 +4960,6 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 		} else if (value > m_boxMaxPoint[k]) {
 			m_boxMaxPoint[k]   = value;
 			m_boxMaxCounter[k] = 1;
-
-			boxUpdated = true;
 		}
 
 		// Update minimum value
@@ -4971,8 +4968,6 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 		} else if (value < m_boxMinPoint[k]) {
 			m_boxMinPoint[k]   = value;
 			m_boxMinCounter[k] = 1;
-
-			boxUpdated = true;
 		}
 	}
 }
