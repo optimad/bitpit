@@ -263,7 +263,7 @@ void LevelSetCachedObject::propagateSign() {
         }
 
         // Set the sends
-        for (const auto entry : mesh.getGhostExchangeSources()) {
+        for (const auto &entry : mesh.getGhostExchangeSources()) {
             const int rank = entry.first;
             auto &list = entry.second;
 
@@ -273,7 +273,7 @@ void LevelSetCachedObject::propagateSign() {
         // Communicate the sign among the partitions
         while (nGlobalWaiting != 0) {
             // Start the receives
-            for (const auto entry : mesh.getGhostExchangeTargets()) {
+            for (const auto &entry : mesh.getGhostExchangeTargets()) {
                 const int rank = entry.first;
                 dataCommunicator.startRecv(rank);
             }
