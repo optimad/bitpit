@@ -1410,7 +1410,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnership
     //
     // Data buffer is filled with the ranks that will own source cells after
     // the partitioning.
-    for (const auto entry : getGhostExchangeSources()) {
+    for (const auto &entry : getGhostExchangeSources()) {
         const int rank = entry.first;
         auto &sourceCells = entry.second;
 

@@ -222,7 +222,7 @@ void PatchNumberingInfo::_extract()
 	// Communicate the consecutive id of the ghost cells
 	if (m_patch->getProcessorCount() > 1) {
 		// Set and start the sends
-		for (const auto entry : m_patch->getGhostExchangeSources()) {
+		for (const auto &entry : m_patch->getGhostExchangeSources()) {
 			const int rank = entry.first;
 			auto &list = entry.second;
 
