@@ -72,7 +72,7 @@ endforeach()
 
 # NOTE: to get lib files, enable both BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags.
 
-set(BITPIT_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
+set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
 
 add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
 

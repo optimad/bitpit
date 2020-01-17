@@ -46,4 +46,4 @@ if (NOT "${SA_SOURCES}" STREQUAL "")
     set_lto_property(${SA_TARGET_OBJECT})
 endif ()
 
-install(FILES ${SA_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+install(FILES ${SA_HEADERS} DESTINATION include/${PROJECT_NAME})

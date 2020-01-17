@@ -80,7 +80,7 @@ if(BUILD_EXAMPLES)
 		add_executable(${EXAMPLE_NAME} "${EXAMPLE_SOURCES}")
 		target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})
 		target_link_libraries(${EXAMPLE_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
-		install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}/examples)
+		install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${PROJECT_NAME}-${BITPIT_VERSION}/examples)
 	endforeach()
 
 	add_custom_target(examples DEPENDS ${EXAMPLE_LIST})
@@ -93,7 +93,7 @@ if(BUILD_EXAMPLES)
 		COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/pod"
 	)
 
-	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION doc/${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}/examples)
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION doc/${PROJECT_NAME}-${BITPIT_VERSION}/examples)
 
 	# List of example sources
 	set (EXAMPLES_SOURCES ${EXAMPLES_SOURCES} PARENT_SCOPE)

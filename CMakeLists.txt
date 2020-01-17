@@ -340,8 +340,8 @@ endif()
 #------------------------------------------------------------------------------------#
 # Library version
 #------------------------------------------------------------------------------------#
-set (VERSION_HEADER_FILENAME "${PROJECT_SOURCE_DIR}/src/common/${CMAKE_PROJECT_NAME}_version.hpp")
-string(TOUPPER "${CMAKE_PROJECT_NAME}_VERSION" VERSION_DEFINE_NAME)
+set (VERSION_HEADER_FILENAME "${PROJECT_SOURCE_DIR}/src/common/${PROJECT_NAME}_version.hpp")
+string(TOUPPER "${PROJECT_NAME}_VERSION" VERSION_DEFINE_NAME)
 
 file(READ "${VERSION_HEADER_FILENAME}" header)
 
