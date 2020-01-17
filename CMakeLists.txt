@@ -492,7 +492,7 @@ if (MODULE_CG_ENABLED OR MODULE_LA_ENABLED OR MODULE_RBF_ENABLED OR MODULE_POD_E
 	set(LAPACKE_STATIC 0 CACHE BOOL "Require LAPACKE static libraries")
 	mark_as_advanced(LAPACKE_STATIC)
 
-	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/LAPACKE/cmake")
+	list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/LAPACKE/cmake")
 
 	find_package(LAPACK REQUIRED)
 	find_package(LAPACKE REQUIRED)
@@ -516,7 +516,7 @@ endif()
 
 isModuleEnabled("LA" MODULE_LA_ENABLED)
 if (MODULE_LA_ENABLED)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/PETSc/cmake")
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/PETSc/cmake")
 
     set(PETSC_DIR "" CACHE PATH "Directory in which PETSc resides")
     set(PETSC_ARCH "arch-linux2-c" CACHE STRING "Build architecture")
