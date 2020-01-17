@@ -46,4 +46,4 @@ if (NOT "${PABLO_SOURCES}" STREQUAL "")
     set_lto_property(${PABLO_TARGET_OBJECT})
 endif ()
 
-install(FILES ${PABLO_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+install(FILES ${PABLO_HEADERS} DESTINATION include/${PROJECT_NAME})

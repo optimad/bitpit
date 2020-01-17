@@ -47,7 +47,7 @@ if (NOT "${RBF_SOURCES}" STREQUAL "")
     set_lto_property(${RBF_TARGET_OBJECT})
 endif ()
 
-install(FILES ${RBF_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+install(FILES ${RBF_HEADERS} DESTINATION include/${PROJECT_NAME})
 
 # Definitions
 set(RBF_DEFINITIONS_DESCRIPTION "Pre-processor definitions needed by RBF Library")
