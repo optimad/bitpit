@@ -47,7 +47,7 @@ if (NOT "${IO_SOURCES}" STREQUAL "")
     set_lto_property(${IO_TARGET_OBJECT})
 endif ()
 
-install(FILES ${IO_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+install(FILES ${IO_HEADERS} DESTINATION include/${PROJECT_NAME})
 
 # Definitions
 set(IO_DEFINITIONS_DESCRIPTION "Pre-processor definitions needed by IO Library")

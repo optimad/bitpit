@@ -260,11 +260,11 @@ function (libfind_process PREFIX)
 
   # Fatal error out if REQUIRED
   if (required)
-    set(msg "REQUIRED PACKAGE NOT FOUND\n${msg} This package is REQUIRED and you need to install it or adjust CMake configuration in order to continue building ${CMAKE_PROJECT_NAME}.")
+    set(msg "REQUIRED PACKAGE NOT FOUND\n${msg} This package is REQUIRED and you need to install it or adjust CMake configuration in order to continue building ${PROJECT_NAME}.")
     message(FATAL_ERROR "${msg}\n${vars}")
   endif()
   # Otherwise just print a nasty warning
   if (NOT quiet)
-    message(WARNING "WARNING: MISSING PACKAGE\n${msg} This package is NOT REQUIRED and you may ignore this warning but by doing so you may miss some functionality of ${CMAKE_PROJECT_NAME}. \n${vars}")
+    message(WARNING "WARNING: MISSING PACKAGE\n${msg} This package is NOT REQUIRED and you may ignore this warning but by doing so you may miss some functionality of ${PROJECT_NAME}. \n${vars}")
   endif()
 endfunction()

@@ -46,4 +46,4 @@ if (NOT "${POD_SOURCES}" STREQUAL "")
     set_lto_property(${POD_TARGET_OBJECT})
 endif ()
 
-install(FILES ${POD_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+install(FILES ${POD_HEADERS} DESTINATION include/${PROJECT_NAME})

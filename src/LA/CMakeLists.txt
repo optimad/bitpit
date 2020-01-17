@@ -46,4 +46,4 @@ if (NOT "${LA_SOURCES}" STREQUAL "")
     set_lto_property(${LA_TARGET_OBJECT})
 endif ()
 
-install(FILES ${LA_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+install(FILES ${LA_HEADERS} DESTINATION include/${PROJECT_NAME})

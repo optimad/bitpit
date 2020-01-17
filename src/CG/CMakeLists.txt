@@ -46,4 +46,4 @@ if (NOT "${CG_SOURCES}" STREQUAL "")
     set_lto_property(${CG_TARGET_OBJECT})
 endif ()
 
-install(FILES ${CG_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+install(FILES ${CG_HEADERS} DESTINATION include/${PROJECT_NAME})
