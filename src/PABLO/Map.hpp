@@ -103,7 +103,8 @@ private:
 	// METHODS
 	// =================================================================================== //
 
-	void initialize();
+public:
+        void initialize();
 	void initialize(uint8_t dim);
 
 	darray3 mapCoordinates(u32array3 const & X) const;

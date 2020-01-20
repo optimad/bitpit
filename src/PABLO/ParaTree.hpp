@@ -404,6 +404,7 @@ namespace bitpit {
         std::size_t getNofGhostLayers() const;
         void setNofGhostLayers(std::size_t nofGhostLayers);
         const std::map<int, std::vector<uint32_t>> & getBordersPerProc() const;
+        const Map& getMap() const;
 
         // =================================================================================== //
         // PRIVATE GET/SET METHODS															   //
