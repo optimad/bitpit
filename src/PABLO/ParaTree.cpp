@@ -1297,6 +1297,15 @@ namespace bitpit {
         return m_trans.mapSize(m_octree.m_octants[idx].getSize());
     }
 
+    /*! Get the size of a ghost octant, i.e. the side length.
+     * \param[in] idx Local index of target octant.
+     * \return Size of octant.
+     */
+    double
+      ParaTree::getSizeGhost(uint32_t idx) const {
+      return m_trans.mapSize(m_octree.m_ghosts[idx].getSize());
+    }
+
     /*! Get the area of an octant (for 2D case the same value of getSize).
      * \param[in] idx Local index of target octant.
      * \return Area of octant.
@@ -1335,6 +1344,18 @@ namespace bitpit {
         darray3 center_ = m_octree.m_octants[idx].getCenter();
         m_trans.mapCenter(center_, center);
         return center;
+    }
+
+    /*! PK : Get the coordinates of the center of a ghost octant.
+     * \param[in] idx Local index of target ghost octant.
+     * \return center Coordinates of the center of ghost octant.
+     */
+    darray3
+    ParaTree::getCenterGhost(uint32_t idx) const {
+      darray3 center;
+      darray3 center_ = m_octree.m_ghosts[idx].getCenter();
+      m_trans.mapCenter(center_, center);
+      return center;
     }
 
     /*! Get the coordinates of the center of a face of an octant.

@@ -297,6 +297,15 @@ namespace bitpit {
         return m_L * ParaTree::getSize(idx);
     };
 
+    /*! Get the size of an octant, i.e. the side length.
+     * \param[in] idx Local index of target octant.
+     * \return Size of octant.
+     */
+    double
+      PabloUniform::getSizeGhost(uint32_t idx) const {
+      return m_L * ParaTree::getSizeGhost(idx);
+    };
+    
     /*! Get the area of an octant (for 2D case the same value of getSize).
      * \param[in] idx Local index of target octant.
      * \return Area of octant.

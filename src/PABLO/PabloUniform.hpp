@@ -117,6 +117,7 @@ namespace bitpit {
         double 		getY(uint32_t idx) const;
         double 		getZ(uint32_t idx) const;
         double 		getSize(uint32_t idx) const;
+        double          getSizeGhost(uint32_t idx) const;
         double 		getArea(uint32_t idx) const;
         double 		getVolume(uint32_t idx) const;
         void 		getCenter(uint32_t idx, darray3& center) const;
