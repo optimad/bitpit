@@ -277,6 +277,9 @@ namespace bitpit {
         double 		getX(uint32_t idx) const;
         double 		getY(uint32_t idx) const;
         double 		getZ(uint32_t idx) const;
+        double 	        getXghost(uint32_t idx) const;
+        double 	        getYghost(uint32_t idx) const;
+        double 	        getZghost(uint32_t idx) const;
         double 		getSize(uint32_t idx) const;
         double          getSizeGhost(uint32_t idx) const;
         double 		getArea(uint32_t idx) const;

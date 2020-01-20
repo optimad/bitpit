@@ -1288,6 +1288,33 @@ namespace bitpit {
         return m_trans.mapZ(m_octree.m_octants[idx].getZ());
     }
 
+    /*! Get the coordinates of a ghost octant, i.e. the coordinates of its node 0.
+     * \param[in] idx Local index of target octant.
+     * \return Coordinate X of node 0.
+     */
+    double
+      ParaTree::getXghost(uint32_t idx) const {
+      return m_trans.mapX(m_octree.m_ghosts[idx].getX());
+    }
+
+    /*! Get the coordinates of a ghost octant, i.e. the coordinates of its node 0.
+     * \param[in] idx Local index of target octant.
+     * \return Coordinate Y of node 0.
+     */
+    double
+      ParaTree::getYghost(uint32_t idx) const {
+      return m_trans.mapY(m_octree.m_ghosts[idx].getY());
+    }
+
+    /*! Get the coordinates of a ghost octant, i.e. the coordinates of its node 0.
+     * \param[in] idx Local index of target octant.
+     * \return Coordinate Z of node 0.
+     */
+    double
+      ParaTree::getZghost(uint32_t idx) const {
+      return m_trans.mapZ(m_octree.m_ghosts[idx].getZ());
+    }
+    
     /*! Get the size of an octant, i.e. the side length.
      * \param[in] idx Local index of target octant.
      * \return Size of octant.
