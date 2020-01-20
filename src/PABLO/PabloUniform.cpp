@@ -781,14 +781,6 @@ namespace bitpit {
         return nodes;
     }
 
-    /** Get the logical coordinates of the nodes
-     * \return Constant reference to the nodes matrix [nnodes*3] with the coordinates of the nodes.
-     */
-    const u32arr3vector &
-    PabloUniform::getNodes() const {
-        return this->getNodes();
-    }
-
 
     /*! Get the normal of an intersection.
      * \param[in] inter Pointer to target intersection.

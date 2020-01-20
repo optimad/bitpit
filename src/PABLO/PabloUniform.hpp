@@ -128,7 +128,9 @@ namespace bitpit {
         void 		getNode(uint32_t idx, uint8_t inode, darray3& node) const;
         void 		getNodes(uint32_t idx, darr3vector & nodes) const;
         darr3vector getNodes(uint32_t idx) const;
-        const u32arr3vector & getNodes() const;
+
+      using ParaTree::getNodes;
+
 
         void 		getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const;
         darray3 	getNormal(uint32_t idx, uint8_t iface) const;
