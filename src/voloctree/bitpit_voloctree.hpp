@@ -28,5 +28,6 @@
 #include "bitpit_version.hpp"
 
 #include "voloctree.hpp"
+#include "voloctree_mapper.hpp"
 
 #endif
