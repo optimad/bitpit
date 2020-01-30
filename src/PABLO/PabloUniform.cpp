@@ -1067,9 +1067,7 @@ namespace bitpit {
             {
             const std::array<double,3> & nodeCoordinates = getNodeCoordinates(i);
             for(int j = 0; j < 3; ++j){
-                if (j==0) out << std::setprecision(6) << m_origin[0] + m_L*nodeCoordinates[j] << " ";
-                if (j==1) out << std::setprecision(6) << m_origin[1] + m_L*nodeCoordinates[j] << " ";
-                if (j==2) out << std::setprecision(6) << m_origin[2] + m_L*nodeCoordinates[j] << " ";
+                out << std::setprecision(6) << nodeCoordinates[j] << " ";
             }
                 if((i+1)%4==0 && i!=nofNodes-1)
                     out << endl << "          ";
