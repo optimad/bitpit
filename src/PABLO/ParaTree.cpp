@@ -1926,6 +1926,15 @@ namespace bitpit {
         return oct->computeMorton();
     };
 
+    /*!Get the morton index of the last possible descendant with maximum refinement level of a target octant.
+     * \param[in] oct Pointer to the target octant
+     * \return Morton index of the last finest descendant of the target octant.
+     */
+    uint64_t
+    ParaTree::getLastDescMorton(const Octant* oct) const {
+        return oct->buildLastDesc().computeMorton();
+    };
+
     /** Compute the Morton index of the specified node of an octant (without
      * level).
      * \param[in] oct Pointer to the target octant
