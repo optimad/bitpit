@@ -944,7 +944,6 @@ void POD::leave1out()
     //dump error
     if (m_writeMode != WriteMode::NONE){    
         std::string ename = m_name + ".error";
-        std::cout<< ename << std::endl;
         dumpField(ename, m_errorMap);
     }
     m_nSnapshots=h_nSnapshots;
