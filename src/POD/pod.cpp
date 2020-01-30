@@ -957,7 +957,7 @@ void POD::leave1out()
 void POD::evalMeanMesh()
 {
     if (m_database.empty())
-        throw std::runtime_error ("PODVolOctree database empty");
+        throw std::runtime_error ("POD database empty");
 
     // If the mesh is static do nothing on mesh and compute mean fields directly
     _evalMeanMesh();
