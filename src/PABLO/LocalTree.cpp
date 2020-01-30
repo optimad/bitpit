@@ -885,7 +885,7 @@ namespace bitpit {
         uint64_t  Morton, Mortontry;
         uint32_t  noctants = getNumOctants();
         uint32_t idxtry;
-        uint32_t size = oct->getSize();
+        uint32_t size = oct->getLogicalSize();
 
         bool amIghost = oct->getIsGhost();
 
@@ -981,17 +981,17 @@ namespace bitpit {
             uint64_t Mortonlast = last_desc.computeMorton();
             int32_t Dx[3] = {0,0,0};
             int32_t Dxstar[3] = {0,0,0};
-            u32array3 coord = oct->getCoord();
-            u32array3 coordtry = m_octants[idxtry].getCoord();
+            u32array3 coord = oct->getLogicalCoord();
+            u32array3 coordtry = m_octants[idxtry].getLogicalCoord();
             u32array3 coord1 = { {1,1,1} };
             u32array3 coordtry1 = { {1,1,1} };
             uint8_t level = oct->m_level;
             while(Mortontry <= Mortonlast && idxtry < noctants){
                 for (int idim=0; idim<m_dim; idim++){
                     Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-                    Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+                    Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                     coord1[idim] 	= coord[idim] + size;
-                    coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
+                    coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getLogicalSize();
                 }
 
                 uint8_t leveltry = m_octants[idxtry].getLevel();
@@ -1016,7 +1016,7 @@ namespace bitpit {
                     break;
                 }
                 Mortontry = m_octants[idxtry].computeMorton();
-                coordtry = m_octants[idxtry].getCoord();
+                coordtry = m_octants[idxtry].getLogicalCoord();
             }
 
             // If the internal neighbours already cover the whole face,
@@ -1024,10 +1024,10 @@ namespace bitpit {
             uint64_t neighArea  = 0;
             std::size_t nNeighs = neighbours.size();
             for (std::size_t i = 0; i < nNeighs; ++i) {
-                neighArea += m_octants[neighbours[i]].getArea();
+                neighArea += m_octants[neighbours[i]].getLogicalArea();
             }
 
-            if (neighArea == oct->getArea()){
+            if (neighArea == oct->getLogicalArea()){
                 return;
             }
         }
@@ -1109,17 +1109,17 @@ namespace bitpit {
                     uint64_t Mortonlast = last_desc.computeMorton();
                     int32_t Dx[3] = {0,0,0};
                     int32_t Dxstar[3] = {0,0,0};
-                    u32array3 coord = oct->getCoord();
-                    u32array3 coordtry = m_ghosts[idxtry].getCoord();
+                    u32array3 coord = oct->getLogicalCoord();
+                    u32array3 coordtry = m_ghosts[idxtry].getLogicalCoord();
                     u32array3 coord1 = { {1,1,1} };
                     u32array3 coordtry1 = { {1,1,1} };
                     uint8_t level = oct->m_level;
                     while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
                         for (int idim=0; idim<m_dim; idim++){
                             Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-                            Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+                            Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                             coord1[idim] 	= coord[idim] + size;
-                            coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getSize();
+                            coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getLogicalSize();
                         }
 
                         uint8_t leveltry = m_ghosts[idxtry].getLevel();
@@ -1144,7 +1144,7 @@ namespace bitpit {
                             break;
                         }
                         Mortontry = m_ghosts[idxtry].computeMorton();
-                        coordtry = m_ghosts[idxtry].getCoord();
+                        coordtry = m_ghosts[idxtry].getLogicalCoord();
                     }
                 }
             }
@@ -1169,7 +1169,7 @@ namespace bitpit {
         uint64_t  		Morton, Mortontry;
         uint32_t  		noctants = getNumOctants();
         uint32_t 		idxtry;
-        uint32_t 		size = oct->getSize();
+        uint32_t 		size = oct->getLogicalSize();
         uint8_t 		iface1, iface2;
         int32_t 		Dx, Dy, Dz;
         int32_t 		Dxstar,Dystar,Dzstar;
@@ -1258,9 +1258,9 @@ namespace bitpit {
                             Dx = int32_t(abs(cx))*(-int32_t(oct->m_x) + int32_t(m_ghosts[idxtry].m_x));
                             Dy = int32_t(abs(cy))*(-int32_t(oct->m_y) + int32_t(m_ghosts[idxtry].m_y));
                             Dz = int32_t(abs(cz))*(-int32_t(oct->m_z) + int32_t(m_ghosts[idxtry].m_z));
-                            Dxstar = int32_t((cx-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-                            Dystar = int32_t((cy-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-                            Dzstar = int32_t((cz-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+                            Dxstar = int32_t((cx-1)/2)*(m_ghosts[idxtry].getLogicalSize()) + int32_t((cx+1)/2)*size;
+                            Dystar = int32_t((cy-1)/2)*(m_ghosts[idxtry].getLogicalSize()) + int32_t((cy+1)/2)*size;
+                            Dzstar = int32_t((cz-1)/2)*(m_ghosts[idxtry].getLogicalSize()) + int32_t((cz+1)/2)*size;
 
                             uint32_t x0 = oct->m_x;
                             uint32_t x1 = x0 + size;
@@ -1269,11 +1269,11 @@ namespace bitpit {
                             uint32_t z0 = oct->m_z;
                             uint32_t z1 = z0 + size;
                             uint32_t x0try = m_ghosts[idxtry].m_x;
-                            uint32_t x1try = x0try + m_ghosts[idxtry].getSize();
+                            uint32_t x1try = x0try + m_ghosts[idxtry].getLogicalSize();
                             uint32_t y0try = m_ghosts[idxtry].m_y;
-                            uint32_t y1try = y0try + m_ghosts[idxtry].getSize();
+                            uint32_t y1try = y0try + m_ghosts[idxtry].getLogicalSize();
                             uint32_t z0try = m_ghosts[idxtry].m_z;
-                            uint32_t z1try = z0try + m_ghosts[idxtry].getSize();
+                            uint32_t z1try = z0try + m_ghosts[idxtry].getLogicalSize();
                             uint8_t level = oct->m_level;
                             uint8_t leveltry = m_ghosts[idxtry].getLevel();
 
@@ -1368,9 +1368,9 @@ namespace bitpit {
                         Dx = int32_t(abs(cx))*(-int32_t(oct->m_x) + int32_t(m_octants[idxtry].m_x));
                         Dy = int32_t(abs(cy))*(-int32_t(oct->m_y) + int32_t(m_octants[idxtry].m_y));
                         Dz = int32_t(abs(cz))*(-int32_t(oct->m_z) + int32_t(m_octants[idxtry].m_z));
-                        Dxstar = int32_t((cx-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-                        Dystar = int32_t((cy-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-                        Dzstar = int32_t((cz-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+                        Dxstar = int32_t((cx-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cx+1)/2)*size;
+                        Dystar = int32_t((cy-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cy+1)/2)*size;
+                        Dzstar = int32_t((cz-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cz+1)/2)*size;
 
                         uint32_t x0 = oct->m_x;
                         uint32_t x1 = x0 + size;
@@ -1379,11 +1379,11 @@ namespace bitpit {
                         uint32_t z0 = oct->m_z;
                         uint32_t z1 = z0 + size;
                         uint32_t x0try = m_octants[idxtry].m_x;
-                        uint32_t x1try = x0try + m_octants[idxtry].getSize();
+                        uint32_t x1try = x0try + m_octants[idxtry].getLogicalSize();
                         uint32_t y0try = m_octants[idxtry].m_y;
-                        uint32_t y1try = y0try + m_octants[idxtry].getSize();
+                        uint32_t y1try = y0try + m_octants[idxtry].getLogicalSize();
                         uint32_t z0try = m_octants[idxtry].m_z;
-                        uint32_t z1try = z0try + m_octants[idxtry].getSize();
+                        uint32_t z1try = z0try + m_octants[idxtry].getLogicalSize();
                         uint8_t level = oct->m_level;
                         uint8_t leveltry = m_octants[idxtry].getLevel();
 
@@ -1437,7 +1437,7 @@ namespace bitpit {
         uint64_t  	Morton, Mortontry;
         uint32_t  	noctants = getNumOctants();
         uint32_t 	idxtry;
-        uint32_t 	size = oct->getSize();
+        uint32_t 	size = oct->getLogicalSize();
         uint8_t 	iface1, iface2, iface3;
 
         bool amIghost = oct->getIsGhost();
@@ -1526,16 +1526,16 @@ namespace bitpit {
                         Mortontry = m_ghosts[idxtry].computeMorton();
                         int32_t Dx[3] = {0,0,0};
                         int32_t Dxstar[3] = {0,0,0};
-                        u32array3 coord = oct->getCoord();
-                        u32array3 coordtry = m_ghosts[idxtry].getCoord();
+                        u32array3 coord = oct->getLogicalCoord();
+                        u32array3 coordtry = m_ghosts[idxtry].getLogicalCoord();
                         u32array3 coord1 = { {1,1,1} };
                         u32array3 coordtry1 = { {1,1,1} };
                         while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
                             for (int idim=0; idim<m_dim; idim++){
                                 Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
-                                Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+                                Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                                 coord1[idim] 	= coord[idim] + size;
-                                coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getSize();
+                                coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getLogicalSize();
                             }
                             if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[m_dim-1] == Dxstar[m_dim-1]){
                                 neighbours.push_back(idxtry);
@@ -1547,7 +1547,7 @@ namespace bitpit {
                                 break;
                             }
                             Mortontry = m_ghosts[idxtry].computeMorton();
-                            coordtry = m_ghosts[idxtry].getCoord();
+                            coordtry = m_ghosts[idxtry].getLogicalCoord();
                         }
                     }
                 }
@@ -1617,16 +1617,16 @@ namespace bitpit {
                     Mortontry = m_octants[idxtry].computeMorton();
                     int32_t Dx[3] = {0,0,0};
                     int32_t Dxstar[3] = {0,0,0};
-                    u32array3 coord = oct->getCoord();
-                    u32array3 coordtry = m_octants[idxtry].getCoord();
+                    u32array3 coord = oct->getLogicalCoord();
+                    u32array3 coordtry = m_octants[idxtry].getLogicalCoord();
                     u32array3 coord1 = { {1,1,1} };
                     u32array3 coordtry1 = { {1,1,1} };
                     while(Mortontry <= Mortonlast && idxtry <= noctants-1){
                         for (int idim=0; idim<m_dim; idim++){
                             Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
-                            Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+                            Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                             coord1[idim] 	= coord[idim] + size;
-                            coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
+                            coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getLogicalSize();
                         }
                         if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[m_dim-1] == Dxstar[m_dim-1]){
                             neighbours.push_back(idxtry);
@@ -1638,7 +1638,7 @@ namespace bitpit {
                             break;
                         }
                         Mortontry = m_octants[idxtry].computeMorton();
-                        coordtry = m_octants[idxtry].getCoord();
+                        coordtry = m_octants[idxtry].getLogicalCoord();
                     }
                 }
             }
@@ -1936,7 +1936,7 @@ namespace bitpit {
         uint64_t  Morton, Mortontry;
         uint32_t  noctants = getNumOctants();
         uint32_t idxtry;
-        uint32_t size = oct->getSize();
+        uint32_t size = oct->getLogicalSize();
 
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
@@ -2011,7 +2011,7 @@ namespace bitpit {
                 int64_t Dx[3] = {0,0,0};
                 int64_t Dxstar[3] = {0,0,0};
                 array<int64_t,3> coord = oct->getPeriodicCoord(iface);
-                u32array3 coordtry = m_octants[idxtry].getCoord();
+                u32array3 coordtry = m_octants[idxtry].getLogicalCoord();
                 array<int64_t,3> coord1 = { {1,1,1} };
                 u32array3 coordtry1 = { {1,1,1} };
                 uint8_t level = oct->m_level;
@@ -2019,9 +2019,9 @@ namespace bitpit {
                 while(Mortontry <= Mortonlast && idxtry < noctants){
                     for (int idim=0; idim<m_dim; idim++){
                         Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-                        Dxstar[idim]	= int32_t(int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size);
+                        Dxstar[idim]	= int32_t(int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size);
                         coord1[idim] 	= coord[idim] + size;
-                        coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
+                        coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getLogicalSize();
                     }
 
                     leveltry = m_octants[idxtry].getLevel();
@@ -2046,7 +2046,7 @@ namespace bitpit {
                         break;
                     }
                     Mortontry = m_octants[idxtry].computeMorton();
-                    coordtry = m_octants[idxtry].getCoord();
+                    coordtry = m_octants[idxtry].getLogicalCoord();
                 }
                 return;
             }
@@ -2118,7 +2118,7 @@ namespace bitpit {
 						int32_t Dx[3] = {0,0,0};
 						int32_t Dxstar[3] = {0,0,0};
 						array<int64_t,3> coord = oct->getPeriodicCoord(iface);
-						u32array3 coordtry = m_ghosts[idxtry].getCoord();
+						u32array3 coordtry = m_ghosts[idxtry].getLogicalCoord();
 						array<int64_t,3> coord1 = { {1,1,1} };
 						u32array3 coordtry1 = { {1,1,1} };
 						uint8_t level = oct->m_level;
@@ -2126,9 +2126,9 @@ namespace bitpit {
 						while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
 							for (int idim=0; idim<m_dim; idim++){
 								Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 								coord1[idim] 	= coord[idim] + size;
-								coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getSize();
+								coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getLogicalSize();
 							}
 							leveltry = m_ghosts[idxtry].getLevel();
 
@@ -2152,7 +2152,7 @@ namespace bitpit {
 								break;
 							}
 							Mortontry = m_ghosts[idxtry].computeMorton();
-							coordtry = m_ghosts[idxtry].getCoord();
+							coordtry = m_ghosts[idxtry].getLogicalCoord();
 						}
 					}
 				}
@@ -2160,9 +2160,9 @@ namespace bitpit {
 				uint32_t lengthneigh = 0;
 				uint32_t sizeneigh = neighbours.size();
 				for (idxtry=0; idxtry<sizeneigh; idxtry++){
-					lengthneigh += m_ghosts[neighbours[idxtry]].getArea();
+					lengthneigh += m_ghosts[neighbours[idxtry]].getLogicalArea();
 				}
-				if (lengthneigh < oct->getArea()){
+				if (lengthneigh < oct->getLogicalArea()){
 					// Search in octants
 
                     //Build Morton number of virtual neigh of same size
@@ -2220,7 +2220,7 @@ namespace bitpit {
                         int32_t Dx[3] = {0,0,0};
                         int32_t Dxstar[3] = {0,0,0};
                         array<int64_t,3> coord = oct->getPeriodicCoord(iface);
-                        u32array3 coordtry = m_octants[idxtry].getCoord();
+                        u32array3 coordtry = m_octants[idxtry].getLogicalCoord();
                         array<int64_t,3> coord1 = { {1,1,1} };
                         u32array3 coordtry1 = { {1,1,1} };
                         uint8_t level = oct->m_level;
@@ -2228,9 +2228,9 @@ namespace bitpit {
                         while(Mortontry <= Mortonlast && idxtry < noctants){
                             for (int idim=0; idim<m_dim; idim++){
                                 Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-                                Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+                                Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                                 coord1[idim] 	= coord[idim] + size;
-                                coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
+                                coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getLogicalSize();
                             }
                             leveltry = m_octants[idxtry].getLevel();
 
@@ -2254,7 +2254,7 @@ namespace bitpit {
                                 break;
                             }
                             Mortontry = m_octants[idxtry].computeMorton();
-                            coordtry = m_octants[idxtry].getCoord();
+                            coordtry = m_octants[idxtry].getLogicalCoord();
                         }
                         return;
                     }
@@ -2278,7 +2278,7 @@ namespace bitpit {
         uint64_t  Morton, Mortontry;
         uint32_t  noctants = getNumOctants();
         uint32_t idxtry;
-        uint32_t size = oct->getSize();
+        uint32_t size = oct->getLogicalSize();
 
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
@@ -2351,16 +2351,16 @@ namespace bitpit {
                 int32_t Dxstar[3] = {0,0,0};
                 array<int64_t,3> coord = oct->getPeriodicCoord(iface);
 
-                u32array3 coordtry = m_octants[idxtry].getCoord();
+                u32array3 coordtry = m_octants[idxtry].getLogicalCoord();
                 array<int64_t,3> coord1 = { {1,1,1} };
                 u32array3 coordtry1 = { {1,1,1} };
                 uint8_t level = oct->m_level;
                 while(Mortontry <= Mortonlast && idxtry < noctants){
                     for (int idim=0; idim<m_dim; idim++){
                         Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-                        Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+                        Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                         coord1[idim] 	= coord[idim] + size;
-                        coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
+                        coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getLogicalSize();
                     }
                     uint8_t leveltry = m_octants[idxtry].getLevel();
 
@@ -2382,7 +2382,7 @@ namespace bitpit {
                         break;
                     }
                     Mortontry = m_octants[idxtry].computeMorton();
-                    coordtry = m_octants[idxtry].getCoord();
+                    coordtry = m_octants[idxtry].getLogicalCoord();
                 }
                 return;
             }
@@ -3577,7 +3577,7 @@ namespace bitpit {
 
             for (uint8_t i = 0; i < m_treeConstants->nNodes; ++i){
                 u32array3 node;
-                octant->getNode(node, i);
+                octant->getLogicalNode(node, i);
 
                 uint64_t morton = octant->computeNodeMorton(node);
                 if (nodeCoords.count(morton) == 0) {

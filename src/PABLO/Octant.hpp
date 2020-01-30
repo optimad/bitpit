@@ -187,11 +187,11 @@ private:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 	uint32_t	getDim() const;
-	u32array3	getCoordinates() const;
-	uint32_t	getX() const;
-	uint32_t	getY() const;
-	uint32_t	getZ() const;
-	u32array3	getCoord() const;
+	u32array3	getLogicalCoordinates() const;
+	uint32_t	getLogicalX() const;
+	uint32_t	getLogicalY() const;
+	uint32_t	getLogicalZ() const;
+	u32array3	getLogicalCoord() const;
 	uint8_t		getLevel() const;
 	int8_t		getMarker() const;
 	bool		getBound(uint8_t face) const;
@@ -213,16 +213,16 @@ private:
 	// =================================================================================== //
 	// OTHER GET/SET METHODS
 	// =================================================================================== //
-	uint32_t		getSize() const;
-	uint64_t		getArea() const;
-	uint64_t		getVolume() const;
-	darray3			getCenter() const;
-	darray3			getFaceCenter(uint8_t iface) const;
-	darray3			getEdgeCenter(uint8_t iedge) const;
-	void			getNodes(u32arr3vector & nodes) const;
-	u32arr3vector	getNodes() const;
-	void			getNode(u32array3 & node, uint8_t inode) const;
-	u32array3		getNode(uint8_t inode) const;
+	uint32_t		getLogicalSize() const;
+	uint64_t		getLogicalArea() const;
+	uint64_t		getLogicalVolume() const;
+	darray3			getLogicalCenter() const;
+	darray3			getLogicalFaceCenter(uint8_t iface) const;
+	darray3			getLogicalEdgeCenter(uint8_t iedge) const;
+	void			getLogicalNodes(u32arr3vector & nodes) const;
+	u32arr3vector	getLogicalNodes() const;
+	void			getLogicalNode(u32array3 & node, uint8_t inode) const;
+	u32array3		getLogicalNode(uint8_t inode) const;
 	void			getNormal(uint8_t iface, i8array3 & normal, const int8_t (&normals)[6][3]) const;
 	uint64_t		computeMorton() const;
 	uint64_t		computeNodeMorton(uint8_t inode) const;
