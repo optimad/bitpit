@@ -101,7 +101,7 @@ void MeshMapper::clearInverseMapping()
 /**
  * Get direct mapping
  */
-const bitpit::PiercedStorage<mapping::Info> & MeshMapper::getMapping()
+const bitpit::PiercedStorage<mapper::Info> & MeshMapper::getMapping()
 {
     return m_mapper;
 }
@@ -109,7 +109,7 @@ const bitpit::PiercedStorage<mapping::Info> & MeshMapper::getMapping()
 /**
  * Get inverse mapping
  */
-const bitpit::PiercedStorage<mapping::Info> & MeshMapper::getInverseMapping()
+const bitpit::PiercedStorage<mapper::Info> & MeshMapper::getInverseMapping()
 {
     return m_invmapper;
 }

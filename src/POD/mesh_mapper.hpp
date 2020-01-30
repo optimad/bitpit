@@ -36,7 +36,7 @@
 
 namespace bitpit {
 
-namespace mapping{
+namespace mapper{
 
 typedef adaption::Info Info;
 
@@ -58,8 +58,8 @@ public:
     void clearMapping();
     void clearInverseMapping();
 
-    const bitpit::PiercedStorage<mapping::Info> & getMapping();
-    const bitpit::PiercedStorage<mapping::Info> & getInverseMapping();
+    const bitpit::PiercedStorage<mapper::Info> & getMapping();
+    const bitpit::PiercedStorage<mapper::Info> & getInverseMapping();
 
     void mapMeshes(bitpit::VolumeKernel * meshReference, bitpit::VolumeKernel * meshMapped, bool fillInv = false);
 
@@ -83,7 +83,7 @@ protected:
     PiercedStorage<adaption::Info> m_invmapper;  /**< Inverse mapping info for each cell of mapped mesh. */
 
 
-    std::unordered_map<long, mapping::Info> m_previousmapper;
+    std::unordered_map<long, mapper::Info> m_previousmapper;
 
 
     void _mapMeshes(bitpit::VolOctree * meshReference, bitpit::VolOctree * meshMapped, bool fillInv);
