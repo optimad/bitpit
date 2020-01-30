@@ -695,7 +695,6 @@ void POD::setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh)
                 trueCells.insert(id);
         }
 
-
         //Map true cells
         std::unordered_set<long> mappedCells = m_podkernel->mapCellsToPOD(&trueCells);
 
