@@ -32,9 +32,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "mesh_mapper.hpp"
 #include "pod_kernel.hpp"
-#include "pod_voloctree.hpp"
 
 namespace bitpit {
 
@@ -185,8 +183,9 @@ public:
     void evalReconstruction();
     void evalErrorBoundingBox();
     void computeMapper(VolumeKernel * mesh);
-    void prepareMapper(const std::vector<adaption::Info> & info);
-    void updateMapper(const std::vector<adaption::Info> & info);
+    void adaptionPrepare(const std::vector<adaption::Info> & info);
+    void adaptionAlter(const std::vector<adaption::Info> & info);
+    void adaptionCleanUp(const std::vector<adaption::Info> & info);
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
     void dumpField(const std::string &name, const pod::PODField &field) const;
@@ -305,7 +304,7 @@ private:
             const std::unordered_set<long> *targetCells = nullptr);
 
     void _computeMapper(VolumeKernel * mesh);
-    void _updateMapper(const std::vector<adaption::Info> & info);
+    void _adaptionAlter(const std::vector<adaption::Info> & info);
 
     void diff(PiercedStorage<double> &fields, const pod::PODMode &mode,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,

@@ -33,5 +33,6 @@
 #include "bitpit_version.hpp"
 
 #include "pod.hpp"
+#include "pod_voloctree.hpp"
 
 #endif

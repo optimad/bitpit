@@ -38,7 +38,7 @@
 #include "bitpit_voloctree.hpp"
 
 #include "pod.hpp"
-#include "pod_kernel.hpp"
+#include "pod_voloctree.hpp"
 
 namespace bitpit {
 
@@ -419,8 +419,8 @@ void POD::setMesh(VolumeKernel* mesh)
     if (m_meshType == MeshType::UNDEFINED)
         throw std::runtime_error ("POD mesh type not set.");
 
-    const VolOctree* _mesh = dynamic_cast<const VolOctree*>(mesh);
-    if (_mesh){
+    const VolOctree* _octreecast_mesh = dynamic_cast<const VolOctree*>(mesh);
+    if (_octreecast_mesh){
         if (m_meshType != MeshType::VOLOCTREE)
             throw std::runtime_error ("POD mesh type not set to VolOctree.");
         m_podkernel->setMesh(mesh);
@@ -1021,8 +1021,7 @@ void POD::_evalMeanMesh()
                 //Compute mapping of read mesh on pod mesh
                 _computeMapper(readf.mesh);
                 readf = pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
-                m_podkernel->getMeshMapper().clear();
-                m_podkernel->setMapperDirty(true);
+                m_podkernel->clearMapper();
             }
 
             for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
@@ -1051,8 +1050,7 @@ void POD::_evalMeanMesh()
             {
                 _computeMapper(readf.mesh);
                 readf = pod::PODField(m_podkernel->mapPODFieldToPOD(readf, nullptr));
-                m_podkernel->getMeshMapper().clear();
-                m_podkernel->setMapperDirty(true);
+                m_podkernel->clearMapper();
             }
 
             for (const Cell &cell : m_podkernel->getMesh()->getCells())
@@ -1108,7 +1106,7 @@ void POD::evalCorrelation()
         if (!m_staticMesh){
             _computeMapper(snapi.mesh);
             snapi = pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
-            m_podkernel->getMeshMapper().clear();
+            m_podkernel->clearMapper();
         }
 
         if (m_useMean)
@@ -1121,7 +1119,7 @@ void POD::evalCorrelation()
             if (!m_staticMesh){
                 _computeMapper(snapj.mesh);
                 snapj = pod::PODField(m_podkernel->mapPODFieldToPOD(snapj, nullptr));
-                m_podkernel->getMeshMapper().clear();
+                m_podkernel->clearMapper();
             }
 
             if (m_useMean)
@@ -1219,7 +1217,7 @@ void POD::evalReconstruction()
 
             // Map snapshot on pod mesh
             snapi = pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
-            m_podkernel->getMeshMapper().clear();
+            m_podkernel->clearMapper();
 
         }
 
@@ -1817,7 +1815,7 @@ void POD::_evalModes()
         if (!m_staticMesh){
             _computeMapper(snapi.mesh);
             snapi = pod::PODField(m_podkernel->mapPODFieldToPOD(snapi, nullptr));
-            m_podkernel->getMeshMapper().clear();
+            m_podkernel->clearMapper();
         }
 
         if (m_useMean)    
@@ -2988,11 +2986,11 @@ void POD::computeMapper(VolumeKernel * mesh)
  * Can be called only if expert mode is active.
  * \param[in] info Info vector result of adaptation of the input mesh
  */
-void POD::updateMapper(const std::vector<adaption::Info> & info)
+void POD::adaptionAlter(const std::vector<adaption::Info> & info)
 {
     if (!m_expert)
         throw std::runtime_error("POD: update mapper can be called only in expert mode");
-    _updateMapper(info);
+    _adaptionAlter(info);
 }
 
 /**
@@ -3010,9 +3008,9 @@ void POD::_computeMapper(VolumeKernel * mesh)
  * the info given before an adaptation of the input mesh (internal method).
  * \param[in] info Info vector result of adaptation prepare of the input mesh
  */
-void POD::prepareMapper(const std::vector<adaption::Info> & info)
+void POD::adaptionPrepare(const std::vector<adaption::Info> & info)
 {
-    m_podkernel->prepareMapper(info);
+    m_podkernel->adaptionPrepare(info);
 }
 
 /**
@@ -3020,9 +3018,18 @@ void POD::prepareMapper(const std::vector<adaption::Info> & info)
  * the info given after an adaptation of the input mesh (internal method).
  * \param[in] info Info vector result of adaptation of the input mesh
  */
-void POD::_updateMapper(const std::vector<adaption::Info> & info)
+void POD::_adaptionAlter(const std::vector<adaption::Info> & info)
 {
-    m_podkernel->updateMapper(info);
+    m_podkernel->adaptionAlter(info);
+}
+
+/**
+ * Clean up the pre-computed internal structures of mapping.
+ * \param[in] info Info vector result of adaptation prepare of the input mesh
+ */
+void POD::adaptionCleanUp(const std::vector<adaption::Info> & info)
+{
+    m_podkernel->adaptionCleanUp(info);
 }
 
 /**

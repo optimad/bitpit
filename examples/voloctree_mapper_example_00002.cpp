@@ -23,27 +23,27 @@
 \*---------------------------------------------------------------------------*/
 
 /**
- * \example meshmapper_example_00001.cpp
- * 
- * \brief Mesh mapping computing between voloctree meshes.
- * <b>To run</b>: ./meshmapper_example_00001 \n
- */ 
+ * \example mapper_voloctree_example_00002.cpp
+ *
+ * \brief Mesh mapping computing between adapted voloctree meshes.
+ * <b>To run</b>: ./mapper_voloctree_example_00002 \n
+ */
 
 #include <array>
 #if BITPIT_ENABLE_MPI
 #include <mpi.h>
 #endif
 
-#include "pod.hpp"
-#include "mesh_mapper.hpp"
+#include "bitpit_POD.hpp"
 #include "bitpit_patchkernel.hpp"
 #include "bitpit_voloctree.hpp"
 
 using namespace bitpit;
+using namespace pod;
 
 /**
  * Run the example.
- */ 
+ */
 void run()
 {
 
@@ -75,11 +75,15 @@ void run()
     /** Create the original patch */
     VolOctree *patch_2D_original = new VolOctree(std::move(treePointer), &treePointer);
 
+    patch_2D_original->buildAdjacencies();
+    patch_2D_original->buildInterfaces();
+
     patch_2D_original->update();
 
-//    /** Partition the patch */
-//    patch_2D_original->partition(true);
-
+#if BITPIT_ENABLE_MPI==1
+    /** Partition the patch */
+    patch_2D_original->partition(true);
+#endif
 
     /**
      * Create the new tree
@@ -95,12 +99,20 @@ void run()
 
     /** Create a new patch */
     VolOctree *patch_2D = new VolOctree(std::move(treePointer2), &treePointer2);
-#if BITPIT_ENABLE_MPI
+
+    patch_2D->buildAdjacencies();
+    patch_2D->buildInterfaces();
+
+    patch_2D->update();
+
+#if BITPIT_ENABLE_MPI==1
     patch_2D->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
+
+    /** Partition the patch */
+    patch_2D->partition(true);
 #endif
 
-//    /** Partition the patch */
-//    patch_2D->partition(true);
+    srand(1);
 
     /** Refine the patch */
     for (int k = 0; k < 4; ++k) {
@@ -145,19 +157,23 @@ void run()
     log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
     log::cout() << "Vertex count: " << patch_2D->getVertexCount() << std::endl;
 
+    patch_2D->getVTK().setName("mesh_random.0");
+#if BITPIT_ENABLE_MPI==1
+    patch_2D->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
+#endif
+    patch_2D->write();
+
     /** Create mapper object */
-    MeshMapper mapobject;
+    VolOctreeMapper mapobject(patch_2D_original, patch_2D);
 
     /** Map the two meshes */
-    mapobject.mapMeshes(patch_2D_original, patch_2D, true);
+    mapobject.initialize(true);
 
-
-
-
-
-
-
-
+    patch_2D_original->getVTK().setName("mesh_original.0");
+#if BITPIT_ENABLE_MPI==1
+    patch_2D_original->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
+#endif
+    patch_2D_original->write();
 
     std::vector<uint64_t> refineList;
     refineList.push_back(  7);
@@ -203,42 +219,33 @@ void run()
     refineList.push_back(229);
     refineList.push_back(230);
 
-    int rank;
-#if BITPIT_ENABLE_MPI
-    rank = patch_2D_original->getRank();
-#else
-    rank = 0;
-#endif
-
     for (uint64_t ind : refineList) {
+#if BITPIT_ENABLE_MPI==1
         int owner = patch_2D_original->getTree().getOwnerRank(ind);
-        if (rank == owner){
+        if (patch_2D_original->getRank() == owner){
             uint32_t lind = patch_2D_original->getTree().getLocalIdx(ind, owner);
+#else
+            uint32_t lind = patch_2D_original->getTree().getLocalIdx(ind);
+#endif
             VolOctree::OctantInfo octinfo(lind, true);
             long id = patch_2D_original->getOctantId(octinfo);
             patch_2D_original->markCellForRefinement(id);
+#if BITPIT_ENABLE_MPI==1
         }
+#endif
     }
-
 
     std::vector<adaption::Info> infoAdapt = patch_2D_original->adaptionPrepare(true);
 
-    mapobject.mappingAdaptionPreparare(infoAdapt, true);
+    mapobject.adaptionPrepare(infoAdapt, true);
 
     infoAdapt = patch_2D_original->adaptionAlter(true);
-//
-//    std::cout << "  " << std::endl;
-//    std::cout << " info 7 previous : " << infoAdapt[7].previous << std::endl;
-//    std::cout << " info 7 current : " << infoAdapt[7].current << std::endl;
-//    std::cout << "  " << std::endl;
-//    std::cout << " info 8 previous : " << infoAdapt[8].previous << std::endl;
-//    std::cout << " info 8 current : " << infoAdapt[8].current << std::endl;
-//    std::cout << "  " << std::endl;
 
-    mapobject.mappingAdaptionUpdate(infoAdapt, true, true);
+    mapobject.adaptionAlter(infoAdapt, true, true);
 
     patch_2D_original->adaptionCleanup();
 
+    mapobject.adaptionCleanup();
 
     /** Show patch info */
     log::cout() << "Cell count:   " << patch_2D_original->getCellCount() << std::endl;
@@ -259,82 +266,81 @@ void run()
 
     patch_2D_original->getVTK().setName("mesh_original.0");
     patch_2D_original->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata);
-#if BITPIT_ENABLE_MPI
+#if BITPIT_ENABLE_MPI==1
     patch_2D_original->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
 #endif
     patch_2D_original->write();
-
 
     /** Map data on second mesh and write */
     PiercedStorage<double> data2(1, &patch_2D->getCells());
     data2.fill(0.0);
     {
-    const PiercedStorage<mapping::Info> & mapper = mapobject.getInverseMapping();
-    std::vector<double> vdata2(patch_2D->getInternalCount());
-    count = 0;
-    for (Cell & cell : patch_2D->getCells()){
-        if (cell.isInterior()){
-            long id = cell.getId();
-            if (mapper[id].type == adaption::Type::TYPE_RENUMBERING){
-                data2[id] = data[mapper[id].previous[0]];
-                vdata2[count] = data2[id];
-            }
-            else if (mapper[id].type == adaption::Type::TYPE_COARSENING){
-                data2[id] = 0.0;
-                int n = mapper[id].previous.size();
-                for (long idd : mapper[id].previous){
-                    data2[id] += data[idd] / n;
+        const PiercedStorage<mapping::Info> & mapper = mapobject.getInverseMapping();
+        std::vector<double> vdata2(patch_2D->getInternalCount());
+        count = 0;
+        for (Cell & cell : patch_2D->getCells()){
+            if (cell.isInterior()){
+                long id = cell.getId();
+                if (mapper[id].type == mapping::Type::TYPE_RENUMBERING){
+                    data2[id] = data[mapper[id].ids[0]];
+                    vdata2[count] = data2[id];
                 }
-                vdata2[count] = data2[id];
+                else if (mapper[id].type == mapping::Type::TYPE_COARSENING){
+                    data2[id] = 0.0;
+                    int n = mapper[id].ids.size();
+                    for (long idd : mapper[id].ids){
+                        data2[id] += data[idd] / n;
+                    }
+                    vdata2[count] = data2[id];
+                }
+                else if (mapper[id].type == mapping::Type::TYPE_REFINEMENT){
+                    data2[id] = data[mapper[id].ids[0]];
+                    vdata2[count] = data2[id];
+                }
+                count++;
             }
-            else if (mapper[id].type == adaption::Type::TYPE_REFINEMENT){
-                data2[id] = data[mapper[id].previous[0]];
-                vdata2[count] = data2[id];
-            }
-            count++;
         }
-    }
 
-    patch_2D->getVTK().setName("mesh_random.0");
-    patch_2D->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata2);
-    patch_2D->write();
-    patch_2D->getVTK().setName("mesh_random.1");
-    patch_2D->write();
+        patch_2D->getVTK().setName("mesh_random.0");
+        patch_2D->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata2);
+        patch_2D->write();
+        patch_2D->getVTK().setName("mesh_random.1");
+        patch_2D->write();
 
     }
 
     /** Re-Map data on first mesh with inverse mapping and write */
     {
-    const PiercedStorage<mapping::Info> & invmapper = mapobject.getMapping();
-    PiercedStorage<double> data3(1, &patch_2D_original->getCells());
-    std::vector<double> vdata3(patch_2D_original->getInternalCount());
-    count = 0;
-    for (Cell & cell : patch_2D_original->getCells()){
-        if (cell.isInterior()){
-            long id = cell.getId();
-            if (invmapper[id].type == adaption::Type::TYPE_RENUMBERING){
-                data3[id] = data2[invmapper[id].previous[0]];
-                vdata3[count] = data3[id];
-            }
-            else if (invmapper[id].type == adaption::Type::TYPE_COARSENING){
-                data3[id] = 0.0;
-                int n = invmapper[id].previous.size();
-                for (long idd : invmapper[id].previous){
-                    data3[id] += data2[idd] / n;
+        const PiercedStorage<mapping::Info> & invmapper = mapobject.getMapping();
+        PiercedStorage<double> data3(1, &patch_2D_original->getCells());
+        std::vector<double> vdata3(patch_2D_original->getInternalCount());
+        count = 0;
+        for (Cell & cell : patch_2D_original->getCells()){
+            if (cell.isInterior()){
+                long id = cell.getId();
+                if (invmapper[id].type == mapping::Type::TYPE_RENUMBERING){
+                    data3[id] = data2[invmapper[id].ids[0]];
+                    vdata3[count] = data3[id];
                 }
-                vdata3[count] = data3[id];
+                else if (invmapper[id].type == mapping::Type::TYPE_COARSENING){
+                    data3[id] = 0.0;
+                    int n = invmapper[id].ids.size();
+                    for (long idd : invmapper[id].ids){
+                        data3[id] += data2[idd] / n;
+                    }
+                    vdata3[count] = data3[id];
+                }
+                else if (invmapper[id].type == mapping::Type::TYPE_REFINEMENT){
+                    data3[id] = data2[invmapper[id].ids[0]];
+                    vdata3[count] = data3[id];
+                }
+                count++;
             }
-            else if (invmapper[id].type == adaption::Type::TYPE_REFINEMENT){
-                data3[id] = data2[invmapper[id].previous[0]];
-                vdata3[count] = data3[id];
-            }
-            count++;
         }
-    }
 
-    patch_2D_original->getVTK().setName("mesh_original.1");
-    patch_2D_original->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata3);
-    patch_2D_original->write();
+        patch_2D_original->getVTK().setName("mesh_original.1");
+        patch_2D_original->getVTK().addData("data", VTKFieldType::SCALAR, VTKLocation::CELL, vdata3);
+        patch_2D_original->write();
 
     }
 
@@ -344,11 +350,11 @@ void run()
  * Main program.
  */
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
 #if BITPIT_ENABLE_MPI
     MPI_Init(&argc,&argv);
-#endif    
+#endif
 
     /** Run the example **/
     try {

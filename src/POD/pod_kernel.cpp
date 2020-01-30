@@ -67,6 +67,7 @@ PODKernel::PODKernel()
 #endif  
 
     m_meshPOD = nullptr;
+    m_meshmap = nullptr;
 
 # if BITPIT_ENABLE_MPI
     initializeCommunicator(comm);
@@ -77,7 +78,7 @@ PODKernel::PODKernel()
     m_nProcs = 1;
 #endif
 
-    m_dirtymap = true;
+    setMapperDirty(true);
 
 }
 
@@ -94,6 +95,7 @@ PODKernel::~PODKernel()
  */
 void PODKernel::clear()
 {
+    clearMapper();
     delete m_meshPOD;
 
 # if BITPIT_ENABLE_MPI
@@ -187,11 +189,20 @@ double PODKernel::getRawCellVolume(long rawIndex)
 /**
  * Compute the mapping of an input mesh on the pod mesh.
  * \param[in] mesh Pointer to input mesh.
- * \param[in] fillInv If true even the inverse mapping is computed.
+* \param[in] fillInv If true even the inverse mapping is computed.
  */
 void PODKernel::computeMapper(VolumeKernel * mesh, bool fillInv)
 {
-    m_meshmap.mapMeshes(m_meshPOD, mesh, fillInv);
+    if (m_meshPOD == nullptr)
+        throw std::runtime_error ("PODKernel: no pod mesh set in compute Mapper");
+
+    if (mesh == nullptr)
+        throw std::runtime_error ("PODKernel: no valid input mesh in compute Mapper");
+
+    clearMapper();
+
+    m_meshmap = _computeMapper(mesh, fillInv);
+
     setMapperDirty(false);
 }
 
@@ -200,9 +211,9 @@ void PODKernel::computeMapper(VolumeKernel * mesh, bool fillInv)
  * the info given before an adaptation of the input mesh (internal method).
  * \param[in] info Info vector result of adaptation prepare of the input mesh
  */
-void PODKernel::prepareMapper(const std::vector<adaption::Info> & info)
+void PODKernel::adaptionPrepare(const std::vector<adaption::Info> & info)
 {
-    m_meshmap.mappingAdaptionPreparare(info, false);
+    m_meshmap->adaptionPrepare(info, false);
     setMapperDirty(true);
 }
 
@@ -212,29 +223,44 @@ void PODKernel::prepareMapper(const std::vector<adaption::Info> & info)
  * \param[in] info Info vector result of adaptation of the input mesh
  * \param[in] fillInv If true even the inverse mapping is computed.
  */
-void PODKernel::updateMapper(const std::vector<adaption::Info> & info, bool fillInv)
+void PODKernel::adaptionAlter(const std::vector<adaption::Info> & info, bool fillInv)
 {
-    m_meshmap.mappingAdaptionUpdate(info, false, fillInv);
+    m_meshmap->adaptionAlter(info, false, fillInv);
     setMapperDirty(false);
+}
+
+/**
+ * Clean up the mapping internal structures.
+ * \param[in] info Info vector result of adaptation of the input mesh
+ */
+void PODKernel::adaptionCleanUp(const std::vector<adaption::Info> & info)
+{
+    BITPIT_UNUSED(info);
+    m_meshmap->adaptionCleanup();
 }
 
 /**
  * Get the stored pre-computed mapping.
  * \return mesh mapper.
  */
-MeshMapper & PODKernel::getMeshMapper()
+VolumeMapper* PODKernel::getMapper()
 {
     return m_meshmap;
 }
+
 
 /**
  * Clear the mapping info.
  */
 void PODKernel::clearMapper()
 {
-    m_meshmap.clear();
-    m_dirtymap = true;
+    if (m_meshmap != nullptr){
+        delete m_meshmap;
+        m_meshmap = nullptr;
+    }
+    setMapperDirty(true);
 }
+
 /**
  * Set if the mapper has to be recomputed.
  * param[in] Dirty mapping flag
