@@ -37,7 +37,7 @@ namespace bitpit {
 template<typename value_t, typename id_t>
 __PVS_REFERENCE__ PiercedVectorStorage<value_t, id_t>::front()
 {
-    return front(0);
+    return PiercedStorage<value_t, id_t>::front(0);
 }
 
 /**
@@ -50,7 +50,7 @@ __PVS_REFERENCE__ PiercedVectorStorage<value_t, id_t>::front()
 template<typename value_t, typename id_t>
 __PVS_CONST_REFERENCE__ PiercedVectorStorage<value_t, id_t>::front() const
 {
-    return front(0);
+    return PiercedStorage<value_t, id_t>::front(0);
 }
 
 /**
