@@ -3402,9 +3402,33 @@ bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeig
 		return false;
 	}
 
+	// Deleting the last interface requires some additional work. If the ids
+	// of interfaces to be deleted contain the last interface, that interface
+	// is deleted after deleting all other interfaces. In this way we make
+	// sure to delete the last interface just once (after deleting the last
+	// interface, another interface becomes the last one and that interface
+	// may be on the deletion list as well, and on and so forth).
+	std::size_t lastId;
+	if (!m_interfaces.empty()) {
+		lastId = m_interfaces.back().getId();
+	} else {
+		lastId = Interface::NULL_ID;
+	}
+
+	bool deleteLast = false;
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		deleteInterface(*i, updateNeighs, true);
+		std::size_t interfaceId = *i;
+		if (interfaceId == lastId) {
+			deleteLast = true;
+			continue;
+		}
+
+		deleteInterface(interfaceId, updateNeighs, true);
+	}
+
+	if (deleteLast) {
+		deleteInterface(lastId, updateNeighs, true);
 	}
 
 	if (!delayed) {
