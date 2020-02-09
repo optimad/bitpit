@@ -1546,19 +1546,14 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 				m_ghostToCell.erase(ghostToCellItr);
 			}
 		}
-
-		// Delete cell
-		deleteCell(cellId, false, true);
 	}
 
-	m_cells.flush();
+	std::vector<long> deadCellsList(deadCells.cbegin(), deadCells.cend());
+	PatchKernel::deleteCells(deadCellsList, false, false);
 
 	// Delete the interfaces
-	for (long interfaceId : deadInterfaces) {
-		deleteInterface(interfaceId, false, true);
-	}
-
-	m_interfaces.flush();
+	std::vector<long> deadInterfacesList(deadInterfaces.cbegin(), deadInterfaces.cend());
+	PatchKernel::deleteInterfaces(deadInterfacesList, false, false);
 
 	// All the vertices belonging to the dangling cells has to be kept
 	//
@@ -1623,11 +1618,8 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 	}
 
 	// Delete the vertices
-	for (long vertexId : deadVertices) {
-		deleteVertex(vertexId, true);
-	}
-
-	m_vertices.flush();
+	std::vector<long> deadVerticesList(deadVertices.cbegin(), deadVertices.cend());
+	PatchKernel::deleteVertices(deadVerticesList, false);
 
 	// Done
 	return stitchVertices;
