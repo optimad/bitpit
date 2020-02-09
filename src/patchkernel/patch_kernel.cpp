@@ -2180,7 +2180,9 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 	// on the deletion list, and on and so forth). The same applies for the
 	// first ghost.
 	bool deleteLastInternal = false;
+#if BITPIT_ENABLE_MPI==1
 	bool deleteFirstGhost   = false;
+#endif
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
 		long cellId = *i;
