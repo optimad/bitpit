@@ -1339,9 +1339,33 @@ bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 		return false;
 	}
 
+	// Deleting the last vertex requires some additional work. If the ids
+	// of vertices to be deleted contain the last vertex, that vertex
+	// is deleted after deleting all other vertices. In this way we make
+	// sure to delete the last vertex just once (after deleting the last
+	// vertex, another vertex becomes the last one and that vertex
+	// may be on the deletion list as well, and on and so forth).
+	std::size_t lastId;
+	if (!m_vertices.empty()) {
+		lastId = m_vertices.back().getId();
+	} else {
+		lastId = Vertex::NULL_ID;
+	}
+
+	bool deleteLast = false;
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
+		std::size_t vertexId = *i;
+		if (vertexId == lastId) {
+			deleteLast = true;
+			continue;
+		}
+
 		deleteVertex(*i, true);
+	}
+
+	if (deleteLast) {
+		deleteVertex(lastId, true);
 	}
 
 	if (!delayed) {
