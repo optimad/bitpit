@@ -2534,6 +2534,13 @@ namespace bitpit {
         return m_bordersPerProc;
     }
 
+    /*!
+     * Get the transformation mapper
+     */
+    const Map& ParaTree::getMap() const {
+        return m_trans;
+    }
+
     // =================================================================================== //
     // PRIVATE GET/SET METHODS
     // =================================================================================== //
