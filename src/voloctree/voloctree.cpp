@@ -831,35 +831,39 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 		std::vector<int8_t> treeMarkers;
 		std::vector<bool> treeGhosts;
 		m_tree->getPreMapping(treeIds, treeMarkers, treeGhosts);
-
-		std::size_t n = 0;
 		std::size_t nUpdatedOctants = treeIds.size();
-		while (n < nUpdatedOctants){
-			int8_t marker = treeMarkers[n];
-			int nAdaptionOctants;
+
+		adaption::Info *adaptionInfo = nullptr;
+		uint64_t previousFatherMorton = PABLO::INVALID_MORTON;
+		for (std::size_t n = 0; n < nUpdatedOctants; ++n) {
+			OctantInfo octantInfo(treeIds[n], !treeGhosts[n]);
+			Octant *octant = getOctantPointer(octantInfo);
+
 			adaption::Type adaptionType;
-			if (marker > 0) {
-				nAdaptionOctants = 1;
-				adaptionType     = adaption::TYPE_REFINEMENT;
+			if (treeMarkers[n] > 0) {
+				adaptionType = adaption::TYPE_REFINEMENT;
 			} else {
-				nAdaptionOctants = pow(2, getDimension());
-				adaptionType     = adaption::TYPE_COARSENING;
+				adaptionType = adaption::TYPE_COARSENING;
 			}
 
-			std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, currentRank);
-			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-			adaptionInfo.previous.reserve(nAdaptionOctants);
-			for (int k = 0; k < nAdaptionOctants; ++k) {
-				uint32_t treeId = treeIds[n];
-				bool isghost    = treeGhosts[n];
-				OctantInfo octantInfo(treeId, !isghost);
-
-				adaptionInfo.previous.emplace_back();
-				long &cellId = adaptionInfo.previous.back();
-				cellId = getOctantId(octantInfo);
-
-				n++;
+			bool createAdaption = true;
+			if (adaptionType == adaption::TYPE_COARSENING) {
+				uint64_t fatherMorton = octant->computeFatherMorton();
+				if (fatherMorton == previousFatherMorton) {
+					createAdaption = false;
+				} else {
+					previousFatherMorton = fatherMorton;
+				}
 			}
+
+			if (createAdaption) {
+				std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, currentRank);
+				adaptionInfo = &(adaptionData[adaptionInfoId]);
+			}
+
+			adaptionInfo->previous.emplace_back();
+			long &cellId = adaptionInfo->previous.back();
+			cellId = getOctantId(octantInfo);
 		}
 
 #if BITPIT_ENABLE_MPI==1
