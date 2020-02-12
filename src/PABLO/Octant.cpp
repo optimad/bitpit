@@ -597,6 +597,19 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 	return computeNodeMorton(node);
 };
 
+/** Compute the coordinates (i.e. the coordinates of the node 0) of the father
+ * of this octant.
+ * \return The coordinates (i.e. the coordinates of the node 0) of the father
+ * of this octant.
+ */
+u32array3	Octant::computeFatherCoordinates() const {
+	u32array3 fatherCoordinates = {{m_x, m_y, m_z}};
+	for (int i=0; i<m_dim; i++){
+		fatherCoordinates[i] -= fatherCoordinates[i]%(uint32_t(1) << (TreeConstants::MAX_LEVEL - max(0,(m_level-1))));
+	}
+	return fatherCoordinates;
+};
+
 /** Compute the Morton index of the given node (without level).
  * \param[in] node Logical coordinates of the node
  * \return morton Morton index of the node.
@@ -644,16 +657,8 @@ Octant	Octant::buildLastDesc() const {
  * \return Father octant.
  */
 Octant	Octant::buildFather() const {
-	uint32_t delta[3];
-	uint32_t xx[3];
-	xx[0] = m_x;
-	xx[1] = m_y;
-	xx[2] = m_z;
-	delta[2] = 0;
-	for (int i=0; i<m_dim; i++){
-		delta[i] = xx[i]%(uint32_t(1) << (TreeConstants::MAX_LEVEL - max(0,(m_level-1))));
-	}
-	Octant father(m_dim, max(0,m_level-1), m_x-delta[0], m_y-delta[1], m_z-delta[2]);
+	u32array3 fatherCoordinates = computeFatherCoordinates();
+	Octant father(m_dim, max(0,m_level-1), fatherCoordinates[0], fatherCoordinates[1], fatherCoordinates[2]);
 	return father;
 };
 
