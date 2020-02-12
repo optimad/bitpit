@@ -172,6 +172,7 @@ public:
 	// =================================================================================== //
 	// PUBLIC METHODS
 	// =================================================================================== //
+	uint64_t		computeFatherMorton() const;
 	u32array3		computeFatherCoordinates() const;
 
 private:

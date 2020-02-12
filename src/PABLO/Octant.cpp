@@ -597,6 +597,14 @@ uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
 	return computeNodeMorton(node);
 };
 
+/** Compute the Morton index of the father of this octant.
+ * \return Morton index of the father of this octant.
+ */
+uint64_t	Octant::computeFatherMorton() const {
+	u32array3 fatherCoordinates = computeFatherCoordinates();
+	return PABLO::computeMorton(fatherCoordinates[0], fatherCoordinates[1], fatherCoordinates[2]);
+};
+
 /** Compute the coordinates (i.e. the coordinates of the node 0) of the father
  * of this octant.
  * \return The coordinates (i.e. the coordinates of the node 0) of the father
