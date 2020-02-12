@@ -108,7 +108,9 @@ namespace bitpit {
         void		setL(double L);
         void		setOrigin(darray3 origin);
         double		levelToSize( uint8_t& level);
-        const u32arr3vector & getNodes() const;
+
+        // bring back ParaTree::getNodes() not redefined here
+        using ParaTree::getNodes;
 
         // =================================================================================== //
         // INDEX BASED METHODS																   //

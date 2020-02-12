@@ -235,14 +235,6 @@ namespace bitpit {
         return m_L *size;
     }
 
-    /*! Get the logical coordinates of the nodes
-     * \return Constant reference to the nodes matrix [nnodes*3] with the coordinates of the nodes.
-     */
-    const u32arr3vector &
-    PabloUniform::getNodes() const {
-        return ParaTree::getNodes();
-    }
-
 
     // =================================================================================== //
     // INDEX BASED METHODS																   //
