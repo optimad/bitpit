@@ -26,10 +26,13 @@
 #define __BITPIT_PABLO_MORTON_HPP__
 
 #include <cstdint>
+#include <limits>
 
 namespace bitpit {
 
 namespace PABLO {
+
+const uint64_t INVALID_MORTON = std::numeric_limits<uint64_t>::max();
 
 /**
 * Seperate bits from a given integer 3 positions apart.
