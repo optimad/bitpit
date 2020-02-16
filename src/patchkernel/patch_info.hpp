@@ -61,6 +61,7 @@ class PatchNumberingInfo : public PatchInfo {
 public:
 	PatchNumberingInfo(PatchKernel const *patch = nullptr);
 
+	long getCellConsecutiveOffset() const;
 	long getCellConsecutiveId(long id) const;
 	const std::unordered_map<long, long> & getCellConsecutiveMap() const;
 
@@ -83,6 +84,7 @@ protected:
 	void _extract() override;
 
 private:
+	long m_cellConsecutiveOffset;
 	std::unordered_map<long, long> m_cellLocalToConsecutiveMap;
 #if BITPIT_ENABLE_MPI==1
 	std::vector<long> m_nGlobalInternals;

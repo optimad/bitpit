@@ -152,6 +152,7 @@ void PatchNumberingInfo::_init()
 */
 void PatchNumberingInfo::_reset()
 {
+	m_cellConsecutiveOffset = -1;
 	m_cellLocalToConsecutiveMap.clear();
 #if BITPIT_ENABLE_MPI==1
 	m_nGlobalInternals.clear();
@@ -207,10 +208,12 @@ void PatchNumberingInfo::_extract()
 		}
 
 #if BITPIT_ENABLE_MPI==1
-		consecutiveId = getCellGlobalCountOffset();
+		m_cellConsecutiveOffset = getCellGlobalCountOffset();
 #else
-		consecutiveId = 0;
+		m_cellConsecutiveOffset = 0;
 #endif
+
+		consecutiveId = m_cellConsecutiveOffset;
 		for (auto itr = nativeIds.begin(); itr != nativeIds.end(); ++itr) {
 			m_cellLocalToConsecutiveMap.insert({itr->second, consecutiveId++});
 		}
@@ -253,6 +256,16 @@ void PatchNumberingInfo::_extract()
 		dataCommunicator->waitAllSends();
 	}
 #endif
+}
+
+/*!
+	Return the consecutive offset for the local ells
+
+	\return The consecutive offset for the local cells.
+*/
+long PatchNumberingInfo::getCellConsecutiveOffset() const
+{
+	return m_cellConsecutiveOffset;
 }
 
 /*!
