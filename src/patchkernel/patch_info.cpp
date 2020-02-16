@@ -57,6 +57,16 @@ PatchInfo::~PatchInfo()
 }
 
 /*!
+	Gets the patch associated with the info.
+
+	\result Returns the patch associated with the info.
+*/
+PatchKernel const & PatchInfo::getPatch() const
+{
+	return *m_patch;
+}
+
+/*!
 	Sets the patch associated to the info.
 
 	\param patch is patch from which the informations will be extracted
