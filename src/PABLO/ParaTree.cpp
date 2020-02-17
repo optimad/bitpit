@@ -5453,7 +5453,9 @@ namespace bitpit {
                 }
             }
         }
+        m_pborders.resize(countpbd);
         m_pborders.shrink_to_fit();
+        m_internals.resize(countint);
         m_internals.shrink_to_fit();
 
         // Build ghosts
