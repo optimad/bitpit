@@ -861,6 +861,7 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 				adaptionInfo = &(adaptionData[adaptionInfoId]);
 			}
 
+			assert(adaptionInfo);
 			adaptionInfo->previous.emplace_back();
 			long &cellId = adaptionInfo->previous.back();
 			cellId = getOctantId(octantInfo);
