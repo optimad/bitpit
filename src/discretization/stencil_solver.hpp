@@ -88,7 +88,9 @@ public:
 #if BITPIT_ENABLE_MPI==1
     void assembly(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> &stencils);
 #endif
+    void update(const std::vector<StencilScalar> &stencils);
     void update(const std::vector<long> &rows, const std::vector<StencilScalar> &stencils);
+    void update(std::size_t nRows, const long *rows, const std::vector<StencilScalar> &stencils);
 
     void solve();
 

@@ -313,6 +313,19 @@ void StencilScalarSolver::assembly(const std::vector<StencilScalar> &stencils)
 }
 
 /*!
+ * Update all the stencil solver.
+ *
+ * Only the values of the system matrix and the values of the constants can be
+ * updated, once the system is initialized its pattern cannot be modified.
+ *
+ * \param stencils are the stencils that will be used to update the rows
+ */
+void StencilScalarSolver::update(const std::vector<StencilScalar> &stencils)
+{
+    update(getRowCount(), nullptr, stencils);
+}
+
+/*!
  * Update the stencil solver.
  *
  * Only the values of the system matrix and the values of the constants can be
@@ -323,18 +336,40 @@ void StencilScalarSolver::assembly(const std::vector<StencilScalar> &stencils)
  */
 void StencilScalarSolver::update(const std::vector<long> &rows, const std::vector<StencilScalar> &stencils)
 {
+    update(rows.size(), rows.data(), stencils);
+}
+
+/*!
+ * Update the stencil solver.
+ *
+ * Only the values of the system matrix and the values of the constants can be
+ * updated, once the system is initialized its pattern cannot be modified.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the indices of the rows that will be updated,
+ * if a null pointer is passed, the rows that will be updated are the
+ * rows from 0 to (nRows - 1).
+ * \param stencils are the stencils that will be used to update the rows
+ */
+void StencilScalarSolver::update(std::size_t nRows, const long *rows, const std::vector<StencilScalar> &stencils)
+{
     // Assembly system
 #if BITPIT_ENABLE_MPI==1
     StencilSolverAssembler assembler(getCommunicator(), isPartitioned(), &stencils);
 #else
     StencilSolverAssembler assembler(&stencils);
 #endif
-    SystemSolver::update(rows.size(), rows.data(), assembler);
+    SystemSolver::update(nRows, rows, assembler);
 
     // Set constants
-    long nUpdatedRows = rows.size();
-    for (long n = 0; n < nUpdatedRows; ++n) {
-        long row = rows[n];
+    for (std::size_t n = 0; n < nRows; ++n) {
+        long row;
+        if (rows) {
+            row = rows[n];
+        } else {
+            row = n;
+        }
+
         m_constants[row] = assembler.getRowConstant(n);
     }
 }
