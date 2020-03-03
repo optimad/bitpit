@@ -42,6 +42,39 @@ namespace bitpit {
 const std::string BinaryArchive::EXTENSION_DEFAULT = "dat";
 
 /*!
+    Generates the path of the archive with the specified properties.
+
+    \param name is the name of the file
+    \param block is the parallel block thefile belongs to, a negative value
+    mean that the file is serial
+    \result The path of the archive with the specified properties.
+*/
+std::string BinaryArchive::generatePath(const std::string &name, int block)
+{
+    return generatePath(name, EXTENSION_DEFAULT, block);
+}
+
+/*!
+    Generates the path of the archive with the specified properties.
+
+    \param name is the name of the file
+    \param extension is the extension of the file
+    \param block is the parallel block thefile belongs to, a negative value
+    mean that the file is serial
+    \result The path of the archive with the specified properties.
+*/
+std::string BinaryArchive::generatePath(const std::string &name, const std::string &extension, int block)
+{
+    FileHandler fileHandler("", name, extension);
+    if (block >= 0) {
+        fileHandler.setParallel(true);
+        fileHandler.setBlock(block);
+    }
+
+    return fileHandler.getPath();
+}
+
+/*!
     Default constructor
 */
 BinaryArchive::BinaryArchive()
@@ -74,13 +107,8 @@ void BinaryArchive::open(const std::string &name, const std::string &extension,
         close();
     }
 
-    FileHandler fileHandler("", name, extension);
-    if (block >= 0) {
-        fileHandler.setParallel(true);
-        fileHandler.setBlock(block);
-    }
-
-    std::fstream::open(fileHandler.getPath().c_str(), std::ios::binary | mode);
+    m_path = generatePath(name, extension, block);
+    std::fstream::open(m_path.c_str(), std::ios::binary | mode);
     if (fail() && bad()) {
         return;
     }
@@ -104,6 +132,16 @@ int BinaryArchive::getVersion() const
 std::string BinaryArchive::getHeader() const
 {
     return m_header;
+}
+
+/*!
+    Gets the path of the archive.
+
+    \result The path of the archive.
+*/
+std::string BinaryArchive::getPath() const
+{
+    return m_path;
 }
 
 /*!

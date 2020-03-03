@@ -40,6 +40,9 @@ public:
 
     static const std::string EXTENSION_DEFAULT;
 
+    static std::string generatePath(const std::string &name, int block = -1);
+    static std::string generatePath(const std::string &name, const std::string &extension, int block = -1);
+
     using std::fstream::close;
 
     BinaryArchive();
@@ -47,10 +50,12 @@ public:
 
     int getVersion() const;
     std::string getHeader() const;
+    std::string getPath() const;
 
 protected:
     int m_version;
     std::string m_header;
+    std::string m_path;
 
     void open(const std::string &name, const std::string &extension,
               ios_base::openmode mode, int block = -1);
