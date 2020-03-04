@@ -837,19 +837,34 @@ void SystemSolver::restoreSolutionRawReadPtr(const double *raw_solution) const
  *
  * \param directory is the directory where the files will be saved
  * \param prefix is the prefix that will be added to the files
+ * \param matrixFormat is the dump format that will be used for the matrix,
+ * the ASCII format may not be able to dump large matrices
+ * \param rhsFormat is the dump format that will be used for the RHS,
+ * the ASCII format may not be able to dump large vectors
+ * \param solutionFormat is the dump format that will be used for the solution,
+ * the ASCII format may not be able to dump large vectors
  */
-void SystemSolver::dump(const std::string &directory, const std::string &prefix) const
+void SystemSolver::dump(const std::string &directory, const std::string &prefix,
+                        DumpFormat matrixFormat, DumpFormat rhsFormat,
+                        DumpFormat solutionFormat) const
 {
     std::stringstream filePathStream;
 
     // Matrix
+    PetscViewerType matrixViewerType;
+    if (matrixFormat == DUMP_BINARY) {
+        matrixViewerType = PETSCVIEWERBINARY;
+    } else {
+        matrixViewerType = PETSCVIEWERASCII;
+    }
+
     PetscViewer matViewer;
 #if BITPIT_ENABLE_MPI==1
     PetscViewerCreate(m_communicator, &matViewer);
 #else
     PetscViewerCreate(PETSC_COMM_SELF, &matViewer);
 #endif
-    PetscViewerSetType(matViewer, PETSCVIEWERASCII);
+    PetscViewerSetType(matViewer, matrixViewerType);
     PetscViewerPushFormat(matViewer, PETSC_VIEWER_DEFAULT);
 
     filePathStream.str(std::string());
@@ -859,13 +874,20 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix)
     PetscViewerDestroy(&matViewer);
 
     // RHS
+    PetscViewerType rhsViewerType;
+    if (rhsFormat == DUMP_BINARY) {
+        rhsViewerType = PETSCVIEWERBINARY;
+    } else {
+        rhsViewerType = PETSCVIEWERASCII;
+    }
+
     PetscViewer rhsViewer;
 #if BITPIT_ENABLE_MPI==1
     PetscViewerCreate(m_communicator, &rhsViewer);
 #else
     PetscViewerCreate(PETSC_COMM_SELF, &rhsViewer);
 #endif
-    PetscViewerSetType(rhsViewer, PETSCVIEWERASCII);
+    PetscViewerSetType(rhsViewer, rhsViewerType);
     PetscViewerPushFormat(rhsViewer, PETSC_VIEWER_DEFAULT);
 
     filePathStream.str(std::string());
@@ -875,13 +897,20 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix)
     PetscViewerDestroy(&rhsViewer);
 
     // Solution
+    PetscViewerType solutionViewerType;
+    if (solutionFormat == DUMP_BINARY) {
+        solutionViewerType = PETSCVIEWERBINARY;
+    } else {
+        solutionViewerType = PETSCVIEWERASCII;
+    }
+
     PetscViewer solutionViewer;
 #if BITPIT_ENABLE_MPI==1
     PetscViewerCreate(m_communicator, &solutionViewer);
 #else
     PetscViewerCreate(PETSC_COMM_SELF, &solutionViewer);
 #endif
-    PetscViewerSetType(solutionViewer, PETSCVIEWERASCII);
+    PetscViewerSetType(solutionViewer, solutionViewerType);
     PetscViewerPushFormat(solutionViewer, PETSC_VIEWER_DEFAULT);
 
     filePathStream.str(std::string());

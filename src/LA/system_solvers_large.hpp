@@ -76,6 +76,11 @@ public:
         PIVOT_MD     // Quotient Minimum Degree
     };
 
+    enum DumpFormat {
+        DUMP_BINARY,
+        DUMP_ASCII
+    };
+
     static void addInitOption(const std::string &option);
     static void addInitOptions(int argc, char **args);
     static void addInitOptions(const std::vector<std::string> &options);
@@ -104,7 +109,9 @@ public:
     void solve();
     void solve(const std::vector<double> &rhs, std::vector<double> *solution);
 
-    void dump(const std::string &directory, const std::string &prefix = "") const;
+    void dump(const std::string &directory, const std::string &prefix = "",
+              DumpFormat matrixFormat = DUMP_BINARY, DumpFormat rhsFormat = DUMP_BINARY,
+              DumpFormat solutionFormat = DUMP_BINARY) const;
 
     PivotType getPivotType();
 
