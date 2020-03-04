@@ -865,6 +865,7 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
     PetscViewerCreate(PETSC_COMM_SELF, &matViewer);
 #endif
     PetscViewerSetType(matViewer, matrixViewerType);
+    PetscViewerFileSetMode(matViewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(matViewer, PETSC_VIEWER_DEFAULT);
 
     filePathStream.str(std::string());
@@ -888,6 +889,7 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
     PetscViewerCreate(PETSC_COMM_SELF, &rhsViewer);
 #endif
     PetscViewerSetType(rhsViewer, rhsViewerType);
+    PetscViewerFileSetMode(rhsViewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(rhsViewer, PETSC_VIEWER_DEFAULT);
 
     filePathStream.str(std::string());
@@ -911,6 +913,7 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
     PetscViewerCreate(PETSC_COMM_SELF, &solutionViewer);
 #endif
     PetscViewerSetType(solutionViewer, solutionViewerType);
+    PetscViewerFileSetMode(solutionViewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(solutionViewer, PETSC_VIEWER_DEFAULT);
 
     filePathStream.str(std::string());
