@@ -852,10 +852,13 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
 
     // Matrix
     PetscViewerType matrixViewerType;
+    PetscViewerFormat matrixViewerFormat;
     if (matrixFormat == DUMP_BINARY) {
-        matrixViewerType = PETSCVIEWERBINARY;
+        matrixViewerType   = PETSCVIEWERBINARY;
+        matrixViewerFormat = PETSC_VIEWER_DEFAULT;
     } else {
-        matrixViewerType = PETSCVIEWERASCII;
+        matrixViewerType   = PETSCVIEWERASCII;
+        matrixViewerFormat = PETSC_VIEWER_ASCII_MATLAB;
     }
 
     PetscViewer matViewer;
@@ -866,7 +869,7 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
 #endif
     PetscViewerSetType(matViewer, matrixViewerType);
     PetscViewerFileSetMode(matViewer, FILE_MODE_WRITE);
-    PetscViewerPushFormat(matViewer, PETSC_VIEWER_DEFAULT);
+    PetscViewerPushFormat(matViewer, matrixViewerFormat);
 
     filePathStream.str(std::string());
     filePathStream << directory << "/" << prefix << "A.txt";
@@ -876,10 +879,13 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
 
     // RHS
     PetscViewerType rhsViewerType;
+    PetscViewerFormat rhsViewerFormat;
     if (rhsFormat == DUMP_BINARY) {
-        rhsViewerType = PETSCVIEWERBINARY;
+        rhsViewerType   = PETSCVIEWERBINARY;
+        rhsViewerFormat = PETSC_VIEWER_DEFAULT;
     } else {
-        rhsViewerType = PETSCVIEWERASCII;
+        rhsViewerType   = PETSCVIEWERASCII;
+        rhsViewerFormat = PETSC_VIEWER_ASCII_MATLAB;
     }
 
     PetscViewer rhsViewer;
@@ -890,7 +896,7 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
 #endif
     PetscViewerSetType(rhsViewer, rhsViewerType);
     PetscViewerFileSetMode(rhsViewer, FILE_MODE_WRITE);
-    PetscViewerPushFormat(rhsViewer, PETSC_VIEWER_DEFAULT);
+    PetscViewerPushFormat(rhsViewer, rhsViewerFormat);
 
     filePathStream.str(std::string());
     filePathStream << directory << "/" << prefix << "rhs.txt";
@@ -900,10 +906,13 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
 
     // Solution
     PetscViewerType solutionViewerType;
+    PetscViewerFormat solutionViewerFormat;
     if (solutionFormat == DUMP_BINARY) {
-        solutionViewerType = PETSCVIEWERBINARY;
+        solutionViewerType   = PETSCVIEWERBINARY;
+        solutionViewerFormat = PETSC_VIEWER_DEFAULT;
     } else {
-        solutionViewerType = PETSCVIEWERASCII;
+        solutionViewerType   = PETSCVIEWERASCII;
+        solutionViewerFormat = PETSC_VIEWER_ASCII_MATLAB;
     }
 
     PetscViewer solutionViewer;
@@ -914,7 +923,7 @@ void SystemSolver::dump(const std::string &directory, const std::string &prefix,
 #endif
     PetscViewerSetType(solutionViewer, solutionViewerType);
     PetscViewerFileSetMode(solutionViewer, FILE_MODE_WRITE);
-    PetscViewerPushFormat(solutionViewer, PETSC_VIEWER_DEFAULT);
+    PetscViewerPushFormat(solutionViewer, solutionViewerFormat);
 
     filePathStream.str(std::string());
     filePathStream << directory << "/" << prefix << "solution.txt";
