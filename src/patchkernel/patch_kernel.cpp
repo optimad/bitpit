@@ -295,11 +295,11 @@ void PatchKernel::initialize()
 
 	// Set VTK Geom Data
 	m_vtk.setGeomData<double>(VTKUnstructuredField::POINTS, this);
-	m_vtk.setGeomData<int>(VTKUnstructuredField::OFFSETS, this);
+	m_vtk.setGeomData<long>(VTKUnstructuredField::OFFSETS, this);
 	m_vtk.setGeomData<int>(VTKUnstructuredField::TYPES, this);
 	m_vtk.setGeomData<long>(VTKUnstructuredField::CONNECTIVITY, this);
 	m_vtk.setGeomData<long>(VTKUnstructuredField::FACE_STREAMS, this);
-	m_vtk.setGeomData<int>(VTKUnstructuredField::FACE_OFFSETS, this);
+	m_vtk.setGeomData<long>(VTKUnstructuredField::FACE_OFFSETS, this);
 
 	// Add VTK basic patch data
 	m_vtk.addData<long>("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
@@ -5523,7 +5523,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			}
 		}
 	} else if (name == "offsets") {
-		int offset = 0;
+		long offset = 0;
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			offset += cell.getVertexCount();
 			genericIO::flushBINARY(stream, offset);
@@ -5613,7 +5613,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			}
 		}
 	} else if (name == "faceoffsets") {
-		int offset = 0;
+		long offset = 0;
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			if (cell.getDimension() <= 2 || cell.hasInfo()) {
 				offset += 1;
