@@ -55,6 +55,16 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::setCellCount( long n){
 }
 
 /*!
+ * Sets the connectivity field associated with the offsets
+ * @param[in] connectivity connectivity field associated with the offsets
+ */
+void VTKUnstructuredGrid::HomogeneousInfoStreamer::setConnectivityField( const VTKField *connectivity){
+
+    m_connectivity = connectivity ;
+
+}
+
+/*!
  * Writes data to stream 
  * @param[in] str file stream for writing
  * @param[in] name name of field
@@ -63,6 +73,8 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::setCellCount( long n){
 void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str, const std::string &name, VTKFormat format){
 
     assert( m_type != VTKElementType::UNDEFINED ) ;
+
+    VTKDataType connectivityDataType = m_connectivity->getDataType();
 
     if( format == VTKFormat::APPENDED){
 
@@ -74,10 +86,30 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str,
         
         } else if(name == "offsets" ){
             uint8_t     n = vtk::getElementNodeCount(m_type) ;
-            uint64_t    offset(0) ;
-            for( unsigned int i=0; i<m_nCells; ++i){
-                offset += n ;
-                genericIO::flushBINARY(str, offset );
+            if (connectivityDataType == VTKDataType::Int64 || connectivityDataType == VTKDataType::UInt64) {
+                uint64_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushBINARY(str, offset );
+                }
+            } else if (connectivityDataType == VTKDataType::Int32 || connectivityDataType == VTKDataType::UInt32) {
+                uint32_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushBINARY(str, offset );
+                }
+            } else if (connectivityDataType == VTKDataType::Int16 || connectivityDataType == VTKDataType::UInt16) {
+                uint16_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushBINARY(str, offset );
+                }
+            } else if (connectivityDataType == VTKDataType::Int8 || connectivityDataType == VTKDataType::UInt8) {
+                uint8_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushBINARY(str, offset );
+                }
             }
         
         }
@@ -90,10 +122,30 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str,
         
         } else if(name == "offsets" ){
             uint8_t     n = vtk::getElementNodeCount(m_type) ;
-            uint64_t    offset(0) ;
-            for( unsigned int i=0; i<m_nCells; ++i){
-                offset += n ;
-                genericIO::flushASCII(str, offset );
+            if (connectivityDataType == VTKDataType::Int64 || connectivityDataType == VTKDataType::UInt64) {
+                uint64_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushASCII(str, offset );
+                }
+            } else if (connectivityDataType == VTKDataType::Int32 || connectivityDataType == VTKDataType::UInt32) {
+                uint32_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushASCII(str, offset );
+                }
+            } else if (connectivityDataType == VTKDataType::Int16 || connectivityDataType == VTKDataType::UInt16) {
+                uint16_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushASCII(str, offset );
+                }
+            } else if (connectivityDataType == VTKDataType::Int8 || connectivityDataType == VTKDataType::UInt8) {
+                uint8_t    offset(0) ;
+                for( unsigned int i=0; i<m_nCells; ++i){
+                    offset += n ;
+                    genericIO::flushASCII(str, offset );
+                }
             }
         
         }
@@ -181,6 +233,7 @@ void VTKUnstructuredGrid::setElementType( VTKElementType elementType ){
 
     // Set homogeneous info streamer properties
     m_homogeneousInfoStreamer.setElementType( m_elementType );
+    m_homogeneousInfoStreamer.setConnectivityField( &(m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)]) );
 
     // Types
     int types_gid = getFieldGeomId(VTKUnstructuredField::TYPES);
@@ -190,7 +243,6 @@ void VTKUnstructuredGrid::setElementType( VTKElementType elementType ){
     // Offsets
     if ( m_elementType != VTKElementType::POLYGON && m_elementType != VTKElementType::POLYHEDRON) {
         int offsets_gid = getFieldGeomId(VTKUnstructuredField::OFFSETS);
-        m_geometry[offsets_gid].setDataType( VTKDataType::UInt64) ;
         m_geometry[offsets_gid].setStreamer(m_homogeneousInfoStreamer) ;
     }
 

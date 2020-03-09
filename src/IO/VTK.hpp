@@ -400,12 +400,14 @@ class VTKUnstructuredGrid : public VTK {
             private:
                 VTKElementType          m_type ;                    /**< the type of cells */
                 long                    m_nCells ;                  /**< numer of cells */
+                const VTKField         *m_connectivity ;            /**< connectivity field */
 
                 void                    flushData( std::fstream &, const std::string &, VTKFormat) override ;
 
             public:
                 void                    setElementType( VTKElementType) ;
                 void                    setCellCount( long) ;
+                void                    setConnectivityField( const VTKField *connectivity) ;
         };
 
         uint64_t                m_nConnectivityEntries ;            /**< size of the connectivity information */
