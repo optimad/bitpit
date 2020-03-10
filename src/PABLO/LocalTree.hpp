@@ -215,7 +215,6 @@ private:
 	void 		findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost) const;
 	void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost) const;
 
-
     void        findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const;
     void        findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost) const;
     void        findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost) const;

@@ -1584,8 +1584,102 @@ Octant Octant::computePeriodicOctant(uint8_t iface) const {
 		return degOct;
 	}
 
+};
+
+/** Build a same size periodic octant of this octant throught node inode.
+ * \return Periodic octant of the same size (note: it is a stand-alone octant,
+ * may be not living in octree).
+ * \param[in] inode Local index of the node target.
+ */
+Octant Octant::computeNodePeriodicOctant(uint8_t inode) const {
+    Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z);
+    uint32_t maxLength = sm_treeConstants[m_dim].MAX_LENGTH;
+    uint32_t dh = this->getLogicalSize();
+
+    uint8_t iface1 = sm_treeConstants[m_dim].nodeFace[inode][0];
+    uint8_t iface2 = sm_treeConstants[m_dim].nodeFace[inode][1];
+    uint8_t iface3 = sm_treeConstants[m_dim].nodeFace[inode][m_dim-1];
+
+    if (!m_info[iface1] && !m_info[iface2] && !m_info[iface3]){
+        return *this;
+    }
+    else{
+        switch (iface1) {
+        case 0 :
+        {
+            if (m_info[OctantInfo::INFO_BOUNDFACE0]){
+                degOct.m_x = maxLength-dh;
+            }
+            else{
+                degOct.m_x -= dh;
+            }
+        }
+        break;
+        case 1 :
+        {
+            if (m_info[OctantInfo::INFO_BOUNDFACE1]){
+                degOct.m_x = 0;
+            }
+            else{
+                degOct.m_x += dh;
+            }
+        }
+        break;
+        }
+
+        switch (iface2) {
+        case 2 :
+        {
+            if (m_info[OctantInfo::INFO_BOUNDFACE2]){
+                degOct.m_y = maxLength-dh;
+            }
+            else{
+                degOct.m_y -= dh;
+            }
+        }
+        break;
+        case 3 :
+        {
+            if (m_info[OctantInfo::INFO_BOUNDFACE3]){
+                degOct.m_y = 0;
+            }
+            else{
+                degOct.m_y += dh;
+            }
+        }
+        break;
+        }
+
+        switch (iface3) {
+        case 4 :
+        {
+            if (m_info[OctantInfo::INFO_BOUNDFACE4]){
+                degOct.m_z = maxLength-dh;
+            }
+            else{
+                degOct.m_z -= dh;
+            }
+        }
+        break;
+        case 5 :
+        {
+            if (m_info[OctantInfo::INFO_BOUNDFACE5]){
+                degOct.m_z = 0;
+            }
+            else{
+                degOct.m_z += dh;
+            }
+        }
+        break;
+        }
+
+        degOct.m_level = this->m_level;
+        degOct.m_info = false;
+        return degOct;
+    }
 
 };
+
 
 /*! Get the coordinates of the octant shifted throught face iface and
  * near the opposite periodic boundary (i.e. the coordinates considering this octant
@@ -1636,6 +1730,80 @@ array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
 	return coord;
 
 };
+
+/*! Get the coordinates of the octant shifted through node inode and
+ * near the opposite periodic boundary (i.e. the coordinates considering this octant
+ * as a ghost periodic octant).
+ * \param[in] inode Local index of the node target.
+ * \return Coordinates of octant considered as periodic ghost out of the logical domain.
+ */
+array<int64_t,3> Octant::getNodePeriodicCoord(uint8_t inode) const {
+    array<int64_t,3> coord;
+    coord[0] = this->m_x;
+    coord[1] = this->m_y;
+    coord[2] = this->m_z;
+    int64_t dh = this->getLogicalSize();
+    int64_t maxLength = int64_t(1)<<TreeConstants::MAX_LEVEL;
+
+    uint8_t iface1 = sm_treeConstants[m_dim].nodeFace[inode][0];
+    uint8_t iface2 = sm_treeConstants[m_dim].nodeFace[inode][1];
+    uint8_t iface3 = sm_treeConstants[m_dim].nodeFace[inode][m_dim-1];
+
+    switch (iface1) {
+    case 0 :
+    {
+        if (m_info[OctantInfo::INFO_BOUNDFACE0]){
+            coord[0] = maxLength;
+        }
+    }
+    break;
+    case 1 :
+    {
+        if (m_info[OctantInfo::INFO_BOUNDFACE1]){
+            coord[0]  = -dh;
+        }
+    }
+    break;
+    }
+
+    switch (iface2) {
+    case 2 :
+    {
+        if (m_info[OctantInfo::INFO_BOUNDFACE2]){
+            coord[1]  = maxLength;
+        }
+    }
+    break;
+    case 3 :
+    {
+        if (m_info[OctantInfo::INFO_BOUNDFACE3]){
+            coord[1] = -dh;
+        }
+    }
+    break;
+    }
+
+    switch (iface3) {
+    case 4 :
+    {
+        if (m_info[OctantInfo::INFO_BOUNDFACE4]){
+            coord[2] = maxLength;
+        }
+    }
+    break;
+    case 5 :
+    {
+        if (m_info[OctantInfo::INFO_BOUNDFACE5]){
+            coord[2] = -dh;
+        }
+    }
+    break;
+    }
+
+    return coord;
+
+};
+
 
 /** Get the local index of the node corresponding to the splitting node of the octant family; i.e. the index of the local node
  * coincident with the center point of the father.

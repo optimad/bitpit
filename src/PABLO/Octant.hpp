@@ -246,7 +246,9 @@ protected:
 	void computeNodeVirtualMorton(uint8_t inode, uint8_t maxdepth, const uint8_t (&nodeface)[8][3], bool *hasMorton, uint64_t *morton) const;
 	uint64_t computePeriodicMorton(uint8_t iface) const;
 	Octant computePeriodicOctant(uint8_t iface) const;
+	Octant computeNodePeriodicOctant(uint8_t inode) const;
 	std::array<int64_t,3> getPeriodicCoord(uint8_t iface) const;
+	std::array<int64_t,3> getNodePeriodicCoord(uint8_t inode) const;
 	uint8_t getFamilySplittingNode() const;
 };
 
