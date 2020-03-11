@@ -51,7 +51,8 @@ extra-scripts:
             <div class="content">
                 <h1>bitpit modules</h1>
 
-                {% for module in site.modules %}
+                {% assign modules = site.modules | sort:'priority' %}
+                {% for module in modules %}
                     {% if module.highlights %}
                     <div class="module-info">
                         <h2><a href="{{ site.baseurl }}/modules/index.html#{{ module.name }}" >{{ module.name }}</a></h2>

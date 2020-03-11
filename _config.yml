@@ -8,6 +8,7 @@ exclude: [_manual]
 
 collections:
   modules:
+    sort_by: priority
     output: true
 
 sections:

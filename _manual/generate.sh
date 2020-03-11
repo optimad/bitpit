@@ -50,6 +50,8 @@ bundle exec jekyll build \
     --destination ${MANUAL_BUILD_DIR}/templates
 
 # Generate doxygen files
+export LD_LIBRARY_PATH=/usr/lib/hpc/gnu9/openmpi3/hdf5/1.10.5/lib64:/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/lib64/:/usr/lib64/mpi/gcc/openmpi2/lib64
+
 cd ${MANUAL_BUILD_DIR}
 mkdir bitpit
 cd bitpit
@@ -57,7 +59,19 @@ cd bitpit
 cmake ${BITPIT_SOURCE_DIR} \
     -DCMAKE_INSTALL_PREFIX:PATH="" \
     -DBUILD_DOCUMENTATION=ON \
-    -DENABLE_MPI=ON \
+    -DBLAS_VENDOR="Generic" \
+    -DLAPACKE_STATIC="ON" \
+    -DENABLE_MPI="ON" \
+    -DPETSC_ARCH="" \
+    -DPETSC_DIR="/usr/lib/hpc/gnu9/openmpi3/petsc/3.11.3" \
+    -DMPI_INCLUDE_PATH="/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/include/" \
+    -DMPIEXEC_EXECUTABLE="/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/bin/mpiexec" \
+    -DMPI_CXX_COMPILER="/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/bin/mpicxx" \
+    -DMPI_CXX_HEADER_DIR="/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/include" \
+    -DMPI_CXX_LIB_NAMES="mpi_mpifh;mpi" \
+    -DMPI_CXX_LINK_FLAGS="-pthread" \
+    -DMPI_mpi_LIBRARY="/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/lib64/libmpi_mpifh.so;/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/lib64/libmpi.so" \
+    -DMPI_mpi_cxx_LIBRARY="/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/lib64/libmpi_mpifh.so;/usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/lib64/libmpi_cxx.so" \
     -DDOXY_HTML_HEADER="${MANUAL_BUILD_DIR}/templates/doxygen_header.html" \
     -DDOXY_HTML_FOOTER="${MANUAL_BUILD_DIR}/templates/doxygen_footer.html" \
     -DDOXY_HTML_EXTRA_STYLESHEET="${MANUAL_BUILD_DIR}/stylesheets/manual.css" \
