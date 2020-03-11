@@ -33,45 +33,45 @@ Engineering Srl</a> and distributed under the <a href="https://www.gnu.org/licen
 <span class="anchor" id="mesh"></span>
 <h2>Mesh modules</h2>
 
-<span class="anchor" id="PABLO"></span>
-<h3>PABLO - PArallel Balanced Linear Octree</h3>
-
 <p>
-<strong>PABLO</strong> implements a parallel linear octree/quadtree capable of
-generating non-conformal grids with hanging nodes. Adaptive mesh refinement,
-dynamic load-balance among partitions and 2:1 balancing between octants
-are some of the main features of <strong>PABLO</strong>. Communication
-of data defined on the octants is transparent to the user since the necessary
-low level MPI calls are completely handled by the module.
+All <strong>bitpit</strong> mesh modules are build upon the abstract mesh interface provided
+by the <strong>PatchKernel</strong> module. In the same module, basic objects (like vertices,
+cells and interfaces) necessary for implementing high level mesh capabilities are also defined.
+The common functionalities provided by <strong>PatchKernel</strong> are then extended and
+optimized by specialized mesh modules.
 </p>
 
-<span class="anchor" id="patchkernel"></span>
-<h3>Patch kernel</h3>
-
-<p>
-<strong>PatchKernel</strong> is the base mesh container of <strong>bitpit</strong>. It defines
-the basic objects like vertices, cells and interfaces necessary for implementing high level mesh
-capabilities. It also provides a homogeneous interface class for defining surface and volume meshes.
-</p>
-
-<span class="anchor" id="mesh_surface"></span>
-<span class="anchor" id="surfunstructured"></span>
-<h3>Surface meshes</h3>
-
-<p>
-<strong>SurfUnstructured</strong> is the container for surface segmentations and has methods to
-read, write and modify surface triangulations.
-</p>
-
-<span class="anchor" id="mesh_volume"></span>
-<span class="anchor" id="volcartesian"></span>
 <span class="anchor" id="voloctree"></span>
-<h3>Volume meshes</h3>
+<h3>VolOctree</h3>
 
 <p>
-<strong>VolCartesian</strong> and <strong>VolOctree</strong> are the modules that handle Cartesian and
-octree meshes respectively. They share a common interface through <strong>VolumeKernel</strong>,
-however each mesh provides specific optimized methods.
+<strong>VolOctree</strong> is the module that handles octree (three-dimensional) and quadtree
+(two-dimensional) meshes. It supports non-conformal elements (i.e., hanging nodes), adaptive
+mesh refinement and dynamic load-balance among parallel partitions.
+</p>
+
+<span class="anchor" id="volcartesian"></span>
+<h3>VolCartesian</h3>
+
+<p>
+<strong>VolCartesian</strong> allows to define simple serial Cartesian meshes.
+</p>
+
+<span class="anchor" id="volunstructured"></span>
+<h3>VolUnstructured</h3>
+
+<p>
+Unstructured three-dimensional and two-dimensional meshes can be generated using
+the module <strong>VolUnstructured</strong>. Both standard elements (e.g., hexaedra,
+tetrahedra, pyramids, ...) and polyhedral elements are supported.
+</p>
+
+<span class="anchor" id="surfunstructured"></span>
+<h3>SurfUnstructured</h3>
+
+<p>
+<strong>SurfUnstructured</strong> is the container for surface segmentations and
+has methods to read, write and modify surface triangulations.
 </p>
 
 <span class="anchor" id="levelset"></span>
@@ -88,6 +88,22 @@ from generic objects immersed in a computational mesh.
 <p>
 The <strong>RBF</strong> module allows to efficiently handle Radial Basis Function interpolation
 and parametrization even with a large set of nodes.</p>
+
+<span class="anchor" id="tree"></span>
+<h2>Tree data structures</h2>
+
+<span class="anchor" id="PABLO"></span>
+<h3>PABLO - PArallel Balanced Linear Octree</h3>
+
+<p>
+<strong>PABLO</strong> implements a parallel linear octree/quadtree capable of
+generating non-conformal grids with hanging nodes. It's the main building
+block of <strong>VolOctree</strong> patch. Adaptive mesh refinement,
+dynamic load-balance among partitions and 2:1 balancing between octants
+are some of the main features of <strong>PABLO</strong>. Communication
+of data defined on the octants is transparent to the user since the necessary
+low level MPI calls are completely handled by the module.
+</p>
 
 <span class="anchor" id="CG"></span>
 <h2>Computational Geometry (CG)</h2>
