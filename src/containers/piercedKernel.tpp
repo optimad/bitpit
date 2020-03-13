@@ -1019,10 +1019,9 @@ id_t PiercedKernel<id_t>::getSizeMarker(std::size_t targetSize, const id_t &fall
 template<typename id_t>
 typename PiercedKernel<id_t>::const_iterator PiercedKernel<id_t>::find(const id_t &id) const noexcept
 {
-    auto iterator = m_pos.find(id);
-    if (iterator != m_pos.end()) {
-        return rawFind(iterator->second);
-    } else {
+    try {
+        return rawFind(m_pos.at(id));
+    } catch (const std::out_of_range &exception) {
         return end();
     }
 }
