@@ -465,9 +465,18 @@ if (${_MPI_index} GREATER -1)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MPI_CXX_LINK_FLAGS}")
     endif()
 
+    get_property (_enabled_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    list(FIND _enabled_languages "Fortran" _fortran_language_index)
+    unset(_enabled_languages)
+
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "MPI")
     list (INSERT BITPIT_EXTERNAL_LIBRARIES 0 "${MPI_CXX_LIBRARIES}")
+    if (${_fortran_language_index} GREATER -1)
+        list (INSERT BITPIT_EXTERNAL_LIBRARIES 0 "${MPI_Fortran_LIBRARIES}")
+    endif()
     list (INSERT BITPIT_EXTERNAL_INCLUDE_DIRS 0 "${MPI_CXX_INCLUDE_PATH}" )
+
+    unset(_fortran_language_index)
 endif()
 unset(_MPI_index)
 
