@@ -412,7 +412,7 @@ set(MPI_ONLY_MODULE_LIST "")
 list(APPEND MPI_ONLY_MODULE_LIST "communications")
 
 #------------------------------------------------------------------------------------#
-# Check of the dependencies
+# Internal dependencies
 #------------------------------------------------------------------------------------#
 
 # If building without MPI remove dependecies on MPI-only modules
@@ -467,7 +467,7 @@ unset(${OPERATORS_MODULE_ENABLED} CACHE)
 set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators module" FORCE)
 
 #------------------------------------------------------------------------------------#
-# External modules dependecies
+# External dependecies
 #------------------------------------------------------------------------------------#
 
 set(BITPIT_EXTERNAL_DEPENDENCIES "")
