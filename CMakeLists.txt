@@ -137,100 +137,6 @@ if (ENABLE_MPI)
 endif()
 
 #------------------------------------------------------------------------------------#
-# Compiler settings
-#------------------------------------------------------------------------------------#
-set (BITPIT_DEFINITIONS_PRIVATE "")
-set (BITPIT_DEFINITIONS_PUBLIC "")
-
-string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
-
-set (ENABLE_WARNINGS ${VERBOSE_MAKE})
-if (VERBOSE_MAKE)
-	set(CMAKE_VERBOSE_MAKEFILE ON)
-endif()
-
-if (ENABLE_MPI)
-	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=1")
-else ()
-	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=0")
-endif()
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-
-if (ENABLE_WARNINGS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra") 
-endif()
-
-if (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.12"))
-	add_compile_options("-std=c++11")
-else ()
-	add_definitions("-std=c++11")
-endif ()
-
-# Define a preprocessor macro to recognize debug builds
-IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug" OR CMAKE_BUILD_TYPE_LOWER MATCHES "debinfo")
-	list (APPEND BITPIT_DEFINITIONS_PRIVATE "BITPIT_ENABLE_DEBUG=1")
-else ()
-	list (APPEND BITPIT_DEFINITIONS_PRIVATE "BITPIT_ENABLE_DEBUG=0")
-endif ()
-
-IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
-	list (APPEND BITPIT_DEFINITIONS_PRIVATE "NDEBUG")
-endif ()
-
-# Define an alias for building with scalasca
-if (ENABLE_MPI)
-	SET(C_FLAGS_INSTRUMENT   "-instrument mpicxx")
-	SET(CXX_FLAGS_INSTRUMENT "-instrument mpic")
-else ()
-	SET(C_FLAGS_INSTRUMENT   "")
-	SET(CXX_FLAGS_INSTRUMENT "")
-endif ()
-
-if (CMAKE_BUILD_TYPE_LOWER MATCHES "scalasca")
-	file(WRITE scalasca_c_compiler
-"#!/bin/bash
-scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
-"
-	)
-
-	file(WRITE scalasca_cxx_compiler
-"#!/bin/bash
-scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
-"
-	)
-
-	file(INSTALL scalasca_cxx_compiler DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
-	file(INSTALL scalasca_c_compiler   DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
-	file(REMOVE  scalasca_cxx_compiler)
-	file(REMOVE  scalasca_c_compiler)
-
-	set(CMAKE_CXX_COMPILER "${PROJECT_BINARY_DIR}/scalasca_cxx_compiler")
-	set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
-endif ()
-
-# Check the features supported by the compiler
-include(CheckCXXSourceCompiles)
-
-CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN_UNREACHABLE)
-if(HAVE___BUILTIN_UNREACHABLE)
-    list (APPEND BITPIT_DEFINITIONS_PRIVATE "HAVE___BUILTIN_UNREACHABLE")
-endif()
-
-# Add the definitions
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PRIVATE})
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PUBLIC})
-
-#------------------------------------------------------------------------------------#
 # Link Time Optimization (LTO)
 #------------------------------------------------------------------------------------#
 
@@ -527,6 +433,100 @@ if (ENABLE_MPI)
     list (APPEND BITPIT_EXTERNAL_LIBRARIES "${MPI_CXX_LIBRARIES}")
     list (APPEND BITPIT_EXTERNAL_INCLUDE_DIRS "${MPI_CXX_INCLUDE_PATH}" )
 endif()
+
+#------------------------------------------------------------------------------------#
+# Compiler settings
+#------------------------------------------------------------------------------------#
+set (BITPIT_DEFINITIONS_PRIVATE "")
+set (BITPIT_DEFINITIONS_PUBLIC "")
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
+
+set (ENABLE_WARNINGS ${VERBOSE_MAKE})
+if (VERBOSE_MAKE)
+	set(CMAKE_VERBOSE_MAKEFILE ON)
+endif()
+
+if (ENABLE_MPI)
+	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=1")
+else ()
+	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=0")
+endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+
+if (ENABLE_WARNINGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+endif()
+
+if (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.12"))
+	add_compile_options("-std=c++11")
+else ()
+	add_definitions("-std=c++11")
+endif ()
+
+# Define a preprocessor macro to recognize debug builds
+IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug" OR CMAKE_BUILD_TYPE_LOWER MATCHES "debinfo")
+	list (APPEND BITPIT_DEFINITIONS_PRIVATE "BITPIT_ENABLE_DEBUG=1")
+else ()
+	list (APPEND BITPIT_DEFINITIONS_PRIVATE "BITPIT_ENABLE_DEBUG=0")
+endif ()
+
+IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
+	list (APPEND BITPIT_DEFINITIONS_PRIVATE "NDEBUG")
+endif ()
+
+# Define an alias for building with scalasca
+if (ENABLE_MPI)
+	SET(C_FLAGS_INSTRUMENT   "-instrument mpicxx")
+	SET(CXX_FLAGS_INSTRUMENT "-instrument mpic")
+else ()
+	SET(C_FLAGS_INSTRUMENT   "")
+	SET(CXX_FLAGS_INSTRUMENT "")
+endif ()
+
+if (CMAKE_BUILD_TYPE_LOWER MATCHES "scalasca")
+	file(WRITE scalasca_c_compiler
+"#!/bin/bash
+scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
+"
+	)
+
+	file(WRITE scalasca_cxx_compiler
+"#!/bin/bash
+scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
+"
+	)
+
+	file(INSTALL scalasca_cxx_compiler DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
+	file(INSTALL scalasca_c_compiler   DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
+	file(REMOVE  scalasca_cxx_compiler)
+	file(REMOVE  scalasca_c_compiler)
+
+	set(CMAKE_CXX_COMPILER "${PROJECT_BINARY_DIR}/scalasca_cxx_compiler")
+	set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
+endif ()
+
+# Check the features supported by the compiler
+include(CheckCXXSourceCompiles)
+
+CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN_UNREACHABLE)
+if(HAVE___BUILTIN_UNREACHABLE)
+    list (APPEND BITPIT_DEFINITIONS_PRIVATE "HAVE___BUILTIN_UNREACHABLE")
+endif()
+
+# Add the definitions
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PRIVATE})
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PUBLIC})
 
 #------------------------------------------------------------------------------------#
 # Subdirectories
