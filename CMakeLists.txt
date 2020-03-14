@@ -129,10 +129,6 @@ if (ENABLE_MPI)
 
     include_directories("${MPI_INCLUDE_PATH}")
 
-    if(MPI_C_COMPILE_FLAGS)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}")
-    endif()
-
     if(MPI_CXX_COMPILE_FLAGS)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
     endif()
