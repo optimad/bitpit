@@ -280,10 +280,49 @@ int main(int argc,char *argv[]) {
 }
 ")
 
-    get_property(includes_external DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-    set (includes_all ${includes} ${includes_external})
+    set (includes_all ${includes})
+    set (libraries_all ${libraries})
+    set (flags_all "")
+    set (definitions_all "")
 
-    multipass_source_runs ("${includes_all}" "${libraries}" "${_PETSC_TEST_SOURCE}" ${runs} "${PETSC_LANGUAGE_BINDINGS}")
+    if (MPI_FOUND)
+        if(NOT "${MPI_INCLUDE_PATH}" STREQUAL "")
+            list (APPEND includes_all ${MPI_INCLUDE_PATH})
+        endif()
+
+        if ("${PETSC_LANGUAGE_BINDINGS}" STREQUAL "C")
+            if(MPI_C_DEFINITIONS)
+                set(definitions_all "${definitions_all} ${MPI_C_DEFINITIONS}")
+            endif()
+
+            if(MPI_C_COMPILE_OPTIONS)
+                set(flags_all "${flags_all} ${MPI_C_COMPILE_OPTIONS}")
+            endif()
+
+            if(MPI_C_LINK_FLAGS)
+                set(flags_all "${flags_all} ${MPI_C_LINK_FLAGS}")
+            endif()
+
+            list (APPEND libraries_all "${MPI_C_LIBRARIES}")
+        endif()
+
+        if ("${PETSC_LANGUAGE_BINDINGS}" STREQUAL "CXX")
+            if(MPI_CXX_DEFINITIONS)
+                set(definitions_all "${definitions_all} ${MPI_CXX_DEFINITIONS}")
+            endif()
+
+            if(MPI_CXX_COMPILE_OPTIONS)
+                set(flags_all "${flags_all} ${MPI_CXX_COMPILE_OPTIONS}")
+            endif()
+
+            if(MPI_CXX_LINK_FLAGS)
+                set(flags_all "${flags_all} ${MPI_CXX_LINK_FLAGS}")
+            endif()
+
+            list (APPEND libraries_all "${MPI_CXX_LIBRARIES}")
+        endif()
+
+    multipass_source_runs ("${includes_all}" "${libraries_all}" "${flags_all}" "${definitions_all}" "${_PETSC_TEST_SOURCE}" ${runs} "${PETSC_LANGUAGE_BINDINGS}")
     if (${${runs}})
       set (PETSC_EXECUTABLE_RUNS "YES" CACHE BOOL
         "Can the system successfully run a PETSc executable?  This variable can be manually set to \"YES\" to force CMake to accept a given PETSc configuration, but this will almost always result in a broken build.  If you change PETSC_DIR, PETSC_ARCH, or PETSC_CURRENT you would have to reset this variable." FORCE)

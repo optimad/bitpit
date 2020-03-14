@@ -77,7 +77,7 @@ macro (FIND_PACKAGE_MULTIPASS _name _current)
 endmacro (FIND_PACKAGE_MULTIPASS)
 
 
-macro (MULTIPASS_SOURCE_RUNS includes libraries source runs language)
+macro (MULTIPASS_SOURCE_RUNS includes libraries flags definitions source runs language)
   include (Check${language}SourceRuns)
   # This is a ridiculous hack.  CHECK_${language}_SOURCE_* thinks that if the
   # *name* of the return variable doesn't change, then the test does
@@ -93,6 +93,8 @@ macro (MULTIPASS_SOURCE_RUNS includes libraries source runs language)
   set (testname MULTIPASS_TEST_${MULTIPASS_TEST_COUNT}_${runs})
   set (CMAKE_REQUIRED_INCLUDES ${includes})
   set (CMAKE_REQUIRED_LIBRARIES ${libraries})
+  set (CMAKE_REQUIRED_FLAGS ${flags})
+  set (CMAKE_REQUIRED_DEFINITIONS ${definitions})
   if(${language} STREQUAL "C")
     check_c_source_runs ("${source}" ${testname})
   elseif(${language} STREQUAL "CXX")
@@ -101,6 +103,6 @@ macro (MULTIPASS_SOURCE_RUNS includes libraries source runs language)
   set (${runs} "${${testname}}")
 endmacro (MULTIPASS_SOURCE_RUNS)
 
-macro (MULTIPASS_C_SOURCE_RUNS includes libraries source runs)
-  multipass_source_runs("${includes}" "${libraries}" "${source}" ${runs} "C")
+macro (MULTIPASS_C_SOURCE_RUNS includes libraries flags definitions source runs)
+  multipass_source_runs("${includes}" "${libraries}" "${source}" "${flags}" "${definitions}" ${runs} "C")
 endmacro (MULTIPASS_C_SOURCE_RUNS)
