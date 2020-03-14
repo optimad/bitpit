@@ -322,6 +322,25 @@ int main(int argc,char *argv[]) {
             list (APPEND libraries_all "${MPI_CXX_LIBRARIES}")
         endif()
 
+        get_property (_enabled_langs GLOBAL PROPERTY ENABLED_LANGUAGES)
+        list (FIND _enabled_langs "Fortran" _fortran_lang_index)
+        if (${_fortran_lang_index} GREATER -1)
+            if(MPI_Fortran_DEFINITIONS)
+                set(definitions_all "${definitions_all} ${MPI_Fortran_DEFINITIONS}")
+            endif()
+
+            if(MPI_Fortran_COMPILE_OPTIONS)
+                set(flags_all "${flags_all} ${MPI_Fortran_COMPILE_OPTIONS}")
+            endif()
+
+            if(MPI_Fortran_LINK_FLAGS)
+                set(flags_all "${flags_all} ${MPI_Fortran_LINK_FLAGS}")
+            endif()
+
+            list (APPEND libraries_all "${MPI_Fortran_LIBRARIES}")
+        endif()
+    endif()
+
     multipass_source_runs ("${includes_all}" "${libraries_all}" "${flags_all}" "${definitions_all}" "${_PETSC_TEST_SOURCE}" ${runs} "${PETSC_LANGUAGE_BINDINGS}")
     if (${${runs}})
       set (PETSC_EXECUTABLE_RUNS "YES" CACHE BOOL
