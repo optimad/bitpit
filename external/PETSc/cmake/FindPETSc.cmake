@@ -30,11 +30,11 @@ set(PETSC_VALID_COMPONENTS
 
 if(NOT PETSc_FIND_COMPONENTS)
   get_property (_enabled_langs GLOBAL PROPERTY ENABLED_LANGUAGES)
-  list (FIND _enabled_langs "C" _c_lang_index)
-  if (${_c_lang_index} GREATER -1)
-    set(PETSC_LANGUAGE_BINDINGS "C")
-  else ()
+  list (FIND _enabled_langs "CXX" _cxx_lang_index)
+  if (${_cxx_lang_index} GREATER -1)
     set(PETSC_LANGUAGE_BINDINGS "CXX")
+  else ()
+    set(PETSC_LANGUAGE_BINDINGS "C")
   endif ()
 else()
   # Right now, this is designed for compatability with the --with-clanguage option, so
