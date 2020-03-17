@@ -1544,7 +1544,7 @@ Octant Octant::computePeriodicOctant(uint8_t iface) const {
 	uint32_t dh = this->getLogicalSize();
 
 	if (!m_info[iface]){
-		return this->computeMorton();
+		return *this;
 	}
 	else{
 		switch (iface) {
