@@ -5636,7 +5636,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			std::size_t vertexRawId = itr.getRawIndex();
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
-				std::size_t vertexId = itr.getId();
+				long vertexId = itr.getId();
 				genericIO::flushBINARY(stream, vertexId);
 			}
 		}
