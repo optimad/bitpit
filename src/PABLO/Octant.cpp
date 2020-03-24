@@ -1680,6 +1680,109 @@ Octant Octant::computeNodePeriodicOctant(uint8_t inode) const {
 
 };
 
+/** Build a same size periodic octant of this octant throught edge inode.
+ * \return Periodic octant of the same size (note: it is a stand-alone octant,
+ * may be not living in octree).
+ * \param[in] iedge Local index of the edge target.
+ */
+Octant Octant::computeEdgePeriodicOctant(uint8_t iedge) const {
+    Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z);
+    uint32_t maxLength = uint32_t(1)<<TreeConstants::MAX_LEVEL;
+    uint32_t dh = this->getLogicalSize();
+
+    std::array<uint8_t,2> iface;
+    iface[0] = sm_treeConstants[m_dim].edgeFace[iedge][0];
+    iface[1] = sm_treeConstants[m_dim].edgeFace[iedge][1];
+
+    int8_t          cxyz[3] = {0,0,0};
+    for (int idim=0; idim<m_dim; idim++){
+        cxyz[idim] = sm_treeConstants[m_dim].edgeCoeffs[iedge][idim];
+    }
+
+    if (!m_info[iface[0]] && !m_info[iface[1]]){
+        return *this;
+    }
+    else{
+        for (std::size_t i=0; i<2; i++){
+            switch (iface[i]) {
+            case 0 :
+                if (cxyz[0] != 0){
+                    if (m_info[OctantInfo::INFO_BOUNDFACE0]){
+                        degOct.m_x = maxLength-dh;
+                    }
+                    else{
+                        degOct.m_x -= dh;
+                    }
+                }
+                break;
+            case 1 :
+            {
+                if (cxyz[0] != 0){
+                    if (m_info[OctantInfo::INFO_BOUNDFACE1]){
+                        degOct.m_x = 0;
+                    }
+                    else{
+                        degOct.m_x += dh;
+                    }
+                }
+            }
+            break;
+            case 2 :
+            {
+                if (cxyz[1] != 0){
+                    if (m_info[OctantInfo::INFO_BOUNDFACE2]){
+                        degOct.m_y = maxLength-dh;
+                    }
+                    else{
+                        degOct.m_y -= dh;
+                    }
+                }
+            }
+            break;
+            case 3 :
+            {
+                if (cxyz[1] != 0){
+                    if (m_info[OctantInfo::INFO_BOUNDFACE3]){
+                        degOct.m_y = 0;
+                    }
+                    else{
+                        degOct.m_y += dh;
+                    }
+                }
+            }
+            break;
+            case 4 :
+            {
+                if (cxyz[2] != 0){
+                    if (m_info[OctantInfo::INFO_BOUNDFACE4]){
+                        degOct.m_z = maxLength-dh;
+                    }
+                    else{
+                        degOct.m_z -= dh;
+                    }
+                }
+            }
+            break;
+            case 5 :
+            {
+                if (cxyz[2] != 0){
+                    if (m_info[OctantInfo::INFO_BOUNDFACE5]){
+                        degOct.m_z = 0;
+                    }
+                    else{
+                        degOct.m_z += dh;
+                    }
+                }
+            }
+            break;
+            }
+        } // end loop on i
+        degOct.m_level = this->m_level;
+        degOct.m_info = false;
+        return degOct;
+    }
+
+};
 
 /*! Get the coordinates of the octant shifted throught face iface and
  * near the opposite periodic boundary (i.e. the coordinates considering this octant
@@ -1804,6 +1907,90 @@ array<int64_t,3> Octant::getNodePeriodicCoord(uint8_t inode) const {
 
 };
 
+/*! Get the coordinates of the octant shifted through edge iedge and
+ * near the opposite periodic boundary (i.e. the coordinates considering this octant
+ * as a ghost periodic octant).
+ * \param[in] iedge Local index of the edge target.
+ * \return Coordinates of octant considered as periodic ghost out of the logical domain.
+ */
+array<int64_t,3> Octant::getEdgePeriodicCoord(uint8_t iedge) const {
+    array<int64_t,3> coord;
+    coord[0] = this->m_x;
+    coord[1] = this->m_y;
+    coord[2] = this->m_z;
+    uint32_t maxLength = uint32_t(1)<<TreeConstants::MAX_LEVEL;
+    uint32_t dh = this->getLogicalSize();
+
+    std::array<uint8_t,2> iface;
+    iface[0] = sm_treeConstants[m_dim].edgeFace[iedge][0];
+    iface[1] = sm_treeConstants[m_dim].edgeFace[iedge][1];
+
+    int8_t          cxyz[3] = {0,0,0};
+    for (int idim=0; idim<m_dim; idim++){
+        cxyz[idim] = sm_treeConstants[m_dim].edgeCoeffs[iedge][idim];
+    }
+
+    for (std::size_t i=0; i<2; i++){
+        switch (iface[i]) {
+        case 0 :
+        {
+            if (cxyz[0] != 0){
+                if (m_info[OctantInfo::INFO_BOUNDFACE0]){
+                    coord[0] = maxLength;
+                }
+            }
+        }
+        break;
+        case 1 :
+        {
+            if (cxyz[0] != 0){
+                if (m_info[OctantInfo::INFO_BOUNDFACE1]){
+                    coord[0]  = -dh;
+                }
+            }
+        }
+        break;
+        case 2 :
+        {
+            if (cxyz[1] != 0){
+                if (m_info[OctantInfo::INFO_BOUNDFACE2]){
+                    coord[1]  = maxLength;
+                }
+            }
+        }
+        break;
+        case 3 :
+        {
+            if (cxyz[1] != 0){
+                if (m_info[OctantInfo::INFO_BOUNDFACE3]){
+                    coord[1] = -dh;
+                }
+            }
+        }
+        break;
+        case 4 :
+        {
+            if (cxyz[2] != 0){
+                if (m_info[OctantInfo::INFO_BOUNDFACE4]){
+                    coord[2] = maxLength;
+                }
+            }
+        }
+        break;
+        case 5 :
+        {
+            if (cxyz[2] != 0){
+                if (m_info[OctantInfo::INFO_BOUNDFACE5]){
+                    coord[2] = -dh;
+                }
+            }
+        }
+        break;
+        }
+    } // end loop on i
+    return coord;
+
+};
 
 /** Get the local index of the node corresponding to the splitting node of the octant family; i.e. the index of the local node
  * coincident with the center point of the father.
