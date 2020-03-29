@@ -798,7 +798,7 @@ void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, arr
 {
     lambda.resize(nVertices);
 
-    return computeGeneralizedBarycentric( p, nVertices, vertex, lambda.data());
+    computeGeneralizedBarycentric( p, nVertices, vertex, lambda.data());
 }
 
 /*!
