@@ -32,7 +32,7 @@ namespace bitpit{
  *  @param[in] type element type
  *  @return number of vertices of element type
  */
-uint8_t vtk::getElementNodeCount( const VTKElementType &type){
+uint8_t vtk::getElementNodeCount( VTKElementType type){
 
     switch (type){
 
@@ -192,7 +192,7 @@ std::string  vtk::convertPDataArrayToString( const VTKField &field ){
  * @param[in] loc VTKLocation to be converted
  * @return string to be used in DataArray
  */
-std::string vtk::convertEnumToString( const VTKLocation &loc ){
+std::string vtk::convertEnumToString( VTKLocation loc ){
    
     switch(loc){
         case VTKLocation::CELL :
@@ -211,7 +211,7 @@ std::string vtk::convertEnumToString( const VTKLocation &loc ){
  * @param[in]  cod VTKFormat to be converted
  * @return string to be used in DataArray
  */
-std::string vtk::convertEnumToString( const VTKFormat &cod ){
+std::string vtk::convertEnumToString( VTKFormat cod ){
     
     switch(cod){
         case VTKFormat::ASCII :
@@ -230,7 +230,7 @@ std::string vtk::convertEnumToString( const VTKFormat &cod ){
  * @param[in] type VTKDataType to be converted
  * @return string to be used in DataArray
  */
-std::string vtk::convertEnumToString( const VTKDataType &type ){
+std::string vtk::convertEnumToString( VTKDataType type ){
     
     switch(type){
         case VTKDataType::Int8 :

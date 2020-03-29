@@ -64,7 +64,7 @@ static VTKDataType VTKTypeIndex_VTKElement = VTKTypes::registerType<VTKElementTy
  * @param[in]  type    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  * @return      size of basic type
  */
-uint8_t VTKTypes::sizeOfType( const VTKDataType & type ){
+uint8_t VTKTypes::sizeOfType( VTKDataType type ){
 
     switch( type){
         case VTKDataType::Int8 : case VTKDataType::UInt8:

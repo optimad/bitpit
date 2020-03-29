@@ -155,7 +155,7 @@ class VTKTypes{
         static std::unordered_map<std::type_index, VTKDataType> m_types;  /**< map conatining registered data types */
 
     public:
-        static uint8_t          sizeOfType( const VTKDataType & type );
+        static uint8_t          sizeOfType( VTKDataType type );
 
         template<typename T>
         static VTKDataType      registerType();
@@ -508,16 +508,16 @@ class VTKRectilinearGrid : public VTK{
  * @brief Utility fuctions for VTK
  */
 namespace vtk{
-    uint8_t                     getElementNodeCount( const VTKElementType & ) ;
+    uint8_t                     getElementNodeCount( VTKElementType ) ;
 
     std::string                 convertDataArrayToString( const VTKField & ) ;
     std::string                 convertPDataArrayToString( const VTKField & ) ;
 
     bool                        convertStringToDataArray( const std::string &, VTKField &) ;
 
-    std::string                 convertEnumToString( const VTKLocation & ) ;
-    std::string                 convertEnumToString( const VTKFormat & ) ;
-    std::string                 convertEnumToString( const VTKDataType & ) ;
+    std::string                 convertEnumToString( VTKLocation ) ;
+    std::string                 convertEnumToString( VTKFormat ) ;
+    std::string                 convertEnumToString( VTKDataType ) ;
 
     bool                        convertStringToEnum( const std::string &, VTKLocation & ) ;
     bool                        convertStringToEnum( const std::string &, VTKFormat & ) ;
