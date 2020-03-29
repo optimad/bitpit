@@ -85,7 +85,7 @@ void SystemSolver::addInitOptions(const std::vector<std::string> &options)
         throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
     }
 
-    for (std::string option : options) {
+    for (const std::string &option : options) {
         m_options.push_back(option);
     }
 }
