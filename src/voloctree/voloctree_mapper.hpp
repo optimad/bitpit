@@ -88,7 +88,7 @@ private:
          * \param[in] _globalId Global octant id
          * \param[in] _rank Octant rank
          */
-        OctantIR(Octant _octant, long _id, long _globalId = -1, int _rank = -1)
+        OctantIR(const Octant &_octant, long _id, long _globalId = -1, int _rank = -1)
         {
             octant = _octant;
             id = _id;

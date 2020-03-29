@@ -87,7 +87,7 @@ VolOctree::VolOctree()
 	\param length is the length of the domain
 	\param dh is the maximum allowed cell size of the initial refinement
 */
-VolOctree::VolOctree(int dimension, std::array<double, 3> origin, double length, double dh)
+VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh)
 	: VolOctree(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh)
 {
 }
@@ -101,7 +101,7 @@ VolOctree::VolOctree(int dimension, std::array<double, 3> origin, double length,
 	\param length is the length of the domain
 	\param dh is the maximum allowed cell size of the initial refinement
 */
-VolOctree::VolOctree(int id, int dimension, std::array<double, 3> origin, double length, double dh)
+VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh)
 	: VolumeKernel(id, dimension, false)
 {
 	// Create the tree

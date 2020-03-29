@@ -66,8 +66,8 @@ public:
 	};
 
 	VolOctree();
-	VolOctree(int dimension, std::array<double, 3> origin, double length, double dh);
-	VolOctree(int id, int dimension, std::array<double, 3> origin, double length, double dh);
+	VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh);
+	VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh);
 	VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
 	VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
 	VolOctree(std::istream &stream);
