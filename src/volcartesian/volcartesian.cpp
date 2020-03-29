@@ -1256,7 +1256,7 @@ long VolCartesian::getCellLinearId(const std::array<int, 3> &ijk) const
 	\param[in] idx is the linear index of the cell
 	\result Returns the set of cartesian indices of the cell.
 */
-std::array<int, 3> VolCartesian::getCellCartesianId(long const &idx) const
+std::array<int, 3> VolCartesian::getCellCartesianId(long idx) const
 {
 	int offset_ij = m_nCells1D[0] * m_nCells1D[1];
 
@@ -1319,7 +1319,7 @@ long VolCartesian::getVertexLinearId(const std::array<int, 3> &ijk) const
 	\param[in] idx is the linear index of the vertex
 	\result Returns the set of cartesian indices of the vertex.
 */
-std::array<int, 3> VolCartesian::getVertexCartesianId(long const &idx) const
+std::array<int, 3> VolCartesian::getVertexCartesianId(long idx) const
 {
 	int offset_ij = m_nVertices1D[0] * m_nVertices1D[1];
 
@@ -1344,7 +1344,7 @@ std::array<int, 3> VolCartesian::getVertexCartesianId(long const &idx) const
 	\param[in] vertex is the local vertex
 	\result Returns the set of cartesian indices of the vertex.
 */
-std::array<int, 3> VolCartesian::getVertexCartesianId(long const &cellIdx, int const &vertex) const
+std::array<int, 3> VolCartesian::getVertexCartesianId(long cellIdx, int vertex) const
 {
 	return getVertexCartesianId(getCellCartesianId(cellIdx), vertex);
 }
@@ -1358,7 +1358,7 @@ std::array<int, 3> VolCartesian::getVertexCartesianId(long const &cellIdx, int c
 	\param[in] vertex is the local vertex
 	\result Returns the set of cartesian indices of the vertex.
 */
-std::array<int, 3> VolCartesian::getVertexCartesianId(const std::array<int, 3> &cellIjk, int const &vertex) const
+std::array<int, 3> VolCartesian::getVertexCartesianId(const std::array<int, 3> &cellIjk, int vertex) const
 {
 	std::bitset<3> vertexBitset(vertex);
 	std::array<int, 3> vertexIjk(cellIjk);
@@ -1524,7 +1524,7 @@ std::vector<long> VolCartesian::extractCellSubSet(std::array<int, 3> const &ijkM
 	\param[in] idxMax is the linear index of the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> VolCartesian::extractCellSubSet(int const &idxMin, int const &idxMax)
+std::vector<long> VolCartesian::extractCellSubSet(int idxMin, int idxMax)
 {
 	return extractCellSubSet(getCellCartesianId(idxMin), getCellCartesianId(idxMax));
 }
@@ -1577,7 +1577,7 @@ std::vector<long> VolCartesian::extractVertexSubSet(std::array<int, 3> const &ij
 	\param[in] idxMax is the linear index of the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> VolCartesian::extractVertexSubSet(int const &idxMin, int const &idxMax)
+std::vector<long> VolCartesian::extractVertexSubSet(int idxMin, int idxMax)
 {
 	return extractVertexSubSet(getVertexCartesianId(idxMin), getVertexCartesianId(idxMax));
 }
