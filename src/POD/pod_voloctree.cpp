@@ -1211,7 +1211,7 @@ std::unordered_set<long> PODVolOctree::mapCellsToPOD(const std::unordered_set<lo
         //build send buffers
         DataCommunicator dataCommunicator(m_communicator);
         std::size_t bytes = sizeof(long);
-        for (std::pair<int, std::unordered_set<long> > val : sendPODcells){
+        for (const auto &val : sendPODcells){
             std::size_t ncells = val.second.size();
             int rank = val.first;
             //set size
@@ -1219,7 +1219,7 @@ std::unordered_set<long> PODVolOctree::mapCellsToPOD(const std::unordered_set<lo
             dataCommunicator.setSend(rank,buffSize);
             //fill buffer with octants
             SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(rank);
-            for (const long & ID : val.second){
+            for (long ID : val.second){
                 sendBuffer << ID;
             }
         }
@@ -1309,14 +1309,14 @@ void PODVolOctree::communicatePODField(const pod::PODField & field, std::map<int
         //build send buffers
         DataCommunicator dataCommunicator(m_communicator);
         std::size_t bytes = sizeof(bool) + (nsf+(3*nvf)+1)*sizeof(double);
-        for (std::pair<const int, std::vector<long int> > val : rankIDsend){
+        for (const auto &val : rankIDsend){
             int rank = val.first;
             //set size
             std::size_t buffSize = val.second.size() * bytes;
             dataCommunicator.setSend(rank,buffSize);
             //fill buffer with octants
             SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(rank);
-            for (long & ID : val.second){
+            for (long ID : val.second){
                 bool mask = field.mask->at(ID);
                 sendBuffer << mask;
                 for (std::size_t i=0; i<nsf; i++)
@@ -1334,11 +1334,11 @@ void PODVolOctree::communicatePODField(const pod::PODField & field, std::map<int
         dataCommunicator.startAllRecvs();
         dataCommunicator.startAllSends();
 
-        for (std::pair<const int, std::vector<long int> > val : rankIDrec){
+        for (const auto &val : rankIDrec){
             int rank = val.first;
             dataCommunicator.waitRecv(rank);
             RecvBuffer & recvBuffer = dataCommunicator.getRecvBuffer(rank);
-            for (long & ID : val.second){
+            for (long ID : val.second){
                 recvBuffer >> dataBrec[rank][ID];
                 for (std::size_t i=0; i<nsf; i++){
                     double data;
@@ -1374,14 +1374,14 @@ void PODVolOctree::communicatePODFieldFromPOD(const pod::PODField & field, std::
         //build send buffers
         DataCommunicator dataCommunicator(m_communicator);
         std::size_t bytes = sizeof(long) + sizeof(bool) + (nsf+3*nvf+1)*sizeof(double);
-        for (std::pair<const int, std::vector<long int> > val : rankIDsend){
+        for (const auto &val : rankIDsend){
             int rank = val.first;
             //set size
             std::size_t buffSize = val.second.size() * bytes;
             dataCommunicator.setSend(rank,buffSize);
             //fill buffer with octants
             SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(rank);
-            for (long & ID : val.second){
+            for (long ID : val.second){
                 sendBuffer << ID;
                 bool mask = field.mask->at(ID);
                 sendBuffer << mask;
@@ -1442,14 +1442,14 @@ void PODVolOctree::communicateBoolField(const PiercedStorage<bool> & field, std:
     //build send buffers
     DataCommunicator dataCommunicator(m_communicator);
     std::size_t bytes = sizeof(bool);
-    for (std::pair<const int, std::vector<long int> > val : rankIDsend){
+    for (const auto &val : rankIDsend){
         int rank = val.first;
         //set size
         std::size_t buffSize = val.second.size() * bytes;
         dataCommunicator.setSend(rank,buffSize);
         //fill buffer with octants
         SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(rank);
-        for (long & ID : val.second){
+        for (long ID : val.second){
             sendBuffer << field.at(ID);
         }
     }
@@ -1458,11 +1458,11 @@ void PODVolOctree::communicateBoolField(const PiercedStorage<bool> & field, std:
     dataCommunicator.startAllRecvs();
     dataCommunicator.startAllSends();
 
-    for (std::pair<const int, std::vector<long int> > val : rankIDrec){
+    for (const auto &val : rankIDrec){
         int rank = val.first;
         dataCommunicator.waitRecv(rank);
         RecvBuffer & recvBuffer = dataCommunicator.getRecvBuffer(rank);
-        for (long & ID : val.second){
+        for (long ID : val.second){
             recvBuffer >> dataBrec[rank][ID];
         }
     }
@@ -1482,14 +1482,14 @@ void PODVolOctree::communicateField(const PiercedStorage<double> & field, const 
     //build send buffers
     DataCommunicator dataCommunicator(m_communicator);
     std::size_t bytes = (nf+1)*sizeof(double);
-    for (std::pair<const int, std::vector<long int> > val : rankIDsend){
+    for (const auto &val : rankIDsend){
         int rank = val.first;
         //set size
         std::size_t buffSize = val.second.size() * bytes;
         dataCommunicator.setSend(rank,buffSize);
         //fill buffer with octants
         SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(rank);
-        for (long & ID : val.second){
+        for (long ID : val.second){
             for (std::size_t ifield=0; ifield<nf; ifield++)
                 sendBuffer << field.at(ID, ifield);
             sendBuffer << mesh->evalCellVolume(ID);
@@ -1500,11 +1500,11 @@ void PODVolOctree::communicateField(const PiercedStorage<double> & field, const 
     dataCommunicator.startAllRecvs();
     dataCommunicator.startAllSends();
 
-    for (std::pair<const int, std::vector<long int> > val : rankIDrec){
+    for (const auto &val : rankIDrec){
         int rank = val.first;
         dataCommunicator.waitRecv(rank);
         RecvBuffer & recvBuffer = dataCommunicator.getRecvBuffer(rank);
-        for (long & ID : val.second){
+        for (long ID : val.second){
             datarec[rank][ID].resize(nf);
             for (std::size_t ifield=0; ifield<nf; ifield++)
                 recvBuffer >> datarec[rank][ID][ifield];
@@ -1526,14 +1526,14 @@ void PODVolOctree::communicateFieldFromPOD(const PiercedStorage<double> & field,
     //build send buffers
     DataCommunicator dataCommunicator(m_communicator);
     std::size_t bytes = (nf+1)*sizeof(double)+sizeof(long);
-    for (std::pair<const int, std::vector<long int> > val : rankIDsend){
+    for (const auto &val : rankIDsend){
         int rank = val.first;
         //set size
         std::size_t buffSize = val.second.size() * bytes;
         dataCommunicator.setSend(rank,buffSize);
         //fill buffer with octants
         SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(rank);
-        for (long & ID : val.second){
+        for (long ID : val.second){
             sendBuffer << ID;
             for (std::size_t ifield=0; ifield<nf; ifield++)
                 sendBuffer << field.at(ID, ifield);

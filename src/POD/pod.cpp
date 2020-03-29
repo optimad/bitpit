@@ -746,10 +746,10 @@ std::vector<std::array<std::string,3>> POD::getVectorNames()
 std::vector<std::string> POD::getFieldsNames()
 {
     std::vector<std::string> names;
-    for (std::string ss : m_nameScalarFields)
+    for (const std::string &ss : m_nameScalarFields)
         names.push_back(ss);
-    for (std::array<std::string,3> ssa : m_nameVectorFields){
-        for (std::string ss : ssa)
+    for (const std::array<std::string,3> &ssa : m_nameVectorFields){
+        for (const std::string &ss : ssa)
             names.push_back(ss);
     }
 
@@ -1271,7 +1271,7 @@ void POD::evalErrorBoundingBox()
     
     // Find scalar target fields
     std::size_t count=0;
-    for (std::string val : m_nameScalarFields) {
+    for (const std::string &val : m_nameScalarFields) {
         std::map<std::string, std::size_t>::iterator found = targetErrorFields.find(val);
         if (found != targetErrorFields.end()) {
             scalarIds.push_back(count);
@@ -1281,10 +1281,10 @@ void POD::evalErrorBoundingBox()
     }
 
     // Find vector target fields
-    for (std::array<std::string,3> valv : m_nameVectorFields) {
+    for (const std::array<std::string,3> &valv : m_nameVectorFields) {
         std::size_t ic = 0;
         std::array<std::string,3> toerase;
-        for (std::string val : valv) {
+        for (const std::string &val : valv) {
             std::map<std::string, std::size_t>::iterator found = targetErrorFields.find(val);
             if (found != targetErrorFields.end()) {
                 toerase[ic] = val;
@@ -2701,7 +2701,7 @@ void POD::reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
 
     // Find scalar target fields
     std::size_t count = 0;
-    for (std::string val : m_nameScalarFields) {
+    for (const std::string &val : m_nameScalarFields) {
         std::map<std::string, std::size_t>::iterator found = targetFields.find(val);
         if (found != targetFields.end()) {
             std::size_t ind = found->second;
@@ -2714,11 +2714,11 @@ void POD::reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
 
     // Find vector target fields
     count = 0;
-    for (std::array<std::string,3> valv : m_nameVectorFields) {
+    for (const std::array<std::string,3> &valv : m_nameVectorFields) {
         std::size_t ic = 0;
         std::array<std::size_t,3> vectorarr;
         std::array<std::string,3> toerase;
-        for (std::string val : valv) {
+        for (const std::string &val : valv) {
             std::map<std::string, std::size_t>::iterator found = targetFields.find(val);
             if (found != targetFields.end()) {
                 std::size_t ind = found->second;
