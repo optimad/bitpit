@@ -4206,7 +4206,7 @@ void PatchKernel::evalCellBoundingBox(long id, std::array<double,3> *minPoint, s
 {
 	const Cell &cell = getCell(id);
 
-	return evalElementBoundingBox(cell, minPoint, maxPoint);
+	evalElementBoundingBox(cell, minPoint, maxPoint);
 }
 
 /*!
