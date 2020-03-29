@@ -85,7 +85,7 @@ public:
     RBFKernel();
     RBFKernel(const RBFKernel & other);
 
-    void                    setFunction(const RBFBasisFunction &);
+    void                    setFunction(RBFBasisFunction);
     void                    setFunction(double (&funct)(double ));
 
     RBFBasisFunction        getFunctionType();

@@ -119,7 +119,7 @@ void RBFKernel::swap(RBFKernel &x) noexcept
  * Sets the rbf function to be used. Supported in both modes.
  * @param[in] bfunc basis function to be used
  */
-void RBFKernel::setFunction( const RBFBasisFunction &bfunc )
+void RBFKernel::setFunction( RBFBasisFunction bfunc )
 {
     switch(bfunc){
 
