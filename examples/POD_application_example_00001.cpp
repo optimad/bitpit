@@ -156,7 +156,7 @@ InfoBitpodPP readArguments(int argc, char*argv[] ){
      * clean the entry from key, give her the key map marker and store it in the final map.
      */
 
-    for(auto val: input){
+    for(const auto &val: input){
         std::size_t pos = std::string::npos;
         int counter=0;
         while (pos == std::string::npos && counter <3){
