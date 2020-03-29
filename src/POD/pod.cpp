@@ -1857,7 +1857,7 @@ void POD::_evalModes()
  * \param[in] snap Snapshot filename
  * \param[out] fieldr Resulting POD field
  */
-void POD::readSnapshot(pod::SnapshotFile snap, pod::PODField & fieldr)
+void POD::readSnapshot(const pod::SnapshotFile & snap, pod::PODField & fieldr)
 {
 
     int dumpBlock = (m_nProcs > 1) ? m_rank : -1;

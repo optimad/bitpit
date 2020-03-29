@@ -270,7 +270,7 @@ private:
 
     void dumpMode(std::size_t ir);
 
-    void readSnapshot(pod::SnapshotFile snap, pod::PODField &fieldr);
+    void readSnapshot(const pod::SnapshotFile &snap, pod::PODField &fieldr);
     void readMode(std::size_t ir);
 
     double getCellVolume(long id);
