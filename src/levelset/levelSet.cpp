@@ -243,7 +243,7 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
  * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
  * @return identifier of new object
  */
-int LevelSet::addObject( const LevelSetBooleanOperation &operation, int id1, int id2, int id ) {
+int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_objects.size();
@@ -262,7 +262,7 @@ int LevelSet::addObject( const LevelSetBooleanOperation &operation, int id1, int
  * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
  * @return identifier of new object
  */
-int LevelSet::addObject( const LevelSetBooleanOperation &operation, const std::vector<int> &ids, int id ) {
+int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<int> &ids, int id ) {
 
     if (id == levelSetDefaults::OBJECT) {
         id = m_objects.size();

@@ -104,7 +104,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
         std::array<double,3> normal;
 
         SurfaceInfo();
-        SurfaceInfo(long, std::array<double,3>);
+        SurfaceInfo(long, const std::array<double,3> &);
     };
 
     std::shared_ptr<const SegmentationKernel> m_segmentation;

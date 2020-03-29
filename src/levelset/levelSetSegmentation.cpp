@@ -315,7 +315,7 @@ LevelSetSegmentation::SurfaceInfo::SurfaceInfo( ) : support(levelSetDefaults::SU
 /*!
  * Constructor
  */
-LevelSetSegmentation::SurfaceInfo::SurfaceInfo( long index, std::array<double,3> vec ) : support(index), normal(vec)
+LevelSetSegmentation::SurfaceInfo::SurfaceInfo( long index, const std::array<double,3> &vec ) : support(index), normal(vec)
 {
 }
 
