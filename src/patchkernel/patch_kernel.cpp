@@ -4249,7 +4249,7 @@ void PatchKernel::evalInterfaceBoundingBox(long id, std::array<double,3> *minPoi
 {
 	const Interface &interface = getInterface(id);
 
-	return evalElementBoundingBox(interface, minPoint, maxPoint);
+	evalElementBoundingBox(interface, minPoint, maxPoint);
 }
 
 
