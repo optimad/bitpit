@@ -79,13 +79,13 @@ namespace bitpit {
         void	__reset();
     public:
 #if BITPIT_ENABLE_MPI==1
-        PabloUniform(std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
-        PabloUniform(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
-        PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, std::string logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        PabloUniform(const std::string &logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        PabloUniform(uint8_t dim, const std::string &logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
+        PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, const std::string &logfile = DEFAULT_LOG_FILE, MPI_Comm comm = MPI_COMM_WORLD);
 #else
-        PabloUniform(std::string logfile = DEFAULT_LOG_FILE);
-        PabloUniform(uint8_t dim, std::string logfile = DEFAULT_LOG_FILE);
-        PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, std::string logfile = DEFAULT_LOG_FILE);
+        PabloUniform(const std::string &logfile = DEFAULT_LOG_FILE);
+        PabloUniform(uint8_t dim, const std::string &logfile = DEFAULT_LOG_FILE);
+        PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, const std::string &logfile = DEFAULT_LOG_FILE);
 #endif
 
         // =================================================================================== //
@@ -106,7 +106,7 @@ namespace bitpit {
         double		getZ0() const;
         double		getL() const;
         void		setL(double L);
-        void		setOrigin(darray3 origin);
+        void		setOrigin(const darray3 &origin);
         double		levelToSize( uint8_t& level);
 
         // =================================================================================== //
@@ -184,8 +184,8 @@ namespace bitpit {
         // =================================================================================== //
         // TESTING OUTPUT METHODS													    	   //
         // =================================================================================== //
-        void        write(std::string filename);
-        void        writeTest(std::string filename, dvector data);
+        void        write(const std::string &filename);
+        void        writeTest(const std::string &filename, dvector data);
     };
 
 }

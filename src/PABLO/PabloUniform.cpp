@@ -50,9 +50,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    PabloUniform::PabloUniform(std::string logfile, MPI_Comm comm):ParaTree(logfile,comm){
+    PabloUniform::PabloUniform(const std::string &logfile, MPI_Comm comm):ParaTree(logfile,comm){
 #else
-    PabloUniform::PabloUniform(std::string logfile):ParaTree(logfile){
+    PabloUniform::PabloUniform(const std::string &logfile):ParaTree(logfile){
 #endif
         __reset();
     }
@@ -66,9 +66,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    PabloUniform::PabloUniform(uint8_t dim, std::string logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
+    PabloUniform::PabloUniform(uint8_t dim, const std::string &logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
 #else
-    PabloUniform::PabloUniform(uint8_t dim, std::string logfile):ParaTree(dim,logfile){
+    PabloUniform::PabloUniform(uint8_t dim, const std::string &logfile):ParaTree(dim,logfile){
 #endif
         __reset();
     };
@@ -86,9 +86,9 @@ namespace bitpit {
     /*!
      * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
      */
-    PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, std::string logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
+    PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, const std::string &logfile, MPI_Comm comm):ParaTree(dim,logfile,comm){
 #else
-    PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, std::string logfile):ParaTree(dim,logfile){
+    PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, const std::string &logfile):ParaTree(dim,logfile){
 #endif
         __reset();
 
@@ -221,7 +221,7 @@ namespace bitpit {
      * \param[in] origin Origin of the octree.
      */
     void
-    PabloUniform::setOrigin(darray3 origin){
+    PabloUniform::setOrigin(const darray3 &origin){
         m_origin = origin;
     };
 
@@ -871,7 +871,7 @@ namespace bitpit {
      * \param[in] filename Name of output file (PABLO will add the total number of processes p000# and the current rank s000#).
      */
     void
-    PabloUniform::write(string filename) {
+    PabloUniform::write(const std::string &filename) {
 
         if (getConnectivity().size() == 0) {
             computeConnectivity();
@@ -1025,7 +1025,7 @@ namespace bitpit {
      * \param[in] data Vector of double with user data.
      */
     void
-    PabloUniform::writeTest(string filename, vector<double> data) {
+    PabloUniform::writeTest(const std::string &filename, vector<double> data) {
 
         if (getConnectivity().size() == 0) {
             computeConnectivity();
