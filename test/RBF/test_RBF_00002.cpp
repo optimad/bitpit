@@ -61,7 +61,7 @@ std::array<double,3> modulation( std::array<double,3> P, std::array<double,3> am
  * @param[in] tras amplitude in three space directions
  * @return displacement vector
  */
-std::array<double,3> traslation( std::array<double,3> P, std::array<double,3> tras){
+std::array<double,3> traslation( const std::array<double,3> &P, const std::array<double,3> &tras){
 	BITPIT_UNUSED(P);
     return tras;
 }
@@ -73,7 +73,7 @@ std::array<double,3> traslation( std::array<double,3> P, std::array<double,3> tr
  * @param[in] rot rotation vector
  * @return displacement vector
  */
-std::array<double,3> rotation( std::array<double,3> P, std::array<double,3> origin, std::array<double,3> rot ){
+std::array<double,3> rotation( const std::array<double,3> &P, const std::array<double,3> &origin, const std::array<double,3> &rot ){
 
     return crossProduct( rot, P - origin ) ;
 
