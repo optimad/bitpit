@@ -1398,7 +1398,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnership
     size_t notificationDataSize = sizeof(patchRank);
 
     // Set and start the receives
-    for (const auto entry : getGhostExchangeTargets()) {
+    for (const auto &entry : getGhostExchangeTargets()) {
         const int rank = entry.first;
         const auto &targetCells = entry.second;
 

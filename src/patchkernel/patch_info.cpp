@@ -186,7 +186,7 @@ void PatchNumberingInfo::_extract()
 		dataCommunicator = std::unique_ptr<DataCommunicator>(new DataCommunicator(m_patch->getCommunicator()));
 
 		// Set and start the receives
-		for (const auto entry : m_patch->getGhostExchangeTargets()) {
+		for (const auto &entry : m_patch->getGhostExchangeTargets()) {
 			const int rank = entry.first;
 			const auto &list = entry.second;
 
