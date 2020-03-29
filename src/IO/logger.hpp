@@ -270,7 +270,7 @@ namespace log {
     // Generic global functions
     LoggerManager & manager();
     Logger & cout();
-    Logger & cout(std::string name);
+    Logger & cout(const std::string &name);
 
     // Manipulators global functions
 

@@ -1369,7 +1369,7 @@ namespace log {
         \param name is the name of the logger
         \result An instance of the specified logger.
     */
-    Logger & cout(std::string name)
+    Logger & cout(const std::string &name)
     {
         return manager().cout(name);
     }
