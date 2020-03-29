@@ -603,7 +603,7 @@ void LevelSetObject::communicate( const std::unordered_map<int,std::vector<long>
 
     // Fill the send buffer with the  content from the LevelSetObject base
     // class and the specific derived class.
-    for (const auto entry : sendList) {
+    for (const auto &entry : sendList) {
         // Create an empty send
         int rank = entry.first;
         dataCommunicator.setSend(rank, 0);

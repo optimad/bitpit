@@ -255,7 +255,7 @@ void LevelSetCachedObject::propagateSign() {
         size_t dataSize = sizeof(sign);
 
         // Set the receives
-        for (const auto entry : mesh.getGhostExchangeTargets()) {
+        for (const auto &entry : mesh.getGhostExchangeTargets()) {
             const int rank = entry.first;
             const auto &list = entry.second;
 
@@ -279,9 +279,9 @@ void LevelSetCachedObject::propagateSign() {
             }
 
             // Start the sends
-            for (const auto entry : mesh.getGhostExchangeSources()) {
+            for (const auto &entry : mesh.getGhostExchangeSources()) {
                 const int rank = entry.first;
-                auto &sendIds = entry.second;
+                const auto &sendIds = entry.second;
                 SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
 
                 for (long cellId : sendIds) {
