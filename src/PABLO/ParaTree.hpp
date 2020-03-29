@@ -478,8 +478,8 @@ namespace bitpit {
         // OTHER PARATREE BASED METHODS												    	   //
         // =================================================================================== //
         uint8_t		getMaxDepth() const;
-        int 		findOwner(const uint64_t & morton) const;
-        int 		getOwnerRank(const uint64_t & globalIdx) const;
+        int 		findOwner(uint64_t morton) const;
+        int 		getOwnerRank(uint64_t globalIdx) const;
         void        settleMarkers();
         void        preadapt();
         bool        checkToAdapt();

@@ -107,16 +107,16 @@ private:
 	void initialize(uint8_t dim);
 
 	darray3 mapCoordinates(u32array3 const & X) const;
-	double mapX(uint32_t const & X) const;
-	double mapY(uint32_t const & Y) const;
-	double mapZ(uint32_t const & Z) const;
+	double mapX(uint32_t X) const;
+	double mapY(uint32_t Y) const;
+	double mapZ(uint32_t Z) const;
 	u32array3 mapCoordinates(darray3 const & X) const;
-	uint32_t mapX(double const & X) const;
-	uint32_t mapY(double const & Y) const;
-	uint32_t mapZ(double const & Z) const;
-	double mapSize(uint32_t const & size) const;
-	double mapArea(uint64_t const & area) const;
-	double mapVolume(uint64_t const & volume) const;
+	uint32_t mapX(double X) const;
+	uint32_t mapY(double Y) const;
+	uint32_t mapZ(double Z) const;
+	double mapSize(uint32_t size) const;
+	double mapArea(uint64_t area) const;
+	double mapVolume(uint64_t volume) const;
 	void mapCenter(double* & center, darray3 & mapcenter) const;
 	void mapCenter(darray3 & center, darray3 & mapcenter) const;
 	void mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes) const;

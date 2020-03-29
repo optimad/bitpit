@@ -100,7 +100,7 @@ darray3 Map::mapCoordinates(u32array3 const & X) const {
  * \param[in] X Coordinate X from logical domain.
  * \return Coordinate X in physical domain.
  */
-double Map::mapX(uint32_t const & X) const {
+double Map::mapX(uint32_t X) const {
 	return m_maxLength_1 * double(X);
 };
 
@@ -108,7 +108,7 @@ double Map::mapX(uint32_t const & X) const {
  * \param[in] Y Coordinate Y from logical domain.
  * \return Coordinate Y in physical domain.
  */
-double Map::mapY(uint32_t const & Y) const {
+double Map::mapY(uint32_t Y) const {
 	return m_maxLength_1 * double(Y);
 };
 
@@ -116,7 +116,7 @@ double Map::mapY(uint32_t const & Y) const {
  * \param[in] Z Coordinate Z from logical domain.
  * \return Coordinate Z in physical domain.
  */
-double Map::mapZ(uint32_t const & Z) const {
+double Map::mapZ(uint32_t Z) const {
 	return m_maxLength_1 * double(Z);
 };
 
@@ -136,7 +136,7 @@ u32array3 Map::mapCoordinates(darray3 const & X) const {
  * \param[in] X Coordinate X from physical domain.
  * \return Coordinate X in logical domain.
  */
-uint32_t Map::mapX(double const & X) const {
+uint32_t Map::mapX(double X) const {
 	return (uint32_t)(double(m_maxLength) * X);
 };
 
@@ -144,7 +144,7 @@ uint32_t Map::mapX(double const & X) const {
  * \param[in] Y Coordinate Y from physical domain.
  * \return Coordinate Y in logical domain.
  */
-uint32_t Map::mapY(double const & Y) const {
+uint32_t Map::mapY(double Y) const {
 	return (uint32_t)(double(m_maxLength) * Y);
 };
 
@@ -152,7 +152,7 @@ uint32_t Map::mapY(double const & Y) const {
  * \param[in] Z Coordinate Z from physical domain.
  * \return Coordinate Z in logical domain.
  */
-uint32_t Map::mapZ(double const & Z) const {
+uint32_t Map::mapZ(double Z) const {
 	return (uint32_t)(double(m_maxLength) * Z);
 };
 
@@ -160,7 +160,7 @@ uint32_t Map::mapZ(double const & Z) const {
  * \param[in] size Size of octant from logical domain.
  * \return Size of octant in physical domain.
  */
-double Map::mapSize(uint32_t const & size) const {
+double Map::mapSize(uint32_t size) const {
 	return m_maxLength_1 *double(size);
 };
 
@@ -168,7 +168,7 @@ double Map::mapSize(uint32_t const & size) const {
  * \param[in] area Area of octant from logical domain.
  * \return Area of octant in physical domain.
  */
-double Map::mapArea(uint64_t const & area) const {
+double Map::mapArea(uint64_t area) const {
 	return m_maxArea_1*double(area);
 };
 
@@ -176,7 +176,7 @@ double Map::mapArea(uint64_t const & area) const {
  * \param[in] volume Volume of octant from logical domain.
  * \return Coordinate Volume of octant in physical domain.
  */
-double Map::mapVolume(uint64_t const & volume) const {
+double Map::mapVolume(uint64_t volume) const {
 	return m_maxVolume_1*double(volume);
 };
 

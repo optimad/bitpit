@@ -3857,7 +3857,7 @@ namespace bitpit {
      * \return Rank of the process owning the element
      */
     int
-    ParaTree::findOwner(const uint64_t & morton) const {
+    ParaTree::findOwner(uint64_t morton) const {
         // Early return if the requested morton is on first partition
         if (morton <= m_partitionLastDesc[0]) {
             return 0;
@@ -3903,7 +3903,7 @@ namespace bitpit {
      * \return Rank of the process owning the element
      */
     int
-    ParaTree::getOwnerRank(const uint64_t & globalIndex) const {
+    ParaTree::getOwnerRank(uint64_t globalIndex) const {
         // Get the iterator point to the onwer rank
         std::vector<uint64_t>::const_iterator rankItr = std::lower_bound (m_partitionRangeGlobalIdx.begin(), m_partitionRangeGlobalIdx.end(), globalIndex);
 
