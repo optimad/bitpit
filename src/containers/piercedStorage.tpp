@@ -1436,7 +1436,7 @@ void PiercedStorage<value_t, id_t>::dump(std::ostream &stream) const
 * \param value is the value that will be dumped
 */
 template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const std::vector<bool>::const_reference &value) const
+void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, std::vector<bool>::const_reference value) const
 {
     bool bool_value = value;
     utils::binary::write(stream, bool_value);
