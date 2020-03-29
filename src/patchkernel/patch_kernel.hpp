@@ -503,9 +503,9 @@ public:
 	bool isBoundingBoxDirty(bool global = false) const;
 	void updateBoundingBox(bool forcedUpdated = false);
 
-	virtual void translate(std::array<double, 3> translation);
+	virtual void translate(const std::array<double, 3> &translation);
 	void translate(double sx, double sy, double sz);
-	virtual void scale(std::array<double, 3> scaling);
+	virtual void scale(const std::array<double, 3> &scaling);
 	void scale(double scaling);
 	void scale(double sx, double sy, double sz);
 
@@ -784,9 +784,9 @@ private:
 	CellIterator _addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id);
 #endif
 
-	void _restoreInternal(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
+	void _restoreInternal(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 #if BITPIT_ENABLE_MPI==1
-	void _restoreGhost(CellIterator iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank);
+	void _restoreGhost(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank);
 #endif
 
 	void _deleteInternal(long id, bool delayed);

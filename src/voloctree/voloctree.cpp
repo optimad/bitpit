@@ -2240,7 +2240,7 @@ void VolOctree::setOrigin(const std::array<double, 3> &origin)
 
 	\param[in] translation is the translation vector
  */
-void VolOctree::translate(std::array<double, 3> translation)
+void VolOctree::translate(const std::array<double, 3> &translation)
 {
 	m_tree->setOrigin(m_tree->getOrigin() + translation);
 
@@ -2304,7 +2304,7 @@ void VolOctree::setLength(double length)
 
 	\param[in] scaling is the scaling factor vector
  */
-void VolOctree::scale(std::array<double, 3> scaling)
+void VolOctree::scale(const std::array<double, 3> &scaling)
 {
 	bool uniformScaling = true;
 	uniformScaling &= (std::abs(scaling[0] - scaling[1]) > 1e-14);

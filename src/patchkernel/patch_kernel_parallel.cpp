@@ -541,7 +541,7 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	the connectivity of the element
 	\param rank is the rank that owns the cell that will be restored
 */
-void PatchKernel::_restoreGhost(CellIterator iterator, ElementType type,
+void PatchKernel::_restoreGhost(const CellIterator &iterator, ElementType type,
 								std::unique_ptr<long[]> &&connectStorage, int rank)
 {
 	// Restore cell

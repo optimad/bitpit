@@ -2106,7 +2106,7 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 */
-void PatchKernel::_restoreInternal(CellIterator iterator, ElementType type,
+void PatchKernel::_restoreInternal(const CellIterator &iterator, ElementType type,
 								   std::unique_ptr<long[]> &&connectStorage)
 {
 	Cell &cell = *iterator;
@@ -5166,7 +5166,7 @@ std::unordered_map<long, std::vector<long>> PatchKernel::binGroupVertices(const 
 
 	\param[in] translation is the translation vector
 */
-void PatchKernel::translate(std::array<double, 3> translation)
+void PatchKernel::translate(const std::array<double, 3> &translation)
 {
 	// Translate the patch
 	for (auto &vertex : m_vertices) {
@@ -5199,7 +5199,7 @@ void PatchKernel::translate(double sx, double sy, double sz)
 
 	\param[in] scaling is the scaling factor vector
 */
-void PatchKernel::scale(std::array<double, 3> scaling)
+void PatchKernel::scale(const std::array<double, 3> &scaling)
 {
 	// Scale the patch
 	for (auto &vertex : m_vertices) {

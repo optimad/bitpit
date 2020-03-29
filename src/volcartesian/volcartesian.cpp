@@ -1625,7 +1625,7 @@ void VolCartesian::setOrigin(const std::array<double, 3> &origin)
 
 	\param[in] translation is the translation vector
  */
-void VolCartesian::translate(std::array<double, 3> translation)
+void VolCartesian::translate(const std::array<double, 3> &translation)
 {
 	for (int n = 0; n < 3; ++n) {
 		m_minCoords[n] += translation[n];
@@ -1685,7 +1685,7 @@ void VolCartesian::setLengths(const std::array<double, 3> &lengths)
 
 	\param[in] scaling is the scaling factor vector
  */
-void VolCartesian::scale(std::array<double, 3> scaling)
+void VolCartesian::scale(const std::array<double, 3> &scaling)
 {
 	for (int n = 0; n < 3; ++n) {
 		m_maxCoords[n] = m_minCoords[n] + scaling[n] * (m_maxCoords[n] - m_minCoords[n]);
