@@ -284,14 +284,14 @@ void run()
             DataCommunicator dataCommunicator(comm);
             MPI_Barrier(comm);
             std::size_t bytes = uint8_t(sizeof(double));
-            for (std::pair<const int, std::vector<long int> > val : rankIDsend){
+            for (const auto &val : rankIDsend){
                 int rank = val.first;
                 //set size
                 std::size_t buffSize = val.second.size() * bytes;
                 dataCommunicator.setSend(rank,buffSize);
                 //fill buffer with octants
                 SendBuffer &sendBuffer = dataCommunicator.getSendBuffer(rank);
-                for (long & ID : val.second){
+                for (long ID : val.second){
                     sendBuffer << data[ID];
                 }
             }
@@ -300,11 +300,11 @@ void run()
             dataCommunicator.startAllRecvs();
             dataCommunicator.startAllSends();
 
-            for (std::pair<const int, std::vector<long int> > val : rankIDrec){
+            for (const auto &val : rankIDrec){
                 int rank = val.first;
                 dataCommunicator.waitRecv(rank);
                 RecvBuffer & recvBuffer = dataCommunicator.getRecvBuffer(rank);
-                for (long & ID : val.second){
+                for (long ID : val.second){
                     recvBuffer >> datarec[rank][ID];
                 }
             }
@@ -408,7 +408,7 @@ void run()
             DataCommunicator dataCommunicator(comm);
             MPI_Barrier(comm);
             std::size_t bytes = uint8_t(sizeof(double) + sizeof(long));
-            for (std::pair<const int, std::set<long int> > val : rankIDsend){
+            for (const auto &val : rankIDsend){
                 int rank = val.first;
                 //set size
                 std::size_t buffSize = val.second.size() * bytes;
