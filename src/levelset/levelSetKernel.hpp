@@ -71,7 +71,7 @@ class LevelSetKernel{
     void                                        updateGeometryCache(const std::vector<adaption::Info> &);
 
     const std::array<double,3> &                computeCellCentroid(long);
-    double                                      isCellInsideBoundingBox(long, std::array<double,3> , std::array<double,3> );
+    double                                      isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & );
 
     const std::array<double,3> &                getVertexCoords(long);
 

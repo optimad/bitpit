@@ -227,7 +227,7 @@ bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoo
  * @result True if the specified cell is inside the given bounding box, false
  * otherwise.
  */
-double LevelSetKernel::isCellInsideBoundingBox( long id, std::array<double, 3> minPoint, std::array<double, 3> maxPoint ){
+double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint ){
 
     const Cell &cell = m_mesh->getCell(id);
     double tolerance = m_mesh->getTol();
