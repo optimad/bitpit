@@ -97,7 +97,7 @@ class DGFObj {
         void                                                                  // (input) none
     );
     DGFObj(                                                                  // Custom constructor #1 for DGF object
-        std::string                                                           // (input) dgf file name
+        const std::string                       &                            // (input) dgf file name
     );
 
     // Destructor =========================================================== //
@@ -109,10 +109,10 @@ class DGFObj {
     // Public methods ------------------------------------------------------- //
     public:
     void open(                                                                // Open input/output stream to dgf file
-        std::string                                                           // (input) stream mode
+        const std::string                       &                             // (input) stream mode
     );
     void close(                                                               // Close input/output stream to dgf file
-        std::string                              a = "inout"                  // (input) stream mode
+        const std::string                       &a = "inout"                  // (input) stream mode
     );
     void clear(                                                               // Reser members to default value
         void                                                                  // (input) none
@@ -144,7 +144,7 @@ class DGFObj {
         std::vector<std::array<double,3> >      &,                            // (input/output) vertex coordinate list
         std::vector<std::vector<int> >          &,                            // (input/output) simplex-vertex connectivity
         std::vector<int>                        &,                            // (input/output) pid list
-        std::string pidName = "PID"                                           // name of simplexdata to be used as PID
+        const std::string                       &pidName = "PID"              // name of simplexdata to be used as PID
     );
     void save(                                                                // Save mesh data into a .dgf file
         int                                     &,                            // (input) number of mesh vertices
@@ -161,28 +161,28 @@ class DGFObj {
 
     template< typename T, typename ... T2 >
     void loadVData(                                                          // Load vertex data sets from dgf file
-        std::string                              data_name,                   // (input) dataset name
+        const std::string                       &data_name,                  // (input) dataset name
         int                                     &n,                           // (input/output) number of data in the dataset
         std::vector< T >                        &data,                        // (input/output) loaded dataset
         T2                                      &... others                   // (input/optional) others datasets to be loaded
     );
     template< typename T, typename ... T2 >
     void loadSData(                                                          // Load simplex data sets from dgf file
-        std::string                              data_name,                   // (input) dataset name
+        const std::string                       &data_name,                   // (input) dataset name
         int                                     &n,                           // (input/output) number of data in the dataset
         std::vector< T >                        &data,                        // (input/output) loaded dataset
         T2                                      &... others                   // (input/optional) others datasets to be loaded
     );
     template < typename T, typename ... T2 >
     void appendVData(                                                        // Append vertex data set to dgf file
-        std::string                              data_name,                   // (input) dataset name
+        const std::string                       &data_name,                   // (input) dataset name
         int                                     &n,                           // (input) number of data in the dataset
         std::vector< T >                        &data,                        // (input) dataset to be exported
         T2                                      &... others                   // (input/optional) others datasets to be exported
     );
     template < typename T, typename ... T2 >
     void appendSData(                                                        // Append simplex data set to dgf file
-        std::string                              data_name,                   // (input) dataset name
+        const std::string                       &data_name,                   // (input) dataset name
         int                                     &n,                           // (input) number of data in the dataset
         std::vector< T >                        &data,                        // (input) dataset to be exported
         T2                                      &... others                   // (input/optional) others datasets to be exported
@@ -262,14 +262,14 @@ unsigned int readVertexData(                                             // Load
     std::ifstream                               &file_handle,                 // (input) input stream to dgf file
     int                                         &n,                           // (input/output) number of loaded data
     std::vector< T >                            &data,                        // (input/output) loaded data
-    std::string                                 data_name = ""                // (input/optional) dataset name
+    const std::string                           &data_name = ""               // (input/optional) dataset name
 );
 template< typename T >
 unsigned int readSimplexData(                                            // Load dgf simplex data
     std::ifstream                               &file_handle,                 // (input) input stream to dgf file
     int                                         &n,                           // (input/output) number of loaded data
     std::vector< T >                            &data,                        // (input/output) loaded data
-    std::string                                 data_name = ""                // (input/optional) dataset name
+    const std::string                           &data_name = ""               // (input/optional) dataset name
 );
 
 // Output routines ---------------------------------------------------------- //
@@ -299,14 +299,14 @@ unsigned int writeVertexData(                                            // Expo
     std::ofstream                               &file_handle,                 // (input) output stream to dgf file
     int                                         &N,                           // (input) number of data in the dataset
     std::vector< T >                            &Data,                        // (input) vertex data set
-    std::string                                 Data_name = ""                // (input/optional) data set name
+    const std::string                           &Data_name = ""               // (input/optional) data set name
 );
 template < typename T >
 unsigned int writeSimplexData(                                           // Export simplex data to dgf file
     std::ofstream                               &file_handle,                 // (input) output stream to dgf file
     int                                         &N,                           // (input) number of data in the dataset
     std::vector< T >                            &Data,                        // (input) simplex data set
-    std::string                                 Data_name = ""                // (input/optional) data set name
+    const std::string                           &Data_name = ""               // (input/optional) data set name
 );
 
 }

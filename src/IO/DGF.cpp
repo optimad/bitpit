@@ -107,7 +107,7 @@ return; }
     \param[in] filename dgf file name
 */
 DGFObj::DGFObj(
-    std::string                          filename
+    const std::string                   &filename
 ) {
 
 // ========================================================================== //
@@ -125,7 +125,8 @@ DGFObj::DGFObj(
 // ========================================================================== //
 
 // General info
-dgf_name = utils::string::trim(filename);
+dgf_name = filename;
+dgf_name = utils::string::trim(dgf_name);
 
 // Error flags
 err = 0;
@@ -148,7 +149,7 @@ return; }
     \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
 */
 void DGFObj::open(
-    std::string                          mode
+    const std::string                    &mode
 ) {
 
 // ========================================================================== //
@@ -211,7 +212,7 @@ return; };
     "app": append mode)
 */
 void DGFObj::close(
-    std::string                          mode
+    const std::string                    &mode
 ) {
 
 // ========================================================================== //
@@ -624,7 +625,7 @@ void DGFObj::load(
     std::vector<std::array<double,3> >  &V,
     std::vector<std::vector<int> >      &S,
     std::vector<int>                    &PID,
-    std::string                         pidName
+    const std::string                   &pidName
 ) {
 
 // ========================================================================== //

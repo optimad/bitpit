@@ -56,7 +56,7 @@
 */ 
 template< typename T, typename ... T2 >
 void DGFObj::loadVData(
-    std::string                  data_name,
+    const std::string           &data_name,
     int                         &n,
     std::vector< T >            &data,
     T2                          &... others
@@ -103,7 +103,7 @@ return; };
 */
 template< typename T, typename ... T2 >
 void DGFObj::loadSData(
-    std::string                  data_name,
+    const std::string           &data_name,
     int                         &n,
     std::vector< T >            &data,
     T2                          &... others
@@ -147,7 +147,7 @@ return; };
 */ 
 template< typename T, typename ... T2 >
 void DGFObj::appendVData(
-    std::string                  data_name,
+    const std::string           &data_name,
     int                         &n,
     std::vector< T >            &data,
     T2                          &... others
@@ -191,7 +191,7 @@ return; }
 */ 
 template< typename T, typename ... T2 >
 void DGFObj::appendSData(
-    std::string                  data_name,
+    const std::string           &data_name,
     int                         &n,
     std::vector< T >            &data,
     T2                          &... others
@@ -342,7 +342,7 @@ unsigned int readVertexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
-    std::string                  data_name
+    const std::string           &data_name
 ) {
 
 // ========================================================================== //
@@ -437,7 +437,7 @@ unsigned int readSimplexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
-    std::string                  data_name
+    const std::string           &data_name
 ) {
 
 // ========================================================================== //
@@ -575,7 +575,7 @@ unsigned int writeVertexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
-    std::string                 Data_name
+    const std::string           &Data_name
 ) {
 
 // ========================================================================== //
@@ -585,6 +585,7 @@ unsigned int writeVertexData(
 // Local variables
 unsigned int        err = 0;
 std::stringstream        sheader;
+std::string              dataset;
 std::string              header;
 
 // Counters
@@ -600,8 +601,9 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 
 // Data header -------------------------------------------------------------- //
-Data_name = utils::string::trim(Data_name);
-sheader << "VERTEXDATA " << Data_name << std::endl;
+dataset = Data_name;
+dataset = utils::string::trim(dataset);
+sheader << "VERTEXDATA " << dataset << std::endl;
 header = sheader.str();
 header = utils::string::trim(header);
 file_handle << header << std::endl;
@@ -629,7 +631,7 @@ unsigned int writeSimplexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
-    std::string                  Data_name
+    const std::string           &Data_name
 ) {
 
 // ========================================================================== //
@@ -639,6 +641,7 @@ unsigned int writeSimplexData(
 // Local variables
 unsigned int        err = 0;
 std::stringstream        sheader;
+std::string              dataset;
 std::string              header;
 
 // Counters
@@ -654,8 +657,9 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 
 // Data header -------------------------------------------------------------- //
-Data_name = utils::string::trim(Data_name);
-sheader << "SIMPLEXDATA " << Data_name << std::endl;
+dataset = Data_name;
+dataset = utils::string::trim(dataset);
+sheader << "SIMPLEXDATA " << dataset << std::endl;
 header = sheader.str();
 header = utils::string::trim(header);
 file_handle << header << std::endl;
