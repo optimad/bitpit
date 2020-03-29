@@ -1281,7 +1281,7 @@ array3D projectPointPolygon( array3D const &P, std::size_t nV, array3D const *V,
  * \param[in] alpha cone half angle
  * \return projection point
  */
-array3D projectPointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha)
+array3D projectPointCone( array3D const &point, array3D const &apex, array3D const &axis, double alpha)
 {
 
 
@@ -1406,7 +1406,7 @@ double distancePointTriangle( array3D const &P, array3D const &Q0, array3D const
  * \param[in] alpha cone half angle
  * \return distance
  */
-double distancePointCone( array3D const &point, array3D const &apex, array3D const &axis, double const &alpha)
+double distancePointCone( array3D const &point, array3D const &apex, array3D const &axis, double alpha)
 {
     array3D xP = projectPointCone( point, apex, axis, alpha);
     return norm2(point-xP);
@@ -2651,7 +2651,7 @@ void subtractionAABB(array3D const &A0, array3D const &A1, array3D const &B0, ar
  * \param[in] V1 second vertex of segment
  * \param[out] P vertex
  */
-void vertexOfSegment(int const &i, array3D const &V0, array3D const &V1, array3D &P)
+void vertexOfSegment(int i, array3D const &V0, array3D const &V1, array3D &P)
 {
     switch(i){
 
@@ -2679,7 +2679,7 @@ void vertexOfSegment(int const &i, array3D const &V0, array3D const &V1, array3D
  * \param[in] V2 third vertex of triangle
  * \param[out] P vertex
  */
-void vertexOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P)
+void vertexOfTriangle(int i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P)
 {
     switch(i){
 
@@ -2712,7 +2712,7 @@ void vertexOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3
  * \param[out] P0 first vertex of edge
  * \param[out] P1 first vertex of edge
  */
-void edgeOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P0, array3D &P1)
+void edgeOfTriangle(int i, array3D const &V0, array3D const &V1, array3D const &V2, array3D &P0, array3D &P1)
 {
     switch(i){
 
@@ -2749,7 +2749,7 @@ void edgeOfTriangle(int const &i, array3D const &V0, array3D const &V1, array3D 
  * \param[out] P2 first vertex of face
  * \param[out] P3 first vertex of face
  */
-void faceOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1, array3D &P2, array3D &P3)
+void faceOfBox(int i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1, array3D &P2, array3D &P3)
 {
 
     assert(i<6);
@@ -2775,7 +2775,7 @@ void faceOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, 
  * \param[out] P0 first vertex of edge
  * \param[out] P1 first vertex of edge
  */
-void edgeOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1)
+void edgeOfBox(int i, array3D const &A0, array3D const &A1, array3D &P0, array3D &P1)
 {
     assert(i<12);
 
@@ -2795,7 +2795,7 @@ void edgeOfBox(int const &i, array3D const &A0, array3D const &A1, array3D &P0, 
  * \param[in] A1 max point of bounding box
  * \param[out] P vertex coordinates
  */
-void vertexOfBox(int  const &i, array3D const &A0, array3D const &A1, array3D &P)
+void vertexOfBox(int i, array3D const &A0, array3D const &A1, array3D &P)
 {
 
     switch(i){
@@ -2939,7 +2939,7 @@ int polygonSubtriangleCount( std::size_t nV, array3D const *V)
  * \param[in] V0 first vertice coordinates of edge
  * \param[in] V1 second vertice coordinates of edge
  */
-void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0, array3D &V1)
+void edgeOfPolygon( int edge, std::vector<array3D> const &V, array3D &V0, array3D &V1)
 {
     edgeOfPolygon( edge, V.size(), V.data(), V0, V1);
 }
@@ -2952,7 +2952,7 @@ void edgeOfPolygon( int const &edge, std::vector<array3D> const &V, array3D &V0,
  * \param[in] V0 first vertice coordinates of edge
  * \param[in] V1 second vertice coordinates of edge
  */
-void edgeOfPolygon( int const &edge, std::size_t nV, array3D const *V, array3D &V0, array3D &V1)
+void edgeOfPolygon( int edge, std::size_t nV, array3D const *V, array3D &V0, array3D &V1)
 {
     assert(edge<polygonEdgesCount(nV, V));
 
@@ -2969,7 +2969,7 @@ void edgeOfPolygon( int const &edge, std::size_t nV, array3D const *V, array3D &
  * \param[in] V1 second vertice coordinates of triangle
  * \param[in] V2 third vertice coordinates of triangle
  */
-void subtriangleOfPolygon( int const &triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
+void subtriangleOfPolygon( int triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
 {
     subtriangleOfPolygon( triangle, V.size(), V.data(), V0, V1, V2);
 }
@@ -2983,7 +2983,7 @@ void subtriangleOfPolygon( int const &triangle, std::vector<array3D> const &V, a
  * \param[in] V1 second vertice coordinates of triangle
  * \param[in] V2 third vertice coordinates of triangle
  */
-void subtriangleOfPolygon( int const &triangle, std::size_t nV, array3D const *V, array3D &V0, array3D &V1, array3D &V2)
+void subtriangleOfPolygon( int triangle, std::size_t nV, array3D const *V, array3D &V0, array3D &V1, array3D &V2)
 {
     BITPIT_UNUSED(nV);
     assert(triangle<polygonSubtriangleCount(nV, V));

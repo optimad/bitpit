@@ -116,7 +116,7 @@ array3D projectPointPolygon( array3D const &, std::size_t, array3D const * );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );
 array3D projectPointPolygon( array3D const &, std::size_t, array3D const *, std::vector<double> & );
 array3D projectPointPolygon( array3D const &, std::size_t, array3D const *, double * );
-array3D projectPointCone( array3D const &, array3D const &, array3D const &, double const &);
+array3D projectPointCone( array3D const &, array3D const &, array3D const &, double );
 std::vector<array3D> projectCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &);
 
 array3D restrictPointTriangle( array3D const &, array3D const &, array3D const &, array3D &);
@@ -139,7 +139,7 @@ double distancePointPolygon( array3D const &, std::vector<array3D> const &, std:
 double distancePointPolygon( array3D const &, std::size_t, array3D const *, std::vector<double> & );
 double distancePointPolygon( array3D const &, std::size_t, array3D const *, double * );
 
-double distancePointCone( array3D const &, array3D const &, array3D const &, double const &);
+double distancePointCone( array3D const &, array3D const &, array3D const &, double );
 
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &);
 std::vector<double> distanceCloudTriangle( std::vector<array3D> const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> & );
@@ -209,23 +209,23 @@ void unionAABB( std::vector<array3D>  const &, std::vector<array3D> const &, arr
 array3D rotateVector( array3D const &, array3D const &, double);
 double areaTriangle( array3D const &, array3D const &, array3D const &);
 
-void vertexOfSegment( int const &, array3D const &, array3D const &, array3D &);
+void vertexOfSegment( int, array3D const &, array3D const &, array3D &);
 
-void vertexOfTriangle( int const &, array3D const &, array3D const &, array3D const &, array3D &);
-void edgeOfTriangle( int const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
+void vertexOfTriangle( int, array3D const &, array3D const &, array3D const &, array3D &);
+void edgeOfTriangle( int, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
 
-void vertexOfBox( int const &, array3D const &, array3D const &, array3D &);
-void edgeOfBox( int const &, array3D const &, array3D const &, array3D &, array3D &);
-void faceOfBox( int const &, array3D const &, array3D const &, array3D &, array3D &, array3D &, array3D & );
+void vertexOfBox( int, array3D const &, array3D const &, array3D &);
+void edgeOfBox( int, array3D const &, array3D const &, array3D &, array3D &);
+void faceOfBox( int, array3D const &, array3D const &, array3D &, array3D &, array3D &, array3D & );
 
 int polygonEdgesCount(std::vector<array3D> const &);
 int polygonEdgesCount(std::size_t, array3D const *);
 int polygonSubtriangleCount(std::vector<array3D> const &);
 int polygonSubtriangleCount(std::size_t, array3D const *);
-void edgeOfPolygon( int const &, std::vector<array3D> const &, array3D &, array3D &);
-void edgeOfPolygon( int const &, std::size_t, array3D const *, array3D &, array3D &);
-void subtriangleOfPolygon( int const &, std::vector<array3D> const &, array3D &, array3D &, array3D &);
-void subtriangleOfPolygon( int const &, std::size_t, array3D const *, array3D &, array3D &, array3D &);
+void edgeOfPolygon( int, std::vector<array3D> const &, array3D &, array3D &);
+void edgeOfPolygon( int, std::size_t, array3D const *, array3D &, array3D &);
+void subtriangleOfPolygon( int, std::vector<array3D> const &, array3D &, array3D &, array3D &);
+void subtriangleOfPolygon( int, std::size_t, array3D const *, array3D &, array3D &, array3D &);
 
 }
 
