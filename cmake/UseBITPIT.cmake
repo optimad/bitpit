@@ -14,6 +14,25 @@ set(BITPIT_USE_FILE_INCLUDED 1)
 # Update CMAKE_MODULE_PATH so includes work.
 list(APPEND CMAKE_MODULE_PATH ${BITPIT_CMAKE_DIR})
 
+# Setp up variables needed by external dependencies
+list(FIND BITPIT_EXTERNAL_DEPENDENCIES "PETSc" _PETSc_index)
+if (${_PETSc_index} GREATER -1)
+    if (NOT PETSC_DIR AND DEFINED ENV{PETSC_DIR})
+        set(DEFAULT_PETSC_DIR "$ENV{PETSC_DIR}")
+    else()
+        set(DEFAULT_PETSC_DIR "")
+    endif()
+    set(PETSC_DIR "${DEFAULT_PETSC_DIR}" CACHE PATH "Installation directory of PETSC library")
+
+    if (NOT PETSC_ARCH AND DEFINED ENV{PETSC_ARCH})
+        set(DEFAULT_PETSC_ARCH "$ENV{PETSC_ARCH}")
+    else()
+        set(DEFAULT_PETSC_ARCH "")
+    endif()
+    set(PETSC_ARCH "${DEFAULT_PETSC_ARCH}" CACHE STRING "Build architecture")
+endif()
+unset(_PETSc_index)
+
 # Add compiler flags needed to use BITPIT.
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BITPIT_REQUIRED_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BITPIT_REQUIRED_CXX_FLAGS}")
