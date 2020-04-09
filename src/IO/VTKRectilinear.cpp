@@ -460,7 +460,7 @@ void VTKRectilinearGrid::setGlobalDimensions( int I, int J ){
  *  Needs to be called only by rank 0.
  *  @param[in] loc min I-index, max I-index, min J-index, max J-index, min K-index, max K-index for each process
  */
-void VTKRectilinearGrid::setGlobalIndex( std::vector<extension3D_t> loc ){
+void VTKRectilinearGrid::setGlobalIndex( const std::vector<extension3D_t> &loc ){
 
     if( loc.size() != m_procs ) 
         log::cout() << "Size of loc_ in VTKRectilinearGrid::setParallelIndex does not fit m_procs " << std::endl ;
@@ -474,7 +474,7 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension3D_t> loc ){
  *  Needs to be called only by rank 0.
  *  @param[in]  loc min I-index, max I-index, min J-index, max J-index for each process
  */
-void VTKRectilinearGrid::setGlobalIndex( std::vector<extension2D_t> loc ){
+void VTKRectilinearGrid::setGlobalIndex( const std::vector<extension2D_t> &loc ){
 
     if( loc.size() !=m_procs ) log::cout() << "Size of loc_ in VTKRectilinearGrid::setParallelIndex does not fit m_procs " << std::endl ;
 

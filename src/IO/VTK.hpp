@@ -495,8 +495,8 @@ class VTKRectilinearGrid : public VTK{
         template<class T>
         void                    setGeomData( VTKRectilinearField, VTKBaseStreamer* = nullptr ) ;
 
-        void                    setGlobalIndex( std::vector<extension3D_t> ) ;
-        void                    setGlobalIndex( std::vector<extension2D_t> ) ;
+        void                    setGlobalIndex( const std::vector<extension3D_t> & ) ;
+        void                    setGlobalIndex( const std::vector<extension2D_t> & ) ;
 
         uint64_t                calcFieldSize( const VTKField &) override ;
         uint64_t                calcFieldEntries( const VTKField &) override ;
