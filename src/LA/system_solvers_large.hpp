@@ -143,11 +143,7 @@ protected:
     void matrixFill(const SparseMatrix &matrix);
     void matrixUpdate(const std::vector<long> &rows, const SparseMatrix &elements);
 
-#if BITPIT_ENABLE_MPI == 1
-    void vectorsInit(const std::vector<long> &ghosts);
-#else
     void vectorsInit();
-#endif
     void vectorsPermute(bool invert);
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
     void vectorsExport(std::vector<double> *solution);

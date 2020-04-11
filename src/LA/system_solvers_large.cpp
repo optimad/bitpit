@@ -304,11 +304,7 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
     matrixFill(matrix);
 
     // Initialize RHS and solution vectors
-#if BITPIT_ENABLE_MPI == 1
-    vectorsInit(matrix.extractGhostGlobalCols());
-#else
     vectorsInit();
-#endif
 
     // The system is now assembled
     m_assembled = true;
@@ -774,15 +770,7 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
 /*!
  * Initialize rhs and solution vectors.
  */
-#if BITPIT_ENABLE_MPI == 1
-/*!
- * \param ghosts is the list of global ids that are ghosts for the local
- * processor
- */
-void SystemSolver::vectorsInit(const std::vector<long> &ghosts)
-#else
 void SystemSolver::vectorsInit()
-#endif
 {
     PetscInt nRows;
     PetscInt nColumns;
@@ -793,15 +781,12 @@ void SystemSolver::vectorsInit()
     PetscInt nGlobalColumns;
     MatGetSize(m_A, &nGlobalRows, &nGlobalColumns);
 
-    int nGhosts = 0;
-    std::vector<PetscInt> ghostGlobalIds(ghosts.size());
-    for (auto &ghostGlobalId : ghosts) {
-        ghostGlobalIds[nGhosts] = ghostGlobalId;
-        ++nGhosts;
-    }
+    PetscInt nGhosts;
+    const PetscInt *ghosts;
+    MatGetGhosts(m_A, &nGhosts, &ghosts);
 
-    VecCreateGhost(m_communicator, nColumns, nGlobalColumns, nGhosts, ghostGlobalIds.data(), &m_solution);
-    VecCreateGhost(m_communicator, nRows, nGlobalRows, nGhosts, ghostGlobalIds.data(), &m_rhs);
+    VecCreateGhost(m_communicator, nColumns, nGlobalColumns, nGhosts, ghosts, &m_solution);
+    VecCreateGhost(m_communicator, nRows, nGlobalRows, nGhosts, ghosts, &m_rhs);
 #else
     VecCreateSeq(PETSC_COMM_SELF, nColumns, &m_solution);
     VecCreateSeq(PETSC_COMM_SELF, nRows, &m_rhs);
