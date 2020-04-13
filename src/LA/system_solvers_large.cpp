@@ -304,7 +304,7 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
     matrixFill(matrix);
 
     // Initialize RHS and solution vectors
-    vectorsInit();
+    vectorsCreate();
 
     // The system is now assembled
     m_assembled = true;
@@ -768,9 +768,9 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
 }
 
 /*!
- * Initialize rhs and solution vectors.
+ * Create rhs and solution vectors.
  */
-void SystemSolver::vectorsInit()
+void SystemSolver::vectorsCreate()
 {
     PetscInt nRows;
     PetscInt nColumns;
