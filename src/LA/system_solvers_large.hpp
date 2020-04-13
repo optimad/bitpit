@@ -65,6 +65,58 @@ struct KSPStatus {
     }
 };
 
+class SystemMatrixAssembler {
+
+public:
+    virtual long getRowCount() const = 0;
+    virtual long getColCount() const = 0;
+
+#if BITPIT_ENABLE_MPI==1
+    virtual long getRowGlobalCount() const = 0;
+    virtual long getColGlobalCount() const = 0;
+
+    virtual long getRowGlobalOffset() const = 0;
+    virtual long getColGlobalOffset() const = 0;
+#endif
+
+    virtual long getRowNZCount(long row) const = 0;
+    virtual long getMaxRowNZCount() const = 0;
+
+    virtual void getRowPattern(long row, ConstProxyVector<long> *pattern) const = 0;
+    virtual void getRowValues(long row, ConstProxyVector<double> *values) const = 0;
+
+protected:
+    SystemMatrixAssembler() = default;
+
+};
+
+class SystemSparseMatrixAssembler : public SystemMatrixAssembler {
+
+public:
+    SystemSparseMatrixAssembler(const SparseMatrix *matrix);
+
+    long getRowCount() const override;
+    long getColCount() const override;
+
+#if BITPIT_ENABLE_MPI==1
+    long getRowGlobalCount() const override;
+    long getColGlobalCount() const override;
+
+    long getRowGlobalOffset() const override;
+    long getColGlobalOffset() const override;
+#endif
+
+    long getRowNZCount(long row) const override;
+    long getMaxRowNZCount() const override;
+
+    void getRowPattern(long row, ConstProxyVector<long> *pattern) const override;
+    void getRowValues(long row, ConstProxyVector<double> *values) const override;
+
+protected:
+    const SparseMatrix *m_matrix;
+
+};
+
 class SystemSolver {
 
 public:
@@ -88,9 +140,14 @@ public:
     void setPermutations(long nRows, const long *rowRanks, long nCols, const long *colRanks);
 
     void assembly(const SparseMatrix &matrix);
+    void assembly(const SystemMatrixAssembler &assembler);
+#if BITPIT_ENABLE_MPI==1
+    void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler);
+#endif
     bool isAssembled() const;
 
     void update(std::size_t nRows, const long *rows, const SparseMatrix &elements);
+    void update(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void setUp();
     bool isSetUp() const;
@@ -139,9 +196,9 @@ protected:
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
 
-    void matrixCreate(const SparseMatrix &matrix);
-    void matrixFill(const SparseMatrix &matrix);
-    void matrixUpdate(std::size_t nRows, const long *rows, const SparseMatrix &elements);
+    void matrixCreate(const SystemMatrixAssembler &assembler);
+    void matrixFill(const SystemMatrixAssembler &assembler);
+    void matrixUpdate(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void vectorsCreate();
     void vectorsPermute(bool invert);

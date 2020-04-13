@@ -32,6 +32,145 @@
 
 namespace bitpit {
 
+/*!
+ * \class SystemMatrixAssembler
+ * \ingroup system_solver_large
+ *
+ * \brief The SystemMatrixAssembler class provides an interface for defining
+ * system matrix assemblers.
+ */
+
+/*!
+ * \class SystemSparseMatrixAssembler
+ * \ingroup system_solver_large
+ *
+ * \brief The SystemSparseMatrixAssembler class defines an assembler for
+ * building the system matrix form a sparse matrix.
+ */
+
+/*!
+ * Constructor.
+ *
+ * \param matrix is the matrix
+ */
+SystemSparseMatrixAssembler::SystemSparseMatrixAssembler(const SparseMatrix *matrix)
+    : SystemMatrixAssembler(), m_matrix(matrix)
+{
+}
+
+/*!
+ * Get the number of rows of the matrix.
+ *
+ * \result The number of rows of the matrix.
+ */
+long SystemSparseMatrixAssembler::getRowCount() const
+{
+    return m_matrix->getRowCount();
+}
+
+/*!
+ * Get the number of columns of the matrix.
+ *
+ * \result The number of columns of the matrix.
+ */
+long SystemSparseMatrixAssembler::getColCount() const
+{
+    return m_matrix->getColCount();
+}
+
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * Get the number of global rows of the matrix.
+ *
+ * \result The number of global rows of the matrix.
+ */
+long SystemSparseMatrixAssembler::getRowGlobalCount() const
+{
+    return m_matrix->getRowGlobalCount();
+}
+
+/*!
+ * Get the number of global columns of the matrix.
+ *
+ * \result The number of global columns of the matrix.
+ */
+long SystemSparseMatrixAssembler::getColGlobalCount() const
+{
+    return m_matrix->getColGlobalCount();
+}
+
+/*!
+ * Get global row offset.
+ *
+ * \result The global row offset.
+ */
+long SystemSparseMatrixAssembler::getRowGlobalOffset() const
+{
+    return m_matrix->getRowGlobalOffset();
+}
+
+/*!
+ * Get global column offset.
+ *
+ * \result The global column offset.
+ */
+long SystemSparseMatrixAssembler::getColGlobalOffset() const
+{
+    return m_matrix->getColGlobalOffset();
+}
+#endif
+
+/*!
+ * Get the number of non-zero elements in the specified row.
+ *
+ * \param row is the row of the matrix
+ * \result The number of non-zero elements in the specified row.
+ */
+long SystemSparseMatrixAssembler::getRowNZCount(long row) const
+{
+    return m_matrix->getRowNZCount(row);
+}
+
+/**
+ * Get the maximum number of non-zero elements per row.
+ *
+ * \result The maximum number of non-zero elements per row.
+ */
+long SystemSparseMatrixAssembler::getMaxRowNZCount() const
+{
+    return m_matrix->getMaxRowNZCount();
+}
+
+/*!
+ * Get the values of the specified row.
+ *
+ * \param row is the row of the matrix
+ * \param pattern on output will contain the values of the specified row
+ */
+void SystemSparseMatrixAssembler::getRowPattern(long row, ConstProxyVector<long> *pattern) const
+{
+    m_matrix->getRowPattern(row, pattern);
+}
+
+/*!
+ * Get the values of the specified row.
+ *
+ * \param row is the row of the matrix
+ * \param pattern on output will contain the values of the specified row
+ */
+void SystemSparseMatrixAssembler::getRowValues(long row, ConstProxyVector<double> *values) const
+{
+    m_matrix->getRowValues(row, values);
+}
+
+/*!
+ * \class SystemSolver
+ * \ingroup system_solver_large
+ *
+ * \brief The SystemSolver class provides methods for building and solving
+ * large linear systems.
+ */
+
 int SystemSolver::m_nInstances = 0;
 bool SystemSolver::m_optionsEditable = true;
 std::vector<std::string> SystemSolver::m_options = std::vector<std::string>(1, "bitpit");
@@ -288,20 +427,58 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
         throw std::runtime_error("Unable to assembly the system. The matrix is not yet assembled.");
     }
 
+    // Assembly the system matrix
+    SystemSparseMatrixAssembler assembler(&matrix);
+#if BITPIT_ENABLE_MPI == 1
+    assembly(matrix.getCommunicator(), matrix.isPartitioned(), assembler);
+#else
+    assembly(assembler);
+#endif
+}
+
+#if BITPIT_ENABLE_MPI == 1
+/*!
+ * Assembly the system.
+ *
+ * \param assembler is the matrix assembler
+ */
+void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
+{
+    assembly(MPI_COMM_SELF, false, assembler);
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param communicator is the MPI communicator
+ * \param partitioned controls if the system is partitioned
+ * \param assembler is the matrix assembler
+ */
+void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler)
+{
+#else
+/*!
+ * Assembly the system.
+ *
+ * \param assembler is the matrix assembler
+ */
+void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
+{
+#endif
     // Clear the system
     clear();
 
 #if BITPIT_ENABLE_MPI == 1
     // Set the communicator
-    setCommunicator(matrix.getCommunicator());
+    setCommunicator(communicator);
 
     // Detect if the system is partitioned
-    m_partitioned = matrix.isPartitioned();
+    m_partitioned = isPartitioned;
 #endif
 
     // Initialize matrix
-    matrixCreate(matrix);
-    matrixFill(matrix);
+    matrixCreate(assembler);
+    matrixFill(assembler);
 
     // Initialize RHS and solution vectors
     vectorsCreate();
@@ -317,7 +494,7 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
  * assembled its pattern cannot be modified.
  *
  * \param nRows is the number of rows that will be updated
- * \param rows are the global indices of the rows that will be updated
+ * \param rows are the indices of the rows that will be updated
  * \param elements are the elements that will be used to update the rows
  */
 void SystemSolver::update(std::size_t nRows, const long *rows, const SparseMatrix &elements)
@@ -327,13 +504,30 @@ void SystemSolver::update(std::size_t nRows, const long *rows, const SparseMatri
         throw std::runtime_error("Unable to update the system. The element storage is not yet assembled.");
     }
 
+    // Update matrix
+    SystemSparseMatrixAssembler assembler(&elements);
+    update(nRows, rows, assembler);
+}
+
+/*!
+ * Update the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the indices of the rows that will be updated
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+void SystemSolver::update(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler)
+{
     // Check if the system is assembled
     if (!isAssembled()) {
         throw std::runtime_error("Unable to update the system. The system is not yet assembled.");
     }
 
     // Update matrix
-    matrixUpdate(nRows, rows, elements);
+    matrixUpdate(nRows, rows, assembler);
 }
 
 /**
@@ -510,71 +704,40 @@ void SystemSolver::postKSPSolveActions()
 /*!
  * Create the matrix.
  *
- * \param matrix is the matrix
+ * \param assembler is the matrix assembler
  */
-void SystemSolver::matrixCreate(const SparseMatrix &matrix)
+void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 {
-    long nRows = matrix.getRowCount();
-    long nCols = matrix.getColCount();
-
     const PetscInt *rowRanks = nullptr;
     if (m_rowPermutation) {
         ISGetIndices(m_rowPermutation, &rowRanks);
     }
 
-    // Set row and column global offset
+    // Set sizes
+    long nRows = assembler.getRowCount();
+    long nCols = assembler.getColCount();
+
 #if BITPIT_ENABLE_MPI == 1
-    m_rowGlobalOffset = matrix.getRowGlobalOffset();
-    m_colGlobalOffset = matrix.getColGlobalOffset();
+    long nGlobalRows = assembler.getRowGlobalCount();
+    long nGlobalCols = assembler.getColGlobalCount();
 #endif
 
 #if BITPIT_ENABLE_MPI == 1
-    // Evaluate the number of non-zero elements
-    //
-    // For each row we count the number of local non-zero elements (d_nnz) and
-    // the number of non-zero elements that belong to other processors (o_nnz)
-    long nGlobalCols      = matrix.getColGlobalCount();
-    long nOffDiagonalCols = nGlobalCols - nCols;
-    long firstColGlobalId = matrix.getColGlobalOffset();
+    // Set row and column global offset
+    m_rowGlobalOffset = assembler.getRowGlobalOffset();
+    m_colGlobalOffset = assembler.getColGlobalOffset();
+#endif
+
+    // Preallocation information
+    std::vector<int> d_nnz(nRows, 0);
+#if BITPIT_ENABLE_MPI == 1
+    std::vector<int> o_nnz(nRows, 0);
+
+    long firstColGlobalId = m_colGlobalOffset;
     long lastColGlobalId  = firstColGlobalId + nCols - 1;
 
-    std::vector<int> d_nnz(nRows, 0);
-    std::vector<int> o_nnz(nRows, 0);
-    if (nOffDiagonalCols > 0) {
-        for (long row = 0; row < nRows; ++row) {
-            long matrixRow = row;
-            if (m_rowPermutation) {
-                matrixRow = rowRanks[matrixRow];
-            }
-
-            ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
-            int nRowNZ = rowPattern.size();
-            for (int k = 0; k < nRowNZ; ++k) {
-                long columnGlobalId = rowPattern[k];
-                if (columnGlobalId < firstColGlobalId || columnGlobalId > lastColGlobalId) {
-                    ++o_nnz[row];
-                } else {
-                    ++d_nnz[row];
-                }
-            }
-        }
-    } else {
-        for (long row = 0; row < nRows; ++row) {
-            long matrixRow = row;
-            if (m_rowPermutation) {
-                matrixRow = rowRanks[matrixRow];
-            }
-
-            ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
-            d_nnz[row] = rowPattern.size();
-        }
-    }
-
-    // Create the matrix
-    MatCreateAIJ(m_communicator, nRows, nCols, PETSC_DETERMINE, PETSC_DETERMINE, 0, d_nnz.data(), 0, o_nnz.data(), &m_A);
-#else
-    // Evaluate the number of non-zero elements
-    std::vector<int> d_nnz(nCols);
+    ConstProxyVector<long> rowPattern;
+#endif
 
     for (long row = 0; row < nRows; ++row) {
         long matrixRow = row;
@@ -582,11 +745,28 @@ void SystemSolver::matrixCreate(const SparseMatrix &matrix)
             matrixRow = rowRanks[matrixRow];
         }
 
-        ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
-        d_nnz[row] = rowPattern.size();
+        d_nnz[row] = assembler.getRowNZCount(matrixRow);
+#if BITPIT_ENABLE_MPI == 1
+        if (m_partitioned) {
+            assembler.getRowPattern(matrixRow, &rowPattern);
+
+            int nRowNZ = rowPattern.size();
+            for (int k = 0; k < nRowNZ; ++k) {
+                long columnGlobalId = rowPattern[k];
+                if (columnGlobalId < firstColGlobalId || columnGlobalId > lastColGlobalId) {
+                    ++o_nnz[row];
+                }
+            }
+
+            d_nnz[row] -= o_nnz[row];
+        }
+#endif
     }
 
     // Create the matrix
+#if BITPIT_ENABLE_MPI == 1
+    MatCreateAIJ(m_communicator, nRows, nCols, nGlobalRows, nGlobalCols, 0, d_nnz.data(), 0, o_nnz.data(), &m_A);
+#else
     MatCreateSeqAIJ(PETSC_COMM_SELF, nRows, nCols, 0, d_nnz.data(), &m_A);
 #endif
 
@@ -599,13 +779,13 @@ void SystemSolver::matrixCreate(const SparseMatrix &matrix)
 /*!
  * Fills the matrix.
  *
- * \param matrix is the matrix
+ * \param assembler is the matrix assembler
  */
-void SystemSolver::matrixFill(const SparseMatrix &matrix)
+void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
 {
-    const long nRows = matrix.getRowCount();
-    const long nCols = matrix.getColCount();
-    const long maxRowNZ = matrix.getMaxRowNZCount();
+    const long nRows = assembler.getRowCount();
+    const long nCols = assembler.getColCount();
+    const long maxRowNZ = assembler.getMaxRowNZCount();
 
     const PetscInt *rowRanks = nullptr;
     if (m_rowPermutation) {
@@ -634,14 +814,16 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
         long firstGlobalCol = rowGlobalOffset;
         long lastGlobalCol  = firstGlobalCol + nCols - 1;
 
+        ConstProxyVector<long> rowPattern;
+        ConstProxyVector<double> rowValues;
         for (long row = 0; row < nRows; ++row) {
             long matrixRow = row;
             if (m_rowPermutation) {
                 matrixRow = rowRanks[matrixRow];
             }
 
-            ConstProxyVector<long> rowPattern = matrix.getRowPattern(matrixRow);
-            ConstProxyVector<double> rowValues = matrix.getRowValues(matrixRow);
+            assembler.getRowPattern(matrixRow, &rowPattern);
+            assembler.getRowValues(matrixRow, &rowValues);
 
             const int nRowNZ = rowPattern.size();
             const PetscInt globalRow = rowGlobalOffset + row;
@@ -686,12 +868,12 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
  * elements.
  *
  * \param nRows is the number of rows that will be updated
- * \param rows are the global indices of the rows that will be updated
- * \param elements are the elements that will be used to update the rows
+ * \param rows are the indices of the rows that will be updated
+ * \param assembler is the matrix assembler for the rows that will be updated
  */
-void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const SparseMatrix &elements)
+void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
-    const long maxRowElements = std::max(elements.getMaxRowNZCount(), 0L);
+    ConstProxyVector<long> rowPattern;
 
     // Check if element columns are already in the pattern
     std::unordered_set<PetscInt> currentRowPattern;
@@ -704,7 +886,7 @@ void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const Spars
 #endif
 
     for (std::size_t n = 0; n < nRows; ++n) {
-        ConstProxyVector<long> rowPattern = elements.getRowPattern(n);
+        assembler.getRowPattern(n, &rowPattern);
         const int nRowElements = rowPattern.size();
         if (nRowElements == 0) {
             continue;
@@ -738,11 +920,14 @@ void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const Spars
     }
 
     // Update element values
-    std::vector<PetscInt> rawRowPattern(maxRowElements);
-    std::vector<PetscScalar> rawRowValues(maxRowElements);
+    const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
 
+    std::vector<PetscInt> rawRowPattern(maxRowNZ);
+    std::vector<PetscScalar> rawRowValues(maxRowNZ);
+
+    ConstProxyVector<double> rowValues;
     for (std::size_t n = 0; n < nRows; ++n) {
-        ConstProxyVector<double> rowValues = elements.getRowValues(n);
+        assembler.getRowValues(n, &rowValues);
         const int nRowElements = rowValues.size();
         if (nRowElements == 0) {
             continue;
@@ -753,7 +938,7 @@ void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const Spars
         const PetscInt globalRow = rowGlobalOffset + row;
 
         // Get pattern
-        ConstProxyVector<long> rowPattern = elements.getRowPattern(n);
+        assembler.getRowPattern(n, &rowPattern);
 
         // Update values
         for (int k = 0; k < nRowElements; ++k) {
