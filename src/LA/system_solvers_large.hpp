@@ -139,7 +139,7 @@ protected:
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
 
-    void matrixInit(const SparseMatrix &matrix);
+    void matrixCreate(const SparseMatrix &matrix);
     void matrixFill(const SparseMatrix &matrix);
     void matrixUpdate(const std::vector<long> &rows, const SparseMatrix &elements);
 

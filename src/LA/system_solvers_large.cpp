@@ -300,7 +300,7 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
 #endif
 
     // Initialize matrix
-    matrixInit(matrix);
+    matrixCreate(matrix);
     matrixFill(matrix);
 
     // Initialize RHS and solution vectors
@@ -507,11 +507,11 @@ void SystemSolver::postKSPSolveActions()
 }
 
 /*!
- * Initializes the matrix.
+ * Create the matrix.
  *
  * \param matrix is the matrix
  */
-void SystemSolver::matrixInit(const SparseMatrix &matrix)
+void SystemSolver::matrixCreate(const SparseMatrix &matrix)
 {
     long nRows = matrix.getRowCount();
     long nCols = matrix.getColCount();
