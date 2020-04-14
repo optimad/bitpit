@@ -316,10 +316,11 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
  * Only the values of the system matrix can be updated, once the system is
  * assembled its pattern cannot be modified.
  *
+ * \param nRows is the number of rows that will be updated
  * \param rows are the global indices of the rows that will be updated
  * \param elements are the elements that will be used to update the rows
  */
-void SystemSolver::update(const std::vector<long> &rows, const SparseMatrix &elements)
+void SystemSolver::update(std::size_t nRows, const long *rows, const SparseMatrix &elements)
 {
     // Check if the element storage is assembled
     if (!elements.isAssembled()) {
@@ -332,7 +333,7 @@ void SystemSolver::update(const std::vector<long> &rows, const SparseMatrix &ele
     }
 
     // Update matrix
-    matrixUpdate(rows, elements);
+    matrixUpdate(nRows, rows, elements);
 }
 
 /**
@@ -684,10 +685,11 @@ void SystemSolver::matrixFill(const SparseMatrix &matrix)
  * The contents of the specified rows will be replaced by the specified
  * elements.
  *
+ * \param nRows is the number of rows that will be updated
  * \param rows are the global indices of the rows that will be updated
  * \param elements are the elements that will be used to update the rows
  */
-void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatrix &elements)
+void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const SparseMatrix &elements)
 {
     const long maxRowElements = std::max(elements.getMaxRowNZCount(), 0L);
 
@@ -701,7 +703,7 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
     rowGlobalOffset = 0;
 #endif
 
-    for (std::size_t n = 0; n < rows.size(); ++n) {
+    for (std::size_t n = 0; n < nRows; ++n) {
         ConstProxyVector<long> rowPattern = elements.getRowPattern(n);
         const int nRowElements = rowPattern.size();
         if (nRowElements == 0) {
@@ -739,7 +741,7 @@ void SystemSolver::matrixUpdate(const std::vector<long> &rows, const SparseMatri
     std::vector<PetscInt> rawRowPattern(maxRowElements);
     std::vector<PetscScalar> rawRowValues(maxRowElements);
 
-    for (std::size_t n = 0; n < rows.size(); ++n) {
+    for (std::size_t n = 0; n < nRows; ++n) {
         ConstProxyVector<double> rowValues = elements.getRowValues(n);
         const int nRowElements = rowValues.size();
         if (nRowElements == 0) {

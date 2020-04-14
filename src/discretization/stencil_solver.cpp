@@ -162,7 +162,7 @@ void StencilScalarSolver::update(const std::vector<long> &rows, const std::vecto
 
     elements.assembly();
 
-    SystemSolver::update(rows, elements);
+    SystemSolver::update(rows.size(), rows.data(), elements);
 }
 
 /*!
