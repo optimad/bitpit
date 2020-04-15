@@ -688,12 +688,26 @@ void SparseMatrix::addRow(long nRowNZ, const long *rowPattern, const double *row
 */
 ConstProxyVector<long> SparseMatrix::getRowPattern(long row) const
 {
+    ConstProxyVector<long> pattern;
+    getRowPattern(row, &pattern);
+
+    return pattern;
+}
+
+/**
+* Get the pattern of the specified row.
+*
+* \param row is the row
+* \param pattern on output will contain the pattern of the specified row
+*/
+void SparseMatrix::getRowPattern(long row, ConstProxyVector<long> *pattern) const
+{
     const std::size_t *rowExtent = m_pattern.indices(row);
 
     const long *rowPattern = m_pattern.data() + rowExtent[0];
     const std::size_t rowPatternSize = rowExtent[1] - rowExtent[0];
 
-    return ConstProxyVector<long>(rowPattern, rowPatternSize);
+    pattern->set(rowPattern, rowPatternSize);
 }
 
 /**

@@ -93,6 +93,7 @@ public:
 
     ConstProxyVector<double> getRowValues(long row) const;
     ConstProxyVector<long> getRowPattern(long row) const;
+    void getRowPattern(long row, ConstProxyVector<long> *pattern) const;
 
 protected:
     long m_nRows;
