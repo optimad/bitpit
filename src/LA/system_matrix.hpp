@@ -91,11 +91,11 @@ public:
     void addRow(const std::vector<long> &rowPattern, const std::vector<double> &rowValues);
     void addRow(long nRowNZ, const long *rowPattern, const double *rowValues);
 
-    ConstProxyVector<double> getRowValues(long row) const;
-    void getRowValues(long row, ConstProxyVector<double> *values) const;
-
     ConstProxyVector<long> getRowPattern(long row) const;
     void getRowPattern(long row, ConstProxyVector<long> *pattern) const;
+
+    ConstProxyVector<double> getRowValues(long row) const;
+    void getRowValues(long row, ConstProxyVector<double> *values) const;
 
 protected:
     long m_nRows;
