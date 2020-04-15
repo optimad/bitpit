@@ -27,6 +27,198 @@
 namespace bitpit {
 
 /*!
+ * \class StencilSolverAssembler
+ * \ingroup discretization
+ *
+ * \brief The StencilSolverAssembler class defines an assembler for
+ * building the stencil solver.
+ */
+
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ */
+StencilSolverAssembler::StencilSolverAssembler(const std::vector<StencilScalar> *stencils)
+    : StencilSolverAssembler(MPI_COMM_SELF, false, stencils)
+{
+}
+
+/*!
+ * Constructor.
+ *
+ * \param communicator is the MPI communicator
+ * \param partitioned controls if the matrix is partitioned
+ * \param stencils are the stencils
+ */
+StencilSolverAssembler::StencilSolverAssembler(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> *stencils)
+#else
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ */
+StencilSolverAssembler::StencilSolverAssembler(const std::vector<StencilScalar> *stencils)
+#endif
+    : SystemMatrixAssembler(), m_stencils(stencils)
+{
+    // Count the DOFs
+    m_nDOFs = m_stencils->size();
+
+#if BITPIT_ENABLE_MPI==1
+    m_nGlobalDOFs = m_nDOFs;
+    if (partitioned) {
+        MPI_Allreduce(MPI_IN_PLACE, &m_nGlobalDOFs, 1, MPI_LONG, MPI_SUM, communicator);
+    }
+#endif
+
+    // Count maximum non-zero elements
+    m_maxRowNZ = 0;
+    for (const StencilScalar &stencil : *m_stencils) {
+        m_maxRowNZ = std::max(m_maxRowNZ, (long) stencil.size());
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    // Get offsets
+    m_globalDOFOffset = 0;
+    if (partitioned) {
+        int nProcessors;
+        MPI_Comm_size(communicator, &nProcessors);
+
+        std::vector<long> nRankDOFs(nProcessors);
+        MPI_Allgather(&m_nDOFs, 1, MPI_LONG, nRankDOFs.data(), 1, MPI_LONG, communicator);
+
+        int rank;
+        MPI_Comm_rank(communicator, &rank);
+        for (int i = 0; i < rank; ++i) {
+            m_globalDOFOffset += nRankDOFs[i];
+        }
+    }
+#endif
+}
+
+/*!
+ * Get the number of rows of the matrix.
+ *
+ * \result The number of rows of the matrix.
+ */
+long StencilSolverAssembler::getRowCount() const
+{
+    return m_nDOFs;
+}
+
+/*!
+ * Get the number of columns of the matrix.
+ *
+ * \result The number of columns of the matrix.
+ */
+long StencilSolverAssembler::getColCount() const
+{
+    return m_nDOFs;
+}
+
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * Get the number of global rows of the matrix.
+ *
+ * \result The number of global rows of the matrix.
+ */
+long StencilSolverAssembler::getRowGlobalCount() const
+{
+    return m_nGlobalDOFs;
+}
+
+/*!
+ * Get the number of global columns of the matrix.
+ *
+ * \result The number of global columns of the matrix.
+ */
+long StencilSolverAssembler::getColGlobalCount() const
+{
+    return m_nGlobalDOFs;
+}
+
+/*!
+ * Get global row offset.
+ *
+ * \result The global row offset.
+ */
+long StencilSolverAssembler::getRowGlobalOffset() const
+{
+    return m_globalDOFOffset;
+}
+
+/*!
+ * Get global column offset.
+ *
+ * \result The global column offset.
+ */
+long StencilSolverAssembler::getColGlobalOffset() const
+{
+    return m_globalDOFOffset;
+}
+#endif
+
+/*!
+ * Get the number of non-zero elements in the specified row.
+ *
+ * \param row is the row of the matrix
+ * \result The number of non-zero elements in the specified row.
+ */
+long StencilSolverAssembler::getRowNZCount(long row) const
+{
+    return (*m_stencils)[row].size();
+}
+
+/**
+ * Get the maximum number of non-zero elements per row.
+ *
+ * \result The maximum number of non-zero elements per row.
+ */
+long StencilSolverAssembler::getMaxRowNZCount() const
+{
+    return m_maxRowNZ;
+}
+
+/*!
+ * Get the values of the specified row.
+ *
+ * \param row is the row of the matrix
+ * \param pattern on output will contain the values of the specified row
+ */
+void StencilSolverAssembler::getRowPattern(long row, ConstProxyVector<long> *pattern) const
+{
+    const StencilScalar &stencil = (*m_stencils)[row];
+    pattern->set(stencil.patternData(), stencil.size());
+}
+
+/*!
+ * Get the values of the specified row.
+ *
+ * \param row is the row of the matrix
+ * \param pattern on output will contain the values of the specified row
+ */
+void StencilSolverAssembler::getRowValues(long row, ConstProxyVector<double> *values) const
+{
+    const StencilScalar &stencil = (*m_stencils)[row];
+    values->set(stencil.weightData(), stencil.size());
+}
+
+/*!
+ * Get the constant associated with the specified row.
+ *
+ * \param row is the row of the matrix
+ * \result The constant associated with the specified row.
+ */
+double StencilSolverAssembler::getRowConstant(long row) const
+{
+    const StencilScalar &stencil = (*m_stencils)[row];
+
+    return stencil.getConstant();
+}
+
+/*!
 * \ingroup discretization
 * \class StencilScalarSolver
 *
@@ -103,30 +295,21 @@ void StencilScalarSolver::assembly(MPI_Comm communicator, bool partitioned, cons
 void StencilScalarSolver::assembly(const std::vector<StencilScalar> &stencils)
 #endif
 {
-    long nDOFs = stencils.size();
-
-    long nNZ = 0;
-    for (const StencilScalar &stencil : stencils) {
-        nNZ += stencil.size();
-    }
-
+    // Assembly system
 #if BITPIT_ENABLE_MPI==1
-    SparseMatrix matrix(communicator, partitioned, nDOFs, nDOFs, nNZ);
+    StencilSolverAssembler assembler(communicator, partitioned, &stencils);
+    SystemSolver::assembly(communicator, partitioned, assembler);
 #else
-    SparseMatrix matrix(nDOFs, nDOFs, nNZ);
+    StencilSolverAssembler assembler(&stencils);
+    SystemSolver::assembly(assembler);
 #endif
 
-    m_constants.resize(nDOFs);
-
-    for (long n = 0; n < nDOFs; ++n) {
-        const StencilScalar &stencil = stencils[n];
-        matrix.addRow(stencil.size(), stencil.patternData(), stencil.weightData());
-        m_constants[n] = stencil.getConstant();
+    // Set constants
+    long nRows = assembler.getRowCount();
+    m_constants.resize(nRows);
+    for (long n = 0; n < nRows; ++n) {
+        m_constants[n] = assembler.getRowConstant(n);
     }
-
-    matrix.assembly();
-
-    SystemSolver::assembly(matrix);
 }
 
 /*!
@@ -140,30 +323,20 @@ void StencilScalarSolver::assembly(const std::vector<StencilScalar> &stencils)
  */
 void StencilScalarSolver::update(const std::vector<long> &rows, const std::vector<StencilScalar> &stencils)
 {
-    long nDOFs = stencils.size();
-
-    long nNZ = 0;
-    for (const StencilScalar &stencil : stencils) {
-        nNZ += stencil.size();
-    }
-
+    // Assembly system
 #if BITPIT_ENABLE_MPI==1
-    SparseMatrix elements(getCommunicator(), isPartitioned(), nDOFs, nDOFs, nNZ);
+    StencilSolverAssembler assembler(getCommunicator(), isPartitioned(), &stencils);
 #else
-    SparseMatrix elements(nDOFs, nDOFs, nNZ);
+    StencilSolverAssembler assembler(&stencils);
 #endif
+    SystemSolver::update(rows.size(), rows.data(), assembler);
 
-    for (long n = 0; n < nDOFs; ++n) {
+    // Set constants
+    long nUpdatedRows = rows.size();
+    for (long n = 0; n < nUpdatedRows; ++n) {
         long row = rows[n];
-
-        const StencilScalar &stencil = stencils[n];
-        elements.addRow(stencil.size(), stencil.patternData(), stencil.weightData());
-        m_constants[row] = stencil.getConstant();
+        m_constants[row] = assembler.getRowConstant(n);
     }
-
-    elements.assembly();
-
-    SystemSolver::update(rows.size(), rows.data(), elements);
 }
 
 /*!

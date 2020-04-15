@@ -36,6 +36,47 @@
 
 namespace bitpit {
 
+class StencilSolverAssembler : public SystemMatrixAssembler {
+
+public:
+    StencilSolverAssembler(const std::vector<StencilScalar> *stencils);
+#if BITPIT_ENABLE_MPI==1
+    StencilSolverAssembler(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> *stencils);
+#endif
+
+    long getRowCount() const override;
+    long getColCount() const override;
+
+#if BITPIT_ENABLE_MPI==1
+    long getRowGlobalCount() const override;
+    long getColGlobalCount() const override;
+
+    long getRowGlobalOffset() const override;
+    long getColGlobalOffset() const override;
+#endif
+
+    long getRowNZCount(long row) const override;
+    long getMaxRowNZCount() const override;
+
+    void getRowPattern(long row, ConstProxyVector<long> *pattern) const override;
+    void getRowValues(long row, ConstProxyVector<double> *values) const override;
+
+    double getRowConstant(long row) const;
+
+protected:
+    const std::vector<StencilScalar> *m_stencils;
+
+    long m_nDOFs;
+    long m_maxRowNZ;
+
+#if BITPIT_ENABLE_MPI==1
+    long m_nGlobalDOFs;
+    long m_globalDOFOffset;
+#endif
+
+
+};
+
 class StencilScalarSolver : public SystemSolver {
 
 public:
