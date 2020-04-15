@@ -718,12 +718,26 @@ void SparseMatrix::getRowPattern(long row, ConstProxyVector<long> *pattern) cons
 */
 ConstProxyVector<double> SparseMatrix::getRowValues(long row) const
 {
+    ConstProxyVector<double> values;
+    getRowValues(row, &values);
+
+    return values;
+}
+
+/**
+* Get the values of the specified row.
+*
+* \param row is the row
+* \param values on output will contain the values of the specified row
+*/
+void SparseMatrix::getRowValues(long row, ConstProxyVector<double> *values) const
+{
     const std::size_t *rowExtent = m_pattern.indices(row);
 
     const double *rowValues = m_values.data() + rowExtent[0];
     const std::size_t nRowValues = rowExtent[1] - rowExtent[0];
 
-    return ConstProxyVector<double>(rowValues, nRowValues);
+    values->set(rowValues, nRowValues);
 }
 
 }
