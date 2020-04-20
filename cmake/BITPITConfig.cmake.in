@@ -153,7 +153,9 @@ libfind_process(BITPIT)
 #-----------------------------------------------------------------------------
 
 # Find external packages
-foreach(_DEPENDENCY @BITPIT_EXTERNAL_DEPENDENCIES@)
+set(_EXTERNAL_DEPENDENCIES "@BITPIT_EXTERNAL_DEPENDENCIES@")
+list(REVERSE _EXTERNAL_DEPENDENCIES)
+foreach(_DEPENDENCY ${_EXTERNAL_DEPENDENCIES})
     find_package("${_DEPENDENCY}" REQUIRED)
 endforeach()
 
