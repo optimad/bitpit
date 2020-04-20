@@ -581,6 +581,10 @@ public:
 	void partitioningCleanup();
 #endif
 
+	std::array<double, 3> evalElementCentroid(const Element &element) const;
+	void evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
+	ConstProxyVector<std::array<double, 3>> getElementVertexCoordinates(const Element &element, std::array<double, 3> *externalStorage = nullptr) const;
+
 protected:
 #if BITPIT_ENABLE_MPI==1
 	const static int DEFAULT_PARTITIONING_WEIGTH;
@@ -685,8 +689,6 @@ protected:
 	template<typename item_t, typename id_t = long>
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 
-	ConstProxyVector<std::array<double, 3>> getElementVertexCoordinates(const Element &element, std::array<double, 3> *externalStorage = nullptr) const;
-
 private:
 	IndexGenerator<long> m_vertexIdGenerator;
 	IndexGenerator<long> m_interfaceIdGenerator;
@@ -773,9 +775,6 @@ private:
 	int findAdjoinNeighFace(long cellId, long neighId) const;
 
 	void setId(int id);
-
-	std::array<double, 3> evalElementCentroid(const Element &element) const;
-	void evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 
 	void mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination);
 
