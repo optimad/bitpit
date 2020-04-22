@@ -90,7 +90,6 @@ public:
     */
     FlatVector2D & operator=(FlatVector2D &&other) = default;
 
-    void initialize(const std::vector<int> &sizes, const T &value = T());
     void initialize(const std::vector<std::size_t> &sizes, const T &value = T());
     void initialize(std::size_t nVectors, std::size_t size, const T &value = T());
     void initialize(const std::vector<std::vector<T> > &vector2D);
