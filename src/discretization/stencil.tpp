@@ -109,8 +109,54 @@ DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, int nBucketItems, const
 */
 template<typename weight_t>
 DiscreteStencil<weight_t>::DiscreteStencil(const std::vector<std::size_t> &bucketSizes, const weight_t &zero)
+    : DiscreteStencil(bucketSizes.size(), bucketSizes.data(), zero)
+{
+}
+
+/*!
+* Constructor
+*
+* \param nBuckets is the number of the buckets
+* \param bucketSizes are the sizes of the buckets
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero)
     : m_zero(zero),
-      m_pattern(bucketSizes, NULL_ID), m_weights(bucketSizes, zero),
+      m_pattern(nBuckets, bucketSizes, &NULL_ID), m_weights(nBuckets, bucketSizes, &zero),
+      m_constant(m_zero)
+{
+}
+
+/*!
+* Constructor
+*
+* \param nBuckets is the number of buckets in the stencil
+* \param bucketSizes are the sizes of the buckets in the stencil
+* \param pattern is the patterns of the stencil
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t &zero)
+    : m_zero(zero),
+      m_pattern(nBuckets, bucketSizes, pattern), m_weights(nBuckets, bucketSizes, &zero),
+      m_constant(m_zero)
+{
+}
+
+/*!
+* Constructor
+*
+* \param nBuckets is the number of buckets in the stencil
+* \param bucketSizes are the sizes of the buckets in the stencil
+* \param pattern is the patterns of the stencil
+* \param weights are the weights of the stencil
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t *weights, const weight_t &zero)
+    : m_zero(zero),
+      m_pattern(nBuckets, bucketSizes, pattern), m_weights(nBuckets, bucketSizes, weights),
       m_constant(m_zero)
 {
 }
@@ -157,15 +203,64 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, int nBucketItems, const
 /*!
 * Initialize the stencil
 *
+* \param nBuckets is the number of buckets in the stencil
 * \param bucketSizes are the sizes of the buckets in the stencil
 * \param zero is the value to be used as zero
 */
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(const std::vector<std::size_t> &bucketSizes, const weight_t &zero)
 {
+    initialize(bucketSizes.size(), bucketSizes.data(), zero);
+}
+
+/*!
+* Initialize the stencil
+*
+* \param nBuckets is the number of buckets in the stencil
+* \param bucketSizes are the sizes of the buckets in the stencil
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero)
+{
     m_zero = zero;
-    m_pattern.initialize(bucketSizes, NULL_ID);
-    m_weights.initialize(bucketSizes, zero);
+    m_pattern.initialize(nBuckets, bucketSizes, &NULL_ID);
+    m_weights.initialize(nBuckets, bucketSizes, &zero);
+    m_constant = m_zero;
+}
+
+/*!
+* Initialize the stencil
+*
+* \param nBuckets is the number of buckets in the stencil
+* \param bucketSizes are the sizes of the buckets in the stencil
+* \param pattern is the patterns of the stencil
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t &zero)
+{
+    m_zero = zero;
+    m_pattern.initialize(nBuckets, bucketSizes, pattern);
+    m_weights.initialize(nBuckets, bucketSizes, &zero);
+    m_constant = m_zero;
+}
+
+/*!
+* Initialize the stencil
+*
+* \param nBuckets is the number of buckets in the stencil
+* \param bucketSizes are the sizes of the buckets in the stencil
+* \param pattern is the patterns of the stencil
+* \param weights are the weights of the stencil
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t *weights, const weight_t &zero)
+{
+    m_zero = zero;
+    m_pattern.initialize(nBuckets, bucketSizes, pattern);
+    m_weights.initialize(nBuckets, bucketSizes, weights);
     m_constant = m_zero;
 }
 
