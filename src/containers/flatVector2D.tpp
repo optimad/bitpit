@@ -273,7 +273,7 @@ void FlatVector2D<T>::initialize(const std::vector<std::vector<T> > &vector2D)
 
     // Initialize the storage
     if (reallocateValues) {
-        m_v.resize(m_index[nVectors]);
+        m_v.resize(nItems);
     }
 
     std::size_t k = 0;
