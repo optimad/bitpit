@@ -70,6 +70,7 @@ public:
     FlatVector2D(bool initialize = true);
     FlatVector2D(const std::vector<std::size_t> &sizes, const T &value = T());
     FlatVector2D(std::size_t nVectors, std::size_t size, const T &value = T());
+    FlatVector2D(std::size_t nVectors, const std::size_t *sizes, const T *values);
     FlatVector2D(const std::vector<std::vector<T> > &vector2D);
     FlatVector2D(const FlatVector2D &other) = default;
     FlatVector2D(FlatVector2D &&other) = default;
@@ -92,6 +93,7 @@ public:
 
     void initialize(const std::vector<std::size_t> &sizes, const T &value = T());
     void initialize(std::size_t nVectors, std::size_t size, const T &value = T());
+    void initialize(std::size_t nVectors, const std::size_t *sizes, const T *values);
     void initialize(const std::vector<std::vector<T> > &vector2D);
     void initialize(const FlatVector2D<T> &other);
 
@@ -159,6 +161,8 @@ private:
     T* operator[](std::size_t i);
     bool isIndexValid(std::size_t i) const;
     bool isIndexValid(std::size_t i, std::size_t j) const;
+
+    void initialize(std::size_t nVectors, const std::size_t *sizes, std::size_t sizesStride, const T *values, std::size_t valuesStride);
 
     void destroy(bool destroyIndex, bool destroyValues);
 

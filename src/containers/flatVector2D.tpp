@@ -92,7 +92,7 @@ FlatVector2D<T>::FlatVector2D(bool initialize)
 template <class T>
 FlatVector2D<T>::FlatVector2D(const std::vector<std::size_t> &sizes, const T &value)
 {
-    initialize(sizes, value);
+    initialize(sizes.size(), sizes.data(), 1, &value, 0);
 }
 
 /*!
@@ -106,7 +106,20 @@ FlatVector2D<T>::FlatVector2D(const std::vector<std::size_t> &sizes, const T &va
 template <class T>
 FlatVector2D<T>::FlatVector2D(std::size_t nVectors, std::size_t size, const T &value)
 {
-    initialize(nVectors, size, value);
+    initialize(nVectors, &size, 0, &value, 0);
+}
+
+/*!
+    Creates a new container.
+
+    \param nVectors is the number of vectors
+    \param sizes are the sizes of the vectors
+    \param values are the values of the vectors
+*/
+template <class T>
+FlatVector2D<T>::FlatVector2D(std::size_t nVectors, const std::size_t *sizes, const T *values)
+{
+    initialize(nVectors, sizes, 1, values, 1);
 }
 
 /*!
@@ -131,11 +144,53 @@ FlatVector2D<T>::FlatVector2D(const std::vector<std::vector<T> > &vector2D)
 template <class T>
 void FlatVector2D<T>::initialize(const std::vector<std::size_t> &sizes, const T &value)
 {
-    std::size_t nVectors = sizes.size();
+    initialize(sizes.size(), sizes.data(), 1, &value, 1);
+}
 
+/*!
+    Initializes the container.
+
+    \param nVectors is the number of vectors
+    \param size is the size of the vectors
+    \param value is the value that will be use to initialize the
+    items of the vectors
+*/
+template <class T>
+void FlatVector2D<T>::initialize(std::size_t nVectors, std::size_t size, const T &value)
+{
+    initialize(nVectors, &size, 0, &value, 0);
+}
+
+/*!
+    Initializes the container.
+
+    \param nVectors is the number of vectors
+    \param sizes are the sizes of the vectors
+    \param values are the values of the vectors
+*/
+template <class T>
+void FlatVector2D<T>::initialize(std::size_t nVectors, const std::size_t *sizes, const T *values)
+{
+    initialize(nVectors, sizes, 1, values, 1);
+}
+
+/*!
+    Initializes the container.
+
+    \param sizes are the sizes of the vectors
+    \param sizesStride is the stride for accessing the sizes
+    \param value are the values of each vector
+    \param sizesStride is the stride for accessing the values
+
+*/
+template <class T>
+void FlatVector2D<T>::initialize(std::size_t nVectors,
+                                 const std::size_t *sizes, std::size_t sizesStride,
+                                 const T *values, std::size_t valuesStride)
+{
     std::size_t nItems = 0;
     for (std::size_t i = 0; i < nVectors; ++i) {
-        nItems += sizes[i];
+        nItems += *(sizes + i * sizesStride);
     }
 
     // Check if the container need reallocation
@@ -163,66 +218,29 @@ void FlatVector2D<T>::initialize(const std::vector<std::size_t> &sizes, const T 
 
     m_index[0] = 0;
     for (std::size_t i = 0; i < nVectors; ++i) {
-        m_index[i+1] = m_index[i] + sizes[i];
+        m_index[i+1] = m_index[i] + *(sizes + i * sizesStride);
     }
 
     // Initialize the storage
-    if (reallocateValues) {
-        m_v.assign(m_index[nVectors], value);
-    } else {
-        for (std::size_t k = 0; k < nItems; ++k) {
-            m_v[k] = value;
+    if (valuesStride == 0) {
+        if (reallocateValues) {
+            m_v.assign(nItems, *values);
+        } else {
+            for (std::size_t k = 0; k < nItems; ++k) {
+                m_v[k] = *values;
+            }
         }
-    }
-}
-
-/*!
-    Initializes the container.
-
-    \param nVectors is the number of vectors
-    \param size is the size of the vectors
-    \param value is the value that will be use to initialize the items of
-    the vectors
-*/
-template <class T>
-void FlatVector2D<T>::initialize(std::size_t nVectors, std::size_t size, const T &value)
-{
-    std::size_t nItems = nVectors * size;
-
-    // Check if the container need reallocation
-    //
-    // If the current number of items is different from the number of items
-    // the container should contain after the initialization, a reallocation
-    // is needed.
-    bool reallocateIndex  = (nVectors != this->size());
-    bool reallocateValues = (nItems != getItemCount());
-
-    // Destroy the container
-    //
-    // Index and the storage data will probabily be stored in memory
-    // regions contigous to each other. To reduce memory fragmentation
-    // it's better to deallocate the container before updating its
-    // data structures.
-    if (reallocateIndex || reallocateValues) {
-        destroy(reallocateIndex, reallocateValues);
-    }
-
-    // Initialize the indexes
-    if (reallocateIndex) {
-        m_index.resize(nVectors + 1);
-    }
-
-    m_index[0] = 0;
-    for (std::size_t i = 0; i < nVectors; ++i) {
-        m_index[i+1] = m_index[i] + size;
-    }
-
-    // Initialize the storage
-    if (reallocateValues) {
-        m_v.assign(m_index[nVectors], value);
     } else {
-        for (std::size_t k = 0; k < nItems; ++k) {
-            m_v[k] = value;
+        if (reallocateValues) {
+            m_v.resize(nItems);
+        }
+
+        std::size_t k = 0;
+        for (std::size_t i = 0; i < nVectors; ++i) {
+            std::size_t subArraySize = *(sizes + i * sizesStride);
+            for (std::size_t j = 0; j < subArraySize; ++j) {
+                m_v[k++] = *(values + i * valuesStride + j);
+            }
         }
     }
 }
