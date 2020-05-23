@@ -35,6 +35,7 @@ namespace bitpit {
 
 template class DiscreteStencil<double>;
 template class DiscreteStencil<std::array<double, 3>>;
+template class DiscreteStencil<std::vector<double>>;
 
 }
 

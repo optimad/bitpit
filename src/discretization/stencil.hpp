@@ -207,6 +207,7 @@ namespace bitpit {
 
 typedef DiscreteStencil<double> StencilScalar;
 typedef DiscreteStencil<std::array<double, 3>> StencilVector;
+typedef DiscreteStencil<std::vector<double>> StencilBlock;
 
 }
 
@@ -216,6 +217,7 @@ namespace bitpit {
 
 extern template class DiscreteStencil<double>;
 extern template class DiscreteStencil<std::array<double, 3>>;
+extern template class DiscreteStencil<std::vector<double>>;
 
 }
 #endif
