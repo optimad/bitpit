@@ -146,7 +146,9 @@ public:
 #endif
     bool isAssembled() const;
 
+    void update(const SparseMatrix &elements);
     void update(std::size_t nRows, const long *rows, const SparseMatrix &elements);
+    void update(const SystemMatrixAssembler &assembler);
     void update(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void setUp();

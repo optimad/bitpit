@@ -488,6 +488,19 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
 }
 
 /*!
+ * Update all the rows of the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param elements are the elements that will be used to update the rows
+ */
+void SystemSolver::update(const SparseMatrix &elements)
+{
+    update(getRowCount(), nullptr, elements);
+}
+
+/*!
  * Update the system.
  *
  * Only the values of the system matrix can be updated, once the system is
@@ -507,6 +520,19 @@ void SystemSolver::update(std::size_t nRows, const long *rows, const SparseMatri
     // Update matrix
     SystemSparseMatrixAssembler assembler(&elements);
     update(nRows, rows, assembler);
+}
+
+/*!
+ * Update all the rows of the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+void SystemSolver::update(const SystemMatrixAssembler &assembler)
+{
+    update(getRowCount(), nullptr, assembler);
 }
 
 /*!
@@ -868,7 +894,9 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  * elements.
  *
  * \param nRows is the number of rows that will be updated
- * \param rows are the indices of the rows that will be updated
+ * \param rows are the indices of the rows that will be updated, if a
+ * null pointer is passed, the rows that will be updated are the rows
+ * from 0 to (nRows - 1).
  * \param assembler is the matrix assembler for the rows that will be updated
  */
 void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler)
@@ -893,7 +921,13 @@ void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const Syste
         }
 
         // Get global row
-        long row = rows[n];
+        long row;
+        if (rows) {
+            row = rows[n];
+        } else {
+            row = n;
+        }
+
         const PetscInt globalRow = rowGlobalOffset + row;
 
         // Get current row pattern
@@ -934,7 +968,13 @@ void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const Syste
         }
 
         // Get global row
-        long row = rows[n];
+        long row;
+        if (rows) {
+            row = rows[n];
+        } else {
+            row = n;
+        }
+
         const PetscInt globalRow = rowGlobalOffset + row;
 
         // Get pattern
