@@ -85,6 +85,7 @@ void StencilScalarSolver::assembly(const std::vector<StencilScalar> &stencils)
 {
     assembly(MPI_COMM_SELF, false, stencils);
 }
+
 /*!
 * Initialize the stencil solver.
 *
