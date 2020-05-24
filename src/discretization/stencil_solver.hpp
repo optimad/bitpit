@@ -22,12 +22,13 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_STENCIL_SCALAR_SOLVER_HPP__
-#define __BITPIT_STENCIL_SCALAR_SOLVER_HPP__
+#ifndef __BITPIT_STENCIL_SOLVER_HPP__
+#define __BITPIT_STENCIL_SOLVER_HPP__
 
 #if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #endif
+#include <algorithm>
 #include <vector>
 
 #include "bitpit_LA.hpp"
@@ -36,13 +37,16 @@
 
 namespace bitpit {
 
-class StencilSolverAssembler : public SystemMatrixAssembler {
+template<typename stencil_t>
+class DiscretizationStencilSolverAssembler : public SystemMatrixAssembler {
 
 public:
-    StencilSolverAssembler(const std::vector<StencilScalar> *stencils);
+    DiscretizationStencilSolverAssembler(const std::vector<stencil_t> *stencils);
 #if BITPIT_ENABLE_MPI==1
-    StencilSolverAssembler(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> *stencils);
+    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const std::vector<stencil_t> *stencils);
 #endif
+
+    int getBlockSize() const;
 
     long getRowCount() const override;
     long getColCount() const override;
@@ -55,19 +59,36 @@ public:
     long getColGlobalOffset() const override;
 #endif
 
-    long getRowNZCount(long row) const override;
+    long getRowNZCount(long rowIndex) const override;
     long getMaxRowNZCount() const override;
 
-    void getRowPattern(long row, ConstProxyVector<long> *pattern) const override;
-    void getRowValues(long row, ConstProxyVector<double> *values) const override;
-
-    double getRowConstant(long row) const;
+    void getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const override;
+    void getRowValues(long rowIndex, ConstProxyVector<double> *values) const override;
+    double getRowConstant(long rowIndex) const;
 
 protected:
-    const std::vector<StencilScalar> *m_stencils;
+    const std::vector<stencil_t> *m_stencils;
+
+    int m_blockSize;
 
     long m_nDOFs;
     long m_maxRowNZ;
+
+    void initializeBlockSize();
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
+    void _getRowValues(long rowIndex, ConstProxyVector<double> *values) const;
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
+    void _getRowValues(long rowIndex, ConstProxyVector<double> *values) const;
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
+    double _getRowConstant(long rowIndex) const;
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
+    double _getRowConstant(long rowIndex) const;
+
+    double getRawValue(const typename stencil_t::weight_type &weight, int item) const;
 
 #if BITPIT_ENABLE_MPI==1
     long m_nGlobalDOFs;
@@ -77,28 +98,63 @@ protected:
 
 };
 
-class StencilScalarSolver : public SystemSolver {
+template<typename stencil_t>
+class DiscretizationStencilSolver : public SystemSolver {
 
 public:
-    StencilScalarSolver(bool debug = false);
-    StencilScalarSolver(const std::string &prefix, bool debug = false);
+    DiscretizationStencilSolver(bool debug = false);
+    DiscretizationStencilSolver(const std::string &prefix, bool debug = false);
 
     void clear(bool release = false);
-    void assembly(const std::vector<StencilScalar> &stencils);
+    void assembly(const std::vector<stencil_t> &stencils);
 #if BITPIT_ENABLE_MPI==1
-    void assembly(MPI_Comm communicator, bool partitioned, const std::vector<StencilScalar> &stencils);
+    void assembly(MPI_Comm communicator, bool partitioned, const std::vector<stencil_t> &stencils);
 #endif
-    void update(const std::vector<StencilScalar> &stencils);
-    void update(const std::vector<long> &rows, const std::vector<StencilScalar> &stencils);
-    void update(std::size_t nRows, const long *rows, const std::vector<StencilScalar> &stencils);
+    void update(const std::vector<stencil_t> &stencils);
+    void update(const std::vector<long> &rows, const std::vector<stencil_t> &stencils);
+    void update(std::size_t nRows, const long *rows, const std::vector<stencil_t> &stencils);
 
     void solve();
 
+    std::size_t getStencilCount() const;
+
 protected:
+    std::size_t nStencils;
+
     std::vector<double> m_constants;
 
 };
 
+// Specializations
+template<>
+void DiscretizationStencilSolverAssembler<StencilScalar>::initializeBlockSize();
+
+template<>
+double DiscretizationStencilSolverAssembler<StencilScalar>::getRawValue(const StencilScalar::weight_type &element, int item) const;
+
 }
+
+// Template implementation
+#include "stencil_solver.tpp"
+
+// Declaration of the typdefs
+namespace bitpit {
+
+typedef DiscretizationStencilSolverAssembler<StencilScalar> StencilScalarSolverAssembler;
+
+typedef DiscretizationStencilSolver<StencilScalar> StencilScalarSolver;
+
+}
+
+// Explicit instantization
+#ifndef __BITPIT_STENCIL_SOLVER_SRC__
+namespace bitpit {
+
+extern template class DiscretizationStencilSolverAssembler<StencilScalar>;
+
+extern template class DiscretizationStencilSolver<StencilScalar>;
+
+}
+#endif
 
 #endif
