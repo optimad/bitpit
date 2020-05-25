@@ -64,10 +64,32 @@ protected:
 
 };
 
-class SkdNode {
+class SkdBox{
+
+public:
+
+    SkdBox();
+    SkdBox(std::array<double,3> boxMin, std::array<double,3> boxMax);
+
+    const std::array<double, 3> & getBoxMin() const;
+    const std::array<double, 3> & getBoxMax() const;
+
+    double evalPointMinDistance(const std::array<double, 3> &point) const;
+    double evalPointMaxDistance(const std::array<double, 3> &point) const;
+
+    bool boxContainsPoint(const std::array<double,3> &point, double offset) const;
+    bool boxIntersectsSphere(const std::array<double,3> &center, double radius) const;
+
+protected:
+
+    std::array<double,3> m_boxMin;
+    std::array<double,3> m_boxMax;
+
+};
+
+class SkdNode : public SkdBox{
 
 friend class PatchSkdTree;
-friend class SkdNodeAllocator;
 
 public:
     static const std::size_t NULL_ID;
@@ -85,19 +107,14 @@ public:
     std::vector<long> getCells() const;
     long getCell(std::size_t n) const;
 
-    const std::array<double, 3> & getBoxMin() const;
-    const std::array<double, 3> & getBoxMax() const ;
+    const SkdBox & getBoundingBox() const;
+
     std::array<double,3> evalBoxWeightedMean() const;
 
     bool isLeaf() const;
     bool hasChild(ChildLocation child) const;
     std::size_t getChildId(ChildLocation child) const;
 
-    bool boxContainsPoint(const std::array<double,3> &point, double offset) const;
-    bool boxIntersectsSphere(const std::array<double,3> &center, double radius) const;
-
-    double evalPointMinDistance(const std::array<double, 3> &point) const;
-    double evalPointMaxDistance(const std::array<double, 3> &point) const;
     double evalPointDistance(const std::array<double, 3> &point) const;
 
     void findPointClosestCell(const std::array<double, 3> &point, long *id, double *distance) const;
@@ -124,9 +141,6 @@ private:
 
     std::size_t m_cellRangeBegin;
     std::size_t m_cellRangeEnd;
-
-    std::array<double,3> m_boxMin;
-    std::array<double,3> m_boxMax;
 
     std::array<std::size_t, MAX_CHILDREN> m_children;
 

@@ -184,6 +184,141 @@ std::array<double, 3> SkdPatchInfo::evalCachedBoxMean(std::size_t rawId) const
 }
 
 /*!
+* \class SkdBox
+*
+* \brief The SkdBox class defines a box of a node of the skd-tree.
+*/
+
+/*!
+* Default constructor.
+*/
+SkdBox::SkdBox()
+{
+    m_boxMin.fill(std::numeric_limits<double>::max());
+    m_boxMax.fill(-1. * std::numeric_limits<double>::max());
+}
+
+/*!
+* Constructor
+*
+* \param boxMin Minimum coordinate of the bounding box
+* \param boxMax Maximum coordinate of the bounding box
+*/
+SkdBox::SkdBox(std::array<double,3> boxMin, std::array<double,3> boxMax)
+    : m_boxMin(boxMin),
+      m_boxMax(boxMax)
+{
+}
+
+/*!
+* Get the minimum coordinate of the bounding box associated to the node.
+*
+* \result The minimum coordinate of the bounding box associated to the
+* box.
+*/
+const std::array<double, 3> & SkdBox::getBoxMin() const
+{
+    return m_boxMin;
+}
+
+/*!
+* Get the maximum coordinate of the bounding box associated to the node.
+*
+* \result The maximum coordinate of the bounding box associated to the
+* box.
+*/
+const std::array<double, 3> & SkdBox::getBoxMax() const
+{
+    return m_boxMax;
+}
+
+/*!
+* Evaluates the minimum distance among the specified point and the box
+*
+* \param point is the point
+* \result The minimum distance among the specified point and the box.
+*/
+double SkdBox::evalPointMinDistance(const std::array<double, 3> &point) const
+{
+    double distance = 0.;
+    for (int d = 0; d < 3; ++d) {
+        distance += std::pow(std::max({0., m_boxMin[d] - point[d], point[d] - m_boxMax[d]}), 2);
+    }
+    distance = std::sqrt(distance);
+
+    return distance;
+}
+
+/*!
+* Evaluates the maximum distance among the specified point and the box
+*
+* \param point is the point
+* \result The maximum distance among the specified point and the box
+*/
+double SkdBox::evalPointMaxDistance(const std::array<double, 3> &point) const
+{
+    double distance = 0.;
+    for (int d = 0; d < 3; ++d) {
+        distance += std::pow(std::max(point[d] - m_boxMin[d], m_boxMax[d] - point[d]), 2);
+    }
+    distance = std::sqrt(distance);
+
+    return distance;
+}
+
+/*!
+* Checks if the specified point is inside the bounding box associated to the
+* node. The bounding box size will be expanded by the specified offset value.
+*
+* \param point is the point
+* \param offset is the offset that will be used to expand the bounding
+* box
+* \result Returns true if the point is inside the inflated bounding box,
+* false otherwise.
+*/
+bool SkdBox::boxContainsPoint(const std::array<double, 3> &point, double offset) const
+{
+    for (int d = 0; d < 3; d++) {
+        if (point[d] < (m_boxMin[d] - offset)) {
+            return false;
+        }
+
+        if (point[d] > (m_boxMax[d] + offset)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*!
+* Checks if the bounding box associated to the node intersects the
+* sphere with given center and radius.
+*
+* \param[in] center is the center of the sphere
+* \param[in] radius is the radius of the sphere
+* \result Returns true if the bounding box associated to the node
+* intersects the sphere with given center and radius, false otherwise.
+*/
+bool SkdBox::boxIntersectsSphere(const std::array<double, 3> &center, double radius) const
+{
+    // If the box contains the center it will also intersect the sphere
+    if (boxContainsPoint(center, 0.)) {
+        return true;
+    }
+
+    // Check if the distance between the center and its projection on
+    // the bounding box is smaller than the radius of the sphere.
+    std::array<double, 3> delta;
+    for (int d = 0; d < 3; d++) {
+        delta[d] = std::min(std::max(center[d], m_boxMin[d]), m_boxMax[d]) - center[d];
+    }
+    double distance = dotProduct(delta, delta);
+
+    return (distance < radius * radius);
+}
+
+/*!
 * \class SkdNode
 *
 * \brief The SkdPatchInfo class defines a node of the skd-tree.
@@ -200,7 +335,6 @@ const std::size_t SkdNode::NULL_ID = std::numeric_limits<std::size_t>::max();
 SkdNode::SkdNode()
     : m_patchInfo(nullptr),
       m_cellRangeBegin(0), m_cellRangeEnd(0),
-      m_boxMin({{0., 0., 0.}}), m_boxMax({{0., 0., 0.}}),
       m_children({{NULL_ID, NULL_ID}})
 {
 }
@@ -308,25 +442,11 @@ std::vector<long> SkdNode::getCells() const
 }
 
 /*!
-* Get the minimum coordinate of the bounding box associated to the node.
-*
-* \result The minimum coordinate of the bounding box associated to the
-* node.
+* Get the bounding box associated to the node.
 */
-const std::array<double, 3> & SkdNode::getBoxMin() const
+const SkdBox & SkdNode::getBoundingBox() const
 {
-    return m_boxMin;
-}
-
-/*!
-* Get the maximum coordinate of the bounding box associated to the node.
-*
-* \result The maximum coordinate of the bounding box associated to the
-* node.
-*/
-const std::array<double, 3> & SkdNode::getBoxMax() const
-{
-    return m_boxMax;
+    return *this;
 }
 
 /*!
@@ -387,44 +507,6 @@ bool SkdNode::hasChild(ChildLocation child) const
 std::size_t SkdNode::getChildId(ChildLocation child) const
 {
     return m_children[static_cast<std::size_t>(child)];
-}
-
-/*!
-* Evaluates the minimum distance among the specified point and the
-* cells contained the node.
-*
-* \param point is the point
-* \result The minimum distance among the specified point and the cells
-* contained the node.
-*/
-double SkdNode::evalPointMinDistance(const std::array<double, 3> &point) const
-{
-    double distance = 0.;
-    for (int d = 0; d < 3; ++d) {
-        distance += std::pow(std::max({0., m_boxMin[d] - point[d], point[d] - m_boxMax[d]}), 2);
-    }
-    distance = std::sqrt(distance);
-
-    return distance;
-}
-
-/*!
-* Evaluates the maximum distance among the specified point and the
-* cells contained in the bounding box associated to the node.
-*
-* \param point is the point
-* \result The maximum distance among the specified point and the cells
-* contained in the bounding box associated to the node.
-*/
-double SkdNode::evalPointMaxDistance(const std::array<double, 3> &point) const
-{
-    double distance = 0.;
-    for (int d = 0; d < 3; ++d) {
-        distance += std::pow(std::max(point[d] - m_boxMin[d], m_boxMax[d] - point[d]), 2);
-    }
-    distance = std::sqrt(distance);
-
-    return distance;
 }
 
 /*!
@@ -638,58 +720,6 @@ void SkdNode::updateClosestCellInfo(const std::array<double, 3> &point,
     }
 
     }
-}
-
-/*!
-* Checks if the specified point is inside the bounding box associated to the
-* node. The bounding box size will be expanded by the specified offset value.
-*
-* \param point is the point
-* \param offset is the offset that will be used to expand the bounding
-* box
-* \result Returns true if the point is inside the inflated bounding box,
-* false otherwise.
-*/
-bool SkdNode::boxContainsPoint(const std::array<double, 3> &point, double offset) const
-{
-    for (int d = 0; d < 3; d++) {
-        if (point[d] < (m_boxMin[d] - offset)) {
-            return false;
-        }
-
-        if (point[d] > (m_boxMax[d] + offset)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/*!
-* Checks if the bounding box associated to the node intersects the
-* sphere with given center and radius.
-*
-* \param[in] center is the center of the sphere
-* \param[in] radius is the radius of the sphere
-* \result Returns true if the bounding box associated to the node
-* intersects the sphere with given center and radius, false otherwise.
-*/
-bool SkdNode::boxIntersectsSphere(const std::array<double, 3> &center, double radius) const
-{
-    // If the box contains the center it will also intersect the sphere
-    if (boxContainsPoint(center, 0.)) {
-        return true;
-    }
-
-    // Check if the distance between the center and its projection on
-    // the bounding box is smaller than the radius of the sphere.
-    std::array<double, 3> delta;
-    for (int d = 0; d < 3; d++) {
-        delta[d] = std::min(std::max(center[d], m_boxMin[d]), m_boxMax[d]) - center[d];
-    }
-    double distance = dotProduct(delta, delta);
-
-    return (distance < radius * radius);
 }
 
 /*!
