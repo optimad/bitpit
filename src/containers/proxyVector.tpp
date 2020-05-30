@@ -272,6 +272,27 @@ typename ProxyVector<T>::T_no_cv * ProxyVector<T>::set(std::vector<T_no_cv> &&st
 }
 
 /*!
+    Sets the content of the container.
+
+    \param size is the number of elements the storage should be able to
+    contain
+*/
+template<typename T>
+template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
+typename ProxyVector<T>::T_no_cv * ProxyVector<T>::set(std::size_t size)
+{
+    if (!m_storage) {
+        m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(size));
+    } else {
+        m_storage->resize(size);
+    }
+    m_data = m_storage->data();
+    m_size = m_storage->size();
+
+    return m_storage->data();
+}
+
+/*!
     Clear content.
 */
 template<typename T>

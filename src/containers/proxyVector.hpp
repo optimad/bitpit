@@ -202,6 +202,8 @@ public:
     void set(T *data, std::size_t size);
     template<typename U = T, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
     T_no_cv * set(std::vector<T_no_cv> &&storage);
+    template<typename U = T, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    T_no_cv * set(std::size_t size);
 
     void clear();
     void swap(ProxyVector &other);
