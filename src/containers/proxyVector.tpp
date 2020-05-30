@@ -262,11 +262,13 @@ void ProxyVector<T>::set(T *data, std::size_t size)
 */
 template<typename T>
 template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-void ProxyVector<T>::set(std::vector<T_no_cv> &&storage)
+typename ProxyVector<T>::T_no_cv * ProxyVector<T>::set(std::vector<T_no_cv> &&storage)
 {
     m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(std::move(storage)));
     m_data    = m_storage->data();
     m_size    = m_storage->size();
+
+    return m_storage->data();
 }
 
 /*!
