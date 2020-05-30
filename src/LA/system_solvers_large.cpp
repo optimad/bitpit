@@ -336,7 +336,7 @@ void SystemSolver::clear()
         m_setUp = false;
     }
 
-    if (!isAssembled()) {
+    if (isAssembled()) {
         MatDestroy(&m_A);
         VecDestroy(&m_rhs);
         VecDestroy(&m_solution);
