@@ -30,8 +30,10 @@ namespace bitpit {
 
 // Explicit instantization
 template class DiscretizationStencilSolverAssembler<StencilScalar>;
+template class DiscretizationStencilSolverAssembler<StencilVector>;
 
 template class DiscretizationStencilSolver<StencilScalar>;
+template class DiscretizationStencilSolver<StencilVector>;
 
 // Template specializations
 
@@ -61,6 +63,32 @@ double DiscretizationStencilSolverAssembler<StencilScalar>::getRawValue(const St
     BITPIT_UNUSED(item);
 
     return element;
+}
+
+/*!
+ * Initialize block size.
+ *
+ * Block size can only be initialized once.
+ */
+template<>
+void DiscretizationStencilSolverAssembler<StencilVector>::initializeBlockSize()
+{
+    assert(m_blockSize == -1);
+
+    m_blockSize = sizeof(typename StencilVector::weight_type) / sizeof(typename StencilVector::weight_type::value_type);
+}
+
+/*!
+ * Get the raw value of the specified element.
+ *
+ * \param element is the stencil element
+ * \param item is the requested block item
+ * \result The values of the specified weight.
+ */
+template<>
+double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const StencilVector::weight_type &element, int item) const
+{
+    return element[item];
 }
 
 }
