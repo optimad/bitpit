@@ -877,6 +877,12 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
     MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
 
+    // No new allocations are now allowed
+    //
+    // When updating the matrix it will not be possible to alter the pattern,
+    // it will be possible to change only the values.
+    MatSetOption(m_A, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
+
     // Cleanup
     if (m_rowPermutation) {
         ISRestoreIndices(m_rowPermutation, &rowRanks);
@@ -901,11 +907,7 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
-    ConstProxyVector<long> rowPattern;
-
-    // Check if element columns are already in the pattern
-    std::unordered_set<PetscInt> currentRowPattern;
-
+    // Update element values
     long rowGlobalOffset;
 #if BITPIT_ENABLE_MPI == 1
     rowGlobalOffset = m_rowGlobalOffset;
@@ -913,52 +915,12 @@ void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const Syste
     rowGlobalOffset = 0;
 #endif
 
-    for (std::size_t n = 0; n < nRows; ++n) {
-        assembler.getRowPattern(n, &rowPattern);
-        const int nRowElements = rowPattern.size();
-        if (nRowElements == 0) {
-            continue;
-        }
-
-        // Get global row
-        long row;
-        if (rows) {
-            row = rows[n];
-        } else {
-            row = n;
-        }
-
-        const PetscInt globalRow = rowGlobalOffset + row;
-
-        // Get current row pattern
-        PetscInt nCurrentRowElements = 0;
-        const PetscInt *rawCurrentRowPattern = nullptr;
-        MatGetRow(m_A, globalRow, &nCurrentRowElements, &rawCurrentRowPattern, NULL);
-        assert(nCurrentRowElements != 0);
-        assert(rawCurrentRowPattern != nullptr);
-
-        currentRowPattern.clear();
-        for (PetscInt k = 0; k < nCurrentRowElements; ++k) {
-            currentRowPattern.insert(rawCurrentRowPattern[k]);
-        }
-
-        // Check if element columns are already in the pattern
-        for (int k = 0; k < nRowElements; ++k) {
-            if (currentRowPattern.count(rowPattern[k]) == 0) {
-                throw std::runtime_error("The element is not in the matrix.");
-            }
-        }
-
-        // Restore row
-        MatRestoreRow(m_A, globalRow, &nCurrentRowElements, &rawCurrentRowPattern, NULL);
-    }
-
-    // Update element values
     const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
 
     std::vector<PetscInt> rawRowPattern(maxRowNZ);
     std::vector<PetscScalar> rawRowValues(maxRowNZ);
 
+    ConstProxyVector<long> rowPattern;
     ConstProxyVector<double> rowValues;
     for (std::size_t n = 0; n < nRows; ++n) {
         assembler.getRowValues(n, &rowValues);
