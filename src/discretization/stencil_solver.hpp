@@ -138,6 +138,12 @@ void DiscretizationStencilSolverAssembler<StencilVector>::initializeBlockSize();
 template<>
 double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const StencilVector::weight_type &element, int item) const;
 
+template<>
+void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize();
+
+template<>
+double DiscretizationStencilSolverAssembler<StencilBlock>::getRawValue(const StencilBlock::weight_type &element, int item) const;
+
 }
 
 // Template implementation
@@ -148,9 +154,11 @@ namespace bitpit {
 
 typedef DiscretizationStencilSolverAssembler<StencilScalar> StencilScalarSolverAssembler;
 typedef DiscretizationStencilSolverAssembler<StencilVector> StencilVectorSolverAssembler;
+typedef DiscretizationStencilSolverAssembler<StencilBlock> StencilBlockSolverAssembler;
 
 typedef DiscretizationStencilSolver<StencilScalar> StencilScalarSolver;
 typedef DiscretizationStencilSolver<StencilVector> StencilVectorSolver;
+typedef DiscretizationStencilSolver<StencilBlock> StencilBlockSolver;
 
 }
 
@@ -160,9 +168,11 @@ namespace bitpit {
 
 extern template class DiscretizationStencilSolverAssembler<StencilScalar>;
 extern template class DiscretizationStencilSolverAssembler<StencilVector>;
+extern template class DiscretizationStencilSolverAssembler<StencilBlock>;
 
 extern template class DiscretizationStencilSolver<StencilScalar>;
 extern template class DiscretizationStencilSolver<StencilVector>;
+extern template class DiscretizationStencilSolver<StencilBlock>;
 
 }
 #endif

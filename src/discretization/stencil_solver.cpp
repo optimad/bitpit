@@ -31,9 +31,11 @@ namespace bitpit {
 // Explicit instantization
 template class DiscretizationStencilSolverAssembler<StencilScalar>;
 template class DiscretizationStencilSolverAssembler<StencilVector>;
+template class DiscretizationStencilSolverAssembler<StencilBlock>;
 
 template class DiscretizationStencilSolver<StencilScalar>;
 template class DiscretizationStencilSolver<StencilVector>;
+template class DiscretizationStencilSolver<StencilBlock>;
 
 // Template specializations
 
@@ -87,6 +89,68 @@ void DiscretizationStencilSolverAssembler<StencilVector>::initializeBlockSize()
  */
 template<>
 double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const StencilVector::weight_type &element, int item) const
+{
+    return element[item];
+}
+
+/*!
+ * Initialize block size.
+ *
+ * Vector can only be initialized once.
+ *
+ * \param stencils are the stencils
+ */
+template<>
+void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize()
+{
+    assert(m_blockSize == -1);
+
+    std::size_t nStencils = m_stencils->size();
+
+    // Set the block size equal to the size of the first weight
+    m_blockSize = - 1;
+    for (std::size_t i = 0; i < nStencils; ++i) {
+        const StencilBlock &stencil = (*m_stencils)[i];
+        const StencilBlock::weight_type *weightData = stencil.weightData();
+        std::size_t stencilSize = stencil.size();
+
+        for (std::size_t k = 0; k < stencilSize; ++k) {
+            m_blockSize = weightData[k].size();
+            break;
+        }
+
+        if (m_blockSize >= 0) {
+            break;
+        }
+    }
+
+    assert(m_blockSize == -1);
+
+#ifdef DEBUG
+    // All weight sizes should match
+    for (std::size_t i = 0; i < nStencils; ++i) {
+        const StencilBlock &stencil = (*m_stencils)[i];
+        const StencilBlock::weight_type *weightData = stencil.weightData();
+        std::size_t stencilSize = stencil.size();
+
+        for (std::size_t k = 0; k < stencilSize; ++k) {
+            assert((int) weightData[k].size() == m_blockSize);
+        }
+
+        assert((int) stencil.getConstant().size() == m_blockSize);
+    }
+#endif
+}
+
+/*!
+ * Get the raw value of the specified element.
+ *
+ * \param element is the stencil element
+ * \param item is the requested block item
+ * \result The values of the specified weight.
+ */
+template<>
+double DiscretizationStencilSolverAssembler<StencilBlock>::getRawValue(const StencilBlock::weight_type &element, int item) const
 {
     return element[item];
 }
