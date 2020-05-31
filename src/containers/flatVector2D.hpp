@@ -122,7 +122,9 @@ public:
     void pushBack(const std::vector<T> &subArray);
     void pushBack(std::size_t subArraySize, const T *subArray);
     void pushBackItem(const T& value);
+    void pushBackItem(T &&value);
     void pushBackItem(std::size_t i, const T& value);
+    void pushBackItem(std::size_t i, T &&value);
 
     void popBack();
     void popBackItem();
@@ -132,12 +134,14 @@ public:
     void eraseItem(std::size_t i, std::size_t j);
 
     void setItem(std::size_t i, std::size_t j, const T &value);
+    void setItem(std::size_t i, std::size_t j, T &&value);
     T & getItem(std::size_t i, std::size_t j);
     const T & getItem(std::size_t i, std::size_t j) const;
     const T * get(std::size_t i) const;
     T * get(std::size_t i);
 
     void rawSetItem(std::size_t k, const T &value);
+    void rawSetItem(std::size_t k, T &&value);
     T & rawGetItem(std::size_t k);
     const T & rawGetItem(std::size_t k) const;
 

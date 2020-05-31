@@ -670,6 +670,23 @@ void FlatVector2D<T>::pushBackItem(const T& value)
 }
 
 /*!
+    Adds an item to the last vector.
+
+    Adds an item at the end of to the last vector.
+
+    \param value is the value that will be added
+*/
+template <class T>
+void FlatVector2D<T>::pushBackItem(T &&value)
+{
+    m_index.back()++;
+
+    m_v.emplace_back();
+    T &storedValue = m_v.back();
+    storedValue = std::move(value);
+}
+
+/*!
     Adds an item to the specified vector.
 
     Adds an item at the end of to the specified last vector.
@@ -683,6 +700,28 @@ void FlatVector2D<T>::pushBackItem(std::size_t i, const T &value)
     assert(isIndexValid(i));
 
     m_v.insert(m_v.begin() + m_index[i+1], value);
+
+    std::size_t nIndexes = m_index.size();
+    for (std::size_t k = i + 1; k < nIndexes; ++k) {
+        m_index[k]++;
+    }
+}
+
+
+/*!
+    Adds an item to the specified vector.
+
+    Adds an item at the end of to the specified last vector.
+
+    \param i is the index of the vector
+    \param value is the value that will be added
+*/
+template <class T>
+void FlatVector2D<T>::pushBackItem(std::size_t i, T &&value)
+{
+    assert(isIndexValid(i));
+
+    m_v.insert(m_v.begin() + m_index[i+1], std::move(value));
 
     std::size_t nIndexes = m_index.size();
     for (std::size_t k = i + 1; k < nIndexes; ++k) {
@@ -798,6 +837,20 @@ void FlatVector2D<T>::setItem(std::size_t i, std::size_t j, const T &value)
 }
 
 /*!
+    Sets the value of the specified item in a vector.
+
+    \param i is the index of the vector
+    \param j is the index of the item that will be removed
+    \param value is the value that will be set
+*/
+template <class T>
+void FlatVector2D<T>::setItem(std::size_t i, std::size_t j, T &&value)
+{
+    assert(isIndexValid(i, j));
+    (*this)[i][j] = std::move(value);
+}
+
+/*!
     Gets a reference of the specified item in a vector.
 
     \param i is the index of the vector
@@ -863,6 +916,18 @@ template <class T>
 void FlatVector2D<T>::rawSetItem(std::size_t k, const T &value)
 {
     m_v[k] = value;
+}
+
+/*!
+    Sets the value of the specified item in a vector.
+
+    \param k is the raw index
+    \param value is the value that will be set
+*/
+template <class T>
+void FlatVector2D<T>::rawSetItem(std::size_t k, T &&value)
+{
+    m_v[k] = std::move(value);
 }
 
 /*!
