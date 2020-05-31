@@ -145,6 +145,7 @@ public:
     const weight_t & getConstant() const;
     void setConstant(const weight_t &value);
     void sumConstant(const weight_t &value);
+    void zeroConstant();
 
     void flatten();
     void optimize(double tolerance = 1.e-12);

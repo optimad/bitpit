@@ -197,7 +197,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, int nBucketItems, const
     m_zero = zero;
     m_pattern.initialize(nBuckets, nBucketItems, NULL_ID);
     m_weights.initialize(nBuckets, nBucketItems, zero);
-    m_constant = m_zero;
+    zeroConstant();
 }
 
 /*!
@@ -226,7 +226,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
     m_zero = zero;
     m_pattern.initialize(nBuckets, bucketSizes, NULL_ID);
     m_weights.initialize(nBuckets, bucketSizes, zero);
-    m_constant = m_zero;
+    zeroConstant();
 }
 
 /*!
@@ -243,7 +243,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
     m_zero = zero;
     m_pattern.initialize(nBuckets, bucketSizes, pattern);
     m_weights.initialize(nBuckets, bucketSizes, zero);
-    m_constant = m_zero;
+    zeroConstant();
 }
 
 /*!
@@ -261,7 +261,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
     m_zero = zero;
     m_pattern.initialize(nBuckets, bucketSizes, pattern);
     m_weights.initialize(nBuckets, bucketSizes, weights);
-    m_constant = m_zero;
+    zeroConstant();
 }
 
 /*!
@@ -834,6 +834,15 @@ void DiscreteStencil<weight_t>::sumConstant(const weight_t &value)
 }
 
 /*!
+* Zero the constant associated to the stencil.
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::zeroConstant()
+{
+    m_constant = m_zero;
+}
+
+/*!
 * Clears the items of the stencil.
 *
 * Removes all items from the stencil (which are destroyed), leaving each
@@ -849,7 +858,7 @@ void DiscreteStencil<weight_t>::clear(bool release)
     m_pattern.clearItems(release);
     m_weights.clearItems(release);
 
-    m_constant = m_zero;
+    zeroConstant();
 }
 
 /*!
