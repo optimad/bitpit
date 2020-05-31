@@ -126,7 +126,9 @@ public:
     const weight_t * weightData() const;
     const FlatVector2D<weight_t> & getWeights() const;
     void setWeight(std::size_t pos, const weight_t &weight);
+    void setWeight(std::size_t pos, weight_t &&weight);
     void setWeight(int bucket, std::size_t pos, const weight_t &weight);
+    void setWeight(int bucket, std::size_t pos, weight_t &&weight);
     void sumWeight(std::size_t pos, const weight_t &value);
     void sumWeight(int bucket, std::size_t pos, const weight_t &value);
     void zeroWeight(std::size_t pos);
@@ -137,15 +139,20 @@ public:
     void rawSetWeight(std::size_t pos, const weight_t &weight);
 
     void setItem(std::size_t pos, long id, const weight_t &weight);
+    void setItem(std::size_t pos, long id, weight_t &&weight);
     void setItem(int bucket, std::size_t pos, long id, const weight_t &weight);
+    void setItem(int bucket, std::size_t pos, long id, weight_t &&weight);
     void sumItem(long id, const weight_t &value);
     void sumItem(int bucket, long id, const weight_t &value);
     void appendItem(long id, const weight_t &weight);
+    void appendItem(long id, weight_t &&weight);
     void appendItem(int bucket, long id, const weight_t &weight);
+    void appendItem(int bucket, long id, weight_t &&weight);
 
     weight_t & getConstant();
     const weight_t & getConstant() const;
     void setConstant(const weight_t &value);
+    void setConstant(weight_t &&value);
     void sumConstant(const weight_t &value);
     void zeroConstant();
 
@@ -166,6 +173,7 @@ public:
 
 private:
     static void rawCopyValue(const weight_t &source, weight_t *destination);
+    static void rawMoveValue(weight_t &&source, weight_t *destination);
 
     weight_t m_zero;
     FlatVector2D<long> m_pattern;

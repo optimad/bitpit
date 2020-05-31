@@ -608,6 +608,20 @@ void DiscreteStencil<weight_t>::setWeight(std::size_t pos, const weight_t &weigh
 /*!
 * Set the value of the specified weight of the stencil.
 *
+* If the stencil has more than one bucket, the first bucket will be considered.
+*
+* \param pos is the position of the weight
+* \param weight is the value that will be set
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::setWeight(std::size_t pos, weight_t &&weight)
+{
+    setWeight(0, pos, std::move(weight));
+}
+
+/*!
+* Set the value of the specified weight of the stencil.
+*
 * \param bucket is the bucket that will updated
 * \param pos is the position of the weight
 * \param weight is the value that will be set
@@ -616,6 +630,19 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::setWeight(int bucket, std::size_t pos, const weight_t &weight)
 {
     m_weights.setItem(bucket, pos, weight);
+}
+
+/*!
+* Set the value of the specified weight of the stencil.
+*
+* \param bucket is the bucket that will updated
+* \param pos is the position of the weight
+* \param weight is the value that will be set
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::setWeight(int bucket, std::size_t pos, weight_t &&weight)
+{
+    m_weights.setItem(bucket, pos, std::move(weight));
 }
 
 /*!
@@ -730,6 +757,21 @@ void DiscreteStencil<weight_t>::setItem(std::size_t pos, long id, const weight_t
 /*!
 * Set the specified item of the stencil.
 *
+* If the stencil has more than one bucket, the first bucket will be considered.
+*
+* \param pos is the position of the weight
+* \param id is the index that will be set
+* \param weight is the weight that will be set
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::setItem(std::size_t pos, long id, weight_t &&weight)
+{
+    setItem(0, pos, id, std::move(weight));
+}
+
+/*!
+* Set the specified item of the stencil.
+*
 * \param bucket is the bucket that will updated
 * \param pos is the position of the weight
 * \param id is the index that will be set
@@ -740,6 +782,21 @@ void DiscreteStencil<weight_t>::setItem(int bucket, std::size_t pos, long id, co
 {
     setPattern(bucket, pos, id);
     setWeight(bucket, pos, weight);
+}
+
+/*!
+* Set the specified item of the stencil.
+*
+* \param bucket is the bucket that will updated
+* \param pos is the position of the weight
+* \param id is the index that will be set
+* \param weight is the weight that will be set
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::setItem(int bucket, std::size_t pos, long id, weight_t &&weight)
+{
+    setPattern(bucket, pos, id);
+    setWeight(bucket, pos, std::move(weight));
 }
 
 /*!
@@ -803,6 +860,21 @@ void DiscreteStencil<weight_t>::appendItem(long id, const weight_t &weight)
 /*!
 * Append an item the stencil.
 *
+* If the stencil has more than one bucket, the item will be appended to the
+* first bucket.
+*
+* \param id is the index that will be set
+* \param weight is the weight that will be set
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::appendItem(long id, weight_t &&weight)
+{
+    appendItem(0, id, std::move(weight));
+}
+
+/*!
+* Append an item the stencil.
+*
 * \param bucket is the bucket that will updated
 * \param id is the index that will be set
 * \param weight is the weight that will be set
@@ -812,6 +884,20 @@ void DiscreteStencil<weight_t>::appendItem(int bucket, long id, const weight_t &
 {
     m_pattern.pushBackItem(bucket, id);
     m_weights.pushBackItem(bucket, weight);
+}
+
+/*!
+* Append an item the stencil.
+*
+* \param bucket is the bucket that will updated
+* \param id is the index that will be set
+* \param weight is the weight that will be set
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::appendItem(int bucket, long id, weight_t &&weight)
+{
+    m_pattern.pushBackItem(bucket, id);
+    m_weights.pushBackItem(bucket, std::move(weight));
 }
 
 /*!
@@ -845,6 +931,17 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::setConstant(const weight_t &value)
 {
     rawCopyValue(value, &m_constant);
+}
+
+/*!
+* Set the value of the constant associated to the stencil.
+*
+* \param value is the value that will be set
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::setConstant(weight_t &&value)
+{
+    rawMoveValue(std::move(value), &m_constant);
 }
 
 /*!
@@ -1052,6 +1149,18 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::rawCopyValue(const weight_t &source, weight_t *target)
 {
     *target = source;
+}
+
+/**
+ * Move the source value into the target.
+ *
+ * \param[in,out] source is the value that will be moved
+ * \param[out] target on output will contain the source value
+ */
+template<typename weight_t>
+void DiscreteStencil<weight_t>::rawMoveValue(weight_t &&source, weight_t *target)
+{
+    *target = std::move(source);
 }
 
 /*!
