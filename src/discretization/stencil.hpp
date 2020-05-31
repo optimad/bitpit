@@ -165,6 +165,8 @@ public:
     DiscreteStencil<weight_t> & operator-=(const DiscreteStencil<weight_t> &other);
 
 private:
+    static void rawCopyValue(const weight_t &source, weight_t *destination);
+
     weight_t m_zero;
     FlatVector2D<long> m_pattern;
     FlatVector2D<weight_t> m_weights;
@@ -180,6 +182,13 @@ private:
     bool isWeightNeglibile(int bucket, std::size_t pos, double tolerance = 1.e-12);
 
 };
+
+// Methods for the spcializations
+template<>
+void DiscreteStencil<std::array<double, 3>>::rawCopyValue(const std::array<double, 3> &source, std::array<double, 3> *target);
+
+template<>
+void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double> &source, std::vector<double> *target);
 
 }
 

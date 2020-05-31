@@ -194,7 +194,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const weight_t &zero)
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(int nBuckets, int nBucketItems, const weight_t &zero)
 {
-    m_zero = zero;
+    rawCopyValue(zero, &m_zero);
     m_pattern.initialize(nBuckets, nBucketItems, NULL_ID);
     m_weights.initialize(nBuckets, nBucketItems, zero);
     zeroConstant();
@@ -223,7 +223,7 @@ void DiscreteStencil<weight_t>::initialize(const std::vector<std::size_t> &bucke
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero)
 {
-    m_zero = zero;
+    rawCopyValue(zero, &m_zero);
     m_pattern.initialize(nBuckets, bucketSizes, NULL_ID);
     m_weights.initialize(nBuckets, bucketSizes, zero);
     zeroConstant();
@@ -240,7 +240,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t &zero)
 {
-    m_zero = zero;
+    rawCopyValue(zero, &m_zero);
     m_pattern.initialize(nBuckets, bucketSizes, pattern);
     m_weights.initialize(nBuckets, bucketSizes, zero);
     zeroConstant();
@@ -258,7 +258,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t *weights, const weight_t &zero)
 {
-    m_zero = zero;
+    rawCopyValue(zero, &m_zero);
     m_pattern.initialize(nBuckets, bucketSizes, pattern);
     m_weights.initialize(nBuckets, bucketSizes, weights);
     zeroConstant();
@@ -274,10 +274,10 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(const DiscreteStencil<weight_t> &other)
 {
-    m_zero = other.m_zero;
+    rawCopyValue(other.m_zero, &m_zero);
     m_pattern.initialize(other.m_pattern);
     m_weights.initialize(other.m_weights);
-    m_constant = other.m_constant;
+    rawCopyValue(other.m_constant, &m_constant);
 }
 
 /*!
@@ -669,7 +669,7 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::zeroWeight(int bucket, std::size_t pos)
 {
     weight_type &weight = m_weights.getItem(bucket, pos);
-    weight = m_zero;
+    rawCopyValue(m_zero, &weight);
 }
 
 /*!
@@ -844,7 +844,7 @@ weight_t & DiscreteStencil<weight_t>::getConstant()
 template<typename weight_t>
 void DiscreteStencil<weight_t>::setConstant(const weight_t &value)
 {
-    m_constant = value;
+    rawCopyValue(value, &m_constant);
 }
 
 /*!
@@ -864,7 +864,7 @@ void DiscreteStencil<weight_t>::sumConstant(const weight_t &value)
 template<typename weight_t>
 void DiscreteStencil<weight_t>::zeroConstant()
 {
-    m_constant = m_zero;
+    rawCopyValue(m_zero, &m_constant);
 }
 
 /*!
@@ -963,7 +963,7 @@ void DiscreteStencil<weight_t>::zero()
     const std::size_t nItems = size();
     for (std::size_t n = 0; n < nItems; ++n) {
         weight_t &weight = m_weights.rawGetItem(n);
-        weight = m_zero;
+        rawCopyValue(m_zero, &weight);
     }
 
     setConstant(m_zero);
@@ -1040,6 +1040,18 @@ const weight_t * DiscreteStencil<weight_t>::findWeight(int bucket, long id) cons
     }
 
     return nullptr;
+}
+
+/**
+ * Copy the source value into the target.
+ *
+ * \param source is the value that will be copied
+ * \param[out] target on output will contain the source value
+ */
+template<typename weight_t>
+void DiscreteStencil<weight_t>::rawCopyValue(const weight_t &source, weight_t *target)
+{
+    *target = source;
 }
 
 /*!
