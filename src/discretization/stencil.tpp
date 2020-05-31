@@ -646,6 +646,31 @@ void DiscreteStencil<weight_t>::sumWeight(int bucket, std::size_t pos, const wei
     weight += value;
 }
 
+/*!
+* Zeros the weight at the specified position of the stencil.
+*
+* If the stencil has more than one bucket, the first bucket will be considered.
+*
+* \param pos is the position of the weight
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::zeroWeight(std::size_t pos)
+{
+    zeroWeight(0, pos);
+}
+
+/*!
+* Zero the weight at the specified position of the stencil.
+*
+* \param bucket is the bucket that will updated
+* \param pos is the position of the weight
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::zeroWeight(int bucket, std::size_t pos)
+{
+    weight_type &weight = m_weights.getItem(bucket, pos);
+    weight = m_zero;
+}
 
 /*!
 * Get a reference to the specified weight of the stencil.

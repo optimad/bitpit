@@ -129,6 +129,8 @@ public:
     void setWeight(int bucket, std::size_t pos, const weight_t &weight);
     void sumWeight(std::size_t pos, const weight_t &value);
     void sumWeight(int bucket, std::size_t pos, const weight_t &value);
+    void zeroWeight(std::size_t pos);
+    void zeroWeight(int bucket, std::size_t pos);
 
     weight_t & rawGetWeight(std::size_t pos);
     const weight_t & rawGetWeight(std::size_t pos) const;
