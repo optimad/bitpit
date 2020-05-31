@@ -146,6 +146,5 @@ void project(const bitpit::StencilVector &stencil, const std::array<double, 3> &
         weight = ::dotProduct(weight, direction) * direction;
     }
 
-    bitpit::StencilVector::weight_type &constant = stencil_projection->getConstant();
-    constant = ::dotProduct(constant, direction) * direction;
+    stencil_projection->setConstant(::dotProduct(stencil_projection->getConstant(), direction) * direction);
 }
