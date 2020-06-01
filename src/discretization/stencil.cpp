@@ -68,15 +68,14 @@ void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double
 /*!
 * Optimize the specified weight.
 *
-* \param bucket is the bucket of the weight to check
 * \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
 * \result Returns true if the whole weight is neglibile
 */
 template<>
-bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(int bucket, std::size_t pos, double tolerance)
+bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(std::size_t pos, double tolerance)
 {
-    std::array<double, 3> &weight = m_weights.getItem(bucket, pos);
+    std::array<double, 3> &weight = m_weights[pos];
     int nItems = weight.size();
 
     int nNegligibleItems = 0;
@@ -95,15 +94,14 @@ bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(int bucket, std::siz
 /*!
 * Optimize the specified weight.
 *
-* \param bucket is the bucket of the weight to check
 * \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
 * \result Returns true if the whole weight is neglibile
 */
 template<>
-bool DiscreteStencil<std::vector<double>>::optimizeWeight(int bucket, std::size_t pos, double tolerance)
+bool DiscreteStencil<std::vector<double>>::optimizeWeight(std::size_t pos, double tolerance)
 {
-    std::vector<double> &weight = m_weights.getItem(bucket, pos);
+    std::vector<double> &weight = m_weights[pos];
     int nItems = weight.size();
 
     int nNegligibleItems = 0;
@@ -142,16 +140,12 @@ bitpit::StencilVector operator*(const bitpit::StencilScalar &stencil, const std:
 */
 bitpit::StencilVector operator*(const std::array<double, 3> &vector, const bitpit::StencilScalar &stencil)
 {
-    int nBuckets = stencil.getBucketCount();
-    std::vector<std::size_t> sizes(nBuckets);
-    for (int k = 0; k < nBuckets; ++k) {
-        sizes[k] = stencil.size(k);
-    }
-
-    bitpit::StencilVector stencil_B(sizes);
-    for (std::size_t k = 0; k < stencil_B.size(); ++k) {
-        stencil_B.rawSetPattern(k, stencil.rawGetPattern(k));
-        stencil_B.rawSetWeight(k, ::operator*(stencil.rawGetWeight(k), vector));
+    const std::size_t nItems = stencil.size();
+    bitpit::StencilVector stencil_B;
+    stencil_B.resize(nItems);
+    for (std::size_t n = 0; n < nItems; ++n) {
+        stencil_B.setPattern(n, stencil.getPattern(n));
+        stencil_B.setWeight(n, ::operator*(stencil.getWeight(n), vector));
     }
     stencil_B.setConstant(::operator*(stencil.getConstant(), vector));
 
@@ -182,17 +176,16 @@ bitpit::StencilScalar dotProduct(const bitpit::StencilVector &stencil, const bit
 */
 void dotProduct(const bitpit::StencilVector &stencil, const bitpit::StencilVector::weight_type &vector, bitpit::StencilScalar *stencil_dotProduct)
 {
-    int nBuckets = stencil.getBucketCount();
-    std::vector<std::size_t> sizes(nBuckets);
-    for (int k = 0; k < nBuckets; ++k) {
-        sizes[k] = stencil.size(k);
-    }
+    const std::size_t nItems = stencil.size();
+    stencil_dotProduct->resize(nItems);
 
-    stencil_dotProduct->initialize(sizes);
-
-    for (std::size_t k = 0; k < stencil_dotProduct->size(); ++k) {
-        stencil_dotProduct->rawSetPattern(k, stencil.rawGetPattern(k));
-        stencil_dotProduct->rawSetWeight(k, ::dotProduct(stencil.rawGetWeight(k), vector));
+    const long *patternData = stencil.patternData();
+    const bitpit::StencilVector::weight_type *weightData = stencil.weightData();
+    long *patternData_dotProduct = stencil_dotProduct->patternData();
+    bitpit::StencilScalar::weight_type *weightData_dotProduct = stencil_dotProduct->weightData();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        patternData_dotProduct[n] = patternData[n];
+        weightData_dotProduct[n]  = ::dotProduct(weightData[n], vector);
     }
 
     stencil_dotProduct->setConstant(::dotProduct(stencil.getConstant(), vector));
@@ -223,9 +216,11 @@ bitpit::StencilVector project(const bitpit::StencilVector &stencil, const std::a
 void project(const bitpit::StencilVector &stencil, const std::array<double, 3> &direction, bitpit::StencilVector *stencil_projection)
 {
     stencil_projection->initialize(stencil);
+    const std::size_t nItems = stencil_projection->size();
 
-    for (std::size_t k = 0; k < stencil_projection->size(); ++k) {
-        bitpit::StencilVector::weight_type &weight = stencil_projection->rawGetWeight(k);
+    bitpit::StencilVector::weight_type *weightData_projection = stencil_projection->weightData();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        bitpit::StencilVector::weight_type &weight = weightData_projection[n];
         weight = ::dotProduct(weight, direction) * direction;
     }
 

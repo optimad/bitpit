@@ -36,8 +36,17 @@ template<typename weight_t>
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::DiscreteStencil<weight_t> &stencil)
 {
     buffer << stencil.m_zero;
-    buffer << stencil.m_pattern;
-    buffer << stencil.m_weights;
+
+    std::size_t nItems = stencil.size();
+    buffer << nItems;
+
+    const long *patternData = stencil.patternData();
+    const weight_t *weightData = stencil.weightData();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        buffer << patternData[n];
+        buffer << weightData[n];
+    }
+
     buffer << stencil.m_constant;
 
     return buffer;
@@ -54,8 +63,18 @@ template<typename weight_t>
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::DiscreteStencil<weight_t> &stencil)
 {
     buffer >> stencil.m_zero;
-    buffer >> stencil.m_pattern;
-    buffer >> stencil.m_weights;
+
+    std::size_t nItems;
+    buffer >> nItems;
+
+    stencil.resize(nItems);
+    long *patternData = stencil.patternData();
+    weight_t *weightData = stencil.weightData();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        buffer >> patternData[n];
+        buffer >> weightData[n];
+    }
+
     buffer >> stencil.m_constant;
 
     return buffer;
@@ -70,33 +89,20 @@ namespace bitpit {
 */
 template<typename weight_t>
 DiscreteStencil<weight_t>::DiscreteStencil(const weight_t &zero)
-    : DiscreteStencil(1, zero)
+    : DiscreteStencil(0, zero)
 {
 }
 
 /*!
-* Constructor
+* Initialize the stencil
 *
-* \param nBuckets is the number of buckets in the stencil
+* \param size is the stencil size, expressed in number of elements
 * \param zero is the value to be used as zero
 */
 template<typename weight_t>
-DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const weight_t &zero)
-    : DiscreteStencil(nBuckets, 0, zero)
-{
-}
-
-/*!
-* Constructor
-*
-* \param nBuckets is the number of buckets in the stencil
-* \param nBucketItems is the number of items contained in each bucket
-* \param zero is the value to be used as zero
-*/
-template<typename weight_t>
-DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, int nBucketItems, const weight_t &zero)
+DiscreteStencil<weight_t>::DiscreteStencil(std::size_t size, const weight_t &zero)
     : m_zero(zero),
-      m_pattern(nBuckets, nBucketItems, NULL_ID), m_weights(nBuckets, nBucketItems, zero),
+      m_pattern(size, -1), m_weights(size, m_zero),
       m_constant(m_zero)
 {
 }
@@ -104,42 +110,14 @@ DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, int nBucketItems, const
 /*!
 * Constructor
 *
-* \param bucketSizes are the sizes of the buckets
-* \param zero is the value to be used as zero
-*/
-template<typename weight_t>
-DiscreteStencil<weight_t>::DiscreteStencil(const std::vector<std::size_t> &bucketSizes, const weight_t &zero)
-    : DiscreteStencil(bucketSizes.size(), bucketSizes.data(), zero)
-{
-}
-
-/*!
-* Constructor
-*
-* \param nBuckets is the number of the buckets
-* \param bucketSizes are the sizes of the buckets
-* \param zero is the value to be used as zero
-*/
-template<typename weight_t>
-DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero)
-    : m_zero(zero),
-      m_pattern(nBuckets, bucketSizes, &NULL_ID), m_weights(nBuckets, bucketSizes, &zero),
-      m_constant(m_zero)
-{
-}
-
-/*!
-* Constructor
-*
-* \param nBuckets is the number of buckets in the stencil
-* \param bucketSizes are the sizes of the buckets in the stencil
+* \param size is the stencil size, expressed in number of elements
 * \param pattern is the patterns of the stencil
 * \param zero is the value to be used as zero
 */
 template<typename weight_t>
-DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t &zero)
+DiscreteStencil<weight_t>::DiscreteStencil(std::size_t size, const long *pattern, const weight_t &zero)
     : m_zero(zero),
-      m_pattern(nBuckets, bucketSizes, pattern), m_weights(nBuckets, bucketSizes, &zero),
+      m_pattern(pattern, pattern + size), m_weights(size, m_zero),
       m_constant(m_zero)
 {
 }
@@ -147,120 +125,79 @@ DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const std::size_t *buck
 /*!
 * Constructor
 *
-* \param nBuckets is the number of buckets in the stencil
-* \param bucketSizes are the sizes of the buckets in the stencil
+* \param size is the stencil size, expressed in number of elements
 * \param pattern is the patterns of the stencil
 * \param weights are the weights of the stencil
 * \param zero is the value to be used as zero
 */
 template<typename weight_t>
-DiscreteStencil<weight_t>::DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t *weights, const weight_t &zero)
+DiscreteStencil<weight_t>::DiscreteStencil(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero)
     : m_zero(zero),
-      m_pattern(nBuckets, bucketSizes, pattern), m_weights(nBuckets, bucketSizes, weights),
+      m_pattern(pattern, pattern + size), m_weights(weights, weights + size),
       m_constant(m_zero)
 {
 }
 
 /*!
-* Initialize the stencil
+* Initialize the stencil.
 *
+* \param size is the stencil size, expressed in number of elements
 * \param zero is the value to be used as zero
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::initialize(const weight_t &zero)
-{
-    initialize(1, zero);
-}
-
-/*!
-* Initialize the stencil
-*
-* \param nBuckets is the number of buckets in the stencil
-* \param zero is the value to be used as zero
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::initialize(int nBuckets, const weight_t &zero)
-{
-    initialize(nBuckets, 0, zero);
-}
-
-/*!
-* Initialize the stencil
-*
-* \param nBuckets is the number of buckets in the stencil
-* \param nBucketItems is the number of items contained in each bucket
-* \param zero is the value to be used as zero
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::initialize(int nBuckets, int nBucketItems, const weight_t &zero)
+void DiscreteStencil<weight_t>::initialize(std::size_t size, const weight_t &zero)
 {
     rawCopyValue(zero, &m_zero);
-    m_pattern.initialize(nBuckets, nBucketItems, NULL_ID);
-    m_weights.initialize(nBuckets, nBucketItems, zero);
-    zeroConstant();
-}
 
-/*!
-* Initialize the stencil
-*
-* \param nBuckets is the number of buckets in the stencil
-* \param bucketSizes are the sizes of the buckets in the stencil
-* \param zero is the value to be used as zero
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::initialize(const std::vector<std::size_t> &bucketSizes, const weight_t &zero)
-{
-    initialize(bucketSizes.size(), bucketSizes.data(), zero);
-}
+    resize(size);
+    for (std::size_t n = 0; n < size; ++n) {
+        m_pattern[n] = -1;
+        rawCopyValue(m_zero, m_weights.data() + n);
+    }
 
-/*!
-* Initialize the stencil
-*
-* \param nBuckets is the number of buckets in the stencil
-* \param bucketSizes are the sizes of the buckets in the stencil
-* \param zero is the value to be used as zero
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero)
-{
-    rawCopyValue(zero, &m_zero);
-    m_pattern.initialize(nBuckets, bucketSizes, NULL_ID);
-    m_weights.initialize(nBuckets, bucketSizes, zero);
     zeroConstant();
 }
 
 /*!
 * Initialize the stencil.
 *
-* \param nBuckets is the number of buckets in the stencil
-* \param bucketSizes are the sizes of the buckets in the stencil
+* \param size is the stencil size, expressed in number of elements
 * \param pattern is the patterns of the stencil
 * \param zero is the value to be used as zero
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t &zero)
+void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern, const weight_t &zero)
 {
     rawCopyValue(zero, &m_zero);
-    m_pattern.initialize(nBuckets, bucketSizes, pattern);
-    m_weights.initialize(nBuckets, bucketSizes, zero);
+
+    resize(size);
+    for (std::size_t n = 0; n < size; ++n) {
+        m_pattern[n] = pattern[n];
+        rawCopyValue(m_zero, m_weights.data() + n);
+    }
+
     zeroConstant();
 }
 
 /*!
 * Initialize the stencil.
 *
-* \param nBuckets is the number of buckets in the stencil
-* \param bucketSizes are the sizes of the buckets in the stencil
+* \param size is the stencil size, expressed in number of elements
 * \param pattern is the patterns of the stencil
 * \param weights are the weights of the stencil
 * \param zero is the value to be used as zero
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t *weights, const weight_t &zero)
+void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero)
 {
     rawCopyValue(zero, &m_zero);
-    m_pattern.initialize(nBuckets, bucketSizes, pattern);
-    m_weights.initialize(nBuckets, bucketSizes, weights);
+
+    resize(size);
+    for (std::size_t n = 0; n < size; ++n) {
+        m_pattern[n] = pattern[n];
+        rawCopyValue(weights[n], m_weights.data() + n);
+    }
+
     zeroConstant();
 }
 
@@ -274,9 +211,15 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(const DiscreteStencil<weight_t> &other)
 {
     rawCopyValue(other.m_zero, &m_zero);
-    m_pattern.initialize(other.m_pattern);
-    m_weights.initialize(other.m_weights);
-    rawCopyValue(other.m_constant, &m_constant);
+
+    std::size_t nItems = other.size();
+    resize(nItems);
+    for (std::size_t n = 0; n < nItems; ++n) {
+        m_pattern[n] = other.m_pattern[n];
+        rawCopyValue(other.m_weights[n], m_weights.data() + n);
+    }
+
+    setConstant(other.m_constant);
 }
 
 /*!
@@ -287,19 +230,19 @@ void DiscreteStencil<weight_t>::initialize(const DiscreteStencil<weight_t> &othe
 template<typename weight_t>
 std::size_t DiscreteStencil<weight_t>::size() const
 {
-    return m_pattern.getItemCount();
+    return m_pattern.size();
 }
 
 /*!
-* Get the size of the specified bucket, expressed in number of items.
+* Resizes the container so that it contains the specified number of items.
 *
-* \param bucket is the bucket
-* \result The size of the specified bucket, expressed in number of items.
+* \param size is the new stencil size, expressed in number of elements
 */
 template<typename weight_t>
-std::size_t DiscreteStencil<weight_t>::size(int bucket) const
+void DiscreteStencil<weight_t>::resize(std::size_t size)
 {
-    return m_pattern.getItemCount(bucket);
+    m_pattern.resize(size, -1);
+    m_weights.resize(size, m_zero);
 }
 
 /*!
@@ -311,43 +254,14 @@ std::size_t DiscreteStencil<weight_t>::size(int bucket) const
 * be able to contain
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::reserve(std::size_t nItems)
+void DiscreteStencil<weight_t>::reserve(std::size_t capacity)
 {
-    return reserve(1, nItems);
-}
-
-/*!
-* Requests a change in capacity.
-*
-* Requests that the stencil capacity be at least enough to contain nBuckets
-* buckets and nItems items.
-*
-* \param nBuckets is the minimum number of buckets that the stencil
-* should be able to contain
-* \param nItems is the minimum number of items that the stencil should
-* be able to contain
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::reserve(int nBuckets, std::size_t nItems)
-{
-    return m_pattern.reserve(nBuckets, nItems);
-}
-
-/*!
-* Get the number of buckets of the stencil.
-*
-* \result The number of buckets of the stencil.
-*/
-template<typename weight_t>
-int DiscreteStencil<weight_t>::getBucketCount() const
-{
-    return m_pattern.size();
+    m_pattern.reserve(capacity);
+    m_weights.reserve(capacity);
 }
 
 /*!
 * Get a reference to the specified element of the pattern.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the pattern element
 * \result A reference to the specified element of the pattern.
@@ -355,13 +269,11 @@ int DiscreteStencil<weight_t>::getBucketCount() const
 template<typename weight_t>
 long & DiscreteStencil<weight_t>::getPattern(std::size_t pos)
 {
-    return getPattern(0, pos);
+    return m_pattern[pos];
 }
 
 /*!
 * Get a constant reference to the specified element of the pattern.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the pattern element
 * \result A constant reference to the specified element of the pattern.
@@ -369,37 +281,7 @@ long & DiscreteStencil<weight_t>::getPattern(std::size_t pos)
 template<typename weight_t>
 const long & DiscreteStencil<weight_t>::getPattern(std::size_t pos) const
 {
-    return getPattern(0, pos);
-}
-
-/*!
-* Get a reference to the specified element of the pattern from the requested
-* bucket.
-*
-* \param bucket is the bucket of the pattern element
-* \param pos is the position of the pattern element
-* \result A reference to the specified element of the pattern from the
-* requested bucket.
-*/
-template<typename weight_t>
-long & DiscreteStencil<weight_t>::getPattern(int bucket, std::size_t pos)
-{
-    return m_pattern.getItem(bucket, pos);
-}
-
-/*!
-* Get a constant reference to the specified element of the pattern from the
-* requested bucket.
-*
-* \param bucket is the bucket of the pattern element
-* \param pos is the position of the pattern element
-* \result A constant reference to the specified element of the pattern from
-* the requested bucket.
-*/
-template<typename weight_t>
-const long & DiscreteStencil<weight_t>::getPattern(int bucket, std::size_t pos) const
-{
-    return m_pattern.getItem(bucket, pos);
+    return m_pattern[pos];
 }
 
 /*!
@@ -426,20 +308,7 @@ const long * DiscreteStencil<weight_t>::patternData() const
 }
 
 /*!
-* Get a constant reference to the container serving as pattern storage.
-*
-* \result A constant reference to the container serving as pattern storage.
-*/
-template<typename weight_t>
-const FlatVector2D<long> & DiscreteStencil<weight_t>::getPattern() const
-{
-    return m_pattern;
-}
-
-/*!
 * Set the index of the specified element of the pattern.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the pattern element
 * \param id is the index that will be set
@@ -447,66 +316,11 @@ const FlatVector2D<long> & DiscreteStencil<weight_t>::getPattern() const
 template<typename weight_t>
 void DiscreteStencil<weight_t>::setPattern(std::size_t pos, long id)
 {
-    setPattern(0, pos, id);
-}
-
-/*!
-* Set the index of the specified element of the pattern.
-*
-* \param bucket is the bucket that will updated
-* \param pos is the position of the pattern element
-* \param id is the index that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::setPattern(int bucket, std::size_t pos, long id)
-{
-    m_pattern.setItem(bucket, pos, id);
-}
-
-/*!
-* Get a constant reference to the specified element of the pattern.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
-*
-* \param pos is the raw position of the pattern element
-* \result A constant reference to the specified element of the pattern.
-*/
-template<typename weight_t>
-long & DiscreteStencil<weight_t>::rawGetPattern(std::size_t pos)
-{
-    return m_pattern.rawGetItem(pos);
-}
-
-/*!
-* Get a constant reference to the specified element of the pattern.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
-*
-* \param pos is the raw position of the pattern element
-* \result A constant reference to the specified element of the pattern.
-*/
-template<typename weight_t>
-const long & DiscreteStencil<weight_t>::rawGetPattern(std::size_t pos) const
-{
-    return m_pattern.rawGetItem(pos);
-}
-
-/*!
-* Set the index of the specified element of the pattern.
-*
-* \param pos is the raw position of the pattern element
-* \param id is the index that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::rawSetPattern(std::size_t pos, long id)
-{
-    m_pattern.rawSetItem(pos, id);
+    m_pattern[pos] = id;
 }
 
 /*!
 * Get a reference to the specified weight of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 * \result A reference to the specified weight of the stencil.
@@ -514,13 +328,11 @@ void DiscreteStencil<weight_t>::rawSetPattern(std::size_t pos, long id)
 template<typename weight_t>
 weight_t & DiscreteStencil<weight_t>::getWeight(std::size_t pos)
 {
-    return getWeight(0, pos);
+    return m_weights[pos];
 }
 
 /*!
 * Get a constant reference to the specified weight of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 * \result A constant reference to the specified weight of the stencil.
@@ -528,33 +340,7 @@ weight_t & DiscreteStencil<weight_t>::getWeight(std::size_t pos)
 template<typename weight_t>
 const weight_t & DiscreteStencil<weight_t>::getWeight(std::size_t pos) const
 {
-    return getWeight(0, pos);
-}
-
-/*!
-* Get a reference to the specified weight of the stencil.
-*
-* \param bucket is the bucket of the weight
-* \param pos is the position of the weight
-* \result A reference to the specified weight of the stencil.
-*/
-template<typename weight_t>
-weight_t & DiscreteStencil<weight_t>::getWeight(int bucket, std::size_t pos)
-{
-    return m_weights.getItem(bucket, pos);
-}
-
-/*!
-* Get a constant reference to the specified weight of the stencil.
-*
-* \param bucket is the bucket of the weight
-* \param pos is the position of the weight
-* \result A constant reference to the specified weight of the stencil.
-*/
-template<typename weight_t>
-const weight_t & DiscreteStencil<weight_t>::getWeight(int bucket, std::size_t pos) const
-{
-    return m_weights.getItem(bucket, pos);
+    return m_weights[pos];
 }
 
 /*!
@@ -580,20 +366,7 @@ const weight_t * DiscreteStencil<weight_t>::weightData() const
 }
 
 /*!
-* Get a constant reference to the container serving as weight storage.
-*
-* \result A constant reference to the container serving as weight storage.
-*/
-template<typename weight_t>
-const FlatVector2D<weight_t> & DiscreteStencil<weight_t>::getWeights() const
-{
-    return m_weights;
-}
-
-/*!
 * Set the value of the specified weight of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 * \param weight is the value that will be set
@@ -601,13 +374,11 @@ const FlatVector2D<weight_t> & DiscreteStencil<weight_t>::getWeights() const
 template<typename weight_t>
 void DiscreteStencil<weight_t>::setWeight(std::size_t pos, const weight_t &weight)
 {
-    setWeight(0, pos, weight);
+    m_weights[pos] = weight;
 }
 
 /*!
 * Set the value of the specified weight of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 * \param weight is the value that will be set
@@ -615,39 +386,11 @@ void DiscreteStencil<weight_t>::setWeight(std::size_t pos, const weight_t &weigh
 template<typename weight_t>
 void DiscreteStencil<weight_t>::setWeight(std::size_t pos, weight_t &&weight)
 {
-    setWeight(0, pos, std::move(weight));
-}
-
-/*!
-* Set the value of the specified weight of the stencil.
-*
-* \param bucket is the bucket that will updated
-* \param pos is the position of the weight
-* \param weight is the value that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::setWeight(int bucket, std::size_t pos, const weight_t &weight)
-{
-    m_weights.setItem(bucket, pos, weight);
-}
-
-/*!
-* Set the value of the specified weight of the stencil.
-*
-* \param bucket is the bucket that will updated
-* \param pos is the position of the weight
-* \param weight is the value that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::setWeight(int bucket, std::size_t pos, weight_t &&weight)
-{
-    m_weights.setItem(bucket, pos, std::move(weight));
+    m_weights[pos] = std::move(weight);
 }
 
 /*!
 * Sum the given value to the weight at the specified position of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 * \param value is the value that will be summed
@@ -655,93 +398,22 @@ void DiscreteStencil<weight_t>::setWeight(int bucket, std::size_t pos, weight_t 
 template<typename weight_t>
 void DiscreteStencil<weight_t>::sumWeight(std::size_t pos, const weight_t &value)
 {
-    sumWeight(0, pos, value);
-}
-
-/*!
-* Sum the given value to the weight at the specified position of the stencil.
-*
-* \param bucket is the bucket that will updated
-* \param pos is the position of the weight
-* \param value is the value that will be summed
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::sumWeight(int bucket, std::size_t pos, const weight_t &value)
-{
-    weight_type &weight = m_weights.getItem(bucket, pos);
-    weight += value;
+    m_weights[pos] += value;
 }
 
 /*!
 * Zeros the weight at the specified position of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 */
 template<typename weight_t>
 void DiscreteStencil<weight_t>::zeroWeight(std::size_t pos)
 {
-    zeroWeight(0, pos);
-}
-
-/*!
-* Zero the weight at the specified position of the stencil.
-*
-* \param bucket is the bucket that will updated
-* \param pos is the position of the weight
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::zeroWeight(int bucket, std::size_t pos)
-{
-    weight_type &weight = m_weights.getItem(bucket, pos);
-    rawCopyValue(m_zero, &weight);
-}
-
-/*!
-* Get a reference to the specified weight of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
-*
-* \param pos is the raw position of the weight
-* \result A reference to the specified weight of the stencil.
-*/
-template<typename weight_t>
-weight_t & DiscreteStencil<weight_t>::rawGetWeight(std::size_t pos)
-{
-    return m_weights.rawGetItem(pos);
-}
-
-/*!
-* Get a constant reference to the specified weight of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
-*
-* \param pos is the raw position of the weight
-* \result A constant reference to the specified weight of the stencil.
-*/
-template<typename weight_t>
-const weight_t & DiscreteStencil<weight_t>::rawGetWeight(std::size_t pos) const
-{
-    return m_weights.rawGetItem(pos);
-}
-
-/*!
-* Set the value of the specified weight of the stencil.
-*
-* \param pos is the raw position of the weight
-* \param weight is the value that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::rawSetWeight(std::size_t pos, const weight_t &weight)
-{
-    m_weights.rawSetItem(pos, weight);
+    rawCopyValue(m_zero, m_weights.data() + pos);
 }
 
 /*!
 * Set the specified item of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 * \param id is the index that will be set
@@ -750,13 +422,12 @@ void DiscreteStencil<weight_t>::rawSetWeight(std::size_t pos, const weight_t &we
 template<typename weight_t>
 void DiscreteStencil<weight_t>::setItem(std::size_t pos, long id, const weight_t &weight)
 {
-    setItem(0, pos, id, weight);
+    setPattern(pos, id);
+    setWeight(pos, weight);
 }
 
 /*!
 * Set the specified item of the stencil.
-*
-* If the stencil has more than one bucket, the first bucket will be considered.
 *
 * \param pos is the position of the weight
 * \param id is the index that will be set
@@ -765,37 +436,8 @@ void DiscreteStencil<weight_t>::setItem(std::size_t pos, long id, const weight_t
 template<typename weight_t>
 void DiscreteStencil<weight_t>::setItem(std::size_t pos, long id, weight_t &&weight)
 {
-    setItem(0, pos, id, std::move(weight));
-}
-
-/*!
-* Set the specified item of the stencil.
-*
-* \param bucket is the bucket that will updated
-* \param pos is the position of the weight
-* \param id is the index that will be set
-* \param weight is the weight that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::setItem(int bucket, std::size_t pos, long id, const weight_t &weight)
-{
-    setPattern(bucket, pos, id);
-    setWeight(bucket, pos, weight);
-}
-
-/*!
-* Set the specified item of the stencil.
-*
-* \param bucket is the bucket that will updated
-* \param pos is the position of the weight
-* \param id is the index that will be set
-* \param weight is the weight that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::setItem(int bucket, std::size_t pos, long id, weight_t &&weight)
-{
-    setPattern(bucket, pos, id);
-    setWeight(bucket, pos, std::move(weight));
+    setPattern(pos, id);
+    setWeight(pos, std::move(weight));
 }
 
 /*!
@@ -803,9 +445,6 @@ void DiscreteStencil<weight_t>::setItem(int bucket, std::size_t pos, long id, we
 *
 * If an item with the same id already exists, the given value will be summed
 * to the weight of the existing item. Otherwise, a new item will be appended.
-*
-* If the stencil has more than one bucket, the item will be appended to the
-* first bucket.
 *
 * \param id is the index of the item
 * \param value is the value that will be summed
@@ -813,39 +452,16 @@ void DiscreteStencil<weight_t>::setItem(int bucket, std::size_t pos, long id, we
 template<typename weight_t>
 void DiscreteStencil<weight_t>::sumItem(long id, const weight_t &value)
 {
-    sumItem(0, id, value);
-}
-
-/*!
-* Sum the given value to the item of the stencil with the specified index.
-*
-* If an item with the same id already exists, the given value will be summed
-* to the weight of the existing item. Otherwise, a new item will be appended.
-*
-* If the stencil has more than one bucket, the item will be appended to the
-* first bucket.
-*
-* \param bucket is the bucket that will updated
-* \param id is the index of the item
-* \param value is the value that will be summed
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::sumItem(int bucket, long id, const weight_t &value)
-{
-    weight_t *weight = findWeight(bucket, id);
+    weight_t *weight = findWeight(id);
     if (weight) {
         *weight += value;
     } else {
-        appendItem(bucket, id, value);
+        appendItem(id, value);
     }
 }
 
-
 /*!
 * Append an item the stencil.
-*
-* If the stencil has more than one bucket, the item will be appended to the
-* first bucket.
 *
 * The item will be appended to the stencil also if the stencil already
 * contains an item with the same id.
@@ -856,14 +472,12 @@ void DiscreteStencil<weight_t>::sumItem(int bucket, long id, const weight_t &val
 template<typename weight_t>
 void DiscreteStencil<weight_t>::appendItem(long id, const weight_t &weight)
 {
-    appendItem(0, id, weight);
+    m_pattern.push_back(id);
+    m_weights.push_back(weight);
 }
 
 /*!
 * Append an item the stencil.
-*
-* If the stencil has more than one bucket, the item will be appended to the
-* first bucket.
 *
 * The item will be appended to the stencil also if the stencil already
 * contains an item with the same id.
@@ -874,41 +488,8 @@ void DiscreteStencil<weight_t>::appendItem(long id, const weight_t &weight)
 template<typename weight_t>
 void DiscreteStencil<weight_t>::appendItem(long id, weight_t &&weight)
 {
-    appendItem(0, id, std::move(weight));
-}
-
-/*!
-* Append an item the stencil.
-*
-* The item will be appended to the stencil also if the stencil already
-* contains an item with the same id.
-*
-* \param bucket is the bucket that will updated
-* \param id is the index that will be set
-* \param weight is the weight that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::appendItem(int bucket, long id, const weight_t &weight)
-{
-    m_pattern.pushBackItem(bucket, id);
-    m_weights.pushBackItem(bucket, weight);
-}
-
-/*!
-* Append an item the stencil.
-*
-* The item will be appended to the stencil also if the stencil already
-* contains an item with the same id.
-*
-* \param bucket is the bucket that will updated
-* \param id is the index that will be set
-* \param weight is the weight that will be set
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::appendItem(int bucket, long id, weight_t &&weight)
-{
-    m_pattern.pushBackItem(bucket, id);
-    m_weights.pushBackItem(bucket, std::move(weight));
+    m_pattern.push_back(id);
+    m_weights.push_back(std::move(weight));
 }
 
 /*!
@@ -978,8 +559,8 @@ void DiscreteStencil<weight_t>::zeroConstant()
 /*!
 * Clears the items of the stencil.
 *
-* Removes all items from the stencil (which are destroyed), leaving each
-* bucket with a size of 0.
+* Removes all items from the stencil (which are destroyed), leaving it
+* with a size of 0.
 *
 * \param release if it's true the memory hold by the stencil will be
 * released, otherwise the stencil will be cleared but its memory will
@@ -988,20 +569,15 @@ void DiscreteStencil<weight_t>::zeroConstant()
 template<typename weight_t>
 void DiscreteStencil<weight_t>::clear(bool release)
 {
-    m_pattern.clearItems(release);
-    m_weights.clearItems(release);
+    m_pattern.clear();
+    m_weights.clear();
+
+    if (release) {
+        m_pattern.shrink_to_fit();
+        m_weights.shrink_to_fit();
+    }
 
     zeroConstant();
-}
-
-/*!
-* Merge the bucket together.
-*/
-template<typename weight_t>
-void DiscreteStencil<weight_t>::flatten()
-{
-    m_pattern.merge();
-    m_weights.merge();
 }
 
 /*!
@@ -1012,17 +588,14 @@ void DiscreteStencil<weight_t>::flatten()
 template<typename weight_t>
 void DiscreteStencil<weight_t>::optimize(double tolerance)
 {
-    int nBuckets = getBucketCount();
-    for (int i = 0; i < nBuckets; ++i) {
-        std::size_t nBucketItems = size(i);
-        for (std::size_t j = 0; j < nBucketItems; ++j) {
-            bool isWeightNeglibile = optimizeWeight(i, j, tolerance);
-            if (isWeightNeglibile) {
-                m_pattern.eraseItem(i, j);
-                m_weights.eraseItem(i, j);
-                --j;
-                --nBucketItems;
-            }
+    std::size_t nItems = size();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        bool isWeightNeglibile = optimizeWeight(n, tolerance);
+        if (isWeightNeglibile) {
+            m_pattern.erase(m_pattern.begin() + n);
+            m_weights.erase(m_weights.begin() + n);
+            --n;
+            --nItems;
         }
     }
 }
@@ -1036,8 +609,8 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::renumber(const std::unordered_map<long, long> &map)
 {
     const std::size_t nItems = size();
-    for (std::size_t k = 0; k < nItems; ++k) {
-        long &id = m_pattern.rawGetItem(k);
+    for (std::size_t n = 0; n < nItems; ++n) {
+        long &id = m_pattern[n];
         id = map.at(id);
     }
 }
@@ -1055,9 +628,9 @@ void DiscreteStencil<weight_t>::addComplementToZero(long id)
         return;
     }
 
-    weight_t complement = -1. * m_weights.rawGetItem(0);
+    weight_t complement = -1. * m_weights[0];
     for (std::size_t n = 1; n < nItems; ++n) {
-        complement -= m_weights.rawGetItem(n);
+        complement -= m_weights[n];
     }
 
     appendItem(id, complement);
@@ -1071,7 +644,7 @@ void DiscreteStencil<weight_t>::zero()
 {
     const std::size_t nItems = size();
     for (std::size_t n = 0; n < nItems; ++n) {
-        weight_t &weight = m_weights.rawGetItem(n);
+        weight_t &weight = m_weights[n];
         rawCopyValue(m_zero, &weight);
     }
 
@@ -1080,34 +653,30 @@ void DiscreteStencil<weight_t>::zero()
 /*!
 * Optimize the specified weight.
 *
-* \param bucket is the bucket of the weight to check
 * \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
 * \result Returns true if the whole weight is neglibile
 */
 template<typename weight_t>
-bool DiscreteStencil<weight_t>::optimizeWeight(int bucket, std::size_t pos, double tolerance)
+bool DiscreteStencil<weight_t>::optimizeWeight(std::size_t pos, double tolerance)
 {
-    return (std::abs(m_weights.getItem(bucket, pos) - m_zero) <= tolerance);
+    return (std::abs(m_weights[pos] - m_zero) <= tolerance);
 }
 
 /*!
 * Find the weight associated to the specified id.
 *
-* \param bucket is the bucket of the weight
 * \param id is the index associated to the weight
 * \result A pointer to the weight associated to the specified id. If the weight
 * is not found, a null pointer is returned.
 */
 template<typename weight_t>
-weight_t * DiscreteStencil<weight_t>::findWeight(int bucket, long id)
+weight_t * DiscreteStencil<weight_t>::findWeight(long id)
 {
-    std::size_t nBucketItems = size(bucket);
-    for (std::size_t j = 0; j < nBucketItems; ++j) {
-        long guessId = *(m_pattern.get(bucket) + j);
-        if (guessId == id) {
-            weight_t *weight = m_weights.get(bucket) + j;
-            return weight;
+    const std::size_t nItems = size();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        if (m_pattern[n] == id) {
+            return (m_weights.data() + n);
         }
     }
 
@@ -1117,20 +686,17 @@ weight_t * DiscreteStencil<weight_t>::findWeight(int bucket, long id)
 /*!
 * Find the weight associated to the specified id.
 *
-* \param bucket is the bucket of the weight
 * \param id is the index associated to the weight
 * \result A constant pointer to the weight associated to the specified id.
 * If the weight is not found, a null pointer is returned.
 */
 template<typename weight_t>
-const weight_t * DiscreteStencil<weight_t>::findWeight(int bucket, long id) const
+const weight_t * DiscreteStencil<weight_t>::findWeight(long id) const
 {
-    std::size_t nBucketItems = size(bucket);
-    for (std::size_t j = 0; j < nBucketItems; ++j) {
-        long guessId = *(m_pattern.get(bucket) + j);
-        if (guessId == id) {
-            const weight_t *weight = m_weights.get(bucket) + j;
-            return weight;
+    const std::size_t nItems = size();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        if (m_pattern[n] == id) {
+            return (m_weights.data() + n);
         }
     }
 
@@ -1170,18 +736,14 @@ void DiscreteStencil<weight_t>::rawMoveValue(weight_t &&source, weight_t *target
 template<typename weight_t>
 void DiscreteStencil<weight_t>::display(std::ostream &out, double factor) const
 {
-    int nBuckets = getBucketCount();
+    const std::size_t nItems = size();
 
     weight_t sum = m_zero;
-    for (int i = 0; i < nBuckets; ++i) {
-        std::size_t nBucketItems = size(i);
-        out << " bucket : " << i << " n. bucket items : " << nBucketItems <<  std::endl;
-        for (std::size_t j = 0; j < nBucketItems; ++j) {
-            long id = m_pattern.getItem(i, j);
-            weight_t value = factor * m_weights.getItem(i, j);
-            out << "   id: " << id << " weight: " << value << std::endl;
-            sum += value;
-        }
+    for (std::size_t n = 0; n < nItems; ++n) {
+        long id = m_pattern[n];
+        weight_t value = factor * m_weights[n];
+        out << "   id: " << id << " weight: " << value << std::endl;
+        sum += value;
     }
 
     out << " constant : " << (factor * m_constant) << std::endl;
@@ -1196,7 +758,9 @@ void DiscreteStencil<weight_t>::display(std::ostream &out, double factor) const
 template<typename weight_t>
 size_t DiscreteStencil<weight_t>::getBinarySize() const
 {
-    return (sizeof(m_zero) + m_pattern.getBinarySize() + m_weights.getBinarySize() + sizeof(m_constant));
+    std::size_t nItems = size();
+
+    return (sizeof(m_zero) + nItems * (sizeof(long) + sizeof(weight_t)) + sizeof(m_constant));
 }
 
 /*!
@@ -1209,9 +773,8 @@ template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator*=(double factor)
 {
     const std::size_t nItems = size();
-    for (std::size_t k = 0; k < nItems; ++k) {
-        weight_t &weight = m_weights.rawGetItem(k);
-        weight *= factor;
+    for (std::size_t n = 0; n < nItems; ++n) {
+        m_weights[n] *= factor;
     }
     m_constant *= factor;
 
@@ -1228,9 +791,8 @@ template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator/=(double factor)
 {
     const std::size_t nItems = size();
-    for (std::size_t k = 0; k < nItems; ++k) {
-        weight_t &weight = m_weights.rawGetItem(k);
-        weight /= factor;
+    for (std::size_t n = 0; n < nItems; ++n) {
+        m_weights[n] /= factor;
     }
     m_constant /= factor;
 
@@ -1246,19 +808,9 @@ DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator/=(double factor)
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator+=(const DiscreteStencil<weight_t> &other)
 {
-    int nBuckets = getBucketCount();
-    int other_nBuckets = other.getBucketCount();
-    if (nBuckets != other_nBuckets) {
-        throw std::runtime_error("Stencil must have the same number of buckets.");
-    }
-
-    for (int i = 0; i < other_nBuckets; ++i) {
-        const int other_nBucketItems = other.size(i);
-        for (int j = 0; j < other_nBucketItems; ++j) {
-            long id = *(other.m_pattern.get(i) + j);
-            const weight_t &other_weight = *(other.m_weights.get(i) + j);
-            sumItem(i, id, other_weight);
-        }
+    const std::size_t other_nItems = other.size();
+    for (std::size_t n = 0; n < other_nItems; ++n) {
+        sumItem(other.m_pattern[n], other.m_weights[n]);
     }
 
     m_constant += other.m_constant;
@@ -1275,19 +827,9 @@ DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator+=(const Discrete
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator-=(const DiscreteStencil<weight_t> &other)
 {
-    int nBuckets = getBucketCount();
-    int other_nBuckets = other.getBucketCount();
-    if (nBuckets != other_nBuckets) {
-        throw std::runtime_error("Stencil must have the same number of buckets.");
-    }
-
-    for (int i = 0; i < other_nBuckets; ++i) {
-        const int other_nBucketItems = other.size(i);
-        for (int j = 0; j < other_nBucketItems; ++j) {
-            long id = *(other.m_pattern.get(i) + j);
-            const weight_t &other_weight = *(other.m_weights.get(i) + j);
-            sumItem(i, id, -1. * other_weight);
-        }
+    const std::size_t other_nItems = other.size();
+    for (std::size_t n = 0; n < other_nItems; ++n) {
+        sumItem(other.m_pattern[n], -1. * other.m_weights[n]);
     }
 
     m_constant -= other.m_constant;

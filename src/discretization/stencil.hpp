@@ -78,76 +78,42 @@ public:
     };
 
     DiscreteStencil(const weight_t &zero = weight_t());
-    DiscreteStencil(int nBuckets, const weight_t &zero = weight_t());
-    DiscreteStencil(int nBuckets, int nBucketItems, const weight_t &zero = weight_t());
-    DiscreteStencil(const std::vector<std::size_t> &bucketSizes, const weight_t &zero = weight_t());
-    DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero = weight_t());
-    DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t &zero = weight_t());
-    DiscreteStencil(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t *weights, const weight_t &zero = weight_t());
+    DiscreteStencil(std::size_t nItems, const weight_t &zero = weight_t());
+    DiscreteStencil(std::size_t size, const long *pattern, const weight_t &zero = weight_t());
+    DiscreteStencil(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero = weight_t());
 
-    void initialize(const weight_t &zero = weight_t());
-    void initialize(int nBuckets, const weight_t &zero = weight_t());
-    void initialize(int nBuckets, int nBucketItems, const weight_t &zero = weight_t());
-    void initialize(const std::vector<std::size_t> &bucketSizes, const weight_t &zero = weight_t());
-    void initialize(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero = weight_t());
-    void initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t &zero = weight_t());
-    void initialize(int nBuckets, const std::size_t *bucketSizes, const long *pattern, const weight_t *weights, const weight_t &zero = weight_t());
+    void initialize(std::size_t nItems, const weight_t &zero = weight_t());
+    void initialize(std::size_t size, const long *pattern, const weight_t &zero = weight_t());
+    void initialize(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero = weight_t());
     void initialize(const DiscreteStencil<weight_t> &other);
 
     void clear(bool release = false);
 
     std::size_t size() const;
-    std::size_t size(int bucket) const;
 
+    void resize(std::size_t nItems);
     void reserve(std::size_t nItems);
-    void reserve(int nBuckets, std::size_t nItems);
-
-    int getBucketCount() const;
 
     long & getPattern(std::size_t pos);
     const long & getPattern(std::size_t pos) const;
-    long & getPattern(int bucket, std::size_t pos);
-    const long & getPattern(int bucket, std::size_t pos) const;
     long * patternData();
     const long * patternData() const;
-    const FlatVector2D<long> & getPattern() const;
     void setPattern(std::size_t pos, long id);
-    void setPattern(int bucket, std::size_t pos, long id);
-
-    long & rawGetPattern(std::size_t pos);
-    const long & rawGetPattern(std::size_t pos) const;
-    void rawSetPattern(std::size_t pos, long id);
 
     weight_t & getWeight(std::size_t pos);
     const weight_t & getWeight(std::size_t pos) const;
-    weight_t & getWeight(int bucket, std::size_t pos);
-    const weight_t & getWeight(int bucket, std::size_t pos) const;
     weight_t * weightData();
     const weight_t * weightData() const;
-    const FlatVector2D<weight_t> & getWeights() const;
     void setWeight(std::size_t pos, const weight_t &weight);
     void setWeight(std::size_t pos, weight_t &&weight);
-    void setWeight(int bucket, std::size_t pos, const weight_t &weight);
-    void setWeight(int bucket, std::size_t pos, weight_t &&weight);
     void sumWeight(std::size_t pos, const weight_t &value);
-    void sumWeight(int bucket, std::size_t pos, const weight_t &value);
     void zeroWeight(std::size_t pos);
-    void zeroWeight(int bucket, std::size_t pos);
-
-    weight_t & rawGetWeight(std::size_t pos);
-    const weight_t & rawGetWeight(std::size_t pos) const;
-    void rawSetWeight(std::size_t pos, const weight_t &weight);
 
     void setItem(std::size_t pos, long id, const weight_t &weight);
     void setItem(std::size_t pos, long id, weight_t &&weight);
-    void setItem(int bucket, std::size_t pos, long id, const weight_t &weight);
-    void setItem(int bucket, std::size_t pos, long id, weight_t &&weight);
     void sumItem(long id, const weight_t &value);
-    void sumItem(int bucket, long id, const weight_t &value);
     void appendItem(long id, const weight_t &weight);
     void appendItem(long id, weight_t &&weight);
-    void appendItem(int bucket, long id, const weight_t &weight);
-    void appendItem(int bucket, long id, weight_t &&weight);
 
     weight_t & getConstant();
     const weight_t & getConstant() const;
@@ -156,7 +122,6 @@ public:
     void sumConstant(const weight_t &value);
     void zeroConstant();
 
-    void flatten();
     void optimize(double tolerance = 1.e-12);
     void renumber(const std::unordered_map<long, long> &map);
     void addComplementToZero(long id);
@@ -176,14 +141,14 @@ private:
     static void rawMoveValue(weight_t &&source, weight_t *destination);
 
     weight_t m_zero;
-    FlatVector2D<long> m_pattern;
-    FlatVector2D<weight_t> m_weights;
+    std::vector<long> m_pattern;
+    std::vector<weight_t> m_weights;
     weight_t m_constant;
 
-    weight_t * findWeight(int bucket, long id);
-    const weight_t * findWeight(int bucket, long id) const;
+    weight_t * findWeight(long id);
+    const weight_t * findWeight(long id) const;
 
-    bool optimizeWeight(int bucket, std::size_t pos, double tolerance = 1.e-12);
+    bool optimizeWeight(std::size_t pos, double tolerance = 1.e-12);
 
 };
 
@@ -195,10 +160,10 @@ template<>
 void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double> &source, std::vector<double> *target);
 
 template<>
-bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(int bucket, std::size_t pos, double tolerance);
+bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(std::size_t pos, double tolerance);
 
 template<>
-bool DiscreteStencil<std::vector<double>>::optimizeWeight(int bucket, std::size_t pos, double tolerance);
+bool DiscreteStencil<std::vector<double>>::optimizeWeight(std::size_t pos, double tolerance);
 
 }
 
