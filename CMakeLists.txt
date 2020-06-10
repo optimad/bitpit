@@ -322,17 +322,18 @@ set(POD_EXTERNAL_DEPS "LAPACKE")
 # Internal dependencies
 #------------------------------------------------------------------------------------#
 
+# List of MPI-only modules
+set(MPI_ONLY_MODULE_LIST "")
+foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+    string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+    list (FIND ${UPPER_MODULE_NAME}_EXTERNAL_DEPS "MPI" _mpi_dep_index)
+    if (${_mpi_dep_index} GREATER -1)
+        LIST(APPEND MPI_ONLY_MODULE_LIST ${MODULE_NAME})
+    endif()
+endforeach()
+
 # If building without MPI remove dependecies on MPI-only modules
 if (NOT ENABLE_MPI)
-    set(MPI_ONLY_MODULE_LIST "")
-    foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-        string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
-        list (FIND ${UPPER_MODULE_NAME}_EXTERNAL_DEPS "MPI" _mpi_dep_index)
-        if (${_mpi_dep_index} GREATER -1)
-            LIST(APPEND MPI_ONLY_MODULE_LIST ${MODULE_NAME})
-        endif()
-    endforeach()
-
     if (NOT ${MPI_ONLY_MODULE_LIST} STREQUAL "")
         foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
             string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
@@ -343,8 +344,6 @@ if (NOT ENABLE_MPI)
             unset(UPPER_MODULE_NAME)
         endforeach()
     endif()
-
-    unset(MPI_ONLY_MODULE_LIST)
 endif()
 
 # Initialize module state
