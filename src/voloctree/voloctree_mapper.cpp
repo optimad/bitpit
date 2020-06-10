@@ -1444,8 +1444,8 @@ void VolOctreeMapper::_communicateInverseMapperBack()
         toRanks.insert(mappingEntry.first);
 
         const std::unordered_map<long, mapping::Info> &inverseMappingInfo = m_partitionIR.map_rank_inverseMapping[mappingEntry.first];
-        for (const auto &mappingEntry : inverseMappingInfo) {
-            toRankId[mappingEntry.first].push_back(mappingEntry.first);
+        for (const auto &submappingEntry : inverseMappingInfo) {
+            toRankId[mappingEntry.first].push_back(submappingEntry.first);
         }
     }
 
