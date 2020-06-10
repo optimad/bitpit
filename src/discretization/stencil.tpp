@@ -230,7 +230,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
 }
 
 /*!
-* Initialize the stencil
+* Initialize the stencil.
 *
 * \param nBuckets is the number of buckets in the stencil
 * \param bucketSizes are the sizes of the buckets in the stencil
@@ -247,7 +247,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
 }
 
 /*!
-* Initialize the stencil
+* Initialize the stencil.
 *
 * \param nBuckets is the number of buckets in the stencil
 * \param bucketSizes are the sizes of the buckets in the stencil
@@ -265,11 +265,10 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
 }
 
 /*!
-* Initialize the stencil
+* Initialize the stencil.
 *
 * \param other is another stencil of the same time, whose items will be used
 * to initialize this stencil
-* \param zero is the value to be used as zero
 */
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(const DiscreteStencil<weight_t> &other)
@@ -848,6 +847,9 @@ void DiscreteStencil<weight_t>::sumItem(int bucket, long id, const weight_t &val
 * If the stencil has more than one bucket, the item will be appended to the
 * first bucket.
 *
+* The item will be appended to the stencil also if the stencil already
+* contains an item with the same id.
+*
 * \param id is the index that will be set
 * \param weight is the weight that will be set
 */
@@ -863,6 +865,9 @@ void DiscreteStencil<weight_t>::appendItem(long id, const weight_t &weight)
 * If the stencil has more than one bucket, the item will be appended to the
 * first bucket.
 *
+* The item will be appended to the stencil also if the stencil already
+* contains an item with the same id.
+*
 * \param id is the index that will be set
 * \param weight is the weight that will be set
 */
@@ -874,6 +879,9 @@ void DiscreteStencil<weight_t>::appendItem(long id, weight_t &&weight)
 
 /*!
 * Append an item the stencil.
+*
+* The item will be appended to the stencil also if the stencil already
+* contains an item with the same id.
 *
 * \param bucket is the bucket that will updated
 * \param id is the index that will be set
@@ -888,6 +896,9 @@ void DiscreteStencil<weight_t>::appendItem(int bucket, long id, const weight_t &
 
 /*!
 * Append an item the stencil.
+*
+* The item will be appended to the stencil also if the stencil already
+* contains an item with the same id.
 *
 * \param bucket is the bucket that will updated
 * \param id is the index that will be set
