@@ -172,6 +172,17 @@ public:
 
     std::size_t evalMaxDepth(std::size_t rootId = 0) const;
 
+#if BITPIT_ENABLE_MPI
+    void setCommunicator(MPI_Comm communicator);
+    void freeCommunicator();
+    bool isCommunicatorSet() const;
+    const MPI_Comm & getCommunicator() const;
+
+    const std::array<double, 3> & getPartitionBoxMin(int rank) const;
+    const std::array<double, 3> & getPartitionBoxMax(int rank) const;
+    const SkdBox & getPartitionBox(int rank) const;
+#endif
+
 protected:
     SkdPatchInfo m_patchInfo;
     std::vector<std::size_t> m_cellRawIds;
@@ -184,6 +195,13 @@ protected:
 
     bool m_includeGhosts;
 
+#if BITPIT_ENABLE_MPI
+    int m_rank;
+    int m_nProcessors;
+    MPI_Comm m_communicator;
+    std::vector<SkdBox> m_partitionBoxes;
+#endif
+
     PatchSkdTree(const PatchKernel *patch, bool includeGhosts = true);
 
     SkdNode & _getNode(std::size_t nodeId);
@@ -191,6 +209,9 @@ protected:
 private:
     void createChildren(std::size_t parentId, std::size_t leaftThreshold);
     void createLeaf(std::size_t nodeId);
+#if BITPIT_ENABLE_MPI
+    void buildPartitionBoxes();
+#endif
 
 };
 

@@ -785,6 +785,9 @@ PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool includeGhosts)
       m_cellRawIds(includeGhosts ? patch->getCellCount() : patch->getInternalCount()),
       m_nLeafs(0), m_nMinLeafCells(0), m_nMaxLeafCells(0),
       m_includeGhosts(includeGhosts)
+#if BITPIT_ENABLE_MPI
+    , m_communicator(MPI_COMM_NULL)
+#endif
 {
 
 }
@@ -900,6 +903,17 @@ void PatchSkdTree::build(std::size_t leafThreshold, bool squeezeStorage)
 
     // Patch cache is no longer needed
     m_patchInfo.destroyCache();
+
+#if BITPIT_ENABLE_MPI
+    // Build partition info with partition boxes if the patch is partitioned
+    if (patch.isCommunicatorSet()){
+        // Set communicator
+        setCommunicator(getPatch().getCommunicator());
+        // Build partition boxes
+        buildPartitionBoxes();
+    }
+#endif
+
 }
 
 /*!
@@ -921,6 +935,16 @@ void PatchSkdTree::clear(bool release)
         m_nodes.clear();
         m_cellRawIds.clear();
     }
+
+#if BITPIT_ENABLE_MPI
+    freeCommunicator();
+    if (release) {
+        std::vector<SkdBox>().swap(m_partitionBoxes);
+    } else {
+        m_partitionBoxes.clear();
+    }
+#endif
+
 }
 
 /*!
@@ -1124,5 +1148,141 @@ void PatchSkdTree::createLeaf(std::size_t nodeId)
     m_nMinLeafCells = std::min(nodeCellCount, m_nMinLeafCells);
     m_nMaxLeafCells = std::max(nodeCellCount, m_nMaxLeafCells);
 }
+
+#if BITPIT_ENABLE_MPI
+/*!
+    Sets the MPI communicator to be used for parallel communications.
+    \param communicator is the communicator to be used for parallel
+    communications.
+*/
+void PatchSkdTree::setCommunicator(MPI_Comm communicator)
+{
+    // Communication can be set just once
+    if (isCommunicatorSet()) {
+        throw std::runtime_error ("SkdParallelPatchInfo communicator can be set just once");
+    }
+
+    // The communicator has to be valid
+    if (communicator == MPI_COMM_NULL) {
+        throw std::runtime_error ("SkdParallelPatchInfo communicator is not valid");
+    }
+
+    // Creat a copy of the user-specified communicator
+    //
+    // No library routine should use MPI_COMM_WORLD as the communicator;
+    // instead, a duplicate of a user-specified communicator should always
+    // be used.
+    MPI_Comm_dup(communicator, &m_communicator);
+
+    // Get MPI information
+    MPI_Comm_size(m_communicator, &m_nProcessors);
+    MPI_Comm_rank(m_communicator, &m_rank);
+
+}
+
+/*!
+    Free the MPI communicator
+*/
+void PatchSkdTree::freeCommunicator()
+{
+    if (!isCommunicatorSet()) {
+        return;
+    }
+
+    int finalizedCalled;
+    MPI_Finalized(&finalizedCalled);
+    if (finalizedCalled) {
+        return;
+    }
+
+    MPI_Comm_free(&m_communicator);
+}
+
+/*!
+    Checks if the communicator to be used for parallel communications has
+    already been set.
+    \result Returns true if the communicator has been set, false otherwise.
+*/
+bool PatchSkdTree::isCommunicatorSet() const
+{
+    return (getCommunicator() != MPI_COMM_NULL);
+}
+
+/*!
+    Gets the MPI communicator associated to the patch
+    \return The MPI communicator associated to the patch.
+*/
+const MPI_Comm & PatchSkdTree::getCommunicator() const
+{
+    return m_communicator;
+}
+
+/*!
+* Build the partition boxes information.
+* Collect the bounding box of the root node of each partition
+* and store in a shared container.
+*/
+void PatchSkdTree::buildPartitionBoxes()
+{
+    // Build partition boxes
+    m_partitionBoxes.resize(getPatch().getProcessorCount());
+
+    // Recover local bounding box of the root node
+    const SkdBox & box = getNode(0).getBoundingBox();
+
+    // Collect minimum coordinates of bounding boxes
+    std::vector<std::array<double,3>> minBoxes(m_nProcessors);
+    minBoxes[m_rank] = box.getBoxMin();
+    std::vector<int> count(m_nProcessors, 3);
+    std::vector<int> displs(m_nProcessors);
+    for (std::size_t i=0; i<m_nProcessors; i++){
+        displs[i] = i*3;
+    }
+    MPI_Allgatherv(MPI_IN_PLACE, 3, MPI_DOUBLE, minBoxes.data(),
+                    count.data(), displs.data(), MPI_DOUBLE, m_communicator);
+
+    // Collect maximum coordinates of bounding boxes
+    std::vector<std::array<double,3>> maxBoxes(m_nProcessors);
+    maxBoxes[m_rank] = box.getBoxMax();
+    MPI_Allgatherv(MPI_IN_PLACE, 3, MPI_DOUBLE, maxBoxes.data(),
+                    count.data(), displs.data(), MPI_DOUBLE, m_communicator);
+
+    // Fill partition boxes
+    for (std::size_t i=0; i<m_nProcessors; i++){
+        m_partitionBoxes[i] = SkdBox(minBoxes[i], maxBoxes[i]);
+    }
+}
+
+/*!
+* Get the minimum coordinate of the bounding box associated to a partition.
+* \param[in] rank Index of the rank owner of the target partition
+* \result The minimum coordinate of the bounding box associated to the partition
+*/
+const std::array<double, 3> & PatchSkdTree::getPartitionBoxMin(int rank) const
+{
+    return m_partitionBoxes[rank].getBoxMin();
+}
+
+/*!
+* Get the maximum coordinate of the bounding box associated to a partition.
+* \param[in] rank Index of the rank owner of the target partition
+* \result The maximum coordinate of the bounding box associated to the partition
+*/
+const std::array<double, 3> & PatchSkdTree::getPartitionBoxMax(int rank) const
+{
+    return m_partitionBoxes[rank].getBoxMax();
+}
+
+/*!
+* Get the bounding box associated to a partition.
+* \param[in] rank Index of the rank owner of the target partition
+* \result The bounding box associated to the partition
+*/
+const SkdBox & PatchSkdTree::getPartitionBox(int rank) const
+{
+    return m_partitionBoxes[rank];
+}
+
+#endif
 
 }

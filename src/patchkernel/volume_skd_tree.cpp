@@ -37,9 +37,10 @@ namespace bitpit {
 * Constructor.
 *
 * \param patch is the volume patch that will be use to build the tree
+* \param includeGhosts if set to true (default value) the ghost cells are included in the tree
 */
-VolumeSkdTree::VolumeSkdTree(const VolumeKernel *patch)
-    : PatchSkdTree(patch)
+VolumeSkdTree::VolumeSkdTree(const VolumeKernel *patch, bool includeGhosts)
+    : PatchSkdTree(patch,includeGhosts)
 {
 }
 
