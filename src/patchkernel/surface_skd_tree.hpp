@@ -33,7 +33,7 @@ namespace bitpit {
 class SurfaceSkdTree : public PatchSkdTree {
 
 public:
-    SurfaceSkdTree(const SurfaceKernel *patch);
+    SurfaceSkdTree(const SurfaceKernel *patch, bool interorOnly = false);
 
     void clear(bool release);
 

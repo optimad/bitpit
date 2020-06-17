@@ -37,9 +37,10 @@ namespace bitpit {
 * Constructor.
 *
 * \param patch is the surface patch that will be use to build the tree
+* \param interiorOnly if set to true, only interior cells will be considered
 */
-SurfaceSkdTree::SurfaceSkdTree(const SurfaceKernel *patch)
-    : PatchSkdTree(patch)
+SurfaceSkdTree::SurfaceSkdTree(const SurfaceKernel *patch, bool interiorOnly)
+    : PatchSkdTree(patch, interiorOnly)
 {
 }
 
