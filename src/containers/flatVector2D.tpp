@@ -114,6 +114,20 @@ FlatVector2D<T>::FlatVector2D(std::size_t nVectors, std::size_t size, const T &v
 
     \param nVectors is the number of vectors
     \param sizes are the sizes of the vectors
+    \param value is the value that will be use to initialize the
+    items of the vectors
+*/
+template <class T>
+FlatVector2D<T>::FlatVector2D(std::size_t nVectors, const std::size_t *sizes, const T &value)
+{
+    initialize(nVectors, sizes, 1, &value, 0);
+}
+
+/*!
+    Creates a new container.
+
+    \param nVectors is the number of vectors
+    \param sizes are the sizes of the vectors
     \param values are the values of the vectors
 */
 template <class T>
@@ -160,6 +174,21 @@ void FlatVector2D<T>::initialize(std::size_t nVectors, std::size_t size, const T
 {
     initialize(nVectors, &size, 0, &value, 0);
 }
+
+/*!
+    Initializes the container.
+
+    \param nVectors is the number of vectors
+    \param sizes are the sizes of the vectors
+    \param value is the value that will be use to initialize the
+    items of the vectors
+*/
+template <class T>
+void FlatVector2D<T>::initialize(std::size_t nVectors, const std::size_t *sizes, const T &value)
+{
+    initialize(nVectors, sizes, 1, &value, 0);
+}
+
 
 /*!
     Initializes the container.
