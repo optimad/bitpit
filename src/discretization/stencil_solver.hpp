@@ -37,8 +37,18 @@
 
 namespace bitpit {
 
+class StencilSolverAssembler : public SystemMatrixAssembler {
+
+public:
+    virtual double getRowConstant(long rowIndex) const = 0;
+
+protected:
+    using SystemMatrixAssembler::SystemMatrixAssembler;
+
+};
+
 template<typename stencil_t>
-class DiscretizationStencilSolverAssembler : public SystemMatrixAssembler {
+class DiscretizationStencilSolverAssembler : public StencilSolverAssembler {
 
 public:
     DiscretizationStencilSolverAssembler(const std::vector<stencil_t> *stencils);
@@ -64,7 +74,7 @@ public:
 
     void getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const override;
     void getRowValues(long rowIndex, ConstProxyVector<double> *values) const override;
-    double getRowConstant(long rowIndex) const;
+    double getRowConstant(long rowIndex) const override;
 
 protected:
     const std::vector<stencil_t> *m_stencils;

@@ -64,7 +64,7 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
 template<typename stencil_t>
 DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const std::vector<stencil_t> *stencils)
 #endif
-    : SystemMatrixAssembler(), m_stencils(stencils),
+    : StencilSolverAssembler(), m_stencils(stencils),
       m_blockSize(-1)
 {
     // Initialize block size
