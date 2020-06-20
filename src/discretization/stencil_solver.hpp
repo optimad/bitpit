@@ -117,8 +117,10 @@ public:
 
     void clear(bool release = false);
     void assembly(const std::vector<stencil_t> &stencils);
+    void assembly(const StencilSolverAssembler &assembler);
 #if BITPIT_ENABLE_MPI==1
     void assembly(MPI_Comm communicator, bool partitioned, const std::vector<stencil_t> &stencils);
+    void assembly(MPI_Comm communicator, bool partitioned, const StencilSolverAssembler &assembler);
 #endif
     void update(const std::vector<stencil_t> &stencils);
     void update(const std::vector<long> &rows, const std::vector<stencil_t> &stencils);

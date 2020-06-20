@@ -433,12 +433,56 @@ template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::assembly(const std::vector<stencil_t> &stencils)
 #endif
 {
-    // Assembly system
+    // Create the assembler
 #if BITPIT_ENABLE_MPI==1
     DiscretizationStencilSolverAssembler<stencil_t> assembler(communicator, partitioned, &stencils);
-    SystemSolver::assembly(communicator, partitioned, assembler);
 #else
     DiscretizationStencilSolverAssembler<stencil_t> assembler(&stencils);
+#endif
+
+    // Assembly the system
+#if BITPIT_ENABLE_MPI==1
+    assembly(communicator, partitioned, assembler);
+#else
+    assembly(assembler);
+#endif
+}
+
+#if BITPIT_ENABLE_MPI==1
+/*!
+* Assembly the stencil solver.
+*
+* \param assembler is the solver assembler
+*/
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(const StencilSolverAssembler &assembler)
+{
+    assembly(MPI_COMM_SELF, false, assembler);
+}
+
+/*!
+* Initialize the stencil solver.
+*
+* \param partitioned controls if the matrix is partitioned
+* \param communicator is the MPI communicator
+* \param assembler is the solver assembler
+*/
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, bool partitioned, const StencilSolverAssembler &assembler)
+#else
+/*!
+* Initialize the stencil solver.
+*
+* \param assembler is the solver assembler
+*/
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(const StencilSolverAssembler &assembler)
+#endif
+{
+    // Assembly system
+#if BITPIT_ENABLE_MPI==1
+    SystemSolver::assembly(communicator, partitioned, assembler);
+#else
     SystemSolver::assembly(assembler);
 #endif
 
