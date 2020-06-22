@@ -1507,6 +1507,27 @@ void VolOctreeMapper::_communicateInverseMapperBack()
             mapping::Info &info = m_inverseMapping[id];
             info.type = mapping::Type(type);
             info.entity = mapping::Entity(entity);
+
+            // Keep only local mapping
+            //
+            // If partition is changed the mapping is always recomputed and not
+            // updated.
+            //
+            // Remove old ids and ranks that don't belong to this partition.
+            auto idsIter = info.ids.begin();
+            auto ranksIter = info.ranks.begin();
+            while (idsIter != info.ids.end()) {
+                int rank = *ranksIter;
+                if (rank != m_mappedPatch->getRank()) {
+                    idsIter = info.ids.erase(idsIter);
+                    ranksIter = info.ranks.erase(ranksIter);
+                } else {
+                    idsIter++;
+                    ranksIter++;
+                }
+            }
+
+            // Add received ids and ranks
             int nmap;
             recvBuffer >> nmap;
             for (int j=0; j<nmap; j++) {
