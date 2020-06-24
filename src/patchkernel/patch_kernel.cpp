@@ -5194,15 +5194,27 @@ void PatchKernel::translate(double sx, double sy, double sz)
 */
 void PatchKernel::scale(const std::array<double, 3> &scaling)
 {
+	scale(scaling, m_boxMinPoint);
+}
+
+/*!
+	Scales the patch.
+
+	\param[in] scaling is the scaling factor vector
+	\param[in] center is the center of the scaling
+*/
+void PatchKernel::scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center)
+{
 	// Scale the patch
 	for (auto &vertex : m_vertices) {
-		vertex.scale(scaling, m_boxMinPoint);
+		vertex.scale(scaling, center);
 	}
 
 	// Update the bounding box
 	if (!isBoundingBoxFrozen() || isBoundingBoxDirty()) {
 		for (int k = 0; k < 3; ++k) {
-			m_boxMaxPoint[k] = m_boxMinPoint[k] + scaling[k] * (m_boxMaxPoint[k] - m_boxMinPoint[k]);
+			m_boxMinPoint[k] = center[k] + scaling[k] * (m_boxMinPoint[k] - center[k]);
+			m_boxMaxPoint[k] = center[k] + scaling[k] * (m_boxMaxPoint[k] - center[k]);
 		}
 	}
 }
@@ -5216,7 +5228,18 @@ void PatchKernel::scale(const std::array<double, 3> &scaling)
 */
 void PatchKernel::scale(double scaling)
 {
-	scale({{scaling, scaling, scaling}});
+	scale({{scaling, scaling, scaling}}, m_boxMinPoint);
+}
+
+/*!
+	Scales the patch.
+
+	\param[in] scaling is the scaling factor
+	\param[in] center is the center of the scaling
+*/
+void PatchKernel::scale(double scaling, const std::array<double, 3> &center)
+{
+	scale({{scaling, scaling, scaling}}, center);
 }
 
 /*!
@@ -5228,7 +5251,22 @@ void PatchKernel::scale(double scaling)
 */
 void PatchKernel::scale(double sx, double sy, double sz)
 {
-	scale({{sx, sy, sz}});
+	scale({{sx, sy, sz}}, m_boxMinPoint);
+}
+
+/*!
+	Scales the patch.
+
+	The patch is scaled about the lower-left point of the bounding box.
+
+	\param[in] sx scaling factor along x direction
+	\param[in] sy scaling factor along y direction
+	\param[in] sz scaling factor along z direction
+	\param[in] center is the center of the scaling
+*/
+void PatchKernel::scale(double sx, double sy, double sz, const std::array<double, 3> &center)
+{
+	scale({{sx, sy, sz}}, center);
 }
 
 /*!

@@ -1681,17 +1681,17 @@ void VolCartesian::setLengths(const std::array<double, 3> &lengths)
 /*!
 	Scales the patch.
 
-	The patch is scaled about the lower-left point of the bounding box.
-
 	\param[in] scaling is the scaling factor vector
+	\param[in] center is the center of the scaling
  */
-void VolCartesian::scale(const std::array<double, 3> &scaling)
+void VolCartesian::scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center)
 {
 	for (int n = 0; n < 3; ++n) {
-		m_maxCoords[n] = m_minCoords[n] + scaling[n] * (m_maxCoords[n] - m_minCoords[n]);
+		m_minCoords[n] = center[n] + scaling[n] * (m_minCoords[n] - center[n]);
+		m_maxCoords[n] = center[n] + scaling[n] * (m_maxCoords[n] - center[n]);
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
-			m_vertexCoords[n][i] = m_minCoords[n] + scaling[n] * (m_vertexCoords[n][i] - m_minCoords[n]);
-			m_cellCenters[n][i]  = m_minCoords[n] + scaling[n] * (m_cellCenters[n][i] - m_minCoords[n]);
+			m_vertexCoords[n][i] = center[n] + scaling[n] * (m_vertexCoords[n][i] - center[n]);
+			m_cellCenters[n][i]  = center[n] + scaling[n] * (m_cellCenters[n][i] - center[n]);
 		}
 
 		m_cellSpacings[n] *= scaling[n];
@@ -1703,7 +1703,7 @@ void VolCartesian::scale(const std::array<double, 3> &scaling)
 
 	setBoundingBox(m_minCoords, m_maxCoords);
 
-	VolumeKernel::scale(scaling);
+	VolumeKernel::scale(scaling, center);
 }
 
 /*!

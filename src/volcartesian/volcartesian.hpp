@@ -116,7 +116,7 @@ public:
 	void translate(const std::array<double, 3> &translation) override;
 	std::array<double, 3> getLengths() const;
 	void setLengths(const std::array<double, 3> &lengths);
-	void scale(const std::array<double, 3> &scaling) override;
+	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center) override;
 
 	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
 	std::vector<double> convertToCellData(const std::vector<double> &nodeData) const;

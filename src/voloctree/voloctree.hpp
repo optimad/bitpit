@@ -113,7 +113,7 @@ public:
 	void translate(const std::array<double, 3> &translation) override;
 	double getLength() const;
 	void setLength(double length);
-	void scale(const std::array<double, 3> &scaling) override;
+	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center) override;
 
 	void updateAdjacencies(const std::vector<long> &cellIds) override;
 

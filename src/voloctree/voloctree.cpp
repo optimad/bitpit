@@ -2303,8 +2303,9 @@ void VolOctree::setLength(double length)
 	Scales the patch.
 
 	\param[in] scaling is the scaling factor vector
+	\param[in] center is the center of the scaling
  */
-void VolOctree::scale(const std::array<double, 3> &scaling)
+void VolOctree::scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center)
 {
 	bool uniformScaling = true;
 	uniformScaling &= (std::abs(scaling[0] - scaling[1]) > 1e-14);
@@ -2315,9 +2316,15 @@ void VolOctree::scale(const std::array<double, 3> &scaling)
 		return;
 	}
 
+	std::array<double, 3> origin = m_tree->getOrigin();
+	for (int n = 0; n < 3; ++n) {
+		origin[n] = center[n] + scaling[n] * (origin[n] - center[n]);
+	}
+	m_tree->setOrigin(origin);
+
 	m_tree->setL(m_tree->getL() * scaling[0]);
 
-	VolumeKernel::scale(scaling);
+	VolumeKernel::scale(scaling, center);
 
 	// The bounding box is frozen, it is not updated automatically
 	setBoundingBox();

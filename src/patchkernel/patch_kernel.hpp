@@ -505,9 +505,12 @@ public:
 
 	virtual void translate(const std::array<double, 3> &translation);
 	void translate(double sx, double sy, double sz);
-	virtual void scale(const std::array<double, 3> &scaling);
+	void scale(const std::array<double, 3> &scaling);
+	virtual void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &origin);
 	void scale(double scaling);
+	void scale(double scaling, const std::array<double, 3> &origin);
 	void scale(double sx, double sy, double sz);
+	void scale(double sx, double sy, double sz, const std::array<double, 3> &origin);
 
 	void setTol(double tolerance);
 	double getTol() const;
