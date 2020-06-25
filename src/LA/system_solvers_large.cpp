@@ -1306,11 +1306,6 @@ void SystemSolver::setUp()
         KSPDestroy(&m_KSP);
     }
 
-    // Set options prefix
-    if (!m_prefix.empty()) {
-        KSPSetOptionsPrefix(m_KSP, m_prefix.c_str());
-    }
-
     // Create Krylov space
 #if BITPIT_ENABLE_MPI==1
     KSPCreate(m_communicator, &m_KSP);
@@ -1318,6 +1313,12 @@ void SystemSolver::setUp()
     KSPCreate(PETSC_COMM_SELF, &m_KSP);
 #endif
 
+    // Set options prefix
+    if (!m_prefix.empty()) {
+        KSPSetOptionsPrefix(m_KSP, m_prefix.c_str());
+    }
+
+    // Set the matrix associated with the linear system
     KSPSetOperators(m_KSP, m_A, m_A);
 
     // Perform actions before KSP set up
