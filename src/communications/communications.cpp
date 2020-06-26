@@ -292,7 +292,8 @@ void DataCommunicator::discoverSends()
     }
 
     // Receive the data sizes and set the sends
-    MPI_Request exchangeCompletedRequest = MPI_REQUEST_NULL;
+    int localDiscoverSendsCompleted = 0;
+    MPI_Request exchangeCompletedRequest;
     while (true) {
         // If there are messagea available receive them and set the sends
         int messageAvailable = 1;
@@ -307,10 +308,9 @@ void DataCommunicator::discoverSends()
         }
 
         // If all the sends are complete notify it
-        if (exchangeCompletedRequest == MPI_REQUEST_NULL) {
-            int discoverSendsCompleted;
-            MPI_Testall(discoverRequests.size(), discoverRequests.data(), &discoverSendsCompleted, MPI_STATUSES_IGNORE);
-            if (discoverSendsCompleted) {
+        if (!localDiscoverSendsCompleted) {
+            MPI_Testall(discoverRequests.size(), discoverRequests.data(), &localDiscoverSendsCompleted, MPI_STATUSES_IGNORE);
+            if (localDiscoverSendsCompleted) {
                 MPI_Ibarrier(m_communicator, &exchangeCompletedRequest);
             }
         }
@@ -320,7 +320,7 @@ void DataCommunicator::discoverSends()
         // be makred as completed only when the corresponding receive has
         // completed. When all processes have completed the send/recevies
         // all sizes have been exchanged.
-        if (exchangeCompletedRequest != MPI_REQUEST_NULL) {
+        if (localDiscoverSendsCompleted) {
             int exchangeCompleted = 0;
             MPI_Test(&exchangeCompletedRequest, &exchangeCompleted, MPI_STATUS_IGNORE);
             if (exchangeCompleted) {
@@ -364,7 +364,8 @@ void DataCommunicator::discoverRecvs()
     }
 
     // Receive the data sizes and set the receives
-    MPI_Request exchangeCompletedRequest = MPI_REQUEST_NULL;
+    int localDiscoverSendsCompleted = 0;
+    MPI_Request exchangeCompletedRequest;
     while (true) {
         // If there are messagea available receive them and set the receives
         int messageAvailable = 1;
@@ -379,10 +380,9 @@ void DataCommunicator::discoverRecvs()
         }
 
         // If all the sends are complete notify it
-        if (exchangeCompletedRequest == MPI_REQUEST_NULL) {
-            int discoverSendsCompleted;
-            MPI_Testall(discoverRequests.size(), discoverRequests.data(), &discoverSendsCompleted, MPI_STATUSES_IGNORE);
-            if (discoverSendsCompleted) {
+        if (!localDiscoverSendsCompleted) {
+            MPI_Testall(discoverRequests.size(), discoverRequests.data(), &localDiscoverSendsCompleted, MPI_STATUSES_IGNORE);
+            if (localDiscoverSendsCompleted) {
                 MPI_Ibarrier(m_communicator, &exchangeCompletedRequest);
             }
         }
@@ -392,7 +392,7 @@ void DataCommunicator::discoverRecvs()
         // be makred as completed only when the corresponding receive has
         // completed. When all processes have completed the send/recevies
         // all sizes have been exchanged.
-        if (exchangeCompletedRequest != MPI_REQUEST_NULL) {
+        if (localDiscoverSendsCompleted) {
             int exchangeCompleted = 0;
             MPI_Test(&exchangeCompletedRequest, &exchangeCompleted, MPI_STATUS_IGNORE);
             if (exchangeCompleted) {
