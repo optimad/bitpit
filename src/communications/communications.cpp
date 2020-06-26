@@ -273,6 +273,13 @@ bool DataCommunicator::areRecvsContinuous()
 
 /*!
     Discover the sends inspecting the receives that the user has already set.
+
+    This function implements the "Nonblocking Consensus" algorithm proposed
+    in "Scalable Communication Protocols for Dynamic Sparse Data Exchange",
+    Torsten Hoefler, Christian Siebert and Andrew Lumsdaine, Proceedings of
+    the 2010 ACM SIGPLAN Symposium on Principles and Practice of Parallel
+    Programming (PPoPP'10), presented in Bangalore, India, pages 159--168,
+    ACM, ISBN: 978-1-60558-708-0, Jan. 2010.
 */
 void DataCommunicator::discoverSends()
 {
@@ -345,6 +352,13 @@ void DataCommunicator::discoverSends()
 
 /*!
     Discover the receives inspecting the sends that the user has already set.
+
+    This function implements the "Nonblocking Consensus" algorithm proposed
+    in "Scalable Communication Protocols for Dynamic Sparse Data Exchange",
+    Torsten Hoefler, Christian Siebert and Andrew Lumsdaine, Proceedings of
+    the 2010 ACM SIGPLAN Symposium on Principles and Practice of Parallel
+    Programming (PPoPP'10), presented in Bangalore, India, pages 159--168,
+    ACM, ISBN: 978-1-60558-708-0, Jan. 2010.
 */
 void DataCommunicator::discoverRecvs()
 {
