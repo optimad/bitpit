@@ -1333,6 +1333,9 @@ void SystemSolver::setUp()
 
     // Perform actions after KSP set up
     postKSPSetupActions();
+
+    // Set up is now complete
+    m_setUp = true;
 }
 
 /*!
