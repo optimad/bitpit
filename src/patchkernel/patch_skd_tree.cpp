@@ -353,7 +353,9 @@ SkdNode::SkdNode(const SkdPatchInfo *patchInfo, std::size_t cellRangeBegin, std:
       m_cellRangeBegin(cellRangeBegin), m_cellRangeEnd(cellRangeEnd),
       m_children({{NULL_ID, NULL_ID}})
 {
-    initializeBoundingBox();
+    if (m_cellRangeBegin != m_cellRangeEnd){
+        initializeBoundingBox();
+    }
 }
 
 /*!
@@ -861,7 +863,8 @@ void PatchSkdTree::build(std::size_t leafThreshold, bool squeezeStorage)
     m_patchInfo.buildCache(cellRange);
 
     // Initialize node list
-    m_nodes.reserve(std::ceil(2. * nCells / leafThreshold - 1.));
+    std::size_t nodesCount = std::max(1, int(std::ceil(2. * nCells / leafThreshold - 1.)));
+    m_nodes.reserve(nodesCount);
 
     // Create the root
     m_nodes.emplace_back(&m_patchInfo, 0, nCells);
