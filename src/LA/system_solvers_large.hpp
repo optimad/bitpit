@@ -130,6 +130,8 @@ public:
     static void addInitOptions(const std::vector<std::string> &options);
     static void clearInitOptions();
 
+    static void enableLogView();
+
     SystemSolver(bool debug = false);
     SystemSolver(const std::string &prefix, bool debug = false);
 
@@ -220,7 +222,10 @@ protected:
 private:
     static int m_nInstances;
     static bool m_optionsEditable;
+    static bool m_logViewEnabled;
     static std::vector<std::string> m_options;
+
+    static PetscErrorCode displayLogView();
 
     std::string m_prefix;
 

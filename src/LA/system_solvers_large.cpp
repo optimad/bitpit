@@ -173,6 +173,7 @@ void SystemSparseMatrixAssembler::getRowValues(long row, ConstProxyVector<double
 
 int SystemSolver::m_nInstances = 0;
 bool SystemSolver::m_optionsEditable = true;
+bool SystemSolver::m_logViewEnabled = false;
 std::vector<std::string> SystemSolver::m_options = std::vector<std::string>(1, "bitpit");
 
 /*!
@@ -239,6 +240,36 @@ void SystemSolver::clearInitOptions()
 }
 
 /*!
+ * Displaye log view
+ *
+ * \returns The error code.
+ */
+void SystemSolver::enableLogView()
+{
+    if (m_logViewEnabled) {
+        return;
+    }
+
+#if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
+    PetscLogDefaultBegin();
+#else
+    PetscLogBegin();
+#endif
+    PetscRegisterFinalize(&(SystemSolver::displayLogView));
+    m_logViewEnabled = true;
+}
+
+/*!
+ * Displaye log view
+ *
+ * \returns The error code.
+ */
+PetscErrorCode SystemSolver::displayLogView()
+{
+    return PetscLogView(PETSC_VIEWER_STDOUT_WORLD);
+}
+
+/*!
  * Constuctor
  *
  * \param debug if set to true, debug information will be printed
@@ -264,11 +295,6 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
 #endif
       m_rowPermutation(nullptr), m_colPermutation(nullptr)
 {
-    // Add debug options
-    if (debug) {
-        addInitOption("-log_view");
-    }
-
     // Initialize Petsc
     if (m_nInstances == 0) {
         // Generate command line arguments
@@ -299,6 +325,8 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
 
     // Set KSP debug options
     if (debug) {
+        enableLogView();
+
 #if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
             PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
             PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_converged_reason").c_str(), "");
