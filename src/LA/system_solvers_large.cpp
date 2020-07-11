@@ -330,7 +330,11 @@ SystemSolver::~SystemSolver()
 
     // Finalize petsc
     if (m_nInstances == 0) {
-        PetscFinalize();
+        PetscBool isPetscFinalized;
+        PetscFinalized(&isPetscFinalized);
+        if (!isPetscFinalized) {
+            PetscFinalize();
+        }
     }
 }
 
