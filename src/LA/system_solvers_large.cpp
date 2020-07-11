@@ -267,9 +267,6 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
     // Add debug options
     if (debug) {
         addInitOption("-log_view");
-        addInitOption("-ksp_monitor_true_residual");
-        addInitOption("-ksp_converged_reason");
-        addInitOption("-ksp_monitor_singular_value");
     }
 
     // Initialize Petsc
@@ -298,6 +295,19 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
         }
 
         delete[] argv;
+    }
+
+    // Set KSP debug options
+    if (debug) {
+#if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
+            PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
+            PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_converged_reason").c_str(), "");
+            PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
+#else
+            PetscOptionsSetValue(("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
+            PetscOptionsSetValue(("-" + m_prefix + "ksp_converged_reason").c_str(), "");
+            PetscOptionsSetValue(("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
+#endif
     }
 
     // Increase the number of instances
