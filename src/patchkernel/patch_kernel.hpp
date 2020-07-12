@@ -325,6 +325,8 @@ public:
 	virtual void setDimension(int dimension);
 	bool isThreeDimensional() const;
 
+	bool empty() const;
+
 	virtual long getVertexCount() const;
 	PiercedVector<Vertex> &getVertices();
 	const PiercedVector<Vertex> &getVertices() const;
@@ -350,8 +352,6 @@ public:
 	VertexConstIterator getVertexConstIterator(long id) const;
 	VertexConstIterator vertexConstBegin() const;
 	VertexConstIterator vertexConstEnd() const;
-
-	bool empty() const;
 
 	virtual long getCellCount() const;
 	long getInternalCount() const;
