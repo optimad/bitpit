@@ -115,9 +115,10 @@ bitpit::FlatVector2D<long> Cell::createNeighbourhoodStorage(bool storeNeighbourh
 	Default constructor.
 */
 Cell::Cell()
-	: Element(), m_interior(true),
+	: Element(),
       m_interfaces(createNeighbourhoodStorage(false)),
-      m_adjacencies(createNeighbourhoodStorage(false))
+      m_adjacencies(createNeighbourhoodStorage(false)),
+      m_interior(true)
 {
 
 }

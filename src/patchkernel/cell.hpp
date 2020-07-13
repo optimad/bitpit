@@ -112,10 +112,10 @@ protected:
 	void setInterior(bool interior);
 
 private:
-	bool m_interior;
-
 	bitpit::FlatVector2D<long> m_interfaces;
 	bitpit::FlatVector2D<long> m_adjacencies;
+
+	bool m_interior;
 
 	bitpit::FlatVector2D<long> createNeighbourhoodStorage(bool storeNeighbourhood);
 
