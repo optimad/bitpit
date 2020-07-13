@@ -89,8 +89,8 @@ public:
 	void display(std::ostream &out, unsigned short int indent) const;
 
 private:
-	long m_id;
 	std::array<double, 3> m_coords;
+	long m_id;
 
 	void _initialize(long id, const std::array<double, 3> &coords);
 
