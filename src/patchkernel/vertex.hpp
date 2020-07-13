@@ -78,12 +78,11 @@ public:
 	void translate(const std::array<double, 3> &translation);
 	void translate(double sx, double sy, double sz);
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center);
-	void scale(double sx, double sy, double sz,
-	           double cx, double cy, double cz);
+	void scale(double sx, double sy, double sz, double cx, double cy, double cz);
 
 	static const long NULL_ID;
 
-    unsigned int getBinarySize() const;
+	unsigned int getBinarySize() const;
 
 	void display(std::ostream &out, unsigned short int indent) const;
 
