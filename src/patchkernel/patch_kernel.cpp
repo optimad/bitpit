@@ -118,6 +118,14 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_vertexIdGenerator(other.m_vertexIdGenerator),
       m_interfaceIdGenerator(other.m_interfaceIdGenerator),
       m_cellIdGenerator(other.m_cellIdGenerator),
+      m_nInternalVertices(other.m_nInternalVertices),
+#if BITPIT_ENABLE_MPI==1
+      m_nGhostVertices(other.m_nGhostVertices),
+#endif
+      m_lastInternalVertexId(other.m_lastInternalVertexId),
+#if BITPIT_ENABLE_MPI==1
+      m_firstGhostVertexId(other.m_firstGhostVertexId),
+#endif
       m_nInternalCells(other.m_nInternalCells),
 #if BITPIT_ENABLE_MPI==1
       m_nGhostCells(other.m_nGhostCells),
@@ -155,6 +163,9 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_partitioningSerialization(other.m_partitioningSerialization),
       m_partitioningOutgoings(other.m_partitioningOutgoings),
       m_partitioningGlobalExchanges(other.m_partitioningGlobalExchanges),
+      m_ghostVertexOwners(other.m_ghostVertexOwners),
+      m_ghostVertexExchangeTargets(other.m_ghostVertexExchangeTargets),
+      m_ghostVertexExchangeSources(other.m_ghostVertexExchangeSources),
       m_ghostCellOwners(other.m_ghostCellOwners),
       m_ghostCellExchangeTargets(other.m_ghostCellExchangeTargets),
       m_ghostCellExchangeSources(other.m_ghostCellExchangeSources)
@@ -222,6 +233,17 @@ void PatchKernel::initialize()
 {
 	// Id
 	m_id = PatchManager::AUTOMATIC_ID;
+
+	// Vertex count
+	m_nInternalVertices = 0;
+#if BITPIT_ENABLE_MPI==1
+	m_nGhostVertices = 0;
+#endif
+
+	m_lastInternalVertexId = Vertex::NULL_ID;
+#if BITPIT_ENABLE_MPI==1
+	m_firstGhostVertexId = Vertex::NULL_ID;
+#endif
 
 	// Cell count
 	m_nInternalCells = 0;
@@ -604,7 +626,7 @@ void PatchKernel::endAlteration(bool squeezeStorage)
 	// information for ghost data exchange unconditionally, if there are no
 	// ghosts the function will exit without doing anything.
 	if (getProcessorCount() > 1 && getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
-		updateGhostCellExchangeInfo();
+		updateGhostExchangeInfo();
 	}
 #endif
 
@@ -705,6 +727,14 @@ void PatchKernel::resetVertices()
 	m_vertices.clear();
 	PiercedVector<Vertex>().swap(m_vertices);
 	m_vertexIdGenerator.reset();
+	m_nInternalVertices = 0;
+#if BITPIT_ENABLE_MPI==1
+	m_nGhostVertices = 0;
+#endif
+	m_lastInternalVertexId = Vertex::NULL_ID;
+#if BITPIT_ENABLE_MPI==1
+	m_firstGhostVertexId = Vertex::NULL_ID;
+#endif
 
 	for (auto &cell : m_cells) {
 		cell.unsetConnect();
@@ -730,6 +760,7 @@ void PatchKernel::resetCells()
 
 #if BITPIT_ENABLE_MPI==1
 	clearGhostCellOwners();
+	clearGhostVertexOwners();
 #endif
 
 	for (auto &interface : m_interfaces) {
@@ -1173,6 +1204,30 @@ PatchKernel::VertexIterator PatchKernel::vertexEnd()
 }
 
 /*!
+	Returns iterator pointing to the first internal vertex.
+
+	\result An iterator to the first internal vertex.
+*/
+PatchKernel::VertexIterator PatchKernel::internalVertexBegin()
+{
+	return m_vertices.begin();
+}
+
+/*!
+	Returns iterator pointing to the end of the list of internal vertices.
+
+	\result An iterator to the end of the list of internal vertices.
+*/
+PatchKernel::VertexIterator PatchKernel::internalVertexEnd()
+{
+	if (m_nInternalVertices > 0) {
+		return ++m_vertices.find(m_lastInternalVertexId);
+	} else {
+		return m_vertices.end();
+	}
+}
+
+/*!
 	Returns a constant iterator pointing to the specified vertex.
 
 	\result A constant iterator to the specified vertex.
@@ -1205,6 +1260,9 @@ PatchKernel::VertexConstIterator PatchKernel::vertexConstEnd() const
 /*!
 	Adds the specified vertex to the patch.
 
+	All new vertices will be temporarly added as internal vertices, is needed
+	they will be converted to ghost vertices when updating ghost information.
+
 	\param source is the vertex that will be added
 	\param id is the id that will be assigned to the newly created vertex.
 	If a negative id value is specified, a new unique id will be generated
@@ -1221,6 +1279,9 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id
 
 /*!
 	Adds the specified vertex to the patch.
+
+	All new vertices will be temporarly added as internal vertices, is needed
+	they will be converted to ghost vertices when updating ghost information.
 
 	\param source is the vertex that will be added
 	\param id is the id that will be assigned to the newly created vertex.
@@ -1239,12 +1300,16 @@ PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 	id = vertex.getId();
 	vertex = std::move(source);
 	vertex.setId(id);
+	vertex.setInterior(true);
 
 	return iterator;
 }
 
 /*!
 	Adds a new vertex with the specified coordinates.
+
+	All new vertices will be temporarly added as internal vertices, is needed
+	they will be converted to ghost vertices when updating ghost information.
 
 	\param coords are the coordinates of the vertex
 	\param id is the id that will be assigned to the newly created vertex.
@@ -1265,7 +1330,50 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 	}
 
 	// Add the vertex
-	PiercedVector<Vertex>::iterator iterator = m_vertices.emreclaim(id, id, coords);
+	VertexIterator iterator = _addInternalVertex(coords, id);
+
+	return iterator;
+}
+
+/*!
+	Internal function to add an internal vertex.
+
+	\param coords are the coordinates of the vertex
+	\param id is the id that will be assigned to the newly created vertex.
+	If a negative id value is specified, a new unique id will be generated
+	for the vertex
+	\return An iterator pointing to the newly created vertex.
+*/
+PatchKernel::VertexIterator PatchKernel::_addInternalVertex(const std::array<double, 3> &coords, long id)
+{
+	// Get the id of the vertex before which the new vertex should be inserted
+#if BITPIT_ENABLE_MPI==1
+	//
+	// If there are ghosts vertices, the internal vertex should be inserted
+	// before the first ghost vertex.
+#endif
+	long referenceId;
+#if BITPIT_ENABLE_MPI==1
+	referenceId = m_firstGhostVertexId;
+#else
+	referenceId = Vertex::NULL_ID;
+#endif
+
+	// Create the vertex
+	VertexIterator iterator;
+	if (referenceId == Vertex::NULL_ID) {
+		iterator = m_vertices.emreclaim(id, id, coords, true);
+	} else {
+		iterator = m_vertices.emreclaimBefore(referenceId, id, id, coords, true);
+	}
+	m_nInternalVertices++;
+
+	// Update the id of the last internal vertex
+	if (m_lastInternalVertexId < 0) {
+		m_lastInternalVertexId = id;
+	} else if (m_vertices.rawIndex(m_lastInternalVertexId) < m_vertices.rawIndex(id)) {
+		m_lastInternalVertexId = id;
+	}
 
 	// Update the bounding box
 	addPointToBoundingBox(iterator->getCoords());
@@ -1273,6 +1381,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 	return iterator;
 }
 
+#if BITPIT_ENABLE_MPI==0
 /*!
 	Resore the vertex with the specified id.
 
@@ -1294,15 +1403,28 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 		throw std::runtime_error("Unable to restore the specified vertex: the kernel doesn't contain an entry for that vertex.");
 	}
 
+	_restoreInternalVertex(iterator, coords);
+
+	return iterator;
+}
+#endif
+
+/*!
+	Internal function to restore an internal vertex.
+
+	\param iterator is an iterator pointing to the vertex to restore
+	\param coords are the coordinates of the vertex
+*/
+void PatchKernel::_restoreInternalVertex(const VertexIterator &iterator, const std::array<double, 3> &coords)
+{
 	// There is not need to set the id of the vertex as assigned, because
 	// also the index generator will be restored.
 	Vertex &vertex = *iterator;
-	vertex.initialize(id, std::move(coords));
+	vertex.initialize(iterator.getId(), coords, true);
+	m_nInternalVertices++;
 
 	// Update the bounding box
-	addPointToBoundingBox(iterator->getCoords());
-
-	return iterator;
+	addPointToBoundingBox(vertex.getCoords());
 }
 
 /*!
@@ -1317,11 +1439,22 @@ bool PatchKernel::deleteVertex(long id, bool delayed)
 		return false;
 	}
 
-    // Update the bounding box
-	removePointFromBoundingBox(m_vertices[id].getCoords(), delayed);
+	// Get vertex information
+	const Vertex &vertex = m_vertices[id];
 
 	// Delete the vertex
-	m_vertices.erase(id, delayed);
+#if BITPIT_ENABLE_MPI==1
+	bool isInternal = vertex.isInterior();
+	if (isInternal) {
+		_deleteInternalVertex(id, delayed);
+	} else {
+		_deleteGhostVertex(id, delayed);
+	}
+#else
+	_deleteInternalVertex(id, delayed);
+#endif
+
+	// Vertex id is no longer used
 	m_vertexIdGenerator.trash(id);
 
 	return true;
@@ -1340,33 +1473,42 @@ bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 	}
 
 	// Deleting the last vertex requires some additional work. If the ids
-	// of vertices to be deleted contain the last vertex, that vertex
-	// is deleted after deleting all other vertices. In this way we make
-	// sure to delete the last vertex just once (after deleting the last
-	// vertex, another vertex becomes the last one and that vertex
-	// may be on the deletion list as well, and on and so forth).
-	std::size_t lastId;
-	if (!m_vertices.empty()) {
-		lastId = m_vertices.back().getId();
-	} else {
-		lastId = Vertex::NULL_ID;
-	}
-
-	bool deleteLast = false;
+	// of vertices to be deleted contain the last vertex, that vertex is
+	// deleted after deleting all other vertices. In this way we make sure
+	// to delete the last vertex just once (after deleting the last vertex,
+	// another vertex becomes the last one and that vertex may be on the
+	// deletion list as well, and on and so forth). The same applies for
+	// the first ghost.
+	bool deleteLastInternalVertex = false;
+#if BITPIT_ENABLE_MPI==1
+	bool deleteFirstGhostVertex = false;
+#endif
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		std::size_t vertexId = *i;
-		if (vertexId == lastId) {
-			deleteLast = true;
+		long vertexId = *i;
+		if (vertexId == m_lastInternalVertexId) {
+			deleteLastInternalVertex = true;
 			continue;
 		}
+#if BITPIT_ENABLE_MPI==1
+		else if (vertexId == m_firstGhostVertexId) {
+			deleteFirstGhostVertex = true;
+			continue;
+		}
+#endif
 
-		deleteVertex(*i, true);
+		deleteVertex(vertexId, true);
 	}
 
-	if (deleteLast) {
-		deleteVertex(lastId, true);
+	if (deleteLastInternalVertex) {
+		deleteVertex(m_lastInternalVertexId, true);
 	}
+
+#if BITPIT_ENABLE_MPI==1
+	if (deleteFirstGhostVertex) {
+		deleteVertex(m_firstGhostVertexId, true);
+	}
+#endif
 
 	if (!delayed) {
 		m_vertices.flush();
@@ -1374,6 +1516,26 @@ bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 	}
 
 	return true;
+}
+
+/*!
+	Internal function to delete an internal vertex.
+
+	\param id is the id of the vertex
+	\param delayed is true a delayed delete will be performed
+*/
+void PatchKernel::_deleteInternalVertex(long id, bool delayed)
+{
+	// Update the bounding box
+	const Vertex &vertex = m_vertices[id];
+	removePointFromBoundingBox(vertex.getCoords(), delayed);
+
+	// Delete vertex
+	m_vertices.erase(id, delayed);
+	m_nInternalVertices--;
+	if (id == m_lastInternalVertexId) {
+		updateLastInternalVertexId();
+	}
 }
 
 /*!
@@ -1660,6 +1822,30 @@ bool PatchKernel::empty() const
 #endif
 
 	return isEmpty;
+}
+
+/*!
+	Updates the id of the last internal vertex.
+*/
+void PatchKernel::updateLastInternalVertexId()
+{
+	if (m_nInternalVertices == 0) {
+		m_lastInternalVertexId = Vertex::NULL_ID;
+		return;
+	}
+
+	VertexIterator lastInternalVertexItr;
+#if BITPIT_ENABLE_MPI==1
+	if (m_nGhostVertices == 0) {
+		lastInternalVertexItr = --m_vertices.end();
+		m_lastInternalVertexId = lastInternalVertexItr->getId();
+	} else {
+		m_lastInternalVertexId = m_vertices.getSizeMarker(m_nInternalVertices - 1, Vertex::NULL_ID);
+	}
+#else
+	lastInternalVertexItr = --m_vertices.end();
+	m_lastInternalVertexId = lastInternalVertexItr->getId();
+#endif
 }
 
 /*!
@@ -3669,12 +3855,27 @@ void PatchKernel::dumpVertices(std::ostream &stream) const
 	// Dump vertices
 	for (const Vertex &vertex : m_vertices) {
 		utils::binary::write(stream, vertex.getId());
+#if BITPIT_ENABLE_MPI==1
+		utils::binary::write(stream, getVertexRank(vertex.getId()));
+#else
+		int dummyRank = 0;
+		utils::binary::write(stream, dummyRank);
+#endif
 
 		const std::array<double, 3> &coords = vertex.getCoords();
 		utils::binary::write(stream, coords[0]);
 		utils::binary::write(stream, coords[1]);
 		utils::binary::write(stream, coords[2]);
 	}
+
+	// Dump ghost/internal subdivision
+#if BITPIT_ENABLE_MPI==1
+	utils::binary::write(stream, m_firstGhostVertexId);
+	utils::binary::write(stream, m_lastInternalVertexId);
+#else
+	utils::binary::write(stream, Vertex::NULL_ID);
+	utils::binary::write(stream, Vertex::NULL_ID);
+#endif
 }
 
 /*!
@@ -3697,13 +3898,36 @@ void PatchKernel::restoreVertices(std::istream &stream)
 		long id;
 		utils::binary::read(stream, id);
 
+#if BITPIT_ENABLE_MPI==1
+		int rank;
+		utils::binary::read(stream, rank);
+#else
+		int dummyRank;
+		utils::binary::read(stream, dummyRank);
+#endif
+
 		std::array<double, 3> coords;
 		utils::binary::read(stream, coords[0]);
 		utils::binary::read(stream, coords[1]);
 		utils::binary::read(stream, coords[2]);
 
+#if BITPIT_ENABLE_MPI==1
+		restoreVertex(std::move(coords), rank, id);
+#else
 		restoreVertex(std::move(coords), id);
+#endif
 	}
+
+	// Restore ghost/internal subdivision
+#if BITPIT_ENABLE_MPI==1
+	utils::binary::read(stream, m_firstGhostVertexId);
+	utils::binary::read(stream, m_lastInternalVertexId);
+#else
+	long dummyFirstGhostVertexId;
+	long dummyLastInternalVertexId;
+	utils::binary::read(stream, dummyFirstGhostVertexId);
+	utils::binary::read(stream, dummyLastInternalVertexId);
+#endif
 
 	// Set original advanced editing status
 	setExpert(originalExpertStatus);
@@ -4059,8 +4283,21 @@ bool PatchKernel::sortVertices()
 		return false;
 	}
 
-	m_vertices.sort();
+	// Sort internal vertices
+	if (m_nInternalVertices > 0) {
+		m_vertices.sortBefore(m_lastInternalVertexId, true);
+		updateLastInternalVertexId();
+	}
 
+#if BITPIT_ENABLE_MPI==1
+	// Sort ghost cells
+	if (m_nGhostVertices > 0) {
+		m_vertices.sortAfter(m_firstGhostVertexId, true);
+		updateFirstGhostVertexId();
+	}
+#endif
+
+	// Synchronize storage
 	m_vertices.sync();
 
 	return true;
@@ -5852,7 +6089,7 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 #if BITPIT_ENABLE_MPI==1
 	// Update information for ghost data exchange
 	if (isPartitioned()) {
-		updateGhostCellExchangeInfo();
+		updateGhostExchangeInfo();
 	}
 #endif
 }	
@@ -5900,7 +6137,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 9;
+	const int KERNEL_DUMP_VERSION = 10;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
@@ -6045,7 +6282,7 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 #if BITPIT_ENABLE_MPI==1
 	// Update information for ghost data exchange
 	if (isPartitioned()) {
-		updateGhostCellExchangeInfo();
+		updateGhostExchangeInfo();
 	}
 #endif
 

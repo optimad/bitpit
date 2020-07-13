@@ -1690,12 +1690,26 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 				// Create the vertex
 				long vertexId;
 				if (!restoreStream) {
+#if BITPIT_ENABLE_MPI==1
 					VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
+#else
+					VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
+#endif
 					vertexId = vertexIterator.getId();
 				} else {
 					utils::binary::read(*restoreStream, vertexId);
 
+#if BITPIT_ENABLE_MPI==1
+					int rank;
+					utils::binary::read(*restoreStream, rank);
+
+					restoreVertex(std::move(nodeCoords), rank, vertexId);
+#else
+					int dummtRank;
+					utils::binary::read(*restoreStream, dummtRank);
+
 					restoreVertex(std::move(nodeCoords), vertexId);
+#endif
 				}
 
 				// Add the vertex to the stitching info
@@ -2071,7 +2085,7 @@ void VolOctree::_resetTol()
  */
 int VolOctree::_getDumpVersion() const
 {
-	const int DUMP_VERSION = 3;
+	const int DUMP_VERSION = 4;
 
 	return DUMP_VERSION;
 }
@@ -2124,6 +2138,12 @@ void VolOctree::_dump(std::ostream &stream) const
 			long vertexId = cellVertexIds[k];
 			if (dumpedVertices.count(vertexId) == 0) {
 				utils::binary::write(stream, vertexId);
+#if BITPIT_ENABLE_MPI==1
+				utils::binary::write(stream, getVertexRank(vertexId));
+#else
+				int dummyRank = 0;
+				utils::binary::write(stream, dummyRank);
+#endif
 				dumpedVertices.insert(vertexId);
 			}
 		}

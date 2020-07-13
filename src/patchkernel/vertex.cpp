@@ -40,6 +40,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out_stream, const bitpi
 {
 	out_stream << vertex.m_id;
 	out_stream << vertex.m_coords;
+	out_stream << vertex.m_interior;
 
 	return out_stream;
 }
@@ -56,6 +57,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in_stream, bitpit::Vert
 {
 	in_stream >> vertex.m_id;
 	in_stream >> vertex.m_coords;
+	in_stream >> vertex.m_interior;
 
 	return in_stream;
 }
@@ -79,15 +81,18 @@ const long Vertex::NULL_ID = std::numeric_limits<long>::min();
 */
 Vertex::Vertex()
 {
-	_initialize(NULL_ID, {{0., 0., 0.}});
+	_initialize(NULL_ID, {{0., 0., 0.}}, true);
 }
 
 /*!
 	Creates a new element.
+
+	\param[in] id is the id of the vertex
+	\param[in] interior if true the vertex is flagged as interior
 */
-Vertex::Vertex(long id)
+Vertex::Vertex(long id, bool interior)
 {
-	_initialize(id, {{0., 0., 0.}});
+	_initialize(id, {{0., 0., 0.}}, interior);
 }
 
 /*!
@@ -95,10 +100,11 @@ Vertex::Vertex(long id)
 
 	\param[in] id is the id of the vertex
 	\param[in] coords are the vertex coordinates
+	\param[in] interior if true the vertex is flagged as interior
 */
-Vertex::Vertex(long id, const std::array<double, 3> &coords)
+Vertex::Vertex(long id, const std::array<double, 3> &coords, bool interior)
 {
-	_initialize(id, coords);
+	_initialize(id, coords, interior);
 }
 
 /**
@@ -112,6 +118,7 @@ void Vertex::swap(Vertex &other) noexcept
 {
 	std::swap(other.m_id, m_id);
 	std::swap(other.m_coords, m_coords);
+	std::swap(other.m_interior, m_interior);
 }
 
 /*!
@@ -119,10 +126,11 @@ void Vertex::swap(Vertex &other) noexcept
 
 	\param[in] id is the id of the vertex
 	\param[in] coords are the vertex coordinates
+	\param[in] interior if true the vertex is flagged as interior
 */
-void Vertex::initialize(long id, const std::array<double, 3> &coords)
+void Vertex::initialize(long id, const std::array<double, 3> &coords, bool interior)
 {
-	_initialize(id, coords);
+	_initialize(id, coords, interior);
 }
 
 /*!
@@ -130,11 +138,34 @@ void Vertex::initialize(long id, const std::array<double, 3> &coords)
 
 	\param[in] id is the id of the vertex
 	\param[in] coords are the vertex coordinates
+	\param[in] interior if true the vertex is flagged as interior
 */
-void Vertex::_initialize(long id, const std::array<double, 3> &coords)
+void Vertex::_initialize(long id, const std::array<double, 3> &coords, bool interior)
 {
 	setId(id);
 	setCoords(coords);
+	setInterior(interior);
+}
+
+/*!
+	Sets if the vertex belongs to the the interior domain.
+
+	\param interior defines if the vertex belongs to the the interior domain
+*/
+void Vertex::setInterior(bool interior)
+{
+	m_interior = interior;
+}
+
+/*!
+	Gets if the vertex belongs to the the interior domain.
+
+	\result Returns true if the vertex belongs to the the interior domain,
+	otherwise it returns false.
+*/
+bool Vertex::isInterior() const
+{
+	return m_interior;
 }
 
 /*!
@@ -298,7 +329,7 @@ void Vertex::display(std::ostream &out, unsigned short int indent) const
 */
 unsigned int Vertex::getBinarySize() const
 {
-    return (sizeof(m_id) + m_coords.size() * sizeof(double));
+    return (sizeof(m_id) + m_coords.size() * sizeof(double) + sizeof(m_interior));
 }
 
 // Explicit instantiation of the Vertex containers

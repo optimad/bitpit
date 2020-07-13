@@ -32,6 +32,7 @@
 
 namespace bitpit {
 	class Vertex;
+	class PatchKernel;
 }
 
 bitpit::OBinaryStream& operator<< (bitpit::OBinaryStream &out, const bitpit::Vertex &vertex);
@@ -40,6 +41,8 @@ bitpit::IBinaryStream& operator>> (bitpit::IBinaryStream &in, bitpit::Vertex &ve
 namespace bitpit {
 
 class Vertex {
+
+friend class PatchKernel;
 
 friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream&, const Vertex &);
 friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream&, Vertex &);
@@ -52,8 +55,8 @@ public:
 	};
 
 	Vertex();
-	Vertex(long id);
-	Vertex(long id, const std::array<double, 3> &coords);
+	Vertex(long id, bool interior = true);
+	Vertex(long id, const std::array<double, 3> &coords, bool interior = true);
 
 	Vertex(const Vertex &other) = default;
 	Vertex(Vertex &&other) = default;
@@ -62,7 +65,9 @@ public:
 
 	void swap(Vertex &other) noexcept;
 
-	void initialize(long id, const std::array<double, 3> &coords);
+	void initialize(long id, const std::array<double, 3> &coords, bool interior);
+
+	bool isInterior() const;
 
 	bool operator==(const Vertex &other) const;
 
@@ -86,11 +91,15 @@ public:
 
 	void display(std::ostream &out, unsigned short int indent) const;
 
+protected:
+	void setInterior(bool interior);
+
 private:
 	std::array<double, 3> m_coords;
 	long m_id;
+	bool m_interior;
 
-	void _initialize(long id, const std::array<double, 3> &coords);
+	void _initialize(long id, const std::array<double, 3> &coords, bool interior);
 
 };
 
