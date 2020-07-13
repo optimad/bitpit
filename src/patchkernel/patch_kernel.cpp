@@ -2120,8 +2120,6 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 		throw std::runtime_error("Unable to restore the specified cell: the kernel doesn't contain an entry for that cell.");
 	}
 
-	// There is not need to set the id of the cell as assigned, because
-	// also the index generator will be restored.
 	_restoreInternal(iterator, type, std::move(connectStorage));
 
 	return iterator;
@@ -2138,6 +2136,8 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 void PatchKernel::_restoreInternal(const CellIterator &iterator, ElementType type,
 								   std::unique_ptr<long[]> &&connectStorage)
 {
+	// There is not need to set the id of the cell as assigned, because
+	// also the index generator will be restored.
 	Cell &cell = *iterator;
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), true, true);
 	m_nInternals++;
