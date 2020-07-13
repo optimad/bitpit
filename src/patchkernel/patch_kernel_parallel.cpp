@@ -509,6 +509,10 @@ PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_p
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												   int rank, long id)
 {
+	if (!isExpert()) {
+		return cellEnd();
+	}
+
 	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
 	}

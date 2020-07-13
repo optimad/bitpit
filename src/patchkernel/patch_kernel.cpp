@@ -2111,6 +2111,10 @@ PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::uniqu
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												   long id)
 {
+	if (!isExpert()) {
+		return cellEnd();
+	}
+
 	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
 	}
