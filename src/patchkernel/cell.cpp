@@ -279,9 +279,9 @@ void Cell::_initialize(bool interior, bool initializeNeighbourhood, bool storeNe
 }
 
 /*!
-	Sets if the cells belongs to the the interior domain.
+	Sets if the cell belongs to the the interior domain.
 
-	\param interior defines if the cells belongs to the the interior domain
+	\param interior defines if the cell belongs to the the interior domain
 */
 void Cell::setInterior(bool interior)
 {
@@ -289,9 +289,9 @@ void Cell::setInterior(bool interior)
 }
 
 /*!
-	Gets if the cells belongs to the the interior domain.
+	Gets if the cell belongs to the the interior domain.
 
-	\result Returns true if the cells belongs to the the interior domain,
+	\result Returns true if the cell belongs to the the interior domain,
 	otherwise it returns false.
 */
 bool Cell::isInterior() const
