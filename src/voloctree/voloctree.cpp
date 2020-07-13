@@ -1695,13 +1695,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 				} else {
 					utils::binary::read(*restoreStream, vertexId);
 
-					VertexIterator vertexIterator = m_vertices.find(vertexId);
-					if (vertexIterator == m_vertices.end()) {
-						throw std::runtime_error("");
-					}
-
-					Vertex &vertex = *vertexIterator;
-					vertex.initialize(vertexId, std::move(nodeCoords));
+					restoreVertex(std::move(nodeCoords), vertexId);
 				}
 
 				// Add the vertex to the stitching info
