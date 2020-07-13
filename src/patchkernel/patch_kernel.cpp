@@ -1980,7 +1980,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 		return cellEnd();
 	}
 
-	PiercedVector<Cell>::iterator iterator = _addInternal(type, std::move(connectStorage), id);
+	CellIterator iterator = _addInternal(type, std::move(connectStorage), id);
 
 	return iterator;
 }
@@ -2078,7 +2078,7 @@ PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::uniqu
 #endif
 
 	// Create the cell
-	PiercedVector<Cell>::iterator iterator;
+	CellIterator iterator;
 	if (referenceId == Cell::NULL_ID) {
 		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), true, true);
 	} else {
@@ -2115,7 +2115,7 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 		return cellEnd();
 	}
 
-	PiercedVector<Cell>::iterator iterator = m_cells.find(id);
+	CellIterator iterator = m_cells.find(id);
 	if (iterator == m_cells.end()) {
 		throw std::runtime_error("Unable to restore the specified cell: the kernel doesn't contain an entry for that cell.");
 	}
