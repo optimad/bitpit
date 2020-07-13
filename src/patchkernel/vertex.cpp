@@ -271,28 +271,6 @@ void Vertex::scale(double sx, double sy, double sz,
 }
 
 /*!
-        Display vertex content to output stream in a nicely formatted form
-
-        \param[in,out] out      output stream
-        \param[in]     padding  (default = 0) number of trailing spaces
-*/
-void Vertex::display(std::ostream &out, unsigned int padding)
-{
-    // Local variables
-    std::string         indent(padding, ' ');
-
-    // Display vertex content
-    out << indent << "id:     " << m_id << std::endl;
-    out << indent << "coords: ";
-    for (int i = 0; i < 3; ++i) {
-        out << m_coords[i] << " ";
-    } //next i
-    out << std::endl;
-
-    return;
-}
-
-/*!
 	Displays vertex information to an output stream
 
 	\param[in] out is the output stream

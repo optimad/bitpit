@@ -80,7 +80,6 @@ public:
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center);
 	void scale(double sx, double sy, double sz,
 	           double cx, double cy, double cz);
-        void display(std::ostream &, unsigned int padding = 0);
 
 	static const long NULL_ID;
 
