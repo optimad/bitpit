@@ -624,7 +624,7 @@ protected:
 
 	InterfaceIterator restoreInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 
-	VertexIterator restoreVertex(const std::array<double, 3> &&coords, long id);
+	VertexIterator restoreVertex(const std::array<double, 3> &coords, long id);
 
 	bool deleteVertex(long id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);

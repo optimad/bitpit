@@ -1283,7 +1283,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 	\param id is the id of the vertex to restore
 	\return An iterator pointing to the restored vertex.
 */
-PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &&coords, long id)
+PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &coords, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
