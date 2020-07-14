@@ -435,10 +435,10 @@ void VolOctree::setBoundingBox()
 #if BITPIT_ENABLE_MPI==1
 	// The tree is only evaluating the bounding box of the internal octants,
 	// we need to consider also ghosts cells.
-	for (auto ghostItr = ghostBegin(); ghostItr != ghostEnd(); ++ghostItr) {
-		ConstProxyVector<long> ghostVertexIds = ghostItr->getVertexIds();
-		int nGhostVertices = ghostVertexIds.size();
-		for (int i = 0; i < nGhostVertices; ++i) {
+	for (auto ghostCellItr = ghostCellBegin(); ghostCellItr != ghostCellEnd(); ++ghostCellItr) {
+		ConstProxyVector<long> ghostVertexIds = ghostCellItr->getVertexIds();
+		int nGhostCellVertices = ghostVertexIds.size();
+		for (int i = 0; i < nGhostCellVertices; ++i) {
 			const std::array<double, 3> coords = m_vertices[ghostVertexIds[i]].getCoords();
 			for (int d = 0; d < 3; ++d) {
 				minPoint[d] = std::min(coords[d], minPoint[d]);
@@ -869,14 +869,14 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 
 #if BITPIT_ENABLE_MPI==1
 		// Ghost cells will be removed
-		if (isPartitioned() && getGhostCount() > 0) {
+		if (isPartitioned() && getGhostCellCount() > 0) {
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-			adaptionInfo.previous.reserve(getGhostCount());
-			for (auto itr = ghostBegin(); itr != ghostEnd(); ++itr) {
+			adaptionInfo.previous.reserve(getGhostCellCount());
+			for (auto itr = ghostCellBegin(); itr != ghostCellEnd(); ++itr) {
 				adaptionInfo.previous.emplace_back();
-				long &deletedGhostId = adaptionInfo.previous.back();
-				deletedGhostId = itr.getId();
+				long &deletedGhostCellId = adaptionInfo.previous.back();
+				deletedGhostCellId = itr.getId();
 			}
 		}
 #endif
@@ -1216,8 +1216,8 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		if (nPreviousGhosts > 0) {
 			for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
 				OctantInfo ghostOctantInfo(ghostTreeId, false);
-				long ghostId = getOctantId(ghostOctantInfo);
-				deletedOctants.emplace_back(ghostId, adaption::TYPE_DELETION);
+				long ghostCellId = getOctantId(ghostOctantInfo);
+				deletedOctants.emplace_back(ghostCellId, adaption::TYPE_DELETION);
 			}
 		}
 #endif
@@ -1776,9 +1776,9 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 
 	// Update first ghost and last internal information
 	if (restoreStream) {
-		updateLastInternalId();
+		updateLastInternalCellId();
 #if BITPIT_ENABLE_MPI==1
-		updateFirstGhostId();
+		updateFirstGhostCellId();
 #endif
 	}
 

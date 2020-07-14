@@ -33,7 +33,7 @@ namespace bitpit {
 class VolumeSkdTree : public PatchSkdTree {
 
 public:
-    VolumeSkdTree(const VolumeKernel *patch, bool interiorOnly = false);
+    VolumeSkdTree(const VolumeKernel *patch, bool interiorCellsOnly = false);
 
 };
 

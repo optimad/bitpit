@@ -78,7 +78,7 @@ int subtest_001()
 		patch_2D->write();
 
 		// Show adaption info
-		log::cout() << " Current internal cells count: " << patch_2D->getInternalCount() << std::endl;
+		log::cout() << " Current internal cells count: " << patch_2D->getInternalCellCount() << std::endl;
 		for (const auto &adaptionData : adaptionInfo) {
 			if (adaptionData.entity != adaption::ENTITY_CELL) {
 				continue;
@@ -148,7 +148,7 @@ int subtest_002()
 		patch_3D->write();
 
 		// Show adaption info
-		log::cout() << " Current internal cells count: " << patch_3D->getInternalCount() << std::endl;
+		log::cout() << " Current internal cells count: " << patch_3D->getInternalCellCount() << std::endl;
 		for (const auto &adaptionData : adaptionInfo) {
 			if (adaptionData.entity != adaption::ENTITY_CELL) {
 				continue;

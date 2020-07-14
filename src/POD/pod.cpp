@@ -2196,8 +2196,8 @@ void POD::dump()
         std::size_t nf=m_nModes;
         if (m_useMean)
             nf=nf+1;
-        std::vector<std::vector<std::vector<double>>> fields(nf, std::vector<std::vector<double>> (m_nScalarFields, std::vector<double>(m_podkernel->getMesh()->getInternalCount(), 0.0)));
-        std::vector<std::vector<std::vector<std::array<double,3>>>> fieldv(nf, std::vector<std::vector<std::array<double,3>>>(m_nVectorFields, std::vector<std::array<double,3>>(m_podkernel->getMesh()->getInternalCount(), {{0.0, 0.0, 0.0}})));
+        std::vector<std::vector<std::vector<double>>> fields(nf, std::vector<std::vector<double>> (m_nScalarFields, std::vector<double>(m_podkernel->getMesh()->getInternalCellCount(), 0.0)));
+        std::vector<std::vector<std::vector<std::array<double,3>>>> fieldv(nf, std::vector<std::vector<std::array<double,3>>>(m_nVectorFields, std::vector<std::array<double,3>>(m_podkernel->getMesh()->getInternalCellCount(), {{0.0, 0.0, 0.0}})));
 
         if (m_useMean){
             for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
@@ -2263,7 +2263,7 @@ void POD::dump()
                 m_modes[ir].clear();
         }
 
-        std::vector<uint8_t> mask(m_podkernel->getMesh()->getInternalCount(), 0);
+        std::vector<uint8_t> mask(m_podkernel->getMesh()->getInternalCellCount(), 0);
         int i=0;
         for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
             if (cell.isInterior()) {
@@ -2399,8 +2399,8 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
         std::vector<std::string > datastring;
         m_podkernel->getMesh()->getVTK().setDirectory(m_directory);
         field.mesh->getVTK().setName(name);
-        std::vector<std::vector<double>> fields(m_nScalarFields, std::vector<double>(field.mesh->getInternalCount(), 0.0));
-        std::vector<std::vector<std::array<double,3>>> fieldv(m_nVectorFields, std::vector<std::array<double,3>>(field.mesh->getInternalCount(), {{0.0, 0.0, 0.0}}));
+        std::vector<std::vector<double>> fields(m_nScalarFields, std::vector<double>(field.mesh->getInternalCellCount(), 0.0));
+        std::vector<std::vector<std::array<double,3>>> fieldv(m_nVectorFields, std::vector<std::array<double,3>>(field.mesh->getInternalCellCount(), {{0.0, 0.0, 0.0}}));
         for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
             int i=0;
             for (const Cell &cell : field.mesh->getCells()) {
@@ -2428,7 +2428,7 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
             datastring.push_back(vname);
         }
 
-        std::vector<uint8_t> mask(field.mesh->getInternalCount(), 0);
+        std::vector<uint8_t> mask(field.mesh->getInternalCellCount(), 0);
         int i=0;
         for (const Cell &cell : field.mesh->getCells()) {
             if (cell.isInterior()) {

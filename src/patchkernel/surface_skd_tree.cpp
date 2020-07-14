@@ -37,10 +37,10 @@ namespace bitpit {
 * Constructor.
 *
 * \param patch is the surface patch that will be use to build the tree
-* \param interiorOnly if set to true, only interior cells will be considered
+* \param interiorCellsOnly if set to true, only interior cells will be considered
 */
-SurfaceSkdTree::SurfaceSkdTree(const SurfaceKernel *patch, bool interiorOnly)
-    : PatchSkdTree(patch, interiorOnly)
+SurfaceSkdTree::SurfaceSkdTree(const SurfaceKernel *patch, bool interiorCellsOnly)
+    : PatchSkdTree(patch, interiorCellsOnly)
 {
 }
 
@@ -107,7 +107,7 @@ double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, dou
 * \param[in] maxDistance all cells whose distance is greater than
 * this parameters will not be considered for the evaluation of the
 * distance
-* \param[in] interiorOnly if set to true, only interior cells will be considered,
+* \param[in] interiorCellsOnly if set to true, only interior cells will be considered,
 * it will be possible to consider non-interior cells only if the tree has been
 * instantiated with non-interior cells support enabled
 * \result The distance between the specified point and the closest
@@ -115,12 +115,12 @@ double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, dou
 * farther than the maximum distance, the function will return the
 * maximum representable distance.
 */
-double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, double maxDistance, bool interiorOnly) const
+double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, double maxDistance, bool interiorCellsOnly) const
 {
     long id;
     double distance = maxDistance;
 
-    findPointClosestCell(point, interiorOnly, &id, &distance);
+    findPointClosestCell(point, interiorCellsOnly, &id, &distance);
 
     return distance;
 }
@@ -178,7 +178,7 @@ void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> 
 * \param[in] maxDistances are the maximum allowed distances, all cells whose
 * distance is greater than this parameter will not be considered for the
 * evaluation of the distance with respect to the related point
-* \param[in] interiorOnly if set to true, only interior cells will be
+* \param[in] interiorCellsOnly if set to true, only interior cells will be
 * considered
 * \param[out] distances on output it will contain the distances
 * between the points and closest cells. If all cells contained in the tree are
@@ -203,18 +203,18 @@ void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> 
 * \param[in] maxDistances are the maximum allowed distances, all cells whose
 * distance is greater than this parameter will not be considered for the
 * evaluation of the distance with respect to the related point
-* \param[in] interiorOnly if set to true, only interior cells will be
+* \param[in] interiorCellsOnly if set to true, only interior cells will be
 * considered
 * \param[out] distances on output it will contain the distances
 * between the points and closest cells. If all cells contained in the tree are
 * farther than the maximum distance, the related argument will be set to the
 * maximum representable distance.
 */
-void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interiorOnly, double *distances) const
+void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interiorCellsOnly, double *distances) const
 {
     std::vector<long> ids(nPoints, Cell::NULL_ID);
 
-    findPointClosestCell(nPoints, points, maxDistances, interiorOnly, ids.data(), distances);
+    findPointClosestCell(nPoints, points, maxDistances, interiorCellsOnly, ids.data(), distances);
 }
 
 #if BITPIT_ENABLE_MPI
@@ -340,7 +340,7 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
 * \param[in] maxDistance all cells whose distance is greater than
 * this parameters will not be considered for the evaluation of the
 * distance
-* \param[in] interiorOnly if set to true, only interior cells will be considered,
+* \param[in] interiorCellsOnly if set to true, only interior cells will be considered,
 * it will be possible to consider non-interior cells only if the tree has been
 * instantiated with non-interior cells support enabled
 * \param[out] id on output it will contain the id of the closest cell.
@@ -352,7 +352,7 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
 * maximum representable distance
 */
 long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, double maxDistance,
-                                          bool interiorOnly, long *id, double *distance) const
+                                          bool interiorCellsOnly, long *id, double *distance) const
 {
     // Initialize the cell id
     *id = Cell::NULL_ID;
@@ -423,7 +423,7 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
         std::size_t nodeId = m_candidateIds[k];
         const SkdNode &node = m_nodes[nodeId];
 
-        node.updatePointClosestCell(point, interiorOnly, id, distance);
+        node.updatePointClosestCell(point, interiorCellsOnly, id, distance);
         ++nDistanceEvaluations;
     }
 
@@ -514,7 +514,7 @@ long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 
 * \param[in] maxDistances are the maximum allowed distances, all cells whose
 * distance is greater than this parameter will not be considered for the
 * evaluation of the distance with respect to the related point
-* \param[in] interiorOnly if set to true, only interior cells will be
+* \param[in] interiorCellsOnly if set to true, only interior cells will be
 * considered
 * \param[out] ids on output it will contain the ids of the cells closest
 * to the points. If all cells contained in the tree are farther from a point
@@ -524,11 +524,11 @@ long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 
 * farther than the maximum distance, the related argument will be set to the
 * maximum representable distance.
 */
-long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interiorOnly, long *ids, double *distances) const
+long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interiorCellsOnly, long *ids, double *distances) const
 {
     long nDistanceEvaluations = 0;
     for (int i = 0; i < nPoints; ++i) {
-        nDistanceEvaluations += findPointClosestCell(points[i], maxDistances[i], interiorOnly, ids + i, distances + i);
+        nDistanceEvaluations += findPointClosestCell(points[i], maxDistances[i], interiorCellsOnly, ids + i, distances + i);
     }
 
     return nDistanceEvaluations;
@@ -680,8 +680,8 @@ long SurfaceSkdTree::findPointClosestGlobalCell(int nPoints, const std::array<do
         double &cellDistance = globalCellDistance.getDistance();
 
         // Evaluate local distance from the point
-        bool interiorOnly = true;
-        nDistanceEvaluations += findPointClosestCell(point, pointMaxDistance, interiorOnly, &cellId, &cellDistance);
+        bool interiorCellsOnly = true;
+        nDistanceEvaluations += findPointClosestCell(point, pointMaxDistance, interiorCellsOnly, &cellId, &cellDistance);
 
         // Set cell rank
         if (cellId != Cell::NULL_ID) {

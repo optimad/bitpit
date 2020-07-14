@@ -168,7 +168,7 @@ void PatchKernel::setHaloSize(std::size_t haloSize)
 	_setHaloSize(haloSize);
 
 	if (isPartitioned()) {
-		updateGhostExchangeInfo();
+		updateGhostCellExchangeInfo();
 	}
 }
 
@@ -212,15 +212,15 @@ void PatchKernel::_setHaloSize(std::size_t haloSize)
 	\param[in] id is the index of the cell
 	\param[in] ownerRank is the owner of the cell
 */
-PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(long id, int ownerRank)
+PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int ownerRank)
 {
 	if (!isExpert()) {
 		return m_cells.end();
 	}
 
 	// Swap the element with the last internal cell
-	if (id != m_lastInternalId) {
-		m_cells.swap(id, m_lastInternalId);
+	if (id != m_lastInternalCellId) {
+		m_cells.swap(id, m_lastInternalCellId);
 	}
 
 	// Get the iterator pointing to the updated position of the element
@@ -230,19 +230,19 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(long id, int ownerRank
 	iterator->setInterior(false);
 
 	// Update cell counters
-	--m_nInternals;
-	++m_nGhosts;
+	--m_nInternalCells;
+	++m_nGhostCells;
 
 	// Update the last internal and first ghost markers
-	m_firstGhostId = id;
-	if (m_nInternals == 0) {
-		m_lastInternalId = Cell::NULL_ID;
+	m_firstGhostCellId = id;
+	if (m_nInternalCells == 0) {
+		m_lastInternalCellId = Cell::NULL_ID;
 	} else {
-		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
+		m_lastInternalCellId = m_cells.getSizeMarker(m_nInternalCells - 1, Cell::NULL_ID);
 	}
 
 	// Set ghost owner
-	setGhostOwner(id, ownerRank);
+	setGhostCellOwner(id, ownerRank);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -253,15 +253,15 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(long id, int ownerRank
 
 	\param[in] id is the index of the cell
 */
-PatchKernel::CellIterator PatchKernel::moveGhost2Internal(long id)
+PatchKernel::CellIterator PatchKernel::ghostCell2InternalCell(long id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
 	}
 
 	// Swap the cell with the first ghost
-	if (id != m_firstGhostId) {
-		m_cells.swap(id, m_firstGhostId);
+	if (id != m_firstGhostCellId) {
+		m_cells.swap(id, m_firstGhostCellId);
 	}
 
 	// Get the iterator pointing to the updated position of the element
@@ -271,21 +271,21 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(long id)
 	iterator->setInterior(true);
 
 	// Update cell counters
-	++m_nInternals;
-	--m_nGhosts;
+	++m_nInternalCells;
+	--m_nGhostCells;
 
 	// Update the last internal and first ghost markers
-	m_lastInternalId = id;
-	if (m_nGhosts == 0) {
-		m_firstGhostId = Cell::NULL_ID;
+	m_lastInternalCellId = id;
+	if (m_nGhostCells == 0) {
+		m_firstGhostCellId = Cell::NULL_ID;
 	} else {
-		CellIterator firstGhostIterator = iterator;
-		++firstGhostIterator;
-		m_firstGhostId = firstGhostIterator->getId();
+		CellIterator firstGhostCellIterator = iterator;
+		++firstGhostCellIterator;
+		m_firstGhostCellId = firstGhostCellIterator->getId();
 	}
 
 	// Unset ghost owner
-	unsetGhostOwner(id);
+	unsetGhostCellOwner(id);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -296,9 +296,29 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(long id)
 
 	\return The number of ghost cells in the patch
 */
+long PatchKernel::getGhostCellCount() const
+{
+	return m_nGhostCells;
+}
+
+/*!
+	Gets the number of ghost cells in the patch.
+
+	\return The number of ghost cells in the patch
+*/
 long PatchKernel::getGhostCount() const
 {
-	return m_nGhosts;
+	return getGhostCellCount();
+}
+
+/*!
+	Gets a reference to the first ghost cell.
+
+	\return A reference to the first ghost cell.
+*/
+Cell & PatchKernel::getFirstGhostCell()
+{
+	return m_cells[m_firstGhostCellId];
 }
 
 /*!
@@ -308,7 +328,17 @@ long PatchKernel::getGhostCount() const
 */
 Cell & PatchKernel::getFirstGhost()
 {
-	return m_cells[m_firstGhostId];
+	return getFirstGhostCell();
+}
+
+/*!
+	Gets a constant reference to the first ghost cell.
+
+	\return A constant reference to the first ghost cell.
+*/
+const Cell & PatchKernel::getFirstGhostCell() const
+{
+	return m_cells[m_firstGhostCellId];
 }
 
 /*!
@@ -318,7 +348,7 @@ Cell & PatchKernel::getFirstGhost()
 */
 const Cell & PatchKernel::getFirstGhost() const
 {
-	return m_cells[m_firstGhostId];
+	return getFirstGhostCell();
 }
 
 /*!
@@ -445,9 +475,9 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 
 	CellIterator iterator;
 	if (rank == getRank()) {
-		iterator = _addInternal(type, std::move(connectStorage), id);
+		iterator = _addInternalCell(type, std::move(connectStorage), id);
 	} else {
-		iterator = _addGhost(type, std::move(connectStorage), rank, id);
+		iterator = _addGhostCell(type, std::move(connectStorage), rank, id);
 	}
 
 	return iterator;
@@ -465,7 +495,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	for the cell
 	\return An iterator pointing to the newly created cell.
 */
-PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												 int rank, long id)
 {
 	// Create the cell
@@ -473,22 +503,22 @@ PatchKernel::CellIterator PatchKernel::_addGhost(ElementType type, std::unique_p
 	// If there are internal cells, the ghost cell should be inserted
 	// after the last internal cell.
 	CellIterator iterator;
-	if (m_lastInternalId < 0) {
+	if (m_lastInternalCellId < 0) {
 		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), false, true);
 	} else {
-		iterator = m_cells.emreclaimAfter(m_lastInternalId, id, id, type, std::move(connectStorage), false, true);
+		iterator = m_cells.emreclaimAfter(m_lastInternalCellId, id, id, type, std::move(connectStorage), false, true);
 	}
-	m_nGhosts++;
+	m_nGhostCells++;
 
 	// Update the id of the first ghost cell
-	if (m_firstGhostId < 0) {
-		m_firstGhostId = id;
-	} else if (m_cells.rawIndex(m_firstGhostId) > m_cells.rawIndex(id)) {
-		m_firstGhostId = id;
+	if (m_firstGhostCellId < 0) {
+		m_firstGhostCellId = id;
+	} else if (m_cells.rawIndex(m_firstGhostCellId) > m_cells.rawIndex(id)) {
+		m_firstGhostCellId = id;
 	}
 
 	// Set owner
-	setGhostOwner(id, rank);
+	setGhostCellOwner(id, rank);
 
 	return iterator;
 }
@@ -525,9 +555,9 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	// There is not need to set the id of the cell as assigned, because
 	// also the index generator will be restored.
 	if (rank == getRank()) {
-		_restoreInternal(iterator, type, std::move(connectStorage));
+		_restoreInternalCell(iterator, type, std::move(connectStorage));
 	} else {
-		_restoreGhost(iterator, type, std::move(connectStorage), rank);
+		_restoreGhostCell(iterator, type, std::move(connectStorage), rank);
 	}
 
 	return iterator;
@@ -545,16 +575,16 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	the connectivity of the element
 	\param rank is the rank that owns the cell that will be restored
 */
-void PatchKernel::_restoreGhost(const CellIterator &iterator, ElementType type,
+void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType type,
 								std::unique_ptr<long[]> &&connectStorage, int rank)
 {
 	// Restore cell
 	Cell &cell = *iterator;
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, true);
-	m_nGhosts++;
+	m_nGhostCells++;
 
 	// Set owner
-	setGhostOwner(cell.getId(), rank);
+	setGhostCellOwner(cell.getId(), rank);
 }
 
 /*!
@@ -563,16 +593,30 @@ void PatchKernel::_restoreGhost(const CellIterator &iterator, ElementType type,
 	\param id is the id of the cell
 	\param delayed is true a delayed delete will be performed
 */
-void PatchKernel::_deleteGhost(long id, bool delayed)
+void PatchKernel::_deleteGhostCell(long id, bool delayed)
 {
 	// Unset ghost owner
-	unsetGhostOwner(id);
+	unsetGhostCellOwner(id);
 
 	// Delete cell
 	m_cells.erase(id, delayed);
-	m_nGhosts--;
-	if (id == m_firstGhostId) {
-		updateFirstGhostId();
+	m_nGhostCells--;
+	if (id == m_firstGhostCellId) {
+		updateFirstGhostCellId();
+	}
+}
+
+/*!
+    Returns iterator to the first ghost cells within the cell list.
+
+    \result An iterator to the first ghost cell.
+*/
+PatchKernel::CellIterator PatchKernel::ghostCellBegin()
+{
+	if (m_nGhostCells > 0) {
+		return m_cells.find(m_firstGhostCellId);
+	} else {
+		return m_cells.end();
 	}
 }
 
@@ -583,11 +627,17 @@ void PatchKernel::_deleteGhost(long id, bool delayed)
 */
 PatchKernel::CellIterator PatchKernel::ghostBegin()
 {
-	if (m_nGhosts > 0) {
-		return m_cells.find(m_firstGhostId);
-	} else {
-		return m_cells.end();
-	}
+	return ghostCellBegin();
+}
+
+/*!
+	Returns iterator to the end of the list of ghost cells.
+
+	\result An iterator to the end of the list of ghost cell.
+*/
+PatchKernel::CellIterator PatchKernel::ghostCellEnd()
+{
+	return m_cells.end();
 }
 
 /*!
@@ -597,7 +647,21 @@ PatchKernel::CellIterator PatchKernel::ghostBegin()
 */
 PatchKernel::CellIterator PatchKernel::ghostEnd()
 {
-	return m_cells.end();
+	return ghostCellEnd();
+}
+
+/*!
+    Returns a constant iterator to the first ghost cells within the cell list.
+
+    \result A constant iterator to the first ghost cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::ghostCellConstBegin() const
+{
+	if (m_nGhostCells > 0) {
+		return m_cells.find(m_firstGhostCellId);
+	} else {
+		return m_cells.cend();
+	}
 }
 
 /*!
@@ -607,11 +671,17 @@ PatchKernel::CellIterator PatchKernel::ghostEnd()
 */
 PatchKernel::CellConstIterator PatchKernel::ghostConstBegin() const
 {
-	if (m_nGhosts > 0) {
-		return m_cells.find(m_firstGhostId);
-	} else {
-		return m_cells.cend();
-	}
+	return ghostCellConstBegin();
+}
+
+/*!
+	Returns a constant iterator to the end of the list of ghost cells.
+
+	\result A constant iterator to the end of the list of ghost cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::ghostCellConstEnd() const
+{
+	return m_cells.cend();
 }
 
 /*!
@@ -621,21 +691,21 @@ PatchKernel::CellConstIterator PatchKernel::ghostConstBegin() const
 */
 PatchKernel::CellConstIterator PatchKernel::ghostConstEnd() const
 {
-	return m_cells.cend();
+	return ghostCellConstEnd();
 }
 
 /*!
 	Updates the id of the first ghost cell.
 */
-void PatchKernel::updateFirstGhostId()
+void PatchKernel::updateFirstGhostCellId()
 {
-	if (m_nGhosts == 0) {
-		m_firstGhostId = Cell::NULL_ID;
-	} else if (m_nInternals == 0) {
-		CellIterator firstGhostItr = cellBegin();
-		m_firstGhostId = firstGhostItr->getId();
+	if (m_nGhostCells == 0) {
+		m_firstGhostCellId = Cell::NULL_ID;
+	} else if (m_nInternalCells == 0) {
+		CellIterator firstghostCellItr = cellBegin();
+		m_firstGhostCellId = firstghostCellItr->getId();
 	} else {
-		m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Cell::NULL_ID);
+		m_firstGhostCellId = m_cells.getSizeMarker(m_nInternalCells, Cell::NULL_ID);
 	}
 }
 
@@ -848,7 +918,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 		}
 
 		long cellId = entry.first;
-		if (m_ghostOwners.count(cellId) > 0) {
+		if (m_ghostCellOwners.count(cellId) > 0) {
 			continue;
 		}
 
@@ -904,7 +974,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	if (m_partitioningSerialization) {
 		int receiverRank = *(globalRecvRanks.begin());
 		if (patchRank != receiverRank) {
-			if (m_partitioningOutgoings.size() != (std::size_t) getInternalCount()) {
+			if (m_partitioningOutgoings.size() != (std::size_t) getInternalCellCount()) {
 				m_partitioningSerialization = false;
 			}
 		}
@@ -1229,7 +1299,7 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 	double partitionWeight;
 	if (!cellWeights.empty()) {
 		partitionWeight = 0.;
-		for (auto cellItr = internalConstBegin(); cellItr != internalConstEnd(); ++cellItr) {
+		for (auto cellItr = internalCellConstBegin(); cellItr != internalCellConstEnd(); ++cellItr) {
 			long cellId = cellItr.getId();
 
 			double cellWeight;
@@ -1243,7 +1313,7 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 			partitionWeight += cellWeight;
 		}
 	} else {
-		partitionWeight = DEFAULT_PARTITIONING_WEIGTH * getInternalCount();
+		partitionWeight = DEFAULT_PARTITIONING_WEIGTH * getInternalCellCount();
 	}
 
 	// Evalaute global weights
@@ -1304,13 +1374,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
     // If we are not serializing the patch, some of the cells that will be send
     // during partitioning may be ghosts on other processors. Therefore, we
     // need to identify the owners of the ghosts after the partitioning.
-    std::unordered_map<long, int> ghostOwnershipChanges;
+    std::unordered_map<long, int> ghostCellOwnershipChanges;
     if (!m_partitioningSerialization) {
         if (isPartitioned()) {
-            ghostOwnershipChanges = _partitioningAlter_evalGhostOwnershipChanges();
+            ghostCellOwnershipChanges = _partitioningAlter_evalGhostCellOwnershipChanges();
         }
     } else {
-        _partitioningAlter_deleteGhosts();
+        _partitioningAlter_deleteGhostCells();
     }
 
     // Communicate patch data structures
@@ -1355,9 +1425,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 
         // Perform sends/receives
         if (isSender) {
-            rankPartitioningData = _partitioningAlter_sendCells(batchRecvRanks, trackPartitioning, &ghostOwnershipChanges);
+            rankPartitioningData = _partitioningAlter_sendCells(batchRecvRanks, trackPartitioning, &ghostCellOwnershipChanges);
         } else if (isReceiver) {
-            rankPartitioningData = _partitioningAlter_receiveCells(batchSendRanks, trackPartitioning, &ghostOwnershipChanges);
+            rankPartitioningData = _partitioningAlter_receiveCells(batchSendRanks, trackPartitioning, &ghostCellOwnershipChanges);
         }
 
         if (trackPartitioning) {
@@ -1368,11 +1438,11 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 
         // Update ghost ownership
         for (int sendRank : batchSendRanks) {
-            _partitioningAlter_applyGhostOwnershipChanges(sendRank, &ghostOwnershipChanges);
+            _partitioningAlter_applyGhostCellOwnershipChanges(sendRank, &ghostCellOwnershipChanges);
         }
     }
 
-    assert(ghostOwnershipChanges.size() == 0);
+    assert(ghostCellOwnershipChanges.size() == 0);
 
     communications::tags().trash(m_partitioningCellsTag, m_communicator);
     communications::tags().trash(m_partitioningVerticesTag, m_communicator);
@@ -1391,7 +1461,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 
     \result The ghosts that will change ownership after the partitioning.
 */
-std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnershipChanges()
+std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostCellOwnershipChanges()
 {
     int patchRank = getRank();
 
@@ -1402,7 +1472,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnership
     size_t notificationDataSize = sizeof(patchRank);
 
     // Set and start the receives
-    for (const auto &entry : getGhostExchangeTargets()) {
+    for (const auto &entry : getGhostCellExchangeTargets()) {
         const int rank = entry.first;
         const auto &targetCells = entry.second;
 
@@ -1414,7 +1484,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnership
     //
     // Data buffer is filled with the ranks that will own source cells after
     // the partitioning.
-    for (const auto &entry : getGhostExchangeSources()) {
+    for (const auto &entry : getGhostCellExchangeSources()) {
         const int rank = entry.first;
         auto &sourceCells = entry.second;
 
@@ -1437,20 +1507,20 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnership
     //
     // Data buffer contains the ranks that will own ghost cells after the
     // partitioning.
-    std::unordered_map<long, int> ghostOwnershipChanges;
+    std::unordered_map<long, int> ghostCellOwnershipChanges;
 
     int nCompletedRecvs = 0;
     while (nCompletedRecvs < notificationCommunicator.getRecvCount()) {
         int rank = notificationCommunicator.waitAnyRecv();
-        const auto &list = getGhostExchangeTargets(rank);
+        const auto &list = getGhostCellExchangeTargets(rank);
 
         RecvBuffer &buffer = notificationCommunicator.getRecvBuffer(rank);
         for (long id : list) {
             int finalOwner;
             buffer >> finalOwner;
 
-            if (finalOwner != m_ghostOwners.at(id)) {
-                ghostOwnershipChanges[id] = finalOwner;
+            if (finalOwner != m_ghostCellOwners.at(id)) {
+                ghostCellOwnershipChanges[id] = finalOwner;
             }
         }
 
@@ -1460,7 +1530,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnership
     // Wait for the sends to finish
     notificationCommunicator.waitAllSends();
 
-    return ghostOwnershipChanges;
+    return ghostCellOwnershipChanges;
 }
 
 /*!
@@ -1468,42 +1538,42 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostOwnership
     specified sender process.
 
     \param sendRank is the rank of the processor sending the cells
-    \param[in,out] ghostOwnershipChanges are the ghosts that will change
+    \param[in,out] ghostCellOwnershipChanges are the ghosts that will change
     ownership after the partitioning, on output the list will be updated
     removing the ghosts that are no longer on the partition (i.e., ghosts
     deleted or promoted to internal cell) and the ghosts whose ownership
     have been updated
 */
-void PatchKernel::_partitioningAlter_applyGhostOwnershipChanges(int sendRank,
-                                                                std::unordered_map<long, int> *ghostOwnershipChanges)
+void PatchKernel::_partitioningAlter_applyGhostCellOwnershipChanges(int sendRank,
+                                                                std::unordered_map<long, int> *ghostCellOwnershipChanges)
 {
-    for (auto itr = ghostOwnershipChanges->begin(); itr != ghostOwnershipChanges->end();) {
+    for (auto itr = ghostCellOwnershipChanges->begin(); itr != ghostCellOwnershipChanges->end();) {
         // Consider only ghosts previously owned by the sender
-        long ghostId = itr->first;
-        int previousGhostOwner = m_ghostOwners.at(ghostId);
-        if (previousGhostOwner != sendRank) {
+        long ghostCellId = itr->first;
+        int previousGhostCellOwner = m_ghostCellOwners.at(ghostCellId);
+        if (previousGhostCellOwner != sendRank) {
             ++itr;
             continue;
         }
 
         // Update ghost owner
-        int finalGhostOwner = itr->second;
-        setGhostOwner(ghostId, finalGhostOwner);
-        itr = ghostOwnershipChanges->erase(itr);
+        int finalGhostCellOwner = itr->second;
+        setGhostCellOwner(ghostCellId, finalGhostCellOwner);
+        itr = ghostCellOwnershipChanges->erase(itr);
     }
 }
 
 /*!
     Delete ghosts.
 */
-void PatchKernel::_partitioningAlter_deleteGhosts()
+void PatchKernel::_partitioningAlter_deleteGhostCells()
 {
     // Delete ghost cells
     std::unordered_set<long> involvedInterfaces;
 
     std::vector<long> cellsDeleteList;
-    cellsDeleteList.reserve(m_ghostOwners.size());
-    for (const auto &entry : m_ghostOwners) {
+    cellsDeleteList.reserve(m_ghostCellOwners.size());
+    for (const auto &entry : m_ghostCellOwners) {
         long cellId = entry.first;
         const Cell &cell = getCell(cellId);
 
@@ -1535,7 +1605,7 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
     \param recvRanks are the receiver ranks
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
-    \param[in,out] ghostOwnershipChanges are the ghosts that will change
+    \param[in,out] ghostCellOwnershipChanges are the ghosts that will change
     ownership after the partitioning, on output the list will be updated
     removing the ghosts that are no longer on the partition (i.e., ghosts
     deleted or promoted to internal cell) and the ghosts whose ownership
@@ -1545,7 +1615,7 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
     an empty vector will be returned.
 */
 std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning,
-                                                                      std::unordered_map<long, int> *ghostOwnershipChanges)
+                                                                      std::unordered_map<long, int> *ghostCellOwnershipChanges)
 {
     // Initialize adaption data
     std::vector<adaption::Info> partitioningData;
@@ -1555,7 +1625,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
     // Detect if the rank is sending all its cells
     std::size_t nOutgoingsOverall = m_partitioningOutgoings.size();
-    bool sendingAllCells = (nOutgoingsOverall == (std::size_t) getInternalCount());
+    bool sendingAllCells = (nOutgoingsOverall == (std::size_t) getInternalCellCount());
 
     //
     // Send data to the receivers
@@ -2017,22 +2087,22 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                 int cellOwnerOnReceiver;
                 if (m_partitioningOutgoings.count(cellId) > 0) {
                     cellOwnerOnReceiver = m_partitioningOutgoings.at(cellId);
-                } else if (m_ghostOwners.count(cellId) > 0) {
-                    cellOwnerOnReceiver = m_ghostOwners.at(cellId);
+                } else if (m_ghostCellOwners.count(cellId) > 0) {
+                    cellOwnerOnReceiver = m_ghostCellOwners.at(cellId);
                 } else {
                     cellOwnerOnReceiver = m_rank;
                 }
 
                 cellsBuffer << cellOwnerOnReceiver;
 
-                int ghostOwnershipChange;
-                if (ghostOwnershipChanges->count(cellId) > 0) {
-                    ghostOwnershipChange = ghostOwnershipChanges->at(cellId);
+                int ghostCellOwnershipChange;
+                if (ghostCellOwnershipChanges->count(cellId) > 0) {
+                    ghostCellOwnershipChange = ghostCellOwnershipChanges->at(cellId);
                 } else {
-                    ghostOwnershipChange = -1;
+                    ghostCellOwnershipChange = -1;
                 }
 
-                cellsBuffer << ghostOwnershipChange;
+                cellsBuffer << ghostCellOwnershipChange;
             }
 
             // Cell data
@@ -2085,7 +2155,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         deleteCells(deleteList, true, true);
 
         // If we are sending many cells try to reduced the used memory
-        bool keepMemoryLimited = (nOutgoingCells > ACTIVATE_MEMORY_LIMIT_THRESHOLD * getInternalCount());
+        bool keepMemoryLimited = (nOutgoingCells > ACTIVATE_MEMORY_LIMIT_THRESHOLD * getInternalCellCount());
         if (keepMemoryLimited) {
             // Squeeze cells
             squeezeCells();
@@ -2112,13 +2182,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // Delete frame cells or move them into the ghosts
         deleteList.clear();
         for (long cellId : frameCellsOverall) {
-            bool moveToGhosts = (ghostCellsOverall.count(cellId) > 0);
-            if (moveToGhosts) {
+            bool moveToGhostCells = (ghostCellsOverall.count(cellId) > 0);
+            if (moveToGhostCells) {
                 int cellOwner = m_partitioningOutgoings.at(cellId);
-                moveInternal2Ghost(cellId, cellOwner);
+                internalCell2GhostCell(cellId, cellOwner);
             } else {
                 deleteList.push_back(cellId);
-                ghostOwnershipChanges->erase(cellId);
+                ghostCellOwnershipChanges->erase(cellId);
             }
         }
 
@@ -2133,7 +2203,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // because some of the frame cells moved into ghosts may be stale
         // ghosts.
         deleteList.clear();
-        for (const auto &entry : m_ghostOwners) {
+        for (const auto &entry : m_ghostCellOwners) {
             long cellId = entry.first;
             bool keep = false;
 
@@ -2143,7 +2213,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             int nCellAdjacencies = cell.getAdjacencyCount();
             for (int i = 0; i < nCellAdjacencies; ++i) {
                 long neighId = adjacencies[i];
-                if (m_ghostOwners.count(neighId) > 0) {
+                if (m_ghostCellOwners.count(neighId) > 0) {
                     continue;
                 } else if (m_partitioningOutgoings.count(neighId) > 0) {
                     continue;
@@ -2159,7 +2229,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                 neighIds.clear();
                 findCellNeighs(cellId, &neighIds);
                 for (long neighId : neighIds) {
-                    if (m_ghostOwners.count(neighId) > 0) {
+                    if (m_ghostCellOwners.count(neighId) > 0) {
                         continue;
                     } else if (m_partitioningOutgoings.count(neighId) > 0) {
                         continue;
@@ -2173,7 +2243,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             // Add the cell to the delete list
             if (!keep) {
                 deleteList.push_back(cellId);
-                ghostOwnershipChanges->erase(cellId);
+                ghostCellOwnershipChanges->erase(cellId);
             }
         }
 
@@ -2187,7 +2257,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     } else {
         // The processor has sent all its cells, the patch is now empty
         reset();
-        ghostOwnershipChanges->clear();
+        ghostCellOwnershipChanges->clear();
     }
 
     // Wait for previous communications to finish
@@ -2217,7 +2287,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     \param sendRanks are the rank of the processors sending the cells
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
-    \param[in,out] ghostOwnershipChanges are the ghosts that will change
+    \param[in,out] ghostCellOwnershipChanges are the ghosts that will change
     ownership after the partitioning, on output the list will be updated
     removing the ghosts that are no longer on the partition (i.e., ghosts
     deleted or promoted to internal cell) and the ghosts whose ownership
@@ -2227,7 +2297,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     an empty vector will be returned.
 */
 std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning,
-                                                                         std::unordered_map<long, int> *ghostOwnershipChanges)
+                                                                         std::unordered_map<long, int> *ghostCellOwnershipChanges)
 {
     //
     // Start receiving buffer sizes
@@ -2321,12 +2391,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         // so we need to build the list on the fly. THe list will contain ghost
         // cells (target) and their neighbours (sources).
         duplicateCellsCandidates.clear();
-        for (auto &entry : m_ghostOwners) {
-            long ghostId = entry.first;
+        for (auto &entry : m_ghostCellOwners) {
+            long ghostCellId = entry.first;
 
-            duplicateCellsCandidates.insert(ghostId);
+            duplicateCellsCandidates.insert(ghostCellId);
 
-            findCellNeighs(ghostId, &neighIds);
+            findCellNeighs(ghostCellId, &neighIds);
             for (long neighId : neighIds) {
                 duplicateCellsCandidates.insert(neighId);
             }
@@ -2512,19 +2582,19 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         // Internal cells will be sent first.
         IBinaryStream &cellsBuffer = *(cellsBuffers[sendRankIndex]);
 
-        long nReceivedInternals;
-        cellsBuffer >> nReceivedInternals;
+        long nReceivedInternalCells;
+        cellsBuffer >> nReceivedInternalCells;
 
         long nReceivedHalo;
         cellsBuffer >> nReceivedHalo;
 
-        long nReceivedCells = nReceivedInternals + nReceivedHalo;
+        long nReceivedCells = nReceivedInternalCells + nReceivedHalo;
 
         reserveCells(getCellCount() + nReceivedCells);
 
         if (trackPartitioning) {
             // Only internal cells are tracked.
-            partitioningData[sendRankIndex].current.reserve(nReceivedInternals);
+            partitioningData[sendRankIndex].current.reserve(nReceivedInternalCells);
         }
 
         validReceivedAdjacencies.clear();
@@ -2550,13 +2620,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             cellsBuffer >> isHalo;
 
             int cellOwner;
-            int ghostOwnershipChange;
+            int ghostCellOwnershipChange;
             if (isHalo) {
                 cellsBuffer >> cellOwner;
-                cellsBuffer >> ghostOwnershipChange;
+                cellsBuffer >> ghostCellOwnershipChange;
             } else {
                 cellOwner = patchRank;
-                ghostOwnershipChange = -1;
+                ghostCellOwnershipChange = -1;
             }
 
             Cell cell;
@@ -2608,8 +2678,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
                 // Setup ghost ownership changes
                 if (!cellIterator->isInterior()) {
-                    if (ghostOwnershipChange >= 0) {
-                        ghostOwnershipChanges->insert({cellId, ghostOwnershipChange});
+                    if (ghostCellOwnershipChange >= 0) {
+                        ghostCellOwnershipChanges->insert({cellId, ghostCellOwnershipChange});
                     }
                 }
 
@@ -2625,8 +2695,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                 // Check if the existing cells needs to become an internal cell
                 const Cell &localCell = m_cells[cellId];
                 if (isInterior && !localCell.isInterior()) {
-                    moveGhost2Internal(cellId);
-                    ghostOwnershipChanges->erase(cellId);
+                    ghostCell2InternalCell(cellId);
+                    ghostCellOwnershipChanges->erase(cellId);
                     isTracked = trackPartitioning;
                 }
 
@@ -2830,7 +2900,7 @@ int PatchKernel::getCellRank(long id) const
 	if (cell.isInterior()) {
 		return m_rank;
 	} else {
-		return m_ghostOwners.at(id);
+		return m_ghostCellOwners.at(id);
 	}
 }
 
@@ -2858,7 +2928,7 @@ int PatchKernel::getCellHaloLayer(long id) const
 */
 bool PatchKernel::isRankNeighbour(int rank)
 {
-	return (m_ghostExchangeTargets.count(rank) > 0);
+	return (m_ghostCellExchangeTargets.count(rank) > 0);
 }
 
 /*!
@@ -2869,8 +2939,8 @@ bool PatchKernel::isRankNeighbour(int rank)
 std::vector<int> PatchKernel::getNeighbourRanks()
 {
 	std::vector<int> neighRanks;
-	neighRanks.reserve(m_ghostExchangeTargets.size());
-	for (const auto &entry : m_ghostExchangeTargets) {
+	neighRanks.reserve(m_ghostCellExchangeTargets.size());
+	for (const auto &entry : m_ghostCellExchangeTargets) {
 		neighRanks.push_back(entry.first);
 	}
 
@@ -2883,9 +2953,33 @@ std::vector<int> PatchKernel::getNeighbourRanks()
 	\result A constant reference to the ghost targets needed for data
 	exchange.
 */
+const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostCellExchangeTargets() const
+{
+	return m_ghostCellExchangeTargets;
+}
+
+/*!
+	Gets a constant reference to the ghost targets needed for data exchange.
+
+	\result A constant reference to the ghost targets needed for data
+	exchange.
+*/
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeTargets() const
 {
-	return m_ghostExchangeTargets;
+	return getGhostCellExchangeTargets();
+}
+
+/*!
+	Gets a constant reference to the ghost targets needed for data
+	exchange for the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A constant reference to the ghost targets needed for data
+	exchange for the specified rank.
+*/
+const std::vector<long> & PatchKernel::getGhostCellExchangeTargets(int rank) const
+{
+	return m_ghostCellExchangeTargets.at(rank);
 }
 
 /*!
@@ -2898,7 +2992,18 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchange
 */
 const std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank) const
 {
-	return m_ghostExchangeTargets.at(rank);
+	return getGhostCellExchangeTargets(rank);
+}
+
+/*!
+	Gets a constant reference to the ghost sources needed for data exchange.
+
+	\result A constant reference to the ghost sources needed for data
+	exchange.
+*/
+const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostCellExchangeSources() const
+{
+	return m_ghostCellExchangeSources;
 }
 
 /*!
@@ -2909,8 +3014,22 @@ const std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank) const
 */
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeSources() const
 {
-	return m_ghostExchangeSources;
+	return getGhostCellExchangeSources();
 }
+
+/*!
+	Gets a constant reference to the ghost sources needed for data
+	exchange for the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A constant reference to the ghost sources needed for data
+	exchange for the specified rank.
+*/
+const std::vector<long> & PatchKernel::getGhostCellExchangeSources(int rank) const
+{
+	return m_ghostCellExchangeSources.at(rank);
+}
+
 
 /*!
 	Gets a constant reference to the ghost sources needed for data
@@ -2922,7 +3041,7 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchange
 */
 const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 {
-	return m_ghostExchangeSources.at(rank);
+	return getGhostCellExchangeSources(rank);
 }
 
 /*!
@@ -2931,13 +3050,13 @@ const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 	\param id is the id of the ghost cell
 	\param rank is the rank of the processors that owns the ghost cell
 */
-void PatchKernel::setGhostOwner(int id, int rank)
+void PatchKernel::setGhostCellOwner(int id, int rank)
 {
-	auto ghostOwnerItr = m_ghostOwners.find(id);
-	if (ghostOwnerItr != m_ghostOwners.end()) {
-		ghostOwnerItr->second = rank;
+	auto ghostCellOwnerItr = m_ghostCellOwners.find(id);
+	if (ghostCellOwnerItr != m_ghostCellOwners.end()) {
+		ghostCellOwnerItr->second = rank;
 	} else {
-		m_ghostOwners.insert({id, rank});
+		m_ghostCellOwners.insert({id, rank});
 	}
 }
 
@@ -2946,14 +3065,14 @@ void PatchKernel::setGhostOwner(int id, int rank)
 
 	\param id is the id of the ghost cell
 */
-void PatchKernel::unsetGhostOwner(int id)
+void PatchKernel::unsetGhostCellOwner(int id)
 {
-	auto ghostOwnerItr = m_ghostOwners.find(id);
-	if (ghostOwnerItr == m_ghostOwners.end()) {
+	auto ghostCellOwnerItr = m_ghostCellOwners.find(id);
+	if (ghostCellOwnerItr == m_ghostCellOwners.end()) {
 		return;
 	}
 
-	m_ghostOwners.erase(ghostOwnerItr);
+	m_ghostCellOwners.erase(ghostCellOwnerItr);
 }
 
 /*!
@@ -2961,46 +3080,46 @@ void PatchKernel::unsetGhostOwner(int id)
 
 	\param updateExchangeInfo if set to true exchange info will be updated
 */
-void PatchKernel::clearGhostOwners()
+void PatchKernel::clearGhostCellOwners()
 {
-	m_ghostOwners.clear();
+	m_ghostCellOwners.clear();
 }
 
 /*!
 	Update the information needed for ghost data exchange.
 */
-void PatchKernel::updateGhostExchangeInfo()
+void PatchKernel::updateGhostCellExchangeInfo()
 {
 	// Check if all structures needed are ready
 	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
 
 	// Clear targets
-	m_ghostExchangeTargets.clear();
+	m_ghostCellExchangeTargets.clear();
 
 	// Update targets
-	for (const auto &entry : m_ghostOwners) {
+	for (const auto &entry : m_ghostCellOwners) {
 		int ghostRank = entry.second;
-		long ghostId = entry.first;
-		m_ghostExchangeTargets[ghostRank].push_back(ghostId);
+		long ghostCellId = entry.first;
+		m_ghostCellExchangeTargets[ghostRank].push_back(ghostCellId);
 	}
 
 	// Sort the targets
-	for (auto &entry : m_ghostExchangeTargets) {
+	for (auto &entry : m_ghostCellExchangeTargets) {
 		std::vector<long> &rankTargets = entry.second;
 		std::sort(rankTargets.begin(), rankTargets.end(), CellPositionLess(*this));
 	}
 
 	// Clear the sources
-	m_ghostExchangeSources.clear();
+	m_ghostCellExchangeSources.clear();
 
 	// Build the sources
-	for (auto &entry : m_ghostExchangeTargets) {
+	for (auto &entry : m_ghostCellExchangeTargets) {
 		int rank = entry.first;
 
 		// Generate the source list
-		std::vector<long> rankSources = _findGhostExchangeSources(rank);
+		std::vector<long> rankSources = _findGhostCellExchangeSources(rank);
 		if (rankSources.empty()) {
-			m_ghostExchangeSources.erase(rank);
+			m_ghostCellExchangeSources.erase(rank);
 			continue;
 		}
 
@@ -3008,7 +3127,7 @@ void PatchKernel::updateGhostExchangeInfo()
 		std::sort(rankSources.begin(), rankSources.end(), CellPositionLess(*this));
 
 		// Store list
-		m_ghostExchangeSources[rank] = std::move(rankSources);
+		m_ghostCellExchangeSources[rank] = std::move(rankSources);
 	}
 }
 
@@ -3019,13 +3138,13 @@ void PatchKernel::updateGhostExchangeInfo()
 
 	\param rank is the rank for which the information will be built
 */
-std::vector<long> PatchKernel::_findGhostExchangeSources(int rank)
+std::vector<long> PatchKernel::_findGhostCellExchangeSources(int rank)
 {
 	// Get targets for the specified rank
 	//
 	// If there are no targets, there will be no soruces either.
-	auto ghostExchangeTargetsItr = m_ghostExchangeTargets.find(rank);
-	if (ghostExchangeTargetsItr == m_ghostExchangeTargets.end()) {
+	auto ghostExchangeTargetsItr = m_ghostCellExchangeTargets.find(rank);
+	if (ghostExchangeTargetsItr == m_ghostCellExchangeTargets.end()) {
 		return std::vector<long>();
 	}
 
@@ -3035,11 +3154,11 @@ std::vector<long> PatchKernel::_findGhostExchangeSources(int rank)
 	std::vector<long> neighIds;
 	std::unordered_set<long> exchangeSources;
 	exchangeSources.reserve(rankTargets.size());
-	for (long ghostId : rankTargets) {
+	for (long ghostCellId : rankTargets) {
 		neighIds.clear();
-		findCellNeighs(ghostId, &neighIds);
+		findCellNeighs(ghostCellId, &neighIds);
 		for (long neighId : neighIds) {
-			if (m_ghostOwners.count(neighId) > 0) {
+			if (m_ghostCellOwners.count(neighId) > 0) {
 				continue;
 			}
 

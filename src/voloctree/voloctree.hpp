@@ -157,7 +157,7 @@ protected:
 	std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning) override;
 	void _partitioningCleanup() override;
 
-	std::vector<long> _findGhostExchangeSources(int rank) override;
+	std::vector<long> _findGhostCellExchangeSources(int rank) override;
 #endif
 
 private:

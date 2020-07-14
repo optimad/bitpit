@@ -153,7 +153,7 @@ void run()
 
     /** Define data on original mesh and write */
     PiercedStorage<double> data(1, &patch_2D_original->getCells());
-    std::vector<double> vdata(patch_2D_original->getInternalCount());
+    std::vector<double> vdata(patch_2D_original->getInternalCellCount());
     int count = 0;
     for (Cell & cell : patch_2D_original->getCells()){
         if (cell.isInterior()){
@@ -248,7 +248,7 @@ void run()
     PiercedStorage<double> data2(1, &patch_2D->getCells());
     {
         const PiercedStorage<mapping::Info> & mapper = mapobject.getMapping();
-        std::vector<double> vdata2(patch_2D->getInternalCount());
+        std::vector<double> vdata2(patch_2D->getInternalCellCount());
         count = 0;
         for (Cell & cell : patch_2D->getCells()){
             if (cell.isInterior()){
@@ -285,7 +285,7 @@ void run()
     {
         const PiercedStorage<mapping::Info> & invmapper = mapobject.getInverseMapping();
         PiercedStorage<double> data3(1, &patch_2D_original->getCells());
-        std::vector<double> vdata3(patch_2D_original->getInternalCount());
+        std::vector<double> vdata3(patch_2D_original->getInternalCellCount());
         count = 0;
         for (Cell & cell : patch_2D_original->getCells()){
             if (cell.isInterior()){

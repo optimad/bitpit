@@ -816,13 +816,13 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
     if (ghostExchangeNeeded) {
         ghostComm = std::unique_ptr<DataCommunicator>(new DataCommunicator(getCommunicator()));
 
-        for (auto &entry : getGhostExchangeSources()) {
+        for (auto &entry : getGhostCellExchangeSources()) {
             const int rank = entry.first;
             const std::vector<long> sources = entry.second;
             ghostComm->setSend(rank, sources.size() * sizeof(bool));
         }
 
-        for (auto &entry : getGhostExchangeTargets()) {
+        for (auto &entry : getGhostCellExchangeTargets()) {
             const int rank = entry.first;
             const std::vector<long> targets = entry.second;
             ghostComm->setRecv(rank, targets.size() * sizeof(bool));
@@ -911,7 +911,7 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
             // Add seeds from other partitions
             ghostComm->startAllRecvs();
 
-            for(auto &entry : getGhostExchangeSources()) {
+            for(auto &entry : getGhostCellExchangeSources()) {
                 int rank = entry.first;
                 SendBuffer &buffer = ghostComm->getSendBuffer(rank);
                 for (long cellId : entry.second) {
@@ -929,7 +929,7 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
                 int rank = ghostComm->waitAnyRecv();
                 RecvBuffer buffer = ghostComm->getRecvBuffer(rank);
 
-                for (long cellId : getGhostExchangeTargets(rank)) {
+                for (long cellId : getGhostCellExchangeTargets(rank)) {
                     bool ghostFlipped;
                     buffer >> ghostFlipped;
                     if (ghostFlipped) {

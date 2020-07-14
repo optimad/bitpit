@@ -354,20 +354,24 @@ public:
 	VertexConstIterator vertexConstEnd() const;
 
 	virtual long getCellCount() const;
-	long getInternalCount() const;
+	long getInternalCellCount() const;
+	BITPIT_DEPRECATED(long getInternalCount() const);
 #if BITPIT_ENABLE_MPI==1
-	long getGhostCount() const;
+	long getGhostCellCount() const;
+    BITPIT_DEPRECATED(long getGhostCount() const);
 #endif
 	PiercedVector<Cell> &getCells();
 	const PiercedVector<Cell> &getCells() const;
 	Cell &getCell(long id);
 	const Cell &getCell(long id) const;
 	virtual ElementType getCellType(long id) const;
-	Cell &getLastInternal();
-	const Cell &getLastInternal() const;
+	Cell &getLastInternalCell();
+	const Cell &getLastInternalCell() const;
 #if BITPIT_ENABLE_MPI==1
-	Cell &getFirstGhost();
-	const Cell &getFirstGhost() const;
+	Cell & getFirstGhostCell();
+	BITPIT_DEPRECATED(Cell & getFirstGhost());
+	const Cell & getFirstGhostCell() const;
+	BITPIT_DEPRECATED(const Cell & getFirstGhost() const);
 #endif
 	CellIterator addCell(const Cell &source, long id = Element::NULL_ID);
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
@@ -384,8 +388,8 @@ public:
 	bool deleteCell(long id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 #if BITPIT_ENABLE_MPI==1
-	CellIterator moveGhost2Internal(long id);
-	CellIterator moveInternal2Ghost(long id, int ownerRank);
+	CellIterator ghostCell2InternalCell(long id);
+	CellIterator internalCell2GhostCell(long id, int ownerRank);
 #endif
 	virtual double evalCellSize(long id) const = 0;
 	long countFreeCells() const;
@@ -415,8 +419,8 @@ public:
 	void findCellVertexOneRing(long id, int vertex, std::vector<long> *neighs) const;
 	bool findFaceNeighCell(long cellId, long neighId, int *cellFace, int *cellAdjacencyId) const;
 
-	std::set<int> getInternalPIDs();
-	std::vector<long> getInternalsByPID(int pid);
+	std::set<int> getInternalCellPIDs();
+	std::vector<long> getInternalCellsByPID(int pid);
 
 	std::vector<long> findVertexOneRing(long vertexId) const;
 	void findVertexOneRing(long vertexId, std::vector<long> *ring) const;
@@ -424,21 +428,29 @@ public:
 	CellIterator getCellIterator(long id);
 	CellIterator cellBegin();
 	CellIterator cellEnd();
-	CellIterator internalBegin();
-	CellIterator internalEnd();
+	CellIterator internalCellBegin();
+	BITPIT_DEPRECATED(CellIterator internalBegin());
+	CellIterator internalCellEnd();
+	BITPIT_DEPRECATED(CellIterator internalEnd());
 #if BITPIT_ENABLE_MPI==1
-	CellIterator ghostBegin();
-	CellIterator ghostEnd();
+	CellIterator ghostCellBegin();
+	BITPIT_DEPRECATED(CellIterator ghostBegin());
+	CellIterator ghostCellEnd();
+	BITPIT_DEPRECATED(CellIterator ghostEnd());
 #endif
 
 	CellConstIterator getCellConstIterator(long id) const;
 	CellConstIterator cellConstBegin() const;
 	CellConstIterator cellConstEnd() const;
-	CellConstIterator internalConstBegin() const;
-	CellConstIterator internalConstEnd() const;
+	CellConstIterator internalCellConstBegin() const;
+	BITPIT_DEPRECATED(CellConstIterator internalConstBegin() const);
+	CellConstIterator internalCellConstEnd() const;
+	BITPIT_DEPRECATED(CellConstIterator internalConstEnd() const);
 #if BITPIT_ENABLE_MPI==1
-	CellConstIterator ghostConstBegin() const;
-	CellConstIterator ghostConstEnd() const;
+	CellConstIterator ghostCellConstBegin() const;
+	BITPIT_DEPRECATED(CellConstIterator ghostConstBegin() const);
+	CellConstIterator ghostCellConstEnd() const;
+	BITPIT_DEPRECATED(CellConstIterator ghostConstEnd() const);
 #endif
 
 	virtual long getInterfaceCount() const;
@@ -561,10 +573,14 @@ public:
 
 	bool isRankNeighbour(int rank);
 	std::vector<int> getNeighbourRanks();
-	const std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets() const;
-	const std::vector<long> & getGhostExchangeTargets(int rank) const;
-	const std::unordered_map<int, std::vector<long>> & getGhostExchangeSources() const;
-	const std::vector<long> & getGhostExchangeSources(int rank) const;
+	const std::unordered_map<int, std::vector<long>> & getGhostCellExchangeTargets() const;
+	BITPIT_DEPRECATED(const std::unordered_map<int BITPIT_COMMA std::vector<long>> & getGhostExchangeTargets() const);
+	const std::vector<long> & getGhostCellExchangeTargets(int rank) const;
+	BITPIT_DEPRECATED(const std::vector<long> & getGhostExchangeTargets(int rank) const);
+	const std::unordered_map<int, std::vector<long>> & getGhostCellExchangeSources() const;
+	BITPIT_DEPRECATED(const std::unordered_map<int BITPIT_COMMA std::vector<long>> & getGhostExchangeSources() const);
+	const std::vector<long> & getGhostCellExchangeSources(int rank) const;
+	BITPIT_DEPRECATED(const std::vector<long> & getGhostExchangeSources(int rank) const);
 
 	bool isPartitioned() const;
 	bool isPartitioningSupported() const;
@@ -635,9 +651,9 @@ protected:
 	void dumpInterfaces(std::ostream &stream) const;
 	void restoreInterfaces(std::istream &stream);
 
-	void updateLastInternalId();
+	void updateLastInternalCellId();
 #if BITPIT_ENABLE_MPI==1
-	void updateFirstGhostId();
+	void updateFirstGhostCellId();
 #endif
 
 	std::unordered_map<long, std::vector<long>> binGroupVertices(const PiercedVector<Vertex> &vertices, int nBins);
@@ -688,7 +704,7 @@ protected:
 	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
 	virtual void _partitioningCleanup();
 
-	virtual std::vector<long> _findGhostExchangeSources(int rank);
+	virtual std::vector<long> _findGhostCellExchangeSources(int rank);
 #endif
 
 	template<typename item_t, typename id_t = long>
@@ -702,14 +718,14 @@ private:
 	IndexGenerator<long> m_interfaceIdGenerator;
 	IndexGenerator<long> m_cellIdGenerator;
 
-	long m_nInternals;
+	long m_nInternalCells;
 #if BITPIT_ENABLE_MPI==1
-	long m_nGhosts;
+	long m_nGhostCells;
 #endif
 
-	long m_lastInternalId;
+	long m_lastInternalCellId;
 #if BITPIT_ENABLE_MPI==1
-	long m_firstGhostId;
+	long m_firstGhostCellId;
 #endif
 
 	VTKUnstructuredGrid m_vtk ;
@@ -754,23 +770,23 @@ private:
 	std::unordered_map<long, int> m_partitioningOutgoings;
 	std::vector<std::pair<int, int>> m_partitioningGlobalExchanges;
 
-	std::unordered_map<long, int> m_ghostOwners;
-	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
-	std::unordered_map<int, std::vector<long>> m_ghostExchangeSources;
+	std::unordered_map<long, int> m_ghostCellOwners;
+	std::unordered_map<int, std::vector<long>> m_ghostCellExchangeTargets;
+	std::unordered_map<int, std::vector<long>> m_ghostCellExchangeSources;
 
-	void setGhostOwner(int id, int rank);
-	void unsetGhostOwner(int id);
-	void clearGhostOwners();
+	void setGhostCellOwner(int id, int rank);
+	void unsetGhostCellOwner(int id);
+	void clearGhostCellOwners();
 
-	std::unordered_map<long, int> _partitioningAlter_evalGhostOwnershipChanges();
-	void _partitioningAlter_applyGhostOwnershipChanges(int sendRank, std::unordered_map<long, int> *ghostOwnershipChanges);
+	std::unordered_map<long, int> _partitioningAlter_evalGhostCellOwnershipChanges();
+	void _partitioningAlter_applyGhostCellOwnershipChanges(int sendRank, std::unordered_map<long, int> *ghostCellOwnershipChanges);
 
-	void _partitioningAlter_deleteGhosts();
+	void _partitioningAlter_deleteGhostCells();
 
-	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostOwnershipChanges);
-	std::vector<adaption::Info> _partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostOwnershipChanges);
+	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostCellOwnershipChanges);
+	std::vector<adaption::Info> _partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostCellOwnershipChanges);
 
-	void updateGhostExchangeInfo();
+	void updateGhostCellExchangeInfo();
 #endif
 
 	void initialize();
@@ -786,19 +802,19 @@ private:
 
 	void mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination);
 
-	CellIterator _addInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+	CellIterator _addInternalCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #if BITPIT_ENABLE_MPI==1
-	CellIterator _addGhost(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id);
+	CellIterator _addGhostCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id);
 #endif
 
-	void _restoreInternal(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
+	void _restoreInternalCell(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 #if BITPIT_ENABLE_MPI==1
-	void _restoreGhost(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank);
+	void _restoreGhostCell(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank);
 #endif
 
-	void _deleteInternal(long id, bool delayed);
+	void _deleteInternalCell(long id, bool delayed);
 #if BITPIT_ENABLE_MPI==1
-	void _deleteGhost(long id, bool delayed);
+	void _deleteGhostCell(long id, bool delayed);
 #endif
 };
 

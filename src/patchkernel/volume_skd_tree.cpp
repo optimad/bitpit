@@ -37,10 +37,10 @@ namespace bitpit {
 * Constructor.
 *
 * \param patch is the volume patch that will be use to build the tree
-* \param interiorOnly if set to true, only interior cells will be considered
+* \param interiorCellsOnly if set to true, only interior cells will be considered
 */
-VolumeSkdTree::VolumeSkdTree(const VolumeKernel *patch, bool interiorOnly)
-    : PatchSkdTree(patch, interiorOnly)
+VolumeSkdTree::VolumeSkdTree(const VolumeKernel *patch, bool interiorCellsOnly)
+    : PatchSkdTree(patch, interiorCellsOnly)
 {
 }
 

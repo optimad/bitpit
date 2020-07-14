@@ -57,7 +57,7 @@ SkdPatchInfo::SkdPatchInfo(const PatchKernel *patch, const std::vector<std::size
 */
 void SkdPatchInfo::buildCache()
 {
-    PatchKernel::CellConstRange cellRange(m_patch->internalConstBegin(), m_patch->internalConstEnd());
+    PatchKernel::CellConstRange cellRange(m_patch->internalCellConstBegin(), m_patch->internalCellConstEnd());
 
     buildCache(cellRange);
 }
@@ -518,18 +518,18 @@ std::size_t SkdNode::getChildId(ChildLocation child) const
 * cell contained in the bounding box associated to the node.
 *
 * \param point is the point
-* \param interiorOnly if set to true, only interior cells will be considered,
+* \param interiorCellsOnly if set to true, only interior cells will be considered,
 * it will be possible to consider non-interior cells only if the tree has been
 * instantiated with non-interior cells support enabled
 * \result The distance between the specified point and the closest
 * cell contained in the bounding box associated to the node.
 */
-double SkdNode::evalPointDistance(const std::array<double, 3> &point, bool interiorOnly) const
+double SkdNode::evalPointDistance(const std::array<double, 3> &point, bool interiorCellsOnly) const
 {
     long id;
     double distance;
 
-    findPointClosestCell(point, interiorOnly, &id, &distance);
+    findPointClosestCell(point, interiorCellsOnly, &id, &distance);
 
     return distance;
 }
@@ -540,7 +540,7 @@ double SkdNode::evalPointDistance(const std::array<double, 3> &point, bool inter
 * between that cell and the given point.
 *
 * \param point is the point
-* \param interiorOnly if set to true, only interior cells will be considered,
+* \param interiorCellsOnly if set to true, only interior cells will be considered,
 * it will be possible to consider non-interior cells only if the tree has been
 * instantiated with non-interior cells support enabled
 * \param[out] id on output it will contain the id of the closest cell
@@ -566,7 +566,7 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point, bool igno
 * the specified point and its projection onto the cell will be chosen.
 *
 * \param point is the point
-* \param interiorOnly if set to true, only interior cells will be considered,
+* \param interiorCellsOnly if set to true, only interior cells will be considered,
 * it will be possible to consider non-interior cells only if the tree has been
 * instantiated with non-interior cells support enabled
 * \param[in,out] id is the id of the current closest cell, on output it will
@@ -574,7 +574,7 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point, bool igno
 * \param[in,out] distance is the distance of the current closest cell,
 * on output it will be updated if a closer cell is found
 */
-void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool interiorOnly,
+void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool interiorCellsOnly,
                                      long *id, double *distance) const
 {
     if (getCellCount() == 0) {
@@ -591,7 +591,7 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool in
     for (std::size_t n = m_cellRangeBegin; n < m_cellRangeEnd; n++) {
         std::size_t cellRawId = cellRawIds[n];
         const Cell &cell = cells.rawAt(cellRawId);
-        if (interiorOnly && !cell.isInterior()) {
+        if (interiorCellsOnly && !cell.isInterior()) {
             continue;
         }
 
@@ -923,13 +923,14 @@ void SkdGlobalCellDistance::exportData(int *rank, long *id, double *distance) co
 * Constructor.
 *
 * \param patch is the patch that will be use to build the tree
-* \param interiorOnly if set to true, only interior cells will be considered
+* \param interiorCellsOnly if set to true, only interior cells will be
+* considered
 */
-PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool interiorOnly)
+PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool interiorCellsOnly)
     : m_patchInfo(patch, &m_cellRawIds),
-      m_cellRawIds(interiorOnly ? patch->getInternalCount() : patch->getCellCount()),
+      m_cellRawIds(interiorCellsOnly ? patch->getInternalCellCount() : patch->getCellCount()),
       m_nLeafs(0), m_nMinLeafCells(0), m_nMaxLeafCells(0),
-      m_interiorOnly(interiorOnly)
+      m_interiorCellsOnly(interiorCellsOnly)
 #if BITPIT_ENABLE_MPI
     , m_rank(0), m_nProcessors(1), m_communicator(MPI_COMM_NULL)
 #endif
@@ -990,9 +991,9 @@ void PatchSkdTree::build(std::size_t leafThreshold, bool squeezeStorage)
     // Initialize list of cell raw ids
     std::size_t nCells;
     PatchKernel::CellConstRange cellRange;
-    if (m_interiorOnly) {
-        nCells = patch.getInternalCount();
-        cellRange.initialize(patch.internalConstBegin(), patch.internalConstEnd());
+    if (m_interiorCellsOnly) {
+        nCells = patch.getInternalCellCount();
+        cellRange.initialize(patch.internalCellConstBegin(), patch.internalCellConstEnd());
     } else {
         nCells = patch.getCellCount();
         cellRange.initialize(patch.cellConstBegin(), patch.cellConstEnd());

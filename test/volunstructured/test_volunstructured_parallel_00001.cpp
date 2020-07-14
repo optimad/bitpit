@@ -145,10 +145,10 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
     patch_2D->partition(cellRanks, true, true);
 
     // Show patch info
-    log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
-    log::cout() << "Internal count:   " << patch_2D->getInternalCount() << std::endl;
-    log::cout() << "Ghost count:   " << patch_2D->getGhostCount() << std::endl;
-    log::cout() << "Vertex count: " << patch_2D->getVertexCount() << std::endl;
+    log::cout() << "Cell count:          " << patch_2D->getCellCount() << std::endl;
+    log::cout() << "Internal cell count: " << patch_2D->getInternalCellCount() << std::endl;
+    log::cout() << "Ghost count:         " << patch_2D->getGhostCellCount() << std::endl;
+    log::cout() << "Vertex count:        " << patch_2D->getVertexCount() << std::endl;
 
     patch_2D->write();
 

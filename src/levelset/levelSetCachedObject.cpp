@@ -255,7 +255,7 @@ void LevelSetCachedObject::propagateSign() {
         size_t dataSize = sizeof(sign);
 
         // Set the receives
-        for (const auto &entry : mesh.getGhostExchangeTargets()) {
+        for (const auto &entry : mesh.getGhostCellExchangeTargets()) {
             const int rank = entry.first;
             const auto &list = entry.second;
 
@@ -263,7 +263,7 @@ void LevelSetCachedObject::propagateSign() {
         }
 
         // Set the sends
-        for (const auto &entry : mesh.getGhostExchangeSources()) {
+        for (const auto &entry : mesh.getGhostCellExchangeSources()) {
             const int rank = entry.first;
             auto &list = entry.second;
 
@@ -273,13 +273,13 @@ void LevelSetCachedObject::propagateSign() {
         // Communicate the sign among the partitions
         while (nGlobalWaiting != 0) {
             // Start the receives
-            for (const auto &entry : mesh.getGhostExchangeTargets()) {
+            for (const auto &entry : mesh.getGhostCellExchangeTargets()) {
                 const int rank = entry.first;
                 dataCommunicator.startRecv(rank);
             }
 
             // Start the sends
-            for (const auto &entry : mesh.getGhostExchangeSources()) {
+            for (const auto &entry : mesh.getGhostCellExchangeSources()) {
                 const int rank = entry.first;
                 const auto &sendIds = entry.second;
                 SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
@@ -302,7 +302,7 @@ void LevelSetCachedObject::propagateSign() {
             int nCompletedRecvs = 0;
             while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
                 int rank = dataCommunicator.waitAnyRecv();
-                const auto &recvIds = mesh.getGhostExchangeTargets(rank);
+                const auto &recvIds = mesh.getGhostCellExchangeTargets(rank);
                 RecvBuffer &buffer = dataCommunicator.getRecvBuffer(rank);
 
                 // Receive data and detect new seeds

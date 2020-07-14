@@ -906,7 +906,7 @@ void VolOctreeMapper::_mapMeshesSamePartition(const std::vector<OctantIR> *octan
 
     std::vector<OctantIR> tempOctantsIRReference;
     if (!octantsIRReference) {
-        long n = referencePatch->getInternalCount();
+        long n = referencePatch->getInternalCellCount();
         tempOctantsIRReference.reserve(n);
         for (long i = 0; i < n; i++) {
             VolOctree::OctantInfo octantIfoRef(i, true);
@@ -923,7 +923,7 @@ void VolOctreeMapper::_mapMeshesSamePartition(const std::vector<OctantIR> *octan
 
     std::vector<OctantIR> tempOctantsIRMapped;
     if (!octantsIRMapped) {
-        long n = mappedPatch->getInternalCount();
+        long n = mappedPatch->getInternalCellCount();
         tempOctantsIRMapped.reserve(n);
         for (long i = 0; i < n; i++) {
             VolOctree::OctantInfo octantIfoMap(i, true);
@@ -1122,7 +1122,7 @@ void VolOctreeMapper::_mapMeshPartitioned(bool fillInverse)
     // Fill IR with reference mesh
     //
     // TODO: make a method to do that
-    long n = static_cast<VolOctree*>(m_referencePatch)->getInternalCount();
+    long n = static_cast<VolOctree*>(m_referencePatch)->getInternalCellCount();
     std::vector<OctantIR> octantsIRReference;
     octantsIRReference.reserve(n);
     for (long i = 0; i < n; i++) {

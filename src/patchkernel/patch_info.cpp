@@ -166,7 +166,7 @@ void PatchNumberingInfo::_reset()
 	// Clear data
 	m_cellLocalToConsecutiveMap.clear();
 #if BITPIT_ENABLE_MPI==1
-	m_nGlobalInternals.clear();
+	m_nGlobalInternalCells.clear();
 #endif
 
 	// Initialize data
@@ -190,7 +190,7 @@ void PatchNumberingInfo::_extract()
 		dataCommunicator = std::unique_ptr<DataCommunicator>(new DataCommunicator(m_patch->getCommunicator()));
 
 		// Set and start the receives
-		for (const auto &entry : m_patch->getGhostExchangeTargets()) {
+		for (const auto &entry : m_patch->getGhostCellExchangeTargets()) {
 			const int rank = entry.first;
 			const auto &list = entry.second;
 
@@ -201,20 +201,20 @@ void PatchNumberingInfo::_extract()
 #endif
 
 #if BITPIT_ENABLE_MPI==1
-	// Get the internal count of all the partitions
-	m_nGlobalInternals.resize(m_patch->getProcessorCount());
+	// Get the internal cell count of all the partitions
+	m_nGlobalInternalCells.resize(m_patch->getProcessorCount());
 	if (m_patch->getProcessorCount() > 1) {
-		long nLocalInternals = m_patch->getInternalCount();
-		MPI_Allgather(&nLocalInternals, 1, MPI_LONG, m_nGlobalInternals.data(), 1, MPI_LONG, m_patch->getCommunicator());
+		long nLocalInternalCells = m_patch->getInternalCellCount();
+		MPI_Allgather(&nLocalInternalCells, 1, MPI_LONG, m_nGlobalInternalCells.data(), 1, MPI_LONG, m_patch->getCommunicator());
 	} else {
-		m_nGlobalInternals[0] = m_patch->getInternalCount();
+		m_nGlobalInternalCells[0] = m_patch->getInternalCellCount();
 	}
 #endif
 
 	// Evalaute the consecutive id of the internal cells
-	if (m_patch->getInternalCount() > 0) {
+	if (m_patch->getInternalCellCount() > 0) {
 		std::map<long,long> nativeIds;
-		for (auto itr = m_patch->internalConstBegin(); itr != m_patch->internalConstEnd(); ++itr) {
+		for (auto itr = m_patch->internalCellConstBegin(); itr != m_patch->internalCellConstEnd(); ++itr) {
 			long id = itr.getId();
 			long nativeId = m_patch->_getCellNativeIndex(id);
 
@@ -239,7 +239,7 @@ void PatchNumberingInfo::_extract()
 	// Communicate the consecutive id of the ghost cells
 	if (m_patch->getProcessorCount() > 1) {
 		// Set and start the sends
-		for (const auto &entry : m_patch->getGhostExchangeSources()) {
+		for (const auto &entry : m_patch->getGhostCellExchangeSources()) {
 			const int rank = entry.first;
 			auto &list = entry.second;
 
@@ -255,7 +255,7 @@ void PatchNumberingInfo::_extract()
 		int nCompletedRecvs = 0;
 		while (nCompletedRecvs < dataCommunicator->getRecvCount()) {
 			int rank = dataCommunicator->waitAnyRecv();
-			const auto &list = m_patch->getGhostExchangeTargets(rank);
+			const auto &list = m_patch->getGhostCellExchangeTargets(rank);
 
 			RecvBuffer &buffer = dataCommunicator->getRecvBuffer(rank);
 			for (long id : list) {
@@ -313,7 +313,7 @@ const std::unordered_map<long, long> & PatchNumberingInfo::getCellConsecutiveMap
 long PatchNumberingInfo::getCellGlobalCount() const
 {
 	long nGlobalCells = 0;
-	for (long count : m_nGlobalInternals) {
+	for (long count : m_nGlobalInternalCells) {
 		nGlobalCells += count;
 	}
 
@@ -340,7 +340,7 @@ long PatchNumberingInfo::getCellGlobalCountOffset(int rank) const
 {
 	long offset = 0;
 	for (int i = 0; i < rank; ++i) {
-		offset += m_nGlobalInternals[i];
+		offset += m_nGlobalInternalCells[i];
 	}
 
 	return offset;
@@ -378,9 +378,9 @@ const std::unordered_map<long, long> & PatchNumberingInfo::getCellGlobalMap() co
 */
 int PatchNumberingInfo::getCellRankFromLocal(long id) const
 {
-	auto ghostOwnerItr = m_patch->m_ghostOwners.find(id);
-	if (ghostOwnerItr != m_patch->m_ghostOwners.end()) {
-		return ghostOwnerItr->second;
+	auto ghostCellOwnerItr = m_patch->m_ghostCellOwners.find(id);
+	if (ghostCellOwnerItr != m_patch->m_ghostCellOwners.end()) {
+		return ghostCellOwnerItr->second;
 	} else {
 		return m_patch->getRank();
 	}
@@ -396,7 +396,7 @@ int PatchNumberingInfo::getCellRankFromConsecutive(long id) const
 {
 	long offset = 0;
 	for (int k = 0; k < m_patch->getProcessorCount(); ++k) {
-		offset += m_nGlobalInternals[k];
+		offset += m_nGlobalInternalCells[k];
 		if (id < offset) {
 			return k;
 		}

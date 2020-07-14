@@ -74,7 +74,7 @@ int subtest_001(int rank)
 			partitioningWeights.insert({cell.getId(), 0});
 
 			++counter;
-			if (counter == 0.25 * patch_2D->getInternalCount()) {
+			if (counter == 0.25 * patch_2D->getInternalCellCount()) {
 				break;
 			}
 		}
@@ -82,7 +82,7 @@ int subtest_001(int rank)
 		std::size_t counter = 0;
 		for(const Cell &cell : patch_2D->getCells()){
 			++counter;
-			if (counter > 0.5 * patch_2D->getInternalCount()) {
+			if (counter > 0.5 * patch_2D->getInternalCellCount()) {
 				partitioningWeights.insert({cell.getId(), 5});
 			}
 		}
@@ -141,7 +141,7 @@ int subtest_002(int rank)
 			partitioningWeights.insert({cell.getId(), 0});
 
 			++counter;
-			if (counter == 0.25 * patch_3D->getInternalCount()) {
+			if (counter == 0.25 * patch_3D->getInternalCellCount()) {
 				break;
 			}
 		}
@@ -149,7 +149,7 @@ int subtest_002(int rank)
 		std::size_t counter = 0;
 		for(const Cell &cell : patch_3D->getCells()){
 			++counter;
-			if (counter > 0.5 * patch_3D->getInternalCount()) {
+			if (counter > 0.5 * patch_3D->getInternalCellCount()) {
 				partitioningWeights.insert({cell.getId(), 5});
 			}
 		}

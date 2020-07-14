@@ -114,7 +114,7 @@ SurfUnstructured                mesh(2, 3);
     cout << "** Appending mesh from (ASCII): \"" << in_name_ASCII << "\"" << endl;
     if (mesh.importSTL(in_name_ASCII, false) != 0) return 1;
     if (mesh.getVertexCount() != 3*nExpected) return 1;
-    if (mesh.getInternalCount() != nExpected) return 1;
+    if (mesh.getInternalCellCount() != nExpected) return 1;
 
     // Import mesh ---------------------------------------------------------- //
     mesh.write(out_name_VTU);

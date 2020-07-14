@@ -212,7 +212,7 @@ protected:
 
     std::vector<SkdNode, SkdNode::Allocator> m_nodes;
 
-    bool m_interiorOnly;
+    bool m_interiorCellsOnly;
 
 #if BITPIT_ENABLE_MPI
     int m_rank;
@@ -221,7 +221,7 @@ protected:
     std::vector<SkdBox> m_partitionBoxes;
 #endif
 
-    PatchSkdTree(const PatchKernel *patch, bool interiorOnly = false);
+    PatchSkdTree(const PatchKernel *patch, bool interiorCellsOnly = false);
 
     SkdNode & _getNode(std::size_t nodeId);
 

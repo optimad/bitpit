@@ -123,10 +123,10 @@ int subtest_001(int rank)
     patch->setCommunicator(MPI_COMM_WORLD);
 
     // Show patch info
-    log::cout() << "Cell count:     " << patch->getCellCount() << std::endl;
-    log::cout() << "Internal count: " << patch->getInternalCount() << std::endl;
-    log::cout() << "Ghost count:    " << patch->getGhostCount() << std::endl;
-    log::cout() << "Vertex count:   " << patch->getVertexCount() << std::endl;
+    log::cout() << "Cell count: " << patch->getCellCount() << std::endl;
+    log::cout() << "Internal cell count: " << patch->getInternalCellCount() << std::endl;
+    log::cout() << "Ghost cell count: " << patch->getGhostCellCount() << std::endl;
+    log::cout() << "Vertex count: " << patch->getVertexCount() << std::endl;
 
     patch->write("serial_mesh");
 
@@ -144,10 +144,10 @@ int subtest_001(int rank)
     if (rank == 0) {
         int nProcs;
         MPI_Comm_size(patch->getCommunicator(), &nProcs);
-        std::size_t nMaxCellsPerProc = std::ceil((double) patch->getInternalCount() / nProcs);
+        std::size_t nMaxCellsPerProc = std::ceil((double) patch->getInternalCellCount() / nProcs);
 
         std::size_t index = 0;
-        for (auto itr = patch->internalBegin(); itr != patch->internalEnd(); ++itr) {
+        for (auto itr = patch->internalCellBegin(); itr != patch->internalCellEnd(); ++itr) {
             int rank = std::floor((double) index / nMaxCellsPerProc);
             ++index;
 
@@ -169,9 +169,9 @@ int subtest_001(int rank)
     log::cout() << "    Partition completed in " << partitioningElapsed << " seconds" << std::endl;
 
     // Show patch info
-    log::cout() << "Cell count:   " << patch->getCellCount() << std::endl;
-    log::cout() << "Internal count:   " << patch->getInternalCount() << std::endl;
-    log::cout() << "Ghost count:   " << patch->getGhostCount() << std::endl;
+    log::cout() << "Cell count: " << patch->getCellCount() << std::endl;
+    log::cout() << "Internal cell count: " << patch->getInternalCellCount() << std::endl;
+    log::cout() << "Ghost cell count: " << patch->getGhostCellCount() << std::endl;
     log::cout() << "Vertex count: " << patch->getVertexCount() << std::endl;
 
     patch->write("partitioned_mesh");
@@ -182,7 +182,7 @@ int subtest_001(int rank)
 
     // Evaluate cell ranks
     cellRanks.clear();
-    for (auto itr = patch->internalBegin(); itr != patch->internalEnd(); ++itr) {
+    for (auto itr = patch->internalCellBegin(); itr != patch->internalCellEnd(); ++itr) {
         cellRanks[itr.getId()] = 0;
     }
 
@@ -200,9 +200,9 @@ int subtest_001(int rank)
     log::cout() << "    Serialization completed in " << serializationElapsed << " seconds" << std::endl;
 
     // Show patch info
-    log::cout() << "Cell count:   " << patch->getCellCount() << std::endl;
-    log::cout() << "Internal count:   " << patch->getInternalCount() << std::endl;
-    log::cout() << "Ghost count:   " << patch->getGhostCount() << std::endl;
+    log::cout() << "Cell count: " << patch->getCellCount() << std::endl;
+    log::cout() << "Internal cell count: " << patch->getInternalCellCount() << std::endl;
+    log::cout() << "Ghost cell count: " << patch->getGhostCellCount() << std::endl;
     log::cout() << "Vertex count: " << patch->getVertexCount() << std::endl;
 
     patch->write("reserialized_mesh");

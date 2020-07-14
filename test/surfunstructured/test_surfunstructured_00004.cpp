@@ -155,7 +155,7 @@ int                             nV, nE;
     mesh.extractEdgeNetwork(edges);
     
     // Check mesh status ---------------------------------------------------- //
-    if (edges.getInternalCount() != nE)         return 2;
+    if (edges.getInternalCellCount() != nE)         return 2;
     if (edges.getVertexCount()   != nV)         return 2;
 
     // Compute cell normals ------------------------------------------------- //
@@ -361,7 +361,7 @@ int                             nV, nS, nE;
 
     // Check mesh status ---------------------------------------------------- //
     nV = mesh.getVertexCount();
-    nS = mesh.getInternalCount();
+    nS = mesh.getInternalCellCount();
     nE = mesh.countFaces(); 
     if (nS != 32)   return 1;
     if (nV != 32)   return 1;

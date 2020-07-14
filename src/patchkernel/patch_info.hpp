@@ -88,7 +88,7 @@ private:
 	long m_cellConsecutiveOffset;
 	std::unordered_map<long, long> m_cellLocalToConsecutiveMap;
 #if BITPIT_ENABLE_MPI==1
-	std::vector<long> m_nGlobalInternals;
+	std::vector<long> m_nGlobalInternalCells;
 #endif
 
 };

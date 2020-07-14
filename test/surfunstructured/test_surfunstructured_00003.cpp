@@ -128,7 +128,7 @@ SurfUnstructured                mesh(2, 3);
     log::cout() << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
     if (mesh.importSTL(in_name_bin, true) != 0) return 1;
     if (mesh.getVertexCount() != 3*nExpected) return 1;
-    if (mesh.getInternalCount() != nExpected) return 1;
+    if (mesh.getInternalCellCount() != nExpected) return 1;
 
 }
 
@@ -156,7 +156,7 @@ SurfUnstructured                mesh(2, 3);
     log::cout() << "** Appending mesh from (ASCII): \"" << in_name_ASCII << "\"" << endl;
     if (mesh.importSTL(in_name_ASCII, false) != 0) return 3;
     if (mesh.getVertexCount() != 3*nExpected) return 3;
-    if (mesh.getInternalCount() != nExpected) return 3;
+    if (mesh.getInternalCellCount() != nExpected) return 3;
 
 }
 
@@ -261,7 +261,7 @@ SurfUnstructured                mesh(2, 3);
     log::cout() << "** Importing mesh from : \"" << in_name << "\"" << endl;
     if (mesh.importDGF(in_name) > 0) return 1;
     if (mesh.getVertexCount() != nSe) return 1;
-    if (mesh.getInternalCount() != nVe) return 1;
+    if (mesh.getInternalCellCount() != nVe) return 1;
 
 }
 
@@ -290,7 +290,7 @@ SurfUnstructured                mesh(2, 3);
     log::cout() << "** Re-importing mesh from : \"" << out_name << "\"" << endl;
     if (mesh_copy.importDGF(in_name) > 0) return 3;
     if (mesh_copy.getVertexCount() != mesh.getVertexCount()) return 3;
-    if (mesh_copy.getInternalCount() != mesh.getInternalCount()) return 3;
+    if (mesh_copy.getInternalCellCount() != mesh.getInternalCellCount()) return 3;
 
 }
 

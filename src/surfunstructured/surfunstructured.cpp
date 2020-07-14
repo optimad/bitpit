@@ -536,7 +536,7 @@ int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary
 #endif
 
     // Count the number of facets
-    long nFacets = getInternalCount();
+    long nFacets = getInternalCellCount();
 #if BITPIT_ENABLE_MPI==1
     if (isPartitioned()) {
         MPI_Allreduce(MPI_IN_PLACE, &nFacets, 1, MPI_LONG, MPI_SUM, getCommunicator());
@@ -586,8 +586,8 @@ int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary
     {
 #endif
             // Write facet section
-            CellConstIterator cellBegin = internalConstBegin();
-            CellConstIterator cellEnd   = internalConstEnd();
+            CellConstIterator cellBegin = internalCellConstBegin();
+            CellConstIterator cellEnd   = internalCellConstEnd();
             for (CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
                 // Get cell
                 const Cell &cell = *cellItr;
@@ -697,7 +697,7 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, std::unordered
     std::set<int> cellPIDs;
 #if BITPIT_ENABLE_MPI==1
     if (isPartitioned()) {
-        std::set<int> internalPIDs = getInternalPIDs();
+        std::set<int> internalPIDs = getInternalCellPIDs();
         std::vector<int> localPIDs(internalPIDs.begin(), internalPIDs.end());
         int nLocalPids = localPIDs.size();
 
@@ -720,14 +720,14 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, std::unordered
 #else
     {
 #endif
-        cellPIDs = getInternalPIDs();
+        cellPIDs = getInternalCellPIDs();
     }
 
     // Export cells
     bool firstPID = true;
     for (int pid : cellPIDs) {
         // Cells associated with the PID
-        std::vector<long> cells = getInternalsByPID(pid);
+        std::vector<long> cells = getInternalCellsByPID(pid);
 
         // Count the number of facets
         long nFacets = cells.size();

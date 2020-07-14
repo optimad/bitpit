@@ -187,7 +187,7 @@ void VolOctree::_partitioningCleanup()
 
 	\param rank is the rank for which the information will be built
 */
-std::vector<long> VolOctree::_findGhostExchangeSources(int rank)
+std::vector<long> VolOctree::_findGhostCellExchangeSources(int rank)
 {
 	const std::vector<uint32_t> &ghostOctantSources = m_tree->getBordersPerProc().at(rank);
 	std::size_t nGhostSources = ghostOctantSources.size();
@@ -221,7 +221,7 @@ void VolOctree::computePartitioningOctantWeights(const std::unordered_map<long, 
 
 	std::size_t nOctants = m_tree->getNumOctants();
 	m_partitioningOctantWeights = std::unique_ptr<std::vector<double>>(new std::vector<double>(nOctants, defaultWeight));
-	for (auto cellItr = internalConstBegin(); cellItr != internalConstEnd(); ++cellItr) {
+	for (auto cellItr = internalCellConstBegin(); cellItr != internalCellConstEnd(); ++cellItr) {
 		long cellId = cellItr.getId();
 		auto weightItr = cellWeights.find(cellId);
 		if (weightItr != cellWeights.end()) {

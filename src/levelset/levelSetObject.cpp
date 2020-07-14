@@ -576,8 +576,8 @@ void LevelSetObject::_restore( std::istream &stream ){
  */
 void LevelSetObject::exchangeGhosts(){
 
-    const std::unordered_map<int,std::vector<long>> &sendList =  m_kernelPtr->getMesh()->getGhostExchangeSources() ;
-    const std::unordered_map<int,std::vector<long>> &recvList =  m_kernelPtr->getMesh()->getGhostExchangeTargets() ;
+    const std::unordered_map<int,std::vector<long>> &sendList =  m_kernelPtr->getMesh()->getGhostCellExchangeSources() ;
+    const std::unordered_map<int,std::vector<long>> &recvList =  m_kernelPtr->getMesh()->getGhostCellExchangeTargets() ;
 
     communicate(sendList,recvList);
 }

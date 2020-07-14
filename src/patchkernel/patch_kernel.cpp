@@ -118,13 +118,13 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_vertexIdGenerator(other.m_vertexIdGenerator),
       m_interfaceIdGenerator(other.m_interfaceIdGenerator),
       m_cellIdGenerator(other.m_cellIdGenerator),
-      m_nInternals(other.m_nInternals),
+      m_nInternalCells(other.m_nInternalCells),
 #if BITPIT_ENABLE_MPI==1
-      m_nGhosts(other.m_nGhosts),
+      m_nGhostCells(other.m_nGhostCells),
 #endif
-      m_lastInternalId(other.m_lastInternalId),
+      m_lastInternalCellId(other.m_lastInternalCellId),
 #if BITPIT_ENABLE_MPI==1
-      m_firstGhostId(other.m_firstGhostId),
+      m_firstGhostCellId(other.m_firstGhostCellId),
 #endif
       m_vtk(other.m_vtk),
       m_vtkWriteTarget(other.m_vtkWriteTarget),
@@ -155,9 +155,9 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_partitioningSerialization(other.m_partitioningSerialization),
       m_partitioningOutgoings(other.m_partitioningOutgoings),
       m_partitioningGlobalExchanges(other.m_partitioningGlobalExchanges),
-      m_ghostOwners(other.m_ghostOwners),
-      m_ghostExchangeTargets(other.m_ghostExchangeTargets),
-      m_ghostExchangeSources(other.m_ghostExchangeSources)
+      m_ghostCellOwners(other.m_ghostCellOwners),
+      m_ghostCellExchangeTargets(other.m_ghostCellExchangeTargets),
+      m_ghostCellExchangeSources(other.m_ghostCellExchangeSources)
 #endif
 {
 	// Register the patch
@@ -224,14 +224,14 @@ void PatchKernel::initialize()
 	m_id = PatchManager::AUTOMATIC_ID;
 
 	// Cell count
-	m_nInternals = 0;
+	m_nInternalCells = 0;
 #if BITPIT_ENABLE_MPI==1
-	m_nGhosts    = 0;
+	m_nGhostCells    = 0;
 #endif
 
-	m_lastInternalId = Cell::NULL_ID;
+	m_lastInternalCellId = Cell::NULL_ID;
 #if BITPIT_ENABLE_MPI==1
-	m_firstGhostId   = Cell::NULL_ID;
+	m_firstGhostCellId   = Cell::NULL_ID;
 #endif
 
 	// Dimension
@@ -604,7 +604,7 @@ void PatchKernel::endAlteration(bool squeezeStorage)
 	// information for ghost data exchange unconditionally, if there are no
 	// ghosts the function will exit without doing anything.
 	if (getProcessorCount() > 1 && getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
-		updateGhostExchangeInfo();
+		updateGhostCellExchangeInfo();
 	}
 #endif
 
@@ -719,17 +719,17 @@ void PatchKernel::resetCells()
 	m_cells.clear();
 	PiercedVector<Cell>().swap(m_cells);
 	m_cellIdGenerator.reset();
-	m_nInternals = 0;
+	m_nInternalCells = 0;
 #if BITPIT_ENABLE_MPI==1
-	m_nGhosts = 0;
+	m_nGhostCells = 0;
 #endif
-	m_lastInternalId = Cell::NULL_ID;
+	m_lastInternalCellId = Cell::NULL_ID;
 #if BITPIT_ENABLE_MPI==1
-	m_firstGhostId = Cell::NULL_ID;
+	m_firstGhostCellId = Cell::NULL_ID;
 #endif
 
 #if BITPIT_ENABLE_MPI==1
-	clearGhostOwners();
+	clearGhostCellOwners();
 #endif
 
 	for (auto &interface : m_interfaces) {
@@ -861,7 +861,7 @@ void PatchKernel::write(VTKWriteMode mode)
 		vtkCellCount = getCellCount();
 #if BITPIT_ENABLE_MPI==1
 	} else if (m_vtkWriteTarget == WRITE_TARGET_CELLS_INTERNAL) {
-		vtkCellCount = getInternalCount();
+		vtkCellCount = getInternalCellCount();
 #endif
 	}
 
@@ -1677,9 +1677,19 @@ long PatchKernel::getCellCount() const
 
 	\return The number of internal cells in the patch
 */
+long PatchKernel::getInternalCellCount() const
+{
+	return m_nInternalCells;
+}
+
+/*!
+	Gets the number of internal cells in the patch.
+
+	\return The number of internal cells in the patch
+*/
 long PatchKernel::getInternalCount() const
 {
-	return m_nInternals;
+	return getInternalCellCount();
 }
 
 /*!
@@ -1740,9 +1750,9 @@ ElementType PatchKernel::getCellType(long id) const
 
 	\return A reference to the last internal cell.
 */
-Cell & PatchKernel::getLastInternal()
+Cell & PatchKernel::getLastInternalCell()
 {
-	return m_cells[m_lastInternalId];
+	return m_cells[m_lastInternalCellId];
 }
 
 /*!
@@ -1750,9 +1760,9 @@ Cell & PatchKernel::getLastInternal()
 
 	\return A constant reference to the last internal cell.
 */
-const Cell & PatchKernel::getLastInternal() const
+const Cell & PatchKernel::getLastInternalCell() const
 {
-	return m_cells[m_lastInternalId];
+	return m_cells[m_lastInternalCellId];
 }
 
 /*!
@@ -1790,9 +1800,33 @@ PatchKernel::CellIterator PatchKernel::cellEnd()
 
 	\result An iterator to the first internal cell.
 */
-PatchKernel::CellIterator PatchKernel::internalBegin()
+PatchKernel::CellIterator PatchKernel::internalCellBegin()
 {
 	return m_cells.begin();
+}
+
+/*!
+	Returns iterator pointing to the first internal cell.
+
+	\result An iterator to the first internal cell.
+*/
+PatchKernel::CellIterator PatchKernel::internalBegin()
+{
+	return internalCellBegin();
+}
+
+/*!
+	Returns iterator pointing to the end of the list of internal cells.
+
+	\result An iterator to the end of the list of internal cells.
+*/
+PatchKernel::CellIterator PatchKernel::internalCellEnd()
+{
+	if (m_nInternalCells > 0) {
+		return ++m_cells.find(m_lastInternalCellId);
+	} else {
+		return m_cells.end();
+	}
 }
 
 /*!
@@ -1802,11 +1836,7 @@ PatchKernel::CellIterator PatchKernel::internalBegin()
 */
 PatchKernel::CellIterator PatchKernel::internalEnd()
 {
-	if (m_nInternals > 0) {
-		return ++m_cells.find(m_lastInternalId);
-	} else {
-		return m_cells.end();
-	}
+	return internalCellEnd();
 }
 
 /*!
@@ -1844,9 +1874,33 @@ PatchKernel::CellConstIterator PatchKernel::cellConstEnd() const
 
 	\result A constant iterator to the first internal cell.
 */
-PatchKernel::CellConstIterator PatchKernel::internalConstBegin() const
+PatchKernel::CellConstIterator PatchKernel::internalCellConstBegin() const
 {
 	return m_cells.cbegin();
+}
+
+/*!
+	Returns a constant iterator pointing to the first internal cell.
+
+	\result A constant iterator to the first internal cell.
+*/
+PatchKernel::CellConstIterator PatchKernel::internalConstBegin() const
+{
+	return internalCellConstBegin();
+}
+
+/*!
+	Returns a constant iterator pointing to the end of the list of internal cells.
+
+	\result A constant iterator to the end of the list of internal cells.
+*/
+PatchKernel::CellConstIterator PatchKernel::internalCellConstEnd() const
+{
+	if (m_nInternalCells > 0) {
+		return ++m_cells.find(m_lastInternalCellId);
+	} else {
+		return m_cells.cend();
+	}
 }
 
 /*!
@@ -1856,11 +1910,7 @@ PatchKernel::CellConstIterator PatchKernel::internalConstBegin() const
 */
 PatchKernel::CellConstIterator PatchKernel::internalConstEnd() const
 {
-	if (m_nInternals > 0) {
-		return ++m_cells.find(m_lastInternalId);
-	} else {
-		return m_cells.cend();
-	}
+	return internalCellConstEnd();
 }
 
 /*!
@@ -1980,7 +2030,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 		return cellEnd();
 	}
 
-	CellIterator iterator = _addInternal(type, std::move(connectStorage), id);
+	CellIterator iterator = _addInternalCell(type, std::move(connectStorage), id);
 
 	return iterator;
 }
@@ -1996,7 +2046,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	for the cell
 	\return An iterator pointing to the newly created cell.
 */
-PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+PatchKernel::CellIterator PatchKernel::_addInternalCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 													long id)
 {
 	// Get the id of the cell before which the new cell should be inserted
@@ -2007,7 +2057,7 @@ PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::uniqu
 #endif
 	long referenceId;
 #if BITPIT_ENABLE_MPI==1
-	referenceId = m_firstGhostId;
+	referenceId = m_firstGhostCellId;
 #else
 	referenceId = Cell::NULL_ID;
 #endif
@@ -2019,13 +2069,13 @@ PatchKernel::CellIterator PatchKernel::_addInternal(ElementType type, std::uniqu
 	} else {
 		iterator = m_cells.emreclaimBefore(referenceId, id, id, type, std::move(connectStorage), true, true);
 	}
-	m_nInternals++;
+	m_nInternalCells++;
 
 	// Update the id of the last internal cell
-	if (m_lastInternalId < 0) {
-		m_lastInternalId = id;
-	} else if (m_cells.rawIndex(m_lastInternalId) < m_cells.rawIndex(id)) {
-		m_lastInternalId = id;
+	if (m_lastInternalCellId < 0) {
+		m_lastInternalCellId = id;
+	} else if (m_cells.rawIndex(m_lastInternalCellId) < m_cells.rawIndex(id)) {
+		m_lastInternalCellId = id;
 	}
 
 	return iterator;
@@ -2059,7 +2109,7 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 		throw std::runtime_error("Unable to restore the specified cell: the kernel doesn't contain an entry for that cell.");
 	}
 
-	_restoreInternal(iterator, type, std::move(connectStorage));
+	_restoreInternalCell(iterator, type, std::move(connectStorage));
 
 	return iterator;
 }
@@ -2072,14 +2122,14 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 */
-void PatchKernel::_restoreInternal(const CellIterator &iterator, ElementType type,
+void PatchKernel::_restoreInternalCell(const CellIterator &iterator, ElementType type,
 								   std::unique_ptr<long[]> &&connectStorage)
 {
 	// There is not need to set the id of the cell as assigned, because
 	// also the index generator will be restored.
 	Cell &cell = *iterator;
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), true, true);
-	m_nInternals++;
+	m_nInternalCells++;
 }
 
 /*!
@@ -2134,14 +2184,14 @@ bool PatchKernel::deleteCell(long id, bool updateNeighs, bool delayed)
 
 	// Delete cell
 #if BITPIT_ENABLE_MPI==1
-	bool isInternal = cell.isInterior();
-	if (isInternal) {
-		_deleteInternal(id, delayed);
+	bool isInternalCell = cell.isInterior();
+	if (isInternalCell) {
+		_deleteInternalCell(id, delayed);
 	} else {
-		_deleteGhost(id, delayed);
+		_deleteGhostCell(id, delayed);
 	}
 #else
-	_deleteInternal(id, delayed);
+	_deleteInternalCell(id, delayed);
 #endif
 
 	// Cell id is no longer used
@@ -2171,20 +2221,20 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 	// internal, another cells becomes the last one and  that cells may be
 	// on the deletion list, and on and so forth). The same applies for the
 	// first ghost.
-	bool deleteLastInternal = false;
+	bool deleteLastInternalCell = false;
 #if BITPIT_ENABLE_MPI==1
-	bool deleteFirstGhost   = false;
+	bool deleteFirstGhostCell = false;
 #endif
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
 		long cellId = *i;
-		if (cellId == m_lastInternalId) {
-			deleteLastInternal = true;
+		if (cellId == m_lastInternalCellId) {
+			deleteLastInternalCell = true;
 			continue;
 		}
 #if BITPIT_ENABLE_MPI==1
-		else if (cellId == m_firstGhostId) {
-			deleteFirstGhost = true;
+		else if (cellId == m_firstGhostCellId) {
+			deleteFirstGhostCell = true;
 			continue;
 		}
 #endif
@@ -2192,13 +2242,13 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 		deleteCell(cellId, updateNeighs, true);
 	}
 
-	if (deleteLastInternal) {
-		deleteCell(m_lastInternalId, updateNeighs, true);
+	if (deleteLastInternalCell) {
+		deleteCell(m_lastInternalCellId, updateNeighs, true);
 	}
 
 #if BITPIT_ENABLE_MPI==1
-	if (deleteFirstGhost) {
-		deleteCell(m_firstGhostId, updateNeighs, true);
+	if (deleteFirstGhostCell) {
+		deleteCell(m_firstGhostCellId, updateNeighs, true);
 	}
 #endif
 
@@ -2215,12 +2265,12 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 	\param id is the id of the cell
 	\param delayed is true a delayed delete will be performed
 */
-void PatchKernel::_deleteInternal(long id, bool delayed)
+void PatchKernel::_deleteInternalCell(long id, bool delayed)
 {
 	m_cells.erase(id, delayed);
-	m_nInternals--;
-	if (id == m_lastInternalId) {
-		updateLastInternalId();
+	m_nInternalCells--;
+	if (id == m_lastInternalCellId) {
+		updateLastInternalCellId();
 	}
 }
 
@@ -2293,24 +2343,24 @@ long PatchKernel::countOrphanCells() const
 /*!
 	Updates the id of the last internal cell.
 */
-void PatchKernel::updateLastInternalId()
+void PatchKernel::updateLastInternalCellId()
 {
-	if (m_nInternals == 0) {
-		m_lastInternalId = Cell::NULL_ID;
+	if (m_nInternalCells == 0) {
+		m_lastInternalCellId = Cell::NULL_ID;
 		return;
 	}
 
-	CellIterator lastInternalItr;
+	CellIterator lastInternalCellItr;
 #if BITPIT_ENABLE_MPI==1
-	if (m_nGhosts == 0) {
-		lastInternalItr = --m_cells.end();
-		m_lastInternalId = lastInternalItr->getId();
+	if (m_nGhostCells == 0) {
+		lastInternalCellItr = --m_cells.end();
+		m_lastInternalCellId = lastInternalCellItr->getId();
 	} else {
-		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Cell::NULL_ID);
+		m_lastInternalCellId = m_cells.getSizeMarker(m_nInternalCells - 1, Cell::NULL_ID);
 	}
 #else
-	lastInternalItr = --m_cells.end();
-	m_lastInternalId = lastInternalItr->getId();
+	lastInternalCellItr = --m_cells.end();
+	m_lastInternalCellId = lastInternalCellItr->getId();
 #endif
 }
 
@@ -2995,11 +3045,11 @@ bool PatchKernel::findFaceNeighCell(long cellId, long neighId, int *cellFace, in
  *
  * \return The PIDs of the internal cells.
  */
-std::set<int> PatchKernel::getInternalPIDs()
+std::set<int> PatchKernel::getInternalCellPIDs()
 {
 	std::set<int> list;
-	CellConstIterator endItr = internalConstEnd();
-	for (CellConstIterator itr = internalConstBegin(); itr != endItr; ++itr) {
+	CellConstIterator endItr = internalCellConstEnd();
+	for (CellConstIterator itr = internalCellConstBegin(); itr != endItr; ++itr) {
 		list.insert(itr->getPID());
 	}
 
@@ -3012,11 +3062,11 @@ std::set<int> PatchKernel::getInternalPIDs()
  * \param pid is the PID
  * \return All the internal cells which belongs to the specified PID.
  */
-std::vector<long> PatchKernel::getInternalsByPID(int pid)
+std::vector<long> PatchKernel::getInternalCellsByPID(int pid)
 {
 	std::vector<long> cells;
-	CellConstIterator endItr = internalConstEnd();
-	for (CellConstIterator itr = internalConstBegin(); itr != endItr; ++itr) {
+	CellConstIterator endItr = internalCellConstEnd();
+	for (CellConstIterator itr = internalCellConstBegin(); itr != endItr; ++itr) {
 		if (itr->getPID() == pid){
 			cells.push_back(itr.getId());
 		}
@@ -3690,8 +3740,8 @@ void PatchKernel::dumpCells(std::ostream &stream) const
 
 	// Dump ghost/internal subdivision
 #if BITPIT_ENABLE_MPI==1
-	utils::binary::write(stream, m_firstGhostId);
-	utils::binary::write(stream, m_lastInternalId);
+	utils::binary::write(stream, m_firstGhostCellId);
+	utils::binary::write(stream, m_lastInternalCellId);
 #else
 	utils::binary::write(stream, Cell::NULL_ID);
 	utils::binary::write(stream, Cell::NULL_ID);
@@ -3751,13 +3801,13 @@ void PatchKernel::restoreCells(std::istream &stream)
 
 	// Restore ghost/internal subdivision
 #if BITPIT_ENABLE_MPI==1
-	utils::binary::read(stream, m_firstGhostId);
-	utils::binary::read(stream, m_lastInternalId);
+	utils::binary::read(stream, m_firstGhostCellId);
+	utils::binary::read(stream, m_lastInternalCellId);
 #else
-	long dummyFirstGhostId;
-	long dummyLastInternalId;
-	utils::binary::read(stream, dummyFirstGhostId);
-	utils::binary::read(stream, dummyLastInternalId);
+	long dummyFirstGhostCellId;
+	long dummyLastInternalCellId;
+	utils::binary::read(stream, dummyFirstGhostCellId);
+	utils::binary::read(stream, dummyLastInternalCellId);
 #endif
 
 	// Restore adjacencies
@@ -4026,16 +4076,16 @@ bool PatchKernel::sortCells()
 	}
 
 	// Sort internal cells
-	if (m_nInternals > 0) {
-		m_cells.sortBefore(m_lastInternalId, true);
-		updateLastInternalId();
+	if (m_nInternalCells > 0) {
+		m_cells.sortBefore(m_lastInternalCellId, true);
+		updateLastInternalCellId();
 	}
 
 #if BITPIT_ENABLE_MPI==1
 	// Sort ghost cells
-	if (m_nGhosts > 0) {
-		m_cells.sortAfter(m_firstGhostId, true);
-		updateFirstGhostId();
+	if (m_nGhostCells > 0) {
+		m_cells.sortAfter(m_firstGhostCellId, true);
+		updateFirstGhostCellId();
 	}
 #endif
 
@@ -5569,7 +5619,7 @@ const PatchKernel::CellConstRange PatchKernel::getVTKCellWriteRange() const
 		return CellConstRange(cellConstBegin(), cellConstEnd());
 #if BITPIT_ENABLE_MPI==1
 	} else if (m_vtkWriteTarget == WRITE_TARGET_CELLS_INTERNAL) {
-		return CellConstRange(internalConstBegin(), internalConstEnd());
+		return CellConstRange(internalCellConstBegin(), internalCellConstEnd());
 #endif
 	} else {
 		return CellConstRange(cellConstEnd(), cellConstEnd());
@@ -5787,20 +5837,20 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 	}
 
 	// Renumber last internal and first ghost markers
-	if (m_lastInternalId >= 0) {
-		m_lastInternalId = map.at(m_lastInternalId);
+	if (m_lastInternalCellId >= 0) {
+		m_lastInternalCellId = map.at(m_lastInternalCellId);
 	}
 
 #if BITPIT_ENABLE_MPI==1
-	if (m_firstGhostId >= 0) {
-		m_firstGhostId = map.at(m_firstGhostId);
+	if (m_firstGhostCellId >= 0) {
+		m_firstGhostCellId = map.at(m_firstGhostCellId);
 	}
 #endif
 
 #if BITPIT_ENABLE_MPI==1
 	// Update information for ghost data exchange
 	if (isPartitioned()) {
-		updateGhostExchangeInfo();
+		updateGhostCellExchangeInfo();
 	}
 #endif
 }	
@@ -5993,7 +6043,7 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 #if BITPIT_ENABLE_MPI==1
 	// Update information for ghost data exchange
 	if (isPartitioned()) {
-		updateGhostExchangeInfo();
+		updateGhostCellExchangeInfo();
 	}
 #endif
 

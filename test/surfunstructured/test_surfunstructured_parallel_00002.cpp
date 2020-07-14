@@ -126,7 +126,7 @@ if (myRank == 0) {
     mesh.collapseCoincidentVertices();
 
     if (mesh.getVertexCount() != 3*nExpected) return 1;
-    if (mesh.getInternalCount() != nExpected) return 1;
+    if (mesh.getInternalCellCount() != nExpected) return 1;
 }
 
 {
