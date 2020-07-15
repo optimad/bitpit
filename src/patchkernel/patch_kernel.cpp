@@ -329,7 +329,7 @@ void PatchKernel::initialize()
 	m_vtk.addData<long>("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, this);
 #if BITPIT_ENABLE_MPI==1
 	m_vtk.addData<long>("cellGlobalIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
-	m_vtk.addData<int>("rank", VTKFieldType::SCALAR, VTKLocation::CELL, this);
+	m_vtk.addData<int>("cellRank", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 #endif
 }
 
@@ -6013,7 +6013,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			genericIO::flushBINARY(stream, numberingInfo.getCellGlobalId(cell.getId()));
 		}
-	} else if (name == "rank") {
+	} else if (name == "cellRank") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			genericIO::flushBINARY(stream, getCellRank(cell.getId()));
 		}
