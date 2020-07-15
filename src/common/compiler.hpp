@@ -84,4 +84,12 @@ do {                  \
 #   define BITPIT_DEPRECATED(func) func
 #endif
 
+
+/*!
+ * \ingroup common_macro
+ *
+ * Comma.
+ */
+#define BITPIT_COMMA ,
+
 #endif
