@@ -84,6 +84,61 @@ public:
 	};
 
 	/*!
+		Functional for comparing the position of two vertices.
+
+		The comparison is made with respect to the vertex coordinates.
+	*/
+	struct VertexPositionLess
+	{
+		VertexPositionLess(const PatchKernel &patch)
+			: m_patch(patch)
+		{
+		}
+
+		virtual ~VertexPositionLess() = default;
+
+		bool operator()(long id_1, long id_2) const
+		{
+			const std::array<double, 3> &coords_1 = m_patch.getVertexCoords(id_1);
+			const std::array<double, 3> &coords_2 = m_patch.getVertexCoords(id_2);
+			for (int k = 0; k < 3; ++k) {
+				if (utils::DoubleFloatingEqual()(coords_1[k], coords_2[k], m_patch.getTol())) {
+					continue;
+				}
+
+				return coords_1[k] < coords_2[k];
+			}
+
+			// If we are here the two vertex coordinates coincide. It's not
+			// possible to define an order for the two vertices.
+			std::ostringstream stream;
+			stream << "It was not possible to define an order for vertices " << id_1 << " and " << id_2 << ". ";
+			stream << "The two vertices have the same coordinates.";
+			throw std::runtime_error (stream.str());
+		}
+
+		const PatchKernel &m_patch;
+	};
+
+	/*!
+		Functional for comparing the position of two vertices.
+
+		The comparison is made with respect to the vertex coordinates.
+	*/
+	struct VertexPositionGreater : private VertexPositionLess
+	{
+		VertexPositionGreater(const PatchKernel &patch)
+			: VertexPositionLess(patch)
+		{
+		}
+
+		bool operator()(long id_1, long id_2) const
+		{
+			return !VertexPositionLess::operator()(id_1, id_2);
+		}
+	};
+
+	/*!
 		Functional for comparing the position of two cells.
 
 		The comparison is made with respect to the cell centroid.
