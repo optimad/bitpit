@@ -381,9 +381,6 @@ public:
 	CellIterator addCell(ElementType type, const std::vector<long> &connectivity, int rank, long id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id = Element::NULL_ID);
 #endif
-	BITPIT_DEPRECATED(CellIterator addCell(ElementType type, bool interior, long id = Element::NULL_ID));
-	BITPIT_DEPRECATED(CellIterator addCell(ElementType type, bool interior, const std::vector<long> &connectivity, long id = Element::NULL_ID));
-	BITPIT_DEPRECATED(CellIterator addCell(ElementType type, bool interior, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID));
 	bool deleteCell(long id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 #if BITPIT_ENABLE_MPI==1
