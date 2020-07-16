@@ -2329,7 +2329,7 @@ void VolOctree::scale(const std::array<double, 3> &scaling, const std::array<dou
 	uniformScaling &= (std::abs(scaling[0] - scaling[2]) > 1e-14);
 	assert(uniformScaling);
 	if (!uniformScaling) {
-		log::cout() << "octree patch only allows uniform scaling)" << std::endl;
+		log::cout() << "VolOctree patch only allows uniform scaling." << std::endl;
 		return;
 	}
 
