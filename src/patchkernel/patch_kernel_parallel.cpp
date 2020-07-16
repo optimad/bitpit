@@ -2896,11 +2896,11 @@ void PatchKernel::_partitioningCleanup()
 */
 int PatchKernel::getCellRank(long id) const
 {
-	const Cell &cell = getCell(id);
-	if (cell.isInterior()) {
+	auto cellOwner = m_ghostCellOwners.find(id);
+	if (cellOwner == m_ghostCellOwners.end()) {
 		return m_rank;
 	} else {
-		return m_ghostCellOwners.at(id);
+		return cellOwner->second;
 	}
 }
 
