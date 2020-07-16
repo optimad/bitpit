@@ -130,8 +130,7 @@ public:
     /**
     * Two-way comparison.
     */
-    template<typename other_id_t>
-    bool operator==(const PiercedKernelIterator<other_id_t>& rhs) const
+    bool operator==(const PiercedKernelIterator &rhs) const
     {
         return (m_kernel == rhs.m_kernel) && (m_pos == rhs.m_pos);
     }
@@ -139,8 +138,7 @@ public:
     /**
     * Two-way comparison.
     */
-    template<typename other_id_t>
-    bool operator!=(const PiercedKernelIterator<other_id_t>& rhs) const
+    bool operator!=(const PiercedKernelIterator &rhs) const
     {
         return (m_kernel != rhs.m_kernel) || (m_pos != rhs.m_pos);
     }

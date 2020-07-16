@@ -160,9 +160,7 @@ public:
     /**
     * Two-way comparison.
     */
-    template<typename other_value_t, typename other_id_t = long,
-         typename other_value_no_cv_t = typename std::remove_cv<other_value_t>::type>
-    bool operator==(const PiercedStorageIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
+    bool operator==(const PiercedStorageIterator &rhs) const
     {
         return (PiercedKernelIterator<id_t>::operator==(rhs) && m_storage == rhs.m_storage);
     }
@@ -170,9 +168,7 @@ public:
     /**
     * Two-way comparison.
     */
-    template<typename other_value_t, typename other_id_t = long,
-         typename other_value_no_cv_t = typename std::remove_cv<other_value_t>::type>
-    bool operator!=(const PiercedStorageIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
+    bool operator!=(const PiercedStorageIterator &rhs) const
     {
         return (PiercedKernelIterator<id_t>::operator!=(rhs) || m_storage != rhs.m_storage);
     }
