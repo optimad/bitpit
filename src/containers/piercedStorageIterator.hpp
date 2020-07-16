@@ -51,7 +51,7 @@ class PiercedStorage;
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type>
 class PiercedStorageIterator
-    : protected bitpit::PiercedKernelIterator<id_t>
+    : protected PiercedKernelIterator<id_t>
 {
 
 friend class PiercedStorageIterator<value_no_cv_t, id_t, value_no_cv_t>;
