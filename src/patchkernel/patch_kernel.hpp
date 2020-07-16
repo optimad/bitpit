@@ -685,9 +685,10 @@ protected:
 	void setBoundingBoxDirty(bool dirty);
 	void setBoundingBox(const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint);
 
-	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #if BITPIT_ENABLE_MPI==1
 	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id);
+#else
+	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #endif
 
 	InterfaceIterator restoreInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);

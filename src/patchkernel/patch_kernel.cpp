@@ -2081,6 +2081,7 @@ PatchKernel::CellIterator PatchKernel::_addInternalCell(ElementType type, std::u
 	return iterator;
 }
 
+#if BITPIT_ENABLE_MPI==0
 /*!
 	Resore the cell with the specified id.
 
@@ -2113,6 +2114,7 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 
 	return iterator;
 }
+#endif
 
 /*!
 	Internal function to restore an internal cell.
