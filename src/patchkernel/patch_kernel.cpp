@@ -3670,7 +3670,7 @@ void PatchKernel::dumpVertices(std::ostream &stream) const
 	for (const Vertex &vertex : m_vertices) {
 		utils::binary::write(stream, vertex.getId());
 
-		std::array<double, 3> coords = vertex.getCoords();
+		const std::array<double, 3> &coords = vertex.getCoords();
 		utils::binary::write(stream, coords[0]);
 		utils::binary::write(stream, coords[1]);
 		utils::binary::write(stream, coords[2]);
