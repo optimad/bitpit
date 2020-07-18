@@ -2673,52 +2673,26 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
     int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
     BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
-    BITPIT_CREATE_WORKSPACE(directionalStencilWeights, double, nEquations, MAX_STACK_WORKSPACE_SIZE);
 
     const double *polynomialWeights = getPolynomialWeights();
 
-    // Evalaute weights in x-direction
-    ReconstructionPolynomial::evalPointBasisDerivatives(degree, dimensions, origin, point, {{1., 0., 0.}}, dcsi);
-    if (limiters) {
-        applyLimiter(degree, limiters, dcsi);
-    }
+    std::array<double, 3> direction = {{0., 0., 0.}};
+    for (int d = 0; d < dimensions; ++d) {
+        direction[d] = 1.;
 
-    cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                nEquations, nCoeffs, 1., polynomialWeights, nEquations,
-                dcsi, 1, 0, directionalStencilWeights, 1);
-
-    for (int i = 0; i < nEquations; ++i) {
-        gradientWeights[i][0] = directionalStencilWeights[i];
-    }
-
-    // Evalaute weights in y-direction
-    ReconstructionPolynomial::evalPointBasisDerivatives(degree, getDimensions(), origin, point, {{0., 1., 0.}}, dcsi);
-    if (limiters) {
-        applyLimiter(degree, limiters, dcsi);
-    }
-
-    cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                nEquations, nCoeffs, 1., polynomialWeights, nEquations,
-                dcsi, 1, 0, directionalStencilWeights, 1);
-
-    for (int i = 0; i < nEquations; ++i) {
-        gradientWeights[i][1] = directionalStencilWeights[i];
-    }
-
-    // Evalaute weights in z-direction
-    if (dimensions == 3) {
-        ReconstructionPolynomial::evalPointBasisDerivatives(degree, getDimensions(), origin, point, {{0., 0., 1.}}, dcsi);
+        ReconstructionPolynomial::evalPointBasisDerivatives(degree, dimensions, origin, point, direction, dcsi);
         if (limiters) {
             applyLimiter(degree, limiters, dcsi);
         }
 
+        // Weights are stored in contiguous three-dimensional arrays, this
+        // means we can access the weights of the current dimensions using
+        // the dimension as offset and a stride of three elements
         cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
                     nEquations, nCoeffs, 1., polynomialWeights, nEquations,
-                    dcsi, 1, 0, directionalStencilWeights, 1);
+                    dcsi, 1, 0, gradientWeights->data() + d, 3);
 
-        for (int i = 0; i < nEquations; ++i) {
-            gradientWeights[i][2] = directionalStencilWeights[i];
-        }
+        direction[d] = 0.;
     }
 }
 
