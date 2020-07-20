@@ -1551,6 +1551,33 @@ void PatchSkdTree::findPointClosestGlobalCell(const std::size_t nPoints, const s
 void PatchSkdTree::findPointClosestGlobalCell(const std::size_t nPoints, const std::array<double, 3> *points,
                                           double maxDistance, long *ids, int *ranks, double *distances) const
 {
+    std::vector<double> maxDistances(nPoints, maxDistance);
+    findPointClosestGlobalCell(nPoints, points, maxDistances.data(), ids, ranks, distances);
+}
+
+/*!
+* Given the specified points, considered distributed on the processes, find the
+* closest cells contained in the tree and evaluates the distance values
+* between those cells and the given points.
+*
+* \param[in] nPoints number of the points
+* \param[in] points points coordinates
+* \param[in] maxDistances maximum allowed distances: all cells whose distance
+* is greater than this parameter will not be considered for the evaluation of
+* the distance with respect to the related point
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the points. If all cells contained in the tree are farther from a point
+* than the maximum distance, the related id will be set to the null id
+* \param[out] ranks on output it will contain the rank indices of the processes
+* owner of the cells closest to the points
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+void PatchSkdTree::findPointClosestGlobalCell(const std::size_t nPoints, const std::array<double, 3> *points,
+                                          double* maxDistances, long *ids, int *ranks, double *distances) const
+{
     // Patch is partitioned call the parallel method
     if (getPatch().isPartitioned()){
 
@@ -1589,6 +1616,11 @@ void PatchSkdTree::findPointClosestGlobalCell(const std::size_t nPoints, const s
         MPI_Allgatherv(points, nPointsCountData, MPI_DOUBLE, globalPoints.data(),
                 pointsCountData.data(), pointsDispls.data(), MPI_DOUBLE, m_communicator);
 
+        // Gather vector with all maximum distances
+        std::vector<double> globalMaxDistances(nGlobalPoints);
+        MPI_Allgatherv(maxDistances, nPoints, MPI_DOUBLE, globalMaxDistances.data(),
+                pointsCount.data(), pointsOffsets.data(), MPI_DOUBLE, m_communicator);
+
         // Call local find point closest cell for each global point collected
 
         // Instantiate global container for distances, ids and ranks (SkdCellInfo)
@@ -1604,7 +1636,7 @@ void PatchSkdTree::findPointClosestGlobalCell(const std::size_t nPoints, const s
 
             // Use a maximum distance for each point given by an estimation based on partition
             // bounding boxes. The distance will be lesser than or equal to the point maximum distance
-            double pointMaxDistance = maxDistance;
+            double pointMaxDistance = globalMaxDistances[ip];
             for (int irank = 0; irank < m_nProcessors; irank++){
                 pointMaxDistance = std::min(getPartitionBox(irank).evalPointMaxDistance(point), pointMaxDistance);
             }
@@ -1670,7 +1702,7 @@ void PatchSkdTree::findPointClosestGlobalCell(const std::size_t nPoints, const s
             int & rank = ranks[ip];
 
             // Call serial find point closest cell with maximum allowed distance
-            long nDistanceEvaluations = findPointClosestCell(point, maxDistance, &id, &distance);
+            long nDistanceEvaluations = findPointClosestCell(point, maxDistances[ip], &id, &distance);
 
             // Fix rank with the default value given by getRank method pf the patch
             rank = getPatch().getRank();
