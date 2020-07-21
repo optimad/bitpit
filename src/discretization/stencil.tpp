@@ -224,8 +224,8 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *bucketSizes, const weight_t &zero)
 {
     m_zero = zero;
-    m_pattern.initialize(nBuckets, bucketSizes, &NULL_ID);
-    m_weights.initialize(nBuckets, bucketSizes, &zero);
+    m_pattern.initialize(nBuckets, bucketSizes, NULL_ID);
+    m_weights.initialize(nBuckets, bucketSizes, zero);
     m_constant = m_zero;
 }
 
@@ -242,7 +242,7 @@ void DiscreteStencil<weight_t>::initialize(int nBuckets, const std::size_t *buck
 {
     m_zero = zero;
     m_pattern.initialize(nBuckets, bucketSizes, pattern);
-    m_weights.initialize(nBuckets, bucketSizes, &zero);
+    m_weights.initialize(nBuckets, bucketSizes, zero);
     m_constant = m_zero;
 }
 
