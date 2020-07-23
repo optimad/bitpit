@@ -125,6 +125,98 @@ double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, dou
 }
 
 /*!
+* Computes the distance between each of the the specified points and the
+* closest cell contained in the tree. Only cells with a distance less than
+* the specified maximum distance will be considered.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells
+*/
+void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> *points, double *distances) const
+{
+    std::vector<double> maxDistances(nPoints, std::numeric_limits<double>::max());
+
+    evalPointDistance(nPoints, points, maxDistances.data(), false, distances);
+}
+
+/*!
+* Computes the distance between each of the the specified points and the
+* closest cell contained in the tree. Only cells with a distance less than
+* the specified maximum distance will be considered. If all cells contained
+* in the tree are farther than the maximum distance, the function will return
+* the maximum representable distance.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistance all cells whose distance is greater than
+* this parameters will not be considered for the evaluation of the
+* distance
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> *points, double maxDistance, double *distances) const
+{
+    std::vector<double> maxDistances(nPoints, maxDistance);
+
+    evalPointDistance(nPoints, points, maxDistances.data(), false, distances);
+}
+
+/*!
+* Computes the distance between the specified points and the closest
+* cell contained in the tree. Only cells with a distance less than
+* the specified maximum distance will be considered. If all cells
+* contained in the tree are farther than the maximum distance, the
+* function will return the maximum representable distance.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistances are the maximum allowed distances, all cells whose
+* distance is greater than this parameter will not be considered for the
+* evaluation of the distance with respect to the related point
+* \param[in] interiorOnly if set to true, only interior cells will be
+* considered
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, double *distances) const
+{
+    evalPointDistance(nPoints, points, maxDistances, false, distances);
+}
+
+
+/*!
+* Computes the distance between the specified points and the closest
+* cell contained in the tree. Only cells with a distance less than
+* the specified maximum distance will be considered. If all cells
+* contained in the tree are farther than the maximum distance, the
+* function will return the maximum representable distance.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistances are the maximum allowed distances, all cells whose
+* distance is greater than this parameter will not be considered for the
+* evaluation of the distance with respect to the related point
+* \param[in] interiorOnly if set to true, only interior cells will be
+* considered
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interiorOnly, double *distances) const
+{
+    std::vector<long> ids(nPoints, Cell::NULL_ID);
+
+    findPointClosestCell(nPoints, points, maxDistances, interiorOnly, ids.data(), distances);
+}
+
+/*!
 * Given the specified point find the closest cell contained in the
 * three and evaluates the distance between that cell and the given
 * point.
@@ -267,6 +359,104 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
     // representable distance.
     if (*id == Cell::NULL_ID) {
         *distance = std::numeric_limits<double>::max();
+    }
+
+    return nDistanceEvaluations;
+}
+
+/*!
+* For each of the specified points find the closest cell contained in the
+* three and evaluates the distance between that cell and the point.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the local points
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells
+*/
+long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 3> *points, long *ids, double *distances) const
+{
+    long nDistanceEvaluations = 0;
+    for (int i = 0; i < nPoints; ++i) {
+        nDistanceEvaluations += findPointClosestCell(points[i], std::numeric_limits<double>::max(), false, ids + i, distances + i);
+    }
+
+    return nDistanceEvaluations;
+}
+
+/*!
+* For each of the specified points find the closest cell contained in the
+* three and evaluates the distance between that cell and the point.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistance all cells whose distance is greater than this
+* parameters will not be considered for the evaluation of the distance
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the points. If all cells contained in the tree are farther from a point
+* than the maximum distance, the related id will be set to the null id
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, double *distances) const
+{
+    long nDistanceEvaluations = 0;
+    for (int i = 0; i < nPoints; ++i) {
+        nDistanceEvaluations += findPointClosestCell(points[i], maxDistance, false, ids + i, distances + i);
+    }
+
+    return nDistanceEvaluations;
+}
+
+/*!
+* For each of the specified points find the closest cell contained in the
+* three and evaluates the distance between that cell and the point.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistances are the maximum allowed distances, all cells whose
+* distance is greater than this parameter will not be considered for the
+* evaluation of the distance with respect to the related point
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the points. If all cells contained in the tree are farther from a point
+* than the maximum distance, the related id will be set to the null id
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, long *ids, double *distances) const
+{
+    return findPointClosestCell(nPoints, points, maxDistances, false, ids, distances);
+}
+
+/*!
+* For each of the specified points find the closest cell contained in the
+* three and evaluates the distance between that cell and the point.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistances are the maximum allowed distances, all cells whose
+* distance is greater than this parameter will not be considered for the
+* evaluation of the distance with respect to the related point
+* \param[in] interiorOnly if set to true, only interior cells will be
+* considered
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the points. If all cells contained in the tree are farther from a point
+* than the maximum distance, the related id will be set to the null id
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interiorOnly, long *ids, double *distances) const
+{
+    long nDistanceEvaluations = 0;
+    for (int i = 0; i < nPoints; ++i) {
+        nDistanceEvaluations += findPointClosestCell(points[i], maxDistances[i], interiorOnly, ids + i, distances + i);
     }
 
     return nDistanceEvaluations;

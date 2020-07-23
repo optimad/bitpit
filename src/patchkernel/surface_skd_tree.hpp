@@ -40,10 +40,18 @@ public:
     double evalPointDistance(const std::array<double,3> &point) const;
     double evalPointDistance(const std::array<double,3> &point, double maxDistance) const;
     double evalPointDistance(const std::array<double,3> &point, double maxDistance, bool interorOnly) const;
+    void evalPointDistance(int nPoints, const std::array<double, 3> *points, double *distances) const;
+    void evalPointDistance(int nPoints, const std::array<double, 3> *points, double maxDistance, double *distances) const;
+    void evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, double *distances) const;
+    void evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interorOnly, double *distances) const;
 
     long findPointClosestCell(const std::array<double,3> &point, long *id, double *distance) const;
     long findPointClosestCell(const std::array<double, 3> &point, double maxDistance, long *id, double *distance) const;
     long findPointClosestCell(const std::array<double, 3> &point, double maxDistance, bool interorOnly, long *id, double *distance) const;
+    long findPointClosestCell(int nPoints, const std::array<double, 3> *points, long *ids, double *distances) const;
+    long findPointClosestCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, double *distances) const;
+    long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, long *ids, double *distances) const;
+    long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interorOnly, long *ids, double *distances) const;
 
 private:
     mutable std::vector<std::size_t> m_candidateIds;
