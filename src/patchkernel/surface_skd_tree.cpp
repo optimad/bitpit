@@ -71,7 +71,7 @@ void SurfaceSkdTree::clear(bool release)
 */
 double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point) const
 {
-    return evalPointDistance(point, std::numeric_limits<double>::max());
+    return evalPointDistance(point, std::numeric_limits<double>::max(), false);
 }
 
 /*!
@@ -92,10 +92,34 @@ double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point) con
 */
 double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, double maxDistance) const
 {
+    return evalPointDistance(point, maxDistance, false);
+}
+
+/*!
+* Computes the distance between the specified point and the closest
+* cell contained in the tree. Only cells with a distance less than
+* the specified maximum distance will be considered. If all cells
+* contained in the tree are farther than the maximum distance, the
+* function will return the maximum representable distance.
+*
+* \param[in] point is the point
+* \param[in] maxDistance all cells whose distance is greater than
+* this parameters will not be considered for the evaluation of the
+* distance
+* \param[in] interiorOnly if set to true, only interior cells will be considered,
+* it will be possible to consider non-interior cells only if the tree has been
+* instantiated with non-interior cells support enabled
+* \result The distance between the specified point and the closest
+* cell contained in the tree. If all cells contained in the tree are
+* farther than the maximum distance, the function will return the
+* maximum representable distance.
+*/
+double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, double maxDistance, bool interiorOnly) const
+{
     long id;
     double distance = maxDistance;
 
-    findPointClosestCell(point, &id, &distance);
+    findPointClosestCell(point, interiorOnly, &id, &distance);
 
     return distance;
 }
@@ -117,7 +141,7 @@ double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, dou
 */
 long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, long *id, double *distance) const
 {
-    return findPointClosestCell(point, std::numeric_limits<double>::max(), id, distance);
+    return findPointClosestCell(point, std::numeric_limits<double>::max(), false, id, distance);
 }
 
 /*!
@@ -139,6 +163,32 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, lo
 */
 long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, double maxDistance,
                                           long *id, double *distance) const
+{
+    return findPointClosestCell(point, maxDistance, false, id, distance);
+}
+
+/*!
+* Given the specified point find the closest cell contained in the
+* three and evaluates the distance between that cell and the given
+* point.
+*
+* \param[in] point is the point
+* \param[in] maxDistance all cells whose distance is greater than
+* this parameters will not be considered for the evaluation of the
+* distance
+* \param[in] interiorOnly if set to true, only interior cells will be considered,
+* it will be possible to consider non-interior cells only if the tree has been
+* instantiated with non-interior cells support enabled
+* \param[out] id on output it will contain the id of the closest cell.
+* If all cells contained in the tree are farther than the maximum
+* distance, the argument will be set to the null id
+* \param[out] distance on output it will contain the distance between
+* the point and closest cell. If all cells contained in the tree are
+* farther than the maximum distance, the argument will be set to the
+* maximum representable distance
+*/
+long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, double maxDistance,
+                                          bool interiorOnly, long *id, double *distance) const
 {
     // Initialize the cell id
     *id = Cell::NULL_ID;
@@ -209,7 +259,7 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
         std::size_t nodeId = m_candidateIds[k];
         const SkdNode &node = m_nodes[nodeId];
 
-        node.updatePointClosestCell(point, id, distance);
+        node.updatePointClosestCell(point, interiorOnly, id, distance);
         ++nDistanceEvaluations;
     }
 

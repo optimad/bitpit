@@ -113,10 +113,10 @@ public:
     bool hasChild(ChildLocation child) const;
     std::size_t getChildId(ChildLocation child) const;
 
-    double evalPointDistance(const std::array<double, 3> &point) const;
+    double evalPointDistance(const std::array<double, 3> &point, bool ignoreGhosts) const;
 
-    void findPointClosestCell(const std::array<double, 3> &point, long *id, double *distance) const;
-    void updatePointClosestCell(const std::array<double, 3> &point, long *id, double *distance) const;
+    void findPointClosestCell(const std::array<double, 3> &point, bool ignoreGhosts, long *id, double *distance) const;
+    void updatePointClosestCell(const std::array<double, 3> &point, bool ignoreGhosts, long *id, double *distance) const;
 
 protected:
     struct Allocator : std::allocator<SkdNode>

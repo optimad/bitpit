@@ -39,9 +39,11 @@ public:
 
     double evalPointDistance(const std::array<double,3> &point) const;
     double evalPointDistance(const std::array<double,3> &point, double maxDistance) const;
+    double evalPointDistance(const std::array<double,3> &point, double maxDistance, bool interorOnly) const;
 
     long findPointClosestCell(const std::array<double,3> &point, long *id, double *distance) const;
     long findPointClosestCell(const std::array<double, 3> &point, double maxDistance, long *id, double *distance) const;
+    long findPointClosestCell(const std::array<double, 3> &point, double maxDistance, bool interorOnly, long *id, double *distance) const;
 
 private:
     mutable std::vector<std::size_t> m_candidateIds;

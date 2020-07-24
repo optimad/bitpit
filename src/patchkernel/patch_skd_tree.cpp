@@ -518,15 +518,18 @@ std::size_t SkdNode::getChildId(ChildLocation child) const
 * cell contained in the bounding box associated to the node.
 *
 * \param point is the point
+* \param interiorOnly if set to true, only interior cells will be considered,
+* it will be possible to consider non-interior cells only if the tree has been
+* instantiated with non-interior cells support enabled
 * \result The distance between the specified point and the closest
 * cell contained in the bounding box associated to the node.
 */
-double SkdNode::evalPointDistance(const std::array<double, 3> &point) const
+double SkdNode::evalPointDistance(const std::array<double, 3> &point, bool interiorOnly) const
 {
     long id;
     double distance;
 
-    findPointClosestCell(point, &id, &distance);
+    findPointClosestCell(point, interiorOnly, &id, &distance);
 
     return distance;
 }
@@ -537,17 +540,20 @@ double SkdNode::evalPointDistance(const std::array<double, 3> &point) const
 * between that cell and the given point.
 *
 * \param point is the point
+* \param interiorOnly if set to true, only interior cells will be considered,
+* it will be possible to consider non-interior cells only if the tree has been
+* instantiated with non-interior cells support enabled
 * \param[out] id on output it will contain the id of the closest cell
 * \param[out] distance on output it will contain the distance between
 * the point and the closest cell
 */
-void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
+void SkdNode::findPointClosestCell(const std::array<double, 3> &point, bool ignoreGhosts,
                                    long *id, double *distance) const
 {
     *id       = Cell::NULL_ID;
     *distance = std::numeric_limits<double>::max();
 
-    updatePointClosestCell(point, id, distance);
+    updatePointClosestCell(point, ignoreGhosts, id, distance);
 }
 
 /*!
@@ -560,12 +566,15 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point,
 * the specified point and its projection onto the cell will be chosen.
 *
 * \param point is the point
+* \param interiorOnly if set to true, only interior cells will be considered,
+* it will be possible to consider non-interior cells only if the tree has been
+* instantiated with non-interior cells support enabled
 * \param[in,out] id is the id of the current closest cell, on output it will
 * be updated if a closer cell is found
 * \param[in,out] distance is the distance of the current closest cell,
 * on output it will be updated if a closer cell is found
 */
-void SkdNode::updatePointClosestCell(const std::array<double, 3> &point,
+void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool interiorOnly,
                                      long *id, double *distance) const
 {
     if (getCellCount() == 0) {
@@ -580,6 +589,9 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point,
     for (std::size_t n = m_cellRangeBegin; n < m_cellRangeEnd; n++) {
         std::size_t cellRawId = cellRawIds[n];
         const Cell &cell = cells.rawAt(cellRawId);
+        if (interiorOnly && !cell.isInterior()) {
+            continue;
+        }
 
         // Get the vertices ids
         ConstProxyVector<long> elementVertexIds = cell.getVertexIds();
