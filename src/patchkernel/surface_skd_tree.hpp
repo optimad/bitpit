@@ -44,6 +44,11 @@ public:
     void evalPointDistance(int nPoints, const std::array<double, 3> *points, double maxDistance, double *distances) const;
     void evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, double *distances) const;
     void evalPointDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interorOnly, double *distances) const;
+#if BITPIT_ENABLE_MPI
+    void evalPointGlobalDistance(int nPoints, const std::array<double, 3> *points, double *distances) const;
+    void evalPointGlobalDistance(int nPoints, const std::array<double, 3> *points, double maxDistance, double *distances) const;
+    void evalPointGlobalDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, double *distances) const;
+#endif
 
     long findPointClosestCell(const std::array<double,3> &point, long *id, double *distance) const;
     long findPointClosestCell(const std::array<double, 3> &point, double maxDistance, long *id, double *distance) const;
@@ -52,6 +57,11 @@ public:
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, double *distances) const;
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, long *ids, double *distances) const;
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interorOnly, long *ids, double *distances) const;
+#if BITPIT_ENABLE_MPI
+    long findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, long *ids, int *ranks, double *distances) const;
+    long findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, int *ranks, double *distances) const;
+    long findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, long *ids, int *ranks, double *distances) const;
+#endif
 
 private:
     mutable std::vector<std::size_t> m_candidateIds;

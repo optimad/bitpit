@@ -216,6 +216,77 @@ void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> 
     findPointClosestCell(nPoints, points, maxDistances, interiorOnly, ids.data(), distances);
 }
 
+#if BITPIT_ENABLE_MPI
+/*!
+* Computes the distance between the specified point, considered distributed
+* on the processes, and the closest cells contained in the tree.
+* Only cells with a distance less than the specified maximum distance will
+* be considered.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells
+*/
+void SurfaceSkdTree::evalPointGlobalDistance(int nPoints, const std::array<double, 3> *points, double *distances) const
+{
+    std::vector<double> maxDistances(nPoints, std::numeric_limits<double>::max());
+
+    evalPointGlobalDistance(nPoints, points, maxDistances.data(), distances);
+}
+
+/*!
+* Computes the distance between the specified point, considered distributed
+* on the processes, and the closest cells contained in the tree.
+* Only cells with a distance less than the specified maximum distance will
+* be considered. If all cells contained in the tree are farther
+* than the maximum distance, the function will return the maximum representable
+* distance.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistance all cells whose distance is greater than
+* this parameters will not be considered for the evaluation of the
+* distance
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+void SurfaceSkdTree::evalPointGlobalDistance(int nPoints, const std::array<double, 3> *points, double maxDistance, double *distances) const
+{
+    std::vector<double> maxDistances(nPoints, maxDistance);
+
+    evalPointGlobalDistance(nPoints, points, maxDistances.data(), distances);
+}
+
+/*!
+* Computes the distance between the specified point, considered distributed
+* on the processes, and the closest cells contained in the tree.
+* Only cells with a distance less than the specified maximum distance will
+* be considered. If all cells contained in the tree are farther
+* than the maximum distance, the function will return the maximum representable
+* distance.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistances are the maximum allowed distances, all cells whose
+* distance is greater than this parameter will not be considered for the
+* evaluation of the distance with respect to the related point
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+void SurfaceSkdTree::evalPointGlobalDistance(int nPoints, const std::array<double, 3> *points, const double *maxDistances, double *distances) const
+{
+    std::vector<long> ids(nPoints, Cell::NULL_ID);
+    std::vector<int> ranks(nPoints, -1);
+
+    findPointClosestGlobalCell(nPoints, points, maxDistances, ids.data(), ranks.data(), distances);
+}
+#endif
+
 /*!
 * Given the specified point find the closest cell contained in the
 * three and evaluates the distance between that cell and the given
@@ -461,5 +532,183 @@ long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 
 
     return nDistanceEvaluations;
 }
+
+#if BITPIT_ENABLE_MPI
+/*!
+* Given the specified points, considered distributed on the processes, find
+* the closest cells contained in the tree and evaluates the distance values
+* between those cells and the given points.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the local points
+* \param[out] ranks on output it will contain the rank indices of the processes
+* owner of the cells closest to the points
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells
+*/
+long SurfaceSkdTree::findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points,
+                                                long *ids, int *ranks, double *distances) const
+{
+    return findPointClosestGlobalCell(nPoints, points, std::numeric_limits<double>::max(), ids, ranks, distances);
+}
+
+/*!
+* Given the specified points, considered distributed on the processes, find the
+* closest cells contained in the tree and evaluates the distance values
+* between those cells and the given points.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistance all cells whose distance is greater than this
+* parameters will not be considered for the evaluation of the distance
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the points. If all cells contained in the tree are farther from a point
+* than the maximum distance, the related id will be set to the null id
+* \param[out] ranks on output it will contain the rank indices of the processes
+* owner of the cells closest to the points
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+long SurfaceSkdTree::findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, double maxDistance,
+                                                long *ids, int *ranks, double *distances) const
+{
+    std::vector<double> maxDistances(nPoints, maxDistance);
+
+    return findPointClosestGlobalCell(nPoints, points, maxDistances.data(), ids, ranks, distances);
+}
+
+/*!
+* Given the specified points, considered distributed on the processes, find the
+* closest cells contained in the tree and evaluates the distance values
+* between those cells and the given points.
+*
+* \param[in] nPoints is the number of the points
+* \param[in] points are the points coordinates
+* \param[in] maxDistances are the maximum allowed distances, all cells whose
+* distance is greater than this parameter will not be considered for the
+* evaluation of the distance with respect to the related point
+* \param[out] ids on output it will contain the ids of the cells closest
+* to the points. If all cells contained in the tree are farther from a point
+* than the maximum distance, the related id will be set to the null id
+* \param[out] ranks on output it will contain the rank indices of the processes
+* owner of the cells closest to the points
+* \param[out] distances on output it will contain the distances
+* between the points and closest cells. If all cells contained in the tree are
+* farther than the maximum distance, the related argument will be set to the
+* maximum representable distance.
+*/
+long SurfaceSkdTree::findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances,
+                                                long *ids, int *ranks, double *distances) const
+{
+    long nDistanceEvaluations = 0;
+
+    // Early return is the patch is not partitioned
+    const PatchKernel &patch = getPatch();
+    if (!patch.isPartitioned()) {
+        for (int i = 0; i < nPoints; ++i) {
+            // Evaluate distance
+            nDistanceEvaluations += findPointClosestCell(points[i], maxDistances[i], ids + i, distances + i);
+
+            // The patch is not partitioned, all cells are local
+            ranks[i] = patch.getRank();
+        }
+
+        return nDistanceEvaluations;
+    }
+
+    // Get MPI communicator
+    if (!isCommunicatorSet()) {
+        throw std::runtime_error("Skd-tree communicator has not been set.");
+    }
+
+    MPI_Comm communicator = getCommunicator();
+
+    // Gather the number of points associated to each process
+    std::vector<int> pointsCount(m_nProcessors);
+    MPI_Allgather(&nPoints, 1, MPI_INT, pointsCount.data(), 1, MPI_INT, communicator);
+
+    // Evaluate information for data communications
+    std::vector<int> globalPointsDispls(m_nProcessors, 0);
+    std::vector<int> globalPointsOffsets(m_nProcessors, 0);
+    std::vector<int> globalPointsDataCount(m_nProcessors, 0);
+
+    globalPointsDataCount[0] = 3 * pointsCount[0];
+    for (int i = 1; i < m_nProcessors; ++i) {
+        globalPointsDispls[i]     = globalPointsDispls[i - 1] + 3 * pointsCount[i - 1];
+        globalPointsOffsets[i]    = globalPointsOffsets[i - 1] + pointsCount[i - 1];
+        globalPointsDataCount[i]  = 3 * pointsCount[i];
+    }
+
+    int nGlobalPoints = globalPointsDispls.back() + pointsCount.back();
+
+    // Gather point coordinates
+    std::vector<std::array<double,3>> globalPoints(nGlobalPoints);
+    int pointsDataCount = 3 * nPoints;
+    MPI_Allgatherv(points, pointsDataCount, MPI_DOUBLE, globalPoints.data(),
+                globalPointsDataCount.data(), globalPointsDispls.data(), MPI_DOUBLE, communicator);
+
+    // Gather vector with all maximum distances
+    std::vector<double> globalMaxDistances(nGlobalPoints);
+    MPI_Allgatherv(maxDistances, nPoints, MPI_DOUBLE, globalMaxDistances.data(),
+                    pointsCount.data(), globalPointsOffsets.data(), MPI_DOUBLE, communicator);
+
+    // Initialize distance information
+    std::vector<SkdGlobalCellDistance> globalCellDistances(nGlobalPoints);
+
+    // Call local find point closest cell for each global point collected
+    for (int i = 0; i < nGlobalPoints; ++i) {
+        // Get point information
+        const std::array<double, 3> &point = globalPoints[i];
+
+        // Use a maximum distance for each point given by an estimation
+        // based on partition bounding boxes. The distance will be lesser
+        // than or equal to the point maximum distance.
+        double pointMaxDistance = globalMaxDistances[i];
+        for (int rank = 0; rank < m_nProcessors; ++rank) {
+            pointMaxDistance = std::min(getPartitionBox(rank).evalPointMaxDistance(point), pointMaxDistance);
+        }
+
+        // Get cell distance information
+        SkdGlobalCellDistance &globalCellDistance = globalCellDistances[i];
+        int &cellRank = globalCellDistance.getRank();
+        long &cellId = globalCellDistance.getId();
+        double &cellDistance = globalCellDistance.getDistance();
+
+        // Evaluate local distance from the point
+        bool interiorOnly = true;
+        nDistanceEvaluations += findPointClosestCell(point, pointMaxDistance, interiorOnly, &cellId, &cellDistance);
+
+        // Set cell rank
+        if (cellId != Cell::NULL_ID) {
+            cellRank = patch.getCellRank(cellId);
+        }
+    }
+
+    // Exchange distance information
+    MPI_Datatype globalCellDistanceDatatype = SkdGlobalCellDistance::getMPIDatatype();
+    MPI_Op globalCellDistanceMinOp = SkdGlobalCellDistance::getMPIMinOperation();
+    for (int rank = 0; rank < m_nProcessors; ++rank) {
+        SkdGlobalCellDistance *globalCellDistance = globalCellDistances.data() + globalPointsOffsets[rank];
+        if (m_rank == rank) {
+            MPI_Reduce(MPI_IN_PLACE, globalCellDistance, pointsCount[rank], globalCellDistanceDatatype, globalCellDistanceMinOp, rank, communicator);
+        } else {
+            MPI_Reduce(globalCellDistance, globalCellDistance, pointsCount[rank], globalCellDistanceDatatype, globalCellDistanceMinOp, rank, communicator);
+        }
+    }
+
+    // Update output arguments
+    for (int i = 0; i < nPoints; ++i) {
+        int globalIndex = i + globalPointsOffsets[m_rank];
+        SkdGlobalCellDistance &globalCellDistance = globalCellDistances[globalIndex];
+        globalCellDistance.exportData(ranks + i, ids + i, distances + i);
+    }
+
+    return nDistanceEvaluations;
+}
+#endif
 
 }

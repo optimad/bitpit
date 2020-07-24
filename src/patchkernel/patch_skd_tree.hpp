@@ -150,6 +150,34 @@ private:
 
 };
 
+#if BITPIT_ENABLE_MPI
+struct SkdGlobalCellDistance {
+
+public:
+    static MPI_Datatype getMPIDatatype();
+    static MPI_Op getMPIMinOperation();
+    static void executeMPIMinOperation(SkdGlobalCellDistance *in, SkdGlobalCellDistance *inout, int *len, MPI_Datatype *datatype);
+
+    int & getRank();
+    long & getId();
+    double & getDistance();
+
+    void exportData(int *rank, long *id, double *distance) const;
+
+private:
+    static bool m_MPIDatatypeInitialized;
+    static MPI_Datatype m_MPIDatatype;
+
+    static bool m_MPIMinOperationInitialized;
+    static MPI_Op m_MPIMinOperation;
+
+    double m_distance;
+    long m_id;
+    int m_rank;
+
+};
+#endif
+
 class PatchSkdTree {
 
 public:
@@ -170,6 +198,10 @@ public:
 
     std::size_t evalMaxDepth(std::size_t rootId = 0) const;
 
+#if BITPIT_ENABLE_MPI
+    const SkdBox & getPartitionBox(int rank) const;
+#endif
+
 protected:
     SkdPatchInfo m_patchInfo;
     std::vector<std::size_t> m_cellRawIds;
@@ -182,13 +214,31 @@ protected:
 
     bool m_interiorOnly;
 
+#if BITPIT_ENABLE_MPI
+    int m_rank;
+    int m_nProcessors;
+    MPI_Comm m_communicator;
+    std::vector<SkdBox> m_partitionBoxes;
+#endif
+
     PatchSkdTree(const PatchKernel *patch, bool interiorOnly = false);
 
     SkdNode & _getNode(std::size_t nodeId);
 
+#if BITPIT_ENABLE_MPI
+    bool isCommunicatorSet() const;
+    const MPI_Comm & getCommunicator() const;
+    void setCommunicator(MPI_Comm communicator);
+    void freeCommunicator();
+#endif
+
 private:
     void createChildren(std::size_t parentId, std::size_t leaftThreshold);
     void createLeaf(std::size_t nodeId);
+
+#if BITPIT_ENABLE_MPI
+    void buildPartitionBoxes();
+#endif
 
 };
 
