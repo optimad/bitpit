@@ -780,13 +780,13 @@ void SkdNode::updateClosestCellInfo(const std::array<double, 3> &point,
 * Constructor.
 *
 * \param patch is the patch that will be use to build the tree
-* \param includeGhosts if set to true the ghost cells are included in the tree
+* \param interiorOnly if set to true, only interior cells will be considered
 */
-PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool includeGhosts)
+PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool interiorOnly)
     : m_patchInfo(patch, &m_cellRawIds),
-      m_cellRawIds(includeGhosts ? patch->getCellCount() : patch->getInternalCount()),
+      m_cellRawIds(interiorOnly ? patch->getInternalCount() : patch->getCellCount()),
       m_nLeafs(0), m_nMinLeafCells(0), m_nMaxLeafCells(0),
-      m_includeGhosts(includeGhosts)
+      m_interiorOnly(interiorOnly)
 {
 
 }
@@ -844,12 +844,12 @@ void PatchSkdTree::build(std::size_t leafThreshold, bool squeezeStorage)
     // Initialize list of cell raw ids
     std::size_t nCells;
     PatchKernel::CellConstRange cellRange;
-    if (m_includeGhosts) {
-        nCells = patch.getCellCount();
-        cellRange.initialize(patch.cellConstBegin(), patch.cellConstEnd());
-    } else {
+    if (m_interiorOnly) {
         nCells = patch.getInternalCount();
         cellRange.initialize(patch.internalConstBegin(), patch.internalConstEnd());
+    } else {
+        nCells = patch.getCellCount();
+        cellRange.initialize(patch.cellConstBegin(), patch.cellConstEnd());
     }
 
     if (m_cellRawIds.size() != nCells) {

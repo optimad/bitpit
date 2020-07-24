@@ -180,9 +180,9 @@ protected:
 
     std::vector<SkdNode, SkdNode::Allocator> m_nodes;
 
-    bool m_includeGhosts;
+    bool m_interiorOnly;
 
-    PatchSkdTree(const PatchKernel *patch, bool includeGhosts = true);
+    PatchSkdTree(const PatchKernel *patch, bool interiorOnly = false);
 
     SkdNode & _getNode(std::size_t nodeId);
 
