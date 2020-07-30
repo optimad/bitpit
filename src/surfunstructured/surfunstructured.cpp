@@ -366,9 +366,6 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
 
     // Read all the solids in the STL file
     int pid = PIDOffset;
-    if (!PIDSquash) {
-        --pid;
-    }
 
     ElementType facetType = ElementType::TRIANGLE;
     int nFacetVertices = ReferenceElementInfo::getInfo(ElementType::TRIANGLE).nVertices;
@@ -425,10 +422,10 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
 
         // Assign PID name
         if (!PIDSquash) {
-            ++pid;
             if (PIDNames && !name.empty()) {
                 PIDNames->insert({{pid, name}});
             }
+            ++pid;
         }
 
         // Multi-body STL files are supported only in ASCII mode
