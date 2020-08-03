@@ -158,7 +158,7 @@ public:
 
     STLWriter(const std::string &filename, Format format);
 
-    int writeBegin(WriteMode writeMode);
+    int writeBegin(WriteMode writeMode, bool partialWrite = false);
     int writeEnd();
 
     int writeSolid(const std::string &name, std::size_t nV, std::size_t nT,

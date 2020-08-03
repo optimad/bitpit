@@ -1383,9 +1383,11 @@ STLWriter::STLWriter(const std::string &filename, Format format)
     Begin writing the file.
 
     \param writeMode is the write mode that will be used
+    \param partialWrite tells the writer that only part of the facets will
+    be written, this can be used for writing a binary file incrementally
     \result Returns a negative number if an error occured, zero otherwise.
 */
-int STLWriter::writeBegin(WriteMode writeMode)
+int STLWriter::writeBegin(WriteMode writeMode, bool partialWrite)
 {
     if (m_fileHandle.is_open()) {
         return -2;
@@ -1395,11 +1397,13 @@ int STLWriter::writeBegin(WriteMode writeMode)
 
     std::ios_base::openmode openMode;
     if (format == FormatBinary) {
-        if (writeMode != WriteOverwrite) {
+        if (writeMode == WriteOverwrite) {
+            openMode = std::ofstream::out | std::ofstream::binary;
+        } else if (partialWrite && writeMode == WriteAppend) {
+            openMode = std::ofstream::app | std::ofstream::binary;
+        } else {
             throw std::runtime_error("Specified write mode is not supported for binary files.");
         }
-
-        openMode = std::ofstream::out | std::ofstream::binary;
     } else {
         if (writeMode == WriteOverwrite) {
             openMode = std::ofstream::out;
