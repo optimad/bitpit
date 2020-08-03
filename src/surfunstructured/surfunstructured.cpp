@@ -450,14 +450,12 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
  *
  * \param[in] filename name of the stl file
  * \param[in] isBinary flag for binary (true) or ASCII (false) file
- * \param[in] exportInternalsOnly flag for exporting only internal cells (true), or
- * internal and ghost cells (false).
  *
  * \result on output returns an error flag for I/O error.
  */
-int SurfUnstructured::exportSTL(const std::string &filename, bool isBinary, bool exportInternalsOnly)
+int SurfUnstructured::exportSTL(const std::string &filename, bool isBinary)
 {
-    return exportSTLSingle(filename, isBinary, exportInternalsOnly);
+    return exportSTLSingle(filename, isBinary);
 }
 
 /*!
@@ -469,21 +467,18 @@ int SurfUnstructured::exportSTL(const std::string &filename, bool isBinary, bool
  * \param[in] isBinary flag for binary (true) or ASCII (false) file
  * \param[in] isMulti flag to write in ASCII multi-solid mode (true) or not (false).
  * If true, isBinary flag will be ignored.
- * \param[in] exportInternalsOnly flag for exporting only internal cells (true), or
- * internal+ghost cells (false).
  * \param[in,out] PIDNames are the names of the PIDs, if a PIDs has no name
  * its number will be used
  * \result on output returns an error flag for I/O error.
  */
-int SurfUnstructured::exportSTL(const std::string &filename, bool isBinary,
-                                bool isMulti, bool exportInternalsOnly,
+int SurfUnstructured::exportSTL(const std::string &filename, bool isBinary, bool isMulti,
                                 std::unordered_map<int, std::string> *PIDNames)
 {
     int flag = 0;
     if (isMulti) {
-        flag = exportSTLMulti(filename, exportInternalsOnly, PIDNames);
+        flag = exportSTLMulti(filename, PIDNames);
     } else {
-        flag = exportSTLSingle(filename, isBinary, exportInternalsOnly);
+        flag = exportSTLSingle(filename, isBinary);
     }
 
     return flag;
@@ -499,12 +494,9 @@ int SurfUnstructured::exportSTL(const std::string &filename, bool isBinary,
  * 
  * \param[in] filename name of the stl file
  * \param[in] isBinary flag for binary (true) or ASCII (false) file
- * \param[in] exportInternalsOnly flag for exporting only internal cells (true),
- * or internal+ghost cells (false).
- * 
  * \result on output returns an error flag for I/O error.
 */
-int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary, bool exportInternalsOnly)
+int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary)
 {
     int writerError;
 
@@ -520,79 +512,145 @@ int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary
 
     // Solid name
     //
-    // An ampty solid name will be used.
+    // An empty solid name will be used.
     const std::string name = "";
 
-    // Begin writing
-    writerError = writer.writeBegin(STLWriter::WriteOverwrite);
-    if (writerError != 0) {
-        writer.writeEnd();
-
-        return writerError;
+    // Detect if this is the master writer
+    bool isMasterWriter;
+#if BITPIT_ENABLE_MPI==1
+    if (isPartitioned()) {
+        isMasterWriter = (getRank() == 0);
+    } else {
+#else
+    {
+#endif
+        isMasterWriter = true;
     }
 
-    // Write header
-    std::size_t nFacets = getInternalCount();
+    // Detect if the file will be written incrementally
+    bool incrementalWrite;
 #if BITPIT_ENABLE_MPI==1
-    if (!exportInternalsOnly) {
-        nFacets += getGhostCount();
+        incrementalWrite = true;
+#else
+        incrementalWrite = false;
+#endif
+
+    // Count the number of facets
+    long nFacets = getInternalCount();
+#if BITPIT_ENABLE_MPI==1
+    if (isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &nFacets, 1, MPI_LONG, MPI_SUM, getCommunicator());
     }
 #endif
 
-    writerError = writer.writeHeader(name, nFacets);
-    if (writerError != 0) {
-        writer.writeEnd();
-
-        return writerError;
-    }
-
-    // Write facet data
-    CellConstIterator cellBegin;
-    CellConstIterator cellEnd;
-    if (exportInternalsOnly) {
-        cellBegin = internalConstBegin();
-        cellEnd   = internalConstEnd();
-    } else {
-        cellBegin = cellConstBegin();
-        cellEnd   = cellConstEnd();
-    }
-
-    for (CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
-        // Get cell
-        const Cell &cell = *cellItr;
-
-        // Get vertex coordinates
-        ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-        assert(cellVertexIds.size() == 3);
-
-        const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
-        const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
-        const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
-
-        // Evaluate normal
-        const std::array<double, 3> normal = evalFacetNormal(cell.getId());
-
-        // Write data
-        writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+    // Write header
+    if (isMasterWriter) {
+        // Begin writing
+        writerError = writer.writeBegin(STLWriter::WriteOverwrite, incrementalWrite);
         if (writerError != 0) {
             writer.writeEnd();
 
             return writerError;
         }
+
+        // Write header section
+        writerError = writer.writeHeader(name, nFacets);
+        if (writerError != 0) {
+            writer.writeEnd();
+
+            return writerError;
+        }
+
+#if BITPIT_ENABLE_MPI==1
+        // Close the file to let other process write into it
+        writerError = writer.writeEnd();
+        if (writerError != 0) {
+            return writerError;
+        }
+#endif
+    }
+
+    // Write facet data
+#if BITPIT_ENABLE_MPI==1
+    int nRanks = getProcessorCount();
+    for (int i = 0; i < nRanks; ++i) {
+        if (i == getRank()) {
+            // Begin writing
+            writerError = writer.writeBegin(STLWriter::WriteAppend, incrementalWrite);
+            if (writerError != 0) {
+                writer.writeEnd();
+                return writerError;
+            }
+
+#else
+    {
+#endif
+            // Write facet section
+            CellConstIterator cellBegin = internalConstBegin();
+            CellConstIterator cellEnd   = internalConstEnd();
+            for (CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
+                // Get cell
+                const Cell &cell = *cellItr;
+
+                // Get vertex coordinates
+                ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+                assert(cellVertexIds.size() == 3);
+
+                const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
+                const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
+                const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
+
+                // Evaluate normal
+                const std::array<double, 3> normal = evalFacetNormal(cell.getId());
+
+                // Write data
+                writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+                if (writerError != 0) {
+                    writer.writeEnd();
+                    return writerError;
+                }
+            }
+
+#if BITPIT_ENABLE_MPI==1
+            // Close the file to let other process write into it
+            writerError = writer.writeEnd();
+            if (writerError != 0) {
+                return writerError;
+            }
+        }
+
+        if (isPartitioned()) {
+            MPI_Barrier(getCommunicator());
+        }
+#endif
     }
 
     // Write footer
-    writerError = writer.writeFooter(name);
-    if (writerError != 0) {
-        writer.writeEnd();
+    if (isMasterWriter) {
+#if BITPIT_ENABLE_MPI==1
+        // Begin writning
+        //
+        // The file was previously closed to let other process write into it.
+        writerError = writer.writeBegin(STLWriter::WriteAppend, incrementalWrite);
+        if (writerError != 0) {
+            writer.writeEnd();
+            return writerError;
+        }
+#endif
 
-        return writerError;
-    }
+        // Write footer section
+        writerError = writer.writeFooter(name);
+        if (writerError != 0) {
+            writer.writeEnd();
 
-    // End writing
-    writerError = writer.writeEnd();
-    if (writerError != 0) {
-        return writerError;
+            return writerError;
+        }
+
+        // End writing
+        writerError = writer.writeEnd();
+        if (writerError != 0) {
+            return writerError;
+        }
     }
 
     return 0;
@@ -604,36 +662,82 @@ int SurfUnstructured::exportSTLSingle(const std::string &filename, bool isBinary
  * ill-formed stl triangulation. If available, ghost cells will be written in a stand-alone solid.
  *
  * \param[in] filename name of the stl file
- * \param[in] exportInternalsOnly OPTIONAL flag for exporting only internal cells (true),
- * or internal+ghost cells (false). Default is true.
-  * \param[in,out] PIDNames are the names of the PIDs, if a PIDs has no name
-  * its number will be used
+ * \param[in,out] PIDNames are the names of the PIDs, if a PIDs has no name
+ * its number will be used
  * \result on output returns an error flag for I/O error 0-done, >0 errors.
  */
-int SurfUnstructured::exportSTLMulti(const std::string &filename, bool exportInternalsOnly,
-                                     std::unordered_map<int, std::string> *PIDNames)
+int SurfUnstructured::exportSTLMulti(const std::string &filename, std::unordered_map<int, std::string> *PIDNames)
 {
-#if not BITPIT_ENABLE_MPI==1
-    BITPIT_UNUSED(exportInternalsOnly);
-#endif
-
     int writerError;
 
     // Initialize writer
     STLWriter writer(filename, STLReader::FormatASCII);
 
-    // Begin writing
-    writerError = writer.writeBegin(STLWriter::WriteOverwrite);
-    if (writerError != 0) {
-        return writerError;
+    // Detect if this is the master writer
+    bool isMasterWriter;
+#if BITPIT_ENABLE_MPI==1
+    if (isPartitioned()) {
+        isMasterWriter = (getRank() == 0);
+    } else {
+#else
+    {
+#endif
+        isMasterWriter = true;
     }
 
-    // Export the internal cells
-    for (int pid : getInternalPIDs()) {
-        // Cells associated to the PID
+    // Detect if the file will be written incrementally
+    bool incrementalWrite = true;
+
+#if BITPIT_ENABLE_MPI==1
+    // Count number of ranks
+    int nRanks = getProcessorCount();
+#endif
+
+    // Get the global list of PID
+    std::set<int> cellPIDs;
+#if BITPIT_ENABLE_MPI==1
+    if (isPartitioned()) {
+        std::set<int> internalPIDs = getInternalPIDs();
+        std::vector<int> localPIDs(internalPIDs.begin(), internalPIDs.end());
+        int nLocalPids = localPIDs.size();
+
+        std::vector<int> gatherPIDCount(nRanks);
+        MPI_Allgather(&nLocalPids, 1, MPI_INT, gatherPIDCount.data(), 1, MPI_INT, getCommunicator());
+
+        std::vector<int> gatherPIDDispls(nRanks, 0);
+        for (int i = 1; i < nRanks; ++i) {
+            gatherPIDDispls[i] = gatherPIDDispls[i - 1] + gatherPIDCount[i - 1];
+        }
+
+        int gatherPIDsSize = gatherPIDDispls.back() + gatherPIDCount.back();
+
+        std::vector<int> globalPIDs(gatherPIDsSize);
+        MPI_Allgatherv(localPIDs.data(), nLocalPids, MPI_INT, globalPIDs.data(),
+                       gatherPIDCount.data(), gatherPIDDispls.data(), MPI_INT, getCommunicator());
+
+        cellPIDs = std::set<int>(globalPIDs.begin(), globalPIDs.end());
+    } else {
+#else
+    {
+#endif
+        cellPIDs = getInternalPIDs();
+    }
+
+    // Export cells
+    bool firstPID = true;
+    for (int pid : cellPIDs) {
+        // Cells associated with the PID
         std::vector<long> cells = getInternalsByPID(pid);
 
-        // Write header
+        // Count the number of facets
+        long nFacets = cells.size();
+#if BITPIT_ENABLE_MPI==1
+        if (isPartitioned()) {
+            MPI_Allreduce(MPI_IN_PLACE, &nFacets, 1, MPI_LONG, MPI_SUM, getCommunicator());
+        }
+#endif
+
+        // Solid name
         std::string name;
         if (PIDNames && PIDNames->count(pid) > 0) {
             name = PIDNames->at(pid);
@@ -641,106 +745,122 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, bool exportInt
             name = std::to_string(pid);
         }
 
-        std::size_t nFacets = cells.size();
+        // Write header
+        if (isMasterWriter) {
+            // Begin writing
+            STLWriter::WriteMode writeMode;
+            if (firstPID) {
+                writeMode = STLWriter::WriteOverwrite;
+            } else {
+                writeMode = STLWriter::WriteAppend;
+            }
 
-        writerError = writer.writeHeader(name, nFacets);
-        if (writerError != 0) {
-            writer.writeEnd();
-
-            return writerError;
-        }
-
-        // Write facet data
-        for (long cellId : cells) {
-            // Get cell
-            const Cell &cell = getCell(cellId);
-
-            // Get vertex coordinates
-            ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-            assert(cellVertexIds.size() == 3);
-
-            const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
-            const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
-            const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
-
-            // Evaluate normal
-            const std::array<double, 3> normal = evalFacetNormal(cellId);
-
-            // Write data
-            writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+            writerError = writer.writeBegin(writeMode, incrementalWrite);
             if (writerError != 0) {
                 writer.writeEnd();
 
                 return writerError;
             }
-        }
 
-        // Write footer
-        writerError = writer.writeFooter(name);
-        if (writerError != 0) {
-            writer.writeEnd();
+            // Write header section
+            writerError = writer.writeHeader(name, nFacets);
+            if (writerError != 0) {
+                writer.writeEnd();
 
-            return writerError;
-        }
-    }
+                return writerError;
+            }
 
 #if BITPIT_ENABLE_MPI==1
-    // Export ghost cells
-    long nGhosts = getGhostCount();
-    if (!exportInternalsOnly && nGhosts > 0) {
-        // Write header
-        std::string name = "ghosts";
-
-        std::size_t nFacets = nGhosts;
-
-        writerError = writer.writeHeader(name, nFacets);
-        if (writerError != 0) {
-            writer.writeEnd();
-
-            return writerError;
+            // Close the file to let other process write into it
+            writerError = writer.writeEnd();
+            if (writerError != 0) {
+                return writerError;
+            }
+#endif
         }
 
         // Write facet data
-        CellConstIterator cellBegin = internalConstBegin();
-        CellConstIterator cellEnd   = internalConstEnd();
-        for (CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
-            // Get cell
-            const Cell &cell = *cellItr;
+#if BITPIT_ENABLE_MPI==1
+        for (int i = 0; i < nRanks; ++i) {
+            if (i == getRank()) {
+                // Begin writing
+                writerError = writer.writeBegin(STLWriter::WriteAppend, incrementalWrite);
+                if (writerError != 0) {
+                    writer.writeEnd();
+                    return writerError;
+                }
 
-            // Get vertex coordinates
-            ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-            assert(cellVertexIds.size() == 3);
+#else
+        {
+#endif
+                // Write facet section
+                for (long cellId : cells) {
+                    // Get cell
+                    const Cell &cell = getCell(cellId);
 
-            const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
-            const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
-            const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
+                    // Get vertex coordinates
+                    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+                    assert(cellVertexIds.size() == 3);
 
-            // Evaluate normal
-            const std::array<double, 3> normal = evalFacetNormal(cell.getId());
+                    const std::array<double, 3> &coords_0 = getVertex(cellVertexIds[0]).getCoords();
+                    const std::array<double, 3> &coords_1 = getVertex(cellVertexIds[1]).getCoords();
+                    const std::array<double, 3> &coords_2 = getVertex(cellVertexIds[2]).getCoords();
 
-            // Write data
-            writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+                    // Evaluate normal
+                    const std::array<double, 3> normal = evalFacetNormal(cell.getId());
+
+                    // Write data
+                    writerError = writer.writeFacet(coords_0, coords_1, coords_2, normal);
+                    if (writerError != 0) {
+                        writer.writeEnd();
+                        return writerError;
+                    }
+                }
+
+    #if BITPIT_ENABLE_MPI==1
+                // Close the file to let other process write into it
+                writerError = writer.writeEnd();
+                if (writerError != 0) {
+                    return writerError;
+                }
+            }
+
+            if (isPartitioned()) {
+                MPI_Barrier(getCommunicator());
+            }
+#endif
+        }
+
+        // Write footer
+        if (isMasterWriter) {
+#if BITPIT_ENABLE_MPI==1
+            // Begin writing
+            //
+            // The file was previously closed to let other process write into it.
+            writerError = writer.writeBegin(STLWriter::WriteAppend, incrementalWrite);
+            if (writerError != 0) {
+                writer.writeEnd();
+                return writerError;
+            }
+#endif
+
+            // Write footer section
+            writerError = writer.writeFooter(name);
             if (writerError != 0) {
                 writer.writeEnd();
 
                 return writerError;
             }
+
+            // End writing
+            writerError = writer.writeEnd();
+            if (writerError != 0) {
+                return writerError;
+            }
         }
 
-        // Write footer
-        writerError = writer.writeFooter(name);
-        if (writerError != 0) {
-            writer.writeEnd();
-
-            return writerError;
-        }
-    }
-#endif
-
-    // End writing
-    writerError = writer.writeEnd();
-    if (writerError != 0) {
-        return writerError;
+        // The first PID has been written
+        firstPID = false;
     }
 
     return 0;

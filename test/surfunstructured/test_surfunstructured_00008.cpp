@@ -86,7 +86,7 @@ int subtest_001(
 
     bool isBinary = false;
     bool isMulti = true;
-    mesh->exportSTL("multiPIDSquare.stl", isBinary, isMulti, false);
+    mesh->exportSTL("multiPIDSquare.stl", isBinary, isMulti);
 
     return 0;
 }
