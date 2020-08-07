@@ -1016,7 +1016,8 @@ void DiscreteStencil<weight_t>::optimize(double tolerance)
     for (int i = 0; i < nBuckets; ++i) {
         std::size_t nBucketItems = size(i);
         for (std::size_t j = 0; j < nBucketItems; ++j) {
-            if (isWeightNeglibile(i, j, tolerance)) {
+            bool isWeightNeglibile = optimizeWeight(i, j, tolerance);
+            if (isWeightNeglibile) {
                 m_pattern.eraseItem(i, j);
                 m_weights.eraseItem(i, j);
                 --j;
@@ -1077,31 +1078,17 @@ void DiscreteStencil<weight_t>::zero()
     setConstant(m_zero);
 }
 /*!
-* Check if the specified weight is neglibile accordingly the specified tolerance.
+* Optimize the specified weight.
 *
 * \param bucket is the bucket of the weight to check
 * \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
+* \result Returns true if the whole weight is neglibile
 */
 template<typename weight_t>
-template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
-bool DiscreteStencil<weight_t>::isWeightNeglibile(int bucket, std::size_t pos, double tolerance)
+bool DiscreteStencil<weight_t>::optimizeWeight(int bucket, std::size_t pos, double tolerance)
 {
-    return (std::abs(m_weights.getItem(bucket, pos)) <= tolerance);
-}
-
-/*!
-* Check if the specified weight is neglibile accordingly the specified tolerance.
-*
-* \param bucket is the bucket of the weight to check
-* \param pos is the position of the weight to check
-* \param tolerance is the tolerance that will be used for the check
-*/
-template<typename weight_t>
-template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
-bool DiscreteStencil<weight_t>::isWeightNeglibile(int bucket, std::size_t pos, double tolerance)
-{
-    return (norm2(m_weights.getItem(bucket, pos)) <= tolerance);
+    return (std::abs(m_weights.getItem(bucket, pos) - m_zero) <= tolerance);
 }
 
 /*!

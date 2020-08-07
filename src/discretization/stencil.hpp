@@ -183,11 +183,7 @@ private:
     weight_t * findWeight(int bucket, long id);
     const weight_t * findWeight(int bucket, long id) const;
 
-    template<typename U = weight_t, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
-    bool isWeightNeglibile(int bucket, std::size_t pos, double tolerance = 1.e-12);
-
-    template<typename U = weight_t, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
-    bool isWeightNeglibile(int bucket, std::size_t pos, double tolerance = 1.e-12);
+    bool optimizeWeight(int bucket, std::size_t pos, double tolerance = 1.e-12);
 
 };
 
@@ -197,6 +193,12 @@ void DiscreteStencil<std::array<double, 3>>::rawCopyValue(const std::array<doubl
 
 template<>
 void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double> &source, std::vector<double> *target);
+
+template<>
+bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(int bucket, std::size_t pos, double tolerance);
+
+template<>
+bool DiscreteStencil<std::vector<double>>::optimizeWeight(int bucket, std::size_t pos, double tolerance);
 
 }
 

@@ -65,6 +65,60 @@ void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double
     }
 }
 
+/*!
+* Optimize the specified weight.
+*
+* \param bucket is the bucket of the weight to check
+* \param pos is the position of the weight to check
+* \param tolerance is the tolerance that will be used for the check
+* \result Returns true if the whole weight is neglibile
+*/
+template<>
+bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(int bucket, std::size_t pos, double tolerance)
+{
+    std::array<double, 3> &weight = m_weights.getItem(bucket, pos);
+    int nItems = weight.size();
+
+    int nNegligibleItems = 0;
+    for (int k = 0; k < nItems; ++k) {
+        if (std::abs(weight[k] - m_zero[k]) > tolerance) {
+            continue;
+        }
+
+        weight[k] = m_zero[k];
+        ++nNegligibleItems;
+    }
+
+    return (nNegligibleItems == nItems);
+}
+
+/*!
+* Optimize the specified weight.
+*
+* \param bucket is the bucket of the weight to check
+* \param pos is the position of the weight to check
+* \param tolerance is the tolerance that will be used for the check
+* \result Returns true if the whole weight is neglibile
+*/
+template<>
+bool DiscreteStencil<std::vector<double>>::optimizeWeight(int bucket, std::size_t pos, double tolerance)
+{
+    std::vector<double> &weight = m_weights.getItem(bucket, pos);
+    int nItems = weight.size();
+
+    int nNegligibleItems = 0;
+    for (int k = 0; k < nItems; ++k) {
+        if (std::abs(weight[k] - m_zero[k]) > tolerance) {
+            continue;
+        }
+
+        weight[k] = m_zero[k];
+        ++nNegligibleItems;
+    }
+
+    return (nNegligibleItems == nItems);
+}
+
 }
 
 /*!
