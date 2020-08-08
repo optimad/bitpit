@@ -168,7 +168,7 @@ void PatchKernel::setHaloSize(std::size_t haloSize)
 	_setHaloSize(haloSize);
 
 	if (isPartitioned()) {
-		updateGhostExchangeInfo();
+		updatePartitioningInfo(true);
 	}
 }
 
@@ -3394,6 +3394,8 @@ void PatchKernel::setGhostVertexOwner(int id, int rank)
 	} else {
 		m_ghostVertexOwners.insert({id, rank});
 	}
+
+	setPartitioningInfoDirty(true);
 }
 
 /*!
@@ -3409,6 +3411,8 @@ void PatchKernel::unsetGhostVertexOwner(int id)
 	}
 
 	m_ghostVertexOwners.erase(ghostVertexOwnerItr);
+
+	setPartitioningInfoDirty(true);
 }
 
 /*!
@@ -3419,6 +3423,8 @@ void PatchKernel::unsetGhostVertexOwner(int id)
 void PatchKernel::clearGhostVertexOwners()
 {
 	m_ghostVertexOwners.clear();
+
+	setPartitioningInfoDirty(true);
 }
 
 /*!
@@ -3435,6 +3441,8 @@ void PatchKernel::setGhostCellOwner(int id, int rank)
 	} else {
 		m_ghostCellOwners.insert({id, rank});
 	}
+
+	setPartitioningInfoDirty(true);
 }
 
 /*!
@@ -3450,6 +3458,8 @@ void PatchKernel::unsetGhostCellOwner(int id)
 	}
 
 	m_ghostCellOwners.erase(ghostCellOwnerItr);
+
+	setPartitioningInfoDirty(true);
 }
 
 /*!
@@ -3460,18 +3470,68 @@ void PatchKernel::unsetGhostCellOwner(int id)
 void PatchKernel::clearGhostCellOwners()
 {
 	m_ghostCellOwners.clear();
+
+	setPartitioningInfoDirty(true);
+}
+
+/*!
+	Checks if the partitioning information are dirty.
+
+	\param global if set to true, the adaption status will be evaluated
+	globally across all the partitions
+	\result Returns true if the partitioning information are dirty, false
+	otherwise.
+*/
+bool PatchKernel::arePartitioningInfoDirty(bool global) const
+{
+	if (!isPartitioned()) {
+		return false;
+	}
+
+	bool partitioningInfoDirty = m_partitioningInfoDirty;
+	if (global) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(MPI_IN_PLACE, &partitioningInfoDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+	}
+
+	return partitioningInfoDirty;
+}
+
+/*!
+	Sets if the partitioning information are dirty.
+
+	\param dirty controls if the partitioning information will be set as dirty
+*/
+void PatchKernel::setPartitioningInfoDirty(bool dirty)
+{
+	if (dirty && !isPartitioned()) {
+		return;
+	}
+
+	m_partitioningInfoDirty = dirty;
 }
 
 /*!
 	Update the information needed for ghost data exchange.
+
+	\param forcedUpdated if set to true, ghost exchange information will be
+	updated also if they are not marked as dirty
 */
-void PatchKernel::updateGhostExchangeInfo()
+void PatchKernel::updatePartitioningInfo(bool forcedUpdated)
 {
+	// Check if ghost information are dirty
+	if (!forcedUpdated && !arePartitioningInfoDirty()) {
+		return;
+	}
+
 	// Cell exchange data
 	updateGhostCellExchangeInfo();
 
 	// Vertex exchange data
 	updateGhostVertexExchangeInfo();
+
+	// Partitioning information are now up-to-date
+	setPartitioningInfoDirty(false);
 }
 
 /*!
