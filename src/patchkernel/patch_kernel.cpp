@@ -5288,6 +5288,9 @@ void PatchKernel::setBoundingBoxDirty(bool dirty)
 
 /*!
 	Updates the stored patch bounding box.
+
+	\param forcedUpdated if set to true, bounding box information will be
+	updated also if they are not marked as dirty
 */
 void PatchKernel::updateBoundingBox(bool forcedUpdated)
 {
