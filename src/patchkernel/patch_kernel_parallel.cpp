@@ -1642,7 +1642,8 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 /*!
 	Prepares the patch for performing the partitioning.
 
-	Default implementation is a no-op function.
+	Default implementation is a no-op function and can only be used to
+	partition an empty patch.
 
 	\param cellWeights are the weights of the cells, the weight represents the
 	relative computational cost associated to a specified cell. If no weight
@@ -1660,6 +1661,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 	BITPIT_UNUSED(cellWeights);
 	BITPIT_UNUSED(defaultWeight);
 	BITPIT_UNUSED(trackPartitioning);
+
+	if (m_nInternalCells > 0) {
+		throw std::runtime_error ("For this patch automatic partitioning can be used only to initialize partitioning on an empty patch.");
+	}
 
 	return std::vector<adaption::Info>();
 }
