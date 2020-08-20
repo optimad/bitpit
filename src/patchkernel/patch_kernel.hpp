@@ -619,7 +619,7 @@ public:
 	VTKUnstructuredGrid & getVTK();
 	WriteTarget getVTKWriteTarget() const;
 	void setVTKWriteTarget(WriteTarget targetCells);
-	const PatchKernel::CellConstRange getVTKCellWriteRange() const;
+	const CellConstRange getVTKCellWriteRange() const;
 	void write(VTKWriteMode mode = VTKWriteMode::DEFAULT);
 	void write(const std::string &name, VTKWriteMode mode = VTKWriteMode::DEFAULT);
 
