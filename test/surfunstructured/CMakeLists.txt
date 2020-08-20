@@ -47,6 +47,7 @@ if (ENABLE_MPI)
 	list(APPEND TESTS "test_surfunstructured_parallel_00005:3")
 	list(APPEND TESTS "test_surfunstructured_parallel_00006:2")
 	list(APPEND TESTS "test_surfunstructured_parallel_00007:4")
+	list(APPEND TESTS "test_surfunstructured_parallel_00008:3")
 endif ()
 
 # Test extra libraries
