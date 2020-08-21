@@ -213,5 +213,7 @@ int main(int argc, char *argv[])
 #if BITPIT_ENABLE_MPI==1
     MPI_Finalize();
 #endif
+
+    return status;
 }
 
