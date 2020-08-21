@@ -1003,7 +1003,8 @@ bool PatchKernel::isAdaptionSupported() const
 /*!
 	Returns the current adaption status.
 
-	\param global if set to true the adaption status will be
+	\param global if set to true, the adaption status will be evaluated
+	globally across all the partitions
 	\return The current adaption status.
 */
 PatchKernel::AdaptionStatus PatchKernel::getAdaptionStatus(bool global) const
@@ -1035,6 +1036,8 @@ void PatchKernel::setAdaptionStatus(AdaptionStatus status)
 /*!
 	Returns true if the the patch needs to update its data strucutres.
 
+	\param global if set to true, the dirty status will be evaluated globally
+	across all the partitions
 	\return This method returns true to indicate the patch needs to update
 	its data strucutres. Otherwise, it returns false.
 */
@@ -5328,6 +5331,8 @@ void PatchKernel::setBoundingBoxFrozen(bool frozen)
 /*!
 	Checks if the bounding box is dirty.
 
+	\param global if set to true, the dirty status will be evaluated globally
+	across all the partitions
 	\result Returns true if the bounding box is dirty, false otherwise.
 */
 bool PatchKernel::isBoundingBoxDirty(bool global) const
