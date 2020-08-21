@@ -828,6 +828,9 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 	// Set owner
 	setGhostCellOwner(id, rank);
 
+	// Set the alteration flags of the cell
+	setAddedCellAlterationFlags(id);
+
 	return iterator;
 }
 
@@ -887,12 +890,16 @@ void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType ty
 								std::unique_ptr<long[]> &&connectStorage, int rank)
 {
 	// Restore cell
+	long cellId = iterator.getId();
 	Cell &cell = *iterator;
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, true);
 	m_nGhostCells++;
 
 	// Set owner
-	setGhostCellOwner(cell.getId(), rank);
+	setGhostCellOwner(cellId, rank);
+
+	// Set the alteration flags of the cell
+	setRestoredCellAlterationFlags(cellId);
 }
 
 /*!
@@ -905,6 +912,9 @@ void PatchKernel::_deleteGhostCell(long id, bool delayed)
 {
 	// Unset ghost owner
 	unsetGhostCellOwner(id);
+
+	// Set the alteration flags of the cell
+	setDeletedCellAlterationFlags(id);
 
 	// Delete cell
 	m_cells.erase(id, delayed);
@@ -3048,6 +3058,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     cellsUpdateInterfacesOverall.emplace_back(cellId);
                 }
             }
+
+            // The interfaces of the cell need to be updated
+            setCellAlterationFlags(cellId, getCellAlterationFlags(cellId) | FLAG_INTERFACES_DIRTY);
 
             // Add the cell to the cell map
             if (cellOriginalId != cellId) {

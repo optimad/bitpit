@@ -115,6 +115,8 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_vertices(other.m_vertices),
       m_cells(other.m_cells),
       m_interfaces(other.m_interfaces),
+      m_alteredCells(other.m_alteredCells),
+      m_alteredInterfaces(other.m_alteredInterfaces),
       m_vertexIdGenerator(other.m_vertexIdGenerator),
       m_interfaceIdGenerator(other.m_interfaceIdGenerator),
       m_cellIdGenerator(other.m_cellIdGenerator),
@@ -633,6 +635,10 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 	}
 #endif
 
+	// Clear alteration flags
+	m_alteredCells.clear();
+	m_alteredInterfaces.clear();
+
 	// Synchronize storage
 	m_cells.sync();
 	m_interfaces.sync();
@@ -770,6 +776,8 @@ void PatchKernel::resetCells()
 		interface.unsetNeigh();
 		interface.unsetOwner();
 	}
+
+	m_alteredCells.clear();
 }
 
 /*!
@@ -790,6 +798,12 @@ void PatchKernel::resetInterfaces()
 	for (auto &cell : m_cells) {
 		cell.resetInterfaces();
 	}
+
+	// Clear list of cells with dirty adjacencies
+	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+
+	// Clear list of altered interfaces
+	m_alteredInterfaces.clear();
 
 	// Set interface build strategy
 	setInterfacesBuildStrategy(INTERFACES_NONE);
@@ -1031,6 +1045,14 @@ bool PatchKernel::isDirty(bool global) const
 #endif
 
 	bool isDirty = false;
+
+	if (!isDirty) {
+		isDirty |= !m_alteredCells.empty();
+	}
+
+	if (!isDirty) {
+		isDirty |= !m_alteredInterfaces.empty();
+	}
 
 	if (!isDirty) {
 		isDirty |= (getSpawnStatus() == SPAWN_NEEDED);
@@ -2315,12 +2337,28 @@ PatchKernel::CellIterator PatchKernel::_addInternalCell(ElementType type, std::u
 		m_lastInternalCellId = id;
 	}
 
+	// Set the alteration flags of the cell
+	setAddedCellAlterationFlags(id);
+
 #if BITPIT_ENABLE_MPI==1
 	// Set partitioning information as dirty
 	setPartitioningInfoDirty(true);
 #endif
 
 	return iterator;
+}
+
+/*!
+	Set the alteration flags for an added cell.
+
+	Only alteration flags needed for tracking the status of the patch are
+	added (for example, there is no explicit flag to tag newly added cells).
+
+	\param id is the id of the cell
+*/
+void PatchKernel::setAddedCellAlterationFlags(long id)
+{
+	setCellAlterationFlags(id, FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
 }
 
 #if BITPIT_ENABLE_MPI==0
@@ -2371,9 +2409,23 @@ void PatchKernel::_restoreInternalCell(const CellIterator &iterator, ElementType
 {
 	// There is not need to set the id of the cell as assigned, because
 	// also the index generator will be restored.
+	long cellId = iterator.getId();
 	Cell &cell = *iterator;
-	cell.initialize(iterator.getId(), type, std::move(connectStorage), true, true);
+	cell.initialize(cellId, type, std::move(connectStorage), true, true);
 	m_nInternalCells++;
+
+	// Set the alteration flags of the cell
+	setRestoredCellAlterationFlags(cellId);
+}
+
+/*!
+	Set the alteration flags for a restored cell.
+
+	\param id is the id of the cell
+*/
+void PatchKernel::setRestoredCellAlterationFlags(long id)
+{
+	setCellAlterationFlags(id, FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
 }
 
 /*!
@@ -2511,10 +2563,49 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 */
 void PatchKernel::_deleteInternalCell(long id, bool delayed)
 {
+	// Set the alteration flags of the cell
+	setDeletedCellAlterationFlags(id);
+
+	// Delete cell
 	m_cells.erase(id, delayed);
 	m_nInternalCells--;
 	if (id == m_lastInternalCellId) {
 		updateLastInternalCellId();
+	}
+}
+
+/*!
+	Set the alteration flags for a deleted cell.
+
+	Only alteration flags needed for tracking the status of the patch are set.
+
+	\param id is the id of the cell
+*/
+void PatchKernel::setDeletedCellAlterationFlags(long id)
+{
+	const Cell &cell = getCell(id);
+
+	// Set the alteration flags of the cell
+	resetCellAlterationFlags(id, FLAG_DELETED);
+
+	// Set the alteration flags of the adjacencies
+	const int nCellAdjacencies = cell.getAdjacencyCount();
+	const long *cellAdjacencies = cell.getAdjacencies();
+	for (int k = 0; k < nCellAdjacencies; ++k) {
+		long adjacencyId = cellAdjacencies[k];
+		if (!testCellAlterationFlags(adjacencyId, FLAG_DELETED)) {
+			setCellAlterationFlags(adjacencyId, FLAG_DANGLING | FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
+		}
+	}
+
+	// Set the alteration flags of the interfaces
+	const int nCellInterfaces = cell.getInterfaceCount();
+	const long *cellInterfaces = cell.getInterfaces();
+	for (int k = 0; k < nCellInterfaces; ++k) {
+		long interfaceId = cellInterfaces[k];
+		if (!testInterfaceAlterationFlags(interfaceId, FLAG_DELETED)) {
+			setInterfaceAlterationFlags(interfaceId, FLAG_DANGLING);
+		}
 	}
 }
 
@@ -3601,7 +3692,23 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.emreclaim(id, id, type, std::move(connectStorage));
 
+	// Set the alteration flags
+	setAddedInterfaceAlterationFlags(id);
+
 	return iterator;
+}
+
+/*!
+	Set the alteration flags for an added interface.
+
+	Only alteration flags needed for tracking the status of the patch are set
+	(for example, there is no explicit flag to tag newly added interfaces).
+
+	\param id is the id of the interface
+*/
+void PatchKernel::setAddedInterfaceAlterationFlags(long id)
+{
+	BITPIT_UNUSED(id);
 }
 
 /*!
@@ -3638,8 +3745,20 @@ PatchKernel::InterfaceIterator PatchKernel::restoreInterface(ElementType type,
 	Interface &interface = *iterator;
 	interface.initialize(id, type, std::move(connectStorage));
 
+	// Set the alteration flags
+	setRestoredInterfaceAlterationFlags(id);
 
 	return iterator;
+}
+
+/*!
+	Set the alteration flags for a restored interface.
+
+	\param id is the id of the interface
+*/
+void PatchKernel::setRestoredInterfaceAlterationFlags(long id)
+{
+	BITPIT_UNUSED(id);
 }
 
 /*!
@@ -3655,6 +3774,9 @@ bool PatchKernel::deleteInterface(long id, bool updateNeighs, bool delayed)
 	if (!isExpert()) {
 		return false;
 	}
+
+	// Set the alteration flags
+	setDeletedInterfaceAlterationFlags(id);
 
 	// Update neighbours
 	if (updateNeighs) {
@@ -3746,6 +3868,18 @@ bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeig
 	}
 
 	return true;
+}
+
+/*!
+	Set the alteration flags for a deleted interface.
+
+	Only alteration flags needed for tracking the status of the patch are set.
+
+	\param id is the id of the interface
+*/
+void PatchKernel::setDeletedInterfaceAlterationFlags(long id)
+{
+	resetInterfaceAlterationFlags(id, FLAG_DELETED);
 }
 
 /*!
@@ -5218,6 +5352,292 @@ int PatchKernel::findAdjoinNeighFace(long cellId, long neighId) const
 	}
 
 	return -1;
+}
+
+/*!
+	Test the specified alteration flags for the given cell.
+
+	\param id is the id of the cell
+	\param flags are the flags that will be tested
+	\result Return true if the flags are set, false otherwise.
+*/
+bool PatchKernel::testCellAlterationFlags(long id, AlterationFlags flags) const
+{
+	return testElementAlterationFlags(id, flags, m_alteredCells);
+}
+
+/*!
+	Get the alteration flags of the specified cell.
+
+	\param id is the id of the cell
+	\result The alteration flags of the cell.
+*/
+PatchKernel::AlterationFlags PatchKernel::getCellAlterationFlags(long id) const
+{
+	return getElementAlterationFlags(id, m_alteredCells);
+}
+
+/*!
+	Reset the alteration flags of the given cell.
+
+	\param id is the id of the cell
+	\param flags are the flags that will be set
+*/
+void PatchKernel::resetCellAlterationFlags(long id, AlterationFlags flags)
+{
+	resetElementAlterationFlags(id, flags, &m_alteredCells);
+}
+
+/*!
+	Set the specified alteration flags for all the cells.
+
+	\param flags are the flags that will be set
+*/
+void PatchKernel::setCellAlterationFlags(AlterationFlags flags)
+{
+	for (CellIterator itr = cellBegin(); itr != cellEnd(); ++itr) {
+		setCellAlterationFlags(itr.getId(), flags);
+	}
+}
+
+/*!
+	Set the specified alteration flags for the given cell.
+
+	\param id is the id of the cell
+	\param flags are the flags that will be set
+*/
+void PatchKernel::setCellAlterationFlags(long id, AlterationFlags flags)
+{
+	setElementAlterationFlags(id, flags, &m_alteredCells);
+}
+
+/*!
+	Unset the specified alteration flags for all the altered cells.
+
+	\param flags are the flags that will be unset
+*/
+void PatchKernel::unsetCellAlterationFlags(AlterationFlags flags)
+{
+	unsetElementAlterationFlags(flags, &m_alteredCells);
+}
+
+/*!
+	Unset the specified alteration flags for the given cell.
+
+	\param id is the id of the cell
+	\param flags are the flags that will be unset
+*/
+void PatchKernel::unsetCellAlterationFlags(long id, AlterationFlags flags)
+{
+	unsetElementAlterationFlags(id, flags, &m_alteredCells);
+}
+
+/*!
+	Test the specified alteration flags for the given interface.
+
+	\param id is the id of the interface
+	\param flags are the flags that will be tested
+	\result Return true if the flags are set, false otherwise.
+*/
+bool PatchKernel::testInterfaceAlterationFlags(long id, AlterationFlags flags) const
+{
+	return testElementAlterationFlags(id, flags, m_alteredInterfaces);
+}
+
+/*!
+	Get the alteration flags of the specified interface.
+
+	\param id is the id of the interface
+	\result The alteration flags of the interface.
+*/
+PatchKernel::AlterationFlags PatchKernel::getInterfaceAlterationFlags(long id) const
+{
+	return getElementAlterationFlags(id, m_alteredInterfaces);
+}
+
+/*!
+	Reset the alteration flags of the given interface.
+
+	\param id is the id of the interface
+	\param flags are the flags that will be set
+*/
+void PatchKernel::resetInterfaceAlterationFlags(long id, AlterationFlags flags)
+{
+	resetElementAlterationFlags(id, flags, &m_alteredInterfaces);
+}
+
+/*!
+	Set the specified alteration flags for all the interfaces.
+
+	\param flags are the flags that will be set
+*/
+void PatchKernel::setInterfaceAlterationFlags(AlterationFlags flags)
+{
+	for (CellIterator itr = cellBegin(); itr != cellEnd(); ++itr) {
+		setInterfaceAlterationFlags(itr.getId(), flags);
+	}
+}
+
+/*!
+	Set the specified alteration flags for the given interface.
+
+	\param id is the id of the interface
+	\param flags are the flags that will be set
+*/
+void PatchKernel::setInterfaceAlterationFlags(long id, AlterationFlags flags)
+{
+	setElementAlterationFlags(id, flags, &m_alteredInterfaces);
+}
+
+/*!
+	Unset the specified alteration flags for all the altered interfaces.
+
+	\param flags are the flags that will be unset
+*/
+void PatchKernel::unsetInterfaceAlterationFlags(AlterationFlags flags)
+{
+	unsetElementAlterationFlags(flags, &m_alteredInterfaces);
+}
+
+/*!
+	Unset the specified alteration flags for the given interface.
+
+	\param id is the id of the interface
+	\param flags are the flags that will be unset
+*/
+void PatchKernel::unsetInterfaceAlterationFlags(long id, AlterationFlags flags)
+{
+	unsetElementAlterationFlags(id, flags, &m_alteredInterfaces);
+}
+
+/*!
+	Test the specified alteration flags for the given element.
+
+	\param id is the id of the element
+	\param flags are the flags that will be tested
+	\param flagsStorage is the container of the elements' flags
+	\result Return true if the flags are set, false otherwise.
+*/
+bool PatchKernel::testElementAlterationFlags(long id, AlterationFlags flags, const AlterationFlagsStorage &flagsStorage) const
+{
+	auto storedFlagsItr = flagsStorage.find(id);
+	if (storedFlagsItr != flagsStorage.end()) {
+		return testAlterationFlags(storedFlagsItr->second, flags);
+	} else {
+		return testAlterationFlags(FLAG_NONE, flags);
+	}
+}
+
+/*!
+	Test if the requested alteration flags are among the available flags.
+
+	\param availableFlags are the available flags
+	\param requestedFlags are the requested flags
+	\result Return true if the flags are set, false otherwise.
+*/
+bool PatchKernel::testAlterationFlags(AlterationFlags availableFlags, AlterationFlags requestedFlags) const
+{
+	return ((availableFlags & requestedFlags) == requestedFlags);
+}
+
+/*!
+	Get the alteration flags of the specified element.
+
+	\param id is the id of the element
+	\param flagsStorage is the container of the elements' flags
+	\result The alteration flags of the element.
+*/
+PatchKernel::AlterationFlags PatchKernel::getElementAlterationFlags(long id, const AlterationFlagsStorage &flagsStorage) const
+{
+	auto storedFlagsItr = flagsStorage.find(id);
+	if (storedFlagsItr != flagsStorage.end()) {
+		return storedFlagsItr->second;
+	} else {
+		return FLAG_NONE;
+	}
+}
+
+/*!
+	Reset the alteration flags of the specified element.
+
+	\param id is the id of the element
+	\param flags are the flags that will be set
+	\param flagsStorage is the container of the elements' flags
+*/
+void PatchKernel::resetElementAlterationFlags(long id, AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const
+{
+	if (flags == FLAG_NONE) {
+		flagsStorage->erase(id);
+	} else {
+		(*flagsStorage)[id] = flags;
+	}
+}
+
+/*!
+	Set the specified alteration flags of the specified element.
+
+	\param id is the id of the element
+	\param flags are the flags that will be set
+	\param flagsStorage is the container of the elements' flags
+*/
+void PatchKernel::setElementAlterationFlags(long id, AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const
+{
+	if (flags == FLAG_NONE) {
+		return;
+	}
+
+	auto storedFlagsItr = flagsStorage->find(id);
+	if (storedFlagsItr != flagsStorage->end()) {
+		storedFlagsItr->second |= flags;
+	} else {
+		flagsStorage->insert({id, flags});
+	}
+}
+
+/*!
+	Unset the specified alteration flags for all the altered elements.
+
+	\param flags are the flags that will be unset
+	\param flagsStorage is the container of the elements' flags
+*/
+void PatchKernel::unsetElementAlterationFlags(AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const
+{
+	if (flags == FLAG_NONE) {
+		return;
+	}
+
+	for (auto storedFlagsItr = flagsStorage->begin(); storedFlagsItr != flagsStorage->end();) {
+		storedFlagsItr->second &= ~flags;
+		if (storedFlagsItr->second == FLAG_NONE) {
+			storedFlagsItr = flagsStorage->erase(storedFlagsItr);
+		} else {
+			++storedFlagsItr;
+		}
+	}
+}
+
+/*!
+	Unset the specified alteration flags for the specified element.
+
+	\param id is the id of the element
+	\param flags are the flags that will be unset
+	\param flagsStorage is the container of the elements' flags
+*/
+void PatchKernel::unsetElementAlterationFlags(long id, AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const
+{
+	if (flags == FLAG_NONE) {
+		return;
+	}
+
+	auto storedFlagsItr = flagsStorage->find(id);
+	if (storedFlagsItr == flagsStorage->end()) {
+		return;
+	}
+
+	storedFlagsItr->second &= ~flags;
+	if (storedFlagsItr->second == FLAG_NONE) {
+		flagsStorage->erase(storedFlagsItr);
+	}
 }
 
 /*!

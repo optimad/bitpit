@@ -699,13 +699,25 @@ public:
 	void getElementVertexCoordinates(const Element &element, std::array<double, 3> *coordinates) const;
 
 protected:
+	typedef uint16_t AlterationFlags;
+	typedef std::unordered_map<long, AlterationFlags> AlterationFlagsStorage;
+
 #if BITPIT_ENABLE_MPI==1
 	const static int DEFAULT_PARTITIONING_WEIGTH;
 #endif
 
+	const static AlterationFlags FLAG_NONE              = 0x0;
+	const static AlterationFlags FLAG_DELETED           = (1u << 0);
+	const static AlterationFlags FLAG_ADJACENCIES_DIRTY = (1u << 1);
+	const static AlterationFlags FLAG_INTERFACES_DIRTY  = (1u << 2);
+	const static AlterationFlags FLAG_DANGLING          = (1u << 3);
+
 	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
+
+	AlterationFlagsStorage m_alteredCells;
+	AlterationFlagsStorage m_alteredInterfaces;
 
 	PatchKernel(bool expert);
 	PatchKernel(int dimension, bool expert);
@@ -765,6 +777,24 @@ protected:
 	void setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status);
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
+
+	bool testCellAlterationFlags(long id, AlterationFlags flags) const;
+	AlterationFlags getCellAlterationFlags(long id) const;
+	void resetCellAlterationFlags(long id, AlterationFlags flags = FLAG_NONE);
+	void setCellAlterationFlags(AlterationFlags flags);
+	void setCellAlterationFlags(long id, AlterationFlags flags);
+	void unsetCellAlterationFlags(AlterationFlags flags);
+	void unsetCellAlterationFlags(long id, AlterationFlags flags);
+
+	bool testInterfaceAlterationFlags(long id, AlterationFlags flags) const;
+	AlterationFlags getInterfaceAlterationFlags(long id) const;
+	void resetInterfaceAlterationFlags(long id, AlterationFlags flags = FLAG_NONE);
+	void setInterfaceAlterationFlags(AlterationFlags flags);
+	void setInterfaceAlterationFlags(long id, AlterationFlags flags);
+	void unsetInterfaceAlterationFlags(AlterationFlags flags);
+	void unsetInterfaceAlterationFlags(long id, AlterationFlags flags);
+
+	bool testAlterationFlags(AlterationFlags availableFlags, AlterationFlags requestedFlags) const;
 
 	void setSpawnStatus(SpawnStatus status);
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
@@ -936,7 +966,22 @@ private:
 
 	void setId(int id);
 
+	bool testElementAlterationFlags(long id, AlterationFlags flags, const AlterationFlagsStorage &flagsStorage) const;
+	AlterationFlags getElementAlterationFlags(long id, const AlterationFlagsStorage &flagsStorage) const;
+	void resetElementAlterationFlags(long id, AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const;
+	void setElementAlterationFlags(long id, AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const;
+	void unsetElementAlterationFlags(AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const;
+	void unsetElementAlterationFlags(long id, AlterationFlags flags, AlterationFlagsStorage *flagsStorage) const;
+
 	void mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::vector<adaption::Info> &destination);
+
+	void setRestoredCellAlterationFlags(long id);
+	void setAddedCellAlterationFlags(long id);
+	void setDeletedCellAlterationFlags(long id);
+
+	void setRestoredInterfaceAlterationFlags(long id);
+	void setAddedInterfaceAlterationFlags(long id);
+	void setDeletedInterfaceAlterationFlags(long id);
 
 	VertexIterator _addInternalVertex(const std::array<double, 3> &coords, long id);
 #if BITPIT_ENABLE_MPI==1
