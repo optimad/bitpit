@@ -157,6 +157,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       , m_communicator(MPI_COMM_NULL),
       m_partitioned(other.m_partitioned),
       m_partitioningStatus(other.m_partitioningStatus),
+      m_owner(other.m_owner),
       m_haloSize(other.m_haloSize),
       m_partitioningCellsTag(other.m_partitioningCellsTag),
       m_partitioningVerticesTag(other.m_partitioningVerticesTag),
@@ -293,6 +294,9 @@ void PatchKernel::initialize()
 	// Specific implementation will set the appropriate status during their
 	// initialization.
 	setPartitioningStatus(PARTITIONING_UNSUPPORTED);
+
+	// Update patch owner
+	updateOwner();
 
 	// Mark partitioning information as up-to-date
 	setPartitioningInfoDirty(false);

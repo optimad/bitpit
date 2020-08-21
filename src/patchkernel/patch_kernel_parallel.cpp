@@ -143,6 +143,55 @@ int PatchKernel::getProcessorCount() const
 }
 
 /*!
+	Check if the patch is distributed among different processors.
+
+	\return Return true if the patch is distributed among different processors,
+	false otherwise.
+*/
+bool PatchKernel::isDistributed() const
+{
+	return (getOwner() < 0);
+}
+
+/*!
+	If the path is NOT distributed among different processors, returns the
+	processor that owns the patch otherwise returns a negative number.
+
+	\return If the path is NOT distributed among different processors, returns
+	the processor that owns the patch otherwise returns a negative number.
+*/
+int PatchKernel::getOwner() const
+{
+	return m_owner;
+}
+
+/*!
+	Updates the owner of the patch.
+
+	If the path is NOT distributed among different processors, the owner is
+	the processor that owns the cells otherwise the owner is set to a negative
+	number.
+*/
+void PatchKernel::updateOwner()
+{
+	long nInternalCells = getInternalCellCount();
+	long nGlobalInternalCells = nInternalCells;
+	if (isCommunicatorSet()) {
+		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
+	}
+
+	if (nInternalCells == nGlobalInternalCells) {
+		m_owner = getRank();
+	} else {
+		m_owner = -1;
+	}
+
+	if (isCommunicatorSet()) {
+		MPI_Allreduce(MPI_IN_PLACE, &m_owner, 1, MPI_INT, MPI_MAX, getCommunicator());
+	}
+}
+
+/*!
 	Sets the size, expressed in number of layers, of the ghost cells halo.
 
 	\param haloSize is the size, expressed in number of layers, of the ghost
@@ -3529,6 +3578,9 @@ void PatchKernel::updatePartitioningInfo(bool forcedUpdated)
 
 	// Vertex exchange data
 	updateGhostVertexExchangeInfo();
+
+	// Update patch owner
+	updateOwner();
 
 	// Partitioning information are now up-to-date
 	setPartitioningInfoDirty(false);
