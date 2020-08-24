@@ -722,9 +722,10 @@ long * Cell::getAdjacencies(int face)
 */
 int Cell::findAdjacency(int face, int adjacency)
 {
+	long *faceAdjacencies = getAdjacencies(face);
 	int nFaceAdjacencies = getAdjacencyCount(face);
 	for (int i = 0; i < nFaceAdjacencies; i++) {
-		if (getAdjacency(face, i) == adjacency) {
+		if (faceAdjacencies[i] == adjacency) {
 			return i;
 		}
 	}
