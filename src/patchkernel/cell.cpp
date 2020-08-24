@@ -494,9 +494,10 @@ long * Cell::getInterfaces(int face)
 */
 int Cell::findInterface(int face, int interface)
 {
+	long *faceInterfaces = getInterfaces(face);
 	int nFaceInterfaces = getInterfaceCount(face);
 	for (int i = 0; i < nFaceInterfaces; i++) {
-		if (getInterface(face, i) == interface) {
+		if (faceInterfaces[i] == interface) {
 			return i;
 		}
 	}
