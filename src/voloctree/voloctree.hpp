@@ -115,8 +115,6 @@ public:
 	void setLength(double length);
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center) override;
 
-	void updateAdjacencies(const std::vector<long> &cellIds) override;
-
 #if BITPIT_ENABLE_MPI==1
 	void setCommunicator(MPI_Comm communicator) override;
 
@@ -127,6 +125,8 @@ protected:
 	VolOctree(const VolOctree &other);
 
 	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
+
+	void _updateAdjacencies() override;
 
 	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption) override;
 	std::vector<adaption::Info> _adaptionAlter(bool trackAdaption) override;

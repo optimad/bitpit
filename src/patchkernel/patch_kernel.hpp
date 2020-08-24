@@ -581,9 +581,10 @@ public:
 	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B) const;
 
 	AdjacenciesBuildStrategy getAdjacenciesBuildStrategy() const;
-	void clearAdjacencies();
-	virtual void buildAdjacencies();
-	virtual void updateAdjacencies(const std::vector<long> &cellIds);
+	bool areAdjacenciesDirty(bool global = false) const;
+	void buildAdjacencies();
+	void updateAdjacencies(bool forcedUpdated = false);
+	void destroyAdjacencies();
 
 	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
 	void clearInterfaces();
@@ -775,6 +776,10 @@ protected:
 	std::unordered_map<long, std::vector<long>> binGroupVertices(int nBins);
 
 	void setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status);
+	void resetAdjacencies();
+	void pruneStaleAdjacencies();
+	virtual void _resetAdjacencies();
+	virtual void _updateAdjacencies();
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
 

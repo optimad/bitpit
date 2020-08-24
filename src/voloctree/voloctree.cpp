@@ -1795,9 +1795,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 	}
 
 	// Update adjacencies
-	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
-		updateAdjacencies(createdCells);
-	}
+	updateAdjacencies();
 
 	// Update interfaces
 	if (!restoreStream) {
@@ -1813,31 +1811,51 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 }
 
 /*!
-	Build the adjacencies the cells.
+	Internal function to update the adjacencies of the patch.
+
+	In addition to the cells whose adjacencies are marked as dirty, also the
+	adjacencies of their neighbours will be updated.
 */
-void VolOctree::updateAdjacencies(const std::vector<long> &cellIds)
+void VolOctree::_updateAdjacencies()
 {
 	// Face information
 	int nCellFaces = 2 * getDimension();
 	uint8_t oppositeFace[nCellFaces];
 	m_tree->getOppface(oppositeFace);
 
+	// Count cells with dirty adjacencies
+	long nDirtyAdjacenciesCells = 0;
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
+			continue;
+		}
+
+		++nDirtyAdjacenciesCells;
+	}
+
 	// Sort the cells beased on their tree level
 	int maxLevel = m_tree->getMaxDepth();
-	size_t averageSize = cellIds.size() / (maxLevel + 1);
+	size_t averageSize = nDirtyAdjacenciesCells / (maxLevel + 1);
 	std::vector<std::vector<long>> hierarchicalCellIds(maxLevel + 1);
 	for (int level = 0; level <= maxLevel; ++level) {
 		hierarchicalCellIds[level].reserve(averageSize);
 	}
 
-	for (long cellId : cellIds) {
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
+			continue;
+		}
+
+		long cellId = entry.first;
 		int cellLevel = getCellLevel(cellId);
 		hierarchicalCellIds[cellLevel].push_back(cellId);
 	}
 
 	// Update the adjacencies
 	FaceInfoSet processedFaces;
-	processedFaces.reserve(cellIds.size() * getDimension());
+	processedFaces.reserve(nDirtyAdjacenciesCells * getDimension());
 
 	for (int level = 0; level <= maxLevel; ++level) {
 		for (long cellId : hierarchicalCellIds[level]) {
@@ -1884,9 +1902,6 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds)
 			}
 		}
 	}
-
-	// Set adjacencies build strategy
-	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
 }
 
 /*!

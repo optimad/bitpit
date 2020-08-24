@@ -504,7 +504,7 @@ vector<long>                            cell_list;
 
     // Insert cells --------------------------------------------------------- //
     log::cout() << "** updating adjacencies" << endl;
-    mesh.updateAdjacencies(cell_list);
+    mesh.updateAdjacencies();
 
     // Mesh stats ----------------------------------------------------------- //
     log::cout() << "   mesh stats (step 4):" << endl;

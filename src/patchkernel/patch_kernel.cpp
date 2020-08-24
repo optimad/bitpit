@@ -612,6 +612,12 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 	// Flush cell data structures
 	m_cells.flush();
 
+	// Update adjacencies
+	bool adjacenciesDirty = areAdjacenciesDirty();
+	if (adjacenciesDirty) {
+		updateAdjacencies();
+	}
+
 	// Flush interfaces data structures
 	m_interfaces.flush();
 
@@ -771,6 +777,8 @@ void PatchKernel::resetCells()
 	clearGhostCellOwners();
 	clearGhostVertexOwners();
 #endif
+
+	resetAdjacencies();
 
 	for (auto &interface : m_interfaces) {
 		interface.unsetNeigh();
@@ -1045,6 +1053,10 @@ bool PatchKernel::isDirty(bool global) const
 #endif
 
 	bool isDirty = false;
+
+	if (!isDirty) {
+		isDirty |= areAdjacenciesDirty(false);
+	}
 
 	if (!isDirty) {
 		isDirty |= !m_alteredCells.empty();
@@ -4226,11 +4238,8 @@ void PatchKernel::restoreCells(std::istream &stream)
 	utils::binary::read(stream, dummyLastInternalCellId);
 #endif
 
-	// Restore adjacencies
-	if (getAdjacenciesBuildStrategy() == ADJACENCIES_AUTOMATIC) {
-		buildAdjacencies();
-	}
-
+	// Update adjacencies
+	updateAdjacencies();
 
 	// Set original advanced editing status
 	setExpert(originalExpertStatus);
@@ -4900,6 +4909,38 @@ void PatchKernel::setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status)
 }
 
 /*!
+	Checks if the adjacencies are dirty.
+
+	\result Returns true if the adjacencies are dirty, false otherwise.
+*/
+bool PatchKernel::areAdjacenciesDirty(bool global) const
+{
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
+		return false;
+	}
+
+	bool areDirty = false;
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
+			areDirty = true;
+			break;
+		}
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	if (global && isCommunicatorSet()) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(MPI_IN_PLACE, &areDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+	}
+#else
+	BITPIT_UNUSED(global);
+#endif
+
+	return areDirty;
+}
+
+/*!
 	Fill adjacencies info for each cell.
 
 	If adjacencies are already built, all adjacencies will be deleted and
@@ -4909,22 +4950,154 @@ void PatchKernel::buildAdjacencies()
 {
 	// Reset adjacencies
 	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
-		clearAdjacencies();
+		destroyAdjacencies();
 	}
 
+	// Set adjacencies strategy
+	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
+
 	// Update the adjacencies
-	updateAdjacencies(m_cells.getIds(false));
+	setCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
+	updateAdjacencies();
 }
 
 /*!
-	Update the adjacencies of the specified list of cells and of their
-	neighbours.
+	Update the adjacencies of the patch.
+
+	\param forcedUpdated if set to true, bounding box information will be
+	updated also if they are not marked as dirty
+*/
+void PatchKernel::updateAdjacencies(bool forcedUpdated)
+{
+	// Early return if adjacencies are not built
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
+		return;
+	}
+
+	// Check if the adjacencies are dirty
+	bool adjacenciesDirty = areAdjacenciesDirty();
+	if (!adjacenciesDirty && !forcedUpdated) {
+		return;
+	}
+
+	// Update adjacencies
+	if (adjacenciesDirty) {
+		// Prune stale adjacencies
+		pruneStaleAdjacencies();
+
+		// Update adjacencies
+		_updateAdjacencies();
+
+		// Adjacencies are now updated
+		unsetCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
+	} else {
+		buildAdjacencies();
+	}
+}
+
+/*!
+	Destroy the adjacencies.
+
+	After deleting the adjacencies, this function changes the build strategy
+	to "None".
+*/
+void PatchKernel::destroyAdjacencies()
+{
+	// Early return if no adjacencies have been built
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
+		return;
+	}
+
+	// Reset the adjacencies
+	_resetAdjacencies();
+
+	// Clear list of cells with dirty adjacencies
+	unsetCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
+
+	// Set adjacencies status
+	setAdjacenciesBuildStrategy(ADJACENCIES_NONE);
+}
+
+/*!
+	Reset the adjacencies.
+
+	This function doesn't change the build strategy, it only deletes the
+	existing adjacencies.
+*/
+void PatchKernel::resetAdjacencies()
+{
+	// Early return if no adjacencies have been built
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
+		return;
+	}
+
+	// Reset adjacencies
+	_resetAdjacencies();
+
+	// All cells have now dirty adjacencies
+	setCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
+}
+
+/*!
+	Internal function to reset the adjacencies.
+
+	This function doesn't change the alteration flags.
+*/
+void PatchKernel::_resetAdjacencies()
+{
+	for (Cell &cell : m_cells) {
+		cell.resetAdjacencies();
+	}
+}
+
+/*!
+	Prune stale adjacencies.
+
+	The list of cells to process and the list of stale adjacencies are filled
+	during cell deletion.
+*/
+void PatchKernel::pruneStaleAdjacencies()
+{
+	// Early return if adjacencies are not built
+	AdjacenciesBuildStrategy currentStrategy = getAdjacenciesBuildStrategy();
+	if (currentStrategy == ADJACENCIES_NONE) {
+		return;
+	}
+
+	// Update cell adjacencies
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
+			continue;
+		}
+
+		long cellId = entry.first;
+		Cell &cell = m_cells.at(cellId);
+		int nCellFaces = cell.getFaceCount();
+		for (int face = nCellFaces - 1; face >= 0; --face) {
+			long *faceAdjacencies = cell.getAdjacencies(face);
+			int nFaceAdjacencies = cell.getAdjacencyCount(face);
+			for (int i = nFaceAdjacencies - 1; i >= 0; --i) {
+				long adjacency = faceAdjacencies[i];
+				if (!testCellAlterationFlags(adjacency, FLAG_DELETED)) {
+					continue;
+				}
+
+				cell.deleteAdjacency(face, i);
+			}
+		}
+	}
+}
+
+/*!
+	Internal function to update the adjacencies of the patch.
+
+	In addition to the cells whose adjacencies are marked as dirty, also the
+	adjacencies of their neighbours will be updated.
 
 	This implementation can NOT handle hanging nodes.
-
-	\param[in] cellIds is the list of cell ids
 */
-void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
+void PatchKernel::_updateAdjacencies()
 {
 	// The adjacencies are found looking for matching half-faces.
 	//
@@ -4961,20 +5134,29 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
 		matchingWindings.push_back(CellHalfFace::WINDING_NATURAL);
 	}
 
+	// Count cells with dirty adjacencies
+	long nDirtyAdjacenciesCells = 0;
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
+			continue;
+		}
+
+		++nDirtyAdjacenciesCells;
+	}
+
 	// Initialize half-faces list
 	std::unordered_multiset<CellHalfFace, CellHalfFace::Hasher> halfFaces;
 	if (multipleMatchesAllowed) {
 		halfFaces.reserve(4 * getCellCount());
 	} else {
-		halfFaces.reserve(2 * cellIds.size());
+		halfFaces.reserve(2 * nDirtyAdjacenciesCells);
 	}
 
 	// Populate list with faces of non-updated cells
-	if ((long) cellIds.size() != getCellCount()) {
-		std::unordered_set<long> updateCellSet(cellIds.begin(), cellIds.end());
-
+	if ((long) nDirtyAdjacenciesCells != getCellCount()) {
 		for (Cell &cell : m_cells) {
-			if (updateCellSet.count(cell.getId()) > 0) {
+			if (testCellAlterationFlags(cell.getId(), FLAG_ADJACENCIES_DIRTY)) {
 				continue;
 			}
 
@@ -4988,8 +5170,14 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
 	}
 
 	// Update the adjacencies
-	for (long cellId : cellIds) {
-		Cell &cell = m_cells[cellId];
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
+			continue;
+		}
+
+		long cellId = entry.first;
+		Cell &cell = m_cells.at(cellId);
 
 		const int nCellFaces = cell.getFaceCount();
 		for (int face = 0; face < nCellFaces; face++) {
@@ -5039,28 +5227,6 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
 			}
 		}
 	}
-
-	// Set adjacencies build strategy
-	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
-}
-
-/*!
-	Clear the adjacencies.
-*/
-void PatchKernel::clearAdjacencies()
-{
-	// Early return if no adjacencies have been built
-	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
-		return;
-	}
-
-	// Reset adjacencies
-	for (Cell &cell : m_cells) {
-		cell.resetAdjacencies();
-	}
-
-	// Set adjacencies status
-	setAdjacenciesBuildStrategy(ADJACENCIES_NONE);
 }
 
 /*!
