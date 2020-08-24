@@ -2426,7 +2426,7 @@ bool PatchKernel::deleteCell(long id, bool updateNeighs, bool delayed)
 					Cell &neigh = m_cells[neighId];
 					neigh.deleteAdjacency(neighFace, adjacencyId);
 				}
-			} //next k
+			}
 
 			// Update interface
 			int nFaceInterfaces = cell.getInterfaceCount(i);
@@ -2439,7 +2439,7 @@ bool PatchKernel::deleteCell(long id, bool updateNeighs, bool delayed)
 				} else {
 						interface.unsetNeigh();
 				}
-			} //next k
+			}
 		}
 	}
 
@@ -4784,6 +4784,9 @@ void PatchKernel::setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status)
 
 /*!
 	Fill adjacencies info for each cell.
+
+	If adjacencies are already built, all adjacencies will be deleted and
+	they will be re-generated from scratch.
 */
 void PatchKernel::buildAdjacencies()
 {
@@ -6391,7 +6394,7 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	// Adjacencies build strategy
 	utils::binary::read(stream, m_adjacenciesBuildStrategy);
 
-	// Interfaces status
+	// Interfaces build strategy
 	utils::binary::read(stream, m_interfacesBuildStrategy);
 
 	// VTK data
