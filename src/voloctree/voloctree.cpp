@@ -1438,18 +1438,13 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 	// Info on the faces
 	int nInterfaceVertices = m_interfaceTypeInfo->nVertices;
 
-	// List of cells ot delete
-	std::unordered_set<long> deadCells;
-	deadCells.reserve(deletedOctants.size());
-	for (const DeleteInfo &deleteInfo : deletedOctants) {
-		deadCells.insert(deleteInfo.cellId);
-	}
-
 	// Delete the cells
 	std::unordered_set<long> deadVertices;
-	std::unordered_set<long> deadInterfaces;
-	std::unordered_set<long> danglingCells;
-	for (long cellId : deadCells) {
+
+	std::vector<long> deadCells;
+	deadCells.reserve(deletedOctants.size());
+	for (const DeleteInfo &deleteInfo : deletedOctants) {
+		long cellId = deleteInfo.cellId;
 		const Cell &cell = m_cells[cellId];
 
 		// List vertices to remove
@@ -1460,75 +1455,6 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 		for (int k = 0; k < nCellVertices; ++k) {
 			long vertexId = cellVertexIds[k];
 			deadVertices.insert(vertexId);
-		}
-
-		// List of interfaces to delete
-		//
-		// All the interfaces of the cell will be deleted, this means that the
-		// neighbours that are not deleted will have a face not connected to
-		// anything. Those faces are called dangling faces and a cell with
-		// dangling faces is called dangling cell.
-		int nCellInterfaces = cell.getInterfaceCount();
-		const long *interfaces = cell.getInterfaces();
-		for (int k = 0; k < nCellInterfaces; ++k) {
-			long interfaceId = interfaces[k];
-			if (interfaceId < 0) {
-				continue;
-			}
-
-			// Interfaces has to be considered just once
-			if (deadInterfaces.count(interfaceId) > 0) {
-				continue;
-			}
-
-			// Find if the face associated to the interface will be dangling
-			Interface &interface = m_interfaces[interfaceId];
-
-			int danglingSide = -1;
-			if (!interface.isBorder()) {
-				if (deadCells.count(interface.getOwner()) == 0) {
-					danglingSide = 0;
-				} else if (deadCells.count(interface.getNeigh()) == 0) {
-					danglingSide = 1;
-				}
-			}
-
-			// Handle dangling faces
-			if (danglingSide >= 0) {
-				// Info on the dangling face
-				long danglingCellId;
-				long danglingNeighId;
-				int danglingCellFace;
-				if (danglingSide == 0) {
-					danglingCellId   = interface.getOwner();
-					danglingNeighId  = interface.getNeigh();
-					danglingCellFace = interface.getOwnerFace();
-				} else {
-					danglingCellId   = interface.getNeigh();
-					danglingNeighId  = interface.getOwner();
-					danglingCellFace = interface.getNeighFace();
-				}
-
-				Cell &danglingCell = m_cells[danglingCellId];
-				danglingCells.insert(danglingCellId);
-
-				// Since the dangling cell will not be deleted, we have to
-				// updated its interface and adjacency data structures.
-				int cellInterfaceIndex = danglingCell.findInterface(danglingCellFace, interfaceId);
-				danglingCell.deleteInterface(danglingCellFace, cellInterfaceIndex);
-
-				int cellAdjacencyIndex = danglingCell.findAdjacency(danglingCellFace, danglingNeighId);
-				danglingCell.deleteAdjacency(danglingCellFace, cellAdjacencyIndex);
-			}
-
-			// Add the interface to the list of interfaces to delete
-			deadInterfaces.insert(interfaceId);
-
-			// Owner and neighbour interfaces are now dirty
-			setCellAlterationFlags(interface.getOwner(), FLAG_INTERFACES_DIRTY);
-			if (interface.getNeigh() >= 0) {
-				setCellAlterationFlags(interface.getNeigh(), FLAG_INTERFACES_DIRTY);
-			}
 		}
 
 		// Remove patch-tree associations
@@ -1550,14 +1476,20 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 				m_ghostToCell.erase(ghostToCellItr);
 			}
 		}
+
+		// Cell needs to be removed
+		deadCells.push_back(cellId);
 	}
 
-	std::vector<long> deadCellsList(deadCells.cbegin(), deadCells.cend());
-	PatchKernel::deleteCells(deadCellsList, false, false);
+	PatchKernel::deleteCells(deadCells, false, false);
 
-	// Delete the interfaces
-	std::vector<long> deadInterfacesList(deadInterfaces.cbegin(), deadInterfaces.cend());
-	PatchKernel::deleteInterfaces(deadInterfacesList, false, false);
+	// Prune cell adjacencies and interfaces
+	//
+	// At this stage we cannot fully update adjacencies and interfaces, but
+	// we need to remove stale adjacencies and interfaces.
+	pruneStaleAdjacencies();
+
+	pruneStaleInterfaces();
 
 	// All the vertices belonging to the dangling cells has to be kept
 	//
@@ -1573,8 +1505,13 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 	// be used when imprting the octants to stitch the imported octants to
 	// the existing cells.
 	StitchInfo stitchVertices;
-	for (const long cellId : danglingCells) {
+	for (const auto &entry: m_alteredCells) {
+		if (!testAlterationFlags(entry.second, FLAG_DANGLING)) {
+			continue;
+		}
+
 		// Vertices of the cell
+		long cellId = entry.first;
 		const Cell &cell = m_cells[cellId];
 		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 
