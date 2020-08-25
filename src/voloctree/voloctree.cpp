@@ -1560,7 +1560,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 
 	// Delete the vertices
 	std::vector<long> deadVerticesList(deadVertices.cbegin(), deadVertices.cend());
-	PatchKernel::deleteVertices(deadVerticesList, true);
+	PatchKernel::deleteVertices(deadVerticesList);
 
 	// Done
 	return stitchVertices;

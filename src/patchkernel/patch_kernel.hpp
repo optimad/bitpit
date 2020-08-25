@@ -747,8 +747,8 @@ protected:
 	VertexIterator restoreVertex(const std::array<double, 3> &coords, long id);
 #endif
 
-	bool deleteVertex(long id, bool delayed = false);
-	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
+	bool deleteVertex(long id);
+	bool deleteVertices(const std::vector<long> &ids);
 #if BITPIT_ENABLE_MPI==1
 	VertexIterator ghostVertex2InternalVertex(long id);
 	VertexIterator internalVertex2GhostVertex(long id, int ownerRank);
@@ -1002,9 +1002,9 @@ private:
 	void _restoreGhostVertex(const VertexIterator &iterator, const std::array<double, 3> &coords, int rank);
 #endif
 
-	void _deleteInternalVertex(long id, bool delayed);
+	void _deleteInternalVertex(long id);
 #if BITPIT_ENABLE_MPI==1
-	void _deleteGhostVertex(long id, bool delayed);
+	void _deleteGhostVertex(long id);
 #endif
 
 	CellIterator _addInternalCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);

@@ -1536,9 +1536,8 @@ void PatchKernel::_restoreInternalVertex(const VertexIterator &iterator, const s
 	Deletes a vertex.
 
 	\param id is the id of the vertex
-	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteVertex(long id, bool delayed)
+bool PatchKernel::deleteVertex(long id)
 {
 	if (!isExpert()) {
 		return false;
@@ -1551,12 +1550,12 @@ bool PatchKernel::deleteVertex(long id, bool delayed)
 #if BITPIT_ENABLE_MPI==1
 	bool isInternal = vertex.isInterior();
 	if (isInternal) {
-		_deleteInternalVertex(id, delayed);
+		_deleteInternalVertex(id);
 	} else {
-		_deleteGhostVertex(id, delayed);
+		_deleteGhostVertex(id);
 	}
 #else
-	_deleteInternalVertex(id, delayed);
+	_deleteInternalVertex(id);
 #endif
 
 	// Vertex id is no longer used
@@ -1569,9 +1568,8 @@ bool PatchKernel::deleteVertex(long id, bool delayed)
 	Deletes a list of vertices.
 
 	\param ids are the ids of the vertices to be deleted
-	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
+bool PatchKernel::deleteVertices(const std::vector<long> &ids)
 {
 	if (!isExpert()) {
 		return false;
@@ -1602,23 +1600,18 @@ bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 		}
 #endif
 
-		deleteVertex(vertexId, true);
+		deleteVertex(vertexId);
 	}
 
 	if (deleteLastInternalVertex) {
-		deleteVertex(m_lastInternalVertexId, true);
+		deleteVertex(m_lastInternalVertexId);
 	}
 
 #if BITPIT_ENABLE_MPI==1
 	if (deleteFirstGhostVertex) {
-		deleteVertex(m_firstGhostVertexId, true);
+		deleteVertex(m_firstGhostVertexId);
 	}
 #endif
-
-	if (!delayed) {
-		m_vertices.flush();
-		updateBoundingBox();
-	}
 
 	return true;
 }
@@ -1627,16 +1620,15 @@ bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 	Internal function to delete an internal vertex.
 
 	\param id is the id of the vertex
-	\param delayed is true a delayed delete will be performed
 */
-void PatchKernel::_deleteInternalVertex(long id, bool delayed)
+void PatchKernel::_deleteInternalVertex(long id)
 {
 	// Update the bounding box
 	const Vertex &vertex = m_vertices[id];
 	removePointFromBoundingBox(vertex.getCoords());
 
 	// Delete vertex
-	m_vertices.erase(id, delayed);
+	m_vertices.erase(id, true);
 	m_nInternalVertices--;
 	if (id == m_lastInternalVertexId) {
 		updateLastInternalVertexId();
