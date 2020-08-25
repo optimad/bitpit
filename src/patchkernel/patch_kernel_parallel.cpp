@@ -905,9 +905,8 @@ void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType ty
 	Internal function to delete a ghost cell.
 
 	\param id is the id of the cell
-	\param delayed is true a delayed delete will be performed
 */
-void PatchKernel::_deleteGhostCell(long id, bool delayed)
+void PatchKernel::_deleteGhostCell(long id)
 {
 	// Unset ghost owner
 	unsetGhostCellOwner(id);
@@ -916,7 +915,7 @@ void PatchKernel::_deleteGhostCell(long id, bool delayed)
 	setDeletedCellAlterationFlags(id);
 
 	// Delete cell
-	m_cells.erase(id, delayed);
+	m_cells.erase(id, true);
 	m_nGhostCells--;
 	if (id == m_firstGhostCellId) {
 		updateFirstGhostCellId();
@@ -1898,7 +1897,7 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
         cellsDeleteList.emplace_back(cellId);
     }
 
-    deleteCells(cellsDeleteList, false, true);
+    deleteCells(cellsDeleteList, false);
 
     // Prune stale adjacencies
     pruneStaleAdjacencies();
@@ -2470,7 +2469,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, false, true);
+        deleteCells(deleteList, false);
 
         // Prune cell adjacencies and interfaces
         //
@@ -2517,7 +2516,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, false, true);
+        deleteCells(deleteList, false);
 
         // Prune cell adjacencies
         //
@@ -2581,7 +2580,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, false, true);
+        deleteCells(deleteList, false);
 
         // Prune cell adjacencies and interfaces
         //

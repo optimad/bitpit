@@ -2458,9 +2458,8 @@ void PatchKernel::setRestoredCellAlterationFlags(long id)
 	\param id is the id of the cell
 	\param updateNeighs if true the neighbour data will be updated after
 	removing the cell
-	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteCell(long id, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteCell(long id, bool updateNeighs)
 {
 	if (!isExpert()) {
 		return false;
@@ -2506,12 +2505,12 @@ bool PatchKernel::deleteCell(long id, bool updateNeighs, bool delayed)
 #if BITPIT_ENABLE_MPI==1
 	bool isInternalCell = cell.isInterior();
 	if (isInternalCell) {
-		_deleteInternalCell(id, delayed);
+		_deleteInternalCell(id);
 	} else {
-		_deleteGhostCell(id, delayed);
+		_deleteGhostCell(id);
 	}
 #else
-	_deleteInternalCell(id, delayed);
+	_deleteInternalCell(id);
 #endif
 
 	// Cell id is no longer used
@@ -2526,9 +2525,8 @@ bool PatchKernel::deleteCell(long id, bool updateNeighs, bool delayed)
 	\param ids are the ids of the cells to be deleted
 	\param updateNeighs if true the neighbour data will be updated after
 	removing the cell
-	\param delayed is true a delayed delete will be performed
  */
-bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs)
 {
 	if (!isExpert()) {
 		return false;
@@ -2559,22 +2557,18 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 		}
 #endif
 
-		deleteCell(cellId, updateNeighs, true);
+		deleteCell(cellId, updateNeighs);
 	}
 
 	if (deleteLastInternalCell) {
-		deleteCell(m_lastInternalCellId, updateNeighs, true);
+		deleteCell(m_lastInternalCellId, updateNeighs);
 	}
 
 #if BITPIT_ENABLE_MPI==1
 	if (deleteFirstGhostCell) {
-		deleteCell(m_firstGhostCellId, updateNeighs, true);
+		deleteCell(m_firstGhostCellId, updateNeighs);
 	}
 #endif
-
-	if (!delayed) {
-		m_cells.flush();
-	}
 
 	return true;
 }
@@ -2583,15 +2577,14 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 	Internal function to delete an internal cell.
 
 	\param id is the id of the cell
-	\param delayed is true a delayed delete will be performed
 */
-void PatchKernel::_deleteInternalCell(long id, bool delayed)
+void PatchKernel::_deleteInternalCell(long id)
 {
 	// Set the alteration flags of the cell
 	setDeletedCellAlterationFlags(id);
 
 	// Delete cell
-	m_cells.erase(id, delayed);
+	m_cells.erase(id, true);
 	m_nInternalCells--;
 	if (id == m_lastInternalCellId) {
 		updateLastInternalCellId();
