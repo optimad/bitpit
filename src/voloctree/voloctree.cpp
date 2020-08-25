@@ -1083,6 +1083,11 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				}
 #endif
 
+				// Ghost octants will be processed later
+				if (mapper_ghostFlag[k]) {
+					continue;
+				}
+
 				// Mark previous octant for deletion
 				uint32_t previousTreeId = mapper_octantMap[k];
 				OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
