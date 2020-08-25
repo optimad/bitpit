@@ -193,7 +193,8 @@ int                     i;
     connectivity[1] = 21;
     connectivity[2] = 26;
     mesh.addCell(ElementType::TRIANGLE, connectivity);
-    
+
+    mesh.update();
 }
 
 return;
@@ -359,6 +360,7 @@ vector<long>                            cell_list;
     mesh.deleteCell(17);
     mesh.deleteCell(5);
     mesh.deleteCell(7);
+    mesh.update();
 
     // Mesh stats ----------------------------------------------------------- //
     log::cout() << "   mesh stats (step 2):" << endl;
@@ -420,7 +422,7 @@ vector<long>                            cell_list;
 {
     // Scope variables ------------------------------------------------------ //
     SurfUnstructured                    envelope(2, 3);
-    vector<long>                        ring1, ring1_expected{7};
+    vector<long>                        ring1, ring1_expected{4,6,7,19,20,21};
     SurfUnstructured::CellIterator      it;
 
     // Set envelope attributes ---------------------------------------------- //
@@ -436,6 +438,8 @@ vector<long>                            cell_list;
 
     it = mesh.addCell(cell_7);
     cell_list.push_back(it->getId());
+
+    mesh.update();
     log::cout() << "   cell list is: " << cell_list << endl;
 
     // Mesh stats topology -------------------------------------------------- //
@@ -446,15 +450,15 @@ vector<long>                            cell_list;
 
     // Vertices stats
     if (mesh.getVertexCount() != 27)            return 3;
-    if (mesh.countFreeVertices() != 24)         return 3;
+    if (mesh.countFreeVertices() != 20)         return 3;
 
     // Faces stats
-    if (mesh.countFaces() != 66)                return 3;
-    if (mesh.countFreeFaces() != 34)            return 3;
+    if (mesh.countFaces() != 59)                return 3;
+    if (mesh.countFreeFaces() != 21)            return 3;
 
     // Cells stats
     if (mesh.getCellCount() != 33)              return 3;
-    if (mesh.countFreeCells() != 26)            return 3;
+    if (mesh.countFreeCells() != 21)            return 3;
 
     // Compute 1-ring of vertex 11 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
@@ -472,15 +476,15 @@ vector<long>                            cell_list;
     // Check external envelope topology ------------------------------------- //
 
     // Vertices stats
-    if (envelope.getVertexCount() != 24)        return 3;
+    if (envelope.getVertexCount() != 20)        return 3;
     if (envelope.countFreeVertices() != 0)      return 3;
 
     // Check faces stats
-    if (envelope.countFaces() != 24)            return 3;
+    if (envelope.countFaces() != 20)            return 3;
     if (envelope.countFreeFaces() != 0)         return 3;
 
     // Check cells stats
-    if (envelope.getCellCount() != 34)          return 3;
+    if (envelope.getCellCount() != 21)          return 3;
     if (envelope.countFreeCells() != 0)         return 3;
 
     // Export triangulation ------------------------------------------------- //
@@ -635,6 +639,7 @@ int                             i;
         expected.push_back(long(i));
         internal.push_back(true);
     } //next i
+    mesh.update();
     log::cout() << endl;
 
     // Check cell ordering -------------------------------------------------- //
@@ -670,6 +675,7 @@ int                             i;
         expected.push_back(long(N + i));
         internal.push_back(false);
     } //next i
+    mesh.update();
     log::cout() << endl;
 
     // Check cells ordering ------------------------------------------------- //
@@ -710,11 +716,11 @@ int                             i;
     //ghosts: {7,8,9}
     mesh.deleteCell(5);
     mesh.deleteCell(6);
+    mesh.update();
     expected.erase(expected.begin() + 6);
     expected.erase(expected.begin() + 5);
     internal.erase(internal.begin() + 6);
     internal.erase(internal.begin() + 5);
-
     // Check element order
     i = 0;
     et = mesh.cellEnd();
@@ -740,6 +746,7 @@ int                             i;
     //ghosts: {7,8,9}
     mesh.deleteCell(4);
     mesh.deleteCell(2);
+    mesh.update();
     expected.erase(expected.begin() + 4);
     expected.erase(expected.begin() + 2);
     internal.erase(internal.begin() + 4);
@@ -772,6 +779,7 @@ int                             i;
     mesh.addCell(ghost, dummyNeighRank);
     mesh.addCell(cell);
     mesh.addCell(ElementType::TRIANGLE, c_connect);
+    mesh.update();
     expected.insert(expected.begin() + 2, 5);
     expected.insert(expected.begin() + 4, 6);
     expected.insert(expected.begin() + 5, 2);
@@ -809,6 +817,7 @@ int                             i;
     mesh.deleteCell(6);
     mesh.addCell(ghost, dummyNeighRank);
     mesh.addCell(ElementType::TRIANGLE, g_connect, dummyNeighRank);
+    mesh.update();
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
@@ -854,6 +863,7 @@ int                             i;
     mesh.deleteCell(9);
     mesh.addCell(cell);
     mesh.addCell(ElementType::TRIANGLE, c_connect);
+    mesh.update();
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
