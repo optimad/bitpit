@@ -2456,10 +2456,8 @@ void PatchKernel::setRestoredCellAlterationFlags(long id)
 	Deletes a cell.
 
 	\param id is the id of the cell
-	\param updateNeighs if true the neighbour data will be updated after
-	removing the cell
 */
-bool PatchKernel::deleteCell(long id, bool updateNeighs)
+bool PatchKernel::deleteCell(long id)
 {
 	if (!isExpert()) {
 		return false;
@@ -2467,39 +2465,6 @@ bool PatchKernel::deleteCell(long id, bool updateNeighs)
 
 	// Get cell information
 	const Cell &cell = m_cells[id];
-
-	// Update neighbours
-	if (updateNeighs) {
-		int nCellFaces = cell.getFaceCount();
-		for (int i = 0; i < nCellFaces; ++i) {
-			// Update adjacency of the neighbours
-			int nFaceAdjacencies = cell.getAdjacencyCount(i);
-			const long *faceAdjacencies = cell.getAdjacencies(i);
-			for (int k = 0; k < nFaceAdjacencies; ++k) {
-				long neighId = faceAdjacencies[k];
-
-				int neighFace, adjacencyId;
-				findFaceNeighCell(neighId, id, &neighFace, &adjacencyId);
-				if (neighFace >= 0) {
-					Cell &neigh = m_cells[neighId];
-					neigh.deleteAdjacency(neighFace, adjacencyId);
-				}
-			}
-
-			// Update interface
-			int nFaceInterfaces = cell.getInterfaceCount(i);
-			const long *faceInterfaces = cell.getInterfaces(i);
-			for (int k = 0; k < nFaceInterfaces; ++k) {
-				long interfaceId = faceInterfaces[k];
-				Interface &interface = m_interfaces[interfaceId];
-				if (interface.getOwner() == id) {
-						interface.unsetOwner();
-				} else {
-						interface.unsetNeigh();
-				}
-			}
-		}
-	}
 
 	// Delete cell
 #if BITPIT_ENABLE_MPI==1
@@ -2523,10 +2488,8 @@ bool PatchKernel::deleteCell(long id, bool updateNeighs)
 	Deletes a list of cells.
 
 	\param ids are the ids of the cells to be deleted
-	\param updateNeighs if true the neighbour data will be updated after
-	removing the cell
  */
-bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs)
+bool PatchKernel::deleteCells(const std::vector<long> &ids)
 {
 	if (!isExpert()) {
 		return false;
@@ -2557,16 +2520,16 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs)
 		}
 #endif
 
-		deleteCell(cellId, updateNeighs);
+		deleteCell(cellId);
 	}
 
 	if (deleteLastInternalCell) {
-		deleteCell(m_lastInternalCellId, updateNeighs);
+		deleteCell(m_lastInternalCellId);
 	}
 
 #if BITPIT_ENABLE_MPI==1
 	if (deleteFirstGhostCell) {
-		deleteCell(m_firstGhostCellId, updateNeighs);
+		deleteCell(m_firstGhostCellId);
 	}
 #endif
 

@@ -1897,7 +1897,7 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
         cellsDeleteList.emplace_back(cellId);
     }
 
-    deleteCells(cellsDeleteList, false);
+    deleteCells(cellsDeleteList);
 
     // Prune stale adjacencies
     pruneStaleAdjacencies();
@@ -2469,7 +2469,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, false);
+        deleteCells(deleteList);
 
         // Prune cell adjacencies and interfaces
         //
@@ -2516,7 +2516,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, false);
+        deleteCells(deleteList);
 
         // Prune cell adjacencies
         //
@@ -2580,7 +2580,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, false);
+        deleteCells(deleteList);
 
         // Prune cell adjacencies and interfaces
         //

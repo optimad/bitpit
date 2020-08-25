@@ -462,8 +462,8 @@ public:
 	CellIterator addCell(ElementType type, const std::vector<long> &connectivity, int rank, long id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id = Element::NULL_ID);
 #endif
-	bool deleteCell(long id, bool updateNeighs = true);
-	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true);
+	bool deleteCell(long id);
+	bool deleteCells(const std::vector<long> &ids);
 #if BITPIT_ENABLE_MPI==1
 	CellIterator ghostCell2InternalCell(long id);
 	CellIterator internalCell2GhostCell(long id, int ownerRank);
