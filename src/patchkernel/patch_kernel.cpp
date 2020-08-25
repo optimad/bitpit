@@ -4309,6 +4309,9 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 		return;
 	}
 
+	// Interfaces need up-to-date adjacencies
+	updateAdjacencies();
+
 	// Restore kernel
 	m_interfaces.restoreKernel(stream);
 
@@ -5315,6 +5318,11 @@ bool PatchKernel::areInterfacesDirty(bool global) const
 */
 void PatchKernel::buildInterfaces()
 {
+	// Interfaces need adjacencies
+	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
+		throw std::runtime_error ("Adjacencies are mandatory for building the interfaces.");
+	}
+
 	// Reset interfaces
 	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
 		destroyInterfaces();
@@ -5346,6 +5354,10 @@ void PatchKernel::updateInterfaces(bool forcedUpdated)
 	if (!interfacesDirty && !forcedUpdated) {
 		return;
 	}
+
+	// Interfaces need up-to-date adjacencies
+	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+	updateAdjacencies();
 
 	// Update interfaces
 	if (interfacesDirty) {
