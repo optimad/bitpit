@@ -1633,7 +1633,7 @@ void PatchKernel::_deleteInternalVertex(long id, bool delayed)
 {
 	// Update the bounding box
 	const Vertex &vertex = m_vertices[id];
-	removePointFromBoundingBox(vertex.getCoords(), delayed);
+	removePointFromBoundingBox(vertex.getCoords());
 
 	// Delete vertex
 	m_vertices.erase(id, delayed);
@@ -6187,12 +6187,8 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 	dirty state.
 
 	\param point is the point that will be removed from to the bounding box
-	\param delayed if true a delayed update ofthe bounding box will
-	be performed. This means that, if the bounding box requires an update,
-	the update will not be performed and only a flag telling that the
-	bounding box needs an update will set.
 */
-void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point, bool delayed)
+void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point)
 {
 	if (isBoundingBoxFrozen() || isBoundingBoxDirty()) {
 		return;
@@ -6222,11 +6218,6 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 			assert(false && "Bounding box is in inconsistent state.");
 			setBoundingBoxDirty(true);
 		}
-	}
-
-	// Bounding box update
-	if (!delayed) {
-		updateBoundingBox();
 	}
 }
 

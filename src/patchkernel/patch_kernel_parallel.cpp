@@ -440,7 +440,7 @@ void PatchKernel::_deleteGhostVertex(long id, bool delayed)
 
 	// Update the bounding box
 	const Vertex &vertex = m_vertices[id];
-	removePointFromBoundingBox(vertex.getCoords(), delayed);
+	removePointFromBoundingBox(vertex.getCoords());
 
 	// Delete vertex
 	m_vertices.erase(id, delayed);

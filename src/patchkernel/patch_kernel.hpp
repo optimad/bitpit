@@ -835,7 +835,7 @@ protected:
 	void setExpert(bool expert);
 
 	void addPointToBoundingBox(const std::array<double, 3> &point);
-	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
+	void removePointFromBoundingBox(const std::array<double, 3> &point);
 #if BITPIT_ENABLE_MPI==1
 	virtual std::size_t _getMaxHaloSize();
 	virtual void _setHaloSize(std::size_t haloSize);
