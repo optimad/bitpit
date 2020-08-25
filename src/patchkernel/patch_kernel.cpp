@@ -3784,9 +3784,8 @@ void PatchKernel::setRestoredInterfaceAlterationFlags(long id)
 	\param id is the id of the interface
 	\param updateNeighs if true the neighbour data will be updated after
 	removing the interface
-	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteInterface(long id, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteInterface(long id, bool updateNeighs)
 {
 	if (!isExpert()) {
 		return false;
@@ -3831,7 +3830,7 @@ bool PatchKernel::deleteInterface(long id, bool updateNeighs, bool delayed)
 	}
 
 	// Delete interface
-	m_interfaces.erase(id, delayed);
+	m_interfaces.erase(id, true);
 	m_interfaceIdGenerator.trash(id);
 
 	return true;
@@ -3843,9 +3842,8 @@ bool PatchKernel::deleteInterface(long id, bool updateNeighs, bool delayed)
 	\param ids are the ids of the interfaces to be deleted
 	\param updateNeighs if true the neighbour data will be updated after
 	removing the interface
-	\param delayed is true a delayed delete will be performed
 */
-bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs)
 {
 	if (!isExpert()) {
 		return false;
@@ -3873,15 +3871,11 @@ bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeig
 			continue;
 		}
 
-		deleteInterface(interfaceId, updateNeighs, true);
+		deleteInterface(interfaceId, updateNeighs);
 	}
 
 	if (deleteLast) {
-		deleteInterface(lastId, updateNeighs, true);
-	}
-
-	if (!delayed) {
-		m_interfaces.flush();
+		deleteInterface(lastId, updateNeighs);
 	}
 
 	return true;
@@ -5443,7 +5437,7 @@ void PatchKernel::pruneStaleInterfaces()
 		long interfaceId = entry.first;
 		danglingInterfaces.push_back(interfaceId);
 	}
-	deleteInterfaces(danglingInterfaces, false, true);
+	deleteInterfaces(danglingInterfaces, false);
 }
 
 /*!

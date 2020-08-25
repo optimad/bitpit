@@ -541,8 +541,8 @@ public:
 	InterfaceIterator addInterface(ElementType type, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(ElementType type, const std::vector<long> &connectivity, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
-	bool deleteInterface(long id, bool updateNeighs = true, bool delayed = false);
-	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
+	bool deleteInterface(long id, bool updateNeighs = true);
+	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true);
 	long countFreeInterfaces() const;
 	long countOrphanInterfaces() const;
 	std::vector<long> findOrphanInterfaces() const;
