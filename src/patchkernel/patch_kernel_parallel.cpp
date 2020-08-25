@@ -1892,31 +1892,22 @@ void PatchKernel::_partitioningAlter_applyGhostCellOwnershipChanges(int sendRank
 void PatchKernel::_partitioningAlter_deleteGhosts()
 {
     // Delete ghost cells
-    std::unordered_set<long> involvedInterfaces;
-
     std::vector<long> cellsDeleteList;
     cellsDeleteList.reserve(m_ghostCellOwners.size());
     for (const auto &entry : m_ghostCellOwners) {
         long cellId = entry.first;
-        const Cell &cell = getCell(cellId);
-
-        const long *interfaces = cell.getInterfaces();
-        const int nCellInterfaces = cell.getInterfaceCount();
-        for (int i = 0; i < nCellInterfaces; ++i) {
-            long interfaceId = interfaces[i];
-            involvedInterfaces.insert(interfaceId);
-        }
-
         cellsDeleteList.emplace_back(cellId);
     }
 
-    deleteCells(cellsDeleteList, true, true);
+    deleteCells(cellsDeleteList, false, true);
 
-    // Delete all involved interfaces
+    // Prune stale adjacencies
+    pruneStaleAdjacencies();
+
+    // Prune stale interfaces
     //
     // Interfaces will be re-created after the partitioning.
-    std::vector<long> interfacesDeleteOverall(involvedInterfaces.begin(), involvedInterfaces.end());
-    deleteInterfaces(interfacesDeleteOverall, true, true);
+    pruneStaleInterfaces();
 
     // Delete vertices no longer used
     deleteOrphanVertices();
@@ -2480,7 +2471,15 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, true, true);
+        deleteCells(deleteList, false, true);
+
+        // Prune cell adjacencies and interfaces
+        //
+        // At this stage we cannot fully update adjacencies and interfaces, but
+        // we need to remove stale adjacencies and interfaces.
+        pruneStaleAdjacencies();
+
+        pruneStaleInterfaces();
 
         // If we are sending many cells try to reduced the used memory
         bool keepMemoryLimited = (nOutgoingCells > ACTIVATE_MEMORY_LIMIT_THRESHOLD * getInternalCellCount());
@@ -2488,8 +2487,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             // Squeeze cells
             squeezeCells();
 
-            // Delete orphan interfaces
-            deleteOrphanInterfaces();
+            // Squeeze interfaces
             squeezeInterfaces();
 
             // Delete orphan vertices
@@ -2520,7 +2518,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, true, true);
+        deleteCells(deleteList, false, true);
+
+        // Prune cell adjacencies
+        //
+        // At this stage we cannot fully update the adjacencies, but we need
+        // to remove stale adjacencies.
+        pruneStaleAdjacencies();
 
         // Update cell adjacencies
         updateAdjacencies();
@@ -2578,10 +2582,15 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             }
         }
 
-        deleteCells(deleteList, true, true);
+        deleteCells(deleteList, false, true);
 
-        // Delete orphan interfaces
-        deleteOrphanInterfaces();
+        // Prune cell adjacencies and interfaces
+        //
+        // At this stage we cannot fully update adjacencies and interfaces, but
+        // we need to remove stale adjacencies and interfaces.
+        pruneStaleAdjacencies();
+
+        pruneStaleInterfaces();
 
         // Delete orphan vertices
         deleteOrphanVertices();
