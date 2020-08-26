@@ -138,6 +138,9 @@ namespace bitpit {
 #else
     ParaTree::ParaTree(const std::string &logfile )
 #endif
+#if BITPIT_ENABLE_MPI==1
+        : m_comm(MPI_COMM_NULL)
+#endif
     {
 #if BITPIT_ENABLE_MPI==1
         initialize(logfile, comm);
@@ -161,6 +164,9 @@ namespace bitpit {
     ParaTree::ParaTree(uint8_t dim, const std::string &logfile )
 #endif
         : m_octree(dim), m_trans(dim)
+#if BITPIT_ENABLE_MPI==1
+          , m_comm(MPI_COMM_NULL)
+#endif
     {
 #if BITPIT_ENABLE_MPI==1
         initialize(dim, logfile, comm);
@@ -186,6 +192,9 @@ namespace bitpit {
     ParaTree::ParaTree(std::istream &stream, const std::string &logfile, MPI_Comm comm)
 #else
     ParaTree::ParaTree(std::istream &stream, const std::string &logfile)
+#endif
+#if BITPIT_ENABLE_MPI==1
+        : m_comm(MPI_COMM_NULL)
 #endif
     {
 #if BITPIT_ENABLE_MPI==1
@@ -245,7 +254,7 @@ namespace bitpit {
 #endif
     {
 #if BITPIT_ENABLE_MPI==1
-        setComm(other.m_comm);
+        _initializeCommunicator(other.m_comm);
 #endif
     }
 
@@ -254,23 +263,33 @@ namespace bitpit {
     // =================================================================================== //
 
 #if BITPIT_ENABLE_MPI==1
-    /*! Internal function to initialize the communications
-     * \param[in] comm The MPI communicator used by the parallel octree.
+    /*! Internal function to initialize the MPI communicator to be used for
+     * parallel communications.
+     * The tree will not use the specified communicator directly, instead a
+     * duplicates is ceated.
+     * \param communicator is the communicator to be used for parallel
+     * communications.
      */
     void
-    ParaTree::_initializeCommunications(MPI_Comm comm) {
-        // Set a null communicator
-        m_comm = MPI_COMM_NULL;
-
-        //Set the number of ghost layers
-        m_nofGhostLayers = 1;
-
-        // Set the real communicator and initialize partition data
-        if (comm != MPI_COMM_NULL) {
-            setComm(comm);
-        } else {
-            _initializePartitions();
+    ParaTree::_initializeCommunicator(MPI_Comm communicator)
+    {
+        // Communicator can be set just once
+        if (isCommSet()) {
+            throw std::runtime_error ("PABLO communicator can be set just once");
         }
+
+        // Early return if the communicator is a null communicator
+        if (communicator == MPI_COMM_NULL) {
+            m_comm = MPI_COMM_NULL;
+            return;
+        }
+
+        // Create a copy of the user-specified communicator
+        //
+        // No library routine should use MPI_COMM_WORLD as the communicator;
+        // instead, a duplicate of a user-specified communicator should always
+        // be used.
+        MPI_Comm_dup(communicator, &m_comm);
     }
 #endif
 
@@ -327,6 +346,9 @@ namespace bitpit {
 
         // Set the dimension to a dummy value
         setDim(dim);
+
+        // Initialize the number of ghost layers
+        m_nofGhostLayers = 1;
     }
 
     /*! Initialize a dummy octree
@@ -344,12 +366,12 @@ namespace bitpit {
     ParaTree::initialize(const std::string &logfile) {
 #endif
 #if BITPIT_ENABLE_MPI==1
-        // Initialize communications
-        _initializeCommunications(comm);
-#else
+        // Initialize the communicator
+        _initializeCommunicator(comm);
+
+#endif
         // Initialize partitions
         _initializePartitions();
-#endif
 
         // Initialized the tree
         _initialize(0, logfile);
@@ -371,12 +393,12 @@ namespace bitpit {
     ParaTree::initialize(uint8_t dim, const std::string &logfile) {
 #endif
 #if BITPIT_ENABLE_MPI==1
-        // Initialize communications
-        _initializeCommunications(comm);
-#else
+        // Initialize the communicator
+        _initializeCommunicator(comm);
+
+#endif
         // Initialize partitions
         _initializePartitions();
-#endif
 
         // Initialized the tree
         if (dim < 2 || dim > 3) {
@@ -823,22 +845,13 @@ namespace bitpit {
     void
     ParaTree::setComm(MPI_Comm communicator)
     {
-        // Communication can be set just once
-        if (isCommSet()) {
-            throw std::runtime_error ("PABLO communicator can be set just once");
-        }
-
         // The communicator has to be valid
         if (communicator == MPI_COMM_NULL) {
             throw std::runtime_error ("PABLO communicator is not valid");
         }
 
-        // Create a copy of the user-specified communicator
-        //
-        // No library routine should use MPI_COMM_WORLD as the communicator;
-        // instead, a duplicate of a user-specified communicator should always
-        // be used.
-        MPI_Comm_dup(communicator, &m_comm);
+        // Initialize the communicator
+        _initializeCommunicator(communicator);
 
         // Initialize partition data
         _initializePartitions();
