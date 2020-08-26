@@ -68,9 +68,15 @@ public:
 	VolOctree();
 	VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh);
 	VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh);
+	VolOctree(std::istream &stream);
+#if BITPIT_ENABLE_MPI==1
+	VolOctree(MPI_Comm communicator, std::size_t haloSize = 1);
+	VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize = 1);
+	VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize = 1);
+	VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t haloSize = 1);
+#endif
 	VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
 	VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
-	VolOctree(std::istream &stream);
 
 	~VolOctree();
 
@@ -116,13 +122,15 @@ public:
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center) override;
 
 #if BITPIT_ENABLE_MPI==1
-	void setCommunicator(MPI_Comm communicator) override;
-
 	int getCellHaloLayer(long id) const override;
 #endif
 
 protected:
 	VolOctree(const VolOctree &other);
+
+#if BITPIT_ENABLE_MPI==1
+	void setCommunicator(MPI_Comm communicator) override;
+#endif
 
 	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
 
@@ -263,6 +271,14 @@ private:
 
 	void computePartitioningOctantWeights(const std::unordered_map<long, double> &cellWeights, double defaultWeight);
 	void clearPartitioningOctantWeights();
+
+#if BITPIT_ENABLE_MPI==1
+	void initializeTree(std::unique_ptr<PabloUniform> *adopter, std::size_t haloSize);
+	void initializeTreePartitioning();
+	void initializeTreeHaloSize(std::size_t haloSize);
+#else
+	void initializeTree(std::unique_ptr<PabloUniform> *adopter);
+#endif
 };
 
 }

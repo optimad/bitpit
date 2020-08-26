@@ -49,21 +49,21 @@ namespace bitpit {
 const int PatchKernel::DEFAULT_PARTITIONING_WEIGTH = 1.;
 
 /*!
-	Sets the MPI communicator to be used for parallel communications.
+	Initialize the MPI communicator to be used for parallel communications.
 
 	\param communicator is the communicator to be used for parallel
 	communications.
 */
-void PatchKernel::setCommunicator(MPI_Comm communicator)
+void PatchKernel::initializeCommunicator(MPI_Comm communicator)
 {
-	// Communication can be set just once
-	if (isCommunicatorSet()) {
-		throw std::runtime_error ("Patch communicator can be set just once");
-	}
-
-	// The communicator has to be valid
+	// Early return if setting a null communicator
 	if (communicator == MPI_COMM_NULL) {
-		throw std::runtime_error ("Patch communicator is not valid");
+		m_communicator = communicator;
+
+		m_nProcessors = 1;
+		m_rank        = 0;
+
+		return;
 	}
 
 	// Creat a copy of the user-specified communicator
@@ -81,6 +81,28 @@ void PatchKernel::setCommunicator(MPI_Comm communicator)
 	if (m_nProcessors > 1) {
 		m_vtk.setParallel(m_nProcessors, m_rank);
 	}
+}
+
+/*!
+	Sets the MPI communicator to be used for parallel communications.
+
+	\param communicator is the communicator to be used for parallel
+	communications.
+*/
+void PatchKernel::setCommunicator(MPI_Comm communicator)
+{
+	// Communication can be set just once
+	if (isCommunicatorSet()) {
+		throw std::runtime_error ("Patch communicator can be set just once");
+	}
+
+	// The communicator has to be valid
+	if (communicator == MPI_COMM_NULL) {
+		throw std::runtime_error ("Patch communicator is not valid");
+	}
+
+	// Set the communicator
+	initializeCommunicator(communicator);
 }
 
 /*!
@@ -192,6 +214,19 @@ void PatchKernel::updateOwner()
 }
 
 /*!
+	Initialize the size, expressed in number of layers, of the ghost cells halo.
+
+	No checks will be perfomered on the validity of the halo size.
+
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+void PatchKernel::initializeHaloSize(std::size_t haloSize)
+{
+	m_haloSize = haloSize;
+}
+
+/*!
 	Sets the size, expressed in number of layers, of the ghost cells halo.
 
 	\param haloSize is the size, expressed in number of layers, of the ghost
@@ -203,16 +238,16 @@ void PatchKernel::setHaloSize(std::size_t haloSize)
 		throw std::runtime_error ("Halo size can only be set before partitionig the patch.");
 	}
 
+	if (m_haloSize == haloSize) {
+		return;
+	}
+
 	std::size_t maxHaloSize = _getMaxHaloSize();
 	if (haloSize > maxHaloSize) {
 		throw std::runtime_error ("Halo size exceeds the maximum allowed value.");
 	}
 
-	if (m_haloSize == haloSize) {
-        return;
-    }
-
-	m_haloSize = haloSize;
+	initializeHaloSize(haloSize);
 
 	_setHaloSize(haloSize);
 

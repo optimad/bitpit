@@ -33,6 +33,18 @@ using namespace std;
 namespace bitpit {
 
 /*!
+	Initialize the size, expressed in number of layers, of the tree ghost
+	cells halo.
+
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+void VolOctree::initializeTreeHaloSize(std::size_t haloSize)
+{
+	m_tree->setNofGhostLayers(haloSize);
+}
+
+/*!
 	Sets the MPI communicator to be used for parallel communications.
 
 	\param communicator is the communicator to be used for parallel
@@ -84,7 +96,7 @@ std::size_t VolOctree::_getMaxHaloSize()
 */
 void VolOctree::_setHaloSize(std::size_t haloSize)
 {
-	m_tree->setNofGhostLayers(haloSize);
+	initializeTreeHaloSize(haloSize);
 }
 
 /*!

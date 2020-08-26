@@ -43,6 +43,12 @@ public:
     SurfUnstructured(int patch_dim, int space_dim);
     SurfUnstructured(int id, int patch_dim, int space_dim);
     SurfUnstructured(std::istream &stream);
+#if BITPIT_ENABLE_MPI==1
+    SurfUnstructured(MPI_Comm communicator);
+    SurfUnstructured(int patch_dim, int space_dim, MPI_Comm communicator);
+    SurfUnstructured(int id, int patch_dim, int space_dim, MPI_Comm communicator);
+    SurfUnstructured(std::istream &stream, MPI_Comm communicator);
+#endif
 
     // Clone
     std::unique_ptr<PatchKernel> clone() const override;

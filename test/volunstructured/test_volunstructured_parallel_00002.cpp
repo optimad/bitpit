@@ -112,15 +112,12 @@ int subtest_001(int rank)
     // Create the patch
     log::cout() << "Creating patch..." << std::endl;
 
-    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3));
+    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD));
     if (rank == 0) {
         fillMesh(patch.get());
     }
     patch->initializeAdjacencies();
     patch->initializeInterfaces();
-
-    // Set patch communicator
-    patch->setCommunicator(MPI_COMM_WORLD);
 
     // Show patch info
     log::cout() << "Cell count: " << patch->getCellCount() << std::endl;

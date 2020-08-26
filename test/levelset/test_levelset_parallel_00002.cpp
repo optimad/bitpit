@@ -108,7 +108,7 @@ int subtest_001(int rank)
     };
 
     dh = h / 16. ;
-    bitpit::VolOctree    mesh(dimensions, meshMin, h, dh );
+    bitpit::VolOctree    mesh(dimensions, meshMin, h, dh, MPI_COMM_WORLD);
     mesh.initializeAdjacencies();
     mesh.initializeInterfaces();
     mesh.update() ;
@@ -148,14 +148,11 @@ int subtest_001(int rank)
 
     elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
-    if(rank==0){
-        mesh.getVTK().setName("levelset_parallel_002_serial");
-        mesh.write() ;
-    }
-
+    mesh.getVTK().setName("levelset_parallel_002_serial");
+    mesh.write() ;
 
     // Mesh Partitioning
-    mapper = mesh.partition(MPI_COMM_WORLD, true) ;
+    mapper = mesh.partition(true) ;
 
     start = std::chrono::system_clock::now();
     levelset.partition(mapper) ;

@@ -40,8 +40,7 @@ using namespace bitpit;
 int subtest_001(int rank)
 {
     // Create the patch
-    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3));
-    patch->setCommunicator(MPI_COMM_WORLD);
+    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD));
     patch->getVTK().setName("test_00003_partitioned_mesh");
     if (rank == 0) {
         patch->addVertex({{0.00000000, 0.00000000,  0.00000000}},  1);

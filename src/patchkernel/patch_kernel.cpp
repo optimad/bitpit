@@ -49,31 +49,72 @@ namespace bitpit {
 */
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(bool expert)
+#if BITPIT_ENABLE_MPI==1
+    : PatchKernel(MPI_COMM_NULL, 0, expert)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool expert)
+#endif
 	: m_expert(expert)
 {
 	// Initialize the patch
+#if BITPIT_ENABLE_MPI==1
+	initialize(communicator, haloSize);
+#else
 	initialize();
+#endif
 
 	// Register the patch
 	patch::manager().registerPatch(this);
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(int dimension, bool expert)
+#if BITPIT_ENABLE_MPI==1
+    : PatchKernel(dimension, MPI_COMM_NULL, 0, expert)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param dimension is the dimension of the patch
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+#endif
 	: m_expert(expert)
 {
 	// Initialize the patch
+#if BITPIT_ENABLE_MPI==1
+	initialize(communicator, haloSize);
+#else
 	initialize();
+#endif
 
 	// Register the patch
 	patch::manager().registerPatch(this);
@@ -83,17 +124,39 @@ PatchKernel::PatchKernel(int dimension, bool expert)
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(int id, int dimension, bool expert)
+#if BITPIT_ENABLE_MPI==1
+    : PatchKernel(id, dimension, MPI_COMM_NULL, 0, expert)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+#endif
 	: m_expert(expert)
 {
 	// Initialize the patch
+#if BITPIT_ENABLE_MPI==1
+	initialize(communicator, haloSize);
+#else
 	initialize();
+#endif
 
 	// Register the patch
 	patch::manager().registerPatch(this, id);
@@ -225,7 +288,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 	// Set the communicator
 	MPI_Comm communicator = other.getCommunicator();
 	if (communicator != MPI_COMM_NULL) {
-		setCommunicator(communicator);
+		initializeCommunicator(communicator);
 	}
 #endif
 }
@@ -233,7 +296,17 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 /*!
 	Initialize the patch
 */
+#if BITPIT_ENABLE_MPI==1
+/*!
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+void PatchKernel::initialize(MPI_Comm communicator, std::size_t haloSize)
+#else
 void PatchKernel::initialize()
+#endif
 {
 	// Id
 	m_id = PatchManager::AUTOMATIC_ID;
@@ -281,14 +354,14 @@ void PatchKernel::initialize()
 	// initialization.
 	setAdaptionStatus(ADAPTION_UNSUPPORTED);
 
-	// Parallel information
-	m_rank        = 0;
-	m_nProcessors = 1;
 #if BITPIT_ENABLE_MPI==1
+	// Initialize communicator
+	initializeCommunicator(communicator);
+
+	// Set halo size
+	initializeHaloSize(haloSize);
 
 	// Patch is not partitioned
-	m_communicator = MPI_COMM_NULL;
-	m_haloSize = 0;
 	setPartitioned(false);
 
 	// Set the partitioning as unsupported
@@ -306,6 +379,10 @@ void PatchKernel::initialize()
 	// Initialize partitioning tags
 	m_partitioningCellsTag    = -1;
 	m_partitioningVerticesTag = -1;
+#else
+	// Dummy parallel information
+	m_rank        = 0;
+	m_nProcessors = 1;
 #endif
 
 	// Initialize the geometrical tolerance

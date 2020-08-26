@@ -40,10 +40,25 @@ namespace bitpit {
 */
 
 /*!
-	Creates an uninitialized patch.
+	Creates an uninitialized serial patch.
 */
 VolUnstructured::VolUnstructured()
+#if BITPIT_ENABLE_MPI==1
+	: VolUnstructured(MPI_COMM_NULL)
+{
+}
+
+/*!
+	Creates an uninitialized partitioned patch.
+
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+*/
+VolUnstructured::VolUnstructured(MPI_Comm communicator)
+	: VolumeKernel(communicator, 1, true)
+#else
 	: VolumeKernel(true)
+#endif
 {
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning
@@ -52,23 +67,56 @@ VolUnstructured::VolUnstructured()
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param dimension is the dimension of the patch
 */
 VolUnstructured::VolUnstructured(int dimension)
-	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension)
+#if BITPIT_ENABLE_MPI==1
+	: VolUnstructured(dimension, MPI_COMM_NULL)
 {
 }
 
 /*!
-	Creates a new patch.
+	Creates a partitioned patch.
+
+	\param dimension is the dimension of the patch
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+*/
+VolUnstructured::VolUnstructured(int dimension, MPI_Comm communicator)
+	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension, communicator)
+#else
+	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension)
+#endif
+{
+}
+
+/*!
+	Creates a serial patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 */
 VolUnstructured::VolUnstructured(int id, int dimension)
+#if BITPIT_ENABLE_MPI==1
+	: VolUnstructured(id, dimension, MPI_COMM_NULL)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param id is the id of the patch
+	\param dimension is the dimension of the patch
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+*/
+VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator)
+	: VolumeKernel(id, dimension, communicator, 1, true)
+#else
 	: VolumeKernel(id, dimension, true)
+#endif
 {
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning

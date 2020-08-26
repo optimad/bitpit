@@ -58,25 +58,63 @@ const unsigned short SurfaceKernel::SELECT_QUAD     = 2;
 const unsigned short SurfaceKernel::SELECT_ALL      = 3;
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param expert if true, the expert mode will be enabled
 */
 SurfaceKernel::SurfaceKernel(bool expert)
+#if BITPIT_ENABLE_MPI==1
+	: SurfaceKernel(MPI_COMM_NULL, 0, expert)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\param expert if true, the expert mode will be enabled
+*/
+SurfaceKernel::SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, bool expert)
+	: PatchKernel(communicator, haloSize, expert)
+#else
 	: PatchKernel(expert)
+#endif
 {
 	initialize();
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param patch_dim is the dimension of the patch
 	\param space_dim is the dimension of the space
 	\param expert if true, the expert mode will be enabled
 */
 SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
+#if BITPIT_ENABLE_MPI==1
+	: SurfaceKernel(patch_dim, space_dim, MPI_COMM_NULL, 0, expert)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param patch_dim is the dimension of the patch
+	\param space_dim is the dimension of the space
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\param expert if true, the expert mode will be enabled
+*/
+SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert)
+	: PatchKernel(patch_dim, communicator, haloSize, expert)
+#else
 	: PatchKernel(patch_dim, expert)
+#endif
 {
     initialize();
 
@@ -85,7 +123,7 @@ SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param id is the id that will be assigned to the patch
 	\param patch_dim is the dimension of the patch
@@ -93,7 +131,28 @@ SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
 	\param expert if true, the expert mode will be enabled
 */
 SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, bool expert)
+#if BITPIT_ENABLE_MPI==1
+    : SurfaceKernel(id, patch_dim, space_dim, MPI_COMM_NULL, 0, expert)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param id is the id that will be assigned to the patch
+	\param patch_dim is the dimension of the patch
+	\param space_dim is the dimension of the space
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\param expert if true, the expert mode will be enabled
+*/
+SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert)
+	: PatchKernel(id, patch_dim, communicator, haloSize, expert)
+#else
 	: PatchKernel(id, patch_dim, expert)
+#endif
 {
     m_spaceDim = space_dim;
 }

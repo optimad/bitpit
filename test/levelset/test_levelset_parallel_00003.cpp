@@ -81,7 +81,7 @@ int subtest_001(int rank)
         h = std::max(h, meshMax[i] - meshMin[i]);
     }
 
-    std::unique_ptr<bitpit::PabloUniform> octree = std::unique_ptr<bitpit::PabloUniform>(new bitpit::PabloUniform(meshMin[0], meshMin[1], meshMin[2], h, dimensions));
+    std::unique_ptr<bitpit::PabloUniform> octree = std::unique_ptr<bitpit::PabloUniform>(new bitpit::PabloUniform(meshMin[0], meshMin[1], meshMin[2], h, dimensions, bitpit::PabloUniform::DEFAULT_LOG_FILE, MPI_COMM_WORLD));
     octree->adaptGlobalRefine();
     octree->adaptGlobalRefine();
     octree->adaptGlobalRefine();
@@ -98,7 +98,7 @@ int subtest_001(int rank)
     mesh.update();
 
     // Mesh Partitioning
-    mesh.partition(MPI_COMM_WORLD, false);
+    mesh.partition(false);
 
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock>    start, end;

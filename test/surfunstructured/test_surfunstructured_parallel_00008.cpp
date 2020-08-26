@@ -47,7 +47,7 @@ int subtest_001(int rank)
     //
 
     // Create the patch
-    SurfUnstructured mesh(2, 3);
+    SurfUnstructured mesh(2, 3, MPI_COMM_WORLD);
 
     // Build the adjacencies
     mesh.initializeAdjacencies();
@@ -56,7 +56,7 @@ int subtest_001(int rank)
     mesh.initializeInterfaces();
 
     // Partition the patch
-    mesh.partition(MPI_COMM_WORLD, false);
+    mesh.partition(false);
 
     // Fill the patch
     if (rank == 0) {

@@ -680,17 +680,17 @@ public:
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	double evalPartitioningUnbalance() const;
 	double evalPartitioningUnbalance(const std::unordered_map<long, double> &cellWeights) const;
-	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
+	BITPIT_DEPRECATED(std::vector<adaption::Info> partition(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1));
 	std::vector<adaption::Info> partition(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, bool squeezeStorage = false);
-	std::vector<adaption::Info> partition(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
+	BITPIT_DEPRECATED(std::vector<adaption::Info> partition(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1));
 	std::vector<adaption::Info> partition(const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, bool squeezeStorage = false);
-	std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1);
+	BITPIT_DEPRECATED(std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackPartitioning, bool squeezeStorage = false, std::size_t haloSize = 1));
 	std::vector<adaption::Info> partition(bool trackPartitioning, bool squeezeStorage = false);
-	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, std::size_t haloSize = 1);
+	BITPIT_DEPRECATED(std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, int> &cellRanks, bool trackPartitioning, std::size_t haloSize = 1));
 	std::vector<adaption::Info> partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning);
-	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, std::size_t haloSize = 1);
+	BITPIT_DEPRECATED(std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, const std::unordered_map<long, double> &cellWeights, bool trackPartitioning, std::size_t haloSize = 1));
 	std::vector<adaption::Info> partitioningPrepare(const std::unordered_map<long, double> &cellWeights, bool trackPartitioning);
-	std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, bool trackPartitioning, std::size_t haloSize = 1);
+	BITPIT_DEPRECATED(std::vector<adaption::Info> partitioningPrepare(MPI_Comm communicator, bool trackPartitioning, std::size_t haloSize = 1));
 	std::vector<adaption::Info> partitioningPrepare(bool trackPartitioning);
 	std::vector<adaption::Info> partitioningAlter(bool trackPartitioning = true, bool squeezeStorage = false);
 	void partitioningCleanup();
@@ -726,6 +726,11 @@ protected:
 	PatchKernel(bool expert);
 	PatchKernel(int dimension, bool expert);
 	PatchKernel(int id, int dimension, bool expert);
+#if BITPIT_ENABLE_MPI==1
+	PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
+	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+#endif
 	PatchKernel(const PatchKernel &other);
     PatchKernel & operator=(const PatchKernel &other) = delete;
 
@@ -969,7 +974,13 @@ private:
 	std::unordered_map<long, int> evaluateExchangeVertexOwners() const;
 #endif
 
+#if BITPIT_ENABLE_MPI==1
+	void initialize(MPI_Comm communicator, std::size_t haloSize);
+	void initializeHaloSize(std::size_t haloSize);
+	void initializeCommunicator(MPI_Comm communicator);
+#else
 	void initialize();
+#endif
 
 	void finalizeAlterations(bool squeezeStorage = false);
 

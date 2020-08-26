@@ -48,10 +48,7 @@ int subtest_001()
     log::cout() << std::endl;
     log::cout() << "Importing STL..." << std::endl;
 
-    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2, 3));
-
-    // Set communicator ----------------------------------------------------- //
-    surfaceMesh->setCommunicator(MPI_COMM_WORLD);
+    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2, 3, MPI_COMM_WORLD));
 
     int myRank = surfaceMesh->getRank();
 

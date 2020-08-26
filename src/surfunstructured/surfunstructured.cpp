@@ -39,10 +39,25 @@ namespace bitpit {
 */
 
 /*!
-	Creates an uninitialized patch.
+	Creates an uninitialized serial patch.
 */
 SurfUnstructured::SurfUnstructured()
+#if BITPIT_ENABLE_MPI==1
+	: SurfUnstructured(MPI_COMM_NULL)
+{
+}
+
+/*!
+	Creates an uninitialized partitioned patch.
+
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+*/
+SurfUnstructured::SurfUnstructured(MPI_Comm communicator)
+	: SurfaceKernel(communicator, 1, true)
+#else
 	: SurfaceKernel(true)
+#endif
 {
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning
@@ -51,13 +66,30 @@ SurfUnstructured::SurfUnstructured()
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param patch_dim is the dimension of the patch
 	\param space_dim is the dimension of the space
 */
 SurfUnstructured::SurfUnstructured(int patch_dim, int space_dim)
+#if BITPIT_ENABLE_MPI==1
+	: SurfUnstructured(patch_dim, space_dim, MPI_COMM_NULL)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param patch_dim is the dimension of the patch
+	\param space_dim is the dimension of the space
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+*/
+SurfUnstructured::SurfUnstructured(int patch_dim, int space_dim, MPI_Comm communicator)
+	: SurfaceKernel(PatchManager::AUTOMATIC_ID, patch_dim, space_dim, communicator, 1, true)
+#else
 	: SurfaceKernel(PatchManager::AUTOMATIC_ID, patch_dim, space_dim, true)
+#endif
 {
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning
@@ -66,14 +98,32 @@ SurfUnstructured::SurfUnstructured(int patch_dim, int space_dim)
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param id is the id of the patch
 	\param patch_dim is the dimension of the patch
 	\param space_dim is the dimension of the space
 */
 SurfUnstructured::SurfUnstructured(int id, int patch_dim, int space_dim)
+#if BITPIT_ENABLE_MPI==1
+	: SurfUnstructured(id, patch_dim, space_dim, MPI_COMM_NULL)
+{
+}
+
+/*!
+	Creates a partitioned patch.
+
+	\param id is the id of the patch
+	\param patch_dim is the dimension of the patch
+	\param space_dim is the dimension of the space
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+*/
+SurfUnstructured::SurfUnstructured(int id, int patch_dim, int space_dim, MPI_Comm communicator)
+	: SurfaceKernel(id, patch_dim, space_dim, communicator, 1, true)
+#else
 	: SurfaceKernel(id, patch_dim, space_dim, true)
+#endif
 {
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning
@@ -82,12 +132,29 @@ SurfUnstructured::SurfUnstructured(int id, int patch_dim, int space_dim)
 }
 
 /*!
-	Creates a new patch restoring the patch saved in the specified stream.
+	Creates a serial patch restoring the patch saved in the specified stream.
 
 	\param stream is the stream to read from
 */
 SurfUnstructured::SurfUnstructured(std::istream &stream)
+#if BITPIT_ENABLE_MPI==1
+	: SurfUnstructured(stream, MPI_COMM_NULL)
+{
+}
+
+/*!
+	Creates a partitioned patch restoring the patch saved in the specified
+	stream.
+
+	\param stream is the stream to read from
+	\param communicator is the communicator to be used for exchanging data
+	among the processes
+*/
+SurfUnstructured::SurfUnstructured(std::istream &stream, MPI_Comm communicator)
+	: SurfaceKernel(communicator, 1, false)
+#else
 	: SurfaceKernel(false)
+#endif
 {
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning

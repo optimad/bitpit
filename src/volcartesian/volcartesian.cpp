@@ -67,7 +67,7 @@ VolCartesian::VolCartesian()
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -83,7 +83,7 @@ VolCartesian::VolCartesian(int dimension,
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
@@ -106,7 +106,7 @@ VolCartesian::VolCartesian(int id, int dimension,
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -121,7 +121,7 @@ VolCartesian::VolCartesian(int dimension,
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
@@ -143,7 +143,7 @@ VolCartesian::VolCartesian(int id, int dimension,
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -158,7 +158,7 @@ VolCartesian::VolCartesian(int dimension,
 }
 
 /*!
-	Creates a new patch.
+	Creates a serial patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
@@ -181,7 +181,7 @@ VolCartesian::VolCartesian(int id, int dimension,
 }
 
 /*!
-	Creates a new patch restoring the patch saved in the specified stream.
+	Creates a serial patch restoring the patch saved in the specified stream.
 
 	\param stream is the stream to read from
 */

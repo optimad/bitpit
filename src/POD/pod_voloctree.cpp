@@ -63,12 +63,11 @@ PODVolOctree::~PODVolOctree()
  */
 VolumeKernel* PODVolOctree::createMesh()
 {
-    VolumeKernel *mesh = new VolOctree();
-
+    VolumeKernel *mesh;
 #if BITPIT_ENABLE_MPI
-    if (isCommunicatorSet()) {
-        mesh->setCommunicator(getCommunicator());
-    }
+    mesh = new VolOctree(getCommunicator());
+#else
+    mesh = new VolOctree();
 #endif
 
     return mesh;

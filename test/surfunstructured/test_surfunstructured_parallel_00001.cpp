@@ -296,7 +296,7 @@ void COM_step(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                     envelope(2, 3);
+SurfUnstructured                     envelope(2, 3, MPI_COMM_WORLD);
 std::unordered_map<long, int>        cellRanks;
 
 // Counters
@@ -357,22 +357,10 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                     mesh(2, 3);
+SurfUnstructured                     mesh(2, 3, MPI_COMM_WORLD);
 
 // Counters
 // none
-
-// ========================================================================== //
-// SET MESH ATTRIBUTES                                                        //
-// ========================================================================== //
-{
-    // Scope variables ------------------------------------------------------ //
-    // none
-
-    // Set MPI communicator ------------------------------------------------- //
-    mesh.setCommunicator(MPI_COMM_WORLD);
-
-}
 
 // ========================================================================== //
 // OUTPUT MESSAGE                                                             //
@@ -396,7 +384,7 @@ if (mesh.getRank() == 0) {
 {
     // Scope variables ------------------------------------------------------ //
     stringstream                name;
-    SurfUnstructured                envelope(2, 3);
+    SurfUnstructured                envelope(2, 3, MPI_COMM_WORLD);
 
     // Generate dummy triangulation ----------------------------------------- //
     if (mesh.getRank() == 0) {
@@ -509,23 +497,10 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured            mesh(2, 3);
+SurfUnstructured            mesh(2, 3, MPI_COMM_WORLD);
 
 // Counters
 // none
-
-// ========================================================================== //
-// SET MESH ATTRIBUTES                                                        //
-// ========================================================================== //
-{
-    // Scope variables ------------------------------------------------------ //
-    // none
-
-    // Set MPI communicator ------------------------------------------------- //
-    mesh.setExpert(true);
-    mesh.setCommunicator(MPI_COMM_WORLD);
-
-}
 
 // ========================================================================== //
 // OUTPUT MESSAGE                                                             //
@@ -726,7 +701,7 @@ int subtest_003(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured            mesh(2, 3);
+SurfUnstructured            mesh(2, 3, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -738,9 +713,8 @@ SurfUnstructured            mesh(2, 3);
     // Scope variables ------------------------------------------------------ //
     // none
 
-    // Set MPI communicator ------------------------------------------------- //
+    // Set expert mode ------------------------------------------------------ //
     mesh.setExpert(true);
-    mesh.setCommunicator(MPI_COMM_WORLD);
 
 }
 

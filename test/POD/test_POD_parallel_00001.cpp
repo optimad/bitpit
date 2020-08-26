@@ -50,8 +50,7 @@ int subtest_001(int rank, int nProcs)
     double dh = length/100;
 
     /**<Create the patch.*/
-    VolumeKernel * mesh = new VolOctree(2, origin, length, dh);
-    mesh->setCommunicator(MPI_COMM_WORLD);
+    VolumeKernel * mesh = new VolOctree(2, origin, length, dh, MPI_COMM_WORLD);
     mesh->initializeAdjacencies();
     mesh->initializeInterfaces();
     mesh->update();

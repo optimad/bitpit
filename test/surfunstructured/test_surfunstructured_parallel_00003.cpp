@@ -75,7 +75,7 @@ int subtest_001(
 
 // Local variables
 string                          in_name_bin = "./data/buddha.stl";
-SurfUnstructured                mesh(2, 3);
+SurfUnstructured                mesh(2, 3, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -89,9 +89,6 @@ SurfUnstructured                mesh(2, 3);
 
     // Set name ------- ----------------------------------------------------- //
     mesh.getVTK().setName("test_surfunstructured_parallel_00003_subtest_001");
-
-    // Set communicator ----------------------------------------------------- //
-    mesh.setCommunicator(MPI_COMM_WORLD);
 }
 
 // ========================================================================== //
@@ -273,7 +270,7 @@ int subtest_002(
 
 // Local variables
 string                          in_name_bin = "./data/disc.stl";
-SurfUnstructured                mesh(2, 3);
+SurfUnstructured                mesh(2, 3, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -287,9 +284,6 @@ SurfUnstructured                mesh(2, 3);
 
     // Set name ------- ----------------------------------------------------- //
     mesh.getVTK().setName("test_surfunstructured_parallel_00003_subtest_002");
-
-    // Set communicator ----------------------------------------------------- //
-    mesh.setCommunicator(MPI_COMM_WORLD);
 }
 
 // ========================================================================== //
@@ -471,7 +465,7 @@ int subtest_003(
 
 // Local variables
 string                          in_name_bin = "./data/circle.dgf";
-SurfUnstructured                mesh(1, 2);
+SurfUnstructured                mesh(1, 2, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -485,9 +479,6 @@ SurfUnstructured                mesh(1, 2);
 
     // Set name ------- ----------------------------------------------------- //
     mesh.getVTK().setName("test_surfunstructured_parallel_00003_subtest_003");
-
-    // Set communicator ----------------------------------------------------- //
-    mesh.setCommunicator(MPI_COMM_WORLD);
 }
 
 // ========================================================================== //

@@ -49,19 +49,19 @@ int subtest_001(int rank)
 	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 8;
 	double dh = 1.0;
-	int nGhostLayers = 16;
+	std::size_t nGhostLayers = 16;
 
 	log::cout() << "  >> 2D octree patch" << "\n";
 
 	// Create the patch
-	VolOctree *patch_2D = new VolOctree(2, origin, length, dh);
+	VolOctree *patch_2D = new VolOctree(2, origin, length, dh, MPI_COMM_WORLD, nGhostLayers);
 	patch_2D->getVTK().setName("octree_parallel_uniform_patch_2D");
 	patch_2D->initializeAdjacencies();
 	patch_2D->initializeInterfaces();
 	patch_2D->update();
 
 	// Partition the patch
-	patch_2D->partition(MPI_COMM_WORLD, true, true, nGhostLayers);
+	patch_2D->partition(true, true);
 
 	// Get information on patch numbering
 	PatchNumberingInfo patchNumberingInfo(patch_2D);
@@ -132,19 +132,19 @@ int subtest_002(int rank)
 	std::array<double, 3> origin = {{0., 0., 0.}};
 	double length = 8;
 	double dh = 1.0;
-	int nGhostLayers = 16;
+	std::size_t nGhostLayers = 16;
 
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
 	// Create the patch
-	VolOctree *patch_3D = new VolOctree(3, origin, length, dh);
+	VolOctree *patch_3D = new VolOctree(3, origin, length, dh, MPI_COMM_WORLD, nGhostLayers);
 	patch_3D->getVTK().setName("octree_parallel_uniform_patch_3D");
 	patch_3D->initializeAdjacencies();
 	patch_3D->initializeInterfaces();
 	patch_3D->update();
 
 	// Partition the patch
-	patch_3D->partition(MPI_COMM_WORLD, true, true, nGhostLayers);
+	patch_3D->partition(true, true);
 
 	// Get information on patch numbering
 	PatchNumberingInfo patchNumberingInfo(patch_3D);
