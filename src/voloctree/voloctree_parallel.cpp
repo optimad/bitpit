@@ -159,11 +159,18 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered
 */
 std::vector<adaption::Info> VolOctree::_partitioningAlter(bool trackPartitioning)
 {
+	std::vector<adaption::Info> partitioningData;
+
+	// Early return if the dimension of the tree is null
+	if (m_tree->getDim() == 0) {
+		return partitioningData;
+	}
+
 	// Updating the tree
 	m_tree->loadBalance(m_partitioningOctantWeights.get());
 
 	// Sync the patch
-	std::vector<adaption::Info> partitioningData = sync(trackPartitioning);
+	partitioningData = sync(trackPartitioning);
 
 	// The bounding box is frozen, it is not updated automatically
 	setBoundingBox();
