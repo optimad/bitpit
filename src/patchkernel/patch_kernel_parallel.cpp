@@ -2499,7 +2499,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         // Process cells
         //
 
-        // Wait until vertex communication is completed
+        // Wait until cell communication is completed
         MPI_Request *cellsRequest = cellsRequests.data() + sendRankIndex;
         MPI_Wait(cellsRequest, MPI_STATUS_IGNORE);
 
