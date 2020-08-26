@@ -45,6 +45,10 @@ namespace bitpit {
 VolUnstructured::VolUnstructured()
 	: VolumeKernel(true)
 {
+#if BITPIT_ENABLE_MPI==1
+	// This patch supports partitioning
+	setPartitioningStatus(PARTITIONING_CLEAN);
+#endif
 }
 
 /*!
@@ -55,10 +59,6 @@ VolUnstructured::VolUnstructured()
 VolUnstructured::VolUnstructured(int dimension)
 	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension)
 {
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
 }
 
 /*!
