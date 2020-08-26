@@ -93,9 +93,6 @@ void run(int rank, int nProcs)
         int dumpBlock = (nProcs > 1) ? rank : -1;
         std::string filename = "./data/test.0.mesh";
         IBinaryArchive binaryReader(filename, dumpBlock);
-#if BITPIT_ENABLE_MPI	
-        meshr->setCommunicator(MPI_COMM_WORLD);
-#endif
         meshr->restore(binaryReader.getStream());
         binaryReader.close();
     }
