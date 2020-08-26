@@ -66,7 +66,9 @@ VolumeKernel* PODVolOctree::createMesh()
     VolumeKernel *mesh = new VolOctree();
 
 #if BITPIT_ENABLE_MPI
-    mesh->setCommunicator(getCommunicator());
+    if (isCommunicatorSet()) {
+        mesh->setCommunicator(getCommunicator());
+    }
 #endif
 
     return mesh;
