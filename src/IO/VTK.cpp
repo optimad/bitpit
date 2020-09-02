@@ -695,12 +695,24 @@ void VTK::writeData( ){
     int                 length;
     char*               buffer ;
 
-    str.open( m_fh.getPath( ), std::ios::in | std::ios::out ) ;
+
+    //We need to open the file in binary mode in order for the seekg/tellg
+    //methods to work properly. ASCII mode does not guarantee a correct
+    //stream positioning, because of automatic jump of escape characters
+    // (e.g., "\n" on Unix or "\r\n" on Windows).
+    str.open( m_fh.getPath( ), std::ios::in | std::ios::out | std::ios::binary ) ;
     if (!str.is_open()) {
         throw std::runtime_error("Cannot create file \"" + m_fh.getName() + "\"" + " inside the directory \"" + m_fh.getDirectory() + "\"");
     }
 
+    //Position the input stream at the beginning
+    str.seekg(0, std::ios::beg);
+
     { // Write Ascii
+      //
+      // It is fine to write ASCII on a binary opened file because the method
+      // genericIO::flushBinary is basically a reinterpret_cast of chars into
+      // chars and ensures consistent results.
 
         position_insert = str.tellg();
 
@@ -795,20 +807,6 @@ void VTK::writeData( ){
         position_insert = str.tellg();
         genericIO::copyUntilEOFInString( str, buffer, length );
 
-        str.close();
-        str.clear();
-
-
-        //Reopening in binary mode
-        str.open( m_fh.getPath( ), std::ios::out | std::ios::in | std::ios::binary);
-        if (!str.is_open()) {
-            throw std::runtime_error("Cannot open file \"" + m_fh.getName() + "\"" + " inside the directory \"" + m_fh.getDirectory() + "\"");
-        }
-
-        str.seekg( position_insert) ;
-
-        //str.open( "data.dat", std::ios::out | std::ios::binary);
-
         //Writing first point data then cell data
         for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
@@ -881,7 +879,7 @@ void VTK::writeData( ){
         delete [] buffer ;
     }
 
-    // Closing Appended Secyion
+    // Closing Appended Section
     str.close();
 
 }
@@ -998,7 +996,7 @@ void VTK::readData( ){
     uint32_t                  nbytes32 ;
     uint64_t                  nbytes64 ;
 
-    str.open( m_fh.getPath( ), std::ios::in ) ;
+    str.open( m_fh.getPath( ), std::ios::in | std::ios::binary) ;
 
     //Read appended data
     //Go to the initial position of the appended section
@@ -1013,11 +1011,6 @@ void VTK::readData( ){
 
         position_appended = str.tellg();
 
-        str.close();
-        str.clear();
-
-        //Open in binary for read
-        str.open( m_fh.getPath( ), std::ios::in | std::ios::binary);
 
         //Read appended data
         for( auto & field : m_data){
@@ -1068,8 +1061,10 @@ void VTK::readData( ){
             }
         }
 
-        str.close();
-        str.open( m_fh.getPath( ), std::ios::in ) ;
+        //Leave the file opened in binary mode and reposition it to the start
+        //to allow using seekg/tellg later.
+        str.clear();
+        str.seekg(0, std::ios::beg) ;
 
     }
 
