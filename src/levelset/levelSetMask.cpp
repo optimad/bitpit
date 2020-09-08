@@ -204,7 +204,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::v
 
     envelope->squeeze();
     envelope->initializeAdjacencies();
-    envelope->buildInterfaces();
+    envelope->initializeInterfaces();
 
     envelope->getVTK().setName("geometry_002") ;
     envelope->write() ;

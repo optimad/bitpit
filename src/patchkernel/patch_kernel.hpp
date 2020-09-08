@@ -589,7 +589,8 @@ public:
 
 	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
 	bool areInterfacesDirty(bool global = false) const;
-	void buildInterfaces();
+	BITPIT_DEPRECATED(void buildInterfaces());
+	void initializeInterfaces(InterfacesBuildStrategy strategy = INTERFACES_AUTOMATIC);
 	void updateInterfaces(bool forcedUpdated = false);
 	void destroyInterfaces();
 

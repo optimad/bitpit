@@ -74,7 +74,7 @@ int subtest_001()
 	VolOctree *patch_2D = new VolOctree(2, origin, length, dh);
 	patch_2D->getVTK().setName("octree_uniform_patch_2D");
 	patch_2D->initializeAdjacencies();
-	patch_2D->buildInterfaces();
+	patch_2D->initializeInterfaces();
 	patch_2D->update();
 
 	log::cout() << "\n  >> 2D location test" << std::endl;
@@ -150,7 +150,7 @@ int subtest_002()
 	VolOctree *patch_3D = new VolOctree(3, origin, length, dh);
 	patch_3D->getVTK().setName("octree_uniform_patch_3D");
 	patch_3D->initializeAdjacencies();
-	patch_3D->buildInterfaces();
+	patch_3D->initializeInterfaces();
 	patch_3D->update();
 
 	log::cout() << "\n  >> 3D location test" << std::endl;

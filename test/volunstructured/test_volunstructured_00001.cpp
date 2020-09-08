@@ -91,7 +91,7 @@ int subtest_001()
     patch_2D->addCell(ElementType::POLYGON,  std::vector<long>({{ 5,  2,  8, 14, 7, 6}}));
 
     patch_2D->initializeAdjacencies();
-    patch_2D->buildInterfaces();
+    patch_2D->initializeInterfaces();
 
     patch_2D->update();
     patch_2D->write();
@@ -333,7 +333,7 @@ int subtest_002()
     patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{50, 49, 46, 42}}));
 
     patch_3D->initializeAdjacencies();
-    patch_3D->buildInterfaces();
+    patch_3D->initializeInterfaces();
 
     patch_3D->update();
     patch_3D->write();

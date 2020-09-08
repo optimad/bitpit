@@ -199,7 +199,7 @@ if (myRank == 0) {
     }
 
     mesh.partition(cellRanks, false);
-    mesh.buildInterfaces();
+    mesh.initializeInterfaces();
 
 }
 

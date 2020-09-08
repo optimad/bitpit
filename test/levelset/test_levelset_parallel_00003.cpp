@@ -94,7 +94,7 @@ int subtest_001(int rank)
 
     bitpit::VolOctree mesh(std::move(octree));
     mesh.initializeAdjacencies();
-    mesh.buildInterfaces();
+    mesh.initializeInterfaces();
     mesh.update();
 
     // Compute level set in narrow band

@@ -50,7 +50,7 @@ int subtest_001()
 	patch_2D_original->setCommunicator(MPI_COMM_WORLD);
 	patch_2D_original->getVTK().setName("octree_parallel_uniform_patch_2D");
 	patch_2D_original->initializeAdjacencies();
-	patch_2D_original->buildInterfaces();
+	patch_2D_original->initializeInterfaces();
 	patch_2D_original->update();
 	patch_2D_original->getVTK().setCounter(0);
 
@@ -120,7 +120,7 @@ int subtest_002()
 	patch_3D_original->setCommunicator(MPI_COMM_WORLD);
 	patch_3D_original->getVTK().setName("octree_parallel_uniform_patch_3D");
 	patch_3D_original->initializeAdjacencies();
-	patch_3D_original->buildInterfaces();
+	patch_3D_original->initializeInterfaces();
 	patch_3D_original->update();
 	patch_3D_original->getVTK().setCounter(0);
 

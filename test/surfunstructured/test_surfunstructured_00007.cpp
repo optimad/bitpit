@@ -207,7 +207,7 @@ int subtest_001()
 	// Generate a Dummy Triangulation
 	generateTestTriangulation(mesh);
 	mesh.initializeAdjacencies();
-	mesh.buildInterfaces();
+	mesh.initializeInterfaces();
 
 	// Mess around with the numbering
 	mesh.getVertices().updateId(0, 108);

@@ -117,7 +117,7 @@ int subtest_001(int rank)
         fillMesh(patch.get());
     }
     patch->initializeAdjacencies();
-    patch->buildInterfaces();
+    patch->initializeInterfaces();
 
     // Set patch communicator
     patch->setCommunicator(MPI_COMM_WORLD);

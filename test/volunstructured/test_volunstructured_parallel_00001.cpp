@@ -95,7 +95,7 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
     }
 
     patch_2D->initializeAdjacencies();
-    patch_2D->buildInterfaces();
+    patch_2D->initializeInterfaces();
 
     // Partition the patch
     std::unordered_map<long, int> cellRanks;
@@ -472,7 +472,7 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
     }
 
     patch_3D->initializeAdjacencies();
-    patch_3D->buildInterfaces();
+    patch_3D->initializeInterfaces();
 
     // Partition the patch
     std::unordered_map<long, int> cellRanks;

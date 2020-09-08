@@ -92,7 +92,7 @@ int subtest_001(VolUnstructured *patch_2D, VolUnstructured *patch_2D_restored)
     patch_2D->addCell(ElementType::POLYGON,  std::vector<long>({{ 5,  2,  8, 14, 7, 6}}));
 
     patch_2D->initializeAdjacencies();
-    patch_2D->buildInterfaces();
+    patch_2D->initializeInterfaces();
 
     // Show patch info
     log::cout() << "Cell count:   " << patch_2D->getCellCount() << std::endl;
@@ -400,7 +400,7 @@ int subtest_002(VolUnstructured *patch_3D, VolUnstructured *patch_3D_restored)
     patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{50, 49, 46, 42}}));
 
     patch_3D->initializeAdjacencies();
-    patch_3D->buildInterfaces();
+    patch_3D->initializeInterfaces();
 
     // Show patch info
     log::cout() << "Cell count:   " << patch_3D->getCellCount() << std::endl;

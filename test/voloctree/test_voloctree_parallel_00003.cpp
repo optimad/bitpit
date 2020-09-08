@@ -56,7 +56,7 @@ int subtest_001(int rank, VolOctree *patch_2D, VolOctree *patch_2D_restored)
     patch_2D->setCommunicator(MPI_COMM_WORLD);
     patch_2D->getVTK().setName("octree_uniform_patch_2D");
     patch_2D->initializeAdjacencies();
-    patch_2D->buildInterfaces();
+    patch_2D->initializeInterfaces();
     patch_2D->update();
 
     // Refine the patch
@@ -182,7 +182,7 @@ int subtest_002(int rank, VolOctree *patch_3D, VolOctree *patch_3D_restored)
     patch_3D->setCommunicator(MPI_COMM_WORLD);
     patch_3D->getVTK().setName("octree_uniform_patch_3D");
     patch_3D->initializeAdjacencies();
-    patch_3D->buildInterfaces();
+    patch_3D->initializeInterfaces();
     patch_3D->update();
 
     // Refine the patch

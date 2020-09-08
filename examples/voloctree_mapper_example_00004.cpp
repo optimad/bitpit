@@ -77,7 +77,7 @@ void runReferenceAdaptation()
     VolOctree *patch_2D_original = new VolOctree(std::move(treePointer), &treePointer);
 
     patch_2D_original->initializeAdjacencies();
-    patch_2D_original->buildInterfaces();
+    patch_2D_original->initializeInterfaces();
 
     patch_2D_original->update();
 
@@ -214,7 +214,7 @@ void runReferenceAdaptation()
         log::cout() << ">> Initial number of cells... " << nCells << std::endl;
 
         patch_2D->initializeAdjacencies();
-        patch_2D->buildInterfaces();
+        patch_2D->initializeInterfaces();
 
         patch_2D->update(true);
 
@@ -726,7 +726,7 @@ void runMappedAdaptation()
     VolOctree *patch_2D_original = new VolOctree(std::move(treePointer), &treePointer);
 
     patch_2D_original->initializeAdjacencies();
-    patch_2D_original->buildInterfaces();
+    patch_2D_original->initializeInterfaces();
 
     patch_2D_original->update();
 
@@ -863,7 +863,7 @@ void runMappedAdaptation()
         log::cout() << ">> Initial number of cells... " << nCells << std::endl;
 
         patch_2D->initializeAdjacencies();
-        patch_2D->buildInterfaces();
+        patch_2D->initializeInterfaces();
 
         patch_2D->update(true);
 

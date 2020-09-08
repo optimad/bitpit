@@ -121,7 +121,7 @@ int subtest_001()
     bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
     mesh.update() ;
     mesh.initializeAdjacencies() ;
-    mesh.buildInterfaces() ;
+    mesh.initializeInterfaces() ;
 
     // mark cells within R=0.5
     std::unordered_set<long> mask;

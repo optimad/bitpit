@@ -5236,21 +5236,41 @@ bool PatchKernel::areInterfacesDirty(bool global) const
 
 /*!
 	Build interfaces among the cells.
+
+	If interfaces are already built, all interfaces will be deleted and
+	they will be re-generated from scratch.
 */
 void PatchKernel::buildInterfaces()
+{
+    initializeInterfaces(INTERFACES_AUTOMATIC);
+}
+
+/*!
+	Initialize the interfaces using the specified build strategy.
+
+	If the current strategy doesn't match the requested strategy, all
+	interfaces will be deleted and they will be re-generated from scratch.
+
+	\param strategy is the build strategy that will be used
+*/
+void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 {
 	// Interfaces need adjacencies
 	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
 		throw std::runtime_error ("Adjacencies are mandatory for building the interfaces.");
 	}
 
-	// Reset interfaces
-	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
-		destroyInterfaces();
-	}
+	// Initialize build strategy
+	InterfacesBuildStrategy currentStrategy = getInterfacesBuildStrategy();
+	if (currentStrategy != strategy) {
+		// Reset interfaces
+		if (currentStrategy != INTERFACES_NONE) {
+			destroyInterfaces();
+		}
 
-	// Set interfaces strategy
-	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
+		// Set interfaces strategy
+		setInterfacesBuildStrategy(strategy);
+	}
 
 	// Update the interfaces
 	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
@@ -5266,7 +5286,8 @@ void PatchKernel::buildInterfaces()
 void PatchKernel::updateInterfaces(bool forcedUpdated)
 {
 	// Early return if interfaces are not built
-	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+	InterfacesBuildStrategy currentStrategy = getInterfacesBuildStrategy();
+	if (currentStrategy == INTERFACES_NONE) {
 		return;
 	}
 
@@ -5299,7 +5320,7 @@ void PatchKernel::updateInterfaces(bool forcedUpdated)
 		// Set original advanced editing status
 		setExpert(originalExpertStatus);
 	} else {
-		buildInterfaces();
+		initializeInterfaces(currentStrategy);
 	}
 }
 
