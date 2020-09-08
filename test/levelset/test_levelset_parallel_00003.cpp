@@ -55,7 +55,7 @@ int subtest_001(int rank)
     STL->importSTL("./data/cube.stl", true);
 
     STL->deleteCoincidentVertices();
-    STL->buildAdjacencies();
+    STL->initializeAdjacencies();
 
     STL->getVTK().setName("geometry_003");
     if (rank == 0) {
@@ -93,7 +93,7 @@ int subtest_001(int rank)
     bitpit::log::cout() << " - Creating the mesh" << std::endl;
 
     bitpit::VolOctree mesh(std::move(octree));
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
     mesh.buildInterfaces();
     mesh.update();
 

@@ -127,7 +127,7 @@ if (myRank == 0) {
     // None
 
     //  Build adjacencies --------------------------------------------------- //
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
 }
 
 if (myRank == 0) {

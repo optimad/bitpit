@@ -280,7 +280,7 @@ vector<long>                            cell_list;
     log::cout() << "** Generating non-manifold surface triangulation" << endl;
     generateTestTriangulation(mesh);
     log::cout() << "   building adjacencies" << endl;
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
 
     // Mesh stats ----------------------------------------------------------- //
     log::cout() << "   mesh stats (step 1):" << endl;
@@ -311,7 +311,7 @@ vector<long>                            cell_list;
     // External envelope ---------------------------------------------------- //
     log::cout() << "  extracting mesh envelope" << endl;
     mesh.extractEnvelope(envelope);
-    envelope.buildAdjacencies();
+    envelope.initializeAdjacencies();
 
     // Check external envelope topology ------------------------------------- //
 
@@ -391,7 +391,7 @@ vector<long>                            cell_list;
     // External envelope ---------------------------------------------------- //
     log::cout() << "   extracting mesh envelope" << endl;
     mesh.extractEnvelope(envelope);
-    envelope.buildAdjacencies();
+    envelope.initializeAdjacencies();
 
     // Check external envelope topology ------------------------------------- //
 
@@ -471,7 +471,7 @@ vector<long>                            cell_list;
     // External envelope ---------------------------------------------------- //
     log::cout() << "   extracting mesh external envelope" << endl;
     mesh.extractEnvelope(envelope);
-    envelope.buildAdjacencies();
+    envelope.initializeAdjacencies();
 
     // Check external envelope topology ------------------------------------- //
 

@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     double dh = length / 16.;
 
     VolOctree mesh(3, minimum, length, dh);
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
     mesh.update();
 
     // Initialize fields

@@ -127,7 +127,7 @@ int                             nV, nE;
     log::cout() << "** Removing coincident vertices" << endl;
     mesh.deleteCoincidentVertices();
     log::cout() << "** Building adjacencies" << endl;
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
 
     // Check mesh status ---------------------------------------------------- //
     nV = mesh.getVertexCount();
@@ -357,7 +357,7 @@ int                             nV, nS, nE;
     log::cout() << "** Generating surface mesh" << endl;
     Generate2DSurfMesh(mesh);
     log::cout() << "** Building adjacencies" << endl;
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
 
     // Check mesh status ---------------------------------------------------- //
     nV = mesh.getVertexCount();

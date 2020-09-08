@@ -116,7 +116,7 @@ int subtest_001(int rank)
     if (rank == 0) {
         fillMesh(patch.get());
     }
-    patch->buildAdjacencies();
+    patch->initializeAdjacencies();
     patch->buildInterfaces();
 
     // Set patch communicator

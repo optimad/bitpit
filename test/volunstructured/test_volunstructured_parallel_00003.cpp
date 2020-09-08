@@ -186,7 +186,7 @@ int subtest_001(int rank)
         patch->addCell(ElementType::TETRA,      std::vector<long>({{50, 49, 46, 42}}));
     }
 
-    patch->buildAdjacencies();
+    patch->initializeAdjacencies();
     patch->buildInterfaces();
 
     //

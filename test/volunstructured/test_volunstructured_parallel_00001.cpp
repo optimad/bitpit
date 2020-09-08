@@ -94,7 +94,7 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
         patch_2D->addCell(ElementType::POLYGON,  std::vector<long>({{ 5,  2,  8, 14, 7, 6}}));
     }
 
-    patch_2D->buildAdjacencies();
+    patch_2D->initializeAdjacencies();
     patch_2D->buildInterfaces();
 
     // Partition the patch
@@ -471,7 +471,7 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
         patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{50, 49, 46, 42}}));
     }
 
-    patch_3D->buildAdjacencies();
+    patch_3D->initializeAdjacencies();
     patch_3D->buildInterfaces();
 
     // Partition the patch

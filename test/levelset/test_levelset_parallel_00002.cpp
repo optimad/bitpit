@@ -57,7 +57,7 @@ int subtest_001(int rank)
     STL0->importDGF("./data/naca0012.dgf");
 
     STL0->deleteCoincidentVertices() ;
-    STL0->buildAdjacencies() ;
+    STL0->initializeAdjacencies() ;
 
     STL0->getVTK().setName("geometry_parallel_002_0") ;
     if(rank==0){
@@ -76,7 +76,7 @@ int subtest_001(int rank)
     STL1->importDGF("./data/square.dgf");
 
     STL1->deleteCoincidentVertices() ;
-    STL1->buildAdjacencies() ;
+    STL1->initializeAdjacencies() ;
 
     STL1->getVTK().setName("geometry_parallel_002_1") ;
     if(rank==0){
@@ -109,7 +109,7 @@ int subtest_001(int rank)
 
     dh = h / 16. ;
     bitpit::VolOctree    mesh(dimensions, meshMin, h, dh );
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
     mesh.buildInterfaces();
     mesh.update() ;
 

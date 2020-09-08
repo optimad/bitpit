@@ -582,7 +582,8 @@ public:
 
 	AdjacenciesBuildStrategy getAdjacenciesBuildStrategy() const;
 	bool areAdjacenciesDirty(bool global = false) const;
-	void buildAdjacencies();
+	BITPIT_DEPRECATED(void buildAdjacencies());
+	void initializeAdjacencies(AdjacenciesBuildStrategy strategy = ADJACENCIES_AUTOMATIC);
 	void updateAdjacencies(bool forcedUpdated = false);
 	void destroyAdjacencies();
 

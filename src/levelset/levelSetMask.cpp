@@ -203,7 +203,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::v
 	}
 
     envelope->squeeze();
-    envelope->buildAdjacencies();
+    envelope->initializeAdjacencies();
     envelope->buildInterfaces();
 
     envelope->getVTK().setName("geometry_002") ;

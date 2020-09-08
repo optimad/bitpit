@@ -75,7 +75,7 @@ void run()
     /** Create the original patch */
     VolOctree *patch_2D_original = new VolOctree(std::move(treePointer), &treePointer);
 
-    patch_2D_original->buildAdjacencies();
+    patch_2D_original->initializeAdjacencies();
     patch_2D_original->buildInterfaces();
 
     patch_2D_original->update();
@@ -100,7 +100,7 @@ void run()
     /** Create a new patch */
     VolOctree *patch_2D = new VolOctree(std::move(treePointer2), &treePointer2);
 
-    patch_2D->buildAdjacencies();
+    patch_2D->initializeAdjacencies();
     patch_2D->buildInterfaces();
 
     patch_2D->update();

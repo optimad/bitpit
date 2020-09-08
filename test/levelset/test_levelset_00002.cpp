@@ -52,7 +52,7 @@ int subtest_001()
     STL->importSTL("./data/cube.stl", true);
 
     STL->deleteCoincidentVertices() ;
-    STL->buildAdjacencies() ;
+    STL->initializeAdjacencies() ;
 
     STL->getVTK().setName("geometry_002") ;
     STL->write() ;
@@ -76,7 +76,7 @@ int subtest_001()
 
     bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
     mesh.update() ;
-    mesh.buildAdjacencies() ;
+    mesh.initializeAdjacencies() ;
     mesh.buildInterfaces() ;
 
     // Compute level set  in narrow band

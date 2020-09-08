@@ -403,7 +403,7 @@ if (mesh.getRank() == 0) {
         log::cout() << "(rank #0) Generating 2D non-manifold triangulation" << endl;
         generateTestTriangulation(mesh);
     }
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
 
     // Extracting mesh boundaries ------------------------------------------- //
     log::cout() << "(rank #" << mesh.getRank() << ") extracting external envelope" << endl;
@@ -559,7 +559,7 @@ if (mesh.getRank() == 0) {
     // Build adjacency ------------------------------------------------------ //
     log::cout() << "   building adjacencies" << endl;
     t0 = high_resolution_clock::now();
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;
@@ -776,7 +776,7 @@ if (mesh.getRank() == 0) {
     // Build adjacency ------------------------------------------------------ //
     log::cout() << "   building adjacencies" << endl;
     t0 = high_resolution_clock::now();
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     log::cout() << "     (" << time_span.count() << " sec.)" << endl;

@@ -4878,13 +4878,30 @@ bool PatchKernel::areAdjacenciesDirty(bool global) const
 */
 void PatchKernel::buildAdjacencies()
 {
-	// Reset adjacencies
-	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
-		destroyAdjacencies();
-	}
+    initializeAdjacencies(ADJACENCIES_AUTOMATIC);
+}
 
-	// Set adjacencies strategy
-	setAdjacenciesBuildStrategy(ADJACENCIES_AUTOMATIC);
+/*!
+	Initialize the adjacencies using the specified build strategy.
+
+	If the current strategy doesn't match the requested strategy, all
+	adjacencies will be deleted and they will be re-generated from scratch.
+
+	\param strategy is the build strategy that will be used
+*/
+void PatchKernel::initializeAdjacencies(AdjacenciesBuildStrategy strategy)
+{
+	// Initialize build strategy
+	AdjacenciesBuildStrategy currentStrategy = getAdjacenciesBuildStrategy();
+	if (currentStrategy != strategy) {
+		// Reset adjacencies
+		if (currentStrategy != ADJACENCIES_NONE) {
+			destroyAdjacencies();
+		}
+
+		// Set adjacencies strategy
+		setAdjacenciesBuildStrategy(strategy);
+	}
 
 	// Update the adjacencies
 	setCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
@@ -4900,7 +4917,8 @@ void PatchKernel::buildAdjacencies()
 void PatchKernel::updateAdjacencies(bool forcedUpdated)
 {
 	// Early return if adjacencies are not built
-	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
+	AdjacenciesBuildStrategy currentStrategy = getAdjacenciesBuildStrategy();
+	if (currentStrategy == ADJACENCIES_NONE) {
 		return;
 	}
 
@@ -4921,7 +4939,7 @@ void PatchKernel::updateAdjacencies(bool forcedUpdated)
 		// Adjacencies are now updated
 		unsetCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
 	} else {
-		buildAdjacencies();
+		initializeAdjacencies(currentStrategy);
 	}
 }
 

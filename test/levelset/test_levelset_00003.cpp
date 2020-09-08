@@ -55,7 +55,7 @@ int subtest_001()
     STL0->importDGF("./data/naca0012.dgf");
 
     STL0->deleteCoincidentVertices() ;
-    STL0->buildAdjacencies() ;
+    STL0->initializeAdjacencies() ;
 
     STL0->getVTK().setName("geometry_003_0") ;
     STL0->write() ;
@@ -72,7 +72,7 @@ int subtest_001()
     STL1->importDGF("./data/square.dgf");
 
     STL1->deleteCoincidentVertices() ;
-    STL1->buildAdjacencies() ;
+    STL1->initializeAdjacencies() ;
 
     STL1->getVTK().setName("geometry_003_1") ;
     STL1->write() ;
@@ -88,7 +88,7 @@ int subtest_001()
     STL2->importDGF("./data/rectangle.dgf");
 
     STL2->deleteCoincidentVertices() ;
-    STL2->buildAdjacencies() ;
+    STL2->initializeAdjacencies() ;
 
     STL2->getVTK().setName("geometry_003_2") ;
     STL2->write() ;
@@ -122,7 +122,7 @@ int subtest_001()
 
     dh = h / 16. ;
     bitpit::VolOctree mesh(dimensions, meshMin, h, dh );
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
     mesh.buildInterfaces();
     mesh.update() ;
 

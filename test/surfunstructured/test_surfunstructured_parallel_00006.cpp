@@ -60,7 +60,7 @@ int subtest_001()
         surfaceMesh->importSTL("./data/buddha.stl");
         surfaceMesh->deleteCoincidentVertices();
     }
-    surfaceMesh->buildAdjacencies();
+    surfaceMesh->initializeAdjacencies();
     surfaceMesh->getVTK().setName("skd_test_STL");
     surfaceMesh->write();
 

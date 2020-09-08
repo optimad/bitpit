@@ -55,7 +55,7 @@ int subtest_001(int rank)
     STL->importSTL("./data/cube.stl", true);
 
     STL->deleteCoincidentVertices() ;
-    STL->buildAdjacencies() ;
+    STL->initializeAdjacencies() ;
 
     STL->getVTK().setName("geometry_002") ;
     if (rank == 0) {
@@ -84,7 +84,7 @@ int subtest_001(int rank)
 
     dh = h / 16. ;
     bitpit::VolOctree mesh(dimensions, meshMin, h, dh );
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
     mesh.buildInterfaces();
     mesh.update() ;
 

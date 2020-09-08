@@ -57,7 +57,7 @@ int subtest_001(int nProcs, int myRank)
     }
 
     //  Build adjacencies
-    mesh.buildAdjacencies();
+    mesh.initializeAdjacencies();
 
     mesh.write("test00005_subtest_001_initial");
 
