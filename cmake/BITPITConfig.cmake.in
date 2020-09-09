@@ -152,8 +152,29 @@ libfind_process(BITPIT)
 # Find bitpit external dependencies
 #-----------------------------------------------------------------------------
 
-# Find external packages
+# Get external dependencies
 set(_EXTERNAL_DEPENDENCIES "@BITPIT_EXTERNAL_DEPENDENCIES@")
+
+# Setp up variables needed by external dependencies
+list(FIND _EXTERNAL_DEPENDENCIES "PETSc" _PETSc_index)
+if (${_PETSc_index} GREATER -1)
+    if (NOT PETSC_DIR AND DEFINED ENV{PETSC_DIR})
+        set(DEFAULT_PETSC_DIR "$ENV{PETSC_DIR}")
+    else()
+        set(DEFAULT_PETSC_DIR "")
+    endif()
+    set(PETSC_DIR "${DEFAULT_PETSC_DIR}" CACHE PATH "Installation directory of PETSC library")
+
+    if (NOT PETSC_ARCH AND DEFINED ENV{PETSC_ARCH})
+        set(DEFAULT_PETSC_ARCH "$ENV{PETSC_ARCH}")
+    else()
+        set(DEFAULT_PETSC_ARCH "")
+    endif()
+    set(PETSC_ARCH "${DEFAULT_PETSC_ARCH}" CACHE STRING "Build architecture")
+endif()
+unset(_PETSc_index)
+
+# Find external packages
 list(REVERSE _EXTERNAL_DEPENDENCIES)
 foreach(_DEPENDENCY ${_EXTERNAL_DEPENDENCIES})
     find_package("${_DEPENDENCY}" REQUIRED)
