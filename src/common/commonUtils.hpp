@@ -121,7 +121,11 @@ unsigned long factorial(unsigned long n);
 /*!
     Functor to compare two double precision floating point numbers.
 
-    See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    See chapter 4.2.2 equation 35 of "The art of computer programming (vol II)"
+    Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2,
+    Addison-Wesley Professional; 3rd edition.
+
+    Also see: "https://www.boost.org/doc/libs/1_74_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/floating_point/floating_points_comparison_theory.html"
 */
 struct DoubleFloatingEqual
 {
@@ -131,35 +135,39 @@ struct DoubleFloatingEqual
 
         \param x if the first value to compare
         \param y if the second value to compare
-        \param tolerance is the relative tolerance that will be used to
+        \param relativeTolerance is the relative tolerance that will be used to
         perform the comparison
-        \param errorFactor is a factor proportional to the floating point
-        errors creeping in as a result of x and y computation
+        \param absoluteTolerance is the absolute tolerance that will be used to
+        perform the comparison
         \result Returns true if the numbers match, false otherwise.
     */
-    bool operator()(double x, double y, double tolerance = std::numeric_limits<double>::epsilon(), double errorFactor = 1.0) const
+    bool operator()(double x, double y, double relativeTolerance = DEFAULT_REL_TOL, double absoluteTolerance = DEFAULT_ABS_TOL) const
     {
-        const double ABS_MAX_DIFF = 1e-15;
-
         // Check if the numbers are really close (needed when comparing
         // numbers near zero).
-        double diff = std::abs(x - y);
-        if (diff <= errorFactor * ABS_MAX_DIFF) {
+        double absoluteDifference = std::abs(x - y);
+        if (absoluteDifference <= absoluteTolerance) {
             return true;
         }
 
-        // Check if the numbers have the same sign
-        if ((x < 0 && y > 0) || (x > 0 && y < 0)) {
-            return false;
-        }
-
         // Compare using a relative difference
-        double abs_x   = std::abs(x);
-        double abs_y   = std::abs(y);
-        double largest = (abs_y > abs_x) ? abs_y : abs_x;
+        //
+        // The check that is performed is:
+        //
+        //  abs(x - y) <= abs(x) * epsilon OR abs(x - y) <= abs(y) * epsilon
+        //
+        // The multiplication in the right side of inequalities may cause an
+        // unwanted underflow condition. To prevent this, the difference is
+        // scaled rather than epsilon.
+        double relativeDifference = absoluteDifference / std::max(std::abs(x), std::abs(y));
 
-        return (diff <= errorFactor * largest * tolerance);
+        return (relativeDifference <= relativeTolerance);
     }
+
+private:
+    constexpr static const double DEFAULT_ABS_TOL = 10 * std::numeric_limits<double>::epsilon();
+    constexpr static const double DEFAULT_REL_TOL = 10 * std::numeric_limits<double>::epsilon();
+
 };
 
 }
