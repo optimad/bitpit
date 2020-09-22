@@ -287,6 +287,7 @@ private:
     mutable std::vector<double> m_U;
     mutable std::vector<double> m_S;
     mutable std::vector<double> m_Vt;
+    mutable std::vector<double> m_SVDWorkspace;
     mutable std::vector<double> m_w;
 
     double * _addEquation(ReconstructionType type, double scaleFactor);

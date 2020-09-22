@@ -2817,6 +2817,7 @@ void ReconstructionAssembler::swap(ReconstructionAssembler &other) noexcept
     std::swap(other.m_U, m_U);
     std::swap(other.m_S, m_S);
     std::swap(other.m_Vt, m_Vt);
+    std::swap(other.m_SVDWorkspace, m_SVDWorkspace);
     std::swap(other.m_w, m_w);
 }
 
@@ -2861,6 +2862,7 @@ void ReconstructionAssembler::clear(bool release)
     m_U.clear();
     m_S.clear();
     m_Vt.clear();
+    m_SVDWorkspace.resize(1);
     m_w.clear();
 
     if (release) {
@@ -2875,6 +2877,7 @@ void ReconstructionAssembler::clear(bool release)
         m_U.shrink_to_fit();
         m_S.shrink_to_fit();
         m_Vt.shrink_to_fit();
+        m_SVDWorkspace.shrink_to_fit();
         m_w.shrink_to_fit();
     }
 }
@@ -3208,9 +3211,23 @@ void ReconstructionAssembler::computePseudoInverse(int m, int n, double zeroThre
     m_U.resize(m * k);
     m_Vt.resize(k * n);
 
-    std::vector<double> supdB(std::min(m,n) - 1, 0.);
-    int info = LAPACKE_dgesvd(LAPACK_COL_MAJOR, 'S', 'S', m, n, A, m, m_sigma.data(),
-                              m_U.data(), m, m_Vt.data(), k, supdB.data());
+    char jobU  = 'S';
+    char jobVT = 'S';
+
+    int workspaceSize = -1;
+
+    int info;
+
+    LAPACK_dgesvd(&jobU, &jobVT, &m, &n, A, &m, m_sigma.data(), m_U.data(), &m, m_Vt.data(), &k,
+                  m_SVDWorkspace.data(), &workspaceSize, &info);
+
+    workspaceSize = m_SVDWorkspace[0];
+    if (workspaceSize > (int) m_SVDWorkspace.size()) {
+        m_SVDWorkspace.resize(workspaceSize);
+    }
+
+    LAPACK_dgesvd(&jobU, &jobVT, &m, &n, A, &m, m_sigma.data(), m_U.data(), &m, m_Vt.data(), &k,
+                  m_SVDWorkspace.data(), &workspaceSize, &info);
 
     if (info > 0) {
         log::cout() << "SVD failed in ReconstructionAssembler::computePseudoInverse()" <<std::endl;
