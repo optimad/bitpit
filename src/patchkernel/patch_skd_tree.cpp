@@ -584,7 +584,9 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool in
     const PatchKernel &patch = m_patchInfo->getPatch();
     const PiercedVector<Cell> &cells = patch.getCells();
     const std::vector<std::size_t> &cellRawIds = m_patchInfo->getCellRawIds();
-    std::vector<std::array<double, 3>> cellVertexCoordinates(ReferenceElementInfo::MAX_ELEM_VERTICES);
+
+    std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> staticCellVertexCoordinates;
+    std::vector<std::array<double, 3>> dynamicCellVertexCoordinates;
 
     for (std::size_t n = m_cellRangeBegin; n < m_cellRangeEnd; n++) {
         std::size_t cellRawId = cellRawIds[n];
@@ -598,13 +600,20 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool in
         const int nElementVertices = elementVertexIds.size();
 
         // Get vertex coordinates
-        cellVertexCoordinates.resize(nElementVertices);
+        std::array<double, 3> *cellVertexCoordinates;
+        if (nElementVertices <= ReferenceElementInfo::MAX_ELEM_VERTICES) {
+            cellVertexCoordinates = staticCellVertexCoordinates.data();
+        } else {
+            dynamicCellVertexCoordinates.resize(nElementVertices);
+            cellVertexCoordinates = dynamicCellVertexCoordinates.data();
+        }
+
         for (int i = 0; i < nElementVertices; ++i) {
             cellVertexCoordinates[i] = patch.getVertex(elementVertexIds[i]).getCoords();
         }
 
         // Evaluate the distance from the cell
-        double cellDistance = cell.evalPointDistance(point, cellVertexCoordinates.data());
+        double cellDistance = cell.evalPointDistance(point, cellVertexCoordinates);
 
         // Update closest distance
         updateClosestCellInfo(point, cell.getId(), cellDistance, id, distance);
