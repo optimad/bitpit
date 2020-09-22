@@ -53,6 +53,7 @@ SurfaceSkdTree::SurfaceSkdTree(const SurfaceKernel *patch, bool interiorOnly)
 void SurfaceSkdTree::clear(bool release)
 {
     if (release) {
+        std::vector<std::size_t>().swap(m_nodeStack);
         std::vector<std::size_t>().swap(m_candidateIds);
         std::vector<double>().swap(m_candidateMinDistances);
     }
@@ -365,17 +366,17 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
 
     // Get a list of candidates nodes
     //
-    // The list of candidates is a memeber of the class to avoid its
-    // reallocation every time the function is called.
+    // Some temporary data structures are memeber of the class to avoid
+    // their reallocation every time the function is called.
+    m_nodeStack.clear();
     m_candidateIds.clear();
     m_candidateMinDistances.clear();
 
-    std::vector<std::size_t> nodeStack;
-    nodeStack.push_back(rootId);
-    while (!nodeStack.empty()) {
-        std::size_t nodeId = nodeStack.back();
+    m_nodeStack.push_back(rootId);
+    while (!m_nodeStack.empty()) {
+        std::size_t nodeId = m_nodeStack.back();
         const SkdNode &node = m_nodes[nodeId];
-        nodeStack.pop_back();
+        m_nodeStack.pop_back();
 
         // Do not consider nodes with a minimum distance greater than
         // the distance estimate
@@ -399,7 +400,7 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
             std::size_t childId = node.getChildId(childLocation);
             if (childId != SkdNode::NULL_ID) {
                 isLeaf = false;
-                nodeStack.push_back(childId);
+                m_nodeStack.push_back(childId);
             }
         }
 

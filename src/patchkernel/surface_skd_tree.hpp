@@ -64,6 +64,7 @@ public:
 #endif
 
 private:
+    mutable std::vector<std::size_t> m_nodeStack;
     mutable std::vector<std::size_t> m_candidateIds;
     mutable std::vector<double> m_candidateMinDistances;
 
