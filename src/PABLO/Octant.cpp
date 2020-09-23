@@ -672,6 +672,19 @@ Octant	Octant::buildFather() const {
 
 // =================================================================================== //
 
+/** Count children of octant.
+ *   \return The number of children of the octant.
+ */
+uint8_t	Octant::countChildren() const {
+	if (this->m_level < TreeConstants::MAX_LEVEL){
+		return sm_treeConstants[m_dim].nChildren;
+	} else {
+		return 0;
+	}
+}
+
+// =================================================================================== //
+
 /** Builds children of octant.
  *   \return Ordered (by Z-index) vector of children[nchildren] (info update)
  */

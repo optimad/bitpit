@@ -236,6 +236,7 @@ public:
     // =================================================================================== //
     Octant                 buildLastDesc() const;
     Octant                 buildFather() const;
+    uint8_t                countChildren() const;
     std::vector<Octant>    buildChildren() const;
 protected:
     void computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
