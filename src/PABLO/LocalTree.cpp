@@ -368,7 +368,6 @@ namespace bitpit {
     LocalTree::refine(u32vector & mapidx){
 
         u32vector		last_child_index;
-        octvector 		children(0,Octant(m_dim));
         uint32_t 		idx, ilastch;
         uint32_t 		offset = 0, blockidx;
         uint32_t		mapsize = mapidx.size();
@@ -388,13 +387,23 @@ namespace bitpit {
                 }
             }
         }
-        m_sizeOctants = m_octants.size();
+
         if (offset > 0){
+            uint8_t nChildren;
+            std::array<Octant, TreeConstants::MAX_CHILDREN> children;
+
+            // Resize octant container
+            //
+            // We want to be sure the container capacity is equal to its size.
+            m_sizeOctants += offset;
+            m_octants.reserve(m_sizeOctants);
+            m_octants.resize(m_sizeOctants, Octant(m_dim));
+            m_octants.shrink_to_fit();
+
+            // Create new octants
             if(mapsize > 0){
-                mapidx.resize(m_sizeOctants+offset);
+                mapidx.resize(m_sizeOctants);
             }
-            m_octants.resize(m_sizeOctants+offset, Octant(m_dim));
-            m_sizeOctants = m_octants.size();
             blockidx = last_child_index[0]-nchm1;
             idx = m_sizeOctants;
             ilastch = last_child_index.size()-1;
@@ -403,13 +412,9 @@ namespace bitpit {
                 idx--;
                 if(idx == last_child_index[ilastch]){
                     m_octants[idx-offset].m_info[Octant::INFO_AUX] = false;
-                    children = m_octants[idx-offset].buildChildren();
-                    for (ich=0; ich<m_octants[idx-offset].countChildren(); ich++){
-                        m_octants[idx-ich] = (children[nchm1-ich]);
-                        if(mapsize>0) mapidx[idx-ich]  = mapidx[idx-offset];
-                    }
-                    offset -= nchm1;
-                    idx -= nchm1;
+                    // Create children
+                    nChildren = m_octants[idx-offset].countChildren();
+                    m_octants[idx-offset].buildChildren(children.data());
                     //Update local max depth
                     if (children[0].getLevel() > m_localMaxDepth){
                         m_localMaxDepth = children[0].getLevel();
@@ -418,6 +423,15 @@ namespace bitpit {
                         //More Refinement to do
                         dorefine = true;
                     }
+                    // Insert children in the tree
+                    for (ich=0; ich<nChildren; ich++){
+                        m_octants[idx-ich] = std::move(children[nchm1-ich]);
+                        if (mapsize>0) {
+                            mapidx[idx-ich] = mapidx[idx-offset];
+                        }
+                    }
+                    offset -= nchm1;
+                    idx -= nchm1;
                     if (ilastch != 0){
                         ilastch--;
                     }
@@ -428,9 +442,6 @@ namespace bitpit {
                 }
             }
         }
-
-        octvector(m_octants).swap(m_octants);
-        m_sizeOctants = m_octants.size();
 
         return dorefine;
 
