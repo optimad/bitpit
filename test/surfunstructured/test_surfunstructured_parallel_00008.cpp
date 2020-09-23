@@ -52,6 +52,9 @@ int subtest_001(int rank)
     // Build the adjacencies
     mesh.initializeAdjacencies();
 
+    // Build the interfaces
+    mesh.initializeInterfaces();
+
     // Partition the patch
     mesh.partition(MPI_COMM_WORLD, false);
 
@@ -142,6 +145,17 @@ int subtest_001(int rank)
 
     mesh.partition(firstPartitioningRanks, false);
 
+    for (Cell & cell : mesh.getCells()){
+        int nCellInterfaces = cell.getInterfaceCount();
+        const long *cellInterfaces = cell.getInterfaces();
+
+        std::cout << "#" << rank << " cell id " << cell.getId();
+        for (int k = 0; k < nCellInterfaces; ++k) {
+            std::cout << " , interface " << cellInterfaces[k];
+        }
+        std::cout << std::endl;
+    }
+
     // Write mesh
     log::cout() << "Writing mesh..." << std::endl;
 
@@ -170,6 +184,17 @@ int subtest_001(int rank)
     }
 
     mesh.partition(secondPartitioningRanks, false);
+
+    for (Cell & cell : mesh.getCells()){
+        int nCellInterfaces = cell.getInterfaceCount();
+        const long *cellInterfaces = cell.getInterfaces();
+
+        std::cout << "#" << rank << " cell id " << cell.getId();
+        for (int k = 0; k < nCellInterfaces; ++k) {
+            std::cout << " , interface " << cellInterfaces[k];
+        }
+        std::cout << std::endl;
+    }
 
     // Write mesh
     log::cout() << "Writing mesh..." << std::endl;
