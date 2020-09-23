@@ -404,7 +404,7 @@ namespace bitpit {
                 if(idx == last_child_index[ilastch]){
                     m_octants[idx-offset].m_info[Octant::INFO_AUX] = false;
                     children = m_octants[idx-offset].buildChildren();
-                    for (ich=0; ich<m_treeConstants->nChildren; ich++){
+                    for (ich=0; ich<m_octants[idx-offset].countChildren(); ich++){
                         m_octants[idx-ich] = (children[nchm1-ich]);
                         if(mapsize>0) mapidx[idx-ich]  = mapidx[idx-offset];
                     }
