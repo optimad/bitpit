@@ -3291,12 +3291,13 @@ namespace bitpit {
             return;
         }
 
-        result->clear();
         if (marker > 0){
-            octvector children = oct->buildChildren();
-            result->swap(children);
+            uint8_t nChildren = oct->countChildren();
+            result->resize(nChildren);
+            oct->buildChildren(result->data());
         }
         else if (marker < 0){
+            result->clear();
             result->push_back(oct->buildFather());
         }
 
