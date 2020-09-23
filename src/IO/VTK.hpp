@@ -251,7 +251,7 @@ class VTKField{
         VTKField();
         VTKField( const std::string & );
 
-        std::string             getName() const;
+        const std::string &     getName() const;
         VTKDataType             getDataType() const;
         VTKFieldType            getFieldType() const;
         VTKLocation             getLocation() const;
@@ -302,7 +302,7 @@ class VTK{
         virtual ~VTK( ) = default;
 
         void                    setHeaderType( const std::string & );
-        std::string             getHeaderType(  ) const;
+        const std::string &     getHeaderType(  ) const;
 
         std::string             getName(  ) const;
         std::string             getDirectory(  ) const;

@@ -94,7 +94,7 @@ void  VTK::setHeaderType(const std::string &st){
  * Get header type for appended binary output
  * @return header type ["UInt32"/"UInt64"]
  */
-std::string  VTK::getHeaderType( ) const{ 
+const std::string &  VTK::getHeaderType( ) const{
     return m_headerType ;
 }
 

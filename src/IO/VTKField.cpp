@@ -140,7 +140,7 @@ void VTKField::disable(){
  * get name of data field
  * @return  name of data field
  */
-std::string VTKField::getName() const{ 
+const std::string & VTKField::getName() const{
     return m_name; 
 }
 
