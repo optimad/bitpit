@@ -577,7 +577,7 @@ namespace bitpit {
             }
         }
         m_octants.resize(nblock, Octant(m_dim));
-        octvector(m_octants).swap(m_octants);
+        m_octants.shrink_to_fit();
         m_sizeOctants = m_octants.size();
         if(mapsize > 0){
             mapidx.resize(m_sizeOctants);
@@ -635,7 +635,7 @@ namespace bitpit {
                         }
                     }
                     m_octants.resize(m_sizeOctants-offset, Octant(m_dim));
-                    octvector(m_octants).swap(m_octants);
+                    m_octants.shrink_to_fit();
                     m_sizeOctants = m_octants.size();
                     if(mapsize > 0){
                         mapidx.resize(m_sizeOctants);
@@ -745,7 +745,7 @@ namespace bitpit {
                     father.setMarker(markerfather);
                     m_octants.resize(m_sizeOctants-offset, Octant(m_dim));
                     m_octants.push_back(father);
-                    octvector(m_octants).swap(m_octants);
+                    m_octants.shrink_to_fit();
                     m_sizeOctants = m_octants.size();
                     if(mapsize > 0){
                         mapidx.resize(m_sizeOctants);
