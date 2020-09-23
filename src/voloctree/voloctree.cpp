@@ -995,11 +995,14 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	}
 
 	uint32_t treeId = 0;
+	std::vector<uint32_t> mapper_octantMap;
+	std::vector<bool> mapper_ghostFlag;
+	std::vector<int> mapper_octantRank;
 	while (treeId < (uint32_t) nOctants) {
 		// Octant mapping
-		std::vector<uint32_t> mapper_octantMap;
-		std::vector<bool> mapper_ghostFlag;
-		std::vector<int> mapper_octantRank;
+		mapper_octantMap.clear();
+		mapper_ghostFlag.clear();
+		mapper_octantRank.clear();
 		if (!importFromScratch) {
 			m_tree->getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
 		}
