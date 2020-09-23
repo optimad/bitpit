@@ -238,6 +238,7 @@ public:
     Octant                 buildFather() const;
     uint8_t                countChildren() const;
     std::vector<Octant>    buildChildren() const;
+    void                   buildChildren(Octant *children) const;
 protected:
     void computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;
     void computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nMortons, std::vector<uint64_t> *mortons) const;

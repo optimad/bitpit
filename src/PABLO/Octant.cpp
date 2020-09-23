@@ -686,154 +686,149 @@ uint8_t	Octant::countChildren() const {
 // =================================================================================== //
 
 /** Builds children of octant.
- *   \return Ordered (by Z-index) vector of children[nchildren] (info update)
+ *   \return The children of the octant ordered by Z-index (info update)
  */
 vector< Octant >	Octant::buildChildren() const {
-	uint8_t xf,yf,zf;
-	int nchildren = 1<<m_dim;
 
-	if (this->m_level < TreeConstants::MAX_LEVEL){
-		vector< Octant > children(nchildren, Octant(m_dim));
-		for (int i=0; i<nchildren; i++){
-			switch (i) {
-			case 0 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				// Update interior face bound and pbound
-				xf=1; yf=3; zf=5;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[0] = oct;
-			}
+	uint8_t nchildren = countChildren();
+	std::vector< Octant > children(nchildren);
+	buildChildren(children.data());
+
+	return children;
+}
+
+// =================================================================================== //
+
+/** Builds children of octant.
+ *   \param[out] children On output will containt the children of the octant
+ *   ordered by Z-index, it's up to the caller allocate enough space for all
+ *   the possible children.
+ */
+void	Octant::buildChildren(Octant *children) const {
+
+	int nChildren = countChildren();
+	for (int i=0; i<nChildren; ++i){
+		// Octant information
+		uint8_t xf;
+		uint8_t yf;
+		uint8_t zf;
+		uint8_t dx;
+		uint8_t dy;
+		uint8_t dz;
+		switch (i) {
+
+		case 0 :
+			dx = 0;
+			dy = 0;
+			dz = 0;
+
+			xf = 1;
+			yf = 3;
+			zf = 5;
+
 			break;
-			case 1 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				uint32_t dh = oct.getLogicalSize();
-				oct.m_x += dh;
-				// Update interior face bound and pbound
-				xf=0; yf=3; zf=5;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[1] = oct;
-			}
+
+		case 1 :
+			dx = 1;
+			dy = 0;
+			dz = 0;
+
+			xf = 0;
+			yf = 3;
+			zf = 5;
+
 			break;
-			case 2 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				uint32_t dh = oct.getLogicalSize();
-				oct.m_y += dh;
-				// Update interior face bound and pbound
-				xf=1; yf=2; zf=5;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[2] = oct;
-			}
+
+		case 2 :
+			dx = 0;
+			dy = 1;
+			dz = 0;
+
+			xf = 1;
+			yf = 2;
+			zf = 5;
+
 			break;
-			case 3 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				uint32_t dh = oct.getLogicalSize();
-				oct.m_x += dh;
-				oct.m_y += dh;
-				// Update interior face bound and pbound
-				xf=0; yf=2; zf=5;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[3] = oct;
-			}
+
+		case 3 :
+			dx = 1;
+			dy = 1;
+			dz = 0;
+
+			xf = 0;
+			yf = 2;
+			zf = 5;
+
 			break;
-			case 4 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				uint32_t dh = oct.getLogicalSize();
-				oct.m_z += dh;
-				// Update interior face bound and pbound
-				xf=1; yf=3; zf=4;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[4] = oct;
-			}
+
+		case 4 :
+			dx = 0;
+			dy = 0;
+			dz = 1;
+
+			xf = 1;
+			yf = 3;
+			zf = 4;
+
 			break;
-			case 5 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				uint32_t dh = oct.getLogicalSize();
-				oct.m_x += dh;
-				oct.m_z += dh;
-				// Update interior face bound and pbound
-				xf=0; yf=3; zf=4;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[5] = oct;
-			}
+
+		case 5 :
+			dx = 1;
+			dy = 0;
+			dz = 1;
+
+			xf = 0;
+			yf = 3;
+			zf = 4;
+
 			break;
-			case 6 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				uint32_t dh = oct.getLogicalSize();
-				oct.m_y += dh;
-				oct.m_z += dh;
-				// Update interior face bound and pbound
-				xf=1; yf=2; zf=4;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[6] = oct;
-			}
+
+		case 6 :
+			dx = 0;
+			dy = 1;
+			dz = 1;
+
+			xf = 1;
+			yf = 2;
+			zf = 4;
+
 			break;
-			case 7 :
-			{
-				Octant oct(*this);
-				oct.setMarker(max(0,oct.m_marker-1));
-				oct.setLevel(oct.m_level+1);
-				oct.m_info[OctantInfo::INFO_NEW4REFINEMENT]=true;
-				uint32_t dh = oct.getLogicalSize();
-				oct.m_x += dh;
-				oct.m_y += dh;
-				oct.m_z += dh;
-				// Update interior face bound and pbound
-				xf=0; yf=2; zf=4;
-				oct.m_info[xf] = oct.m_info[xf+6] = false;
-				oct.m_info[yf] = oct.m_info[yf+6] = false;
-				oct.m_info[zf] = oct.m_info[zf+6] = false;
-				children[7] = oct;
-			}
+
+		case 7 :
+			dx = 1;
+			dy = 1;
+			dz = 1;
+
+			xf = 0;
+			yf = 2;
+			zf = 4;
+
 			break;
-			}
+
 		}
-		return children;
-	}
-	else{
-		vector< Octant > children(0, Octant(m_dim));
-		return children;
+
+		// Create octant
+		children[i] = Octant(*this);
+		Octant &oct = children[i];
+
+		oct.setMarker(std::max(0, oct.m_marker - 1));
+		oct.setLevel(oct.m_level + 1);
+
+		uint32_t dh = oct.getLogicalSize();
+
+		oct.m_x += dh * dx;
+		oct.m_y += dh * dy;
+		oct.m_z += dh * dz;
+
+		oct.m_info[OctantInfo::INFO_NEW4REFINEMENT] = true;
+
+		oct.m_info[INFO_BOUNDFACE0 + xf] = false;
+		oct.m_info[INFO_BOUNDFACE0 + yf] = false;
+		oct.m_info[INFO_BOUNDFACE0 + zf] = false;
+
+		oct.m_info[INFO_PBOUNDFACE0 + xf] = false;
+		oct.m_info[INFO_PBOUNDFACE0 + yf] = false;
+		oct.m_info[INFO_PBOUNDFACE0 + zf] = false;
 	}
 };
 
