@@ -80,9 +80,9 @@ long SystemSparseMatrixAssembler::getColCount() const
 
 #if BITPIT_ENABLE_MPI==1
 /*!
- * Get the number of global rows of the matrix.
+ * Get the global number of rows of the matrix.
  *
- * \result The number of global rows of the matrix.
+ * \result The global number of rows of the matrix.
  */
 long SystemSparseMatrixAssembler::getRowGlobalCount() const
 {
@@ -90,9 +90,9 @@ long SystemSparseMatrixAssembler::getRowGlobalCount() const
 }
 
 /*!
- * Get the number of global columns of the matrix.
+ * Get the global number of columns of the matrix.
  *
- * \result The number of global columns of the matrix.
+ * \result The global number of columns of the matrix.
  */
 long SystemSparseMatrixAssembler::getColGlobalCount() const
 {
@@ -156,7 +156,7 @@ void SystemSparseMatrixAssembler::getRowPattern(long rowIndex, ConstProxyVector<
  * Get the values of the specified row.
  *
  * \param rowIndex is the index of the row in the assembler
- * \param pattern on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified row
  */
 void SystemSparseMatrixAssembler::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
 {
