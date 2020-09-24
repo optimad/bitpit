@@ -552,7 +552,7 @@ void SystemSolver::update(const SparseMatrix &elements)
  * \param rows are the indices of the rows that will be updated
  * \param elements are the elements that will be used to update the rows
  */
-void SystemSolver::update(std::size_t nRows, const long *rows, const SparseMatrix &elements)
+void SystemSolver::update(long nRows, const long *rows, const SparseMatrix &elements)
 {
     // Check if the element storage is assembled
     if (!elements.isAssembled()) {
@@ -587,7 +587,7 @@ void SystemSolver::update(const SystemMatrixAssembler &assembler)
  * \param rows are the indices of the rows that will be updated
  * \param assembler is the matrix assembler for the rows that will be updated
  */
-void SystemSolver::update(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler)
+void SystemSolver::update(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
     // Check if the system is assembled
     if (!isAssembled()) {
@@ -947,7 +947,7 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  * from 0 to (nRows - 1).
  * \param assembler is the matrix assembler for the rows that will be updated
  */
-void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler)
+void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
     // Update element values
     long rowGlobalOffset;
@@ -964,7 +964,7 @@ void SystemSolver::matrixUpdate(std::size_t nRows, const long *rows, const Syste
 
     ConstProxyVector<long> rowPattern;
     ConstProxyVector<double> rowValues;
-    for (std::size_t n = 0; n < nRows; ++n) {
+    for (long n = 0; n < nRows; ++n) {
         assembler.getRowValues(n, &rowValues);
         const int nRowElements = rowValues.size();
         if (nRowElements == 0) {

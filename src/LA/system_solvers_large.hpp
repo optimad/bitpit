@@ -149,9 +149,9 @@ public:
     bool isAssembled() const;
 
     void update(const SparseMatrix &elements);
-    void update(std::size_t nRows, const long *rows, const SparseMatrix &elements);
+    void update(long nRows, const long *rows, const SparseMatrix &elements);
     void update(const SystemMatrixAssembler &assembler);
-    void update(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler);
+    void update(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void setUp();
     bool isSetUp() const;
@@ -202,7 +202,7 @@ protected:
 
     void matrixCreate(const SystemMatrixAssembler &assembler);
     void matrixFill(const SystemMatrixAssembler &assembler);
-    void matrixUpdate(std::size_t nRows, const long *rows, const SystemMatrixAssembler &assembler);
+    void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void vectorsCreate();
     void vectorsPermute(bool invert);
