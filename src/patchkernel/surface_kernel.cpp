@@ -861,9 +861,9 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
             const auto &cell = getCell(cellId);
             const long *adjacencyIds = cell.getAdjacencies();
             const long *interfaceIds = cell.getInterfaces();
-            const int nInterfaces = cell.getInterfaceCount();
+            const int nAdjacencies = cell.getAdjacencyCount();
 
-            for (int i = 0; i < nInterfaces; ++i) {
+            for (int i = 0; i < nAdjacencies; ++i) {
                 const long neighId = adjacencyIds[i];
 
 #if BITPIT_ENABLE_MPI==1
