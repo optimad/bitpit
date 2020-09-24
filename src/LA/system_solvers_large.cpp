@@ -123,12 +123,12 @@ long SystemSparseMatrixAssembler::getColGlobalOffset() const
 /*!
  * Get the number of non-zero elements in the specified row.
  *
- * \param row is the row of the matrix
+ * \param rowIndex is the index of the row in the assembler
  * \result The number of non-zero elements in the specified row.
  */
-long SystemSparseMatrixAssembler::getRowNZCount(long row) const
+long SystemSparseMatrixAssembler::getRowNZCount(long rowIndex) const
 {
-    return m_matrix->getRowNZCount(row);
+    return m_matrix->getRowNZCount(rowIndex);
 }
 
 /**
@@ -144,23 +144,23 @@ long SystemSparseMatrixAssembler::getMaxRowNZCount() const
 /*!
  * Get the values of the specified row.
  *
- * \param row is the row of the matrix
+ * \param rowIndex is the index of the row in the assembler
  * \param pattern on output will contain the values of the specified row
  */
-void SystemSparseMatrixAssembler::getRowPattern(long row, ConstProxyVector<long> *pattern) const
+void SystemSparseMatrixAssembler::getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const
 {
-    m_matrix->getRowPattern(row, pattern);
+    m_matrix->getRowPattern(rowIndex, pattern);
 }
 
 /*!
  * Get the values of the specified row.
  *
- * \param row is the row of the matrix
+ * \param rowIndex is the index of the row in the assembler
  * \param pattern on output will contain the values of the specified row
  */
-void SystemSparseMatrixAssembler::getRowValues(long row, ConstProxyVector<double> *values) const
+void SystemSparseMatrixAssembler::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
 {
-    m_matrix->getRowValues(row, values);
+    m_matrix->getRowValues(rowIndex, values);
 }
 
 /*!

@@ -79,11 +79,11 @@ public:
     virtual long getColGlobalOffset() const = 0;
 #endif
 
-    virtual long getRowNZCount(long row) const = 0;
+    virtual long getRowNZCount(long rowIndex) const = 0;
     virtual long getMaxRowNZCount() const = 0;
 
-    virtual void getRowPattern(long row, ConstProxyVector<long> *pattern) const = 0;
-    virtual void getRowValues(long row, ConstProxyVector<double> *values) const = 0;
+    virtual void getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const = 0;
+    virtual void getRowValues(long rowIndex, ConstProxyVector<double> *values) const = 0;
 
 protected:
     SystemMatrixAssembler() = default;
@@ -106,11 +106,11 @@ public:
     long getColGlobalOffset() const override;
 #endif
 
-    long getRowNZCount(long row) const override;
+    long getRowNZCount(long rowIndex) const override;
     long getMaxRowNZCount() const override;
 
-    void getRowPattern(long row, ConstProxyVector<long> *pattern) const override;
-    void getRowValues(long row, ConstProxyVector<double> *values) const override;
+    void getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const override;
+    void getRowValues(long rowIndex, ConstProxyVector<double> *values) const override;
 
 protected:
     const SparseMatrix *m_matrix;
