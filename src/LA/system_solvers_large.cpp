@@ -416,29 +416,29 @@ void SystemSolver::setPermutations(long nRows, const long *rowRanks, long nCols,
     resetPermutations();
 
     // Create new permutations
-    PetscInt *rowPermutationsStorage;
-    PetscMalloc(nRows * sizeof(PetscInt), &rowPermutationsStorage);
+    PetscInt *rowPermutationStorage;
+    PetscMalloc(nRows * sizeof(PetscInt), &rowPermutationStorage);
     for (long i = 0; i < nRows; ++i) {
-        rowPermutationsStorage[i] = rowRanks[i];
+        rowPermutationStorage[rowRanks[i]] = i;
     }
 
 #if BITPIT_ENABLE_MPI == 1
-    ISCreateGeneral(m_communicator, nRows, rowPermutationsStorage, PETSC_OWN_POINTER, &m_rowPermutation);
+    ISCreateGeneral(m_communicator, nRows, rowPermutationStorage, PETSC_OWN_POINTER, &m_rowPermutation);
 #else
-    ISCreateGeneral(PETSC_COMM_SELF, nRows, rowPermutationsStorage, PETSC_OWN_POINTER, &m_rowPermutation);
+    ISCreateGeneral(PETSC_COMM_SELF, nRows, rowPermutationStorage, PETSC_OWN_POINTER, &m_rowPermutation);
 #endif
     ISSetPermutation(m_rowPermutation);
 
-    PetscInt *colPermutationsStorage;
-    PetscMalloc(nCols * sizeof(PetscInt), &colPermutationsStorage);
+    PetscInt *colPermutationStorage;
+    PetscMalloc(nCols * sizeof(PetscInt), &colPermutationStorage);
     for (long j = 0; j < nCols; ++j) {
-        colPermutationsStorage[j] = colRanks[j];
+        colPermutationStorage[colRanks[j]] = j;
     }
 
 #if BITPIT_ENABLE_MPI == 1
-    ISCreateGeneral(m_communicator, nCols, colPermutationsStorage, PETSC_OWN_POINTER, &m_colPermutation);
+    ISCreateGeneral(m_communicator, nCols, colPermutationStorage, PETSC_OWN_POINTER, &m_colPermutation);
 #else
-    ISCreateGeneral(PETSC_COMM_SELF, nCols, colPermutationsStorage, PETSC_OWN_POINTER, &m_colPermutation);
+    ISCreateGeneral(PETSC_COMM_SELF, nCols, colPermutationStorage, PETSC_OWN_POINTER, &m_colPermutation);
 #endif
     ISSetPermutation(m_colPermutation);
 }
@@ -776,9 +776,9 @@ void SystemSolver::postKSPSolveActions()
  */
 void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 {
-    const PetscInt *rowRanks = nullptr;
+    const PetscInt *rowPermutation = nullptr;
     if (m_rowPermutation) {
-        ISGetIndices(m_rowPermutation, &rowRanks);
+        ISGetIndices(m_rowPermutation, &rowPermutation);
     }
 
     // Set sizes
@@ -807,16 +807,16 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     ConstProxyVector<long> rowPattern;
 #endif
 
-    for (long row = 0; row < nRows; ++row) {
-        long matrixRow = row;
+    for (long n = 0; n < nRows; ++n) {
+        long row = n;
         if (m_rowPermutation) {
-            matrixRow = rowRanks[matrixRow];
+            row = rowPermutation[row];
         }
 
-        d_nnz[row] = assembler.getRowNZCount(matrixRow);
+        d_nnz[row] = assembler.getRowNZCount(n);
 #if BITPIT_ENABLE_MPI == 1
         if (m_partitioned) {
-            assembler.getRowPattern(matrixRow, &rowPattern);
+            assembler.getRowPattern(n, &rowPattern);
 
             int nRowNZ = rowPattern.size();
             for (int k = 0; k < nRowNZ; ++k) {
@@ -840,7 +840,7 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 
     // Cleanup
     if (m_rowPermutation) {
-        ISRestoreIndices(m_rowPermutation, &rowRanks);
+        ISRestoreIndices(m_rowPermutation, &rowPermutation);
     }
 }
 
@@ -855,16 +855,14 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
     const long nCols = assembler.getColCount();
     const long maxRowNZ = assembler.getMaxRowNZCount();
 
-    const PetscInt *rowRanks = nullptr;
+    const PetscInt *rowPermutations = nullptr;
     if (m_rowPermutation) {
-        ISGetIndices(m_rowPermutation, &rowRanks);
+        ISGetIndices(m_rowPermutation, &rowPermutations);
     }
 
-    IS invColPermutation;
-    const PetscInt *colInvRanks = nullptr;
+    const PetscInt *colPermutations = nullptr;
     if (m_colPermutation) {
-        ISInvertPermutation(m_colPermutation, nCols, &invColPermutation);
-        ISGetIndices(invColPermutation, &colInvRanks);
+        ISGetIndices(m_colPermutation, &colPermutations);
     }
 
     // Create the matrix
@@ -884,14 +882,14 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
 
         ConstProxyVector<long> rowPattern;
         ConstProxyVector<double> rowValues;
-        for (long row = 0; row < nRows; ++row) {
-            long matrixRow = row;
+        for (long n = 0; n < nRows; ++n) {
+            long row = n;
             if (m_rowPermutation) {
-                matrixRow = rowRanks[matrixRow];
+                row = rowPermutations[row];
             }
 
-            assembler.getRowPattern(matrixRow, &rowPattern);
-            assembler.getRowValues(matrixRow, &rowValues);
+            assembler.getRowPattern(n, &rowPattern);
+            assembler.getRowValues(n, &rowValues);
 
             const int nRowNZ = rowPattern.size();
             const PetscInt globalRow = rowGlobalOffset + row;
@@ -902,7 +900,7 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
                 if (m_colPermutation) {
                     if (globalCol >= firstGlobalCol && globalCol <= lastGlobalCol) {
                         long col = globalCol - firstGlobalCol;
-                        col = colInvRanks[col];
+                        col = colPermutations[col];
                         globalCol = firstGlobalCol + col;
                     }
                 }
@@ -927,11 +925,11 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
 
     // Cleanup
     if (m_rowPermutation) {
-        ISRestoreIndices(m_rowPermutation, &rowRanks);
+        ISRestoreIndices(m_rowPermutation, &rowPermutations);
     }
 
     if (m_colPermutation) {
-        ISDestroy(&invColPermutation);
+        ISRestoreIndices(m_colPermutation, &colPermutations);
     }
 }
 
