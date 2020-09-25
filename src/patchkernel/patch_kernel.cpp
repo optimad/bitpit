@@ -5453,7 +5453,7 @@ void PatchKernel::_updateInterfaces()
 
 					buildCellInterface(&cell, face, neigh, neighFace);
 				}
-			} else if (nFaceInterfaces == 0 && cell.isInterior()) {
+			} else if (nFaceInterfaces == 0) {
 				// Internal borderes need an interface
 				buildCellInterface(&cell, face, nullptr, -1);
 			}
