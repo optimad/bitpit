@@ -5198,6 +5198,9 @@ void PatchKernel::_updateAdjacencies()
 					const CellHalfFace &neighHalfFace = *matchItr;
 
 					// Generate the adjacency
+					//
+					// The function that adds the adjacencies to a cell takes
+					// care of checking if the adjacency already exists.
 					Cell &neigh    = neighHalfFace.getCell();
 					long neighId   = neigh.getId();
 					long neighFace = neighHalfFace.getFace();
