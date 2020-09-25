@@ -191,12 +191,6 @@ VolOctree::VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_p
 	setPartitioned(!m_tree->getSerial());
 #endif
 
-	// Sync the patch with the tree
-	sync(false);
-
-	// Set the bounding
-	setBoundingBox();
-
 	// Set the aopter
 	setTreeAdopter(adopter);
 }
@@ -782,9 +776,7 @@ std::vector<adaption::Info> VolOctree::_spawn(bool trackSpawn)
 	std::vector<adaption::Info> updateInfo;
 
 	// Perform initial import
-	bool emtpyPatch = (getCellCount() == 0);
-	ParaTree::Operation lastTreeOperation = m_tree->getLastOperation();
-	if (lastTreeOperation == ParaTree::OP_INIT && emtpyPatch) {
+	if (empty()) {
 		m_tree->adapt();
 		updateInfo = sync(trackSpawn);
 	}
