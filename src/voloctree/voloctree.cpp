@@ -312,9 +312,6 @@ void VolOctree::initialize()
 	// This patch supports adaption
 	setAdaptionStatus(ADAPTION_CLEAN);
 
-	// Set interfaces build strategy
-	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
-
 #if BITPIT_ENABLE_MPI==1
 	// This patch supports partitioning
 	setPartitioningStatus(PARTITIONING_CLEAN);
