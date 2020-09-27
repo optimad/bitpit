@@ -1612,7 +1612,7 @@ void ReconstructionPolynomial::computeGradients(int degree, const std::array<dou
     // Generic polynomial
     int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
 
-    BITPIT_CREATE_WORKSPACE(dcsi, double, m_dimensions * nCoeffs, 3 * MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(dcsi, double, static_cast<std::size_t>(m_dimensions * nCoeffs), 3 * MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{1., 0., 0.}}, dcsi);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 1., 0.}}, dcsi + nCoeffs);
     if (m_dimensions == 3) {
@@ -1846,7 +1846,7 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
     int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
     const std::vector<uint16_t> &nDegreeCoeffs = ReconstructionPolynomial::getDegreeCoefficientsCount(m_dimensions);
 
-    BITPIT_CREATE_WORKSPACE(dcsi, double, m_dimensions * nCoeffs, 3 * MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(dcsi, double, static_cast<std::size_t>(m_dimensions * nCoeffs), 3 * MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{1., 0., 0.}}, dcsi);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 1., 0.}}, dcsi + nCoeffs);
     if (m_dimensions == 3) {
