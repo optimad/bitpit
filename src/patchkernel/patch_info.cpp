@@ -155,6 +155,7 @@ PatchNumberingInfo::PatchNumberingInfo(PatchKernel const *patch)
 */
 void PatchNumberingInfo::_init()
 {
+	m_cellConsecutiveOffset = -1;
 }
 
 /*!
@@ -162,11 +163,14 @@ void PatchNumberingInfo::_init()
 */
 void PatchNumberingInfo::_reset()
 {
-	m_cellConsecutiveOffset = -1;
+	// Clear data
 	m_cellLocalToConsecutiveMap.clear();
 #if BITPIT_ENABLE_MPI==1
 	m_nGlobalInternals.clear();
 #endif
+
+	// Initialize data
+	_init();
 }
 
 /*!
