@@ -931,7 +931,7 @@ PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool interiorOnly)
       m_nLeafs(0), m_nMinLeafCells(0), m_nMaxLeafCells(0),
       m_interiorOnly(interiorOnly)
 #if BITPIT_ENABLE_MPI
-    , m_communicator(MPI_COMM_NULL)
+    , m_rank(0), m_nProcessors(1), m_communicator(MPI_COMM_NULL)
 #endif
 {
 
@@ -1057,6 +1057,9 @@ void PatchSkdTree::build(std::size_t leafThreshold, bool squeezeStorage)
 
         // Build partition info with partition boxes if the patch is partitioned
         buildPartitionBoxes();
+    } else {
+        m_rank        = 0;
+        m_nProcessors = 1;
     }
 #endif
 }
