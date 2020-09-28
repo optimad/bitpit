@@ -1918,8 +1918,8 @@ array<int64_t,3> Octant::getEdgePeriodicCoord(uint8_t iedge) const {
     coord[0] = this->m_x;
     coord[1] = this->m_y;
     coord[2] = this->m_z;
-    uint32_t maxLength = uint32_t(1)<<TreeConstants::MAX_LEVEL;
-    uint32_t dh = this->getLogicalSize();
+    int64_t dh = this->getLogicalSize();
+    int64_t maxLength = int64_t(1)<<TreeConstants::MAX_LEVEL;
 
     std::array<uint8_t,2> iface;
     iface[0] = sm_treeConstants[m_dim].edgeFace[iedge][0];
