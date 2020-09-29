@@ -441,7 +441,7 @@ namespace bitpit {
         // =================================================================================== //
 
         void        findAllGlobalNeighbours(uint32_t idx, std::vector<uint64_t> &globalNeighs);
-        void        findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals = false) const;
+        void        findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals) const;
     public:
         void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         void 		findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const ;

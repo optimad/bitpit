@@ -2601,15 +2601,13 @@ namespace bitpit {
      * in their structure (octants or ghosts) and sets isghost[i] = true if the
      * i-th neighbour is ghost in the local tree.
      * \param[in] oct Pointer to the current octant.
-     * \param[in] haveIidx Boolean flag to specify if the octant is passed with a valid idx
-     * \param[in] idx Index of the searching octant. Its value is not important if haveIidx is false
      * \param[in] iface Index of face/edge/node passed through for neighbours finding
      * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
      * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
      * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).*/
     void
-    ParaTree::findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    ParaTree::findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
 
         bool	Fedge = ((codim==2) && (m_dim==3));
         bool	Fnode = (codim == m_dim);
@@ -2645,7 +2643,7 @@ namespace bitpit {
 
         const Octant* oct = &m_octree.m_octants[idx];
 
-        findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, iface, codim, neighbours, isghost, false);
 
     };
 
@@ -2661,7 +2659,7 @@ namespace bitpit {
     void
     ParaTree::findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
 
-        findNeighbours(oct, false, 0, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, iface, codim, neighbours, isghost, false);
 
     };
 
@@ -2678,7 +2676,7 @@ namespace bitpit {
 
         const Octant* oct = &m_octree.m_ghosts[idx];
         bvector isghost;
-        findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, true);
+        findNeighbours(oct, iface, codim, neighbours, isghost, true);
 
     };
 
@@ -2695,7 +2693,7 @@ namespace bitpit {
     ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
 
         const Octant* oct = &m_octree.m_ghosts[idx];
-        findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, iface, codim, neighbours, isghost, false);
 
     };
 
@@ -2711,8 +2709,7 @@ namespace bitpit {
     void
     ParaTree::findGhostNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
 
-        uint32_t idx = getIdx(oct);
-        findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, iface, codim, neighbours, isghost, false);
 
     };
 
