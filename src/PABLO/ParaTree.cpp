@@ -2621,7 +2621,7 @@ namespace bitpit {
             m_octree.findEdgeNeighbours(oct, iface, neighbours, isghost, onlyinternal);
         }
         else if (Fnode){
-            m_octree.findNodeNeighbours(oct, haveIidx, idx, iface, neighbours, isghost, onlyinternal);
+            m_octree.findNodeNeighbours(oct, iface, neighbours, isghost, onlyinternal);
         }
         else {
             neighbours.clear();
@@ -2730,7 +2730,7 @@ namespace bitpit {
 
         // Get vertex neighbours
         int dim = getDim();
-        m_octree.findNodeNeighbours(oct, false, 0, inode, neighbours, isghost, false);
+        m_octree.findNodeNeighbours(oct, inode, neighbours, isghost, false);
 
         int octantLevel = getLevel(oct);
         if (dim == 3) {
