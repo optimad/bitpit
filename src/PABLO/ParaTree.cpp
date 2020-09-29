@@ -2615,7 +2615,7 @@ namespace bitpit {
         bool	Fnode = (codim == m_dim);
 
         if (codim == 1){
-            m_octree.findNeighbours(oct, haveIidx, idx, iface, neighbours, isghost, onlyinternal);
+            m_octree.findNeighbours(oct, iface, neighbours, isghost, onlyinternal);
         }
         else if (Fedge){
             m_octree.findEdgeNeighbours(oct, haveIidx, idx, iface, neighbours, isghost, onlyinternal);
