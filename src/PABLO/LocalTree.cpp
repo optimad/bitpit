@@ -3227,7 +3227,7 @@ namespace bitpit {
      */
     uint32_t
     LocalTree::findMorton(uint64_t Morton) const {
-        return _findMorton(Morton, m_octants);
+        return findMorton(Morton, m_octants);
     };
 
     // =================================================================================== //
@@ -3237,7 +3237,7 @@ namespace bitpit {
      */
     uint32_t
     LocalTree::findGhostMorton(uint64_t Morton) const {
-        return _findMorton(Morton, m_ghosts);
+        return findMorton(Morton, m_ghosts);
     };
 
     // =================================================================================== //
@@ -3248,7 +3248,7 @@ namespace bitpit {
      * \return Local index of the target octant (=nocts if target Morton not found).
      */
     uint32_t
-    LocalTree::_findMorton(uint64_t Morton, const octvector &octants) const {
+    LocalTree::findMorton(uint64_t Morton, const octvector &octants) const {
 
         uint32_t nocts = octants.size();
 
