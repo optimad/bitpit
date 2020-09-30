@@ -3242,32 +3242,79 @@ namespace bitpit {
 
     // =================================================================================== //
     /*! Find the index of the octant with the specified Morton in the given
-     *  sorted list of octants.
-     * \param[in] Morton Morton index to be found.
+     *  sorted list of octants. If the requested octant is not in the given
+     *  list, the index of the end (i.e., the element after the last element
+     *  is returned).
+     * \param[in] targetMorton is the Morton index to be found.
      * \param[in] octants list of octants
      * \return Local index of the target octant (=nocts if target Morton not found).
      */
     uint32_t
-    LocalTree::_findMorton(uint64_t Morton, const octvector &octants) const {
+    LocalTree::_findMorton(uint64_t targetMorton, const octvector &octants) const {
 
-        uint32_t nocts = octants.size();
+        uint32_t markerIndex;
+        uint64_t markerMorton;
+        _findLastLowerEqualMorton(targetMorton, octants, &markerIndex, &markerMorton);
 
-        uint32_t low  = 0;
-        uint32_t high = nocts - 1;
-        while (low <= high) {
-            uint32_t mid = low + ((high - low) / 2);
-            uint64_t mid_morton = octants[mid].computeMorton();
-            if (mid_morton > Morton) {
-                high = mid - 1;
-            } else if (mid_morton < Morton) {
-                low = mid + 1;
-            } else {
-                return mid;
+        return markerIndex;
+    };
+
+    // =================================================================================== //
+    /*! Given a target Morton number and a sorted list of octants, finds the
+     *  index of the last octant whose Morton number if lower or equal to the
+     *  target Morton number. If the target Morton is lower than the Morton
+     *  of the first element, the index of the past-the-element element is
+     *  returned.
+     * \param[in] targetMorton is the Morton index to be found.
+     * \param[in] octants list of octants
+     * \param[out] markerIndex on output will contain the index of the last
+     * octant whose Morton number if lower or equal to the target Morton
+     * number. If the target Morton is lower than the Morton of the first
+     * element, the index of the past-the-element element is returned
+     * \param[out] markerIndex on output will contain the Morton associated
+     * with the marker index
+     */
+    void
+    LocalTree::_findLastLowerEqualMorton(uint64_t targetMorton, const octvector &octants, uint32_t *markerIndex, uint64_t *markerMorton) const {
+
+        uint32_t nOctants = octants.size();
+        if (nOctants == 0) {
+            *markerIndex  = 0;
+            *markerMorton = numeric_limits<uint64_t>::max();
+            return;
+        }
+
+        uint32_t lowIndex  = 0;
+        uint32_t highIndex = nOctants - 1;
+        while (lowIndex < highIndex) {
+            uint32_t midIndex  = lowIndex + (highIndex - lowIndex) / 2 + 1;
+            uint64_t midMorton = octants[midIndex].computeMorton();
+            if (midMorton > targetMorton) {
+                highIndex = midIndex - 1;
+            }
+            else if (midMorton <= targetMorton) {
+                lowIndex = midIndex;
+
+                *markerIndex  = midIndex;
+                *markerMorton = midMorton;
+                if (*markerMorton == targetMorton) {
+                    return;
+                }
             }
         }
 
-        return nocts;
-    };
+        if (lowIndex == 0 && highIndex == 0) {
+            uint64_t firstMorton = octants[0].computeMorton();
+            if (targetMorton >= firstMorton) {
+                *markerIndex  = 0;
+                *markerMorton = firstMorton;
+            } else {
+                *markerIndex  = nOctants;
+                *markerMorton = numeric_limits<uint64_t>::max();
+            }
+        }
+
+    }
 
     // =================================================================================== //
 

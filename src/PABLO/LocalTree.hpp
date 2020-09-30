@@ -237,7 +237,8 @@ private:
 
 	uint32_t 	findMorton(uint64_t Morton) const;
 	uint32_t 	findGhostMorton(uint64_t Morton) const;
-	uint32_t 	_findMorton(uint64_t Morton, const octvector &octants) const;
+	uint32_t 	_findMorton(uint64_t targetMorton, const octvector &octants) const;
+	void 		_findLastLowerEqualMorton(uint64_t targetMorton, const octvector &octants, uint32_t *markerIndex, uint64_t *markerMorton) const;
 
 	void 		computeConnectivity();
 	void 		clearConnectivity();
