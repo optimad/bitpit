@@ -173,24 +173,6 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
 }
 
 /*!
- * Get the coordinates of the specified segment's vertices.
- * @param[in] id segmment's id
- * @param[out] coords on output will contain coordinates of the vertices
- */
-void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array<double,3>> *coords ) const {
-
-    const Cell &segment = m_surface->getCell(id) ;
-    int nVertices = segment.getVertexCount() ;
-    const long *segmentConnect = segment.getConnect();
-
-    coords->resize(nVertices);
-    for (int n = 0; n < nVertices; ++n) {
-        long vertexId = segmentConnect[n] ;
-        (*coords)[n] = m_surface->getVertexCoords(vertexId);
-    }
-}
-
-/*!
  * Computes levelset relevant information at one point with respect to a segment
  *
  * @param[in] pointCoords coordinates of point
@@ -638,7 +620,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
         }
     }
 
-    std::vector<std::array<double,3>>       VS(3);
+    std::vector<std::array<double,3>>       VS;
 
     const SurfUnstructured                  &m_surface = m_segmentation->getSurface();
 
@@ -656,15 +638,19 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
     log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
 
     for (const Cell &segment : m_surface.getCells()) {
+        // get segment info
         long segmentId = segment.getId();
+        ElementType segmentType = segment.getType();
+        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+        std::size_t nSegmentVertices = segmentVertexIds.size();
+
+        // get segment coordinates
+        VS.resize(nSegmentVertices);
+        m_surface.getVertexCoords(nSegmentVertices, segmentVertexIds.data(), VS.data());
 
         // compute initial seeds, ie the cells where the vertices
         // of the surface element fall in and add them to stack
-        m_segmentation->getSegmentVertexCoords( segmentId, &VS ) ;
         seedNarrowBand( visitee, VS, searchRadius, stack );
-
-        ElementType segmentType = segment.getType();
-
 
         // propagate from seed
         size_t stackSize = stack.size();

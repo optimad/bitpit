@@ -61,7 +61,6 @@ public:
 
     const SurfaceSkdTree & getSearchTree() const ;
 
-    void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
     int getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
 
 private:
