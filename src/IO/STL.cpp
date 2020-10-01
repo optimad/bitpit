@@ -351,19 +351,13 @@ int STLReader::inspectASCII(InspectionInfo *info)
     m_fileHandle.seekg(0);
 
     // Scan file
-    std::string line;
     std::string word;
-    std::stringstream sline;
     std::stringstream sname;
 
     int inspectionError = 0;
-    while (getline(m_fileHandle, line)) {
-        line = utils::string::trim(line);
-        sline.clear(),
-        sline.str(line);
-
+    while (m_lineStream.readLine(m_fileHandle) >= 0) {
         // Get keyword
-        if ((sline >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
+        if ((m_lineStream >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
             // Initialize inspection info
             int solidIndex = info->nSolids;
 
@@ -375,7 +369,7 @@ int STLReader::inspectASCII(InspectionInfo *info)
 
             // Get solid name
             sname.str("");
-            while (sline >> word) {
+            while (m_lineStream >> word) {
                 sname << word << " ";
             }
             std::string name = sname.str();
@@ -429,20 +423,15 @@ int STLReader::inspectSolidASCII(std::size_t *nFacets, std::array<bool, 6> *erro
     }
 
     // Inspect the solid
-    std::string line;
     std::string word;
-    std::stringstream sline;
     long last_valid_pos;
 
     int inspectError = 0;
     while (true) {
         // Get next line
         last_valid_pos = m_fileHandle.tellg();
-        getline(m_fileHandle, line);
-        line = utils::string::trim(line);
-        sline.clear();
-        sline.str(line);
-        if (!(sline >> word)) {
+        m_lineStream.readLine(m_fileHandle);
+        if (!(m_lineStream >> word)) {
             word = "";
         }
 
@@ -498,17 +487,12 @@ int STLReader::inspectFacetASCII(std::array<bool, 6> *errors)
     }
 
     // Check facet data
-    std::string line;
     std::string word;
-    std::stringstream sline;
     long last_valid_pos;
 
     last_valid_pos = m_fileHandle.tellg();
-    getline(m_fileHandle, line);
-    line = utils::string::trim(line);
-    sline.clear(),
-    sline.str(line);
-    if ((!(sline >> word)) || (word.compare(ASCII_FACET_BEGIN) == 0)) {
+    m_lineStream.readLine(m_fileHandle);
+    if ((!(m_lineStream >> word)) || (word.compare(ASCII_FACET_BEGIN) == 0)) {
         word = "begin";
     }
 
@@ -522,11 +506,11 @@ int STLReader::inspectFacetASCII(std::array<bool, 6> *errors)
 
         // Check facet normal or facet vertices
         if (word.compare("begin") == 0) {
-            if ((sline >> word) && (word.compare("normal") == 0)) {
+            if ((m_lineStream >> word) && (word.compare("normal") == 0)) {
                 normal_found = true;
 
                 int nxyz = 0;
-                while (sline >> word) {
+                while (m_lineStream >> word) {
                     nxyz++;
                 }
 
@@ -539,7 +523,7 @@ int STLReader::inspectFacetASCII(std::array<bool, 6> *errors)
             nV++;
 
             int nxyz = 0;
-            while (sline >> word) {
+            while (m_lineStream >> word) {
                 nxyz++;
             }
 
@@ -550,11 +534,8 @@ int STLReader::inspectFacetASCII(std::array<bool, 6> *errors)
 
         // Get next line
         last_valid_pos = m_fileHandle.tellg();
-        getline(m_fileHandle, line);
-        line = utils::string::trim(line);
-        sline.clear(),
-        sline.str(line);
-        if (!(sline >> word)) {
+        m_lineStream.readLine(m_fileHandle);
+        if (!(m_lineStream >> word)) {
             word = "";
         }
     }
@@ -1005,9 +986,8 @@ int STLReader::readHeaderASCII(const std::string &solid, std::string *name, std:
     utils::string::trim(solidKey);
 
     // Scan file until solid is found
-    std::string line;
     std::string word;
-    std::stringstream sline;
+    std::string line;
 
     long start_pos   = m_fileHandle.tellg();
     long current_pos = start_pos + 1;
@@ -1016,10 +996,7 @@ int STLReader::readHeaderASCII(const std::string &solid, std::string *name, std:
     bool wrapAround = solidKey.compare(ASCII_SOLID_BEGIN) != 0;
     while (!solidFound && (start_pos != current_pos)) {
         // Get current line
-        getline(m_fileHandle, line);
-        line = utils::string::trim(line);
-        sline.clear();
-        sline.str(line);
+        m_lineStream.readLine(m_fileHandle);
 
         // Check end of file
         if (m_fileHandle.eof()) {
@@ -1035,7 +1012,8 @@ int STLReader::readHeaderASCII(const std::string &solid, std::string *name, std:
         current_pos = m_fileHandle.tellg();
 
         // Look for keyword "solid"
-        if ((sline >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
+        if ((m_lineStream >> word) && (word.compare(ASCII_SOLID_BEGIN) == 0)) {
+            m_lineStream.copyLine(&line);
             if (solidKey.compare(ASCII_SOLID_BEGIN) == 0 || line.compare(solidKey) == 0) {
                 *name = line.erase(0, ASCII_SOLID_BEGIN.size());
                 *name = utils::string::trim(*name);
@@ -1090,24 +1068,21 @@ int STLReader::readFooterASCII(const std::string &solid)
     utils::string::trim(solidKey);
 
     // Look for the end of solid section
-    std::string line;
     std::string word;
-    std::stringstream sline;
+    std::string line;
 
     while (true) {
         // Get next line
-        getline(m_fileHandle, line);
+        m_lineStream.readLine(m_fileHandle);
 
         // Get next word
-        line = utils::string::trim(line);
-        sline.clear();
-        sline.str(line);
-        if (!(sline >> word)) {
+        if (!(m_lineStream >> word)) {
             word = "";
         }
 
         // Handle the word
         if (word.compare(ASCII_SOLID_END) == 0) {
+            m_lineStream.copyLine(&line);
             if (line.compare(solidKey) != 0) {
                 log::cout() << "WARNING: end-solid key does not match the solid name." << std::endl;
                 log::cout() << "         Expected end-solid key : " << solidKey << std::endl;
@@ -1144,9 +1119,8 @@ int STLReader::readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *
                               std::array<double, 3> *V2, std::array<double, 3> *N)
 {
     // Read facet data
-    std::string line;
     std::string word;
-    std::stringstream sline;
+    std::string value;
     long last_valid_pos;
 
     int error = 0;
@@ -1155,13 +1129,8 @@ int STLReader::readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *
     while (true) {
         // Get next line
         last_valid_pos = m_fileHandle.tellg();
-        getline(m_fileHandle, line);
-
-        // Get next word
-        line = utils::string::trim(line);
-        sline.clear();
-        sline.str(line);
-        if (!(sline >> word)) {
+        m_lineStream.readLine(m_fileHandle);
+        if (!(m_lineStream >> word)) {
             continue;
         }
 
@@ -1174,7 +1143,7 @@ int STLReader::readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *
             if (word.compare(target) == 0) {
                 target = "normal";
 
-                if (!(sline >> word)) {
+                if (!(m_lineStream >> word)) {
                     continue;
                 }
             } else {
@@ -1192,7 +1161,10 @@ int STLReader::readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *
             }
         } else if (word.compare("normal") == 0) {
             if (word.compare(target) == 0) {
-                sline >> (*N);
+                for (int k = 0; k < 3; ++k) {
+                    m_lineStream >> value;
+                    (*N)[k] = stod(value);
+                }
                 target = "vertex";
             } else {
                 error = -2;
@@ -1200,16 +1172,22 @@ int STLReader::readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *
             }
         } else if (word.compare("vertex") == 0) {
             if (word.compare(target) == 0) {
+                std::array<double, 3> *coords;
                 if (nFacetVertices == 0) {
-                    sline >> *V0;
+                    coords = V0;
                 } else if (nFacetVertices == 1) {
-                    sline >> *V1;
+                    coords = V1;
                 } else if (nFacetVertices == 2) {
-                    sline >> *V2;
+                    coords = V2;
                     target = ASCII_FACET_END;
                 } else {
                     error = -3;
                     break;
+                }
+
+                for (int k = 0; k < 3; ++k) {
+                    m_lineStream >> value;
+                    (*coords)[k] = stod(value);
                 }
 
                 nFacetVertices++;

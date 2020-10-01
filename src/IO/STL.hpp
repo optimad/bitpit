@@ -32,6 +32,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "line_stream.hpp"
+
 namespace bitpit {
 
 class STLBase {
@@ -125,6 +127,8 @@ public:
 
 private:
     std::ifstream m_fileHandle;      /**< File handle */
+
+    LineStream m_lineStream;    /**< Line stream */
 
     int inspectASCII(InspectionInfo *info);
     int inspectSolidASCII(std::size_t *nFactes, std::array<bool, 6> *errors);
