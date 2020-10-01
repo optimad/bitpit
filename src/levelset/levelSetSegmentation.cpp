@@ -117,6 +117,7 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
 
     std::vector<std::array<double,3>> limitedVertexNormal ;
     std::vector<std::array<double,3>> vertexNormal ;
+    std::vector<long> vertexNeighbours ;
 
     m_surface      = surface;
     m_featureAngle = featureAngle;
@@ -131,8 +132,11 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
 
         double misalignment = 0. ;
         for( int i = 0; i < nVertices; ++i ){
-            vertexNormal[i] = m_surface->evalVertexNormal(segmentId, i) ;
-            limitedVertexNormal[i]   = m_surface->evalLimitedVertexNormal(segmentId, i, m_featureAngle) ;
+            vertexNeighbours.clear();
+            m_surface->findCellVertexNeighs(segmentId, i, &vertexNeighbours);
+
+            vertexNormal[i] = m_surface->evalVertexNormal(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data()) ;
+            limitedVertexNormal[i] = m_surface->evalLimitedVertexNormal(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle) ;
 
             misalignment += norm2(vertexNormal[i] - limitedVertexNormal[i]) ;
         }
