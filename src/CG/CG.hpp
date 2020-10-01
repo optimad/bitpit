@@ -111,6 +111,7 @@ array3D projectPointSegment( array3D const &, array3D const &, array3D const &, 
 array3D projectPointSegment( array3D const &, array3D const &, array3D const &, double* );
 array3D projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const & );
 array3D projectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D & );
+array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const & );
 array3D projectPointPolygon( array3D const &, std::size_t, array3D const * );
 array3D projectPointPolygon( array3D const &, std::vector<array3D> const &, std::vector<double> & );

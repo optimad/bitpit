@@ -1049,8 +1049,22 @@ array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const
  */
 array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D &lambda)
 {
+    return projectPointTriangle( P, Q0, Q1, Q2, lambda.data() );
+}
+
+/*!
+ * Computes projection of point on triangle
+ * \param[in] P point coordinates
+ * \param[in] Q0 first triangle vertex
+ * \param[in] Q1 second triangle vertex
+ * \param[in] Q2 third triangle vertex
+ * \param[out] lambda barycentric coordinates of projection point
+ * \return coordinates of projection point
+ */
+array3D projectPointTriangle( array3D const &P, array3D const &Q0, array3D const &Q1, array3D const &Q2, double *lambda)
+{
     array3D xP;
-    _projectPointsTriangle( 1, &P, Q0, Q1, Q2, &xP, lambda.data() );
+    _projectPointsTriangle( 1, &P, Q0, Q1, Q2, &xP, lambda );
 
     return xP;
 }
