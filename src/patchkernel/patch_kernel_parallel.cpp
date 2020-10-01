@@ -1878,7 +1878,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         }
 
         // Start the communication
-        long cellsBufferSize = 2 * sizeof(long) + nHaloCells * sizeof(int) + 2 * (nOutgoingCells + nHaloCells) * sizeof(bool);
+        long cellsBufferSize = 2 * sizeof(long) + 2 * nHaloCells * sizeof(int) + 2 * (nOutgoingCells + nHaloCells) * sizeof(bool);
         for (const long cellId : cellSendList) {
             cellsBufferSize += m_cells.at(cellId).getBinarySize();
         }
