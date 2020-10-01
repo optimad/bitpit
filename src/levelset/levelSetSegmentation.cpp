@@ -93,6 +93,14 @@ const SurfUnstructured & SegmentationKernel::getSurface() const {
 }
 
 /*!
+ * Get search tree
+ * @return search tree;
+ */
+const SurfaceSkdTree & SegmentationKernel::getSearchTree() const {
+    return *m_searchTree;
+}
+
+/*!
  * Set the surface
  * @param[in] surface pointer to surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
@@ -139,8 +147,8 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
     }
 
     // Initialize search tree
-    m_searchTreeUPtr = std::unique_ptr<SurfaceSkdTree>(new SurfaceSkdTree(surface));
-    m_searchTreeUPtr->build();
+    m_searchTree = std::unique_ptr<SurfaceSkdTree>(new SurfaceSkdTree(surface));
+    m_searchTree->build();
 }
 
 /*!
@@ -784,7 +792,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
             searchRadius = factor *cellSize;
         }
 
-        m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+        m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
 
         if(segmentId>=0){
 
@@ -835,7 +843,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
             centroid = visitee->computeCellCentroid(neighId);
             searchRadius =  1.05 *norm2(centroid-root);
-            m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+            m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
 
             if(segmentId>=0){
 
@@ -904,7 +912,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
                 searchRadius =  factor *cellSize;
             }
 
-            m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+            m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
 
             if(segmentId>=0){
 
@@ -952,7 +960,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
                 root = computeProjectionPoint(neighId);
 
                 searchRadius =  1.05 *norm2(centroid-root);
-                m_segmentation->m_searchTreeUPtr->findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+                m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
 
                 if(segmentId>=0){
 
@@ -1127,7 +1135,7 @@ LevelSetInfo LevelSetSegmentation::computeLevelSetInfo(const std::array<double,3
     std::array<double,3> gradient;
     std::array<double,3> normal;
 
-    m_segmentation->m_searchTreeUPtr->findPointClosestCell(coords, &segmentId, &distance);
+    m_segmentation->getSearchTree().findPointClosestCell(coords, &segmentId, &distance);
 
     int error = m_segmentation->getSegmentInfo(coords, segmentId, false, distance, gradient, normal);
     if (error) {

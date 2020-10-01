@@ -59,15 +59,17 @@ public:
     const SurfUnstructured & getSurface() const;
     double getFeatureAngle() const;
 
+    const SurfaceSkdTree & getSearchTree() const ;
+
     void getSegmentVertexCoords(long id, std::vector<std::array<double,3>> *coords) const;
     int getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
-
-    std::unique_ptr<SurfaceSkdTree> m_searchTreeUPtr;
 
 private:
     const SurfUnstructured *m_surface;
     std::unique_ptr<const SurfUnstructured> m_ownedSurface;
     double m_featureAngle;
+
+    std::unique_ptr<SurfaceSkdTree> m_searchTree;
 
     PiercedStorage<std::vector< std::array<double,3>>> m_segmentVertexNormals;
 
