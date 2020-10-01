@@ -633,7 +633,27 @@ std::array<double, 3> SurfaceKernel::evalEdgeNormal(long id, int edge_id) const
 */
 std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex) const
 {
-    return evalLimitedVertexNormal(id, vertex, std::numeric_limits<double>::max());
+    std::vector<long> vertexNeighs = findCellVertexNeighs(id, vertex);
+
+    return evalLimitedVertexNormal(id, vertex, vertexNeighs.size(), vertexNeighs.data(), std::numeric_limits<double>::max());
+}
+
+/*!
+ * Evaluate the normal unit vector of the specified local vertex.
+ *
+ * Vertex normal is evaluated as a weighted average of the normals of the
+ * 1 ring of the vertex. The weights used in the average are the normalized
+ * angles of incident facets at vertex.
+ *
+ * \param[in] id is the cell id
+ * \param[in] vertex is the local vertex id
+ * \param[in] nVertexNeighs is the number of vertex neighbours
+ * \param[in] vertexNeighs are the neighbours of the vertex
+ * \result The normal unit vector of the specified local vertex.
+*/
+std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex, std::size_t nVertexNeighs, const long *vertexNeighs) const
+{
+    return evalLimitedVertexNormal(id, vertex, nVertexNeighs, vertexNeighs, std::numeric_limits<double>::max());
 }
 
 /*!
@@ -653,6 +673,30 @@ std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex) const
 */
 std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex, double limit) const
 {
+    std::vector<long> vertexNeighs = findCellVertexNeighs(id, vertex);
+
+    return evalLimitedVertexNormal(id, vertex, vertexNeighs.size(), vertexNeighs.data(), limit);
+}
+
+/*!
+ * Evaluate the limited normal unit vector of the specified local vertex.
+ *
+ * Vertex normal is evaluated as a weighted average of the normals of the
+ * 1 ring of the vertex. Only the normal whose angle with respect to the
+ * considered cell is less that the specified limit are considered. The
+ * weights used in the average are the angles of incident facets at vertex.
+ *
+ * \param[in] id is the cell id
+ * \param[in] vertex is the local vertex id
+ * \param[in] nVertexNeighs is the number of vertex neighbours
+ * \param[in] vertexNeighs are the neighbours of the vertex
+ * \param[in] limit is the maximum allowed misalignment between the normal
+ * of the reference cell and the normal of facets used for evaualting the
+ * vertex normal
+ * \result The normal unit vector of the specified local vertex.
+*/
+std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex, std::size_t nVertexNeighs, const long *vertexNeighs, double limit) const
+{
     // Get vertex id
     const Cell &cell = m_cells[id];
     ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
@@ -664,12 +708,12 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex
     // Cell angle at vertex
     double cellVertexAngle = evalAngleAtVertex(id, vertex);
 
-    // Compute cell vertex neighs
-    std::vector<long> vertexNeighs = findCellVertexNeighs(id, vertex);
-
     // Compute non-normalized normal
     std::array<double, 3> normal = cellVertexAngle * cellNormal;
-    for (long facetId : vertexNeighs) {
+    for (std::size_t i = 0; i < nVertexNeighs; ++i) {
+        // Get neighbour facet
+        long facetId = vertexNeighs[i];
+
         // Eval facet normal
         std::array<double, 3> facetNormal = evalFacetNormal(facetId);
 

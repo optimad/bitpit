@@ -56,7 +56,9 @@ public:
         virtual std::array<double, 3> evalFacetNormal(long) const;
         std::array<double, 3> evalEdgeNormal(long, int) const;
         std::array<double, 3> evalVertexNormal(long, int) const;
-        virtual std::array<double, 3> evalLimitedVertexNormal(long, int, double ) const;
+        std::array<double, 3> evalVertexNormal(long, int, std::size_t, const long *) const;
+        std::array<double, 3> evalLimitedVertexNormal(long, int, double ) const;
+        virtual std::array<double, 3> evalLimitedVertexNormal(long, int, std::size_t, const long *, double ) const;
         double evalCellSize(long id) const override;
 
         bool adjustCellOrientation();
