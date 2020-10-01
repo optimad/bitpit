@@ -60,7 +60,7 @@ SegmentationKernel::SegmentationKernel( ) : m_surface(nullptr), m_featureAngle(0
  */
 SegmentationKernel::SegmentationKernel( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle ) {
 
-    m_ownedSurface = std::shared_ptr<const SurfUnstructured>(surface.release());
+    m_ownedSurface = std::move(surface);
 
     setSurface(m_ownedSurface.get(), featureAngle);
 }

@@ -66,7 +66,7 @@ public:
 
 private:
     const SurfUnstructured *m_surface;
-    std::shared_ptr<const SurfUnstructured> m_ownedSurface;
+    std::unique_ptr<const SurfUnstructured> m_ownedSurface;
     double m_featureAngle;
 
     PiercedStorage<std::vector< std::array<double,3>>> m_segmentVertexNormals;
