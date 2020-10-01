@@ -85,22 +85,6 @@ double SegmentationKernel::getFeatureAngle() const {
 }
 
 /*!
- * Get segmentation vertex normals
- * @return segmentation vertex normals;
- */
-const std::unordered_map<long, std::vector< std::array<double,3>>> & SegmentationKernel::getLimitedVertexNormals() const {
-    return m_limitedVertexNormals;
-}
-
-/*!
- * Get segmentation vertex gradients
- * @return segmentation vertex gradients;
- */
-const std::unordered_map<long, std::vector< std::array<double,3>>> & SegmentationKernel::getVertexNormals() const {
-    return m_vertexNormals;
-}
-
-/*!
  * Get segmentation surface
  * @return segmentation surface;
  */
@@ -115,35 +99,42 @@ const SurfUnstructured & SegmentationKernel::getSurface() const {
  */
 void SegmentationKernel::setSurface( const SurfUnstructured *surface, double featureAngle){
 
-    std::vector<std::array<double,3>> limitedVertexNormal ;
-    std::vector<std::array<double,3>> vertexNormal ;
-    std::vector<long> vertexNeighbours ;
-
     m_surface      = surface;
     m_featureAngle = featureAngle;
 
     double tol = m_surface->getTol() ;
-    for( const Cell &segment : m_surface->getCells() ){
-        long segmentId = segment.getId() ;
-        int nVertices  = segment.getVertexCount() ;
 
-        limitedVertexNormal.resize(nVertices) ;
-        vertexNormal.resize(nVertices) ;
+    m_segmentVertexNormals.setStaticKernel(&m_surface->getCells());
+
+    std::vector<long> vertexNeighbours ;
+    std::vector<std::array<double,3>> limitedVertexNormals ;
+    for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != m_surface->cellConstEnd(); ++segmentItr ){
+        long segmentId = segmentItr.getId() ;
+        std::size_t segmentRawId = segmentItr.getRawIndex() ;
+        const Cell &segment = *segmentItr;
+        int nSegmentVertices = segment.getVertexCount() ;
+        std::vector<std::array<double,3>> *segmentVertexNormals = m_segmentVertexNormals.rawData(segmentRawId);
+
+        // Evaluate segment vertex normals
+        //
+        // Normals are initialized with unlimited normals, if the segment is
+        // misalign they will be replaced with limited normals.
+        (*segmentVertexNormals).resize(nSegmentVertices) ;
+        limitedVertexNormals.resize(nSegmentVertices) ;
 
         double misalignment = 0. ;
-        for( int i = 0; i < nVertices; ++i ){
+        for( int i = 0; i < nSegmentVertices; ++i ){
             vertexNeighbours.clear();
             m_surface->findCellVertexNeighs(segmentId, i, &vertexNeighbours);
 
-            vertexNormal[i] = m_surface->evalVertexNormal(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data()) ;
-            limitedVertexNormal[i] = m_surface->evalLimitedVertexNormal(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle) ;
+            (*segmentVertexNormals)[i] = m_surface->evalVertexNormal(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data()) ;
+            limitedVertexNormals[i] = m_surface->evalLimitedVertexNormal(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle) ;
 
-            misalignment += norm2(vertexNormal[i] - limitedVertexNormal[i]) ;
+            misalignment += norm2((*segmentVertexNormals)[i] - limitedVertexNormals[i]) ;
         }
 
-        m_vertexNormals.insert({{segmentId, vertexNormal}}) ;
         if( misalignment >= tol ){
-            m_limitedVertexNormals.insert({{segmentId, limitedVertexNormal}}) ;
+            segmentVertexNormals->swap(limitedVertexNormals);
         }
     }
 
@@ -186,81 +177,40 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
  */
 int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const {
 
-    std::array<double,3> outwards;
+    SurfUnstructured::CellConstIterator segmentIterator = m_surface->getCellConstIterator(segmentId);
+    const Cell &segment = *segmentIterator ;
+    ElementType segmentType = segment.getType();
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds() ;
+    int nSegmentVertices = segmentVertexIds.size() ;
+    const std::vector<std::array<double,3>> &segmentVertexNormals = m_segmentVertexNormals.rawAt(segmentIterator.getRawIndex());
 
-    auto itrLimitedNormal = getLimitedVertexNormals().find(segmentId) ;
-    auto itrNormal = getVertexNormals().find(segmentId) ;
-    assert( itrNormal != getVertexNormals().end() ) ;
-
-    const Cell &cell = m_surface->getCell(segmentId) ;
-    ElementType cellType = cell.getType();
-    const long *cellConnect = cell.getConnect();
-
+    BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
     std::array<double,3> projectionCoords;
-
-    switch (cellType) {
+    switch (segmentType) {
 
     case ElementType::VERTEX :
     {
-        long id = cellConnect[0] ;
-
+        long id = segmentVertexIds[0] ;
         projectionCoords = m_surface->getVertexCoords(id);
-
-
-        normal.fill(0.);
 
         break;
     }
 
     case ElementType::LINE:
     {
-        long id0 = cellConnect[0] ;
-        long id1 = cellConnect[1] ;
-        std::array<double,2> lambda ;
-
+        long id0 = segmentVertexIds[0] ;
+        long id1 = segmentVertexIds[1] ;
         projectionCoords = CGElem::projectPointSegment( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), lambda);
-        outwards  = lambda[0] *itrNormal->second[0] ;
-        outwards += lambda[1] *itrNormal->second[1] ;
-        outwards /= norm2(outwards) ;
-
-        if( itrLimitedNormal != getLimitedVertexNormals().end() ){
-            normal  = lambda[0] *itrLimitedNormal->second[0] ;
-            normal += lambda[1] *itrLimitedNormal->second[1] ;
-            normal /= norm2(normal) ;
-
-        } else {
-            normal = outwards;
-
-        }
 
         break;
     }
 
     case ElementType::TRIANGLE:
     {
-        long id0 = cellConnect[0] ;
-        long id1 = cellConnect[1] ;
-        long id2 = cellConnect[2] ;
-
-        std::array<double,3> lambda ;
-
+        long id0 = segmentVertexIds[0] ;
+        long id1 = segmentVertexIds[1] ;
+        long id2 = segmentVertexIds[2] ;
         projectionCoords = CGElem::projectPointTriangle( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), lambda );
-        outwards  = lambda[0] *itrNormal->second[0] ;
-        outwards += lambda[1] *itrNormal->second[1] ;
-        outwards += lambda[2] *itrNormal->second[2] ;
-        outwards /= norm2(outwards);
-
-
-        if( itrLimitedNormal != getLimitedVertexNormals().end() ){
-            normal  = lambda[0] *itrLimitedNormal->second[0] ;
-            normal += lambda[1] *itrLimitedNormal->second[1] ;
-            normal += lambda[2] *itrLimitedNormal->second[2] ;
-            normal /= norm2(normal) ;
-
-        } else {
-            normal = outwards;
-
-        }
 
         break;
     }
@@ -271,6 +221,16 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
         break;
     }
 
+    }
+
+    if (segmentType != ElementType::VERTEX) {
+        normal = lambda[0] * segmentVertexNormals[0] ;
+        for (int i = 1; i < nSegmentVertices; ++i) {
+            normal += lambda[i] * segmentVertexNormals[i] ;
+        }
+        normal /= norm2(normal) ;
+    } else {
+        normal.fill(0.);
     }
 
     gradient = pointCoords-projectionCoords;
