@@ -4242,16 +4242,52 @@ void PatchKernel::evalCellBoundingBox(long id, std::array<double,3> *minPoint, s
 	Get vertex coordinates of the specified cell.
 
 	\param id is the id of the cell
-	\param[in,out] externalStorage is an optional external storage that can
-	be used to store vertex coordinates of standard elements (i.e., elements
-	associated to a reference element)
 	\result Vertex coordinates of the cell.
 */
-ConstProxyVector<std::array<double, 3>> PatchKernel::getCellVertexCoordinates(long id, std::array<double, 3> *externalStorage) const
+ConstProxyVector<std::array<double, 3>> PatchKernel::getCellVertexCoordinates(long id) const
+{
+	// Get the vertices ids
+	const Cell &cell = getCell(id);
+	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+	const int nCellVertices = cellVertexIds.size();
+
+	// Store coordinates in storage
+	std::vector<std::array<double, 3>> storage(nCellVertices);
+	getVertexCoords(cellVertexIds.size(), cellVertexIds.data(), storage.data());
+
+	// Build the proxy vector with the coordinates
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
+	vertexCoordinates.set(std::move(storage));
+
+	return vertexCoordinates;
+}
+
+/*!
+	Get vertex coordinates of the specified cell.
+
+	\param id is the id of the cell
+	\param[out] coordinates on output will contain the vertex coordinates
+*/
+void PatchKernel::getCellVertexCoordinates(long id, std::unique_ptr<std::array<double, 3>[]> *coordinates) const
 {
 	const Cell &cell = getCell(id);
 
-	return getElementVertexCoordinates(cell, externalStorage);
+	getElementVertexCoordinates(cell, coordinates);
+}
+
+/*!
+	Get vertex coordinates of the specified cell.
+
+	\param id is the id of the cell
+	\param[out] coordinates on output will contain the vertex coordinates, it
+	is up to the caller to ensure that the storage has enough space for all
+	the vertex coordinates
+*/
+void PatchKernel::getCellVertexCoordinates(long id, std::array<double, 3> *coordinates) const
+{
+	const Cell &cell = getCell(id);
+
+	getElementVertexCoordinates(cell, coordinates);
 }
 
 /*!
@@ -4281,21 +4317,56 @@ void PatchKernel::evalInterfaceBoundingBox(long id, std::array<double,3> *minPoi
 	evalElementBoundingBox(interface, minPoint, maxPoint);
 }
 
+/*!
+	Get vertex coordinates of the specified interface.
+
+	\param id is the id of the interface
+	\result Vertex coordinates of the interface.
+*/
+ConstProxyVector<std::array<double, 3>> PatchKernel::getInterfaceVertexCoordinates(long id) const
+{
+	// Get the vertices ids
+	const Interface &interface = getInterface(id);
+	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
+	const int nInterfaceVertices = interfaceVertexIds.size();
+
+	// Store coordinates in storage
+	std::vector<std::array<double, 3>> storage(nInterfaceVertices);
+	getVertexCoords(interfaceVertexIds.size(), interfaceVertexIds.data(), storage.data());
+
+	// Build the proxy vector with the coordinates
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
+	vertexCoordinates.set(std::move(storage));
+
+	return vertexCoordinates;
+}
 
 /*!
 	Get vertex coordinates of the specified interface.
 
 	\param id is the id of the interface
-	\param[in,out] externalStorage is an optional external storage that can
-	be used to store vertex coordinates of standard elements (i.e., elements
-	associated to a reference element)
-	\result Vertex coordinates of the interface.
+	\param[out] coordinates on output will contain the vertex coordinates
 */
-ConstProxyVector<std::array<double, 3>> PatchKernel::getInterfaceVertexCoordinates(long id, std::array<double, 3> *externalStorage) const
+void PatchKernel::getInterfaceVertexCoordinates(long id, std::unique_ptr<std::array<double, 3>[]> *coordinates) const
 {
 	const Interface &interface = getInterface(id);
 
-	return getElementVertexCoordinates(interface, externalStorage);
+	getElementVertexCoordinates(interface, coordinates);
+}
+
+/*!
+	Get vertex coordinates of the specified interface.
+
+	\param id is the id of the interface
+	\param[out] coordinates on output will contain the vertex coordinates, it
+	is up to the caller to ensure that the storage has enough space for all
+	the vertex coordinates
+*/
+void PatchKernel::getInterfaceVertexCoordinates(long id, std::array<double, 3> *coordinates) const
+{
+	const Interface &interface = getInterface(id);
+
+	getElementVertexCoordinates(interface, coordinates);
 }
 
 /*!
@@ -5101,43 +5172,49 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 	Get the coordinates of the specified element
 
 	\param element is the element
-	\param[in,out] externalStorage is an optional external storage that can
-	be used to store vertex coordinates of standard elements (i.e., elements
-	associated to a reference element)
 	\result The coordinates of the element.
 */
-ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates(const Element &element, std::array<double, 3> *externalStorage) const
+ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates(const Element &element) const
 {
-	std::unique_ptr<std::vector<std::array<double, 3>>> localStorage;
-	std::array<double, 3> *storage;
-
 	// Get the vertices ids
 	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
 	const int nElementVertices = elementVertexIds.size();
 
 	// Store coordinates in storage
-	bool useExternalStorage = (externalStorage != nullptr) && element.hasInfo();
-	if (useExternalStorage) {
-		storage = externalStorage;
-	} else {
-		localStorage = std::unique_ptr<std::vector<std::array<double, 3>>>(new std::vector<std::array<double, 3>>(nElementVertices));
-		storage = localStorage->data();
-	}
-
-	for (int i = 0; i < nElementVertices; ++i) {
-		storage[i] = getVertex(elementVertexIds[i]).getCoords();
-	}
+	std::vector<std::array<double, 3>> storage(nElementVertices);
+	getVertexCoords(elementVertexIds.size(), elementVertexIds.data(), storage.data());
 
 	// Build the proxy vector with the coordinates
 	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
-	if (useExternalStorage) {
-		vertexCoordinates.set(externalStorage, nElementVertices);
-	} else {
-		vertexCoordinates.set(std::move(*localStorage));
-		localStorage.release();
-	}
+	vertexCoordinates.set(std::move(storage));
 
 	return vertexCoordinates;
+}
+
+/*!
+	Get vertex coordinates of the specified element
+
+	\param element is the element
+	\param[out] coordinates on output will contain the vertex coordinates
+*/
+void PatchKernel::getElementVertexCoordinates(const Element &element, std::unique_ptr<std::array<double, 3>[]> *coordinates) const
+{
+	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
+	getVertexCoords(elementVertexIds.size(), elementVertexIds.data(), coordinates);
+}
+
+/*!
+	Get vertex coordinates of the specified element
+
+	\param element is the element
+	\param[out] coordinates on output will contain the vertex coordinates, it
+	is up to the caller to ensure that the storage has enough space for all
+	the vertex coordinates
+*/
+void PatchKernel::getElementVertexCoordinates(const Element &element, std::array<double, 3> *coordinates) const
+{
+	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
+	getVertexCoords(elementVertexIds.size(), elementVertexIds.data(), coordinates);
 }
 
 /*!

@@ -395,7 +395,9 @@ public:
 	long countOrphanCells() const;
 	virtual std::array<double, 3> evalCellCentroid(long id) const;
 	virtual void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
-	ConstProxyVector<std::array<double, 3>> getCellVertexCoordinates(long id, std::array<double, 3> *staticStorage = nullptr) const;
+	BITPIT_DEPRECATED(ConstProxyVector<std::array<double BITPIT_COMMA 3>> getCellVertexCoordinates(long id) const);
+	void getCellVertexCoordinates(long id, std::unique_ptr<std::array<double, 3>[]> *coordinates) const;
+	void getCellVertexCoordinates(long id, std::array<double, 3> *coordinates) const;
 	std::vector<long> findCellNeighs(long id) const;
 	void findCellNeighs(long id, std::vector<long> *neighs) const;
 	std::vector<long> findCellNeighs(long id, int codimension, bool complete = true) const;
@@ -462,7 +464,9 @@ public:
 	bool isInterfaceOrphan(long id) const;
 	virtual std::array<double, 3> evalInterfaceCentroid(long id) const;
 	virtual void evalInterfaceBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
-	ConstProxyVector<std::array<double, 3>> getInterfaceVertexCoordinates(long id, std::array<double, 3> *staticStorage = nullptr) const;
+	BITPIT_DEPRECATED(ConstProxyVector<std::array<double BITPIT_COMMA 3>> getInterfaceVertexCoordinates(long id) const);
+	void getInterfaceVertexCoordinates(long id, std::unique_ptr<std::array<double, 3>[]> *coordinates) const;
+	void getInterfaceVertexCoordinates(long id, std::array<double, 3> *coordinates) const;
 
 	InterfaceIterator getInterfaceIterator(long id);
 	InterfaceIterator interfaceBegin();
@@ -588,7 +592,9 @@ public:
 
 	std::array<double, 3> evalElementCentroid(const Element &element) const;
 	void evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
-	ConstProxyVector<std::array<double, 3>> getElementVertexCoordinates(const Element &element, std::array<double, 3> *externalStorage = nullptr) const;
+	BITPIT_DEPRECATED(ConstProxyVector<std::array<double BITPIT_COMMA 3>> getElementVertexCoordinates(const Element &element) const);
+	void getElementVertexCoordinates(const Element &element, std::unique_ptr<std::array<double, 3>[]> *coordinates) const;
+	void getElementVertexCoordinates(const Element &element, std::array<double, 3> *coordinates) const;
 
 protected:
 #if BITPIT_ENABLE_MPI==1

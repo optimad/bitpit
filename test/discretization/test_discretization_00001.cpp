@@ -59,13 +59,13 @@ int subtest_001()
         long cellId;
         Reconstruction::ReconstructionType reconstructionType;
         std::array<double, 3> reconstructionOrigin = {{0., 0., 0.}};
-        ConstProxyVector<std::array<double, 3>> vertexCoords;
+        std::vector<std::array<double, 3>> vertexCoords(ReferenceElementInfo::getInfo(ElementType::PIXEL).nVertices);
 
         Reconstruction reconstruction(0, dimensions);
 
         // Base cell
         cellId = 12;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_CONSTRAINT;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
@@ -81,37 +81,37 @@ int subtest_001()
         long cellId;
         Reconstruction::ReconstructionType reconstructionType;
         std::array<double, 3> reconstructionOrigin = {{0., 0., 0.}};
-        ConstProxyVector<std::array<double, 3>> vertexCoords;
+        std::vector<std::array<double, 3>> vertexCoords(ReferenceElementInfo::getInfo(ElementType::PIXEL).nVertices);
 
         Reconstruction reconstruction(1, dimensions);
 
         // Base cell
         cellId = 12;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_CONSTRAINT;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // West neighbour
         cellId = 11;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // East neighbour
         cellId = 13;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // South neighbour
         cellId = 7;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // North neighbour
         cellId = 17;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
@@ -139,31 +139,31 @@ int subtest_001()
         long cellId;
         Reconstruction::ReconstructionType reconstructionType;
         std::array<double, 3> reconstructionOrigin = {{0., 0., 0.}};
-        ConstProxyVector<std::array<double, 3>> vertexCoords;
+        std::vector<std::array<double, 3>> vertexCoords(ReferenceElementInfo::getInfo(ElementType::PIXEL).nVertices);
 
         Reconstruction reconstruction(1, dimensions);
 
         // Base cell
         cellId = 12;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_CONSTRAINT;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // West neighbour
         cellId = 11;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // South neighbour
         cellId = 7;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // South-west neighbour
         cellId = 6;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
@@ -179,13 +179,13 @@ int subtest_001()
         long cellId;
         Reconstruction::ReconstructionType reconstructionType;
         std::array<double, 3> reconstructionOrigin = {{0., 0., 0.}};
-        ConstProxyVector<std::array<double, 3>> vertexCoords;
+        std::vector<std::array<double, 3>> vertexCoords(ReferenceElementInfo::getInfo(ElementType::PIXEL).nVertices);
 
         Reconstruction reconstruction(2, dimensions);
 
         // Base cell
         cellId = 12;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_CONSTRAINT;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
@@ -197,7 +197,7 @@ int subtest_001()
                 }
 
                 cellId = patch.getCellLinearId(2 + i, 2 + j, 0);
-                vertexCoords = patch.getCellVertexCoordinates(cellId);
+                patch.getCellVertexCoordinates(cellId, vertexCoords.data());
                 reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
                 reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
             }
@@ -239,25 +239,25 @@ int subtest_002()
         std::array<double, 3> direction;
         Reconstruction::ReconstructionType reconstructionType;
         std::array<double, 3> reconstructionOrigin = {{0., 0., 0.}};
-        ConstProxyVector<std::array<double, 3>> vertexCoords;
+        std::vector<std::array<double, 3>> vertexCoords(ReferenceElementInfo::getInfo(ElementType::PIXEL).nVertices);
 
         Reconstruction reconstruction(1, dimensions);
 
         // Base cell
         cellId = 12;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_CONSTRAINT;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // West neighbour
         cellId = 11;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
         // South neighbour
         cellId = 7;
-        vertexCoords = patch.getCellVertexCoordinates(cellId);
+        patch.getCellVertexCoordinates(cellId, vertexCoords.data());
         reconstructionType = Reconstruction::TYPE_LEAST_SQUARE;
         reconstruction.addCellAverageEquation(reconstructionType, patch.getCell(cellId), reconstructionOrigin, vertexCoords.data());
 
