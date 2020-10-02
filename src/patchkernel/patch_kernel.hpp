@@ -331,6 +331,8 @@ public:
 	Vertex &getVertex(long id);
 	const Vertex & getVertex(long id) const;
 	const std::array<double, 3> & getVertexCoords(long id) const;
+	void getVertexCoords(std::size_t nVertices, const long *ids, std::unique_ptr<std::array<double, 3>[]> *coordinates) const;
+	void getVertexCoords(std::size_t nVertices, const long *ids, std::array<double, 3> *coordinates) const;
 	VertexIterator addVertex(const Vertex &source, long id = Vertex::NULL_ID);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
 	VertexIterator addVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);

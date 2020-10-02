@@ -1617,6 +1617,35 @@ const std::array<double, 3> & PatchKernel::getVertexCoords(long id) const
 }
 
 /*!
+	Gets the coordinates of the specified vertices.
+
+	\param nVertices is the number of vertices
+	\param ids are the ids of the requested vertices
+	\param[out] coordinates on output will contain the vertex coordinates
+*/
+void PatchKernel::getVertexCoords(std::size_t nVertices, const long *ids, std::unique_ptr<std::array<double, 3>[]> *coordinates) const
+{
+	*coordinates = std::unique_ptr<std::array<double, 3>[]>(new std::array<double, 3>[nVertices]);
+	getVertexCoords(nVertices, ids, coordinates->get());
+}
+
+/*!
+	Gets the coordinates of the specified vertices.
+
+	\param nVertices is the number of vertices
+	\param ids are the ids of the requested vertices
+	\param[out] coordinates on output will contain the vertex coordinates, it
+	is up to the caller to ensure that the storage has enough space for all
+	the vertex coordinates
+*/
+void PatchKernel::getVertexCoords(std::size_t nVertices, const long *ids, std::array<double, 3> *coordinates) const
+{
+	for (std::size_t i = 0; i < nVertices; ++i) {
+		coordinates[i] = getVertex(ids[i]).getCoords();
+	}
+}
+
+/*!
 	Return true if the patch is emtpy.
 
 	\return Return true if the patch is emtpy.
