@@ -4309,10 +4309,12 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getInterfaceVertexCoordinat
 */
 std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element) const
 {
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> referenceCoordinatesCache;
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(element, referenceCoordinatesCache.data());
+	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
+	std::size_t nCellVertices = elementVertexIds.size();
+	BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+	getVertexCoords(nCellVertices, elementVertexIds.data(), vertexCoordinates);
 
-	return element.evalCentroid(vertexCoordinates.data());
+	return element.evalCentroid(vertexCoordinates);
 }
 
 /*!
