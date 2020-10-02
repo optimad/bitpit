@@ -115,15 +115,17 @@ void VolUnstructured::setExpert(bool expert)
 */
 double VolUnstructured::evalCellVolume(long id) const
 {
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
-
 	const Cell &cell = getCell(id);
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(cell, coordinatesStaticPool.data());
+
+	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+	std::size_t nCellVertices = cellVertexIds.size();
+	BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+	getVertexCoords(nCellVertices, cellVertexIds.data(), vertexCoordinates);
 
 	if (isThreeDimensional()) {
-		return cell.evalVolume(vertexCoordinates.data());
+		return cell.evalVolume(vertexCoordinates);
 	} else {
-		return cell.evalArea(vertexCoordinates.data());
+		return cell.evalArea(vertexCoordinates);
 	}
 }
 
@@ -135,12 +137,14 @@ double VolUnstructured::evalCellVolume(long id) const
 */
 double VolUnstructured::evalCellSize(long id) const
 {
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
-
 	const Cell &cell = getCell(id);
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(cell, coordinatesStaticPool.data());
 
-	return cell.evalSize(vertexCoordinates.data());
+	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+	std::size_t nCellVertices = cellVertexIds.size();
+	BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+	getVertexCoords(nCellVertices, cellVertexIds.data(), vertexCoordinates);
+
+	return cell.evalSize(vertexCoordinates);
 }
 
 /*!
@@ -151,15 +155,17 @@ double VolUnstructured::evalCellSize(long id) const
 */
 double VolUnstructured::evalInterfaceArea(long id) const
 {
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
-
 	const Interface &interface = getInterface(id);
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(interface, coordinatesStaticPool.data());
+
+	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
+	std::size_t nInterfaceVertices = interfaceVertexIds.size();
+	BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nInterfaceVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+	getVertexCoords(nInterfaceVertices, interfaceVertexIds.data(), vertexCoordinates);
 
 	if (isThreeDimensional()) {
-		return interface.evalArea(vertexCoordinates.data());
+		return interface.evalArea(vertexCoordinates);
 	} else {
-		return interface.evalLength(vertexCoordinates.data());
+		return interface.evalLength(vertexCoordinates);
 	}
 }
 
@@ -171,10 +177,12 @@ double VolUnstructured::evalInterfaceArea(long id) const
 */
 std::array<double, 3> VolUnstructured::evalInterfaceNormal(long id) const
 {
-	std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> coordinatesStaticPool;
-
 	const Interface &interface = getInterface(id);
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates = getElementVertexCoordinates(interface, coordinatesStaticPool.data());
+
+	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
+	std::size_t nInterfaceVertices = interfaceVertexIds.size();
+	BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nInterfaceVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+	getVertexCoords(nInterfaceVertices, interfaceVertexIds.data(), vertexCoordinates);
 
 	std::array<double, 3> orientation = {{0., 0., 0.}};
 	if (!isThreeDimensional()) {
@@ -191,7 +199,7 @@ std::array<double, 3> VolUnstructured::evalInterfaceNormal(long id) const
 		orientation = crossProduct(V_B - V_A, V_Z - V_A);
 	}
 
-	return interface.evalNormal(vertexCoordinates.data(), orientation);
+	return interface.evalNormal(vertexCoordinates, orientation);
 }
 
 /*!
