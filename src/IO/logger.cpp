@@ -831,9 +831,7 @@ void Logger::print(const std::string &message)
 */
 void Logger::print(const std::string &message, log::Priority priority)
 {
-    setPriority(priority);
-
-    (*this) << message;
+    print(message, priority, getVisibility());
 }
 
 /*!
@@ -844,9 +842,7 @@ void Logger::print(const std::string &message, log::Priority priority)
 */
 void Logger::print(const std::string &message, log::Visibility visibility)
 {
-    setVisibility(visibility);
-
-    (*this) << message;
+    print(message, getPriority(), visibility);
 }
 
 /*!
@@ -858,16 +854,25 @@ void Logger::print(const std::string &message, log::Visibility visibility)
 */
 void Logger::print(const std::string &message, log::Priority priority, log::Visibility visibility)
 {
-    log::Priority prevPriority   = getPriority();
-    log::Visibility prevVisibility = getVisibility();
+    log::Priority initialPriority = getPriority();
+    if (priority != initialPriority) {
+        setPriority(priority);
+    }
 
-    setPriority(priority);
-    setVisibility(visibility);
+    log::Visibility initialVisibility = getVisibility();
+    if (visibility != initialVisibility) {
+        setVisibility(visibility);
+    }
 
     (*this) << message;
 
-    setPriority(prevPriority);
-    setVisibility(prevVisibility);
+    if (priority != initialPriority) {
+        setPriority(initialPriority);
+    }
+
+    if (visibility != initialVisibility) {
+        setVisibility(initialVisibility);
+    }
 }
 
 /*!
