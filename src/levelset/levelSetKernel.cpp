@@ -242,7 +242,7 @@ double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double
     int nCellVertices = cellVertexIds.size();
     for (int i = 0; i < nCellVertices; ++i) {
         long vertexId = cellVertexIds[i];
-        std::array<double, 3> vertexCoords = m_mesh->getVertexCoords(vertexId);
+        const std::array<double, 3> &vertexCoords = m_mesh->getVertexCoords(vertexId);
         for (int d = 0; d < 3; ++d) {
             cellMinPoint[d] = std::min( vertexCoords[d] - tolerance, cellMinPoint[d]) ;
             cellMaxPoint[d] = std::max( vertexCoords[d] + tolerance, cellMaxPoint[d]) ;
