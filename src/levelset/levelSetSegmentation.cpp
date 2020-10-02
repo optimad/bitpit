@@ -120,8 +120,29 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
         long segmentId = segmentItr.getId() ;
         std::size_t segmentRawId = segmentItr.getRawIndex() ;
         const Cell &segment = *segmentItr;
+        ElementType segmentType = segment.getType() ;
         int nSegmentVertices = segment.getVertexCount() ;
         std::vector<std::array<double,3>> *segmentVertexNormals = m_segmentVertexNormals.rawData(segmentRawId);
+
+        // Check if segment is supported
+        bool segmentSupported ;
+        switch (segmentType) {
+
+        case ElementType::VERTEX :
+        case ElementType::LINE :
+        case ElementType::TRIANGLE :
+            segmentSupported = true ;
+            break ;
+
+        default:
+            segmentSupported = false ;
+            break ;
+
+        }
+
+        if ( !segmentSupported ) {
+            throw std::runtime_error ("levelset: only segments and triangles supported in LevelSetSegmentation!") ;
+        }
 
         // Evaluate segment vertex normals
         //
@@ -166,10 +187,6 @@ void SegmentationKernel::getSegmentVertexCoords( long id, std::vector<std::array
     for (int n = 0; n < nVertices; ++n) {
         long vertexId = segmentConnect[n] ;
         (*coords)[n] = m_surface->getVertexCoords(vertexId);
-    }
-
-    if ( nVertices > 3 ) {
-        log::cout() << "levelset: only segments and triangles supported in LevelSetSegmentation !!" << std::endl ;
     }
 }
 
