@@ -2011,8 +2011,8 @@ bool VolOctree::isPointInside(long id, const std::array<double, 3> &point) const
     int lowerLeftVertex  = 0;
 	int upperRightVertex = pow(2, getDimension()) - 1;
 
-	std::array<double, 3> lowerLeft  = getVertexCoords(cellVertexIds[lowerLeftVertex]);
-	std::array<double, 3> upperRight = getVertexCoords(cellVertexIds[upperRightVertex]);
+	const std::array<double, 3> &lowerLeft  = getVertexCoords(cellVertexIds[lowerLeftVertex]);
+	const std::array<double, 3> &upperRight = getVertexCoords(cellVertexIds[upperRightVertex]);
 
 	const double EPS = getTol();
     for (int d = 0; d < 3; ++d){
