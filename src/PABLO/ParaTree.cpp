@@ -2833,13 +2833,13 @@ namespace bitpit {
      */
     void
     ParaTree::findAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
-        std::array<uint8_t, 4> codimensionsIndeces;
-        codimensionsIndeces[0] = 0;
-        codimensionsIndeces[1] = getNfaces();
+        std::array<uint8_t, 4> nCodimensionItems;
+        nCodimensionItems[0] = 0;
+        nCodimensionItems[1] = getNfaces();
         if(m_dim == 3){
-            codimensionsIndeces[2] = getNedges();
+            nCodimensionItems[2] = getNedges();
         }
-        codimensionsIndeces[m_dim] = getNnodes();
+        nCodimensionItems[m_dim] = getNnodes();
 
         neighbours.clear();
         neighbours.reserve(26);
@@ -2848,8 +2848,8 @@ namespace bitpit {
         u32vector singleCodimNeighbours;
         bvector singleCodimIsGhost;
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
-            for(int icodim = 0; icodim < codimensionsIndeces[codim]; ++icodim){
-                findNeighbours(oct,icodim,codim,singleCodimNeighbours,singleCodimIsGhost);
+            for(int item = 0; item < nCodimensionItems[codim]; ++item){
+                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost);
                 for(size_t i = 0; i < singleCodimIsGhost.size(); ++i){
                     isghost.push_back(singleCodimIsGhost[i]);
                     neighbours.push_back(singleCodimNeighbours[i]);
@@ -2882,13 +2882,13 @@ namespace bitpit {
      */
     void
     ParaTree::findGhostAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
-        std::array<uint8_t, 4> codimensionsIndeces;
-        codimensionsIndeces[0] = 0;
-        codimensionsIndeces[1] = getNfaces();
+        std::array<uint8_t, 4> nCodimensionItems;
+        nCodimensionItems[0] = 0;
+        nCodimensionItems[1] = getNfaces();
         if(m_dim == 3){
-            codimensionsIndeces[2] = getNedges();
+            nCodimensionItems[2] = getNedges();
         }
-        codimensionsIndeces[m_dim] = getNnodes();
+        nCodimensionItems[m_dim] = getNnodes();
 
         neighbours.clear();
         neighbours.reserve(26);
@@ -2897,8 +2897,8 @@ namespace bitpit {
         u32vector singleCodimNeighbours;
         bvector singleCodimIsGhost;
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
-            for(int icodim = 0; icodim < codimensionsIndeces[codim]; ++icodim){
-                findGhostNeighbours(oct,icodim,codim,singleCodimNeighbours,singleCodimIsGhost);
+            for(int item = 0; item < nCodimensionItems[codim]; ++item){
+                findGhostNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost);
                 for(size_t i = 0; i < singleCodimIsGhost.size(); ++i){
                     isghost.push_back(singleCodimIsGhost[i]);
                     neighbours.push_back(singleCodimNeighbours[i]);
