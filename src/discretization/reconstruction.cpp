@@ -3031,13 +3031,13 @@ double * ReconstructionAssembler::_addEquation(ReconstructionType type, double s
     switch (type) {
 
     case TYPE_CONSTRAINT:
-        m_C.emplace_back(nCoeffs);
-        equationCoeffsStorage = m_C.back().data();
+        m_C.resize(m_C.size() + nCoeffs);
+        equationCoeffsStorage = m_C.data() + m_C.size() - nCoeffs;
         break;
 
     case TYPE_LEAST_SQUARE:
-        m_A.emplace_back(nCoeffs);
-        equationCoeffsStorage = m_A.back().data();
+        m_A.resize(m_A.size() + nCoeffs);
+        equationCoeffsStorage = m_A.data() + m_A.size() - nCoeffs;
         break;
 
     }
@@ -3124,7 +3124,9 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
             // Compute A^t A on the fly
             double ATA_ij = 0.;
             for (int k = 0; k < nLeastSquares; ++k) {
-                ATA_ij += m_A[k][i] * m_A[k][j] * m_w[k];
+                int A_ki_idx = linearalgebra::linearIndexRowMajor(k, i, nLeastSquares, nCoeffs);
+                int A_kj_idx = linearalgebra::linearIndexRowMajor(k, j, nLeastSquares, nCoeffs);
+                ATA_ij += m_A[A_ki_idx] * m_A[A_kj_idx] * m_w[k];
             }
 
             int l = linearalgebra::linearIndexColMajor(i, j, nUnknowns, nUnknowns);
@@ -3135,8 +3137,9 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
         }
 
         for (int j = nCoeffs; j < nUnknowns; ++j) {
-            int l = linearalgebra::linearIndexColMajor(i, j, nUnknowns, nUnknowns);
-            m_S[l] = m_C[j - nCoeffs][i];
+            int l     = linearalgebra::linearIndexColMajor(i, j, nUnknowns, nUnknowns);
+            int C_idx = linearalgebra::linearIndexRowMajor(j - nCoeffs, i, nConstraints, nCoeffs);
+            m_S[l] = m_C[C_idx];
 
             int m = linearalgebra::linearIndexColMajor(j, i, nUnknowns, nUnknowns);
             m_S[m] = m_S[l];
@@ -3169,7 +3172,8 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
             for (int k = 0; k < nUnknowns; ++k) {
                 int l = linearalgebra::linearIndexColMajorSymmetric(i, k, nUnknowns, nUnknowns, 'U');
                 if (k < nCoeffs && j < nLeastSquares) {
-                    value += m_S[l] * m_A[j][k] * m_w[j];
+                    int A_jk_idx = linearalgebra::linearIndexRowMajor(j, k, nLeastSquares, nCoeffs);
+                    value += m_S[l] * m_A[A_jk_idx] * m_w[j];
                 } else if ((k - nCoeffs) == (j - nLeastSquares)) {
                     value += m_S[l];
                 }

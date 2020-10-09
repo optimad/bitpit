@@ -280,8 +280,8 @@ private:
 
     std::vector<double> m_leastSquaresScaleFactors;
 
-    std::vector<std::vector<double>> m_A;
-    std::vector<std::vector<double>> m_C;
+    std::vector<double> m_A;
+    std::vector<double> m_C;
 
     mutable std::vector<double> m_sigma;
     mutable std::vector<double> m_U;
