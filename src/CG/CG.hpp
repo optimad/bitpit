@@ -44,6 +44,9 @@ typedef std::array<double,3> array3D ;
  *  \{
  */
 
+static const double DEFAULT_DISTANCE_TOLERANCE = 1.e-12;
+static const double DEFAULT_COPLANARITY_TOLERANCE = 1.e-12;
+
 /*!
  * The edge vertex connectivty of a box
  */
@@ -156,45 +159,76 @@ double distanceLineLine(array3D const &, array3D const &, array3D const &, array
 double distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
 
 
-bool intersectPointSegment( array3D const &, array3D const &, array3D const & ) ;
-bool intersectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const & ) ;
-bool intersectPointBox( array3D const &, array3D const &, array3D const &, int dim=3 ) ;
+bool intersectPointSegment( array3D const &, array3D const &, array3D const &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectPointBox( array3D const &, array3D const &, array3D const &, int dim=3, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 
-bool intersectLineLine( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
-bool intersectLinePlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
-bool intersectLineTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
-bool intersectLinePolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ) ;
-bool intersectLinePolygon( array3D const &, array3D const &, std::size_t, array3D const *, array3D & ) ;
+bool intersectLineLine( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectLinePlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, 
+        const double coplanarityTolerance = DEFAULT_COPLANARITY_TOLERANCE) ;
+bool intersectLineTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, 
+        array3D &, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectLinePolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectLinePolygon( array3D const &, array3D const &, std::size_t, array3D const *, array3D &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 
-bool intersectSegmentSegment( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
-bool intersectSegmentPlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
-bool intersectSegmentTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, array3D & ) ;
-bool intersectSegmentPolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D & ) ;
-bool intersectSegmentPolygon( array3D const &, array3D const &, std::size_t, array3D const *, array3D & ) ;
+bool intersectSegmentSegment( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectSegmentPlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectSegmentTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, 
+        array3D &, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectSegmentPolygon( array3D const &, array3D const &, std::vector<array3D> const &, array3D &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectSegmentPolygon( array3D const &, array3D const &, std::size_t, array3D const *, array3D &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 
-bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3 ) ;
-bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, int dim=3 );
-bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 );
+bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, 
+        std::vector<array3D> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, 
+        std::vector<array3D> &, std::vector<int> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
 
-bool intersectPlanePlane( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;
-bool intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, int dim=3);
-bool intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, std::vector<array3D> &, int dim=3);
+bool intersectPlanePlane( array3D const &, array3D const &, array3D const &, array3D const &, 
+        array3D &, array3D &, const double coplanarityTolerance = DEFAULT_COPLANARITY_TOLERANCE) ;
+bool intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, int dim=3, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+bool intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, 
+        std::vector<array3D> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
 
-bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3 ) ;
-bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &, int  dim = 3 ) ;
+bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, int  dim = 3, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, 
+        array3D &, array3D &, int  dim = 3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 
 
-bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, int dim=3 ) ;
-bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> &, int dim=3 ) ;
-bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3 ) ;
+bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, 
+        int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, 
+        bool, bool, bool, std::vector<array3D> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
+bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, 
+        bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 
 
-bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, int dim=3 );
-bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, int dim=3 );
-bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, int dim=3);
-bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, bool, bool, bool, std::vector<array3D> &, int dim=3);
-bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3);
-bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, bool, bool, bool, std::vector<array3D> &, std::vector<int> &, int dim=3);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, int dim=3, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, int dim=3, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, 
+        std::vector<array3D> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, bool, bool, bool, 
+        std::vector<array3D> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D> const &, bool, bool, bool, 
+        std::vector<array3D> &, std::vector<int> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, bool, bool, bool, 
+        std::vector<array3D> &, std::vector<int> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
 
 
 void computeAABBSegment( array3D const &, array3D const &, array3D &, array3D & ) ;

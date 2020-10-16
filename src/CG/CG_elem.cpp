@@ -161,12 +161,13 @@ void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0,
  * \param[in] interiorTriangleVertices if true, all triangle vertices within the box will be added to the intersection points P
  * \param[in] triangleEdgeBoxHullIntersections if true, the intersections between the edges of the triangle and the outer hull of the box will be added to the intersection points P
  * \param[in] triangleBoxEdgeIntersections if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] intrPtr pointed vector will hold intersection points between triangle edges and box faces
  * \param[out] flagPtr pointed vector will have the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertices. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
+bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim, const double distanceTolerance)
 {
 
     bool intersect(false);
@@ -187,14 +188,14 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
     array3D B0, B1;
     computeAABBTriangle( V0, V1, V2, B0, B1);
 
-    if( !intersectBoxBox( A0, A1, B0, B1, dim) ) { 
+    if( !intersectBoxBox( A0, A1, B0, B1, dim, distanceTolerance) ) {
         return false; 
     }
 
     //check if triangle vertices are within the box
     for( int i=0; i<3; ++i){
         vertexOfTriangle(i, V0, V1, V2, B0);
-        if( intersectPointBox(B0, A0, A1, dim) ){
+        if( intersectPointBox(B0, A0, A1, dim, distanceTolerance) ){
             intersect = true;
             if(!interiorTriangleVertices) break;
 
@@ -217,7 +218,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
                 for( int face=0; face<4; ++face){
                     edgeOfBox( face, A0, A1, faceVertex0, faceVertex1);
 
-                    if( intersectSegmentSegment(B0, B1, faceVertex0, faceVertex1, p) ){
+                    if( intersectSegmentSegment(B0, B1, faceVertex0, faceVertex1, p, distanceTolerance) ){
                         intersect=true;
                         if(!triangleEdgeBoxHullIntersections) break;
 
@@ -234,7 +235,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
                 for( int face=0; face<6; ++face){
                     faceOfBox( face, A0, A1, V[0], V[1], V[2], V[3] );
 
-                    if( intersectSegmentPolygon( B0, B1, V.size(), V.data(), p ) ) {
+                    if( intersectSegmentPolygon( B0, B1, V.size(), V.data(), p, distanceTolerance ) ) {
                         intersect=true;
                         if(!triangleEdgeBoxHullIntersections) break;
 
@@ -254,7 +255,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
         if(dim==2){
             for( int i=0; i<4; ++i){
                 vertexOfBox( i, A0, A1, B0);
-                if( intersectPointTriangle(B0,V0,V1,V2)) {
+                if( intersectPointTriangle(B0,V0,V1,V2,distanceTolerance)) {
                     intersect = true;
                     if(!triangleBoxEdgeIntersections) break;
 
@@ -266,7 +267,7 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
         } else if(dim==3){
             for( int i=0; i<12; ++i){
                 edgeOfBox( i, A0, A1, B0, B1);
-                if( intersectSegmentTriangle(B0,B1,V0,V1,V2,p)) {
+                if( intersectSegmentTriangle(B0,B1,V0,V1,V2,p,distanceTolerance)) {
                     intersect = true;
                     if(!triangleBoxEdgeIntersections) break;
 
@@ -292,9 +293,10 @@ bool _intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &
  * \param[in,out] intrPtr pointer to the list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
  * \param[in,out] flagPtr if (!=nullptr), for each intersection point a flag will be inserted indicatingif it belongs to interiorSegmentVertice (flag=0) or segmentBoxHullIntersection (flag=1)
  * \param[in] dim number of dimensions to be checked
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
+bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim, const double distanceTolerance)
 {
 
     bool intersect(false);
@@ -316,7 +318,7 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
 
     //check if segment boundig box and Box overlap
     computeAABBSegment( V0, V1, B0, B1);
-    if( !intersectBoxBox( A0, A1, B0, B1, dim) ) { 
+    if( !intersectBoxBox( A0, A1, B0, B1, dim, distanceTolerance) ) {
         return false;
     }
 
@@ -324,7 +326,7 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
     for( int i=0; i<2; ++i){
         vertexOfSegment(i, V0, V1, B0);
 
-        if( intersectPointBox(B0,A0,A1) ){
+        if( intersectPointBox(B0,A0,A1,dim,distanceTolerance) ){
             intersect = true;
             if(!interiorSegmentVertice) break;
 
@@ -340,7 +342,7 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
             for( int i=0; i<4; ++i){
                 edgeOfBox( i, A0, A1, B0, B1);
 
-                if( intersectSegmentSegment(B0,B1,V0,V1,p)) {
+                if( intersectSegmentSegment(B0,B1,V0,V1,p,distanceTolerance)) {
                     intersect = true;
                     if(!segmentBoxHullIntersection) break;
 
@@ -357,7 +359,7 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
             for( int i=0; i<6; ++i){
                 faceOfBox( i, A0, A1, E[0], E[1], E[2], E[3]);
 
-                if( intersectSegmentPolygon(V0,V1,E.size(),E.data(),p) ) {
+                if( intersectSegmentPolygon(V0,V1,E.size(),E.data(),p,distanceTolerance) ) {
                     intersect = true;
                     if(!segmentBoxHullIntersection) break;
 
@@ -382,9 +384,10 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
  * \param[in,out] intrPtr if (intrPtr!=nullptr) the list of intersection points between the edges of the box and the plane.
  * if (dim==3) the intersections will be ordered in counter-clockwise sense with respect to the plane normal.
  * \param[in] dim number of dimensions
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, array3D const &A1, std::vector<array3D> *intrPtr, int dim)
+bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, array3D const &A1, std::vector<array3D> *intrPtr, int dim, const double distanceTolerance)
 {
 
     bool intersect(false);
@@ -392,7 +395,7 @@ bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, a
 
     if(computeIntersection){
         intrPtr->clear();
-    } else if( intersectPointBox(P,A0,A1,dim)) {
+    } else if( intersectPointBox(P,A0,A1,dim,distanceTolerance)) {
         return true;
     }
 
@@ -404,7 +407,7 @@ bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, a
     for(int i=0; i<edgeCount; ++i){
         edgeOfBox(i, A0, A1, E0, E1);
 
-        if( intersectSegmentPlane( E0, E1, P, N, V) ){
+        if( intersectSegmentPlane( E0, E1, P, N, V, distanceTolerance) ){
             intersect = true;
 
             if(intrPtr){
@@ -440,12 +443,13 @@ bool _intersectPlaneBox(array3D const &P, array3D const &N, array3D const &A0, a
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
  * \param[in] polygonEdgeBoxHullIntersection intersection between the edges of the polygon and the hull of the box should be added to the intersection list
  * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] intrPtr pointed vector will hold intersection points between polygon edges and box faces
  * \param[out] flagPtr pointed vector will have the same size of intrPtr. If the i-th flag=0, the intersection is due to interiorPolygonVertice. If the i-th flag=1, the intersection is due to polygonEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to polygonBoxEdgeIntersections.
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxHullIntersection, bool polygonBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim)
+bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxHullIntersection, bool polygonBoxEdgeIntersections, std::vector<array3D> *intrPtr, std::vector<int> *flagPtr, int dim, const double distanceTolerance)
 {
 
     bool intersect(false);
@@ -466,7 +470,7 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS,
 
     //check if simplex boundig box and box overlap -> necessary condition
     computeAABBPolygon( nVS, VS, V0, V1);
-    if( !intersectBoxBox( A0, A1, V0, V1, dim) ) { 
+    if( !intersectBoxBox( A0, A1, V0, V1, dim, distanceTolerance) ) {
         return false; 
     }
     
@@ -480,7 +484,7 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS,
     for (int triangle=0; triangle<trianglesCount; ++triangle) {
         subtriangleOfPolygon(triangle, nVS, VS, V0, V1, V2);
 
-        if( _intersectBoxTriangle( A0, A1, V0, V1, V2, innerPolygonPoints, false, polygonBoxEdgeIntersections, &partialIntr, &partialFlag, dim ) ){
+        if( _intersectBoxTriangle( A0, A1, V0, V1, V2, innerPolygonPoints, false, polygonBoxEdgeIntersections, &partialIntr, &partialFlag, dim, distanceTolerance ) ){
 
             intersect = true;
             if(!computeIntersection) break;
@@ -496,7 +500,7 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS,
                 bool iterate = (PItr!=intrPtr->end());
                 while(iterate){
 
-                    iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidateCoord ), 0. );
+                    iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidateCoord ), 0., distanceTolerance );
                 
                     if(iterate){
                         ++PItr;
@@ -523,7 +527,7 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS,
         for (int edge=0; edge<edgesCount; ++edge) {
             edgeOfPolygon(edge, nVS, VS, V0, V1);
 
-            if( _intersectSegmentBox( V0, V1, A0, A1, false, polygonEdgeBoxHullIntersection, &partialIntr, &partialFlag, dim) ){
+            if( _intersectSegmentBox( V0, V1, A0, A1, false, polygonEdgeBoxHullIntersection, &partialIntr, &partialFlag, dim, distanceTolerance) ){
 
                 intersect = true;
                 if(!computeIntersection) break;
@@ -539,7 +543,7 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS,
                     bool iterate = (PItr!=intrPtr->end());
                     while(iterate){
 
-                        iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidateCoord ), 0. );
+                        iterate = !utils::DoubleFloatingEqual()( norm2( *PItr -candidateCoord ), 0., distanceTolerance );
                     
                         if(iterate){
                             ++PItr;
@@ -1764,13 +1768,13 @@ double distanceLineLine( array3D const &P0, array3D const &n0, array3D const &P1
  * \param[in] n2 direction of second line
  * \param[in] P2 point on second line
  * \param[out] P intersection point if intersect, else unaltered
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool intersectLineLine( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P)
+bool intersectLineLine( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P, double distanceTolerance)
 {
-    double tol = 1.e-12;
     array3D xP1, xP2;
-    if( distanceLineLine(P1,n1,P2,n2,xP1,xP2) < tol){
+    if( distanceLineLine(P1,n1,P2,n2,xP1,xP2) < distanceTolerance){
         P = xP1;
         return true;
     }
@@ -1784,10 +1788,11 @@ bool intersectLineLine( array3D const &P1, array3D const &n1, array3D const &P2,
  * \param[in] P2 end point of first segment
  * \param[in] Q1 start point of second segment
  * \param[in] Q2 end point of second segment
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] x intersection point if intersect, else unaltered
  * \return if intersect
  */
-bool intersectSegmentSegment( array3D const &P1, array3D const &P2, array3D const &Q1, array3D const &Q2, array3D &x)
+bool intersectSegmentSegment( array3D const &P1, array3D const &P2, array3D const &Q1, array3D const &Q2, array3D &x, double distanceTolerance)
 {
     assert( validSegment(P1,P2) );
     assert( validSegment(Q1,Q2) );
@@ -1799,7 +1804,7 @@ bool intersectSegmentSegment( array3D const &P1, array3D const &P2, array3D cons
     nQ /= norm2(nQ);
 
     array3D temp;
-    if( intersectLineLine(P1, nP, Q1, nQ, temp) && intersectPointSegment( temp, P1, P2) && intersectPointSegment(temp, Q1, Q2) ){
+    if( intersectLineLine(P1, nP, Q1, nQ, temp, distanceTolerance) && intersectPointSegment( temp, P1, P2, distanceTolerance) && intersectPointSegment(temp, Q1, Q2, distanceTolerance) ){
         x = temp;
         return true;
     }
@@ -1813,22 +1818,22 @@ bool intersectSegmentSegment( array3D const &P1, array3D const &P2, array3D cons
  * \param[in] n1 direction of line
  * \param[in] P2 point on plane
  * \param[in] n2 normal to plane
+ * \param[in] coplanarityTolerance if angle between the line and plane is less than this value,
+ * they are considered as coplanar and not intersecting
  * \param[out] P intersection point if intersect, else unaltered
  * \return if intersect
  */
-bool intersectLinePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P)
+bool intersectLinePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &P, const double coplanarityTolerance)
 {
 
     assert( validLine(P1,n1) );
     assert( validPlane(P2,n2) );
 
-    double const tol = 1.0e-14;
-
     // ========================================================================== //
     // CHECK DEGENERATE CASES                                                     //
     // ========================================================================== //
     double s = dotProduct(n1, n2);
-    if (std::abs(s) < tol) { 
+    if (std::abs(s) < std::cos(0.5*BITPIT_PI-coplanarityTolerance)) {
         return false; 
     }
 
@@ -1847,10 +1852,11 @@ bool intersectLinePlane( array3D const &P1, array3D const &n1, array3D const &P2
  * \param[in] Q2 end point of segment
  * \param[in] P2 point on plane
  * \param[in] n2 normal to plane
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P intersection point if intersect, else unaltered
  * \return if intersect
  */
-bool intersectSegmentPlane( array3D const &Q1, array3D const &Q2, array3D const &P2, array3D const &n2, array3D &P)
+bool intersectSegmentPlane( array3D const &Q1, array3D const &Q2, array3D const &P2, array3D const &n2, array3D &P, const double distanceTolerance)
 {
 
     assert( validSegment(Q1,Q2) );
@@ -1860,7 +1866,7 @@ bool intersectSegmentPlane( array3D const &Q1, array3D const &Q2, array3D const 
     n /= norm2(n);
 
     array3D xP;
-    if ( intersectLinePlane(Q1, n, P2, n2, xP) && intersectPointSegment(xP, Q1, Q2) ) {
+    if ( intersectLinePlane(Q1, n, P2, n2, xP, distanceTolerance) && intersectPointSegment(xP, Q1, Q2, distanceTolerance) ) {
         P = xP;
         return true;
     }
@@ -1876,22 +1882,26 @@ bool intersectSegmentPlane( array3D const &Q1, array3D const &Q2, array3D const 
  * \param[in] n2 normal to second plane
  * \param[out] Pl point on intersection line
  * \param[out] nl direction of intersection line
+ * \param[in] coplanarityTolerance if angle between planes is less than this value, they are considered
+ * as coplanar and not intersecting
  * \return if intersect
  */
-bool intersectPlanePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, array3D &Pl, array3D &nl)
+bool intersectPlanePlane( array3D const &P1, array3D const &n1, array3D const &P2, array3D const &n2, 
+        array3D &Pl, array3D &nl, const double coplanarityTolerance)
 {
 
     assert( validPlane(P1,n1) );
     assert( validPlane(P2,n2) );
 
-    double const tol = 1.0e-14;
     double n12 = dotProduct(n1, n2);
-    double detCB = 1.0-n12*n12;
-
     // check degenerate condition
-    if( std::abs(detCB) <= tol) { 
+    if( std::abs(n12) > std::cos(coplanarityTolerance)) {
         return false; 
     }
+
+
+    double detCB = 1.0-n12*n12;
+
 
     nl = crossProduct(n1,n2);
     nl /= norm2(nl);
@@ -1925,12 +1935,13 @@ bool intersectPlanePlane( array3D const &P1, array3D const &n1, array3D const &P
  * \param[in] A0 min point of box
  * \param[in] A1 max point of box
  * \param[in] dim number of dimensions
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0, array3D const &A1, int dim)
+bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0, array3D const &A1, int dim, const double distanceTolerance)
 {
     assert( validPlane(P1,n1) );
-    return _intersectPlaneBox( P1, n1, A0, A1, nullptr, dim);
+    return _intersectPlaneBox( P1, n1, A0, A1, nullptr, dim, distanceTolerance);
 }
 
 /*!
@@ -1939,14 +1950,15 @@ bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0,
  * \param[in] n1 normal to first plane
  * \param[in] A0 min point of box
  * \param[in] A1 max point of box
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] intersects intersection points
  * \param[in] dim number of dimensions
  * \return if intersect
  */
-bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0, array3D const &A1, std::vector<array3D> &intersects, int dim)
+bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0, array3D const &A1, std::vector<array3D> &intersects, int dim, const double distanceTolerance)
 {
     assert( validPlane(P1,n1) );
-    return _intersectPlaneBox( P1, n1, A0, A1, &intersects, dim);
+    return _intersectPlaneBox( P1, n1, A0, A1, &intersects, dim, distanceTolerance);
 }
 
 /*!
@@ -1956,10 +1968,11 @@ bool intersectPlaneBox( array3D const &P1, array3D const &n1, array3D const &A0,
  * \param[in] A first vertex of triangle
  * \param[in] B second vertex of triangle
  * \param[in] C third vertex of triangle
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] Q intersection point
  * \return if intersect
  */
-bool intersectLineTriangle( array3D const &P, array3D const &n, array3D const &A, array3D const &B, array3D const &C, array3D &Q)
+bool intersectLineTriangle( array3D const &P, array3D const &n, array3D const &A, array3D const &B, array3D const &C, array3D &Q, const double distanceTolerance)
 {
     assert( validLine(P,n) );
     assert( validTriangle(A,B,C) );
@@ -1968,7 +1981,7 @@ bool intersectLineTriangle( array3D const &P, array3D const &n, array3D const &A
     nT /= norm2(nT);
 
     array3D xP;
-    if ( intersectLinePlane(P, n, A, nT, xP) && intersectPointTriangle(xP, A, B, C) ) { 
+    if ( intersectLinePlane(P, n, A, nT, xP, distanceTolerance) && intersectPointTriangle(xP, A, B, C, distanceTolerance) ) {
         Q = xP;
         return true; 
     }
@@ -1983,10 +1996,11 @@ bool intersectLineTriangle( array3D const &P, array3D const &n, array3D const &A
  * \param[in] A first vertex of triangle
  * \param[in] B second vertex of triangle
  * \param[in] C third vertex of triangle
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] Q intersection point
  * \return if intersect
  */
-bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D const &A, array3D const &B, array3D const &C, array3D &Q)
+bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D const &A, array3D const &B, array3D const &C, array3D &Q, const double distanceTolerance)
 {
     assert( validSegment(P0,P1) );
     assert( validTriangle(A,B,C) );
@@ -1995,7 +2009,7 @@ bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D con
     n /= norm2(n);
 
     array3D xP;
-    if ( intersectLineTriangle(P0, n, A, B, C, xP) && intersectPointSegment(xP, P0, P1)  ) { 
+    if ( intersectLineTriangle(P0, n, A, B, C, xP, distanceTolerance) && intersectPointSegment(xP, P0, P1, distanceTolerance)  ) {
         Q = xP;
         return true; 
     }
@@ -2008,12 +2022,13 @@ bool intersectSegmentTriangle( array3D const &P0, array3D const &P1, array3D con
  * \param[in] P point on line
  * \param[in] n direction of line
  * \param[in] V polygon vertices coordinates
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] Q intersection point
  * \return if intersect
  */
-bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array3D > const &V, array3D &Q)
+bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array3D > const &V, array3D &Q, const double distanceTolerance)
 {
-    return intersectLinePolygon( P, n, V.size(), V.data(), Q);
+    return intersectLinePolygon( P, n, V.size(), V.data(), Q, distanceTolerance);
 }
 
 /*!
@@ -2022,10 +2037,11 @@ bool intersectLinePolygon( array3D const &P, array3D const &n, std::vector<array
  * \param[in] n direction of line
  * \param[in] nV number of polygon vertices
  * \param[in] V polygon vertices coordinates
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] Q intersection point
  * \return if intersect
  */
-bool intersectLinePolygon( array3D const &P, array3D const &n, std::size_t nV, array3D const *V, array3D &Q)
+bool intersectLinePolygon( array3D const &P, array3D const &n, std::size_t nV, array3D const *V, array3D &Q, const double distanceTolerance)
 {
     assert( validLine(P,n) );
 
@@ -2035,7 +2051,7 @@ bool intersectLinePolygon( array3D const &P, array3D const &n, std::size_t nV, a
     for( int i=0; i< nTriangles; ++i){
         subtriangleOfPolygon(i, nV, V, V0, V1, V2);
 
-        if( intersectLineTriangle(P, n, V0, V1, V2, Q) ) { 
+        if( intersectLineTriangle(P, n, V0, V1, V2, Q, distanceTolerance) ) {
             return true; 
         }
     }
@@ -2048,12 +2064,13 @@ bool intersectLinePolygon( array3D const &P, array3D const &n, std::size_t nV, a
  * \param[in] P0 start point of segment
  * \param[in] P1 end point of segment
  * \param[in] V polygon vertices coordinates
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] Q intersection point
  * \return if intersect
  */
-bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::vector<array3D > const &V, array3D &Q)
+bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::vector<array3D > const &V, array3D &Q, const double distanceTolerance)
 {
-    return intersectSegmentPolygon( P0, P1, V.size(), V.data(), Q);
+    return intersectSegmentPolygon( P0, P1, V.size(), V.data(), Q, distanceTolerance);
 }
 
 /*!
@@ -2062,10 +2079,11 @@ bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::vector<
  * \param[in] P1 end point of segment
  * \param[in] nV number of polygon vertices
  * \param[in] V polygon vertices coordinates
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] Q intersection point
  * \return if intersect
  */
-bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::size_t nV, array3D const *V, array3D &Q)
+bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::size_t nV, array3D const *V, array3D &Q, const double distanceTolerance)
 {
     assert( validSegment(P0,P1) );
 
@@ -2075,7 +2093,7 @@ bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::size_t 
     for( int i=0; i< nTriangles; ++i){
         subtriangleOfPolygon(i, nV, V, V0, V1, V2);
 
-        if( intersectSegmentTriangle(P0, P1, V0, V1, V2, Q) ) { 
+        if( intersectSegmentTriangle(P0, P1, V0, V1, V2, Q, distanceTolerance) ) {
             return true; 
         }
     }
@@ -2090,12 +2108,13 @@ bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::size_t 
  * \param[in] B1 min point of second box
  * \param[in] B2 max point of second box
  * \param[in] dim number of dimensions to be checked
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, int dim)
+bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, int dim, const double distanceTolerance)
 {
     for( int d=0; d<dim; ++d){
-        if( B1[d] > A2[d] || B2[d] < A1[d] ){
+        if( B1[d] > A2[d] + distanceTolerance || B2[d] < A1[d] - distanceTolerance ){
             return false;
         }
     }
@@ -2109,16 +2128,17 @@ bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, ar
  * \param[in] A2 max point of first box
  * \param[in] B1 min point of second box
  * \param[in] B2 max point of second box
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] I1 min point of intersection box
  * \param[out] I2 max point of intersection box
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, array3D &I1, array3D &I2, int dim )
+bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, array3D const &B2, array3D &I1, array3D &I2, int dim, const double distanceTolerance )
 {
     for( int d=0; d<dim; ++d){
 
-        if( B1[d] > A2[d] || B2[d] < A1[d] ){
+        if( B1[d] > A2[d] + distanceTolerance || B2[d] < A1[d] - distanceTolerance ){
             return false;
         }
 
@@ -2140,11 +2160,12 @@ bool intersectBoxBox(array3D const &A1, array3D const &A2, array3D const &B1, ar
  * \param[in] V1 second vertex of triangle
  * \param[in] V2 third vertex of triangle
  * \param[in] dim number of dimensions to be checked
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, int dim)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, int dim, const double distanceTolerance)
 {
-    return _intersectBoxTriangle( A0, A1, V0, V1, V2, false, false, false, nullptr, nullptr, dim);
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, false, false, false, nullptr, nullptr, dim, distanceTolerance);
 }
 
 /*!
@@ -2157,13 +2178,14 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] interiorTriangleVertices if true, all triangle vertices within the box will be added to the intersection points P
  * \param[in] triangleEdgeBoxFaceIntersections if true, the intersections between the edges of the triangle and the hull of the box will be added to the intersection points P
  * \param[in] triangleBoxEdgeIntersections if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P calculated intersection points 
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> &P, int dim)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxFaceIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> &P, int dim, const double distanceTolerance)
 {
-    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertices, triangleEdgeBoxFaceIntersections, triangleBoxEdgeIntersections, &P, nullptr, dim);
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertices, triangleEdgeBoxFaceIntersections, triangleBoxEdgeIntersections, &P, nullptr, dim, distanceTolerance);
 }
 
 /*!
@@ -2176,14 +2198,15 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] interiorTriangleVertices if true, all triangle vertices within the box will be added to the intersection points P
  * \param[in] triangleEdgeBoxHullIntersections if true, the intersections between the edges of the triangle and the outer hull of the box will be added to the intersection points P
  * \param[in] triangleBoxEdgeIntersections if true, the intersections between the edges (dim=3) or vertices (dim=2) of the box and the triangle will be added to the intersection points P
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P calculated intersection points 
  * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to interiorTriangleVertices. If the ith flag=1, the intersection is due to triangleEdgeBoxHullIntersection. If the ith flag=2, the intersection is due to triangleBoxEdgeIntersections.
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V0, array3D const &V1, array3D const &V2, bool interiorTriangleVertices, bool triangleEdgeBoxHullIntersections, bool triangleBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim, const double distanceTolerance)
 {
-    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertices, triangleEdgeBoxHullIntersections, triangleBoxEdgeIntersections, &P, &flag, dim);
+    return _intersectBoxTriangle( A0, A1, V0, V1, V2, interiorTriangleVertices, triangleEdgeBoxHullIntersections, triangleBoxEdgeIntersections, &P, &flag, dim, distanceTolerance);
 }
 
 /*!
@@ -2193,11 +2216,12 @@ bool intersectBoxTriangle(array3D const &A0, array3D const &A1, array3D const &V
  * \param[in] A0 min point of box
  * \param[in] A1 max point of box
  * \param[in] dim number of dimensions to be checked
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, int dim)
+bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, int dim, const double distanceTolerance)
 {
-    return _intersectSegmentBox( V0, V1, A0, A1, false, false, nullptr, nullptr, dim);
+    return _intersectSegmentBox( V0, V1, A0, A1, false, false, nullptr, nullptr, dim, distanceTolerance);
 }
 
 /*!
@@ -2208,13 +2232,14 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
  * \param[in] A1 max point of box
  * \param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
  * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, int dim)
+bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, int dim, const double distanceTolerance)
 {
-    return _intersectSegmentBox( V0, V1, A0, A1, interiorSegmentVertice, segmentBoxHullIntersection, &P, nullptr, dim);
+    return _intersectSegmentBox( V0, V1, A0, A1, interiorSegmentVertice, segmentBoxHullIntersection, &P, nullptr, dim, distanceTolerance);
 }
 
 /*!
@@ -2225,14 +2250,15 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
  * \param[in] A1 max point of box
  * \param[in] interiorSegmentVertice if the segment vertices within the box should be added to the list of intersection points
  * \param[in] segmentBoxHullIntersection if the intersections between the segment and the outer hull of the box should be added to the list of intersection points
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P list of intersection points. If no intersetion points should be calculated nullptr can be passed as argument
  * \param[out] flag indicates for each intersection if it belongs to interiorSegmentVertice (flag=0) or segmentHullIntersection (flag=1)
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A0, array3D const &A1, bool interiorSegmentVertice, bool segmentBoxHullIntersection, std::vector<array3D> &P, std::vector<int> &flag, int dim, const double distanceTolerance)
 {
-    return _intersectSegmentBox( V0, V1, A0, A1, interiorSegmentVertice, segmentBoxHullIntersection, &P, &flag, dim);
+    return _intersectSegmentBox( V0, V1, A0, A1, interiorSegmentVertice, segmentBoxHullIntersection, &P, &flag, dim, distanceTolerance);
 }
 
 /*!
@@ -2241,11 +2267,12 @@ bool intersectSegmentBox( array3D const &V0, array3D const &V1, array3D const &A
  * \param[in] A1 max point of first box
  * \param[in] VS simplex vertices coordinates
  * \param[in] dim number of dimensions to be checked
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, int dim )
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, int dim, const double distanceTolerance )
 {
-    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), dim );
+    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), dim, distanceTolerance );
 }
 /*!
  * Computes intersection between an axis aligned bounding box and a simplex
@@ -2254,11 +2281,12 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
  * \param[in] nVS number of polygon vertices
  * \param[in] VS simplex vertices coordinates
  * \param[in] dim number of dimensions to be checked
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, int dim )
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, int dim, const double distanceTolerance )
 {
-    return _intersectBoxPolygon(A0, A1, nVS, VS, false, false, false, nullptr, nullptr, dim);
+    return _intersectBoxPolygon(A0, A1, nVS, VS, false, false, false, nullptr, nullptr, dim, distanceTolerance);
 }
 
 /*!
@@ -2269,13 +2297,14 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS,
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
  * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
  * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P calculated intersection points
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, int dim)
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, int dim, const double distanceTolerance)
 {
-    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, P, dim);
+    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, P, dim, distanceTolerance);
 }
 
 
@@ -2288,13 +2317,14 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
  * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
  * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P calculated intersection points
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, int dim)
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, int dim, const double distanceTolerance)
 {
-    return _intersectBoxPolygon(A0, A1, nVS, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, nullptr, dim);
+    return _intersectBoxPolygon(A0, A1, nVS, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, nullptr, dim, distanceTolerance);
 }
 
 /*!
@@ -2305,14 +2335,15 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS,
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
  * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
  * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P calculated intersection points
  * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to innerPolygonPoints. If the ith flag=1, the intersection is due to polygonEdgeBoxFaceIntersections. If the ith flag=2, the intersection is due to polygonBoxEdgeIntersections.
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<array3D> const &VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim, const double distanceTolerance)
 {
-    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, P, flag, dim);
+    return intersectBoxPolygon( A0, A1, VS.size(), VS.data(), innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, P, flag, dim, distanceTolerance);
 }
 
 /*!
@@ -2324,14 +2355,15 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::vector<arra
  * \param[in] innerPolygonPoints simplex vertices within the box should be added to the intersection list
  * \param[in] polygonEdgeBoxFaceIntersections intersection between the edges of the polygon and the hull of the box should be added to the intersection list
  * \param[in] polygonBoxEdgeIntersections intersection between the polygon and the edges of the box should be added to the intersection list
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \param[out] P calculated intersection points
  * \param[out] flag has the same size of P. If the ith flag=0, the intersection is due to innerPolygonPoints. If the ith flag=1, the intersection is due to polygonEdgeBoxFaceIntersections. If the ith flag=2, the intersection is due to polygonBoxEdgeIntersections.
  * \param[in] dim number of dimensions to be checked
  * \return if intersect
  */
-bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim)
+bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS, array3D const *VS, bool innerPolygonPoints, bool polygonEdgeBoxFaceIntersections, bool polygonBoxEdgeIntersections, std::vector<array3D> &P, std::vector<int> &flag, int dim, const double distanceTolerance)
 {
-    return _intersectBoxPolygon(A0, A1, nVS, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, &flag, dim);
+    return _intersectBoxPolygon(A0, A1, nVS, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, &flag, dim, distanceTolerance);
 }
 
 
@@ -2410,39 +2442,18 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS,
  * \param[in] P point coordinates
  * \param[in] P1 start point of segment
  * \param[in] P2 end point of segment
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if point lies on segment
  */
-bool intersectPointSegment( array3D const &P, array3D const &P1, array3D const &P2)
+bool intersectPointSegment( array3D const &P, array3D const &P1, array3D const &P2, const double distanceTolerance)
 {
     assert( validSegment(P1,P2) );
 
-
-    if( utils::DoubleFloatingEqual()( norm2(P-P1), 0.) ){
-        return true;
-    }
-
-    if( utils::DoubleFloatingEqual()( norm2(P-P2), 0.) ){
-        return true;
-    }
-
-    array3D segmentDir = P2 - P1;
-    double segmentLength = norm2(segmentDir);
-    segmentDir /= segmentLength;
-
-    array3D versor = P - P1;
-    double length = norm2(versor);
-    versor /= length;
-
-    if( length>segmentLength ){
-        return false;
-    }
-    
-    if( !utils::DoubleFloatingEqual()( dotProduct(versor,segmentDir), 1.) ){
+    if(distancePointSegment(P, P1, P2) > distanceTolerance){
         return false;
     }
 
-    return true; 
-
+    return true;
 }
 
 /*!
@@ -2451,19 +2462,14 @@ bool intersectPointSegment( array3D const &P, array3D const &P1, array3D const &
  * \param[in] A first vertex of triangle
  * \param[in] B second vertex of triangle
  * \param[in] C third vertex of triangle
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if point lies on triangle
  */
-bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &B, array3D const &C)
+bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &B, array3D const &C, const double distanceTolerance)
 {
 
-    array3D xP, lambda;
-
-    _projectPointsPlane( 1, &P, A, B, C, &xP, &lambda[0]);
-
-    for( const auto &l : lambda){
-        if(l<0.) {
-            return false;
-        }
+    if(distancePointTriangle(P, A, B, C) > distanceTolerance){
+        return false;
     }
 
     return true;
@@ -2475,14 +2481,14 @@ bool intersectPointTriangle( array3D const &P, array3D const &A, array3D const &
  * \param[in] B1 min coodinates of box
  * \param[in] B2 max coodinates of box
  * \param[in] dim number of dimensions to be checked
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
  * \return if point in box
  */
-bool intersectPointBox( array3D const &P, array3D const &B1, array3D const &B2, int dim)
+bool intersectPointBox( array3D const &P, array3D const &B1, array3D const &B2, int dim, const double distanceTolerance)
 {
 
     for( int d=0; d<dim; ++d){
-
-        if( P[d]< B1[d] || P[d] > B2[d] ){
+        if( P[d]< (B1[d] - distanceTolerance) || P[d] > (B2[d] + distanceTolerance)){
             return false;
         }
     }
