@@ -35,6 +35,7 @@ list(APPEND TESTS "test_volunstructured_00002")
 if (ENABLE_MPI)
     list(APPEND TESTS "test_volunstructured_parallel_00001:3")
     list(APPEND TESTS "test_volunstructured_parallel_00002:4")
+    list(APPEND TESTS "test_volunstructured_parallel_00003:4")
 endif ()
 
 # Test extra libraries
