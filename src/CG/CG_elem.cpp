@@ -328,7 +328,7 @@ bool _intersectSegmentBox(array3D const &V0, array3D const &V1, array3D const &A
             intersect = true;
             if(!interiorSegmentVertice) break;
 
-            intrPtr->push_back(V0);
+            intrPtr->push_back(B0);
             if(addFlag) flagPtr->push_back(0);
         }
     }
