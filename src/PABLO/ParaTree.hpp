@@ -638,18 +638,15 @@ namespace bitpit {
             m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
 
-                uint32_t* partition = new uint32_t [m_nproc];
+                std::vector<uint32_t> partition(m_nproc);
                 if (weight == NULL)
-                    computePartition(partition);
+                    computePartition(partition.data());
                 else
-                    computePartition(partition, weight);
+                    computePartition(partition.data(), weight);
 
                 weight = NULL;
 
-                privateLoadBalance(userData, partition);
-
-                delete [] partition;
-                partition = NULL;
+                privateLoadBalance(userData, partition.data());
 
                 //Write info of final partition on log
                 (*m_log) << " " << std::endl;
@@ -693,13 +690,10 @@ namespace bitpit {
             m_lastOp = OP_LOADBALANCE;
             if (m_nproc>1){
 
-                uint32_t* partition = new uint32_t [m_nproc];
-                computePartition(partition, level, weight);
+                std::vector<uint32_t> partition(m_nproc);
+                computePartition(partition.data(), level, weight);
 
-                privateLoadBalance(userData, partition);
-
-                delete [] partition;
-                partition = NULL;
+                privateLoadBalance(userData, partition.data());
 
                 //Write info of final partition on log
                 (*m_log) << " " << std::endl;
