@@ -506,8 +506,6 @@ namespace bitpit {
         LoadBalanceRanges evalLoadBalanceRanges(dvector *weights);
         LoadBalanceRanges evalLoadBalanceRanges(uint8_t level, dvector *weights);
     private:
-        void 		privateLoadBalance(uint32_t* partition);
-
         LoadBalanceRanges evalLoadBalanceRanges(const uint32_t *updatedPartition);
 
         ExchangeRanges evalLoadBalanceSendRanges(const uint32_t *updatedPartition);
@@ -646,7 +644,7 @@ namespace bitpit {
 
                 weight = NULL;
 
-                privateLoadBalance(userData, partition.data());
+                privateLoadBalance(partition.data(), &userData);
 
                 //Write info of final partition on log
                 (*m_log) << " " << std::endl;
@@ -693,7 +691,7 @@ namespace bitpit {
                 std::vector<uint32_t> partition(m_nproc);
                 computePartition(level, weight, partition.data());
 
-                privateLoadBalance(userData, partition.data());
+                privateLoadBalance(partition.data(), &userData);
 
                 //Write info of final partition on log
                 (*m_log) << " " << std::endl;
@@ -723,347 +721,217 @@ namespace bitpit {
         * tree over the processes of the job following a given partition
         * distribution. Until loadBalance is not called for the first time
         * the mesh is serial.
-        * \param[in] userData User data that will be distributed among the
-        * processes.
         * \param[in] partition Target distribution of octants over processes.
+        * \param[in,out] userData User data that will be distributed among the
+        * processes.
         */
         template<class Impl>
         void
-        privateLoadBalance(DataLBInterface<Impl> & userData,uint32_t* partition){
+        privateLoadBalance(const uint32_t *partition, DataLBInterface<Impl> *userData = nullptr){
 
-            if(m_serial)
-            {
-                m_lastOp = OP_LOADBALANCE_FIRST;
-                (*m_log) << " " << std::endl;
+            (*m_log) << " " << std::endl;
+            if (m_serial) {
                 (*m_log) << " Initial Serial distribution : " << std::endl;
-                for(int ii=0; ii<m_nproc; ii++){
-                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << std::endl;
-                }
-
-                uint32_t stride = 0;
-                for(int i = 0; i < m_rank; ++i)
-                    stride += partition[i];
-                LocalTree::octvector octantsCopy = m_octree.m_octants;
-                LocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
-                LocalTree::octvector::const_iterator last = first + partition[m_rank];
-
-                m_octree.m_octants.assign(first, last);
-                octvector(m_octree.m_octants).swap(m_octree.m_octants);
-
-                first = octantsCopy.end();
-                last = octantsCopy.end();
-
-                userData.assign(stride,partition[m_rank]);
-
-                //Update and build ghosts here
-                updateLoadBalance();
-                computeGhostHalo();
-            }
-            else
-            {
-                (*m_log) << " " << std::endl;
+            } else {
                 (*m_log) << " Initial Parallel partition : " << std::endl;
-                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << std::endl;
-                for(int ii=1; ii<m_nproc; ii++){
-                    (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << std::endl;
-                }
-
-                //empty ghosts
-                m_octree.m_ghosts.clear();
-                m_octree.m_sizeGhosts = 0;
-                //compute new partition range globalidx
-                assert(m_nproc > 0);
-                uint64_t* newPartitionRangeGlobalidx = new uint64_t[m_nproc];
-                for(int p = 0; p < m_nproc; ++p){
-                    newPartitionRangeGlobalidx[p] = 0;
-                    for(int pp = 0; pp <= p; ++pp)
-                        newPartitionRangeGlobalidx[p] += (uint64_t)partition[pp];
-                    --newPartitionRangeGlobalidx[p];
-                }
-
-                //find resident octants local offset lastHead(lh) and firstTail(ft)
-                int32_t lh,ft;
-                if(m_rank == 0)
-                    lh = -1;
-                else{
-                    lh = (int32_t)(newPartitionRangeGlobalidx[m_rank-1] + 1 - m_partitionRangeGlobalIdx[m_rank-1] - 1 - 1);
-                }
-                if(lh < 0)
-                    lh = - 1;
-                else if(lh > (int64_t) m_octree.m_octants.size() - 1)
-                    lh = m_octree.m_octants.size() - 1;
-
-                if(m_rank == m_nproc - 1)
-                    ft = m_octree.m_octants.size();
-                else if(m_rank == 0)
-                    ft = (int32_t)(newPartitionRangeGlobalidx[m_rank] + 1);
-                else{
-                    ft = (int32_t)(newPartitionRangeGlobalidx[m_rank] - m_partitionRangeGlobalIdx[m_rank -1]);
-                }
-                if(ft > (int32_t)(m_octree.m_octants.size() - 1))
-                    ft = m_octree.m_octants.size();
-                else if(ft < 0)
-                    ft = 0;
-
-                //compute size Head and size Tail
-                uint32_t headSize = (uint32_t)(lh + 1);
-                uint32_t tailSize = (uint32_t)(m_octree.m_octants.size() - ft);
-                uint32_t headOffset = headSize;
-                uint32_t tailOffset = tailSize;
-
-                //Communicator declaration
-                DataCommunicator lbCommunicator(m_comm);
-
-                //Compute first predecessor and first successor to send buffers to
-                int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
-                int64_t globalLastHead = (int64_t) lh;
-                int64_t globalFirstTail = (int64_t) ft; //lastHead and firstTail in global ordering
-                int firstPredecessor = -1;
-                int firstSuccessor = m_nproc;
-                if(m_rank != 0){
-                    firstOctantGlobalIdx = (int64_t)(m_partitionRangeGlobalIdx[m_rank-1] + 1);
-                    globalLastHead = firstOctantGlobalIdx + (int64_t)lh;
-                    globalFirstTail = firstOctantGlobalIdx + (int64_t)ft;
-                    for(int pre = m_rank - 1; pre >=0; --pre){
-                        if((uint64_t)globalLastHead <= newPartitionRangeGlobalidx[pre])
-                            firstPredecessor = pre;
-                    }
-                    for(int post = m_rank + 1; post < m_nproc; ++post){
-                        if((uint64_t)globalFirstTail <= newPartitionRangeGlobalidx[post] && (uint64_t)globalFirstTail > newPartitionRangeGlobalidx[post-1])
-                            firstSuccessor = post;
-                    }
-                }
-                else if(m_rank == 0){
-                    firstSuccessor = 1;
-                }
-                MPI_Barrier(m_comm); //da spostare prima della prima comunicazione
-
-                int intBuffer = 0;
-                int contatore = 0;
-                //build send buffers from Head
-                uint32_t nofElementsFromSuccessiveToPrevious = 0;
-                if(headSize != 0){
-                    for(int p = firstPredecessor; p >= 0; --p){
-                        if(headSize < partition[p]){
-                            intBuffer = (newPartitionRangeGlobalidx[p] - partition[p] );
-                            intBuffer = abs(intBuffer);
-                            nofElementsFromSuccessiveToPrevious = globalLastHead - intBuffer;
-                            if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
-                                nofElementsFromSuccessiveToPrevious  = headSize;
-
-                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)Octant::getBinarySize();
-                            //compute size of data in buffers
-                            if(userData.fixedSize()){
-                                buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
-                            }
-                            else{
-                                for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
-                                    buffSize += userData.size(i);
-                                }
-                            }
-                            //add room for uint32_t, number of octants in this buffer
-                            buffSize += sizeof(uint32_t);
-                            lbCommunicator.setSend(p,buffSize);
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
-                            //store the number of octants at the beginning of the buffer
-                            sendBuffer << nofElementsFromSuccessiveToPrevious;
-
-                            for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
-                                sendBuffer << m_octree.m_octants[i];
-                                userData.gather(sendBuffer,i);
-                            }
-                            if(nofElementsFromSuccessiveToPrevious == headSize)
-                                break;
-
-                            lh -= nofElementsFromSuccessiveToPrevious;
-                            globalLastHead -= nofElementsFromSuccessiveToPrevious;
-                            headSize = lh + 1;
-                            ++contatore;
-                        }
-                        else{
-                            nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-                            std::size_t buffSize = (std::size_t)nofElementsFromSuccessiveToPrevious * (std::size_t)Octant::getBinarySize();
-                            //compute size of data in buffers
-                            if(userData.fixedSize()){
-                                buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
-                            }
-                            else{
-                                for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
-                                    buffSize += userData.size(i);
-                                }
-                            }
-                            //add room for uint32_t, number of octants in this buffer
-                            buffSize += sizeof(uint32_t);
-                            lbCommunicator.setSend(p,buffSize);
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
-                            //store the number of octants at the beginning of the buffer
-                            sendBuffer << nofElementsFromSuccessiveToPrevious;
-
-                            for(int64_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
-                                //WRITE octants from lh - partition[p] to lh
-                                sendBuffer << m_octree.m_octants[i];
-                                userData.gather(sendBuffer,i);
-                            }
-                            lh -= nofElementsFromSuccessiveToPrevious;
-                            globalLastHead -= nofElementsFromSuccessiveToPrevious;
-                            headSize = lh + 1;
-                            if(headSize == 0)
-                                break;
-                        }
-                    }
-
-                }
-                uint32_t nofElementsFromPreviousToSuccessive = 0;
-                contatore = 0;
-                //build send buffers from Tail
-                if(tailSize != 0){
-                    for(int p = firstSuccessor; p < m_nproc; ++p){
-                        if(tailSize < partition[p]){
-                            nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
-                            if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
-                                nofElementsFromPreviousToSuccessive = tailSize;
-
-                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)Octant::getBinarySize();
-                            //compute size of data in buffers
-                            if(userData.fixedSize()){
-                                buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
-                            }
-                            else{
-                                for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
-                                    buffSize += userData.size(i);
-                                }
-                            }
-                            //add room for uint32_t, number of octants in this buffer
-                            buffSize += sizeof(uint32_t);
-                            lbCommunicator.setSend(p,buffSize);
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
-                            //store the number of octants at the beginning of the buffer
-                            sendBuffer << nofElementsFromPreviousToSuccessive;
-
-                            for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
-                                sendBuffer << m_octree.m_octants[i];
-                                userData.gather(sendBuffer,i);
-                            }
-                            if(nofElementsFromPreviousToSuccessive == tailSize)
-                                break;
-                            ft += nofElementsFromPreviousToSuccessive;
-                            globalFirstTail += nofElementsFromPreviousToSuccessive;
-                            tailSize -= nofElementsFromPreviousToSuccessive;
-                            ++contatore;
-                        }
-                        else{
-                            nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
-                            uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
-                            std::size_t buffSize = (std::size_t)nofElementsFromPreviousToSuccessive * (std::size_t)Octant::getBinarySize();
-                            //compute size of data in buffers
-                            if(userData.fixedSize()){
-                                buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
-                            }
-                            else{
-                                for(uint32_t i = ft; i <= endOctants; ++i){
-                                    buffSize += userData.size(i);
-                                }
-                            }
-                            //add room for uint32_t, number of octants in this buffer
-                            buffSize += sizeof(uint32_t);
-                            lbCommunicator.setSend(p,buffSize);
-                            SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(p);
-                            //store the number of octants at the beginning of the buffer
-                            sendBuffer << nofElementsFromPreviousToSuccessive;
-
-                            for(uint32_t i = ft; i <= endOctants; ++i ){
-                                //WRITE octants from ft to ft + partition[p] -1
-                                sendBuffer << m_octree.m_octants[i];
-                                userData.gather(sendBuffer,i);
-                            }
-                            ft += nofElementsFromPreviousToSuccessive;
-                            globalFirstTail += nofElementsFromPreviousToSuccessive;
-                            tailSize -= nofElementsFromPreviousToSuccessive;
-                            if(tailSize == 0)
-                                break;
-                        }
-                    }
-                }
-
-                lbCommunicator.discoverRecvs();
-                lbCommunicator.startAllRecvs();
-                lbCommunicator.startAllSends();
-
-                uint32_t nofNewHead = 0;
-                uint32_t nofNewTail = 0;
-
-                //READ number of octants per sender
-                std::vector<int> recvRanks = lbCommunicator.getRecvRanks();
-                std::sort(recvRanks.begin(),recvRanks.end());
-                std::vector<uint32_t> nofNewOverProcs(recvRanks.size());
-                for(int rank : recvRanks){
-                    lbCommunicator.waitRecv(rank);
-                    RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
-                    uint32_t nofNewPerProc;
-                    recvBuffer >> nofNewPerProc;
-                    nofNewOverProcs[rank] = nofNewPerProc;
-                    if(rank < m_rank)
-                        nofNewHead += nofNewPerProc;
-                    else if(rank > m_rank)
-                        nofNewTail += nofNewPerProc;
-                }
-
-                //MOVE RESIDENT TO BEGIN IN OCTANTS
-                m_octree.m_sizeOctants = m_octree.m_octants.size();
-                uint32_t resEnd = m_octree.m_sizeOctants - tailOffset;
-                uint32_t nofResidents = resEnd - headOffset;
-                uint32_t octCounter = 0;
-                for(uint32_t i = headOffset; i < resEnd; ++i){
-                    m_octree.m_octants[octCounter] = m_octree.m_octants[i];
-                    userData.move(i,octCounter);
-                    ++octCounter;
-                }
-                uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
-                m_octree.m_octants.resize(newCounter, Octant(m_dim));
-                userData.resize(newCounter);
-                //MOVE RESIDENTS IN RIGHT POSITION
-                uint32_t resCounter = nofNewHead + nofResidents - 1;
-                for(uint32_t k = 0; k < nofResidents ; ++k){
-                    m_octree.m_octants[resCounter - k] = m_octree.m_octants[nofResidents - k - 1];
-                    userData.move(nofResidents - k - 1,resCounter - k);
-                }
-
-                //READ BUFFERS AND BUILD NEW OCTANTS
-                newCounter = 0;
-                bool jumpResident = false;
-                for(int rank : recvRanks){
-                    RecvBuffer & recvBuffer = lbCommunicator.getRecvBuffer(rank);
-                    uint32_t nofNewPerProc = nofNewOverProcs[rank];
-                    if(rank > m_rank && !jumpResident){
-                        newCounter += nofResidents ;
-                        jumpResident = true;
-                    }
-                    for(int i = nofNewPerProc - 1; i >= 0; --i){
-                        recvBuffer >> m_octree.m_octants[newCounter];
-                        userData.scatter(recvBuffer,newCounter);
-                        ++newCounter;
-                    }
-                }
-                lbCommunicator.waitAllSends();
-                octvector(m_octree.m_octants).swap(m_octree.m_octants);
-
-                userData.shrink();
-
-                delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
-
-                //Update and ghosts here
-                updateLoadBalance();
-                computeGhostHalo();
-                uint32_t nofGhosts = getNumGhosts();
-                userData.resizeGhost(nofGhosts);
-
+            }
+            (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << std::endl;
+            for(int ii=1; ii<m_nproc; ii++){
+                (*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << std::endl;
             }
 
-            // Update load balance ranges
+            // Compute load balance ranges
             std::unordered_map<int, std::array<uint32_t, 2>> sendRanges = evalLoadBalanceSendRanges(partition);
             std::unordered_map<int, std::array<uint32_t, 2>> recvRanges = evalLoadBalanceRecvRanges(partition);
 
             m_loadBalanceRanges = LoadBalanceRanges(m_serial, sendRanges, recvRanges);
+
+            // Compute information about the new partitioning
+            assert(m_nproc > 0);
+            std::vector<uint64_t> newPartitionRangeGlobalidx(m_nproc);
+            newPartitionRangeGlobalidx[0] = partition[0] - 1;
+            for (int p = 1; p < m_nproc; ++p) {
+                newPartitionRangeGlobalidx[p] = newPartitionRangeGlobalidx[p - 1] + partition[p];
+            }
+
+            uint32_t newSizeOctants = partition[m_rank];
+
+            uint64_t newLastOctantGlobalIdx  = newPartitionRangeGlobalidx[m_rank];
+            uint64_t newFirstOctantGlobalIdx = newLastOctantGlobalIdx - newSizeOctants + 1;
+
+            // Partition internal octants
+            if (m_serial) {
+                m_lastOp = OP_LOADBALANCE_FIRST;
+
+                if (newFirstOctantGlobalIdx != 0) {
+                    for (uint32_t i = 0; i < newSizeOctants; ++i){
+                        m_octree.m_octants[i] = m_octree.m_octants[newFirstOctantGlobalIdx + i];
+                        if (userData) {
+                            userData->move(newFirstOctantGlobalIdx + i, i);
+                        }
+                    }
+                }
+
+                m_octree.m_octants.resize(newSizeOctants);
+                m_octree.m_octants.shrink_to_fit();
+                m_octree.m_sizeOctants = m_octree.m_octants.size();
+
+                if (userData) {
+                    userData->resize(m_octree.m_sizeOctants);
+                    userData->shrink();
+                }
+            } else {
+                // Compute information about the current partitioning
+                uint64_t lastOctantGlobalIdx  = m_partitionRangeGlobalIdx[m_rank];
+                uint64_t firstOctantGlobalIdx = lastOctantGlobalIdx - m_octree.m_sizeOctants + 1;
+
+                // Initialize communications
+                DataCommunicator lbCommunicator(m_comm);
+
+                if (!userData || userData->fixedSize()) {
+                    for (const auto &entry : recvRanges) {
+                        int rank = entry.first;
+                        uint32_t beginRecvIdx = entry.second[0];
+                        uint32_t endRecvIdx   = entry.second[1];
+
+                        uint32_t nOctantsToReceive = endRecvIdx - beginRecvIdx;
+                        std::size_t buffSize = nOctantsToReceive * Octant::getBinarySize();
+                        if (userData) {
+                            buffSize += nOctantsToReceive * userData->fixedSize();
+                        }
+
+                        lbCommunicator.setRecv(rank, buffSize);
+                        lbCommunicator.startRecv(rank);
+                    }
+                }
+
+                for (const auto &entry : sendRanges) {
+                    int rank = entry.first;
+                    uint32_t beginSendIdx = entry.second[0];
+                    uint32_t endSendIdx   = entry.second[1];
+
+                    uint32_t nOctantsToSend = endSendIdx - beginSendIdx;
+                    std::size_t buffSize = nOctantsToSend * Octant::getBinarySize();
+                    if (userData) {
+                        if (userData->fixedSize()) {
+                            buffSize += nOctantsToSend * userData->fixedSize();
+                        }  else {
+                            for (uint32_t i = beginSendIdx; i < endSendIdx; ++i) {
+                                buffSize += userData->size(i);
+                            }
+                        }
+                    }
+                    lbCommunicator.setSend(rank, buffSize);
+
+                    SendBuffer &sendBuffer = lbCommunicator.getSendBuffer(rank);
+                    for (uint32_t i = beginSendIdx; i < endSendIdx; ++i) {
+                        sendBuffer << m_octree.m_octants[i];
+                        userData->gather(sendBuffer, i);
+                    }
+
+                    lbCommunicator.startSend(rank);
+                }
+
+                if (userData && !userData->fixedSize()) {
+                    lbCommunicator.discoverRecvs();
+                    lbCommunicator.startAllRecvs();
+                }
+
+                // Move resident octants into place
+                if (newSizeOctants > m_octree.m_sizeOctants) {
+                    m_octree.m_octants.reserve(newSizeOctants);
+                    m_octree.m_octants.resize(newSizeOctants);
+                    m_octree.m_sizeOctants = m_octree.m_octants.size();
+
+                    if (userData) {
+                        userData->resize(m_octree.m_sizeOctants);
+                    }
+                }
+
+                bool hasResidentOctants = true;
+                if (newFirstOctantGlobalIdx > lastOctantGlobalIdx) {
+                    hasResidentOctants = false;
+                } else if (newLastOctantGlobalIdx < firstOctantGlobalIdx) {
+                    hasResidentOctants = false;
+                }
+
+                if (hasResidentOctants) {
+                    uint32_t firstResidentGlobalOctantIdx = std::max(firstOctantGlobalIdx, newFirstOctantGlobalIdx);
+                    uint32_t lastResidentGlobalOctantIdx  = std::min(lastOctantGlobalIdx, newLastOctantGlobalIdx);
+
+                    uint32_t nofResidents = lastResidentGlobalOctantIdx - firstResidentGlobalOctantIdx + 1;
+                    uint32_t newFirstResidentOffsetIdx = firstResidentGlobalOctantIdx - newFirstOctantGlobalIdx;
+                    uint32_t firstResidentOffsetIdx = firstResidentGlobalOctantIdx - firstOctantGlobalIdx;
+
+                    // If residents are moved closer to the head, we need to move
+                    // them from the first to the last. Otherwise, if resident are
+                    // moved closer to the tail, we need to move them in reversed
+                    // order, i.e., from the last to the first (otherwise octants
+                    // will be overwritten during the relocaiton).
+                    if (newFirstResidentOffsetIdx != firstResidentOffsetIdx) {
+                        for (uint32_t i = 0; i < nofResidents; ++i) {
+                            int residentIdx;
+                            if (newFirstResidentOffsetIdx < firstResidentOffsetIdx) {
+                                residentIdx = i;
+                            } else {
+                                residentIdx = nofResidents - i - 1;
+                            }
+
+                            m_octree.m_octants[newFirstResidentOffsetIdx + residentIdx] = m_octree.m_octants[firstResidentOffsetIdx + residentIdx];
+                            if (userData) {
+                                userData->move(firstResidentOffsetIdx + residentIdx, newFirstResidentOffsetIdx + residentIdx);
+                            }
+                        }
+                    }
+                }
+
+                if (newSizeOctants < m_octree.m_sizeOctants) {
+                    m_octree.m_octants.resize(newSizeOctants);
+                    m_octree.m_octants.shrink_to_fit();
+                    m_octree.m_sizeOctants = m_octree.m_octants.size();
+
+                    if (userData) {
+                        userData->resize(m_octree.m_sizeOctants);
+                        userData->shrink();
+                    }
+                }
+
+                // Read buffers and build new octants
+                int nCompletedRecvs = 0;
+                while (nCompletedRecvs < lbCommunicator.getRecvCount()) {
+                    int senderRank = lbCommunicator.waitAnyRecv();
+                    RecvBuffer &recvBuffer = lbCommunicator.getRecvBuffer(senderRank);
+
+                    const std::array<uint32_t, 2> &recvRange = recvRanges.at(senderRank);
+                    uint32_t beginRecvIdx = recvRange[0];
+                    uint32_t endRecvIdx   = recvRange[1];
+                    assert((endRecvIdx - beginRecvIdx) == (recvBuffer.getSize() / Octant::getBinarySize()));
+
+                    for (uint32_t i = beginRecvIdx; i < endRecvIdx; ++i) {
+                        recvBuffer >> m_octree.m_octants[i];
+                        if (userData) {
+                            userData->scatter(recvBuffer, i);
+                        }
+                    }
+
+                    ++nCompletedRecvs;
+                }
+
+                lbCommunicator.waitAllSends();
+            }
+
+            // Update load balance information
+            updateLoadBalance();
+
+            // Update ghosts
+            m_octree.m_ghosts.clear();
+            m_octree.m_sizeGhosts = 0;
+
+            computeGhostHalo();
+
+            if (userData) {
+                userData->resizeGhost(m_octree.m_sizeGhosts);
+            }
         };
 #endif
 
