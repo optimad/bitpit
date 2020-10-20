@@ -4365,7 +4365,7 @@ namespace bitpit {
         }
 
         // Get the intersections
-        PartitionIntersections globalIntersections = evalPartitionIntersections(currentPartition.data(), m_rank, updatedPartition);
+        PartitionIntersections globalIntersections = evalPartitionIntersections(updatedPartition, m_rank, currentPartition.data());
 
         // Evaluate the receive local indexes
         uint64_t offset = 0;
@@ -4375,6 +4375,10 @@ namespace bitpit {
 
         for (const auto &intersectionEntry : globalIntersections) {
             int rank = intersectionEntry.first;
+            if (rank == m_rank) {
+                continue;
+            }
+
             const std::array<uint64_t, 2> &intersection = intersectionEntry.second;
 
             std::array<uint32_t, 2> &recvRange = recvRanges[rank];
