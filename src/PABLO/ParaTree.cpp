@@ -4127,7 +4127,7 @@ namespace bitpit {
             if (weight == NULL)
                 computePartition(partition.data());
             else
-                computePartition(partition.data(), weight);
+                computePartition(weight, partition.data());
 
             weight = NULL;
 
@@ -4171,7 +4171,7 @@ namespace bitpit {
         if (m_nproc>1){
 
             std::vector<uint32_t> partition(m_nproc);
-            computePartition(partition.data(), level, weight);
+            computePartition(level, weight, partition.data());
 
             privateLoadBalance(partition.data());
 
@@ -4220,7 +4220,7 @@ namespace bitpit {
         // Compute updated partition
         std::vector<uint32_t> updatedPartition(m_nproc);
         if (weights) {
-            computePartition(updatedPartition.data(), weights);
+            computePartition(weights, updatedPartition.data());
         } else {
             computePartition(updatedPartition.data());
         }
@@ -4257,7 +4257,7 @@ namespace bitpit {
 
         // Compute updated partition
         std::vector<uint32_t> updatedPartition(m_nproc);
-        computePartition(updatedPartition.data(), level, weights);
+        computePartition(level, weights, updatedPartition.data());
 
         // Evaluate send ranges
         return evalLoadBalanceRanges(updatedPartition.data());
@@ -4974,10 +4974,10 @@ namespace bitpit {
      * how distribute the mesh). This is an weighted distribution method: each process will have the same weight.
      * \param[out] partition Pointer to partition information array. partition[i] = number of octants
      * to be stored on the i-th process (i-th rank).
-     * \param[in] weight Pointer to weight array. weight[i] = weight of i-th local octant.
+     * \param[in] weights Pointer to weight array. weight[i] = weight of i-th local octant.
      */
     void
-    ParaTree::computePartition(uint32_t* partition, dvector* weight){
+    ParaTree::computePartition(const dvector *weight, uint32_t *partition){
         if(m_serial){
 
             double division_result = 0;
@@ -5214,7 +5214,7 @@ namespace bitpit {
      * \param[in] weight Pointer to weight array. weight[i] = weight of i-th local octant.
      */
     void
-    ParaTree::computePartition(uint32_t* partition, uint8_t & level_, dvector* weight) {
+    ParaTree::computePartition(uint8_t level_, const dvector *weight, uint32_t *partition) {
 
         uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
         uint32_t* partition_temp = new uint32_t[m_nproc];
@@ -5234,7 +5234,7 @@ namespace bitpit {
             computePartition(partition_temp);
         }
         else{
-            computePartition(partition_temp, weight);
+            computePartition(weight, partition_temp);
         }
 
         j = 0;

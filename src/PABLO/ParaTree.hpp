@@ -531,9 +531,9 @@ namespace bitpit {
         bool 		private_adapt_mapidx(bool mapflag);
         void 		updateAdapt();
 #if BITPIT_ENABLE_MPI==1
-        void 		computePartition(uint32_t* partition);
-        void 		computePartition(uint32_t* partition, dvector* weight);
-        void 		computePartition(uint32_t* partition, uint8_t & level_, dvector* weight);
+        void 		computePartition(uint32_t *partition);
+        void 		computePartition(const dvector *weight, uint32_t *partition);
+        void 		computePartition(uint8_t level_, const dvector *weight, uint32_t *partition);
         void 		updateLoadBalance();
         void 		setPboundGhosts();
         void 		buildGhostOctants(const std::map<int, u32vector> &bordersPerProc, const std::vector<AccretionData> &accretions);
@@ -642,7 +642,7 @@ namespace bitpit {
                 if (weight == NULL)
                     computePartition(partition.data());
                 else
-                    computePartition(partition.data(), weight);
+                    computePartition(weight, partition.data());
 
                 weight = NULL;
 
@@ -691,7 +691,7 @@ namespace bitpit {
             if (m_nproc>1){
 
                 std::vector<uint32_t> partition(m_nproc);
-                computePartition(partition.data(), level, weight);
+                computePartition(level, weight, partition.data());
 
                 privateLoadBalance(userData, partition.data());
 
