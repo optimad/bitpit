@@ -144,4 +144,22 @@ inline const Impl& DataLBInterface<Impl>::getImpl() const {
 	return static_cast<const Impl &>(*this);
 }
 
+template<class Buffer>
+void DummyDataLBImpl::gather(Buffer & buff,const uint32_t e)
+{
+	BITPIT_UNUSED(buff);
+	BITPIT_UNUSED(e);
+
+	return;
+}
+
+template<class Buffer>
+void DummyDataLBImpl::scatter(Buffer & buff,const uint32_t e)
+{
+	BITPIT_UNUSED(buff);
+	BITPIT_UNUSED(e);
+
+	return;
+}
+
 }

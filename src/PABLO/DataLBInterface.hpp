@@ -29,6 +29,8 @@
 
 #include <stdint.h>
 
+#include "bitpit_common.hpp"
+
 namespace bitpit {
   
   /*!
@@ -89,6 +91,33 @@ private:
 	//BartonHackman trick
 	Impl& getImpl();
 	const Impl& getImpl() const;
+
+};
+
+  /*!
+    \ingroup PABLO
+
+    \brief Dummy class for data communications
+
+    This class is a dummy class for the user interface to data communications
+    for load balance. All the implemented methods are no-op.
+  */
+class DummyDataLBImpl : public bitpit::DataLBInterface<DummyDataLBImpl> {
+public:
+	size_t size(const uint32_t e) const;
+	size_t fixedSize() const;
+	void move(const uint32_t from, const uint32_t to);
+
+	template<class Buffer>
+	void gather(Buffer & buff,const uint32_t e);
+
+	template<class Buffer>
+	void scatter(Buffer & buff,const uint32_t e);
+
+	void assign(uint32_t stride, uint32_t length);
+	void resize(uint32_t newSize);
+	void resizeGhost(uint32_t newSize);
+	void shrink();
 
 };
 
