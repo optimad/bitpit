@@ -591,10 +591,10 @@ void		Octant::getNormal(uint8_t iface, i8array3 & normal, const int8_t (&normals
 };
 
 
-/** Compute the Morton index of the octant (without level).
+/** Get the Morton index of the octant (without level).
  * \return morton Morton index of the octant.
  */
-uint64_t	Octant::computeMorton() const{
+uint64_t	Octant::getMorton() const{
 	return m_morton;
 };
 
@@ -1411,7 +1411,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint8_t iface = nodeface[inode][i];
 		if (m_info[iface]) {
 			*hasMorton = false;
-			*morton = this->computeMorton();
+			*morton = this->getMorton();
 			return;
 		}
 	}
@@ -1528,7 +1528,7 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
 	u32array3 coords = getLogicalCoordinates();
 
 	if (!m_info[iface]){
-		return this->computeMorton();
+		return this->getMorton();
 	}
 	else{
 		switch (iface) {
