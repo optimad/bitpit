@@ -75,6 +75,45 @@ inline uint64_t splitBy2(uint32_t a)
 }
 
 /**
+* Get the third bits of the given Morton number.
+*
+* The function comes from libmorton (see https://github.com/Forceflow/libmorton).
+*
+* \param morton is the morton number
+* \result The third bit of the given Morton number.
+*/
+inline uint32_t getThirdBits(uint64_t morton)
+{
+    uint64_t x = morton & 0x1249249249249249;
+    x = (x ^ (x >> 2)) & 0x10c30c30c30c30c3;
+    x = (x ^ (x >> 4)) & 0x100f00f00f00f00f;
+    x = (x ^ (x >> 8)) & 0x1f0000ff0000ff;
+    x = (x ^ (x >> 16)) & 0x1f00000000ffff;
+    x = (x ^ ((uint_fast64_t)x >> 32)) & 0x1fffff;
+
+    return static_cast<uint32_t>(x);
+}
+
+/**
+* Get the second bits of the given Morton number.
+*
+* The function comes from libmorton (see https://github.com/Forceflow/libmorton).
+*
+* \param morton is the morton number
+* \result The third bit of the given Morton number.
+*/
+inline uint32_t getSecondBits(uint64_t morton)
+{
+    uint64_t x = morton & 0x5555555555555555;
+    x = (x ^ (x >> 2)) & 0x3333333333333333;
+    x = (x ^ (x >> 4)) & 0xF0F0F0F0F0F0F0F;
+    x = (x ^ (x >> 8)) & 0xFF00FF00FF00FF;
+    x = (x ^ (x >> 16)) & 0xFFFF0000FFFF;
+
+    return static_cast<uint32_t>(x);
+}
+
+/**
 * Compute the Morton number of the given set of coordinates.
 *
 * The function uses the "magic bits" algorithm of the libmorton library
@@ -107,6 +146,36 @@ inline uint64_t computeMorton(uint32_t x, uint32_t y)
     uint64_t morton = splitBy2(x) | splitBy2(y) << 1;
 
     return morton;
+}
+
+/**
+* Compute the specified coordinate value from the given Morton number.
+*
+* The function uses the "magic bits" algorithm of the libmorton library
+* (see https://github.com/Forceflow/libmorton).
+*
+* \param morton is the morton number
+* \param coord is the coordinate that will be computed
+* \result The coordinate value.
+*/
+inline uint32_t computeCoordinate3D(uint64_t morton, int coord)
+{
+    return getThirdBits(morton >> coord);
+}
+
+/**
+* Compute the specified coordinate value from the given Morton number.
+*
+* The function uses the "magic bits" algorithm of the libmorton library
+* (see https://github.com/Forceflow/libmorton).
+*
+* \param morton is the morton number
+* \param coord is the coordinate that will be computed
+* \result The coordinate value.
+*/
+inline uint32_t computeCoordinate2D(uint64_t morton, int coord)
+{
+    return getSecondBits(morton >> coord);
 }
 
 /**
