@@ -160,7 +160,7 @@ private:
 	int8_t 			getLocalMaxDepth() const;
 	int8_t 			getMarker(int32_t idx) const;
 	uint8_t 		getLevel(int32_t idx) const;
-	uint64_t 		computeMorton(int32_t idx) const;
+	uint64_t 		getMorton(int32_t idx) const;
 	uint64_t 		computeNodePersistentKey(int32_t idx, uint8_t inode) const;
 	uint8_t 		getGhostLevel(int32_t idx) const;
 	uint64_t 		computeGhostMorton(int32_t idx) const;
