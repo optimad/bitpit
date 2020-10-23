@@ -236,11 +236,11 @@ Octant::getDim() const{return m_dim;};
  */
 u32array3
 Octant::getLogicalCoordinates() const{
-	u32array3 xx;
-	xx[0] = m_x;
-	xx[1] = m_y;
-	xx[2] = m_z;
-	return xx;
+	u32array3 coords;
+	coords[0] = m_x;
+	coords[1] = m_y;
+	coords[2] = m_z;
+	return coords;
 };
 
 /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -260,18 +260,6 @@ Octant::getLogicalY() const{return m_y;};
  */
 uint32_t
 Octant::getLogicalZ() const{return m_z;};
-
-/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
- * \return Coordinates of node 0.
- */
-u32array3
-Octant::getLogicalCoord() const {
-	u32array3 coord;
-	coord[0] = m_x;
-	coord[1] = m_y;
-	coord[2] = m_z;
-	return coord;
-};
 
 /*! Get the level of an octant.
  * \return Level of octant.

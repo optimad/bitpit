@@ -192,7 +192,6 @@ public:
     uint32_t    getLogicalX() const;
     uint32_t    getLogicalY() const;
     uint32_t    getLogicalZ() const;
-    u32array3   getLogicalCoord() const;
     uint8_t     getLevel() const;
     int8_t      getMarker() const;
     bool        getBound(uint8_t face) const;
