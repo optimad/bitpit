@@ -600,15 +600,15 @@ uint64_t	Octant::computeMorton() const{
 	return morton;
 };
 
-/** Compute the Morton index of the given node (without level).
+/** Compute the persistent XYZ key of the given node (without level).
  * \param[in] inode Local index of the node
- * \return morton Morton index of the node.
+ * \return persistent XYZ key of the node.
  */
-uint64_t	Octant::computeNodeMorton(uint8_t inode) const{
+uint64_t	Octant::computeNodePersistentKey(uint8_t inode) const{
 
 	u32array3 node = getLogicalNode(inode);
 
-	return computeNodeMorton(node);
+	return computeNodePersistentKey(node);
 };
 
 /** Compute the Morton index of the father of this octant.
@@ -632,11 +632,11 @@ u32array3	Octant::computeFatherCoordinates() const {
 	return fatherCoordinates;
 };
 
-/** Compute the Morton index of the given node (without level).
+/** Compute the persistent XYZ key of the given node (without level).
  * \param[in] node Logical coordinates of the node
- * \return morton Morton index of the node.
+ * \return persistent XYZ key of the node.
  */
-uint64_t	Octant::computeNodeMorton(const u32array3 &node) const{
+uint64_t	Octant::computeNodePersistentKey(const u32array3 &node) const{
 
 	return PABLO::computeXYZKey(node[0], node[1], node[2], TreeConstants::MAX_LEVEL);
 };

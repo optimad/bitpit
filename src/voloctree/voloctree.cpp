@@ -1682,8 +1682,8 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 
 		for (int k = 0; k < nCellVertices; ++k) {
 			long vertexId = cellVertexIds[k];
-			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
-			stitchVertices.insert({vertexTreeMorton, vertexId});
+			uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
+			stitchVertices.insert({vertexTreeKey, vertexId});
 			deadVertices.erase(vertexId);
 		}
 
@@ -1713,8 +1713,8 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 			const int *localFaceConnect = m_cellTypeInfo->faceConnectStorage[ownerFace].data();
 			for (int k = 0; k < nInterfaceVertices; ++k) {
 				long vertexId = ownerCellVertexIds[localFaceConnect[k]];
-				uint64_t vertexTreeMorton = m_tree->getNodeMorton(ownerOctant, localFaceConnect[k]);
-				stitchVertices.insert({vertexTreeMorton, vertexId});
+				uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(ownerOctant, localFaceConnect[k]);
+				stitchVertices.insert({vertexTreeKey, vertexId});
 				deadVertices.erase(vertexId);
 			}
 		}
@@ -1781,8 +1781,8 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 	for (const OctantInfo &octantInfo : octantInfoList) {
 		Octant *octant = getOctantPointer(octantInfo);
 		for (int k = 0; k < nCellVertices; ++k) {
-			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
-			if (stitchInfo.count(vertexTreeMorton) == 0) {
+			uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
+			if (stitchInfo.count(vertexTreeKey) == 0) {
 				// Vertex coordinates
 				std::array<double, 3> nodeCoords = m_tree->getNode(octant, k);
 
@@ -1812,7 +1812,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 				}
 
 				// Add the vertex to the stitching info
-				stitchInfo[vertexTreeMorton] = vertexId;
+				stitchInfo[vertexTreeKey] = vertexId;
 			}
 		}
 	}
@@ -1840,8 +1840,8 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 		// Cell connectivity
 		std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
 		for (int k = 0; k < nCellVertices; ++k) {
-			uint64_t vertexTreeMorton = m_tree->getNodeMorton(octant, k);
-			cellConnect[k] = stitchInfo.at(vertexTreeMorton);
+			uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
+			cellConnect[k] = stitchInfo.at(vertexTreeKey);
 		}
 
 #if BITPIT_ENABLE_MPI==1

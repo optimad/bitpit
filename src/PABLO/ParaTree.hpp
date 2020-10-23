@@ -293,7 +293,7 @@ namespace bitpit {
         int8_t 		getMarker(uint32_t idx) const;
         uint8_t 	getLevel(uint32_t idx) const;
         uint64_t 	getMorton(uint32_t idx) const;
-        uint64_t 	getNodeMorton(uint32_t idx, uint8_t inode) const;
+        uint64_t 	computeNodePersistentKey(uint32_t idx, uint8_t inode) const;
         bool 		getBalance(uint32_t idx) const;
         bool		getBound(uint32_t idx, uint8_t iface) const;
         bool		getBound(uint32_t idx) const;
@@ -336,7 +336,7 @@ namespace bitpit {
         uint8_t 	getLevel(const Octant* oct) const;
         uint64_t 	getMorton(const Octant* oct) const;
         uint64_t 	getLastDescMorton(const Octant* oct) const;
-        uint64_t 	getNodeMorton(const Octant* oct, uint8_t inode) const;
+        uint64_t 	computeNodePersistentKey(const Octant* oct, uint8_t inode) const;
         bool 		getBalance(const Octant* oct) const;
         bool		getBound(const Octant* oct, uint8_t iface) const;
         bool		getBound(const Octant* oct) const;

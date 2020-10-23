@@ -229,8 +229,8 @@ public:
     u32array3       getLogicalNode(uint8_t inode) const;
     void            getNormal(uint8_t iface, i8array3 & normal, const int8_t (&normals)[6][3]) const;
     uint64_t        computeMorton() const;
-    uint64_t        computeNodeMorton(uint8_t inode) const;
-    uint64_t        computeNodeMorton(const u32array3 &node) const;
+    uint64_t        computeNodePersistentKey(uint8_t inode) const;
+    uint64_t        computeNodePersistentKey(const u32array3 &node) const;
 
     // =================================================================================== //
     // OTHER METHODS                                                                   //

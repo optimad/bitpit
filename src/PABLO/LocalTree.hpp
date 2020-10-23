@@ -161,10 +161,10 @@ private:
 	int8_t 			getMarker(int32_t idx) const;
 	uint8_t 		getLevel(int32_t idx) const;
 	uint64_t 		computeMorton(int32_t idx) const;
-	uint64_t 		computeNodeMorton(int32_t idx, uint8_t inode) const;
+	uint64_t 		computeNodePersistentKey(int32_t idx, uint8_t inode) const;
 	uint8_t 		getGhostLevel(int32_t idx) const;
 	uint64_t 		computeGhostMorton(int32_t idx) const;
-	uint64_t 		computeGhostNodeMorton(int32_t idx, uint8_t inode) const;
+	uint64_t 		computeGhostNodePersistentKey(int32_t idx, uint8_t inode) const;
 	bool 			getBalance(int32_t idx) const;
 	uint8_t 		getBalanceCodim() const;
 	void 			setMarker(int32_t idx, int8_t marker);
