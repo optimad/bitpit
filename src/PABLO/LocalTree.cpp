@@ -962,7 +962,7 @@ namespace bitpit {
         neighbours.clear();
 
         // Default if iface is nface<iface<0
-        if (iface > m_treeConstants->nFaces){
+        if (iface >= m_treeConstants->nFaces){
             return;
         }
 
