@@ -137,15 +137,15 @@ namespace bitpit {
         return m_octants[idx].computeMorton();
     };
 
-    /** Compute the Morton index of the specified node of the idx-th octant
+    /** Compute the persistent XYZ key of the specified node of an octant
      * (without level).
      * \param[in] idx Local index of the target octant.
      * \param[in] inode Index of the target node.
-     * \return Morton index of the octant.
+     * \return persistent XYZ key of the node.
      */
     uint64_t
-    LocalTree::computeNodeMorton(int32_t idx, uint8_t inode) const {
-        return m_octants[idx].computeNodeMorton(inode);
+    LocalTree::computeNodePersistentKey(int32_t idx, uint8_t inode) const {
+        return m_octants[idx].computeNodePersistentKey(inode);
     };
 
     /** Get refinement/coarsening marker for idx-th ghost octant
@@ -166,15 +166,15 @@ namespace bitpit {
         return m_ghosts[idx].computeMorton();
     };
 
-    /** Compute the Morton index of the specified node of the idx-th ghost
-     * octant (without level).
+    /** Compute the persistent XYZ key of the specified node of a ghost octant
+     * (without level).
      * \param[in] idx Local index of the target octant.
      * \param[in] inode Index of the target node.
-     * \return Morton index of the octant.
+     * \return persistent XYZ key of the node.
      */
     uint64_t
-    LocalTree::computeGhostNodeMorton(int32_t idx, uint8_t inode) const {
-        return m_ghosts[idx].computeNodeMorton(inode);
+    LocalTree::computeGhostNodePersistentKey(int32_t idx, uint8_t inode) const {
+        return m_ghosts[idx].computeNodePersistentKey(inode);
     };
 
     /** Get if balancing-blocked idx-th octant
@@ -3178,7 +3178,7 @@ namespace bitpit {
                 u32array3 node;
                 octant->getLogicalNode(node, i);
 
-                uint64_t morton = octant->computeNodeMorton(node);
+                uint64_t morton = octant->computeNodePersistentKey(node);
                 if (nodeCoords.count(morton) == 0) {
                     mortonList.push_back(morton);
                     nodeCoords.insert({{morton, std::move(node)}});

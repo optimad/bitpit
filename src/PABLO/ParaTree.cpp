@@ -1493,15 +1493,15 @@ namespace bitpit {
         return m_octree.computeMorton(idx);
     };
 
-    /** Compute the Morton index of the specified node of the idx-th octant
-     * (without level).
+    /** Compute the persistent XYZ key of the specified node of an octant (without
+     * level).
      * \param[in] idx Local index of the target octant.
      * \param[in] inode Index of the target node.
-     * \return Morton index of the node.
+     * \return persistent XYZ key of the node.
      */
     uint64_t
-    ParaTree::getNodeMorton(uint32_t idx, uint8_t inode) const {
-        return m_octree.computeNodeMorton(idx, inode);
+    ParaTree::computeNodePersistentKey(uint32_t idx, uint8_t inode) const {
+        return m_octree.computeNodePersistentKey(idx, inode);
     };
 
     /*! Get the balancing condition of an octant.
@@ -1952,15 +1952,15 @@ namespace bitpit {
         return oct->buildLastDesc().computeMorton();
     };
 
-    /** Compute the Morton index of the specified node of an octant (without
+    /** Compute the persistent XYZ key of the specified node of an octant (without
      * level).
      * \param[in] oct Pointer to the target octant
      * \param[in] inode Index of the target node.
-     * \return Morton index of the node.
+     * \return persistent XYZ key of the node.
      */
     uint64_t
-    ParaTree::getNodeMorton(const Octant* oct, uint8_t inode) const {
-        return oct->computeNodeMorton(inode);
+    ParaTree::computeNodePersistentKey(const Octant* oct, uint8_t inode) const {
+        return oct->computeNodePersistentKey(inode);
     };
 
     /*! Get the balancing condition of an octant.
