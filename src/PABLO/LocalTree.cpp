@@ -1456,7 +1456,7 @@ namespace bitpit {
         neighbours.clear();
 
         // Default if inode is nnodes<inode<0
-        if (inode > m_treeConstants->nNodes){
+        if (inode >= m_treeConstants->nNodes){
             return;
         }
 
