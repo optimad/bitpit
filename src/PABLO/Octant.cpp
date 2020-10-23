@@ -546,22 +546,8 @@ Octant::getLogicalNodes(u32arr3vector & nodes) const{
  */
 u32arr3vector
 Octant::getLogicalNodes() const{
-	uint8_t		i;
-	uint32_t	dh;
-	uint8_t nn = uint8_t(1)<<m_dim;
 	u32arr3vector nodes;
-
-	dh = getLogicalSize();
-	nodes.resize(nn);
-
-	u32array3 coords = getLogicalCoordinates();
-
-	for (i = 0; i < nn; i++){
-		nodes[i][0] = coords[0] + sm_treeConstants[m_dim].nodeCoordinates[i][0]*dh;
-		nodes[i][1] = coords[1] + sm_treeConstants[m_dim].nodeCoordinates[i][1]*dh;
-		nodes[i][2] = coords[2] + sm_treeConstants[m_dim].nodeCoordinates[i][2]*dh;
-	}
-
+	getLogicalNodes(nodes);
 	return nodes;
 };
 
@@ -587,15 +573,8 @@ void		Octant::getLogicalNode(u32array3 & node, uint8_t inode) const{
  * \return Array[3] with the logical coordinates of the node of the octant.
  */
 u32array3		Octant::getLogicalNode(uint8_t inode) const{
-	uint32_t	dh;
-
-	dh = getLogicalSize();
-
-	u32array3 node = getLogicalCoordinates();
-
-	node[0] += sm_treeConstants[m_dim].nodeCoordinates[inode][0]*dh;
-	node[1] += sm_treeConstants[m_dim].nodeCoordinates[inode][1]*dh;
-	node[2] += sm_treeConstants[m_dim].nodeCoordinates[inode][2]*dh;
+	u32array3 node;
+	getLogicalNode(node, inode);
 	return node;
 };
 
