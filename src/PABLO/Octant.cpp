@@ -50,9 +50,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Octant 
 
     octant.initialize(dimensions, level, true);
 
-    buffer >> octant.m_x;
-    buffer >> octant.m_y;
-    buffer >> octant.m_z;
+    buffer >> octant.m_morton;
 
     buffer >> octant.m_marker;
 
@@ -80,9 +78,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
     buffer << octant.m_dim;
     buffer << octant.m_level;
 
-    buffer << octant.m_x;
-    buffer << octant.m_y;
-    buffer << octant.m_z;
+    buffer << octant.m_morton;
 
     buffer << octant.m_marker;
 
@@ -141,10 +137,9 @@ Octant::Octant(uint8_t dim){
 Octant::Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
 	initialize(dim, level, true);
 
-	// Set the coordinates
-	m_x = x;
-	m_y = y;
-	m_z = (m_dim-2) * z;
+	// Set the morton
+	m_morton = PABLO::computeMorton(x, y, (m_dim-2) * z);
+
 };
 
 /*! Custom constructor of an octant.
@@ -159,10 +154,9 @@ Octant::Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
 Octant::Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
 	initialize(dim, level, bound);
 
-	// Set the coordinates
-	m_x = x;
-	m_y = y;
-	m_z = (m_dim-2) * z;
+	// Set the morton
+	m_morton = PABLO::computeMorton(x, y, (m_dim-2) * z);
+
 };
 
 /*! Check if two octants are equal (no check on info)
@@ -170,9 +164,7 @@ Octant::Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int
 bool Octant::operator ==(const Octant & oct2){
 	bool check = true;
 	check = check && (m_dim == oct2.m_dim);
-	check = check && (m_x == oct2.m_x);
-	check = check && (m_y == oct2.m_y);
-	check = check && (m_z == oct2.m_z);
+	check = check && (m_morton == oct2.m_morton);
 	check = check && (m_level == oct2.m_level);
 	return check;
 }
@@ -201,10 +193,8 @@ Octant::initialize(uint8_t dim, uint8_t level, bool bound) {
 	// Reset the marker
 	m_marker = 0;
 
-	// Set the coordinates
-	m_x = 0;
-	m_y = 0;
-	m_z = 0;
+	// Reset the morton
+	m_morton = 0;
 
 	// Initialize octant info
 	m_info.reset();
@@ -247,19 +237,29 @@ Octant::getLogicalCoordinates() const{
  * \return Coordinate X of node 0.
  */
 uint32_t
-Octant::getLogicalX() const{return m_x;};
+Octant::getLogicalX() const{
+	return PABLO::computeCoordinate3D(m_morton, 0);
+};
 
 /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
  * \return Coordinate Y of node 0.
  */
 uint32_t
-Octant::getLogicalY() const{return m_y;};
+Octant::getLogicalY() const{
+	return PABLO::computeCoordinate3D(m_morton, 1);
+};
 
 /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
  * \return Coordinate Z of node 0.
  */
 uint32_t
-Octant::getLogicalZ() const{return m_z;};
+Octant::getLogicalZ() const{
+	if (m_dim == 3) {
+		return PABLO::computeCoordinate3D(m_morton, 2);
+	} else {
+		return 0;
+	}
+};
 
 /*! Get the level of an octant.
  * \return Level of octant.
@@ -595,9 +595,7 @@ void		Octant::getNormal(uint8_t iface, i8array3 & normal, const int8_t (&normals
  * \return morton Morton index of the octant.
  */
 uint64_t	Octant::computeMorton() const{
-	uint64_t morton = 0;
-	morton = PABLO::computeMorton(this->m_x,this->m_y,this->m_z);
-	return morton;
+	return m_morton;
 };
 
 /** Compute the persistent XYZ key of the given node (without level).
@@ -649,7 +647,7 @@ unsigned int Octant::getBinarySize()
     unsigned int binarySize = 0;
     binarySize += sizeof(uint8_t); // dimensions
     binarySize += sizeof(uint8_t); // level
-    binarySize += 3 * sizeof(uint32_t); // 3 coordinates
+    binarySize += sizeof(uint64_t); // morton
     binarySize += sizeof(int8_t); // marker
     binarySize += sizeof(int); // ghost layer
     binarySize += INFO_ITEM_COUNT * sizeof(bool); // info
@@ -720,6 +718,8 @@ vector< Octant >	Octant::buildChildren() const {
  *   the possible children.
  */
 void	Octant::buildChildren(Octant *children) const {
+
+	u32array3 coords = getLogicalCoordinates();
 
 	int nChildren = countChildren();
 	for (int i=0; i<nChildren; ++i){
@@ -833,10 +833,7 @@ void	Octant::buildChildren(Octant *children) const {
 		oct.setLevel(oct.m_level + 1);
 
 		uint32_t dh = oct.getLogicalSize();
-
-		oct.m_x += dh * dx;
-		oct.m_y += dh * dy;
-		oct.m_z += dh * dz;
+		oct.m_morton = PABLO::computeMorton(coords[0] + dh * dx, coords[1] + dh * dy, coords[2] + dh * dz);
 
 		oct.m_info[OctantInfo::INFO_NEW4REFINEMENT] = true;
 
