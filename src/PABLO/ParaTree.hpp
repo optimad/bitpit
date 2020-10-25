@@ -28,6 +28,36 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+
+// Octant header should be included before bitpit_communications header. If
+// this is not the case, octants will be streamed in the communication buffer
+// using the standard bitpit operator instead of the custom operator defined
+// for the octant. GCC will work also if the Octant header is included after
+// bitpit_communications header, but that's a bug in GCC.
+//
+//    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51577
+//    https://bugs.llvm.org/show_bug.cgi?id=47967
+//
+// For a dependent name used in a template definition, the lookup is postponed
+// until the template arguments are known, at which time ADL examines function
+// declarations with external linkage (until C++11) that are visible from the
+// template definition context as well as in the template instantiation context
+// (in other words, ADL will only look in namespaces associated with the
+// argument types), while unqualified lookup only examines function declarations
+// with external linkage (until C++11) that are visible from the template
+// definition context (in other words, adding a new function declaration after
+// template definition does not make it visible except via ADL). The stream
+// operator template is defined in the global namespace, whereas the octant
+// class is defined in the bitpit namespace. Hence, custom stream operator
+// defined for the octant class cannot be selected by ADL (ADL will only look
+// in the namaspace of its arguments, i.e., bitpit, whereas the custom stream
+// operator is defined in the global namespace). The only chance to select
+// the custom operator is through unqualified lookup, and for that to happen,
+// the stream operator defined for the octant class should be defined before
+// the template.
+
+#include "Octant.hpp"
+
 #if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #include "DataLBInterface.hpp"
@@ -35,7 +65,6 @@
 #include "bitpit_communications.hpp"
 #endif
 #include "tree_constants.hpp"
-#include "Octant.hpp"
 #include "LocalTree.hpp"
 #include "Map.hpp"
 #include "bitpit_IO.hpp"
