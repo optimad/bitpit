@@ -967,8 +967,6 @@ namespace bitpit {
 
         bool amIghost = oct->getIsGhost();
 
-        bool isperiodic = false;
-
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
             cxyz[idim] = m_treeConstants->normals[iface][idim];
@@ -983,12 +981,10 @@ namespace bitpit {
         }
 
         // If a face is a boundary, it can have neighbours only if periodic
-        if (oct->m_info[iface]){
-            // Set searching periodic neighbours
-            if (m_periodic[iface]){
-                isperiodic = true;
-            }
-            else{
+        bool isperiodic = false;
+        if (oct->getBound(iface)) {
+            isperiodic = isPeriodic(oct, iface);
+            if (!isperiodic) {
                 return;
             }
         }
