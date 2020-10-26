@@ -5425,6 +5425,13 @@ namespace bitpit {
                         //					if (abs(pBegin-pEnd) <= 1) ee = maxDelta + 1;
                     }
                 }
+                else if(m_octree.isEdgePeriodic(&octant, e)){
+                    Octant periodicNeighbor = octant.computeEdgePeriodicOctant(e);
+                    int neighProc = findOwner(periodicNeighbor.computeMorton());
+                    if(neighProc != m_rank){
+                        neighProcs.insert(neighProc);
+                    }
+                }
             }
 
             // Virtual Corner Neighbors
@@ -5435,6 +5442,13 @@ namespace bitpit {
                 if(hasVirtualNeighbour){
                     int neighProc = findOwner(virtualNeighbor);
                     if (neighProc != m_rank) {
+                        neighProcs.insert(neighProc);
+                    }
+                }
+                else if(m_octree.isNodePeriodic(&octant, c)){
+                    Octant periodicNeighbor = octant.computeNodePeriodicOctant(c);
+                    int neighProc = findOwner(periodicNeighbor.computeMorton());
+                    if(neighProc != m_rank){
                         neighProcs.insert(neighProc);
                     }
                 }
