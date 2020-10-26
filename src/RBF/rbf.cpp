@@ -96,7 +96,7 @@ RBFKernel::RBFKernel(const RBFKernel & other)
 }
 
 /*!
- * Swap method. Exchange contents of each class member with those 
+ * Swap method. Exchange contents of each class member with those
  * corresponding in the argument object.
  * \param[in] x object to be swapped
  */
@@ -807,7 +807,7 @@ int RBFKernel::addGreedyPoint( )
     }
 
     int     i(0), index(-1);
-    double  maxError(0.); 
+    double  maxError(0.);
 
     std::vector<int>     active( getActiveSet() );
 
@@ -1001,7 +1001,7 @@ RBF & RBF::operator=(RBF other)
 }
 
 /*!
- * Swap method. Exchange contents of each class member with those 
+ * Swap method. Exchange contents of each class member with those
  * corresponding in the argument object.
  * \param[in] x object to be swapped
  */
@@ -1327,4 +1327,49 @@ double rbf::c2c2( double dist )
     }
 }
 
-}
+namespace rbf
+{
+  // ============================================================= //
+  // EXPLICIT SPECIALIZATIONS                                      //
+  // ============================================================= //
+  template class WendlandC2<1, float>;
+  template class WendlandC2<2, float>;
+  template class WendlandC2<3, float>;
+  template class WendlandC2<1, double>;
+  template class WendlandC2<2, double>;
+  template class WendlandC2<3, double>;
+  template class WendlandC2<1, long double>;
+  template class WendlandC2<2, long double>;
+  template class WendlandC2<3, long double>;
+
+  template class GeneralizedMultiquadrics<1, 2, 1, float>;
+  template class GeneralizedMultiquadrics<2, 2, 1, float>;
+  template class GeneralizedMultiquadrics<3, 2, 1, float>;
+  template class GeneralizedMultiquadrics<1, 2, 1, double>;
+  template class GeneralizedMultiquadrics<2, 2, 1, double>;
+  template class GeneralizedMultiquadrics<3, 2, 1, double>;
+  template class GeneralizedMultiquadrics<1, 2, 1, long double>;
+  template class GeneralizedMultiquadrics<2, 2, 1, long double>;
+  template class GeneralizedMultiquadrics<3, 2, 1, long double>;
+
+  template class GeneralizedMultiquadrics<1, 3, 2, float>;
+  template class GeneralizedMultiquadrics<2, 3, 2, float>;
+  template class GeneralizedMultiquadrics<3, 3, 2, float>;
+  template class GeneralizedMultiquadrics<1, 3, 2, double>;
+  template class GeneralizedMultiquadrics<2, 3, 2, double>;
+  template class GeneralizedMultiquadrics<3, 3, 2, double>;
+  template class GeneralizedMultiquadrics<1, 3, 2, long double>;
+  template class GeneralizedMultiquadrics<2, 3, 2, long double>;
+  template class GeneralizedMultiquadrics<3, 3, 2, long double>;
+
+  template class GeneralizedMultiquadrics<1, 5, 2, float>;
+  template class GeneralizedMultiquadrics<2, 5, 2, float>;
+  template class GeneralizedMultiquadrics<3, 5, 2, float>;
+  template class GeneralizedMultiquadrics<1, 5, 2, double>;
+  template class GeneralizedMultiquadrics<2, 5, 2, double>;
+  template class GeneralizedMultiquadrics<3, 5, 2, double>;
+  template class GeneralizedMultiquadrics<1, 5, 2, long double>;
+  template class GeneralizedMultiquadrics<2, 5, 2, long double>;
+  template class GeneralizedMultiquadrics<3, 5, 2, long double>;
+} //end namespace rbf
+} //end namespace bitpit
