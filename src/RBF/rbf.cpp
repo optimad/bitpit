@@ -1330,6 +1330,24 @@ double rbf::c2c2( double dist )
 namespace rbf
 {
   // ============================================================= //
+  // HELPER FUNCTIONS                                              //
+  // ============================================================= //
+
+  // ------------------------------------------------------------- //
+  std::string   getRBFTag( eRBFType type )
+  {
+    switch( type )
+    {
+      default:                                    { return "Undefined"; }
+      case( bitpit::rbf::eRBFType::kWendlandC2 ):      { return "WendLandC2";        }
+      case( bitpit::rbf::eRBFType::kMultiQuadric2 ):   { return "kMultiQuadric2";    }
+      case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): { return "kMultiQuadric3_2";  }
+      case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): { return "kMultiQuadric5_2";  }
+    }
+    return "";
+  }
+
+  // ============================================================= //
   // EXPLICIT SPECIALIZATIONS                                      //
   // ============================================================= //
   template class WendlandC2<1, float>;
