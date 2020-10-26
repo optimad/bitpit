@@ -41,6 +41,7 @@ if (ENABLE_MPI)
 	list(APPEND TESTS "test_PABLO_parallel_00002")
 	list(APPEND TESTS "test_PABLO_parallel_00003")
 	list(APPEND TESTS "test_PABLO_parallel_00004")
+	list(APPEND TESTS "test_PABLO_parallel_00005:4")
 endif()
 
 # Test extra libraries
