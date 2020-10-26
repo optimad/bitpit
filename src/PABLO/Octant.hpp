@@ -196,6 +196,8 @@ public:
     uint8_t     getLevel() const;
     int8_t      getMarker() const;
     bool        getBound(uint8_t face) const;
+    bool        getEdgeBound(uint8_t edge) const;
+    bool        getNodeBound(uint8_t node) const;
     bool        getBound() const;
     bool        getPbound(uint8_t face) const;
     bool        getPbound() const;

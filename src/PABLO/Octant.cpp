@@ -294,6 +294,36 @@ Octant::getBound(uint8_t face) const{
 	return (m_info[OctantInfo::INFO_BOUNDFACE0 + face]);
 };
 
+/*! Get the bound flag on an octant edge.
+ * \param[in] edge local index of the edge.
+ * \return true if the edge is on a boundary.
+ */
+bool
+Octant::getEdgeBound(uint8_t edge) const{
+	for (int face : sm_treeConstants[m_dim].edgeFace[edge]) {
+		if (getBound(face)) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+/*! Get the bound flag on an octant node.
+ * \param[in] node local index of the node.
+ * \return true if the node is on a boundary.
+ */
+bool
+Octant::getNodeBound(uint8_t node) const{
+	for (int face : sm_treeConstants[m_dim].nodeFace[node]) {
+		if (getBound(face)) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
 /*! Get the bound flag on an octant.
  * \return true if the octant is a boundary octant.
  */
