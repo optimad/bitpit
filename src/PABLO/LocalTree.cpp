@@ -257,6 +257,73 @@ namespace bitpit {
     // OTHER GET/SET METHODS
     // =================================================================================== //
 
+    /*!Check if the face of the specified octant is on a periodic boundary.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] iface Index of face
+     * \return Returns true if the face of the specified octant is on a
+     * periodic boundary, false otherwise.
+     */
+    bool
+    LocalTree::isPeriodic(const Octant* oct, uint8_t iface) const{
+        // Check if face is on a boundary
+        if (!oct->getBound(iface)) {
+            return false;
+        }
+
+        // Check if boundary is periodic
+        return m_periodic[iface];
+    };
+
+    /*!Check if the edge of the specified octant is on a periodic boundary.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] iedge Index of edge
+     * \return Returns true if the edge of the specified octant is on a
+     * periodic boundary, false otherwise.
+     */
+    bool
+    LocalTree::isEdgePeriodic(const Octant* oct, uint8_t iedge) const{
+        // The edge needs to be on a border
+        if (!oct->getEdgeBound(iedge)) {
+            return false;
+        }
+
+        // If one of the edge faces is on a non-periodic border the edge is
+        // non-periodic
+        for (int face : m_treeConstants->edgeFace[iedge]) {
+            if (oct->getBound(face) && !isPeriodic(oct, face)) {
+                return false;
+            }
+        }
+
+        // The edge is periodic
+        return true;
+    };
+
+    /*!Check if the node of the specified octant is on a periodic boundary.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] inode Index of node
+     * \return Returns true if the node of the specified octant is on a
+     * periodic boundary, false otherwise.
+     */
+    bool
+    LocalTree::isNodePeriodic(const Octant* oct, uint8_t inode) const{
+        // The node needs to be on a border
+        if (!oct->getNodeBound(inode)) {
+            return false;
+        }
+
+        // If one of the node faces is on a non-periodic border the node is
+        // non-periodic
+        for (int face : m_treeConstants->nodeFace[inode]) {
+            if (oct->getBound(face) && !isPeriodic(oct, face)) {
+                return false;
+            }
+        }
+
+        // The edge is periodic
+        return true;
+    };
+
     // =================================================================================== //
     // OTHER METHODS
     // =================================================================================== //

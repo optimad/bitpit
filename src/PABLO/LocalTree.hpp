@@ -177,6 +177,9 @@ private:
 	// =================================================================================== //
 	// OTHER GET/SET METHODS
 	// =================================================================================== //
+	bool 		isPeriodic(const Octant* oct, uint8_t iface) const;
+	bool 		isEdgePeriodic(const Octant* oct, uint8_t iedge) const;
+	bool 		isNodePeriodic(const Octant* oct, uint8_t inode) const;
 
 	// =================================================================================== //
 	// OTHER METHODS
