@@ -1297,11 +1297,8 @@ namespace bitpit {
         uint32_t  		noctants = getNumOctants();
         uint32_t 		idxtry;
         uint32_t 		size = oct->getLogicalSize();
-        uint8_t 		iface1, iface2;
 
         bool amIghost = oct->getIsGhost();
-
-        bool isperiodic = false;
 
         //Alternative to switch case
         int8_t          cxyz[3] = {0,0,0};
@@ -1320,21 +1317,11 @@ namespace bitpit {
             return;
         }
 
-        // Check if octants edge is a process boundary
-        iface1 = m_treeConstants->edgeFace[iedge][0];
-        iface2 = m_treeConstants->edgeFace[iedge][1];
-
-        // If a face is a boundary, the edge can have neighbours only if this face periodic
-        // Set periodic face flags for the current octant edge
-        bool periodic_face1 = (oct->m_info[iface1] && m_periodic[iface1]);
-        bool periodic_face2 = (oct->m_info[iface2] && m_periodic[iface2]);
-        if (oct->m_info[iface1] || oct->m_info[iface2]){
-            // Set searching periodic neighbours
-            if ((periodic_face1 || !oct->m_info[iface1]) &&
-                    (periodic_face2 || !oct->m_info[iface2]) ){
-                isperiodic = true;
-            }
-            else{
+        // If a edge is a on boundary, it can have neighbours only if periodic
+        bool isperiodic = false;
+        if (oct->getEdgeBound(iedge)) {
+            isperiodic = isEdgePeriodic(oct, iedge);
+            if (!isperiodic) {
                 return;
             }
         }
