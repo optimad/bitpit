@@ -322,7 +322,7 @@ Octant::setBound(uint8_t face) {
  */
 bool
 Octant::getPbound(uint8_t face) const{
-	return m_info[6+face];
+	return m_info[INFO_PBOUNDFACE0 + face];
 };
 
 /*! Get the pbound flag on an octant face.
@@ -330,9 +330,13 @@ Octant::getPbound(uint8_t face) const{
  */
 bool
 Octant::getPbound() const{
-	return m_info[OctantInfo::INFO_PBOUNDFACE0]||m_info[OctantInfo::INFO_PBOUNDFACE1]||
-	        m_info[OctantInfo::INFO_PBOUNDFACE2]||m_info[OctantInfo::INFO_PBOUNDFACE3]||
-	        ((m_dim==3)&&(m_info[OctantInfo::INFO_PBOUNDFACE4]||m_info[OctantInfo::INFO_PBOUNDFACE5]));
+	for (int i = 0; i < sm_treeConstants[m_dim].nFaces; ++i) {
+		if (getPbound(i)) {
+			return true;
+		}
+	}
+
+	return false;
 };
 
 /*! Get if the octant is new after a refinement.
@@ -399,7 +403,7 @@ Octant::setLevel(uint8_t level){
  */
 void
 Octant::setPbound(uint8_t face, bool flag){
-	m_info[6+face] = flag;
+	m_info[INFO_PBOUNDFACE0 + face] = flag;
 };
 
 /*! Set the ghost specifier of an octant.
