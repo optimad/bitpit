@@ -244,20 +244,23 @@ namespace rbf
   enum eRBFType
   {
     /*! @brief undefined type. */
-    kUndefined                = 0,
+    kUndefined,
     /*! @brief WendLand C2-continuous radial functions. */
-    kWendlandC2               = 10,
-    /*! @brief Generalized multiquadrics */
-    kGeneralizedMultiQuadric  = 20,
+    kWendlandC2,
     /*! @brief Generalized multiquadrics with \f$\alpha = 2, \beta = 1\f$) */
-    kMultiQuadric2            = 21,
+    kMultiQuadric2,
     /*! @brief Generalized multiquarics with \f$\alpha = 3, \beta = 2\f$ */
-    kMultiQuadric3_2          = 22,
+    kMultiQuadric3_2,
     /*! @brief Generalized multiquarics with \f$\alpha = 5, \beta = 2\f$ */
-    kMultiQuadric5_2          = 23
-
+    kMultiQuadric5_2
   }; //end enum eRBFType
 
+  // ---------------------------------------------------------------- //
+  /*! @brief Helper function returning the tag associated to each type
+   *  of RBF.
+  */
+  std::string   getRBFTag( eRBFType type );
+  
   // ================================================================ //
   // DEFINITION OF CLASS RadialFunct									                //
   // ================================================================ //
@@ -682,7 +685,7 @@ namespace rbf
     GeneralizedMultiquadrics( coord_t r, const point_t &c, coord_t bias = (coord_t) 0 ) :
       base_t( r, c )
     {
-      mType = bitpit::rbf::eRBFType::kGeneralizedMultiQuadric;
+      //mType =
       bindParameters();
       setDefault();
     }
