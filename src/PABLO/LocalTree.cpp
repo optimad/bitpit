@@ -1598,11 +1598,8 @@ namespace bitpit {
         uint32_t  	noctants = getNumOctants();
         uint32_t 	idxtry;
         uint32_t 	size = oct->getLogicalSize();
-        uint8_t 	iface1, iface2, iface3;
 
         bool amIghost = oct->getIsGhost();
-
-        bool isperiodic = false;
 
         int8_t 			cxyz[3] = {0,0,0};
         for (int idim=0; idim<m_dim; idim++){
@@ -1617,24 +1614,11 @@ namespace bitpit {
             return;
         }
 
-        // Check if octants node is a boundary
-        iface1 = m_treeConstants->nodeFace[inode][0];
-        iface2 = m_treeConstants->nodeFace[inode][1];
-        iface3 = m_treeConstants->nodeFace[inode][m_dim-1];
-
-        // If a face is a boundary, the node can have neighbours only if this face periodic
-        // Set periodic direction flags for the current octant
-        bool xperiodic = (oct->m_info[iface1] && m_periodic[iface1]);
-        bool yperiodic = (oct->m_info[iface2] && m_periodic[iface2]);
-        bool zperiodic = (oct->m_info[iface3] && m_periodic[iface3]);
-        if (oct->m_info[iface1] || oct->m_info[iface2] || oct->m_info[iface3]){
-            // Set searching periodic neighbours
-            if ((xperiodic || !oct->m_info[iface1]) &&
-                    (yperiodic || !oct->m_info[iface2]) &&
-                    (zperiodic || !oct->m_info[iface3]) ){
-                isperiodic = true;
-            }
-            else{
+        // If a node is a on boundary, it can have neighbours only if periodic
+        bool isperiodic = false;
+        if (oct->getNodeBound(inode)) {
+            isperiodic = isNodePeriodic(oct, inode);
+            if (!isperiodic) {
                 return;
             }
         }
