@@ -287,11 +287,11 @@ Octant::getMarker() const{return m_marker;};
 
 /*! Get the bound flag on an octant face.
  * \param[in] face local index of the face.
- * \return true if the face face is a boundary face.
+ * \return true if the face is a boundary.
  */
 bool
 Octant::getBound(uint8_t face) const{
-	return m_info[face];
+	return (m_info[OctantInfo::INFO_BOUNDFACE0 + face]);
 };
 
 /*! Get the bound flag on an octant.
@@ -299,9 +299,13 @@ Octant::getBound(uint8_t face) const{
  */
 bool
 Octant::getBound() const{
-	return m_info[OctantInfo::INFO_BOUNDFACE0]||m_info[OctantInfo::INFO_BOUNDFACE1]||
-	        m_info[OctantInfo::INFO_BOUNDFACE2]||m_info[OctantInfo::INFO_BOUNDFACE3]||
-	        ((m_dim==3)&&(m_info[OctantInfo::INFO_BOUNDFACE4]||m_info[OctantInfo::INFO_BOUNDFACE5]));
+	for (int i = 0; i < sm_treeConstants[m_dim].nFaces; ++i) {
+		if (getBound(i)) {
+			return true;
+		}
+	}
+
+	return false;
 };
 
 /*! Set the boundary flag to true on an octant face.
@@ -309,7 +313,7 @@ Octant::getBound() const{
  */
 void
 Octant::setBound(uint8_t face) {
-	m_info[face] = true;
+	m_info[INFO_BOUNDFACE0 + face] = true;
 };
 
 /*! Get the pbound flag on an octant face.
