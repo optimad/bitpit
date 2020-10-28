@@ -21,7 +21,7 @@
 *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
 *
 \*---------------------------------------------------------------------------*/
-/*! @file   mataprogramming.hpp
+/*! @file   metaprogramming.hpp
  *  @author Alessandro Alaia (alessandro.alaia@optimad.it), Andrea Iob (andrea.iob@optimad.it)
  *  @brief  Various utilities for template metaprogramming.
 */
