@@ -36,6 +36,7 @@
 
 // Bitpit
 # include "rbf.hpp"
+# include "metaprogramming.hpp"
 
 namespace bitpit
 {
@@ -43,6 +44,61 @@ namespace rbf
 {
 namespace testing
 {
+  template< std::size_t Dim, class CoordT >
+  bool compare( RF<Dim, CoordT> const &in1, RF<Dim, CoordT> const &in2 )
+  {
+    int err = 0;
+    if ( in1.getType() != in2.getType() ) {
+      std::cout << "**ERROR** Mismatching type: found "
+                << bitpit::rbf::getRBFTag(in1.getType() )
+                << " vs "
+                << bitpit::rbf::getRBFTag(in2.getType() )
+                << std::endl;
+      ++err;
+    }
+    if ( in1.getRadius() != in2.getRadius() ) {
+      std::cout << "**ERROR** Mimatching radius: found "
+                << in1.getRadius()
+                << " vs "
+                << in2.getRadus()
+                << std::endl;
+      ++err;
+    }
+    if( in1.getCenter() != in2.getCenter() ) {
+      std::cout << "**ERROR** Mimatching geometry kernel: found "
+                << in1.getCenter()
+                << " vs "
+                << in2.getCenter()
+                << std::endl;
+      ++err;
+    }
+    if (in1.getNumberOfParameters() != in2.getNumberOfParameters() ) {
+      std::cout << "**ERROR** Mimatching nr. of parameters: found "
+                << in1.getNumberOfParameters()
+                << " vs "
+                << in2.getNumberOfParameters()
+                << std::endl;
+      ++err;
+    }
+    else {
+      auto p1 = in1.getParameters(),
+           p2 = in2.getParameters();
+      for (int i = 0, n = in1.getNumberOfParameters(); i < n; ++i )
+      {
+        if ( p1[i] !=  p2[i] ) {
+          std::cout << "**ERROR** Mimatching value for parameter #" << i << ": found "
+                    << in1.getNumberOfParameters()
+                    << " vs "
+                    << in2.getNumberOfParameters()
+                    << std::endl;
+          ++err;
+        }
+      } //next i
+    }
+
+    return err;
+
+  }
   // ------------------------------------------------------------------------ //
   template<size_t d, class coeff_t>
   int test_rf_constructors( bitpit::rbf::eRBFType type )
@@ -54,11 +110,22 @@ namespace testing
     std::cout << "    testing default constructor" << std::endl;
     try
     {
-        auto rbf = RadialFunct<d, coeff_t>::New( type );
+        auto rbf = RF<d, coeff_t>::New( type );
+        delete rbf;
     }
     catch ( std::exception &e )
     {
-      std::cout << "bitpit::rbf::testing::test_constructors: ** ERROR ** " << e.what() << std::endl;
+      std::cout << "bitpit::rbf::testing::test_rf_constructors: ** ERROR ** " << e.what() << std::endl;
+      ++err;
+    }
+
+    // Test constructor #1
+    std::cout << "    testing construction with argumets" << std::endl;
+    try
+    {}
+    catch ( std::exception &e )
+    {
+      std::cout << "bitpit::rbf::testing::test_rf_constructors: ** ERROR ** " << e.what() << std::endl;
       ++err;
     }
 
