@@ -33,6 +33,8 @@
 // Standard Template Library
 # include <iostream>
 # include <exception>
+# include <vector>
+# include <random>
 
 // Bitpit
 # include "rbf.hpp"
@@ -99,6 +101,145 @@ namespace testing
     return err;
 
   }
+
+  template< std::size_t Dim, class CoordT >
+  class EvaluationTester
+  {
+    private:
+    using rf_t      = RF<Dim, CoordT>;
+    using coord_t   = typename rf_t::coord_t;
+    using point_t   = typename rf_t::point_t;
+
+    public:
+    EvaluationTester( bitpit::rbf::eRBFType type, std::size_t N = 100, coord_t e = std::numeric_limits<coord_t>::epsilon() ) :
+      rf( RF<Dim, CoordT>::New( type ) )
+      , test_values(N)
+      , n_trials(N)
+      , tol(e)
+    {
+      pars = new coord_t[ rf->getNumberOfParameters() ];
+    }
+    int operator()() const
+    {
+      int err = 0;
+      init();
+      test();
+      err += check();
+      init();
+      test();
+      err += check();
+      cleanup();
+      return err;
+    }
+    protected:
+    typename rf_t::rf_funct_t initGenerator() const
+    {
+        auto p = rf->getParameters();
+        switch( rf->getType() )
+        {
+          case( bitpit::rbf::eRBFType::kWendlandC2 ) :
+            return &wendland_c2<coord_t>;
+          case( bitpit::rbf::eRBFType::kHardy ) :
+              return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>, std::placeholders::_1, p[0] );
+          case( bitpit::rbf::eRBFType::kMultiQuadric2 ) :
+            return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 2, 1>, std::placeholders::_1, p[0] );
+          case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ) :
+            return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>, std::placeholders::_1, p[0] );
+          case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ) :
+            return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>, std::placeholders::_1, p[0] );
+          default: throw std::runtime_error( "bitpit::rbf::testing: **ERROR** unsupported rbf type" );
+        }
+    }
+    bool  init() const
+    {
+      // Scope variables
+      std::random_device dev;
+      std::default_random_engine eng(dev());
+      std::uniform_real_distribution<coord_t> dist( (coord_t)0, (coord_t)1);
+      coord_t r;
+      point_t c;
+
+      // Initialize the radial funct
+      {
+        for ( std::size_t j = 0; j < Dim; ++j ) {
+          c[j] = dist(eng);
+          rf->center[j] = c[j];
+        }
+        r = dist(eng) + (coord_t)1;
+        rf->radius = r;
+        if ( std::size_t n = rf->getNumberOfParameters() )
+        {
+          for ( std::size_t i = 0; i < n; ++i )
+            pars[i] = dist(eng);
+          rf->setParameters( pars );
+        }
+      }
+
+      // Generate a cloud of scattered points in a space of dimension Dim
+      {
+        test_values.resize(n_trials);
+        for ( std::size_t i = 0; i < n_trials; ++i ) {
+          auto &p = std::get<0>( test_values[i] );
+          for ( std::size_t j = 0; j < Dim; ++j )
+            p[j] = dist(eng);
+        } //next i
+      }
+
+      // Generate expected values
+      {
+        auto f = initGenerator();
+        for ( std::size_t i = 0; i < n_trials; ++i ) {
+          auto &v = std::get<1>( test_values[i] );
+          const auto &p = std::get<0>( test_values[i] );
+          v = f( norm2(p - c)/r );
+        }
+      }
+
+      return true;
+    }
+    bool  cleanup() const
+    {
+      delete rf;
+      delete [] pars;
+      std::vector<std::tuple<point_t, coord_t, coord_t>>(0).swap( test_values );
+    }
+    bool  test() const
+    {
+      for ( std::size_t i = 0; i < n_trials; ++i ) {
+        auto &trial = test_values[i];
+        auto &v = std::get<2>( trial );
+        const auto &p = std::get<0>( trial );
+        v = rf->operator()(p);
+      } //next i
+      return true;
+    }
+    int   check() const
+    {
+      int err = 0;
+      for ( std::size_t i = 0; i < n_trials; ++i ) {
+        const auto &trial = test_values[i];
+        const auto &v = std::get<2>( trial );
+        const auto &e = std::get<1>( trial );
+        auto ee = std::abs(v-e);
+        if ( ee > tol )
+        {
+          std::cout << "**ERROR** Wrong value from rf evaluation. Found "
+                    << v << ", expecting " << e
+                    << " (err: " << ee << ")"
+                    << std::endl;
+          ++err;
+        }
+      } //next i
+      return err;
+    }
+    protected:
+    mutable std::vector<std::tuple<point_t, coord_t, coord_t>>  test_values;
+    mutable RF< Dim, CoordT >     *rf;
+    mutable coord_t               *pars;
+    coord_t                       tol;
+    std::size_t                   n_trials;
+  }; //end class EvaluationTester
+
   // ------------------------------------------------------------------------ //
   template<size_t d, class coeff_t>
   int test_rf_constructors( bitpit::rbf::eRBFType type )
@@ -107,22 +248,12 @@ namespace testing
     int err = 0;
 
     // Test default constructor.
-    std::cout << "    testing default constructor" << std::endl;
+    std::cout << "    testing constructor #1" << std::endl;
     try
     {
         auto rbf = RF<d, coeff_t>::New( type );
         delete rbf;
     }
-    catch ( std::exception &e )
-    {
-      std::cout << "bitpit::rbf::testing::test_rf_constructors: ** ERROR ** " << e.what() << std::endl;
-      ++err;
-    }
-
-    // Test constructor #1
-    std::cout << "    testing construction with argumets" << std::endl;
-    try
-    {}
     catch ( std::exception &e )
     {
       std::cout << "bitpit::rbf::testing::test_rf_constructors: ** ERROR ** " << e.what() << std::endl;
@@ -136,6 +267,31 @@ namespace testing
   template<size_t d, class coeff_t>
   int test_rf_operators( bitpit::rbf::eRBFType type )
   {
+    // Scope variables
+    int err = 0;
+
+    // Run rf evaluations on random data
+    std::cout << "    testing evaluation operator" << std::endl;
+    try
+    {
+      EvaluationTester<d, coeff_t> tester(type);
+      err += tester();
+    }
+    catch ( std::exception &e )
+    {
+      std::cout << "**ERROR** " << e.what() << std::endl;
+      ++err;
+    }
+
+    // Output message
+    std::cout << "    test completed with " << err << " error(s)" << std::endl;
+    return err;
+  }
+
+  // ------------------------------------------------------------------------ //
+  template<size_t d, class coeff_t>
+  int test_rf_setters_getters( bitpit::rbf::eRBFType type )
+  {
     return 0;
   }
 
@@ -148,14 +304,15 @@ namespace testing
 
     // Test constructor(s)
     std::cout << "   testing constructor(s)" << std::endl;
-    err += test_rf_constructors<d, coeff_t>( type );
+    err += ( test_rf_constructors<d, coeff_t>( type ) != 0 );
+
+    // Test member(s)
+    std::cout << "   testing setter(s)/getter(s)" << std::endl;
+    err += ( test_rf_setters_getters<d, coeff_t>( type ) != 0 );
 
     // Test operator(s)
     std::cout << "   testing operator(s)" << std::endl;
-    err += test_rf_operators<d, coeff_t>( type );
-
-    // Test member(s)
-    std::cout << "   testing method(s)" << std::endl;
+    err += ( test_rf_operators<d, coeff_t>( type ) != 0 );
 
     return err;
 
@@ -172,14 +329,11 @@ namespace testing
     std::cout << "- testing d = " << d << std::endl;
 
     // Run tests for various type of RBF functions
-    std::cout << "  testing " + bitpit::rbf::getRBFTag( bitpit::rbf::eRBFType::kWendlandC2 ) + " rbf " << std::endl;
-    err += run_unit_tests<d, coeff_t>( bitpit::rbf::eRBFType::kWendlandC2 );
-    std::cout << "  testing " + bitpit::rbf::getRBFTag( bitpit::rbf::eRBFType::kMultiQuadric2 ) + " rbf " << std::endl;
-    err += run_unit_tests<d, coeff_t>( bitpit::rbf::eRBFType::kMultiQuadric2 );
-    std::cout << "  testing " + bitpit::rbf::getRBFTag( bitpit::rbf::eRBFType::kMultiQuadric3_2 ) + " rbf " << std::endl;
-    err += run_unit_tests<d, coeff_t>( bitpit::rbf::eRBFType::kMultiQuadric3_2 );
-    std::cout << "  testing " + bitpit::rbf::getRBFTag( bitpit::rbf::eRBFType::kMultiQuadric5_2 ) + " rbf " << std::endl;
-    err += run_unit_tests<d, coeff_t>( bitpit::rbf::eRBFType::kMultiQuadric5_2 );
+    for ( int i = bitpit::rbf::eRBFType::kUndefined+1, n = bitpit::rbf::eRBFType::kUserDefined; i < n; ++i ) {
+      std::cout << "  testing " + bitpit::rbf::getRBFTag( static_cast<bitpit::rbf::eRBFType>(i) ) + " rbf " << std::endl;
+      err += run_unit_tests<d, coeff_t>( static_cast<bitpit::rbf::eRBFType>(i) );
+    } //next type
+
 
 
     // Output message
