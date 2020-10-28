@@ -271,6 +271,11 @@ namespace rbf
    *  \f$
    *  where \f$c\f$ is a amplification/reduction factor, \f$r\f$ is the usual
    *  radial distance from the geometry kernel.
+   *
+   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
+   *
+   *  @param [in]     r           radial distance
+   *  @param [in]     c           amplification/reduction factor.
   */
   template<
     class CoordT,
@@ -279,6 +284,48 @@ namespace rbf
   CoordT gaussian( CoordT r, CoordT c )
   {
     return c * std::exp( - (r*r) );
+  }
+
+  /*! @brief Linear function.
+   *
+   *  Linear function with trivial expression:
+   *
+   *  \f$ f(r) := r\ f$
+   *
+   *  Generally used to as a bias.
+   *
+   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT linear( CoordT r )
+  {
+    return r;
+  }
+
+  /*! @brief Generalized power function
+   *
+   *  Generalized power functions have the following expression:
+   *  \f$ f(r) := r^\alpha \f$
+   *  where \f$\alpha>0\f$ is the power exponent and \f$r\f$ is the usual radial distance.
+   *
+   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
+   *  @tparam         alpha       power expoenent.
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    int   Alpha,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* = nullptr
+  >
+  CoordT generalized_power( CoordT r )
+  {
+    return std::pow( r, Alpha );
   }
 
   // ================================================================ //
@@ -308,6 +355,14 @@ namespace rbf
     kMultiQuadric3_2,
     /*! @brief Generalized multiquarics with \f$\alpha = 5, \beta = 2\f$ */
     kMultiQuadric5_2,
+    /*! @brief Linear */
+    kLinear,
+    /*| @brief Quadratic */
+    kQuadratic,
+    /*! @brief Cubic */
+    kCubic,
+    /*! @brief Quartic. */
+    kQuartic,
     /*! @brief User-defined */
     // Leave it last to facilitate auto-looping through eRBFType.
     kUserDefined
@@ -399,7 +454,6 @@ namespace rbf
             type,
             &bitpit::rbf::wendland_c2<coord_t>
           );
-          out->mType = type;
           out->mHasCompactSupport = true;
           return out;
         } //end case kWendlandC2
@@ -408,7 +462,6 @@ namespace rbf
             type,
             &bitpit::rbf::gaussian<coord_t>
           );
-          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
@@ -418,7 +471,6 @@ namespace rbf
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>
           );
-          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
@@ -428,7 +480,6 @@ namespace rbf
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 2, 1 >
           );
-          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
@@ -438,7 +489,6 @@ namespace rbf
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>
           );
-          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
@@ -448,11 +498,42 @@ namespace rbf
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>
           );
-          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
         } //end case kMultiQuadric3_2
+        case( bitpit::rbf::eRBFType::kLinear ): {
+          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+            type,
+            &bitpit::rbf::linear<coord_t>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        }
+        case( bitpit::rbf::eRBFType::kQuadratic ): {
+          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+            type,
+            &bitpit::rbf::generalized_power<coord_t, 2>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        }
+        case( bitpit::rbf::eRBFType::kCubic ): {
+          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+            type,
+            &bitpit::rbf::generalized_power<coord_t, 3>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        }
+        case( bitpit::rbf::eRBFType::kQuartic ): {
+          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+            type,
+            &bitpit::rbf::generalized_power<coord_t, 4>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        }
       } //end switch
 
       return nullptr;
