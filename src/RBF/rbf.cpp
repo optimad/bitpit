@@ -1330,6 +1330,39 @@ double rbf::c2c2( double dist )
 namespace rbf
 {
   // ============================================================= //
+  // EXPLICIT SPECIALIZATIONS                                      //
+  // ============================================================= //
+  template class RF<1, float>;
+  template class RF<2, float>;
+  template class RF<3, float>;
+  template class RF<1, double>;
+  template class RF<2, double>;
+  template class RF<3, double>;
+  template class RF<1, long double>;
+  template class RF<2, long double>;
+  template class RF<3, long double>;
+
+  template class RFP<1, 1, float>;
+  template class RFP<2, 1, float>;
+  template class RFP<3, 1, float>;
+  template class RFP<1, 1, double>;
+  template class RFP<2, 1, double>;
+  template class RFP<3, 1, double>;
+  template class RFP<1, 1, long double>;
+  template class RFP<2, 1, long double>;
+  template class RFP<3, 1, long double>;
+
+  template class RFP<1, 2, float>;
+  template class RFP<2, 2, float>;
+  template class RFP<3, 2, float>;
+  template class RFP<1, 2, double>;
+  template class RFP<2, 2, double>;
+  template class RFP<3, 2, double>;
+  template class RFP<1, 2, long double>;
+  template class RFP<2, 2, long double>;
+  template class RFP<3, 2, long double>;
+
+  // ============================================================= //
   // HELPER FUNCTIONS                                              //
   // ============================================================= //
 
@@ -1338,56 +1371,16 @@ namespace rbf
   {
     switch( type )
     {
-      default:                                    { return "Undefined"; }
-      case( bitpit::rbf::eRBFType::kWendlandC2 ):      { return "WendLandC2";        }
-      case( bitpit::rbf::eRBFType::kMultiQuadric2 ):   { return "kMultiQuadric2";    }
-      case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): { return "kMultiQuadric3_2";  }
-      case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): { return "kMultiQuadric5_2";  }
+      default:                                         { return "Undefined";        }
+      case( bitpit::rbf::eRBFType::kWendlandC2 ):      { return "WendLandC2";       }
+      case( bitpit::rbf::eRBFType::kHardy ):           { return "Hardy";            }
+      case( bitpit::rbf::eRBFType::kMultiQuadric2 ):   { return "MultiQuadric2";    }
+      case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): { return "MultiQuadric3_2";  }
+      case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): { return "MultiQuadric5_2";  }
+      case( bitpit::rbf::eRBFType::kUserDefined ):     { return "User-defined";     }
     }
     return "";
   }
 
-  // ============================================================= //
-  // EXPLICIT SPECIALIZATIONS                                      //
-  // ============================================================= //
-  template class WendlandC2<1, float>;
-  template class WendlandC2<2, float>;
-  template class WendlandC2<3, float>;
-  template class WendlandC2<1, double>;
-  template class WendlandC2<2, double>;
-  template class WendlandC2<3, double>;
-  template class WendlandC2<1, long double>;
-  template class WendlandC2<2, long double>;
-  template class WendlandC2<3, long double>;
-
-  template class GeneralizedMultiquadrics<1, 2, 1, float>;
-  template class GeneralizedMultiquadrics<2, 2, 1, float>;
-  template class GeneralizedMultiquadrics<3, 2, 1, float>;
-  template class GeneralizedMultiquadrics<1, 2, 1, double>;
-  template class GeneralizedMultiquadrics<2, 2, 1, double>;
-  template class GeneralizedMultiquadrics<3, 2, 1, double>;
-  template class GeneralizedMultiquadrics<1, 2, 1, long double>;
-  template class GeneralizedMultiquadrics<2, 2, 1, long double>;
-  template class GeneralizedMultiquadrics<3, 2, 1, long double>;
-
-  template class GeneralizedMultiquadrics<1, 3, 2, float>;
-  template class GeneralizedMultiquadrics<2, 3, 2, float>;
-  template class GeneralizedMultiquadrics<3, 3, 2, float>;
-  template class GeneralizedMultiquadrics<1, 3, 2, double>;
-  template class GeneralizedMultiquadrics<2, 3, 2, double>;
-  template class GeneralizedMultiquadrics<3, 3, 2, double>;
-  template class GeneralizedMultiquadrics<1, 3, 2, long double>;
-  template class GeneralizedMultiquadrics<2, 3, 2, long double>;
-  template class GeneralizedMultiquadrics<3, 3, 2, long double>;
-
-  template class GeneralizedMultiquadrics<1, 5, 2, float>;
-  template class GeneralizedMultiquadrics<2, 5, 2, float>;
-  template class GeneralizedMultiquadrics<3, 5, 2, float>;
-  template class GeneralizedMultiquadrics<1, 5, 2, double>;
-  template class GeneralizedMultiquadrics<2, 5, 2, double>;
-  template class GeneralizedMultiquadrics<3, 5, 2, double>;
-  template class GeneralizedMultiquadrics<1, 5, 2, long double>;
-  template class GeneralizedMultiquadrics<2, 5, 2, long double>;
-  template class GeneralizedMultiquadrics<3, 5, 2, long double>;
 } //end namespace rbf
 } //end namespace bitpit
