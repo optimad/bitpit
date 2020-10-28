@@ -157,12 +157,14 @@ namespace testing
             return std::bind( &bitpit::rbf::generalized_power<coord_t, 3>, std::placeholders::_1 );
           case( bitpit::rbf::eRBFType::kQuartic ) :
             return std::bind( &bitpit::rbf::generalized_power<coord_t, 4>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kThinPlateSpline1 ) :
-            return std::bind( &bitpit::rbf::thin_plate_spline<coord_t, 1>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kThinPlateSpline2 ) :
-            return std::bind( &bitpit::rbf::thin_plate_spline<coord_t, 2>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kThinPlateSpline3 ) :
-            return std::bind( &bitpit::rbf::thin_plate_spline<coord_t, 3>, std::placeholders::_1 );
+          case( bitpit::rbf::eRBFType::kThinPlateSpline ) :
+            return std::bind( &bitpit::rbf::thin_plate_spline<coord_t>, std::placeholders::_1 );
+          case( bitpit::rbf::eRBFType::kPolyharmonic2 ) :
+            return std::bind( &bitpit::rbf::polyharmonic<coord_t, 2>, std::placeholders::_1, p[0] );
+          case( bitpit::rbf::eRBFType::kPolyharmonic3 ) :
+            return std::bind( &bitpit::rbf::polyharmonic<coord_t, 3>, std::placeholders::_1, p[0] );
+          case( bitpit::rbf::eRBFType::kPolyharmonic4 ) :
+            return std::bind( &bitpit::rbf::polyharmonic<coord_t, 4>, std::placeholders::_1, p[0] );
           default: throw std::runtime_error( "bitpit::rbf::testing: **ERROR** unsupported rbf type" );
         }
     }
