@@ -25,6 +25,7 @@
  *  @author Alessandro Alaia (alessandro.alaia@optimad.it), Andrea Iob (andrea.iob@optimad.it)
  *  @brief  Various utilities for template metaprogramming.
 */
+# pragma once
 
 namespace bitpit
 {
