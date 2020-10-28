@@ -149,6 +149,14 @@ namespace testing
             return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>, std::placeholders::_1, p[0] );
           case( bitpit::rbf::eRBFType::kGaussian ) :
             return std::bind( &bitpit::rbf::gaussian<coord_t>, std::placeholders::_1, p[0] );
+          case( bitpit::rbf::eRBFType::kLinear ) :
+            return std::bind( &bitpit::rbf::linear<coord_t>, std::placeholders::_1 );
+          case( bitpit::rbf::eRBFType::kQuadratic ) :
+            return std::bind( &bitpit::rbf::generalized_power<coord_t, 2>, std::placeholders::_1 );
+          case( bitpit::rbf::eRBFType::kCubic ) :
+            return std::bind( &bitpit::rbf::generalized_power<coord_t, 3>, std::placeholders::_1 );
+          case( bitpit::rbf::eRBFType::kQuartic ) :
+            return std::bind( &bitpit::rbf::generalized_power<coord_t, 4>, std::placeholders::_1 );
           default: throw std::runtime_error( "bitpit::rbf::testing: **ERROR** unsupported rbf type" );
         }
     }
