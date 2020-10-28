@@ -375,7 +375,7 @@ namespace rbf
             type,
             &bitpit::rbf::wendland_c2<coord_t>
           );
-          out->mType = bitpit::rbf::eRBFType::kMultiQuadric2;
+          out->mType = bitpit::rbf::eRBFType::kWendlandC2;
           out->mHasCompactSupport = true;
           return out;
         } //end case kWendlandC2
