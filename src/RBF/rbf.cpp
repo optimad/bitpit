@@ -1373,6 +1373,7 @@ namespace rbf
     {
       default:                                         { return "Undefined";        }
       case( bitpit::rbf::eRBFType::kWendlandC2 ):      { return "WendLandC2";       }
+      case( bitpit::rbf::eRBFType::kGaussian ):        { return "Gaussian";         }
       case( bitpit::rbf::eRBFType::kHardy ):           { return "Hardy";            }
       case( bitpit::rbf::eRBFType::kMultiQuadric2 ):   { return "MultiQuadric2";    }
       case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): { return "MultiQuadric3_2";  }
