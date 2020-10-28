@@ -147,6 +147,8 @@ namespace testing
             return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>, std::placeholders::_1, p[0] );
           case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ) :
             return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>, std::placeholders::_1, p[0] );
+          case( bitpit::rbf::eRBFType::kGaussian ) :
+            return std::bind( &bitpit::rbf::gaussian<coord_t>, std::placeholders::_1, p[0] );
           default: throw std::runtime_error( "bitpit::rbf::testing: **ERROR** unsupported rbf type" );
         }
     }
@@ -170,7 +172,7 @@ namespace testing
         if ( std::size_t n = rf->getNumberOfParameters() )
         {
           for ( std::size_t i = 0; i < n; ++i )
-            pars[i] = dist(eng);
+            pars[i] = (coord_t)1;//dist(eng);
           rf->setParameters( pars );
         }
       }
@@ -274,7 +276,7 @@ namespace testing
     std::cout << "    testing evaluation operator" << std::endl;
     try
     {
-      EvaluationTester<d, coeff_t> tester(type);
+      EvaluationTester<d, coeff_t> tester(type, 100);
       err += tester();
     }
     catch ( std::exception &e )
