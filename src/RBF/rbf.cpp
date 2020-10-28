@@ -1383,6 +1383,9 @@ namespace rbf
       case( bitpit::rbf::eRBFType::kQuadratic ):       { return "kQuadratic";       }
       case( bitpit::rbf::eRBFType::kCubic ):           { return "kCubic";           }
       case( bitpit::rbf::eRBFType::kQuartic ):         { return "kQuartic";         }
+      case( bitpit::rbf::eRBFType::kThinPlateSpline1 ): { return "Thin plate spline 1";}
+      case( bitpit::rbf::eRBFType::kThinPlateSpline2 ): { return "Thin plate spline 2";}
+      case( bitpit::rbf::eRBFType::kThinPlateSpline3 ): { return "Thin plate spline 3";}
     }
     return "";
   }

@@ -307,14 +307,14 @@ namespace rbf
     return r;
   }
 
-  /*! @brief Generalized power function
+  /*! @brief Generalized power function (also referred to as radial power)
    *
    *  Generalized power functions have the following expression:
    *  \f$ f(r) := r^\alpha \f$
    *  where \f$\alpha>0\f$ is the power exponent and \f$r\f$ is the usual radial distance.
    *
    *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
-   *  @tparam         alpha       power expoenent.
+   *  @tparam         Alpha       power expoenent.
    *
    *  @param [in]     r           radial distance
   */
@@ -326,6 +326,31 @@ namespace rbf
   CoordT generalized_power( CoordT r )
   {
     return std::pow( r, Alpha );
+  }
+
+  /*! @brief Thin plate splines
+   *
+   *  Radial function of this type have the following expression:
+   *  \f$
+   *  \begin{equation}
+   *    f(r):= r^{2\beta} log(x), \; \beta \neq 0
+   *  \end{equation}
+   *  \f$
+   *  where \f$r\f$ is the radial distance.
+   *
+   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
+   *  @tparam         Beta        power expoenent (Beta != 0).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    int   Beta,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && !(Beta == 0) >::type* = nullptr
+  >
+  CoordT    thin_plate_spline( CoordT r )
+  {
+    return std::pow(r, 2*Beta) * std::log(r);
   }
 
   // ================================================================ //
@@ -347,6 +372,12 @@ namespace rbf
     kWendlandC2,
     /*! @brief Gaussian radial function. */
     kGaussian,
+    /*! @brief Thin plate spline of order 1*/
+    kThinPlateSpline1,
+    /*! @brief Thin plate spline of order 2*/
+    kThinPlateSpline2,
+    /*! @brief Thin plate spline of order 3*/
+    kThinPlateSpline3,
     /*! @brief Hardy's radial function (from the family of multiquadrics with \f$\alpha = 1, \beta = 2\f$)*/
     kHardy,
     /*! @brief Generalized multiquadrics with \f$\alpha = 2, \beta = 1\f$) */
@@ -530,6 +561,30 @@ namespace rbf
           auto out = new bitpit::rbf::RF<Dim, CoordT>(
             type,
             &bitpit::rbf::generalized_power<coord_t, 4>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        }
+        case( bitpit::rbf::eRBFType::kThinPlateSpline1 ): {
+          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+            type,
+            &bitpit::rbf::thin_plate_spline<coord_t, 1>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        }
+        case( bitpit::rbf::eRBFType::kThinPlateSpline2 ): {
+          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+            type,
+            &bitpit::rbf::thin_plate_spline<coord_t, 2>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        }
+        case( bitpit::rbf::eRBFType::kThinPlateSpline3 ): {
+          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+            type,
+            &bitpit::rbf::thin_plate_spline<coord_t, 3>
           );
           out->mHasCompactSupport = false;
           return out;
