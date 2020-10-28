@@ -204,7 +204,7 @@ namespace rbf
    *  C2-continuous Wendland's functions have the following expression:
    *  \f$
    *  \begin{equation}
-   *      \left\{
+   *      f(r;c) := \left\{
    *        \begin{aligned}
    *          &(1 - z )^4 ( 4 z + 1 ), \; \text{if} z < 0, \\
    *          &0, \; \text{otherwise}
@@ -222,7 +222,8 @@ namespace rbf
   */
   template<
     class CoordT,
-    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr >
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
   CoordT  wendland_c2( CoordT r )
   {
     return r > (CoordT)1 ?
@@ -235,7 +236,7 @@ namespace rbf
    *  The family of generalized multi-quadrics RF has the following expression:
    *  \f$
    *  \begin{equation}
-   *    \frac{1}{ \left( c^2 + z^2 \right)^{\frac{\alpha}{\beta}} }
+   *    f(r;c) := \frac{1}{ \left( c^2 + z^2 \right)^{\frac{\alpha}{\beta}} }
    *  \end{equation}
    *  \f$
    *  for \f$\alpha, \beta > 0\f$.
@@ -253,10 +254,31 @@ namespace rbf
     class CoordT,
     unsigned Alpha,
     unsigned Beta,
-    typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* = nullptr >
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* = nullptr
+  >
   CoordT generalized_multiquadrics( CoordT r, CoordT c )
   {
     return CoordT(1)/std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) );
+  }
+
+  /*! @brief Gaussian radial basis function.
+   *
+   *  Guassian radial basis function have the following expression:
+   *  \f$
+   *  \begin{equation}
+   *    f(r;c) := c exp( -r^2 );
+   *  \end{equation}
+   *  \f$
+   *  where \f$c\f$ is a amplification/reduction factor, \f$r\f$ is the usual
+   *  radial distance from the geometry kernel.
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT gaussian( CoordT r, CoordT c )
+  {
+    return c * std::exp( - (r*r) );
   }
 
   // ================================================================ //
@@ -276,6 +298,8 @@ namespace rbf
     kUndefined,
     /*! @brief WendLand C2-continuous radial functions. */
     kWendlandC2,
+    /*! @brief Gaussian radial function. */
+    kGaussian,
     /*! @brief Hardy's radial function (from the family of multiquadrics with \f$\alpha = 1, \beta = 2\f$)*/
     kHardy,
     /*! @brief Generalized multiquadrics with \f$\alpha = 2, \beta = 1\f$) */
@@ -375,16 +399,26 @@ namespace rbf
             type,
             &bitpit::rbf::wendland_c2<coord_t>
           );
-          out->mType = bitpit::rbf::eRBFType::kWendlandC2;
+          out->mType = type;
           out->mHasCompactSupport = true;
           return out;
         } //end case kWendlandC2
+        case( bitpit::rbf::eRBFType::kGaussian ): {
+          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
+            type,
+            &bitpit::rbf::gaussian<coord_t>
+          );
+          out->mType = type;
+          out->mHasCompactSupport = false;
+          out->mParams[0] = 1;
+          return out;
+        }
         case( bitpit::rbf::eRBFType::kHardy ): {
           auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>
           );
-          out->mType = bitpit::rbf::eRBFType::kHardy;
+          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
@@ -394,7 +428,7 @@ namespace rbf
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 2, 1 >
           );
-          out->mType = bitpit::rbf::eRBFType::kMultiQuadric2;
+          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
@@ -404,7 +438,7 @@ namespace rbf
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>
           );
-          out->mType = bitpit::rbf::eRBFType::kMultiQuadric3_2;
+          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
@@ -414,7 +448,7 @@ namespace rbf
             type,
             &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>
           );
-          out->mType = bitpit::rbf::eRBFType::kMultiQuadric5_2;
+          out->mType = type;
           out->mHasCompactSupport = false;
           out->mParams[0] = 1;
           return out;
