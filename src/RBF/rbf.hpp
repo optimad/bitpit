@@ -333,7 +333,7 @@ namespace rbf
    *  Radial function of this type have the following expression:
    *  \f$
    *  \begin{equation}
-   *    f(r):= r^{2\beta} log(x), \; \beta \neq 0
+   *    f(r):= r^2 log(x), \; \beta \neq 0
    *  \end{equation}
    *  \f$
    *  where \f$r\f$ is the radial distance.
@@ -345,13 +345,38 @@ namespace rbf
   */
   template<
     class CoordT,
-    int   Beta,
-    typename std::enable_if< std::is_floating_point<CoordT>::value && !(Beta == 0) >::type* = nullptr
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
   CoordT    thin_plate_spline( CoordT r )
   {
-    return std::pow(r, 2*Beta) * std::log(r);
+    return r*r * std::log(r);
   }
+
+  /*! @brief Polyharmonic radial functions.
+   *  Polyharmiic function of this type have the following expression:
+   *  \f$
+   *  \begin{equation}
+   *    f(r):= (-1)^{1+\beta) r^{2\beta} log(x), \; \beta \neq 0
+   *  \end{equation}
+   *  \f$
+   *  where \f$r\f$ is the radial distance.
+   *  @note The special case \f$beta = 2\f$ correspnds to thin-plate-spline case.
+   *
+   *  @tparam        CoordT      type of coeffs. (e.g. double, float, etc. )
+   *  @tparam         Beta        power expoenent (Beta != 0).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    int   Beta,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* = nullptr
+  >
+  CoordT polyharmonic( CoordT r, CoordT c )
+  {
+    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * c * std::pow(r, 2*Beta) * std::log(r);
+  }
+
 
   // ================================================================ //
   // FORWARD DECLARATIONS                                             //
@@ -373,11 +398,13 @@ namespace rbf
     /*! @brief Gaussian radial function. */
     kGaussian,
     /*! @brief Thin plate spline of order 1*/
-    kThinPlateSpline1,
-    /*! @brief Thin plate spline of order 2*/
-    kThinPlateSpline2,
-    /*! @brief Thin plate spline of order 3*/
-    kThinPlateSpline3,
+    kThinPlateSpline,
+    /*! @brief Polyharmonic of order 2*/
+    kPolyharmonic2,
+    /*! @brief Polyharmonic of order 3*/
+    kPolyharmonic3,
+    /*! @brief Polyharmonic of order 4*/
+    kPolyharmonic4,
     /*! @brief Hardy's radial function (from the family of multiquadrics with \f$\alpha = 1, \beta = 2\f$)*/
     kHardy,
     /*! @brief Generalized multiquadrics with \f$\alpha = 2, \beta = 1\f$) */
@@ -540,7 +567,7 @@ namespace rbf
           );
           out->mHasCompactSupport = false;
           return out;
-        }
+        } //end case kLinear
         case( bitpit::rbf::eRBFType::kQuadratic ): {
           auto out = new bitpit::rbf::RF<Dim, CoordT>(
             type,
@@ -548,7 +575,7 @@ namespace rbf
           );
           out->mHasCompactSupport = false;
           return out;
-        }
+        } //end case kQuadratic
         case( bitpit::rbf::eRBFType::kCubic ): {
           auto out = new bitpit::rbf::RF<Dim, CoordT>(
             type,
@@ -556,7 +583,7 @@ namespace rbf
           );
           out->mHasCompactSupport = false;
           return out;
-        }
+        } //end case kCubic
         case( bitpit::rbf::eRBFType::kQuartic ): {
           auto out = new bitpit::rbf::RF<Dim, CoordT>(
             type,
@@ -564,31 +591,39 @@ namespace rbf
           );
           out->mHasCompactSupport = false;
           return out;
-        }
-        case( bitpit::rbf::eRBFType::kThinPlateSpline1 ): {
+        } //end case kQuartic
+        case( bitpit::rbf::eRBFType::kThinPlateSpline ): {
           auto out = new bitpit::rbf::RF<Dim, CoordT>(
             type,
-            &bitpit::rbf::thin_plate_spline<coord_t, 1>
+            &bitpit::rbf::thin_plate_spline<coord_t>
           );
           out->mHasCompactSupport = false;
           return out;
-        }
-        case( bitpit::rbf::eRBFType::kThinPlateSpline2 ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+        } //end case kThinPlateSpline
+        case( bitpit::rbf::eRBFType::kPolyharmonic2 ): {
+          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
             type,
-            &bitpit::rbf::thin_plate_spline<coord_t, 2>
+            &bitpit::rbf::polyharmonic<coord_t, 2>
           );
           out->mHasCompactSupport = false;
           return out;
-        }
-        case( bitpit::rbf::eRBFType::kThinPlateSpline3 ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
+        } //end case kPolyharmonic2
+        case( bitpit::rbf::eRBFType::kPolyharmonic3 ): {
+          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
             type,
-            &bitpit::rbf::thin_plate_spline<coord_t, 3>
+            &bitpit::rbf::polyharmonic<coord_t, 3>
           );
           out->mHasCompactSupport = false;
           return out;
-        }
+        } //end case kPolyharmonic3
+        case( bitpit::rbf::eRBFType::kPolyharmonic4 ): {
+          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
+            type,
+            &bitpit::rbf::polyharmonic<coord_t, 4>
+          );
+          out->mHasCompactSupport = false;
+          return out;
+        } //end case kPolyharmonic3
       } //end switch
 
       return nullptr;
