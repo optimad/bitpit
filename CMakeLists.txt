@@ -121,6 +121,62 @@ function(addModuleIncludeDirectories MODULE_NAME)
     include_directories("${PROJECT_SOURCE_DIR}/src/${MODULE_NAME}")
 endfunction()
 
+# Define an experimental feature
+#
+# Experimental features are disabled by default.
+function(defineExperimentalFeature FEATURE_NAME FEATURE_DESCRIPTION)
+    defineFeature("EXPERIMENTAL_${FEATURE_NAME}" ${FEATURE_DESCRIPTION} 0)
+endfunction()
+
+# Define a module experimental feature
+#
+# Experimental features are disabled by default.
+function(defineExperimentalModuleFeature MODULE_NAME FEATURE_NAME FEATURE_DESCRIPTION)
+    string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
+    set(MODULE_FEATURE_NAME "${UPPERCASE_MODULE_NAME}_EXPERIMENTAL_${FEATURE_NAME}")
+    defineFeature("${MODULE_FEATURE_NAME}" ${FEATURE_DESCRIPTION} 0)
+endfunction()
+
+# Define a deprecated feature
+#
+# Deprecated features are enabled by default.
+function(defineDeprecatedFeature FEATURE_NAME FEATURE_DESCRIPTION)
+    defineFeature("DEPRECATED_${FEATURE_NAME}" ${FEATURE_DESCRIPTION} 1)
+endfunction()
+
+# Define a module deprecated feature
+#
+# Deprecated features are enabled by default.
+function(defineDeprecatedModuleFeature MODULE_NAME FEATURE_NAME FEATURE_DESCRIPTION)
+    string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
+    set(MODULE_FEATURE_NAME "${UPPERCASE_MODULE_NAME}_DEPRECATED_${FEATURE_NAME}")
+    defineFeature("${MODULE_FEATURE_NAME}" ${FEATURE_DESCRIPTION} 1)
+endfunction()
+
+# Define a feature
+#
+# For each feature a corresponding preprocessor macro will be defined. Given
+# the feature FEATURE the corresponding preprocessor macro will be called
+# BITPIT_FEATURE. Ye value of the macro will be set to 1 if the feature is
+# enable or it will be set to 0 if the feature is disabled.
+function(defineFeature FEATURE_NAME FEATURE_DESCRIPTION DEFAULT_STATUS)
+    string(TOUPPER ${FEATURE_NAME} UPPER_FEATURE_NAME)
+    set(BITPIT_FEATURE_NAME BITPIT_${UPPER_FEATURE_NAME})
+    set(${BITPIT_FEATURE_NAME} ${DEFAULT_STATUS} CACHE BOOL ${FEATURE_DESCRIPTION})
+    mark_as_advanced(${BITPIT_FEATURE_NAME})
+
+    set(FEATURE_ENTRY "${BITPIT_FEATURE_NAME}")
+    if(NOT DEFINED ${BITPIT_FEATURE_NAME})
+        set(FEATURE_ENTRY "${FEATURE_ENTRY}=0")
+    elseif(${BITPIT_FEATURE_NAME})
+        set(FEATURE_ENTRY "${FEATURE_ENTRY}=1")
+    else ()
+        set(FEATURE_ENTRY "${FEATURE_ENTRY}=0")
+    endif()
+    set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" APPEND PROPERTY COMPILE_DEFINITIONS ${FEATURE_ENTRY})
+
+endfunction()
+
 #------------------------------------------------------------------------------------#
 # Link Time Optimization (LTO)
 #------------------------------------------------------------------------------------#
@@ -317,6 +373,10 @@ set(RBF_EXTERNAL_DEPS "LAPACKE")
 set(DISCRETIZATION_EXTERNAL_DEPS "CBLAS;LAPACKE")
 set(LEVELSET_EXTERNAL_DEPS "")
 set(POD_EXTERNAL_DEPS "LAPACKE")
+
+#------------------------------------------------------------------------------------#
+# Experimental/deprecated features
+#------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
 # Internal dependencies
