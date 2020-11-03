@@ -1598,10 +1598,17 @@ void ReconstructionPolynomial::computeGradients(int degree, const std::array<dou
     // Linear polynomial
     if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 1) {
         do {
+            // Evaluate gradients
             for (int d = 0; d < m_dimensions; ++d) {
                 (*fieldGradient)[d] = fieldCoeffs[1 + d];
             }
 
+            // Explicitly zero unused components
+            for (int d = m_dimensions; d < ReconstructionPolynomial::MAX_DIMENSIONS; ++d) {
+                (*fieldGradient)[d] = 0.;
+            }
+
+            // Advance to the next field
             fieldCoeffs   += fieldCoeffsStride;
             fieldGradient += fieldGradientStride;
         } while (fieldGradient != fieldGradientEnd);
@@ -1620,6 +1627,7 @@ void ReconstructionPolynomial::computeGradients(int degree, const std::array<dou
     }
 
     do {
+        // Evaluate gradient
         for (int d = 0; d < m_dimensions; ++d) {
             const double *dcsi_dimension = dcsi + d * nCoeffs;
 
@@ -1629,6 +1637,12 @@ void ReconstructionPolynomial::computeGradients(int degree, const std::array<dou
             }
         }
 
+        // Explicitly zero unused components
+        for (int d = m_dimensions; d < ReconstructionPolynomial::MAX_DIMENSIONS; ++d) {
+            (*fieldGradient)[d] = 0.;
+        }
+
+        // Advance to the next field
         fieldCoeffs   += fieldCoeffsStride;
         fieldGradient += fieldGradientStride;
     } while (fieldGradient != fieldGradientEnd);
@@ -1830,10 +1844,17 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
     // Linear polynomial
     if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 1) {
         do {
+            // Evaluate gradients
             for (int d = 0; d < m_dimensions; ++d) {
                 (*fieldGradient)[d] = fieldLimiters[0] * fieldCoeffs[1 + d];
             }
 
+            // Explicitly zero unused components
+            for (int d = m_dimensions; d < ReconstructionPolynomial::MAX_DIMENSIONS; ++d) {
+                (*fieldGradient)[d] = 0.;
+            }
+
+            // Advance to the next field
             fieldCoeffs   += fieldCoeffsStride;
             fieldGradient += fieldGradientStride;
             fieldLimiters += fieldLimitersStride;
@@ -1854,6 +1875,7 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
     }
 
     do {
+        // Evaluate gradients
         for (int d = 0; d < m_dimensions; ++d) {
             const double *dcsi_dimension = dcsi + d * nCoeffs;
 
@@ -1875,6 +1897,12 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
             }
         }
 
+        // Explicitly zero unused components
+        for (int d = m_dimensions; d < ReconstructionPolynomial::MAX_DIMENSIONS; ++d) {
+            (*fieldGradient)[d] = 0.;
+        }
+
+        // Advance to the next field
         fieldCoeffs   += fieldCoeffsStride;
         fieldGradient += fieldGradientStride;
         fieldLimiters += fieldLimitersStride;
