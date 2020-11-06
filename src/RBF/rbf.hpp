@@ -35,10 +35,14 @@
 # include <functional>
 # include <exception>
 # include <type_traits>
+# include <memory>
+# include <string>
+# include <stdexcept>
 
 // Bitpit
 # include "bitpit_operators.hpp"
 # include "metaprogramming.hpp"
+# include "bitpit_private_lapacke.hpp"
 
 
 namespace bitpit{
@@ -448,6 +452,88 @@ namespace rbf
    *  of RBF.
   */
   std::string   getRBFTag( eRBFType type );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Set the weights of the input RBF, for a least square interpolation
+   *  problem.
+   *
+   *  Given a set of scattered data, find the weights of the radial basis functions
+   *  which best fit the input data in a least square sense.
+   *
+   *  @tparam         Dim           nr. of woking dimensions.
+   *  @tparam         CoordT        type of coordinates. Only scalar floating point types
+   *                                are supported (e.g. float, double, etc. ).
+   *
+   *  @param [in]     data_points   scattered points in the Dim-dimensional space.
+   *  @param [in]     data_values   value associated to each data point.
+   *  @param [in,out] rbf           basis of radial functions.
+   *
+   *  @result Returns (true) on success.
+  */
+  template<
+    std::size_t Dim,
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  bool computeRBFWeights( const std::vector<typename RBF<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RBF<Dim,CoordT> rbf )
+  {
+    if ( data_points.size() != data_values.size() )
+      throw std::runtime_error(
+        "bitpit::rbf::computeRBFWeights: The nr. of data points and the nr. of data values mismatch!"
+      );
+    if ( data_points.size() < rbf.size() )
+      throw std::runtime_error(
+        "bitpit::rbf::computeRBFWeights: The nr. of data points must be at least the size of the radial function basis."
+      );
+
+    // Constant(s)
+    const CoordT  rcond = (CoordT)-1;
+
+    // Scope variables
+    int n_rbf         = rbf.size();
+    int n_data_points = data_points.size();
+
+    // Scope variables
+    std::vector<CoordT> A(n_data_points * n_rbf);
+    std::vector<CoordT> b(n_data_points * n_data_points);
+    std::vector<CoordT> s(n_data_points);
+
+    // Assembly rhs
+    for( std::size_t j = 0; j < n_data_points; ++j )
+        for( std::size_t i = 0; i < n_data_points; ++i )
+            b[j*n_data_points + i] = data_values[j][i];
+        //next i
+    //next j
+
+    // Assembly coeff. matrix
+    for( std::size_t j = 0, k = 0; j < n_rbf; ++j ) {
+        const auto &rf = rbf.at(j);
+        for( std::size_t i = 0; i < n_data_points; ++i ) {
+            const auto &p = data_points.at(i);
+            A[k++] = rf.second->operator()( p );
+        } //next i
+    } //next j
+
+    // Solve least square
+    int rank;
+    auto info = LAPACKE_dgelsd(
+      LAPACK_COL_MAJOR, 
+      n_data_points, n_rbf, n_data_points, A.data(), 
+      n_data_points, b.data(), 
+      n_data_points, s.data(), 
+      rcond, &rank 
+    );
+
+    // Check for error(s)
+    if( info > 0 )
+      return false;
+
+    // Set weights (if success)
+    rbf.setWeights(s);
+    
+    // Return success
+    return true;
+  }
 
   // ================================================================ //
   // DEFINITION OF CLASS RadialFunct									                //
@@ -470,7 +556,7 @@ namespace rbf
     // Static assertions ============================================ //
     static_assert(
       std::is_floating_point<CoordT>::value,
-      "**ERROR** bitpit::rbf::RF<Dim,CoordT>: CoordT must be a integral floating point type "
+      "**ERROR** bitpit::rbf::RF<Dim,CoordT>: CoordT must be a scalar floating point type "
       ", e.g. float, double or long double"
     );
 
@@ -747,6 +833,137 @@ namespace rbf
   // =============================================================== //
   // DEFINITION OF CLASS RBF                                         //
   // =============================================================== //
+  /*! @brief Radial Basis Function.
+   *
+   *  Class storing a basis of (heterogeneous) Radial Functions.
+   *
+   *  @tparam     Dim     nr. of working dimensions.
+   *  @tparam     CoordT  (default = double) type for coordinates/coefficients. Only scalar
+   *                      floating point types are supported (e.g. float, double, etc.)
+  */
+  template<
+    std::size_t Dim,
+    class CoordT = double
+  >
+  class RBF : private std::vector< std::pair<CoordT, std::unique_ptr< RF<Dim,CoordT> > > >
+  {
+    // Static assertion(s) ========================================= //
+    static_assert(
+      std::is_floating_point<CoordT>::value,
+      "**ERROR** bitpit::rbf::RBF<Dim,CoordT>: CoordT must be a scalar floating point type "
+      ", e.g. float, double or long double"
+    );
+    
+    // Typedef(s) ================================================== //
+    private:
+    /*! @brief Type of the base class. */
+    using base_t    = std::vector< std::pair<CoordT, std::unique_ptr<RF<Dim,CoordT> > > >;
+    /*! @brief Self type. */
+    using self_t    = RBF<Dim, CoordT>;
+    public:
+    /*! @brief Type of Radial function. */
+    using rf_t      = RF<Dim,CoordT>;
+    /*! @brief Type of coordinate. */
+    using coord_t   = typename rf_t::coord_t;
+    /*! @brief Type of point in the Euclidean space. */
+    using point_t   = typename rf_t::point_t;
+    
+    // Constructor(s) ============================================== //
+    public:
+    /*! @brief Default constructor.
+     *
+     *  Initialize a empty radial basis.
+    */
+    RBF() :
+      base_t()
+    {}
+    /*! @brief Constructor #1.
+     *
+     *  Initialize a radial basis function with N functions of the specified,
+     *  type.
+     *
+     *  @param [in]     N       nr. of functions.
+     *  @param [in]     type    type of radial basis.
+    */
+    RBF( std::size_t n, eRBFType type ) :
+      base_t( n, std::make_pair( (coord_t)1, nullptr ) )
+    {
+      for ( auto &rf : *this )
+        rf.second.reset( rf_t::New( type ) ); 
+    }
+    /*! @brief Copy-constructor (deleted). */
+    RBF( const self_t & ) = delete;
+    /*! @brief Move-constructor (deleted). */
+    RBF( self_t && ) = delete;
+    
+    // Operator(s) ================================================= //
+    public:
+    /*! @brief Copy-assignment operator (deleted). */
+    self_t& operator=( const self_t & ) = delete;
+    /*! @brief Move-assignment operator (deleted). */
+    self_t& operator=( self_t && ) = delete;
+    /*! @brief Evaluate the linear combination of the RFs at the input point. */
+    coord_t operator()( const point_t &coords ) const
+    {
+      coord_t out = (coord_t)0;
+      for ( const auto &rf : *this )
+        out += rf.first * rf.second(coords);
+      return out;
+    }
+    
+    // Getter(s)/Info ============================================== //
+    public:
+    /*! @brief Returns the size of this basis */
+    using base_t::size;
+    /*! @brief Returns (const/non-const) reference to the i-th radial function in the basis. */
+    using   base_t::operator[];
+    using   base_t::at;
+    /*! @brief Returns a copy of the weights for this radial basis function. */
+    std::vector<coord_t> getWeights() const
+    {
+      std::vector<coord_t> weights( base_t::size() );
+      auto i = weights.begin(), e = weights.end();
+      auto j = base_t::cbegin();
+      for ( ; i != e; ++i, ++j )
+        (*i) = j->first;
+    }
+    
+    // Setter(s) =================================================== //
+    public:
+    /*! @brief Add a new radial function to the basis. 
+     *
+     *  @param [in]   rf      (unique) Pointer to the radial function.
+     *  @param [in]   weight  (default = 1) weight to be assigned to the new function.
+     *
+     *  @result Returns the position in the basis where the new function
+     *  has been added.
+    */
+    std::size_t add( std::unique_ptr<rf_t> rf, CoordT weight = (CoordT)1 )
+    {
+      base_t::push_back( std::make_pair( weight, std::move(rf) ) );
+      return base_t::size()-1;
+    }
+    /*! @brief Remove the i-th function from the basis. */
+    void remove( std::size_t i )
+    {
+      base_t::erase( base_t::begin() + i );
+    }
+    /*! @brief Utility function to set the weights of each radial function. */
+    void setWeights( const std::vector<coord_t> &weights )
+    {
+      if ( weights.size() != base_t::size() )
+        throw std::runtime_error(
+          "bitpit::rbf::RBF::setWeights: ** ERROR** The nr. of the input weights "
+          "and the size of this basis mismatch!"          
+        );
+      auto i = weights.cbegin(), e = weights.cend();
+      auto j = base_t::begin();
+      for ( ; i != e; ++i, ++j )
+        j->first = (*i);
+    }
+    
+  }; //end class RBF
+  
   // =============================================================== //
   // EXPLICIT SPECIALIZATIONS                                        //
   // =============================================================== //
