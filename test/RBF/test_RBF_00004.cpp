@@ -306,9 +306,6 @@ namespace testing
       std::cout << "bitpit::rbf::testing::test_rf_operators: **ERROR** " << e.what() << std::endl;
       ++err;
     }
-
-    // Output message
-    std::cout << "    test completed with " << err << " error(s)" << std::endl;
     return err;
   }
 
@@ -316,7 +313,70 @@ namespace testing
   template<size_t d, class coeff_t>
   int test_rf_setters_getters( bitpit::rbf::eRBFType type )
   {
-    return 0;
+    // Scope variables
+    int err = 0;
+    
+    // Test get/setParameters
+    std::cout << "    testing setParameters, getParameters" << std::endl;
+    try
+    {
+      auto rf = RF<d, coeff_t>::New( type );
+      if ( std::size_t np = rf->getNumberOfParameters() )
+      {
+        // Scope variables
+        std::random_device dev;
+        std::default_random_engine eng(dev());
+        std::uniform_real_distribution<coeff_t> dist( (coeff_t)0, (coeff_t)1);
+        
+        // Set random values for RF parameters
+        coeff_t *pars = new coeff_t[np];
+        for ( auto i = 0; i < np; ++i )
+          pars[i] = dist(eng);
+       
+        // Assign the parameters
+        rf->setParameters(pars);
+        if ( auto out = rf->getParameters() )
+        {
+          // Check the value of the parameters returned by RF object
+          for ( auto i = 0; i < np; ++i )
+          {
+            if ( pars[i] != out[i] )
+            {
+              std::cout << "bitpit::rbf::testing::test_rf_setters_getters: **ERROR** "
+                        << "Incorrect value for parameter " << i
+                        << ". Found " << out[i] << ", expecting " << pars[i]
+                        << std::endl;
+              ++err;
+            }
+          }
+        }
+        else
+        {
+          std::cout << "bitpit::rbf::testing::test_rf_setters_getters: **ERROR** "
+                    << "RF with additional parameters returns null pointer to parameter list"
+                    << std::endl;
+          ++err;
+        }
+        delete [] pars;
+      }
+      else
+      {
+        if ( rf->getParameters() )
+        {
+          std::cout << "bitpit::rbf::testing::test_rf_setters_getters: **ERROR** "
+                    << "RF with no parameters returns non-null pointer to parameter list"
+                    << std::endl;
+          ++err;
+        }
+      }
+    }
+    catch( std::exception &e )
+    {
+      std::cout << "bitpit::rbf::testing::test_rf_setters_getters: **ERROR** " << e.what() << std::endl;
+      ++err;
+      ++err;
+    }
+    return err;
   }
 
   // ------------------------------------------------------------------------ //
@@ -337,7 +397,10 @@ namespace testing
     // Test operator(s)
     std::cout << "   testing operator(s)" << std::endl;
     err += ( test_rf_operators<d, coeff_t>( type ) != 0 );
-
+    
+    // Output message
+    std::cout << " test completed with " << err << " error(s)" << std::endl;
+    
     return err;
 
   }
