@@ -46,6 +46,7 @@ namespace rbf
 {
 namespace testing
 {
+  // tmp (to be removed)
   template< std::size_t Dim, class CoordT >
   bool compare( RF<Dim, CoordT> const &in1, RF<Dim, CoordT> const &in2 )
   {
@@ -116,8 +117,10 @@ namespace testing
       , test_values(N)
       , n_trials(N)
       , tol(e)
+      , pars(nullptr)
     {
-      pars = new coord_t[ rf->getNumberOfParameters() ];
+      if ( rf->getNumberOfParameters() )
+        pars = new coord_t[ rf->getNumberOfParameters() ];
     }
     int operator()() const
     {
@@ -168,7 +171,7 @@ namespace testing
           default: throw std::runtime_error( "bitpit::rbf::testing: **ERROR** unsupported rbf type" );
         }
     }
-    bool  init() const
+    bool init() const
     {
       // Scope variables
       std::random_device dev;
@@ -218,8 +221,11 @@ namespace testing
     bool  cleanup() const
     {
       delete rf;
-      delete [] pars;
+      if ( pars )
+        delete [] pars;
       std::vector<std::tuple<point_t, coord_t, coord_t>>(0).swap( test_values );
+      
+      return true;
     }
     bool  test() const
     {
@@ -251,7 +257,7 @@ namespace testing
       return err;
     }
     protected:
-    mutable std::vector<std::tuple<point_t, coord_t, coord_t>>  test_values;
+    mutable std::vector<std::tuple<point_t, coord_t, coord_t>> test_values;
     mutable RF< Dim, CoordT >     *rf;
     mutable coord_t               *pars;
     coord_t                       tol;
@@ -297,7 +303,7 @@ namespace testing
     }
     catch ( std::exception &e )
     {
-      std::cout << "**ERROR** " << e.what() << std::endl;
+      std::cout << "bitpit::rbf::testing::test_rf_operators: **ERROR** " << e.what() << std::endl;
       ++err;
     }
 
@@ -352,10 +358,10 @@ namespace testing
       err += run_unit_tests<d, coeff_t>( static_cast<bitpit::rbf::eRBFType>(i) );
     } //next type
 
-
-
     // Output message
     std::cout << err << " unit test(s) failed" << std::endl;
+    
+    return err;
   }
 } //end namespace testings
 } //end namespace rbf
