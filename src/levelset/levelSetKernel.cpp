@@ -23,10 +23,6 @@
 \*---------------------------------------------------------------------------*/
 
 
-# if BITPIT_ENABLE_MPI
-# include "bitpit_communications.hpp"
-# endif
-
 # include "bitpit_operators.hpp"
 # include "bitpit_CG.hpp"
 # include "bitpit_patchkernel.hpp"
@@ -327,6 +323,21 @@ void LevelSetKernel::freeCommunicator() {
     }
 
     MPI_Comm_free(&m_communicator);
+}
+
+/*!
+    Create a data communicator for exchanging data among partitions.
+
+    \result A data communicator for exchanging data among partitions.
+*/
+std::unique_ptr<DataCommunicator> LevelSetKernel::createDataCommunicator( ) const {
+
+    std::unique_ptr<DataCommunicator> dataCommunicator;
+    if (isCommunicatorSet()) {
+        dataCommunicator = std::unique_ptr<DataCommunicator>(new DataCommunicator(getCommunicator())) ;
+    }
+
+    return dataCommunicator;
 }
 
 #endif

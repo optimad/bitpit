@@ -606,26 +606,25 @@ void LevelSetObject::communicate( const std::unordered_map<int,std::vector<long>
     }
 
     // Create a data communicator
-    MPI_Comm meshComm = m_kernelPtr->getCommunicator() ;
-    DataCommunicator dataCommunicator(meshComm) ;
+    std::unique_ptr<DataCommunicator> dataCommunicator = m_kernelPtr->createDataCommunicator() ;
 
     // Fill the send buffer with the  content from the LevelSetObject base
     // class and the specific derived class.
     for (const auto &entry : sendList) {
         // Create an empty send
         int rank = entry.first;
-        dataCommunicator.setSend(rank, 0);
+        dataCommunicator->setSend(rank, 0);
 
         // Write data in the buffer
-        SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
+        SendBuffer &buffer = dataCommunicator->getSendBuffer(rank);
         writeCommunicationBuffer(entry.second, buffer);
     }
 
     // Discover the receives
-    dataCommunicator.discoverRecvs();
+    dataCommunicator->discoverRecvs();
 
     // Start the sends
-    dataCommunicator.startAllRecvs();
+    dataCommunicator->startAllRecvs();
 
     // In case of mesh adaption, the ids of the moved items must be freed
     // in order to avoid conflicts when ids are recycled
@@ -634,23 +633,23 @@ void LevelSetObject::communicate( const std::unordered_map<int,std::vector<long>
     }
 
     // Start the sends
-    dataCommunicator.startAllSends();
+    dataCommunicator->startAllSends();
 
     // Check which data communications have arrived. For those which are
     // available start reading the databuffer into the data structure of
     // LevelSetObject and its derived classes.
     int nCompletedRecvs = 0;
-    while (nCompletedRecvs < dataCommunicator.getRecvCount()) {
-        int rank = dataCommunicator.waitAnyRecv();
+    while (nCompletedRecvs < dataCommunicator->getRecvCount()) {
+        int rank = dataCommunicator->waitAnyRecv();
 
-        RecvBuffer &dataBuffer = dataCommunicator.getRecvBuffer(rank);
+        RecvBuffer &dataBuffer = dataCommunicator->getRecvBuffer(rank);
         readCommunicationBuffer(recvList.at(rank), dataBuffer);
 
         ++nCompletedRecvs;
     }
 
-    dataCommunicator.waitAllSends();
-    dataCommunicator.finalize();
+    dataCommunicator->waitAllSends();
+    dataCommunicator->finalize();
 }
 
 /*!
