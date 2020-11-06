@@ -26,7 +26,6 @@
 # include <mpi.h>
 # include "bitpit_communications.hpp"
 # endif
-# include <stack>
 
 # include "bitpit_operators.hpp"
 # include "bitpit_CG.hpp"

@@ -23,7 +23,6 @@
 \*---------------------------------------------------------------------------*/
 
 # include <vector>
-# include <stack>
 
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
