@@ -551,7 +551,7 @@ void LevelSet::compute(){
 }
 
 /*!
- * Updates the levelset after mesh adaptation.
+ * Updates the levelset after a mesh update.
  * Each object should compute the levelset and associated
  * information on both internal and ghost cells.
  *
@@ -559,21 +559,107 @@ void LevelSet::compute(){
  */
 void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
-    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::update()");
+    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
 
-    // Udate the cache of the kernel
+    VolumeKernel *mesh = m_kernel->getMesh();
+#if BITPIT_ENABLE_MPI
+    bool isMeshPartitioned = mesh->isPartitioned();
+#endif
+
+#if BITPIT_ENABLE_MPI
+    // Set the communicator
+    //
+    // The mesh may have been partitioned after being set.
+    if (isMeshPartitioned && !m_kernel->isCommunicatorSet()) {
+        m_kernel->initializeCommunicator();
+    }
+#endif
+
+    // Inspect mapper to detect what needs to be updated
+    std::unordered_map<int,std::vector<long>> partitioningSendList ;
+    std::unordered_map<int,std::vector<long>> partitioningRecvList ;
+
+    bool updateNarrowBand   = false;
+    bool updatePartitioning = false;
+    for( const auto &event : mapper){
+        if( event.entity != adaption::Entity::ENTITY_CELL){
+            continue;
+        }
+
+        if( event.type == adaption::Type::TYPE_PARTITION_SEND){
+            partitioningSendList.insert({{event.rank,event.previous}}) ;
+            updatePartitioning = true;
+        } else if( event.type == adaption::Type::TYPE_PARTITION_RECV){
+            partitioningRecvList.insert({{event.rank,event.current}}) ;
+            updatePartitioning = true;
+        } else {
+            if (!updateNarrowBand) {
+                for (long cellId : event.current) {
+                    const Cell &cell = mesh->getCell(cellId);
+                    if (cell.isInterior()) {
+                        updateNarrowBand = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+#if BITPIT_ENABLE_MPI
+    if (isMeshPartitioned) {
+        MPI_Allreduce(MPI_IN_PLACE, &updateNarrowBand, 1, MPI_C_BOOL, MPI_LOR, m_kernel->getCommunicator());
+        MPI_Allreduce(MPI_IN_PLACE, &updatePartitioning, 1, MPI_C_BOOL, MPI_LOR, m_kernel->getCommunicator());
+    }
+#endif
+
+#if BITPIT_ENABLE_MPI
+    // Get data communicator for updating partitioning
+    std::unique_ptr<DataCommunicator> dataCommunicator;
+    if (updatePartitioning) {
+        dataCommunicator = m_kernel->createDataCommunicator();
+    }
+#endif
+
+    // Update kernel
     m_kernel->updateGeometryCache( mapper ) ;
 
-    // Update ls in narrow band
+    // Update objects
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
-        visitor.clearAfterMeshAdaption(mapper) ;
-        visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
+
 #if BITPIT_ENABLE_MPI
+        // Start partitioning update
+        if (updatePartitioning) {
+            visitor.startExchange( partitioningSendList, dataCommunicator.get() );
+        }
+#endif
+
+        // Clear data structures after mesh update
+        visitor.clearAfterMeshAdaption( mapper ) ;
+
+#if BITPIT_ENABLE_MPI
+        // Complete partitioning update
+        if (updatePartitioning) {
+            visitor.completeExchange( partitioningRecvList, dataCommunicator.get() );
+        }
+#endif
+
+        // Update levelset inside narrow band
+        if (updateNarrowBand) {
+            visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
+        }
+
+#if BITPIT_ENABLE_MPI
+        // Update data on ghost cells
         visitor.exchangeGhosts();
 #endif
-        if(m_propagateS) visitor.propagateSign() ;
+
+        // Propagate sign
+        if (updateNarrowBand) {
+            if(m_propagateS) visitor.propagateSign() ;
+        }
     }
+
 }
 
 #if BITPIT_ENABLE_MPI
@@ -583,46 +669,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
  */
 void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
 
-    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
-
-    // Set the communicator
-    if (!m_kernel->isCommunicatorSet()) {
-        m_kernel->initializeCommunicator();
-    }
-
-    // Udate the cache of the kernel
-    m_kernel->updateGeometryCache( mapper ) ;
-
-    // Compile send and receive lists
-    std::unordered_map<int,std::vector<long>> sendList, recvList ;
-    for( const auto &event : mapper){
-        if( event.entity != adaption::Entity::ENTITY_CELL){
-            continue;
-        }
-
-        if( event.type == adaption::Type::TYPE_PARTITION_SEND){
-            sendList.insert({{event.rank,event.previous}}) ;
-        } else if( event.type == adaption::Type::TYPE_PARTITION_RECV){
-            recvList.insert({{event.rank,event.current}}) ;
-        }
-    }
-
-    // Communicate according to new partitioning
-    std::unique_ptr<DataCommunicator> dataCommunicator;
-    dataCommunicator = m_kernel->createDataCommunicator();
-    for( int objectId : m_order){
-        auto &visitor = *(m_objects.at(objectId)) ;
-
-        visitor.startExchange( sendList, dataCommunicator.get() );
-        visitor.clearAfterMeshAdaption( mapper ) ;
-        visitor.completeExchange( recvList, dataCommunicator.get() );
-    }
-
-    for( int objectId : m_order){
-        auto &visitor = *(m_objects.at(objectId)) ;
-
-        visitor.exchangeGhosts();
-    }
+    update ( mapper ) ;
 
 }
 #endif
