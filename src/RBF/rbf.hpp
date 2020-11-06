@@ -4,7 +4,7 @@
 *
 *  Copyright (C) 2015-2019 OPTIMAD engineering Srl
 *
-*  -------------------------------------------------------------------------
+*  --------------------------------------------------------------------------
 *  License
 *  This file is part of bitpit.
 *
@@ -21,10 +21,15 @@
 *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
 *
 \*---------------------------------------------------------------------------*/
+# pragma once
+# undef __USE_DEPRECATED__
 
-#pragma once
+// ========================================================================= //
+// INCLUDES                                                                  //
+// ========================================================================= //
 
 // Standard Template Library
+# include <cmath>
 # include <vector>
 # include <array>
 # include <functional>
@@ -38,6 +43,7 @@
 
 namespace bitpit{
 
+# ifdef __USE_DEPRECATED__
 /*!
  * @enum RBFBasisFunction
  * @ingroup RBF
@@ -175,12 +181,15 @@ private:
     double calcDist(const std::array<double,3> & point, int j);
 };
 
+# endif
 /*!
- * @ingroup  RBF
- * @brief Utility fuctions for RBF
+ * @ingroup  	RBF
+ * @brief 		Classes and utility fuctions for R(adial)B(asis)F(unction)
  */
 namespace rbf
 {
+# ifdef __USE_DEPRECATED__
+
     double                  wendlandc2(double);
     double                  linear(double);
     double                  gauss90(double);
@@ -194,14 +203,20 @@ namespace rbf
     double                  c0c2(double);
     double                  c1c2(double);
     double                  c2c2(double);
+# endif
 
   /*! @addtogroup RBF
    *  @{
   */
 
+  // ======================================================================= //
+  // LIBRARY OF SUPPORTED RADIAL FUNCTIONS                                   //
+  // ======================================================================= //
+  
+  // ----------------------------------------------------------------------- //
   /*! @brief C2-continuous Wendland'2 functions.
    *
-   *  C2-continuous Wendland's functions have the following expression:
+   *  C2-continuous Wendland's functions have the following expression up to dimension 3:
    *  \f$
    *  \begin{equation}
    *      f(r;c) := \left\{
@@ -215,8 +230,8 @@ namespace rbf
    *  In the above expression, \f$r\f$ is the radial distance of a given point
    *  from the geometrical kernel (e.g. the center of the RF).
    *
-   *  @tparam         CoordT      Type for coeffs. (only scalar floating point types
-   *                              are supported, e.g. double, float, etc.)
+   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance.
   */
@@ -224,13 +239,9 @@ namespace rbf
     class CoordT,
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  CoordT  wendland_c2( CoordT r )
-  {
-    return r > (CoordT)1 ?
-      (CoordT)0 :
-      std::pow( (CoordT)1 - r, 4 ) * ( (CoordT)4 * r + (CoordT)1 );
-  }
-
+  CoordT  wendland_c2( CoordT r );
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Generalized multiquadric functions.
    *
    *  The family of generalized multi-quadrics RF has the following expression:
@@ -244,11 +255,12 @@ namespace rbf
    *  from the kernel of the RF (e.g. the center of the RF),
    *  and \f$c\f$ is a additional parameter (bias).
    *
-   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
-   *  @tparam         Alha, Beta  expoenent values.
+   *  @tparam         CoordT      type of coeffs. Only scalar floating 
+   *                              point types are supported (e.g. double, float, etc. )
+   *  @tparam         Alha, Beta  values for the fractional exponent.
    *
    *  @param [in]     r           radial distance
-   *  @param [in]     c           value for the bias coeff.
+   *  @param [in]     c           value of the bias coeff.
   */
   template<
     class CoordT,
@@ -256,23 +268,22 @@ namespace rbf
     unsigned Beta,
     typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* = nullptr
   >
-  CoordT generalized_multiquadrics( CoordT r, CoordT c )
-  {
-    return CoordT(1)/std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) );
-  }
+  CoordT generalized_multiquadrics( CoordT r, CoordT c );
 
-  /*! @brief Gaussian radial basis function.
+  // ---------------------------------------------------------------- //
+  /*! @brief Gaussian radial function.
    *
-   *  Guassian radial basis function have the following expression:
+   *  A Guassian radial basis function has the following expression:
    *  \f$
    *  \begin{equation}
    *    f(r;c) := c exp( -r^2 );
    *  \end{equation}
    *  \f$
-   *  where \f$c\f$ is a amplification/reduction factor, \f$r\f$ is the usual
-   *  radial distance from the geometry kernel.
+   *  where \f$c\f$ is a amplification/reduction factor, and \f$r\f$ is the
+   *  radial distance from the geometry kernel (e.g. the center of the radial function).
    *
-   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
+   *  @tparam         CoordT      type of coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
    *  @param [in]     c           amplification/reduction factor.
@@ -281,20 +292,18 @@ namespace rbf
     class CoordT,
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  CoordT gaussian( CoordT r, CoordT c )
-  {
-    return c * std::exp( - (r*r) );
-  }
-
+  CoordT gaussian( CoordT r, CoordT c );
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Linear function.
    *
-   *  Linear function with trivial expression:
-   *
+   *  Linear function with trivial expression (generally used to as a bias):
    *  \f$ f(r) := r\ f$
+   *  where \f$r\f$ is the radial distance from the geometry kernel (e.g. the 
+   *  center of the radial function).
    *
-   *  Generally used to as a bias.
-   *
-   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
+   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
   */
@@ -302,44 +311,43 @@ namespace rbf
     class CoordT,
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  CoordT linear( CoordT r )
-  {
-    return r;
-  }
-
+  CoordT linear( CoordT r );
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Generalized power function (also referred to as radial power)
    *
    *  Generalized power functions have the following expression:
    *  \f$ f(r) := r^\alpha \f$
-   *  where \f$\alpha>0\f$ is the power exponent and \f$r\f$ is the usual radial distance.
+   *  where \f$\alpha>0\f$ is the power exponent and \f$r\f$ is the radial distance
+   *  from the geomtry kernel of the radial function (e.g. the center of the RF).
    *
-   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
+   *  @tparam         CoordT      type of coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. )
    *  @tparam         Alpha       power expoenent.
    *
-   *  @param [in]     r           radial distance
+   *  @param [in]     r           radial distance.
   */
   template<
     class CoordT,
     int   Alpha,
     typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* = nullptr
   >
-  CoordT generalized_power( CoordT r )
-  {
-    return std::pow( r, Alpha );
-  }
-
+  CoordT generalized_power( CoordT r );
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Thin plate splines
    *
-   *  Radial function of this type have the following expression:
+   *  Thin plate spline has the following expression:
    *  \f$
    *  \begin{equation}
-   *    f(r):= r^2 log(x), \; \beta \neq 0
+   *    f(r):= r^2 log(r)
    *  \end{equation}
    *  \f$
-   *  where \f$r\f$ is the radial distance.
+   *  where \f$r\f$ is the radial distance from the geometry kernel
+   *  (e.g. the center of the RF).
    *
-   *  @tparam         CoordT      type of coeffs. (e.g. double, float, etc. )
-   *  @tparam         Beta        power expoenent (Beta != 0).
+   *  @tparam         CoordT      type of coeffs. Only scalar floating point types are
+   *                              supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
   */
@@ -347,36 +355,35 @@ namespace rbf
     class CoordT,
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  CoordT    thin_plate_spline( CoordT r )
-  {
-    return r*r * std::log(r);
-  }
-
+  CoordT    thin_plate_spline( CoordT r );
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Polyharmonic radial functions.
-   *  Polyharmiic function of this type have the following expression:
+   *
+   *  The family of polyharmonic functions has the following expression:
    *  \f$
    *  \begin{equation}
-   *    f(r):= (-1)^{1+\beta) r^{2\beta} log(x), \; \beta \neq 0
+   *    f(r):= (-c)^{1+\beta) r^{2\beta} \, log(r), \; \beta \neq 0
    *  \end{equation}
    *  \f$
-   *  where \f$r\f$ is the radial distance.
-   *  @note The special case \f$beta = 2\f$ correspnds to thin-plate-spline case.
+   *  where \f$r\f$ is the radial distance, \f$\beta \ge 0 \f$ is the power
+   *  exponent, and \f$c\f$ is a amplification/reduction factor.
    *
-   *  @tparam        CoordT      type of coeffs. (e.g. double, float, etc. )
-   *  @tparam         Beta        power expoenent (Beta != 0).
+   *  @note The special case \f$beta = 2\f$ correspnds to thin-plate-splines.
    *
-   *  @param [in]     r           radial distance
+   *  @tparam         CoordT      type of coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *  @tparam         Beta        power expoenent (Beta >= 0).
+   *
+   *  @param [in]     r           radial distance.
+   *  @param [in]     c           amplification/reduction factor.
   */
   template<
     class CoordT,
     int   Beta,
     typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* = nullptr
   >
-  CoordT polyharmonic( CoordT r, CoordT c )
-  {
-    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * c * std::pow(r, 2*Beta) * std::log(r);
-  }
-
+  CoordT polyharmonic( CoordT r, CoordT c );
 
   // ================================================================ //
   // FORWARD DECLARATIONS                                             //
@@ -385,13 +392,19 @@ namespace rbf
   class RF;
   template< std::size_t, std::size_t, class >
   class RFP;
+  template< std::size_t, class >
+  class RBF;
 
-
+  // ================================================================ //
+  // DEFINITIONS                                                      //
+  // ================================================================ //
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Enum for supported families of radial functions. */
   enum eRBFType
   {
     /*! @brief undefined type. */
-    // Leave it first to facilitate auto-looping through eRBFType
+    // Leave it first to facilitate auto-loop through eRBFType
     kUndefined,
     /*! @brief WendLand C2-continuous radial functions. */
     kWendlandC2,
@@ -415,17 +428,21 @@ namespace rbf
     kMultiQuadric5_2,
     /*! @brief Linear */
     kLinear,
-    /*| @brief Quadratic */
+    /*! @brief Quadratic */
     kQuadratic,
     /*! @brief Cubic */
     kCubic,
     /*! @brief Quartic. */
     kQuartic,
     /*! @brief User-defined */
-    // Leave it last to facilitate auto-looping through eRBFType.
+    // Leave it last to facilitate auto-loop through eRBFType.
     kUserDefined
   }; //end enum eRBFType
 
+  // ================================================================ //
+  // HELPER FUNCTIONS                                                 //
+  // ================================================================ //
+  
   // ---------------------------------------------------------------- //
   /*! @brief Helper function returning the tag associated to each type
    *  of RBF.
@@ -435,14 +452,14 @@ namespace rbf
   // ================================================================ //
   // DEFINITION OF CLASS RadialFunct									                //
   // ================================================================ //
-  /*! @brief Base class used to derive radial functions of different families.
+  /*! @brief Class used for radial function with no additional parameters.
    *
-   *  This class holds a radial function (RH in short) which does not depend
+   *  This class holds a radial function (RF in short) which does not depend
    *  on any additional parameter beyond its radius and its center.
    *
-   *	@tparam 			Dim 			   nr. of dimension in the working space.
-   *	@tparam 			CoordT 	     (default = double) type used for parameters and coordinates
-   *                             (only scalar floating point type are allowed, e.g. coord_t = double, float).
+   *	@tparam 			Dim 		    nr. of dimension in the working space.
+   *	@tparam 			CoordT 	    (default = double) type for coefficients and coordinates.
+   *                            Only scalar floating point type are supported (e.g. coord_t = double, float).
   */
   template<
     std::size_t Dim,
@@ -450,324 +467,161 @@ namespace rbf
   >
   class RF
   {
-    // Static assertions ========================================== //
-    static_assert(
-      (Dim > 0),
-      "**ERROR** bitpit::rbf::RF<Dim,CoordT>: nr. of working dimensions, Dim, must be greater than 0"
-    );
+    // Static assertions ============================================ //
     static_assert(
       std::is_floating_point<CoordT>::value,
       "**ERROR** bitpit::rbf::RF<Dim,CoordT>: CoordT must be a integral floating point type "
       ", e.g. float, double or long double"
     );
 
-    // Typedef(s) ================================================= //
+    // Typedef(s) =================================================== //
     public:
     /*!	@brief Coeffs. type. */
     using coord_t 		= CoordT;
     /*!	@brief Point type in the working space. */
     using point_t 		= std::array<coord_t, Dim>;
     /*!	@brief Type of functor holding the actual implementation */
-    using rf_funct_t  = std::function< coord_t( coord_t ) >;
+    using rf_funct_t  	= std::function< coord_t( coord_t ) >;
     private:
     /*!	@brief Type of this object. */
     using self_t    	= RF<Dim, CoordT>;
 
-    // Member variable(s) ========================================= //
+    // Member variable(s) =========================================== //
     protected:
-    /*!	@brief Function implementing the expression of the Radial Basis Function. */
-    rf_funct_t        mFunct;
+    /*!	@brief Functor implementing the expression of the Radial Function. */
+    rf_funct_t mFunct;
     /*! @brief Type of this radial function. */
-    eRBFType          mType;
+    eRBFType mType;
     /*! @brief Bool for compactly supported RFs.*/
-    bool              mHasCompactSupport;
+    bool mHasCompactSupport;
     public:
     /*!	@brief Radius of this RF. */
-    coord_t           radius;
+    coord_t radius;
     /*!	@brief Center of this RF (sometimes referred to as control point, geometry kernel) */
-    point_t           center;
+    point_t center;
 
-    // Static member function(s) ================================== //
+    // Static member function(s) ==================================== //
     public:
-    /*! @brief Returns a instance of a radial function corresponding to the input
-     *  type.
+    /*! @brief Returns a pointer to a new instance of a radial function 
+     *  of the specified type.
      *
-     *  @param [in]     type        type of the RF.
-     *  @param [in]     args        arguments forwarded to the constructor of the RF.
-     *                              (the nr. and type of arguments depend on the specific RF)
-     *
-     *  @result Returns pointer to the new object.
-    */
-    static self_t*		New( eRBFType type )
-    {
-      switch( type )
-      {
-        default: {
-          throw std::runtime_error(
-            "rbf::RF::New: Undefined RF type."
-          );
-        } //end default
-        case( bitpit::rbf::eRBFType::kWendlandC2 ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
-            type,
-            &bitpit::rbf::wendland_c2<coord_t>
-          );
-          out->mHasCompactSupport = true;
-          return out;
-        } //end case kWendlandC2
-        case( bitpit::rbf::eRBFType::kGaussian ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::gaussian<coord_t>
-          );
-          out->mHasCompactSupport = false;
-          out->mParams[0] = 1;
-          return out;
-        }
-        case( bitpit::rbf::eRBFType::kHardy ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>
-          );
-          out->mHasCompactSupport = false;
-          out->mParams[0] = 1;
-          return out;
-        } //end case kHardy
-        case( bitpit::rbf::eRBFType::kMultiQuadric2 ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::generalized_multiquadrics<coord_t, 2, 1 >
-          );
-          out->mHasCompactSupport = false;
-          out->mParams[0] = 1;
-          return out;
-        } //end case kMultiQuadrics2
-        case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>
-          );
-          out->mHasCompactSupport = false;
-          out->mParams[0] = 1;
-          return out;
-        } //end case kMultiQuadric3_2
-        case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>
-          );
-          out->mHasCompactSupport = false;
-          out->mParams[0] = 1;
-          return out;
-        } //end case kMultiQuadric3_2
-        case( bitpit::rbf::eRBFType::kLinear ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
-            type,
-            &bitpit::rbf::linear<coord_t>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kLinear
-        case( bitpit::rbf::eRBFType::kQuadratic ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
-            type,
-            &bitpit::rbf::generalized_power<coord_t, 2>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kQuadratic
-        case( bitpit::rbf::eRBFType::kCubic ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
-            type,
-            &bitpit::rbf::generalized_power<coord_t, 3>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kCubic
-        case( bitpit::rbf::eRBFType::kQuartic ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
-            type,
-            &bitpit::rbf::generalized_power<coord_t, 4>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kQuartic
-        case( bitpit::rbf::eRBFType::kThinPlateSpline ): {
-          auto out = new bitpit::rbf::RF<Dim, CoordT>(
-            type,
-            &bitpit::rbf::thin_plate_spline<coord_t>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kThinPlateSpline
-        case( bitpit::rbf::eRBFType::kPolyharmonic2 ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::polyharmonic<coord_t, 2>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kPolyharmonic2
-        case( bitpit::rbf::eRBFType::kPolyharmonic3 ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::polyharmonic<coord_t, 3>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kPolyharmonic3
-        case( bitpit::rbf::eRBFType::kPolyharmonic4 ): {
-          auto out = new bitpit::rbf::RFP<Dim, 1, CoordT>(
-            type,
-            &bitpit::rbf::polyharmonic<coord_t, 4>
-          );
-          out->mHasCompactSupport = false;
-          return out;
-        } //end case kPolyharmonic3
-      } //end switch
-
-      return nullptr;
-    }
-
-    // Member function(s) ========================================= //
-
-    // Constructor(s) --------------------------------------------- //
+     *  @param [in]     type        type of the RF.    */
+    static self_t* New( eRBFType type );
+    
+    // Constructor(s) =============================================== //
     protected:
     /*! @brief Default constructor.
      *
-     *  Initialize a radial function of undefined type with default values
-     *  for the parameters (see #setDefault )
+     *  Initialize a radial function of undefined type.
     */
-    RF() :
-      mFunct(nullptr)
-      , radius()
-      , center()
-      , mType( bitpit::rbf::eRBFType::kUndefined )
-    {
-      setDefault();
-    }
+    RF();
     public:
     /*! @brief Constructor #1.
      *
-     *  Initialize a radial function with the specified expression, radius and center.
+     *  Constructs a radial function of the specified type using the
+     *  expression provided as input argument.
      *
      *  @param [in]     type      type of this RF.
-     *  @param [in]     f         expresion of this radial function
-     *  @param [in]     r         radius of this radial function.
-     *  @param [in]     c         center of this radial function.
+     *  @param [in]     f         pointer to the function implementing the expression
+     *	 						              of this radial function.
     */
-    RF( bitpit::rbf::eRBFType type, coord_t (*f)(coord_t) ) :
-      mFunct(f)
-      , mType(type)
-    {
-      setDefault();
-    }
+    RF( bitpit::rbf::eRBFType type, coord_t (*f)(coord_t) );
     /*! @brief Constructor #2.
      *
-     *  Initialize a RF object using the input functor and parameters
+     *  Constructs a radial function of the specified type using the
+     *  functor provided as input argument.
      *
      *  @param [in]     type      type of this RF.
      *  @param [in]     f         functor implementing the expression of this RF.
-     *  @param [in]     r         radius of this radial function.
-     *  @param [in]     c         center of this radial function.
     */
-    RF( bitpit::rbf::eRBFType type, rf_funct_t const &f ) :
-      mFunct(f)
-      , mType(type)
-    {
-      setDefault();
-    }
+    RF( bitpit::rbf::eRBFType type, rf_funct_t const &f );
     /*! @brief Copy-constructor (deleted) */
     RF( const self_t & ) = delete;
     /*! @brief Move-constructor (deleted) */
     RF( self_t && ) = delete;
 
-    // Operator(s) =============================================== //
+    // Operator(s) ================================================= //
     public:
     /*!	@brief Copy assignement operator (deleted). */
-    self_t&					operator=( const self_t & ) = delete;
+    self_t& operator=( const self_t & ) = delete;
     /*!	@brief Move assignment operator (deleted). */
-    self_t&			    operator=( self_t &&other ) = delete;
+    self_t&	operator=( self_t &&other ) = delete;
     /*!	@brief Evaluation operator.
      *
      *  Evaluate this RF function at the input point.
      *
-     *	@param [in]			coords 	   coordinates of the input point.
+     *	@param [in]		coords 	   coordinates of the input point.
     */
-    coord_t 				operator()( const point_t &coords ) const
-    {
-      mFunct( norm2( coords - center )/radius );
-    }
-
-    // Getter(s)/Info --------------------------------------------- //
+    coord_t operator()( const point_t &coords ) const;
+    
+    // Getter(s)/Info ============================================== //
     public:
-    /*!	@brief Returns the nr. of additional parameters of this RF.
+    /*!	@brief Returns the nr. of additional parameters for this RF.
      *
-     *  By default it is assumed that the radial function
+     *  By default, it is assumed that the radial function
      *  does not depend on any additional parameter.
-    */
-    virtual std::size_t     getNumberOfParameters() const { return 0; };
-    /*!	@brief Returns (true) if this RF has a compact support.
      *
-     *  By default, it is assumed  that the RF has compact support.
-     *
-     *  @note If a family of radial basis function does not have a compact support,
-     *  the derived class implementing the radial function, should override this method.
+     *  If the RF depends on some other parameter, this method
+     *  must be overridden.
     */
-    bool 			              hasCompactSupport() const { return mHasCompactSupport; };
+    virtual std::size_t	getNumberOfParameters() const;
+    /*!	@brief Returns (true) if this RF is compactly supported. */
+    bool hasCompactSupport() const;
     /*!	@brief Returns const pointer to the internal array of parameters
      *	of this RF.
      *
      *  The default behavior is to assume that the radial function does not
      *  depend on any additional parameter.
+     *
+     *  If the RF depends on additional parameters, this method must be overridden
+     *  by the derived class.
     */
-    virtual const coord_t*	getParameters() const { return nullptr; };
+    virtual const coord_t* getParameters() const;
     /*! @brief Returns the type of this radial function. */
-    eRBFType                getType() const { return mType; }
+    eRBFType getType() const;
 
-    // Setter(s) -------------------------------------------------- //
+    // Setter(s) =================================================== //
     public:
     /*! @brief Set default values for function parameters, ie.:
      *  * radius = 1          (assumes uniform behavior across the basis, and normalized space)
      *  * center = (0, 0, 0)  (radial function centered in the origin)
     */
-    virtual void            setDefault()
-    {
-      radius = (CoordT) 1;
-      center.fill( (CoordT)0 );
-    }
+    virtual void setDefault();
     /*!	@brief Set the value of the parameters of this Radial Function.
      *
      *  The default behavior is to assume that the radial function does not
      *  depend on any additional parameters.
+     *
+     *  If the RF depends on additional parameters, this method must be overridden
+     *  by the derived class.
     */
-    virtual void            setParameters( const coord_t * ) {};
+    virtual void setParameters( const coord_t * );
 
   }; //end class RF
 
-  // ============================================================= //
-  // DEFINITION OF CLASS RFP                                       //
-  // ============================================================= //
+  // =============================================================== //
+  // DEFINITION OF CLASS RFP                                         //
+  // =============================================================== //
   /*! @brief Definition of generalized RF.
    *
    *  @tparam       Dim           nr. of dimensions in the working space (Dim>0)
    *  @tparam       NParams       Nr of additional parameters for this RF (NParams>0)
-   *  @tparam       CoordT        (default = double) type of coefficients, e.g. double, float, etc.
-   *                              (only scalar floating point types are allowed).
+   *  @tparam       CoordT        (default = double) type of coefficients. Only scalar floating
+   *                              point types are supported (e.g. double, float, etc.)
    *
-   *  This class can store a generic radial function which depends
+   *  This class stores a generic radial function which depends
    *  on a arbitrary nr. of parameters of type CoordT.
    *
    *  ** Usage **
    *  * Default usage *
-   *  If you wish to use one of the radial function implemented in bitpit just call:
-   *  RF::New (providing the specific type you want to use).
+   *  If you wish to use one of the radial function implemented in bitpit just create a new instance
+   *  by calling:
+   *  RF::New (specify the type of radial function you want to use).
    *
    *  * Passing the ownership of the additional parameters to RFP class. *
-   *  If you wish to encapsulate a user-defined function which depends on N parameters
-   *  you can invoke the RFP constructor by a pointer to the function which implements
-   *  the particular expression of your radial function,
-   *  and specifying the nr. of additional parameters for this function.
+   *  If you wish to encapsulate a user-defined function (which depends on N parameters),
+   *  you can invoke the RFP constructor passing the pointer to that function. The nr. of 
+   *  additional parameters, which you function depends on, must be specified in the list of template arguments.
    *  For instance, assumung D=3, CoordT = double and a user-defined funtion which depends
    *  on 2 additional parameters:
    *
@@ -776,28 +630,26 @@ namespace rbf
    *    bitpit::rbf::eRBFType::kUserDefined,
    *    &my_radial_funct
    *  )
-   *
-   *  In this case the instance my_rf will take exclusive ownership of the additional parameters
-   *  (par1 and par2) and will bind such parameters to the function provided as input
-   *  at construction time. The value of there parameters can be accesed/modified
+   *  will create a instance of the radial function (my_rf) which has exclusive ownership 
+   *  over the additional parameters. The value of these parameters can be accesed/modified
    *  any time via #setParameters and #getParameters
    *
-   *  In some cases the user might want to keep ownership of some (all) of the additional parameters.
+   *  In some cases user might want to keep ownership on some (all) of the additional parameters.
    *  You can keep the ownership of such parameters by binding yourself the desired parameters
-   *  and leaving RFP the task of taking the ownership of the remaining parameters.
+   *  and leaving RFP the ownership of the remaining parameters.
    *  For instance, assuming D=3, CoordT = double, and a user-defined function
    *  whihc depends on 3 parameters:
    *
    *  CoordT = my_radial_funct_2( CoordT r, Coord_T par1, CoordT par2, CoordT par3 ) defined somewhere,
    *  double par1 = //somevalue,
-   *         par3 = //somevalue
+   *         par3 = //somevalue;
    *  auto my_rf = new RFP<3, 1 //nr. of parameters that will be managed by RFP// , double>(
    *    bitpit::rbf::eRBFType::kUserDefined,
    *    std::bind( &my_radial_funct_2, std::placeholders::_1, std::cref(par1), std::placeholders::_2, std::cred(par3)
    *  );
    *
-   *  In this case, you will keep the ownership over 2 parameters (par1 and par3) while
-   *  leaving the ownership of only 1 parameter (par2) to my_rf.
+   *  In this case, my_rf will have ownership on 1 parameter (par2) while the ownership of the 2 
+   *  other parameters is left to the user.
   */
   template<
     std::size_t Dim,
@@ -806,7 +658,7 @@ namespace rbf
   >
   class RFP : public RF<Dim, CoordT>
   {
-    // Static asserts ============================================ //
+    // Static asserts ============================================== //
     static_assert(
       (NParams > 0),
       "bitpit::rbf::RFP<Dim, NParams, CoordT>: "
@@ -814,7 +666,7 @@ namespace rbf
       "If the radial function does not depends on any parameter, use RF<Dim, CoordT>"
     );
 
-    // Typedef(s) ================================================ //
+    // Typedef(s) ================================================== //
     private:
     /*! @brief Type of the base class. */
     using base_t      = RF<Dim, CoordT>;
@@ -828,91 +680,76 @@ namespace rbf
     /*! @brief Point type. */
     using point_t     = typename base_t::point_t;
 
-    // Friendships =============================================== //
+    // Friendships ================================================= //
     friend class RF<Dim, CoordT>;
 
-    // Member variable(s) ======================================== //
+    // Member variable(s) ========================================== //
     protected:
     using base_t::mType;
     using base_t::mFunct;
-    /*! @brief List of values for the additional parameters of this radial function. */
-    coord_t     mParams[NParams];
+    /*! @brief Values of the additional parameters for this radial function. */
+    coord_t mParams[NParams];
     public:
     using base_t::center;
     using base_t::radius;
 
-    // Typedef(s) ================================================ //
+    // Constructor(s) ============================================== //
     private:
     /*! @brief Default constructor.
      *
-     *  Initialize a generalized multiquadric radial function with default values
-     *  for the parameters.
+     *  Initialize a generalized radial function with default values for the parameters.
     */
-    RFP() :
-      base_t()
-    {}
+    RFP();
     public:
     /*! @brief Contructor #1.
      *
-     *  Initialize a generalized multiquadrics radial function with the specified
-     *  values for the parameters.
+     *  Initialize a generalized radial function of the specified type,
+     *  from the input pointer to the function implementating the expression of the RF.
      *
-     *  @param [in]       r         radius of this function.
-     *  @param [in]       c         center of this radial function.
-     *  @param [in]       bias      bias coeff.
+     *  @param [in]       type      type of this RF.
+     *  @param [in]       f         pointer to the function implementing the expression
+     *                              of this RF.
     */
     template<class ...Args>
-    RFP( bitpit::rbf::eRBFType type, coord_t(*f)( coord_t, Args ...args) ) :
-      base_t( type, bindParameters(f, mParams) )
-    { }
+    RFP( bitpit::rbf::eRBFType type, coord_t(*f)( coord_t, Args ...args) );
     /*! @brief Copy constructor (deleted) */
     RFP( const self_t & ) = delete;
     /*! @brief Move-constructor (deleted). */
     RFP( self_t && ) = delete;
 
-    // Operator(s) =============================================== //
+    // Operator(s) ================================================= //
     public:
     /*! @brief Copy-assignment operator (delete) */
-    self_t&       operator=( const self_t & ) = delete;
+    self_t& operator=( const self_t & ) = delete;
     /*! @brief Move-assignement operator (delete) */
-    self_t&       operator=( self_t &&other ) = delete;
+    self_t& operator=( self_t &&other ) = delete;
 
-    // Member function(s) ======================================== //
-
-    // Getter(s)/Info -------------------------------------------- //
+    // Getter(s)/Info ============================================== //
     public:
-
     /*! @brief Returns the nr. of additional parameters for this radial function. */
-    virtual size_t          getNumberOfParameters() const override { return NParams; };
+    virtual std::size_t getNumberOfParameters() const override;
     /*! @brief Returns (const) pointer to the list of additional parameters of this funciton. */
-    virtual const coord_t*  getParameters() const override { return mParams; }
+    virtual const coord_t*  getParameters() const override;
 
-    // Setter(s) ------------------------------------------------- //
+    // Setter(s) =================================================== //
     private:
     /*! @brief Bind the expression of the radial function to the parameters of
      *  this instance.
     */
     template<class f_in_t, std::size_t... I>
-    static rf_funct_t       doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> )
-    {
-         return std::bind( f, std::placeholders::_1, std::cref(data[I]...) ); // A trick here
-    }
+    static rf_funct_t       doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> );
     template<class f_in_t>
-    static rf_funct_t       bindParameters( f_in_t f, coord_t* data )
-    {
-         return doBind( f, data, bitpit::make_index_sequence<NParams>{} );
-    }
-    public:
+    static rf_funct_t       bindParameters( f_in_t f, coord_t* data );public:
     /*! @brief Set the value for the additional parameters of this function.*/
-    virtual void            setParameters( const coord_t *values ) override
-    {
-      std::copy( values, values + NParams, mParams );
-    }
-  }; //end class GeneralizedMultiquadrics
+    virtual void            setParameters( const coord_t *values ) override;
+  }; //end class RFP
 
-  // ================================================================ //
-  // EXPLICIT SPECIALIZATIONS                                         //
-  // ================================================================ //
+  // =============================================================== //
+  // DEFINITION OF CLASS RBF                                         //
+  // =============================================================== //
+  // =============================================================== //
+  // EXPLICIT SPECIALIZATIONS                                        //
+  // =============================================================== //
   extern template class RF<1, float>;
   extern template class RF<2, float>;
   extern template class RF<3, float>;
@@ -947,3 +784,9 @@ namespace rbf
 } //end namespace rbf
 
 } //end namespace bitpit
+
+
+// =============================================================== //
+// TEMPLATE IMPLEMENTATIONS                                        //
+// =============================================================== //
+# include "rbf.tpp"
