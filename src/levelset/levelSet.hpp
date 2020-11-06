@@ -113,7 +113,7 @@ class LevelSet{
     void                    compute( ) ;
     void                    update( const std::vector<adaption::Info> & );
 # if BITPIT_ENABLE_MPI
-    void                    partition( const std::vector<adaption::Info> & );
+    BITPIT_DEPRECATED(void  partition( const std::vector<adaption::Info> & ));
 # endif
 };
 
