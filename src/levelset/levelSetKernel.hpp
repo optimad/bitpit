@@ -27,11 +27,13 @@
 
 // Standard Template Library
 # include <array>
+# include <memory>
 # include <vector>
 # include <unordered_map>
 
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
+# include "bitpit_communications.hpp"
 # endif
 
 namespace bitpit{
@@ -80,6 +82,8 @@ class LevelSetKernel{
     MPI_Comm                                    getCommunicator() const;
     void                                        freeCommunicator();
     bool                                        isCommunicatorSet() const;
+
+    std::unique_ptr<DataCommunicator>           createDataCommunicator() const;
 # endif
 
 };
