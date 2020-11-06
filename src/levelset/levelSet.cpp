@@ -608,10 +608,14 @@ void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
     }
 
     // Communicate according to new partitioning
+    std::unique_ptr<DataCommunicator> dataCommunicator;
+    dataCommunicator = m_kernel->createDataCommunicator();
     for( int objectId : m_order){
         auto &visitor = *(m_objects.at(objectId)) ;
 
-        visitor.communicate( sendList, recvList, &mapper ) ;
+        visitor.startExchange( sendList, dataCommunicator.get() );
+        visitor.clearAfterMeshAdaption( mapper ) ;
+        visitor.completeExchange( recvList, dataCommunicator.get() );
     }
 
     for( int objectId : m_order){

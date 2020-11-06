@@ -32,6 +32,9 @@
 # include <unordered_map>
 
 # include "bitpit_IO.hpp"
+# if BITPIT_ENABLE_MPI
+# include "bitpit_communications.hpp"
+# endif
 # include "levelSetCommon.hpp"
 
 namespace bitpit{
@@ -74,9 +77,8 @@ class LevelSetObject : public VTKBaseStreamer{
 
 # if BITPIT_ENABLE_MPI
     void                                        exchangeGhosts() ;
-    void                                        communicate( const std::unordered_map<int,std::vector<long>> &,
-                                                             const std::unordered_map<int,std::vector<long>> &,
-                                                             std::vector<adaption::Info> const *mapper=NULL );
+    void                                        startExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
+    void                                        completeExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
 # endif
 
 

@@ -24,11 +24,6 @@
 
 # include <vector>
 
-# if BITPIT_ENABLE_MPI
-# include <mpi.h>
-# include "bitpit_communications.hpp"
-# endif
-
 # include "bitpit_operators.hpp"
 # include "bitpit_CG.hpp"
 # include "bitpit_patchkernel.hpp"
@@ -580,33 +575,27 @@ void LevelSetObject::_restore( std::istream &stream ){
 #if BITPIT_ENABLE_MPI
 
 /*!
- * Update of ghost cell;
+ * Exchange of data structures of kernel and objects on ghost cells.
  */
 void LevelSetObject::exchangeGhosts(){
-
-    const std::unordered_map<int,std::vector<long>> &sendList =  m_kernelPtr->getMesh()->getGhostCellExchangeSources() ;
-    const std::unordered_map<int,std::vector<long>> &recvList =  m_kernelPtr->getMesh()->getGhostCellExchangeTargets() ;
-
-    communicate(sendList,recvList);
-}
-
-/*!
- * communicates data structures of kernel and objects.
- * If mapper!=NULL, clearAfterMeshAdaption of kernel and objects will be called between send and receive.
- * @param[in] sendList list of elements to be send
- * @param[in] recvList list of elements to be received
- * @param[in] mapper mapper containing mesh modifications
- */
-void LevelSetObject::communicate( const std::unordered_map<int,std::vector<long>> &sendList,
-                                  const std::unordered_map<int,std::vector<long>> &recvList,
-                                  std::vector<adaption::Info> const *mapper){
 
     if (!m_kernelPtr->getMesh()->isPartitioned()) {
         return;
     }
 
-    // Create a data communicator
-    std::unique_ptr<DataCommunicator> dataCommunicator = m_kernelPtr->createDataCommunicator() ;
+    std::unique_ptr<DataCommunicator> dataCommunicator = m_kernelPtr->createDataCommunicator();
+    startExchange(m_kernelPtr->getMesh()->getGhostCellExchangeSources(), dataCommunicator.get());
+    completeExchange(m_kernelPtr->getMesh()->getGhostCellExchangeTargets(), dataCommunicator.get());
+}
+
+/*!
+ * Start exchange of data structures of kernel and objects.
+ * @param[in] sendList list of elements to be send
+ * @param[in,out] dataCommunicator is the data communicator that will be used
+ * for the data exchange
+ */
+void LevelSetObject::startExchange( const std::unordered_map<int,std::vector<long>> &sendList,
+                                    DataCommunicator *dataCommunicator){
 
     // Fill the send buffer with the  content from the LevelSetObject base
     // class and the specific derived class.
@@ -626,14 +615,19 @@ void LevelSetObject::communicate( const std::unordered_map<int,std::vector<long>
     // Start the sends
     dataCommunicator->startAllRecvs();
 
-    // In case of mesh adaption, the ids of the moved items must be freed
-    // in order to avoid conflicts when ids are recycled
-    if (mapper) {
-        clearAfterMeshAdaption(*mapper);
-    }
-
     // Start the sends
     dataCommunicator->startAllSends();
+
+}
+
+/*!
+ * Complete exchange of data structures of kernel and objects.
+ * @param[in] recvList list of elements to be received
+ * @param[in,out] dataCommunicator is the data communicator that will be used
+ * for the data exchange
+ */
+void LevelSetObject::completeExchange( const std::unordered_map<int,std::vector<long>> &recvList,
+                                       DataCommunicator *dataCommunicator){
 
     // Check which data communications have arrived. For those which are
     // available start reading the databuffer into the data structure of
