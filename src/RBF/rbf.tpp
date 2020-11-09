@@ -282,6 +282,19 @@ namespace rbf
   template< std::size_t D, class C >
   eRBFType RF<D,C>::getType() const { return mType; }
 
+  // ---------------------------------------------------------------------- //
+  template< std::size_t D, class C >
+  void RF<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
+  {
+    std::string   s( indent, ' ' );
+    out << s << "Type:        " << bitpit::rbf::getRBFTag( mType ) << '\n'
+        << s << "radius:      " << radius << "\n"
+        << s << "center:      [ ";
+    for ( std::size_t i = 0; i < D; ++i )
+      out << center[i] << ' ';
+    out << "]\n";
+  }
+  
   // Setter(s) ============================================================== //
   
   // ------------------------------------------------------------------------ //
@@ -348,6 +361,19 @@ namespace rbf
   void RFP<D,N,C>::setParameters( const coord_t *values )
   {
     std::copy( values, values + N, mParams );
+  }
+  
+  // ---------------------------------------------------------------------- //
+  template< std::size_t D, std::size_t N, class C >
+  void RFP<D,N,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
+  {
+    std::string   s( indent, ' ' );
+    base_t::display(out, indent);
+    out << s  << "# params:    " << N << '\n'
+        << s  << "params:      [ ";
+    for ( std::size_t i = 0; i < N; ++i )
+      out << mParams[i] << ' ';
+    out << "]\n";
   }
   
 } //end namespace rbf

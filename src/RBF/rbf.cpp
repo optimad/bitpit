@@ -1369,6 +1369,13 @@ namespace rbf
   // ======================================================================= //
   // EXPLICIT SPECIALIZATIONS                                                //
   // ======================================================================= //
+  # ifdef __USE_LAPACKE__
+  template<>
+  const typename LAPACKE_xgels_type_wrap<float>::xgels_signature_t LAPACKE_xgels_type_wrap<float>::xgels_ptr = &LAPACKE_sgels;
+  template<>
+  const typename LAPACKE_xgels_type_wrap<double>::xgels_signature_t LAPACKE_xgels_type_wrap<double>::xgels_ptr = &LAPACKE_dgels;
+  # endif
+  
   template class RF<1, float>;
   template class RF<2, float>;
   template class RF<3, float>;
@@ -1398,6 +1405,16 @@ namespace rbf
   template class RFP<1, 2, long double>;
   template class RFP<2, 2, long double>;
   template class RFP<3, 2, long double>;
+  
+  template class RBF<1, float>;
+  template class RBF<2, float>;
+  template class RBF<3, float>;
+  template class RBF<1, double>;
+  template class RBF<2, double>;
+  template class RBF<3, double>;
+  template class RBF<1, long double>;
+  template class RBF<2, long double>;
+  template class RBF<3, long double>;
 
   
 } //end namespace rbf

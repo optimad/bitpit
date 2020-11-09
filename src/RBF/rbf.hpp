@@ -23,6 +23,12 @@
 \*---------------------------------------------------------------------------*/
 # pragma once
 # undef __USE_DEPRECATED__
+# define __RBF_USE_EIGEN__
+# ifdef __RBF_USE_EIGEN__
+# undef __RBF_USE_LAPACKE__
+# else
+# define __RBF_USE_LAPACKE__
+# endif
 
 // ========================================================================= //
 // INCLUDES                                                                  //
@@ -37,12 +43,20 @@
 # include <type_traits>
 # include <memory>
 # include <string>
+# include <iostream>
 # include <stdexcept>
+
+// Eigen
+# ifdef __RBF_USE_EIGEN__
+# include <Eigen/Dense>
+# endif
 
 // Bitpit
 # include "bitpit_operators.hpp"
 # include "metaprogramming.hpp"
+# ifdef __RBF_USE_LAPACKE__
 # include "bitpit_private_lapacke.hpp"
+# endif
 
 
 namespace bitpit{
@@ -454,10 +468,11 @@ namespace rbf
   std::string   getRBFTag( eRBFType type );
   
   // ---------------------------------------------------------------- //
-  /*! @brief Set the weights of the input RBF, for a least square interpolation
-   *  problem.
+  /*! @brief Compute the weights of a basis of radial functions
+   *  for a least square interpolation problem.
    *
-   *  Given a set of scattered data, find the weights of the radial basis functions
+   *  Given a set of scattered data in a Dim dimensional space, 
+   *  this function computes the weights associated to each radial function
    *  which best fit the input data in a least square sense.
    *
    *  @tparam         Dim           nr. of woking dimensions.
@@ -470,12 +485,26 @@ namespace rbf
    *
    *  @result Returns (true) on success.
   */
+  # ifdef __RBF_USE_LAPACKE__
+  template< class CoordT >
+  struct LAPACKE_xgels_type_wrap
+  {
+    using xgels_signature_t = lapack_int (*)( lapack_int, char, lapack_int, lapack_int, lapack_int, CoordT*, lapack_int, CoordT*, lapack_int );
+    static const xgels_signature_t xgels_ptr;
+  }; //end struct LAPACKE_xgels_type_wrap
+  template< class CoordT >
+  const typename LAPACKE_xgels_type_wrap<CoordT>::xgels_signature_t LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr = nullptr;
+  template<>
+  const LAPACKE_xgels_type_wrap<float>::xgels_signature_t LAPACKE_xgels_type_wrap<float>::xgels_ptr;
+  template<>
+  const LAPACKE_xgels_type_wrap<double>::xgels_signature_t LAPACKE_xgels_type_wrap<double>::xgels_ptr;
+  # endif
   template<
     std::size_t Dim,
     class CoordT,
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  bool computeRBFWeights( const std::vector<typename RBF<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RBF<Dim,CoordT> rbf )
+  bool computeRBFWeights( const std::vector<typename RBF<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RBF<Dim,CoordT> &rbf )
   {
     if ( data_points.size() != data_values.size() )
       throw std::runtime_error(
@@ -490,46 +519,95 @@ namespace rbf
     const CoordT  rcond = (CoordT)-1;
 
     // Scope variables
-    int n_rbf         = rbf.size();
-    int n_data_points = data_points.size();
+    int n_rbf   = rbf.size();
+    int n_data  = data_points.size();
 
+    // Implementation with LAPACKE support -------------------------- //
+    // Implementation node: dgesv suffer from numerical stability issues.
+    // Better implementation in Eigen with QR factorization and full pivoting.
+    # ifdef __RBF_USE_LAPACKE__
     // Scope variables
-    std::vector<CoordT> A(n_data_points * n_rbf);
-    std::vector<CoordT> b(n_data_points * n_data_points);
-    std::vector<CoordT> s(n_data_points);
+    std::vector<CoordT> mat( n_data * n_rbf );
+    std::vector<CoordT> rhs( n_data );
 
-    // Assembly rhs
-    for( std::size_t j = 0; j < n_data_points; ++j )
-        for( std::size_t i = 0; i < n_data_points; ++i )
-            b[j*n_data_points + i] = data_values[j][i];
-        //next i
+    // Fill rhs
+    for( std::size_t i_data = 0; i_data < n_data; ++i_data )
+      rhs[i_data] = data_values[i_data];
     //next j
 
-    // Assembly coeff. matrix
-    for( std::size_t j = 0, k = 0; j < n_rbf; ++j ) {
-        const auto &rf = rbf.at(j);
-        for( std::size_t i = 0; i < n_data_points; ++i ) {
-            const auto &p = data_points.at(i);
-            A[k++] = rf.second->operator()( p );
+    // Fill coeff. matrix
+    for( std::size_t i_data = 0, i_mat = 0; i_data < n_data; ++i_data ) {
+        const auto &p = data_points.at(i_data);
+        for( std::size_t i_rbf = 0; i_rbf < n_rbf; ++i_rbf ) {
+            const auto &rf = *( rbf.at(i_rbf).second );
+            mat[i_mat++] = rf( p );
         } //next i
     } //next j
 
-    // Solve least square
-    int rank;
-    auto info = LAPACKE_dgelsd(
-      LAPACK_COL_MAJOR, 
-      n_data_points, n_rbf, n_data_points, A.data(), 
-      n_data_points, b.data(), 
-      n_data_points, s.data(), 
-      rcond, &rank 
-    );
-
+    // Single precision
+    lapack_int info;
+    if ( LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr )
+    {
+      info = LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr( 
+        LAPACK_ROW_MAJOR, //matrix layout
+        'N',              // 'M' for col major, 'N' for row major 
+        n_data,           //nr. of matrix row
+        n_rbf,            //nr. of matrix cols
+        1,                //nr. of rhs cols.
+        mat.data(),       //ptr to matrix entries
+        n_rbf,            //leading dim for matrix array
+        rhs.data(),       //ptr. to rhs entries
+        1                 //leading dim for rhs array
+      );
+    }
+    else
+    {
+      throw std::runtime_error(
+        "bitpit::rbf::computeRBFWeights: ** ERROR ** LAPACK does not support the required floating point precision."
+      );
+    }
+    
     // Check for error(s)
     if( info > 0 )
       return false;
-
+    
     // Set weights (if success)
-    rbf.setWeights(s);
+    rbf.setWeights(rhs.cbegin(), rhs.cbegin() + n_rbf );
+    # endif
+
+    // Implementation with EIGEN support ---------------------------- //
+    # ifdef __RBF_USE_EIGEN__
+    
+    // Typedef(s)
+    using matrix_t  = Eigen::Matrix<CoordT, Eigen::Dynamic, Eigen::Dynamic>;
+    using vec_t     = Eigen::Matrix<CoordT, Eigen::Dynamic, 1>;
+    
+    // Fill coeff. matrix
+    matrix_t  mat( n_data, n_rbf );
+    vec_t     rhs( n_data );
+    
+     // Fill rhs
+    for( std::size_t i_data = 0; i_data < n_data; ++i_data )
+      rhs(i_data) = data_values[i_data];
+    //next j
+
+    // Fill coeff. matrix
+    for( std::size_t i_data = 0; i_data < n_data; ++i_data ) {
+        const auto &p = data_points.at(i_data);
+        for( std::size_t i_rbf = 0; i_rbf < n_rbf; ++i_rbf ) {
+            const auto &rf = *( rbf.at(i_rbf).second );
+            mat(i_data, i_rbf) = rf( p );
+        } //next i
+    } //next j
+      
+    // Solve with QR fact. full pivoting
+    vec_t sol = mat.colPivHouseholderQr().solve(rhs);
+    
+    // Assign weights to RBF
+    rbf.setWeights( sol.data(), sol.data() + sol.size() );
+    
+    # endif
+
     
     // Return success
     return true;
@@ -665,7 +743,13 @@ namespace rbf
     virtual const coord_t* getParameters() const;
     /*! @brief Returns the type of this radial function. */
     eRBFType getType() const;
-
+    /*! @brief Display info for this RBF (mostly meant for debugging purposes).
+     *
+     *  @param [in,out]   out       (default = std::cout) output stream.
+     *  @param [in]       indent    (default = 0) indentation level.
+    */
+    virtual void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const;
+    
     // Setter(s) =================================================== //
     public:
     /*! @brief Set default values for function parameters, ie.:
@@ -816,6 +900,12 @@ namespace rbf
     virtual std::size_t getNumberOfParameters() const override;
     /*! @brief Returns (const) pointer to the list of additional parameters of this funciton. */
     virtual const coord_t*  getParameters() const override;
+    /*! @brief Display info for this RBF (mostly meant for debugging purposes).
+     *
+     *  @param [in,out]   out       (default = std::cout) output stream.
+     *  @param [in]       indent    (default = 0) indentation level.
+    */
+    virtual void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const override;
 
     // Setter(s) =================================================== //
     private:
@@ -886,7 +976,7 @@ namespace rbf
      *  @param [in]     type    type of radial basis.
     */
     RBF( std::size_t n, eRBFType type ) :
-      base_t( n, std::make_pair( (coord_t)1, nullptr ) )
+      base_t( n )
     {
       for ( auto &rf : *this )
         rf.second.reset( rf_t::New( type ) ); 
@@ -907,7 +997,7 @@ namespace rbf
     {
       coord_t out = (coord_t)0;
       for ( const auto &rf : *this )
-        out += rf.first * rf.second(coords);
+        out += rf.first * rf.second->operator()(coords);
       return out;
     }
     
@@ -918,14 +1008,52 @@ namespace rbf
     /*! @brief Returns (const/non-const) reference to the i-th radial function in the basis. */
     using   base_t::operator[];
     using   base_t::at;
-    /*! @brief Returns a copy of the weights for this radial basis function. */
-    std::vector<coord_t> getWeights() const
+    /*! @brief Returns the collection of weights for this radial basis function. */
+    std::vector<coord_t> collectWeights() const
     {
-      std::vector<coord_t> weights( base_t::size() );
-      auto i = weights.begin(), e = weights.end();
-      auto j = base_t::cbegin();
+      std::vector<coord_t> out( base_t::size() );
+      auto  i = out.begin(), 
+            e = out.end();
+      auto  j = base_t::cbegin();
       for ( ; i != e; ++i, ++j )
         (*i) = j->first;
+      return out;
+    }
+    /*! @brief Returns const/non-const reference to the weight of the i-th radial function. */
+    const coord_t& getWeight( std::size_t i ) const
+    {
+      return this->at(i).first;
+    }
+    const coord_t& getWeight( std::size_t i )
+    {
+      return const_cast< coord_t& >( const_cast<const self_t*>( this )->getWeight(i) );
+    }
+    /*! @brief Returns const/non-const reference to the i-th radial function. */
+    const rf_t& getRadialFunction( std::size_t i ) const
+    {
+      return *( this->at(i).second );
+    }
+    rf_t& getRadialFunction( std::size_t i )
+    {
+      return const_cast< rf_t& >( const_cast< const self_t* >( this )->getRadialFunction(i) );
+    }
+    /*! @brief Display info to the output stream provided as input.
+     *  (Mostly meant for debugging purposes).
+     *
+     *  @param [in,out]   out     (default = std::cout) output stream.
+     *  @param [in]       indent  (default = 0) indentation level.
+    */
+    void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const
+    {
+      std::string s(indent, ' ');
+      out << s << "# of RBF:   " << this->size() << '\n';
+      std::size_t i = 0;
+      for ( const auto &rf : *this )
+      {
+        out << s << "  #" << i++ << '\n'
+            << s << "  weight: " << rf.first << '\n';
+        rf.second->display( out, indent +2 );
+      } //next rf
     }
     
     // Setter(s) =================================================== //
@@ -951,17 +1079,37 @@ namespace rbf
     /*! @brief Utility function to set the weights of each radial function. */
     void setWeights( const std::vector<coord_t> &weights )
     {
-      if ( weights.size() != base_t::size() )
+      setWeights( weights.cbegin(), weights.cend() );
+    }
+    /*! @brief Overloading of #setWeights taking a range iterator as input. 
+     *
+     *  Set the weight for each radial function from the range [first, last).
+     *  [first, last) must contain at least N values (N being the size of this basis).
+     *
+     *  @tparam       ItaratorType      iterator type. IteratorType must be at
+     *                                  least a forward iterator.
+     * 
+     *  @param [in]   first, last       iterators pointing to the beginning/end of the 
+     *                                  input range.
+    */
+    template< class IteratorType >
+    void setWeights( IteratorType first, IteratorType last )
+    {
+      if ( std::distance( first, last ) != base_t::size() )
         throw std::runtime_error(
-          "bitpit::rbf::RBF::setWeights: ** ERROR** The nr. of the input weights "
+          "bitpit::rbf::RBF::setWeights: ** ERROR** The size of the input range "
           "and the size of this basis mismatch!"          
         );
-      auto i = weights.cbegin(), e = weights.cend();
       auto j = base_t::begin();
-      for ( ; i != e; ++i, ++j )
-        j->first = (*i);
+      for ( ; first != last; ++first, ++j )
+        j->first = (*first);
     }
-    
+    /*! @brief Set the specified radius for all radial function in this basis. */
+    void setRadius( coord_t radius )
+    {
+      for ( auto &rf : *this )
+        rf.second->radius = radius;
+    }
   }; //end class RBF
   
   // =============================================================== //
@@ -996,6 +1144,16 @@ namespace rbf
   extern template class RFP<1, 2, long double>;
   extern template class RFP<2, 2, long double>;
   extern template class RFP<3, 2, long double>;
+  
+  extern template class RBF<1, float>;
+  extern template class RBF<2, float>;
+  extern template class RBF<3, float>;
+  extern template class RBF<1, double>;
+  extern template class RBF<2, double>;
+  extern template class RBF<3, double>;
+  extern template class RBF<1, long double>;
+  extern template class RBF<2, long double>;
+  extern template class RBF<3, long double>;
   /*! @} */
 
 } //end namespace rbf
