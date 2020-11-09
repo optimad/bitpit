@@ -224,7 +224,7 @@ namespace testing
       if ( pars )
         delete [] pars;
       std::vector<std::tuple<point_t, coord_t, coord_t>>(0).swap( test_values );
-      
+
       return true;
     }
     bool  test() const
@@ -315,7 +315,7 @@ namespace testing
   {
     // Scope variables
     int err = 0;
-    
+
     // Test get/setParameters
     std::cout << "    testing setParameters, getParameters" << std::endl;
     try
@@ -327,12 +327,12 @@ namespace testing
         std::random_device dev;
         std::default_random_engine eng(dev());
         std::uniform_real_distribution<coeff_t> dist( (coeff_t)0, (coeff_t)1);
-        
+
         // Set random values for RF parameters
         coeff_t *pars = new coeff_t[np];
         for ( auto i = 0; i < np; ++i )
           pars[i] = dist(eng);
-       
+
         // Assign the parameters
         rf->setParameters(pars);
         if ( auto out = rf->getParameters() )
@@ -369,6 +369,7 @@ namespace testing
           ++err;
         }
       }
+      delete rf;
     }
     catch( std::exception &e )
     {
@@ -397,10 +398,10 @@ namespace testing
     // Test operator(s)
     std::cout << "   testing operator(s)" << std::endl;
     err += ( test_rf_operators<d, coeff_t>( type ) != 0 );
-    
+
     // Output message
     std::cout << " test completed with " << err << " error(s)" << std::endl;
-    
+
     return err;
 
   }
@@ -423,7 +424,7 @@ namespace testing
 
     // Output message
     std::cout << err << " unit test(s) failed" << std::endl;
-    
+
     return err;
   }
 } //end namespace testings
