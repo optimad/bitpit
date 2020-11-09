@@ -32,7 +32,7 @@ namespace rbf
   // ======================================================================== //
   // IMPLEMENTATION OF RADIAL FUNCTION SUPPORTED BY bitpit.                   //
   // ======================================================================== //
-  
+
   // ------------------------------------------------------------------------ //
   template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
   CoordT  wendland_c2( CoordT r )
@@ -90,7 +90,7 @@ namespace rbf
 
 
    // Static member function(s) ============================================== //
-    
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   RF<D,C>* RF<D,C>::New( eRBFType type )
@@ -200,6 +200,7 @@ namespace rbf
           type,
           &bitpit::rbf::polyharmonic<coord_t, 2>
         );
+        out->mParams[0] = (coord_t) 1;
         out->mHasCompactSupport = false;
         return out;
       } //end case kPolyharmonic2
@@ -208,6 +209,7 @@ namespace rbf
           type,
           &bitpit::rbf::polyharmonic<coord_t, 3>
         );
+        out->mParams[0] = (coord_t) 1;
         out->mHasCompactSupport = false;
         return out;
       } //end case kPolyharmonic3
@@ -216,6 +218,7 @@ namespace rbf
           type,
           &bitpit::rbf::polyharmonic<coord_t, 4>
         );
+        out->mParams[0] = (coord_t) 1;
         out->mHasCompactSupport = false;
         return out;
       } //end case kPolyharmonic3
@@ -225,7 +228,7 @@ namespace rbf
   }
 
   // Constructor(s) ========================================================== //
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   RF<D,C>::RF() :
@@ -236,7 +239,7 @@ namespace rbf
   {
     setDefault();
   }
- 
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   RF<D,C>::RF( bitpit::rbf::eRBFType type, coord_t (*f)(coord_t) ) :
@@ -245,7 +248,7 @@ namespace rbf
   {
     setDefault();
   }
- 
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   RF<D,C>::RF( bitpit::rbf::eRBFType type, rf_funct_t const &f ) :
@@ -256,7 +259,7 @@ namespace rbf
   }
 
   // Operator(s) ============================================================ //
- 
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   typename RF<D,C>::coord_t RF<D,C>::operator()( const point_t &coords ) const
@@ -265,19 +268,19 @@ namespace rbf
   }
 
   // Getter(s)/Info ========================================================= //
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   std::size_t	RF<D,C>::getNumberOfParameters() const { return 0; };
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   bool RF<D,C>::hasCompactSupport() const { return mHasCompactSupport; };
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   const typename RF<D,C>::coord_t* RF<D,C>::getParameters() const { return nullptr; };
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   eRBFType RF<D,C>::getType() const { return mType; }
@@ -294,9 +297,9 @@ namespace rbf
       out << center[i] << ' ';
     out << "]\n";
   }
-  
+
   // Setter(s) ============================================================== //
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   void RF<D,C>::setDefault()
@@ -304,17 +307,17 @@ namespace rbf
     radius = (C) 1;
     center.fill( (C)0 );
   }
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   void RF<D,C>::setParameters( const coord_t * ) {};
-  
+
   // ======================================================================== //
   // IMPLEMENTATION OF CLASS RFP                                              //
   // ======================================================================== //
 
   // Constructor(s) ========================================================= //
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   RFP<D,N,C>::RFP() :
@@ -327,19 +330,19 @@ namespace rbf
   RFP<D,N,C>::RFP( bitpit::rbf::eRBFType type, coord_t(*f)( coord_t, Args ...args) ) :
     base_t( type, bindParameters(f, mParams) )
   { }
-  
+
   // Getter(s)/Info ========================================================= //
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   std::size_t RFP<D,N,C>::getNumberOfParameters() const { return N; };
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   const typename RFP<D,N,C>::coord_t* RFP<D,N,C>::getParameters() const { return mParams; }
 
   // Setter(s) ============================================================== //
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   template<class f_in_t, std::size_t... I>
@@ -347,7 +350,7 @@ namespace rbf
   {
        return std::bind( f, std::placeholders::_1, std::cref(data[I]...) ); // A trick here
   }
-  
+
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   template<class f_in_t>
@@ -355,14 +358,14 @@ namespace rbf
   {
        return doBind( f, data, bitpit::make_index_sequence<N>{} );
   }
-  
+
   // ---------------------------------------------------------------------- //
   template< std::size_t D, std::size_t N, class C >
   void RFP<D,N,C>::setParameters( const coord_t *values )
   {
     std::copy( values, values + N, mParams );
   }
-  
+
   // ---------------------------------------------------------------------- //
   template< std::size_t D, std::size_t N, class C >
   void RFP<D,N,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
@@ -375,6 +378,6 @@ namespace rbf
       out << mParams[i] << ' ';
     out << "]\n";
   }
-  
+
 } //end namespace rbf
 } //end namespace bitpit
