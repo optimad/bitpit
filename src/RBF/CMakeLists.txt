@@ -47,8 +47,12 @@ if (NOT "${RBF_SOURCES}" STREQUAL "")
     set_lto_property(${RBF_TARGET_OBJECT})
 endif ()
 
+# Config file
+configure_file( rbf_config.hpp.in rbf_config.hpp )
+
 install(FILES ${RBF_HEADERS} DESTINATION include/${PROJECT_NAME})
 
 # Definitions
 set(RBF_DEFINITIONS_DESCRIPTION "Pre-processor definitions needed by RBF Library")
 set(RBF_DEFINITIONS "" CACHE INTERNAL "${RBF_DEFINITIONS_DESCRIPTION}" FORCE)
+

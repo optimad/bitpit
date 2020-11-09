@@ -1,0 +1,42 @@
+/*---------------------------------------------------------------------------*\
+ *
+ *  bitpit
+ *
+ *  Copyright (C) 2015-2019 OPTIMAD engineering Srl
+ *
+ *  -------------------------------------------------------------------------
+ *  License
+ *  This file is part of bitpit.
+ *
+ *  bitpit is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License v3 (LGPL)
+ *  as published by the Free Software Foundation.
+ *
+ *  bitpit is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ *  License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
+ *
+ \*---------------------------------------------------------------------------*/
+ /*!  @file rbf_config.hpp
+  *   @author Alessandro Alaia (mail to: alessandro.alaia@optimad.it)
+  *   @brief Configuration file for bitpit RBF module.
+ */
+ # pragma once
+ 
+# undef __USE_DEPRECATED__    //link with new DEPRECATED EXPERIMENTAL FEATURE
+#cmakedefine RBF_EIGEN_SUPPORT
+
+# ifdef RBF_EIGEN_SUPPORT
+# define __RBF_USE_EIGEN__
+# endif
+
+# define __RBF_USE_EIGEN__ 
+# ifdef __RBF_USE_EIGEN__
+# undef __RBF_USE_LAPACKE__
+# else
+# define __RBF_USE_LAPACKE__
+# endif

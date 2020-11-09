@@ -635,6 +635,7 @@ if (${_EIGEN_index} GREATER -1)
     #list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/LAPACKE/cmake")
     #find_package(EIGEN REQUIRED)
     
+    set( RBF_EIGEN_SUPPORT BOOL ON )
     set( EIGEN_ROOT_DIR CACHE PATH "Path to Eigen root dir" )
     set(EIGEN_PRIVATE_INCLUDE_DIR "${EIGEN_ROOT_DIR}")
 
