@@ -44,13 +44,13 @@ typedef std::array<double,3> array3D ;
  *  \{
  */
 
-static const double DEFAULT_DISTANCE_TOLERANCE = 1.e-12;
-static const double DEFAULT_COPLANARITY_TOLERANCE = 1.e-12;
+const double DEFAULT_DISTANCE_TOLERANCE = 1.e-12;
+const double DEFAULT_COPLANARITY_TOLERANCE = 1.e-12;
 
 /*!
  * The edge vertex connectivty of a box
  */
-static const std::array< std::array<int,2>,12> boxEdgeVertexConnectivity =
+const std::array< std::array<int,2>,12> boxEdgeVertexConnectivity =
 {{
     std::array<int,2>{ {0,2} },
     std::array<int,2>{ {1,3} },
@@ -70,7 +70,7 @@ static const std::array< std::array<int,2>,12> boxEdgeVertexConnectivity =
 /*!
  * The face vertex connectivty of a box
  */
-static const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
+const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
 {{
     std::array<int,4>{ {0,2,6,4} },
     std::array<int,4>{ {1,3,7,5} },
