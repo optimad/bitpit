@@ -506,115 +506,8 @@ namespace rbf
     class CoordT,
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  bool computeRBFWeights( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf )
-  {
-    if ( data_points.size() != data_values.size() )
-      throw std::runtime_error(
-        "bitpit::rbf::computeRBFWeights: The nr. of data points and the nr. of data values mismatch!"
-      );
-    if ( data_points.size() < rbf.size() )
-      throw std::runtime_error(
-        "bitpit::rbf::computeRBFWeights: The nr. of data points must be at least the size of the radial function basis."
-      );
-
-    // Constant(s)
-    const CoordT  rcond = (CoordT)-1;
-
-    // Scope variables
-    int n_rbf   = rbf.size();
-    int n_data  = data_points.size();
-
-    // Implementation with LAPACKE support -------------------------- //
-    // Implementation node: dgesv suffer from numerical stability issues.
-    // Better implementation in Eigen with QR factorization and full pivoting.
-    # ifdef __RBF_USE_LAPACKE__
-    // Scope variables
-    std::vector<CoordT> mat( n_data * n_rbf );
-    std::vector<CoordT> rhs( n_data );
-
-    // Fill rhs
-    for( std::size_t i_data = 0; i_data < n_data; ++i_data )
-      rhs[i_data] = data_values[i_data];
-    //next j
-
-    // Fill coeff. matrix
-    for( std::size_t i_data = 0, i_mat = 0; i_data < n_data; ++i_data ) {
-        const auto &p = data_points.at(i_data);
-        for( std::size_t i_rbf = 0; i_rbf < n_rbf; ++i_rbf ) {
-            const auto &rf = *( rbf.at(i_rbf).second );
-            mat[i_mat++] = rf( p );
-        } //next i
-    } //next j
-
-    // Single precision
-    lapack_int info;
-    if ( LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr )
-    {
-      info = LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr( 
-        LAPACK_ROW_MAJOR, //matrix layout
-        'N',              // 'M' for col major, 'N' for row major 
-        n_data,           //nr. of matrix row
-        n_rbf,            //nr. of matrix cols
-        1,                //nr. of rhs cols.
-        mat.data(),       //ptr to matrix entries
-        n_rbf,            //leading dim for matrix array
-        rhs.data(),       //ptr. to rhs entries
-        1                 //leading dim for rhs array
-      );
-    }
-    else
-    {
-      throw std::runtime_error(
-        "bitpit::rbf::computeRBFWeights: ** ERROR ** LAPACK does not support the required floating point precision."
-      );
-    }
-    
-    // Check for error(s)
-    if( info > 0 )
-      return false;
-    
-    // Set weights (if success)
-    rbf.setWeights(rhs.cbegin(), rhs.cbegin() + n_rbf );
-    # endif
-
-    // Implementation with EIGEN support ---------------------------- //
-    # ifdef __RBF_USE_EIGEN__
-    
-    // Typedef(s)
-    using matrix_t  = Eigen::Matrix<CoordT, Eigen::Dynamic, Eigen::Dynamic>;
-    using vec_t     = Eigen::Matrix<CoordT, Eigen::Dynamic, 1>;
-    
-    // Fill coeff. matrix
-    matrix_t  mat( n_data, n_rbf );
-    vec_t     rhs( n_data );
-    
-     // Fill rhs
-    for( std::size_t i_data = 0; i_data < n_data; ++i_data )
-      rhs(i_data) = data_values[i_data];
-    //next j
-
-    // Fill coeff. matrix
-    for( std::size_t i_data = 0; i_data < n_data; ++i_data ) {
-        const auto &p = data_points.at(i_data);
-        for( std::size_t i_rbf = 0; i_rbf < n_rbf; ++i_rbf ) {
-            const auto &rf = *( rbf.at(i_rbf).second );
-            mat(i_data, i_rbf) = rf( p );
-        } //next i
-    } //next j
-      
-    // Solve with QR fact. full pivoting
-    vec_t sol = mat.colPivHouseholderQr().solve(rhs);
-    
-    // Assign weights to RBF
-    rbf.setWeights( sol.data(), sol.data() + sol.size() );
-    
-    # endif
-
-    
-    // Return success
-    return true;
-  }
-
+  bool computeRBFWeights( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf );
+  
   // ================================================================ //
   // DEFINITION OF CLASS RadialFunct									                //
   // ================================================================ //
@@ -966,9 +859,7 @@ namespace rbf
      *
      *  Initialize a empty radial basis.
     */
-    RFBasis() :
-      base_t()
-    {}
+    RFBasis();
     /*! @brief Constructor #1.
      *
      *  Initialize a radial basis function with N functions of the specified,
@@ -977,12 +868,7 @@ namespace rbf
      *  @param [in]     N       nr. of functions.
      *  @param [in]     type    type of radial basis.
     */
-    RFBasis( std::size_t n, eRBFType type ) :
-      base_t( n )
-    {
-      for ( auto &rf : *this )
-        rf.second.reset( rf_t::New( type ) ); 
-    }
+    RFBasis( std::size_t n, eRBFType type );
     /*! @brief Copy-constructor (deleted). */
     RFBasis( const self_t & ) = delete;
     /*! @brief Move-constructor (deleted). */
@@ -995,13 +881,7 @@ namespace rbf
     /*! @brief Move-assignment operator (deleted). */
     self_t& operator=( self_t && ) = delete;
     /*! @brief Evaluate the linear combination of the RFs at the input point. */
-    coord_t operator()( const point_t &coords ) const
-    {
-      coord_t out = (coord_t)0;
-      for ( const auto &rf : *this )
-        out += rf.first * rf.second->operator()(coords);
-      return out;
-    }
+    coord_t operator()( const point_t &coords ) const;
     
     // Getter(s)/Info ============================================== //
     public:
@@ -1011,53 +891,21 @@ namespace rbf
     using   base_t::operator[];
     using   base_t::at;
     /*! @brief Returns the collection of weights for this radial basis function. */
-    std::vector<coord_t> collectWeights() const
-    {
-      std::vector<coord_t> out( base_t::size() );
-      auto  i = out.begin(), 
-            e = out.end();
-      auto  j = base_t::cbegin();
-      for ( ; i != e; ++i, ++j )
-        (*i) = j->first;
-      return out;
-    }
+    std::vector<coord_t> collectWeights() const;
     /*! @brief Returns const/non-const reference to the weight of the i-th radial function. */
-    const coord_t& getWeight( std::size_t i ) const
-    {
-      return this->at(i).first;
-    }
-    const coord_t& getWeight( std::size_t i )
-    {
-      return const_cast< coord_t& >( const_cast<const self_t*>( this )->getWeight(i) );
-    }
+    const coord_t& getWeight( std::size_t i ) const;
+    coord_t& getWeight( std::size_t i );
     /*! @brief Returns const/non-const reference to the i-th radial function. */
-    const rf_t& getRadialFunction( std::size_t i ) const
-    {
-      return *( this->at(i).second );
-    }
-    rf_t& getRadialFunction( std::size_t i )
-    {
-      return const_cast< rf_t& >( const_cast< const self_t* >( this )->getRadialFunction(i) );
-    }
+    const rf_t& getRadialFunction( std::size_t i ) const;
+    rf_t& getRadialFunction( std::size_t i );
     /*! @brief Display info to the output stream provided as input.
      *  (Mostly meant for debugging purposes).
      *
      *  @param [in,out]   out     (default = std::cout) output stream.
      *  @param [in]       indent  (default = 0) indentation level.
     */
-    void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const
-    {
-      std::string s(indent, ' ');
-      out << s << "# of RBF:   " << this->size() << '\n';
-      std::size_t i = 0;
-      for ( const auto &rf : *this )
-      {
-        out << s << "  #" << i++ << '\n'
-            << s << "  weight: " << rf.first << '\n';
-        rf.second->display( out, indent +2 );
-      } //next rf
-    }
-    
+    void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const;
+
     // Setter(s) =================================================== //
     public:
     /*! @brief Add a new radial function to the basis. 
@@ -1068,21 +916,11 @@ namespace rbf
      *  @result Returns the position in the basis where the new function
      *  has been added.
     */
-    std::size_t add( std::unique_ptr<rf_t> rf, CoordT weight = (CoordT)1 )
-    {
-      base_t::push_back( std::make_pair( weight, std::move(rf) ) );
-      return base_t::size()-1;
-    }
+    std::size_t add( std::unique_ptr<rf_t> rf, CoordT weight = (CoordT)1 );
     /*! @brief Remove the i-th function from the basis. */
-    void remove( std::size_t i )
-    {
-      base_t::erase( base_t::begin() + i );
-    }
+    void remove( std::size_t i );
     /*! @brief Utility function to set the weights of each radial function. */
-    void setWeights( const std::vector<coord_t> &weights )
-    {
-      setWeights( weights.cbegin(), weights.cend() );
-    }
+    void setWeights( const std::vector<coord_t> &weights );
     /*! @brief Overloading of #setWeights taking a range iterator as input. 
      *
      *  Set the weight for each radial function from the range [first, last).
@@ -1095,23 +933,9 @@ namespace rbf
      *                                  input range.
     */
     template< class IteratorType >
-    void setWeights( IteratorType first, IteratorType last )
-    {
-      if ( std::distance( first, last ) != base_t::size() )
-        throw std::runtime_error(
-          "bitpit::rbf::RFBasis::setWeights: ** ERROR** The size of the input range "
-          "and the size of this basis mismatch!"          
-        );
-      auto j = base_t::begin();
-      for ( ; first != last; ++first, ++j )
-        j->first = (*first);
-    }
+    void setWeights( IteratorType first, IteratorType last );
     /*! @brief Set the specified radius for all radial function in this basis. */
-    void setRadius( coord_t radius )
-    {
-      for ( auto &rf : *this )
-        rf.second->radius = radius;
-    }
+    void setRadius( coord_t radius );
   }; //end class RFBasis
   
   // =============================================================== //
