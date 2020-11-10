@@ -62,7 +62,7 @@ namespace rbf
     {
       private:
       using coord_t = CoordT;
-      using rbf_t   = bitpit::rbf::RBF< Dim, coord_t >;
+      using rbf_t   = bitpit::rbf::RFBasis< Dim, coord_t >;
 
       private:
       mutable rbf_t rbf;

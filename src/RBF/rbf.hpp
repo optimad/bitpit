@@ -46,14 +46,16 @@
 # include <iostream>
 # include <stdexcept>
 
+// Bitpit
+# include "bitpit_operators.hpp"
+# include "metaprogramming.hpp"
+
 // Eigen
 # ifdef __RBF_USE_EIGEN__
 # include <Eigen/Dense>
 # endif
 
-// Bitpit
-# include "bitpit_operators.hpp"
-# include "metaprogramming.hpp"
+// Lapack
 # ifdef __RBF_USE_LAPACKE__
 # include "bitpit_private_lapacke.hpp"
 # endif
@@ -411,7 +413,7 @@ namespace rbf
   template< std::size_t, std::size_t, class >
   class RFP;
   template< std::size_t, class >
-  class RBF;
+  class RFBasis;
 
   // ================================================================ //
   // DEFINITIONS                                                      //
@@ -504,7 +506,7 @@ namespace rbf
     class CoordT,
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  bool computeRBFWeights( const std::vector<typename RBF<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RBF<Dim,CoordT> &rbf )
+  bool computeRBFWeights( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf )
   {
     if ( data_points.size() != data_values.size() )
       throw std::runtime_error(
@@ -921,7 +923,7 @@ namespace rbf
   }; //end class RFP
 
   // =============================================================== //
-  // DEFINITION OF CLASS RBF                                         //
+  // DEFINITION OF CLASS RFBasis                                     //
   // =============================================================== //
   /*! @brief Radial Basis Function.
    *
@@ -935,12 +937,12 @@ namespace rbf
     std::size_t Dim,
     class CoordT = double
   >
-  class RBF : private std::vector< std::pair<CoordT, std::unique_ptr< RF<Dim,CoordT> > > >
+  class RFBasis : private std::vector< std::pair<CoordT, std::unique_ptr< RF<Dim,CoordT> > > >
   {
     // Static assertion(s) ========================================= //
     static_assert(
       std::is_floating_point<CoordT>::value,
-      "**ERROR** bitpit::rbf::RBF<Dim,CoordT>: CoordT must be a scalar floating point type "
+      "**ERROR** bitpit::rbf::RFBasis<Dim,CoordT>: CoordT must be a scalar floating point type "
       ", e.g. float, double or long double"
     );
     
@@ -949,7 +951,7 @@ namespace rbf
     /*! @brief Type of the base class. */
     using base_t    = std::vector< std::pair<CoordT, std::unique_ptr<RF<Dim,CoordT> > > >;
     /*! @brief Self type. */
-    using self_t    = RBF<Dim, CoordT>;
+    using self_t    = RFBasis<Dim, CoordT>;
     public:
     /*! @brief Type of Radial function. */
     using rf_t      = RF<Dim,CoordT>;
@@ -964,7 +966,7 @@ namespace rbf
      *
      *  Initialize a empty radial basis.
     */
-    RBF() :
+    RFBasis() :
       base_t()
     {}
     /*! @brief Constructor #1.
@@ -975,16 +977,16 @@ namespace rbf
      *  @param [in]     N       nr. of functions.
      *  @param [in]     type    type of radial basis.
     */
-    RBF( std::size_t n, eRBFType type ) :
+    RFBasis( std::size_t n, eRBFType type ) :
       base_t( n )
     {
       for ( auto &rf : *this )
         rf.second.reset( rf_t::New( type ) ); 
     }
     /*! @brief Copy-constructor (deleted). */
-    RBF( const self_t & ) = delete;
+    RFBasis( const self_t & ) = delete;
     /*! @brief Move-constructor (deleted). */
-    RBF( self_t && ) = delete;
+    RFBasis( self_t && ) = delete;
     
     // Operator(s) ================================================= //
     public:
@@ -1097,7 +1099,7 @@ namespace rbf
     {
       if ( std::distance( first, last ) != base_t::size() )
         throw std::runtime_error(
-          "bitpit::rbf::RBF::setWeights: ** ERROR** The size of the input range "
+          "bitpit::rbf::RFBasis::setWeights: ** ERROR** The size of the input range "
           "and the size of this basis mismatch!"          
         );
       auto j = base_t::begin();
@@ -1110,7 +1112,7 @@ namespace rbf
       for ( auto &rf : *this )
         rf.second->radius = radius;
     }
-  }; //end class RBF
+  }; //end class RFBasis
   
   // =============================================================== //
   // EXPLICIT SPECIALIZATIONS                                        //
@@ -1145,15 +1147,15 @@ namespace rbf
   extern template class RFP<2, 2, long double>;
   extern template class RFP<3, 2, long double>;
   
-  extern template class RBF<1, float>;
-  extern template class RBF<2, float>;
-  extern template class RBF<3, float>;
-  extern template class RBF<1, double>;
-  extern template class RBF<2, double>;
-  extern template class RBF<3, double>;
-  extern template class RBF<1, long double>;
-  extern template class RBF<2, long double>;
-  extern template class RBF<3, long double>;
+  extern template class RFBasis<1, float>;
+  extern template class RFBasis<2, float>;
+  extern template class RFBasis<3, float>;
+  extern template class RFBasis<1, double>;
+  extern template class RFBasis<2, double>;
+  extern template class RFBasis<3, double>;
+  extern template class RFBasis<1, long double>;
+  extern template class RFBasis<2, long double>;
+  extern template class RFBasis<3, long double>;
   /*! @} */
 
 } //end namespace rbf

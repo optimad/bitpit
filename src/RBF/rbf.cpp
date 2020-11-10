@@ -1406,15 +1406,15 @@ namespace rbf
   template class RFP<2, 2, long double>;
   template class RFP<3, 2, long double>;
   
-  template class RBF<1, float>;
-  template class RBF<2, float>;
-  template class RBF<3, float>;
-  template class RBF<1, double>;
-  template class RBF<2, double>;
-  template class RBF<3, double>;
-  template class RBF<1, long double>;
-  template class RBF<2, long double>;
-  template class RBF<3, long double>;
+  template class RFBasis<1, float>;
+  template class RFBasis<2, float>;
+  template class RFBasis<3, float>;
+  template class RFBasis<1, double>;
+  template class RFBasis<2, double>;
+  template class RFBasis<3, double>;
+  template class RFBasis<1, long double>;
+  template class RFBasis<2, long double>;
+  template class RFBasis<3, long double>;
 
   
 } //end namespace rbf
