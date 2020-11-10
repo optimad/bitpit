@@ -22,7 +22,7 @@
 *
 \*---------------------------------------------------------------------------*/
 # pragma once
-# undef __USE_DEPRECATED__
+# define __USE_DEPRECATED__
 # define __RBF_USE_EIGEN__
 # ifdef __RBF_USE_EIGEN__
 # undef __RBF_USE_LAPACKE__
