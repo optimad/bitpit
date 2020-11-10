@@ -118,7 +118,7 @@ function(addModuleIncludeDirectories MODULE_NAME)
     unset(UPPER_MODULE_NAME)
 
     # Add module directory
-    include_directories("${PROJECT_SOURCE_DIR}/src/${MODULE_NAME}")
+    include_directories("${PROJECT_SOURCE_DIR}/src/${MODULE_NAME}" "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}")
 endfunction()
 
 # Define an experimental feature
