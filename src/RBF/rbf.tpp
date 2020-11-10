@@ -85,6 +85,125 @@ namespace rbf
   }
 
   // ======================================================================== //
+  // HELPER FUNCTIONS                                                         //
+  // ======================================================================== //
+  
+  // ------------------------------------------------------------------------ //
+  template<
+    std::size_t Dim,
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/
+  >
+  bool computeRBFWeights( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf )
+  {
+    if ( data_points.size() != data_values.size() )
+      throw std::runtime_error(
+        "bitpit::rbf::computeRBFWeights: The nr. of data points and the nr. of data values mismatch!"
+      );
+    if ( data_points.size() < rbf.size() )
+      throw std::runtime_error(
+        "bitpit::rbf::computeRBFWeights: The nr. of data points must be at least the size of the radial function basis."
+      );
+
+    // Constant(s)
+    const CoordT  rcond = (CoordT)-1;
+
+    // Scope variables
+    int n_rbf   = rbf.size();
+    int n_data  = data_points.size();
+
+    // Implementation with LAPACKE support -------------------------- //
+    // Implementation node: dgesv suffer from numerical stability issues.
+    // Better implementation in Eigen with QR factorization and full pivoting.
+    # ifdef __RBF_USE_LAPACKE__
+    // Scope variables
+    std::vector<CoordT> mat( n_data * n_rbf );
+    std::vector<CoordT> rhs( n_data );
+
+    // Fill rhs
+    for( std::size_t i_data = 0; i_data < n_data; ++i_data )
+      rhs[i_data] = data_values[i_data];
+    //next j
+
+    // Fill coeff. matrix
+    for( std::size_t i_data = 0, i_mat = 0; i_data < n_data; ++i_data ) {
+        const auto &p = data_points.at(i_data);
+        for( std::size_t i_rbf = 0; i_rbf < n_rbf; ++i_rbf ) {
+            const auto &rf = *( rbf.at(i_rbf).second );
+            mat[i_mat++] = rf( p );
+        } //next i
+    } //next j
+
+    // Single precision
+    lapack_int info;
+    if ( LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr )
+    {
+      info = LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr( 
+        LAPACK_ROW_MAJOR, //matrix layout
+        'N',              // 'M' for col major, 'N' for row major 
+        n_data,           //nr. of matrix row
+        n_rbf,            //nr. of matrix cols
+        1,                //nr. of rhs cols.
+        mat.data(),       //ptr to matrix entries
+        n_rbf,            //leading dim for matrix array
+        rhs.data(),       //ptr. to rhs entries
+        1                 //leading dim for rhs array
+      );
+    }
+    else
+    {
+      throw std::runtime_error(
+        "bitpit::rbf::computeRBFWeights: ** ERROR ** LAPACK does not support the required floating point precision."
+      );
+    }
+    
+    // Check for error(s)
+    if( info > 0 )
+      return false;
+    
+    // Set weights (if success)
+    rbf.setWeights(rhs.cbegin(), rhs.cbegin() + n_rbf );
+    # endif
+
+    // Implementation with EIGEN support ---------------------------- //
+    # ifdef __RBF_USE_EIGEN__
+    
+    // Typedef(s)
+    using matrix_t  = Eigen::Matrix<CoordT, Eigen::Dynamic, Eigen::Dynamic>;
+    using vec_t     = Eigen::Matrix<CoordT, Eigen::Dynamic, 1>;
+    
+    // Fill coeff. matrix
+    matrix_t  mat( n_data, n_rbf );
+    vec_t     rhs( n_data );
+    
+     // Fill rhs
+    for( std::size_t i_data = 0; i_data < n_data; ++i_data )
+      rhs(i_data) = data_values[i_data];
+    //next j
+
+    // Fill coeff. matrix
+    for( std::size_t i_data = 0; i_data < n_data; ++i_data ) {
+        const auto &p = data_points.at(i_data);
+        for( std::size_t i_rbf = 0; i_rbf < n_rbf; ++i_rbf ) {
+            const auto &rf = *( rbf.at(i_rbf).second );
+            mat(i_data, i_rbf) = rf( p );
+        } //next i
+    } //next j
+      
+    // Solve with QR fact. full pivoting
+    vec_t sol = mat.colPivHouseholderQr().solve(rhs);
+    
+    // Assign weights to RBF
+    rbf.setWeights( sol.data(), sol.data() + sol.size() );
+    
+    # endif
+
+    
+    // Return success
+    return true;
+  }
+
+  // ======================================================================== //
   // IMPLEMENTATION OF CLASS RF                                               //
   // ======================================================================== //
 
@@ -379,5 +498,144 @@ namespace rbf
     out << "]\n";
   }
 
+
+  // ======================================================================== //
+  // IMPLEMENTATION OF CLASS RFBasis                                          //
+  // ======================================================================== //
+      
+  // Constructor(s) ========================================================= //
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  RFBasis<D,C>::RFBasis() :
+    base_t()
+  {}
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  RFBasis<D,C>::RFBasis( std::size_t n, eRBFType type ) :
+    base_t( n )
+  {
+    for ( auto &rf : *this )
+      rf.second.reset( rf_t::New( type ) ); 
+  }
+  
+  // Operator(s) ============================================================ //
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  typename RFBasis<D,C>::coord_t RFBasis<D,C>::operator()( const point_t &coords ) const
+  {
+    coord_t out = (coord_t)0;
+    for ( const auto &rf : *this )
+      out += rf.first * rf.second->operator()(coords);
+    return out;
+  }
+  
+  // Getter(s)/Info ========================================================= //
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  std::vector<typename RFBasis<D,C>::coord_t> RFBasis<D,C>::collectWeights() const
+  {
+    std::vector<coord_t> out( base_t::size() );
+    auto  i = out.begin(), 
+          e = out.end();
+    auto  j = base_t::cbegin();
+    for ( ; i != e; ++i, ++j )
+      (*i) = j->first;
+    return out;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  const typename RFBasis<D,C>::coord_t& RFBasis<D,C>::getWeight( std::size_t i ) const
+  {
+    return this->at(i).first;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  typename RFBasis<D,C>::coord_t& RFBasis<D,C>::getWeight( std::size_t i )
+  {
+    return const_cast< coord_t& >( const_cast<const self_t*>( this )->getWeight(i) );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  const typename RFBasis<D,C>::rf_t& RFBasis<D,C>::getRadialFunction( std::size_t i ) const
+  {
+    return *( this->at(i).second );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  typename RFBasis<D,C>::rf_t& RFBasis<D,C>::getRadialFunction( std::size_t i )
+  {
+    return const_cast< rf_t& >( const_cast< const self_t* >( this )->getRadialFunction(i) );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
+  {
+    std::string s(indent, ' ');
+    out << s << "# of RBF:   " << this->size() << '\n';
+    std::size_t i = 0;
+    for ( const auto &rf : *this )
+    {
+      out << s << "  #" << i++ << '\n'
+          << s << "  weight: " << rf.first << '\n';
+      rf.second->display( out, indent +2 );
+    } //next rf
+  }
+  
+  // Setter(s) ============================================================== //
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  std::size_t RFBasis<D,C>::add( std::unique_ptr<rf_t> rf, C weight /*= (C)1*/ )
+  {
+    base_t::push_back( std::make_pair( weight, std::move(rf) ) );
+    return base_t::size()-1;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::remove( std::size_t i )
+  {
+    base_t::erase( base_t::begin() + i );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::setWeights( const std::vector<coord_t> &weights )
+  {
+    setWeights( weights.cbegin(), weights.cend() );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  template< class IteratorType >
+  void RFBasis<D,C>::setWeights( IteratorType first, IteratorType last )
+  {
+    if ( std::distance( first, last ) != base_t::size() )
+      throw std::runtime_error(
+        "bitpit::rbf::RFBasis::setWeights: ** ERROR** The size of the input range "
+        "and the size of this basis mismatch!"          
+      );
+    auto j = base_t::begin();
+    for ( ; first != last; ++first, ++j )
+      j->first = (*first);
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::setRadius( coord_t radius )
+  {
+    for ( auto &rf : *this )
+      rf.second->radius = radius;
+  }
+  
 } //end namespace rbf
 } //end namespace bitpit
