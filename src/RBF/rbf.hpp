@@ -890,6 +890,8 @@ namespace rbf
     /*! @brief Returns (const/non-const) reference to the i-th radial function in the basis. */
     using   base_t::operator[];
     using   base_t::at;
+    using   base_t::empty;
+    using   base_t::clear;
     /*! @brief Returns the collection of weights for this radial basis function. */
     std::vector<coord_t> collectWeights() const;
     /*! @brief Returns const/non-const reference to the weight of the i-th radial function. */
