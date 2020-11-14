@@ -58,9 +58,7 @@ SegmentationKernel::SegmentationKernel( ) : m_surface(nullptr), m_featureAngle(0
  * @param[in,out] surface pointer to surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
-SegmentationKernel::SegmentationKernel( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle ) {
-
-    m_ownedSurface = std::move(surface);
+SegmentationKernel::SegmentationKernel( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle ) : m_ownedSurface(std::move(surface)) {
 
     setSurface(m_ownedSurface.get(), featureAngle);
 }
