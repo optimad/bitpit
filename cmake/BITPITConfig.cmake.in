@@ -152,8 +152,10 @@ libfind_process(BITPIT)
 # Find bitpit external dependencies
 #-----------------------------------------------------------------------------
 
-# Get external dependencies
+# Set external dependencies information
 set(_EXTERNAL_DEPENDENCIES "@BITPIT_EXTERNAL_DEPENDENCIES@")
+set(_EXTERNAL_VARIABLES_LIBRARIES "@BITPIT_EXTERNAL_VARIABLES_LIBRARIES@")
+set(_EXTERNAL_VARIABLES_INCLUDE_DIRS "@BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS@")
 
 # Setp up variables needed by external dependencies
 list(FIND _EXTERNAL_DEPENDENCIES "PETSc" _PETSc_index)
@@ -181,7 +183,19 @@ foreach(_DEPENDENCY ${_EXTERNAL_DEPENDENCIES})
 endforeach()
 
 # Add external libraries
-list(APPEND BITPIT_LIBRARIES "@BITPIT_SHARED_EXTERNAL_LIBRARIES@")
+foreach (VARIABLE_NAME IN LISTS _EXTERNAL_VARIABLES_LIBRARIES)
+    set(LIBRARY_LIST "${${VARIABLE_NAME}}")
+    list(REVERSE LIBRARY_LIST)
+    foreach (LIBRARY IN LISTS LIBRARY_LIST)
+        get_filename_component(LIBRARY_EXTENSION ${LIBRARY} EXT)
+        if (NOT ${LIBRARY_EXTENSION} EQUAL ".a")
+            list (INSERT BITPIT_LIBRARIES 0 "${LIBRARY}")
+        endif ()
+    endforeach ()
+endforeach ()
 
 # Add external inclued paths
-list(APPEND BITPIT_INCLUDE_DIRS "@BITPIT_EXTERNAL_INCLUDE_DIRS@")
+set(BITPIT_EXTERNAL_INCLUDE_DIRS "")
+foreach (VARIABLE_NAME IN LISTS _EXTERNAL_VARIABLES_INCLUDE_DIRS)
+    list (INSERT BITPIT_INCLUDE_DIRS 0 "${${VARIABLE_NAME}}")
+endforeach ()
