@@ -9,19 +9,6 @@ cmake_minimum_required(VERSION 2.8)
 set(BITPIT_INSTALL_CMAKE_DIR "lib/cmake/${PROJECT_NAME}-${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}" CACHE INTERNAL "Directory in which cmake modules will be installed")
 
 #------------------------------------------------------------------------------------#
-# Generate external dependencies
-#
-# We need to remove the static libraries from the list of external dependencies.
-#------------------------------------------------------------------------------------#
-set(BITPIT_SHARED_EXTERNAL_LIBRARIES "")
-foreach(ENTRY IN LISTS BITPIT_EXTERNAL_LIBRARIES)
-    get_filename_component(LIBRARY_EXTENSION ${ENTRY} EXT)
-    if(NOT ${LIBRARY_EXTENSION} EQUAL ".a")
-        list(APPEND BITPIT_SHARED_EXTERNAL_LIBRARIES ${ENTRY})
-    endif()
-endforeach()
-
-#------------------------------------------------------------------------------------#
 # Generate BITPITConfig.cmake
 #------------------------------------------------------------------------------------#
 set(BITPIT_CMAKE_CONFIG_DIR "${CMAKE_INSTALL_PREFIX}/${BITPIT_INSTALL_CMAKE_DIR}")
