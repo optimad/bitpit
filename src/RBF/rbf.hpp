@@ -261,6 +261,34 @@ namespace rbf
   >
   CoordT  wendland_c2( CoordT r );
   
+  // ----------------------------------------------------------------------- //
+  /*! @brief First derivative of C2-continuous Wendland's functions.
+   *
+   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance.
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT wendland_c2_der1( CoordT r );
+  
+  // ----------------------------------------------------------------------- //
+  /*! @brief Second derivative of C2-continuous Wendland's functions.
+   *
+   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance.
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT wendland_c2_der2( CoordT r );
+  
   // ---------------------------------------------------------------- //
   /*! @brief Generalized multiquadric functions.
    *
@@ -313,6 +341,36 @@ namespace rbf
     typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
   >
   CoordT gaussian( CoordT r, CoordT c );
+  
+  // ----------------------------------------------------------------------- //
+  /*! @brief First derivative of Gaussian function.
+   *
+   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance.
+   *  @param [in]     c           amplification/reduction factor.
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT gaussian_der1( CoordT r, CoordT c );
+  
+  // ----------------------------------------------------------------------- //
+  /*! @brief Second derivative of Gaussian function.
+   *
+   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance.
+   *  @param [in]     c           amplification/reduction factor.
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT gaussian_der2( CoordT r, CoordT c );
   
   // ---------------------------------------------------------------- //
   /*! @brief Linear function.
@@ -644,6 +702,17 @@ namespace rbf
      *  @param [in]       indent    (default = 0) indentation level.
     */
     virtual void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const;
+    /*! @brief Returns reference to the actual functor implementing the expression of this
+     *  radial function.
+    */
+    const rf_funct_t& getFunctor() const
+    {
+      return mFunct;
+    }
+    /*! @brief Computes the the first derivative of this radial function w.r.t. the radial distance. */
+    rf_funct_t getFirstDerivative() const;
+    /*! @brief Computes the second derivative of this radial function w.r.t. the radial distance. */
+    rf_funct_t getSecondDerivative() const;
     
     // Setter(s) =================================================== //
     public:
@@ -758,6 +827,17 @@ namespace rbf
     using base_t::center;
     using base_t::radius;
 
+    // Static method(s) ============================================ //
+    private:
+    /*! @brief Bind the expression of the radial function to the parameters of
+     *  this instance.
+    */
+    template<class f_in_t, std::size_t... I>
+    static rf_funct_t       doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> );
+    public:
+    template<class f_in_t>
+    static rf_funct_t       bindParameters( f_in_t f, coord_t* data );
+    
     // Constructor(s) ============================================== //
     private:
     /*! @brief Default constructor.
@@ -803,14 +883,7 @@ namespace rbf
     virtual void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const override;
 
     // Setter(s) =================================================== //
-    private:
-    /*! @brief Bind the expression of the radial function to the parameters of
-     *  this instance.
-    */
-    template<class f_in_t, std::size_t... I>
-    static rf_funct_t       doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> );
-    template<class f_in_t>
-    static rf_funct_t       bindParameters( f_in_t f, coord_t* data );public:
+    public:
     /*! @brief Set the value for the additional parameters of this function.*/
     virtual void            setParameters( const coord_t *values ) override;
   }; //end class RFP

@@ -35,13 +35,33 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT  wendland_c2( CoordT r )
+  CoordT wendland_c2( CoordT r )
   {
     return r > (CoordT)1 ?
       (CoordT)0 :
       std::pow( (CoordT)1 - r, 4 ) * ( (CoordT)4 * r + (CoordT)1 );
   }
 
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
+  CoordT wendland_c2_der1( CoordT r )
+  {
+    return r > (CoordT)1 ?
+      (CoordT)0 :
+      - (CoordT)4 * std::pow( (CoordT)1 - r, 3 ) * ( (CoordT)4 * r + (CoordT)1 )
+      + (CoordT)4 * std::pow( (CoordT)1 - r, 4 );
+  }
+  
+    // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
+  CoordT wendland_c2_der2( CoordT r )
+  {
+    return r > (CoordT)1 ?
+      (CoordT)0 :
+      + (CoordT)12 * std::pow( (CoordT)1 - r, 2 ) * ( (CoordT)4 * r + (CoordT)1 )
+      - (CoordT)32 * std::pow( (CoordT)1 - r, 3 );
+  }
+  
   // ------------------------------------------------------------------------ //
   template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* >
   CoordT generalized_multiquadrics( CoordT r, CoordT c )
@@ -56,6 +76,21 @@ namespace rbf
     return c * std::exp( - (r*r) );
   }
 
+  // ----------------------------------------------------------------------- //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr >
+  CoordT gaussian_der1( CoordT r, CoordT c )
+  {
+    return - (CoordT)2 * c * r * std::exp( - (r*r) );
+  }
+  
+  // ----------------------------------------------------------------------- //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr >
+  CoordT gaussian_der2( CoordT r, CoordT c )
+  {
+    return - (CoordT)2 * c * std::exp( - (r*r) );
+           + (CoordT)4 * c * r * r * std::exp( - (r*r) );
+  }
+  
   // ------------------------------------------------------------------------ //
   template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
   CoordT linear( CoordT r )
@@ -206,7 +241,6 @@ namespace rbf
   // ======================================================================== //
   // IMPLEMENTATION OF CLASS RF                                               //
   // ======================================================================== //
-
 
    // Static member function(s) ============================================== //
 
@@ -404,7 +438,7 @@ namespace rbf
   template< std::size_t D, class C >
   eRBFType RF<D,C>::getType() const { return mType; }
 
-  // ---------------------------------------------------------------------- //
+  // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   void RF<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
   {
@@ -415,6 +449,58 @@ namespace rbf
     for ( std::size_t i = 0; i < D; ++i )
       out << center[i] << ' ';
     out << "]\n";
+  }
+
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  typename RF<D,C>::rf_funct_t RF<D,C>::getFirstDerivative() const
+    {
+      switch( mType )
+      {
+        default :
+        {
+          throw std::runtime_error( 
+            "bitpit::rbf::RF::getFirstDerivative: "
+            "** ERROR ** First derivative is not available for this radial function."
+          );
+        }
+        case( bitpit::rbf::eRBFType::kWendlandC2 ):
+        {
+          // No additional parameters. Nothing to bind
+          return &bitpit::rbf::wendland_c2_der1<coord_t>;
+        }
+        case( bitpit::rbf::eRBFType::kGaussian ):
+        {
+          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+          return RFP<D,1,C>::bindParameters( &bitpit::rbf::gaussian_der1<coord_t>, this_as_rfp->mParams );
+        }
+       }
+       return nullptr;
+    }
+    
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  typename RF<D,C>::rf_funct_t RF<D,C>::getSecondDerivative() const
+  {
+    switch( mType )
+    {
+      default:
+        throw std::runtime_error(
+          "bitpit::rbf::RF::getSecondDerivative: "
+          "** ERROR ** Second derivative is not available for this radial function."
+        );
+      case( bitpit::rbf::eRBFType::kWendlandC2 ):
+      {
+        // No additional parameters. Nothing to bind.
+        return &bitpit::rbf::wendland_c2_der2<coord_t>;
+      }
+      case( bitpit::rbf::eRBFType::kGaussian ):
+      {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::gaussian_der2<coord_t>, this_as_rfp->mParams );
+      }
+    }
+    return nullptr;
   }
 
   // Setter(s) ============================================================== //
