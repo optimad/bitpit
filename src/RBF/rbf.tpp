@@ -723,5 +723,13 @@ namespace rbf
       rf.second->radius = radius;
   }
   
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::reset( eRBFType type )
+  {
+    base_t( this->size() ).swap( *this );
+    for ( auto &rf : *this )
+      rf.second.reset( rf_t::New( type ) ); 
+  }
 } //end namespace rbf
 } //end namespace bitpit

@@ -1011,6 +1011,8 @@ namespace rbf
     void setWeights( IteratorType first, IteratorType last );
     /*! @brief Set the specified radius for all radial function in this basis. */
     void setRadius( coord_t radius );
+    /*! @brief Reset the type of this basis of radial functions. */
+    void reset( eRBFType type );
   }; //end class RFBasis
   
   // =============================================================== //
