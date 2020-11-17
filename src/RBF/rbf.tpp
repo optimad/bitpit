@@ -725,9 +725,9 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  void RFBasis<D,C>::reset( eRBFType type )
+  void RFBasis<D,C>::reset( eRBFType type, std::size_t n /*= -1*/ )
   {
-    base_t( this->size() ).swap( *this );
+    base_t( n == -1 ? this->size() : n ).swap( *this );
     for ( auto &rf : *this )
       rf.second.reset( rf_t::New( type ) ); 
   }

@@ -1011,8 +1011,13 @@ namespace rbf
     void setWeights( IteratorType first, IteratorType last );
     /*! @brief Set the specified radius for all radial function in this basis. */
     void setRadius( coord_t radius );
-    /*! @brief Reset the type of this basis of radial functions. */
-    void reset( eRBFType type );
+    /*! @brief Reset the type of this basis of radial functions.
+     *
+     *  @param [in]   type    new type for this radial basis.
+     *  @param [in]   n       (default = -1) new size of this radial basis.
+     *                        If not specified the current size will be kept.
+    */
+    void reset( eRBFType type, std::size_t n = -1 );
   }; //end class RFBasis
   
   // =============================================================== //
