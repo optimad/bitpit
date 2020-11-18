@@ -37,7 +37,25 @@ namespace bitpit {
 
 	\brief The VolCartesian defines a Cartesian patch.
 
-	VolCartesian defines a Cartesian patch.
+	VolCartesian is a Cartesian patch that can operate in two modes. In normal
+	memory mode, the patch behaves like a standard patch: all data structures
+	needed by the patch are generated and stored within the ptch. This means
+	that, in normal mode, the patch will create cells, vertices and, if
+	requested, interfaces data structures. In light memory mode, the patch
+	will create only a minimal set of data structures. Altohugh this allows
+	to reduce its memory footprint, it will also limit the functionalites
+	available when operating in light memory mode. Features that are
+	available in light memory mode are:
+	- evaluation of vertices/cell/interface topological properties;
+	- evaluation of cell/interface geometrical properties;
+	- evaluation of cell neighbours.
+	Features that are NOT available in light memory mode are:
+	- evaluation of vertex geometrical properties;
+	- access to vertex/cell/interface data structures;
+	- access to vertex/cell/interface iterators;
+	- writing of VTK files.
+	When in light memory mode, updating the patch will automatically switch
+	to normal memory mode.
 */
 
 /*!
