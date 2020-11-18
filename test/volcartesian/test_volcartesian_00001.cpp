@@ -56,6 +56,15 @@ int subtest_001()
 	patch_2D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 	patch_2D->write();
 
+	log::cout() << std::endl;
+	log::cout() << "\n  >> 2D centroids " << "\n";
+	log::cout() << std::endl;
+
+	for (long i = 0; i < patch_2D->getCellCount(); ++i) {
+		std::array<double, 3> cellCentroid = patch_2D->evalCellCentroid(i);
+		log::cout() << "  >> Cell : " << i << "  Centroid : " << cellCentroid << std::endl;
+	}
+
 	log::cout() << "\n  >> 2D data" << "\n";
 
 	cellData.resize(patch_2D->getCellCount());
@@ -149,6 +158,15 @@ int subtest_002()
 	vtk.setName("cartesian_uniform_patch_3D");
 	patch_3D->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
 	patch_3D->write();
+
+	log::cout() << std::endl;
+	log::cout() << "\n  >> 3D centroids " << "\n";
+	log::cout() << std::endl;
+
+	for (long i = 0; i < patch_3D->getCellCount(); ++i) {
+		std::array<double, 3> cellCentroid = patch_3D->evalCellCentroid(i);
+		log::cout() << "  >> Cell : " << i << "  Centroid : " << cellCentroid << std::endl;
+	}
 
 	log::cout() << "\n  >> 3D data" << "\n";
 
