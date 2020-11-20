@@ -75,6 +75,8 @@ public:
 	long getVertexCount() const override;
 
 	long getCellCount() const override;
+	int getCellCount(int direction) const;
+
 	ElementType getCellType() const;
 	ElementType getCellType(long id) const override;
 
