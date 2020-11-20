@@ -47,10 +47,9 @@ namespace bitpit {
 	available when operating in light memory mode. Features that are
 	available in light memory mode are:
 	- evaluation of vertex/cell/interface topological properties;
-	- evaluation of cell/interface geometrical properties;
+	- evaluation of vertex/cell/interface geometrical properties;
 	- evaluation of cell neighbours.
 	Features that are NOT available in light memory mode are:
-	- evaluation of vertex geometrical properties;
 	- access to vertex/cell/interface data structures;
 	- access to vertex/cell/interface iterators;
 	- writing of VTK files.
@@ -543,6 +542,19 @@ ElementType VolCartesian::getInterfaceType() const
 	} else {
 		return ElementType::LINE;
 	}
+}
+
+/*!
+	Get vertex coordinates along the specified direction.
+
+	\param direction is the direction along which vertex coordinates are
+	requested
+
+	\result Vertex coordinates along the specified direction.
+*/
+const std::vector<double> & VolCartesian::getVertexCoords(int direction) const
+{
+	return m_vertexCoords[direction];
 }
 
 /*!
