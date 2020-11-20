@@ -73,6 +73,7 @@ public:
 	void setDiscretization(const std::array<int, 3> &nCells);
 
 	long getVertexCount() const override;
+	int getVertexCount(int direction) const;
 
 	long getCellCount() const override;
 	int getCellCount(int direction) const;
