@@ -567,6 +567,28 @@ ElementType VolCartesian::getInterfaceType() const
 }
 
 /*!
+	Evaluates the coordinate of the specified vertex.
+
+	\param id is the id of the vertex
+	\result The coordinate of the specified vertex.
+*/
+std::array<double, 3> VolCartesian::evalVertexCoords(long id)
+{
+	std::array<int, 3> ijk = getVertexCartesianId(id);
+
+	std::array<double, 3> coords;
+	coords[Vertex::COORD_X] = m_vertexCoords[Vertex::COORD_X][ijk[0]];
+	coords[Vertex::COORD_Y] = m_vertexCoords[Vertex::COORD_Y][ijk[1]];
+	if (isThreeDimensional()) {
+		coords[Vertex::COORD_Z] = m_vertexCoords[Vertex::COORD_Z][ijk[2]];
+	} else {
+		coords[Vertex::COORD_Z] = 0.0;
+	}
+
+	return coords;
+}
+
+/*!
 	Get vertex coordinates along the specified direction.
 
 	\param direction is the direction along which vertex coordinates are
@@ -806,28 +828,6 @@ void VolCartesian::addVertices()
 			}
 		}
 	}
-}
-
-/*!
-	Evaluates the coordinate of the specified vertex.
-
-	\param id is the id of the vertex
-	\result The coordinate of the specified vertex.
-*/
-std::array<double, 3> VolCartesian::evalVertexCoords(long id)
-{
-	std::array<int, 3> ijk = getVertexCartesianId(id);
-
-	std::array<double, 3> coords;
-	coords[Vertex::COORD_X] = m_vertexCoords[Vertex::COORD_X][ijk[0]];
-	coords[Vertex::COORD_Y] = m_vertexCoords[Vertex::COORD_Y][ijk[1]];
-	if (isThreeDimensional()) {
-		coords[Vertex::COORD_Z] = m_vertexCoords[Vertex::COORD_Z][ijk[2]];
-	} else {
-		coords[Vertex::COORD_Z] = 0.0;
-	}
-
-	return coords;
 }
 
 /*!
