@@ -46,7 +46,7 @@ namespace bitpit {
 	to reduce its memory footprint, it will also limit the functionalites
 	available when operating in light memory mode. Features that are
 	available in light memory mode are:
-	- evaluation of vertices/cell/interface topological properties;
+	- evaluation of vertex/cell/interface topological properties;
 	- evaluation of cell/interface geometrical properties;
 	- evaluation of cell neighbours.
 	Features that are NOT available in light memory mode are:
@@ -872,7 +872,7 @@ std::array<int, 3> VolCartesian::getInterfaceCountDirection(int direction)
 /*!
 	Creates the interfaces normal to the given direction.
 
-	\param direction the method will creat the interfaces normal to this
+	\param direction the method will create the interfaces normal to this
 	                 direction
 */
 void VolCartesian::addInterfacesDirection(int direction)
