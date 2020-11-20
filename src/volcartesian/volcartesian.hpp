@@ -85,6 +85,7 @@ public:
 	ElementType getInterfaceType() const;
 	ElementType getInterfaceType(long id) const override;
 
+	std::array<double, 3> evalVertexCoords(long id);
 	const std::vector<double> & getVertexCoords(int direction) const;
 
 	double evalCellVolume(long id) const override;
@@ -186,7 +187,6 @@ private:
 	void setMemoryMode(MemoryMode mode);
 
 	void addVertices();
-	std::array<double, 3> evalVertexCoords(long id);
 
 	void addCells();
 
