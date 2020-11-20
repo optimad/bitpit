@@ -121,10 +121,8 @@ public:
 	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
 	std::vector<double> convertToCellData(const std::vector<double> &nodeData) const;
 
-	int linearCellInterpolation(std::array<double,3> &point,
-		std::vector<int> &stencil, std::vector<double> &weights);
-	int linearVertexInterpolation(std::array<double,3> &point,
-		std::vector<int> &stencil, std::vector<double> &weights);
+	int linearCellInterpolation(std::array<double,3> &point, std::vector<int> &stencil, std::vector<double> &weights);
+	int linearVertexInterpolation(std::array<double,3> &point, std::vector<int> &stencil, std::vector<double> &weights);
 
 	long getCellLinearId(int i, int j, int k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;
