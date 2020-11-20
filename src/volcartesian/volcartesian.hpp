@@ -85,6 +85,7 @@ public:
 	double evalCellVolume(long id) const override;
 	double evalCellSize(long id) const override;
 	std::array<double, 3> evalCellCentroid(long id) const override;
+	const std::vector<double> & getCellCentroids(int direction) const;
 
 	double evalInterfaceArea(long id) const override;
 	std::array<double, 3> evalInterfaceNormal(long id) const override;
