@@ -471,6 +471,17 @@ long VolCartesian::getVertexCount() const
 }
 
 /*!
+	Gets the number of vertices along the specified direction.
+
+	\param direction is the direction along which vertex count is requested
+	\return The number of vertices along the specified.
+*/
+int VolCartesian::getVertexCount(int direction) const
+{
+	return m_nVertices1D[direction];
+}
+
+/*!
 	Gets the number of cells in the patch.
 
 	\return The number of cells in the patch
