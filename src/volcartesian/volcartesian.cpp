@@ -481,6 +481,17 @@ long VolCartesian::getCellCount() const
 }
 
 /*!
+	Gets the number of cells along the specified direction.
+
+	\param direction is the direction along which cell count is requested
+	\return The number of cells along the specified.
+*/
+int VolCartesian::getCellCount(int direction) const
+{
+	return m_nCells1D[direction];
+}
+
+/*!
 	Gets the element type for the cell with the specified id.
 
 	\param id is the id of the requested cell
