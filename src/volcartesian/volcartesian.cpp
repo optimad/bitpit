@@ -2024,4 +2024,15 @@ std::array<double, 3> VolCartesian::evalCellCentroid(long id) const
 	return centroid;
 }
 
+/*!
+	Get cell centroids along the specified direction.
+
+	\param direction is the direction along which cell centroids are requested
+	\result Cell centroids along the specified direction.
+*/
+const std::vector<double> & VolCartesian::getCellCentroids(int direction) const
+{
+	return m_cellCenters[direction];
+}
+
 }
