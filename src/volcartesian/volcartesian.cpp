@@ -248,9 +248,7 @@ void VolCartesian::reset()
 
 	m_nVertices   = 0;
 	m_nCells      = 0;
-	if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-		m_nInterfaces = 0;
-	}
+	m_nInterfaces = 0;
 }
 
 /*!
@@ -259,8 +257,6 @@ void VolCartesian::reset()
 void VolCartesian::resetInterfaces()
 {
 	PatchKernel::resetInterfaces();
-
-	m_nInterfaces = 0;
 }
 
 
@@ -336,21 +332,6 @@ void VolCartesian::_updateInterfaces()
 	if (partialUpdate) {
 		log::cout() << " It is not possible to partially update the interfaces.";
 		log::cout() << " All interfaces will be updated.";
-	}
-
-	// Count the total number of interfaces
-	m_nInterfaces = 0;
-	for (int d = 0; d < getDimension(); ++d) {
-		int nDirectionInterfaces = 1;
-		for (int n = 0; n < getDimension(); n++) {
-			int nDirectionInterfaces1D = m_nCells1D[n];
-			if (n == d) {
-				++nDirectionInterfaces1D;
-			}
-
-			nDirectionInterfaces *= nDirectionInterfaces1D;
-		}
-		m_nInterfaces += nDirectionInterfaces;
 	}
 
 	// Build interfaces
@@ -621,6 +602,23 @@ void VolCartesian::setDiscretization(const std::array<int, 3> &nCells)
 	}
 
 	log::cout() << "  - Total cell count: " << m_nCells << "\n";
+
+	// Count the total number of interfaces
+	m_nInterfaces = 0;
+	for (int d = 0; d < getDimension(); ++d) {
+		int nDirectionInterfaces = 1;
+		for (int n = 0; n < getDimension(); n++) {
+			int nDirectionInterfaces1D = m_nCells1D[n];
+			if (n == d) {
+				++nDirectionInterfaces1D;
+			}
+
+			nDirectionInterfaces *= nDirectionInterfaces1D;
+		}
+		m_nInterfaces += nDirectionInterfaces;
+	}
+
+	log::cout() << "  - Total interface count: " << m_nInterfaces << "\n";
 
 	// Cell volume
 	initializeCellVolume();
