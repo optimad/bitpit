@@ -1750,7 +1750,7 @@ void VolCartesian::_findCellVertexNeighs(long id, int vertex, const std::vector<
 	\param[in] ijkMax is the set of cartesian indices of the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> VolCartesian::extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
+std::vector<long> VolCartesian::extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax) const
 {
 	int nSubsetCells_x = ijkMax[0] - ijkMin[0] + 1;
 	int nSubsetCells_y = ijkMax[1] - ijkMin[1] + 1;
@@ -1779,7 +1779,7 @@ std::vector<long> VolCartesian::extractCellSubSet(std::array<int, 3> const &ijkM
 	\param[in] idMax is the linear index of the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> VolCartesian::extractCellSubSet(int idMin, int idMax)
+std::vector<long> VolCartesian::extractCellSubSet(int idMin, int idMax) const
 {
 	return extractCellSubSet(getCellCartesianId(idMin), getCellCartesianId(idMax));
 }
@@ -1791,7 +1791,7 @@ std::vector<long> VolCartesian::extractCellSubSet(int idMin, int idMax)
 	\param[in] pointMax is the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> VolCartesian::extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
+std::vector<long> VolCartesian::extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax) const
 {
 	return extractCellSubSet(locatePointCartesian(pointMin), locatePointCartesian(pointMax));
 }
@@ -1803,7 +1803,7 @@ std::vector<long> VolCartesian::extractCellSubSet(std::array<double, 3> const &p
 	\param[in] ijkMax is the set of cartesian indices of the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> VolCartesian::extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
+std::vector<long> VolCartesian::extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax) const
 {
 	int nSubsetVertices_x = ijkMax[0] - ijkMin[0] + 1;
 	int nSubsetVertices_y = ijkMax[1] - ijkMin[1] + 1;
@@ -1832,7 +1832,7 @@ std::vector<long> VolCartesian::extractVertexSubSet(std::array<int, 3> const &ij
 	\param[in] idMax is the linear index of the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> VolCartesian::extractVertexSubSet(int idMin, int idMax)
+std::vector<long> VolCartesian::extractVertexSubSet(int idMin, int idMax) const
 {
 	return extractVertexSubSet(getVertexCartesianId(idMin), getVertexCartesianId(idMax));
 }
@@ -1844,7 +1844,7 @@ std::vector<long> VolCartesian::extractVertexSubSet(int idMin, int idMax)
 	\param[in] pointMax is the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> VolCartesian::extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
+std::vector<long> VolCartesian::extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax) const
 {
 	return extractVertexSubSet(locatePointCartesian(pointMin), locatePointCartesian(pointMax));
 }
@@ -2092,7 +2092,7 @@ std::vector<double> VolCartesian::convertToCellData(const std::vector<double> &v
 	point is outside a null stencil size is returned.
 */
 int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
-                                          std::vector<int> *stencil, std::vector<double> *weights)
+                                          std::vector<int> *stencil, std::vector<double> *weights) const
 {
 	std::array<int, 3> ijk_point = locatePointCartesian(point);
 	if (ijk_point[0] < 0) {
@@ -2189,7 +2189,7 @@ int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
 	point is outside a null stencil size is returned.
 */
 int VolCartesian::linearVertexInterpolation(const std::array<double,3> &point,
-                                            std::vector<int> *stencil, std::vector<double> *weights)
+                                            std::vector<int> *stencil, std::vector<double> *weights) const
 {
 	std::array<int, 3> ijk_point = locatePointCartesian(point);
 	if (ijk_point[0] < 0) {
