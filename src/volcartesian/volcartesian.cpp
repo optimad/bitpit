@@ -1948,9 +1948,13 @@ void VolCartesian::scale(const std::array<double, 3> &scaling, const std::array<
 	for (int n = 0; n < 3; ++n) {
 		m_minCoords[n] = center[n] + scaling[n] * (m_minCoords[n] - center[n]);
 		m_maxCoords[n] = center[n] + scaling[n] * (m_maxCoords[n] - center[n]);
+
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
 			m_vertexCoords[n][i] = center[n] + scaling[n] * (m_vertexCoords[n][i] - center[n]);
-			m_cellCenters[n][i]  = center[n] + scaling[n] * (m_cellCenters[n][i] - center[n]);
+		}
+
+		for (int i = 1; i < m_nCells1D[n]; ++i) {
+			m_cellCenters[n][i] = center[n] + scaling[n] * (m_cellCenters[n][i] - center[n]);
 		}
 
 		m_cellSpacings[n] *= scaling[n];
