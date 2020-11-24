@@ -1885,9 +1885,13 @@ void VolCartesian::translate(const std::array<double, 3> &translation)
 	for (int n = 0; n < 3; ++n) {
 		m_minCoords[n] += translation[n];
 		m_maxCoords[n] += translation[n];
+
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
 			m_vertexCoords[n][i] += translation[n];
-			m_cellCenters[n][i]  += translation[n];
+		}
+
+		for (int i = 1; i < m_nCells1D[n]; ++i) {
+			m_cellCenters[n][i] += translation[n];
 		}
 	}
 
