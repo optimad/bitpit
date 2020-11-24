@@ -2092,13 +2092,12 @@ std::vector<double> VolCartesian::convertToCellData(const std::vector<double> &v
 	point is outside a null stencil size is returned.
 */
 int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
-                                            std::vector<int> &stencil,
-                                            std::vector<double> &weights)
+                                          std::vector<int> *stencil, std::vector<double> *weights)
 {
 	std::array<int, 3> ijk_point = locatePointCartesian(point);
 	if (ijk_point[0] < 0) {
-		stencil.clear();
-		weights.clear();
+		stencil->clear();
+		weights->clear();
 		return 0;
 	}
 
@@ -2148,11 +2147,11 @@ int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
 	}
 
 	int stencilSize = nContribs_x * nContribs_y * nContribs_z;
-	stencil.resize(stencilSize);
-	weights.resize(stencilSize);
+	stencil->resize(stencilSize);
+	weights->resize(stencilSize);
 
-	std::vector<int>::iterator itrStencil = stencil.begin();
-	std::vector<double>::iterator itrWeights = weights.begin();
+	std::vector<int>::iterator itrStencil = stencil->begin();
+	std::vector<double>::iterator itrWeights = weights->begin();
 	for (int k = 0; k < nContribs_z; ++k) {
 		for (int j = 0; j < nContribs_y; ++j) {
 			for (int i = 0; i < nContribs_x; ++i) {
@@ -2190,13 +2189,12 @@ int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
 	point is outside a null stencil size is returned.
 */
 int VolCartesian::linearVertexInterpolation(const std::array<double,3> &point,
-                                              std::vector<int> &stencil,
-                                              std::vector<double> &weights)
+                                            std::vector<int> *stencil, std::vector<double> *weights)
 {
 	std::array<int, 3> ijk_point = locatePointCartesian(point);
 	if (ijk_point[0] < 0) {
-		stencil.clear();
-		weights.clear();
+		stencil->clear();
+		weights->clear();
 		return 0;
 	}
 
@@ -2225,11 +2223,11 @@ int VolCartesian::linearVertexInterpolation(const std::array<double,3> &point,
 	}
 
 	int stencilSize = pow(2, dimension);
-	stencil.resize(stencilSize);
-	weights.resize(stencilSize);
+	stencil->resize(stencilSize);
+	weights->resize(stencilSize);
 
-	std::vector<int>::iterator itrStencil    = stencil.begin();
-	std::vector<double>::iterator itrWeights = weights.begin();
+	std::vector<int>::iterator itrStencil    = stencil->begin();
+	std::vector<double>::iterator itrWeights = weights->begin();
 	for (int k = 0; k < nContribs_z; ++k) {
 		for (int j = 0; j < nContribs_y; ++j) {
 			for (int i = 0; i < nContribs_x; ++i) {
