@@ -128,7 +128,7 @@ public:
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center) override;
 
 	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
-	std::vector<double> convertToCellData(const std::vector<double> &nodeData) const;
+	std::vector<double> convertToCellData(const std::vector<double> &vertexData) const;
 
 	int linearCellInterpolation(const std::array<double,3> &point, std::vector<int> &stencil, std::vector<double> &weights);
 	int linearVertexInterpolation(const std::array<double,3> &point, std::vector<int> &stencil, std::vector<double> &weights);
