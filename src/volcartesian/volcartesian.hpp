@@ -113,12 +113,12 @@ public:
 	long locateClosestCell(std::array<double,3> const &point);
 	std::array<int, 3> locateClosestCellCartesian(std::array<double,3> const &point) const;
 
-	std::vector<long> extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax);
-	std::vector<long> extractCellSubSet(int idMin, int idMax);
-	std::vector<long> extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax);
-	std::vector<long> extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax);
-	std::vector<long> extractVertexSubSet(int idMin, int idMax);
-	std::vector<long> extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax);
+	std::vector<long> extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax) const;
+	std::vector<long> extractCellSubSet(int idMin, int idMax) const;
+	std::vector<long> extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax) const;
+	std::vector<long> extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax) const;
+	std::vector<long> extractVertexSubSet(int idMin, int idMax) const;
+	std::vector<long> extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax) const;
 
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);
@@ -130,8 +130,8 @@ public:
 	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
 	std::vector<double> convertToCellData(const std::vector<double> &vertexData) const;
 
-	int linearCellInterpolation(const std::array<double,3> &point, std::vector<int> *stencil, std::vector<double> *weights);
-	int linearVertexInterpolation(const std::array<double,3> &point, std::vector<int> *stencil, std::vector<double> *weights);
+	int linearCellInterpolation(const std::array<double,3> &point, std::vector<int> *stencil, std::vector<double> *weights) const;
+	int linearVertexInterpolation(const std::array<double,3> &point, std::vector<int> *stencil, std::vector<double> *weights) const;
 
 	long getCellLinearId(int i, int j, int k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;
