@@ -2083,7 +2083,7 @@ std::vector<double> VolCartesian::convertToCellData(const std::vector<double> &v
 	\return The number of cells used in the interpolation stencil. If the
 	point is outside a null stencil size is returned.
 */
-int VolCartesian::linearCellInterpolation(std::array<double,3> &point,
+int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
                                             std::vector<int> &stencil,
                                             std::vector<double> &weights)
 {
@@ -2181,7 +2181,7 @@ int VolCartesian::linearCellInterpolation(std::array<double,3> &point,
 	\return The number of cells used in the interpolation stencil. If the
 	point is outside a null stencil size is returned.
 */
-int VolCartesian::linearVertexInterpolation(std::array<double,3> &point,
+int VolCartesian::linearVertexInterpolation(const std::array<double,3> &point,
                                               std::vector<int> &stencil,
                                               std::vector<double> &weights)
 {
