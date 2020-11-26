@@ -725,6 +725,30 @@ namespace rbf
     kUserDefined
   }; //end enum eRBFType
 
+  
+  // ================================================================ //
+  // HELPER CLASSES                                                   //
+  // ================================================================ //
+# ifdef __RBF_USE_LAPACKE__
+  /*! @brief Class defining the LAPACK xgels function corresponding to the type of coeff.
+   *
+   *  @tparam         CoeffT        type of coeffs. Only scalar floating point type are
+   *                                supported (e.g. float, double, etc. )
+  */
+  template< class CoordT >
+  struct LAPACKE_xgels_type_wrap
+  {
+    using xgels_signature_t = lapack_int (*)( lapack_int, char, lapack_int, lapack_int, lapack_int, CoordT*, lapack_int, CoordT*, lapack_int );
+    static const xgels_signature_t xgels_ptr;
+  }; //end struct LAPACKE_xgels_type_wrap
+  template< class CoordT >
+  const typename LAPACKE_xgels_type_wrap<CoordT>::xgels_signature_t LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr = nullptr;
+  template<>
+  const LAPACKE_xgels_type_wrap<float>::xgels_signature_t LAPACKE_xgels_type_wrap<float>::xgels_ptr;
+  template<>
+  const LAPACKE_xgels_type_wrap<double>::xgels_signature_t LAPACKE_xgels_type_wrap<double>::xgels_ptr;
+# endif
+  
   // ================================================================ //
   // HELPER FUNCTIONS                                                 //
   // ================================================================ //
@@ -743,7 +767,7 @@ namespace rbf
    *  this function computes the weights associated to each radial function
    *  which best fit the input data in a least square sense.
    *
-   *  @tparam         Dim           nr. of woking dimensions.
+   *  @tparam         Dim           nr. of woking dimensions (Dim > 0).
    *  @tparam         CoordT        type of coordinates. Only scalar floating point types
    *                                are supported (e.g. float, double, etc. ).
    *
@@ -753,26 +777,12 @@ namespace rbf
    *
    *  @result Returns (true) on success.
   */
-  # ifdef __RBF_USE_LAPACKE__
-  template< class CoordT >
-  struct LAPACKE_xgels_type_wrap
-  {
-    using xgels_signature_t = lapack_int (*)( lapack_int, char, lapack_int, lapack_int, lapack_int, CoordT*, lapack_int, CoordT*, lapack_int );
-    static const xgels_signature_t xgels_ptr;
-  }; //end struct LAPACKE_xgels_type_wrap
-  template< class CoordT >
-  const typename LAPACKE_xgels_type_wrap<CoordT>::xgels_signature_t LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr = nullptr;
-  template<>
-  const LAPACKE_xgels_type_wrap<float>::xgels_signature_t LAPACKE_xgels_type_wrap<float>::xgels_ptr;
-  template<>
-  const LAPACKE_xgels_type_wrap<double>::xgels_signature_t LAPACKE_xgels_type_wrap<double>::xgels_ptr;
-  # endif
   template<
     std::size_t Dim,
     class CoordT,
-    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+    typename std::enable_if< (Dim>0) && std::is_floating_point<CoordT>::value >::type* = nullptr
   >
-  bool computeRBFWeights( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf );
+  bool leastSquareRBF( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf );
   
   // ================================================================ //
   // DEFINITION OF CLASS RF         									                //
