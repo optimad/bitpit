@@ -1354,7 +1354,8 @@ namespace rbf
       case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): { return "MultiQuadric3_2";  }
       case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): { return "MultiQuadric5_2";  }
       case( bitpit::rbf::eRBFType::kUserDefined ):     { return "User-defined";     }
-      case( bitpit::rbf::eRBFType::kLinear ):          { return "kLinear";          }
+      case( bitpit::rbf::eRBFType::kLinear ):          { return "Linear";           }
+      case( bitpit::rbf::eRBFType::kConstant ):        { return "Constant";         }
       case( bitpit::rbf::eRBFType::kQuadratic ):       { return "kQuadratic";       }
       case( bitpit::rbf::eRBFType::kCubic ):           { return "kCubic";           }
       case( bitpit::rbf::eRBFType::kQuartic ):         { return "kQuartic";         }
