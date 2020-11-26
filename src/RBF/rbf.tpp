@@ -66,7 +66,7 @@ namespace rbf
   template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* >
   CoordT generalized_multiquadrics( CoordT r, CoordT c )
   {
-    return CoordT(1)/std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) );
+    return std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) );
   }
 
   // ------------------------------------------------------------------------ //

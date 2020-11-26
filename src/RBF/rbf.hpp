@@ -295,7 +295,7 @@ namespace rbf
    *  The family of generalized multi-quadrics RF has the following expression:
    *  \f$
    *  \begin{equation}
-   *    f(r;c) := \frac{1}{ \left( c^2 + z^2 \right)^{\frac{\alpha}{\beta}} }
+   *    f(r;c) := \left( r^2 + z^2 \right)^{\frac{\alpha}{\beta}}
    *  \end{equation}
    *  \f$
    *  for \f$\alpha, \beta > 0\f$.
@@ -305,7 +305,7 @@ namespace rbf
    *
    *  @tparam         CoordT      type of coeffs. Only scalar floating 
    *                              point types are supported (e.g. double, float, etc. )
-   *  @tparam         Alha, Beta  values for the fractional exponent.
+   *  @tparam         Alpha, Beta values for the fractional exponent (Alpha, Beta > 0 ).
    *
    *  @param [in]     r           radial distance
    *  @param [in]     c           value of the bias coeff.
