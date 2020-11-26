@@ -34,141 +34,162 @@ namespace rbf
   // ======================================================================== //
 
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT wendland_c2( CoordT r )
-  {
-    return r > (CoordT)1 ?
-      (CoordT)0 :
-      std::pow( (CoordT)1 - r, 4 ) * ( (CoordT)4 * r + (CoordT)1 );
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT wendland_c2( CoordT r ) {
+    return ( r > (CoordT)1 ) ?
+      (CoordT)0 
+      :
+      std::pow( (CoordT)1 - r, 4 ) * ( (CoordT)4 * r + (CoordT)1 ); 
   }
 
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT wendland_c2_der1( CoordT r )
-  {
-    return r > (CoordT)1 ?
-      (CoordT)0 :
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT wendland_c2_der1( CoordT r ) {
+    return ( r > (CoordT)1 ) ?
+      (CoordT)0 
+      :
       - (CoordT)4 * std::pow( (CoordT)1 - r, 3 ) * ( (CoordT)4 * r + (CoordT)1 )
       + (CoordT)4 * std::pow( (CoordT)1 - r, 4 );
   }
   
     // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT wendland_c2_der2( CoordT r )
-  {
-    return r > (CoordT)1 ?
-      (CoordT)0 :
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT wendland_c2_der2( CoordT r ) {
+    return ( r > (CoordT)1 ) ?
+      (CoordT)0 
+      :
       + (CoordT)12 * std::pow( (CoordT)1 - r, 2 ) * ( (CoordT)4 * r + (CoordT)1 )
       - (CoordT)32 * std::pow( (CoordT)1 - r, 3 );
   }
   
   // ------------------------------------------------------------------------ //
-  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* >
-  CoordT generalized_multiquadrics( CoordT r, CoordT c )
-  {
+  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* /*= nullptr*/ >
+  CoordT generalized_multiquadrics( CoordT r, CoordT c ) {
     return std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) );
   }
 
   // ------------------------------------------------------------------------ //
-  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* >
-  CoordT generalized_multiquadrics_der1( CoordT r, CoordT c )
-  {
+  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* /*= nullptr*/ >
+  CoordT generalized_multiquadrics_der1( CoordT r, CoordT c ) {
     return (CoordT)2 * r * ( (CoordT)Alpha/(CoordT)Beta ) * std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) - CoordT(1) );
   }
   
   // ------------------------------------------------------------------------ //
-  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* >
-  CoordT generalized_multiquadrics_der2( CoordT r, CoordT c )
-  {
+  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* /*= nullptr*/ >
+  CoordT generalized_multiquadrics_der2( CoordT r, CoordT c ) {
     return (CoordT)2 * ( (CoordT)Alpha/(CoordT)Beta ) * std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) - CoordT(1) )
          + (CoordT)4 * r * ( (CoordT)Alpha/(CoordT)Beta ) * ( (CoordT)Alpha/(CoordT)Beta - (CoordT)1 ) * std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) - CoordT(2) );
   }
   
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT gaussian( CoordT r, CoordT c )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT gaussian( CoordT r, CoordT c ) {
     return c * std::exp( - (r*r) );
   }
 
   // ----------------------------------------------------------------------- //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr >
-  CoordT gaussian_der1( CoordT r, CoordT c )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT gaussian_der1( CoordT r, CoordT c ) {
     return - (CoordT)2 * c * r * std::exp( - (r*r) );
   }
   
   // ----------------------------------------------------------------------- //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr >
-  CoordT gaussian_der2( CoordT r, CoordT c )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT gaussian_der2( CoordT r, CoordT c ) {
     return - (CoordT)2 * c * std::exp( - (r*r) );
            + (CoordT)4 * c * r * r * std::exp( - (r*r) );
   }
   
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT linear( CoordT r )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT linear( CoordT r ) {
     return r;
   }
 
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT linear_der1( CoordT r )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT linear_der1( CoordT r ) {
     return (CoordT)1;
   }
   
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT linear_der2( CoordT r )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT linear_der2( CoordT r ) {
     return (CoordT)0;
   }
 
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT constant( CoordT )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT constant( CoordT ) {
     return (CoordT)1;
   }
   
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT constant_der1( CoordT )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT constant_der1( CoordT ) {
     return (CoordT)0;
   }
   
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT constant_der2( CoordT )
-  {
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT constant_der2( CoordT ) {
     return (CoordT)0;
   }
 
   // ------------------------------------------------------------------------ //
-  template< class CoordT, int Alpha, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* >
-  CoordT generalized_power( CoordT r )
-  {
+  template< class CoordT, int Alpha, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* /*= nullptr*/ >
+  CoordT generalized_power( CoordT r ) {
     return std::pow( r, Alpha );
   }
-
+ 
   // ------------------------------------------------------------------------ //
-  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
-  CoordT    thin_plate_spline( CoordT r )
-  {
+  template< class CoordT, int Alpha, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* /*= nullptr*/ >
+  CoordT generalized_power_der1( CoordT r ) {
+    return (CoordT)Alpha * std::pow( r, Alpha - (unsigned)1 );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, int Alpha, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* /*= nullptr*/ >
+  CoordT generalized_power_der2( CoordT r ) {
+    return (CoordT)Alpha * (CoordT)( Alpha - (unsigned)1 ) * std::pow( r, Alpha - (unsigned)2 );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT    thin_plate_spline( CoordT r ) {
     return r*r * std::log(r);
   }
-
+  
   // ------------------------------------------------------------------------ //
-  template< class CoordT, int Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* >
-  CoordT polyharmonic( CoordT r, CoordT c )
-  {
-    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta) * std::log(r);
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT    thin_plate_spline_der1( CoordT r ) {
+    return (CoordT)2 * r * std::log(r) + r;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  CoordT    thin_plate_spline_der2( CoordT r ) {
+    return (CoordT)2 * std::log(r) + (CoordT)3;
   }
 
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, int Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* /*= nullptr*/ >
+  CoordT polyharmonic( CoordT r, CoordT c ) {
+    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta) * std::log(r);
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, int Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* /*= nullptr*/ >
+  CoordT polyharmonic_der1( CoordT r, CoordT c ) {
+    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta-1) * ( (CoordT)(2*Beta) * std::log(r) - (CoordT)1 );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, int Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* /*= nullptr*/ >
+  CoordT polyharmonic_der2( CoordT r, CoordT c ) {
+    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta-2) * ( (CoordT)( 2*Beta*(2*Beta-1) ) * std::log(r) - (CoordT)1 );
+  }
+  
   // ======================================================================== //
   // HELPER FUNCTIONS                                                         //
   // ======================================================================== //
@@ -571,8 +592,43 @@ namespace rbf
           auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
           return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 5, 2>, this_as_rfp->mParams );
         }
-       }
-       return nullptr;
+        case( bitpit::rbf::eRBFType::kQuadratic ):
+        {
+          // No additional parameters. Nothing to bind
+          return &bitpit::rbf::generalized_power_der1<coord_t,2>;
+        }
+        case( bitpit::rbf::eRBFType::kCubic ):
+        {
+          // No additional parameters. Nothing to bind
+          return &bitpit::rbf::generalized_power_der1<coord_t,3>;
+        }
+        case( bitpit::rbf::eRBFType::kQuartic ):
+        {
+          // No additional parameters. Nothing to bind
+          return &bitpit::rbf::generalized_power_der1<coord_t,4>;
+        }
+        case( bitpit::rbf::eRBFType::kThinPlateSpline ):
+        {
+          // No additional parameters. Nothing to bind
+          return &bitpit::rbf::thin_plate_spline_der1<coord_t>;
+        }
+        case( bitpit::rbf::eRBFType::kPolyharmonic2 ):
+        {
+          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+          return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 2>, this_as_rfp->mParams );
+        }
+        case( bitpit::rbf::eRBFType::kPolyharmonic3 ):
+        {
+          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+          return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 3>, this_as_rfp->mParams );
+        }
+        case( bitpit::rbf::eRBFType::kPolyharmonic4 ):
+        {
+          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+          return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 4>, this_as_rfp->mParams );
+        }
+      }
+      return nullptr;
     }
     
   // ------------------------------------------------------------------------ //
@@ -625,6 +681,41 @@ namespace rbf
       {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der2<coord_t, 5, 2>, this_as_rfp->mParams );
+      }
+      case( bitpit::rbf::eRBFType::kQuadratic ):
+      {
+        // No additional parameters. Nothing to bind
+        return &bitpit::rbf::generalized_power_der2<coord_t,2>;
+      }
+      case( bitpit::rbf::eRBFType::kCubic ):
+      {
+        // No additional parameters. Nothing to bind
+        return &bitpit::rbf::generalized_power_der2<coord_t,3>;
+      }
+      case( bitpit::rbf::eRBFType::kQuartic ):
+      {
+        // No additional parameters. Nothing to bind
+        return &bitpit::rbf::generalized_power_der2<coord_t,4>;
+      }
+      case( bitpit::rbf::eRBFType::kThinPlateSpline ):
+      {
+        // No additional parameters. Nothing to bind
+        return &bitpit::rbf::thin_plate_spline_der2<coord_t>;
+      }
+      case( bitpit::rbf::eRBFType::kPolyharmonic2 ):
+      {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der2<coord_t, 2>, this_as_rfp->mParams );
+      }
+      case( bitpit::rbf::eRBFType::kPolyharmonic3 ):
+      {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der2<coord_t, 3>, this_as_rfp->mParams );
+      }
+      case( bitpit::rbf::eRBFType::kPolyharmonic4 ):
+      {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der2<coord_t, 4>, this_as_rfp->mParams );
       }
     }
     return nullptr;

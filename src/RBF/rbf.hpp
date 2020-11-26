@@ -241,16 +241,16 @@ namespace rbf
    *  \begin{equation}
    *      f(r;c) := \left\{
    *        \begin{aligned}
-   *          &(1 - z )^4 ( 4 z + 1 ), \; \text{if} z < 0, \\
+   *          &(1 - r )^4 ( 4 r + 1 ), \; \text{if} r < 1, \\
    *          &0, \; \text{otherwise}
    *        \end{aligned}
    *    \right.
    *  \end{equation}
    *  \f$
-   *  In the above expression, \f$r\f$ is the radial distance of a given point
-   *  from the geometrical kernel (e.g. the center of the RF).
+   *  where \f$r\f$ is the radial distance of a given point
+   *  from the geometrical kernel (i.e. the center of the RF).
    *
-   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance.
@@ -264,7 +264,7 @@ namespace rbf
   // ----------------------------------------------------------------------- //
   /*! @brief First derivative of C2-continuous Wendland's functions.
    *
-   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance.
@@ -278,7 +278,7 @@ namespace rbf
   // ----------------------------------------------------------------------- //
   /*! @brief Second derivative of C2-continuous Wendland's functions.
    *
-   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance.
@@ -295,17 +295,17 @@ namespace rbf
    *  The family of generalized multi-quadrics RF has the following expression:
    *  \f$
    *  \begin{equation}
-   *    f(r;c) := \left( r^2 + z^2 \right)^{\frac{\alpha}{\beta}}
+   *    f(r;c) := \left( r^2 + c^2 \right)^{\frac{\alpha}{\beta}}
    *  \end{equation}
    *  \f$
    *  for \f$\alpha, \beta > 0\f$.
    *  In the above expression, \f$r\f$ is the radial distance of a given point
-   *  from the kernel of the RF (e.g. the center of the RF),
-   *  and \f$c\f$ is a additional parameter (bias).
+   *  from the geometric kernel (i.e. the center of the RF), and \f$c\f$ is 
+   *  a additional parameter (bias).
    *
-   *  @tparam         CoordT      type of coeffs. Only scalar floating 
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating 
    *                              point types are supported (e.g. double, float, etc. )
-   *  @tparam         Alpha, Beta values for the fractional exponent (Alpha, Beta > 0 ).
+   *  @tparam         Alpha, Beta Values for the fractional exponent (Alpha, Beta > 0 ).
    *
    *  @param [in]     r           radial distance
    *  @param [in]     c           value of the bias coeff.
@@ -321,9 +321,9 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief First derivative of generalized multiquadric. 
    *
-   *  @tparam         CoordT      type of coeffs. Only scalar floating 
+   *  @tparam         CoordT      Tyoe of RF coeffs. Only scalar floating 
    *                              point types are supported (e.g. double, float, etc. )
-   *  @tparam         Alpha, Beta values for the fractional exponent (Alpha, Beta > 0 ).
+   *  @tparam         Alpha, Beta Values for the fractional exponent (Alpha, Beta > 0 ).
    *
    *  @param [in]     r           radial distance
    *  @param [in]     c           value of the bias coeff.
@@ -339,9 +339,9 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief Second derivative of generalized multiquadric. 
    *
-   *  @tparam         CoordT      type of coeffs. Only scalar floating 
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating 
    *                              point types are supported (e.g. double, float, etc. )
-   *  @tparam         Alpha, Beta values for the fractional exponent (Alpha, Beta > 0 ).
+   *  @tparam         Alpha, Beta Values for the fractional exponent (Alpha, Beta > 0 ).
    *
    *  @param [in]     r           radial distance
    *  @param [in]     c           value of the bias coeff.
@@ -357,6 +357,7 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief Gaussian radial function.
    *
+   *  A Guassian radial function has the following expression:
    *  A Guassian radial basis function has the following expression:
    *  \f$
    *  \begin{equation}
@@ -364,9 +365,9 @@ namespace rbf
    *  \end{equation}
    *  \f$
    *  where \f$c\f$ is a amplification/reduction factor, and \f$r\f$ is the
-   *  radial distance from the geometry kernel (e.g. the center of the radial function).
+   *  radial distance from the geometry kernel (i.e. the center of the radial function).
    *
-   *  @tparam         CoordT      type of coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -381,7 +382,7 @@ namespace rbf
   // ----------------------------------------------------------------------- //
   /*! @brief First derivative of Gaussian function.
    *
-   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance.
@@ -396,7 +397,7 @@ namespace rbf
   // ----------------------------------------------------------------------- //
   /*! @brief Second derivative of Gaussian function.
    *
-   *  @tparam         CoordT      Type for coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance.
@@ -413,10 +414,10 @@ namespace rbf
    *
    *  Linear function with trivial expression (generally used to as a bias):
    *  \f$ f(r) := r\ f$
-   *  where \f$r\f$ is the radial distance from the geometry kernel (e.g. the 
+   *  where \f$r\f$ is the radial distance from the geometry kernel (i.e. the 
    *  center of the radial function).
    *
-   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -430,7 +431,7 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief First derivative of linear function.
    *
-   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *  @tparam         CoordT      TYpe of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -444,7 +445,7 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief Second derivative of linear function.
    *
-   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -458,10 +459,10 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief Constant function.
    *
-   *  Linear function with trivial expression (generally used to as a bias):
+   *  Constant function with trivial expression (generally used to as a bias):
    *  \f$ f(r) := 1\ f$
    *
-   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -475,7 +476,7 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief First derivative of constant function.
    *
-   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -489,7 +490,7 @@ namespace rbf
   // ---------------------------------------------------------------- //
   /*! @brief Second derivative of constant function.
    *
-   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -501,16 +502,16 @@ namespace rbf
   CoordT constant_der2( CoordT r );
   
   // ---------------------------------------------------------------- //
-  /*! @brief Generalized power function (also referred to as radial power)
+  /*! @brief Generalized power function (radial power).
    *
    *  Generalized power functions have the following expression:
    *  \f$ f(r) := r^\alpha \f$
    *  where \f$\alpha>0\f$ is the power exponent and \f$r\f$ is the radial distance
-   *  from the geomtry kernel of the radial function (e.g. the center of the RF).
+   *  from the geomtry kernel (i.e. the center of the RF).
    *
-   *  @tparam         CoordT      type of coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. )
-   *  @tparam         Alpha       power expoenent.
+   *  @tparam         Alpha       power exponent (>0).
    *
    *  @param [in]     r           radial distance.
   */
@@ -522,18 +523,50 @@ namespace rbf
   CoordT generalized_power( CoordT r );
   
   // ---------------------------------------------------------------- //
-  /*! @brief Thin plate splines
+  /*! @brief First derivative of generalized power function.
    *
-   *  Thin plate spline has the following expression:
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. )
+   *  @tparam         Alpha       power exponent (>0).
+   *
+   *  @param [in]     r           radial distance.
+  */
+  template<
+    class CoordT,
+    int   Alpha,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* = nullptr
+  >
+  CoordT generalized_power_der1( CoordT r );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Second derivative of generalized power function.
+   *
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. )
+   *  @tparam         Alpha       power exponent (>0).
+   *
+   *  @param [in]     r           radial distance.
+  */
+  template<
+    class CoordT,
+    int   Alpha,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* = nullptr
+  >
+  CoordT generalized_power_der2( CoordT r );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Thin plate splines.
+   *
+   *  Thin plate splines have the following expression:
    *  \f$
    *  \begin{equation}
    *    f(r):= r^2 log(r)
    *  \end{equation}
    *  \f$
    *  where \f$r\f$ is the radial distance from the geometry kernel
-   *  (e.g. the center of the RF).
+   *  (i.e. the center of the RF).
    *
-   *  @tparam         CoordT      type of coeffs. Only scalar floating point types are
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types are
    *                              supported (e.g. double, float, etc. ).
    *
    *  @param [in]     r           radial distance
@@ -545,6 +578,34 @@ namespace rbf
   CoordT    thin_plate_spline( CoordT r );
   
   // ---------------------------------------------------------------- //
+  /*! @brief First derivative of thin plate splines.
+   *
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types are
+   *                              supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT    thin_plate_spline_der1( CoordT r );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Second derivative of thin plate splines.
+   *
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types are
+   *                              supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT    thin_plate_spline_der2( CoordT r );
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Polyharmonic radial functions.
    *
    *  The family of polyharmonic functions has the following expression:
@@ -553,12 +614,12 @@ namespace rbf
    *    f(r):= (-c)^{1+\beta) r^{2\beta} \, log(r), \; \beta \neq 0
    *  \end{equation}
    *  \f$
-   *  where \f$r\f$ is the radial distance, \f$\beta \ge 0 \f$ is the power
+   *  where \f$r\f$ is the radial distance, \f$\beta \ge 0 \f$is the power
    *  exponent, and \f$c\f$ is a amplification/reduction factor.
    *
    *  @note The special case \f$beta = 2\f$ correspnds to thin-plate-splines.
    *
-   *  @tparam         CoordT      type of coeffs. Only scalar floating point types
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
    *                              are supported (e.g. double, float, etc. ).
    *  @tparam         Beta        power expoenent (Beta >= 0).
    *
@@ -571,6 +632,40 @@ namespace rbf
     typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* = nullptr
   >
   CoordT polyharmonic( CoordT r, CoordT c );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief First derivative of polyharmonic radial functions.
+   *
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *  @tparam         Beta        power expoenent (Beta >= 0).
+   *
+   *  @param [in]     r           radial distance.
+   *  @param [in]     c           amplification/reduction factor.
+  */
+  template<
+    class CoordT,
+    int   Beta,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* = nullptr
+  >
+  CoordT polyharmonic_der1( CoordT r, CoordT c );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Second derivative of polyharmonic radial functions.
+   *
+   *  @tparam         CoordT      Type of RF coeffs. Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *  @tparam         Beta        power expoenent (Beta >= 0).
+   *
+   *  @param [in]     r           radial distance.
+   *  @param [in]     c           amplification/reduction factor.
+  */
+  template<
+    class CoordT,
+    int   Beta,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* = nullptr
+  >
+  CoordT polyharmonic_der2( CoordT r, CoordT c );
 
   // ================================================================ //
   // FORWARD DECLARATIONS                                             //

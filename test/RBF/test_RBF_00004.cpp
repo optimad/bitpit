@@ -137,39 +137,44 @@ namespace testing
     protected:
     typename rf_t::rf_funct_t initGenerator() const
     {
-        auto p = rf->getParameters();
-        switch( rf->getType() )
-        {
-          case( bitpit::rbf::eRBFType::kWendlandC2 ) :
-            return &wendland_c2<coord_t>;
-          case( bitpit::rbf::eRBFType::kHardy ) :
-              return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>, std::placeholders::_1, p[0] );
-          case( bitpit::rbf::eRBFType::kMultiQuadric2 ) :
-            return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 2, 1>, std::placeholders::_1, p[0] );
-          case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ) :
-            return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>, std::placeholders::_1, p[0] );
-          case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ) :
-            return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>, std::placeholders::_1, p[0] );
-          case( bitpit::rbf::eRBFType::kGaussian ) :
-            return std::bind( &bitpit::rbf::gaussian<coord_t>, std::placeholders::_1, p[0] );
-          case( bitpit::rbf::eRBFType::kLinear ) :
-            return std::bind( &bitpit::rbf::linear<coord_t>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kQuadratic ) :
-            return std::bind( &bitpit::rbf::generalized_power<coord_t, 2>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kCubic ) :
-            return std::bind( &bitpit::rbf::generalized_power<coord_t, 3>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kQuartic ) :
-            return std::bind( &bitpit::rbf::generalized_power<coord_t, 4>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kThinPlateSpline ) :
-            return std::bind( &bitpit::rbf::thin_plate_spline<coord_t>, std::placeholders::_1 );
-          case( bitpit::rbf::eRBFType::kPolyharmonic2 ) :
-            return std::bind( &bitpit::rbf::polyharmonic<coord_t, 2>, std::placeholders::_1, p[0] );
-          case( bitpit::rbf::eRBFType::kPolyharmonic3 ) :
-            return std::bind( &bitpit::rbf::polyharmonic<coord_t, 3>, std::placeholders::_1, p[0] );
-          case( bitpit::rbf::eRBFType::kPolyharmonic4 ) :
-            return std::bind( &bitpit::rbf::polyharmonic<coord_t, 4>, std::placeholders::_1, p[0] );
-          default: throw std::runtime_error( "bitpit::rbf::testing: **ERROR** unsupported rbf type" );
-        }
+      auto p = rf->getParameters();
+      switch( rf->getType() )
+      {
+        case( bitpit::rbf::eRBFType::kWendlandC2 ) :
+          return &wendland_c2<coord_t>;
+        case( bitpit::rbf::eRBFType::kHardy ):
+          return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kMultiQuadric1_2 ) :
+          return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kMultiQuadric2 ) :
+          return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 2, 1>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ) :
+          return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ) :
+          return std::bind( &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kGaussian ) :
+          return std::bind( &bitpit::rbf::gaussian<coord_t>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kLinear ) :
+          return std::bind( &bitpit::rbf::linear<coord_t>, std::placeholders::_1 );
+        case( bitpit::rbf::eRBFType::kConstant ) :
+          return std::bind( &bitpit::rbf::constant<coord_t>, std::placeholders::_1 );
+        case( bitpit::rbf::eRBFType::kQuadratic ) :
+          return std::bind( &bitpit::rbf::generalized_power<coord_t, 2>, std::placeholders::_1 );
+        case( bitpit::rbf::eRBFType::kCubic ) :
+          return std::bind( &bitpit::rbf::generalized_power<coord_t, 3>, std::placeholders::_1 );
+        case( bitpit::rbf::eRBFType::kQuartic ) :
+          return std::bind( &bitpit::rbf::generalized_power<coord_t, 4>, std::placeholders::_1 );
+        case( bitpit::rbf::eRBFType::kThinPlateSpline ) :
+          return std::bind( &bitpit::rbf::thin_plate_spline<coord_t>, std::placeholders::_1 );
+        case( bitpit::rbf::eRBFType::kPolyharmonic2 ) :
+          return std::bind( &bitpit::rbf::polyharmonic<coord_t, 2>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kPolyharmonic3 ) :
+          return std::bind( &bitpit::rbf::polyharmonic<coord_t, 3>, std::placeholders::_1, p[0] );
+        case( bitpit::rbf::eRBFType::kPolyharmonic4 ) :
+          return std::bind( &bitpit::rbf::polyharmonic<coord_t, 4>, std::placeholders::_1, p[0] );
+        default: throw std::runtime_error( "bitpit::rbf::testing: **ERROR** unsupported rbf type" );
+      }
+      return nullptr;
     }
     bool init() const
     {
