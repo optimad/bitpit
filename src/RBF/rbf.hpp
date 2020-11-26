@@ -22,13 +22,6 @@
 *
 \*---------------------------------------------------------------------------*/
 # pragma once
-//# define __USE_DEPRECATED__
-//# define __RBF_USE_EIGEN__
-//# ifdef __RBF_USE_EIGEN__
-//# undef __RBF_USE_LAPACKE__
-//# else
-//# define __RBF_USE_LAPACKE__
-//# endif
 
 // ========================================================================= //
 // INCLUDES                                                                  //
@@ -64,6 +57,7 @@
 
 namespace bitpit{
 
+# ifdef __RBF_DEPRECATED_ON__
 /*!
  * @enum RBFBasisFunction
  * @ingroup RBF
@@ -201,13 +195,15 @@ private:
     double calcDist(const std::array<double,3> & point, int j);
 };
 
+# endif
 /*!
  * @ingroup  	RBF
  * @brief 		Classes and utility fuctions for R(adial)B(asis)F(unction)
  */
 namespace rbf
 {
-
+  
+# ifdef __RBF_DEPRECATED_ON__
     double                  wendlandc2(double);
     double                  linear(double);
     double                  gauss90(double);
@@ -221,7 +217,8 @@ namespace rbf
     double                  c0c2(double);
     double                  c1c2(double);
     double                  c2c2(double);
-
+# endif
+  
   /*! @addtogroup RBF
    *  @{
   */

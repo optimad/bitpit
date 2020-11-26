@@ -30,9 +30,11 @@ get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
 # List of tests
 set(TESTS "")
-list(APPEND TESTS "test_RBF_00001")
-list(APPEND TESTS "test_RBF_00002")
-list(APPEND TESTS "test_RBF_00003")
+if ( BITPIT_RBF_DEPRECATED_IMPLEMENTATION MATCHES ON )
+  list(APPEND TESTS "test_RBF_00001")
+  list(APPEND TESTS "test_RBF_00002")
+  list(APPEND TESTS "test_RBF_00003")
+endif()
 list(APPEND TESTS "test_RBF_00004")
 list(APPEND TESTS "test_RBF_00005")
 

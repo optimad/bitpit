@@ -32,7 +32,7 @@
 
 #include "bitpit_version.hpp"
 
-//# include "rbf_config.hpp"
+#include "rbf_config.hpp"
 #include "rbf.hpp"
 
 #endif
