@@ -615,6 +615,8 @@ namespace rbf
     kMultiQuadric5_2,
     /*! @brief Linear */
     kLinear,
+    /*! @brief Constant */
+    kConstant,
     /*! @brief Quadratic */
     kQuadratic,
     /*! @brief Cubic */

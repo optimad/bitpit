@@ -366,6 +366,14 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kLinear
+      case( bitpit::rbf::eRBFType::kConstant ): {
+        auto out = new bitpit::rbf::RF<D, C>(
+          type,
+          &bitpit::rbf::constant<coord_t>
+        );
+        out->mHasCompactSupport = false;
+        return out;
+      } //end case kConstant
       case( bitpit::rbf::eRBFType::kQuadratic ): {
         auto out = new bitpit::rbf::RF<D, C>(
           type,
@@ -519,6 +527,16 @@ namespace rbf
           // No additional parameters. Nothing to bind
           return &bitpit::rbf::wendland_c2_der1<coord_t>;
         }
+        case( bitpit::rbf::eRBFType::kLinear ):
+        {
+          // No additional parameters. Nothing to bind
+          return &bitpit::rbf::linear_der1<coord_t>;
+        }        
+        case( bitpit::rbf::eRBFType::kConstant ):
+        {
+          // No additional parameters. Nothing to bind
+          return &bitpit::rbf::constant_der1<coord_t>;
+        }
         case( bitpit::rbf::eRBFType::kGaussian ):
         {
           auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
@@ -543,6 +561,16 @@ namespace rbf
       {
         // No additional parameters. Nothing to bind.
         return &bitpit::rbf::wendland_c2_der2<coord_t>;
+      }
+      case( bitpit::rbf::eRBFType::kLinear ):
+      {
+        // No additional parameters. Nothing to bind.
+        return &bitpit::rbf::linear_der2<coord_t>;
+      }      
+      case( bitpit::rbf::eRBFType::kConstant ):
+      {
+        // No additional parameters. Nothing to bind.
+        return &bitpit::rbf::constant_der2<coord_t>;
       }
       case( bitpit::rbf::eRBFType::kGaussian ):
       {
