@@ -1370,12 +1370,13 @@ namespace rbf
   // ======================================================================= //
   // EXPLICIT SPECIALIZATIONS                                                //
   // ======================================================================= //
-  # ifdef __USE_LAPACKE__
+  
+# ifdef __USE_LAPACKE__
   template<>
   const typename LAPACKE_xgels_type_wrap<float>::xgels_signature_t LAPACKE_xgels_type_wrap<float>::xgels_ptr = &LAPACKE_sgels;
   template<>
   const typename LAPACKE_xgels_type_wrap<double>::xgels_signature_t LAPACKE_xgels_type_wrap<double>::xgels_ptr = &LAPACKE_dgels;
-  # endif
+# endif
   
   template class RF<1, float>;
   template class RF<2, float>;

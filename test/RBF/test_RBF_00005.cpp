@@ -123,7 +123,7 @@ namespace rbf
         // Assign the value of radius and center to each rf.
         {
           // Set the radius for all radial functions (random value)
-          rbf.setRadius( (coord_t) dist(eng) + (coord_t)1 / (coord_t)5 );
+          rbf.setRadii( (coord_t) dist(eng) + (coord_t)1 / (coord_t)5 );
 
           // Set the center for each radial basis function
           for ( std::size_t i = 0; i < nrbf; ++i )
@@ -153,7 +153,7 @@ namespace rbf
       }
       bool test( ) const
       {
-        if ( !bitpit::rbf::computeRBFWeights( data_p, data_v, rbf ) )
+        if ( !bitpit::rbf::leastSquareRBF( data_p, data_v, rbf ) )
           throw std::runtime_error(
             "bitpit::rbf::testing::RBFTester: ** ERROR ** Failed to compute RBF weights"
           );

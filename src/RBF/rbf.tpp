@@ -195,20 +195,17 @@ namespace rbf
   // ======================================================================== //
   
   // ------------------------------------------------------------------------ //
-  template<
-    std::size_t Dim,
-    class CoordT,
-    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/
-  >
-  bool computeRBFWeights( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf )
-  {
+  template< std::size_t Dim, class CoordT, typename std::enable_if< (Dim>0) && std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
+  bool leastSquareRBF( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf ) {
     if ( data_points.size() != data_values.size() )
       throw std::runtime_error(
-        "bitpit::rbf::computeRBFWeights: The nr. of data points and the nr. of data values mismatch!"
+        "bitpit::rbf::leastSquareRBF: "
+        "** ERROR ** The nr. of data points and the nr. of data values mismatch!"
       );
     if ( data_points.size() < rbf.size() )
       throw std::runtime_error(
-        "bitpit::rbf::computeRBFWeights: The nr. of data points must be at least the size of the radial function basis."
+        "bitpit::rbf::leastSquareRBF: "
+        "** ERROR ** The nr. of data points must be at least the size of the radial function basis."
       );
 
     // Constant(s)
@@ -221,7 +218,7 @@ namespace rbf
     // Implementation with LAPACKE support -------------------------- //
     // Implementation node: dgesv suffer from numerical stability issues.
     // Better implementation in Eigen with QR factorization and full pivoting.
-    # ifdef __RBF_USE_LAPACKE__
+# ifdef __RBF_USE_LAPACKE__
     // Scope variables
     std::vector<CoordT> mat( n_data * n_rbf );
     std::vector<CoordT> rhs( n_data );
@@ -242,11 +239,10 @@ namespace rbf
 
     // Single precision
     lapack_int info;
-    if ( LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr )
-    {
+    if ( LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr ) {
       info = LAPACKE_xgels_type_wrap<CoordT>::xgels_ptr( 
         LAPACK_ROW_MAJOR, //matrix layout
-        'N',              // 'M' for col major, 'N' for row major 
+        'N',              //'M' for col major, 'N' for row major 
         n_data,           //nr. of matrix row
         n_rbf,            //nr. of matrix cols
         1,                //nr. of rhs cols.
@@ -257,22 +253,21 @@ namespace rbf
       );
     }
     else
-    {
       throw std::runtime_error(
-        "bitpit::rbf::computeRBFWeights: ** ERROR ** LAPACK does not support the required floating point precision."
+        "bitpit::rbf::leastSquareRBF: "
+        "** ERROR ** LAPACK does not support the floating input point type."
       );
-    }
     
     // Check for error(s)
     if( info > 0 )
       return false;
     
     // Set weights (if success)
-    rbf.setWeights(rhs.cbegin(), rhs.cbegin() + n_rbf );
-    # endif
+    rbf.setWeights( rhs.cbegin(), rhs.cbegin() + n_rbf );
+# endif
 
     // Implementation with EIGEN support ---------------------------- //
-    # ifdef __RBF_USE_EIGEN__
+# ifdef __RBF_USE_EIGEN__
     
     // Typedef(s)
     using matrix_t  = Eigen::Matrix<CoordT, Eigen::Dynamic, Eigen::Dynamic>;
@@ -285,7 +280,6 @@ namespace rbf
      // Fill rhs
     for( std::size_t i_data = 0; i_data < n_data; ++i_data )
       rhs(i_data) = data_values[i_data];
-    //next j
 
     // Fill coeff. matrix
     for( std::size_t i_data = 0; i_data < n_data; ++i_data ) {
@@ -302,9 +296,8 @@ namespace rbf
     // Assign weights to RBF
     rbf.setWeights( sol.data(), sol.data() + sol.size() );
     
-    # endif
+# endif
 
-    
     // Return success
     return true;
   }
