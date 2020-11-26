@@ -1342,28 +1342,27 @@ namespace rbf
   // ======================================================================= //
 
   // ----------------------------------------------------------------------- //
-  std::string   getRBFTag( eRBFType type )
+  std::string getRBFTag( eRBFType type )
   {
-    switch( type )
-    {
+    switch( type ) {
       default:                                         { return "Undefined";        }
-      case( bitpit::rbf::eRBFType::kWendlandC2 ):      { return "WendLandC2";       }
-      case( bitpit::rbf::eRBFType::kGaussian ):        { return "Gaussian";         }
-      case( bitpit::rbf::eRBFType::kHardy ):           { return "Hardy";            }
+      case( bitpit::rbf::eRBFType::kWendlandC2      ): { return "WendLandC2";       }
+      case( bitpit::rbf::eRBFType::kGaussian        ): { return "Gaussian";         }
+      case( bitpit::rbf::eRBFType::kHardy           ): { return "Hardy";            }
       case( bitpit::rbf::eRBFType::kMultiQuadric1_2 ): { return "MultiQuadric1_2";  }
-      case( bitpit::rbf::eRBFType::kMultiQuadric2 ):   { return "MultiQuadric2";    }
+      case( bitpit::rbf::eRBFType::kMultiQuadric2   ): { return "MultiQuadric2";    }
       case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): { return "MultiQuadric3_2";  }
       case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): { return "MultiQuadric5_2";  }
-      case( bitpit::rbf::eRBFType::kUserDefined ):     { return "User-defined";     }
-      case( bitpit::rbf::eRBFType::kLinear ):          { return "Linear";           }
-      case( bitpit::rbf::eRBFType::kConstant ):        { return "Constant";         }
-      case( bitpit::rbf::eRBFType::kQuadratic ):       { return "kQuadratic";       }
-      case( bitpit::rbf::eRBFType::kCubic ):           { return "kCubic";           }
-      case( bitpit::rbf::eRBFType::kQuartic ):         { return "kQuartic";         }
+      case( bitpit::rbf::eRBFType::kUserDefined     ): { return "User-defined";     }
+      case( bitpit::rbf::eRBFType::kLinear          ): { return "Linear";           }
+      case( bitpit::rbf::eRBFType::kConstant        ): { return "Constant";         }
+      case( bitpit::rbf::eRBFType::kQuadratic       ): { return "kQuadratic";       }
+      case( bitpit::rbf::eRBFType::kCubic           ): { return "kCubic";           }
+      case( bitpit::rbf::eRBFType::kQuartic         ): { return "kQuartic";         }
       case( bitpit::rbf::eRBFType::kThinPlateSpline ): { return "Thin plate spline";}
-      case( bitpit::rbf::eRBFType::kPolyharmonic2 ):   { return "Polyharonic2";     }
-      case( bitpit::rbf::eRBFType::kPolyharmonic3 ):   { return "Polyharonic3";     }
-      case( bitpit::rbf::eRBFType::kPolyharmonic4 ):   { return "Polyharonic4";     }
+      case( bitpit::rbf::eRBFType::kPolyharmonic2   ): { return "Polyharonic2";     }
+      case( bitpit::rbf::eRBFType::kPolyharmonic3   ): { return "Polyharonic3";     }
+      case( bitpit::rbf::eRBFType::kPolyharmonic4   ): { return "Polyharonic4";     }
     }
     return "";
   }
