@@ -28,9 +28,9 @@
  # pragma once
  
 # undef __USE_DEPRECATED__    //link with new DEPRECATED EXPERIMENTAL FEATURE
-#cmakedefine RBF_EIGEN_SUPPORT
+#cmakedefine EIGEN3_SUPPORT
 
-# ifdef RBF_EIGEN_SUPPORT
+# ifdef EIGEN3_SUPPORT
 # define __RBF_USE_EIGEN__
 # endif
 
