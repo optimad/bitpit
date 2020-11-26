@@ -775,16 +775,16 @@ namespace rbf
   bool computeRBFWeights( const std::vector<typename RFBasis<Dim,CoordT>::point_t> &data_points, const std::vector<CoordT> data_values, RFBasis<Dim,CoordT> &rbf );
   
   // ================================================================ //
-  // DEFINITION OF CLASS RadialFunct									                //
+  // DEFINITION OF CLASS RF         									                //
   // ================================================================ //
-  /*! @brief Class used for radial function with no additional parameters.
+  /*! @brief Radial function with no additional parameters.
    *
-   *  This class holds a radial function (RF in short) which does not depend
+   *  This class holds a radial function (in short, RF) which does not depend
    *  on any additional parameter beyond its radius and its center.
    *
-   *	@tparam 			Dim 		    nr. of dimension in the working space.
-   *	@tparam 			CoordT 	    (default = double) type for coefficients and coordinates.
-   *                            Only scalar floating point type are supported (e.g. coord_t = double, float).
+   *	@tparam 			Dim 		    Nr. of dimension in the working space.
+   *	@tparam 			CoordT 	    (default = double) Type of coefficients.
+   *                            Only scalar floating point type are supported (e.g. double, float, etc.).
   */
   template<
     std::size_t Dim,
@@ -795,17 +795,21 @@ namespace rbf
     // Static assertions ============================================ //
     static_assert(
       std::is_floating_point<CoordT>::value,
-      "**ERROR** bitpit::rbf::RF<Dim,CoordT>: CoordT must be a scalar floating point type "
+      "** ERROR ** bitpit::rbf::RF<Dim,CoordT>: CoordT must be a scalar floating point type "
       ", e.g. float, double or long double"
+    );
+    static_assert(
+      (Dim > 0),
+      "** ERROR ** bitpit::rbf::RF<Dim,CoordT>: Dim must be greater than 0."
     );
 
     // Typedef(s) =================================================== //
     public:
-    /*!	@brief Coeffs. type. */
+    /*!	@brief Type of coeffs. */
     using coord_t 		= CoordT;
-    /*!	@brief Point type in the working space. */
+    /*!	@brief Point type. */
     using point_t 		= std::array<coord_t, Dim>;
-    /*!	@brief Type of functor holding the actual implementation */
+    /*!	@brief Type of functor holding the actual implementation of the RF.*/
     using rf_funct_t  	= std::function< coord_t( coord_t ) >;
     private:
     /*!	@brief Type of this object. */
@@ -813,21 +817,21 @@ namespace rbf
 
     // Member variable(s) =========================================== //
     protected:
-    /*!	@brief Functor implementing the expression of the Radial Function. */
+    /*!	@brief Functor implementing the actual expression of the Radial Function. */
     rf_funct_t mFunct;
     /*! @brief Type of this radial function. */
     eRBFType mType;
-    /*! @brief Bool for compactly supported RFs.*/
+    /*! @brief Flag for compactly supported RFs.*/
     bool mHasCompactSupport;
     public:
     /*!	@brief Radius of this RF. */
     coord_t radius;
-    /*!	@brief Center of this RF (sometimes referred to as control point, geometry kernel) */
+    /*!	@brief Center of this RF (also referred to as control point, geometry kernel) */
     point_t center;
 
     // Static member function(s) ==================================== //
     public:
-    /*! @brief Returns a pointer to a new instance of a radial function 
+    /*! @brief Returns a pointer to a new instance of a RF 
      *  of the specified type.
      *
      *  @param [in]     type        type of the RF.    */
@@ -875,67 +879,52 @@ namespace rbf
      *
      *  Evaluate this RF function at the input point.
      *
-     *	@param [in]		coords 	   coordinates of the input point.
+     *	@param [in]		  coords 	   coordinates of the input point.
     */
     virtual coord_t operator()( const point_t &coords ) const;
     
     // Getter(s)/Info ============================================== //
     public:
-    /*!	@brief Returns the nr. of additional parameters for this RF.
-     *
-     *  By default, it is assumed that the radial function
-     *  does not depend on any additional parameter.
-     *
-     *  If the RF depends on some other parameter, this method
-     *  must be overridden.
-    */
+    /*!	@brief Returns the nr. of additional parameters for this RF. */
     virtual std::size_t	getNumberOfParameters() const;
     /*!	@brief Returns (true) if this RF is compactly supported. */
     bool hasCompactSupport() const;
-    /*!	@brief Returns const pointer to the internal array of parameters
-     *	of this RF.
-     *
-     *  The default behavior is to assume that the radial function does not
-     *  depend on any additional parameter.
-     *
-     *  If the RF depends on additional parameters, this method must be overridden
-     *  by the derived class.
-    */
+    /*!	@brief Returns (const) pointer to the internal array storing
+     *  the values of the additional parameters of this RF. */
     virtual const coord_t* getParameters() const;
     /*! @brief Returns the type of this radial function. */
     eRBFType getType() const;
-    /*! @brief Display info for this RBF (mostly meant for debugging purposes).
+    /*! @brief Display info to a output stream
+     *  (mostly meant for debugging purposes).
      *
      *  @param [in,out]   out       (default = std::cout) output stream.
      *  @param [in]       indent    (default = 0) indentation level.
     */
     virtual void display( std::ostream &out = std::cout, unsigned int indent = 0 ) const;
     /*! @brief Returns reference to the actual functor implementing the expression of this
-     *  radial function.
-    */
+     *  radial function. */
     const rf_funct_t& getFunctor() const
     {
       return mFunct;
     }
-    /*! @brief Computes the the first derivative of this radial function w.r.t. the radial distance. */
+    /*! @brief Returns a functor implementing the the first derivative 
+     *  of this radial function w.r.t. the radial distance. */
     rf_funct_t getFirstDerivative() const;
-    /*! @brief Computes the second derivative of this radial function w.r.t. the radial distance. */
+    /*! @brief Returns a functor implementing the second derivative 
+     *  of this radial function w.r.t. the radial distance. */
     rf_funct_t getSecondDerivative() const;
     
     // Setter(s) =================================================== //
     public:
     /*! @brief Set default values for function parameters, ie.:
-     *  * radius = 1          (assumes uniform behavior across the basis, and normalized space)
-     *  * center = (0, 0, 0)  (radial function centered in the origin)
+     *  * radius = 1 
+     *  * center = (0, 0, 0)
     */
     virtual void setDefault();
     /*!	@brief Set the value of the parameters of this Radial Function.
      *
-     *  The default behavior is to assume that the radial function does not
-     *  depend on any additional parameters.
-     *
-     *  If the RF depends on additional parameters, this method must be overridden
-     *  by the derived class.
+     *  @param [in]       vals      const pointer to the array storing the values
+     *                              of the parameter.
     */
     virtual void setParameters( const coord_t * );
 

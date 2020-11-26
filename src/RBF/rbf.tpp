@@ -317,16 +317,16 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  RF<D,C>* RF<D,C>::New( eRBFType type )
-  {
+  RF<D,C>* RF<D,C>::New( eRBFType type ) {
     switch( type )
     {
       default: {
         throw std::runtime_error(
-          "rbf::RF::New: Undefined RF type."
+          "bitpit::rbf::RF::New: "
+          "** ERROR ** Unsupported RF type."
         );
       } //end default
-      case( bitpit::rbf::eRBFType::kWendlandC2 ): {
+      case( bitpit::rbf::eRBFType::kWendlandC2      ): {
         auto out = new bitpit::rbf::RF<D, C>(
           type,
           &bitpit::rbf::wendland_c2<coord_t>
@@ -334,22 +334,22 @@ namespace rbf
         out->mHasCompactSupport = true;
         return out;
       } //end case kWendlandC2
-      case( bitpit::rbf::eRBFType::kGaussian ): {
+      case( bitpit::rbf::eRBFType::kGaussian        ): {
         auto out = new bitpit::rbf::RFP<D, 1, C>(
           type,
           &bitpit::rbf::gaussian<coord_t>
         );
         out->mHasCompactSupport = false;
-        out->mParams[0] = 1;
+        out->mParams[0] = 1; //amplification factor
         return out;
-      }
-      case( bitpit::rbf::eRBFType::kHardy ): {
+      } //end case kGaussian
+      case( bitpit::rbf::eRBFType::kHardy           ): {
         auto out = new bitpit::rbf::RFP<D, 1, C>(
           type,
           &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2>
         );
         out->mHasCompactSupport = false;
-        out->mParams[0] = 1;
+        out->mParams[0] = 1; // bias
         return out;
       } //end case kHardy
       case( bitpit::rbf::eRBFType::kMultiQuadric1_2 ): {
@@ -358,16 +358,16 @@ namespace rbf
           &bitpit::rbf::generalized_multiquadrics<coord_t, 1, 2 >
         );
         out->mHasCompactSupport = false;
-        out->mParams[0] = 1;
+        out->mParams[0] = 1; //bias factor
         return out;
-      }
-      case( bitpit::rbf::eRBFType::kMultiQuadric2 ): {
+      } //end case kMultiQuadric1_2
+      case( bitpit::rbf::eRBFType::kMultiQuadric2   ): {
         auto out = new bitpit::rbf::RFP<D, 1, C>(
           type,
           &bitpit::rbf::generalized_multiquadrics<coord_t, 2, 1 >
         );
         out->mHasCompactSupport = false;
-        out->mParams[0] = 1;
+        out->mParams[0] = 1; //bias factor
         return out;
       } //end case kMultiQuadrics2
       case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): {
@@ -376,7 +376,7 @@ namespace rbf
           &bitpit::rbf::generalized_multiquadrics<coord_t, 3, 2>
         );
         out->mHasCompactSupport = false;
-        out->mParams[0] = 1;
+        out->mParams[0] = 1; //bias factor
         return out;
       } //end case kMultiQuadric3_2
       case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): {
@@ -385,10 +385,10 @@ namespace rbf
           &bitpit::rbf::generalized_multiquadrics<coord_t, 5, 2>
         );
         out->mHasCompactSupport = false;
-        out->mParams[0] = 1;
+        out->mParams[0] = 1; //bias factor
         return out;
-      } //end case kMultiQuadric3_2
-      case( bitpit::rbf::eRBFType::kLinear ): {
+      } //end case kMultiQuadric5_2
+      case( bitpit::rbf::eRBFType::kLinear          ): {
         auto out = new bitpit::rbf::RF<D, C>(
           type,
           &bitpit::rbf::linear<coord_t>
@@ -396,7 +396,7 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kLinear
-      case( bitpit::rbf::eRBFType::kConstant ): {
+      case( bitpit::rbf::eRBFType::kConstant        ): {
         auto out = new bitpit::rbf::RF<D, C>(
           type,
           &bitpit::rbf::constant<coord_t>
@@ -404,7 +404,7 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kConstant
-      case( bitpit::rbf::eRBFType::kQuadratic ): {
+      case( bitpit::rbf::eRBFType::kQuadratic       ): {
         auto out = new bitpit::rbf::RF<D, C>(
           type,
           &bitpit::rbf::generalized_power<coord_t, 2>
@@ -412,7 +412,7 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kQuadratic
-      case( bitpit::rbf::eRBFType::kCubic ): {
+      case( bitpit::rbf::eRBFType::kCubic           ): {
         auto out = new bitpit::rbf::RF<D, C>(
           type,
           &bitpit::rbf::generalized_power<coord_t, 3>
@@ -420,7 +420,7 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kCubic
-      case( bitpit::rbf::eRBFType::kQuartic ): {
+      case( bitpit::rbf::eRBFType::kQuartic         ): {
         auto out = new bitpit::rbf::RF<D, C>(
           type,
           &bitpit::rbf::generalized_power<coord_t, 4>
@@ -436,7 +436,7 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kThinPlateSpline
-      case( bitpit::rbf::eRBFType::kPolyharmonic2 ): {
+      case( bitpit::rbf::eRBFType::kPolyharmonic2   ): {
         auto out = new bitpit::rbf::RFP<D, 1, C>(
           type,
           &bitpit::rbf::polyharmonic<coord_t, 2>
@@ -445,7 +445,7 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kPolyharmonic2
-      case( bitpit::rbf::eRBFType::kPolyharmonic3 ): {
+      case( bitpit::rbf::eRBFType::kPolyharmonic3   ): {
         auto out = new bitpit::rbf::RFP<D, 1, C>(
           type,
           &bitpit::rbf::polyharmonic<coord_t, 3>
@@ -454,7 +454,7 @@ namespace rbf
         out->mHasCompactSupport = false;
         return out;
       } //end case kPolyharmonic3
-      case( bitpit::rbf::eRBFType::kPolyharmonic4 ): {
+      case( bitpit::rbf::eRBFType::kPolyharmonic4   ): {
         auto out = new bitpit::rbf::RFP<D, 1, C>(
           type,
           &bitpit::rbf::polyharmonic<coord_t, 4>
@@ -462,9 +462,8 @@ namespace rbf
         out->mParams[0] = (coord_t) 1;
         out->mHasCompactSupport = false;
         return out;
-      } //end case kPolyharmonic3
+      } //end case kPolyharmonic4
     } //end switch
-
     return nullptr;
   }
 
@@ -472,8 +471,8 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  RF<D,C>::RF() :
-    mFunct(nullptr)
+  RF<D,C>::RF()
+    : mFunct(nullptr)
     , radius()
     , center()
     , mType( bitpit::rbf::eRBFType::kUndefined )
@@ -483,8 +482,8 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  RF<D,C>::RF( bitpit::rbf::eRBFType type, coord_t (*f)(coord_t) ) :
-    mFunct(f)
+  RF<D,C>::RF( bitpit::rbf::eRBFType type, coord_t (*f)(coord_t) )
+    : mFunct(f)
     , mType(type)
   {
     setDefault();
@@ -492,8 +491,8 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  RF<D,C>::RF( bitpit::rbf::eRBFType type, rf_funct_t const &f ) :
-    mFunct(f)
+  RF<D,C>::RF( bitpit::rbf::eRBFType type, rf_funct_t const &f )
+    : mFunct(f)
     , mType(type)
   {
     setDefault();
@@ -503,8 +502,7 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  typename RF<D,C>::coord_t RF<D,C>::operator()( const point_t &coords ) const
-  {
+  typename RF<D,C>::coord_t RF<D,C>::operator()( const point_t &coords ) const {
     return mFunct( norm2( coords - center )/radius );
   }
 
@@ -528,195 +526,143 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  void RF<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
-  {
+  void RF<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const {
     std::string   s( indent, ' ' );
-    out << s << "Type:        " << bitpit::rbf::getRBFTag( mType ) << '\n'
-        << s << "radius:      " << radius << "\n"
-        << s << "center:      [ ";
-    for ( std::size_t i = 0; i < D; ++i )
-      out << center[i] << ' ';
-    out << "]\n";
+    out << s << "type:   "  << bitpit::rbf::getRBFTag( mType ) << '\n'
+        << s << "radius: "  << radius << "\n"
+        << s << "center: [" << center << "]\n";
   }
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  typename RF<D,C>::rf_funct_t RF<D,C>::getFirstDerivative() const
-    {
-      switch( mType )
-      {
-        default :
-        {
-          throw std::runtime_error( 
-            "bitpit::rbf::RF::getFirstDerivative: "
-            "** ERROR ** First derivative is not available for this radial function."
-          );
-        }
-        case( bitpit::rbf::eRBFType::kWendlandC2 ):
-        {
-          // No additional parameters. Nothing to bind
-          return &bitpit::rbf::wendland_c2_der1<coord_t>;
-        }
-        case( bitpit::rbf::eRBFType::kLinear ):
-        {
-          // No additional parameters. Nothing to bind
-          return &bitpit::rbf::linear_der1<coord_t>;
-        }        
-        case( bitpit::rbf::eRBFType::kConstant ):
-        {
-          // No additional parameters. Nothing to bind
-          return &bitpit::rbf::constant_der1<coord_t>;
-        }
-        case( bitpit::rbf::eRBFType::kGaussian ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::gaussian_der1<coord_t>, this_as_rfp->mParams );
-        }
-        case( bitpit::rbf::eRBFType::kMultiQuadric1_2 ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 1, 2>, this_as_rfp->mParams );
-        }
-        case( bitpit::rbf::eRBFType::kMultiQuadric2 ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 2, 1>, this_as_rfp->mParams );
-        }
-        case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 3, 2>, this_as_rfp->mParams );
-        }
-        case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 5, 2>, this_as_rfp->mParams );
-        }
-        case( bitpit::rbf::eRBFType::kQuadratic ):
-        {
-          // No additional parameters. Nothing to bind
-          return &bitpit::rbf::generalized_power_der1<coord_t,2>;
-        }
-        case( bitpit::rbf::eRBFType::kCubic ):
-        {
-          // No additional parameters. Nothing to bind
-          return &bitpit::rbf::generalized_power_der1<coord_t,3>;
-        }
-        case( bitpit::rbf::eRBFType::kQuartic ):
-        {
-          // No additional parameters. Nothing to bind
-          return &bitpit::rbf::generalized_power_der1<coord_t,4>;
-        }
-        case( bitpit::rbf::eRBFType::kThinPlateSpline ):
-        {
-          // No additional parameters. Nothing to bind
-          return &bitpit::rbf::thin_plate_spline_der1<coord_t>;
-        }
-        case( bitpit::rbf::eRBFType::kPolyharmonic2 ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 2>, this_as_rfp->mParams );
-        }
-        case( bitpit::rbf::eRBFType::kPolyharmonic3 ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 3>, this_as_rfp->mParams );
-        }
-        case( bitpit::rbf::eRBFType::kPolyharmonic4 ):
-        {
-          auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
-          return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 4>, this_as_rfp->mParams );
-        }
-      }
-      return nullptr;
+  typename RF<D,C>::rf_funct_t RF<D,C>::getFirstDerivative() const {
+    switch( mType ) {
+      default : {
+        throw std::runtime_error( 
+          "bitpit::rbf::RF::getFirstDerivative: "
+          "** ERROR ** First derivative not available for this radial function."
+        );
+      } //end case default
+      case( bitpit::rbf::eRBFType::kWendlandC2      ): {
+        return &bitpit::rbf::wendland_c2_der1<coord_t>;
+      } //end case kWendlandC2
+      case( bitpit::rbf::eRBFType::kLinear          ): {
+        return &bitpit::rbf::linear_der1<coord_t>;
+      } //end case kLinear    
+      case( bitpit::rbf::eRBFType::kConstant        ): {
+        return &bitpit::rbf::constant_der1<coord_t>;
+      } //end case kConstant
+      case( bitpit::rbf::eRBFType::kGaussian        ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::gaussian_der1<coord_t>, this_as_rfp->mParams );
+      } //end case kGaussian
+      case( bitpit::rbf::eRBFType::kMultiQuadric1_2 ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 1, 2>, this_as_rfp->mParams );
+      } //end case kMultiQuadric1_2
+      case( bitpit::rbf::eRBFType::kMultiQuadric2   ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 2, 1>, this_as_rfp->mParams );
+      } //end case kMultiQuadric2
+      case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 3, 2>, this_as_rfp->mParams );
+      } //end case kMultiQuadric3_2
+      case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der1<coord_t, 5, 2>, this_as_rfp->mParams );
+      } //end case kMultiQuadric5_2
+      case( bitpit::rbf::eRBFType::kQuadratic       ): {
+        return &bitpit::rbf::generalized_power_der1<coord_t,2>;
+      } //end case kQuadratic
+      case( bitpit::rbf::eRBFType::kCubic           ): {
+        return &bitpit::rbf::generalized_power_der1<coord_t,3>;
+      } //end case kCubic
+      case( bitpit::rbf::eRBFType::kQuartic         ): {
+        return &bitpit::rbf::generalized_power_der1<coord_t,4>;
+      } //end case kQuartic
+      case( bitpit::rbf::eRBFType::kThinPlateSpline ): {
+        return &bitpit::rbf::thin_plate_spline_der1<coord_t>;
+      } //end case kThinPlateSpline
+      case( bitpit::rbf::eRBFType::kPolyharmonic2   ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 2>, this_as_rfp->mParams );
+      } //end case kPolyharmonic2
+      case( bitpit::rbf::eRBFType::kPolyharmonic3   ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 3>, this_as_rfp->mParams );
+      } //end case kPolyharmonic3
+      case( bitpit::rbf::eRBFType::kPolyharmonic4   ): {
+        auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
+        return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der1<coord_t, 4>, this_as_rfp->mParams );
+      } //end case kPolyharmonic4
     }
+    return nullptr;
+  }
     
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  typename RF<D,C>::rf_funct_t RF<D,C>::getSecondDerivative() const
-  {
-    switch( mType )
-    {
-      default:
+  typename RF<D,C>::rf_funct_t RF<D,C>::getSecondDerivative() const {
+    switch( mType ) {
+      default: {
         throw std::runtime_error(
           "bitpit::rbf::RF::getSecondDerivative: "
-          "** ERROR ** Second derivative is not available for this radial function."
+          "** ERROR ** Second derivative not available for this radial function."
         );
-      case( bitpit::rbf::eRBFType::kWendlandC2 ):
-      {
-        // No additional parameters. Nothing to bind.
+      } //end case default
+      case( bitpit::rbf::eRBFType::kWendlandC2      ): {
         return &bitpit::rbf::wendland_c2_der2<coord_t>;
-      }
-      case( bitpit::rbf::eRBFType::kLinear ):
-      {
-        // No additional parameters. Nothing to bind.
+      } //end case kWendlandC2
+      case( bitpit::rbf::eRBFType::kLinear          ): {
         return &bitpit::rbf::linear_der2<coord_t>;
-      }      
-      case( bitpit::rbf::eRBFType::kConstant ):
-      {
-        // No additional parameters. Nothing to bind.
+      } //end case kLinear
+      case( bitpit::rbf::eRBFType::kConstant        ): {
         return &bitpit::rbf::constant_der2<coord_t>;
-      }
-      case( bitpit::rbf::eRBFType::kGaussian ):
-      {
+      } //end case kConstant
+      case( bitpit::rbf::eRBFType::kGaussian        ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::gaussian_der2<coord_t>, this_as_rfp->mParams );
-      }
-      case( bitpit::rbf::eRBFType::kMultiQuadric1_2 ):
-      {
+      } //end case kGaussian
+      case( bitpit::rbf::eRBFType::kMultiQuadric1_2 ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der2<coord_t, 1, 2>, this_as_rfp->mParams );
-      }
-      case( bitpit::rbf::eRBFType::kMultiQuadric2 ):
-      {
+      } //end case kMultiQuadric1_2
+      case( bitpit::rbf::eRBFType::kMultiQuadric2   ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der2<coord_t, 2, 1>, this_as_rfp->mParams );
-      }
-      case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ):
-      {
+      } //end case kMultiQuadric2
+      case( bitpit::rbf::eRBFType::kMultiQuadric3_2 ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der2<coord_t, 3, 2>, this_as_rfp->mParams );
-      }
-      case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ):
-      {
+      } //end case kMultiQuadric3_2
+      case( bitpit::rbf::eRBFType::kMultiQuadric5_2 ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::generalized_multiquadrics_der2<coord_t, 5, 2>, this_as_rfp->mParams );
-      }
-      case( bitpit::rbf::eRBFType::kQuadratic ):
-      {
-        // No additional parameters. Nothing to bind
+      } //end case kMultiQuadric5_2
+      case( bitpit::rbf::eRBFType::kQuadratic       ): {
         return &bitpit::rbf::generalized_power_der2<coord_t,2>;
-      }
-      case( bitpit::rbf::eRBFType::kCubic ):
-      {
-        // No additional parameters. Nothing to bind
+      } //end case kQuadratic
+      case( bitpit::rbf::eRBFType::kCubic           ): {
         return &bitpit::rbf::generalized_power_der2<coord_t,3>;
-      }
-      case( bitpit::rbf::eRBFType::kQuartic ):
-      {
-        // No additional parameters. Nothing to bind
+      } //end case kCubic
+      case( bitpit::rbf::eRBFType::kQuartic         ): {
         return &bitpit::rbf::generalized_power_der2<coord_t,4>;
-      }
-      case( bitpit::rbf::eRBFType::kThinPlateSpline ):
-      {
-        // No additional parameters. Nothing to bind
+      } //end case kQuartic
+      case( bitpit::rbf::eRBFType::kThinPlateSpline ): {
         return &bitpit::rbf::thin_plate_spline_der2<coord_t>;
-      }
-      case( bitpit::rbf::eRBFType::kPolyharmonic2 ):
-      {
+      } //end case kThinPlateSpline
+      case( bitpit::rbf::eRBFType::kPolyharmonic2   ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der2<coord_t, 2>, this_as_rfp->mParams );
-      }
-      case( bitpit::rbf::eRBFType::kPolyharmonic3 ):
-      {
+      } //end case kPolyharmonic2
+      case( bitpit::rbf::eRBFType::kPolyharmonic3   ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der2<coord_t, 3>, this_as_rfp->mParams );
-      }
-      case( bitpit::rbf::eRBFType::kPolyharmonic4 ):
-      {
+      } //end case kPolyharmonic3
+      case( bitpit::rbf::eRBFType::kPolyharmonic4   ): {
         auto this_as_rfp = dynamic_cast< RFP<D,1,C>* >( const_cast< RF<D,C>* >( this ) );
         return RFP<D,1,C>::bindParameters( &bitpit::rbf::polyharmonic_der2<coord_t, 4>, this_as_rfp->mParams );
-      }
+      } //end case kPolyharmonic4
     }
     return nullptr;
   }
