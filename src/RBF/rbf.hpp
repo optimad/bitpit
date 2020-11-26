@@ -1109,8 +1109,8 @@ namespace rbf
    *
    *  Class storing a basis of (heterogeneous) Radial Functions.
    *
-   *  @tparam     Dim     nr. of working dimensions.
-   *  @tparam     CoordT  (default = double) type for coordinates/coefficients. Only scalar
+   *  @tparam     Dim     nr. of working dimensions (Dim > 0).
+   *  @tparam     CoordT  (default = double) type of coefficients. Only scalar
    *                      floating point types are supported (e.g. float, double, etc.)
   */
   template<
@@ -1121,9 +1121,14 @@ namespace rbf
   {
     // Static assertion(s) ========================================= //
     static_assert(
+      Dim > 0,
+      "bitpit::rbf::RFBasis<Dim,CoordT>: "
+      "** ERROR ** Nr. of working dimensions, Dim, must be greater than 0"
+    );
+    static_assert(
       std::is_floating_point<CoordT>::value,
-      "**ERROR** bitpit::rbf::RFBasis<Dim,CoordT>: CoordT must be a scalar floating point type "
-      ", e.g. float, double or long double"
+      "bitpit::rbf::RFBasis<Dim,CoordT>: "
+      "** ERROR ** CoordT must be a scalar floating point type (e.g. float, double, etc. )"
     );
     
     // Typedef(s) ================================================== //
@@ -1149,8 +1154,7 @@ namespace rbf
     RFBasis();
     /*! @brief Constructor #1.
      *
-     *  Initialize a radial basis function with N functions of the specified,
-     *  type.
+     *  Initialize a radial basis function with N functions of the specified type.
      *
      *  @param [in]     N       nr. of functions.
      *  @param [in]     type    type of radial basis.
@@ -1172,13 +1176,32 @@ namespace rbf
     
     // Getter(s)/Info ============================================== //
     public:
-    /*! @brief Returns the size of this basis */
+    /*! @brief Reserve memory for the insertion of new radial functions.
+     *
+     *  If the specified reserve is smaller than the current capacity
+     *  no action is taken.
+     *
+     *  @param [in]     n       memory to be reserved in terms of nr. of elements.
+    */
+    using base_t::reserve;
+    /*! @brief Returns const/non-const iterator pointing to the first
+     *  pair radial function-weight. */
+    using base_t::cbegin;
+    using base_t::begin;
+    /*! @brief Returns const/non-const iterator pointing at the end
+     *  of the list of radial functions (i.e. after the last radial function). */
+    using base_t::cend;
+    using base_t::end;
+    /*! @brief Returns the size of this basis. */
     using base_t::size;
-    /*! @brief Returns (const/non-const) reference to the i-th radial function in the basis. */
-    using   base_t::operator[];
-    using   base_t::at;
-    using   base_t::empty;
-    using   base_t::clear;
+    /*! @brief Returns (const/non-const) reference to a pair consisting of the i-th radial function 
+     *  and the associated weight. */
+    using base_t::operator[];
+    using base_t::at;
+    /*! @brief Returns (true) if this radial function basis is empty (i.e. it does not contain any function). */
+    using base_t::empty;
+    /*! @brief Clear the content of this class and reset its state to default (empty basis). */
+    using base_t::clear;
     /*! @brief Returns the collection of weights for this radial basis function. */
     std::vector<coord_t> collectWeights() const;
     /*! @brief Returns const/non-const reference to the weight of the i-th radial function. */
@@ -1187,8 +1210,8 @@ namespace rbf
     /*! @brief Returns const/non-const reference to the i-th radial function. */
     const rf_t& getRadialFunction( std::size_t i ) const;
     rf_t& getRadialFunction( std::size_t i );
-    /*! @brief Display info to the output stream provided as input.
-     *  (Mostly meant for debugging purposes).
+    /*! @brief Display info to a output stream
+     *  (mostly meant for debugging purposes).
      *
      *  @param [in,out]   out     (default = std::cout) output stream.
      *  @param [in]       indent  (default = 0) indentation level.
@@ -1202,18 +1225,28 @@ namespace rbf
      *  @param [in]   rf      (unique) Pointer to the radial function.
      *  @param [in]   weight  (default = 1) weight to be assigned to the new function.
      *
-     *  @result Returns the position in the basis where the new function
-     *  has been added.
-    */
-    std::size_t add( std::unique_ptr<rf_t> rf, CoordT weight = (CoordT)1 );
-    /*! @brief Remove the i-th function from the basis. */
-    void remove( std::size_t i );
-    /*! @brief Utility function to set the weights of each radial function. */
-    void setWeights( const std::vector<coord_t> &weights );
-    /*! @brief Overloading of #setWeights taking a range iterator as input. 
+     *  @note All iterators, pointer, references to any radial function/weight
+     *  might be invalidated after calling this method.
      *
-     *  Set the weight for each radial function from the range [first, last).
-     *  [first, last) must contain at least N values (N being the size of this basis).
+     *  @result Returns the ID assigned to the new radial function. This ID can
+     *  be used to access the radial function via #getRadialFunction and #getWeight
+     *  methods.
+    */
+    std::size_t add( std::unique_ptr<rf_t> rf, coord_t weight = (coord_t)1 );
+    /*! @brief Remove the i-th function from the basis.
+     *  
+     *  @note All iterators, pointers, references to any radial function/weight
+     *  might be invalidated after calling this method.
+     *
+     *  @param [in]   i       ID of the radial function to be removed.
+    */
+    void remove( std::size_t i );
+    /*! @brief Utility function which assign a constant weight to all radial function
+     *  of this basis. */
+    void setWeights( coord_t weight );
+    /*! @brief Set the weight of each radial function from the input list of values. */
+    void setWeights( std::vector<coord_t> const &weights );
+    /*! @brief Set the weight of each radial function from the input range of values.
      *
      *  @tparam       ItaratorType      iterator type. IteratorType must be at
      *                                  least a forward iterator.
@@ -1223,8 +1256,34 @@ namespace rbf
     */
     template< class IteratorType >
     void setWeights( IteratorType first, IteratorType last );
-    /*! @brief Set the specified radius for all radial function in this basis. */
-    void setRadius( coord_t radius );
+    /*! @brief Set the radius of all radial functions in this basis to the specified value. */
+    void setRadii( coord_t radius );
+    /*! @brief Set the radius of each radial function from the input list of values. */
+    void setRadii( std::vector<coord_t> const &radii );
+    /*! @brief Set the radius of each radial function from the input range of values.
+     *
+     *  @tparam       ItaratorType      iterator type. IteratorType must be at
+     *                                  least a forward iterator.
+     * 
+     *  @param [in]   first, last       iterators pointing to the beginning/end of the 
+     *                                  input range.
+    */
+    template< class IteratorType >
+    void setRadii( IteratorType first, IteratorType last );
+    /*! @brief Set the center of all radial functions in this basis to the specified value. */
+    void setCenters( point_t const &center );
+    /*! @brief Set the center of all radial functions in this basis from the input list of points. */
+    void setCenters( std::vector<point_t> const &centers );
+    /*! @brief Set the center of all radial functions in this basis from the input range of points.
+     *
+     *  @tparam       ItaratorType      iterator type. IteratorType must be at
+     *                                  least a forward iterator.
+     * 
+     *  @param [in]   first, last       iterators pointing to the beginning/end of the 
+     *                                  input range.
+    */
+    template< class IteratorType >
+    void setCenters( IteratorType first, IteratorType last );
     /*! @brief Reset the type of this basis of radial functions.
      *
      *  @param [in]   type    new type for this radial basis.

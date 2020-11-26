@@ -753,14 +753,14 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  RFBasis<D,C>::RFBasis() :
-    base_t()
+  RFBasis<D,C>::RFBasis()
+  : base_t()
   {}
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  RFBasis<D,C>::RFBasis( std::size_t n, eRBFType type ) :
-    base_t( n )
+  RFBasis<D,C>::RFBasis( std::size_t n, eRBFType type )
+  : base_t( n )
   {
     for ( auto &rf : *this )
       rf.second.reset( rf_t::New( type ) ); 
@@ -770,8 +770,7 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  typename RFBasis<D,C>::coord_t RFBasis<D,C>::operator()( const point_t &coords ) const
-  {
+  typename RFBasis<D,C>::coord_t RFBasis<D,C>::operator()( const point_t &coords ) const {
     coord_t out = (coord_t)0;
     for ( const auto &rf : *this )
       out += rf.first * rf.second->operator()(coords);
@@ -782,8 +781,7 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  std::vector<typename RFBasis<D,C>::coord_t> RFBasis<D,C>::collectWeights() const
-  {
+  std::vector<typename RFBasis<D,C>::coord_t> RFBasis<D,C>::collectWeights() const {
     std::vector<coord_t> out( base_t::size() );
     auto  i = out.begin(), 
           e = out.end();
@@ -795,36 +793,31 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  const typename RFBasis<D,C>::coord_t& RFBasis<D,C>::getWeight( std::size_t i ) const
-  {
+  const typename RFBasis<D,C>::coord_t& RFBasis<D,C>::getWeight( std::size_t i ) const {
     return this->at(i).first;
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  typename RFBasis<D,C>::coord_t& RFBasis<D,C>::getWeight( std::size_t i )
-  {
+  typename RFBasis<D,C>::coord_t& RFBasis<D,C>::getWeight( std::size_t i ) {
     return const_cast< coord_t& >( const_cast<const self_t*>( this )->getWeight(i) );
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  const typename RFBasis<D,C>::rf_t& RFBasis<D,C>::getRadialFunction( std::size_t i ) const
-  {
+  const typename RFBasis<D,C>::rf_t& RFBasis<D,C>::getRadialFunction( std::size_t i ) const {
     return *( this->at(i).second );
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  typename RFBasis<D,C>::rf_t& RFBasis<D,C>::getRadialFunction( std::size_t i )
-  {
+  typename RFBasis<D,C>::rf_t& RFBasis<D,C>::getRadialFunction( std::size_t i ) {
     return const_cast< rf_t& >( const_cast< const self_t* >( this )->getRadialFunction(i) );
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  void RFBasis<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
-  {
+  void RFBasis<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const {
     std::string s(indent, ' ');
     out << s << "# of RBF:   " << this->size() << '\n';
     std::size_t i = 0;
@@ -840,35 +833,38 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  std::size_t RFBasis<D,C>::add( std::unique_ptr<rf_t> rf, C weight /*= (C)1*/ )
-  {
+  std::size_t RFBasis<D,C>::add( std::unique_ptr<rf_t> rf, coord_t weight /*= (coord_t)1*/ ) {
     base_t::push_back( std::make_pair( weight, std::move(rf) ) );
     return base_t::size()-1;
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  void RFBasis<D,C>::remove( std::size_t i )
-  {
+  void RFBasis<D,C>::remove( std::size_t i ) {
     base_t::erase( base_t::begin() + i );
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  void RFBasis<D,C>::setWeights( const std::vector<coord_t> &weights )
-  {
+  void RFBasis<D,C>::setWeights( coord_t weight ) {
+    for ( auto &rf : *this )
+      rf.first = weight;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::setWeights( std::vector<coord_t> const &weights ) {
     setWeights( weights.cbegin(), weights.cend() );
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
   template< class IteratorType >
-  void RFBasis<D,C>::setWeights( IteratorType first, IteratorType last )
-  {
+  void RFBasis<D,C>::setWeights( IteratorType first, IteratorType last ) {
     if ( std::distance( first, last ) != base_t::size() )
       throw std::runtime_error(
-        "bitpit::rbf::RFBasis::setWeights: ** ERROR** The size of the input range "
-        "and the size of this basis mismatch!"          
+        "bitpit::rbf::RFBasis::setWeights: "
+        "** ERROR** The extent of the input range and the size of this basis mismatch!"          
       );
     auto j = base_t::begin();
     for ( ; first != last; ++first, ++j )
@@ -877,16 +873,61 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  void RFBasis<D,C>::setRadius( coord_t radius )
-  {
+  void RFBasis<D,C>::setRadii( coord_t radius ) {
     for ( auto &rf : *this )
       rf.second->radius = radius;
   }
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
-  void RFBasis<D,C>::reset( eRBFType type, std::size_t n /*= -1*/ )
-  {
+  void RFBasis<D,C>::setRadii( std::vector<coord_t> const &radii ) {
+    setRadii( radii.cbegin(), radii.cend() );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  template< class IteratorType >
+  void RFBasis<D,C>::setRadii( IteratorType first, IteratorType last ) {
+    if ( std::distance( first, last ) != base_t::size() )
+      throw std::runtime_error(
+        "bitpit::rbf::RFBasis::setRadii: "
+        "** ERROR** The extent of the input range and the size of this basis mismatch!"          
+      );
+    auto j = base_t::begin();
+    for ( ; first != last; ++first, ++j )
+      j->second->radius = (*first);
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::setCenters( point_t const &center ) {
+    for ( auto &rf : *this )
+      rf.second->center = center;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::setCenters( std::vector<point_t> const &centers ) {
+    setCenters( centers.cbegin(), centers.cend() );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  template< class IteratorType >
+  void RFBasis<D,C>::setCenters( IteratorType first, IteratorType last ) {
+    if ( std::distance( first, last ) != base_t::size() )
+      throw std::runtime_error(
+        "bitpit::rbf::RFBasis::setRadii: "
+        "** ERROR** The extent of the input range and the size of this basis mismatch!"          
+      );
+    auto j = base_t::begin();
+    for ( ; first != last; ++first, ++j )
+      j->second->center = (*first);
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
+  void RFBasis<D,C>::reset( eRBFType type, std::size_t n /*= -1*/ ) {
     base_t( n == -1 ? this->size() : n ).swap( *this );
     for ( auto &rf : *this )
       rf.second.reset( rf_t::New( type ) ); 
