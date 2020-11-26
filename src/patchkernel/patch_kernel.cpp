@@ -365,28 +365,28 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 {
 	std::vector<adaption::Info> updateInfo;
 
-	// Check if there are pending changes
-	bool spawnNeeed       = (getSpawnStatus() == SPAWN_NEEDED);
-	bool adaptionDirty    = (getAdaptionStatus(true) == ADAPTION_DIRTY);
-	bool boundingBoxDirty = isBoundingBoxDirty();
-
-	bool pendingChanges = (spawnNeeed || adaptionDirty || boundingBoxDirty);
-	if (!pendingChanges) {
+	// Early return if the patch is not dirty
+	if (!isDirty(true)) {
 		return updateInfo;
 	}
 
 	// Spawn
+	bool spawnNeeed = (getSpawnStatus() == SPAWN_NEEDED);
 	if (spawnNeeed) {
 		mergeAdaptionInfo(spawn(trackAdaption), updateInfo);
 	}
 
 	// Adaption
+	bool adaptionDirty = (getAdaptionStatus(true) == ADAPTION_DIRTY);
 	if (adaptionDirty) {
 		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), updateInfo);
 	}
 
 	// Update bounding box
-	updateBoundingBox();
+	bool boundingBoxDirty = isBoundingBoxDirty();
+	if (boundingBoxDirty) {
+		updateBoundingBox();
+	}
 
 	return updateInfo;
 }
