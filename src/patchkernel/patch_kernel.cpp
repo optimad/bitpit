@@ -1021,11 +1021,33 @@ void PatchKernel::setAdaptionStatus(AdaptionStatus status)
 */
 bool PatchKernel::isDirty(bool global) const
 {
-	bool spawnNeeed       = (getSpawnStatus() == SPAWN_NEEDED);
-	bool adaptionDirty    = (getAdaptionStatus(global) == ADAPTION_DIRTY);
-	bool boundingBoxDirty = isBoundingBoxDirty(global);
+#if BITPIT_ENABLE_MPI==0
+	BITPIT_UNUSED(global);
+#endif
 
-	return (spawnNeeed || adaptionDirty || boundingBoxDirty);
+	bool isDirty = false;
+
+	if (!isDirty) {
+		isDirty |= (getSpawnStatus() == SPAWN_NEEDED);
+	}
+
+	if (!isDirty) {
+		isDirty |= (getAdaptionStatus(false) == ADAPTION_DIRTY);
+	}
+
+	if (!isDirty) {
+		isDirty |= isBoundingBoxDirty(false);
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	// Get the global flag
+	if (global && isCommunicatorSet()) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(MPI_IN_PLACE, &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+	}
+#endif
+
+	return isDirty;
 }
 
 /*!
