@@ -428,6 +428,79 @@ namespace rbf
   CoordT linear( CoordT r );
   
   // ---------------------------------------------------------------- //
+  /*! @brief First derivative of linear function.
+   *
+   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT linear_der1( CoordT r );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Second derivative of linear function.
+   *
+   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT linear_der2( CoordT r );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Constant function.
+   *
+   *  Linear function with trivial expression (generally used to as a bias):
+   *  \f$ f(r) := 1\ f$
+   *
+   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT constant( CoordT r );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief First derivative of constant function.
+   *
+   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT constant_der1( CoordT r );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Second derivative of constant function.
+   *
+   *  @tparam         CoordT      type of coeffs.  Only scalar floating point types
+   *                              are supported (e.g. double, float, etc. ).
+   *
+   *  @param [in]     r           radial distance
+  */
+  template<
+    class CoordT,
+    typename std::enable_if< std::is_floating_point<CoordT>::value >::type* = nullptr
+  >
+  CoordT constant_der2( CoordT r );
+  
+  // ---------------------------------------------------------------- //
   /*! @brief Generalized power function (also referred to as radial power)
    *
    *  Generalized power functions have the following expression:

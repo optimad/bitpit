@@ -114,6 +114,41 @@ namespace rbf
   }
 
   // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
+  CoordT linear_der1( CoordT r )
+  {
+    return (CoordT)1;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
+  CoordT linear_der2( CoordT r )
+  {
+    return (CoordT)0;
+  }
+
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
+  CoordT constant( CoordT )
+  {
+    return (CoordT)1;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
+  CoordT constant_der1( CoordT )
+  {
+    return (CoordT)0;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
+  CoordT constant_der2( CoordT )
+  {
+    return (CoordT)0;
+  }
+
+  // ------------------------------------------------------------------------ //
   template< class CoordT, int Alpha, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) >::type* >
   CoordT generalized_power( CoordT r )
   {
