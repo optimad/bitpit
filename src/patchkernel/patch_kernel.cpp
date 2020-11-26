@@ -6231,10 +6231,42 @@ int PatchKernel::getDumpVersion() const
 /*!
  *  Write the patch to the specified stream.
  *
+ *  Dumping a patch that is not up-to-date is not supported. If the patch is
+ *  not up-to-date, it will be automatically updated before dump it.
+ *
  *  \param stream is the stream to write to
+ *  \result Return true if the patch was sucessfully dumped, false otherwise.
  */
-void PatchKernel::dump(std::ostream &stream) const
+bool PatchKernel::dump(std::ostream &stream)
 {
+	// Update the patch
+	update();
+
+	// Dump the patch
+	const PatchKernel *constPatch = this;
+	return constPatch->dump(stream);
+}
+
+/*!
+ *  Write the patch to the specified stream.
+ *
+ *  Dumping a patch that is not up-to-date is not supported. If the patch is
+ *  not up-to-date and compilation of assertions is enabled, the function will
+ *  assert, whereas if compilation of assertions is not enabled, the function
+ *  is a no-op.
+ *
+ *  \param stream is the stream to write to
+ *  \result Return true if the patch was sucessfully dumped, false otherwise.
+ */
+bool PatchKernel::dump(std::ostream &stream) const
+{
+	// Dumping a dirty patch is not supported.
+	bool dirty = isDirty(true);
+	assert(!dirty && "Dumping a patch that is not up-to-date is not supported.");
+	if (dirty) {
+		return false;
+	}
+
 	// Version
 	utils::binary::write(stream, getDumpVersion());
 
@@ -6285,6 +6317,9 @@ void PatchKernel::dump(std::ostream &stream) const
 	m_vertexIdGenerator.dump(stream);
 	m_cellIdGenerator.dump(stream);
 	m_interfaceIdGenerator.dump(stream);
+
+	// The patch has been dumped sucessfully
+	return true;
 }
 
 /*!

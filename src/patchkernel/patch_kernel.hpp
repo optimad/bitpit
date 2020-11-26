@@ -626,7 +626,8 @@ public:
 	void flushData(std::fstream &stream, const std::string &name, VTKFormat format) override;
 
 	int getDumpVersion() const;
-	void dump(std::ostream &stream) const;
+	bool dump(std::ostream &stream);
+	bool dump(std::ostream &stream) const;
 	void restore(std::istream &stream, bool reregister = false);
 
 	void consecutiveRenumberVertices(long offset = 0);
