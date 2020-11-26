@@ -528,9 +528,9 @@ namespace rbf
   template< std::size_t D, class C >
   void RF<D,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const {
     std::string   s( indent, ' ' );
-    out << s << "type:   "  << bitpit::rbf::getRBFTag( mType ) << '\n'
-        << s << "radius: "  << radius << "\n"
-        << s << "center: [" << center << "]\n";
+    out << s << "type:      "  << bitpit::rbf::getRBFTag( mType ) << '\n'
+        << s << "radius:    "  << radius << "\n"
+        << s << "center:    [" << center << "]\n";
   }
 
   // ------------------------------------------------------------------------ //
@@ -689,16 +689,16 @@ namespace rbf
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
-  RFP<D,N,C>::RFP() :
-    base_t()
+  RFP<D,N,C>::RFP()
+    : base_t()
   {}
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   template<class ...Args>
-  RFP<D,N,C>::RFP( bitpit::rbf::eRBFType type, coord_t(*f)( coord_t, Args ...args) ) :
-    base_t( type, bindParameters(f, mParams) )
-  { }
+  RFP<D,N,C>::RFP( bitpit::rbf::eRBFType type, coord_t(*f)( coord_t, Args ...args) )
+    : base_t( type, bindParameters(f, mParams) )
+  {}
 
   // Getter(s)/Info ========================================================= //
 
@@ -715,34 +715,30 @@ namespace rbf
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   template<class f_in_t, std::size_t... I>
-  typename RFP<D,N,C>::rf_funct_t RFP<D,N,C>::doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> )
-  {
+  typename RFP<D,N,C>::rf_funct_t RFP<D,N,C>::doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> ) {
        return std::bind( f, std::placeholders::_1, std::cref(data[I]...) ); // A trick here
   }
 
   // ------------------------------------------------------------------------ //
   template< std::size_t D, std::size_t N, class C >
   template<class f_in_t>
-  typename RFP<D,N,C>::rf_funct_t RFP<D,N,C>::bindParameters( f_in_t f, coord_t* data )
-  {
-       return doBind( f, data, bitpit::make_index_sequence<N>{} );
+  typename RFP<D,N,C>::rf_funct_t RFP<D,N,C>::bindParameters( f_in_t f, coord_t* data ) {
+    return doBind( f, data, bitpit::make_index_sequence<N>{} );
   }
 
   // ---------------------------------------------------------------------- //
   template< std::size_t D, std::size_t N, class C >
-  void RFP<D,N,C>::setParameters( const coord_t *values )
-  {
+  void RFP<D,N,C>::setParameters( const coord_t *values ) {
     std::copy( values, values + N, mParams );
   }
 
   // ---------------------------------------------------------------------- //
   template< std::size_t D, std::size_t N, class C >
-  void RFP<D,N,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const
-  {
-    std::string   s( indent, ' ' );
+  void RFP<D,N,C>::display( std::ostream &out /*= std::cout*/, unsigned int indent /*= 0*/ ) const {
+    std::string s( indent, ' ' );
     base_t::display(out, indent);
-    out << s  << "# params:    " << N << '\n'
-        << s  << "params:      [ ";
+    out << s  << "# params: " << N << '\n'
+        << s  << "params:   [ ";
     for ( std::size_t i = 0; i < N; ++i )
       out << mParams[i] << ' ';
     out << "]\n";

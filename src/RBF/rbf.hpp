@@ -935,52 +935,55 @@ namespace rbf
   // =============================================================== //
   /*! @brief Definition of generalized RF.
    *
-   *  @tparam       Dim           nr. of dimensions in the working space (Dim>0)
-   *  @tparam       NParams       Nr of additional parameters for this RF (NParams>0)
-   *  @tparam       CoordT        (default = double) type of coefficients. Only scalar floating
-   *                              point types are supported (e.g. double, float, etc.)
-   *
-   *  This class stores a generic radial function which depends
-   *  on a arbitrary nr. of parameters of type CoordT.
+   *  This class can be used to store a generic radial function
+   *  which depends on a arbitrary nr. of parameters of type CoordT
+   *  beyond its radius and center.
    *
    *  ** Usage **
    *  * Default usage *
-   *  If you wish to use one of the radial function implemented in bitpit just create a new instance
+   *  If you wish to use one of the radial function implemented in bitpit, just create a new instance
    *  by calling:
    *  RF::New (specify the type of radial function you want to use).
    *
    *  * Passing the ownership of the additional parameters to RFP class. *
-   *  If you wish to encapsulate a user-defined function (which depends on N parameters),
-   *  you can invoke the RFP constructor passing the pointer to that function. The nr. of 
-   *  additional parameters, which you function depends on, must be specified in the list of template arguments.
-   *  For instance, assumung D=3, CoordT = double and a user-defined funtion which depends
+   *  If you wish to encapsulate a given function (which depends on N additional parameters),
+   *  you just need to invoke the RFP constructor passing the pointer to that function. 
+   *  The nr. of additional parameters must be specified as a template argument of the RF class.
+   *
+   *  For instance, assumung Dim=3, CoordT = double and a user-defined funtion which depends
    *  on 2 additional parameters:
    *
-   *  CoordT = my_radial_funct( CoordT r, CoordT par1, CoordT par2 ) defined somewhere
-   *  auto my_rf = new RFP<3, 2, double>(
-   *    bitpit::rbf::eRBFType::kUserDefined,
-   *    &my_radial_funct
-   *  )
-   *  will create a instance of the radial function (my_rf) which has exclusive ownership 
-   *  over the additional parameters. The value of these parameters can be accesed/modified
-   *  any time via #setParameters and #getParameters
+   *  CoordT = my_radial_funct( CoordT r, CoordT par1, CoordT par2 ) { ... }
+   *  auto my_rf = new RFP<3, 2, double>( bitpit::rbf::eRBFType::kUserDefined, &my_radial_funct )
+   *  
+   *  will create a radial function with the specified expression and automatically bind 
+   *  the additional parameters to some inernal member variable which can be accesed/modified
+   *  any time via #setParameters and #getParameters member functions.
    *
-   *  In some cases user might want to keep ownership on some (all) of the additional parameters.
+   *  * Retaining the ownership of the additional parameters *
+   *  In some cases you might want to keep the ownership over some of the additional parameters.
    *  You can keep the ownership of such parameters by binding yourself the desired parameters
-   *  and leaving RFP the ownership of the remaining parameters.
-   *  For instance, assuming D=3, CoordT = double, and a user-defined function
-   *  whihc depends on 3 parameters:
+   *  to the function implementing the expression of the RF and leaving the ownership of the remaining parameters.
+   *  to RFP.
    *
-   *  CoordT = my_radial_funct_2( CoordT r, Coord_T par1, CoordT par2, CoordT par3 ) defined somewhere,
-   *  double par1 = //somevalue,
-   *         par3 = //somevalue;
+   *  For instance, assuming Dim=3, CoordT = double, and a user-defined function
+   *  which depends on 3 parameters:
+   *
+   *  CoordT = my_radial_funct_2( CoordT r, Coord_T par1, CoordT par2, CoordT par3 ) {...},
+   *  double par1 = //some value,
+   *         par3 = //some value;
    *  auto my_rf = new RFP<3, 1 //nr. of parameters that will be managed by RFP// , double>(
    *    bitpit::rbf::eRBFType::kUserDefined,
    *    std::bind( &my_radial_funct_2, std::placeholders::_1, std::cref(par1), std::placeholders::_2, std::cred(par3)
    *  );
    *
-   *  In this case, my_rf will have ownership on 1 parameter (par2) while the ownership of the 2 
-   *  other parameters is left to the user.
+   *  will create a instance of RFP with exclusive ownership on just 1 parameter (par2), while the ownership of the 2 
+   *  other parameters is left to you.
+   *
+   *  @tparam     Dim       Nr. of working dimensions (Dim > 0)
+   *  @tparam     NParams   Nr. of additional parameters which the RF function depends on.
+   *  @tparam     CoordT    (default = double) type of coeff. Only scalar floating point
+   *                        types are supported (e.g. double, float, etc.)
   */
   template<
     std::size_t Dim,
@@ -993,8 +996,18 @@ namespace rbf
     static_assert(
       (NParams > 0),
       "bitpit::rbf::RFP<Dim, NParams, CoordT>: "
-      "**ERROR** The nr. of additional parameters must be greater than 0. "
+      "** ERROR ** The nr. of additional parameters must be greater than 0. "
       "If the radial function does not depends on any parameter, use RF<Dim, CoordT>"
+    );
+    static_assert(
+      Dim > 0,
+      "bitpit::rbf::RFP<Dim, NParams, CoordT>: "
+      "** ERROR ** The nr. of dimensions, Dim, must be greater than 0"
+    );
+    static_assert(
+      std::is_floating_point<CoordT>::value,
+      "bitpit::rbf::RFP<Dim, NParams, CoordT>: "
+      "** ERROR ** Only floating point types are supported for the coeff. type, CoordT"
     );
 
     // Typedef(s) ================================================== //
@@ -1016,22 +1029,26 @@ namespace rbf
 
     // Member variable(s) ========================================== //
     protected:
+    /*! @brief Type of this radial function. */
     using base_t::mType;
+    /*! @brief Functor implementing the actual expression of the RF. */
     using base_t::mFunct;
-    /*! @brief Values of the additional parameters for this radial function. */
+    /*! @brief Values of the additional parameters for this radial function which are binded at construction time. */
     coord_t mParams[NParams];
     public:
+    /*! @brief Center of this radial function. */
     using base_t::center;
+    /*! @brief Radius of this radial function. */
     using base_t::radius;
 
     // Static method(s) ============================================ //
     private:
-    /*! @brief Bind the expression of the radial function to the parameters of
-     *  this instance.
-    */
+    /*! @brief Do the actual binding. */
     template<class f_in_t, std::size_t... I>
     static rf_funct_t       doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> );
     public:
+    /*! @brief Bind the expression of the radial function to the parameters of
+     *  this instance. */
     template<class f_in_t>
     static rf_funct_t       bindParameters( f_in_t f, coord_t* data );
     
@@ -1039,14 +1056,14 @@ namespace rbf
     private:
     /*! @brief Default constructor.
      *
-     *  Initialize a generalized radial function with default values for the parameters.
+     *  Initialize a generalized radial function with default values for the parameters
+     *  (see #setDefault).
     */
     RFP();
     public:
     /*! @brief Contructor #1.
      *
-     *  Initialize a generalized radial function of the specified type,
-     *  from the input pointer to the function implementating the expression of the RF.
+     *  Initialize a generalized radial function of a specified type and given expression.
      *
      *  @param [in]       type      type of this RF.
      *  @param [in]       f         pointer to the function implementing the expression
@@ -1068,11 +1085,11 @@ namespace rbf
 
     // Getter(s)/Info ============================================== //
     public:
-    /*! @brief Returns the nr. of additional parameters for this radial function. */
+    /*! @brief Returns the nr. of additional parameters of this radial function. */
     virtual std::size_t getNumberOfParameters() const override;
     /*! @brief Returns (const) pointer to the list of additional parameters of this funciton. */
-    virtual const coord_t*  getParameters() const override;
-    /*! @brief Display info for this RBF (mostly meant for debugging purposes).
+    virtual const coord_t* getParameters() const override;
+    /*! @brief Display info to a output stream (mostly meant for debugging purposes).
      *
      *  @param [in,out]   out       (default = std::cout) output stream.
      *  @param [in]       indent    (default = 0) indentation level.
@@ -1081,8 +1098,8 @@ namespace rbf
 
     // Setter(s) =================================================== //
     public:
-    /*! @brief Set the value for the additional parameters of this function.*/
-    virtual void            setParameters( const coord_t *values ) override;
+    /*! @brief Set the value of the additional parameters for this function.*/
+    virtual void  setParameters( const coord_t *values ) override;
   }; //end class RFP
 
   // =============================================================== //
