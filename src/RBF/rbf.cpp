@@ -26,10 +26,6 @@
  *  @brief  Implementation file for bitpit RBF.
 */
 
-// Standard Template Library
-//#include <cmath>
-//#include <set>
-
 // Bitpit
 # include "bitpit_private_lapacke.hpp"
 # include "bitpit_operators.hpp"
@@ -38,8 +34,6 @@
 # include "rbf.hpp"
 
 namespace bitpit {
-
-#ifdef __USE_DEPRECATED__
 
 /*!
  * @class RBFKernel
@@ -1332,8 +1326,6 @@ double rbf::c2c2( double dist )
         return (1.0 -10.0*std::pow(dist,3) +15.0*std::pow(dist,4) -6.0*std::pow(dist,5));
     }
 }
-
-# endif
 
 namespace rbf
 {
