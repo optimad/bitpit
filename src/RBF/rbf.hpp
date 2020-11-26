@@ -317,7 +317,43 @@ namespace rbf
     typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* = nullptr
   >
   CoordT generalized_multiquadrics( CoordT r, CoordT c );
-
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief First derivative of generalized multiquadric. 
+   *
+   *  @tparam         CoordT      type of coeffs. Only scalar floating 
+   *                              point types are supported (e.g. double, float, etc. )
+   *  @tparam         Alpha, Beta values for the fractional exponent (Alpha, Beta > 0 ).
+   *
+   *  @param [in]     r           radial distance
+   *  @param [in]     c           value of the bias coeff.
+  */
+  template<
+    class CoordT,
+    unsigned Alpha,
+    unsigned Beta,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* = nullptr
+  >
+  CoordT generalized_multiquadrics_der1( CoordT r, CoordT c );
+  
+  // ---------------------------------------------------------------- //
+  /*! @brief Second derivative of generalized multiquadric. 
+   *
+   *  @tparam         CoordT      type of coeffs. Only scalar floating 
+   *                              point types are supported (e.g. double, float, etc. )
+   *  @tparam         Alpha, Beta values for the fractional exponent (Alpha, Beta > 0 ).
+   *
+   *  @param [in]     r           radial distance
+   *  @param [in]     c           value of the bias coeff.
+  */
+  template<
+    class CoordT,
+    unsigned Alpha,
+    unsigned Beta,
+    typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* = nullptr
+  >
+  CoordT generalized_multiquadrics_der2( CoordT r, CoordT c );
+  
   // ---------------------------------------------------------------- //
   /*! @brief Gaussian radial function.
    *

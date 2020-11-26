@@ -70,6 +70,21 @@ namespace rbf
   }
 
   // ------------------------------------------------------------------------ //
+  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* >
+  CoordT generalized_multiquadrics_der1( CoordT r, CoordT c )
+  {
+    return (CoordT)2 * r * ( (CoordT)Alpha/(CoordT)Beta ) * std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) - CoordT(1) );
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< class CoordT, unsigned Alpha, unsigned Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Alpha > 0) && (Beta > 0) >::type* >
+  CoordT generalized_multiquadrics_der2( CoordT r, CoordT c )
+  {
+    return (CoordT)2 * ( (CoordT)Alpha/(CoordT)Beta ) * std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) - CoordT(1) )
+         + (CoordT)4 * r * ( (CoordT)Alpha/(CoordT)Beta ) * ( (CoordT)Alpha/(CoordT)Beta - (CoordT)1 ) * std::pow( c*c + r*r, CoordT(Alpha)/CoordT(Beta) - CoordT(2) );
+  }
+  
+  // ------------------------------------------------------------------------ //
   template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* >
   CoordT gaussian( CoordT r, CoordT c )
   {
