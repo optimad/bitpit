@@ -607,11 +607,13 @@ namespace rbf
     kPolyharmonic4,
     /*! @brief Hardy's radial function (from the family of multiquadrics with \f$\alpha = 1, \beta = 2\f$)*/
     kHardy,
-    /*! @brief Generalized multiquadrics with \f$\alpha = 2, \beta = 1\f$) */
+    /*! @brief Generalized multiquadric with \f$\alpha = 1, \beta = 2\f$ */
+    kMultiQuadric1_2,
+    /*! @brief Generalized multiquadric with \f$\alpha = 2, \beta = 1\f$ */
     kMultiQuadric2,
-    /*! @brief Generalized multiquarics with \f$\alpha = 3, \beta = 2\f$ */
+    /*! @brief Generalized multiquadric with \f$\alpha = 3, \beta = 2\f$ */
     kMultiQuadric3_2,
-    /*! @brief Generalized multiquarics with \f$\alpha = 5, \beta = 2\f$ */
+    /*! @brief Generalized multiquadric with \f$\alpha = 5, \beta = 2\f$ */
     kMultiQuadric5_2,
     /*! @brief Linear */
     kLinear,
@@ -780,7 +782,7 @@ namespace rbf
      *
      *	@param [in]		coords 	   coordinates of the input point.
     */
-    coord_t operator()( const point_t &coords ) const;
+    virtual coord_t operator()( const point_t &coords ) const;
     
     // Getter(s)/Info ============================================== //
     public:
