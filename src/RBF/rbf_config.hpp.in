@@ -21,14 +21,19 @@
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
  \*---------------------------------------------------------------------------*/
- /*!  @file rbf_config.hpp
-  *   @author Alessandro Alaia (mail to: alessandro.alaia@optimad.it)
-  *   @brief Configuration file for bitpit RBF module.
- */
- # pragma once
- 
-# undef __USE_DEPRECATED__    //link with new DEPRECATED EXPERIMENTAL FEATURE
+/*!  @file rbf_config.hpp
+ *   @author Alessandro Alaia (mail to: alessandro.alaia@optimad.it)
+ *   @brief Configuration file for bitpit RBF module.
+*/
+# pragma once
+
 #cmakedefine EIGEN3_SUPPORT
+
+# if ( BITPIT_RBF_DEPRECATED_IMPLEMENTATION == 1 )
+# define __RBF_DEPRECATED_ON__
+# else
+# undef __RBF_DEPRECATED_ON__
+# endif
 
 # ifdef EIGEN3_SUPPORT
 # define __RBF_USE_EIGEN__

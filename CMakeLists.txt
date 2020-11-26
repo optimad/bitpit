@@ -411,6 +411,11 @@ set(POD_EXTERNAL_DEPS "LAPACKE")
 #------------------------------------------------------------------------------------#
 # Experimental/deprecated features
 #------------------------------------------------------------------------------------#
+defineDeprecatedModuleFeature(
+  "RBF"                         #module name
+  "IMPLEMENTATION"              #feature name
+  "Old implementation of RBFs"  #msg
+)
 
 #------------------------------------------------------------------------------------#
 # Internal dependencies

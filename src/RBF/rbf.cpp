@@ -35,6 +35,7 @@
 
 namespace bitpit {
 
+# ifdef __RBF_DEPRECATED_ON__
 /*!
  * @class RBFKernel
  * @ingroup RBF
@@ -1327,6 +1328,7 @@ double rbf::c2c2( double dist )
     }
 }
 
+# endif
 namespace rbf
 {
   // ======================================================================= //
