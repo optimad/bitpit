@@ -174,8 +174,42 @@ function(defineFeature FEATURE_NAME FEATURE_DESCRIPTION DEFAULT_STATUS)
         set(FEATURE_ENTRY "${FEATURE_ENTRY}=0")
     endif()
     set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" APPEND PROPERTY COMPILE_DEFINITIONS ${FEATURE_ENTRY})
-
 endfunction()
+
+# Add a private definition
+#
+# Only targets defined after this call will make use of the given definitions.
+function(addPrivateDefinitions DEFINITIONS)
+    set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" APPEND PROPERTY COMPILE_DEFINITIONS ${DEFINITIONS})
+endfunction()
+
+# Get the description for the variable holding public definitions
+function(getPublicDefinitionVariableDescription DESCRIPTION)
+    set (${DESCRIPTION} "Public pre-processor definitions needed by bitpit Library" PARENT_SCOPE)
+endfunction()
+
+# Initialize the list of public definitions
+function(initializePublicDefinitions)
+    getPublicDefinitionVariableDescription(DESCRIPTION)
+    set (BITPIT_DEFINITIONS_PUBLIC "" CACHE INTERNAL "${DESCRIPTION}" FORCE)
+endfunction()
+
+# Add a public definition
+#
+# Only targets defined after this call will make use of the given definitions.
+#
+# Public definitions are made available to external programs through the
+# variables set by the find_BITPIT module.
+function(addPublicDefinitions DEFINITIONS)
+    getPublicDefinitionVariableDescription(DESCRIPTION)
+    set (BITPIT_DEFINITIONS_PUBLIC "${BITPIT_DEFINITIONS_PUBLIC};${DEFINITIONS}" CACHE INTERNAL "${DESCRIPTION}" FORCE)
+    addPrivateDefinitions("${DEFINITIONS}")
+endfunction()
+
+#------------------------------------------------------------------------------------#
+# Initialize public definitions
+#------------------------------------------------------------------------------------#
+initializePublicDefinitions()
 
 #------------------------------------------------------------------------------------#
 # Link Time Optimization (LTO)
@@ -631,9 +665,6 @@ unset(_PETSc_index)
 #------------------------------------------------------------------------------------#
 # Compiler settings
 #------------------------------------------------------------------------------------#
-set (BITPIT_DEFINITIONS_PRIVATE "")
-set (BITPIT_DEFINITIONS_PUBLIC "")
-
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
 set (ENABLE_WARNINGS ${VERBOSE_MAKE})
@@ -642,9 +673,9 @@ if (VERBOSE_MAKE)
 endif()
 
 if (ENABLE_MPI)
-	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=1")
+	addPublicDefinitions("BITPIT_ENABLE_MPI=1")
 else ()
-	list (APPEND BITPIT_DEFINITIONS_PUBLIC "BITPIT_ENABLE_MPI=0")
+	addPublicDefinitions("BITPIT_ENABLE_MPI=0")
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
@@ -670,13 +701,13 @@ endif ()
 
 # Define a preprocessor macro to recognize debug builds
 IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug" OR CMAKE_BUILD_TYPE_LOWER MATCHES "debinfo")
-	list (APPEND BITPIT_DEFINITIONS_PRIVATE "BITPIT_ENABLE_DEBUG=1")
+	addPrivateDefinitions("BITPIT_ENABLE_DEBUG=1")
 else ()
-	list (APPEND BITPIT_DEFINITIONS_PRIVATE "BITPIT_ENABLE_DEBUG=0")
+	addPrivateDefinitions("BITPIT_ENABLE_DEBUG=0")
 endif ()
 
 IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
-	list (APPEND BITPIT_DEFINITIONS_PRIVATE "NDEBUG")
+	addPrivateDefinitions("NDEBUG")
 endif ()
 
 # Define an alias for building with scalasca
@@ -715,12 +746,8 @@ include(CheckCXXSourceCompiles)
 
 CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN_UNREACHABLE)
 if(HAVE___BUILTIN_UNREACHABLE)
-    list (APPEND BITPIT_DEFINITIONS_PRIVATE "HAVE___BUILTIN_UNREACHABLE")
+    addPrivateDefinitions("HAVE___BUILTIN_UNREACHABLE")
 endif()
-
-# Add the definitions
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PRIVATE})
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PUBLIC})
 
 #------------------------------------------------------------------------------------#
 # Subdirectories
