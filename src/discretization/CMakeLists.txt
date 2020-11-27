@@ -24,26 +24,9 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
-initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-# Add library to targets
-addModuleIncludeDirectories(${MODULE_NAME})
-
-file(GLOB SOURCE_FILES "*.cpp")
-set(DISCRETIZATION_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of discratization Library" FORCE)
-unset(SOURCE_FILES)
-
-file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-set(DISCRETIZATION_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of discratization Library" FORCE)
-unset(HEADER_FILES)
-
-if (NOT "${DISCRETIZATION_SOURCES}" STREQUAL "")
-    set(DISCRETIZATION_TARGET_OBJECT "DISCRETIZATION_TARGET_OBJECT")
-    add_library(${DISCRETIZATION_TARGET_OBJECT} OBJECT ${DISCRETIZATION_SOURCES})
-    set_lto_property(${DISCRETIZATION_TARGET_OBJECT})
-endif ()
-
-install(FILES ${DISCRETIZATION_HEADERS} DESTINATION include/${PROJECT_NAME})
+# Configure module
+configureModule(${MODULE_NAME})

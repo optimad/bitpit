@@ -24,31 +24,9 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
-initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-# Add library to targets
-addModuleIncludeDirectories(${MODULE_NAME})
-
-file(GLOB SOURCE_FILES "*.cpp")
-
-set(IO_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of IO Library" FORCE)
-unset(SOURCE_FILES)
-
-file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-set(IO_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of IO Library" FORCE)
-unset(HEADER_FILES)
-
-if (NOT "${IO_SOURCES}" STREQUAL "")
-    set(IO_TARGET_OBJECT "IO_TARGET_OBJECT")
-    add_library(${IO_TARGET_OBJECT} OBJECT ${IO_SOURCES})
-    set_lto_property(${IO_TARGET_OBJECT})
-endif ()
-
-install(FILES ${IO_HEADERS} DESTINATION include/${PROJECT_NAME})
-
-# Definitions
-set(IO_DEFINITIONS_DESCRIPTION "Pre-processor definitions needed by IO Library")
-set(IO_DEFINITIONS "" CACHE INTERNAL "${IO_DEFINITIONS_DESCRIPTION}" FORCE)
+# Configure module
+configureModule(${MODULE_NAME})
