@@ -38,7 +38,10 @@ initialize_lto_property()
 # files (*.cpp) available in the current directory.
 #
 # All header files (*.hpp) and files with template implementations (*.tpp) in
-# the current directory will be installed in "include/${PROJECT_NAME}".
+# the current directory and in the build directory will be installed inside
+# the directory "include/${PROJECT_NAME}". In order for the files in the build
+# directory to be properly installed they need to be created before calling
+# this function.
 function(configureModule MODULE_NAME)
     string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
 
@@ -60,8 +63,10 @@ function(configureModule MODULE_NAME)
 
     # Configure installation
     file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-    set(${UPPER_MODULE_NAME}_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of ${MODULE_NAME} module" FORCE)
+    file(GLOB CONFIGURED_HEADER_FILES "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}/*.hpp" "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}/*.tpp")
+    set(${UPPER_MODULE_NAME}_HEADERS "${HEADER_FILES}" "${CONFIGURED_HEADER_FILES}" CACHE INTERNAL "Headers of ${MODULE_NAME} module" FORCE)
     unset(HEADER_FILES)
+    unset(CONFIGURED_HEADER_FILES)
 
     if (NOT "${${UPPER_MODULE_NAME}_HEADERS}" STREQUAL "")
         install(FILES ${${UPPER_MODULE_NAME}_HEADERS} DESTINATION include/${PROJECT_NAME})
