@@ -24,26 +24,9 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
-initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-# Add library to targets
-addModuleIncludeDirectories(${MODULE_NAME})
-
-file(GLOB SOURCE_FILES "*.cpp")
-set(VOLCARTESIAN_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of volcartesian module" FORCE)
-unset(SOURCE_FILES)
-
-file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-set(VOLCARTESIAN_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of volcartesian module" FORCE)
-unset(HEADER_FILES)
-
-if (NOT "${VOLCARTESIAN_SOURCES}" STREQUAL "")
-    set(VOLCARTESIAN_TARGET_OBJECT "VOLCARTESIAN_TARGET_OBJECT")
-    add_library(${VOLCARTESIAN_TARGET_OBJECT} OBJECT ${VOLCARTESIAN_SOURCES})
-    set_lto_property(${VOLCARTESIAN_TARGET_OBJECT})
-endif ()
-
-install(FILES ${VOLCARTESIAN_HEADERS} DESTINATION include/${PROJECT_NAME})
+# Configure module
+configureModule(${MODULE_NAME})
