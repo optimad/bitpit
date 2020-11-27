@@ -157,37 +157,37 @@ namespace rbf
   // ------------------------------------------------------------------------ //
   template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
   CoordT    thin_plate_spline( CoordT r ) {
-    return r*r * std::log(r);
+    return r*r * std::log( std::max( r, std::numeric_limits<CoordT>::epsilon() ) );
   }
   
   // ------------------------------------------------------------------------ //
   template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
   CoordT    thin_plate_spline_der1( CoordT r ) {
-    return (CoordT)2 * r * std::log(r) + r;
+    return (CoordT)2 * r * std::log( std::max( r, std::numeric_limits<CoordT>::epsilon() ) ) + r;
   }
   
   // ------------------------------------------------------------------------ //
   template< class CoordT, typename std::enable_if< std::is_floating_point<CoordT>::value >::type* /*= nullptr*/ >
   CoordT    thin_plate_spline_der2( CoordT r ) {
-    return (CoordT)2 * std::log(r) + (CoordT)3;
+    return (CoordT)2 * std::log( std::max( r, std::numeric_limits<CoordT>::epsilon() ) ) + (CoordT)3;
   }
 
   // ------------------------------------------------------------------------ //
   template< class CoordT, int Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* /*= nullptr*/ >
   CoordT polyharmonic( CoordT r, CoordT c ) {
-    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta) * std::log(r);
+    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta) * std::log( std::max( r, std::numeric_limits<CoordT>::epsilon() ) );
   }
   
   // ------------------------------------------------------------------------ //
   template< class CoordT, int Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* /*= nullptr*/ >
   CoordT polyharmonic_der1( CoordT r, CoordT c ) {
-    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta-1) * ( (CoordT)(2*Beta) * std::log(r) - (CoordT)1 );
+    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta-1) * ( (CoordT)(2*Beta) * std::log( std::max( r, std::numeric_limits<CoordT>::epsilon() ) ) - (CoordT)1 );
   }
   
   // ------------------------------------------------------------------------ //
   template< class CoordT, int Beta, typename std::enable_if< std::is_floating_point<CoordT>::value && (Beta >= 0) >::type* /*= nullptr*/ >
   CoordT polyharmonic_der2( CoordT r, CoordT c ) {
-    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta-2) * ( (CoordT)( 2*Beta*(2*Beta-1) ) * std::log(r) - (CoordT)1 );
+    return ( Beta % 2 == 0 ? (CoordT)-1 : (CoordT)1 ) * std::pow( c, 1+Beta) * std::pow(r, 2*Beta-2) * ( (CoordT)( 2*Beta*(2*Beta-1) ) * std::log( std::max( r, std::numeric_limits<CoordT>::epsilon() ) ) - (CoordT)1 );
   }
   
   // ======================================================================== //
