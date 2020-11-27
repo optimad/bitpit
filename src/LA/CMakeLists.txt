@@ -24,26 +24,9 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 2.8)
-initialize_lto_property()
 
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-# Add library to targets
-addModuleIncludeDirectories(${MODULE_NAME})
-
-file(GLOB SOURCE_FILES "*.cpp")
-set(LA_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of LA Library" FORCE)
-unset(SOURCE_FILES)
-
-file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-set(LA_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of LA Library" FORCE)
-unset(HEADER_FILES)
-
-if (NOT "${LA_SOURCES}" STREQUAL "")
-    set(LA_TARGET_OBJECT "LA_TARGET_OBJECT")
-    add_library(${LA_TARGET_OBJECT} OBJECT ${LA_SOURCES})
-    set_lto_property(${LA_TARGET_OBJECT})
-endif ()
-
-install(FILES ${LA_HEADERS} DESTINATION include/${PROJECT_NAME})
+# Configure module
+configureModule(${MODULE_NAME})
