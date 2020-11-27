@@ -29,6 +29,46 @@ cmake_minimum_required(VERSION 2.8)
 initialize_lto_property()
 
 #------------------------------------------------------------------------------------#
+# Functions
+#------------------------------------------------------------------------------------#
+
+# Add a module to the project
+#
+# The module will be added to the project as a library built from the source
+# files (*.cpp) available in the current directory.
+#
+# All header files (*.hpp) and files with template implementations (*.tpp) in
+# the current directory will be installed in "include/${PROJECT_NAME}".
+function(configureModule MODULE_NAME)
+    string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+
+    # Configure compilation
+    addModuleIncludeDirectories(${MODULE_NAME})
+
+    # Configure targets
+    file(GLOB SOURCE_FILES "*.cpp")
+    set(${UPPER_MODULE_NAME}_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of ${MODULE_NAME} module" FORCE)
+    unset(SOURCE_FILES)
+
+    if (NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
+        set(${UPPER_MODULE_NAME}_TARGET_OBJECT "${UPPER_MODULE_NAME}_TARGET_OBJECT")
+        add_library(${${UPPER_MODULE_NAME}_TARGET_OBJECT} OBJECT ${${UPPER_MODULE_NAME}_SOURCES})
+
+        initialize_lto_property()
+        set_lto_property(${${UPPER_MODULE_NAME}_TARGET_OBJECT})
+    endif ()
+
+    # Configure installation
+    file(GLOB HEADER_FILES "*.hpp" "*.tpp")
+    set(${UPPER_MODULE_NAME}_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of ${MODULE_NAME} module" FORCE)
+    unset(HEADER_FILES)
+
+    if (NOT "${${UPPER_MODULE_NAME}_HEADERS}" STREQUAL "")
+        install(FILES ${${UPPER_MODULE_NAME}_HEADERS} DESTINATION include/${PROJECT_NAME})
+    endif ()
+endfunction()
+
+#------------------------------------------------------------------------------------#
 # Library properties
 #------------------------------------------------------------------------------------#
 
