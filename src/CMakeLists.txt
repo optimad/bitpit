@@ -37,16 +37,28 @@ initialize_lto_property()
 # The module will be added to the project as a library built from the source
 # files (*.cpp) available in the current directory.
 #
+# All configurable header files (*.hpp.in) and files with configurable template
+# implementations (*.tpp.in) will be automatically configured and copied into
+# the build directory.
+#
 # All header files (*.hpp) and files with template implementations (*.tpp) in
 # the current directory and in the build directory will be installed inside
-# the directory "include/${PROJECT_NAME}". In order for the files in the build
-# directory to be properly installed they need to be created before calling
-# this function.
+# the directory "include/${PROJECT_NAME}". Only files automatically generated
+# by this function (e.g., configurable header files) or files created before
+# calling this function will be installed.
 function(configureModule MODULE_NAME)
     string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
 
     # Configure compilation
     addModuleIncludeDirectories(${MODULE_NAME})
+
+    # Configure headers
+    file(GLOB CONFIGURABLE_HEADER_FILES "*.hpp.in" "*.tpp.in")
+    foreach(CONFIGURABLE_HEADER_FILE IN LISTS CONFIGURABLE_HEADER_FILES)
+        string(REGEX REPLACE "\\.[^.]*$" "" CONFIGURED_HEADER_FILE ${CONFIGURABLE_HEADER_FILE})
+        set(CONFIGURED_HEADER_FILE "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}/${CONFIGURED_HEADER_FILE}")
+        configure_file("${CONFIGURABLE_HEADER_FILE}" "${CONFIGURED_HEADER_FILE}")
+    endforeach()
 
     # Configure targets
     file(GLOB SOURCE_FILES "*.cpp")

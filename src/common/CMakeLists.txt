@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 2.8)
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-# Generate the bitpit header file
+# Generate the variables needed for configuring header files
 set(INCLUDE_LIST "#include \"bitpit_common.hpp\"\n")
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
@@ -37,9 +37,8 @@ foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     endif ()
 endforeach ()
 
-configure_file("bitpit_template.hpp.in" "bitpit.hpp")
-
-unset(INCLUDE_LIST)
-
 # Configure module
 configureModule(${MODULE_NAME})
+
+# Clean-up
+unset(INCLUDE_LIST)
