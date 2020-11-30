@@ -1224,9 +1224,28 @@ namespace rbf
 
     // Setter(s) =================================================== //
     public:
+    /*! @brief Insert a new radial function before the radial function with specified
+     *  index.
+     *
+     *  This allows to sort and track radial functions which require a special treatment
+     *  (e.g. bias).
+     *
+     *  @note After calling this method, indexes in previously in the range [i, nrbf) will be shifted by +1.
+     *
+     *  @note After calling this method, pointers, iterators and references to radial
+     *  functions within the basis, might be invalidated.
+     *
+     *  @param [in]   i       index of the radial function before which the new radial function
+     *                        must be placed.
+     *  @param [in]   rf      (unique) pointer to the radial function to be added.
+     *  @param [in]   weight  (default = 1) weight to be associated to the new radial function.
+     *
+     *  @result Returns the index assigned to the new radial function within the basis.
+    */
+    std::size_t insert( std::size_t i, std::unique_ptr<rf_t> rf, coord_t weight = (coord_t)1 );
     /*! @brief Add a new radial function to the basis. 
      *
-     *  @param [in]   rf      (unique) Pointer to the radial function.
+     *  @param [in]   rf      (unique) pointer to the radial function.
      *  @param [in]   weight  (default = 1) weight to be assigned to the new function.
      *
      *  @note All iterators, pointer, references to any radial function/weight

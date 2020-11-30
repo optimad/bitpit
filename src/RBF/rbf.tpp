@@ -833,6 +833,13 @@ namespace rbf
   
   // ------------------------------------------------------------------------ //
   template< std::size_t D, class C >
+  std::size_t RFBasis<D,C>::insert( std::size_t i, std::unique_ptr<rf_t> rf, coord_t weight /*= (coord_t)1*/ ) {
+    base_t::insert( base_t::begin()+i, std::make_pair( weight, std::move(rf) ) ); 
+    return i;
+  }
+  
+  // ------------------------------------------------------------------------ //
+  template< std::size_t D, class C >
   void RFBasis<D,C>::remove( std::size_t i ) {
     base_t::erase( base_t::begin() + i );
   }
