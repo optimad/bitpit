@@ -303,6 +303,10 @@ int main(int argc,char *argv[]) {
                 set(flags_all "${flags_all} ${MPI_C_LINK_FLAGS}")
             endif()
 
+            if(MPI_C_INCLUDE_PATH)
+                list (APPEND includes_all ${MPI_C_INCLUDE_PATH})
+            endif()
+
             list (APPEND libraries_all "${MPI_C_LIBRARIES}")
         endif()
 
@@ -317,6 +321,10 @@ int main(int argc,char *argv[]) {
 
             if(MPI_CXX_LINK_FLAGS)
                 set(flags_all "${flags_all} ${MPI_CXX_LINK_FLAGS}")
+            endif()
+
+            if(MPI_CXX_INCLUDE_PATH)
+                list (APPEND includes_all ${MPI_CXX_INCLUDE_PATH})
             endif()
 
             list (APPEND libraries_all "${MPI_CXX_LIBRARIES}")
@@ -335,6 +343,10 @@ int main(int argc,char *argv[]) {
 
             if(MPI_Fortran_LINK_FLAGS)
                 set(flags_all "${flags_all} ${MPI_Fortran_LINK_FLAGS}")
+            endif()
+
+            if(MPI_Fortran_INCLUDE_PATH)
+                list (APPEND includes_all ${MPI_Fortran_INCLUDE_PATH})
             endif()
 
             list (APPEND libraries_all "${MPI_Fortran_LIBRARIES}")
