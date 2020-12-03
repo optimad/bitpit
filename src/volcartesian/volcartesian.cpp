@@ -442,7 +442,7 @@ void VolCartesian::setDiscretization(const std::array<int, 3> &nCells)
 		m_nCells1D[Vertex::COORD_Z]     = 0;
 		m_cellSpacings[Vertex::COORD_Z] = 0.;
 
-		m_nVertices1D[Vertex::COORD_Z] = 0;
+		m_nVertices1D[Vertex::COORD_Z] = 1;
 	}
 
 	log::cout() << std::endl;
