@@ -68,8 +68,6 @@ public:
 
 	void resetInterfaces() override;
 
-	void setDiscretization(const std::array<int, 3> &nCells);
-
 	long getVertexCount() const override;
 	int getVertexCount(int direction) const;
 
@@ -131,11 +129,11 @@ public:
 
 	long getCellLinearId(int i, int j, int k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;
-	std::array<int, 3> getCellCartesianId(long idx) const;
+	std::array<int, 3> getCellCartesianId(long id) const;
 	bool isCellCartesianIdValid(const std::array<int, 3> &ijk) const;
 	long getVertexLinearId(int i, int j, int k) const;
 	long getVertexLinearId(const std::array<int, 3> &ijk) const;
-	std::array<int, 3> getVertexCartesianId(long idx) const;
+	std::array<int, 3> getVertexCartesianId(long id) const;
 	std::array<int, 3> getVertexCartesianId(long cellIdx, int vertex) const;
 	std::array<int, 3> getVertexCartesianId(const std::array<int, 3> &cellIjk, int vertex) const;
 	bool isVertexCartesianIdValid(const std::array<int, 3> &ijk) const;
@@ -162,6 +160,8 @@ private:
 	std::array<double, 3> m_minCoords;
 	std::array<double, 3> m_maxCoords;
 
+	std::array<double, 3> m_directionOrdering;
+
 	std::array<std::vector<double>, 3> m_vertexCoords;
 	std::array<std::vector<double>, 3> m_cellCenters;
 
@@ -183,6 +183,8 @@ private:
 	void initialize();
 	void initializeInterfaceArea();
 	void initializeCellVolume();
+
+	void setDiscretization(const std::array<int, 3> &nCells);
 
 	void setMemoryMode(MemoryMode mode);
 
