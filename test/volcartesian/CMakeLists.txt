@@ -34,6 +34,7 @@ list(APPEND TESTS "test_volcartesian_00001")
 list(APPEND TESTS "test_volcartesian_00002")
 list(APPEND TESTS "test_volcartesian_00003")
 list(APPEND TESTS "test_volcartesian_00004")
+list(APPEND TESTS "test_volcartesian_00005")
 
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
