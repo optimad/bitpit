@@ -197,3 +197,8 @@ endforeach ()
 foreach (VARIABLE_NAME IN LISTS _EXTERNAL_VARIABLES_INCLUDE_DIRS)
     list (APPEND BITPIT_INCLUDE_DIRS "${${VARIABLE_NAME}}")
 endforeach ()
+
+#-----------------------------------------------------------------------------
+# Set programming languages
+#-----------------------------------------------------------------------------
+set(BITPIT_LANGUAGES "@BITPIT_LANGUAGES@")

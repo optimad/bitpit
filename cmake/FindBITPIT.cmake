@@ -10,6 +10,7 @@
 #  BITPIT_INCLUDE_DIRS - The BITPIT include directories
 #  BITPIT_LIBRARIES    - The libraries needed to use BITPIT
 #  BITPIT_DEFINITIONS  - Compiler switches required for using patchman
+#  BITPIT_LANGUAGES    - Programming languages used by the BITPIT library
 #
 # The following cache entries must be set by the user to locate BITPIT:
 #
