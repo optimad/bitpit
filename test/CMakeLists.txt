@@ -153,7 +153,7 @@ function(addTest TEST_NAME TEST_SOURCES TEST_LIBRARIES WORKING_DIRECTORY N_PROCS
     # Add test target
     add_executable(${TEST_NAME} "${TEST_SOURCES}")
     target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-    target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
+    target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_SHARED_LIBRARIES})
     target_link_libraries(${TEST_NAME} ${TEST_LIBRARIES})
 
     # Add test
