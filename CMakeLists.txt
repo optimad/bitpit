@@ -709,6 +709,27 @@ else ()
 	add_definitions("-std=c++11")
 endif ()
 
+# Set linker flags for Intel compilers
+#
+# If we are using an external library that uses Fortran, we need to add the
+# Fortran core library to the linker flags. This is somewhat a workaround,
+# because, for building C++ applications that call Fortran functions, Intel
+# recommends to link the C++ program with the Fortran compiler (ifort) and
+# passing it the flags "-cxxlib" and "-nofor_main". This would be difficult
+# to achieve with CMake, so we link with the C++ linker and we pass it the
+# Fortran core library.
+if (CMAKE_C_COMPILER_ID STREQUAL "Intel" OR CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    get_property (_enabled_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    list(FIND _enabled_languages "Fortran" _fortran_language_index)
+    unset(_enabled_languages)
+
+    if (${_fortran_language_index} GREATER -1)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lifcore")
+    endif()
+
+    unset(_fortran_language_index)
+endif()
+
 # Define a preprocessor macro to recognize debug builds
 IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug" OR CMAKE_BUILD_TYPE_LOWER MATCHES "debinfo")
 	addPrivateDefinitions("BITPIT_ENABLE_DEBUG=1")
