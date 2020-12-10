@@ -628,7 +628,7 @@ ElementType VolCartesian::getInterfaceType() const
 	\param id is the id of the vertex
 	\result The coordinate of the specified vertex.
 */
-std::array<double, 3> VolCartesian::evalVertexCoords(long id)
+std::array<double, 3> VolCartesian::evalVertexCoords(long id) const
 {
 	std::array<int, 3> ijk = getVertexCartesianId(id);
 
@@ -641,7 +641,7 @@ std::array<double, 3> VolCartesian::evalVertexCoords(long id)
 	\param ijk is the set of cartesian indices of the vertex
 	\result The coordinate of the specified vertex.
 */
-std::array<double, 3> VolCartesian::evalVertexCoords(const std::array<int, 3> &ijk)
+std::array<double, 3> VolCartesian::evalVertexCoords(const std::array<int, 3> &ijk) const
 {
 	std::array<double, 3> coords;
 	for (int d = 0; d < 3; ++d) {
