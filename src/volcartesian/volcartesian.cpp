@@ -632,6 +632,17 @@ std::array<double, 3> VolCartesian::evalVertexCoords(long id)
 {
 	std::array<int, 3> ijk = getVertexCartesianId(id);
 
+	return evalVertexCoords(ijk);
+}
+
+/*!
+	Evaluates the coordinate of the specified vertex.
+
+	\param ijk is the set of cartesian indices of the vertex
+	\result The coordinate of the specified vertex.
+*/
+std::array<double, 3> VolCartesian::evalVertexCoords(const std::array<int, 3> &ijk)
+{
 	std::array<double, 3> coords;
 	for (int d = 0; d < 3; ++d) {
 		if (ijk[d] >= 0) {
