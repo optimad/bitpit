@@ -1498,13 +1498,13 @@ std::array<int, 3> VolCartesian::getVertexCartesianId(long id) const
 
 	No check on bounds is performed.
 
-	\param[in] cellIdx is the linear cell index
+	\param[in] cellId is the linear cell index
 	\param[in] vertex is the local vertex
 	\result Returns the set of cartesian indices of the vertex.
 */
-std::array<int, 3> VolCartesian::getVertexCartesianId(long cellIdx, int vertex) const
+std::array<int, 3> VolCartesian::getVertexCartesianId(long cellId, int vertex) const
 {
-	return getVertexCartesianId(getCellCartesianId(cellIdx), vertex);
+	return getVertexCartesianId(getCellCartesianId(cellId), vertex);
 }
 
 /*!
@@ -1678,13 +1678,13 @@ std::vector<long> VolCartesian::extractCellSubSet(std::array<int, 3> const &ijkM
 /*!
 	Extract a cell subset.
 
-	\param[in] idxMin is the linear index of the lower bound
-	\param[in] idxMax is the linear index of the upper bound
+	\param[in] idMin is the linear index of the lower bound
+	\param[in] idMax is the linear index of the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> VolCartesian::extractCellSubSet(int idxMin, int idxMax)
+std::vector<long> VolCartesian::extractCellSubSet(int idMin, int idMax)
 {
-	return extractCellSubSet(getCellCartesianId(idxMin), getCellCartesianId(idxMax));
+	return extractCellSubSet(getCellCartesianId(idMin), getCellCartesianId(idMax));
 }
 
 /*!
@@ -1731,13 +1731,13 @@ std::vector<long> VolCartesian::extractVertexSubSet(std::array<int, 3> const &ij
 /*!
 	Extract a vertex subset.
 
-	\param[in] idxMin is the linear index of the lower bound
-	\param[in] idxMax is the linear index of the upper bound
+	\param[in] idMin is the linear index of the lower bound
+	\param[in] idMax is the linear index of the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> VolCartesian::extractVertexSubSet(int idxMin, int idxMax)
+std::vector<long> VolCartesian::extractVertexSubSet(int idMin, int idMax)
 {
-	return extractVertexSubSet(getVertexCartesianId(idxMin), getVertexCartesianId(idxMax));
+	return extractVertexSubSet(getVertexCartesianId(idMin), getVertexCartesianId(idMax));
 }
 
 /*!
