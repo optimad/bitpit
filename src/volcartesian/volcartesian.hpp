@@ -85,8 +85,11 @@ public:
 	const std::vector<double> & getVertexCoords(int direction) const;
 
 	double evalCellVolume(long id) const override;
+	double evalCellVolume(const std::array<int, 3> &ijk) const;
 	double evalCellSize(long id) const override;
+	double evalCellSize(const std::array<int, 3> &ijk) const;
 	std::array<double, 3> evalCellCentroid(long id) const override;
+	std::array<double, 3> evalCellCentroid(const std::array<int, 3> &ijk) const;
 	const std::vector<double> & getCellCentroids(int direction) const;
 
 	double evalInterfaceArea(long id) const override;
@@ -195,6 +198,9 @@ private:
 	void addInterfaces();
 	std::array<int, 3> getInterfaceCountDirection(int direction);
 	void addInterfacesDirection(int direction);
+
+	double evalCellVolume() const;
+	double evalCellSize() const;
 
 };
 
