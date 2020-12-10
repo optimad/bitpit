@@ -81,8 +81,8 @@ public:
 	ElementType getInterfaceType() const;
 	ElementType getInterfaceType(long id) const override;
 
-	std::array<double, 3> evalVertexCoords(long id);
-	std::array<double, 3> evalVertexCoords(const std::array<int, 3> &ijk);
+	std::array<double, 3> evalVertexCoords(long id) const;
+	std::array<double, 3> evalVertexCoords(const std::array<int, 3> &ijk) const;
 	const std::vector<double> & getVertexCoords(int direction) const;
 
 	double evalCellVolume(long id) const override;
