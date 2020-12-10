@@ -875,7 +875,7 @@ void VolCartesian::addCells()
 				cellConnect[1] = getVertexLinearId(i + 1, j,     k);
 				cellConnect[2] = getVertexLinearId(i,     j + 1, k);
 				cellConnect[3] = getVertexLinearId(i + 1, j + 1, k);
-				if (isThreeDimensional()) {
+				if (cellType == ElementType::VOXEL) {
 					cellConnect[4] = getVertexLinearId(i,     j,     k + 1);
 					cellConnect[5] = getVertexLinearId(i + 1, j,     k + 1);
 					cellConnect[6] = getVertexLinearId(i,     j + 1, k + 1);
@@ -999,21 +999,21 @@ void VolCartesian::addInterfacesDirection(int direction)
 				if (direction == Vertex::COORD_X) {
 					connect[0] = getVertexLinearId(i, j,     k);
 					connect[1] = getVertexLinearId(i, j + 1, k);
-					if (isThreeDimensional()) {
+					if (interfaceType == ElementType::PIXEL) {
 						connect[2] = getVertexLinearId(i, j + 1, k + 1);
 						connect[3] = getVertexLinearId(i, j,     k + 1);
 					}
 				} else if (direction == Vertex::COORD_Y) {
 					connect[0] = getVertexLinearId(i,     j,     k);
 					connect[1] = getVertexLinearId(i + 1, j,     k);
-					if (isThreeDimensional()) {
+					if (interfaceType == ElementType::PIXEL) {
 						connect[2] = getVertexLinearId(i + 1, j, k + 1);
 						connect[3] = getVertexLinearId(i,     j, k + 1);
 					}
 				} else if (direction == Vertex::COORD_Z) {
 					connect[0] = getVertexLinearId(i,     j,     k);
 					connect[1] = getVertexLinearId(i + 1, j,     k);
-					if (isThreeDimensional()) {
+					if (interfaceType == ElementType::PIXEL) {
 						connect[2] = getVertexLinearId(i + 1, j + 1, k);
 						connect[3] = getVertexLinearId(i,     j + 1, k);
 					}
