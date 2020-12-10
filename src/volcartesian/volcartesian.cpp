@@ -1398,6 +1398,12 @@ std::array<int, 3> VolCartesian::locateClosestCellCartesian(const std::array<dou
 /*!
 	Converts the cell cartesian notation to a linear notation.
 
+	The linear index is built incrementing first the cartesian index along
+	direction x (index i), then the cartesian index along direction y (index
+	j) and finally the cartesian index along direction z (index k). If there
+	are no cells along a direction, that directon will not be considered for
+	the generation of the linear index.
+
 	\param i is the cartesian index along the x direction
 	\param j is the cartesian index along the y direction
 	\param k is the cartesian index along the z direction
@@ -1410,6 +1416,12 @@ long VolCartesian::getCellLinearId(int i, int j, int k) const
 
 /*!
 	Converts the cell cartesian notation to a linear notation.
+
+	The linear index is built incrementing first the cartesian index along
+	direction x (index i), then the cartesian index along direction y (index
+	j) and finally the cartesian index along direction z (index k). If there
+	are no cells along a direction, that directon will not be considered for
+	the generation of the linear index.
 
 	\param ijk is the set of cartesian indices of the cell
 	\result The linear id of the specified cell.
@@ -1437,6 +1449,11 @@ long VolCartesian::getCellLinearId(const std::array<int, 3> &ijk) const
 
 /*!
 	Converts a cell linear index to a set of cartesian indices.
+
+	The set of cartesian indices (i, j, k) identifies the position of a cell
+	along the dimensions x, y, and z (in this specific order). If there are no
+	cells along a direction, the corresponding cartesian index is set to a
+	negative number.
 
 	No check on bounds is performed.
 
@@ -1484,7 +1501,13 @@ bool VolCartesian::isCellCartesianIdValid(const std::array<int, 3> &ijk) const
 }
 
 /*!
-	Converts the vertex cartesian notation to a linear notation
+	Converts the vertex cartesian notation to a linear notation.
+
+	The linear index is built incrementing first the cartesian index along
+	direction x (index i), then the cartesian index along direction y (index
+	j) and finally the cartesian index along direction z (index k). If there
+	are no cells along a direction, that directon will not be considered for
+	the generation of the linear index.
 
 	\param i is the cartesian index along the x direction
 	\param j is the cartesian index along the y direction
@@ -1498,6 +1521,12 @@ long VolCartesian::getVertexLinearId(int i, int j, int k) const
 
 /*!
 	Converts the vertex cartesian notation to a linear notation.
+
+	The linear index is built incrementing first the cartesian index along
+	direction x (index i), then the cartesian index along direction y (index
+	j) and finally the cartesian index along direction z (index k). If there
+	are no cells along a direction, that directon will not be considered for
+	the generation of the linear index.
 
 	\param ijk is the set of cartesian indices of the vertex
 	\result The linear id of the specified vertex.
@@ -1525,6 +1554,11 @@ long VolCartesian::getVertexLinearId(const std::array<int, 3> &ijk) const
 
 /*!
 	Converts a vertex linear index to a set of cartesian indices.
+
+	The set of cartesian indices (i, j, k) identifies the position of a vertex
+	along the dimensions x, y, and z (in this specific order). If there are no
+	cells along a direction, the corresponding cartesian index is set to a
+	negative number.
 
 	No check on bounds is performed.
 
@@ -1555,7 +1589,12 @@ std::array<int, 3> VolCartesian::getVertexCartesianId(long id) const
 }
 
 /*!
-	Gets the cartesian indices of the specified local vertex.
+	Gets the cartesian indices of the specified local vertex of a cell.
+
+	The set of cartesian indices (i, j, k) identifies the position of a vertex
+	along the dimensions x, y, and z (in this specific order). If there are no
+	cells along a direction, the corresponding cartesian index is set to a
+	negative number.
 
 	No check on bounds is performed.
 
@@ -1569,7 +1608,12 @@ std::array<int, 3> VolCartesian::getVertexCartesianId(long cellId, int vertex) c
 }
 
 /*!
-	Gets the cartesian indices of the specified local vertex.
+	Gets the cartesian indices of the specified local vertex of a cell.
+
+	The set of cartesian indices (i, j, k) identifies the position of a vertex
+	along the dimensions x, y, and z (in this specific order). If there are no
+	cells along a direction, the corresponding cartesian index is set to a
+	negative number.
 
 	No check on bounds is performed.
 
