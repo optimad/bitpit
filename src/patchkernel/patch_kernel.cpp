@@ -1543,11 +1543,9 @@ bool PatchKernel::deleteVertex(long id)
 		return false;
 	}
 
-	// Get vertex information
-	const Vertex &vertex = m_vertices[id];
-
 	// Delete the vertex
 #if BITPIT_ENABLE_MPI==1
+	const Vertex &vertex = m_vertices[id];
 	bool isInternal = vertex.isInterior();
 	if (isInternal) {
 		_deleteInternalVertex(id);
@@ -2463,11 +2461,9 @@ bool PatchKernel::deleteCell(long id)
 		return false;
 	}
 
-	// Get cell information
-	const Cell &cell = m_cells[id];
-
 	// Delete cell
 #if BITPIT_ENABLE_MPI==1
+	const Cell &cell = m_cells[id];
 	bool isInternalCell = cell.isInterior();
 	if (isInternalCell) {
 		_deleteInternalCell(id);
