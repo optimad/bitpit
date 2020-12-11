@@ -609,18 +609,25 @@ void PatchKernel::settleAdaptionMarkers()
 */
 void PatchKernel::finalizeAlterations(bool squeezeStorage)
 {
-	// Flush data structures
-	m_cells.flush();
-	m_interfaces.flush();
+	// Flush vertex data structures
 	m_vertices.flush();
 
-	// Squeeze data structures
+	// Update bounding box
+	bool boundingBoxDirty = isBoundingBoxDirty();
+	if (boundingBoxDirty) {
+		updateBoundingBox();
+	}
+
+	// Flush cell data structures
+	m_cells.flush();
+
+	// Flush interfaces data structures
+	m_interfaces.flush();
+
+	// Squeeze the patch
 	if (squeezeStorage) {
 		squeeze();
 	}
-
-	// Update geometric information
-	updateBoundingBox();
 
 #if BITPIT_ENABLE_MPI==1
 	// Update partitioning information
