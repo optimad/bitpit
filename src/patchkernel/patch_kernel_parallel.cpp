@@ -1458,14 +1458,11 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 		throw std::runtime_error ("The prepare function has no been called.");
 	}
 
-	// Begin patch alteration
-	beginAlteration();
-
-	// Alter patch
+	// Partition the patch
 	partitioningData = _partitioningAlter(trackPartitioning);
 
-	// End patch alteration
-	endAlteration(squeezeStorage);
+	// Finalize patch alterations
+	finalizeAlterations(squeezeStorage);
 
 	// The patch is now partitioned
 	setPartitioned(true);

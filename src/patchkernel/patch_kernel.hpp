@@ -928,8 +928,7 @@ private:
 
 	void initialize();
 
-	void beginAlteration();
-	void endAlteration(bool squeezeStorage = false);
+	void finalizeAlterations(bool squeezeStorage = false);
 
 	InterfaceIterator buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
 

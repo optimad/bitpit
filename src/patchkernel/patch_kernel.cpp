@@ -452,14 +452,11 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 		return spawnInfo;
 	}
 
-	// Begin patch alteration
-	beginAlteration();
-
-	// Alter patch
+	// Spawn the patch
 	spawnInfo = _spawn(trackSpawn);
 
-	// End patch alteration
-	endAlteration(true);
+	// Finalize patch alterations
+	finalizeAlterations(true);
 
 	// Spwan is done
 	setSpawnStatus(SPAWN_DONE);
@@ -560,14 +557,11 @@ std::vector<adaption::Info> PatchKernel::adaptionAlter(bool trackAdaption, bool 
 		throw std::runtime_error ("The prepare function has not been called.");
 	}
 
-	// Begin patch alteration
-	beginAlteration();
-
-	// Alter patch
+	// Adapt the patch
 	adaptionInfo = _adaptionAlter(trackAdaption);
 
-	// End patch alteration
-	endAlteration(squeezeStorage);
+	// Finalize patch alterations
+	finalizeAlterations(squeezeStorage);
 
 	// Update the status
 	setAdaptionStatus(ADAPTION_ALTERED);
@@ -608,19 +602,12 @@ void PatchKernel::settleAdaptionMarkers()
 }
 
 /*!
-	Begin patch alteration.
-*/
-void PatchKernel::beginAlteration()
-{
-}
-
-/*!
-	End patch alteration.
+	Finalize patch alterations.
 
 	\param squeezeStorage if set to true patch data structures will be
-	squeezed after the adaption
+	squeezed
 */
-void PatchKernel::endAlteration(bool squeezeStorage)
+void PatchKernel::finalizeAlterations(bool squeezeStorage)
 {
 	// Flush data structures
 	m_cells.flush();
