@@ -378,30 +378,19 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 		return updateInfo;
 	}
 
+	// Finalize alterations
+	finalizeAlterations(squeezeStorage);
+
 	// Spawn
 	bool spawnNeeed = (getSpawnStatus() == SPAWN_NEEDED);
 	if (spawnNeeed) {
 		mergeAdaptionInfo(spawn(trackAdaption), updateInfo);
 	}
 
-#if BITPIT_ENABLE_MPI==1
-	// Update partitioning information
-	bool partitioningInfoDirty = arePartitioningInfoDirty();
-	if (partitioningInfoDirty) {
-		updatePartitioningInfo();
-	}
-#endif
-
 	// Adaption
 	bool adaptionDirty = (getAdaptionStatus(true) == ADAPTION_DIRTY);
 	if (adaptionDirty) {
 		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), updateInfo);
-	}
-
-	// Update bounding box
-	bool boundingBoxDirty = isBoundingBoxDirty();
-	if (boundingBoxDirty) {
-		updateBoundingBox();
 	}
 
 	return updateInfo;
