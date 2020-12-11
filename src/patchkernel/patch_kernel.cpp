@@ -623,10 +623,8 @@ void PatchKernel::endAlteration(bool squeezeStorage)
 	// Update information for ghost data exchange
 	//
 	// If we are partitioning the patch, the partition flag is not set yet (it
-	// will be set after the call to this function). We call the update of
-	// information for ghost data exchange unconditionally, if there are no
-	// ghosts the function will exit without doing anything.
-	if (getProcessorCount() > 1 && getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+	// will be set after the call to this function).
+	if (isPartitioned() || getPartitioningStatus() == PARTITIONING_PREPARED) {
 		updateGhostExchangeInfo();
 	}
 #endif
