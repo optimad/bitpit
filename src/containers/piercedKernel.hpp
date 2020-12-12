@@ -407,6 +407,7 @@ public:
 
     // Methods to handle the storage
     using PiercedSyncMaster::sync;
+    using PiercedSyncMaster::isSynced;
 
     // Dump and restore
     void restore(std::istream &stream);

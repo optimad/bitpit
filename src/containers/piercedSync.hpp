@@ -173,11 +173,13 @@ protected:
     void unregisterSlave(const PiercedSyncSlave *slave);
     bool isSlaveRegistered(const PiercedSyncSlave *slave) const;
     PiercedSyncMaster::SyncMode getSlaveSyncMode(const PiercedSyncSlave *slave) const;
+    bool isSlaveSynced(const PiercedSyncSlave *slave) const;
 
     void setSyncEnabled(bool enabled);
     bool isSyncEnabled() const;
 
     void sync();
+    bool isSynced() const;
 
     void swap(PiercedSyncMaster &x) noexcept;
 

@@ -348,6 +348,27 @@ PiercedSyncMaster::SyncMode PiercedSyncMaster::getSlaveSyncMode(const PiercedSyn
 }
 
 /**
+* Check if the specified slave is synced.
+*
+* If synchronization is disabled for the slave, the slaved will be always
+* considered out-of-sync.
+*
+* \param slave is the slave for which the check has to be performed
+* \result Returns true if the slave is synchronized, false otherwise.
+*/
+bool PiercedSyncMaster::isSlaveSynced(const PiercedSyncSlave *slave) const
+{
+    SyncMode syncMode = getSlaveSyncMode(slave);
+    if (syncMode == SYNC_MODE_CONCURRENT) {
+        return true;
+    } else if (syncMode == SYNC_MODE_JOURNALED) {
+        return m_syncJournal.empty();
+    } else {
+        return false;
+    }
+}
+
+/**
 * Syncronize all the registered slaves.
 */
 void PiercedSyncMaster::sync()
@@ -362,6 +383,22 @@ void PiercedSyncMaster::sync()
     // Clear the sync journal
     m_syncJournal.clear();
     m_syncJournal.shrink_to_fit();
+}
+
+/**
+* Check if all the slaves are synced.
+*
+* \result Returns true if all slave are synchronized, false otherwise.
+*/
+bool PiercedSyncMaster::isSynced() const
+{
+    for (const PiercedSyncSlave *slave : m_syncGroups.at(SYNC_MODE_JOURNALED)) {
+        if (!isSlaveSynced(slave)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
