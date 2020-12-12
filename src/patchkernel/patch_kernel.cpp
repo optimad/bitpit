@@ -1039,6 +1039,18 @@ bool PatchKernel::isDirty(bool global) const
 		isDirty |= isBoundingBoxDirty(false);
 	}
 
+	if (!isDirty) {
+		isDirty |= !m_vertices.isSynced();
+	}
+
+	if (!isDirty) {
+		isDirty |= !m_cells.isSynced();
+	}
+
+	if (!isDirty) {
+		isDirty |= !m_interfaces.isSynced();
+	}
+
 #if BITPIT_ENABLE_MPI==1
 	// Get the global flag
 	if (global && isCommunicatorSet()) {
