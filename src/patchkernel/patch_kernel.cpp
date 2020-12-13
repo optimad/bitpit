@@ -376,7 +376,10 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 	std::vector<adaption::Info> updateInfo;
 
 	// Early return if the patch is not dirty
-	if (!isDirty(true)) {
+	//
+	// If we need to squeeze the storage we need to perform the update also
+	// if the patch is not dirty.
+	if (!squeezeStorage && !isDirty(true)) {
 		return updateInfo;
 	}
 
