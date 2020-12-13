@@ -241,13 +241,26 @@ void VolCartesian::resetInterfaces()
 }
 
 /*!
-	Build interfaces among the cells.
+	Internal function to update the interfaces of the patch.
+
+	It is not possible to partially update the interfaces of this patch.
+	The function will always update all the interfaces.
 */
-void VolCartesian::buildInterfaces()
+void VolCartesian::_updateInterfaces()
 {
-	// Reset interfaces
-	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
-		clearInterfaces();
+	// Partial updates are not supported
+	bool partialUpdate = false;
+	for (auto cellIterator = cellBegin(); cellIterator != cellEnd(); ++cellIterator) {
+		long cellId = cellIterator.getId();
+		if (!testCellAlterationFlags(cellId, FLAG_INTERFACES_DIRTY)) {
+			partialUpdate = true;
+			break;
+		}
+	}
+
+	if (partialUpdate) {
+		log::cout() << " It is not possible to partially update the interfaces.";
+		log::cout() << " All interface will be updated.";
 	}
 
 	// Count the total number of interfaces
@@ -276,25 +289,6 @@ void VolCartesian::buildInterfaces()
 		// Set interfaces build strategy
 		setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
 	}
-}
-
-/*!
-	Update the interfaces.
-
-	Although the function receives a list of cells to update, it is not
-	possible to partially update the interfaces. The function will always
-	update all the interfaces.
-
-	\param[in] cellIds is the list of cell ids
-*/
-void VolCartesian::updateInterfaces(const std::vector<long> &cellIds)
-{
-	if (cellIds.size() != (std::size_t) m_nCells) {
-		log::cout() << " It is not possible to partially update the interfaces.";
-		log::cout() << " All interface will be updated.";
-	}
-
-	buildInterfaces();
 }
 
 /*!

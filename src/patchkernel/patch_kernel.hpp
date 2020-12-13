@@ -587,9 +587,10 @@ public:
 	void destroyAdjacencies();
 
 	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
-	void clearInterfaces();
-	virtual void buildInterfaces();
-	virtual void updateInterfaces(const std::vector<long> &cellIds);
+	bool areInterfacesDirty(bool global = false) const;
+	void buildInterfaces();
+	void updateInterfaces(bool forcedUpdated = false);
+	void destroyInterfaces();
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
 	void getBoundingBox(bool global, std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
@@ -782,6 +783,9 @@ protected:
 	virtual void _updateAdjacencies();
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
+	void pruneStaleInterfaces();
+	virtual void _resetInterfaces();
+	virtual void _updateInterfaces();
 
 	bool testCellAlterationFlags(long id, AlterationFlags flags) const;
 	AlterationFlags getCellAlterationFlags(long id) const;

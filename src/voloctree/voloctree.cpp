@@ -1518,6 +1518,12 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 
 			// Add the interface to the list of interfaces to delete
 			deadInterfaces.insert(interfaceId);
+
+			// Owner and neighbour interfaces are now dirty
+			setCellAlterationFlags(interface.getOwner(), FLAG_INTERFACES_DIRTY);
+			if (interface.getNeigh() >= 0) {
+				setCellAlterationFlags(interface.getNeigh(), FLAG_INTERFACES_DIRTY);
+			}
 		}
 
 		// Remove patch-tree associations
@@ -1799,11 +1805,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 
 	// Update interfaces
 	if (!restoreStream) {
-		if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-			updateInterfaces(createdCells);
-		}
-	} else {
-		restoreInterfaces(*restoreStream);
+		updateInterfaces();
 	}
 
 	// Done
@@ -2207,6 +2209,9 @@ void VolOctree::_restore(std::istream &stream)
 	}
 
 	importCells(octantInfoList, stitchInfo, &stream);
+
+	// Restore interfaces
+	restoreInterfaces(stream);
 
 	// De-activate expert mode
 	setExpert(false);

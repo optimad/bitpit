@@ -618,6 +618,12 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 		updateAdjacencies();
 	}
 
+	// Update interfaces
+	bool interfacesDirty = areInterfacesDirty();
+	if (interfacesDirty) {
+		updateInterfaces();
+	}
+
 	// Flush interfaces data structures
 	m_interfaces.flush();
 
@@ -790,31 +796,44 @@ void PatchKernel::resetCells()
 
 /*!
 	Resest the interfaces of the patch.
+
+	This function doesn't change the build strategy, it only deletes the
+	existing interface.
 */
 void PatchKernel::resetInterfaces()
 {
-	// Early return if no adjacencies have been built
+	// Early return if no interfaces have been built
 	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
 		return;
 	}
 
-	// Clear interfaces
-	m_interfaces.clear();
-	PiercedVector<Interface>().swap(m_interfaces);
-	m_interfaceIdGenerator.reset();
+	// Prune stale interfaces
+	pruneStaleInterfaces();
 
+	// All remaining interfaces will be deleted
+	setInterfaceAlterationFlags(FLAG_DELETED);
+
+	// Mark cell interfaces as dirty
+	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+
+	// Reset the interfaces
+	_resetInterfaces();
+}
+
+/*!
+	Internal funtion to reset the interfaces of the patch.
+
+	This function doesn't change the alteration flags.
+*/
+void PatchKernel::_resetInterfaces()
+{
 	for (auto &cell : m_cells) {
 		cell.resetInterfaces();
 	}
 
-	// Clear list of cells with dirty adjacencies
-	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
-
-	// Clear list of altered interfaces
-	m_alteredInterfaces.clear();
-
-	// Set interface build strategy
-	setInterfacesBuildStrategy(INTERFACES_NONE);
+	m_interfaces.clear();
+	PiercedVector<Interface>().swap(m_interfaces);
+	m_interfaceIdGenerator.reset();
 }
 
 /*!
@@ -1063,7 +1082,8 @@ bool PatchKernel::isDirty(bool global) const
 	}
 
 	if (!isDirty) {
-		isDirty |= !m_alteredInterfaces.empty();
+		isDirty |= areInterfacesDirty(false);
+		assert(isDirty || m_alteredInterfaces.empty());
 	}
 
 	if (!isDirty) {
@@ -4327,6 +4347,10 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 		interfaceIterator->setPID(pid);
 	}
 
+	// Interfaces are now updated
+	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+	m_alteredInterfaces.clear();
+
 	// Set original advanced editing status
 	setExpert(originalExpertStatus);
 }
@@ -5253,31 +5277,186 @@ void PatchKernel::setInterfacesBuildStrategy(InterfacesBuildStrategy status)
 }
 
 /*!
+	Checks if the interfaces are dirty.
+
+	\result Returns true if the interfaces are dirty, false otherwise.
+*/
+bool PatchKernel::areInterfacesDirty(bool global) const
+{
+	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+		return false;
+	}
+
+	bool areDirty = !m_alteredInterfaces.empty();
+	if (!areDirty) {
+		for (const auto &entry : m_alteredCells) {
+			AlterationFlags cellAlterationFlags = entry.second;
+			if (testAlterationFlags(cellAlterationFlags, FLAG_INTERFACES_DIRTY)) {
+				areDirty = true;
+				break;
+			}
+		}
+	}
+
+#if BITPIT_ENABLE_MPI==1
+	if (global && isCommunicatorSet()) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(MPI_IN_PLACE, &areDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+	}
+#else
+	BITPIT_UNUSED(global);
+#endif
+
+	return areDirty;
+}
+
+/*!
 	Build interfaces among the cells.
 */
 void PatchKernel::buildInterfaces()
 {
 	// Reset interfaces
 	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
-		clearInterfaces();
+		destroyInterfaces();
 	}
 
-	// Update interfaces
-	updateInterfaces(m_cells.getIds(false));
+	// Set interfaces strategy
+	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
+
+	// Update the interfaces
+	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+	updateInterfaces();
 }
 
 /*!
-	Update the interfaces of the specified list of cells and of their
-	neighbours.
+	Update the interfaces of the patch.
 
-	\param[in] cellIds is the list of cell ids
+	\param forcedUpdated if set to true, bounding box information will be
+	updated also if they are not marked as dirty
 */
-void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
+void PatchKernel::updateInterfaces(bool forcedUpdated)
 {
-	// Enable advanced editing
-	bool originalExpertStatus = isExpert();
-	setExpert(true);
+	// Early return if interfaces are not built
+	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+		return;
+	}
 
+	// Check if the interfaces are dirty
+	bool interfacesDirty = areInterfacesDirty();
+	if (!interfacesDirty && !forcedUpdated) {
+		return;
+	}
+
+	// Update interfaces
+	if (interfacesDirty) {
+		// Enable advanced editing
+		bool originalExpertStatus = isExpert();
+		setExpert(true);
+
+		// Prune stale interfaces
+		pruneStaleInterfaces();
+
+		// Update interfaces
+		_updateInterfaces();
+
+		// Interfaces are now updated
+		unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+		m_alteredInterfaces.clear();
+
+		// Set original advanced editing status
+		setExpert(originalExpertStatus);
+	} else {
+		buildInterfaces();
+	}
+}
+
+/*!
+	Destroy the interfaces.
+
+	After deleting the interfaces, this function changes the build strategy
+	to "None".
+*/
+void PatchKernel::destroyInterfaces()
+{
+	// Early return if no interfaces have been built
+	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+		return;
+	}
+
+	// Reset the interfaces
+	_resetInterfaces();
+
+	// Clear list of cells with dirty adjacencies
+	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+
+	// Clear list of altered interfaces
+	m_alteredInterfaces.clear();
+
+	// Set interface build strategy
+	setInterfacesBuildStrategy(INTERFACES_NONE);
+}
+
+/*!
+	Prune stale interfaces.
+
+	The list of cells to process and the list of stale interfaces are filled
+	during cell deletion.
+*/
+void PatchKernel::pruneStaleInterfaces()
+{
+	// Early return if no interfaces have been built
+	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
+		return;
+	}
+
+	// Update cell interfaces
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (!testAlterationFlags(cellAlterationFlags, FLAG_INTERFACES_DIRTY)) {
+			continue;
+		}
+
+		long cellId = entry.first;
+		Cell &cell = m_cells.at(cellId);
+		int nCellFaces = cell.getFaceCount();
+		for (int face = nCellFaces - 1; face >= 0; --face) {
+			long *faceInterfaces = cell.getInterfaces(face);
+			int nFaceInterfaces = cell.getInterfaceCount(face);
+			for (int i = nFaceInterfaces - 1; i >= 0; --i) {
+				long interfaceId = faceInterfaces[i];
+				if (!testInterfaceAlterationFlags(interfaceId, FLAG_DANGLING)) {
+					continue;
+				}
+
+				// Delete the interface from the cell
+				cell.deleteInterface(face, i);
+			}
+		}
+	}
+
+	// Delete dangling interfaces
+	std::vector<long> danglingInterfaces;
+	danglingInterfaces.reserve(m_alteredInterfaces.size());
+	for (const auto &entry : m_alteredInterfaces) {
+		AlterationFlags interfaceAlterationFlags = entry.second;
+		if (!testAlterationFlags(interfaceAlterationFlags, FLAG_DANGLING)) {
+			continue;
+		}
+
+		long interfaceId = entry.first;
+		danglingInterfaces.push_back(interfaceId);
+	}
+	deleteInterfaces(danglingInterfaces, false, true);
+}
+
+/*!
+	Internal function to update the interfaces of the patch.
+
+	The function will process the cells whose interfaces have been marked as
+	dirty.
+*/
+void PatchKernel::_updateInterfaces()
+{
 	//
 	// Update interfaces
 	//
@@ -5290,15 +5469,23 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 	//
 	// On border faces of internal cells we need to build an interface, also
 	// if there are no adjacencies.
-	for (long cellId : cellIds) {
-		Cell &cell = m_cells[cellId];
+	for (const auto &entry : m_alteredCells) {
+		AlterationFlags cellAlterationFlags = entry.second;
+		if (!testAlterationFlags(cellAlterationFlags, FLAG_INTERFACES_DIRTY)) {
+			continue;
+		}
+
+		long cellId = entry.first;
+		Cell &cell = m_cells.at(cellId);
 		const int nCellFaces = cell.getFaceCount();
 		for (int face = 0; face < nCellFaces; face++) {
+			int nFaceInterfaces= cell.getInterfaceCount(face);
+
 			bool isFaceBorder = cell.isFaceBorder(face);
 			if (!isFaceBorder) {
 				// Find the range of adjacencies that need an interface
 				int updateEnd   = cell.getAdjacencyCount(face);
-				int updateBegin = cell.getInterfaceCount(face);
+				int updateBegin = nFaceInterfaces;
 				if (updateBegin == updateEnd) {
 					continue;
 				}
@@ -5313,30 +5500,12 @@ void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
 
 					buildCellInterface(&cell, face, neigh, neighFace);
 				}
-			} else if (cell.isInterior()) {
+			} else if (nFaceInterfaces == 0 && cell.isInterior()) {
 				// Internal borderes need an interface
 				buildCellInterface(&cell, face, nullptr, -1);
 			}
 		}
 	}
-
-	// Set interfaces build strategy
-	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
-
-	// Set original advanced editing status
-	setExpert(originalExpertStatus);
-}
-
-/*!
-	Clear the interfaces of the patch.
-
-	This function just calls 'resetInterfaces', its only purpose is to make
-	the API for handling the interfaces as much as possible similar to the
-	API for handling the adjacencied.
-*/
-void PatchKernel::clearInterfaces()
-{
-	resetInterfaces();
 }
 
 /*!

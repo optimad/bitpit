@@ -67,8 +67,6 @@ public:
 	void reset() override;
 
 	void resetInterfaces() override;
-	void buildInterfaces() override;
-	void updateInterfaces(const std::vector<long> &cellIds) override;
 
 	void setDiscretization(const std::array<int, 3> &nCells);
 
@@ -146,6 +144,8 @@ protected:
 	VolCartesian(const VolCartesian &other) = default;
 
 	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
+
+	void _updateInterfaces() override;
 
 	int _getDumpVersion() const override;
 	void _dump(std::ostream &stream) const override;

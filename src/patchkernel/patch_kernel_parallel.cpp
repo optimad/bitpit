@@ -2680,6 +2680,27 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         }
     }
 
+    // Mark border interfaces of ghost cells as dangling
+    //
+    // We may recieved cells that connect to the existing mesh through one
+    // of the faces that are now borders. Marking those border interfaces as
+    // dangling allows to delete them and create new internal interfaces.
+    for (auto itr = ghostCellConstBegin(); itr != ghostCellConstEnd(); ++itr) {
+        const Cell &cell = *itr;
+        const long *interfaces = cell.getInterfaces();
+        const int nCellInterfaces = cell.getInterfaceCount();
+
+        setCellAlterationFlags(cell.getId(), FLAG_INTERFACES_DIRTY);
+
+        for (int k = 0; k < nCellInterfaces; ++k) {
+            long interfaceId = interfaces[k];
+            const Interface &interface = getInterface(interfaceId);
+            if (interface.isBorder()) {
+                setInterfaceAlterationFlags(interfaceId, FLAG_DANGLING);
+            }
+        }
+    }
+
     // Receive data
     int patchRank = getRank();
 
@@ -2698,9 +2719,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
     std::vector<long> addedCells;
     std::unordered_map<long, FlatVector2D<long>> duplicateCellsReceivedAdjacencies;
     std::unordered_map<long, long> cellsMap;
-
-    std::vector<long> cellsUpdateInterfacesOverall;
-    std::unordered_set<long> interfacesDeleteOverall;
 
     std::unordered_set<int> awaitingSendRanks = sendRanks;
     while (!awaitingSendRanks.empty()) {
@@ -2938,10 +2956,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         addedCells.clear();
         addedCells.reserve(nReceivedCells);
 
-        if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-            cellsUpdateInterfacesOverall.reserve(cellsUpdateInterfacesOverall.size() + nReceivedCells);
-        }
-
         duplicateCellsReceivedAdjacencies.clear();
 
         cellsMap.clear();
@@ -2998,6 +3012,11 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             // properly connected to the received cells
             bool isTracked = false;
             if (cellId < 0) {
+                // Reset the interfaces of the cell
+                if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+                    cell.resetInterfaces();
+                }
+
                 // Add cell
                 //
                 // If the id of the received cell is already assigned, let the
@@ -3020,12 +3039,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
                 // Interior cells are tacked
                 isTracked = (trackPartitioning && isInterior);
-
-                // Reset the interfaces of the cell, they will be recreated later
-                if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-                    cellIterator->resetInterfaces();
-                    cellsUpdateInterfacesOverall.push_back(cellId);
-                }
             } else {
                 // Check if the existing cells needs to become an internal cell
                 const Cell &localCell = m_cells[cellId];
@@ -3046,19 +3059,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     int nFaceAdjacencies = cell.getAdjacencyCount(face);
                     const long *faceAdjacencies = cell.getAdjacencies(face);
                     cellAdjacencies.pushBack(nFaceAdjacencies, faceAdjacencies);
-                }
-
-                // Mark the interfaces of the cell for deletion, they will be
-                // recreated later
-                if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-                    int nLocalCellInterfaces = localCell.getInterfaceCount();
-                    const long *localCellInterfaces = localCell.getInterfaces();
-                    for (int k = 0; k < nLocalCellInterfaces; ++k) {
-                        long interfaceId = localCellInterfaces[k];
-                        interfacesDeleteOverall.insert(interfaceId);
-                    }
-
-                    cellsUpdateInterfacesOverall.emplace_back(cellId);
                 }
             }
 
@@ -3205,11 +3205,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
     // Update interfaces
     if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-        std::vector<long> deleteList(interfacesDeleteOverall.begin(), interfacesDeleteOverall.end());
-        deleteInterfaces(deleteList, true, false);
-
-        std::vector<long> updateList(cellsUpdateInterfacesOverall.begin(), cellsUpdateInterfacesOverall.end());
-        updateInterfaces(updateList);
+        updateInterfaces();
     }
 
     // Return adaption data
