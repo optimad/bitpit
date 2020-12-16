@@ -1129,9 +1129,9 @@ void VTK::readDataHeader( std::fstream &str ){
 
 
     // Mark all fields as unused
-    std::unordered_set<VTKField *> unusedFields;
+    std::unordered_set<std::string> unusedFields;
     for (VTKField &field : m_data) {
-        unusedFields.insert(&field);
+        unusedFields.insert(field.getName());
     }
 
     // Read header
@@ -1184,8 +1184,8 @@ void VTK::readDataHeader( std::fstream &str ){
                     ptemp->setPosition( temp.getPosition() ) ;
 
                     // The field should not be marked as unused
-                    if( unusedFields.count(ptemp) > 0 ){
-                        unusedFields.erase(ptemp);
+                    if( unusedFields.count(ptemp->getName()) > 0 ){
+                        unusedFields.erase(ptemp->getName());
                     }
                 }
 
@@ -1198,8 +1198,8 @@ void VTK::readDataHeader( std::fstream &str ){
     }
 
     // Disable all unused fields
-    for (VTKField *field : unusedFields) {
-        field->disable();
+    for (const std::string &fieldname : unusedFields) {
+        _findData(fieldname)->disable();
     }
 }
 
