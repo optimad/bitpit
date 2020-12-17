@@ -55,7 +55,7 @@ LevelSetObject::~LevelSetObject( ){
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject(int id) : m_id(id), m_kernelPtr(nullptr), m_narrowBand(-10.) {
+LevelSetObject::LevelSetObject(int id) : m_id(id), m_kernelPtr(nullptr), m_narrowBand(levelSetDefaults::NARROWBAND_SIZE) {
 }
 
 /*!

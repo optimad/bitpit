@@ -44,6 +44,7 @@ namespace levelSetDefaults{
     const int                               OBJECT = -1 ;               /**< Default value for closest object  */
     const int                               PART  = -1 ;                /**< Default value for closest patch  */
     const long                              SUPPORT = -1 ;              /**< Default value for closest support element */
+    const double                            NARROWBAND_SIZE = -1 ;      /**< Default value for the narrowband size */
 };
 
 struct LevelSetInfo{
