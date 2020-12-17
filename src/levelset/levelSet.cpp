@@ -70,7 +70,7 @@ LevelSet::LevelSet() {
 
     m_objects.clear() ;
 
-    m_useNarrowBand = false ;
+    m_narrowBandSize = levelSetDefaults::NARROWBAND_SIZE;
 
     m_signedDF    = true ;
     m_propagateS  = false;
@@ -334,6 +334,10 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
         object->setKernel(m_kernel.get());
     }
 
+    if (m_narrowBandSize > 0.) {
+        object->setSizeNarrowBand(m_narrowBandSize);
+    }
+
     int objectId = object->getId();
 
     m_objects[objectId] = std::move(object) ;
@@ -509,9 +513,10 @@ void LevelSet::setPropagateSign(bool flag){
  * @param[in] r Size of the narrow band.
  */
 void LevelSet::setSizeNarrowBand(double r){
-    m_useNarrowBand = true ;
+    m_narrowBandSize = r;
+
     for( auto &object :m_objects){
-        object.second->setSizeNarrowBand(r) ;
+        object.second->setSizeNarrowBand(m_narrowBandSize);
     }
 }
 
@@ -615,7 +620,7 @@ void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
 void LevelSet::dump( std::ostream &stream ){
 
     utils::binary::write(stream, m_order);
-    utils::binary::write(stream, m_useNarrowBand);
+    utils::binary::write(stream, m_narrowBandSize);
     utils::binary::write(stream, m_signedDF);
     utils::binary::write(stream, m_propagateS);
 
@@ -631,7 +636,7 @@ void LevelSet::dump( std::ostream &stream ){
 void LevelSet::restore( std::istream &stream ){
 
     utils::binary::read(stream, m_order);
-    utils::binary::read(stream, m_useNarrowBand);
+    utils::binary::read(stream, m_narrowBandSize);
     utils::binary::read(stream, m_signedDF);
     utils::binary::read(stream, m_propagateS);
 
