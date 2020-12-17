@@ -773,101 +773,109 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    bool adaptiveSearch(m_narrowBand<0);
-    double searchRadius = m_narrowBand;
-    double factor = 0.5 *sqrt( (double) mesh.getDimension() );
+    double intersectionFactor = 0.5 * std::sqrt((double) mesh.getDimension());
 
-    long segmentId;
-    double distance;
-    std::array<double,3> gradient, normal;
-    std::array<double,3> centroid, root;
+    std::unordered_set<long> intersectedCells;
 
-    std::unordered_set<long> intersects;
-
+    // Evaluate levelset information
     for( const Cell &cell : mesh.getCells() ){
 
+        // Identify the segment associated with the cell
+        //
+        // If no segment is identified the cell is not processed.
         long cellId = cell.getId();
+        std::array<double,3> cellCentroid = visitee->computeCellCentroid(cellId);
 
-        centroid = visitee->computeCellCentroid(cellId);
-
-        if(adaptiveSearch){
-            double cellSize = mesh.evalCellSize(cellId);
-            searchRadius = factor *cellSize;
+        double searchRadius;
+        if (m_narrowBand < 0) {
+            double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
+            searchRadius = intersectDistance;
+        } else {
+            searchRadius = m_narrowBand;
         }
 
-        m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
-
-        if(segmentId>=0){
-
-            int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
-            if (error) {
-                throw std::runtime_error ("Unable to extract the levelset information from segment.");
-            }
-
-            PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId);
-            lsInfoItr = m_ls.emplace(cellId) ;
-            lsInfoItr->value    = distance;
-            lsInfoItr->gradient = gradient;
-
-            PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
-            infoItr->support = segmentId;
-            infoItr->normal = normal;
-
-            if(adaptiveSearch){
-                intersects.insert(cellId);
-            }
-
+        long segmentId;
+        double distance;
+        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
+        if(segmentId < 0){
+            continue;
         }
-             
+
+        // Evaluate levelset information
+        std::array<double,3> gradient;
+        std::array<double,3> normal;
+        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+        if (error) {
+            throw std::runtime_error ("Unable to extract the levelset information from segment.");
+        }
+
+        PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId);
+        lsInfoItr = m_ls.emplace(cellId) ;
+        lsInfoItr->value    = distance;
+        lsInfoItr->gradient = gradient;
+
+        PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
+        infoItr->support = segmentId;
+        infoItr->normal = normal;
+
+        // Update the list of cells that intersects the surface
+        if (m_narrowBand < 0) {
+            intersectedCells.insert(cellId);
+        }
+
     }
 
-    if(!adaptiveSearch){
-        return;
-    }
-    
-    for( long cellId : intersects){
+    // Process the neighbours of the cells that intersect the surface
+    //
+    // If a cell intersects the surface, we need to evaluate the levelset
+    // of all its neigbours.
+    for( long cellId : intersectedCells){
 
         Cell const &cell = mesh.getCell(cellId);
         
-        centroid = visitee->computeCellCentroid(cellId);
-        root = computeProjectionPoint(cellId);
+        std::array<double,3> cellProjectionPoint = computeProjectionPoint(cellId);
 
         const long *neighbours = cell.getAdjacencies() ;
         int nNeighbours = cell.getAdjacencyCount() ;
         for (int n = 0; n < nNeighbours; ++n) {
+            // Skip the neighbour if it has already been processed
+            //
+            // The neighbour may already have been processed either because
+            // it distance from the segmentation is within the search radius,
+            // or because is a neighbour of an intersected cells already
+            // processed.
             long neighId = neighbours[n];
-
-            // skip if neigh cell has already been processed
-            // either because it is intersected by surface or
-            // because it is a neigh to a previous intersect
             if( m_ls.count(neighId) != 0 ){
                 continue;
             }
 
-            centroid = visitee->computeCellCentroid(neighId);
-            searchRadius =  1.05 *norm2(centroid-root);
-            m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+            // Identify the segment associated with the neighbour
+            std::array<double,3> neighCentroid = visitee->computeCellCentroid(neighId);
 
-            if(segmentId>=0){
+            double searchRadius = 1.05 * norm2(neighCentroid - cellProjectionPoint);
 
-                int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
-                if (error) {
-                    throw std::runtime_error ("Unable to extract the levelset information from segment.");
-                }
-
-                PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(neighId) ;
-                lsInfoItr->value    = distance;
-                lsInfoItr->gradient = gradient;
-
-
-                PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(neighId);
-                infoItr->support = segmentId;
-                infoItr->normal = normal;
-
-            } else {
+            long segmentId;
+            double distance;
+            m_segmentation->getSearchTree().findPointClosestCell(neighCentroid, searchRadius, &segmentId, &distance);
+            if (segmentId < 0) {
                 assert(false && "Should not pass here");
             }
 
+            // Evaluate negihbour leveset information
+            std::array<double,3> gradient;
+            std::array<double,3> normal;
+            int error = m_segmentation->getSegmentInfo(neighCentroid, segmentId, signd, distance, gradient, normal);
+            if (error) {
+                throw std::runtime_error ("Unable to extract the levelset information from segment.");
+            }
+
+            PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(neighId) ;
+            lsInfoItr->value    = distance;
+            lsInfoItr->gradient = gradient;
+
+            PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(neighId);
+            infoItr->support = segmentId;
+            infoItr->normal = normal;
         }
     }
 }
@@ -889,18 +897,15 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    bool adaptiveSearch(m_narrowBand<0);
-    double searchRadius = m_narrowBand;
-    double factor = 0.5 *sqrt( (double) mesh.getDimension() );
+    double intersectionFactor = 0.5 * std::sqrt((double) mesh.getDimension());
 
-    long segmentId;
-    std::array<double,3> centroid, root;
+    std::vector<long> cellsOutsideNarrowband;
 
-    double distance;
-    std::array<double,3> gradient, normal;
-
-    std::vector<long> unprocessed;
-
+    // Evaluate the levelset of the cells
+    //
+    // When searching for the segment associated to a cell, the search radius
+    // is evaluated as the maximum value between the narroband size and the
+    // distance above which the cell will surely not intersect the surface.
     for( const auto &event : mapper ){
 
         if( event.entity != adaption::Entity::ENTITY_CELL ){
@@ -908,88 +913,99 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
         }
 
         for( long cellId : event.current ){
-            centroid = visitee->computeCellCentroid(cellId);
 
-            if(adaptiveSearch){
-                double cellSize = mesh.evalCellSize(cellId);
-                searchRadius =  factor *cellSize;
+            // Identify the segment associated with the cell
+            //
+            // If no segment is identified the cell is not processed.
+            std::array<double,3> centroid = visitee->computeCellCentroid(cellId);
+
+            double searchRadius;
+            if (m_narrowBand < 0) {
+                double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
+                searchRadius = intersectDistance;
+            } else {
+                searchRadius = m_narrowBand;
             }
 
+            long segmentId;
+            double distance;
             m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
-
-            if(segmentId>=0){
-
-                int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
-                if (error) {
-                    throw std::runtime_error ("Unable to extract the levelset information from segment.");
-                }
-
-                PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
-                lsInfoItr->value    = distance;
-                lsInfoItr->gradient = gradient;
-
-                PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId) ;
-                infoItr->support = segmentId;
-                infoItr->normal = normal;
-
-            } else if(adaptiveSearch){
-                unprocessed.push_back(cellId);
+            if (segmentId < 0) {
+                cellsOutsideNarrowband.push_back(cellId);
+                continue;
             }
 
+            // Evaluate levelset information
+            std::array<double,3> gradient;
+            std::array<double,3> normal;
+            int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+            if (error) {
+                throw std::runtime_error ("Unable to extract the levelset information from segment.");
+            }
+
+            PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
+            lsInfoItr->value    = distance;
+            lsInfoItr->gradient = gradient;
+
+            PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId) ;
+            infoItr->support = segmentId;
+            infoItr->normal = normal;
         }
+
     }
 
-    if(!adaptiveSearch){
-        return;
-    }
-
-    for( long cellId : unprocessed){
-
+    // Cells with neighbours that intersect the surface need to be added to
+    // the narrowband even if they don't intersect the surface themself or
+    // have a distance from the surface greater than the narroband size.
+    for( long cellId : cellsOutsideNarrowband){
         const Cell &cell = mesh.getCell(cellId);
 
+        // Consider only cells with a neighbour that intersects the surface
         const long *neighbours = cell.getAdjacencies() ;
         int nNeighbours = cell.getAdjacencyCount() ;
 
-        int n=0;
-        bool iterate = (nNeighbours>0);
-
-        while(iterate){
-
+        long intersectedNeighId = Cell::NULL_ID;
+        for (int n = 0; n < nNeighbours; ++n) {
             long neighId = neighbours[n];
-
             if( intersectSurface(neighId,LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE){
-
-                centroid = visitee->computeCellCentroid(cellId);
-                root = computeProjectionPoint(neighId);
-
-                searchRadius =  1.05 *norm2(centroid-root);
-                m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
-
-                if(segmentId>=0){
-
-                        int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
-                        if (error) {
-                            throw std::runtime_error ("Unable to extract the levelset information from segment.");
-                        }
-
-                    PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
-                    lsInfoItr->value    = distance;
-                    lsInfoItr->gradient = gradient;
-
-
-                    PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
-                    infoItr->support = segmentId;
-                    infoItr->normal = normal;
-
-                } else {
-                    assert(false && "Should not pass here");
-                }
-                iterate = false;
+                intersectedNeighId = neighId;
+                break;
             }
-
-            ++n;
-            iterate &= (n<nNeighbours);
         }
+
+        if (intersectedNeighId == Cell::NULL_ID) {
+            continue;
+        }
+
+        // Identify the segment associated with the cell
+        std::array<double,3> cellCentroid = visitee->computeCellCentroid(cellId);
+        std::array<double,3> neighProjectionPoint = computeProjectionPoint(intersectedNeighId);
+
+        double searchRadius = 1.05 * norm2(cellCentroid - neighProjectionPoint);
+
+        long segmentId;
+        double distance;
+        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
+        if (segmentId < 0) {
+            assert(false && "Should not pass here");
+            continue;
+        }
+
+        // Evaluate levelset information for the cell
+        std::array<double,3> gradient;
+        std::array<double,3> normal;
+        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+        if (error) {
+            throw std::runtime_error ("Unable to extract the levelset information from segment.");
+        }
+
+        PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
+        lsInfoItr->value    = distance;
+        lsInfoItr->gradient = gradient;
+
+        PiercedVector<SurfaceInfo>::iterator infoItr = m_surfaceInfo.emplace(cellId);
+        infoItr->support = segmentId;
+        infoItr->normal = normal;
     }
 }
 
