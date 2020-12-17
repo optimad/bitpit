@@ -782,17 +782,19 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
         // Identify the segment associated with the cell
         //
+        // The search radius is evaluated as the maximum value between the
+        // narroband size and the distance above which the cell will surely
+        // not intersect the surface. In this way, cells that intersect the
+        // surface are always included in the narrowband, even if their
+        // distance from the surface is greater than then narrowband size
+        // explicitly set by the user.
+        //
         // If no segment is identified the cell is not processed.
         long cellId = cell.getId();
         std::array<double,3> cellCentroid = visitee->computeCellCentroid(cellId);
 
-        double searchRadius;
-        if (m_narrowBand < 0) {
-            double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
-            searchRadius = intersectDistance;
-        } else {
-            searchRadius = m_narrowBand;
-        }
+        double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
+        double searchRadius = std::max(m_narrowBand, intersectDistance);
 
         long segmentId;
         double distance;
@@ -819,7 +821,12 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
         infoItr->normal = normal;
 
         // Update the list of cells that intersects the surface
-        if (m_narrowBand < 0) {
+        //
+        // When the narrowband size is not explicitly set, the cell will always
+        // intersects the surface because only cells that intersect the surface
+        // are considered, otherwise we need to check if the absolute distance
+        // associated with the cell is lower than the intersection distance.
+        if (m_narrowBand < 0 || intersectDistance < std::abs(lsInfoItr->value)) {
             intersectedCells.insert(cellId);
         }
 
@@ -916,16 +923,18 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
             // Identify the segment associated with the cell
             //
+            // The search radius is evaluated as the maximum value between the
+            // narroband size and the distance above which the cell will surely
+            // not intersect the surface. In this way, cells that intersect the
+            // surface are always included in the narrowband, even if their
+            // distance from the surface is greater than then narrowband size
+            // explicitly set by the user.
+            //
             // If no segment is identified the cell is not processed.
             std::array<double,3> centroid = visitee->computeCellCentroid(cellId);
 
-            double searchRadius;
-            if (m_narrowBand < 0) {
-                double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
-                searchRadius = intersectDistance;
-            } else {
-                searchRadius = m_narrowBand;
-            }
+            double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
+            double searchRadius = std::max(m_narrowBand, intersectDistance);
 
             long segmentId;
             double distance;
