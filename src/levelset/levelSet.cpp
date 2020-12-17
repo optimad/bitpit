@@ -501,6 +501,11 @@ void LevelSet::setPropagateSign(bool flag){
 
 /*!
  * Manually set the physical size of the narrow band.
+ * Setting a size equal or less than zero levelset will be evaluated only on
+ * cells that intersect the surface.
+ * After setting the size of the narrowband, the levelset is not automatically
+ * updated. It's up to the caller to make sure the levelset will be properly
+ * updated if the size of the narrowband changes.
  * @param[in] r Size of the narrow band.
  */
 void LevelSet::setSizeNarrowBand(double r){
