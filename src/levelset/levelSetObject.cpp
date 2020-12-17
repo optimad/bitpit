@@ -182,6 +182,8 @@ bool LevelSetObject::isInNarrowBand(long i)const{
 
 /*!
  * Get the current size of the narrow band.
+ * A size equal or less than zero means that the levelset will be evaluated
+ * only on cells that intersect the surface.
  * @return size of the current narrow band
  */
 double LevelSetObject::getSizeNarrowBand()const{

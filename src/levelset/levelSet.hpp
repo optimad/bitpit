@@ -102,6 +102,7 @@ class LevelSet{
     std::vector<int>        getObjectIds( ) const ;
 
     void                    setSizeNarrowBand(double) ;
+    double                  getSizeNarrowBand() const ;
 
     void                    setSign(bool);
     void                    setPropagateSign(bool) ;

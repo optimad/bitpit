@@ -504,6 +504,16 @@ void LevelSet::setPropagateSign(bool flag){
 }
 
 /*!
+ * Get the physical size of the narrow band.
+ * A size equal or less than zero means that the levelset will be evaluated
+ * only on cells that intersect the surface.
+ * @return the physical size of the narrow band
+ */
+double LevelSet::getSizeNarrowBand() const{
+    return m_narrowBandSize;
+}
+
+/*!
  * Manually set the physical size of the narrow band.
  * Setting a size equal or less than zero levelset will be evaluated only on
  * cells that intersect the surface.
