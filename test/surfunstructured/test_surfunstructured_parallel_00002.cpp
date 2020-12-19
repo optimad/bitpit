@@ -288,8 +288,8 @@ SurfUnstructured                mesh(2, 3);
         }
     }
 
-    //  Build adjacencies ----------------------------------------------- //
-    mesh.buildAdjacencies();
+    //  Initialize adjacencies ---------------------------------------------- //
+    mesh.initializeAdjacencies();
 }
 
 // ========================================================================== //
