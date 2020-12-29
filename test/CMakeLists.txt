@@ -181,6 +181,9 @@ function(addTest TEST_NAME TEST_TYPE TEST_LIBRARIES WORKING_DIRECTORY N_PROCS PA
     target_link_libraries(${TEST_TARGET_NAME} ${BITPIT_LIBRARY})
     target_link_libraries(${TEST_TARGET_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
     target_link_libraries(${TEST_TARGET_NAME} ${TEST_LIBRARIES})
+    if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+        target_link_libraries(${TEST_TARGET_NAME} "gcov")
+    endif()
 
     # Add test
     add_test(NAME "${TEST_TARGET_NAME}" COMMAND ${TEST_EXEC} ${TEST_ARGS} WORKING_DIRECTORY "${WORKING_DIRECTORY}")
