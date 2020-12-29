@@ -222,6 +222,166 @@ function(addPublicDefinitions DEFINITIONS)
     addPrivateDefinitions("${DEFINITIONS}")
 endfunction()
 
+# Add coverage analysis
+function(addCoverageAnalysis GENERATE_GCOVR_REPORTS GENERATE_LCOV_REPORTS EXCLUDES)
+
+    # Collect excludes
+    set(OVERALL_EXCLUDES "/usr/include/*;/usr/lib/*")
+    foreach(EXCLUDE ${EXCLUDES} ${COVERAGE_EXCLUDES})
+        list(APPEND OVERALL_EXCLUDES "${EXCLUDE}")
+    endforeach()
+    list(REMOVE_DUPLICATES OVERALL_EXCLUDES)
+
+    # Coverage output directory
+    set(COVERAGE_OUTPUT_DIR "${PROJECT_BINARY_DIR}/coverage")
+
+    # Initialize coverage analysis
+    #
+    # Before initializing coverage analyses needs we need to build the tests.
+    add_custom_target(coverage-initialize
+        # Remove existing code coverage data
+        COMMAND find ${PROJECT_BINARY_DIR} -name "*.gcda" -exec rm {} \;
+
+        VERBATIM
+        DEPENDS tests
+        COMMENT "Initializeing coverage analysis."
+    )
+
+    # Tests are used to gather coverage data
+    add_custom_target(coverage
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${COVERAGE_OUTPUT_DIR}
+        COMMAND ${CMAKE_CTEST_COMMAND}
+
+        BYPRODUCTS ${COVERAGE_OUTPUT_DIR}
+        DEPENDS coverage-initialize
+        COMMENT "Running tests to gather coverage data."
+    )
+
+    # Generate gcovr reports
+    if (GENERATE_GCOVR_REPORTS)
+        # Find needed executables
+        find_program(GCOVR_PATH gcovr REQUIRED)
+
+        # Combine excludes to several -e arguments
+        set(GCOVR_EXCLUDE_ARGS "")
+        foreach(EXCLUDE ${OVERALL_EXCLUDES})
+            list(APPEND GCOVR_EXCLUDE_ARGS "-e")
+            list(APPEND GCOVR_EXCLUDE_ARGS "${EXCLUDE}")
+        endforeach()
+
+        # Set output directory
+        set(GCOVR_OUTPUT_DIR "${COVERAGE_OUTPUT_DIR}/gcovr")
+
+        # Initialize reports
+        add_custom_command(TARGET coverage-initialize POST_BUILD
+            # Create output directory
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${GCOVR_OUTPUT_DIR}
+
+            BYPRODUCTS ${GCOVR_OUTPUT_DIR}
+            VERBATIM
+            COMMENT "Initializing gcovr reports"
+        )
+
+        # Generate reports
+        add_custom_command(TARGET coverage POST_BUILD
+            COMMAND ${GCOVR_PATH} --html --html-details
+                -r ${PROJECT_SOURCE_DIR} ${GCOVR_EXCLUDE_ARGS}
+                --object-directory=${PROJECT_BINARY_DIR}
+                -o ${GCOVR_OUTPUT_DIR}/index.html
+
+            COMMAND ${GCOVR_PATH} --xml
+                -r ${PROJECT_SOURCE_DIR} ${GCOVR_EXCLUDE_ARGS}
+                --object-directory=${PROJECT_BINARY_DIR}
+                -o ${GCOVR_OUTPUT_DIR}/coverage.xml
+
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            VERBATIM
+            COMMENT "Running gcovr to produce code coverage reports."
+        )
+
+        # Show path of the reports
+        add_custom_command(TARGET coverage POST_BUILD
+            COMMAND ;
+            COMMENT "gcovr HTML coverage report saved in \"${GCOVR_OUTPUT_DIR}/index.html.html\"."
+        )
+
+        add_custom_command(TARGET coverage POST_BUILD
+            COMMAND ;
+            COMMENT "gcovr XML coverage report saved in \"${GCOVR_OUTPUT_DIR}/coverage.xml\"."
+        )
+    endif()
+
+    # Generate lcov reports
+    if (GENERATE_LCOV_REPORTS)
+        # Set output directory
+        set(LCOV_OUTPUT_DIR "${COVERAGE_OUTPUT_DIR}/lcov")
+        set(LCOV_CASE_NAME  "coverage")
+
+        # Find needed executables
+        find_program(GCOV_PATH REQUIRED gcov)
+        find_program(LCOV_PATH REQUIRED NAMES lcov lcov.bat lcov.exe lcov.perl)
+        find_program(GENHTML_PATH REQUIRED NAMES genhtml genhtml.perl genhtml.bat)
+        find_program(CPPFILT_PATH NAMES c++filt)
+
+        # lcov arguments
+        set(LCOV_ARGS "")
+
+        # genhtml arguments
+        set(GENHTML_ARGS "")
+        if(CPPFILT_PATH)
+            set(GENHTML_EXTRA_ARGS ${GENHTML_ARGS} "--demangle-cpp")
+        endif()
+
+        # Initialize lcov reports
+        add_custom_command(TARGET coverage-initialize POST_BUILD
+            # Cleanup lcov
+            COMMAND ${LCOV_PATH} ${LCOV_ARGS} --gcov-tool ${GCOV_PATH} -d ${PROJECT_BINARY_DIR} -b ${PROJECT_SOURCE_DIR} --zerocounters
+
+            # Create output directory
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${LCOV_OUTPUT_DIR}
+
+            # Create baseline to make sure untouched files show up in the report
+            COMMAND ${LCOV_PATH} ${LCOV_ARGS} --gcov-tool ${GCOV_PATH} -d ${PROJECT_BINARY_DIR} -b ${PROJECT_SOURCE_DIR} -c -i -o ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}_base.info
+
+            BYPRODUCTS ${LCOV_OUTPUT_DIR}
+            VERBATIM
+            COMMENT "Initializing lcov reports"
+        )
+
+        # Generate report
+        add_custom_command(TARGET coverage POST_BUILD
+            # Capturing lcov counters and generating report
+            COMMAND ${LCOV_PATH} ${LCOV_ARGS} --gcov-tool ${GCOV_PATH} -d ${PROJECT_BINARY_DIR} -b ${PROJECT_SOURCE_DIR} -c -o ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}_test.info
+
+            # Add baseline counters
+            COMMAND ${LCOV_PATH} ${LCOV_ARGS} --gcov-tool ${GCOV_PATH} -a ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}_base.info -a ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}_test.info -o ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}_total.info
+
+            # Filter collected data to final coverage report
+            COMMAND ${LCOV_PATH} ${LCOV_ARGS} --gcov-tool ${GCOV_PATH} --remove ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}_total.info ${OVERALL_EXCLUDES} -o ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}.info
+
+            # Generate HTML output
+            COMMAND ${GENHTML_PATH} ${GENHTML_ARGS} -o ${LCOV_OUTPUT_DIR} ${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}.info
+
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            VERBATIM
+            COMMENT "Processing code coverage counters and generating report."
+        )
+
+        # Show path of the reports
+        add_custom_command(TARGET coverage POST_BUILD
+            COMMAND ;
+            COMMENT "lcov coverage report saved in \"${LCOV_OUTPUT_DIR}/${LCOV_CASE_NAME}.info\"."
+        )
+
+        add_custom_command(TARGET coverage POST_BUILD
+            COMMAND ;
+            COMMENT "lcov HTML coverage report saved in \"${LCOV_OUTPUT_DIR}/index.html\"."
+        )
+    endif()
+
+
+endfunction()
+
 #------------------------------------------------------------------------------------#
 # Initialize public definitions
 #------------------------------------------------------------------------------------#
@@ -289,50 +449,16 @@ endfunction()
 # Customized build types
 #------------------------------------------------------------------------------------#
 
-# GNU Profiling
-SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used by the C++ compiler during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_GNUPROFILING)
-
-SET(CMAKE_C_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used by the C compiler during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_C_FLAGS_GNUPROFILING)
-
-SET(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used for linking binaries during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING)
-
-SET(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used by the shared libraries linker during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING)
-
-# Scalasca Profiling
-SET(CMAKE_CXX_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
-    "Flags used by the C++ compiler during Scalasca profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_SCALASCAPROFILING)
-
-SET(CMAKE_C_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
-    "Flags used by the C compiler during Scalasca builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_C_FLAGS_SCALASCAPROFILING)
-
-SET(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
-    "Flags used for linking binaries during Scalasca builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING)
-
-SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
-    "Flags used by the shared libraries linker during Scalasca builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
-
 # Set build type variable
 if(NOT CMAKE_BUILD_TYPE)
+	set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "GNUProfiling" "ScalascaProfiling")
+
 	# Set default build type to Debug
-	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
-		"Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel GNUProfiling ScalascaProfiling."
-		FORCE)
+	string(REPLACE ";" " " SUPPORTED_BUILD_TYPE_STRING "${SUPPORTED_BUILD_TYPE}")
+	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: ${SUPPORTED_BUILD_TYPE_STRING}." FORCE)
 
 	# Set the possible values of build type for the GUI
-	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-	"MinSizeRel" "RelWithDebInfo" "GNUProfiling" "ScalascaProfiling")
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_BUILD_TYPE})
 endif()
 
 #------------------------------------------------------------------------------------#
@@ -797,6 +923,41 @@ else ()
 	addPublicDefinitions("BITPIT_ENABLE_MPI=0")
 endif()
 
+# GNU profiling build type
+SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the C++ compiler during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_GNUPROFILING)
+
+SET(CMAKE_C_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the C compiler during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_C_FLAGS_GNUPROFILING)
+
+SET(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used for linking binaries during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING)
+
+SET(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the shared libraries linker during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING)
+
+# Scalasca profiling build type
+SET(CMAKE_CXX_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
+    "Flags used by the C++ compiler during Scalasca profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_C_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
+    "Flags used by the C compiler during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_C_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
+    "Flags used for linking binaries during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
+    "Flags used by the shared libraries linker during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
+
+# Standard build types
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
@@ -817,6 +978,23 @@ if (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.12"))
 else ()
 	add_definitions("-std=c++11")
 endif ()
+
+# Coverage build type
+SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
+    "Flags used by the C compiler during coverage builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_C_FLAGS_COVERAGE)
+
+SET(CMAKE_CXX_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
+    "Flags used by the C++ compiler during coverage builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_COVERAGE)
+
+SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE "-fprofile-arcs -ftest-coverage" CACHE STRING
+    "Flags used for linking binaries during coverage builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_COVERAGE)
+
+SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE "-fprofile-arcs -ftest-coverage" CACHE STRING
+    "Flags used by the shared libraries linker during coverage builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
 
 # Set linker flags for Intel compilers
 #
@@ -887,6 +1065,23 @@ include(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN_UNREACHABLE)
 if(HAVE___BUILTIN_UNREACHABLE)
     addPrivateDefinitions("HAVE___BUILTIN_UNREACHABLE")
+endif()
+
+#------------------------------------------------------------------------------------#
+# Code coverage analysis
+#------------------------------------------------------------------------------------#
+if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+        message(FATAL_ERROR "Code coverage analysis requires gcc! Aborting...")
+    endif()
+
+    set(BITPIT_COVERAGE_GCOVR_REPORTS 1 CACHE BOOL "If set, coverage analysis will generate gcov reports")
+    mark_as_advanced(${BITPIT_COVERAGE_GCOVR_REPORTS})
+
+    set(BITPIT_COVERAGE_LCOV_REPORTS 1 CACHE BOOL "If set, coverage analysis will generate lcov reports")
+    mark_as_advanced(${BITPIT_COVERAGE_LCOV_REPORTS})
+
+    addCoverageAnalysis(${BITPIT_COVERAGE_GCOVR_REPORTS} ${BITPIT_COVERAGE_LCOV_REPORTS} "${PROJECT_SOURCE_DIR}/examples/*;${PROJECT_SOURCE_DIR}/test/*")
 endif()
 
 #------------------------------------------------------------------------------------#
