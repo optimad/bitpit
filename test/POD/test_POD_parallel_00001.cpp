@@ -33,9 +33,9 @@
 using namespace bitpit;
 
 /** Subtest 001
- * 
+ *
  * Testing basic POD features on a 2D octree patch
- * 
+ *
  * \param rank is the rank of the process
  * \param nProcs is the number of the processes
  */
@@ -49,11 +49,14 @@ int subtest_001(int rank, int nProcs)
     double length = 2*BITPIT_PI;
     double dh = length/100;
 
-    /**<Create the patch.*/ 
+    /**<Create the patch.*/
     VolumeKernel * mesh = new VolOctree(2, origin, length, dh);
+    mesh->setCommunicator(MPI_COMM_WORLD);
     mesh->initializeAdjacencies();
     mesh->initializeInterfaces();
     mesh->update();
+
+    mesh->partition(true);
 
     int archiveVersion = 1;
     int dumpBlock = (nProcs > 1) ? rank : -1;
@@ -63,10 +66,10 @@ int subtest_001(int rank, int nProcs)
         log::cout() << ">> Creating synthetic fields... " << std::endl;
     bitpit::PiercedStorage<double> fields(1, &mesh->getCells());
     bitpit::PiercedStorage<std::array<double, 3>> fieldv(1, &mesh->getCells());
-    bitpit::PiercedStorage<bool> mask(1, &mesh->getCells());  
+    bitpit::PiercedStorage<bool> mask(1, &mesh->getCells());
     mask.fill(true);
 
-    for (int k=0; k<2; k++){   
+    for (int k=0; k<2; k++){
         for (bitpit::Cell & cell : mesh->getCells()){
             long id = cell.getId();
             if (k%2){
@@ -109,11 +112,11 @@ int subtest_001(int rank, int nProcs)
     /**<Create POD object.*/
     POD pod;
 
-    /**<Add snapshots to database.*/   
+    /**<Add snapshots to database.*/
     pod.addSnapshot(".", "snapshot.0");
     pod.addSnapshot(".", "snapshot.1");
 
-    /**<Set POD.*/    
+    /**<Set POD.*/
     pod.setMeshType(POD::MeshType::VOLOCTREE);
     pod.setStaticMesh(true);
     pod.setWriteMode(POD::WriteMode::DEBUG);
@@ -123,7 +126,7 @@ int subtest_001(int rank, int nProcs)
     pod.setDirectory(".");
     pod.setName("s001_pod");
 
-    /**<Compute the POD basis.*/ 
+    /**<Compute the POD basis.*/
     pod.evalMeanMesh();
     pod.fillListActiveIDs(mask);
     pod.evalCorrelation();
@@ -131,19 +134,19 @@ int subtest_001(int rank, int nProcs)
     pod.evalModes();
     pod.setSensorMask(mask);
 
-    /**<Reconstruct first snapshot.*/    
+    /**<Reconstruct first snapshot.*/
     pod.addReconstructionSnapshot(".", "snapshot.0");
     pod.evalReconstruction();
     std::vector<std::vector<double> > rcoeffs0 = pod.getReconstructionCoeffs();
 
-    /**<Reconstruct second snapshot.*/  
+    /**<Reconstruct second snapshot.*/
     pod.addReconstructionSnapshot(".", "snapshot.1");
     pod.evalReconstruction();
     std::vector<std::vector<double> > rcoeffs1 = pod.getReconstructionCoeffs();
 
     std::vector<std::vector<double> > sum = rcoeffs0+rcoeffs1;
 
-    if (rank==0){ 
+    if (rank==0){
         std::cout<< ">> Reconstruction coeffs:" << std::endl;
         std::cout<< rcoeffs0 << std::endl;
         std::cout<< rcoeffs1 << std::endl;
@@ -163,22 +166,12 @@ int subtest_001(int rank, int nProcs)
  */
 int main(int argc, char *argv[])
 {
-#if BITPIT_ENABLE_MPI
     MPI_Init(&argc,&argv);
-#else
-    BITPIT_UNUSED(argc);
-    BITPIT_UNUSED(argv);
-#endif
 
     int nProcs;
     int rank;
-#if BITPIT_ENABLE_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#else
-    nProcs = 1;
-    rank   = 0;
-#endif 
 
     int status = 1;
     try {
@@ -189,9 +182,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-#if BITPIT_ENABLE_MPI
     MPI_Finalize();
-#endif 
 
     return status;
 }
