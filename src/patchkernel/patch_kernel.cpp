@@ -62,6 +62,10 @@ PatchKernel::PatchKernel(bool expert)
 /*!
 	Creates a partitioned patch.
 
+	Patches that are filled automatically (e.g. VolOctree) will initialize
+	the cells only on the process identified by the rank zero in the
+	communicator.
+
 	\param communicator is the communicator to be used for exchanging data
 	among the processes
 	\param haloSize is the size, expressed in number of layers, of the ghost
@@ -97,6 +101,10 @@ PatchKernel::PatchKernel(int dimension, bool expert)
 
 /*!
 	Creates a partitioned patch.
+
+	Patches that are filled automatically (e.g. VolOctree) will initialize
+	the cells only on the process identified by the rank zero in the
+	communicator.
 
 	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
@@ -138,6 +146,10 @@ PatchKernel::PatchKernel(int id, int dimension, bool expert)
 
 /*!
 	Creates a partitioned patch.
+
+	Patches that are filled automatically (e.g. VolOctree) will initialize
+	the cells only on the process identified by the rank zero in the
+	communicator.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
@@ -220,7 +232,6 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_nProcessors(other.m_nProcessors)
 #if BITPIT_ENABLE_MPI==1
       , m_communicator(MPI_COMM_NULL),
-      m_partitioned(other.m_partitioned),
       m_partitioningStatus(other.m_partitioningStatus),
       m_owner(other.m_owner),
       m_haloSize(other.m_haloSize),
@@ -361,24 +372,21 @@ void PatchKernel::initialize()
 	// Set halo size
 	initializeHaloSize(haloSize);
 
-	// Patch is not partitioned
-	setPartitioned(false);
-
-	// Set the partitioning as unsupported
-	//
-	// Specific implementation will set the appropriate status during their
-	// initialization.
-	setPartitioningStatus(PARTITIONING_UNSUPPORTED);
-
-	// Update patch owner
-	updateOwner();
-
-	// Mark partitioning information as up-to-date
-	setPartitioningInfoDirty(false);
+	// Mark patch as partioned
+	if (isPartitioned()) {
+		setPartitioningStatus(PARTITIONING_CLEAN);
+	} else {
+		setPartitioningStatus(PARTITIONING_UNSUPPORTED);
+	}
 
 	// Initialize partitioning tags
 	m_partitioningCellsTag    = -1;
 	m_partitioningVerticesTag = -1;
+
+	// Update partitioning information
+	if (isPartitioned()) {
+		updatePartitioningInfo(true);
+	}
 #else
 	// Dummy parallel information
 	m_rank        = 0;
@@ -714,14 +722,7 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 
 #if BITPIT_ENABLE_MPI==1
 	// Update partitioning information
-	//
-	// If we are partitioning the patch, the partition flag is not set yet (it
-	// will be set after the call to this function).
-	bool partitioningInfoDirty = (getPartitioningStatus() == PARTITIONING_PREPARED);
-	if (!partitioningInfoDirty) {
-		partitioningInfoDirty = arePartitioningInfoDirty();
-	}
-
+	bool partitioningInfoDirty = arePartitioningInfoDirty();
 	if (partitioningInfoDirty) {
 		updatePartitioningInfo(true);
 	}
@@ -7012,7 +7013,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 10;
+	const int KERNEL_DUMP_VERSION = 11;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
@@ -7064,10 +7065,8 @@ bool PatchKernel::dump(std::ostream &stream) const
 	utils::binary::write(stream, m_dimension);
 	utils::binary::write(stream, m_vtk.getName());
 #if BITPIT_ENABLE_MPI==1
-	utils::binary::write(stream, isPartitioned());
 	utils::binary::write(stream, m_haloSize);
 #else
-	utils::binary::write(stream, false);
 	utils::binary::write(stream, 0);
 #endif
 
@@ -7147,13 +7146,6 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	std::string name;
 	utils::binary::read(stream, name);
 	m_vtk.setName(name);
-
-	// Partioned flag
-	bool partitioned;
-	utils::binary::read(stream, partitioned);
-#if BITPIT_ENABLE_MPI==1
-	setPartitioned(partitioned);
-#endif
 
 	// Halo size
 #if BITPIT_ENABLE_MPI==1

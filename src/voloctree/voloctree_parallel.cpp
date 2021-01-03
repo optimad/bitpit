@@ -33,6 +33,27 @@ using namespace std;
 namespace bitpit {
 
 /*!
+	Initialize tree partitioning.
+
+	All octants are moved to the process identified by the rank zero in the
+	communicator.
+*/
+void VolOctree::initializeTreePartitioning()
+{
+	// Move all the octants to the first processor
+	//
+	// Assigning a null weight to every octant but the last octant and then
+	// doing a load balance will have the effect of moving all the octants
+	// to the first process.
+	std::size_t nOctants = m_tree->getNumOctants();
+	std::vector<double> octantWeights(nOctants, 0.);
+	if (nOctants > 0) {
+		octantWeights[nOctants - 1] = 1.;
+	}
+	m_tree->loadBalance(m_partitioningOctantWeights.get());
+}
+
+/*!
 	Initialize the size, expressed in number of layers, of the tree ghost
 	cells halo.
 

@@ -1507,9 +1507,6 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 	// Finalize patch alterations
 	finalizeAlterations(squeezeStorage);
 
-	// The patch is now partitioned
-	setPartitioned(true);
-
 	// Update the status
 	setPartitioningStatus(PARTITIONING_ALTERED);
 
@@ -1555,17 +1552,7 @@ void PatchKernel::partitioningCleanup()
 */
 bool PatchKernel::isPartitioned() const
 {
-	return m_partitioned;
-}
-
-/*!
-	Sets the partitioned flag.
-
-	\param partitioned is the flag that will be set
-*/
-void PatchKernel::setPartitioned(bool partitioned)
-{
-	m_partitioned = partitioned;
+	return isCommunicatorSet();
 }
 
 /*!

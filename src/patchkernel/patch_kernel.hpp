@@ -922,7 +922,6 @@ private:
 	int m_nProcessors;
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
-	bool m_partitioned;
 	PartitioningStatus m_partitioningStatus;
 
 	int m_owner;

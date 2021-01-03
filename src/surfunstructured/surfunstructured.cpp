@@ -59,10 +59,6 @@ SurfUnstructured::SurfUnstructured(MPI_Comm communicator)
 	: SurfaceKernel(true)
 #endif
 {
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
 }
 
 /*!
@@ -91,10 +87,6 @@ SurfUnstructured::SurfUnstructured(int patch_dim, int space_dim, MPI_Comm commun
 	: SurfaceKernel(PatchManager::AUTOMATIC_ID, patch_dim, space_dim, true)
 #endif
 {
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
 }
 
 /*!
@@ -125,10 +117,6 @@ SurfUnstructured::SurfUnstructured(int id, int patch_dim, int space_dim, MPI_Com
 	: SurfaceKernel(id, patch_dim, space_dim, true)
 #endif
 {
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
 }
 
 /*!
@@ -156,11 +144,6 @@ SurfUnstructured::SurfUnstructured(std::istream &stream, MPI_Comm communicator)
 	: SurfaceKernel(false)
 #endif
 {
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
-
 	// Restore the patch
 	restore(stream);
 }

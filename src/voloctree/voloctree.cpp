@@ -67,6 +67,9 @@ VolOctree::VolOctree()
 /*!
 	Creates an uninitialized partitioned patch.
 
+	Cells will be initialized the cells only on the process identified by the
+	rank zero in the communicator.
+
 	\param communicator is the communicator to be used for exchanging data
 	among the processes
 	\param haloSize is the size, expressed in number of layers, of the ghost
@@ -120,6 +123,9 @@ VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double 
 /*!
 	Creates a partitioned patch.
 
+	Cells will be initialized the cells only on the process identified by the
+	rank zero in the communicator.
+
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
 	\param length is the length of the domain
@@ -154,6 +160,9 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 
 /*!
 	Creates a partitioned patch.
+
+	Cells will be initialized the cells only on the process identified by the
+	rank zero in the communicator.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
@@ -209,10 +218,11 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 	// Set the bounding
 	setBoundingBox();
 
-	// Inizializzazione dell'octree
-	double initial_level = ceil(log2(std::max(1., length / dh)));
-
-	m_tree->setMarker((uint32_t) 0, initial_level);
+	// Initialize refinement markers
+	if (m_tree->getNumOctants() > 0) {
+		double initial_level = ceil(log2(std::max(1., length / dh)));
+		m_tree->setMarker((uint32_t) 0, initial_level);
+	}
 }
 
 /*!
@@ -276,6 +286,9 @@ VolOctree::VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<Pablo
 
 /*!
 	Creates a paritioned patch.
+
+	Cells will be initialized the cells only on the process identified by the
+	rank zero in the communicator.
 */
 #if BITPIT_ENABLE_MPI==1
 /*!
@@ -426,6 +439,9 @@ void VolOctree::initializeTree(std::unique_ptr<PabloUniform> *adopter)
 			if (haloSize != m_tree->getNofGhostLayers()) {
 				initializeTreeHaloSize(haloSize);
 			}
+
+			// Initialize partitioning
+			initializeTreePartitioning();
 		} else {
 			// Check if the current halo size is equal to the requested one
 			if (haloSize != m_tree->getNofGhostLayers()) {
@@ -455,11 +471,6 @@ void VolOctree::initialize()
 
 	// This patch supports adaption
 	setAdaptionStatus(ADAPTION_CLEAN);
-
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
 
 	// Initialize the tolerance
 	//

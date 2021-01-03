@@ -60,10 +60,6 @@ VolUnstructured::VolUnstructured(MPI_Comm communicator)
 	: VolumeKernel(true)
 #endif
 {
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
 }
 
 /*!
@@ -118,10 +114,6 @@ VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator)
 	: VolumeKernel(id, dimension, true)
 #endif
 {
-#if BITPIT_ENABLE_MPI==1
-	// This patch supports partitioning
-	setPartitioningStatus(PARTITIONING_CLEAN);
-#endif
 }
 
 /*!
