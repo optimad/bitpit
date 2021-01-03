@@ -185,7 +185,7 @@ void PatchNumberingInfo::_extract()
 	size_t exchangeDataSize = sizeof(consecutiveId);
 	std::unique_ptr<DataCommunicator> dataCommunicator;
 
-	if (m_patch->getProcessorCount() > 1) {
+	if (m_patch->isPartitioned()) {
 		// Create the data communicator
 		dataCommunicator = std::unique_ptr<DataCommunicator>(new DataCommunicator(m_patch->getCommunicator()));
 
@@ -202,11 +202,12 @@ void PatchNumberingInfo::_extract()
 
 #if BITPIT_ENABLE_MPI==1
 	// Get the internal cell count of all the partitions
-	m_nGlobalInternalCells.resize(m_patch->getProcessorCount());
-	if (m_patch->getProcessorCount() > 1) {
+	if (m_patch->isPartitioned()) {
+		m_nGlobalInternalCells.resize(m_patch->getProcessorCount());
 		long nLocalInternalCells = m_patch->getInternalCellCount();
 		MPI_Allgather(&nLocalInternalCells, 1, MPI_LONG, m_nGlobalInternalCells.data(), 1, MPI_LONG, m_patch->getCommunicator());
 	} else {
+		m_nGlobalInternalCells.resize(1);
 		m_nGlobalInternalCells[0] = m_patch->getInternalCellCount();
 	}
 #endif
@@ -237,7 +238,7 @@ void PatchNumberingInfo::_extract()
 
 #if BITPIT_ENABLE_MPI==1
 	// Communicate the consecutive id of the ghost cells
-	if (m_patch->getProcessorCount() > 1) {
+	if (m_patch->isPartitioned()) {
 		// Set and start the sends
 		for (const auto &entry : m_patch->getGhostCellExchangeSources()) {
 			const int rank = entry.first;
@@ -394,6 +395,10 @@ int PatchNumberingInfo::getCellRankFromLocal(long id) const
 */
 int PatchNumberingInfo::getCellRankFromConsecutive(long id) const
 {
+	if (m_patch->isPartitioned()) {
+		return m_patch->getRank();
+	}
+
 	long offset = 0;
 	for (int k = 0; k < m_patch->getProcessorCount(); ++k) {
 		offset += m_nGlobalInternalCells[k];
