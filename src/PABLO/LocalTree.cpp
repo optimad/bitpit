@@ -370,7 +370,7 @@ namespace bitpit {
 
         std::fill(m_periodic.begin(), m_periodic.end(), false);
 
-        if (createRoot) {
+        if (m_dim > 0 && createRoot) {
             m_localMaxDepth = 0;
 
             m_octants.push_back(Octant(m_dim));
