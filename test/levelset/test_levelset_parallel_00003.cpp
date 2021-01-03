@@ -97,6 +97,9 @@ int subtest_001(int rank)
     mesh.initializeInterfaces();
     mesh.update();
 
+    // Mesh Partitioning
+    mesh.partition(MPI_COMM_WORLD, false);
+
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock>    start, end;
     int elapsed_init, elapsed_refi(0);
