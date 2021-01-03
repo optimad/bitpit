@@ -748,16 +748,23 @@ namespace bitpit {
 
             // Compute information about the new partitioning
             assert(m_nproc > 0);
-            std::vector<uint64_t> newPartitionRangeGlobalidx(m_nproc);
-            newPartitionRangeGlobalidx[0] = partition[0] - 1;
-            for (int p = 1; p < m_nproc; ++p) {
-                newPartitionRangeGlobalidx[p] = newPartitionRangeGlobalidx[p - 1] + partition[p];
-            }
 
             uint32_t newSizeOctants = partition[m_rank];
 
-            uint64_t newLastOctantGlobalIdx  = newPartitionRangeGlobalidx[m_rank];
-            uint64_t newFirstOctantGlobalIdx = newLastOctantGlobalIdx - newSizeOctants + 1;
+            uint64_t newLastOctantGlobalIdx;
+            uint64_t newFirstOctantGlobalIdx;
+            if (newSizeOctants > 0) {
+                newLastOctantGlobalIdx = partition[0];
+                for (int p = 1; p < m_rank + 1; ++p) {
+                    newLastOctantGlobalIdx += partition[p];
+                }
+                --newLastOctantGlobalIdx;
+
+                newFirstOctantGlobalIdx = newLastOctantGlobalIdx - newSizeOctants + 1;
+            } else {
+                newLastOctantGlobalIdx  = 0;
+                newFirstOctantGlobalIdx = 1;
+            }
 
             // Partition internal octants
             if (m_serial) {
@@ -848,10 +855,15 @@ namespace bitpit {
                     }
                 }
 
-                bool hasResidentOctants = true;
-                if (newFirstOctantGlobalIdx > lastOctantGlobalIdx) {
-                    hasResidentOctants = false;
-                } else if (newLastOctantGlobalIdx < firstOctantGlobalIdx) {
+                bool hasResidentOctants;
+                if (newSizeOctants > 0) {
+                    hasResidentOctants = true;
+                    if (newFirstOctantGlobalIdx > lastOctantGlobalIdx) {
+                        hasResidentOctants = false;
+                    } else if (newLastOctantGlobalIdx < firstOctantGlobalIdx) {
+                        hasResidentOctants = false;
+                    }
+                } else {
                     hasResidentOctants = false;
                 }
 
