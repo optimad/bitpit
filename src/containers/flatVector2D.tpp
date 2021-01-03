@@ -1100,7 +1100,7 @@ T* FlatVector2D<T>::operator[](std::size_t i)
 template <class T>
 bool FlatVector2D<T>::isIndexValid(std::size_t i) const
 {
-    return (i >= 0 && i < size());
+    return (i < size());
 }
 
 /*!
@@ -1117,7 +1117,7 @@ bool FlatVector2D<T>::isIndexValid(std::size_t i, std::size_t j) const
         return false;
     }
 
-    return (j >= 0 && j < (m_index[i+1] - m_index[i]));
+    return (j < (m_index[i+1] - m_index[i]));
 }
 
 }
