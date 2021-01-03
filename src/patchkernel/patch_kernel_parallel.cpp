@@ -4000,9 +4000,6 @@ std::unordered_map<long, int> PatchKernel::evaluateExchangeVertexOwners() const
 */
 void PatchKernel::updateGhostCellExchangeInfo()
 {
-	// Check if all structures needed are ready
-	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
-
 	// Clear targets
 	m_ghostCellExchangeTargets.clear();
 
@@ -4061,6 +4058,8 @@ std::vector<long> PatchKernel::_findGhostCellExchangeSources(int rank)
 	std::vector<long> &rankTargets = ghostExchangeTargetsItr->second;
 
 	// The internal neighbours of the ghosts will be sources for the rank
+	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
 	std::vector<long> neighIds;
 	std::unordered_set<long> exchangeSources;
 	exchangeSources.reserve(rankTargets.size());
