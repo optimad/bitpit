@@ -4936,22 +4936,24 @@ namespace bitpit {
                 bool isFacePbound = false;
                 if(octant.getBound(i) == false){
                     octant.computeFaceVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
-                    uint32_t maxDelta = nVirtualNeighbors/2;
-                    for(uint32_t j = 0; j <= maxDelta; ++j){
-                        int neighProcFirst = findOwner(virtualNeighbors[j]);
-                        if (neighProcFirst != m_rank) {
-                            neighProcs.insert(neighProcFirst);
-                            isFacePbound = true;
-                        }
+                    if (nVirtualNeighbors > 0) {
+                        uint32_t maxDelta = nVirtualNeighbors/2;
+                        for(uint32_t j = 0; j <= maxDelta; ++j){
+                            int neighProcFirst = findOwner(virtualNeighbors[j]);
+                            if (neighProcFirst != m_rank) {
+                                neighProcs.insert(neighProcFirst);
+                                isFacePbound = true;
+                            }
 
-                        int neighProcLast = findOwner(virtualNeighbors[nVirtualNeighbors - 1 - j]);
-                        if (neighProcLast != m_rank) {
-                            neighProcs.insert(neighProcLast);
-                            isFacePbound = true;
-                        }
+                            int neighProcLast = findOwner(virtualNeighbors[nVirtualNeighbors - 1 - j]);
+                            if (neighProcLast != m_rank) {
+                                neighProcs.insert(neighProcLast);
+                                isFacePbound = true;
+                            }
 
-                        //					//TODO debug
-                        //					if (abs(pBegin-pEnd) <= 1) j = maxDelta + 1;
+                            //					//TODO debug
+                            //					if (abs(pBegin-pEnd) <= 1) j = maxDelta + 1;
+                        }
                     }
                 }
                 else if(m_periodic[i]){
