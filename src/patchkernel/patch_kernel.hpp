@@ -640,9 +640,6 @@ public:
 	void consecutiveRenumber(long offsetVertices, long offsetCells, long offsetInterfaces);
 
 #if BITPIT_ENABLE_MPI==1
-	virtual void setCommunicator(MPI_Comm communicator);
-	void freeCommunicator();
-	bool isCommunicatorSet() const;
 	const MPI_Comm & getCommunicator() const;
 	int getRank() const;
 	int getProcessorCount() const;
@@ -739,6 +736,11 @@ protected:
 	void setBoundingBoxFrozen(bool frozen);
 	void setBoundingBoxDirty(bool dirty);
 	void setBoundingBox(const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint);
+
+#if BITPIT_ENABLE_MPI==1
+	bool isCommunicatorSet() const;
+	virtual void setCommunicator(MPI_Comm communicator);
+#endif
 
 #if BITPIT_ENABLE_MPI==1
 	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id);
@@ -978,6 +980,8 @@ private:
 	void initialize(MPI_Comm communicator, std::size_t haloSize);
 	void initializeHaloSize(std::size_t haloSize);
 	void initializeCommunicator(MPI_Comm communicator);
+
+	void freeCommunicator();
 #else
 	void initialize();
 #endif
