@@ -4680,87 +4680,73 @@ namespace bitpit {
      */
     void
     ParaTree::computePartition(const dvector *weight, uint32_t *partition){
-        if(m_serial){
 
-            double division_result = 0;
-            double global_weight = 0.0;
-            for (unsigned int i=0; i<weight->size(); i++){
-                global_weight += (*weight)[i];
-            }
-            division_result = global_weight/(double)m_nproc;
+        assert(weight->size() >= m_octree.m_sizeOctants);
 
-            //Estimate resulting weight distribution starting from proc 0 (sending tail)
-            //Estimate sending weight by each proc in initial conf (sending tail)
-            uint32_t i = 0, tot = 0;
-            int iproc = 0;
-            while (iproc < m_nproc-1){
-                double partial_weight = 0.0;
-                partition[iproc] = 0;
-                while(partial_weight < division_result){
-                    partial_weight += (*weight)[i];
-                    tot++;
-                    partition[iproc]++;
-                    i++;
-                }
-                iproc++;
+        // Evaluate global weights
+        //
+        // If the tree is serial, all process have all the octants, hence
+        // global weights and local weights are the same.
+        std::vector<double> globalWeightsStorage;
+
+        const double *globalWeights;
+        if (m_serial) {
+            globalWeights = weight->data();
+        } else {
+            // Information about current partitioning and displacements should
+            // be stored using uint32_t, however the maximum number of items
+            // that can be exchanged using MPI funcitons is limited to INT_MAX.
+            assert(m_globalNumOctants <= INT_MAX);
+            std::vector<int> currentPartition(m_nproc);
+            MPI_Allgather(&(m_octree.m_sizeOctants), 1, MPI_INT, currentPartition.data(), 1, MPI_INT, m_comm);
+
+            std::vector<int> displacements(m_nproc);
+            displacements[0] = 0;
+            for(int i = 1; i < m_nproc; ++i){
+                displacements[i] = displacements[i - 1] + currentPartition[i - 1];
             }
-            partition[m_nproc-1] = weight->size() - tot;
+
+            globalWeightsStorage.resize(m_globalNumOctants);
+            globalWeights = globalWeightsStorage.data();
+            MPI_Allgatherv(weight->data(), m_octree.m_sizeOctants, MPI_DOUBLE, globalWeightsStorage.data(),
+                           currentPartition.data(), displacements.data(), MPI_DOUBLE, m_comm);
         }
-        else{
 
-            int weightSize = weight->size();
-            double* gweight;
-            double* lweight = new double[weightSize];
-
-            for (unsigned int i=0; i<weight->size(); i++){
-                lweight[i] = (*weight)[i];
-            }
-
-            int *oldpartition = new int[m_nproc];
-            int *displays = new int[m_nproc];
-            MPI_Allgather(&weightSize,1,MPI_INT,oldpartition,1,MPI_INT,m_comm);
-            int globalNofOctant = 0;
-            for(int i = 0; i < m_nproc; ++i){
-                displays[i] = globalNofOctant;
-                globalNofOctant += oldpartition[i];
-            }
-            gweight = new double[globalNofOctant];
-            MPI_Allgatherv(lweight,weightSize,MPI_DOUBLE,gweight,oldpartition,displays,MPI_DOUBLE,m_comm);
-
-            double division_result = 0;
-            double global_weight = 0.0;
-            for (int i=0; i<globalNofOctant; i++){
-                global_weight += gweight[i];
-            }
-            division_result = global_weight/(double)m_nproc;
-
-            //Estimate resulting weight distribution starting from proc 0 (sending tail)
-            //Estimate sending weight by each proc in initial conf (sending tail)
-            uint32_t i = 0, tot = 0;
-            int iproc = 0;
-            while (iproc < m_nproc-1){
-                double partial_weight = 0.0;
-                partition[iproc] = 0;
-                while(partial_weight < division_result && (int32_t) i < globalNofOctant){
-                    partial_weight += gweight[i];
-                    tot++;
-                    partition[iproc]++;
-                    i++;
-                }
-                global_weight = 0;
-                for(int j = i; j < globalNofOctant; ++j)
-                    global_weight += gweight[j];
-                division_result = global_weight/double(m_nproc-(iproc+1));
-                iproc++;
-            }
-            partition[m_nproc-1] = globalNofOctant - tot;
-
-            delete [] oldpartition;
-            delete [] displays;
-            delete [] lweight;
-            delete [] gweight;
-
+        // Initialize partitioning
+        for (int i = 0; i < m_nproc; ++i) {
+            partition[i] = 0;
         }
+
+        // Assign octants to partitions
+        //
+        // After evaluationg the target weight of a partition, octants will
+        // be added to that partition until the weigth of the partition is
+        // greater or equal the target weigth or until all the octant are
+        // assigned
+        uint32_t nAssigendOctants = 0;
+        for (int i = 0; i < m_nproc - 1; ++i) {
+            double unassignedWeight = 0.;
+            for (uint32_t n=nAssigendOctants; n<m_globalNumOctants; n++){
+                unassignedWeight += globalWeights[n];
+            }
+            double targetWeight = unassignedWeight / (m_nproc - i);
+
+            double partitionWeight = 0.;
+            while(partitionWeight < targetWeight){
+                partitionWeight += globalWeights[nAssigendOctants];
+                partition[i]++;
+
+                nAssigendOctants++;
+                if (nAssigendOctants == m_globalNumOctants) {
+                    break;
+                }
+            }
+
+            if (nAssigendOctants == m_globalNumOctants) {
+                    break;
+            }
+        }
+        partition[m_nproc-1] = m_globalNumOctants - nAssigendOctants;
     };
 
     /*! Compute the partition of the octree over the processes (only compute the information about
