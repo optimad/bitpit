@@ -121,7 +121,7 @@ void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize()
         break;
     }
 
-    assert(m_blockSize == -1);
+    assert(m_blockSize != -1);
 
 #ifdef DEBUG
     // All weight sizes should match
