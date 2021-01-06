@@ -857,6 +857,8 @@ protected:
 	template<typename item_t, typename id_t = long>
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 
+	int findAdjoinNeighFace(long cellId, long neighId) const;
+
 private:
 	IndexGenerator<long> m_vertexIdGenerator;
 	IndexGenerator<long> m_interfaceIdGenerator;
@@ -972,8 +974,6 @@ private:
 	void finalizeAlterations(bool squeezeStorage = false);
 
 	InterfaceIterator buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
-
-	int findAdjoinNeighFace(long cellId, long neighId) const;
 
 	void setId(int id);
 
