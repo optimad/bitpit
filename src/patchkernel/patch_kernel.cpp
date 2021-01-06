@@ -5413,12 +5413,12 @@ void PatchKernel::_updateInterfaces()
 	//
 	// Update interfaces
 	//
-	// Adjacencies and interfaces are paired: the i-th adjacency correspondes
-	// to the i-th interface. Moreover if we loop through the adjacencies of
-	// a face, the adjacencies that have an interface are always listed first.
-	// This meas that, to update the interfaces, we can count the interfaces
-	// already associated to a face and loop only on the adjacencies which
-	// have an index past the one of the last interface.
+	// Adjacencies and interfaces of a face are paired: the i-th face adjacency
+	// corresponds to the i-th face interface. Moreover if we loop through the
+	// adjacencies of a face, the adjacencies that have an interface are always
+	// listed first. This meas that, to update the interfaces, we can count the
+	// interfaces already associated to a face and loop only on the adjacencies
+	// which have an index past the one of the last interface.
 	//
 	// On border faces of internal cells we need to build an interface, also
 	// if there are no adjacencies.
