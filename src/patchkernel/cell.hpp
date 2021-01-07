@@ -73,6 +73,7 @@ public:
 	void deleteInterfaces();
 	void resetInterfaces(bool storeInterfaces = true);
 	void setInterfaces(const std::vector<std::vector<long>> &interfaces);
+	void setInterfaces(FlatVector2D<long> &&interfaces);
 	void setInterface(int face, int index, long interface);
 	void pushInterface(int face, long interface);
 	void deleteInterface(int face, int i);

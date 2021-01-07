@@ -345,6 +345,22 @@ void Cell::setInterfaces(const std::vector<std::vector<long>> &interfaces)
 }
 
 /*!
+	Sets all the interfaces of the cell.
+
+	\param interfaces the list of all interfaces associated to the cell
+*/
+void Cell::setInterfaces(FlatVector2D<long> &&interfaces)
+{
+	if (getType() == ElementType::UNDEFINED) {
+	    return;
+	}
+
+	assert(m_interfaces.size() == getFaceCount());
+	assert(interfaces.size() == getFaceCount());
+	m_interfaces.swap(interfaces);
+}
+
+/*!
 	Sets the i-th interface associated the the given face of the cell.
 
 	\param face the face of the cell
