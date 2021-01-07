@@ -72,7 +72,7 @@ public:
 	
 	void deleteInterfaces();
 	void resetInterfaces(bool storeInterfaces = true);
-	void setInterfaces(std::vector<std::vector<long>> &interfaces);
+	void setInterfaces(const std::vector<std::vector<long>> &interfaces);
 	void setInterface(int face, int index, long interface);
 	void pushInterface(int face, long interface);
 	void deleteInterface(int face, int i);
@@ -88,7 +88,7 @@ public:
 
 	void deleteAdjacencies();
 	void resetAdjacencies(bool storeAdjacencies = true);
-	void setAdjacencies(std::vector<std::vector<long>> &adjacencies);
+	void setAdjacencies(const std::vector<std::vector<long>> &adjacencies);
 	void setAdjacency(int face, int index, long adjacencies);
 	void pushAdjacency(int face, long adjacency);
 	void deleteAdjacency(int face, int i);

@@ -333,7 +333,7 @@ void Cell::resetInterfaces(bool storeInterfaces)
 
 	\param interfaces the list of all interfaces associated to the cell
 */
-void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
+void Cell::setInterfaces(const std::vector<std::vector<long>> &interfaces)
 {
 	if (getType() == ElementType::UNDEFINED) {
 	    return;
@@ -562,7 +562,7 @@ void Cell::resetAdjacencies(bool storeAdjacencies)
 
 	\param adjacencies the list of all adjacencies associated to the cell
 */
-void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
+void Cell::setAdjacencies(const std::vector<std::vector<long>> &adjacencies)
 {
 	if (getType() == ElementType::UNDEFINED) {
 	    return;
