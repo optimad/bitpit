@@ -1013,141 +1013,119 @@ bool SurfaceKernel::sameOrientationAtInterface(long id)
  */
 void SurfaceKernel::flipCellOrientation(long id)
 {
-    int top, end;
-    auto &cell = getCell(id);
+    // Cell information
+    Cell &cell = getCell(id);
 
     //
-    // In order to flip the orientation of cell,
-    // the connectivity will be inverted
+    // Flip connectivity
     //
+    // In order to flip cell orientation, we need to reverse the order of
+    // the vertices:
+    //
+    //  Vertices             0     1     2     3     4
+    //
+    //  Flipped vertices     4     3     2     1     0
+    //
+    //  This means we have to invert the connectivity of the cell.
     int nCellVertices = cell.getVertexCount();
-    const long *cellConnect = cell.getConnect();
-    std::unique_ptr<long[]> newCellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
-    for (int j = 0; j < nCellVertices; ++j) {
-        newCellConnect[j] = cellConnect[j];
-    }
-
-    top = 0;
-    end = nCellVertices - 1;
-    for (int j = 0; j < (int) std::floor(nCellVertices/2); ++j) {
-        std::swap(newCellConnect[top], newCellConnect[end]);
-        ++top;
-        --end;
+    long *cellConnect = cell.getConnect();
+    for (int i = 0; i < (int) std::floor(nCellVertices / 2); ++i) {
+        std::swap(cellConnect[i], cellConnect[nCellVertices - i - 1]);
     }
 
     //
-    // The numbering of the adjacencies and interfaces must be 
-    // changed according the new connectivity. This implies that
-    // all numbering must be inverted, but the last entry of the
-    // adjacencies and interfaces. Since both adjacencies and
-    // interfaces are grouped by faces, in a second step each
-    // ordering within a face must be inverted
+    // Flip adjacencies and interfaces
     //
-    int faceCount = cell.getFaceCount();
-    std::vector<std::vector<long>> newAdjacency, newInterface;
-    newAdjacency.resize(faceCount);
-    newInterface.resize(faceCount);
-
-    // Copy original ordering in newAdjacency and newInterface
+    // Adjacencies and interfaces are associated with the faces of the cells,
+    // since we have flipped the connectivity we need to flip also adjacencies
+    // and interfaces.
     //
-    for (int f = 0; f < faceCount; ++f) {
-        // Adjacencies
-        std::vector<long> &faceAdjacencies = newAdjacency[f];
+    // For two-dimensional elements faces are defined between two vertices:
+    //
+    //  Vertices             0     1     2     3     4
+    //  Faces                   0     1     2     3     4
+    //
+    //  Flipped vertices     4     3     2     1     0
+    //  Flipped faces           3     2     1     0     4
+    //
+    // We have reversed the order of the vertices, this means that we have
+    // to invert the order of all the faces but the lust one.
+    //
+    // For one-dimensional elements faces are defined on the vertices itself:
+    //
+    //  Vertices             0     1
+    //  Faces                0     1
+    //
+    //  Flipped vertices     1     0
+    //  Flipped faces        1     0
+    //
+    // We have reversed the order of the vertices, this means that we have
+    // to invert the order of all the faces.
+    int nCellFaces = cell.getFaceCount();
+    int nCellAdjacencies = cell.getAdjacencyCount();
+    int nCellInterfaces = cell.getInterfaceCount();
 
-        int nCellAdjacencies = cell.getAdjacencyCount(f);
-        const long *cellAdjacencies = cell.getAdjacencies(f);
-
-        faceAdjacencies.resize(nCellAdjacencies);
-        for (int j = 0; j < nCellAdjacencies; ++j) {
-            faceAdjacencies[j] = cellAdjacencies[j];
-        }
-
-        // Interfaces
-        std::vector<long> &faceInterfaces = newInterface[f];
-
-        int nCellInterfaces = cell.getInterfaceCount(f);
-        const long *cellInterfaces = cell.getInterfaces(f);
-
-        faceInterfaces.resize(nCellInterfaces);
-        for (int j = 0; j < nCellInterfaces; ++j) {
-            faceInterfaces[j] = cellInterfaces[j];
-        }
+    int flipOffset;
+    if (cell.getDimension() == 1) {
+        flipOffset = 0;
+    } else {
+        flipOffset = 1;
     }
 
-    //
-    // Invert entire face based ordering but tha last entry
-    //
-    top = 0;
-    end = faceCount - 2;
-    for (int f = 0; f < std::max(1, (int) std::floor((faceCount - 1) / 2)); ++f) {
-        std::swap(newAdjacency[top], newAdjacency[end]);
-        std::swap(newInterface[top], newInterface[end]);
-        ++top;
-        --end;
+    FlatVector2D<long> flippedCellAdjacencies;
+    FlatVector2D<long> flippedCellInterfaces;
+    flippedCellAdjacencies.reserve(nCellFaces, nCellAdjacencies);
+    flippedCellInterfaces.reserve(nCellFaces, nCellInterfaces);
+
+    for (int i = 0; i < nCellFaces - flipOffset; ++i) {
+        int nFaceAdjacencies = cell.getAdjacencyCount(nCellFaces - i - 1 - flipOffset);
+        const long *faceAdjacencies = cell.getAdjacencies(nCellFaces - i - 1 - flipOffset);
+        flippedCellAdjacencies.pushBack(nFaceAdjacencies, faceAdjacencies);
+
+        int nFaceInterfaces = cell.getInterfaceCount(nCellFaces - i - 1 - flipOffset);
+        const long *faceInterfaces = cell.getInterfaces(nCellFaces - i - 1 - flipOffset);
+        flippedCellInterfaces.pushBack(nFaceInterfaces, faceInterfaces);
     }
 
-    //
-    // Invert all enties within one face
-    //
-    for (int f = 0; f < faceCount; ++f) {
-        // Adjacencies
-        std::vector<long> &faceAdjacencies =newAdjacency[f];
-        int nFaceAdjacencies = faceAdjacencies.size();
+    if (flipOffset == 1) {
+        int nLastFaceAdjacencies = cell.getAdjacencyCount(nCellFaces - 1);
+        const long *lastFaceAdjacencies = cell.getAdjacencies(nCellFaces - 1);
+        flippedCellAdjacencies.pushBack(nLastFaceAdjacencies, lastFaceAdjacencies);
 
-        top = 0;
-        end = nFaceAdjacencies - 1;
-        for (int j = 0; j<(int) std::floor(nFaceAdjacencies / 2); ++j) {
-            std::swap(faceAdjacencies[top], faceAdjacencies[end]);
-            ++top;
-            --end;
-        }
-
-        // Interfaces
-        std::vector<long> &faceInterfaces =newInterface[f];
-        int nFaceInterfaces = faceInterfaces.size();
-
-        top = 0;
-        end = nFaceInterfaces - 1;
-        for (int j = 0; j<(int) std::floor(nFaceInterfaces / 2); ++j) {
-            std::swap(faceInterfaces[top], faceInterfaces[end]);
-            ++top;
-            --end;
-        }
+        int nLastFaceInterfaces = cell.getInterfaceCount(nCellFaces - 1);
+        const long *lastFaceInterfaces = cell.getInterfaces(nCellFaces - 1);
+        flippedCellInterfaces.pushBack(nLastFaceInterfaces, lastFaceInterfaces);
     }
 
-    cell.setConnect(std::move(newCellConnect));
-
-    if (newAdjacency[0].size() != 0) {
-        cell.setAdjacencies(newAdjacency);
+    // Set flipped adjacencies
+    if (nCellAdjacencies > 0) {
+        cell.setAdjacencies(std::move(flippedCellAdjacencies));
     }
 
-    if (newInterface[0].size() != 0) {
-        cell.setInterfaces(newInterface);
+    // Set flipped interfaces
+    //
+    // After setting the flipped interfaces, we also need to update the face
+    // associated with the interfaces.
+    if (nCellInterfaces > 0) {
+        cell.setInterfaces(std::move(flippedCellInterfaces));
 
-        //
-        // For the interfaces, we need to correct either
-        // ownerFace or neighFace, respectivly.
-        //
-        const long* intPtr = cell.getInterfaces(); 
-        int interfaceCount = cell.getInterfaceCount();
-        for (int i=0; i<interfaceCount; ++i) {
-            long interfaceId = intPtr[i];
-            if (interfaceId < 0) {
-                continue;
-            }
+        const long *cellInterfaces = cell.getInterfaces();
+        int nCellInterfaces = cell.getInterfaceCount();
+        for (int i = 0; i < nCellInterfaces; ++i) {
+            long interfaceId = cellInterfaces[i];
+            Interface &interface = getInterface(interfaceId);
 
-            Interface &interface=getInterface(interfaceId);
             long owner = interface.getOwner();
             if (owner == id) {
                 int ownerFace = interface.getOwnerFace();
-                if (ownerFace != faceCount - 1) {
-                    ownerFace = faceCount - 2 - ownerFace;
-                    interface.setOwner(id,ownerFace);
+                if (ownerFace != nCellFaces - 1) {
+                    ownerFace = nCellFaces - 2 - ownerFace;
+                    interface.setOwner(id, ownerFace);
                 }
             } else {
                 int neighFace = interface.getNeighFace();
-                if (neighFace != faceCount - 1) {
-                    neighFace = faceCount - 2 - neighFace;
+                if (neighFace != nCellFaces - 1) {
+                    neighFace = nCellFaces - 2 - neighFace;
                     interface.setNeigh(id,neighFace);
                 }
             }
