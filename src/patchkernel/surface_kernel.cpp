@@ -859,37 +859,43 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
             visited.insert(cellId);
 
             const auto &cell = getCell(cellId);
-            const long *adjacencyIds = cell.getAdjacencies();
-            const long *interfaceIds = cell.getInterfaces();
-            const int nAdjacencies = cell.getAdjacencyCount();
-
-            for (int i = 0; i < nAdjacencies; ++i) {
-                const long neighId = adjacencyIds[i];
-
+            int nCellFaces = cell.getFaceCount();
+            for (int face = 0; face < nCellFaces; ++face) {
+                int nFaceAdjacencies = cell.getAdjacencyCount(face);
+                const long *faceAdjacencies = cell.getAdjacencies(face);
+                for (int i = 0; i < nFaceAdjacencies; ++i) {
+                    long neighId = faceAdjacencies[i];
 #if BITPIT_ENABLE_MPI==1
-                if (ghostExchangeNeeded) {
-                    const auto &neigh = getCell(neighId);
-                    if (!neigh.isInterior()) {
-                        continue;
-                    }
-                }
-#endif
-
-                bool isNeighOriented = sameOrientationAtInterface(interfaceIds[i]);
-                if (visited.count(neighId) == 0) {
-                    if (!isNeighOriented) {
-                        flipCellOrientation(neighId);
-#if BITPIT_ENABLE_MPI==1
-                        if (ghostExchangeNeeded) {
-                            flipped.insert(neighId);
+                    if (ghostExchangeNeeded) {
+                        const auto &neigh = getCell(neighId);
+                        if (!neigh.isInterior()) {
+                            continue;
                         }
+                    }
 #endif
+
+                    int neighFace = findAdjoinNeighFace(cellId, face, neighId);
+
+                    bool isNeighOriented = haveSameOrientation(cellId, face, neighId, neighFace);
+                    if (visited.count(neighId) == 0) {
+                        if (!isNeighOriented) {
+                            flipCellOrientation(neighId);
+#if BITPIT_ENABLE_MPI==1
+                            if (ghostExchangeNeeded) {
+                                flipped.insert(neighId);
+                            }
+#endif
+                        }
+
+                        toVisit.insert(neighId);
+                    } else if (!isNeighOriented) {
+                        orientable = false;
+                        break;
                     }
 
-                    toVisit.insert(neighId);
-                } else if (!isNeighOriented) {
-                    orientable = false;
-                    break;
+                    if (!orientable) {
+                        break;
+                    }
                 }
             }
         }
@@ -961,49 +967,163 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
 }
 
 /*!
- * Check if the cells sharing an interface have the same orientation.
+ * Check if the specified facets have the same orientation.
  *
- * Two cells have the same orientation, if the two cell connectivity vectors
- * cycle through the common interface with opposite order.
+ * The functions assumes that the specified facets share (at least partially)
+ * a face, however it's up to the caller make sure this assumption is valid.
  *
- * \param[in] id is the id of the interface
- * \return Returns true if the cells sharing an interface have the same
- * orientation.
- */
-bool SurfaceKernel::sameOrientationAtInterface(long id)
+ *  This guarantees  that is possible  are either coincident
+ * (conformal faces), or lay on the same plane and one face contains the
+ * other (non-conformal faces).
+ *
+ * If the faces share at least two vertices, it is possible to detect their
+ * relative orientation only checking the order of the vertices, otherwise
+ * is is necessary to evaluate the normals.
+ *
+ * \param[in] cellId_A is the index of the first cell
+ * \param[in] cellFace_A is the face on the first cell
+ * \param[in] cellId_B is the index of the second cell
+ * \param[in] cellFace_B is the face on the second cell
+ * \result Returns true if the two facets have the same orientation, false
+ * otherwise.
+*/
+bool SurfaceKernel::haveSameOrientation(long cellId_A, int cellFace_A, long cellId_B, int cellFace_B) const
 {
-    const auto &face = getInterface(id);
-    if (face.isBorder()) {
-        return true;
+    //
+    // Cell information
+    //
+    const Cell &cell_A = getCell(cellId_A);
+    ConstProxyVector<long> cellVertexIds_A = cell_A.getVertexIds();
+    std::size_t nCellVertices_A = cellVertexIds_A.size();
+
+    const Cell &cell_B = getCell(cellId_B);
+    ConstProxyVector<long> cellVertexIds_B = cell_B.getVertexIds();
+    std::size_t nCellVertices_B = cellVertexIds_B.size();
+
+    assert(cell_A.getDimension() == cell_B.getDimension());
+    int cellDimension = cell_A.getDimension();
+    assert(cellDimension < 3);
+
+    //
+    // Check relative orientation using vertices
+    //
+
+    // If the facets share at least two consecutive vertices, it is possible
+    // to detect relative orientation checking the order in which these two
+    // vertices appear while traversing the list of vertices of the facets.
+    // If the vertices appear in the same order, the facets have opposite
+    // orientation, if the vertices appear in reversed order, the facets have
+    // the same orientation.
+    for (std::size_t i = 0; i < nCellVertices_A; ++i) {
+        long vertexId_A = cellVertexIds_A[i];
+        for (std::size_t j = 0; j < nCellVertices_B; ++j) {
+            long vertexId_B = cellVertexIds_B[j];
+            if (vertexId_A == vertexId_B) {
+                if (cellDimension == 2) {
+                    long previousVertexId_A = cellVertexIds_A[(i - 1 + nCellVertices_A) % nCellVertices_A];
+                    long previousVertexId_B = cellVertexIds_B[(j - 1 + nCellVertices_B) % nCellVertices_B];
+
+                    long nextVertexId_A = cellVertexIds_A[(i + 1) % nCellVertices_A];
+                    long nextVertexId_B = cellVertexIds_B[(j + 1) % nCellVertices_B];
+
+                    if (nextVertexId_A == nextVertexId_B || previousVertexId_A == previousVertexId_B) {
+                        return false;
+                    } else if (nextVertexId_A == previousVertexId_B || previousVertexId_A == nextVertexId_B) {
+                        return true;
+                    }
+                } else if (cellDimension == 1) {
+                    return (i != j);
+                } else {
+                    throw std::runtime_error("Unable to identify if the factes has the same orientation.");
+                }
+            }
+        }
     }
 
-    const long ownerId = face.getOwner();
-    const auto &owner = getCell(ownerId);
+    //
+    // Check relative orientation using facet normals
+    //
 
-    const long neighId = face.getNeigh();
-    const auto &neigh = getCell(neighId);
+    // The faces doesn't have enough common vertices to check the orientation
+    // using topological checks, we need a geometric check. Starting from the
+    // first vertex of the face, we identify three non-collinear vertices and
+    // we detect their winding. The two facets have the same orientation if
+    // they have the same winding.
+    //
+    // To detect the winding of the vertices, we evaluate the normal of the
+    // plane defined by the vertices and then we calculate the projection of
+    // that vector along a direction (called winding direction) which is
+    // chosen equal for both the cells. The sign of the projection defines
+    // the winding of the vertices. We don't care if the winding of a single
+    // cell is clockwise or counter-clockwise, all we care about is if the
+    // two cells have the same winding.
 
-    if (face.getType() == ElementType::VERTEX) {
-        ConstProxyVector<long> ownerVertexIds = owner.getVertexIds();
-        ConstProxyVector<long> neighVertexIds = neigh.getVertexIds();
-        if (ownerVertexIds[0] == neighVertexIds[0] || ownerVertexIds[1] == neighVertexIds[1]) {
-            return false;
+    // Pseudo normal directions
+    //
+    // For each face, we identify three non-collinear vertices and we evaluate
+    // the normal direction of the plane defined by those three vertices.
+    std::size_t nMaxCellVertices = std::max(nCellVertices_A, nCellVertices_B);
+    BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nMaxCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+
+    ConstProxyVector<int> faceLocalVertexIds_A = cell_A.getFaceLocalVertexIds(cellFace_A);
+    ConstProxyVector<int> faceLocalVertexIds_B = cell_B.getFaceLocalVertexIds(cellFace_B);
+
+    std::array<double, 3> pseudoNormal_A;
+    std::array<double, 3> pseudoNormal_B;
+    for (int i = 0; i < 2; ++i) {
+        std::array<double, 3> *pseudoNormal;
+        long firstFaceVertexLocalId;
+        std::size_t nCellVertices;
+        if (i == 0) {
+            pseudoNormal = &pseudoNormal_A;
+            firstFaceVertexLocalId = faceLocalVertexIds_A[0];
+            nCellVertices = nCellVertices_A;
+            getCellVertexCoordinates(cellId_A, vertexCoordinates);
+        } else {
+            pseudoNormal = &pseudoNormal_B;
+            firstFaceVertexLocalId = faceLocalVertexIds_B[0];
+            nCellVertices = nCellVertices_B;
+            getCellVertexCoordinates(cellId_B, vertexCoordinates);
         }
-    } else if (face.getType() == ElementType::LINE) {
-        const int ownerFace = face.getOwnerFace();
-        ConstProxyVector<long> ownerVertexIds = owner.getFaceVertexIds(ownerFace);
+        assert(nCellVertices >= 3);
 
-        const int neighFace = face.getNeighFace();
-        ConstProxyVector<long> neighVertexIds = neigh.getFaceVertexIds(neighFace);
+        const std::array<double, 3> &V_0 = vertexCoordinates[(firstFaceVertexLocalId + 0) % nCellVertices];
+        const std::array<double, 3> &V_1 = vertexCoordinates[(firstFaceVertexLocalId + 1) % nCellVertices];
+        for (std::size_t k = 2; k < nCellVertices; ++k) {
+            const std::array<double, 3> &V_2 = vertexCoordinates[(firstFaceVertexLocalId + k) % nCellVertices];
 
-        if (ownerVertexIds[0] != neighVertexIds[1] || ownerVertexIds[1] != neighVertexIds[0]) {
-            return false;
+            *pseudoNormal = crossProduct(V_0 - V_1, V_2 - V_1);
+            if (!utils::DoubleFloatingEqual()(norm2(*pseudoNormal), 0.)) {
+                break;
+            } else if (k == (nCellVertices - 1)) {
+                throw std::runtime_error("Unable to identify the non-collinear vertices.");
+            }
         }
-    } else {
-        throw std::runtime_error ("Type of element not supported in SurfaceKernel");
     }
 
-    return true;
+    // Direction for evaluating the winding
+    //
+    // This direction has to be the same for both the cells and should not be
+    // perpendicular to the pseudo normals.
+    std::array<double, 3> windingDirection = {{0., 0., 1.}};
+    for (int d = 2; d <= 0; --d) {
+        windingDirection = {{0., 0., 0.}};
+        windingDirection[d] = 1.;
+
+        double pseudNormalProjection_A = dotProduct(pseudoNormal_A, windingDirection);
+        double pseudNormalProjection_B = dotProduct(pseudoNormal_B, windingDirection);
+        if (!utils::DoubleFloatingEqual()(pseudNormalProjection_A, 0.) && !utils::DoubleFloatingEqual()(pseudNormalProjection_B, 0.)) {
+            break;
+        } else if (d == 0) {
+            throw std::runtime_error("Unable to identify the relative orientation of the cells.");
+        }
+    }
+
+    // Identify the winding of the cells
+    int cellWinding_A = (dotProduct(pseudoNormal_A, windingDirection) > 0.);
+    int cellWinding_B = (dotProduct(pseudoNormal_B, windingDirection) > 0.);
+
+    return (cellWinding_A == cellWinding_B);
 }
 
 /*!
