@@ -88,7 +88,7 @@ SurfUnstructured                mesh(2, 3);
     // none
 
     // Set name ------- ----------------------------------------------------- //
-    mesh.getVTK().setName("surfunstructured_partition");
+    mesh.getVTK().setName("test_surfunstructured_parallel_00003_subtest_001");
 
     // Set communicator ----------------------------------------------------- //
     mesh.setCommunicator(MPI_COMM_WORLD);
@@ -242,6 +242,204 @@ return 0;
 }
 
 // ========================================================================== //
+// SUBTEST #002 Test surface orientation                                      //
+// ========================================================================== //
+int subtest_002(
+    void
+) {
+
+// ========================================================================== //
+// int subtest_002(                                                           //
+//     void)                                                                  //
+//                                                                            //
+// Test mesh orientation                                                      //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err       : int, error flag:                                             //
+//               err = 0  --> no error(s)                                     //
+//               err = 1  --> error at step #1 (import STL)                   //
+//               err = 2  --> error at step #2 (mesh partition)               //
+//               err = 3  --> error at step #3 (mesh orientation)             //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+string                          in_name_bin = "./data/disc.stl";
+SurfUnstructured                mesh(2, 3);
+
+// Counters
+// none
+
+// ========================================================================== //
+// INITIALIZE MESH PARAMETERS                                                 //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Set name ------- ----------------------------------------------------- //
+    mesh.getVTK().setName("test_surfunstructured_parallel_00003_subtest_002");
+
+    // Set communicator ----------------------------------------------------- //
+    mesh.setCommunicator(MPI_COMM_WORLD);
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+{
+    // Scope variables
+    // none
+
+    // Output message
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Sub-test #002 - Orientation surface                               **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
+}
+
+// ========================================================================== //
+// STEP #1 (IMPORT MESH FROM BINARY STL AND FLIP EVERY 4TH TRIANGLE)          //
+// ========================================================================== //
+int myRank = mesh.getRank();
+if (myRank == 0) {
+    // Scope variables ------------------------------------------------------ //
+    // None
+
+    // Import mesh from stl format ------------------------------------------ //
+    log::cout() << "** Importing mesh from (ASCII): \"" << in_name_bin << "\"" << endl;
+    if (mesh.importSTL(in_name_bin, false) != 0) return 1;
+    mesh.collapseCoincidentVertices();
+}
+
+{
+    // Scope variables ------------------------------------------------------ //
+    // None
+
+    //  Build adjacencies --------------------------------------------------- //
+    mesh.initializeAdjacencies();
+}
+
+if (myRank == 0) {
+    // Scope variables ------------------------------------------------------ //
+    // None
+
+    // Mess-up the orientation ---------------------------------------------- //
+    for (const auto &cell : mesh.getCells()) {
+        if (!cell.isInterior()) {
+            continue;
+        }
+
+        long cellId = cell.getId();
+        if (cellId % 4 == 0) {
+            mesh.flipCellOrientation(cellId);
+        }
+    }
+}
+
+// ========================================================================== //
+// STEP #2 (PARTITION THE MESH)                                               //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    long nCells = mesh.getCellCount();
+
+    int nProcs;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+
+    // Evaluation of baricenter ----------------------------------------------//
+    std::array<double, 3> baricenter = {{0, 0, 0}};
+    for (const auto &cell : mesh.getCells()) {
+        baricenter += mesh.evalCellCentroid(cell.getId());
+    }
+    baricenter = baricenter / ((double) nCells);
+
+    // Partitioning ----------------------------------------------------------//
+    log::cout() << "** Mesh partitioning" << endl;
+
+    std::unordered_map<long, int> cellRanks;
+    if (myRank == 0) {
+        for (const auto &cell : mesh.getCells()) {
+            int side_x = (mesh.evalCellCentroid(cell.getId())[0] > baricenter[0]) ? 0 : 1;
+            int side_y = (mesh.evalCellCentroid(cell.getId())[1] > baricenter[1]) ? 0 : 1;
+            int side_z = (mesh.evalCellCentroid(cell.getId())[2] > baricenter[2]) ? 0 : 1;
+
+            int rank = -1;
+            if (side_z == 0 && side_y == 0 && side_x == 0) {
+                rank = 0;
+            } else if (side_z == 0 && side_y == 0 && side_x == 1) {
+                rank = 1;
+            } else if (side_z == 0 && side_y == 1 && side_x == 0) {
+                rank = 2;
+            } else if (side_z == 0 && side_y == 1 && side_x == 1) {
+                rank = 3;
+            } else if (side_z == 1 && side_y == 0 && side_x == 0) {
+                rank = 4;
+            } else if (side_z == 1 && side_y == 0 && side_x == 1) {
+                rank = 5;
+            } else if (side_z == 1 && side_y == 1 && side_x == 0) {
+                rank = 6;
+            } else if (side_z == 1 && side_y == 1 && side_x == 1) {
+                rank = 7;
+            }
+            rank = rank % nProcs;
+
+            cellRanks[cell.getId()] = rank;
+        }
+    }
+
+    mesh.partition(cellRanks, false);
+
+}
+
+// ========================================================================== //
+// STEP #3 (ADJUST ORIENTATION)                                               //
+// ========================================================================== //
+{
+    // Adjust orientation --------------------------------------------------- //
+    log::cout() << "** Mesh adjust orientation" << endl;
+    bool orientable = mesh.adjustCellOrientation();
+    if (orientable) {
+        log::cout() << "   Mesh successfully oriented" << endl;
+    } else {
+        log::cout() << "   Error during surface orientation" << endl;
+    }
+
+    // Write mesh ----------------------------------------------------------- //
+    log::cout() << "** Writing mesh" << endl;
+    mesh.write();
+
+    // Output message ------------------------------------------------------- //
+    log::cout() << "** Mesh partitioning" << endl;
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+{
+    // Scope variables
+    // none
+
+    // Output message
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Sub-test #002 - completed!                                        **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
+}
+
+return 0;
+
+}
+
+// ========================================================================== //
 // MAIN                                                                       //
 // ========================================================================== //
 int main(int argc, char *argv[])
@@ -276,6 +474,11 @@ int main(int argc, char *argv[])
         status = subtest_001();
         if (status != 0) {
             return (10 + status);
+        }
+
+        status = subtest_002();
+        if (status != 0) {
+            return (20 + status);
         }
     } catch (const std::exception &exception) {
         log::cout() << exception.what();
