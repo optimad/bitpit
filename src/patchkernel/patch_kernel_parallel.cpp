@@ -2125,10 +2125,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                             // Find vertex neighbours
                             neighsList.clear();
                             int vertex = frontierFaceLocalVerticesIds[k];
-                            findCellVertexNeighs(cellId, vertex, &neighsList);
+                            findCellVertexNeighs(frontierCellId, vertex, &neighsList);
 
                             // Check if the vertex is on the inner frontier
-                            bool innerFrontierVertex = (m_partitioningOutgoings.count(cellId) == 0);
+                            bool innerFrontierVertex = (m_partitioningOutgoings.count(frontierCellId) == 0);
                             if (!innerFrontierVertex) {
                                 for (long frontierNeighId : neighsList) {
                                     if (m_partitioningOutgoings.count(frontierNeighId) == 0) {
@@ -2198,7 +2198,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                 findCellEdgeNeighs(frontierCellId, edge, &neighsList);
 
                                 // Check if the vertex is on the inner frontier
-                                bool innerFrontierEdge = (m_partitioningOutgoings.count(cellId) == 0);
+                                bool innerFrontierEdge = (m_partitioningOutgoings.count(frontierCellId) == 0);
                                 if (!innerFrontierEdge) {
                                     for (long frontierNeighId : neighsList) {
                                         if (m_partitioningOutgoings.count(frontierNeighId) == 0) {
