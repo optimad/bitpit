@@ -591,6 +591,22 @@ void Cell::setAdjacencies(const std::vector<std::vector<long>> &adjacencies)
 }
 
 /*!
+	Sets all the adjacencies of the cell.
+
+	\param adjacencies the list of all adjacencies associated to the cell
+*/
+void Cell::setAdjacencies(FlatVector2D<long> &&adjacencies)
+{
+	if (getType() == ElementType::UNDEFINED) {
+	    return;
+	}
+
+	assert(m_adjacencies.size() == getFaceCount());
+	assert(adjacencies.size() == getFaceCount());
+	m_adjacencies.swap(adjacencies);
+}
+
+/*!
 	Sets the i-th adjacency associated the the given face of the cell.
 
 	\param face the face of the cell
