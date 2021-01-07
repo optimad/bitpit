@@ -2065,7 +2065,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                             frontierCell = &cell;
                         } else {
                             frontierCellId = neighId;
-                            frontierFace = findAdjoinNeighFace(cellId, neighId);
+                            frontierFace = findAdjoinNeighFace(cellId, face, neighId);
                             frontierCell = &(m_cells.at(neighId));
 
                             assert(frontierFace >= 0);

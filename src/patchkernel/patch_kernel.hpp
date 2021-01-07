@@ -857,7 +857,7 @@ protected:
 	template<typename item_t, typename id_t = long>
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 
-	int findAdjoinNeighFace(long cellId, long neighId) const;
+	int findAdjoinNeighFace(long cellId, int cellFace, long neighId) const;
 
 private:
 	IndexGenerator<long> m_vertexIdGenerator;

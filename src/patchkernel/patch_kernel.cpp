@@ -5449,7 +5449,7 @@ void PatchKernel::_updateInterfaces()
 					long neighId = faceAdjacencies[k];
 					Cell *neigh  = &m_cells[neighId];
 
-					int neighFace = findAdjoinNeighFace(cellId, neighId);
+					int neighFace = findAdjoinNeighFace(cellId, face, neighId);
 
 					buildCellInterface(&cell, face, neigh, neighFace);
 				}
@@ -5618,26 +5618,50 @@ PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int
 }
 
 /*!
-	Given a cell and one of it's neighbours, finds the faces of the neighbour
-	that adjoins the specified cell.
-
-	The function doesn't check if the two cells are really neighbours.
+	Finds the face of the supposed neighbour that adjoins the target face.
 
 	\param cellId is the id of the cell
-	\param neighId is the id of a neighbour of the cell
-	\result The face of the neighbour which adjoin the specified cell
+	\param cellFace is the target face of the cell
+	\param neighId is the id of a supposed neighbour of the cell
+	\result The face of the neighbour which adjoins the target face. If the
+	two cells are not neighbours, a negative number is returned.
  */
-int PatchKernel::findAdjoinNeighFace(long cellId, long neighId) const
+int PatchKernel::findAdjoinNeighFace(long cellId, int cellFace, long neighId) const
 {
-	const Cell &neigh = m_cells[neighId];
+	// Evaluate list of candidate faces
+	//
+	// The cells may be neighbours through multiple faces. Identify which face
+	// matches the target one is quite expensive. Moreover, if the cells are
+	// neighbours through a single face (which is the common case), the check
+	// is not needed at all. Therefore, first we identify all the faces through
+	// which the two cells are neighbours and then, if and only if there are
+	// multiple candidates, we identify the face that matches the target one.
+	const Cell &neigh = getCell(neighId);
 	const int nNeighFaces = neigh.getFaceCount();
-	for (int face = 0; face < nNeighFaces; face++) {
-		int nFaceAdjacencies = neigh.getAdjacencyCount(face);
-		const long *faceAdjacencies = neigh.getAdjacencies(face);
+
+	int nCandidates = 0;
+	BITPIT_CREATE_WORKSPACE(candidates, std::array<double BITPIT_COMMA 3>, nNeighFaces, ReferenceElementInfo::MAX_ELEM_FACES);
+	for (int neighFace = 0; neighFace < nNeighFaces; neighFace++) {
+		int nFaceAdjacencies = neigh.getAdjacencyCount(neighFace);
+		const long *faceAdjacencies = neigh.getAdjacencies(neighFace);
 		for (int k = 0; k < nFaceAdjacencies; ++k) {
 			long geussId = faceAdjacencies[k];
 			if (geussId == cellId) {
-				return face;
+				(*candidates)[nCandidates] = neighFace;
+				++nCandidates;
+				break;
+			}
+		}
+	}
+
+	// Select the face of the neighbour which adjoin the given face
+	if (nCandidates == 1) {
+		return (*candidates)[0];
+	} else {
+		for (int i = 0; i < nCandidates; ++i) {
+			int candidateFace = (*candidates)[i];
+			if (isSameFace(cellId, cellFace, neighId, candidateFace)) {
+				return candidateFace;
 			}
 		}
 	}
