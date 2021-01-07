@@ -2006,19 +2006,23 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // The faces that tell apart cells explicitly marked for sending from
         // halo cells are called "frontier faces". We can identify frontier
         // faces looping through the outgoing cells an looking for faces with
-        // a neighbour not explicitly marked for sending.
+        // a neighbour not explicitly marked for being sent to the receiver
+        // rank.
         //
-        // Frame is made up by cells explicitly marked for sending that have
-        // a face, an edge or a vertex on a frontier face.
+        // Frame is made up by cells explicitly marked for being sent to the
+        // receiver rank that have a face, an edge or a vertex on a frontier
+        // face.
         //
-        // Halo is made up by cells not explicitly marked for sending that
-        // have a face, an edge or a vertex on a frontier face.
+        // Halo is made up by cells not explicitly marked for being sent to
+        // the receiver that have a face, an edge or a vertex on a frontier
+        // face.
         //
         // We also identify cells that, at the end of the partitionig, will
-        // be ghosts for the current rank. These are all non-outgonig cells
+        // be ghosts for the current rank. These are all the outgonig cells
         // that have a face/edge/vertex on the inner frontier. A face/edge/
         // vertex is on the inner frontier if its on the frontier and one of
-        // the cells that contain that item is not an outgoing cell.
+        // the cells that contain that item is not an outgoing cell (i.e.,
+        // is not explicitly marked for being sent to any rank).
         //
         // There are no halo nor frame cells if we are serializing a patch.
         //
