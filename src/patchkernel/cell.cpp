@@ -339,6 +339,7 @@ void Cell::setInterfaces(const std::vector<std::vector<long>> &interfaces)
 	    return;
 	}
 
+	assert(interfaces.size() == getFaceCount());
 	assert(m_interfaces.size() == getFaceCount());
 	m_interfaces.initialize(interfaces);
 }
@@ -568,7 +569,8 @@ void Cell::setAdjacencies(const std::vector<std::vector<long>> &adjacencies)
 	    return;
 	}
 
-	assert(m_interfaces.size() == getFaceCount());
+	assert(m_adjacencies.size() == getFaceCount());
+	assert(adjacencies.size() == getFaceCount());
 	m_adjacencies.initialize(adjacencies);
 }
 
