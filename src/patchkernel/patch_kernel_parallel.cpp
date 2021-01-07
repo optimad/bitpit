@@ -2079,25 +2079,27 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                         //
 
                         // Check if the face is on the inner frontier
-                        bool innerFrontierFace = false;
-                        if (m_partitioningOutgoings.count(cellId) == 0) {
-                            innerFrontierFace = true;
-                        } else if (m_partitioningOutgoings.count(neighId) == 0) {
-                            innerFrontierFace = true;
-                        }
+                        //
+                        // To be on the inner frontier, the face needs to be
+                        // on a cell not explicitly marked for being sent to
+                        // any rank. We are iterating on the cells explicitly
+                        // marked for being sent to the receiver rank, hence
+                        // the current cell is definitely an outgoing cell.
+                        // Therefore, the face will be on the inner frontier
+                        // if the neighbour is not an outgoing cell.
+                        bool innerFrontierFace = (m_partitioningOutgoings.count(neighId) == 0);
 
                         // Add the neighbours to the list
+                        //
+                        // If the face is on the inner frontier, the outgoing
+                        // cell is the current cell (neighbour cannot be an
+                        // outgoing cell, otherwise the face will not be on
+                        // the inner frontier).
                         frontierNeighs.insert(cellId);
                         frontierNeighs.insert(neighId);
 
                         if (innerFrontierFace) {
-                            if (m_partitioningOutgoings.count(cellId) > 0) {
-                                ghostCellsOverall.insert(cellId);
-                            }
-
-                            if (m_partitioningOutgoings.count(neighId) > 0) {
-                                ghostCellsOverall.insert(neighId);
-                            }
+                            ghostCellsOverall.insert(cellId);
                         }
 
                         //
