@@ -766,9 +766,7 @@ ConstProxyVector<int> Element::getFaceLocalConnect(int face) const
 		int faceConnectSize = getFaceVertexCount(face);
 		std::vector<int> localFaceConnect(faceConnectSize);
 		for (int i = 0; i < faceConnectSize; ++i) {
-			int localVertexId = (face + i) % connectSize;
-
-			localFaceConnect[i] = localVertexId;
+			localFaceConnect[i] = 1 + ((face + i) % (connectSize - 1));
 		}
 
 		return ConstProxyVector<int>(std::move(localFaceConnect));
@@ -1315,15 +1313,47 @@ long Element::getFaceVertexId(int face, int vertex) const
 */
 ConstProxyVector<int> Element::getFaceLocalVertexIds(int face) const
 {
-	ConstProxyVector<int> localVertexIds = getFaceLocalConnect(face);
-	if  (m_type == ElementType::POLYHEDRON) {
-		ElementType faceType = getFaceType(face);
-		if (faceType == ElementType::POLYGON) {
-			localVertexIds.set(localVertexIds.data() + 1, localVertexIds.size() - 1);
+	switch (m_type) {
+
+	case (ElementType::POLYGON):
+	{
+		ConstProxyVector<int> faceLocalConnect = getFaceLocalConnect(face);
+		std::size_t faceLocalConnectSize = faceLocalConnect.size();
+
+		std::size_t nFaceVertices = faceLocalConnectSize;
+		std::vector<int> faceLocalVertexIds(nFaceVertices);
+		for (int i = 0; i < nFaceVertices; ++i) {
+			faceLocalVertexIds[i] = faceLocalConnect[i] - 1;
 		}
+
+		return ConstProxyVector<int>(std::move(faceLocalVertexIds));
 	}
 
-	return localVertexIds;
+	case (ElementType::POLYHEDRON):
+	{
+		ElementType faceType = getFaceType(face);
+		if (faceType != ElementType::POLYGON) {
+			return getFaceLocalConnect(face);
+		}
+
+		ConstProxyVector<int> faceLocalConnect = getFaceLocalConnect(face);
+		std::size_t faceLocalConnectSize = faceLocalConnect.size();
+
+		std::size_t nFaceVertices = faceLocalConnectSize - 1;
+		std::vector<int> faceLocalVertexIds(nFaceVertices);
+		for (int i = 0; i < nFaceVertices; ++i) {
+			faceLocalVertexIds[i] = faceLocalConnect[i + 1] - 1;
+		}
+
+		return ConstProxyVector<int>(std::move(faceLocalVertexIds));
+	}
+
+	default:
+	{
+		return getFaceLocalConnect(face);
+	}
+
+	}
 }
 
 /*!
