@@ -151,7 +151,7 @@ int subtest_002()
         if (i == rank) {
             for (PatchKernel::CellIterator itr = patch_3D->cellBegin(); itr != patch_3D->cellEnd(); ++itr) {
                 for (int i = 0; i < itr->getVertexCount(); ++i) {
-                    log::cout() << itr.getId() << ":" << i << " :: " << patch_3D->findCellVertexNeighs(itr.getId(), i) << std::endl;
+                    patch_3D->findCellVertexNeighs(itr.getId(), i);
                 }
             }
         }

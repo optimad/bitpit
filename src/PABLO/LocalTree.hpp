@@ -208,7 +208,11 @@ private:
     void        findNeighbours(uint32_t idx, bool amIghost, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
     void        findEdgeNeighbours(uint32_t idx, bool amIghost, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
     void        findNodeNeighbours(uint32_t idx, bool amIghost, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
+
     void        findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
+    void        findNeighbours_OLD(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
+    void        findNeighbours_NEW(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
+
     void        findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
     void        findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
 
