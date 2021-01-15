@@ -2114,6 +2114,51 @@ namespace bitpit {
     };
 
     // =================================================================================== //
+    /*! Given the Morton number of the same-size virtual neighbour and a sorted
+     *  list of octans, computes the index from which a neighbour search should
+     *  begin.
+     *  We are looking for the index of the last octant with a Morton number
+     *  lower than the Morton number of the same-size virtual neighbour. If
+     *  such an index does not exists (i.e., all the octants have a Morton
+     *  number greater than the Morton number of the virtual neighbour, the
+     *  search should start from the beginning the octant list).
+     * \param[in] sameSizeVirtualNeighMorton Morton number of the same-size
+    *  virtual neighbour
+     * \param[in] octants list of octants
+     * \param[out] searchBeginIdx on output will contain the index from which a
+     * neighbour search should begin
+     * \param[out] searchBeginMorton on output will contain the Morton of the
+     * octant from which a neighbour search should begin
+     */
+    void
+    LocalTree::computeNeighSearchBegin(uint64_t sameSizeVirtualNeighMorton, const octvector &octants, uint32_t *searchBeginIdx, uint64_t *searchBeginMorton) const {
+
+        // Early return if there are no octants
+        if (octants.empty()) {
+            *searchBeginIdx    = 0;
+            *searchBeginMorton = PABLO::INVALID_MORTON;
+            return;
+        }
+
+        // The search should start from the lower bound if it points to the
+        // first octant or to an octant whose Morton number is equal to the
+        // the same-size virtual neighbour Morton number. Otherwise, the
+        // search should start form the octant preceding the lower bound.
+        uint32_t lowerBoundIdx;
+        uint64_t lowerBoundMorton;
+        findMortonLowerBound(sameSizeVirtualNeighMorton, octants, &lowerBoundIdx, &lowerBoundMorton);
+
+        if (lowerBoundMorton == sameSizeVirtualNeighMorton || lowerBoundIdx == 0) {
+            *searchBeginIdx    = lowerBoundIdx;
+            *searchBeginMorton = lowerBoundMorton;
+        } else {
+            *searchBeginIdx    = lowerBoundIdx - 1;
+            *searchBeginMorton = octants[*searchBeginIdx].computeMorton();
+        }
+
+    }
+
+    // =================================================================================== //
 
     /*! Pre-processing for 2:1 balancing of local tree. Check if there are broken families over processes.
      * \param[in] internal Set to true if the interior octants have to be checked.

@@ -228,6 +228,7 @@ private:
 	void 		findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours) const;
 	void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours) const;
 
+	void 		computeNeighSearchBegin(uint64_t sameSizeVirtualNeighMorton, const octvector &octants, uint32_t *searchBeginIdx, uint64_t *searchBeginMorton) const;
 
 	void 		preBalance21(bool internal);
 	void 		preBalance21(u32vector& newmodified);
