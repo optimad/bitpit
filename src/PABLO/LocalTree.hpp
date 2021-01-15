@@ -238,6 +238,8 @@ private:
 	uint32_t 	findMorton(uint64_t targetMorton) const;
 	uint32_t 	findGhostMorton(uint64_t targetMorton) const;
 	uint32_t 	findMorton(uint64_t targetMorton, const octvector &octants) const;
+	void 		findMortonLowerBound(uint64_t targetMorton, const octvector &octants, uint32_t *lowerBoundIdx, uint64_t *lowerBoundMorton) const;
+	void 		findMortonUpperBound(uint64_t targetMorton, const octvector &octants, uint32_t *upperBoundIdx, uint64_t *upperBoundMorton) const;
 
 	void 		computeConnectivity();
 	void 		clearConnectivity();

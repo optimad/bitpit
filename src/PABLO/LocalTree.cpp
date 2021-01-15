@@ -3252,24 +3252,125 @@ namespace bitpit {
     uint32_t
     LocalTree::findMorton(uint64_t targetMorton, const octvector &octants) const {
 
-        uint32_t nocts = octants.size();
+        uint32_t lowerBoundIdx;
+        uint64_t lowerBoundMorton;
+        findMortonLowerBound(targetMorton, octants, &lowerBoundIdx, &lowerBoundMorton);
 
-        uint32_t low  = 0;
-        uint32_t high = nocts - 1;
-        while (low <= high) {
-            uint32_t mid = low + ((high - low) / 2);
-            uint64_t mid_morton = octants[mid].computeMorton();
-            if (mid_morton > targetMorton) {
-                high = mid - 1;
-            } else if (mid_morton < targetMorton) {
-                low = mid + 1;
-            } else {
-                return mid;
+        uint32_t targetIdx;
+        if (lowerBoundMorton == targetMorton) {
+            targetIdx = lowerBoundIdx;
+        } else {
+            targetIdx = octants.size();
+        }
+
+        return targetIdx;
+    };
+
+    // =================================================================================== //
+    /*! Given a target Morton number and a sorted list of octants, finds the
+     *  index of the first octant whose Morton number does not compare less
+     *  than the target Morton number (in other words, the index of the first
+     *  octant whose Morton number is greater or equal than the target Morton
+     *  number). If the target Morton is greater than the Morton number of the
+     *  last element, the index of the past-the-element element is returned.
+     * \param[in] targetMorton is the Morton index to be found.
+     * \param[in] octants list of octants
+     * \param[out] lowerBoundIdx on output will contain the index of first
+     * octant whose Morton number does not compare less than the target Morton
+     * number. If the target Morton numer is greater than the Morton number of
+     * the last element, the index of the past-the-element element is returned
+     * \param[out] lowerBoundMorton on output will contain the Morton associated
+     * with the lower bound. If the target Morton is greater than the Morton
+     * number of the last element, the maximum finite value representable by
+     * the numeric type is returned
+     */
+    void
+    LocalTree::findMortonLowerBound(uint64_t targetMorton, const octvector &octants, uint32_t *lowerBoundIdx, uint64_t *lowerBoundMorton) const {
+
+        uint32_t nOctants = octants.size();
+
+        uint32_t lowIndex  = 0;
+        uint32_t highIndex = nOctants;
+        uint32_t midIndex  = nOctants;
+        uint64_t midMorton = PABLO::INVALID_MORTON;
+        while (lowIndex < highIndex) {
+            midIndex  = lowIndex + (highIndex - lowIndex) / 2;
+            midMorton = octants[midIndex].computeMorton();
+            if (targetMorton < midMorton) {
+                highIndex = midIndex;
+            }
+            else if (targetMorton > midMorton) {
+                lowIndex = midIndex + 1;
+            }
+            else {
+                *lowerBoundIdx  = midIndex;
+                *lowerBoundMorton = midMorton;
+
+                return;
             }
         }
 
-        return nocts;
-    };
+        *lowerBoundIdx = lowIndex;
+        if (*lowerBoundIdx == midIndex) {
+            *lowerBoundMorton = midMorton;
+        }
+        else if (*lowerBoundIdx < nOctants) {
+            *lowerBoundMorton = octants[*lowerBoundIdx].computeMorton();
+        }
+        else {
+            *lowerBoundMorton = PABLO::INVALID_MORTON;
+        }
+
+    }
+
+    // =================================================================================== //
+    /*! Given a target Morton number and a sorted list of octants, finds the
+     *  index of the first octant whose Morton number is greater than the
+     *  target Morton number. If the target Morton is greater than the Morton
+     *  number of the last element, the index of the past-the-element element
+     *  is returned.
+     * \param[in] targetMorton is the Morton index to be found.
+     * \param[in] octants list of octants
+     * \param[out] upperBoundIdx on output will contain the index of the first
+     * octant whose Morton number is greater than the target Morton number. If
+     * the target Morton numer is greater than the Morton number of the last
+     * element, the index of the past-the-last-element is returned
+     * \param[out] upperBoundMorton on output will contain the Morton associated
+     * with the upper bound. If no upper bound was found, the maximum finite
+     * value representable by the numeric type is returned
+     */
+    void
+    LocalTree::findMortonUpperBound(uint64_t targetMorton, const octvector &octants, uint32_t *upperBoundIdx, uint64_t *upperBoundMorton) const {
+
+        uint32_t nOctants = octants.size();
+
+        uint32_t lowIndex  = 0;
+        uint32_t highIndex = nOctants;
+        uint32_t midIndex  = nOctants;
+        uint64_t midMorton = PABLO::INVALID_MORTON;
+        while (lowIndex < highIndex) {
+            midIndex  = lowIndex + (highIndex - lowIndex) / 2;
+            midMorton = octants[midIndex].computeMorton();
+            if (targetMorton < midMorton) {
+                highIndex = midIndex;
+            }
+            else {
+                lowIndex = midIndex + 1;
+            }
+        }
+
+        *upperBoundIdx = lowIndex;
+        if (*upperBoundIdx == midIndex) {
+            *upperBoundMorton = midMorton;
+        }
+        else if (*upperBoundIdx < nOctants) {
+            *upperBoundMorton = octants[*upperBoundIdx].computeMorton();
+        }
+        else {
+            *upperBoundMorton = PABLO::INVALID_MORTON;
+        }
+
+    }
 
     // =================================================================================== //
 
