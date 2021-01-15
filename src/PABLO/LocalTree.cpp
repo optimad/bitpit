@@ -3597,13 +3597,8 @@ namespace bitpit {
 
         if (lowIndex == 0 && highIndex == 0) {
             uint64_t firstMorton = octants[0].computeMorton();
-            if (targetMorton >= firstMorton) {
-                *markerIndex  = 0;
-                *markerMorton = firstMorton;
-            } else {
-                *markerIndex  = nOctants;
-                *markerMorton = numeric_limits<uint64_t>::max();
-            }
+            *markerIndex  = 0;
+            *markerMorton = firstMorton;
         }
 
     }
