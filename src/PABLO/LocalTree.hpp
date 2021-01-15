@@ -235,9 +235,9 @@ private:
 
 	void 		computeIntersections();
 
-	uint32_t 	findMorton(uint64_t Morton) const;
-	uint32_t 	findGhostMorton(uint64_t Morton) const;
-	uint32_t 	findMorton(uint64_t Morton, const octvector &octants) const;
+	uint32_t 	findMorton(uint64_t targetMorton) const;
+	uint32_t 	findGhostMorton(uint64_t targetMorton) const;
+	uint32_t 	findMorton(uint64_t targetMorton, const octvector &octants) const;
 
 	void 		computeConnectivity();
 	void 		clearConnectivity();

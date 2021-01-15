@@ -3222,33 +3222,35 @@ namespace bitpit {
 
     // =================================================================================== //
     /*! Find an input Morton in octants and return the local idx
-     * \param[in] Morton Morton index to be found.
+     * \param[in] targetMorton Morton index to be found.
      * \return Local index of the target octant (=nocts if target Morton not found).
      */
     uint32_t
-    LocalTree::findMorton(uint64_t Morton) const {
-        return findMorton(Morton, m_octants);
+    LocalTree::findMorton(uint64_t targetMorton) const {
+        return findMorton(targetMorton, m_octants);
     };
 
     // =================================================================================== //
     /*! Find an input Morton in ghosts and return the local idx
-     * \param[in] Morton Morton index to be found.
+     * \param[in] targetMorton Morton index to be found.
      * \return Index of the target ghost octant (=nghosts if target Morton not found).
      */
     uint32_t
-    LocalTree::findGhostMorton(uint64_t Morton) const {
-        return findMorton(Morton, m_ghosts);
+    LocalTree::findGhostMorton(uint64_t targetMorton) const {
+        return findMorton(targetMorton, m_ghosts);
     };
 
     // =================================================================================== //
     /*! Find the index of the octant with the specified Morton in the given
-     *  sorted list of octants.
-     * \param[in] Morton Morton index to be found.
+     *  sorted list of octants. If the requested octant is not in the given
+     *  list, the index of the end (i.e., the element after the last element
+     *  is returned).
+     * \param[in] targetMorton is the Morton index to be found.
      * \param[in] octants list of octants
      * \return Local index of the target octant (=nocts if target Morton not found).
      */
     uint32_t
-    LocalTree::findMorton(uint64_t Morton, const octvector &octants) const {
+    LocalTree::findMorton(uint64_t targetMorton, const octvector &octants) const {
 
         uint32_t nocts = octants.size();
 
@@ -3257,9 +3259,9 @@ namespace bitpit {
         while (low <= high) {
             uint32_t mid = low + ((high - low) / 2);
             uint64_t mid_morton = octants[mid].computeMorton();
-            if (mid_morton > Morton) {
+            if (mid_morton > targetMorton) {
                 high = mid - 1;
-            } else if (mid_morton < Morton) {
+            } else if (mid_morton < targetMorton) {
                 low = mid + 1;
             } else {
                 return mid;
