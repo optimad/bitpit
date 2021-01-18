@@ -843,6 +843,9 @@ void	Octant::buildChildren(Octant *children) const {
 
 			break;
 
+		default:
+			BITPIT_UNREACHABLE("The maximum number of children is 8.");
+
 		}
 
 		// Create octant
