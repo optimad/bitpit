@@ -146,8 +146,8 @@ else()
 endif()
 
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_VERSION}"
-                                                 SOVERSION  "${BITPIT_MAJOR_VERSION}")
+set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}.${BITPIT_PATCH_VERSION}"
+                                                 SOVERSION "${BITPIT_MAJOR_VERSION}")
 
 # Windows shared libraries have to be linked against their dependencies.
 if (MINGW AND BUILD_SHARED_LIBS)
