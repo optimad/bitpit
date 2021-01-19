@@ -341,6 +341,40 @@ set(VERSION_TAG_MATCHER_REGEX "^${CMAKE_PROJECT_NAME}-[^-]*(-(.*))?$")
 # Initialize version string
 set(BITPIT_VERSION_STRING "${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}")
 
+# Add git information
+get_git_head_revision(BITPIT_GIT_REFERENCE BITPIT_GIT_HASH)
+if(NOT "${BITPIT_GIT_REFERENCE}" STREQUAL "GITDIR-NOTFOUND")
+    # Add git information
+    #
+    # Information about git are added only if git tag doens't match the version
+    # string.
+    git_get_exact_tag(BITPIT_GIT_TAG)
+    if(NOT "${BITPIT_GIT_TAG}" STREQUAL "${BITPIT_VERSION_STRING}")
+        git_get_branch(BITPIT_GIT_BRANCH)
+        if(NOT "${BITPIT_GIT_BRANCH}" MATCHES "NOTFOUND$")
+            set(BITPIT_VERSION_STRING "${BITPIT_VERSION_STRING}-${BITPIT_GIT_BRANCH}")
+        else()
+            set(BITPIT_VERSION_STRING "${BITPIT_VERSION_STRING}-detached")
+        endif()
+
+        git_get_short_hash(BITPIT_GIT_SHORT_HASH)
+        set(BITPIT_VERSION_STRING "${BITPIT_VERSION_STRING}-${BITPIT_GIT_SHORT_HASH}")
+    endif()
+
+    # Report if there are uncommited changes
+    #
+    # It's not possible to automatically re-run cmake (and thus update the
+    # version) if there are uncommited changes. The label will be reliably
+    # added only if, after changing the code, cmake is run manually.
+    set(BITPIT_VERSION_DIRTY_LABEL "dirty" CACHE STRING "Label that will be added to the version string when there are uncommited changes")
+    mark_as_advanced(${BITPIT_VERSION_DIRTY_LABEL})
+
+    git_local_changes(BITPIT_GIT_STATUS)
+    if (BITPIT_GIT_STATUS STREQUAL "DIRTY")
+        set(BITPIT_VERSION_STRING "${BITPIT_VERSION_STRING}-${BITPIT_VERSION_DIRTY_LABEL}")
+    endif()
+endif()
+
 # Check if version string is valid
 string(REGEX MATCH "${VERSION_MATCHER_REGEX}" VERSION_STRING_VALID "${BITPIT_VERSION_STRING}")
 if ("${VERSION_STRING_VALID}" STREQUAL "")
