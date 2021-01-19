@@ -511,7 +511,7 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 
 #if BITPIT_ENABLE_MPI==1
 	// This is a collevtive operation and should be called by all processes
-	if (isCommunicatorSet()) {
+	if (isPartitioned()) {
 		const auto &communicator = getCommunicator();
 		MPI_Barrier(communicator);
 	}
@@ -1116,7 +1116,7 @@ PatchKernel::AdaptionStatus PatchKernel::getAdaptionStatus(bool global) const
 	int adaptionStatus = static_cast<int>(m_adaptionStatus);
 
 #if BITPIT_ENABLE_MPI==1
-	if (global && isCommunicatorSet()) {
+	if (global && isPartitioned()) {
 		const auto &communicator = getCommunicator();
 		MPI_Allreduce(MPI_IN_PLACE, &adaptionStatus, 1, MPI_INT, MPI_MAX, communicator);
 	}
@@ -1198,7 +1198,7 @@ bool PatchKernel::isDirty(bool global) const
 
 #if BITPIT_ENABLE_MPI==1
 	// Get the global flag
-	if (global && isCommunicatorSet()) {
+	if (global && isPartitioned()) {
 		const auto &communicator = getCommunicator();
 		MPI_Allreduce(MPI_IN_PLACE, &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
 	}
@@ -4935,7 +4935,7 @@ bool PatchKernel::areAdjacenciesDirty(bool global) const
 	}
 
 #if BITPIT_ENABLE_MPI==1
-	if (global && isCommunicatorSet()) {
+	if (global && isPartitioned()) {
 		const auto &communicator = getCommunicator();
 		MPI_Allreduce(MPI_IN_PLACE, &areDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
 	}
@@ -5299,7 +5299,7 @@ bool PatchKernel::areInterfacesDirty(bool global) const
 	}
 
 #if BITPIT_ENABLE_MPI==1
-	if (global && isCommunicatorSet()) {
+	if (global && isPartitioned()) {
 		const auto &communicator = getCommunicator();
 		MPI_Allreduce(MPI_IN_PLACE, &areDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
 	}
@@ -6137,7 +6137,7 @@ bool PatchKernel::isBoundingBoxDirty(bool global) const
 {
 	bool isDirty = m_boxDirty;
 #if BITPIT_ENABLE_MPI==1
-	if (global && isCommunicatorSet()) {
+	if (global && isPartitioned()) {
 		const auto &communicator = getCommunicator();
 		MPI_Allreduce(const_cast<bool *>(&m_boxDirty), &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
 	}

@@ -198,7 +198,7 @@ void PatchKernel::updateOwner()
 {
 	long nInternalCells = getInternalCellCount();
 	long nGlobalInternalCells = nInternalCells;
-	if (isCommunicatorSet()) {
+	if (isPartitioned()) {
 		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
 	}
 
@@ -208,7 +208,7 @@ void PatchKernel::updateOwner()
 		m_owner = -1;
 	}
 
-	if (isCommunicatorSet()) {
+	if (isPartitioned()) {
 		MPI_Allreduce(MPI_IN_PLACE, &m_owner, 1, MPI_INT, MPI_MAX, getCommunicator());
 	}
 }
@@ -1588,7 +1588,7 @@ PatchKernel::PartitioningStatus PatchKernel::getPartitioningStatus(bool global) 
 {
 	int partitioningStatus = static_cast<int>(m_partitioningStatus);
 
-	if (global && isCommunicatorSet()) {
+	if (global && isPartitioned()) {
 		const auto &communicator = getCommunicator();
 		MPI_Allreduce(MPI_IN_PLACE, &partitioningStatus, 1, MPI_INT, MPI_MAX, communicator);
 	}
