@@ -42,6 +42,12 @@ if(${CMAKE_VERSION} VERSION_EQUAL "3.9.0" OR ${CMAKE_VERSION} VERSION_GREATER "3
 endif()
 
 #------------------------------------------------------------------------------------#
+# External utilities
+#------------------------------------------------------------------------------------#
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/git/cmake")
+include(GetGitRevisionDescription)
+
+#------------------------------------------------------------------------------------#
 # Functions
 #------------------------------------------------------------------------------------#
 function(getModuleEnableName MODULE_NAME FLAG_NAME)
