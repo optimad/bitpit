@@ -633,18 +633,18 @@ unset(_LAPACKE_index)
 
 list(FIND EXTERNAL_DEPS "EIGEN3" _EIGEN3_index)
 if (${_EIGEN3_index} GREATER -1)
-    #For now, add dependency to Eigen as a header-only library
-    
+    #For now, add dependency to Eigen as a header-only library    
     #set(LAPACKE_STATIC 0 CACHE BOOL "Require LAPACKE static libraries")
-    #mark_as_advanced(LAPACKE_STATIC)
-    #list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/LAPACKE/cmake")
-    #find_package(EIGEN REQUIRED)
     
-    set( EIGEN3_SUPPORT BOOL ON )
-    set( EIGEN3_ROOT_DIR CACHE PATH "Path to Eigen3 root dir" )
-    set( EIGEN3_INCLUDE_DIRS "${EIGEN3_ROOT_DIR}")
+    mark_as_advanced(EIGEN)
+    
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/EIGEN/cmake")
+        
+    find_package(Eigen3 REQUIRED)
+    
+    list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Eigen3")
 
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "EIGEN3_INCLUDE_DIRS")
+    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "EIGEN3_INCLUDE_DIR")
 endif()
 unset(_EIGEN3_index)
 

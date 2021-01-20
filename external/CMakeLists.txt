@@ -9,3 +9,6 @@ add_subdirectory(LAPACKE)
 
 # PETSc
 add_subdirectory(PETSc)
+
+# EIGEN
+add_subdirectory(EIGEN)
