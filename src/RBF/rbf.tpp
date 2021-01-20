@@ -709,7 +709,7 @@ namespace rbf
   template< std::size_t D, std::size_t N, class C >
   template<class f_in_t, std::size_t... I>
   typename RFP<D,N,C>::rf_funct_t RFP<D,N,C>::doBind( f_in_t f, coord_t* data, bitpit::index_sequence<I...> ) {
-       return std::bind( f, std::placeholders::_1, std::cref(data[I]...) ); // A trick here
+       return std::bind( f, std::placeholders::_1, std::cref(data[I])... ); // A trick here
   }
 
   // ------------------------------------------------------------------------ //
