@@ -24,6 +24,7 @@
 
 #ifndef __BITPIT_MODULE_CG_HPP__
 #define __BITPIT_MODULE_CG_HPP__
+#include "moduleBegin.hpp"
 
 /*!
  * @defgroup CG Computational Geometry (CG)
@@ -33,8 +34,7 @@
  * @}
  */
 
-#include "bitpit_version.hpp"
-
 #include "CG.hpp"
 
+#include "moduleEnd.hpp"
 #endif

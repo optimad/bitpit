@@ -24,10 +24,10 @@
 
 #ifndef __BITPIT_MODULE_VOLOCTREE_HPP__
 #define __BITPIT_MODULE_VOLOCTREE_HPP__
-
-#include "bitpit_version.hpp"
+#include "moduleBegin.hpp"
 
 #include "voloctree.hpp"
 #include "voloctree_mapper.hpp"
 
+#include "moduleEnd.hpp"
 #endif

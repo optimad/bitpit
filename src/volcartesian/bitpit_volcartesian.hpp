@@ -24,9 +24,9 @@
 
 #ifndef __BITPIT_MODULE_VOLCARTESIAN_HPP__
 #define __BITPIT_MODULE_VOLCARTESIAN_HPP__
-
-#include "bitpit_version.hpp"
+#include "moduleBegin.hpp"
 
 #include "volcartesian.hpp"
 
+#include "moduleEnd.hpp"
 #endif

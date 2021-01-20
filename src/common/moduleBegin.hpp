@@ -22,29 +22,9 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_LA_HPP__
-#define __BITPIT_MODULE_LA_HPP__
-#include "moduleBegin.hpp"
+#ifndef __BITPIT_MODULE_BEGIN_HPP__
+#define __BITPIT_MODULE_BEGIN_HPP__
 
-/*!
- * @defgroup LinearAlgebra Linear algebra (LA)
- * @{
- * @defgroup laspecialmatrix Special Matrices
- * @defgroup ladisplay Display
- * @defgroup lamanipulation Manipulation
- * @defgroup lamultiplication Multiplication
- * @defgroup lainfo Info
- * @defgroup laauxiliary Auxiliary Utilities
- * @defgroup system_solver_small System Solvers (Small Systems)
- * @defgroup system_solver_large System Solvers (Large Systems)
- * @}
- */
+#include "bitpit_version.hpp"
 
-#include "manipulation.hpp"
-#include "matrix_utilities.hpp"
-#include "multiplication.hpp"
-#include "system_solvers_large.hpp"
-#include "system_solvers_small.hpp"
-
-#include "moduleEnd.hpp"
 #endif

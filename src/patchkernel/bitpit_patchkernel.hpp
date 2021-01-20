@@ -24,6 +24,7 @@
 
 #ifndef __BITPIT_MODULE_PATCH_KERNEL_HPP__
 #define __BITPIT_MODULE_PATCH_KERNEL_HPP__
+#include "moduleBegin.hpp"
 
 /*!
  * @defgroup patches Patches
@@ -35,8 +36,6 @@
  * @}
  */
 
-#include "bitpit_version.hpp"
-
 #include "patch_info.hpp"
 #include "patch_kernel.hpp"
 #include "patch_manager.hpp"
@@ -47,4 +46,5 @@
 #include "volume_mapper.hpp"
 #include "adaption.hpp"
 
+#include "moduleEnd.hpp"
 #endif

@@ -24,15 +24,15 @@
 
 #ifndef __BITPIT_MODULE_DISCRETIZATION_HPP__
 #define __BITPIT_MODULE_DISCRETIZATION_HPP__
+#include "moduleBegin.hpp"
 
 /*!
  * @defgroup discretization Discretization
  */
 
-#include "bitpit_version.hpp"
-
 #include "reconstruction.hpp"
 #include "stencil.hpp"
 #include "stencil_solver.hpp"
 
+#include "moduleEnd.hpp"
 #endif

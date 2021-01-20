@@ -24,13 +24,13 @@
 
 #ifndef __BITPIT_MODULE_SA_HPP__
 #define __BITPIT_MODULE_SA_HPP__
+#include "moduleBegin.hpp"
 
 /*!
  * \defgroup SortAlgorithms Sort algorithms (SA)
  */
 
-#include "bitpit_version.hpp"
-
 #include "SortAlgorithms.hpp"
 
+#include "moduleEnd.hpp"
 #endif

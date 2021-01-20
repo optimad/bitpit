@@ -28,11 +28,11 @@
 
 #ifndef __BITPIT_MODULE_COMMNICATIONS_HPP__
 #define __BITPIT_MODULE_COMMNICATIONS_HPP__
-
-#include "bitpit_version.hpp"
+#include "moduleBegin.hpp"
 
 #include "communications.hpp"
 #include "communications_buffers.hpp"
 #include "communications_tags.hpp"
 
+#include "moduleEnd.hpp"
 #endif

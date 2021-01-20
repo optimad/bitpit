@@ -24,9 +24,9 @@
 
 #ifndef __BITPIT_MODULE_VOLUNSTRUCTURED_HPP__
 #define __BITPIT_MODULE_VOLUNSTRUCTURED_HPP__
-
-#include "bitpit_version.hpp"
+#include "moduleBegin.hpp"
 
 #include "volunstructured.hpp"
 
+#include "moduleEnd.hpp"
 #endif

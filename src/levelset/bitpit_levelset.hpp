@@ -24,6 +24,7 @@
 
 #ifndef __BITPIT_MODULE_LEVELSET_HPP__
 #define __BITPIT_MODULE_LEVELSET_HPP__
+#include "moduleBegin.hpp"
 
 /*!
  * @defgroup levelset LevelSet
@@ -31,8 +32,6 @@
  *     @defgroup levelsetEnums LevelSet Enumerations
  * @}
  */
-
-#include "bitpit_version.hpp"
 
 #include "levelSetCommon.hpp"
 
@@ -48,4 +47,5 @@
 
 #include "levelSet.hpp"
 
+#include "moduleEnd.hpp"
 #endif
