@@ -37,11 +37,11 @@
 
 #ifndef __BITPIT_MODULE_COMMON_HPP__
 #define __BITPIT_MODULE_COMMON_HPP__
-
-#include "bitpit_version.hpp"
+#include "moduleBegin.hpp"
 
 #include "compiler.hpp"
 #include "constants.hpp"
 #include "utils.hpp"
 
+#include "moduleEnd.hpp"
 #endif

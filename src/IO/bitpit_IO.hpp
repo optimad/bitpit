@@ -39,8 +39,7 @@
 
 #ifndef __BITPIT_MODULE_IO_HPP__
 #define __BITPIT_MODULE_IO_HPP__
-
-#include "bitpit_version.hpp"
+#include "moduleBegin.hpp"
 
 #include "binary_archive.hpp"
 #include "configuration.hpp"
@@ -52,4 +51,5 @@
 #include "GenericIO.hpp"
 #include "STL.hpp"
 
+#include "moduleEnd.hpp"
 #endif

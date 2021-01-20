@@ -24,9 +24,9 @@
 
 #ifndef __BITPIT_MODULE_SURFUNSTRUCTURED_HPP__
 #define __BITPIT_MODULE_SURFUNSTRUCTURED_HPP__
-
-#include "bitpit_version.hpp"
+#include "moduleBegin.hpp"
 
 #include "surfunstructured.hpp"
 
+#include "moduleEnd.hpp"
 #endif

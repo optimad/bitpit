@@ -24,6 +24,7 @@
 
 #ifndef __BITPIT_MODULE_OPERATORS_HPP__
 #define __BITPIT_MODULE_OPERATORS_HPP__
+#include "moduleBegin.hpp"
 
 /*! 
  * @defgroup OperatorsFunctions Operators and Functions
@@ -35,8 +36,7 @@
  * @}
  */
 
-#include "bitpit_version.hpp"
-
 #include "Operators.hpp"
 
+#include "moduleEnd.hpp"
 #endif
