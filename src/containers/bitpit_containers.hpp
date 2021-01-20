@@ -22,6 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#ifndef __BITPIT_MODULE_CONTAINERS_HPP__
+#define __BITPIT_MODULE_CONTAINERS_HPP__
+#include "moduleBegin.hpp"
+
 /*!
  * @defgroup containers Containers
  * @{
@@ -29,10 +33,6 @@
  * @}
  *
  */
-
-#ifndef __BITPIT_MODULE_CONTAINERS_HPP__
-#define __BITPIT_MODULE_CONTAINERS_HPP__
-#include "moduleBegin.hpp"
 
 #include "binary_stream.hpp"
 #include "flatVector2D.hpp"
