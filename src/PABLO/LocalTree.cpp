@@ -827,6 +827,9 @@ namespace bitpit {
 
         m_sizeOctants = m_octants.size();
 
+        // Update maximum depth
+        updateLocalMaxDepth();
+
         // Set final last desc
         setFirstDescMorton();
         setLastDescMorton();
