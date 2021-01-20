@@ -22,14 +22,14 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#ifndef __BITPIT_MODULE_POD_HPP__
+#define __BITPIT_MODULE_POD_HPP__
+#include "moduleBegin.hpp"
+
 /*!
  * @defgroup POD Proper Orthogonal Decomposition (POD)
  *
  */
-
-#ifndef __BITPIT_MODULE_POD_HPP__
-#define __BITPIT_MODULE_POD_HPP__
-#include "moduleBegin.hpp"
 
 #include "pod.hpp"
 #include "pod_voloctree.hpp"
