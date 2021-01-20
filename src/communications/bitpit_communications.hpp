@@ -22,13 +22,13 @@
  *
  \*---------------------------------------------------------------------------*/
 
-/*!
- * @defgroup communications Parallel communications
- */
-
 #ifndef __BITPIT_MODULE_COMMNICATIONS_HPP__
 #define __BITPIT_MODULE_COMMNICATIONS_HPP__
 #include "moduleBegin.hpp"
+
+/*!
+ * @defgroup communications Parallel communications
+ */
 
 #include "communications.hpp"
 #include "communications_buffers.hpp"
