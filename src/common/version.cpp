@@ -22,19 +22,15 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*! \file */
-
-#ifndef __BITPIT_VERSION_HPP__
-#define __BITPIT_VERSION_HPP__
-
-#define BITPIT_VERSION "@BITPIT_VERSION@"
-
-#include <string>
+#include "version.hpp"
 
 namespace bitpit {
 
-const std::string & getVersion();
+const std::string & getVersion()
+{
+    const static std::string VERSION_STRING = BITPIT_VERSION;
 
+    return VERSION_STRING;
 }
 
-#endif
+}
