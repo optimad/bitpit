@@ -448,7 +448,11 @@ namespace bitpit {
         m_serial    = true;
         m_errorFlag = 0;
 
-        m_maxDepth  = 0;
+        if (createRoot) {
+            m_maxDepth = 0;
+        } else {
+            m_maxDepth = -1;
+        }
 
         m_octree.reset(createRoot);
         m_globalNumOctants = getNumOctants();
@@ -3854,10 +3858,11 @@ namespace bitpit {
         return globalDone;
     }
 
-    /*! Get the local current maximum size of the octree.
-     * \return Local current maximum size of the local partition of the octree.
+    /*! Get the current maximum size of the octree.
+     *  If the tree is empty a negative number is returned.
+     * \return Current maximum size of the octree.
      */
-    uint8_t
+    int8_t
     ParaTree::getMaxDepth() const{
         return m_maxDepth;
     };
@@ -4631,7 +4636,7 @@ namespace bitpit {
                     m_partitionRangeGlobalIdx0[iproc] = m_partitionRangeGlobalIdx[iproc];
                 }
                 //update m_maxDepth
-                m_errorFlag = MPI_Allreduce(&m_octree.m_localMaxDepth,&m_maxDepth,1,MPI_UINT8_T,MPI_MAX,m_comm);
+                m_errorFlag = MPI_Allreduce(&m_octree.m_localMaxDepth,&m_maxDepth,1,MPI_INT8_T,MPI_MAX,m_comm);
                 //update m_globalNumOctants
                 uint64_t local_num_octants = getNumOctants();
                 m_errorFlag = MPI_Allreduce(&local_num_octants,&m_globalNumOctants,1,MPI_UINT64_T,MPI_SUM,m_comm);

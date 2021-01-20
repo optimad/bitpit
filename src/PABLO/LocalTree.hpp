@@ -122,7 +122,7 @@ private:
 	uint64_t			 	m_lastDescMorton;		/**< Morton number of last (Morton order) most refined octant possible in local partition */
 	uint32_t 				m_sizeGhosts;			/**< Size of vector of ghost octants */
 	uint32_t 				m_sizeOctants;			/**< Size of vector of local octants */
-	uint8_t					m_localMaxDepth;		/**< Reached max depth in local tree */
+	int8_t					m_localMaxDepth;		/**< Reached max depth in local tree */
 	uint8_t 				m_balanceCodim;			/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through faces (default);
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 2 = 2:1 balance through edges and faces;
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 3 = 2:1 balance through nodes, edges and faces)*/
@@ -157,7 +157,7 @@ private:
 	uint64_t		getLastDescMorton() const;
 	uint32_t 		getNumGhosts() const;
 	uint32_t 		getNumOctants() const;
-	uint8_t 		getLocalMaxDepth() const;
+	int8_t 			getLocalMaxDepth() const;
 	int8_t 			getMarker(int32_t idx) const;
 	uint8_t 		getLevel(int32_t idx) const;
 	uint64_t 		computeMorton(int32_t idx) const;

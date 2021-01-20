@@ -138,7 +138,7 @@ namespace bitpit {
         std::vector<uint64_t>	m_partitionRangeGlobalIdx0;	 	/**<Global array containing global index of the last existing octant in each processor before the last loadBalance (after an adapt is set equal to the actual.)*/
         uint64_t 				m_globalNumOctants;   			/**<Global number of octants in the parallel octree*/
         int 					m_nproc;						/**<Number of processes of the job*/
-        uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
+        int8_t 					m_maxDepth;						/**<Global max existing level in the parallel octree*/
         const TreeConstants	   *m_treeConstants;				/**<Tree constants*/
         std::size_t 			m_nofGhostLayers;				/**<Global number of ghost layers from the process boundary expressing the depth of the ghost halo*/
 
@@ -477,7 +477,7 @@ namespace bitpit {
         // =================================================================================== //
         // OTHER PARATREE BASED METHODS												    	   //
         // =================================================================================== //
-        uint8_t		getMaxDepth() const;
+        int8_t		getMaxDepth() const;
         int 		findOwner(uint64_t morton) const;
         int 		getOwnerRank(uint64_t globalIdx) const;
         void        settleMarkers();
