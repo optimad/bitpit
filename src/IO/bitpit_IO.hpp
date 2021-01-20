@@ -22,6 +22,10 @@
  *
  \*---------------------------------------------------------------------------*/
 
+#ifndef __BITPIT_MODULE_IO_HPP__
+#define __BITPIT_MODULE_IO_HPP__
+#include "moduleBegin.hpp"
+
 /*!
  * @defgroup IO Input/Output (IO)
  * @{
@@ -36,10 +40,6 @@
  *     @defgroup Logger Logger
  * @}
  */
-
-#ifndef __BITPIT_MODULE_IO_HPP__
-#define __BITPIT_MODULE_IO_HPP__
-#include "moduleBegin.hpp"
 
 #include "binary_archive.hpp"
 #include "configuration.hpp"
