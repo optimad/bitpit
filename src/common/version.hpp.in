@@ -22,9 +22,11 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_BEGIN_HPP__
-#define __BITPIT_MODULE_BEGIN_HPP__
+/*! \file */
 
-#include "version.hpp"
+#ifndef __BITPIT_VERSION_HPP__
+#define __BITPIT_VERSION_HPP__
+
+#define BITPIT_VERSION "@BITPIT_VERSION@"
 
 #endif
