@@ -1199,7 +1199,9 @@ void VTK::readDataHeader( std::fstream &str ){
 
     // Disable all unused fields
     for (const std::string &fieldname : unusedFields) {
-        _findData(fieldname)->disable();
+        VTKField *field = _findData(fieldname);
+        assert(field);
+        field->disable();
     }
 }
 
