@@ -206,11 +206,11 @@ void FlatVector2D<T>::initialize(std::size_t nVectors, const std::size_t *sizes,
 /*!
     Initializes the container.
 
+    \param nVectors is the number of vectors
     \param sizes are the sizes of the vectors
     \param sizesStride is the stride for accessing the sizes
-    \param value are the values of each vector
-    \param sizesStride is the stride for accessing the values
-
+    \param values are the values of each vector
+    \param valuesStride is the stride for accessing the values
 */
 template <class T>
 void FlatVector2D<T>::initialize(std::size_t nVectors,
