@@ -84,6 +84,7 @@ void write(std::ostream &stream, const std::array<T, dim> &container)
     Write the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
+    \param value is the data to write
 */
 template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type*>
 void write(std::ostream &stream, const T &value)
@@ -145,7 +146,7 @@ void write(std::ostream &stream, const T *value, size_t size)
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
-    \param container is the container to write
+    \param[out] container on output it will contain the read values
 */
 template<typename T, typename std::enable_if<std::is_pod<T>::value>::type*>
 void read(std::istream &stream, std::vector<T> &container)
@@ -162,8 +163,8 @@ void read(std::istream &stream, std::vector<T> &container)
 
     Read the given container to the specified stream in binary format.
 
-    \param stream is the stream to write to
-    \param container is the container to write
+    \param stream is the stream to read from
+    \param[out] container on output it will contain the read values
 */
 template<typename T, std::size_t dim, typename std::enable_if<std::is_pod<T>::value>::type*>
 void read(std::istream &stream, std::array<T, dim> &container)
@@ -176,8 +177,8 @@ void read(std::istream &stream, std::array<T, dim> &container)
 
     Read the given container to the specified stream in binary format.
 
-    \param stream is the stream to write to
-    \param container is the container to write
+    \param stream is the stream to read from
+    \param[out] container on output it will contain the read values
 */
 template<typename T, std::size_t dim, typename std::enable_if<!std::is_pod<T>::value>::type*>
 void read(std::istream &stream, std::array<T, dim> &container)
@@ -192,7 +193,8 @@ void read(std::istream &stream, std::array<T, dim> &container)
 
     Read the given container to the specified stream in binary format.
 
-    \param stream is the stream to write to
+    \param stream is the stream to read from
+    \param[out] value on output it will contain the read value
 */
 template<typename T, typename std::enable_if<utils::is_iterable<T>::value>::type*>
 void read(std::istream &stream, T &value)
