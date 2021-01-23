@@ -127,7 +127,6 @@ uint16_t ReconstructionPolynomial::getCoefficientCount(uint8_t degree, uint8_t d
  * Get the number of coefficients of the reconstruction polynomial up to
  * the different degrees.
  *
- * \param degree is the degree
  * \param dimensions is the number of space dimensions
  * \return The number of coefficients of the reconstruction polynomial up to
  * the different degrees.
@@ -264,8 +263,8 @@ void ReconstructionPolynomial::evalPointBasisValues(uint8_t degree, uint8_t dime
  * \param point is the point were the basis will be evaluated
  * \param direction is the direction of the derivative
  * \param point is the point were the basis will be evaluated
- * \param[out] csi on output will contain values of the basis for point
- * reconstruction.
+ * \param[out] dcsi on output will contain values of the basis for point
+ * derivative reconstruction.
  */
 void ReconstructionPolynomial::evalPointBasisDerivatives(uint8_t degree, uint8_t dimensions,  const std::array<double, 3> &origin,
                                                          const std::array<double, 3> &point, const std::array<double, 3> &direction,
@@ -1477,7 +1476,6 @@ void ReconstructionPolynomial::computeGradient(const std::array<double, 3> &poin
  * Computes the gradients of the polynomial at the specified point.
  *
  * \param point is the point were the gradients will be evaluated
- * \param field is the field for which gradients will be evaluated
  * \param[out] gradients on output will contain the gradients
  */
 void ReconstructionPolynomial::computeGradients(const std::array<double, 3> &point,
@@ -1678,7 +1676,6 @@ void ReconstructionPolynomial::computeGradientLimited(const std::array<double, 3
  *
  * \param point is the point were the gradients will be evaluated
  * \param limiters are the scale factors of the limiters
- * \param field is the field for which gradients will be evaluated
  * \param[out] gradients on output will contain the gradients
  */
 void ReconstructionPolynomial::computeGradientsLimited(const std::array<double, 3> &point,
@@ -2154,6 +2151,7 @@ void ReconstructionKernel::assemblePolynomial(const std::array<double, 3> &origi
  * The values need to be passed in the same order as the equations.
  *
  * \param origin is the point chosen as origin of the reconstruction
+ * \param nFields is the number of fields associated with the polynomial
  * \param values are the values associated with the equations, values are
  * grouped by equation, this means that the first element will contain
  * all the values associated with the first equation, the second element
@@ -2287,7 +2285,6 @@ void ReconstructionKernel::updatePolynomial(int nFields, const double **values,
  * The values need to be passed in the same order as the equations.
  *
  * \param degree is the degree of the polynomial
- * \param origin is the point chosen as origin of the reconstruction
  * \param values are the values associated with the equations
  * \param[out] polynomial on output will contain the polynomial
  */
@@ -2318,7 +2315,7 @@ void ReconstructionKernel::updatePolynomial(uint8_t degree, const double *values
  * The values need to be passed in the same order as the equations.
  *
  * \param degree is the degree of the polynomial
- * \param origin is the point chosen as origin of the reconstruction
+ * \param nFields is the number of fields associated with the polynomial
  * \param values are the values associated with the equations, values are
  * grouped by equation, this means that the first element will contain
  * all the values associated with the first equation, the second element
@@ -2365,7 +2362,8 @@ void ReconstructionKernel::updatePolynomial(uint8_t degree, int nFields, const d
  *
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
- * \param[out] weights on output will contain the weights of the reconstruction
+ * \param[out] valueWeights on output will contain the weights of the
+ * reconstruction
  */
 void ReconstructionKernel::computeValueWeights(const std::array<double, 3> &origin,
                                                const std::array<double, 3> &point, double *valueWeights) const
@@ -2388,7 +2386,8 @@ void ReconstructionKernel::computeValueWeights(const std::array<double, 3> &orig
  * \param degree is the degree of the polynomial
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
- * \param[out] weights on output will contain the weights of the reconstruction
+ * \param[out] valueWeights on output will contain the weights of the
+ * reconstruction
  */
 void ReconstructionKernel::computeValueWeights(uint8_t degree, const std::array<double, 3> &origin,
                                                const std::array<double, 3> &point, double *valueWeights) const
@@ -2414,7 +2413,8 @@ void ReconstructionKernel::computeValueWeights(uint8_t degree, const std::array<
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
  * \param limiters are the scale factors of the limiter
- * \param[out] weights on output will contain the weights of the reconstruction
+ * \param[out] valueWeights on output will contain the weights of the
+ * reconstruction
  */
 void ReconstructionKernel::computeValueLimitedWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point,
                                                       const double *limiters, double *valueWeights) const
@@ -2443,7 +2443,8 @@ void ReconstructionKernel::computeValueLimitedWeights(const std::array<double, 3
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
  * \param limiters are the scale factors of the limiter
- * \param[out] weights on output will contain the weights of the reconstruction
+ * \param[out] valueWeights on output will contain the weights of the
+ * reconstruction
  */
 void ReconstructionKernel::computeValueLimitedWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point,
                                                       const double *limiters, double *valueWeights) const
@@ -2480,7 +2481,8 @@ void ReconstructionKernel::computeValueLimitedWeights(uint8_t degree, const std:
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
  * \param direction is the direction of the derivative
- * \param[out] weights on output will contain the weights of the derivative
+ * \param[out] derivativeWeights on output will contain the weights of the
+ * derivative
  */
 void ReconstructionKernel::computeDerivativeWeights(const std::array<double, 3> &origin,
                                                     const std::array<double, 3> &point, const std::array<double, 3> &direction,
@@ -2506,7 +2508,8 @@ void ReconstructionKernel::computeDerivativeWeights(const std::array<double, 3> 
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
  * \param direction is the direction of the derivative
- * \param[out] weights on output will contain the weights of the derivative
+ * \param[out] derivativeWeights on output will contain the weights of the
+ * derivative
  */
 void ReconstructionKernel::computeDerivativeWeights(uint8_t degree, const std::array<double, 3> &origin,
                                                     const std::array<double, 3> &point, const std::array<double, 3> &direction,
@@ -2536,7 +2539,8 @@ void ReconstructionKernel::computeDerivativeWeights(uint8_t degree, const std::a
  * \param point is the point were the reconstruction will be evaluated
  * \param direction is the direction of the derivative
  * \param limiters are the scale factors of the limiters
- * \param[out] weights on output will contain the weights of the derivative
+ * \param[out] derivativeWeights on output will contain the weights of the
+ * derivative
  */
 void ReconstructionKernel::computeDerivativeLimitedWeights(const std::array<double, 3> &origin,
                                                            const std::array<double, 3> &point, const std::array<double, 3> &direction,
@@ -2570,7 +2574,8 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(const std::array<doub
  * \param point is the point were the reconstruction will be evaluated
  * \param direction is the direction of the derivative
  * \param limiters are the scale factors of the limiters
- * \param[out] weights on output will contain the weights of the derivative
+ * \param[out] derivativeWeights on output will contain the weights of the
+ * derivative
  */
 void ReconstructionKernel::computeDerivativeLimitedWeights(uint8_t degree, const std::array<double, 3> &origin,
                                                            const std::array<double, 3> &point, const std::array<double, 3> &direction,
@@ -2607,7 +2612,8 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(uint8_t degree, const
  *
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
- * \param[out] weights on output will contain the weights of the gradient
+ * \param[out] gradientWeights on output will contain the weights of the
+ * gradient
  */
 void ReconstructionKernel::computeGradientWeights(const std::array<double, 3> &origin,
                                                   const std::array<double, 3> &point,
@@ -2631,7 +2637,8 @@ void ReconstructionKernel::computeGradientWeights(const std::array<double, 3> &o
  * \param degree is the degree of the polynomial
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
- * \param[out] weights on output will contain the weights of the gradient
+ * \param[out] gradientWeights on output will contain the weights of the
+ * gradient
  */
 void ReconstructionKernel::computeGradientWeights(uint8_t degree, const std::array<double, 3> &origin,
                                                   const std::array<double, 3> &point,
@@ -2657,7 +2664,8 @@ void ReconstructionKernel::computeGradientWeights(uint8_t degree, const std::arr
  *
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
- * \param[out] weights on output will contain the weights of the gradient
+ * \param[out] gradientWeights on output will contain the weights of the
+ * gradient
  */
 void ReconstructionKernel::computeGradientLimitedWeights(const std::array<double, 3> &origin,
                                                          const std::array<double, 3> &point, const double *limiters,
@@ -2687,7 +2695,8 @@ void ReconstructionKernel::computeGradientLimitedWeights(const std::array<double
  * \param degree is the degree of the polynomial
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
- * \param[out] weights on output will contain the weights of the gradient
+ * \param[out] gradientWeights on output will contain the weights of the
+ * gradient
  */
 void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const std::array<double, 3> &origin,
                                                          const std::array<double, 3> &point, const double *limiters,

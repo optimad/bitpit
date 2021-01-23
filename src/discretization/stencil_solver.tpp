@@ -245,7 +245,7 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowInde
  * Get the values of the specified row.
  *
  * \param rowIndex is the index of the row in the assembler
- * \param pattern on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified row
  */
 template<typename stencil_t>
 void DiscretizationStencilSolverAssembler<stencil_t>::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
@@ -257,7 +257,7 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowValues(long rowIndex
  * Get the values of the specified row.
  *
  * \param rowIndex is the index of the row in the assembler
- * \param pattern on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified row
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
@@ -274,7 +274,7 @@ void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowInde
  * Get the values of the specified row.
  *
  * \param rowIndex is the index of the row in the assembler
- * \param pattern on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified row
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
