@@ -38,30 +38,30 @@ namespace bitpit {
 * The SparseMatrix class mimics the beahviour of the sparse parallel matrix
 * in AIJ format of the PETSc library.
 *
-* The parallel matrix is partitioned across processors such that the first
+* The parallel matrix is partitioned across processes such that the first
 * m0 rows belong to process 0, the next m1 rows belong to process 1, the
 * next m2 rows belong to process 2 etc.. where m0, m1, m2,.. are the local
-* number of rows defined by each processors.
+* number of rows defined by each processes.
 *
-* Each processor stores values corresponding to [m x N] submatrix, wher N
+* Each process stores values corresponding to [m x N] submatrix, wher N
 * is the global number of columns of the matrix, N is obtained summing the
-* local number of columns of each processor.
+* local number of columns of each process.
 *
-* Although each processor stores values for the whole global row, columns are
-* logically partitioned across processors, with the n0 columns belonging to
+* Although each process stores values for the whole global row, columns are
+* logically partitioned across processes, with the n0 columns belonging to
 * 0th partition, the next n1 columns belonging to the next partition etc..
 * where n0, n1, n2... are the local number of columns defined by each
-* processor.
+* process.
 *
-* The DIAGONAL portion of the local submatrix on any given processor is the
+* The DIAGONAL portion of the local submatrix on any given process is the
 * submatrix corresponding to the rows and columns m,n corresponding to the
-* given processor. i.e diagonal matrix on process 0 is [m0 x n0], diagonal
+* given process. i.e diagonal matrix on process 0 is [m0 x n0], diagonal
 * matrix on process 1 is [m1 x n1] etc. The remaining portion of the local
 * submatrix [m x (N-n)] constitute the OFF-DIAGONAL portion.
 *
-* For a square global matrix we define each processor's diagonal portion to
+* For a square global matrix we define each process's diagonal portion to
 * be its local rows and the corresponding columns (a square submatrix); each
-* processor's off-diagonal portion encompasses the remainder of the local
+* process's off-diagonal portion encompasses the remainder of the local
 * matrix (a rectangular submatrix).
 */
 #endif
@@ -340,7 +340,7 @@ void SparseMatrix::squeeze()
 * Its purpose is to prepare the matrix for the usage.
 #if BITPIT_ENABLE_MPI==1
 *
-* It's a collective operation, hence it has to be called by all processors.
+* It's a collective operation, hence it has to be called by all processes.
 #endif
 */
 void SparseMatrix::assembly()
