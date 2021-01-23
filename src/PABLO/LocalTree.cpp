@@ -382,7 +382,7 @@ namespace bitpit {
         } else {
             Octant octDesc(m_dim,TreeConstants::MAX_LEVEL,pow(2,TreeConstants::MAX_LEVEL),pow(2,TreeConstants::MAX_LEVEL),(m_dim > 2 ? pow(2,TreeConstants::MAX_LEVEL) : 0));
             m_lastDescMorton  = octDesc.computeMorton();
-            m_firstDescMorton = std::numeric_limits<uint64_t>::max();
+            m_firstDescMorton = PABLO::INVALID_MORTON;
         }
 
         m_sizeGhosts  = m_ghosts.size();
