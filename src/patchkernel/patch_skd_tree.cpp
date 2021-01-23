@@ -540,7 +540,7 @@ double SkdNode::evalPointDistance(const std::array<double, 3> &point, bool inter
 * between that cell and the given point.
 *
 * \param point is the point
-* \param interiorCellsOnly if set to true, only interior cells will be considered,
+* \param ignoreGhosts if set to true, only interior cells will be considered,
 * it will be possible to consider non-interior cells only if the tree has been
 * instantiated with non-interior cells support enabled
 * \param[out] id on output it will contain the id of the closest cell

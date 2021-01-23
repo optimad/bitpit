@@ -178,8 +178,6 @@ void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> 
 * \param[in] maxDistances are the maximum allowed distances, all cells whose
 * distance is greater than this parameter will not be considered for the
 * evaluation of the distance with respect to the related point
-* \param[in] interiorCellsOnly if set to true, only interior cells will be
-* considered
 * \param[out] distances on output it will contain the distances
 * between the points and closest cells. If all cells contained in the tree are
 * farther than the maximum distance, the related argument will be set to the

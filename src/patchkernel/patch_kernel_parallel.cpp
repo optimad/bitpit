@@ -117,9 +117,9 @@ bool PatchKernel::isCommunicatorSet() const
 }
 
 /*!
-	Gets the MPI communicator associated to the patch
+	Gets the MPI communicator associated with the patch
 
-	\return The MPI communicator associated to the patch.
+	\return The MPI communicator associated with the patch.
 */
 const MPI_Comm & PatchKernel::getCommunicator() const
 {
@@ -127,7 +127,7 @@ const MPI_Comm & PatchKernel::getCommunicator() const
 }
 
 /*!
-	Frees the MPI communicator associated to the patch
+	Frees the MPI communicator associated with the patch.
 */
 void PatchKernel::freeCommunicator()
 {
@@ -145,9 +145,9 @@ void PatchKernel::freeCommunicator()
 }
 
 /*!
-	Gets the MPI rank associated to the patch
+	Gets the MPI rank associated with the patch.
 
-	\return The MPI rank associated to the patch.
+	\return The MPI rank associated with the patch.
 */
 int PatchKernel::getRank() const
 {
@@ -155,9 +155,10 @@ int PatchKernel::getRank() const
 }
 
 /*!
-	Gets the MPI processors in the communicator associated to the patch
+	Count the MPI processes in the communicator associated with the patch.
 
-	\return The MPI processors in the communicator associated to the patch
+	\return The number of MPI processes in the communicator associated with
+	the patch.
 */
 int PatchKernel::getProcessorCount() const
 {
@@ -165,9 +166,9 @@ int PatchKernel::getProcessorCount() const
 }
 
 /*!
-	Check if the patch is distributed among different processors.
+	Check if the patch is distributed among different processes.
 
-	\return Return true if the patch is distributed among different processors,
+	\return Return true if the patch is distributed among different processes,
 	false otherwise.
 */
 bool PatchKernel::isDistributed() const
@@ -176,11 +177,11 @@ bool PatchKernel::isDistributed() const
 }
 
 /*!
-	If the path is NOT distributed among different processors, returns the
-	processor that owns the patch otherwise returns a negative number.
+	If the path is NOT distributed among different processes, returns the
+	process that owns the patch, otherwise returns a negative number.
 
-	\return If the path is NOT distributed among different processors, returns
-	the processor that owns the patch otherwise returns a negative number.
+	\return If the path is NOT distributed among different processes, returns
+	the process that owns the patch, otherwise returns a negative number.
 */
 int PatchKernel::getOwner() const
 {
@@ -190,8 +191,8 @@ int PatchKernel::getOwner() const
 /*!
 	Updates the owner of the patch.
 
-	If the path is NOT distributed among different processors, the owner is
-	the processor that owns the cells otherwise the owner is set to a negative
+	If the path is NOT distributed among different processes, the owner is set
+	to the process that owns the cells, otherwise the owner is set to a negative
 	number.
 */
 void PatchKernel::updateOwner()
@@ -406,7 +407,7 @@ const Vertex & PatchKernel::getFirstGhostVertex() const
 }
 
 /*!
-	Resore the vertex with the specified id.
+	Restore the vertex with the specified id.
 
 	The kernel should already contain the vertex, only the contents of the
 	vertex will be updated.
@@ -636,7 +637,7 @@ PatchKernel::CellIterator PatchKernel::ghostCell2InternalCell(long id)
 /*!
 	Gets the number of ghost cells in the patch.
 
-	\return The number of ghost cells in the patch
+	\return The number of ghost cells in the patch.
 */
 long PatchKernel::getGhostCellCount() const
 {
@@ -646,7 +647,7 @@ long PatchKernel::getGhostCellCount() const
 /*!
 	Gets the number of ghost cells in the patch.
 
-	\return The number of ghost cells in the patch
+	\return The number of ghost cells in the patch.
 */
 long PatchKernel::getGhostCount() const
 {
@@ -696,6 +697,12 @@ const Cell & PatchKernel::getFirstGhost() const
 /*!
 	Adds the specified cell to the patch.
 
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
 	\param source is the cell that will be added
 	\param rank is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
@@ -713,6 +720,12 @@ PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int rank, lon
 
 /*!
 	Adds the specified cell to the patch.
+
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
 
 	\param source is the cell that will be added
 	\param rank is the rank that owns the cell that will be added
@@ -745,6 +758,12 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int rank, long id)
 /*!
 	Adds a new cell with the specified id and type.
 
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
 	\param type is the type of the cell
 	\param rank is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
@@ -768,6 +787,12 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int rank, long 
 /*!
 	Adds a new cell with the specified id, type, and connectivity.
 
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
 	\param type is the type of the cell
 	\param connectivity is the connectivity of the cell
 	\param rank is the rank that owns the cell that will be added
@@ -788,6 +813,12 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vect
 
 /*!
 	Adds a new cell with the specified id, type, and connectivity.
+
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
 
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
@@ -827,6 +858,11 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 
 /*!
 	Internal function to add a ghost cell.
+
+	It is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch or with an invalid id. If this happens, an
+	exception is thrown. Ids are considered valid if they are greater or equal
+	than zero.
 
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
@@ -869,7 +905,7 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 }
 
 /*!
-	Resore the cell with the specified id.
+	Restore the cell with the specified id.
 
 	The kernel should already contain the cell, only the contents of the
 	cell will be updated.
@@ -1061,8 +1097,8 @@ void PatchKernel::updateFirstGhostCellId()
 }
 
 /*!
-	Partitions the patch among the processors. Each cell will be assigned
-	to a specific processor according to the specified input.
+	Partitions the patch among the processes. Each cell will be assigned
+	to a specific process according to the specified input.
 
 	\param communicator is the communicator that will be used
 	\param cellRanks are the ranks of the cells after the partitioning
@@ -1085,8 +1121,8 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const 
 }
 
 /*!
-	Partitions the patch among the processors. Each cell will be assigned
-	to a specific processor according to the specified input.
+	Partitions the patch among the processes. Each cell will be assigned
+	to a specific process according to the specified input.
 
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1108,8 +1144,8 @@ std::vector<adaption::Info> PatchKernel::partition(const std::unordered_map<long
 }
 
 /*!
-	Partitions the patch among the processors. The partitioning is done using
-	a criteria that tries to balance the load among the processors.
+	Partitions the patch among the processes. The partitioning is done using
+	a criteria that tries to balance the load among the processes.
 
 	\param communicator is the communicator that will be used
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1133,8 +1169,8 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool t
 }
 
 /*!
-	Partitions the patch among the processors. The partitioning is done using
-	a criteria that tries to balance the load among the processors.
+	Partitions the patch among the processes. The partitioning is done using
+	a criteria that tries to balance the load among the processes.
 
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1157,12 +1193,12 @@ std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool 
 }
 
 /*!
-	Partitions the patch among the processors. Each cell will be assigned
-	to a specific processor according to the specified input.
+	Partitions the patch among the processes. Each cell will be assigned
+	to a specific process according to the specified input.
 
 	\param communicator is the communicator that will be used
 	\param cellWeights are the weights of the cells, the weight represents the
-	relative computational cost associated to a specified cell. If no weight
+	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, a weight equal to one is used
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1183,11 +1219,11 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const 
 }
 
 /*!
-	Partitions the patch among the processors. Each cell will be assigned
-	to a specific processor according to the specified input.
+	Partitions the patch among the processes. Each cell will be assigned
+	to a specific process according to the specified input.
 
 	\param cellWeights are the weights of the cells, the weight represents the
-	relative computational cost associated to a specified cell. If no weight
+	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, a weight equal to one is used
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1208,8 +1244,8 @@ std::vector<adaption::Info> PatchKernel::partition(const std::unordered_map<long
 }
 
 /*!
-	Partitions the patch among the processors. The partitioning is done using
-	a criteria that tries to balance the load among the processors.
+	Partitions the patch among the processes. The partitioning is done using
+	a criteria that tries to balance the load among the processes.
 
 	\param communicator is the communicator that will be used
 	\param cellRanks are the ranks of the cells after the partitioning
@@ -1230,8 +1266,8 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 }
 
 /*!
-	Partitions the patch among the processors. Each cell will be assigned
-	to a specific processor according to the specified input.
+	Partitions the patch among the processes. Each cell will be assigned
+	to a specific process according to the specified input.
 
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1375,8 +1411,8 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 }
 
 /*!
-	Partitions the patch among the processors. The partitioning is done using
-	a criteria that tries to balance the load among the processors.
+	Partitions the patch among the processes. The partitioning is done using
+	a criteria that tries to balance the load among the processes.
 
 	\param communicator is the communicator that will be used
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1398,8 +1434,8 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 }
 
 /*!
-	Partitions the patch among the processors. The partitioning is done using
-	a criteria that tries to balance the load among the processors.
+	Partitions the patch among the processes. The partitioning is done using
+	a criteria that tries to balance the load among the processes.
 
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1414,12 +1450,12 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartition
 }
 
 /*!
-	Partitions the patch among the processors. The partitioning is done using
-	a criteria that tries to balance the load among the processors.
+	Partitions the patch among the processes. The partitioning is done using
+	a criteria that tries to balance the load among the processes.
 
 	\param communicator is the communicator that will be used
 	\param cellWeights are the weights of the cells, the weight represents the
-	relative computational cost associated to a specified cell. If no weight
+	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, a weight equal to one is used
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1438,11 +1474,11 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 }
 
 /*!
-	Partitions the patch among the processors. The partitioning is done using
-	a criteria that tries to balance the load among the processors.
+	Partitions the patch among the processes. The partitioning is done using
+	a criteria that tries to balance the load among the processes.
 
 	\param cellWeights are the weights of the cells, the weight represents the
-	relative computational cost associated to a specified cell. If no weight
+	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, a weight equal to one is used
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1475,7 +1511,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	Alter the patch performing the partitioning.
 
 	The actual modification of the patch takes place during this phase. After
-	this phase the adapton is completed and the patch is in its final state.
+	this phase the adaption is completed and the patch is in its final state.
 	Optionally the patch can track the changes performed to the patch.
 
 	\param trackPartitioning if set to true the function will return the changes
@@ -1620,7 +1656,7 @@ double PatchKernel::evalPartitioningUnbalance() const
 	Evaluate partitioning load unbalance index.
 
 	\param cellWeights are the weights of the cells, the weight represents the
-	relative computational cost associated to a specified cell. If no weight
+	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, a weight equal to one is used.
 	\result Partitioning load unbalance index.
 */
@@ -1673,7 +1709,7 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 	partition an empty patch.
 
 	\param cellWeights are the weights of the cells, the weight represents the
-	relative computational cost associated to a specified cell. If no weight
+	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, the default weight will be used
 	\param defaultWeight is the default weight that will assigned to the cells
 	for which an explicit weight has not been defined
@@ -1715,7 +1751,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
     // If we are serializing the patch, we need to delete all the ghosts cells.
     //
     // If we are not serializing the patch, some of the cells that will be send
-    // during partitioning may be ghosts on other processors. Therefore, we
+    // during partitioning may be ghosts on other processes. Therefore, we
     // need to identify the owners of the ghosts after the partitioning.
     std::unordered_map<long, int> ghostCellOwnershipChanges;
     if (!m_partitioningSerialization) {
@@ -1797,7 +1833,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
     Get the ghost that will change ownership after partitioning.
 
     Some of the cells that are send during a partitioning may be ghosts on
-    other processors. We need to find out the final ghost owners after the
+    other processes. We need to find out the final ghost owners after the
     partitioning.
 
     This function uses the ghost exchange information.
@@ -1880,7 +1916,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostCellOwner
     Apply changes of ghost ownership for ghosts previously owned by the
     specified sender process.
 
-    \param sendRank is the rank of the processor sending the cells
+    \param sendRank is the rank of the process sending the cells
     \param[in,out] ghostCellOwnershipChanges are the ghosts that will change
     ownership after the partitioning, on output the list will be updated
     removing the ghosts that are no longer on the partition (i.e., ghosts
@@ -2469,9 +2505,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             // Update partition
             //
             // The ids of the cells send will be stored accordingly to the send
-            // order, this is the same order that will be used on the processor
+            // order, this is the same order that will be used on the process
             // that has received the cell. Since the order is the same, the
-            // two processors are able to exchange cell data without additional
+            // two processes are able to exchange cell data without additional
             // communications (they already know the list of cells for which
             // data is needed and the order in which these data will be sent).
             partitioningData.emplace_back();
@@ -2621,7 +2657,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // Delete orphan vertices
         deleteOrphanVertices();
     } else {
-        // The processor has sent all its cells, the patch is now empty
+        // The process has sent all its cells, the patch is now empty
         reset();
         ghostCellOwnershipChanges->clear();
     }
@@ -2648,9 +2684,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 }
 
 /*!
-    Recevies a list of cells from the specified processor.
+    Receives a list of cells from the specified process.
 
-    \param sendRanks are the rank of the processors sending the cells
+    \param sendRanks are the rank of the processes sending the cells
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
     \param[in,out] ghostCellOwnershipChanges are the ghosts that will change
@@ -2717,7 +2753,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
     // Mark border interfaces of ghost cells as dangling
     //
-    // We may recieved cells that connect to the existing mesh through one
+    // We may received cells that connect to the existing mesh through one
     // of the faces that are now borders. Marking those border interfaces as
     // dangling allows to delete them and create new internal interfaces.
     for (auto itr = ghostCellConstBegin(); itr != ghostCellConstEnd(); ++itr) {
@@ -3115,8 +3151,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             //
             // The ids of the cells send will be stored accordingly to the
             // receive order, this is the same order that will be used on the
-            // processor that has sent the cell. Since the order is the same,
-            // the two processors are able to exchange cell data without
+            // process that has sent the cell. Since the order is the same,
+            // the two processes are able to exchange cell data without
             // additional communications (they already know the list of cells
             // for which data is needed and the order in which these data will
             // be sent).
@@ -3257,7 +3293,7 @@ void PatchKernel::_partitioningCleanup()
 }
 
 /*!
-	Gets the rank of the processor that owns the specified cell.
+	Gets the rank of the process that owns the specified cell.
 
 	\param id is the id of the requested cell
 	\result The rank that owns the specified cell.
@@ -3289,7 +3325,7 @@ int PatchKernel::getCellHaloLayer(long id) const
 }
 
 /*!
-	Gets the rank of the processor that owns the specified vertex.
+	Gets the rank of the process that owns the specified vertex.
 
 	\param id is the id of the requested vertex
 	\result The rank that owns the specified vertex.
@@ -3305,10 +3341,10 @@ int PatchKernel::getVertexRank(long id) const
 }
 
 /*!
-	Check if the processors associated to the specified rank is a neighbour.
+	Check if the processes associated with the specified rank is a neighbour.
 
-	\param rank is the rank associated to the processor
-	\result True is the processor is a neighbour, false otherwise.
+	\param rank is the rank associated with the process
+	\result True is the process is a neighbour, false otherwise.
 */
 bool PatchKernel::isRankNeighbour(int rank)
 {
@@ -3332,10 +3368,21 @@ std::vector<int> PatchKernel::getNeighbourRanks()
 }
 
 /*!
-	Gets a constant reference to the ghost targets needed for data exchange.
+	Gets a constant reference to the vertices that define the "targets" for the
+	exchange of data on ghost vertices. For each process, the corresponding list
+	of "targets" is returned.
 
-	\result A constant reference to the ghost targets needed for data
-	exchange.
+	During data exchange, each partition will send the data of its "source"
+	vertices to the corresponding "target" vertices (i.e., ghost vertices) on
+	other partitions.
+
+	Source and target vertices are ordered using a geometrical criterion (the
+	same criterion is used on all the partitions), in this way the n-th source
+	on a partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank data will be received from
+	\result A constant reference to the vertices that define the "targets" for
+	the exchange of data on ghost vertices.
 */
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostVertexExchangeTargets() const
 {
@@ -3343,12 +3390,20 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostVertexEx
 }
 
 /*!
-	Gets a constant reference to the ghost targets needed for data
-	exchange for the specified rank.
+	Gets a constant reference to the vertices that define the "targets" for the
+	exchange of data on ghost vertices with the specified process.
 
-	\param rank is the rank for which the information will be retreived
-	\result A constant reference to the ghost targets needed for data
-	exchange for the specified rank.
+	During data exchange, each partition will send the data of its "source"
+	vertices to the corresponding "target" vertices (i.e., ghost vertices) on
+	other partitions.
+
+	Source and target vertices are ordered using a geometrical criterion (the
+	same criterion is used on all the partitions), in this way the n-th source
+	on a partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank data will be received from
+	\result A constant reference to the vertices that define the "targets" for
+	the exchange of data on ghost vertices with the specified process.
 */
 const std::vector<long> & PatchKernel::getGhostVertexExchangeTargets(int rank) const
 {
@@ -3356,10 +3411,22 @@ const std::vector<long> & PatchKernel::getGhostVertexExchangeTargets(int rank) c
 }
 
 /*!
-	Gets a constant reference to the ghost sources needed for data exchange.
+	Gets a constant reference to the vertices that define the "sources" for the
+	exchange of data on ghost vertices. For each process, the corresponding list
+	of "sources" is returned.
 
-	\result A constant reference to the ghost sources needed for data
-	exchange.
+	Sources are internal vertices (i.e. vertices owned by the current partition)
+	that are ghost vertices on other partitions. When exchanging data on ghost
+	vertices, these vertices will be the sources form which data will be read
+	from.
+
+	Source and target vertices are ordered using a geometrical criterion (the
+	same criterion is used on all the partitions), in this way the n-th source
+	on a partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank data will be send to
+	\result A constant reference to the vertices that define the "sources" for
+	the exchange of data on ghost vertices with the specified process.
 */
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostVertexExchangeSources() const
 {
@@ -3367,12 +3434,21 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostVertexEx
 }
 
 /*!
-	Gets a constant reference to the ghost sources needed for data
-	exchange for the specified rank.
+	Gets a constant reference to the vertices that define the "sources" for the
+	exchange of data on ghost vertices with the specified process.
 
-	\param rank is the rank for which the information will be retreived
-	\result A constant reference to the ghost sources needed for data
-	exchange for the specified rank.
+	Sources are internal vertices (i.e. vertices owned by the current partition)
+	that are ghost vertices on other partitions. When exchanging data on ghost
+	vertices, these vertices will be the sources form which data will be read
+	from.
+
+	Source and target vertices are ordered using a geometrical criterion (the
+	same criterion is used on all the partitions), in this way the n-th source
+	on a partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank to which data will be send
+	\result A constant reference to the vertices that define the "sources" for
+	the exchange of data on ghost vertices with the specified process.
 */
 const std::vector<long> & PatchKernel::getGhostVertexExchangeSources(int rank) const
 {
@@ -3380,10 +3456,21 @@ const std::vector<long> & PatchKernel::getGhostVertexExchangeSources(int rank) c
 }
 
 /*!
-	Gets a constant reference to the ghost targets needed for data exchange.
+	Gets a constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells. For each process, the corresponding list
+	of "targets" is returned.
 
-	\result A constant reference to the ghost targets needed for data
-	exchange.
+	During data exchange, each partition will send the data of its "source"
+	cells to the corresponding "target" cells (i.e., ghost cells) on other
+	partitions.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank data will be received from
+	\result A constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells.
 */
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostCellExchangeTargets() const
 {
@@ -3391,10 +3478,21 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostCellExch
 }
 
 /*!
-	Gets a constant reference to the ghost targets needed for data exchange.
+	Gets a constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells. For each process, the corresponding list
+	of "targets" is returned.
 
-	\result A constant reference to the ghost targets needed for data
-	exchange.
+	During data exchange, each partition will send the data of its "source"
+	cells to the corresponding "target" cells (i.e., ghost cells) on other
+	partitions.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank data will be received from
+	\result A constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells.
 */
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeTargets() const
 {
@@ -3402,12 +3500,20 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchange
 }
 
 /*!
-	Gets a constant reference to the ghost targets needed for data
-	exchange for the specified rank.
+	Gets a constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells with the specified process.
 
-	\param rank is the rank for which the information will be retreived
-	\result A constant reference to the ghost targets needed for data
-	exchange for the specified rank.
+	During data exchange, each partition will send the data of its "source"
+	cells to the corresponding "target" cells (i.e., ghost cells) on other
+	partitions.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank data will be received from
+	\result A constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells with the specified process.
 */
 const std::vector<long> & PatchKernel::getGhostCellExchangeTargets(int rank) const
 {
@@ -3415,12 +3521,20 @@ const std::vector<long> & PatchKernel::getGhostCellExchangeTargets(int rank) con
 }
 
 /*!
-	Gets a constant reference to the ghost targets needed for data
-	exchange for the specified rank.
+	Gets a constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells with the specified process.
 
-	\param rank is the rank for which the information will be retreived
-	\result A constant reference to the ghost targets needed for data
-	exchange for the specified rank.
+	During data exchange, each partition will send the data of its "source"
+	cells to the corresponding "target" cells (i.e., ghost cells) on other
+	partitions.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank data will be received from
+	\result A constant reference to the cells that define the "targets" for the
+	exchange of data on ghost cells with the specified process.
 */
 const std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank) const
 {
@@ -3428,10 +3542,20 @@ const std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank) const
 }
 
 /*!
-	Gets a constant reference to the ghost sources needed for data exchange.
+	Gets a constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells. For each process, the corresponding list
+	of "sources" is returned.
 
-	\result A constant reference to the ghost sources needed for data
-	exchange.
+	Sources are internal cells (i.e. cells owned by the current partition) that
+	are ghost cells on other partitions. When exchanging data on ghost cells,
+	these cells will be the sources form which data will be read from.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\result A constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells.
 */
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostCellExchangeSources() const
 {
@@ -3439,10 +3563,20 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostCellExch
 }
 
 /*!
-	Gets a constant reference to the ghost sources needed for data exchange.
+	Gets a constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells. For each process, the corresponding list
+	of "sources" is returned.
 
-	\result A constant reference to the ghost sources needed for data
-	exchange.
+	Sources are internal cells (i.e. cells owned by the current partition) that
+	are ghost cells on other partitions. When exchanging data on ghost cells,
+	these cells will be the sources form which data will be read from.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\result A constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells.
 */
 const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeSources() const
 {
@@ -3450,38 +3584,52 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchange
 }
 
 /*!
-	Gets a constant reference to the ghost sources needed for data
-	exchange for the specified rank.
+	Gets a constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells with the specified process.
 
-	\param rank is the rank for which the information will be retreived
-	\result A constant reference to the ghost sources needed for data
-	exchange for the specified rank.
+	Sources are internal cells (i.e. cells owned by the current partition) that
+	are ghost cells on other partitions. When exchanging data on ghost cells,
+	these cells will be the sources form which data will be read from.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank to which data will be send
+	\result A constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells with the specified process.
 */
 const std::vector<long> & PatchKernel::getGhostCellExchangeSources(int rank) const
 {
 	return m_ghostCellExchangeSources.at(rank);
 }
 
-
 /*!
-	Gets a constant reference to the ghost sources needed for data
-	exchange for the specified rank.
+	Gets a constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells with the specified process.
 
-	\param rank is the rank for which the information will be retreived
-	\result A constant reference to the ghost sources needed for data
-	exchange for the specified rank.
+	Sources are internal cells (i.e. cells owned by the current partition) that
+	are ghost cells on other partitions. When exchanging data on ghost cells,
+	these cells will be the sources form which data will be read from.
+
+	Source and target cells are ordered using a geometrical criterion (the same
+	criterion is used on all the partitions), in this way the n-th source on a
+	partition will correspond to the n-th target on the other partition.
+
+	\param rank is the rank to which data will be send
+	\result A constant reference to the cells that define the "sources" for the
+	exchange of data on ghost cells with the specified process.
 */
 const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 {
 	return getGhostCellExchangeSources(rank);
 }
 
-
 /*!
 	Sets the owner of the specified ghost vertex.
 
 	\param id is the id of the ghost vertex
-	\param rank is the rank of the processors that owns the ghost vertex
+	\param rank is the rank of the process that owns the ghost vertex
 */
 void PatchKernel::setGhostVertexOwner(int id, int rank)
 {
@@ -3528,7 +3676,7 @@ void PatchKernel::clearGhostVertexOwners()
 	Sets the owner of the specified ghost.
 
 	\param id is the id of the ghost cell
-	\param rank is the rank of the processors that owns the ghost cell
+	\param rank is the rank of the process that owns the ghost cell
 */
 void PatchKernel::setGhostCellOwner(int id, int rank)
 {
@@ -3574,8 +3722,8 @@ void PatchKernel::clearGhostCellOwners()
 /*!
 	Checks if the partitioning information are dirty.
 
-	\param global if set to true, the adaption status will be evaluated
-	globally across all the partitions
+	\param global if set to true, the dirty status will be evaluated globally
+	across all the partitions
 	\result Returns true if the partitioning information are dirty, false
 	otherwise.
 */
@@ -3635,7 +3783,36 @@ void PatchKernel::updatePartitioningInfo(bool forcedUpdated)
 }
 
 /*!
-	Update the information needed for ghost vertex data exchange.
+	Update the information needed for exchanging data on ghost vertices.
+
+	Since vertices are shared among elements, data exchange does not involve
+	only the ranks identified for the target cells, but also all other ranks
+	that have the source cells of this process among their ghosts.
+
+	For example, in a patch like this:
+
+	       V1    V2    V3    V4
+	       +-----+-----+-----+            Vx identifies the vertex x
+	       |  0  |  1  |  2  |
+	       +-----+-----+-----+             x identifies the cell x
+	       V5    V6    V7    V8
+
+	partitioned as the following:
+
+	       +-----+-----+
+	       | I0  | G1  |        Rank 1
+	       +-----+-----+
+	                                      Gx identifies the internal cell x
+	       +-----+-----+-----+
+	       | G0  | I1  | G2  |  Rank 2
+	       +-----+-----+-----+
+	                                      Ix identifies the ghost cell x
+	             +-----+-----+
+	             | I1  | G2  |  Rank 3
+	             +-----+-----+
+
+	the rank 0 has to send data for vertices V2 and V6 both to rank 2 and
+	rank 3.
 */
 void PatchKernel::updateGhostVertexExchangeInfo()
 {
@@ -3714,6 +3891,8 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 	//
 	// Identify exchange targets
 	//
+	// See function Doxygen documentation for an explanation of which ranks are
+	// involved in vertex data exchange.
 
 	// Clear targets
 	m_ghostVertexExchangeTargets.clear();
@@ -3734,34 +3913,8 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 	//
 	// Identify exchange sources
 	//
-	// Since vertices are shared among elements, data exchange does not involve
-	// only the ranks identified for the target cells, but also all other ranks
-	// that have the source cells of this process among their ghosts.
-	//
-	// For example, in a patch like this:
-	//
-	//        V1    V2    V3    V4
-	//        +-----+-----+-----+            Vx identifies the vertex x
-	//        |  0  |  1  |  2  |
-	//        +-----+-----+-----+             x identifies the cell x
-	//        V5    V6    V7    V8
-	//
-	// partitioned as the following:
-	//
-	//        +-----+-----+
-	//        | I0  | G1  |        Rank 1
-	//        +-----+-----+
-	//                                       Gx identifies the internal cell x
-	//        +-----+-----+-----+
-	//        | G0  | I1  | G2  |  Rank 2
-	//        +-----+-----+-----+
-	//                                       Ix identifies the ghost cell x
-	//              +-----+-----+
-	//              | I1  | G2  |  Rank 3
-	//              +-----+-----+
-	//
-	// the rank 0 has to send data for vertices V2 and V6 both to rank 2 and
-	// rank 3.
+	// See function Doxygen documentation for an explanation of which ranks are
+	// involved in vertex data exchange.
 
 	// Compute source distribution
 	//
@@ -3903,7 +4056,7 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 
 	We don't have information on the neighbours of the last layer of ghost
 	cells. To identify the owner of the vertices on the border faces of the
-	last layer of ghosts cells we need to excahgne some information among
+	last layer of ghosts cells we need to exchange some information among
 	the partitions. Each partition will use the local information to define
 	the owner of the vertices of the source and target cells. This tentative
 	values is then communicated among the partitions (the communications is
@@ -4018,7 +4171,7 @@ std::unordered_map<long, int> PatchKernel::evaluateExchangeVertexOwners() const
 }
 
 /*!
-	Update the information needed for ghost cell data exchange.
+	Update the information needed for exchanging data on ghost cells.
 */
 void PatchKernel::updateGhostCellExchangeInfo()
 {
@@ -4061,7 +4214,7 @@ void PatchKernel::updateGhostCellExchangeInfo()
 }
 
 /*!
-	Finds the internal cells that will be ghost cells for the processors
+	Finds the internal cells that will be ghost cells for the process
 	with the specified ranks. During data exchange, these cells will be
 	the sources form which data will be read from.
 
