@@ -1264,8 +1264,8 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// The adaption info associated to the octants that has been received
 		// from external partitions will contain the current octants sorted by
 		// their tree id (we are looping over the octants in that order), this
-		// is the same order that will be used on the processor that has sent
-		// the octants. Since the order is the same, the two processors are able
+		// is the same order that will be used on the process that has sent
+		// the octants. Since the order is the same, the two processes are able
 		// to exchange cell data without any additional extra communication
 		// (they already know the list of cells for which data is needed and
 		// the order in which these data will be sent).
@@ -1302,10 +1302,10 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 			// Previous cells
 			//
-			// A coarsening can merge togheter cells of different processors.
+			// A coarsening can merge togheter cells of different processes.
 			// However, since the coarsening is limited to one level, the
 			// previous cells will always be internal or among the ghost of
-			// the current processor.
+			// the current process.
 			int nPreviousCellIds = mapper_octantMap.size();
 			adaptionInfo.previous.reserve(nPreviousCellIds);
 			for (int k = 0; k < nPreviousCellIds; ++k) {
@@ -1342,7 +1342,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	// Remove octants that are no more in the tree
 	if (!importFromScratch) {
 #if BITPIT_ENABLE_MPI==1
-		// Cells that have been send to other processors need to be removed
+		// Cells that have been send to other processes need to be removed
 		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->getLoadBalanceRanges();
 		for (const auto &rankEntry : loadBalanceRanges.sendRanges) {
 			int rank = rankEntry.first;
@@ -1379,8 +1379,8 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 		// Remove unmapped octants
 		//
-		// A coarsening that merges cells from different processors, can leave, on
-		// the processors which own the ghost octants involved in the coarsening,
+		// A coarsening that merges cells from different processes, can leave, on
+		// the processes which own the ghost octants involved in the coarsening,
 		// some octants that are not mapped.
 		for (uint32_t previousTreeId = 0; previousTreeId < nPreviousOctants; ++previousTreeId) {
 			if (unmappedOctants[previousTreeId]) {
@@ -1407,9 +1407,9 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// The adaption info associated to the octants that has been sent
 		// to external partitions will contain the current octants sorted by
 		// their tree id (they were added to the deleted octants list in that
-		// order), this is the same order that will be used on the processor
+		// order), this is the same order that will be used on the process
 		// that has received the octants. Since the order is the same, the two
-		// processors are able to exchange cell data without any additional
+		// processes are able to exchange cell data without any additional
 		// extra communication (they already know the list of cells for which
 		// data is needed and the order in which these data will be sent).
 		if (trackChanges) {

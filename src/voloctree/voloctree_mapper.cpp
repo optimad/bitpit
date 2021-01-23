@@ -1549,7 +1549,7 @@ void VolOctreeMapper::_communicateInverseMapperBack()
  * Communicate adaption info of overlapped partitions of the mapped mesh to
  * the processes of reference partitions.
  *
- * \param[in] adaptionInfo are the adaptation info that describe the changes
+ * \param[in] adaptionInfoMap are the adaptation info that describe the changes
  * of the local mapped partitions
  * \param[out] adaptionInfoRef are the adaptation info that describe the
  * changes of the local reference partitions

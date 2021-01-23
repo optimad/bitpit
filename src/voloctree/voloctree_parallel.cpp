@@ -221,7 +221,7 @@ void VolOctree::_partitioningCleanup()
 }
 
 /*!
-	Finds the internal cells that will be ghost cells for the processors
+	Finds the internal cells that will be ghost cells for the processes
 	with the specified ranks. During data exchange, these cells will be
 	the sources form which data will be read from.
 
