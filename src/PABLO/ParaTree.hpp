@@ -132,10 +132,10 @@ namespace bitpit {
         };
 
         //undistributed members
-        std::vector<uint64_t>	m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each processor*/
-        std::vector<uint64_t>	m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each processor*/
-        std::vector<uint64_t>	m_partitionRangeGlobalIdx;	 	/**<Global array containing global index of the last existing octant in each processor*/
-        std::vector<uint64_t>	m_partitionRangeGlobalIdx0;	 	/**<Global array containing global index of the last existing octant in each processor before the last loadBalance (after an adapt is set equal to the actual.)*/
+        std::vector<uint64_t>	m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each process*/
+        std::vector<uint64_t>	m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each process*/
+        std::vector<uint64_t>	m_partitionRangeGlobalIdx;	 	/**<Global array containing global index of the last existing octant in each process*/
+        std::vector<uint64_t>	m_partitionRangeGlobalIdx0;	 	/**<Global array containing global index of the last existing octant in each process before the last loadBalance (after an adapt is set equal to the actual.)*/
         uint64_t 				m_globalNumOctants;   			/**<Global number of octants in the parallel octree*/
         int 					m_nproc;						/**<Number of processes of the job*/
         int8_t 					m_maxDepth;						/**<Global max existing level in the parallel octree*/
@@ -144,7 +144,7 @@ namespace bitpit {
 
         //distributed members
         int 					m_rank;							/**<Local m_rank of process*/
-        LocalTree 				m_octree;						/**<Local tree in each processor*/
+        LocalTree 				m_octree;						/**<Local tree in each process*/
         std::map<int,u32vector> m_bordersPerProc;				/**<Local indices of border octants per process*/
         ptroctvector 			m_internals;					/**<Local pointers to internal octants*/
         ptroctvector 			m_pborders;						/**<Local pointers to border of process octants*/
@@ -160,7 +160,7 @@ namespace bitpit {
 
         //auxiliary members
         int 					m_errorFlag;					/**<MPI error flag*/
-        bool 					m_serial;						/**<True if the octree is the same on each processor, False if the octree is distributed*/
+        bool 					m_serial;						/**<True if the octree is the same on each process, False if the octree is distributed*/
         double					m_tol;							/**<Tolerance for geometric operations.*/
 
         //map members

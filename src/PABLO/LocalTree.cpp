@@ -337,7 +337,6 @@ namespace bitpit {
     }
 
     /*!Initialize the octree.
-     * \param[in] maxlevel Maximum refinement level of the octree.
      * \param[in] dim Space dimension of octree.
      */
     void
@@ -1115,7 +1114,7 @@ namespace bitpit {
         //
         // If we want also the neighbours that are ghosts, we always need to
         // search in the ghosts, the only exception is for faces of internal
-        // octants that are not processor boundaries.
+        // octants that are not process boundaries.
         bool ghostSearch = !onlyinternal && (m_sizeGhosts > 0);
         if (ghostSearch){
             if (!oct->getIsGhost() && !oct->getPbound(iface)){

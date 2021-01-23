@@ -585,11 +585,11 @@ namespace bitpit {
             throw std::runtime_error ("The version of the file does not match the required version");
         }
 
-        // Check if the number of processors matches
+        // Check if the number of processes matches
         int nProcs;
         utils::binary::read(stream, nProcs);
         if (nProcs != m_nproc) {
-            throw std::runtime_error ("The restart was saved with a different number of processors.");
+            throw std::runtime_error ("The restart was saved with a different number of processes.");
         }
 
         // Initialize the tree
@@ -949,9 +949,9 @@ namespace bitpit {
 #endif
 
     /*! Get a constant reference to the vector containing the
-     * global index of the last existing octant in each processor.
+     * global index of the last existing octant in each process.
      * \return A constant reference to the vector containing the
-     * global index of the last existing octant in each processor.
+     * global index of the last existing octant in each process.
      */
     const std::vector<uint64_t> &
     ParaTree::getPartitionRangeGlobalIdx() const {
@@ -959,9 +959,9 @@ namespace bitpit {
     };
 
     /*! Get a constant reference to the vector containing the
-     * Morton number of the first octant on each processor.
+     * Morton number of the first octant on each process.
      * \return Constant reference to the vector containing the
-     * Morton number of the first octant on each processor.
+     * Morton number of the first octant on each process.
      */
     const std::vector<uint64_t> &
     ParaTree::getPartitionFirstDesc() const {
@@ -969,9 +969,9 @@ namespace bitpit {
     };
 
     /*! Get a constant reference to the vector containing the
-     * Morton number of the last possible octant on each processor.
+     * Morton number of the last possible octant on each process.
      * \return Constant reference to the vector containing the
-     * Morton number of the last possible octant on each processor.
+     * Morton number of the last possible octant on each process.
      */
     const std::vector<uint64_t> &
     ParaTree::getPartitionLastDesc() const {
@@ -4200,17 +4200,17 @@ namespace bitpit {
 
     /**
      * Evaluate the elements of the current partition that will be exchanged
-     * with other processors during the load balance.
+     * with other processes during the load balance.
      *
      * \param[in] weights are the weights of the local octants (if a null
      * pointer is given a uniform distribution is used)
      * \return The ranges of local ids that will be exchanged with other
-     * processors.
+     * processes.
      */
     ParaTree::LoadBalanceRanges
     ParaTree::evalLoadBalanceRanges(dvector *weights){
 
-        // If there is only one processor no octants can be exchanged
+        // If there is only one process no octants can be exchanged
         if (m_nproc == 1) {
             LoadBalanceRanges loadBalanceInfo;
             loadBalanceInfo.sendAction = LoadBalanceRanges::ACTION_NONE;
@@ -4233,7 +4233,7 @@ namespace bitpit {
 
     /**
      * Evaluate the elements of the current partition that will be exchanged
-     * with other processors during the load balance.
+     * with other processes during the load balance.
      *
      * The families of octants of a desired level are retained compact on the
      * same process.
@@ -4243,12 +4243,12 @@ namespace bitpit {
      * \param[in] weights are the weights of the local octants (if a null
      * pointer is given a uniform distribution is used)
      * \return The ranges of local ids that will be exchanged with other
-     * processors.
+     * processes.
      */
     ParaTree::LoadBalanceRanges
     ParaTree::evalLoadBalanceRanges(uint8_t level, dvector *weights){
 
-        // If there is only one processor no octants can be sent
+        // If there is only one process no octants can be sent
         if (m_nproc == 1) {
             LoadBalanceRanges loadBalanceInfo;
             loadBalanceInfo.sendAction = LoadBalanceRanges::ACTION_NONE;
@@ -4267,16 +4267,16 @@ namespace bitpit {
 
     /**
      * Evaluate the elements of the current partition that will be exchanged
-     * with other processors during the load balance.
+     * with other processes during the load balance.
      *
      * \param[in] updatedPartition is the pointer to the updated pattition
      * \return The ranges of local ids that will be exchanged with other
-     * processors.
+     * processes.
      */
     ParaTree::LoadBalanceRanges
     ParaTree::evalLoadBalanceRanges(const uint32_t *updatedPartition){
 
-        // If there is only one processor no octants can be sent
+        // If there is only one process no octants can be sent
         if (m_nproc == 1) {
              LoadBalanceRanges loadBalanceInfo;
             loadBalanceInfo.sendAction = LoadBalanceRanges::ACTION_NONE;
@@ -4293,17 +4293,17 @@ namespace bitpit {
 
     /**
      * Evaluate the elements of the current partition that will be sent to
-     * other processors after the load balance.
+     * other processes after the load balance.
      *
      * \param[in] updatedPartition is the pointer to the updated pattition
-     * \return The range of local ids that will be sent to other processors.
+     * \return The range of local ids that will be sent to other processes.
      */
     ParaTree::ExchangeRanges
     ParaTree::evalLoadBalanceSendRanges(const uint32_t *updatedPartition){
 
         ExchangeRanges sendRanges;
 
-        // If there is only one processor no octants can be sent
+        // If there is only one process no octants can be sent
         if (m_nproc == 1) {
             return sendRanges;
         }
@@ -4346,18 +4346,18 @@ namespace bitpit {
 
     /**
      * Evaluate the elements of the current partition that will be received
-     * from other processors after the load balance.
+     * from other processes after the load balance.
      *
      * \param[in] updatedPartition is the pointer to the updated pattition
      * \return The range of local ids that will be received from other
-     * processors.
+     * processes.
      */
     ParaTree::ExchangeRanges
     ParaTree::evalLoadBalanceRecvRanges(const uint32_t *updatedPartition){
 
         ExchangeRanges recvRanges;
 
-        // If there is only one processor no octants can be received
+        // If there is only one process no octants can be received
         if (m_nproc == 1) {
             return recvRanges;
         }
@@ -5022,7 +5022,7 @@ namespace bitpit {
                 }
             }
 
-            // Build list of internal and processor borders octants
+            // Build list of internal and process borders octants
             if (neighProcs.empty()){
                 m_internals[countint] = &octant;
                 countint++;
@@ -5069,8 +5069,8 @@ namespace bitpit {
         // sources exists.
         //
         // Sources are identified one layer at a time. The first layer is
-        // already known: the processor-border octants. The neighbors of
-        // processor-border octants are the second layer of sources; the
+        // already known: the process-border octants. The neighbors of
+        // process-border octants are the second layer of sources; the
         // neighbors of the second layer of sources are the third layer,
         // and so on an so forth.
         //
@@ -5081,16 +5081,16 @@ namespace bitpit {
         // the sources gathered by the accretion will be ghosts.
         //
         // The identification of the sources starts creating one accretions for
-        // each of the neighboring processors. The accretions are initialized
-        // using the processor-border octants already build: those octants are
+        // each of the neighboring processes. The accretions are initialized
+        // using the process-border octants already build: those octants are
         // the first layer of sources and the seeds for the generation of the
         // second layer. Adding the internal neighbors of the internal seeds to
         // the population, accretions are grown one layer at a time. When an
-        // accretion reaches a neighboring processors (i.e., when a first-layer
+        // accretion reaches a neighboring processes (i.e., when a first-layer
         // ghost enters in the list of foreign seeds), we communicate to the
         // owner of the ghost to create a new accretion and continue the search
         // for the sources. At the end of the procedure, the population of the
-        // accretions on each processor will contain the desired sources.
+        // accretions on each process will contain the desired sources.
 
         // Initialize cache for 1-rings of the internal octants
         std::unordered_map<uint32_t, std::vector<uint64_t>> oneRingsCache;
@@ -5108,7 +5108,7 @@ namespace bitpit {
             // Exchange accretions
             //
             // When a ghost is incorporated in the seeds, the accretion
-            // needs to continue on the processor that owns the ghost.
+            // needs to continue on the process that owns the ghost.
             exchangeGhostHaloAccretions(&accretionDataCommunicator, &accretions);
 
             // Grow accretions
@@ -5118,14 +5118,14 @@ namespace bitpit {
         // To correctly identify the population of the last layer of sources,
         // we need to exchange the accretions one more time. This allows to
         // communicate the foreign seeds found during the last growth to the
-        // processors that own them.
+        // processes that own them.
         exchangeGhostHaloAccretions(&accretionDataCommunicator, &accretions);
 
         //
         // Extract list of sources
         //
-        // Sources are internal octants that are ghosts for other processors,
-        // i.e., internal octants on processors borders (pborder octants).
+        // Sources are internal octants that are ghosts for other processes,
+        // i.e., internal octants on processes borders (pborder octants).
         // The population of the accretions is exaclty made of the sources
         // for the target rank of the accretion.
         for(const AccretionData &accretion : accretions){
@@ -5176,7 +5176,7 @@ namespace bitpit {
             // Initialize the first layer
             //
             // The population and the seeds of the first layer are the octants
-            // on processors borders.
+            // on processes borders.
             const std::vector<uint32_t> &rankBordersPerProc = bordersPerProcEntry.second;
             const std::size_t nRankBordersPerProc = rankBordersPerProc.size();
 
@@ -5284,7 +5284,7 @@ namespace bitpit {
         }
     }
 
-    /*! Exchange the accretions among neighbouring processors.
+    /*! Exchange the accretions among neighbouring processes.
      *
      * Accretions are auxiliary data structures needed for generation of ghost
      * halo. An explanation of how ghost halo is generated can be found in the
@@ -5298,7 +5298,7 @@ namespace bitpit {
     ParaTree::exchangeGhostHaloAccretions(DataCommunicator *dataCommunicator,
                                           std::vector<AccretionData> *accretions) {
 
-        // Generate accretions that has to be sent to other processors
+        // Generate accretions that has to be sent to other processes
         //
         // When the accretion reaches a foreign process (i.e., a ghost is
         // added to the seeds), the ranks that owns the ghost seed have to
