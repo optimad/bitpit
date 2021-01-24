@@ -35,7 +35,7 @@ using namespace bitpit;
 * Subtest 001
 *
 * Testing coarsening of a 2D patch that merges octants from different
-* processors.
+* processes.
 */
 int subtest_001()
 {
@@ -104,7 +104,7 @@ int subtest_001()
 * Subtest 002
 *
 * Testing coarsening of a 3D patch that merges octants from different
-* processors.
+* processes.
 */
 int subtest_002()
 {
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 	log::cout().setVisibility(log::GLOBAL);
 
 	// Run the subtests
-    log::cout() << "Testing coarsening that merges octants from different processors" << std::endl;
+    log::cout() << "Testing coarsening that merges octants from different processes" << std::endl;
 
 	int status;
 	try {

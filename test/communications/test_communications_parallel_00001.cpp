@@ -42,7 +42,7 @@ int getSendCount(int dstRank)
  *
  * After setting the sends, the DataCommunicator is used to automatically
  * discorver and set the receives. Finally some data is communicated among
- * the processors.
+ * the processes.
  *
  * \param rank is the rank of the process
  * \param nProcs is the number of processes

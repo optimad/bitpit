@@ -57,7 +57,7 @@ int subtest_001(int rank)
 	// Partition the patch
 	patch_2D->partition(true);
 
-	// Refine one processor
+	// Refine the patch on one process
 	if(rank==0){
 		for(const auto& cell:patch_2D->getCells()){
 			patch_2D->markCellForRefinement(cell.getId());
@@ -123,7 +123,7 @@ int subtest_002(int rank)
 	// Partition the patch
 	patch_3D->partition(true);
 
-	// Refine one processor
+	// Refine the patch on one process
 	if(rank==0){
 		for(const auto& cell:patch_3D->getCells()){
 			patch_3D->markCellForRefinement(cell.getId());

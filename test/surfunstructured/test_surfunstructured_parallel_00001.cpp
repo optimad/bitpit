@@ -582,7 +582,7 @@ if (mesh.getRank() == 0) {
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
-    // Send cells to neighboring processors --------------------------------- //
+    // Send cells to neighboring processes --------------------------------- //
     log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
     log::cout() << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
@@ -632,7 +632,7 @@ if (mesh.getRank() == 0) {
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
-    // Send cells to neighboring processors --------------------------------- //
+    // Send cells to neighboring processes --------------------------------- //
     log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
     log::cout() << "   sending cell: " << cell_list << " from 0 to 2" << endl;
@@ -799,7 +799,7 @@ if (mesh.getRank() == 0) {
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
-    // Send cells to neighboring processors --------------------------------- //
+    // Send cells to neighboring processes --------------------------------- //
     log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
     log::cout() << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
@@ -863,7 +863,7 @@ if (mesh.getRank() == 0) {
     high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
-    // Send cells to neighboring processors --------------------------------- //
+    // Send cells to neighboring processes --------------------------------- //
     log::cout() << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
 
     log::cout() << "   sending cell: " << cell_list << " from 0 to 3" << endl;

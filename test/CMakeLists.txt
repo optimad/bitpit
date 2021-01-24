@@ -44,7 +44,7 @@ function(isTestParallel TEST_ENTRY PARALLEL_FLAG)
 	endif ()
 endfunction()
 
-# Get the number of processors a test has to run on
+# Get the number of processes a test has to run on
 function(getTestNumProcs TEST_ENTRY N_PROCS)
 	isTestParallel("${TEST_ENTRY}" IS_TEST_PARALLEL)
 	if (NOT IS_TEST_PARALLEL)
