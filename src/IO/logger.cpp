@@ -740,9 +740,9 @@ int Logger::getIndentation()
 }
 
 /*!
-    Gets the processors in the communicator.
+    Count the nuomber of processes in the communicator.
 
-    \result The processors in the communicator.
+    \result The number of processes in the communicator.
 */
 int Logger::getProcessorCount()
 {
@@ -984,7 +984,7 @@ Logger & LoggerManager::cout(const std::string &name)
 
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processors in the communicator
+    \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset,
@@ -999,7 +999,7 @@ void LoggerManager::initialize(log::Mode mode, bool reset,
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
     \param directory is the defualt directory for saving the log files
-    \param nProcessors is the total number of processors in the communicator
+    \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &directory,
@@ -1015,7 +1015,7 @@ void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &di
     \param name is the name for the default logger
     \param reset if true the log files will be reset
     \param directory is the defualt directory for saving the log files
-    \param nProcessors is the total number of processors in the communicator
+    \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, const std::string &name, bool reset,
@@ -1043,7 +1043,7 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
 
     \param name is the name for the logger
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processors in the communicator
+    \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
@@ -1058,7 +1058,7 @@ void LoggerManager::create(const std::string &name, bool reset,
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processors in the communicator
+    \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
@@ -1195,7 +1195,7 @@ log::Mode LoggerManager::getMode() const
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processors in the communicator
+    \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::_create(const std::string &name, bool reset,
