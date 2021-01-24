@@ -2,7 +2,7 @@
  *
  *  bitpit
  *
- *  Copyright (C) 2015-2019 OPTIMAD engineering Srl
+ *  Copyright (C) 2015-2021 OPTIMAD engineering Srl
  *
  *  -------------------------------------------------------------------------
  *  License
@@ -38,7 +38,7 @@ namespace bitpit {
     \date			09/sep/2015
     \authors		Edoardo Lombardi
     \authors		Marco Cisternino
-    \copyright		Copyright (C) 2014-2019 OPTIMAD engineering srl. All rights reserved.
+    \copyright		Copyright (C) 2014-2021 OPTIMAD engineering srl. All rights reserved.
     \par			License
     This version of PABLO is released under the LGPL License.
     
