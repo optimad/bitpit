@@ -44,7 +44,7 @@ using namespace bitpit;
   
   The example is the parallel version of PABLO_example_00003.
   
-  In order to perform the smoothing procedure in parallel, ghost elements and data communications towards them are needed. Now ghost quadrants and ghost data are not only instantiated, as in example 00003, but actually used to perform smoothing across processor borders.
+  In order to perform the smoothing procedure in parallel, ghost elements and data communications towards them are needed. Now ghost quadrants and ghost data are not only instantiated, as in example 00003, but actually used to perform smoothing across process borders.
   
   The user data communication interfaces are based on the Couriously Recurrent Template Pattern. The user has to implement a specification of the interface by writing a derived class.
   In the files PABLO_userDataComm.hpp and PABLO_userDataComm.tpp an example of this specification is given in the case of user data stored in a POD container similar to the STL vector.
