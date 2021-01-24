@@ -38,7 +38,7 @@ namespace bitpit {
     \ingroup communications
 
     \brief The DataCommunicator class provides the infrastructure needed to
-    exchange data among processors.
+    exchange data among processes.
 */
 
 /*!
@@ -430,7 +430,7 @@ void DataCommunicator::discoverRecvs()
 }
 
 /*!
-    Clear the send associated to the specified processor.
+    Clear the send associated to the specified process.
 
     \param rank is the ranks associated to the send that will be cleared
 */
@@ -458,7 +458,7 @@ void DataCommunicator::clearSend(int rank)
 }
 
 /*!
-    Clear the receive associated to the specified processor.
+    Clear the receive associated to the specified process.
 
     \param rank is the ranks associated to the receive that will be cleared
 */
@@ -532,7 +532,7 @@ void DataCommunicator::clearAllRecvs(bool synchronous)
 /*!
     Set send information for the specified rank
 
-    \param rank is the rank of the processor associated to the send
+    \param rank is the rank of the process associated to the send
     \param length is the length, expressed in bytes, of the data to be sent
 */
 void DataCommunicator::setSend(int rank, long length)
@@ -552,7 +552,7 @@ void DataCommunicator::setSend(int rank, long length)
 /*!
     Set recevie information for the specified rank
 
-    \param rank is the rank of the processor associated to the receive
+    \param rank is the rank of the process associated to the receive
     \param length is the length, expressed in bytes, of the data to be received
 */
 void DataCommunicator::setRecv(int rank, long length)
@@ -577,7 +577,7 @@ void DataCommunicator::setRecv(int rank, long length)
 /*!
     Resize the send associated to the specified rank
 
-    \param rank is the rank of the processor associated to the send
+    \param rank is the rank of the process associated to the send
     \param size is the size, expressed in bytes, of the send
 */
 void DataCommunicator::resizeSend(int rank, long size)
@@ -589,7 +589,7 @@ void DataCommunicator::resizeSend(int rank, long size)
         return;
     }
 
-    // Cancel the send associated to the processor
+    // Cancel the send associated to the process
     cancelSend(rank);
 
     // Resize the buffer
@@ -600,7 +600,7 @@ void DataCommunicator::resizeSend(int rank, long size)
 /*!
     Resize the receive associated to the specified rank
 
-    \param rank is the rank of the processor associated to the receive
+    \param rank is the rank of the process associated to the receive
     \param size is the size, expressed in bytes, of the receive
 */
 void DataCommunicator::resizeRecv(int rank, long size)
@@ -612,7 +612,7 @@ void DataCommunicator::resizeRecv(int rank, long size)
         return;
     }
 
-    // Cancel the receive associated to the processor
+    // Cancel the receive associated to the process
     cancelRecv(rank);
 
     // Resize the buffer
@@ -1089,7 +1089,7 @@ void DataCommunicator::cancelAllSends(bool synchronous)
     //
     // We will receive a notification from all the processes for which a
     // receive has been set. A notification equal to one means that the
-    // send request on that processor that matches the receive of this rank has
+    // send request on that process that matches the receive of this rank has
     // been successfully cancelled.
     int nRecvNotifications = getRecvCount();
     std::vector<MPI_Request> recvNotificationRequests(nRecvNotifications);
@@ -1166,7 +1166,7 @@ void DataCommunicator::cancelAllRecvs(bool synchronous)
     //
     // We will receive a notification from all the processes for which a
     // send has been set. A notification equal to one means that the receive
-    // request on that processor that matches the send of this rank has
+    // request on that process that matches the send of this rank has
     // been successfully cancelled.
     int nRecvNotifications = getSendCount();
     std::vector<MPI_Request> recvNotificationRequests(nRecvNotifications);
