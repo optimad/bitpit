@@ -827,7 +827,6 @@ void PatchKernel::reset()
 void PatchKernel::resetVertices()
 {
 	m_vertices.clear();
-	PiercedVector<Vertex>().swap(m_vertices);
 	m_vertexIdGenerator.reset();
 	m_nInternalVertices = 0;
 #if BITPIT_ENABLE_MPI==1
@@ -849,7 +848,6 @@ void PatchKernel::resetVertices()
 void PatchKernel::resetCells()
 {
 	m_cells.clear();
-	PiercedVector<Cell>().swap(m_cells);
 	m_cellIdGenerator.reset();
 	m_nInternalCells = 0;
 #if BITPIT_ENABLE_MPI==1
@@ -913,7 +911,6 @@ void PatchKernel::_resetInterfaces()
 	}
 
 	m_interfaces.clear();
-	PiercedVector<Interface>().swap(m_interfaces);
 	m_interfaceIdGenerator.reset();
 }
 
