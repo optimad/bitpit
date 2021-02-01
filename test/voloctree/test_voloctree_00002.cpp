@@ -163,7 +163,11 @@ int subtest_001(const std::array<double, 3> &origin, double length, double dh)
 	log::cout() << std::endl;
 	log::cout() << ">> Creating the patch" << std::endl;
 
+#if BITPIT_ENABLE_MPI
+	VolOctree *patch = new VolOctree(2, origin, length, dh, MPI_COMM_NULL);
+#else
 	VolOctree *patch = new VolOctree(2, origin, length, dh);
+#endif
 	patch->getVTK().setName("octree_adapted_patch_2D");
 	patch->initializeAdjacencies();
 	patch->initializeInterfaces();
@@ -244,7 +248,11 @@ int subtest_002(const std::array<double, 3> &origin, double length, double dh)
 	log::cout() << std::endl;
 	log::cout() << ">> Creating patch" << std::endl;
 
+#if BITPIT_ENABLE_MPI
+	VolOctree *patch = new VolOctree(3, origin, length, dh, MPI_COMM_NULL);
+#else
 	VolOctree *patch = new VolOctree(3, origin, length, dh);
+#endif
 	patch->getVTK().setName("octree_adapted_patch_3D");
 	patch->initializeAdjacencies();
 	patch->initializeInterfaces();

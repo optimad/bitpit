@@ -65,15 +65,16 @@ public:
 		}
 	};
 
-	VolOctree();
-	VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh);
-	VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh);
-	VolOctree(std::istream &stream);
 #if BITPIT_ENABLE_MPI==1
 	VolOctree(MPI_Comm communicator, std::size_t haloSize = 1);
 	VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize = 1);
 	VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize = 1);
 	VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t haloSize = 1);
+#else
+	VolOctree();
+	VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh);
+	VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh);
+	VolOctree(std::istream &stream);
 #endif
 	VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
 	VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);

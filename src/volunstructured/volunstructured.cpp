@@ -39,78 +39,81 @@ namespace bitpit {
 	a dummy interface, the real implementation will come in a future release.
 */
 
-/*!
-	Creates an uninitialized serial patch.
-*/
-VolUnstructured::VolUnstructured()
 #if BITPIT_ENABLE_MPI==1
-	: VolUnstructured(MPI_COMM_NULL)
-{
-}
-
 /*!
 	Creates an uninitialized partitioned patch.
 
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 */
 VolUnstructured::VolUnstructured(MPI_Comm communicator)
 	: VolumeKernel(communicator, 1, true)
 #else
+/*!
+	Creates an uninitialized serial patch.
+*/
+VolUnstructured::VolUnstructured()
 	: VolumeKernel(true)
 #endif
 {
 }
 
-/*!
-	Creates a serial patch.
-
-	\param dimension is the dimension of the patch
-*/
-VolUnstructured::VolUnstructured(int dimension)
 #if BITPIT_ENABLE_MPI==1
-	: VolUnstructured(dimension, MPI_COMM_NULL)
-{
-}
-
 /*!
-	Creates a partitioned patch.
+	Creates a patch.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
 
 	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 */
 VolUnstructured::VolUnstructured(int dimension, MPI_Comm communicator)
 	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension, communicator)
 #else
+/*!
+	Creates a patch.
+
+	\param dimension is the dimension of the patch
+*/
+VolUnstructured::VolUnstructured(int dimension)
 	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension)
 #endif
 {
 }
 
+#if BITPIT_ENABLE_MPI==1
 /*!
-	Creates a serial patch.
+	Creates a patch.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
+	\param id is the id of the patch
+	\param dimension is the dimension of the patch
+	\param communicator is the communicator to be used for exchanging data
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
+*/
+VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator)
+	: VolumeKernel(id, dimension, communicator, 1, true)
+#else
+/*!
+	Creates a patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 */
 VolUnstructured::VolUnstructured(int id, int dimension)
-#if BITPIT_ENABLE_MPI==1
-	: VolUnstructured(id, dimension, MPI_COMM_NULL)
-{
-}
-
-/*!
-	Creates a partitioned patch.
-
-	\param id is the id of the patch
-	\param dimension is the dimension of the patch
-	\param communicator is the communicator to be used for exchanging data
-	among the processes
-*/
-VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator)
-	: VolumeKernel(id, dimension, communicator, 1, true)
-#else
 	: VolumeKernel(id, dimension, true)
 #endif
 {

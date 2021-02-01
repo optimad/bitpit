@@ -105,7 +105,11 @@ int main(int argc, char *argv[])
     std::array<double, 3> minimum = center  - length / 2.;
     double dh = length / 16.;
 
+#if BITPIT_ENABLE_MPI
+    VolOctree mesh(3, minimum, length, dh, MPI_COMM_NULL);
+#else
     VolOctree mesh(3, minimum, length, dh);
+#endif
     mesh.initializeAdjacencies();
     mesh.update();
 
