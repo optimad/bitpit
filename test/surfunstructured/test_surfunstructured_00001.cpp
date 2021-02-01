@@ -231,7 +231,11 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
+#if BITPIT_ENABLE_MPI
+SurfUnstructured                        mesh(2, 3, MPI_COMM_NULL);
+#else
 SurfUnstructured                        mesh(2, 3);
+#endif
 Cell                                    cell_17, cell_5, cell_7;
 vector<long>                            cell_list;
 
@@ -270,7 +274,11 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
+#if BITPIT_ENABLE_MPI
+    SurfUnstructured                    envelope(2, 3, MPI_COMM_NULL);
+#else
     SurfUnstructured                    envelope(2, 3);
+#endif
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -341,7 +349,11 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
+#if BITPIT_ENABLE_MPI
+    SurfUnstructured                    envelope(2, 3, MPI_COMM_NULL);
+#else
     SurfUnstructured                    envelope(2, 3);
+#endif
     vector<long>                        ring1, ring1_expected{6,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -421,7 +433,11 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
+#if BITPIT_ENABLE_MPI
+    SurfUnstructured                    envelope(2, 3, MPI_COMM_NULL);
+#else
     SurfUnstructured                    envelope(2, 3);
+#endif
     vector<long>                        ring1, ring1_expected{4,6,7,19,20,21};
     SurfUnstructured::CellIterator      it;
 
@@ -542,7 +558,11 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
+#if BITPIT_ENABLE_MPI
+SurfUnstructured                mesh(2, 3, MPI_COMM_NULL);
+#else
 SurfUnstructured                mesh(2, 3);
+#endif
 vector<long>                    c_connect{0, 1, 2};
 vector<long>                    g_connect{3, 4, 5};
 Cell                            cell(0, ElementType::TRIANGLE, true);

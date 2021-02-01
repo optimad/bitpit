@@ -51,7 +51,11 @@ int subtest_001(SurfUnstructured *patch_2D, SurfUnstructured *patch_2D_restored)
 
 	const std::string fielname_2D = "./data/cube.stl";
 
+#if BITPIT_ENABLE_MPI
+	patch_2D = new SurfUnstructured(2, 2, MPI_COMM_NULL);
+#else
 	patch_2D = new SurfUnstructured(2, 2);
+#endif
 	patch_2D->importSTL(fielname_2D);
 	patch_2D->getVTK().setName("surfunstructured_patch_2D");
 
@@ -74,7 +78,11 @@ int subtest_001(SurfUnstructured *patch_2D, SurfUnstructured *patch_2D_restored)
 	// Restore the patch
 	log::cout() << "Restoring 2D patch..." << std::endl;
 
+#if BITPIT_ENABLE_MPI
+	patch_2D_restored = new SurfUnstructured(MPI_COMM_NULL);
+#else
 	patch_2D_restored = new SurfUnstructured();
+#endif
 	IBinaryArchive binaryReader2D("surfunstructured_patch_2D.dat");
 	patch_2D_restored->restore(binaryReader2D.getStream());
 	binaryReader2D.close();

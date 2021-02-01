@@ -46,7 +46,11 @@ int subtest_001()
 
     log::cout() << "\n\n:: 2D unstructured patch ::\n";
 
+#if BITPIT_ENABLE_MPI
+    VolUnstructured *patch_2D = new VolUnstructured(0, 2, MPI_COMM_NULL);
+#else
     VolUnstructured *patch_2D = new VolUnstructured(0, 2);
+#endif
     patch_2D->getVTK().setName("unstructured_uniform_patch_2D");
 
     patch_2D->addVertex({{0.00000000, 0.00000000, 0.00000000}},  1);
@@ -188,7 +192,11 @@ int subtest_002()
 
     log::cout() << "\n\n:: 3D unstructured mesh ::\n";
 
+#if BITPIT_ENABLE_MPI
+    VolUnstructured *patch_3D = new VolUnstructured(0, 3, MPI_COMM_NULL);
+#else
     VolUnstructured *patch_3D = new VolUnstructured(0, 3);
+#endif
     patch_3D->getVTK().setName("unstructured_uniform_patch_3D");
 
     patch_3D->addVertex({{0.00000000, 0.00000000,  0.00000000}},  1);

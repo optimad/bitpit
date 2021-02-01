@@ -48,31 +48,33 @@ namespace bitpit {
 	PatchKernel is the base class for defining patches.
 */
 
-/*!
-	Creates a serial patch.
-
-	\param expert if true, the expert mode will be enabled
-*/
-PatchKernel::PatchKernel(bool expert)
 #if BITPIT_ENABLE_MPI==1
-    : PatchKernel(MPI_COMM_NULL, 0, expert)
-{
-}
-
 /*!
-	Creates a partitioned patch.
+	Creates a patch.
 
 	Patches that are filled automatically (e.g. VolOctree) will initialize
 	the cells only on the process identified by the rank zero in the
 	communicator.
 
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool expert)
+#else
+/*!
+	Creates a patch.
+
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(bool expert)
 #endif
 	: m_expert(expert)
 {
@@ -87,33 +89,35 @@ PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool exper
 	patch::manager().registerPatch(this);
 }
 
-/*!
-	Creates a serial patch.
-
-	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
-*/
-PatchKernel::PatchKernel(int dimension, bool expert)
 #if BITPIT_ENABLE_MPI==1
-    : PatchKernel(dimension, MPI_COMM_NULL, 0, expert)
-{
-}
-
 /*!
-	Creates a partitioned patch.
+	Creates a patch.
 
 	Patches that are filled automatically (e.g. VolOctree) will initialize
 	the cells only on the process identified by the rank zero in the
 	communicator.
 
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
 	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+#else
+/*!
+	Creates a patch.
+
+	\param dimension is the dimension of the patch
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(int dimension, bool expert)
 #endif
 	: m_expert(expert)
 {
@@ -131,35 +135,37 @@ PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloS
 	setDimension(dimension);
 }
 
+#if BITPIT_ENABLE_MPI==1
 /*!
-	Creates a serial patch.
+	Creates a patch.
+
+	Patches that are filled automatically (e.g. VolOctree) will initialize
+	the cells only on the process identified by the rank zero in the
+	communicator.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param communicator is the communicator to be used for exchanging data
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+	\param expert if true, the expert mode will be enabled
+*/
+PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+#else
+/*!
+	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(int id, int dimension, bool expert)
-#if BITPIT_ENABLE_MPI==1
-    : PatchKernel(id, dimension, MPI_COMM_NULL, 0, expert)
-{
-}
-
-/*!
-	Creates a partitioned patch.
-
-	Patches that are filled automatically (e.g. VolOctree) will initialize
-	the cells only on the process identified by the rank zero in the
-	communicator.
-
-	\param id is the id that will be assigned to the patch
-	\param dimension is the dimension of the patch
-	\param communicator is the communicator to be used for exchanging data
-	among the processes
-	\param haloSize is the size, expressed in number of layers, of the ghost
-	cells halo
-	\param expert if true, the expert mode will be enabled
-*/
-PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
 #endif
 	: m_expert(expert)
 {

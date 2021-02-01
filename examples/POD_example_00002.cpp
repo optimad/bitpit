@@ -88,7 +88,11 @@ void run(int rank, int nProcs)
     if (rank==0) 
         std::cout<< "2. Read snapshot for reconstruction ..." << std::endl;
 
+#if BITPIT_ENABLE_MPI
+    VolumeKernel* meshr = new VolOctree(MPI_COMM_NULL);
+#else
     VolumeKernel* meshr = new VolOctree();
+#endif
     {
         int dumpBlock = (nProcs > 1) ? rank : -1;
         std::string filename = "./data/test.0.mesh";

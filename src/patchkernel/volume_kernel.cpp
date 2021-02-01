@@ -36,22 +36,17 @@ namespace bitpit {
 	VolumeKernel is the base class for defining voulme patches.
 */
 
-/*!
-	Creates a serial patch.
-
-	\param expert if true, the expert mode will be enabled
-*/
-VolumeKernel::VolumeKernel(bool expert)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(MPI_COMM_NULL, 0, expert)
-{
-}
-
 /*!
-	Creates a partitioned patch.
+	Creates a patch.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
 
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param expert if true, the expert mode will be enabled
@@ -59,29 +54,29 @@ VolumeKernel::VolumeKernel(bool expert)
 VolumeKernel::VolumeKernel(MPI_Comm communicator, std::size_t haloSize, bool expert)
 	: PatchKernel(communicator, haloSize, expert)
 #else
+/*!
+	Creates a patch.
+
+	\param expert if true, the expert mode will be enabled
+*/
+VolumeKernel::VolumeKernel(bool expert)
 	: PatchKernel(expert)
 #endif
 {
 }
 
-/*!
-	Creates a serial patch.
-
-	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
-*/
-VolumeKernel::VolumeKernel(int dimension, bool expert)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(dimension, MPI_COMM_NULL, 0, expert)
-{
-}
-
 /*!
-	Creates a partitioned patch.
+	Creates a patch.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
 
 	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param expert if true, the expert mode will be enabled
@@ -89,31 +84,31 @@ VolumeKernel::VolumeKernel(int dimension, bool expert)
 VolumeKernel::VolumeKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
 	: PatchKernel(dimension, communicator, haloSize, expert)
 #else
+/*!
+	Creates a patch.
+
+	\param dimension is the dimension of the patch
+	\param expert if true, the expert mode will be enabled
+*/
+VolumeKernel::VolumeKernel(int dimension, bool expert)
 	: PatchKernel(dimension, expert)
 #endif
 {
 }
 
-/*!
-	Creates a serial patch.
-
-	\param id is the id that will be assigned to the patch
-	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
-*/
-VolumeKernel::VolumeKernel(int id, int dimension, bool expert)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, expert)
-{
-}
-
 /*!
-	Creates a partitioned patch.
+	Creates a patch.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param expert if true, the expert mode will be enabled
@@ -121,6 +116,14 @@ VolumeKernel::VolumeKernel(int id, int dimension, bool expert)
 VolumeKernel::VolumeKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
 	: PatchKernel(id, dimension, communicator, haloSize, expert)
 #else
+/*!
+	Creates a patch.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param expert if true, the expert mode will be enabled
+*/
+VolumeKernel::VolumeKernel(int id, int dimension, bool expert)
 	: PatchKernel(id, dimension, expert)
 #endif
 {

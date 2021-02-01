@@ -82,7 +82,11 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
+#if BITPIT_ENABLE_MPI
+SurfUnstructured                mesh(2, 3, MPI_COMM_NULL), edges(2, 3, MPI_COMM_NULL);
+#else
 SurfUnstructured                mesh(2, 3), edges(2, 3);
+#endif
 
 // Counters
 int                             nV, nE;
@@ -316,7 +320,11 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
+#if BITPIT_ENABLE_MPI
+SurfUnstructured                mesh(2, 3, MPI_COMM_NULL);
+#else
 SurfUnstructured                mesh(2, 3);
+#endif
 
 // Counters
 int                             nV, nS, nE;

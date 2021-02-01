@@ -71,7 +71,11 @@ int subtest_001()
 
 	log::cout() << "  >> 2D octree patch" << "\n";
 
+#if BITPIT_ENABLE_MPI
+	VolOctree *patch_2D = new VolOctree(2, origin, length, dh, MPI_COMM_NULL);
+#else
 	VolOctree *patch_2D = new VolOctree(2, origin, length, dh);
+#endif
 	patch_2D->getVTK().setName("octree_uniform_patch_2D");
 	patch_2D->initializeAdjacencies();
 	patch_2D->initializeInterfaces();
@@ -147,7 +151,11 @@ int subtest_002()
 
 	log::cout() << "  >> 3D octree patch" << "\n";
 
+#if BITPIT_ENABLE_MPI
+	VolOctree *patch_3D = new VolOctree(3, origin, length, dh, MPI_COMM_NULL);
+#else
 	VolOctree *patch_3D = new VolOctree(3, origin, length, dh);
+#endif
 	patch_3D->getVTK().setName("octree_uniform_patch_3D");
 	patch_3D->initializeAdjacencies();
 	patch_3D->initializeInterfaces();

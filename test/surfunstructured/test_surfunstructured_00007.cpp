@@ -201,7 +201,11 @@ int subtest_001()
 	long counter;
 
 	// Local variables
+#if BITPIT_ENABLE_MPI
+	SurfUnstructured                        mesh(2, 3, MPI_COMM_NULL);
+#else
 	SurfUnstructured                        mesh(2, 3);
+#endif
 	mesh.setExpert(true);
 
 	// Generate a Dummy Triangulation
