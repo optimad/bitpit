@@ -48,7 +48,11 @@ int subtest_001()
     uint8_t dimensions(2);
 
     // First Input geometry
+#if BITPIT_ENABLE_MPI
+    std::unique_ptr<bitpit::SurfUnstructured> STL0( new bitpit::SurfUnstructured (0,1,dimensions,MPI_COMM_NULL) );
+#else
     std::unique_ptr<bitpit::SurfUnstructured> STL0( new bitpit::SurfUnstructured (0,1,dimensions) );
+#endif
 
     bitpit::log::cout()<< " - Loading stl geometry" << std::endl;
 
@@ -65,7 +69,11 @@ int subtest_001()
 
 
     // Second Input geometry
+#if BITPIT_ENABLE_MPI
+    std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (1,dimensions,MPI_COMM_NULL) );
+#else
     std::unique_ptr<bitpit::SurfUnstructured> STL1( new bitpit::SurfUnstructured (1,dimensions) );
+#endif
 
     bitpit::log::cout()<< " - Loading stl geometry" << std::endl;
 
@@ -81,7 +89,11 @@ int subtest_001()
     bitpit::log::cout()<< "n. simplex: " << STL1->getCellCount() << std::endl;
 
     // Third Input geometry
+#if BITPIT_ENABLE_MPI
+    std::unique_ptr<bitpit::SurfUnstructured> STL2( new bitpit::SurfUnstructured (1,dimensions,MPI_COMM_NULL) );
+#else
     std::unique_ptr<bitpit::SurfUnstructured> STL2( new bitpit::SurfUnstructured (1,dimensions) );
+#endif
 
     bitpit::log::cout()<< " - Loading stl geometry" << std::endl;
 
@@ -121,7 +133,11 @@ int subtest_001()
     };
 
     dh = h / 16. ;
+#if BITPIT_ENABLE_MPI
+    bitpit::VolOctree mesh(dimensions, meshMin, h, dh, MPI_COMM_NULL );
+#else
     bitpit::VolOctree mesh(dimensions, meshMin, h, dh );
+#endif
     mesh.initializeAdjacencies();
     mesh.initializeInterfaces();
     mesh.update() ;

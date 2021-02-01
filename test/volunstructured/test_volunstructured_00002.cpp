@@ -47,7 +47,11 @@ int subtest_001(VolUnstructured *patch_2D, VolUnstructured *patch_2D_restored)
     // Create the patch
     log::cout() << "Creating 2D patch..." << std::endl;
 
+#if BITPIT_ENABLE_MPI
+    patch_2D = new VolUnstructured(2, MPI_COMM_NULL);
+#else
     patch_2D = new VolUnstructured(2);
+#endif
     patch_2D->getVTK().setName("unstructured_patch_2D");
 
     patch_2D->addVertex({{0.00000000, 0.00000000, 0.00000000}},  1);
@@ -170,7 +174,11 @@ int subtest_001(VolUnstructured *patch_2D, VolUnstructured *patch_2D_restored)
     // Restore the patch
     log::cout() << "Restoring 2D patch..." << std::endl;
 
+#if BITPIT_ENABLE_MPI
+    patch_2D_restored = new VolUnstructured(MPI_COMM_NULL);
+#else
     patch_2D_restored = new VolUnstructured();
+#endif
     IBinaryArchive binaryReader2D("unstructured_patch_2D");
     patch_2D_restored->restore(binaryReader2D.getStream());
 
@@ -255,7 +263,11 @@ int subtest_002(VolUnstructured *patch_3D, VolUnstructured *patch_3D_restored)
     // Create the patch
     log::cout() << "\n\n:: 3D unstructured mesh ::\n";
 
+#if BITPIT_ENABLE_MPI
+    patch_3D = new VolUnstructured(3, MPI_COMM_NULL);
+#else
     patch_3D = new VolUnstructured(3);
+#endif
     patch_3D->getVTK().setName("unstructured_patch_3D");
 
     patch_3D->addVertex({{0.00000000, 0.00000000,  0.00000000}},  1);
@@ -478,7 +490,11 @@ int subtest_002(VolUnstructured *patch_3D, VolUnstructured *patch_3D_restored)
     // Restore the patch
     log::cout() << "Restoring 3D patch..." << std::endl;
 
+#if BITPIT_ENABLE_MPI
+    patch_3D_restored = new VolUnstructured(MPI_COMM_NULL);
+#else
     patch_3D_restored = new VolUnstructured();
+#endif
     IBinaryArchive binaryReader3D("unstructured_patch_3D");
     patch_3D_restored->restore(binaryReader3D.getStream());
 

@@ -55,29 +55,30 @@ namespace bitpit {
 	OctantInfoHasher allows to generate a hash for the OctantInfo structure.
 */
 
-/*!
-	Creates an uninitialized serial patch.
-*/
-VolOctree::VolOctree()
 #if BITPIT_ENABLE_MPI==1
-	: VolOctree(MPI_COMM_NULL, 0)
-{
-}
-
 /*!
 	Creates an uninitialized partitioned patch.
 
 	Cells will be initialized the cells only on the process identified by the
 	rank zero in the communicator.
 
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
 	\param communicator is the communicator to be used for exchanging data
-	among the processes
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 */
 VolOctree::VolOctree(MPI_Comm communicator, std::size_t haloSize)
 	: VolumeKernel(communicator, haloSize, false)
 #else
+/*!
+	Creates an uninitialized serial patch.
+*/
+VolOctree::VolOctree()
 	: VolumeKernel(false)
 #endif
 {
@@ -106,8 +107,32 @@ VolOctree::VolOctree(MPI_Comm communicator, std::size_t haloSize)
 	__reset(false);
 }
 
+#if BITPIT_ENABLE_MPI==1
 /*!
-	Creates a serial patch.
+	Creates a patch.
+
+	Cells will be initialized the cells only on the process identified by the
+	rank zero in the communicator.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param dh is the maximum allowed cell size of the initial refinement
+	\param communicator is the communicator to be used for exchanging data
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize)
+	: VolOctree(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh, communicator, haloSize)
+#else
+/*!
+	Creates a patch.
 
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -115,36 +140,38 @@ VolOctree::VolOctree(MPI_Comm communicator, std::size_t haloSize)
 	\param dh is the maximum allowed cell size of the initial refinement
 */
 VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh)
-#if BITPIT_ENABLE_MPI==1
-	: VolOctree(dimension, origin, length, dh, MPI_COMM_NULL, 0)
-{
-}
-
-/*!
-	Creates a partitioned patch.
-
-	Cells will be initialized the cells only on the process identified by the
-	rank zero in the communicator.
-
-	\param dimension is the dimension of the patch
-	\param origin is the origin of the domain
-	\param length is the length of the domain
-	\param dh is the maximum allowed cell size of the initial refinement
-	\param communicator is the communicator to be used for exchanging data
-	among the processes
-	\param haloSize is the size, expressed in number of layers, of the ghost
-	cells halo
-*/
-VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize)
-	: VolOctree(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh, communicator, haloSize)
-#else
 	: VolOctree(PatchManager::AUTOMATIC_ID, dimension, origin, length, dh)
 #endif
 {
 }
 
+#if BITPIT_ENABLE_MPI==1
 /*!
-	Creates a serial patch.
+	Creates a patch.
+
+	Cells will be initialized the cells only on the process identified by the
+	rank zero in the communicator.
+
+	If a null comunicator is provided, a serial patch will be created, this
+	means that each processor will be unaware of the existence of the other
+	processes.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param dh is the maximum allowed cell size of the initial refinement
+	\param communicator is the communicator to be used for exchanging data
+	among the processes. If a null comunicator is provided, a serial patch
+	will be created
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
+*/
+VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize)
+	: VolumeKernel(id, dimension, communicator, haloSize, false)
+#else
+/*!
+	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
@@ -153,30 +180,6 @@ VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double 
 	\param dh is the maximum allowed cell size of the initial refinement
 */
 VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh)
-#if BITPIT_ENABLE_MPI==1
-	: VolOctree(id, dimension, origin, length, dh, MPI_COMM_NULL, 0)
-{
-}
-
-/*!
-	Creates a partitioned patch.
-
-	Cells will be initialized the cells only on the process identified by the
-	rank zero in the communicator.
-
-	\param id is the id that will be assigned to the patch
-	\param dimension is the dimension of the patch
-	\param origin is the origin of the domain
-	\param length is the length of the domain
-	\param dh is the maximum allowed cell size of the initial refinement
-	\param communicator is the communicator to be used for exchanging data
-	among the processes
-	\param haloSize is the size, expressed in number of layers, of the ghost
-	cells halo
-*/
-VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(id, dimension, communicator, haloSize, false)
-#else
 	: VolumeKernel(id, dimension, false)
 #endif
 {
@@ -225,20 +228,12 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 	}
 }
 
-/*!
-	Creates a serial patch restoring the patch saved in the specified stream.
-
-	\param stream is the stream to read from
-*/
-VolOctree::VolOctree(std::istream &stream)
 #if BITPIT_ENABLE_MPI==1
-	: VolOctree(stream, MPI_COMM_NULL, 0)
-{
-}
-
 /*!
-	Creates a partitioned patch restoring the patch saved in the specified
-	stream.
+	Creates a patch restoring the patch saved in the specified stream.
+
+	The number of processes in the communicator should be equal to the number
+	of processes of the communicator used when dumping the patch.
 
 	\param stream is the stream to read from
 	\param communicator is the communicator to be used for exchanging data
@@ -249,6 +244,12 @@ VolOctree::VolOctree(std::istream &stream)
 VolOctree::VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t haloSize)
 	: VolumeKernel(communicator, haloSize, false)
 #else
+/*!
+	Creates a patch restoring the patch saved in the specified stream.
+
+	\param stream is the stream to read from
+*/
+VolOctree::VolOctree(std::istream &stream)
 	: VolumeKernel(false)
 #endif
 {
@@ -267,7 +268,7 @@ VolOctree::VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t ha
 }
 
 /*!
-	Creates a serial patch.
+	Creates a patch.
 */
 #if BITPIT_ENABLE_MPI==1
 /*!

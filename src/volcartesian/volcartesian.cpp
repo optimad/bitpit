@@ -24,6 +24,9 @@
 
 #include <cmath>
 #include <bitset>
+#if BITPIT_ENABLE_MPI==1
+#	include <mpi.h>
+#endif
 
 #include "bitpit_common.hpp"
 
@@ -61,13 +64,17 @@ namespace bitpit {
 	Creates an uninitialized patch.
 */
 VolCartesian::VolCartesian()
+#if BITPIT_ENABLE_MPI==1
+	: VolumeKernel(MPI_COMM_NULL, 0, false)
+#else
 	: VolumeKernel(false)
+#endif
 {
 	initialize();
 }
 
 /*!
-	Creates a serial patch.
+	Creates a patch.
 
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -83,7 +90,7 @@ VolCartesian::VolCartesian(int dimension,
 }
 
 /*!
-	Creates a serial patch.
+	Creates a patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
@@ -95,7 +102,11 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
+#if BITPIT_ENABLE_MPI==1
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+#else
 	: VolumeKernel(id, dimension, false)
+#endif
 {
 	initialize();
 
@@ -106,7 +117,7 @@ VolCartesian::VolCartesian(int id, int dimension,
 }
 
 /*!
-	Creates a serial patch.
+	Creates a patch.
 
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -121,7 +132,7 @@ VolCartesian::VolCartesian(int dimension,
 }
 
 /*!
-	Creates a serial patch.
+	Creates a patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
@@ -132,7 +143,11 @@ VolCartesian::VolCartesian(int dimension,
 VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells)
+#if BITPIT_ENABLE_MPI==1
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+#else
 	: VolumeKernel(id, dimension, false)
+#endif
 {
 	initialize();
 
@@ -143,7 +158,7 @@ VolCartesian::VolCartesian(int id, int dimension,
 }
 
 /*!
-	Creates a serial patch.
+	Creates a patch.
 
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
@@ -158,7 +173,7 @@ VolCartesian::VolCartesian(int dimension,
 }
 
 /*!
-	Creates a serial patch.
+	Creates a patch.
 
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
@@ -169,7 +184,11 @@ VolCartesian::VolCartesian(int dimension,
 VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
+#if BITPIT_ENABLE_MPI==1
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+#else
 	: VolumeKernel(id, dimension, false)
+#endif
 {
 	initialize();
 
@@ -186,7 +205,11 @@ VolCartesian::VolCartesian(int id, int dimension,
 	\param stream is the stream to read from
 */
 VolCartesian::VolCartesian(std::istream &stream)
+#if BITPIT_ENABLE_MPI==1
+	: VolumeKernel(MPI_COMM_NULL, 0, false)
+#else
 	: VolumeKernel(false)
+#endif
 {
 	initialize();
 	restore(stream);

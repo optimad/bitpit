@@ -45,7 +45,11 @@ int subtest_001()
     int dimensions(3) ;
 
     // Input geometry
+#if BITPIT_ENABLE_MPI
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(2, 3, MPI_COMM_NULL) );
+#else
     std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(2, 3) );
+#endif
 
     bitpit::log::cout()<< " - Loading stl geometry" << std::endl;
 

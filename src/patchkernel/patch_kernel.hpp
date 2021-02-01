@@ -720,13 +720,14 @@ protected:
 	AlterationFlagsStorage m_alteredCells;
 	AlterationFlagsStorage m_alteredInterfaces;
 
-	PatchKernel(bool expert);
-	PatchKernel(int dimension, bool expert);
-	PatchKernel(int id, int dimension, bool expert);
 #if BITPIT_ENABLE_MPI==1
 	PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
 	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
 	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+#else
+	PatchKernel(bool expert);
+	PatchKernel(int dimension, bool expert);
+	PatchKernel(int id, int dimension, bool expert);
 #endif
 	PatchKernel(const PatchKernel &other);
     PatchKernel & operator=(const PatchKernel &other) = delete;
