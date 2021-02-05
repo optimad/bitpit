@@ -4817,7 +4817,7 @@ namespace bitpit {
                 i = istart;
                 rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
                 while(rest!=0){
-                    if (i==nocts){
+                    if (i==nocts-1){
                         i = istart + nocts;
                         break;
                     }
