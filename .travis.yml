@@ -104,7 +104,7 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
+            - llvm-toolchain-xenial-3.9
           packages:
             - clang-3.9
             - g++-6
