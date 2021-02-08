@@ -55,8 +55,8 @@ int subtest_001(int rank)
     // Build the interfaces
     mesh.initializeInterfaces();
 
-    // Partition the patch
-    mesh.partition(false);
+//    // Partition the patch
+//    mesh.partition(false);
 
     // Fill the patch
     if (rank == 0) {
