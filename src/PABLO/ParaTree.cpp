@@ -3220,7 +3220,7 @@ namespace bitpit {
                 bool isInIdxtry = true;
 
                 for(int i = 0; i < m_dim; ++i){
-                    isInIdxtry *= (point[i] >= anchor_idxtry[i] && point[i] <= anchor_idxtry[i] + size_try);
+                    isInIdxtry = isInIdxtry && (point[i] >= anchor_idxtry[i] && point[i] <= (anchor_idxtry[i] + size_try));
                 }
 
                 if( isInIdxtry){
