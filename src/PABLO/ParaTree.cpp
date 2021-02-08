@@ -4767,8 +4767,30 @@ namespace bitpit {
     void
     ParaTree::computePartition(uint8_t level_, const dvector *weight, uint32_t *partition) {
 
-        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
+        // Compute partitioning without family constrains
         uint32_t* partition_temp = new uint32_t[m_nproc];
+        if (weight==NULL){
+            computePartition(partition_temp);
+        }
+        else{
+            computePartition(weight, partition_temp);
+        }
+
+        // Modify partitioning to take into account family constrains
+        //
+        // Partitioning is modified to guarantee that families of octants at
+        // the desired level are retained compact on the same process.
+        //
+        // If the desired level is greater that the maximum depth reached by
+        // the tree, no constrains are needed.
+        if (level_ > m_maxDepth) {
+            for (int i = 0; i < m_nproc; i++){
+                partition[i] = partition_temp[i];
+            }
+            return;
+        }
+
+        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
         uint8_t* boundary_proc = new uint8_t[m_nproc-1];
         uint8_t dimcomm, indcomm;
         uint8_t* glbdimcomm = new uint8_t[m_nproc];
@@ -4780,13 +4802,6 @@ namespace bitpit {
         uint64_t sum;
         int32_t* pointercomm;
         int32_t* deplace = new int32_t[m_nproc-1];
-
-        if (weight==NULL){
-            computePartition(partition_temp);
-        }
-        else{
-            computePartition(weight, partition_temp);
-        }
 
         j = 0;
         sum = 0;
