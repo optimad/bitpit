@@ -411,8 +411,10 @@ namespace bitpit {
         // =================================================================================== //
     private:
         void		setDim(uint8_t dim);
-        void 		setFirstDescMorton();
-        void 		setLastDescMorton();
+#if BITPIT_ENABLE_MPI==1
+        void 		updateGlobalFirstDescMorton();
+        void 		updateGlobalLasttDescMorton();
+#endif
 
         // =================================================================================== //
         // OTHER METHODS												    			       //
