@@ -2578,19 +2578,56 @@ namespace bitpit {
         }
     }
 
+#if BITPIT_ENABLE_MPI==1
     /*! Set the first finer descendant of the local tree.
      */
     void
-    ParaTree::setFirstDescMorton(){
-        m_octree.setFirstDescMorton();
+    ParaTree::updateGlobalFirstDescMorton(){
+
+        // Exchange first descendant information
+        uint64_t firstDescMorton = m_octree.getFirstDescMorton();
+        m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
+
+        // Fix first descendant for empty partitions
+        int pp = m_nproc-1;
+        if (m_partitionRangeGlobalIdx[pp] == m_partitionRangeGlobalIdx[pp-1]){
+            m_partitionFirstDesc[pp] = std::numeric_limits<uint64_t>::max();
+            if (m_rank == pp){
+                m_octree.m_firstDescMorton = std::numeric_limits<uint64_t>::max();
+            }
+        }
+        for (int p = pp-1; p > 0; --p){
+            if (m_partitionRangeGlobalIdx[p] == m_partitionRangeGlobalIdx[p-1]){
+                m_partitionFirstDesc[p] = m_partitionFirstDesc[p+1];
+                if (m_rank == p){
+                    m_octree.m_firstDescMorton = m_partitionFirstDesc[p+1];
+                }
+            }
+        }
     };
 
     /*! Set the last finer descendant of the local tree.
      */
     void
-    ParaTree::setLastDescMorton(){
-        m_octree.setLastDescMorton();
+    ParaTree::updateGlobalLasttDescMorton(){
+
+        // Exchange last descendant information
+        uint64_t lastDescMorton = m_octree.getLastDescMorton();
+        m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
+
+        // Fix first descendant for empty partitions
+        //
+        // Attention rank = 0 can't be empty
+        for (int p = 1; p < m_nproc; ++p){
+            if (m_partitionRangeGlobalIdx[p] == m_partitionRangeGlobalIdx[p-1]){
+                m_partitionLastDesc[p] = m_partitionLastDesc[p-1];
+                if (m_rank == p){
+                    m_octree.m_lastDescMorton = m_partitionLastDesc[p-1];
+                }
+            }
+        }
     };
+#endif
 
     // =================================================================================== //
     // OTHER METHODS												    			   //
@@ -4951,25 +4988,16 @@ namespace bitpit {
                 m_partitionRangeGlobalIdx[p] += rbuff[pp];
             --m_partitionRangeGlobalIdx[p];
         }
-        //update first last descendant
-        if(getNumOctants()==0){
-            Octant octDesc(m_dim,TreeConstants::MAX_LEVEL,pow(2,TreeConstants::MAX_LEVEL),pow(2,TreeConstants::MAX_LEVEL),(m_dim > 2 ? pow(2,TreeConstants::MAX_LEVEL) : 0));
-            m_octree.m_lastDescMorton = octDesc.computeMorton();
-            m_octree.m_firstDescMorton = std::numeric_limits<uint64_t>::max();
-        }
-        else{
-            m_octree.setFirstDescMorton();
-            m_octree.setLastDescMorton();
-        }
 
-        //update partition_range_position
-        uint64_t lastDescMorton = m_octree.getLastDescMorton();
-        m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
-        uint64_t firstDescMorton = m_octree.getFirstDescMorton();
-        m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
         m_serial = false;
 
         delete [] rbuff; rbuff = NULL;
+
+        //update first and last descendant
+        m_octree.setFirstDescMorton();
+        m_octree.setLastDescMorton();
+        updateGlobalFirstDescMorton();
+        updateGlobalLasttDescMorton();
     }
 
     /*! Build the structure with the information about the first layer of ghost octants, partition boundary octants
@@ -5714,54 +5742,12 @@ namespace bitpit {
     void
     ParaTree::updateAfterCoarse(){
 
+        updateAdapt();
+
 #if BITPIT_ENABLE_MPI==1
-        if(m_serial){
-#endif
-            updateAdapt();
-#if BITPIT_ENABLE_MPI==1
-        }
-        else{
-
-            updateAdapt();
-
-            //update partition_range_position
-            uint64_t lastDescMorton = m_octree.getLastDescMorton();
-            m_errorFlag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,m_partitionLastDesc.data(),1,MPI_UINT64_T,m_comm);
-            uint64_t firstDescMorton = m_octree.getFirstDescMorton();
-            m_errorFlag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,m_partitionFirstDesc.data(),1,MPI_UINT64_T,m_comm);
-
-            //correct first and last desc morton for empty partitions
-            if (m_nproc>1){
-
-                //Last desc
-                //Attention rank = 0 can't be empty
-                for (int p = 1; p < m_nproc; ++p){
-                    if (m_partitionRangeGlobalIdx[p] == m_partitionRangeGlobalIdx[p-1]){
-                        m_partitionLastDesc[p] = m_partitionLastDesc[p-1];
-                        if (m_rank == p){
-                            m_octree.m_lastDescMorton = m_partitionLastDesc[p-1];
-                        }
-                    }
-                }
-
-                //first desc
-                //attention! Last desc of last rank (if empty partition) is the maximum uint64_t
-                int pp = m_nproc-1;
-                if (m_partitionRangeGlobalIdx[pp] == m_partitionRangeGlobalIdx[pp-1]){
-                    m_partitionFirstDesc[pp] = std::numeric_limits<uint64_t>::max();
-                    if (m_rank == pp){
-                        m_octree.m_firstDescMorton = std::numeric_limits<uint64_t>::max();
-                    }
-                }
-                for (int p = pp-1; p > 0; --p){
-                    if (m_partitionRangeGlobalIdx[p] == m_partitionRangeGlobalIdx[p-1]){
-                        m_partitionFirstDesc[p] = m_partitionFirstDesc[p+1];
-                        if (m_rank == p){
-                            m_octree.m_firstDescMorton = m_partitionFirstDesc[p+1];
-                        }
-                    }
-                }
-            }//end if nprocs>1
+        if(!m_serial){
+            updateGlobalFirstDescMorton();
+            updateGlobalLasttDescMorton();
         }
 #endif
     }

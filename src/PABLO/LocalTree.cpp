@@ -227,6 +227,8 @@ namespace bitpit {
         if(m_sizeOctants){
             octvector::const_iterator firstOctant = m_octants.begin();
             m_firstDescMorton = firstOctant->computeMorton();
+        } else {
+            m_firstDescMorton = std::numeric_limits<uint64_t>::max();
         }
     };
 
@@ -243,6 +245,8 @@ namespace bitpit {
             z = lastOctant->m_z + (m_dim-2)*delta;
             Octant lastDesc = Octant(m_dim, TreeConstants::MAX_LEVEL,x,y,z);
             m_lastDescMorton = lastDesc.computeMorton();
+        } else {
+            m_lastDescMorton = 0;
         }
     };
 
@@ -373,22 +377,16 @@ namespace bitpit {
             m_localMaxDepth = 0;
 
             m_octants.push_back(Octant(m_dim));
-
-            Octant firstDesc(TreeConstants::MAX_LEVEL,0,0,0);
-            m_firstDescMorton = firstDesc.computeMorton();
-
-            Octant lastDesc(m_dim,TreeConstants::MAX_LEVEL,TreeConstants::MAX_LENGTH-1,TreeConstants::MAX_LENGTH-1,(m_dim-2)*(TreeConstants::MAX_LENGTH-1));
-            m_lastDescMorton = lastDesc.computeMorton();
         } else {
             m_localMaxDepth = -1;
-
-            Octant octDesc(m_dim,TreeConstants::MAX_LEVEL,pow(2,TreeConstants::MAX_LEVEL),pow(2,TreeConstants::MAX_LEVEL),(m_dim > 2 ? pow(2,TreeConstants::MAX_LEVEL) : 0));
-            m_lastDescMorton  = octDesc.computeMorton();
-            m_firstDescMorton = PABLO::INVALID_MORTON;
         }
 
         m_sizeGhosts  = m_ghosts.size();
         m_sizeOctants = m_octants.size();
+
+        setFirstDescMorton();
+        setLastDescMorton();
+
     };
 
     /*!Extract an octant of the octree.
