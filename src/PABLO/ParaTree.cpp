@@ -4816,6 +4816,9 @@ namespace bitpit {
 
                 i = istart;
                 rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                if (m_dim == 3){
+                    rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                }
                 while(rest!=0){
                     if (i==nocts-1){
                         i = istart + nocts;
@@ -4823,10 +4826,16 @@ namespace bitpit {
                     }
                     i++;
                     rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                    if (m_dim == 3){
+                        rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                    }
                 }
                 forw = i - istart;
                 i = istart;
                 rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                if (m_dim == 3){
+                    rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                }
                 while(rest!=0){
                     if (i==0){
                         i = istart - nocts;
@@ -4834,6 +4843,9 @@ namespace bitpit {
                     }
                     i--;
                     rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                    if (m_dim == 3){
+                        rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                    }
                 }
                 backw = istart - i;
                 if (forw<backw)
