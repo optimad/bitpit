@@ -4759,28 +4759,18 @@ namespace bitpit {
      * of a desired level are retained compact on the same process.
      * \param[out] partition Pointer to partition information array. partition[i] = number of octants
      * to be stored on the i-th process (i-th rank).
-     * \param[in] level_ Number of level over the max depth reached in the tree at
-     * which families of octants are fixed compact on the same process
-     * (level=0 is uniform partition).
+     * \param[in] level_ Number of level above the max depth reached in the tree at
+     * which families of octants are fixed compact on the same process (setting level_=0
+     * is the same as partitioning with no family constraints). The maximum allowed value
+     * for level_ is one level below the maximum depth reached in the tree (i.e., it is
+     * possible to keep compact only families up to level 1).
      * \param[in] weight Pointer to weight array. weight[i] = weight of i-th local octant.
      */
     void
     ParaTree::computePartition(uint8_t level_, const dvector *weight, uint32_t *partition) {
 
-        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
+        // Compute partitioning without family constrains
         uint32_t* partition_temp = new uint32_t[m_nproc];
-        uint8_t* boundary_proc = new uint8_t[m_nproc-1];
-        uint8_t dimcomm, indcomm;
-        uint8_t* glbdimcomm = new uint8_t[m_nproc];
-        uint8_t* glbindcomm = new uint8_t[m_nproc];
-
-        uint32_t Dh = uint32_t(pow(double(2),double(TreeConstants::MAX_LEVEL-level)));
-        uint32_t istart, nocts, rest, forw, backw;
-        uint32_t i = 0, iproc, j;
-        uint64_t sum;
-        int32_t* pointercomm;
-        int32_t* deplace = new int32_t[m_nproc-1];
-
         if (weight==NULL){
             computePartition(partition_temp);
         }
@@ -4788,6 +4778,28 @@ namespace bitpit {
             computePartition(weight, partition_temp);
         }
 
+        // Modify partitioning to take into account family constrains
+        //
+        // Partitioning is modified to guarantee that families of octants at
+        // the desired level above the maximum depth reached in the tree
+        // are retained compact on the same process.
+        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
+        uint8_t* boundary_proc = new uint8_t[m_nproc-1];
+        uint8_t dimcomm, indcomm;
+        uint8_t* glbdimcomm = new uint8_t[m_nproc];
+        uint8_t* glbindcomm = new uint8_t[m_nproc];
+
+        uint32_t Dh = uint32_t(pow(double(2),double(TreeConstants::MAX_LEVEL-level)));
+        uint32_t istart, nocts, rest;
+        uint32_t forw = 0, backw = 0;
+        uint32_t i = 0, iproc, j;
+        uint64_t sum;
+        int32_t* pointercomm;
+        int32_t* deplace = new int32_t[m_nproc-1];
+
+        // Find processes currently owning the new incoming process boundaries
+        // boundary_proc[i] = j means that the new process interface between i-th and (i+1)-th
+        // processes is falling currently on j-th process
         j = 0;
         sum = 0;
         for (iproc=0; iproc<(uint32_t)(m_nproc-1); iproc++){
@@ -4797,28 +4809,47 @@ namespace bitpit {
             }
             boundary_proc[iproc] = j;
         }
+
         nocts = getNumOctants();
         sum = 0;
+
+        // Store how many process interfaces fall in the current rank. For these interfaces
+        // the current rank has to communicate the info about the correction to the partition
+        // strcture aimed to maintain the families compact.
         dimcomm = 0;
+
+        // Store the index of the process new owner of the new process interface
         indcomm = 0;
+
         for (iproc=0; iproc<(uint32_t)(m_nproc-1); iproc++){
             deplace[iproc] = 1;
             sum += partition_temp[iproc];
+
+            // If the current process owns a new process interface, check if
+            // the family at the interface is compact and store the correction on the
+            // temporary partition structure.
             if (boundary_proc[iproc] == m_rank){
                 if (dimcomm == 0){
                     indcomm = iproc;
                 }
                 dimcomm++;
+
+                // Place istart at index of the last octant at new incoming process interface
                 if (m_rank!=0)
                     istart = sum - m_partitionRangeGlobalIdx[m_rank-1] - 1;
                 else
                     istart = sum;
 
+                // Compute the rest w.r.t. the size of the octant of the same size
+                // of a compact family of the desired level
                 i = istart;
                 rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
                 if (m_dim == 3){
                     rest += m_octree.m_octants[i].getLogicalZ()%Dh;
                 }
+
+                // Deplace forward the index of the octant i defining the process boundary until the previous
+                // defined rest is zero, i.e. the families are compact up to the target level.
                 while(rest!=0){
                     if (i==nocts-1){
                         i = istart + nocts;
@@ -4830,7 +4861,11 @@ namespace bitpit {
                         rest += m_octree.m_octants[i].getLogicalZ()%Dh;
                     }
                 }
+
+                // Store the computed forward correction (= local number of octants if not found)
                 forw = i - istart;
+
+                // Do the same for a backward correction try
                 i = istart;
                 rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
                 if (m_dim == 3){
@@ -4847,7 +4882,15 @@ namespace bitpit {
                         rest += m_octree.m_octants[i].getLogicalZ()%Dh;
                     }
                 }
+
+                // Store the backward correction previously computed
                 backw = istart - i;
+
+                // If no correction are needed forward and backward corrections are zero,
+                // so the deplace term will be zero and, even if communicated it will no correct
+                // the partition structure.
+                // If correction is needed the lower between forward and backward corrections
+                // is the correct one, beeing the other one overdimensioned with local number of octants value.
                 if (forw<backw)
                     deplace[iproc] = forw;
                 else
@@ -4855,6 +4898,7 @@ namespace bitpit {
             }
         }
 
+        // Communicate the right corrections to other processes
         m_errorFlag = MPI_Allgather(&dimcomm,1,MPI_UINT8_T,glbdimcomm,1,MPI_UINT8_T,m_comm);
         m_errorFlag = MPI_Allgather(&indcomm,1,MPI_UINT8_T,glbindcomm,1,MPI_UINT8_T,m_comm);
         for (iproc=0; iproc<(uint32_t)(m_nproc); iproc++){
@@ -4862,6 +4906,11 @@ namespace bitpit {
             m_errorFlag = MPI_Bcast(pointercomm, glbdimcomm[iproc], MPI_INT32_T, iproc, m_comm);
         }
 
+        // Apply the corrections stored in deplace container to the termporary
+        // computed partition structure.
+        // The new number of octants for each processors are increased by the
+        // (signed) deplace value related to itself and decreased by the (signed)
+        // deplace value of the previous process.
         for (iproc=0; iproc<(uint32_t)(m_nproc); iproc++){
             if (iproc < (uint32_t)(m_nproc-1))
                 partition[iproc] = partition_temp[iproc] + deplace[iproc];
