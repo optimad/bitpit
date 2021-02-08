@@ -4791,10 +4791,11 @@ namespace bitpit {
         }
 
         uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
-        uint8_t* boundary_proc = new uint8_t[m_nproc-1];
-        uint8_t dimcomm, indcomm;
-        uint8_t* glbdimcomm = new uint8_t[m_nproc];
-        uint8_t* glbindcomm = new uint8_t[m_nproc];
+        uint8_t* new_boundary_owner = new uint8_t[m_nproc-1];
+        uint8_t new_interfaces_count;
+        uint8_t first_new_interface_rank_index;
+        uint8_t* new_interfaces_count_per_rank = new uint8_t[m_nproc];
+        uint8_t* first_new_interface_rank_index_per_rank = new uint8_t[m_nproc];
 
         uint32_t Dh = uint32_t(pow(double(2),double(TreeConstants::MAX_LEVEL-level)));
         uint32_t istart, nocts, rest;
@@ -4814,7 +4815,7 @@ namespace bitpit {
             while(sum > m_partitionRangeGlobalIdx[j]){
                 j++;
             }
-            boundary_proc[iproc] = j;
+            new_boundary_owner[iproc] = j;
         }
 
         nocts = getNumOctants();
@@ -4823,10 +4824,12 @@ namespace bitpit {
         // Store how many process interfaces fall in the current rank. For these interfaces
         // the current rank has to communicate the info about the correction to the partition
         // strcture aimed to maintain the families compact.
-        dimcomm = 0;
+        new_interfaces_count = 0;
 
-        // Store the index of the process new owner of the new process interface
-        indcomm = 0;
+        // Store the index of the first process owner of the new process interface
+        // It will be the starting index for the communication of the corrections on
+        // the partition structure.
+        first_new_interface_rank_index = 0;
 
         for (iproc=0; iproc<(uint32_t)(m_nproc-1); iproc++){
             deplace[iproc] = 1;
@@ -4835,11 +4838,11 @@ namespace bitpit {
             // If the current process owns a new process interface, check if
             // the family at the interface is compact and store the correction on the
             // temporary partition structure.
-            if (boundary_proc[iproc] == m_rank){
-                if (dimcomm == 0){
-                    indcomm = iproc;
+            if (new_boundary_owner[iproc] == m_rank){
+                if (new_interfaces_count == 0){
+                    first_new_interface_rank_index = iproc;
                 }
-                dimcomm++;
+                new_interfaces_count++;
 
                 // Place istart at index of the last octant at new incoming process interface
                 if (m_rank!=0)
@@ -4906,11 +4909,11 @@ namespace bitpit {
         }
 
         // Communicate the right corrections to other processes
-        m_errorFlag = MPI_Allgather(&dimcomm,1,MPI_UINT8_T,glbdimcomm,1,MPI_UINT8_T,m_comm);
-        m_errorFlag = MPI_Allgather(&indcomm,1,MPI_UINT8_T,glbindcomm,1,MPI_UINT8_T,m_comm);
+        m_errorFlag = MPI_Allgather(&new_interfaces_count,1,MPI_UINT8_T,new_interfaces_count_per_rank,1,MPI_UINT8_T,m_comm);
+        m_errorFlag = MPI_Allgather(&first_new_interface_rank_index,1,MPI_UINT8_T,first_new_interface_rank_index_per_rank,1,MPI_UINT8_T,m_comm);
         for (iproc=0; iproc<(uint32_t)(m_nproc); iproc++){
-            pointercomm = &deplace[glbindcomm[iproc]];
-            m_errorFlag = MPI_Bcast(pointercomm, glbdimcomm[iproc], MPI_INT32_T, iproc, m_comm);
+            pointercomm = &deplace[first_new_interface_rank_index_per_rank[iproc]];
+            m_errorFlag = MPI_Bcast(pointercomm, new_interfaces_count_per_rank[iproc], MPI_INT32_T, iproc, m_comm);
         }
 
         // Apply the corrections stored in deplace container to the termporary
@@ -4928,9 +4931,9 @@ namespace bitpit {
         }
 
         delete [] partition_temp; partition_temp = NULL;
-        delete [] boundary_proc; boundary_proc = NULL;
-        delete [] glbdimcomm; glbdimcomm = NULL;
-        delete [] glbindcomm; glbindcomm = NULL;
+        delete [] new_boundary_owner; new_boundary_owner = NULL;
+        delete [] new_interfaces_count_per_rank; new_interfaces_count_per_rank = NULL;
+        delete [] first_new_interface_rank_index_per_rank; first_new_interface_rank_index_per_rank = NULL;
         delete [] deplace; deplace = NULL;
     }
 
