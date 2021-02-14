@@ -1,0 +1,4 @@
+<map id="bitpit::LevelSetOctree" name="bitpit::LevelSetOctree">
+<area shape="rect" id="node1" title="Implements LevelSetKernel for octree meshes." alt="" coords="5,80,152,107"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetKernel.html" title="Mesh specific implementation to calculate the levelset function." alt="" coords="7,5,150,32"/>
+</map>

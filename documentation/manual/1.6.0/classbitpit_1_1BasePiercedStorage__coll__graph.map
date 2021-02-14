@@ -1,4 +1,0 @@
-<map id="bitpit::BasePiercedStorage" name="bitpit::BasePiercedStorage">
-<area shape="rect" id="node1" title="Base class for the pierced storages." alt="" coords="5,80,183,107"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization." alt="" coords="11,5,177,32"/>
-</map>

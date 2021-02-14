@@ -1,0 +1,6 @@
+<map id="bitpit::DiscretizationStencilSolver&lt; stencil_t &gt;" name="bitpit::DiscretizationStencilSolver&lt; stencil_t &gt;">
+<area shape="rect" id="node1" title=" " alt="" coords="52,171,229,212"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1SystemSolver.html" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="71,95,210,121"/>
+<area shape="rect" id="node3" href="$structbitpit_1_1KSPStatus.html" title=" " alt="" coords="5,5,127,32"/>
+<area shape="rect" id="node4" href="$structbitpit_1_1KSPOptions.html" title=" " alt="" coords="151,5,279,32"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;" name="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;">
+<area shape="rect" id="node1" title="The QualifiedInterfaceHalfEdge class defines interface half&#45;edges." alt="" coords="1263,5,1465,47"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="1055,5,1213,47"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="512,5,667,47"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="716,35,875,76"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1ProxyVector.html" title=" " alt="" coords="267,5,395,47"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1ProxyVector.html" title="Metafunction for generating a list of elements that can be either stored in an external vectror or,..." alt="" coords="5,13,165,39"/>
+</map>

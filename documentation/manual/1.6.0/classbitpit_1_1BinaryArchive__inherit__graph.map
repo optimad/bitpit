@@ -1,6 +1,0 @@
-<map id="bitpit::BinaryArchive" name="bitpit::BinaryArchive">
-<area shape="rect" id="node1" title="Base class for binary archives." alt="" coords="93,80,231,107"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1IBinaryArchive.html" title="Input binary archive." alt="" coords="5,155,148,181"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1OBinaryArchive.html" title="Output binary archive." alt="" coords="173,155,322,181"/>
-<area shape="rect" id="node2" title=" " alt="" coords="116,5,208,32"/>
-</map>

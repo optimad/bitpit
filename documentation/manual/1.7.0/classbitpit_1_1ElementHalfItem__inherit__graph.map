@@ -1,0 +1,11 @@
+<map id="bitpit::ElementHalfItem&lt; DerivedElement &gt;" name="bitpit::ElementHalfItem&lt; DerivedElement &gt;">
+<area shape="rect" id="node1" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="5,106,160,148"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1ElementHalfEdge.html" title=" " alt="" coords="548,6,707,48"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="548,125,707,166"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="548,202,707,244"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1ElementHalfEdge.html" title="The ElementHalfEdge class defines element half&#45;edge items." alt="" coords="209,48,368,89"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="209,165,368,206"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1QualifiedCellHalfEdge.html" title=" " alt="" coords="780,6,935,48"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1QualifiedInterfaceHalfEdge.html" title="The QualifiedInterfaceHalfEdge class defines interface half&#45;edges." alt="" coords="756,125,959,166"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1QualifiedCellHalfFace.html" title="The QualifiedCellHalfFace class defines cell half&#45;faces." alt="" coords="780,202,935,244"/>
+</map>

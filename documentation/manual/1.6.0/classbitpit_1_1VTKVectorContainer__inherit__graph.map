@@ -1,4 +1,0 @@
-<map id="bitpit::VTKVectorContainer&lt; T &gt;" name="bitpit::VTKVectorContainer&lt; T &gt;">
-<area shape="rect" id="node1" title="Implementation of VTKBaseContainer in order to support natively std::vector in VTK." alt="" coords="5,80,216,107"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1VTKBaseContainer.html" title="An interface class to all containers that are batively supported by VTK." alt="" coords="25,5,196,32"/>
-</map>
