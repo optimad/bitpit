@@ -2467,13 +2467,14 @@ void VolOctree::scale(const std::array<double, 3> &scaling, const std::array<dou
 
 	\param id is the id of the cell
 	\param blackList is a list of cells that are excluded from the search.
-	The blacklist has to be a unique list of ordered cell ids.
+	The blacklist has to be a pointer to a unique list of ordered cell ids
+	or a null pointer if no cells should be excluded from the search
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given vertex will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolOctree::_findCellNeighs(long id, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolOctree::_findCellNeighs(long id, const std::vector<long> *blackList, std::vector<long> *neighs) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
@@ -2501,7 +2502,7 @@ void VolOctree::_findCellNeighs(long id, const std::vector<long> &blackList, std
 				OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
 				long neighId = getOctantId(neighOctantInfo);
 
-				if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
+				if (!blackList || utils::findInOrderedVector<long>(neighId, *blackList) == blackList->end()) {
 					utils::addToOrderedVector<long>(neighId, *neighs);
 				}
 			}
@@ -2517,13 +2518,14 @@ void VolOctree::_findCellNeighs(long id, const std::vector<long> &blackList, std
 	\param id is the id of the cell
 	\param edge is an edge of the cell
 	\param blackList is a list of cells that are excluded from the search.
-	The blacklist has to be a unique list of ordered cell ids.
+	The blacklist has to be a pointer to a unique list of ordered cell ids
+	or a null pointer if no cells should be excluded from the search
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given edge will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolOctree::_findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolOctree::_findCellEdgeNeighs(long id, int edge, const std::vector<long> *blackList, std::vector<long> *neighs) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -2572,14 +2574,15 @@ void VolOctree::_findCellEdgeNeighs(long id, int edge, const std::vector<long> &
 
 	\param id is the id of the cell
 	\param vertex is a local vertex of the cell
-	\param blackList is a list of cells that are excluded from the search
-	The blacklist has to be a unique list of ordered cell ids.
+	\param blackList is a list of cells that are excluded from the search.
+	The blacklist has to be a pointer to a unique list of ordered cell ids
+	or a null pointer if no cells should be excluded from the search
 	\param[in,out] neighs is the vector were the neighbours of the specified
 	cell for the given vertex will be stored. The vector is not cleared before
 	adding the neighbours, it is extended by appending all the neighbours
 	found by this function
 */
-void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const
+void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<long> *blackList, std::vector<long> *neighs) const
 {
 	// Get octant info
 	const OctantInfo octantInfo = getCellOctant(id);
@@ -2650,13 +2653,14 @@ void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<lon
 	\param codimension is the co-dimension
 	\param index is the local index of the entity (vertex, edge or face)
 	\param blackList is a list of cells that are excluded from the search.
-	The blacklist has to be a unique list of ordered cell ids.
+	The blacklist has to be a pointer to a unique list of ordered cell ids
+	or a null pointer if no cells should be excluded from the search
 	\param[in,out] neighs is the vector were the neighbours will be stored.
 	The vector is not cleared before adding the neighbours, it is extended
 	by appending all the neighbours found by this function
 */
 void VolOctree::findOctantCodimensionNeighs(const OctantInfo &octantInfo, int index, int codimension,
-                                            const std::vector<long> &blackList, std::vector<long> *neighs) const
+                                            const std::vector<long> *blackList, std::vector<long> *neighs) const
 {
 	int dimension = getDimension();
 	if (codimension > dimension || codimension <= 0) {
@@ -2676,7 +2680,7 @@ void VolOctree::findOctantCodimensionNeighs(const OctantInfo &octantInfo, int in
 		OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
 		long neighId = getOctantId(neighOctantInfo);
 
-		if (utils::findInOrderedVector<long>(neighId, blackList) == blackList.end()) {
+		if (!blackList || utils::findInOrderedVector<long>(neighId, *blackList) == blackList->end()) {
 			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
 	}
