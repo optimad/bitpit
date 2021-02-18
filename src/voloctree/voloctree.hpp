@@ -154,9 +154,9 @@ protected:
 
 	long _getCellNativeIndex(long id) const override;
 
-	void _findCellNeighs(long id, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellNeighs(long id, const std::vector<long> *blackList, std::vector<long> *neighs) const override;
+	void _findCellEdgeNeighs(long id, int edge, const std::vector<long> *blackList, std::vector<long> *neighs) const override;
+	void _findCellVertexNeighs(long id, int vertex, const std::vector<long> *blackList, std::vector<long> *neighs) const override;
 
 #if BITPIT_ENABLE_MPI==1
 	std::size_t _getMaxHaloSize() override;
@@ -268,7 +268,7 @@ private:
 	std::vector<adaption::Info> sync(bool trackChanges);
 
 	void findOctantCodimensionNeighs(const OctantInfo &octantInfo, int index, int codimension,
-									 const std::vector<long> &blackList, std::vector<long> *neighs) const;
+	                                 const std::vector<long> *blackList, std::vector<long> *neighs) const;
 
 	void computePartitioningOctantWeights(const std::unordered_map<long, double> &cellWeights, double defaultWeight);
 	void clearPartitioningOctantWeights();
