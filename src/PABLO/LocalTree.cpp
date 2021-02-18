@@ -2188,9 +2188,9 @@ namespace bitpit {
                         while(m_octants[idx].buildFather() == father){
                             if (m_octants[idx].getMarker()<0)
                                 nbro++;
-                            idx--;
                             if (idx==0)
                                 break;
+                            idx--;
                         }
                     }
                     last_idx=idx;
