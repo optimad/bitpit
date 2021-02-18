@@ -153,9 +153,9 @@ protected:
 	void _dump(std::ostream &stream) const override;
 	void _restore(std::istream &stream) override;
 
-	void _findCellFaceNeighs(long id, int face, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellEdgeNeighs(long id, int edge, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
-	void _findCellVertexNeighs(long id, int vertex, const std::vector<long> &blackList, std::vector<long> *neighs) const override;
+	void _findCellFaceNeighs(long id, int face, const std::vector<long> *blackList, std::vector<long> *neighs) const override;
+	void _findCellEdgeNeighs(long id, int edge, const std::vector<long> *blackList, std::vector<long> *neighs) const override;
+	void _findCellVertexNeighs(long id, int vertex, const std::vector<long> *blackList, std::vector<long> *neighs) const override;
 
 private:
 	MemoryMode m_memoryMode;
