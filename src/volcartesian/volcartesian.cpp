@@ -829,10 +829,6 @@ void VolCartesian::switchMemoryMode(MemoryMode mode)
 */
 void VolCartesian::setMemoryMode(MemoryMode mode)
 {
-	if (mode == m_memoryMode) {
-		return;
-	}
-
 	m_memoryMode = mode;
 }
 
