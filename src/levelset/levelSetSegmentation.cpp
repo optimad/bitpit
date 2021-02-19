@@ -110,60 +110,24 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
     m_surface      = surface;
     m_featureAngle = featureAngle;
 
-    double tol = m_surface->getTol() ;
+    m_hasSegmentVertexNormals.setStaticKernel(&m_surface->getCells());
+    m_hasSegmentVertexNormals.fill(false);
 
-    m_segmentVertexNormals.setStaticKernel(&m_surface->getCells());
+    m_segmentVertexNormalsStorage.setStaticKernel(&m_surface->getCells());
 
-    std::vector<long> vertexNeighbours ;
-    std::vector<std::array<double,3>> limitedVertexNormals ;
+    // Check if segment is supported
     for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != m_surface->cellConstEnd(); ++segmentItr ){
-        long segmentId = segmentItr.getId() ;
-        std::size_t segmentRawId = segmentItr.getRawIndex() ;
-        const Cell &segment = *segmentItr;
-        ElementType segmentType = segment.getType() ;
-        int nSegmentVertices = segment.getVertexCount() ;
-        std::vector<std::array<double,3>> *segmentVertexNormals = m_segmentVertexNormals.rawData(segmentRawId);
-
-        // Check if segment is supported
-        bool segmentSupported ;
-        switch (segmentType) {
+        switch (segmentItr->getType()) {
 
         case ElementType::VERTEX :
         case ElementType::LINE :
         case ElementType::TRIANGLE :
-            segmentSupported = true ;
             break ;
 
         default:
-            segmentSupported = false ;
+            throw std::runtime_error ("levelset: only segments and triangles supported in LevelSetSegmentation!") ;
             break ;
 
-        }
-
-        if ( !segmentSupported ) {
-            throw std::runtime_error ("levelset: only segments and triangles supported in LevelSetSegmentation!") ;
-        }
-
-        // Evaluate segment vertex normals
-        //
-        // Normals are initialized with unlimited normals, if the segment is
-        // misalign they will be replaced with limited normals.
-        (*segmentVertexNormals).resize(nSegmentVertices) ;
-        limitedVertexNormals.resize(nSegmentVertices) ;
-
-        double misalignment = 0. ;
-        for( int i = 0; i < nSegmentVertices; ++i ){
-            vertexNeighbours.clear();
-            m_surface->findCellVertexNeighs(segmentId, i, &vertexNeighbours);
-
-            std::array<double, 3> *unlimitedVertexNormal = segmentVertexNormals->data() + i;
-            std::array<double, 3> *limitedVertexNormal   = limitedVertexNormals.data() + i;
-            m_surface->evalVertexNormals(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle, unlimitedVertexNormal, limitedVertexNormal) ;
-            misalignment += norm2(*unlimitedVertexNormal - *limitedVertexNormal) ;
-        }
-
-        if( misalignment >= tol ){
-            segmentVertexNormals->swap(limitedVertexNormals);
         }
     }
 
@@ -189,7 +153,7 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
     ElementType segmentType = segment.getType();
     ConstProxyVector<long> segmentVertexIds = segment.getVertexIds() ;
     int nSegmentVertices = segmentVertexIds.size() ;
-    const std::vector<std::array<double,3>> &segmentVertexNormals = m_segmentVertexNormals.rawAt(segmentIterator.getRawIndex());
+    const std::vector<std::array<double,3>> &segmentVertexNormals = computeSegmentVertexNormals(segmentIterator);
 
     BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
     std::array<double,3> projectionCoords;
@@ -269,6 +233,62 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     return 0;
 }
+
+/*!
+ * Get the normals of the vertices associated with the specified segment.
+ *
+ * The normals of a segment will be evaluates the first time they are
+ * requested and then cached.
+ *
+ * @param[in] segmentIterator is an iterator pointing to the segment
+ * @return the normals of the vertices associated with the specified segment
+ */
+const std::vector<std::array<double,3>> & SegmentationKernel::computeSegmentVertexNormals( const SurfUnstructured::CellConstIterator &segmentIterator ) const {
+
+    // Early return if the normals have already been evaluated
+    std::size_t segmentRawId = segmentIterator.getRawIndex() ;
+    if (m_hasSegmentVertexNormals.rawAt(segmentRawId)) {
+        return m_segmentVertexNormalsStorage.rawAt(segmentRawId);
+    }
+
+    // Get segment information
+    long segmentId = segmentIterator.getId() ;
+    const Cell &segment = *segmentIterator;
+    int nSegmentVertices = segment.getVertexCount() ;
+
+    // Evaluate segment vertex normals
+    //
+    // Normals are initialized with unlimited normals, if the segment is
+    // misalign they will be replaced with limited normals.
+    std::vector<std::array<double,3>> *segmentVertexNormals = m_segmentVertexNormalsStorage.rawData(segmentRawId);
+    segmentVertexNormals->resize(nSegmentVertices) ;
+
+    static std::vector<std::array<double,3>> limitedVertexNormals ;
+    limitedVertexNormals.resize(nSegmentVertices) ;
+
+    double misalignment = 0. ;
+    for( int i = 0; i < nSegmentVertices; ++i ){
+        static std::vector<long> vertexNeighbours ;
+        vertexNeighbours.clear();
+        m_surface->findCellVertexNeighs(segmentId, i, &vertexNeighbours);
+
+        std::array<double, 3> *unlimitedVertexNormal = segmentVertexNormals->data() + i;
+        std::array<double, 3> *limitedVertexNormal   = limitedVertexNormals.data() + i;
+        m_surface->evalVertexNormals(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle, unlimitedVertexNormal, limitedVertexNormal) ;
+        misalignment += norm2(*unlimitedVertexNormal - *limitedVertexNormal) ;
+    }
+
+    double tol = m_surface->getTol() ;
+    if( misalignment >= tol ){
+        segmentVertexNormals->swap(limitedVertexNormals);
+    }
+
+    // Normals have been evaluated
+    m_hasSegmentVertexNormals.rawAt(segmentRawId) = true;
+
+    return *segmentVertexNormals;
+}
+
 
 /*!
  *  \class      SurfaceInfo
