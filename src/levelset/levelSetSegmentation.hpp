@@ -31,6 +31,8 @@
 # include <unordered_set>
 # include <unordered_map>
 
+#include "bitpit_surfunstructured.hpp"
+
 #include "levelSetCommon.hpp"
 
 namespace bitpit{
@@ -38,7 +40,6 @@ namespace bitpit{
 namespace adaption{
     struct Info;
 }
-class SurfUnstructured;
 class SurfaceSkdTree;
 
 class SendBuffer;
@@ -70,9 +71,12 @@ private:
 
     std::unique_ptr<SurfaceSkdTree> m_searchTree;
 
-    PiercedStorage<std::vector< std::array<double,3>>> m_segmentVertexNormals;
+    mutable PiercedStorage<double> m_hasSegmentVertexNormals;
+    mutable PiercedStorage<std::vector< std::array<double,3>>> m_segmentVertexNormalsStorage;
 
     void setSurface( const SurfUnstructured *surface, double featureAngle);
+
+    const std::vector<std::array<double,3>> & computeSegmentVertexNormals( const SurfUnstructured::CellConstIterator &segmentIterator ) const;
 
 };
 
