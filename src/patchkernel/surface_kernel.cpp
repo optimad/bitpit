@@ -686,9 +686,9 @@ std::array<double, 3> SurfaceKernel::evalEdgeNormal(long id, int edge_id) const
 /*!
  * Evaluate the normal unit vector of the specified local vertex.
  *
- * Vertex normal is evaluated as a weighted average of the normals of the
- * 1 ring of the vertex. The weights used in the average are the normalized
- * angles of incident facets at vertex.
+ * Vertex normals are evaluated as a weighted average of the normals of the
+ * cells that define the one-ring of the vertex. For each cell, the weight
+ * is the angle beteen the two side that share the specfied vertex.
  *
  * \param[in] id is the cell id
  * \param[in] vertex is the local vertex id
@@ -696,17 +696,19 @@ std::array<double, 3> SurfaceKernel::evalEdgeNormal(long id, int edge_id) const
 */
 std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex) const
 {
+    std::array<double, 3> normal;
     std::vector<long> vertexNeighs = findCellVertexNeighs(id, vertex);
+    evalVertexNormals(id, vertex, vertexNeighs.size(), vertexNeighs.data(), std::numeric_limits<double>::max(), &normal, nullptr);
 
-    return evalLimitedVertexNormal(id, vertex, vertexNeighs.size(), vertexNeighs.data(), std::numeric_limits<double>::max());
+    return normal;
 }
 
 /*!
  * Evaluate the normal unit vector of the specified local vertex.
  *
- * Vertex normal is evaluated as a weighted average of the normals of the
- * 1 ring of the vertex. The weights used in the average are the normalized
- * angles of incident facets at vertex.
+ * Vertex normals are evaluated as a weighted average of the normals of the
+ * cells that define the one-ring of the vertex. For each cell, the weight
+ * is the angle beteen the two side that share the specfied vertex.
  *
  * \param[in] id is the cell id
  * \param[in] vertex is the local vertex id
@@ -716,16 +718,20 @@ std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex) const
 */
 std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex, std::size_t nVertexNeighs, const long *vertexNeighs) const
 {
-    return evalLimitedVertexNormal(id, vertex, nVertexNeighs, vertexNeighs, std::numeric_limits<double>::max());
+    std::array<double, 3> normal;
+    evalVertexNormals(id, vertex, nVertexNeighs, vertexNeighs, std::numeric_limits<double>::max(), &normal, nullptr);
+
+    return normal;
 }
 
 /*!
  * Evaluate the limited normal unit vector of the specified local vertex.
  *
- * Vertex normal is evaluated as a weighted average of the normals of the
- * 1 ring of the vertex. Only the normal whose angle with respect to the
- * considered cell is less that the specified limit are considered. The
- * weights used in the average are the angles of incident facets at vertex.
+ * Vertex normals are evaluated as a weighted average of the normals of the
+ * cells that define the one-ring of the vertex. For each cell, the weight
+ * is the angle beteen the two side that share the specfied vertex. Only the
+ * normals whose angle with respect to the considered cell is less that the
+ * specified limit are considered.
  *
  * \param[in] id is the cell id
  * \param[in] vertex is the local vertex id
@@ -733,21 +739,24 @@ std::array<double, 3> SurfaceKernel::evalVertexNormal(long id, int vertex, std::
  * of the reference cell and the normal of facets used for evaualting the
  * vertex normal
  * \result The normal unit vector of the specified local vertex.
-*/
+ */
 std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex, double limit) const
 {
+    std::array<double, 3> normal;
     std::vector<long> vertexNeighs = findCellVertexNeighs(id, vertex);
+    evalVertexNormals(id, vertex, vertexNeighs.size(), vertexNeighs.data(), limit, nullptr, &normal);
 
-    return evalLimitedVertexNormal(id, vertex, vertexNeighs.size(), vertexNeighs.data(), limit);
+    return normal;
 }
 
 /*!
  * Evaluate the limited normal unit vector of the specified local vertex.
  *
- * Vertex normal is evaluated as a weighted average of the normals of the
- * 1 ring of the vertex. Only the normal whose angle with respect to the
- * considered cell is less that the specified limit are considered. The
- * weights used in the average are the angles of incident facets at vertex.
+ * Vertex normals are evaluated as a weighted average of the normals of the
+ * cells that define the one-ring of the vertex. For each cell, the weight
+ * is the angle beteen the two side that share the specfied vertex. Only the
+ * normals whose angle with respect to the considered cell is less that the
+ * specified limit are considered.
  *
  * \param[in] id is the cell id
  * \param[in] vertex is the local vertex id
@@ -757,53 +766,104 @@ std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex
  * of the reference cell and the normal of facets used for evaualting the
  * vertex normal
  * \result The normal unit vector of the specified local vertex.
-*/
+ */
 std::array<double, 3> SurfaceKernel::evalLimitedVertexNormal(long id, int vertex, std::size_t nVertexNeighs, const long *vertexNeighs, double limit) const
 {
-    // Get vertex id
-    const Cell &cell = m_cells[id];
-    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-    long vertexId = cellVertexIds[vertex];
-
-    // Cell normal
-    std::array<double, 3> cellNormal = evalFacetNormal(id);
-
-    // Cell angle at vertex
-    double cellVertexAngle = evalAngleAtVertex(id, vertex);
-
-    // Compute non-normalized normal
-    std::array<double, 3> normal = cellVertexAngle * cellNormal;
-    for (std::size_t i = 0; i < nVertexNeighs; ++i) {
-        // Get neighbour facet
-        long facetId = vertexNeighs[i];
-
-        // Eval facet normal
-        std::array<double, 3> facetNormal = evalFacetNormal(facetId);
-
-        // Discard facets with a misalignment greater than the specified limit
-        //
-        // The argument of the acos function has to be in the range [-1, 1].
-        // Rounding errors may lead to a dot product slightly outside this
-        // range. Since the arguments of the dot product are unit vectors,
-        // we can safetly clamp the dot product result to be between -1 and
-        // 1.
-        double misalignment = std::acos(std::min(1.0, std::max(-1.0, dotProduct(facetNormal, cellNormal))));
-        if (misalignment > std::abs(limit)) {
-            continue;
-        }
-
-        // Eval facet angle used as normalization weight
-        const Cell &facet = m_cells[facetId];
-        double facetVertexAngle = evalAngleAtVertex(facetId, facet.findVertex(vertexId));
-
-        // Add facet contribution to normal
-        normal += facetVertexAngle * facetNormal;
-    }
-
-    // Normalization
-    normal = normal / norm2(normal);
+    std::array<double, 3> normal;
+    evalVertexNormals(id, vertex, nVertexNeighs, vertexNeighs, limit, nullptr, &normal);
 
     return normal;
+}
+
+/*!
+ * Evaluate unlimited and limited normal unit vectors at the specified local
+ * vertex.
+ *
+ * Vertex normals are evaluated as a weighted average of the normals of the
+ * cells that define the one-ring of the vertex. For each cell, the weight
+ * is the angle beteen the two side that share the specfied vertex. When
+ * evaluating the limited normal, only the normals whose angle with respect
+ * to the considered cell is less that the specified limit are considered.
+ * Whereas, when evaluating the unlimited normal, all cells in the one-ring
+ * are considered.
+ *
+ * \param[in] id is the cell id
+ * \param[in] vertex is the local vertex id
+ * \param[in] nVertexNeighs is the number of vertex neighbours
+ * \param[in] vertexNeighs are the neighbours of the vertex
+ * \param[in] limit is the maximum allowed misalignment between the normal
+ * of the reference cell and the normal of facets used for evaualting the
+ * vertex normal
+ * \param[out] unlimitedNormal if a valid pointer is provided, on output will
+ * contain the unlimited normal
+ * \param[out] limitedNormal if a valid pointer is provided, on output will
+ * contain the limited normal
+*/
+void SurfaceKernel::evalVertexNormals(long id, int vertex, std::size_t nVertexNeighs, const long *vertexNeighs, double limit,
+                                      std::array<double, 3> *unlimitedNormal, std::array<double, 3> *limitedNormal) const
+{
+    // Early return if no calculation is needed
+    if (!unlimitedNormal && !limitedNormal) {
+        return;
+    }
+
+    // Get vertex id
+    const Cell &cell = getCell(id);
+    long vertexId = cell.getVertexId(vertex);
+
+    // Get cell information
+    double cellVertexAngle = evalAngleAtVertex(id, vertex);
+    std::array<double, 3> cellNormal = evalFacetNormal(id);
+
+    // Initialize unlimited normal
+    if (unlimitedNormal) {
+        *unlimitedNormal = cellVertexAngle * cellNormal;
+    }
+
+    // Initialize limited normal
+    if (limitedNormal) {
+        *limitedNormal = cellVertexAngle * cellNormal;
+    }
+
+    // Add contribution of neighbouring cells
+    for (std::size_t i = 0; i < nVertexNeighs; ++i) {
+        // Get neighbour information
+        long neighId = vertexNeighs[i];
+        const Cell &neigh = getCell(neighId);
+        std::array<double, 3> neighNormal = evalFacetNormal(neighId);
+        double neighVertexAngle = evalAngleAtVertex(neighId, neigh.findVertex(vertexId));
+
+        // Add contribution to unlimited normal
+        if (unlimitedNormal) {
+            *unlimitedNormal += neighVertexAngle * neighNormal;
+        }
+
+        // Add contribution to limited normal
+        //
+        // Only the negihbours whose normal has a misalignment less then the
+        // specified limit are considered.
+        if (limitedNormal) {
+            // The argument of the acos function has to be in the range [-1, 1].
+            // Rounding errors may lead to a dot product slightly outside this
+            // range. Since the arguments of the dot product are unit vectors,
+            // we can safetly clamp the dot product result to be between -1 and
+            // 1.
+            double misalignment = std::acos(std::min(1.0, std::max(-1.0, dotProduct(neighNormal, cellNormal))));
+            if (misalignment <= std::abs(limit)) {
+                *limitedNormal += neighVertexAngle * neighNormal;
+            }
+        }
+    }
+
+    // Normalize the unlimited normal
+    if (unlimitedNormal) {
+        *unlimitedNormal /= norm2(*unlimitedNormal);
+    }
+
+    // Normalize the unlimited normal
+    if (limitedNormal) {
+        *limitedNormal /= norm2(*limitedNormal);
+    }
 }
 
 /*!
