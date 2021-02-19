@@ -417,47 +417,48 @@ double SurfaceKernel::evalMaxEdgeLength(long id, int &edge_id) const
 }
 
 /*!
- * Evaluate the angle at specified vertex for a cell with specified ID.
- * If cell is of type ElementType::VERTEX or ElementType::LINE, a returns zero.
+ * Evaluate the angle at specified vertex for a cell with specified id.
+ *
+ * The function will return zero if the cell is of type ElementType::UNDEFINED
+ * or ElementType::VERTEX. It will also return zero if the cell is of type
+ * ElementType::LINE and the codimension of the surface with respect to the
+ * space in which it is embedded is not one.
  * 
- * \param[in] id cell global ID
- * \param[in] vertex_id vertex local ID
+ * \param[in] cellId is the cell id
+ * \param[in] vertex is the local vertex id
 */
-double SurfaceKernel::evalAngleAtVertex(long id, int vertex_id) const
+double SurfaceKernel::evalAngleAtVertex(long id, int vertex) const
 {
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
-
-    // Local variables
-    const Cell                   *cell_ = &m_cells[id];
-    ConstProxyVector<long>       cellVertexIds = cell_->getVertexIds();
-
-    // Counters
-
-    // ====================================================================== //
-    // EVALUATE ANGLE AT SPECIFIED VERTEX                                     //
-    // ====================================================================== //
-    if ((cell_->getType() == ElementType::UNDEFINED)
-     || (cell_->getType() == ElementType::VERTEX)) return 0.0;
-    if (cell_->getType() == ElementType::LINE) {
+    const Cell &cell = m_cells.at(id);
+    ElementType cellType = cell.getType();
+    if (cellType == ElementType::UNDEFINED) {
+        return 0.;
+    } else if (cellType == ElementType::VERTEX) {
+        return 0.;
+    } else if (cellType == ElementType::LINE) {
         if (m_spaceDim - getDimension() == 1)   return BITPIT_PI;
-        else                                    return 0.0;
+        else                                    return 0.;
     }
 
-    int                          n_vert = cell_->getVertexCount();
-    int                          prev = (n_vert + vertex_id - 1) % n_vert;
-    int                          next = (vertex_id + 1) % n_vert;
-    double                       angle;
-    std::array<double, 3>        d1, d2;
+    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+    int nCellVertices = cellVertexIds.size();
 
-    d1 = m_vertices[cellVertexIds[next]].getCoords() - m_vertices[cellVertexIds[vertex_id]].getCoords();
-    d2 = m_vertices[cellVertexIds[prev]].getCoords() - m_vertices[cellVertexIds[vertex_id]].getCoords();
-    d1 = d1/norm2(d1);
-    d2 = d2/norm2(d2);
-    angle = acos( std::min(1.0, std::max(-1.0, dotProduct(d1, d2) ) ) );
+    int prevVertex = (vertex - 1 + nCellVertices) % nCellVertices;
+    int nextVertex = (vertex + 1) % nCellVertices;
 
-    return(angle);
+    const std::array<double, 3> &prevVertexCoords = m_vertices[cellVertexIds[prevVertex]].getCoords();
+    const std::array<double, 3> &vertexCoords     = m_vertices[cellVertexIds[vertex]].getCoords();
+    const std::array<double, 3> &nextVertexCoords = m_vertices[cellVertexIds[nextVertex]].getCoords();
+
+    std::array<double, 3> d1 = prevVertexCoords - vertexCoords;
+    d1 = d1 / norm2(d1);
+
+    std::array<double, 3> d2 = nextVertexCoords - vertexCoords;
+    d2 = d2 / norm2(d2);
+
+    double angle = std::acos(std::min(1., std::max(-1., dotProduct(d1, d2))));
+
+    return angle;
 }
 
 /*!
