@@ -26,7 +26,8 @@
 # CMake settings
 #------------------------------------------------------------------------------------#
 cmake_minimum_required(VERSION 2.8)
-
+# Allow find_package() to use <PackageName>_ROOT variables
+cmake_policy(SET CMP0074 NEW)
 project("bitpit" CXX)
 
 #------------------------------------------------------------------------------------#
@@ -695,25 +696,33 @@ else ()
 	addPublicDefinitions("BITPIT_ENABLE_MPI=0")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    if (ENABLE_WARNINGS)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+    endif()
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+    set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+    set(CMAKE_C_FLAGS_RELEASE "-O2")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
-if (ENABLE_WARNINGS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    if (ENABLE_WARNINGS)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    endif()
 endif()
 
-if (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.12"))
-	add_compile_options("-std=c++11")
+if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    add_definitions("-std=c++11")
+elseif ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
+    add_compile_options("-std=c++11")
 else ()
-	add_definitions("-std=c++11")
+    set(CMAKE_CXX_STANDARD 11)
 endif ()
 
 # Set linker flags for Intel compilers
