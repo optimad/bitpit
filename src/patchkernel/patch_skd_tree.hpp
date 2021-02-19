@@ -113,10 +113,10 @@ public:
     bool hasChild(ChildLocation child) const;
     std::size_t getChildId(ChildLocation child) const;
 
-    double evalPointDistance(const std::array<double, 3> &point, bool ignoreGhosts) const;
+    double evalPointDistance(const std::array<double, 3> &point, bool interiorCellsOnly) const;
 
-    void findPointClosestCell(const std::array<double, 3> &point, bool ignoreGhosts, long *id, double *distance) const;
-    void updatePointClosestCell(const std::array<double, 3> &point, bool ignoreGhosts, long *id, double *distance) const;
+    void findPointClosestCell(const std::array<double, 3> &point, bool interiorCellsOnly, long *closestId, double *closestDistance) const;
+    void updatePointClosestCell(const std::array<double, 3> &point, bool interiorCellsOnly, long *closestId, double *closestDistance) const;
 
 protected:
     struct Allocator : std::allocator<SkdNode>
@@ -144,9 +144,7 @@ private:
 
     void initializeBoundingBox();
 
-    void updateClosestCellInfo(const std::array<double, 3> &point,
-                               long cellId, double cellDistance,
-                               long *closestId, double *closestDistance) const;
+    void updatePointClosestCell(const std::array<double, 3> &point, const Cell &cell, long *closestId, double *closestDistance) const;
 
 };
 
