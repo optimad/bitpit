@@ -694,9 +694,12 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, const C
         std::array<double, 3> cellNormal    = cell.evalNormal(cellVertexCoordinates);
         std::array<double, 3> closestNormal = closest.evalNormal(closestCellVertexCoordinates);
 
-        // Find cell more aligned with tespect to the normal
-        double cellAligement    = std::abs(dotProduct(cellNormal, point - cellProjection));
-        double closestAligement = std::abs(dotProduct(closestNormal, point - closestCellProjection));
+        // Find cell more aligned with respect to the point
+        //
+        // We want to chhose the cell whose normal is most aligned towards
+        // the point.
+        double cellAligement    = dotProduct(cellNormal, point - cellProjection);
+        double closestAligement = dotProduct(closestNormal, point - closestCellProjection);
 
         // If the specified cell is more aligned than the closest cell, update
         // the closest info.
