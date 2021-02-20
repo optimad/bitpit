@@ -637,7 +637,7 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, const C
     const int DISTANCE_FARTHER =   1;
 
     int distanceFlag = DISTANCE_FARTHER;
-    if (utils::DoubleFloatingEqual()(cellDistance, *closestDistance)) {
+    if (utils::DoubleFloatingEqual()(cellDistance, *closestDistance, patch.getTol(), patch.getTol())) {
         distanceFlag = DISTANCE_EQUAL;
     } else if (cellDistance < *closestDistance) {
         distanceFlag = DISTANCE_CLOSER;
