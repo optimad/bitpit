@@ -58,6 +58,7 @@ protected:
 
     static const std::size_t BINARY_HEADER_SIZE;
     static const std::size_t BINARY_MINIMUM_SIZE;
+    static const std::size_t BINARY_FACET_SIZE;
 
     static const std::string ASCII_SOLID_BEGIN;
     static const std::string ASCII_SOLID_END;
