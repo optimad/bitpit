@@ -81,7 +81,7 @@ void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &
         ++points;
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
+    int info =  LAPACKE_dposv_work( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
     assert( info == 0 );
     BITPIT_UNUSED( info );
 
@@ -132,7 +132,7 @@ void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0,
         ++points;
     }
 
-    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
+    int info =  LAPACKE_dposv_work( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
     assert( info == 0 );
     BITPIT_UNUSED( info );
 
