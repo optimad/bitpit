@@ -3346,7 +3346,6 @@ void PatchKernel::_findCellVertexNeighs(long id, int vertex, const std::vector<l
 	scanQueue.reserve(GUESS_NEIGHS_COUNT);
 	scanQueue.push_back(id);
 
-	ConstProxyVector<long> scanCellVertexIds;
 	while (!scanQueue.empty()) {
 		// Pop a cell to process
 		long scanCellId = scanQueue.back();
@@ -3354,13 +3353,22 @@ void PatchKernel::_findCellVertexNeighs(long id, int vertex, const std::vector<l
 		scanQueue.pop_back();
 		utils::addToOrderedVector<long>(scanCell.getId(), alreadyProcessed);
 
-		// Get vertex list
+		// Get cell information
+		const ReferenceElementInfo *scanCellInfo = nullptr;
+		const long *scanCellConnectivity = nullptr;
 		if (scanCell.hasInfo()) {
-			scanCellVertexIds = scanCell.getVertexIds();
+			scanCellInfo = &(scanCell.getInfo());
+			scanCellConnectivity = scanCell.getConnect();
 		}
 
 		// Use face adjacencies to find vertex negihbours
-		int nFaces = scanCell.getFaceCount();
+		int nFaces;
+		if (scanCellInfo) {
+			nFaces = scanCellInfo->nFaces;
+		} else {
+			nFaces = scanCell.getFaceCount();
+		}
+
 		for (int i = 0; i < nFaces; ++i) {
 			// Discard faces with no neighbours
             if (scanCell.isFaceBorder(i)) {
@@ -3374,12 +3382,18 @@ void PatchKernel::_findCellVertexNeighs(long id, int vertex, const std::vector<l
 			// accessing the local connectivity of the face is cheap. If the
 			// cell has no reference element, it is better to avoid using the
 			// local connectivity of the face.
+			//
+			// Moreover, to optimize the search for cells that has a reference
+			// element, we work directly on the connectivity inseatd of on the
+			// list of vertex ids. That's because for reference elements the
+			// connectivity is just a list of vertices.
 			bool faceOwnsVertex = false;
-			if (scanCell.hasInfo()) {
-				ConstProxyVector<int> faceLocalVertexIds = scanCell.getFaceLocalVertexIds(i);
-				int nFaceVertices = faceLocalVertexIds.size();
+			if (scanCellInfo) {
+				const ReferenceElementInfo &faceInfo = ReferenceElementInfo::getInfo(scanCellInfo->faceTypeStorage[i]);
+				const int *faceLocalConnectivity = scanCellInfo->faceConnectStorage[i].data();
+				const int nFaceVertices = faceInfo.nVertices;
 				for (int k = 0; k < nFaceVertices; ++k) {
-					long faceVertexId = scanCellVertexIds[faceLocalVertexIds[k]];
+					long faceVertexId = scanCellConnectivity[faceLocalConnectivity[k]];
 					if (faceVertexId == vertexId) {
 						faceOwnsVertex = true;
 						break;
