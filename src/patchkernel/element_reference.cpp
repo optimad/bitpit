@@ -1298,10 +1298,8 @@ std::array<double, 3> ReferenceTriangleInfo::evalNormal(const std::array<double,
 void ReferenceTriangleInfo::evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords,
                                                 std::array<double, 3> *projection, double *distance) const
 {
-    std::array<double, 3> lambda;
-    *distance = CGElem::distancePointTriangle(point, vertexCoords[0], vertexCoords[1], vertexCoords[2], lambda);
-
-    *projection = CGElem::reconstructPointFromBarycentricTriangle(vertexCoords[0], vertexCoords[1], vertexCoords[2], lambda);
+    *projection = CGElem::projectPointTriangle(point, vertexCoords[0], vertexCoords[1], vertexCoords[2]);
+    *distance   = norm2(point - *projection);
 }
 
 /*!
