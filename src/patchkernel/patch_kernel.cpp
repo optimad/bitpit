@@ -1844,6 +1844,7 @@ bool PatchKernel::deleteOrphanVertices()
 
 	std::vector<long> list = findOrphanVertices();
 	deleteVertices(list);
+	updateBoundingBox();
 
 	return true;
 }
