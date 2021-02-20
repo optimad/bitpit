@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <cassert>
+#include <cstring>
 
 #include "bitpit_common.hpp"
 #include "bitpit_operators.hpp"
@@ -37,8 +38,18 @@ namespace bitpit {
     \brief Base class for the STL writer and the STL reader.
 */
 
-const std::size_t STLBase::BINARY_HEADER_SIZE  = 80 * sizeof(STLBase::BINARY_UINT8);
+// Header is 80 characters long
+const std::size_t STLBase::BINARY_HEADER_SIZE = 80 * sizeof(STLBase::BINARY_UINT8);
+
+// An empty binary file contains the header plus a float_32 stating that there
+// are zero trinagles in the file.
 const std::size_t STLBase::BINARY_MINIMUM_SIZE = STLBase::BINARY_HEADER_SIZE + sizeof(STLBase::BINARY_UINT32);
+
+// Each facet is defined by the following information:
+//  - Normal: 3 float_32
+//  - Vertices' coordinates: 3x float_32
+//  - Attribute byte count: 1 unit_16
+const std::size_t STLBase::BINARY_FACET_SIZE = 3 * sizeof(BINARY_REAL32) + 3 * 3 * sizeof(BINARY_REAL32) + sizeof(BINARY_UINT16);
 
 const std::string STLBase::ASCII_SOLID_BEGIN  = "solid";
 const std::string STLBase::ASCII_SOLID_END    = "endsolid";
@@ -263,15 +274,6 @@ STLReader::Format STLReader::detectFormat(const std::string &filename)
     fileStream.clear();
 
     // Check that the size of the file is compatiblewith the number of facets
-    //
-    // Each facet has three facet and each facet contains:
-    //  - Normal: 3 float_32
-    //  - Vertices' coordinates: 3x float_32
-    //  - Attribute byte count: 1 unit_16
-    const std::size_t BINARY_FACET_SIZE = 3 * sizeof(BINARY_REAL32) +
-                                          3 * 3 * sizeof(BINARY_REAL32) +
-                                          sizeof(BINARY_UINT16);
-
     std::size_t expectedFileSize = BINARY_HEADER_SIZE + sizeof(BINARY_UINT32) + (nFacets * BINARY_FACET_SIZE);
     if (fileSize == expectedFileSize) {
         return FormatBinary;
@@ -616,25 +618,8 @@ int STLReader::inspectBinary(InspectionInfo *info)
     // Check facet data
     std::size_t n = 0;
     while ((!m_fileHandle.eof()) && (n < nFacets)) {
-        // Read normal
-        for (int j = 0; j < 3; ++j) {
-            BINARY_REAL32 N_ij;
-            m_fileHandle.read(reinterpret_cast<char *>(&N_ij), sizeof(BINARY_REAL32));
-        }
-
-        // Read vertex coordinates
-        for (int j = 0; j < 3; ++j) {
-            for (int k = 0; k < 3; ++k) {
-                BINARY_REAL32 V_ijk;
-                m_fileHandle.read(reinterpret_cast<char *>(&V_ijk), sizeof(BINARY_REAL32));
-            }
-        }
-
-        // Attribute byte count
-        BINARY_UINT16 attributeByteCount;
-        m_fileHandle.read(reinterpret_cast<char *>(&attributeByteCount), sizeof(BINARY_UINT16));
-
-        // Update facet counter
+        std::array<char, BINARY_FACET_SIZE> facetData;
+        m_fileHandle.read(facetData.data(), BINARY_FACET_SIZE);
         n++;
     }
 
@@ -1300,35 +1285,32 @@ int STLReader::readFacetBinary(std::array<double, 3> *V0, std::array<double, 3> 
         return -1;
     }
 
-    // Read normal
+    // Read facet data
+    std::array<char, BINARY_FACET_SIZE> facetData;
+    m_fileHandle.read(facetData.data(), BINARY_FACET_SIZE);
+    int facetDataOffset = 0;
+
+    // Store normal
     for (int k = 0; k < 3; ++k) {
-        BINARY_REAL32 N_k;
-        m_fileHandle.read(reinterpret_cast<char *>(&N_k), sizeof(BINARY_REAL32));
-        (*N)[k] = (double) N_k;
+        (*N)[k] = (double) *(reinterpret_cast<BINARY_REAL32 *>(facetData.data() + facetDataOffset));
+        facetDataOffset += sizeof(BINARY_REAL32);
     }
 
-    // Read vertex coordinates
+    // Store vertex coordinates
     for (int k = 0; k < 3; ++k) {
-        BINARY_REAL32 V_k;
-        m_fileHandle.read(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
-        (*V0)[k] = (double) V_k;
-    }
-
-    for (int k = 0; k < 3; ++k) {
-        BINARY_REAL32 V_k;
-        m_fileHandle.read(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
-        (*V1)[k] = (double) V_k;
+        (*V0)[k] = (double) *(reinterpret_cast<BINARY_REAL32 *>(facetData.data() + facetDataOffset));
+        facetDataOffset += sizeof(BINARY_REAL32);
     }
 
     for (int k = 0; k < 3; ++k) {
-        BINARY_REAL32 V_k;
-        m_fileHandle.read(reinterpret_cast<char *>(&V_k), sizeof(BINARY_REAL32));
-        (*V2)[k] = (double) V_k;
+        (*V1)[k] = (double) *(reinterpret_cast<BINARY_REAL32 *>(facetData.data() + facetDataOffset));
+        facetDataOffset += sizeof(BINARY_REAL32);
     }
 
-    // Attribute byte count
-    BINARY_UINT16 attributeByteCount;
-    m_fileHandle.read(reinterpret_cast<char *>(&attributeByteCount), sizeof(BINARY_UINT16));
+    for (int k = 0; k < 3; ++k) {
+        (*V2)[k] = (double) *(reinterpret_cast<BINARY_REAL32 *>(facetData.data() + facetDataOffset));
+        facetDataOffset += sizeof(BINARY_REAL32);
+    }
 
     // Check if the end of file has been reached
     if (m_fileHandle.eof()) {
