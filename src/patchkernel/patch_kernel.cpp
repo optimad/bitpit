@@ -6355,29 +6355,34 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point)
 		return;
 	}
 
+	double tolerance = getTol();
 	for (size_t k = 0; k < point.size(); ++k) {
 		double value = point[k];
 
 		// Check if maximum value is still valid
-		if (utils::DoubleFloatingEqual()(value, m_boxMaxPoint[k], getTol())) {
+		if (utils::DoubleFloatingEqual()(value, m_boxMaxPoint[k], tolerance)) {
 			--m_boxMaxCounter[k];
 			if (m_boxMaxCounter[k] == 0) {
 				setBoundingBoxDirty(true);
+				return;
 			}
 		} else if (value > m_boxMaxPoint[k]) {
 			assert(false && "Bounding box is in inconsistent state.");
 			setBoundingBoxDirty(true);
+			return;
 		}
 
 		// Update minimum value
-		if (utils::DoubleFloatingEqual()(value, m_boxMinPoint[k], getTol())) {
+		if (utils::DoubleFloatingEqual()(value, m_boxMinPoint[k], tolerance)) {
 			--m_boxMinCounter[k];
 			if (m_boxMinCounter[k] == 0) {
 				setBoundingBoxDirty(true);
+				return;
 			}
 		} else if (value < m_boxMinPoint[k]) {
 			assert(false && "Bounding box is in inconsistent state.");
 			setBoundingBoxDirty(true);
+			return;
 		}
 	}
 }
