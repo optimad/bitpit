@@ -1099,8 +1099,6 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 
     assert( validBarycentric(&lambda[0], 3) );
 
-    std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}};
-
     int count = 0;
     std::array<int,2> negatives = {{ 0, 0 }};
 
@@ -1113,8 +1111,10 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 
     if( count == 0){
         return reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda );
+    }
 
-    } else if( count == 1){
+    std::array<const array3D*,3> r = {{&Q0, &Q1, &Q2}};
+    if( count == 1){
         std::array<double,2>   lambdaLocal;
         int vertex0 = (negatives[0] +1) %3;
         int vertex1 = (vertex0     +1) %3;
@@ -1127,7 +1127,6 @@ array3D restrictPointTriangle( array3D const &Q0, array3D const &Q1, array3D con
 
     } else {
         int vertex0 = 3 -negatives[0] -negatives[1];
-
         int vertex1 = (vertex0 +1) %3;
         int vertex2 = (vertex1 +1) %3;
 
