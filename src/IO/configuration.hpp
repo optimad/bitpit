@@ -27,7 +27,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include <configuration_config.hpp>
+#include "configuration_config.hpp"
 
 namespace bitpit {
 
