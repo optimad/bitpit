@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <array>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
