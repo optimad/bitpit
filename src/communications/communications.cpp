@@ -24,8 +24,6 @@
 
 #if BITPIT_ENABLE_MPI==1
 
-#include <unistd.h>
-
 #include "bitpit_IO.hpp"
 
 #include "communications.hpp"
