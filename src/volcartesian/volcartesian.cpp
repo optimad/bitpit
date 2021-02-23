@@ -1313,6 +1313,8 @@ std::array<int, 3> VolCartesian::locatePointCartesian(const std::array<double, 3
 		ijk[0] = -1;
 		ijk[1] = -1;
 		ijk[2] = -1;
+
+		return ijk;
 	}
 
 	ijk[0] = std::floor((point[Vertex::COORD_X] - m_minCoords[Vertex::COORD_X]) / m_cellSpacings[Vertex::COORD_X]);
