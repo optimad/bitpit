@@ -150,6 +150,8 @@ protected:
 
 	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
 
+	void _updateAdjacencies() override;
+
 	void _updateInterfaces() override;
 
 	int _getDumpVersion() const override;

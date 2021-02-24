@@ -263,6 +263,52 @@ void VolCartesian::resetInterfaces()
 	m_nInterfaces = 0;
 }
 
+
+/*!
+	Internal function to update the adjacencies of the patch.
+
+	The function will always update the adjacencies of all the cells.
+*/
+void VolCartesian::_updateAdjacencies()
+{
+	// Partial updates are not supported
+	bool partialUpdate = false;
+	for (auto cellIterator = cellBegin(); cellIterator != cellEnd(); ++cellIterator) {
+		long cellId = cellIterator.getId();
+		if (!testCellAlterationFlags(cellId, FLAG_ADJACENCIES_DIRTY)) {
+			partialUpdate = true;
+			break;
+		}
+	}
+
+	if (partialUpdate) {
+		log::cout() << " It is not possible to partially update the adjacencies.";
+		log::cout() << " All adjacencies will be updated.";
+	}
+
+	// Update adjacencies
+	int nCellFaces = 2 * getDimension();
+	for (Cell &cell : getCells()) {
+		// Reset cell adjacencies
+		if (cell.getAdjacencyCount() != 0) {
+			cell.resetAdjacencies();
+		}
+
+		// Evaluate adjacencies
+		long cellId = cell.getId();
+		for (int face = 0; face < nCellFaces; ++face) {
+			// Identify face neighbour
+			long neighId = getCellFaceNeighsLinearId(cellId, face);
+			if (neighId < 0) {
+				continue;
+			}
+
+			// Add adjacency
+			cell.pushAdjacency(face, neighId);
+		}
+	}
+}
+
 /*!
 	Internal function to update the interfaces of the patch.
 
