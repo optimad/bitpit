@@ -546,10 +546,10 @@ ReferenceVoxelInfo::ReferenceVoxelInfo()
     faceConnectStorage[4][2] = 0;
     faceConnectStorage[4][3] = 1;
 
-    faceConnectStorage[5][0] = 4;
-    faceConnectStorage[5][1] = 5;
-    faceConnectStorage[5][2] = 6;
-    faceConnectStorage[5][3] = 7;
+    faceConnectStorage[5][0] = 7;
+    faceConnectStorage[5][1] = 6;
+    faceConnectStorage[5][2] = 5;
+    faceConnectStorage[5][3] = 4;
 
     initializeFaceEdges(facesInfo, edgesInfo);
 }
