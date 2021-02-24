@@ -72,7 +72,7 @@ public:
 	bool operator==(const Vertex &other) const;
 
 	double & operator[](int coord_id);
-	double  operator[](int coord_id) const;
+	const double & operator[](int coord_id) const;
 
 	void setId(long id);
 	long getId() const;
