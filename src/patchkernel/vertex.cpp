@@ -203,7 +203,7 @@ double & Vertex::operator[](int coord_id)
 	\param coord_id is the index of the requested coordinate
 	\result Returns a constant reference to requested coordinate
 */
-double  Vertex::operator[](int coord_id) const
+const double & Vertex::operator[](int coord_id) const
 {
 	return m_coords[coord_id];
 }
