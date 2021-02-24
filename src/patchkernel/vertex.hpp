@@ -78,6 +78,7 @@ public:
 	long getId() const;
 
 	void setCoords(const std::array<double, 3> &coords);
+	std::array<double, 3> & getCoords();
 	const std::array<double, 3> & getCoords() const;
 
 	void translate(const std::array<double, 3> &translation);
