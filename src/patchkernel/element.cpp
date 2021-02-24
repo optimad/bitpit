@@ -1322,7 +1322,7 @@ ConstProxyVector<int> Element::getFaceLocalVertexIds(int face) const
 
 		std::size_t nFaceVertices = faceLocalConnectSize;
 		std::vector<int> faceLocalVertexIds(nFaceVertices);
-		for (int i = 0; i < nFaceVertices; ++i) {
+		for (std::size_t i = 0; i < nFaceVertices; ++i) {
 			faceLocalVertexIds[i] = faceLocalConnect[i] - 1;
 		}
 
@@ -1341,7 +1341,7 @@ ConstProxyVector<int> Element::getFaceLocalVertexIds(int face) const
 
 		std::size_t nFaceVertices = faceLocalConnectSize - 1;
 		std::vector<int> faceLocalVertexIds(nFaceVertices);
-		for (int i = 0; i < nFaceVertices; ++i) {
+		for (std::size_t i = 0; i < nFaceVertices; ++i) {
 			faceLocalVertexIds[i] = faceLocalConnect[i + 1] - 1;
 		}
 
