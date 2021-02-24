@@ -243,6 +243,16 @@ void Vertex::setCoords(const std::array<double, 3> &coords)
 
 	\return A pointer to the coordinates of the vertex
 */
+std::array<double, 3> & Vertex::getCoords()
+{
+	return m_coords;
+}
+
+/*!
+	Gets the coordinates of the vertex.
+
+	\return A pointer to the coordinates of the vertex
+*/
 const std::array<double, 3> & Vertex::getCoords() const
 {
 	return m_coords;
