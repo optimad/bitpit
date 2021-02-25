@@ -56,9 +56,8 @@ int subtest_001()
 
     bitpit::log::cout()<< " - Loading stl geometry" << std::endl;
 
-    STL0->importDGF("./data/naca0012.dgf");
+    STL0->importDGF("./data/naca0012.dgf", true);
 
-    STL0->deleteCoincidentVertices() ;
     STL0->initializeAdjacencies() ;
 
     STL0->getVTK().setName("geometry_003_0") ;
