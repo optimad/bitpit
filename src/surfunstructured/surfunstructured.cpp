@@ -955,15 +955,52 @@ int SurfUnstructured::exportSTLMulti(const std::string &filename, std::unordered
 
 /*!
  * Import surface tasselation from DGF file.
+ *
+ * A separate set of vertices will be created for with each facet.
+ *
+ * DGF facets are added to the present mesh, i.e. current mesh content is not
+ * discarded. However, factes are not joined to the cells of the current mesh.
+ * After importing the DGF, the resulting mesh can contain duplicate vertices
+ * and cells.
+ *
+ * \param[in] filename name of dgf file
+ * \param[in] PIDOffset is the offset for the PID numbering
+ * \param[in] PIDSquash controls if the PID of the cells will be read from
+ * the file or if the same PID will be assigned to all cells
+ *
+ * \result on output returns an error flag for I/O error.
+*/
+int SurfUnstructured::importDGF(const std::string &filename, int PIDOffset, bool PIDSquash)
+{
+    return importDGF(filename, false, PIDOffset, PIDSquash);
+}
+
+/*!
+ * Import surface tasselation from DGF file.
+ *
+ * It is possible to control if DGF factes that share the same vertices will
+ * be joined together or if a separate set of vertices will be created for
+ * with each facet. When faces are joined together, vertices with a distance
+ * less than (10 * machine epsilon) are considered conincident and will be
+ * merged together.
+ *
+ * DGF facets are added to the present mesh, i.e. current mesh content is not
+ * discarded. However, factes are not joined to the cells of the current mesh.
+ * After importing the DGF, the resulting mesh can contain duplicate vertices
+ * and cells.
  * 
  * \param[in] filename name of dgf file
+ * \param[in] joinFacets if set to true, facets sharing the same vertices will
+ * be joined together, otherwise a separate set of vertices will be created for
+ * each facet. In any case, factes will not be joined to the cells of the
+ * current mesh
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file or if the same PID will be assigned to all cells
  * 
  * \result on output returns an error flag for I/O error.
 */
-int SurfUnstructured::importDGF(const std::string &filename, int PIDOffset, bool PIDSquash)
+int SurfUnstructured::importDGF(const std::string &filename, bool joinFacets, int PIDOffset, bool PIDSquash)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -993,14 +1030,34 @@ int SurfUnstructured::importDGF(const std::string &filename, int PIDOffset, bool
     dgf_in.load(nV, nS, vertex_list, simplex_list, simplex_PID);
 
     // Add vertices
+    std::map<Vertex *, long, Vertex::Less> vertexCache(Vertex::Less(10 * std::numeric_limits<double>::epsilon()));
+
     ve_ = vertex_list.cend();
     vcount = 0;
     vertex_map.resize(nV);
-    for (v_ = vertex_list.cbegin(); v_ != ve_; ++v_) {
-        idx = addVertex(*v_)->getId();
-        vertex_map[vcount] = idx;
-        ++vcount;
-    } //next v_
+
+    if (joinFacets) {
+        for (v_ = vertex_list.cbegin(); v_ != ve_; ++v_) {
+            long idx;
+            Vertex vertex(Vertex::NULL_ID, *v_);
+            auto vertexCacheItr = vertexCache.find(&vertex);
+            if (vertexCacheItr == vertexCache.end()) {
+                VertexIterator vertexItr = addVertex(std::move(vertex));
+                idx = vertexItr.getId();
+                vertexCache.insert({&(*vertexItr), idx});
+            } else {
+                idx = vertexCacheItr->second;
+            }
+            vertex_map[vcount] = idx;
+            ++vcount;
+        } //next v_
+    } else {
+        for (v_ = vertex_list.cbegin(); v_ != ve_; ++v_) {
+            idx = addVertex(*v_)->getId();
+            vertex_map[vcount] = idx;
+            ++vcount;
+        } //next v_
+    }
 
     // Update connectivity infos
     ce_ = simplex_list.end();
