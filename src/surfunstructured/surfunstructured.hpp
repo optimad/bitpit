@@ -70,6 +70,7 @@ public:
     int exportSTL(const std::string &filename, bool isBinary);
     int exportSTL(const std::string &filename, bool isBinary, bool isMulti, std::unordered_map<int, std::string> *PIDNames = nullptr);
     int importDGF(const std::string &filename, int PIDOffset = 0, bool PIDSquash = false);
+    int importDGF(const std::string &filename, bool joinFactes, int PIDOffset = 0, bool PIDSquash = false);
     int exportDGF(const std::string &filename);
 
 protected:
