@@ -181,9 +181,19 @@ std::size_t ElementHalfItem<DerivedElement>::Hasher::operator()(const ElementHal
 			utils::hashing::hash_combine(hash, vertexIds[k]);
 		}
 	} else {
-		for (std::size_t i = nVertices; i > 0; --i) {
-			std::size_t k = (item.m_firstVertexId + i) % nVertices;
-			utils::hashing::hash_combine(hash, vertexIds[k]);
+		// Reversing the winding of pixel elements needs special handling. In
+		// pixel elements, vertices are ordered using a Z-order, wherase in
+		// all other elements ordering of the vertices is anti-clockwise.
+		if (item.m_element.getType() != ElementType::VOXEL) {
+			for (std::size_t i = nVertices; i > 0; --i) {
+				std::size_t k = (item.m_firstVertexId + i) % nVertices;
+				utils::hashing::hash_combine(hash, vertexIds[k]);
+			}
+		} else {
+			utils::hashing::hash_combine(hash, vertexIds[(item.m_firstVertexId + 1) % nVertices]);
+			utils::hashing::hash_combine(hash, vertexIds[(item.m_firstVertexId + 0) % nVertices]);
+			utils::hashing::hash_combine(hash, vertexIds[(item.m_firstVertexId + 3) % nVertices]);
+			utils::hashing::hash_combine(hash, vertexIds[(item.m_firstVertexId + 2) % nVertices]);
 		}
 	}
 
