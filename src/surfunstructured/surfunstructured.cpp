@@ -324,30 +324,40 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
 //TODO: error flag on output
 //TODO: import a specified solid (ascii format only)
 /*!
- * Import surface tasselation from S.T.L. file. STL facet are added at to the
- * present mesh, i.e. current mesh content is not discarded. However no checks
- * are performed to ensure that no duplicated vertices or cells are created.
+ * Import surface tasselation from STL file.
+ *
+ * A separate set of vertices will be created for with each facet.
+ *
+ * STL facets are added to the present mesh, i.e. current mesh content is not
+ * discarded. However, factes are not joined to the cells of the current mesh.
+ * After importing the STL, the resulting mesh can contain duplicate vertices
+ * and cells.
  *
  * If the input file is a multi-solid ASCII file, all solids will be loaded
  * and a different PID will be assigned to the PID of the different solids.
- * 
+ *
  * \param[in] filename name of stl file
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file or if the same PID will be assigned to all cells
- * 
+ *
  * \result on output returns an error flag for I/O error
 */
 int SurfUnstructured::importSTL(const std::string &filename,
                                 int PIDOffset, bool PIDSquash)
 {
-    return importSTL(filename, STLReader::FormatUnknown, PIDOffset, PIDSquash);
+    return importSTL(filename, STLReader::FormatUnknown, false, PIDOffset, PIDSquash);
 }
 
 /*!
- * Import surface tasselation from S.T.L. file. STL facet are added at to the
- * present mesh, i.e. current mesh content is not discarded. However no checks
- * are performed to ensure that no duplicated vertices or cells are created.
+ * Import surface tasselation from STL file.
+ *
+ * A separate set of vertices will be created for with each facet.
+ *
+ * STL facets are added to the present mesh, i.e. current mesh content is not
+ * discarded. However, factes are not joined to the cells of the current mesh.
+ * After importing the STL, the resulting mesh can contain duplicate vertices
+ * and cells.
  *
  * If the input file is a multi-solid ASCII file, all solids will be loaded
  * and a different PID will be assigned to the PID of the different solids.
@@ -373,19 +383,34 @@ int SurfUnstructured::importSTL(const std::string &filename, bool isBinary,
         format = STLReader::FormatASCII;
     }
 
-    return importSTL(filename, format, PIDOffset, PIDSquash, PIDNames);
+    return importSTL(filename, format, false, PIDOffset, PIDSquash, PIDNames);
 }
 
 /*!
- * Import surface tasselation from S.T.L. file. STL facet are added at to the
- * present mesh, i.e. current mesh content is not discarded. However no checks
- * are performed to ensure that no duplicated vertices or cells are created.
+ * Import surface tasselation from STL file.
+ *
+ * It is possible to control if STL factes that share the same vertices will
+ * be joined together or if a separate set of vertices will be created for
+ * with each facet. When faces are joined together, vertices with a distance
+ * less than (10 * machine epsilon) are considered conincident and will be
+ * merged together.
+ *
+ * STL facets are added to the present mesh, i.e. current mesh content is not
+ * discarded. However, factes are not joined to the cells of the current mesh.
+ * After importing the STL, the resulting mesh can contain duplicate vertices
+ * and cells.
  *
  * If the input file is a multi-solid ASCII file, all solids will be loaded
  * and a different PID will be assigned to the PID of the different solids.
+ * Solids will not be joined together, only facets whithin a solid can be
+ * joined.
  *
  * \param[in] filename name of stl file
  * \param[in] format is the format of stl file
+ * \param[in] joinFacets if set to true, facets sharing the same vertices will
+ * be joined together, otherwise a separate set of vertices will be created for
+ * each facet. In any case, factes will not be joined to the cells of the
+ * current mesh
  * \param[in] PIDOffset is the offset for the PID numbering
  * \param[in] PIDSquash controls if the PID of the cells will be read from
  * the file (false) or if the same PID will be assigned to all cells (true).
@@ -395,7 +420,7 @@ int SurfUnstructured::importSTL(const std::string &filename, bool isBinary,
  * \result on output returns an error flag for I/O error
 */
 int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format format,
-                                int PIDOffset, bool PIDSquash,
+                                bool joinFacets, int PIDOffset, bool PIDSquash,
                                 std::unordered_map<int, std::string> *PIDNames)
 {
     int readerError;
@@ -416,7 +441,9 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
     int pid = PIDOffset;
 
     ElementType facetType = ElementType::TRIANGLE;
-    int nFacetVertices = ReferenceElementInfo::getInfo(ElementType::TRIANGLE).nVertices;
+    const int nFacetVertices = ReferenceElementInfo::getInfo(ElementType::TRIANGLE).nVertices;
+
+    std::map<Vertex *, long, Vertex::Less> vertexCache(Vertex::Less(10 * std::numeric_limits<double>::epsilon()));
 
     while (true) {
         // Read header
@@ -435,29 +462,41 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
         reserveVertices(getVertexCount() + nFacetVertices * nFacets);
         reserveCells(getCellCount() + nFacets);
 
+        vertexCache.clear();
+
         for (std::size_t n = 0; n < nFacets; ++n) {
             // Read facet data
-            std::array<double, 3> coords_0;
-            std::array<double, 3> coords_1;
-            std::array<double, 3> coords_2;
-            std::array<double, 3> normal;
-
-            readerError = reader.readFacet(&coords_0, &coords_1, &coords_2, &normal);
+            std::array<Vertex, 3> faceVertices;
+            std::array<double, 3> facetNormal;
+            readerError = reader.readFacet(&(faceVertices[0].getCoords()), &(faceVertices[1].getCoords()), &(faceVertices[2].getCoords()), &facetNormal);
             if (readerError != 0) {
                 return readerError;
             }
 
             // Add vertices
-            VertexIterator vertexItr_0 = addVertex(coords_0);
-            VertexIterator vertexItr_1 = addVertex(coords_1);
-            VertexIterator vertexItr_2 = addVertex(coords_2);
+            std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[nFacetVertices]);
+            if (joinFacets) {
+                for (int i = 0; i < nFacetVertices; ++i) {
+                    long vertexId;
+                    auto vertexCacheItr = vertexCache.find(faceVertices.data() + i);
+                    if (vertexCacheItr == vertexCache.end()) {
+                        VertexIterator vertexItr = addVertex(faceVertices[i].getCoords());
+                        vertexId = vertexItr.getId();
+                        vertexCache.insert({&(*vertexItr), vertexId});
+                    } else {
+                        vertexId = vertexCacheItr->second;
+                    }
+                    connectStorage[i] = vertexId;
+                }
+            } else {
+                for (int i = 0; i < nFacetVertices; ++i) {
+                    VertexIterator vertexItr = addVertex(faceVertices[i].getCoords());
+                    long vertexId = vertexItr.getId();
+                    connectStorage[i] = vertexId;
+                }
+            }
 
             // Add cell
-            std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[nFacetVertices]);
-            connectStorage[0] = vertexItr_0.getId();
-            connectStorage[1] = vertexItr_1.getId();
-            connectStorage[2] = vertexItr_2.getId();
-
             CellIterator cellIterator = addCell(facetType, std::move(connectStorage));
             cellIterator->setPID(pid);
         }
