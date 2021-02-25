@@ -41,25 +41,25 @@ namespace bitpit {
 /*!
 	Constructor.
 
-	\param element is a reference to the element the owns the edge
-	\param connectivity is the the connectivity of the edge
+	\param element is a reference to the element the owns the item
+	\param vertexIds are the ids of the vertices
 	\param winding is the winding order of the vertices
 */
 template<class DerivedElement>
-ElementHalfItem<DerivedElement>::ElementHalfItem(DerivedElement &element, ConstProxyVector<long> &&connectivity, Winding winding)
-    : m_element(element), m_connect(std::move(connectivity)), m_winding(winding)
+ElementHalfItem<DerivedElement>::ElementHalfItem(DerivedElement &element, ConstProxyVector<long> &&vertexIds, Winding winding)
+    : m_element(element), m_vertexIds(std::move(vertexIds)), m_winding(winding)
 {
 	// Find the vertex with the lowest id, this will be used as first vertex
-	// when iterating over the connectivity.
-	std::size_t connectSize = m_connect.size();
+	// when iterating over the ids.
+	std::size_t nVertices = m_vertexIds.size();
 
-	m_connectBegin = 0;
-	if (connectSize > 0) {
-		long smallestVertexId = m_connect[m_connectBegin];
-		for (std::size_t i = 1; i < connectSize; ++i) {
-			long vertexId = m_connect[i];
+	m_firstVertexId = 0;
+	if (nVertices > 0) {
+		long smallestVertexId = m_vertexIds[m_firstVertexId];
+		for (std::size_t i = 1; i < nVertices; ++i) {
+			long vertexId = m_vertexIds[i];
 			if (vertexId < smallestVertexId) {
-				m_connectBegin = i;
+				m_firstVertexId = i;
 				smallestVertexId = vertexId;
 			}
 		}
@@ -78,14 +78,14 @@ DerivedElement & ElementHalfItem<DerivedElement>::getElement() const
 }
 
 /*!
-	Get the connectivity of the edge
+	Get the list of vertex ids of the edge.
 
-	\result Returns the connectivity of the edge.
+	\result Returns the list of vertex ids of the edge.
 */
 template<class DerivedElement>
-const ConstProxyVector<long> & ElementHalfItem<DerivedElement>::getConnect() const
+const ConstProxyVector<long> & ElementHalfItem<DerivedElement>::getVertexIds() const
 {
-    return m_connect;
+    return m_vertexIds;
 }
 
 /*!
@@ -120,20 +120,20 @@ void ElementHalfItem<DerivedElement>::setWinding(Winding winding)
 template<class DerivedElement>
 bool ElementHalfItem<DerivedElement>::operator==(const ElementHalfItem<DerivedElement> &other) const
 {
-	const bitpit::ConstProxyVector<long> &connect1 = m_connect;
-	const bitpit::ConstProxyVector<long> &connect2 = other.m_connect;
+	const bitpit::ConstProxyVector<long> &vertexIds_1 = m_vertexIds;
+	const bitpit::ConstProxyVector<long> &vertexIds_2 = other.m_vertexIds;
 
-	std::size_t connectSize = connect1.size();
-	if (connectSize != connect2.size()) {
+	std::size_t nVertices = vertexIds_1.size();
+	if (nVertices != vertexIds_2.size()) {
 		return false;
 	}
 
 	int winding = m_winding * other.m_winding;
-	std::size_t offset = other.m_connectBegin - winding * m_connectBegin + 2 * connectSize;
-	for (std::size_t i = 0; i < connectSize; ++i) {
+	std::size_t offset = other.m_firstVertexId - winding * m_firstVertexId + 2 * nVertices;
+	for (std::size_t i = 0; i < nVertices; ++i) {
 		std::size_t k1 = i;
-		std::size_t k2 = (offset + winding * i) % connectSize;
-		if (connect1[k1] != connect2[k2]) {
+		std::size_t k2 = (offset + winding * i) % nVertices;
+		if (vertexIds_1[k1] != vertexIds_2[k2]) {
 			return false;
 		}
 	}
@@ -171,19 +171,19 @@ bool ElementHalfItem<DerivedElement>::operator!=(const ElementHalfItem<DerivedEl
 template<class DerivedElement>
 std::size_t ElementHalfItem<DerivedElement>::Hasher::operator()(const ElementHalfItem &item) const
 {
-	const ConstProxyVector<long> &connectivity = item.m_connect;
-	std::size_t connectivitySize = connectivity.size();
+	const ConstProxyVector<long> &vertexIds = item.m_vertexIds;
+	std::size_t nVertices = vertexIds.size();
 
-	std::size_t hash = connectivitySize;
+	std::size_t hash = nVertices;
 	if (item.m_winding == ElementHalfItem::WINDING_NATURAL) {
-		for (std::size_t i = 0; i < connectivitySize; ++i) {
-			std::size_t k = (item.m_connectBegin + i) % connectivitySize;
-			utils::hashing::hash_combine(hash, connectivity[k]);
+		for (std::size_t i = 0; i < nVertices; ++i) {
+			std::size_t k = (item.m_firstVertexId + i) % nVertices;
+			utils::hashing::hash_combine(hash, vertexIds[k]);
 		}
 	} else {
-		for (std::size_t i = connectivitySize; i > 0; --i) {
-			std::size_t k = (item.m_connectBegin + i) % connectivitySize;
-			utils::hashing::hash_combine(hash, connectivity[k]);
+		for (std::size_t i = nVertices; i > 0; --i) {
+			std::size_t k = (item.m_firstVertexId + i) % nVertices;
+			utils::hashing::hash_combine(hash, vertexIds[k]);
 		}
 	}
 
@@ -204,11 +204,11 @@ std::size_t ElementHalfItem<DerivedElement>::Hasher::operator()(const ElementHal
 
 	\param element is a reference to the element the owns the edge
 	\param edge if the local index of the edge
-	\param winding is the winding order of the vertices
+	\param winding is the winding order of the vertexIds
 */
 template<class DerivedElement>
 ElementHalfEdge<DerivedElement>::ElementHalfEdge(DerivedElement &element, int edge, Winding winding)
-    : ElementHalfItem<DerivedElement>(element, element.getEdgeConnect(edge), winding),
+    : ElementHalfItem<DerivedElement>(element, element.getEdgeVertexIds(edge), winding),
       m_edge(edge)
 {
 }
@@ -233,7 +233,7 @@ int ElementHalfEdge<DerivedElement>::getEdge() const
 	ElementHalfFace is the class that defines element half-faces. Each face
 	can be seen as two half-faces: one belonging to an element and the other
 	belonging to the neighbouring element. A half-face is identify by its
-	vertices and by the winding order of the vertices.
+	vertexIds and by the winding order of the vertexIds.
 */
 
 /*!
@@ -241,11 +241,11 @@ int ElementHalfEdge<DerivedElement>::getEdge() const
 
 	\param element is a reference to the element the owns the face
 	\param face if the local face of the element
-	\param winding is the winding order of the vertices
+	\param winding is the winding order of the vertexIds
 */
 template<class DerivedElement>
 ElementHalfFace<DerivedElement>::ElementHalfFace(DerivedElement &element, int face, Winding winding)
-    : ElementHalfItem<DerivedElement>(element, element.getFaceConnect(face), winding),
+    : ElementHalfItem<DerivedElement>(element, element.getFaceVertexIds(face), winding),
       m_face(face)
 {
 }
