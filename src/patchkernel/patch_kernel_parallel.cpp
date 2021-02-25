@@ -2213,14 +2213,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                             int nFrontierCellEdges = frontierCell->getEdgeCount();
                             for (int edge = 0; edge < nFrontierCellEdges; ++edge) {
                                 // Edge information
-                                ElementType edgeType = frontierCell->getEdgeType(edge);
                                 int nEdgeVertices = frontierCell->getEdgeVertexCount(edge);
 
                                 CellHalfEdge frontierEdge = CellHalfEdge(*frontierCell, edge, CellHalfEdge::WINDING_NATURAL);
 
                                 // Discard edges that do not belong to the
                                 // current frontier face
-                                ConstProxyVector<long> edgeVertexIds = Cell::getVertexIds(edgeType, frontierEdge.getConnect().data());
+                                ConstProxyVector<long> edgeVertexIds = frontierEdge.getVertexIds();
 
                                 bool isFrontierFaceEdge = true;
                                 for (int k = 0; k < nEdgeVertices; ++k) {

@@ -232,7 +232,7 @@ public:
 		std::size_t operator()(const ElementHalfItem &item) const;
 	};
 
-	const ConstProxyVector<long> & getConnect() const;
+	const ConstProxyVector<long> & getVertexIds() const;
 
 	Winding getWinding() const;
 	void setWinding(Winding winding);
@@ -243,12 +243,12 @@ public:
 protected:
 	DerivedElement &m_element;
 
-	ConstProxyVector<long> m_connect;
-	std::size_t m_connectBegin;
+	ConstProxyVector<long> m_vertexIds;
+	std::size_t m_firstVertexId;
 
 	Winding m_winding;
 
-	ElementHalfItem(DerivedElement &element, ConstProxyVector<long> &&connectivity, ElementHalfItem<DerivedElement>::Winding winding);
+	ElementHalfItem(DerivedElement &element, ConstProxyVector<long> &&vertexIds, ElementHalfItem<DerivedElement>::Winding winding);
 
 	DerivedElement & getElement() const;
 
