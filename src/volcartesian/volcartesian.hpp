@@ -142,6 +142,9 @@ public:
 	std::array<int, 3> getVertexCartesianId(const std::array<int, 3> &cellIjk, int vertex) const;
 	bool isVertexCartesianIdValid(const std::array<int, 3> &ijk) const;
 
+	std::array<int, 3> getCellFaceNeighsCartesianId(long id, int face) const;
+	long getCellFaceNeighsLinearId(long id, int face) const;
+
 protected:
 	VolCartesian(const VolCartesian &other) = default;
 

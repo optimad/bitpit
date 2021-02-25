@@ -1661,22 +1661,14 @@ bool VolCartesian::isVertexCartesianIdValid(const std::array<int, 3> &ijk) const
 */
 void VolCartesian::_findCellFaceNeighs(long id, int face, const std::vector<long> *blackList, std::vector<long> *neighs) const
 {
-	int neighSide      = face % 2;
-	int neighDirection = std::floor(face / 2);
-
-	std::array<int, 3> neighIjk(getCellCartesianId(id));
-	if (neighSide == 0) {
-		neighIjk[neighDirection]--;
-	} else {
-		neighIjk[neighDirection]++;
+	long neighId = getCellFaceNeighsLinearId(id, face);
+	if (neighId < 0) {
+		return;
+	} else if (blackList && utils::findInOrderedVector<long>(neighId, *blackList) != blackList->end()) {
+		return;
 	}
 
-	if (isCellCartesianIdValid(neighIjk)) {
-		long neighId = getCellLinearId(neighIjk);
-		if (!blackList || utils::findInOrderedVector<long>(neighId, *blackList) == blackList->end()) {
-			neighs->push_back(neighId);
-		}
-	}
+	neighs->push_back(neighId);
 }
 
 /*!
@@ -2294,6 +2286,49 @@ std::array<double, 3> VolCartesian::evalCellCentroid(const std::array<int, 3> &i
 const std::vector<double> & VolCartesian::getCellCentroids(int direction) const
 {
 	return m_cellCenters[direction];
+}
+
+/*!
+	Evaluate the cartesian index of the neighbour for the specified face.
+
+	\param id is the id of the cell
+	\param face is a face of the cell
+	\result The cartesian index of the neighbour for the specified face.
+*/
+std::array<int, 3> VolCartesian::getCellFaceNeighsCartesianId(long id, int face) const
+{
+	int neighSide      = face % 2;
+	int neighDirection = std::floor(face / 2);
+
+	std::array<int, 3> neighIjk(getCellCartesianId(id));
+	if (neighSide == 0) {
+		neighIjk[neighDirection]--;
+	} else {
+		neighIjk[neighDirection]++;
+	}
+
+	return neighIjk;
+}
+
+/*!
+	Evaluate the linear index of the neighbour for the specified face.
+
+	\param id is the id of the cell
+	\param face is a face of the cell
+	\result The linear index of the neighbour for the specified face.
+*/
+long VolCartesian::getCellFaceNeighsLinearId(long id, int face) const
+{
+	std::array<int, 3> neighIjk = getCellFaceNeighsCartesianId(id, face);
+
+	long neighId;
+	if (isCellCartesianIdValid(neighIjk)) {
+		neighId = getCellLinearId(neighIjk);
+	} else {
+		neighId = Cell::NULL_ID;
+	}
+
+	return neighId;
 }
 
 }
