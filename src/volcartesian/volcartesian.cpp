@@ -329,34 +329,96 @@ void VolCartesian::_updateInterfaces()
 
 	if (partialUpdate) {
 		log::cout() << " It is not possible to partially update the interfaces.";
-		log::cout() << " All interface will be updated.";
+		log::cout() << " All interfaces will be updated.";
 	}
 
 	// Count the total number of interfaces
 	m_nInterfaces = 0;
-	for (int n = 0; n < getDimension(); n++) {
-		std::array<int, 3> interfaceCount1D = getInterfaceCountDirection(n);
-
+	for (int d = 0; d < getDimension(); ++d) {
 		int nDirectionInterfaces = 1;
 		for (int n = 0; n < getDimension(); n++) {
-			nDirectionInterfaces *= interfaceCount1D[n];
+			int nDirectionInterfaces1D = m_nCells1D[n];
+			if (n == d) {
+				++nDirectionInterfaces1D;
+			}
+
+			nDirectionInterfaces *= nDirectionInterfaces1D;
 		}
 		m_nInterfaces += nDirectionInterfaces;
 	}
 
 	// Build interfaces
 	if (getMemoryMode() == MemoryMode::MEMORY_NORMAL) {
+		int nCellFaces = 2 * getDimension();
+
+		// Info on the interfaces
+		ElementType interfaceType = getInterfaceType();
+
+		const ReferenceElementInfo &interfaceTypeInfo = ReferenceElementInfo::getInfo(interfaceType);
+		const int nInterfaceVertices = interfaceTypeInfo.nVertices;
+
 		// Enable advanced editing
 		setExpert(true);
 
-		// Update interfaces
-		addInterfaces();
+		// Initialize interfaces
+		for (Cell &cell : getCells()) {
+			cell.setInterfaces(FlatVector2D<long>(nCellFaces, 1, Interface::NULL_ID));
+		}
+
+		// Build interfaces
+		for (Cell &cell : getCells()) {
+			long cellId = cell.getId();
+			for (int face = 0; face < nCellFaces; ++face) {
+				// Get neighbour information
+				//
+				// The interface between two cells needs to be processed only
+				// once. In order to ensure this, we build an interface if the
+				// faces is a border, or if the id of this cell is lower than
+				// the id of its neighbour.
+				long neighId;
+				if (cell.getAdjacencyCount(face) > 0) {
+					neighId = cell.getAdjacencies(face)[0];
+					if (neighId < cellId) {
+						continue;
+					}
+				} else {
+					neighId = Cell::NULL_ID;
+				}
+
+				// Create the interface
+				InterfaceIterator interfaceIterator = VolumeKernel::addInterface(interfaceType);
+				Interface &interface = *interfaceIterator;
+				long interfaceId = interface.getId();
+
+				// Set connectivity
+				ConstProxyVector<long> faceConnect = cell.getFaceConnect(face);
+				int connectSize = faceConnect.size();
+
+				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
+				for (int k = 0; k < connectSize; ++k) {
+					connect[k] = faceConnect[k];
+				}
+				interface.setConnect(std::move(connect));
+
+				// Set owner data
+				interface.setOwner(cellId, face);
+				cell.setInterface(face, 0, interfaceId);
+
+				// Neighbour data
+				if (neighId >= 0) {
+					Cell &neigh = getCell(neighId);
+					int neighFace = 2 * std::floor(face / 2.) + (1 - face % 2);
+
+					interface.setNeigh(neighId, neighFace);
+					neigh.setInterface(neighFace, 0, interfaceId);
+				} else {
+					interface.unsetNeigh();
+				}
+			}
+		}
 
 		// Disable advanced editing
 		setExpert(false);
-	} else {
-		// Set interfaces build strategy
-		setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
 	}
 }
 
@@ -922,9 +984,6 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 	// Definition of the mesh
 	addVertices();
 	addCells();
-	if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-		addInterfaces();
-	}
 
 	// Disable advanced editing
 	setExpert(false);
@@ -1023,145 +1082,6 @@ void VolCartesian::addCells()
 					cellConnect[6] = getVertexLinearId(i,     j + 1, k + 1);
 					cellConnect[7] = getVertexLinearId(i + 1, j + 1, k + 1);
 				}
-			}
-		}
-	}
-}
-
-/*!
-	Creates the interfaces of the patch.
-*/
-void VolCartesian::addInterfaces()
-{
-	log::cout() << "  >> Creating interfaces\n";
-
-	log::cout() << "    - Interface count: " << m_nInterfaces << "\n";
-
-	// Create interfaces
-	m_interfaces.reserve(m_nInterfaces);
-	for (int n = 0; n < getDimension(); n++) {
-		addInterfacesDirection(n);
-	}
-
-	// Set interfaces build strategy
-	setInterfacesBuildStrategy(INTERFACES_AUTOMATIC);
-}
-
-/*!
-	Get the interface ount for the given direction.
-
-	\param direction the method will count the interfaces normal to this
-	                 direction
-	\result The interface count for the given direction.
-*/
-std::array<int, 3> VolCartesian::getInterfaceCountDirection(int direction)
-{
-	std::array<int, 3> interfaceDirectionCount = m_nCells1D;
-	interfaceDirectionCount[direction]++;
-
-	return interfaceDirectionCount;
-}
-
-/*!
-	Creates the interfaces normal to the given direction.
-
-	\param direction the method will create the interfaces normal to this
-	                 direction
-*/
-void VolCartesian::addInterfacesDirection(int direction)
-{
-	log::cout() << "  >> Creating interfaces normal to direction " << direction << "\n";
-
-	// Info on the interfaces
-	ElementType interfaceType = getInterfaceType();
-
-	const ReferenceElementInfo &interfaceTypeInfo = ReferenceElementInfo::getInfo(interfaceType);
-	const int nInterfaceVertices = interfaceTypeInfo.nVertices;
-	std::array<int, 3> interfaceCount1D = getInterfaceCountDirection(direction);
-
-	// Counters
-	std::array<int, 3> counters = {{0, 0, 0}};
-	int &i = counters[Vertex::COORD_X];
-	int &j = counters[Vertex::COORD_Y];
-	int &k = counters[Vertex::COORD_Z];
-
-	// Creation of the interfaces
-	for (k = 0; (isThreeDimensional()) ? (k < interfaceCount1D[Vertex::COORD_Z]) : (k <= 0); k++) {
-		for (j = 0; j < interfaceCount1D[Vertex::COORD_Y]; j++) {
-			for (i = 0; i < interfaceCount1D[Vertex::COORD_X]; i++) {
-				InterfaceIterator interfaceIterator = VolumeKernel::addInterface(interfaceType);
-				Interface &interface = *interfaceIterator;
-
-				// Owner id
-				std::array<int, 3> ownerIJK(counters);
-				if (counters[direction] == (interfaceCount1D[direction] - 1)) {
-					ownerIJK[direction] -= 1;
-				}
-
-				long ownerId = getCellLinearId(ownerIJK);
-
-				// Neighbour id
-				long neighId;
-				if (counters[direction] != 0 && counters[direction] != interfaceCount1D[direction] - 1) {
-					std::array<int, 3> neighIJK(counters);
-					neighIJK[direction] -= 1;
-
-					neighId = getCellLinearId(neighIJK);
-				} else {
-					neighId = Element::NULL_ID;
-				}
-
-				// Owner data
-				Cell &owner = m_cells[ownerId];
-
-				int ownerFace = 2 * direction;
-				if (counters[direction] == interfaceCount1D[direction] - 1) {
-					ownerFace++;
-				}
-
-				interface.setOwner(owner.getId(), ownerFace);
-				owner.pushInterface(ownerFace, interface.getId());
-				owner.pushAdjacency(ownerFace, neighId);
-
-				// Neighbour data
-				if (counters[direction] != 0 && counters[direction] != interfaceCount1D[direction] - 1) {
-					Cell &neigh = m_cells[neighId];
-
-					int neighFace = 2 * direction + 1;
-
-					interface.setNeigh(neigh.getId(), neighFace);
-					neigh.pushInterface(neighFace, interface.getId());
-					neigh.pushAdjacency(neighFace, ownerId);
-				} else {
-					interface.unsetNeigh();
-				}
-
-				// Connectivity
-				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
-				if (direction == Vertex::COORD_X) {
-					connect[0] = getVertexLinearId(i, j,     k);
-					connect[1] = getVertexLinearId(i, j + 1, k);
-					if (interfaceType == ElementType::PIXEL) {
-						connect[2] = getVertexLinearId(i, j + 1, k + 1);
-						connect[3] = getVertexLinearId(i, j,     k + 1);
-					}
-				} else if (direction == Vertex::COORD_Y) {
-					connect[0] = getVertexLinearId(i,     j,     k);
-					connect[1] = getVertexLinearId(i + 1, j,     k);
-					if (interfaceType == ElementType::PIXEL) {
-						connect[2] = getVertexLinearId(i + 1, j, k + 1);
-						connect[3] = getVertexLinearId(i,     j, k + 1);
-					}
-				} else if (direction == Vertex::COORD_Z) {
-					connect[0] = getVertexLinearId(i,     j,     k);
-					connect[1] = getVertexLinearId(i + 1, j,     k);
-					if (interfaceType == ElementType::PIXEL) {
-						connect[2] = getVertexLinearId(i + 1, j + 1, k);
-						connect[3] = getVertexLinearId(i,     j + 1, k);
-					}
-				}
-
-				interface.setConnect(std::move(connect));
 			}
 		}
 	}

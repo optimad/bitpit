@@ -201,10 +201,6 @@ private:
 
 	void addCells();
 
-	void addInterfaces();
-	std::array<int, 3> getInterfaceCountDirection(int direction);
-	void addInterfacesDirection(int direction);
-
 	double evalCellVolume() const;
 	double evalCellSize() const;
 
