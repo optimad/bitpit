@@ -2367,6 +2367,32 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS,
 }
 
 /*!
+ * Checks it the axis aligned bounding box intersects the circle.
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] centre is the centre of the circle
+ * \param[in] radius is the radius of the circle
+ * \param[in] distanceTolerance is the tolerance used to checking the
+ * intersection
+ * \return Returns true if the box intersects the circle, false otherwise.
+ */
+bool intersectBoxCircle( array3D const &A0, array3D const &A1, array3D const &centre, double radius, const double distanceTolerance)
+{
+    double minimumDistance = 0.;
+    for (int i = 0; i < 2; ++i) {
+        if (centre[i] < A0[i]) {
+            minimumDistance += (centre[i] - A0[i]) * (centre[i] - A0[i]);
+        } else if (centre[i] > A1[i]) {
+            minimumDistance += (centre[i] - A1[i]) * (centre[i] - A1[i]);
+        }
+    }
+
+    double inflatedRadius = radius + distanceTolerance;
+
+    return (minimumDistance <= (inflatedRadius * inflatedRadius));
+}
+
+/*!
  * Checks it the axis aligned bounding box intersects the sphere.
  * \param[in] A0 min point of box
  * \param[in] A1 max point of box

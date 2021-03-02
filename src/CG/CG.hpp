@@ -230,6 +230,8 @@ bool intersectBoxPolygon( array3D const &, array3D const &, std::vector<array3D>
 bool intersectBoxPolygon( array3D const &, array3D const &, std::size_t, array3D const *, bool, bool, bool, 
         std::vector<array3D> &, std::vector<int> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
 
+bool intersectBoxCircle( array3D const &A0, array3D const &A1, array3D const &centre, double radius, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+
 bool intersectBoxSphere( array3D const &A0, array3D const &A1, array3D const &centre, double radius, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
 
 void computeAABBSegment( array3D const &, array3D const &, array3D &, array3D & ) ;
