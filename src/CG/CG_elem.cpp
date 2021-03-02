@@ -2366,6 +2366,31 @@ bool intersectBoxPolygon( array3D const &A0, array3D const &A1, std::size_t nVS,
     return _intersectBoxPolygon(A0, A1, nVS, VS, innerPolygonPoints, polygonEdgeBoxFaceIntersections, polygonBoxEdgeIntersections, &P, &flag, dim, distanceTolerance);
 }
 
+/*!
+ * Checks it the axis aligned bounding box intersects the sphere.
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] centre is the centre of the sphere
+ * \param[in] radius is the radius of the sphere
+ * \param[in] distanceTolerance is the tolerance used to checking the
+ * intersection
+ * \return Returns true if the box intersects the sphere, false otherwise.
+ */
+bool intersectBoxSphere( array3D const &A0, array3D const &A1, array3D const &centre, double radius, const double distanceTolerance)
+{
+    double minimumDistance = 0.;
+    for (int i = 0; i < 3; ++i) {
+        if (centre[i] < A0[i]) {
+            minimumDistance += (centre[i] - A0[i]) * (centre[i] - A0[i]);
+        } else if (centre[i] > A1[i]) {
+            minimumDistance += (centre[i] - A1[i]) * (centre[i] - A1[i]);
+        }
+    }
+
+    double inflatedRadius = radius + distanceTolerance;
+
+    return (minimumDistance <= (inflatedRadius * inflatedRadius));
+}
 
 //to levelset // -------------------------------------------------------------------------- //
 //to levelset bool intersectLineSurface(
