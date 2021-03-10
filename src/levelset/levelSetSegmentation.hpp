@@ -65,18 +65,31 @@ public:
     int getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
 
 private:
+    typedef std::pair<long, int> SegmentVertexKey;
+
     const SurfUnstructured *m_surface;
     std::unique_ptr<const SurfUnstructured> m_ownedSurface;
     double m_featureAngle;
 
     std::unique_ptr<SurfaceSkdTree> m_searchTree;
 
-    mutable PiercedStorage<double> m_hasSegmentVertexNormals;
-    mutable PiercedStorage<std::vector< std::array<double,3>>> m_segmentVertexNormalsStorage;
+    PiercedStorage<std::size_t> m_segmentVertexOffset;
+
+    mutable PiercedStorage<bool> m_segmentNormalsValid;
+    mutable PiercedStorage<std::array<double,3>> m_segmentNormalsStorage;
+    mutable PiercedStorage<bool> m_unlimitedVertexNormalsValid;
+    mutable PiercedStorage<std::array<double,3>> m_unlimitedVertexNormalsStorage;
+    mutable std::vector<bool> m_limitedSegmentVertexNormalValid;
+    mutable std::unordered_map<SegmentVertexKey, std::array<double,3>, utils::hashing::hash<SegmentVertexKey>> m_limitedSegmentVertexNormalStorage;
 
     void setSurface( const SurfUnstructured *surface, double featureAngle);
 
-    const std::vector<std::array<double,3>> & computeSegmentVertexNormals( const SurfUnstructured::CellConstIterator &segmentIterator ) const;
+    std::array<double,3> computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
+    std::array<double,3> computeSurfaceNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
+
+    std::array<double,3> computeSegmentNormal( const SurfUnstructured::CellConstIterator &segmentIterator ) const;
+    std::array<double,3> computeSegmentEdgeNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int edge ) const;
+    std::array<double,3> computeSegmentVertexNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int vertex, bool limited ) const;
 
 };
 
