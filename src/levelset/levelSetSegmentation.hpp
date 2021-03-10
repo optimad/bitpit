@@ -71,12 +71,17 @@ private:
 
     std::unique_ptr<SurfaceSkdTree> m_searchTree;
 
-    mutable PiercedStorage<double> m_hasSegmentVertexNormals;
-    mutable PiercedStorage<std::vector< std::array<double,3>>> m_segmentVertexNormalsStorage;
+    mutable PiercedStorage<bool> m_segmentHasNormals;
+
+    mutable std::unordered_map<long, std::vector<std::array<double,3>>> m_segmentLimitedVertexNormalsStorage;
+
+    mutable PiercedStorage<bool> m_vertexHasUnlimitedNormals;
+    mutable PiercedStorage<std::array<double,3>> m_vertexUnlimitedNormalsStorage;
 
     void setSurface( const SurfUnstructured *surface, double featureAngle);
 
-    const std::vector<std::array<double,3>> & computeSegmentVertexNormals( const SurfUnstructured::CellConstIterator &segmentIterator ) const;
+    void computeSegmentNormals( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda,
+                                std::array<double,3> *limitedNormal, std::array<double,3> *unlimitedNormal) const;
 
 };
 

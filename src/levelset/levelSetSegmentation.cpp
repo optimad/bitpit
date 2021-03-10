@@ -110,10 +110,15 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
     m_surface      = surface;
     m_featureAngle = featureAngle;
 
-    m_hasSegmentVertexNormals.setStaticKernel(&m_surface->getCells());
-    m_hasSegmentVertexNormals.fill(false);
+    m_segmentHasNormals.setStaticKernel(&m_surface->getCells());
+    m_segmentHasNormals.fill(false);
 
-    m_segmentVertexNormalsStorage.setStaticKernel(&m_surface->getCells());
+    m_segmentLimitedVertexNormalsStorage.clear();
+
+    m_vertexHasUnlimitedNormals.setStaticKernel(&m_surface->getVertices());
+    m_vertexHasUnlimitedNormals.fill(false);
+
+    m_vertexUnlimitedNormalsStorage.setStaticKernel(&m_surface->getVertices());
 
     // Check if segment is supported
     for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != m_surface->cellConstEnd(); ++segmentItr ){
@@ -153,7 +158,6 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
     ElementType segmentType = segment.getType();
     ConstProxyVector<long> segmentVertexIds = segment.getVertexIds() ;
     int nSegmentVertices = segmentVertexIds.size() ;
-    const std::vector<std::array<double,3>> &segmentVertexNormals = computeSegmentVertexNormals(segmentIterator);
 
     BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
     std::array<double,3> projectionCoords;
@@ -194,15 +198,9 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     }
 
-    if (segmentType != ElementType::VERTEX) {
-        normal = lambda[0] * segmentVertexNormals[0] ;
-        for (int i = 1; i < nSegmentVertices; ++i) {
-            normal += lambda[i] * segmentVertexNormals[i] ;
-        }
-        normal /= norm2(normal) ;
-    } else {
-        normal.fill(0.);
-    }
+    // Compute levelset information
+    std::array<double, 3> unlimitedNormal;
+    computeSegmentNormals(segmentIterator, lambda, &normal, &unlimitedNormal);
 
     gradient = pointCoords-projectionCoords;
     distance = norm2(gradient); 
@@ -210,7 +208,7 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     // the sign is computed by determining the side of point p
     // with respect to the normal plane 
-    int s = sign( dotProduct(gradient, normal) );
+    int s = sign( dotProduct(gradient, unlimitedNormal) );
 
     // If the point lies on the normal plane (s = 0), but its distance is
     // finite the sign must be evaluated considering the curvature of the
@@ -235,58 +233,114 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 }
 
 /*!
- * Get the normals of the vertices associated with the specified segment.
+ * Compute the normals associated with the segment at the specified point.
  *
- * The normals of a segment will be evaluates the first time they are
- * requested and then cached.
+ * Two normals are evaluated. The unlimited normal is the angle weighted
+ * pseudo-normal at the vertices of the segment. The limited normal is the
+ * angle weighted pseudo-normal evaluated at the vertices of segment evaluated
+ * excluding the negihbours whose normal has a misalignment greater than the
+ * specified feature angle.
+ *
+ * The normals of a segment vertices will be evaluated the first time they are
+ * requested and then cached. To save space, unlimited normals are saved on a
+ * per-vertex basis, that's because the unlimited normal is the same regardless
+ * the segment on which is evaluated. On the other hand, limited normals need
+ * to be saved on a per-segment basis, because that normal will be different on
+ * the different segments that share a vertex.
  *
  * @param[in] segmentIterator is an iterator pointing to the segment
- * @return the normals of the vertices associated with the specified segment
+ * @param[in] lambda are the barycentric coordinates of the point
+ * @param[out] limitedNormal on output will contain the limited normal
+ * @param[out] unlimitedNormal on output will contain the unlimited normal
  */
-const std::vector<std::array<double,3>> & SegmentationKernel::computeSegmentVertexNormals( const SurfUnstructured::CellConstIterator &segmentIterator ) const {
-
-    // Early return if the normals have already been evaluated
-    std::size_t segmentRawId = segmentIterator.getRawIndex() ;
-    if (m_hasSegmentVertexNormals.rawAt(segmentRawId)) {
-        return m_segmentVertexNormalsStorage.rawAt(segmentRawId);
-    }
+void SegmentationKernel::computeSegmentNormals( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda,
+                                                std::array<double,3> *limitedNormal, std::array<double,3> *unlimitedNormal) const {
 
     // Get segment information
     long segmentId = segmentIterator.getId() ;
+    std::size_t segmentRawId = segmentIterator.getRawIndex() ;
     const Cell &segment = *segmentIterator;
-    int nSegmentVertices = segment.getVertexCount() ;
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+    int nSegmentVertices = segmentVertexIds.size() ;
 
-    // Evaluate segment vertex normals
+    // Evaluate vertex normals
     //
-    // Normals are initialized with unlimited normals, if the segment is
-    // misalign they will be replaced with limited normals.
-    std::vector<std::array<double,3>> *segmentVertexNormals = m_segmentVertexNormalsStorage.rawData(segmentRawId);
-    segmentVertexNormals->resize(nSegmentVertices) ;
+    // If the normals for the specified segment have already been evaluated
+    // we can re-use the stored values.
+    if (!m_segmentHasNormals.rawAt(segmentRawId)) {
+        // Evaluate limited and unlimited normals
+        static std::vector<std::array<double,3>> unlimitedVertexNormals ;
+        unlimitedVertexNormals.resize(nSegmentVertices) ;
 
-    static std::vector<std::array<double,3>> limitedVertexNormals ;
-    limitedVertexNormals.resize(nSegmentVertices) ;
+        static std::unique_ptr<std::vector<std::array<double,3>>> limitedVertexNormals(nullptr) ;
+        if (!limitedVertexNormals) {
+            limitedVertexNormals = std::unique_ptr<std::vector<std::array<double,3>>>(new std::vector<std::array<double,3>>(nSegmentVertices));
+        }
+        limitedVertexNormals->resize(nSegmentVertices) ;
 
-    double misalignment = 0. ;
-    for( int i = 0; i < nSegmentVertices; ++i ){
-        static std::vector<long> vertexNeighbours ;
-        vertexNeighbours.clear();
-        m_surface->findCellVertexNeighs(segmentId, i, &vertexNeighbours);
+        double misalignment = 0. ;
+        for( int i = 0; i < nSegmentVertices; ++i ){
+            // Evaluate segment normals
+            static std::vector<long> vertexNeighbours ;
+            vertexNeighbours.clear();
+            m_surface->findCellVertexNeighs(segmentId, i, &vertexNeighbours);
 
-        std::array<double, 3> *unlimitedVertexNormal = segmentVertexNormals->data() + i;
-        std::array<double, 3> *limitedVertexNormal   = limitedVertexNormals.data() + i;
-        m_surface->evalVertexNormals(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle, unlimitedVertexNormal, limitedVertexNormal) ;
-        misalignment += norm2(*unlimitedVertexNormal - *limitedVertexNormal) ;
+            std::array<double, 3> *limitedVertexNormal   = limitedVertexNormals->data() + i ;
+            std::array<double, 3> *unlimitedVertexNormal = unlimitedVertexNormals.data() + i ;
+            m_surface->evalVertexNormals(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle, unlimitedVertexNormal, limitedVertexNormal) ;
+            misalignment += norm2(*unlimitedVertexNormal - *limitedVertexNormal) ;
+
+            // Store vertex unlimited normal
+            long vertexId = segmentVertexIds[i];
+            std::size_t vertexRawId = m_surface->getVertexConstIterator(vertexId).getRawIndex() ;
+            if (!m_vertexHasUnlimitedNormals.rawAt(vertexRawId)) {
+                m_vertexUnlimitedNormalsStorage.rawAt(vertexRawId).fill(0.) ;
+                std::swap(unlimitedVertexNormals[i], m_vertexUnlimitedNormalsStorage.rawAt(vertexRawId)) ;
+                m_vertexHasUnlimitedNormals.rawAt(vertexRawId) = true ;
+            }
+        }
+
+        // Store segment limited vertex normals
+        //
+        // Both limited and unlimited normal are evaluated, however limited
+        // normal is only stored if its misalignment with respect to the
+        // unlimited normal is greater than a defined tolerance.
+        if( misalignment >= m_surface->getTol() ){
+            m_segmentLimitedVertexNormalsStorage.insert({segmentId, std::move(*limitedVertexNormals)}) ;
+            limitedVertexNormals.reset() ;
+        }
+
+        // Normals have been evaluated
+        m_segmentHasNormals.rawAt(segmentRawId) = true;
     }
 
-    double tol = m_surface->getTol() ;
-    if( misalignment >= tol ){
-        segmentVertexNormals->swap(limitedVertexNormals);
+    // Evaluate normal at specified point
+    ElementType segmentType = segment.getType();
+    if (segmentType != ElementType::VERTEX) {
+        // Unlimited normal
+        *unlimitedNormal = lambda[0] * m_vertexUnlimitedNormalsStorage.at(segmentVertexIds[0]) ;
+        for (int i = 1; i < nSegmentVertices; ++i) {
+            *unlimitedNormal += lambda[i] * m_vertexUnlimitedNormalsStorage.at(segmentVertexIds[i]) ;
+        }
+        *unlimitedNormal /= norm2(*unlimitedNormal) ;
+
+        // Limited normal
+        auto segmentLimitedVertexNormalsItr = m_segmentLimitedVertexNormalsStorage.find(segmentId) ;
+        if (segmentLimitedVertexNormalsItr == m_segmentLimitedVertexNormalsStorage.end()) {
+            *limitedNormal = *unlimitedNormal ;
+        } else {
+            std::vector<std::array<double,3>> &segmentLimitedVertexNormals = segmentLimitedVertexNormalsItr->second ;
+
+            *limitedNormal = lambda[0] * segmentLimitedVertexNormals[0] ;
+            for (int i = 1; i < nSegmentVertices; ++i) {
+                *limitedNormal += lambda[i] * segmentLimitedVertexNormals[i] ;
+            }
+            *limitedNormal /= norm2(*limitedNormal) ;
+        }
+    } else {
+        limitedNormal->fill(0.) ;
+        unlimitedNormal->fill(0.) ;
     }
-
-    // Normals have been evaluated
-    m_hasSegmentVertexNormals.rawAt(segmentRawId) = true;
-
-    return *segmentVertexNormals;
 }
 
 
