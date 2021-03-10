@@ -107,13 +107,14 @@ const SurfaceSkdTree & SegmentationKernel::getSearchTree() const {
  */
 void SegmentationKernel::setSurface( const SurfUnstructured *surface, double featureAngle){
 
+    // Check if adjacencies are built
+    if (surface->getAdjacenciesBuildStrategy() == SurfUnstructured::ADJACENCIES_NONE) {
+        throw std::runtime_error ("Segmentation needs adjacencies!") ;
+    }
+
+    // Surface information
     m_surface      = surface;
     m_featureAngle = featureAngle;
-
-    m_hasSegmentVertexNormals.setStaticKernel(&m_surface->getCells());
-    m_hasSegmentVertexNormals.fill(false);
-
-    m_segmentVertexNormalsStorage.setStaticKernel(&m_surface->getCells());
 
     // Check if segment is supported
     for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != m_surface->cellConstEnd(); ++segmentItr ){
@@ -130,6 +131,26 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
 
         }
     }
+
+    // Segment vertices information
+    m_segmentVertexOffset.setStaticKernel(&m_surface->getCells());
+
+    std::size_t nTotalSegmentVertices = 0;
+    for( auto itr = m_segmentVertexOffset.begin(); itr != m_segmentVertexOffset.end(); ++itr ){
+        *itr = nTotalSegmentVertices;
+        nTotalSegmentVertices += m_surface->getCells().rawAt(itr.getRawIndex()).getVertexCount();
+    }
+
+    // Normals
+    m_segmentNormalsValid.setStaticKernel(&m_surface->getCells());
+    m_segmentNormalsValid.fill(false);
+    m_segmentNormalsStorage.setStaticKernel(&m_surface->getCells());
+
+    m_unlimitedVertexNormalsValid.setStaticKernel(&m_surface->getVertices());
+    m_unlimitedVertexNormalsValid.fill(false);
+    m_unlimitedVertexNormalsStorage.setStaticKernel(&m_surface->getVertices());
+
+    m_limitedSegmentVertexNormalValid.resize(nTotalSegmentVertices);
 
     // Initialize search tree
     m_searchTree = std::unique_ptr<SurfaceSkdTree>(new SurfaceSkdTree(surface));
@@ -154,7 +175,6 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
     ElementType segmentType = segment.getType();
     ConstProxyVector<long> segmentVertexIds = segment.getVertexIds() ;
     int nSegmentVertices = segmentVertexIds.size() ;
-    const std::vector<std::array<double,3>> &segmentVertexNormals = computeSegmentVertexNormals(segmentIterator);
 
     // Projct the point on the surface and evaluate the point-projeciont vector
     BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
@@ -196,15 +216,8 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     }
 
-    if (segmentType != ElementType::VERTEX) {
-        normal = lambda[0] * segmentVertexNormals[0] ;
-        for (int i = 1; i < nSegmentVertices; ++i) {
-            normal += lambda[i] * segmentVertexNormals[i] ;
-        }
-        normal /= norm2(normal) ;
-    } else {
-        normal.fill(0.);
-    }
+    // Compute surface normal
+    normal = computeSurfaceNormal(segmentIterator, lambda);
 
     // Evaluate distance from surface
     distance = norm2(pointProjectionVector);
@@ -234,7 +247,8 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
     // on the segmentation or on the normal plane. In the latter case the sign
     // must be evaluated taking into account the the curvature of the surface.
     // However, this is not yet implemented.
-    int s = sign( dotProduct(pointProjectionVector, normal) );
+    std::array<double, 3> pseudoNormal = computePseudoNormal(segmentIterator, lambda);
+    int s = sign( dotProduct(pointProjectionVector, pseudoNormal) );
     if (!pointOnSegmentation && s == 0) {
         distance = levelSetDefaults::VALUE;
         gradient = levelSetDefaults::GRADIENT;
@@ -259,60 +273,205 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 }
 
 /*!
- * Get the normals of the vertices associated with the specified segment.
+ * Compute the pseudo-normal at specified point of the given triangle.
  *
- * The normals of a segment will be evaluates the first time they are
- * requested and then cached.
+ * The algorithm used to evaluate the pseudo-normal depends on the location
+ * of the point within the triangle:
+ *  - if the point coincides with a vertex, the pseudo-normal is evaluated
+ *    as the unlimited normal of the vertex;
+ *  - if the point lies on an edge, the pseudo-normal is the average of
+ *    the normals of the two segments sharing the edge;
+ *  - if the point is inside the segment, the pseudo-normal is evaluated as
+ *    the normal of the segment.
+ *
+ * See "Signed Distance Computation Using the Angle Weighted Pseudo-normal",
+ * J. Andreas Bearentzen, Henrik Aanaes, IEEE Transactions on Visualization
+ * and Computer Graphics, 2005.
+ *
+ * To reduce computational times, normals of segments and vertices are cached.
  *
  * @param[in] segmentIterator is an iterator pointing to the segment
- * @return the normals of the vertices associated with the specified segment
+ * @param[in] lambda are the barycentric coordinates of the point
+ * @return the pseudo-normal at specified point of the given triangle
  */
-const std::vector<std::array<double,3>> & SegmentationKernel::computeSegmentVertexNormals( const SurfUnstructured::CellConstIterator &segmentIterator ) const {
+std::array<double,3> SegmentationKernel::computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const {
 
-    // Early return if the normals have already been evaluated
-    std::size_t segmentRawId = segmentIterator.getRawIndex() ;
-    if (m_hasSegmentVertexNormals.rawAt(segmentRawId)) {
-        return m_segmentVertexNormalsStorage.rawAt(segmentRawId);
-    }
-
-    // Get segment information
-    long segmentId = segmentIterator.getId() ;
+    // Early return if the segment is a point
     const Cell &segment = *segmentIterator;
-    int nSegmentVertices = segment.getVertexCount() ;
-
-    // Evaluate segment vertex normals
-    //
-    // Normals are initialized with unlimited normals, if the segment is
-    // misalign they will be replaced with limited normals.
-    std::vector<std::array<double,3>> *segmentVertexNormals = m_segmentVertexNormalsStorage.rawData(segmentRawId);
-    segmentVertexNormals->resize(nSegmentVertices) ;
-
-    static std::vector<std::array<double,3>> limitedVertexNormals ;
-    limitedVertexNormals.resize(nSegmentVertices) ;
-
-    double misalignment = 0. ;
-    for( int i = 0; i < nSegmentVertices; ++i ){
-        static std::vector<long> vertexNeighbours ;
-        vertexNeighbours.clear();
-        m_surface->findCellVertexNeighs(segmentId, i, &vertexNeighbours);
-
-        std::array<double, 3> *unlimitedVertexNormal = segmentVertexNormals->data() + i;
-        std::array<double, 3> *limitedVertexNormal   = limitedVertexNormals.data() + i;
-        m_surface->evalVertexNormals(segmentId, i, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle, unlimitedVertexNormal, limitedVertexNormal) ;
-        misalignment += norm2(*unlimitedVertexNormal - *limitedVertexNormal) ;
+    ElementType segmentType = segment.getType();
+    if (segmentType == ElementType::VERTEX) {
+        return {{0., 0., 0.}};
     }
 
-    double tol = m_surface->getTol() ;
-    if( misalignment >= tol ){
-        segmentVertexNormals->swap(limitedVertexNormals);
+    // Evaluate pseudo normal
+    int positionFlag;
+    if (segmentType == ElementType::LINE) {
+        positionFlag = CGElem::convertBarycentricToFlagSegment(lambda, m_surface->getTol());
+    } else {
+        int nSegmentVertices = segment.getVertexCount();
+        positionFlag = CGElem::convertBarycentricToFlagPolygon(nSegmentVertices, lambda, m_surface->getTol());
     }
 
-    // Normals have been evaluated
-    m_hasSegmentVertexNormals.rawAt(segmentRawId) = true;
+    std::array<double,3> pseudoNormal;
+    if (positionFlag == 0) {
+        pseudoNormal = computeSegmentNormal(segmentIterator);
+    } else if (positionFlag > 0) {
+        int vertex = positionFlag - 1;
+        pseudoNormal = computeSegmentVertexNormal(segmentIterator, vertex, false);
+    } else if (positionFlag < 0) {
+        int edge = (- positionFlag) - 1;
+        pseudoNormal = computeSegmentEdgeNormal(segmentIterator, edge);
+    }
 
-    return *segmentVertexNormals;
+    return pseudoNormal;
 }
 
+/*!
+ * Compute the surface-normal at specified point of the given triangle.
+ *
+ * Surface-normal is evaluated interpolating the unlimited vertex normals at
+ * the specified point.
+ *
+ * To reduce computational times, normals of vertices are cached.
+ *
+ * @param[in] segmentIterator is an iterator pointing to the segment
+ * @param[in] lambda are the barycentric coordinates of the point
+ * @return the surface-normal at specified point of the given triangle
+ */
+std::array<double,3> SegmentationKernel::computeSurfaceNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const {
+
+    // Early return if the segment is a point
+    const Cell &segment = *segmentIterator;
+    ElementType segmentType = segment.getType();
+    if (segmentType == ElementType::VERTEX) {
+        return {{0., 0., 0.}};
+    }
+
+    // Evaluate surface normal
+    std::size_t nSegmentVertices = segment.getVertexCount();
+    std::array<double,3> surfaceNormal = lambda[0] * computeSegmentVertexNormal(segmentIterator, 0, true);
+    for (std::size_t i = 1; i < nSegmentVertices; ++i) {
+        surfaceNormal += lambda[i] * computeSegmentVertexNormal(segmentIterator, i, true);
+    }
+    surfaceNormal /= norm2(surfaceNormal);
+
+    return surfaceNormal;
+}
+
+/*!
+ * Compute the normal of the specified triangle.
+ *
+ * To reduce computational times, normals of vertices are cached.
+ *
+ * @param[in] segmentIterator is an iterator pointing to the segment
+ * @return the normal of the specified triangle
+ */
+std::array<double,3> SegmentationKernel::computeSegmentNormal( const SurfUnstructured::CellConstIterator &segmentIterator ) const {
+
+    std::size_t segmentRawId = segmentIterator.getRawIndex();
+    std::array<double, 3> *segmentNormal = m_segmentNormalsStorage.rawData(segmentRawId);
+    if (!m_segmentNormalsValid.rawAt(segmentRawId)) {
+        *segmentNormal = m_surface->evalFacetNormal(segmentIterator->getId());
+        m_segmentNormalsValid.rawAt(segmentRawId) = true;
+    }
+
+    return *segmentNormal;
+}
+
+/*!
+ * Compute the normal of the specified triangle's edge.
+ *
+ * To reduce computational times, normals of vertices are cached.
+ *
+ * @param[in] segmentIterator is an iterator pointing to the segment
+ * @param[in] edge is the local index of the edge
+ * @return the normal of the specified triangle's edge
+ */
+std::array<double,3> SegmentationKernel::computeSegmentEdgeNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int edge ) const {
+
+    long neighId = segmentIterator->getAdjacency(edge);
+    SurfUnstructured::CellConstIterator neighIterator = m_surface->getCellConstIterator(neighId);
+
+    std::array<double,3> normal = computeSegmentNormal(segmentIterator);
+    normal += computeSegmentNormal(neighIterator);
+    normal /= norm2(normal);
+
+    return normal;
+}
+
+/*!
+ * Compute the normal of the specified triangle's vertex.
+ *
+ * To reduce computational times, normals of vertices are cached.
+ *
+ * @param[in] segmentIterator is an iterator pointing to the segment
+ * @param[in] vertex is the local index of the vertex
+ * @param[in] limited controls is the limited or the unlimited normal will
+ * be evaluated
+ * @return the normal of the specified triangle's vertex
+ */
+std::array<double,3> SegmentationKernel::computeSegmentVertexNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int vertex, bool limited ) const {
+
+    // Segment information
+    long segmentId = segmentIterator.getId();
+    long segmentRawId = segmentIterator.getRawIndex();
+    const Cell &segment = *segmentIterator;
+
+    // Update the cache
+    //
+    // Cache is updated for all the vertices of the segment.
+    long vertexId = segment.getVertexId(vertex);
+    std::size_t vertexRawId = m_surface->getVertices().getRawIndex(vertexId);
+    bool hasUnlimitedNormal = m_unlimitedVertexNormalsValid.rawAt(vertexRawId);
+
+    bool hasLimitedNormal = m_limitedSegmentVertexNormalValid[m_segmentVertexOffset.rawAt(segmentRawId) + vertex];
+
+    if (!hasUnlimitedNormal || !hasLimitedNormal) {
+        static std::vector<long> vertexNeighbours;
+        vertexNeighbours.clear();
+        m_surface->findCellVertexNeighs(segmentId, vertex, &vertexNeighbours);
+
+        std::array<double, 3> limitedVertexNormal;
+        std::array<double, 3> unlimitedVertexNormal;
+        if (hasUnlimitedNormal) {
+            limitedVertexNormal   = m_surface->evalLimitedVertexNormal(segmentId, vertex, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle) ;
+            unlimitedVertexNormal = m_unlimitedVertexNormalsStorage.rawAt(vertexRawId);
+        } else {
+            m_surface->evalVertexNormals(segmentId, vertex, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle, &unlimitedVertexNormal, &limitedVertexNormal) ;
+        }
+
+        // Store vertex limited normal
+        //
+        // Both limited and unlimited normal are evaluated, however limited
+        // normal is only stored if its misalignment with respect to the
+        // unlimited normal is greater than a defined tolerance.
+        if( !hasLimitedNormal ){
+            double misalignment = norm2(unlimitedVertexNormal - limitedVertexNormal) ;
+            if( misalignment >= m_surface->getTol() ){
+                std::pair<long, int> segmentVertexKey = std::make_pair(segmentId, vertex);
+                m_limitedSegmentVertexNormalStorage.insert({segmentVertexKey, std::move(limitedVertexNormal)}) ;
+            }
+            m_limitedSegmentVertexNormalValid[m_segmentVertexOffset.rawAt(segmentRawId) + vertex] = true;
+        }
+
+        // Store vertex unlimited normal
+        if ( !hasUnlimitedNormal ) {
+            m_unlimitedVertexNormalsStorage.rawAt(vertexRawId) = std::move(unlimitedVertexNormal);
+            m_unlimitedVertexNormalsValid.rawAt(vertexRawId) = true ;
+        }
+    }
+
+    // Get the normal from the cache
+    if (limited) {
+        std::pair<long, int> segmentVertexKey = std::make_pair(segmentId, vertex);
+        auto limitedSegmentVertexNormal = m_limitedSegmentVertexNormalStorage.find(segmentVertexKey);
+        if (limitedSegmentVertexNormal != m_limitedSegmentVertexNormalStorage.end()) {
+            return limitedSegmentVertexNormal->second;
+        }
+    }
+
+    return m_unlimitedVertexNormalsStorage.rawAt(vertexRawId);
+}
 
 /*!
  *  \class      SurfaceInfo

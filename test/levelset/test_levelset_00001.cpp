@@ -98,6 +98,7 @@ int subtest_001()
 #else
     std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(0,1,dimensions) );
 #endif
+    STL->initializeAdjacencies();
 
     bitpit::log::cout() << " - Loading dgf geometry" << std::endl;
 
