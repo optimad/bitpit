@@ -234,11 +234,13 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
 
     double incircle, circumcircle;
 
+    double distanceTolerance = m_kernelPtr->getMesh()->getTol();
+
     switch(mode){
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
         {
             incircle = m_kernelPtr->computeCellIncircle(i) ;
-            if(std::abs(getLS(i)) <= incircle){
+            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(i)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
@@ -250,7 +252,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
         case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
-            if(std::abs(getLS(i)) > circumcircle){
+            if(utils::DoubleFloatingGreater()(std::abs(getLS(i)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             } else {
                 return LevelSetIntersectionStatus::TRUE;
@@ -262,12 +264,12 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
         case LevelSetIntersectionMode::FAST_FUZZY:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
-            if(std::abs(getLS(i)) > circumcircle){
+            if(utils::DoubleFloatingGreater()(std::abs(getLS(i)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
             incircle = m_kernelPtr->computeCellIncircle(i) ;
-            if(std::abs(getLS(i)) <= incircle){
+            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(i)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
@@ -279,18 +281,18 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
         case LevelSetIntersectionMode::ACCURATE:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
-            if(std::abs(getLS(i)) > circumcircle){
+            if(utils::DoubleFloatingGreater()(std::abs(getLS(i)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
             incircle = m_kernelPtr->computeCellIncircle(i) ;
-            if(std::abs(getLS(i)) <= incircle){
+            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(i)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
             std::array<double,3> root = computeProjectionPoint(i);
             std::array<double,3> normal = getGradient(i);
-            if( m_kernelPtr->intersectCellPlane(i,root,normal) ){
+            if( m_kernelPtr->intersectCellPlane(i,root,normal, distanceTolerance) ){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
