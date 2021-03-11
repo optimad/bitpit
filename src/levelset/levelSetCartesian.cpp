@@ -103,9 +103,10 @@ double LevelSetCartesian::computeCellCircumcircle( long id ) {
  * @param[in] id is the index of cell
  * @param[in] root is a point on the plane
  * @param[in] normal is the normal of the plane
+ * @param[in] tolerance is the tolerance used for distance comparisons
  * @return true if intersect
  */
-bool LevelSetCartesian::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal ) {
+bool LevelSetCartesian::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
 
     std::array<double,3> centroid( computeCellCentroid(id) );
     std::array<double,3> spacing( m_cartesian->getSpacing() );
@@ -113,7 +114,7 @@ bool LevelSetCartesian::intersectCellPlane( long id, const std::array<double,3> 
     std::array<double,3> maxPoint( centroid +0.5*spacing );
 
     int dim = m_cartesian->getDimension();
-    return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim);
+    return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
 }
 
 }
