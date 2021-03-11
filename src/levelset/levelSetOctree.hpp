@@ -42,7 +42,7 @@ class LevelSetOctree : public LevelSetKernel{
     VolOctree *                                 getOctreeMesh() const;
     double                                      computeCellIncircle(long) override;
     double                                      computeCellCircumcircle(long) override;
-    bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &) override;
+    bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) override;
 };
 
 }
