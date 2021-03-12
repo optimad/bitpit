@@ -230,38 +230,63 @@ const std::array<double, 3> & SkdBox::getBoxMax() const
     return m_boxMax;
 }
 
+
 /*!
-* Evaluates the minimum distance among the specified point and the box
+* Evaluates the minimum distance between the specified point and the box.
 *
 * \param point is the point
-* \result The minimum distance among the specified point and the box.
+* \result The minimum distance between the specified point and the box.
 */
 double SkdBox::evalPointMinDistance(const std::array<double, 3> &point) const
 {
-    double distance = 0.;
-    for (int d = 0; d < 3; ++d) {
-        distance += std::pow(std::max({0., m_boxMin[d] - point[d], point[d] - m_boxMax[d]}), 2);
-    }
-    distance = std::sqrt(distance);
-
-    return distance;
+    return std::sqrt(evalPointMinSquareDistance(point));
 }
 
 /*!
-* Evaluates the maximum distance among the specified point and the box
+* Evaluates the maximum distance between the specified point and the box.
 *
 * \param point is the point
-* \result The maximum distance among the specified point and the box
+* \result The maximum distance between the specified point and the box.
 */
 double SkdBox::evalPointMaxDistance(const std::array<double, 3> &point) const
 {
-    double distance = 0.;
-    for (int d = 0; d < 3; ++d) {
-        distance += std::pow(std::max(point[d] - m_boxMin[d], m_boxMax[d] - point[d]), 2);
-    }
-    distance = std::sqrt(distance);
+    return std::sqrt(evalPointMaxSquareDistance(point));
+}
 
-    return distance;
+/*!
+* Evaluates the square of the minimum distance between the specified point and
+* the box.
+*
+* \param point is the point
+* \result The square of the minimum distance between the specified point and
+* the box.
+*/
+double SkdBox::evalPointMinSquareDistance(const std::array<double, 3> &point) const
+{
+    double squareDistance = 0.;
+    for (int d = 0; d < 3; ++d) {
+        squareDistance += std::pow(std::max({0., m_boxMin[d] - point[d], point[d] - m_boxMax[d]}), 2);
+    }
+
+    return squareDistance;
+}
+
+/*!
+* Evaluates the square of the maximum distance between the specified point and
+* the box.
+*
+* \param point is the point
+* \result The square of the maximum distance between the specified point and
+* the box.
+*/
+double SkdBox::evalPointMaxSquareDistance(const std::array<double, 3> &point) const
+{
+    double squareDistance = 0.;
+    for (int d = 0; d < 3; ++d) {
+        squareDistance += std::pow(std::max(point[d] - m_boxMin[d], m_boxMax[d] - point[d]), 2);
+    }
+
+    return squareDistance;
 }
 
 /*!
