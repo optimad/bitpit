@@ -268,7 +268,7 @@ public:
     void updateKernel(ReconstructionKernel *kernel) const;
 
 private:
-    static double SVD_ZERO_THRESHOLD;
+    static const double SVD_ZERO_THRESHOLD;
 
     uint8_t m_degree;
     uint8_t m_dimensions;
