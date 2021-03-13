@@ -67,8 +67,8 @@ class LevelSetKernel{
     virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) =0;
     bool                                        isPointInCell(long, const std::array<double,3> &);
 
-    void                                        clearGeometryCache();
-    void                                        updateGeometryCache(const std::vector<adaption::Info> &);
+    virtual void                                clearGeometryCache();
+    virtual void                                updateGeometryCache(const std::vector<adaption::Info> &);
 
     const std::array<double,3> &                computeCellCentroid(long);
     double                                      isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & );
