@@ -40,6 +40,9 @@ namespace bitpit {
  */
 LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
     m_octree = &patch ;
+
+    clearCellCirclesCache();
+    updateCellCirclesCache();
 }
 
 /*!
@@ -56,7 +59,8 @@ VolOctree* LevelSetOctree::getOctreeMesh() const{
  * @return radius of incircle
  */
 double LevelSetOctree::computeCellIncircle(long id) {
-    return 0.5*m_octree->evalCellSize(id);
+    int cellLevel = m_octree->getCellLevel(id);
+    return m_levelToCellIncircle[cellLevel];
 }
 
 /*!
@@ -65,8 +69,8 @@ double LevelSetOctree::computeCellIncircle(long id) {
  * @return radius of incircle
  */
 double LevelSetOctree::computeCellCircumcircle( long id ) {
-    int dim = m_octree->getDimension();
-    return 0.5*std::sqrt(dim)*m_octree->evalCellSize(id);
+    int cellLevel = m_octree->getCellLevel(id);
+    return m_levelToCellCircumcircle[cellLevel];
 }
 
 /*!
@@ -86,5 +90,56 @@ bool LevelSetOctree::intersectCellPlane( long id, const std::array<double,3> &ro
 
     int dim = m_octree->getDimension();
     return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
+}
+
+/*!
+ * Clears the geometry cache.
+ */
+void LevelSetOctree::clearGeometryCache(  ) {
+
+    LevelSetKernel::clearGeometryCache();
+
+    clearCellCirclesCache();
+
+}
+
+/*!
+ * Updates the geometry cache after an adaption.
+ */
+void LevelSetOctree::updateGeometryCache( const std::vector<adaption::Info> &mapper ) {
+
+    LevelSetKernel::updateGeometryCache(mapper);
+
+    updateCellCirclesCache();
+
+}
+
+/*!
+ * Clears the cache that hold information about cell incircle and circumcircle.
+ */
+void LevelSetOctree::clearCellCirclesCache(  ) {
+
+    m_levelToCellIncircle.clear();
+    m_levelToCellCircumcircle.clear();
+
+}
+
+/*!
+ * Updates the cache that hold information about cell incircle and circumcircle.
+ */
+void LevelSetOctree::updateCellCirclesCache(  ) {
+
+    int dimension = m_octree->getDimension();
+    int maxLevel  = m_octree->getTree().getMaxLevel();
+
+    m_levelToCellIncircle.resize(maxLevel + 1);
+    m_levelToCellCircumcircle.resize(maxLevel + 1);
+    for (int level = 0; level <= maxLevel; ++level) {
+        double levelSize = m_octree->getTree().levelToSize(level);
+
+        m_levelToCellIncircle[level]     = 0.5 * levelSize;
+        m_levelToCellCircumcircle[level] = 0.5 * std::sqrt(dimension) * levelSize;
+    }
+
 }
 }

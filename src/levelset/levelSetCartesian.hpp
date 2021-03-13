@@ -36,15 +36,26 @@ class LevelSetCartesian : public LevelSetKernel{
     private:
     VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
 
+    double                                      m_cellIncircle ;        /**< Cell incircle*/
+    double                                      m_cellCircumcircle ;    /**< Cell circumcircle*/
+
+    void                                        clearCellCirclesCache();
+    void                                        updateCellCirclesCache();
+
     public:
     LevelSetCartesian( VolCartesian & );
 
     VolCartesian *                              getCartesianMesh() const;
 
+    double                                      getCellIncircle();
+    double                                      getCellCircumcircle();
+
     double                                      computeCellIncircle(long) override;
     double                                      computeCellCircumcircle(long) override;
     bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) override;
 
+    void                                        clearGeometryCache() override;
+    void                                        updateGeometryCache(const std::vector<adaption::Info> &) override;
 };
 
 }

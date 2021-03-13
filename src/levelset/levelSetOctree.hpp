@@ -35,6 +35,12 @@ class LevelSetOctree : public LevelSetKernel{
     private:
     VolOctree*                                  m_octree ;       /**< Pointer to underlying octree mesh*/
 
+    std::vector<double>                         m_levelToCellIncircle ;        /**< Incircles associated with cell levels*/
+    std::vector<double>                         m_levelToCellCircumcircle ;    /**< Circumcircles associated with cell levels*/
+
+    void                                        clearCellCirclesCache();
+    void                                        updateCellCirclesCache();
+
     public:
     LevelSetOctree( VolOctree & );
 
@@ -42,6 +48,9 @@ class LevelSetOctree : public LevelSetKernel{
     double                                      computeCellIncircle(long) override;
     double                                      computeCellCircumcircle(long) override;
     bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) override;
+
+    void                                        clearGeometryCache() override;
+    void                                        updateGeometryCache(const std::vector<adaption::Info> &) override;
 };
 
 }
