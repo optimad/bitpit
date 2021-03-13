@@ -131,7 +131,7 @@ std::array<double,3> LevelSetObject::computeProjectionPoint(const std::array<dou
  */
 std::array<double,3> LevelSetObject::computeVertexProjectionPoint(long vertexId) const{
 
-    const std::array<double,3> &coords = m_kernelPtr->getVertexCoords(vertexId);
+    const std::array<double,3> &coords = m_kernelPtr->getMesh()->getVertexCoords(vertexId);
     return computeProjectionPoint(coords);
 }
 
