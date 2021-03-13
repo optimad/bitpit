@@ -781,12 +781,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
     const SurfUnstructured &surface = m_segmentation->getSurface();
 
     // Define search radius
-    double searchRadius = m_narrowBand;
-    if (searchRadius < 0.) {
-        for (int d = 0; d < meshDimension; ++d) {
-            searchRadius = std::max(searchRadius, mesh.getSpacing(d));
-        }
-    }
+    double searchRadius = std::max(m_narrowBand, visitee->getCellCircumcircle());
 
     // Define mesh bounding box
     //
