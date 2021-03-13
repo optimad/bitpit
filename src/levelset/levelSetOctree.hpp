@@ -36,7 +36,6 @@ class LevelSetOctree : public LevelSetKernel{
     VolOctree*                                  m_octree ;       /**< Pointer to underlying octree mesh*/
 
     public:
-    virtual ~LevelSetOctree();
     LevelSetOctree( VolOctree & );
 
     VolOctree *                                 getOctreeMesh() const;

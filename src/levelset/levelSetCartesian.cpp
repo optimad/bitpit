@@ -37,13 +37,6 @@ namespace bitpit {
 */
 
 /*!
- * Destructor
- */
-LevelSetCartesian::~LevelSetCartesian( ){
-    m_cartesian = NULL ;
-}
-
-/*!
  * Constructor
  */
 LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){

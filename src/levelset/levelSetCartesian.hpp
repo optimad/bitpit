@@ -37,7 +37,6 @@ class LevelSetCartesian : public LevelSetKernel{
     VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
 
     public:
-    virtual ~LevelSetCartesian();
     LevelSetCartesian( VolCartesian & );
 
     VolCartesian *                              getCartesianMesh() const;
