@@ -182,6 +182,7 @@ private:
 	long m_nInterfaces;
 
 	double m_cellVolume;
+	double m_cellSize;
 	std::array<double, 3> m_interfaceArea;
 	std::array<std::array<double, 3>, 6> m_normals;
 
@@ -192,6 +193,7 @@ private:
 	void initialize();
 	void initializeInterfaceArea();
 	void initializeCellVolume();
+	void initializeCellSize();
 
 	void setDiscretization(const std::array<int, 3> &nCells);
 
