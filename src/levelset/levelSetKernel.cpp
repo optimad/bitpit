@@ -252,17 +252,6 @@ double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double
     return CGElem::intersectBoxBox(minPoint, maxPoint, cellMinPoint, cellMaxPoint);
 }
 
-/*!
- * Get the coordinates of vertex
- *
- * @param vertexId the index of the vertex
- * @result its coordinates
- */
-const std::array<double,3> & LevelSetKernel::getVertexCoords(long vertexId)
-{
-    return m_mesh->getVertexCoords(vertexId);
-}
-
 # if BITPIT_ENABLE_MPI
 
 /*!

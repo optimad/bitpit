@@ -73,8 +73,6 @@ class LevelSetKernel{
     const std::array<double,3> &                computeCellCentroid(long);
     double                                      isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & );
 
-    const std::array<double,3> &                getVertexCoords(long);
-
 # if BITPIT_ENABLE_MPI
     void                                        initializeCommunicator();
     MPI_Comm                                    getCommunicator() const;
