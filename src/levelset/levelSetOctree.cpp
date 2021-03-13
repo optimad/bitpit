@@ -36,13 +36,6 @@ namespace bitpit {
  */
 
 /*!
- * Destructor
- */
-LevelSetOctree::~LevelSetOctree( ){
-    m_octree = NULL ;
-}
-
-/*!
  * Constructor
  */
 LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
