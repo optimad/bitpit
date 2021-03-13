@@ -902,8 +902,6 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    double intersectionFactor = 0.5 * std::sqrt((double) mesh.getDimension());
-
     std::unordered_set<long> intersectedCells;
 
     // Evaluate levelset information
@@ -921,9 +919,9 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
         // If no segment is identified the cell is not processed.
         long cellId = cell.getId();
         std::array<double,3> cellCentroid = visitee->computeCellCentroid(cellId);
+        double cellCircumcircle = visitee->computeCellCircumcircle(cellId);
 
-        double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
-        double searchRadius = std::max(m_narrowBand, intersectDistance);
+        double searchRadius = std::max(m_narrowBand, cellCircumcircle);
 
         long segmentId;
         double distance;
@@ -954,7 +952,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
         // intersects the surface because only cells that intersect the surface
         // are considered, otherwise we need to check if the absolute distance
         // associated with the cell is lower than the intersection distance.
-        if (m_narrowBand < 0 || intersectDistance < std::abs(lsInfoItr->value)) {
+        if (m_narrowBand < 0 || cellCircumcircle < std::abs(lsInfoItr->value)) {
             intersectedCells.insert(cellId);
         }
 
@@ -1032,8 +1030,6 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
 
     VolumeKernel &mesh = *(visitee->getMesh()) ;
 
-    double intersectionFactor = 0.5 * std::sqrt((double) mesh.getDimension());
-
     std::vector<long> cellsOutsideNarrowband;
 
     // Evaluate the levelset of the cells
@@ -1067,8 +1063,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
             // If no segment is identified the cell is not processed.
             std::array<double,3> centroid = visitee->computeCellCentroid(cellId);
 
-            double intersectDistance = intersectionFactor * mesh.evalCellSize(cellId);
-            double searchRadius = std::max(m_narrowBand, intersectDistance);
+            double searchRadius = std::max(m_narrowBand, visitee->computeCellCircumcircle(cellId));
 
             long segmentId;
             double distance;
