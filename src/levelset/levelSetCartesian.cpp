@@ -41,6 +41,9 @@ namespace bitpit {
  */
 LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
     m_cartesian = &patch ;
+
+    clearCellCirclesCache();
+    updateCellCirclesCache();
 }
 
 /*!
@@ -52,6 +55,15 @@ VolCartesian* LevelSetCartesian::getCartesianMesh() const{
 }
 
 /*!
+ * Get the radius of the incircle of the cells.
+ * @return radius of incircle
+ */
+double LevelSetCartesian::getCellIncircle() {
+
+    return m_cellIncircle;
+}
+
+/*!
  * Computes the radius of the incircle of the specfified cell.
  * @param[in] id is the index of cell
  * @return radius of incircle
@@ -60,15 +72,16 @@ double LevelSetCartesian::computeCellIncircle(long id) {
 
     BITPIT_UNUSED(id);
 
-    int dim = m_cartesian->getDimension();
-    std::array<double,3> spacing = m_cartesian->getSpacing();
-    double minSpacing = std::numeric_limits<double>::max() ;
+    return getCellIncircle();
+}
 
-    for(int i=0; i<dim; ++i){
-        minSpacing = std::min( minSpacing, spacing[i] );
-    }
+/*!
+ * Get the radius of the circumcircle of the cells.
+ * @return radius of circumcircle
+ */
+double LevelSetCartesian::getCellCircumcircle() {
 
-    return 0.5*minSpacing;
+    return m_cellCircumcircle;
 }
 
 /*!
@@ -80,15 +93,7 @@ double LevelSetCartesian::computeCellCircumcircle( long id ) {
 
     BITPIT_UNUSED(id);
 
-    int dim = m_cartesian->getDimension();
-    std::array<double,3> spacing = m_cartesian->getSpacing();
-    double diagonalSquare = 0.0;
-
-    for(int i=0; i<dim; ++i){
-        diagonalSquare += spacing[i]*spacing[i];
-    }
-
-    return 0.5*sqrt(diagonalSquare);
+    return getCellCircumcircle();
 }
 
 /*!
@@ -110,4 +115,54 @@ bool LevelSetCartesian::intersectCellPlane( long id, const std::array<double,3> 
     return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
 }
 
+/*!
+ * Clears the geometry cache.
+ */
+void LevelSetCartesian::clearGeometryCache(  ) {
+
+    LevelSetKernel::clearGeometryCache();
+
+    clearCellCirclesCache();
+
+}
+
+/*!
+ * Updates the geometry cache after an adaption.
+ */
+void LevelSetCartesian::updateGeometryCache( const std::vector<adaption::Info> &mapper ) {
+
+    LevelSetKernel::updateGeometryCache(mapper);
+
+    updateCellCirclesCache();
+
+}
+
+/*!
+ * Clears the cache that hold information about cell incircle and circumcircle.
+ */
+void LevelSetCartesian::clearCellCirclesCache(  ) {
+
+    m_cellIncircle     = 0.;
+    m_cellCircumcircle = 0.;
+
+}
+
+/*!
+ * Updates the cache that hold information about cell incircle and circumcircle.
+ */
+void LevelSetCartesian::updateCellCirclesCache(  ) {
+
+    int dimension = m_cartesian->getDimension();
+    std::array<double,3> spacing = m_cartesian->getSpacing();
+
+    m_cellIncircle     = std::numeric_limits<double>::max();
+    m_cellCircumcircle = 0.;
+    for(int i=0; i<dimension; ++i){
+        m_cellIncircle      = std::min(m_cellIncircle, spacing[i]);
+        m_cellCircumcircle += spacing[i] * spacing[i];
+    }
+    m_cellIncircle     = 0.5 * m_cellIncircle;
+    m_cellCircumcircle = 0.5 * std::sqrt(m_cellCircumcircle);
+
+}
 }
