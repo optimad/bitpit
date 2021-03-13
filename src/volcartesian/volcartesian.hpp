@@ -93,6 +93,8 @@ public:
 	std::array<double, 3> evalCellCentroid(const std::array<int, 3> &ijk) const;
 	const std::vector<double> & getCellCentroids(int direction) const;
 
+	void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const override;
+
 	double evalInterfaceArea(long id) const override;
 	std::array<double, 3> evalInterfaceNormal(long id) const override;
 

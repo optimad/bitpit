@@ -864,6 +864,22 @@ double VolCartesian::evalCellSize() const
 }
 
 /*!
+	Evaluates the bounding box of the specified cell.
+
+	\param id is the id of the cell
+	\param[out] minPoint is the minimum point of the bounding box
+	\param[out] maxPoint is the maximum point of the bounding box
+*/
+void VolCartesian::evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const
+{
+	std::array<double,3> cellCentroid = evalCellCentroid(id);
+	for (int d = 0; d < 3; ++d) {
+		(*minPoint)[d] = cellCentroid[d] - 0.5 * m_cellSpacings[d];
+		(*maxPoint)[d] = cellCentroid[d] + 0.5 * m_cellSpacings[d];
+	}
+}
+
+/*!
 	Evaluates the area of the specified interface.
 
 	\param id is the id of the interface
