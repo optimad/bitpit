@@ -506,6 +506,14 @@ void VolCartesian::initializeCellVolume()
 }
 
 /*!
+	Initializes cell size
+*/
+void VolCartesian::initializeCellSize()
+{
+	m_cellSize = std::pow(m_cellVolume, 1. / getDimension());
+}
+
+/*!
 	Initializes interface area
 */
 void VolCartesian::initializeInterfaceArea()
@@ -610,6 +618,9 @@ void VolCartesian::setDiscretization(const std::array<int, 3> &nCells)
 
 	// Cell volume
 	initializeCellVolume();
+
+	// Cell size
+	initializeCellSize();
 
 	// Interface area
 	initializeInterfaceArea();
@@ -849,7 +860,7 @@ double VolCartesian::evalCellSize(const std::array<int, 3> &ijk) const
 */
 double VolCartesian::evalCellSize() const
 {
-	return pow(m_cellVolume, 1. / getDimension());
+	return m_cellSize;
 }
 
 /*!
@@ -1920,6 +1931,8 @@ void VolCartesian::scale(const std::array<double, 3> &scaling, const std::array<
 	}
 
 	initializeCellVolume();
+
+	initializeCellSize();
 
 	initializeInterfaceArea();
 
