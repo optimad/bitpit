@@ -106,10 +106,9 @@ double LevelSetCartesian::computeCellCircumcircle( long id ) {
  */
 bool LevelSetCartesian::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
 
-    std::array<double,3> centroid( computeCellCentroid(id) );
-    std::array<double,3> spacing( m_cartesian->getSpacing() );
-    std::array<double,3> minPoint( centroid -0.5*spacing );
-    std::array<double,3> maxPoint( centroid +0.5*spacing );
+    std::array<double,3> minPoint;
+    std::array<double,3> maxPoint;
+    m_cartesian->evalCellBoundingBox(id, &minPoint, &maxPoint);
 
     int dim = m_cartesian->getDimension();
     return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
