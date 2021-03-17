@@ -92,7 +92,7 @@ int subtest_001()
         log::cout() << "  Solution[" << i << "] = " << solution[i] << std::endl;
 
         double expectedSolution = i + 1;
-        if (!utils::DoubleFloatingEqual()(solution[i], expectedSolution, 10)) {
+        if (!utils::DoubleFloatingEqual()(solution[i], expectedSolution, 1e-10)) {
             log::cout() << "  Expected solution[" << i << "] = " << expectedSolution << std::endl;
             log::cout() << "  Error[" << i << "] = " << (expectedSolution - solution[i]) << std::endl;
             throw std::runtime_error("  The solution of the system doesn't match the expected one.");
