@@ -41,37 +41,49 @@ int subtest_001()
 {
     int nRows = 10;
     int nCols = 10;
-    int nNZ   = 10;
+    int nNZ   = 20;
 
     // Build matrix
     log::cout() << "Building matrix..." << std::endl;
 
-    std::vector<long> rowPattern(1);
-    std::vector<double> rowValues(1);
+    std::vector<long> rowPattern(2);
+    std::vector<double> rowValues(2);
 
 #if BITPIT_ENABLE_MPI==1
     SparseMatrix matrix(MPI_COMM_WORLD, false, nRows, nCols, nNZ);
 #else
     SparseMatrix matrix(nRows, nCols, nNZ);
 #endif
-    for (int i = 0; i < nRows; ++i) {
-        rowPattern[0] = i;
-        rowValues[0]  = 1. / (double) (i + 1);
+    for (int row = 0; row < nRows; ++row) {
+        rowPattern[0] = row;
+        rowValues[0]  = (row + 1);
+
+        rowPattern[1] = nRows - row - 1;
+        rowValues[1]  = 11 * (row + 1);
 
         matrix.addRow(rowPattern, rowValues);
     }
     matrix.assembly();
 
+    std::unique_ptr<SparseMatrix> transposeMatrix = matrix.computeTranspose();
+
     // Build system
     log::cout() << "Building system..." << std::endl;
 
     SystemSolver system;
-    system.assembly(matrix);
+    system.assembly(*transposeMatrix);
 
     double *rhs = system.getRHSRawPtr();
-    for (int i = 0; i < nCols; ++i) {
-        rhs[i] = 1.;
-    }
+    rhs[0] = 1101;
+    rhs[1] =  895;
+    rhs[2] =  713;
+    rhs[3] =  555;
+    rhs[4] =  421;
+    rhs[5] =  311;
+    rhs[6] =  225;
+    rhs[7] =  163;
+    rhs[8] =  125;
+    rhs[9] =  111;
     system.restoreRHSRawPtr(rhs);
 
     double *initialSolution = system.getSolutionRawPtr();

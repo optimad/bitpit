@@ -740,4 +740,75 @@ void SparseMatrix::getRowValues(long row, ConstProxyVector<double> *values) cons
     values->set(rowValues, nRowValues);
 }
 
+/**
+* Compute the transpose of the matrix.
+*
+* The transpose is evaluated as a new matrix, the current matrix is not
+* modified.
+*
+* \result The transpose of the matrix.
+*/
+std::unique_ptr<SparseMatrix> SparseMatrix::computeTranspose() const
+{
+    // Early return if the matrix is not assembled.
+    if (!isAssembled()) {
+        return nullptr;
+    }
+
+    // Create the transpose matrix
+    std::unique_ptr<SparseMatrix> transpose;
+#if BITPIT_ENABLE_MPI==1
+    transpose = std::unique_ptr<SparseMatrix>(new SparseMatrix(m_communicator, m_partitioned, m_nCols, m_nRows, m_nNZ));
+#else
+    transpose = std::unique_ptr<SparseMatrix>(new SparseMatrix(m_nCols, m_nRows, m_nNZ));
+#endif
+
+    // Create an empty transpose pattern
+    std::vector<std::size_t> transposeRowSizes(transpose->m_nRows, 0.);
+    for (int i = 0; i < m_nNZ; ++i) {
+        long column = *(m_pattern.data() + i);
+        ++transposeRowSizes[column];
+    }
+
+    transpose->m_pattern.initialize(transpose->m_nRows, transposeRowSizes.data(), 0.);
+
+    // Create the empty storage for the values
+    transpose->m_values.resize(m_nNZ);
+
+    // Set non-zero information
+    transpose->m_nNZ = m_nNZ;
+
+    transpose->m_maxRowNZ = 0;
+    for (int i = 0; i < transpose->m_nRows; ++i) {
+        transpose->m_maxRowNZ = std::max(static_cast<long>(transposeRowSizes[i]), transpose->m_maxRowNZ);
+    }
+
+    // Fill patter and values of the transpose matrix
+    const std::size_t *rowExtents = m_pattern.indices();
+    std::fill(transposeRowSizes.begin(), transposeRowSizes.end(), 0);
+    for (long row = 0; row < m_nRows; ++row) {
+        const std::size_t rowPatternSize = rowExtents[row + 1] - rowExtents[row];
+        const long *rowPattern = m_pattern.data() + rowExtents[row];
+        const double *rowValues = m_values.data() + rowExtents[row];
+        for (std::size_t k = 0; k < rowPatternSize; ++k) {
+            long column = rowPattern[k];
+            const std::size_t transposeRowLastIndex = *(transpose->m_pattern.indices(column)) + transposeRowSizes[column];
+
+            long *transposeRowLastPattern = transpose->m_pattern.data() + transposeRowLastIndex;
+            *transposeRowLastPattern = row;
+
+            double *transposeRowLastValue = transpose->m_values.data() + transposeRowLastIndex;
+            *transposeRowLastValue = rowValues[k];
+
+            ++transposeRowSizes[column];
+        }
+    }
+    transpose->m_lastRow = transpose->m_nRows - 1;
+
+    // Assembly the transpose matrix
+    transpose->assembly();
+
+    return transpose;
+}
+
 }
