@@ -97,6 +97,8 @@ public:
     ConstProxyVector<double> getRowValues(long row) const;
     void getRowValues(long row, ConstProxyVector<double> *values) const;
 
+    std::unique_ptr<SparseMatrix> computeTranspose() const;
+
 protected:
     long m_nRows;
     long m_nCols;
