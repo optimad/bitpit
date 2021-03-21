@@ -76,8 +76,8 @@ void SkdPatchInfo::buildCache(const PatchKernel::CellConstRange &cellRange)
 
         // Cell info
         const Cell &cell = *itr;
-        int nCellVertices = cell.getVertexCount();
         ConstProxyVector<long> cellConnect = cell.getVertexIds();
+        int nCellVertices = cellConnect.size();
 
         // Bounding box
         std::array<double, 3> &cellBoxMin   = m_cellBoxes->rawAt(rawCellId, 0);

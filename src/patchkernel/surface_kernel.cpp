@@ -265,7 +265,7 @@ double SurfaceKernel::evalCellArea(long id) const
         return (0.5*norm2(crossProduct(d1, d2)));
     }
     else {
-        int                     nvert = cell_->getVertexCount();
+        int                     nvert = cellVertexIds.size();
         double                  coeff = 0.25;
         double                  area = 0.0;
         for (int i = 0; i < nvert; ++i) {
@@ -639,7 +639,7 @@ std::array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
     }
     else {
         std::array<double, 3>           d1, d2;
-        int                             i, nvert = cell_->getVertexCount();
+        int                             i, nvert = cellVertexIds.size();
         double                          coeff = 1.0/double(nvert);
         for (i = 0; i < nvert; ++i) {
             int prevVertex = getOrderedLocalVertexIds(*cell_, (nvert + i - 1) % nvert);
