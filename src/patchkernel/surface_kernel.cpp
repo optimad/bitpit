@@ -1270,10 +1270,16 @@ void SurfaceKernel::flipCellOrientation(long id)
     //  Flipped vertices     4     3     2     1     0
     //
     //  This means we have to invert the connectivity of the cell.
+    long *connectivity = cell.getConnect();
+
+    int connectBegin = 0;
+    if (cell.getType() == ElementType::POLYGON) {
+        ++connectBegin;
+    }
+
     int nCellVertices = cell.getVertexCount();
-    long *cellConnect = cell.getConnect();
     for (int i = 0; i < (int) std::floor(nCellVertices / 2); ++i) {
-        std::swap(cellConnect[i], cellConnect[nCellVertices - i - 1]);
+        std::swap(connectivity[connectBegin + i], connectivity[connectBegin + nCellVertices - i - 1]);
     }
 
     //
