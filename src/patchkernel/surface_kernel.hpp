@@ -91,6 +91,8 @@ protected:
         SurfaceKernel(int id, int patch_dim, int space_dim, bool expert);
 #endif
 
+        int getOrderedLocalVertexIds(const Cell &cell, long n) const;
+
 };
 
 }
