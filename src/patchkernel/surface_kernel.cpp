@@ -266,14 +266,19 @@ double SurfaceKernel::evalCellArea(long id) const
     }
     else {
         int                     nvert = cell_->getVertexCount();
-        int                     next, prev;
         double                  coeff = 0.25;
         double                  area = 0.0;
         for (int i = 0; i < nvert; ++i) {
-            next = (i + 1) % nvert;
-            prev = (nvert + i - 1) % nvert;
-            d1 = m_vertices[cellVertexIds[next]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
-            d2 = m_vertices[cellVertexIds[prev]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
+            int prevVertex = getOrderedLocalVertexIds(*cell_, (nvert + i - 1) % nvert);
+            int vertex     = getOrderedLocalVertexIds(*cell_, i);
+            int nextVertex = getOrderedLocalVertexIds(*cell_, (i + 1) % nvert);
+
+            const std::array<double, 3> &prevVertexCoords = m_vertices[cellVertexIds[prevVertex]].getCoords();
+            const std::array<double, 3> &vertexCoords     = m_vertices[cellVertexIds[vertex]].getCoords();
+            const std::array<double, 3> &nextVertexCoords = m_vertices[cellVertexIds[nextVertex]].getCoords();
+
+            d1 = nextVertexCoords - vertexCoords;
+            d2 = prevVertexCoords - vertexCoords;
             area += coeff*norm2(crossProduct(d1, d2));
         } //next i
         return(area);
@@ -443,8 +448,8 @@ double SurfaceKernel::evalAngleAtVertex(long id, int vertex) const
     ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
     int nCellVertices = cellVertexIds.size();
 
-    int prevVertex = (vertex - 1 + nCellVertices) % nCellVertices;
-    int nextVertex = (vertex + 1) % nCellVertices;
+    int prevVertex = getOrderedLocalVertexIds(cell, (vertex - 1 + nCellVertices) % nCellVertices);
+    int nextVertex = getOrderedLocalVertexIds(cell, (vertex + 1) % nCellVertices);
 
     const std::array<double, 3> &prevVertexCoords = m_vertices[cellVertexIds[prevVertex]].getCoords();
     const std::array<double, 3> &vertexCoords     = m_vertices[cellVertexIds[vertex]].getCoords();
@@ -634,13 +639,19 @@ std::array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
     }
     else {
         std::array<double, 3>           d1, d2;
-        int                             next, prev, i, nvert = cell_->getVertexCount();
+        int                             i, nvert = cell_->getVertexCount();
         double                          coeff = 1.0/double(nvert);
         for (i = 0; i < nvert; ++i) {
-            next = (i+1) % nvert;
-            prev = (nvert + i - 1) % nvert;
-            d1 = m_vertices[cellVertexIds[next]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
-            d2 = m_vertices[cellVertexIds[prev]].getCoords() - m_vertices[cellVertexIds[i]].getCoords();
+            int prevVertex = getOrderedLocalVertexIds(*cell_, (nvert + i - 1) % nvert);
+            int vertex     = getOrderedLocalVertexIds(*cell_, i);
+            int nextVertex = getOrderedLocalVertexIds(*cell_, (i + 1) % nvert);
+
+            const std::array<double, 3> &prevVertexCoords = m_vertices[cellVertexIds[prevVertex]].getCoords();
+            const std::array<double, 3> &vertexCoords     = m_vertices[cellVertexIds[vertex]].getCoords();
+            const std::array<double, 3> &nextVertexCoords = m_vertices[cellVertexIds[nextVertex]].getCoords();
+
+            d1 = nextVertexCoords - vertexCoords;
+            d2 = prevVertexCoords - vertexCoords;
             normal += coeff*crossProduct(d1, d2);
         } //next i
     }
@@ -1138,16 +1149,16 @@ bool SurfaceKernel::haveSameOrientation(long cellId_A, int cellFace_A, long cell
     // orientation, if the vertices appear in reversed order, the facets have
     // the same orientation.
     for (std::size_t i = 0; i < nCellVertices_A; ++i) {
-        long vertexId_A = cellVertexIds_A[i];
+        long vertexId_A = cellVertexIds_A[getOrderedLocalVertexIds(cell_A, i)];
         for (std::size_t j = 0; j < nCellVertices_B; ++j) {
-            long vertexId_B = cellVertexIds_B[j];
+            long vertexId_B = cellVertexIds_B[getOrderedLocalVertexIds(cell_B, j)];
             if (vertexId_A == vertexId_B) {
                 if (cellDimension == 2) {
-                    long previousVertexId_A = cellVertexIds_A[(i - 1 + nCellVertices_A) % nCellVertices_A];
-                    long previousVertexId_B = cellVertexIds_B[(j - 1 + nCellVertices_B) % nCellVertices_B];
+                    long previousVertexId_A = cellVertexIds_A[getOrderedLocalVertexIds(cell_A, (i - 1 + nCellVertices_A) % nCellVertices_A)];
+                    long previousVertexId_B = cellVertexIds_B[getOrderedLocalVertexIds(cell_B, (j - 1 + nCellVertices_B) % nCellVertices_B)];
 
-                    long nextVertexId_A = cellVertexIds_A[(i + 1) % nCellVertices_A];
-                    long nextVertexId_B = cellVertexIds_B[(j + 1) % nCellVertices_B];
+                    long nextVertexId_A = cellVertexIds_A[getOrderedLocalVertexIds(cell_A, (i + 1) % nCellVertices_A)];
+                    long nextVertexId_B = cellVertexIds_B[getOrderedLocalVertexIds(cell_B, (j + 1) % nCellVertices_B)];
 
                     if (nextVertexId_A == nextVertexId_B || previousVertexId_A == previousVertexId_B) {
                         return false;
@@ -1628,6 +1639,34 @@ bool SurfaceKernel::compareSelectedTypes(unsigned short mask_, ElementType type_
 {
     unsigned short       masked = m_selectionTypes.at(type_);
     return ( (mask_ & masked) == masked );
+}
+
+/*!
+ * Get the local index of the n-th vertex in the anti-clockwise ordered list of
+ * vertex ids.
+ *
+ * \param[in] cell is the cell
+ * \param[in] n is the index of the requested vertex
+ * \result The the local index of the n-th vertex in the anti-clockwise ordered
+ * list of vertex ids.
+*/
+int SurfaceKernel::getOrderedLocalVertexIds(const Cell &cell, long n) const
+{
+    switch (cell.getType()) {
+
+    case ElementType::PIXEL:
+        if (n == 2) {
+            return 3;
+        } else if (n == 3) {
+            return 2;
+        } else {
+            return n;
+        }
+
+    default:
+        return n;
+
+    }
 }
 
 }
