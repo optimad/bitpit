@@ -6950,7 +6950,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 	} else if (name == "connectivity") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-			const int nCellVertices = cell.getVertexCount();
+			const int nCellVertices = cellVertexIds.size();
 			for (int k = 0; k < nCellVertices; ++k) {
 				long vertexId = cellVertexIds[k];
 				long vtkVertexId = m_vtkVertexMap.at(vertexId);
