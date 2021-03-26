@@ -671,17 +671,18 @@ bool validBarycentric(double const *lambdaPtr, int n )
  * Flag = 1 Point coincides with the first vertex or is positioned befor the line
  * Flag = 2 Point coincides with the second vertex or is positioned after the line
  * \param[in] lambda barycentric coordinates of point
+ * \param[in] tolerance tolerance used for comparisons
  * \return flag
  */
-int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
+int convertBarycentricToFlagSegment( std::array<double,2> const &lambda, double tolerance)
 {
 
     assert( validBarycentric(&lambda[0],2) );
 
-    if (lambda[0]>=1.) {
+    if ( lambda[0] > 1. || utils::DoubleFloatingEqual()( lambda[0], 1., tolerance ) ) {
         return 1;
 
-    } else if (lambda[1]>=1.) {
+    } else if ( lambda[1] > 1. || utils::DoubleFloatingEqual()( lambda[1], 1., tolerance ) ) {
         return 2;
 
     } 
@@ -695,11 +696,12 @@ int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
  * Flag = i Point coincides with the (ith - 1) vertex of triangle or lies within the area spanned by the edges incident in the (ith - 1) vertex
  * Flag = -i Point lies on the edge starting from the (ith - 1) vertex and connecting the following vertex in clockwise direction or in its shaddowed area
  * \param[in] lambda barycentric coordinates of point
+ * \param[in] tolerance tolerance used for comparisons
  * \return flag
  */
-int convertBarycentricToFlagTriangle( array3D const &lambda)
+int convertBarycentricToFlagTriangle( array3D const &lambda, double tolerance)
 {
-    return convertBarycentricToFlagPolygon( 3, lambda.data());
+    return convertBarycentricToFlagPolygon( 3, lambda.data(), tolerance);
 }
 
 /*!
@@ -708,11 +710,12 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
  * Flag = i Point coincides with the (ith - 1) vertex of simplex or lies within the area spanned by the edges incident in the (ith - 1) vertex
  * Flag = -i Point lies on the edge starting from the (ith - 1) vertex and connecting the following vertex in counter-clockwise direction or in its shaddowed area
  * \param[in] lambda barycentric coordinates of point
+ * \param[in] tolerance tolerance used for comparisons
  * \return flag
  */
-int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
+int convertBarycentricToFlagPolygon( std::vector<double> const &lambda, double tolerance)
 {
-    return convertBarycentricToFlagPolygon( lambda.size(), lambda.data());
+    return convertBarycentricToFlagPolygon( lambda.size(), lambda.data(), tolerance);
 }
 
 /*!
@@ -722,9 +725,10 @@ int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
  * Flag = -i Point lies on the edge starting from the (ith - 1) vertex and connecting the following vertex in counter-clockwise direction or in its shaddowed area
  * \param[in] nLambda number of barycentric coordinates of point
  * \param[in] lambda barycentric coordinates of point
+ * \param[in] tolerance tolerance used for comparisons
  * \return flag
  */
-int convertBarycentricToFlagPolygon( std::size_t nLambda, double const *lambda)
+int convertBarycentricToFlagPolygon( std::size_t nLambda, double const *lambda, double tolerance)
 {
 
     assert( validBarycentric(&lambda[0],nLambda) );
@@ -732,7 +736,7 @@ int convertBarycentricToFlagPolygon( std::size_t nLambda, double const *lambda)
     int count = 0;
     std::size_t lastPositive = std::numeric_limits<std::size_t>::max();
     for( std::size_t i=0; i<nLambda; ++i){
-        if ( lambda[i] <= 0.) {
+        if ( lambda[i] < 0. || utils::DoubleFloatingEqual()( lambda[i], 0., tolerance ) ) {
             continue;
         }
 
