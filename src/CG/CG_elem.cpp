@@ -699,29 +699,7 @@ int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
  */
 int convertBarycentricToFlagTriangle( array3D const &lambda)
 {
-
-    assert( validBarycentric(&lambda[0],3) );
-
-    int count = 0;
-    std::array<int,2> zeros = {{0,0}};
-
-    for( int i=0; i<3; ++i){
-        if ( lambda[i] <= 0.) {
-            zeros[count] = i;
-            ++count;
-        }
-    }
-
-    if( count == 1){
-        int vertex0 = (zeros[0] +1) %3;
-        count = -(vertex0+1);
-
-    } else if (count == 2) {
-        count = 3 -zeros[0] -zeros[1] +1;
-
-    }
-
-    return count;
+    return convertBarycentricToFlagPolygon( 3, lambda.data());
 }
 
 /*!
