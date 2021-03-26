@@ -90,10 +90,10 @@ bool validPlane( array3D const &, array3D const & );
 bool validTriangle( array3D const &, array3D const &, array3D const & );
 bool validBarycentric( double const * , int );
 
-int convertBarycentricToFlagTriangle( std::array<double,3> const &);
-int convertBarycentricToFlagSegment( std::array<double,2> const &);
-int convertBarycentricToFlagPolygon( std::vector<double> const &);
-int convertBarycentricToFlagPolygon( std::size_t, double const *);
+int convertBarycentricToFlagTriangle( std::array<double,3> const &, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
+int convertBarycentricToFlagSegment( std::array<double,2> const &, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
+int convertBarycentricToFlagPolygon( std::vector<double> const &, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
+int convertBarycentricToFlagPolygon( std::size_t, double const *, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
 
 void computeGeneralizedBarycentric( array3D const &, std::vector<array3D> const &, std::vector<double> &);
 void computeGeneralizedBarycentric( array3D const &, std::size_t, array3D const *, std::vector<double> &);
