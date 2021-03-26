@@ -727,26 +727,35 @@ int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
 int convertBarycentricToFlagPolygon( std::size_t nLambda, double const *lambda)
 {
 
-    int count(0);
-    std::size_t firstPositive(nLambda);
-
     assert( validBarycentric(&lambda[0],nLambda) );
 
+    int count = 0;
+    std::size_t lastPositive = std::numeric_limits<std::size_t>::max();
     for( std::size_t i=0; i<nLambda; ++i){
-        if ( lambda[i] > 0.) {
-            firstPositive = std::min( firstPositive, i);
-            ++count;
+        if ( lambda[i] <= 0.) {
+            continue;
+        }
+
+        ++count;
+        if (count > 2) {
+            return 0;
+        }
+
+        if (lastPositive != 0 || i == 1) {
+            lastPositive = i;
         }
     }
 
     if( count == 1){
-        count = firstPositive +1;
+        count = lastPositive + 1;
 
     } else if (count==2) {
-        count = -(firstPositive+1);
+        if (lastPositive != 0) {
+            count = - lastPositive;
+        } else {
+            count = - nLambda;
+        }
 
-    } else {
-        count = 0;
     }
 
     return count;
