@@ -692,8 +692,8 @@ int convertBarycentricToFlagSegment( std::array<double,2> const &lambda)
 /*!
  * Converts barycentric coordinates of a point on a triangle to a flag that indicates where the point lies.
  * Flag = 0 Point lies within the triangle
- * Flag = i Point coincides with the ith vertex of triangle or lies within the area spanned by the edges incident in the ith vertex
- * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
+ * Flag = i Point coincides with the (ith - 1) vertex of triangle or lies within the area spanned by the edges incident in the (ith - 1) vertex
+ * Flag = -i Point lies on the edge starting from the (ith - 1) vertex and connecting the following vertex in clockwise direction or in its shaddowed area
  * \param[in] lambda barycentric coordinates of point
  * \return flag
  */
@@ -727,8 +727,8 @@ int convertBarycentricToFlagTriangle( array3D const &lambda)
 /*!
  * Converts barycentric coordinates of a point on a convex polygon to a flag that indicates where the point lies.
  * Flag = 0 Point lies within the simplex
- * Flag = i Point coincides with the ith vertex of simplex or lies within the area spanned by the edges incident in the ith vertex
- * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
+ * Flag = i Point coincides with the (ith - 1) vertex of simplex or lies within the area spanned by the edges incident in the (ith - 1) vertex
+ * Flag = -i Point lies on the edge starting from the (ith - 1) vertex and connecting the following vertex in counter-clockwise direction or in its shaddowed area
  * \param[in] lambda barycentric coordinates of point
  * \return flag
  */
@@ -740,8 +740,8 @@ int convertBarycentricToFlagPolygon( std::vector<double> const &lambda)
 /*!
  * Converts barycentric coordinates of a point on a convex polygon to a flag that indicates where the point lies.
  * Flag = 0 Point lies within the simplex
- * Flag = i Point coincides with the ith vertex of simplex or lies within the area spanned by the edges incident in the ith vertex
- * Flag = -i Point lies on the edge starting from the ith vertex and connecting the following vertex in clockwise direction or in its shaddowed area
+ * Flag = i Point coincides with the (ith - 1) vertex of simplex or lies within the area spanned by the edges incident in the (ith - 1) vertex
+ * Flag = -i Point lies on the edge starting from the (ith - 1) vertex and connecting the following vertex in counter-clockwise direction or in its shaddowed area
  * \param[in] nLambda number of barycentric coordinates of point
  * \param[in] lambda barycentric coordinates of point
  * \return flag
