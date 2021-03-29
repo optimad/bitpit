@@ -98,6 +98,19 @@ struct hash<std::tuple<TT...>>
 	}
 };
 
+template <typename T, typename U>
+struct hash<std::pair<T, U>>
+{
+	size_t
+	operator()(std::pair<T, U> const &value) const
+	{
+		std::size_t seed = 0;
+		hash_combine(seed, value.first);
+		hash_combine(seed, value.second);
+		return seed;
+	}
+};
+
 }
 
 }
