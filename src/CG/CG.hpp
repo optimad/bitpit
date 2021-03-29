@@ -91,7 +91,9 @@ bool validTriangle( array3D const &, array3D const &, array3D const & );
 bool validBarycentric( double const * , int );
 
 int convertBarycentricToFlagSegment( std::array<double,2> const &, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
+int convertBarycentricToFlagSegment( const double *lambda, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
 int convertBarycentricToFlagTriangle( std::array<double,3> const &, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
+int convertBarycentricToFlagTriangle( const double *lambda, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
 int convertBarycentricToFlagPolygon( std::vector<double> const &, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
 int convertBarycentricToFlagPolygon( std::size_t, double const *, double tolerance = DEFAULT_DISTANCE_TOLERANCE);
 
