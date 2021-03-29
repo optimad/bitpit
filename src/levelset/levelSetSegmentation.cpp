@@ -945,8 +945,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
             throw std::runtime_error ("Unable to extract the levelset information from segment.");
         }
 
-        PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.find(cellId);
-        lsInfoItr = m_ls.emplace(cellId) ;
+        PiercedVector<LevelSetInfo>::iterator lsInfoItr = m_ls.emplace(cellId) ;
         lsInfoItr->value    = distance;
         lsInfoItr->gradient = gradient;
 
