@@ -677,6 +677,21 @@ bool validBarycentric(double const *lambdaPtr, int n )
 int convertBarycentricToFlagSegment( std::array<double,2> const &lambda, double tolerance)
 {
 
+    return convertBarycentricToFlagSegment( lambda.data(), tolerance);
+}
+
+/*!
+ * Converts barycentric coordinates of a point on a segment to a flag that indicates where the point lies.
+ * Flag = 0 Point lies within the segment
+ * Flag = 1 Point coincides with the first vertex or is positioned befor the line
+ * Flag = 2 Point coincides with the second vertex or is positioned after the line
+ * \param[in] lambda barycentric coordinates of point
+ * \param[in] tolerance tolerance used for comparisons
+ * \return flag
+ */
+int convertBarycentricToFlagSegment( const double *lambda, double tolerance)
+{
+
     assert( validBarycentric(&lambda[0],2) );
 
     if ( lambda[0] > 1. || utils::DoubleFloatingEqual()( lambda[0], 1., tolerance ) ) {
@@ -702,6 +717,20 @@ int convertBarycentricToFlagSegment( std::array<double,2> const &lambda, double 
 int convertBarycentricToFlagTriangle( array3D const &lambda, double tolerance)
 {
     return convertBarycentricToFlagPolygon( 3, lambda.data(), tolerance);
+}
+
+/*!
+ * Converts barycentric coordinates of a point on a triangle to a flag that indicates where the point lies.
+ * Flag = 0 Point lies within the triangle
+ * Flag = i Point coincides with the (ith - 1) vertex of triangle or lies within the area spanned by the edges incident in the (ith - 1) vertex
+ * Flag = -i Point lies on the edge starting from the (ith - 1) vertex and connecting the following vertex in clockwise direction or in its shaddowed area
+ * \param[in] lambda barycentric coordinates of point
+ * \param[in] tolerance tolerance used for comparisons
+ * \return flag
+ */
+int convertBarycentricToFlagTriangle( const double *lambda, double tolerance)
+{
+    return convertBarycentricToFlagPolygon( 3, lambda, tolerance);
 }
 
 /*!
