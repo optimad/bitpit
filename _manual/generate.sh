@@ -11,6 +11,7 @@ MANUAL_BUILD_DIR="${MANUAL_ROOT_DIR}/build"
 # Generate build directory
 rm -rf "${MANUAL_BUILD_DIR}"
 mkdir "${MANUAL_BUILD_DIR}"
+mkdir "${MANUAL_BUILD_DIR}/templates"
 cd "${MANUAL_BUILD_DIR}"
 
 # Link files needed by jekyll
@@ -19,8 +20,8 @@ cp -r "${MANUAL_ROOT_DIR}/_layouts" "${MANUAL_BUILD_DIR}"
 cp -r "${MANUAL_ROOT_DIR}/stylesheets" "${MANUAL_BUILD_DIR}"
 cp "${JEKYLL_ROOT_DIR}/_includes/"* "${MANUAL_BUILD_DIR}/_includes/"
 cp "${JEKYLL_ROOT_DIR}/_layouts/"* "${MANUAL_BUILD_DIR}/_layouts/"
-cp "${MANUAL_ROOT_DIR}/doxygen_footer.html" "${MANUAL_BUILD_DIR}"
-cp "${MANUAL_ROOT_DIR}/doxygen_header.html" "${MANUAL_BUILD_DIR}"
+cp "${MANUAL_ROOT_DIR}/doxygen_footer.html" "${MANUAL_BUILD_DIR}/templates"
+cp "${MANUAL_ROOT_DIR}/doxygen_header.html" "${MANUAL_BUILD_DIR}/templates"
 
 # Configration files needed by jekyll
 JEKYLL_CONFIG_GLOBAL="${JEKYLL_ROOT_DIR}/_config.yml"
@@ -63,7 +64,7 @@ cmake ${BITPIT_SOURCE_DIR} \
     -DLAPACKE_STATIC="ON" \
     -DENABLE_MPI="ON" \
     -DPETSC_ARCH="" \
-    -DPETSC_DIR="/usr/lib/hpc/gnu10/openmpi3/petsc/3.14.1" \
+    -DPETSC_DIR="/usr/lib/hpc/gnu10/openmpi3/petsc/3.14.4" \
     -DMPI_INCLUDE_PATH="/usr/lib/hpc/gnu10/mpi/openmpi/3.1.6/include/" \
     -DMPIEXEC_EXECUTABLE="/usr/lib/hpc/gnu10/mpi/openmpi/3.1.6/bin/mpiexec" \
     -DMPI_CXX_COMPILER="/usr/lib/hpc/gnu10/mpi/openmpi/3.1.6/bin/mpicxx" \
