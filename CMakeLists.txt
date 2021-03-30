@@ -32,13 +32,13 @@ project("bitpit" CXX)
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
-set(ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
-set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
-set(BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
+set(BITPIT_ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
+set(BITPIT_VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
+set(BITPIT_BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
 
 if(${CMAKE_VERSION} VERSION_EQUAL "3.9.0" OR ${CMAKE_VERSION} VERSION_GREATER "3.9.0")
-    set(LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
-    set_property(CACHE LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
+    set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
+    set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
 endif()
 
 #------------------------------------------------------------------------------------#
@@ -227,13 +227,13 @@ initializePublicDefinitions()
 #------------------------------------------------------------------------------------#
 
 # Detect if LTO can be enabled
-if(DEFINED LTO_STRATEGY)
-    if (NOT "${LTO_STRATEGY}" STREQUAL "Disabled")
+if(DEFINED BITPIT_LTO_STRATEGY)
+    if (NOT "${BITPIT_LTO_STRATEGY}" STREQUAL "Disabled")
         cmake_policy(SET CMP0069 NEW)
         include(CheckIPOSupported)
 
-        if ("${LTO_STRATEGY}" STREQUAL "Enabled")
-            if (NOT BUILD_SHARED_LIBS)
+        if ("${BITPIT_LTO_STRATEGY}" STREQUAL "Enabled")
+            if (NOT BITPIT_BUILD_SHARED_LIBS)
                 message(FATAL_ERROR "LTO can be enabled only when building a shared library." )
             endif()
             if (MSYS OR MINGW)
@@ -241,9 +241,9 @@ if(DEFINED LTO_STRATEGY)
             endif()
             check_ipo_supported()
             set(ENABLE_LTO TRUE)
-        elseif ("${LTO_STRATEGY}" STREQUAL "Auto")
+        elseif ("${BITPIT_LTO_STRATEGY}" STREQUAL "Auto")
             if (NOT MSYS AND NOT MINGW)
-                if (BUILD_SHARED_LIBS)
+                if (BITPIT_BUILD_SHARED_LIBS)
                     check_ipo_supported(RESULT LTO_SUPPORTED)
                     if (${LTO_SUPPORTED} AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                         set(ENABLE_LTO TRUE)
@@ -441,7 +441,7 @@ set(POD_DEPS "IO;common;containers;voloctree")
 #------------------------------------------------------------------------------------#
 # Modules external dependecies
 #------------------------------------------------------------------------------------#
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
     set(COMMON_EXTERNAL_DEPS "MPI")
 endif()
 set(OPERATORS_EXTERNAL_DEPS "")
@@ -481,7 +481,7 @@ foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
 endforeach()
 
 # If building without MPI remove dependecies on MPI-only modules
-if (NOT ENABLE_MPI)
+if (NOT BITPIT_ENABLE_MPI)
     if (NOT ${MPI_ONLY_MODULE_LIST} STREQUAL "")
         foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
             string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
@@ -496,7 +496,7 @@ endif()
 
 # Initialize module state
 foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-	if ((NOT ENABLE_MPI) AND (";${MPI_ONLY_MODULE_LIST};" MATCHES ";${MODULE_NAME};"))
+	if ((NOT BITPIT_ENABLE_MPI) AND (";${MPI_ONLY_MODULE_LIST};" MATCHES ";${MODULE_NAME};"))
 		hideModule(${MODULE_NAME})
 	else ()
 		enableModule(${MODULE_NAME} TRUE FALSE)
@@ -541,7 +541,7 @@ set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators mod
 set(CBLAS_DEPS "BLAS")
 set(LAPACK_DEPS "BLAS")
 set(LAPACKE_DEPS "LAPACK")
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
     set(PETSC_DEPS "MPI;LAPACK")
 else()
     set(PETSC_DEPS "LAPACK")
@@ -731,12 +731,12 @@ endforeach ()
 #------------------------------------------------------------------------------------#
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
-set (ENABLE_WARNINGS ${VERBOSE_MAKE})
-if (VERBOSE_MAKE)
+set (ENABLE_WARNINGS ${BITPIT_VERBOSE_MAKE})
+if (BITPIT_VERBOSE_MAKE)
 	set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
 	addPublicDefinitions("BITPIT_ENABLE_MPI=1")
 else ()
 	addPublicDefinitions("BITPIT_ENABLE_MPI=0")
@@ -796,7 +796,7 @@ IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
 endif ()
 
 # Define an alias for building with scalasca
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
 	SET(C_FLAGS_INSTRUMENT   "-instrument mpicxx")
 	SET(CXX_FLAGS_INSTRUMENT "-instrument mpic")
 else ()

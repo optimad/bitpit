@@ -31,22 +31,22 @@ jobs:
     - if: branch != coverity
       os: linux
       env:
-        - BUILD_TYPE="Release" ENABLE_MPI="True"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
 
     - if: branch != coverity
       os: linux
       env:
-        - BUILD_TYPE="Release" ENABLE_MPI="False"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="False"
 
     - if: branch != coverity
       os: linux
       env:
-        - BUILD_TYPE="Debug" ENABLE_MPI="True"
+        - BUILD_TYPE="Debug" BITPIT_ENABLE_MPI="True"
 
     - if: branch != coverity
       os: linux
       env:
-        - BUILD_TYPE="Debug" ENABLE_MPI="False"
+        - BUILD_TYPE="Debug" BITPIT_ENABLE_MPI="False"
 
     - if: branch != coverity
       os: linux
@@ -71,7 +71,7 @@ jobs:
         - C_COMPILER="gcc-6"
         - CXX_COMPILER="g++-6"
         - Fortran_COMPILER="gfortran-6"
-        - BUILD_TYPE="Release" ENABLE_MPI="True"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
 
     - if: branch != coverity
       os: linux
@@ -96,7 +96,7 @@ jobs:
         - C_COMPILER="gcc-8"
         - CXX_COMPILER="g++-8"
         - Fortran_COMPILER="gfortran-8"
-        - BUILD_TYPE="Release" ENABLE_MPI="True"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
 
     - if: branch != coverity
       os: linux
@@ -122,7 +122,7 @@ jobs:
         - C_COMPILER="clang-3.9"
         - CXX_COMPILER="clang++-3.9"
         - Fortran_COMPILER="gfortran-6"
-        - BUILD_TYPE="Release" ENABLE_MPI="True"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
 
     - if: branch != coverity
       os: linux
@@ -148,7 +148,7 @@ jobs:
         - C_COMPILER="clang-5.0"
         - CXX_COMPILER="clang++-5.0"
         - Fortran_COMPILER="gfortran-7"
-        - BUILD_TYPE="Release" ENABLE_MPI="True"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
 
     - if: branch != coverity
       os: linux
@@ -174,7 +174,7 @@ jobs:
         - C_COMPILER="clang-6.0"
         - CXX_COMPILER="clang++-6.0"
         - Fortran_COMPILER="gfortran-7"
-        - BUILD_TYPE="Release" ENABLE_MPI="True"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
 
     - if: branch != coverity
       os: linux
@@ -199,7 +199,7 @@ jobs:
         - C_COMPILER="clang"
         - CXX_COMPILER="clang++"
         - Fortran_COMPILER="gfortran-7"
-        - BUILD_TYPE="Release" ENABLE_MPI="True"
+        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
 
     - if: branch = coverity
       os: linux
@@ -231,8 +231,8 @@ jobs:
               -DPETSC_DIR=/usr/lib/petscdir/3.6.2/x86_64-linux-gnu-real \
               -DPETSC_ARCH= \
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-              -DENABLE_MPI=${ENABLE_MPI} \
-              -DVERBOSE_MAKE=True \
+              -DBITPIT_ENABLE_MPI=${BITPIT_ENABLE_MPI} \
+              -DBITPIT_VERBOSE_MAKE=True \
               ..;
           build_command: >
             make -j2
@@ -242,7 +242,7 @@ jobs:
         - C_COMPILER="gcc"
         - CXX_COMPILER="g++"
         - Fortran_COMPILER="gfortran"
-        - BUILD_TYPE="Debug" ENABLE_MPI="True"
+        - BUILD_TYPE="Debug" BITPIT_ENABLE_MPI="True"
 
         # Encrypted COVERITY_SCAN_TOKEN
         - secure: "q4Pdqc6eiar7cxgr+iqmED+/vDRq+yE7kzY0GM/gFUpuYMVEh7Rox4TWcPDadLAWsFXIQhDkomoWVC6ButyCqtqa41WDG7aeo73bRG10MV4n5uMzPasLE9KS1KQBmKHN/nofuX6S0IR8EsTOymdtXV4Wsc8T0uEOn/FDsVa+i4o2UHQDmyzPJ4yXnYh/98Q3umVC5nqrTfn43oqHUIedYqPv8LQLZTQBYhY2I4q1J/kTntyele79Zt1KmCdsQYZlMLZ5kT2/aVZpQ4nlvpC61BMCmKBvdEEEP13W5FpBF7KmZqOZqRZLbIxkP1UMOrsjbPXOD1c9INYmII+ouSh5DLiBpHFNTFp854s21Oa7A93igtYM5BLIGsKCTCyXdWi59WGKGY4jtSMKM0XnRzQ/Wpd9fEFyaokebJx8YuWs/JUPSDovoifmbjo9hwNQNeomSKMEieqFXRAqX8qEQ1MPxxP+Pdku8/CwJ15yZmNSA/gh/rbrFykC5btu2FHeFxaXe1HYF8EOEi8nWlseOC3obdBdzIUM8zoOCQroyuom+QWEuOu1AGwSdwMS2K7xKDfrYQSbjb8KkfSb+s6xAcQZHKiBLgX4eeYWabUbFlCJl4hGyQXjGZpCiaY8q7GMdgslgPE4e6ALl6BnmLCupBsdMDvSP9YB5PUPaPeK6B33SrM="
@@ -273,8 +273,8 @@ before_script:
         -DPETSC_DIR=/usr/lib/petscdir/3.6.2/x86_64-linux-gnu-real
         -DPETSC_ARCH=
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-        -DENABLE_MPI=${ENABLE_MPI}
-        -DVERBOSE_MAKE=True
+        -DBITPIT_ENABLE_MPI=${BITPIT_ENABLE_MPI}
+        -DBITPIT_VERBOSE_MAKE=True
         ..;
     fi
 

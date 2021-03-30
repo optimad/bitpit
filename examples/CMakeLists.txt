@@ -27,15 +27,15 @@ cmake_minimum_required(VERSION 2.8)
 
 # Examples can be compiled only if all modules are enabled
 set(MODULE_LIST "${BITPIT_MODULE_LIST}")
-if (NOT ENABLE_MPI)
+if (NOT BITPIT_ENABLE_MPI)
     list(REMOVE_ITEM MODULE_LIST "${MPI_ONLY_MODULE_LIST}")
 endif ()
 
 areModulesEnabled("${MODULE_LIST}" ALL_MODULES_ENABLED)
 if (ALL_MODULES_ENABLED)
-	option(BUILD_EXAMPLES "Create and install the examples" OFF)
+	option(BITPIT_BUILD_EXAMPLES "Create and install the examples" OFF)
 else ()
-	unset(BUILD_EXAMPLES CACHE)
+	unset(BITPIT_BUILD_EXAMPLES CACHE)
 	return()
 endif ()
 
@@ -47,7 +47,7 @@ foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
 	endif()
 endforeach ()
 
-if(BUILD_EXAMPLES)
+if(BITPIT_BUILD_EXAMPLES)
 	# List of examples
 	set(EXAMPLE_LIST "")
 	list(APPEND EXAMPLE_LIST "operators_example")

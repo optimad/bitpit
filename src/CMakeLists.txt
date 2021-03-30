@@ -91,7 +91,7 @@ endfunction()
 #------------------------------------------------------------------------------------#
 
 # Library type
-if (BUILD_SHARED_LIBS)
+if (BITPIT_BUILD_SHARED_LIBS)
 	set(LIBRARY_TYPE "SHARED")
 	set(PIC_FLAG TRUE)
 else()
@@ -128,7 +128,7 @@ endforeach()
 # Library
 #------------------------------------------------------------------------------------#
 
-# NOTE: to get lib files, enable both BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags.
+# NOTE: to get lib files, enable both BITPIT_BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags.
 
 set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
 
@@ -136,7 +136,7 @@ add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
 
 set_lto_property(${BITPIT_LIBRARY})
 
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
 	set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
 	set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
 	set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
@@ -150,7 +150,7 @@ set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_MAJOR_VERSI
                                                  SOVERSION "${BITPIT_MAJOR_VERSION}")
 
 # Windows shared libraries have to be linked against their dependencies.
-if (MINGW AND BUILD_SHARED_LIBS)
+if (MINGW AND BITPIT_BUILD_SHARED_LIBS)
 	target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
 endif()
 

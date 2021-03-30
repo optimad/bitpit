@@ -26,17 +26,17 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Add a target to generate API documentation with Doxygen
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
+option(BITPIT_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 
-IF(BUILD_DOCUMENTATION)
+IF(BITPIT_BUILD_DOCUMENTATION)
   FIND_PACKAGE(Doxygen)
   IF(NOT DOXYGEN_FOUND)
     MESSAGE(FATAL_ERROR "Doxygen is needed to build the documentation.")
   ENDIF()
 
   # Documentation user options
-  option(DOC_EXTRACT_PRIVATE "If set, all private members are included in the documentation" OFF)
-  IF (DOC_EXTRACT_PRIVATE)
+  option(BITPIT_DOC_EXTRACT_PRIVATE "If set, all private members are included in the documentation" OFF)
+  IF (BITPIT_DOC_EXTRACT_PRIVATE)
     SET(DOXY_EXTRACT_PRIVATE "YES")
   ELSE ()
     SET(DOXY_EXTRACT_PRIVATE "NO")
@@ -46,10 +46,10 @@ IF(BUILD_DOCUMENTATION)
   #
   # DOXY_INPUT_DIRECTORIES will be substitued in the Doxygen input file,
   # therefore its elements are separated by spaces and not by semicolons.
-  if (ENABLE_MPI)
-    SET(DOXY_ENABLE_MPI 1)
+  if (BITPIT_ENABLE_MPI)
+    SET(DOXY_BITPIT_ENABLE_MPI 1)
   else ()
-    SET(DOXY_ENABLE_MPI 0)
+    SET(DOXY_BITPIT_ENABLE_MPI 0)
   endif ()
 
   SET(DOXYFILE_IN          ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
@@ -57,7 +57,7 @@ IF(BUILD_DOCUMENTATION)
   SET(DOXYFILE             ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
   SET(DOXY_HTML_INDEX_FILE ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
   SET(DOXY_OUTPUT_ROOT     ${CMAKE_CURRENT_BINARY_DIR})
-  SET(DOXY_PREDEFINED      "\"BITPIT_ENABLE_MPI=${DOXY_ENABLE_MPI}\" \"BITPIT_DEPRECATED(x)=x\"")
+  SET(DOXY_PREDEFINED      "\"BITPIT_ENABLE_MPI=${DOXY_BITPIT_ENABLE_MPI}\" \"BITPIT_DEPRECATED(x)=x\"")
 
   SET(DOXY_HTML_HEADER           "" CACHE INTERNAL "Header file for Doxygen documentation")
   SET(DOXY_HTML_FOOTER           "" CACHE INTERNAL "Footer file for Doxygen documentation")
@@ -78,11 +78,11 @@ IF(BUILD_DOCUMENTATION)
   endforeach ()
 
   # Create Doxygen input file
-  if (NOT "${DOC_EXTRACT_PRIVATE_INTERNAL}" STREQUAL "${DOC_EXTRACT_PRIVATE}")
+  if (NOT "${BITPIT_DOC_EXTRACT_PRIVATE_INTERNAL}" STREQUAL "${BITPIT_DOC_EXTRACT_PRIVATE}")
     if (EXISTS ${DOXY_HTML_INDEX_FILE})
       FILE (REMOVE ${DOXY_HTML_INDEX_FILE})
     endif ()
-    set(DOC_EXTRACT_PRIVATE_INTERNAL ${DOC_EXTRACT_PRIVATE} CACHE INTERNAL "This is the value of the last time DOC_EXTRACT_PRIVATE was set successfully." FORCE)
+    set(BITPIT_DOC_EXTRACT_PRIVATE_INTERNAL ${BITPIT_DOC_EXTRACT_PRIVATE} CACHE INTERNAL "This is the value of the last time BITPIT_DOC_EXTRACT_PRIVATE was set successfully." FORCE)
   endif ()
 
   CONFIGURE_FILE( ${DOXYFILE_IN} ${DOXYFILE} @ONLY )

@@ -74,7 +74,7 @@ function(addModuleTests MODULE_NAME TEST_ENTRIES TEST_LIBRARIES)
         endif ()
 
         isTestParallel("${TEST_ENTRY}" IS_TEST_PARALLEL)
-        if (IS_TEST_PARALLEL AND NOT ENABLE_MPI)
+        if (IS_TEST_PARALLEL AND NOT BITPIT_ENABLE_MPI)
             return ()
         endif ()
 
@@ -125,7 +125,7 @@ endfunction()
 # Add a parallel test
 function(addModuleParallelTest TEST_NAME TEST_LIBRARIES N_PROCS)
     # Parallel tests are enable only in MPI builds
-    if (NOT ENABLE_MPI)
+    if (NOT BITPIT_ENABLE_MPI)
         return()
     endif ()
 
@@ -137,7 +137,7 @@ endfunction()
 function(addTest TEST_NAME TEST_SOURCES TEST_LIBRARIES WORKING_DIRECTORY N_PROCS)
 
     # Parallel tests are enable only in MPI builds
-    if (NOT ENABLE_MPI AND ${N_PROCS} GREATER 1)
+    if (NOT BITPIT_ENABLE_MPI AND ${N_PROCS} GREATER 1)
         return()
     endif ()
 
