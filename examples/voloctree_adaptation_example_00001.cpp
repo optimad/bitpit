@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     BITPIT_UNUSED(argv);
 
 
-#if ENABLE_MPI == 1
+#if BITPIT_ENABLE_MPI == 1
     // Initialize MPI
     MPI_Init(&argc, &argv);
 #endif
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
         mesh.write();
     }
 
-#if ENABLE_MPI == 1
+#if BITPIT_ENABLE_MPI == 1
     // Finalize MPI
     MPI_Finalize();
 #endif
