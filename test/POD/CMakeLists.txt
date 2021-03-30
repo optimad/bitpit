@@ -31,7 +31,7 @@ get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 # List of tests
 set(TESTS "")
 list(APPEND TESTS "test_POD_00001")
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
     list(APPEND TESTS "test_POD_parallel_00001")
 endif ()
 

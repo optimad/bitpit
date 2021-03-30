@@ -33,7 +33,7 @@ set(TESTS "")
 list(APPEND TESTS "test_levelset_00001")
 list(APPEND TESTS "test_levelset_00002")
 list(APPEND TESTS "test_levelset_00003")
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
 	list(APPEND TESTS "test_levelset_parallel_00001:3")
 	list(APPEND TESTS "test_levelset_parallel_00002:3")
 	list(APPEND TESTS "test_levelset_parallel_00003:3")
@@ -59,7 +59,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/rectangle.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/rectangle.dgf"
 )
 
-if (ENABLE_MPI)
+if (BITPIT_ENABLE_MPI)
 	add_custom_command(
 		TARGET "test_levelset_parallel_00001" PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"

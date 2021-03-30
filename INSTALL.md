@@ -39,9 +39,9 @@ Setting some variable in ccmake interface you can customize a bit your configura
 
 The `CMAKE_BUILD_TYPE` variable has to be used to set the type of build. The possible options are : `None`, the environment compiler flags are used; `Release`, using compiler optimization flag `-O2`; `Debug`, related to compiler flags `-O0 -fmessage-length=0`, `RelWithDebInfo`, that uses compilation flags `-O2 -g` and `MinSizeRel` to have the smallest binary size.
 
-The `ENABLE_MPI` variable can be used to compile the parallel implementation of the bitpit packages and to allow the dependency on MPI libraries.
+The `BITPIT_ENABLE_MPI` variable can be used to compile the parallel implementation of the bitpit packages and to allow the dependency on MPI libraries.
 
-The `BUILD_EXAMPLES` can be used to compile examples sources in `bitpit/examples`. Note that the tests sources in `bitpit/test`are necessarily compiled and successively available at `bitpit/build/test/` as well as the compiled examples are available at `bitpit/build/examples/`.
+The `BITPIT_BUILD_EXAMPLES` can be used to compile examples sources in `bitpit/examples`. Note that the tests sources in `bitpit/test`are necessarily compiled and successively available at `bitpit/build/test/` as well as the compiled examples are available at `bitpit/build/examples/`.
 
 The module variables (available in the advanced mode) can be used to compile each module singularly by setting the related varible `ON/OFF` (BITPIT_MODULE_CONTAINERS, BITPIT_MODULE_IO, BITPIT_MODULE_LA, BITPIT_MODULE_SA...). Possible dependencies between bitpit modules are automatically resolved. 
 
@@ -67,8 +67,8 @@ If you have also installed bitpit, its headers will be available at `/my/install
 ## Building Documentation
 In order to build properly the documentation Doxygen (>=1.8.6) and Graphviz (>=2.20.2) are needed.
 
-In the ccmake interface the variable `BUILD_DOCUMENTATION` can be set to `ON` in order to build the documentation during the library compilation. 
-If turned on the new variable `DOC_EXTRACT_PRIVATE` can be used to include all the private class members in the documentation.
+In the ccmake interface the variable `BITPIT_BUILD_DOCUMENTATION` can be set to `ON` in order to build the documentation during the library compilation.
+If turned on the new variable `BITPIT_DOC_EXTRACT_PRIVATE` can be used to include all the private class members in the documentation.
   
 After the `make` or `make install` the doxygen documentation will be built. You can chose to compile only the documentation with command 
 ```bash
