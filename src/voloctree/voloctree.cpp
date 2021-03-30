@@ -2283,9 +2283,6 @@ void VolOctree::_dump(std::ostream &stream) const
 void VolOctree::_restore(std::istream &stream)
 {
 	// Restore tree
-#if ENABLE_MPI==1
-	m_tree->setComm(getCommunicator());
-#endif
 	m_tree->restore(stream);
 
 	// Restore kernel of vertex's containers
