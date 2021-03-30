@@ -39,8 +39,6 @@ Setting some variable in ccmake interface you can customize a bit your configura
 
 The `CMAKE_BUILD_TYPE` variable has to be used to set the type of build. The possible options are : `None`, the environment compiler flags are used; `Release`, using compiler optimization flag `-O2`; `Debug`, related to compiler flags `-O0 -fmessage-length=0`, `RelWithDebInfo`, that uses compilation flags `-O2 -g` and `MinSizeRel` to have the smallest binary size.
 
-In addition the `ENABLE_PROFILING` variable can be set to `ON` in order to add profiling flag `-pg` during the compilation.
-
 The `ENABLE_MPI` variable can be used to compile the parallel implementation of the bitpit packages and to allow the dependency on MPI libraries.
 
 The `BUILD_EXAMPLES` can be used to compile examples sources in `bitpit/examples`. Note that the tests sources in `bitpit/test`are necessarily compiled and successively available at `bitpit/build/test/` as well as the compiled examples are available at `bitpit/build/examples/`.
