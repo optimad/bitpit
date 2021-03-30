@@ -67,7 +67,7 @@ If you have also installed bitpit, its headers will be available at `/my/install
 ## Building Documentation
 In order to build properly the documentation Doxygen (>=1.8.6) and Graphviz (>=2.20.2) are needed.
 
-In the ccmake interface the variable `BITPIT_BUILD_DOCUMENTATION` can be set to `ON` in order to build the documentation during the library compilation.
+In the ccmake interface the variable `BITPIT_ENABLE_DOC` can be set to `ON` in order to build the documentation during the library compilation.
 If turned on the new variable `BITPIT_DOC_EXTRACT_PRIVATE` can be used to include all the private class members in the documentation.
   
 After the `make` or `make install` the doxygen documentation will be built. You can chose to compile only the documentation with command 
