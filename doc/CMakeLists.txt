@@ -26,9 +26,9 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Add a target to generate API documentation with Doxygen
-option(BITPIT_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
+option(BITPIT_ENABLE_DOC "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 
-IF(BITPIT_BUILD_DOCUMENTATION)
+IF(BITPIT_ENABLE_DOC)
   FIND_PACKAGE(Doxygen)
   IF(NOT DOXYGEN_FOUND)
     MESSAGE(FATAL_ERROR "Doxygen is needed to build the documentation.")
