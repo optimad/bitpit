@@ -119,6 +119,24 @@ void extractWithoutReplacement(                                               //
 unsigned long factorial(unsigned long n);
 
 /*!
+    Base class for defining functors to compare double precision floating point
+    numbers.
+*/
+struct DoubleFloatingComparison
+{
+
+public:
+    virtual ~DoubleFloatingComparison() = default;
+
+protected:
+    constexpr static const double DEFAULT_ABS_TOL = 10 * std::numeric_limits<double>::epsilon();
+    constexpr static const double DEFAULT_REL_TOL = 10 * std::numeric_limits<double>::epsilon();
+
+    DoubleFloatingComparison() = default;
+
+};
+
+/*!
     Functor to compare two double precision floating point numbers.
 
     See chapter 4.2.2 equation 35 of "The art of computer programming (vol II)"
@@ -127,7 +145,7 @@ unsigned long factorial(unsigned long n);
 
     Also see: "https://www.boost.org/doc/libs/1_74_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/floating_point/floating_points_comparison_theory.html"
 */
-struct DoubleFloatingEqual
+struct DoubleFloatingEqual : public DoubleFloatingComparison
 {
     /*!
         Compares the specified double precision floating point numbers
@@ -164,9 +182,168 @@ struct DoubleFloatingEqual
         return (relativeDifference <= relativeTolerance);
     }
 
-private:
-    constexpr static const double DEFAULT_ABS_TOL = 10 * std::numeric_limits<double>::epsilon();
-    constexpr static const double DEFAULT_REL_TOL = 10 * std::numeric_limits<double>::epsilon();
+};
+
+/*!
+    Functor to check if a floating point value compares less than another.
+*/
+struct DoubleFloatingLess : public DoubleFloatingComparison
+{
+    /*!
+        Compares the specified double precision floating point numbers and
+        returns true if the first value compare less than the second.
+
+        This is equaivalent to:
+
+               (x < y) AND (NOT FloatingEqual(x, y))
+
+        where FloatingEqual is the operator that compares two double precision
+        floating point numbers.
+
+        \param x if the first value to compare
+        \param y if the second value to compare
+        \param relativeTolerance is the relative tolerance that will be used to
+        perform the comparison
+        \param absoluteTolerance is the absolute tolerance that will be used to
+        perform the comparison
+        \result Returns true if the first value compare less than the second,
+        false otherwise.
+    */
+    bool operator()(double x, double y, double relativeTolerance = DEFAULT_REL_TOL, double absoluteTolerance = DEFAULT_ABS_TOL) const
+    {
+        if (x > y) {
+            return false;
+        }
+
+        if (DoubleFloatingEqual()(x, y, relativeTolerance, absoluteTolerance)) {
+            return false;
+        }
+
+        return true;
+    }
+
+};
+
+/*!
+    Functor to check if a floating point value compares less or equal than
+    another.
+*/
+struct DoubleFloatingLessEqual : public DoubleFloatingComparison
+{
+    /*!
+        Compares the specified double precision floating point numbers and
+        returns true if the first value compare less or equal than the second.
+
+        This is equaivalent to:
+
+               (x < y) OR (FloatingEqual(x, y))
+
+        where FloatingEqual is the operator that compares two double precision
+        floating point numbers.
+
+        \param x if the first value to compare
+        \param y if the second value to compare
+        \param relativeTolerance is the relative tolerance that will be used to
+        perform the comparison
+        \param absoluteTolerance is the absolute tolerance that will be used to
+        perform the comparison
+        \result Returns true if the first value compare less or equal than the
+        second, false otherwise.
+    */
+    bool operator()(double x, double y, double relativeTolerance = DEFAULT_REL_TOL, double absoluteTolerance = DEFAULT_ABS_TOL) const
+    {
+        if (x < y) {
+            return true;
+        }
+
+        if (DoubleFloatingEqual()(x, y, relativeTolerance, absoluteTolerance)) {
+            return true;
+        }
+
+        return false;
+    }
+
+};
+
+/*!
+    Functor to check if a floating point value compares greater than another.
+*/
+struct DoubleFloatingGreater : public DoubleFloatingComparison
+{
+    /*!
+        Compares the specified double precision floating point numbers and
+        returns true if the first value compare greater than the second.
+
+        This is equaivalent to:
+
+               (x > y) AND (NOT FloatingEqual(x, y))
+
+        where FloatingEqual is the operator that compares two double precision
+        floating point numbers.
+
+        \param x if the first value to compare
+        \param y if the second value to compare
+        \param relativeTolerance is the relative tolerance that will be used to
+        perform the comparison
+        \param absoluteTolerance is the absolute tolerance that will be used to
+        perform the comparison
+        \result Returns true if the first value compare greater than the second,
+        false otherwise.
+    */
+    bool operator()(double x, double y, double relativeTolerance = DEFAULT_REL_TOL, double absoluteTolerance = DEFAULT_ABS_TOL) const
+    {
+        if (x < y) {
+            return false;
+        }
+
+        if (DoubleFloatingEqual()(x, y, relativeTolerance, absoluteTolerance)) {
+            return false;
+        }
+
+        return true;
+    }
+
+};
+
+/*!
+    Functor to check if a floating point value compares greater or equal than
+    another.
+*/
+struct DoubleFloatingGreaterEqual : public DoubleFloatingComparison
+{
+    /*!
+        Compares the specified double precision floating point numbers and
+        returns true if the first value compare greater or equal than the
+        second.
+
+        This is equaivalent to:
+
+               (x > y) OR (FloatingEqual(x, y))
+
+        where FloatingEqual is the operator that compares two double precision
+        floating point numbers.
+
+        \param x if the first value to compare
+        \param y if the second value to compare
+        \param relativeTolerance is the relative tolerance that will be used to
+        perform the comparison
+        \param absoluteTolerance is the absolute tolerance that will be used to
+        perform the comparison
+        \result Returns true if the first value compare greater or equal than
+        the second, false otherwise.
+    */
+    bool operator()(double x, double y, double relativeTolerance = DEFAULT_REL_TOL, double absoluteTolerance = DEFAULT_ABS_TOL) const
+    {
+        if (x > y) {
+            return true;
+        }
+
+        if (DoubleFloatingEqual()(x, y, relativeTolerance, absoluteTolerance)) {
+            return true;
+        }
+
+        return false;
+    }
 
 };
 
