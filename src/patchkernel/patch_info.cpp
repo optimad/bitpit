@@ -214,13 +214,23 @@ void PatchNumberingInfo::_extract()
 
 	// Evalaute the consecutive id of the internal cells
 	if (m_patch->getInternalCellCount() > 0) {
-		std::map<long,long> nativeIds;
+		std::size_t index = 0;
+		std::vector<std::pair<long, long>> nativeIds(m_patch->getInternalCellCount());
 		for (auto itr = m_patch->internalCellConstBegin(); itr != m_patch->internalCellConstEnd(); ++itr) {
 			long id = itr.getId();
 			long nativeId = m_patch->_getCellNativeIndex(id);
 
-			nativeIds.insert({nativeId, id});
+			nativeIds[index++] = std::make_pair(nativeId, id);
 		}
+
+		std::sort(
+			nativeIds.begin(),
+			nativeIds.end(),
+			[](const std::pair<long, long> &x, const std::pair<long, long> &y) -> bool
+			{
+				return x.first < y.first;
+			}
+		);
 
 #if BITPIT_ENABLE_MPI==1
 		m_cellConsecutiveOffset = getCellGlobalCountOffset();
@@ -232,8 +242,6 @@ void PatchNumberingInfo::_extract()
 		for (auto itr = nativeIds.begin(); itr != nativeIds.end(); ++itr) {
 			m_cellLocalToConsecutiveMap.insert({itr->second, consecutiveId++});
 		}
-
-		std::map<long,long>().swap(nativeIds);
 	}
 
 #if BITPIT_ENABLE_MPI==1
