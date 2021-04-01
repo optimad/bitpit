@@ -68,7 +68,6 @@ private:
     std::set<id_type> m_trash;
 
     void eraseFromTrash(id_type id);
-    void pushToTrash(id_type id);
 
     int getBinaryArchiveVersion() const;
 

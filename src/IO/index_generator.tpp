@@ -68,7 +68,7 @@ typename IndexGenerator<id_t>::id_type IndexGenerator<id_t>::generate()
         }
     } else {
         m_latest = *(m_trash.begin());
-        eraseFromTrash(m_latest);
+        m_trash.erase(m_trash.begin());
     }
 
     return m_latest;
@@ -149,14 +149,16 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
         m_lowest  = id;
         m_highest = id;
     } else if (id > m_highest) {
+        typename std::set<id_type>::iterator trashIterator = m_trash.end();
         for (id_type wasteId = m_highest + 1; wasteId < id; ++wasteId) {
-            trash(wasteId);
+            trashIterator = m_trash.insert(trashIterator, wasteId);
         }
 
         m_highest = id;
     } else if (id < m_lowest) {
+        typename std::set<id_type>::iterator trashIterator = m_trash.end();
         for (id_type wasteId = id + 1; wasteId < m_lowest; ++wasteId) {
-            trash(wasteId);
+            trashIterator = m_trash.insert(trashIterator, wasteId);
         }
 
         m_lowest = id;
@@ -179,6 +181,7 @@ void IndexGenerator<id_t>::setAssigned(typename IndexGenerator<id_t>::id_type id
 template<typename id_t>
 void IndexGenerator<id_t>::trash(typename IndexGenerator<id_t>::id_type id)
 {
+    assert(id != NULL_ID);
     assert(m_trash.count(id) == 0);
 
     // If we are trashing the highest or the lowest id we can update the
@@ -193,18 +196,35 @@ void IndexGenerator<id_t>::trash(typename IndexGenerator<id_t>::id_type id)
         m_highest = NULL_ID;
     } else if (id == m_highest) {
         --m_highest;
-        while (m_trash.count(m_highest) > 0) {
-            eraseFromTrash(m_highest);
-            --m_highest;
+        auto trashIterator = m_trash.end();
+        while (!m_trash.empty()) {
+            --trashIterator;
+            if (*trashIterator != m_highest) {
+                break;
+            }
+
+            trashIterator = m_trash.erase(trashIterator);
+            if (m_highest != 0) {
+                --m_highest;
+            } else {
+                assert(m_trash.empty());
+                m_highest = NULL_ID;
+                break;
+            }
         }
     } else if (id == m_lowest) {
         ++m_lowest;
-        while (m_trash.count(m_lowest) > 0) {
-            eraseFromTrash(m_lowest);
+        auto trashIterator = m_trash.begin();
+        while (!m_trash.empty()) {
+            if (*trashIterator != m_lowest) {
+                break;
+            }
+
+            trashIterator = m_trash.erase(trashIterator);
             ++m_lowest;
         }
     } else {
-        pushToTrash(id);
+        m_trash.insert(id);
     }
 
     // We only keep track of the latest assigned id, if we trash that id we
@@ -225,17 +245,6 @@ void IndexGenerator<id_t>::reset()
     m_highest = NULL_ID;
 
     m_trash.clear();
-}
-
-/*!
-    Add the specified index to the trash.
-
-    \param id is the id to be added
-*/
-template<typename id_t>
-void IndexGenerator<id_t>::pushToTrash(id_type id)
-{
-    m_trash.insert(id);
 }
 
 /*!
@@ -308,7 +317,7 @@ void IndexGenerator<id_t>::restore(std::istream &stream)
     for (size_t i = 0; i < nTrashedIds; ++i) {
         id_type id;
         utils::binary::read(stream, id);
-        pushToTrash(id);
+        m_trash.insert(id);
     }
 }
 
