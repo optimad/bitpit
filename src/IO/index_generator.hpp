@@ -26,7 +26,6 @@
 #define __BITPIT_INDEX_GENERATOR_HPP__
 
 #include <cassert>
-#include <deque>
 #include <iostream>
 #include <limits>
 #include <set>
