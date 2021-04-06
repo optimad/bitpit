@@ -45,6 +45,7 @@ class PiercedKernel;
 */
 template<typename id_t = long>
 class PiercedKernelIterator
+    : public std::iterator<std::random_access_iterator_tag, id_t, std::ptrdiff_t, id_t*, id_t&>
 {
 
 template<typename PK_id_t>
