@@ -40,7 +40,6 @@ class PiercedKernel;
 *
 * \brief Iterator for the class PiercedKernel
 *
-* \tparam value_t is the type of elements in the storage
 * \tparam id_t is the type of ids associated to the elements
 */
 template<typename id_t = long>
