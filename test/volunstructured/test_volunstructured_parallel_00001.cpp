@@ -49,6 +49,8 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
     patch_2D = new VolUnstructured(2, MPI_COMM_WORLD);
     patch_2D->getVTK().setName("unstructured_patch_2D");
 
+    patch_2D->setVertexAutoIndexing(false);
+
     // Fill the patch
     if (rank == 0) {
         patch_2D->addVertex({{0.00000000, 0.00000000, 0.00000000}},  1);
@@ -323,6 +325,8 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
 
     patch_3D = new VolUnstructured(3, MPI_COMM_WORLD);
     patch_3D->getVTK().setName("unstructured_patch_3D");
+
+    patch_3D->setVertexAutoIndexing(false);
 
     // Fill the patch
     if (rank == 0) {
