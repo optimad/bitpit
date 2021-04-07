@@ -53,6 +53,8 @@ int subtest_001()
 #endif
     patch_2D->getVTK().setName("unstructured_uniform_patch_2D");
 
+    patch_2D->setVertexAutoIndexing(false);
+
     patch_2D->addVertex({{0.00000000, 0.00000000, 0.00000000}},  1);
     patch_2D->addVertex({{0.00000000, 1.00000000, 0.00000000}},  2);
     patch_2D->addVertex({{1.00000000, 1.00000000, 0.00000000}},  3);
@@ -200,6 +202,8 @@ int subtest_002()
     VolUnstructured *patch_3D = new VolUnstructured(0, 3);
 #endif
     patch_3D->getVTK().setName("unstructured_uniform_patch_3D");
+
+    patch_3D->setVertexAutoIndexing(false);
 
     patch_3D->addVertex({{0.00000000, 0.00000000,  0.00000000}},  1);
     patch_3D->addVertex({{1.00000000, 0.00000000,  0.00000000}},  2);

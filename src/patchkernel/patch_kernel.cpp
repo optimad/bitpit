@@ -198,9 +198,6 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_interfaces(other.m_interfaces),
       m_alteredCells(other.m_alteredCells),
       m_alteredInterfaces(other.m_alteredInterfaces),
-      m_vertexIdGenerator(other.m_vertexIdGenerator),
-      m_interfaceIdGenerator(other.m_interfaceIdGenerator),
-      m_cellIdGenerator(other.m_cellIdGenerator),
       m_nInternalVertices(other.m_nInternalVertices),
 #if BITPIT_ENABLE_MPI==1
       m_nGhostVertices(other.m_nGhostVertices),
@@ -255,6 +252,19 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_ghostCellExchangeSources(other.m_ghostCellExchangeSources)
 #endif
 {
+	// Create index generators
+	if (other.m_vertexIdGenerator) {
+		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(other.m_vertexIdGenerator)));
+	}
+
+	if (other.m_interfaceIdGenerator) {
+		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(other.m_interfaceIdGenerator)));
+	}
+
+	if (other.m_cellIdGenerator) {
+		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(other.m_cellIdGenerator)));
+	}
+
 	// Register the patch
 	patch::manager().registerPatch(this);
 
@@ -352,6 +362,11 @@ void PatchKernel::initialize()
 
 	// Dimension
 	m_dimension = -1;
+
+	// Index generators
+	setVertexAutoIndexing(true);
+	setInterfaceAutoIndexing(true);
+	setCellAutoIndexing(true);
 
 	// Set adjacencies build strategy
 	setAdjacenciesBuildStrategy(ADJACENCIES_NONE);
@@ -833,7 +848,9 @@ void PatchKernel::reset()
 void PatchKernel::resetVertices()
 {
 	m_vertices.clear();
-	m_vertexIdGenerator.reset();
+	if (m_vertexIdGenerator) {
+		m_vertexIdGenerator->reset();
+	}
 	m_nInternalVertices = 0;
 #if BITPIT_ENABLE_MPI==1
 	m_nGhostVertices = 0;
@@ -854,7 +871,9 @@ void PatchKernel::resetVertices()
 void PatchKernel::resetCells()
 {
 	m_cells.clear();
-	m_cellIdGenerator.reset();
+	if (m_cellIdGenerator) {
+		m_cellIdGenerator->reset();
+	}
 	m_nInternalCells = 0;
 #if BITPIT_ENABLE_MPI==1
 	m_nGhostCells = 0;
@@ -917,7 +936,9 @@ void PatchKernel::_resetInterfaces()
 	}
 
 	m_interfaces.clear();
-	m_interfaceIdGenerator.reset();
+	if (m_interfaceIdGenerator) {
+		m_interfaceIdGenerator->reset();
+	}
 }
 
 /*!
@@ -1305,6 +1326,43 @@ bool PatchKernel::isThreeDimensional() const
 }
 
 /*!
+	Returns true if auto-indexing is enabled for vertices.
+
+	When auto-indexing is disabled, ids for newly added vertices has to be
+	manually specified.
+
+	\return Returns true if auto-indexing is enabled for vertices.
+*/
+bool PatchKernel::isVertexAutoIndexingEnabled() const
+{
+	return static_cast<bool>(m_vertexIdGenerator);
+}
+
+/*!
+	Enables or disables auto-indexing for vertices.
+
+	When auto-indexing is disabled, ids for newly added vertices has to be
+	manually specified.
+
+	\param enabled if set to true the auto-indexing will be enabled
+*/
+void PatchKernel::setVertexAutoIndexing(bool enabled)
+{
+	if (isVertexAutoIndexingEnabled() == enabled) {
+		return;
+	}
+
+	if (enabled) {
+		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
+		for (auto itr = m_vertices.begin(); itr != m_vertices.end(); ++itr) {
+			m_vertexIdGenerator->setAssigned(itr.getId());
+		}
+	} else {
+		m_vertexIdGenerator.reset();
+	}
+}
+
+/*!
 	Gets the number of vertices in the patch.
 
 	\return The number of vertices in the patch
@@ -1524,10 +1582,14 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 		return vertexEnd();
 	}
 
-	if (id < 0) {
-		id = m_vertexIdGenerator.generate();
-	} else {
-		m_vertexIdGenerator.setAssigned(id);
+	if (m_vertexIdGenerator) {
+		if (id < 0) {
+			id = m_vertexIdGenerator->generate();
+		} else {
+			m_vertexIdGenerator->setAssigned(id);
+		}
+	} else if (id < 0) {
+		throw std::runtime_error("No valid id has been provided for the vertex.");
 	}
 
 	// Add the vertex
@@ -1663,7 +1725,9 @@ bool PatchKernel::deleteVertex(long id)
 #endif
 
 	// Vertex id is no longer used
-	m_vertexIdGenerator.trash(id);
+	if (m_vertexIdGenerator) {
+		m_vertexIdGenerator->trash(id);
+	}
 
 	return true;
 }
@@ -2048,6 +2112,43 @@ void PatchKernel::updateLastInternalVertexId()
 	lastInternalVertexItr = --m_vertices.end();
 	m_lastInternalVertexId = lastInternalVertexItr->getId();
 #endif
+}
+
+/*!
+	Returns true if auto-indexing is enabled for cells.
+
+	When auto-indexing is disabled, cell ids for newly added cells should
+	be provided by the user.
+
+	\return Returns true if auto-indexing is enabled for cells.
+*/
+bool PatchKernel::isCellAutoIndexingEnabled() const
+{
+	return static_cast<bool>(m_cellIdGenerator);
+}
+
+/*!
+	Enables or disables auto-indexing for cells.
+
+	When auto-indexing is disabled, ids for newly added cells has to be
+	manually specified.
+
+	\param enabled if set to true the auto-indexing will be enabled
+*/
+void PatchKernel::setCellAutoIndexing(bool enabled)
+{
+	if (isCellAutoIndexingEnabled() == enabled) {
+		return;
+	}
+
+	if (enabled) {
+		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
+		for (auto itr = m_cells.begin(); itr != m_cells.end(); ++itr) {
+			m_cellIdGenerator->setAssigned(itr.getId());
+		}
+	} else {
+		m_cellIdGenerator.reset();
+	}
 }
 
 /*!
@@ -2440,10 +2541,14 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 		return cellEnd();
 	}
 
-	if (id < 0) {
-		id = m_cellIdGenerator.generate();
-	} else {
-		m_cellIdGenerator.setAssigned(id);
+	if (m_cellIdGenerator) {
+		if (id < 0) {
+			id = m_cellIdGenerator->generate();
+		} else {
+			m_cellIdGenerator->setAssigned(id);
+		}
+	} else if (id < 0) {
+		throw std::runtime_error("No valid id has been provided for the cell.");
 	}
 
 	if (Cell::getDimension(type) > getDimension()) {
@@ -2619,7 +2724,7 @@ bool PatchKernel::deleteCell(long id)
 #endif
 
 	// Cell id is no longer used
-	m_cellIdGenerator.trash(id);
+	m_cellIdGenerator->trash(id);
 
 	return true;
 }
@@ -3597,6 +3702,50 @@ void PatchKernel::findVertexOneRing(long vertexId, std::vector<long> *ring) cons
 }
 
 /*!
+	Returns true if auto-indexing is enabled for interfaces.
+
+	When auto-indexing is disabled, ids for newly added interfaces has to be
+	manually specified.
+
+	\return Returns true if auto-indexing is enabled for interfaces.
+*/
+bool PatchKernel::isInterfaceAutoIndexingEnabled() const
+{
+	return static_cast<bool>(m_interfaceIdGenerator);
+}
+
+/*!
+	Enables or disables auto-indexing for interfaces.
+
+	When auto-indexing is disabled, ids for newly added interfaces has to be
+	manually specified.
+
+	Auto-indexing cannot be disabled if interfaces build strategy is set
+	to "automatic".
+
+	\param enabled if set to true the auto-indexing will be enabled
+*/
+void PatchKernel::setInterfaceAutoIndexing(bool enabled)
+{
+	if (isInterfaceAutoIndexingEnabled() == enabled) {
+		return;
+	}
+
+	if (enabled) {
+		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
+		for (auto itr = m_interfaces.begin(); itr != m_interfaces.end(); ++itr) {
+			m_interfaceIdGenerator->setAssigned(itr.getId());
+		}
+	} else {
+		if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
+			throw std::runtime_error("Auto-indexing cannot be disabled if interfaces build strategy is set to automatic.");
+		}
+
+		m_interfaceIdGenerator.reset();
+	}
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch
@@ -3849,10 +3998,14 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 		return interfaceEnd();
 	}
 
-	if (id < 0) {
-		id = m_interfaceIdGenerator.generate();
-	} else {
-		m_interfaceIdGenerator.setAssigned(id);
+	if (m_interfaceIdGenerator) {
+		if (id < 0) {
+			id = m_interfaceIdGenerator->generate();
+		} else {
+			m_interfaceIdGenerator->setAssigned(id);
+		}
+	} else if (id < 0) {
+		throw std::runtime_error("No valid id has been provided for the interface.");
 	}
 
 	if (Interface::getDimension(type) > (getDimension() - 1)) {
@@ -3946,7 +4099,9 @@ bool PatchKernel::deleteInterface(long id)
 
 	// Delete interface
 	m_interfaces.erase(id, true);
-	m_interfaceIdGenerator.trash(id);
+	if (m_interfaceIdGenerator) {
+		m_interfaceIdGenerator->trash(id);
+	}
 
 	return true;
 }
@@ -5388,6 +5543,12 @@ PatchKernel::InterfacesBuildStrategy PatchKernel::getInterfacesBuildStrategy() c
 */
 void PatchKernel::setInterfacesBuildStrategy(InterfacesBuildStrategy status)
 {
+	if (status == INTERFACES_AUTOMATIC) {
+		if (!isInterfaceAutoIndexingEnabled()) {
+			throw std::runtime_error("Automatic build strategy requires auto-indexing.");
+		}
+	}
+
 	m_interfacesBuildStrategy = status;
 }
 
@@ -7136,7 +7297,7 @@ void PatchKernel::consecutiveRenumber(long vertexOffset, long cellOffset, long i
  */
 int PatchKernel::getDumpVersion() const
 {
-	const int KERNEL_DUMP_VERSION = 11;
+	const int KERNEL_DUMP_VERSION = 12;
 
 	return (KERNEL_DUMP_VERSION + _getDumpVersion());
 }
@@ -7225,9 +7386,20 @@ bool PatchKernel::dump(std::ostream &stream) const
 	}
 
 	// Index generators
-	m_vertexIdGenerator.dump(stream);
-	m_cellIdGenerator.dump(stream);
-	m_interfaceIdGenerator.dump(stream);
+	utils::binary::write(stream, (bool) m_vertexIdGenerator);
+	if (m_vertexIdGenerator) {
+		m_vertexIdGenerator->dump(stream);
+	}
+
+	utils::binary::write(stream, (bool) m_interfaceIdGenerator);
+	if (m_interfaceIdGenerator) {
+		m_interfaceIdGenerator->dump(stream);
+	}
+
+	utils::binary::write(stream, (bool) m_cellIdGenerator);
+	if (m_cellIdGenerator) {
+		m_cellIdGenerator->dump(stream);
+	}
 
 	// The patch has been dumped successfully
 	return true;
@@ -7323,9 +7495,23 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	}
 
 	// Index generators
-	m_vertexIdGenerator.restore(stream);
-	m_cellIdGenerator.restore(stream);
-	m_interfaceIdGenerator.restore(stream);
+	bool hasVertexIdGenerator;
+	utils::binary::read(stream, hasVertexIdGenerator);
+	if (hasVertexIdGenerator) {
+		m_vertexIdGenerator->restore(stream);
+	}
+
+	bool hasInterfaceIdGenerator;
+	utils::binary::read(stream, hasInterfaceIdGenerator);
+	if (hasInterfaceIdGenerator) {
+		m_interfaceIdGenerator->restore(stream);
+	}
+
+	bool hasCellIdGenerator;
+	utils::binary::read(stream, hasCellIdGenerator);
+	if (hasCellIdGenerator) {
+		m_cellIdGenerator->restore(stream);
+	}
 }
 
 /*!
