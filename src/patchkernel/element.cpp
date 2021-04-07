@@ -761,12 +761,12 @@ ConstProxyVector<int> Element::getFaceLocalConnect(int face) const
 
 	case (ElementType::POLYGON):
 	{
-		int connectSize = getConnectSize();
+		int nVertices = getVertexCount();
 
 		int faceConnectSize = getFaceVertexCount(face);
 		std::vector<int> localFaceConnect(faceConnectSize);
 		for (int i = 0; i < faceConnectSize; ++i) {
-			localFaceConnect[i] = 1 + ((face + i) % (connectSize - 1));
+			localFaceConnect[i] = (face + i) % nVertices;
 		}
 
 		return ConstProxyVector<int>(std::move(localFaceConnect));
@@ -1315,20 +1315,6 @@ ConstProxyVector<int> Element::getFaceLocalVertexIds(int face) const
 {
 	switch (m_type) {
 
-	case (ElementType::POLYGON):
-	{
-		ConstProxyVector<int> faceLocalConnect = getFaceLocalConnect(face);
-		std::size_t faceLocalConnectSize = faceLocalConnect.size();
-
-		std::size_t nFaceVertices = faceLocalConnectSize;
-		std::vector<int> faceLocalVertexIds(nFaceVertices);
-		for (std::size_t i = 0; i < nFaceVertices; ++i) {
-			faceLocalVertexIds[i] = faceLocalConnect[i] - 1;
-		}
-
-		return ConstProxyVector<int>(std::move(faceLocalVertexIds));
-	}
-
 	case (ElementType::POLYHEDRON):
 	{
 		ElementType faceType = getFaceType(face);
@@ -1342,7 +1328,7 @@ ConstProxyVector<int> Element::getFaceLocalVertexIds(int face) const
 		std::size_t nFaceVertices = faceLocalConnectSize - 1;
 		std::vector<int> faceLocalVertexIds(nFaceVertices);
 		for (std::size_t i = 0; i < nFaceVertices; ++i) {
-			faceLocalVertexIds[i] = faceLocalConnect[i + 1] - 1;
+			faceLocalVertexIds[i] = faceLocalConnect[i + 1];
 		}
 
 		return ConstProxyVector<int>(std::move(faceLocalVertexIds));
