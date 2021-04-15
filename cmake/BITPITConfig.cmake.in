@@ -45,7 +45,7 @@ if(BITPIT_RECONFIGURE)
     unset(BITPIT_INCLUDE_DIR CACHE)
 endif()
 
-find_path(BITPIT_INCLUDE_DIR "@PROJECT_NAME@_version.hpp"
+find_path(BITPIT_INCLUDE_DIR "@PROJECT_NAME@.hpp"
           HINTS "${BITPIT_INSTALL_PREFIX}/include/bitpit")
 
 mark_as_advanced(BITPIT_INCLUDE_DIR)
