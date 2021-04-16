@@ -1009,7 +1009,6 @@ int SurfUnstructured::importDGF(const std::string &filename, bool joinFacets, in
     // Local variables
     DGFObj                                                      dgf_in(filename);
     int                                                         nV = 0, nS = 0;
-    long                                                        vcount, idx;
     std::vector<std::array<double, 3>>                          vertex_list;
     std::vector<std::vector<int>>                               simplex_list;
     std::vector<int>                                            simplex_PID;
@@ -1017,7 +1016,6 @@ int SurfUnstructured::importDGF(const std::string &filename, bool joinFacets, in
     std::vector<long>                                           connect;
 
     // Counters
-    std::vector<std::array<double, 3>>::const_iterator          v_, ve_;
     std::vector<std::vector<int>>::iterator                     c_, ce_;
     std::vector<int>::iterator                                  i_, ie_;
     std::vector<long>::iterator                                 j_, je_;
@@ -1030,33 +1028,35 @@ int SurfUnstructured::importDGF(const std::string &filename, bool joinFacets, in
     dgf_in.load(nV, nS, vertex_list, simplex_list, simplex_PID);
 
     // Add vertices
-    std::map<Vertex *, long, Vertex::Less> vertexCache(Vertex::Less(10 * std::numeric_limits<double>::epsilon()));
-
-    ve_ = vertex_list.cend();
-    vcount = 0;
     vertex_map.resize(nV);
-
     if (joinFacets) {
-        for (v_ = vertex_list.cbegin(); v_ != ve_; ++v_) {
-            long idx;
-            Vertex vertex(Vertex::NULL_ID, *v_);
-            auto vertexCacheItr = vertexCache.find(&vertex);
+        Vertex::Less vertexLess(10 * std::numeric_limits<double>::epsilon());
+
+        auto vertexCoordsLess = [&vertexLess, &vertex_list](const int &i, const int &j)
+        {
+            return vertexLess(vertex_list[i], vertex_list[j]);
+        };
+
+        std::set<int, decltype(vertexCoordsLess)> vertexCache(vertexCoordsLess);
+
+        for (int i = 0; i < nV; ++i) {
+            long vertexId;
+            auto vertexCacheItr = vertexCache.find(i);
             if (vertexCacheItr == vertexCache.end()) {
-                VertexIterator vertexItr = addVertex(std::move(vertex));
-                idx = vertexItr.getId();
-                vertexCache.insert({&(*vertexItr), idx});
+                VertexIterator vertexItr = addVertex(vertex_list[i]);
+                vertexId = vertexItr.getId();
+                vertexCache.insert(i);
             } else {
-                idx = vertexCacheItr->second;
+                vertexId = vertex_map[*vertexCacheItr];
             }
-            vertex_map[vcount] = idx;
-            ++vcount;
-        } //next v_
+            vertex_map[i] = vertexId;
+        }
     } else {
-        for (v_ = vertex_list.cbegin(); v_ != ve_; ++v_) {
-            idx = addVertex(*v_)->getId();
-            vertex_map[vcount] = idx;
-            ++vcount;
-        } //next v_
+        for (int i = 0; i < nV; ++i) {
+            VertexIterator vertexItr = addVertex(vertex_list[i]);
+            long vertexId = vertexItr.getId();
+            vertex_map[i] = vertexId;
+        }
     }
 
     // Update connectivity infos
