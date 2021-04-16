@@ -66,17 +66,22 @@ public:
 
 		bool operator()(const Vertex &vertex_1, const Vertex &vertex_2) const
 		{
-			return operator()(&vertex_1, &vertex_2);
+			return operator()(vertex_1.getCoords(), vertex_2.getCoords());
 		}
 
 		bool operator()(const Vertex *vertex_1, const Vertex *vertex_2) const
 		{
+			return operator()(vertex_1->getCoords(), vertex_2->getCoords());
+		}
+
+		bool operator()(const std::array<double, 3> &coords_1, const std::array<double, 3> &coords_2) const
+		{
 			for (int d = 0; d < 3; ++d) {
-				if (utils::DoubleFloatingEqual()((*vertex_1)[d], (*vertex_2)[d], m_tolerance)) {
+				if (utils::DoubleFloatingEqual()(coords_1[d], coords_2[d], m_tolerance)) {
 					continue;
 				}
 
-				return (*vertex_1)[d] < (*vertex_2)[d];
+				return coords_1[d] < coords_2[d];
 			}
 
 			return false;
