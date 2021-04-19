@@ -160,7 +160,9 @@ public:
     };
 
     SystemSolver(bool debug = false);
+    SystemSolver(bool transpose, bool debug);
     SystemSolver(const std::string &prefix, bool debug = false);
+    SystemSolver(const std::string &prefix, bool transpose, bool debug);
 
     virtual ~SystemSolver();
 
@@ -222,6 +224,8 @@ public:
     void enableForceConsistency(bool enable);
 
 protected:
+    bool m_transpose;
+
     Mat m_A;
     Vec m_rhs;
     Vec m_solution;
