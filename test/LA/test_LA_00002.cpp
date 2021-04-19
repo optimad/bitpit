@@ -116,6 +116,87 @@ int subtest_001()
 }
 
 /*!
+* Subtest 002
+*
+* Testing solution of transposed linear systems.
+*/
+int subtest_002()
+{
+    int nRows = 10;
+    int nCols = 10;
+    int nNZ   = 20;
+
+    // Build matrix
+    log::cout() << "Building matrix..." << std::endl;
+
+    std::vector<long> rowPattern(2);
+    std::vector<double> rowValues(2);
+
+#if BITPIT_ENABLE_MPI==1
+    SparseMatrix matrix(MPI_COMM_WORLD, false, nRows, nCols, nNZ);
+#else
+    SparseMatrix matrix(nRows, nCols, nNZ);
+#endif
+    for (int row = 0; row < nRows; ++row) {
+        rowPattern[0] = row;
+        rowValues[0]  = (row + 1);
+
+        rowPattern[1] = nRows - row - 1;
+        rowValues[1]  = 11 * (row + 1);
+
+        matrix.addRow(rowPattern, rowValues);
+    }
+    matrix.assembly();
+
+    // Build system
+    log::cout() << "Building system..." << std::endl;
+
+    SystemSolver system(true, false);
+    system.assembly(matrix);
+
+    double *rhs = system.getRHSRawPtr();
+    rhs[0] = 1101;
+    rhs[1] =  895;
+    rhs[2] =  713;
+    rhs[3] =  555;
+    rhs[4] =  421;
+    rhs[5] =  311;
+    rhs[6] =  225;
+    rhs[7] =  163;
+    rhs[8] =  125;
+    rhs[9] =  111;
+    system.restoreRHSRawPtr(rhs);
+
+    double *initialSolution = system.getSolutionRawPtr();
+    for (int i = 0; i < nRows; ++i) {
+        initialSolution[i] = 0;
+    }
+    system.restoreSolutionRawPtr(initialSolution);
+
+    // Solve system
+    log::cout() << "Solving transposed system..." << std::endl;
+
+    system.solve();
+
+    log::cout() << std::setprecision(16) << std::scientific;
+
+    const double *solution = system.getSolutionRawReadPtr();
+    for (int i = 0; i < nRows; ++i) {
+        log::cout() << "  Solution[" << i << "] = " << solution[i] << std::endl;
+
+        double expectedSolution = i + 1;
+        if (!utils::DoubleFloatingEqual()(solution[i], expectedSolution, 1e-10)) {
+            log::cout() << "  Expected solution[" << i << "] = " << expectedSolution << std::endl;
+            log::cout() << "  Error[" << i << "] = " << (expectedSolution - solution[i]) << std::endl;
+            throw std::runtime_error("  The solution of the system doesn't match the expected one.");
+        }
+    }
+    system.restoreSolutionRawReadPtr(solution);
+
+    return 0;
+}
+
+/*!
 * Main program.
 */
 int main(int argc, char *argv[])
@@ -136,6 +217,11 @@ int main(int argc, char *argv[])
     int status;
     try {
         status = subtest_001();
+        if (status != 0) {
+            return status;
+        }
+
+        status = subtest_002();
         if (status != 0) {
             return status;
         }

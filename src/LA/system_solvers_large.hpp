@@ -133,7 +133,9 @@ public:
     static void enableLogView();
 
     SystemSolver(bool debug = false);
+    SystemSolver(bool transpose, bool debug);
     SystemSolver(const std::string &prefix, bool debug = false);
+    SystemSolver(const std::string &prefix, bool transpose, bool debug);
 
     virtual ~SystemSolver();
 
@@ -192,6 +194,8 @@ public:
     void restoreSolutionRawReadPtr(const double *raw_solution) const;
 
 protected:
+    bool m_transpose;
+
     Mat m_A;
     Vec m_rhs;
     Vec m_solution;

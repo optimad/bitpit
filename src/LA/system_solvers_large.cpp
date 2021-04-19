@@ -275,7 +275,18 @@ PetscErrorCode SystemSolver::displayLogView()
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(bool debug)
-    : SystemSolver("", debug)
+    : SystemSolver("", false, debug)
+{
+}
+
+/*!
+ * Constuctor
+ *
+ * \param transpose if set to true, transposed system will be solved
+ * \param debug if set to true, debug information will be printed
+ */
+SystemSolver::SystemSolver(bool transpose, bool debug)
+    : SystemSolver("", transpose, debug)
 {
 }
 
@@ -286,7 +297,20 @@ SystemSolver::SystemSolver(bool debug)
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(const std::string &prefix, bool debug)
-    : m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
+    : SystemSolver(prefix, false, debug)
+{
+}
+
+/*!
+ * Constuctor
+ *
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param transpose if set to true, transposed system will be solved
+ * \param debug if set to true, debug information will be printed
+ */
+SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug)
+    : m_transpose(transpose),
+      m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
       m_KSP(nullptr),
       m_prefix(prefix), m_assembled(false), m_setUp(false),
 #if BITPIT_ENABLE_MPI==1
@@ -717,7 +741,11 @@ void SystemSolver::solve()
     preKSPSolveActions();
 
     // Solve the system
-    m_KSPStatus.error = KSPSolve(m_KSP, m_rhs, m_solution);
+    if (!m_transpose) {
+        m_KSPStatus.error = KSPSolve(m_KSP, m_rhs, m_solution);
+    } else {
+        m_KSPStatus.error = KSPSolveTranspose(m_KSP, m_rhs, m_solution);
+    }
 
     // Set solver info
     if (m_KSPStatus.error == 0) {
@@ -1007,20 +1035,40 @@ void SystemSolver::vectorsCreate()
     PetscInt nColumns;
     MatGetLocalSize(m_A, &nRows, &nColumns);
 
+    PetscInt rhsSize;
+    PetscInt solutionSize;
+    if (!m_transpose) {
+        rhsSize      = nRows;
+        solutionSize = nColumns;
+    } else {
+        rhsSize      = nColumns;
+        solutionSize = nRows;
+    }
+
 #if BITPIT_ENABLE_MPI == 1
     PetscInt nGlobalRows;
     PetscInt nGlobalColumns;
     MatGetSize(m_A, &nGlobalRows, &nGlobalColumns);
 
+    PetscInt rhsGlobalSize;
+    PetscInt solutionGlobalSize;
+    if (!m_transpose) {
+        rhsGlobalSize      = nGlobalRows;
+        solutionGlobalSize = nGlobalColumns;
+    } else {
+        rhsGlobalSize      = nGlobalColumns;
+        solutionGlobalSize = nGlobalRows;
+    }
+
     PetscInt nGhosts;
     const PetscInt *ghosts;
     MatGetGhosts(m_A, &nGhosts, &ghosts);
 
-    VecCreateGhost(m_communicator, nColumns, nGlobalColumns, nGhosts, ghosts, &m_solution);
-    VecCreateGhost(m_communicator, nRows, nGlobalRows, nGhosts, ghosts, &m_rhs);
+    VecCreateGhost(m_communicator, solutionSize, solutionGlobalSize, nGhosts, ghosts, &m_solution);
+    VecCreateGhost(m_communicator, rhsSize, rhsGlobalSize, nGhosts, ghosts, &m_rhs);
 #else
-    VecCreateSeq(PETSC_COMM_SELF, nColumns, &m_solution);
-    VecCreateSeq(PETSC_COMM_SELF, nRows, &m_rhs);
+    VecCreateSeq(PETSC_COMM_SELF, solutionSize, &m_solution);
+    VecCreateSeq(PETSC_COMM_SELF, rhsSize, &m_rhs);
 #endif
 }
 
@@ -1056,23 +1104,23 @@ void SystemSolver::vectorsPermute(bool invert)
 void SystemSolver::vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution)
 {
     // Import RHS
-    int nRows;
-    VecGetLocalSize(m_rhs, &nRows);
+    int rhsSize;
+    VecGetLocalSize(m_rhs, &rhsSize);
 
     PetscScalar *raw_rhs;
     VecGetArray(m_rhs, &raw_rhs);
-    for (int i = 0; i < nRows; ++i) {
+    for (int i = 0; i < rhsSize; ++i) {
         raw_rhs[i] = rhs[i];
     }
     VecRestoreArray(m_rhs, &raw_rhs);
 
     // Import initial solution
-    int nColumns;
-    VecGetLocalSize(m_solution, &nColumns);
+    int solutionSize;
+    VecGetLocalSize(m_solution, &solutionSize);
 
     PetscScalar *raw_solution;
     VecGetArray(m_solution, &raw_solution);
-    for (int i = 0; i < nColumns; ++i) {
+    for (int i = 0; i < solutionSize; ++i) {
         raw_solution[i] = (*solution)[i];
     }
     VecRestoreArray(m_solution, &raw_solution);
