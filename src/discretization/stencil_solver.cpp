@@ -105,12 +105,10 @@ void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize()
 {
     assert(m_blockSize == -1);
 
-    std::size_t nStencils = m_stencils->size();
-
     // Set the block size equal to the size of the first weight
     m_blockSize = - 1;
-    for (std::size_t i = 0; i < nStencils; ++i) {
-        const StencilBlock &stencil = (*m_stencils)[i];
+    for (long i = 0; i < getRowCount(); ++i) {
+        const StencilBlock &stencil = getRowStencil(i);
         std::size_t stencilSize = stencil.size();
         if (stencilSize == 0) {
             continue;
@@ -125,8 +123,8 @@ void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize()
 
 #ifdef DEBUG
     // All weight sizes should match
-    for (std::size_t i = 0; i < nStencils; ++i) {
-        const StencilBlock &stencil = (*m_stencils)[i];
+    for (long i = 0; i < getRowCount(); ++i) {
+        const StencilBlock &stencil = getRowStencil(i);
         const StencilBlock::weight_type *weightData = stencil.weightData();
         std::size_t stencilSize = stencil.size();
 
