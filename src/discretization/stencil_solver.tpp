@@ -27,6 +27,179 @@
 namespace bitpit {
 
 /*!
+ * \class DiscretizationStencilStorageInterface
+ * \ingroup discretization
+ *
+ * \brief The DiscretizationStencilStorageInterface class defines the interface
+ * for stencil storage.
+ */
+
+/*!
+ * \class DiscretizationStencilProxyBaseStorage
+ * \ingroup discretization
+ *
+ * \brief The DiscretizationStencilProxyBaseStorage class defines a proxy for
+ * stencil storage.
+ */
+
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ * \param stride is the stride
+ */
+template<typename stencil_t, typename stencil_container_t>
+DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::DiscretizationStencilProxyBaseStorage(const stencil_container_t *stencils, int stride)
+    : DiscretizationStencilStorageInterface<stencil_t>(),
+      m_stencils(stencils), m_stride(stride)
+{
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param rowIndex is the index of the row in the assembler
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::at(long rowIndex) const
+{
+    return (*m_stencils)[rowIndex];
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param rowRawIndex is the raw index of the row in the assembler
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::rawAt(std::size_t rowRawIndex) const
+{
+    return at(rowRawIndex);
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param blockIndex is the index of the block
+ * \param componentIdx is the index of the component inside the block
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::at(long blockIndex, int componentIdx) const
+{
+    return (*m_stencils)[blockIndex * this->m_stride + componentIdx];
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param blockRawIndex is the raw index of the block
+ * \param componentIdx is the index of the component inside the block
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::rawAt(std::size_t blockRawIndex, int componentIdx) const
+{
+    return at(blockRawIndex, componentIdx);
+}
+
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ */
+template<typename stencil_t, typename stencil_container_t>
+DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::DiscretizationStencilProxyStorage(const stencil_container_t *stencils)
+    : DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>(stencils, 1)
+{
+}
+
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ */
+template<typename stencil_t>
+DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::DiscretizationStencilProxyStorage(const PiercedStorage<stencil_t> *stencils)
+    : DiscretizationStencilProxyBaseStorage<stencil_t, PiercedStorage<stencil_t>>(stencils, stencils->getFieldCount())
+{
+}
+
+/*!
+ * Get the size of the container.
+ *
+ * \result The size of the container.
+ */
+template<typename stencil_t, typename stencil_container_t>
+std::size_t DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::size() const
+{
+    return this->m_stencils->size();
+}
+
+/*!
+ * Get the size of the container.
+ *
+ * \result The size of the container.
+ */
+template<typename stencil_t>
+std::size_t DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::size() const
+{
+    return this->m_stencils->getKernel()->size() * this->m_stride;
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param rowIndex is the index of the row in the assembler
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::at(long rowIndex) const
+{
+    return this->m_stencils->at(rowIndex);
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param rowRawIndex is the raw index of the row in the assembler
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::rawAt(std::size_t rowRawIndex) const
+{
+    return this->m_stencils->rawAt(rowRawIndex);
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param blockIndex is the index of the block
+ * \param componentIdx is the index of the component inside the block
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::at(long blockIndex, int componentIdx) const
+{
+    return this->m_stencils->at(blockIndex, componentIdx);
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param blockRawIndex is the raw index of the block
+ * \param componentIdx is the index of the component inside the block
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::rawAt(std::size_t blockRawIndex, int componentIdx) const
+{
+    return this->m_stencils->rawAt(blockRawIndex, componentIdx);
+}
+
+/*!
  * \class DiscretizationStencilSolverAssembler
  * \ingroup discretization
  *
@@ -41,7 +214,8 @@ namespace bitpit {
  * \param stencils are the stencils
  */
 template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const std::vector<stencil_t> *stencils)
+template<typename stencil_container_t>
+DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const stencil_container_t *stencils)
     : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false, stencils)
 {
 }
@@ -54,7 +228,8 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  * \param stencils are the stencils
  */
 template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const std::vector<stencil_t> *stencils)
+template<typename stencil_container_t>
+DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils)
 #else
 /*!
  * Constructor.
@@ -62,16 +237,18 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  * \param stencils are the stencils
  */
 template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const std::vector<stencil_t> *stencils)
+template<typename stencil_container_t>
+DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const stencil_container_t *stencils)
 #endif
-    : StencilSolverAssembler(), m_stencils(stencils),
+    : StencilSolverAssembler(),
+      m_stencils(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)),
       m_blockSize(-1)
 {
     // Initialize block size
     initializeBlockSize();
 
     // Count the DOFs
-    m_nDOFs = stencils->size();
+    m_nDOFs = m_stencils->size();
 
 #if BITPIT_ENABLE_MPI==1
     m_nGlobalDOFs = m_nDOFs;
@@ -193,7 +370,7 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalOffset() const
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getRowNZCount(long rowIndex) const
 {
-    const stencil_t &stencil = (*m_stencils)[rowIndex];
+    const stencil_t &stencil = getRowStencil(rowIndex);
     std::size_t stencilSize = stencil.size();
 
     return (m_blockSize * stencilSize);
@@ -220,7 +397,7 @@ template<typename stencil_t>
 void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const
 {
     // Get stencil information
-    const stencil_t &stencil = (*m_stencils)[rowIndex];
+    const stencil_t &stencil = getRowStencil(rowIndex);
     std::size_t stencilSize = stencil.size();
 
     // Get pattern
@@ -264,7 +441,7 @@ template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::typ
 void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowIndex, ConstProxyVector<double> *values) const
 {
     // Get stencil information
-    const stencil_t &stencil = (*m_stencils)[rowIndex];
+    const stencil_t &stencil = getRowStencil(rowIndex);
 
     // Get values
     values->set(stencil.weightData(), stencil.size());
@@ -281,7 +458,7 @@ template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::ty
 void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowIndex, ConstProxyVector<double> *values) const
 {
     // Get stencil information
-    const stencil_t &stencil = (*m_stencils)[rowIndex];
+    const stencil_t &stencil = getRowStencil(rowIndex);
     std::size_t stencilSize = stencil.size();
 
     // Get values
@@ -321,7 +498,7 @@ template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::typ
 double DiscretizationStencilSolverAssembler<stencil_t>::_getRowConstant(long rowIndex) const
 {
     // Get stencil information
-    const stencil_t &stencil = (*m_stencils)[rowIndex];
+    const stencil_t &stencil = getRowStencil(rowIndex);
 
     // Get constant
     return getRawValue(stencil.getConstant(), 0);
@@ -338,7 +515,7 @@ template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::ty
 double DiscretizationStencilSolverAssembler<stencil_t>::_getRowConstant(long rowIndex) const
 {
     // Get stencil information
-    const stencil_t &stencil = (*m_stencils)[rowIndex];
+    const stencil_t &stencil = getRowStencil(rowIndex);
     const typename stencil_t::weight_type &stencilConstant = stencil.getConstant();
 
     // Get constant
@@ -348,6 +525,18 @@ double DiscretizationStencilSolverAssembler<stencil_t>::_getRowConstant(long row
     }
 
     return constant;
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param rowIndex is the index of the row in the assembler
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t>
+const stencil_t & DiscretizationStencilSolverAssembler<stencil_t>::getRowStencil(long rowIndex) const
+{
+    return m_stencils->at(rowIndex);
 }
 
 /*!
@@ -435,7 +624,8 @@ void DiscretizationStencilSolver<stencil_t>::clear(bool release)
 * \param stencils are the stencils
 */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(const std::vector<stencil_t> &stencils)
+template<typename stencil_container_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t &stencils)
 {
     assembly(MPI_COMM_SELF, false, stencils);
 }
@@ -448,7 +638,8 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const std::vector<stencil_
 * \param stencils are the stencils
 */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, bool partitioned, const std::vector<stencil_t> &stencils)
+template<typename stencil_container_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, bool partitioned, const stencil_container_t &stencils)
 #else
 /*!
 * Initialize the stencil solver.
@@ -456,7 +647,8 @@ void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, boo
 * \param stencils are the stencils
 */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(const std::vector<stencil_t> &stencils)
+template<typename stencil_container_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t &stencils)
 #endif
 {
     // Create the assembler
@@ -473,6 +665,43 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const std::vector<stencil_
     assembly(assembler);
 #endif
 }
+
+#if BITPIT_ENABLE_MPI==1
+/*!
+* Assembly the stencil solver.
+*
+* \param assembler is the solver assembler
+*/
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler)
+{
+    assembly(MPI_COMM_SELF, false, static_cast<const StencilSolverAssembler &>(assembler));
+}
+
+/*!
+* Initialize the stencil solver.
+*
+* \param partitioned controls if the matrix is partitioned
+* \param communicator is the MPI communicator
+* \param assembler is the solver assembler
+*/
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, bool partitioned, const DiscretizationStencilSolverAssembler<stencil_t> &assembler)
+{
+    assembly(communicator, partitioned, static_cast<const StencilSolverAssembler &>(assembler));
+}
+#else
+/*!
+* Initialize the stencil solver.
+*
+* \param assembler is the solver assembler
+*/
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler)
+{
+    assembly(static_cast<const StencilSolverAssembler &>(assembler));
+}
+#endif
 
 #if BITPIT_ENABLE_MPI==1
 /*!
@@ -529,7 +758,8 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const StencilSolverAssembl
  * \param stencils are the stencils that will be used to update the rows
  */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::update(const std::vector<stencil_t> &stencils)
+template<typename stencil_container_t>
+void DiscretizationStencilSolver<stencil_t>::update(const stencil_container_t &stencils)
 {
     update(getRowCount(), nullptr, stencils);
 }
@@ -544,7 +774,8 @@ void DiscretizationStencilSolver<stencil_t>::update(const std::vector<stencil_t>
  * \param stencils are the stencils that will be used to update the rows
  */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::update(const std::vector<long> &rows, const std::vector<stencil_t> &stencils)
+template<typename stencil_container_t>
+void DiscretizationStencilSolver<stencil_t>::update(const std::vector<long> &rows, const stencil_container_t &stencils)
 {
     update(rows.size(), rows.data(), stencils);
 }
@@ -562,7 +793,8 @@ void DiscretizationStencilSolver<stencil_t>::update(const std::vector<long> &row
  * \param stencils are the stencils that will be used to update the rows
  */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows, const std::vector<stencil_t> &stencils)
+template<typename stencil_container_t>
+void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows, const stencil_container_t &stencils)
 {
     // Update the system
 #if BITPIT_ENABLE_MPI==1

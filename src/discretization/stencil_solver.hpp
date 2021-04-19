@@ -48,12 +48,77 @@ protected:
 };
 
 template<typename stencil_t>
+class DiscretizationStencilStorageInterface {
+
+public:
+    virtual ~DiscretizationStencilStorageInterface() = default;
+
+    virtual std::size_t size() const = 0;
+
+    virtual const stencil_t & at(long rowIndex) const = 0;
+    virtual const stencil_t & rawAt(std::size_t rowRawIndex) const = 0;
+
+    virtual const stencil_t & at(long blockIndex, int componentIdx) const;
+    virtual const stencil_t & rawAt(std::size_t blockRawIndex, int componentIdx) const;
+
+protected:
+    DiscretizationStencilStorageInterface() = default;
+
+};
+
+template<typename stencil_t, typename stencil_container_t>
+class DiscretizationStencilProxyBaseStorage : public DiscretizationStencilStorageInterface<stencil_t> {
+
+public:
+    const stencil_t & at(long rowIndex) const override;
+    const stencil_t & rawAt(std::size_t rowRawIndex) const override;
+
+    const stencil_t & at(long blockIndex, int componentIdx) const override;
+    const stencil_t & rawAt(std::size_t blockRawIndex, int componentIdx) const override;
+
+protected:
+    const stencil_container_t *m_stencils;
+    int m_stride;
+
+    DiscretizationStencilProxyBaseStorage(const stencil_container_t *stencils, int stride);
+
+};
+
+template<typename stencil_t, typename stencil_container_t>
+class DiscretizationStencilProxyStorage : public DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t> {
+
+public:
+    DiscretizationStencilProxyStorage(const stencil_container_t *stencils);
+
+    std::size_t size() const override;
+
+};
+
+template<typename stencil_t>
+class DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>> : public DiscretizationStencilProxyBaseStorage<stencil_t, PiercedStorage<stencil_t>> {
+
+public:
+    DiscretizationStencilProxyStorage(const PiercedStorage<stencil_t> *stencils);
+
+    std::size_t size() const override;
+
+    const stencil_t & at(long rowIndex) const override;
+    const stencil_t & rawAt(std::size_t rowRawIndex) const override;
+
+    const stencil_t & at(long blockIndex, int componentIdx) const override;
+    const stencil_t & rawAt(std::size_t blockRawIndex, int componentIdx) const override;
+
+};
+
+template<typename stencil_t>
 class DiscretizationStencilSolverAssembler : public StencilSolverAssembler {
 
 public:
-    DiscretizationStencilSolverAssembler(const std::vector<stencil_t> *stencils);
+    template<typename stencil_container_t = std::vector<stencil_t>>
+    DiscretizationStencilSolverAssembler(const stencil_container_t *stencils);
 #if BITPIT_ENABLE_MPI==1
-    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const std::vector<stencil_t> *stencils);
+    template<typename stencil_container_t = std::vector<stencil_t>>
+    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils);
 #endif
 
     int getBlockSize() const;
@@ -77,7 +142,7 @@ public:
     double getRowConstant(long rowIndex) const override;
 
 protected:
-    const std::vector<stencil_t> *m_stencils;
+    std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> m_stencils;
 
     int m_blockSize;
 
@@ -97,6 +162,8 @@ protected:
 
     template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
     double _getRowConstant(long rowIndex) const;
+
+    virtual const stencil_t & getRowStencil(long rowIndex) const;
 
     double getRawValue(const typename stencil_t::weight_type &weight, int item) const;
 
@@ -118,19 +185,26 @@ public:
     DiscretizationStencilSolver(const std::string &prefix, bool transpose, bool debug = false);
 
     void clear(bool release = false);
-    void assembly(const std::vector<stencil_t> &stencils);
+    template<typename stencil_container_t = std::vector<stencil_t>>
+    void assembly(const stencil_container_t &stencils);
+    void assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
     void assembly(const StencilSolverAssembler &assembler);
 #if BITPIT_ENABLE_MPI==1
-    void assembly(MPI_Comm communicator, bool partitioned, const std::vector<stencil_t> &stencils);
+    template<typename stencil_container_t = std::vector<stencil_t>>
+    void assembly(MPI_Comm communicator, bool partitioned, const stencil_container_t &stencils);
+    void assembly(MPI_Comm communicator, bool partitioned, const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
     void assembly(MPI_Comm communicator, bool partitioned, const StencilSolverAssembler &assembler);
 #endif
-    void update(const std::vector<stencil_t> &stencils);
-    void update(const std::vector<long> &rows, const std::vector<stencil_t> &stencils);
-    void update(std::size_t nRows, const long *rows, const std::vector<stencil_t> &stencils);
+    template<typename stencil_container_t = std::vector<stencil_t>>
+    void update(const stencil_container_t &stencils);
+    template<typename stencil_container_t = std::vector<stencil_t>>
+    void update(const std::vector<long> &rows, const stencil_container_t &stencils);
+    template<typename stencil_container_t = std::vector<stencil_t>>
+    void update(std::size_t nRows, const long *rows, const stencil_container_t &stencils);
 
     void solve();
 
-    std::size_t getStencilCount() const;
+    std::size_t getRowStencilCount() const;
 
 protected:
     std::size_t nStencils;
