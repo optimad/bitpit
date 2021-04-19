@@ -366,7 +366,20 @@ double DiscretizationStencilSolverAssembler<stencil_t>::_getRowConstant(long row
 */
 template<typename stencil_t>
 DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool debug)
-    : SystemSolver("", debug)
+    : DiscretizationStencilSolver<stencil_t>("", false, debug)
+{
+}
+
+/*!
+* Constuctor
+*
+* \param transpose if set to true, transposed system will be solved
+* \param debug if this parameter is set to true, debug informations will be
+* printed when solving the system
+*/
+template<typename stencil_t>
+DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool transpose, bool debug)
+    : DiscretizationStencilSolver<stencil_t>("", transpose, debug)
 {
 }
 
@@ -379,7 +392,20 @@ DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool debug)
 */
 template<typename stencil_t>
 DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(const std::string &prefix, bool debug)
-    : SystemSolver(prefix, debug)
+    : DiscretizationStencilSolver<stencil_t>(prefix, false, debug)
+{
+}
+
+/*!
+* Constuctor
+*
+* \param prefix is the prefix string to prepend to all option requests
+* \param debug if this parameter is set to true, debug informations will be
+* printed when solving the system
+*/
+template<typename stencil_t>
+DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(const std::string &prefix, bool transpose, bool debug)
+    : SystemSolver(prefix, transpose, debug)
 {
 }
 
