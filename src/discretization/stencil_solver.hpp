@@ -113,7 +113,9 @@ class DiscretizationStencilSolver : public SystemSolver {
 
 public:
     DiscretizationStencilSolver(bool debug = false);
+    DiscretizationStencilSolver(bool transpose, bool debug);
     DiscretizationStencilSolver(const std::string &prefix, bool debug = false);
+    DiscretizationStencilSolver(const std::string &prefix, bool transpose, bool debug = false);
 
     void clear(bool release = false);
     void assembly(const std::vector<stencil_t> &stencils);
