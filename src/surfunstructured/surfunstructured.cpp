@@ -437,13 +437,30 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
         return readerError;
     }
 
+    // Initialize cache needed for joinin the facets
+    //
+    // The cache will contain the ids of the vertices that have been added
+    // to the patch. It uses a special comparator that allows to compare
+    // the coordinates of a candidate vertex with the coordinates of the
+    // vertices in the cache.
+    std::array<double, 3> *candidateVertexCoords;
+    Vertex::Less vertexLess(10 * std::numeric_limits<double>::epsilon());
+
+    auto vertexCoordsLess = [this, &vertexLess, &candidateVertexCoords](const long &id_1, const long &id_2)
+    {
+        const std::array<double, 3> &coords_1 = (id_1 >= 0) ? this->getVertex(id_1).getCoords() : *candidateVertexCoords;
+        const std::array<double, 3> &coords_2 = (id_2 >= 0) ? this->getVertex(id_2).getCoords() : *candidateVertexCoords;
+
+        return vertexLess(coords_1, coords_2);
+    };
+
+    std::set<long, decltype(vertexCoordsLess)> vertexCache(vertexCoordsLess);
+
     // Read all the solids in the STL file
     int pid = PIDOffset;
 
     ElementType facetType = ElementType::TRIANGLE;
     const int nFacetVertices = ReferenceElementInfo::getInfo(ElementType::TRIANGLE).nVertices;
-
-    std::map<Vertex *, long, Vertex::Less> vertexCache(Vertex::Less(10 * std::numeric_limits<double>::epsilon()));
 
     while (true) {
         // Read header
@@ -477,14 +494,27 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
             std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[nFacetVertices]);
             if (joinFacets) {
                 for (int i = 0; i < nFacetVertices; ++i) {
+                    // The candidate vertex is set equal to the face vertex
+                    // that needs to be added, then the cache is checked: if
+                    // a vertex with the same coordinates is already in the
+                    // cache, the vertex will not be added and the existing
+                    // one will be used.
+                    //
+                    // The cache contains the ids of the vertices that have
+                    // been added. It uses a special comparator that allows
+                    // to compare the candidate vertex with the ones in the
+                    // cache, in order to do that the null vertex should be
+                    // passed to the find function.
+                    candidateVertexCoords = &(faceVertices[i].getCoords());
+
                     long vertexId;
-                    auto vertexCacheItr = vertexCache.find(faceVertices.data() + i);
+                    auto vertexCacheItr = vertexCache.find(Vertex::NULL_ID);
                     if (vertexCacheItr == vertexCache.end()) {
-                        VertexIterator vertexItr = addVertex(faceVertices[i].getCoords());
+                        VertexIterator vertexItr = addVertex(*candidateVertexCoords);
                         vertexId = vertexItr.getId();
-                        vertexCache.insert({&(*vertexItr), vertexId});
+                        vertexCache.insert(vertexId);
                     } else {
-                        vertexId = vertexCacheItr->second;
+                        vertexId = *vertexCacheItr;
                     }
                     connectStorage[i] = vertexId;
                 }
