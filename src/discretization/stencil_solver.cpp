@@ -40,16 +40,12 @@ template class DiscretizationStencilSolver<StencilBlock>;
 // Template specializations
 
 /*!
- * Initialize block size.
- *
- * Block size can only be initialized once.
+ * Set block size.
  */
 template<>
-void DiscretizationStencilSolverAssembler<StencilScalar>::initializeBlockSize()
+void DiscretizationStencilSolverAssembler<StencilScalar>::setBlockSize()
 {
-    assert(m_blockSize == -1);
-
-    m_blockSize = 1;
+    setBlockSize(1);
 }
 
 /*!
@@ -68,16 +64,12 @@ double DiscretizationStencilSolverAssembler<StencilScalar>::getRawValue(const St
 }
 
 /*!
- * Initialize block size.
- *
- * Block size can only be initialized once.
+ * Set block size.
  */
 template<>
-void DiscretizationStencilSolverAssembler<StencilVector>::initializeBlockSize()
+void DiscretizationStencilSolverAssembler<StencilVector>::setBlockSize()
 {
-    assert(m_blockSize == -1);
-
-    m_blockSize = sizeof(typename StencilVector::weight_type) / sizeof(typename StencilVector::weight_type::value_type);
+    setBlockSize(sizeof(typename StencilVector::weight_type) / sizeof(typename StencilVector::weight_type::value_type));
 }
 
 /*!
@@ -95,16 +87,10 @@ double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const St
 
 /*!
  * Initialize block size.
- *
- * Vector can only be initialized once.
- *
- * \param stencils are the stencils
  */
 template<>
-void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize()
+void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize()
 {
-    assert(m_blockSize == -1);
-
     // Set the block size equal to the size of the first weight
     m_blockSize = - 1;
     for (long i = 0; i < getRowCount(); ++i) {
@@ -115,7 +101,7 @@ void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize()
         }
 
         const StencilBlock::weight_type *weightData = stencil.weightData();
-        m_blockSize = weightData[0].size();
+        setBlockSize(weightData[0].size());
         break;
     }
 
