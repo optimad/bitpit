@@ -426,7 +426,7 @@ void SystemSolver::clear()
  *
  * \param nRows are the rows of the matrix
  * \param rowRanks are the rank of the rows
- * \param nRows are the columns of the matrix
+ * \param nCols are the columns of the matrix
  * \param colRanks are the rank of the columns
  */
 void SystemSolver::setPermutations(long nRows, const long *rowRanks, long nCols, const long *colRanks)
