@@ -230,6 +230,9 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
 template<typename stencil_t>
 template<typename stencil_container_t>
 DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils)
+    : DiscretizationStencilSolverAssembler(communicator, partitioned, std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>>(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)))
+{
+}
 #else
 /*!
  * Constructor.
@@ -239,47 +242,186 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
 template<typename stencil_t>
 template<typename stencil_container_t>
 DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const stencil_container_t *stencils)
-#endif
-    : StencilSolverAssembler(),
-      m_stencils(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)),
-      m_blockSize(-1)
+    : DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>>(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)))
 {
-    // Initialize block size
-    initializeBlockSize();
-
-    // Count the DOFs
-    m_nDOFs = m_stencils->size();
-
-#if BITPIT_ENABLE_MPI==1
-    m_nGlobalDOFs = m_nDOFs;
-    if (partitioned) {
-        MPI_Allreduce(MPI_IN_PLACE, &m_nGlobalDOFs, 1, MPI_LONG, MPI_SUM, communicator);
-    }
+}
 #endif
 
-    // Count maximum non-zero elements
-    m_maxRowNZ = 0;
-    for (long n = 0; n < getRowCount(); ++n) {
-        m_maxRowNZ = std::max(getRowNZCount(n), m_maxRowNZ);
-    }
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ */
+template<typename stencil_t>
+DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
+    : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false, std::move(stencils))
+{
+}
+
+/*!
+ * Constructor.
+ *
+ * \param communicator is the MPI communicator
+ * \param partitioned controls if the matrix is partitioned
+ * \param stencils are the stencils
+ */
+template<typename stencil_t>
+DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
+#else
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ */
+template<typename stencil_t>
+DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
+#endif
+    : DiscretizationStencilSolverAssembler()
+{
+    setStencils(std::move(stencils));
+#if BITPIT_ENABLE_MPI==1
+    setMatrixSizes(communicator, partitioned);
+#else
+    setMatrixSizes();
+#endif
+    setBlockSize();
+    setMaximumRowNZ();
+}
+
+/*!
+ * Constructor.
+ */
+template<typename stencil_t>
+DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler()
+    : StencilSolverAssembler()
+{
+}
+
+/*!
+ * Set block size.
+ *
+ * \param blockSize is the block size
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize(int blockSize)
+{
+    m_blockSize = blockSize;
+}
+
+/*!
+ * Set the stencils.
+ *
+ * \param stencils are the stencils
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setStencils(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
+{
+    m_stencils = std::move(stencils);
+}
 
 #if BITPIT_ENABLE_MPI==1
-    // Get offsets
-    m_globalDOFOffset = 0;
+/*!
+ * Set matrix sizes.
+ *
+ * \param communicator is the MPI communicator
+ * \param partitioned controls if the matrix is partitioned
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes(MPI_Comm communicator, bool partitioned)
+{
+    setMatrixSizes(m_stencils->size(), m_stencils->size(), communicator, partitioned);
+}
+
+/*!
+ * Set matrix sizes.
+ *
+ * \param nRows are the rows of the matrix
+ * \param nCols are the columns of the matrix
+ * \param communicator is the MPI communicator
+ * \param partitioned controls if the matrix is partitioned
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes(long nRows, long nCols, MPI_Comm communicator, bool partitioned)
+#else
+/*!
+ * Set matrix sizes.
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes()
+{
+    setMatrixSizes(m_stencils->size(), m_stencils->size());
+}
+
+/*!
+ * Set matrix sizes.
+ *
+ * \param nRows are the rows of the matrix
+ * \param nCols are the columns of the matrix
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes(long nRows, long nCols)
+#endif
+{
+    // Set system sizes
+    m_nRows = nRows;
+    m_nCols = nCols;
+
+#if BITPIT_ENABLE_MPI==1
+    // Global system sizes
+    m_nGlobalRows = nRows;
+    m_nGlobalCols = nCols;
+    if (partitioned) {
+        MPI_Allreduce(MPI_IN_PLACE, &m_nGlobalRows, 1, MPI_LONG, MPI_SUM, communicator);
+        MPI_Allreduce(MPI_IN_PLACE, &m_nGlobalCols, 1, MPI_LONG, MPI_SUM, communicator);
+    }
+
+    // Global offsets
+    m_globalRowOffset = 0;
+    m_globalColOffset = 0;
     if (partitioned) {
         int nProcessors;
         MPI_Comm_size(communicator, &nProcessors);
 
-        std::vector<long> nRankDOFs(nProcessors);
-        MPI_Allgather(&m_nDOFs, 1, MPI_LONG, nRankDOFs.data(), 1, MPI_LONG, communicator);
+        std::vector<long> nRankRows(nProcessors);
+        MPI_Allgather(&m_nRows, 1, MPI_LONG, nRankRows.data(), 1, MPI_LONG, communicator);
+
+        std::vector<long> nRankCols(nProcessors);
+        MPI_Allgather(&m_nCols, 1, MPI_LONG, nRankCols.data(), 1, MPI_LONG, communicator);
 
         int rank;
         MPI_Comm_rank(communicator, &rank);
         for (int i = 0; i < rank; ++i) {
-            m_globalDOFOffset += nRankDOFs[i];
+            m_globalRowOffset += nRankRows[i];
+            m_globalColOffset += nRankCols[i];
         }
     }
 #endif
+}
+
+/*!
+ * Set the maximum number of non-zero element on a single row.
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setMaximumRowNZ()
+{
+    long maxRowNZ = 0;
+    for (long n = 0; n < getRowCount(); ++n) {
+        maxRowNZ = std::max(getRowNZCount(n), maxRowNZ);
+    }
+
+    setMaximumRowNZ(maxRowNZ);
+}
+
+/*!
+ * Set the maximum number of non-zero element on a single row.
+ *
+ * \param maxRowNZ is the maximum number of non-zero element on a single row
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::setMaximumRowNZ(long maxRowNZ)
+{
+    m_maxRowNZ = maxRowNZ;
 }
 
 /*!
@@ -301,7 +443,7 @@ int DiscretizationStencilSolverAssembler<stencil_t>::getBlockSize() const
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getRowCount() const
 {
-    return m_nDOFs;
+    return m_nRows;
 }
 
 /*!
@@ -312,7 +454,7 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowCount() const
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getColCount() const
 {
-    return m_nDOFs;
+    return m_nCols;
 }
 
 #if BITPIT_ENABLE_MPI==1
@@ -324,7 +466,7 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColCount() const
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalCount() const
 {
-    return m_nGlobalDOFs;
+    return m_nGlobalRows;
 }
 
 /*!
@@ -335,7 +477,7 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalCount() const
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalCount() const
 {
-    return m_nGlobalDOFs;
+    return m_nGlobalCols;
 }
 
 /*!
@@ -346,7 +488,7 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalCount() const
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalOffset() const
 {
-    return m_globalDOFOffset;
+    return m_globalRowOffset;
 }
 
 /*!
@@ -357,7 +499,7 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalOffset() const
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalOffset() const
 {
-    return m_globalDOFOffset;
+    return m_globalColOffset;
 }
 #endif
 
