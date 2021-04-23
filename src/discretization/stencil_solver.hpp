@@ -114,6 +114,8 @@ template<typename stencil_t>
 class DiscretizationStencilSolverAssembler : public StencilSolverAssembler {
 
 public:
+    typedef stencil_t stencil_type;
+
     template<typename stencil_container_t = std::vector<stencil_t>>
     DiscretizationStencilSolverAssembler(const stencil_container_t *stencils);
 #if BITPIT_ENABLE_MPI==1
@@ -142,14 +144,44 @@ public:
     double getRowConstant(long rowIndex) const override;
 
 protected:
+    long m_nRows;
+    long m_nCols;
+
+#if BITPIT_ENABLE_MPI==1
+    long m_nGlobalRows;
+    long m_nGlobalCols;
+
+    long m_globalRowOffset;
+    long m_globalColOffset;
+#endif
+
     std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> m_stencils;
 
     int m_blockSize;
 
-    long m_nDOFs;
     long m_maxRowNZ;
 
-    void initializeBlockSize();
+    DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
+#if BITPIT_ENABLE_MPI==1
+    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
+#endif
+    DiscretizationStencilSolverAssembler();
+
+    void setStencils(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
+
+#if BITPIT_ENABLE_MPI==1
+    void setMatrixSizes(MPI_Comm communicator, bool partitioned);
+    void setMatrixSizes(long nRows, long nCols, MPI_Comm communicator, bool partitioned);
+#else
+    void setMatrixSizes();
+    void setMatrixSizes(long nRows, long nCols);
+#endif
+
+    void setBlockSize();
+    void setBlockSize(int blockSize);
+
+    void setMaximumRowNZ();
+    void setMaximumRowNZ(long maxRowNZ);
 
     template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
     void _getRowValues(long rowIndex, ConstProxyVector<double> *values) const;
@@ -166,12 +198,6 @@ protected:
     virtual const stencil_t & getRowStencil(long rowIndex) const;
 
     double getRawValue(const typename stencil_t::weight_type &weight, int item) const;
-
-#if BITPIT_ENABLE_MPI==1
-    long m_nGlobalDOFs;
-    long m_globalDOFOffset;
-#endif
-
 
 };
 
@@ -215,19 +241,19 @@ protected:
 
 // Specializations
 template<>
-void DiscretizationStencilSolverAssembler<StencilScalar>::initializeBlockSize();
+void DiscretizationStencilSolverAssembler<StencilScalar>::setBlockSize();
 
 template<>
 double DiscretizationStencilSolverAssembler<StencilScalar>::getRawValue(const StencilScalar::weight_type &element, int item) const;
 
 template<>
-void DiscretizationStencilSolverAssembler<StencilVector>::initializeBlockSize();
+void DiscretizationStencilSolverAssembler<StencilVector>::setBlockSize();
 
 template<>
 double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const StencilVector::weight_type &element, int item) const;
 
 template<>
-void DiscretizationStencilSolverAssembler<StencilBlock>::initializeBlockSize();
+void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize();
 
 template<>
 double DiscretizationStencilSolverAssembler<StencilBlock>::getRawValue(const StencilBlock::weight_type &element, int item) const;
