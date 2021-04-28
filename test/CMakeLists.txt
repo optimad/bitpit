@@ -110,6 +110,9 @@ function(addModuleTests MODULE_NAME TEST_ENTRIES TEST_LIBRARIES)
     # Add include directories required by the module
     addModuleIncludeDirectories(${MODULE_NAME})
 
+    # Add include directories required by the test framework
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
+
     # Add rules for the module
     add_custom_target(tests-${MODULE_NAME} DEPENDS ${TARGETS})
     add_custom_target(clean-tests-${MODULE_NAME} COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

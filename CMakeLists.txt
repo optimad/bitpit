@@ -36,6 +36,9 @@ set(BITPIT_ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI sup
 set(BITPIT_VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 set(BITPIT_BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
 
+set(BITPIT_ENABLE_UNIT_TESTS 0 CACHE BOOL "If set, the unit tests will be built")
+mark_as_advanced(${BITPIT_ENABLE_UNIT_TESTS})
+
 if(${CMAKE_VERSION} VERSION_EQUAL "3.9.0" OR ${CMAKE_VERSION} VERSION_GREATER "3.9.0")
     set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
     set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
@@ -556,6 +559,11 @@ else()
 endif()
 
 set(EXTERNAL_DEPS_PROCESS_LIST "")
+
+if(BITPIT_ENABLE_UNIT_TESTS)
+    LIST(APPEND EXTERNAL_DEPS_PROCESS_LIST "BoostTest")
+endif()
+
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
     if(MODULE_ENABLED)
@@ -744,6 +752,22 @@ if (${_PETSc_index} GREATER -1)
     list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "PETSC_INCLUDES" )
 endif()
 unset(_PETSc_index)
+
+list(FIND EXTERNAL_DEPS "BoostTest" _BoostTest_index)
+if (${_BoostTest_index} GREATER -1)
+    set(BOOST_COMPONENTS "")
+    if(${_BoostTest_index} GREATER -1)
+        LIST(APPEND BOOST_COMPONENTS "unit_test_framework")
+    endif()
+    string (REPLACE ";" " " BOOST_COMPONENTS_STRING "${BOOST_COMPONENTS}")
+
+    FIND_PACKAGE(Boost 1.40 COMPONENTS "${BOOST_COMPONENTS_STRING}" REQUIRED)
+
+    list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Boost")
+    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "Boost_LIBRARIES")
+    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "Boost_INCLUDE_DIR")
+endif()
+unset(_BoostTest_index)
 
 set(BITPIT_EXTERNAL_LIBRARIES "")
 foreach (VARIABLE_NAME IN LISTS BITPIT_EXTERNAL_VARIABLES_LIBRARIES)
