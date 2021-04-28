@@ -38,6 +38,8 @@ set(BITPIT_BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
 
 set(BITPIT_ENABLE_UNIT_TESTS 0 CACHE BOOL "If set, the unit tests will be built")
 mark_as_advanced(${BITPIT_ENABLE_UNIT_TESTS})
+set(BITPIT_ENABLE_INTEGRATION_TESTS 1 CACHE BOOL "If set, the integration tests will be built")
+mark_as_advanced(${BITPIT_ENABLE_INTEGRATION_TESTS})
 
 if(${CMAKE_VERSION} VERSION_EQUAL "3.9.0" OR ${CMAKE_VERSION} VERSION_GREATER "3.9.0")
     set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
@@ -912,5 +914,7 @@ add_subdirectory(examples)
 add_subdirectory(external)
 
 # Tests
-enable_testing()
-add_subdirectory(test)
+if (BITPIT_ENABLE_UNIT_TESTS OR BITPIT_ENABLE_INTEGRATION_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif()
