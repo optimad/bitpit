@@ -267,9 +267,6 @@ private:
     MPI_Comm m_communicator;
 
     bool m_partitioned;
-
-    long m_rowGlobalOffset;
-    long m_colGlobalOffset;
 #endif
 
     IS m_rowPermutation;
