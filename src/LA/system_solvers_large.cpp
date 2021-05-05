@@ -164,6 +164,19 @@ void SystemSparseMatrixAssembler::getRowValues(long rowIndex, ConstProxyVector<d
 }
 
 /*!
+ * Get the data of the specified row.
+ *
+ * \param rowIndex is the index of the row in the assembler
+ * \param pattern on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified row
+ */
+void SystemSparseMatrixAssembler::getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const
+{
+    m_matrix->getRowPattern(rowIndex, pattern);
+    m_matrix->getRowValues(rowIndex, values);
+}
+
+/*!
  * \class PetscManager
  * \ingroup system_solver_large
  *
