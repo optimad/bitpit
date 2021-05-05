@@ -1072,8 +1072,7 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
                 matrixRow = rowRanks[matrixRow];
             }
 
-            assembler.getRowPattern(matrixRow, &rowPattern);
-            assembler.getRowValues(matrixRow, &rowValues);
+            assembler.getRowData(matrixRow, &rowPattern, &rowValues);
 
             const int nRowNZ = rowPattern.size();
             const PetscInt globalRow = rowGlobalOffset + row;
@@ -1143,8 +1142,8 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     ConstProxyVector<long> rowPattern;
     ConstProxyVector<double> rowValues;
     for (long n = 0; n < nRows; ++n) {
-        assembler.getRowValues(n, &rowValues);
-        const int nRowElements = rowValues.size();
+        assembler.getRowData(n, &rowPattern, &rowValues);
+        const int nRowElements = rowPattern.size();
         if (nRowElements == 0) {
             continue;
         }
@@ -1158,9 +1157,6 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         }
 
         const PetscInt globalRow = rowGlobalOffset + row;
-
-        // Get pattern
-        assembler.getRowPattern(n, &rowPattern);
 
         // Update values
         for (int k = 0; k < nRowElements; ++k) {
