@@ -84,6 +84,7 @@ public:
 
     virtual void getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const = 0;
     virtual void getRowValues(long rowIndex, ConstProxyVector<double> *values) const = 0;
+    virtual void getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const = 0;
 
 protected:
     SystemMatrixAssembler() = default;
@@ -111,6 +112,7 @@ public:
 
     void getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const override;
     void getRowValues(long rowIndex, ConstProxyVector<double> *values) const override;
+    void getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const override;
 
 protected:
     const SparseMatrix *m_matrix;
