@@ -58,8 +58,8 @@ public:
     virtual const stencil_t & at(long rowIndex) const = 0;
     virtual const stencil_t & rawAt(std::size_t rowRawIndex) const = 0;
 
-    virtual const stencil_t & at(long blockIndex, int componentIdx) const;
-    virtual const stencil_t & rawAt(std::size_t blockRawIndex, int componentIdx) const;
+    virtual const stencil_t & at(long blockIndex, int componentIdx) const = 0;
+    virtual const stencil_t & rawAt(std::size_t blockRawIndex, int componentIdx) const = 0;
 
 protected:
     DiscretizationStencilStorageInterface() = default;
@@ -68,13 +68,6 @@ protected:
 
 template<typename stencil_t, typename stencil_container_t>
 class DiscretizationStencilProxyBaseStorage : public DiscretizationStencilStorageInterface<stencil_t> {
-
-public:
-    const stencil_t & at(long rowIndex) const override;
-    const stencil_t & rawAt(std::size_t rowRawIndex) const override;
-
-    const stencil_t & at(long blockIndex, int componentIdx) const override;
-    const stencil_t & rawAt(std::size_t blockRawIndex, int componentIdx) const override;
 
 protected:
     const stencil_container_t *m_stencils;
@@ -91,6 +84,12 @@ public:
     DiscretizationStencilProxyStorage(const stencil_container_t *stencils);
 
     std::size_t size() const override;
+
+    const stencil_t & at(long rowIndex) const override;
+    const stencil_t & rawAt(std::size_t rowRawIndex) const override;
+
+    const stencil_t & at(long blockIndex, int componentIdx) const override;
+    const stencil_t & rawAt(std::size_t blockRawIndex, int componentIdx) const override;
 
 };
 

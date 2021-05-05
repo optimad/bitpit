@@ -56,56 +56,6 @@ DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::Discretiz
 }
 
 /*!
- * Get the stencil associated with the specified row.
- *
- * \param rowIndex is the index of the row in the assembler
- * \result The stencil associated with the specified row.
- */
-template<typename stencil_t, typename stencil_container_t>
-const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::at(long rowIndex) const
-{
-    return (*m_stencils)[rowIndex];
-}
-
-/*!
- * Get the stencil associated with the specified row.
- *
- * \param rowRawIndex is the raw index of the row in the assembler
- * \result The stencil associated with the specified row.
- */
-template<typename stencil_t, typename stencil_container_t>
-const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::rawAt(std::size_t rowRawIndex) const
-{
-    return at(rowRawIndex);
-}
-
-/*!
- * Get the stencil associated with the specified row.
- *
- * \param blockIndex is the index of the block
- * \param componentIdx is the index of the component inside the block
- * \result The stencil associated with the specified row.
- */
-template<typename stencil_t, typename stencil_container_t>
-const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::at(long blockIndex, int componentIdx) const
-{
-    return (*m_stencils)[blockIndex * this->m_stride + componentIdx];
-}
-
-/*!
- * Get the stencil associated with the specified row.
- *
- * \param blockRawIndex is the raw index of the block
- * \param componentIdx is the index of the component inside the block
- * \result The stencil associated with the specified row.
- */
-template<typename stencil_t, typename stencil_container_t>
-const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>::rawAt(std::size_t blockRawIndex, int componentIdx) const
-{
-    return at(blockRawIndex, componentIdx);
-}
-
-/*!
  * Constructor.
  *
  * \param stencils are the stencils
@@ -113,17 +63,6 @@ const stencil_t & DiscretizationStencilProxyBaseStorage<stencil_t, stencil_conta
 template<typename stencil_t, typename stencil_container_t>
 DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::DiscretizationStencilProxyStorage(const stencil_container_t *stencils)
     : DiscretizationStencilProxyBaseStorage<stencil_t, stencil_container_t>(stencils, 1)
-{
-}
-
-/*!
- * Constructor.
- *
- * \param stencils are the stencils
- */
-template<typename stencil_t>
-DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::DiscretizationStencilProxyStorage(const PiercedStorage<stencil_t> *stencils)
-    : DiscretizationStencilProxyBaseStorage<stencil_t, PiercedStorage<stencil_t>>(stencils, stencils->getFieldCount())
 {
 }
 
@@ -136,6 +75,67 @@ template<typename stencil_t, typename stencil_container_t>
 std::size_t DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::size() const
 {
     return this->m_stencils->size();
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param rowIndex is the index of the row in the assembler
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::at(long rowIndex) const
+{
+    return (*(this->m_stencils))[rowIndex];
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param rowRawIndex is the raw index of the row in the assembler
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::rawAt(std::size_t rowRawIndex) const
+{
+    return (*(this->m_stencils))[rowRawIndex];
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param blockIndex is the index of the block
+ * \param componentIdx is the index of the component inside the block
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::at(long blockIndex, int componentIdx) const
+{
+    return (*(this->m_stencils))[blockIndex * this->m_stride + componentIdx];
+}
+
+/*!
+ * Get the stencil associated with the specified row.
+ *
+ * \param blockRawIndex is the raw index of the block
+ * \param componentIdx is the index of the component inside the block
+ * \result The stencil associated with the specified row.
+ */
+template<typename stencil_t, typename stencil_container_t>
+const stencil_t & DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::rawAt(std::size_t blockRawIndex, int componentIdx) const
+{
+    return (*(this->m_stencils))[blockRawIndex * this->m_stride + componentIdx];
+}
+
+/*!
+ * Constructor.
+ *
+ * \param stencils are the stencils
+ */
+template<typename stencil_t>
+DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_t>>::DiscretizationStencilProxyStorage(const PiercedStorage<stencil_t> *stencils)
+    : DiscretizationStencilProxyBaseStorage<stencil_t, PiercedStorage<stencil_t>>(stencils, stencils->getFieldCount())
+{
 }
 
 /*!
