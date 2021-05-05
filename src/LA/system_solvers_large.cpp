@@ -493,7 +493,6 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
       m_prefix(prefix), m_assembled(false), m_setUp(false),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
-      m_rowGlobalOffset(0), m_colGlobalOffset(0),
 #endif
       m_rowPermutation(nullptr), m_colPermutation(nullptr),
       m_forceConsistency(false)
@@ -969,18 +968,12 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     long nGlobalCols = assembler.getColGlobalCount();
 #endif
 
-#if BITPIT_ENABLE_MPI == 1
-    // Set row and column global offset
-    m_rowGlobalOffset = assembler.getRowGlobalOffset();
-    m_colGlobalOffset = assembler.getColGlobalOffset();
-#endif
-
     // Preallocation information
     std::vector<int> d_nnz(nRows, 0);
 #if BITPIT_ENABLE_MPI == 1
     std::vector<int> o_nnz(nRows, 0);
 
-    long firstColGlobalId = m_colGlobalOffset;
+    long firstColGlobalId = assembler.getColGlobalOffset();
     long lastColGlobalId  = firstColGlobalId + nCols - 1;
 
     ConstProxyVector<long> rowPattern;
@@ -1051,15 +1044,12 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
         std::vector<PetscInt> rowNZGlobalIds(maxRowNZ);
         std::vector<PetscScalar> rowNZValues(maxRowNZ);
 
-        long rowGlobalOffset;
-#if BITPIT_ENABLE_MPI == 1
-        rowGlobalOffset = m_rowGlobalOffset;
-#else
-        rowGlobalOffset = 0;
-#endif
+        PetscInt rowGlobalOffset;
+        MatGetOwnershipRangeColumn(m_A, &rowGlobalOffset, nullptr);
 
-        long firstGlobalCol = rowGlobalOffset;
-        long lastGlobalCol  = firstGlobalCol + nCols - 1;
+        PetscInt colGlobalBegin;
+        PetscInt colGlobalEnd;
+        MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, &colGlobalEnd);
 
         ConstProxyVector<long> rowPattern;
         ConstProxyVector<double> rowValues;
@@ -1079,10 +1069,10 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
 
                 long globalCol = matrixGlobalCol;
                 if (m_colPermutation) {
-                    if (globalCol >= firstGlobalCol && globalCol <= lastGlobalCol) {
-                        long col = globalCol - firstGlobalCol;
+                    if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
+                        long col = globalCol - colGlobalBegin;
                         col = colInvRanks[col];
-                        globalCol = firstGlobalCol + col;
+                        globalCol = colGlobalBegin + col;
                     }
                 }
 
@@ -1129,12 +1119,8 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
 void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
     // Update element values
-    long rowGlobalOffset;
-#if BITPIT_ENABLE_MPI == 1
-    rowGlobalOffset = m_rowGlobalOffset;
-#else
-    rowGlobalOffset = 0;
-#endif
+    PetscInt rowGlobalOffset;
+    MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
 
     const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
 
