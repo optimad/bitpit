@@ -941,13 +941,13 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
 
         for (auto &entry : getGhostCellExchangeSources()) {
             const int rank = entry.first;
-            const std::vector<long> sources = entry.second;
+            const std::vector<long> &sources = entry.second;
             ghostComm->setSend(rank, sources.size() * sizeof(bool));
         }
 
         for (auto &entry : getGhostCellExchangeTargets()) {
             const int rank = entry.first;
-            const std::vector<long> targets = entry.second;
+            const std::vector<long> &targets = entry.second;
             ghostComm->setRecv(rank, targets.size() * sizeof(bool));
         }
     }
