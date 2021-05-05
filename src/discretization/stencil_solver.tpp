@@ -570,41 +570,37 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowInde
 template<typename stencil_t>
 void DiscretizationStencilSolverAssembler<stencil_t>::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
 {
-    _getRowValues(rowIndex, values);
+    // Get stencil information
+    const stencil_t &stencil = getRowStencil(rowIndex);
+
+    // Get values
+    getValues(stencil, values);
 }
 
 /*!
- * Get the values of the specified row.
+ * Get the values of the specified stencil.
  *
- * \param rowIndex is the index of the row in the assembler
+ * \param stencil is the stencil
  * \param values on output will contain the values of the specified row
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowIndex, ConstProxyVector<double> *values) const
+void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
 {
-    // Get stencil information
-    const stencil_t &stencil = getRowStencil(rowIndex);
-
-    // Get values
     values->set(stencil.weightData(), stencil.size());
 }
 
 /*!
- * Get the values of the specified row.
+ * Get the values of the specified stencil.
  *
- * \param rowIndex is the index of the row in the assembler
+ * \param stencil is the stencil
  * \param values on output will contain the values of the specified row
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowIndex, ConstProxyVector<double> *values) const
+void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
 {
-    // Get stencil information
-    const stencil_t &stencil = getRowStencil(rowIndex);
     std::size_t stencilSize = stencil.size();
-
-    // Get values
     const typename stencil_t::weight_type *weightData = stencil.weightData();
 
     std::size_t expandedValuesSize = m_blockSize * stencilSize;
@@ -620,6 +616,26 @@ void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowInde
 }
 
 /*!
+ * Get the data of the specified row.
+ *
+ * \param rowIndex is the index of the row in the assembler
+ * \param pattern on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified row
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const
+{
+    // Get stencil information
+    const stencil_t &stencil = getRowStencil(rowIndex);
+
+    // Get pattern
+    getPattern(stencil, pattern);
+
+    // Get values
+    getValues(stencil, values);
+}
+
+/*!
  * Get the constant associated with the specified row.
  *
  * \param rowIndex is the index of the row in the assembler
@@ -628,41 +644,38 @@ void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowInde
 template<typename stencil_t>
 double DiscretizationStencilSolverAssembler<stencil_t>::getRowConstant(long rowIndex) const
 {
-    return _getRowConstant(rowIndex);
-}
-
-/*!
- * Get the constant associated with the specified row.
- *
- * \param rowIndex is the index of the row in the assembler
- * \result The constant associated with the specified row.
- */
-template<typename stencil_t>
-template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
-double DiscretizationStencilSolverAssembler<stencil_t>::_getRowConstant(long rowIndex) const
-{
     // Get stencil information
     const stencil_t &stencil = getRowStencil(rowIndex);
 
     // Get constant
+    return getConstant(stencil);
+}
+
+/*!
+ * Get the constant associated with the specified stencil.
+ *
+ * \param stencil is the stencil
+ * \result The constant associated with the specified stencil.
+ */
+template<typename stencil_t>
+template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
+double DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil) const
+{
     return getRawValue(stencil.getConstant(), 0);
 }
 
 /*!
- * Get the constant associated with the specified row.
+ * Get the constant associated with the specified stencil.
  *
- * \param rowIndex is the index of the row in the assembler
- * \result The constant associated with the specified row.
+ * \param stencil is the stencil
+ * \result The constant associated with the specified stencil.
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
-double DiscretizationStencilSolverAssembler<stencil_t>::_getRowConstant(long rowIndex) const
+double DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil) const
 {
-    // Get stencil information
-    const stencil_t &stencil = getRowStencil(rowIndex);
     const typename stencil_t::weight_type &stencilConstant = stencil.getConstant();
 
-    // Get constant
     double constant = 0.;
     for (int i = 0; i < m_blockSize; ++i) {
         constant += getRawValue(stencilConstant, i);
