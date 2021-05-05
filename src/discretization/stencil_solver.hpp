@@ -182,19 +182,21 @@ protected:
     void setMaximumRowNZ();
     void setMaximumRowNZ(long maxRowNZ);
 
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
-    void _getRowValues(long rowIndex, ConstProxyVector<double> *values) const;
-
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
-    void _getRowValues(long rowIndex, ConstProxyVector<double> *values) const;
-
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
-    double _getRowConstant(long rowIndex) const;
-
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
-    double _getRowConstant(long rowIndex) const;
-
     virtual const stencil_t & getRowStencil(long rowIndex) const;
+
+    void getPattern(const stencil_t &stencil, ConstProxyVector<long> *pattern) const;
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
+    void getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const;
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
+    void getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const;
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
+    double getConstant(const stencil_t &stencil) const;
+
+    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
+    double getConstant(const stencil_t &stencil) const;
 
     double getRawValue(const typename stencil_t::weight_type &weight, int item) const;
 
