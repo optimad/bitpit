@@ -183,6 +183,7 @@ void IndexGenerator<id_t>::trash(typename IndexGenerator<id_t>::id_type id)
 {
     assert(id != NULL_ID);
     assert(m_trash.count(id) == 0);
+    assert(id >= m_lowest && id <= m_highest);
 
     // If we are trashing the highest or the lowest id we can update the
     // limits of the generator, otherwise we add the id to the trash.
