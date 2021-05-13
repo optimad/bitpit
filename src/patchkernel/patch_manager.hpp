@@ -29,8 +29,6 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "bitpit_IO.hpp"
-
 namespace bitpit {
 
 class PatchManager {

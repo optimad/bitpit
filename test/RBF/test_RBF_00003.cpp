@@ -34,6 +34,7 @@
 
 #include "bitpit_operators.hpp"
 #include "bitpit_IO.hpp"
+#include "bitpit_common.hpp"
 #include "bitpit_RBF.hpp"
 
 using namespace bitpit;

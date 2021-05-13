@@ -37,14 +37,12 @@
  *     @{
  *         @defgroup VTKEnums VTK Enumerations
  *     @}
- *     @defgroup Logger Logger
  * @}
  */
 
 #include "binary_archive.hpp"
 #include "configuration.hpp"
 #include "index_generator.hpp"
-#include "logger.hpp"
 #include "VTK.hpp"
 #include "DGF.hpp"
 #include "GenericIO.hpp"

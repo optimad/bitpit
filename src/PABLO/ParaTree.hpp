@@ -67,7 +67,7 @@
 #include "tree_constants.hpp"
 #include "LocalTree.hpp"
 #include "Map.hpp"
-#include "bitpit_IO.hpp"
+#include "bitpit_common.hpp"
 #include <map>
 #include <unordered_map>
 #include <unordered_set>

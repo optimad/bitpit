@@ -25,7 +25,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "bitpit_IO.hpp"
+#include "bitpit_common.hpp"
 
 #include "voloctree.hpp"
 

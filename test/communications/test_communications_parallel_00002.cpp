@@ -24,7 +24,7 @@
 
 #include <mpi.h>
 
-#include "bitpit_IO.hpp"
+#include "bitpit_common.hpp"
 #include "bitpit_communications.hpp"
 
 using namespace bitpit;

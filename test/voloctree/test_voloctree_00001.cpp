@@ -28,7 +28,6 @@
 #endif
 
 #include "bitpit_common.hpp"
-#include "bitpit_IO.hpp"
 #include "bitpit_voloctree.hpp"
 
 using namespace bitpit;

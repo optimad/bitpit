@@ -37,7 +37,6 @@
 #include <mpi.h>
 #endif
 
-#include "bitpit_IO.hpp"
 #include "bitpit_patchkernel.hpp"
 
 using namespace bitpit;

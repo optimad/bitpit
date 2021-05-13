@@ -25,7 +25,6 @@
 #include <array>
 
 #include "bitpit_common.hpp"
-#include "bitpit_IO.hpp"
 #include "bitpit_operators.hpp"
 #include "bitpit_volunstructured.hpp"
 

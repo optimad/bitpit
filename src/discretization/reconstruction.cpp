@@ -26,7 +26,6 @@
 #include <limits>
 #include <cblas.h>
 
-#include "bitpit_IO.hpp"
 #include "bitpit_LA.hpp"
 #include "bitpit_operators.hpp"
 

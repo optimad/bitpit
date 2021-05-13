@@ -32,6 +32,7 @@
  * @defgroup common_strings String manipulation
  * @defgroup common_binary Binary streams
  * @defgroup common_hashing Hashing
+ * @defgroup common_logger Logger
  * @defgroup common_misc Miscellaneous
  * @defgroup common_macro Macros
  * @defgroup common_constants Constants
@@ -42,6 +43,7 @@
 #include "compiler.hpp"
 #include "constants.hpp"
 #include "fileHandler.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 #include "moduleEnd.hpp"
