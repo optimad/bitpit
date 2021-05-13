@@ -25,7 +25,6 @@
 #include "bitpit_common.hpp"
 
 #include "binary_archive.hpp"
-#include "FileHandler.hpp"
 
 namespace bitpit {
 

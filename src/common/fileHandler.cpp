@@ -28,8 +28,8 @@
 #include <sstream>
 
 #include"bitpit_common.hpp"
-#include"FileHandler.hpp"
-#include"Operators.hpp"
+
+#include"fileHandler.hpp"
 
 namespace bitpit{
 

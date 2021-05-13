@@ -45,7 +45,6 @@
 #include "configuration.hpp"
 #include "index_generator.hpp"
 #include "logger.hpp"
-#include "FileHandler.hpp"
 #include "VTK.hpp"
 #include "DGF.hpp"
 #include "GenericIO.hpp"

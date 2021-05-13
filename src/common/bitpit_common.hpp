@@ -41,6 +41,7 @@
 
 #include "compiler.hpp"
 #include "constants.hpp"
+#include "fileHandler.hpp"
 #include "utils.hpp"
 
 #include "moduleEnd.hpp"
