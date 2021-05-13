@@ -35,7 +35,6 @@
 
 #include "bitpit_common.hpp"
 #include "GenericIO.hpp"
-#include "FileHandler.hpp"
 
 namespace bitpit{
 

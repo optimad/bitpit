@@ -30,8 +30,6 @@
 
 #include "bitpit_common.hpp"
 
-#include "FileHandler.hpp"
-
 #define BITPIT_DEBUG_COUT(...) BITPIT_OVERLOAD_CALL(BITPIT_DEBUG_COUT, __VA_ARGS__)
 #if BITPIT_ENABLE_DEBUG
 #define BITPIT_DEBUG_COUT_0()     bitpit::log::cout()
