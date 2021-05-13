@@ -27,18 +27,22 @@
 #include <cmath>
 #include <chrono>
 #include <ctime>
-#include <ostream>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <functional>
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "fileHandler.hpp"
 #include "logger.hpp"
 
 namespace bitpit{
 
 /*!
     \class LoggerBuffer
-    \ingroup Logger
+    \ingroup common_logger
     \brief Stream buffer for the message logger.
 
     This class implements a stream buffer used by the message logger.
@@ -416,7 +420,7 @@ const std::string LoggerBuffer::getTimestamp() const
 
 /*!
     \class Logger
-    \ingroup Logger
+    \ingroup common_logger
     \brief Message logger.
 
     This class implements a message logger. The logger allows to write
@@ -877,7 +881,7 @@ void Logger::print(const std::string &message, log::Priority priority, log::Visi
 
 /*!
     \class LoggerManager
-    \ingroup Logger
+    \ingroup common_logger
     \brief Manager for the loggers.
 
     This class implements a manager for the loggers. The manager allowes the

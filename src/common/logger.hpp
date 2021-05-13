@@ -25,10 +25,9 @@
 #define __BITPIT_LOGGER_HPP__
 
 #include <memory>
+#include <ostream>
 #include <unordered_map>
 #include <vector>
-
-#include "bitpit_common.hpp"
 
 #define BITPIT_DEBUG_COUT(...) BITPIT_OVERLOAD_CALL(BITPIT_DEBUG_COUT, __VA_ARGS__)
 #if BITPIT_ENABLE_DEBUG
@@ -259,7 +258,7 @@ private:
 
 
 /*!
-    \ingroup Logger
+    \ingroup common_logger
     \brief The namespace 'log' contains routines for interacting with the
     message logger.
 */

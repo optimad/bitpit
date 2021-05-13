@@ -24,7 +24,6 @@
 
 #include "bitpit_common.hpp"
 #include "bitpit_PABLO.hpp"
-#include "bitpit_IO.hpp"
 
 #include <mpi.h>
 

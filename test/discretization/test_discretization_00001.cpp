@@ -27,7 +27,7 @@
 #   include <mpi.h>
 #endif
 
-#include "bitpit_IO.hpp"
+#include "bitpit_common.hpp"
 #include "bitpit_discretization.hpp"
 #include "bitpit_volcartesian.hpp"
 

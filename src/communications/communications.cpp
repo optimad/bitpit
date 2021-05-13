@@ -24,7 +24,7 @@
 
 #if BITPIT_ENABLE_MPI==1
 
-#include "bitpit_IO.hpp"
+#include "bitpit_common.hpp"
 
 #include "communications.hpp"
 #include "communications_tags.hpp"

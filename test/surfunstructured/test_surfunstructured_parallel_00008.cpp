@@ -23,7 +23,6 @@
 \*---------------------------------------------------------------------------*/
 
 #include "bitpit_common.hpp"
-#include "bitpit_IO.hpp"
 #include "bitpit_CG.hpp"
 #include "bitpit_surfunstructured.hpp"
 

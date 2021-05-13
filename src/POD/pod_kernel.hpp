@@ -33,8 +33,8 @@
 #include <unordered_map>
 
 #include "pod_common.hpp"
+#include "bitpit_common.hpp"
 #include "bitpit_patchkernel.hpp"
-#include "bitpit_IO.hpp"
 
 namespace bitpit {
 

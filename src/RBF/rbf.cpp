@@ -28,8 +28,8 @@
 
 #include "bitpit_private_lapacke.hpp"
 
+#include "bitpit_common.hpp"
 #include "bitpit_operators.hpp"
-#include "bitpit_IO.hpp"
 
 #include "rbf.hpp"
 
