@@ -375,18 +375,27 @@ void Cell::setInterface(int face, int index, long interface)
 /*!
 	Add an interface to the given face of the cell.
 
+	Before adding the interface a check is performed to avoid adding duplicate
+	adjacencies. The interface will not be added if the face already contains
+	it.
+
 	\param face is the face of the cell
 	\param interface is the index of the interface that will be added
+	\result Returns true if the interface has been added, false if the
+	interface has not been added because the face already contained it.
 */
-void Cell::pushInterface(int face, long interface)
+bool Cell::pushInterface(int face, long interface)
 {
 	// Do not push an existing interface
 	if (findInterface(face, interface) >= 0) {
-		return;
+		return false;
 	}
 
 	// Add the interface
 	m_interfaces.pushBackItem(face, interface);
+
+	// Done
+	return true;
 }
 
 /*!
