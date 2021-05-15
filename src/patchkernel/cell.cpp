@@ -630,18 +630,27 @@ void Cell::setAdjacency(int face, int index, long adjacency)
 /*!
 	Add an adjacency to the given face of the cell.
 
+	Before adding the adjacency a check is performed to avoid adding duplicate
+	adjacencies. The adjacency will not be added if the face already contains
+	it.
+
 	\param face is the face of the cell
 	\param adjacency is the index of the adjacency that will be added
+	\result Returns true if the adjacency has been added, false if the
+	adjacency has not been added because the face already contained it.
 */
-void Cell::pushAdjacency(int face, long adjacency)
+bool Cell::pushAdjacency(int face, long adjacency)
 {
 	// Do not push an existing adjacency
 	if (findAdjacency(face, adjacency) >= 0) {
-		return;
+		return false;
 	}
 
 	// Add the adjacency
 	m_adjacencies.pushBackItem(face, adjacency);
+
+	// Done
+	return true;
 }
 
 /*!
