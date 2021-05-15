@@ -31,7 +31,6 @@
 #endif
 
 #include "bitpit_common.hpp"
-#include "bitpit_SA.hpp"
 
 #include "patch_info.hpp"
 #include "patch_kernel.hpp"
@@ -1931,71 +1930,29 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 		return collapsedVertices;
 	}
 
-	// Random number generator
-	srand(1223145611);
-
 	// Update bounding box
 	updateBoundingBox();
-
-	// Define a sensible values for the number of bins
-	int nBoxDimensions = 3;
-	for (int k = 0; k < 3; ++k) {
-		if (utils::DoubleFloatingEqual()(m_boxMaxPoint[k], m_boxMinPoint[k], getTol())) {
-			--nBoxDimensions;
-		}
-	}
-
-	int nBins;
-	if (nBoxDimensions != 0) {
-		nBins = std::ceil(std::pow(nVertices, 1. / (double) nBoxDimensions));
-		if (nBins < 16) {
-			nBins = 16;
-		} else if (nBins > 128) {
-			nBins = 128;
-		}
-	} else {
-		nBins = 1;
-	}
-
-	// Group vertices into bins
-	std::unordered_map<long, std::vector<long>> bins = binGroupVertices(nBins);
 
 	//
 	// Collapse double vertices
 	//
-
-	// Evaluate vertex map
-	std::size_t nMaxBinVertices = 0;
-	for (const auto &binEntry : bins) {
-		nMaxBinVertices = std::max(binEntry.second.size(), nMaxBinVertices);
-	}
-
-	std::vector<int> randomExtraction;
-	randomExtraction.reserve(nMaxBinVertices);
-	KdTree<3, Vertex, long> kd(nMaxBinVertices);
+	Vertex::Less vertexLess(10 * std::numeric_limits<double>::epsilon());
+	auto rawVertexLess = [this, &vertexLess](const std::size_t &i, const std::size_t &j)
+	{
+		return vertexLess(this->m_vertices.rawAt(i), this->m_vertices.rawAt(j));
+	};
+	std::set<std::size_t, decltype(rawVertexLess)> vertexTree(rawVertexLess);
 
 	std::unordered_map<long, long> vertexMap;
-	for (const auto &binEntry : bins) {
-		const std::vector<long> &binVertices = binEntry.second;
-		int nBinVertices = binVertices.size();
-
-		// Randomize vertex insertion
-		randomExtraction.clear();
-		utils::extractWithoutReplacement(nBinVertices, nBinVertices - 1, randomExtraction);
-
-		// Vertex insertion
-		kd.clear();
-		for (int j = 0; j < nBinVertices; ++j) {
-			long vertexId = binVertices[randomExtraction[j]];
-			Vertex &vertex = m_vertices.at(vertexId);
-
-			long collapsedVertexId;
-			if (kd.exist(&vertex, collapsedVertexId) < 0) {
-				collapsedVertexId = vertexId;
-				kd.insert(&vertex, vertexId);
-			} else {
-				vertexMap.insert({vertexId, collapsedVertexId});
-			}
+	for (VertexConstIterator vertexItr = m_vertices.cbegin(); vertexItr != m_vertices.cend(); ++vertexItr) {
+		std::size_t vertexRawId = vertexItr.getRawIndex();
+		auto vertexTreeItr = vertexTree.find(vertexRawId);
+		if (vertexTreeItr == vertexTree.end()) {
+			vertexTree.insert(vertexRawId);
+		} else {
+			long vertexId = vertexItr.getId();
+			long vertexCoincidentId = m_vertices.rawFind(*vertexTreeItr).getId();
+			vertexMap.insert({vertexId, vertexCoincidentId});
 		}
 	}
 
