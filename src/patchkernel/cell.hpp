@@ -92,7 +92,7 @@ public:
 	void setAdjacencies(const std::vector<std::vector<long>> &adjacencies);
 	void setAdjacencies(FlatVector2D<long> &&adjacencies);
 	void setAdjacency(int face, int index, long adjacencies);
-	void pushAdjacency(int face, long adjacency);
+	bool pushAdjacency(int face, long adjacency);
 	void deleteAdjacency(int face, int i);
 	int getAdjacencyCount() const;
 	int getAdjacencyCount(int face) const;
